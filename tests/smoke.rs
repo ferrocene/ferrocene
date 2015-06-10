@@ -68,7 +68,7 @@ fn smoke() {
         }
 
         // linux dladdr doesn't work, but everything else should
-        if cfg!(not(target_os = "linux")) {
+        if can_resolve && cfg!(not(target_os = "linux")) {
             let bytes = name.expect("didn't find a name");
             let bytes = str::from_utf8(&bytes).unwrap();
             let mut demangled = String::new();

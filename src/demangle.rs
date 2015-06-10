@@ -8,8 +8,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::io::prelude::*;
-use std::io;
+use std::fmt::{self, Write};
 
 // All rust symbols are in theory lists of "::"-separated identifiers. Some
 // assemblers, however, can't handle these characters in symbol names. To get
@@ -28,7 +27,7 @@ use std::io;
 // Note that this demangler isn't quite as fancy as it could be. We have lots
 // of other information in our symbols like hashes, version, type information,
 // etc. Additionally, this doesn't handle glue symbols at all.
-pub fn demangle(writer: &mut Write, s: &str) -> io::Result<()> {
+pub fn demangle(writer: &mut Write, s: &str) -> fmt::Result {
     // First validate the symbol. If it doesn't look like anything we're
     // expecting, we just print it literally. Note that we must handle non-rust
     // symbols because we could have any function in the backtrace.
@@ -66,13 +65,13 @@ pub fn demangle(writer: &mut Write, s: &str) -> io::Result<()> {
 
     // Alright, let's do this.
     if !valid {
-        return writer.write_all(s.as_bytes());
+        return writer.write_str(s);
     }
 
     let mut first = true;
     while !inner.is_empty() {
         if !first {
-            try!(writer.write_all(b"::"));
+            try!(writer.write_str("::"));
         } else {
             first = false;
         }
@@ -88,11 +87,11 @@ pub fn demangle(writer: &mut Write, s: &str) -> io::Result<()> {
                 macro_rules! demangle {
                     ($($pat:expr, => $demangled:expr),*) => ({
                         $(if rest.starts_with($pat) {
-                            try!(writer.write_all($demangled));
+                            try!(writer.write_str($demangled));
                             rest = &rest[$pat.len()..];
                           } else)*
                         {
-                            try!(writer.write_all(rest.as_bytes()));
+                            try!(writer.write_str(rest));
                             break;
                         }
 
@@ -101,26 +100,26 @@ pub fn demangle(writer: &mut Write, s: &str) -> io::Result<()> {
 
                 // see src/librustc/back/link.rs for these mappings
                 demangle! {
-                    "$SP$", => b"@",
-                    "$BP$", => b"*",
-                    "$RF$", => b"&",
-                    "$LT$", => b"<",
-                    "$GT$", => b">",
-                    "$LP$", => b"(",
-                    "$RP$", => b")",
-                    "$C$", => b",",
+                    "$SP$", => "@",
+                    "$BP$", => "*",
+                    "$RF$", => "&",
+                    "$LT$", => "<",
+                    "$GT$", => ">",
+                    "$LP$", => "(",
+                    "$RP$", => ")",
+                    "$C$", => ",",
 
                     // in theory we can demangle any Unicode code point, but
                     // for simplicity we just catch the common ones.
-                    "$u7e$", => b"~",
-                    "$u20$", => b" ",
-                    "$u27$", => b"'",
-                    "$u5b$", => b"[",
-                    "$u5d$", => b"]"
+                    "$u7e$", => "~",
+                    "$u20$", => " ",
+                    "$u27$", => "'",
+                    "$u5b$", => "[",
+                    "$u5d$", => "]"
                 }
             } else {
                 let idx = rest.find('$').unwrap_or(rest.len());
-                try!(writer.write_all(rest[..idx].as_bytes()));
+                try!(writer.write_str(&rest[..idx]));
                 rest = &rest[idx..];
             }
         }
@@ -132,9 +131,9 @@ pub fn demangle(writer: &mut Write, s: &str) -> io::Result<()> {
 #[cfg(test)]
 mod tests {
     macro_rules! t { ($a:expr, $b:expr) => ({
-        let mut m = Vec::new();
+        let mut m = String::new();
         super::demangle(&mut m, $a).unwrap();
-        assert_eq!(String::from_utf8(m).unwrap(), $b);
+        assert_eq!(m, $b);
     }) }
 
     #[test]

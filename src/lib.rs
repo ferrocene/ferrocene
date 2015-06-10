@@ -9,6 +9,9 @@ mod backtrace;
 pub use symbolize::{Symbol, resolve};
 mod symbolize;
 
+pub use demangle::demangle;
+mod demangle;
+
 struct Bomb {
     enabled: bool,
 }

@@ -1,0 +1,14 @@
+[package]
+name = "backtrace"
+version = "0.1.0"
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+build = "build.rs"
+
+[dependencies]
+libc = "0.1"
+
+[features]
+libunwind = []
+unix-backtrace = []
+libbacktrace = []
+dladdr = []

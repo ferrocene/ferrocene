@@ -9,7 +9,7 @@
 // except according to those terms.
 
 use libc::c_void;
-use {Callback, Frame};
+use Frame;
 
 struct UnwindFrame {
     ctx: *mut uw::_Unwind_Context,
@@ -50,14 +50,14 @@ impl Frame for UnwindFrame {
 
 #[inline(never)] // if this is known to be a function call, it can be skipped it
                  // when tracing
-pub fn trace(mut cb: &mut Callback) {
+pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
     unsafe {
         uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
     }
 
     extern fn trace_fn(ctx: *mut uw::_Unwind_Context,
                        arg: *mut c_void) -> uw::_Unwind_Reason_Code {
-        let cb = unsafe { &mut *(arg as *mut &mut Callback) };
+        let cb = unsafe { &mut *(arg as *mut &mut FnMut(&Frame) -> bool) };
         let cx = UnwindFrame { ctx: ctx };
 
         let mut bomb = ::Bomb { enabled: true };

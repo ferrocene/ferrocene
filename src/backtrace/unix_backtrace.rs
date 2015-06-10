@@ -11,7 +11,7 @@
 use std::mem;
 use libc::{c_void, c_int};
 
-use backtrace::{Callback, Frame};
+use Frame;
 
 struct BacktraceFrame {
     addr: *mut c_void,
@@ -28,7 +28,7 @@ extern {
 
 #[inline(never)] // if this is known to be a function call, it can be skipped it
                  // when tracing
-pub fn trace(mut cb: &mut Callback) {
+pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
     const SIZE: usize = 100;
 
     let mut buf: [*mut c_void; SIZE];

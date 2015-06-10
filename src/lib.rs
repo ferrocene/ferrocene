@@ -3,7 +3,7 @@ extern crate libc;
 #[macro_use]
 mod macros;
 
-pub use backtrace::{trace, Frame, Callback};
+pub use backtrace::{trace, Frame};
 mod backtrace;
 
 pub use symbolize::{Symbol, resolve};

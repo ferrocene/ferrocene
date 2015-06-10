@@ -28,12 +28,12 @@ fn print() {
                 print!("\n     ");
             }
 
-            if let Some(name) = symbol.name() {
-                if let Ok(s) = str::from_utf8(name) {
-                    let mut demangled = String::new();
-                    backtrace::demangle(&mut demangled, s).unwrap();
-                    print!(" - {}", demangled);
-                }
+            if let Some(name) = symbol.name().and_then(|s| str::from_utf8(s).ok()) {
+                let mut demangled = String::new();
+                backtrace::demangle(&mut demangled, name).unwrap();
+                print!(" - {}", demangled);
+            } else {
+                print!(" - <unknown>");
             }
             if let Some(file) = symbol.filename() {
                 if let Ok(file) = str::from_utf8(file) {
@@ -46,6 +46,9 @@ fn print() {
             println!("");
 
         });
+        if !resolved {
+            println!(" - <no info>");
+        }
         true // keep going
     });
 }

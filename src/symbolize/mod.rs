@@ -6,11 +6,12 @@ pub trait Symbol {
 }
 
 cascade! {
-    if #[cfg(feature = "libbacktrace")] {
-    } else if #[cfg(feature = "dladdr")] {
+    if #[cfg(feature = "dladdr")] {
         mod dladdr;
         pub use self::dladdr::resolve;
     } else {
+        mod noop;
+        pub use self::noop::resolve;
     }
 }
 

@@ -13,6 +13,7 @@ script:
   - cargo test --no-default-features --features 'unix-backtrace'
   - cargo test --no-default-features --features 'unix-backtrace dladdr'
   - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
+  - rustdoc --test README.md -L target/debug/deps -L target/debug
 notifications:
   email:
     on_success: never

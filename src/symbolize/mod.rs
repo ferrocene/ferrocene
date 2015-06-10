@@ -8,7 +8,7 @@ pub trait Symbol {
 }
 
 cascade! {
-    if #[cfg(all(feature = "libbacktrace", unix))] {
+    if #[cfg(all(feature = "libbacktrace", unix, not(target_os = "macos")))] {
         mod libbacktrace;
         pub use self::libbacktrace::resolve;
     } else if #[cfg(feature = "dladdr")] {

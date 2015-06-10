@@ -7,8 +7,41 @@ authors = ["Alex Crichton <alex@alexcrichton.com>"]
 libc = "0.1"
 backtrace-sys = { path = "backtrace-sys", version = "0.1", optional = true }
 
+# Each feature controls the two phases of finding a backtrace: getting a
+# backtrace and then resolving instruction pointers to symbols. The default
+# feature enables all the necessary features for each platform this library
+# supports, but it can be disabled to have finer grained control over the
+# dependencies.
+#
+# Note that not all features are available on all platforms, so even though a
+# feature is enabled some other feature may be used instead.
 [features]
-libunwind = []
-unix-backtrace = []
-libbacktrace = ["backtrace-sys"]
-dladdr = []
+default = ["libunwind", "libbacktrace", "dladdr"]
+
+    #=======================================
+    # Methods of acquiring a backtrace
+    #
+    # - libunwind: when using this the libgcc library is linked against to get
+    #   the unwinding support. This is generally the most reliable method to get
+    #   a backtrace on unix.
+    # - unix-backtrace: this uses the backtrace(3) function to acquire a
+    #   backtrace, but is not as reliable as libunwind. It is, however,
+    #   generally found in more locations.
+    libunwind = []
+    unix-backtrace = []
+
+    #=======================================
+    # Methods of resolving symbols
+    #
+    # - libbacktrace: this feature activates the `backtrace-sys` dependency,
+    #   building the libbacktrace library found in gcc repos. This library
+    #   parses the DWARF info of ELF executables to find symbol names, and it
+    #   can also provide filename/line number information if debuginfo is
+    #   compiled in. This library currently only primarily works on unixes that
+    #   are not OSX, however.
+    # - dladdr: this feature uses the dladdr(3) function (a glibc extension) to
+    #   resolve symbol names. This is fairly unreliable on linux, but works well
+    #   enough on OSX.
+    libbacktrace = ["backtrace-sys"]
+    dladdr = []
+

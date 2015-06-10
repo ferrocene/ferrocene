@@ -45,7 +45,8 @@ fn smoke() {
         assert!(sym - actual_fn_pointer < 1024);
 
         let mut resolved = 0;
-        let libbacktrace = cfg!(feature = "libbacktrace");
+        let libbacktrace = cfg!(feature = "libbacktrace") &&
+                           !cfg!(target_os = "macos");
         let dladdr = cfg!(feature = "dladdr");
         let can_resolve = dladdr || libbacktrace;
 

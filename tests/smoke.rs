@@ -43,18 +43,29 @@ fn smoke() {
         assert!(sym >= actual_fn_pointer);
         assert!(sym - actual_fn_pointer < 1024);
         let outer_sym = sym as *mut libc::c_void;
+
+        let mut resolved = false;
         backtrace::resolve(outer_sym, &mut |sym| {
+            resolved = true;
             if let Some(bytes) = sym.name() {
                 let bytes = str::from_utf8(bytes).unwrap();
                 let mut demangled = String::new();
                 backtrace::demangle(&mut demangled, bytes).unwrap();;
                 assert!(demangled.contains(name),
                         "didn't find `{}` in `{}`", name, demangled);
+            } else {
+                // linux dladdr doesn't work so hot here
+                assert!(cfg!(target_os = "linux") ||
+                        cfg!(not(feature = "dladdr")));
             }
 
             if let Some(addr) = sym.addr() {
                 assert!(outer_sym as usize >= addr as usize);
+            } else {
+                assert!(cfg!(not(feature = "dladdr")));
             }
         });
+
+        assert!(resolved || cfg!(not(feature = "dladdr")));
     }
 }

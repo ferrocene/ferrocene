@@ -10,6 +10,8 @@
 
 #![allow(bad_style)]
 
+extern crate backtrace_sys as bt;
+
 use libc::{c_void, c_char, uintptr_t, c_int};
 use std::env;
 use std::ffi::CStr;
@@ -18,42 +20,6 @@ use std::ptr;
 use std::sync::{ONCE_INIT, Once};
 
 use Symbol;
-
-type backtrace_syminfo_callback =
-    extern "C" fn(data: *mut c_void,
-                  pc: uintptr_t,
-                  symname: *const c_char,
-                  symval: uintptr_t,
-                  symsize: uintptr_t);
-type backtrace_full_callback =
-    extern "C" fn(data: *mut c_void,
-                  pc: uintptr_t,
-                  filename: *const c_char,
-                  lineno: c_int,
-                  function: *const c_char) -> c_int;
-type backtrace_error_callback =
-    extern "C" fn(data: *mut c_void,
-                  msg: *const c_char,
-                  errnum: c_int);
-enum backtrace_state {}
-
-extern {
-    fn backtrace_create_state(filename: *const c_char,
-                              threaded: c_int,
-                              error: backtrace_error_callback,
-                              data: *mut c_void)
-                                    -> *mut backtrace_state;
-    fn backtrace_syminfo(state: *mut backtrace_state,
-                         addr: uintptr_t,
-                         cb: backtrace_syminfo_callback,
-                         error: backtrace_error_callback,
-                         data: *mut c_void) -> c_int;
-    fn backtrace_pcinfo(state: *mut backtrace_state,
-                        addr: uintptr_t,
-                        cb: backtrace_full_callback,
-                        error: backtrace_error_callback,
-                        data: *mut c_void) -> c_int;
-}
 
 type FileLine = (*const c_char, c_int);
 
@@ -165,8 +131,8 @@ unsafe fn call(data: *mut c_void, sym: &Symbol) {
 // the symbols. The libbacktrace API also states that the filename must
 // be in "permanent memory", so we copy it to a static and then use the
 // static as the pointer.
-unsafe fn init_state() -> *mut backtrace_state {
-    static mut STATE: *mut backtrace_state = 0 as *mut backtrace_state;
+unsafe fn init_state() -> *mut bt::backtrace_state {
+    static mut STATE: *mut bt::backtrace_state = 0 as *mut _;
     static mut LAST_FILENAME: [c_char; 256] = [0; 256];
     static INIT: Once = ONCE_INIT;
     INIT.call_once(|| {
@@ -193,8 +159,8 @@ unsafe fn init_state() -> *mut backtrace_state {
             }
             None => ptr::null(),
         };
-        STATE = backtrace_create_state(filename, 0, error_cb,
-                                       ptr::null_mut());
+        STATE = bt::backtrace_create_state(filename, 1, error_cb,
+                                           ptr::null_mut());
     });
 
     STATE
@@ -208,13 +174,13 @@ pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {
             return
         }
 
-        let ret = backtrace_pcinfo(state, symaddr as uintptr_t,
-                                   pcinfo_cb, error_cb,
-                                   &mut cb as *mut _ as *mut _);
+        let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
+                                       pcinfo_cb, error_cb,
+                                       &mut cb as *mut _ as *mut _);
         if ret != 0 {
-            backtrace_syminfo(state, symaddr as uintptr_t,
-                              syminfo_cb, error_cb,
-                              &mut cb as *mut _ as *mut _);
+            bt::backtrace_syminfo(state, symaddr as uintptr_t,
+                                  syminfo_cb, error_cb,
+                                  &mut cb as *mut _ as *mut _);
         }
     }
 }

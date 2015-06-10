@@ -1,0 +1,8 @@
+[package]
+name = "backtrace-sys"
+version = "0.1.0"
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+build = "build.rs"
+
+[dependencies]
+libc = "0.1"

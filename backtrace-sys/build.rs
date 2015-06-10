@@ -7,10 +7,12 @@ fn main() {
     let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let target = env::var("TARGET").unwrap();
 
-    if target.contains("windows") || target.contains("darwin") ||
-       target.contains("linux") {
-        return
-    }
+    // libbacktrace doesn't currently support Mach-O files
+    if target.contains("darwin") { return }
+    // libbacktrace currently doesn't build on MSVC
+    if target.contains("msvc") { return }
+    // libbacktrace is already included in the linux libstd for rust
+    if target.contains("linux") { return }
 
     run(Command::new(src.join("src/libbacktrace/configure"))
                 .current_dir(&dst)

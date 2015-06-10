@@ -26,8 +26,6 @@ extern {
     fn backtrace(buf: *mut *mut c_void, sz: c_int) -> c_int;
 }
 
-#[inline(never)] // if this is known to be a function call, it can be skipped it
-                 // when tracing
 pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
     const SIZE: usize = 100;
 

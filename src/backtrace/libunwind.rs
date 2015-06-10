@@ -48,8 +48,7 @@ impl Frame for UnwindFrame {
     }
 }
 
-#[inline(never)] // if this is known to be a function call, it can be skipped it
-                 // when tracing
+#[inline(always)]
 pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
     unsafe {
         uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);

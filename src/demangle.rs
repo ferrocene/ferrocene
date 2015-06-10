@@ -10,6 +10,29 @@
 
 use std::fmt::{self, Write};
 
+/// De-mangles a Rust symbol into a more readable version
+///
+/// All rust symbols by default are mangled as they contain characters that
+/// cannot be represented in all object files. The mangling mechanism is similar
+/// to C++'s, but Rust has a few specifics to handle items like lifetimes in
+/// symbols.
+///
+/// This function will take a **mangled** symbol (typically acquired from a
+/// `Symbol` which is in turn resolved from a `Frame`) and then writes the
+/// de-mangled version into the given `writer`. If the symbol does not look like
+/// a mangled symbol, it is still written to `writer`.
+///
+/// # Example
+///
+/// ```
+/// extern crate backtrace;
+///
+/// let mangled = "_ZN4testE";
+/// let mut demangled = String::new();
+/// backtrace::demangle(&mut demangled, mangled).unwrap();
+///
+/// assert_eq!(demangled, "test");
+/// ```
 // All rust symbols are in theory lists of "::"-separated identifiers. Some
 // assemblers, however, can't handle these characters in symbol names. To get
 // around this, we use C++-style mangling. The mangling method is:

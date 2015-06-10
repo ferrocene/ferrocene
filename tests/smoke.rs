@@ -64,8 +64,7 @@ fn smoke() {
 
         match resolved {
             0 => return assert!(!can_resolve),
-            1 => {}
-            _ => panic!("more than one symbol with no inlining"),
+            _ => {}
         }
 
         // linux dladdr doesn't work, but everything else should

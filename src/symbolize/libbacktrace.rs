@@ -159,7 +159,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
             }
             None => ptr::null(),
         };
-        STATE = bt::backtrace_create_state(filename, 1, error_cb,
+        STATE = bt::backtrace_create_state(filename, 0, error_cb,
                                            ptr::null_mut());
     });
 

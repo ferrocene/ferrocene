@@ -12,10 +12,12 @@ mod symbolize;
 pub use demangle::demangle;
 mod demangle;
 
+#[allow(dead_code)]
 struct Bomb {
     enabled: bool,
 }
 
+#[allow(dead_code)]
 impl Drop for Bomb {
     fn drop(&mut self) {
         if self.enabled {

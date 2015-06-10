@@ -9,8 +9,10 @@ script:
   - cargo test --no-default-features
   - cargo test --no-default-features --features 'libunwind'
   - cargo test --no-default-features --features 'libunwind dladdr'
+  - cargo test --no-default-features --features 'libunwind libbacktrace'
   - cargo test --no-default-features --features 'unix-backtrace'
   - cargo test --no-default-features --features 'unix-backtrace dladdr'
+  - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
 notifications:
   email:
     on_success: never

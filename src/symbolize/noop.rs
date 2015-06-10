@@ -4,10 +4,7 @@ use Symbol;
 
 struct Dummy;
 
-impl Symbol for Dummy {
-    fn name(&self) -> Option<&[u8]> { None }
-    fn addr(&self) -> Option<*mut c_void> { None }
-}
+impl Symbol for Dummy {}
 
 pub fn resolve(_addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
     cb(&Dummy)

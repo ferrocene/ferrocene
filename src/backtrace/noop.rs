@@ -1,3 +1,4 @@
-use Callback;
+use Frame;
 
-pub fn trace(_cb: &mut Callback) {}
+#[inline(always)]
+pub fn trace(_cb: &mut FnMut(&Frame) -> bool) {}

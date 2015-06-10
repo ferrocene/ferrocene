@@ -11,13 +11,13 @@
 use std::mem;
 use libc::{c_void, c_int};
 
-use backtrace::{Callback, Context};
+use backtrace::{Callback, Frame};
 
-struct BacktraceContext {
+struct BacktraceFrame {
     addr: *mut c_void,
 }
 
-impl Context for BacktraceContext {
+impl Frame for BacktraceFrame {
     fn ip(&self) -> *mut c_void { self.addr }
     fn symbol_address(&self) -> *mut c_void { self.addr }
 }
@@ -39,7 +39,7 @@ pub fn trace(mut cb: &mut Callback) {
     }
 
     for addr in buf[..cnt as usize].iter() {
-        let cx = BacktraceContext { addr: *addr };
+        let cx = BacktraceFrame { addr: *addr };
         if !cb(&cx) {
             return
         }

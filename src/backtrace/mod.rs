@@ -1,11 +1,11 @@
 use libc::c_void;
 
-pub trait Context {
+pub trait Frame {
     fn ip(&self) -> *mut c_void;
     fn symbol_address(&self) -> *mut c_void;
 }
 
-pub type Callback<'a> = FnMut(&Context) -> bool + 'a;
+pub type Callback<'a> = FnMut(&Frame) -> bool + 'a;
 
 cascade! {
     if #[cfg(feature = "libunwind")] {

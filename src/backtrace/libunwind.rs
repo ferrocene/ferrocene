@@ -9,13 +9,13 @@
 // except according to those terms.
 
 use libc::c_void;
-use {Callback, Context};
+use {Callback, Frame};
 
-struct UnwindContext {
+struct UnwindFrame {
     ctx: *mut uw::_Unwind_Context,
 }
 
-impl Context for UnwindContext {
+impl Frame for UnwindFrame {
     fn ip(&self) -> *mut c_void {
         let mut ip_before_insn = 0;
         let mut ip = unsafe {
@@ -58,7 +58,7 @@ pub fn trace(mut cb: &mut Callback) {
     extern fn trace_fn(ctx: *mut uw::_Unwind_Context,
                        arg: *mut c_void) -> uw::_Unwind_Reason_Code {
         let cb = unsafe { &mut *(arg as *mut &mut Callback) };
-        let cx = UnwindContext { ctx: ctx };
+        let cx = UnwindFrame { ctx: ctx };
 
         let mut bomb = ::Bomb { enabled: true };
         let keep_going = cb(&cx);

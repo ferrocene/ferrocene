@@ -20,7 +20,11 @@ fn smoke() {
             true
         });
 
-        if v.len() < 5 { return }
+        if v.len() < 5 {
+            assert!(cfg!(not(feature = "libunwind")));
+            assert!(cfg!(not(feature = "unix-backtrace")));
+            return
+        }
 
         assert_frame(v[0], backtrace::trace as usize, "::trace::");
         assert_frame(v[1], test as usize, "::test::");

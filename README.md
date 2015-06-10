@@ -1,5 +1,9 @@
 # backtrace-rs
 
+[![Build Status](https://travis-ci.org/alexcrichton/backtrace-rs.svg?branch=master)](https://travis-ci.org/alexcrichton/backtrace-rs)
+
+[Documentation](http://alexcrichton.com/backtrace-rs)
+
 A library for acquiring backtraces at runtime for Rust. This library aims to
 enhance the support given by the standard library at `std::rt` by providing a
 more stable and programmatic interface.

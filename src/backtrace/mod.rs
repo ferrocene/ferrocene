@@ -65,7 +65,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
 }
 
 cascade! {
-    if #[cfg(feature = "libunwind")] {
+    if #[cfg(all(unix, feature = "libunwind"))] {
         mod libunwind;
         use self::libunwind::trace as trace_imp;
     } else if #[cfg(all(unix, feature = "unix-backtrace"))] {

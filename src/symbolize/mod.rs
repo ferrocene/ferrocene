@@ -70,7 +70,7 @@ cascade! {
     if #[cfg(all(feature = "libbacktrace", not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
-    } else if #[cfg(feature = "dladdr")] {
+    } else if #[cfg(all(unix, feature = "dladdr"))] {
         mod dladdr;
         use self::dladdr::resolve as resolve_imp;
     } else {

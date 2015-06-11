@@ -31,7 +31,10 @@ fn main() {
 
 fn run(cmd: &mut Command) {
     println!("running: {:?}", cmd);
-    let status = cmd.status().unwrap();
+    let status = match cmd.status() {
+        Ok(s) => s,
+        Err(e) => panic!("failed to get status: {}", e),
+    };
     if !status.success() {
         panic!("failed with: {}", status);
     }

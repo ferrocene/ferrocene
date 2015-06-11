@@ -20,8 +20,7 @@ fn main() {
                 .arg("--with-pic")
                 .arg("--disable-multilib")
                 .arg("--disable-shared")
-                .arg("--disable-host-shared")
-                .arg(format!("--host={}", target)));
+                .arg("--disable-host-shared"));
     run(Command::new("make")
                 .current_dir(&dst)
                 .arg(format!("INCDIR={}",

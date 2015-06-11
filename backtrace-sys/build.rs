@@ -14,8 +14,9 @@ fn main() {
     // libbacktrace is already included in the linux libstd for rust
     if target.contains("linux") { return }
 
-    run(Command::new(src.join("src/libbacktrace/configure"))
+    run(Command::new("sh")
                 .current_dir(&dst)
+                .arg(src.join("src/libbacktrace/configure"))
                 .arg("--with-pic")
                 .arg("--disable-multilib")
                 .arg("--disable-shared")

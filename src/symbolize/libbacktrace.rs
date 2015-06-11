@@ -15,7 +15,7 @@ extern crate backtrace_sys as bt;
 use libc::{c_void, c_char, uintptr_t, c_int};
 use std::env;
 use std::ffi::CStr;
-use std::os::unix::prelude::*;
+use std::path::Path;
 use std::ptr;
 use std::sync::{ONCE_INIT, Once};
 
@@ -144,9 +144,8 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
         } else {
             None
         };
-        let filename = match selfname {
-            Some(path) => {
-                let bytes = path.as_os_str().as_bytes();
+        let filename = match selfname.as_ref().and_then(|p| path2bytes(p)) {
+            Some(bytes) => {
                 if bytes.len() < LAST_FILENAME.len() {
                     let i = bytes.iter();
                     for (slot, val) in LAST_FILENAME.iter_mut().zip(i) {
@@ -164,6 +163,17 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     });
 
     STATE
+}
+
+#[cfg(unix)]
+fn path2bytes(p: &Path) -> Option<&[u8]> {
+    use std::os::unix::prelude::*;
+    Some(p.as_os_str().as_bytes())
+}
+
+#[cfg(windows)]
+fn path2bytes(p: &Path) -> Option<&[u8]> {
+    p.to_str().map(|s| s.as_bytes())
 }
 
 pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {

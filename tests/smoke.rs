@@ -5,6 +5,11 @@ extern crate libc;
 
 use std::str;
 
+const LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
+const UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
+const LIBBACKTRACE: bool = cfg!(feature = "libbacktrace");
+const DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
+
 #[test]
 fn smoke() {
     a(line!());
@@ -19,8 +24,8 @@ fn smoke() {
         });
 
         if v.len() < 5 {
-            assert!(cfg!(not(feature = "libunwind")));
-            assert!(cfg!(not(feature = "unix-backtrace")));
+            assert!(!LIBUNWIND);
+            assert!(!UNIX_BACKTRACE);
             return
         }
 
@@ -45,10 +50,7 @@ fn smoke() {
         assert!(sym - actual_fn_pointer < 1024);
 
         let mut resolved = 0;
-        let libbacktrace = cfg!(feature = "libbacktrace") &&
-                           !cfg!(target_os = "macos");
-        let dladdr = cfg!(feature = "dladdr");
-        let can_resolve = dladdr || libbacktrace;
+        let can_resolve = DLADDR || LIBBACKTRACE;
 
         let mut name = None;
         let mut addr = None;
@@ -81,7 +83,7 @@ fn smoke() {
             addr.expect("didn't find a symbol");
         }
 
-        if libbacktrace && cfg!(debug_assertions) {
+        if LIBBACKTRACE && cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {

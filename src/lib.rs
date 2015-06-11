@@ -69,6 +69,9 @@
 #![cfg_attr(test, deny(warnings))]
 
 extern crate libc;
+#[cfg(feature = "kernel32-sys")] extern crate kernel32;
+#[cfg(feature = "winapi")] extern crate winapi;
+#[cfg(feature = "dbghelp")] extern crate dbghelp;
 
 #[macro_use]
 mod macros;
@@ -92,6 +95,40 @@ impl Drop for Bomb {
     fn drop(&mut self) {
         if self.enabled {
             panic!("cannot panic during the backtrace function");
+        }
+    }
+}
+
+mod lock {
+    use std::cell::Cell;
+    use std::mem;
+    use std::sync::{Once, Mutex, MutexGuard, ONCE_INIT};
+
+    pub struct LockGuard(MutexGuard<'static, ()>);
+
+    static mut LOCK: *mut Mutex<()> = 0 as *mut _;
+    static INIT: Once = ONCE_INIT;
+    thread_local!(static LOCK_HELD: Cell<bool> = Cell::new(false));
+
+    impl Drop for LockGuard {
+        fn drop(&mut self) {
+            LOCK_HELD.with(|slot| {
+                assert!(slot.get());
+                slot.set(false);
+            });
+        }
+    }
+
+    pub fn lock() -> Option<LockGuard> {
+        if LOCK_HELD.with(|l| l.get()) {
+            return None
+        }
+        LOCK_HELD.with(|s| s.set(true));
+        unsafe {
+            INIT.call_once(|| {
+                LOCK = mem::transmute(Box::new(Mutex::new(())));
+            });
+            Some(LockGuard((*LOCK).lock().unwrap()))
         }
     }
 }

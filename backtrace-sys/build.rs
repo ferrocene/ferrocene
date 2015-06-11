@@ -9,20 +9,13 @@ fn main() {
 
     // libbacktrace doesn't currently support Mach-O files
     if target.contains("darwin") { return }
-    // libbacktrace currently doesn't build on MSVC
-    if target.contains("msvc") { return }
+    // libbacktrace isn't used on windows
+    if target.contains("windows") { return }
     // libbacktrace is already included in the linux libstd for rust
     if target.contains("linux") { return }
 
-    let configure = src.join("src/libbacktrace/configure").display().to_string();
-    let configure = if cfg!(windows) {
-        configure.replace("\\", "/")
-    } else {
-        configure
-    };
-    run(Command::new("sh")
+    run(Command::new(src.join("src/libbacktrace/configure"))
                 .current_dir(&dst)
-                .arg(configure)
                 .arg("--with-pic")
                 .arg("--disable-multilib")
                 .arg("--disable-shared")

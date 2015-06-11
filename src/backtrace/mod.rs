@@ -71,6 +71,9 @@ cascade! {
     } else if #[cfg(all(unix, feature = "unix-backtrace"))] {
         mod unix_backtrace;
         use self::unix_backtrace::trace as trace_imp;
+    } else if #[cfg(all(windows, feature = "dbghelp"))] {
+        mod dbghelp;
+        use self::dbghelp::trace as trace_imp;
     } else {
         mod noop;
         use self::noop::trace as trace_imp;

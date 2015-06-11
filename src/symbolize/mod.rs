@@ -67,7 +67,10 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
 }
 
 cascade! {
-    if #[cfg(all(feature = "libbacktrace", not(target_os = "macos")))] {
+    if #[cfg(all(windows, feature = "dbghelp"))] {
+        mod dbghelp;
+        use self::dbghelp::resolve as resolve_imp;
+    } else if #[cfg(all(feature = "libbacktrace", not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
     } else if #[cfg(all(unix, feature = "dladdr"))] {

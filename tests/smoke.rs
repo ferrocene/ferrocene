@@ -5,10 +5,10 @@ extern crate libc;
 
 use std::str;
 
-const LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
-const UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
-const LIBBACKTRACE: bool = cfg!(feature = "libbacktrace");
-const DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
+static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
+static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
+static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace");
+static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
 
 #[test]
 fn smoke() {

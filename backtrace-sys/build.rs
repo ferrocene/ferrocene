@@ -14,9 +14,15 @@ fn main() {
     // libbacktrace is already included in the linux libstd for rust
     if target.contains("linux") { return }
 
+    let configure = src.join("src/libbacktrace/configure").display().to_string();
+    let configure = if cfg!(windows) {
+        configure.replace("\\", "/")
+    } else {
+        configure
+    };
     run(Command::new("sh")
                 .current_dir(&dst)
-                .arg(src.join("src/libbacktrace/configure"))
+                .arg(configure)
                 .arg("--with-pic")
                 .arg("--disable-multilib")
                 .arg("--disable-shared")

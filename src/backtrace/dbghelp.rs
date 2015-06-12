@@ -31,21 +31,17 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         let process = kernel32::GetCurrentProcess();
         let thread = kernel32::GetCurrentThread();
 
-        // FIXME(retep998/winapi-rs#110): currently the structure is too small
-        // so allocate a large block of data which is big enough to fit the
-        // context for now.
-        let mut context = [0u8; 2048];
-        let context = &mut *(context.as_mut_ptr() as *mut CONTEXT);
-        kernel32::RtlCaptureContext(context);
+        let mut context = mem::zeroed::<CONTEXT>();
+        kernel32::RtlCaptureContext(&mut context);
         let mut frame: STACKFRAME64 = mem::zeroed();
-        let image = init_frame(&mut frame, context);
+        let image = init_frame(&mut frame, &context);
 
         // Initialize this process's symbols
         let _c = ::dbghelp_init();
 
         // And now that we're done with all the setup, do the stack walking!
         while ::dbghelp::StackWalk64(image as DWORD, process, thread, &mut frame,
-                                     context as *mut _ as *mut _,
+                                     &mut context as *mut _ as *mut _,
                                      None,
                                      Some(::dbghelp::SymFunctionTableAccess64),
                                      Some(::dbghelp::SymGetModuleBase64),

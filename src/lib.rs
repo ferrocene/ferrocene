@@ -100,6 +100,7 @@ impl Drop for Bomb {
     }
 }
 
+#[allow(dead_code)]
 mod lock {
     use std::cell::Cell;
     use std::mem;

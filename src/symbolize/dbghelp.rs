@@ -48,6 +48,8 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
         // due to struct alignment.
         info.SizeOfStruct = 88;
 
+        let _c = ::dbghelp_init();
+
         let mut displacement = 0u64;
         let ret = ::dbghelp::SymFromAddrW(kernel32::GetCurrentProcess(),
                                           addr as DWORD64,

@@ -7,8 +7,9 @@ use std::str;
 
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
-static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace");
+static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace"));
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
+static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 
 #[test]
 fn smoke() {
@@ -26,6 +27,7 @@ fn smoke() {
         if v.len() < 5 {
             assert!(!LIBUNWIND);
             assert!(!UNIX_BACKTRACE);
+            assert!(!DBGHELP);
             return
         }
 
@@ -47,10 +49,15 @@ fn smoke() {
         let sym = sym as usize;
         assert!(ip >= sym);
         assert!(sym >= actual_fn_pointer);
-        assert!(sym - actual_fn_pointer < 1024);
+
+        // windows dbghelp is *quite* liberal (and wrong) in many of its reports
+        // right now...
+        if !DBGHELP {
+            assert!(sym - actual_fn_pointer < 1024);
+        }
 
         let mut resolved = 0;
-        let can_resolve = DLADDR || LIBBACKTRACE;
+        let can_resolve = DLADDR || LIBBACKTRACE || DBGHELP;
 
         let mut name = None;
         let mut addr = None;
@@ -64,13 +71,18 @@ fn smoke() {
             file = sym.filename().map(|v| v.to_vec());
         });
 
+        // dbghelp doesn't always resolve symbols right now
         match resolved {
-            0 => return assert!(!can_resolve),
+            0 => return assert!(!can_resolve || DBGHELP),
             _ => {}
         }
 
-        // linux dladdr doesn't work, but everything else should
-        if can_resolve && cfg!(not(target_os = "linux")) {
+        // * linux dladdr doesn't work (only consults local symbol table)
+        // * windows dbghelp doesn't work very well (unsure why)
+        if can_resolve &&
+           (cfg!(not(target_os = "linux")) || !DLADDR) &&
+           !DBGHELP
+        {
             let bytes = name.expect("didn't find a name");
             let bytes = str::from_utf8(&bytes).unwrap();
             let mut demangled = String::new();

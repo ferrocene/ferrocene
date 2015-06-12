@@ -11,23 +11,10 @@
 #![allow(bad_style)]
 
 use std::mem;
-use std::ptr;
 use winapi::*;
 use kernel32;
 
 use Frame;
-
-struct Cleanup {
-    handle: HANDLE,
-}
-
-impl Drop for Cleanup {
-    fn drop(&mut self) {
-        unsafe {
-            ::dbghelp::SymCleanup(self.handle);
-        }
-    }
-}
 
 impl Frame for STACKFRAME64 {
     fn ip(&self) -> *mut c_void { self.AddrPC.Offset as *mut _ }
@@ -54,9 +41,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         let image = init_frame(&mut frame, context);
 
         // Initialize this process's symbols
-        let ret = ::dbghelp::SymInitializeW(process, ptr::null_mut(), TRUE);
-        if ret != TRUE { return }
-        let _c = Cleanup { handle: process };
+        let _c = ::dbghelp_init();
 
         // And now that we're done with all the setup, do the stack walking!
         while ::dbghelp::StackWalk64(image, process, thread, &mut frame,

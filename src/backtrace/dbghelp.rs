@@ -44,7 +44,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         let _c = ::dbghelp_init();
 
         // And now that we're done with all the setup, do the stack walking!
-        while ::dbghelp::StackWalk64(image, process, thread, &mut frame,
+        while ::dbghelp::StackWalk64(image as DWORD, process, thread, &mut frame,
                                      context as *mut _ as *mut _,
                                      None,
                                      Some(::dbghelp::SymFunctionTableAccess64),
@@ -64,7 +64,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
 }
 
 #[cfg(target_arch = "x86_64")]
-fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> DWORD {
+fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Rip as u64;
     frame.AddrPC.Mode = ADDRESS_MODE::AddrModeFlat;
     frame.AddrStack.Offset = ctx.Rsp as u64;
@@ -75,7 +75,7 @@ fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> DWORD {
 }
 
 #[cfg(target_arch = "x86")]
-fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> libc::DWORD {
+fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Eip as u64;
     frame.AddrPC.Mode = ADDRESS_MODE::AddrModeFlat;
     frame.AddrStack.Offset = ctx.Esp as u64;

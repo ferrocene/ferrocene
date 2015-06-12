@@ -46,7 +46,8 @@ fn main() {
 
 ## Platform Support
 
-This library currently supports OSX and Linux, with Windows support coming soon!
+This library currently supports OSX, Linux, and Windows. Support for other
+platforms is always welcome!
 
 ## License
 

@@ -19,8 +19,9 @@
 //!
 //! # Platform Support
 //!
-//! Currently this library is verified to work on Linux and OSX, but it may work
-//! on other platforms as well. Windows support is planned soon!
+//! Currently this library is verified to work on Linux, OSX, and Windows, but
+//! it may work on other platforms as well. Note that the quality of the
+//! backtrace may vary across platforms.
 //!
 //! # API Principles
 //!

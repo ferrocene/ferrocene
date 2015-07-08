@@ -1,3 +1,6 @@
+use std::fmt;
+
+use debug_builders::DebugStruct;
 use libc::c_void;
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`
@@ -62,6 +65,15 @@ pub trait Frame {
                  // to be skipped
 pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
     trace_imp(cb)
+}
+
+impl fmt::Debug for Frame {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        DebugStruct::new(f, "Frame")
+            .field("ip", &self.ip())
+            .field("symbol_address", &self.symbol_address())
+            .finish()
+    }
 }
 
 cfg_if! {

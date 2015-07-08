@@ -1,3 +1,6 @@
+use std::fmt;
+
+use debug_builders::DebugStruct;
 use libc::c_void;
 
 /// A trait representing the resolution of a symbol in a file.
@@ -64,6 +67,25 @@ pub trait Symbol {
 /// ```
 pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
     resolve_imp(addr, cb)
+}
+
+impl fmt::Debug for Symbol {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut d = DebugStruct::new(f, "Symbol");
+        if let Some(name) = self.name() {
+            d = d.field("name", &String::from_utf8_lossy(name));
+        }
+        if let Some(addr) = self.addr() {
+            d = d.field("addr", &addr);
+        }
+        if let Some(filename) = self.filename() {
+            d = d.field("filename", &String::from_utf8_lossy(filename));
+        }
+        if let Some(lineno) = self.lineno() {
+            d = d.field("lineno", &lineno);
+        }
+        d.finish()
+    }
 }
 
 cfg_if! {

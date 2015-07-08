@@ -70,6 +70,7 @@
 #![cfg_attr(test, deny(warnings))]
 
 extern crate libc;
+extern crate debug_builders;
 #[cfg(feature = "kernel32-sys")] extern crate kernel32;
 #[cfg(feature = "winapi")] extern crate winapi;
 #[cfg(feature = "dbghelp")] extern crate dbghelp;

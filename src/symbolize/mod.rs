@@ -66,7 +66,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
     resolve_imp(addr, cb)
 }
 
-cascade! {
+cfg_if! {
     if #[cfg(all(windows, feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;

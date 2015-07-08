@@ -75,7 +75,7 @@ extern crate libc;
 #[cfg(feature = "dbghelp")] extern crate dbghelp;
 
 #[macro_use]
-mod macros;
+extern crate cfg_if;
 
 pub use backtrace::{trace, Frame};
 mod backtrace;

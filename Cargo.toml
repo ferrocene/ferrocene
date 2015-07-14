@@ -16,7 +16,7 @@ A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 libc = "0.1"
 backtrace-sys = { path = "backtrace-sys", version = "0.1", optional = true }
 kernel32-sys = { version = "0.1", optional = true }
-winapi = { version = "0.1", optional = true }
+winapi = { version = "0.2", optional = true }
 dbghelp-sys = { version = "0.1", optional = true }
 cfg-if = "0.1"
 debug-builders = "0.1"

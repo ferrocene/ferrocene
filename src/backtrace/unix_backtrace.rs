@@ -9,7 +9,7 @@
 // except according to those terms.
 
 use std::mem;
-use libc::{c_void, c_int};
+use std::os::raw::{c_void, c_int};
 
 use Frame;
 

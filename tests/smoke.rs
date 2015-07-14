@@ -1,8 +1,8 @@
 #![allow(unconditional_recursion)] // FIXME rust-lang/rust#26165
 
 extern crate backtrace;
-extern crate libc;
 
+use std::os::raw::c_void;
 use std::str;
 
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
@@ -40,7 +40,7 @@ fn smoke() {
         assert_frame(v[5], smoke as usize, "smoke::", "", 0);
     }
 
-    fn assert_frame((ip, sym): (*mut libc::c_void, *mut libc::c_void),
+    fn assert_frame((ip, sym): (*mut c_void, *mut c_void),
                     actual_fn_pointer: usize,
                     expected_name: &str,
                     expected_file: &str,
@@ -63,7 +63,7 @@ fn smoke() {
         let mut addr = None;
         let mut line = None;
         let mut file = None;
-        backtrace::resolve(ip as *mut libc::c_void, &mut |sym| {
+        backtrace::resolve(ip as *mut c_void, &mut |sym| {
             resolved += 1;
             name = sym.name().map(|v| v.to_vec());
             addr = sym.addr();

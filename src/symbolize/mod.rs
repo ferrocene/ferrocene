@@ -1,7 +1,7 @@
 use std::fmt;
+use std::os::raw::c_void;
 
 use debug_builders::DebugStruct;
-use libc::c_void;
 
 /// A trait representing the resolution of a symbol in a file.
 ///

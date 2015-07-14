@@ -1,7 +1,7 @@
 use std::fmt;
 
 use debug_builders::DebugStruct;
-use libc::c_void;
+use std::os::raw::c_void;
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`
 /// function of this crate.

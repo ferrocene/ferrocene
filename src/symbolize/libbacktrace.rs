@@ -12,7 +12,8 @@
 
 extern crate backtrace_sys as bt;
 
-use libc::{c_void, c_char, uintptr_t, c_int};
+use libc::uintptr_t;
+use std::os::raw::{c_void, c_char, c_int};
 use std::env;
 use std::ffi::CStr;
 use std::path::Path;

@@ -18,7 +18,7 @@ use std::env;
 use std::ffi::CStr;
 use std::path::Path;
 use std::ptr;
-use std::sync::{ONCE_INIT, StaticMutex, Once};
+use std::sync::{MUTEX_INIT, ONCE_INIT, Once, StaticMutex};
 
 use Symbol;
 
@@ -26,15 +26,13 @@ type FileLine = (*const c_char, c_int);
 
 extern fn error_cb(_data: *mut c_void, msg: *const c_char,
                    _errnum: c_int) {
-
-    let s: &'static [u8] = b"backtrace library does not support threads";
     unsafe {
         let msg: &[u8] = CStr::from_ptr(msg).to_bytes();
         // Install a global mutex for libbacktrace's state, signaling
         // that we need to try initialization with `threaded = 0`.
         // It'd be nice if there was a better way to detect this...
         if msg == &b"backtrace library does not support threads"[..] {
-            STATE_LOCK = Some(StaticMutex::new());
+            STATE_LOCK = Some(MUTEX_INIT);
         }
     }
 }

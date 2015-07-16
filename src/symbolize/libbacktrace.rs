@@ -18,15 +18,25 @@ use std::env;
 use std::ffi::CStr;
 use std::path::Path;
 use std::ptr;
-use std::sync::{ONCE_INIT, Once};
+use std::sync::{ONCE_INIT, StaticMutex, Once};
 
 use Symbol;
 
 type FileLine = (*const c_char, c_int);
 
-extern fn error_cb(_data: *mut c_void, _msg: *const c_char,
+extern fn error_cb(_data: *mut c_void, msg: *const c_char,
                    _errnum: c_int) {
-    // do nothing for now
+
+    let s: &'static [u8] = b"backtrace library does not support threads";
+    unsafe {
+        let msg: &[u8] = CStr::from_ptr(msg).to_bytes();
+        // Install a global mutex for libbacktrace's state, signaling
+        // that we need to try initialization with `threaded = 0`.
+        // It'd be nice if there was a better way to detect this...
+        if msg == &b"backtrace library does not support threads"[..] {
+            STATE_LOCK = Some(StaticMutex::new());
+        }
+    }
 }
 
 extern fn syminfo_cb(data: *mut c_void,
@@ -124,7 +134,7 @@ unsafe fn call(data: *mut c_void, sym: &Symbol) {
 // that is calculated the first time this is requested. Remember that
 // backtracing all happens serially (one global lock).
 //
-// An additionally oddity in this function is that we initialize the
+// An additional oddity in this function is that we initialize the
 // filename via self_exe_name() to pass to libbacktrace. It turns out
 // that on Linux libbacktrace seamlessly gets the filename of the
 // current executable, but this fails on freebsd. by always providing
@@ -132,6 +142,12 @@ unsafe fn call(data: *mut c_void, sym: &Symbol) {
 // the symbols. The libbacktrace API also states that the filename must
 // be in "permanent memory", so we copy it to a static and then use the
 // static as the pointer.
+//
+// Furthermore, libbacktrace may not be compiled with multithreading
+// support, even though we certainly want to present a thread-safe
+// interface here.  If we detect that multithreading support is
+// missing, we'll serialize access to the state via a mutex.
+static mut STATE_LOCK: Option<StaticMutex> = None;
 unsafe fn init_state() -> *mut bt::backtrace_state {
     static mut STATE: *mut bt::backtrace_state = 0 as *mut _;
     static mut LAST_FILENAME: [c_char; 256] = [0; 256];
@@ -159,8 +175,14 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
             }
             None => ptr::null(),
         };
-        STATE = bt::backtrace_create_state(filename, 0, error_cb,
+        STATE = bt::backtrace_create_state(filename, 1, error_cb,
                                            ptr::null_mut());
+        // Retry with `threaded = 0` if we failed due to a lack of
+        // multithreading support
+        if STATE.is_null() && STATE_LOCK.is_some() {
+            STATE = bt::backtrace_create_state(filename, 0, error_cb,
+                                               ptr::null_mut());
+        }
     });
 
     STATE
@@ -184,6 +206,8 @@ pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {
         if state.is_null() {
             return
         }
+        // Potentially serialize the remainder of this function
+        let _guard = STATE_LOCK.as_ref().map(|s| s.lock());
 
         let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
                                        pcinfo_cb, error_cb,

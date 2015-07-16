@@ -68,6 +68,7 @@
 #![doc(html_root_url = "http://alexcrichton.com/backtrace-rs")]
 #![deny(missing_docs)]
 #![cfg_attr(test, deny(warnings))]
+#![feature(static_mutex)]
 
 extern crate libc;
 extern crate debug_builders;

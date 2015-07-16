@@ -4,6 +4,7 @@ extern crate backtrace;
 
 use std::os::raw::c_void;
 use std::str;
+use std::thread;
 
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
@@ -107,5 +108,28 @@ fn smoke() {
                         expected_name, line, expected_line);
             }
         }
+    }
+}
+
+#[test]
+fn many_threads() {
+    let threads = (0..16).map(|_| {
+        thread::spawn(|| {
+            for _ in (0..16) {
+                backtrace::trace(&mut |frame| {
+                    backtrace::resolve(frame.ip(), &mut |symbol| {
+                        symbol.name().and_then(|s| str::from_utf8(s).ok()).map(|name| {
+                            let mut demangled = String::new();
+                            backtrace::demangle(&mut demangled, name).unwrap();
+                        });
+                    });
+                    true
+                });
+            }
+        })
+    }).collect::<Vec<_>>();
+
+    for t in threads {
+        t.join().unwrap()
     }
 }

@@ -180,13 +180,14 @@ fn path2bytes(p: &Path) -> Option<&[u8]> {
 }
 
 pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {
+    let _guard = ::lock::lock();
+
     // backtrace errors are currently swept under the rug
     unsafe {
         let state = init_state();
         if state.is_null() {
             return
         }
-        let _guard = ::lock::lock();
 
         let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
                                        pcinfo_cb, error_cb,

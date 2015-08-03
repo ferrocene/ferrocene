@@ -31,8 +31,11 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         let process = kernel32::GetCurrentProcess();
         let thread = kernel32::GetCurrentThread();
 
-        let mut context = mem::zeroed::<CONTEXT>();
-        kernel32::RtlCaptureContext(&mut context);
+        // The CONTEXT structure needs to be aligned on a 16-byte boundary but
+        // currently we don't have a way to express that in Rust. Allocations
+        // are generally aligned to 16-bytes, though, so we box this up.
+        let mut context = Box::new(mem::zeroed::<CONTEXT>());
+        kernel32::RtlCaptureContext(&mut *context);
         let mut frame: STACKFRAME64 = mem::zeroed();
         let image = init_frame(&mut frame, &context);
 
@@ -41,7 +44,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
 
         // And now that we're done with all the setup, do the stack walking!
         while ::dbghelp::StackWalk64(image as DWORD, process, thread, &mut frame,
-                                     &mut context as *mut _ as *mut _,
+                                     &mut *context as *mut _ as *mut _,
                                      None,
                                      Some(::dbghelp::SymFunctionTableAccess64),
                                      Some(::dbghelp::SymGetModuleBase64),

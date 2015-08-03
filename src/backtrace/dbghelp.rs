@@ -31,9 +31,10 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         let process = kernel32::GetCurrentProcess();
         let thread = kernel32::GetCurrentThread();
 
-        // The CONTEXT structure needs to be aligned on a 16-byte boundary but
-        // currently we don't have a way to express that in Rust. Allocations
-        // are generally aligned to 16-bytes, though, so we box this up.
+        // The CONTEXT structure needs to be aligned on a 16-byte boundary for
+        // 64-bit Windows, but currently we don't have a way to express that in
+        // Rust. Allocations are generally aligned to 16-bytes, though, so we
+        // box this up.
         let mut context = Box::new(mem::zeroed::<CONTEXT>());
         kernel32::RtlCaptureContext(&mut *context);
         let mut frame: STACKFRAME64 = mem::zeroed();

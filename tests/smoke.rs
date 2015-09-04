@@ -3,6 +3,7 @@
 extern crate backtrace;
 
 use std::os::raw::c_void;
+use std::path::Path;
 use std::str;
 use std::thread;
 
@@ -12,6 +13,7 @@ static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace")) &&
                             !cfg!(target_os = "macos");
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
+static MSVC: bool = cfg!(target_env = "msvc");
 
 #[test]
 fn smoke() {
@@ -80,10 +82,10 @@ fn smoke() {
         }
 
         // * linux dladdr doesn't work (only consults local symbol table)
-        // * windows dbghelp doesn't work very well (unsure why)
+        // * windows dbghelp isn't great for GNU
         if can_resolve &&
            !(cfg!(target_os = "linux") && DLADDR) &&
-           !DBGHELP
+           !(DBGHELP && MSVC)
         {
             let bytes = name.expect("didn't find a name");
             let bytes = str::from_utf8(&bytes).unwrap();
@@ -97,11 +99,13 @@ fn smoke() {
             addr.expect("didn't find a symbol");
         }
 
-        if LIBBACKTRACE && cfg!(debug_assertions) {
+        if (LIBBACKTRACE || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {
-                assert_eq!(str::from_utf8(&file).unwrap(), expected_file);
+                let p = Path::new(str::from_utf8(&file).unwrap());
+                assert!(p.ends_with(expected_file),
+                        "{:?} didn't end with {:?}", p, expected_file);
             }
             if expected_line != 0 {
                 assert!(line == expected_line,

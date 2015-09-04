@@ -21,6 +21,7 @@ impl Frame for STACKFRAME64 {
     fn symbol_address(&self) -> *mut c_void { self.ip() }
 }
 
+#[inline(always)]
 pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
     // According to windows documentation, all dbghelp functions are
     // single-threaded.

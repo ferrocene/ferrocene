@@ -16,12 +16,12 @@ static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 static MSVC: bool = cfg!(target_env = "msvc");
 
 #[test]
-fn smoke() {
-    a(line!());
-    #[inline(never)] fn a(start_line: u32) { b(start_line) }
-    #[inline(never)] fn b(start_line: u32) { c(start_line) }
-    #[inline(never)] fn c(start_line: u32) { test(start_line) }
-    #[inline(never)] fn test(start_line: u32) {
+fn smoke_test_frames() {
+    frame_1(line!());
+    #[inline(never)] fn frame_1(start_line: u32) { frame_2(start_line) }
+    #[inline(never)] fn frame_2(start_line: u32) { frame_3(start_line) }
+    #[inline(never)] fn frame_3(start_line: u32) { frame_4(start_line) }
+    #[inline(never)] fn frame_4(start_line: u32) {
         let mut v = Vec::new();
         backtrace::trace(&mut |cx| {
             v.push((cx.ip(), cx.symbol_address()));
@@ -41,15 +41,16 @@ fn smoke() {
             0
         };
         assert_frame(&v, o, 0, backtrace::trace as usize, "::trace", "", 0);
-        assert_frame(&v, o, 1, test as usize, "::test",
+        assert_frame(&v, o, 1, frame_4 as usize, "frame_4",
                      "tests/smoke.rs", start_line + 6);
-        assert_frame(&v, o, 2, c as usize, "::c", "tests/smoke.rs",
+        assert_frame(&v, o, 2, frame_3 as usize, "frame_3", "tests/smoke.rs",
                      start_line + 3);
-        assert_frame(&v, o, 3, b as usize, "::b", "tests/smoke.rs",
+        assert_frame(&v, o, 3, frame_2 as usize, "frame_2", "tests/smoke.rs",
                      start_line + 2);
-        assert_frame(&v, o, 4, a as usize, "::a", "tests/smoke.rs",
+        assert_frame(&v, o, 4, frame_1 as usize, "frame_1", "tests/smoke.rs",
                      start_line + 1);
-        assert_frame(&v, o, 5, smoke as usize, "smoke::", "", 0);
+        assert_frame(&v, o, 5, smoke_test_frames as usize,
+                     "smoke_test_frames", "", 0);
     }
 
     fn assert_frame(syms: &[(*mut c_void, *mut c_void)],

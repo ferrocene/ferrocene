@@ -82,7 +82,7 @@ fn smoke() {
         // * linux dladdr doesn't work (only consults local symbol table)
         // * windows dbghelp doesn't work very well (unsure why)
         if can_resolve &&
-           (cfg!(not(target_os = "linux")) || !DLADDR) &&
+           !(cfg!(target_os = "linux") && DLADDR) &&
            !DBGHELP
         {
             let bytes = name.expect("didn't find a name");

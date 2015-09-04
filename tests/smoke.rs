@@ -35,11 +35,10 @@ fn smoke_test_frames() {
             return
         }
 
-        let o = if cfg!(all(target_env = "msvc", target_pointer_width = "32")) {
-            1
-        } else {
-            0
-        };
+        // On 32-bit windows apparently the first frame isn't our backtrace
+        // frame but it's actually this frame. I'm not entirely sure why, but at
+        // least it seems consistent?
+        let o = if cfg!(all(windows, target_pointer_width = "32")) {1} else {0};
         assert_frame(&v, o, 0, backtrace::trace as usize, "trace", "", 0);
         assert_frame(&v, o, 1, frame_4 as usize, "frame_4",
                      "tests/smoke.rs", start_line + 6);

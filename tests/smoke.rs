@@ -40,7 +40,7 @@ fn smoke_test_frames() {
         } else {
             0
         };
-        assert_frame(&v, o, 0, backtrace::trace as usize, "::trace", "", 0);
+        assert_frame(&v, o, 0, backtrace::trace as usize, "trace", "", 0);
         assert_frame(&v, o, 1, frame_4 as usize, "frame_4",
                      "tests/smoke.rs", start_line + 6);
         assert_frame(&v, o, 2, frame_3 as usize, "frame_3", "tests/smoke.rs",

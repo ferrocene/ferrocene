@@ -35,20 +35,32 @@ fn smoke() {
             return
         }
 
-        assert_frame(v[0], backtrace::trace as usize, "::trace", "", 0);
-        assert_frame(v[1], test as usize, "::test",
+        let o = if cfg!(all(target_env = "msvc", target_pointer_width = "32")) {
+            1
+        } else {
+            0
+        };
+        assert_frame(&v, o, 0, backtrace::trace as usize, "::trace", "", 0);
+        assert_frame(&v, o, 1, test as usize, "::test",
                      "tests/smoke.rs", start_line + 6);
-        assert_frame(v[2], c as usize, "::c", "tests/smoke.rs", start_line + 3);
-        assert_frame(v[3], b as usize, "::b", "tests/smoke.rs", start_line + 2);
-        assert_frame(v[4], a as usize, "::a", "tests/smoke.rs", start_line + 1);
-        assert_frame(v[5], smoke as usize, "smoke::", "", 0);
+        assert_frame(&v, o, 2, c as usize, "::c", "tests/smoke.rs",
+                     start_line + 3);
+        assert_frame(&v, o, 3, b as usize, "::b", "tests/smoke.rs",
+                     start_line + 2);
+        assert_frame(&v, o, 4, a as usize, "::a", "tests/smoke.rs",
+                     start_line + 1);
+        assert_frame(&v, o, 5, smoke as usize, "smoke::", "", 0);
     }
 
-    fn assert_frame((ip, sym): (*mut c_void, *mut c_void),
+    fn assert_frame(syms: &[(*mut c_void, *mut c_void)],
+                    offset: usize,
+                    idx: usize,
                     actual_fn_pointer: usize,
                     expected_name: &str,
                     expected_file: &str,
                     expected_line: u32) {
+        if offset > idx { return }
+        let (ip, sym) = syms[idx - offset];
         let ip = ip as usize;
         let sym = sym as usize;
         assert!(ip >= sym);
@@ -85,7 +97,7 @@ fn smoke() {
         // * windows dbghelp isn't great for GNU
         if can_resolve &&
            !(cfg!(target_os = "linux") && DLADDR) &&
-           !(DBGHELP && MSVC)
+           !(DBGHELP && !MSVC)
         {
             let bytes = name.expect("didn't find a name");
             let bytes = str::from_utf8(&bytes).unwrap();

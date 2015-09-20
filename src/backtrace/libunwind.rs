@@ -155,7 +155,7 @@ mod uw {
             _UVRSD_DOUBLE = 5,
         }
 
-        type _Unwind_Word = c_uint;
+        type _Unwind_Word = libc::c_uint;
         extern {
             fn _Unwind_VRS_Get(ctx: *mut _Unwind_Context,
                                klass: _Unwind_VRS_RegClass,

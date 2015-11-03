@@ -12,4 +12,4 @@ Bindings to the libbacktrace gcc library
 """
 
 [dependencies]
-libc = "0.1"
+libc = "0.2"

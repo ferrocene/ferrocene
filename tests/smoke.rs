@@ -132,7 +132,7 @@ fn smoke_test_frames() {
 fn many_threads() {
     let threads = (0..16).map(|_| {
         thread::spawn(|| {
-            for _ in (0..16) {
+            for _ in 0..16 {
                 backtrace::trace(&mut |frame| {
                     backtrace::resolve(frame.ip(), &mut |symbol| {
                         symbol.name().and_then(|s| str::from_utf8(s).ok()).map(|name| {

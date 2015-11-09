@@ -67,21 +67,21 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
 #[cfg(target_arch = "x86_64")]
 fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Rip as u64;
-    frame.AddrPC.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrPC.Mode = AddrModeFlat;
     frame.AddrStack.Offset = ctx.Rsp as u64;
-    frame.AddrStack.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrStack.Mode = AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Rbp as u64;
-    frame.AddrFrame.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrFrame.Mode = AddrModeFlat;
     IMAGE_FILE_MACHINE_AMD64
 }
 
 #[cfg(target_arch = "x86")]
 fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Eip as u64;
-    frame.AddrPC.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrPC.Mode = AddrModeFlat;
     frame.AddrStack.Offset = ctx.Esp as u64;
-    frame.AddrStack.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrStack.Mode = AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Ebp as u64;
-    frame.AddrFrame.Mode = ADDRESS_MODE::AddrModeFlat;
+    frame.AddrFrame.Mode = AddrModeFlat;
     IMAGE_FILE_MACHINE_I386
 }

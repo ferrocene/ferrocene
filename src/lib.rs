@@ -37,7 +37,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! backtrace = "0.1"
+//! backtrace = "0.2"
 //! ```
 //!
 //! Next:

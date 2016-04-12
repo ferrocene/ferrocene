@@ -12,25 +12,37 @@
 
 use std::ffi::OsString;
 use std::mem;
+use std::path::Path;
 use std::os::windows::prelude::*;
 use std::slice;
 use kernel32;
 use winapi::*;
 
-use Symbol;
+use {Symbol, SymbolName};
 
 struct SymbolInfo<'a> {
     info: &'a SYMBOL_INFOW,
     data: Option<&'a [u8]>,
     line: Option<&'a IMAGEHLP_LINEW64>,
-    line_data: Option<&'a [u8]>,
+    line_data: Option<&'a Path>,
 }
 
 impl<'a> Symbol for SymbolInfo<'a> {
-    fn name(&self) -> Option<&[u8]> { self.data }
-    fn addr(&self) -> Option<*mut c_void> { Some(self.info.Address as *mut _) }
-    fn filename(&self) -> Option<&[u8]> { self.line_data }
-    fn lineno(&self) -> Option<u32> { self.line.map(|l| l.LineNumber as u32) }
+    fn name(&self) -> Option<SymbolName> {
+        self.data.map(SymbolName::new)
+    }
+
+    fn addr(&self) -> Option<*mut c_void> {
+        Some(self.info.Address as *mut _)
+    }
+
+    fn filename(&self) -> Option<&Path> {
+        self.line_data
+    }
+
+    fn lineno(&self) -> Option<u32> {
+        self.line.map(|l| l.LineNumber as u32)
+    }
 }
 
 pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
@@ -79,7 +91,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
             }
             let name = slice::from_raw_parts(base, len as usize);
             line_data = OsString::from_wide(name);
-            (Some(&line), line_data.to_str().map(|s| s.as_bytes()))
+            (Some(&line), Some(Path::new(&line_data)))
         } else {
             (None, None)
         };

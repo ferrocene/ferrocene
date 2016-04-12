@@ -12,7 +12,7 @@ use std::os::raw::{c_void, c_char, c_int};
 use std::mem;
 use std::ffi::CStr;
 
-use Symbol;
+use {Symbol, SymbolName};
 
 #[repr(C)]
 struct Dl_info {
@@ -23,11 +23,13 @@ struct Dl_info {
 }
 
 impl Symbol for Dl_info {
-    fn name(&self) -> Option<&[u8]> {
+    fn name(&self) -> Option<SymbolName> {
         if self.dli_sname.is_null() {
             None
         } else {
-            Some(unsafe { CStr::from_ptr(self.dli_sname).to_bytes() })
+            Some(SymbolName::new(unsafe {
+                CStr::from_ptr(self.dli_sname).to_bytes()
+            }))
         }
     }
     fn addr(&self) -> Option<*mut c_void> {

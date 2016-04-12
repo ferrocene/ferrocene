@@ -15,13 +15,13 @@ fn baz() { print() }
 
 fn print() {
     let mut cnt = 0;
-    backtrace::trace(&mut |frame| {
+    backtrace::trace(|frame| {
         let ip = frame.ip();
         print!("frame #{:<2} - {:#02$x}", cnt, ip as usize, HEX_WIDTH);
         cnt += 1;
 
         let mut resolved = false;
-        backtrace::resolve(frame.ip(), &mut |symbol| {
+        backtrace::resolve(frame.ip(), |symbol| {
             if !resolved {
                 resolved = true;
             } else {

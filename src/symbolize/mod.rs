@@ -52,10 +52,10 @@ pub trait Symbol {
 /// extern crate backtrace;
 ///
 /// fn main() {
-///     backtrace::trace(&mut |frame| {
+///     backtrace::trace(|frame| {
 ///         let ip = frame.ip();
 ///
-///         backtrace::resolve(ip, &mut |symbol| {
+///         backtrace::resolve(ip, |symbol| {
 ///             // ...
 ///         });
 ///
@@ -63,8 +63,8 @@ pub trait Symbol {
 ///     });
 /// }
 /// ```
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
-    resolve_imp(addr, cb)
+pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, mut cb: F) {
+    resolve_imp(addr, &mut cb)
 }
 
 impl fmt::Debug for Symbol {

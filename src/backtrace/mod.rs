@@ -53,7 +53,7 @@ pub trait Frame {
 /// extern crate backtrace;
 ///
 /// fn main() {
-///     backtrace::trace(&mut |frame| {
+///     backtrace::trace(|frame| {
 ///         // ...
 ///
 ///         true // continue the backtrace
@@ -62,8 +62,8 @@ pub trait Frame {
 /// ```
 #[inline(never)] // if this is never inlined then the first frame can be konwn
                  // to be skipped
-pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
-    trace_imp(cb)
+pub fn trace<F: FnMut(&Frame) -> bool>(mut cb: F) {
+    trace_imp(&mut cb)
 }
 
 impl fmt::Debug for Frame {

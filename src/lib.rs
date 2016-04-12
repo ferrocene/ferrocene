@@ -46,12 +46,12 @@
 //! extern crate backtrace;
 //!
 //! fn main() {
-//!     backtrace::trace(&mut |frame| {
+//!     backtrace::trace(|frame| {
 //!         let ip = frame.ip();
 //!         let symbol_address = frame.symbol_address();
 //!
 //!         // Resolve this instruction pointer to a symbol name
-//!         backtrace::resolve(ip, &mut |symbol| {
+//!         backtrace::resolve(ip, |symbol| {
 //!             if let Some(name) = symbol.name() {
 //!                 // ...
 //!             }

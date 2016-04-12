@@ -23,7 +23,7 @@ fn smoke_test_frames() {
     #[inline(never)] fn frame_3(start_line: u32) { frame_4(start_line) }
     #[inline(never)] fn frame_4(start_line: u32) {
         let mut v = Vec::new();
-        backtrace::trace(&mut |cx| {
+        backtrace::trace(|cx| {
             v.push((cx.ip(), cx.symbol_address()));
             true
         });
@@ -39,7 +39,7 @@ fn smoke_test_frames() {
         // frame but it's actually this frame. I'm not entirely sure why, but at
         // least it seems consistent?
         let o = if cfg!(all(windows, target_pointer_width = "32")) {1} else {0};
-        assert_frame(&v, o, 0, backtrace::trace as usize, "trace", "", 0);
+        // frame offset 0 is the `backtrace::trace` function, but that's generic
         assert_frame(&v, o, 1, frame_4 as usize, "frame_4",
                      "tests/smoke.rs", start_line + 6);
         assert_frame(&v, o, 2, frame_3 as usize, "frame_3", "tests/smoke.rs",
@@ -79,7 +79,7 @@ fn smoke_test_frames() {
         let mut addr = None;
         let mut line = None;
         let mut file = None;
-        backtrace::resolve(ip as *mut c_void, &mut |sym| {
+        backtrace::resolve(ip as *mut c_void, |sym| {
             resolved += 1;
             name = sym.name().map(|v| v.to_vec());
             addr = sym.addr();
@@ -133,8 +133,8 @@ fn many_threads() {
     let threads = (0..16).map(|_| {
         thread::spawn(|| {
             for _ in 0..16 {
-                backtrace::trace(&mut |frame| {
-                    backtrace::resolve(frame.ip(), &mut |symbol| {
+                backtrace::trace(|frame| {
+                    backtrace::resolve(frame.ip(), |symbol| {
                         symbol.name().and_then(|s| str::from_utf8(s).ok()).map(|name| {
                             let mut demangled = String::new();
                             backtrace::demangle(&mut demangled, name).unwrap();

@@ -47,6 +47,10 @@ pub trait Frame {
 /// to convert the `ip` (instruction pointer) or symbol address to a `Symbol`
 /// through which the name and/or filename/line number can be learned.
 ///
+/// Note that this is a relatively low-level function and if you'd like to, for
+/// example, capture a backtrace to be inspected later, then the `Backtrace`
+/// type may be more appropriate.
+///
 /// # Example
 ///
 /// ```

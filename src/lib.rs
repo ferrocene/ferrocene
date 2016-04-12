@@ -85,6 +85,9 @@ mod symbolize;
 
 mod demangle;
 
+pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
+mod capture;
+
 #[allow(dead_code)]
 struct Bomb {
     enabled: bool,

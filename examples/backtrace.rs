@@ -25,7 +25,7 @@ fn print() {
             if !resolved {
                 resolved = true;
             } else {
-                print!("\n     ");
+                print!("{}", vec![" "; 7 + 2 + 3 + HEX_WIDTH].join(""));
             }
 
             if let Some(name) = symbol.name() {

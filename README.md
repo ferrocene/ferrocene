@@ -22,16 +22,36 @@ extern crate backtrace;
 
 ## Usage
 
+To simply capture a backtrace and defer dealing with it until a later time,
+you can use the top-level `Backtrace` type.
+
+```rust
+extern crate backtrace;
+
+use backtrace::Backtrace;
+
+fn main() {
+    let bt = Backtrace::new();
+
+    // do_some_work();
+
+    println!("{:?}", bt);
+}
+```
+
+If, however, you'd like more raw access to the actual tracing functionality, you
+can use the `trace` and `resolve` functions directly.
+
 ```rust
 extern crate backtrace;
 
 fn main() {
-    backtrace::trace(&mut |frame| {
+    backtrace::trace(|frame| {
         let ip = frame.ip();
         let symbol_address = frame.symbol_address();
 
         // Resolve this instruction pointer to a symbol name
-        backtrace::resolve(ip, &mut |symbol| {
+        backtrace::resolve(ip, |symbol| {
             if let Some(name) = symbol.name() {
                 // ...
             }

@@ -1,7 +1,5 @@
 extern crate backtrace;
 
-use std::str;
-
 fn main() {
     foo();
 }
@@ -34,11 +32,9 @@ fn print() {
                 print!(" - <unknown>");
             }
             if let Some(file) = symbol.filename() {
-                if let Ok(file) = str::from_utf8(file) {
-                    if let Some(l) = symbol.lineno() {
-                        print!("\n{:13}{:4$}@ {}:{}", "", "", file, l,
-                               HEX_WIDTH);
-                    }
+                if let Some(l) = symbol.lineno() {
+                    print!("\n{:13}{:4$}@ {}:{}", "", "", file.display(), l,
+                           HEX_WIDTH);
                 }
             }
             println!("");

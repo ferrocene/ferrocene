@@ -1,10 +1,6 @@
-#![allow(unconditional_recursion)] // FIXME rust-lang/rust#26165
-
 extern crate backtrace;
 
 use std::os::raw::c_void;
-use std::path::Path;
-use std::str;
 use std::thread;
 
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
@@ -84,7 +80,7 @@ fn smoke_test_frames() {
             name = sym.name().map(|v| v.to_string());
             addr = sym.addr();
             line = sym.lineno();
-            file = sym.filename().map(|v| v.to_vec());
+            file = sym.filename().map(|v| v.to_path_buf());
         });
 
         // dbghelp doesn't always resolve symbols right now
@@ -112,9 +108,8 @@ fn smoke_test_frames() {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {
-                let p = Path::new(str::from_utf8(&file).unwrap());
-                assert!(p.ends_with(expected_file),
-                        "{:?} didn't end with {:?}", p, expected_file);
+                assert!(file.ends_with(expected_file),
+                        "{:?} didn't end with {:?}", file, expected_file);
             }
             if expected_line != 0 {
                 assert!(line == expected_line,

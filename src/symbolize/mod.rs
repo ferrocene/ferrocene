@@ -1,5 +1,6 @@
 use std::fmt;
 use std::os::raw::c_void;
+use std::path::Path;
 use std::str;
 
 use demangle::{demangle, Demangle};
@@ -14,7 +15,15 @@ use demangle::{demangle, Demangle};
 /// name, filename, line number, precise address, etc. Not all information is
 /// always available in a symbol, however, so all methods return an `Option`.
 pub trait Symbol {
-    /// Returns the name of this function as a demangled symbol.
+    /// Returns the name of this function.
+    ///
+    /// The returned structure can be used to query various properties about the
+    /// symbol name:
+    ///
+    /// * The `Display` implementation will print out the demangled symbol.
+    /// * The raw `str` value of the symbol can be accessed (if it's valid
+    ///   utf-8).
+    /// * The raw bytes for the symbol name can be accessed.
     fn name(&self) -> Option<SymbolName> { None }
 
     /// Returns the starting address of this function.
@@ -26,7 +35,7 @@ pub trait Symbol {
     /// unix platforms other than OSX) and when a binary is compiled with
     /// debuginfo. If neither of these conditions is met then this will likely
     /// return `None`.
-    fn filename(&self) -> Option<&[u8]> { None }
+    fn filename(&self) -> Option<&Path> { None }
 
     /// Returns the line number for where this symbol is currently executing.
     ///
@@ -86,7 +95,7 @@ impl fmt::Debug for Symbol {
             d.field("addr", &addr);
         }
         if let Some(filename) = self.filename() {
-            d.field("filename", &String::from_utf8_lossy(filename));
+            d.field("filename", &filename);
         }
         if let Some(lineno) = self.lineno() {
             d.field("lineno", &lineno);

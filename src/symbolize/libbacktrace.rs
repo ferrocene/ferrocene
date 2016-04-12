@@ -13,9 +13,10 @@
 extern crate backtrace_sys as bt;
 
 use libc::uintptr_t;
-use std::os::raw::{c_void, c_char, c_int};
 use std::env;
-use std::ffi::CStr;
+use std::ffi::{CStr, OsStr};
+use std::os::raw::{c_void, c_char, c_int};
+use std::os::unix::prelude::*;
 use std::path::Path;
 use std::ptr;
 use std::sync::{ONCE_INIT, Once};
@@ -87,8 +88,10 @@ extern fn pcinfo_cb(data: *mut c_void,
             if self.pc == 0 {None} else {Some(self.pc as *mut _)}
         }
 
-        fn filename(&self) -> Option<&[u8]> {
-            Some(unsafe { CStr::from_ptr(self.filename).to_bytes() })
+        fn filename(&self) -> Option<&Path> {
+            Some(Path::new(OsStr::from_bytes(unsafe {
+                CStr::from_ptr(self.filename).to_bytes()
+            })))
         }
 
         fn lineno(&self) -> Option<u32> {

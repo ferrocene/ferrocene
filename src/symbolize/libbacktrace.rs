@@ -20,7 +20,7 @@ use std::path::Path;
 use std::ptr;
 use std::sync::{ONCE_INIT, Once};
 
-use Symbol;
+use {Symbol, SymbolName};
 
 type FileLine = (*const c_char, c_int);
 
@@ -39,11 +39,13 @@ extern fn syminfo_cb(data: *mut c_void,
         symname: *const c_char,
     }
     impl Symbol for SyminfoSymbol {
-        fn name(&self) -> Option<&[u8]> {
+        fn name(&self) -> Option<SymbolName> {
             if self.symname.is_null() {
                 None
             } else {
-                Some(unsafe { CStr::from_ptr(self.symname).to_bytes() })
+                Some(SymbolName::new(unsafe {
+                    CStr::from_ptr(self.symname).to_bytes()
+                }))
             }
         }
 
@@ -71,11 +73,13 @@ extern fn pcinfo_cb(data: *mut c_void,
         function: *const c_char,
     }
     impl Symbol for PcinfoSymbol {
-        fn name(&self) -> Option<&[u8]> {
+        fn name(&self) -> Option<SymbolName> {
             if self.function.is_null() {
                 None
             } else {
-                Some(unsafe { CStr::from_ptr(self.function).to_bytes() })
+                Some(SymbolName::new(unsafe {
+                    CStr::from_ptr(self.function).to_bytes()
+                }))
             }
         }
 

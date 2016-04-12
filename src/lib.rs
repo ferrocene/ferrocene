@@ -80,10 +80,9 @@ extern crate cfg_if;
 pub use backtrace::{trace, Frame};
 mod backtrace;
 
-pub use symbolize::{Symbol, resolve};
+pub use symbolize::{Symbol, SymbolName, resolve};
 mod symbolize;
 
-pub use demangle::demangle;
 mod demangle;
 
 #[allow(dead_code)]

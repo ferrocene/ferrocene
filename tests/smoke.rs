@@ -81,7 +81,7 @@ fn smoke_test_frames() {
         let mut file = None;
         backtrace::resolve(ip as *mut c_void, |sym| {
             resolved += 1;
-            name = sym.name().map(|v| v.to_vec());
+            name = sym.name().map(|v| v.to_string());
             addr = sym.addr();
             line = sym.lineno();
             file = sym.filename().map(|v| v.to_vec());
@@ -99,12 +99,9 @@ fn smoke_test_frames() {
            !(cfg!(target_os = "linux") && DLADDR) &&
            !(DBGHELP && !MSVC)
         {
-            let bytes = name.expect("didn't find a name");
-            let bytes = str::from_utf8(&bytes).unwrap();
-            let mut demangled = String::new();
-            backtrace::demangle(&mut demangled, bytes).unwrap();;
-            assert!(demangled.contains(expected_name),
-                    "didn't find `{}` in `{}`", expected_name, demangled);
+            let name = name.expect("didn't find a name");
+            assert!(name.contains(expected_name),
+                    "didn't find `{}` in `{}`", expected_name, name);
         }
 
         if can_resolve {
@@ -135,10 +132,7 @@ fn many_threads() {
             for _ in 0..16 {
                 backtrace::trace(|frame| {
                     backtrace::resolve(frame.ip(), |symbol| {
-                        symbol.name().and_then(|s| str::from_utf8(s).ok()).map(|name| {
-                            let mut demangled = String::new();
-                            backtrace::demangle(&mut demangled, name).unwrap();
-                        });
+                        let _s = symbol.name().map(|s| s.to_string());
                     });
                     true
                 });

@@ -28,10 +28,8 @@ fn print() {
                 print!("\n     ");
             }
 
-            if let Some(name) = symbol.name().and_then(|s| str::from_utf8(s).ok()) {
-                let mut demangled = String::new();
-                backtrace::demangle(&mut demangled, name).unwrap();
-                print!(" - {}", demangled);
+            if let Some(name) = symbol.name() {
+                print!(" - {}", name);
             } else {
                 print!(" - <unknown>");
             }

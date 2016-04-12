@@ -8,7 +8,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::fmt::{self, Write};
+use std::fmt;
+
+pub struct Demangle<'a> {
+    original: &'a str,
+    inner: &'a str,
+    valid: bool,
+}
 
 /// De-mangles a Rust symbol into a more readable version
 ///
@@ -21,18 +27,7 @@ use std::fmt::{self, Write};
 /// `Symbol` which is in turn resolved from a `Frame`) and then writes the
 /// de-mangled version into the given `writer`. If the symbol does not look like
 /// a mangled symbol, it is still written to `writer`.
-///
-/// # Example
-///
-/// ```
-/// extern crate backtrace;
-///
-/// let mangled = "_ZN4testE";
-/// let mut demangled = String::new();
-/// backtrace::demangle(&mut demangled, mangled).unwrap();
-///
-/// assert_eq!(demangled, "test");
-/// ```
+
 // All rust symbols are in theory lists of "::"-separated identifiers. Some
 // assemblers, however, can't handle these characters in symbol names. To get
 // around this, we use C++-style mangling. The mangling method is:
@@ -50,7 +45,7 @@ use std::fmt::{self, Write};
 // Note that this demangler isn't quite as fancy as it could be. We have lots
 // of other information in our symbols like hashes, version, type information,
 // etc. Additionally, this doesn't handle glue symbols at all.
-pub fn demangle(writer: &mut Write, s: &str) -> fmt::Result {
+pub fn demangle(s: &str) -> Demangle {
     // First validate the symbol. If it doesn't look like anything we're
     // expecting, we just print it literally. Note that we must handle non-rust
     // symbols because we could have any function in the backtrace.
@@ -86,78 +81,98 @@ pub fn demangle(writer: &mut Write, s: &str) -> fmt::Result {
         }
     }
 
-    // Alright, let's do this.
-    if !valid {
-        return writer.write_str(s);
+    Demangle { inner: inner, valid: valid, original: s }
+}
+
+impl<'a> Demangle<'a> {
+    /// Returns the underlying string that's being demangled.
+    pub fn as_str(&self) -> &'a str {
+        self.original
     }
+}
 
-    let mut first = true;
-    while !inner.is_empty() {
-        if !first {
-            try!(writer.write_str("::"));
-        } else {
-            first = false;
+impl<'a> fmt::Display for Demangle<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Alright, let's do this.
+        if !self.valid {
+            return f.write_str(self.inner);
         }
-        let mut rest = inner;
-        while rest.chars().next().unwrap().is_numeric() {
-            rest = &rest[1..];
-        }
-        let i: usize = inner[..(inner.len() - rest.len())].parse().unwrap();
-        inner = &rest[i..];
-        rest = &rest[..i];
-        while !rest.is_empty() {
-            if rest.starts_with("$") {
-                macro_rules! demangle {
-                    ($($pat:expr, => $demangled:expr),*) => ({
-                        $(if rest.starts_with($pat) {
-                            try!(writer.write_str($demangled));
-                            rest = &rest[$pat.len()..];
-                          } else)*
-                        {
-                            try!(writer.write_str(rest));
-                            break;
-                        }
 
-                    })
-                }
-
-                // see src/librustc/back/link.rs for these mappings
-                demangle! {
-                    "$SP$", => "@",
-                    "$BP$", => "*",
-                    "$RF$", => "&",
-                    "$LT$", => "<",
-                    "$GT$", => ">",
-                    "$LP$", => "(",
-                    "$RP$", => ")",
-                    "$C$", => ",",
-
-                    // in theory we can demangle any Unicode code point, but
-                    // for simplicity we just catch the common ones.
-                    "$u7e$", => "~",
-                    "$u20$", => " ",
-                    "$u27$", => "'",
-                    "$u5b$", => "[",
-                    "$u5d$", => "]"
-                }
+        let mut inner = self.inner;
+        let mut first = true;
+        while !inner.is_empty() {
+            if !first {
+                try!(f.write_str("::"));
             } else {
-                let idx = rest.find('$').unwrap_or(rest.len());
-                try!(writer.write_str(&rest[..idx]));
-                rest = &rest[idx..];
+                first = false;
+            }
+            let mut rest = inner;
+            while rest.chars().next().unwrap().is_numeric() {
+                rest = &rest[1..];
+            }
+            let i: usize = inner[..(inner.len() - rest.len())].parse().unwrap();
+            inner = &rest[i..];
+            rest = &rest[..i];
+            while !rest.is_empty() {
+                if rest.starts_with("$") {
+                    macro_rules! demangle {
+                        ($($pat:expr, => $demangled:expr),*) => ({
+                            $(if rest.starts_with($pat) {
+                                try!(f.write_str($demangled));
+                                rest = &rest[$pat.len()..];
+                              } else)*
+                            {
+                                try!(f.write_str(rest));
+                                break;
+                            }
+
+                        })
+                    }
+
+                    // see src/librustc/back/link.rs for these mappings
+                    demangle! {
+                        "$SP$", => "@",
+                        "$BP$", => "*",
+                        "$RF$", => "&",
+                        "$LT$", => "<",
+                        "$GT$", => ">",
+                        "$LP$", => "(",
+                        "$RP$", => ")",
+                        "$C$", => ",",
+
+                        // in theory we can demangle any Unicode code point, but
+                        // for simplicity we just catch the common ones.
+                        "$u7e$", => "~",
+                        "$u20$", => " ",
+                        "$u27$", => "'",
+                        "$u5b$", => "[",
+                        "$u5d$", => "]"
+                    }
+                } else {
+                    let idx = rest.find('$').unwrap_or(rest.len());
+                    try!(f.write_str(&rest[..idx]));
+                    rest = &rest[idx..];
+                }
             }
         }
-    }
 
-    Ok(())
+        Ok(())
+    }
+}
+
+impl<'a> fmt::Debug for Demangle<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    macro_rules! t { ($a:expr, $b:expr) => ({
-        let mut m = String::new();
-        super::demangle(&mut m, $a).unwrap();
-        assert_eq!(m, $b);
-    }) }
+    macro_rules! t {
+        ($a:expr, $b:expr) => ({
+            assert_eq!(super::demangle($a).to_string(), $b);
+        })
+    }
 
     #[test]
     fn demangle() {

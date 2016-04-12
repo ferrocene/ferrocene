@@ -1,8 +1,6 @@
 use std::fmt;
 use std::os::raw::c_void;
 
-use debug_builders::DebugStruct;
-
 /// A trait representing the resolution of a symbol in a file.
 ///
 /// This trait is yielded as a trait object to the closure given to the
@@ -71,18 +69,18 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
 
 impl fmt::Debug for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut d = DebugStruct::new(f, "Symbol");
+        let mut d = f.debug_struct("Symbol");
         if let Some(name) = self.name() {
-            d = d.field("name", &String::from_utf8_lossy(name));
+            d.field("name", &String::from_utf8_lossy(name));
         }
         if let Some(addr) = self.addr() {
-            d = d.field("addr", &addr);
+            d.field("addr", &addr);
         }
         if let Some(filename) = self.filename() {
-            d = d.field("filename", &String::from_utf8_lossy(filename));
+            d.field("filename", &String::from_utf8_lossy(filename));
         }
         if let Some(lineno) = self.lineno() {
-            d = d.field("lineno", &lineno);
+            d.field("lineno", &lineno);
         }
         d.finish()
     }

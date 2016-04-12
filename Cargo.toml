@@ -19,7 +19,6 @@ kernel32-sys = { version = "0.2", optional = true }
 winapi = { version = "0.2.5", optional = true }
 dbghelp-sys = { version = "0.2", optional = true }
 cfg-if = "0.1"
-debug-builders = "0.1"
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default

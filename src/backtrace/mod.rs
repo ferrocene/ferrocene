@@ -1,6 +1,5 @@
 use std::fmt;
 
-use debug_builders::DebugStruct;
 use std::os::raw::c_void;
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`
@@ -69,7 +68,7 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
 
 impl fmt::Debug for Frame {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        DebugStruct::new(f, "Frame")
+        f.debug_struct("Frame")
             .field("ip", &self.ip())
             .field("symbol_address", &self.symbol_address())
             .finish()

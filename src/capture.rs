@@ -9,6 +9,7 @@ use {trace, resolve, Frame, Symbol, SymbolName};
 ///
 /// This structure can be used to capture a backtrace at various points in a
 /// program and later used to inspect what the backtrace was at that time.
+#[derive(Clone)]
 pub struct Backtrace {
     frames: Box<[BacktraceFrame]>,
 }
@@ -17,6 +18,7 @@ pub struct Backtrace {
 ///
 /// This type is returned as a list from `Backtrace::frames` and represents one
 /// stack frame in a captured backtrace.
+#[derive(Clone)]
 pub struct BacktraceFrame {
     ip: usize,
     symbol_address: usize,
@@ -27,6 +29,7 @@ pub struct BacktraceFrame {
 ///
 /// This type is returned as a list from `BacktraceFrame::symbols` and
 /// represents the metadata for a symbol in a backtrace.
+#[derive(Clone)]
 pub struct BacktraceSymbol {
     name: Option<Box<[u8]>>,
     addr: Option<usize>,

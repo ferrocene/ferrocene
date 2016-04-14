@@ -10,7 +10,7 @@
 //!
 //! This library makes use of a number of strategies for actually acquiring a
 //! backtrace. For example unix uses libgcc's libunwind bindings by default to
-//! acquir a backtrace, but dladdr is used on OSX to acquire symbol names while
+//! acquire a backtrace, but dladdr is used on OSX to acquire symbol names while
 //! linux uses gcc's libbacktrace.
 //!
 //! When using the default feature set of this library the "most reasonable" set

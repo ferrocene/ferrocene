@@ -67,12 +67,18 @@
 
 #![doc(html_root_url = "http://alexcrichton.com/backtrace-rs")]
 #![deny(missing_docs)]
-#![cfg_attr(test, deny(warnings))]
+// #![cfg_attr(test, deny(warnings))]
 
 extern crate libc;
 #[cfg(feature = "kernel32-sys")] extern crate kernel32;
 #[cfg(feature = "winapi")] extern crate winapi;
 #[cfg(feature = "dbghelp")] extern crate dbghelp;
+
+#[cfg(feature = "serde")]
+extern crate serde;
+
+#[cfg(feature = "rustc-serialize")]
+extern crate rustc_serialize;
 
 #[macro_use]
 extern crate cfg_if;
@@ -86,7 +92,9 @@ mod symbolize;
 mod demangle;
 
 pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
-mod capture;
+mod capture {
+    include!(concat!(env!("OUT_DIR"), "/capture.rs"));
+}
 
 #[allow(dead_code)]
 struct Bomb {

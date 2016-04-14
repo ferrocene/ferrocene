@@ -11,6 +11,7 @@ documentation = "http://alexcrichton.com/backtrace-rs"
 description = """
 A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 """
+build = "build.rs"
 
 [dependencies]
 libc = "0.2"
@@ -19,6 +20,14 @@ kernel32-sys = { version = "0.2", optional = true }
 winapi = { version = "0.2.5", optional = true }
 dbghelp-sys = { version = "0.2", optional = true }
 cfg-if = "0.1"
+
+# Optionally enable the ability to serialize a `Backtrace`
+serde = { version = "0.7", optional = true }
+rustc-serialize = { version = "0.3", optional = true }
+
+[build-dependencies]
+serde_codegen = { version = "0.7", optional = true }
+syntex = { version = "0.31", optional = true }
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default
@@ -64,3 +73,10 @@ default = ["libunwind", "libbacktrace", "dladdr", "dbghelp"]
     libbacktrace = ["backtrace-sys"]
     dladdr = []
 
+
+    #=======================================
+    # Methods of serialization
+    #
+    # Various features used for enabling rustc-serialize or syntex codegen.
+    serialize-rustc = ["rustc-serialize"]
+    serialize-serde = ["serde", "serde_codegen", "syntex"]

@@ -13,6 +13,9 @@ script:
   - cargo test --no-default-features --features 'unix-backtrace'
   - cargo test --no-default-features --features 'unix-backtrace dladdr'
   - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
+  - cargo test --no-default-features --features 'serialize-serde'
+  - cargo test --no-default-features --features 'serialize-rustc'
+  - cargo test --no-default-features --features 'serialize-rustc serialize-serde'
   - rustdoc --test README.md -L target/debug/deps -L target/debug
   - cargo doc --no-deps
 notifications:

@@ -139,3 +139,27 @@ fn many_threads() {
         t.join().unwrap()
     }
 }
+
+#[test]
+#[cfg(feature = "rustc-serialize")]
+fn is_rustc_serialize() {
+    extern crate rustc_serialize;
+
+    fn is_encode<T: rustc_serialize::Encodable>() {}
+    fn is_decode<T: rustc_serialize::Decodable>() {}
+
+    is_encode::<backtrace::Backtrace>();
+    is_decode::<backtrace::Backtrace>();
+}
+
+#[test]
+#[cfg(feature = "serde")]
+fn is_serde() {
+    extern crate serde;
+
+    fn is_serialize<T: serde::ser::Serialize>() {}
+    fn is_deserialize<T: serde::de::Deserialize>() {}
+
+    is_serialize::<backtrace::Backtrace>();
+    is_deserialize::<backtrace::Backtrace>();
+}

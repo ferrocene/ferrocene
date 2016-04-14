@@ -5,13 +5,30 @@ use std::path::{Path, PathBuf};
 
 use {trace, resolve, Frame, Symbol, SymbolName};
 
+// Ok so the `//~ HACK` directives here are, well, hacks. Right now we want to
+// compile on stable for serde support, but we also want to use
+// #[derive(Serialize, Deserialize)] macros *along* with the
+// `#[derive(RustcEncodable, RustcDecodable)]` macros. In theory both of these
+// can be behind a #[cfg_attr], but that unfortunately doesn't work for two
+// reasons:
+//
+// 1. rust-lang/rust#32957 - means the include! of this module doesn't expand
+//    the RustcDecodable/RustcEncodable blocks.
+// 2. serde-rs/serde#148 - means that Serialize/Deserialize won't get expanded.
+//
+// We just hack around it by doing #[cfg_attr] manually essentially. Our build
+// script will just strip the `//~ HACKn` prefixes here if the corresponding
+// feature is enabled.
+
 /// Representation of an owned and self-contained backtrace.
 ///
 /// This structure can be used to capture a backtrace at various points in a
 /// program and later used to inspect what the backtrace was at that time.
 #[derive(Clone)]
+//~ HACK1 #[derive(RustcDecodable, RustcEncodable)]
+//~ HACK2 #[derive(Deserialize, Serialize)]
 pub struct Backtrace {
-    frames: Box<[BacktraceFrame]>,
+    frames: Vec<BacktraceFrame>,
 }
 
 /// Captured version of a frame in a backtrace.
@@ -19,10 +36,12 @@ pub struct Backtrace {
 /// This type is returned as a list from `Backtrace::frames` and represents one
 /// stack frame in a captured backtrace.
 #[derive(Clone)]
+//~ HACK1 #[derive(RustcDecodable, RustcEncodable)]
+//~ HACK2 #[derive(Deserialize, Serialize)]
 pub struct BacktraceFrame {
     ip: usize,
     symbol_address: usize,
-    symbols: Box<[BacktraceSymbol]>,
+    symbols: Vec<BacktraceSymbol>,
 }
 
 /// Captured version of a symbol in a backtrace.
@@ -30,8 +49,10 @@ pub struct BacktraceFrame {
 /// This type is returned as a list from `BacktraceFrame::symbols` and
 /// represents the metadata for a symbol in a backtrace.
 #[derive(Clone)]
+//~ HACK1 #[derive(RustcDecodable, RustcEncodable)]
+//~ HACK2 #[derive(Deserialize, Serialize)]
 pub struct BacktraceSymbol {
-    name: Option<Box<[u8]>>,
+    name: Option<Vec<u8>>,
     addr: Option<usize>,
     filename: Option<PathBuf>,
     lineno: Option<u32>,
@@ -59,7 +80,7 @@ impl Backtrace {
             let mut symbols = Vec::new();
             resolve(frame.ip(), |symbol| {
                 symbols.push(BacktraceSymbol {
-                    name: symbol.name().map(|m| m.as_bytes().to_vec().into_boxed_slice()),
+                    name: symbol.name().map(|m| m.as_bytes().to_vec()),
                     addr: symbol.addr().map(|a| a as usize),
                     filename: symbol.filename().map(|m| m.to_path_buf()),
                     lineno: symbol.lineno(),
@@ -68,12 +89,12 @@ impl Backtrace {
             frames.push(BacktraceFrame {
                 ip: frame.ip() as usize,
                 symbol_address: frame.symbol_address() as usize,
-                symbols: symbols.into_boxed_slice(),
+                symbols: symbols,
             });
             true
         });
 
-        Backtrace { frames: frames.into_boxed_slice() }
+        Backtrace { frames: frames }
     }
 
     /// Returns the frames from when this backtrace was captured.

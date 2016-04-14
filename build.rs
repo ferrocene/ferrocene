@@ -4,7 +4,7 @@ extern crate syntex;
 extern crate serde_codegen;
 
 use std::env;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -21,6 +21,8 @@ fn main() {
         let s = s.replace("//~ HACK1 ", "");
         File::create(out_dir.join("capture.rs")).unwrap()
              .write_all(s.as_bytes()).unwrap();
+    } else {
+        fs::copy("src/capture.rs", out_dir.join("capture.rs")).unwrap();
     }
 
     expand_serde(out_dir);

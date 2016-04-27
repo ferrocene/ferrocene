@@ -13,3 +13,6 @@ Bindings to the libbacktrace gcc library
 
 [dependencies]
 libc = "0.2"
+
+[build-dependencies]
+gcc = "0.3"

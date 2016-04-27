@@ -185,3 +185,9 @@ impl fmt::Debug for Backtrace {
         Ok(())
     }
 }
+
+impl Default for Backtrace {
+    fn default() -> Backtrace {
+        Backtrace::new()
+    }
+}

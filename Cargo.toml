@@ -27,7 +27,7 @@ rustc-serialize = { version = "0.3", optional = true }
 
 [build-dependencies]
 serde_codegen = { version = "0.7", optional = true }
-syntex = { version = "0.31", optional = true }
+syntex = { version = "0.32", optional = true }
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default

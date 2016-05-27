@@ -2,8 +2,7 @@ use std::fmt;
 use std::os::raw::c_void;
 use std::path::Path;
 use std::str;
-
-use demangle::{demangle, Demangle};
+use rustc_demangle::{demangle, Demangle};
 
 /// A trait representing the resolution of a symbol in a file.
 ///

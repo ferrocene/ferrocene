@@ -13,7 +13,6 @@
 extern crate backtrace_sys as bt;
 
 use libc::uintptr_t;
-use std::env;
 use std::ffi::{CStr, OsStr};
 use std::os::raw::{c_void, c_char, c_int};
 use std::os::unix::prelude::*;
@@ -131,59 +130,28 @@ unsafe fn call(data: *mut c_void, sym: &Symbol) {
 // that is calculated the first time this is requested. Remember that
 // backtracing all happens serially (one global lock).
 //
-// An additional oddity in this function is that we initialize the
-// filename via self_exe_name() to pass to libbacktrace. It turns out
-// that on Linux libbacktrace seamlessly gets the filename of the
-// current executable, but this fails on freebsd. by always providing
-// it, we make sure that libbacktrace never has a reason to not look up
-// the symbols. The libbacktrace API also states that the filename must
-// be in "permanent memory", so we copy it to a static and then use the
-// static as the pointer.
+// Things don't work so well on not-Linux since libbacktrace can't track down
+// that executable this is. We at one point used env::current_exe but it turns
+// out that there are some serious security issues with that approach.
+//
+// Specifically, on certain platforms like BSDs, a malicious actor can cause an
+// arbitrary file to be placed at the path returned by current_exe. libbacktrace
+// does not behave defensively in the presence of ill-formed DWARF information,
+// and has been demonstrated to segfault in at least one case. There is no
+// evidence at the moment to suggest that a more carefully constructed file
+// can't cause arbitrary code execution. As a result of all of this, we don't
+// hint libbacktrace with the path to the current process.
 unsafe fn init_state() -> *mut bt::backtrace_state {
     static mut STATE: *mut bt::backtrace_state = 0 as *mut _;
-    static mut LAST_FILENAME: [c_char; 256] = [0; 256];
     static INIT: Once = ONCE_INIT;
     INIT.call_once(|| {
-        let selfname = if cfg!(target_os = "freebsd") ||
-                          cfg!(target_os = "dragonfly") ||
-                          cfg!(target_os = "bitrig") ||
-                          cfg!(target_os = "openbsd") {
-            env::current_exe().ok()
-        } else {
-            None
-        };
-        let filename = match selfname.as_ref().and_then(|p| path2bytes(p)) {
-            Some(bytes) => {
-                if bytes.len() < LAST_FILENAME.len() {
-                    let i = bytes.iter();
-                    for (slot, val) in LAST_FILENAME.iter_mut().zip(i) {
-                        *slot = *val as c_char;
-                    }
-                    LAST_FILENAME.as_ptr()
-                } else {
-                    ptr::null()
-                }
-            }
-            None => ptr::null(),
-        };
         // Our libbacktrace may not have multithreading support, so
         // set `threaded = 0` and synchronize ourselves.
-        STATE = bt::backtrace_create_state(filename, 0, error_cb,
+        STATE = bt::backtrace_create_state(ptr::null(), 0, error_cb,
                                            ptr::null_mut());
     });
 
     STATE
-}
-
-#[cfg(unix)]
-fn path2bytes(p: &Path) -> Option<&[u8]> {
-    use std::os::unix::prelude::*;
-    Some(p.as_os_str().as_bytes())
-}
-
-#[cfg(windows)]
-fn path2bytes(p: &Path) -> Option<&[u8]> {
-    p.to_str().map(|s| s.as_bytes())
 }
 
 pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {

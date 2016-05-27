@@ -20,6 +20,7 @@ kernel32-sys = { version = "0.2", optional = true }
 winapi = { version = "0.2.5", optional = true }
 dbghelp-sys = { version = "0.2", optional = true }
 cfg-if = "0.1"
+rustc-demangle = "0.1"
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "0.7", optional = true }

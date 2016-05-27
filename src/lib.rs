@@ -83,13 +83,13 @@ extern crate rustc_serialize;
 #[macro_use]
 extern crate cfg_if;
 
+extern crate rustc_demangle;
+
 pub use backtrace::{trace, Frame};
 mod backtrace;
 
 pub use symbolize::{resolve, Symbol, SymbolName};
 mod symbolize;
-
-mod demangle;
 
 pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
 mod capture {

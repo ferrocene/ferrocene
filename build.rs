@@ -1,6 +1,4 @@
 #[cfg(feature = "serialize-serde")]
-extern crate syntex;
-#[cfg(feature = "serialize-serde")]
 extern crate serde_codegen;
 
 use std::env;
@@ -42,7 +40,5 @@ fn expand_serde(out_dir: &Path) {
     input.read_to_string(&mut s).unwrap();
     tmp.write_all(s.replace("//~ HACK2 ", "").as_bytes()).unwrap();
 
-    let mut registry = syntex::Registry::new();
-    serde_codegen::register(&mut registry);
-    registry.expand("", &out_dir.join("tmp.rs"), &dst).unwrap();
+    serde_codegen::expand(&out_dir.join("tmp.rs"), &dst).unwrap();
 }

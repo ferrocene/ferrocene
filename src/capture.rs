@@ -148,37 +148,33 @@ impl Symbol for BacktraceSymbol {
 }
 
 impl fmt::Debug for Backtrace {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let hex_width = mem::size_of::<usize>() * 2 + 2;
 
-        for (i, frame) in self.frames().iter().enumerate() {
-            let ip = frame.ip();
-            try!(write!(f, "frame #{:<2} - {:#02$x}", i, ip as usize, hex_width));
+        try!(write!(fmt, "stack backtrace:"));
 
-            if frame.symbols().len() == 0 {
-                try!(writeln!(f, " - <no info>"));
-                continue
+        for (idx, frame) in self.frames().iter().enumerate() {
+            let ip = frame.ip();
+            try!(write!(fmt, "\n{:4}: {:2$?}", idx, ip, hex_width));
+
+            if frame.symbols.len() == 0 {
+                try!(write!(fmt, " - <no info>"));
             }
 
-            for (j, symbol) in frame.symbols().iter().enumerate() {
-                if j != 0 {
-                    for _ in 0..7 + 2 + 3 + hex_width {
-                        try!(write!(f, " "));
-                    }
+            for (idx, symbol) in frame.symbols().iter().enumerate() {
+                if idx != 0 {
+                    try!(write!(fmt, "\n      {:1$}", "", hex_width));
                 }
 
                 if let Some(name) = symbol.name() {
-                    try!(write!(f, " - {}", name));
+                    try!(write!(fmt, " - {}", name));
                 } else {
-                    try!(write!(f, " - <unknown>"));
+                    try!(write!(fmt, " - <unknown>"));
                 }
-                if let Some(file) = symbol.filename() {
-                    if let Some(l) = symbol.lineno() {
-                        try!(write!(f, "\n{:13}{:4$}@ {}:{}", "", "",
-                                    file.display(), l, hex_width));
-                    }
+
+                if let (Some(file), Some(line)) = (symbol.filename(), symbol.lineno()) {
+                    try!(write!(fmt, "\n      {:3$}at {}:{}", "", file.display(), line, hex_width));
                 }
-                try!(writeln!(f, ""));
             }
         }
 

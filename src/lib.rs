@@ -145,24 +145,15 @@ mod lock {
     }
 }
 
+// requires external synchronization
 #[cfg(all(windows, feature = "dbghelp"))]
-fn dbghelp_init() -> Box<std::any::Any> {
-    use winapi::*;
-    struct Cleanup { handle: HANDLE }
+unsafe fn dbghelp_init() {
+    static mut INITIALIZED: bool = false;
 
-    impl Drop for Cleanup {
-        fn drop(&mut self) {
-            unsafe { ::dbghelp::SymCleanup(self.handle); }
-        }
-    }
-
-    unsafe {
-        let ret = ::dbghelp::SymInitializeW(kernel32::GetCurrentProcess(),
-                                            0 as *mut _, TRUE);
-        if ret != TRUE {
-            Box::new(())
-        } else {
-            Box::new(Cleanup { handle: kernel32::GetCurrentProcess() })
-        }
+    if !INITIALIZED {
+        dbghelp::SymInitializeW(kernel32::GetCurrentProcess(),
+                                0 as *mut _,
+                                winapi::TRUE);
+        INITIALIZED = true;
     }
 }

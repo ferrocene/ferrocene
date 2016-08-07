@@ -32,6 +32,8 @@ fn expand_serde(_out_dir: &Path) {}
 
 #[cfg(feature = "serialize-serde")]
 fn expand_serde(out_dir: &Path) {
+    use std::thread;
+
     let dst = out_dir.join("capture.rs");
 
     let mut input = File::open(&dst).unwrap();
@@ -40,5 +42,10 @@ fn expand_serde(out_dir: &Path) {
     input.read_to_string(&mut s).unwrap();
     tmp.write_all(s.replace("//~ HACK2 ", "").as_bytes()).unwrap();
 
-    serde_codegen::expand(&out_dir.join("tmp.rs"), &dst).unwrap();
+    // This has been seen to overflow the stack on travis, so just use a
+    // dedicated big-stack thread.
+    let out_dir = out_dir.to_path_buf();
+    thread::Builder::new().stack_size(16 * 1024 * 1024).spawn(move || {
+        serde_codegen::expand(&out_dir.join("tmp.rs"), &dst).unwrap();
+    }).unwrap().join().unwrap();
 }

@@ -17,6 +17,19 @@ use libc::getpid;
 
 use {Symbol, SymbolName};
 
+// since we are quite defensive here we want to use dladdr as a
+// fallback for OS X in case we cannot load the core symbolication
+// framework.
+#[cfg(feature = "dladdr")]
+#[path="dladdr.rs"]
+mod dladdr_fallback;
+
+#[cfg(feature = "dladdr")]
+use self::dladdr_fallback::resolve as fallback_resolve;
+
+#[cfg(not(feature = "dladdr"))]
+fn fallback_resolve(_addr: *mut c_void, _cb: &mut FnMut(&Symbol)) {}
+
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub struct CSTypeRef {
@@ -91,7 +104,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
     let lib = match Cs::open(Path::new(
         "/System/Library/PrivateFrameworks/CoreSymbolication.framework/Versions/A/CoreSymbolication")) {
         Ok(x) => x,
-        Err(_) => { return; }
+        Err(_) => { return fallback_resolve(addr, cb); }
     };
 
     unsafe {

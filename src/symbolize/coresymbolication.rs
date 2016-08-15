@@ -102,29 +102,25 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
             CSSourceInfoGetSymbol(info)
         };
 
-        if sym == CSREF_NULL {
-            return;
+        if sym != CSREF_NULL {
+            let owner = CSSymbolGetSymbolOwner(sym);
+            if owner != CSREF_NULL {
+                cb(&Info {
+                    path: if info != CSREF_NULL {
+                        CSSourceInfoGetPath(info)
+                    } else {
+                        ptr::null()
+                    },
+                    lineno: if info != CSREF_NULL {
+                        CSSourceInfoGetLineNumber(info) as u32
+                    } else {
+                        0
+                    },
+                    name: CSSymbolGetName(sym),
+                    addr: CSSymbolOwnerGetBaseAddress(owner),
+                });
+            }
         }
-
-        let owner = CSSymbolGetSymbolOwner(sym);
-        if owner == CSREF_NULL {
-            return;
-        }
-
-        cb(&Info {
-            path: if info != CSREF_NULL {
-                CSSourceInfoGetPath(info)
-            } else {
-                ptr::null()
-            },
-            lineno: if info != CSREF_NULL {
-                CSSourceInfoGetLineNumber(info) as u32
-            } else {
-                0
-            },
-            name: CSSymbolGetName(sym),
-            addr: CSSymbolOwnerGetBaseAddress(owner),
-        });
 
         CSRelease(cs);
     }

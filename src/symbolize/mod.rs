@@ -152,6 +152,10 @@ cfg_if! {
                         not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
+    } else if #[cfg(all(feature = "coresymbolication", unix,
+                        target_os = "macos"))] {
+        mod coresymbolication;
+        use self::coresymbolication::resolve as resolve_imp;
     } else if #[cfg(all(unix, feature = "dladdr"))] {
         mod dladdr;
         use self::dladdr::resolve as resolve_imp;

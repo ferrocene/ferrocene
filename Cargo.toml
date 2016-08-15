@@ -38,7 +38,7 @@ serde_codegen = { version = "0.8", optional = true }
 # Note that not all features are available on all platforms, so even though a
 # feature is enabled some other feature may be used instead.
 [features]
-default = ["libunwind", "libbacktrace", "dladdr", "dbghelp"]
+default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
 
     #=======================================
     # Methods of acquiring a backtrace
@@ -70,9 +70,11 @@ default = ["libunwind", "libbacktrace", "dladdr", "dbghelp"]
     # - dladdr: this feature uses the dladdr(3) function (a glibc extension) to
     #   resolve symbol names. This is fairly unreliable on linux, but works well
     #   enough on OSX.
+    # - coresymbolication: this feature uses the undocumented core symbolication
+    #   framework on OS X to symbolize.
     libbacktrace = ["backtrace-sys"]
     dladdr = []
-
+    coresymbolication = []
 
     #=======================================
     # Methods of serialization

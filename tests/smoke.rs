@@ -7,6 +7,8 @@ static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace")) &&
                             !cfg!(target_os = "macos");
+static CORESYMBOLICATION: bool = cfg!(all(unix, target_os = "macos",
+                                          feature = "coresymbolication"));
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 static MSVC: bool = cfg!(target_env = "msvc");
@@ -69,7 +71,7 @@ fn smoke_test_frames() {
         }
 
         let mut resolved = 0;
-        let can_resolve = DLADDR || LIBBACKTRACE || DBGHELP;
+        let can_resolve = DLADDR || LIBBACKTRACE || CORESYMBOLICATION || DBGHELP;
 
         let mut name = None;
         let mut addr = None;
@@ -104,7 +106,7 @@ fn smoke_test_frames() {
             addr.expect("didn't find a symbol");
         }
 
-        if (LIBBACKTRACE || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
+        if (LIBBACKTRACE || CORESYMBOLICATION || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {

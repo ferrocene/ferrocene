@@ -74,6 +74,10 @@ extern crate libc;
 #[cfg(feature = "winapi")] extern crate winapi;
 #[cfg(feature = "dbghelp")] extern crate dbghelp;
 
+#[macro_use]
+#[cfg(all(feature = "coresymbolication", target_os = "macos"))]
+extern crate shared_library;
+
 #[cfg(feature = "serde")]
 extern crate serde;
 

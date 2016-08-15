@@ -23,10 +23,6 @@ fn main() {
         fs::copy("src/capture.rs", out_dir.join("capture.rs")).unwrap();
     }
 
-    if cfg!(feature = "coresymbolication") {
-        println!("cargo:rustc-link-search=framework=/System/Library/PrivateFrameworks/");
-    }
-
     expand_serde(out_dir);
     println!("cargo:rerun-if-changed=src/capture.rs");
 }

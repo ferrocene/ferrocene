@@ -19,7 +19,7 @@ use {Symbol, SymbolName};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
-struct CSTypeRef {
+pub struct CSTypeRef {
     cpp_data: *const c_void,
     cpp_obj: *const c_void
 }
@@ -72,56 +72,61 @@ impl Symbol for Info {
     }
 }
 
-#[link(name="CoreSymbolication", kind="framework")]
-extern {
-    fn CSSymbolicatorCreateWithPid(pid: c_int) -> CSTypeRef;
-    fn CSRelease(rf: CSTypeRef);
+shared_library!(Cs,
+    fn CSSymbolicatorCreateWithPid(pid: c_int) -> CSTypeRef,
+    fn CSRelease(rf: CSTypeRef),
     fn CSSymbolicatorGetSymbolWithAddressAtTime(
-        cs: CSTypeRef, addr: *const c_void, time: u64) -> CSTypeRef;
+        cs: CSTypeRef, addr: *const c_void, time: u64) -> CSTypeRef,
     fn CSSymbolicatorGetSourceInfoWithAddressAtTime(
-        cs: CSTypeRef, addr: *const c_void, time: u64) -> CSTypeRef;
-    fn CSSourceInfoGetLineNumber(info: CSTypeRef) -> c_int;
-    fn CSSourceInfoGetPath(info: CSTypeRef) -> *const c_char;
-    fn CSSourceInfoGetSymbol(info: CSTypeRef) -> CSTypeRef;
-    fn CSSymbolGetName(sym: CSTypeRef) -> *const c_char;
-    fn CSSymbolGetSymbolOwner(sym: CSTypeRef) -> CSTypeRef;
-    fn CSSymbolOwnerGetBaseAddress(symowner: CSTypeRef) -> *mut c_void;
-}
+        cs: CSTypeRef, addr: *const c_void, time: u64) -> CSTypeRef,
+    fn CSSourceInfoGetLineNumber(info: CSTypeRef) -> c_int,
+    fn CSSourceInfoGetPath(info: CSTypeRef) -> *const c_char,
+    fn CSSourceInfoGetSymbol(info: CSTypeRef) -> CSTypeRef,
+    fn CSSymbolGetName(sym: CSTypeRef) -> *const c_char,
+    fn CSSymbolGetSymbolOwner(sym: CSTypeRef) -> CSTypeRef,
+    fn CSSymbolOwnerGetBaseAddress(symowner: CSTypeRef) -> *mut c_void,
+);
 
 pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
+    let lib = match Cs::open(Path::new(
+        "/System/Library/PrivateFrameworks/CoreSymbolication.framework/Versions/A/CoreSymbolication")) {
+        Ok(x) => x,
+        Err(_) => { return; }
+    };
+
     unsafe {
-        let cs = CSSymbolicatorCreateWithPid(getpid());
+        let cs = (lib.CSSymbolicatorCreateWithPid)(getpid());
         if cs == CSREF_NULL {
             return;
         }
 
-        let info = CSSymbolicatorGetSourceInfoWithAddressAtTime(cs, addr, CS_NOW);
+        let info = (lib.CSSymbolicatorGetSourceInfoWithAddressAtTime)(cs, addr, CS_NOW);
         let sym = if info == CSREF_NULL {
-            CSSymbolicatorGetSymbolWithAddressAtTime(cs, addr, CS_NOW)
+            (lib.CSSymbolicatorGetSymbolWithAddressAtTime)(cs, addr, CS_NOW)
         } else {
-            CSSourceInfoGetSymbol(info)
+            (lib.CSSourceInfoGetSymbol)(info)
         };
 
         if sym != CSREF_NULL {
-            let owner = CSSymbolGetSymbolOwner(sym);
+            let owner = (lib.CSSymbolGetSymbolOwner)(sym);
             if owner != CSREF_NULL {
                 cb(&Info {
                     path: if info != CSREF_NULL {
-                        CSSourceInfoGetPath(info)
+                        (lib.CSSourceInfoGetPath)(info)
                     } else {
                         ptr::null()
                     },
                     lineno: if info != CSREF_NULL {
-                        CSSourceInfoGetLineNumber(info) as u32
+                        (lib.CSSourceInfoGetLineNumber)(info) as u32
                     } else {
                         0
                     },
-                    name: CSSymbolGetName(sym),
-                    addr: CSSymbolOwnerGetBaseAddress(owner),
+                    name: (lib.CSSymbolGetName)(sym),
+                    addr: (lib.CSSymbolOwnerGetBaseAddress)(owner),
                 });
             }
         }
 
-        CSRelease(cs);
+        (lib.CSRelease)(cs);
     }
 }

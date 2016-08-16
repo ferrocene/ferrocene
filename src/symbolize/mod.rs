@@ -152,7 +152,7 @@ cfg_if! {
                         not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
-    } else if #[cfg(all(feature = "coresymbolication", unix,
+    } else if #[cfg(all(feature = "coresymbolication",
                         target_os = "macos"))] {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;

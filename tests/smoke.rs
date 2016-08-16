@@ -7,7 +7,7 @@ static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace")) &&
                             !cfg!(target_os = "macos");
-static CORESYMBOLICATION: bool = cfg!(all(unix, target_os = "macos",
+static CORESYMBOLICATION: bool = cfg!(all(target_os = "macos",
                                           feature = "coresymbolication"));
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));

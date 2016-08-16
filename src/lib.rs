@@ -90,7 +90,7 @@ extern crate cfg_if;
 extern crate rustc_demangle;
 
 // this has some macros
-#[cfg(all(feature = "coresymbolication", target_os="macos"))]
+#[cfg(all(feature = "coresymbolication", target_os = "macos"))]
 mod dylib;
 
 pub use backtrace::{trace, Frame};

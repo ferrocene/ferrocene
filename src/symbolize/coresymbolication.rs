@@ -121,39 +121,41 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
         return false;
     }
 
-    let mut rv = false;
     let cs = get(&CSSymbolicatorCreateWithPid)(getpid());
-    if cs != CSREF_NULL {
-        let info = get(&CSSymbolicatorGetSourceInfoWithAddressAtTime)(
-            cs, addr, CS_NOW);
-        let sym = if info == CSREF_NULL {
-            get(&CSSymbolicatorGetSymbolWithAddressAtTime)(cs, addr, CS_NOW)
-        } else {
-            get(&CSSourceInfoGetSymbol)(info)
-        };
-
-        if sym != CSREF_NULL {
-            let owner = get(&CSSymbolGetSymbolOwner)(sym);
-            if owner != CSREF_NULL {
-                cb(&Info {
-                    path: if info != CSREF_NULL {
-                        get(&CSSourceInfoGetPath)(info)
-                    } else {
-                        ptr::null()
-                    },
-                    lineno: if info != CSREF_NULL {
-                        get(&CSSourceInfoGetLineNumber)(info) as u32
-                    } else {
-                        0
-                    },
-                    name: get(&CSSymbolGetName)(sym),
-                    addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
-                });
-                rv = true;
-            }
-        }
-        get(&CSRelease)(cs);
+    if cs == CSREF_NULL {
+        return false
     }
+
+    let info = get(&CSSymbolicatorGetSourceInfoWithAddressAtTime)(
+        cs, addr, CS_NOW);
+    let sym = if info == CSREF_NULL {
+        get(&CSSymbolicatorGetSymbolWithAddressAtTime)(cs, addr, CS_NOW)
+    } else {
+        get(&CSSourceInfoGetSymbol)(info)
+    };
+
+    let mut rv = false;
+    if sym != CSREF_NULL {
+        let owner = get(&CSSymbolGetSymbolOwner)(sym);
+        if owner != CSREF_NULL {
+            cb(&Info {
+                path: if info != CSREF_NULL {
+                    get(&CSSourceInfoGetPath)(info)
+                } else {
+                    ptr::null()
+                },
+                lineno: if info != CSREF_NULL {
+                    get(&CSSourceInfoGetLineNumber)(info) as u32
+                } else {
+                    0
+                },
+                name: get(&CSSymbolGetName)(sym),
+                addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
+            });
+            rv = true;
+        }
+    }
+    get(&CSRelease)(cs);
 
     rv
 }

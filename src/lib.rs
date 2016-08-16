@@ -67,7 +67,7 @@
 
 #![doc(html_root_url = "http://alexcrichton.com/backtrace-rs")]
 #![deny(missing_docs)]
-// #![cfg_attr(test, deny(warnings))]
+#![deny(warnings)]
 
 extern crate libc;
 #[cfg(feature = "kernel32-sys")] extern crate kernel32;
@@ -85,7 +85,8 @@ extern crate cfg_if;
 
 extern crate rustc_demangle;
 
-#[cfg(all(feature = "coresymbolication", target_os = "macos"))]
+#[allow(dead_code)] // not used everywhere
+#[cfg(unix)]
 #[macro_use]
 mod dylib;
 

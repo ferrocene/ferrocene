@@ -22,7 +22,6 @@ winapi = { version = "0.2.5", optional = true }
 dbghelp-sys = { version = "0.2", optional = true }
 cfg-if = "0.1"
 rustc-demangle = "0.1"
-shared_library = { version = "0.1.5", optional = true }
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "0.8", optional = true }
@@ -76,7 +75,7 @@ default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"
     #   framework on OS X to symbolize.
     libbacktrace = ["backtrace-sys"]
     dladdr = []
-    coresymbolication = ["shared_library"]
+    coresymbolication = []
 
     #=======================================
     # Methods of serialization

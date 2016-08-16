@@ -69,14 +69,11 @@
 #![deny(missing_docs)]
 // #![cfg_attr(test, deny(warnings))]
 
+#[macro_use] extern crate lazy_static;
 extern crate libc;
 #[cfg(feature = "kernel32-sys")] extern crate kernel32;
 #[cfg(feature = "winapi")] extern crate winapi;
 #[cfg(feature = "dbghelp")] extern crate dbghelp;
-
-#[macro_use]
-#[cfg(all(feature = "coresymbolication", target_os = "macos"))]
-extern crate shared_library;
 
 #[cfg(feature = "serde")]
 extern crate serde;
@@ -88,6 +85,9 @@ extern crate rustc_serialize;
 extern crate cfg_if;
 
 extern crate rustc_demangle;
+
+// this has some macros
+mod dylib;
 
 pub use backtrace::{trace, Frame};
 mod backtrace;

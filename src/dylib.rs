@@ -1,89 +1,80 @@
-#![macro_use]
-
 use std::ffi::CString;
-use libc::{dlopen, dlsym, dlclose, c_void};
+use std::marker;
+use std::mem;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
+use libc::{self, c_void};
 
-/// Simple implementation of dynamic library loading.  We're using
-/// this for loading debug support on OS X at runtime since we're
-/// using a private framework there which might not be there or
-/// disappear.  See `symbolize/coresymbolication` for how this is used.
 pub struct Dylib {
-    handle: *mut c_void,
+    pub init: AtomicUsize,
 }
 
-unsafe impl Sync for Dylib {}
+pub struct Symbol<T> {
+    pub name: &'static str,
+    pub addr: AtomicUsize,
+    pub _marker: marker::PhantomData<T>,
+}
 
 impl Dylib {
-    pub fn open(path: &str) -> Dylib {
-        let path = CString::new(path).unwrap();
-        unsafe {
-            Dylib {
-                handle: dlopen(path.as_ptr() as *const _, 1)
-            }
+    pub unsafe fn get<'a, T>(&self, sym: &'a Symbol<T>) -> Option<&'a T> {
+        self.load().and_then(|handle| {
+            sym.get(handle)
+        })
+    }
+
+    pub unsafe fn init(&self, path: &str) -> bool {
+        let name = CString::new(path).unwrap();
+        let ptr = libc::dlopen(name.as_ptr(), libc::RTLD_LAZY);
+        if ptr.is_null() {
+            return false
         }
+        match self.init.compare_and_swap(0, ptr as usize, Ordering::SeqCst) {
+            0 => {}
+            _ => { libc::dlclose(ptr); }
+        }
+        return true
     }
 
-    pub fn is_available(&self) -> bool {
-        !self.handle.is_null()
-    }
-
-    pub unsafe fn load_symbol(&self, sym: &str) -> *mut c_void {
-        let name = CString::new(sym).unwrap();
-        dlsym(self.handle, name.as_ptr() as *const _)
+    unsafe fn load(&self) -> Option<*mut c_void> {
+        match self.init.load(Ordering::SeqCst) {
+            0 => None,
+            n => Some(n as *mut c_void),
+        }
     }
 }
 
-impl Drop for Dylib {
-    fn drop(&mut self) {
-        if !self.handle.is_null() {
-            unsafe {
-                dlclose(self.handle);
-            }
+impl<T> Symbol<T> {
+    unsafe fn get(&self, handle: *mut c_void) -> Option<&T> {
+        assert_eq!(mem::size_of::<T>(), mem::size_of_val(&self.addr));
+        if self.addr.load(Ordering::SeqCst) == 0 {
+            self.addr.store(fetch(handle, self.name.as_ptr()), Ordering::SeqCst)
+        }
+        if self.addr.load(Ordering::SeqCst) == 1 {
+            None
+        } else {
+            mem::transmute::<&AtomicUsize, Option<&T>>(&self.addr)
         }
     }
 }
 
+unsafe fn fetch(handle: *mut c_void, name: *const u8) -> usize {
+    let ptr = libc::dlsym(handle, name as *const _);
+    if ptr.is_null() {
+        1
+    } else {
+        ptr as usize
+    }
+}
 
-macro_rules! load_dynamically {
-    (@as_item $i:item) => { $i };
-    (
-        #[link=$lib:tt]
-        extern $cconv:tt as $libname:ident {
-            $(
-                fn $funcname:ident($($argnames:ident: $argtypes:ty),*)
-                    -> $rv:ty;
-            )*
-        }
-    ) => {
-        lazy_static! {
-            static ref $libname: ::dylib::Dylib = ::dylib::Dylib::open($lib);
-        }
-
-        $(
-            load_dynamically! {
-                @as_item
-                #[allow(non_snake_case)]
-                unsafe fn $funcname($($argnames: $argtypes),*) -> $rv {
-                    #![allow(dead_code)]
-                    lazy_static! {
-                        static ref FN: unsafe extern $cconv fn($($argtypes),*) -> $rv = {
-                            unsafe {
-                                if !$libname.is_available() {
-                                    panic!("Library {} is not available", $lib);
-                                }
-                                let ptr = $libname.load_symbol(stringify!($funcname));
-                                if ptr.is_null() {
-                                    panic!("Symbol {} not found in {}",
-                                           stringify!($funcname), $lib);
-                                }
-                                ::std::mem::transmute(ptr)
-                            }
-                        };
-                    }
-                    (FN)($($argnames),*)
-                }
-            }
-        )*
-    };
+macro_rules! dlsym {
+    (extern {
+        $(fn $name:ident($($arg:ident: $t:ty),*) -> $ret:ty;)*
+    }) => ($(
+        static $name: ::dylib::Symbol<unsafe extern fn($($t),*) -> $ret> =
+            ::dylib::Symbol {
+                name: concat!(stringify!($name), "\0"),
+                addr: ::std::sync::atomic::ATOMIC_USIZE_INIT,
+                _marker: ::std::marker::PhantomData,
+            };
+    )*)
 }

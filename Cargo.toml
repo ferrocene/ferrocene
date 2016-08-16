@@ -15,7 +15,6 @@ build = "build.rs"
 
 [dependencies]
 libc = "0.2"
-lazy_static = { version = "0.2", optional = true }
 backtrace-sys = { path = "backtrace-sys", version = "0.1.3", optional = true }
 kernel32-sys = { version = "0.2", optional = true }
 winapi = { version = "0.2.5", optional = true }
@@ -75,7 +74,7 @@ default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"
     #   framework on OS X to symbolize.
     libbacktrace = ["backtrace-sys"]
     dladdr = []
-    coresymbolication = ["lazy_static"]
+    coresymbolication = []
 
     #=======================================
     # Methods of serialization

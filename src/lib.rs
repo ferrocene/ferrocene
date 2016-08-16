@@ -69,10 +69,6 @@
 #![deny(missing_docs)]
 // #![cfg_attr(test, deny(warnings))]
 
-#[cfg(all(feature = "coresymbolication", target_os="macos"))]
-#[macro_use]
-extern crate lazy_static;
-
 extern crate libc;
 #[cfg(feature = "kernel32-sys")] extern crate kernel32;
 #[cfg(feature = "winapi")] extern crate winapi;
@@ -89,8 +85,8 @@ extern crate cfg_if;
 
 extern crate rustc_demangle;
 
-// this has some macros
 #[cfg(all(feature = "coresymbolication", target_os = "macos"))]
+#[macro_use]
 mod dylib;
 
 pub use backtrace::{trace, Frame};

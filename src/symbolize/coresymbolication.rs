@@ -8,14 +8,20 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#![allow(bad_style)]
+
 use std::os::raw::{c_void, c_char, c_int};
 use std::ffi::{CStr, OsStr};
 use std::path::Path;
 use std::os::unix::prelude::*;
 use std::ptr;
+use std::sync::atomic::ATOMIC_USIZE_INIT;
+
 use libc::getpid;
 
 use {Symbol, SymbolName};
+use dylib::Dylib;
+use dylib::Symbol as DylibSymbol;
 
 // since we are quite defensive here we want to use dladdr as a
 // fallback for OS X in case we cannot load the core symbolication
@@ -85,9 +91,10 @@ impl Symbol for Info {
     }
 }
 
-load_dynamically! {
-    #[link="/System/Library/PrivateFrameworks/CoreSymbolication.framework/Versions/A/CoreSymbolication"]
-    extern "C" as CORESYMBOLICATION {
+static CORESYMBOLICATION: Dylib = Dylib { init: ATOMIC_USIZE_INIT };
+
+dlsym! {
+    extern {
         fn CSSymbolicatorCreateWithPid(pid: c_int) -> CSTypeRef;
         fn CSRelease(rf: CSTypeRef) -> c_void;
         fn CSSymbolicatorGetSymbolWithAddressAtTime(
@@ -103,54 +110,58 @@ load_dynamically! {
     }
 }
 
+unsafe fn get<T>(sym: &DylibSymbol<T>) -> &T {
+    CORESYMBOLICATION.get(sym).unwrap()
+}
 
-#[allow(non_snake_case)]
-fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
-    let mut rv = false;
-    if !CORESYMBOLICATION.is_available() {
+unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
+    let path = "/System/Library/PrivateFrameworks/CoreSymbolication.framework\
+                /Versions/A/CoreSymbolication";
+    if !CORESYMBOLICATION.init(path) {
         return false;
     }
 
-    unsafe {
-        let cs = CSSymbolicatorCreateWithPid(getpid());
-        if cs != CSREF_NULL {
-            let info = CSSymbolicatorGetSourceInfoWithAddressAtTime(
-                cs, addr, CS_NOW);
-            let sym = if info == CSREF_NULL {
-                CSSymbolicatorGetSymbolWithAddressAtTime(cs, addr, CS_NOW)
-            } else {
-                CSSourceInfoGetSymbol(info)
-            };
+    let mut rv = false;
+    let cs = get(&CSSymbolicatorCreateWithPid)(getpid());
+    if cs != CSREF_NULL {
+        let info = get(&CSSymbolicatorGetSourceInfoWithAddressAtTime)(
+            cs, addr, CS_NOW);
+        let sym = if info == CSREF_NULL {
+            get(&CSSymbolicatorGetSymbolWithAddressAtTime)(cs, addr, CS_NOW)
+        } else {
+            get(&CSSourceInfoGetSymbol)(info)
+        };
 
-            if sym != CSREF_NULL {
-                let owner = CSSymbolGetSymbolOwner(sym);
-                if owner != CSREF_NULL {
-                    cb(&Info {
-                        path: if info != CSREF_NULL {
-                            CSSourceInfoGetPath(info)
-                        } else {
-                            ptr::null()
-                        },
-                        lineno: if info != CSREF_NULL {
-                            CSSourceInfoGetLineNumber(info) as u32
-                        } else {
-                            0
-                        },
-                        name: CSSymbolGetName(sym),
-                        addr: CSSymbolOwnerGetBaseAddress(owner),
-                    });
-                    rv = true;
-                }
+        if sym != CSREF_NULL {
+            let owner = get(&CSSymbolGetSymbolOwner)(sym);
+            if owner != CSREF_NULL {
+                cb(&Info {
+                    path: if info != CSREF_NULL {
+                        get(&CSSourceInfoGetPath)(info)
+                    } else {
+                        ptr::null()
+                    },
+                    lineno: if info != CSREF_NULL {
+                        get(&CSSourceInfoGetLineNumber)(info) as u32
+                    } else {
+                        0
+                    },
+                    name: get(&CSSymbolGetName)(sym),
+                    addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
+                });
+                rv = true;
             }
-            CSRelease(cs);
         }
+        get(&CSRelease)(cs);
     }
 
     rv
 }
 
 pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
-    if !try_resolve(addr, cb) {
-        fallback_resolve(addr, cb);
+    unsafe {
+        if !try_resolve(addr, cb) {
+            fallback_resolve(addr, cb);
+        }
     }
 }

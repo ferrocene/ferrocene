@@ -148,7 +148,9 @@ cfg_if! {
     if #[cfg(all(windows, feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
-    } else if #[cfg(all(feature = "libbacktrace", unix,
+    } else if #[cfg(all(feature = "libbacktrace",
+                        unix,
+                        not(target_os = "emscripten"),
                         not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
@@ -156,7 +158,9 @@ cfg_if! {
                         target_os = "macos"))] {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;
-    } else if #[cfg(all(unix, feature = "dladdr"))] {
+    } else if #[cfg(all(unix,
+                        not(target_os = "emscripten"),
+                        feature = "dladdr"))] {
         mod dladdr;
         use self::dladdr::resolve as resolve_imp;
     } else {

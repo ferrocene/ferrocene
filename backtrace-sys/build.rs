@@ -26,6 +26,11 @@ fn main() {
         return
     }
 
+    // no way this will ever compile for emscripten
+    if target.contains("emscripten") {
+        return
+    }
+
     let cfg = gcc::Config::new();
     let compiler = cfg.get_compiler();
     let mut flags = OsString::new();

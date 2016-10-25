@@ -2,6 +2,7 @@ use std::fmt;
 use std::mem;
 use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
+use std::convert::{From, Into};
 
 use {trace, resolve, Frame, Symbol, SymbolName};
 
@@ -104,6 +105,20 @@ impl Backtrace {
     /// function started.
     pub fn frames(&self) -> &[BacktraceFrame] {
         &self.frames
+    }
+}
+
+impl From<Vec<BacktraceFrame>> for Backtrace {
+    fn from(frames: Vec<BacktraceFrame>) -> Self {
+        Backtrace {
+            frames: frames
+        }
+    }
+}
+
+impl Into<Vec<BacktraceFrame>> for Backtrace {
+    fn into(self) -> Vec<BacktraceFrame> {
+        self.frames
     }
 }
 

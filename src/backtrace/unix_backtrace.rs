@@ -11,15 +11,13 @@
 use std::mem;
 use std::os::raw::{c_void, c_int};
 
-use Frame;
-
-struct BacktraceFrame {
+pub struct Frame {
     addr: *mut c_void,
 }
 
-impl Frame for BacktraceFrame {
-    fn ip(&self) -> *mut c_void { self.addr }
-    fn symbol_address(&self) -> *mut c_void { self.addr }
+impl Frame {
+    pub fn ip(&self) -> *mut c_void { self.addr }
+    pub fn symbol_address(&self) -> *mut c_void { self.addr }
 }
 
 extern {
@@ -27,7 +25,7 @@ extern {
 }
 
 #[inline(always)]
-pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
+pub fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
     const SIZE: usize = 100;
 
     let mut buf: [*mut c_void; SIZE];
@@ -38,7 +36,9 @@ pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
     }
 
     for addr in buf[..cnt as usize].iter() {
-        let cx = BacktraceFrame { addr: *addr };
+        let cx = super::Frame {
+            inner: Frame { addr: *addr },
+        };
         if !cb(&cx) {
             return
         }

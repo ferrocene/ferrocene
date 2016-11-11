@@ -2,9 +2,8 @@ use std::fmt;
 use std::mem;
 use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
-use std::convert::{From, Into};
 
-use {trace, resolve, Frame, Symbol, SymbolName};
+use {trace, resolve, Symbol, SymbolName};
 
 // Ok so the `//~ HACK` directives here are, well, hacks. Right now we want to
 // compile on stable for serde support, but we also want to use
@@ -122,12 +121,14 @@ impl Into<Vec<BacktraceFrame>> for Backtrace {
     }
 }
 
-impl Frame for BacktraceFrame {
-    fn ip(&self) -> *mut c_void {
+impl BacktraceFrame {
+    /// Same as `Frame::ip`
+    pub fn ip(&self) -> *mut c_void {
         self.ip as *mut c_void
     }
 
-    fn symbol_address(&self) -> *mut c_void {
+    /// Same as `Frame::symbol_address`
+    pub fn symbol_address(&self) -> *mut c_void {
         self.symbol_address as *mut c_void
     }
 }

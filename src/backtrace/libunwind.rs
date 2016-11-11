@@ -9,14 +9,13 @@
 // except according to those terms.
 
 use std::os::raw::c_void;
-use Frame;
 
-struct UnwindFrame {
+pub struct Frame {
     ctx: *mut uw::_Unwind_Context,
 }
 
-impl Frame for UnwindFrame {
-    fn ip(&self) -> *mut c_void {
+impl Frame {
+    pub fn ip(&self) -> *mut c_void {
         let mut ip_before_insn = 0;
         let mut ip = unsafe {
             uw::_Unwind_GetIPInfo(self.ctx, &mut ip_before_insn) as *mut c_void
@@ -29,7 +28,7 @@ impl Frame for UnwindFrame {
         return ip
     }
 
-    fn symbol_address(&self) -> *mut c_void {
+    pub fn symbol_address(&self) -> *mut c_void {
         // dladdr() on osx gets whiny when we use FindEnclosingFunction, and
         // it appears to work fine without it, so we only use
         // FindEnclosingFunction on non-osx platforms. In doing so, we get a
@@ -49,15 +48,17 @@ impl Frame for UnwindFrame {
 }
 
 #[inline(always)]
-pub fn trace(mut cb: &mut FnMut(&Frame) -> bool) {
+pub fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
     unsafe {
         uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
     }
 
     extern fn trace_fn(ctx: *mut uw::_Unwind_Context,
                        arg: *mut c_void) -> uw::_Unwind_Reason_Code {
-        let cb = unsafe { &mut *(arg as *mut &mut FnMut(&Frame) -> bool) };
-        let cx = UnwindFrame { ctx: ctx };
+        let cb = unsafe { &mut *(arg as *mut &mut FnMut(&super::Frame) -> bool) };
+        let cx = super::Frame {
+            inner: Frame { ctx: ctx },
+        };
 
         let mut bomb = ::Bomb { enabled: true };
         let keep_going = cb(&cx);

@@ -14,15 +14,22 @@ use std::mem;
 use winapi::*;
 use kernel32;
 
-use Frame;
+pub struct Frame {
+    inner: STACKFRAME64,
+}
 
-impl Frame for STACKFRAME64 {
-    fn ip(&self) -> *mut c_void { self.AddrPC.Offset as *mut _ }
-    fn symbol_address(&self) -> *mut c_void { self.ip() }
+impl Frame {
+    pub fn ip(&self) -> *mut c_void {
+        self.inner.AddrPC.Offset as *mut _
+    }
+
+    pub fn symbol_address(&self) -> *mut c_void {
+        self.ip()
+    }
 }
 
 #[inline(always)]
-pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
+pub fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
     // According to windows documentation, all dbghelp functions are
     // single-threaded.
     let _g = ::lock::lock();
@@ -38,22 +45,27 @@ pub fn trace(cb: &mut FnMut(&Frame) -> bool) {
         // box this up.
         let mut context = Box::new(mem::zeroed::<CONTEXT>());
         kernel32::RtlCaptureContext(&mut *context);
-        let mut frame: STACKFRAME64 = mem::zeroed();
-        let image = init_frame(&mut frame, &context);
+        let mut frame = super::Frame {
+            inner: Frame { inner: mem::zeroed() },
+        };
+        let image = init_frame(&mut frame.inner.inner, &context);
 
         // Initialize this process's symbols
         let _c = ::dbghelp_init();
 
         // And now that we're done with all the setup, do the stack walking!
-        while ::dbghelp::StackWalk64(image as DWORD, process, thread, &mut frame,
+        while ::dbghelp::StackWalk64(image as DWORD,
+                                     process,
+                                     thread,
+                                     &mut frame.inner.inner,
                                      &mut *context as *mut _ as *mut _,
                                      None,
                                      Some(::dbghelp::SymFunctionTableAccess64),
                                      Some(::dbghelp::SymGetModuleBase64),
                                      None) == TRUE {
-            if frame.AddrPC.Offset == frame.AddrReturn.Offset ||
-               frame.AddrPC.Offset == 0 ||
-               frame.AddrReturn.Offset == 0 {
+            if frame.inner.inner.AddrPC.Offset == frame.inner.inner.AddrReturn.Offset ||
+               frame.inner.inner.AddrPC.Offset == 0 ||
+               frame.inner.inner.AddrReturn.Offset == 0 {
                 break
             }
 

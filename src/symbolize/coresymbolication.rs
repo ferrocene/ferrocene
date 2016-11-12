@@ -10,31 +10,19 @@
 
 #![allow(bad_style)]
 
-use std::os::raw::{c_void, c_char, c_int};
 use std::ffi::{CStr, OsStr};
-use std::path::Path;
+use std::mem;
+use std::os::raw::{c_void, c_char, c_int};
 use std::os::unix::prelude::*;
+use std::path::Path;
 use std::ptr;
 use std::sync::atomic::ATOMIC_USIZE_INIT;
 
-use libc::getpid;
+use libc::{self, Dl_info};
 
-use {Symbol, SymbolName};
+use SymbolName;
 use dylib::Dylib;
 use dylib::Symbol as DylibSymbol;
-
-// since we are quite defensive here we want to use dladdr as a
-// fallback for OS X in case we cannot load the core symbolication
-// framework.
-#[cfg(feature = "dladdr")]
-#[path="dladdr.rs"]
-mod dladdr_fallback;
-
-#[cfg(feature = "dladdr")]
-use self::dladdr_fallback::resolve as fallback_resolve;
-
-#[cfg(not(feature = "dladdr"))]
-fn fallback_resolve(_addr: *mut c_void, _cb: &mut FnMut(&Symbol)) {}
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
@@ -49,44 +37,58 @@ const CSREF_NULL: CSTypeRef = CSTypeRef {
     cpp_obj: 0 as *const c_void,
 };
 
-#[repr(C)]
-struct Info {
-    path: *const c_char,
-    lineno: u32,
-    name: *const c_char,
-    addr: *mut c_void,
+pub enum Symbol {
+    Core {
+        path: *const c_char,
+        lineno: u32,
+        name: *const c_char,
+        addr: *mut c_void,
+    },
+    Dladdr(Dl_info),
 }
 
-impl Symbol for Info {
-    fn name(&self) -> Option<SymbolName> {
-        if self.name.is_null() {
+impl Symbol {
+    pub fn name(&self) -> Option<SymbolName> {
+        let name = match *self {
+            Symbol::Core { name, .. } => name,
+            Symbol::Dladdr(ref info) => info.dli_sname,
+        };
+        if name.is_null() {
             None
         } else {
             Some(SymbolName::new(unsafe {
-                CStr::from_ptr(self.name).to_bytes()
+                CStr::from_ptr(name).to_bytes()
             }))
         }
     }
 
-    fn addr(&self) -> Option<*mut c_void> {
-        Some(self.addr)
-    }
-
-    fn filename(&self) -> Option<&Path> {
-        if self.path.is_null() {
-            None
-        } else {
-            Some(Path::new(OsStr::from_bytes(unsafe {
-                CStr::from_ptr(self.path).to_bytes()
-            })))
+    pub fn addr(&self) -> Option<*mut c_void> {
+        match *self {
+            Symbol::Core { addr, .. } => Some(addr),
+            Symbol::Dladdr(ref info) => Some(info.dli_saddr as *mut _),
         }
     }
 
-    fn lineno(&self) -> Option<u32> {
-        if self.lineno == 0 {
-            None
-        } else {
-            Some(self.lineno)
+    pub fn filename(&self) -> Option<&Path> {
+        match *self {
+            Symbol::Core { path, .. } => {
+                if path.is_null() {
+                    None
+                } else {
+                    Some(Path::new(OsStr::from_bytes(unsafe {
+                        CStr::from_ptr(path).to_bytes()
+                    })))
+                }
+            }
+            Symbol::Dladdr(_) => None,
+        }
+    }
+
+    pub fn lineno(&self) -> Option<u32> {
+        match *self {
+            Symbol::Core { lineno: 0, .. } => None,
+            Symbol::Core { lineno, .. } => Some(lineno),
+            Symbol::Dladdr(_) => None,
         }
     }
 }
@@ -114,14 +116,14 @@ unsafe fn get<T>(sym: &DylibSymbol<T>) -> &T {
     CORESYMBOLICATION.get(sym).unwrap()
 }
 
-unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
+unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool {
     let path = "/System/Library/PrivateFrameworks/CoreSymbolication.framework\
                 /Versions/A/CoreSymbolication";
     if !CORESYMBOLICATION.init(path) {
         return false;
     }
 
-    let cs = get(&CSSymbolicatorCreateWithPid)(getpid());
+    let cs = get(&CSSymbolicatorCreateWithPid)(libc::getpid());
     if cs == CSREF_NULL {
         return false
     }
@@ -138,19 +140,21 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
     if sym != CSREF_NULL {
         let owner = get(&CSSymbolGetSymbolOwner)(sym);
         if owner != CSREF_NULL {
-            cb(&Info {
-                path: if info != CSREF_NULL {
-                    get(&CSSourceInfoGetPath)(info)
-                } else {
-                    ptr::null()
+            cb(&super::Symbol {
+                inner: Symbol::Core {
+                    path: if info != CSREF_NULL {
+                        get(&CSSourceInfoGetPath)(info)
+                    } else {
+                        ptr::null()
+                    },
+                    lineno: if info != CSREF_NULL {
+                        get(&CSSourceInfoGetLineNumber)(info) as u32
+                    } else {
+                        0
+                    },
+                    name: get(&CSSymbolGetName)(sym),
+                    addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
                 },
-                lineno: if info != CSREF_NULL {
-                    get(&CSSourceInfoGetLineNumber)(info) as u32
-                } else {
-                    0
-                },
-                name: get(&CSSymbolGetName)(sym),
-                addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
             });
             rv = true;
         }
@@ -160,10 +164,16 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) -> bool {
     rv
 }
 
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
+pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     unsafe {
-        if !try_resolve(addr, cb) {
-            fallback_resolve(addr, cb);
+        if try_resolve(addr, cb) {
+            return
+        }
+        let mut info: Dl_info = mem::zeroed();
+        if libc::dladdr(addr as *mut _, &mut info) != 0 {
+            cb(&super::Symbol {
+                inner: Symbol::Dladdr(info),
+            });
         }
     }
 }

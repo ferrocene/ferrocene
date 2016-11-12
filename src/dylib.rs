@@ -23,6 +23,9 @@ impl Dylib {
     }
 
     pub unsafe fn init(&self, path: &str) -> bool {
+        if self.init.load(Ordering::SeqCst) != 0 {
+            return true
+        }
         let name = CString::new(path).unwrap();
         let ptr = libc::dlopen(name.as_ptr(), libc::RTLD_LAZY);
         if ptr.is_null() {

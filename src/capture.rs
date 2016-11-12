@@ -3,7 +3,7 @@ use std::mem;
 use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
 
-use {trace, resolve, Symbol, SymbolName};
+use {trace, resolve, SymbolName};
 
 // Ok so the `//~ HACK` directives here are, well, hacks. Right now we want to
 // compile on stable for serde support, but we also want to use
@@ -145,20 +145,24 @@ impl BacktraceFrame {
     }
 }
 
-impl Symbol for BacktraceSymbol {
-    fn name(&self) -> Option<SymbolName> {
+impl BacktraceSymbol {
+    /// Same as `Symbol::name`
+    pub fn name(&self) -> Option<SymbolName> {
         self.name.as_ref().map(|s| SymbolName::new(s))
     }
 
-    fn addr(&self) -> Option<*mut c_void> {
+    /// Same as `Symbol::addr`
+    pub fn addr(&self) -> Option<*mut c_void> {
         self.addr.map(|s| s as *mut c_void)
     }
 
-    fn filename(&self) -> Option<&Path> {
+    /// Same as `Symbol::filename`
+    pub fn filename(&self) -> Option<&Path> {
         self.filename.as_ref().map(|p| &**p)
     }
 
-    fn lineno(&self) -> Option<u32> {
+    /// Same as `Symbol::lineno`
+    pub fn lineno(&self) -> Option<u32> {
         self.lineno
     }
 }

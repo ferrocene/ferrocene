@@ -4,52 +4,6 @@ use std::path::Path;
 use std::str;
 use rustc_demangle::{demangle, Demangle};
 
-/// A trait representing the resolution of a symbol in a file.
-///
-/// This trait is yielded as a trait object to the closure given to the
-/// `backtrace::resolve` function, and it is virtually dispatched as it's
-/// unknown which implementation is behind it.
-///
-/// A symbol can give contextual information about a funciton, for example the
-/// name, filename, line number, precise address, etc. Not all information is
-/// always available in a symbol, however, so all methods return an `Option`.
-pub trait Symbol {
-    /// Returns the name of this function.
-    ///
-    /// The returned structure can be used to query various properties about the
-    /// symbol name:
-    ///
-    /// * The `Display` implementation will print out the demangled symbol.
-    /// * The raw `str` value of the symbol can be accessed (if it's valid
-    ///   utf-8).
-    /// * The raw bytes for the symbol name can be accessed.
-    fn name(&self) -> Option<SymbolName> { None }
-
-    /// Returns the starting address of this function.
-    fn addr(&self) -> Option<*mut c_void> { None }
-
-    /// Returns the file name where this function was defined.
-    ///
-    /// This is currently only available when libbacktrace is being used (e.g.
-    /// unix platforms other than OSX) and when a binary is compiled with
-    /// debuginfo. If neither of these conditions is met then this will likely
-    /// return `None`.
-    fn filename(&self) -> Option<&Path> { None }
-
-    /// Returns the line number for where this symbol is currently executing.
-    ///
-    /// This return value is typically `Some` if `filename` returns `Some`, and
-    /// is consequently subject to similar caveats.
-    fn lineno(&self) -> Option<u32> { None }
-}
-
-/// A wrapper around a symbol name to provide ergonomic accessors to the
-/// demangled name, the raw bytes, the raw string, etc.
-pub struct SymbolName<'a> {
-    bytes: &'a [u8],
-    demangled: Option<Demangle<'a>>,
-}
-
 /// Resolve an address to a symbol, passing the symbol to the specified
 /// closure.
 ///
@@ -84,6 +38,57 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, mut cb: F) {
     resolve_imp(addr, &mut cb)
 }
 
+/// A trait representing the resolution of a symbol in a file.
+///
+/// This trait is yielded as a trait object to the closure given to the
+/// `backtrace::resolve` function, and it is virtually dispatched as it's
+/// unknown which implementation is behind it.
+///
+/// A symbol can give contextual information about a funciton, for example the
+/// name, filename, line number, precise address, etc. Not all information is
+/// always available in a symbol, however, so all methods return an `Option`.
+pub struct Symbol {
+    inner: SymbolImp,
+}
+
+impl Symbol {
+    /// Returns the name of this function.
+    ///
+    /// The returned structure can be used to query various properties about the
+    /// symbol name:
+    ///
+    /// * The `Display` implementation will print out the demangled symbol.
+    /// * The raw `str` value of the symbol can be accessed (if it's valid
+    ///   utf-8).
+    /// * The raw bytes for the symbol name can be accessed.
+    pub fn name(&self) -> Option<SymbolName> {
+        self.inner.name()
+    }
+
+    /// Returns the starting address of this function.
+    pub fn addr(&self) -> Option<*mut c_void> {
+        self.inner.addr()
+    }
+
+    /// Returns the file name where this function was defined.
+    ///
+    /// This is currently only available when libbacktrace is being used (e.g.
+    /// unix platforms other than OSX) and when a binary is compiled with
+    /// debuginfo. If neither of these conditions is met then this will likely
+    /// return `None`.
+    pub fn filename(&self) -> Option<&Path> {
+        self.inner.filename()
+    }
+
+    /// Returns the line number for where this symbol is currently executing.
+    ///
+    /// This return value is typically `Some` if `filename` returns `Some`, and
+    /// is consequently subject to similar caveats.
+    pub fn lineno(&self) -> Option<u32> {
+        self.inner.lineno()
+    }
+}
+
 impl fmt::Debug for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut d = f.debug_struct("Symbol");
@@ -101,6 +106,13 @@ impl fmt::Debug for Symbol {
         }
         d.finish()
     }
+}
+
+/// A wrapper around a symbol name to provide ergonomic accessors to the
+/// demangled name, the raw bytes, the raw string, etc.
+pub struct SymbolName<'a> {
+    bytes: &'a [u8],
+    demangled: Option<Demangle<'a>>,
 }
 
 impl<'a> SymbolName<'a> {
@@ -148,24 +160,29 @@ cfg_if! {
     if #[cfg(all(windows, feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
+        use self::dbghelp::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "libbacktrace",
                         unix,
                         not(target_os = "emscripten"),
                         not(target_os = "macos")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
+        use self::libbacktrace::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "coresymbolication",
                         target_os = "macos"))] {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;
+        use self::coresymbolication::Symbol as SymbolImp;
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
                         feature = "dladdr"))] {
         mod dladdr;
         use self::dladdr::resolve as resolve_imp;
+        use self::dladdr::Symbol as SymbolImp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;
+        use self::noop::Symbol as SymbolImp;
     }
 }
 

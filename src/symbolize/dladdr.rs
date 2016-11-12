@@ -8,42 +8,52 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::os::raw::{c_void, c_char, c_int};
-use std::mem;
 use std::ffi::CStr;
+use std::mem;
+use std::os::raw::c_void;
+use std::path::Path;
 
-use {Symbol, SymbolName};
+use libc::{self, Dl_info};
 
-#[repr(C)]
-struct Dl_info {
-    dli_fname: *const c_char,
-    dli_fbase: *mut c_void,
-    dli_sname: *const c_char,
-    dli_saddr: *mut c_void,
+use SymbolName;
+
+pub struct Symbol {
+    inner: Dl_info,
 }
 
-impl Symbol for Dl_info {
-    fn name(&self) -> Option<SymbolName> {
-        if self.dli_sname.is_null() {
+impl Symbol {
+    pub fn name(&self) -> Option<SymbolName> {
+        if self.inner.dli_sname.is_null() {
             None
         } else {
             Some(SymbolName::new(unsafe {
-                CStr::from_ptr(self.dli_sname).to_bytes()
+                CStr::from_ptr(self.inner.dli_sname).to_bytes()
             }))
         }
     }
-    fn addr(&self) -> Option<*mut c_void> {
-        Some(self.dli_saddr)
+
+    pub fn addr(&self) -> Option<*mut c_void> {
+        Some(self.inner.dli_saddr as *mut _)
+    }
+
+    pub fn filename(&self) -> Option<&Path> {
+        None
+    }
+
+    pub fn lineno(&self) -> Option<u32> {
+        None
     }
 }
 
-extern {
-    fn dladdr(addr: *const c_void, info: *mut Dl_info) -> c_int;
-}
-
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
-    let mut info: Dl_info = unsafe { mem::zeroed() };
-    if unsafe { dladdr(addr, &mut info) != 0 } {
-        cb(&info)
+pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+    unsafe {
+        let mut info: super::Symbol = super::Symbol {
+            inner: Symbol {
+                inner: mem::zeroed(),
+            },
+        };
+        if libc::dladdr(addr as *mut _, &mut info.inner.inner) != 0 {
+            cb(&info)
+        }
     }
 }

@@ -18,34 +18,34 @@ use std::slice;
 use kernel32;
 use winapi::*;
 
-use {Symbol, SymbolName};
+use SymbolName;
 
-struct SymbolInfo<'a> {
-    info: &'a SYMBOL_INFOW,
-    data: Option<&'a [u8]>,
-    line: Option<&'a IMAGEHLP_LINEW64>,
-    line_data: Option<&'a Path>,
+pub struct Symbol {
+    name: OsString,
+    addr: *mut c_void,
+    line: Option<u32>,
+    filename: Option<OsString>,
 }
 
-impl<'a> Symbol for SymbolInfo<'a> {
-    fn name(&self) -> Option<SymbolName> {
-        self.data.map(SymbolName::new)
+impl Symbol {
+    pub fn name(&self) -> Option<SymbolName> {
+        self.name.to_str().map(|s| SymbolName::new(s.as_bytes()))
     }
 
-    fn addr(&self) -> Option<*mut c_void> {
-        Some(self.info.Address as *mut _)
+    pub fn addr(&self) -> Option<*mut c_void> {
+        Some(self.addr as *mut _)
     }
 
-    fn filename(&self) -> Option<&Path> {
-        self.line_data
+    pub fn filename(&self) -> Option<&Path> {
+        self.filename.as_ref().map(Path::new)
     }
 
-    fn lineno(&self) -> Option<u32> {
-        self.line.map(|l| l.LineNumber as u32)
+    pub fn lineno(&self) -> Option<u32> {
+        self.line
     }
 }
 
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
+pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     // According to windows documentation, all dbghelp functions are
     // single-threaded.
     let _g = ::lock::lock();
@@ -73,7 +73,6 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
         let name = slice::from_raw_parts(info.Name.as_ptr() as *const u16,
                                          info.NameLen as usize);
         let name = OsString::from_wide(name);
-        let name = name.to_str().map(|s| s.as_bytes());
 
         let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
         line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
@@ -82,25 +81,27 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&Symbol)) {
                                                    addr as DWORD64,
                                                    &mut displacement,
                                                    &mut line);
-        let line_data;
-        let (line, line_data) = if ret == TRUE {
+        let mut filename = None;
+        let mut lineno = None;
+        if ret == TRUE {
+            lineno = Some(line.LineNumber as u32);
+
             let base = line.FileName;
             let mut len = 0;
             while *base.offset(len) != 0 {
                 len += 1;
             }
             let name = slice::from_raw_parts(base, len as usize);
-            line_data = OsString::from_wide(name);
-            (Some(&line), Some(Path::new(&line_data)))
-        } else {
-            (None, None)
-        };
+            filename = Some(OsString::from_wide(name));
+        }
 
-        cb(&SymbolInfo {
-            info: info,
-            data: name,
-            line: line,
-            line_data: line_data,
+        cb(&super::Symbol {
+            inner: Symbol {
+                name: name,
+                addr: info.Address as *mut _,
+                line: lineno,
+                filename: filename,
+            },
         })
     }
 }

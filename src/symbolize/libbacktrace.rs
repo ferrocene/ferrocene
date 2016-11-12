@@ -20,9 +20,62 @@ use std::path::Path;
 use std::ptr;
 use std::sync::{ONCE_INIT, Once};
 
-use {Symbol, SymbolName};
+use SymbolName;
 
 type FileLine = (*const c_char, c_int);
+
+pub enum Symbol {
+    Syminfo {
+        pc: uintptr_t,
+        symname: *const c_char,
+    },
+    Pcinfo {
+        pc: uintptr_t,
+        filename: *const c_char,
+        lineno: c_int,
+        function: *const c_char,
+    },
+}
+
+impl Symbol {
+    pub fn name(&self) -> Option<SymbolName> {
+        let ptr = match *self {
+            Symbol::Syminfo { symname, .. } => symname,
+            Symbol::Pcinfo { function, .. } => function,
+        };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(SymbolName::new(unsafe { CStr::from_ptr(ptr).to_bytes() }))
+        }
+    }
+
+    pub fn addr(&self) -> Option<*mut c_void> {
+        let pc = match *self {
+            Symbol::Syminfo { pc, .. } => pc,
+            Symbol::Pcinfo { pc, .. } => pc,
+        };
+        if pc == 0 {None} else {Some(pc as *mut _)}
+    }
+
+    pub fn filename(&self) -> Option<&Path> {
+        match *self {
+            Symbol::Syminfo { .. } => None,
+            Symbol::Pcinfo { filename, .. } => {
+                Some(Path::new(OsStr::from_bytes(unsafe {
+                    CStr::from_ptr(filename).to_bytes()
+                })))
+            }
+        }
+    }
+
+    pub fn lineno(&self) -> Option<u32> {
+        match *self {
+            Symbol::Syminfo { .. } => None,
+            Symbol::Pcinfo { lineno, .. } => Some(lineno as u32),
+        }
+    }
+}
 
 extern fn error_cb(_data: *mut c_void, _msg: *const c_char,
                    _errnum: c_int) {
@@ -34,29 +87,12 @@ extern fn syminfo_cb(data: *mut c_void,
                      symname: *const c_char,
                      _symval: uintptr_t,
                      _symsize: uintptr_t) {
-    struct SyminfoSymbol {
-        pc: uintptr_t,
-        symname: *const c_char,
-    }
-    impl Symbol for SyminfoSymbol {
-        fn name(&self) -> Option<SymbolName> {
-            if self.symname.is_null() {
-                None
-            } else {
-                Some(SymbolName::new(unsafe {
-                    CStr::from_ptr(self.symname).to_bytes()
-                }))
-            }
-        }
-
-        fn addr(&self) -> Option<*mut c_void> {
-            if self.pc == 0 {None} else {Some(self.pc as *mut _)}
-        }
-    }
     unsafe {
-        call(data, &SyminfoSymbol {
-            pc: pc,
-            symname: symname,
+        call(data, &super::Symbol {
+            inner: Symbol::Syminfo {
+                pc: pc,
+                symname: symname,
+            },
         });
     }
 }
@@ -66,54 +102,24 @@ extern fn pcinfo_cb(data: *mut c_void,
                     filename: *const c_char,
                     lineno: c_int,
                     function: *const c_char) -> c_int {
-    struct PcinfoSymbol {
-        pc: uintptr_t,
-        filename: *const c_char,
-        lineno: c_int,
-        function: *const c_char,
-    }
-    impl Symbol for PcinfoSymbol {
-        fn name(&self) -> Option<SymbolName> {
-            if self.function.is_null() {
-                None
-            } else {
-                Some(SymbolName::new(unsafe {
-                    CStr::from_ptr(self.function).to_bytes()
-                }))
-            }
-        }
-
-        fn addr(&self) -> Option<*mut c_void> {
-            if self.pc == 0 {None} else {Some(self.pc as *mut _)}
-        }
-
-        fn filename(&self) -> Option<&Path> {
-            Some(Path::new(OsStr::from_bytes(unsafe {
-                CStr::from_ptr(self.filename).to_bytes()
-            })))
-        }
-
-        fn lineno(&self) -> Option<u32> {
-            Some(self.lineno as u32)
-        }
-    }
-
     unsafe {
         if filename.is_null() || function.is_null() {
             return -1
         }
-        call(data, &PcinfoSymbol {
-            pc: pc,
-            filename: filename,
-            lineno: lineno,
-            function: function,
+        call(data, &super::Symbol {
+            inner: Symbol::Pcinfo {
+                pc: pc,
+                filename: filename,
+                lineno: lineno,
+                function: function,
+            },
         });
         return 0
     }
 }
 
-unsafe fn call(data: *mut c_void, sym: &Symbol) {
-    let cb = data as *mut &mut FnMut(&Symbol);
+unsafe fn call(data: *mut c_void, sym: &super::Symbol) {
+    let cb = data as *mut &mut FnMut(&super::Symbol);
     let mut bomb = ::Bomb { enabled: true };
     (*cb)(sym);
     bomb.enabled = false;
@@ -154,7 +160,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     STATE
 }
 
-pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&Symbol)) {
+pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&super::Symbol)) {
     let _guard = ::lock::lock();
 
     // backtrace errors are currently swept under the rug

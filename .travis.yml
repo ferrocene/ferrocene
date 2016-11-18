@@ -16,6 +16,7 @@ script:
   - cargo test --no-default-features --features 'serialize-serde'
   - cargo test --no-default-features --features 'serialize-rustc'
   - cargo test --no-default-features --features 'serialize-rustc serialize-serde'
+  - cargo clean && cargo build
   - rustdoc --test README.md -L target/debug/deps -L target/debug
   - cargo doc --no-deps
 notifications:

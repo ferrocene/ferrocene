@@ -22,8 +22,6 @@ use std::sync::{ONCE_INIT, Once};
 
 use SymbolName;
 
-type FileLine = (*const c_char, c_int);
-
 pub enum Symbol {
     Syminfo {
         pc: uintptr_t,

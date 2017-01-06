@@ -70,9 +70,9 @@
 #![deny(warnings)]
 
 extern crate libc;
-#[cfg(feature = "kernel32-sys")] extern crate kernel32;
-#[cfg(feature = "winapi")] extern crate winapi;
-#[cfg(feature = "dbghelp")] extern crate dbghelp;
+#[cfg(all(windows, feature = "kernel32-sys"))] extern crate kernel32;
+#[cfg(all(windows, feature = "winapi"))] extern crate winapi;
+#[cfg(all(windows, feature = "dbghelp"))] extern crate dbghelp;
 
 #[cfg(feature = "serde")]
 extern crate serde;

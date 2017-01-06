@@ -15,16 +15,20 @@ build = "build.rs"
 
 [dependencies]
 libc = "0.2"
-backtrace-sys = { path = "backtrace-sys", version = "0.1.3", optional = true }
-kernel32-sys = { version = "0.2", optional = true }
-winapi = { version = "0.2.5", optional = true }
-dbghelp-sys = { version = "0.2", optional = true }
 cfg-if = "0.1"
 rustc-demangle = "0.1"
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "0.8", optional = true }
 rustc-serialize = { version = "0.3", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+dbghelp-sys = { version = "0.2", optional = true }
+kernel32-sys = { version = "0.2", optional = true }
+winapi = { version = "0.2.5", optional = true }
+
+[target.'cfg(all(unix, not(target_os = "emscripten"), not(target_os = "macos")))'.dependencies]
+backtrace-sys = { path = "backtrace-sys", version = "0.1.3", optional = true }
 
 [build-dependencies]
 serde_codegen = { version = "0.8", optional = true }

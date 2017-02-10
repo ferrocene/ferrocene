@@ -20,6 +20,9 @@ backtrace = "0.2"
 extern crate backtrace;
 ```
 
+Note that this crate requires `make`, `objcopy`, and `ar` to be present on Linux
+systems.
+
 ## Usage
 
 To simply capture a backtrace and defer dealing with it until a later time,

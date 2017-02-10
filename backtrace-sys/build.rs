@@ -3,6 +3,7 @@ extern crate gcc;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
+use std::io;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -52,11 +53,13 @@ fn main() {
                 .arg("--disable-shared")
                 .arg("--disable-host-shared")
                 .arg(format!("--target={}", target))
-                .arg(format!("--host={}", host)));
+                .arg(format!("--host={}", host)),
+        "sh");
     run(Command::new("make")
                 .current_dir(&dst)
                 .arg(format!("INCDIR={}",
-                             src.join("src/libbacktrace").display())));
+                             src.join("src/libbacktrace").display())),
+        "make");
     println!("cargo:rustc-link-search=native={}/.libs", dst.display());
     println!("cargo:rustc-link-lib=static=backtrace");
 
@@ -69,7 +72,7 @@ fn main() {
     let tmpdir = dst.join("__tmp");
     drop(fs::remove_dir_all(&tmpdir));
     t!(fs::create_dir_all(&tmpdir));
-    run(Command::new("ar").arg("x").arg(&lib).current_dir(&tmpdir));
+    run(Command::new("ar").arg("x").arg(&lib).current_dir(&tmpdir), "ar");
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
@@ -77,17 +80,24 @@ fn main() {
         let obj = t!(obj);
         run(Command::new("objcopy")
                     .arg("--redefine-syms=symbol-map")
-                    .arg(obj.path()));
+                    .arg(obj.path()),
+            "objcopy");
         objs.push(obj.path());
     }
 
-    run(Command::new("ar").arg("crus").arg(&lib).args(&objs));
+    run(Command::new("ar").arg("crus").arg(&lib).args(&objs), "ar");
 }
 
-fn run(cmd: &mut Command) {
+fn run(cmd: &mut Command, program: &str) {
     println!("running: {:?}", cmd);
     let status = match cmd.status() {
         Ok(s) => s,
+        Err(ref e) if e.kind() == io::ErrorKind::NotFound => {
+            panic!("\n\nfailed to execute command: {}\nIs `{}` \
+                    not installed?\n\n",
+                   e,
+                   program);
+        }
         Err(e) => panic!("failed to get status: {}", e),
     };
     if !status.success() {

@@ -76,12 +76,18 @@ fn main() {
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
+    let cc = compiler.path().file_name().unwrap().to_str().unwrap();
+    let objcopy = if cc.ends_with("-gcc") {
+        compiler.path().parent().unwrap().join(cc.replace("-gcc", "-objcopy"))
+    } else {
+        PathBuf::from("objcopy")
+    };
     for obj in t!(tmpdir.read_dir()) {
         let obj = t!(obj);
-        run(Command::new("objcopy")
+        run(Command::new(&objcopy)
                     .arg("--redefine-syms=symbol-map")
                     .arg(obj.path()),
-            "objcopy");
+            objcopy.to_str().unwrap());
         objs.push(obj.path());
     }
 

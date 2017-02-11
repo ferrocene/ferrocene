@@ -78,7 +78,13 @@ fn main() {
     let mut objs = Vec::new();
     let cc = compiler.path().file_name().unwrap().to_str().unwrap();
     let objcopy = if cc.ends_with("-gcc") {
-        compiler.path().parent().unwrap().join(cc.replace("-gcc", "-objcopy"))
+        let candidate = compiler.path().parent().unwrap()
+                                .join(cc.replace("-gcc", "-objcopy"));
+        if Command::new(&candidate).output().is_ok() {
+            candidate
+        } else {
+            PathBuf::from("objcopy")
+        }
     } else {
         PathBuf::from("objcopy")
     };

@@ -37,6 +37,7 @@ fn main() {
 
     let cfg = gcc::Config::new();
     let compiler = cfg.get_compiler();
+    let cc = compiler.path().file_name().unwrap().to_str().unwrap();
     let mut flags = OsString::new();
     for (i, flag) in compiler.args().iter().enumerate() {
         if i > 0 {
@@ -44,6 +45,17 @@ fn main() {
         }
         flags.push(flag);
     }
+    let ar = if cc.ends_with("-gcc") {
+        let candidate = compiler.path().parent().unwrap()
+                                .join(cc.replace("-gcc", "-ar"));
+        if Command::new(&candidate).output().is_ok() {
+            candidate
+        } else {
+            PathBuf::from("ar")
+        }
+    } else {
+        PathBuf::from("ar")
+    };
     run(Command::new(src.join("src/libbacktrace/configure"))
                 .current_dir(&dst)
                 .env("CC", compiler.path())
@@ -72,11 +84,10 @@ fn main() {
     let tmpdir = dst.join("__tmp");
     drop(fs::remove_dir_all(&tmpdir));
     t!(fs::create_dir_all(&tmpdir));
-    run(Command::new("ar").arg("x").arg(&lib).current_dir(&tmpdir), "ar");
+    run(Command::new(&ar).arg("x").arg(&lib).current_dir(&tmpdir), &ar);
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
-    let cc = compiler.path().file_name().unwrap().to_str().unwrap();
     let objcopy = if cc.ends_with("-gcc") {
         let candidate = compiler.path().parent().unwrap()
                                 .join(cc.replace("-gcc", "-objcopy"));
@@ -97,7 +108,7 @@ fn main() {
         objs.push(obj.path());
     }
 
-    run(Command::new("ar").arg("crus").arg(&lib).args(&objs), "ar");
+    run(Command::new(&ar).arg("crus").arg(&lib).args(&objs), &ar);
 }
 
 fn run(cmd: &mut Command, program: &str) {

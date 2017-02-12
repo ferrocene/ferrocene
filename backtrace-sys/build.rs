@@ -84,7 +84,8 @@ fn main() {
     let tmpdir = dst.join("__tmp");
     drop(fs::remove_dir_all(&tmpdir));
     t!(fs::create_dir_all(&tmpdir));
-    run(Command::new(&ar).arg("x").arg(&lib).current_dir(&tmpdir), &ar);
+    run(Command::new(&ar).arg("x").arg(&lib).current_dir(&tmpdir),
+        ar.to_str().unwrap());
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
@@ -108,7 +109,8 @@ fn main() {
         objs.push(obj.path());
     }
 
-    run(Command::new(&ar).arg("crus").arg(&lib).args(&objs), &ar);
+    run(Command::new(&ar).arg("crus").arg(&lib).args(&objs),
+        ar.to_str().unwrap());
 }
 
 fn run(cmd: &mut Command, program: &str) {

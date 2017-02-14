@@ -25,7 +25,7 @@ fn try_tool(compiler: &gcc::Tool, cc: &str, compiler_suffix: &str, tool_suffix: 
 
 fn find_tool(compiler: &gcc::Tool, cc: &str, tool: &str) -> PathBuf {
     let tool_suffix = format!("-{}", tool);
-    try_tool(compiler, cc, "-gcc", &tool_suffix).unwrap_or(PathBuf::from(tool))
+    try_tool(compiler, cc, "-gcc", &tool_suffix).or_else(|| try_tool(compiler, cc, "-cc", &tool_suffix)).unwrap_or(PathBuf::from(tool))
 }
 
 fn main() {

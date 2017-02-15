@@ -14,6 +14,22 @@ macro_rules! t {
     })
 }
 
+fn try_tool(compiler: &gcc::Tool, cc: &str, compiler_suffix: &str, tool_suffix: &str) -> Option<PathBuf> {
+    if cc.ends_with(compiler_suffix) {
+        let candidate = compiler.path().parent().unwrap().join(cc.replace(compiler_suffix, tool_suffix));
+        Command::new(&candidate).output().ok().map(|_| candidate)
+    } else {
+        None
+    }
+}
+
+fn find_tool(compiler: &gcc::Tool, cc: &str, tool: &str) -> PathBuf {
+    let tool_suffix = format!("-{}", tool);
+    try_tool(compiler, cc, "-gcc", &tool_suffix)
+        .or_else(|| try_tool(compiler, cc, "-cc", &tool_suffix))
+        .unwrap_or_else(|| PathBuf::from(tool))
+}
+
 fn main() {
     let src = env::current_dir().unwrap();
     let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
@@ -45,17 +61,7 @@ fn main() {
         }
         flags.push(flag);
     }
-    let ar = if cc.ends_with("-gcc") {
-        let candidate = compiler.path().parent().unwrap()
-                                .join(cc.replace("-gcc", "-ar"));
-        if Command::new(&candidate).output().is_ok() {
-            candidate
-        } else {
-            PathBuf::from("ar")
-        }
-    } else {
-        PathBuf::from("ar")
-    };
+    let ar = find_tool(&compiler, cc, "ar");
     run(Command::new(src.join("src/libbacktrace/configure"))
                 .current_dir(&dst)
                 .env("CC", compiler.path())
@@ -89,17 +95,7 @@ fn main() {
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
-    let objcopy = if cc.ends_with("-gcc") {
-        let candidate = compiler.path().parent().unwrap()
-                                .join(cc.replace("-gcc", "-objcopy"));
-        if Command::new(&candidate).output().is_ok() {
-            candidate
-        } else {
-            PathBuf::from("objcopy")
-        }
-    } else {
-        PathBuf::from("objcopy")
-    };
+    let objcopy = find_tool(&compiler, cc, "objcopy");
     for obj in t!(tmpdir.read_dir()) {
         let obj = t!(obj);
         run(Command::new(&objcopy)

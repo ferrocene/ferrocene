@@ -14,10 +14,15 @@ macro_rules! t {
     })
 }
 
-fn try_tool(compiler: &gcc::Tool, cc: &str, compiler_suffix: &str, tool_suffix: &str) -> Option<PathBuf> {
-    if cc.ends_with(compiler_suffix) {
-        let candidate = compiler.path().parent().unwrap().join(cc.replace(compiler_suffix, tool_suffix));
-        Command::new(&candidate).output().ok().map(|_| candidate)
+fn try_tool(compiler: &gcc::Tool, cc: &str, compiler_suffix: &str, tool_suffix: &str)
+            -> Option<PathBuf> {
+    if !cc.ends_with(compiler_suffix) {
+        return None
+    }
+    let cc = cc.replace(compiler_suffix, tool_suffix);
+    let candidate = compiler.path().parent().unwrap().join(cc);
+    if Command::new(&candidate).output().is_ok() {
+        Some(candidate)
     } else {
         None
     }

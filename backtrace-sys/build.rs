@@ -29,6 +29,10 @@ fn try_tool(compiler: &gcc::Tool, cc: &str, compiler_suffix: &str, tool_suffix: 
 }
 
 fn find_tool(compiler: &gcc::Tool, cc: &str, tool: &str) -> PathBuf {
+    // Allow overrides via env var
+    if let Some(s) = env::var_os(tool.to_uppercase()) {
+        return s.into()
+    }
     let tool_suffix = format!("-{}", tool);
     try_tool(compiler, cc, "-gcc", &tool_suffix)
         .or_else(|| try_tool(compiler, cc, "-cc", &tool_suffix))
@@ -100,13 +104,7 @@ fn main() {
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
-    // yocto/ openembedded provide a OBJCOPY environment var. Use these or get from cc
-    let objcopy;
-    if let Ok(var) = env::var("OBJCOPY") {
-        objcopy = PathBuf::from(var);
-    } else {
-        objcopy = find_tool(&compiler, cc, "objcopy");
-    }
+    let objcopy = find_tool(&compiler, cc, "objcopy");
     for obj in t!(tmpdir.read_dir()) {
         let obj = t!(obj);
         run(Command::new(&objcopy)

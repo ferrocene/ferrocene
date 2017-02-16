@@ -100,7 +100,13 @@ fn main() {
 
     t!(fs::remove_file(&lib));
     let mut objs = Vec::new();
-    let objcopy = find_tool(&compiler, cc, "objcopy");
+    // yocto/ openembedded provide a OBJCOPY environment var. Use these or get from cc
+    let objcopy;
+    if let Ok(var) = env::var("OBJCOPY") {
+        objcopy = PathBuf::from(var);
+    } else {
+        objcopy = find_tool(&compiler, cc, "objcopy");
+    }
     for obj in t!(tmpdir.read_dir()) {
         let obj = t!(obj);
         run(Command::new(&objcopy)

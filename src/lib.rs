@@ -85,6 +85,9 @@ extern crate cfg_if;
 
 extern crate rustc_demangle;
 
+#[cfg(feature = "cpp_demangle")]
+extern crate cpp_demangle;
+
 #[allow(dead_code)] // not used everywhere
 #[cfg(unix)]
 #[macro_use]

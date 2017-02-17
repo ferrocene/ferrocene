@@ -1,8 +1,10 @@
 use std::fmt;
+#[cfg(not(feature = "cpp_demangle"))]
+use std::marker::PhantomData;
 use std::os::raw::c_void;
 use std::path::Path;
 use std::str;
-use rustc_demangle::{demangle, Demangle};
+use rustc_demangle::{try_demangle, Demangle};
 
 /// Resolve an address to a symbol, passing the symbol to the specified
 /// closure.
@@ -108,26 +110,76 @@ impl fmt::Debug for Symbol {
     }
 }
 
+
+cfg_if! {
+    if #[cfg(feature = "cpp_demangle")] {
+        // Maybe a parsed C++ symbol, if parsing the mangled symbol as Rust
+        // failed.
+        struct OptionCppSymbol<'a>(Option<::cpp_demangle::BorrowedSymbol<'a>>);
+
+        impl<'a> OptionCppSymbol<'a> {
+            fn parse(input: &'a [u8]) -> OptionCppSymbol<'a> {
+                OptionCppSymbol(::cpp_demangle::BorrowedSymbol::new(input).ok())
+            }
+
+            fn none() -> OptionCppSymbol<'a> {
+                OptionCppSymbol(None)
+            }
+        }
+    } else {
+        // Make sure to keep this zero-sized, so that the `cpp_demangle` feature
+        // has no cost when disabled.
+        struct OptionCppSymbol<'a>(PhantomData<&'a ()>);
+
+        impl<'a> OptionCppSymbol<'a> {
+            fn parse(_: &'a [u8]) -> OptionCppSymbol<'a> {
+                OptionCppSymbol(PhantomData)
+            }
+
+            fn none() -> OptionCppSymbol<'a> {
+                OptionCppSymbol(PhantomData)
+            }
+        }
+    }
+}
+
 /// A wrapper around a symbol name to provide ergonomic accessors to the
 /// demangled name, the raw bytes, the raw string, etc.
+// Allow dead code for when the `cpp_demangle` feature is not enabled.
+#[allow(dead_code)]
 pub struct SymbolName<'a> {
     bytes: &'a [u8],
     demangled: Option<Demangle<'a>>,
+    cpp_demangled: OptionCppSymbol<'a>,
 }
 
 impl<'a> SymbolName<'a> {
     /// Creates a new symbol name from the raw underlying bytes.
     pub fn new(bytes: &'a [u8]) -> SymbolName<'a> {
-        let demangled = str::from_utf8(bytes).ok().map(demangle);
+        let str_bytes = str::from_utf8(bytes).ok();
+        let demangled = str_bytes.and_then(|s| try_demangle(s).ok());
+
+        let cpp = if demangled.is_none() {
+            OptionCppSymbol::parse(bytes)
+        } else {
+            OptionCppSymbol::none()
+        };
+
         SymbolName {
             bytes: bytes,
             demangled: demangled,
+            cpp_demangled: cpp,
         }
     }
 
-    /// Returns the raw symbol name as `&str` if the symbols is valid utf-8.
+    /// Returns the raw symbol name as a `str` if the symbols is valid utf-8.
     pub fn as_str(&self) -> Option<&'a str> {
-        self.demangled.as_ref().map(|s| s.as_str())
+        self.demangled
+            .as_ref()
+            .map(|s| s.as_str())
+            .or_else(|| {
+                str::from_utf8(self.bytes).ok()
+            })
     }
 
     /// Returns the raw symbol name as a list of bytes
@@ -136,22 +188,54 @@ impl<'a> SymbolName<'a> {
     }
 }
 
-impl<'a> fmt::Display for SymbolName<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(ref s) = self.demangled {
-            s.fmt(f)
-        } else {
-            String::from_utf8_lossy(self.bytes).fmt(f)
+cfg_if! {
+    if #[cfg(feature = "cpp_demangle")] {
+        impl<'a> fmt::Display for SymbolName<'a> {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if let Some(ref s) = self.demangled {
+                    s.fmt(f)
+                } else if let Some(ref cpp) = self.cpp_demangled.0 {
+                    cpp.fmt(f)
+                } else {
+                    String::from_utf8_lossy(self.bytes).fmt(f)
+                }
+            }
+        }
+    } else {
+        impl<'a> fmt::Display for SymbolName<'a> {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if let Some(ref s) = self.demangled {
+                    s.fmt(f)
+                } else {
+                    String::from_utf8_lossy(self.bytes).fmt(f)
+                }
+            }
         }
     }
 }
 
-impl<'a> fmt::Debug for SymbolName<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(ref s) = self.demangled {
-            s.fmt(f)
-        } else {
-            String::from_utf8_lossy(self.bytes).fmt(f)
+cfg_if! {
+    if #[cfg(feature = "cpp_demangle")] {
+        impl<'a> fmt::Debug for SymbolName<'a> {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if let Some(ref s) = self.demangled {
+                    s.fmt(f)
+                } else if let Some(ref cpp) = self.cpp_demangled.0 {
+                    fmt::Display::fmt(cpp, f)
+                } else {
+                    String::from_utf8_lossy(self.bytes).fmt(f)
+                }
+            }
+        }
+    } else {
+        impl<'a> fmt::Debug for SymbolName<'a> {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                if let Some(ref s) = self.demangled {
+                    s.fmt(f)
+                } else {
+                    String::from_utf8_lossy(self.bytes).fmt(f)
+                }
+            }
         }
     }
 }
@@ -185,4 +269,3 @@ cfg_if! {
         use self::noop::Symbol as SymbolImp;
     }
 }
-

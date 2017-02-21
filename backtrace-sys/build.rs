@@ -71,7 +71,8 @@ fn main() {
         flags.push(flag);
     }
     let ar = find_tool(&compiler, cc, "ar");
-    run(Command::new(src.join("src/libbacktrace/configure"))
+    run(Command::new("sh")
+                .arg(src.join("src/libbacktrace/configure"))
                 .current_dir(&dst)
                 .env("CC", compiler.path())
                 .env("CFLAGS", flags)

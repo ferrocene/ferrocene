@@ -16,11 +16,14 @@ build = "build.rs"
 [dependencies]
 libc = "0.2"
 cfg-if = "0.1"
-rustc-demangle = "0.1"
+rustc-demangle = "0.1.4"
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "0.8", optional = true }
 rustc-serialize = { version = "0.3", optional = true }
+
+# Optionally demangle C++ frames' symbols in backtraces.
+cpp_demangle = { version = "0.2", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 dbghelp-sys = { version = "0.2", optional = true }
@@ -42,7 +45,7 @@ serde_codegen = { version = "0.8", optional = true }
 # Note that not all features are available on all platforms, so even though a
 # feature is enabled some other feature may be used instead.
 [features]
-default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
+default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp", "cpp_demangle"]
 
     #=======================================
     # Methods of acquiring a backtrace

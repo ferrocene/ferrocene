@@ -248,12 +248,14 @@ cfg_if! {
     } else if #[cfg(all(feature = "libbacktrace",
                         unix,
                         not(target_os = "emscripten"),
-                        not(target_os = "macos")))] {
+                        not(target_os = "macos"),
+                        not(target_os = "ios")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "coresymbolication",
-                        target_os = "macos"))] {
+                        any(target_os = "macos",
+                            target_os = "ios")))] {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;

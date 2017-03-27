@@ -6,8 +6,8 @@ use std::thread;
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace")) &&
-                            !cfg!(target_os = "macos");
-static CORESYMBOLICATION: bool = cfg!(all(target_os = "macos",
+                            !cfg!(target_os = "macos") && !cfg!(target_os = "ios");
+static CORESYMBOLICATION: bool = cfg!(all(any(target_os = "macos", target_os = "ios"),
                                           feature = "coresymbolication"));
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));

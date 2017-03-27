@@ -218,13 +218,23 @@ cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
         impl<'a> fmt::Debug for SymbolName<'a> {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                use std::fmt::Write;
+
                 if let Some(ref s) = self.demangled {
-                    s.fmt(f)
-                } else if let Some(ref cpp) = self.cpp_demangled.0 {
-                    fmt::Display::fmt(cpp, f)
-                } else {
-                    String::from_utf8_lossy(self.bytes).fmt(f)
+                    return s.fmt(f)
                 }
+
+                // This may to print if the demangled symbol isn't actually
+                // valid, so handle the error here gracefully by not propagating
+                // it outwards.
+                if let Some(ref cpp) = self.cpp_demangled.0 {
+                    let mut s = String::new();
+                    if write!(s, "{}", cpp).is_ok() {
+                        return s.fmt(f)
+                    }
+                }
+
+                String::from_utf8_lossy(self.bytes).fmt(f)
             }
         }
     } else {

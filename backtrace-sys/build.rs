@@ -35,6 +35,7 @@ fn find_tool(compiler: &gcc::Tool, cc: &str, tool: &str) -> PathBuf {
     }
     let tool_suffix = format!("-{}", tool);
     try_tool(compiler, cc, "-gcc", &tool_suffix)
+        .or_else(|| try_tool(compiler, cc, "-clang", &tool_suffix))
         .or_else(|| try_tool(compiler, cc, "-cc", &tool_suffix))
         .unwrap_or_else(|| PathBuf::from(tool))
 }

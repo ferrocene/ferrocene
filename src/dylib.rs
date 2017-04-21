@@ -3,7 +3,7 @@ use std::marker;
 use std::mem;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use libc::{self, c_void};
+use libc::{self, c_char, c_void};
 
 pub struct Dylib {
     pub init: AtomicUsize,
@@ -27,7 +27,7 @@ impl Dylib {
             return true
         }
         let name = CString::new(path).unwrap();
-        let ptr = libc::dlopen(name.as_ptr(), libc::RTLD_LAZY);
+        let ptr = libc::dlopen(name.as_ptr() as *const c_char, libc::RTLD_LAZY);
         if ptr.is_null() {
             return false
         }

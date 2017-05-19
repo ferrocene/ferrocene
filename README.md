@@ -13,7 +13,7 @@ more stable and programmatic interface.
 
 ```toml
 [dependencies]
-backtrace = "0.2"
+backtrace = "0.3"
 ```
 
 ```rust

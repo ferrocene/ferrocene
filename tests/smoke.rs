@@ -160,7 +160,7 @@ fn is_serde() {
     extern crate serde;
 
     fn is_serialize<T: serde::ser::Serialize>() {}
-    fn is_deserialize<T: serde::de::Deserialize>() {}
+    fn is_deserialize<T: serde::de::DeserializeOwned>() {}
 
     is_serialize::<backtrace::Backtrace>();
     is_deserialize::<backtrace::Backtrace>();

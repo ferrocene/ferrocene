@@ -77,6 +77,10 @@ extern crate libc;
 #[cfg(feature = "serde")]
 extern crate serde;
 
+#[cfg(feature = "serde_derive")]
+#[cfg_attr(feature = "serde_derive", macro_use)]
+extern crate serde_derive;
+
 #[cfg(feature = "rustc-serialize")]
 extern crate rustc_serialize;
 
@@ -100,9 +104,7 @@ pub use symbolize::{resolve, Symbol, SymbolName};
 mod symbolize;
 
 pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
-mod capture {
-    include!(concat!(env!("OUT_DIR"), "/capture.rs"));
-}
+mod capture;
 
 #[allow(dead_code)]
 struct Bomb {

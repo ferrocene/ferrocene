@@ -68,16 +68,3 @@ unsafe fn fetch(handle: *mut c_void, name: *const u8) -> usize {
         ptr as usize
     }
 }
-
-macro_rules! dlsym {
-    (extern {
-        $(fn $name:ident($($arg:ident: $t:ty),*) -> $ret:ty;)*
-    }) => ($(
-        static $name: ::dylib::Symbol<unsafe extern fn($($t),*) -> $ret> =
-            ::dylib::Symbol {
-                name: concat!(stringify!($name), "\0"),
-                addr: ::std::sync::atomic::ATOMIC_USIZE_INIT,
-                _marker: ::std::marker::PhantomData,
-            };
-    )*)
-}

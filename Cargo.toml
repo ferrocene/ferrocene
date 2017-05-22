@@ -22,7 +22,7 @@ serde_derive = { version = "1.0", optional = true }
 rustc-serialize = { version = "0.3", optional = true }
 
 # Optionally demangle C++ frames' symbols in backtraces.
-cpp_demangle = { version = "0.2", optional = true }
+cpp_demangle = { default-features = false, version = "0.2.3", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 dbghelp-sys = { version = "0.2", optional = true }

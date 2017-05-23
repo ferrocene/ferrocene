@@ -81,8 +81,8 @@ fn main() {
                 .arg("--disable-multilib")
                 .arg("--disable-shared")
                 .arg("--disable-host-shared")
-                .arg(format!("--target={}", target))
-                .arg(format!("--host={}", host)),
+                .arg(format!("--host={}", target))
+                .arg(format!("--build={}", host)),
         "sh");
     run(Command::new("make")
                 .current_dir(&dst)

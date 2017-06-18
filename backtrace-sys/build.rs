@@ -61,6 +61,14 @@ fn main() {
         return
     }
 
+    let mut make = "make";
+
+    //FreeBSD make is BSD make
+    if target.contains("freebsd") {
+        make = "gmake"
+    }
+
+
     let cfg = gcc::Config::new();
     let compiler = cfg.get_compiler();
     let cc = compiler.path().file_name().unwrap().to_str().unwrap();
@@ -84,7 +92,7 @@ fn main() {
                 .arg(format!("--host={}", target))
                 .arg(format!("--build={}", host)),
         "sh");
-    run(Command::new("make")
+    run(Command::new(make)
                 .current_dir(&dst)
                 .arg(format!("INCDIR={}",
                              src.join("src/libbacktrace").display())),

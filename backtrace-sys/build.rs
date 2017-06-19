@@ -63,8 +63,11 @@ fn main() {
 
     let mut make = "make";
 
-    //FreeBSD make is BSD make
-    if target.contains("freebsd") {
+    // host BSDs has GNU-make as gmake
+    if host.contains("bitrig") || host.contains("dragonfly") ||
+        host.contains("freebsd") || host.contains("netbsd") ||
+        host.contains("openbsd") {
+            
         make = "gmake"
     }
 

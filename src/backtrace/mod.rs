@@ -36,7 +36,7 @@ use std::os::raw::c_void;
 ///     });
 /// }
 /// ```
-#[inline(never)] // if this is never inlined then the first frame can be konwn
+#[inline(never)] // if this is never inlined then the first frame can be known
                  // to be skipped
 pub fn trace<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)

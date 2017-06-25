@@ -25,7 +25,7 @@
 //!
 //! # API Principles
 //!
-//! This library attempts to be as flexible as possible to accomodate different
+//! This library attempts to be as flexible as possible to accommodate different
 //! backend implementations of acquiring a backtrace. Consequently the currently
 //! exported functions are closure-based as opposed to the likely expected
 //! iterator-based versions. This is done due to limitations of the underlying

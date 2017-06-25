@@ -49,7 +49,7 @@ impl Backtrace {
     ///
     /// This function is useful for representing a backtrace as an object in
     /// Rust. This returned value can be sent across threads and printed
-    /// elsewhere, and thie purpose of this value is to be entirely self
+    /// elsewhere, and the purpose of this value is to be entirely self
     /// contained.
     ///
     /// # Examples

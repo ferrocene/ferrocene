@@ -69,7 +69,7 @@ fn main() {
     if host.contains("bitrig") || host.contains("dragonfly") ||
         host.contains("freebsd") || host.contains("netbsd") ||
         host.contains("openbsd") {
-            
+
         make = "gmake"
     }
 
@@ -101,18 +101,25 @@ fn main() {
         flags.push(flag);
     }
     let ar = find_tool(&compiler, cc, "ar");
-    run(Command::new("sh")
-                .arg(configure)
-                .current_dir(&dst)
-                .env("AR", &ar)
-                .env("CC", compiler.path())
-                .env("CFLAGS", flags)
-                .arg("--with-pic")
-                .arg("--disable-multilib")
-                .arg("--disable-shared")
-                .arg("--disable-host-shared")
-                .arg(format!("--host={}", target)),
-        "sh");
+    let mut cmd = Command::new("sh");
+
+    cmd.arg(configure)
+       .current_dir(&dst)
+       .env("AR", &ar)
+       .env("CC", compiler.path())
+       .env("CFLAGS", flags)
+       .arg("--with-pic")
+       .arg("--disable-multilib")
+       .arg("--disable-shared")
+       .arg("--disable-host-shared")
+       .arg(format!("--host={}", target));
+
+    // Apparently passing this flag causes problems on Windows
+    if !host.contains("windows") {
+       cmd.arg(format!("--build={}", host));
+    }
+
+    run(&mut cmd, "sh");
     run(Command::new(make)
                 .current_dir(&dst)
                 .arg(format!("INCDIR={}",

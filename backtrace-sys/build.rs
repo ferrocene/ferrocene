@@ -4,8 +4,6 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io;
-#[cfg(windows)]
-use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -78,7 +76,8 @@ fn main() {
     // When cross-compiling on Windows, this path will contain backslashes,
     // but configure doesn't like that. Replace them with forward slashes.
     #[cfg(windows)]
-    let configure = if host.contains("windows") {
+    let configure = {
+        use std::os::windows::ffi::{OsStrExt, OsStringExt};
         let mut chars: Vec<u16> = configure.encode_wide().collect();
         for c in chars.iter_mut() {
             if *c == '\\' as u16 {
@@ -86,8 +85,6 @@ fn main() {
             }
         }
         OsString::from_wide(&chars)
-    } else {
-        configure
     };
 
     let cfg = gcc::Config::new();

@@ -4,6 +4,8 @@ use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::io;
+#[cfg(windows)]
+use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -71,6 +73,22 @@ fn main() {
         make = "gmake"
     }
 
+    let configure = src.join("src/libbacktrace/configure").into_os_string();
+
+    // When cross-compiling on Windows, this path will contain backslashes,
+    // but configure doesn't like that. Replace them with forward slashes.
+    #[cfg(windows)]
+    let configure = if host.contains("windows") {
+        let mut chars: Vec<u16> = configure.encode_wide().collect();
+        for c in chars.iter_mut() {
+            if *c == '\\' as u16 {
+                *c = '/' as u16;
+            }
+        }
+        OsString::from_wide(&chars)
+    } else {
+        configure
+    };
 
     let cfg = gcc::Config::new();
     let compiler = cfg.get_compiler();
@@ -84,16 +102,16 @@ fn main() {
     }
     let ar = find_tool(&compiler, cc, "ar");
     run(Command::new("sh")
-                .arg(src.join("src/libbacktrace/configure"))
+                .arg(configure)
                 .current_dir(&dst)
+                .env("AR", &ar)
                 .env("CC", compiler.path())
                 .env("CFLAGS", flags)
                 .arg("--with-pic")
                 .arg("--disable-multilib")
                 .arg("--disable-shared")
                 .arg("--disable-host-shared")
-                .arg(format!("--host={}", target))
-                .arg(format!("--build={}", host)),
+                .arg(format!("--host={}", target)),
         "sh");
     run(Command::new(make)
                 .current_dir(&dst)

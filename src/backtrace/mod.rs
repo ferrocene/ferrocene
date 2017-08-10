@@ -90,6 +90,7 @@ impl fmt::Debug for Frame {
 cfg_if! {
     if #[cfg(all(unix,
                  not(target_os = "emscripten"),
+                 not(all(target_os = "ios", target_arch = "arm")),
                  feature = "libunwind"))] {
         mod libunwind;
         use self::libunwind::trace as trace_imp;

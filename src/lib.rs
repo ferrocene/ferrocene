@@ -92,6 +92,15 @@ extern crate rustc_demangle;
 #[cfg(feature = "cpp_demangle")]
 extern crate cpp_demangle;
 
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate addr2line;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate findshlibs;
+
 #[allow(dead_code)] // not used everywhere
 #[cfg(unix)]
 #[macro_use]

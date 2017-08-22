@@ -24,6 +24,9 @@ rustc-serialize = { version = "0.3", optional = true }
 # Optionally demangle C++ frames' symbols in backtraces.
 cpp_demangle = { default-features = false, version = "0.2.3", optional = true }
 
+addr2line = { version = "0.5.0", optional = true }
+findshlibs = { version = "0.3.3", optional = true }
+
 [target.'cfg(windows)'.dependencies]
 dbghelp-sys = { version = "0.2", optional = true }
 kernel32-sys = { version = "0.2", optional = true }
@@ -75,9 +78,15 @@ default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"
     #   enough on OSX.
     # - coresymbolication: this feature uses the undocumented core symbolication
     #   framework on OS X to symbolize.
+    # - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
+    #   addresses into file, line, and name using DWARF debug information. At
+    #   the moment, this is only possible when targetting Linux, since macOS
+    #   splits DWARF out into a separate object file. Enabling this feature
+    #   means one less C dependency.
     libbacktrace = ["backtrace-sys"]
     dladdr = []
     coresymbolication = []
+    gimli-symbolize = ["addr2line", "findshlibs"]
 
     #=======================================
     # Methods of serialization

@@ -74,9 +74,6 @@ extern crate libc;
 #[cfg(all(windows, feature = "winapi"))] extern crate winapi;
 #[cfg(all(windows, feature = "dbghelp"))] extern crate dbghelp;
 
-#[cfg(feature = "serde")]
-extern crate serde;
-
 #[cfg(feature = "serde_derive")]
 #[cfg_attr(feature = "serde_derive", macro_use)]
 extern crate serde_derive;

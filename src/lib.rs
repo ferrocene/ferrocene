@@ -69,6 +69,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
+#[cfg(unix)]
 extern crate libc;
 #[cfg(all(windows, feature = "kernel32-sys"))] extern crate kernel32;
 #[cfg(all(windows, feature = "winapi"))] extern crate winapi;

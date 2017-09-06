@@ -98,11 +98,13 @@ fn main() {
         flags.push(flag);
     }
     let ar = find_tool(&compiler, cc, "ar");
+    let ranlib = find_tool(&compiler, cc, "ranlib");
     let mut cmd = Command::new("sh");
 
     cmd.arg(configure)
        .current_dir(&dst)
        .env("AR", &ar)
+       .env("RANLIB", &ranlib)
        .env("CC", compiler.path())
        .env("CFLAGS", flags)
        .arg("--with-pic")

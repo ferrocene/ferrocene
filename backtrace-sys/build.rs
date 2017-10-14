@@ -119,11 +119,16 @@ fn main() {
     }
 
     run(&mut cmd, "sh");
-    run(Command::new(make)
-                .current_dir(&dst)
-                .arg(format!("INCDIR={}",
-                             src.join("src/libbacktrace").display())),
+    let mut cmd = Command::new(make);
+    if let Some(makeflags) = env::var_os("CARGO_MAKEFLAGS") {
+        cmd.env("MAKEFLAGS", makeflags);
+    }
+
+    run(cmd.current_dir(&dst)
+           .arg(format!("INCDIR={}",
+                        src.join("src/libbacktrace").display())),
         "make");
+
     println!("cargo:rustc-link-search=native={}/.libs", dst.display());
     println!("cargo:rustc-link-lib=static=backtrace");
 

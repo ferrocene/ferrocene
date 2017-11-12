@@ -6,10 +6,11 @@ use std::thread;
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(all(unix, feature = "libbacktrace")) &&
-                            !cfg!(target_os = "macos") && !cfg!(target_os = "ios");
+                            !cfg!(target_os = "fuchsia") && !cfg!(target_os = "macos") &&
+                            !cfg!(target_os = "ios");
 static CORESYMBOLICATION: bool = cfg!(all(any(target_os = "macos", target_os = "ios"),
                                           feature = "coresymbolication"));
-static DLADDR: bool = cfg!(all(unix, feature = "dladdr"));
+static DLADDR: bool = cfg!(all(unix, feature = "dladdr")) && !cfg!(target_os = "fuchsia");
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 static MSVC: bool = cfg!(target_env = "msvc");
 static GIMLI_SYMBOLIZE: bool = cfg!(all(feature = "gimli-symbolize",

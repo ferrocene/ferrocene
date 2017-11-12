@@ -263,6 +263,7 @@ cfg_if! {
         use self::gimli::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "libbacktrace",
                         unix,
+                        not(target_os = "fuchsia"),
                         not(target_os = "emscripten"),
                         not(target_os = "macos"),
                         not(target_os = "ios")))] {

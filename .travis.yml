@@ -1,11 +1,21 @@
 language: rust
-
-rust:
-  - stable
-  - beta
-  - nightly
-
 sudo: false
+
+matrix:
+  include:
+    - rust: 1.21.0
+    - rust: stable
+    - os: osx
+    - rust: beta
+    - rust: nightly
+
+    - rust: nightly
+      before_script:
+        - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
+      script:
+        - cargo doc --no-deps --all-features
+      after_success:
+        - travis-cargo --only nightly doc-upload
 
 dist: trusty
 
@@ -18,10 +28,6 @@ addons:
       # Required for `bindgen`, which is required by `findshlibs`, which is
       # required by the `gimli` feature.
       - clang-3.9
-
-before_script:
-  - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
-  - export LIBCLANG_PATH=/usr/lib/llvm-3.9/lib
 
 script:
   - cargo test
@@ -40,7 +46,6 @@ script:
   - cd ./cpp_smoke_test && cargo test && cd ..
   - cargo clean && cargo build
   - rustdoc --test README.md -L target/debug/deps -L target/debug
-  - cargo doc --no-deps
 
 notifications:
   email:
@@ -54,8 +59,3 @@ env:
     # serde-codegen has historically needed a large stack to expand
     - RUST_MIN_STACK=16777216
     - secure: "Kuf3j6gC3MhR+F7g8/5J4+3tu+FXJP/SqKjsUVVjs/qjniIVX3MwZPhtP/pVtdRvYjW0NzLw5Nufb4o1cyY4uKwR8BHHNuEUE/h3mPShjWHqzLyn5QiBumPozsFCa32H4gconRmp3+s0YrBT7nLoGvUZZS0dkldMkpvvrPL/yUKXLS8HEP4L1GO5iMQQYG6i3sbWTbHikE6ZQogW/iZommyqUkVB/s/SQvdH9SXu89ttNXlm/F+EIsgsgyzpbULp5sD34GRDPJe+H1m+sgA1kTRrzmuBGNmz9mx6GyIKaqACTm1gRcb06nFjTPVTQioJBNnoV7TEqZCvjuSsUjcGmP4Aeissafo93ADzV+bd0uoWIScE9ltSVS+RgCDV+sd0GHz5U6FjhgZp0amaVl3d6hPp8lbTfK/gfj1i9ktQfKZbG7rB4tfIU1KeQRkyE9vb/TaKp8nwBbc4SVQ4EKFOlRbE1S1FooaKZweW8w57d2u+sMMMVJbO28/Ap8tk9xDSOl4shPaT0iM0U9/heF8FmCZB1OKXLKn6TAaNFnaMTvdTHl+Tjrf6Vzd/oPXJ7GuaB6eLxXYjXvZHuKiLkSZriOzhL7PbijNILbSgZt7+Fa0vcnXP8zgD4dmupx/CoIHLN9NP4o9cGXuBcaJ/iFryJ4i5LKGFNEUHtXkavDrcgcA="
-
-
-os:
-  - linux
-  - osx

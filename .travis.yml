@@ -45,7 +45,6 @@ script:
   - cargo test --no-default-features --features 'gimli-symbolize'
   - cd ./cpp_smoke_test && cargo test && cd ..
   - cargo clean && cargo build
-  - rustdoc --test README.md -L target/debug/deps -L target/debug
 
 notifications:
   email:

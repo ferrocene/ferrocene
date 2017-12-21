@@ -11,8 +11,12 @@
 #![allow(bad_style)]
 
 use std::mem;
-use winapi::*;
-use kernel32;
+use winapi::ctypes::*;
+use winapi::shared::minwindef::*;
+use winapi::um::processthreadsapi;
+use winapi::um::winnt::{self, CONTEXT};
+use winapi::um::dbghelp;
+use winapi::um::dbghelp::*;
 
 pub struct Frame {
     inner: STACKFRAME64,
@@ -36,15 +40,15 @@ pub fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
 
     unsafe {
         // Allocate necessary structures for doing the stack walk
-        let process = kernel32::GetCurrentProcess();
-        let thread = kernel32::GetCurrentThread();
+        let process = processthreadsapi::GetCurrentProcess();
+        let thread = processthreadsapi::GetCurrentThread();
 
         // The CONTEXT structure needs to be aligned on a 16-byte boundary for
         // 64-bit Windows, but currently we don't have a way to express that in
         // Rust. Allocations are generally aligned to 16-bytes, though, so we
         // box this up.
         let mut context = Box::new(mem::zeroed::<CONTEXT>());
-        kernel32::RtlCaptureContext(&mut *context);
+        winnt::RtlCaptureContext(&mut *context);
         let mut frame = super::Frame {
             inner: Frame { inner: mem::zeroed() },
         };
@@ -54,15 +58,15 @@ pub fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
         let _c = ::dbghelp_init();
 
         // And now that we're done with all the setup, do the stack walking!
-        while ::dbghelp::StackWalk64(image as DWORD,
-                                     process,
-                                     thread,
-                                     &mut frame.inner.inner,
-                                     &mut *context as *mut _ as *mut _,
-                                     None,
-                                     Some(::dbghelp::SymFunctionTableAccess64),
-                                     Some(::dbghelp::SymGetModuleBase64),
-                                     None) == TRUE {
+        while dbghelp::StackWalk64(image as DWORD,
+                                   process,
+                                   thread,
+                                   &mut frame.inner.inner,
+                                   &mut *context as *mut _ as *mut _,
+                                   None,
+                                   Some(dbghelp::SymFunctionTableAccess64),
+                                   Some(dbghelp::SymGetModuleBase64),
+                                   None) == TRUE {
             if frame.inner.inner.AddrPC.Offset == frame.inner.inner.AddrReturn.Offset ||
                frame.inner.inner.AddrPC.Offset == 0 ||
                frame.inner.inner.AddrReturn.Offset == 0 {
@@ -84,7 +88,7 @@ fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrStack.Mode = AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Rbp as u64;
     frame.AddrFrame.Mode = AddrModeFlat;
-    IMAGE_FILE_MACHINE_AMD64
+    winnt::IMAGE_FILE_MACHINE_AMD64
 }
 
 #[cfg(target_arch = "x86")]
@@ -95,5 +99,5 @@ fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrStack.Mode = AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Ebp as u64;
     frame.AddrFrame.Mode = AddrModeFlat;
-    IMAGE_FILE_MACHINE_I386
+    winnt::IMAGE_FILE_MACHINE_I386
 }

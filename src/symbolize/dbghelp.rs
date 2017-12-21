@@ -15,8 +15,12 @@ use std::mem;
 use std::path::Path;
 use std::os::windows::prelude::*;
 use std::slice;
-use kernel32;
-use winapi::*;
+use winapi::ctypes::*;
+use winapi::shared::basetsd::*;
+use winapi::shared::minwindef::*;
+use winapi::um::processthreadsapi;
+use winapi::um::dbghelp;
+use winapi::um::dbghelp::*;
 
 use SymbolName;
 
@@ -63,7 +67,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
         let _c = ::dbghelp_init();
 
         let mut displacement = 0u64;
-        let ret = ::dbghelp::SymFromAddrW(kernel32::GetCurrentProcess(),
+        let ret = dbghelp::SymFromAddrW(processthreadsapi::GetCurrentProcess(),
                                           addr as DWORD64,
                                           &mut displacement,
                                           info);
@@ -84,7 +88,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
         let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
         line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
         let mut displacement = 0;
-        let ret = ::dbghelp::SymGetLineFromAddrW64(kernel32::GetCurrentProcess(),
+        let ret = dbghelp::SymGetLineFromAddrW64(processthreadsapi::GetCurrentProcess(),
                                                    addr as DWORD64,
                                                    &mut displacement,
                                                    &mut line);

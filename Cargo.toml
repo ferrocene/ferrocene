@@ -30,7 +30,7 @@ findshlibs = { version = "0.3.3", optional = true }
 libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", optional = true, features = ["std", "dbghelp", "processthreadsapi", "winnt", "minwindef"] }
+winapi = { version = "0.3.3", optional = true, features = ["std", "dbghelp", "processthreadsapi", "winnt", "minwindef"] }
 
 [target.'cfg(all(unix, not(target_os = "fuchsia"), not(target_os = "emscripten"), not(target_os = "macos"), not(target_os = "ios")))'.dependencies]
 backtrace-sys = { path = "backtrace-sys", version = "0.1.3", optional = true }
@@ -94,6 +94,3 @@ default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"
     # Various features used for enabling rustc-serialize or syntex codegen.
     serialize-rustc = ["rustc-serialize"]
     serialize-serde = ["serde", "serde_derive"]
-
-[replace]
-"winapi:0.3.2" = { git = "https://github.com/steffengy/winapi-rs", branch = "0.3" }

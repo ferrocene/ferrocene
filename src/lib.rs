@@ -71,9 +71,7 @@
 
 #[cfg(unix)]
 extern crate libc;
-#[cfg(all(windows, feature = "kernel32-sys"))] extern crate kernel32;
 #[cfg(all(windows, feature = "winapi"))] extern crate winapi;
-#[cfg(all(windows, feature = "dbghelp"))] extern crate dbghelp;
 
 #[cfg(feature = "serde_derive")]
 #[cfg_attr(feature = "serde_derive", macro_use)]
@@ -165,12 +163,15 @@ mod lock {
 // requires external synchronization
 #[cfg(all(windows, feature = "dbghelp"))]
 unsafe fn dbghelp_init() {
+    use winapi::shared::minwindef;
+    use winapi::um::{dbghelp, processthreadsapi};
+
     static mut INITIALIZED: bool = false;
 
     if !INITIALIZED {
-        dbghelp::SymInitializeW(kernel32::GetCurrentProcess(),
+        dbghelp::SymInitializeW(processthreadsapi::GetCurrentProcess(),
                                 0 as *mut _,
-                                winapi::TRUE);
+                                minwindef::TRUE);
         INITIALIZED = true;
     }
 }

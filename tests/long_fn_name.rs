@@ -23,6 +23,7 @@ mod _234567890_234567890_234567890_234567890_234567890 {
 #[test]
 #[cfg(all(windows, feature = "dbghelp", target_env = "msvc"))]
 fn test_long_fn_name() {
+    use winapi::um::dbghelp;
     use _234567890_234567890_234567890_234567890_234567890::
         _234567890_234567890_234567890_234567890_234567890 as S;
 
@@ -47,7 +48,7 @@ fn test_long_fn_name() {
                 "::_234567890_234567890_234567890_234567890_234567890")
             {
                 found_long_name_frame = true;
-                assert_eq!(function_name.len(), winapi::MAX_SYM_NAME - 1);
+                assert_eq!(function_name.len(), dbghelp::MAX_SYM_NAME - 1);
             }
         }
     }

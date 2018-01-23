@@ -96,6 +96,27 @@ extern crate addr2line;
           unix,
           target_os = "linux"))]
 extern crate findshlibs;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate gimli;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate memmap;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate object;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+#[macro_use]
+extern crate rental;
+#[cfg(all(feature = "gimli-symbolize",
+          unix,
+          target_os = "linux"))]
+extern crate stable_deref_trait;
 
 #[allow(dead_code)] // not used everywhere
 #[cfg(unix)]

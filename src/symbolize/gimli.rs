@@ -1,7 +1,14 @@
 use addr2line;
 use findshlibs::{self, Segment, SharedLibrary};
+use gimli;
+use memmap::Mmap;
+use object::{self, Object};
+use rental;
+use stable_deref_trait::StableDeref;
 use std::cell::RefCell;
 use std::env;
+use std::fs::File;
+use std::ops::Deref;
 use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
 use std::u32;
@@ -10,24 +17,62 @@ use SymbolName;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
+struct StableMmap(Mmap);
+
+impl Deref for StableMmap {
+    type Target = [u8];
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+unsafe impl StableDeref for StableMmap {}
+
+type Dwarf<'map> = addr2line::Context<gimli::EndianBuf<'map, gimli::RunTimeEndian>>;
+type Symbols<'map> = object::SymbolMap<'map>;
+
+rental! {
+    mod mapping {
+        #[rental]
+        pub(super) struct Mapping {
+            #[target_ty_hack = "[u8]"]
+            map: super::StableMmap,
+            ctx: (super::Dwarf<'map>, super::Symbols<'map>),
+        }
+    }
+}
+use self::mapping::Mapping;
+
+fn create_mapping(path: &PathBuf) -> Result<Mapping, ()> {
+    let file = File::open(path).unwrap();
+    // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
+    let map = unsafe { StableMmap(Mmap::map(&file).map_err(|_| ())?) };
+    Mapping::try_new(map, |map| {
+        let object = object::File::parse(map).map_err(|_| ())?;
+        let dwarf = addr2line::Context::new(&object).map_err(|_| ())?;
+        let symbols = object.symbol_map();
+        Ok((dwarf, symbols))
+    }).map_err(|_: rental::TryNewError<(), StableMmap>| ())
+}
+
 thread_local! {
     // A very small, very simple LRU cache for debug info mappings.
     //
     // The hit rate should be very high, since the typical stack doesn't cross
     // between many shared libraries.
     //
-    // The `addr2line::Mapping` structures are pretty expensive to create. Its
+    // The `addr2line::Context` structures are pretty expensive to create. Its
     // cost is expected to be amortized by subsequent `locate` queries, which
-    // leverage the structures built when constructing `addr2line::Mapping`s to
+    // leverage the structures built when constructing `addr2line::Context`s to
     // get nice speedups. If we didn't have this cache, that amortization would
     // never happen, and symbolicating backtraces would be ssssllllooooowwww.
-    static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, addr2line::Mapping)>>
+    static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>>
         = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
 }
 
-fn with_mapping_for_path<F>(path: PathBuf, mut f: F)
+fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
-    F: FnMut(&mut addr2line::Mapping)
+    F: FnMut(&(Dwarf, Symbols)),
 {
     MAPPINGS_CACHE.with(|cache| {
         let mut cache = cache.borrow_mut();
@@ -47,10 +92,7 @@ where
             // When the mapping is not in the cache, create a new mapping,
             // insert it into the front of the cache, and evict the oldest cache
             // entry if necessary.
-            let opts = addr2line::Options::default()
-                .with_functions();
-
-            let mapping = match opts.build(&path) {
+            let mapping = match create_mapping(&path) {
                 Err(_) => return,
                 Ok(m) => m,
             };
@@ -62,7 +104,7 @@ where
             cache.insert(0, (path, mapping));
         }
 
-        f(&mut cache[0].1);
+        cache[0].1.rent(f);
     });
 }
 
@@ -109,33 +151,46 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
     // Finally, get a cached mapping or create a new mapping for this file, and
     // evaluate the DWARF info to find the file/line/name for this address.
-    with_mapping_for_path(path, |mapping| {
-        let (file, line, func) = match mapping.locate(addr.0 as u64) {
-            Ok(None) | Err(_) => return,
-            Ok(Some((file, line, func))) => (file, line, func),
-        };
+    with_mapping_for_path(path, |&(ref dwarf, ref symbols)| {
+        let mut found_sym = false;
+        if let Ok(mut frames) = dwarf.find_frames(addr.0 as u64) {
+            while let Ok(Some(frame)) = frames.next() {
+                let (file, line) = frame
+                    .location
+                    .map(|l| (l.file, l.line))
+                    .unwrap_or((None, None));
+                let name = frame
+                    .function
+                    .and_then(|f| f.raw_name().ok().map(|f| f.to_string()));
+                let sym = super::Symbol {
+                    inner: Symbol::new(addr.0 as usize, file, line, name),
+                };
+                cb(&sym);
+                found_sym = true;
+            }
+        }
 
-        let sym = super::Symbol {
-            inner: Symbol::new(addr.0 as usize,
-                               file,
-                               line,
-                               func.map(|f| f.to_string()))
-        };
-
-        cb(&sym);
+        if !found_sym {
+            if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
+                let sym = super::Symbol {
+                    inner: Symbol::new(addr.0 as usize, None, None, Some(name.to_string())),
+                };
+                cb(&sym);
+            }
+        }
     });
 }
 
 pub struct Symbol {
     addr: usize,
-    file: PathBuf,
+    file: Option<PathBuf>,
     line: Option<u64>,
     name: Option<String>,
 }
 
 impl Symbol {
     fn new(addr: usize,
-           file: PathBuf,
+           file: Option<PathBuf>,
            line: Option<u64>,
            name: Option<String>)
            -> Symbol {
@@ -156,7 +211,7 @@ impl Symbol {
     }
 
     pub fn filename(&self) -> Option<&Path> {
-        Some(self.file.as_ref())
+        self.file.as_ref().map(|f| f.as_ref())
     }
 
     pub fn lineno(&self) -> Option<u32> {

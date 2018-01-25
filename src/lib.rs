@@ -88,35 +88,15 @@ extern crate rustc_demangle;
 #[cfg(feature = "cpp_demangle")]
 extern crate cpp_demangle;
 
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate addr2line;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate findshlibs;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate gimli;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate memmap;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate object;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-#[macro_use]
-extern crate rental;
-#[cfg(all(feature = "gimli-symbolize",
-          unix,
-          target_os = "linux"))]
-extern crate stable_deref_trait;
+cfg_if! {
+    if #[cfg(all(feature = "gimli-symbolize", unix, target_os = "linux"))] {
+        extern crate addr2line;
+        extern crate findshlibs;
+        extern crate gimli;
+        extern crate memmap;
+        extern crate object;
+    }
+}
 
 #[allow(dead_code)] // not used everywhere
 #[cfg(unix)]

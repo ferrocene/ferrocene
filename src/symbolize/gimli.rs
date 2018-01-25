@@ -3,12 +3,10 @@ use findshlibs::{self, Segment, SharedLibrary};
 use gimli;
 use memmap::Mmap;
 use object::{self, Object};
-use rental;
-use stable_deref_trait::StableDeref;
 use std::cell::RefCell;
 use std::env;
 use std::fs::File;
-use std::ops::Deref;
+use std::mem;
 use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
 use std::u32;
@@ -17,42 +15,42 @@ use SymbolName;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-struct StableMmap(Mmap);
-
-impl Deref for StableMmap {
-    type Target = [u8];
-    fn deref(&self) -> &Self::Target {
-        &*self.0
-    }
-}
-
-unsafe impl StableDeref for StableMmap {}
-
 type Dwarf<'map> = addr2line::Context<gimli::EndianBuf<'map, gimli::RunTimeEndian>>;
 type Symbols<'map> = object::SymbolMap<'map>;
 
-rental! {
-    mod mapping {
-        #[rental]
-        pub(super) struct Mapping {
-            #[target_ty_hack = "[u8]"]
-            map: super::StableMmap,
-            ctx: (super::Dwarf<'map>, super::Symbols<'map>),
-        }
-    }
+struct Mapping {
+    // 'static lifetime is a lie to hack around lack of support for self-referential structs.
+    dwarf: Dwarf<'static>,
+    symbols: Symbols<'static>,
+    _map: Mmap,
 }
-use self::mapping::Mapping;
 
-fn create_mapping(path: &PathBuf) -> Result<Mapping, ()> {
-    let file = File::open(path).unwrap();
-    // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
-    let map = unsafe { StableMmap(Mmap::map(&file).map_err(|_| ())?) };
-    Mapping::try_new(map, |map| {
-        let object = object::File::parse(map).map_err(|_| ())?;
-        let dwarf = addr2line::Context::new(&object).map_err(|_| ())?;
-        let symbols = object.symbol_map();
-        Ok((dwarf, symbols))
-    }).map_err(|_: rental::TryNewError<(), StableMmap>| ())
+impl Mapping {
+    fn new(path: &PathBuf) -> Option<Mapping> {
+        let file = File::open(path).ok()?;
+        // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
+        let map = unsafe { Mmap::map(&file).ok()? };
+        let (dwarf, symbols) = {
+            let object = object::File::parse(&*map).ok()?;
+            let dwarf = addr2line::Context::new(&object).ok()?;
+            let symbols = object.symbol_map();
+            // Convert to 'static lifetimes.
+            unsafe { (mem::transmute(dwarf), mem::transmute(symbols)) }
+        };
+        Some(Mapping {
+            dwarf,
+            symbols,
+            _map: map,
+        })
+    }
+
+    // Ensure the 'static lifetimes don't leak.
+    fn rent<F>(&self, mut f: F)
+    where
+        F: FnMut(&Dwarf, &Symbols),
+    {
+        f(&self.dwarf, &self.symbols)
+    }
 }
 
 thread_local! {
@@ -72,7 +70,7 @@ thread_local! {
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
-    F: FnMut(&(Dwarf, Symbols)),
+    F: FnMut(&Dwarf, &Symbols),
 {
     MAPPINGS_CACHE.with(|cache| {
         let mut cache = cache.borrow_mut();
@@ -92,9 +90,9 @@ where
             // When the mapping is not in the cache, create a new mapping,
             // insert it into the front of the cache, and evict the oldest cache
             // entry if necessary.
-            let mapping = match create_mapping(&path) {
-                Err(_) => return,
-                Ok(m) => m,
+            let mapping = match Mapping::new(&path) {
+                None => return,
+                Some(m) => m,
             };
 
             if cache.len() == MAPPINGS_CACHE_SIZE {
@@ -151,7 +149,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
     // Finally, get a cached mapping or create a new mapping for this file, and
     // evaluate the DWARF info to find the file/line/name for this address.
-    with_mapping_for_path(path, |&(ref dwarf, ref symbols)| {
+    with_mapping_for_path(path, |dwarf, symbols| {
         let mut found_sym = false;
         if let Ok(mut frames) = dwarf.find_frames(addr.0 as u64) {
             while let Ok(Some(frame)) = frames.next() {
@@ -170,6 +168,7 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
             }
         }
 
+        // No DWARF info found, so fallback to the symbol table.
         if !found_sym {
             if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
                 let sym = super::Symbol {

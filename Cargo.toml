@@ -49,51 +49,51 @@ backtrace-sys = { path = "backtrace-sys", version = "0.1.3", optional = true }
 [features]
 default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
 
-    #=======================================
-    # Methods of acquiring a backtrace
-    #
-    # - libunwind: when using this the libgcc library is linked against to get
-    #   the unwinding support. This is generally the most reliable method to get
-    #   a backtrace on unix.
-    # - unix-backtrace: this uses the backtrace(3) function to acquire a
-    #   backtrace, but is not as reliable as libunwind. It is, however,
-    #   generally found in more locations.
-    # - dbghelp: on windows this enables usage of dbghelp.dll to find a
-    #   backtrace at runtime
-    # - kernel32: on windows this enables using RtlCaptureStackBackTrace as the
-    #   function to acquire a backtrace
-    libunwind = []
-    unix-backtrace = []
-    dbghelp = ["winapi"]
-    kernel32 = []
+#=======================================
+# Methods of acquiring a backtrace
+#
+# - libunwind: when using this the libgcc library is linked against to get
+#   the unwinding support. This is generally the most reliable method to get
+#   a backtrace on unix.
+# - unix-backtrace: this uses the backtrace(3) function to acquire a
+#   backtrace, but is not as reliable as libunwind. It is, however,
+#   generally found in more locations.
+# - dbghelp: on windows this enables usage of dbghelp.dll to find a
+#   backtrace at runtime
+# - kernel32: on windows this enables using RtlCaptureStackBackTrace as the
+#   function to acquire a backtrace
+libunwind = []
+unix-backtrace = []
+dbghelp = ["winapi"]
+kernel32 = []
 
-    #=======================================
-    # Methods of resolving symbols
-    #
-    # - libbacktrace: this feature activates the `backtrace-sys` dependency,
-    #   building the libbacktrace library found in gcc repos. This library
-    #   parses the DWARF info of ELF executables to find symbol names, and it
-    #   can also provide filename/line number information if debuginfo is
-    #   compiled in. This library currently only primarily works on unixes that
-    #   are not OSX, however.
-    # - dladdr: this feature uses the dladdr(3) function (a glibc extension) to
-    #   resolve symbol names. This is fairly unreliable on linux, but works well
-    #   enough on OSX.
-    # - coresymbolication: this feature uses the undocumented core symbolication
-    #   framework on OS X to symbolize.
-    # - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
-    #   addresses into file, line, and name using DWARF debug information. At
-    #   the moment, this is only possible when targetting Linux, since macOS
-    #   splits DWARF out into a separate object file. Enabling this feature
-    #   means one less C dependency.
-    libbacktrace = ["backtrace-sys"]
-    dladdr = []
-    coresymbolication = []
-    gimli-symbolize = ["addr2line", "findshlibs", "gimli", "memmap", "object" ]
+#=======================================
+# Methods of resolving symbols
+#
+# - libbacktrace: this feature activates the `backtrace-sys` dependency,
+#   building the libbacktrace library found in gcc repos. This library
+#   parses the DWARF info of ELF executables to find symbol names, and it
+#   can also provide filename/line number information if debuginfo is
+#   compiled in. This library currently only primarily works on unixes that
+#   are not OSX, however.
+# - dladdr: this feature uses the dladdr(3) function (a glibc extension) to
+#   resolve symbol names. This is fairly unreliable on linux, but works well
+#   enough on OSX.
+# - coresymbolication: this feature uses the undocumented core symbolication
+#   framework on OS X to symbolize.
+# - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
+#   addresses into file, line, and name using DWARF debug information. At
+#   the moment, this is only possible when targetting Linux, since macOS
+#   splits DWARF out into a separate object file. Enabling this feature
+#   means one less C dependency.
+libbacktrace = ["backtrace-sys"]
+dladdr = []
+coresymbolication = []
+gimli-symbolize = ["addr2line", "findshlibs", "gimli", "memmap", "object" ]
 
-    #=======================================
-    # Methods of serialization
-    #
-    # Various features used for enabling rustc-serialize or syntex codegen.
-    serialize-rustc = ["rustc-serialize"]
-    serialize-serde = ["serde", "serde_derive"]
+#=======================================
+# Methods of serialization
+#
+# Various features used for enabling rustc-serialize or syntex codegen.
+serialize-rustc = ["rustc-serialize"]
+serialize-serde = ["serde", "serde_derive"]

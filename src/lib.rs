@@ -65,7 +65,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "http://alexcrichton.com/backtrace-rs")]
+#![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
 #![deny(warnings)]
 

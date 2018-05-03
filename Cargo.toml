@@ -7,7 +7,7 @@ license = "MIT/Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/alexcrichton/backtrace-rs"
 homepage = "https://github.com/alexcrichton/backtrace-rs"
-documentation = "http://alexcrichton.com/backtrace-rs"
+documentation = "https://docs.rs/backtrace"
 description = """
 A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 """

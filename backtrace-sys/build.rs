@@ -148,14 +148,16 @@ fn main() {
     let mut objs = Vec::new();
     let objcopy = find_tool(&compiler, cc, "objcopy");
     for obj in t!(tmpdir.read_dir()) {
-        let obj = t!(obj);
-        run(Command::new(&objcopy)
-                    .arg("--redefine-syms=symbol-map")
-                    .arg(obj.path()),
-            objcopy.to_str().unwrap());
-        objs.push(obj.path());
+        objs.push(t!(obj).path());
     }
-
+    
+	for obj in objs.as_slice() {
+        run(Command::new(&objcopy)
+                .arg("--redefine-syms=symbol-map")
+                .arg(obj),
+        objcopy.to_str().unwrap());
+    }
+    
     run(Command::new(&ar).arg("crus").arg(&lib).args(&objs),
         ar.to_str().unwrap());
 }

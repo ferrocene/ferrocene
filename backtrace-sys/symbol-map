@@ -16,3 +16,4 @@ backtrace_print __rbt_backtrace_print
 backtrace_simple __rbt_backtrace_simple
 backtrace_qsort __rbt_backtrace_qsort
 backtrace_create_state __rbt_backtrace_create_state
+backtrace_uncompress_zdebug __rbt_backtrace_uncompress_zdebug

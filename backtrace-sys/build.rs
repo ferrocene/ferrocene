@@ -101,6 +101,12 @@ fn main() {
     let ranlib = find_tool(&compiler, cc, "ranlib");
     let mut cmd = Command::new("sh");
 
+    let host_to_configure = if let Some(i) = target.find("musl") {
+        format!("{}gnu{}", &target[..i], &target[i + 4..])
+    } else {
+        target.to_string()
+    };
+
     cmd.arg(configure)
        .current_dir(&dst)
        .env("AR", &ar)
@@ -111,7 +117,7 @@ fn main() {
        .arg("--disable-multilib")
        .arg("--disable-shared")
        .arg("--disable-host-shared")
-       .arg(format!("--host={}", target));
+       .arg(format!("--host={}", host_to_configure));
 
     // Apparently passing this flag causes problems on Windows
     if !host.contains("windows") {
@@ -150,14 +156,14 @@ fn main() {
     for obj in t!(tmpdir.read_dir()) {
         objs.push(t!(obj).path());
     }
-    
+
 	for obj in objs.as_slice() {
         run(Command::new(&objcopy)
                 .arg("--redefine-syms=symbol-map")
                 .arg(obj),
         objcopy.to_str().unwrap());
     }
-    
+
     run(Command::new(&ar).arg("crus").arg(&lib).args(&objs),
         ar.to_str().unwrap());
 }

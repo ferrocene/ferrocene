@@ -101,11 +101,12 @@ fn main() {
     let ranlib = find_tool(&compiler, cc, "ranlib");
     let mut cmd = Command::new("sh");
 
-    let host_to_configure = if let Some(i) = target.find("musl") {
-        format!("{}gnu{}", &target[..i], &target[i + 4..])
-    } else {
-        target.to_string()
-    };
+    // Apparently libbacktrace's configure script is pretty finnicky about what
+    // targets it's given. Try to canonicalize targets in a way that hopefully
+    // doesn't affect codegen to get the script to understand it.
+    let host_to_configure = target
+        .replace("linux-android", "unknown-linux-gnu")
+        .replace("musl", "gnu");
 
     cmd.arg(configure)
        .current_dir(&dst)

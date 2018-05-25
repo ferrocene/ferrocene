@@ -1,56 +1,75 @@
 language: rust
 sudo: false
-
-matrix:
-  include:
-    - rust: stable
-    - os: osx
-    - rust: beta
-    - rust: nightly
-
-    - rust: nightly
-      before_script:
-        - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
-      script:
-        - cargo doc --no-deps --all-features
-      after_success:
-        - travis-cargo --only nightly doc-upload
-
 dist: trusty
 
-addons:
-  sources:
-    # Provides clang-3.9
-    - llvm-toolchain-trusty-3.9
-  apt:
-    packages:
-      # Required for `bindgen`, which is required by `findshlibs`, which is
-      # required by the `gimli` feature.
-      - clang-3.9
+matrix:
+  fast_finish: true
+  include:
+    # Test everything on stable linux
+    - rust: stable
+      addons:
+        sources:
+          # Provides clang-3.9
+          - llvm-toolchain-trusty-3.9
+        apt:
+          packages:
+            # Required for `bindgen`, which is required by `findshlibs`, which is
+            # required by the `gimli` feature.
+            - clang-3.9
+      script: &test_all
+        - cargo test
+        - cargo test --no-default-features
+        - cargo test --no-default-features --features 'libunwind'
+        - cargo test --no-default-features --features 'libunwind dladdr'
+        - cargo test --no-default-features --features 'libunwind libbacktrace'
+        - cargo test --no-default-features --features 'unix-backtrace'
+        - cargo test --no-default-features --features 'unix-backtrace dladdr'
+        - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
+        - cargo test --no-default-features --features 'serialize-serde'
+        - cargo test --no-default-features --features 'serialize-rustc'
+        - cargo test --no-default-features --features 'serialize-rustc serialize-serde'
+        - cargo test --no-default-features --features 'cpp_demangle'
+        - cargo test --no-default-features --features 'gimli-symbolize'
+        - cd ./cpp_smoke_test && cargo test && cd ..
+        - cargo clean && cargo build
+
+    # Test everything on OSX as well as beta/nightly
+    - os: osx
+      script: *test_all
+    - rust: beta
+      script: *test_all
+    - rust: nightly
+      script: *test_all
+
+    # Upload docs on nightly
+    - rust: nightly
+      script:
+        - pip install 'travis-cargo<0.2' --user && export PATH=$HOME/.local/bin:$PATH
+        - cargo doc --no-deps --all-features
+      after_success:
+        - travis-cargo doc-upload
+
+    # Cross-compile tests, not as comprehensive as above but gets us breadth of
+    # targets
+    - env: TARGET=aarch64-unknown-linux-gnu
+    - env: TARGET=arm-unknown-linux-gnueabihf
+    - env: TARGET=armv7-unknown-linux-gnueabihf
+    - env: TARGET=i586-unknown-linux-gnu
+    - env: TARGET=i686-unknown-linux-gnu
+    - env: TARGET=powerpc64-unknown-linux-gnu
+    - env: TARGET=powerpc-unknown-linux-gnu
+    - env: TARGET=x86_64-pc-windows-gnu
+    - env: TARGET=x86_64-unknown-linux-gnu NO_ADD=1
+    - env: TARGET=x86_64-unknown-linux-musl
 
 script:
-  - cargo test
-  - cargo test --no-default-features
-  - cargo test --no-default-features --features 'libunwind'
-  - cargo test --no-default-features --features 'libunwind dladdr'
-  - cargo test --no-default-features --features 'libunwind libbacktrace'
-  - cargo test --no-default-features --features 'unix-backtrace'
-  - cargo test --no-default-features --features 'unix-backtrace dladdr'
-  - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
-  - cargo test --no-default-features --features 'serialize-serde'
-  - cargo test --no-default-features --features 'serialize-rustc'
-  - cargo test --no-default-features --features 'serialize-rustc serialize-serde'
-  - cargo test --no-default-features --features 'cpp_demangle'
-  - cargo test --no-default-features --features 'gimli-symbolize'
-  - cd ./cpp_smoke_test && cargo test && cd ..
-  - cargo clean && cargo build
+  - if [ "$NO_ADD" == "" ]; then rustup target add $TARGET; fi
+  - cargo generate-lockfile
+  - ci/run-docker.sh $TARGET
 
 notifications:
   email:
     on_success: never
-
-after_success:
-  - travis-cargo --only nightly doc-upload
 
 env:
   global:

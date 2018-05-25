@@ -59,6 +59,7 @@ matrix:
     - env: TARGET=i686-unknown-linux-gnu
     - env: TARGET=powerpc64-unknown-linux-gnu
     - env: TARGET=powerpc-unknown-linux-gnu
+    - env: TARGET=x86_64-pc-windows-gnu
     - env: TARGET=x86_64-unknown-linux-gnu NO_ADD=1
     - env: TARGET=x86_64-unknown-linux-musl
 

@@ -38,6 +38,7 @@ fn main() {
     } else if target.contains("windows") {
         build.file("src/libbacktrace/pecoff.c");
     } else {
+        build.flag("-fvisibility=hidden");
         build.file("src/libbacktrace/elf.c");
 
         if target.contains("64") {

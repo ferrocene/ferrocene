@@ -58,7 +58,6 @@ fn main() {
     build.define("HAVE_DL_ITERATE_PHDR", "1");
     build.define("_GNU_SOURCE", "1");
     build.define("_LARGE_FILES", "1");
-    build.define("_POSIX_SOURCE", "1");
 
     let syms = [
         "backtrace_full",

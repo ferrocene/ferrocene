@@ -17,6 +17,8 @@ matrix:
             # required by the `gimli` feature.
             - clang-3.9
       script: &test_all
+        - cargo build --manifest-path backtrace-sys/Cargo.toml
+        - cargo build
         - cargo test
         - cargo test --no-default-features
         - cargo test --no-default-features --features 'libunwind'

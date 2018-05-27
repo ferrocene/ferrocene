@@ -1,3 +1,4 @@
+extern crate pkg_config;
 extern crate cc;
 
 use std::env;
@@ -45,6 +46,12 @@ fn main() {
             build.define("BACKTRACE_ELF_SIZE", "64");
         } else {
             build.define("BACKTRACE_ELF_SIZE", "32");
+        }
+    }
+
+    if let Ok(unwind) = pkg_config::Config::new().probe("libunwind") {
+        for path in unwind.include_paths {
+            build.include(path);
         }
     }
 

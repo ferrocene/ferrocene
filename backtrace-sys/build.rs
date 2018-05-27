@@ -55,7 +55,9 @@ fn main() {
     build.define("BACKTRACE_SUPPORTS_DATA", "0");
 
     File::create(out_dir.join("config.h")).unwrap();
-    build.define("HAVE_DL_ITERATE_PHDR", "1");
+    if !target.contains("apple-ios") {
+        build.define("HAVE_DL_ITERATE_PHDR", "1");
+    }
     build.define("_GNU_SOURCE", "1");
     build.define("_LARGE_FILES", "1");
 

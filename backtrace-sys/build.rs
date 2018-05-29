@@ -1,4 +1,3 @@
-extern crate pkg_config;
 extern crate cc;
 
 use std::env;
@@ -26,7 +25,6 @@ fn main() {
         .include(&out_dir)
         .warnings(false)
         .file("src/libbacktrace/alloc.c")
-        .file("src/libbacktrace/backtrace.c")
         .file("src/libbacktrace/dwarf.c")
         .file("src/libbacktrace/fileline.c")
         .file("src/libbacktrace/posix.c")
@@ -46,12 +44,6 @@ fn main() {
             build.define("BACKTRACE_ELF_SIZE", "64");
         } else {
             build.define("BACKTRACE_ELF_SIZE", "32");
-        }
-    }
-
-    if let Ok(unwind) = pkg_config::Config::new().probe("libunwind") {
-        for path in unwind.include_paths {
-            build.include(path);
         }
     }
 

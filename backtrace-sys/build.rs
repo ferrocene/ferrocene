@@ -1,4 +1,3 @@
-extern crate pkg_config;
 extern crate cc;
 
 use std::env;
@@ -26,7 +25,6 @@ fn main() {
         .include(&out_dir)
         .warnings(false)
         .file("src/libbacktrace/alloc.c")
-        .file("src/libbacktrace/backtrace.c")
         .file("src/libbacktrace/dwarf.c")
         .file("src/libbacktrace/fileline.c")
         .file("src/libbacktrace/posix.c")
@@ -49,12 +47,6 @@ fn main() {
         }
     }
 
-    if let Ok(unwind) = pkg_config::Config::new().probe("libunwind") {
-        for path in unwind.include_paths {
-            build.include(path);
-        }
-    }
-
     File::create(out_dir.join("backtrace-supported.h")).unwrap();
     build.define("BACKTRACE_SUPPORTED", "1");
     build.define("BACKTRACE_USES_MALLOC", "1");
@@ -62,7 +54,7 @@ fn main() {
     build.define("BACKTRACE_SUPPORTS_DATA", "0");
 
     File::create(out_dir.join("config.h")).unwrap();
-    if !target.contains("apple-ios") {
+    if !target.contains("apple-ios") && !target.contains("solaris") {
         build.define("HAVE_DL_ITERATE_PHDR", "1");
     }
     build.define("_GNU_SOURCE", "1");

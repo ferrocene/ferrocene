@@ -54,7 +54,10 @@ fn main() {
     build.define("BACKTRACE_SUPPORTS_DATA", "0");
 
     File::create(out_dir.join("config.h")).unwrap();
-    if !target.contains("apple-ios") && !target.contains("solaris") {
+    if !target.contains("apple-ios") &&
+       !target.contains("solaris") &&
+       !target.contains("redox") &&
+       !target.contains("android") {
         build.define("HAVE_DL_ITERATE_PHDR", "1");
     }
     build.define("_GNU_SOURCE", "1");

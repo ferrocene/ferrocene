@@ -4,7 +4,7 @@
 set -ex
 
 run() {
-    docker build -t backtrace ci/docker/$1
+    docker build -t backtrace -f ci/docker/$1/Dockerfile ci
     mkdir -p target
     docker run \
       --user `id -u`:`id -g` \

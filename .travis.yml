@@ -1,6 +1,20 @@
 language: rust
 sudo: false
 dist: trusty
+cache:
+  - cargo
+  - directories:
+      - cached
+
+addons:
+  sources:
+    # Provides clang-3.9
+    - llvm-toolchain-trusty-3.9
+  apt:
+    packages:
+      # Required for `bindgen`, which is required by `findshlibs`, which is
+      # required by the `gimli` feature.
+      - clang-3.9
 
 matrix:
   fast_finish: true
@@ -64,6 +78,91 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-gnu NO_ADD=1
     - env: TARGET=x86_64-unknown-linux-musl
 
+    # Cross compile Android targets from linux
+    - env: TARGET=arm-linux-androideabi
+      script: &dinghy-build
+        - rustup target add $TARGET
+        - cargo dinghy --platform $PLATFORM test --no-run
+    - env: TARGET=armv7-linux-androideabi
+      script: *dinghy-build
+    - env: TARGET=aarch64-linux-android
+      script: *dinghy-build
+    - env: TARGET=i686-linux-android
+      script: *dinghy-build
+    - env: TARGET=x86_64-linux-android
+      script: *dinghy-build
+
+    # Build iOS targets from OSX
+    - env: TARGET=aarch64-apple-ios
+      os: osx
+      script: *dinghy-build
+    - env: TARGET=armv7-apple-ios
+      os: osx
+      script: *dinghy-build
+    - env: TARGET=armv7s-apple-ios
+      os: osx
+      script: *dinghy-build
+    - env: TARGET=i386-apple-ios
+      os: osx
+      script: *dinghy-build
+    - env: TARGET=x86_64-apple-ios
+      os: osx
+      script: *dinghy-build
+
+
+install:
+  - |
+    case "$TARGET" in
+      *android*)
+        export ANDROID_HOME="$HOME/cached/android-sdk";
+        mkdir -p $ANDROID_HOME
+        [ -e "cached/android-sdk.zip" ] || curl -o cached/android-sdk.zip \
+            "https://dl.google.com/android/repository/sdk-tools-${TRAVIS_OS_NAME}-${ANDROID_SDK_VERSION}.zip" 
+        [ -e $ANDROID_HOME/tools ] || unzip -q cached/android-sdk.zip -d $ANDROID_HOME
+
+        yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses > /dev/null
+
+        ANDROID_NDK=$ANDROID_HOME/ndk-bundle
+
+        [ -e $ANDROID_NDK ] || \
+          $ANDROID_HOME/tools/bin/sdkmanager \
+            'build-tools;27.0.0' 'platforms;android-27' 'ndk-bundle' \
+            'platform-tools' > /dev/null
+
+        ARCH=`echo $TARGET | cut -f 1 -d '-'`
+
+        case $ARCH in
+          arm) ANDROID_ARCH=arm;;
+          armv7) ANDROID_ARCH=arm;;
+          aarch64) ANDROID_ARCH=arm64;;
+          i686) ANDROID_ARCH=x86;;
+          x86_64) ANDROID_ARCH=x86_64;;
+        esac
+
+        export TOOLCHAIN=$HOME/cached/android-$ANDROID_ARCH
+        [ -e $TOOLCHAIN ] || \
+          $ANDROID_NDK/build/tools/make_standalone_toolchain.py --arch $ANDROID_ARCH \
+            --stl=libc++ --api 21 --install-dir $TOOLCHAIN
+
+        echo "[platforms.android-$ARCH]" > $HOME/.dinghy.toml
+        echo "rustc_triple=\"$TARGET\"" >> $HOME/.dinghy.toml
+        echo "toolchain=\"$TOOLCHAIN\"" >> $HOME/.dinghy.toml
+
+        PLATFORM=android-$ARCH
+      ;;
+      *-apple-ios)
+        ARCH=`echo $TARGET | cut -f 1 -d '-'`
+        PLATFORM=ios-$ARCH
+      ;;
+      *)
+      esac
+
+      if [ -n "$PLATFORM" ]
+      then
+        which cargo-dinghy || cargo install cargo-dinghy
+      fi
+
+# non dinghy cross-compilation targets
 script:
   - if [ "$NO_ADD" == "" ]; then rustup target add $TARGET; fi
   - cargo generate-lockfile
@@ -77,4 +176,5 @@ env:
   global:
     # serde-codegen has historically needed a large stack to expand
     - RUST_MIN_STACK=16777216
+    - ANDROID_SDK_VERSION=4333796
     - secure: "Kuf3j6gC3MhR+F7g8/5J4+3tu+FXJP/SqKjsUVVjs/qjniIVX3MwZPhtP/pVtdRvYjW0NzLw5Nufb4o1cyY4uKwR8BHHNuEUE/h3mPShjWHqzLyn5QiBumPozsFCa32H4gconRmp3+s0YrBT7nLoGvUZZS0dkldMkpvvrPL/yUKXLS8HEP4L1GO5iMQQYG6i3sbWTbHikE6ZQogW/iZommyqUkVB/s/SQvdH9SXu89ttNXlm/F+EIsgsgyzpbULp5sD34GRDPJe+H1m+sgA1kTRrzmuBGNmz9mx6GyIKaqACTm1gRcb06nFjTPVTQioJBNnoV7TEqZCvjuSsUjcGmP4Aeissafo93ADzV+bd0uoWIScE9ltSVS+RgCDV+sd0GHz5U6FjhgZp0amaVl3d6hPp8lbTfK/gfj1i9ktQfKZbG7rB4tfIU1KeQRkyE9vb/TaKp8nwBbc4SVQ4EKFOlRbE1S1FooaKZweW8w57d2u+sMMMVJbO28/Ap8tk9xDSOl4shPaT0iM0U9/heF8FmCZB1OKXLKn6TAaNFnaMTvdTHl+Tjrf6Vzd/oPXJ7GuaB6eLxXYjXvZHuKiLkSZriOzhL7PbijNILbSgZt7+Fa0vcnXP8zgD4dmupx/CoIHLN9NP4o9cGXuBcaJ/iFryJ4i5LKGFNEUHtXkavDrcgcA="

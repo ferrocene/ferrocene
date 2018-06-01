@@ -2,6 +2,16 @@ language: rust
 sudo: false
 dist: trusty
 
+addons:
+  sources:
+    # Provides clang-3.9
+    - llvm-toolchain-trusty-3.9
+  apt:
+    packages:
+      # Required for `bindgen`, which is required by `findshlibs`, which is
+      # required by the `gimli` feature.
+      - clang-3.9
+
 matrix:
   fast_finish: true
   include:
@@ -64,6 +74,35 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-gnu NO_ADD=1
     - env: TARGET=x86_64-unknown-linux-musl
 
+    # Cross compile Android targets from linux
+    - env: TARGET=arm-linux-androideabi
+    - env: TARGET=armv7-linux-androideabi
+    - env: TARGET=aarch64-linux-android
+    - env: TARGET=i686-linux-android
+    - env: TARGET=x86_64-linux-android
+
+    # Build iOS targets from OSX
+    - env: TARGET=aarch64-apple-ios SDK=iphoneos
+      os: osx
+      script: &ios-build
+        - rustup target add $TARGET
+        - export SDK_PATH=`xcrun --show-sdk-path --sdk $SDK`
+        - export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=$SDK_PATH"
+        - cargo test --no-run --target $TARGET
+    - env: TARGET=armv7-apple-ios SDK=iphoneos
+      os: osx
+      script: *ios-build
+    - env: TARGET=armv7s-apple-ios SDK=iphoneos
+      os: osx
+      script: *ios-build
+    - env: TARGET=i386-apple-ios SDK=iphonesimulator
+      os: osx
+      script: *ios-build
+    - env: TARGET=x86_64-apple-ios SDK=iphonesimulator
+      os: osx
+      script: *ios-build
+
+# docker cross-compilation targets
 script:
   - if [ "$NO_ADD" == "" ]; then rustup target add $TARGET; fi
   - cargo generate-lockfile

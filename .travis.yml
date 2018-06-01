@@ -1,10 +1,6 @@
 language: rust
 sudo: false
 dist: trusty
-cache:
-  - cargo
-  - directories:
-      - cached
 
 addons:
   sources:
@@ -86,26 +82,26 @@ matrix:
     - env: TARGET=x86_64-linux-android
 
     # Build iOS targets from OSX
-    - env: TARGET=aarch64-apple-ios PLATFORM=ios-aarch64
+    - env: TARGET=aarch64-apple-ios SDK=iPhoneOS
       os: osx
-      script: &dinghy-build
-        - cargo install cargo-dinghy --debug
+      script: &ios-build
         - rustup target add $TARGET
-        - cargo dinghy --platform $PLATFORM test --no-run
-    - env: TARGET=armv7-apple-ios PLATFORM=ios-armv7
+        - export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=/Applications/Xcode.app/Contents/Developer/Platforms/$SDK.platform/Developer/SDKs/$SDK.sdk"
+        - cargo test --no-run
+    - env: TARGET=armv7-apple-ios SDK=iPhoneOS
       os: osx
-      script: *dinghy-build
-    - env: TARGET=armv7s-apple-ios PLATFORM=ios-armv7s
+      script: *ios-build
+    - env: TARGET=armv7s-apple-ios SDK=iPhoneOS
       os: osx
-      script: *dinghy-build
-    - env: TARGET=i386-apple-ios PLATFORM=ios-i386
+      script: *ios-build
+    - env: TARGET=i386-apple-ios SDK=iPhoneSimulator
       os: osx
-      script: *dinghy-build
-    - env: TARGET=x86_64-apple-ios PLATFORM=ios-x86_64
+      script: *ios-build
+    - env: TARGET=x86_64-apple-ios SDK=iPhoneSimulator
       os: osx
-      script: *dinghy-build
+      script: *ios-build
 
-# non dinghy cross-compilation targets
+# docker cross-compilation targets
 script:
   - if [ "$NO_ADD" == "" ]; then rustup target add $TARGET; fi
   - cargo generate-lockfile

@@ -2,16 +2,6 @@ language: rust
 sudo: false
 dist: trusty
 
-addons:
-  sources:
-    # Provides clang-3.9
-    - llvm-toolchain-trusty-3.9
-  apt:
-    packages:
-      # Required for `bindgen`, which is required by `findshlibs`, which is
-      # required by the `gimli` feature.
-      - clang-3.9
-
 matrix:
   fast_finish: true
   include:

@@ -82,22 +82,23 @@ matrix:
     - env: TARGET=x86_64-linux-android
 
     # Build iOS targets from OSX
-    - env: TARGET=aarch64-apple-ios SDK=iPhoneOS
+    - env: TARGET=aarch64-apple-ios SDK=iphoneos
       os: osx
       script: &ios-build
         - rustup target add $TARGET
-        - export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=/Applications/Xcode.app/Contents/Developer/Platforms/$SDK.platform/Developer/SDKs/$SDK.sdk"
-        - cargo test --no-run
-    - env: TARGET=armv7-apple-ios SDK=iPhoneOS
+        - export SDK_PATH=`xcrun --show-sdk-path --sdk $SDK`
+        - export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=$SDK_PATH"
+        - cargo test --no-run --target $TARGET
+    - env: TARGET=armv7-apple-ios SDK=iphoneos
       os: osx
       script: *ios-build
-    - env: TARGET=armv7s-apple-ios SDK=iPhoneOS
+    - env: TARGET=armv7s-apple-ios SDK=iphoneos
       os: osx
       script: *ios-build
-    - env: TARGET=i386-apple-ios SDK=iPhoneSimulator
+    - env: TARGET=i386-apple-ios SDK=iphonesimulator
       os: osx
       script: *ios-build
-    - env: TARGET=x86_64-apple-ios SDK=iPhoneSimulator
+    - env: TARGET=x86_64-apple-ios SDK=iphonesimulator
       os: osx
       script: *ios-build
 

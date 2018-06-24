@@ -119,7 +119,7 @@ dlsym! {
         fn CSSourceInfoGetLineNumber(info: CSTypeRef) -> c_int;
         fn CSSourceInfoGetPath(info: CSTypeRef) -> *const c_char;
         fn CSSourceInfoGetSymbol(info: CSTypeRef) -> CSTypeRef;
-        fn CSSymbolGetName(sym: CSTypeRef) -> *const c_char;
+        fn CSSymbolGetMangledName(sym: CSTypeRef) -> *const c_char;
         fn CSSymbolGetSymbolOwner(sym: CSTypeRef) -> CSTypeRef;
         fn CSSymbolOwnerGetBaseAddress(symowner: CSTypeRef) -> *mut c_void;
     }
@@ -165,7 +165,7 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
                     } else {
                         0
                     },
-                    name: get(&CSSymbolGetName)(sym),
+                    name: get(&CSSymbolGetMangledName)(sym),
                     addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
                 },
             });

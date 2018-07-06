@@ -102,6 +102,10 @@ notifications:
   email:
     on_success: never
 
+branches:
+  only:
+  - master
+
 env:
   global:
     # serde-codegen has historically needed a large stack to expand

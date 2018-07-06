@@ -18,3 +18,7 @@ build: false
 
 test_script:
   - cargo test --target %TARGET%
+
+branches:
+  only:
+    - master

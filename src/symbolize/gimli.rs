@@ -15,12 +15,12 @@ use SymbolName;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-type Dwarf<'map> = addr2line::Context<gimli::EndianBuf<'map, gimli::RunTimeEndian>>;
+type Dwarf = addr2line::Context<gimli::EndianRcSlice<gimli::RunTimeEndian>>;
 type Symbols<'map> = object::SymbolMap<'map>;
 
 struct Mapping {
+    dwarf: Dwarf,
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
-    dwarf: Dwarf<'static>,
     symbols: Symbols<'static>,
     _map: Mmap,
 }
@@ -35,7 +35,7 @@ impl Mapping {
             let dwarf = addr2line::Context::new(&object).ok()?;
             let symbols = object.symbol_map();
             // Convert to 'static lifetimes.
-            unsafe { (mem::transmute(dwarf), mem::transmute(symbols)) }
+            (dwarf, unsafe { mem::transmute(symbols) })
         };
         Some(Mapping {
             dwarf,
@@ -182,14 +182,14 @@ pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
 pub struct Symbol {
     addr: usize,
-    file: Option<PathBuf>,
+    file: Option<String>,
     line: Option<u64>,
     name: Option<String>,
 }
 
 impl Symbol {
     fn new(addr: usize,
-           file: Option<PathBuf>,
+           file: Option<String>,
            line: Option<u64>,
            name: Option<String>)
            -> Symbol {

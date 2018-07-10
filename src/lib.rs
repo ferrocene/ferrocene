@@ -67,7 +67,6 @@
 
 #![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
-#![deny(warnings)]
 
 #[cfg(unix)]
 extern crate libc;

@@ -14,6 +14,7 @@ use {trace, resolve, SymbolName};
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
     frames: Vec<BacktraceFrame>,
+    ext_index: Option<usize>,
 }
 
 /// Captured version of a frame in a backtrace.
@@ -60,9 +61,7 @@ impl Backtrace {
     /// let current_backtrace = Backtrace::new();
     /// ```
     pub fn new() -> Backtrace {
-        let mut bt = Backtrace::new_unresolved();
-        bt.resolve();
-        return bt
+        Self::create(Self::new as usize).resolved()
     }
 
     /// Similar to `new` except that this does not resolve any symbols, this
@@ -84,17 +83,38 @@ impl Backtrace {
     /// println!("{:?}", current_backtrace); // symbol names now present
     /// ```
     pub fn new_unresolved() -> Backtrace {
+        Self::create(Self::new_unresolved as usize)
+    }
+
+    fn create(ip: usize) -> Backtrace {
+        let ip_range: (usize, usize) = (ip, ip + 128);
+
         let mut frames = Vec::new();
+        let mut ext_index = None;
         trace(|frame| {
+            let ip = frame.ip() as usize;
             frames.push(BacktraceFrame {
-                ip: frame.ip() as usize,
+                ip,
                 symbol_address: frame.symbol_address() as usize,
                 symbols: None,
             });
+
+            if cfg!(not(all(target_os = "windows", target_arch = "x86"))) && ip >= ip_range.0 && ip <= ip_range.1 {
+                ext_index = Some(frames.len());
+            }
             true
         });
 
-        Backtrace { frames: frames }
+        Backtrace {
+            frames,
+            ext_index,
+        }
+    }
+
+    #[inline(always)]
+    fn resolved(mut self) -> Backtrace {
+        self.resolve();
+        self
     }
 
     /// Returns the frames from when this backtrace was captured.
@@ -104,6 +124,41 @@ impl Backtrace {
     /// function started.
     pub fn frames(&self) -> &[BacktraceFrame] {
         &self.frames
+    }
+
+    /// Returns the frames from when this backtrace was captured, omitting frames from within this
+    /// crate itself, if possible (see `ext_index()`)
+    pub fn ext_frames(&self) -> &[BacktraceFrame] {
+        if let Some(i) = self.ext_index {
+            &self.frames[i..]
+        } else {
+            &self.frames
+        }
+    }
+
+    /// Returns the index of the first "external" frame (i.e. the call-site of one of the
+    /// public constructors `new` or `new_unresolved`), if known. Backtrace frames up to this index
+    /// are from within this crate itself, and usually do not present useful information when used
+    /// from other crates, and as such can be skipped from displaying.
+    ///
+    /// This index is used when backtrace is displayed in the default debug format `{:?}`.
+    /// Full backtrace can be still displayed using alternative debug format `{:#?}`.
+    ///
+    /// If this function returns `None`, either debug formats will display full backtrace.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use backtrace::Backtrace;
+    ///
+    /// let backtrace = Backtrace::new();
+    /// println!("{:?}", backtrace);  // prints backtrace skipping frames from within this crate
+    ///
+    /// println!("{:#?}", backtrace); // prints full backtrace
+    /// ```
+	/// *Note*: currently this always return `None` on Windows x86 (32-bit) targets
+    pub fn ext_index(&self) -> Option<usize> {
+        self.ext_index
     }
 
     /// If this backtrace was created from `new_unresolved` then this function
@@ -130,7 +185,8 @@ impl Backtrace {
 impl From<Vec<BacktraceFrame>> for Backtrace {
     fn from(frames: Vec<BacktraceFrame>) -> Self {
         Backtrace {
-            frames: frames
+            frames,
+            ext_index: None,
         }
     }
 }
@@ -192,36 +248,42 @@ impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let hex_width = mem::size_of::<usize>() * 2 + 2;
 
-        try!(write!(fmt, "stack backtrace:"));
+        write!(fmt, "stack backtrace:")?;
 
-        for (idx, frame) in self.frames().iter().enumerate() {
+        let iter = if fmt.alternate() {
+            self.frames()
+        } else {
+            self.ext_frames()
+        }.iter();
+
+        for (idx, frame) in iter.enumerate() {
             let ip = frame.ip();
-            try!(write!(fmt, "\n{:4}: {:2$?}", idx, ip, hex_width));
+            write!(fmt, "\n{:4}: {:2$?}", idx, ip, hex_width)?;
 
             let symbols = match frame.symbols {
                 Some(ref s) => s,
                 None => {
-                    try!(write!(fmt, " - <unresolved>"));
+                    write!(fmt, " - <unresolved>")?;
                     continue
                 }
             };
             if symbols.len() == 0 {
-                try!(write!(fmt, " - <no info>"));
+                write!(fmt, " - <no info>")?;
             }
 
             for (idx, symbol) in symbols.iter().enumerate() {
                 if idx != 0 {
-                    try!(write!(fmt, "\n      {:1$}", "", hex_width));
+                    write!(fmt, "\n      {:1$}", "", hex_width)?;
                 }
 
                 if let Some(name) = symbol.name() {
-                    try!(write!(fmt, " - {}", name));
+                    write!(fmt, " - {}", name)?;
                 } else {
-                    try!(write!(fmt, " - <unknown>"));
+                    write!(fmt, " - <unknown>")?;
                 }
 
                 if let (Some(file), Some(line)) = (symbol.filename(), symbol.lineno()) {
-                    try!(write!(fmt, "\n      {:3$}at {}:{}", "", file.display(), line, hex_width));
+                    write!(fmt, "\n      {:3$}at {}:{}", "", file.display(), line, hex_width)?;
                 }
             }
         }

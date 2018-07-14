@@ -14,7 +14,7 @@ use {trace, resolve, SymbolName};
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
     frames: Vec<BacktraceFrame>,
-    ext_index: Option<usize>,
+    ext_index: usize,
 }
 
 /// Captured version of a frame in a backtrace.
@@ -107,7 +107,7 @@ impl Backtrace {
 
         Backtrace {
             frames,
-            ext_index,
+            ext_index: ext_index.unwrap_or(0),
         }
     }
 
@@ -129,22 +129,18 @@ impl Backtrace {
     /// Returns the frames from when this backtrace was captured, omitting frames from within this
     /// crate itself, if possible (see `ext_index()`)
     pub fn ext_frames(&self) -> &[BacktraceFrame] {
-        if let Some(i) = self.ext_index {
-            &self.frames[i..]
-        } else {
-            &self.frames
-        }
+        &self.frames[self.ext_index..]
     }
 
     /// Returns the index of the first "external" frame (i.e. the call-site of one of the
-    /// public constructors `new` or `new_unresolved`), if known. Backtrace frames up to this index
-    /// are from within this crate itself, and usually do not present useful information when used
-    /// from other crates, and as such can be skipped from displaying.
+    /// public constructors `new` or `new_unresolved`), if known, `0` otherwise. Backtrace frames
+    /// up to this index are from within this crate itself, and usually do not present useful
+    /// information when used from other crates, and as such can be skipped from displaying.
     ///
     /// This index is used when backtrace is displayed in the default debug format `{:?}`.
     /// Full backtrace can be still displayed using alternative debug format `{:#?}`.
     ///
-    /// If this function returns `None`, either debug formats will display full backtrace.
+    /// If this function returns `0`, either debug formats will display full backtrace.
     ///
     /// # Examples
     ///
@@ -156,8 +152,8 @@ impl Backtrace {
     ///
     /// println!("{:#?}", backtrace); // prints full backtrace
     /// ```
-	/// *Note*: currently this always return `None` on Windows x86 (32-bit) targets
-    pub fn ext_index(&self) -> Option<usize> {
+	/// *Note*: currently this always return `0` on Windows x86 (32-bit) targets
+    pub fn ext_index(&self) -> usize {
         self.ext_index
     }
 
@@ -186,7 +182,7 @@ impl From<Vec<BacktraceFrame>> for Backtrace {
     fn from(frames: Vec<BacktraceFrame>) -> Self {
         Backtrace {
             frames,
-            ext_index: None,
+            ext_index: 0,
         }
     }
 }

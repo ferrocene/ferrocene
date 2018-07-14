@@ -10,9 +10,9 @@ const FRAME_RANGE: usize = 128; // should be close enough not to give false posi
 // Until resolved those test are ignored and `Backtrace::ext_index()` always returns None.
 #[test]
 #[cfg_attr(not(all(target_os = "windows", target_arch = "x86")), ignore)]
-fn ext_index_must_be_disabled_on_win32() {
+fn ext_index_must_be_0_on_win32() {
     let b = Backtrace::new();
-    assert!(b.ext_index().is_none());
+    assert_eq!(b.ext_index(), 0);
 }
 
 #[test]
@@ -24,7 +24,7 @@ fn backtrace_new_unresolved_should_start_with_call_site_trace() {
 	println!("{:#?}", b);
 
     assert!(!b.frames().is_empty());
-    assert!(b.ext_index().is_some());
+    assert!(b.ext_index() > 0);
 
     let this_ip = backtrace_new_unresolved_should_start_with_call_site_trace as usize;
     let frame_ip = b.ext_frames().first().unwrap().ip() as usize;
@@ -40,7 +40,7 @@ fn backtrace_new_should_start_with_call_site_trace() {
     println!("{:?}", b);
 
     assert!(!b.frames().is_empty());
-    assert!(b.ext_index().is_some());
+    assert!(b.ext_index() > 0);
 
     let this_ip = backtrace_new_should_start_with_call_site_trace as usize;
     let frame_ip = b.ext_frames().first().unwrap().ip() as usize;

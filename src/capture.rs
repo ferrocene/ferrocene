@@ -13,8 +13,11 @@ use {trace, resolve, SymbolName};
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
+    // Frames here are listed from top-to-bottom of the stack
     frames: Vec<BacktraceFrame>,
-    ext_index: usize,
+    // The index we believe is the actual start of the backtrace, omitting
+    // frames like `Backtrace::new` and `backtrace::trace`.
+    actual_start_index: usize,
 }
 
 /// Captured version of a frame in a backtrace.
@@ -60,8 +63,11 @@ impl Backtrace {
     ///
     /// let current_backtrace = Backtrace::new();
     /// ```
+    #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new() -> Backtrace {
-        Self::create(Self::new as usize).resolved()
+        let mut bt = Self::create(Self::new as usize);
+        bt.resolve();
+        bt
     }
 
     /// Similar to `new` except that this does not resolve any symbols, this
@@ -82,15 +88,17 @@ impl Backtrace {
     /// current_backtrace.resolve();
     /// println!("{:?}", current_backtrace); // symbol names now present
     /// ```
+    #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new_unresolved() -> Backtrace {
         Self::create(Self::new_unresolved as usize)
     }
 
     fn create(ip: usize) -> Backtrace {
-        let ip_range: (usize, usize) = (ip, ip + 128);
+        let ip_lo = ip;
+        let ip_hi = ip + 128;
 
         let mut frames = Vec::new();
-        let mut ext_index = None;
+        let mut actual_start_index = None;
         trace(|frame| {
             let ip = frame.ip() as usize;
             frames.push(BacktraceFrame {
@@ -99,22 +107,20 @@ impl Backtrace {
                 symbols: None,
             });
 
-            if cfg!(not(all(target_os = "windows", target_arch = "x86"))) && ip >= ip_range.0 && ip <= ip_range.1 {
-                ext_index = Some(frames.len());
+            if cfg!(not(all(target_os = "windows", target_arch = "x86"))) &&
+                ip >= ip_lo &&
+                ip <= ip_hi &&
+                actual_start_index.is_none()
+            {
+                actual_start_index = Some(frames.len());
             }
             true
         });
 
         Backtrace {
             frames,
-            ext_index: ext_index.unwrap_or(0),
+            actual_start_index: actual_start_index.unwrap_or(0),
         }
-    }
-
-    #[inline(always)]
-    fn resolved(mut self) -> Backtrace {
-        self.resolve();
-        self
     }
 
     /// Returns the frames from when this backtrace was captured.
@@ -124,37 +130,6 @@ impl Backtrace {
     /// function started.
     pub fn frames(&self) -> &[BacktraceFrame] {
         &self.frames
-    }
-
-    /// Returns the frames from when this backtrace was captured, omitting frames from within this
-    /// crate itself, if possible (see `ext_index()`)
-    pub fn ext_frames(&self) -> &[BacktraceFrame] {
-        &self.frames[self.ext_index..]
-    }
-
-    /// Returns the index of the first "external" frame (i.e. the call-site of one of the
-    /// public constructors `new` or `new_unresolved`), if known, `0` otherwise. Backtrace frames
-    /// up to this index are from within this crate itself, and usually do not present useful
-    /// information when used from other crates, and as such can be skipped from displaying.
-    ///
-    /// This index is used when backtrace is displayed in the default debug format `{:?}`.
-    /// Full backtrace can be still displayed using alternative debug format `{:#?}`.
-    ///
-    /// If this function returns `0`, either debug formats will display full backtrace.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use backtrace::Backtrace;
-    ///
-    /// let backtrace = Backtrace::new();
-    /// println!("{:?}", backtrace);  // prints backtrace skipping frames from within this crate
-    ///
-    /// println!("{:#?}", backtrace); // prints full backtrace
-    /// ```
-	/// *Note*: currently this always return `0` on Windows x86 (32-bit) targets
-    pub fn ext_index(&self) -> usize {
-        self.ext_index
     }
 
     /// If this backtrace was created from `new_unresolved` then this function
@@ -182,7 +157,7 @@ impl From<Vec<BacktraceFrame>> for Backtrace {
     fn from(frames: Vec<BacktraceFrame>) -> Self {
         Backtrace {
             frames,
-            ext_index: 0,
+            actual_start_index: 0,
         }
     }
 }
@@ -247,10 +222,10 @@ impl fmt::Debug for Backtrace {
         write!(fmt, "stack backtrace:")?;
 
         let iter = if fmt.alternate() {
-            self.frames()
+            self.frames.iter()
         } else {
-            self.ext_frames()
-        }.iter();
+            self.frames[self.actual_start_index..].iter()
+        };
 
         for (idx, frame) in iter.enumerate() {
             let ip = frame.ip();

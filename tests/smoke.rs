@@ -64,6 +64,7 @@ fn smoke_test_frames() {
                     expected_file: &str,
                     expected_line: u32) {
         if offset > idx { return }
+        println!("frame: {}", idx);
         let (ip, sym) = syms[idx - offset];
         let ip = ip as usize;
         let sym = sym as usize;
@@ -72,8 +73,9 @@ fn smoke_test_frames() {
 
         // windows dbghelp is *quite* liberal (and wrong) in many of its reports
         // right now...
-        if !DBGHELP && cfg!(debug) {
-            // this assertion fails for release build.
+        //
+        // This assertion can also fail for release builds, so skip it there
+        if !DBGHELP && cfg!(debug_assertions) {
             assert!(sym - actual_fn_pointer < 1024);
         }
 
@@ -90,6 +92,7 @@ fn smoke_test_frames() {
             addr = sym.addr();
             line = sym.lineno();
             file = sym.filename().map(|v| v.to_path_buf());
+            println!("  sym: {:?}", name);
         });
 
         // dbghelp doesn't always resolve symbols right now
@@ -105,8 +108,13 @@ fn smoke_test_frames() {
            !(DBGHELP && !MSVC)
         {
             let name = name.expect("didn't find a name");
-            assert!(name.contains(expected_name),
-                    "didn't find `{}` in `{}`", expected_name, name);
+
+            // in release mode names get weird as functions can get merged
+            // together with `mergefunc`, so only assert this in debug mode
+            if cfg!(debug_assertions) {
+                assert!(name.contains(expected_name),
+                        "didn't find `{}` in `{}`", expected_name, name);
+            }
         }
 
         if can_resolve {

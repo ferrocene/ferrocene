@@ -129,7 +129,7 @@ impl Backtrace {
     /// and the last frame is likely something about how this thread or the main
     /// function started.
     pub fn frames(&self) -> &[BacktraceFrame] {
-        &self.frames
+        &self.frames[self.actual_start_index..]
     }
 
     /// If this backtrace was created from `new_unresolved` then this function

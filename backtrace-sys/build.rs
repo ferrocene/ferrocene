@@ -40,7 +40,8 @@ fn main() {
         build.flag("-fvisibility=hidden");
         build.file("src/libbacktrace/elf.c");
 
-        if target.contains("64") {
+        let pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
+        if pointer_width == "64" {
             build.define("BACKTRACE_ELF_SIZE", "64");
         } else {
             build.define("BACKTRACE_ELF_SIZE", "32");

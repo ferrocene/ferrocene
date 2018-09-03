@@ -128,7 +128,6 @@ impl Drop for Bomb {
 #[allow(dead_code)]
 mod lock {
     use std::cell::Cell;
-    use std::mem;
     use std::sync::{Once, Mutex, MutexGuard, ONCE_INIT};
 
     pub struct LockGuard(MutexGuard<'static, ()>);
@@ -153,7 +152,7 @@ mod lock {
         LOCK_HELD.with(|s| s.set(true));
         unsafe {
             INIT.call_once(|| {
-                LOCK = mem::transmute(Box::new(Mutex::new(())));
+                LOCK = Box::into_raw(Box::new(Mutex::new(())));
             });
             Some(LockGuard((*LOCK).lock().unwrap()))
         }

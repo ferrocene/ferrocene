@@ -1,6 +1,5 @@
-use std::fmt;
-
-use std::os::raw::c_void;
+use core::fmt;
+use types::c_void;
 
 /// Inspects the current call-stack, passing all active frames into the closure
 /// provided to calculate a stack trace.
@@ -37,9 +36,19 @@ use std::os::raw::c_void;
 /// }
 /// ```
 #[inline(never)]
+#[cfg(feature = "std")]
 pub fn trace<F: FnMut(&Frame) -> bool>(mut cb: F) {
+    let _guard = ::lock::lock();
+    unsafe { trace_imp(&mut cb) }
+}
+
+/// Without std this function now does not have synchronization guarentees.
+/// Please refer to std documentation for examples and explaination.
+#[inline(never)]
+pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)
 }
+
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`
 /// function of this crate.

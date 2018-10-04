@@ -11,6 +11,9 @@ documentation = "https://docs.rs/backtrace"
 description = """
 A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 """
+autoexamples = true
+autotests = true
+
 [dependencies]
 cfg-if = "0.1"
 rustc-demangle = "0.1.4"
@@ -47,7 +50,10 @@ backtrace-sys = { path = "backtrace-sys", version = "0.1.17", optional = true }
 # Note that not all features are available on all platforms, so even though a
 # feature is enabled some other feature may be used instead.
 [features]
-default = ["libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
+default = ["std", "libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
+
+# Include std support.
+std = []
 
 #=======================================
 # Methods of acquiring a backtrace
@@ -86,7 +92,7 @@ kernel32 = []
 #   the moment, this is only possible when targetting Linux, since macOS
 #   splits DWARF out into a separate object file. Enabling this feature
 #   means one less C dependency.
-libbacktrace = ["backtrace-sys"]
+libbacktrace = ["backtrace-sys", "std"]
 dladdr = []
 coresymbolication = []
 gimli-symbolize = ["addr2line", "findshlibs", "gimli", "memmap", "object" ]
@@ -97,3 +103,23 @@ gimli-symbolize = ["addr2line", "findshlibs", "gimli", "memmap", "object" ]
 # Various features used for enabling rustc-serialize or syntex codegen.
 serialize-rustc = ["rustc-serialize"]
 serialize-serde = ["serde", "serde_derive"]
+
+[[example]]
+name = "backtrace"
+required-features = ["std"]
+
+[[example]]
+name = "raw"
+required-features = ["std"]
+
+[[test]]
+name = "skip_inner_frames"
+required-features = ["std"]
+
+[[test]]
+name = "long_fn_name"
+required-features = ["std"]
+
+[[test]]
+name = "smoke"
+required-features = ["std"]

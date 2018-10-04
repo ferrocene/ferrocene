@@ -7,11 +7,13 @@ use std::cell::RefCell;
 use std::env;
 use std::fs::File;
 use std::mem;
-use std::os::raw::c_void;
+use libc::c_void;
 use std::path::{Path, PathBuf};
 use std::u32;
+use std::prelude::v1::*;
 
 use SymbolName;
+use types::BytesOrWideString;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -209,8 +211,8 @@ impl Symbol {
         Some(self.addr as *mut c_void)
     }
 
-    pub fn filename(&self) -> Option<&Path> {
-        self.file.as_ref().map(|f| f.as_ref())
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+        self.file.as_ref().map(|f| BytesOrWideString::Bytes(f.as_bytes()))
     }
 
     pub fn lineno(&self) -> Option<u32> {

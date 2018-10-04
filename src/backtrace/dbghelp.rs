@@ -11,6 +11,7 @@
 #![allow(bad_style)]
 
 use std::mem;
+use std::prelude::v1::*;
 use winapi::ctypes::*;
 use winapi::shared::minwindef::*;
 use winapi::um::processthreadsapi;
@@ -33,49 +34,43 @@ impl Frame {
 }
 
 #[inline(always)]
-pub fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
-    // According to windows documentation, all dbghelp functions are
-    // single-threaded.
-    let _g = ::lock::lock();
+pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
+    // Allocate necessary structures for doing the stack walk
+    let process = processthreadsapi::GetCurrentProcess();
+    let thread = processthreadsapi::GetCurrentThread();
 
-    unsafe {
-        // Allocate necessary structures for doing the stack walk
-        let process = processthreadsapi::GetCurrentProcess();
-        let thread = processthreadsapi::GetCurrentThread();
+    // The CONTEXT structure needs to be aligned on a 16-byte boundary for
+    // 64-bit Windows, but currently we don't have a way to express that in
+    // Rust. Allocations are generally aligned to 16-bytes, though, so we
+    // box this up.
+    let mut context = Box::new(mem::zeroed::<CONTEXT>());
+    winnt::RtlCaptureContext(&mut *context);
+    let mut frame = super::Frame {
+        inner: Frame { inner: mem::zeroed() },
+    };
+    let image = init_frame(&mut frame.inner.inner, &context);
 
-        // The CONTEXT structure needs to be aligned on a 16-byte boundary for
-        // 64-bit Windows, but currently we don't have a way to express that in
-        // Rust. Allocations are generally aligned to 16-bytes, though, so we
-        // box this up.
-        let mut context = Box::new(mem::zeroed::<CONTEXT>());
-        winnt::RtlCaptureContext(&mut *context);
-        let mut frame = super::Frame {
-            inner: Frame { inner: mem::zeroed() },
-        };
-        let image = init_frame(&mut frame.inner.inner, &context);
+    // Initialize this process's symbols
+    let _c = ::dbghelp_init();
 
-        // Initialize this process's symbols
-        let _c = ::dbghelp_init();
+    // And now that we're done with all the setup, do the stack walking!
+    while dbghelp::StackWalk64(image as DWORD,
+                               process,
+                               thread,
+                               &mut frame.inner.inner,
+                               &mut *context as *mut _ as *mut _,
+                               None,
+                               Some(dbghelp::SymFunctionTableAccess64),
+                               Some(dbghelp::SymGetModuleBase64),
+                               None) == TRUE {
+        if frame.inner.inner.AddrPC.Offset == frame.inner.inner.AddrReturn.Offset ||
+            frame.inner.inner.AddrPC.Offset == 0 ||
+                frame.inner.inner.AddrReturn.Offset == 0 {
+                    break
+                }
 
-        // And now that we're done with all the setup, do the stack walking!
-        while dbghelp::StackWalk64(image as DWORD,
-                                   process,
-                                   thread,
-                                   &mut frame.inner.inner,
-                                   &mut *context as *mut _ as *mut _,
-                                   None,
-                                   Some(dbghelp::SymFunctionTableAccess64),
-                                   Some(dbghelp::SymGetModuleBase64),
-                                   None) == TRUE {
-            if frame.inner.inner.AddrPC.Offset == frame.inner.inner.AddrReturn.Offset ||
-               frame.inner.inner.AddrPC.Offset == 0 ||
-               frame.inner.inner.AddrReturn.Offset == 0 {
-                break
-            }
-
-            if !cb(&frame) {
-                break
-            }
+        if !cb(&frame) {
+            break
         }
     }
 }

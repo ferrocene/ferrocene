@@ -8,8 +8,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::mem;
-use std::os::raw::{c_void, c_int};
+use core::mem;
+use types::{c_void, c_int};
 
 pub struct Frame {
     addr: *mut c_void,
@@ -25,15 +25,14 @@ extern {
 }
 
 #[inline(always)]
-pub fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
+pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
     const SIZE: usize = 100;
 
     let mut buf: [*mut c_void; SIZE];
     let cnt;
-    unsafe {
-        buf = mem::zeroed();
-        cnt = backtrace(buf.as_mut_ptr(), SIZE as c_int);
-    }
+
+    buf = mem::zeroed();
+    cnt = backtrace(buf.as_mut_ptr(), SIZE as c_int);
 
     for addr in buf[..cnt as usize].iter() {
         let cx = super::Frame {

@@ -46,6 +46,8 @@
 //! extern crate backtrace;
 //!
 //! fn main() {
+//! # // Unsafe here so test passes on no_std.
+//! # #[cfg(feature = "std")] {
 //!     backtrace::trace(|frame| {
 //!         let ip = frame.ip();
 //!         let symbol_address = frame.symbol_address();
@@ -63,10 +65,15 @@
 //!         true // keep going to the next frame
 //!     });
 //! }
+//! # }
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
+#![no_std]
+
+#[cfg(feature = "std")]
+#[macro_use] extern crate std;
 
 #[cfg(unix)]
 extern crate libc;
@@ -98,18 +105,27 @@ cfg_if! {
 }
 
 #[allow(dead_code)] // not used everywhere
-#[cfg(unix)]
+#[cfg(all(unix, feature = "std"))]
 #[macro_use]
 mod dylib;
 
-pub use backtrace::{trace, Frame};
+pub use backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 
-pub use symbolize::{resolve, Symbol, SymbolName};
+pub use symbolize::{resolve_unsynchronized, Symbol, SymbolName};
 mod symbolize;
 
-pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
-mod capture;
+pub use types::BytesOrWideString;
+mod types;
+
+cfg_if! {
+    if #[cfg(feature = "std")] {
+        pub use backtrace::trace;
+        pub use symbolize::resolve;
+        pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
+        mod capture;
+    }
+}
 
 #[allow(dead_code)]
 struct Bomb {
@@ -126,8 +142,10 @@ impl Drop for Bomb {
 }
 
 #[allow(dead_code)]
+#[cfg(feature = "std")]
 mod lock {
     use std::cell::Cell;
+    use std::boxed::Box;
     use std::sync::{Once, Mutex, MutexGuard, ONCE_INIT};
 
     pub struct LockGuard(MutexGuard<'static, ()>);

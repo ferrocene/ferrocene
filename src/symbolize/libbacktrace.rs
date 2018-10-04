@@ -12,15 +12,16 @@
 
 extern crate backtrace_sys as bt;
 
-use libc::uintptr_t;
-use std::ffi::{CStr, OsStr};
-use std::os::raw::{c_void, c_char, c_int};
+use std::ffi::CStr;
 use std::os::unix::prelude::*;
-use std::path::Path;
-use std::ptr;
+use std::{ptr, slice};
 use std::sync::{ONCE_INIT, Once};
 
+use libc::{self, c_char, c_int, c_void, uintptr_t};
+
 use SymbolName;
+
+use types::BytesOrWideString;
 
 pub enum Symbol {
     Syminfo {
@@ -56,13 +57,15 @@ impl Symbol {
         if pc == 0 {None} else {Some(pc as *mut _)}
     }
 
-    pub fn filename(&self) -> Option<&Path> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         match *self {
             Symbol::Syminfo { .. } => None,
             Symbol::Pcinfo { filename, .. } => {
-                Some(Path::new(OsStr::from_bytes(unsafe {
-                    CStr::from_ptr(filename).to_bytes()
-                })))
+                let ptr = filename as *const u8;
+                unsafe {
+                    let len = libc::strlen(filename);
+                    Some(BytesOrWideString::Bytes(slice::from_raw_parts(ptr, len)))
+                }
             }
         }
     }
@@ -158,9 +161,8 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     STATE
 }
 
-pub fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&super::Symbol)) {
-    let _guard = ::lock::lock();
-
+pub unsafe fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&super::Symbol))
+{
     // backtrace errors are currently swept under the rug
     unsafe {
         let state = init_state();

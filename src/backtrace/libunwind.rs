@@ -8,7 +8,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::os::raw::c_void;
+use types::c_void;
 
 pub struct Frame {
     ctx: *mut uw::_Unwind_Context,
@@ -48,10 +48,8 @@ impl Frame {
 }
 
 #[inline(always)]
-pub fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
-    unsafe {
-        uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
-    }
+pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
+    uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
 
     extern fn trace_fn(ctx: *mut uw::_Unwind_Context,
                        arg: *mut c_void) -> uw::_Unwind_Reason_Code {
@@ -84,7 +82,7 @@ mod uw {
     pub use self::_Unwind_Reason_Code::*;
 
     use libc;
-    use std::os::raw::{c_int, c_void};
+    use types::{c_int, c_void};
 
     #[repr(C)]
     pub enum _Unwind_Reason_Code {

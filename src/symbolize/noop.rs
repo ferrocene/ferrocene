@@ -1,9 +1,7 @@
-use std::path::Path;
-use std::os::raw::c_void;
-
+use types::{BytesOrWideString, c_void};
 use SymbolName;
 
-pub fn resolve(_addr: *mut c_void, _cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(_addr: *mut c_void, _cb: &mut FnMut(&super::Symbol)) {
 }
 
 pub struct Symbol;
@@ -17,7 +15,7 @@ impl Symbol {
         None
     }
 
-    pub fn filename(&self) -> Option<&Path> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         None
     }
 

@@ -10,11 +10,8 @@
 
 #![allow(bad_style)]
 
-use std::ffi::{CStr, OsStr};
+use std::ffi::CStr;
 use std::mem;
-use std::os::raw::{c_void, c_char, c_int};
-use std::os::unix::prelude::*;
-use std::path::Path;
 use std::ptr;
 use std::sync::atomic::ATOMIC_USIZE_INIT;
 
@@ -23,6 +20,7 @@ use libc::{self, Dl_info};
 use SymbolName;
 use dylib::Dylib;
 use dylib::Symbol as DylibSymbol;
+use types::{BytesOrWideString, c_void, c_char, c_int};
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
@@ -69,15 +67,15 @@ impl Symbol {
         }
     }
 
-    pub fn filename(&self) -> Option<&Path> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         match *self {
             Symbol::Core { path, .. } => {
                 if path.is_null() {
                     None
                 } else {
-                    Some(Path::new(OsStr::from_bytes(unsafe {
+                    Some(BytesOrWideString::Bytes(unsafe {
                         CStr::from_ptr(path).to_bytes()
-                    })))
+                    }))
                 }
             }
             Symbol::Dladdr(_) => None,
@@ -177,16 +175,14 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
     rv
 }
 
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
-    unsafe {
-        if try_resolve(addr, cb) {
-            return
-        }
-        let mut info: Dl_info = mem::zeroed();
-        if libc::dladdr(addr as *mut _, &mut info) != 0 {
-            cb(&super::Symbol {
-                inner: Symbol::Dladdr(info),
-            });
-        }
+pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+    if try_resolve(addr, cb) {
+        return
+    }
+    let mut info: Dl_info = mem::zeroed();
+    if libc::dladdr(addr as *mut _, &mut info) != 0 {
+        cb(&super::Symbol {
+            inner: Symbol::Dladdr(info),
+        });
     }
 }

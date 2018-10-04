@@ -8,11 +8,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::ffi::CStr;
-use std::mem;
-use std::os::raw::c_void;
-use std::path::Path;
+use core::{mem, slice};
 
+use types::{BytesOrWideString, c_void};
 use libc::{self, Dl_info};
 
 use SymbolName;
@@ -26,9 +24,11 @@ impl Symbol {
         if self.inner.dli_sname.is_null() {
             None
         } else {
-            Some(SymbolName::new(unsafe {
-                CStr::from_ptr(self.inner.dli_sname).to_bytes()
-            }))
+            let ptr = self.inner.dli_sname as *const u8;
+            unsafe {
+                let len = libc::strlen(self.inner.dli_sname);
+                Some(SymbolName::new(slice::from_raw_parts(ptr, len)))
+            }
         }
     }
 
@@ -36,7 +36,7 @@ impl Symbol {
         Some(self.inner.dli_saddr as *mut _)
     }
 
-    pub fn filename(&self) -> Option<&Path> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         None
     }
 
@@ -45,15 +45,13 @@ impl Symbol {
     }
 }
 
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
-    unsafe {
-        let mut info: super::Symbol = super::Symbol {
-            inner: Symbol {
-                inner: mem::zeroed(),
-            },
-        };
-        if libc::dladdr(addr as *mut _, &mut info.inner.inner) != 0 {
-            cb(&info)
-        }
+pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+    let mut info: super::Symbol = super::Symbol {
+        inner: Symbol {
+            inner: mem::zeroed(),
+        },
+    };
+    if libc::dladdr(addr as *mut _, &mut info.inner.inner) != 0 {
+        cb(&info)
     }
 }

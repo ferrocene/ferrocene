@@ -26,7 +26,7 @@ use types::BytesOrWideString;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
-    name: Option<*const [u8]>,
+    name: *const [u8],
     addr: *mut c_void,
     line: Option<u32>,
     filename: Option<*const [u16]>,
@@ -38,7 +38,7 @@ pub struct Symbol {
 
 impl Symbol {
     pub fn name(&self) -> Option<SymbolName> {
-        self.name.map(|x| SymbolName::new(unsafe { &*x }))
+        Some(SymbolName::new(unsafe { &*self.name }))
     }
 
     pub fn addr(&self) -> Option<*mut c_void> {
@@ -98,7 +98,6 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
     // Reencode the utf-16 symbol to utf-8 so we can use `SymbolName::new` like
     // all other platforms
-    let mut name_overflow = false;
     let mut name_len = 0;
     let mut name_buffer = [0; 256];
     {
@@ -112,16 +111,11 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
                 remaining = &mut tmp[len..];
                 name_len += len;
             } else {
-                name_overflow = true;
                 break
             }
         }
     }
-    let name = if name_overflow {
-        None
-    } else {
-        Some(&name_buffer[..name_len] as *const [u8])
-    };
+    let name = &name_buffer[..name_len] as *const [u8];
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;

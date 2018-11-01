@@ -12,6 +12,7 @@
 
 use core::mem;
 use core::slice;
+use core::char;
 
 cfg_if! {
     if #[cfg(feature = "std")] {
@@ -32,23 +33,15 @@ use types::BytesOrWideString;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
-    #[cfg(feature = "std")]
-    name_cache: OsString,
-    #[cfg(not(feature = "std"))]
-    name_cache: (),
-    name: (*const u16, usize),
+    name: Option<&'static [u8]>,
     addr: *mut c_void,
     line: Option<u32>,
-    #[cfg(feature = "std")]
-    filename_cache: Option<OsString>,
     filename: Option<(*mut u16, usize)>,
 }
 
 impl Symbol {
-
-    #[cfg(not(feature = "std"))]
     pub fn name(&self) -> Option<SymbolName> {
-        None
+        self.name.map(SymbolName::new)
     }
 
     pub fn addr(&self) -> Option<*mut c_void> {
@@ -70,18 +63,20 @@ impl Symbol {
 
 #[cfg(feature = "std")]
 impl Symbol {
-    pub fn name(&self) -> Option<SymbolName> {
-        self.name_cache.to_str().map(|s| SymbolName::new(s.as_bytes()))
-    }
-
     pub fn filename(&self) -> Option<&OsString> {
         self.filename_cache.as_ref()
     }
 }
 
+#[repr(C, align(8))]
+struct Aligned8<T>(T);
+
+static mut NAME_BUFFER: [u8; 256] = [0; 256];
+
 pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
-    let size = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
-    let mut data = vec![0u8; size];
+    const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
+    let mut data = Aligned8([0u8; SIZE]);
+    let data = &mut data.0;
     let info = &mut *(data.as_mut_ptr() as *mut SYMBOL_INFOW);
     info.MaxNameLen = MAX_SYM_NAME as ULONG;
     // the struct size in C.  the value is different to
@@ -104,16 +99,31 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     // give a buffer of (MaxNameLen - 1) characters and set NameLen to
     // the real value.
     let name_len = ::core::cmp::min(info.NameLen as usize,
-                                   info.MaxNameLen as usize - 1);
-
+                                    info.MaxNameLen as usize - 1);
     let name_ptr = info.Name.as_ptr() as *const u16;
+    let name = slice::from_raw_parts(name_ptr, name_len);
 
-    let name = (name_ptr, name_len);
-    let name_cache;
-
-    #[cfg(feature = "std")] {
-        name_cache = OsString::from_wide(slice::from_raw_parts(name_ptr, name_len));
+    // Reencode the utf-16 symbol to utf-8 so we can use `SymbolName::new` like
+    // all other platforms
+    let mut name_overflow = false;
+    let mut name_len = 0;
+    {
+        let mut remaining = &mut NAME_BUFFER[..];
+        for c in char::decode_utf16(name.iter().cloned()) {
+            let c = c.unwrap_or(char::REPLACEMENT_CHARACTER);
+            let len = c.len_utf8();
+            if len < remaining.len() {
+                c.encode_utf8(remaining);
+                let tmp = remaining;
+                remaining = &mut tmp[len..];
+                name_len += len;
+            } else {
+                name_overflow = true;
+                break
+            }
+        }
     }
+    let name = if name_overflow { None } else { Some(&NAME_BUFFER[..name_len]) };
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
@@ -124,7 +134,6 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
                                              &mut line);
 
     let mut filename = None;
-    let mut filename_cache = None;
     let mut lineno = None;
     if ret == TRUE {
         lineno = Some(line.LineNumber as u32);
@@ -138,22 +147,15 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
         let len = len as usize;
 
         filename = Some((base, len));
-
-        #[cfg(feature = "std")] {
-            let wide_slice = slice::from_raw_parts(base, len);
-            filename_cache = Some(OsString::from_wide(wide_slice));
-        }
     }
 
 
     cb(&super::Symbol {
         inner: Symbol {
             name,
-            name_cache,
             addr: info.Address as *mut _,
             line: lineno,
             filename,
-            filename_cache,
         },
     })
 }

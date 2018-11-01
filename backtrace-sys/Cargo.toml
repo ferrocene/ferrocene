@@ -12,7 +12,7 @@ Bindings to the libbacktrace gcc library
 """
 
 [dependencies]
-libc = "0.2"
+libc = { version = "0.2", default-features = false }
 
 [build-dependencies]
 cc = "1.0"

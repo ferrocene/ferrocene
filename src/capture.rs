@@ -1,9 +1,10 @@
+use std::prelude::v1::*;
 use std::fmt;
 use std::mem;
-use std::os::raw::c_void;
 use std::path::{Path, PathBuf};
 
 use {trace, resolve, SymbolName};
+use types::c_void;
 
 /// Representation of an owned and self-contained backtrace.
 ///
@@ -144,7 +145,7 @@ impl Backtrace {
                 symbols.push(BacktraceSymbol {
                     name: symbol.name().map(|m| m.as_bytes().to_vec()),
                     addr: symbol.addr().map(|a| a as usize),
-                    filename: symbol.filename().map(|m| m.to_path_buf()),
+                    filename: symbol.filename().map(|m| m.to_owned()),
                     lineno: symbol.lineno(),
                 });
             });

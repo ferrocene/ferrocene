@@ -1,6 +1,5 @@
-use std::fmt;
-
-use std::os::raw::c_void;
+use core::fmt;
+use types::c_void;
 
 /// Inspects the current call-stack, passing all active frames into the closure
 /// provided to calculate a stack trace.
@@ -23,6 +22,11 @@ use std::os::raw::c_void;
 /// example, capture a backtrace to be inspected later, then the `Backtrace`
 /// type may be more appropriate.
 ///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
+///
 /// # Example
 ///
 /// ```
@@ -36,10 +40,23 @@ use std::os::raw::c_void;
 ///     });
 /// }
 /// ```
+#[inline(always)]
+#[cfg(feature = "std")]
+pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
+    let _guard = ::lock::lock();
+    unsafe { trace_unsynchronized(cb) }
+}
+
+/// Same as `trace`, only unsafe as it's unsynchronized.
+///
+/// This function does not have synchronization guarentees but is available
+/// when the `std` feature of this crate isn't compiled in. See the `trace`
+/// function for more documentation and examples.
 #[inline(never)]
-pub fn trace<F: FnMut(&Frame) -> bool>(mut cb: F) {
+pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)
 }
+
 
 /// A trait representing one frame of a backtrace, yielded to the `trace`
 /// function of this crate.

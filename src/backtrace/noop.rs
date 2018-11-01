@@ -1,4 +1,4 @@
-use std::os::raw::c_void;
+use types::c_void;
 
 #[inline(always)]
 pub fn trace(_cb: &mut FnMut(&super::Frame) -> bool) {}

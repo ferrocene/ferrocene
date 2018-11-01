@@ -18,6 +18,8 @@ build: false
 
 test_script:
   - cargo test --target %TARGET%
+  - cargo build --target %TARGET% --no-default-features
+  - cargo build --target %TARGET% --no-default-features --features dbghelp
 
 branches:
   only:

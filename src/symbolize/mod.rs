@@ -1,9 +1,13 @@
-use std::fmt;
-#[cfg(not(feature = "cpp_demangle"))]
-use std::marker::PhantomData;
-use std::os::raw::c_void;
-use std::path::Path;
-use std::str;
+use core::{fmt, str};
+
+cfg_if! {
+    if #[cfg(feature = "std")] {
+        use std::path::Path;
+        use std::prelude::v1::*;
+    }
+}
+
+use types::{BytesOrWideString, c_void};
 use rustc_demangle::{try_demangle, Demangle};
 
 /// Resolve an address to a symbol, passing the symbol to the specified
@@ -18,6 +22,11 @@ use rustc_demangle::{try_demangle, Demangle};
 ///
 /// Symbols yielded represent the execution at the specified `addr`, returning
 /// file/line pairs for that address (if available).
+///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
 ///
 /// # Example
 ///
@@ -36,9 +45,23 @@ use rustc_demangle::{try_demangle, Demangle};
 ///     });
 /// }
 /// ```
-pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, mut cb: F) {
-    resolve_imp(addr, &mut cb)
+#[cfg(feature = "std")]
+pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
+    let _guard = ::lock::lock();
+    unsafe { resolve_unsynchronized(addr, cb) }
 }
+
+/// Same as `resolve`, only unsafe as it's unsynchronized.
+///
+/// This function does not have synchronization guarentees but is available when
+/// the `std` feature of this crate isn't compiled in. See the `resolve`
+/// function for more documentation and examples.
+pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
+    where F: FnMut(&Symbol)
+{
+    resolve_imp(addr as *mut _, &mut cb)
+}
+
 
 /// A trait representing the resolution of a symbol in a file.
 ///
@@ -69,7 +92,22 @@ impl Symbol {
 
     /// Returns the starting address of this function.
     pub fn addr(&self) -> Option<*mut c_void> {
-        self.inner.addr()
+        self.inner.addr().map(|p| p as *mut _)
+    }
+
+    /// Returns the raw filename as a slice. This is mainly useful for `no_std`
+    /// environments.
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+        self.inner.filename_raw()
+    }
+
+
+    /// Returns the line number for where this symbol is currently executing.
+    ///
+    /// This return value is typically `Some` if `filename` returns `Some`, and
+    /// is consequently subject to similar caveats.
+    pub fn lineno(&self) -> Option<u32> {
+        self.inner.lineno()
     }
 
     /// Returns the file name where this function was defined.
@@ -78,16 +116,27 @@ impl Symbol {
     /// unix platforms other than OSX) and when a binary is compiled with
     /// debuginfo. If neither of these conditions is met then this will likely
     /// return `None`.
-    pub fn filename(&self) -> Option<&Path> {
-        self.inner.filename()
-    }
-
-    /// Returns the line number for where this symbol is currently executing.
     ///
-    /// This return value is typically `Some` if `filename` returns `Some`, and
-    /// is consequently subject to similar caveats.
-    pub fn lineno(&self) -> Option<u32> {
-        self.inner.lineno()
+    /// This function requires the `std` feature to be enabled for this crate.
+    #[cfg(feature = "std")]
+    pub fn filename(&self) -> Option<&Path> {
+        #[cfg(not(windows))]
+        {
+            use std::ffi::OsStr;
+            use std::os::unix::ffi::OsStrExt;
+
+            match self.filename_raw() {
+                Some(BytesOrWideString::Bytes(slice)) => {
+                    Some(Path::new(OsStr::from_bytes(slice)))
+                }
+                None => None,
+                _ => unreachable!(),
+            }
+        }
+        #[cfg(windows)]
+        {
+            self.inner.filename().map(Path::new)
+        }
     }
 }
 
@@ -100,16 +149,19 @@ impl fmt::Debug for Symbol {
         if let Some(addr) = self.addr() {
             d.field("addr", &addr);
         }
-        if let Some(filename) = self.filename() {
-            d.field("filename", &filename);
+
+        #[cfg(feature = "std")] {
+            if let Some(filename) = self.filename() {
+                d.field("filename", &filename);
+            }
         }
+
         if let Some(lineno) = self.lineno() {
             d.field("lineno", &lineno);
         }
         d.finish()
     }
 }
-
 
 cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
@@ -127,6 +179,8 @@ cfg_if! {
             }
         }
     } else {
+        use core::marker::PhantomData;
+
         // Make sure to keep this zero-sized, so that the `cpp_demangle` feature
         // has no cost when disabled.
         struct OptionCppSymbol<'a>(PhantomData<&'a ()>);
@@ -188,6 +242,30 @@ impl<'a> SymbolName<'a> {
     }
 }
 
+fn format_symbol_name(fmt: fn(&str, &mut fmt::Formatter) -> fmt::Result,
+                      mut bytes: &[u8],
+                      f: &mut fmt::Formatter)
+    -> fmt::Result
+{
+    while bytes.len() > 0 {
+        match str::from_utf8(bytes) {
+            Ok(name) => {
+                fmt(name, f)?;
+                break
+            }
+            Err(err) => {
+                fmt("\u{FFFD}", f)?;
+
+                match err.error_len() {
+                    Some(len) => bytes = &bytes[err.valid_up_to() + len..],
+                    None => break,
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
         impl<'a> fmt::Display for SymbolName<'a> {
@@ -197,7 +275,7 @@ cfg_if! {
                 } else if let Some(ref cpp) = self.cpp_demangled.0 {
                     cpp.fmt(f)
                 } else {
-                    String::from_utf8_lossy(self.bytes).fmt(f)
+                    format_symbol_name(fmt::Display::fmt, self.bytes, f)
                 }
             }
         }
@@ -207,7 +285,7 @@ cfg_if! {
                 if let Some(ref s) = self.demangled {
                     s.fmt(f)
                 } else {
-                    String::from_utf8_lossy(self.bytes).fmt(f)
+                    format_symbol_name(fmt::Display::fmt, self.bytes, f)
                 }
             }
         }
@@ -215,7 +293,7 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(feature = "cpp_demangle")] {
+    if #[cfg(all(feature = "std", feature = "cpp_demangle"))] {
         impl<'a> fmt::Debug for SymbolName<'a> {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 use std::fmt::Write;
@@ -234,7 +312,7 @@ cfg_if! {
                     }
                 }
 
-                String::from_utf8_lossy(self.bytes).fmt(f)
+                format_symbol_name(fmt::Debug::fmt, self.bytes, f)
             }
         }
     } else {
@@ -243,7 +321,7 @@ cfg_if! {
                 if let Some(ref s) = self.demangled {
                     s.fmt(f)
                 } else {
-                    String::from_utf8_lossy(self.bytes).fmt(f)
+                    format_symbol_name(fmt::Debug::fmt, self.bytes, f)
                 }
             }
         }
@@ -255,7 +333,8 @@ cfg_if! {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
-    } else if #[cfg(all(feature = "gimli-symbolize",
+    } else if #[cfg(all(feature = "std",
+                        feature = "gimli-symbolize",
                         unix,
                         target_os = "linux"))] {
         mod gimli;

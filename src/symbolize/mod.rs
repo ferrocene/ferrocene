@@ -242,35 +242,28 @@ impl<'a> SymbolName<'a> {
     }
 }
 
-// With std enabled attempts to lossy convert bytes, on core uses
-// strict checking
-#[cfg(feature = "std")]
 fn format_symbol_name(fmt: fn(&str, &mut fmt::Formatter) -> fmt::Result,
-                      bytes: &[u8],
+                      mut bytes: &[u8],
                       f: &mut fmt::Formatter)
     -> fmt::Result
 {
-    fmt(&*String::from_utf8_lossy(bytes), f)
-}
+    while bytes.len() > 0 {
+        match str::from_utf8(bytes) {
+            Ok(name) => {
+                fmt(name, f)?;
+                break
+            }
+            Err(err) => {
+                fmt("\u{FFFD}", f)?;
 
-#[cfg(not(feature = "std"))]
-fn format_symbol_name(fmt: fn(&str, &mut fmt::Formatter) -> fmt::Result,
-                      bytes: &[u8],
-                      f: &mut fmt::Formatter)
-    -> fmt::Result
-{
-    match str::from_utf8(bytes) {
-        Ok(name) => fmt(name, f),
-        Err(err) => {
-            fmt("\u{FFFD}", f)?;
-
-            if let Some(len) = err.error_len() {
-                format_symbol_name(fmt, &bytes[err.valid_up_to() + len..], f)
-            } else {
-                Ok(())
+                match err.error_len() {
+                    Some(len) => bytes = &bytes[err.valid_up_to() + len..],
+                    None => break,
+                }
             }
         }
     }
+    Ok(())
 }
 
 cfg_if! {

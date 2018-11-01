@@ -13,7 +13,6 @@
 extern crate backtrace_sys as bt;
 
 use std::ffi::CStr;
-use std::os::unix::prelude::*;
 use std::{ptr, slice};
 use std::sync::{ONCE_INIT, Once};
 
@@ -164,19 +163,17 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
 pub unsafe fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&super::Symbol))
 {
     // backtrace errors are currently swept under the rug
-    unsafe {
-        let state = init_state();
-        if state.is_null() {
-            return
-        }
+    let state = init_state();
+    if state.is_null() {
+        return
+    }
 
-        let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
-                                       pcinfo_cb, error_cb,
-                                       &mut cb as *mut _ as *mut _);
-        if ret != 0 {
-            bt::backtrace_syminfo(state, symaddr as uintptr_t,
-                                  syminfo_cb, error_cb,
-                                  &mut cb as *mut _ as *mut _);
-        }
+    let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
+                                   pcinfo_cb, error_cb,
+                                   &mut cb as *mut _ as *mut _);
+    if ret != 0 {
+        bt::backtrace_syminfo(state, symaddr as uintptr_t,
+                              syminfo_cb, error_cb,
+                              &mut cb as *mut _ as *mut _);
     }
 }

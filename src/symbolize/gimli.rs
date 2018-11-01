@@ -8,7 +8,7 @@ use std::env;
 use std::fs::File;
 use std::mem;
 use libc::c_void;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::u32;
 use std::prelude::v1::*;
 

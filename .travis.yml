@@ -27,11 +27,11 @@ matrix:
         - cargo test --no-default-features --features 'unix-backtrace'
         - cargo test --no-default-features --features 'unix-backtrace dladdr'
         - cargo test --no-default-features --features 'unix-backtrace libbacktrace'
-        - cargo test --no-default-features --features 'serialize-serde'
-        - cargo test --no-default-features --features 'serialize-rustc'
-        - cargo test --no-default-features --features 'serialize-rustc serialize-serde'
-        - cargo test --no-default-features --features 'cpp_demangle'
-        - cargo test --no-default-features --features 'gimli-symbolize'
+        - cargo test --no-default-features --features 'serialize-serde std'
+        - cargo test --no-default-features --features 'serialize-rustc std'
+        - cargo test --no-default-features --features 'serialize-rustc serialize-serde std'
+        - cargo test --no-default-features --features 'cpp_demangle std'
+        - cargo test --no-default-features --features 'gimli-symbolize std'
         - cd ./cpp_smoke_test && cargo test && cd ..
         - cargo clean && cargo build
 

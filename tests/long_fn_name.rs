@@ -48,7 +48,7 @@ fn test_long_fn_name() {
                 "::_234567890_234567890_234567890_234567890_234567890")
             {
                 found_long_name_frame = true;
-                assert_eq!(function_name.len(), dbghelp::MAX_SYM_NAME - 1);
+                assert!(function_name.len() > 200);
             }
         }
     }

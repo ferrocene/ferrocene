@@ -77,7 +77,8 @@
 
 #[cfg(unix)]
 extern crate libc;
-#[cfg(all(windows, feature = "winapi"))] extern crate winapi;
+#[cfg(windows)]
+extern crate winapi;
 
 #[cfg(feature = "serde_derive")]
 #[cfg_attr(feature = "serde_derive", macro_use)]

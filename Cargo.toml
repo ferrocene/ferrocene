@@ -36,7 +36,7 @@ object = { version = "0.9.0", optional = true }
 libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.3", optional = true, features = ["std", "dbghelp", "processthreadsapi", "winnt", "minwindef"] }
+winapi = { version = "0.3.3", features = ["dbghelp", "processthreadsapi", "winnt", "minwindef"] }
 
 [target.'cfg(all(unix, not(target_os = "fuchsia"), not(target_os = "emscripten"), not(target_os = "macos"), not(target_os = "ios")))'.dependencies]
 backtrace-sys = { path = "backtrace-sys", version = "0.1.17", optional = true }
@@ -70,7 +70,7 @@ std = []
 #   function to acquire a backtrace
 libunwind = []
 unix-backtrace = []
-dbghelp = ["winapi"]
+dbghelp = []
 kernel32 = []
 
 #=======================================

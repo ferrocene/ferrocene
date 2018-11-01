@@ -18,6 +18,7 @@ build: false
 
 test_script:
   - cargo test --target %TARGET%
+  - cargo build --target %TARGET% --no-default-features
 
 branches:
   only:

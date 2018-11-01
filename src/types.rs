@@ -7,7 +7,7 @@ cfg_if! {
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
-    } else if #[cfg(all(windows, feature = "winapi"))] {
+    } else if #[cfg(windows)] {
         pub use winapi::ctypes::*;
     } else {
         pub use libc::*;

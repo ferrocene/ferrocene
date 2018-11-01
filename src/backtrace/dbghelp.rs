@@ -10,8 +10,9 @@
 
 #![allow(bad_style)]
 
-use std::mem;
-use std::prelude::v1::*;
+use core::mem;
+use core::prelude::v1::*;
+
 use winapi::ctypes::*;
 use winapi::shared::minwindef::*;
 use winapi::um::processthreadsapi;

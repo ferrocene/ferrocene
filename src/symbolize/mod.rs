@@ -109,36 +109,35 @@ impl Symbol {
     pub fn lineno(&self) -> Option<u32> {
         self.inner.lineno()
     }
-}
 
-#[cfg(feature = "std")]
-impl Symbol {
     /// Returns the file name where this function was defined.
     ///
     /// This is currently only available when libbacktrace is being used (e.g.
     /// unix platforms other than OSX) and when a binary is compiled with
     /// debuginfo. If neither of these conditions is met then this will likely
     /// return `None`.
-    #[cfg(not(windows))]
+    ///
+    /// This function requires the `std` feature to be enabled for this crate.
+    #[cfg(feature = "std")]
     pub fn filename(&self) -> Option<&Path> {
-        use std::ffi::OsStr;
-        use std::os::unix::ffi::OsStrExt;
+        #[cfg(not(windows))]
+        {
+            use std::ffi::OsStr;
+            use std::os::unix::ffi::OsStrExt;
 
-        match self.filename_raw() {
-            Some(BytesOrWideString::Bytes(slice)) => {
-                Some(Path::new(OsStr::from_bytes(slice)))
+            match self.filename_raw() {
+                Some(BytesOrWideString::Bytes(slice)) => {
+                    Some(Path::new(OsStr::from_bytes(slice)))
+                }
+                None => None,
+                _ => unreachable!(),
             }
-            None => None,
-            _ => unreachable!(),
+        }
+        #[cfg(windows)]
+        {
+            self.inner.filename().map(Path::new)
         }
     }
-
-    /// Returns the file name where this function was defined.
-    #[cfg(windows)]
-    pub fn filename(&self) -> Option<&Path> {
-        self.inner.filename().map(Path::new)
-    }
-
 }
 
 impl fmt::Debug for Symbol {

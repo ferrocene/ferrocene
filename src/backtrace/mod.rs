@@ -22,6 +22,11 @@ use types::c_void;
 /// example, capture a backtrace to be inspected later, then the `Backtrace`
 /// type may be more appropriate.
 ///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
+///
 /// # Example
 ///
 /// ```
@@ -35,15 +40,18 @@ use types::c_void;
 ///     });
 /// }
 /// ```
-#[inline(never)]
+#[inline(always)]
 #[cfg(feature = "std")]
-pub fn trace<F: FnMut(&Frame) -> bool>(mut cb: F) {
+pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
     let _guard = ::lock::lock();
-    unsafe { trace_imp(&mut cb) }
+    unsafe { trace_unsynchronized(cb) }
 }
 
-/// Without std this function now does not have synchronization guarentees.
-/// Please refer to std documentation for examples and explaination.
+/// Same as `trace`, only unsafe as it's unsynchronized.
+///
+/// This function does not have synchronization guarentees but is available
+/// when the `std` feature of this crate isn't compiled in. See the `trace`
+/// function for more documentation and examples.
 #[inline(never)]
 pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)

@@ -23,6 +23,11 @@ use rustc_demangle::{try_demangle, Demangle};
 /// Symbols yielded represent the execution at the specified `addr`, returning
 /// file/line pairs for that address (if available).
 ///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
+///
 /// # Example
 ///
 /// ```
@@ -41,13 +46,16 @@ use rustc_demangle::{try_demangle, Demangle};
 /// }
 /// ```
 #[cfg(feature = "std")]
-pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, mut cb: F) {
+pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
     let _guard = ::lock::lock();
-    unsafe { resolve_imp(addr as *mut _, &mut cb) }
+    unsafe { resolve_unsynchronized(addr, cb) }
 }
 
-/// Without std this function now does not have synchronization guarentees.
-/// Please refer to std documentation for examples and explaination.
+/// Same as `resolve`, only unsafe as it's unsynchronized.
+///
+/// This function does not have synchronization guarentees but is available when
+/// the `std` feature of this crate isn't compiled in. See the `resolve`
+/// function for more documentation and examples.
 pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
     where F: FnMut(&Symbol)
 {

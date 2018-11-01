@@ -13,12 +13,13 @@
 use core::mem;
 use core::prelude::v1::*;
 
-use winapi::ctypes::*;
 use winapi::shared::minwindef::*;
 use winapi::um::processthreadsapi;
 use winapi::um::winnt::{self, CONTEXT};
 use winapi::um::dbghelp;
 use winapi::um::dbghelp::*;
+
+use types::c_void;
 
 pub struct Frame {
     inner: STACKFRAME64,

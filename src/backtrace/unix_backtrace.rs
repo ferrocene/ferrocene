@@ -9,7 +9,9 @@
 // except according to those terms.
 
 use core::mem;
-use types::{c_void, c_int};
+use libc::c_int;
+
+use types::c_void;
 
 pub struct Frame {
     addr: *mut c_void,

@@ -2,15 +2,13 @@
 
 cfg_if! {
     if #[cfg(feature = "std")] {
-        pub use std::os::raw::*;
+        pub use std::os::raw::c_void;
         use std::borrow::Cow;
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
-    } else if #[cfg(windows)] {
-        pub use winapi::ctypes::*;
     } else {
-        pub use libc::*;
+        pub use core::ffi::c_void;
     }
 }
 

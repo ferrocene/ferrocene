@@ -81,8 +81,8 @@ pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
 mod uw {
     pub use self::_Unwind_Reason_Code::*;
 
-    use libc;
-    use types::{c_int, c_void};
+    use libc::{self, c_int};
+    use types::c_void;
 
     #[repr(C)]
     pub enum _Unwind_Reason_Code {

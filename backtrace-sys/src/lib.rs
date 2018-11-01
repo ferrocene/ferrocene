@@ -1,4 +1,5 @@
 #![allow(bad_style)]
+#![no_std]
 
 extern crate libc;
 

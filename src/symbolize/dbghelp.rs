@@ -14,13 +14,6 @@ use core::mem;
 use core::slice;
 use core::char;
 
-cfg_if! {
-    if #[cfg(feature = "std")] {
-        use std::ffi::OsString;
-        use std::os::windows::ffi::OsStringExt;
-    }
-}
-
 use winapi::ctypes::*;
 use winapi::shared::basetsd::*;
 use winapi::shared::minwindef::*;
@@ -33,15 +26,19 @@ use types::BytesOrWideString;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
-    name: Option<&'static [u8]>,
+    name: Option<*const [u8]>,
     addr: *mut c_void,
     line: Option<u32>,
-    filename: Option<(*mut u16, usize)>,
+    filename: Option<*const [u16]>,
+    #[cfg(feature = "std")]
+    _filename_cache: Option<::std::ffi::OsString>,
+    #[cfg(not(feature = "std"))]
+    _filename_cache: (),
 }
 
 impl Symbol {
     pub fn name(&self) -> Option<SymbolName> {
-        self.name.map(SymbolName::new)
+        self.name.map(|x| SymbolName::new(unsafe { &*x }))
     }
 
     pub fn addr(&self) -> Option<*mut c_void> {
@@ -49,9 +46,9 @@ impl Symbol {
     }
 
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-        self.filename.map(|(ptr, len)| {
+        self.filename.map(|slice| {
             unsafe {
-                BytesOrWideString::Wide(slice::from_raw_parts(ptr, len))
+                BytesOrWideString::Wide(&*slice)
             }
         })
     }
@@ -59,19 +56,15 @@ impl Symbol {
     pub fn lineno(&self) -> Option<u32> {
         self.line
     }
-}
 
-#[cfg(feature = "std")]
-impl Symbol {
-    pub fn filename(&self) -> Option<&OsString> {
-        self.filename_cache.as_ref()
+    #[cfg(feature = "std")]
+    pub fn filename(&self) -> Option<&::std::ffi::OsString> {
+        self._filename_cache.as_ref()
     }
 }
 
 #[repr(C, align(8))]
 struct Aligned8<T>(T);
-
-static mut NAME_BUFFER: [u8; 256] = [0; 256];
 
 pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
@@ -107,8 +100,9 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     // all other platforms
     let mut name_overflow = false;
     let mut name_len = 0;
+    let mut name_buffer = [0; 256];
     {
-        let mut remaining = &mut NAME_BUFFER[..];
+        let mut remaining = &mut name_buffer[..];
         for c in char::decode_utf16(name.iter().cloned()) {
             let c = c.unwrap_or(char::REPLACEMENT_CHARACTER);
             let len = c.len_utf8();
@@ -123,7 +117,11 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
             }
         }
     }
-    let name = if name_overflow { None } else { Some(&NAME_BUFFER[..name_len]) };
+    let name = if name_overflow {
+        None
+    } else {
+        Some(&name_buffer[..name_len] as *const [u8])
+    };
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
@@ -146,7 +144,7 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
         let len = len as usize;
 
-        filename = Some((base, len));
+        filename = Some(slice::from_raw_parts(base, len) as *const [u16]);
     }
 
 
@@ -156,6 +154,19 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
             addr: info.Address as *mut _,
             line: lineno,
             filename,
+            _filename_cache: cache(filename),
         },
     })
+}
+
+#[cfg(feature = "std")]
+unsafe fn cache(filename: Option<*const [u16]>) -> Option<::std::ffi::OsString> {
+    use std::os::windows::ffi::OsStringExt;
+    filename.map(|f| {
+        ::std::ffi::OsString::from_wide(&*f)
+    })
+}
+
+#[cfg(not(feature = "std"))]
+unsafe fn cache(_filename: Option<*const [u16]>) {
 }

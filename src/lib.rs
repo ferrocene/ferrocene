@@ -106,7 +106,7 @@ cfg_if! {
 }
 
 #[allow(dead_code)] // not used everywhere
-#[cfg(all(unix, feature = "std"))]
+#[cfg(unix)]
 #[macro_use]
 mod dylib;
 

@@ -269,12 +269,6 @@ impl fmt::Debug for Backtrace {
     }
 }
 
-impl fmt::Display for Backtrace {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(self, fmt)
-    }
-}
-
 impl Default for Backtrace {
     fn default() -> Backtrace {
         Backtrace::new()

@@ -1,6 +1,5 @@
 use std::prelude::v1::*;
 use std::fmt;
-use std::mem;
 use std::path::{Path, PathBuf};
 
 use {trace, resolve, SymbolName};
@@ -221,8 +220,6 @@ impl BacktraceSymbol {
 
 impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let hex_width = mem::size_of::<usize>() * 2 + 2;
-
         write!(fmt, "stack backtrace:")?;
 
         let iter = if fmt.alternate() {

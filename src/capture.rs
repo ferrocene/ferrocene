@@ -233,32 +233,37 @@ impl fmt::Debug for Backtrace {
 
         for (idx, frame) in iter.enumerate() {
             let ip = frame.ip();
-            write!(fmt, "\n{:4}: {:2$?}", idx, ip, hex_width)?;
+            write!(fmt, "\n{:4}: ", idx)?;
 
             let symbols = match frame.symbols {
                 Some(ref s) => s,
                 None => {
-                    write!(fmt, " - <unresolved>")?;
+                    write!(fmt, "<unresolved> ({:?})", ip)?;
                     continue
                 }
             };
             if symbols.len() == 0 {
-                write!(fmt, " - <no info>")?;
+                write!(fmt, "<no info> ({:?})", ip)?;
+                continue;
             }
 
             for (idx, symbol) in symbols.iter().enumerate() {
                 if idx != 0 {
-                    write!(fmt, "\n      {:1$}", "", hex_width)?;
+                    write!(fmt, "\n      ")?;
                 }
 
                 if let Some(name) = symbol.name() {
-                    write!(fmt, " - {}", name)?;
+                    write!(fmt, "{}", name)?;
                 } else {
-                    write!(fmt, " - <unknown>")?;
+                    write!(fmt, "<unknown>")?;
+                }
+
+                if idx == 0 {
+                    write!(fmt, " ({:?})", ip)?;
                 }
 
                 if let (Some(file), Some(line)) = (symbol.filename(), symbol.lineno()) {
-                    write!(fmt, "\n      {:3$}at {}:{}", "", file.display(), line, hex_width)?;
+                    write!(fmt, "\n             at {}:{}", file.display(), line)?;
                 }
             }
         }

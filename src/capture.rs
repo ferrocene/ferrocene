@@ -10,6 +10,9 @@ use types::c_void;
 ///
 /// This structure can be used to capture a backtrace at various points in a
 /// program and later used to inspect what the backtrace was at that time.
+///
+/// `Backtrace` supports pretty-printing of backtraces by implementing
+/// `Display` and `Debug` (which do the same thing).
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
@@ -261,6 +264,12 @@ impl fmt::Debug for Backtrace {
         }
 
         Ok(())
+    }
+}
+
+impl fmt::Display for Backtrace {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, fmt)
     }
 }
 

@@ -10,8 +10,12 @@
 
 #![allow(bad_style)]
 
+#[cfg(feature = "std")]
+use std::char;
+
 use core::mem;
 use core::slice;
+#[cfg(not(feature = "std"))]
 use core::char;
 
 use winapi::ctypes::*;

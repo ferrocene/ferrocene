@@ -31,8 +31,8 @@ impl<'a> BytesOrWideString<'a> {
         use self::BytesOrWideString::*;
 
         match self {
-            Bytes(slice) => String::from_utf8_lossy(slice),
-            Wide(wide) => Cow::Owned(String::from_utf16_lossy(wide)),
+            &Bytes(slice) => String::from_utf8_lossy(slice),
+            &Wide(wide) => Cow::Owned(String::from_utf16_lossy(wide)),
         }
     }
 

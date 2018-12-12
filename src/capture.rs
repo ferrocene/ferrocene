@@ -10,8 +10,8 @@ use types::c_void;
 /// This structure can be used to capture a backtrace at various points in a
 /// program and later used to inspect what the backtrace was at that time.
 ///
-/// `Backtrace` supports pretty-printing of backtraces by implementing
-/// `Display` and `Debug` (which do the same thing).
+/// `Backtrace` supports pretty-printing of backtraces through its `Debug`
+/// implementation.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]

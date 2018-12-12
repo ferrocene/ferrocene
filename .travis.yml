@@ -43,6 +43,10 @@ matrix:
     - rust: nightly
       script: *test_all
 
+    # Test everything on Rust 1.25.0 for backward compatibility
+    - rust: 1.25.0
+      script: *test_all
+
     # Upload docs on nightly
     - rust: nightly
       script:

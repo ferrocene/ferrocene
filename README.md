@@ -6,8 +6,8 @@
 [Documentation](https://docs.rs/backtrace)
 
 A library for acquiring backtraces at runtime for Rust. This library aims to
-enhance the support given by the standard library at `std::rt` by providing a
-more stable and programmatic interface.
+enhance the support of the standard library by providing a more stable and
+programmatic interface.
 
 ## Install
 

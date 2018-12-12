@@ -37,28 +37,34 @@ impl<'a> BytesOrWideString<'a> {
     }
 
     /// Provides a `Path` representation of `BytesOrWideString`.
-    #[cfg(not(windows))]
     pub fn into_path_buf(self) -> PathBuf {
-        use self::BytesOrWideString::*;
-        use std::ffi::OsStr;
-        use std::os::unix::ffi::OsStrExt;
+        #[cfg(unix)]
+        {
+            use self::BytesOrWideString::*;
+            use std::ffi::OsStr;
+            use std::os::unix::ffi::OsStrExt;
 
-        match self {
-            Bytes(slice) => PathBuf::from(OsStr::from_bytes(slice)),
-            _ => unreachable!(),
+            match self {
+                Bytes(slice) => PathBuf::from(OsStr::from_bytes(slice)),
+                _ => unreachable!(),
+            }
         }
-    }
 
-    /// Provides a `Path` representation of `BytesOrWideString`.
-    #[cfg(windows)]
-    pub fn into_path_buf(self) -> PathBuf {
-        use self::BytesOrWideString::*;
-        use std::ffi::OsString;
-        use std::os::windows::ffi::OsStringExt;
+        #[cfg(windows)]
+        {
+            use self::BytesOrWideString::*;
+            use std::ffi::OsString;
+            use std::os::windows::ffi::OsStringExt;
 
-        match self {
-            Wide(slice) => PathBuf::from(OsString::from_wide(slice)),
-            _ => unreachable!(),
+            match self {
+                Wide(slice) => PathBuf::from(OsString::from_wide(slice)),
+                _ => unreachable!(),
+            }
+        }
+
+        #[cfg(all(not(windows), not(unix)))]
+        {
+            unreachable!()
         }
     }
 }

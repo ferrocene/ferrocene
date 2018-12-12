@@ -91,6 +91,8 @@ matrix:
     - env: TARGET=x86_64-apple-ios SDK=iphonesimulator
       os: osx
       script: *ios-build
+    - env: TARGET=wasm32-unknown-unknown
+      script: cargo build --target $TARGET
 
 # docker cross-compilation targets
 script:

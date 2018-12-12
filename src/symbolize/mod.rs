@@ -120,7 +120,7 @@ impl Symbol {
     /// This function requires the `std` feature to be enabled for this crate.
     #[cfg(feature = "std")]
     pub fn filename(&self) -> Option<&Path> {
-        #[cfg(not(windows))]
+        #[cfg(unix)]
         {
             use std::ffi::OsStr;
             use std::os::unix::ffi::OsStrExt;
@@ -136,6 +136,10 @@ impl Symbol {
         #[cfg(windows)]
         {
             self.inner.filename().map(Path::new)
+        }
+        #[cfg(all(not(windows), not(unix)))]
+        {
+            None
         }
     }
 }

@@ -44,6 +44,11 @@ matrix:
       script: *test_all
 
     # Test features with std on Rust 1.25.0 for backward compatibility
+    #
+    # Not supported:
+    #
+    # * no_std
+    # * gimli-symbolize feature
     - rust: 1.25.0
       script:
         - cargo build --manifest-path backtrace-sys/Cargo.toml
@@ -59,7 +64,6 @@ matrix:
         - cargo test --no-default-features --features 'serialize-rustc std'
         - cargo test --no-default-features --features 'serialize-rustc serialize-serde std'
         - cargo test --no-default-features --features 'cpp_demangle std'
-        - cargo test --no-default-features --features 'gimli-symbolize std'
         - cd ./cpp_smoke_test && cargo test && cd ..
         - cargo clean && cargo build
 

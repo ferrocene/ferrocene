@@ -41,6 +41,9 @@ winapi = { version = "0.3.3", features = ["dbghelp", "processthreadsapi", "winnt
 [target.'cfg(all(unix, not(target_os = "fuchsia"), not(target_os = "emscripten"), not(target_os = "macos"), not(target_os = "ios")))'.dependencies]
 backtrace-sys = { path = "backtrace-sys", version = "0.1.17", optional = true }
 
+[build-dependencies]
+autocfg = "0.1"
+
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default
 # feature enables all the necessary features for each platform this library

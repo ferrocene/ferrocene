@@ -7,8 +7,10 @@ cfg_if! {
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
-    } else {
+    } else if #[cfg(rustc_1_30)] {
         pub use core::ffi::c_void;
+    } else {
+        compile_error!("`backtrace` requires Rust >=1.30.0 to support `no_std`.");
     }
 }
 

@@ -15,7 +15,7 @@ autoexamples = true
 autotests = true
 
 [dependencies]
-cfg-if = "0.1"
+cfg-if = "0.1.6"
 rustc-demangle = "0.1.4"
 
 # Optionally enable the ability to serialize a `Backtrace`

@@ -43,29 +43,9 @@ matrix:
     - rust: nightly
       script: *test_all
 
-    # Test features with std on Rust 1.25.0 for backward compatibility
-    #
-    # Not supported:
-    #
-    # * no_std
-    # * gimli-symbolize feature
+    # Make sure the default crate builds with 1.25.0
     - rust: 1.25.0
-      script:
-        - cargo build --manifest-path backtrace-sys/Cargo.toml
-        - cargo build
-        - cargo test
-        - cargo test --no-default-features --features 'libunwind std'
-        - cargo test --no-default-features --features 'libunwind dladdr std'
-        - cargo test --no-default-features --features 'libunwind libbacktrace std'
-        - cargo test --no-default-features --features 'unix-backtrace std'
-        - cargo test --no-default-features --features 'unix-backtrace dladdr std'
-        - cargo test --no-default-features --features 'unix-backtrace libbacktrace std'
-        - cargo test --no-default-features --features 'serialize-serde std'
-        - cargo test --no-default-features --features 'serialize-rustc std'
-        - cargo test --no-default-features --features 'serialize-rustc serialize-serde std'
-        - cargo test --no-default-features --features 'cpp_demangle std'
-        - cd ./cpp_smoke_test && cargo test && cd ..
-        - cargo clean && cargo build
+      script: cargo test
 
     # Upload docs on nightly
     - rust: nightly

@@ -8,4 +8,6 @@ fn main() {
     //
     // <https://github.com/rust-lang/rust/pull/53910>
     ac.emit_rustc_version(1, 30);
+
+    println!("cargo:rerun-if-changed=build.rs");
 }

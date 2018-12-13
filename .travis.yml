@@ -43,6 +43,10 @@ matrix:
     - rust: nightly
       script: *test_all
 
+    # Make sure the default crate builds with 1.25.0
+    - rust: 1.25.0
+      script: cargo test
+
     # Upload docs on nightly
     - rust: nightly
       script:

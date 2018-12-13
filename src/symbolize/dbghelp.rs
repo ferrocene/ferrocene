@@ -10,9 +10,18 @@
 
 #![allow(bad_style)]
 
+// This is a hack for compatibility with rustc 1.25.0. The no_std mode of this
+// crate is not supported pre-1.30.0, but in std mode the `char` module here
+// moved in rustc 1.26.0 (ish). As a result, in std mode we use `std::char` to
+// retain compatibility with rustc 1.25.0, but in `no_std` mode (which is
+// 1.30.0+ already) we use `core::char`.
+#[cfg(feature = "std")]
+use std::char;
+#[cfg(not(feature = "std"))]
+use core::char;
+
 use core::mem;
 use core::slice;
-use core::char;
 
 use winapi::ctypes::*;
 use winapi::shared::basetsd::*;

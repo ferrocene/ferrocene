@@ -7,13 +7,11 @@ use std::fs::File;
 fn main() {
     let target = env::var("TARGET").unwrap();
 
-    // libbacktrace isn't used on windows
-    if target.contains("windows") {
-        return
-    }
-
-    // no way this will ever compile for emscripten
-    if target.contains("emscripten") {
+    if target.contains("msvc") || // libbacktrace isn't used on MSVC windows
+        target.contains("emscripten") || // no way this will ever compile for emscripten
+        target.contains("cloudabi") ||
+        target.contains("wasm32")
+    {
         return
     }
 
@@ -32,12 +30,14 @@ fn main() {
         .file("src/libbacktrace/sort.c")
         .file("src/libbacktrace/state.c");
 
+    // No need to have any symbols reexported form shared objects
+    build.flag("-fvisibility=hidden");
+
     if target.contains("darwin") {
         build.file("src/libbacktrace/macho.c");
     } else if target.contains("windows") {
         build.file("src/libbacktrace/pecoff.c");
     } else {
-        build.flag("-fvisibility=hidden");
         build.file("src/libbacktrace/elf.c");
 
         let pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
@@ -65,6 +65,12 @@ fn main() {
     build.define("_GNU_SOURCE", "1");
     build.define("_LARGE_FILES", "1");
 
+    // When we're built as part of the Rust compiler, this is used to enable
+    // debug information in libbacktrace itself.
+    let any_debug = env::var("RUSTC_DEBUGINFO").unwrap_or_default() == "true" ||
+        env::var("RUSTC_DEBUGINFO_LINES").unwrap_or_default() == "true";
+    build.debug(any_debug);
+
     let syms = [
         "backtrace_full",
         "backtrace_dwarf_add",
@@ -86,8 +92,15 @@ fn main() {
         "backtrace_create_state",
         "backtrace_uncompress_zdebug",
     ];
+    let prefix = if cfg!(feature = "rustc-dep-of-std") {
+        println!("cargo:rustc-cfg=rdos");
+        "__rdos_"
+    } else {
+        println!("cargo:rustc-cfg=rbt");
+        "__rbt_"
+    };
     for sym in syms.iter() {
-        build.define(sym, &format!("__rbt_{}", sym)[..]);
+        build.define(sym, &format!("{}{}", prefix, sym)[..]);
     }
 
     build.compile("backtrace");

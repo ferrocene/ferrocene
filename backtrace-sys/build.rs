@@ -12,6 +12,7 @@ fn main() {
         target.contains("cloudabi") ||
         target.contains("wasm32")
     {
+        println!("cargo:rustc-cfg=empty");
         return
     }
 

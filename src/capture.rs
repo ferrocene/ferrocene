@@ -229,7 +229,22 @@ impl fmt::Debug for Backtrace {
         };
 
         for (idx, frame) in iter.enumerate() {
-            let ip = frame.ip();
+            // To reduce TCB size in Sgx enclave, we do not want to implement symbol resolution functionality.
+            // Rather, we can print the offset of the address here, which could be later mapped to
+            // correct function.
+            let ip: *mut c_void;
+            #[cfg(target_env = "sgx")]
+            {
+                ip = usize::wrapping_sub(
+                    frame.ip() as _,
+                    std::os::fortanix_sgx::mem::image_base() as _,
+                ) as _;
+            }
+            #[cfg(not(target_env = "sgx"))]
+            {
+                ip = frame.ip();
+            }
+
             write!(fmt, "\n{:4}: ", idx)?;
 
             let symbols = match frame.symbols {

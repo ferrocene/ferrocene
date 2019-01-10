@@ -104,10 +104,11 @@ impl fmt::Debug for Frame {
 }
 
 cfg_if! {
-    if #[cfg(all(unix,
+    if #[cfg(any(all(unix,
                  not(target_os = "emscripten"),
                  not(all(target_os = "ios", target_arch = "arm")),
-                 feature = "libunwind"))] {
+                 feature = "libunwind"),
+                 target_env="sgx"))] {
         mod libunwind;
         use self::libunwind::trace as trace_imp;
         use self::libunwind::Frame as FrameImp;

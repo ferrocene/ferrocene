@@ -71,11 +71,12 @@
 #![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
 #![no_std]
+#![cfg_attr(target_env = "sgx", feature(sgx_platform))]
 
 #[cfg(feature = "std")]
 #[macro_use] extern crate std;
 
-#[cfg(unix)]
+#[cfg(any(unix, target_env = "sgx"))]
 extern crate libc;
 #[cfg(windows)]
 extern crate winapi;

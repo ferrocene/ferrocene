@@ -119,28 +119,28 @@ impl Symbol {
     ///
     /// This function requires the `std` feature to be enabled for this crate.
     #[cfg(feature = "std")]
+    #[allow(unreachable_code)]
     pub fn filename(&self) -> Option<&Path> {
         #[cfg(unix)]
         {
             use std::ffi::OsStr;
             use std::os::unix::ffi::OsStrExt;
 
-            match self.filename_raw() {
+            return match self.filename_raw() {
                 Some(BytesOrWideString::Bytes(slice)) => {
                     Some(Path::new(OsStr::from_bytes(slice)))
                 }
                 None => None,
                 _ => unreachable!(),
-            }
+            };
         }
-        #[cfg(windows)]
+
+        #[cfg(all(windows, feature = "dbghelp"))]
         {
-            self.inner.filename().map(Path::new)
+            return self.inner.filename().map(Path::new);
         }
-        #[cfg(all(not(windows), not(unix)))]
-        {
-            None
-        }
+
+        None
     }
 }
 

@@ -97,3 +97,16 @@ fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrFrame.Mode = AddrModeFlat;
     winnt::IMAGE_FILE_MACHINE_I386
 }
+
+#[cfg(target_arch = "aarch64")]
+fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
+    frame.AddrPC.Offset = ctx.Pc as u64;
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrStack.Offset = ctx.Sp as u64;
+    frame.AddrStack.Mode = AddrModeFlat;
+    unsafe {
+        frame.AddrFrame.Offset = ctx.u.s().Fp as u64;
+    }
+    frame.AddrFrame.Mode = AddrModeFlat;
+    winnt::IMAGE_FILE_MACHINE_ARM64
+}

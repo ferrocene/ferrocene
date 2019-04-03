@@ -146,3 +146,13 @@ jobs:
           TARGET: x86_64-pc-windows-gnu
         i686-gnu:
           TARGET: i686-pc-windows-gnu
+
+  - job: Windows_arm64
+    pool:
+      vmImage: windows-2019
+    steps:
+      - template: ci/azure-install-rust.yml
+      - script: rustup target add aarch64-pc-windows-msvc
+        displayName: "Install rust cross target"
+      - script: cargo test --no-run --target aarch64-pc-windows-msvc
+        displayName: "Build for arm64"

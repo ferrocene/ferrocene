@@ -1,8 +1,7 @@
 use addr2line;
+use addr2line::object::{self, Object};
 use findshlibs::{self, Segment, SharedLibrary};
-use gimli;
 use memmap::Mmap;
-use object::{self, Object};
 use std::cell::RefCell;
 use std::env;
 use std::fs::File;
@@ -17,7 +16,7 @@ use types::BytesOrWideString;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-type Dwarf = addr2line::Context<gimli::EndianRcSlice<gimli::RunTimeEndian>>;
+type Dwarf = addr2line::Context;
 type Symbols<'map> = object::SymbolMap<'map>;
 
 struct Mapping {
@@ -33,7 +32,7 @@ impl Mapping {
         // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
         let map = unsafe { Mmap::map(&file).ok()? };
         let (dwarf, symbols) = {
-            let object = object::File::parse(&*map).ok()?;
+            let object = object::ElfFile::parse(&*map).ok()?;
             let dwarf = addr2line::Context::new(&object).ok()?;
             let symbols = object.symbol_map();
             // Convert to 'static lifetimes.

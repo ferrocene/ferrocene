@@ -100,9 +100,7 @@ cfg_if! {
     if #[cfg(all(feature = "gimli-symbolize", unix, target_os = "linux"))] {
         extern crate addr2line;
         extern crate findshlibs;
-        extern crate gimli;
         extern crate memmap;
-        extern crate object;
     }
 }
 

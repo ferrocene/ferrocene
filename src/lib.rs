@@ -177,18 +177,79 @@ mod lock {
     }
 }
 
-// requires external synchronization
 #[cfg(all(windows, feature = "dbghelp"))]
-unsafe fn dbghelp_init() {
+struct Cleanup {
+    handle: winapi::um::winnt::HANDLE,
+    opts: winapi::shared::minwindef::DWORD,
+}
+
+#[cfg(all(windows, feature = "dbghelp"))]
+unsafe fn dbghelp_init() -> Option<Cleanup> {
     use winapi::shared::minwindef;
     use winapi::um::{dbghelp, processthreadsapi};
 
-    static mut INITIALIZED: bool = false;
+    use std::sync::{Mutex, Once, ONCE_INIT};
+    use std::boxed::Box;
 
-    if !INITIALIZED {
-        dbghelp::SymInitializeW(processthreadsapi::GetCurrentProcess(),
-                                0 as *mut _,
-                                minwindef::TRUE);
-        INITIALIZED = true;
+    // Initializing symbols has significant overhead, but initializing only once
+    // without cleanup causes problems for external sources. For example, the
+    // standard library checks the result of SymInitializeW (which returns an
+    // error if attempting to initialize twice) and in the event of an error,
+    // will not print a backtrace on panic. Presumably, external debuggers may
+    // have similar issues.
+    //
+    // As a compromise, we'll keep track of the number of internal initialization
+    // requests within a single API call in order to minimize the number of
+    // init/cleanup cycles.
+    static mut REF_COUNT: *mut Mutex<usize> = 0 as *mut _;
+    static mut INIT: Once = ONCE_INIT;
+
+    INIT.call_once(|| {
+        REF_COUNT = Box::into_raw(Box::new(Mutex::new(0)));
+    });
+
+    // Not sure why these are missing in winapi
+    const SYMOPT_DEFERRED_LOADS: minwindef::DWORD = 0x00000004;
+    extern "system" {
+        fn SymGetOptions() -> minwindef::DWORD;
+        fn SymSetOptions(options: minwindef::DWORD);
+    }
+
+    impl Drop for Cleanup {
+        fn drop(&mut self) {
+            unsafe {
+                let mut ref_count_guard = (&*REF_COUNT).lock().unwrap();
+                *ref_count_guard -= 1;
+
+                if *ref_count_guard == 0 {
+                    dbghelp::SymCleanup(self.handle);
+                    SymSetOptions(self.opts);
+                }
+            }
+        }
+    }
+
+    let opts = SymGetOptions();
+    let handle = processthreadsapi::GetCurrentProcess();
+
+    let mut ref_count_guard = (&*REF_COUNT).lock().unwrap();
+
+    if *ref_count_guard > 0 {
+        *ref_count_guard += 1;
+        return Some(Cleanup { handle, opts });
+    }
+
+    SymSetOptions(opts | SYMOPT_DEFERRED_LOADS);
+
+    let ret = dbghelp::SymInitializeW(handle,
+                                      0 as *mut _,
+                                      minwindef::TRUE);
+
+    if ret != minwindef::TRUE {
+        // Symbols may have been initialized by another library or an external debugger
+        None
+    } else {
+        *ref_count_guard += 1;
+        Some(Cleanup { handle, opts })
     }
 }

@@ -68,6 +68,10 @@ impl Backtrace {
     /// ```
     #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new() -> Backtrace {
+        // initialize dbghelp only once for both the trace and the resolve
+        #[cfg(all(windows, feature = "dbghelp"))]
+        let _c = unsafe { ::dbghelp_init() };
+
         let mut bt = Self::create(Self::new as usize);
         bt.resolve();
         bt
@@ -141,6 +145,10 @@ impl Backtrace {
     /// If this backtrace has been previously resolved or was created through
     /// `new`, this function does nothing.
     pub fn resolve(&mut self) {
+        // initialize dbghelp only once for all frames
+        #[cfg(all(windows, feature = "dbghelp"))]
+        let _c = unsafe { ::dbghelp_init() };
+
         for frame in self.frames.iter_mut().filter(|f| f.symbols.is_none()) {
             let mut symbols = Vec::new();
             resolve(frame.ip as *mut _, |symbol| {

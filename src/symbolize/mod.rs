@@ -230,7 +230,9 @@ impl<'a> SymbolName<'a> {
         }
     }
 
-    /// Returns the raw symbol name as a `str` if the symbols is valid utf-8.
+    /// Returns the raw (mangled) symbol name as a `str` if the symbol is valid utf-8.
+    ///
+    /// Use the `Display` implementation if you want the demangled version.
     pub fn as_str(&self) -> Option<&'a str> {
         self.demangled
             .as_ref()

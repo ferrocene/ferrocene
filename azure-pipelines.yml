@@ -9,8 +9,8 @@ jobs:
       - checkout: self
         submodules: true
       - template: ci/azure-install-rust.yml
-      - script: cargo test
-        displayName: "Run crate tests"
+      - script: cargo build
+        displayName: "Build crate"
     variables:
       TOOLCHAIN: 1.25.0
 

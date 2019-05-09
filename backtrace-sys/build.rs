@@ -1,8 +1,8 @@
 extern crate cc;
 
 use std::env;
-use std::path::PathBuf;
 use std::fs::File;
+use std::path::PathBuf;
 
 fn main() {
     let target = env::var("TARGET").unwrap();
@@ -13,7 +13,7 @@ fn main() {
         target.contains("wasm32")
     {
         println!("cargo:rustc-cfg=empty");
-        return
+        return;
     }
 
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
@@ -56,11 +56,12 @@ fn main() {
     build.define("BACKTRACE_SUPPORTS_DATA", "0");
 
     File::create(out_dir.join("config.h")).unwrap();
-    if !target.contains("apple-ios") &&
-       !target.contains("solaris") &&
-       !target.contains("redox") &&
-       !target.contains("android") &&
-       !target.contains("haiku") {
+    if !target.contains("apple-ios")
+        && !target.contains("solaris")
+        && !target.contains("redox")
+        && !target.contains("android")
+        && !target.contains("haiku")
+    {
         build.define("HAVE_DL_ITERATE_PHDR", "1");
     }
     build.define("_GNU_SOURCE", "1");
@@ -68,8 +69,8 @@ fn main() {
 
     // When we're built as part of the Rust compiler, this is used to enable
     // debug information in libbacktrace itself.
-    let any_debug = env::var("RUSTC_DEBUGINFO").unwrap_or_default() == "true" ||
-        env::var("RUSTC_DEBUGINFO_LINES").unwrap_or_default() == "true";
+    let any_debug = env::var("RUSTC_DEBUGINFO").unwrap_or_default() == "true"
+        || env::var("RUSTC_DEBUGINFO_LINES").unwrap_or_default() == "true";
     build.debug(any_debug);
 
     let syms = [

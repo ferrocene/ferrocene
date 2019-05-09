@@ -37,8 +37,6 @@ fn trace_and_resolve_callback(b: &mut test::Bencher) {
     b.iter(the_function);
 }
 
-
-
 #[bench]
 #[cfg(feature = "std")]
 fn trace_and_resolve_separate(b: &mut test::Bencher) {

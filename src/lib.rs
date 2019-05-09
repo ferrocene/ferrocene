@@ -74,7 +74,8 @@
 #![cfg_attr(target_env = "sgx", feature(sgx_platform))]
 
 #[cfg(feature = "std")]
-#[macro_use] extern crate std;
+#[macro_use]
+extern crate std;
 
 #[cfg(any(unix, target_env = "sgx"))]
 extern crate libc;
@@ -144,9 +145,9 @@ impl Drop for Bomb {
 #[allow(dead_code)]
 #[cfg(feature = "std")]
 mod lock {
-    use std::cell::Cell;
     use std::boxed::Box;
-    use std::sync::{Once, Mutex, MutexGuard, ONCE_INIT};
+    use std::cell::Cell;
+    use std::sync::{Mutex, MutexGuard, Once, ONCE_INIT};
 
     pub struct LockGuard(Option<MutexGuard<'static, ()>>);
 
@@ -167,7 +168,7 @@ mod lock {
 
     pub fn lock() -> LockGuard {
         if LOCK_HELD.with(|l| l.get()) {
-            return LockGuard(None)
+            return LockGuard(None);
         }
         LOCK_HELD.with(|s| s.set(true));
         unsafe {
@@ -183,8 +184,8 @@ mod lock {
 mod dbghelp {
     use core::ptr;
     use winapi::shared::minwindef::{DWORD, TRUE};
-    use winapi::um::processthreadsapi::GetCurrentProcess;
     use winapi::um::dbghelp;
+    use winapi::um::processthreadsapi::GetCurrentProcess;
 
     pub struct Cleanup;
 

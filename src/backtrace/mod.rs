@@ -57,7 +57,6 @@ pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)
 }
 
-
 /// A trait representing one frame of a backtrace, yielded to the `trace`
 /// function of this crate.
 ///

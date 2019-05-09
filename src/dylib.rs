@@ -16,25 +16,28 @@ pub struct Symbol<T> {
 
 impl Dylib {
     pub unsafe fn get<'a, T>(&self, sym: &'a Symbol<T>) -> Option<&'a T> {
-        self.load().and_then(|handle| {
-            sym.get(handle)
-        })
+        self.load().and_then(|handle| sym.get(handle))
     }
 
     pub unsafe fn init(&self, path: &str) -> bool {
         if self.init.load(Ordering::SeqCst) != 0 {
-            return true
+            return true;
         }
         assert!(path.as_bytes()[path.len() - 1] == 0);
         let ptr = libc::dlopen(path.as_ptr() as *const c_char, libc::RTLD_LAZY);
         if ptr.is_null() {
-            return false
+            return false;
         }
-        match self.init.compare_and_swap(0, ptr as usize, Ordering::SeqCst) {
+        match self
+            .init
+            .compare_and_swap(0, ptr as usize, Ordering::SeqCst)
+        {
             0 => {}
-            _ => { libc::dlclose(ptr); }
+            _ => {
+                libc::dlclose(ptr);
+            }
         }
-        return true
+        return true;
     }
 
     unsafe fn load(&self) -> Option<*mut c_void> {
@@ -49,7 +52,8 @@ impl<T> Symbol<T> {
     unsafe fn get(&self, handle: *mut c_void) -> Option<&T> {
         assert_eq!(mem::size_of::<T>(), mem::size_of_val(&self.addr));
         if self.addr.load(Ordering::SeqCst) == 0 {
-            self.addr.store(fetch(handle, self.name.as_ptr()), Ordering::SeqCst)
+            self.addr
+                .store(fetch(handle, self.name.as_ptr()), Ordering::SeqCst)
         }
         if self.addr.load(Ordering::SeqCst) == 1 {
             None

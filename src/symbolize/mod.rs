@@ -7,8 +7,8 @@ cfg_if! {
     }
 }
 
-use types::{BytesOrWideString, c_void};
 use rustc_demangle::{try_demangle, Demangle};
+use types::{c_void, BytesOrWideString};
 
 /// Resolve an address to a symbol, passing the symbol to the specified
 /// closure.
@@ -57,11 +57,11 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
 /// the `std` feature of this crate isn't compiled in. See the `resolve`
 /// function for more documentation and examples.
 pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
-    where F: FnMut(&Symbol)
+where
+    F: FnMut(&Symbol),
 {
     resolve_imp(addr as *mut _, &mut cb)
 }
-
 
 /// A trait representing the resolution of a symbol in a file.
 ///
@@ -101,7 +101,6 @@ impl Symbol {
         self.inner.filename_raw()
     }
 
-
     /// Returns the line number for where this symbol is currently executing.
     ///
     /// This return value is typically `Some` if `filename` returns `Some`, and
@@ -127,9 +126,7 @@ impl Symbol {
             use std::os::unix::ffi::OsStrExt;
 
             return match self.filename_raw() {
-                Some(BytesOrWideString::Bytes(slice)) => {
-                    Some(Path::new(OsStr::from_bytes(slice)))
-                }
+                Some(BytesOrWideString::Bytes(slice)) => Some(Path::new(OsStr::from_bytes(slice))),
                 None => None,
                 _ => unreachable!(),
             };
@@ -154,7 +151,8 @@ impl fmt::Debug for Symbol {
             d.field("addr", &addr);
         }
 
-        #[cfg(feature = "std")] {
+        #[cfg(feature = "std")]
+        {
             if let Some(filename) = self.filename() {
                 d.field("filename", &filename);
             }
@@ -237,9 +235,7 @@ impl<'a> SymbolName<'a> {
         self.demangled
             .as_ref()
             .map(|s| s.as_str())
-            .or_else(|| {
-                str::from_utf8(self.bytes).ok()
-            })
+            .or_else(|| str::from_utf8(self.bytes).ok())
     }
 
     /// Returns the raw symbol name as a list of bytes
@@ -248,16 +244,16 @@ impl<'a> SymbolName<'a> {
     }
 }
 
-fn format_symbol_name(fmt: fn(&str, &mut fmt::Formatter) -> fmt::Result,
-                      mut bytes: &[u8],
-                      f: &mut fmt::Formatter)
-    -> fmt::Result
-{
+fn format_symbol_name(
+    fmt: fn(&str, &mut fmt::Formatter) -> fmt::Result,
+    mut bytes: &[u8],
+    f: &mut fmt::Formatter,
+) -> fmt::Result {
     while bytes.len() > 0 {
         match str::from_utf8(bytes) {
             Ok(name) => {
                 fmt(name, f)?;
-                break
+                break;
             }
             Err(err) => {
                 fmt("\u{FFFD}", f)?;

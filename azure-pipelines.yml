@@ -154,3 +154,5 @@ jobs:
         displayName: "Install rust cross target"
       - script: cargo test --no-run --target aarch64-pc-windows-msvc
         displayName: "Build for arm64"
+      - script: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-winapi
+        displayName: "Build for arm64"

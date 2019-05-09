@@ -23,14 +23,10 @@ use core::char;
 use core::mem;
 use core::slice;
 
-use winapi::ctypes::*;
-use winapi::shared::basetsd::*;
-use winapi::shared::minwindef::*;
-use winapi::um::processthreadsapi;
-
 use SymbolName;
 use types::BytesOrWideString;
-use crate::dbghelp;
+use dbghelp;
+use dbghelp::ffi::*;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
@@ -75,11 +71,11 @@ impl Symbol {
 struct Aligned8<T>(T);
 
 pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
-    const SIZE: usize = 2 * dbghelp::MAX_SYM_NAME + mem::size_of::<dbghelp::SYMBOL_INFOW>();
+    const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);
     let data = &mut data.0;
-    let info = &mut *(data.as_mut_ptr() as *mut dbghelp::SYMBOL_INFOW);
-    info.MaxNameLen = dbghelp::MAX_SYM_NAME as ULONG;
+    let info = &mut *(data.as_mut_ptr() as *mut SYMBOL_INFOW);
+    info.MaxNameLen = MAX_SYM_NAME as ULONG;
     // the struct size in C.  the value is different to
     // `size_of::<SYMBOL_INFOW>() - MAX_SYM_NAME + 1` (== 81)
     // due to struct alignment.
@@ -92,7 +88,7 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     };
 
     let mut displacement = 0u64;
-    let ret = dbghelp.SymFromAddrW()(processthreadsapi::GetCurrentProcess(),
+    let ret = dbghelp.SymFromAddrW()(GetCurrentProcess(),
                                      addr as DWORD64,
                                      &mut displacement,
                                      info);
@@ -129,10 +125,10 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     }
     let name = &name_buffer[..name_len] as *const [u8];
 
-    let mut line = mem::zeroed::<dbghelp::IMAGEHLP_LINEW64>();
-    line.SizeOfStruct = mem::size_of::<dbghelp::IMAGEHLP_LINEW64>() as DWORD;
+    let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
+    line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
     let mut displacement = 0;
-    let ret = dbghelp.SymGetLineFromAddrW64()(processthreadsapi::GetCurrentProcess(),
+    let ret = dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(),
                                               addr as DWORD64,
                                               &mut displacement,
                                               &mut line);

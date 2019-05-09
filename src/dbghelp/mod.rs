@@ -19,14 +19,9 @@
 
 use core::mem;
 use core::ptr;
-use winapi::shared::basetsd::*;
-use winapi::shared::minwindef::*;
-use winapi::um::libloaderapi::{FreeLibrary, GetProcAddress, LoadLibraryW};
-use winapi::um::processthreadsapi::GetCurrentProcess;
-use winapi::um::winnt::*;
+use dbghelp::ffi::{DWORD, BOOL, HANDLE, DWORD64, PVOID, PCWSTR};
 
-mod ffi;
-pub use self::ffi::*;
+pub mod ffi;
 
 // Work around `SymGetOptions` and `SymSetOptions` not being present in winapi
 // itself. Otherwise this is only used when we're double-checking types against
@@ -53,7 +48,7 @@ macro_rules! dbghelp {
     }) => (
         pub struct Dbghelp {
             /// The loaded DLL for `dbghelp.dll`
-            dll: HMODULE,
+            dll: ffi::HMODULE,
 
             // Each function pointer for each function we might use
             $($name: usize,)*
@@ -92,7 +87,7 @@ macro_rules! dbghelp {
                     0,
                 ];
                 unsafe {
-                    self.dll = LoadLibraryW(lib.as_ptr());
+                    self.dll = ffi::LoadLibraryW(lib.as_ptr());
                     if self.dll.is_null() {
                         Err(())
                     }  else {
@@ -107,7 +102,7 @@ macro_rules! dbghelp {
                 assert!(!self.dll.is_null());
                 unsafe {
                     $(self.$name = 0;)*
-                    FreeLibrary(self.dll);
+                    ffi::FreeLibrary(self.dll);
                     self.dll = ptr::null_mut();
                 }
             }
@@ -130,7 +125,7 @@ macro_rules! dbghelp {
 
             fn symbol(&self, symbol: &[u8]) -> Option<usize> {
                 unsafe {
-                    match GetProcAddress(self.dll, symbol.as_ptr() as *const _) as usize {
+                    match ffi::GetProcAddress(self.dll, symbol.as_ptr() as *const _) as usize {
                         0 => None,
                         n => Some(n),
                     }
@@ -168,12 +163,12 @@ dbghelp! {
             MachineType: DWORD,
             hProcess: HANDLE,
             hThread: HANDLE,
-            StackFrame: LPSTACKFRAME64,
+            StackFrame: ffi::LPSTACKFRAME64,
             ContextRecord: PVOID,
-            ReadMemoryRoutine: PREAD_PROCESS_MEMORY_ROUTINE64,
-            FunctionTableAccessRoutine: PFUNCTION_TABLE_ACCESS_ROUTINE64,
-            GetModuleBaseRoutine: PGET_MODULE_BASE_ROUTINE64,
-            TranslateAddress: PTRANSLATE_ADDRESS_ROUTINE64
+            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64
         ) -> BOOL;
         fn SymFunctionTableAccess64(
             hProcess: HANDLE,
@@ -186,14 +181,14 @@ dbghelp! {
 		fn SymFromAddrW(
 			hProcess: HANDLE,
 			Address: DWORD64,
-			Displacement: PDWORD64,
-			Symbol: PSYMBOL_INFOW
+			Displacement: ffi::PDWORD64,
+			Symbol: ffi::PSYMBOL_INFOW
 		) -> BOOL;
 		fn SymGetLineFromAddrW64(
 			hProcess: HANDLE,
 			dwAddr: DWORD64,
-			pdwDisplacement: PDWORD,
-			Line: PIMAGEHLP_LINEW64
+			pdwDisplacement: ffi::PDWORD,
+			Line: ffi::PIMAGEHLP_LINEW64
 		) -> BOOL;
     }
 }
@@ -240,8 +235,8 @@ pub unsafe fn init() -> Result<Cleanup, ()> {
     // efficient way to use the symbol handler.", so let's do that!
     DBGHELP.SymSetOptions()(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
 
-    let ret = DBGHELP.SymInitializeW()(GetCurrentProcess(), ptr::null_mut(), TRUE);
-    if ret != TRUE {
+    let ret = DBGHELP.SymInitializeW()(ffi::GetCurrentProcess(), ptr::null_mut(), ffi::TRUE);
+    if ret != ffi::TRUE {
         // Symbols may have been initialized by another library or an
         // external debugger
         DBGHELP.SymSetOptions()(OPTS_ORIG);
@@ -266,7 +261,7 @@ impl Drop for Cleanup {
             // required to cooperate with libstd as libstd's backtracing will
             // assert symbol initialization succeeds and will clean up after the
             // backtrace is finished.
-            DBGHELP.SymCleanup()(GetCurrentProcess());
+            DBGHELP.SymCleanup()(ffi::GetCurrentProcess());
             DBGHELP.SymSetOptions()(OPTS_ORIG);
 
             // We can in theory leak this to stay in a global and we simply

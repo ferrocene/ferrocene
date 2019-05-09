@@ -7,45 +7,65 @@
 //! This module largely exists to integrate into libstd itself where winapi is
 //! not currently available.
 
-#![allow(bad_style)]
+#![allow(bad_style, dead_code)]
 
-use winapi::shared::basetsd::*;
-use winapi::shared::minwindef::*;
-use winapi::um::winnt::*;
+cfg_if! {
+    if #[cfg(feature = "verify-winapi")] {
+        pub use self::winapi::c_void;
+        pub use self::winapi::HINSTANCE;
+        pub use self::winapi::FARPROC;
+
+        mod winapi {
+            pub use winapi::ctypes::*;
+            pub use winapi::shared::basetsd::*;
+            pub use winapi::shared::minwindef::*;
+            pub use winapi::um::dbghelp::*;
+            pub use winapi::um::winnt::*;
+            pub use winapi::um::libloaderapi::*;
+            pub use winapi::um::processthreadsapi::*;
+        }
+    } else {
+        pub use core::ffi::c_void;
+        pub type HINSTANCE = *mut c_void;
+        pub type FARPROC = *mut c_void;
+    }
+}
 
 macro_rules! ffi {
 	() => ();
 
-    (#[repr(C)] pub struct $name:ident { $(pub $field:ident: $ty:ty,)* } $($rest:tt)*) => (
-        #[repr(C)]
+    (#[repr($($r:tt)*)] pub struct $name:ident { $(pub $field:ident: $ty:ty,)* } $($rest:tt)*) => (
+        #[repr($($r)*)]
         #[cfg(not(feature = "verify-winapi"))]
         pub struct $name {
             $(pub $field: $ty,)*
         }
 
         #[cfg(feature = "verify-winapi")]
-        pub use winapi::um::dbghelp::$name;
+        pub use self::winapi::$name;
 
         #[test]
         #[cfg(feature = "verify-winapi")]
         fn $name() {
             use core::mem;
 
-            #[repr(C)]
+            #[repr($($r)*)]
             pub struct $name {
                 $(pub $field: $ty,)*
             }
 
             assert_eq!(
                 mem::size_of::<$name>(),
-                mem::size_of::<winapi::um::dbghelp::$name>(),
+                mem::size_of::<winapi::$name>(),
+                concat!("size of ", stringify!($name), " is wrong"),
             );
             assert_eq!(
                 mem::align_of::<$name>(),
-                mem::align_of::<winapi::um::dbghelp::$name>(),
+                mem::align_of::<winapi::$name>(),
+                concat!("align of ", stringify!($name), " is wrong"),
             );
 
-            type Winapi = winapi::um::dbghelp::$name;
+            type Winapi = winapi::$name;
 
             fn assert_same<T>(_: T, _: T) {}
 
@@ -54,15 +74,39 @@ macro_rules! ffi {
                 let b = &*(mem::align_of::<Winapi>() as *const Winapi);
 
                 $(
-                    assert_same(&a.$field, &b.$field);
-                    assert_eq!(&a.$field as *const $ty, &b.$field as *const $ty,
-                               concat!("misplaced field ", stringify!($field)));
+                    ffi!(@test_fields a b $field $ty);
                 )*
             }
         }
 
         ffi!($($rest)*);
     );
+
+    // Handling verification against unions in winapi requires some special care
+    (@test_fields $a:ident $b:ident FltSave $ty:ty) => (
+        // Skip this field on x86_64 `CONTEXT` since it's a union and a bit funny
+    );
+    (@test_fields $a:ident $b:ident D $ty:ty) => ({
+        let a = &$a.D;
+        let b = $b.D();
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty, "misplaced field D");
+    });
+    (@test_fields $a:ident $b:ident s $ty:ty) => ({
+        let a = &$a.s;
+        let b = $b.s();
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty, "misplaced field s");
+    });
+
+    // Otherwise test all fields normally.
+    (@test_fields $a:ident $b:ident $field:ident $ty:ty) => ({
+        let a = &$a.$field;
+        let b = &$b.$field;
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty,
+                   concat!("misplaced field ", stringify!($field)));
+    });
 
     (pub type $name:ident = $ty:ty; $($rest:tt)*) => (
         pub type $name = $ty;
@@ -75,7 +119,7 @@ macro_rules! ffi {
                 impl<T> SameType for (T, T) {}
                 fn assert_same<T: SameType>() {}
 
-                assert_same::<($name, winapi::um::dbghelp::$name)>();
+                assert_same::<($name, winapi::$name)>();
             }
         };
 
@@ -91,7 +135,7 @@ macro_rules! ffi {
             use super::*;
             #[test]
             fn assert_valid() {
-                let x: $ty = winapi::um::dbghelp::$name;
+                let x: $ty = winapi::$name;
                 assert_eq!(x, $val);
             }
         }
@@ -99,106 +143,359 @@ macro_rules! ffi {
 
         ffi!($($rest)*);
     );
+
+    (extern "system" { $(pub fn $name:ident($($args:tt)*) -> $ret:ty;)* } $($rest:tt)*) => (
+        extern "system" {
+            $(pub fn $name($($args)*) -> $ret;)*
+        }
+
+        $(
+            mod $name {
+                use super::*;
+
+                #[test]
+                fn assert_same() {
+                    assert_eq!($name as usize, winapi::$name as usize);
+                    let mut x: unsafe extern "system" fn($($args)*) -> $ret;
+                    x = $name;
+                    drop(x);
+                    x = winapi::$name;
+                    drop(x);
+                }
+            }
+        )*
+
+        ffi!($($rest)*);
+    );
+
+    (impl $name:ident { $($i:tt)* } $($rest:tt)*) => (
+        #[cfg(not(feature = "verify-winapi"))]
+        impl $name {
+            $($i)*
+        }
+
+        ffi!($($rest)*);
+    );
 }
 
-
 ffi! {
-	#[repr(C)]
-	pub struct STACKFRAME64 {
-		pub AddrPC: ADDRESS64,
-		pub AddrReturn: ADDRESS64,
-		pub AddrFrame: ADDRESS64,
-		pub AddrStack: ADDRESS64,
-		pub AddrBStore: ADDRESS64,
-		pub FuncTableEntry: PVOID,
-		pub Params: [DWORD64; 4],
-		pub Far: BOOL,
-		pub Virtual: BOOL,
-		pub Reserved: [DWORD64; 3],
-		pub KdHelp: KDHELP64,
-	}
+    #[repr(C)]
+    pub struct STACKFRAME64 {
+        pub AddrPC: ADDRESS64,
+        pub AddrReturn: ADDRESS64,
+        pub AddrFrame: ADDRESS64,
+        pub AddrStack: ADDRESS64,
+        pub AddrBStore: ADDRESS64,
+        pub FuncTableEntry: PVOID,
+        pub Params: [DWORD64; 4],
+        pub Far: BOOL,
+        pub Virtual: BOOL,
+        pub Reserved: [DWORD64; 3],
+        pub KdHelp: KDHELP64,
+    }
 
-	pub type LPSTACKFRAME64 = *mut STACKFRAME64;
+    pub type LPSTACKFRAME64 = *mut STACKFRAME64;
 
-	#[repr(C)]
-	pub struct IMAGEHLP_LINEW64 {
-		pub SizeOfStruct: DWORD,
-		pub Key: PVOID,
-		pub LineNumber: DWORD,
-		pub FileName: PWSTR,
-		pub Address: DWORD64,
-	}
+    #[repr(C)]
+    pub struct IMAGEHLP_LINEW64 {
+        pub SizeOfStruct: DWORD,
+        pub Key: PVOID,
+        pub LineNumber: DWORD,
+        pub FileName: PWSTR,
+        pub Address: DWORD64,
+    }
 
-	pub type PIMAGEHLP_LINEW64 = *mut IMAGEHLP_LINEW64;
+    pub type PIMAGEHLP_LINEW64 = *mut IMAGEHLP_LINEW64;
 
-	#[repr(C)]
-	pub struct SYMBOL_INFOW {
-		pub SizeOfStruct: ULONG,
-		pub TypeIndex: ULONG,
-		pub Reserved: [ULONG64; 2],
-		pub Index: ULONG,
-		pub Size: ULONG,
-		pub ModBase: ULONG64,
-		pub Flags: ULONG,
-		pub Value: ULONG64,
-		pub Address: ULONG64,
-		pub Register: ULONG,
-		pub Scope: ULONG,
-		pub Tag: ULONG,
-		pub NameLen: ULONG,
-		pub MaxNameLen: ULONG,
-		pub Name: [WCHAR; 1],
-	}
+    #[repr(C)]
+    pub struct SYMBOL_INFOW {
+        pub SizeOfStruct: ULONG,
+        pub TypeIndex: ULONG,
+        pub Reserved: [ULONG64; 2],
+        pub Index: ULONG,
+        pub Size: ULONG,
+        pub ModBase: ULONG64,
+        pub Flags: ULONG,
+        pub Value: ULONG64,
+        pub Address: ULONG64,
+        pub Register: ULONG,
+        pub Scope: ULONG,
+        pub Tag: ULONG,
+        pub NameLen: ULONG,
+        pub MaxNameLen: ULONG,
+        pub Name: [WCHAR; 1],
+    }
 
-	pub type PSYMBOL_INFOW = *mut SYMBOL_INFOW;
+    pub type PSYMBOL_INFOW = *mut SYMBOL_INFOW;
 
-	pub type PTRANSLATE_ADDRESS_ROUTINE64 = Option<
-		unsafe extern "system" fn(hProcess: HANDLE, hThread: HANDLE, lpaddr: LPADDRESS64) -> DWORD64,
-	>;
-	pub type PGET_MODULE_BASE_ROUTINE64 =
-		Option<unsafe extern "system" fn(hProcess: HANDLE, Address: DWORD64) -> DWORD64>;
-	pub type PFUNCTION_TABLE_ACCESS_ROUTINE64 =
-		Option<unsafe extern "system" fn(ahProcess: HANDLE, AddrBase: DWORD64) -> PVOID>;
-	pub type PREAD_PROCESS_MEMORY_ROUTINE64 = Option<
-		unsafe extern "system" fn(
-			hProcess: HANDLE,
-			qwBaseAddress: DWORD64,
-			lpBuffer: PVOID,
-			nSize: DWORD,
-			lpNumberOfBytesRead: LPDWORD,
-		) -> BOOL,
-	>;
+    pub type PTRANSLATE_ADDRESS_ROUTINE64 = Option<
+        unsafe extern "system" fn(hProcess: HANDLE, hThread: HANDLE, lpaddr: LPADDRESS64) -> DWORD64,
+    >;
+    pub type PGET_MODULE_BASE_ROUTINE64 =
+        Option<unsafe extern "system" fn(hProcess: HANDLE, Address: DWORD64) -> DWORD64>;
+    pub type PFUNCTION_TABLE_ACCESS_ROUTINE64 =
+        Option<unsafe extern "system" fn(ahProcess: HANDLE, AddrBase: DWORD64) -> PVOID>;
+    pub type PREAD_PROCESS_MEMORY_ROUTINE64 = Option<
+        unsafe extern "system" fn(
+            hProcess: HANDLE,
+            qwBaseAddress: DWORD64,
+            lpBuffer: PVOID,
+            nSize: DWORD,
+            lpNumberOfBytesRead: LPDWORD,
+        ) -> BOOL,
+    >;
 
-	#[repr(C)]
-	pub struct ADDRESS64 {
-		pub Offset: DWORD64,
-		pub Segment: WORD,
-		pub Mode: ADDRESS_MODE,
-	}
+    #[repr(C)]
+    pub struct ADDRESS64 {
+        pub Offset: DWORD64,
+        pub Segment: WORD,
+        pub Mode: ADDRESS_MODE,
+    }
 
-	pub type LPADDRESS64 = *mut ADDRESS64;
+    pub type LPADDRESS64 = *mut ADDRESS64;
 
-	pub type ADDRESS_MODE = u32;
+    pub type ADDRESS_MODE = u32;
 
-	#[repr(C)]
-	pub struct KDHELP64 {
-		pub Thread: DWORD64,
-		pub ThCallbackStack: DWORD,
-		pub ThCallbackBStore: DWORD,
-		pub NextCallback: DWORD,
-		pub FramePointer: DWORD,
-		pub KiCallUserMode: DWORD64,
-		pub KeUserCallbackDispatcher: DWORD64,
-		pub SystemRangeStart: DWORD64,
-		pub KiUserExceptionDispatcher: DWORD64,
-		pub StackBase: DWORD64,
-		pub StackLimit: DWORD64,
-		pub BuildVersion: DWORD,
-		pub Reserved0: DWORD,
-		pub Reserved1: [DWORD64; 4],
-	}
+    #[repr(C)]
+    pub struct KDHELP64 {
+        pub Thread: DWORD64,
+        pub ThCallbackStack: DWORD,
+        pub ThCallbackBStore: DWORD,
+        pub NextCallback: DWORD,
+        pub FramePointer: DWORD,
+        pub KiCallUserMode: DWORD64,
+        pub KeUserCallbackDispatcher: DWORD64,
+        pub SystemRangeStart: DWORD64,
+        pub KiUserExceptionDispatcher: DWORD64,
+        pub StackBase: DWORD64,
+        pub StackLimit: DWORD64,
+        pub BuildVersion: DWORD,
+        pub Reserved0: DWORD,
+        pub Reserved1: [DWORD64; 4],
+    }
 
-	pub const MAX_SYM_NAME: usize = 2000;
+    pub const MAX_SYM_NAME: usize = 2000;
+    pub const AddrModeFlat: ADDRESS_MODE = 3;
+    pub const TRUE: BOOL = 1;
+    pub const IMAGE_FILE_MACHINE_ARM64: u16 = 43620;
+    pub const IMAGE_FILE_MACHINE_AMD64: u16 = 34404;
+    pub const IMAGE_FILE_MACHINE_I386: u16 = 332;
 
-	pub const AddrModeFlat: ADDRESS_MODE = 3;
+    pub type DWORD = u32;
+    pub type PDWORD = *mut u32;
+    pub type BOOL = i32;
+    pub type DWORD64 = u64;
+    pub type PDWORD64 = *mut u64;
+    pub type HANDLE = *mut c_void;
+    pub type PVOID = HANDLE;
+    pub type PCWSTR = *const u16;
+    pub type PWSTR = *mut u16;
+    pub type WORD = u16;
+    pub type ULONG = u32;
+    pub type ULONG64 = u64;
+    pub type WCHAR = u16;
+    pub type PCONTEXT = *mut CONTEXT;
+    pub type LPDWORD = *mut DWORD;
+    pub type DWORDLONG = u64;
+    pub type HMODULE = HINSTANCE;
+
+    extern "system" {
+        pub fn GetCurrentProcess() -> HANDLE;
+        pub fn GetCurrentThread() -> HANDLE;
+        pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
+        pub fn LoadLibraryW(a: *const u16) -> HMODULE;
+        pub fn FreeLibrary(h: HMODULE) -> BOOL;
+        pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
+    }
+}
+
+#[cfg(target_arch = "aarch64")]
+ffi! {
+    #[repr(C, align(16))]
+    pub struct CONTEXT {
+        pub ContextFlags: DWORD,
+        pub Cpsr: DWORD,
+        pub u: CONTEXT_u,
+        pub Sp: u64,
+        pub Pc: u64,
+        pub V: [ARM64_NT_NEON128; 32],
+        pub Fpcr: DWORD,
+        pub Fpsr: DWORD,
+        pub Bcr: [DWORD; ARM64_MAX_BREAKPOINTS],
+        pub Bvr: [DWORD64; ARM64_MAX_BREAKPOINTS],
+        pub Wcr: [DWORD; ARM64_MAX_WATCHPOINTS],
+        pub Wvr: [DWORD64; ARM64_MAX_WATCHPOINTS],
+    }
+
+    #[repr(C)]
+    pub struct CONTEXT_u {
+        pub s: CONTEXT_u_s,
+    }
+
+    impl CONTEXT_u {
+        pub unsafe fn s(&self) -> &CONTEXT_u_s {
+            &self.s
+        }
+    }
+
+    #[repr(C)]
+    pub struct CONTEXT_u_s {
+        pub X0: u64,
+        pub X1: u64,
+        pub X2: u64,
+        pub X3: u64,
+        pub X4: u64,
+        pub X5: u64,
+        pub X6: u64,
+        pub X7: u64,
+        pub X8: u64,
+        pub X9: u64,
+        pub X10: u64,
+        pub X11: u64,
+        pub X12: u64,
+        pub X13: u64,
+        pub X14: u64,
+        pub X15: u64,
+        pub X16: u64,
+        pub X17: u64,
+        pub X18: u64,
+        pub X19: u64,
+        pub X20: u64,
+        pub X21: u64,
+        pub X22: u64,
+        pub X23: u64,
+        pub X24: u64,
+        pub X25: u64,
+        pub X26: u64,
+        pub X27: u64,
+        pub X28: u64,
+        pub Fp: u64,
+        pub Lr: u64,
+    }
+
+    pub const ARM64_MAX_BREAKPOINTS: usize = 8;
+    pub const ARM64_MAX_WATCHPOINTS: usize = 2;
+
+    #[repr(C)]
+    pub struct ARM64_NT_NEON128 {
+        pub D: [f64; 2],
+    }
+}
+
+#[cfg(target_arch = "x86")]
+ffi! {
+    #[repr(C)]
+    pub struct CONTEXT {
+        pub ContextFlags: DWORD,
+        pub Dr0: DWORD,
+        pub Dr1: DWORD,
+        pub Dr2: DWORD,
+        pub Dr3: DWORD,
+        pub Dr6: DWORD,
+        pub Dr7: DWORD,
+        pub FloatSave: FLOATING_SAVE_AREA,
+        pub SegGs: DWORD,
+        pub SegFs: DWORD,
+        pub SegEs: DWORD,
+        pub SegDs: DWORD,
+        pub Edi: DWORD,
+        pub Esi: DWORD,
+        pub Ebx: DWORD,
+        pub Edx: DWORD,
+        pub Ecx: DWORD,
+        pub Eax: DWORD,
+        pub Ebp: DWORD,
+        pub Eip: DWORD,
+        pub SegCs: DWORD,
+        pub EFlags: DWORD,
+        pub Esp: DWORD,
+        pub SegSs: DWORD,
+        pub ExtendedRegisters: [u8; 512],
+    }
+
+    #[repr(C)]
+    pub struct FLOATING_SAVE_AREA {
+        pub ControlWord: DWORD,
+        pub StatusWord: DWORD,
+        pub TagWord: DWORD,
+        pub ErrorOffset: DWORD,
+        pub ErrorSelector: DWORD,
+        pub DataOffset: DWORD,
+        pub DataSelector: DWORD,
+        pub RegisterArea: [u8; 80],
+        pub Spare0: DWORD,
+    }
+}
+
+#[cfg(target_arch = "x86_64")]
+ffi! {
+    #[repr(C, align(8))]
+    pub struct CONTEXT {
+        pub P1Home: DWORDLONG,
+        pub P2Home: DWORDLONG,
+        pub P3Home: DWORDLONG,
+        pub P4Home: DWORDLONG,
+        pub P5Home: DWORDLONG,
+        pub P6Home: DWORDLONG,
+
+        pub ContextFlags: DWORD,
+        pub MxCsr: DWORD,
+
+        pub SegCs: WORD,
+        pub SegDs: WORD,
+        pub SegEs: WORD,
+        pub SegFs: WORD,
+        pub SegGs: WORD,
+        pub SegSs: WORD,
+        pub EFlags: DWORD,
+
+        pub Dr0: DWORDLONG,
+        pub Dr1: DWORDLONG,
+        pub Dr2: DWORDLONG,
+        pub Dr3: DWORDLONG,
+        pub Dr6: DWORDLONG,
+        pub Dr7: DWORDLONG,
+
+        pub Rax: DWORDLONG,
+        pub Rcx: DWORDLONG,
+        pub Rdx: DWORDLONG,
+        pub Rbx: DWORDLONG,
+        pub Rsp: DWORDLONG,
+        pub Rbp: DWORDLONG,
+        pub Rsi: DWORDLONG,
+        pub Rdi: DWORDLONG,
+        pub R8:  DWORDLONG,
+        pub R9:  DWORDLONG,
+        pub R10: DWORDLONG,
+        pub R11: DWORDLONG,
+        pub R12: DWORDLONG,
+        pub R13: DWORDLONG,
+        pub R14: DWORDLONG,
+        pub R15: DWORDLONG,
+
+        pub Rip: DWORDLONG,
+
+        pub FltSave: FLOATING_SAVE_AREA,
+
+        pub VectorRegister: [M128A; 26],
+        pub VectorControl: DWORDLONG,
+
+        pub DebugControl: DWORDLONG,
+        pub LastBranchToRip: DWORDLONG,
+        pub LastBranchFromRip: DWORDLONG,
+        pub LastExceptionToRip: DWORDLONG,
+        pub LastExceptionFromRip: DWORDLONG,
+    }
+
+    #[repr(C)]
+    pub struct M128A {
+        pub Low: u64,
+        pub High: i64,
+    }
+}
+
+#[repr(C)]
+#[cfg(target_arch = "x86_64")]
+pub struct FLOATING_SAVE_AREA {
+    _Dummy: [u8; 512],
 }

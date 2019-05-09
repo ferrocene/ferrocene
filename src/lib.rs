@@ -53,7 +53,7 @@
 //!         let symbol_address = frame.symbol_address();
 //!
 //!         // Resolve this instruction pointer to a symbol name
-//!         backtrace::resolve(ip, |symbol| {
+//!         backtrace::resolve_frame(frame, |symbol| {
 //!             if let Some(name) = symbol.name() {
 //!                 // ...
 //!             }
@@ -114,6 +114,7 @@ pub use backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 
 pub use symbolize::{resolve_unsynchronized, Symbol, SymbolName};
+pub use symbolize::resolve_frame_unsynchronized;
 mod symbolize;
 
 pub use types::BytesOrWideString;
@@ -122,7 +123,7 @@ mod types;
 cfg_if! {
     if #[cfg(feature = "std")] {
         pub use backtrace::trace;
-        pub use symbolize::resolve;
+        pub use symbolize::{resolve, resolve_frame};
         pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
         mod capture;
     }

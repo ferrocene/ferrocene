@@ -1,6 +1,6 @@
 extern crate backtrace;
 
-use std::os::raw::c_void;
+use backtrace::Frame;
 use std::thread;
 
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
@@ -30,7 +30,7 @@ fn smoke_test_frames() {
     #[inline(never)] fn frame_4(start_line: u32) {
         let mut v = Vec::new();
         backtrace::trace(|cx| {
-            v.push((cx.ip(), cx.symbol_address()));
+            v.push(cx.clone());
             true
         });
 
@@ -41,55 +41,56 @@ fn smoke_test_frames() {
             return;
         }
 
-        // On 32-bit windows apparently the first frame isn't our backtrace
-        // frame but it's actually this frame. I'm not entirely sure why, but at
-        // least it seems consistent?
-        let o = if cfg!(all(windows, target_pointer_width = "32")) {
-            1
-        } else {
-            0
-        };
-        // frame offset 0 is the `backtrace::trace` function, but that's generic
+        // Various platforms have various bits of weirdness about their
+        // backtraces. To find a good starting spot let's search through the
+        // frames
+        let target = frame_4 as usize;
+        let offset = v
+            .iter()
+            .map(|frame| frame.symbol_address() as usize)
+            .enumerate()
+            .filter_map(|(i, sym)| {
+                if sym >= target {
+                    Some((sym, i))
+                } else {
+                    None
+                }
+            })
+            .min()
+            .unwrap()
+            .1;
+        let mut frames = v[offset..].iter();
+
         assert_frame(
-            &v,
-            o,
-            1,
+            frames.next().unwrap(),
             frame_4 as usize,
             "frame_4",
             "tests/smoke.rs",
             start_line + 6,
         );
         assert_frame(
-            &v,
-            o,
-            2,
+            frames.next().unwrap(),
             frame_3 as usize,
             "frame_3",
             "tests/smoke.rs",
             start_line + 3,
         );
         assert_frame(
-            &v,
-            o,
-            3,
+            frames.next().unwrap(),
             frame_2 as usize,
             "frame_2",
             "tests/smoke.rs",
             start_line + 2,
         );
         assert_frame(
-            &v,
-            o,
-            4,
+            frames.next().unwrap(),
             frame_1 as usize,
             "frame_1",
             "tests/smoke.rs",
             start_line + 1,
         );
         assert_frame(
-            &v,
-            o,
-            5,
+            frames.next().unwrap(),
             smoke_test_frames as usize,
             "smoke_test_frames",
             "",
@@ -98,21 +99,14 @@ fn smoke_test_frames() {
     }
 
     fn assert_frame(
-        syms: &[(*mut c_void, *mut c_void)],
-        offset: usize,
-        idx: usize,
+        frame: &Frame,
         actual_fn_pointer: usize,
         expected_name: &str,
         expected_file: &str,
         expected_line: u32,
     ) {
-        if offset > idx {
-            return;
-        }
-        println!("frame: {}", idx);
-        let (ip, sym) = syms[idx - offset];
-        let ip = ip as usize;
-        let sym = sym as usize;
+        let ip = frame.ip() as usize;
+        let sym = frame.symbol_address() as usize;
         assert!(ip >= sym);
         assert!(sym >= actual_fn_pointer);
 
@@ -131,7 +125,7 @@ fn smoke_test_frames() {
         let mut addr = None;
         let mut line = None;
         let mut file = None;
-        backtrace::resolve(ip as *mut c_void, |sym| {
+        backtrace::resolve_frame(frame, |sym| {
             resolved += 1;
             name = sym.name().map(|v| v.to_string());
             addr = sym.addr();

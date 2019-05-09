@@ -37,6 +37,7 @@ macro_rules! ffi {
     (#[repr($($r:tt)*)] pub struct $name:ident { $(pub $field:ident: $ty:ty,)* } $($rest:tt)*) => (
         #[repr($($r)*)]
         #[cfg(not(feature = "verify-winapi"))]
+        #[derive(Copy, Clone)]
         pub struct $name {
             $(pub $field: $ty,)*
         }
@@ -152,10 +153,10 @@ macro_rules! ffi {
         $(
             #[cfg(feature = "verify-winapi")]
             mod $name {
-                use super::*;
-
                 #[test]
                 fn assert_same() {
+                    use super::*;
+
                     assert_eq!($name as usize, winapi::$name as usize);
                     let mut x: unsafe extern "system" fn($($args)*) -> $ret;
                     x = $name;
@@ -196,6 +197,25 @@ ffi! {
     }
 
     pub type LPSTACKFRAME64 = *mut STACKFRAME64;
+
+    #[repr(C)]
+    pub struct STACKFRAME_EX {
+        pub AddrPC: ADDRESS64,
+        pub AddrReturn: ADDRESS64,
+        pub AddrFrame: ADDRESS64,
+        pub AddrStack: ADDRESS64,
+        pub AddrBStore: ADDRESS64,
+        pub FuncTableEntry: PVOID,
+        pub Params: [DWORD64; 4],
+        pub Far: BOOL,
+        pub Virtual: BOOL,
+        pub Reserved: [DWORD64; 3],
+        pub KdHelp: KDHELP64,
+        pub StackFrameSize: DWORD,
+        pub InlineFrameContext: DWORD,
+    }
+
+    pub type LPSTACKFRAME_EX = *mut STACKFRAME_EX;
 
     #[repr(C)]
     pub struct IMAGEHLP_LINEW64 {
@@ -497,6 +517,7 @@ ffi! {
 
 #[repr(C)]
 #[cfg(target_arch = "x86_64")]
+#[derive(Copy, Clone)]
 pub struct FLOATING_SAVE_AREA {
     _Dummy: [u8; 512],
 }

@@ -21,6 +21,7 @@ use libc::{self, c_char, c_int, c_void, uintptr_t};
 use SymbolName;
 
 use types::BytesOrWideString;
+use symbolize::ResolveWhat;
 
 pub enum Symbol {
     Syminfo {
@@ -160,8 +161,9 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     STATE
 }
 
-pub unsafe fn resolve(symaddr: *mut c_void, mut cb: &mut FnMut(&super::Symbol))
-{
+pub unsafe fn resolve(what: ResolveWhat, mut cb: &mut FnMut(&super::Symbol)) {
+    let symaddr = what.address_or_ip();
+
     // backtrace errors are currently swept under the rug
     let state = init_state();
     if state.is_null() {

@@ -21,6 +21,7 @@ use SymbolName;
 use dylib::Dylib;
 use dylib::Symbol as DylibSymbol;
 use types::{BytesOrWideString, c_void};
+use symbolize::ResolveWhat;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
@@ -177,7 +178,8 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
     rv
 }
 
-pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+    let addr = what.address_or_ip();
     if try_resolve(addr, cb) {
         return
     }

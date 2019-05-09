@@ -12,6 +12,7 @@ use core::{mem, slice};
 
 use types::{BytesOrWideString, c_void};
 use libc::{self, Dl_info};
+use symbolize::ResolveWhat;
 
 use SymbolName;
 
@@ -45,7 +46,8 @@ impl Symbol {
     }
 }
 
-pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+    let addr = what.address_or_ip();
     let mut info: super::Symbol = super::Symbol {
         inner: Symbol {
             inner: mem::zeroed(),

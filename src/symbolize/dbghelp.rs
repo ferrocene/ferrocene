@@ -15,18 +15,18 @@
 // moved in rustc 1.26.0 (ish). As a result, in std mode we use `std::char` to
 // retain compatibility with rustc 1.25.0, but in `no_std` mode (which is
 // 1.30.0+ already) we use `core::char`.
-#[cfg(feature = "std")]
-use std::char;
 #[cfg(not(feature = "std"))]
 use core::char;
+#[cfg(feature = "std")]
+use std::char;
 
 use core::mem;
 use core::slice;
 
-use SymbolName;
-use types::BytesOrWideString;
 use dbghelp;
 use dbghelp::ffi::*;
+use types::BytesOrWideString;
+use SymbolName;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
@@ -50,11 +50,8 @@ impl Symbol {
     }
 
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-        self.filename.map(|slice| {
-            unsafe {
-                BytesOrWideString::Wide(&*slice)
-            }
-        })
+        self.filename
+            .map(|slice| unsafe { BytesOrWideString::Wide(&*slice) })
     }
 
     pub fn lineno(&self) -> Option<u32> {
@@ -88,19 +85,20 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     };
 
     let mut displacement = 0u64;
-    let ret = dbghelp.SymFromAddrW()(GetCurrentProcess(),
-                                     addr as DWORD64,
-                                     &mut displacement,
-                                     info);
+    let ret = dbghelp.SymFromAddrW()(
+        GetCurrentProcess(),
+        addr as DWORD64,
+        &mut displacement,
+        info,
+    );
     if ret != TRUE {
-        return
+        return;
     }
 
     // If the symbol name is greater than MaxNameLen, SymFromAddrW will
     // give a buffer of (MaxNameLen - 1) characters and set NameLen to
     // the real value.
-    let name_len = ::core::cmp::min(info.NameLen as usize,
-                                    info.MaxNameLen as usize - 1);
+    let name_len = ::core::cmp::min(info.NameLen as usize, info.MaxNameLen as usize - 1);
     let name_ptr = info.Name.as_ptr() as *const u16;
     let name = slice::from_raw_parts(name_ptr, name_len);
 
@@ -119,7 +117,7 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
                 remaining = &mut tmp[len..];
                 name_len += len;
             } else {
-                break
+                break;
             }
         }
     }
@@ -128,10 +126,12 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
     let mut displacement = 0;
-    let ret = dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(),
-                                              addr as DWORD64,
-                                              &mut displacement,
-                                              &mut line);
+    let ret = dbghelp.SymGetLineFromAddrW64()(
+        GetCurrentProcess(),
+        addr as DWORD64,
+        &mut displacement,
+        &mut line,
+    );
 
     let mut filename = None;
     let mut lineno = None;
@@ -149,7 +149,6 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
         filename = Some(slice::from_raw_parts(base, len) as *const [u16]);
     }
 
-
     cb(&super::Symbol {
         inner: Symbol {
             name,
@@ -164,11 +163,8 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 #[cfg(feature = "std")]
 unsafe fn cache(filename: Option<*const [u16]>) -> Option<::std::ffi::OsString> {
     use std::os::windows::ffi::OsStringExt;
-    filename.map(|f| {
-        ::std::ffi::OsString::from_wide(&*f)
-    })
+    filename.map(|f| ::std::ffi::OsString::from_wide(&*f))
 }
 
 #[cfg(not(feature = "std"))]
-unsafe fn cache(_filename: Option<*const [u16]>) {
-}
+unsafe fn cache(_filename: Option<*const [u16]>) {}

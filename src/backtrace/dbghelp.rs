@@ -16,13 +16,12 @@ use core::prelude::v1::*;
 use winapi::shared::minwindef::*;
 use winapi::um::processthreadsapi;
 use winapi::um::winnt::{self, CONTEXT};
-use winapi::um::dbghelp;
-use winapi::um::dbghelp::*;
 
 use types::c_void;
+use crate::dbghelp;
 
 pub struct Frame {
-    inner: STACKFRAME64,
+    inner: dbghelp::STACKFRAME64,
 }
 
 impl Frame {
@@ -52,21 +51,21 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
     let image = init_frame(&mut frame.inner.inner, &context.0);
 
     // Ensure this process's symbols are initialized
-    let _cleanup = match ::dbghelp::init() {
-        Ok(cleanup) => cleanup,
+    let dbghelp = match dbghelp::init() {
+        Ok(dbghelp) => dbghelp,
         Err(()) => return, // oh well...
     };
 
     // And now that we're done with all the setup, do the stack walking!
-    while dbghelp::StackWalk64(image as DWORD,
-                               process,
-                               thread,
-                               &mut frame.inner.inner,
-                               &mut context.0 as *mut CONTEXT as *mut _,
-                               None,
-                               Some(dbghelp::SymFunctionTableAccess64),
-                               Some(dbghelp::SymGetModuleBase64),
-                               None) == TRUE {
+    while dbghelp.StackWalk64()(image as DWORD,
+                                process,
+                                thread,
+                                &mut frame.inner.inner,
+                                &mut context.0 as *mut CONTEXT as *mut _,
+                                None,
+                                Some(dbghelp.SymFunctionTableAccess64()),
+                                Some(dbghelp.SymGetModuleBase64()),
+                                None) == TRUE {
         if frame.inner.inner.AddrPC.Offset == frame.inner.inner.AddrReturn.Offset ||
             frame.inner.inner.AddrPC.Offset == 0 ||
                 frame.inner.inner.AddrReturn.Offset == 0 {
@@ -80,36 +79,36 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
 }
 
 #[cfg(target_arch = "x86_64")]
-fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
+fn init_frame(frame: &mut dbghelp::STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Rip as u64;
-    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrPC.Mode = dbghelp::AddrModeFlat;
     frame.AddrStack.Offset = ctx.Rsp as u64;
-    frame.AddrStack.Mode = AddrModeFlat;
+    frame.AddrStack.Mode = dbghelp::AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Rbp as u64;
-    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrFrame.Mode = dbghelp::AddrModeFlat;
     winnt::IMAGE_FILE_MACHINE_AMD64
 }
 
 #[cfg(target_arch = "x86")]
-fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
+fn init_frame(frame: &mut dbghelp::STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Eip as u64;
-    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrPC.Mode = dbghelp::AddrModeFlat;
     frame.AddrStack.Offset = ctx.Esp as u64;
-    frame.AddrStack.Mode = AddrModeFlat;
+    frame.AddrStack.Mode = dbghelp::AddrModeFlat;
     frame.AddrFrame.Offset = ctx.Ebp as u64;
-    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrFrame.Mode = dbghelp::AddrModeFlat;
     winnt::IMAGE_FILE_MACHINE_I386
 }
 
 #[cfg(target_arch = "aarch64")]
-fn init_frame(frame: &mut STACKFRAME64, ctx: &CONTEXT) -> WORD {
+fn init_frame(frame: &mut dbghelp::STACKFRAME64, ctx: &CONTEXT) -> WORD {
     frame.AddrPC.Offset = ctx.Pc as u64;
-    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrPC.Mode = dbghelp::AddrModeFlat;
     frame.AddrStack.Offset = ctx.Sp as u64;
-    frame.AddrStack.Mode = AddrModeFlat;
+    frame.AddrStack.Mode = dbghelp::AddrModeFlat;
     unsafe {
         frame.AddrFrame.Offset = ctx.u.s().Fp as u64;
     }
-    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrFrame.Mode = dbghelp::AddrModeFlat;
     winnt::IMAGE_FILE_MACHINE_ARM64
 }

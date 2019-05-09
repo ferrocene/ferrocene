@@ -34,7 +34,7 @@ memmap = { version = "0.7.0", optional = true }
 libc = { version = "0.2.45", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.3", features = ["dbghelp", "processthreadsapi", "winnt", "minwindef"] }
+winapi = { version = "0.3.3", features = ["processthreadsapi", "winnt", "minwindef", "libloaderapi"] }
 
 [target.'cfg(all(unix, not(target_os = "fuchsia"), not(target_os = "emscripten"), not(target_os = "macos"), not(target_os = "ios")))'.dependencies]
 backtrace-sys = { path = "backtrace-sys", version = "0.1.17", optional = true }
@@ -97,6 +97,9 @@ libbacktrace = ["backtrace-sys", "std"]
 dladdr = []
 coresymbolication = []
 gimli-symbolize = ["addr2line", "findshlibs", "memmap" ]
+
+# Internal feature to this crate, only used when testing this crate
+verify-winapi = ['winapi/dbghelp']
 
 #=======================================
 # Methods of serialization

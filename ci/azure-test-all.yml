@@ -37,5 +37,7 @@ steps:
     displayName: "Test backtrace (-default + gimli-symbolize + std)"
   - bash: cargo test --no-default-features --features 'dbghelp std'
     displayName: "Test backtrace (-default + dbghelp + std)"
+  - bash: cargo test --no-default-features --features 'dbghelp std verify-winapi'
+    displayName: "Test backtrace (-default + dbghelp + std + verify-winapi)"
   - bash: cd ./cpp_smoke_test && cargo test
     displayName: "Test cpp_smoke_test"

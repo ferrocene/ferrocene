@@ -27,11 +27,10 @@ use winapi::ctypes::*;
 use winapi::shared::basetsd::*;
 use winapi::shared::minwindef::*;
 use winapi::um::processthreadsapi;
-use winapi::um::dbghelp;
-use winapi::um::dbghelp::*;
 
 use SymbolName;
 use types::BytesOrWideString;
+use crate::dbghelp;
 
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol {
@@ -76,27 +75,27 @@ impl Symbol {
 struct Aligned8<T>(T);
 
 pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
-    const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
+    const SIZE: usize = 2 * dbghelp::MAX_SYM_NAME + mem::size_of::<dbghelp::SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);
     let data = &mut data.0;
-    let info = &mut *(data.as_mut_ptr() as *mut SYMBOL_INFOW);
-    info.MaxNameLen = MAX_SYM_NAME as ULONG;
+    let info = &mut *(data.as_mut_ptr() as *mut dbghelp::SYMBOL_INFOW);
+    info.MaxNameLen = dbghelp::MAX_SYM_NAME as ULONG;
     // the struct size in C.  the value is different to
     // `size_of::<SYMBOL_INFOW>() - MAX_SYM_NAME + 1` (== 81)
     // due to struct alignment.
     info.SizeOfStruct = 88;
 
     // Ensure this process's symbols are initialized
-    let _cleanup = match ::dbghelp::init() {
-        Ok(cleanup) => cleanup,
+    let dbghelp = match dbghelp::init() {
+        Ok(dbghelp) => dbghelp,
         Err(()) => return, // oh well...
     };
 
     let mut displacement = 0u64;
-    let ret = dbghelp::SymFromAddrW(processthreadsapi::GetCurrentProcess(),
-                                    addr as DWORD64,
-                                    &mut displacement,
-                                    info);
+    let ret = dbghelp.SymFromAddrW()(processthreadsapi::GetCurrentProcess(),
+                                     addr as DWORD64,
+                                     &mut displacement,
+                                     info);
     if ret != TRUE {
         return
     }
@@ -130,13 +129,13 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     }
     let name = &name_buffer[..name_len] as *const [u8];
 
-    let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
-    line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
+    let mut line = mem::zeroed::<dbghelp::IMAGEHLP_LINEW64>();
+    line.SizeOfStruct = mem::size_of::<dbghelp::IMAGEHLP_LINEW64>() as DWORD;
     let mut displacement = 0;
-    let ret = dbghelp::SymGetLineFromAddrW64(processthreadsapi::GetCurrentProcess(),
-                                             addr as DWORD64,
-                                             &mut displacement,
-                                             &mut line);
+    let ret = dbghelp.SymGetLineFromAddrW64()(processthreadsapi::GetCurrentProcess(),
+                                              addr as DWORD64,
+                                              &mut displacement,
+                                              &mut line);
 
     let mut filename = None;
     let mut lineno = None;

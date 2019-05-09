@@ -79,7 +79,7 @@ extern crate std;
 
 #[cfg(any(unix, target_env = "sgx"))]
 extern crate libc;
-#[cfg(feature = "verify-winapi")]
+#[cfg(all(windows, feature = "verify-winapi"))]
 extern crate winapi;
 
 #[cfg(feature = "serde_derive")]

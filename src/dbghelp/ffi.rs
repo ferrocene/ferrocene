@@ -150,6 +150,7 @@ macro_rules! ffi {
         }
 
         $(
+            #[cfg(feature = "verify-winapi")]
             mod $name {
                 use super::*;
 

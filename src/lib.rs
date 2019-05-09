@@ -148,7 +148,7 @@ mod lock {
     use std::boxed::Box;
     use std::sync::{Once, Mutex, MutexGuard, ONCE_INIT};
 
-    pub struct LockGuard(MutexGuard<'static, ()>);
+    pub struct LockGuard(Option<MutexGuard<'static, ()>>);
 
     static mut LOCK: *mut Mutex<()> = 0 as *mut _;
     static INIT: Once = ONCE_INIT;
@@ -156,23 +156,25 @@ mod lock {
 
     impl Drop for LockGuard {
         fn drop(&mut self) {
-            LOCK_HELD.with(|slot| {
-                assert!(slot.get());
-                slot.set(false);
-            });
+            if self.0.is_some() {
+                LOCK_HELD.with(|slot| {
+                    assert!(slot.get());
+                    slot.set(false);
+                });
+            }
         }
     }
 
-    pub fn lock() -> Option<LockGuard> {
+    pub fn lock() -> LockGuard {
         if LOCK_HELD.with(|l| l.get()) {
-            return None
+            return LockGuard(None)
         }
         LOCK_HELD.with(|s| s.set(true));
         unsafe {
             INIT.call_once(|| {
                 LOCK = Box::into_raw(Box::new(Mutex::new(())));
             });
-            Some(LockGuard((*LOCK).lock().unwrap()))
+            LockGuard(Some((*LOCK).lock().unwrap()))
         }
     }
 }

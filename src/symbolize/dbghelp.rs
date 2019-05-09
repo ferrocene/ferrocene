@@ -86,7 +86,11 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     // due to struct alignment.
     info.SizeOfStruct = 88;
 
-    let _c = ::dbghelp_init();
+    // Ensure this process's symbols are initialized
+    let _cleanup = match ::dbghelp::init() {
+        Ok(cleanup) => cleanup,
+        Err(()) => return, // oh well...
+    };
 
     let mut displacement = 0u64;
     let ret = dbghelp::SymFromAddrW(processthreadsapi::GetCurrentProcess(),

@@ -51,8 +51,11 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
     };
     let image = init_frame(&mut frame.inner.inner, &context.0);
 
-    // Initialize this process's symbols
-    let _c = ::dbghelp_init();
+    // Ensure this process's symbols are initialized
+    let _cleanup = match ::dbghelp::init() {
+        Ok(cleanup) => cleanup,
+        Err(()) => return, // oh well...
+    };
 
     // And now that we're done with all the setup, do the stack walking!
     while dbghelp::StackWalk64(image as DWORD,

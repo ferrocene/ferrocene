@@ -178,78 +178,76 @@ mod lock {
 }
 
 #[cfg(all(windows, feature = "dbghelp"))]
-struct Cleanup {
-    handle: winapi::um::winnt::HANDLE,
-    opts: winapi::shared::minwindef::DWORD,
-}
+mod dbghelp {
+    use core::ptr;
+    use winapi::shared::minwindef::{DWORD, TRUE};
+    use winapi::um::processthreadsapi::GetCurrentProcess;
+    use winapi::um::dbghelp;
 
-#[cfg(all(windows, feature = "dbghelp"))]
-unsafe fn dbghelp_init() -> Option<Cleanup> {
-    use winapi::shared::minwindef;
-    use winapi::um::{dbghelp, processthreadsapi};
+    pub struct Cleanup;
 
-    use std::sync::{Mutex, Once, ONCE_INIT};
-    use std::boxed::Box;
+    static mut COUNT: usize = 0;
+    static mut OPTS_ORIG: DWORD = 0;
 
-    // Initializing symbols has significant overhead, but initializing only once
-    // without cleanup causes problems for external sources. For example, the
-    // standard library checks the result of SymInitializeW (which returns an
-    // error if attempting to initialize twice) and in the event of an error,
-    // will not print a backtrace on panic. Presumably, external debuggers may
-    // have similar issues.
-    //
-    // As a compromise, we'll keep track of the number of internal initialization
-    // requests within a single API call in order to minimize the number of
-    // init/cleanup cycles.
-    static mut REF_COUNT: *mut Mutex<usize> = 0 as *mut _;
-    static mut INIT: Once = ONCE_INIT;
-
-    INIT.call_once(|| {
-        REF_COUNT = Box::into_raw(Box::new(Mutex::new(0)));
-    });
-
-    // Not sure why these are missing in winapi
-    const SYMOPT_DEFERRED_LOADS: minwindef::DWORD = 0x00000004;
+    const SYMOPT_DEFERRED_LOADS: DWORD = 0x00000004;
     extern "system" {
-        fn SymGetOptions() -> minwindef::DWORD;
-        fn SymSetOptions(options: minwindef::DWORD);
+        fn SymGetOptions() -> DWORD;
+        fn SymSetOptions(options: DWORD);
+    }
+
+    /// Unsafe because this requires external synchronization, must be done
+    /// inside of the same lock as all other backtrace operations.
+    ///
+    /// Note that the `Cleanup` returned must also be dropped within the same
+    /// lock.
+    #[cfg(all(windows, feature = "dbghelp"))]
+    pub unsafe fn init() -> Result<Cleanup, ()> {
+        // Initializing symbols has significant overhead, but initializing only
+        // once without cleanup causes problems for external sources. For
+        // example, the standard library checks the result of SymInitializeW
+        // (which returns an error if attempting to initialize twice) and in
+        // the event of an error, will not print a backtrace on panic.
+        // Presumably, external debuggers may have similar issues.
+        //
+        // As a compromise, we'll keep track of the number of internal
+        // initialization requests within a single API call in order to
+        // minimize the number of init/cleanup cycles.
+
+        if COUNT > 0 {
+            COUNT += 1;
+            return Ok(Cleanup);
+        }
+
+        OPTS_ORIG = SymGetOptions();
+
+        // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
+        // according to MSVC's own docs about this: "This is the fastest, most
+        // efficient way to use the symbol handler.", so let's do that!
+        SymSetOptions(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
+
+        let ret = dbghelp::SymInitializeW(GetCurrentProcess(), ptr::null_mut(), TRUE);
+        if ret != TRUE {
+            // Symbols may have been initialized by another library or an
+            // external debugger
+            SymSetOptions(OPTS_ORIG);
+            Err(())
+        } else {
+            COUNT += 1;
+            Ok(Cleanup)
+        }
     }
 
     impl Drop for Cleanup {
         fn drop(&mut self) {
             unsafe {
-                let mut ref_count_guard = (&*REF_COUNT).lock().unwrap();
-                *ref_count_guard -= 1;
-
-                if *ref_count_guard == 0 {
-                    dbghelp::SymCleanup(self.handle);
-                    SymSetOptions(self.opts);
+                COUNT -= 1;
+                if COUNT != 0 {
+                    return;
                 }
+
+                dbghelp::SymCleanup(GetCurrentProcess());
+                SymSetOptions(OPTS_ORIG);
             }
         }
-    }
-
-    let opts = SymGetOptions();
-    let handle = processthreadsapi::GetCurrentProcess();
-
-    let mut ref_count_guard = (&*REF_COUNT).lock().unwrap();
-
-    if *ref_count_guard > 0 {
-        *ref_count_guard += 1;
-        return Some(Cleanup { handle, opts });
-    }
-
-    SymSetOptions(opts | SYMOPT_DEFERRED_LOADS);
-
-    let ret = dbghelp::SymInitializeW(handle,
-                                      0 as *mut _,
-                                      minwindef::TRUE);
-
-    if ret != minwindef::TRUE {
-        // Symbols may have been initialized by another library or an external debugger
-        None
-    } else {
-        *ref_count_guard += 1;
-        Some(Cleanup { handle, opts })
     }
 }

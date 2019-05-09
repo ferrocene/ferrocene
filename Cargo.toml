@@ -71,7 +71,7 @@ std = []
 #   function to acquire a backtrace
 libunwind = []
 unix-backtrace = []
-dbghelp = ["std"]
+dbghelp = []
 kernel32 = []
 
 #=======================================

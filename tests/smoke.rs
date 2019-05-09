@@ -21,22 +21,13 @@ static GIMLI_SYMBOLIZE: bool = cfg!(all(feature = "gimli-symbolize", unix, targe
 #[test]
 // FIXME: shouldn't ignore this test on i686-msvc, unsure why it's failing
 #[cfg_attr(all(target_arch = "x86", target_env = "msvc"), ignore)]
+#[rustfmt::skip] // we care about line numbers here
 fn smoke_test_frames() {
     frame_1(line!());
-    #[inline(never)]
-    fn frame_1(start_line: u32) {
-        frame_2(start_line)
-    }
-    #[inline(never)]
-    fn frame_2(start_line: u32) {
-        frame_3(start_line)
-    }
-    #[inline(never)]
-    fn frame_3(start_line: u32) {
-        frame_4(start_line)
-    }
-    #[inline(never)]
-    fn frame_4(start_line: u32) {
+    #[inline(never)] fn frame_1(start_line: u32) { frame_2(start_line) }
+    #[inline(never)] fn frame_2(start_line: u32) { frame_3(start_line) }
+    #[inline(never)] fn frame_3(start_line: u32) { frame_4(start_line) }
+    #[inline(never)] fn frame_4(start_line: u32) {
         let mut v = Vec::new();
         backtrace::trace(|cx| {
             v.push((cx.ip(), cx.symbol_address()));

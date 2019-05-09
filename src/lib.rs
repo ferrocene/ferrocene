@@ -79,7 +79,7 @@ extern crate std;
 
 #[cfg(any(unix, target_env = "sgx"))]
 extern crate libc;
-#[cfg(windows)]
+#[cfg(all(windows, feature = "verify-winapi"))]
 extern crate winapi;
 
 #[cfg(feature = "serde_derive")]
@@ -181,76 +181,4 @@ mod lock {
 }
 
 #[cfg(all(windows, feature = "dbghelp"))]
-mod dbghelp {
-    use core::ptr;
-    use winapi::shared::minwindef::{DWORD, TRUE};
-    use winapi::um::dbghelp;
-    use winapi::um::processthreadsapi::GetCurrentProcess;
-
-    pub struct Cleanup;
-
-    static mut COUNT: usize = 0;
-    static mut OPTS_ORIG: DWORD = 0;
-
-    const SYMOPT_DEFERRED_LOADS: DWORD = 0x00000004;
-    extern "system" {
-        fn SymGetOptions() -> DWORD;
-        fn SymSetOptions(options: DWORD);
-    }
-
-    /// Unsafe because this requires external synchronization, must be done
-    /// inside of the same lock as all other backtrace operations.
-    ///
-    /// Note that the `Cleanup` returned must also be dropped within the same
-    /// lock.
-    #[cfg(all(windows, feature = "dbghelp"))]
-    pub unsafe fn init() -> Result<Cleanup, ()> {
-        // Initializing symbols has significant overhead, but initializing only
-        // once without cleanup causes problems for external sources. For
-        // example, the standard library checks the result of SymInitializeW
-        // (which returns an error if attempting to initialize twice) and in
-        // the event of an error, will not print a backtrace on panic.
-        // Presumably, external debuggers may have similar issues.
-        //
-        // As a compromise, we'll keep track of the number of internal
-        // initialization requests within a single API call in order to
-        // minimize the number of init/cleanup cycles.
-
-        if COUNT > 0 {
-            COUNT += 1;
-            return Ok(Cleanup);
-        }
-
-        OPTS_ORIG = SymGetOptions();
-
-        // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
-        // according to MSVC's own docs about this: "This is the fastest, most
-        // efficient way to use the symbol handler.", so let's do that!
-        SymSetOptions(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
-
-        let ret = dbghelp::SymInitializeW(GetCurrentProcess(), ptr::null_mut(), TRUE);
-        if ret != TRUE {
-            // Symbols may have been initialized by another library or an
-            // external debugger
-            SymSetOptions(OPTS_ORIG);
-            Err(())
-        } else {
-            COUNT += 1;
-            Ok(Cleanup)
-        }
-    }
-
-    impl Drop for Cleanup {
-        fn drop(&mut self) {
-            unsafe {
-                COUNT -= 1;
-                if COUNT != 0 {
-                    return;
-                }
-
-                dbghelp::SymCleanup(GetCurrentProcess());
-                SymSetOptions(OPTS_ORIG);
-            }
-        }
-    }
-}
+mod dbghelp;

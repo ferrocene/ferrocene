@@ -1,8 +1,5 @@
 extern crate backtrace;
 
-#[cfg(all(windows, feature = "dbghelp"))]
-extern crate winapi;
-
 use backtrace::Backtrace;
 
 // 50-character module name

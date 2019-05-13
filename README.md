@@ -54,7 +54,7 @@ fn main() {
         let symbol_address = frame.symbol_address();
 
         // Resolve this instruction pointer to a symbol name
-        backtrace::resolve(ip, |symbol| {
+        backtrace::resolve_frame(frame, |symbol| {
             if let Some(name) = symbol.name() {
                 // ...
             }

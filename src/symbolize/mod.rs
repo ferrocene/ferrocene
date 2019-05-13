@@ -10,6 +10,8 @@ cfg_if! {
 use rustc_demangle::{try_demangle, Demangle};
 use types::{c_void, BytesOrWideString};
 
+use backtrace::Frame;
+
 /// Resolve an address to a symbol, passing the symbol to the specified
 /// closure.
 ///
@@ -22,6 +24,9 @@ use types::{c_void, BytesOrWideString};
 ///
 /// Symbols yielded represent the execution at the specified `addr`, returning
 /// file/line pairs for that address (if available).
+///
+/// Note that if you have a `Frame` then it's recommended to use the
+/// `resolve_frame` function instead of this one.
 ///
 /// # Required features
 ///
@@ -51,6 +56,56 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
     unsafe { resolve_unsynchronized(addr, cb) }
 }
 
+/// Resolve a previously capture frame to a symbol, passing the symbol to the
+/// specified closure.
+///
+/// This functin performs the same function as `resolve` except that it takes a
+/// `Frame` as an argument instead of an address. This can allow some platform
+/// implementations of backtracing to provide more accurate symbol information
+/// or information about inline frames for example. It's recommended to use this
+/// if you can.
+///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
+///
+/// # Example
+///
+/// ```
+/// extern crate backtrace;
+///
+/// fn main() {
+///     backtrace::trace(|frame| {
+///         backtrace::resolve_frame(frame, |symbol| {
+///             // ...
+///         });
+///
+///         false // only look at the top frame
+///     });
+/// }
+/// ```
+#[cfg(feature = "std")]
+pub fn resolve_frame<F: FnMut(&Symbol)>(frame: &Frame, cb: F) {
+    let _guard = ::lock::lock();
+    unsafe { resolve_frame_unsynchronized(frame, cb) }
+}
+
+pub enum ResolveWhat<'a> {
+    Address(*mut c_void),
+    Frame(&'a Frame),
+}
+
+impl<'a> ResolveWhat<'a> {
+    #[allow(dead_code)]
+    fn address_or_ip(&self) -> *mut c_void {
+        match *self {
+            ResolveWhat::Address(a) => a,
+            ResolveWhat::Frame(ref f) => f.ip(),
+        }
+    }
+}
+
 /// Same as `resolve`, only unsafe as it's unsynchronized.
 ///
 /// This function does not have synchronization guarentees but is available when
@@ -60,7 +115,19 @@ pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
 where
     F: FnMut(&Symbol),
 {
-    resolve_imp(addr as *mut _, &mut cb)
+    resolve_imp(ResolveWhat::Address(addr), &mut cb)
+}
+
+/// Same as `resolve_frame`, only unsafe as it's unsynchronized.
+///
+/// This function does not have synchronization guarentees but is available
+/// when the `std` feature of this crate isn't compiled in. See the
+/// `resolve_frame` function for more documentation and examples.
+pub unsafe fn resolve_frame_unsynchronized<F>(frame: &Frame, mut cb: F)
+where
+    F: FnMut(&Symbol),
+{
+    resolve_imp(ResolveWhat::Frame(frame), &mut cb)
 }
 
 /// A trait representing the resolution of a symbol in a file.

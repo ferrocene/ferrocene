@@ -23,9 +23,11 @@ use std::char;
 use core::mem;
 use core::slice;
 
+use backtrace::FrameImp as Frame;
 use dbghelp;
 use dbghelp::ffi::*;
-use types::BytesOrWideString;
+use symbolize::ResolveWhat;
+use types::{c_void, BytesOrWideString};
 use SymbolName;
 
 // Store an OsString on std so we can provide the symbol name and filename.
@@ -67,7 +69,82 @@ impl Symbol {
 #[repr(C, align(8))]
 struct Aligned8<T>(T);
 
-pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+    // Ensure this process's symbols are initialized
+    let dbghelp = match dbghelp::init() {
+        Ok(dbghelp) => dbghelp,
+        Err(()) => return, // oh well...
+    };
+
+    match what {
+        ResolveWhat::Address(addr) => resolve_without_inline(&dbghelp, addr, cb),
+        ResolveWhat::Frame(frame) => match &frame.inner {
+            Frame::New(frame) => resolve_with_inline(&dbghelp, frame, cb),
+            Frame::Old(_) => resolve_without_inline(&dbghelp, frame.ip(), cb),
+        },
+    }
+}
+
+unsafe fn resolve_with_inline(
+    dbghelp: &dbghelp::Cleanup,
+    frame: &STACKFRAME_EX,
+    cb: &mut FnMut(&super::Symbol),
+) {
+    do_resolve(
+        |info| {
+            dbghelp.SymFromInlineContextW()(
+                GetCurrentProcess(),
+                frame.AddrPC.Offset,
+                frame.InlineFrameContext,
+                &mut 0,
+                info,
+            )
+        },
+        |line| {
+            dbghelp.SymGetLineFromInlineContextW()(
+                GetCurrentProcess(),
+                frame.AddrPC.Offset,
+                frame.InlineFrameContext,
+                0,
+                &mut 0,
+                line,
+            )
+        },
+        cb,
+    )
+}
+
+unsafe fn resolve_without_inline(
+    dbghelp: &dbghelp::Cleanup,
+    addr: *mut c_void,
+    cb: &mut FnMut(&super::Symbol),
+) {
+    do_resolve(
+        |info| {
+            dbghelp.SymFromAddrW()(
+                GetCurrentProcess(),
+                addr as DWORD64,
+                &mut 0,
+                info,
+            )
+        },
+        |line| {
+            dbghelp.SymGetLineFromAddrW64()(
+                GetCurrentProcess(),
+                addr as DWORD64,
+                &mut 0,
+                line,
+            )
+        },
+        cb,
+    )
+}
+
+unsafe fn do_resolve(
+    sym_from_addr: impl FnOnce(*mut SYMBOL_INFOW) -> BOOL,
+    get_line_from_addr: impl FnOnce(&mut IMAGEHLP_LINEW64) -> BOOL,
+    cb: &mut FnMut(&super::Symbol),
+) {
     const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);
     let data = &mut data.0;
@@ -78,20 +155,7 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
     // due to struct alignment.
     info.SizeOfStruct = 88;
 
-    // Ensure this process's symbols are initialized
-    let dbghelp = match dbghelp::init() {
-        Ok(dbghelp) => dbghelp,
-        Err(()) => return, // oh well...
-    };
-
-    let mut displacement = 0u64;
-    let ret = dbghelp.SymFromAddrW()(
-        GetCurrentProcess(),
-        addr as DWORD64,
-        &mut displacement,
-        info,
-    );
-    if ret != TRUE {
+    if sym_from_addr(info) != TRUE {
         return;
     }
 
@@ -125,17 +189,10 @@ pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
-    let mut displacement = 0;
-    let ret = dbghelp.SymGetLineFromAddrW64()(
-        GetCurrentProcess(),
-        addr as DWORD64,
-        &mut displacement,
-        &mut line,
-    );
 
     let mut filename = None;
     let mut lineno = None;
-    if ret == TRUE {
+    if get_line_from_addr(&mut line) == TRUE {
         lineno = Some(line.LineNumber as u32);
 
         let base = line.FileName;

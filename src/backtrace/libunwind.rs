@@ -10,15 +10,30 @@
 
 use types::c_void;
 
-pub struct Frame {
-    ctx: *mut uw::_Unwind_Context,
+pub enum Frame {
+    Raw(*mut uw::_Unwind_Context),
+    Cloned {
+        ip: *mut c_void,
+        symbol_address: *mut c_void,
+    },
 }
+
+// With a raw libunwind pointer it should only ever be access in a readonly
+// threadsafe fashion, so it's `Sync`. When sending to other threads via `Clone`
+// we always switch to a version which doesn't retain interior pointers, so we
+// should be `Send` as well.
+unsafe impl Send for Frame {}
+unsafe impl Sync for Frame {}
 
 impl Frame {
     pub fn ip(&self) -> *mut c_void {
+        let ctx = match *self {
+            Frame::Raw(ctx) => ctx,
+            Frame::Cloned { ip, .. } => return ip,
+        };
         let mut ip_before_insn = 0;
         let mut ip = unsafe {
-            uw::_Unwind_GetIPInfo(self.ctx, &mut ip_before_insn) as *mut c_void
+            uw::_Unwind_GetIPInfo(ctx, &mut ip_before_insn) as *mut c_void
         };
         if !ip.is_null() && ip_before_insn == 0 {
             // this is a non-signaling frame, so `ip` refers to the address
@@ -29,6 +44,10 @@ impl Frame {
     }
 
     pub fn symbol_address(&self) -> *mut c_void {
+        if let Frame::Cloned { symbol_address, .. } = *self {
+            return symbol_address;
+        }
+
         // dladdr() on osx gets whiny when we use FindEnclosingFunction, and
         // it appears to work fine without it, so we only use
         // FindEnclosingFunction on non-osx platforms. In doing so, we get a
@@ -47,6 +66,15 @@ impl Frame {
     }
 }
 
+impl Clone for Frame {
+    fn clone(&self) -> Frame {
+        Frame::Cloned {
+            ip: self.ip(),
+            symbol_address: self.symbol_address(),
+        }
+    }
+}
+
 #[inline(always)]
 pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
     uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
@@ -55,7 +83,7 @@ pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
                        arg: *mut c_void) -> uw::_Unwind_Reason_Code {
         let cb = unsafe { &mut *(arg as *mut &mut FnMut(&super::Frame) -> bool) };
         let cx = super::Frame {
-            inner: Frame { ctx: ctx },
+            inner: Frame::Raw(ctx),
         };
 
         let mut bomb = ::Bomb { enabled: true };

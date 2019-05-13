@@ -13,16 +13,21 @@ use libc::c_int;
 
 use types::c_void;
 
+#[derive(Clone)]
 pub struct Frame {
-    addr: *mut c_void,
+    addr: usize,
 }
 
 impl Frame {
-    pub fn ip(&self) -> *mut c_void { self.addr }
-    pub fn symbol_address(&self) -> *mut c_void { self.addr }
+    pub fn ip(&self) -> *mut c_void {
+        self.addr as *mut c_void
+    }
+    pub fn symbol_address(&self) -> *mut c_void {
+        self.ip()
+    }
 }
 
-extern {
+extern "C" {
     fn backtrace(buf: *mut *mut c_void, sz: c_int) -> c_int;
 }
 
@@ -38,10 +43,12 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
 
     for addr in buf[..cnt as usize].iter() {
         let cx = super::Frame {
-            inner: Frame { addr: *addr },
+            inner: Frame {
+                addr: *addr as usize,
+            },
         };
         if !cb(&cx) {
-            return
+            return;
         }
     }
 }

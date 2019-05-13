@@ -134,3 +134,4 @@ required-features = ["std"]
 [[test]]
 name = "smoke"
 required-features = ["std"]
+edition = '2018'

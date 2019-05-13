@@ -40,7 +40,6 @@ use types::c_void;
 ///     });
 /// }
 /// ```
-#[inline(always)]
 #[cfg(feature = "std")]
 pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
     let _guard = ::lock::lock();
@@ -52,7 +51,6 @@ pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
 /// This function does not have synchronization guarentees but is available
 /// when the `std` feature of this crate isn't compiled in. See the `trace`
 /// function for more documentation and examples.
-#[inline(never)]
 pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)
 }
@@ -63,8 +61,9 @@ pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
 /// The tracing function's closure will be yielded frames, and the frame is
 /// virtually dispatched as the underlying implementation is not always known
 /// until runtime.
+#[derive(Clone)]
 pub struct Frame {
-    inner: FrameImp,
+    pub(crate) inner: FrameImp,
 }
 
 impl Frame {
@@ -110,20 +109,20 @@ cfg_if! {
                  target_env="sgx"))] {
         mod libunwind;
         use self::libunwind::trace as trace_imp;
-        use self::libunwind::Frame as FrameImp;
+        pub(crate) use self::libunwind::Frame as FrameImp;
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
                         feature = "unix-backtrace"))] {
         mod unix_backtrace;
         use self::unix_backtrace::trace as trace_imp;
-        use self::unix_backtrace::Frame as FrameImp;
+        pub(crate) use self::unix_backtrace::Frame as FrameImp;
     } else if #[cfg(all(windows, feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::trace as trace_imp;
-        use self::dbghelp::Frame as FrameImp;
+        pub(crate) use self::dbghelp::Frame as FrameImp;
     } else {
         mod noop;
         use self::noop::trace as trace_imp;
-        use self::noop::Frame as FrameImp;
+        pub(crate) use self::noop::Frame as FrameImp;
     }
 }

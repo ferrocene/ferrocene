@@ -19,7 +19,7 @@
 
 use core::mem;
 use core::ptr;
-use dbghelp::ffi::{DWORD, BOOL, HANDLE, DWORD64, PVOID, PCWSTR};
+use dbghelp::ffi::{BOOL, DWORD, DWORD64, HANDLE, PCWSTR, PVOID};
 
 pub mod ffi;
 
@@ -28,11 +28,44 @@ pub mod ffi;
 // winapi.
 #[cfg(feature = "verify-winapi")]
 mod dbghelp {
+    use super::ffi;
     pub use winapi::um::dbghelp::*;
 
     extern "system" {
+        // Not defined in winapi yet
         pub fn SymGetOptions() -> u32;
         pub fn SymSetOptions(_: u32);
+
+        // This is defined in winapi, but it's incorrect (FIXME winapi-rs#768)
+        pub fn StackWalkEx(
+            MachineType: ffi::DWORD,
+            hProcess: ffi::HANDLE,
+            hThread: ffi::HANDLE,
+            StackFrame: ffi::LPSTACKFRAME_EX,
+            ContextRecord: ffi::PVOID,
+            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64,
+            Flags: ffi::DWORD,
+        ) -> ffi::BOOL;
+
+        // Not defined in winapi yet
+        pub fn SymFromInlineContextW(
+            hProcess: ffi::HANDLE,
+            Address: ffi::DWORD64,
+            InlineContext: ffi::ULONG,
+            Displacement: ffi::PDWORD64,
+            Symbol: ffi::PSYMBOL_INFOW
+        ) -> ffi::BOOL;
+        pub fn SymGetLineFromInlineContextW(
+            hProcess: ffi::HANDLE,
+            dwAddr: ffi::DWORD64,
+            InlineContext: ffi::ULONG,
+            qwModuleBaseAddress: ffi::DWORD64,
+            pdwDisplacement: ffi::PDWORD,
+            Line: ffi::PIMAGEHLP_LINEW64
+        ) -> ffi::BOOL;
     }
 
     pub fn assert_equal_types<T>(a: T, _b: T) -> T {
@@ -110,16 +143,16 @@ macro_rules! dbghelp {
             // Function for each method we'd like to use. When called it will
             // either read the cached function pointer or load it and return the
             // loaded value. Loads are asserted to succeed.
-            $(fn $name(&mut self) -> $name {
+            $(pub fn $name(&mut self) -> Option<$name> {
                 unsafe {
                     if self.$name == 0 {
                         let name = concat!(stringify!($name), "\0");
-                        self.$name = self.symbol(name.as_bytes()).unwrap();
+                        self.$name = self.symbol(name.as_bytes())?;
                     }
                     let ret = mem::transmute::<usize, $name>(self.$name);
                     #[cfg(feature = "verify-winapi")]
                     dbghelp::assert_equal_types(ret, dbghelp::$name);
-                    return ret;
+                    Some(ret)
                 }
             })*
 
@@ -139,9 +172,15 @@ macro_rules! dbghelp {
         impl Cleanup {
             $(pub fn $name(&self) -> $name {
                 unsafe {
-                    DBGHELP.$name()
+                    DBGHELP.$name().unwrap()
                 }
             })*
+
+            pub fn dbghelp(&self) -> *mut Dbghelp {
+                unsafe {
+                    &mut DBGHELP
+                }
+            }
         }
     )
 
@@ -178,18 +217,45 @@ dbghelp! {
             hProcess: HANDLE,
             AddrBase: DWORD64
         ) -> DWORD64;
-		fn SymFromAddrW(
-			hProcess: HANDLE,
-			Address: DWORD64,
-			Displacement: ffi::PDWORD64,
-			Symbol: ffi::PSYMBOL_INFOW
-		) -> BOOL;
-		fn SymGetLineFromAddrW64(
-			hProcess: HANDLE,
-			dwAddr: DWORD64,
-			pdwDisplacement: ffi::PDWORD,
-			Line: ffi::PIMAGEHLP_LINEW64
-		) -> BOOL;
+        fn SymFromAddrW(
+            hProcess: HANDLE,
+            Address: DWORD64,
+            Displacement: ffi::PDWORD64,
+            Symbol: ffi::PSYMBOL_INFOW
+        ) -> BOOL;
+        fn SymGetLineFromAddrW64(
+            hProcess: HANDLE,
+            dwAddr: DWORD64,
+            pdwDisplacement: ffi::PDWORD,
+            Line: ffi::PIMAGEHLP_LINEW64
+        ) -> BOOL;
+        fn StackWalkEx(
+            MachineType: DWORD,
+            hProcess: HANDLE,
+            hThread: HANDLE,
+            StackFrame: ffi::LPSTACKFRAME_EX,
+            ContextRecord: PVOID,
+            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64,
+            Flags: DWORD
+        ) -> BOOL;
+        fn SymFromInlineContextW(
+            hProcess: HANDLE,
+            Address: DWORD64,
+            InlineContext: ffi::ULONG,
+            Displacement: ffi::PDWORD64,
+            Symbol: ffi::PSYMBOL_INFOW
+        ) -> BOOL;
+        fn SymGetLineFromInlineContextW(
+            hProcess: HANDLE,
+            dwAddr: DWORD64,
+            InlineContext: ffi::ULONG,
+            qwModuleBaseAddress: DWORD64,
+            pdwDisplacement: ffi::PDWORD,
+            Line: ffi::PIMAGEHLP_LINEW64
+        ) -> BOOL;
     }
 }
 
@@ -228,18 +294,19 @@ pub unsafe fn init() -> Result<Cleanup, ()> {
     // that fails.
     DBGHELP.open()?;
 
-    OPTS_ORIG = DBGHELP.SymGetOptions()();
+    OPTS_ORIG = DBGHELP.SymGetOptions().unwrap()();
 
     // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
     // according to MSVC's own docs about this: "This is the fastest, most
     // efficient way to use the symbol handler.", so let's do that!
-    DBGHELP.SymSetOptions()(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
+    DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
 
-    let ret = DBGHELP.SymInitializeW()(ffi::GetCurrentProcess(), ptr::null_mut(), ffi::TRUE);
+    let ret =
+        DBGHELP.SymInitializeW().unwrap()(ffi::GetCurrentProcess(), ptr::null_mut(), ffi::TRUE);
     if ret != ffi::TRUE {
         // Symbols may have been initialized by another library or an
         // external debugger
-        DBGHELP.SymSetOptions()(OPTS_ORIG);
+        DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
         DBGHELP.close();
         Err(())
     } else {
@@ -261,8 +328,8 @@ impl Drop for Cleanup {
             // required to cooperate with libstd as libstd's backtracing will
             // assert symbol initialization succeeds and will clean up after the
             // backtrace is finished.
-            DBGHELP.SymCleanup()(ffi::GetCurrentProcess());
-            DBGHELP.SymSetOptions()(OPTS_ORIG);
+            DBGHELP.SymCleanup().unwrap()(ffi::GetCurrentProcess());
+            DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
 
             // We can in theory leak this to stay in a global and we simply
             // always reuse it, but for now let's be tidy and release all our

@@ -13,6 +13,7 @@ use std::prelude::v1::*;
 
 use SymbolName;
 use types::BytesOrWideString;
+use symbolize::ResolveWhat;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -107,7 +108,9 @@ where
     });
 }
 
-pub fn resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+pub fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+    let addr = what.address_or_ip();
+
     // First, find the file containing the segment that the given AVMA (after
     // relocation) address falls within. Use the containing segment to compute
     // the SVMA (before relocation) address.

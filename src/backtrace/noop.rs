@@ -3,6 +3,7 @@ use types::c_void;
 #[inline(always)]
 pub fn trace(_cb: &mut FnMut(&super::Frame) -> bool) {}
 
+#[derive(Clone)]
 pub struct Frame;
 
 impl Frame {

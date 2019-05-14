@@ -7,7 +7,7 @@ use std::env;
 use std::fs::File;
 use std::mem;
 use libc::c_void;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::u32;
 use std::prelude::v1::*;
 
@@ -215,6 +215,10 @@ impl Symbol {
 
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         self.file.as_ref().map(|f| BytesOrWideString::Bytes(f.as_bytes()))
+    }
+
+    pub fn filename(&self) -> Option<&Path> {
+        self.file.as_ref().map(Path::new)
     }
 
     pub fn lineno(&self) -> Option<u32> {

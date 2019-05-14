@@ -61,8 +61,10 @@ impl Symbol {
     }
 
     #[cfg(feature = "std")]
-    pub fn filename(&self) -> Option<&::std::ffi::OsString> {
-        self._filename_cache.as_ref()
+    pub fn filename(&self) -> Option<&::std::path::Path> {
+        use std::path::Path;
+
+        self._filename_cache.as_ref().map(Path::new)
     }
 }
 

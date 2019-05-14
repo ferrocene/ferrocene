@@ -41,6 +41,11 @@ impl Symbol {
         None
     }
 
+    #[cfg(feature = "std")]
+    pub fn filename(&self) -> Option<&::std::path::Path> {
+        None
+    }
+
     pub fn lineno(&self) -> Option<u32> {
         None
     }

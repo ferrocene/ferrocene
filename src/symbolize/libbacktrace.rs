@@ -58,17 +58,30 @@ impl Symbol {
         if pc == 0 {None} else {Some(pc as *mut _)}
     }
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+    fn filename_bytes(&self) -> Option<&[u8]> {
         match *self {
             Symbol::Syminfo { .. } => None,
             Symbol::Pcinfo { filename, .. } => {
                 let ptr = filename as *const u8;
                 unsafe {
                     let len = libc::strlen(filename);
-                    Some(BytesOrWideString::Bytes(slice::from_raw_parts(ptr, len)))
+                    Some(slice::from_raw_parts(ptr, len))
                 }
             }
         }
+    }
+
+    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+        self.filename_bytes().map(BytesOrWideString::Bytes)
+    }
+
+    #[cfg(feature = "std")]
+    pub fn filename(&self) -> Option<&::std::path::Path> {
+        use std::os::unix::prelude::*;
+        use std::path::Path;
+        use std::ffi::OsStr;
+
+        self.filename_bytes().map(OsStr::from_bytes).map(Path::new)
     }
 
     pub fn lineno(&self) -> Option<u32> {

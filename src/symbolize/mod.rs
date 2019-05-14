@@ -187,24 +187,7 @@ impl Symbol {
     #[cfg(feature = "std")]
     #[allow(unreachable_code)]
     pub fn filename(&self) -> Option<&Path> {
-        #[cfg(unix)]
-        {
-            use std::ffi::OsStr;
-            use std::os::unix::ffi::OsStrExt;
-
-            return match self.filename_raw() {
-                Some(BytesOrWideString::Bytes(slice)) => Some(Path::new(OsStr::from_bytes(slice))),
-                None => None,
-                _ => unreachable!(),
-            };
-        }
-
-        #[cfg(all(windows, feature = "dbghelp"))]
-        {
-            return self.inner.filename().map(Path::new);
-        }
-
-        None
+        self.inner.filename()
     }
 }
 

@@ -18,8 +18,8 @@ use libc::{self, c_char, c_int, c_void, uintptr_t};
 
 use SymbolName;
 
-use types::BytesOrWideString;
 use symbolize::ResolveWhat;
+use types::BytesOrWideString;
 
 pub enum Symbol {
     Syminfo {
@@ -45,7 +45,10 @@ impl Symbol {
         } else {
             unsafe {
                 let len = libc::strlen(ptr);
-                Some(SymbolName::new(slice::from_raw_parts(ptr as *const u8, len)))
+                Some(SymbolName::new(slice::from_raw_parts(
+                    ptr as *const u8,
+                    len,
+                )))
             }
         }
     }
@@ -55,7 +58,11 @@ impl Symbol {
             Symbol::Syminfo { pc, .. } => pc,
             Symbol::Pcinfo { pc, .. } => pc,
         };
-        if pc == 0 {None} else {Some(pc as *mut _)}
+        if pc == 0 {
+            None
+        } else {
+            Some(pc as *mut _)
+        }
     }
 
     fn filename_bytes(&self) -> Option<&[u8]> {
@@ -77,9 +84,9 @@ impl Symbol {
 
     #[cfg(feature = "std")]
     pub fn filename(&self) -> Option<&::std::path::Path> {
+        use std::ffi::OsStr;
         use std::os::unix::prelude::*;
         use std::path::Path;
-        use std::ffi::OsStr;
 
         self.filename_bytes().map(OsStr::from_bytes).map(Path::new)
     }
@@ -92,44 +99,53 @@ impl Symbol {
     }
 }
 
-extern fn error_cb(_data: *mut c_void, _msg: *const c_char,
-                   _errnum: c_int) {
+extern "C" fn error_cb(_data: *mut c_void, _msg: *const c_char, _errnum: c_int) {
     // do nothing for now
 }
 
-extern fn syminfo_cb(data: *mut c_void,
-                     pc: uintptr_t,
-                     symname: *const c_char,
-                     _symval: uintptr_t,
-                     _symsize: uintptr_t) {
+extern "C" fn syminfo_cb(
+    data: *mut c_void,
+    pc: uintptr_t,
+    symname: *const c_char,
+    _symval: uintptr_t,
+    _symsize: uintptr_t,
+) {
     unsafe {
-        call(data, &super::Symbol {
-            inner: Symbol::Syminfo {
-                pc: pc,
-                symname: symname,
+        call(
+            data,
+            &super::Symbol {
+                inner: Symbol::Syminfo {
+                    pc: pc,
+                    symname: symname,
+                },
             },
-        });
+        );
     }
 }
 
-extern fn pcinfo_cb(data: *mut c_void,
-                    pc: uintptr_t,
-                    filename: *const c_char,
-                    lineno: c_int,
-                    function: *const c_char) -> c_int {
+extern "C" fn pcinfo_cb(
+    data: *mut c_void,
+    pc: uintptr_t,
+    filename: *const c_char,
+    lineno: c_int,
+    function: *const c_char,
+) -> c_int {
     unsafe {
         if filename.is_null() || function.is_null() {
-            return -1
+            return -1;
         }
-        call(data, &super::Symbol {
-            inner: Symbol::Pcinfo {
-                pc: pc,
-                filename: filename,
-                lineno: lineno,
-                function: function,
+        call(
+            data,
+            &super::Symbol {
+                inner: Symbol::Pcinfo {
+                    pc: pc,
+                    filename: filename,
+                    lineno: lineno,
+                    function: function,
+                },
             },
-        });
-        return 0
+        );
+        return 0;
     }
 }
 
@@ -151,31 +167,81 @@ unsafe fn call(data: *mut c_void, sym: &super::Symbol) {
 // that is calculated the first time this is requested. Remember that
 // backtracing all happens serially (one global lock).
 //
-// Things don't work so well on not-Linux since libbacktrace can't track down
-// that executable this is. We at one point used env::current_exe but it turns
-// out that there are some serious security issues with that approach.
-//
-// Specifically, on certain platforms like BSDs, a malicious actor can cause an
-// arbitrary file to be placed at the path returned by current_exe. libbacktrace
-// does not behave defensively in the presence of ill-formed DWARF information,
-// and has been demonstrated to segfault in at least one case. There is no
-// evidence at the moment to suggest that a more carefully constructed file
-// can't cause arbitrary code execution. As a result of all of this, we don't
-// hint libbacktrace with the path to the current process.
-//
-// Finally, the lack of synchronization here is due to the requirement that
+// Note the lack of synchronization here is due to the requirement that
 // `resolve` is externally synchronized.
 unsafe fn init_state() -> *mut bt::backtrace_state {
     static mut STATE: *mut bt::backtrace_state = 0 as *mut _;
 
-    if STATE.is_null() {
-        // Our libbacktrace may not have multithreading support, so
-        // set `threaded = 0` and synchronize ourselves.
-        STATE = bt::backtrace_create_state(ptr::null(), 0, error_cb,
-                                           ptr::null_mut());
+    if !STATE.is_null() {
+        return STATE;
     }
 
-    STATE
+    STATE = bt::backtrace_create_state(
+        load_filename(),
+        // Don't exercise threadsafe capabilities of libbacktrace since
+        // we're always calling it in a synchronized fashion.
+        0,
+        error_cb,
+        ptr::null_mut(), // no extra data
+    );
+
+    return STATE;
+
+    // Note that for libbacktrace to operate at all it needs to find the DWARF
+    // debug info for the current executable. It typically does that via a
+    // number of mechanisms including, but not limited to:
+    //
+    // * /proc/self/exe on supported platforms
+    // * The filename passed in below
+    //
+    // The libbacktrace library is a big wad of C code. This naturally means
+    // it's got memory safety vulnerabilities, especially when handling
+    // malformed debuginfo. Libstd has run into plenty of these historically.
+    //
+    // Turns out that if we pass in a filename here it's possible on some
+    // platforms (like BSDs) where a malicious actor can cause an arbitrary file
+    // to be placed at that location. This means that if we tell libbacktrace
+    // about a filename it may be using an arbitrary file, possibly causing
+    // segfaults. If we don't tell libbacktrace anything though then it won't do
+    // anything on platforms that don't support paths like /proc/self/exe!
+    //
+    // As a result we only, on some platforms, pass an explicit filename.
+    // Currently this is only what OSX does to match what libstd does, as the
+    // probing logic in libbacktrace is thought to be "good enough". Eventually
+    // we'll want to switch to a 100% safe version like gimli...
+    cfg_if! {
+        if #[cfg(any(target_os = "macos", target_os = "ios"))] {
+            // Note that ideally we'd use `std::env::current_exe`, but we can't
+            // require `std` here.
+            //
+            // Use `_NSGetExecutablePath` to load the current executable path
+            // into a static area (which if it's too small just give up).
+            //
+            // Note that we're seriously trusting libbacktrace here to not die
+            // on corrupt executables, but it surely does...
+            unsafe fn load_filename() -> *const libc::c_char {
+                const N: usize = 256;
+                static mut BUF: [u8; N] = [0; N];
+                extern {
+                    fn _NSGetExecutablePath(
+                        buf: *mut libc::c_char,
+                        bufsize: *mut u32,
+                    ) -> libc::c_int;
+                }
+                let mut sz: u32 = BUF.len() as u32;
+                let ptr = BUF.as_mut_ptr() as *mut libc::c_char;
+                if _NSGetExecutablePath(ptr, &mut sz) == 0 {
+                    ptr
+                } else {
+                    ptr::null()
+                }
+            }
+        } else {
+            unsafe fn load_filename() -> *const libc::c_char {
+                ptr::null()
+            }
+        }
+    }
 }
 
 pub unsafe fn resolve(what: ResolveWhat, mut cb: &mut FnMut(&super::Symbol)) {
@@ -184,15 +250,23 @@ pub unsafe fn resolve(what: ResolveWhat, mut cb: &mut FnMut(&super::Symbol)) {
     // backtrace errors are currently swept under the rug
     let state = init_state();
     if state.is_null() {
-        return
+        return;
     }
 
-    let ret = bt::backtrace_pcinfo(state, symaddr as uintptr_t,
-                                   pcinfo_cb, error_cb,
-                                   &mut cb as *mut _ as *mut _);
+    let ret = bt::backtrace_pcinfo(
+        state,
+        symaddr as uintptr_t,
+        pcinfo_cb,
+        error_cb,
+        &mut cb as *mut _ as *mut _,
+    );
     if ret != 0 {
-        bt::backtrace_syminfo(state, symaddr as uintptr_t,
-                              syminfo_cb, error_cb,
-                              &mut cb as *mut _ as *mut _);
+        bt::backtrace_syminfo(
+            state,
+            symaddr as uintptr_t,
+            syminfo_cb,
+            error_cb,
+            &mut cb as *mut _ as *mut _,
+        );
     }
 }

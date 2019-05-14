@@ -381,7 +381,7 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(all(windows, feature = "dbghelp"))] {
+    if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
@@ -402,7 +402,7 @@ cfg_if! {
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "libbacktrace",
-                        unix,
+                        any(unix, all(windows, target_env = "gnu")),
                         not(target_os = "fuchsia"),
                         not(target_os = "emscripten")))] {
         mod libbacktrace;

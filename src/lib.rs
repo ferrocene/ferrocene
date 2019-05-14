@@ -77,7 +77,6 @@
 #[macro_use]
 extern crate std;
 
-#[cfg(any(unix, target_env = "sgx"))]
 extern crate libc;
 #[cfg(all(windows, feature = "verify-winapi"))]
 extern crate winapi;
@@ -183,3 +182,5 @@ mod lock {
 
 #[cfg(all(windows, feature = "dbghelp"))]
 mod dbghelp;
+#[cfg(windows)]
+mod windows;

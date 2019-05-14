@@ -19,17 +19,18 @@
 
 use core::mem;
 use core::ptr;
-use dbghelp::ffi::{BOOL, DWORD, DWORD64, HANDLE, PCWSTR, PVOID};
-
-pub mod ffi;
+use windows::*;
 
 // Work around `SymGetOptions` and `SymSetOptions` not being present in winapi
 // itself. Otherwise this is only used when we're double-checking types against
 // winapi.
 #[cfg(feature = "verify-winapi")]
 mod dbghelp {
-    use super::ffi;
-    pub use winapi::um::dbghelp::*;
+    pub use winapi::um::dbghelp::{
+        StackWalk64, SymCleanup, SymFromAddrW, SymFunctionTableAccess64, SymGetLineFromAddrW64,
+        SymGetModuleBase64, SymInitializeW,
+    };
+    use windows::*;
 
     extern "system" {
         // Not defined in winapi yet
@@ -38,34 +39,34 @@ mod dbghelp {
 
         // This is defined in winapi, but it's incorrect (FIXME winapi-rs#768)
         pub fn StackWalkEx(
-            MachineType: ffi::DWORD,
-            hProcess: ffi::HANDLE,
-            hThread: ffi::HANDLE,
-            StackFrame: ffi::LPSTACKFRAME_EX,
-            ContextRecord: ffi::PVOID,
-            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
-            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
-            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
-            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64,
-            Flags: ffi::DWORD,
-        ) -> ffi::BOOL;
+            MachineType: DWORD,
+            hProcess: HANDLE,
+            hThread: HANDLE,
+            StackFrame: LPSTACKFRAME_EX,
+            ContextRecord: PVOID,
+            ReadMemoryRoutine: PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: PTRANSLATE_ADDRESS_ROUTINE64,
+            Flags: DWORD,
+        ) -> BOOL;
 
         // Not defined in winapi yet
         pub fn SymFromInlineContextW(
-            hProcess: ffi::HANDLE,
-            Address: ffi::DWORD64,
-            InlineContext: ffi::ULONG,
-            Displacement: ffi::PDWORD64,
-            Symbol: ffi::PSYMBOL_INFOW
-        ) -> ffi::BOOL;
+            hProcess: HANDLE,
+            Address: DWORD64,
+            InlineContext: ULONG,
+            Displacement: PDWORD64,
+            Symbol: PSYMBOL_INFOW,
+        ) -> BOOL;
         pub fn SymGetLineFromInlineContextW(
-            hProcess: ffi::HANDLE,
-            dwAddr: ffi::DWORD64,
-            InlineContext: ffi::ULONG,
-            qwModuleBaseAddress: ffi::DWORD64,
-            pdwDisplacement: ffi::PDWORD,
-            Line: ffi::PIMAGEHLP_LINEW64
-        ) -> ffi::BOOL;
+            hProcess: HANDLE,
+            dwAddr: DWORD64,
+            InlineContext: ULONG,
+            qwModuleBaseAddress: DWORD64,
+            pdwDisplacement: PDWORD,
+            Line: PIMAGEHLP_LINEW64,
+        ) -> BOOL;
     }
 
     pub fn assert_equal_types<T>(a: T, _b: T) -> T {
@@ -81,7 +82,7 @@ macro_rules! dbghelp {
     }) => (
         pub struct Dbghelp {
             /// The loaded DLL for `dbghelp.dll`
-            dll: ffi::HMODULE,
+            dll: HMODULE,
 
             // Each function pointer for each function we might use
             $($name: usize,)*
@@ -120,7 +121,7 @@ macro_rules! dbghelp {
                     0,
                 ];
                 unsafe {
-                    self.dll = ffi::LoadLibraryW(lib.as_ptr());
+                    self.dll = LoadLibraryW(lib.as_ptr());
                     if self.dll.is_null() {
                         Err(())
                     }  else {
@@ -135,7 +136,7 @@ macro_rules! dbghelp {
                 assert!(!self.dll.is_null());
                 unsafe {
                     $(self.$name = 0;)*
-                    ffi::FreeLibrary(self.dll);
+                    FreeLibrary(self.dll);
                     self.dll = ptr::null_mut();
                 }
             }
@@ -158,7 +159,7 @@ macro_rules! dbghelp {
 
             fn symbol(&self, symbol: &[u8]) -> Option<usize> {
                 unsafe {
-                    match ffi::GetProcAddress(self.dll, symbol.as_ptr() as *const _) as usize {
+                    match GetProcAddress(self.dll, symbol.as_ptr() as *const _) as usize {
                         0 => None,
                         n => Some(n),
                     }
@@ -202,12 +203,12 @@ dbghelp! {
             MachineType: DWORD,
             hProcess: HANDLE,
             hThread: HANDLE,
-            StackFrame: ffi::LPSTACKFRAME64,
+            StackFrame: LPSTACKFRAME64,
             ContextRecord: PVOID,
-            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
-            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
-            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
-            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64
+            ReadMemoryRoutine: PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: PTRANSLATE_ADDRESS_ROUTINE64
         ) -> BOOL;
         fn SymFunctionTableAccess64(
             hProcess: HANDLE,
@@ -220,41 +221,41 @@ dbghelp! {
         fn SymFromAddrW(
             hProcess: HANDLE,
             Address: DWORD64,
-            Displacement: ffi::PDWORD64,
-            Symbol: ffi::PSYMBOL_INFOW
+            Displacement: PDWORD64,
+            Symbol: PSYMBOL_INFOW
         ) -> BOOL;
         fn SymGetLineFromAddrW64(
             hProcess: HANDLE,
             dwAddr: DWORD64,
-            pdwDisplacement: ffi::PDWORD,
-            Line: ffi::PIMAGEHLP_LINEW64
+            pdwDisplacement: PDWORD,
+            Line: PIMAGEHLP_LINEW64
         ) -> BOOL;
         fn StackWalkEx(
             MachineType: DWORD,
             hProcess: HANDLE,
             hThread: HANDLE,
-            StackFrame: ffi::LPSTACKFRAME_EX,
+            StackFrame: LPSTACKFRAME_EX,
             ContextRecord: PVOID,
-            ReadMemoryRoutine: ffi::PREAD_PROCESS_MEMORY_ROUTINE64,
-            FunctionTableAccessRoutine: ffi::PFUNCTION_TABLE_ACCESS_ROUTINE64,
-            GetModuleBaseRoutine: ffi::PGET_MODULE_BASE_ROUTINE64,
-            TranslateAddress: ffi::PTRANSLATE_ADDRESS_ROUTINE64,
+            ReadMemoryRoutine: PREAD_PROCESS_MEMORY_ROUTINE64,
+            FunctionTableAccessRoutine: PFUNCTION_TABLE_ACCESS_ROUTINE64,
+            GetModuleBaseRoutine: PGET_MODULE_BASE_ROUTINE64,
+            TranslateAddress: PTRANSLATE_ADDRESS_ROUTINE64,
             Flags: DWORD
         ) -> BOOL;
         fn SymFromInlineContextW(
             hProcess: HANDLE,
             Address: DWORD64,
-            InlineContext: ffi::ULONG,
-            Displacement: ffi::PDWORD64,
-            Symbol: ffi::PSYMBOL_INFOW
+            InlineContext: ULONG,
+            Displacement: PDWORD64,
+            Symbol: PSYMBOL_INFOW
         ) -> BOOL;
         fn SymGetLineFromInlineContextW(
             hProcess: HANDLE,
             dwAddr: DWORD64,
-            InlineContext: ffi::ULONG,
+            InlineContext: ULONG,
             qwModuleBaseAddress: DWORD64,
-            pdwDisplacement: ffi::PDWORD,
-            Line: ffi::PIMAGEHLP_LINEW64
+            pdwDisplacement: PDWORD,
+            Line: PIMAGEHLP_LINEW64
         ) -> BOOL;
     }
 }
@@ -301,9 +302,8 @@ pub unsafe fn init() -> Result<Cleanup, ()> {
     // efficient way to use the symbol handler.", so let's do that!
     DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
 
-    let ret =
-        DBGHELP.SymInitializeW().unwrap()(ffi::GetCurrentProcess(), ptr::null_mut(), ffi::TRUE);
-    if ret != ffi::TRUE {
+    let ret = DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
+    if ret != TRUE {
         // Symbols may have been initialized by another library or an
         // external debugger
         DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
@@ -328,7 +328,7 @@ impl Drop for Cleanup {
             // required to cooperate with libstd as libstd's backtracing will
             // assert symbol initialization succeeds and will clean up after the
             // backtrace is finished.
-            DBGHELP.SymCleanup().unwrap()(ffi::GetCurrentProcess());
+            DBGHELP.SymCleanup().unwrap()(GetCurrentProcess());
             DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
 
             // We can in theory leak this to stay in a global and we simply

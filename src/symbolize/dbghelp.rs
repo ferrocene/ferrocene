@@ -25,9 +25,9 @@ use core::slice;
 
 use backtrace::FrameImp as Frame;
 use dbghelp;
-use dbghelp::ffi::*;
 use symbolize::ResolveWhat;
 use types::{c_void, BytesOrWideString};
+use windows::*;
 use SymbolName;
 
 // Store an OsString on std so we can provide the symbol name and filename.
@@ -122,22 +122,8 @@ unsafe fn resolve_without_inline(
     cb: &mut FnMut(&super::Symbol),
 ) {
     do_resolve(
-        |info| {
-            dbghelp.SymFromAddrW()(
-                GetCurrentProcess(),
-                addr as DWORD64,
-                &mut 0,
-                info,
-            )
-        },
-        |line| {
-            dbghelp.SymGetLineFromAddrW64()(
-                GetCurrentProcess(),
-                addr as DWORD64,
-                &mut 0,
-                line,
-            )
-        },
+        |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr as DWORD64, &mut 0, info),
+        |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr as DWORD64, &mut 0, line),
         cb,
     )
 }

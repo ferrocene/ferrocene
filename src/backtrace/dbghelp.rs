@@ -13,8 +13,8 @@
 use core::mem;
 use core::prelude::v1::*;
 
-use crate::dbghelp;
-use crate::dbghelp::ffi::*;
+use dbghelp;
+use windows::*;
 use types::c_void;
 
 #[derive(Clone, Copy)]

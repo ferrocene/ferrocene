@@ -94,7 +94,7 @@ kernel32 = []
 #   the moment, this is only possible when targetting Linux, since macOS
 #   splits DWARF out into a separate object file. Enabling this feature
 #   means one less C dependency.
-libbacktrace = ["backtrace-sys", "std"]
+libbacktrace = ["backtrace-sys"]
 dladdr = []
 coresymbolication = []
 gimli-symbolize = ["addr2line", "findshlibs", "memmap" ]

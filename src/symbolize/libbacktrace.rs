@@ -12,9 +12,7 @@
 
 extern crate backtrace_sys as bt;
 
-use std::ffi::CStr;
-use std::{ptr, slice};
-use std::sync::{ONCE_INIT, Once};
+use core::{ptr, slice};
 
 use libc::{self, c_char, c_int, c_void, uintptr_t};
 
@@ -45,7 +43,10 @@ impl Symbol {
         if ptr.is_null() {
             None
         } else {
-            Some(SymbolName::new(unsafe { CStr::from_ptr(ptr).to_bytes() }))
+            unsafe {
+                let len = libc::strlen(ptr);
+                Some(SymbolName::new(slice::from_raw_parts(ptr as *const u8, len)))
+            }
         }
     }
 
@@ -148,15 +149,18 @@ unsafe fn call(data: *mut c_void, sym: &super::Symbol) {
 // evidence at the moment to suggest that a more carefully constructed file
 // can't cause arbitrary code execution. As a result of all of this, we don't
 // hint libbacktrace with the path to the current process.
+//
+// Finally, the lack of synchronization here is due to the requirement that
+// `resolve` is externally synchronized.
 unsafe fn init_state() -> *mut bt::backtrace_state {
     static mut STATE: *mut bt::backtrace_state = 0 as *mut _;
-    static INIT: Once = ONCE_INIT;
-    INIT.call_once(|| {
+
+    if STATE.is_null() {
         // Our libbacktrace may not have multithreading support, so
         // set `threaded = 0` and synchronize ourselves.
         STATE = bt::backtrace_create_state(ptr::null(), 0, error_cb,
                                            ptr::null_mut());
-    });
+    }
 
     STATE
 }

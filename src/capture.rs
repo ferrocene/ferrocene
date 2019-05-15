@@ -12,6 +12,11 @@ use {resolve, resolve_frame, trace, Symbol, SymbolName};
 ///
 /// `Backtrace` supports pretty-printing of backtraces through its `Debug`
 /// implementation.
+///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
@@ -32,6 +37,11 @@ fn _assert_send_sync() {
 ///
 /// This type is returned as a list from `Backtrace::frames` and represents one
 /// stack frame in a captured backtrace.
+///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
 pub struct BacktraceFrame {
     frame: Frame,
@@ -65,6 +75,11 @@ impl Frame {
 ///
 /// This type is returned as a list from `BacktraceFrame::symbols` and
 /// represents the metadata for a symbol in a backtrace.
+///
+/// # Required features
+///
+/// This function requires the `std` feature of the `backtrace` crate to be
+/// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
@@ -91,6 +106,11 @@ impl Backtrace {
     ///
     /// let current_backtrace = Backtrace::new();
     /// ```
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new() -> Backtrace {
         let _guard = lock_and_platform_init();
@@ -117,6 +137,11 @@ impl Backtrace {
     /// current_backtrace.resolve();
     /// println!("{:?}", current_backtrace); // symbol names now present
     /// ```
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     #[inline(never)] // want to make sure there's a frame here to remove
     pub fn new_unresolved() -> Backtrace {
         let _guard = lock_and_platform_init();
@@ -157,6 +182,11 @@ impl Backtrace {
     /// The first entry of this slice is likely the function `Backtrace::new`,
     /// and the last frame is likely something about how this thread or the main
     /// function started.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn frames(&self) -> &[BacktraceFrame] {
         &self.frames[self.actual_start_index..]
     }
@@ -166,6 +196,11 @@ impl Backtrace {
     ///
     /// If this backtrace has been previously resolved or was created through
     /// `new`, this function does nothing.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn resolve(&mut self) {
         let _guard = lock_and_platform_init();
         for frame in self.frames.iter_mut().filter(|f| f.symbols.is_none()) {
@@ -208,11 +243,21 @@ impl Into<Vec<BacktraceFrame>> for Backtrace {
 
 impl BacktraceFrame {
     /// Same as `Frame::ip`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn ip(&self) -> *mut c_void {
         self.frame.ip() as *mut c_void
     }
 
     /// Same as `Frame::symbol_address`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn symbol_address(&self) -> *mut c_void {
         self.frame.symbol_address() as *mut c_void
     }
@@ -226,6 +271,11 @@ impl BacktraceFrame {
     ///
     /// Note that if this frame came from an unresolved backtrace then this will
     /// return an empty list.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn symbols(&self) -> &[BacktraceSymbol] {
         self.symbols.as_ref().map(|s| &s[..]).unwrap_or(&[])
     }
@@ -233,21 +283,41 @@ impl BacktraceFrame {
 
 impl BacktraceSymbol {
     /// Same as `Symbol::name`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn name(&self) -> Option<SymbolName> {
         self.name.as_ref().map(|s| SymbolName::new(s))
     }
 
     /// Same as `Symbol::addr`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn addr(&self) -> Option<*mut c_void> {
         self.addr.map(|s| s as *mut c_void)
     }
 
     /// Same as `Symbol::filename`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn filename(&self) -> Option<&Path> {
         self.filename.as_ref().map(|p| &**p)
     }
 
     /// Same as `Symbol::lineno`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn lineno(&self) -> Option<u32> {
         self.lineno
     }

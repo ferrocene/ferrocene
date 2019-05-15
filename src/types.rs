@@ -29,6 +29,11 @@ pub enum BytesOrWideString<'a> {
 impl<'a> BytesOrWideString<'a> {
     /// Lossy converts to a `Cow<str>`, will allocate if `Bytes` is not valid
     /// UTF-8 or if `BytesOrWideString` is `Wide`.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn to_str_lossy(&self) -> Cow<'a, str> {
         use self::BytesOrWideString::*;
 
@@ -39,6 +44,11 @@ impl<'a> BytesOrWideString<'a> {
     }
 
     /// Provides a `Path` representation of `BytesOrWideString`.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     pub fn into_path_buf(self) -> PathBuf {
         #[cfg(unix)]
         {

@@ -183,7 +183,10 @@ impl Symbol {
     /// debuginfo. If neither of these conditions is met then this will likely
     /// return `None`.
     ///
-    /// This function requires the `std` feature to be enabled for this crate.
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     #[cfg(feature = "std")]
     #[allow(unreachable_code)]
     pub fn filename(&self) -> Option<&Path> {

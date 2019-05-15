@@ -114,6 +114,12 @@ extern "C" fn error_cb(_data: *mut c_void, _msg: *const c_char, _errnum: c_int) 
     // do nothing for now
 }
 
+/// Type of the `data` pointer passed into `syminfo_cb`
+struct SyminfoState<'a> {
+    cb: &'a mut (FnMut(&super::Symbol) + 'a),
+    pc: usize,
+}
+
 extern "C" fn syminfo_cb(
     data: *mut c_void,
     pc: uintptr_t,
@@ -121,17 +127,45 @@ extern "C" fn syminfo_cb(
     _symval: uintptr_t,
     _symsize: uintptr_t,
 ) {
+    // Once this callback is invoked from `backtrace_syminfo` when we start
+    // resolving we go further to call `backtrace_pcinfo`. The
+    // `backtrace_pcinfo` function will consult debug information and attemp tto
+    // do things like recover file/line information as well as inlined frames.
+    // Note though that `backtrace_pcinfo` can fail or not do much if there's
+    // not debug info, so if that happens we're sure to call the callback with
+    // at least one symbol from the `syminfo_cb`.
     unsafe {
-        call(
-            data,
-            &super::Symbol {
+        let syminfo_state = &mut *(data as *mut SyminfoState);
+        let mut pcinfo_state = PcinfoState {
+            symname,
+            called: false,
+            cb: syminfo_state.cb,
+        };
+        bt::backtrace_pcinfo(
+            init_state(),
+            syminfo_state.pc as uintptr_t,
+            pcinfo_cb,
+            error_cb,
+            &mut pcinfo_state as *mut _ as *mut _,
+        );
+        if !pcinfo_state.called {
+            let mut bomb = ::Bomb { enabled: true };
+            (pcinfo_state.cb)(&super::Symbol {
                 inner: Symbol::Syminfo {
                     pc: pc,
                     symname: symname,
                 },
-            },
-        );
+            });
+            bomb.enabled = false;
+        }
     }
+}
+
+/// Type of the `data` pointer passed into `pcinfo_cb`
+struct PcinfoState<'a> {
+    cb: &'a mut (FnMut(&super::Symbol) + 'a),
+    symname: *const c_char,
+    called: bool,
 }
 
 extern "C" fn pcinfo_cb(
@@ -145,26 +179,31 @@ extern "C" fn pcinfo_cb(
         if filename.is_null() || function.is_null() {
             return -1;
         }
-        call(
-            data,
-            &super::Symbol {
-                inner: Symbol::Pcinfo {
-                    pc: pc,
-                    filename: filename,
-                    lineno: lineno,
-                    function: function,
+        let state = &mut *(data as *mut PcinfoState);
+        let mut bomb = ::Bomb { enabled: true };
+        state.called = true;
+        (state.cb)(&super::Symbol {
+            inner: Symbol::Pcinfo {
+                pc: pc,
+                filename: filename,
+                lineno: lineno,
+
+                // Favor the function name going into the `syminfo_cb`. That's
+                // typically from the symbol table and is the full symbol name
+                // whereas the `function` above is coming from debuginfo which
+                // isn't always as descriptive when considering the whole
+                // program.
+                function: if !state.symname.is_null() {
+                    state.symname
+                } else {
+                    function
                 },
             },
-        );
+        });
+        bomb.enabled = false;
+
         return 0;
     }
-}
-
-unsafe fn call(data: *mut c_void, sym: &super::Symbol) {
-    let cb = data as *mut &mut FnMut(&super::Symbol);
-    let mut bomb = ::Bomb { enabled: true };
-    (*cb)(sym);
-    bomb.enabled = false;
 }
 
 // The libbacktrace API supports creating a state, but it does not
@@ -334,7 +373,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     }
 }
 
-pub unsafe fn resolve(what: ResolveWhat, mut cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     let symaddr = what.address_or_ip();
 
     // backtrace errors are currently swept under the rug
@@ -343,20 +382,21 @@ pub unsafe fn resolve(what: ResolveWhat, mut cb: &mut FnMut(&super::Symbol)) {
         return;
     }
 
-    let ret = bt::backtrace_pcinfo(
+    // Call the `backtrace_syminfo` API first. This is (from reading the code)
+    // guaranteed to call `syminfo_cb` exactly once (or fail with an error
+    // presumably). We then handle more within the `syminfo_cb`.
+    //
+    // Note that we do this since `syminfo` will consult the symbol table,
+    // finding symbol names even if there's no debug information in the binary.
+    let mut syminfo_state = SyminfoState {
+        pc: symaddr as usize,
+        cb: cb,
+    };
+    bt::backtrace_syminfo(
         state,
         symaddr as uintptr_t,
-        pcinfo_cb,
+        syminfo_cb,
         error_cb,
-        &mut cb as *mut _ as *mut _,
+        &mut syminfo_state as *mut _ as *mut _,
     );
-    if ret != 0 {
-        bt::backtrace_syminfo(
-            state,
-            symaddr as uintptr_t,
-            syminfo_cb,
-            error_cb,
-            &mut cb as *mut _ as *mut _,
-        );
-    }
 }

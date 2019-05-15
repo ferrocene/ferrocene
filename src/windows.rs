@@ -309,6 +309,7 @@ ffi! {
     pub const IMAGE_FILE_MACHINE_ARM64: u16 = 43620;
     pub const IMAGE_FILE_MACHINE_AMD64: u16 = 34404;
     pub const IMAGE_FILE_MACHINE_I386: u16 = 332;
+    pub const IMAGE_FILE_MACHINE_ARMNT: u16 = 452;
     pub const FILE_SHARE_READ: DWORD = 0x1;
     pub const FILE_SHARE_WRITE: DWORD = 0x2;
     pub const OPEN_EXISTING: DWORD = 0x3;
@@ -557,3 +558,54 @@ ffi! {
 pub struct FLOATING_SAVE_AREA {
     _Dummy: [u8; 512],
 }
+
+#[cfg(target_arch = "arm")]
+ffi! {
+    // #[repr(C)]
+    // pub struct NEON128 {
+    //     pub Low: ULONG64,
+    //     pub High: LONG64,
+    // }
+
+    // pub type PNEON128 = *mut NEON128;    
+
+    #[repr(C)]
+    pub struct CONTEXT_u {
+        // pub Q: [NEON128; 16],
+        pub D: [ULONG64; 32],
+        // pub S: [DWORD; 32],
+    }
+
+    pub const ARM_MAX_BREAKPOINTS: usize = 8;
+    pub const ARM_MAX_WATCHPOINTS: usize = 1;
+    
+    #[repr(C)]
+    pub struct CONTEXT {
+        pub ContextFlags: DWORD,
+        pub R0: DWORD,
+        pub R1: DWORD,
+        pub R2: DWORD,
+        pub R3: DWORD,
+        pub R4: DWORD,
+        pub R5: DWORD,
+        pub R6: DWORD,
+        pub R7: DWORD,
+        pub R8: DWORD,
+        pub R9: DWORD,
+        pub R10: DWORD,
+        pub R11: DWORD,
+        pub R12: DWORD,
+        pub Sp: DWORD,
+        pub Lr: DWORD,
+        pub Pc: DWORD,
+        pub Cpsr: DWORD,
+        pub Fpsrc: DWORD,
+        pub Padding: DWORD,
+        pub u: CONTEXT_u,
+        pub Bvr: [DWORD; ARM_MAX_BREAKPOINTS],
+        pub Bcr: [DWORD; ARM_MAX_BREAKPOINTS],
+        pub Wvr: [DWORD; ARM_MAX_WATCHPOINTS],
+        pub Wcr: [DWORD; ARM_MAX_WATCHPOINTS],
+        pub Padding2: [DWORD; 2],
+    }
+} // IFDEF(arm)

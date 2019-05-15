@@ -66,6 +66,8 @@
 #![deny(missing_docs)]
 #![no_std]
 #![cfg_attr(target_env = "sgx", feature(sgx_platform))]
+#![allow(bare_trait_objects)] // TODO: remove when updating to 2018 edition
+#![allow(rust_2018_idioms)]   // TODO: remove when updating to 2018 edition
 
 #[cfg(feature = "std")]
 #[macro_use]

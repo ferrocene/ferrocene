@@ -19,6 +19,8 @@ cfg-if = "0.1.6"
 rustc-demangle = "0.1.4"
 backtrace-sys = { path = "backtrace-sys", version = "0.1.17", optional = true }
 libc = { version = "0.2.45", default-features = false }
+core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core' }
+compiler_builtins = { version = '0.1.2', optional = true }
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "1.0", optional = true }
@@ -95,7 +97,15 @@ dladdr = []
 coresymbolication = []
 gimli-symbolize = ["addr2line", "findshlibs", "memmap" ]
 
-# Internal feature to this crate, only used when testing this crate
+#=======================================
+# Methods of serialization
+#
+# Various features used for enabling rustc-serialize or syntex codegen.
+serialize-rustc = ["rustc-serialize"]
+serialize-serde = ["serde", "serde_derive"]
+
+#=======================================
+# Internal features for testing and such.
 verify-winapi = [
   'winapi/dbghelp',
   'winapi/handleapi',
@@ -105,13 +115,14 @@ verify-winapi = [
   'winapi/winbase',
   'winapi/winnt',
 ]
-
-#=======================================
-# Methods of serialization
-#
-# Various features used for enabling rustc-serialize or syntex codegen.
-serialize-rustc = ["rustc-serialize"]
-serialize-serde = ["serde", "serde_derive"]
+rustc-dep-of-std = [
+  'backtrace-sys/rustc-dep-of-std',
+  'cfg-if/rustc-dep-of-std',
+  'core',
+  'compiler_builtins',
+  'libc/rustc-dep-of-std',
+  'rustc-demangle/rustc-dep-of-std',
+]
 
 [[example]]
 name = "backtrace"

@@ -31,24 +31,41 @@ pub enum Symbol {
         filename: *const c_char,
         lineno: c_int,
         function: *const c_char,
+        symname: *const c_char,
     },
 }
 
 impl Symbol {
     pub fn name(&self) -> Option<SymbolName> {
-        let ptr = match *self {
-            Symbol::Syminfo { symname, .. } => symname,
-            Symbol::Pcinfo { function, .. } => function,
-        };
-        if ptr.is_null() {
-            None
-        } else {
+        let symbol = |ptr: *const c_char| {
             unsafe {
-                let len = libc::strlen(ptr);
-                Some(SymbolName::new(slice::from_raw_parts(
-                    ptr as *const u8,
-                    len,
-                )))
+                if ptr.is_null() {
+                    None
+                } else {
+                    let len = libc::strlen(ptr);
+                    Some(SymbolName::new(slice::from_raw_parts(
+                        ptr as *const u8,
+                        len,
+                    )))
+                }
+            }
+        };
+        match *self {
+            Symbol::Syminfo { symname, .. } => symbol(symname),
+            Symbol::Pcinfo { function, symname, .. } => {
+                // If possible prefer the `function` name which comes from
+                // debuginfo and can typically be more accurate for inline
+                // frames for example. If that's not present though fall back to
+                // the symbol table name specified in `symname`.
+                //
+                // Note that sometimes `function` can feel somewhat less
+                // accurate, for example being listed as `try<i32,closure>`
+                // isntead of `std::panicking::try::do_call`. It's not really
+                // clear why, but overall the `function` name seems more accurate.
+                if let Some(sym) = symbol(function) {
+                    return Some(sym)
+                }
+                symbol(symname)
             }
         }
     }
@@ -187,17 +204,8 @@ extern "C" fn pcinfo_cb(
                 pc: pc,
                 filename: filename,
                 lineno: lineno,
-
-                // Favor the function name going into the `syminfo_cb`. That's
-                // typically from the symbol table and is the full symbol name
-                // whereas the `function` above is coming from debuginfo which
-                // isn't always as descriptive when considering the whole
-                // program.
-                function: if !state.symname.is_null() {
-                    state.symname
-                } else {
-                    function
-                },
+                symname: state.symname,
+                function,
             },
         });
         bomb.enabled = false;

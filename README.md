@@ -1,7 +1,6 @@
 # backtrace-rs
 
-[![Build Status](https://travis-ci.com/alexcrichton/backtrace-rs.svg?branch=master)](https://travis-ci.com/alexcrichton/backtrace-rs)
-[![Build status](https://ci.appveyor.com/api/projects/status/v4l9oj4aqbbgyx44?svg=true)](https://ci.appveyor.com/project/alexcrichton/backtrace-rs)
+[![Build Status](https://dev.azure.com/alexcrichton/backtrace-rs/_apis/build/status/alexcrichton.backtrace-rs?branchName=master)](https://dev.azure.com/alexcrichton/backtrace-rs/_build/latest?definitionId=7&branchName=master)
 
 [Documentation](https://docs.rs/backtrace)
 

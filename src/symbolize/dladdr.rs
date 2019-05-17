@@ -8,6 +8,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Symbolication strategy using `dladdr`
+//!
+//! The `dladdr` API is available on most Unix implementations but it's quite
+//! basic, not handling inline frame information at all. Since it's so prevalent
+//! though we have an option to use it!
+
 use core::{mem, slice};
 
 use types::{BytesOrWideString, c_void};

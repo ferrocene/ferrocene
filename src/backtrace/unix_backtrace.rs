@@ -8,6 +8,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Unwinding through the `backtrace` function provided in Unix.
+//!
+//! This is an alternative unwinding strategy for Unix platforms which don't
+//! have support for libunwind but do have support for `backtrace`. Currently
+//! there's not a whole lot of those though. This module is a relatively
+//! straightforward binding of the `backtrace` API to the `Frame` API that we'd
+//! like to have.
+
 use core::mem;
 use libc::c_int;
 

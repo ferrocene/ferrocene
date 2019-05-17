@@ -8,6 +8,23 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Symbolication strategy using `dbghelp.dll` on Windows, only used for MSVC
+//!
+//! This symbolication strategy, like with backtraces, uses dynamically loaded
+//! information from `dbghelp.dll`. (see `src/dbghelp.rs` for info about why
+//! it's dynamically loaded).
+//!
+//! This API selects its resolution strategy based on the frame provided or the
+//! information we have at hand. If a frame from `StackWalkEx` is given to us
+//! then we use similar APIs to generate correct information about inlined
+//! functions. Otherwise if all we have is an address or an older stack frame
+//! from `StackWalk64` we use the older APIs for symbolication.
+//!
+//! There's a good deal of support in this module, but a good chunk of it is
+//! converting back and forth between Windows types and Rust types. For example
+//! symbols come to us as wide strings which we then convert to utf-8 strings if
+//! we can.
+
 #![allow(bad_style)]
 
 // This is a hack for compatibility with rustc 1.25.0. The no_std mode of this

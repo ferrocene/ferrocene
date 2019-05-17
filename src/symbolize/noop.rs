@@ -1,3 +1,6 @@
+//! Empty symbolication strategy used to compile for platforms that have no
+//! support.
+
 use types::{BytesOrWideString, c_void};
 use SymbolName;
 use symbolize::ResolveWhat;

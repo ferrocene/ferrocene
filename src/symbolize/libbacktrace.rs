@@ -8,6 +8,29 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Symbolication strategy using the DWARF-parsing code in libbacktrace.
+//!
+//! The libbacktrace C library, typically distributed with gcc, supports not
+//! only generating a backtrace (which we don't actually use) but also
+//! symbolicating the backtrace and handling dwarf debug information about
+//! things like inlined frames and whatnot.
+//!
+//! This is relatively complicated due to lots of various concerns here, but the
+//! basic idea is:
+//!
+//! * First we call `backtrace_syminfo`. This gets symbol information from the
+//!   dynamic symbol table if we can.
+//! * Next we call `backtrace_pcinfo`. This will parse debuginfo tables if
+//!   they're available and allow us to recover information about inline frames,
+//!   filenames, line numbers, etc.
+//!
+//! There's lots of trickery about getting the dwarf tables into libbacktrace,
+//! but hopefully it's not the end of the world and is clear enough when reading
+//! below.
+//!
+//! This is the default symbolication strategy for non-MSVC and non-OSX
+//! platforms. In libstd though this is the default strategy for OSX.
+
 #![allow(bad_style)]
 
 extern crate backtrace_sys as bt;

@@ -1,3 +1,6 @@
+//! Empty implementation of unwinding used when no other implementation is
+//! appropriate.
+
 use types::c_void;
 
 #[inline(always)]

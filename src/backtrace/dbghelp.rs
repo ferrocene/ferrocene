@@ -8,6 +8,17 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Backtrace strategy for MSVC platforms.
+//!
+//! This module contains the ability to generate a backtrace on MSVC using one
+//! of two possible methods. The `StackWalkEx` function is primarily used if
+//! possible, but not all systems have that. Failing that the `StackWalk64`
+//! function is used instead. Note that `StackWalkEx` is favored because it
+//! handles debuginfo internally and returns inline frame information.
+//!
+//! Note that all dbghelp support is loaded dynamically, see `src/dbghelp.rs`
+//! for more information about that.
+
 #![allow(bad_style)]
 
 use core::mem;

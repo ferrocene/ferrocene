@@ -8,6 +8,23 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Backtrace support using libunwind/gcc_s/etc APIs.
+//!
+//! This module contains the ability to unwind the stack using libunwind-style
+//! APIs. Note that there's a whole bunch of implementations of the
+//! libunwind-like API, and this is just trying to be compatible with most of
+//! them all at once instead of being picky.
+//!
+//! The libunwind API is powered by `_Unwind_Backtrace` and is in practice very
+//! reliable at generating a backtrace. It's not entirely clear how it does it
+//! (frame pointers? eh_frame info? both?) but it seems to work!
+//!
+//! Most of the complexity of this module is handling the various platform
+//! differences across libunwind implementations. Otherwise this is a pretty
+//! straightforward Rust binding to the libunwind APIs.
+//!
+//! This is the default unwinding API for all non-Windows platforms currently.
+
 use types::c_void;
 
 pub enum Frame {

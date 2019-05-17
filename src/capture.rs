@@ -99,6 +99,12 @@ impl Backtrace {
     /// elsewhere, and the purpose of this value is to be entirely self
     /// contained.
     ///
+    /// Note that on some platforms acquiring a full backtrace and resolving it
+    /// can be extremely expensive. If the cost is too much for your application
+    /// it's recommended to instead use `Backtrace::new_unresolved()` which
+    /// avoids the symbol resolution step (which typically takes the longest)
+    /// and allows deferring that to a later date.
+    ///
     /// # Examples
     ///
     /// ```

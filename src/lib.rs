@@ -17,12 +17,6 @@
 //! of defaults is chosen for the current platform, but the features activated
 //! can also be controlled at a finer granularity.
 //!
-//! # Platform Support
-//!
-//! Currently this library is verified to work on Linux, OSX, and Windows, but
-//! it may work on other platforms as well. Note that the quality of the
-//! backtrace may vary across platforms.
-//!
 //! # API Principles
 //!
 //! This library attempts to be as flexible as possible to accommodate different

@@ -5,8 +5,9 @@
 [Documentation](https://docs.rs/backtrace)
 
 A library for acquiring backtraces at runtime for Rust. This library aims to
-enhance the support of the standard library by providing a more stable and
-programmatic interface.
+enhance the support of the standard library by providing a programmatic
+interface to work with, but it also supports simply easily printing the current
+backtrace like libstd's panics.
 
 ## Install
 
@@ -15,12 +16,9 @@ programmatic interface.
 backtrace = "0.3"
 ```
 
-```rust
-extern crate backtrace;
-```
-
-Note that this crate requires `make`, `objcopy`, and `ar` to be present on Linux
-systems.
+Note that this crate requires `cc` and `ar` to be present on Unix systems when
+`libbacktrace` is used (which is the default). For configuring C compilers see
+the [`cc` crate documentation](https://github.com/alexcrichton/cc-rs).
 
 ## Usage
 
@@ -66,11 +64,6 @@ fn main() {
     });
 }
 ```
-
-## Platform Support
-
-This library currently supports OSX, Linux, and Windows. Support for other
-platforms is always welcome!
 
 # License
 

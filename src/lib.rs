@@ -104,11 +104,6 @@ cfg_if! {
     }
 }
 
-#[allow(dead_code)] // not used everywhere
-#[cfg(unix)]
-#[macro_use]
-mod dylib;
-
 pub use backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 

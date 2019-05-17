@@ -8,27 +8,38 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Symbolication strategy that's OSX-specific and uses the `CoreSymbolication`
+//! framework, if possible.
+//!
+//! This strategy uses internal private APIs that are somewhat undocumented but
+//! seem to be widely used on OSX. This is the default symbolication strategy
+//! for OSX, but is turned off in release builds for iOS due to reports of apps
+//! being rejected due to using these APIs.
+//!
+//! This would probably be good to get official one day and not using private
+//! APIs, but for now it should largely suffice.
+//!
+//! Note that this module will dynamically load `CoreSymbolication` and its APIs
+//! through dlopen/dlsym, and if the loading fails this falls back to `dladdr`
+//! as a symbolication strategy.
+
 #![allow(bad_style)]
 
 use core::mem;
 use core::ptr;
 use core::slice;
-#[allow(deprecated)] // atomic initializer is relative new currently
-use core::sync::atomic::ATOMIC_USIZE_INIT;
 
-use libc::{self, Dl_info, c_char, c_int};
+use libc::{self, c_char, c_int, Dl_info};
 
-use SymbolName;
-use dylib::Dylib;
-use dylib::Symbol as DylibSymbol;
-use types::{BytesOrWideString, c_void};
 use symbolize::ResolveWhat;
+use types::{c_void, BytesOrWideString};
+use SymbolName;
 
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub struct CSTypeRef {
     cpp_data: *const c_void,
-    cpp_obj: *const c_void
+    cpp_obj: *const c_void,
 }
 
 const CS_NOW: u64 = 0x80000000;
@@ -92,9 +103,9 @@ impl Symbol {
 
     #[cfg(feature = "std")]
     pub fn filename(&self) -> Option<&::std::path::Path> {
+        use std::ffi::OsStr;
         use std::os::unix::prelude::*;
         use std::path::Path;
-        use std::ffi::OsStr;
 
         self.filename_bytes().map(OsStr::from_bytes).map(Path::new)
     }
@@ -108,25 +119,75 @@ impl Symbol {
     }
 }
 
-#[allow(deprecated)] // atomic initializer is relative new currently
-static CORESYMBOLICATION: Dylib = Dylib { init: ATOMIC_USIZE_INIT };
+macro_rules! coresymbolication {
+    (#[load_path = $path:tt] extern "C" {
+        $(fn $name:ident($($arg:ident: $argty:ty),*) -> $ret: ty;)*
+    }) => (
+        pub struct CoreSymbolication {
+            // The loaded dynamic library
+            dll: *mut c_void,
 
-macro_rules! dlsym {
-    (extern {
-        $(fn $name:ident($($arg:ident: $t:ty),*) -> $ret:ty;)*
-    }) => ($(
-        #[allow(deprecated)] // atomic initializer is relative new currently
-        static $name: ::dylib::Symbol<unsafe extern fn($($t),*) -> $ret> =
-            ::dylib::Symbol {
-                name: concat!(stringify!($name), "\0"),
-                addr: ::core::sync::atomic::ATOMIC_USIZE_INIT,
-                _marker: ::core::marker::PhantomData,
-            };
-    )*)
+            // Each function pointer for each function we might use
+            $($name: usize,)*
+        }
+
+        static mut CORESYMBOLICATION: CoreSymbolication = CoreSymbolication {
+            // Initially we haven't loaded the dynamic library
+            dll: 0 as *mut _,
+            // Initiall all functions are set to zero to say they need to be
+            // dynamically loaded.
+            $($name: 0,)*
+        };
+
+        // Convenience typedef for each function type.
+        $(pub type $name = unsafe extern "C" fn($($argty),*) -> $ret;)*
+
+        impl CoreSymbolication {
+            /// Attempts to open `dbghelp.dll`. Returns success if it works or
+            /// error if `LoadLibraryW` fails.
+            ///
+            /// Panics if library is already loaded.
+            fn open(&mut self) -> bool {
+                if !self.dll.is_null() {
+                    return true;
+                }
+                let lib = concat!($path, "\0").as_bytes();
+                unsafe {
+                    self.dll = libc::dlopen(lib.as_ptr() as *const _, libc::RTLD_LAZY);
+                    !self.dll.is_null()
+                }
+            }
+
+            // Function for each method we'd like to use. When called it will
+            // either read the cached function pointer or load it and return the
+            // loaded value. Loads are asserted to succeed.
+            $(pub fn $name(&mut self) -> $name {
+                unsafe {
+                    if self.$name == 0 {
+                        let name = concat!(stringify!($name), "\0");
+                        self.$name = self.symbol(name.as_bytes())
+                            .expect(concat!("symbol ", stringify!($name), " is missing"));
+                    }
+                    mem::transmute::<usize, $name>(self.$name)
+                }
+            })*
+
+            fn symbol(&self, symbol: &[u8]) -> Option<usize> {
+                unsafe {
+                    match libc::dlsym(self.dll, symbol.as_ptr() as *const _) as usize {
+                        0 => None,
+                        n => Some(n),
+                    }
+                }
+            }
+        }
+    )
 }
 
-dlsym! {
-    extern {
+coresymbolication! {
+    #[load_path = "/System/Library/PrivateFrameworks/CoreSymbolication.framework\
+                 /Versions/A/CoreSymbolication"]
+    extern "C" {
         fn CSSymbolicatorCreateWithPid(pid: c_int) -> CSTypeRef;
         fn CSRelease(rf: CSTypeRef) -> c_void;
         fn CSSymbolicatorGetSymbolWithAddressAtTime(
@@ -142,54 +203,50 @@ dlsym! {
     }
 }
 
-unsafe fn get<T>(sym: &DylibSymbol<T>) -> &T {
-    CORESYMBOLICATION.get(sym).unwrap()
-}
-
 unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool {
-    let path = "/System/Library/PrivateFrameworks/CoreSymbolication.framework\
-                /Versions/A/CoreSymbolication\0";
-    if !CORESYMBOLICATION.init(path) {
+    // Note that this is externally synchronized so there's no need for
+    // synchronization here, making this `static mut` safer.
+    let lib = &mut CORESYMBOLICATION;
+    if !lib.open() {
         return false;
     }
 
-    let cs = get(&CSSymbolicatorCreateWithPid)(libc::getpid());
+    let cs = lib.CSSymbolicatorCreateWithPid()(libc::getpid());
     if cs == CSREF_NULL {
-        return false
+        return false;
     }
 
-    let info = get(&CSSymbolicatorGetSourceInfoWithAddressAtTime)(
-        cs, addr, CS_NOW);
+    let info = lib.CSSymbolicatorGetSourceInfoWithAddressAtTime()(cs, addr, CS_NOW);
     let sym = if info == CSREF_NULL {
-        get(&CSSymbolicatorGetSymbolWithAddressAtTime)(cs, addr, CS_NOW)
+        lib.CSSymbolicatorGetSymbolWithAddressAtTime()(cs, addr, CS_NOW)
     } else {
-        get(&CSSourceInfoGetSymbol)(info)
+        lib.CSSourceInfoGetSymbol()(info)
     };
 
     let mut rv = false;
     if sym != CSREF_NULL {
-        let owner = get(&CSSymbolGetSymbolOwner)(sym);
+        let owner = lib.CSSymbolGetSymbolOwner()(sym);
         if owner != CSREF_NULL {
             cb(&super::Symbol {
                 inner: Symbol::Core {
                     path: if info != CSREF_NULL {
-                        get(&CSSourceInfoGetPath)(info)
+                        lib.CSSourceInfoGetPath()(info)
                     } else {
                         ptr::null()
                     },
                     lineno: if info != CSREF_NULL {
-                        get(&CSSourceInfoGetLineNumber)(info) as u32
+                        lib.CSSourceInfoGetLineNumber()(info) as u32
                     } else {
                         0
                     },
-                    name: get(&CSSymbolGetMangledName)(sym),
-                    addr: get(&CSSymbolOwnerGetBaseAddress)(owner),
+                    name: lib.CSSymbolGetMangledName()(sym),
+                    addr: lib.CSSymbolOwnerGetBaseAddress()(owner),
                 },
             });
             rv = true;
         }
     }
-    get(&CSRelease)(cs);
+    lib.CSRelease()(cs);
 
     rv
 }
@@ -197,7 +254,7 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     let addr = what.address_or_ip();
     if try_resolve(addr, cb) {
-        return
+        return;
     }
     let mut info: Dl_info = mem::zeroed();
     if libc::dladdr(addr as *mut _, &mut info) != 0 {

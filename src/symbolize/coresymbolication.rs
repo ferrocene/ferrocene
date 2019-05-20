@@ -143,10 +143,8 @@ macro_rules! coresymbolication {
         $(pub type $name = unsafe extern "C" fn($($argty),*) -> $ret;)*
 
         impl CoreSymbolication {
-            /// Attempts to open `dbghelp.dll`. Returns success if it works or
-            /// error if `LoadLibraryW` fails.
-            ///
-            /// Panics if library is already loaded.
+            /// Attempts to open `dbghelp.dll`. Returns `true` if it works or
+            /// `false` if `dlopen` fails.
             fn open(&mut self) -> bool {
                 if !self.dll.is_null() {
                     return true;

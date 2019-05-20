@@ -390,7 +390,6 @@ cfg_if! {
         use self::dbghelp::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "std",
                         feature = "gimli-symbolize",
-                        unix,
                         target_os = "linux"))] {
         mod gimli;
         use self::gimli::resolve as resolve_imp;

@@ -36,7 +36,7 @@ use backtrace::Frame;
 /// # Panics
 ///
 /// This function strives to never panic, but if the `cb` provided panics then
-/// some platforms will force a double abort to abort the process. Some
+/// some platforms will force a double panic to abort the process. Some
 /// platforms use a C library which internally uses callbacks which cannot be
 /// unwound through, so panicking from `cb` may trigger a process abort.
 ///
@@ -80,7 +80,7 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
 /// # Panics
 ///
 /// This function strives to never panic, but if the `cb` provided panics then
-/// some platforms will force a double abort to abort the process. Some
+/// some platforms will force a double panic to abort the process. Some
 /// platforms use a C library which internally uses callbacks which cannot be
 /// unwound through, so panicking from `cb` may trigger a process abort.
 ///

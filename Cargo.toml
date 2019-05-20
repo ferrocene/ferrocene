@@ -18,8 +18,6 @@ cfg-if = "0.1.6"
 rustc-demangle = "0.1.4"
 backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.17", optional = true }
 libc = { version = "0.2.45", default-features = false }
-core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core' }
-compiler_builtins = { version = '0.1.2', optional = true }
 
 # Optionally enable the ability to serialize a `Backtrace`
 serde = { version = "1.0", optional = true }
@@ -113,14 +111,6 @@ verify-winapi = [
   'winapi/processthreadsapi',
   'winapi/winbase',
   'winapi/winnt',
-]
-rustc-dep-of-std = [
-  'backtrace-sys/rustc-dep-of-std',
-  'cfg-if/rustc-dep-of-std',
-  'core',
-  'compiler_builtins',
-  'libc/rustc-dep-of-std',
-  'rustc-demangle/rustc-dep-of-std',
 ]
 
 [[example]]

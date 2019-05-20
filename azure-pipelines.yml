@@ -12,7 +12,7 @@ jobs:
       - script: cargo build
         displayName: "Build crate"
     variables:
-      TOOLCHAIN: 1.25.0
+      TOOLCHAIN: 1.32.0
 
   - job: Docker
     pool:

@@ -187,7 +187,7 @@ coresymbolication! {
                  /Versions/A/CoreSymbolication"]
     extern "C" {
         fn CSSymbolicatorCreateWithPid(pid: c_int) -> CSTypeRef;
-        fn CSRelease(rf: CSTypeRef) -> c_void;
+        fn CSRelease(rf: CSTypeRef) -> ();
         fn CSSymbolicatorGetSymbolWithAddressAtTime(
             cs: CSTypeRef, addr: *const c_void, time: u64) -> CSTypeRef;
         fn CSSymbolicatorGetSourceInfoWithAddressAtTime(
@@ -213,6 +213,10 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
     if cs == CSREF_NULL {
         return false;
     }
+    let _dtor = OwnedCSTypeRef {
+        ptr: cs,
+        CSRelease: lib.CSRelease(),
+    };
 
     let info = lib.CSSymbolicatorGetSourceInfoWithAddressAtTime()(cs, addr, CS_NOW);
     let sym = if info == CSREF_NULL {
@@ -220,33 +224,44 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
     } else {
         lib.CSSourceInfoGetSymbol()(info)
     };
+    if sym == CSREF_NULL {
+        return false;
+    }
+    let owner = lib.CSSymbolGetSymbolOwner()(sym);
+    if owner == CSREF_NULL {
+        return false;
+    }
 
-    let mut rv = false;
-    if sym != CSREF_NULL {
-        let owner = lib.CSSymbolGetSymbolOwner()(sym);
-        if owner != CSREF_NULL {
-            cb(&super::Symbol {
-                inner: Symbol::Core {
-                    path: if info != CSREF_NULL {
-                        lib.CSSourceInfoGetPath()(info)
-                    } else {
-                        ptr::null()
-                    },
-                    lineno: if info != CSREF_NULL {
-                        lib.CSSourceInfoGetLineNumber()(info) as u32
-                    } else {
-                        0
-                    },
-                    name: lib.CSSymbolGetMangledName()(sym),
-                    addr: lib.CSSymbolOwnerGetBaseAddress()(owner),
-                },
-            });
-            rv = true;
+    cb(&super::Symbol {
+        inner: Symbol::Core {
+            path: if info != CSREF_NULL {
+                lib.CSSourceInfoGetPath()(info)
+            } else {
+                ptr::null()
+            },
+            lineno: if info != CSREF_NULL {
+                lib.CSSourceInfoGetLineNumber()(info) as u32
+            } else {
+                0
+            },
+            name: lib.CSSymbolGetMangledName()(sym),
+            addr: lib.CSSymbolOwnerGetBaseAddress()(owner),
+        },
+    });
+    true
+}
+
+struct OwnedCSTypeRef {
+    ptr: CSTypeRef,
+    CSRelease: unsafe extern "C" fn(CSTypeRef),
+}
+
+impl Drop for OwnedCSTypeRef {
+    fn drop(&mut self) {
+        unsafe {
+            (self.CSRelease)(self.ptr);
         }
     }
-    lib.CSRelease()(cs);
-
-    rv
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {

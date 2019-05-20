@@ -52,7 +52,10 @@ pub struct BacktraceFrame {
 enum Frame {
     Raw(::Frame),
     #[allow(dead_code)]
-    Deserialized { ip: usize, symbol_address: usize },
+    Deserialized {
+        ip: usize,
+        symbol_address: usize,
+    },
 }
 
 impl Frame {
@@ -155,23 +158,15 @@ impl Backtrace {
     }
 
     fn create(ip: usize) -> Backtrace {
-        let ip_lo = ip;
-        let ip_hi = ip + 128;
-
         let mut frames = Vec::new();
         let mut actual_start_index = None;
         trace(|frame| {
-            let ip = frame.ip() as usize;
             frames.push(BacktraceFrame {
                 frame: Frame::Raw(frame.clone()),
                 symbols: None,
             });
 
-            if cfg!(not(all(target_os = "windows", target_arch = "x86")))
-                && ip >= ip_lo
-                && ip <= ip_hi
-                && actual_start_index.is_none()
-            {
+            if frame.symbol_address() as usize == ip && actual_start_index.is_none() {
                 actual_start_index = Some(frames.len());
             }
             true

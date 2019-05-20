@@ -167,6 +167,8 @@ extern "C" fn syminfo_cb(
     _symval: uintptr_t,
     _symsize: uintptr_t,
 ) {
+    let mut bomb = ::Bomb { enabled: true };
+
     // Once this callback is invoked from `backtrace_syminfo` when we start
     // resolving we go further to call `backtrace_pcinfo`. The
     // `backtrace_pcinfo` function will consult debug information and attemp tto
@@ -189,16 +191,16 @@ extern "C" fn syminfo_cb(
             &mut pcinfo_state as *mut _ as *mut _,
         );
         if !pcinfo_state.called {
-            let mut bomb = ::Bomb { enabled: true };
             (pcinfo_state.cb)(&super::Symbol {
                 inner: Symbol::Syminfo {
                     pc: pc,
                     symname: symname,
                 },
             });
-            bomb.enabled = false;
         }
     }
+
+    bomb.enabled = false;
 }
 
 /// Type of the `data` pointer passed into `pcinfo_cb`
@@ -215,12 +217,13 @@ extern "C" fn pcinfo_cb(
     lineno: c_int,
     function: *const c_char,
 ) -> c_int {
+    if filename.is_null() || function.is_null() {
+        return -1;
+    }
+    let mut bomb = ::Bomb { enabled: true };
+
     unsafe {
-        if filename.is_null() || function.is_null() {
-            return -1;
-        }
         let state = &mut *(data as *mut PcinfoState);
-        let mut bomb = ::Bomb { enabled: true };
         state.called = true;
         (state.cb)(&super::Symbol {
             inner: Symbol::Pcinfo {
@@ -231,10 +234,10 @@ extern "C" fn pcinfo_cb(
                 function,
             },
         });
-        bomb.enabled = false;
-
-        return 0;
     }
+
+    bomb.enabled = false;
+    return 0;
 }
 
 // The libbacktrace API supports creating a state, but it does not

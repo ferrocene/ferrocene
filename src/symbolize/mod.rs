@@ -33,6 +33,13 @@ use backtrace::Frame;
 /// This function requires the `std` feature of the `backtrace` crate to be
 /// enabled, and the `std` feature is enabled by default.
 ///
+/// # Panics
+///
+/// This function strives to never panic, but if the `cb` provided panics then
+/// some platforms will force a double abort to abort the process. Some
+/// platforms use a C library which internally uses callbacks which cannot be
+/// unwound through, so panicking from `cb` may trigger a process abort.
+///
 /// # Example
 ///
 /// ```
@@ -69,6 +76,13 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
 ///
 /// This function requires the `std` feature of the `backtrace` crate to be
 /// enabled, and the `std` feature is enabled by default.
+///
+/// # Panics
+///
+/// This function strives to never panic, but if the `cb` provided panics then
+/// some platforms will force a double abort to abort the process. Some
+/// platforms use a C library which internally uses callbacks which cannot be
+/// unwound through, so panicking from `cb` may trigger a process abort.
 ///
 /// # Example
 ///
@@ -111,6 +125,10 @@ impl<'a> ResolveWhat<'a> {
 /// This function does not have synchronization guarentees but is available when
 /// the `std` feature of this crate isn't compiled in. See the `resolve`
 /// function for more documentation and examples.
+///
+/// # Panics
+///
+/// See information on `resolve` for caveats on `cb` panicking.
 pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
 where
     F: FnMut(&Symbol),
@@ -123,6 +141,10 @@ where
 /// This function does not have synchronization guarentees but is available
 /// when the `std` feature of this crate isn't compiled in. See the
 /// `resolve_frame` function for more documentation and examples.
+///
+/// # Panics
+///
+/// See information on `resolve_frame` for caveats on `cb` panicking.
 pub unsafe fn resolve_frame_unsynchronized<F>(frame: &Frame, mut cb: F)
 where
     F: FnMut(&Symbol),

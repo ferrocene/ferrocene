@@ -27,6 +27,13 @@ use types::c_void;
 /// This function requires the `std` feature of the `backtrace` crate to be
 /// enabled, and the `std` feature is enabled by default.
 ///
+/// # Panics
+///
+/// This function strives to never panic, but if the `cb` provided panics then
+/// some platforms will force a double abort to abort the process. Some
+/// platforms use a C library which internally uses callbacks which cannot be
+/// unwound through, so panicking from `cb` may trigger a process abort.
+///
 /// # Example
 ///
 /// ```
@@ -51,6 +58,10 @@ pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
 /// This function does not have synchronization guarentees but is available
 /// when the `std` feature of this crate isn't compiled in. See the `trace`
 /// function for more documentation and examples.
+///
+/// # Panics
+///
+/// See information on `trace` for caveats on `cb` panicking.
 pub unsafe fn trace_unsynchronized<F: FnMut(&Frame) -> bool>(mut cb: F) {
     trace_imp(&mut cb)
 }

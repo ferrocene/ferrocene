@@ -106,22 +106,9 @@ macro_rules! dbghelp {
             /// Panics if library is already loaded.
             fn open(&mut self) -> Result<(), ()> {
                 assert!(self.dll.is_null());
-                let lib = [
-                    'd' as u16,
-                    'b' as u16,
-                    'g' as u16,
-                    'h' as u16,
-                    'e' as u16,
-                    'l' as u16,
-                    'p' as u16,
-                    '.' as u16,
-                    'd' as u16,
-                    'l' as u16,
-                    'l' as u16,
-                    0,
-                ];
+                let lib = b"dbghelp.dll\0";
                 unsafe {
-                    self.dll = LoadLibraryW(lib.as_ptr());
+                    self.dll = LoadLibraryA(lib.as_ptr() as *const i8);
                     if self.dll.is_null() {
                         Err(())
                     }  else {

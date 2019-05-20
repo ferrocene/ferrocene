@@ -339,7 +339,7 @@ ffi! {
         pub fn GetCurrentProcess() -> HANDLE;
         pub fn GetCurrentThread() -> HANDLE;
         pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
-        pub fn LoadLibraryW(a: *const u16) -> HMODULE;
+        pub fn LoadLibraryA(a: *const i8) -> HMODULE;
         pub fn FreeLibrary(h: HMODULE) -> BOOL;
         pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
         pub fn OpenProcess(
@@ -567,7 +567,7 @@ ffi! {
     //     pub High: LONG64,
     // }
 
-    // pub type PNEON128 = *mut NEON128;    
+    // pub type PNEON128 = *mut NEON128;
 
     #[repr(C)]
     pub struct CONTEXT_u {
@@ -578,7 +578,7 @@ ffi! {
 
     pub const ARM_MAX_BREAKPOINTS: usize = 8;
     pub const ARM_MAX_WATCHPOINTS: usize = 1;
-    
+
     #[repr(C)]
     pub struct CONTEXT {
         pub ContextFlags: DWORD,

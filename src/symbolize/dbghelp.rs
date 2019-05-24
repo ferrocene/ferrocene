@@ -113,7 +113,11 @@ unsafe fn resolve_with_inline(
         |info| {
             dbghelp.SymFromInlineContextW()(
                 GetCurrentProcess(),
-                frame.AddrPC.Offset,
+                // FIXME: why is `-1` used here and below? It seems to produce
+                // more accurate backtraces on Windows (aka passes tests in
+                // rust-lang/rust), but it's unclear why it's required in the
+                // first place.
+                frame.AddrPC.Offset - 1,
                 frame.InlineFrameContext,
                 &mut 0,
                 info,
@@ -122,7 +126,7 @@ unsafe fn resolve_with_inline(
         |line| {
             dbghelp.SymGetLineFromInlineContextW()(
                 GetCurrentProcess(),
-                frame.AddrPC.Offset,
+                frame.AddrPC.Offset - 1,
                 frame.InlineFrameContext,
                 0,
                 &mut 0,

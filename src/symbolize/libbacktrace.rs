@@ -408,7 +408,19 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
-    let symaddr = what.address_or_ip();
+    let mut symaddr = what.address_or_ip() as usize;
+
+    // It's sort of unclear why this is necessary, but it appears that the ip
+    // values from stack traces are typically the instruction *after* the call
+    // that's the actual stack trace. Symbolizing this on Windows causes the
+    // filename/line number to be one ahead and perhaps into the void if it's
+    // near the end of the function. Apparently on Unix though it's roughly fine
+    // in that the filename/line number turn out alright. For now just try to
+    // get good backtraces with this, and hopefully one day we can figure out
+    // why the `-=1` is here.
+    if cfg!(windows) && symaddr > 0 {
+        symaddr -= 1;
+    }
 
     // backtrace errors are currently swept under the rug
     let state = init_state();
@@ -423,7 +435,7 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     // Note that we do this since `syminfo` will consult the symbol table,
     // finding symbol names even if there's no debug information in the binary.
     let mut syminfo_state = SyminfoState {
-        pc: symaddr as usize,
+        pc: symaddr,
         cb: cb,
     };
     bt::backtrace_syminfo(

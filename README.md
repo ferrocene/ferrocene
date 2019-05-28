@@ -1,6 +1,6 @@
 # backtrace-rs
 
-[![Build Status](https://dev.azure.com/alexcrichton/backtrace-rs/_apis/build/status/alexcrichton.backtrace-rs?branchName=master)](https://dev.azure.com/alexcrichton/backtrace-rs/_build/latest?definitionId=7&branchName=master)
+[![Build Status](https://dev.azure.com/rust-lang/backtrace-rs/_apis/build/status/rust-lang.backtrace-rs?branchName=master)](https://dev.azure.com/rust-lang/backtrace-rs/_build/latest?definitionId=12&branchName=master)
 
 [Documentation](https://docs.rs/backtrace)
 

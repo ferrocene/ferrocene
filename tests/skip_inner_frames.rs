@@ -5,7 +5,7 @@ use backtrace::Backtrace;
 // This test only works on platforms which have a working `symbol_address`
 // function for frames which reports the starting address of a symbol. As a
 // result it's only enabled on a few platforms.
-const ENABLED: bool = cfg!(all(unix, feature = "libunwind"));
+const ENABLED: bool = cfg!(all(target_os = "linux", feature = "libunwind"));
 
 #[test]
 fn backtrace_new_unresolved_should_start_with_call_site_trace() {

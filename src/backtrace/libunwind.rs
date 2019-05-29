@@ -65,16 +65,14 @@ impl Frame {
             return symbol_address;
         }
 
-        // dladdr() on osx gets whiny when we use FindEnclosingFunction, and
-        // it appears to work fine without it, so we only use
-        // FindEnclosingFunction on non-osx platforms. In doing so, we get a
-        // slightly more accurate stack trace in the process.
+        // It seems that on OSX `_Unwind_FindEnclosingFunction` returns a
+        // pointer to... something that's unclear. It's definitely not always
+        // the enclosing function for whatever reason. It's not entirely clear
+        // to me what's going on here, so pessimize this for now and just always
+        // return the ip.
         //
-        // This is often because panic involves the last instruction of a
-        // function being "call std::rt::begin_unwind", with no ret
-        // instructions after it. This means that the return instruction
-        // pointer points *outside* of the calling function, and by
-        // unwinding it we go back to the original function.
+        // Note the `skip_inner_frames.rs` test is skipped on OSX due to this
+        // clause, and if this is fixed that test in theory can be run on OSX!
         if cfg!(target_os = "macos") || cfg!(target_os = "ios") {
             self.ip()
         } else {

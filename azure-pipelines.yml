@@ -32,7 +32,7 @@ jobs:
       matrix:
         aarch64:
           TARGET: aarch64-unknown-linux-gnu
-        armhv:
+        armhf:
           TARGET: arm-unknown-linux-gnueabihf
         armv7:
           TARGET: armv7-unknown-linux-gnueabihf

@@ -103,10 +103,32 @@ fn smoke_test_frames() {
         expected_file: &str,
         expected_line: u32,
     ) {
+        backtrace::resolve_frame(frame, |sym| {
+            print!("symbol  ip:{:?} address:{:?} ", frame.ip(), frame.symbol_address());
+            if let Some(name) = sym.name() {
+                print!("name:{} ", name);
+            }
+            if let Some(file) = sym.filename() {
+                print!("file:{} ", file.display());
+            }
+            if let Some(lineno) = sym.lineno() {
+                print!("lineno:{} ", lineno);
+            }
+            println!();
+        });
+
         let ip = frame.ip() as usize;
         let sym = frame.symbol_address() as usize;
         assert!(ip >= sym);
-        assert!(sym >= actual_fn_pointer);
+        assert!(
+            sym >= actual_fn_pointer,
+            "{:?} < {:?} ({} {}:{})",
+            sym as *const usize,
+            actual_fn_pointer as *const usize,
+            expected_name,
+            expected_file,
+            expected_line,
+        );
 
         // windows dbghelp is *quite* liberal (and wrong) in many of its reports
         // right now...
@@ -129,7 +151,6 @@ fn smoke_test_frames() {
             addr = sym.addr();
             line = sym.lineno();
             file = sym.filename().map(|v| v.to_path_buf());
-            println!("  sym: {:?}", name);
         });
 
         // dbghelp doesn't always resolve symbols right now

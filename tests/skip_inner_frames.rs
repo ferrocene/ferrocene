@@ -5,7 +5,16 @@ use backtrace::Backtrace;
 // This test only works on platforms which have a working `symbol_address`
 // function for frames which reports the starting address of a symbol. As a
 // result it's only enabled on a few platforms.
-const ENABLED: bool = cfg!(all(target_os = "linux", feature = "libunwind"));
+const ENABLED: bool = cfg!(all(
+    // Windows hasn't really been tested, and OSX doesn't support actually
+    // finding an enclosing frame, so disable this
+    target_os = "linux",
+    // This is the only method currently that supports accurate enough
+    // backtraces for this test to work.
+    feature = "libunwind",
+    // On ARM finding the enclosing function is simply returning the ip itself.
+    not(target_arch = "arm"),
+));
 
 #[test]
 fn backtrace_new_unresolved_should_start_with_call_site_trace() {

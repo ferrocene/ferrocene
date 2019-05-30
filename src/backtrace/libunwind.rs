@@ -48,16 +48,9 @@ impl Frame {
             Frame::Raw(ctx) => ctx,
             Frame::Cloned { ip, .. } => return ip,
         };
-        let mut ip_before_insn = 0;
-        let mut ip = unsafe {
-            uw::_Unwind_GetIPInfo(ctx, &mut ip_before_insn) as *mut c_void
-        };
-        if !ip.is_null() && ip_before_insn == 0 {
-            // this is a non-signaling frame, so `ip` refers to the address
-            // after the calling instruction. account for that.
-            ip = (ip as usize - 1) as *mut _;
+        unsafe {
+            uw::_Unwind_GetIP(ctx) as *mut c_void
         }
-        return ip
     }
 
     pub fn symbol_address(&self) -> *mut c_void {
@@ -124,7 +117,7 @@ pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
 mod uw {
     pub use self::_Unwind_Reason_Code::*;
 
-    use libc::{self, c_int};
+    use libc;
     use types::c_void;
 
     #[repr(C)]
@@ -158,8 +151,7 @@ mod uw {
         #[cfg(all(not(all(target_os = "android", target_arch = "arm")),
                   not(all(target_os = "freebsd", target_arch = "arm")),
                   not(all(target_os = "linux", target_arch = "arm"))))]
-        pub fn _Unwind_GetIPInfo(ctx: *mut _Unwind_Context,
-                                 ip_before_insn: *mut c_int)
+        pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context)
                     -> libc::uintptr_t;
 
         #[cfg(all(not(target_os = "android"),
@@ -216,19 +208,6 @@ mod uw {
                                 _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
                                 ptr as *mut c_void);
         (val & !1) as libc::uintptr_t
-    }
-
-    // This function doesn't exist on Android or ARM/Linux, so make it same
-    // to _Unwind_GetIP
-    #[cfg(any(all(target_os = "android", target_arch = "arm"),
-              all(target_os = "freebsd", target_arch = "arm"),
-              all(target_os = "linux", target_arch = "arm")))]
-    pub unsafe fn _Unwind_GetIPInfo(ctx: *mut _Unwind_Context,
-                                    ip_before_insn: *mut c_int)
-        -> libc::uintptr_t
-    {
-        *ip_before_insn = 0;
-        _Unwind_GetIP(ctx)
     }
 
     // This function also doesn't exist on Android or ARM/Linux, so make it

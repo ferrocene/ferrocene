@@ -8,4 +8,4 @@ build = "build.rs"
 gcc = "0.3.43"
 
 [dependencies]
-"backtrace" = { path = "..", features = ["cpp_demangle"] }
+backtrace = { path = "../..", features = ["cpp_demangle"] }

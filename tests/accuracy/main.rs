@@ -86,7 +86,7 @@ fn verify(filelines: &[Pos]) {
             };
             if let Some(filename) = sym.filename() {
                 if let Some(lineno) = sym.lineno() {
-                    if filename == Path::new(file) && lineno == *line {
+                    if filename.ends_with(file) && lineno == *line {
                         break;
                     }
                 }

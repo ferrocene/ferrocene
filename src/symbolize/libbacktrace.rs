@@ -413,15 +413,20 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     let mut symaddr = what.address_or_ip() as usize;
 
-    // It's sort of unclear why this is necessary, but it appears that the ip
-    // values from stack traces are typically the instruction *after* the call
-    // that's the actual stack trace. Symbolizing this on Windows causes the
-    // filename/line number to be one ahead and perhaps into the void if it's
-    // near the end of the function. Apparently on Unix though it's roughly fine
-    // in that the filename/line number turn out alright. For now just try to
-    // get good backtraces with this, and hopefully one day we can figure out
-    // why the `-=1` is here.
-    if cfg!(windows) && symaddr > 0 {
+    // IP values from stack frames are typically (always?) the instruction
+    // *after* the call that's the actual stack trace. Symbolizing this on
+    // causes the filename/line number to be one ahead and perhaps into
+    // the void if it's near the end of the function.
+    //
+    // On Windows it's pretty sure that it's always the case that the IP is one
+    // ahead (except for the final frame but oh well) and for Unix it appears
+    // that we used to use `_Unwind_GetIPInfo` which tells us if the instruction
+    // is the next or not, but it seems that on all platforms it's always the
+    // next instruction so far so let's just always assume that.
+    //
+    // In any case we'll probably have to tweak this over time, but for now this
+    // gives the most accurate backtraces.
+    if symaddr > 0 {
         symaddr -= 1;
     }
 

@@ -143,3 +143,8 @@ required-features = ["std"]
 name = "smoke"
 required-features = ["std"]
 edition = '2018'
+
+[[test]]
+name = "accuracy"
+required-features = ["std", "dbghelp", "libbacktrace", "libunwind"]
+edition = '2018'

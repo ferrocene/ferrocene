@@ -171,7 +171,7 @@ mod lock {
     }
 }
 
-#[cfg(all(windows, feature = "dbghelp"))]
+#[cfg(all(windows, feature = "dbghelp", not(target_vendor = "uwp")))]
 mod dbghelp;
 #[cfg(windows)]
 mod windows;

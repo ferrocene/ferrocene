@@ -40,17 +40,13 @@ fn inner(main_pos: Pos, outer_pos: Pos) {
     });
 }
 
-// We emit the wrong location for the caller here when inlined on MSVC
-#[cfg_attr(not(target_env = "msvc"), inline(always))]
-#[cfg_attr(target_env = "msvc", inline(never))]
+#[inline(always)]
 #[rustfmt::skip]
 fn inner_inlined(main_pos: Pos, outer_pos: Pos) {
     check!(main_pos, outer_pos);
     check!(main_pos, outer_pos);
 
-    // Again, disable inlining for MSVC.
-    #[cfg_attr(not(target_env = "msvc"), inline(always))]
-    #[cfg_attr(target_env = "msvc", inline(never))]
+    #[inline(always)]
     fn inner_further_inlined(main_pos: Pos, outer_pos: Pos, inner_pos: Pos) {
         check!(main_pos, outer_pos, inner_pos);
     }

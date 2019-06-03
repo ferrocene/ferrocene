@@ -29,9 +29,10 @@ use core::mem;
 use core::ptr;
 use core::slice;
 
-use libc::{self, c_char, c_int, Dl_info};
+use libc::{self, c_char, c_int};
 
 use symbolize::ResolveWhat;
+use symbolize::dladdr;
 use types::{c_void, BytesOrWideString};
 use SymbolName;
 
@@ -55,14 +56,14 @@ pub enum Symbol {
         name: *const c_char,
         addr: *mut c_void,
     },
-    Dladdr(Dl_info),
+    Dladdr(dladdr::Symbol),
 }
 
 impl Symbol {
     pub fn name(&self) -> Option<SymbolName> {
         let name = match *self {
             Symbol::Core { name, .. } => name,
-            Symbol::Dladdr(ref info) => info.dli_sname,
+            Symbol::Dladdr(ref info) => return info.name(),
         };
         if name.is_null() {
             None
@@ -77,7 +78,7 @@ impl Symbol {
     pub fn addr(&self) -> Option<*mut c_void> {
         match *self {
             Symbol::Core { addr, .. } => Some(addr),
-            Symbol::Dladdr(ref info) => Some(info.dli_saddr as *mut _),
+            Symbol::Dladdr(ref info) => info.addr(),
         }
     }
 
@@ -269,10 +270,9 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     if try_resolve(addr, cb) {
         return;
     }
-    let mut info: Dl_info = mem::zeroed();
-    if libc::dladdr(addr as *mut _, &mut info) != 0 {
+    dladdr::resolve(addr, &mut |sym| {
         cb(&super::Symbol {
-            inner: Symbol::Dladdr(info),
-        });
-    }
+            inner: Symbol::Dladdr(sym),
+        })
+    })
 }

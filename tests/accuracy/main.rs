@@ -1,5 +1,3 @@
-use std::path::Path;
-
 mod auxiliary;
 
 macro_rules! pos {

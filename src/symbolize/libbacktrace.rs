@@ -36,12 +36,10 @@
 extern crate backtrace_sys as bt;
 
 use core::{ptr, slice};
-
 use libc::{self, c_char, c_int, c_void, uintptr_t};
 
-use SymbolName;
-
-use symbolize::ResolveWhat;
+use symbolize::{ResolveWhat, SymbolName};
+use symbolize::dladdr;
 use types::BytesOrWideString;
 
 pub enum Symbol {
@@ -56,6 +54,7 @@ pub enum Symbol {
         function: *const c_char,
         symname: *const c_char,
     },
+    Dladdr(dladdr::Symbol),
 }
 
 impl Symbol {
@@ -90,6 +89,7 @@ impl Symbol {
                 }
                 symbol(symname)
             }
+            Symbol::Dladdr(ref s) => s.name(),
         }
     }
 
@@ -97,6 +97,7 @@ impl Symbol {
         let pc = match *self {
             Symbol::Syminfo { pc, .. } => pc,
             Symbol::Pcinfo { pc, .. } => pc,
+            Symbol::Dladdr(ref s) => return s.addr(),
         };
         if pc == 0 {
             None
@@ -115,6 +116,7 @@ impl Symbol {
                     Some(slice::from_raw_parts(ptr, len))
                 }
             }
+            Symbol::Dladdr(_) => None,
         }
     }
 
@@ -146,6 +148,7 @@ impl Symbol {
         match *self {
             Symbol::Syminfo { .. } => None,
             Symbol::Pcinfo { lineno, .. } => Some(lineno as u32),
+            Symbol::Dladdr(ref s) => s.lineno(),
         }
     }
 }
@@ -425,7 +428,7 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     // backtrace errors are currently swept under the rug
     let state = init_state();
     if state.is_null() {
-        return;
+        return dladdr_fallback(what.address_or_ip(), cb);
     }
 
     // Call the `backtrace_syminfo` API first. This is (from reading the code)
@@ -434,15 +437,33 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     //
     // Note that we do this since `syminfo` will consult the symbol table,
     // finding symbol names even if there's no debug information in the binary.
-    let mut syminfo_state = SyminfoState {
-        pc: symaddr,
-        cb: cb,
-    };
-    bt::backtrace_syminfo(
-        state,
-        symaddr as uintptr_t,
-        syminfo_cb,
-        error_cb,
-        &mut syminfo_state as *mut _ as *mut _,
-    );
+    let mut called = false;
+    {
+        let mut syminfo_state = SyminfoState {
+            pc: symaddr,
+            cb: &mut |sym| {
+                called = true;
+                cb(sym);
+            },
+        };
+        bt::backtrace_syminfo(
+            state,
+            symaddr as uintptr_t,
+            syminfo_cb,
+            error_cb,
+            &mut syminfo_state as *mut _ as *mut _,
+        );
+    }
+
+    if !called {
+        dladdr_fallback(what.address_or_ip(), cb);
+    }
+}
+
+unsafe fn dladdr_fallback(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) {
+    dladdr::resolve(addr, &mut |sym| {
+        cb(&super::Symbol {
+            inner: Symbol::Dladdr(sym),
+        })
+    });
 }

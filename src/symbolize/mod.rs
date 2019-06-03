@@ -405,6 +405,8 @@ cfg_if! {
     }
 }
 
+mod dladdr;
+
 cfg_if! {
     if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp"))] {
         mod dbghelp;
@@ -435,9 +437,9 @@ cfg_if! {
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
                         feature = "dladdr"))] {
-        mod dladdr;
-        use self::dladdr::resolve as resolve_imp;
-        use self::dladdr::Symbol as SymbolImp;
+        mod dladdr_resolve;
+        use self::dladdr_resolve::resolve as resolve_imp;
+        use self::dladdr_resolve::Symbol as SymbolImp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;

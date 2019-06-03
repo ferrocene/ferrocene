@@ -8,63 +8,94 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Symbolication strategy using `dladdr`
-//!
-//! The `dladdr` API is available on most Unix implementations but it's quite
-//! basic, not handling inline frame information at all. Since it's so prevalent
-//! though we have an option to use it!
+//! Common support for resolving with `dladdr`, often used as a fallback if
+//! other strategies don't work.
 
-use core::{mem, slice};
+#![allow(dead_code)]
 
-use types::{BytesOrWideString, c_void};
-use libc::{self, Dl_info};
-use symbolize::ResolveWhat;
+cfg_if! {
+    if #[cfg(all(unix, not(target_os = "emscripten"), feature = "dladdr"))] {
+        use core::{mem, slice};
 
-use SymbolName;
+        use types::{BytesOrWideString, c_void};
+        use libc::{self, Dl_info};
 
-pub struct Symbol {
-    inner: Dl_info,
-}
+        use SymbolName;
 
-impl Symbol {
-    pub fn name(&self) -> Option<SymbolName> {
-        if self.inner.dli_sname.is_null() {
-            None
-        } else {
-            let ptr = self.inner.dli_sname as *const u8;
-            unsafe {
-                let len = libc::strlen(self.inner.dli_sname);
-                Some(SymbolName::new(slice::from_raw_parts(ptr, len)))
+        pub struct Symbol {
+            inner: Dl_info,
+        }
+
+        impl Symbol {
+            pub fn name(&self) -> Option<SymbolName> {
+                if self.inner.dli_sname.is_null() {
+                    None
+                } else {
+                    let ptr = self.inner.dli_sname as *const u8;
+                    unsafe {
+                        let len = libc::strlen(self.inner.dli_sname);
+                        Some(SymbolName::new(slice::from_raw_parts(ptr, len)))
+                    }
+                }
+            }
+
+            pub fn addr(&self) -> Option<*mut c_void> {
+                Some(self.inner.dli_saddr as *mut _)
+            }
+
+            pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+                None
+            }
+
+            #[cfg(feature = "std")]
+            pub fn filename(&self) -> Option<&::std::path::Path> {
+                None
+            }
+
+            pub fn lineno(&self) -> Option<u32> {
+                None
             }
         }
-    }
 
-    pub fn addr(&self) -> Option<*mut c_void> {
-        Some(self.inner.dli_saddr as *mut _)
-    }
+        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol)) {
+            let mut info = Symbol {
+                inner: mem::zeroed(),
+            };
+            if libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
+                cb(info)
+            }
+        }
+    } else {
+        use types::{BytesOrWideString, c_void};
+        use symbolize::SymbolName;
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-        None
-    }
+        pub enum Symbol {}
 
-    #[cfg(feature = "std")]
-    pub fn filename(&self) -> Option<&::std::path::Path> {
-        None
-    }
+        impl Symbol {
+            pub fn name(&self) -> Option<SymbolName> {
+                match *self {}
+            }
 
-    pub fn lineno(&self) -> Option<u32> {
-        None
-    }
-}
+            pub fn addr(&self) -> Option<*mut c_void> {
+                match *self {}
+            }
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
-    let addr = what.address_or_ip();
-    let mut info: super::Symbol = super::Symbol {
-        inner: Symbol {
-            inner: mem::zeroed(),
-        },
-    };
-    if libc::dladdr(addr as *mut _, &mut info.inner.inner) != 0 {
-        cb(&info)
+            pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+                match *self {}
+            }
+
+            #[cfg(feature = "std")]
+            pub fn filename(&self) -> Option<&::std::path::Path> {
+                match *self {}
+            }
+
+            pub fn lineno(&self) -> Option<u32> {
+                match *self {}
+            }
+        }
+
+        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol)) {
+            drop((addr, cb));
+        }
     }
 }

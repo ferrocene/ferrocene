@@ -1,6 +1,6 @@
 use std::path::Path;
 
-mod aux;
+mod auxiliary;
 
 macro_rules! pos {
     () => {
@@ -32,10 +32,10 @@ fn outer(main_pos: Pos) {
 fn inner(main_pos: Pos, outer_pos: Pos) {
     check!(main_pos, outer_pos);
     check!(main_pos, outer_pos);
-    let inner_pos = pos!(); aux::callback(|aux_pos| {
+    let inner_pos = pos!(); auxiliary::callback(|aux_pos| {
         check!(main_pos, outer_pos, inner_pos, aux_pos);
     });
-    let inner_pos = pos!(); aux::callback_inlined(|aux_pos| {
+    let inner_pos = pos!(); auxiliary::callback_inlined(|aux_pos| {
         check!(main_pos, outer_pos, inner_pos, aux_pos);
     });
 }
@@ -56,10 +56,10 @@ fn inner_inlined(main_pos: Pos, outer_pos: Pos) {
     }
     inner_further_inlined(main_pos, outer_pos, pos!());
 
-    let inner_pos = pos!(); aux::callback(|aux_pos| {
+    let inner_pos = pos!(); auxiliary::callback(|aux_pos| {
         check!(main_pos, outer_pos, inner_pos, aux_pos);
     });
-    let inner_pos = pos!(); aux::callback_inlined(|aux_pos| {
+    let inner_pos = pos!(); auxiliary::callback_inlined(|aux_pos| {
         check!(main_pos, outer_pos, inner_pos, aux_pos);
     });
 

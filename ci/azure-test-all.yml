@@ -3,7 +3,7 @@ steps:
     submodules: true
   - template: azure-install-rust.yml
 
-  - bash: cargo build --manifest-path backtrace-sys/Cargo.toml
+  - bash: cargo build --manifest-path crates/backtrace-sys/Cargo.toml
     displayName: "Build backtrace-sys"
   - bash: cargo build
     displayName: "Build backtrace"

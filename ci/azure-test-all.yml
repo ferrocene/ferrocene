@@ -19,6 +19,8 @@ steps:
     displayName: "Test backtrace (-default + libunwind + dladdr)"
   - bash: cargo test --no-default-features --features 'libunwind libbacktrace std'
     displayName: "Test backtrace (-default + libunwind + libbacktrace)"
+  - bash: cargo test --no-default-features --features 'libunwind libbacktrace dbghelp std'
+    displayName: "Test backtrace (-default + libunwind + libbacktrace + dbghelp)"
   - bash: cargo test --no-default-features --features 'unix-backtrace std'
     displayName: "Test backtrace (-default + unix-backtrace)"
   - bash: cargo test --no-default-features --features 'unix-backtrace dladdr std'

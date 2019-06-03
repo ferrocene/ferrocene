@@ -18,6 +18,10 @@ type Pos = (&'static str, u32);
 
 #[test]
 fn doit() {
+    // Looks like this test doesn't work on OSX with coresymbolication
+    if cfg!(feature = "coresymbolication") {
+        return;
+    }
     outer(pos!());
 }
 

@@ -340,7 +340,6 @@ ffi! {
         pub fn GetCurrentThread() -> HANDLE;
         pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
         pub fn LoadLibraryA(a: *const i8) -> HMODULE;
-        pub fn FreeLibrary(h: HMODULE) -> BOOL;
         pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
         pub fn OpenProcess(
             dwDesiredAccess: DWORD,

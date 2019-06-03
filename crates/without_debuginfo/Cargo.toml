@@ -4,11 +4,27 @@ version = "0.1.0"
 authors = ["Alex Crichton <alex@alexcrichton.com>"]
 edition = "2018"
 
-[dependencies]
-backtrace = { path = "../.." }
+[dependencies.backtrace]
+path = "../.."
+default-features = false
+features = [
+  # make sure a trace can be acquired
+  'libunwind',
+  'dbghelp',
+
+  # Allow fallback to dladdr
+  'dladdr',
+
+  # Yes, we have `std`
+  'std',
+]
 
 [profile.dev]
 debug = false
 
 [profile.test]
 debug = false
+
+[features]
+libbacktrace = ['backtrace/libbacktrace']
+coresymbolication = ['backtrace/coresymbolication']

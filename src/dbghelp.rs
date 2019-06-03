@@ -14,6 +14,12 @@
 //! be in the business of duplicating winapi, so we have a Cargo feature
 //! `verify-winapi` which asserts that all bindings match those in winapi and
 //! this feature is enabled on CI.
+//!
+//! Finally, you'll note here that the dll for `dbghelp.dll` is never unloaded,
+//! and that's currently intentional. The thinking is that we can globally cache
+//! it and use it between calls to the API, avoiding expensive loads/unloads. If
+//! this is a problem for leak detectors or something like that we can cross the
+//! bridge when we get there.
 
 #![allow(non_snake_case)]
 
@@ -104,8 +110,10 @@ macro_rules! dbghelp {
             /// error if `LoadLibraryW` fails.
             ///
             /// Panics if library is already loaded.
-            fn open(&mut self) -> Result<(), ()> {
-                assert!(self.dll.is_null());
+            fn ensure_open(&mut self) -> Result<(), ()> {
+                if !self.dll.is_null() {
+                    return Ok(())
+                }
                 let lib = b"dbghelp.dll\0";
                 unsafe {
                     self.dll = LoadLibraryA(lib.as_ptr() as *const i8);
@@ -114,17 +122,6 @@ macro_rules! dbghelp {
                     }  else {
                         Ok(())
                     }
-                }
-            }
-
-            /// Unloads `dbghelp.dll`, resetting all function pointers to zero
-            /// as well.
-            fn close(&mut self) {
-                assert!(!self.dll.is_null());
-                unsafe {
-                    $(self.$name = 0;)*
-                    FreeLibrary(self.dll);
-                    self.dll = ptr::null_mut();
                 }
             }
 
@@ -280,7 +277,7 @@ pub unsafe fn init() -> Result<Cleanup, ()> {
 
     // Actually load `dbghelp.dll` into the process here, returning an error if
     // that fails.
-    DBGHELP.open()?;
+    DBGHELP.ensure_open()?;
 
     OPTS_ORIG = DBGHELP.SymGetOptions().unwrap()();
 
@@ -294,7 +291,6 @@ pub unsafe fn init() -> Result<Cleanup, ()> {
         // Symbols may have been initialized by another library or an
         // external debugger
         DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
-        DBGHELP.close();
         Err(())
     } else {
         COUNT += 1;
@@ -317,13 +313,6 @@ impl Drop for Cleanup {
             // backtrace is finished.
             DBGHELP.SymCleanup().unwrap()(GetCurrentProcess());
             DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
-
-            // We can in theory leak this to stay in a global and we simply
-            // always reuse it, but for now let's be tidy and release all our
-            // resources. If we get bug reports the we could basically elide
-            // this `close()` (and the one above) and then update `open` to be a
-            // noop if it's already opened.
-            DBGHELP.close();
         }
     }
 }

@@ -39,5 +39,7 @@ steps:
     displayName: "Test backtrace (-default + dbghelp + std)"
   - bash: cargo test --no-default-features --features 'dbghelp std verify-winapi'
     displayName: "Test backtrace (-default + dbghelp + std + verify-winapi)"
-  - bash: cd ./cpp_smoke_test && cargo test
+  - bash: cd ./crates/cpp_smoke_test && cargo test
     displayName: "Test cpp_smoke_test"
+  - bash: cd ./crates/without_debuginfo && cargo test
+    displayName: "Test without debuginfo"

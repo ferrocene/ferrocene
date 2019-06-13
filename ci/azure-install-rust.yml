@@ -6,7 +6,7 @@ steps:
         toolchain=stable
       fi
       if command -v rustup; then
-        rustup update $toolchain
+        rustup update --no-self-update $toolchain
         rustup default $toolchain
       else
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $toolchain
@@ -15,7 +15,7 @@ steps:
     displayName: Install rust (unix)
     condition: ne( variables['Agent.OS'], 'Windows_NT' )
 
-  - bash: rustup update stable-$TARGET && rustup default stable-$TARGET
+  - bash: rustup update --no-self-update stable-$TARGET && rustup default stable-$TARGET
     displayName: Install rust (windows)
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
 

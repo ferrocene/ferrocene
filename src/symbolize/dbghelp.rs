@@ -142,6 +142,8 @@ unsafe fn resolve_without_inline(
     addr: *mut c_void,
     cb: &mut FnMut(&super::Symbol),
 ) {
+    // See above for why there's a `-1` here
+    let addr = (addr as usize - 1) as *mut c_void;
     do_resolve(
         |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr as DWORD64, &mut 0, info),
         |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr as DWORD64, &mut 0, line),

@@ -428,7 +428,7 @@ cfg_if! {
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;
     } else if #[cfg(all(feature = "libbacktrace",
-                        any(unix, all(windows, target_vendor = "pc", target_env = "gnu")),
+                        any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
                         not(target_os = "fuchsia"),
                         not(target_os = "emscripten")))] {
         mod libbacktrace;

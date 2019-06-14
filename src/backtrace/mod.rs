@@ -137,7 +137,7 @@ cfg_if! {
         mod unix_backtrace;
         use self::unix_backtrace::trace as trace_imp;
         pub(crate) use self::unix_backtrace::Frame as FrameImp;
-    } else if #[cfg(all(windows, feature = "dbghelp"))] {
+    } else if #[cfg(all(windows, feature = "dbghelp", not(target_vendor = "uwp")))] {
         mod dbghelp;
         use self::dbghelp::trace as trace_imp;
         pub(crate) use self::dbghelp::Frame as FrameImp;

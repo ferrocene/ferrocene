@@ -140,6 +140,9 @@ jobs:
           TARGET: x86_64-pc-windows-msvc
         i686-msvc:
           TARGET: i686-pc-windows-msvc
+          # this looks to be required to get full fidelity of backtrace
+          # information on 32-bit MSVC
+          RUSTFLAGS: -Cforce-frame-pointers
         x86_64-gnu:
           TARGET: x86_64-pc-windows-gnu
         i686-gnu:

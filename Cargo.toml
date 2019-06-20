@@ -48,8 +48,11 @@ autocfg = "0.1"
 #
 # Note that not all features are available on all platforms, so even though a
 # feature is enabled some other feature may be used instead.
+#
+# coresymbolication is intentionally disabled because it's very slow and sometimes
+# yields no results.
 [features]
-default = ["std", "libunwind", "libbacktrace", "coresymbolication", "dladdr", "dbghelp"]
+default = ["std", "libunwind", "libbacktrace", "dladdr", "dbghelp"]
 
 # Include std support.
 std = []

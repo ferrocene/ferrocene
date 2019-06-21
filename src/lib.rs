@@ -67,7 +67,7 @@
 #![no_std]
 #![cfg_attr(all(feature = "std", target_env = "sgx"), feature(sgx_platform))]
 #![allow(bare_trait_objects)] // TODO: remove when updating to 2018 edition
-#![allow(rust_2018_idioms)]   // TODO: remove when updating to 2018 edition
+#![allow(rust_2018_idioms)] // TODO: remove when updating to 2018 edition
 
 #[cfg(feature = "std")]
 #[macro_use]
@@ -103,8 +103,8 @@ cfg_if! {
 pub use backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 
-pub use symbolize::{resolve_unsynchronized, Symbol, SymbolName};
 pub use symbolize::resolve_frame_unsynchronized;
+pub use symbolize::{resolve_unsynchronized, Symbol, SymbolName};
 mod symbolize;
 
 pub use types::BytesOrWideString;

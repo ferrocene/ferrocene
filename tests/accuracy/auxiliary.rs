@@ -7,6 +7,7 @@ where
 }
 
 #[inline(always)]
+#[cfg_attr(feature = "coresymbolication", inline(never))]
 pub fn callback_inlined<F>(f: F)
 where
     F: FnOnce((&'static str, u32)),

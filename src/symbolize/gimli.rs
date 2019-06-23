@@ -4,13 +4,16 @@
 //! all platforms, but it's hoped to be developed over time! Long-term this is
 //! intended to wholesale replace the `libbacktrace.rs` implementation.
 
+use self::gimli::read::EndianRcSlice;
+use self::gimli::RunTimeEndian;
 use crate::symbolize::dladdr;
 use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
-use addr2line;
+use addr2line::gimli;
 use addr2line::object::{self, Object};
 use core::cell::RefCell;
+use core::convert::TryFrom;
 use core::mem;
 use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
@@ -243,17 +246,15 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
         let mut found_sym = false;
         if let Ok(mut frames) = dwarf.find_frames(addr.0 as u64) {
             while let Ok(Some(frame)) = frames.next() {
-                let (file, line) = frame
-                    .location
-                    .map(|l| (l.file, l.line))
-                    .unwrap_or((None, None));
-                let name = frame
-                    .function
-                    .and_then(|f| f.raw_name().ok().map(|f| f.to_string()));
-                let sym = super::Symbol {
-                    inner: Symbol::new(addr.0 as usize, file, line, name),
-                };
-                cb.call(&sym);
+                let name = frame.function.as_ref().and_then(|f| f.raw_name().ok());
+                let name = name.as_ref().map(|n| n.as_bytes() as *const _);
+                cb.call(&super::Symbol {
+                    inner: Symbol::Frame {
+                        addr: addr.0 as *mut c_void,
+                        frame,
+                        name,
+                    },
+                });
                 found_sym = true;
             }
         }
@@ -262,7 +263,10 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
         if !found_sym {
             if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
                 let sym = super::Symbol {
-                    inner: Symbol::new(addr.0 as usize, None, None, Some(name.to_string())),
+                    inner: Symbol::Symbol {
+                        addr: addr.0 as usize as *mut c_void,
+                        name: name.as_bytes(),
+                    },
                 };
                 cb.call(&sym);
             }
@@ -301,67 +305,82 @@ impl Drop for DladdrFallback<'_, '_> {
 }
 
 pub enum Symbol {
-    Dladdr(dladdr::Symbol),
-    Gimli {
-        addr: usize,
-        file: Option<String>,
-        line: Option<u64>,
-        name: Option<String>,
+    /// We were able to locate frame information for this symbol, and
+    /// `addr2line`'s frame internally has all the nitty gritty details.
+    Frame {
+        addr: *mut c_void,
+        frame: addr2line::Frame<EndianRcSlice<RunTimeEndian>>,
+        // Note that this would ideally be `&[u8]`, but we currently can't have
+        // a lifetime parameter on this type. Eventually in the next breaking
+        // change of this crate we should add a lifetime parameter to the
+        // `Symbol` type in the top-level module, and then thread that lifetime
+        // through to here.
+        name: Option<*const [u8]>,
     },
+    /// We weren't able to find anything in the debuginfo for this address, but
+    /// we were able to find an entry into the symbol table for the symbol name.
+    Symbol {
+        addr: *mut c_void,
+        // see note on `name` above
+        name: *const [u8],
+    },
+    /// We weren't able to find anything in the original file, so we had to fall
+    /// back to using `dladdr` which had a hit.
+    Dladdr(dladdr::Symbol),
 }
 
 impl Symbol {
-    fn new(addr: usize, file: Option<String>, line: Option<u64>, name: Option<String>) -> Symbol {
-        Symbol::Gimli {
-            addr,
-            file,
-            line,
-            name,
-        }
-    }
-
     pub fn name(&self) -> Option<SymbolName> {
         match self {
             Symbol::Dladdr(s) => s.name(),
-            Symbol::Gimli { name, .. } => name.as_ref().map(|s| SymbolName::new(s.as_bytes())),
+            Symbol::Frame { name, .. } => {
+                let name = name.as_ref()?;
+                unsafe { Some(SymbolName::new(&**name)) }
+            }
+            Symbol::Symbol { name, .. } => unsafe { Some(SymbolName::new(&**name)) },
         }
     }
 
     pub fn addr(&self) -> Option<*mut c_void> {
         match self {
             Symbol::Dladdr(s) => s.addr(),
-            Symbol::Gimli { addr, .. } => Some(*addr as *mut c_void),
+            Symbol::Frame { addr, .. } => Some(*addr),
+            Symbol::Symbol { addr, .. } => Some(*addr),
         }
     }
 
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-        let file = match self {
+        match self {
             Symbol::Dladdr(s) => return s.filename_raw(),
-            Symbol::Gimli { file, .. } => file,
-        };
-        file.as_ref()
-            .map(|f| BytesOrWideString::Bytes(f.as_bytes()))
+            Symbol::Frame { frame, .. } => {
+                let location = frame.location.as_ref()?;
+                let file = location.file.as_ref()?;
+                Some(BytesOrWideString::Bytes(file.as_bytes()))
+            }
+            Symbol::Symbol { .. } => None,
+        }
     }
 
     pub fn filename(&self) -> Option<&Path> {
-        let file = match self {
+        match self {
             Symbol::Dladdr(s) => return s.filename(),
-            Symbol::Gimli { file, .. } => file,
-        };
-        file.as_ref().map(Path::new)
+            Symbol::Frame { frame, .. } => {
+                let location = frame.location.as_ref()?;
+                let file = location.file.as_ref()?;
+                Some(Path::new(file))
+            }
+            Symbol::Symbol { .. } => None,
+        }
     }
 
     pub fn lineno(&self) -> Option<u32> {
-        let line = match self {
+        match self {
             Symbol::Dladdr(s) => return s.lineno(),
-            Symbol::Gimli { line, .. } => line,
-        };
-        line.and_then(|l| {
-            if l > (u32::MAX as u64) {
-                None
-            } else {
-                Some(l as u32)
+            Symbol::Frame { frame, .. } => {
+                let location = frame.location.as_ref()?;
+                location.line.and_then(|l| u32::try_from(l).ok())
             }
-        })
+            Symbol::Symbol { .. } => None,
+        }
     }
 }

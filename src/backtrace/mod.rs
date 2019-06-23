@@ -1,5 +1,5 @@
 use core::fmt;
-use types::c_void;
+use core::ffi::c_void;
 
 /// Inspects the current call-stack, passing all active frames into the closure
 /// provided to calculate a stack trace.
@@ -49,7 +49,7 @@ use types::c_void;
 /// ```
 #[cfg(feature = "std")]
 pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
-    let _guard = ::lock::lock();
+    let _guard = crate::lock::lock();
     unsafe { trace_unsynchronized(cb) }
 }
 
@@ -112,7 +112,7 @@ impl fmt::Debug for Frame {
     }
 }
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(
         any(
             all(

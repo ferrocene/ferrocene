@@ -1,16 +1,11 @@
 //! Platform dependent types.
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
-        pub use std::os::raw::c_void;
         use std::borrow::Cow;
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
-    } else if #[cfg(rustc_1_30)] {
-        pub use core::ffi::c_void;
-    } else {
-        compile_error!("`backtrace` requires Rust >=1.30.0 to support `no_std`.");
     }
 }
 

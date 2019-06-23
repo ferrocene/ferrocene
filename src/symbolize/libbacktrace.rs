@@ -38,9 +38,9 @@ extern crate backtrace_sys as bt;
 use core::{ptr, slice};
 use libc::{self, c_char, c_int, c_void, uintptr_t};
 
-use symbolize::{ResolveWhat, SymbolName};
-use symbolize::dladdr;
-use types::BytesOrWideString;
+use crate::symbolize::{ResolveWhat, SymbolName};
+use crate::symbolize::dladdr;
+use crate::types::BytesOrWideString;
 
 pub enum Symbol {
     Syminfo {
@@ -170,7 +170,7 @@ extern "C" fn syminfo_cb(
     _symval: uintptr_t,
     _symsize: uintptr_t,
 ) {
-    let mut bomb = ::Bomb { enabled: true };
+    let mut bomb = crate::Bomb { enabled: true };
 
     // Once this callback is invoked from `backtrace_syminfo` when we start
     // resolving we go further to call `backtrace_pcinfo`. The
@@ -223,7 +223,7 @@ extern "C" fn pcinfo_cb(
     if filename.is_null() || function.is_null() {
         return -1;
     }
-    let mut bomb = ::Bomb { enabled: true };
+    let mut bomb = crate::Bomb { enabled: true };
 
     unsafe {
         let state = &mut *(data as *mut PcinfoState);
@@ -298,7 +298,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     //
     // Given all that we try as hard as possible to *not* pass in a filename,
     // but we must on platforms that don't support /proc/self/exe at all.
-    cfg_if! {
+    cfg_if::cfg_if! {
         if #[cfg(any(target_os = "macos", target_os = "ios"))] {
             // Note that ideally we'd use `std::env::current_exe`, but we can't
             // require `std` here.
@@ -326,7 +326,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
                 }
             }
         } else if #[cfg(windows)] {
-            use windows::*;
+            use crate::windows::*;
 
             // Windows has a mode of opening files where after it's opened it
             // can't be deleted. That's in general what we want here because we

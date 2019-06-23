@@ -1,7 +1,7 @@
 //! Empty implementation of unwinding used when no other implementation is
 //! appropriate.
 
-use types::c_void;
+use core::ffi::c_void;
 
 #[inline(always)]
 pub fn trace(_cb: &mut FnMut(&super::Frame) -> bool) {}

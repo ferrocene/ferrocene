@@ -4,6 +4,9 @@
 //! all platforms, but it's hoped to be developed over time! Long-term this is
 //! intended to wholesale replace the `libbacktrace.rs` implementation.
 
+use crate::symbolize::ResolveWhat;
+use crate::types::BytesOrWideString;
+use crate::SymbolName;
 use addr2line;
 use addr2line::object::{self, Object};
 use findshlibs::{self, Segment, SharedLibrary};
@@ -16,10 +19,6 @@ use std::mem;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
 use std::u32;
-
-use symbolize::ResolveWhat;
-use types::BytesOrWideString;
-use SymbolName;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 

@@ -9,7 +9,7 @@
 
 #![allow(bad_style, dead_code)]
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "verify-winapi")] {
         pub use self::winapi::c_void;
         pub use self::winapi::HINSTANCE;

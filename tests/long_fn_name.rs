@@ -9,8 +9,8 @@ mod _234567890_234567890_234567890_234567890_234567890 {
     pub struct _234567890_234567890_234567890_234567890_234567890<T>(T);
     impl<T> _234567890_234567890_234567890_234567890_234567890<T> {
         #[allow(dead_code)]
-        pub fn new() -> ::Backtrace {
-            ::Backtrace::new()
+        pub fn new() -> crate::Backtrace {
+            crate::Backtrace::new()
         }
     }
 }

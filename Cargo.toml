@@ -12,6 +12,7 @@ A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 """
 autoexamples = true
 autotests = true
+edition = "2018"
 
 [dependencies]
 cfg-if = "0.1.6"
@@ -22,8 +23,7 @@ core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core
 compiler_builtins = { version = '0.1.2', optional = true }
 
 # Optionally enable the ability to serialize a `Backtrace`
-serde = { version = "1.0", optional = true }
-serde_derive = { version = "1.0", optional = true }
+serde = { version = "1.0", optional = true, features = ['derive'] }
 rustc-serialize = { version = "0.3", optional = true }
 
 # Optionally demangle C++ frames' symbols in backtraces.
@@ -36,9 +36,6 @@ memmap = { version = "0.7.0", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.3", optional = true }
-
-[build-dependencies]
-autocfg = "0.1"
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default
@@ -102,7 +99,7 @@ gimli-symbolize = ["addr2line", "findshlibs", "memmap" ]
 #
 # Various features used for enabling rustc-serialize or syntex codegen.
 serialize-rustc = ["rustc-serialize"]
-serialize-serde = ["serde", "serde_derive"]
+serialize-serde = ["serde"]
 
 #=======================================
 # Internal features for testing and such.

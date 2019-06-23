@@ -13,14 +13,14 @@
 
 #![allow(dead_code)]
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(all(unix, not(target_os = "emscripten"), feature = "dladdr"))] {
         use core::{mem, slice};
-
-        use types::{BytesOrWideString, c_void};
+        use crate::types::BytesOrWideString;
+        use core::ffi::c_void;
         use libc::{self, Dl_info};
 
-        use SymbolName;
+        use crate::SymbolName;
 
         pub struct Symbol {
             inner: Dl_info,
@@ -66,8 +66,9 @@ cfg_if! {
             }
         }
     } else {
-        use types::{BytesOrWideString, c_void};
-        use symbolize::SymbolName;
+        use core::ffi::c_void;
+        use crate::types::BytesOrWideString;
+        use crate::symbolize::SymbolName;
 
         pub enum Symbol {}
 

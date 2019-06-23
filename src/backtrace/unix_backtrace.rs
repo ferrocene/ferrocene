@@ -16,10 +16,9 @@
 //! straightforward binding of the `backtrace` API to the `Frame` API that we'd
 //! like to have.
 
+use core::ffi::c_void;
 use core::mem;
 use libc::c_int;
-
-use types::c_void;
 
 #[derive(Clone)]
 pub struct Frame {

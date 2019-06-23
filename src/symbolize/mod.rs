@@ -1,16 +1,16 @@
 use core::{fmt, str};
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
         use std::path::Path;
         use std::prelude::v1::*;
     }
 }
 
+use core::ffi::c_void;
+use crate::backtrace::Frame;
+use crate::types::{BytesOrWideString};
 use rustc_demangle::{try_demangle, Demangle};
-use types::{c_void, BytesOrWideString};
-
-use backtrace::Frame;
 
 /// Resolve an address to a symbol, passing the symbol to the specified
 /// closure.
@@ -59,7 +59,7 @@ use backtrace::Frame;
 /// ```
 #[cfg(feature = "std")]
 pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
-    let _guard = ::lock::lock();
+    let _guard = crate::lock::lock();
     unsafe { resolve_unsynchronized(addr, cb) }
 }
 
@@ -101,7 +101,7 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
 /// ```
 #[cfg(feature = "std")]
 pub fn resolve_frame<F: FnMut(&Symbol)>(frame: &Frame, cb: F) {
-    let _guard = ::lock::lock();
+    let _guard = crate::lock::lock();
     unsafe { resolve_frame_unsynchronized(frame, cb) }
 }
 
@@ -240,7 +240,7 @@ impl fmt::Debug for Symbol {
     }
 }
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
         // Maybe a parsed C++ symbol, if parsing the mangled symbol as Rust
         // failed.
@@ -343,7 +343,7 @@ fn format_symbol_name(
     Ok(())
 }
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
         impl<'a> fmt::Display for SymbolName<'a> {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -369,7 +369,7 @@ cfg_if! {
     }
 }
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(all(feature = "std", feature = "cpp_demangle"))] {
         impl<'a> fmt::Debug for SymbolName<'a> {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -407,7 +407,7 @@ cfg_if! {
 
 mod dladdr;
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;

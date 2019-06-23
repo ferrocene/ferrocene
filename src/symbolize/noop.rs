@@ -1,9 +1,10 @@
 //! Empty symbolication strategy used to compile for platforms that have no
 //! support.
 
-use types::{BytesOrWideString, c_void};
-use SymbolName;
-use symbolize::ResolveWhat;
+use core::ffi::c_void;
+use crate::types::BytesOrWideString;
+use crate::SymbolName;
+use crate::symbolize::ResolveWhat;
 
 pub unsafe fn resolve(_addr: ResolveWhat, _cb: &mut FnMut(&super::Symbol)) {
 }

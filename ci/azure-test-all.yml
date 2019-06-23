@@ -9,6 +9,8 @@ steps:
     displayName: "Build backtrace"
   - bash: cargo test
     displayName: "Test backtrace"
+  - bash: cargo test --features 'gimli-symbolize'
+    displayName: "Test backtrace (gimli-symbolize)"
   - bash: cargo test --no-default-features
     displayName: "Test backtrace (-default)"
   - bash: cargo test --no-default-features --features 'std'
@@ -41,8 +43,6 @@ steps:
     displayName: "Test backtrace (-default + serialize-rustc + serialize-serde + std)"
   - bash: cargo test --no-default-features --features 'cpp_demangle std'
     displayName: "Test backtrace (-default + cpp_demangle + std)"
-  - bash: cargo test --no-default-features --features 'gimli-symbolize std'
-    displayName: "Test backtrace (-default + gimli-symbolize + std)"
   - bash: cargo test --no-default-features --features 'dbghelp std'
     displayName: "Test backtrace (-default + dbghelp + std)"
   - bash: cargo test --no-default-features --features 'dbghelp std verify-winapi'

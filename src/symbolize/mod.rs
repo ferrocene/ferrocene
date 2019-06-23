@@ -438,9 +438,14 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
-    } else if #[cfg(all(feature = "std",
-                        feature = "gimli-symbolize",
-                        target_os = "linux"))] {
+    } else if #[cfg(all(
+        feature = "std",
+        feature = "gimli-symbolize",
+        any(
+            target_os = "linux",
+            target_os = "macos",
+        ),
+    ))] {
         mod gimli;
         use self::gimli::resolve as resolve_imp;
         use self::gimli::Symbol as SymbolImp;

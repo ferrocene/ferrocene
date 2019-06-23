@@ -23,20 +23,20 @@
 
 #![allow(non_snake_case)]
 
+use crate::windows::*;
 use core::mem;
 use core::ptr;
-use crate::windows::*;
 
 // Work around `SymGetOptions` and `SymSetOptions` not being present in winapi
 // itself. Otherwise this is only used when we're double-checking types against
 // winapi.
 #[cfg(feature = "verify-winapi")]
 mod dbghelp {
+    use crate::windows::*;
     pub use winapi::um::dbghelp::{
         StackWalk64, SymCleanup, SymFromAddrW, SymFunctionTableAccess64, SymGetLineFromAddrW64,
         SymGetModuleBase64, SymInitializeW,
     };
-    use crate::windows::*;
 
     extern "system" {
         // Not defined in winapi yet

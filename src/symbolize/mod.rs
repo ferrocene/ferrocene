@@ -7,9 +7,9 @@ cfg_if::cfg_if! {
     }
 }
 
-use core::ffi::c_void;
 use crate::backtrace::Frame;
-use crate::types::{BytesOrWideString};
+use crate::types::BytesOrWideString;
+use core::ffi::c_void;
 use rustc_demangle::{try_demangle, Demangle};
 
 /// Resolve an address to a symbol, passing the symbol to the specified
@@ -113,10 +113,36 @@ pub enum ResolveWhat<'a> {
 impl<'a> ResolveWhat<'a> {
     #[allow(dead_code)]
     fn address_or_ip(&self) -> *mut c_void {
-        match *self {
-            ResolveWhat::Address(a) => a,
-            ResolveWhat::Frame(ref f) => f.ip(),
+        match self {
+            ResolveWhat::Address(a) => adjust_ip(*a),
+            ResolveWhat::Frame(f) => adjust_ip(f.ip()),
         }
+    }
+}
+
+// IP values from stack frames are typically (always?) the instruction
+// *after* the call that's the actual stack trace. Symbolizing this on
+// causes the filename/line number to be one ahead and perhaps into
+// the void if it's near the end of the function.
+//
+// This appears to basically always be the case on all platforms, so we always
+// subtract one from a resolved ip to resolve it to the previous call
+// instruction instead of the instruction being returned to.
+//
+// Ideally we would not do this. Ideally we would require callers of the
+// `resolve` APIs here to manually do the -1 and account that they want location
+// information for the *previous* instruction, not the current. Ideally we'd
+// also expose on `Frame` if we are indeed the address of the next instruction
+// or the current.
+//
+// For now though this is a pretty niche concern so we just internally always
+// subtract one. Consumers should keep working and getting pretty good results,
+// so we should be good enough.
+fn adjust_ip(a: *mut c_void) -> *mut c_void {
+    if a.is_null() {
+        a
+    } else {
+        (a as usize - 1) as *mut c_void
     }
 }
 

@@ -218,10 +218,6 @@ unsafe fn try_resolve(addr: *mut c_void, cb: &mut FnMut(&super::Symbol)) -> bool
         CSRelease: lib.CSRelease(),
     };
 
-    // Typically `addr` is the *next* instruction during a backtrace so we're
-    // careful to subtract one here to get the filename/line information for the
-    // previous instruction which is the one we're interested in.
-    let addr = (addr as usize - 1) as *mut c_void;
     let info = lib.CSSymbolicatorGetSourceInfoWithAddressAtTime()(cs, addr, CS_NOW);
     let sym = if info == CSREF_NULL {
         lib.CSSymbolicatorGetSymbolWithAddressAtTime()(cs, addr, CS_NOW)

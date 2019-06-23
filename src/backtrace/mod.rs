@@ -1,5 +1,5 @@
-use core::fmt;
 use core::ffi::c_void;
+use core::fmt;
 
 /// Inspects the current call-stack, passing all active frames into the closure
 /// provided to calculate a stack trace.

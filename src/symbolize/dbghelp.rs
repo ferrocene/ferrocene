@@ -87,7 +87,7 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     };
 
     match what {
-        ResolveWhat::Address(addr) => resolve_without_inline(&dbghelp, addr, cb),
+        ResolveWhat::Address(_) => resolve_without_inline(&dbghelp, what.address_or_ip(), cb),
         ResolveWhat::Frame(frame) => match &frame.inner {
             Frame::New(frame) => resolve_with_inline(&dbghelp, frame, cb),
             Frame::Old(_) => resolve_without_inline(&dbghelp, frame.ip(), cb),
@@ -104,11 +104,7 @@ unsafe fn resolve_with_inline(
         |info| {
             dbghelp.SymFromInlineContextW()(
                 GetCurrentProcess(),
-                // FIXME: why is `-1` used here and below? It seems to produce
-                // more accurate backtraces on Windows (aka passes tests in
-                // rust-lang/rust), but it's unclear why it's required in the
-                // first place.
-                frame.AddrPC.Offset - 1,
+                super::adjust_ip(frame.AddrPC.Offset as *mut _) as u64,
                 frame.InlineFrameContext,
                 &mut 0,
                 info,
@@ -117,7 +113,7 @@ unsafe fn resolve_with_inline(
         |line| {
             dbghelp.SymGetLineFromInlineContextW()(
                 GetCurrentProcess(),
-                frame.AddrPC.Offset - 1,
+                super::adjust_ip(frame.AddrPC.Offset as *mut _) as u64,
                 frame.InlineFrameContext,
                 0,
                 &mut 0,
@@ -133,8 +129,6 @@ unsafe fn resolve_without_inline(
     addr: *mut c_void,
     cb: &mut FnMut(&super::Symbol),
 ) {
-    // See above for why there's a `-1` here
-    let addr = (addr as usize - 1) as *mut c_void;
     do_resolve(
         |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr as DWORD64, &mut 0, info),
         |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr as DWORD64, &mut 0, line),

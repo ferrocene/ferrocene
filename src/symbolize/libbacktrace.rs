@@ -411,24 +411,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
-    let mut symaddr = what.address_or_ip() as usize;
-
-    // IP values from stack frames are typically (always?) the instruction
-    // *after* the call that's the actual stack trace. Symbolizing this on
-    // causes the filename/line number to be one ahead and perhaps into
-    // the void if it's near the end of the function.
-    //
-    // On Windows it's pretty sure that it's always the case that the IP is one
-    // ahead (except for the final frame but oh well) and for Unix it appears
-    // that we used to use `_Unwind_GetIPInfo` which tells us if the instruction
-    // is the next or not, but it seems that on all platforms it's always the
-    // next instruction so far so let's just always assume that.
-    //
-    // In any case we'll probably have to tweak this over time, but for now this
-    // gives the most accurate backtraces.
-    if symaddr > 0 {
-        symaddr -= 1;
-    }
+    let symaddr = what.address_or_ip() as usize;
 
     // backtrace errors are currently swept under the rug
     let state = init_state();

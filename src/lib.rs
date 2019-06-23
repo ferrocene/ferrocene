@@ -73,48 +73,21 @@
 #[macro_use]
 extern crate std;
 
-extern crate libc;
-#[cfg(all(windows, feature = "verify-winapi"))]
-extern crate winapi;
-
-#[cfg(feature = "serde_derive")]
-#[cfg_attr(feature = "serde_derive", macro_use)]
-extern crate serde_derive;
-
-#[cfg(feature = "rustc-serialize")]
-extern crate rustc_serialize;
-
-#[macro_use]
-extern crate cfg_if;
-
-extern crate rustc_demangle;
-
-#[cfg(feature = "cpp_demangle")]
-extern crate cpp_demangle;
-
-cfg_if! {
-    if #[cfg(all(feature = "gimli-symbolize", unix, target_os = "linux"))] {
-        extern crate addr2line;
-        extern crate findshlibs;
-        extern crate memmap;
-    }
-}
-
-pub use backtrace::{trace_unsynchronized, Frame};
+pub use crate::backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 
-pub use symbolize::resolve_frame_unsynchronized;
-pub use symbolize::{resolve_unsynchronized, Symbol, SymbolName};
+pub use crate::symbolize::resolve_frame_unsynchronized;
+pub use crate::symbolize::{resolve_unsynchronized, Symbol, SymbolName};
 mod symbolize;
 
-pub use types::BytesOrWideString;
+pub use crate::types::BytesOrWideString;
 mod types;
 
-cfg_if! {
+cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
-        pub use backtrace::trace;
-        pub use symbolize::{resolve, resolve_frame};
-        pub use capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
+        pub use crate::backtrace::trace;
+        pub use crate::symbolize::{resolve, resolve_frame};
+        pub use crate::capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
         mod capture;
     }
 }

@@ -1,9 +1,11 @@
+use crate::{resolve, resolve_frame, trace, Symbol, SymbolName};
+use std::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
 
-use types::c_void;
-use {resolve, resolve_frame, trace, Symbol, SymbolName};
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 
 /// Representation of an owned and self-contained backtrace.
 ///
@@ -19,7 +21,7 @@ use {resolve, resolve_frame, trace, Symbol, SymbolName};
 /// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
-#[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
     // Frames here are listed from top-to-bottom of the stack
     frames: Vec<BacktraceFrame>,
@@ -50,7 +52,7 @@ pub struct BacktraceFrame {
 
 #[derive(Clone)]
 enum Frame {
-    Raw(::Frame),
+    Raw(crate::Frame),
     #[allow(dead_code)]
     Deserialized {
         ip: usize,
@@ -85,7 +87,7 @@ impl Frame {
 /// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
-#[cfg_attr(feature = "serialize-serde", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct BacktraceSymbol {
     name: Option<Vec<u8>>,
     addr: Option<usize>,
@@ -505,7 +507,7 @@ mod rustc_serialize_impls {
     }
 }
 
-#[cfg(feature = "serialize-serde")]
+#[cfg(feature = "serde")]
 mod serde_impls {
     extern crate serde;
 

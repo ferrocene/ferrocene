@@ -25,7 +25,7 @@
 //!
 //! This is the default unwinding API for all non-Windows platforms currently.
 
-use types::c_void;
+use core::ffi::c_void;
 
 pub enum Frame {
     Raw(*mut uw::_Unwind_Context),
@@ -94,7 +94,7 @@ pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
             inner: Frame::Raw(ctx),
         };
 
-        let mut bomb = ::Bomb { enabled: true };
+        let mut bomb = crate::Bomb { enabled: true };
         let keep_going = cb(&cx);
         bomb.enabled = false;
 
@@ -117,8 +117,7 @@ pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
 mod uw {
     pub use self::_Unwind_Reason_Code::*;
 
-    use libc;
-    use types::c_void;
+    use core::ffi::c_void;
 
     #[repr(C)]
     pub enum _Unwind_Reason_Code {

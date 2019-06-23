@@ -14,8 +14,9 @@
 //! basic, not handling inline frame information at all. Since it's so prevalent
 //! though we have an option to use it!
 
-use types::{BytesOrWideString, c_void};
-use symbolize::{dladdr, SymbolName, ResolveWhat};
+use core::ffi::c_void;
+use crate::types::BytesOrWideString;
+use crate::symbolize::{dladdr, SymbolName, ResolveWhat};
 
 pub struct Symbol(dladdr::Symbol);
 

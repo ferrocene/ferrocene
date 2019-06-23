@@ -21,12 +21,10 @@
 
 #![allow(bad_style)]
 
+use core::ffi::c_void;
 use core::mem;
-use core::prelude::v1::*;
-
-use dbghelp;
-use windows::*;
-use types::c_void;
+use crate::dbghelp;
+use crate::windows::*;
 
 #[derive(Clone, Copy)]
 pub enum Frame {

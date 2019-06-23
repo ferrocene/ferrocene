@@ -53,3 +53,7 @@ steps:
     displayName: "Test without debuginfo (libbacktrace)"
   - bash: cd ./crates/without_debuginfo && cargo test --features 'libbacktrace coresymbolication'
     displayName: "Test without debuginfo (coresymbolication)"
+  # TODO: there's a bug on stable Rust right now (1.35.0) which prevents testing
+  # gimli here, so disable this temporarily until 1.36.0 is released.
+  # - bash: cd ./crates/without_debuginfo && cargo test --features 'libbacktrace gimli-symbolize'
+  #   displayName: "Test without debuginfo (gimli-symbolize)"

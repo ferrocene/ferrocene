@@ -21,12 +21,18 @@ steps:
     displayName: "Test backtrace (-default + libunwind + libbacktrace)"
   - bash: cargo test --no-default-features --features 'libunwind libbacktrace dbghelp std'
     displayName: "Test backtrace (-default + libunwind + libbacktrace + dbghelp)"
+  - bash: cargo test --no-default-features --features 'libunwind coresymbolication dbghelp std'
+    displayName: "Test backtrace (-default + libunwind + coresymbolication + dbghelp)"
+  - bash: cargo test --no-default-features --features 'libunwind coresymbolication dbghelp std libbacktrace'
+    displayName: "Test backtrace (-default + libunwind + coresymbolication + dbghelp + libbacktrace)"
   - bash: cargo test --no-default-features --features 'unix-backtrace std'
     displayName: "Test backtrace (-default + unix-backtrace)"
   - bash: cargo test --no-default-features --features 'unix-backtrace dladdr std'
     displayName: "Test backtrace (-default + unix-backtrace + dladdr)"
   - bash: cargo test --no-default-features --features 'unix-backtrace libbacktrace std'
     displayName: "Test backtrace (-default + unix-backtrace + libbacktrace)"
+  - bash: cargo test --no-default-features --features 'unix-backtrace coresymbolication std'
+    displayName: "Test backtrace (-default + unix-backtrace + coresymbolication)"
   - bash: cargo test --no-default-features --features 'serialize-serde std'
     displayName: "Test backtrace (-default + serialize-serde + std)"
   - bash: cargo test --no-default-features --features 'serialize-rustc std'
@@ -41,8 +47,6 @@ steps:
     displayName: "Test backtrace (-default + dbghelp + std)"
   - bash: cargo test --no-default-features --features 'dbghelp std verify-winapi'
     displayName: "Test backtrace (-default + dbghelp + std + verify-winapi)"
-  - bash: cargo test --no-default-features --features 'libbacktrace std coresymbolication'
-    displayName: "Test backtrace (-default + libbacktrace + std + coresymbolication)"
   - bash: cd ./crates/cpp_smoke_test && cargo test
     displayName: "Test cpp_smoke_test"
   - bash: cd ./crates/without_debuginfo && cargo test --features libbacktrace

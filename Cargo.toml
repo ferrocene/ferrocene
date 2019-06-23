@@ -48,9 +48,6 @@ autocfg = "0.1"
 #
 # Note that not all features are available on all platforms, so even though a
 # feature is enabled some other feature may be used instead.
-#
-# coresymbolication is intentionally disabled because it's very slow and sometimes
-# yields no results.
 [features]
 default = ["std", "libunwind", "libbacktrace", "dladdr", "dbghelp"]
 
@@ -88,7 +85,8 @@ kernel32 = []
 #   resolve symbol names. This is fairly unreliable on linux, but works well
 #   enough on OSX.
 # - coresymbolication: this feature uses the undocumented core symbolication
-#   framework on OS X to symbolize.
+#   framework on OS X to symbolize. Note that this is not turned on default due
+#   to various issues, you can see more in #202.
 # - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
 #   addresses into file, line, and name using DWARF debug information. At
 #   the moment, this is only possible when targetting Linux, since macOS

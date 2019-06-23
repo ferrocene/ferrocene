@@ -9,52 +9,128 @@ use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line;
 use addr2line::object::{self, Object};
+use core::cell::RefCell;
+use core::mem;
+use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
 use libc::c_void;
 use memmap::Mmap;
-use std::cell::RefCell;
 use std::env;
 use std::fs::File;
-use std::mem;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
-use std::u32;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-type Dwarf = addr2line::Context;
 type Symbols<'map> = object::SymbolMap<'map>;
 
 struct Mapping {
-    dwarf: Dwarf,
+    dwarf: addr2line::Context,
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     symbols: Symbols<'static>,
     _map: Mmap,
 }
 
+macro_rules! mk {
+    (Mapping { $map:expr, $object:expr }) => {{
+        Mapping {
+            dwarf: addr2line::Context::new(&$object).ok()?,
+            // Convert to 'static lifetimes since the symbols should
+            // only borrow `map` and we're preserving `map` below.
+            //
+            // TODO: how do we know that `symbol_map` *only* borrows `map`?
+            symbols: unsafe { mem::transmute::<Symbols, Symbols<'static>>($object.symbol_map()) },
+            _map: $map,
+        }
+    }};
+}
+
+fn mmap(path: &Path) -> Option<Mmap> {
+    let file = File::open(path).ok()?;
+    // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
+    unsafe { Mmap::map(&file).ok() }
+
+}
+
 impl Mapping {
-    fn new(path: &PathBuf) -> Option<Mapping> {
-        let file = File::open(path).ok()?;
-        // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
-        let map = unsafe { Mmap::map(&file).ok()? };
-        let (dwarf, symbols) = {
-            let object = object::ElfFile::parse(&*map).ok()?;
-            let dwarf = addr2line::Context::new(&object).ok()?;
-            let symbols = object.symbol_map();
-            // Convert to 'static lifetimes.
-            (dwarf, unsafe { mem::transmute(symbols) })
-        };
-        Some(Mapping {
-            dwarf,
-            symbols,
-            _map: map,
-        })
+    fn new(path: &Path) -> Option<Mapping> {
+        if cfg!(target_os = "macos") {
+            Mapping::new_find_dsym(path)
+        } else {
+            let map = mmap(path)?;
+            let object = object::ElfFile::parse(&map).ok()?;
+            Some(mk!(Mapping { map, object }))
+        }
+    }
+
+    fn new_find_dsym(path: &Path) -> Option<Mapping> {
+        // First up we need to load the unique UUID which is stored in the macho
+        // header of the file we're reading, specified at `path`.
+        let map = mmap(path)?;
+        let object = object::MachOFile::parse(&map).ok()?;
+        let uuid = get_uuid(&object)?;
+
+        // Next we need to look for a `*.dSYM` file. For now we just probe the
+        // containing directory and look around for something that matches
+        // `*.dSYM`. Once it's found we root through the dwarf resources that it
+        // contains and try to find a macho file which has a matching UUID as
+        // the one of our own file. If we find a match that's the dwarf file we
+        // want to return.
+        let parent = path.parent()?;
+        for entry in parent.read_dir().ok()? {
+            let entry = entry.ok()?;
+            let filename = match entry.file_name().into_string() {
+                Ok(name) => name,
+                Err(_) => continue,
+            };
+            if !filename.ends_with(".dSYM") {
+                continue;
+            }
+            let candidates = entry.path().join("Contents/Resources/DWARF");
+            if let Some(mapping) = load_dsym(&candidates, &uuid) {
+                return Some(mapping);
+            }
+        }
+
+        // Looks like nothing matched our UUID, so let's at least return our own
+        // file. This should have the symbol table for at least some
+        // symbolication purposes.
+        return Some(mk!(Mapping { map, object }));
+
+        fn load_dsym(dir: &Path, uuid: &[u8]) -> Option<Mapping> {
+            for entry in dir.read_dir().ok()? {
+                let entry = entry.ok()?;
+                let map = mmap(&entry.path())?;
+                let object = object::MachOFile::parse(&map).ok()?;
+                let entry_uuid = get_uuid(&object)?;
+                if &entry_uuid[..] != uuid {
+                    continue;
+                }
+                return Some(mk!(Mapping { map, object }));
+            }
+
+            None
+        }
+
+        fn get_uuid(object: &object::MachOFile) -> Option<[u8; 16]> {
+            use goblin::mach::load_command::CommandVariant;
+
+            object
+                .macho()
+                .load_commands
+                .iter()
+                .filter_map(|cmd| match cmd.command {
+                    CommandVariant::Uuid(u) => Some(u.uuid),
+                    _ => None,
+                })
+                .next()
+        }
     }
 
     // Ensure the 'static lifetimes don't leak.
     fn rent<F>(&self, mut f: F)
     where
-        F: FnMut(&Dwarf, &Symbols),
+        F: FnMut(&addr2line::Context, &Symbols),
     {
         f(&self.dwarf, &self.symbols)
     }
@@ -77,7 +153,7 @@ thread_local! {
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
-    F: FnMut(&Dwarf, &Symbols),
+    F: FnMut(&addr2line::Context, &Symbols),
 {
     MAPPINGS_CACHE.with(|cache| {
         let mut cache = cache.borrow_mut();

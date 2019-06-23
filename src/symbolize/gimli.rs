@@ -4,6 +4,7 @@
 //! all platforms, but it's hoped to be developed over time! Long-term this is
 //! intended to wholesale replace the `libbacktrace.rs` implementation.
 
+use crate::symbolize::dladdr;
 use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
@@ -49,7 +50,6 @@ fn mmap(path: &Path) -> Option<Mmap> {
     let file = File::open(path).ok()?;
     // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
     unsafe { Mmap::map(&file).ok() }
-
 }
 
 impl Mapping {
@@ -189,8 +189,13 @@ where
     });
 }
 
-pub fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     let addr = what.address_or_ip();
+    let mut cb = DladdrFallback {
+        cb,
+        addr,
+        called: false,
+    };
 
     // First, find the file containing the segment that the given AVMA (after
     // relocation) address falls within. Use the containing segment to compute
@@ -248,7 +253,7 @@ pub fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
                 let sym = super::Symbol {
                     inner: Symbol::new(addr.0 as usize, file, line, name),
                 };
-                cb(&sym);
+                cb.call(&sym);
                 found_sym = true;
             }
         }
@@ -259,22 +264,55 @@ pub fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
                 let sym = super::Symbol {
                     inner: Symbol::new(addr.0 as usize, None, None, Some(name.to_string())),
                 };
-                cb(&sym);
+                cb.call(&sym);
             }
         }
     });
+
+    drop(cb);
 }
 
-pub struct Symbol {
-    addr: usize,
-    file: Option<String>,
-    line: Option<u64>,
-    name: Option<String>,
+struct DladdrFallback<'a, 'b> {
+    addr: *mut c_void,
+    called: bool,
+    cb: &'a mut (FnMut(&super::Symbol) + 'b),
+}
+
+impl DladdrFallback<'_, '_> {
+    fn call(&mut self, sym: &super::Symbol) {
+        self.called = true;
+        (self.cb)(sym);
+    }
+}
+
+impl Drop for DladdrFallback<'_, '_> {
+    fn drop(&mut self) {
+        if self.called {
+            return;
+        }
+        unsafe {
+            dladdr::resolve(self.addr, &mut |sym| {
+                (self.cb)(&super::Symbol {
+                    inner: Symbol::Dladdr(sym),
+                })
+            });
+        }
+    }
+}
+
+pub enum Symbol {
+    Dladdr(dladdr::Symbol),
+    Gimli {
+        addr: usize,
+        file: Option<String>,
+        line: Option<u64>,
+        name: Option<String>,
+    },
 }
 
 impl Symbol {
     fn new(addr: usize, file: Option<String>, line: Option<u64>, name: Option<String>) -> Symbol {
-        Symbol {
+        Symbol::Gimli {
             addr,
             file,
             line,
@@ -283,25 +321,42 @@ impl Symbol {
     }
 
     pub fn name(&self) -> Option<SymbolName> {
-        self.name.as_ref().map(|s| SymbolName::new(s.as_bytes()))
+        match self {
+            Symbol::Dladdr(s) => s.name(),
+            Symbol::Gimli { name, .. } => name.as_ref().map(|s| SymbolName::new(s.as_bytes())),
+        }
     }
 
     pub fn addr(&self) -> Option<*mut c_void> {
-        Some(self.addr as *mut c_void)
+        match self {
+            Symbol::Dladdr(s) => s.addr(),
+            Symbol::Gimli { addr, .. } => Some(*addr as *mut c_void),
+        }
     }
 
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-        self.file
-            .as_ref()
+        let file = match self {
+            Symbol::Dladdr(s) => return s.filename_raw(),
+            Symbol::Gimli { file, .. } => file,
+        };
+        file.as_ref()
             .map(|f| BytesOrWideString::Bytes(f.as_bytes()))
     }
 
     pub fn filename(&self) -> Option<&Path> {
-        self.file.as_ref().map(Path::new)
+        let file = match self {
+            Symbol::Dladdr(s) => return s.filename(),
+            Symbol::Gimli { file, .. } => file,
+        };
+        file.as_ref().map(Path::new)
     }
 
     pub fn lineno(&self) -> Option<u32> {
-        self.line.and_then(|l| {
+        let line = match self {
+            Symbol::Dladdr(s) => return s.lineno(),
+            Symbol::Gimli { line, .. } => line,
+        };
+        line.and_then(|l| {
             if l > (u32::MAX as u64) {
                 None
             } else {

@@ -233,7 +233,6 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     // Finally, get a cached mapping or create a new mapping for this file, and
     // evaluate the DWARF info to find the file/line/name for this address.
     with_mapping_for_path(path, |dwarf, symbols| {
-        let mut found_sym = false;
         if let Ok(mut frames) = dwarf.find_frames(addr.0 as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 let name = frame.function.as_ref().and_then(|f| f.raw_name().ok());
@@ -245,21 +244,21 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
                         name,
                     },
                 });
-                found_sym = true;
             }
+        }
+        if cb.called {
+            return;
         }
 
         // No DWARF info found, so fallback to the symbol table.
-        if !found_sym {
-            if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
-                let sym = super::Symbol {
-                    inner: Symbol::Symbol {
-                        addr: addr.0 as usize as *mut c_void,
-                        name: name.as_bytes(),
-                    },
-                };
-                cb.call(&sym);
-            }
+        if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
+            let sym = super::Symbol {
+                inner: Symbol::Symbol {
+                    addr: addr.0 as usize as *mut c_void,
+                    name: name.as_bytes(),
+                },
+            };
+            cb.call(&sym);
         }
     });
 

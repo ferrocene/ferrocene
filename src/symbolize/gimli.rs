@@ -11,7 +11,7 @@ use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line::gimli;
-use addr2line::object::{self, Object};
+use addr2line::object::{self, Object, Uuid};
 use core::cell::RefCell;
 use core::convert::TryFrom;
 use core::mem;
@@ -71,7 +71,7 @@ impl Mapping {
         // header of the file we're reading, specified at `path`.
         let map = mmap(path)?;
         let object = object::MachOFile::parse(&map).ok()?;
-        let uuid = get_uuid(&object)?;
+        let uuid = object.mach_uuid()?;
 
         // Next we need to look for a `*.dSYM` file. For now we just probe the
         // containing directory and look around for something that matches
@@ -100,33 +100,19 @@ impl Mapping {
         // symbolication purposes.
         return Some(mk!(Mapping { map, object }));
 
-        fn load_dsym(dir: &Path, uuid: &[u8]) -> Option<Mapping> {
+        fn load_dsym(dir: &Path, uuid: &Uuid) -> Option<Mapping> {
             for entry in dir.read_dir().ok()? {
                 let entry = entry.ok()?;
                 let map = mmap(&entry.path())?;
                 let object = object::MachOFile::parse(&map).ok()?;
-                let entry_uuid = get_uuid(&object)?;
-                if &entry_uuid[..] != uuid {
+                let entry_uuid = object.mach_uuid()?;
+                if entry_uuid != *uuid {
                     continue;
                 }
                 return Some(mk!(Mapping { map, object }));
             }
 
             None
-        }
-
-        fn get_uuid(object: &object::MachOFile) -> Option<[u8; 16]> {
-            use goblin::mach::load_command::CommandVariant;
-
-            object
-                .macho()
-                .load_commands
-                .iter()
-                .filter_map(|cmd| match cmd.command {
-                    CommandVariant::Uuid(u) => Some(u.uuid),
-                    _ => None,
-                })
-                .next()
         }
     }
 

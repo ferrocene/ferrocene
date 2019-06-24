@@ -59,6 +59,10 @@ impl Mapping {
     fn new(path: &Path) -> Option<Mapping> {
         if cfg!(target_os = "macos") {
             Mapping::new_find_dsym(path)
+        } else if cfg!(windows) {
+            let map = mmap(path)?;
+            let object = object::PeFile::parse(&map).ok()?;
+            Some(mk!(Mapping { map, object }))
         } else {
             let map = mmap(path)?;
             let object = object::ElfFile::parse(&map).ok()?;

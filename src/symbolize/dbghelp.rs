@@ -35,11 +35,12 @@ use crate::windows::*;
 use crate::SymbolName;
 use core::char;
 use core::ffi::c_void;
+use core::marker;
 use core::mem;
 use core::slice;
 
 // Store an OsString on std so we can provide the symbol name and filename.
-pub struct Symbol {
+pub struct Symbol<'a> {
     name: *const [u8],
     addr: *mut c_void,
     line: Option<u32>,
@@ -48,9 +49,10 @@ pub struct Symbol {
     _filename_cache: Option<::std::ffi::OsString>,
     #[cfg(not(feature = "std"))]
     _filename_cache: (),
+    _marker: marker::PhantomData<&'a i32>,
 }
 
-impl Symbol {
+impl Symbol<'_> {
     pub fn name(&self) -> Option<SymbolName> {
         Some(SymbolName::new(unsafe { &*self.name }))
     }
@@ -209,6 +211,7 @@ unsafe fn do_resolve(
             line: lineno,
             filename,
             _filename_cache: cache(filename),
+            _marker: marker::PhantomData,
         },
     })
 }

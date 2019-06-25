@@ -42,7 +42,7 @@ use crate::symbolize::{ResolveWhat, SymbolName};
 use crate::symbolize::dladdr;
 use crate::types::BytesOrWideString;
 
-pub enum Symbol {
+pub enum Symbol<'a> {
     Syminfo {
         pc: uintptr_t,
         symname: *const c_char,
@@ -54,10 +54,10 @@ pub enum Symbol {
         function: *const c_char,
         symname: *const c_char,
     },
-    Dladdr(dladdr::Symbol),
+    Dladdr(dladdr::Symbol<'a>),
 }
 
-impl Symbol {
+impl Symbol<'_> {
     pub fn name(&self) -> Option<SymbolName> {
         let symbol = |ptr: *const c_char| {
             unsafe {

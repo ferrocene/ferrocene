@@ -94,6 +94,19 @@ fn main() {
         "backtrace_qsort",
         "backtrace_create_state",
         "backtrace_uncompress_zdebug",
+
+        // These should be `static` in C, but they aren't...
+        "macho_get_view",
+        "macho_symbol_type_relevant",
+        "macho_get_commands",
+        "macho_try_dsym",
+        "macho_try_dwarf",
+        "macho_get_addr_range",
+        "macho_get_uuid",
+        "macho_add",
+        "macho_add_symtab",
+        "macho_file_to_host_u64",
+        "macho_file_to_host_u32",
     ];
     let prefix = if cfg!(feature = "rustc-dep-of-std") {
         println!("cargo:rustc-cfg=rdos");

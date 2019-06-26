@@ -11,7 +11,7 @@ use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line::gimli;
-use addr2line::object::{self, Object};
+use addr2line::object::{self, Object, Uuid};
 use core::cell::RefCell;
 use core::convert::TryFrom;
 use core::mem;
@@ -59,6 +59,10 @@ impl Mapping {
     fn new(path: &Path) -> Option<Mapping> {
         if cfg!(target_os = "macos") {
             Mapping::new_find_dsym(path)
+        } else if cfg!(windows) {
+            let map = mmap(path)?;
+            let object = object::PeFile::parse(&map).ok()?;
+            Some(mk!(Mapping { map, object }))
         } else {
             let map = mmap(path)?;
             let object = object::ElfFile::parse(&map).ok()?;
@@ -71,7 +75,7 @@ impl Mapping {
         // header of the file we're reading, specified at `path`.
         let map = mmap(path)?;
         let object = object::MachOFile::parse(&map).ok()?;
-        let uuid = get_uuid(&object)?;
+        let uuid = object.mach_uuid()?;
 
         // Next we need to look for a `*.dSYM` file. For now we just probe the
         // containing directory and look around for something that matches
@@ -100,33 +104,19 @@ impl Mapping {
         // symbolication purposes.
         return Some(mk!(Mapping { map, object }));
 
-        fn load_dsym(dir: &Path, uuid: &[u8]) -> Option<Mapping> {
+        fn load_dsym(dir: &Path, uuid: &Uuid) -> Option<Mapping> {
             for entry in dir.read_dir().ok()? {
                 let entry = entry.ok()?;
                 let map = mmap(&entry.path())?;
                 let object = object::MachOFile::parse(&map).ok()?;
-                let entry_uuid = get_uuid(&object)?;
-                if &entry_uuid[..] != uuid {
+                let entry_uuid = object.mach_uuid()?;
+                if entry_uuid != *uuid {
                     continue;
                 }
                 return Some(mk!(Mapping { map, object }));
             }
 
             None
-        }
-
-        fn get_uuid(object: &object::MachOFile) -> Option<[u8; 16]> {
-            use goblin::mach::load_command::CommandVariant;
-
-            object
-                .macho()
-                .load_commands
-                .iter()
-                .filter_map(|cmd| match cmd.command {
-                    CommandVariant::Uuid(u) => Some(u.uuid),
-                    _ => None,
-                })
-                .next()
         }
     }
 
@@ -243,7 +233,6 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
     // Finally, get a cached mapping or create a new mapping for this file, and
     // evaluate the DWARF info to find the file/line/name for this address.
     with_mapping_for_path(path, |dwarf, symbols| {
-        let mut found_sym = false;
         if let Ok(mut frames) = dwarf.find_frames(addr.0 as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 let name = frame.function.as_ref().and_then(|f| f.raw_name().ok());
@@ -255,21 +244,21 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
                         name,
                     },
                 });
-                found_sym = true;
             }
+        }
+        if cb.called {
+            return;
         }
 
         // No DWARF info found, so fallback to the symbol table.
-        if !found_sym {
-            if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
-                let sym = super::Symbol {
-                    inner: Symbol::Symbol {
-                        addr: addr.0 as usize as *mut c_void,
-                        name: name.as_bytes(),
-                    },
-                };
-                cb.call(&sym);
-            }
+        if let Some(name) = symbols.get(addr.0 as u64).and_then(|x| x.name()) {
+            let sym = super::Symbol {
+                inner: Symbol::Symbol {
+                    addr: addr.0 as usize as *mut c_void,
+                    name: name.as_bytes(),
+                },
+            };
+            cb.call(&sym);
         }
     });
 

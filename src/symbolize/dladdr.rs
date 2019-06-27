@@ -15,18 +15,19 @@
 
 cfg_if::cfg_if! {
     if #[cfg(all(unix, not(target_os = "emscripten"), feature = "dladdr"))] {
-        use core::{mem, slice};
-        use crate::types::BytesOrWideString;
         use core::ffi::c_void;
+        use core::marker;
+        use core::{mem, slice};
+        use crate::SymbolName;
+        use crate::types::BytesOrWideString;
         use libc::{self, Dl_info};
 
-        use crate::SymbolName;
-
-        pub struct Symbol {
+        pub struct Symbol<'a> {
             inner: Dl_info,
+            _marker: marker::PhantomData<&'a i32>,
         }
 
-        impl Symbol {
+        impl Symbol<'_> {
             pub fn name(&self) -> Option<SymbolName> {
                 if self.inner.dli_sname.is_null() {
                     None
@@ -57,9 +58,10 @@ cfg_if::cfg_if! {
             }
         }
 
-        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol)) {
+        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol<'static>)) {
             let mut info = Symbol {
                 inner: mem::zeroed(),
+                _marker: marker::PhantomData,
             };
             if libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
                 cb(info)
@@ -67,35 +69,41 @@ cfg_if::cfg_if! {
         }
     } else {
         use core::ffi::c_void;
-        use crate::types::BytesOrWideString;
+        use core::marker;
         use crate::symbolize::SymbolName;
+        use crate::types::BytesOrWideString;
 
-        pub enum Symbol {}
+        pub struct Symbol<'a> {
+            a: Void,
+            _b: marker::PhantomData<&'a i32>,
+        }
 
-        impl Symbol {
+        enum Void {}
+
+        impl Symbol<'_> {
             pub fn name(&self) -> Option<SymbolName> {
-                match *self {}
+                match self.a {}
             }
 
             pub fn addr(&self) -> Option<*mut c_void> {
-                match *self {}
+                match self.a {}
             }
 
             pub fn filename_raw(&self) -> Option<BytesOrWideString> {
-                match *self {}
+                match self.a {}
             }
 
             #[cfg(feature = "std")]
             pub fn filename(&self) -> Option<&::std::path::Path> {
-                match *self {}
+                match self.a {}
             }
 
             pub fn lineno(&self) -> Option<u32> {
-                match *self {}
+                match self.a {}
             }
         }
 
-        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol)) {
+        pub unsafe fn resolve(addr: *mut c_void, cb: &mut FnMut(Symbol<'static>)) {
             drop((addr, cb));
         }
     }

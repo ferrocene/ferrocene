@@ -188,7 +188,10 @@ where
 /// name, filename, line number, precise address, etc. Not all information is
 /// always available in a symbol, however, so all methods return an `Option`.
 pub struct Symbol {
-    inner: SymbolImp,
+    // TODO: this lifetime bound needs to be persisted eventually to `Symbol`,
+    // but that's currently a breaking change. For now this is safe since
+    // `Symbol` is only ever handed out by reference and can't be cloned.
+    inner: SymbolImp<'static>,
 }
 
 impl Symbol {
@@ -444,6 +447,7 @@ cfg_if::cfg_if! {
         any(
             target_os = "linux",
             target_os = "macos",
+            windows,
         ),
     ))] {
         mod gimli;

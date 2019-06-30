@@ -107,6 +107,7 @@ fn main() {
         "macho_add_symtab",
         "macho_file_to_host_u64",
         "macho_file_to_host_u32",
+        "macho_file_to_host_u16",
     ];
     let prefix = if cfg!(feature = "rustc-dep-of-std") {
         println!("cargo:rustc-cfg=rdos");

@@ -25,7 +25,10 @@ use std::prelude::v1::*;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-type Context<'a> = addr2line::Context<EndianSlice<'a, Endian>>;
+struct Context<'a> {
+    dwarf: addr2line::Context<EndianSlice<'a, Endian>>,
+    object: Object<'a>,
+}
 
 struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
@@ -33,38 +36,29 @@ struct Mapping {
     _map: Mmap,
 }
 
-fn cx<'data>(load: impl Fn(&str) -> &'data [u8]) -> Option<Context<'data>> {
-    fn load_section<'data, S>(load: impl Fn(&str) -> &'data [u8]) -> S
+fn cx<'data>(object: Object<'data>) -> Option<Context<'data>> {
+    fn load_section<'data, S>(obj: &Object<'data>) -> S
     where
         S: gimli::Section<gimli::EndianSlice<'data, Endian>>,
     {
-        S::from(EndianSlice::new(load(S::section_name()), Endian))
+        let data = obj.section(S::section_name()).unwrap_or(&[]);
+        S::from(EndianSlice::new(data, Endian))
     }
 
-    let debug_abbrev: gimli::DebugAbbrev<_> = load_section(&load);
-    let debug_addr: gimli::DebugAddr<_> = load_section(&load);
-    let debug_info: gimli::DebugInfo<_> = load_section(&load);
-    let debug_line: gimli::DebugLine<_> = load_section(&load);
-    let debug_line_str: gimli::DebugLineStr<_> = load_section(&load);
-    let debug_ranges: gimli::DebugRanges<_> = load_section(&load);
-    let debug_rnglists: gimli::DebugRngLists<_> = load_section(&load);
-    let debug_str: gimli::DebugStr<_> = load_section(&load);
-    let debug_str_offsets: gimli::DebugStrOffsets<_> = load_section(&load);
-    let default_section = gimli::EndianSlice::new(&[], Endian);
-
-    addr2line::Context::from_sections(
-        debug_abbrev,
-        debug_addr,
-        debug_info,
-        debug_line,
-        debug_line_str,
-        debug_ranges,
-        debug_rnglists,
-        debug_str,
-        debug_str_offsets,
-        default_section,
+    let dwarf = addr2line::Context::from_sections(
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        load_section(&object),
+        gimli::EndianSlice::new(&[], Endian),
     )
-    .ok()
+    .ok()?;
+    Some(Context { dwarf, object })
 }
 
 fn assert_lifetimes<'a>(_: &'a Mmap, _: &Context<'a>) {}
@@ -87,65 +81,185 @@ fn mmap(path: &Path) -> Option<Mmap> {
     unsafe { Mmap::map(&file).ok() }
 }
 
-impl Mapping {
-    #[cfg(not(any(target_os = "macos", windows)))]
-    fn new(path: &Path) -> Option<Mapping> {
-        use goblin::elf::*;
+cfg_if::cfg_if! {
+    if #[cfg(windows)] {
+        use std::cmp;
+        use goblin::pe::{self, PE};
+        use goblin::strtab::Strtab;
 
-        let map = mmap(path)?;
-        let object = Elf::parse(&map).ok()?;
-        if !object.little_endian {
-            return None;
+        struct Object<'a> {
+            pe: PE<'a>,
+            data: &'a [u8],
+            symbols: Vec<(usize, pe::symbol::Symbol)>,
+            strtab: Strtab<'a>,
         }
-        let cx = cx(|name| {
-            let section = object.section_headers.iter().find(|section| {
-                match object.shdr_strtab.get(section.sh_name) {
-                    Some(Ok(section_name)) => section_name == name,
-                    _ => false,
+
+        impl<'a> Object<'a> {
+            fn parse(data: &'a [u8]) -> Option<Object<'a>> {
+                let pe = PE::parse(data).ok()?;
+                let syms = pe.header.coff_header.symbols(data).ok()?;
+                let strtab = pe.header.coff_header.strings(data).ok()?;
+
+                // Collect all the symbols into a local vector which is sorted
+                // by address and contains enough data to learn about the symbol
+                // name. Note that we only look at function symbols and also
+                // note that the sections are 1-indexed because the zero section
+                // is special (apparently).
+                let mut symbols = Vec::new();
+                for (_, _, sym) in syms.iter() {
+                    if sym.derived_type() != pe::symbol::IMAGE_SYM_DTYPE_FUNCTION
+                        || sym.section_number == 0
+                    {
+                        continue;
+                    }
+                    let addr = usize::try_from(sym.value).ok()?;
+                    let section = pe.sections.get(usize::try_from(sym.section_number).ok()? - 1)?;
+                    let va = usize::try_from(section.virtual_address).ok()?;
+                    symbols.push((addr + va + pe.image_base, sym));
                 }
-            });
-            section
-                .and_then(|section| {
-                    map.get(section.sh_offset as usize..)
-                        .and_then(|data| data.get(..section.sh_size as usize))
-                })
-                .unwrap_or(&[])
-        })?;
-        Some(mk!(Mapping { map, cx }))
-    }
+                symbols.sort_unstable_by_key(|x| x.0);
+                Some(Object { pe, data, symbols, strtab })
+            }
 
-    #[cfg(windows)]
+            fn section(&self, name: &str) -> Option<&'a [u8]> {
+                let section = self.pe
+                    .sections
+                    .iter()
+                    .find(|section| section.name().ok() == Some(name));
+                section
+                    .and_then(|section| {
+                        let offset = section.pointer_to_raw_data as usize;
+                        let size = cmp::min(section.virtual_size, section.size_of_raw_data) as usize;
+                        self.data.get(offset..).and_then(|data| data.get(..size))
+                    })
+            }
+
+            fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
+                // Note that unlike other formats COFF doesn't embed the size of
+                // each symbol. As a last ditch effort search for the *closest*
+                // symbol to a particular address and return that one. This gets
+                // really wonky once symbols start getting removed because the
+                // symbols returned here can be totally incorrect, but we have
+                // no idea of knowing how to detect that.
+                let addr = usize::try_from(addr).ok()?;
+                let i = match self.symbols.binary_search_by_key(&addr, |p| p.0) {
+                    Ok(i) => i,
+                    // typically `addr` isn't in the array, but `i` is where
+                    // we'd insert it, so the previous position must be the
+                    // greatest less than `addr`
+                    Err(i) => i.checked_sub(1)?,
+                };
+                Some(self.symbols[i].1.name(&self.strtab).ok()?.as_bytes())
+            }
+        }
+    } else if #[cfg(target_os = "macos")] {
+        use goblin::mach::MachO;
+
+        struct Object<'a> {
+            macho: MachO<'a>,
+            dwarf: Option<usize>,
+        }
+
+        impl<'a> Object<'a> {
+            fn parse(macho: MachO<'a>) -> Option<Object<'a>> {
+                if !macho.little_endian {
+                    return None;
+                }
+                let dwarf = macho
+                    .segments
+                    .iter()
+                    .enumerate()
+                    .find(|(_, segment)| segment.name().ok() == Some("__DWARF"))
+                    .map(|p| p.0);
+                Some(Object { macho, dwarf })
+            }
+
+            fn section(&self, name: &str) -> Option<&'a [u8]> {
+                let dwarf = self.dwarf?;
+                let dwarf = &self.macho.segments[dwarf];
+                dwarf
+                    .into_iter()
+                    .filter_map(|s| s.ok())
+                    .find(|(section, _data)| {
+                        let section_name = match section.name() {
+                            Ok(s) => s,
+                            Err(_) => return false,
+                        };
+                        &section_name[..] == name || {
+                            section_name.starts_with("__")
+                                && name.starts_with(".")
+                                && &section_name[2..] == &name[1..]
+                        }
+                    })
+                    .map(|p| p.1)
+            }
+
+            fn search_symtab<'b>(&'b self, _addr: u64) -> Option<&'b [u8]> {
+                // So far it seems that we don't need to implement this. Maybe
+                // `dladdr` on OSX has us covered? Maybe there's not much in the
+                // symbol table? In any case our relevant tests are passing
+                // without this being implemented, so let's skip it for now.
+                None
+            }
+        }
+    } else {
+        use goblin::elf::Elf;
+
+        struct Object<'a> {
+            elf: Elf<'a>,
+            data: &'a [u8],
+        }
+
+        impl<'a> Object<'a> {
+            fn parse(data: &'a [u8]) -> Option<Object<'a>> {
+                let elf = Elf::parse(data).ok()?;
+                if !elf.little_endian {
+                    return None;
+                }
+                Some(Object { elf, data })
+            }
+
+            fn section(&self, name: &str) -> Option<&'a [u8]> {
+                let section = self.elf.section_headers.iter().find(|section| {
+                    match self.elf.shdr_strtab.get(section.sh_name) {
+                        Some(Ok(section_name)) => section_name == name,
+                        _ => false,
+                    }
+                });
+                section
+                    .and_then(|section| {
+                        self.data.get(section.sh_offset as usize..)
+                            .and_then(|data| data.get(..section.sh_size as usize))
+                    })
+            }
+
+            fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
+                let sym = self.elf.syms.iter()
+                    .find(|sym| sym.st_value <= addr && addr <= sym.st_value + sym.st_size)?;
+                Some(self.elf.strtab.get(sym.st_name)?.ok()?.as_bytes())
+            }
+        }
+    }
+}
+
+impl Mapping {
+    #[cfg(not(target_os = "macos"))]
     fn new(path: &Path) -> Option<Mapping> {
-        use core::cmp;
-        use goblin::pe::*;
-
         let map = mmap(path)?;
-        let object = PE::parse(&map).ok()?;
-        let cx = cx(|name| {
-            let section = object
-                .sections
-                .iter()
-                .find(|section| section.name().ok() == Some(name));
-            section
-                .and_then(|section| {
-                    let offset = section.pointer_to_raw_data as usize;
-                    let size = cmp::min(section.virtual_size, section.size_of_raw_data) as usize;
-                    map.get(offset..).and_then(|data| data.get(..size))
-                })
-                .unwrap_or(&[])
-        })?;
+        let cx = cx(Object::parse(&map)?)?;
         Some(mk!(Mapping { map, cx }))
     }
 
+    // The loading path for OSX is is so different we just have a completely
+    // different implementation of the function here. On OSX we need to go
+    // probing the filesystem for a bunch of files.
     #[cfg(target_os = "macos")]
     fn new(path: &Path) -> Option<Mapping> {
-        use goblin::mach::*;
-
         // First up we need to load the unique UUID which is stored in the macho
         // header of the file we're reading, specified at `path`.
         let map = mmap(path)?;
-        let object = MachO::parse(&map, 0).ok()?;
-        let uuid = find_uuid(&object)?;
+        let macho = MachO::parse(&map, 0).ok()?;
+        let uuid = find_uuid(&macho)?;
 
         // Next we need to look for a `*.dSYM` file. For now we just probe the
         // containing directory and look around for something that matches
@@ -172,62 +286,34 @@ impl Mapping {
         // Looks like nothing matched our UUID, so let's at least return our own
         // file. This should have the symbol table for at least some
         // symbolication purposes.
-        return match macho2inner(&object) {
-            Some(inner) => Some(mk!(Mapping { map, inner })),
-            None => None,
-        };
+        let inner = cx(Object::parse(macho)?)?;
+        return Some(mk!(Mapping { map, inner }));
 
         fn load_dsym(dir: &Path, uuid: &[u8; 16]) -> Option<Mapping> {
             for entry in dir.read_dir().ok()? {
                 let entry = entry.ok()?;
                 let map = mmap(&entry.path())?;
-                let object = MachO::parse(&map, 0).ok()?;
-                let entry_uuid = find_uuid(&object)?;
+                let macho = MachO::parse(&map, 0).ok()?;
+                let entry_uuid = find_uuid(&macho)?;
                 if entry_uuid != uuid {
                     continue;
                 }
-                if let Some(inner) = macho2inner(&object) {
-                    return Some(mk!(Mapping { map, inner }));
+                if let Some(cx) = Object::parse(macho).and_then(cx) {
+                    return Some(mk!(Mapping { map, cx }));
                 }
             }
 
             None
         }
 
-        fn macho2inner<'a>(object: &MachO<'a>) -> Option<Context<'a>> {
-            if !object.little_endian {
-                return None;
-            }
-            let dwarf = object
-                .segments
-                .iter()
-                .find(|segment| segment.name().ok() == Some("__DWARF"))?;
-            cx(|name| {
-                dwarf
-                    .into_iter()
-                    .filter_map(|s| s.ok())
-                    .find(|(section, _data)| {
-                        let section_name = match section.name() {
-                            Ok(s) => s,
-                            Err(_) => return false,
-                        };
-                        &section_name[..] == name || {
-                            section_name.starts_with("__")
-                                && name.starts_with(".")
-                                && &section_name[2..] == &name[1..]
-                        }
-                    })
-                    .map(|p| p.1)
-                    .unwrap_or(&[])
-            })
-        }
-
         fn find_uuid<'a>(object: &'a MachO) -> Option<&'a [u8; 16]> {
+            use goblin::mach::load_command::CommandVariant;
+
             object
                 .load_commands
                 .iter()
                 .filter_map(|cmd| match &cmd.command {
-                    load_command::CommandVariant::Uuid(u) => Some(&u.uuid),
+                    CommandVariant::Uuid(u) => Some(&u.uuid),
                     _ => None,
                 })
                 .next()
@@ -237,7 +323,7 @@ impl Mapping {
     // Ensure the 'static lifetimes don't leak.
     fn rent<F>(&self, mut f: F)
     where
-        F: FnMut(&addr2line::Context<EndianSlice<'_, Endian>>),
+        F: FnMut(&Context<'_>),
     {
         f(&self.cx)
     }
@@ -260,7 +346,7 @@ thread_local! {
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
-    F: FnMut(&addr2line::Context<EndianSlice<'_, Endian>>),
+    F: FnMut(&Context<'_>),
 {
     MAPPINGS_CACHE.with(|cache| {
         let mut cache = cache.borrow_mut();
@@ -355,20 +441,29 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
 
     // Finally, get a cached mapping or create a new mapping for this file, and
     // evaluate the DWARF info to find the file/line/name for this address.
-    with_mapping_for_path(path, |dwarf| {
-        let mut frames = match dwarf.find_frames(addr.0 as u64) {
-            Ok(frames) => frames,
-            Err(_) => return,
-        };
-        while let Ok(Some(mut frame)) = frames.next() {
-            let function = frame.function.take();
-            let name = function.as_ref().and_then(|f| f.raw_name().ok());
-            let name = name.as_ref().map(|n| n.as_bytes());
-            cb.call(Symbol::Frame {
-                addr: addr.0 as *mut c_void,
-                frame,
-                name,
-            });
+    with_mapping_for_path(path, |cx| {
+        let mut called = false;
+        if let Ok(mut frames) = cx.dwarf.find_frames(addr.0 as u64) {
+            while let Ok(Some(mut frame)) = frames.next() {
+                let function = frame.function.take();
+                let name = function.as_ref().and_then(|f| f.raw_name().ok());
+                let name = name.as_ref().map(|n| n.as_bytes());
+                called = true;
+                cb.call(Symbol::Frame {
+                    addr: addr.0 as *mut c_void,
+                    frame,
+                    name,
+                });
+            }
+        }
+
+        if !called {
+            if let Some(name) = cx.object.search_symtab(addr.0 as u64) {
+                cb.call(Symbol::Symtab {
+                    addr: addr.0 as *mut c_void,
+                    name,
+                });
+            }
         }
     });
 
@@ -416,6 +511,9 @@ pub enum Symbol<'a> {
         frame: addr2line::Frame<EndianSlice<'a, Endian>>,
         name: Option<&'a [u8]>,
     },
+    /// Couldn't find debug information, but we found it in the symbol table of
+    /// the elf executable.
+    Symtab { addr: *mut c_void, name: &'a [u8] },
     /// We weren't able to find anything in the original file, so we had to fall
     /// back to using `dladdr` which had a hit.
     Dladdr(dladdr::Symbol<'a>),
@@ -429,6 +527,7 @@ impl Symbol<'_> {
                 let name = name.as_ref()?;
                 Some(SymbolName::new(name))
             }
+            Symbol::Symtab { name, .. } => Some(SymbolName::new(name)),
         }
     }
 
@@ -436,6 +535,7 @@ impl Symbol<'_> {
         match self {
             Symbol::Dladdr(s) => s.addr(),
             Symbol::Frame { addr, .. } => Some(*addr),
+            Symbol::Symtab { .. } => None,
         }
     }
 
@@ -447,6 +547,7 @@ impl Symbol<'_> {
                 let file = location.file.as_ref()?;
                 Some(BytesOrWideString::Bytes(file.as_bytes()))
             }
+            Symbol::Symtab { .. } => None,
         }
     }
 
@@ -458,6 +559,7 @@ impl Symbol<'_> {
                 let file = location.file.as_ref()?;
                 Some(Path::new(file))
             }
+            Symbol::Symtab { .. } => None,
         }
     }
 
@@ -468,6 +570,7 @@ impl Symbol<'_> {
                 let location = frame.location.as_ref()?;
                 location.line.and_then(|l| u32::try_from(l).ok())
             }
+            Symbol::Symtab { .. } => None,
         }
     }
 }

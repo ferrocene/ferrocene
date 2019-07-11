@@ -83,6 +83,8 @@ mod symbolize;
 pub use crate::types::BytesOrWideString;
 mod types;
 
+pub use crate::symbolize::clear_symbol_cache;
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
         pub use crate::backtrace::trace;

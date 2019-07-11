@@ -329,57 +329,57 @@ impl Mapping {
     }
 }
 
-thread_local! {
-    // A very small, very simple LRU cache for debug info mappings.
-    //
-    // The hit rate should be very high, since the typical stack doesn't cross
-    // between many shared libraries.
-    //
-    // The `addr2line::Context` structures are pretty expensive to create. Its
-    // cost is expected to be amortized by subsequent `locate` queries, which
-    // leverage the structures built when constructing `addr2line::Context`s to
-    // get nice speedups. If we didn't have this cache, that amortization would
-    // never happen, and symbolicating backtraces would be ssssllllooooowwww.
-    static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>>
-        = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+// A very small, very simple LRU cache for debug info mappings.
+//
+// The hit rate should be very high, since the typical stack doesn't cross
+// between many shared libraries.
+//
+// The `addr2line::Context` structures are pretty expensive to create. Its
+// cost is expected to be amortized by subsequent `locate` queries, which
+// leverage the structures built when constructing `addr2line::Context`s to
+// get nice speedups. If we didn't have this cache, that amortization would
+// never happen, and symbolicating backtraces would be ssssllllooooowwww.
+static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>>
+    = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+
+pub fn clear_symbol_cache() {
+    MAPPINGS_CACHE.borrow_mut().clear()
 }
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {
-    MAPPINGS_CACHE.with(|cache| {
-        let mut cache = cache.borrow_mut();
+    let mut cache = MAPPINGS_CACHE.borrow_mut();
 
-        let idx = cache.iter().position(|&(ref p, _)| p == &path);
+    let idx = cache.iter().position(|&(ref p, _)| p == &path);
 
-        // Invariant: after this conditional completes without early returning
-        // from an error, the cache entry for this path is at index 0.
+    // Invariant: after this conditional completes without early returning
+    // from an error, the cache entry for this path is at index 0.
 
-        if let Some(idx) = idx {
-            // When the mapping is already in the cache, move it to the front.
-            if idx != 0 {
-                let entry = cache.remove(idx);
-                cache.insert(0, entry);
-            }
-        } else {
-            // When the mapping is not in the cache, create a new mapping,
-            // insert it into the front of the cache, and evict the oldest cache
-            // entry if necessary.
-            let mapping = match Mapping::new(&path) {
-                None => return,
-                Some(m) => m,
-            };
+    if let Some(idx) = idx {
+        // When the mapping is already in the cache, move it to the front.
+        if idx != 0 {
+            let entry = cache.remove(idx);
+            cache.insert(0, entry);
+        }
+    } else {
+        // When the mapping is not in the cache, create a new mapping,
+        // insert it into the front of the cache, and evict the oldest cache
+        // entry if necessary.
+        let mapping = match Mapping::new(&path) {
+            None => return,
+            Some(m) => m,
+        };
 
-            if cache.len() == MAPPINGS_CACHE_SIZE {
-                cache.pop();
-            }
-
-            cache.insert(0, (path, mapping));
+        if cache.len() == MAPPINGS_CACHE_SIZE {
+            cache.pop();
         }
 
-        cache[0].1.rent(f);
-    });
+        cache.insert(0, (path, mapping));
+    }
+
+    cache[0].1.rent(f);
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {

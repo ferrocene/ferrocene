@@ -436,11 +436,21 @@ cfg_if::cfg_if! {
 
 mod dladdr;
 
+/// Each resolve() implementation allocates and caches several megabytes worth of symbols,
+/// clear_symbol_cache tries to reclaim that cached memory.
+/// Note: for now, only the Gimli implementation is able to clear its cache.
+pub fn clear_symbol_cache() {
+    clear_imp()
+}
+
+fn noop_clear_symbol_cache() {}
+
 cfg_if::cfg_if! {
     if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp"))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
+        use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(
         feature = "std",
         feature = "gimli-symbolize",
@@ -453,6 +463,8 @@ cfg_if::cfg_if! {
         mod gimli;
         use self::gimli::resolve as resolve_imp;
         use self::gimli::Symbol as SymbolImp;
+        use self::gimli::clear_symbol_cache as clear_imp;
+        // pub use self::gimli::clear_symbol_cache as clear_symbol_cache;
     // Note that we only enable coresymbolication on iOS when debug assertions
     // are enabled because it's helpful in debug mode but it looks like apps get
     // rejected from the app store if they use this API, see #92 for more info
@@ -462,6 +474,7 @@ cfg_if::cfg_if! {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;
+        use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(feature = "libbacktrace",
                         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
                         not(target_os = "fuchsia"),
@@ -469,15 +482,18 @@ cfg_if::cfg_if! {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
+        use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
                         feature = "dladdr"))] {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;
         use self::dladdr_resolve::Symbol as SymbolImp;
+        use noop_clear_symbol_cache as clear_imp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
+        use clear_symbol_cache as clear_imp;
     }
 }

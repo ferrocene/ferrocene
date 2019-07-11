@@ -443,8 +443,6 @@ pub fn clear_symbol_cache() {
     clear_imp()
 }
 
-fn noop_clear_symbol_cache() {}
-
 cfg_if::cfg_if! {
     if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp"))] {
         mod dbghelp;
@@ -474,6 +472,8 @@ cfg_if::cfg_if! {
         mod coresymbolication;
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;
+
+        fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(feature = "libbacktrace",
                         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
@@ -482,6 +482,8 @@ cfg_if::cfg_if! {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
+        
+        fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
@@ -489,11 +491,15 @@ cfg_if::cfg_if! {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;
         use self::dladdr_resolve::Symbol as SymbolImp;
+        
+        fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
-        use clear_symbol_cache as clear_imp;
+        
+        fn noop_clear_symbol_cache() {}
+        use noop_clear_symbol_cache as clear_imp;
     }
 }

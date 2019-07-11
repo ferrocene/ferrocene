@@ -11,17 +11,18 @@ use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line::gimli;
-use core::cell::RefCell;
 use core::convert::TryFrom;
 use core::mem;
 use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
+use lazy_static::lazy_static;
 use libc::c_void;
 use memmap::Mmap;
 use std::env;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
+use std::sync::Mutex;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -329,57 +330,62 @@ impl Mapping {
     }
 }
 
-// A very small, very simple LRU cache for debug info mappings.
-//
-// The hit rate should be very high, since the typical stack doesn't cross
-// between many shared libraries.
-//
-// The `addr2line::Context` structures are pretty expensive to create. Its
-// cost is expected to be amortized by subsequent `locate` queries, which
-// leverage the structures built when constructing `addr2line::Context`s to
-// get nice speedups. If we didn't have this cache, that amortization would
-// never happen, and symbolicating backtraces would be ssssllllooooowwww.
-static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>>
-    = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+lazy_static! {
+    // A very small, very simple LRU cache for debug info mappings.
+    //
+    // The hit rate should be very high, since the typical stack doesn't cross
+    // between many shared libraries.
+    //
+    // The `addr2line::Context` structures are pretty expensive to create. Its
+    // cost is expected to be amortized by subsequent `locate` queries, which
+    // leverage the structures built when constructing `addr2line::Context`s to
+    // get nice speedups. If we didn't have this cache, that amortization would
+    // never happen, and symbolicating backtraces would be ssssllllooooowwww.
+    // static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>> = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+    static ref MAPPINGS_CACHE: Mutex<Vec<(PathBuf, Mapping)>> = Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+}
 
 pub fn clear_symbol_cache() {
-    MAPPINGS_CACHE.borrow_mut().clear()
+    if let Ok(mut cache) = MAPPINGS_CACHE.lock() {
+        cache.clear();
+    }
 }
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {
-    let mut cache = MAPPINGS_CACHE.borrow_mut();
+    if let Ok(mut cache) = MAPPINGS_CACHE.lock() {
 
-    let idx = cache.iter().position(|&(ref p, _)| p == &path);
+        let idx = cache.iter().position(|&(ref p, _)| p == &path);
 
-    // Invariant: after this conditional completes without early returning
-    // from an error, the cache entry for this path is at index 0.
+        // Invariant: after this conditional completes without early returning
+        // from an error, the cache entry for this path is at index 0.
 
-    if let Some(idx) = idx {
-        // When the mapping is already in the cache, move it to the front.
-        if idx != 0 {
-            let entry = cache.remove(idx);
-            cache.insert(0, entry);
+        if let Some(idx) = idx {
+            // When the mapping is already in the cache, move it to the front.
+            if idx != 0 {
+                let entry = cache.remove(idx);
+                cache.insert(0, entry);
+            }
+        } else {
+            // When the mapping is not in the cache, create a new mapping,
+            // insert it into the front of the cache, and evict the oldest cache
+            // entry if necessary.
+            let mapping = match Mapping::new(&path) {
+                None => return,
+                Some(m) => m,
+            };
+
+            if cache.len() == MAPPINGS_CACHE_SIZE {
+                cache.pop();
+            }
+
+            cache.insert(0, (path, mapping));
         }
-    } else {
-        // When the mapping is not in the cache, create a new mapping,
-        // insert it into the front of the cache, and evict the oldest cache
-        // entry if necessary.
-        let mapping = match Mapping::new(&path) {
-            None => return,
-            Some(m) => m,
-        };
 
-        if cache.len() == MAPPINGS_CACHE_SIZE {
-            cache.pop();
-        }
-
-        cache.insert(0, (path, mapping));
+        cache[0].1.rent(f);
     }
-
-    cache[0].1.rent(f);
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {

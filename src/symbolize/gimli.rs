@@ -341,8 +341,8 @@ lazy_static! {
     // leverage the structures built when constructing `addr2line::Context`s to
     // get nice speedups. If we didn't have this cache, that amortization would
     // never happen, and symbolicating backtraces would be ssssllllooooowwww.
-    // static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>> = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
-    static ref MAPPINGS_CACHE: Mutex<Vec<(PathBuf, Mapping)>> = Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+    static ref MAPPINGS_CACHE: Mutex<Vec<(PathBuf, Mapping)>> 
+        = Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
 }
 
 pub fn clear_symbol_cache() {

@@ -448,6 +448,7 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
+        fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(
         feature = "std",

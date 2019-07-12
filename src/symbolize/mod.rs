@@ -482,7 +482,7 @@ cfg_if::cfg_if! {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
-        
+
         fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(unix,
@@ -491,14 +491,14 @@ cfg_if::cfg_if! {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;
         use self::dladdr_resolve::Symbol as SymbolImp;
-        
+
         fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
-        
+
         fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     }

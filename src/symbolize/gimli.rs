@@ -15,7 +15,6 @@ use core::convert::TryFrom;
 use core::mem;
 use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
-use lazy_static::lazy_static;
 use libc::c_void;
 use memmap::Mmap;
 use std::env;
@@ -330,23 +329,26 @@ impl Mapping {
     }
 }
 
-lazy_static! {
-    // A very small, very simple LRU cache for debug info mappings.
-    //
-    // The hit rate should be very high, since the typical stack doesn't cross
-    // between many shared libraries.
-    //
-    // The `addr2line::Context` structures are pretty expensive to create. Its
-    // cost is expected to be amortized by subsequent `locate` queries, which
-    // leverage the structures built when constructing `addr2line::Context`s to
-    // get nice speedups. If we didn't have this cache, that amortization would
-    // never happen, and symbolicating backtraces would be ssssllllooooowwww.
-    static ref MAPPINGS_CACHE: Mutex<Vec<(PathBuf, Mapping)>> 
-        = Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+// A very small, very simple LRU cache for debug info mappings.
+//
+// The hit rate should be very high, since the typical stack doesn't cross
+// between many shared libraries.
+//
+// The `addr2line::Context` structures are pretty expensive to create. Its
+// cost is expected to be amortized by subsequent `locate` queries, which
+// leverage the structures built when constructing `addr2line::Context`s to
+// get nice speedups. If we didn't have this cache, that amortization would
+// never happen, and symbolicating backtraces would be ssssllllooooowwww.
+static mut MAPPINGS_CACHE: Option<Mutex<Vec<(PathBuf, Mapping)>>> = None;
+
+fn lazy_cache() -> &'static Mutex<Vec<(PathBuf, Mapping)>> {
+    unsafe {
+        MAPPINGS_CACHE.get_or_insert_with(|| Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE)))
+    }
 }
 
 pub fn clear_symbol_cache() {
-    if let Ok(mut cache) = MAPPINGS_CACHE.lock() {
+    if let Ok(mut cache) = lazy_cache().lock() {
         cache.clear();
     }
 }
@@ -355,8 +357,7 @@ fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {
-    if let Ok(mut cache) = MAPPINGS_CACHE.lock() {
-
+    if let Ok(mut cache) = lazy_cache().lock() {
         let idx = cache.iter().position(|&(ref p, _)| p == &path);
 
         // Invariant: after this conditional completes without early returning

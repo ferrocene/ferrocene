@@ -21,7 +21,6 @@ use std::env;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
-use std::sync::Mutex;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -329,35 +328,33 @@ impl Mapping {
     }
 }
 
-// A very small, very simple LRU cache for debug info mappings.
-//
-// The hit rate should be very high, since the typical stack doesn't cross
-// between many shared libraries.
-//
-// The `addr2line::Context` structures are pretty expensive to create. Its
-// cost is expected to be amortized by subsequent `locate` queries, which
-// leverage the structures built when constructing `addr2line::Context`s to
-// get nice speedups. If we didn't have this cache, that amortization would
-// never happen, and symbolicating backtraces would be ssssllllooooowwww.
-static mut MAPPINGS_CACHE: Option<Mutex<Vec<(PathBuf, Mapping)>>> = None;
+type Cache = Vec<(PathBuf, Mapping)>;
 
-fn lazy_cache() -> &'static Mutex<Vec<(PathBuf, Mapping)>> {
-    unsafe {
-        MAPPINGS_CACHE.get_or_insert_with(|| Mutex::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE)))
-    }
+fn with_cache(f: impl FnOnce(&mut Cache)) {
+    // A very small, very simple LRU cache for debug info mappings.
+    //
+    // The hit rate should be very high, since the typical stack doesn't cross
+    // between many shared libraries.
+    //
+    // The `addr2line::Context` structures are pretty expensive to create. Its
+    // cost is expected to be amortized by subsequent `locate` queries, which
+    // leverage the structures built when constructing `addr2line::Context`s to
+    // get nice speedups. If we didn't have this cache, that amortization would
+    // never happen, and symbolicating backtraces would be ssssllllooooowwww.
+    static mut MAPPINGS_CACHE: Option<Cache> = None;
+
+    unsafe { f(MAPPINGS_CACHE.get_or_insert_with(|| Vec::with_capacity(MAPPINGS_CACHE_SIZE))) }
 }
 
 pub fn clear_symbol_cache() {
-    if let Ok(mut cache) = lazy_cache().lock() {
-        cache.clear();
-    }
+    with_cache(|cache| cache.clear());
 }
 
 fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {
-    if let Ok(mut cache) = lazy_cache().lock() {
+    with_cache(|cache| {
         let idx = cache.iter().position(|&(ref p, _)| p == &path);
 
         // Invariant: after this conditional completes without early returning
@@ -386,7 +383,7 @@ where
         }
 
         cache[0].1.rent(f);
-    }
+    });
 }
 
 pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {

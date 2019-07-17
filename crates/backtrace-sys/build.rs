@@ -56,10 +56,11 @@ fn main() {
     build.define("BACKTRACE_SUPPORTS_DATA", "0");
 
     File::create(out_dir.join("config.h")).unwrap();
-    if !target.contains("apple-ios")
+    if target.contains("android") {
+        maybe_enable_dl_iterate_phdr_android(&mut build);
+    } else if !target.contains("apple-ios")
         && !target.contains("solaris")
         && !target.contains("redox")
-        && !target.contains("android")
         && !target.contains("haiku")
         && !target.contains("vxworks")
     {
@@ -121,4 +122,33 @@ fn main() {
     }
 
     build.compile("backtrace");
+}
+
+// The `dl_iterate_phdr` API was added in Android API 21+ (according to #227),
+// so if we can dynamically detect an appropriately configured C compiler for
+// that then let's enable the `dl_iterate_phdr` API, otherwise Android just
+// won't have any information.
+fn maybe_enable_dl_iterate_phdr_android(build: &mut cc::Build) {
+    let expansion = cc::Build::new().file("src/android-api.c").expand();
+    let expansion = match std::str::from_utf8(&expansion) {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+    println!("expanded android version detection:\n{}", expansion);
+    let marker = "APIVERSION";
+    let i = match expansion.find(marker) {
+        Some(i) => i,
+        None => return,
+    };
+    let version = match expansion[i + marker.len() + 1..].split_whitespace().next() {
+        Some(s) => s,
+        None => return,
+    };
+    let version = match version.parse::<u32>() {
+        Ok(n) => n,
+        Err(_) => return,
+    };
+    if version >= 21 {
+        build.define("HAVE_DL_ITERATE_PHDR", "1");
+    }
 }

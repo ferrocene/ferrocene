@@ -330,7 +330,8 @@ impl Mapping {
 
 type Cache = Vec<(PathBuf, Mapping)>;
 
-fn with_cache(f: impl FnOnce(&mut Cache)) {
+/// Warning: this function is not threadsafe and needs to be externally synchronized
+unsafe fn with_cache(f: impl FnOnce(&mut Cache)) {
     // A very small, very simple LRU cache for debug info mappings.
     //
     // The hit rate should be very high, since the typical stack doesn't cross
@@ -343,10 +344,10 @@ fn with_cache(f: impl FnOnce(&mut Cache)) {
     // never happen, and symbolicating backtraces would be ssssllllooooowwww.
     static mut MAPPINGS_CACHE: Option<Cache> = None;
 
-    unsafe { f(MAPPINGS_CACHE.get_or_insert_with(|| Vec::with_capacity(MAPPINGS_CACHE_SIZE))) }
+    f(MAPPINGS_CACHE.get_or_insert_with(|| Vec::with_capacity(MAPPINGS_CACHE_SIZE)))
 }
 
-pub fn clear_symbol_cache() {
+pub unsafe fn clear_symbol_cache() {
     with_cache(|cache| cache.clear());
 }
 

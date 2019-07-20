@@ -439,8 +439,12 @@ mod dladdr;
 /// Each resolve() implementation allocates and caches several megabytes worth of symbols,
 /// clear_symbol_cache tries to reclaim that cached memory.
 /// Note: for now, only the Gimli implementation is able to clear its cache.
-pub fn clear_symbol_cache() {
-    clear_imp()
+#[cfg(feature = "std")]
+pub fn clear_symbol_cache() {    
+    let _guard = crate::lock::lock();
+    unsafe {
+        clear_imp()
+    }
 }
 
 cfg_if::cfg_if! {
@@ -448,7 +452,7 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;
-        fn noop_clear_symbol_cache() {}
+        unsafe fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(
         feature = "std",
@@ -473,7 +477,7 @@ cfg_if::cfg_if! {
         use self::coresymbolication::resolve as resolve_imp;
         use self::coresymbolication::Symbol as SymbolImp;
 
-        fn noop_clear_symbol_cache() {}
+        unsafe fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(feature = "libbacktrace",
                         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
@@ -483,7 +487,7 @@ cfg_if::cfg_if! {
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
 
-        fn noop_clear_symbol_cache() {}
+        unsafe fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
@@ -492,14 +496,14 @@ cfg_if::cfg_if! {
         use self::dladdr_resolve::resolve as resolve_imp;
         use self::dladdr_resolve::Symbol as SymbolImp;
 
-        fn noop_clear_symbol_cache() {}
+        unsafe fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
 
-        fn noop_clear_symbol_cache() {}
+        unsafe fn noop_clear_symbol_cache() {}
         use noop_clear_symbol_cache as clear_imp;
     }
 }

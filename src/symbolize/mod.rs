@@ -489,7 +489,6 @@ cfg_if::cfg_if! {
         any(
             target_os = "linux",
             target_os = "macos",
-            windows,
         ),
     ))] {
         /// clear_symbol_cache tries to reclaim that cached memory.

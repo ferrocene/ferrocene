@@ -489,7 +489,9 @@ cfg_if::cfg_if! {
         any(
             target_os = "linux",
             target_os = "macos",
+            windows,
         ),
+        not(all(windows, target_env = "msvc", feature = "dbghelp")),
     ))] {
         /// clear_symbol_cache tries to reclaim that cached memory.
         /// Note: for now, only the Gimli implementation is able to clear its cache.

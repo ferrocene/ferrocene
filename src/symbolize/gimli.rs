@@ -351,7 +351,7 @@ pub unsafe fn clear_symbol_cache() {
     with_cache(|cache| cache.clear());
 }
 
-fn with_mapping_for_path<F>(path: PathBuf, f: F)
+unsafe fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {

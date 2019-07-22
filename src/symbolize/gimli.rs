@@ -11,7 +11,6 @@ use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line::gimli;
-use core::cell::RefCell;
 use core::convert::TryFrom;
 use core::mem;
 use core::u32;
@@ -329,7 +328,10 @@ impl Mapping {
     }
 }
 
-thread_local! {
+type Cache = Vec<(PathBuf, Mapping)>;
+
+// unsafe because this is required to be externally synchronized
+unsafe fn with_cache(f: impl FnOnce(&mut Cache)) {
     // A very small, very simple LRU cache for debug info mappings.
     //
     // The hit rate should be very high, since the typical stack doesn't cross
@@ -340,17 +342,21 @@ thread_local! {
     // leverage the structures built when constructing `addr2line::Context`s to
     // get nice speedups. If we didn't have this cache, that amortization would
     // never happen, and symbolicating backtraces would be ssssllllooooowwww.
-    static MAPPINGS_CACHE: RefCell<Vec<(PathBuf, Mapping)>>
-        = RefCell::new(Vec::with_capacity(MAPPINGS_CACHE_SIZE));
+    static mut MAPPINGS_CACHE: Option<Cache> = None;
+
+    f(MAPPINGS_CACHE.get_or_insert_with(|| Vec::with_capacity(MAPPINGS_CACHE_SIZE)))
 }
 
-fn with_mapping_for_path<F>(path: PathBuf, f: F)
+// unsafe because this is required to be externally synchronized
+pub unsafe fn clear_symbol_cache() {
+    with_cache(|cache| cache.clear());
+}
+
+unsafe fn with_mapping_for_path<F>(path: PathBuf, f: F)
 where
     F: FnMut(&Context<'_>),
 {
-    MAPPINGS_CACHE.with(|cache| {
-        let mut cache = cache.borrow_mut();
-
+    with_cache(|cache| {
         let idx = cache.iter().position(|&(ref p, _)| p == &path);
 
         // Invariant: after this conditional completes without early returning

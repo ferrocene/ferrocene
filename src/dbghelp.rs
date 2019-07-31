@@ -154,7 +154,7 @@ macro_rules! dbghelp {
         // Convenience proxy to use the cleanup locks to reference dbghelp
         // functions.
         #[allow(dead_code)]
-        impl Cleanup {
+        impl Init {
             $(pub fn $name(&self) -> $name {
                 unsafe {
                     DBGHELP.$name().unwrap()
@@ -244,14 +244,7 @@ dbghelp! {
     }
 }
 
-pub struct Cleanup;
-
-// Number of times `init` has been called on this thread. This is externally
-// synchronized and doesn't use internal synchronization on our behalf.
-static mut COUNT: usize = 0;
-
-// Used to restore `SymSetOptions` and `SymGetOptions` values.
-static mut OPTS_ORIG: DWORD = 0;
+pub struct Init;
 
 /// Unsafe because this requires external synchronization, must be done
 /// inside of the same lock as all other backtrace operations.
@@ -259,60 +252,37 @@ static mut OPTS_ORIG: DWORD = 0;
 /// Note that the `Dbghelp` returned must also be dropped within the same
 /// lock.
 #[cfg(all(windows, feature = "dbghelp"))]
-pub unsafe fn init() -> Result<Cleanup, ()> {
-    // Initializing symbols has significant overhead, but initializing only
-    // once without cleanup causes problems for external sources. For
-    // example, the standard library checks the result of SymInitializeW
-    // (which returns an error if attempting to initialize twice) and in
-    // the event of an error, will not print a backtrace on panic.
-    // Presumably, external debuggers may have similar issues.
-    //
-    // As a compromise, we'll keep track of the number of internal
-    // initialization requests within a single API call in order to
-    // minimize the number of init/cleanup cycles.
-    if COUNT > 0 {
-        COUNT += 1;
-        return Ok(Cleanup);
+pub unsafe fn init() -> Result<Init, ()> {
+    // Calling `SymInitializeW` is quite expensive, so we only do so once per
+    // process.
+    static mut INITIALIZED: bool = false;
+    if INITIALIZED {
+        return Ok(Init);
     }
 
     // Actually load `dbghelp.dll` into the process here, returning an error if
     // that fails.
     DBGHELP.ensure_open()?;
 
-    OPTS_ORIG = DBGHELP.SymGetOptions().unwrap()();
+    let orig = DBGHELP.SymGetOptions().unwrap()();
 
     // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
     // according to MSVC's own docs about this: "This is the fastest, most
     // efficient way to use the symbol handler.", so let's do that!
-    DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG | SYMOPT_DEFERRED_LOADS);
+    DBGHELP.SymSetOptions().unwrap()(orig | SYMOPT_DEFERRED_LOADS);
 
-    let ret = DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
-    if ret != TRUE {
-        // Symbols may have been initialized by another library or an
-        // external debugger
-        DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
-        Err(())
-    } else {
-        COUNT += 1;
-        Ok(Cleanup)
-    }
-}
-
-impl Drop for Cleanup {
-    fn drop(&mut self) {
-        unsafe {
-            COUNT -= 1;
-            if COUNT != 0 {
-                return;
-            }
-
-            // Clean up after ourselves by cleaning up symbols and restoring the
-            // symbol options to their original value. This is currently
-            // required to cooperate with libstd as libstd's backtracing will
-            // assert symbol initialization succeeds and will clean up after the
-            // backtrace is finished.
-            DBGHELP.SymCleanup().unwrap()(GetCurrentProcess());
-            DBGHELP.SymSetOptions().unwrap()(OPTS_ORIG);
-        }
-    }
+    // Actually initialize symbols with MSVC. Note that this can fail, but we
+    // ignore it. There's not a ton of prior art for this per se, but LLVM
+    // internally seems to ignore the return value here and one of the
+    // sanitizer libraries in LLVM prints a scary warning if this fails but
+    // basically ignores it in the long run.
+    //
+    // One case this comes up a lot for Rust is that the standard library and
+    // this crate on crates.io both want to compete for `SymInitializeW`. The
+    // standard library historically wanted to initialize then cleanup most of
+    // the time, but now that it's using this crate it means that someone will
+    // get to initialization first and the other will pick up that
+    // initialization.
+    DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
+    Ok(Init)
 }

@@ -98,7 +98,7 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
 }
 
 unsafe fn resolve_with_inline(
-    dbghelp: &dbghelp::Cleanup,
+    dbghelp: &dbghelp::Init,
     frame: &STACKFRAME_EX,
     cb: &mut FnMut(&super::Symbol),
 ) {
@@ -127,7 +127,7 @@ unsafe fn resolve_with_inline(
 }
 
 unsafe fn resolve_without_inline(
-    dbghelp: &dbghelp::Cleanup,
+    dbghelp: &dbghelp::Init,
     addr: *mut c_void,
     cb: &mut FnMut(&super::Symbol),
 ) {

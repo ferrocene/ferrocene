@@ -63,7 +63,9 @@ cfg_if::cfg_if! {
                 inner: mem::zeroed(),
                 _marker: marker::PhantomData,
             };
-            if libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
+            // Skip null addresses to avoid calling into libc and having it do
+            // things with the dynamic symbol table for no reason.
+            if !addr.is_null() && libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
                 cb(info)
             }
         }

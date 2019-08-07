@@ -208,6 +208,7 @@ cfg_if::cfg_if! {
         struct Object<'a> {
             elf: Elf<'a>,
             data: &'a [u8],
+            syms: Vec<goblin::elf::Sym>,
         }
 
         impl<'a> Object<'a> {
@@ -216,7 +217,13 @@ cfg_if::cfg_if! {
                 if !elf.little_endian {
                     return None;
                 }
-                Some(Object { elf, data })
+                let mut syms = elf.syms.iter().collect::<Vec<_>>();
+                syms.sort_unstable_by_key(|s| s.st_value);
+                Some(Object {
+                    syms,
+                    elf,
+                    data,
+                })
             }
 
             fn section(&self, name: &str) -> Option<&'a [u8]> {
@@ -234,9 +241,17 @@ cfg_if::cfg_if! {
             }
 
             fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
-                let sym = self.elf.syms.iter()
-                    .find(|sym| sym.st_value <= addr && addr <= sym.st_value + sym.st_size)?;
-                Some(self.elf.strtab.get(sym.st_name)?.ok()?.as_bytes())
+                // Same sort of binary search as Windows above
+                let i = match self.syms.binary_search_by_key(&addr, |s| s.st_value) {
+                    Ok(i) => i,
+                    Err(i) => i.checked_sub(1)?,
+                };
+                let sym = self.syms.get(i)?;
+                if sym.st_value <= addr && addr <= sym.st_value + sym.st_size {
+                    Some(self.elf.strtab.get(sym.st_name)?.ok()?.as_bytes())
+                } else {
+                    None
+                }
             }
         }
     }

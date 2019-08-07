@@ -208,7 +208,10 @@ cfg_if::cfg_if! {
         struct Object<'a> {
             elf: Elf<'a>,
             data: &'a [u8],
-            syms: Vec<goblin::elf::Sym>,
+            // List of pre-parsed and sorted symbols by base address. The
+            // boolean indicates whether it comes from the dynamic symbol table
+            // or the normal symbol table, affecting where it's symbolicated.
+            syms: Vec<(goblin::elf::Sym, bool)>,
         }
 
         impl<'a> Object<'a> {
@@ -217,8 +220,24 @@ cfg_if::cfg_if! {
                 if !elf.little_endian {
                     return None;
                 }
-                let mut syms = elf.syms.iter().collect::<Vec<_>>();
-                syms.sort_unstable_by_key(|s| s.st_value);
+                let mut syms = elf
+                    .syms
+                    .iter()
+                    .map(|s| (s, false))
+                    .chain(elf.dynsyms.iter().map(|s| (s, true)))
+                    // Only look at function/object symbols. Not entirely sure
+                    // why, but this is what libbacktrace does.
+                    .filter(|(s, _)| {
+                        s.is_function() || s.st_type() == goblin::elf::sym::STT_OBJECT
+                    })
+                    // skip anything that's in an undefined section header,
+                    // again not entirely sure why but this is what libbacktrace
+                    // does.
+                    .filter(|(s, _)| {
+                        s.st_shndx != goblin::elf::section_header::SHN_UNDEF as usize
+                    })
+                    .collect::<Vec<_>>();
+                syms.sort_unstable_by_key(|s| s.0.st_value);
                 Some(Object {
                     syms,
                     elf,
@@ -242,13 +261,18 @@ cfg_if::cfg_if! {
 
             fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
                 // Same sort of binary search as Windows above
-                let i = match self.syms.binary_search_by_key(&addr, |s| s.st_value) {
+                let i = match self.syms.binary_search_by_key(&addr, |s| s.0.st_value) {
                     Ok(i) => i,
                     Err(i) => i.checked_sub(1)?,
                 };
-                let sym = self.syms.get(i)?;
+                let (sym, dynamic) = self.syms.get(i)?;
                 if sym.st_value <= addr && addr <= sym.st_value + sym.st_size {
-                    Some(self.elf.strtab.get(sym.st_name)?.ok()?.as_bytes())
+                    let strtab = if *dynamic {
+                        &self.elf.dynstrtab
+                    } else {
+                        &self.elf.strtab
+                    };
+                    Some(strtab.get(sym.st_name)?.ok()?.as_bytes())
                 } else {
                     None
                 }

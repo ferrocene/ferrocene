@@ -225,14 +225,17 @@ cfg_if::cfg_if! {
                     .iter()
                     .map(|s| (s, false))
                     .chain(elf.dynsyms.iter().map(|s| (s, true)))
-                    // Only look at function/object symbols. Not entirely sure
-                    // why, but this is what libbacktrace does.
+                    // Only look at function/object symbols. This mirrors what
+                    // libbacktrace does and in general we're only symbolicating
+                    // function addresses in theory. Object symbols correspond
+                    // to data, and maybe someone's crazy enough to have a
+                    // function go into static data?
                     .filter(|(s, _)| {
                         s.is_function() || s.st_type() == goblin::elf::sym::STT_OBJECT
                     })
                     // skip anything that's in an undefined section header,
-                    // again not entirely sure why but this is what libbacktrace
-                    // does.
+                    // since it means it's an imported function and we're only
+                    // symbolicating with locally defined functions.
                     .filter(|(s, _)| {
                         s.st_shndx != goblin::elf::section_header::SHN_UNDEF as usize
                     })

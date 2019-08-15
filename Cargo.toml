@@ -115,6 +115,7 @@ verify-winapi = [
   'winapi/libloaderapi',
   'winapi/minwindef',
   'winapi/processthreadsapi',
+  'winapi/synchapi',
   'winapi/winbase',
   'winapi/winnt',
 ]

@@ -496,6 +496,7 @@ cfg_if::cfg_if! {
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
+                        not(target_os = "fuchsia"),
                         feature = "dladdr"))] {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;

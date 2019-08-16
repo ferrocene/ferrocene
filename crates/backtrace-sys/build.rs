@@ -10,7 +10,8 @@ fn main() {
     if target.contains("msvc") || // libbacktrace isn't used on MSVC windows
         target.contains("emscripten") || // no way this will ever compile for emscripten
         target.contains("cloudabi") ||
-        target.contains("wasm32")
+        target.contains("wasm32") ||
+        target.contains("fuchsia") // fuchsia uses external out-of-process symbolization
     {
         println!("cargo:rustc-cfg=empty");
         return;

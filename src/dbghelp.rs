@@ -244,45 +244,127 @@ dbghelp! {
     }
 }
 
-pub struct Init;
+pub struct Init {
+    lock: HANDLE,
+}
 
-/// Unsafe because this requires external synchronization, must be done
-/// inside of the same lock as all other backtrace operations.
+/// Initialize all support necessary to access `dbghelp` API functions from this
+/// crate.
 ///
-/// Note that the `Dbghelp` returned must also be dropped within the same
-/// lock.
+/// Note that this function is **safe**, it internally has its own
+/// synchronization. Also note that it is safe to call this function multiple
+/// times recursively.
 #[cfg(all(windows, feature = "dbghelp"))]
-pub unsafe fn init() -> Result<Init, ()> {
-    // Calling `SymInitializeW` is quite expensive, so we only do so once per
-    // process.
-    static mut INITIALIZED: bool = false;
-    if INITIALIZED {
-        return Ok(Init);
+pub fn init() -> Result<Init, ()> {
+    use core::sync::atomic::{AtomicUsize, Ordering::SeqCst};
+
+    unsafe {
+        // First thing we need to do is to synchronize this function. This can
+        // be called concurrently from other threads or recursively within one
+        // thread. Note that it's trickier than that though because what we're
+        // using here, `dbghelp`, *also* needs to be synchronized with all other
+        // callers to `dbghelp` in this process.
+        //
+        // Typically there aren't really that many calls to `dbghelp` within the
+        // same process and we can probably safely assume that we're the only
+        // ones accessing it. There is, however, one primary other user we have
+        // to worry about which is ironically ourselves, but in the standard
+        // library. The Rust standard library depends on this crate for
+        // backtrace support, and this crate also exists on crates.io. This
+        // means that if the standard library is printing a panic backtrace it
+        // may race with this crate coming from crates.io, causing segfaults.
+        //
+        // To help solve this synchronization problem we employ a
+        // Windows-specific trick here (it is, after all, a Windows-specific
+        // restriction about synchronization). We create a *session-local* named
+        // mutex to protect this call. The intention here is that the standard
+        // library and this crate don't have to share Rust-level APIs to
+        // synchronize here but can instead work behind the scenes to make sure
+        // they're synchronizing with one another. That way when this function
+        // is called through the standard library or through crates.io we can be
+        // sure that the same mutex is being acquired.
+        //
+        // So all of that is to say that the first thing we do here is we
+        // atomically create a `HANDLE` which is a named mutex on Windows. We
+        // synchronize a bit with other threads sharing this function
+        // specifically and ensure that only one handle is created per instance
+        // of this function. Note that the handle is never closed once it's
+        // stored in the global.
+        //
+        // After we've actually go the lock we simply acquire it, and our `Init`
+        // handle we hand out will be responsible for dropping it eventually.
+        static LOCK: AtomicUsize = AtomicUsize::new(0);
+        let mut lock = LOCK.load(SeqCst);
+        if lock == 0 {
+            lock = CreateMutexA(
+                ptr::null_mut(),
+                0,
+                "Local\\RustBacktraceMutex\0".as_ptr() as _,
+            ) as usize;
+            if lock == 0 {
+                return Err(());
+            }
+            if let Err(other) = LOCK.compare_exchange(0, lock, SeqCst, SeqCst) {
+                debug_assert!(other != 0);
+                CloseHandle(lock as HANDLE);
+                lock = other;
+            }
+        }
+        debug_assert!(lock != 0);
+        let lock = lock as HANDLE;
+        let r = WaitForSingleObjectEx(lock, INFINITE, FALSE);
+        debug_assert_eq!(r, 0);
+        let ret = Init { lock };
+
+        // Ok, phew! Now that we're all safely synchronized, let's actually
+        // start processing everything. First up we need to ensure that
+        // `dbghelp.dll` is actually loaded in this process. We do this
+        // dynamically to avoid a static dependency. This has historically been
+        // done to work around weird linking issues and is intended at making
+        // binaries a bit more portable since this is largely just a debugging
+        // utility.
+        //
+        // Once we've opened `dbghelp.dll` we need to call some initialization
+        // functions in it, and that's detailed more below. We only do this
+        // once, though, so we've got a global boolean indicating whether we're
+        // done yet or not.
+        DBGHELP.ensure_open()?;
+
+        static mut INITIALIZED: bool = false;
+        if INITIALIZED {
+            return Ok(ret);
+        }
+
+        let orig = DBGHELP.SymGetOptions().unwrap()();
+
+        // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
+        // according to MSVC's own docs about this: "This is the fastest, most
+        // efficient way to use the symbol handler.", so let's do that!
+        DBGHELP.SymSetOptions().unwrap()(orig | SYMOPT_DEFERRED_LOADS);
+
+        // Actually initialize symbols with MSVC. Note that this can fail, but we
+        // ignore it. There's not a ton of prior art for this per se, but LLVM
+        // internally seems to ignore the return value here and one of the
+        // sanitizer libraries in LLVM prints a scary warning if this fails but
+        // basically ignores it in the long run.
+        //
+        // One case this comes up a lot for Rust is that the standard library and
+        // this crate on crates.io both want to compete for `SymInitializeW`. The
+        // standard library historically wanted to initialize then cleanup most of
+        // the time, but now that it's using this crate it means that someone will
+        // get to initialization first and the other will pick up that
+        // initialization.
+        DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
+        INITIALIZED = true;
+        Ok(ret)
     }
+}
 
-    // Actually load `dbghelp.dll` into the process here, returning an error if
-    // that fails.
-    DBGHELP.ensure_open()?;
-
-    let orig = DBGHELP.SymGetOptions().unwrap()();
-
-    // Ensure that the `SYMOPT_DEFERRED_LOADS` flag is set, because
-    // according to MSVC's own docs about this: "This is the fastest, most
-    // efficient way to use the symbol handler.", so let's do that!
-    DBGHELP.SymSetOptions().unwrap()(orig | SYMOPT_DEFERRED_LOADS);
-
-    // Actually initialize symbols with MSVC. Note that this can fail, but we
-    // ignore it. There's not a ton of prior art for this per se, but LLVM
-    // internally seems to ignore the return value here and one of the
-    // sanitizer libraries in LLVM prints a scary warning if this fails but
-    // basically ignores it in the long run.
-    //
-    // One case this comes up a lot for Rust is that the standard library and
-    // this crate on crates.io both want to compete for `SymInitializeW`. The
-    // standard library historically wanted to initialize then cleanup most of
-    // the time, but now that it's using this crate it means that someone will
-    // get to initialization first and the other will pick up that
-    // initialization.
-    DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
-    Ok(Init)
+impl Drop for Init {
+    fn drop(&mut self) {
+        unsafe {
+            let r = ReleaseMutex(self.lock);
+            debug_assert!(r != 0);
+        }
+    }
 }

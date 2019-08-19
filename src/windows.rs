@@ -28,6 +28,7 @@ cfg_if::cfg_if! {
             pub use winapi::um::winnt::*;
             pub use winapi::um::fileapi::*;
             pub use winapi::um::minwinbase::*;
+            pub use winapi::um::synchapi::*;
         }
     } else {
         pub use core::ffi::c_void;
@@ -314,6 +315,7 @@ ffi! {
     pub const FILE_SHARE_WRITE: DWORD = 0x2;
     pub const OPEN_EXISTING: DWORD = 0x3;
     pub const GENERIC_READ: DWORD = 0x80000000;
+    pub const INFINITE: DWORD = !0;
 
     pub type DWORD = u32;
     pub type PDWORD = *mut u32;
@@ -363,6 +365,17 @@ ffi! {
             dwFlagsAndAttributes: DWORD,
             hTemplateFile: HANDLE,
         ) -> HANDLE;
+        pub fn CreateMutexA(
+            attrs: LPSECURITY_ATTRIBUTES,
+            initial: BOOL,
+            name: LPCSTR,
+        ) -> HANDLE;
+        pub fn ReleaseMutex(hMutex: HANDLE) -> BOOL;
+        pub fn WaitForSingleObjectEx(
+            hHandle: HANDLE,
+            dwMilliseconds: DWORD,
+            bAlertable: BOOL,
+        ) -> DWORD;
     }
 }
 

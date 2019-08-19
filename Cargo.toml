@@ -40,8 +40,10 @@ winapi = { version = "0.3.3", optional = true }
 goblin = { version = "0.0.24", optional = true, default-features = false, features = ['pe32', 'pe64'] }
 [target.'cfg(target_os = "macos")'.dependencies]
 goblin = { version = "0.0.24", optional = true, default-features = false, features = ['mach32', 'mach64'] }
-[target.'cfg(not(any(target_os = "macos", windows)))'.dependencies]
+[target.'cfg(not(any(target_os = "fuchsia", target_os = "macos", windows)))'.dependencies]
 goblin = { version = "0.0.24", optional = true, default-features = false, features = ['elf32', 'elf64'] }
+[target.'cfg(target_os = "fuchsia")'.dependencies]
+fuchsia_backtrace = "0.1"
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default

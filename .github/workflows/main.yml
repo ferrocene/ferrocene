@@ -1,0 +1,202 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        thing: [stable, beta, nightly, macos, windows-msvc64, windows-msvc32, windows-gnu64, windows-gnu32]
+        include:
+          - thing: stable
+            os: ubuntu-latest
+            rust: stable
+          - thing: beta
+            os: ubuntu-latest
+            rust: beta
+          - thing: nightly
+            os: ubuntu-latest
+            rust: nightly
+          - thing: macos
+            os: macos-latest
+            rust: stable
+          # Note that these are on nightly due to rust-lang/rust#63700 not being
+          # on stable yet
+          - thing: windows-msvc64
+            os: windows-latest
+            rust: nightly-x86_64-msvc
+          - thing: windows-msvc32
+            os: windows-latest
+            rust: nightly-i686-msvc
+          - thing: windows-gnu64
+            os: windows-latest
+            rust: nightly-x86_64-gnu
+          - thing: windows-gnu32
+            os: windows-latest
+            rust: nightly-i686-gnu
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust (rustup)
+      run: rustup update ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
+      if: matrix.os != 'macos-latest'
+    - name: Install Rust (macos)
+      run: |
+        curl https://sh.rustup.rs | sh -s -- -y
+        echo "##[add-path]$HOME/.cargo/bin"
+      if: matrix.os == 'macos-latest'
+    # full fidelity of backtraces on 32-bit msvc requires frame pointers, so
+    # enable that for our tests
+    - name: Force frame pointers
+      run: echo "##[set-env name=RUSTFLAGS]-Cforce-frame-pointers"
+      shell: bash
+      if: matrix.thing == 'windows-msvc32'
+    - run: cargo build --manifest-path crates/backtrace-sys/Cargo.toml
+    - run: cargo build
+    - run: cargo test
+    - run: cargo test --features "gimli-symbolize"
+    - run: cargo test --no-default-features
+    - run: cargo test --no-default-features --features "std"
+    - run: cargo test --no-default-features --features "libunwind std"
+    - run: cargo test --no-default-features --features "libunwind dladdr std"
+    - run: cargo test --no-default-features --features "libunwind libbacktrace std"
+    - run: cargo test --no-default-features --features "libunwind libbacktrace dbghelp std"
+    - run: cargo test --no-default-features --features "libunwind coresymbolication dbghelp std"
+    - run: cargo test --no-default-features --features "libunwind coresymbolication dbghelp std libbacktrace"
+    - run: cargo test --no-default-features --features "unix-backtrace std"
+    - run: cargo test --no-default-features --features "unix-backtrace dladdr std"
+    - run: cargo test --no-default-features --features "unix-backtrace libbacktrace std"
+    - run: cargo test --no-default-features --features "unix-backtrace coresymbolication std"
+    - run: cargo test --no-default-features --features "serialize-serde std"
+    - run: cargo test --no-default-features --features "serialize-rustc std"
+    - run: cargo test --no-default-features --features "serialize-rustc serialize-serde std"
+    - run: cargo test --no-default-features --features "cpp_demangle std"
+    - run: cargo test --no-default-features --features "dbghelp std"
+    - run: cargo test --no-default-features --features "dbghelp std verify-winapi"
+    - run: cargo test --manifest-path crates/cpp_smoke_test/Cargo.toml
+    - run: cargo test --features libbacktrace --manifest-path crates/without_debuginfo/Cargo.toml
+    - run: cargo test --features "libbacktrace coresymbolication" --manifest-path crates/without_debuginfo/Cargo.toml
+    - run: cargo test --features "libbacktrace gimli-symbolize" --manifest-path crates/without_debuginfo/Cargo.toml
+
+  windows_arm64:
+    name: Windows AArch64
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update stable && rustup default stable
+    - run: rustup target add aarch64-pc-windows-msvc
+    - run: cargo test --no-run --target aarch64-pc-windows-msvc
+    - run: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-winapi
+
+  ios:
+    name: iOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target:
+        - aarch64-apple-ios
+        - armv7-apple-ios
+        - armv7s-apple-ios
+        - i386-apple-ios
+        - x86_64-apple-ios
+        include:
+        - target: aarch64-apple-ios
+          sdk: iphoneos
+        - target: armv7-apple-ios
+          sdk: iphoneos
+        - target: armv7s-apple-ios
+          sdk: iphoneos
+        - target: i386-apple-ios
+          sdk: iphonesimulator
+        - target: x86_64-apple-ios
+          sdk: iphonesimulator
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust (
+      run: |
+        curl https://sh.rustup.rs | sh -s -- -y
+        echo "##[add-path]$HOME/.cargo/bin"
+    - run: rustup target add ${{ matrix.target }}
+    - run: |
+        export SDK_PATH=`xcrun --show-sdk-path --sdk ${{ matrix.sdk }}`
+        export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=$SDK_PATH"
+        cargo test --no-run --target ${{ matrix.target }}
+      name: Build tests
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+        - aarch64-unknown-linux-gnu
+        - arm-unknown-linux-gnueabihf
+        - armv7-unknown-linux-gnueabihf
+        - i586-unknown-linux-gnu
+        - i686-unknown-linux-gnu
+        - powerpc64-unknown-linux-gnu
+        - x86_64-pc-windows-gnu
+        - x86_64-unknown-linux-gnu
+        - x86_64-unknown-linux-musl
+        - arm-linux-androideabi
+        - armv7-linux-androideabi
+        - aarch64-linux-android
+        - i686-linux-android
+        - x86_64-linux-android
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update stable && rustup default stable
+    - run: rustup target add ${{ matrix.target }}
+    - run: cargo generate-lockfile
+    - run: ./ci/run-docker.sh ${{ matrix.target }}
+
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update stable && rustup default stable && rustup component add rustfmt
+    - run: cargo fmt --all -- --check
+
+  wasm:
+    name: WebAssembly
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update stable && rustup default stable
+    - run: rustup target add wasm32-unknown-unknown
+    - run: cargo build --target wasm32-unknown-unknown
+
+  msrv:
+    name: MSRV
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update 1.32.0 && rustup default 1.32.0
+    - run: cargo build

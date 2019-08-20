@@ -1,7 +1,5 @@
 # backtrace-rs
 
-[![Build Status](https://dev.azure.com/rust-lang/backtrace-rs/_apis/build/status/rust-lang.backtrace-rs?branchName=master)](https://dev.azure.com/rust-lang/backtrace-rs/_build/latest?definitionId=12&branchName=master)
-
 [Documentation](https://docs.rs/backtrace)
 
 A library for acquiring backtraces at runtime for Rust. This library aims to

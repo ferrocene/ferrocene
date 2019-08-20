@@ -153,3 +153,8 @@ edition = '2018'
 name = "accuracy"
 required-features = ["std", "dbghelp", "libbacktrace", "libunwind"]
 edition = '2018'
+
+[[test]]
+name = "concurrent-panics"
+required-features = ["std"]
+harness = false

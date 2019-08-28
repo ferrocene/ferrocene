@@ -1,17 +1,9 @@
-use crate::Backtrace;
+use super::BacktraceFrame;
 use std::ffi::c_void;
 use std::fmt;
 
-pub(super) fn fmt_backtrace(bt: &Backtrace, fmt: &mut fmt::Formatter) -> fmt::Result {
-    write!(fmt, "stack backtrace:")?;
-
-    let iter = if fmt.alternate() {
-        bt.frames.iter()
-    } else {
-        bt.frames[bt.actual_start_index..].iter()
-    };
-
-    for (idx, frame) in iter.enumerate() {
+pub(super) fn fmt_backtrace(frames: &[BacktraceFrame], fmt: &mut fmt::Formatter) -> fmt::Result {
+    for (idx, frame) in frames.iter().enumerate() {
         // To reduce TCB size in Sgx enclave, we do not want to implement symbol resolution functionality.
         // Rather, we can print the offset of the address here, which could be later mapped to
         // correct function.

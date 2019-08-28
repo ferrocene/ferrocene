@@ -335,7 +335,13 @@ cfg_if::cfg_if! {
 
 impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt_backtrace(self, fmt)
+        fmt.write_str("stack backtrace:\n")?;
+        let frames = if fmt.alternate() {
+            &self.frames[..]
+        } else {
+            &self.frames[self.actual_start_index..]
+        };
+        fmt_backtrace(frames, fmt)
     }
 }
 

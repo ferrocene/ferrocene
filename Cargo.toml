@@ -37,8 +37,6 @@ goblin = { version = "0.0.24", optional = true, default-features = false, featur
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.3", optional = true }
-[target.'cfg(target_os = "fuchsia")'.dependencies]
-fuchsia_backtrace = "0.1"
 
 # Each feature controls the two phases of finding a backtrace: getting a
 # backtrace and then resolving instruction pointers to symbols. The default

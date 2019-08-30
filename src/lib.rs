@@ -86,6 +86,11 @@ mod types;
 #[cfg(feature = "std")]
 pub use crate::symbolize::clear_symbol_cache;
 
+#[cfg(target_os = "fuchsia")]
+mod fmt_fuchsia_backtrace;
+#[cfg(target_os = "fuchsia")]
+pub use fmt_fuchsia_backtrace::fmt_fuchsia_backtrace;
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
         pub use crate::backtrace::trace;

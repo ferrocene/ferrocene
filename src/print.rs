@@ -1,6 +1,6 @@
 use crate::BytesOrWideString;
 use core::fmt;
-use libc::c_void;
+use core::ffi::c_void;
 
 const HEX_WIDTH: usize = 2 + 2 * core::mem::size_of::<usize>();
 

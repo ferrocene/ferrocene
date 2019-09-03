@@ -5,18 +5,50 @@ use {
     libc::{c_char, c_void},
 };
 
-/// Prints a formatted backtrace for Fuchsia based on a series of instruction pointers.
-pub fn fmt_fuchsia_backtrace(ips: impl Iterator<Item = *mut c_void>, fmt: &mut fmt::Formatter) -> fmt::Result {
-    // Print the DSO context to tell the logger where our libs are loaded into memory.
-    print_dso_context(fmt)?;
+/// A formatter for Fuchsia backtraces.
+pub struct FuchsiaBacktraceFmt<'a, 'b> {
+    fmt: &'a mut fmt::Formatter<'b>,
+    frame_index: usize,
+}
 
-    // Print the addresses of the backtrace frames
-    for (idx, ip) in ips.enumerate() {
-        fmt.write_str("{{{bt:")?;
-        write!(fmt, "{}:{:?}", idx, ip)?;
-        fmt.write_str("}}}\n")?;
+impl<'a, 'b> FuchsiaBacktraceFmt<'a, 'b> {
+    /// Create a new `FuchsiaBacktraceFmt` which will write output to the provided `fmt`.
+    pub fn new(fmt: &'a mut fmt::Formatter<'b>) -> Self {
+        FuchsiaBacktraceFmt { fmt, frame_index: 0 }
     }
 
+    /// Adds the current shared library context to the output.
+    ///
+    /// This is required for the resulting frames to be symbolized.
+    pub fn add_context(&mut self) -> fmt::Result {
+        print_dso_context(self.fmt)
+    }
+
+    /// Adds a frame to the backtrace output.
+    pub fn add_frame(&mut self, instruction_pointer: *mut c_void) -> fmt::Result {
+        let ip = instruction_pointer;
+        self.fmt.write_str("{{{bt:")?;
+        write!(self.fmt, "{}:{:?}", self.frame_index, ip)?;
+        self.frame_index += 1;
+        self.fmt.write_str("}}}\n")?;
+        Ok(())
+    }
+
+    /// Completes the backtrace output.
+    pub fn finish(&mut self) -> fmt::Result {
+        // Currently a no-op-- including this hook to allow for future additions.
+        Ok(())
+    }
+}
+
+/// Prints a formatted backtrace for Fuchsia based on a series of instruction pointers.
+pub fn fmt_fuchsia_backtrace(ips: impl Iterator<Item = *mut c_void>, fmt: &mut fmt::Formatter) -> fmt::Result {
+    let mut fb = FuchsiaBacktraceFmt::new(fmt);
+    fb.add_context()?;
+    for ip in ips {
+        fb.add_frame(ip)?;
+    }
+    fb.finish()?;
     Ok(())
 }
 

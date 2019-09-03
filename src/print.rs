@@ -1,3 +1,4 @@
+use crate::BytesOrWideString;
 use core::fmt;
 use libc::c_void;
 
@@ -11,6 +12,7 @@ pub struct BacktraceFmt<'a, 'b> {
     fmt: &'a mut fmt::Formatter<'b>,
     frame_index: usize,
     format: PrintFmt,
+    print_path: &'a mut (FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
 }
 
 /// The styles of printing that we can print
@@ -25,11 +27,16 @@ pub enum PrintFmt {
 
 impl<'a, 'b> BacktraceFmt<'a, 'b> {
     /// Create a new `BacktraceFmt` which will write output to the provided `fmt`.
-    pub fn new(fmt: &'a mut fmt::Formatter<'b>, format: PrintFmt) -> Self {
+    pub fn new(
+        fmt: &'a mut fmt::Formatter<'b>,
+        format: PrintFmt,
+        print_path: &'a mut (FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
+    ) -> Self {
         BacktraceFmt {
             fmt,
             frame_index: 0,
             format,
+            print_path,
         }
     }
 
@@ -76,7 +83,7 @@ impl FrameFmt<'_, '_, '_> {
             self.backtrace_symbol(frame, symbol)?;
         }
         if symbols.is_empty() {
-            self.print_raw(frame.ip(), None, None::<usize>, None)?;
+            self.print_raw(frame.ip(), None, None, None)?;
         }
         Ok(())
     }
@@ -91,7 +98,9 @@ impl FrameFmt<'_, '_, '_> {
         self.print_raw(
             frame.ip(),
             symbol.name(),
-            symbol.filename().map(|p| p.display()),
+            symbol
+                .filename()
+                .and_then(|p| Some(BytesOrWideString::Bytes(p.to_str()?.as_bytes()))),
             symbol.lineno(),
         )?;
         Ok(())
@@ -103,7 +112,7 @@ impl FrameFmt<'_, '_, '_> {
         self.print_raw(
             frame.ip(),
             symbol.name(),
-            symbol.filename().map(|p| p.display()),
+            symbol.filename_raw(),
             symbol.lineno(),
         )?;
         Ok(())
@@ -114,18 +123,13 @@ impl FrameFmt<'_, '_, '_> {
         &mut self,
         frame_ip: *mut c_void,
         symbol_name: Option<crate::SymbolName>,
-        filename: Option<impl fmt::Display>,
+        filename: Option<BytesOrWideString>,
         lineno: Option<u32>,
     ) -> fmt::Result {
         if cfg!(target_os = "fuchsia") {
             self.print_raw_fuchsia(frame_ip)?;
         } else {
-            self.print_raw_generic(
-                frame_ip,
-                symbol_name,
-                filename.as_ref().map(|s| s as &fmt::Display),
-                lineno,
-            )?;
+            self.print_raw_generic(frame_ip, symbol_name, filename, lineno)?;
         }
         self.symbol_index += 1;
         Ok(())
@@ -136,14 +140,14 @@ impl FrameFmt<'_, '_, '_> {
         &mut self,
         mut frame_ip: *mut c_void,
         symbol_name: Option<crate::SymbolName>,
-        filename: Option<&fmt::Display>,
+        filename: Option<BytesOrWideString>,
         lineno: Option<u32>,
     ) -> fmt::Result {
         // No need to print "null" frames, it basically just means that the
         // system backtrace was a bit eager to trace back super far.
         if let PrintFmt::Short = self.fmt.format {
             if frame_ip.is_null() {
-                return Ok(())
+                return Ok(());
             }
         }
 
@@ -157,32 +161,21 @@ impl FrameFmt<'_, '_, '_> {
         }
 
         if self.symbol_index == 0 {
-            match self.fmt.format {
-                PrintFmt::Short => {
-                    write!(self.fmt.fmt, "{:4}: ", self.fmt.frame_index)?;
-                }
-                PrintFmt::Full => {
-                    write!(self.fmt.fmt, "{:4}: {:2$?} - ", self.fmt.frame_index, frame_ip, HEX_WIDTH)?;
-                }
-                PrintFmt::__Nonexhaustive => {}
+            write!(self.fmt.fmt, "{:4}: ", self.fmt.frame_index)?;
+            if let PrintFmt::Full = self.fmt.format {
+                write!(self.fmt.fmt, "{:1$?} - ", frame_ip, HEX_WIDTH)?;
             }
         } else {
-            match self.fmt.format {
-                PrintFmt::Full => write!(self.fmt.fmt, "{:1$}", "", HEX_WIDTH + 3)?,
-                PrintFmt::Short |
-                PrintFmt::__Nonexhaustive => {}
-            }
             write!(self.fmt.fmt, "      ")?;
+            if let PrintFmt::Full = self.fmt.format {
+                write!(self.fmt.fmt, "{:1$}", "", HEX_WIDTH + 3)?;
+            }
         }
 
-        if let Some(name) = symbol_name {
-            match self.fmt.format {
-                PrintFmt::Short => write!(self.fmt.fmt, "{}", name)?,
-                PrintFmt::Full => write!(self.fmt.fmt, "{:#}", name)?,
-                PrintFmt::__Nonexhaustive => {}
-            }
-        } else {
-            write!(self.fmt.fmt, "<unknown>")?;
+        match (symbol_name, &self.fmt.format) {
+            (Some(name), PrintFmt::Short) => write!(self.fmt.fmt, "{}", name)?,
+            (Some(name), PrintFmt::Full) => write!(self.fmt.fmt, "{:#}", name)?,
+            (None, _) | (_, PrintFmt::__Nonexhaustive) => write!(self.fmt.fmt, "<unknown>")?,
         }
         self.fmt.fmt.write_str("\n")?;
 
@@ -193,13 +186,14 @@ impl FrameFmt<'_, '_, '_> {
         Ok(())
     }
 
-
-    fn print_fileline(&mut self, file: &fmt::Display, line: u32) -> fmt::Result {
+    fn print_fileline(&mut self, file: BytesOrWideString, line: u32) -> fmt::Result {
         match self.fmt.format {
             PrintFmt::Full => write!(self.fmt.fmt, "{:1$}", "", HEX_WIDTH)?,
             PrintFmt::Short | PrintFmt::__Nonexhaustive => {}
         }
-        write!(self.fmt.fmt, "             at {}:{}\n", file, line)?;
+        write!(self.fmt.fmt, "             at ")?;
+        (self.fmt.print_path)(self.fmt.fmt, file)?;
+        write!(self.fmt.fmt, ":{}\n", line)?;
         Ok(())
     }
 

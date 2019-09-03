@@ -1,62 +1,7 @@
-use {
-    core::fmt::{self, Write},
-    core::mem::{size_of, transmute},
-    core::slice::from_raw_parts,
-    libc::{c_char, c_void},
-};
-
-/// A formatter for Fuchsia backtraces.
-pub struct FuchsiaBacktraceFmt<'a, 'b> {
-    fmt: &'a mut fmt::Formatter<'b>,
-    frame_index: usize,
-}
-
-impl<'a, 'b> FuchsiaBacktraceFmt<'a, 'b> {
-    /// Create a new `FuchsiaBacktraceFmt` which will write output to the provided `fmt`.
-    pub fn new(fmt: &'a mut fmt::Formatter<'b>) -> Self {
-        FuchsiaBacktraceFmt {
-            fmt,
-            frame_index: 0,
-        }
-    }
-
-    /// Adds the current shared library context to the output.
-    ///
-    /// This is required for the resulting frames to be symbolized.
-    pub fn add_context(&mut self) -> fmt::Result {
-        print_dso_context(self.fmt)
-    }
-
-    /// Adds a frame to the backtrace output.
-    pub fn add_frame(&mut self, instruction_pointer: *mut c_void) -> fmt::Result {
-        let ip = instruction_pointer;
-        self.fmt.write_str("{{{bt:")?;
-        write!(self.fmt, "{}:{:?}", self.frame_index, ip)?;
-        self.frame_index += 1;
-        self.fmt.write_str("}}}\n")?;
-        Ok(())
-    }
-
-    /// Completes the backtrace output.
-    pub fn finish(&mut self) -> fmt::Result {
-        // Currently a no-op-- including this hook to allow for future additions.
-        Ok(())
-    }
-}
-
-/// Prints a formatted backtrace for Fuchsia based on a series of instruction pointers.
-pub fn fmt_fuchsia_backtrace(
-    ips: impl Iterator<Item = *mut c_void>,
-    fmt: &mut fmt::Formatter,
-) -> fmt::Result {
-    let mut fb = FuchsiaBacktraceFmt::new(fmt);
-    fb.add_context()?;
-    for ip in ips {
-        fb.add_frame(ip)?;
-    }
-    fb.finish()?;
-    Ok(())
-}
+use core::fmt::{self, Write};
+use core::mem::{size_of, transmute};
+use core::slice::from_raw_parts;
+use libc::c_char;
 
 extern "C" {
     // dl_iterate_phdr takes a callback that will receive a dl_phdr_info pointer

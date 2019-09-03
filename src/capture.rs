@@ -1,11 +1,12 @@
-use crate::{resolve, resolve_frame, trace, Symbol, SymbolName};
+use crate::{resolve, resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
+use crate::PrintFmt;
 use std::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Representation of an owned and self-contained backtrace.
 ///
@@ -323,25 +324,20 @@ impl BacktraceSymbol {
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(target_os = "fuchsia")] {
-        mod fuchsia_backtrace_fmt;
-        use fuchsia_backtrace_fmt::fmt_backtrace;
-    } else {
-        mod default_backtrace_fmt;
-        use default_backtrace_fmt::fmt_backtrace;
-    }
-}
-
 impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.write_str("stack backtrace:\n")?;
-        let frames = if fmt.alternate() {
-            &self.frames[..]
+        let (frames, style) = if fmt.alternate() {
+            (&self.frames[..], PrintFmt::Full)
         } else {
-            &self.frames[self.actual_start_index..]
+            (&self.frames[self.actual_start_index..], PrintFmt::Short)
         };
-        fmt_backtrace(frames, fmt)
+        let mut f = BacktraceFmt::new(fmt, style);
+        f.add_context()?;
+        for frame in frames {
+            f.frame()?.backtrace_frame(frame)?;
+        }
+        f.finish()?;
+        Ok(())
     }
 }
 

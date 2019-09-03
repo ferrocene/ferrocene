@@ -14,7 +14,10 @@ pub struct FuchsiaBacktraceFmt<'a, 'b> {
 impl<'a, 'b> FuchsiaBacktraceFmt<'a, 'b> {
     /// Create a new `FuchsiaBacktraceFmt` which will write output to the provided `fmt`.
     pub fn new(fmt: &'a mut fmt::Formatter<'b>) -> Self {
-        FuchsiaBacktraceFmt { fmt, frame_index: 0 }
+        FuchsiaBacktraceFmt {
+            fmt,
+            frame_index: 0,
+        }
     }
 
     /// Adds the current shared library context to the output.
@@ -42,7 +45,10 @@ impl<'a, 'b> FuchsiaBacktraceFmt<'a, 'b> {
 }
 
 /// Prints a formatted backtrace for Fuchsia based on a series of instruction pointers.
-pub fn fmt_fuchsia_backtrace(ips: impl Iterator<Item = *mut c_void>, fmt: &mut fmt::Formatter) -> fmt::Result {
+pub fn fmt_fuchsia_backtrace(
+    ips: impl Iterator<Item = *mut c_void>,
+    fmt: &mut fmt::Formatter,
+) -> fmt::Result {
     let mut fb = FuchsiaBacktraceFmt::new(fmt);
     fb.add_context()?;
     for ip in ips {
@@ -94,7 +100,10 @@ struct dl_phdr_info {
 
 impl dl_phdr_info {
     fn program_headers(&self) -> PhdrIter<'_> {
-        PhdrIter { phdrs: self.phdr_slice(), base: self.addr }
+        PhdrIter {
+            phdrs: self.phdr_slice(),
+            base: self.addr,
+        }
     }
     // We have no way of knowing of checking if e_phoff and e_phnum are valid.
     // libc should ensure this for us however so it's safe to form a slice here.
@@ -113,7 +122,10 @@ impl<'a> Iterator for PhdrIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.phdrs.split_first().map(|(phdr, new_phdrs)| {
             self.phdrs = new_phdrs;
-            Phdr { phdr, base: self.base }
+            Phdr {
+                phdr,
+                base: self.base,
+            }
         })
     }
 }
@@ -148,7 +160,10 @@ impl<'a> Phdr<'a> {
     // that this is the case for us here.
     fn notes(&self) -> NoteIter<'a> {
         unsafe {
-            NoteIter::new(self.base.add(self.phdr.p_offset as usize), self.phdr.p_memsz as usize)
+            NoteIter::new(
+                self.base.add(self.phdr.p_offset as usize),
+                self.phdr.p_memsz as usize,
+            )
         }
     }
 }
@@ -187,7 +202,10 @@ impl<'a> NoteIter<'a> {
     // valid range of bytes that can all be read. The contents of these bytes
     // can be anything but the range must be valid for this to be safe.
     unsafe fn new(base: *const u8, size: usize) -> Self {
-        NoteIter { base: from_raw_parts(base, size), error: false }
+        NoteIter {
+            base: from_raw_parts(base, size),
+            error: false,
+        }
     }
 }
 
@@ -243,7 +261,11 @@ impl<'a> Iterator for NoteIter<'a> {
         let nhdr = take_nhdr(&mut self.base)?;
         let name = take_bytes_align4(nhdr.n_namesz as usize, &mut self.base)?;
         let desc = take_bytes_align4(nhdr.n_descsz as usize, &mut self.base)?;
-        Some(Note { name: name, desc: desc, tipe: nhdr.n_type })
+        Some(Note {
+            name: name,
+            desc: desc,
+            tipe: nhdr.n_type,
+        })
     }
 }
 
@@ -331,7 +353,10 @@ struct Dso<'a> {
 impl Dso<'_> {
     /// Returns an iterator over Segments in this DSO.
     fn segments(&self) -> SegmentIter<'_> {
-        SegmentIter { phdrs: self.phdrs.as_ref(), base: self.base }
+        SegmentIter {
+            phdrs: self.phdrs.as_ref(),
+            base: self.base,
+        }
     }
 }
 
@@ -380,15 +405,12 @@ enum Error {
 ///
 /// * `visitor` - A DsoPrinter that will have one of eats methods called foreach DSO.
 fn for_each_dso(mut visitor: &mut DsoPrinter) {
-    extern "C" fn callback(
-        info: &dl_phdr_info,
-        _size: usize,
-        visitor: &mut DsoPrinter,
-    ) -> i32 {
+    extern "C" fn callback(info: &dl_phdr_info, _size: usize, visitor: &mut DsoPrinter) -> i32 {
         // dl_iterate_phdr ensures that info.name will point to a valid
         // location.
         let name_len = unsafe { libc::strlen(info.name) };
-        let name_slice: &[u8] = unsafe { core::slice::from_raw_parts(info.name as *const u8, name_len) };
+        let name_slice: &[u8] =
+            unsafe { core::slice::from_raw_parts(info.name as *const u8, name_len) };
         let name = match core::str::from_utf8(name_slice) {
             Ok(name) => name,
             Err(err) => {
@@ -425,7 +447,9 @@ impl DsoPrinter<'_, '_> {
                 "{{{{{{module:{:#x}:{}:elf:{}}}}}}}\n",
                 self.module_count,
                 dso.name,
-                HexSlice { bytes: dso.build_id.as_ref() }
+                HexSlice {
+                    bytes: dso.build_id.as_ref()
+                }
             )?;
             for seg in dso.segments() {
                 write!(
@@ -453,7 +477,11 @@ impl DsoPrinter<'_, '_> {
 /// This function prints the Fuchsia symbolizer markup for all information contained in a DSO.
 pub fn print_dso_context(out: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
     out.write_str("{{{reset}}}\n")?;
-    let mut visitor = DsoPrinter { writer: out, module_count: 0, error: Ok(()) };
+    let mut visitor = DsoPrinter {
+        writer: out,
+        module_count: 0,
+        error: Ok(()),
+    };
     for_each_dso(&mut visitor);
     visitor.error
 }

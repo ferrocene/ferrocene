@@ -506,6 +506,7 @@ cfg_if::cfg_if! {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
+        #[allow(unused)]
         unsafe fn clear_symbol_cache_imp() {}
     }
 }

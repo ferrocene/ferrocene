@@ -6,6 +6,7 @@ cfg_if::cfg_if! {
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
+        use std::str;
     }
 }
 
@@ -47,32 +48,30 @@ impl<'a> BytesOrWideString<'a> {
     pub fn into_path_buf(self) -> PathBuf {
         #[cfg(unix)]
         {
-            use self::BytesOrWideString::*;
             use std::ffi::OsStr;
             use std::os::unix::ffi::OsStrExt;
 
-            match self {
-                Bytes(slice) => PathBuf::from(OsStr::from_bytes(slice)),
-                _ => unreachable!(),
+            if let BytesOrWideString::Bytes(slice) = self {
+                return PathBuf::from(OsStr::from_bytes(slice));
             }
         }
 
         #[cfg(windows)]
         {
-            use self::BytesOrWideString::*;
             use std::ffi::OsString;
             use std::os::windows::ffi::OsStringExt;
 
-            match self {
-                Wide(slice) => PathBuf::from(OsString::from_wide(slice)),
-                _ => unreachable!(),
+            if let BytesOrWideString::Wide(slice) = self {
+                return PathBuf::from(OsString::from_wide(slice));
             }
         }
 
-        #[cfg(all(not(windows), not(unix)))]
-        {
-            unreachable!()
+        if let BytesOrWideString::Bytes(b) = self {
+            if let Ok(s) = str::from_utf8(b) {
+                return PathBuf::from(s);
+            }
         }
+        unreachable!()
     }
 }
 

@@ -1,11 +1,12 @@
-use crate::{resolve, resolve_frame, trace, Symbol, SymbolName};
+use crate::PrintFmt;
+use crate::{resolve, resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
 use std::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Representation of an owned and self-contained backtrace.
 ///
@@ -325,66 +326,36 @@ impl BacktraceSymbol {
 
 impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "stack backtrace:")?;
-
-        let iter = if fmt.alternate() {
-            self.frames.iter()
+        let full = fmt.alternate();
+        let (frames, style) = if full {
+            (&self.frames[..], PrintFmt::Full)
         } else {
-            self.frames[self.actual_start_index..].iter()
+            (&self.frames[self.actual_start_index..], PrintFmt::Short)
         };
 
-        for (idx, frame) in iter.enumerate() {
-            // To reduce TCB size in Sgx enclave, we do not want to implement symbol resolution functionality.
-            // Rather, we can print the offset of the address here, which could be later mapped to
-            // correct function.
-            let ip: *mut c_void;
-            #[cfg(target_env = "sgx")]
-            {
-                ip = usize::wrapping_sub(
-                    frame.ip() as _,
-                    std::os::fortanix_sgx::mem::image_base() as _,
-                ) as _;
-            }
-            #[cfg(not(target_env = "sgx"))]
-            {
-                ip = frame.ip();
-            }
-
-            write!(fmt, "\n{:4}: ", idx)?;
-
-            let symbols = match frame.symbols {
-                Some(ref s) => s,
-                None => {
-                    write!(fmt, "<unresolved> ({:?})", ip)?;
-                    continue;
-                }
-            };
-            if symbols.len() == 0 {
-                write!(fmt, "<no info> ({:?})", ip)?;
-                continue;
-            }
-
-            for (idx, symbol) in symbols.iter().enumerate() {
-                if idx != 0 {
-                    write!(fmt, "\n      ")?;
-                }
-
-                if let Some(name) = symbol.name() {
-                    write!(fmt, "{}", name)?;
-                } else {
-                    write!(fmt, "<unknown>")?;
-                }
-
-                if idx == 0 {
-                    write!(fmt, " ({:?})", ip)?;
-                }
-
-                if let (Some(file), Some(line)) = (symbol.filename(), symbol.lineno()) {
-                    write!(fmt, "\n             at {}:{}", file.display(), line)?;
+        // When printing paths we try to strip the cwd if it exists, otherwise
+        // we just print the path as-is. Note that we also only do this for the
+        // short format, because if it's full we presumably want to print
+        // everything.
+        let cwd = std::env::current_dir();
+        let mut print_path = move |fmt: &mut fmt::Formatter, path: crate::BytesOrWideString| {
+            let path = path.into_path_buf();
+            if !full {
+                if let Ok(cwd) = &cwd {
+                    if let Ok(suffix) = path.strip_prefix(cwd) {
+                        return fmt::Display::fmt(&suffix.display(), fmt);
+                    }
                 }
             }
+            fmt::Display::fmt(&path.display(), fmt)
+        };
+
+        let mut f = BacktraceFmt::new(fmt, style, &mut print_path);
+        f.add_context()?;
+        for frame in frames {
+            f.frame()?.backtrace_frame(frame)?;
         }
-
+        f.finish()?;
         Ok(())
     }
 }

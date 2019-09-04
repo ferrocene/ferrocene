@@ -178,17 +178,20 @@ jobs:
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt --all -- --check
 
-  wasm:
-    name: WebAssembly
+  build:
+    name: Build Targets
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [wasm32-unknown-unknown, x86_64-fuchsia]
     steps:
     - uses: actions/checkout@master
       with:
         submodules: true
     - name: Install Rust
       run: rustup update stable && rustup default stable
-    - run: rustup target add wasm32-unknown-unknown
-    - run: cargo build --target wasm32-unknown-unknown
+    - run: rustup target add ${{ matrix.target }}
+    - run: cargo build --target ${{ matrix.target }}
 
   msrv:
     name: MSRV

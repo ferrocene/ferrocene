@@ -86,6 +86,9 @@ mod types;
 #[cfg(feature = "std")]
 pub use crate::symbolize::clear_symbol_cache;
 
+mod print;
+pub use print::{BacktraceFmt, PrintFmt};
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
         pub use crate::backtrace::trace;

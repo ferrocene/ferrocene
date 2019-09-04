@@ -52,7 +52,7 @@ impl<'a> BytesOrWideString<'a> {
             use std::os::unix::ffi::OsStrExt;
 
             if let BytesOrWideString::Bytes(slice) = self {
-                return PathBuf::from(OsStr::from_bytes(slice))
+                return PathBuf::from(OsStr::from_bytes(slice));
             }
         }
 
@@ -62,13 +62,13 @@ impl<'a> BytesOrWideString<'a> {
             use std::os::windows::ffi::OsStringExt;
 
             if let BytesOrWideString::Wide(slice) = self {
-                return PathBuf::from(OsString::from_wide(slice))
+                return PathBuf::from(OsString::from_wide(slice));
             }
         }
 
         if let BytesOrWideString::Bytes(b) = self {
             if let Ok(s) = str::from_utf8(b) {
-                return PathBuf::from(s)
+                return PathBuf::from(s);
             }
         }
         unreachable!()

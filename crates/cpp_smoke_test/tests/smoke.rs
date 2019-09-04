@@ -1,5 +1,5 @@
-extern crate cpp_smoke_test;
 extern crate backtrace;
+extern crate cpp_smoke_test;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -26,7 +26,8 @@ fn smoke_test_cpp() {
             physical_frames.len() < 4
         });
 
-        let names: Vec<_> = physical_frames.into_iter()
+        let names: Vec<_> = physical_frames
+            .into_iter()
             .flat_map(|ip| {
                 let mut logical_frame_names = vec![];
 
@@ -36,8 +37,10 @@ fn smoke_test_cpp() {
                     logical_frame_names.push(demangled);
                 });
 
-                assert!(!logical_frame_names.is_empty(),
-                        "Should have resolved at least one symbol for the physical frame");
+                assert!(
+                    !logical_frame_names.is_empty(),
+                    "Should have resolved at least one symbol for the physical frame"
+                );
 
                 logical_frame_names
             })

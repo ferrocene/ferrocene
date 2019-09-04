@@ -220,8 +220,8 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         // more information if we're a full backtrace. Here we also handle
         // symbols which don't have a name,
         match (symbol_name, &self.fmt.format) {
-            (Some(name), PrintFmt::Short) => write!(self.fmt.fmt, "{}", name)?,
-            (Some(name), PrintFmt::Full) => write!(self.fmt.fmt, "{:#}", name)?,
+            (Some(name), PrintFmt::Short) => write!(self.fmt.fmt, "{:#}", name)?,
+            (Some(name), PrintFmt::Full) => write!(self.fmt.fmt, "{}", name)?,
             (None, _) | (_, PrintFmt::__Nonexhaustive) => write!(self.fmt.fmt, "<unknown>")?,
         }
         self.fmt.fmt.write_str("\n")?;

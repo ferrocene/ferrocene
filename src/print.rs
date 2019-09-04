@@ -97,6 +97,11 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     ///
     /// This will recusrively print all `BacktraceSymbol` instances within the
     /// `BacktraceFrame`.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     #[cfg(feature = "std")]
     pub fn backtrace_frame(&mut self, frame: &crate::BacktraceFrame) -> fmt::Result {
         let symbols = frame.symbols();
@@ -110,6 +115,11 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     }
 
     /// Prints a `BacktraceSymbol` within a `BacktraceFrame`.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
     #[cfg(feature = "std")]
     pub fn backtrace_symbol(
         &mut self,

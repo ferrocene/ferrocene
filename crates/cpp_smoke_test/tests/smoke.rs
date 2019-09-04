@@ -1,7 +1,7 @@
 extern crate cpp_smoke_test;
 extern crate backtrace;
 
-use std::sync::atomic::{ATOMIC_BOOL_INIT, AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 extern "C" {
     fn cpp_trampoline(func: extern "C" fn()) -> ();
@@ -11,7 +11,7 @@ extern "C" {
 #[ignore] // fixme(fitzgen/cpp_demangle#73)
 #[cfg(not(target_os = "windows"))]
 fn smoke_test_cpp() {
-    static RAN_ASSERTS: AtomicBool = ATOMIC_BOOL_INIT;
+    static RAN_ASSERTS: AtomicBool = AtomicBool::new(false);
 
     extern "C" fn assert_cpp_frames() {
         let mut physical_frames = Vec::new();

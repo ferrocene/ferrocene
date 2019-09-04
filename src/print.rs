@@ -64,11 +64,11 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
 
     /// Adds a frame to the backtrace output.
     ///
-    /// This commit returns an RAII instance of a `FrameFmt` which can be used
+    /// This commit returns an RAII instance of a `BacktraceFrameFmt` which can be used
     /// to actually print a frame, and on destruction it will increment the
     /// frame counter.
-    pub fn frame(&mut self) -> FrameFmt<'_, 'a, 'b> {
-        FrameFmt {
+    pub fn frame(&mut self) -> BacktraceFrameFmt<'_, 'a, 'b> {
+        BacktraceFrameFmt {
             fmt: self,
             symbol_index: 0,
         }
@@ -87,12 +87,12 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
 /// A formatter for just one frame of a backtrace.
 ///
 /// This type is created by the `BacktraceFmt::frame` function.
-pub struct FrameFmt<'fmt, 'a, 'b> {
+pub struct BacktraceFrameFmt<'fmt, 'a, 'b> {
     fmt: &'fmt mut BacktraceFmt<'a, 'b>,
     symbol_index: usize,
 }
 
-impl FrameFmt<'_, '_, '_> {
+impl BacktraceFrameFmt<'_, '_, '_> {
     /// Prints a `BacktraceFrame` with this frame formatter.
     ///
     /// This will recusrively print all `BacktraceSymbol` instances within the
@@ -250,7 +250,7 @@ impl FrameFmt<'_, '_, '_> {
     }
 }
 
-impl Drop for FrameFmt<'_, '_, '_> {
+impl Drop for BacktraceFrameFmt<'_, '_, '_> {
     fn drop(&mut self) {
         self.fmt.frame_index += 1;
     }

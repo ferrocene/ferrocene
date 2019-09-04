@@ -353,7 +353,7 @@ impl fmt::Debug for Backtrace {
         let mut f = BacktraceFmt::new(fmt, style, &mut print_path);
         f.add_context()?;
         for frame in frames {
-            f.frame()?.backtrace_frame(frame)?;
+            f.frame().backtrace_frame(frame)?;
         }
         f.finish()?;
         Ok(())

@@ -1,7 +1,7 @@
-extern crate cpp_smoke_test;
 extern crate backtrace;
+extern crate cpp_smoke_test;
 
-use std::sync::atomic::{ATOMIC_BOOL_INIT, AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 extern "C" {
     fn cpp_trampoline(func: extern "C" fn()) -> ();
@@ -11,7 +11,7 @@ extern "C" {
 #[ignore] // fixme(fitzgen/cpp_demangle#73)
 #[cfg(not(target_os = "windows"))]
 fn smoke_test_cpp() {
-    static RAN_ASSERTS: AtomicBool = ATOMIC_BOOL_INIT;
+    static RAN_ASSERTS: AtomicBool = AtomicBool::new(false);
 
     extern "C" fn assert_cpp_frames() {
         let mut physical_frames = Vec::new();
@@ -26,7 +26,8 @@ fn smoke_test_cpp() {
             physical_frames.len() < 4
         });
 
-        let names: Vec<_> = physical_frames.into_iter()
+        let names: Vec<_> = physical_frames
+            .into_iter()
             .flat_map(|ip| {
                 let mut logical_frame_names = vec![];
 
@@ -36,8 +37,10 @@ fn smoke_test_cpp() {
                     logical_frame_names.push(demangled);
                 });
 
-                assert!(!logical_frame_names.is_empty(),
-                        "Should have resolved at least one symbol for the physical frame");
+                assert!(
+                    !logical_frame_names.is_empty(),
+                    "Should have resolved at least one symbol for the physical frame"
+                );
 
                 logical_frame_names
             })

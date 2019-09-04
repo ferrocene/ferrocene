@@ -96,7 +96,6 @@ fn main() {
         "backtrace_qsort",
         "backtrace_create_state",
         "backtrace_uncompress_zdebug",
-
         // These should be `static` in C, but they aren't...
         "macho_get_view",
         "macho_symbol_type_relevant",

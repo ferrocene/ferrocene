@@ -1,5 +1,3 @@
-extern crate gcc;
-
 fn main() {
     compile_cpp();
 }
@@ -7,7 +5,7 @@ fn main() {
 fn compile_cpp() {
     println!("cargo:rerun-if-changed=cpp/trampoline.cpp");
 
-    gcc::Config::new()
+    cc::Build::new()
         .cpp(true)
         .debug(true)
         .opt_level(0)

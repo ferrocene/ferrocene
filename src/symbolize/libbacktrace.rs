@@ -400,8 +400,22 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
                     Ok(&buf[..(len + 1) as usize])
                 }
             }
-
-
+        } else if #[cfg(target_os = "vxworks")] {
+            unsafe fn load_filename() -> *const libc::c_char {
+                use libc;
+                use core::mem;
+                
+                const N: usize = libc::VX_RTP_NAME_LENGTH + 1;
+                static mut BUF: [libc::c_char; N] = [0; N];
+                
+                let mut rtp_desc : libc::RTP_DESC = mem::zeroed();
+                if (libc::rtpInfoGet(0, &mut rtp_desc as *mut libc::RTP_DESC) == 0) {
+                    BUF.copy_from_slice(&rtp_desc.pathName);
+                    BUF.as_ptr()
+                } else {
+                    ptr::null()
+                }
+            }
         } else {
             unsafe fn load_filename() -> *const libc::c_char {
                 ptr::null()

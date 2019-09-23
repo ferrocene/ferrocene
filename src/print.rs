@@ -198,8 +198,8 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         // address here, which could be later mapped to correct function.
         #[cfg(all(feature = "std", target_env = "sgx"))]
         {
-            frame_ip =
-                usize::wrapping_sub(frame_ip, std::os::fortanix_sgx::mem::image_base() as _) as _;
+            let image_base = std::os::fortanix_sgx::mem::image_base();
+            frame_ip = usize::wrapping_sub(frame_ip as usize, image_base as _) as _;
         }
 
         // Print the index of the frame as well as the optional instruction

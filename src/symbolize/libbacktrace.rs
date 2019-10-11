@@ -405,7 +405,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
                 use libc;
                 use core::mem;
                 
-                const N: usize = libc::VX_RTP_NAME_LENGTH + 1;
+                const N: usize = libc::VX_RTP_NAME_LENGTH as usize + 1;
                 static mut BUF: [libc::c_char; N] = [0; N];
                 
                 let mut rtp_desc : libc::RTP_DESC = mem::zeroed();

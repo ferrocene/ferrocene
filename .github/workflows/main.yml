@@ -97,6 +97,7 @@ jobs:
         submodules: true
     - name: Install Rust
       run: rustup update stable --no-self-update && rustup default stable
+      shell: bash
     - run: rustup target add aarch64-pc-windows-msvc
     - run: cargo test --no-run --target aarch64-pc-windows-msvc
     - run: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-winapi

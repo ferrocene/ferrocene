@@ -1,4 +1,4 @@
-// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT
+﻿// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT
 // file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
 //
@@ -382,18 +382,42 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
             }
 
             unsafe fn query_full_name(buf: &mut [i8]) -> Result<&[i8], ()> {
-                let p1 = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId());
-                let mut len = buf.len() as u32;
-                let rc = QueryFullProcessImageNameA(p1, 0, buf.as_mut_ptr(), &mut len);
-                CloseHandle(p1);
-
+                let dll = GetModuleHandleA(b"kernel32.dll\0".as_ptr() as *const i8);
+                if dll.is_null() {
+                    return Err(())
+                }
+                let ptrQueryFullProcessImageNameA =
+                    GetProcAddress(dll, b"QueryFullProcessImageNameA\0".as_ptr() as *const _) as usize;
+                let mut len: u32;
+                if ptrQueryFullProcessImageNameA == 0
+                {
+                    len = GetModuleFileNameA(0 as HMODULE, buf.as_mut_ptr(), buf.len() as u32);
+                }
+                else
+                {
+                    use core::mem;
+                    let p1 = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId());
+                    len = buf.len() as u32;
+                    let pfnQueryFullProcessImageNameA : extern "system" fn(
+                        hProcess: HANDLE,
+                        dwFlags: DWORD,
+                        lpExeName: LPSTR,
+                        lpdwSize: PDWORD,
+                    ) -> BOOL = mem::transmute(ptrQueryFullProcessImageNameA);
+                    
+                    let rc = pfnQueryFullProcessImageNameA(p1, 0, buf.as_mut_ptr(), &mut len);
+                    CloseHandle(p1);
+                    if rc == 0 {
+                        return Err(())
+                    }
+                }
                 // We want to return a slice that is nul-terminated, so if
                 // everything was filled in and it equals the total length
                 // then equate that to failure.
                 //
                 // Otherwise when returning success make sure the nul byte is
                 // included in the slice.
-                if rc == 0 || len == buf.len() as u32 {
+                if len == buf.len() as u32 {
                     Err(())
                 } else {
                     assert_eq!(buf[len as usize], 0);

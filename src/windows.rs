@@ -1,4 +1,4 @@
-//! A module to define the FFI definitions we use on Windows for `dbghelp.dll`
+﻿//! A module to define the FFI definitions we use on Windows for `dbghelp.dll`
 //!
 //! This module uses a custom macro, `ffi!`, to wrap all definitions to
 //! automatically generate tests to assert that our definitions here are the
@@ -343,6 +343,7 @@ ffi! {
         pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
         pub fn LoadLibraryA(a: *const i8) -> HMODULE;
         pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
+        pub fn GetModuleHandleA(name: *const i8) -> HMODULE;
         pub fn OpenProcess(
             dwDesiredAccess: DWORD,
             bInheitHandle: BOOL,
@@ -350,12 +351,6 @@ ffi! {
         ) -> HANDLE;
         pub fn GetCurrentProcessId() -> DWORD;
         pub fn CloseHandle(h: HANDLE) -> BOOL;
-        pub fn QueryFullProcessImageNameA(
-            hProcess: HANDLE,
-            dwFlags: DWORD,
-            lpExeName: LPSTR,
-            lpdwSize: PDWORD,
-        ) -> BOOL;
         pub fn CreateFileA(
             lpFileName: LPCSTR,
             dwDesiredAccess: DWORD,

@@ -351,11 +351,6 @@ ffi! {
         ) -> HANDLE;
         pub fn GetCurrentProcessId() -> DWORD;
         pub fn CloseHandle(h: HANDLE) -> BOOL;
-        pub fn GetModuleFileNameA(
-            hModule: HMODULE,
-            lpFilename: LPSTR,
-            nSize: DWORD)
-            -> DWORD;
         pub fn CreateFileA(
             lpFileName: LPCSTR,
             dwDesiredAccess: DWORD,

@@ -388,36 +388,30 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
                 }
                 let ptrQueryFullProcessImageNameA =
                     GetProcAddress(dll, b"QueryFullProcessImageNameA\0".as_ptr() as *const _) as usize;
-                let mut len: u32;
                 if ptrQueryFullProcessImageNameA == 0
                 {
-                    len = GetModuleFileNameA(0 as HMODULE, buf.as_mut_ptr(), buf.len() as u32);
+                    return Err(());
                 }
-                else
-                {
-                    use core::mem;
-                    let p1 = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId());
-                    len = buf.len() as u32;
-                    let pfnQueryFullProcessImageNameA : extern "system" fn(
-                        hProcess: HANDLE,
-                        dwFlags: DWORD,
-                        lpExeName: LPSTR,
-                        lpdwSize: PDWORD,
-                    ) -> BOOL = mem::transmute(ptrQueryFullProcessImageNameA);
-                    
-                    let rc = pfnQueryFullProcessImageNameA(p1, 0, buf.as_mut_ptr(), &mut len);
-                    CloseHandle(p1);
-                    if rc == 0 {
-                        return Err(())
-                    }
-                }
+                use core::mem;
+                let p1 = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId());
+                let mut len = buf.len() as u32;
+                let pfnQueryFullProcessImageNameA : extern "system" fn(
+                    hProcess: HANDLE,
+                    dwFlags: DWORD,
+                    lpExeName: LPSTR,
+                    lpdwSize: PDWORD,
+                ) -> BOOL = mem::transmute(ptrQueryFullProcessImageNameA);
+                
+                let rc = pfnQueryFullProcessImageNameA(p1, 0, buf.as_mut_ptr(), &mut len);
+                CloseHandle(p1);
+
                 // We want to return a slice that is nul-terminated, so if
                 // everything was filled in and it equals the total length
                 // then equate that to failure.
                 //
                 // Otherwise when returning success make sure the nul byte is
                 // included in the slice.
-                if len == buf.len() as u32 {
+                if rc == 0 || len == buf.len() as u32 {
                     Err(())
                 } else {
                     assert_eq!(buf[len as usize], 0);

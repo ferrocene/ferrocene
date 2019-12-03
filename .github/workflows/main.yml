@@ -43,7 +43,7 @@ jobs:
             os: windows-latest
             rust: nightly-i686-gnu
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust (rustup)
@@ -92,7 +92,7 @@ jobs:
     name: Windows AArch64
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust
@@ -125,7 +125,7 @@ jobs:
         - target: x86_64-apple-ios
           sdk: iphonesimulator
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust (
@@ -160,7 +160,7 @@ jobs:
         - i686-linux-android
         - x86_64-linux-android
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust
@@ -173,7 +173,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust
@@ -187,7 +187,7 @@ jobs:
       matrix:
         target: [wasm32-unknown-unknown, wasm32-wasi, x86_64-fuchsia, x86_64-fortanix-unknown-sgx]
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust
@@ -199,7 +199,7 @@ jobs:
     name: MSRV
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Install Rust

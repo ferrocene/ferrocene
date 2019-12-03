@@ -65,7 +65,10 @@
 #![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
 #![no_std]
-#![cfg_attr(all(feature = "std", target_env = "sgx"), feature(sgx_platform))]
+#![cfg_attr(
+    all(feature = "std", target_env = "sgx", target_vendor = "fortanix"),
+    feature(sgx_platform)
+)]
 #![allow(bare_trait_objects)] // TODO: remove when updating to 2018 edition
 #![allow(rust_2018_idioms)] // TODO: remove when updating to 2018 edition
 

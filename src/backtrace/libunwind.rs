@@ -48,9 +48,7 @@ impl Frame {
             Frame::Raw(ctx) => ctx,
             Frame::Cloned { ip, .. } => return ip,
         };
-        unsafe {
-            uw::_Unwind_GetIP(ctx) as *mut c_void
-        }
+        unsafe { uw::_Unwind_GetIP(ctx) as *mut c_void }
     }
 
     pub fn symbol_address(&self) -> *mut c_void {
@@ -87,8 +85,10 @@ impl Clone for Frame {
 pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
     uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
 
-    extern fn trace_fn(ctx: *mut uw::_Unwind_Context,
-                       arg: *mut c_void) -> uw::_Unwind_Reason_Code {
+    extern "C" fn trace_fn(
+        ctx: *mut uw::_Unwind_Context,
+        arg: *mut c_void,
+    ) -> uw::_Unwind_Reason_Code {
         let cb = unsafe { &mut *(arg as *mut &mut FnMut(&super::Frame) -> bool) };
         let cx = super::Frame {
             inner: Frame::Raw(ctx),
@@ -136,36 +136,40 @@ mod uw {
     pub enum _Unwind_Context {}
 
     pub type _Unwind_Trace_Fn =
-            extern fn(ctx: *mut _Unwind_Context,
-                      arg: *mut c_void) -> _Unwind_Reason_Code;
+        extern "C" fn(ctx: *mut _Unwind_Context, arg: *mut c_void) -> _Unwind_Reason_Code;
 
-    extern {
+    extern "C" {
         // No native _Unwind_Backtrace on iOS
         #[cfg(not(all(target_os = "ios", target_arch = "arm")))]
-        pub fn _Unwind_Backtrace(trace: _Unwind_Trace_Fn,
-                                 trace_argument: *mut c_void)
-                    -> _Unwind_Reason_Code;
+        pub fn _Unwind_Backtrace(
+            trace: _Unwind_Trace_Fn,
+            trace_argument: *mut c_void,
+        ) -> _Unwind_Reason_Code;
 
         // available since GCC 4.2.0, should be fine for our purpose
-        #[cfg(all(not(all(target_os = "android", target_arch = "arm")),
-                  not(all(target_os = "freebsd", target_arch = "arm")),
-                  not(all(target_os = "linux", target_arch = "arm"))))]
-        pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context)
-                    -> libc::uintptr_t;
+        #[cfg(all(
+            not(all(target_os = "android", target_arch = "arm")),
+            not(all(target_os = "freebsd", target_arch = "arm")),
+            not(all(target_os = "linux", target_arch = "arm"))
+        ))]
+        pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
 
-        #[cfg(all(not(target_os = "android"),
-                  not(all(target_os = "freebsd", target_arch = "arm")),
-                  not(all(target_os = "linux", target_arch = "arm"))))]
-        pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void)
-            -> *mut c_void;
+        #[cfg(all(
+            not(target_os = "android"),
+            not(all(target_os = "freebsd", target_arch = "arm")),
+            not(all(target_os = "linux", target_arch = "arm"))
+        ))]
+        pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
     }
 
     // On android, the function _Unwind_GetIP is a macro, and this is the
     // expansion of the macro. This is all copy/pasted directly from the
     // header file with the definition of _Unwind_GetIP.
-    #[cfg(any(all(target_os = "android", target_arch = "arm"),
-              all(target_os = "freebsd", target_arch = "arm"),
-              all(target_os = "linux", target_arch = "arm")))]
+    #[cfg(any(
+        all(target_os = "android", target_arch = "arm"),
+        all(target_os = "freebsd", target_arch = "arm"),
+        all(target_os = "linux", target_arch = "arm")
+    ))]
     pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
         #[repr(C)]
         enum _Unwind_VRS_Result {
@@ -192,33 +196,36 @@ mod uw {
         }
 
         type _Unwind_Word = libc::c_uint;
-        extern {
-            fn _Unwind_VRS_Get(ctx: *mut _Unwind_Context,
-                               klass: _Unwind_VRS_RegClass,
-                               word: _Unwind_Word,
-                               repr: _Unwind_VRS_DataRepresentation,
-                               data: *mut c_void)
-                -> _Unwind_VRS_Result;
+        extern "C" {
+            fn _Unwind_VRS_Get(
+                ctx: *mut _Unwind_Context,
+                klass: _Unwind_VRS_RegClass,
+                word: _Unwind_Word,
+                repr: _Unwind_VRS_DataRepresentation,
+                data: *mut c_void,
+            ) -> _Unwind_VRS_Result;
         }
 
         let mut val: _Unwind_Word = 0;
         let ptr = &mut val as *mut _Unwind_Word;
-        let _ = _Unwind_VRS_Get(ctx, _Unwind_VRS_RegClass::_UVRSC_CORE, 15,
-                                _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                                ptr as *mut c_void);
+        let _ = _Unwind_VRS_Get(
+            ctx,
+            _Unwind_VRS_RegClass::_UVRSC_CORE,
+            15,
+            _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
+            ptr as *mut c_void,
+        );
         (val & !1) as libc::uintptr_t
     }
 
     // This function also doesn't exist on Android or ARM/Linux, so make it
     // a no-op
-    #[cfg(any(target_os = "android",
-              all(target_os = "freebsd", target_arch = "arm"),
-              all(target_os = "linux", target_arch = "arm")))]
-    pub unsafe fn _Unwind_FindEnclosingFunction(pc: *mut c_void)
-        -> *mut c_void
-    {
+    #[cfg(any(
+        target_os = "android",
+        all(target_os = "freebsd", target_arch = "arm"),
+        all(target_os = "linux", target_arch = "arm")
+    ))]
+    pub unsafe fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void {
         pc
     }
 }
-
-

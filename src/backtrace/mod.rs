@@ -121,7 +121,10 @@ cfg_if::cfg_if! {
                 not(all(target_os = "ios", target_arch = "arm")),
                 feature = "libunwind",
             ),
-            target_env = "sgx",
+            all(
+                target_env = "sgx",
+                target_vendor = "fortanix",
+            ),
         )
     )] {
         mod libunwind;

@@ -1,4 +1,4 @@
-﻿// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT
+// Copyright 2014-2015 The Rust Project Developers. See the COPYRIGHT
 // file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
 //
@@ -38,8 +38,8 @@ extern crate backtrace_sys as bt;
 use core::{ptr, slice};
 use libc::{self, c_char, c_int, c_void, uintptr_t};
 
-use crate::symbolize::{ResolveWhat, SymbolName};
 use crate::symbolize::dladdr;
+use crate::symbolize::{ResolveWhat, SymbolName};
 use crate::types::BytesOrWideString;
 
 pub enum Symbol<'a> {
@@ -59,22 +59,22 @@ pub enum Symbol<'a> {
 
 impl Symbol<'_> {
     pub fn name(&self) -> Option<SymbolName> {
-        let symbol = |ptr: *const c_char| {
-            unsafe {
-                if ptr.is_null() {
-                    None
-                } else {
-                    let len = libc::strlen(ptr);
-                    Some(SymbolName::new(slice::from_raw_parts(
-                        ptr as *const u8,
-                        len,
-                    )))
-                }
+        let symbol = |ptr: *const c_char| unsafe {
+            if ptr.is_null() {
+                None
+            } else {
+                let len = libc::strlen(ptr);
+                Some(SymbolName::new(slice::from_raw_parts(
+                    ptr as *const u8,
+                    len,
+                )))
             }
         };
         match *self {
             Symbol::Syminfo { symname, .. } => symbol(symname),
-            Symbol::Pcinfo { function, symname, .. } => {
+            Symbol::Pcinfo {
+                function, symname, ..
+            } => {
                 // If possible prefer the `function` name which comes from
                 // debuginfo and can typically be more accurate for inline
                 // frames for example. If that's not present though fall back to
@@ -85,7 +85,7 @@ impl Symbol<'_> {
                 // isntead of `std::panicking::try::do_call`. It's not really
                 // clear why, but overall the `function` name seems more accurate.
                 if let Some(sym) = symbol(function) {
-                    return Some(sym)
+                    return Some(sym);
                 }
                 symbol(symname)
             }
@@ -401,7 +401,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
                     lpExeName: LPSTR,
                     lpdwSize: PDWORD,
                 ) -> BOOL = mem::transmute(ptrQueryFullProcessImageNameA);
-                
+
                 let rc = pfnQueryFullProcessImageNameA(p1, 0, buf.as_mut_ptr(), &mut len);
                 CloseHandle(p1);
 
@@ -422,10 +422,10 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
             unsafe fn load_filename() -> *const libc::c_char {
                 use libc;
                 use core::mem;
-                
+
                 const N: usize = libc::VX_RTP_NAME_LENGTH as usize + 1;
                 static mut BUF: [libc::c_char; N] = [0; N];
-                
+
                 let mut rtp_desc : libc::RTP_DESC = mem::zeroed();
                 if (libc::rtpInfoGet(0, &mut rtp_desc as *mut libc::RTP_DESC) == 0) {
                     BUF.copy_from_slice(&rtp_desc.pathName);

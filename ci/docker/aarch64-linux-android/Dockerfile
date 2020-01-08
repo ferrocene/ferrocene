@@ -15,4 +15,4 @@ ENV PATH=$PATH:/android-toolchain/bin
 
 # TODO: run tests in an emulator eventually
 ENV CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=aarch64-linux-android-gcc \
-    CARGO_TARGET_AARCH64_LINUX_ANDROID_RUNNER="true"
+    CARGO_TARGET_AARCH64_LINUX_ANDROID_RUNNER=echo

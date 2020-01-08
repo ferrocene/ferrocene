@@ -15,4 +15,4 @@ ENV PATH=$PATH:/android-toolchain/bin
 
 # TODO: run tests in an emulator eventually
 ENV CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=arm-linux-androideabi-gcc \
-    CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_RUNNER="true"
+    CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_RUNNER=echo

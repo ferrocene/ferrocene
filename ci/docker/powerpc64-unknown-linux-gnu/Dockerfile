@@ -12,5 +12,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_LINKER=powerpc64-linux-gnu-gcc \
     # TODO: should actually run these tests
     #CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_RUNNER="qemu-ppc64 -L /usr/powerpc64-linux-gnu" \
-    CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_RUNNER=true \
+    CARGO_TARGET_POWERPC64_UNKNOWN_LINUX_GNU_RUNNER=echo \
     CC=powerpc64-linux-gnu-gcc

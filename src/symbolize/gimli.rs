@@ -11,7 +11,6 @@ use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
 use addr2line::gimli;
-use core::convert::TryFrom;
 use core::mem;
 use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
@@ -83,9 +82,10 @@ fn mmap(path: &Path) -> Option<Mmap> {
 
 cfg_if::cfg_if! {
     if #[cfg(windows)] {
-        use std::cmp;
         use goblin::pe::{self, PE};
         use goblin::strtab::Strtab;
+        use std::cmp;
+        use std::convert::TryFrom;
 
         struct Object<'a> {
             pe: PE<'a>,
@@ -542,14 +542,11 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
             None => return,
         };
         if let Ok(mut frames) = cx.dwarf.find_frames(addr.0 as u64) {
-            while let Ok(Some(mut frame)) = frames.next() {
-                let function = frame.function.take();
-                let name = function.as_ref().and_then(|f| f.raw_name().ok());
-                let name = name.as_ref().map(|n| n.as_bytes());
+            while let Ok(Some(frame)) = frames.next() {
                 cb.call(Symbol::Frame {
                     addr: addr.0 as *mut c_void,
-                    frame,
-                    name,
+                    location: frame.location,
+                    name: frame.function.map(|f| f.name.slice()),
                 });
             }
         }
@@ -605,7 +602,7 @@ pub enum Symbol<'a> {
     /// `addr2line`'s frame internally has all the nitty gritty details.
     Frame {
         addr: *mut c_void,
-        frame: addr2line::Frame<EndianSlice<'a, Endian>>,
+        location: Option<addr2line::Location<'a>>,
         name: Option<&'a [u8]>,
     },
     /// Couldn't find debug information, but we found it in the symbol table of
@@ -639,9 +636,8 @@ impl Symbol<'_> {
     pub fn filename_raw(&self) -> Option<BytesOrWideString> {
         match self {
             Symbol::Dladdr(s) => return s.filename_raw(),
-            Symbol::Frame { frame, .. } => {
-                let location = frame.location.as_ref()?;
-                let file = location.file.as_ref()?;
+            Symbol::Frame { location, .. } => {
+                let file = location.as_ref()?.file?;
                 Some(BytesOrWideString::Bytes(file.as_bytes()))
             }
             Symbol::Symtab { .. } => None,
@@ -651,9 +647,8 @@ impl Symbol<'_> {
     pub fn filename(&self) -> Option<&Path> {
         match self {
             Symbol::Dladdr(s) => return s.filename(),
-            Symbol::Frame { frame, .. } => {
-                let location = frame.location.as_ref()?;
-                let file = location.file.as_ref()?;
+            Symbol::Frame { location, .. } => {
+                let file = location.as_ref()?.file?;
                 Some(Path::new(file))
             }
             Symbol::Symtab { .. } => None,
@@ -663,10 +658,7 @@ impl Symbol<'_> {
     pub fn lineno(&self) -> Option<u32> {
         match self {
             Symbol::Dladdr(s) => return s.lineno(),
-            Symbol::Frame { frame, .. } => {
-                let location = frame.location.as_ref()?;
-                location.line.and_then(|l| u32::try_from(l).ok())
-            }
+            Symbol::Frame { location, .. } => location.as_ref()?.line,
             Symbol::Symtab { .. } => None,
         }
     }

@@ -98,6 +98,9 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
     // the `RtlLookupFunctionEntry` function in kernel32 which will account for
     // JIT compiler frames as well. These should be equivalent, but using
     // `Rtl*` allows us to backtrace through JIT frames.
+    //
+    // Note that `RtlLookupFunctionEntry` only works for in-process backtraces,
+    // but that's all we support anyway, so it all lines up well.
     cfg_if::cfg_if! {
         if #[cfg(target_pointer_width = "64")] {
             use core::ptr;

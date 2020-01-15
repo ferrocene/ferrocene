@@ -93,6 +93,31 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
         Err(()) => return, // oh well...
     };
 
+    // On x86_64 and ARM64 we opt to not use the default `Sym*` functions from
+    // dbghelp for getting the function table and module base. Instead we use
+    // the `RtlLookupFunctionEntry` function in kernel32 which will account for
+    // JIT compiler frames as well. These should be equivalent, but using
+    // `Rtl*` allows us to backtrace through JIT frames.
+    cfg_if::cfg_if! {
+        if #[cfg(target_pointer_width = "64")] {
+            use core::ptr;
+
+            unsafe extern "system" fn function_table_access(_process: HANDLE, addr: DWORD64) -> PVOID {
+                let mut base = 0;
+                RtlLookupFunctionEntry(addr, &mut base, ptr::null_mut()).cast()
+            }
+
+            unsafe extern "system" fn get_module_base(_process: HANDLE, addr: DWORD64) -> DWORD64 {
+                let mut base = 0;
+                RtlLookupFunctionEntry(addr, &mut base, ptr::null_mut());
+                base
+            }
+        } else {
+            let function_table_access = dbghelp.SymFunctionTableAccess64();
+            let get_module_base = dbghelp.SymGetModuleBase64();
+        }
+    }
+
     // Attempt to use `StackWalkEx` if we can, but fall back to `StackWalk64`
     // since it's in theory supported on more systems.
     match (*dbghelp.dbghelp()).StackWalkEx() {
@@ -113,8 +138,8 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
                 frame_ptr,
                 &mut context.0 as *mut CONTEXT as *mut _,
                 None,
-                Some(dbghelp.SymFunctionTableAccess64()),
-                Some(dbghelp.SymGetModuleBase64()),
+                Some(function_table_access),
+                Some(get_module_base),
                 None,
                 0,
             ) == TRUE
@@ -141,8 +166,8 @@ pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
                 frame_ptr,
                 &mut context.0 as *mut CONTEXT as *mut _,
                 None,
-                Some(dbghelp.SymFunctionTableAccess64()),
-                Some(dbghelp.SymGetModuleBase64()),
+                Some(function_table_access),
+                Some(get_module_base),
                 None,
             ) == TRUE
             {

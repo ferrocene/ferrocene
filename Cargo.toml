@@ -19,7 +19,7 @@ members = ['crates/cpp_smoke_test']
 exclude = ['crates/without_debuginfo']
 
 [dependencies]
-cfg-if = "0.1.6"
+cfg-if = "0.1.10"
 rustc-demangle = "0.1.4"
 backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.32", optional = true }
 libc = { version = "0.2.45", default-features = false }

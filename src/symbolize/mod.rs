@@ -489,7 +489,8 @@ cfg_if::cfg_if! {
     } else if #[cfg(all(feature = "libbacktrace",
                         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
                         not(target_os = "fuchsia"),
-                        not(target_os = "emscripten")))] {
+                        not(target_os = "emscripten"),
+                        not(target_env = "uclibc")))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
@@ -497,6 +498,7 @@ cfg_if::cfg_if! {
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
                         not(target_os = "fuchsia"),
+                        not(target_env = "uclibc"),
                         feature = "dladdr"))] {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;

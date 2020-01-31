@@ -12,7 +12,8 @@ fn main() {
         target.contains("cloudabi") ||
         target.contains("hermit") ||
         target.contains("wasm32") ||
-        target.contains("fuchsia")
+        target.contains("fuchsia") ||
+        target.contains("uclibc")   // not supported for uclibc
     // fuchsia uses external out-of-process symbolization
     {
         println!("cargo:rustc-cfg=empty");

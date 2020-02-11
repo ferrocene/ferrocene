@@ -57,7 +57,6 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
     /// sumbolicated later, and otherwise this should just be the first method
     /// you call after creating a `BacktraceFmt`.
     pub fn add_context(&mut self) -> fmt::Result {
-        self.fmt.write_str("stack backtrace:\n")?;
         #[cfg(target_os = "fuchsia")]
         fuchsia::print_dso_context(self.fmt)?;
         Ok(())

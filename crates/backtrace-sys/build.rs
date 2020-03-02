@@ -7,7 +7,8 @@ use std::path::PathBuf;
 fn main() {
     let target = env::var("TARGET").unwrap();
 
-    if target.contains("msvc") || // libbacktrace isn't used on MSVC windows
+    if !cfg!(feature = "backtrace-sys") || // without this feature, this crate does nothing
+        target.contains("msvc") || // libbacktrace isn't used on MSVC windows
         target.contains("emscripten") || // no way this will ever compile for emscripten
         target.contains("cloudabi") ||
         target.contains("hermit") ||

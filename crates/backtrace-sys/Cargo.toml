@@ -20,4 +20,8 @@ compiler_builtins = { version = '0.1.2', optional = true }
 cc = "1.0.37"
 
 [features]
+default = ["backtrace-sys"]
+
+# Without this feature, this crate does nothing.
+backtrace-sys = []
 rustc-dep-of-std = ['core', 'compiler_builtins']

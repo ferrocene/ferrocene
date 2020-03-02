@@ -21,7 +21,7 @@ exclude = ['crates/without_debuginfo']
 [dependencies]
 cfg-if = "0.1.10"
 rustc-demangle = "0.1.4"
-backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.32", optional = true }
+backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.32", optional = true, default_features = false }
 libc = { version = "0.2.45", default-features = false }
 core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core' }
 compiler_builtins = { version = '0.1.2', optional = true }
@@ -94,7 +94,7 @@ kernel32 = []
 #   the moment, this is only possible when targetting Linux, since macOS
 #   splits DWARF out into a separate object file. Enabling this feature
 #   means one less C dependency.
-libbacktrace = ["backtrace-sys"]
+libbacktrace = ["backtrace-sys/backtrace-sys"]
 dladdr = []
 coresymbolication = []
 gimli-symbolize = ["addr2line", "findshlibs", "memmap", "goblin"]

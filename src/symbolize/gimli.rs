@@ -158,6 +158,7 @@ cfg_if::cfg_if! {
         struct Object<'a> {
             macho: MachO<'a>,
             dwarf: Option<usize>,
+            syms: Vec<(&'a str, u64)>,
         }
 
         impl<'a> Object<'a> {
@@ -171,7 +172,16 @@ cfg_if::cfg_if! {
                     .enumerate()
                     .find(|(_, segment)| segment.name().ok() == Some("__DWARF"))
                     .map(|p| p.0);
-                Some(Object { macho, dwarf })
+                let mut syms = Vec::new();
+                if let Some(s) = &macho.symbols {
+                    syms = s.iter()
+                        .filter_map(|e| e.ok())
+                        .filter(|(name, nlist)| name.len() > 0 && !nlist.is_undefined())
+                        .map(|(name, nlist)| (name, nlist.n_value))
+                        .collect();
+                }
+                syms.sort_unstable_by_key(|(_, addr)| *addr);
+                Some(Object { macho, dwarf, syms })
             }
 
             fn section(&self, name: &str) -> Option<&'a [u8]> {
@@ -194,12 +204,13 @@ cfg_if::cfg_if! {
                     .map(|p| p.1)
             }
 
-            fn search_symtab<'b>(&'b self, _addr: u64) -> Option<&'b [u8]> {
-                // So far it seems that we don't need to implement this. Maybe
-                // `dladdr` on OSX has us covered? Maybe there's not much in the
-                // symbol table? In any case our relevant tests are passing
-                // without this being implemented, so let's skip it for now.
-                None
+            fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
+                let i = match self.syms.binary_search_by_key(&addr, |(_, addr)| *addr) {
+                    Ok(i) => i,
+                    Err(i) => i.checked_sub(1)?,
+                };
+                let (sym, _addr) = self.syms.get(i)?;
+                Some(sym.as_bytes())
             }
         }
     } else {

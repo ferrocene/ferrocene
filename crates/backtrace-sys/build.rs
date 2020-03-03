@@ -31,9 +31,16 @@ fn main() {
         .file("src/libbacktrace/dwarf.c")
         .file("src/libbacktrace/fileline.c")
         .file("src/libbacktrace/posix.c")
-        .file("src/libbacktrace/read.c")
         .file("src/libbacktrace/sort.c")
         .file("src/libbacktrace/state.c");
+
+    // `mmap` does not exist on Windows, so we use
+    // the less efficient `read`-based code.
+    if target.contains("windows") {
+        build.file("src/libbacktrace/read.c");
+    } else {
+        build.file("src/libbacktrace/mmapio.c");
+    }
 
     // No need to have any symbols reexported form shared objects
     build.flag("-fvisibility=hidden");

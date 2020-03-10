@@ -16,7 +16,7 @@ edition = "2018"
 
 [workspace]
 members = ['crates/cpp_smoke_test']
-exclude = ['crates/without_debuginfo']
+exclude = ['crates/without_debuginfo', 'crates/macos_frames_test']
 
 [dependencies]
 cfg-if = "0.1.10"

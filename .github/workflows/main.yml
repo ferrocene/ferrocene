@@ -78,6 +78,7 @@ jobs:
     - run: cargo test --no-default-features --features "dbghelp std"
     - run: cargo test --no-default-features --features "dbghelp std verify-winapi"
     - run: cargo test --manifest-path crates/cpp_smoke_test/Cargo.toml
+    - run: cargo test --manifest-path crates/macos_frames_test/Cargo.toml
     - run: cargo test --features libbacktrace --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --features "libbacktrace coresymbolication" --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --features "libbacktrace gimli-symbolize" --manifest-path crates/without_debuginfo/Cargo.toml

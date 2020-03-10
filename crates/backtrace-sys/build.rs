@@ -36,7 +36,9 @@ fn main() {
 
     // `mmap` does not exist on Windows, so we use
     // the less efficient `read`-based code.
-    if target.contains("windows") {
+    // Using `mmap` on macOS causes weird isseus - see
+    // https://github.com/rust-lang/rust/pull/45866
+    if target.contains("windows") || target.contains("darwin") {
         build.file("src/libbacktrace/read.c");
     } else {
         build.file("src/libbacktrace/mmapio.c");

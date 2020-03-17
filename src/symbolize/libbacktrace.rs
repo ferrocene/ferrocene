@@ -111,6 +111,9 @@ impl Symbol<'_> {
             Symbol::Syminfo { .. } => None,
             Symbol::Pcinfo { filename, .. } => {
                 let ptr = filename as *const u8;
+                if ptr.is_null() {
+                    return None;
+                }
                 unsafe {
                     let len = libc::strlen(filename);
                     Some(slice::from_raw_parts(ptr, len))
@@ -220,9 +223,6 @@ extern "C" fn pcinfo_cb(
     lineno: c_int,
     function: *const c_char,
 ) -> c_int {
-    if filename.is_null() || function.is_null() {
-        return -1;
-    }
     let mut bomb = crate::Bomb { enabled: true };
 
     unsafe {

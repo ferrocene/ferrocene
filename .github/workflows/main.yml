@@ -82,7 +82,8 @@ jobs:
     - run: cargo test --features libbacktrace --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --features "libbacktrace coresymbolication" --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --features "libbacktrace gimli-symbolize" --manifest-path crates/without_debuginfo/Cargo.toml
-    - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml
+    - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features libbacktrace
+    - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features gimli-symbolize
 
   windows_arm64:
     name: Windows AArch64

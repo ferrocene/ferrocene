@@ -26,7 +26,7 @@ mod tests {
             for symbol in frame.symbols() {
                 if let Some(name) = symbol.name() {
                     if name.as_bytes() == expected_name.as_bytes() {
-                        assert_eq!(symbol.filename(), Some(expected_file));
+                        assert!(symbol.filename().unwrap().ends_with(expected_file));
                         assert_eq!(symbol.lineno(), Some(expected_line));
                         return;
                     }

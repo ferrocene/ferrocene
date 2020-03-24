@@ -110,12 +110,6 @@ jobs:
         include:
         - target: aarch64-apple-ios
           sdk: iphoneos
-        - target: armv7-apple-ios
-          sdk: iphoneos
-        - target: armv7s-apple-ios
-          sdk: iphoneos
-        - target: i386-apple-ios
-          sdk: iphonesimulator
         - target: x86_64-apple-ios
           sdk: iphonesimulator
     steps:

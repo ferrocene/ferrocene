@@ -32,16 +32,16 @@ jobs:
           # on stable yet
           - thing: windows-msvc64
             os: windows-latest
-            rust: nightly-x86_64-msvc
+            rust: stable-x86_64-msvc
           - thing: windows-msvc32
             os: windows-latest
-            rust: nightly-i686-msvc
+            rust: stable-i686-msvc
           - thing: windows-gnu64
             os: windows-latest
-            rust: nightly-x86_64-gnu
+            rust: stable-x86_64-gnu
           - thing: windows-gnu32
             os: windows-latest
-            rust: nightly-i686-gnu
+            rust: stable-i686-gnu
     steps:
     - uses: actions/checkout@v1
       with:

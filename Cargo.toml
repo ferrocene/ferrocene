@@ -21,7 +21,7 @@ exclude = ['crates/without_debuginfo', 'crates/macos_frames_test', 'crates/line-
 [dependencies]
 cfg-if = "0.1.10"
 rustc-demangle = "0.1.4"
-backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.33", optional = true, default_features = false }
+backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.35", optional = true, default_features = false }
 libc = { version = "0.2.45", default-features = false }
 core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core' }
 compiler_builtins = { version = '0.1.2', optional = true }

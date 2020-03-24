@@ -106,9 +106,6 @@ jobs:
       matrix:
         target:
         - aarch64-apple-ios
-        - armv7-apple-ios
-        - armv7s-apple-ios
-        - i386-apple-ios
         - x86_64-apple-ios
         include:
         - target: aarch64-apple-ios

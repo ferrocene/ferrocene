@@ -49,6 +49,7 @@ fn main() {
 
     if target.contains("darwin") {
         build.file("src/libbacktrace/macho.c");
+        build.define("HAVE_MACH_O_DYLD_H", "1");
     } else if target.contains("windows") {
         build.file("src/libbacktrace/pecoff.c");
     } else {

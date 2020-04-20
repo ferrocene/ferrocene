@@ -91,9 +91,11 @@ fn main() {
 
     // When we're built as part of the Rust compiler, this is used to enable
     // debug information in libbacktrace itself.
-    let any_debug = env::var("RUSTC_DEBUGINFO").unwrap_or_default() == "true"
-        || env::var("RUSTC_DEBUGINFO_LINES").unwrap_or_default() == "true";
-    build.debug(any_debug);
+    if cfg!(feature = "rustc-dep-of-std") {
+        let any_debug = env::var("RUSTC_DEBUGINFO").unwrap_or_default() == "true"
+            || env::var("RUSTC_DEBUGINFO_LINES").unwrap_or_default() == "true";
+        build.debug(any_debug);
+    }
 
     let syms = [
         "backtrace_full",

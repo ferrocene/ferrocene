@@ -25,14 +25,15 @@ cfg_if::cfg_if! {
             pub use winapi::shared::basetsd::*;
             pub use winapi::shared::minwindef::*;
             pub use winapi::um::dbghelp::*;
+            pub use winapi::um::fileapi::*;
             pub use winapi::um::handleapi::*;
             pub use winapi::um::libloaderapi::*;
+            pub use winapi::um::memoryapi::*;
+            pub use winapi::um::minwinbase::*;
             pub use winapi::um::processthreadsapi::*;
+            pub use winapi::um::synchapi::*;
             pub use winapi::um::winbase::*;
             pub use winapi::um::winnt::*;
-            pub use winapi::um::fileapi::*;
-            pub use winapi::um::minwinbase::*;
-            pub use winapi::um::synchapi::*;
         }
     } else {
         pub use core::ffi::c_void;
@@ -324,6 +325,8 @@ ffi! {
     pub const OPEN_EXISTING: DWORD = 0x3;
     pub const GENERIC_READ: DWORD = 0x80000000;
     pub const INFINITE: DWORD = !0;
+    pub const PAGE_READONLY: DWORD = 2;
+    pub const FILE_MAP_READ: DWORD = 4;
 
     pub type DWORD = u32;
     pub type PDWORD = *mut u32;
@@ -344,6 +347,9 @@ ffi! {
     pub type LPDWORD = *mut DWORD;
     pub type DWORDLONG = u64;
     pub type HMODULE = HINSTANCE;
+    pub type SIZE_T = usize;
+    pub type LPVOID = *mut c_void;
+    pub type LPCVOID = *const c_void;
 
     extern "system" {
         pub fn GetCurrentProcess() -> HANDLE;
@@ -379,6 +385,22 @@ ffi! {
             dwMilliseconds: DWORD,
             bAlertable: BOOL,
         ) -> DWORD;
+        pub fn CreateFileMappingA(
+            hFile: HANDLE,
+            lpFileMappingAttributes: LPSECURITY_ATTRIBUTES,
+            flProtect: DWORD,
+            dwMaximumSizeHigh: DWORD,
+            dwMaximumSizeLow: DWORD,
+            lpName: LPCSTR,
+        ) -> HANDLE;
+        pub fn MapViewOfFile(
+            hFileMappingObject: HANDLE,
+            dwDesiredAccess: DWORD,
+            dwFileOffsetHigh: DWORD,
+            dwFileOffsetLow: DWORD,
+            dwNumberOfBytesToMap: SIZE_T,
+        ) -> LPVOID;
+        pub fn UnmapViewOfFile(lpBaseAddress: LPCVOID) -> BOOL;
     }
 }
 

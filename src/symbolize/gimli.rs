@@ -6,6 +6,7 @@
 
 use self::gimli::read::EndianSlice;
 use self::gimli::LittleEndian as Endian;
+use self::mmap::Mmap;
 use crate::symbolize::dladdr;
 use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
@@ -15,12 +16,19 @@ use core::mem;
 use core::u32;
 use findshlibs::{self, Segment, SharedLibrary};
 use libc::c_void;
-use memmap::Mmap;
+use std::convert::TryInto;
 use std::env;
 use std::ffi::OsString;
 use std::fs::File;
 use std::path::Path;
 use std::prelude::v1::*;
+
+#[cfg(windows)]
+#[path = "gimli/mmap_windows.rs"]
+mod mmap;
+#[cfg(unix)]
+#[path = "gimli/mmap_unix.rs"]
+mod mmap;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -76,8 +84,8 @@ macro_rules! mk {
 
 fn mmap(path: &Path) -> Option<Mmap> {
     let file = File::open(path).ok()?;
-    // TODO: not completely safe, see https://github.com/danburkert/memmap-rs/issues/25
-    unsafe { Mmap::map(&file).ok() }
+    let len = file.metadata().ok()?.len().try_into().ok()?;
+    unsafe { Mmap::map(&file, len) }
 }
 
 cfg_if::cfg_if! {

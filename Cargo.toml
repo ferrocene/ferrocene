@@ -35,7 +35,6 @@ cpp_demangle = { default-features = false, version = "0.2.3", optional = true }
 
 # Optional dependencies enabled through the `gimli-symbolize` feature
 addr2line = { version = "0.11.0", optional = true, default-features = false, features = ['std'] }
-findshlibs = { version = "0.5.0", optional = true }
 goblin = { version = "0.2", optional = true, default-features = false, features = ['elf32', 'elf64', 'mach32', 'mach64', 'pe32', 'pe64', 'std'] }
 
 [target.'cfg(windows)'.dependencies]
@@ -96,7 +95,7 @@ kernel32 = []
 libbacktrace = ["backtrace-sys/backtrace-sys"]
 dladdr = []
 coresymbolication = []
-gimli-symbolize = ["addr2line", "findshlibs", "goblin"]
+gimli-symbolize = ["addr2line", "goblin"]
 
 #=======================================
 # Methods of serialization

@@ -14,7 +14,6 @@ use crate::SymbolName;
 use addr2line::gimli;
 use core::mem;
 use core::u32;
-use findshlibs::{self, Segment, SharedLibrary};
 use libc::c_void;
 use std::convert::TryInto;
 use std::env;
@@ -160,8 +159,14 @@ cfg_if::cfg_if! {
                 Some(self.symbols[i].1.name(&self.strtab).ok()?.as_bytes())
             }
         }
+
+        fn native_libraries() -> Vec<Library> {
+            Vec::new()
+        }
     } else if #[cfg(target_os = "macos")] {
         use goblin::mach::MachO;
+        use std::os::unix::prelude::*;
+        use std::ffi::{OsStr, CStr};
 
         struct Object<'a> {
             macho: MachO<'a>,
@@ -221,8 +226,78 @@ cfg_if::cfg_if! {
                 Some(sym.as_bytes())
             }
         }
+
+        #[allow(deprecated)]
+        fn native_libraries() -> Vec<Library> {
+            let mut ret = Vec::new();
+            unsafe {
+                for i in 0..libc::_dyld_image_count() {
+                    ret.extend(native_library(i));
+                }
+            }
+            return ret;
+        }
+
+        #[allow(deprecated)]
+        unsafe fn native_library(i: u32) -> Option<Library> {
+            let name = libc::_dyld_get_image_name(i);
+            if name.is_null() {
+                return None;
+            }
+            let name = CStr::from_ptr(name);
+            let header = libc::_dyld_get_image_header(i);
+            if header.is_null() {
+                return None;
+            }
+            let mut segments = Vec::new();
+            match (*header).magic {
+                libc::MH_MAGIC => {
+                    let mut next_cmd = header.offset(1) as *const libc::load_command;
+                    for _ in 0..(*header).ncmds {
+                        segments.extend(segment(next_cmd));
+                        next_cmd = (next_cmd as usize + (*next_cmd).cmdsize as usize) as *const _;
+                    }
+                }
+                libc::MH_MAGIC_64 => {
+                    let header = header as *const libc::mach_header_64;
+                    let mut next_cmd = header.offset(1) as *const libc::load_command;
+                    for _ in 0..(*header).ncmds {
+                        segments.extend(segment(next_cmd));
+                        next_cmd = (next_cmd as usize + (*next_cmd).cmdsize as usize) as *const _;
+                    }
+                }
+                _ => return None,
+            }
+            Some(Library {
+                name: OsStr::from_bytes(name.to_bytes()).to_owned(),
+                segments,
+                bias: libc::_dyld_get_image_vmaddr_slide(i) as *const u8,
+            })
+        }
+
+        unsafe fn segment(cmd: *const libc::load_command) -> Option<LibrarySegment> {
+            Some(match (*cmd).cmd {
+                libc::LC_SEGMENT => {
+                    let cmd = cmd as *const libc::segment_command;
+                    LibrarySegment {
+                        len: (*cmd).vmsize as usize,
+                        stated_virtual_memory_address: (*cmd).vmaddr as *const u8,
+                    }
+                }
+                libc::LC_SEGMENT_64 => {
+                    let cmd = cmd as *const libc::segment_command_64;
+                    LibrarySegment {
+                        len: (*cmd).vmsize as usize,
+                        stated_virtual_memory_address: (*cmd).vmaddr as *const u8,
+                    }
+                }
+                _ => return None,
+            })
+        }
     } else {
         use goblin::elf::Elf;
+        use std::os::unix::prelude::*;
+        use std::ffi::{OsStr, CStr};
 
         struct Object<'a> {
             elf: Elf<'a>,
@@ -299,6 +374,45 @@ cfg_if::cfg_if! {
                     None
                 }
             }
+        }
+
+        fn native_libraries() -> Vec<Library> {
+            let mut ret = Vec::new();
+            unsafe {
+                libc::dl_iterate_phdr(Some(callback), &mut ret as *mut _ as *mut _);
+            }
+            return ret;
+        }
+
+        unsafe extern "C" fn callback(
+            info: *mut libc::dl_phdr_info,
+            _size: libc::size_t,
+            vec: *mut libc::c_void,
+        ) -> libc::c_int {
+            let libs = &mut *(vec as *mut Vec<Library>);
+            let name = if (*info).dlpi_name.is_null() || *(*info).dlpi_name == 0{
+                if libs.is_empty() {
+                    std::env::current_exe().map(|e| e.into()).unwrap_or_default()
+                } else {
+                    OsString::new()
+                }
+            } else {
+                let bytes = CStr::from_ptr((*info).dlpi_name).to_bytes();
+                OsStr::from_bytes(bytes).to_owned()
+            };
+            let headers = std::slice::from_raw_parts((*info).dlpi_phdr, (*info).dlpi_phnum as usize);
+            libs.push(Library {
+                name,
+                segments: headers
+                    .iter()
+                    .map(|header| LibrarySegment {
+                        len: (*header).p_memsz as usize,
+                        stated_virtual_memory_address: (*header).p_vaddr as *const u8,
+                    })
+                    .collect(),
+                bias: (*info).dlpi_addr as *const u8,
+            });
+            0
         }
     }
 }
@@ -402,12 +516,12 @@ struct Cache {
 struct Library {
     name: OsString,
     segments: Vec<LibrarySegment>,
-    bias: findshlibs::Bias,
+    bias: *const u8,
 }
 
 struct LibrarySegment {
     len: usize,
-    stated_virtual_memory_address: findshlibs::Svma,
+    stated_virtual_memory_address: *const u8,
 }
 
 // unsafe because this is required to be externally synchronized
@@ -417,29 +531,9 @@ pub unsafe fn clear_symbol_cache() {
 
 impl Cache {
     fn new() -> Cache {
-        let mut libraries = Vec::new();
-        // Iterate over all loaded shared libraries and cache information we
-        // learn about them. This way we only load information here once instead
-        // of once per symbol.
-        findshlibs::TargetSharedLibrary::each(|so| {
-            use findshlibs::IterationControl::*;
-            libraries.push(Library {
-                name: so.name().to_owned(),
-                segments: so
-                    .segments()
-                    .map(|s| LibrarySegment {
-                        len: s.len(),
-                        stated_virtual_memory_address: s.stated_virtual_memory_address(),
-                    })
-                    .collect(),
-                bias: so.virtual_memory_bias(),
-            });
-            Continue
-        });
-
         Cache {
             mappings: Vec::with_capacity(MAPPINGS_CACHE_SIZE),
-            libraries,
+            libraries: native_libraries(),
         }
     }
 
@@ -460,14 +554,14 @@ impl Cache {
         f(MAPPINGS_CACHE.get_or_insert_with(|| Cache::new()))
     }
 
-    fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, findshlibs::Svma)> {
-        // Note that for now `findshlibs` is unimplemented on Windows, so we
-        // just unhelpfully assume that the address is an SVMA. Surprisingly it
-        // seems to at least somewhat work on Wine on Linux though...
+    fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {
+        // Note that we don't implement iterating native libraries on Windows,
+        // so we just unhelpfully assume that the address is an SVMA.
+        // Surprisingly it seems to at least somewhat work on Wine on Linux
+        // though...
         //
         // This probably means ASLR on Windows is busted.
         if cfg!(windows) {
-            let addr = findshlibs::Svma(addr);
             return Some((usize::max_value(), addr));
         }
 
@@ -478,12 +572,9 @@ impl Cache {
                 // First up, test if this `lib` has any segment containing the
                 // `addr` (handling relocation). If this check passes then we
                 // can continue below and actually translate the address.
-                //
-                // Note that this is an inlining of `contains_avma` in the
-                // `findshlibs` crate here.
                 if !lib.segments.iter().any(|s| {
-                    let svma = s.stated_virtual_memory_address;
-                    let start = unsafe { svma.0.offset(lib.bias.0) as usize };
+                    let svma = s.stated_virtual_memory_address as usize;
+                    let start = svma + lib.bias as usize;
                     let end = start + s.len;
                     let address = addr as usize;
                     start <= address && address < end
@@ -491,11 +582,10 @@ impl Cache {
                     return None;
                 }
 
-                // Now that we know `lib` contains `addr`, do the equiavlent of
-                // `avma_to_svma` in the `findshlibs` crate.
-                let reverse_bias = -lib.bias.0;
-                let svma = findshlibs::Svma(unsafe { addr.offset(reverse_bias) });
-                Some((i, svma))
+                // Now that we know `lib` contains `addr`, we can offset with
+                // the bias to find the stated virutal memory address.
+                let svma = addr as usize - lib.bias as usize;
+                Some((i, svma as *const u8))
             })
             .next()
     }
@@ -560,10 +650,10 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
             Some(cx) => cx,
             None => return,
         };
-        if let Ok(mut frames) = cx.dwarf.find_frames(addr.0 as u64) {
+        if let Ok(mut frames) = cx.dwarf.find_frames(addr as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 cb.call(Symbol::Frame {
-                    addr: addr.0 as *mut c_void,
+                    addr: addr as *mut c_void,
                     location: frame.location,
                     name: frame.function.map(|f| f.name.slice()),
                 });
@@ -571,9 +661,9 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
         }
 
         if !cb.called {
-            if let Some(name) = cx.object.search_symtab(addr.0 as u64) {
+            if let Some(name) = cx.object.search_symtab(addr as u64) {
                 cb.call(Symbol::Symtab {
-                    addr: addr.0 as *mut c_void,
+                    addr: addr as *mut c_void,
                     name,
                 });
             }

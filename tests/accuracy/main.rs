@@ -39,14 +39,12 @@ fn inner(main_pos: Pos, outer_pos: Pos) {
 }
 
 #[inline(always)]
-#[cfg_attr(feature = "coresymbolication", inline(never))]
 #[rustfmt::skip]
 fn inner_inlined(main_pos: Pos, outer_pos: Pos) {
     check!(main_pos, outer_pos);
     check!(main_pos, outer_pos);
 
     #[inline(always)]
-    #[cfg_attr(feature = "coresymbolication", inline(never))]
     fn inner_further_inlined(main_pos: Pos, outer_pos: Pos, inner_pos: Pos) {
         check!(main_pos, outer_pos, inner_pos);
     }

@@ -6,10 +6,6 @@ use std::thread;
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace") && !cfg!(target_os = "fuchsia");
-static CORESYMBOLICATION: bool = cfg!(all(
-    any(target_os = "macos", target_os = "ios"),
-    feature = "coresymbolication"
-));
 static DLADDR: bool = cfg!(all(unix, feature = "dladdr")) && !cfg!(target_os = "fuchsia");
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 static MSVC: bool = cfg!(target_env = "msvc");
@@ -138,7 +134,7 @@ fn smoke_test_frames() {
         }
 
         let mut resolved = 0;
-        let can_resolve = DLADDR || LIBBACKTRACE || CORESYMBOLICATION || DBGHELP || GIMLI_SYMBOLIZE;
+        let can_resolve = DLADDR || LIBBACKTRACE || DBGHELP || GIMLI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;
@@ -179,7 +175,7 @@ fn smoke_test_frames() {
             addr.expect("didn't find a symbol");
         }
 
-        if (LIBBACKTRACE || CORESYMBOLICATION || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
+        if (LIBBACKTRACE || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {

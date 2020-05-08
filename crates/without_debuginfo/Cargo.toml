@@ -27,5 +27,4 @@ debug = false
 
 [features]
 libbacktrace = ['backtrace/libbacktrace']
-coresymbolication = ['backtrace/coresymbolication']
 gimli-symbolize = ['backtrace/gimli-symbolize']

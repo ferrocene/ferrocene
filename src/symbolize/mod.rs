@@ -476,16 +476,6 @@ cfg_if::cfg_if! {
         use self::gimli::resolve as resolve_imp;
         use self::gimli::Symbol as SymbolImp;
         use self::gimli::clear_symbol_cache as clear_symbol_cache_imp;
-    // Note that we only enable coresymbolication on iOS when debug assertions
-    // are enabled because it's helpful in debug mode but it looks like apps get
-    // rejected from the app store if they use this API, see #92 for more info
-    } else if #[cfg(all(feature = "coresymbolication",
-                        any(target_os = "macos",
-                            all(target_os = "ios", debug_assertions))))] {
-        mod coresymbolication;
-        use self::coresymbolication::resolve as resolve_imp;
-        use self::coresymbolication::Symbol as SymbolImp;
-        unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(feature = "libbacktrace",
                         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
                         not(target_os = "fuchsia"),

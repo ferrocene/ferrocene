@@ -84,9 +84,6 @@ kernel32 = []
 # - dladdr: this feature uses the dladdr(3) function (a glibc extension) to
 #   resolve symbol names. This is fairly unreliable on linux, but works well
 #   enough on OSX.
-# - coresymbolication: this feature uses the undocumented core symbolication
-#   framework on OS X to symbolize. Note that this is not turned on default due
-#   to various issues, you can see more in #202.
 # - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
 #   addresses into file, line, and name using DWARF debug information. At
 #   the moment, this is only possible when targetting Linux, since macOS
@@ -94,7 +91,6 @@ kernel32 = []
 #   means one less C dependency.
 libbacktrace = ["backtrace-sys/backtrace-sys"]
 dladdr = []
-coresymbolication = []
 gimli-symbolize = ["addr2line", "goblin"]
 
 #=======================================
@@ -103,6 +99,12 @@ gimli-symbolize = ["addr2line", "goblin"]
 # Various features used for enabling rustc-serialize or syntex codegen.
 serialize-rustc = ["rustc-serialize"]
 serialize-serde = ["serde"]
+
+#=======================================
+# Deprecated features
+#
+# Only here for backwards compatibility purposes, they do nothing now.
+coresymbolication = []
 
 #=======================================
 # Internal features for testing and such.

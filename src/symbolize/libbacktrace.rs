@@ -157,7 +157,7 @@ extern "C" fn error_cb(_data: *mut c_void, _msg: *const c_char, _errnum: c_int) 
 
 /// Type of the `data` pointer passed into `syminfo_cb`
 struct SyminfoState<'a> {
-    cb: &'a mut (FnMut(&super::Symbol) + 'a),
+    cb: &'a mut (dyn FnMut(&super::Symbol) + 'a),
     pc: usize,
 }
 
@@ -207,7 +207,7 @@ extern "C" fn syminfo_cb(
 
 /// Type of the `data` pointer passed into `pcinfo_cb`
 struct PcinfoState<'a> {
-    cb: &'a mut (FnMut(&super::Symbol) + 'a),
+    cb: &'a mut (dyn FnMut(&super::Symbol) + 'a),
     symname: *const c_char,
     called: bool,
 }
@@ -438,7 +438,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     }
 }
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
     let symaddr = what.address_or_ip() as usize;
 
     // backtrace errors are currently swept under the rug

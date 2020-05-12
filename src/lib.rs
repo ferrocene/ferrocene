@@ -6,25 +6,6 @@
 //! parsed, for example, and expose the functionality of multiple backend
 //! implementations.
 //!
-//! # Implementation
-//!
-//! This library makes use of a number of strategies for actually acquiring a
-//! backtrace. For example unix uses libgcc's libunwind bindings by default to
-//! acquire a backtrace, but coresymbolication or dladdr is used on OSX to
-//! acquire symbol names while linux uses gcc's libbacktrace.
-//!
-//! When using the default feature set of this library the "most reasonable" set
-//! of defaults is chosen for the current platform, but the features activated
-//! can also be controlled at a finer granularity.
-//!
-//! # API Principles
-//!
-//! This library attempts to be as flexible as possible to accommodate different
-//! backend implementations of acquiring a backtrace. Consequently the currently
-//! exported functions are closure-based as opposed to the likely expected
-//! iterator-based versions. This is done due to limitations of the underlying
-//! APIs used from the system.
-//!
 //! # Usage
 //!
 //! First, add this to your Cargo.toml
@@ -37,8 +18,6 @@
 //! Next:
 //!
 //! ```
-//! extern crate backtrace;
-//!
 //! fn main() {
 //! # // Unsafe here so test passes on no_std.
 //! # #[cfg(feature = "std")] {
@@ -69,8 +48,6 @@
     all(feature = "std", target_env = "sgx", target_vendor = "fortanix"),
     feature(sgx_platform)
 )]
-#![allow(bare_trait_objects)] // TODO: remove when updating to 2018 edition
-#![allow(rust_2018_idioms)] // TODO: remove when updating to 2018 edition
 
 #[cfg(feature = "std")]
 #[macro_use]

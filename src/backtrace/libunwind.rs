@@ -82,14 +82,14 @@ impl Clone for Frame {
 }
 
 #[inline(always)]
-pub unsafe fn trace(mut cb: &mut FnMut(&super::Frame) -> bool) {
+pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
     uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
 
     extern "C" fn trace_fn(
         ctx: *mut uw::_Unwind_Context,
         arg: *mut c_void,
     ) -> uw::_Unwind_Reason_Code {
-        let cb = unsafe { &mut *(arg as *mut &mut FnMut(&super::Frame) -> bool) };
+        let cb = unsafe { &mut *(arg as *mut &mut dyn FnMut(&super::Frame) -> bool) };
         let cx = super::Frame {
             inner: Frame::Raw(ctx),
         };

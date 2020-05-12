@@ -16,7 +16,7 @@ pub struct BacktraceFmt<'a, 'b> {
     fmt: &'a mut fmt::Formatter<'b>,
     frame_index: usize,
     format: PrintFmt,
-    print_path: &'a mut (FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
+    print_path: &'a mut (dyn FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
 }
 
 /// The styles of printing that we can print
@@ -41,7 +41,7 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
     pub fn new(
         fmt: &'a mut fmt::Formatter<'b>,
         format: PrintFmt,
-        print_path: &'a mut (FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
+        print_path: &'a mut (dyn FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
     ) -> Self {
         BacktraceFmt {
             fmt,

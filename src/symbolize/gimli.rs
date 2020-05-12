@@ -459,7 +459,7 @@ impl Cache {
     }
 }
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
     let addr = what.address_or_ip();
     let mut call = |sym: Symbol| {
         // Extend the lifetime of `sym` to `'static` since we are unfortunately

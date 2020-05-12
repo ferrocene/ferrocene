@@ -81,7 +81,7 @@ impl Symbol<'_> {
 #[repr(C, align(8))]
 struct Aligned8<T>(T);
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
     // Ensure this process's symbols are initialized
     let dbghelp = match dbghelp::init() {
         Ok(dbghelp) => dbghelp,
@@ -100,7 +100,7 @@ pub unsafe fn resolve(what: ResolveWhat, cb: &mut FnMut(&super::Symbol)) {
 unsafe fn resolve_with_inline(
     dbghelp: &dbghelp::Init,
     frame: &STACKFRAME_EX,
-    cb: &mut FnMut(&super::Symbol),
+    cb: &mut dyn FnMut(&super::Symbol),
 ) {
     do_resolve(
         |info| {
@@ -129,7 +129,7 @@ unsafe fn resolve_with_inline(
 unsafe fn resolve_without_inline(
     dbghelp: &dbghelp::Init,
     addr: *mut c_void,
-    cb: &mut FnMut(&super::Symbol),
+    cb: &mut dyn FnMut(&super::Symbol),
 ) {
     do_resolve(
         |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr as DWORD64, &mut 0, info),
@@ -141,7 +141,7 @@ unsafe fn resolve_without_inline(
 unsafe fn do_resolve(
     sym_from_addr: impl FnOnce(*mut SYMBOL_INFOW) -> BOOL,
     get_line_from_addr: impl FnOnce(&mut IMAGEHLP_LINEW64) -> BOOL,
-    cb: &mut FnMut(&super::Symbol),
+    cb: &mut dyn FnMut(&super::Symbol),
 ) {
     const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);

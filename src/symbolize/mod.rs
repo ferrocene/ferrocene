@@ -455,8 +455,6 @@ pub fn clear_symbol_cache() {
     }
 }
 
-mod dladdr;
-
 cfg_if::cfg_if! {
     if #[cfg(all(windows, target_env = "msvc", feature = "dbghelp", not(target_vendor = "uwp")))] {
         mod dbghelp;
@@ -484,15 +482,6 @@ cfg_if::cfg_if! {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
-        unsafe fn clear_symbol_cache_imp() {}
-    } else if #[cfg(all(unix,
-                        not(target_os = "emscripten"),
-                        not(target_os = "fuchsia"),
-                        not(target_env = "uclibc"),
-                        feature = "dladdr"))] {
-        mod dladdr_resolve;
-        use self::dladdr_resolve::resolve as resolve_imp;
-        use self::dladdr_resolve::Symbol as SymbolImp;
         unsafe fn clear_symbol_cache_imp() {}
     } else {
         mod noop;

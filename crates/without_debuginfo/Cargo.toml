@@ -12,9 +12,6 @@ features = [
   'libunwind',
   'dbghelp',
 
-  # Allow fallback to dladdr
-  'dladdr',
-
   # Yes, we have `std`
   'std',
 ]

@@ -6,7 +6,6 @@ use std::thread;
 static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
 static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace") && !cfg!(target_os = "fuchsia");
-static DLADDR: bool = cfg!(all(unix, feature = "dladdr")) && !cfg!(target_os = "fuchsia");
 static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
 static MSVC: bool = cfg!(target_env = "msvc");
 static GIMLI_SYMBOLIZE: bool = cfg!(all(feature = "gimli-symbolize", unix, target_os = "linux"));
@@ -134,7 +133,7 @@ fn smoke_test_frames() {
         }
 
         let mut resolved = 0;
-        let can_resolve = DLADDR || LIBBACKTRACE || DBGHELP || GIMLI_SYMBOLIZE;
+        let can_resolve = LIBBACKTRACE || DBGHELP || GIMLI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;
@@ -154,9 +153,8 @@ fn smoke_test_frames() {
             _ => {}
         }
 
-        // * linux dladdr doesn't work (only consults local symbol table)
         // * windows dbghelp isn't great for GNU
-        if can_resolve && !(cfg!(target_os = "linux") && DLADDR) && !(DBGHELP && !MSVC) {
+        if can_resolve && !(DBGHELP && !MSVC) {
             let name = name.expect("didn't find a name");
 
             // in release mode names get weird as functions can get merged

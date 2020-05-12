@@ -66,11 +66,13 @@ jobs:
     - run: cargo test --no-default-features
     - run: cargo test --no-default-features --features "libbacktrace"
     - run: cargo test --no-default-features --features "gimli-symbolize"
+    - run: cargo test --no-default-features --features "libbacktrace std"
+    - run: cargo test --no-default-features --features "gimli-symbolize std"
     - run: cargo test --no-default-features --features "std"
     - run: cargo test --manifest-path crates/cpp_smoke_test/Cargo.toml
     - run: cargo test --manifest-path crates/macos_frames_test/Cargo.toml
     - run: cargo test --features libbacktrace --manifest-path crates/without_debuginfo/Cargo.toml
-    - run: cargo test --features "libbacktrace gimli-symbolize" --manifest-path crates/without_debuginfo/Cargo.toml
+    - run: cargo test --features gimli-symbolize --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features libbacktrace
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features gimli-symbolize
 

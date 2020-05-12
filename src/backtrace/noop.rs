@@ -4,7 +4,7 @@
 use core::ffi::c_void;
 
 #[inline(always)]
-pub fn trace(_cb: &mut FnMut(&super::Frame) -> bool) {}
+pub fn trace(_cb: &mut dyn FnMut(&super::Frame) -> bool) {}
 
 #[derive(Clone)]
 pub struct Frame;

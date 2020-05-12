@@ -7,7 +7,7 @@ use crate::SymbolName;
 use core::ffi::c_void;
 use core::marker;
 
-pub unsafe fn resolve(_addr: ResolveWhat, _cb: &mut FnMut(&super::Symbol)) {}
+pub unsafe fn resolve(_addr: ResolveWhat, _cb: &mut dyn FnMut(&super::Symbol)) {}
 
 pub struct Symbol<'a> {
     _marker: marker::PhantomData<&'a i32>,

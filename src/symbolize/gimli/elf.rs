@@ -67,8 +67,8 @@ impl<'a> Object<'a> {
             // symbolicating with locally defined functions.
             .filter(|sym| sym.st_shndx(endian) != object::elf::SHN_UNDEF)
             .map(|sym| {
-                let address = sym.st_value(endian);
-                let size = sym.st_size(endian);
+                let address = sym.st_value(endian).into();
+                let size = sym.st_size(endian).into();
                 let name = sym.st_name(endian);
                 ParsedSym {
                     address,

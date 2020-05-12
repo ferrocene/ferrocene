@@ -463,21 +463,19 @@ cfg_if::cfg_if! {
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(
         feature = "gimli-symbolize",
-        any(
-            target_os = "linux",
-            target_os = "macos",
-            windows,
-        ),
+        not(target_os = "emscripten"),
     ))] {
         mod gimli;
         use self::gimli::resolve as resolve_imp;
         use self::gimli::Symbol as SymbolImp;
         use self::gimli::clear_symbol_cache as clear_symbol_cache_imp;
-    } else if #[cfg(all(feature = "libbacktrace",
-                        any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
-                        not(target_os = "fuchsia"),
-                        not(target_os = "emscripten"),
-                        not(target_env = "uclibc")))] {
+    } else if #[cfg(all(
+        feature = "libbacktrace",
+        any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
+        not(target_os = "fuchsia"),
+        not(target_os = "emscripten"),
+        not(target_env = "uclibc"),
+    ))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;

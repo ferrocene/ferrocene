@@ -267,7 +267,10 @@ cfg_if::cfg_if! {
                 bias: slide,
             })
         }
-    } else {
+    } else if #[cfg(any(
+        target_os = "linux",
+        target_os = "fuchsia",
+    ))] {
         // Other Unix (e.g. Linux) platforms use ELF as an object file format
         // and typically implement an API called `dl_iterate_phdr` to load
         // native libraries.
@@ -279,6 +282,7 @@ cfg_if::cfg_if! {
         use self::elf::Object;
 
         fn native_libraries() -> Vec<Library> {
+            wut();
             let mut ret = Vec::new();
             unsafe {
                 libc::dl_iterate_phdr(Some(callback), &mut ret as *mut _ as *mut _);
@@ -315,6 +319,16 @@ cfg_if::cfg_if! {
                 bias: (*info).dlpi_addr as usize,
             });
             0
+        }
+    } else {
+        // Everything else should use ELF, but doesn't know how to load native
+        // libraries.
+
+        mod elf;
+        use self::elf::Object;
+
+        fn native_libraries() -> Vec<Library> {
+            Vec::new()
         }
     }
 }

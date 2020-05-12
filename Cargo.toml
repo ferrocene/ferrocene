@@ -74,7 +74,7 @@ std = []
 #   splits DWARF out into a separate object file. Enabling this feature
 #   means one less C dependency.
 libbacktrace = ["backtrace-sys/backtrace-sys"]
-gimli-symbolize = ["addr2line", "object"]
+gimli-symbolize = ["addr2line", "object", "std"]
 
 #=======================================
 # Methods of serialization

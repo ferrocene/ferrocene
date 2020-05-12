@@ -462,7 +462,6 @@ cfg_if::cfg_if! {
         use self::dbghelp::Symbol as SymbolImp;
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(
-        feature = "std",
         feature = "gimli-symbolize",
         any(
             target_os = "linux",

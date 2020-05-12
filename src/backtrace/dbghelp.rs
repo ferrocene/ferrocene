@@ -79,7 +79,7 @@ impl Frame {
 struct MyContext(CONTEXT);
 
 #[inline(always)]
-pub unsafe fn trace(cb: &mut FnMut(&super::Frame) -> bool) {
+pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     // Allocate necessary structures for doing the stack walk
     let process = GetCurrentProcess();
     let thread = GetCurrentThread();

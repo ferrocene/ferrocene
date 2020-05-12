@@ -49,8 +49,8 @@ features = ['read_core', 'elf', 'macho', 'pe']
 winapi = { version = "0.3.3", optional = true }
 
 [features]
-# By default libstd support and libbacktrace is used to symbolize addresses.
-default = ["std", "libbacktrace"]
+# By default libstd support and gimli-symbolize is used to symbolize addresses.
+default = ["std", "gimli-symbolize"]
 
 # Include std support. This enables types like `Backtrace`.
 std = []
@@ -58,16 +58,17 @@ std = []
 #=======================================
 # Methods of resolving symbols
 #
-# - libbacktrace: this feature activates the `backtrace-sys` dependency,
-#   building the libbacktrace library found in gcc repos. This is the historical
-#   default for the `backtrace` crate.
 # - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
 #   addresses into file, line, and name using DWARF debug information.
+# - libbacktrace: this feature activates the `backtrace-sys` dependency,
+#   building the libbacktrace library found in gcc repos.
 #
 # Note that MSVC unconditionally uses the dbghelp library to symbolize and won't
-# be affected by feature selection here.
-libbacktrace = ["backtrace-sys/backtrace-sys"]
+# be affected by feature selection here. Also note that it's highly unlikely you
+# want to configure this. If you're having trouble getting backtraces it's
+# likely best to open an issue.
 gimli-symbolize = ["addr2line", "object", "std"]
+libbacktrace = ["backtrace-sys/backtrace-sys"]
 
 #=======================================
 # Methods of serialization

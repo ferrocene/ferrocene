@@ -282,7 +282,6 @@ cfg_if::cfg_if! {
         use self::elf::Object;
 
         fn native_libraries() -> Vec<Library> {
-            wut();
             let mut ret = Vec::new();
             unsafe {
                 libc::dl_iterate_phdr(Some(callback), &mut ret as *mut _ as *mut _);

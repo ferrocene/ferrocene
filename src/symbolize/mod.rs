@@ -463,6 +463,7 @@ cfg_if::cfg_if! {
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(
         feature = "gimli-symbolize",
+        any(unix, windows),
         not(target_os = "emscripten"),
     ))] {
         mod gimli;

@@ -3,11 +3,7 @@ extern crate backtrace;
 use backtrace::Frame;
 use std::thread;
 
-static LIBUNWIND: bool = cfg!(all(unix, feature = "libunwind"));
-static UNIX_BACKTRACE: bool = cfg!(all(unix, feature = "unix-backtrace"));
 static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace") && !cfg!(target_os = "fuchsia");
-static DBGHELP: bool = cfg!(all(windows, feature = "dbghelp"));
-static MSVC: bool = cfg!(target_env = "msvc");
 static GIMLI_SYMBOLIZE: bool = cfg!(all(feature = "gimli-symbolize", unix, target_os = "linux"));
 
 #[test]
@@ -25,13 +21,6 @@ fn smoke_test_frames() {
             v.push(cx.clone());
             true
         });
-
-        if v.len() < 5 {
-            assert!(!LIBUNWIND);
-            assert!(!UNIX_BACKTRACE);
-            assert!(!DBGHELP);
-            return;
-        }
 
         // Various platforms have various bits of weirdness about their
         // backtraces. To find a good starting spot let's search through the
@@ -128,12 +117,12 @@ fn smoke_test_frames() {
         // right now...
         //
         // This assertion can also fail for release builds, so skip it there
-        if !DBGHELP && cfg!(debug_assertions) {
+        if cfg!(debug_assertions) {
             assert!(sym - actual_fn_pointer < 1024);
         }
 
         let mut resolved = 0;
-        let can_resolve = LIBBACKTRACE || DBGHELP || GIMLI_SYMBOLIZE;
+        let can_resolve = LIBBACKTRACE || GIMLI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;
@@ -149,12 +138,11 @@ fn smoke_test_frames() {
 
         // dbghelp doesn't always resolve symbols right now
         match resolved {
-            0 => return assert!(!can_resolve || DBGHELP),
+            0 => return assert!(!can_resolve),
             _ => {}
         }
 
-        // * windows dbghelp isn't great for GNU
-        if can_resolve && !(DBGHELP && !MSVC) {
+        if can_resolve {
             let name = name.expect("didn't find a name");
 
             // in release mode names get weird as functions can get merged
@@ -173,7 +161,7 @@ fn smoke_test_frames() {
             addr.expect("didn't find a symbol");
         }
 
-        if (LIBBACKTRACE || (DBGHELP && MSVC)) && cfg!(debug_assertions) {
+        if cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
             let file = file.expect("didn't find a line number");
             if !expected_file.is_empty() {

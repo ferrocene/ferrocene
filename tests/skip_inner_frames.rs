@@ -9,9 +9,6 @@ const ENABLED: bool = cfg!(all(
     // Windows hasn't really been tested, and OSX doesn't support actually
     // finding an enclosing frame, so disable this
     target_os = "linux",
-    // This is the only method currently that supports accurate enough
-    // backtraces for this test to work.
-    feature = "libunwind",
     // On ARM finding the enclosing function is simply returning the ip itself.
     not(target_arch = "arm"),
 ));

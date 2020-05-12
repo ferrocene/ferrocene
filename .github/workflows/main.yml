@@ -59,21 +59,14 @@ jobs:
     - run: cargo build
     - run: cargo test
     - run: cargo test --features "gimli-symbolize"
+    - run: cargo test --features "serialize-rustc"
+    - run: cargo test --features "serialize-serde"
+    - run: cargo test --features "verify-winapi"
+    - run: cargo test --features "cpp_demangle"
     - run: cargo test --no-default-features
+    - run: cargo test --no-default-features --features "libbacktrace"
+    - run: cargo test --no-default-features --features "gimli-symbolize"
     - run: cargo test --no-default-features --features "std"
-    - run: cargo test --no-default-features --features "libunwind std"
-    - run: cargo test --no-default-features --features "libunwind dladdr std"
-    - run: cargo test --no-default-features --features "libunwind libbacktrace std"
-    - run: cargo test --no-default-features --features "libunwind libbacktrace dbghelp std"
-    - run: cargo test --no-default-features --features "unix-backtrace std"
-    - run: cargo test --no-default-features --features "unix-backtrace dladdr std"
-    - run: cargo test --no-default-features --features "unix-backtrace libbacktrace std"
-    - run: cargo test --no-default-features --features "serialize-serde std"
-    - run: cargo test --no-default-features --features "serialize-rustc std"
-    - run: cargo test --no-default-features --features "serialize-rustc serialize-serde std"
-    - run: cargo test --no-default-features --features "cpp_demangle std"
-    - run: cargo test --no-default-features --features "dbghelp std"
-    - run: cargo test --no-default-features --features "dbghelp std verify-winapi"
     - run: cargo test --manifest-path crates/cpp_smoke_test/Cargo.toml
     - run: cargo test --manifest-path crates/macos_frames_test/Cargo.toml
     - run: cargo test --features libbacktrace --manifest-path crates/without_debuginfo/Cargo.toml

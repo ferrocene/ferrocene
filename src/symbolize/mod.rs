@@ -462,15 +462,6 @@ cfg_if::cfg_if! {
         use self::dbghelp::Symbol as SymbolImp;
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(
-        feature = "gimli-symbolize",
-        any(unix, windows),
-        not(target_os = "emscripten"),
-    ))] {
-        mod gimli;
-        use self::gimli::resolve as resolve_imp;
-        use self::gimli::Symbol as SymbolImp;
-        use self::gimli::clear_symbol_cache as clear_symbol_cache_imp;
-    } else if #[cfg(all(
         feature = "libbacktrace",
         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
         not(target_os = "fuchsia"),
@@ -481,6 +472,15 @@ cfg_if::cfg_if! {
         use self::libbacktrace::resolve as resolve_imp;
         use self::libbacktrace::Symbol as SymbolImp;
         unsafe fn clear_symbol_cache_imp() {}
+    } else if #[cfg(all(
+        feature = "gimli-symbolize",
+        any(unix, windows),
+        not(target_os = "emscripten"),
+    ))] {
+        mod gimli;
+        use self::gimli::resolve as resolve_imp;
+        use self::gimli::Symbol as SymbolImp;
+        use self::gimli::clear_symbol_cache as clear_symbol_cache_imp;
     } else {
         mod noop;
         use self::noop::resolve as resolve_imp;

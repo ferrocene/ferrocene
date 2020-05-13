@@ -104,7 +104,7 @@ impl Frame {
 }
 
 impl fmt::Debug for Frame {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Frame")
             .field("ip", &self.ip())
             .field("symbol_address", &self.symbol_address())

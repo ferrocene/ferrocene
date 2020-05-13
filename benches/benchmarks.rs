@@ -2,8 +2,6 @@
 
 extern crate test;
 
-extern crate backtrace;
-
 #[cfg(feature = "std")]
 use backtrace::Backtrace;
 

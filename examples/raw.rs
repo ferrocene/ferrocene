@@ -1,5 +1,3 @@
-extern crate backtrace;
-
 fn main() {
     foo();
 }

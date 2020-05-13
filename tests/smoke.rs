@@ -1,5 +1,3 @@
-extern crate backtrace;
-
 use backtrace::Frame;
 use std::thread;
 

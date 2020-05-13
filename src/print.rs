@@ -16,7 +16,8 @@ pub struct BacktraceFmt<'a, 'b> {
     fmt: &'a mut fmt::Formatter<'b>,
     frame_index: usize,
     format: PrintFmt,
-    print_path: &'a mut (dyn FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
+    print_path:
+        &'a mut (dyn FnMut(&mut fmt::Formatter<'_>, BytesOrWideString<'_>) -> fmt::Result + 'b),
 }
 
 /// The styles of printing that we can print
@@ -41,7 +42,8 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
     pub fn new(
         fmt: &'a mut fmt::Formatter<'b>,
         format: PrintFmt,
-        print_path: &'a mut (dyn FnMut(&mut fmt::Formatter, BytesOrWideString) -> fmt::Result + 'b),
+        print_path: &'a mut (dyn FnMut(&mut fmt::Formatter<'_>, BytesOrWideString<'_>) -> fmt::Result
+                     + 'b),
     ) -> Self {
         BacktraceFmt {
             fmt,
@@ -160,8 +162,8 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     pub fn print_raw(
         &mut self,
         frame_ip: *mut c_void,
-        symbol_name: Option<crate::SymbolName>,
-        filename: Option<BytesOrWideString>,
+        symbol_name: Option<crate::SymbolName<'_>>,
+        filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
     ) -> fmt::Result {
         // Fuchsia is unable to symbolize within a process so it has a special
@@ -180,8 +182,8 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     fn print_raw_generic(
         &mut self,
         mut frame_ip: *mut c_void,
-        symbol_name: Option<crate::SymbolName>,
-        filename: Option<BytesOrWideString>,
+        symbol_name: Option<crate::SymbolName<'_>>,
+        filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
     ) -> fmt::Result {
         // No need to print "null" frames, it basically just means that the
@@ -234,7 +236,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         Ok(())
     }
 
-    fn print_fileline(&mut self, file: BytesOrWideString, line: u32) -> fmt::Result {
+    fn print_fileline(&mut self, file: BytesOrWideString<'_>, line: u32) -> fmt::Result {
         // Filename/line are printed on lines under the symbol name, so print
         // some appropriate whitespace to sort of right-align ourselves.
         if let PrintFmt::Full = self.fmt.format {

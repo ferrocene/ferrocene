@@ -48,6 +48,7 @@
     all(feature = "std", target_env = "sgx", target_vendor = "fortanix"),
     feature(sgx_platform)
 )]
+#![warn(rust_2018_idioms)]
 
 #[cfg(feature = "std")]
 #[macro_use]

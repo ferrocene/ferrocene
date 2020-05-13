@@ -1,5 +1,3 @@
-extern crate backtrace;
-
 use backtrace::Backtrace;
 
 // This test only works on platforms which have a working `symbol_address`

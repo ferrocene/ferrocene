@@ -467,13 +467,13 @@ impl Cache {
     }
 }
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
     let addr = what.address_or_ip();
-    let mut call = |sym: Symbol| {
+    let mut call = |sym: Symbol<'_>| {
         // Extend the lifetime of `sym` to `'static` since we are unfortunately
         // required to here, but it's ony ever going out as a reference so no
         // reference to it should be persisted beyond this frame anyway.
-        let sym = mem::transmute::<Symbol, Symbol<'static>>(sym);
+        let sym = mem::transmute::<Symbol<'_>, Symbol<'static>>(sym);
         (cb)(&super::Symbol { inner: sym });
     };
 
@@ -526,7 +526,7 @@ pub enum Symbol<'a> {
 }
 
 impl Symbol<'_> {
-    pub fn name(&self) -> Option<SymbolName> {
+    pub fn name(&self) -> Option<SymbolName<'_>> {
         match self {
             Symbol::Frame { name, .. } => {
                 let name = name.as_ref()?;
@@ -543,7 +543,7 @@ impl Symbol<'_> {
         }
     }
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString<'_>> {
         match self {
             Symbol::Frame { location, .. } => {
                 let file = location.as_ref()?.file?;

@@ -408,10 +408,18 @@ impl Cache {
                 // First up, test if this `lib` has any segment containing the
                 // `addr` (handling relocation). If this check passes then we
                 // can continue below and actually translate the address.
+                //
+                // Note that we're using `wrapping_add` here to avoid overflow
+                // checks. It's been seen in the wild that the SVMA + bias
+                // computation overflows. It seems a bit odd that would happen
+                // but there's not a huge amount we can do about it other than
+                // probably just ignore those segments since they're likely
+                // pointing off into space. This originally came up in
+                // rust-lang/backtrace-rs#329.
                 if !lib.segments.iter().any(|s| {
-                    let svma = s.stated_virtual_memory_address as usize;
-                    let start = svma + lib.bias as usize;
-                    let end = start + s.len;
+                    let svma = s.stated_virtual_memory_address;
+                    let start = svma.wrapping_add(lib.bias);
+                    let end = start.wrapping_add(s.len);
                     let address = addr as usize;
                     start <= address && address < end
                 }) {
@@ -420,7 +428,7 @@ impl Cache {
 
                 // Now that we know `lib` contains `addr`, we can offset with
                 // the bias to find the stated virutal memory address.
-                let svma = addr as usize - lib.bias as usize;
+                let svma = (addr as usize).wrapping_sub(lib.bias);
                 Some((i, svma as *const u8))
             })
             .next()

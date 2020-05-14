@@ -48,6 +48,10 @@ features = ['read_core', 'elf', 'macho', 'pe']
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.3", optional = true }
 
+[dev-dependencies]
+dylib-dep = { path = "crates/dylib-dep" }
+libloading = "0.6"
+
 [features]
 # By default libstd support and gimli-symbolize is used to symbolize addresses.
 default = ["std", "gimli-symbolize"]
@@ -131,7 +135,7 @@ edition = '2018'
 
 [[test]]
 name = "accuracy"
-required-features = ["std", "libbacktrace"]
+required-features = ["std", "gimli-symbolize"]
 edition = '2018'
 
 [[test]]

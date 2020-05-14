@@ -16,6 +16,29 @@ type Pos = (&'static str, u32);
 
 #[test]
 fn doit() {
+    // Skip musl which is by default statically linked and doesn't support
+    // dynamic libraries.
+    //
+    // FIXME(#333) doesn't work on MinGW yet
+    if !cfg!(target_env = "musl") && !(cfg!(windows) && cfg!(target_env = "gnu")) {
+        // TODO(#238) this shouldn't have to happen first in this function, but
+        // currently it does.
+        let mut dir = std::env::current_exe().unwrap();
+        dir.pop();
+        if cfg!(windows) {
+            dir.push("dylib_dep.dll");
+        } else if cfg!(target_os = "macos") {
+            dir.push("libdylib_dep.dylib");
+        } else {
+            dir.push("libdylib_dep.so");
+        }
+        let lib = libloading::Library::new(&dir).unwrap();
+        let api = unsafe { lib.get::<extern "C" fn(Pos, fn(Pos, Pos))>(b"foo").unwrap() };
+        api(pos!(), |a, b| {
+            check!(a, b);
+        });
+    }
+
     outer(pos!());
 }
 

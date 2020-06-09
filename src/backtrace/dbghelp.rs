@@ -42,6 +42,10 @@ impl Frame {
         self.addr_pc().Offset as *mut _
     }
 
+    pub fn sp(&self) -> *mut c_void {
+        self.addr_stack().Offset as *mut _
+    }
+
     pub fn symbol_address(&self) -> *mut c_void {
         self.ip()
     }
@@ -64,6 +68,13 @@ impl Frame {
         match self {
             Frame::New(new) => &mut new.AddrFrame,
             Frame::Old(old) => &mut old.AddrFrame,
+        }
+    }
+
+    fn addr_stack(&self) -> &ADDRESS64 {
+        match self {
+            Frame::New(new) => &new.AddrStack,
+            Frame::Old(old) => &old.AddrStack,
         }
     }
 

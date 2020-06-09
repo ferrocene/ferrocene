@@ -338,17 +338,18 @@ impl fmt::Debug for Backtrace {
         // short format, because if it's full we presumably want to print
         // everything.
         let cwd = std::env::current_dir();
-        let mut print_path = move |fmt: &mut fmt::Formatter<'_>, path: crate::BytesOrWideString<'_>| {
-            let path = path.into_path_buf();
-            if !full {
-                if let Ok(cwd) = &cwd {
-                    if let Ok(suffix) = path.strip_prefix(cwd) {
-                        return fmt::Display::fmt(&suffix.display(), fmt);
+        let mut print_path =
+            move |fmt: &mut fmt::Formatter<'_>, path: crate::BytesOrWideString<'_>| {
+                let path = path.into_path_buf();
+                if !full {
+                    if let Ok(cwd) = &cwd {
+                        if let Ok(suffix) = path.strip_prefix(cwd) {
+                            return fmt::Display::fmt(&suffix.display(), fmt);
+                        }
                     }
                 }
-            }
-            fmt::Display::fmt(&path.display(), fmt)
-        };
+                fmt::Display::fmt(&path.display(), fmt)
+            };
 
         let mut f = BacktraceFmt::new(fmt, style, &mut print_path);
         f.add_context()?;

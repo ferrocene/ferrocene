@@ -14,6 +14,10 @@ impl Frame {
         0 as *mut _
     }
 
+    pub fn sp(&self) -> *mut c_void {
+        0 as *mut _
+    }
+
     pub fn symbol_address(&self) -> *mut c_void {
         0 as *mut _
     }

@@ -90,6 +90,14 @@ impl Frame {
         self.inner.ip()
     }
 
+    /// Returns the current stack pointer of this frame.
+    ///
+    /// In the case that a backend cannot recover the stack pointer for this
+    /// frame, a null pointer is returned.
+    pub fn sp(&self) -> *mut c_void {
+        self.inner.sp()
+    }
+
     /// Returns the starting symbol address of the frame of this function.
     ///
     /// This will attempt to rewind the instruction pointer returned by `ip` to

@@ -57,7 +57,7 @@ pub enum Symbol<'a> {
 }
 
 impl Symbol<'_> {
-    pub fn name(&self) -> Option<SymbolName> {
+    pub fn name(&self) -> Option<SymbolName<'_>> {
         let symbol = |ptr: *const c_char| unsafe {
             if ptr.is_null() {
                 None
@@ -119,7 +119,7 @@ impl Symbol<'_> {
         }
     }
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString<'_>> {
         self.filename_bytes().map(BytesOrWideString::Bytes)
     }
 
@@ -178,7 +178,7 @@ extern "C" fn syminfo_cb(
     // not debug info, so if that happens we're sure to call the callback with
     // at least one symbol from the `syminfo_cb`.
     unsafe {
-        let syminfo_state = &mut *(data as *mut SyminfoState);
+        let syminfo_state = &mut *(data as *mut SyminfoState<'_>);
         let mut pcinfo_state = PcinfoState {
             symname,
             called: false,
@@ -222,7 +222,7 @@ extern "C" fn pcinfo_cb(
     let mut bomb = crate::Bomb { enabled: true };
 
     unsafe {
-        let state = &mut *(data as *mut PcinfoState);
+        let state = &mut *(data as *mut PcinfoState<'_>);
         state.called = true;
         (state.cb)(&super::Symbol {
             inner: Symbol::Pcinfo {
@@ -438,7 +438,7 @@ unsafe fn init_state() -> *mut bt::backtrace_state {
     }
 }
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
     let symaddr = what.address_or_ip() as usize;
 
     // backtrace errors are currently swept under the rug

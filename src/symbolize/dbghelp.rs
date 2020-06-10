@@ -53,7 +53,7 @@ pub struct Symbol<'a> {
 }
 
 impl Symbol<'_> {
-    pub fn name(&self) -> Option<SymbolName> {
+    pub fn name(&self) -> Option<SymbolName<'_>> {
         Some(SymbolName::new(unsafe { &*self.name }))
     }
 
@@ -61,7 +61,7 @@ impl Symbol<'_> {
         Some(self.addr as *mut _)
     }
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString<'_>> {
         self.filename
             .map(|slice| unsafe { BytesOrWideString::Wide(&*slice) })
     }
@@ -81,7 +81,7 @@ impl Symbol<'_> {
 #[repr(C, align(8))]
 struct Aligned8<T>(T);
 
-pub unsafe fn resolve(what: ResolveWhat, cb: &mut dyn FnMut(&super::Symbol)) {
+pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
     // Ensure this process's symbols are initialized
     let dbghelp = match dbghelp::init() {
         Ok(dbghelp) => dbghelp,

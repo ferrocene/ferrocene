@@ -7,14 +7,14 @@ use crate::SymbolName;
 use core::ffi::c_void;
 use core::marker;
 
-pub unsafe fn resolve(_addr: ResolveWhat, _cb: &mut dyn FnMut(&super::Symbol)) {}
+pub unsafe fn resolve(_addr: ResolveWhat<'_>, _cb: &mut dyn FnMut(&super::Symbol)) {}
 
 pub struct Symbol<'a> {
     _marker: marker::PhantomData<&'a i32>,
 }
 
 impl Symbol<'_> {
-    pub fn name(&self) -> Option<SymbolName> {
+    pub fn name(&self) -> Option<SymbolName<'_>> {
         None
     }
 
@@ -22,7 +22,7 @@ impl Symbol<'_> {
         None
     }
 
-    pub fn filename_raw(&self) -> Option<BytesOrWideString> {
+    pub fn filename_raw(&self) -> Option<BytesOrWideString<'_>> {
         None
     }
 

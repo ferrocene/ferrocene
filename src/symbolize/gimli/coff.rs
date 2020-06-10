@@ -25,6 +25,13 @@ pub struct Object<'a> {
     strings: StringTable<'a>,
 }
 
+pub fn get_image_base(data: &[u8]) -> Option<usize> {
+    let data = Bytes(data);
+    let dos_header = ImageDosHeader::parse(data).ok()?;
+    let (nt_headers, _, _) = dos_header.nt_headers::<Pe>(data).ok()?;
+    usize::try_from(nt_headers.optional_header().image_base()).ok()
+}
+
 impl<'a> Object<'a> {
     fn parse(data: &'a [u8]) -> Option<Object<'a>> {
         let data = Bytes(data);

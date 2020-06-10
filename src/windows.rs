@@ -32,6 +32,7 @@ cfg_if::cfg_if! {
             pub use winapi::um::minwinbase::*;
             pub use winapi::um::processthreadsapi::*;
             pub use winapi::um::synchapi::*;
+            pub use winapi::um::tlhelp32::*;
             pub use winapi::um::winbase::*;
             pub use winapi::um::winnt::*;
         }
@@ -311,6 +312,20 @@ ffi! {
         pub Reserved1: [DWORD64; 4],
     }
 
+    #[repr(C)]
+    pub struct MODULEENTRY32W {
+        pub dwSize: DWORD,
+        pub th32ModuleID: DWORD,
+        pub th32ProcessID: DWORD,
+        pub GlblcntUsage: DWORD,
+        pub ProccntUsage: DWORD,
+        pub modBaseAddr: *mut u8,
+        pub modBaseSize: DWORD,
+        pub hModule: HMODULE,
+        pub szModule: [WCHAR; MAX_MODULE_NAME32 + 1],
+        pub szExePath: [WCHAR; MAX_PATH],
+    }
+
     pub const MAX_SYM_NAME: usize = 2000;
     pub const AddrModeFlat: ADDRESS_MODE = 3;
     pub const TRUE: BOOL = 1;
@@ -327,6 +342,10 @@ ffi! {
     pub const INFINITE: DWORD = !0;
     pub const PAGE_READONLY: DWORD = 2;
     pub const FILE_MAP_READ: DWORD = 4;
+    pub const TH32CS_SNAPMODULE: DWORD = 0x00000008;
+    pub const INVALID_HANDLE_VALUE: HANDLE = -1isize as HANDLE;
+    pub const MAX_MODULE_NAME32: usize = 255;
+    pub const MAX_PATH: usize = 260;
 
     pub type DWORD = u32;
     pub type PDWORD = *mut u32;
@@ -350,6 +369,7 @@ ffi! {
     pub type SIZE_T = usize;
     pub type LPVOID = *mut c_void;
     pub type LPCVOID = *const c_void;
+    pub type LPMODULEENTRY32W = *mut MODULEENTRY32W;
 
     extern "system" {
         pub fn GetCurrentProcess() -> HANDLE;
@@ -401,6 +421,18 @@ ffi! {
             dwNumberOfBytesToMap: SIZE_T,
         ) -> LPVOID;
         pub fn UnmapViewOfFile(lpBaseAddress: LPCVOID) -> BOOL;
+        pub fn CreateToolhelp32Snapshot(
+            dwFlags: DWORD,
+            th32ProcessID: DWORD,
+        ) -> HANDLE;
+        pub fn Module32FirstW(
+            hSnapshot: HANDLE,
+            lpme: LPMODULEENTRY32W,
+        ) -> BOOL;
+        pub fn Module32NextW(
+            hSnapshot: HANDLE,
+            lpme: LPMODULEENTRY32W,
+        ) -> BOOL;
     }
 }
 

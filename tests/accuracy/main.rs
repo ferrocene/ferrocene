@@ -16,11 +16,13 @@ type Pos = (&'static str, u32);
 
 #[test]
 fn doit() {
+    if
     // Skip musl which is by default statically linked and doesn't support
     // dynamic libraries.
-    //
-    // FIXME(#333) doesn't work on MinGW yet
-    if !cfg!(target_env = "musl") && !(cfg!(windows) && cfg!(target_env = "gnu")) {
+    !cfg!(target_env = "musl")
+    // Skip MinGW on libbacktrace which doesn't have support for DLLs.
+    && !(cfg!(windows) && cfg!(target_env = "gnu") && cfg!(feature = "libbacktrace"))
+    {
         // TODO(#238) this shouldn't have to happen first in this function, but
         // currently it does.
         let mut dir = std::env::current_exe().unwrap();

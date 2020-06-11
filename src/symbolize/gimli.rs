@@ -7,6 +7,7 @@
 use self::gimli::read::EndianSlice;
 use self::gimli::LittleEndian as Endian;
 use self::mmap::Mmap;
+use self::stash::Stash;
 use crate::symbolize::ResolveWhat;
 use crate::types::BytesOrWideString;
 use crate::SymbolName;
@@ -26,6 +27,7 @@ mod mmap;
 #[cfg(unix)]
 #[path = "gimli/mmap_unix.rs"]
 mod mmap;
+mod stash;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
@@ -38,27 +40,28 @@ struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     cx: Context<'static>,
     _map: Mmap,
+    _stash: Stash,
 }
 
-fn cx<'data>(object: Object<'data>) -> Option<Context<'data>> {
-    fn load_section<'data, S>(obj: &Object<'data>) -> S
+fn cx<'data>(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data>> {
+    fn load_section<'data, S>(stash: &'data Stash, obj: &Object<'data>) -> S
     where
         S: gimli::Section<gimli::EndianSlice<'data, Endian>>,
     {
-        let data = obj.section(S::section_name()).unwrap_or(&[]);
+        let data = obj.section(stash, S::section_name()).unwrap_or(&[]);
         S::from(EndianSlice::new(data, Endian))
     }
 
     let dwarf = addr2line::Context::from_sections(
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
-        load_section(&object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
+        load_section(stash, &object),
         gimli::EndianSlice::new(&[], Endian),
     )
     .ok()?;
@@ -66,16 +69,17 @@ fn cx<'data>(object: Object<'data>) -> Option<Context<'data>> {
 }
 
 macro_rules! mk {
-    (Mapping { $map:expr, $inner:expr }) => {{
+    (Mapping { $map:expr, $inner:expr, $stash:expr }) => {{
         use crate::symbolize::gimli::{Context, Mapping, Mmap};
 
-        fn assert_lifetimes<'a>(_: &'a Mmap, _: &Context<'a>) {}
-        assert_lifetimes(&$map, &$inner);
+        fn assert_lifetimes<'a>(_: &'a Mmap, _: &Context<'a>, _: &'a Stash) {}
+        assert_lifetimes(&$map, &$inner, &$stash);
         Mapping {
             // Convert to 'static lifetimes since the symbols should
-            // only borrow `map` and we're preserving `map` below.
+            // only borrow `map` and `stash` and we're preserving them below.
             cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>($inner) },
             _map: $map,
+            _stash: $stash,
         }
     }};
 }

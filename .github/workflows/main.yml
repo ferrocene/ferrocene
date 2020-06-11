@@ -78,6 +78,10 @@ jobs:
     - run: cargo test --features gimli-symbolize --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features libbacktrace
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features gimli-symbolize
+    - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gabi" cargo test --features gimli-symbolize
+      if: contains(matrix.os, 'ubuntu')
+    - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gnu" cargo test --features gimli-symbolize
+      if: contains(matrix.os, 'ubuntu')
 
   windows_arm64:
     name: Windows AArch64

@@ -1,4 +1,4 @@
-use super::{Mapping, Path, Vec};
+use super::{Mapping, Path, Stash, Vec};
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
 use object::read::StringTable;
@@ -13,8 +13,9 @@ use std::convert::TryFrom;
 impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
-        let cx = super::cx(Object::parse(&map)?)?;
-        Some(mk!(Mapping { map, cx }))
+        let stash = Stash::new();
+        let cx = super::cx(&stash, Object::parse(&map)?)?;
+        Some(mk!(Mapping { map, cx, stash }))
     }
 }
 
@@ -73,7 +74,7 @@ impl<'a> Object<'a> {
         })
     }
 
-    pub fn section(&self, name: &str) -> Option<&'a [u8]> {
+    pub fn section(&self, _: &Stash, name: &str) -> Option<&'a [u8]> {
         Some(
             self.sections
                 .section_by_name(self.strings, name.as_bytes())?

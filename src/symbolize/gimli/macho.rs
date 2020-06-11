@@ -1,4 +1,4 @@
-use super::{Mapping, Path, Vec};
+use super::{Mapping, Path, Stash, Vec};
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};
@@ -49,8 +49,9 @@ impl Mapping {
         // Looks like nothing matched our UUID, so let's at least return our own
         // file. This should have the symbol table for at least some
         // symbolication purposes.
-        let inner = super::cx(Object::parse(macho, endian, data)?)?;
-        return Some(mk!(Mapping { map, inner }));
+        let stash = Stash::new();
+        let inner = super::cx(&stash, Object::parse(macho, endian, data)?)?;
+        return Some(mk!(Mapping { map, inner, stash }));
 
         fn load_dsym(dir: &Path, uuid: [u8; 16]) -> Option<Mapping> {
             for entry in dir.read_dir().ok()? {
@@ -62,8 +63,11 @@ impl Mapping {
                 if entry_uuid != uuid {
                     continue;
                 }
-                if let Some(cx) = Object::parse(macho, endian, data).and_then(super::cx) {
-                    return Some(mk!(Mapping { map, cx }));
+                let stash = Stash::new();
+                if let Some(cx) =
+                    Object::parse(macho, endian, data).and_then(|o| super::cx(&stash, o))
+                {
+                    return Some(mk!(Mapping { map, cx, stash }));
                 }
             }
 
@@ -175,7 +179,7 @@ impl<'a> Object<'a> {
         })
     }
 
-    pub fn section(&self, name: &str) -> Option<&'a [u8]> {
+    pub fn section(&self, _: &Stash, name: &str) -> Option<&'a [u8]> {
         let name = name.as_bytes();
         let dwarf = self.dwarf?;
         let section = dwarf.into_iter().find(|section| {

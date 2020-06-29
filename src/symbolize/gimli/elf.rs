@@ -3,7 +3,6 @@ use object::elf::{ELFCOMPRESS_ZLIB, SHF_COMPRESSED};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
 use object::{BigEndian, Bytes, NativeEndian};
-use std::io::Cursor;
 
 #[cfg(target_pointer_width = "32")]
 type Elf = object::elf::FileHeader32<NativeEndian>;
@@ -164,7 +163,8 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     let (status, in_read, out_read) = decompress(
         &mut DecompressorOxide::new(),
         input,
-        &mut Cursor::new(output),
+        output,
+        0,
         TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF | TINFL_FLAG_PARSE_ZLIB_HEADER,
     );
     if status == TINFLStatus::Done && in_read == input.len() && out_read == output.len() {

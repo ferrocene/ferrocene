@@ -1,9 +1,8 @@
-use crate::windows::*;
-use std::fs::File;
-use std::ops::Deref;
-use std::os::windows::prelude::*;
-use std::ptr;
-use std::slice;
+use super::super::super::windows::*;
+use super::{AsRawHandle, File};
+use core::ops::Deref;
+use core::ptr;
+use core::slice;
 
 pub struct Mmap {
     // keep the file alive to prevent it from ebeing deleted which would cause

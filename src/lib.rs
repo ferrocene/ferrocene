@@ -49,32 +49,39 @@
     feature(sgx_platform)
 )]
 #![warn(rust_2018_idioms)]
+// When we're building as part of libstd, silence all warnings since they're
+// irrelevant as this crate is developed out-of-tree.
+#![cfg_attr(backtrace_in_libstd, allow(warnings))]
 
 #[cfg(feature = "std")]
 #[macro_use]
 extern crate std;
 
-pub use crate::backtrace::{trace_unsynchronized, Frame};
+// This is only used for gimli right now, so silence warnings elsewhere.
+#[cfg_attr(not(target_os = "linux"), allow(unused_extern_crates))]
+extern crate alloc;
+
+pub use self::backtrace::{trace_unsynchronized, Frame};
 mod backtrace;
 
-pub use crate::symbolize::resolve_frame_unsynchronized;
-pub use crate::symbolize::{resolve_unsynchronized, Symbol, SymbolName};
+pub use self::symbolize::resolve_frame_unsynchronized;
+pub use self::symbolize::{resolve_unsynchronized, Symbol, SymbolName};
 mod symbolize;
 
-pub use crate::types::BytesOrWideString;
+pub use self::types::BytesOrWideString;
 mod types;
 
 #[cfg(feature = "std")]
-pub use crate::symbolize::clear_symbol_cache;
+pub use self::symbolize::clear_symbol_cache;
 
 mod print;
 pub use print::{BacktraceFmt, BacktraceFrameFmt, PrintFmt};
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
-        pub use crate::backtrace::trace;
-        pub use crate::symbolize::{resolve, resolve_frame};
-        pub use crate::capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
+        pub use self::backtrace::trace;
+        pub use self::symbolize::{resolve, resolve_frame};
+        pub use self::capture::{Backtrace, BacktraceFrame, BacktraceSymbol};
         mod capture;
     }
 }

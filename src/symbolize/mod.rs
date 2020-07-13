@@ -7,8 +7,8 @@ cfg_if::cfg_if! {
     }
 }
 
-use crate::backtrace::Frame;
-use crate::types::BytesOrWideString;
+use super::backtrace::Frame;
+use super::types::BytesOrWideString;
 use core::ffi::c_void;
 use rustc_demangle::{try_demangle, Demangle};
 

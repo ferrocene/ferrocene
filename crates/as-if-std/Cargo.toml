@@ -1,0 +1,28 @@
+[package]
+name = "as-if-std"
+version = "0.1.0"
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+edition = "2018"
+publish = false
+
+[lib]
+test = false
+doc = false
+doctest = false
+bench = false
+
+[dependencies]
+cfg-if = "0.1.10"
+rustc-demangle = "0.1.4"
+libc = { version = "0.2.45", default-features = false }
+addr2line = { version = "0.12.0", default-features = false }
+miniz_oxide = { version = "0.4.0", default-features = false }
+
+[dependencies.object]
+version = "0.20.0"
+default-features = false
+features = ['read_core', 'elf', 'macho', 'pe', 'unaligned']
+
+[features]
+default = ['gimli-symbolize']
+gimli-symbolize = []

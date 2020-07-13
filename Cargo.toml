@@ -15,7 +15,7 @@ autotests = true
 edition = "2018"
 
 [workspace]
-members = ['crates/cpp_smoke_test']
+members = ['crates/cpp_smoke_test', 'crates/as-if-std']
 exclude = ['crates/without_debuginfo', 'crates/macos_frames_test', 'crates/line-tables-only']
 
 [dependencies]
@@ -32,9 +32,6 @@ rustc-serialize = { version = "0.3", optional = true }
 # Optionally demangle C++ frames' symbols in backtraces.
 cpp_demangle = { default-features = false, version = "0.3.0", optional = true }
 
-# Internal dependencies when built as a dependency of libstd, do not use.
-core = { version = "1.0.0", optional = true, package = 'rustc-std-workspace-core' }
-compiler_builtins = { version = '0.1.2', optional = true }
 
 # Optional dependencies enabled through the `gimli-symbolize` feature, do not
 # use these features directly.
@@ -72,7 +69,7 @@ std = []
 # be affected by feature selection here. Also note that it's highly unlikely you
 # want to configure this. If you're having trouble getting backtraces it's
 # likely best to open an issue.
-gimli-symbolize = ["addr2line", "miniz_oxide", "object", "std"]
+gimli-symbolize = ["addr2line", "miniz_oxide", "object"]
 libbacktrace = ["backtrace-sys/backtrace-sys"]
 
 #=======================================
@@ -104,14 +101,6 @@ verify-winapi = [
   'winapi/tlhelp32',
   'winapi/winbase',
   'winapi/winnt',
-]
-rustc-dep-of-std = [
-  'backtrace-sys/rustc-dep-of-std',
-  'cfg-if/rustc-dep-of-std',
-  'core',
-  'compiler_builtins',
-  'libc/rustc-dep-of-std',
-  'rustc-demangle/rustc-dep-of-std',
 ]
 
 [[example]]

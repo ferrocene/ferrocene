@@ -25,6 +25,7 @@
 //!
 //! This is the default unwinding API for all non-Windows platforms currently.
 
+use super::super::Bomb;
 use core::ffi::c_void;
 
 pub enum Frame {
@@ -103,7 +104,7 @@ pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
             inner: Frame::Raw(ctx),
         };
 
-        let mut bomb = crate::Bomb { enabled: true };
+        let mut bomb = Bomb { enabled: true };
         let keep_going = cb(&cx);
         bomb.enabled = false;
 

@@ -82,6 +82,7 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
     - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gnu" cargo test --features gimli-symbolize
       if: contains(matrix.os, 'ubuntu')
+    - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
 
   windows_arm64:
     name: Windows AArch64

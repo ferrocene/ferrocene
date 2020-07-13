@@ -1,5 +1,9 @@
-use std::cell::UnsafeCell;
-use std::vec::Vec;
+// only used on Linux right now, so allow dead code elsewhere
+#![cfg_attr(not(target_os = "linux"), allow(dead_code))]
+
+use alloc::vec;
+use alloc::vec::Vec;
+use core::cell::UnsafeCell;
 
 /// A simple arena allocator for byte buffers.
 pub struct Stash {

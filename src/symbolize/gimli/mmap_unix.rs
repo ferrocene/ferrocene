@@ -1,8 +1,7 @@
-use std::fs::File;
-use std::ops::Deref;
-use std::os::unix::prelude::*;
-use std::ptr;
-use std::slice;
+use super::{AsRawFd, File};
+use core::ops::Deref;
+use core::ptr;
+use core::slice;
 
 pub struct Mmap {
     ptr: *mut libc::c_void,

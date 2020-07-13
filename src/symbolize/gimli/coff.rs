@@ -1,4 +1,5 @@
-use super::{Mapping, Path, Stash, Vec};
+use super::{Context, Mapping, Mmap, Path, Stash, Vec};
+use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
 use object::read::StringTable;
@@ -8,7 +9,6 @@ use object::{Bytes, LittleEndian as LE};
 type Pe = object::pe::ImageNtHeaders32;
 #[cfg(target_pointer_width = "64")]
 type Pe = object::pe::ImageNtHeaders64;
-use std::convert::TryFrom;
 
 impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {

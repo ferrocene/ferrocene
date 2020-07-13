@@ -23,7 +23,7 @@
 
 #![allow(non_snake_case)]
 
-use crate::windows::*;
+use super::windows::*;
 use core::mem;
 use core::ptr;
 

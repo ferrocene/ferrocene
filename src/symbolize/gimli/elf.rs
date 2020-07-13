@@ -1,4 +1,5 @@
-use super::{Mapping, Path, Stash, Vec};
+use super::{Context, Mapping, Mmap, Path, Stash, Vec};
+use core::convert::TryFrom;
 use object::elf::{ELFCOMPRESS_ZLIB, SHF_COMPRESSED};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
@@ -106,30 +107,40 @@ impl<'a> Object<'a> {
                 // Zlib compression is the only known type.
                 return None;
             }
-            let size = header.ch_size(self.endian) as usize;
+            let size = usize::try_from(header.ch_size(self.endian)).ok()?;
             let buf = stash.allocate(size);
             decompress_zlib(data.0, buf)?;
             return Some(buf);
         }
 
         // Check for the nonstandard GNU compression format, i.e., as generated
-        // by ld's `--compress-debug-sections=zlib-gnu` flag.
+        // by ld's `--compress-debug-sections=zlib-gnu` flag. This means that if
+        // we're actually asking for `.debug_info` then we need to look up a
+        // section named `.zdebug_info`.
         if !name.starts_with(".debug_") {
             return None;
         }
-        let zdebug_name = format!(".zdebug_{}", &name[7..]);
-        if let Some(section) = self.section_header(&zdebug_name) {
-            let mut data = section.data(self.endian, self.data).ok()?;
-            if data.read_bytes(8).ok()?.0 != b"ZLIB\0\0\0\0" {
-                return None;
-            }
-            let size = data.read::<object::U32Bytes<_>>().ok()?.get(BigEndian) as usize;
-            let buf = stash.allocate(size);
-            decompress_zlib(data.0, buf)?;
-            return Some(buf);
+        let debug_name = name[7..].as_bytes();
+        let compressed_section = self
+            .sections
+            .iter()
+            .filter_map(|header| {
+                let name = self.sections.section_name(self.endian, header).ok()?;
+                if name.starts_with(b".zdebug_") && &name[8..] == debug_name {
+                    Some(header)
+                } else {
+                    None
+                }
+            })
+            .next()?;
+        let mut data = compressed_section.data(self.endian, self.data).ok()?;
+        if data.read_bytes(8).ok()?.0 != b"ZLIB\0\0\0\0" {
+            return None;
         }
-
-        None
+        let size = usize::try_from(data.read::<object::U32Bytes<_>>().ok()?.get(BigEndian)).ok()?;
+        let buf = stash.allocate(size);
+        decompress_zlib(data.0, buf)?;
+        Some(buf)
     }
 
     fn section_header(&self, name: &str) -> Option<&<Elf as FileHeader>::SectionHeader> {

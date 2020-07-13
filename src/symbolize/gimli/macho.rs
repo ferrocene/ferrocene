@@ -1,4 +1,4 @@
-use super::{Mapping, Path, Stash, Vec};
+use super::{Context, Mapping, Mmap, Path, Stash, Vec};
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};

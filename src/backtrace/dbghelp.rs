@@ -21,8 +21,7 @@
 
 #![allow(bad_style)]
 
-use crate::dbghelp;
-use crate::windows::*;
+use super::super::{dbghelp, windows::*};
 use core::ffi::c_void;
 use core::mem;
 

@@ -27,12 +27,8 @@
 
 #![allow(bad_style)]
 
-use crate::backtrace::FrameImp as Frame;
-use crate::dbghelp;
-use crate::symbolize::ResolveWhat;
-use crate::types::BytesOrWideString;
-use crate::windows::*;
-use crate::SymbolName;
+use super::super::{backtrace::FrameImp as Frame, dbghelp, windows::*};
+use super::{BytesOrWideString, ResolveWhat, SymbolName};
 use core::char;
 use core::ffi::c_void;
 use core::marker;

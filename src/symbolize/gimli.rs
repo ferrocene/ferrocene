@@ -8,18 +8,25 @@ use self::gimli::read::EndianSlice;
 use self::gimli::LittleEndian as Endian;
 use self::mmap::Mmap;
 use self::stash::Stash;
-use crate::symbolize::ResolveWhat;
-use crate::types::BytesOrWideString;
-use crate::SymbolName;
+use super::BytesOrWideString;
+use super::ResolveWhat;
+use super::SymbolName;
 use addr2line::gimli;
 use core::convert::TryInto;
 use core::mem;
 use core::u32;
 use libc::c_void;
-use std::ffi::OsString;
-use std::fs::File;
-use std::path::Path;
-use std::prelude::v1::*;
+use mystd::ffi::OsString;
+use mystd::fs::File;
+use mystd::path::Path;
+use mystd::prelude::v1::*;
+
+#[cfg(backtrace_in_libstd)]
+mod mystd {
+    pub use crate::*;
+}
+#[cfg(not(backtrace_in_libstd))]
+extern crate std as mystd;
 
 #[cfg(windows)]
 #[path = "gimli/mmap_windows.rs"]
@@ -70,8 +77,6 @@ fn cx<'data>(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data
 
 macro_rules! mk {
     (Mapping { $map:expr, $inner:expr, $stash:expr }) => {{
-        use crate::symbolize::gimli::{Context, Mapping, Mmap};
-
         fn assert_lifetimes<'a>(_: &'a Mmap, _: &Context<'a>, _: &'a Stash) {}
         assert_lifetimes(&$map, &$inner, &$stash);
         Mapping {
@@ -93,8 +98,9 @@ fn mmap(path: &Path) -> Option<Mmap> {
 cfg_if::cfg_if! {
     if #[cfg(windows)] {
         use core::mem::MaybeUninit;
-        use crate::windows::*;
-        use std::os::windows::prelude::*;
+        use super::super::windows::*;
+        use mystd::os::windows::prelude::*;
+        use alloc::vec;
 
         mod coff;
         use self::coff::Object;
@@ -183,8 +189,8 @@ cfg_if::cfg_if! {
         // macOS uses the Mach-O file format and uses DYLD-specific APIs to
         // load a list of native libraries that are part of the appplication.
 
-        use std::os::unix::prelude::*;
-        use std::ffi::{OsStr, CStr};
+        use mystd::os::unix::prelude::*;
+        use mystd::ffi::{OsStr, CStr};
 
         mod macho;
         use self::macho::Object;
@@ -336,8 +342,8 @@ cfg_if::cfg_if! {
         // and typically implement an API called `dl_iterate_phdr` to load
         // native libraries.
 
-        use std::os::unix::prelude::*;
-        use std::ffi::{OsStr, CStr};
+        use mystd::os::unix::prelude::*;
+        use mystd::ffi::{OsStr, CStr};
 
         mod elf;
         use self::elf::Object;
@@ -358,7 +364,7 @@ cfg_if::cfg_if! {
             let libs = &mut *(vec as *mut Vec<Library>);
             let name = if (*info).dlpi_name.is_null() || *(*info).dlpi_name == 0{
                 if libs.is_empty() {
-                    std::env::current_exe().map(|e| e.into()).unwrap_or_default()
+                    mystd::env::current_exe().map(|e| e.into()).unwrap_or_default()
                 } else {
                     OsString::new()
                 }
@@ -384,6 +390,7 @@ cfg_if::cfg_if! {
         // Everything else should use ELF, but doesn't know how to load native
         // libraries.
 
+        use mystd::os::unix::prelude::*;
         mod elf;
         use self::elf::Object;
 

@@ -1,4 +1,6 @@
-use crate::BytesOrWideString;
+#[cfg(feature = "std")]
+use super::{BacktraceFrame, BacktraceSymbol};
+use super::{BytesOrWideString, Frame, SymbolName};
 use core::ffi::c_void;
 use core::fmt;
 
@@ -105,7 +107,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     #[cfg(feature = "std")]
-    pub fn backtrace_frame(&mut self, frame: &crate::BacktraceFrame) -> fmt::Result {
+    pub fn backtrace_frame(&mut self, frame: &BacktraceFrame) -> fmt::Result {
         let symbols = frame.symbols();
         for symbol in symbols {
             self.backtrace_symbol(frame, symbol)?;
@@ -125,8 +127,8 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     #[cfg(feature = "std")]
     pub fn backtrace_symbol(
         &mut self,
-        frame: &crate::BacktraceFrame,
-        symbol: &crate::BacktraceSymbol,
+        frame: &BacktraceFrame,
+        symbol: &BacktraceSymbol,
     ) -> fmt::Result {
         self.print_raw(
             frame.ip(),
@@ -144,7 +146,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
 
     /// Prints a raw traced `Frame` and `Symbol`, typically from within the raw
     /// callbacks of this crate.
-    pub fn symbol(&mut self, frame: &crate::Frame, symbol: &crate::Symbol) -> fmt::Result {
+    pub fn symbol(&mut self, frame: &Frame, symbol: &super::Symbol) -> fmt::Result {
         self.print_raw(
             frame.ip(),
             symbol.name(),
@@ -162,7 +164,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     pub fn print_raw(
         &mut self,
         frame_ip: *mut c_void,
-        symbol_name: Option<crate::SymbolName<'_>>,
+        symbol_name: Option<SymbolName<'_>>,
         filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
     ) -> fmt::Result {
@@ -182,7 +184,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     fn print_raw_generic(
         &mut self,
         mut frame_ip: *mut c_void,
-        symbol_name: Option<crate::SymbolName<'_>>,
+        symbol_name: Option<SymbolName<'_>>,
         filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
     ) -> fmt::Result {

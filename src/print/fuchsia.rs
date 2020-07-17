@@ -12,8 +12,8 @@ extern "C" {
     // callback on each call. 'size' gives the size of the dl_phdr_info.
     #[allow(improper_ctypes)]
     fn dl_iterate_phdr(
-        f: extern "C" fn(info: &dl_phdr_info, size: usize, data: &mut DsoPrinter) -> i32,
-        data: &mut DsoPrinter,
+        f: extern "C" fn(info: &dl_phdr_info, size: usize, data: &mut DsoPrinter<'_, '_>) -> i32,
+        data: &mut DsoPrinter<'_, '_>,
     ) -> i32;
 }
 
@@ -224,7 +224,7 @@ const PERM_W: u32 = 0b00000010;
 const PERM_R: u32 = 0b00000100;
 
 impl core::fmt::Display for Perm {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = self.0;
         if v & PERM_R != 0 {
             f.write_char('r')?
@@ -310,7 +310,7 @@ struct HexSlice<'a> {
 }
 
 impl fmt::Display for HexSlice<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for byte in self.bytes {
             write!(f, "{:02x}", byte)?;
         }
@@ -349,8 +349,12 @@ enum Error {
 /// # Arguments
 ///
 /// * `visitor` - A DsoPrinter that will have one of eats methods called foreach DSO.
-fn for_each_dso(mut visitor: &mut DsoPrinter) {
-    extern "C" fn callback(info: &dl_phdr_info, _size: usize, visitor: &mut DsoPrinter) -> i32 {
+fn for_each_dso(mut visitor: &mut DsoPrinter<'_, '_>) {
+    extern "C" fn callback(
+        info: &dl_phdr_info,
+        _size: usize,
+        visitor: &mut DsoPrinter<'_, '_>,
+    ) -> i32 {
         // dl_iterate_phdr ensures that info.name will point to a valid
         // location.
         let name_len = unsafe { libc::strlen(info.name) };

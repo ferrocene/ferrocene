@@ -121,7 +121,11 @@ impl fmt::Debug for Frame {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(
+    if #[cfg(miri)] {
+        mod noop;
+        use self::noop::trace as trace_imp;
+        pub(crate) use self::noop::Frame as FrameImp;
+    } else if #[cfg(
         any(
             all(
                 unix,

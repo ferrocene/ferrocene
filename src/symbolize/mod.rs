@@ -456,7 +456,13 @@ pub fn clear_symbol_cache() {
 }
 
 cfg_if::cfg_if! {
-    if #[cfg(all(windows, target_env = "msvc", not(target_vendor = "uwp")))] {
+    if #[cfg(miri)] {
+        mod noop;
+        use self::noop::resolve as resolve_imp;
+        use self::noop::Symbol as SymbolImp;
+        #[allow(unused)]
+        unsafe fn clear_symbol_cache_imp() {}
+    } else if #[cfg(all(windows, target_env = "msvc", not(target_vendor = "uwp")))] {
         mod dbghelp;
         use self::dbghelp::resolve as resolve_imp;
         use self::dbghelp::Symbol as SymbolImp;

@@ -28,12 +28,19 @@ mod mystd {
 #[cfg(not(backtrace_in_libstd))]
 extern crate std as mystd;
 
-#[cfg(windows)]
-#[path = "gimli/mmap_windows.rs"]
-mod mmap;
-#[cfg(unix)]
-#[path = "gimli/mmap_unix.rs"]
-mod mmap;
+cfg_if::cfg_if! {
+    if #[cfg(windows)] {
+        #[path = "gimli/mmap_windows.rs"]
+        mod mmap;
+    } else if #[cfg(target_env = "devkita64")] {
+        #[path = "gimli/mmap_fake.rs"]
+        mod mmap;
+    } else {
+        #[path = "gimli/mmap_unix.rs"]
+        mod mmap;
+    }
+}
+
 mod stash;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
@@ -385,6 +392,35 @@ cfg_if::cfg_if! {
                 bias: (*info).dlpi_addr as usize,
             });
             0
+        }
+    } else if #[cfg(target_env = "devkita64")] {
+        // DevkitA64 doesn't natively support debug info, but the build system will place debug
+        // info at the path `romfs:/debug_info.elf`.
+        mod elf;
+        use self::elf::Object;
+
+        fn native_libraries() -> Vec<Library> {
+            extern "C" {
+                static __start__: u8;
+            }
+
+            let bias = unsafe { &__start__ } as *const u8 as usize;
+
+            let mut ret = Vec::new();
+            let mut segments = Vec::new();
+            segments.push(LibrarySegment {
+                stated_virtual_memory_address: 0,
+                len: usize::max_value() - bias,
+            });
+
+            let path = "romfs:/debug_info.elf";
+            ret.push(Library {
+                name: path.into(),
+                segments,
+                bias,
+            });
+
+            ret
         }
     } else {
         // Everything else should use ELF, but doesn't know how to load native

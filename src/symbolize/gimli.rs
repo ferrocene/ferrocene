@@ -32,11 +32,20 @@ cfg_if::cfg_if! {
     if #[cfg(windows)] {
         #[path = "gimli/mmap_windows.rs"]
         mod mmap;
-    } else if #[cfg(target_env = "devkita64")] {
-        #[path = "gimli/mmap_fake.rs"]
+    } else if #[cfg(any(
+        target_os = "android",
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "ios",
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "openbsd",
+        target_os = "solaris",
+    ))] {
+        #[path = "gimli/mmap_unix.rs"]
         mod mmap;
     } else {
-        #[path = "gimli/mmap_unix.rs"]
+        #[path = "gimli/mmap_fake.rs"]
         mod mmap;
     }
 }

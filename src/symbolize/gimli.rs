@@ -402,7 +402,7 @@ cfg_if::cfg_if! {
             });
             0
         }
-    } else if #[cfg(target_env = "devkita64")] {
+    } else if #[cfg(target_env = "libnx")] {
         // DevkitA64 doesn't natively support debug info, but the build system will place debug
         // info at the path `romfs:/debug_info.elf`.
         mod elf;

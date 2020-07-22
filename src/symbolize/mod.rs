@@ -481,6 +481,7 @@ cfg_if::cfg_if! {
     } else if #[cfg(all(
         feature = "gimli-symbolize",
         any(unix, windows),
+        not(target_vendor = "uwp"),
         not(target_os = "emscripten"),
     ))] {
         mod gimli;

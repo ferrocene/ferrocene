@@ -14,7 +14,8 @@ fn main() {
         target.contains("hermit") ||
         target.contains("wasm32") ||
         target.contains("fuchsia") ||
-        target.contains("uclibc")
+        target.contains("uclibc") ||
+        target.contains("libnx")
     {
         println!("cargo:rustc-cfg=empty");
         return;

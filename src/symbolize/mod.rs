@@ -473,6 +473,7 @@ cfg_if::cfg_if! {
         not(target_os = "fuchsia"),
         not(target_os = "emscripten"),
         not(target_env = "uclibc"),
+        not(target_env = "libnx"),
     ))] {
         mod libbacktrace;
         use self::libbacktrace::resolve as resolve_imp;

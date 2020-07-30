@@ -682,4 +682,11 @@ impl Symbol<'_> {
             Symbol::Symtab { .. } => None,
         }
     }
+
+    pub fn colno(&self) -> Option<u32> {
+        match self {
+            Symbol::Frame { location, .. } => location.as_ref()?.column,
+            Symbol::Symtab { .. } => None,
+        }
+    }
 }

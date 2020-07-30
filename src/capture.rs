@@ -94,6 +94,7 @@ pub struct BacktraceSymbol {
     addr: Option<usize>,
     filename: Option<PathBuf>,
     lineno: Option<u32>,
+    colno: Option<u32>,
 }
 
 impl Backtrace {
@@ -213,6 +214,7 @@ impl Backtrace {
                         addr: symbol.addr().map(|a| a as usize),
                         filename: symbol.filename().map(|m| m.to_owned()),
                         lineno: symbol.lineno(),
+                        colno: symbol.colno(),
                     });
                 };
                 match frame.frame {
@@ -322,6 +324,16 @@ impl BacktraceSymbol {
     pub fn lineno(&self) -> Option<u32> {
         self.lineno
     }
+
+    /// Same as `Symbol::colno`
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
+    pub fn colno(&self) -> Option<u32> {
+        self.colno
+    }
 }
 
 impl fmt::Debug for Backtrace {
@@ -383,6 +395,7 @@ impl fmt::Debug for BacktraceSymbol {
             .field("addr", &self.addr())
             .field("filename", &self.filename())
             .field("lineno", &self.lineno())
+            .field("colno", &self.colno())
             .finish()
     }
 }

@@ -1,8 +1,36 @@
 use backtrace::Frame;
 use std::thread;
 
-static LIBBACKTRACE: bool = cfg!(feature = "libbacktrace") && !cfg!(target_os = "fuchsia");
-static GIMLI_SYMBOLIZE: bool = cfg!(all(feature = "gimli-symbolize", unix, target_os = "linux"));
+// Reflects the conditional compilation logic at end of src/symbolize/mod.rs
+static NOOP: bool = cfg!(miri);
+static DBGHELP: bool = !NOOP
+    && cfg!(all(
+        windows,
+        target_env = "msvc",
+        not(target_vendor = "uwp")
+    ));
+static LIBBACKTRACE: bool = !NOOP
+    && !DBGHELP
+    && cfg!(all(
+        feature = "libbacktrace",
+        any(
+            unix,
+            all(windows, not(target_vendor = "uwp"), target_env = "gnu")
+        ),
+        not(target_os = "fuchsia"),
+        not(target_os = "emscripten"),
+        not(target_env = "uclibc"),
+        not(target_env = "libnx"),
+    ));
+static GIMLI_SYMBOLIZE: bool = !NOOP
+    && !DBGHELP
+    && !LIBBACKTRACE
+    && cfg!(all(
+        feature = "gimli-symbolize",
+        any(unix, windows),
+        not(target_vendor = "uwp"),
+        not(target_os = "emscripten"),
+    ));
 
 #[test]
 // FIXME: shouldn't ignore this test on i686-msvc, unsure why it's failing
@@ -46,6 +74,7 @@ fn smoke_test_frames() {
             "frame_4",
             "tests/smoke.rs",
             start_line + 6,
+            9,
         );
         assert_frame(
             frames.next().unwrap(),
@@ -53,6 +82,7 @@ fn smoke_test_frames() {
             "frame_3",
             "tests/smoke.rs",
             start_line + 3,
+            52,
         );
         assert_frame(
             frames.next().unwrap(),
@@ -60,6 +90,7 @@ fn smoke_test_frames() {
             "frame_2",
             "tests/smoke.rs",
             start_line + 2,
+            52,
         );
         assert_frame(
             frames.next().unwrap(),
@@ -67,12 +98,14 @@ fn smoke_test_frames() {
             "frame_1",
             "tests/smoke.rs",
             start_line + 1,
+            52,
         );
         assert_frame(
             frames.next().unwrap(),
             smoke_test_frames as usize,
             "smoke_test_frames",
             "",
+            0,
             0,
         );
     }
@@ -83,6 +116,7 @@ fn smoke_test_frames() {
         expected_name: &str,
         expected_file: &str,
         expected_line: u32,
+        expected_col: u32,
     ) {
         backtrace::resolve_frame(frame, |sym| {
             print!("symbol  ip:{:?} address:{:?} ", frame.ip(), frame.symbol_address());
@@ -95,6 +129,9 @@ fn smoke_test_frames() {
             if let Some(lineno) = sym.lineno() {
                 print!("lineno:{} ", lineno);
             }
+            if let Some(colno) = sym.colno() {
+                print!("colno:{} ", colno);
+            }
             println!();
         });
 
@@ -103,12 +140,13 @@ fn smoke_test_frames() {
         assert!(ip >= sym);
         assert!(
             sym >= actual_fn_pointer,
-            "{:?} < {:?} ({} {}:{})",
+            "{:?} < {:?} ({} {}:{}:{})",
             sym as *const usize,
             actual_fn_pointer as *const usize,
             expected_name,
             expected_file,
             expected_line,
+            expected_col,
         );
 
         // windows dbghelp is *quite* liberal (and wrong) in many of its reports
@@ -121,15 +159,18 @@ fn smoke_test_frames() {
 
         let mut resolved = 0;
         let can_resolve = LIBBACKTRACE || GIMLI_SYMBOLIZE;
+        let can_resolve_cols = GIMLI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;
+        let mut col  = None;
         let mut line = None;
         let mut file = None;
         backtrace::resolve_frame(frame, |sym| {
             resolved += 1;
             name = sym.name().map(|v| v.to_string());
             addr = sym.addr();
+            col  = sym.colno();
             line = sym.lineno();
             file = sym.filename().map(|v| v.to_path_buf());
         });
@@ -178,6 +219,18 @@ fn smoke_test_frames() {
                     line,
                     expected_line
                 );
+            }
+            if can_resolve_cols {
+                let col = col.expect("didn't find a column number");
+                if expected_col != 0 {
+                    assert!(
+                        col == expected_col,
+                        "bad column number on frame for `{}`: {} != {}",
+                        expected_name,
+                        col,
+                        expected_col
+                    );
+                }
             }
         }
     }

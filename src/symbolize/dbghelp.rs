@@ -62,6 +62,10 @@ impl Symbol<'_> {
             .map(|slice| unsafe { BytesOrWideString::Wide(&*slice) })
     }
 
+    pub fn colno(&self) -> Option<u32> {
+        None
+    }
+
     pub fn lineno(&self) -> Option<u32> {
         self.line
     }

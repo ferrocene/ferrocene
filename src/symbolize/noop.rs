@@ -32,4 +32,8 @@ impl Symbol<'_> {
     pub fn lineno(&self) -> Option<u32> {
         None
     }
+
+    pub fn colno(&self) -> Option<u32> {
+        None
+    }
 }

@@ -149,6 +149,10 @@ impl Symbol<'_> {
             Symbol::Pcinfo { lineno, .. } => Some(lineno as u32),
         }
     }
+
+    pub fn colno(&self) -> Option<u32> {
+        None
+    }
 }
 
 extern "C" fn error_cb(_data: *mut c_void, _msg: *const c_char, _errnum: c_int) {

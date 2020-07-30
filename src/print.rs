@@ -130,7 +130,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         frame: &BacktraceFrame,
         symbol: &BacktraceSymbol,
     ) -> fmt::Result {
-        self.print_raw(
+        self.print_raw_with_column(
             frame.ip(),
             symbol.name(),
             // TODO: this isn't great that we don't end up printing anything
@@ -140,6 +140,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
                 .filename()
                 .and_then(|p| Some(BytesOrWideString::Bytes(p.to_str()?.as_bytes()))),
             symbol.lineno(),
+            symbol.colno(),
         )?;
         Ok(())
     }
@@ -147,11 +148,12 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     /// Prints a raw traced `Frame` and `Symbol`, typically from within the raw
     /// callbacks of this crate.
     pub fn symbol(&mut self, frame: &Frame, symbol: &super::Symbol) -> fmt::Result {
-        self.print_raw(
+        self.print_raw_with_column(
             frame.ip(),
             symbol.name(),
             symbol.filename_raw(),
             symbol.lineno(),
+            symbol.colno(),
         )?;
         Ok(())
     }
@@ -174,7 +176,32 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         if cfg!(target_os = "fuchsia") {
             self.print_raw_fuchsia(frame_ip)?;
         } else {
-            self.print_raw_generic(frame_ip, symbol_name, filename, lineno)?;
+            self.print_raw_generic(frame_ip, symbol_name, filename, lineno, None)?;
+        }
+        self.symbol_index += 1;
+        Ok(())
+    }
+
+    /// Adds a raw frame to the backtrace output, including column information.
+    ///
+    /// This method, like the previous, takes the raw arguments in case
+    /// they're being source from different locations. Note that this may be
+    /// called multiple times for one frame.
+    pub fn print_raw_with_column(
+        &mut self,
+        frame_ip: *mut c_void,
+        symbol_name: Option<SymbolName<'_>>,
+        filename: Option<BytesOrWideString<'_>>,
+        lineno: Option<u32>,
+        colno: Option<u32>,
+    ) -> fmt::Result {
+        // Fuchsia is unable to symbolize within a process so it has a special
+        // format which can be used to symbolize later. Print that instead of
+        // printing addresses in our own format here.
+        if cfg!(target_os = "fuchsia") {
+            self.print_raw_fuchsia(frame_ip)?;
+        } else {
+            self.print_raw_generic(frame_ip, symbol_name, filename, lineno, colno)?;
         }
         self.symbol_index += 1;
         Ok(())
@@ -187,6 +214,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         symbol_name: Option<SymbolName<'_>>,
         filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
+        colno: Option<u32>,
     ) -> fmt::Result {
         // No need to print "null" frames, it basically just means that the
         // system backtrace was a bit eager to trace back super far.
@@ -232,13 +260,18 @@ impl BacktraceFrameFmt<'_, '_, '_> {
 
         // And last up, print out the filename/line number if they're available.
         if let (Some(file), Some(line)) = (filename, lineno) {
-            self.print_fileline(file, line)?;
+            self.print_fileline(file, line, colno)?;
         }
 
         Ok(())
     }
 
-    fn print_fileline(&mut self, file: BytesOrWideString<'_>, line: u32) -> fmt::Result {
+    fn print_fileline(
+        &mut self,
+        file: BytesOrWideString<'_>,
+        line: u32,
+        colno: Option<u32>,
+    ) -> fmt::Result {
         // Filename/line are printed on lines under the symbol name, so print
         // some appropriate whitespace to sort of right-align ourselves.
         if let PrintFmt::Full = self.fmt.format {
@@ -249,7 +282,14 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         // Delegate to our internal callback to print the filename and then
         // print out the line number.
         (self.fmt.print_path)(self.fmt.fmt, file)?;
-        write!(self.fmt.fmt, ":{}\n", line)?;
+        write!(self.fmt.fmt, ":{}", line)?;
+
+        // Add column number, if available.
+        if let Some(colno) = colno {
+            write!(self.fmt.fmt, ":{}", colno)?;
+        }
+
+        write!(self.fmt.fmt, "\n")?;
         Ok(())
     }
 

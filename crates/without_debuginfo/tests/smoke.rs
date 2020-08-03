@@ -27,3 +27,18 @@ fn all_frames_have_symbols() {
         assert_eq!(missing_symbols, 0);
     }
 }
+
+#[test]
+fn all_frames_have_module_base_address() {
+    let mut missing_base_addresses = 0;
+    backtrace::trace(|frame| {
+        if frame.module_base_address().is_none() {
+            missing_base_addresses += 1;
+        }
+        true
+    });
+
+    if cfg!(windows) {
+        assert_eq!(missing_base_addresses, 0);
+    }
+}

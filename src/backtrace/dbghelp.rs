@@ -26,9 +26,15 @@ use core::ffi::c_void;
 use core::mem;
 
 #[derive(Clone, Copy)]
-pub enum Frame {
+pub enum StackFrame {
     New(STACKFRAME_EX),
     Old(STACKFRAME64),
+}
+
+#[derive(Clone, Copy)]
+pub struct Frame {
+    pub(crate) stack_frame: StackFrame,
+    base_address: *mut c_void,
 }
 
 // we're just sending around raw pointers and reading them, never interpreting
@@ -49,38 +55,42 @@ impl Frame {
         self.ip()
     }
 
+    pub fn module_base_address(&self) -> Option<*mut c_void> {
+        Some(self.base_address)
+    }
+
     fn addr_pc(&self) -> &ADDRESS64 {
-        match self {
-            Frame::New(new) => &new.AddrPC,
-            Frame::Old(old) => &old.AddrPC,
+        match self.stack_frame {
+            StackFrame::New(ref new) => &new.AddrPC,
+            StackFrame::Old(ref old) => &old.AddrPC,
         }
     }
 
     fn addr_pc_mut(&mut self) -> &mut ADDRESS64 {
-        match self {
-            Frame::New(new) => &mut new.AddrPC,
-            Frame::Old(old) => &mut old.AddrPC,
+        match self.stack_frame {
+            StackFrame::New(ref mut new) => &mut new.AddrPC,
+            StackFrame::Old(ref mut old) => &mut old.AddrPC,
         }
     }
 
     fn addr_frame_mut(&mut self) -> &mut ADDRESS64 {
-        match self {
-            Frame::New(new) => &mut new.AddrFrame,
-            Frame::Old(old) => &mut old.AddrFrame,
+        match self.stack_frame {
+            StackFrame::New(ref mut new) => &mut new.AddrFrame,
+            StackFrame::Old(ref mut old) => &mut old.AddrFrame,
         }
     }
 
     fn addr_stack(&self) -> &ADDRESS64 {
-        match self {
-            Frame::New(new) => &new.AddrStack,
-            Frame::Old(old) => &old.AddrStack,
+        match self.stack_frame {
+            StackFrame::New(ref new) => &new.AddrStack,
+            StackFrame::Old(ref old) => &old.AddrStack,
         }
     }
 
     fn addr_stack_mut(&mut self) -> &mut ADDRESS64 {
-        match self {
-            Frame::New(new) => &mut new.AddrStack,
-            Frame::Old(old) => &mut old.AddrStack,
+        match self.stack_frame {
+            StackFrame::New(ref mut new) => &mut new.AddrStack,
+            StackFrame::Old(ref mut old) => &mut old.AddrStack,
         }
     }
 }
@@ -131,16 +141,21 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         }
     }
 
+    let process_handle = GetCurrentProcess();
+
     // Attempt to use `StackWalkEx` if we can, but fall back to `StackWalk64`
     // since it's in theory supported on more systems.
     match (*dbghelp.dbghelp()).StackWalkEx() {
         Some(StackWalkEx) => {
             let mut frame = super::Frame {
-                inner: Frame::New(mem::zeroed()),
+                inner: Frame {
+                    stack_frame: StackFrame::New(mem::zeroed()),
+                    base_address: 0 as _,
+                },
             };
             let image = init_frame(&mut frame.inner, &context.0);
-            let frame_ptr = match &mut frame.inner {
-                Frame::New(ptr) => ptr as *mut STACKFRAME_EX,
+            let frame_ptr = match &mut frame.inner.stack_frame {
+                StackFrame::New(ptr) => ptr as *mut STACKFRAME_EX,
                 _ => unreachable!(),
             };
 
@@ -157,6 +172,8 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 0,
             ) == TRUE
             {
+                frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
+
                 if !cb(&frame) {
                     break;
                 }
@@ -164,11 +181,14 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         }
         None => {
             let mut frame = super::Frame {
-                inner: Frame::Old(mem::zeroed()),
+                inner: Frame {
+                    stack_frame: StackFrame::Old(mem::zeroed()),
+                    base_address: 0 as _,
+                },
             };
             let image = init_frame(&mut frame.inner, &context.0);
-            let frame_ptr = match &mut frame.inner {
-                Frame::Old(ptr) => ptr as *mut STACKFRAME64,
+            let frame_ptr = match &mut frame.inner.stack_frame {
+                StackFrame::Old(ptr) => ptr as *mut STACKFRAME64,
                 _ => unreachable!(),
             };
 
@@ -184,6 +204,8 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 None,
             ) == TRUE
             {
+                frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
+
                 if !cb(&frame) {
                     break;
                 }

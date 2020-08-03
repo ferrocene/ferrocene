@@ -109,6 +109,11 @@ impl Frame {
     pub fn symbol_address(&self) -> *mut c_void {
         self.inner.symbol_address()
     }
+
+    /// Returns the base address of the module to which the frame belongs.
+    pub fn module_base_address(&self) -> Option<*mut c_void> {
+        self.inner.module_base_address()
+    }
 }
 
 impl fmt::Debug for Frame {
@@ -145,6 +150,7 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use self::dbghelp::trace as trace_imp;
         pub(crate) use self::dbghelp::Frame as FrameImp;
+        pub(crate) use self::dbghelp::StackFrame;
     } else {
         mod noop;
         use self::noop::trace as trace_imp;

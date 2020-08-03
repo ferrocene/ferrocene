@@ -79,6 +79,10 @@ impl Frame {
             unsafe { uw::_Unwind_FindEnclosingFunction(self.ip()) }
         }
     }
+
+    pub fn module_base_address(&self) -> Option<*mut c_void> {
+        None
+    }
 }
 
 impl Clone for Frame {

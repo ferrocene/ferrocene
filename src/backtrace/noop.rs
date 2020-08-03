@@ -21,4 +21,8 @@ impl Frame {
     pub fn symbol_address(&self) -> *mut c_void {
         0 as *mut _
     }
+
+    pub fn module_base_address(&self) -> Option<*mut c_void> {
+        None
+    }
 }

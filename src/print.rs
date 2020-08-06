@@ -170,16 +170,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
         filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
     ) -> fmt::Result {
-        // Fuchsia is unable to symbolize within a process so it has a special
-        // format which can be used to symbolize later. Print that instead of
-        // printing addresses in our own format here.
-        if cfg!(target_os = "fuchsia") {
-            self.print_raw_fuchsia(frame_ip)?;
-        } else {
-            self.print_raw_generic(frame_ip, symbol_name, filename, lineno, None)?;
-        }
-        self.symbol_index += 1;
-        Ok(())
+        self.print_raw_with_column(frame_ip, symbol_name, filename, lineno, None)
     }
 
     /// Adds a raw frame to the backtrace output, including column information.

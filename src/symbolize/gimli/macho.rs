@@ -161,7 +161,7 @@ impl<'a> Object<'a> {
                     .filter_map(|nlist: &MachNlist| {
                         let name = nlist.name(endian, symbols.strings()).ok()?;
                         if name.len() > 0 && !nlist.is_undefined() {
-                            Some((name, nlist.n_value(endian)))
+                            Some((name, u64::from(nlist.n_value(endian))))
                         } else {
                             None
                         }

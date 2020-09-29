@@ -465,10 +465,9 @@ pub fn clear_symbol_cache() {
 
 cfg_if::cfg_if! {
     if #[cfg(miri)] {
-        mod noop;
-        use self::noop::resolve as resolve_imp;
-        use self::noop::Symbol as SymbolImp;
-        #[allow(unused)]
+        mod miri;
+        use self::miri::resolve as resolve_imp;
+        use self::miri::Symbol as SymbolImp;
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(windows, target_env = "msvc", not(target_vendor = "uwp")))] {
         mod dbghelp;

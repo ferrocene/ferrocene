@@ -5,7 +5,7 @@
 //! intended to wholesale replace the `libbacktrace.rs` implementation.
 
 use self::gimli::read::EndianSlice;
-use self::gimli::LittleEndian as Endian;
+use self::gimli::NativeEndian as Endian;
 use self::mmap::Mmap;
 use self::stash::Stash;
 use super::BytesOrWideString;

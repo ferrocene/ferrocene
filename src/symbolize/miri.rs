@@ -1,9 +1,9 @@
 use core::ffi::c_void;
 use core::marker::PhantomData;
 
-use crate::backtrace::miri::{resolve_addr, Frame};
-use crate::symbolize::{ResolveWhat, SymbolName};
-use crate::types::BytesOrWideString;
+use super::super::backtrace::miri::{resolve_addr, Frame};
+use super::BytesOrWideString;
+use super::{ResolveWhat, SymbolName};
 
 pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
     let sym = match what {
@@ -45,10 +45,10 @@ impl<'a> Symbol<'a> {
         Some(self.inner.inner.colno)
     }
 
-    pub fn filename(&self) -> Option<&::std::path::Path> {
-        use std::path::Path;
-        Some(Path::new(
-            std::str::from_utf8(&self.inner.inner.filename).unwrap(),
+    #[cfg(feature = "std")]
+    pub fn filename(&self) -> Option<&std::path::Path> {
+        Some(std::path::Path::new(
+            core::str::from_utf8(&self.inner.inner.filename).unwrap(),
         ))
     }
 }

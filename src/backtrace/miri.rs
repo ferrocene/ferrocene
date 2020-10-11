@@ -1,5 +1,5 @@
-use std::boxed::Box;
-use std::ffi::c_void;
+use alloc::boxed::Box;
+use core::ffi::c_void;
 
 extern "Rust" {
     fn miri_get_backtrace(flags: u64) -> Box<[*mut ()]>;
@@ -32,7 +32,7 @@ impl Frame {
     }
 
     pub fn sp(&self) -> *mut c_void {
-        std::ptr::null_mut()
+        core::ptr::null_mut()
     }
 
     pub fn symbol_address(&self) -> *mut c_void {

@@ -12,14 +12,14 @@ doctest = false
 bench = false
 
 [dependencies]
-cfg-if = "0.1.10"
+cfg-if = "1.0"
 rustc-demangle = "0.1.4"
 libc = { version = "0.2.45", default-features = false }
-addr2line = { version = "0.12.0", default-features = false }
+addr2line = { version = "0.13.0", default-features = false }
 miniz_oxide = { version = "0.4.0", default-features = false }
 
 [dependencies.object]
-version = "0.20.0"
+version = "0.21"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned']
 

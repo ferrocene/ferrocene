@@ -13,7 +13,8 @@ fn main() {
     // These run in docker containers on CI where they can't re-exec the test,
     // so just skip these for CI. No other reason this can't run on those
     // platforms though.
-    if cfg!(unix) && (cfg!(target_arch = "arm") || cfg!(target_arch = "aarch64")) {
+    // Miri does not have support for re-execing a file
+    if cfg!(unix) && (cfg!(target_arch = "arm") || cfg!(target_arch = "aarch64")) || cfg!(miri) {
         println!("test result: ok");
         return;
     }

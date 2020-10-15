@@ -13,6 +13,7 @@ pub struct MiriFrame {
     pub filename: Box<[u8]>,
     pub lineno: u32,
     pub colno: u32,
+    pub fn_ptr: *mut c_void,
 }
 
 #[derive(Debug, Clone)]
@@ -36,7 +37,7 @@ impl Frame {
     }
 
     pub fn symbol_address(&self) -> *mut c_void {
-        self.addr
+        self.inner.fn_ptr
     }
 
     pub fn module_base_address(&self) -> Option<*mut c_void> {

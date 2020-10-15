@@ -192,3 +192,14 @@ jobs:
     - name: Install Rust
       run: rustup update 1.40.0 && rustup default 1.40.0
     - run: cargo build
+
+  miri:
+    name: Miri
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: Install Rust
+      run: ./ci/miri-rustup.sh
+    - run: MIRIFLAGS="-Zmiri-disable-isolation" cargo miri test

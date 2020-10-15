@@ -22,6 +22,8 @@ fn doit() {
     !cfg!(target_env = "musl")
     // Skip MinGW on libbacktrace which doesn't have support for DLLs.
     && !(cfg!(windows) && cfg!(target_env = "gnu") && cfg!(feature = "libbacktrace"))
+    // Skip Miri, since it doesn't support dynamic libraries.
+    && !cfg!(miri)
     {
         // TODO(#238) this shouldn't have to happen first in this function, but
         // currently it does.

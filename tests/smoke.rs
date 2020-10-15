@@ -2,7 +2,7 @@ use backtrace::Frame;
 use std::thread;
 
 // Reflects the conditional compilation logic at end of src/symbolize/mod.rs
-static NOOP: bool = cfg!(miri);
+static NOOP: bool = false;
 static DBGHELP: bool = !NOOP
     && cfg!(all(
         windows,
@@ -31,6 +31,7 @@ static GIMLI_SYMBOLIZE: bool = !NOOP
         not(target_vendor = "uwp"),
         not(target_os = "emscripten"),
     ));
+static MIRI_SYMBOLIZE: bool = cfg!(miri);
 
 #[test]
 // FIXME: shouldn't ignore this test on i686-msvc, unsure why it's failing
@@ -158,8 +159,8 @@ fn smoke_test_frames() {
         }
 
         let mut resolved = 0;
-        let can_resolve = LIBBACKTRACE || GIMLI_SYMBOLIZE;
-        let can_resolve_cols = GIMLI_SYMBOLIZE;
+        let can_resolve = LIBBACKTRACE || GIMLI_SYMBOLIZE || MIRI_SYMBOLIZE;
+        let can_resolve_cols = GIMLI_SYMBOLIZE || MIRI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;

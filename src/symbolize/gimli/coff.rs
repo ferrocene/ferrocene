@@ -52,7 +52,7 @@ impl<'a> Object<'a> {
         let mut i = 0;
         let len = symtab.len();
         while i < len {
-            let sym = symtab.symbol(i)?;
+            let sym = symtab.symbol(i).ok()?;
             i += 1 + sym.number_of_aux_symbols as usize;
             let section_number = sym.section_number.get(LE);
             if sym.derived_type() != object::pe::IMAGE_SYM_DTYPE_FUNCTION || section_number == 0 {

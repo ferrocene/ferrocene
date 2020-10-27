@@ -99,7 +99,7 @@ pub struct BacktraceFrameFmt<'fmt, 'a, 'b> {
 impl BacktraceFrameFmt<'_, '_, '_> {
     /// Prints a `BacktraceFrame` with this frame formatter.
     ///
-    /// This will recusrively print all `BacktraceSymbol` instances within the
+    /// This will recursively print all `BacktraceSymbol` instances within the
     /// `BacktraceFrame`.
     ///
     /// # Required features

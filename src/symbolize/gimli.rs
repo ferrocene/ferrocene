@@ -1,8 +1,6 @@
 //! Support for symbolication using the `gimli` crate on crates.io
 //!
-//! This implementation is largely a work in progress and is off by default for
-//! all platforms, but it's hoped to be developed over time! Long-term this is
-//! intended to wholesale replace the `libbacktrace.rs` implementation.
+//! This is the default symbolication implementation for Rust.
 
 use self::gimli::read::EndianSlice;
 use self::gimli::NativeEndian as Endian;

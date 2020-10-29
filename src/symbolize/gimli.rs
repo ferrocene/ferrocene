@@ -54,11 +54,6 @@ mod stash;
 
 const MAPPINGS_CACHE_SIZE: usize = 4;
 
-struct Context<'a> {
-    dwarf: addr2line::Context<EndianSlice<'a, Endian>>,
-    object: Object<'a>,
-}
-
 struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     cx: Context<'static>,
@@ -66,43 +61,53 @@ struct Mapping {
     _stash: Stash,
 }
 
-fn cx<'data>(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data>> {
-    fn load_section<'data, S>(stash: &'data Stash, obj: &Object<'data>) -> S
+impl Mapping {
+    fn mk<F>(data: Mmap, mk: F) -> Option<Mapping>
     where
-        S: gimli::Section<gimli::EndianSlice<'data, Endian>>,
+        F: for<'a> Fn(&'a [u8], &'a Stash) -> Option<Context<'a>>,
     {
-        let data = obj.section(stash, S::section_name()).unwrap_or(&[]);
-        S::from(EndianSlice::new(data, Endian))
-    }
-
-    let dwarf = addr2line::Context::from_sections(
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        load_section(stash, &object),
-        gimli::EndianSlice::new(&[], Endian),
-    )
-    .ok()?;
-    Some(Context { dwarf, object })
-}
-
-macro_rules! mk {
-    (Mapping { $map:expr, $inner:expr, $stash:expr }) => {{
-        fn assert_lifetimes<'a>(_: &'a Mmap, _: &Context<'a>, _: &'a Stash) {}
-        assert_lifetimes(&$map, &$inner, &$stash);
-        Mapping {
+        let stash = Stash::new();
+        let cx = mk(&data, &stash)?;
+        Some(Mapping {
             // Convert to 'static lifetimes since the symbols should
             // only borrow `map` and `stash` and we're preserving them below.
-            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>($inner) },
-            _map: $map,
-            _stash: $stash,
+            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
+            _map: data,
+            _stash: stash,
+        })
+    }
+}
+
+struct Context<'a> {
+    dwarf: addr2line::Context<EndianSlice<'a, Endian>>,
+    object: Object<'a>,
+}
+
+impl<'data> Context<'data> {
+    fn new(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data>> {
+        fn load_section<'data, S>(stash: &'data Stash, obj: &Object<'data>) -> S
+        where
+            S: gimli::Section<gimli::EndianSlice<'data, Endian>>,
+        {
+            let data = obj.section(stash, S::section_name()).unwrap_or(&[]);
+            S::from(EndianSlice::new(data, Endian))
         }
-    }};
+
+        let dwarf = addr2line::Context::from_sections(
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            load_section(stash, &object),
+            gimli::EndianSlice::new(&[], Endian),
+        )
+        .ok()?;
+        Some(Context { dwarf, object })
+    }
 }
 
 fn mmap(path: &Path) -> Option<Mmap> {

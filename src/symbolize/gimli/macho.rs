@@ -1,4 +1,4 @@
-use super::{Box, Context, Mapping, Mmap, Path, Stash, Vec};
+use super::{Box, Context, Mapping, Path, Stash, Vec};
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};
@@ -30,8 +30,25 @@ impl Mapping {
         // contains and try to find a macho file which has a matching UUID as
         // the one of our own file. If we find a match that's the dwarf file we
         // want to return.
-        let parent = path.parent()?;
-        for entry in parent.read_dir().ok()? {
+        if let Some(parent) = path.parent() {
+            if let Some(mapping) = Mapping::load_dsym(parent, uuid) {
+                return Some(mapping);
+            }
+        }
+
+        // Looks like nothing matched our UUID, so let's at least return our own
+        // file. This should have the symbol table for at least some
+        // symbolication purposes.
+        Mapping::mk(map, |data, stash| {
+            let (macho, data) = find_header(Bytes(data))?;
+            let endian = macho.endian().ok()?;
+            let obj = Object::parse(macho, endian, data)?;
+            Context::new(stash, obj)
+        })
+    }
+
+    fn load_dsym(dir: &Path, uuid: [u8; 16]) -> Option<Mapping> {
+        for entry in dir.read_dir().ok()? {
             let entry = entry.ok()?;
             let filename = match entry.file_name().into_string() {
                 Ok(name) => name,
@@ -41,38 +58,36 @@ impl Mapping {
                 continue;
             }
             let candidates = entry.path().join("Contents/Resources/DWARF");
-            if let Some(mapping) = load_dsym(&candidates, uuid) {
+            if let Some(mapping) = Mapping::try_dsym_candidate(&candidates, uuid) {
                 return Some(mapping);
             }
         }
+        None
+    }
 
-        // Looks like nothing matched our UUID, so let's at least return our own
-        // file. This should have the symbol table for at least some
-        // symbolication purposes.
-        let stash = Stash::new();
-        let inner = super::cx(&stash, Object::parse(macho, endian, data)?)?;
-        return Some(mk!(Mapping { map, inner, stash }));
-
-        fn load_dsym(dir: &Path, uuid: [u8; 16]) -> Option<Mapping> {
-            for entry in dir.read_dir().ok()? {
-                let entry = entry.ok()?;
-                let map = super::mmap(&entry.path())?;
-                let (macho, data) = find_header(Bytes(&map))?;
+    fn try_dsym_candidate(dir: &Path, uuid: [u8; 16]) -> Option<Mapping> {
+        // Look for files in the `DWARF` directory which have a matching uuid to
+        // the original object file. If we find one then we found the debug
+        // information.
+        for entry in dir.read_dir().ok()? {
+            let entry = entry.ok()?;
+            let map = super::mmap(&entry.path())?;
+            let candidate = Mapping::mk(map, |data, stash| {
+                let (macho, data) = find_header(Bytes(data))?;
                 let endian = macho.endian().ok()?;
                 let entry_uuid = macho.uuid(endian, data).ok()??;
                 if entry_uuid != uuid {
-                    continue;
+                    return None;
                 }
-                let stash = Stash::new();
-                if let Some(cx) =
-                    Object::parse(macho, endian, data).and_then(|o| super::cx(&stash, o))
-                {
-                    return Some(mk!(Mapping { map, cx, stash }));
-                }
+                let obj = Object::parse(macho, endian, data)?;
+                Context::new(stash, obj)
+            });
+            if let Some(candidate) = candidate {
+                return Some(candidate);
             }
-
-            None
         }
+
+        None
     }
 }
 
@@ -269,25 +284,30 @@ fn object_mapping(path: &[u8]) -> Option<Mapping> {
     let map;
 
     // `N_OSO` symbol names can be either `/path/to/object.o` or `/path/to/archive.a(object.o)`.
-    let data = if let Some((archive_path, member_name)) = split_archive_path(path) {
+    let member_name = if let Some((archive_path, member_name)) = split_archive_path(path) {
         map = super::mmap(Path::new(OsStr::from_bytes(archive_path)))?;
-        let archive = object::read::archive::ArchiveFile::parse(&map).ok()?;
-        let member = archive
-            .members()
-            .filter_map(Result::ok)
-            .find(|m| m.name() == member_name)?;
-        Bytes(member.data())
+        Some(member_name)
     } else {
         map = super::mmap(Path::new(OsStr::from_bytes(path)))?;
-        Bytes(&map)
+        None
     };
-
-    let (macho, data) = find_header(data)?;
-    let endian = macho.endian().ok()?;
-    let object = Object::parse(macho, endian, data)?;
-    let stash = Stash::new();
-    let inner = super::cx(&stash, object)?;
-    Some(mk!(Mapping { map, inner, stash }))
+    Mapping::mk(map, |data, stash| {
+        let data = match member_name {
+            Some(member_name) => {
+                let archive = object::read::archive::ArchiveFile::parse(data).ok()?;
+                let member = archive
+                    .members()
+                    .filter_map(Result::ok)
+                    .find(|m| m.name() == member_name)?;
+                Bytes(member.data())
+            }
+            None => Bytes(data),
+        };
+        let (macho, data) = find_header(data)?;
+        let endian = macho.endian().ok()?;
+        let obj = Object::parse(macho, endian, data)?;
+        Context::new(stash, obj)
+    })
 }
 
 fn split_archive_path(path: &[u8]) -> Option<(&[u8], &[u8])> {

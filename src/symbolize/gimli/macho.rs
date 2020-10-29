@@ -1,4 +1,4 @@
-use super::{Context, Mapping, Mmap, Path, Stash, Vec};
+use super::{Box, Context, Mapping, Mmap, Path, Stash, Vec};
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};
@@ -137,21 +137,32 @@ fn find_header(mut data: Bytes<'_>) -> Option<(&'_ Mach, Bytes<'_>)> {
     Mach::parse(data).ok().map(|h| (h, data))
 }
 
+// This is used both for executables/libraries and source object files.
 pub struct Object<'a> {
     endian: NativeEndian,
     data: Bytes<'a>,
     dwarf: Option<&'a [MachSection]>,
     syms: Vec<(&'a [u8], u64)>,
+    syms_sort_by_name: bool,
+    // Only set for executables/libraries, and not the source object files.
+    object_map: Option<object::ObjectMap<'a>>,
+    // The outer Option is for lazy loading, and the inner Option allows load errors to be cached.
+    object_mappings: Box<[Option<Option<Mapping>>]>,
 }
 
 impl<'a> Object<'a> {
     fn parse(mach: &'a Mach, endian: NativeEndian, data: Bytes<'a>) -> Option<Object<'a>> {
+        let is_object = mach.filetype(endian) == object::macho::MH_OBJECT;
         let mut dwarf = None;
         let mut syms = Vec::new();
+        let mut syms_sort_by_name = false;
         let mut commands = mach.load_commands(endian, data).ok()?;
+        let mut object_map = None;
+        let mut object_mappings = Vec::new();
         while let Ok(Some(command)) = commands.next() {
             if let Some((segment, section_data)) = MachSegment::from_command(command).ok()? {
-                if segment.name() == b"__DWARF" {
+                // Object files should have all sections in a single unnamed segment load command.
+                if segment.name() == b"__DWARF" || (is_object && segment.name() == b"") {
                     dwarf = segment.sections(endian, section_data).ok();
                 }
             } else if let Some(symtab) = command.symtab().ok()? {
@@ -167,7 +178,18 @@ impl<'a> Object<'a> {
                         }
                     })
                     .collect();
-                syms.sort_unstable_by_key(|(_, addr)| *addr);
+                if is_object {
+                    // We never search object file symbols by address.
+                    // Instead, we already know the symbol name from the executable, and we
+                    // need to search by name to find the matching symbol in the object file.
+                    syms.sort_unstable_by_key(|(name, _)| *name);
+                    syms_sort_by_name = true;
+                } else {
+                    syms.sort_unstable_by_key(|(_, addr)| *addr);
+                    let map = symbols.object_map(endian);
+                    object_mappings.resize_with(map.objects().len(), || None);
+                    object_map = Some(map);
+                }
             }
         }
 
@@ -176,6 +198,9 @@ impl<'a> Object<'a> {
             data,
             dwarf,
             syms,
+            syms_sort_by_name,
+            object_map,
+            object_mappings: object_mappings.into_boxed_slice(),
         })
     }
 
@@ -194,6 +219,7 @@ impl<'a> Object<'a> {
     }
 
     pub fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
+        debug_assert!(!self.syms_sort_by_name);
         let i = match self.syms.binary_search_by_key(&addr, |(_, addr)| *addr) {
             Ok(i) => i,
             Err(i) => i.checked_sub(1)?,
@@ -201,4 +227,75 @@ impl<'a> Object<'a> {
         let (sym, _addr) = self.syms.get(i)?;
         Some(sym)
     }
+
+    /// Try to load a context for an object file.
+    ///
+    /// If dsymutil was not run, then the DWARF may be found in the source object files.
+    pub(super) fn search_object_map<'b>(&'b mut self, addr: u64) -> Option<(&Context<'b>, u64)> {
+        // `object_map` contains a map from addresses to symbols and object paths.
+        // Look up the address and get a mapping for the object.
+        let object_map = self.object_map.as_ref()?;
+        let symbol = object_map.get(addr)?;
+        let object_index = symbol.object_index();
+        let mapping = self.object_mappings.get_mut(object_index)?;
+        if mapping.is_none() {
+            // No cached mapping, so create it.
+            *mapping = Some(object_mapping(object_map.objects().get(object_index)?));
+        }
+        let cx: &'b Context<'static> = &mapping.as_ref()?.as_ref()?.cx;
+        // Don't leak the `'static` lifetime, make sure it's scoped to just ourselves.
+        let cx = unsafe { core::mem::transmute::<&'b Context<'static>, &'b Context<'b>>(cx) };
+
+        // We must translate the address in order to be able to look it up
+        // in the DWARF in the object file.
+        debug_assert!(cx.object.syms.is_empty() || cx.object.syms_sort_by_name);
+        let i = cx
+            .object
+            .syms
+            .binary_search_by_key(&symbol.name(), |(name, _)| *name)
+            .ok()?;
+        let object_symbol = cx.object.syms.get(i)?;
+        let object_addr = addr
+            .wrapping_sub(symbol.address())
+            .wrapping_add(object_symbol.1);
+        Some((cx, object_addr))
+    }
+}
+
+fn object_mapping(path: &[u8]) -> Option<Mapping> {
+    use super::mystd::ffi::OsStr;
+    use super::mystd::os::unix::prelude::*;
+
+    let map;
+
+    // `N_OSO` symbol names can be either `/path/to/object.o` or `/path/to/archive.a(object.o)`.
+    let data = if let Some((archive_path, member_name)) = split_archive_path(path) {
+        map = super::mmap(Path::new(OsStr::from_bytes(archive_path)))?;
+        let archive = object::read::archive::ArchiveFile::parse(&map).ok()?;
+        let member = archive
+            .members()
+            .filter_map(Result::ok)
+            .find(|m| m.name() == member_name)?;
+        Bytes(member.data())
+    } else {
+        map = super::mmap(Path::new(OsStr::from_bytes(path)))?;
+        Bytes(&map)
+    };
+
+    let (macho, data) = find_header(data)?;
+    let endian = macho.endian().ok()?;
+    let object = Object::parse(macho, endian, data)?;
+    let stash = Stash::new();
+    let inner = super::cx(&stash, object)?;
+    Some(mk!(Mapping { map, inner, stash }))
+}
+
+fn split_archive_path(path: &[u8]) -> Option<(&[u8], &[u8])> {
+    let (last, path) = path.split_last()?;
+    if *last != b')' {
+        return None;
+    }
+    let index = path.iter().position(|&x| x == b'(')?;
+    let (archive, rest) = path.split_at(index);
+    Some((archive, &rest[1..]))
 }

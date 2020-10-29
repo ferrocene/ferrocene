@@ -21,7 +21,7 @@ miniz_oxide = { version = "0.4.0", default-features = false }
 [dependencies.object]
 version = "0.22"
 default-features = false
-features = ['read_core', 'elf', 'macho', 'pe', 'unaligned']
+features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 
 [features]
 default = ['gimli-symbolize']

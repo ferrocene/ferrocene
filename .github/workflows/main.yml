@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        thing: [stable, beta, nightly, macos, windows-msvc64, windows-msvc32, windows-gnu64, windows-gnu32]
+        thing: [stable, beta, nightly, macos, macos-nightly, windows-msvc64, windows-msvc32, windows-gnu64, windows-gnu32]
         include:
           - thing: stable
             os: ubuntu-latest
@@ -28,6 +28,9 @@ jobs:
           - thing: macos
             os: macos-latest
             rust: stable
+          - thing: macos-nightly
+            os: macos-latest
+            rust: nightly
           # Note that these are on nightly due to rust-lang/rust#63700 not being
           # on stable yet
           - thing: windows-msvc64
@@ -82,6 +85,8 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
     - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gnu" cargo test --features gimli-symbolize
       if: contains(matrix.os, 'ubuntu')
+    - run: cargo clean && RUSTFLAGS="-Z run-dsymutil=no" cargo test --features gimli-symbolize
+      if: matrix.thing == 'macos-nightly'
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
 
   windows_arm64:

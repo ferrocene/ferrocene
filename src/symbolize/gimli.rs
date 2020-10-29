@@ -556,7 +556,7 @@ impl Cache {
             .next()
     }
 
-    fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<&'a Context<'a>> {
+    fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<&'a mut Context<'a>> {
         let idx = self.mappings.iter().position(|(idx, _)| *idx == lib);
 
         // Invariant: after this conditional completes without early returning
@@ -582,10 +582,10 @@ impl Cache {
             self.mappings.insert(0, (lib, mapping));
         }
 
-        let cx: &'a Context<'static> = &self.mappings[0].1.cx;
+        let cx: &'a mut Context<'static> = &mut self.mappings[0].1.cx;
         // don't leak the `'static` lifetime, make sure it's scoped to just
         // ourselves
-        Some(unsafe { mem::transmute::<&'a Context<'static>, &'a Context<'a>>(cx) })
+        Some(unsafe { mem::transmute::<&'a mut Context<'static>, &'a mut Context<'a>>(cx) })
     }
 }
 
@@ -622,7 +622,20 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
                 });
             }
         }
-
+        if !any_frames {
+            if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
+                if let Ok(mut frames) = object_cx.dwarf.find_frames(object_addr) {
+                    while let Ok(Some(frame)) = frames.next() {
+                        any_frames = true;
+                        call(Symbol::Frame {
+                            addr: addr as *mut c_void,
+                            location: frame.location,
+                            name: frame.function.map(|f| f.name.slice()),
+                        });
+                    }
+                }
+            }
+        }
         if !any_frames {
             if let Some(name) = cx.object.search_symtab(addr as u64) {
                 call(Symbol::Symtab {

@@ -162,6 +162,10 @@ impl<'a> Object<'a> {
             None
         }
     }
+
+    pub(super) fn search_object_map(&self, _addr: u64) -> Option<(&Context, u64)> {
+        None
+    }
 }
 
 fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {

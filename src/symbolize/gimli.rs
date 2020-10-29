@@ -208,7 +208,7 @@ cfg_if::cfg_if! {
         target_os = "watchos",
     ))] {
         // macOS uses the Mach-O file format and uses DYLD-specific APIs to
-        // load a list of native libraries that are part of the appplication.
+        // load a list of native libraries that are part of the application.
 
         use mystd::os::unix::prelude::*;
         use mystd::ffi::{OsStr, CStr};
@@ -372,28 +372,32 @@ cfg_if::cfg_if! {
         fn native_libraries() -> Vec<Library> {
             let mut ret = Vec::new();
             unsafe {
-                libc::dl_iterate_phdr(Some(callback), &mut ret as *mut _ as *mut _);
+                libc::dl_iterate_phdr(Some(callback), &mut ret as *mut Vec<_> as *mut _);
             }
             return ret;
         }
 
+        // `info` should be a valid pointers.
+        // `vec` should be a valid pointer to a `std::Vec`.
         unsafe extern "C" fn callback(
             info: *mut libc::dl_phdr_info,
             _size: libc::size_t,
             vec: *mut libc::c_void,
         ) -> libc::c_int {
+            let info = &*info;
             let libs = &mut *(vec as *mut Vec<Library>);
-            let name = if (*info).dlpi_name.is_null() || *(*info).dlpi_name == 0{
+            let is_main_prog = info.dlpi_name.is_null() || *info.dlpi_name == 0;
+            let name = if is_main_prog {
                 if libs.is_empty() {
                     mystd::env::current_exe().map(|e| e.into()).unwrap_or_default()
                 } else {
                     OsString::new()
                 }
             } else {
-                let bytes = CStr::from_ptr((*info).dlpi_name).to_bytes();
+                let bytes = CStr::from_ptr(info.dlpi_name).to_bytes();
                 OsStr::from_bytes(bytes).to_owned()
             };
-            let headers = core::slice::from_raw_parts((*info).dlpi_phdr, (*info).dlpi_phnum as usize);
+            let headers = core::slice::from_raw_parts(info.dlpi_phdr, info.dlpi_phnum as usize);
             libs.push(Library {
                 name,
                 segments: headers
@@ -403,7 +407,7 @@ cfg_if::cfg_if! {
                         stated_virtual_memory_address: (*header).p_vaddr as usize,
                     })
                     .collect(),
-                bias: (*info).dlpi_addr as usize,
+                bias: info.dlpi_addr as usize,
             });
             0
         }

@@ -55,7 +55,7 @@ jobs:
     # full fidelity of backtraces on 32-bit msvc requires frame pointers, so
     # enable that for our tests
     - name: Force frame pointers
-      run: echo "##[set-env name=RUSTFLAGS]-Cforce-frame-pointers"
+      run: echo RUSTFLAGS=-Cforce-frame-pointers >> $GITHUB_ENV
       shell: bash
       if: matrix.thing == 'windows-msvc32'
     - run: cargo build --manifest-path crates/backtrace-sys/Cargo.toml
@@ -120,10 +120,6 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: Install Rust (
-      run: |
-        curl https://sh.rustup.rs | sh -s -- -y
-        echo "##[add-path]$HOME/.cargo/bin"
     - run: rustup target add ${{ matrix.target }}
     - run: |
         export SDK_PATH=`xcrun --show-sdk-path --sdk ${{ matrix.sdk }}`

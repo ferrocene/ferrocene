@@ -14,7 +14,12 @@ fn main() {
     // so just skip these for CI. No other reason this can't run on those
     // platforms though.
     // Miri does not have support for re-execing a file
-    if cfg!(unix) && (cfg!(target_arch = "arm") || cfg!(target_arch = "aarch64")) || cfg!(miri) {
+    if cfg!(unix)
+        && (cfg!(target_arch = "arm")
+            || cfg!(target_arch = "aarch64")
+            || cfg!(target_arch = "s390x"))
+        || cfg!(miri)
+    {
         println!("test result: ok");
         return;
     }

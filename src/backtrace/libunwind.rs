@@ -168,7 +168,8 @@ mod uw {
         #[cfg(all(
             not(all(target_os = "android", target_arch = "arm")),
             not(all(target_os = "freebsd", target_arch = "arm")),
-            not(all(target_os = "linux", target_arch = "arm"))
+            not(all(target_os = "linux", target_arch = "arm")),
+            not(all(target_os = "linux", target_arch = "s390x"))
         ))]
         // This function is a misnomer: rather than getting this frame's
         // Canonical Frame Address (aka the caller frame's SP) it
@@ -177,6 +178,17 @@ mod uw {
         // https://github.com/libunwind/libunwind/blob/d32956507cf29d9b1a98a8bce53c78623908f4fe/src/unwind/GetCFA.c#L28-L35
         #[link_name = "_Unwind_GetCFA"]
         pub fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
+    }
+
+    // s390x uses a biased CFA value, therefore we need to use
+    // _Unwind_GetGR to get the stack pointer register (%r15)
+    // instead of relying on _Unwind_GetCFA.
+    #[cfg(all(target_os = "linux", target_arch = "s390x"))]
+    pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
+        extern "C" {
+            pub fn _Unwind_GetGR(ctx: *mut _Unwind_Context, index: libc::c_int) -> libc::uintptr_t;
+        }
+        _Unwind_GetGR(ctx, 15)
     }
 
     // On android and arm, the function `_Unwind_GetIP` and a bunch of others

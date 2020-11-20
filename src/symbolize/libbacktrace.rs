@@ -456,3 +456,5 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         &mut syminfo_state as *mut _ as *mut _,
     );
 }
+
+pub unsafe fn clear_symbol_cache() {}

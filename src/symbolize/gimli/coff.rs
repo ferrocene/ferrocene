@@ -101,7 +101,7 @@ impl<'a> Object<'a> {
         self.symbols[i].1.name(self.strings).ok()
     }
 
-    pub(super) fn search_object_map(&self, _addr: u64) -> Option<(&Context, u64)> {
+    pub(super) fn search_object_map(&self, _addr: u64) -> Option<(&Context<'_>, u64)> {
         None
     }
 }

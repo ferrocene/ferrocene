@@ -37,3 +37,5 @@ impl Symbol<'_> {
         None
     }
 }
+
+pub unsafe fn clear_symbol_cache() {}

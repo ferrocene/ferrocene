@@ -214,3 +214,5 @@ unsafe fn cache(filename: Option<*const [u16]>) -> Option<::std::ffi::OsString> 
 
 #[cfg(not(feature = "std"))]
 unsafe fn cache(_filename: Option<*const [u16]>) {}
+
+pub unsafe fn clear_symbol_cache() {}

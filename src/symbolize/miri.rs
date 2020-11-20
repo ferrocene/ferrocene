@@ -52,3 +52,5 @@ impl<'a> Symbol<'a> {
         ))
     }
 }
+
+pub unsafe fn clear_symbol_cache() {}

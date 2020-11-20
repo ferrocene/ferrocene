@@ -159,7 +159,7 @@ pub unsafe fn resolve_unsynchronized<F>(addr: *mut c_void, mut cb: F)
 where
     F: FnMut(&Symbol),
 {
-    resolve_imp(ResolveWhat::Address(addr), &mut cb)
+    imp::resolve(ResolveWhat::Address(addr), &mut cb)
 }
 
 /// Same as `resolve_frame`, only unsafe as it's unsynchronized.
@@ -175,7 +175,7 @@ pub unsafe fn resolve_frame_unsynchronized<F>(frame: &Frame, mut cb: F)
 where
     F: FnMut(&Symbol),
 {
-    resolve_imp(ResolveWhat::Frame(frame), &mut cb)
+    imp::resolve(ResolveWhat::Frame(frame), &mut cb)
 }
 
 /// A trait representing the resolution of a symbol in a file.
@@ -191,7 +191,7 @@ pub struct Symbol {
     // TODO: this lifetime bound needs to be persisted eventually to `Symbol`,
     // but that's currently a breaking change. For now this is safe since
     // `Symbol` is only ever handed out by reference and can't be cloned.
-    inner: SymbolImp<'static>,
+    inner: imp::Symbol<'static>,
 }
 
 impl Symbol {
@@ -383,7 +383,7 @@ fn format_symbol_name(
 cfg_if::cfg_if! {
     if #[cfg(feature = "cpp_demangle")] {
         impl<'a> fmt::Display for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 if let Some(ref s) = self.demangled {
                     s.fmt(f)
                 } else if let Some(ref cpp) = self.cpp_demangled.0 {
@@ -409,7 +409,7 @@ cfg_if::cfg_if! {
 cfg_if::cfg_if! {
     if #[cfg(all(feature = "std", feature = "cpp_demangle"))] {
         impl<'a> fmt::Debug for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 use std::fmt::Write;
 
                 if let Some(ref s) = self.demangled {
@@ -459,21 +459,17 @@ cfg_if::cfg_if! {
 pub fn clear_symbol_cache() {
     let _guard = crate::lock::lock();
     unsafe {
-        clear_symbol_cache_imp();
+        imp::clear_symbol_cache();
     }
 }
 
 cfg_if::cfg_if! {
     if #[cfg(miri)] {
         mod miri;
-        use self::miri::resolve as resolve_imp;
-        use self::miri::Symbol as SymbolImp;
-        unsafe fn clear_symbol_cache_imp() {}
+        use miri as imp;
     } else if #[cfg(all(windows, target_env = "msvc", not(target_vendor = "uwp")))] {
         mod dbghelp;
-        use self::dbghelp::resolve as resolve_imp;
-        use self::dbghelp::Symbol as SymbolImp;
-        unsafe fn clear_symbol_cache_imp() {}
+        use dbghelp as imp;
     } else if #[cfg(all(
         feature = "libbacktrace",
         any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
@@ -483,9 +479,7 @@ cfg_if::cfg_if! {
         not(target_env = "libnx"),
     ))] {
         mod libbacktrace;
-        use self::libbacktrace::resolve as resolve_imp;
-        use self::libbacktrace::Symbol as SymbolImp;
-        unsafe fn clear_symbol_cache_imp() {}
+        use libbacktrace as imp;
     } else if #[cfg(all(
         feature = "gimli-symbolize",
         any(unix, windows),
@@ -493,14 +487,9 @@ cfg_if::cfg_if! {
         not(target_os = "emscripten"),
     ))] {
         mod gimli;
-        use self::gimli::resolve as resolve_imp;
-        use self::gimli::Symbol as SymbolImp;
-        use self::gimli::clear_symbol_cache as clear_symbol_cache_imp;
+        use gimli as imp;
     } else {
         mod noop;
-        use self::noop::resolve as resolve_imp;
-        use self::noop::Symbol as SymbolImp;
-        #[allow(unused)]
-        unsafe fn clear_symbol_cache_imp() {}
+        use noop as imp;
     }
 }

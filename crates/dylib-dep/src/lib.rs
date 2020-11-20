@@ -1,3 +1,5 @@
+#![allow(improper_ctypes_definitions)]
+
 type Pos = (&'static str, u32);
 
 macro_rules! pos {

@@ -9,7 +9,6 @@ extern "C" {
 
 #[test]
 #[ignore] // fixme(fitzgen/cpp_demangle#73)
-#[cfg(not(target_os = "windows"))]
 fn smoke_test_cpp() {
     static RAN_ASSERTS: AtomicBool = AtomicBool::new(false);
 

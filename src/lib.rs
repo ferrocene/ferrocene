@@ -52,13 +52,15 @@
 // When we're building as part of libstd, silence all warnings since they're
 // irrelevant as this crate is developed out-of-tree.
 #![cfg_attr(backtrace_in_libstd, allow(warnings))]
+#![cfg_attr(not(feature = "std"), allow(dead_code))]
 
 #[cfg(feature = "std")]
 #[macro_use]
 extern crate std;
 
-// This is only used for gimli right now, so silence warnings elsewhere.
-#[cfg_attr(not(target_os = "linux"), allow(unused_extern_crates))]
+// This is only used for gimli right now, which is only used on some platforms,
+// so don't worry if it's unused in other configurations.
+#[allow(unused_extern_crates)]
 extern crate alloc;
 
 pub use self::backtrace::{trace_unsynchronized, Frame};

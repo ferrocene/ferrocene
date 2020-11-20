@@ -18,6 +18,7 @@ run() {
       --volume `pwd`/target:/checkout/target \
       --workdir /checkout \
       --privileged \
+      --env RUSTFLAGS \
       backtrace \
       bash \
       -c 'PATH=$PATH:/rust/bin exec ci/run.sh'

@@ -52,10 +52,12 @@ jobs:
     - name: Install Rust (rustup)
       run: rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
       shell: bash
+    - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
+      shell: bash
     # full fidelity of backtraces on 32-bit msvc requires frame pointers, so
     # enable that for our tests
     - name: Force frame pointers
-      run: echo RUSTFLAGS=-Cforce-frame-pointers >> $GITHUB_ENV
+      run: echo RUSTFLAGS="-Cforce-frame-pointers $RUSTFLAGS" >> $GITHUB_ENV
       shell: bash
       if: matrix.thing == 'windows-msvc32'
     - run: cargo build --manifest-path crates/backtrace-sys/Cargo.toml
@@ -99,6 +101,8 @@ jobs:
     - name: Install Rust
       run: rustup update stable --no-self-update && rustup default stable
       shell: bash
+    - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
+      shell: bash
     - run: rustup target add aarch64-pc-windows-msvc
     - run: cargo test --no-run --target aarch64-pc-windows-msvc
     - run: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-winapi
@@ -122,6 +126,7 @@ jobs:
         submodules: true
     - run: rustup target add ${{ matrix.target }}
     - run: |
+        export RUSTFLAGS=-Dwarnings
         export SDK_PATH=`xcrun --show-sdk-path --sdk ${{ matrix.sdk }}`
         export RUSTFLAGS="-C link-arg=-isysroot -C link-arg=$SDK_PATH"
         cargo test --no-run --target ${{ matrix.target }}
@@ -156,6 +161,8 @@ jobs:
       run: rustup update stable && rustup default stable
     - run: rustup target add ${{ matrix.target }}
     - run: cargo generate-lockfile
+    - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
+      shell: bash
     - run: ./ci/run-docker.sh ${{ matrix.target }}
 
   rustfmt:
@@ -182,6 +189,8 @@ jobs:
     - name: Install Rust
       run: rustup update nightly && rustup default nightly
     - run: rustup target add ${{ matrix.target }}
+    - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
+      shell: bash
     - run: cargo build --target ${{ matrix.target }}
 
   msrv:

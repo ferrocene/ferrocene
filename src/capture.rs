@@ -472,12 +472,10 @@ mod rustc_serialize_impls {
 
 #[cfg(feature = "serde")]
 mod serde_impls {
-    extern crate serde;
-
-    use self::serde::de::Deserializer;
-    use self::serde::ser::Serializer;
-    use self::serde::{Deserialize, Serialize};
     use super::*;
+    use serde::de::Deserializer;
+    use serde::ser::Serializer;
+    use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize)]
     struct SerializedFrame {

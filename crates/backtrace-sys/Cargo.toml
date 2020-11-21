@@ -4,9 +4,9 @@ version = "0.1.37"
 authors = ["Alex Crichton <alex@alexcrichton.com>"]
 build = "build.rs"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/alexcrichton/backtrace-rs"
-homepage = "https://github.com/alexcrichton/backtrace-rs"
-documentation = "http://alexcrichton.com/backtrace-rs"
+repository = "https://github.com/rust-lang/backtrace-rs"
+homepage = "https://github.com/rust-lang/backtrace-rs"
+documentation = "https://docs.rs/backtrace-sys"
 description = """
 Bindings to the libbacktrace gcc library
 """

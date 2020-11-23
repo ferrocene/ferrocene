@@ -8,7 +8,7 @@
 #[test]
 #[cfg(target_os = "macos")]
 fn backtrace_no_dsym() {
-    use std::{env, fs, panic};
+    use std::{env, fs};
 
     // Find our dSYM and replace the DWARF binary with an empty file
     let mut dsym_path = env::current_exe().unwrap();

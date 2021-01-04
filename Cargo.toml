@@ -22,7 +22,7 @@ exclude = ['crates/without_debuginfo', 'crates/macos_frames_test', 'crates/line-
 cfg-if = "1.0"
 rustc-demangle = "0.1.4"
 backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.35", optional = true, default_features = false }
-libc = { version = "0.2.45", default-features = false }
+libc = { version = "0.2.81", default-features = false }
 
 # Optionally enable the ability to serialize a `Backtrace`, controlled through
 # the `serialize-*` features below.

@@ -362,6 +362,7 @@ cfg_if::cfg_if! {
         any(
             target_os = "linux",
             target_os = "fuchsia",
+            target_os = "freebsd",
         ),
         not(target_env = "uclibc"),
     ))] {

@@ -621,10 +621,14 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         if let Ok(mut frames) = cx.dwarf.find_frames(addr as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 any_frames = true;
+                let name = match frame.function {
+                    Some(f) => Some(f.name.slice()),
+                    None => cx.object.search_symtab(addr as u64),
+                };
                 call(Symbol::Frame {
                     addr: addr as *mut c_void,
                     location: frame.location,
-                    name: frame.function.map(|f| f.name.slice()),
+                    name,
                 });
             }
         }

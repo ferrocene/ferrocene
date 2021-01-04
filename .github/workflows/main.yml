@@ -89,6 +89,8 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
     - run: cargo clean && RUSTFLAGS="-Z run-dsymutil=no" cargo test --features gimli-symbolize
       if: matrix.thing == 'macos-nightly'
+    - run: cargo clean && RUSTFLAGS="-Z split-dwarf=split -C save-temps" cargo test --features gimli-symbolize
+      if: matrix.thing == 'nightly'
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
 
   windows_arm64:

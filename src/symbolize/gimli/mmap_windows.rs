@@ -1,5 +1,6 @@
 use super::super::super::windows::*;
-use super::{AsRawHandle, File};
+use super::mystd::fs::File;
+use super::mystd::os::windows::prelude::*;
 use core::ops::Deref;
 use core::ptr;
 use core::slice;

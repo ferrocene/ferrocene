@@ -118,352 +118,37 @@ fn mmap(path: &Path) -> Option<Mmap> {
 
 cfg_if::cfg_if! {
     if #[cfg(windows)] {
-        use core::mem::MaybeUninit;
-        use super::super::windows::*;
-        use mystd::os::windows::prelude::*;
-        use alloc::vec;
-
         mod coff;
         use self::coff::Object;
-
-        // For loading native libraries on Windows, see some discussion on
-        // rust-lang/rust#71060 for the various strategies here.
-        fn native_libraries() -> Vec<Library> {
-            let mut ret = Vec::new();
-            unsafe { add_loaded_images(&mut ret); }
-            return ret;
-        }
-
-        unsafe fn add_loaded_images(ret: &mut Vec<Library>) {
-            let snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
-            if snap == INVALID_HANDLE_VALUE {
-                return;
-            }
-
-            let mut me = MaybeUninit::<MODULEENTRY32W>::zeroed().assume_init();
-            me.dwSize = mem::size_of_val(&me) as DWORD;
-            if Module32FirstW(snap, &mut me) == TRUE {
-                loop {
-                    if let Some(lib) = load_library(&me) {
-                        ret.push(lib);
-                    }
-
-                    if Module32NextW(snap, &mut me) != TRUE {
-                        break;
-                    }
-                }
-
-            }
-
-            CloseHandle(snap);
-        }
-
-        unsafe fn load_library(me: &MODULEENTRY32W) -> Option<Library> {
-            let pos = me
-                .szExePath
-                .iter()
-                .position(|i| *i == 0)
-                .unwrap_or(me.szExePath.len());
-            let name = OsString::from_wide(&me.szExePath[..pos]);
-
-            // MinGW libraries currently don't support ASLR
-            // (rust-lang/rust#16514), but DLLs can still be relocated around in
-            // the address space. It appears that addresses in debug info are
-            // all as-if this library was loaded at its "image base", which is a
-            // field in its COFF file headers. Since this is what debuginfo
-            // seems to list we parse the symbol table and store addresses as if
-            // the library was loaded at "image base" as well.
-            //
-            // The library may not be loaded at "image base", however.
-            // (presumably something else may be loaded there?) This is where
-            // the `bias` field comes into play, and we need to figure out the
-            // value of `bias` here. Unfortunately though it's not clear how to
-            // acquire this from a loaded module. What we do have, however, is
-            // the actual load address (`modBaseAddr`).
-            //
-            // As a bit of a cop-out for now we mmap the file, read the file
-            // header information, then drop the mmap. This is wasteful because
-            // we'll probably reopen the mmap later, but this should work well
-            // enough for now.
-            //
-            // Once we have the `image_base` (desired load location) and the
-            // `base_addr` (actual load location) we can fill in the `bias`
-            // (difference between the actual and desired) and then the stated
-            // address of each segment is the `image_base` since that's what the
-            // file says.
-            //
-            // For now it appears that unlike ELF/MachO we can make do with one
-            // segment per library, using `modBaseSize` as the whole size.
-            let mmap = mmap(name.as_ref())?;
-            let image_base = coff::get_image_base(&mmap)?;
-            let base_addr = me.modBaseAddr as usize;
-            Some(Library {
-                name,
-                bias: base_addr.wrapping_sub(image_base),
-                segments: vec![LibrarySegment {
-                    stated_virtual_memory_address: image_base,
-                    len: me.modBaseSize as usize,
-                }],
-            })
-        }
     } else if #[cfg(any(
         target_os = "macos",
         target_os = "ios",
         target_os = "tvos",
         target_os = "watchos",
     ))] {
-        // macOS uses the Mach-O file format and uses DYLD-specific APIs to
-        // load a list of native libraries that are part of the application.
-
-        use mystd::os::unix::prelude::*;
-        use mystd::ffi::{OsStr, CStr};
-
         mod macho;
         use self::macho::Object;
-
-        #[allow(deprecated)]
-        fn native_libraries() -> Vec<Library> {
-            let mut ret = Vec::new();
-            let images = unsafe { libc::_dyld_image_count() };
-            for i in 0..images {
-                ret.extend(native_library(i));
-            }
-            return ret;
-        }
-
-        #[allow(deprecated)]
-        fn native_library(i: u32) -> Option<Library> {
-            use object::macho;
-            use object::read::macho::{MachHeader, Segment};
-            use object::{Bytes, NativeEndian};
-
-            // Fetch the name of this library which corresponds to the path of
-            // where to load it as well.
-            let name = unsafe {
-                let name = libc::_dyld_get_image_name(i);
-                if name.is_null() {
-                    return None;
-                }
-                CStr::from_ptr(name)
-            };
-
-            // Load the image header of this library and delegate to `object` to
-            // parse all the load commands so we can figure out all the segments
-            // involved here.
-            let (mut load_commands, endian) = unsafe {
-                let header = libc::_dyld_get_image_header(i);
-                if header.is_null() {
-                    return None;
-                }
-                match (*header).magic {
-                    macho::MH_MAGIC => {
-                        let endian = NativeEndian;
-                        let header = &*(header as *const macho::MachHeader32<NativeEndian>);
-                        let data = core::slice::from_raw_parts(
-                            header as *const _ as *const u8,
-                            mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize
-                        );
-                        (header.load_commands(endian, Bytes(data)).ok()?, endian)
-                    }
-                    macho::MH_MAGIC_64 => {
-                        let endian = NativeEndian;
-                        let header = &*(header as *const macho::MachHeader64<NativeEndian>);
-                        let data = core::slice::from_raw_parts(
-                            header as *const _ as *const u8,
-                            mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize
-                        );
-                        (header.load_commands(endian, Bytes(data)).ok()?, endian)
-                    }
-                    _ => return None,
-                }
-            };
-
-            // Iterate over the segments and register known regions for segments
-            // that we find. Additionally record information bout text segments
-            // for processing later, see comments below.
-            let mut segments = Vec::new();
-            let mut first_text = 0;
-            let mut text_fileoff_zero = false;
-            while let Some(cmd) = load_commands.next().ok()? {
-                if let Some((seg, _)) = cmd.segment_32().ok()? {
-                    if seg.name() == b"__TEXT" {
-                        first_text = segments.len();
-                        if seg.fileoff(endian) == 0 && seg.filesize(endian) > 0 {
-                            text_fileoff_zero = true;
-                        }
-                    }
-                    segments.push(LibrarySegment {
-                        len: seg.vmsize(endian).try_into().ok()?,
-                        stated_virtual_memory_address: seg.vmaddr(endian).try_into().ok()?,
-                    });
-                }
-                if let Some((seg, _)) = cmd.segment_64().ok()? {
-                    if seg.name() == b"__TEXT" {
-                        first_text = segments.len();
-                        if seg.fileoff(endian) == 0 && seg.filesize(endian) > 0 {
-                            text_fileoff_zero = true;
-                        }
-                    }
-                    segments.push(LibrarySegment {
-                        len: seg.vmsize(endian).try_into().ok()?,
-                        stated_virtual_memory_address: seg.vmaddr(endian).try_into().ok()?,
-                    });
-                }
-            }
-
-            // Determine the "slide" for this library which ends up being the
-            // bias we use to figure out where in memory objects are loaded.
-            // This is a bit of a weird computation though and is the result of
-            // trying a few things in the wild and seeing what sticks.
-            //
-            // The general idea is that the `bias` plus a segment's
-            // `stated_virtual_memory_address` is going to be where in the
-            // actual address space the segment resides. The other thing we rely
-            // on though is that a real address minus the `bias` is the index to
-            // look up in the symbol table and debuginfo.
-            //
-            // It turns out, though, that for system loaded libraries these
-            // calculations are incorrect. For native executables, however, it
-            // appears correct. Lifting some logic from LLDB's source it has
-            // some special-casing for the first `__TEXT` section loaded from
-            // file offset 0 with a nonzero size. For whatever reason when this
-            // is present it appears to mean that the symbol table is relative
-            // to just the vmaddr slide for the library. If it's *not* present
-            // then the symbol table is relative to the the vmaddr slide plus
-            // the segment's stated address.
-            //
-            // To handle this situation if we *don't* find a text section at
-            // file offset zero then we increase the bias by the first text
-            // sections's stated address and decrease all stated addresses by
-            // that amount as well. That way the symbol table is always appears
-            // relative to the library's bias amount. This appears to have the
-            // right results for symbolizing via the symbol table.
-            //
-            // Honestly I'm not entirely sure whether this is right or if
-            // there's something else that should indicate how to do this. For
-            // now though this seems to work well enough (?) and we should
-            // always be able to tweak this over time if necessary.
-            //
-            // For some more information see #318
-            let mut slide = unsafe { libc::_dyld_get_image_vmaddr_slide(i) as usize };
-            if !text_fileoff_zero {
-                let adjust = segments[first_text].stated_virtual_memory_address;
-                for segment in segments.iter_mut() {
-                    segment.stated_virtual_memory_address -= adjust;
-                }
-                slide += adjust;
-            }
-
-            Some(Library {
-                name: OsStr::from_bytes(name.to_bytes()).to_owned(),
-                segments,
-                bias: slide,
-            })
-        }
-    } else if #[cfg(target_os = "illumos")] {
-        use mystd::os::unix::prelude::*;
-        use mystd::ffi::{OsStr, CStr};
-        use object::NativeEndian;
-
-        #[cfg(target_pointer_width = "64")]
-        use object::elf::{
-            FileHeader64 as FileHeader,
-            ProgramHeader64 as ProgramHeader
-        };
-
-        type EHdr = FileHeader<NativeEndian>;
-        type PHdr = ProgramHeader<NativeEndian>;
-
+    } else {
         mod elf;
         use self::elf::Object;
+    }
+}
 
-        #[repr(C)]
-        struct LinkMap {
-            l_addr: libc::c_ulong,
-            l_name: *const libc::c_char,
-            l_ld: *const libc::c_void,
-            l_next: *const LinkMap,
-            l_prev: *const LinkMap,
-            l_refname: *const libc::c_char,
-        }
-
-        const RTLD_SELF: *const libc::c_void = -3isize as *const libc::c_void;
-        const RTLD_DI_LINKMAP: libc::c_int = 2;
-
-        extern "C" {
-            fn dlinfo(
-                handle: *const libc::c_void,
-                request: libc::c_int,
-                p: *mut libc::c_void,
-            ) -> libc::c_int;
-        }
-
-        fn native_libraries() -> Vec<Library> {
-            let mut libs = Vec::new();
-
-            // Request the current link map from the runtime linker:
-            let map = unsafe {
-                let mut map: *const LinkMap = std::mem::zeroed();
-                if dlinfo(
-                    RTLD_SELF,
-                    RTLD_DI_LINKMAP,
-                    (&mut map) as *mut *const LinkMap as *mut libc::c_void
-                ) != 0 {
-                    return libs;
-                }
-                map
-            };
-
-            // Each entry in the link map represents a loaded object:
-            let mut l = map;
-            while !l.is_null() {
-                // Fetch the fully qualified path of the loaded object:
-                let bytes = unsafe { CStr::from_ptr((*l).l_name)}.to_bytes();
-                let name = OsStr::from_bytes(bytes).to_owned();
-
-                // The base address of the object loaded into memory:
-                let addr = unsafe { (*l).l_addr };
-
-                // Use the ELF header for this object to locate the program
-                // header:
-                let e: *const EHdr = unsafe { (*l).l_addr as *const EHdr };
-                let phoff = unsafe { (*e).e_phoff }.get(NativeEndian);
-                let phnum = unsafe { (*e).e_phnum }.get(NativeEndian);
-                let etype = unsafe { (*e).e_type }.get(NativeEndian);
-
-                let phdr: *const PHdr = (addr + phoff) as *const PHdr;
-                let phdr = unsafe {
-                    core::slice::from_raw_parts(phdr, phnum as usize)
-                };
-
-                libs.push(Library {
-                    name,
-                    segments: phdr
-                        .iter()
-                        .map(|p| {
-                            let memsz = p.p_memsz.get(NativeEndian);
-                            let vaddr = p.p_vaddr.get(NativeEndian);
-                            LibrarySegment {
-                                len: memsz as usize,
-                                stated_virtual_memory_address: vaddr as usize,
-                            }
-                        })
-                        .collect(),
-                    bias: if etype == object::elf::ET_EXEC {
-                        // Program header addresses for the base executable are
-                        // already absolute.
-                        0
-                    } else {
-                        // Other addresses are relative to the object base.
-                        addr as usize
-                    },
-                });
-
-                l = unsafe { (*l).l_next };
-            }
-
-            libs
-        }
+cfg_if::cfg_if! {
+    if #[cfg(windows)] {
+        mod libs_windows;
+        use libs_windows::native_libraries;
+    } else if #[cfg(any(
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "tvos",
+        target_os = "watchos",
+    ))] {
+        mod libs_macos;
+        use libs_macos::native_libraries;
+    } else if #[cfg(target_os = "illumos")] {
+        mod libs_illumos;
+        use libs_illumos::native_libraries;
     } else if #[cfg(all(
         any(
             target_os = "linux",
@@ -472,151 +157,16 @@ cfg_if::cfg_if! {
         ),
         not(target_env = "uclibc"),
     ))] {
-        // Other Unix (e.g. Linux) platforms use ELF as an object file format
-        // and typically implement an API called `dl_iterate_phdr` to load
-        // native libraries.
-
-        use mystd::os::unix::prelude::*;
-        use mystd::ffi::{OsStr, CStr};
-
-        mod elf;
-        use self::elf::Object;
-
-        fn native_libraries() -> Vec<Library> {
-            let mut ret = Vec::new();
-            unsafe {
-                libc::dl_iterate_phdr(Some(callback), &mut ret as *mut Vec<_> as *mut _);
-            }
-            return ret;
-        }
-
-        // `info` should be a valid pointers.
-        // `vec` should be a valid pointer to a `std::Vec`.
-        unsafe extern "C" fn callback(
-            info: *mut libc::dl_phdr_info,
-            _size: libc::size_t,
-            vec: *mut libc::c_void,
-        ) -> libc::c_int {
-            let info = &*info;
-            let libs = &mut *(vec as *mut Vec<Library>);
-            let is_main_prog = info.dlpi_name.is_null() || *info.dlpi_name == 0;
-            let name = if is_main_prog {
-                if libs.is_empty() {
-                    mystd::env::current_exe().map(|e| e.into()).unwrap_or_default()
-                } else {
-                    OsString::new()
-                }
-            } else {
-                let bytes = CStr::from_ptr(info.dlpi_name).to_bytes();
-                OsStr::from_bytes(bytes).to_owned()
-            };
-            let headers = core::slice::from_raw_parts(info.dlpi_phdr, info.dlpi_phnum as usize);
-            libs.push(Library {
-                name,
-                segments: headers
-                    .iter()
-                    .map(|header| LibrarySegment {
-                        len: (*header).p_memsz as usize,
-                        stated_virtual_memory_address: (*header).p_vaddr as usize,
-                    })
-                    .collect(),
-                bias: info.dlpi_addr as usize,
-            });
-            0
-        }
+        mod libs_dl_iterate_phdr;
+        use libs_dl_iterate_phdr::native_libraries;
     } else if #[cfg(target_env = "libnx")] {
-        // DevkitA64 doesn't natively support debug info, but the build system will place debug
-        // info at the path `romfs:/debug_info.elf`.
-        mod elf;
-        use self::elf::Object;
-
-        fn native_libraries() -> Vec<Library> {
-            extern "C" {
-                static __start__: u8;
-            }
-
-            let bias = unsafe { &__start__ } as *const u8 as usize;
-
-            let mut ret = Vec::new();
-            let mut segments = Vec::new();
-            segments.push(LibrarySegment {
-                stated_virtual_memory_address: 0,
-                len: usize::max_value() - bias,
-            });
-
-            let path = "romfs:/debug_info.elf";
-            ret.push(Library {
-                name: path.into(),
-                segments,
-                bias,
-            });
-
-            ret
-        }
+        mod libs_libnx;
+        use libs_libnx::native_libraries;
     } else if #[cfg(target_os = "haiku")] {
-        // Haiku implements the image_info struct and the get_next_image_info()
-        // functions to iterate through the loaded executable images. The
-        // image_info struct contains a pointer to the start of the .text
-        // section within the virtual address space, as well as the size of
-        // that section. All the read-only segments of the ELF-binary are in
-        // that part of the address space.
-
-        use mystd::os::unix::prelude::*;
-        use mystd::ffi::{OsStr, CStr};
-
-        mod elf;
-        use self::elf::Object;
-
-        fn native_libraries() -> Vec<Library> {
-            let mut libraries: Vec<Library> = Vec::new();
-
-            unsafe {
-                let mut info = mem::MaybeUninit::<libc::image_info>::zeroed();
-                let mut cookie: i32 = 0;
-                // Load the first image to get a valid info struct
-                let mut status = libc::get_next_image_info(
-                    libc::B_CURRENT_TEAM,
-                    &mut cookie,
-                    info.as_mut_ptr(),
-                );
-                if status != libc::B_OK {
-                    return libraries;
-                }
-                let mut info = info.assume_init();
-
-                while status == libc::B_OK {
-                    let mut segments = Vec::new();
-                    segments.push(LibrarySegment {
-                        stated_virtual_memory_address: 0,
-                        len: info.text_size as usize,
-                    });
-
-                    let bytes = CStr::from_ptr(info.name.as_ptr()).to_bytes();
-                    let name = OsStr::from_bytes(bytes).to_owned();
-                    libraries.push(Library{
-                        name: name,
-                        segments: segments,
-                        bias: info.text as usize
-                    });
-
-                    status = libc::get_next_image_info(
-                        libc::B_CURRENT_TEAM,
-                        &mut cookie,
-                        &mut info
-                    );
-                }
-            }
-
-            libraries
-        }
+        mod libs_haiku;
+        use libs_haiku::native_libraries;
     } else {
-        // Everything else should use ELF, but doesn't know how to load native
-        // libraries.
-
-        use mystd::os::unix::prelude::*;
-        mod elf;
-        use self::elf::Object;
-
+        // Everything else should doesn't know how to load native libraries.
         fn native_libraries() -> Vec<Library> {
             Vec::new()
         }

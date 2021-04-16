@@ -1,4 +1,5 @@
-use super::{AsRawFd, File};
+use super::mystd::fs::File;
+use super::mystd::os::unix::prelude::*;
 use core::ops::Deref;
 use core::ptr;
 use core::slice;

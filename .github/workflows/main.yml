@@ -14,36 +14,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        thing: [stable, beta, nightly, macos, macos-nightly, windows-msvc64, windows-msvc32, windows-gnu64, windows-gnu32]
         include:
-          - thing: stable
-            os: ubuntu-latest
+          - os: ubuntu-latest
             rust: stable
-          - thing: beta
-            os: ubuntu-latest
+          - os: ubuntu-latest
             rust: beta
-          - thing: nightly
-            os: ubuntu-latest
+          - os: ubuntu-latest
             rust: nightly
-          - thing: macos
-            os: macos-latest
+          - os: macos-latest
             rust: stable
-          - thing: macos-nightly
-            os: macos-latest
+          - os: macos-latest
             rust: nightly
           # Note that these are on nightly due to rust-lang/rust#63700 not being
           # on stable yet
-          - thing: windows-msvc64
-            os: windows-latest
+          - os: windows-latest
             rust: stable-x86_64-msvc
-          - thing: windows-msvc32
-            os: windows-latest
+          - os: windows-latest
             rust: stable-i686-msvc
-          - thing: windows-gnu64
-            os: windows-latest
+          - os: windows-latest
             rust: stable-x86_64-gnu
-          - thing: windows-gnu32
-            os: windows-latest
+          - os: windows-latest
             rust: stable-i686-gnu
     steps:
     - uses: actions/checkout@v1
@@ -54,18 +44,28 @@ jobs:
       shell: bash
     - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
       shell: bash
+
     # full fidelity of backtraces on 32-bit msvc requires frame pointers, so
     # enable that for our tests
     - name: Force frame pointers
       run: echo RUSTFLAGS="-Cforce-frame-pointers $RUSTFLAGS" >> $GITHUB_ENV
       shell: bash
-      if: matrix.thing == 'windows-msvc32'
+      if: matrix.rust == 'stable-i686-msvc'
+
+    # Force packed debuginfo on macOS because libbacktrace only works with
+    # packed debuginfo. We specifically test later that both packed and
+    # unpacked work.
+    - run: |
+        echo CARGO_PROFILE_DEV_SPLIT_DEBUGINFO=packed >> $GITHUB_ENV
+        echo CARGO_PROFILE_TEST_SPLIT_DEBUGINFO=packed >> $GITHUB_ENV
+      if: matrix.os == 'macos-latest'
+
     - run: cargo build --manifest-path crates/backtrace-sys/Cargo.toml
     - run: cargo build
     - run: cargo test
     - run: cargo test --features "gimli-symbolize"
     - run: cargo test --features "libbacktrace"
-    - run: cargo test --features "libbacktrace gimli-symbolize"
+    - run: cargo check --features "libbacktrace gimli-symbolize"
     - run: cargo test --features "serialize-rustc"
     - run: cargo test --features "serialize-serde"
     - run: cargo test --features "verify-winapi"
@@ -83,16 +83,41 @@ jobs:
     - run: cargo test --features gimli-symbolize --manifest-path crates/without_debuginfo/Cargo.toml
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features libbacktrace
     - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features gimli-symbolize
-    - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gabi" cargo test --features gimli-symbolize
+
+    # Test that if debuginfo is compressed gimli still works
+    - run: cargo test
       if: contains(matrix.os, 'ubuntu')
-    - run: RUSTFLAGS="-C link-arg=-Wl,--compress-debug-sections=zlib-gnu" cargo test --features gimli-symbolize
+      env:
+        RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib-gabi"
+    - run: cargo test
       if: contains(matrix.os, 'ubuntu')
-    - run: cargo clean && RUSTFLAGS="-C split-debuginfo=unpacked" cargo test --features gimli-symbolize
-      if: matrix.thing == 'macos-nightly'
-    - run: cargo clean && RUSTFLAGS="-C split-debuginfo=unpacked -Zunstable-options" cargo test --features gimli-symbolize
-      if: matrix.thing == 'nightly'
-    - run: cargo clean && RUSTFLAGS="-C split-debuginfo=packed -Zunstable-options" cargo test --features gimli-symbolize
-      if: matrix.thing == 'nightly'
+      env:
+        RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib-gnu"
+
+    # Test that, on macOS, packed/unpacked debuginfo both work
+    - run: cargo clean && cargo test
+    # Test that, on macOS, packed/unpacked debuginfo both work
+      if: matrix.os == 'macos-latest'
+      env:
+        CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: unpacked
+        CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: unpacked
+    - run: cargo clean && cargo test
+      if: matrix.os == 'macos-latest'
+      env:
+        CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: packed
+        CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: packed
+
+    # Test that, on Linux, packed/unpacked debuginfo both work
+    - run: cargo clean && cargo test
+      if: matrix.rust == 'nightly'
+      env:
+        RUSTFLAGS: "-C split-debuginfo=unpacked -Zunstable-options"
+    - run: cargo clean && cargo test
+      if: matrix.rust == 'nightly'
+      env:
+        RUSTFLAGS: "-C split-debuginfo=packed -Zunstable-options"
+
+    # Test that including as a submodule will still work
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
 
   windows_arm64:
@@ -116,9 +141,6 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        target:
-        - aarch64-apple-ios
-        - x86_64-apple-ios
         include:
         - target: aarch64-apple-ios
           sdk: iphoneos
@@ -185,7 +207,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [wasm32-unknown-unknown, wasm32-wasi, x86_64-fuchsia, x86_64-fortanix-unknown-sgx]
+        target:
+        - wasm32-unknown-unknown
+        - wasm32-wasi
+        - x86_64-fuchsia
+        - x86_64-fortanix-unknown-sgx
+        - x86_64-unknown-illumos
     steps:
     - uses: actions/checkout@v1
       with:
@@ -196,6 +223,7 @@ jobs:
     - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
       shell: bash
     - run: cargo build --target ${{ matrix.target }}
+    - run: cargo build --manifest-path crates/as-if-std/Cargo.toml --target ${{ matrix.target }}
 
   msrv:
     name: MSRV

@@ -154,6 +154,7 @@ cfg_if::cfg_if! {
             target_os = "linux",
             target_os = "fuchsia",
             target_os = "freebsd",
+            all(target_os = "android", feature = "dl_iterate_phdr"),
         ),
         not(target_env = "uclibc"),
     ))] {

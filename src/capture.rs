@@ -249,6 +249,15 @@ impl From<Vec<BacktraceFrame>> for Backtrace {
     }
 }
 
+impl From<crate::Frame> for BacktraceFrame {
+    fn from(frame: crate::Frame) -> BacktraceFrame {
+        BacktraceFrame {
+            frame: Frame::Raw(frame),
+            symbols: None,
+        }
+    }
+}
+
 impl Into<Vec<BacktraceFrame>> for Backtrace {
     fn into(self) -> Vec<BacktraceFrame> {
         self.frames
@@ -515,6 +524,62 @@ mod serde_impls {
                 },
                 symbols: frame.symbols,
             })
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_frame_conversion() {
+        // captures an original backtrace, and makes sure that the manual conversion
+        // to frames yields the same results.
+        let mut bt = Backtrace::new();
+        bt.resolve();
+        let original_frames = bt.frames();
+
+        let mut frames = vec![];
+        crate::trace(|frame| {
+            let converted = BacktraceFrame::from(frame.clone());
+            frames.push(converted);
+            true
+        });
+
+        let mut manual = Backtrace::from(frames);
+        manual.resolve();
+        let frames = manual.frames();
+
+        // the first frames can be different because we call from slightly different places,
+        // and the `trace` version has an extra capture. But because of inlining the number of
+        // frames that differ may be different between release and debug versions. Plus who knows
+        // what the compiler will do in the future. So we just take 4 frames from the end and make
+        // sure they match
+        //
+        // For miri, every backtrace that is taken yields different addresses and different
+        // instruction pointers. That is irrespective of conversion and happens even if
+        // Backtrace::new() is invoked in a row. They all resolve to the same names, though, so to
+        // make sure this works on miri we resolve the symbols and compare the results. It is okay
+        // if some addresses don't have symbols, but if we scan enough frames at least some will do
+        for (converted, og) in frames
+            .iter()
+            .rev()
+            .take(4)
+            .zip(original_frames.iter().rev().take(4))
+        {
+            let converted_symbols = converted.symbols();
+            let og_symbols = og.symbols();
+
+            assert_eq!(og_symbols.len(), converted_symbols.len());
+            for (os, cs) in og_symbols.iter().zip(converted_symbols.iter()) {
+                assert_eq!(
+                    os.name().map(|x| x.as_bytes()),
+                    cs.name().map(|x| x.as_bytes())
+                );
+                assert_eq!(os.filename(), cs.filename());
+                assert_eq!(os.lineno(), cs.lineno());
+            }
         }
     }
 }

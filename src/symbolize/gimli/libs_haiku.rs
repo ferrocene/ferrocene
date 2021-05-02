@@ -7,6 +7,7 @@
 
 use super::mystd::borrow::ToOwned;
 use super::mystd::ffi::{CStr, OsStr};
+use super::mystd::mem::MaybeUninit;
 use super::mystd::os::unix::prelude::*;
 use super::{Library, LibrarySegment, Vec};
 
@@ -14,7 +15,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
     let mut libraries: Vec<Library> = Vec::new();
 
     unsafe {
-        let mut info = mem::MaybeUninit::<libc::image_info>::zeroed();
+        let mut info = MaybeUninit::<libc::image_info>::zeroed();
         let mut cookie: i32 = 0;
         // Load the first image to get a valid info struct
         let mut status =

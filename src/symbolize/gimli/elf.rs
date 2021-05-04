@@ -29,7 +29,7 @@ pub struct Object<'a> {
     /// We could use a literal instead, but this helps ensure correctness.
     endian: NativeEndian,
     /// The entire file data.
-    data: Bytes<'a>,
+    data: &'a [u8],
     sections: SectionTable<'a, Elf>,
     strings: StringTable<'a>,
     /// List of pre-parsed and sorted symbols by base address.
@@ -38,7 +38,6 @@ pub struct Object<'a> {
 
 impl<'a> Object<'a> {
     fn parse(data: &'a [u8]) -> Option<Object<'a>> {
-        let data = object::Bytes(data);
         let elf = Elf::parse(data).ok()?;
         let endian = elf.endian().ok()?;
         let sections = elf.sections(endian, data).ok()?;
@@ -90,7 +89,7 @@ impl<'a> Object<'a> {
 
     pub fn section(&self, stash: &'a Stash, name: &str) -> Option<&'a [u8]> {
         if let Some(section) = self.section_header(name) {
-            let mut data = section.data(self.endian, self.data).ok()?;
+            let mut data = Bytes(section.data(self.endian, self.data).ok()?);
 
             // Check for DWARF-standard (gABI) compression, i.e., as generated
             // by ld's `--compress-debug-sections=zlib-gabi` flag.
@@ -131,7 +130,7 @@ impl<'a> Object<'a> {
                 }
             })
             .next()?;
-        let mut data = compressed_section.data(self.endian, self.data).ok()?;
+        let mut data = Bytes(compressed_section.data(self.endian, self.data).ok()?);
         if data.read_bytes(8).ok()?.0 != b"ZLIB\0\0\0\0" {
             return None;
         }

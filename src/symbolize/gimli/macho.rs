@@ -20,7 +20,7 @@ impl Mapping {
         // First up we need to load the unique UUID which is stored in the macho
         // header of the file we're reading, specified at `path`.
         let map = super::mmap(path)?;
-        let (macho, data) = find_header(Bytes(&map))?;
+        let (macho, data) = find_header(&map)?;
         let endian = macho.endian().ok()?;
         let uuid = macho.uuid(endian, data).ok()??;
 
@@ -40,7 +40,7 @@ impl Mapping {
         // file. This should have the symbol table for at least some
         // symbolication purposes.
         Mapping::mk(map, |data, stash| {
-            let (macho, data) = find_header(Bytes(data))?;
+            let (macho, data) = find_header(data)?;
             let endian = macho.endian().ok()?;
             let obj = Object::parse(macho, endian, data)?;
             Context::new(stash, obj)
@@ -73,7 +73,7 @@ impl Mapping {
             let entry = entry.ok()?;
             let map = super::mmap(&entry.path())?;
             let candidate = Mapping::mk(map, |data, stash| {
-                let (macho, data) = find_header(Bytes(data))?;
+                let (macho, data) = find_header(data)?;
                 let endian = macho.endian().ok()?;
                 let entry_uuid = macho.uuid(endian, data).ok()??;
                 if entry_uuid != uuid {
@@ -91,7 +91,7 @@ impl Mapping {
     }
 }
 
-fn find_header(mut data: Bytes<'_>) -> Option<(&'_ Mach, Bytes<'_>)> {
+fn find_header(data: &'_ [u8]) -> Option<(&'_ Mach, &'_ [u8])> {
     use object::endian::BigEndian;
 
     let desired_cpu = || {
@@ -108,6 +108,7 @@ fn find_header(mut data: Bytes<'_>) -> Option<(&'_ Mach, Bytes<'_>)> {
         }
     };
 
+    let mut data = Bytes(data);
     match data
         .clone()
         .read::<object::endian::U32<NativeEndian>>()
@@ -149,13 +150,13 @@ fn find_header(mut data: Bytes<'_>) -> Option<(&'_ Mach, Bytes<'_>)> {
         _ => return None,
     }
 
-    Mach::parse(data).ok().map(|h| (h, data))
+    Mach::parse(data.0).ok().map(|h| (h, data.0))
 }
 
 // This is used both for executables/libraries and source object files.
 pub struct Object<'a> {
     endian: NativeEndian,
-    data: Bytes<'a>,
+    data: &'a [u8],
     dwarf: Option<&'a [MachSection]>,
     syms: Vec<(&'a [u8], u64)>,
     syms_sort_by_name: bool,
@@ -166,7 +167,7 @@ pub struct Object<'a> {
 }
 
 impl<'a> Object<'a> {
-    fn parse(mach: &'a Mach, endian: NativeEndian, data: Bytes<'a>) -> Option<Object<'a>> {
+    fn parse(mach: &'a Mach, endian: NativeEndian, data: &'a [u8]) -> Option<Object<'a>> {
         let is_object = mach.filetype(endian) == object::macho::MH_OBJECT;
         let mut dwarf = None;
         let mut syms = Vec::new();
@@ -181,7 +182,7 @@ impl<'a> Object<'a> {
                     dwarf = segment.sections(endian, section_data).ok();
                 }
             } else if let Some(symtab) = command.symtab().ok()? {
-                let symbols = symtab.symbols::<Mach>(endian, data).ok()?;
+                let symbols = symtab.symbols::<Mach, _>(endian, data).ok()?;
                 syms = symbols
                     .iter()
                     .filter_map(|nlist: &MachNlist| {
@@ -230,7 +231,7 @@ impl<'a> Object<'a> {
                     && &section_name[2..] == &name[1..]
             }
         })?;
-        Some(section.data(self.endian, self.data).ok()?.0)
+        Some(section.data(self.endian, self.data).ok()?)
     }
 
     pub fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
@@ -299,9 +300,9 @@ fn object_mapping(path: &[u8]) -> Option<Mapping> {
                     .members()
                     .filter_map(Result::ok)
                     .find(|m| m.name() == member_name)?;
-                Bytes(member.data())
+                member.data(data).ok()?
             }
-            None => Bytes(data),
+            None => data,
         };
         let (macho, data) = find_header(data)?;
         let endian = macho.endian().ok()?;

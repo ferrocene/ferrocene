@@ -85,27 +85,13 @@ struct Context<'a> {
 
 impl<'data> Context<'data> {
     fn new(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data>> {
-        fn load_section<'data, S>(stash: &'data Stash, obj: &Object<'data>) -> S
-        where
-            S: gimli::Section<gimli::EndianSlice<'data, Endian>>,
-        {
-            let data = obj.section(stash, S::section_name()).unwrap_or(&[]);
-            S::from(EndianSlice::new(data, Endian))
-        }
-
-        let dwarf = addr2line::Context::from_sections(
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            load_section(stash, &object),
-            gimli::EndianSlice::new(&[], Endian),
-        )
+        let sections = gimli::Dwarf::load(|id| -> Result<_, ()> {
+            let data = object.section(stash, id.name()).unwrap_or(&[]);
+            Ok(EndianSlice::new(data, Endian))
+        })
         .ok()?;
+        let dwarf = addr2line::Context::from_dwarf(sections).ok()?;
+
         Some(Context { dwarf, object })
     }
 }

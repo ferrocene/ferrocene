@@ -3,7 +3,7 @@ use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
 use object::read::StringTable;
-use object::{Bytes, LittleEndian as LE};
+use object::LittleEndian as LE;
 
 #[cfg(target_pointer_width = "32")]
 type Pe = object::pe::ImageNtHeaders32;
@@ -18,25 +18,25 @@ impl Mapping {
 }
 
 pub struct Object<'a> {
-    data: Bytes<'a>,
+    data: &'a [u8],
     sections: SectionTable<'a>,
     symbols: Vec<(usize, &'a ImageSymbol)>,
     strings: StringTable<'a>,
 }
 
 pub fn get_image_base(data: &[u8]) -> Option<usize> {
-    let data = Bytes(data);
     let dos_header = ImageDosHeader::parse(data).ok()?;
-    let (nt_headers, _, _) = dos_header.nt_headers::<Pe>(data).ok()?;
+    let mut offset = dos_header.nt_headers_offset().into();
+    let (nt_headers, _) = Pe::parse(data, &mut offset).ok()?;
     usize::try_from(nt_headers.optional_header().image_base()).ok()
 }
 
 impl<'a> Object<'a> {
     fn parse(data: &'a [u8]) -> Option<Object<'a>> {
-        let data = Bytes(data);
         let dos_header = ImageDosHeader::parse(data).ok()?;
-        let (nt_headers, _, nt_tail) = dos_header.nt_headers::<Pe>(data).ok()?;
-        let sections = nt_headers.sections(nt_tail).ok()?;
+        let mut offset = dos_header.nt_headers_offset().into();
+        let (nt_headers, _) = Pe::parse(data, &mut offset).ok()?;
+        let sections = nt_headers.sections(data, offset).ok()?;
         let symtab = nt_headers.symbols(data).ok()?;
         let strings = symtab.strings();
         let image_base = usize::try_from(nt_headers.optional_header().image_base()).ok()?;
@@ -78,8 +78,7 @@ impl<'a> Object<'a> {
                 .section_by_name(self.strings, name.as_bytes())?
                 .1
                 .pe_data(self.data)
-                .ok()?
-                .0,
+                .ok()?,
         )
     }
 

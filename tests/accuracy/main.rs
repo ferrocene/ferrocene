@@ -20,8 +20,6 @@ fn doit() {
     // Skip musl which is by default statically linked and doesn't support
     // dynamic libraries.
     !cfg!(target_env = "musl")
-    // Skip MinGW on libbacktrace which doesn't have support for DLLs.
-    && !(cfg!(windows) && cfg!(target_env = "gnu") && cfg!(feature = "libbacktrace"))
     // Skip Miri, since it doesn't support dynamic libraries.
     && !cfg!(miri)
     {

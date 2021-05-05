@@ -1,38 +1,6 @@
 use backtrace::Frame;
 use std::thread;
 
-// Reflects the conditional compilation logic at end of src/symbolize/mod.rs
-static NOOP: bool = false;
-static DBGHELP: bool = !NOOP
-    && cfg!(all(
-        windows,
-        target_env = "msvc",
-        not(target_vendor = "uwp")
-    ));
-static LIBBACKTRACE: bool = !NOOP
-    && !DBGHELP
-    && cfg!(all(
-        feature = "libbacktrace",
-        any(
-            unix,
-            all(windows, not(target_vendor = "uwp"), target_env = "gnu")
-        ),
-        not(target_os = "fuchsia"),
-        not(target_os = "emscripten"),
-        not(target_env = "uclibc"),
-        not(target_env = "libnx"),
-    ));
-static GIMLI_SYMBOLIZE: bool = !NOOP
-    && !DBGHELP
-    && !LIBBACKTRACE
-    && cfg!(all(
-        feature = "gimli-symbolize",
-        any(unix, windows),
-        not(target_vendor = "uwp"),
-        not(target_os = "emscripten"),
-    ));
-static MIRI_SYMBOLIZE: bool = cfg!(miri);
-
 #[test]
 // FIXME: shouldn't ignore this test on i686-msvc, unsure why it's failing
 #[cfg_attr(all(target_arch = "x86", target_env = "msvc"), ignore)]
@@ -159,8 +127,6 @@ fn smoke_test_frames() {
         }
 
         let mut resolved = 0;
-        let can_resolve = LIBBACKTRACE || GIMLI_SYMBOLIZE || MIRI_SYMBOLIZE;
-        let can_resolve_cols = GIMLI_SYMBOLIZE || MIRI_SYMBOLIZE;
 
         let mut name = None;
         let mut addr = None;
@@ -175,31 +141,22 @@ fn smoke_test_frames() {
             line = sym.lineno();
             file = sym.filename().map(|v| v.to_path_buf());
         });
+        assert!(resolved > 0);
 
-        // dbghelp doesn't always resolve symbols right now
-        match resolved {
-            0 => return assert!(!can_resolve),
-            _ => {}
+        let name = name.expect("didn't find a name");
+
+        // in release mode names get weird as functions can get merged
+        // together with `mergefunc`, so only assert this in debug mode
+        if cfg!(debug_assertions) {
+            assert!(
+                name.contains(expected_name),
+                "didn't find `{}` in `{}`",
+                expected_name,
+                name
+            );
         }
 
-        if can_resolve {
-            let name = name.expect("didn't find a name");
-
-            // in release mode names get weird as functions can get merged
-            // together with `mergefunc`, so only assert this in debug mode
-            if cfg!(debug_assertions) {
-                assert!(
-                    name.contains(expected_name),
-                    "didn't find `{}` in `{}`",
-                    expected_name,
-                    name
-                );
-            }
-        }
-
-        if can_resolve {
-            addr.expect("didn't find a symbol");
-        }
+        addr.expect("didn't find a symbol");
 
         if cfg!(debug_assertions) {
             let line = line.expect("didn't find a line number");
@@ -221,7 +178,9 @@ fn smoke_test_frames() {
                     expected_line
                 );
             }
-            if can_resolve_cols {
+
+            // dbghelp on MSVC doesn't support column numbers
+            if !cfg!(target_env = "msvc") {
                 let col = col.expect("didn't find a column number");
                 if expected_col != 0 {
                     assert!(
@@ -321,9 +280,8 @@ fn sp_smoke_test() {
 
             let mut is_recursive_stack_references = false;
             backtrace::resolve(frame.ip(), |sym| {
-                is_recursive_stack_references |= (LIBBACKTRACE || GIMLI_SYMBOLIZE)
-                    && sym
-                        .name()
+                is_recursive_stack_references |=
+                    sym.name()
                         .and_then(|name| name.as_str())
                         .map_or(false, |name| {
                             eprintln!("name = {}", name);

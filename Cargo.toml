@@ -22,7 +22,6 @@ exclude = ['crates/without_debuginfo', 'crates/macos_frames_test', 'crates/line-
 [dependencies]
 cfg-if = "1.0"
 rustc-demangle = "0.1.4"
-backtrace-sys = { path = "crates/backtrace-sys", version = "0.1.35", optional = true, default_features = false }
 libc = { version = "0.2.94", default-features = false }
 
 # Optionally enable the ability to serialize a `Backtrace`, controlled through
@@ -36,11 +35,10 @@ cpp_demangle = { default-features = false, version = "0.3.0", optional = true }
 
 # Optional dependencies enabled through the `gimli-symbolize` feature, do not
 # use these features directly.
-addr2line = { version = "0.15.1", optional = true, default-features = false }
-miniz_oxide = { version = "0.4.0", optional = true, default-features = false }
+addr2line = { version = "0.15.1", default-features = false }
+miniz_oxide = { version = "0.4.0", default-features = false }
 [dependencies.object]
 version = "0.24"
-optional = true
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 
@@ -58,25 +56,10 @@ libloading = "0.6"
 
 [features]
 # By default libstd support and gimli-symbolize is used to symbolize addresses.
-default = ["std", "gimli-symbolize"]
+default = ["std"]
 
 # Include std support. This enables types like `Backtrace`.
 std = []
-
-#=======================================
-# Methods of resolving symbols
-#
-# - gimli-symbolize: use the `gimli-rs/addr2line` crate to symbolicate
-#   addresses into file, line, and name using DWARF debug information.
-# - libbacktrace: this feature activates the `backtrace-sys` dependency,
-#   building the libbacktrace library found in gcc repos.
-#
-# Note that MSVC unconditionally uses the dbghelp library to symbolize and won't
-# be affected by feature selection here. Also note that it's highly unlikely you
-# want to configure this. If you're having trouble getting backtraces it's
-# likely best to open an issue.
-gimli-symbolize = ["addr2line", "miniz_oxide", "object"]
-libbacktrace = ["backtrace-sys/backtrace-sys"]
 
 #=======================================
 # Methods of serialization
@@ -91,11 +74,13 @@ serialize-serde = ["serde"]
 # Only here for backwards compatibility purposes or for internal testing
 # purposes. New code should use none of these features.
 coresymbolication = []
-dladdr = []
-kernel32 = []
-unix-backtrace = []
-libunwind = []
 dbghelp = []
+dladdr = []
+gimli-symbolize = []
+kernel32 = []
+libbacktrace = []
+libunwind = []
+unix-backtrace = []
 verify-winapi = [
   'winapi/dbghelp',
   'winapi/handleapi',
@@ -132,7 +117,7 @@ edition = '2018'
 
 [[test]]
 name = "accuracy"
-required-features = ["std", "gimli-symbolize"]
+required-features = ["std"]
 edition = '2018'
 
 [[test]]

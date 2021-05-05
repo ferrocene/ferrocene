@@ -471,17 +471,6 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use dbghelp as imp;
     } else if #[cfg(all(
-        feature = "libbacktrace",
-        any(unix, all(windows, not(target_vendor = "uwp"), target_env = "gnu")),
-        not(target_os = "fuchsia"),
-        not(target_os = "emscripten"),
-        not(target_env = "uclibc"),
-        not(target_env = "libnx"),
-    ))] {
-        mod libbacktrace;
-        use libbacktrace as imp;
-    } else if #[cfg(all(
-        feature = "gimli-symbolize",
         any(unix, windows),
         not(target_vendor = "uwp"),
         not(target_os = "emscripten"),

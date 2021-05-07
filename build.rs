@@ -10,7 +10,13 @@ fn main() {
 }
 
 fn build_android() {
-    let expansion = cc::Build::new().file("src/android-api.c").expand();
+    let expansion = match cc::Build::new().file("src/android-api.c").try_expand() {
+        Ok(result) => result,
+        Err(e) => {
+            println!("failed to run C compiler: {}", e);
+            return;
+        }
+    };
     let expansion = match std::str::from_utf8(&expansion) {
         Ok(s) => s,
         Err(_) => return,

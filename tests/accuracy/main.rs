@@ -34,11 +34,13 @@ fn doit() {
         } else {
             dir.push("libdylib_dep.so");
         }
-        let lib = libloading::Library::new(&dir).unwrap();
-        let api = unsafe { lib.get::<extern "C" fn(Pos, fn(Pos, Pos))>(b"foo").unwrap() };
-        api(pos!(), |a, b| {
-            check!(a, b);
-        });
+        unsafe {
+            let lib = libloading::Library::new(&dir).unwrap();
+            let api = lib.get::<extern "C" fn(Pos, fn(Pos, Pos))>(b"foo").unwrap();
+            api(pos!(), |a, b| {
+                check!(a, b);
+            });
+        }
     }
 
     outer(pos!());

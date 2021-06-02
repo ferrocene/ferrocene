@@ -47,7 +47,7 @@ fn native_library(i: u32) -> Option<Library> {
                     header as *const _ as *const u8,
                     mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize,
                 );
-                (header.load_commands(endian, data).ok()?, endian)
+                (header.load_commands(endian, data, 0).ok()?, endian)
             }
             macho::MH_MAGIC_64 => {
                 let endian = NativeEndian;
@@ -56,7 +56,7 @@ fn native_library(i: u32) -> Option<Library> {
                     header as *const _ as *const u8,
                     mem::size_of_val(header) + header.sizeofcmds.get(endian) as usize,
                 );
-                (header.load_commands(endian, data).ok()?, endian)
+                (header.load_commands(endian, data, 0).ok()?, endian)
             }
             _ => return None,
         }

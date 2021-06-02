@@ -38,7 +38,7 @@ cpp_demangle = { default-features = false, version = "0.3.0", optional = true }
 addr2line = { version = "0.15.1", default-features = false }
 miniz_oxide = { version = "0.4.0", default-features = false }
 [dependencies.object]
-version = "0.24"
+version = "0.25"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 
@@ -52,7 +52,7 @@ cc = "1.0.67"
 
 [dev-dependencies]
 dylib-dep = { path = "crates/dylib-dep" }
-libloading = "0.6"
+libloading = "0.7"
 
 [features]
 # By default libstd support and gimli-symbolize is used to symbolize addresses.

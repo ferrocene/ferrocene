@@ -22,7 +22,7 @@ impl Mapping {
         let map = super::mmap(path)?;
         let (macho, data) = find_header(&map)?;
         let endian = macho.endian().ok()?;
-        let uuid = macho.uuid(endian, data).ok()??;
+        let uuid = macho.uuid(endian, data, 0).ok()??;
 
         // Next we need to look for a `*.dSYM` file. For now we just probe the
         // containing directory and look around for something that matches
@@ -75,7 +75,7 @@ impl Mapping {
             let candidate = Mapping::mk(map, |data, stash| {
                 let (macho, data) = find_header(data)?;
                 let endian = macho.endian().ok()?;
-                let entry_uuid = macho.uuid(endian, data).ok()??;
+                let entry_uuid = macho.uuid(endian, data, 0).ok()??;
                 if entry_uuid != uuid {
                     return None;
                 }
@@ -150,7 +150,7 @@ fn find_header(data: &'_ [u8]) -> Option<(&'_ Mach, &'_ [u8])> {
         _ => return None,
     }
 
-    Mach::parse(data.0).ok().map(|h| (h, data.0))
+    Mach::parse(data.0, 0).ok().map(|h| (h, data.0))
 }
 
 // This is used both for executables/libraries and source object files.
@@ -172,7 +172,7 @@ impl<'a> Object<'a> {
         let mut dwarf = None;
         let mut syms = Vec::new();
         let mut syms_sort_by_name = false;
-        let mut commands = mach.load_commands(endian, data).ok()?;
+        let mut commands = mach.load_commands(endian, data, 0).ok()?;
         let mut object_map = None;
         let mut object_mappings = Vec::new();
         while let Ok(Some(command)) = commands.next() {

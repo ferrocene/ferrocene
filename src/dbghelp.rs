@@ -34,29 +34,11 @@ use core::ptr;
 mod dbghelp {
     use crate::windows::*;
     pub use winapi::um::dbghelp::{
-        StackWalk64, SymCleanup, SymFromAddrW, SymFunctionTableAccess64, SymGetLineFromAddrW64,
-        SymGetModuleBase64, SymInitializeW,
+        StackWalk64, StackWalkEx, SymCleanup, SymFromAddrW, SymFunctionTableAccess64,
+        SymGetLineFromAddrW64, SymGetModuleBase64, SymGetOptions, SymInitializeW, SymSetOptions,
     };
 
     extern "system" {
-        // Not defined in winapi yet
-        pub fn SymGetOptions() -> u32;
-        pub fn SymSetOptions(_: u32);
-
-        // This is defined in winapi, but it's incorrect (FIXME winapi-rs#768)
-        pub fn StackWalkEx(
-            MachineType: DWORD,
-            hProcess: HANDLE,
-            hThread: HANDLE,
-            StackFrame: LPSTACKFRAME_EX,
-            ContextRecord: PVOID,
-            ReadMemoryRoutine: PREAD_PROCESS_MEMORY_ROUTINE64,
-            FunctionTableAccessRoutine: PFUNCTION_TABLE_ACCESS_ROUTINE64,
-            GetModuleBaseRoutine: PGET_MODULE_BASE_ROUTINE64,
-            TranslateAddress: PTRANSLATE_ADDRESS_ROUTINE64,
-            Flags: DWORD,
-        ) -> BOOL;
-
         // Not defined in winapi yet
         pub fn SymFromInlineContextW(
             hProcess: HANDLE,
@@ -176,7 +158,7 @@ const SYMOPT_DEFERRED_LOADS: DWORD = 0x00000004;
 dbghelp! {
     extern "system" {
         fn SymGetOptions() -> DWORD;
-        fn SymSetOptions(options: DWORD) -> ();
+        fn SymSetOptions(options: DWORD) -> DWORD;
         fn SymInitializeW(
             handle: HANDLE,
             path: PCWSTR,

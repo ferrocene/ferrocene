@@ -43,7 +43,7 @@ default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.3", optional = true }
+winapi = { version = "0.3.9", optional = true }
 
 [build-dependencies]
 # Only needed for Android, but cannot be target dependent

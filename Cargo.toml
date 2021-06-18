@@ -17,7 +17,12 @@ edition = "2018"
 
 [workspace]
 members = ['crates/cpp_smoke_test', 'crates/as-if-std']
-exclude = ['crates/without_debuginfo', 'crates/macos_frames_test', 'crates/line-tables-only']
+exclude = [
+   'crates/without_debuginfo',
+   'crates/macos_frames_test',
+   'crates/line-tables-only',
+   'crates/debuglink',
+]
 
 [dependencies]
 cfg-if = "1.0"

@@ -102,6 +102,10 @@ jobs:
       env:
         RUSTFLAGS: "-C split-debuginfo=packed -Zunstable-options"
 
+    # Test that separate debug info works
+    - run: ./ci/debuglink-docker.sh
+      if: contains(matrix.os, 'ubuntu')
+
     # Test that including as a submodule will still work
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml
 

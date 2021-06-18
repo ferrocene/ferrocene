@@ -58,10 +58,12 @@ struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     cx: Context<'static>,
     _map: Mmap,
+    _map_sup: Option<Mmap>,
     _stash: Stash,
 }
 
 impl Mapping {
+    #[allow(dead_code)]
     fn mk<F>(data: Mmap, mk: F) -> Option<Mapping>
     where
         F: for<'a> Fn(&'a [u8], &'a Stash) -> Option<Context<'a>>,
@@ -73,6 +75,7 @@ impl Mapping {
             // only borrow `map` and `stash` and we're preserving them below.
             cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
             _map: data,
+            _map_sup: None,
             _stash: stash,
         })
     }
@@ -84,12 +87,25 @@ struct Context<'a> {
 }
 
 impl<'data> Context<'data> {
-    fn new(stash: &'data Stash, object: Object<'data>) -> Option<Context<'data>> {
-        let sections = gimli::Dwarf::load(|id| -> Result<_, ()> {
+    fn new(
+        stash: &'data Stash,
+        object: Object<'data>,
+        sup: Option<Object<'data>>,
+    ) -> Option<Context<'data>> {
+        let mut sections = gimli::Dwarf::load(|id| -> Result<_, ()> {
             let data = object.section(stash, id.name()).unwrap_or(&[]);
             Ok(EndianSlice::new(data, Endian))
         })
         .ok()?;
+
+        if let Some(sup) = sup {
+            sections
+                .load_sup(|id| -> Result<_, ()> {
+                    let data = sup.section(stash, id.name()).unwrap_or(&[]);
+                    Ok(EndianSlice::new(data, Endian))
+                })
+                .ok()?;
+        }
         let dwarf = addr2line::Context::from_dwarf(sections).ok()?;
 
         Some(Context { dwarf, object })

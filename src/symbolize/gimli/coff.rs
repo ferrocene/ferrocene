@@ -13,7 +13,9 @@ type Pe = object::pe::ImageNtHeaders64;
 impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
-        Mapping::mk(map, |data, stash| Context::new(stash, Object::parse(data)?))
+        Mapping::mk(map, |data, stash| {
+            Context::new(stash, Object::parse(data)?, None)
+        })
     }
 }
 

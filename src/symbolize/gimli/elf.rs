@@ -1,6 +1,11 @@
-use super::{Context, Mapping, Path, Stash, Vec};
-use core::convert::TryFrom;
-use object::elf::{ELFCOMPRESS_ZLIB, SHF_COMPRESSED};
+use super::mystd::ffi::{OsStr, OsString};
+use super::mystd::fs;
+use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
+use super::mystd::path::{Path, PathBuf};
+use super::{Context, Mapping, Stash, Vec};
+use core::convert::{TryFrom, TryInto};
+use core::str;
+use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
 use object::{BigEndian, Bytes, NativeEndian};
@@ -13,7 +18,76 @@ type Elf = object::elf::FileHeader64<NativeEndian>;
 impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
-        Mapping::mk(map, |data, stash| Context::new(stash, Object::parse(data)?))
+        let object = Object::parse(&map)?;
+
+        // Try to locate an external debug file using the build ID.
+        if let Some(path_debug) = object.build_id().and_then(locate_build_id) {
+            if let Some(mapping) = Mapping::new_debug(path_debug, None) {
+                return Some(mapping);
+            }
+        }
+
+        // Try to locate an external debug file using the GNU debug link section.
+        if let Some((path_debug, crc)) = object.gnu_debuglink_path(path) {
+            if let Some(mapping) = Mapping::new_debug(path_debug, Some(crc)) {
+                return Some(mapping);
+            }
+        }
+
+        let stash = Stash::new();
+        let cx = Context::new(&stash, object, None)?;
+        Some(Mapping {
+            // Convert to 'static lifetimes since the symbols should
+            // only borrow `map` and `stash` and we're preserving them below.
+            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
+            _map: map,
+            _map_sup: None,
+            _stash: stash,
+        })
+    }
+
+    /// Load debuginfo from an external debug file.
+    fn new_debug(path: PathBuf, crc: Option<u32>) -> Option<Mapping> {
+        let map = super::mmap(&path)?;
+        let object = Object::parse(&map)?;
+
+        if let Some(_crc) = crc {
+            // TODO: check crc
+        }
+
+        // Try to locate a supplementary object file.
+        if let Some((path_sup, build_id_sup)) = object.gnu_debugaltlink_path(&path) {
+            if let Some(map_sup) = super::mmap(&path_sup) {
+                if let Some(sup) = Object::parse(&map_sup) {
+                    if sup.build_id() == Some(build_id_sup) {
+                        let stash = Stash::new();
+                        let cx = Context::new(&stash, object, Some(sup))?;
+                        return Some(Mapping {
+                            // Convert to 'static lifetimes since the symbols should
+                            // only borrow `map`, `map_sup`, and `stash` and we're
+                            // preserving them below.
+                            cx: unsafe {
+                                core::mem::transmute::<Context<'_>, Context<'static>>(cx)
+                            },
+                            _map: map,
+                            _map_sup: Some(map_sup),
+                            _stash: stash,
+                        });
+                    }
+                }
+            }
+        }
+
+        let stash = Stash::new();
+        let cx = Context::new(&stash, object, None)?;
+        Some(Mapping {
+            // Convert to 'static lifetimes since the symbols should
+            // only borrow `map` and `stash` and we're preserving them below.
+            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
+            _map: map,
+            _map_sup: None,
+            _stash: stash,
+        })
     }
 }
 
@@ -163,6 +237,46 @@ impl<'a> Object<'a> {
     pub(super) fn search_object_map(&self, _addr: u64) -> Option<(&Context<'_>, u64)> {
         None
     }
+
+    fn build_id(&self) -> Option<&'a [u8]> {
+        for section in self.sections.iter() {
+            if let Ok(Some(mut notes)) = section.notes(self.endian, self.data) {
+                while let Ok(Some(note)) = notes.next() {
+                    if note.name() == ELF_NOTE_GNU && note.n_type(self.endian) == NT_GNU_BUILD_ID {
+                        return Some(note.desc());
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    // The contents of the ".gnu_debuglink" section is documented at:
+    // https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
+    fn gnu_debuglink_path(&self, path: &Path) -> Option<(PathBuf, u32)> {
+        let section = self.section_header(".gnu_debuglink")?;
+        let data = section.data(self.endian, self.data).ok()?;
+        let len = data.iter().position(|x| *x == 0)?;
+        let filename = &data[..len];
+        let offset = (len + 1 + 3) & !3;
+        let crc_bytes = data
+            .get(offset..offset + 4)
+            .and_then(|bytes| bytes.try_into().ok())?;
+        let crc = u32::from_ne_bytes(crc_bytes);
+        let path_debug = locate_debuglink(path, filename)?;
+        Some((path_debug, crc))
+    }
+
+    // The format of the ".gnu_debugaltlink" section is based on gdb.
+    fn gnu_debugaltlink_path(&self, path: &Path) -> Option<(PathBuf, &'a [u8])> {
+        let section = self.section_header(".gnu_debugaltlink")?;
+        let data = section.data(self.endian, self.data).ok()?;
+        let len = data.iter().position(|x| *x == 0)?;
+        let filename = &data[..len];
+        let build_id = &data[len + 1..];
+        let path_sup = locate_debugaltlink(path, filename, build_id)?;
+        Some((path_sup, build_id))
+    }
 }
 
 fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
@@ -184,4 +298,150 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     } else {
         None
     }
+}
+
+const DEBUG_PATH: &[u8] = b"/usr/lib/debug";
+
+fn debug_path_exists() -> bool {
+    cfg_if::cfg_if! {
+        if #[cfg(any(target_os = "freebsd", target_os = "linux"))] {
+            use core::sync::atomic::{AtomicU8, Ordering};
+            static DEBUG_PATH_EXISTS: AtomicU8 = AtomicU8::new(0);
+
+            let mut exists = DEBUG_PATH_EXISTS.load(Ordering::Relaxed);
+            if exists == 0 {
+                exists = if Path::new(OsStr::from_bytes(DEBUG_PATH)).is_dir() {
+                    1
+                } else {
+                    2
+                };
+                DEBUG_PATH_EXISTS.store(exists, Ordering::Relaxed);
+            }
+            exists == 1
+        } else {
+            false
+        }
+    }
+}
+
+/// Locate a debug file based on its build ID.
+///
+/// The format of build id paths is documented at:
+/// https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
+fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
+    const BUILD_ID_PATH: &[u8] = b"/usr/lib/debug/.build-id/";
+    const BUILD_ID_SUFFIX: &[u8] = b".debug";
+
+    if build_id.len() < 2 {
+        return None;
+    }
+
+    if !debug_path_exists() {
+        return None;
+    }
+
+    let mut path =
+        Vec::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
+    path.extend(BUILD_ID_PATH);
+    path.push(hex(build_id[0] >> 4));
+    path.push(hex(build_id[0] & 0xf));
+    path.push(b'/');
+    for byte in &build_id[1..] {
+        path.push(hex(byte >> 4));
+        path.push(hex(byte & 0xf));
+    }
+    path.extend(BUILD_ID_SUFFIX);
+    Some(PathBuf::from(OsString::from_vec(path)))
+}
+
+fn hex(byte: u8) -> u8 {
+    if byte < 10 {
+        b'0' + byte
+    } else {
+        b'a' + byte - 10
+    }
+}
+
+/// Locate a file specified in a `.gnu_debuglink` section.
+///
+/// `path` is the file containing the section.
+/// `filename` is from the contents of the section.
+///
+/// Search order is based on gdb, documented at:
+/// https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
+///
+/// gdb also allows the user to customize the debug search path, but we don't.
+///
+/// gdb also supports debuginfod, but we don't yet.
+fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
+    let path = fs::canonicalize(path).ok()?;
+    let parent = path.parent()?;
+    let mut f = PathBuf::from(OsString::with_capacity(
+        DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2,
+    ));
+    let filename = Path::new(OsStr::from_bytes(filename));
+
+    // Try "/parent/filename" if it differs from "path"
+    f.push(parent);
+    f.push(filename);
+    if f != path && f.is_file() {
+        return Some(f);
+    }
+
+    // Try "/parent/.debug/filename"
+    let mut s = OsString::from(f);
+    s.clear();
+    f = PathBuf::from(s);
+    f.push(parent);
+    f.push(".debug");
+    f.push(filename);
+    if f.is_file() {
+        return Some(f);
+    }
+
+    if debug_path_exists() {
+        // Try "/usr/lib/debug/parent/filename"
+        let mut s = OsString::from(f);
+        s.clear();
+        f = PathBuf::from(s);
+        f.push(OsStr::from_bytes(DEBUG_PATH));
+        f.push(parent.strip_prefix("/").unwrap());
+        f.push(filename);
+        if f.is_file() {
+            return Some(f);
+        }
+    }
+
+    None
+}
+
+/// Locate a file specified in a `.gnu_debugaltlink` section.
+///
+/// `path` is the file containing the section.
+/// `filename` and `build_id` are the contents of the section.
+///
+/// Search order is based on gdb:
+/// - filename, which is either absolute or relative to `path`
+/// - the build ID path under `BUILD_ID_PATH`
+///
+/// gdb also allows the user to customize the debug search path, but we don't.
+///
+/// gdb also supports debuginfod, but we don't yet.
+fn locate_debugaltlink(path: &Path, filename: &[u8], build_id: &[u8]) -> Option<PathBuf> {
+    let filename = Path::new(OsStr::from_bytes(filename));
+    if filename.is_absolute() {
+        if filename.is_file() {
+            return Some(filename.into());
+        }
+    } else {
+        let path = fs::canonicalize(path).ok()?;
+        let parent = path.parent()?;
+        let mut f = PathBuf::from(parent);
+        f.push(filename);
+        if f.is_file() {
+            return Some(f);
+        }
+    }
+
+    locate_build_id(build_id)
 }

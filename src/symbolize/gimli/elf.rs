@@ -2,6 +2,7 @@ use super::mystd::ffi::{OsStr, OsString};
 use super::mystd::fs;
 use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
 use super::mystd::path::{Path, PathBuf};
+use super::Either;
 use super::{Context, Mapping, Stash, Vec};
 use core::convert::{TryFrom, TryInto};
 use core::str;
@@ -18,75 +19,50 @@ type Elf = object::elf::FileHeader64<NativeEndian>;
 impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
-        let object = Object::parse(&map)?;
+        Mapping::mk_or_other(map, |map, stash| {
+            let object = Object::parse(&map)?;
 
-        // Try to locate an external debug file using the build ID.
-        if let Some(path_debug) = object.build_id().and_then(locate_build_id) {
-            if let Some(mapping) = Mapping::new_debug(path_debug, None) {
-                return Some(mapping);
+            // Try to locate an external debug file using the build ID.
+            if let Some(path_debug) = object.build_id().and_then(locate_build_id) {
+                if let Some(mapping) = Mapping::new_debug(path_debug, None) {
+                    return Some(Either::A(mapping));
+                }
             }
-        }
 
-        // Try to locate an external debug file using the GNU debug link section.
-        if let Some((path_debug, crc)) = object.gnu_debuglink_path(path) {
-            if let Some(mapping) = Mapping::new_debug(path_debug, Some(crc)) {
-                return Some(mapping);
+            // Try to locate an external debug file using the GNU debug link section.
+            if let Some((path_debug, crc)) = object.gnu_debuglink_path(path) {
+                if let Some(mapping) = Mapping::new_debug(path_debug, Some(crc)) {
+                    return Some(Either::A(mapping));
+                }
             }
-        }
 
-        let stash = Stash::new();
-        let cx = Context::new(&stash, object, None)?;
-        Some(Mapping {
-            // Convert to 'static lifetimes since the symbols should
-            // only borrow `map` and `stash` and we're preserving them below.
-            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
-            _map: map,
-            _map_sup: None,
-            _stash: stash,
+            Context::new(stash, object, None).map(Either::B)
         })
     }
 
     /// Load debuginfo from an external debug file.
     fn new_debug(path: PathBuf, crc: Option<u32>) -> Option<Mapping> {
         let map = super::mmap(&path)?;
-        let object = Object::parse(&map)?;
+        Mapping::mk(map, |map, stash| {
+            let object = Object::parse(&map)?;
 
-        if let Some(_crc) = crc {
-            // TODO: check crc
-        }
+            if let Some(_crc) = crc {
+                // TODO: check crc
+            }
 
-        // Try to locate a supplementary object file.
-        if let Some((path_sup, build_id_sup)) = object.gnu_debugaltlink_path(&path) {
-            if let Some(map_sup) = super::mmap(&path_sup) {
-                if let Some(sup) = Object::parse(&map_sup) {
-                    if sup.build_id() == Some(build_id_sup) {
-                        let stash = Stash::new();
-                        let cx = Context::new(&stash, object, Some(sup))?;
-                        return Some(Mapping {
-                            // Convert to 'static lifetimes since the symbols should
-                            // only borrow `map`, `map_sup`, and `stash` and we're
-                            // preserving them below.
-                            cx: unsafe {
-                                core::mem::transmute::<Context<'_>, Context<'static>>(cx)
-                            },
-                            _map: map,
-                            _map_sup: Some(map_sup),
-                            _stash: stash,
-                        });
+            // Try to locate a supplementary object file.
+            if let Some((path_sup, build_id_sup)) = object.gnu_debugaltlink_path(&path) {
+                if let Some(map_sup) = super::mmap(&path_sup) {
+                    let map_sup = stash.set_mmap_aux(map_sup);
+                    if let Some(sup) = Object::parse(map_sup) {
+                        if sup.build_id() == Some(build_id_sup) {
+                            return Context::new(stash, object, Some(sup));
+                        }
                     }
                 }
             }
-        }
 
-        let stash = Stash::new();
-        let cx = Context::new(&stash, object, None)?;
-        Some(Mapping {
-            // Convert to 'static lifetimes since the symbols should
-            // only borrow `map` and `stash` and we're preserving them below.
-            cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
-            _map: map,
-            _map_sup: None,
-            _stash: stash,
+            Context::new(stash, object, None)
         })
     }
 }

@@ -58,24 +58,45 @@ struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     cx: Context<'static>,
     _map: Mmap,
-    _map_sup: Option<Mmap>,
     _stash: Stash,
 }
 
-impl Mapping {
+enum Either<A, B> {
     #[allow(dead_code)]
+    A(A),
+    B(B),
+}
+
+impl Mapping {
+    /// Creates a `Mapping` by ensuring that the `data` specified is used to
+    /// create a `Context` and it can only borrow from that or the `Stash` of
+    /// decompressed sections or auxiliary data.
     fn mk<F>(data: Mmap, mk: F) -> Option<Mapping>
     where
-        F: for<'a> Fn(&'a [u8], &'a Stash) -> Option<Context<'a>>,
+        F: for<'a> FnOnce(&'a [u8], &'a Stash) -> Option<Context<'a>>,
+    {
+        Mapping::mk_or_other(data, move |data, stash| {
+            let cx = mk(data, stash)?;
+            Some(Either::B(cx))
+        })
+    }
+
+    /// Creates a `Mapping` from `data`, or if the closure decides to, returns a
+    /// different mapping.
+    fn mk_or_other<F>(data: Mmap, mk: F) -> Option<Mapping>
+    where
+        F: for<'a> FnOnce(&'a [u8], &'a Stash) -> Option<Either<Mapping, Context<'a>>>,
     {
         let stash = Stash::new();
-        let cx = mk(&data, &stash)?;
+        let cx = match mk(&data, &stash)? {
+            Either::A(mapping) => return Some(mapping),
+            Either::B(cx) => cx,
+        };
         Some(Mapping {
             // Convert to 'static lifetimes since the symbols should
             // only borrow `map` and `stash` and we're preserving them below.
             cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
             _map: data,
-            _map_sup: None,
             _stash: stash,
         })
     }

@@ -474,6 +474,7 @@ cfg_if::cfg_if! {
         any(unix, windows),
         not(target_vendor = "uwp"),
         not(target_os = "emscripten"),
+        any(not(backtrace_in_libstd), feature = "backtrace"),
     ))] {
         mod gimli;
         use gimli as imp;

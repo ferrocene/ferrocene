@@ -55,14 +55,17 @@ impl Frame {
             return symbol_address;
         }
 
-        // It seems that on OSX `_Unwind_FindEnclosingFunction` returns a
-        // pointer to... something that's unclear. It's definitely not always
-        // the enclosing function for whatever reason. It's not entirely clear
-        // to me what's going on here, so pessimize this for now and just always
+        // The macOS linker emits a "compact" unwind table that only includes an
+        // entry for a function if that function either has an LSDA or its
+        // encoding differs from that of the previous entry.  Consequently, on
+        // macOS, `_Unwind_FindEnclosingFunction` is unreliable (it can return a
+        // pointer to some totally unrelated function).  Instead, we just always
         // return the ip.
         //
-        // Note the `skip_inner_frames.rs` test is skipped on OSX due to this
-        // clause, and if this is fixed that test in theory can be run on OSX!
+        // https://github.com/rust-lang/rust/issues/74771#issuecomment-664056788
+        //
+        // Note the `skip_inner_frames.rs` test is skipped on macOS due to this
+        // clause, and if this is fixed that test in theory can be run on macOS!
         if cfg!(target_os = "macos") || cfg!(target_os = "ios") {
             self.ip()
         } else {

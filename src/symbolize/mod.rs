@@ -66,7 +66,7 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
 /// Resolve a previously capture frame to a symbol, passing the symbol to the
 /// specified closure.
 ///
-/// This functin performs the same function as `resolve` except that it takes a
+/// This function performs the same function as `resolve` except that it takes a
 /// `Frame` as an argument instead of an address. This can allow some platform
 /// implementations of backtracing to provide more accurate symbol information
 /// or information about inline frames for example. It's recommended to use this

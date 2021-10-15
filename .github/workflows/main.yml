@@ -91,6 +91,11 @@ jobs:
       env:
         CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: packed
         CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: packed
+    # Test that, on macOS, binaries with no UUID work
+    - run: cargo clean && cargo test
+      if: matrix.os == 'macos-latest'
+      env:
+        RUSTFLAGS: "-C link-arg=-Wl,-no_uuid"
 
     # Test that, on Linux, packed/unpacked debuginfo both work
     - run: cargo clean && cargo test

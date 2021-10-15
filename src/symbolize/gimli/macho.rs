@@ -22,7 +22,7 @@ impl Mapping {
         let map = super::mmap(path)?;
         let (macho, data) = find_header(&map)?;
         let endian = macho.endian().ok()?;
-        let uuid = macho.uuid(endian, data, 0).ok()??;
+        let uuid = macho.uuid(endian, data, 0).ok()?;
 
         // Next we need to look for a `*.dSYM` file. For now we just probe the
         // containing directory and look around for something that matches
@@ -30,9 +30,11 @@ impl Mapping {
         // contains and try to find a macho file which has a matching UUID as
         // the one of our own file. If we find a match that's the dwarf file we
         // want to return.
-        if let Some(parent) = path.parent() {
-            if let Some(mapping) = Mapping::load_dsym(parent, uuid) {
-                return Some(mapping);
+        if let Some(uuid) = uuid {
+            if let Some(parent) = path.parent() {
+                if let Some(mapping) = Mapping::load_dsym(parent, uuid) {
+                    return Some(mapping);
+                }
             }
         }
 

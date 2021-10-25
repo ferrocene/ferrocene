@@ -146,145 +146,122 @@ mod uw {
         extern "C" fn(ctx: *mut _Unwind_Context, arg: *mut c_void) -> _Unwind_Reason_Code;
 
     extern "C" {
-        // No native _Unwind_Backtrace on iOS
-        #[cfg(not(all(target_os = "ios", target_arch = "arm")))]
         pub fn _Unwind_Backtrace(
             trace: _Unwind_Trace_Fn,
             trace_argument: *mut c_void,
         ) -> _Unwind_Reason_Code;
+    }
 
+    cfg_if::cfg_if! {
         // available since GCC 4.2.0, should be fine for our purpose
-        #[cfg(all(
+        if #[cfg(all(
             not(all(target_os = "android", target_arch = "arm")),
             not(all(target_os = "freebsd", target_arch = "arm")),
             not(all(target_os = "linux", target_arch = "arm")),
             not(all(target_os = "horizon", target_arch = "arm"))
-        ))]
-        pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
+        ))] {
+            extern "C" {
+                pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
+                pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
 
-        #[cfg(all(
-            not(all(target_os = "android", target_arch = "arm")),
-            not(all(target_os = "freebsd", target_arch = "arm")),
-            not(all(target_os = "linux", target_arch = "arm"))
-        ))]
-        pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
+                #[cfg(not(all(target_os = "linux", target_arch = "s390x")))]
+                // This function is a misnomer: rather than getting this frame's
+                // Canonical Frame Address (aka the caller frame's SP) it
+                // returns this frame's SP.
+                //
+                // https://github.com/libunwind/libunwind/blob/d32956507cf29d9b1a98a8bce53c78623908f4fe/src/unwind/GetCFA.c#L28-L35
+                #[link_name = "_Unwind_GetCFA"]
+                pub fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
 
-        #[cfg(all(
-            not(all(target_os = "android", target_arch = "arm")),
-            not(all(target_os = "freebsd", target_arch = "arm")),
-            not(all(target_os = "linux", target_arch = "arm")),
-            not(all(target_os = "linux", target_arch = "s390x"))
-        ))]
-        // This function is a misnomer: rather than getting this frame's
-        // Canonical Frame Address (aka the caller frame's SP) it
-        // returns this frame's SP.
-        //
-        // https://github.com/libunwind/libunwind/blob/d32956507cf29d9b1a98a8bce53c78623908f4fe/src/unwind/GetCFA.c#L28-L35
-        #[link_name = "_Unwind_GetCFA"]
-        pub fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
-    }
+            }
 
-    // s390x uses a biased CFA value, therefore we need to use
-    // _Unwind_GetGR to get the stack pointer register (%r15)
-    // instead of relying on _Unwind_GetCFA.
-    #[cfg(all(target_os = "linux", target_arch = "s390x"))]
-    pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
-        extern "C" {
-            pub fn _Unwind_GetGR(ctx: *mut _Unwind_Context, index: libc::c_int) -> libc::uintptr_t;
-        }
-        _Unwind_GetGR(ctx, 15)
-    }
+            // s390x uses a biased CFA value, therefore we need to use
+            // _Unwind_GetGR to get the stack pointer register (%r15)
+            // instead of relying on _Unwind_GetCFA.
+            #[cfg(all(target_os = "linux", target_arch = "s390x"))]
+            pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
+                extern "C" {
+                    pub fn _Unwind_GetGR(ctx: *mut _Unwind_Context, index: libc::c_int) -> libc::uintptr_t;
+                }
+                _Unwind_GetGR(ctx, 15)
+            }
+        } else {
+            // On android and arm, the function `_Unwind_GetIP` and a bunch of
+            // others are macros, so we define functions containing the
+            // expansion of the macros.
+            //
+            // TODO: link to the header file that defines these macros, if you
+            // can find it. (I, fitzgen, cannot find the header file that some
+            // of these macro expansions were originally borrowed from.)
+            #[repr(C)]
+            enum _Unwind_VRS_Result {
+                _UVRSR_OK = 0,
+                _UVRSR_NOT_IMPLEMENTED = 1,
+                _UVRSR_FAILED = 2,
+            }
+            #[repr(C)]
+            enum _Unwind_VRS_RegClass {
+                _UVRSC_CORE = 0,
+                _UVRSC_VFP = 1,
+                _UVRSC_FPA = 2,
+                _UVRSC_WMMXD = 3,
+                _UVRSC_WMMXC = 4,
+            }
+            #[repr(C)]
+            enum _Unwind_VRS_DataRepresentation {
+                _UVRSD_UINT32 = 0,
+                _UVRSD_VFPX = 1,
+                _UVRSD_FPAX = 2,
+                _UVRSD_UINT64 = 3,
+                _UVRSD_FLOAT = 4,
+                _UVRSD_DOUBLE = 5,
+            }
 
-    // On android and arm, the function `_Unwind_GetIP` and a bunch of others
-    // are macros, so we define functions containing the expansion of the
-    // macros.
-    //
-    // TODO: link to the header file that defines these macros, if you can find
-    // it. (I, fitzgen, cannot find the header file that some of these macro
-    // expansions were originally borrowed from.)
-    #[cfg(any(
-        all(target_os = "android", target_arch = "arm"),
-        all(target_os = "freebsd", target_arch = "arm"),
-        all(target_os = "linux", target_arch = "arm"),
-        all(target_os = "horizon", target_arch = "arm")
-    ))]
-    pub use self::arm::*;
-    #[cfg(any(
-        all(target_os = "android", target_arch = "arm"),
-        all(target_os = "freebsd", target_arch = "arm"),
-        all(target_os = "linux", target_arch = "arm"),
-        all(target_os = "horizon", target_arch = "arm")
-    ))]
-    mod arm {
-        pub use super::*;
-        #[repr(C)]
-        enum _Unwind_VRS_Result {
-            _UVRSR_OK = 0,
-            _UVRSR_NOT_IMPLEMENTED = 1,
-            _UVRSR_FAILED = 2,
-        }
-        #[repr(C)]
-        enum _Unwind_VRS_RegClass {
-            _UVRSC_CORE = 0,
-            _UVRSC_VFP = 1,
-            _UVRSC_FPA = 2,
-            _UVRSC_WMMXD = 3,
-            _UVRSC_WMMXC = 4,
-        }
-        #[repr(C)]
-        enum _Unwind_VRS_DataRepresentation {
-            _UVRSD_UINT32 = 0,
-            _UVRSD_VFPX = 1,
-            _UVRSD_FPAX = 2,
-            _UVRSD_UINT64 = 3,
-            _UVRSD_FLOAT = 4,
-            _UVRSD_DOUBLE = 5,
-        }
+            type _Unwind_Word = libc::c_uint;
+            extern "C" {
+                fn _Unwind_VRS_Get(
+                    ctx: *mut _Unwind_Context,
+                    klass: _Unwind_VRS_RegClass,
+                    word: _Unwind_Word,
+                    repr: _Unwind_VRS_DataRepresentation,
+                    data: *mut c_void,
+                ) -> _Unwind_VRS_Result;
+            }
 
-        type _Unwind_Word = libc::c_uint;
-        extern "C" {
-            fn _Unwind_VRS_Get(
-                ctx: *mut _Unwind_Context,
-                klass: _Unwind_VRS_RegClass,
-                word: _Unwind_Word,
-                repr: _Unwind_VRS_DataRepresentation,
-                data: *mut c_void,
-            ) -> _Unwind_VRS_Result;
-        }
+            pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
+                let mut val: _Unwind_Word = 0;
+                let ptr = &mut val as *mut _Unwind_Word;
+                let _ = _Unwind_VRS_Get(
+                    ctx,
+                    _Unwind_VRS_RegClass::_UVRSC_CORE,
+                    15,
+                    _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
+                    ptr as *mut c_void,
+                );
+                (val & !1) as libc::uintptr_t
+            }
 
-        pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
-            let mut val: _Unwind_Word = 0;
-            let ptr = &mut val as *mut _Unwind_Word;
-            let _ = _Unwind_VRS_Get(
-                ctx,
-                _Unwind_VRS_RegClass::_UVRSC_CORE,
-                15,
-                _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                ptr as *mut c_void,
-            );
-            (val & !1) as libc::uintptr_t
-        }
+            // R13 is the stack pointer on arm.
+            const SP: _Unwind_Word = 13;
 
-        // R13 is the stack pointer on arm.
-        const SP: _Unwind_Word = 13;
+            pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
+                let mut val: _Unwind_Word = 0;
+                let ptr = &mut val as *mut _Unwind_Word;
+                let _ = _Unwind_VRS_Get(
+                    ctx,
+                    _Unwind_VRS_RegClass::_UVRSC_CORE,
+                    SP,
+                    _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
+                    ptr as *mut c_void,
+                );
+                val as libc::uintptr_t
+            }
 
-        pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
-            let mut val: _Unwind_Word = 0;
-            let ptr = &mut val as *mut _Unwind_Word;
-            let _ = _Unwind_VRS_Get(
-                ctx,
-                _Unwind_VRS_RegClass::_UVRSC_CORE,
-                SP,
-                _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                ptr as *mut c_void,
-            );
-            val as libc::uintptr_t
-        }
-
-        // This function also doesn't exist on Android or ARM/Linux, so make it
-        // a no-op.
-        pub unsafe fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void {
-            pc
+            // This function also doesn't exist on Android or ARM/Linux, so make it
+            // a no-op.
+            pub unsafe fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void {
+                pc
+            }
         }
     }
 }

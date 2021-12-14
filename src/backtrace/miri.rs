@@ -46,7 +46,7 @@ impl Frame {
 }
 
 pub fn trace<F: FnMut(&super::Frame) -> bool>(cb: F) {
-    // SAFETY: Miri guarnatees that the backtrace API functions
+    // SAFETY: Miri guarantees that the backtrace API functions
     // can be called from any thread.
     unsafe { trace_unsynchronized(cb) };
 }

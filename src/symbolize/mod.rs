@@ -148,7 +148,7 @@ fn adjust_ip(a: *mut c_void) -> *mut c_void {
 
 /// Same as `resolve`, only unsafe as it's unsynchronized.
 ///
-/// This function does not have synchronization guarentees but is available when
+/// This function does not have synchronization guarantees but is available when
 /// the `std` feature of this crate isn't compiled in. See the `resolve`
 /// function for more documentation and examples.
 ///
@@ -164,7 +164,7 @@ where
 
 /// Same as `resolve_frame`, only unsafe as it's unsynchronized.
 ///
-/// This function does not have synchronization guarentees but is available
+/// This function does not have synchronization guarantees but is available
 /// when the `std` feature of this crate isn't compiled in. See the
 /// `resolve_frame` function for more documentation and examples.
 ///

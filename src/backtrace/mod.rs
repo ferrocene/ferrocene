@@ -55,7 +55,7 @@ pub fn trace<F: FnMut(&Frame) -> bool>(cb: F) {
 
 /// Same as `trace`, only unsafe as it's unsynchronized.
 ///
-/// This function does not have synchronization guarentees but is available
+/// This function does not have synchronization guarantees but is available
 /// when the `std` feature of this crate isn't compiled in. See the `trace`
 /// function for more documentation and examples.
 ///

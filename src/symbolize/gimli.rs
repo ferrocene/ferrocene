@@ -205,7 +205,7 @@ struct Cache {
 
     /// Mappings cache where we retain parsed dwarf information.
     ///
-    /// This list has a fixed capacity for its entire liftime which never
+    /// This list has a fixed capacity for its entire lifetime which never
     /// increases. The `usize` element of each pair is an index into `libraries`
     /// above where `usize::max_value()` represents the current executable. The
     /// `Mapping` is corresponding parsed dwarf information.
@@ -232,7 +232,7 @@ struct LibrarySegment {
     /// actually where the segment is loaded, but rather this address plus the
     /// containing library's `bias` is where to find it.
     stated_virtual_memory_address: usize,
-    /// The size of ths segment in memory.
+    /// The size of this segment in memory.
     len: usize,
 }
 
@@ -293,7 +293,7 @@ impl Cache {
                 }
 
                 // Now that we know `lib` contains `addr`, we can offset with
-                // the bias to find the stated virutal memory address.
+                // the bias to find the stated virtual memory address.
                 let svma = (addr as usize).wrapping_sub(lib.bias);
                 Some((i, svma as *const u8))
             })
@@ -337,7 +337,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
     let addr = what.address_or_ip();
     let mut call = |sym: Symbol<'_>| {
         // Extend the lifetime of `sym` to `'static` since we are unfortunately
-        // required to here, but it's ony ever going out as a reference so no
+        // required to here, but it's only ever going out as a reference so no
         // reference to it should be persisted beyond this frame anyway.
         let sym = mem::transmute::<Symbol<'_>, Symbol<'static>>(sym);
         (cb)(&super::Symbol { inner: sym });

@@ -286,7 +286,7 @@ struct Dso<'a> {
     /// of a shared object it will be the soname (see DT_SONAME).
     name: &'a str,
     /// On Fuchsia virtually all binaries have build IDs but this is not a strict
-    /// requierment. There's no way to match up DSO information with a real ELF
+    /// requirements. There's no way to match up DSO information with a real ELF
     /// file afterwards if there is no build_id so we require that every DSO
     /// have one here. DSO's without a build_id are ignored.
     build_id: &'a [u8],

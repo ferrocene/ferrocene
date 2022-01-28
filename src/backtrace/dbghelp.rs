@@ -137,9 +137,11 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     // since it's in theory supported on more systems.
     match (*dbghelp.dbghelp()).StackWalkEx() {
         Some(StackWalkEx) => {
+            let mut inner: STACKFRAME_EX = mem::zeroed();
+            inner.StackFrameSize = mem::size_of::<STACKFRAME_EX>() as DWORD;
             let mut frame = super::Frame {
                 inner: Frame {
-                    stack_frame: StackFrame::New(mem::zeroed()),
+                    stack_frame: StackFrame::New(inner),
                     base_address: 0 as _,
                 },
             };

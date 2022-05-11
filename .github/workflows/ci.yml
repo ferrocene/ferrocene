@@ -7,8 +7,8 @@ on:
   pull_request: {}
 
 jobs:
-  spec:
-    name: Specification
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

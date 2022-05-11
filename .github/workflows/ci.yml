@@ -1,0 +1,24 @@
+---
+
+name: CI
+on:
+  push:
+    branches: main
+  pull_request: {}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build documentation
+        run: ./make.py
+
+      - name: Publish to GitHub Pages
+        uses: ferrous-systems/shared-github-actions/github-pages@main
+        with:
+          path: build/dirhtml/
+          token: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'

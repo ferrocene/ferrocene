@@ -1,0 +1,27 @@
+---
+
+name: CI
+on:
+  push:
+    branches: main
+  pull_request: {}
+
+jobs:
+  spec:
+    name: Specification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build documentation
+        run: make dirhtml
+
+      - name: Publish to GitHub Pages
+        uses: ferrous-systems/shared-github-actions/github-pages@main
+        with:
+          path: build/dirhtml/
+          token: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'

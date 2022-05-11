@@ -1,5 +1,6 @@
 # Sphinx ignored files
 /build
+/.venv
 
 # Python ignored files
 __pycache__

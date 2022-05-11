@@ -13,11 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
       - name: Build documentation
-        run: make dirhtml
+        run: ./make.py
 
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main

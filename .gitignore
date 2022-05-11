@@ -1,0 +1,6 @@
+# Sphinx ignored files
+/build
+
+# Python ignored files
+__pycache__
+*.py[co]

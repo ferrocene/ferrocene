@@ -3,7 +3,7 @@
 name: CI
 on:
   push:
-    branches: main
+    branches: [staging, trying]
   pull_request: {}
 
 jobs:
@@ -21,4 +21,4 @@ jobs:
         with:
           path: build/dirhtml/
           token: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/staging'

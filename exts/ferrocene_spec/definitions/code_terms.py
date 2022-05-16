@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: Critical Section GmbH
+
 from dataclasses import dataclass
 from docutils import nodes
 import sphinx

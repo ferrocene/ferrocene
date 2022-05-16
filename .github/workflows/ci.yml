@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: Critical Section GmbH
+
 ---
 
 name: CI
@@ -15,6 +18,12 @@ jobs:
 
       - name: Build documentation
         run: ./make.py
+
+      - name: Install REUSE
+        run: python3 -m pip install reuse
+
+      - name: Verify licensing metadata
+        run: reuse lint
 
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main

@@ -5,7 +5,9 @@
 
 TODO: description of what FLS is
 
-TODO: license
+The Ferrocene Language Specification is licensed under either the `MIT` or
+`Apache-2.0`, at your option. Licensing metadata is present in each file, and
+the full license text is present in the `LICENSES/` directory.
 
 ## Building the specification
 

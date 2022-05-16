@@ -19,6 +19,12 @@ jobs:
       - name: Build documentation
         run: ./make.py
 
+      - name: Install REUSE
+        run: python3 -m pip install reuse
+
+      - name: Verify licensing metadata
+        run: reuse lint
+
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main
         with:

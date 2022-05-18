@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: Critical Section GmbH
 
 from collections import defaultdict
-from dataclasses import dataclass
 from docutils import nodes
 import sphinx
 
@@ -12,12 +11,12 @@ NAME = "paragraph"
 PRETTY_NAME = "paragraph"
 
 
-@dataclass
 class Paragraph:
-    id: str
-    document: str
-    section: str
-    sequential: int
+    def __init__(self, id, document, section, sequential):
+        self.id = id
+        self.document = document
+        self.section = section
+        self.sequential = sequential
 
     def number(self, env):
         section = ".".join(

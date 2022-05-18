@@ -55,7 +55,8 @@ class VirtualEnv:
     def create(self):
         venv.EnvBuilder(clear=True, symlinks=True, with_pip=True).create(self.path)
         subprocess.run(
-            [self.bin("pip"), "install", "-r", self.requirements], check=True
+            [self.bin("pip"), "install", "-r", self.requirements, "--require-hashes"],
+            check=True,
         )
         self.installed_requirements.write_bytes(self.requirements.read_bytes())
 

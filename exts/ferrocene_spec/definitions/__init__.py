@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: Critical Section GmbH
 
 from . import paragraphs, syntax, terms, code_terms
-from dataclasses import dataclass
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.domains import ObjType
@@ -41,10 +40,10 @@ class DefIdRole(SphinxRole):
         return [DefIdNode(self.kind, self.text)], []
 
 
-@dataclass
 class Reference:
-    id: str
-    document: str
+    def __init__(self, id, document):
+        self.id = id
+        self.document = document
 
 
 class DefinitionsCollector(EnvironmentCollector):

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from dataclasses import dataclass
 from docutils import nodes
 import sphinx
 
@@ -11,10 +10,10 @@ NAME = "term"
 PRETTY_NAME = "term"
 
 
-@dataclass
 class Term:
-    id: str
-    document: str
+    def __init__(self, id, document):
+        self.id = id
+        self.document = document
 
     def anchor(self):
         return f"term_{self.id.lower().replace(' ', '_')}"

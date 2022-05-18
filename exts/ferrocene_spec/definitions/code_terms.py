@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from dataclasses import dataclass
 from docutils import nodes
 import sphinx
 
@@ -11,10 +10,10 @@ NAME = "code_terms"
 PRETTY_NAME = "programmatic construct"
 
 
-@dataclass
 class CodeTerm:
-    id: str
-    document: str
+    def __init__(self, id, document):
+        self.id = id
+        self.document = document
 
     def anchor(self):
         return f"codeterm_{self.id.lower().replace(' ', '_')}"

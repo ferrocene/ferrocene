@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: Critical Section GmbH
 
 from .definitions import DefIdNode
-from dataclasses import dataclass
 from docutils import nodes
 from sphinx import addnodes as sphinxnodes
 from sphinx.directives import SphinxDirective
@@ -164,7 +163,7 @@ def is_syntax_identifier(identifier):
     return True
 
 
-@dataclass
 class Token:
-    kind: str
-    content: Optional[str] = None
+    def __init__(self, kind, content=None):
+        self.kind = kind
+        self.content = content

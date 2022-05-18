@@ -32,3 +32,26 @@ building:
 ```
 
 The rendered version will be available in `build/dirhtml/`.
+
+## Updating build dependencies
+
+FLS uses `pip-tools` to manage the Python dependencies used for builds, as it
+allows pinning hashes for the dependencies. While it doesn't add any additional
+burden when installing dependencies (the format it outputs is understood by
+`pip`), you have to install it when regenerating the `requirements.txt` file.
+
+To install `pip-tools`, we recommend first installing [pipx], and then running:
+
+```
+pipx install pip-tools
+```
+
+Once that's done, you can change the list of desired dependencies in the
+`requirements.in` file, and run this command to regenerate the
+`requirements.txt` file:
+
+```
+pip-compile --generate-hashes
+```
+
+[pipx]: https://pypa.github.io/pipx/

@@ -40,9 +40,9 @@ class Parser:
                 yield node
 
             elif token.kind == "identifier" and is_syntax_identifier(token.content):
-                peek_kind = lambda kind, nth=0: (
-                    (peeked := self.peek(nth)) is not None and peeked.kind == kind
-                )
+                def peek_kind(kind, nth=0):
+                    peeked = self.peek(nth)
+                    return peeked is not None and peeked.kind == kind
 
                 if peek_kind("definition", int(peek_kind("whitespace"))):
                     yield DefIdNode("syntaxes", token.content)
@@ -92,8 +92,11 @@ class Lexer:
 
                 # Collect all the chars until the next `$$`
                 buffer = ""
-                while (peeked := self.peek()) is not None:
-                    if peeked == "$" and self.peek(1) == "$":
+                while True:
+                    peeked = self.peek()
+                    if peeked is None:
+                        break
+                    elif peeked == "$" and self.peek(1) == "$":
                         self.next()  # Consume the first "$"
                         self.next()  # Consume the second "$"
                         break
@@ -108,13 +111,19 @@ class Lexer:
 
             elif char.isalpha():
                 buffer = char
-                while (peeked := self.peek()) is not None and peeked.isalpha():
+                while True:
+                    peeked = self.peek()
+                    if peeked is None or not peeked.isalpha():
+                        break
                     buffer += self.next()
                 yield Token("identifier", buffer)
 
             elif char.isspace():
                 buffer = char
-                while (peeked := self.peek()) is not None and peeked.isspace():
+                while True:
+                    peeked = self.peek()
+                    if peeked is None or not peeked.isspace():
+                        break
                     buffer += self.next()
                 yield Token("whitespace", buffer)
 

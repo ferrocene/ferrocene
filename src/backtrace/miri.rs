@@ -1,14 +1,25 @@
 use alloc::boxed::Box;
+use alloc::vec::Vec;
 use core::ffi::c_void;
 
 extern "Rust" {
-    fn miri_get_backtrace(flags: u64) -> Box<[*mut ()]>;
+    fn miri_backtrace_size(flags: u64) -> usize;
+    fn miri_get_backtrace(flags: u64, buf: *mut *mut ());
     fn miri_resolve_frame(ptr: *mut (), flags: u64) -> MiriFrame;
+    fn miri_resolve_frame_names(ptr: *mut (), flags: u64, name_buf: *mut u8, filename_buf: *mut u8);
+}
+
+#[repr(C)]
+pub struct MiriFrame {
+    pub name_len: usize,
+    pub filename_len: usize,
+    pub lineno: u32,
+    pub colno: u32,
+    pub fn_ptr: *mut c_void,
 }
 
 #[derive(Clone, Debug)]
-#[repr(C)]
-pub struct MiriFrame {
+pub struct FullMiriFrame {
     pub name: Box<[u8]>,
     pub filename: Box<[u8]>,
     pub lineno: u32,
@@ -19,7 +30,7 @@ pub struct MiriFrame {
 #[derive(Debug, Clone)]
 pub struct Frame {
     pub addr: *mut c_void,
-    pub inner: MiriFrame,
+    pub inner: FullMiriFrame,
 }
 
 // SAFETY: Miri guarantees that the returned pointer
@@ -54,15 +65,41 @@ pub fn trace<F: FnMut(&super::Frame) -> bool>(cb: F) {
 pub fn resolve_addr(ptr: *mut c_void) -> Frame {
     // SAFETY: Miri will stop execution with an error if this pointer
     // is invalid.
-    let frame: MiriFrame = unsafe { miri_resolve_frame(ptr as *mut (), 0) };
+    let frame = unsafe { miri_resolve_frame(ptr as *mut (), 1) };
+
+    let mut name = Vec::with_capacity(frame.name_len);
+    let mut filename = Vec::with_capacity(frame.filename_len);
+
+    // SAFETY: name and filename have been allocated with the amount
+    // of memory miri has asked for, and miri guarantees it will initialize it
+    unsafe {
+        miri_resolve_frame_names(ptr as *mut (), 0, name.as_mut_ptr(), filename.as_mut_ptr());
+
+        name.set_len(frame.name_len);
+        filename.set_len(frame.filename_len);
+    }
+
     Frame {
         addr: ptr,
-        inner: frame,
+        inner: FullMiriFrame {
+            name: name.into(),
+            filename: filename.into(),
+            lineno: frame.lineno,
+            colno: frame.colno,
+            fn_ptr: frame.fn_ptr,
+        },
     }
 }
 
 pub unsafe fn trace_unsynchronized<F: FnMut(&super::Frame) -> bool>(mut cb: F) {
-    let frames = miri_get_backtrace(0);
+    let len = miri_backtrace_size(0);
+
+    let mut frames = Vec::with_capacity(len);
+
+    miri_get_backtrace(1, frames.as_mut_ptr());
+
+    frames.set_len(len);
+
     for ptr in frames.iter() {
         let frame = resolve_addr(*ptr as *mut c_void);
         cb(&super::Frame { inner: frame });

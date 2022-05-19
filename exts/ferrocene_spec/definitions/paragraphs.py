@@ -53,12 +53,11 @@ def replace_id_node(app, node, paragraph):
     node.replace_self(new)
 
 
-def create_ref_node(env, paragraph, text, make_link):
-    return make_link(
-        paragraph.document,
-        paragraph.id,
-        nodes.emphasis("", paragraph.number(env)),
-    )
+def create_ref_node(env, text, item):
+    if item is not None:
+        return nodes.emphasis("", item.number(env))
+    else:
+        return nodes.emphasis("", "Paragraph " + item.id)
 
 
 def find_section(node):

@@ -33,9 +33,5 @@ def replace_id_node(app, node, term):
     node.replace_self(new)
 
 
-def create_ref_node(env, term, text, make_link):
-    return make_link(
-        term.document,
-        term.anchor(),
-        nodes.Text(text),
-    )
+def create_ref_node(env, text, item):
+    return nodes.Text(text)

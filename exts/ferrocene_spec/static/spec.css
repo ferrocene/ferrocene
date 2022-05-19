@@ -1,6 +1,11 @@
 /* SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: Critical Section GmbH */
 
+.spec-missing-ref {
+    display: inline-block;
+    border: 1px solid red;
+}
+
 span.spec-paragraph-id {
     display: block;
     font-size: 0.8em;

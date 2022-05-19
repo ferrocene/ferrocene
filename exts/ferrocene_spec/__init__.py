@@ -18,9 +18,6 @@ class SpecDomain(Domain):
     object_types = definitions.get_object_types()
     indices = {}
 
-    def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
-        return definitions.handle_ref(builder, env, fromdocname, target)
-
     def get_objects(self):
         return definitions.get_objects(self.env)
 

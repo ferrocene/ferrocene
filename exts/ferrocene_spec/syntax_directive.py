@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from .definitions import DefIdNode
+from .definitions import DefIdNode, DefRefNode
 from docutils import nodes
-from sphinx import addnodes as sphinxnodes
 from sphinx.directives import SphinxDirective
 from typing import Optional
 
@@ -46,16 +45,7 @@ class Parser:
                 if peek_kind("definition", int(peek_kind("whitespace"))):
                     yield DefIdNode("syntaxes", token.content)
                 else:
-                    node = sphinxnodes.pending_xref(
-                        refdomain="spec",
-                        refdoc=self.document_name,
-                        refexplicit=False,
-                        reftarget=token.content,
-                        reftype="ref",
-                        refwarn=False,
-                    )
-                    node += nodes.Text(token.content)
-                    yield node
+                    yield DefRefNode("syntaxes", self.document_name, token.content)
 
             else:
                 yield nodes.Text(token.content)

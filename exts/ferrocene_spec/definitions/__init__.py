@@ -193,7 +193,8 @@ def get_refs_storage(env):
 def get_roles():
     result = {}
     for kind in KINDS:
-        result[kind.ROLE] = DefIdRole(kind.NAME)
+        result["def_" + kind.ROLE] = DefIdRole(kind.NAME)
+        result[kind.ROLE] = sphinx.roles.XRefRole()
     return result
 
 

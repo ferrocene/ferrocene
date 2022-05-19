@@ -20,8 +20,8 @@ KINDS = [
 
 
 class DefIdNode(nodes.Element):
-    def __init__(self, kind, id):
-        super().__init__(def_kind=kind, def_id=id)
+    def __init__(self, kind, text):
+        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(text))
 
 
 class DefIdRole(SphinxRole):
@@ -129,10 +129,11 @@ def handle_ref(builder, env, fromdocname, target):
             contents,
         )
 
+    id = id_from_text(target)
     for kind in KINDS:
         storage = get_storage(env, kind)
-        if target in storage:
-            return kind.create_ref_node(env, storage[target], make_link)
+        if id in storage:
+            return kind.create_ref_node(env, storage[id], target, make_link)
 
     # TODO: handle missing references, and collect all of them in a page
 
@@ -195,6 +196,10 @@ def get_object_types():
     for kind in KINDS:
         result[kind.NAME] = ObjType(kind.PRETTY_NAME, kind.ROLE)
     return result
+
+
+def id_from_text(text):
+    return "".join(c if c.isalnum() else "_" for c in text.lower())
 
 
 def setup(app):

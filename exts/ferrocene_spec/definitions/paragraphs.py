@@ -53,7 +53,7 @@ def replace_id_node(app, node, paragraph):
     node.replace_self(new)
 
 
-def create_ref_node(env, paragraph, make_link):
+def create_ref_node(env, paragraph, text, make_link):
     return make_link(
         paragraph.document,
         paragraph.id,

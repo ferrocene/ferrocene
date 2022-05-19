@@ -28,14 +28,14 @@ def collect_items_in_document(app, nodes):
 
 
 def replace_id_node(app, node, syntax):
-    new = nodes.literal("", syntax.id)
+    new = nodes.literal("", node["def_text"])
     new["ids"].append(syntax.anchor())
     node.replace_self(new)
 
 
-def create_ref_node(env, syntax, make_link):
+def create_ref_node(env, syntax, text, make_link):
     return make_link(
         syntax.document,
         syntax.anchor(),
-        nodes.literal("", syntax.id),
+        nodes.literal("", text),
     )

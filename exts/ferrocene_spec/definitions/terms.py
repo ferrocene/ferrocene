@@ -16,7 +16,7 @@ class Term:
         self.document = document
 
     def anchor(self):
-        return f"term_{self.id.lower().replace(' ', '_')}"
+        return f"term_{self.id}"
 
     def search_name(self, env):
         return self.id
@@ -28,14 +28,14 @@ def collect_items_in_document(app, nodes):
 
 
 def replace_id_node(app, node, term):
-    new = nodes.emphasis("", term.id)
+    new = nodes.emphasis("", node["def_text"])
     new["ids"].append(term.anchor())
     node.replace_self(new)
 
 
-def create_ref_node(env, term, make_link):
+def create_ref_node(env, term, text, make_link):
     return make_link(
         term.document,
         term.anchor(),
-        nodes.Text(term.id),
+        nodes.Text(text),
     )

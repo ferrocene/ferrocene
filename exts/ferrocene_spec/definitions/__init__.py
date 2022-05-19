@@ -19,17 +19,9 @@ KINDS = [
 ]
 
 
-class DefIdNode(nodes.General, nodes.Element):
+class DefIdNode(nodes.Element):
     def __init__(self, kind, id):
-        super().__init__()
-        self.def_kind = kind
-        self.def_id = id
-
-    def __repr__(self):
-        return f'<DefIdNode {self.def_kind} "{self.def_id}" />'
-
-    def __str__(self):
-        return repr(self)
+        super().__init__(def_kind=kind, def_id=id)
 
 
 class DefIdRole(SphinxRole):
@@ -100,7 +92,7 @@ class DefinitionsCollector(EnvironmentCollector):
         for kind in KINDS:
             storage = get_storage(app.env, kind)
             nodes = filter(
-                lambda node: node.def_kind == kind.NAME,
+                lambda node: node["def_kind"] == kind.NAME,
                 document.findall(DefIdNode),
             )
             for item in kind.collect_items_in_document(app, nodes):
@@ -121,9 +113,9 @@ class DefinitionsTransform(SphinxTransform):
             storage = get_storage(self.env, kind)
 
             for node in self.document.findall(DefIdNode):
-                if node.def_kind != kind.NAME:
+                if node["def_kind"] != kind.NAME:
                     continue
-                item = storage[node.def_id]
+                item = storage[node["def_id"]]
                 kind.replace_id_node(self.app, node, item)
 
 

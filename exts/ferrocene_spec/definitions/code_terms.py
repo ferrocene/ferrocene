@@ -24,7 +24,7 @@ class CodeTerm:
 
 def collect_items_in_document(app, nodes):
     for node in nodes:
-        yield CodeTerm(node.def_id, app.env.docname)
+        yield CodeTerm(node["def_id"], app.env.docname)
 
 
 def replace_id_node(app, node, term):

@@ -37,7 +37,7 @@ def collect_items_in_document(app, nodes):
     for node in nodes:
         section = find_section(node)
         yield Paragraph(
-            id=node.def_id,
+            id=node["def_id"],
             document=app.env.docname,
             section=section,
             sequential=ids[section],

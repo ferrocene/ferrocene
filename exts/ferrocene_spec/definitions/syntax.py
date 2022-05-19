@@ -24,7 +24,7 @@ class Syntax:
 
 def collect_items_in_document(app, nodes):
     for node in nodes:
-        yield Syntax(node.def_id, app.env.docname)
+        yield Syntax(node["def_id"], app.env.docname)
 
 
 def replace_id_node(app, node, syntax):

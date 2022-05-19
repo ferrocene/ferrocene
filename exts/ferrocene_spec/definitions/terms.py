@@ -24,7 +24,7 @@ class Term:
 
 def collect_items_in_document(app, nodes):
     for node in nodes:
-        yield Term(node.def_id, app.env.docname)
+        yield Term(node["def_id"], app.env.docname)
 
 
 def replace_id_node(app, node, term):

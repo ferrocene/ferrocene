@@ -57,7 +57,7 @@ def create_ref_node(env, text, item):
     if item is not None:
         return nodes.emphasis("", item.number(env))
     else:
-        return nodes.emphasis("", "Paragraph " + item.id)
+        return nodes.emphasis("", "Paragraph " + text)
 
 
 def find_section(node):

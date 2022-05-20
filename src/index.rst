@@ -10,6 +10,8 @@ Ferrocene Language Specification
    :caption: Contents:
 
    items
+   patterns
+   functions
 
 Indices and tables
 ------------------

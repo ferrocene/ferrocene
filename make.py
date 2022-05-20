@@ -24,7 +24,7 @@ def build_docs(root, env, clear):
         [
             env.bin("sphinx-build"),
             "-M",
-            "dirhtml",
+            "html",
             root / "src",
             dest,
         ],

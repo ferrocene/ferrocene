@@ -34,6 +34,6 @@ jobs:
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main
         with:
-          path: build/dirhtml/
+          path: build/html
           token: ${{ secrets.GITHUB_TOKEN }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/staging'

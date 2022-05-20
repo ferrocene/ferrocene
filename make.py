@@ -17,14 +17,14 @@ import venv
 def build_docs(root, env, clear):
     dest = root / "build"
 
-    if clear:
+    if clear and dest.is_dir():
         shutil.rmtree(dest)
 
     subprocess.run(
         [
             env.bin("sphinx-build"),
             "-M",
-            "dirhtml",
+            "html",
             root / "src",
             dest,
         ],

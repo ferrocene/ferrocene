@@ -9,7 +9,7 @@ Ferrocene Language Specification
    :maxdepth: 2
    :caption: Contents:
 
-   ffi
+   items
 
 Indices and tables
 ------------------

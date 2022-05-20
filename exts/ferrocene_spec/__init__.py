@@ -3,7 +3,6 @@
 
 from . import definitions, syntax_directive
 from sphinx.domains import Domain
-from sphinx.roles import XRefRole
 import os
 
 
@@ -11,7 +10,6 @@ class SpecDomain(Domain):
     name = "spec"
     label = "Specification"
     roles = {
-        "ref": XRefRole(),
         **definitions.get_roles(),
     }
     directives = {
@@ -19,9 +17,6 @@ class SpecDomain(Domain):
     }
     object_types = definitions.get_object_types()
     indices = {}
-
-    def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
-        return definitions.handle_ref(builder, env, fromdocname, target)
 
     def get_objects(self):
         return definitions.get_objects(self.env)

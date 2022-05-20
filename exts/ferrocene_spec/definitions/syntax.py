@@ -24,18 +24,14 @@ class Syntax:
 
 def collect_items_in_document(app, nodes):
     for node in nodes:
-        yield Syntax(node.def_id, app.env.docname)
+        yield Syntax(node["def_id"], app.env.docname)
 
 
 def replace_id_node(app, node, syntax):
-    new = nodes.literal("", syntax.id)
+    new = nodes.literal("", node["def_text"])
     new["ids"].append(syntax.anchor())
     node.replace_self(new)
 
 
-def create_ref_node(env, syntax, make_link):
-    return make_link(
-        syntax.document,
-        syntax.anchor(),
-        nodes.literal("", syntax.id),
-    )
+def create_ref_node(env, text, item):
+    return nodes.literal("", text)

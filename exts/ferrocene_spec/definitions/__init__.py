@@ -19,17 +19,19 @@ KINDS = [
 ]
 
 
-class DefIdNode(nodes.General, nodes.Element):
-    def __init__(self, kind, id):
-        super().__init__()
-        self.def_kind = kind
-        self.def_id = id
+class DefIdNode(nodes.Element):
+    def __init__(self, kind, text):
+        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(text))
 
-    def __repr__(self):
-        return f'<DefIdNode {self.def_kind} "{self.def_id}" />'
 
-    def __str__(self):
-        return repr(self)
+class DefRefNode(nodes.Element):
+    def __init__(self, kind, source_doc, text):
+        super().__init__(
+            ref_kind=kind,
+            ref_source_doc=source_doc,
+            ref_text=text,
+            ref_target=id_from_text(text),
+        )
 
 
 class DefIdRole(SphinxRole):
@@ -40,8 +42,17 @@ class DefIdRole(SphinxRole):
         return [DefIdNode(self.kind, self.text)], []
 
 
+class DefRefRole(SphinxRole):
+    def __init__(self, kind):
+        self.kind = kind
+
+    def run(self):
+        return [DefRefNode(self.kind, self.env.docname, self.text)], []
+
+
 class Reference:
-    def __init__(self, id, document):
+    def __init__(self, kind, id, document):
+        self.kind = kind
         self.id = id
         self.document = document
 
@@ -61,12 +72,12 @@ class DefinitionsCollector(EnvironmentCollector):
                 if item.document == docname:
                     del storage[item.id]
 
-        refs = get_refs_storage(env)
-        removed = 0
-        for i, ref in enumerate(list(refs)):
-            if ref.document == docname:
-                del refs[i - removed]
-                removed += 1
+            refs = get_refs_storage(env, kind)
+            removed = 0
+            for i, ref in enumerate(list(refs)):
+                if ref.document == docname:
+                    del refs[i - removed]
+                    removed += 1
 
     def merge_others(self, app, env, docnames, other):
         """
@@ -84,10 +95,10 @@ class DefinitionsCollector(EnvironmentCollector):
                 if item.document in docnames:
                     storage[item.id] = item
 
-        refs = get_refs_storage(env)
-        other_refs = get_refs_storage(other)
-        for ref in other_refs:
-            refs.append(ref)
+            refs = get_refs_storage(env, kind)
+            other_refs = get_refs_storage(other, kind)
+            for ref in other_refs:
+                refs.append(ref)
 
     def process_doc(self, app, document):
         """
@@ -100,17 +111,21 @@ class DefinitionsCollector(EnvironmentCollector):
         for kind in KINDS:
             storage = get_storage(app.env, kind)
             nodes = filter(
-                lambda node: node.def_kind == kind.NAME,
+                lambda node: node["def_kind"] == kind.NAME,
                 document.findall(DefIdNode),
             )
             for item in kind.collect_items_in_document(app, nodes):
                 storage[item.id] = item
 
-        refs = get_refs_storage(app.env)
-        for node in document.findall(addnodes.pending_xref):
-            if node["refdomain"] != "spec":
-                continue
-            refs.append(Reference(id=node["reftarget"], document=node["refdoc"]))
+            refs = get_refs_storage(app.env, kind)
+            for node in document.findall(DefRefNode):
+                if node["ref_kind"] != kind.NAME:
+                    continue
+                refs.append(Reference(
+                    kind=node["ref_kind"],
+                    document=node["ref_source_doc"],
+                    id=node["ref_target"],
+                ))
 
 
 class DefinitionsTransform(SphinxTransform):
@@ -121,28 +136,31 @@ class DefinitionsTransform(SphinxTransform):
             storage = get_storage(self.env, kind)
 
             for node in self.document.findall(DefIdNode):
-                if node.def_kind != kind.NAME:
+                if node["def_kind"] != kind.NAME:
                     continue
-                item = storage[node.def_id]
+                item = storage[node["def_id"]]
                 kind.replace_id_node(self.app, node, item)
 
+            for node in self.document.findall(DefRefNode):
+                if node["ref_kind"] != kind.NAME:
+                    continue
 
-def handle_ref(builder, env, fromdocname, target):
-    def make_link(document, target, contents):
-        return sphinx.util.nodes.make_refnode(
-            builder,
-            fromdocname,
-            document,
-            target,
-            contents,
-        )
-
-    for kind in KINDS:
-        storage = get_storage(env, kind)
-        if target in storage:
-            return kind.create_ref_node(env, storage[target], make_link)
-
-    # TODO: handle missing references, and collect all of them in a page
+                if node["ref_target"] in storage:
+                    item = storage[node["ref_target"]]
+                    node.replace_self(sphinx.util.nodes.make_refnode(
+                        self.app.builder,
+                        node["ref_source_doc"],
+                        item.document,
+                        item.anchor(),
+                        kind.create_ref_node(self.env, node["ref_text"], item)
+                    ))
+                else:
+                    new = nodes.inline(
+                        "", "",
+                        kind.create_ref_node(self.env, node["ref_text"], None),
+                    )
+                    new["classes"].append("spec-missing-ref")
+                    node.replace_self(new)
 
 
 def get_objects(env):
@@ -183,8 +201,8 @@ def get_storage(env, kind):
     return getattr(env, key)
 
 
-def get_refs_storage(env):
-    key = "spec_refs"
+def get_refs_storage(env, kind):
+    key = "spec_refs_{kind.NAME}"
     if not hasattr(env, key):
         setattr(env, key, [])
     return getattr(env, key)
@@ -193,7 +211,8 @@ def get_refs_storage(env):
 def get_roles():
     result = {}
     for kind in KINDS:
-        result[kind.ROLE] = DefIdRole(kind.NAME)
+        result["def_" + kind.ROLE] = DefIdRole(kind.NAME)
+        result[kind.ROLE] = DefRefRole(kind.NAME)
     return result
 
 
@@ -202,6 +221,10 @@ def get_object_types():
     for kind in KINDS:
         result[kind.NAME] = ObjType(kind.PRETTY_NAME, kind.ROLE)
     return result
+
+
+def id_from_text(text):
+    return "".join(c if c.isalnum() else "_" for c in text.lower())
 
 
 def setup(app):

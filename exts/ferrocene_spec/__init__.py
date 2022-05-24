@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from . import definitions, syntax_directive
+from . import definitions, syntax_directive, std_role
 from sphinx.domains import Domain
 import os
 
@@ -11,6 +11,7 @@ class SpecDomain(Domain):
     label = "Specification"
     roles = {
         **definitions.get_roles(),
+        "std": std_role.StdRefRole(),
     }
     directives = {
         "syntax": syntax_directive.SyntaxDirective,
@@ -30,6 +31,13 @@ def setup(app):
     # HTML static paths in `conf.py`. Unfortunately there is no non-hackish way
     # to add a stylesheet from an extension.
     app.add_css_file("spec.css")
+
+    app.add_config_value(
+        name="spec_std_docs_url",
+        default="https://doc.rust-lang.org/stable/std",
+        rebuild="env",  # Rebuild the environment when this changes
+        types=[str],
+    )
 
     return {
         "version": "0",

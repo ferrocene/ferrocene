@@ -25,11 +25,17 @@ jobs:
       - name: Build documentation
         run: ./make.py
 
-      - name: Install REUSE
-        run: python3 -m pip install reuse
+      - name: Install Python dependencies
+        run: python3 -m pip install reuse black flake8
 
       - name: Verify licensing metadata
         run: reuse lint
+
+      - name: Verify Python code formatting
+        run: black . --check --diff --color
+
+      - name: Lint Python code with flake8
+        run: flake8 . --exclude .venv
 
       - name: Publish to GitHub Pages
         uses: ferrous-systems/shared-github-actions/github-pages@main

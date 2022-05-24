@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from . import definitions, syntax_directive
+from . import definitions, syntax_directive, std_role
 from sphinx.domains import Domain
 import os
 
@@ -11,6 +11,7 @@ class SpecDomain(Domain):
     label = "Specification"
     roles = {
         **definitions.get_roles(),
+        "std": std_role.StdRefRole(),
     }
     directives = {
         "syntax": syntax_directive.SyntaxDirective,

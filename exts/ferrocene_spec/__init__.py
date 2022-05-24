@@ -32,6 +32,13 @@ def setup(app):
     # to add a stylesheet from an extension.
     app.add_css_file("spec.css")
 
+    app.add_config_value(
+        name="spec_std_docs_url",
+        default="https://doc.rust-lang.org/stable/std",
+        rebuild="env",  # Rebuild the environment when this changes
+        types=[str],
+    )
+
     return {
         "version": "0",
         "parallel_read_safe": True,

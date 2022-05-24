@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 class StdRefRole(SphinxRole):
     def run(self):
-        url = f"https://doc.rust-lang.org/stable/std/?search={quote(self.text)}"
+        url = f"{self.env.config.spec_std_docs_url}/?search={quote(self.text)}"
 
         node = nodes.reference(internal=False, refuri=url)
         node += nodes.literal("", self.text)

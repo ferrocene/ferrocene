@@ -3,7 +3,6 @@
 
 from . import definitions, syntax_directive, std_role
 from sphinx.domains import Domain
-import os
 
 
 class SpecDomain(Domain):

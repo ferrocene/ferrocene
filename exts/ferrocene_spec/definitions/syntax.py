@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: Critical Section GmbH
 
 from docutils import nodes
-import sphinx
 
 
 ROLE = "syntax"

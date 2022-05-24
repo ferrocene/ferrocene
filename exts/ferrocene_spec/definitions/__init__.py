@@ -3,7 +3,6 @@
 
 from . import paragraphs, syntax, terms, code_terms
 from docutils import nodes
-from sphinx import addnodes
 from sphinx.domains import ObjType
 from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.roles import SphinxRole
@@ -121,11 +120,13 @@ class DefinitionsCollector(EnvironmentCollector):
             for node in document.findall(DefRefNode):
                 if node["ref_kind"] != kind.NAME:
                     continue
-                refs.append(Reference(
-                    kind=node["ref_kind"],
-                    document=node["ref_source_doc"],
-                    id=node["ref_target"],
-                ))
+                refs.append(
+                    Reference(
+                        kind=node["ref_kind"],
+                        document=node["ref_source_doc"],
+                        id=node["ref_target"],
+                    )
+                )
 
 
 class DefinitionsTransform(SphinxTransform):
@@ -147,16 +148,19 @@ class DefinitionsTransform(SphinxTransform):
 
                 if node["ref_target"] in storage:
                     item = storage[node["ref_target"]]
-                    node.replace_self(sphinx.util.nodes.make_refnode(
-                        self.app.builder,
-                        node["ref_source_doc"],
-                        item.document,
-                        item.anchor(),
-                        kind.create_ref_node(self.env, node["ref_text"], item)
-                    ))
+                    node.replace_self(
+                        sphinx.util.nodes.make_refnode(
+                            self.app.builder,
+                            node["ref_source_doc"],
+                            item.document,
+                            item.anchor(),
+                            kind.create_ref_node(self.env, node["ref_text"], item),
+                        )
+                    )
                 else:
                     new = nodes.inline(
-                        "", "",
+                        "",
+                        "",
                         kind.create_ref_node(self.env, node["ref_text"], None),
                     )
                     new["classes"].append("spec-missing-ref")

@@ -3,7 +3,6 @@
 
 from collections import defaultdict
 from docutils import nodes
-import sphinx
 
 
 ROLE = "p"

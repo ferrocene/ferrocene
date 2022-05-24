@@ -4,7 +4,6 @@
 from .definitions import DefIdNode, DefRefNode
 from docutils import nodes
 from sphinx.directives import SphinxDirective
-from typing import Optional
 
 
 class SyntaxDirective(SphinxDirective):
@@ -38,6 +37,7 @@ class Parser:
                 yield node
 
             elif token.kind == "identifier" and is_syntax_identifier(token.content):
+
                 def peek_kind(kind, nth=0):
                     peeked = self.peek(nth)
                     return peeked is not None and peeked.kind == kind

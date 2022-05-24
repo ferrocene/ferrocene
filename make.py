@@ -8,7 +8,6 @@
 
 from pathlib import Path
 import argparse
-import ensurepip
 import shutil
 import subprocess
 import venv

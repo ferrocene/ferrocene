@@ -26,9 +26,11 @@ class Paragraph:
     def anchor(self):
         return self.id
 
-    def search_name(self, env):
-        # Exclude paragraph numbers from search
-        return None
+    def include_in_search(self):
+        return False
+
+    def display_name(self, env):
+        return self.number(env)
 
 
 def collect_items_in_document(app, nodes):

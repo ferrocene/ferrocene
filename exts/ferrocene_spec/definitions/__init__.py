@@ -183,15 +183,14 @@ def get_objects(env):
     for kind in KINDS:
         storage = get_storage(env, kind)
         for item in storage.values():
-            search_name = item.search_name(env)
             result.append(
                 (
                     item.id,
-                    search_name if search_name is not None else item.id,
+                    item.display_name(env),
                     kind.NAME,
                     item.document,
                     item.anchor(),
-                    1 if search_name is not None else -1,
+                    1 if item.include_in_search() is not None else -1,
                 )
             )
 

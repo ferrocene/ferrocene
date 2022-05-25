@@ -17,7 +17,10 @@ class CodeTerm:
     def anchor(self):
         return f"codeterm_{self.id}"
 
-    def search_name(self, env):
+    def include_in_search(self):
+        return True
+
+    def display_name(self, env):
         return self.id
 
 

@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 from docutils import nodes
+import hashlib
 
 
 ROLE = "p"
@@ -11,10 +12,11 @@ PRETTY_NAME = "paragraph"
 
 
 class Paragraph:
-    def __init__(self, id, document, section, sequential):
+    def __init__(self, id, document, section, plaintext, sequential):
         self.id = id
         self.document = document
         self.section = section
+        self.plaintext = plaintext
         self.sequential = sequential
 
     def number(self, env):
@@ -30,7 +32,14 @@ class Paragraph:
         return False
 
     def display_name(self, env):
-        return self.number(env)
+        # Include the hash of the paragraph contents in `objects.inv`. This
+        # will be used by the tooling in ferrocene/ferrocene to generate
+        # lockfiles, requiring tests to be updated whenever the corresponding
+        # paragraph's contents change.
+        sha256 = hashlib.sha256()
+        sha256.update(self.plaintext.encode("utf-8"))
+
+        return f"{self.number(env)} {sha256.hexdigest()}"
 
 
 def collect_items_in_document(app, nodes):
@@ -41,6 +50,7 @@ def collect_items_in_document(app, nodes):
             id=node["def_id"],
             document=app.env.docname,
             section=section,
+            plaintext=plaintext_paragraph(node),
             sequential=ids[section],
         )
         ids[section] += 1
@@ -61,16 +71,27 @@ def create_ref_node(env, text, item):
         return nodes.emphasis("", "Paragraph " + text)
 
 
+def plaintext_paragraph(node):
+    paragraph = find_parent_of_type(node, nodes.paragraph)
+    if paragraph is None:
+        paragraph = node
+    return paragraph.astext().replace("\n", " ")
+
+
 def find_section(node):
-    cursor = node.parent
+    section = find_parent_of_type(node, nodes.section)
+    if section is None:
+        raise RuntimeError(f"could not find section for {node!r}")
+    if section.parent is not None and isinstance(section.parent, nodes.document):
+        return ""
+    else:
+        return "#" + section["ids"][0]
+
+
+def find_parent_of_type(node, ty):
+    cursor = node
     while cursor is not None:
-        if not isinstance(cursor, nodes.section):
-            cursor = cursor.parent
-            continue
-
-        if cursor.parent is not None and isinstance(cursor.parent, nodes.document):
-            return ""
-        else:
-            return "#" + cursor["ids"][0]
-
-    raise RuntimeError(f"could not find section for {node!r}")
+        if isinstance(cursor, ty):
+            return cursor
+        cursor = cursor.parent
+    return None

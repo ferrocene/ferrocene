@@ -22,6 +22,9 @@ class DefIdNode(nodes.Element):
     def __init__(self, kind, text):
         super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(text))
 
+    def astext(self):
+        return self["def_text"]
+
 
 class DefRefNode(nodes.Element):
     def __init__(self, kind, source_doc, text):
@@ -31,6 +34,9 @@ class DefRefNode(nodes.Element):
             ref_text=text,
             ref_target=id_from_text(text),
         )
+
+    def astext(self):
+        return self["ref_text"]
 
 
 class DefIdRole(SphinxRole):

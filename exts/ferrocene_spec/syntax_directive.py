@@ -10,7 +10,21 @@ class SyntaxDirective(SphinxDirective):
     has_content = True
 
     def run(self):
-        node = nodes.literal_block("", "")
+        # The first argument of creating any docutils node is the "raw source",
+        # which in theory is completely optional for our needs. That's why all
+        # the nodes we create pass an empty string (the default) to it.
+        #
+        # Still, this block is fairly special: to decide whether to perform
+        # syntax highlighting on a literal block, Sphinx compares the raw
+        # source with the output of the astext() method, and it highlights only
+        # if the two are equal.
+        #
+        # We had problems in the past with the heuristic randomly causing the
+        # syntax blocks to be highlighted by Sphinx (thus losing all our custom
+        # formatting). Thus, to avoid problems we set the raw source to
+        # something that will never appear in the astext() output (byte zero).
+        node = nodes.literal_block("\0")
+
         node["classes"].append("spec-syntax")
 
         for child in Parser("\n".join(self.content), self.env.docname).parse():

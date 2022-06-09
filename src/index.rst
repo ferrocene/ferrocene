@@ -12,9 +12,7 @@ Ferrocene Language Specification
    general
    lexical-elements
    items
-   types-and-traits
    patterns
-   expressions
    values-and-objects
    statements
    functions

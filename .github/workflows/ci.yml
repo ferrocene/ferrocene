@@ -41,5 +41,6 @@ jobs:
         uses: ferrous-systems/shared-github-actions/github-pages@main
         with:
           path: build/html
+          cname: spec.ferrocene.dev
           token: ${{ secrets.GITHUB_TOKEN }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/staging'

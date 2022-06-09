@@ -30,6 +30,39 @@ def build_docs(root, env, clear):
         check=False,
     )
 
+    return dest / "html"
+
+
+def build_linkchecker(root):
+    repo = root / ".linkchecker"
+    src = repo / "src" / "tools" / "linkchecker"
+    bin = src / "target" / "release" / "linkchecker"
+
+    if not src.is_dir():
+        subprocess.run(["git", "init", repo], check=True)
+
+        def git(args):
+            subprocess.run(["git", *args], cwd=repo, check=True)
+
+        # Avoid fetching blobs unless needed by the sparse checkout
+        git(["remote", "add", "origin", "https://github.com/rust-lang/rust"])
+        git(["config", "remote.origin.promisor", "true"])
+        git(["config", "remote.origin.partialCloneFilter", "blob:none"])
+
+        # Checkout only the linkchecker tool rather than the whole repo
+        git(["config", "core.sparsecheckout", "true"])
+        with open(repo / ".git" / "info" / "sparse-checkout", "w") as f:
+            f.write("/src/tools/linkchecker/")
+
+        # Avoid fetching the whole history
+        git(["fetch", "--depth=1", "origin", "master"])
+        git(["checkout", "master"])
+
+    if not bin.is_file():
+        subprocess.run(["cargo", "build", "--release"], cwd=src, check=True)
+
+    return bin
+
 
 class VirtualEnv:
     def __init__(self, root, path):
@@ -65,9 +98,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c", "--clear", help="disable incremental builds", action="store_true"
     )
+    parser.add_argument(
+        "--check-links", help="Checke whether all links are valid", action="store_true"
+    )
     args = parser.parse_args()
 
     root = Path(__file__).parent.resolve()
 
     env = VirtualEnv(root, root / ".venv")
-    build_docs(root, env, args.clear)
+    rendered = build_docs(root, env, args.clear)
+
+    if args.check_links:
+        linkchecker = build_linkchecker(root)
+        if subprocess.run([linkchecker, rendered]).returncode != 0:
+            print("error: linkchecker failed")
+            exit(1)

@@ -99,7 +99,7 @@ if __name__ == "__main__":
         "-c", "--clear", help="disable incremental builds", action="store_true"
     )
     parser.add_argument(
-        "--check-links", help="Checke whether all links are valid", action="store_true"
+        "--check-links", help="Check whether all links are valid", action="store_true"
     )
     args = parser.parse_args()
 

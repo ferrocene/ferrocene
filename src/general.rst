@@ -712,7 +712,7 @@ Backus-Naur form. In particular:
    		HexadecimalDigit1-6
 
 * :def_p:`fls_rllu7aksf17e`
-  ``[ ] ``\ (square brackets) indicate any character within, for example:
+  ``[ ]`` (square brackets) indicate any character within, for example:
 
 .. syntax::
 
@@ -875,7 +875,7 @@ referenced document (including any amendments) applies.
 **What do we put here? Is this subchapter even needed?**
 
 :def_p:`fls_a8yw7d7z1jmq`
-Suggestion:term:`: `
+Suggestion:
 
 :def_p:`fls_45orythfcwri`
 The following documents, in whole or in part, are normatively referenced in this

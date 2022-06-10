@@ -22,8 +22,8 @@ jobs:
         with:
           python-version: "3.6.x"
 
-      - name: Build documentation
-        run: ./make.py
+      - name: Build documentation and check links
+        run: ./make.py --check-links
 
       - name: Install Python dependencies
         run: python3 -m pip install reuse black flake8

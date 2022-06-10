@@ -33,6 +33,18 @@ building:
 
 The rendered version will be available in `build/html/`.
 
+## Checking links consistency
+
+It's possible to run Rust's linkchecker tool on the rendered documentation, to
+see if there are broken links. To do so, pass the `--check-links` flag:
+
+```
+./make.py --check-links
+```
+
+This will clone the source code of the tool, build it, and execute it on the
+rendered documentation.
+
 ## Updating build dependencies
 
 FLS uses `pip-tools` to manage the Python dependencies used for builds, as it

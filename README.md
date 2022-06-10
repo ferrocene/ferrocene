@@ -31,7 +31,7 @@ building:
 ./make.py -c
 ```
 
-The rendered version will be available in `build/dirhtml/`.
+The rendered version will be available in `build/html/`.
 
 ## Updating build dependencies
 

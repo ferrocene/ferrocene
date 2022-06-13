@@ -99,7 +99,10 @@ class Lexer:
                     peeked = self.peek()
                     if peeked is None:
                         break
-                    elif peeked == "$" and self.peek(1) == "$":
+                    # We check that the third peek is not a "$" to perform a
+                    # greedy parsing. This way, $$$$$ is parsed as "<b>$</b>"
+                    # rather than "<b></b>$".
+                    elif peeked == "$" and self.peek(1) == "$" and self.peek(2) != "$":
                         self.next()  # Consume the first "$"
                         self.next()  # Consume the second "$"
                         break

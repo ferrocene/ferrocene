@@ -347,7 +347,7 @@ This document specifies:
   The effect of translating and executing such a program;
 
 * :def_p:`fls_jiryupa5fxgf`
-  The manner in which :term:`module`\ s and :term:`crate`\ s may be combined to
+  The manner in which :term:`[module]s` and :term:`[crate]s` may be combined to
   form Rust programs;
 
 * :def_p:`fls_sph1a3sapinh`
@@ -514,15 +514,15 @@ its interactions with its external environment. The following are defined as
 external interactions:
 
 * :def_p:`fls_gu3331rmv2ho`
-  Any call on an foreign :term:`function`, including any :term:`argument
-  operand`\ s passed to it;
+  Any call on an foreign :term:`function`, including any :term:`[argument
+  operand]s` passed to it;
 
 * :def_p:`fls_3iekobt8qqi`
   Any result returned or :term:`panic` propagated from a :term:`main function`
   or an exported :term:`function` to an external caller;
 
 * :def_p:`fls_qx9fxf4py0j0`
-  The :term:`value`\ s of imported and exported :term:`object`\ s at the time of
+  The :term:`[value]s` of imported and exported :term:`[object]s` at the time of
   any other interaction with the external environment.
 
 :def_p:`fls_pl0fyjcwslqm`
@@ -536,9 +536,9 @@ A tool that conforms to this document shall support each capability required by
 the language as specified.
 
 :def_p:`fls_d07x1mbhgpsd`
-A tool that conforms to this document may provide additional :term:`attribute`\
-s as long as their names are not the same as the names of :term:`built-in
-attribute`\ s.
+A tool that conforms to this document may provide additional
+:term:`[attribute]s` as long as their names are not the same as the names of
+:term:`[built-in attribute]s`.
 
 Method of Description and Syntax Notation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -566,8 +566,8 @@ Backus-Naur form. In particular:
    		FloatExponent
 
 * :def_p:`fls_pts29mb5ld68`
-  Words in **bold** font are used to indicate literal words and :term:`keyword`\
-  s, for example:
+  Words in **bold** font are used to indicate literal words and
+  :term:`[keyword]s`, for example:
 
 .. syntax::
 

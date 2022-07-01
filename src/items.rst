@@ -38,7 +38,7 @@ Items
 
 :def_p:`fls_s3b1cba9lfj5`
 The :term:`expansion` of a :term:`terminated macro invocation` is treated as
-zero or more :term:`item`\ s if the :term:`terminated macro invocation` appears
+zero or more :term:`[item]s` if the :term:`terminated macro invocation` appears
 as an :term:`item`.
 
 .. rubric:: Dynamic Semantics

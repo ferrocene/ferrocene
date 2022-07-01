@@ -39,20 +39,20 @@ An :term:`implementation` is an :term:`item` that supplements an
 :term:`implementing type` by extending its functionality.
 
 :def_p:`fls_yopmjbnw8tbl`
-An :term:`implementing type` is the :term:`type` that the :term:`associated
-item`\ s of an :term:`implementation` are associated with.
+An :term:`implementing type` is the :term:`type` that the :term:`[associated
+item]s` of an :term:`implementation` are associated with.
 
 :def_p:`fls_v0n0bna40dqr`
 An :term:`inherent implementation` is an :term:`implementation` that adds direct
 functionality.
 
 :def_p:`fls_gufjaib913d6`
-An :term:`implementing type` may have multiple :term:`inherent implementation`\
-s. :term:`Inherent implementation`\ s of the same :term:`implementing type`
-share a common :term:`scope`.
+An :term:`implementing type` may have multiple :term:`[inherent
+implementation]s`. :term:`[Inherent implementation]s` of the same
+:term:`implementing type` share a common :term:`scope`.
 
 :def_p:`fls_797etpdk5dyb`
-:term:`Inherent implementation`\ s of the same :term:`implementing type` shall
+:term:`[Inherent implementation]s` of the same :term:`implementing type` shall
 be defined within the same :term:`crate`.
 
 :def_p:`fls_ry3an0mwb63g`
@@ -73,10 +73,10 @@ The :term:`type path` of a :term:`trait implementation` shall resolve to a
 
 :def_p:`fls_mx5xjcejwa6u`
 A :term:`trait implementation` shall be an :term:`unsafe trait implementation`
-if and only if it :term:`implement`\ s an :term:`unsafe trait`.
+if and only if it :term:`[implement]s` an :term:`unsafe trait`.
 
 :def_p:`fls_z78dg261oob6`
-:term:`Trait implementation`\ s are subject to :term:`implementation coherence`
+:term:`[Trait implementation]s` are subject to :term:`implementation coherence`
 and :term:`implementation conformance`.
 
 .. rubric:: Examples
@@ -131,8 +131,8 @@ Implementation Coherence
 .. rubric:: Legality Rules
 
 :def_p:`fls_swdusjwzgksx`
-Two :term:`trait implementation`\ s of the same :term:`implemented trait`
-overlap when the intersection of the :term:`implemented type`\ s is non-empty.
+Two :term:`[trait implementation]s` of the same :term:`implemented trait`
+overlap when the intersection of the :term:`[implemented type]s` is non-empty.
 
 :def_p:`fls_ir7hp941ky8t`
 Given :term:`trait implementation` ``impl<P1, P2, .., PN> Trait<T1, T2, .., TN>
@@ -145,11 +145,11 @@ for T0``, the :term:`trait implementation` is considered valid when
   All of
 
   * :def_p:`fls_9klwbsh3vlxu`
-    At least one of :term:`type`\ s ``T0, T1, .., TN`` is a :term:`local type`.
+    At least one of :term:`[type]s` ``T0, T1, .., TN`` is a :term:`local type`.
 
 * * :def_p:`fls_9gmc1tcscq9v`
     No :term:`type parameter` of ``P1, P2, .., PN`` that is not used in another
-    :term:`type` may appear in the non-:term:`local type`\ s of ``T0, T1, ..,
+    :term:`type` may appear in the :term:`non-[local type]s` of ``T0, T1, ..,
     TN``.
 
 :def_p:`fls_fv1l4yjuut7p`
@@ -169,15 +169,15 @@ An :term:`associated trait constant` is conformant with an :term:`associated
 constant` of an :term:`implemented trait` when
 
 * :def_p:`fls_k3wfh5japmyw`
-  The :term:`name`\ s of both :term:`associated constant`\ s are the same, and
+  The :term:`[name]s` of both :term:`[associated constant]s` are the same, and
 
 * :def_p:`fls_11qrqfuc3rmh`
-  The :term:`type`\ s of both :term:`associated constant`\ s are the same.
+  The :term:`[type]s` of both :term:`[associated constant]s` are the same.
 
 :def_p:`fls_qmhduwunxww0`
 An :term:`associated trait function` is conformant with an :term:`associated
-function` of an :term:`implemented trait` when the :term:`function signature`\ s
-of both :term:`function`\ s are the same.
+function` of an :term:`implemented trait` when the :term:`[function signature]s`
+of both :term:`[function]s` are the same.
 
 * :def_p:`fls_2500ivh0cc3y`
   The :term:`signature` of the :term:`associated function` of the
@@ -185,8 +185,8 @@ of both :term:`function`\ s are the same.
   :term:`associated trait function`, and
 
 * :def_p:`fls_18gimgfy0kw9`
-  The :term:`bound`\ s of the :term:`associated function` of the
-  :term:`implemented trait` are more general that the :term:`bound`\ s of the
+  The :term:`[bound]s` of the :term:`associated function` of the
+  :term:`implemented trait` are more general that the :term:`[bound]s` of the
   :term:`associated trait function`.
 
 :def_p:`fls_fi4qmauirlsm`
@@ -194,11 +194,11 @@ An :term:`associated type` of a :term:`trait implementation` is conformant with
 an :term:`associated type` of an :term:`implemented trait` when:
 
 * :def_p:`fls_2s8lh3k4rw6u`
-  The :term:`name`\ s of both :term:`type`\ s are the same, and
+  The :term:`[name]s` of both :term:`[type]s` are the same, and
 
 * :def_p:`fls_bb874uu2alt3`
   The :term:`type specification` of the :term:`associated type` of the
-  :term:`implemented trait` conforms to the :term:`bound`\ s of the
+  :term:`implemented trait` conforms to the :term:`[bound]s` of the
   :term:`associated type` of the :term:`trait implementation`.
 
 :def_p:`fls_so8em6rphkhv`

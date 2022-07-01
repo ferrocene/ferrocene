@@ -7,9 +7,9 @@ Lexical Elements
 ================
 
 :def_p:`fls_pqwpf87b84tr`
-The text of a Rust program consists of :term:`module`\ s organized into
-:term:`source file`\ s. The text of a :term:`source file` is a sequence of
-:term:`lexical element`\ s, each composed of characters, whose rules are
+The text of a Rust program consists of :term:`[module]s` organized into
+:term:`[source file]s`. The text of a :term:`source file` is a sequence of
+:term:`[lexical element]s`, each composed of characters, whose rules are
 presented in this chapter.
 
 Character Set
@@ -61,7 +61,7 @@ A :def_term:`whitespace character` is one of the following characters:
 
 :def_p:`fls_7eifv4ksunu1`
 A :term:`whitespace string` is a string that consists of one or more
-:term:`whitespace character`\ s.
+:term:`[whitespace character]s`.
 
 .. rubric:: Legality Rules
 
@@ -141,15 +141,15 @@ Lexical Elements, Separators, and Punctuation
 .. rubric:: Legality Rules
 
 :def_p:`fls_d4nvxsvxj537`
-The text of a :term:`source file` is a sequence of separate :term:`lexical
-element`\ s. The meaning of a program depends only on the particular sequence of
-:term:`lexical element`\ s, excluding :term:`non-doc comment`\ s.
+The text of a :term:`source file` is a sequence of separate :term:`[lexical
+element]s`. The meaning of a program depends only on the particular sequence of
+:term:`[lexical element]s`, excluding :term:`[non-doc comment]s`.
 
 :def_p:`fls_a1zylpqha73x`
 A :term:`lexical element` is the most basic syntactic element in program text.
 
 :def_p:`fls_jy6wifn5r2bu`
-The text of a :term:`source file` is divided into :term:`line`\ s.
+The text of a :term:`source file` is divided into :term:`[line]s`.
 
 :def_p:`fls_efdfq9nhpmp5`
 A :term:`line` is a sequence of zero or more characters followed by an
@@ -160,7 +160,7 @@ The representation of an :term:`end of line` is tool-defined.
 
 :def_p:`fls_a6t53o8h1vdk`
 A :term:`separator` is a character or a string that separates adjacent
-:term:`lexical element`\ s. A :term:`whitespace string` is a :term:`separator`.
+:term:`[lexical element]s`. A :term:`whitespace string` is a :term:`separator`.
 
 :def_p:`fls_8fv63w6f4udl`
 A :def_term:`simple punctuator` is one of the following characters:
@@ -227,8 +227,8 @@ special characters:
    $$=>$$
 
 :def_p:`fls_vm86olkeecer`
-The following :term:`compound punctuator`\ s are *flexible compound
-punctuators*.
+The following :term:`[compound punctuator]s` are *[flexible compound
+punctuator]s*.
 
 .. syntax::
 
@@ -239,7 +239,7 @@ punctuators*.
 
 :def_p:`fls_5zxdgxy8tjrq`
 A :term:`flexible compound punctuator` may be treated as a single
-:term:`compound punctuator` or two adjacent :term:`simple punctuator`\ s.
+:term:`compound punctuator` or two adjacent :term:`[simple punctuator]s`.
 
 :def_p:`fls_x89vkq9rwlyt`
 Each of the special characters listed for single character :term:`punctuator` is
@@ -248,7 +248,7 @@ a :term:`compound punctuator`, or a character of a :term:`character literal`, a
 :term:`comment`, a :term:`numeric literal`, or a :term:`string literal`.
 
 :def_p:`fls_bo3xh8r60ji1`
-The following names are used when referring to :term:`punctuator`\ s:
+The following names are used when referring to :term:`[punctuator]s`:
 
 .. list-table::
 
@@ -453,7 +453,7 @@ An :term:`identifier` is a :term:`lexical element` that refers to a
 
 :def_p:`fls_ktnf6zkrdy45`
 A :term:`pure identifier` is an :term:`identifier` that does not include
-:term:`weak keyword`\ s.
+:term:`[weak keyword]s`.
 
 :def_p:`fls_jpecw46eh061`
 A :term:`pure identifier` shall follow the specification in Unicode Standard
@@ -477,35 +477,35 @@ A :term:`pure identifier` shall be restricted to characters in category
 :syntax:`AsciiCharacter` in the following contexts:
 
 * :def_p:`fls_6qo63nlkr0s8`
-  :term:`External crate import`\ s,
+  :term:`[External crate import]s`,
 
 * :def_p:`fls_w473jevurlt1`
-  :term:`Name`\ s of :term:`external crate`\ s represented in a :term:`simple
+  :term:`[Name]s` of :term:`[external crate]s` represented in a :term:`simple
   path`, when the :term:`simple path` that starts with namespace qualifier
   ``::``,
 
 * :def_p:`fls_mt1u4m3simhc`
-  :term:`Name`\ s of :term:`outline module`\ s that lack attribute
+  :term:`[Name]s` of :term:`[outline module]s` that lack attribute
   :codeterm:`path`,
 
 * :def_p:`fls_e2v58o233lvd`
-  :term:`Name`\ s of :term:`item`\ s that are subject to attribute
+  :term:`[Name]s` of :term:`[item]s` that are subject to attribute
   :codeterm:`no_mangle`,
 
 * :def_p:`fls_op0lp1i065di`
-  :term:`Name`\ s of :term:`item`\ s within :term:`external block`\ s.
+  :term:`[Name]s` of :term:`[item]s` within :term:`[external block]s`.
 
 :def_p:`fls_vde7gev5rz4q`
-:term:`Identifier`\ s are normalized using Normalization Form C as defined in
+:term:`[Identifier]s` are normalized using Normalization Form C as defined in
 Unicode Standard Annex #15.
 
 :def_p:`fls_j9yh8j8jgdeu`
-Two :term:`identifier`\ s are considered the same if they consist of the same
+Two :term:`[identifier]s` are considered the same if they consist of the same
 sequence of characters after performing normalization.
 
 :def_p:`fls_jejt5z8m1yew`
-:term:`Procedural macro`\ s and :term:`declarative macro`\ s shall receive
-normalized :term:`identifier`\ s in their input.
+:term:`[Procedural macro]s` and :term:`[declarative macro]s` shall receive
+normalized :term:`[identifier]s` in their input.
 
 .. rubric:: Examples
 
@@ -670,7 +670,7 @@ Raw Byte String Literals
 
 :def_p:`fls_yyw7nv651580`
 A :term:`raw byte string literal` is a :term:`simple byte literal` that does not
-recognize :term:`escaped character`\ s.
+recognize :term:`[escaped character]s`.
 
 :def_p:`fls_5ybq0euwya42`
 The :term:`type` of a :term:`raw byte string literal` of size ``N`` is
@@ -1096,7 +1096,7 @@ Raw String Literals
 
 :def_p:`fls_36suwhbwmq1t`
 A :term:`raw string literal` is a :term:`simple string literal` that does not
-recognize :term:`escaped character`\ s.
+recognize :term:`[escaped character]s`.
 
 :def_p:`fls_ms43w1towz40`
 The :term:`type` of a :term:`raw string literal` is ``&'static str``.
@@ -1124,7 +1124,7 @@ Boolean Literals
 
 :def_p:`fls_1lll64ftupjd`
 A :term:`boolean literal` is a :term:`literal` that denotes the truth
-:term:`value`\ s of logic and Boolean algebra.
+:term:`[value]s` of logic and Boolean algebra.
 
 :def_p:`fls_pgngble3ilyx`
 The :term:`type` of a :term:`boolean literal` is :codeterm:`bool`.
@@ -1185,54 +1185,54 @@ explanation in program text.
 
 :def_p:`fls_qsbnl11be35s`
 A :term:`block comment` is a :term:`comment` that spans one or more
-:term:`line`\ s.
+:term:`[line]s`.
 
 :def_p:`fls_nayisy85kyq2`
 A :term:`line comment` is a :term:`comment` that spans exactly one :term:`line`.
 
 :def_p:`fls_k3hj30hjkdhw`
 An :term:`inner block doc` is a :term:`block comment` that applies to an
-enclosing non-:term:`comment` :term:`construct`.
+enclosing :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_tspijl68lduc`
 An :term:`inner line doc` is a :term:`line doc` that applies to an enclosing
-non-:term:`comment` :term:`construct`.
+:term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_63gzofa9ktic`
 An :term:`outer block doc` is a :term:`block comment` that applies to a
-subsequent non-:term:`comment` :term:`construct`.
+subsequent :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_scko7crha0um`
 An :term:`outer line doc` is a :term:`line comment` that applies to a subsequent
-non-:term:`comment` :term:`construct`.
+:term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_7n6d3jx61ose`
-A :term:`doc comment` is a :term:`comment` class that includes :term:`inner
-block doc`\ s, :term:`inner line doc`\ s, :term:`outer block doc`\ s, and
-:term:`outer line doc`\ s.
+A :term:`doc comment` is a :term:`comment` class that includes :term:`[inner
+block doc]s`, :term:`[inner line doc]s`, :term:`[outer block doc]s`, and
+:term:`[outer line doc]s`.
 
 :def_p:`fls_6fxcs17n4kw`
 Character 0x0D (carriage return) shall not appear in a :term:`comment`.
 
 :def_p:`fls_uze7l7cxonk1`
-:term:`Block comment`\ s, :term:`inner block doc`\ s, and :term:`outer block
-doc`\ s shall extend one or more :term:`line`\ s.
+:term:`[Block comment]s`, :term:`[inner block doc]s`, and :term:`[outer block
+doc]s` shall extend one or more :term:`[line]s`.
 
 :def_p:`fls_gy23lwlqw2mc`
-:term:`Line comment`\ s, :term:`inner line doc`\ s, and :term:`outer line doc`\
-s shall extend exactly one :term:`line`.
+:term:`[Line comment]s`, :term:`[inner line doc]s`, and :term:`[outer line
+doc]s` shall extend exactly one :term:`line`.
 
 :def_p:`fls_w7d0skpov1is`
-:term:`Outer block doc`\ s and :term:`outer line doc`\ s shall apply to a
-subsequent non-:term:`comment` :term:`construct`.
+:term:`[Outer block doc]s` and :term:`[outer line doc]s` shall apply to a
+subsequent :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_32ncjvj2kn7z`
-:term:`Inner block doc`\ s and :term:`inner line doc`\ s shall apply to an
-enclosing non-:term:`comment` :term:`construct`.
+:term:`[Inner block doc]s` and :term:`[inner line doc]s` shall apply to an
+enclosing :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_ok0zvo9vcmzo`
-:term:`Inner block doc`\ s, :term:`inner line doc`\ s, :term:`outer block
-doc`\ s, and :term:`outer line doc`\ s are equivalent to  :term:`attribute`
+:term:`[Inner block doc]s`, :term:`[inner line doc]s`, :term:`[outer block
+doc]s`, and :term:`[outer line doc]s` are equivalent to  :term:`attribute`
 :codeterm:`doc`.
 
 .. rubric:: Examples
@@ -1277,7 +1277,7 @@ Keywords
 A :term:`keyword` is a word in program text that has special meaning.
 
 :def_p:`fls_sxg1o4oxql51`
-:term:`Keyword`\ s are case sensitive.
+:term:`[Keyword]s` are case sensitive.
 
 Strict Keywords
 ~~~~~~~~~~~~~~~

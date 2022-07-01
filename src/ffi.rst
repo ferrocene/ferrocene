@@ -10,12 +10,12 @@ FFI
 
 :def_p:`fls_djlglv2eaihl`
 :term:`Foreign Function Interface` or :term:`FFI` employs :term:`ABI`,
-:term:`attribute`\ s, :term:`external blocks`, :term:`external function`\
-s, linkage, and :term:`type` :term:`layout` to interface a Rust program with
+:term:`[attribute]s`, :term:`external blocks`, :term:`[external function]s`,
+linkage, and :term:`type` :term:`layout` to interface a Rust program with
 foreign code.
 
 :def_p:`fls_k1hiwghzxtfa`
-The following :term:`attribute`\ s affect :term:`FFI`:
+The following :term:`[attribute]s` affect :term:`FFI`:
 
 * :def_p:`fls_3cgtdk4698hm`
   :term:`Attribute` :codeterm:`export_name`.
@@ -56,7 +56,7 @@ dictate how data and computation cross language boundaries.
 The :term:`ABI kind` indicates the :term:`ABI` of a :term:`construct`.
 
 :def_p:`fls_9zitf1fvvfk8`
-The following :term:`ABI`\ s are supported:
+The following :term:`[ABI]s` are supported:
 
 * :def_p:`fls_x7ct9k82fpgn`
   ``extern "C"`` - The default :term:`ABI` of C code, referred to as
@@ -81,7 +81,7 @@ has implicit :term:`external C ABI`.
 .. rubric:: Implementation Permissions
 
 :def_p:`fls_j6pqchx27ast`
-A tool is allowed to specify additional :term:`ABI`\ s. These :term:`ABI`\ s may
+A tool is allowed to specify additional :term:`[ABI]s`. These :term:`[ABI]s` may
 include, but may not be limited to, the following:
 
 * :def_p:`fls_dbbfqaqa80r8`
@@ -140,11 +140,11 @@ External Blocks
 
 :def_p:`fls_4dje9t5y2dia`
 An :term:`external block` is a :term:`construct` that provides the declarations
-of foreign :term:`function`\ s as unchecked imports.
+of foreign :term:`[function]s` as unchecked imports.
 
 :def_p:`fls_iaimuqcclstl`
 The ``unsafe`` :term:`keyword` of an :term:`external block` is rejected, but may
-still be consumed by :term:`macro`\ s.
+still be consumed by :term:`[macro]s`.
 
 .. rubric:: Examples
 
@@ -166,7 +166,7 @@ External Functions
 
 .. rubric:: Legality Rules
 
-:term:`External function`\ s and :term:`external static`\ s inherit the
+:term:`[External function]s` and :term:`[external static]s` inherit the
 :term:`ABI` of their enclosing :term:`external block`.
 
 An :term:`external function` is an unchecked import of a foreign
@@ -178,7 +178,7 @@ An :term:`external function` shall not specify a
 :syntax:`FunctionQualifierList`.
 
 An :term:`external function` shall not specify a :syntax:`GenericParameterList`
-containing :term:`constant parameter`\ s or :term:`type parameter`\ s.
+containing :term:`[constant parameter]s` or :term:`[type parameter]s`.
 
 An :term:`external function` shall not specify a :syntax:`FunctionBody`.
 

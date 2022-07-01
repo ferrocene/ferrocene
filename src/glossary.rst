@@ -41,7 +41,7 @@ abstract data type
 ^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_64drmro2fcfo`
-An :def_term:`abstract data type` is a collection of other :term:`type`\ s.
+An :def_term:`abstract data type` is a collection of other :term:`[type]s`.
 
 active attribute
 ^^^^^^^^^^^^^^^^
@@ -117,7 +117,7 @@ arithmetic expression
 
 :def_p:`fls_u3z2r1fw89xo`
 An :def_term:`arithmetic expression` is an :term:`expression` that computes a
-:term:`value` from two :term:`operand`\ s using arithmetic.
+:term:`value` from two :term:`[operand]s` using arithmetic.
 
 :def_p:`fls_in59ccg4g3we`
 See :syntax:`ArithmeticExpression`.
@@ -126,7 +126,7 @@ arity
 ^^^^^
 
 :def_p:`fls_dl2gkip00bua`
-An :def_term:`arity` is the number of :term:`tuple field`\ s in a :term:`tuple
+An :def_term:`arity` is the number of :term:`[tuple field]s` in a :term:`tuple
 type`.
 
 array
@@ -306,7 +306,7 @@ associativity
 ^^^^^^^^^^^^^
 
 :def_p:`fls_7i7o23mi2i33`
-:def_term:`Associativity` is the order by which :term:`operand`\ s are evaluated
+:def_term:`Associativity` is the order by which :term:`[operand]s` are evaluated
 within a single :term:`expression`.
 
 async block
@@ -357,8 +357,8 @@ attribute macro
 
 :def_p:`fls_mtqr4d817ikn`
 An :def_term:`attribute macro` is a :term:`procedural macro` that consumes two
-streams of :term:`token`\ s to produce a stream of tokens, and defines a new
-:term:`outer attribute` that can be attached to :term:`item`\ s.
+streams of :term:`[token]s` to produce a stream of tokens, and defines a new
+:term:`outer attribute` that can be attached to :term:`[item]s`.
 
 await expression
 ^^^^^^^^^^^^^^^^
@@ -410,7 +410,7 @@ binary operator
 
 :def_p:`fls_v0he0zp9ph7a`
 A :def_term:`binary operator` is an operator that operates on two
-:term:`operand`\ s.
+:term:`[operand]s`.
 
 binding
 ^^^^^^^
@@ -448,7 +448,7 @@ bit expression
 
 :def_p:`fls_b3p5xqsfolqo`
 A :def_term:`bit expression` is an :term:`expression` that computes a
-:term:`value` from two :term:`operand`\ s using bit arithmetic.
+:term:`value` from two :term:`[operand]s` using bit arithmetic.
 
 :def_p:`fls_iw1k2cfwfjou`
 See :syntax:`BitExpression`.
@@ -518,7 +518,7 @@ block comment
 
 :def_p:`fls_a0ejcfs7y5uy`
 A :def_term:`block comment` is a :term:`comment` that spans one or more
-:term:`line`\ s.
+:term:`[line]s`.
 
 :def_p:`fls_21r4tblk8awi`
 See :syntax:`BlockComment`.
@@ -528,7 +528,7 @@ block expression
 
 :def_p:`fls_gvjvzxi2xps4`
 A :def_term:`block expression` is an :term:`expression` that sequences
-expressions and :term:`statement`\ s.
+expressions and :term:`[statement]s`.
 
 :def_p:`fls_h8j9t2xq2i1u`
 See :syntax:`BlockExpression`.
@@ -537,7 +537,7 @@ bool
 ^^^^
 
 :def_p:`fls_wtmaf5amvleh`
-:def_term:`bool` is a :term:`type` whose :term:`value`\ s denote the truth
+:def_term:`bool` is a :term:`type` whose :term:`[value]s` denote the truth
 values of logic and Boolean algebra.
 
 boolean literal
@@ -545,7 +545,7 @@ boolean literal
 
 :def_p:`fls_5mrxdqh474vk`
 A :def_term:`boolean literal` is a :term:`literal` that denotes the truth
-:term:`value`\ s of logic and Boolean algebra.
+:term:`[value]s` of logic and Boolean algebra.
 
 :def_p:`fls_i13qcchm9vkk`
 See :syntax:`BooleanLiteral`.
@@ -578,8 +578,8 @@ bound
 ^^^^^
 
 :def_p:`fls_q6mxhn1fxjs6`
-A :def_term:`bound` imposes a constraint on :term:`generic parameter`\ s by
-limiting the set of possible :term:`generic substitution`\ s.
+A :def_term:`bound` imposes a constraint on :term:`[generic parameter]s` by
+limiting the set of possible :term:`[generic substitution]s`.
 
 :def_p:`fls_rxabhhigp5uy`
 See :syntax:`TypeBound`.
@@ -652,7 +652,7 @@ C representation
 
 :def_p:`fls_g9pdb06m5fto`
 :def_term:`C representation` is a :term:`type representation` that lays out
-:term:`type`\ s such that they are interoperable with the C language.
+:term:`[type]s` such that they are interoperable with the C language.
 
 call expression
 ^^^^^^^^^^^^^^^
@@ -681,7 +681,7 @@ callee type
 A :def_term:`callee type` is either a :term:`function item type`, a
 :term:`function pointer type`, or a :term:`type` that implements any
 of the :codeterm:`core::ops::Fn`, :codeterm:`core::ops::FnMut`, or
-:codeterm:`core::ops::FnOnce` :term:`trait`\ s.
+:codeterm:`core::ops::FnOnce` :term:`[trait]s`.
 
 capture mode
 ^^^^^^^^^^^^
@@ -701,15 +701,15 @@ capturing
 ^^^^^^^^^
 
 :def_p:`fls_4achbk2ewyyb`
-:def_term:`Capturing` is the process of saving the :term:`capture target`\ s of
-a :term:`capturing expression`'s :term:`capturing environment`.
+:def_term:`Capturing` is the process of saving the :term:`[capture target]s` of
+a :term:`[capturing expression]'s` :term:`capturing environment`.
 
 capturing environment
 ^^^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_7br4azaay3wu`
 The :def_term:`capturing environment` of a :term:`capturing expression` consists
-of all :term:`capture target`\ s that are defined outside the :term:`capture
+of all :term:`[capture target]s` that are defined outside the :term:`capture
 expression`.
 
 capturing expression
@@ -730,7 +730,7 @@ char
 ^^^^
 
 :def_p:`fls_vx0dss1yplw1`
-:def_codeterm:`char` is a :term:`type` whose :term:`value`\ s denote
+:def_codeterm:`char` is a :term:`type` whose :term:`[value]s` denote
 :term:`Unicode` characters.
 
 character literal
@@ -768,7 +768,7 @@ closure type
 
 :def_p:`fls_wp4kues3nbvn`
 A :def_term:`closure type` is a unique anonymous :term:`function type` that
-encapsulates all :term:`captured variable`\ s of a :term:`closure expression`.
+encapsulates all :term:`[captured variable]s` of a :term:`closure expression`.
 
 code point
 ^^^^^^^^^^
@@ -792,7 +792,7 @@ comparison expression
 
 :def_p:`fls_394p7gdruvk7`
 A :def_term:`comparison expression` is an :term:`expression` that compares the
-:term:`value`\ s of two :term:`operand`\ s.
+:term:`[value]s` of two :term:`[operand]s`.
 
 :def_p:`fls_1jk0s7389mt0`
 See :syntax:`ComparisonExpression`.
@@ -808,7 +808,7 @@ compound assignment expression
 
 :def_p:`fls_mkxpk2jhe5s0`
 A :def_term:`compound assignment expression` is an expression that first
-computes a :term:`value` from two :term:`operand`\ s and then assigns the value
+computes a :term:`value` from two :term:`[operand]s` and then assigns the value
 to an :term:`assigned operand`.
 
 :def_p:`fls_55abuw8symub`
@@ -904,7 +904,7 @@ constrain
 ^^^^^^^^^
 
 A :term:`generic parameter` is said to :term:`constrain` an
-:term:`implementation` if it makes the :term:`implementation`'s applicability
+:term:`implementation` if it makes the :term:`[implementation]'s` applicability
 more narrow.
 
 construct
@@ -1053,7 +1053,7 @@ derive macro
 
 :def_p:`fls_jrrjhl9hocrm`
 A :def_term:`derive macro` is a :term:`procedural macro` that consumes a
-stream of :term:`token`\ s and produces a stream of tokens, and is invoked via
+stream of :term:`[token]s` and produces a stream of tokens, and is invoked via
 attribute :codeterm:`derive`.
 
 destructuring assignment
@@ -1106,9 +1106,9 @@ doc comment
 ^^^^^^^^^^^
 
 :def_p:`fls_wkc1w2xk7ebh`
-A :def_term:`doc comment` is a :term:`comment` class that includes :term:`inner
-block doc`\ s, :term:`inner line doc`\ s, :term:`outer block doc`\ s, and
-:term:`outer line doc`\ s.
+A :def_term:`doc comment` is a :term:`comment` class that includes :term:`[inner
+block doc]s`, :term:`[inner line doc]s`, :term:`[outer block doc]s`, and
+:term:`[outer line doc]s`.
 
 dynamically sized type
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1171,7 +1171,7 @@ end of line
 
 :def_p:`fls_tmqt52j5w4f`
 An :def_term:`end of line` is a sequence of one or more
-:syntax:`FormatEffector`\ s other than character 0x09 (horizontal tabulation).
+:syntax:`[FormatEffector]s` other than character 0x09 (horizontal tabulation).
 
 enum
 ^^^^
@@ -1184,7 +1184,7 @@ enum type
 
 :def_p:`fls_idwrgo87ub3i`
 An :def_term:`enum type` is an :term:`abstract data type` that contains
-:term:`enum variant`\ s.
+:term:`[enum variant]s`.
 
 :def_p:`fls_o6ih6n1z1566`
 See :syntax:`EnumDeclaration`.
@@ -1298,7 +1298,7 @@ external block
 
 :def_p:`fls_z2ebcp7kjpuy`
 An :def_term:`external block` is a :term:`construct` that provides the
-declarations of foreign :term:`function`\ s as unchecked imports.
+declarations of foreign :term:`[function]s` as unchecked imports.
 
 :def_p:`fls_dm2wz1th2haz`
 See :syntax:`ExternalBlock`.
@@ -1360,9 +1360,10 @@ Foreign Function Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_240yj1kym1kh`
-:def_term:`Foreign Function Interface` employs :term:`ABI`, :term:`attribute`\
-s, :term:`external block`, :term:`external function`\ s, linkage, and
-:term:`type` :term:`layout` to interface a Rust program with foreign code.
+:def_term:`Foreign Function Interface` employs :term:`ABI`,
+:term:`[attribute]s`, :term:`external block`, :term:`[external function]s`,
+linkage, and :term:`type` :term:`layout` to interface a Rust program with
+foreign code.
 
 field access expression
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1425,15 +1426,15 @@ floating-point type
 ^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_1w5yjiffah1u`
-A :def_term:`floating-point type` is a :term:`numeric type` whose :term:`value`\
-s denote fractional numbers.
+A :def_term:`floating-point type` is a :term:`numeric type` whose
+:term:`[value]s` denote fractional numbers.
 
 floating-point type variable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_ls41emhkrxdi`
 A :def_term:`floating-point type variable` is a :term:`type variable` that can
-refer only to :term:`floating-point type`\ s.
+refer only to :term:`[floating-point type]s`.
 
 for loop
 ^^^^^^^^
@@ -1524,8 +1525,8 @@ function signature
 
 :def_p:`fls_ndld48kg6o8d`
 A :def_term:`function signature` is a unique identification of a
-:term:`function` that encompases of its :term:`function qualifier`\ s,
-:term:`name`, :term:`generic parameter`\ s, :term:`function parameter`\ s,
+:term:`function` that encompases of its :term:`[function qualifier]s`,
+:term:`name`, :term:`[generic parameter]s`, :term:`[function parameter]s`,
 :term:`return type`, and :term:`where clause`.
 
 function type
@@ -1538,7 +1539,7 @@ function-like macro
 ^^^^^^^^^^^^^^^^^^^
 
 A :def_term:`function-like macro` is a :term:`procedural macro` that consumes
-a stream of :term:`token`\ s and produces a stream of tokens, and is invoked
+a stream of :term:`[token]s` and produces a stream of tokens, and is invoked
 directly.
 
 future
@@ -1573,21 +1574,21 @@ generic enum
 ^^^^^^^^^^^^
 
 :def_p:`fls_pnu8w26uexaq`
-A :def_term:`generic enum` is an :term:`enum` with :term:`generic parameter`\ s.
+A :def_term:`generic enum` is an :term:`enum` with :term:`[generic parameter]s`.
 
 generic function
 ^^^^^^^^^^^^^^^^
 
 :def_p:`fls_rfkbc967d48h`
-A :def_term:`generic function` is a :term:`function` with :term:`generic
-parameter`\ s.
+A :def_term:`generic function` is a :term:`function` with :term:`[generic
+parameter]s`.
 
 generic implementation
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_jic937ujpnar`
 A :def_term:`generic implementation` is an :term:`implementation` with
-:term:`generic parameter`\ s.
+:term:`[generic parameter]s`.
 
 generic parameter
 ^^^^^^^^^^^^^^^^^
@@ -1604,29 +1605,29 @@ generic struct
 ^^^^^^^^^^^^^^
 
 :def_p:`fls_mcb2mlklith8`
-A :def_term:`generic struct` is a :term:`struct` with :term:`generic parameter`\
-s.
+A :def_term:`generic struct` is a :term:`struct` with :term:`[generic
+parameter]s`.
 
 generic trait
 ^^^^^^^^^^^^^
 
 :def_p:`fls_h515f11akr91`
-A :def_term:`generic trait` is a :term:`trait` with :term:`generic parameter`\
-s.
+A :def_term:`generic trait` is a :term:`trait` with :term:`[generic
+parameter]s`.
 
 generic type alias
 ^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_zgxsqq4vu7e3`
-A :def_term:`generic type alias` is a :term:`type alias` with :term:`generic
-parameter`\ s.
+A :def_term:`generic type alias` is a :term:`type alias` with :term:`[generic
+parameter]s`.
 
 generic union
 ^^^^^^^^^^^^^
 
 :def_p:`fls_93rxr0yjx1e7`
-A :def_term:`generic union` is a :term:`union` with :term:`generic parameter`\
-s.
+A :def_term:`generic union` is a :term:`union` with :term:`[generic
+parameter]s`.
 
 global type variable
 ^^^^^^^^^^^^^^^^^^^^
@@ -1679,7 +1680,7 @@ higher-ranked trait bound
 
 :def_p:`fls_lpyc4omcthv`
 A :def_term:`higher-ranked trait bound` is a :term:`bound` that specifies an
-infinite list of :term:`bound`\ s for all possible :term:`lifetime`\ s.
+infinite list of :term:`[bound]s` for all possible :term:`[lifetime]s`.
 
 :def_p:`fls_m3nrsdvxxg6j`
 See :syntax:`ForLifetimeList`.
@@ -1688,35 +1689,35 @@ i8
 ^^
 
 :def_p:`fls_1y9ulxnz8qba`
-:def_codeterm:`i8` is a :term:`signed integer type` whose :term:`value`\ s range
+:def_codeterm:`i8` is a :term:`signed integer type` whose :term:`[value]s` range
 from - (2\ :sup:`7`) to 2\ :sup:`7` - 1, all inclusive.
 
 i16
 ^^^
 
 :def_p:`fls_ci9jl55wxwdg`
-:def_codeterm:`i16` is a :term:`signed integer type` whose :term:`value`\ s
+:def_codeterm:`i16` is a :term:`signed integer type` whose :term:`[value]s`
 range from - (2\ :sup:`15`) to 2\ :sup:`15` - 1, all inclusive.
 
 i32
 ^^^
 
 :def_p:`fls_yh8wzhhso4xc`
-:def_codeterm:`i32` is a :term:`signed integer type` whose :term:`value`\ s
+:def_codeterm:`i32` is a :term:`signed integer type` whose :term:`[value]s`
 range from - (2\ :sup:`31`) to 2\ :sup:`31` - 1, all inclusive.
 
 i64
 ^^^
 
 :def_p:`fls_4bpatxp8yelv`
-:def_codeterm:`i64` is a :term:`signed integer type` whose :term:`value`\ s
+:def_codeterm:`i64` is a :term:`signed integer type` whose :term:`[value]s`
 range from - (2\ :sup:`63`) to 2\ :sup:`63` - 1, all inclusive.
 
 i128
 ^^^^
 
 :def_p:`fls_p75kpbtonb8z`
-:def_codeterm:`i128` is a :term:`signed integer type` whose :term:`value`\ s
+:def_codeterm:`i128` is a :term:`signed integer type` whose :term:`[value]s`
 range from - (2\ :sup:`127`) to 2\ :sup:`127` - 1, all inclusive.
 
 identifier
@@ -1822,8 +1823,8 @@ See :syntax:`ImplementedTrait`.
 implementing type
 ^^^^^^^^^^^^^^^^^
 
-An :def_term:`implementing type` is the :term:`type` that the :term:`associated
-item`\ s of an :term:`implementation` are associated with.
+An :def_term:`implementing type` is the :term:`type` that the :term:`[associated
+item]s` of an :term:`implementation` are associated with.
 
 :def_p:`fls_9ixcwh6to74g`
 See :syntax:`ImplementingType`.
@@ -1922,7 +1923,7 @@ indirection type
 ^^^^^^^^^^^^^^^^
 
 :def_p:`fls_8so1phpdjyk8`
-An :def_term:`indirection type` is a :term:`type` whose :term:`value`\ s refer
+An :def_term:`indirection type` is a :term:`type` whose :term:`[value]s` refer
 to memory locations.
 
 inert attribute
@@ -2005,7 +2006,7 @@ inner block doc
 
 :def_p:`fls_f4nqkybpwj1a`
 An :def_term:`inner block doc` is a :term:`block comment` that applies to an
-enclosing non-:term:`comment` :term:`construct`.
+enclosing :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_lmpaznk198ga`
 See :syntax:`InnerBlockDoc`.
@@ -2015,7 +2016,7 @@ inner line doc
 
 :def_p:`fls_vtwavwjhgvlz`
 An :def_term:`inner line doc` is a :term:`line doc` that applies to an enclosing
-non-:term:`comment` :term:`construct`.
+:term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_8cnikewkqs7`
 See :syntax:`InnerLineDoc`.
@@ -2044,7 +2045,7 @@ integer type
 ^^^^^^^^^^^^
 
 :def_p:`fls_nhfqdhf26ym3`
-An :def_term:`integer type` is a :term:`numeric type` whose :term:`value`\ s
+An :def_term:`integer type` is a :term:`numeric type` whose :term:`[value]s`
 denote whole numbers.
 
 integer type variable
@@ -2052,13 +2053,13 @@ integer type variable
 
 :def_p:`fls_e3ed1tyrjsy4`
 An :def_term:`integer type variable` is a :term:`type variable` that can refer
-only to :term:`integer type`\ s.
+only to :term:`[integer type]s`.
 
 intermediate match arm
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_l6pemxmdllvl`
-An :def_term:`intermediate match arm` is any non-:term:`final match arm` of a
+An :def_term:`intermediate match arm` is any :term:`non-[final match arm]` of a
 :term:`match expression`.
 
 :def_p:`fls_8713j5lrwqvs`
@@ -2143,7 +2144,7 @@ layout
 
 :def_p:`fls_qk602dmhc0d6`
 :def_term:`Layout` specifies the :term:`alignment`, :term:`size`, and the
-relative offset of :term:`field`\ s in a :term:`type`.
+relative offset of :term:`[field]s` in a :term:`type`.
 
 lazy and expression
 ^^^^^^^^^^^^^^^^^^^
@@ -2210,7 +2211,7 @@ let statement
 
 :def_p:`fls_yh7hn6jjv3ur`
 A :def_term:`let statement` is a :term:`statement` that introduces new
-:term:`variable`\ s given by the :term:`binding`\ s produced by its
+:term:`[variable]s` given by the :term:`[binding]s` produced by its
 :term:`pattern-without-alternation`.
 
 :def_p:`fls_tsem3c6zqmh4`
@@ -2256,7 +2257,7 @@ lifetime bound
 
 :def_p:`fls_u6xfs8fg558`
 A :def_term:`lifetime bound` is a :term:`bound` that imposes a constraint on the
-:term:`lifetime`\ s of :term:`generic parameter`\ s.
+:term:`[lifetime]s` of :term:`[generic parameter]s`.
 
 :def_p:`fls_ivcjmp54hdej`
 See :syntax:`LifetimeIndication`.
@@ -2266,7 +2267,7 @@ lifetime elision
 
 :def_p:`fls_dq5wkd61ry3l`
 :def_term:`Lifetime elision` is a set of relaxations on the use of
-:term:`lifetime`\ s.
+:term:`[lifetime]s`.
 
 lifetime parameter
 ^^^^^^^^^^^^^^^^^^
@@ -2492,7 +2493,7 @@ match expression
 
 :def_p:`fls_2ohrphptjny6`
 A :def_term:`match expression` is an :term:`expression` that tries to match one
-of its multiple :term:`pattern`\ s against its :term:`subject expression` and if
+of its multiple :term:`[pattern]s` against its :term:`subject expression` and if
 it succeeds, evaluates an :term:`operand`.
 
 :def_p:`fls_wkalvzkmp95y`
@@ -2539,7 +2540,7 @@ module
 ^^^^^^
 
 :def_p:`fls_ujlsg58bskl5`
-A :def_term:`module` is a container for zero or more :term:`item`\ s.
+A :def_term:`module` is a container for zero or more :term:`[item]s`.
 
 :def_p:`fls_os60q6vvm71c`
 See :syntax:`ModuleDeclaration`.
@@ -2690,8 +2691,8 @@ non-reference pattern
 
 :def_p:`fls_tejled5izyue`
 A :def_term:`non-reference pattern` is any :term:`pattern` except
-non-:term:`binding pattern`\ s, :term:`path pattern`\ s, :term:`reference
-pattern`\ s, and :term:`wildcard pattern`\ s.
+:term:`non-[binding pattern]s`, :term:`[path pattern]s`, :term:`[reference
+pattern]s`, and :term:`[wildcard pattern]s`.
 
 not-equals expression
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2722,7 +2723,7 @@ numeric type
 ^^^^^^^^^^^^
 
 :def_p:`fls_cpdsj94l57af`
-A :def_term:`numeric type` is a :term:`type` whose :term:`value`\ s denote
+A :def_term:`numeric type` is a :term:`type` whose :term:`[value]s` denote
 numbers.
 
 object
@@ -2799,7 +2800,7 @@ outer block doc
 
 :def_p:`fls_531ggn1f8f6u`
 An :def_term:`outer block doc` is a :term:`block comment` that applies to a
-subsequent non-:term:`comment` :term:`construct`.
+subsequent :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_ddy9a66tpytp`
 See :syntax:`OuterBlockDoc`.
@@ -2809,7 +2810,7 @@ outer line doc
 
 :def_p:`fls_m3u30fu8uac3`
 An :def_term:`outer line doc` is a :term:`line comment` that applies to a
-subsequent non-:term:`comment` :term:`construct`.
+subsequent :term:`non-[comment]` :term:`construct`.
 
 :def_p:`fls_1ppwidw7szk5`
 See :syntax:`OuterLineDoc`.
@@ -2828,7 +2829,7 @@ overlap
 ^^^^^^^
 
 :def_p:`fls_itkz9y19923k`
-Two :term:`value`\ s :def_term:`overlap` when their memory locations overlap, or
+Two :term:`[value]s` :def_term:`overlap` when their memory locations overlap, or
 both values are elements of the same :term:`array`.
 
 panic
@@ -2853,7 +2854,7 @@ parenthesized pattern
 
 :def_p:`fls_7j12dwsx9ghg`
 A :def_term:`parenthesized pattern` is a :term:`pattern` that controls the
-precedence of its :term:`subpattern`\ s.
+precedence of its :term:`[subpattern]s`.
 
 :def_p:`fls_rwt31e8m694i`
 See :syntax:`ParenthesizedPattern`.
@@ -2863,7 +2864,7 @@ parenthesized type
 
 :def_p:`fls_pamypc7t7l5n`
 A :def_term:`parenthesized type` is a :term:`type` that disambiguates the
-interpretation of :term:`lexical element`\ s.
+interpretation of :term:`[lexical element]s`.
 
 :def_p:`fls_lovkvqoni3xs`
 See :syntax:`ParenthesizedTypeSpecification`.
@@ -2883,7 +2884,7 @@ path pattern
 
 :def_p:`fls_vacvk3t26ctg`
 A :def_term:`path pattern` is a :term:`pattern` that matches a :term:`constant`,
-an :term:`enum variant` without :term:`field`\ s, or a :term:`unit struct`
+an :term:`enum variant` without :term:`[field]s`, or a :term:`unit struct`
 indicated by a :term:`path`.
 
 :def_p:`fls_9fudbxoyq8k4`
@@ -2932,7 +2933,7 @@ plane
 ^^^^^
 
 In :term:`Unicode`, a :def_term:`plane` is a continuous group of 65,536
-:term:`code point`\ s.
+:term:`[code point]s`.
 
 positional initializer
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -2948,7 +2949,7 @@ precedence
 ^^^^^^^^^^
 
 :def_p:`fls_sz93844rqc4r`
-:def_term:`Precedence` is the order by which :term:`expression`\ s are evaluated
+:def_term:`Precedence` is the order by which :term:`[expression]s` are evaluated
 in the presence of other expressions.
 
 primitive representation
@@ -2956,14 +2957,14 @@ primitive representation
 
 :def_p:`fls_bydly1rt63pf`
 :def_term:`Primitive representation` is the :term:`type representation` of
-:term:`integer type`\ s.
+:term:`[integer type]s`.
 
 primitive type
 ^^^^^^^^^^^^^^
 
 :def_p:`fls_xu454ni4ls4k`
 A :def_term:`primitive type` is a :term:`type` class that includes the
-:term:`never type`, :term:`scalar type`\ s, and type :codeterm:`str`.
+:term:`never type`, :term:`[scalar type]s`, and type :codeterm:`str`.
 
 :def_p:`fls_cn82v86wr8z0`
 **Setting as a reminder, we'll have to check the usages of primitive types.
@@ -2982,7 +2983,7 @@ pure identifier
 
 :def_p:`fls_6pez8fyiew0k`
 A :def_term:`pure identifier` is an :term:`identifier` that does not include
-:term:`weak keyword`\ s.
+:term:`[weak keyword]s`.
 
 range expression
 ^^^^^^^^^^^^^^^^
@@ -3079,7 +3080,7 @@ range pattern
 ^^^^^^^^^^^^^
 
 :def_p:`fls_vf42zdyq23lc`
-A :def_term:`range pattern` is a :term:`pattern` that matches :term:`value`\ s
+A :def_term:`range pattern` is a :term:`pattern` that matches :term:`[value]s`
 which fall within a range.
 
 :def_p:`fls_r36uf3y2denr`
@@ -3120,7 +3121,7 @@ raw byte string literal
 
 :def_p:`fls_8v5k3wemy4tl`
 A :def_term:`raw byte string literal` is a :term:`simple byte literal` that does
-not recognize :term:`escaped character`\ s.
+not recognize :term:`[escaped character]s`.
 
 :def_p:`fls_5x71i3ay3na2`
 See ``RawByteStringLiteral.``
@@ -3146,7 +3147,7 @@ raw string literal
 
 :def_p:`fls_48t4v316951j`
 A :def_term:`raw string literal` is a :term:`simple string literal` that does
-not recognize :term:`escaped character`\ s.
+not recognize :term:`[escaped character]s`.
 
 :def_p:`fls_26ol7lrnux94`
 See :syntax:`RawStringLiteral`.
@@ -3209,7 +3210,7 @@ record struct type
 
 :def_p:`fls_mgrz3o51gbis`
 A :def_term:`record struct type` is a :term:`struct type` with named
-:term:`field`\ s.
+:term:`[field]s`.
 
 :def_p:`fls_rqs5rdnhkwnx`
 See :syntax:`RecordStructDeclaration`.
@@ -3252,8 +3253,8 @@ refutability
 ^^^^^^^^^^^^
 
 :def_p:`fls_gzjrfx19fg40`
-:def_term:`Refutability` is a property of :term:`pattern`\ s that expresses the
-ability to match all possible :term:`value`\ s of a :term:`type`.
+:def_term:`Refutability` is a property of :term:`[pattern]s` that expresses the
+ability to match all possible :term:`[value]s` of a :term:`type`.
 
 refutable constant
 ^^^^^^^^^^^^^^^^^^
@@ -3408,9 +3409,9 @@ Self
 ^^^^
 
 :def_p:`fls_q6whqbfusswf`
-:def_term:`Self` is either an implicit :term:`type parameter` in :term:`trait`\
-s or an implicit :term:`type alias` in :term:`implementation`\ s. :term:`Self`
-refers to the :term:`type` that implements a :term:`trait`.
+:def_term:`Self` is either an implicit :term:`type parameter` in
+:term:`[trait]s` or an implicit :term:`type alias` in :term:`[implementation]s`.
+:term:`Self` refers to the :term:`type` that implements a :term:`trait`.
 
 self parameter
 ^^^^^^^^^^^^^^
@@ -3431,7 +3432,7 @@ separator
 
 :def_p:`fls_128xny4qfcj5`
 A :def_term:`separator` is a character or a string that separates adjacent
-:term:`lexical element`\ s.
+:term:`[lexical element]s`.
 
 sequence type
 ^^^^^^^^^^^^^
@@ -3525,7 +3526,7 @@ signed integer type
 
 :def_p:`fls_vcronf7l2bhy`
 A :def_term:`signed integer type` is an :term:`integer type` whose
-:term:`value`\ s denote negative whole numbers, zero, and positive whole
+:term:`[value]s` denote negative whole numbers, zero, and positive whole
 numbers.
 
 simple byte literal
@@ -3574,8 +3575,8 @@ slice pattern
 ^^^^^^^^^^^^^
 
 :def_p:`fls_7613qu4igwiw`
-A :def_term:`slice pattern` is a :term:`pattern` that matches :term:`array`\ s
-of fixed size and :term:`slice`\ s of dynamic size.
+A :def_term:`slice pattern` is a :term:`pattern` that matches :term:`[array]s`
+of fixed size and :term:`[slice]s` of dynamic size.
 
 :def_p:`fls_3qey00280x27`
 See :syntax:`SlicePattern`.
@@ -3594,8 +3595,8 @@ source file
 ^^^^^^^^^^^
 
 :def_p:`fls_nh737q4mn27u`
-A :def_term:`source file` contains the program text of :term:`inner attribute`\
-s, :term:`inner doc comment`\ s, and :term:`item`\ s.
+A :def_term:`source file` contains the program text of :term:`[inner
+attribute]s`, :term:`[inner doc comment]s`, and :term:`[item]s`.
 
 :def_p:`fls_zgh1m5357ex1`
 See :syntax:`SourceFile`.
@@ -3686,7 +3687,7 @@ struct type
 
 :def_p:`fls_7v4dhh3nl8h9`
 A :def_term:`struct type` is an :term:`abstract data type` that is a product of
-other :term:`type`\ s.
+other :term:`[type]s`.
 
 :def_p:`fls_dhlww4yrnb2v`
 See :syntax:`StructDeclaration`.
@@ -3696,7 +3697,7 @@ subject expression
 
 :def_p:`fls_xisqke87ert`
 A :def_term:`subject expression` is an :term:`expression` that controls
-:term:`for loop`\ s, :term:`if expression`\ s, and :term:`match expression`\ s.
+:term:`[for loop]s`, :term:`[if expression]s`, and :term:`[match expression]s`.
 
 :def_p:`fls_gph5doham4js`
 See :syntax:`SubjectExpression`.
@@ -3706,7 +3707,7 @@ subject let expression
 
 :def_p:`fls_b3ckv6zgnaeb`
 A :def_term:`subject let expression` is an :term:`expression` that controls
-:term:`if let expression`\ s and :term:`while let loop`\ s.
+:term:`[if let expression]s` and :term:`[while let loop]s`.
 
 :def_p:`fls_vnzaargh5yok`
 See :syntax:`SubjectLetExpression`.
@@ -3747,7 +3748,7 @@ subtyping
 ^^^^^^^^^
 
 :def_p:`fls_bo5xzjsdd3lj`
-:def_term:`Subtyping` is a property of :term:`type`\ s, allowing one
+:def_term:`Subtyping` is a property of :term:`[type]s`, allowing one
 :term:`type` to be used where another :term:`type` is expected.
 
 suffixed float
@@ -3848,8 +3849,8 @@ tokens
 ^^^^^^
 
 :def_p:`fls_v23kqvyvscd7`
-:def_term:`Token`\ s are a subset of :term:`lexical element`\ s consumed by
-:term:`macro`\ s.
+:def_term:`Token`\ s are a subset of :term:`[lexical element]s` consumed by
+:term:`[macro]s`.
 
 trait
 ^^^^^
@@ -3866,7 +3867,7 @@ trait bound
 
 :def_p:`fls_95zx8unuxxpq`
 A :def_term:`trait bound` is a :term:`bound` that imposes a constraint on the
-:term:`trait`\ s of :term:`generic parameter`\ s.
+:term:`[trait]s` of :term:`[generic parameter]s`.
 
 :def_p:`fls_bkbym8v4t6oh`
 See :syntax:`TraitBound`.
@@ -3904,7 +3905,7 @@ trivial predicate
 
 :def_p:`fls_db5njwrjolhs`
 A :def_term:`trivial predicate` is a :term:`where clause predicate` that does
-not use the :term:`generic parameter`\ s or :term:`higher-ranked lifetime`\ s of
+not use the :term:`[generic parameter]s` or :term:`[higher-ranked lifetime]s` of
 the related :term:`construct`.
 
 tuple
@@ -3949,7 +3950,7 @@ tuple pattern
 
 :def_p:`fls_al2q3vh1rg6e`
 A :def_term:`tuple pattern` is a :term:`pattern` that matches a :term:`tuple`
-which satisfies all criteria defined by its :term:`subpattern`\ s.
+which satisfies all criteria defined by its :term:`[subpattern]s`.
 
 :def_p:`fls_bevmt5t0238j`
 See :syntax:`TuplePattern`.
@@ -3985,7 +3986,7 @@ tuple struct pattern
 
 :def_p:`fls_gu1mfurivnfz`
 A :def_term:`tuple struct pattern` is a :term:`struct pattern` that matches
-:term:`enum variant`\ s and :term:`tuple struct`\ s.
+:term:`[enum variant]s` and :term:`[tuple struct]s`.
 
 :def_p:`fls_3jx5683mdm10`
 See :syntax:`TupleStructPattern`.
@@ -3995,7 +3996,7 @@ tuple struct type
 
 :def_p:`fls_hhikx5ajx3bl`
 A :def_term:`tuple struct type` is a :term:`struct type` with anonymous
-:term:`field`\ s.
+:term:`[field]s`.
 
 :def_p:`fls_1tj4p05m4wdf`
 See :syntax:`TupleStructDeclaration`.
@@ -4005,7 +4006,7 @@ tuple type
 
 :def_p:`fls_q0ulqfvnxwni`
 A :def_term:`tuple type` is a :term:`sequence type` that represents a
-heterogeneous list of other :term:`type`\ s.
+heterogeneous list of other :term:`[type]s`.
 
 :def_p:`fls_rkugxsau1w78`
 See :syntax:`TupleTypeSpecification`.
@@ -4076,8 +4077,8 @@ type representation
 ^^^^^^^^^^^^^^^^^^^
 
 :def_p:`fls_rv80nyxwj2z8`
-:def_term:`Type representation` specifies the :term:`layout` of :term:`field`\ s
-of :term:`abstract data type`\ s.
+:def_term:`Type representation` specifies the :term:`layout` of :term:`[field]s`
+of :term:`[abstract data type]s`.
 
 type specification
 ^^^^^^^^^^^^^^^^^^
@@ -4093,7 +4094,7 @@ type unification
 
 :def_p:`fls_3vyodut341b5`
 :def_term:`Type unification` is a measure of compatibility between two
-:term:`type`\ s.
+:term:`[type]s`.
 
 type variable
 ^^^^^^^^^^^^^
@@ -4105,35 +4106,35 @@ u8
 ^^
 
 :def_p:`fls_umf9zfeghy6`
-:def_codeterm:`u8` is an :term:`unsigned integer type` whose :term:`value`\ s
+:def_codeterm:`u8` is an :term:`unsigned integer type` whose :term:`[value]s`
 range from 0 to 2\ :sup:`8` - 1, all inclusive.
 
 u16
 ^^^
 
 :def_p:`fls_8vi7bm2895y0`
-:def_codeterm:`u16` is an :term:`unsigned integer type` whose :term:`value`\ s
+:def_codeterm:`u16` is an :term:`unsigned integer type` whose :term:`[value]s`
 range from 0 to 2\ :sup:`16` - 1, all inclusive.
 
 u32
 ^^^
 
 :def_p:`fls_pw90erui8vkk`
-:def_codeterm:`u32` is an :term:`unsigned integer type` whose :term:`value`\ s
+:def_codeterm:`u32` is an :term:`unsigned integer type` whose :term:`[value]s`
 range from 0 to 2\ :sup:`32` - 1, all inclusive.
 
 u64
 ^^^
 
 :def_p:`fls_pbcmhznqft9m`
-:def_codeterm:`u64` is an :term:`unsigned integer type` whose :term:`value`\ s
+:def_codeterm:`u64` is an :term:`unsigned integer type` whose :term:`[value]s`
 range from 0 to 2\ :sup:`64` - 1, all inclusive.
 
 u128
 ^^^^
 
 :def_p:`fls_8yv891ur2av5`
-:def_codeterm:`u128` is an :term:`unsigned integer type` whose :term:`value`\ s
+:def_codeterm:`u128` is an :term:`unsigned integer type` whose :term:`[value]s`
 range from 0 to 2\ :sup:`128` - 1, all inclusive.
 
 unary operator
@@ -4163,7 +4164,7 @@ unifiable types
 ^^^^^^^^^^^^^^^
 
 :def_p:`fls_jsbggfitv9xk`
-Two :term:`type`\ s that :term:`unify` are said to be *unifiable types*.
+Two :term:`[type]s` that :term:`unify` are said to be *[unifiable type]s*.
 
 unify
 ^^^^^
@@ -4216,7 +4217,7 @@ unit struct
 
 :def_p:`fls_9t7fu8fcak6k`
 A :def_term:`unit struct` is a :term:`record struct type` without any
-:term:`field`\ s.
+:term:`[field]s`.
 
 unit struct constructor
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -4352,7 +4353,7 @@ unsafety
 ^^^^^^^^
 
 :def_p:`fls_742ycx5181n`
-:def_term:`Unsafety` is the presence of :term:`unsafe operation`\ s in program
+:def_term:`Unsafety` is the presence of :term:`[unsafe operation]s` in program
 text.
 
 unsigned integer type
@@ -4360,7 +4361,7 @@ unsigned integer type
 
 :def_p:`fls_dxnf79qemlg6`
 An :def_term:`unsigned integer type` is an :term:`integer type` whose
-:term:`value`\ s denote zero and positive whole numbers.
+:term:`[value]s` denote zero and positive whole numbers.
 
 unsized coercion
 ^^^^^^^^^^^^^^^^
@@ -4434,10 +4435,10 @@ variance
 ^^^^^^^^
 
 :def_p:`fls_il0krrsf09f8`
-:def_term:`Variance` is a property of :term:`lifetime parameter`\ s and
-:term:`type parameter`\ s that describes the circumstances under which a
+:def_term:`Variance` is a property of :term:`[lifetime parameter]s` and
+:term:`[type parameter]s` that describes the circumstances under which a
 :term:`generic type` is a :term:`subtype` of an instantiation of itself with
-different :term:`generic argument`\ s.
+different :term:`[generic argument]s`.
 
 weak keyword
 ^^^^^^^^^^^^
@@ -4453,8 +4454,8 @@ where clause
 ^^^^^^^^^^^^
 
 :def_p:`fls_prljyrhontzn`
-A :def_term:`where clause` is a :term:`construct` that specifies :term:`bound`\
-s on :term:`lifetime parameter`\ s and :term:`type parameter`\ s.
+A :def_term:`where clause` is a :term:`construct` that specifies
+:term:`[bound]s` on :term:`[lifetime parameter]s` and :term:`[type parameter]s`.
 
 :def_p:`fls_k32hnug33eo9`
 See :syntax:`WhereClause`.
@@ -4499,7 +4500,7 @@ whitespace string
 
 :def_p:`fls_nljkmadklwdp`
 A :def_term:`whitespace string` is a string that consists of one or more
-:term:`whitespace character`\ s.
+:term:`[whitespace character]s`.
 
 wildcard pattern
 ^^^^^^^^^^^^^^^^
@@ -4523,5 +4524,5 @@ zero-variant enum type
 
 :def_p:`fls_84gqz3vwi5mj`
 A :def_term:`zero-variant enum type` is an :term:`enum type` without any
-:term:`enum variant`\ s.
+:term:`[enum variant]s`.
 

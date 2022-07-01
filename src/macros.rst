@@ -11,20 +11,20 @@ Macros
 :def_p:`fls_j1jc83erljo0`
 A :term:`macro` is a custom definition that extends Rust by defining callable
 syntactic transformations. The effects of a :term:`macro` are realized through
-:term:`macro invocation`\ s or :term:`attribute` use. :term:`Macro`\ s come in
+:term:`[macro invocation]s` or :term:`attribute` use. :term:`[Macro]s` come in
 two distinct forms:
 
 * :def_p:`fls_23eapx3ckymf`
-  :term:`Declarative macro`\ s define rules for recognizing syntactic patterns
+  :term:`[Declarative macro]s` define rules for recognizing syntactic patterns
   and generating direct syntax.
 
 * :def_p:`fls_a5uemz2hnbi8`
-  :term:`Procedural macro`\ s define augmented :term:`function`\ s that operate
-  on and return a stream of :term:`lexical element`\ s.
+  :term:`[Procedural macro]s` define augmented :term:`[function]s` that operate
+  on and return a stream of :term:`[lexical element]s`.
 
 :def_p:`fls_rnty1c8l5495`
-:term:`Token`\ s are a subset of :term:`lexical element`\ s consumed by
-:term:`macro`\ s.
+:term:`[Token]s` are a subset of :term:`[lexical element]s` consumed by
+:term:`[macro]s`.
 
 Declarative Macros
 ------------------
@@ -70,7 +70,7 @@ category :syntax:`LexicalElement`, except punctuation ``$`` and category
 
 :def_p:`fls_w44hav7mw3ao`
 A :term:`declarative macro` is a :term:`macro` that associates a :term:`name`
-with a set of syntactic transformation :term:`macro rule`\ s.
+with a set of syntactic transformation :term:`[macro rule]s`.
 
 :def_p:`fls_dw1nq4r9ghhd`
 A :term:`macro rule` is a :term:`construct` that consists of a :term:`macro
@@ -135,7 +135,7 @@ Metavariables
 .. rubric:: Legality Rules
 
 :def_p:`fls_g93r3teei8wo`
-:term:`Declarative macro`\ s employ :term:`metavariable`\ s to match a
+:term:`[Declarative macro]s` employ :term:`[metavariable]s` to match a
 :term:`token` of a particular kind and bind its :term:`value` to a name for use
 during :term:`macro transcription`.
 
@@ -222,11 +222,11 @@ Procedural Macros
 
 :def_p:`fls_ejbddhggstd2`
 A :term:`procedural macro` is a :term:`macro` that encapsulates syntactic
-transformations in a :term:`function`. :term:`Procedural macro`\ s consume one
-or more streams of :term:`token`\ s and produce a stream of :term:`token`\ s.
+transformations in a :term:`function`. :term:`[Procedural macro]s` consume one
+or more streams of :term:`[token]s` and produce a stream of :term:`[token]s`.
 
 :def_p:`fls_pcce9gmjpxba`
-:term:`Procedural macro`\ s shall be defined in a :term:`crate` subject to
+:term:`[Procedural macro]s` shall be defined in a :term:`crate` subject to
 :term:`attribute` :codeterm:`crate_type` where the type is ``proc-macro``.
 
 :def_p:`fls_vtzuplb1p3s`
@@ -244,7 +244,7 @@ Function-like Macros
 
 :def_p:`fls_utd3zqczix`
 A :term:`function-like macro` is a :term:`procedural macro` that consumes a
-stream of :term:`token`\ s and produces a stream of :term:`token`\ s.
+stream of :term:`[token]s` and produces a stream of :term:`[token]s`.
 
 :def_p:`fls_ojr30lf6jfx0`
 The :term:`macro implementation function` of a :term:`function-like macro` shall
@@ -259,12 +259,12 @@ be subject to the following restrictions:
   modifier ``pub``,
 
 * :def_p:`fls_ofzql79i9if`
-  The :term:`macro implementation function` shall lack :term:`function
-  qualifier`\ s,
+  The :term:`macro implementation function` shall lack :term:`[function
+  qualifier]s`,
 
 * :def_p:`fls_j1wsyzip2qb3`
-  The :term:`macro implementation function` shall lack :term:`generic
-  parameter`\ s,
+  The :term:`macro implementation function` shall lack :term:`[generic
+  parameter]s`,
 
 * :def_p:`fls_etyo9bmzxby6`
   The :term:`macro implementation function` shall have a single :term:`function
@@ -282,7 +282,7 @@ A :term:`function-like macro` is invoked using a :term:`macro invocation`.
 :def_p:`fls_fbgal48cgj44`
 The sole parameter of the :term:`macro implementation function` captures the
 :term:`token` stream produced from the :syntax:`DelimitedTokenTree` of the
-:term:`macro invocation`, excluding outer :syntax:`Delimiter`\ s.
+:term:`macro invocation`, excluding outer :syntax:`[Delimiter]s`.
 
 .. rubric:: Examples
 
@@ -300,8 +300,8 @@ Derive Macros
 
 :def_p:`fls_e5x92q2rq8a0`
 A :term:`derive macro` is a :term:`procedural macro` that consumes a stream
-of :term:`token`\ s and produces a stream of :term:`token`\ s. :term:`Derive
-macro`\ s are used to construct new syntax for :term:`abstract data type`\ s.
+of :term:`[token]s` and produces a stream of :term:`[token]s`. :term:`[Derive
+macro]s` are used to construct new syntax for :term:`[abstract data type]s`.
 
 :def_p:`fls_ldw75sy5uj7p`
 The :term:`macro implementation function` of a :term:`derive macro` shall be
@@ -316,12 +316,12 @@ subject to the following restrictions:
   modifier ``pub``,
 
 * :def_p:`fls_mo00vqm9xfqc`
-  The :term:`macro implementation function` shall lack :term:`function
-  qualifier`\ s,
+  The :term:`macro implementation function` shall lack :term:`[function
+  qualifier]s`,
 
 * :def_p:`fls_gr9wugeqyb3b`
-  The :term:`macro implementation function` shall lack :term:`generic
-  parameter`\ s,
+  The :term:`macro implementation function` shall lack :term:`[generic
+  parameter]s`,
 
 * :def_p:`fls_npnze2cg8ae`
   The :term:`macro implementation function` shall have a single :term:`function
@@ -361,10 +361,10 @@ Attribute Macros
 
 :def_p:`fls_l3epi1dqpi8o`
 An :term:`attribute macro` is a :term:`procedural macro` that consumes two
-streams of :term:`token`\ s to produce a single stream of :term:`token`\ s,
-and defines a new :term:`outer attribute` that can be attached to :term:`item`\
-s. :term:`Attribute macro`\ s are used to replace :term:`item`\ s with other
-:term:`item`\ s.
+streams of :term:`[token]s` to produce a single stream of :term:`[token]s`, and
+defines a new :term:`outer attribute` that can be attached to :term:`[item]s`.
+:term:`[Attribute macro]s` are used to replace :term:`[item]s` with other
+:term:`[item]s`.
 
 :def_p:`fls_3sublbi9bz7k`
 The :term:`macro implementation function` of an :term:`attribute macro` shall be
@@ -379,16 +379,16 @@ subject to the following restrictions:
   modifier ``pub``,
 
 * :def_p:`fls_y700oif45wum`
-  The :term:`macro implementation function` shall lack :term:`function
-  qualifier`\ s,
+  The :term:`macro implementation function` shall lack :term:`[function
+  qualifier]s`,
 
 * :def_p:`fls_hhsf1a9p6o55`
-  The :term:`macro implementation function` shall lack :term:`generic
-  parameter`\ s,
+  The :term:`macro implementation function` shall lack :term:`[generic
+  parameter]s`,
 
 * :def_p:`fls_4g932k8ueyqp`
-  The :term:`macro implementation function` shall have two :term:`function
-  parameter`\ s whose :term:`type specification`\ s indicate :term:`type`
+  The :term:`macro implementation function` shall have two :term:`[function
+  parameter]s` whose :term:`[type specification]s` indicate :term:`type`
   :codeterm:`proc_macro::TokenStream`,
 
 * :def_p:`fls_f5qy1pnlbpng`
@@ -409,13 +409,13 @@ An :term:`attribute macro` is invoked using an :term:`attribute` of the form
 The first :term:`function parameter` of the :term:`macro implementation
 function` captures the :term:`token` stream produced from the
 :syntax:`DelimitedTokenTree` of the invoking :term:`attribute`, excluding outer
-:syntax:`Delimiter`\ s. If no :syntax:`DelimitedTokenTree` is provided, then the
+:syntax:`[Delimiter]s`. If no :syntax:`DelimitedTokenTree` is provided, then the
 :term:`token` stream is considered empty.
 
 :def_p:`fls_knjsslplv5ri`
 The second :term:`function parameter` of the :term:`macro implementation
 function` captures the :term:`token` stream produced from the related
-:term:`item`, including all :term:`outer attribute`\ s that apply to that
+:term:`item`, including all :term:`[outer attribute]s` that apply to that
 :term:`item`.
 
 .. rubric:: Examples
@@ -540,17 +540,17 @@ invocation` and replacing it with the produced output of the :term:`macro
 invocation`.
 
 :def_p:`fls_nz5stwcc41gk`
-:term:`Macro expansion` of :term:`declarative macro`\ s proceeds as follows:
+:term:`Macro expansion` of :term:`[declarative macro]s` proceeds as follows:
 
 #. :def_p:`fls_76prdp6k1fga`
    The :syntax:`TokenTree` of the :term:`macro invocation` is matched against
-   the :term:`macro rule`\ s of the resolved :term:`macro` by considering
-   individual :term:`macro matcher`\ s. It is a static error if no :term:`macro
+   the :term:`[macro rule]s` of the resolved :term:`macro` by considering
+   individual :term:`[macro matcher]s`. It is a static error if no :term:`macro
    matcher` is satisfied.
 
 #. :def_p:`fls_76u274l4kew8`
    The :term:`macro transcriber` of the satisfied :term:`macro rule` produces
-   its result, with all :term:`metavariable indication`\ s resolved. It is a
+   its result, with all :term:`[metavariable indication]s` resolved. It is a
    static error if the :term:`macro transcriber` fails to produce its result.
 
 #. :def_p:`fls_lakpily1zwfl`
@@ -561,7 +561,7 @@ invocation`.
 
    #. :def_p:`fls_3zn4dz19nyvq`
       If the :term:`macro invocation` appears as part of a :term:`statement`,
-      the output is required to constitute zero or more :term:`statement`\ s.
+      the output is required to constitute zero or more :term:`[statement]s`.
 
    #. :def_p:`fls_nsh2vwx8oiw`
       If the :term:`macro invocation` appears as part of an
@@ -571,12 +571,12 @@ invocation`.
    #. :def_p:`fls_tu6kmwm4v9nj`
       If the :term:`macro invocation` appears as part of a
       :term:`pattern-without-range`, the output is required to constitute zero
-      or more :term:`pattern`\ s.
+      or more :term:`[pattern]s`.
 
    #. :def_p:`fls_y20pmwo3v3uu`
       If the :term:`macro invocation` appears as part of an :term:`associated
       item`, an :term:`external item`, or a :term:`macro item`, the output is
-      required to constitute zero or more :term:`item`\ s.
+      required to constitute zero or more :term:`[item]s`.
 
    #. :def_p:`fls_t89sw6az99z7`
       If the :term:`macro invocation` appears as part of a
@@ -584,13 +584,13 @@ invocation`.
       constitute a :term:`type`.
 
 :def_p:`fls_417hvhvj2554`
-Expansion of :term:`function-like macro`\ s proceeds as follows:
+Expansion of :term:`[function-like macro]s` proceeds as follows:
 
 #. :def_p:`fls_srtqkdceaz5t`
    The :codeterm:`proc_macro::TokenStream` of the :term:`macro invocation`
    is passed to the sole :term:`function parameter` of the :term:`macro
    implementation function`. The :codeterm:`proc_macro::TokenStream` captures
-   the :syntax:`DelimitedTokenTree` without the outer :syntax:`Delimiter`\ s.
+   the :syntax:`DelimitedTokenTree` without the outer :syntax:`[Delimiter]s`.
 
 #. :def_p:`fls_mi92etjtpamu`
    The :term:`macro implementation function` produces its
@@ -606,7 +606,7 @@ Expansion of :term:`function-like macro`\ s proceeds as follows:
 
    #. :def_p:`fls_stseor6tln22`
       If the :term:`macro invocation` appears as part of a :term:`statement`,
-      the output is required to constitute zero or more :term:`statement`\ s.
+      the output is required to constitute zero or more :term:`[statement]s`.
 
    #. :def_p:`fls_l8j2jiuuao4f`
       If the :term:`macro invocation` appears as part of an
@@ -616,12 +616,12 @@ Expansion of :term:`function-like macro`\ s proceeds as follows:
    #. :def_p:`fls_xvemyqj5gc6g`
       If the :term:`macro invocation` appears as part of a
       :term:`pattern-without-range`, the output is required to constitute zero
-      or more :term:`pattern`\ s.
+      or more :term:`[pattern]s`.
 
    #. :def_p:`fls_vd3dzvr6re19`
       If the :term:`macro invocation` appears as part of an :term:`associated
       item`, an :term:`external item`, or a :term:`macro item`, the output is
-      required to constitute zero or more :term:`item`\ s.
+      required to constitute zero or more :term:`[item]s`.
 
    #. :def_p:`fls_u11o90szy68s`
       If the :term:`macro invocation` appears as part of a
@@ -629,7 +629,7 @@ Expansion of :term:`function-like macro`\ s proceeds as follows:
       constitute a :term:`type`.
 
 :def_p:`fls_qi5kyvj1e8th`
-Expansion of :term:`derive macro`\ s proceeds as follows:
+Expansion of :term:`[derive macro]s` proceeds as follows:
 
 #. :def_p:`fls_grtiwf7q8jah`
    The :codeterm:`proc_macro::TokenStream` of the related :term:`item` is passed
@@ -637,7 +637,7 @@ Expansion of :term:`derive macro`\ s proceeds as follows:
    function`. The :codeterm:`proc_macro::TokenStream` captures the :term:`item`
    subject to the :term:`derive macro` excluding the invoking :term:`attribute`
    :codeterm:`derive` as well as any preceding :codeterm:`derive`
-   :term:`attribute`\ s.
+   :term:`[attribute]s`.
 
 #. :def_p:`fls_tbe2qq7whq10`
    The :term:`macro implementation function` produces its output
@@ -651,17 +651,17 @@ Expansion of :term:`derive macro`\ s proceeds as follows:
    related :syntax:`EnumDeclaration`, :syntax:`StructDeclaration`, or
    :syntax:`UnionDeclaration` resides. It is a static error if the output
    :codeterm:`proc_macro::TokenStream` does not constitute zero or more
-   :term:`item`\ s.
+   :term:`[item]s`.
 
 :def_p:`fls_zat7kwi5vc5c`
-The expansion of :term:`attribute macro`\ s proceeds as follows:
+The expansion of :term:`[attribute macro]s` proceeds as follows:
 
 #. :def_p:`fls_tjn92evtlflq`
    The :codeterm:`proc_macro::TokenStream` of the invoking :term:`attribute`
    is passed to the first :term:`function parameter` of the :term:`macro
    implementation function`. The :codeterm:`proc_macro::TokenStream` captures
-   the :syntax:`DelimitedTokenTree` without the outer :syntax:`Delimiter`\
-   s. If no :syntax:`DelimitedTokenTree` is provided, then an empty
+   the :syntax:`DelimitedTokenTree` without the outer :syntax:`[Delimiter]s`.
+   If no :syntax:`DelimitedTokenTree` is provided, then an empty
    :codeterm:`proc_macro::TokenStream` is passed.
 
 #. :def_p:`fls_mpgh22bi8caz`
@@ -681,7 +681,7 @@ The expansion of :term:`attribute macro`\ s proceeds as follows:
    The :term:`item` is replaced with the output
    :codeterm:`proc_macro::TokenStream`. It is a static error if the output
    :codeterm:`proc_macro::TokenStream` does not constitute zero or more
-   :term:`item`\ s.
+   :term:`[item]s`.
 
 Macro Matching
 ~~~~~~~~~~~~~~
@@ -700,7 +700,7 @@ belongs to a resolved :term:`declarative macro`.
 :term:`Rule matching` proceeds as follows:
 
 #. :def_p:`fls_r6i1ykrhb49j`
-   The :term:`macro matcher`\ s of all :term:`macro rule`\ s that belong to
+   The :term:`[macro matcher]s` of all :term:`[macro rule]s` that belong to
    a resolved :term:`macro` are tried against the :syntax:`TokenTree` of the
    :term:`macro invocation`, in declarative order. In the event of a static
    error, no further attempts at selecting a subsequent :term:`macro matcher`
@@ -709,7 +709,7 @@ belongs to a resolved :term:`declarative macro`.
 #. :def_p:`fls_3qzes4lr8yuv`
    The :term:`macro match` of a candidate :term:`macro matcher` is tried
    against the :syntax:`TokenTree` of the :term:`macro invocation` by matching
-   individual :term:`token`\ s, in left-to-right order.
+   individual :term:`[token]s`, in left-to-right order.
 
 #. :def_p:`fls_lrpxlag31r3e`
    Matching does not employ lookahead. It is a static error if matching a
@@ -738,12 +738,12 @@ matcher` that belongs to a resolved :term:`declarative macro`.
 :term:`Token matching` proceeds as follows:
 
 :def_p:`fls_g1rml9tavh8v`
-The outer :syntax:`Delimiter`\ s of a macro matcher match any outer
+The outer :syntax:`[Delimiter]s` of a macro matcher match any outer
 ``Delimiter``\ s in the :term:`macro invocation`.
 
 :def_p:`fls_h7x3tc208zpk`
 A :term:`metavariable` in a :term:`macro matcher` is matched against a sequence
-of :term:`token`\ s in the :term:`macro invocation` based on its :term:`fragment
+of :term:`[token]s` in the :term:`macro invocation` based on its :term:`fragment
 specifier`:
 
 * :def_p:`fls_p9eqa17d3dx`
@@ -783,7 +783,7 @@ specifier`:
 
 * :def_p:`fls_mb3yr1j7npv5`
   :term:`Fragment specifier` **stmt** requires a :term:`statement` without
-  trailing character 0x3B (semicolon), excluding :term:`item`\ s that require
+  trailing character 0x3B (semicolon), excluding :term:`[item]s` that require
   character 0x3B (semicolon).
 
 * :def_p:`fls_xbuixjt9pum6`
@@ -797,8 +797,8 @@ specifier`:
   modifier.
 
 :def_p:`fls_dqroklsaayzb`
-Once a :term:`metavariable` is matched, the matching sequence of :term:`token`\
-s is bound to that :term:`metavariable`.
+Once a :term:`metavariable` is matched, the matching sequence of
+:term:`[token]s` is bound to that :term:`metavariable`.
 
 :def_p:`fls_ghqjk6xj85ng`
 Repetition in a :term:`macro matcher` is matched based on how many times
@@ -851,7 +851,7 @@ the :syntax:`TokenTree` of the :term:`macro invocation`\ ``.``
 
 :def_p:`fls_c76sdvos5xeo`
 It is a static error if the :syntax:`TokenTree` of the :term:`macro invocation`
-contains leftover :term:`token`\ s after :term:`macro matching`.
+contains leftover :term:`[token]s` after :term:`macro matching`.
 
 Macro Transcription
 ~~~~~~~~~~~~~~~~~~~
@@ -868,17 +868,17 @@ Macro Transcription
 :def_p:`fls_iw7322ycvhkc`
 Every :term:`metavariable indication` found in the :syntax:`DelimitedTokenTree`
 of the :term:`macro transcriber` that belongs to a matched :term:`macro
-rule` is replaced by the matched sequence of :term:`token`\ s of the
+rule` is replaced by the matched sequence of :term:`[token]s` of the
 :term:`metavariable`.
 
 :def_p:`fls_jgitbqmyixem`
-Unresolved :term:`metavariable indication`\ s are kept as :term:`token`\ s in
+Unresolved :term:`[metavariable indication]s` are kept as :term:`[token]s` in
 the output verbatim.
 
 :def_p:`fls_ihcwl6taptas`
 Every :term:`macro repetition in transcription` found in the
 :syntax:`DelimitedTokenTree` of the :term:`macro transcriber` shall be
-transcribed by repeatedly transcribing the :term:`token`\ s inside of it.
+transcribed by repeatedly transcribing the :term:`[token]s` inside of it.
 
 :def_p:`fls_g3dtpw4rtgdr`
 The number of transcription repetitions for a :term:`macro repetition in
@@ -911,13 +911,13 @@ transcription` shall repeat the same number of times in its matching
 :term:`repetition` if the :term:`repetition` occurs at the same nesting depth.
 
 :def_p:`fls_g445ovedgo4q`
-Multiple transcribed :term:`metavariable indication`\ s in the same :term:`macro
+Multiple transcribed :term:`[metavariable indication]s` in the same :term:`macro
 repetition in transcription` shall repeat the same number of times.
 
 :def_p:`fls_ctzthi6keit2`
 When transcribing a metavariable indication in a macro repetition in
 transcription, the metavariable indication is replaced with the matched
-sequence of :term:`token`\ s of the corresponding iteration of the repetition.
+sequence of :term:`[token]s` of the corresponding iteration of the repetition.
 metavariable taken from the ordered collection.
 
 :def_p:`fls_vqc2lsa9dozk`

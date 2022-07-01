@@ -57,7 +57,7 @@ Let Statements
 
 :def_p:`fls_ct7pp7jnfr86`
 A :term:`let statement` is a :term:`statement` that introduces new
-:term:`binding`\ s produced by its :term:`pattern-without-alternation`.
+:term:`[binding]s` produced by its :term:`pattern-without-alternation`.
 
 :def_p:`fls_1prqh1trybwz`
 The :term:`type` of a :term:`binding` introduced by a :term:`let statement` is

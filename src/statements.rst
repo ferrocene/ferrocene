@@ -21,16 +21,16 @@ Statements
 .. rubric:: Legality Rules
 
 :def_p:`fls_kdxe1ukmgl1`
-An :term:`item statement` is a :term:`statement` that is expressed as
-an :term:`item`.
+An :term:`item statement` is a :term:`statement` that is expressed as an
+:term:`item`.
 
 :def_p:`fls_fftdnwe22xrb`
 An :term:`empty statement` is a :term:`statement` expressed as character 0x3B
 (semicolon).
 
 :def_p:`fls_or125cqtxg9j`
-A :term:`macro statement` is a :term:`statement` expressed as
-a :term:`terminated macro invocation`.
+A :term:`macro statement` is a :term:`statement` expressed as a
+:term:`terminated macro invocation`.
 
 .. rubric:: Dynamic Semantics
 
@@ -56,36 +56,36 @@ Let Statements
 .. rubric:: Legality Rules
 
 :def_p:`fls_ct7pp7jnfr86`
-A :term:`let statement` is a :term:`statement` that introduces
-new :term:`binding`\ s produced by its :term:`pattern-without-alternation`.
+A :term:`let statement` is a :term:`statement` that introduces new
+:term:`binding`\ s produced by its :term:`pattern-without-alternation`.
 
 :def_p:`fls_1prqh1trybwz`
 The :term:`type` of a :term:`binding` introduced by a :term:`let statement` is
 determined as follows:
 
 * :def_p:`fls_djkm8r2iuu6u`
-  If the :term:`let statement` appears with a :term:`type ascription`, then
-  the :term:`type` is the :term:`type` specified by the :term:`type ascription`.
+  If the :term:`let statement` appears with a :term:`type ascription`, then the
+  :term:`type` is the :term:`type` specified by the :term:`type ascription`.
 
 * :def_p:`fls_ppj9gvhp8wcj`
-  If the :term:`let statement` lacks a :term:`type ascription`, then
-  the :term:`type` is :term:`inferred` using :term:`type inference`.
+  If the :term:`let statement` lacks a :term:`type ascription`, then the
+  :term:`type` is :term:`inferred` using :term:`type inference`.
 
 :def_p:`fls_m8a7gesa4oim`
 The :term:`value` of a :term:`binding` introduced by a :term:`let statement` is
 determined as follows:
 
 * :def_p:`fls_oaxnre7m9s10`
-  If the :term:`let statement` appears with an :term:`expression`, then
-  the :term:`value` is the :term:`value` of the :term:`expression`.
+  If the :term:`let statement` appears with an :term:`expression`, then the
+  :term:`value` is the :term:`value` of the :term:`expression`.
 
 * :def_p:`fls_t5bjwluyv8za`
-  If the :term:`let statement` lacks an :term:`expression`, then
-  the :term:`binding` is uninitialized.
+  If the :term:`let statement` lacks an :term:`expression`, then the
+  :term:`binding` is uninitialized.
 
 :def_p:`fls_iqar7vvtw22c`
-The :term:`pattern-without-alternation` of a :term:`let statement` shall
-be :term:`irrefutable`.
+The :term:`pattern-without-alternation` of a :term:`let statement` shall be
+:term:`irrefutable`.
 
 .. rubric:: Dynamic Semantics
 
@@ -95,12 +95,12 @@ The :term:`execution` of a :term:`let statement` proceeds as follows:
 #. :def_p:`fls_mvvigioc1ozm`
    If the :term:`let statement` appears with an :term:`expression`, then:
 
-#.    #. :def_p:`fls_t53g5hlabqw1`
-         The :term:`expression` is evaluated.
+   #. :def_p:`fls_t53g5hlabqw1`
+      The :term:`expression` is evaluated.
 
-#.    #. :def_p:`fls_7j4qlwg72ege`
-         The :term:`value` of the :term:`expression` is assigned to
-         each :term:`binding` introduced by the :term:`let statement`.
+   #. :def_p:`fls_7j4qlwg72ege`
+      The :term:`value` of the :term:`expression` is assigned to each
+      :term:`binding` introduced by the :term:`let statement`.
 
 .. rubric:: Examples
 

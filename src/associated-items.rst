@@ -15,67 +15,36 @@ Associated Items
 
    AssociatedItemWithVisibility ::=
        VisibilityModifier? (
-           AssociatedConstantDeclaration
-         | AssociatedFunctionDeclaration
-         | AssociatedTypeDeclaration
+           ConstantDeclaration
+         | FunctionDeclaration
+         | TypeDeclaration
        )
-
-   AssociatedConstantDeclaration ::=
-       $$const$$ Name TypeAscription ConstantInitializer? $$;$$
-
-   AssociatedFunctionDeclaration ::=
-       AssociatedFunctionQualifierList $$fn$$ Name GenericParameterList? $$($$ AssociatedFunctionParameterList? $$)$$ ReturnType? WhereClause? (BlockExpression | $$;$$)
-
-   AssociatedFunctionQualifierList ::=
-       $$unsafe$$? AbiSpecification?
-
-   AssociatedFunctionParameterList ::=
-       SingleFunctionParameter
-     | MultipleFunctionParameterList
-
-   SingleFunctionParameter ::=
-       SelfParameter $$,$$?
-
-   MultipleFunctionParameterList ::=
-       (SelfParameter $$,$$)? FunctionParameter ($$,$$ FunctionParameter)* $$,$$?
-
-   SelfParameter ::=
-       OuterAttributeOrDoc* (ShorthandSelf | TypedSelf)
-
-   ShorthandSelf ::=
-       ($$&$$ LifetimeIndication?)? $$mut$$? $$self$$
-
-   TypedSelf ::=
-       $$mut$$? $$self$$ TypeAscription
-
-   AssociatedTypeDeclaration ::=
-       $$type$$ Name ($$:$$ TypeParameterBoundList)? ($$=$$ TypeSpecification)? $$;$$
 
 .. rubric:: Legality Rules
 
 :def_p:`fls_ckzd25qd213t`
-An :term:`associated item` is an :term:`item` that appears within
-an :term:`implementation` or a :term:`trait`.
+An :term:`associated item` is an :term:`item` that appears within an
+:term:`implementation` or a :term:`trait`.
 
 :def_p:`fls_5y6ae0xqux57`
-An :term:`associated constant` is a :term:`constant` that appears as
-an :term:`associated item`.
+An :term:`associated constant` is a :term:`constant` that appears as an
+:term:`associated item`.
 
 :def_p:`fls_lj7492aq7fzo`
-An :term:`associated function` is a :term:`function` that appears as
-an :term:`associated item`.
+An :term:`associated function` is a :term:`function` that appears as an
+:term:`associated item`.
 
 :def_p:`fls_8cz4rdrklaj4`
-An :term:`associated type` is a :term:`type alias` that appears as
-an :term:`associated item`.
+An :term:`associated type` is a :term:`type alias` that appears as an
+:term:`associated item`.
 
 :def_p:`fls_w8nu8suy7t5`
 An :term:`associated type` shall not be used in the :term:`path-in-expression`
 of a :term:`struct expression`\ ``.``
 
 :def_p:`fls_wasocqdnuzd1`
-An :term:`associated type` with a :syntax:`TypeParameterBoundList` shall appear
-only as an :term:`associated trait type`.
+An :term:`associated type` with a :syntax:`TypeBoundList` shall appear only as
+an :term:`associated trait type`.
 
 :def_p:`fls_l3iwn56n1uz8`
 An :term:`associated implementation constant` is an :term:`associated constant`
@@ -116,6 +85,10 @@ within a :term:`trait`.
 :def_p:`fls_kl9p3ycl5mzf`
 An :term:`associated trait type` shall not have an :term:`initialization type`.
 
+:def_p:`fls_a5prbmuruma4`
+An :term:`associated trait type` has an implicit :codeterm:`core::marker::Sized`
+:term:`bound`.
+
 :def_p:`fls_vp2ov6ykueue`
 An :term:`associated trait type` of the form
 
@@ -133,10 +106,6 @@ is equivalent to a :term:`where clause` of the following form:
    	trait T where Self::X: Bound {
    	    type X;
    	}
-
-:def_p:`fls_vtzhi889n1fs`
-A :term:`self parameter` or a :term:`receiver` is a :term:`function parameter`
-expressed by :term:`keyword` **``self``**.
 
 :def_p:`fls_oy92gzxgc273`
 A :term:`method` is an :term:`associated function` with a :term:`receiver`.

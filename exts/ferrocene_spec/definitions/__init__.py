@@ -225,8 +225,8 @@ def get_refs_storage(env, kind):
 def get_roles():
     result = {}
     for kind in KINDS:
-        result["def_" + kind.ROLE] = DefIdRole(kind.NAME)
-        result[kind.ROLE] = DefRefRole(kind.NAME)
+        result["d" + kind.ROLE[0]] = DefIdRole(kind.NAME)
+        result[kind.ROLE[0]] = DefRefRole(kind.NAME)
     return result
 
 

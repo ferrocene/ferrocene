@@ -6,66 +6,66 @@
 Lexical Elements
 ================
 
-:def_p:`fls_pqwpf87b84tr`
-The text of a Rust program consists of :term:`[module]s` organized into
-:term:`[source file]s`. The text of a :term:`source file` is a sequence of
-:term:`[lexical element]s`, each composed of characters, whose rules are
-presented in this chapter.
+:dp:`fls_pqwpf87b84tr`
+The text of a Rust program consists of :t:`[module]s` organized into :t:`[source
+file]s`. The text of a :t:`source file` is a sequence of :t:`[lexical
+element]s`, each composed of characters, whose rules are presented in this
+chapter.
 
 Character Set
 -------------
 
-:def_p:`fls_itcth8292ud6`
-The program text of a Rust program is written using the :term:`Unicode`
-character set.
+:dp:`fls_itcth8292ud6`
+The program text of a Rust program is written using the :t:`Unicode` character
+set.
 
 .. rubric:: Syntax
 
-:def_p:`fls_vfx8byq5zo8t`
+:dp:`fls_vfx8byq5zo8t`
 A character is defined by this document for each cell in the coding space
-described by :term:`Unicode`, regardless of whether or not :term:`Unicode`
-allocates a character to that cell.
+described by :t:`Unicode`, regardless of whether or not :t:`Unicode` allocates a
+character to that cell.
 
-:def_p:`fls_pvslhm3chtlb`
-A :def_term:`whitespace character` is one of the following characters:
+:dp:`fls_pvslhm3chtlb`
+A :dt:`whitespace character` is one of the following characters:
 
-* :def_p:`fls_a5ec9cpn4sc8`
+* :dp:`fls_a5ec9cpn4sc8`
   0x09 (horizontal tabulation)
 
-* :def_p:`fls_dgyrj49y3c7c`
+* :dp:`fls_dgyrj49y3c7c`
   0x0A (new line)
 
-* :def_p:`fls_5ocmngyur7by`
+* :dp:`fls_5ocmngyur7by`
   0x0B (vertical tabulation)
 
-* :def_p:`fls_1aj0rgi9kpib`
+* :dp:`fls_1aj0rgi9kpib`
   0x0C (form feed)
 
-* :def_p:`fls_bfzdxsbq2c2q`
+* :dp:`fls_bfzdxsbq2c2q`
   0x0D (carriage return)
 
-* :def_p:`fls_vw0kq2y1o63m`
+* :dp:`fls_vw0kq2y1o63m`
   0x20 (space)
 
-* :def_p:`fls_ao296bmamwzh`
+* :dp:`fls_ao296bmamwzh`
   0x85 (next line)
 
-* :def_p:`fls_6kymhq7embdh`
+* :dp:`fls_6kymhq7embdh`
   0x200E (left-to-right mark)
 
-* :def_p:`fls_8mxmrxvhn3by`
+* :dp:`fls_8mxmrxvhn3by`
   0x200F (right-to-left mark)
 
-* :def_p:`fls_zfs15iel08y0`
+* :dp:`fls_zfs15iel08y0`
   0x2029 (paragraph separator)
 
-:def_p:`fls_7eifv4ksunu1`
-A :term:`whitespace string` is a string that consists of one or more
-:term:`[whitespace character]s`.
+:dp:`fls_7eifv4ksunu1`
+A :t:`whitespace string` is a string that consists of one or more
+:t:`[whitespace character]s`.
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_2brw13n9ldgy`
+:dp:`fls_2brw13n9ldgy`
 The coded representation of a character is tool-defined.
 
 Lexical Elements, Separators, and Punctuation
@@ -140,30 +140,30 @@ Lexical Elements, Separators, and Punctuation
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_d4nvxsvxj537`
-The text of a :term:`source file` is a sequence of separate :term:`[lexical
+:dp:`fls_d4nvxsvxj537`
+The text of a :t:`source file` is a sequence of separate :t:`[lexical
 element]s`. The meaning of a program depends only on the particular sequence of
-:term:`[lexical element]s`, excluding :term:`[non-doc comment]s`.
+:t:`[lexical element]s`, excluding :t:`[non-doc comment]s`.
 
-:def_p:`fls_a1zylpqha73x`
-A :term:`lexical element` is the most basic syntactic element in program text.
+:dp:`fls_a1zylpqha73x`
+A :t:`lexical element` is the most basic syntactic element in program text.
 
-:def_p:`fls_jy6wifn5r2bu`
-The text of a :term:`source file` is divided into :term:`[line]s`.
+:dp:`fls_jy6wifn5r2bu`
+The text of a :t:`source file` is divided into :t:`[line]s`.
 
-:def_p:`fls_efdfq9nhpmp5`
-A :term:`line` is a sequence of zero or more characters followed by an
-:term:`end of line`.
+:dp:`fls_efdfq9nhpmp5`
+A :t:`line` is a sequence of zero or more characters followed by an :t:`end
+of line`.
 
-:def_p:`fls_go25sisi5fdp`
-The representation of an :term:`end of line` is tool-defined.
+:dp:`fls_go25sisi5fdp`
+The representation of an :t:`end of line` is tool-defined.
 
-:def_p:`fls_a6t53o8h1vdk`
-A :term:`separator` is a character or a string that separates adjacent
-:term:`[lexical element]s`. A :term:`whitespace string` is a :term:`separator`.
+:dp:`fls_a6t53o8h1vdk`
+A :t:`separator` is a character or a string that separates adjacent :t:`[lexical
+element]s`. A :t:`whitespace string` is a :t:`separator`.
 
-:def_p:`fls_8fv63w6f4udl`
-A :def_term:`simple punctuator` is one of the following characters:
+:dp:`fls_8fv63w6f4udl`
+A :dt:`simple punctuator` is one of the following characters:
 
 .. syntax::
 
@@ -195,9 +195,9 @@ A :def_term:`simple punctuator` is one of the following characters:
    $$($$
    $$)$$
 
-:def_p:`fls_es0tz1q9cmoo`
-A :def_term:`compound punctuator` is one of the following two or more adjacent
-special characters:
+:dp:`fls_es0tz1q9cmoo`
+A :dt:`compound punctuator` is one of the following two or more adjacent special
+characters:
 
 .. syntax::
 
@@ -226,9 +226,8 @@ special characters:
    $$->$$
    $$=>$$
 
-:def_p:`fls_vm86olkeecer`
-The following :term:`[compound punctuator]s` are *[flexible compound
-punctuator]s*.
+:dp:`fls_vm86olkeecer`
+The following :t:`[compound punctuator]s` are *[flexible compound punctuator]s*.
 
 .. syntax::
 
@@ -237,176 +236,177 @@ punctuator]s*.
    $$<<$$
    $$>>$$
 
-:def_p:`fls_5zxdgxy8tjrq`
-A :term:`flexible compound punctuator` may be treated as a single
-:term:`compound punctuator` or two adjacent :term:`[simple punctuator]s`.
+:dp:`fls_5zxdgxy8tjrq`
+A :t:`flexible compound punctuator` may be treated as a single :t:`compound
+punctuator` or two adjacent :t:`[simple punctuator]s`.
 
-:def_p:`fls_x89vkq9rwlyt`
-Each of the special characters listed for single character :term:`punctuator` is
-a :term:`single punctuator` except if this character is used as a character of
-a :term:`compound punctuator`, or a character of a :term:`character literal`, a
-:term:`comment`, a :term:`numeric literal`, or a :term:`string literal`.
+:dp:`fls_x89vkq9rwlyt`
+Each of the special characters listed for single character :t:`punctuator`
+is a :t:`single punctuator` except if this character is used as a character
+of a :t:`compound punctuator`, or a character of a :t:`character literal`, a
+:t:`comment`, a :t:`numeric literal`, or a :t:`string literal`.
 
-:def_p:`fls_bo3xh8r60ji1`
-The following names are used when referring to :term:`[punctuator]s`:
+:dp:`fls_bo3xh8r60ji1`
+The following names are used when referring to :t:`[punctuator]s`:
 
 .. list-table::
 
-   * - .. rubric:: punctuator
-     - .. rubric:: name
-   * - .. rubric:: ``+``
-     - :def_p:`fls_o0p0k7s1htgx`
-       Plus
-   * - .. rubric:: ``-``
-     - :def_p:`fls_3mlq3zyt0kwy`
-       Minus
-   * - .. rubric:: ``*``
-     - :def_p:`fls_ev6pe6molg3t`
-       Star
-   * - .. rubric:: ``/``
-     - :def_p:`fls_vmdextc3u0t3`
-       Slash
-   * - .. rubric:: ``%``
-     - :def_p:`fls_po1jyhaz5umy`
-       Percent
-   * - .. rubric:: ``^``
-     - :def_p:`fls_kuqjk34aqx0f`
-       Caret
-   * - .. rubric:: ``!``
-     - :def_p:`fls_nxzhksyqxmcg`
-       Not
-   * - .. rubric:: ``&``
-     - :def_p:`fls_2ekl3lfdlpby`
-       And
-   * - .. rubric:: ``|``
-     - :def_p:`fls_gqtnh8o60en3`
-       Or
-   * - .. rubric:: ``&&``
-     - :def_p:`fls_tm34dx9px4j7`
-       And and, lazy boolean and
-   * - .. rubric:: ``||``
-     - :def_p:`fls_7nb986dlm77i`
-       Or or, lazy boolean or
-   * - .. rubric:: ``<<``
-     - :def_p:`fls_bhdfooj0t2dz`
-       Shift left
-   * - .. rubric:: ``>>``
-     - :def_p:`fls_hmzqin3pxm37`
-       Shift right
-   * - .. rubric:: ``+=``
-     - :def_p:`fls_k4r8gvob7uk6`
-       Plus equals
-   * - .. rubric:: ``-=``
-     - :def_p:`fls_xijsv9vl73wj`
-       Minus equals
-   * - .. rubric:: ``*=``
-     - :def_p:`fls_gyuswf1lrdaa`
-       Start equals
-   * - .. rubric:: ``/=``
-     - :def_p:`fls_4ws4v0ow9epr`
-       Slash equals
-   * - .. rubric:: ``%=``
-     - :def_p:`fls_b05knjvh40sx`
-       Percent equals
-   * - .. rubric:: ``^=``
-     - :def_p:`fls_jxvijqju32y7`
-       Caret equals
-   * - .. rubric:: ``&=``
-     - :def_p:`fls_2fds81qi64az`
-       And equals
-   * - .. rubric:: ``|=``
-     - :def_p:`fls_h04jhzgwnajj`
-       Or equals
-   * - .. rubric:: ``<<=``
-     - :def_p:`fls_wanmi8okel6p`
-       Shift left equals
-   * - .. rubric:: ``>>=``
-     - :def_p:`fls_wufecquvnn1`
-       Shift right equals
-   * - .. rubric:: ``=``
-     - :def_p:`fls_fxd70q9edhvf`
-       Equals
-   * - .. rubric:: ``==``
-     - :def_p:`fls_kkvoncx8zqg0`
-       Equals equals
-   * - .. rubric:: ``!=``
-     - :def_p:`fls_l96w0nsnaj2p`
-       Not equals
-   * - .. rubric:: ``>``
-     - :def_p:`fls_kjx3xe1hve6b`
-       Greater than
-   * - .. rubric:: ``<``
-     - :def_p:`fls_a1t0fkvtqhym`
-       Less than
-   * - .. rubric:: ``>=``
-     - :def_p:`fls_c7c3tmfucz2a`
-       Greater than equals
-   * - .. rubric:: ``<=``
-     - :def_p:`fls_3nto2gyi6x9m`
-       Less than equals
-   * - .. rubric:: ``@``
-     - :def_p:`fls_aeoi7spez3y4`
-       At
-   * - .. rubric:: ``_``
-     - :def_p:`fls_5oo1dhhjjv5v`
-       Underscore
-   * -
-     - :def_p:`fls_lmgrlo42u1iq`
-       Dot
-   * -
-     - :def_p:`fls_f4ivhxufu9jp`
-       Dot dot, exclusive range
-   * -
-     - :def_p:`fls_nuy7q4b75owa`
-       Dot dot dot, ellipsis
-   * - .. rubric:: ``=``
-     - :def_p:`fls_vgu5u6r95g9u`
-       Dot dot equals, inclusive range
-   * - .. rubric:: ``,``
-     - :def_p:`fls_tm95hdtzn0pp`
-       Comma
-   * - .. rubric:: ``;``
-     - :def_p:`fls_567xv1ojt810`
-       Semicolon
-   * - .. rubric:: ``:``
-     - :def_p:`fls_c7q8ivzabguc`
-       Colon
-   * - .. rubric:: ``::``
-     - :def_p:`fls_fnbkp67q3xo9`
-       Path separator
-   * - .. rubric:: ``->``
-     - :def_p:`fls_hghwfv5njnr2`
-       Right arrow
-   * - .. rubric:: ``=>``
-     - :def_p:`fls_8oszerfd3w89`
-       Fat arrow
-   * - .. rubric:: ``#``
-     - :def_p:`fls_a8h0wxtsxwxl`
-       Pound
-   * - .. rubric:: ``$``
-     - :def_p:`fls_wh9m39naxo2t`
-       Dollar sign
-   * - .. rubric:: ``?``
-     - :def_p:`fls_qvvmcjp1k3e5`
-       Question mark
-   * - .. rubric:: ``{``
-     - :def_p:`fls_4s8idmjzmsvj`
-       Left curly brace
-   * - .. rubric:: ``}``
-     - :def_p:`fls_tpwmb5v1t8hz`
-       Right curly brace
-   * - .. rubric:: ``[``
-     - :def_p:`fls_39pagkfcmbuv`
-       Left square bracket
-   * - .. rubric:: ``]``
-     - :def_p:`fls_hec1sut23331`
-       Right square bracket
-   * - .. rubric:: ``(``
-     - :def_p:`fls_3hc23jw55x6j`
-       Left parenthesis
-   * - .. rubric:: ``)``
-     - :def_p:`fls_rvqg3ca3a7cs`
-       Right parenthesis
+   * - :dp:`fls_sslkjuxjnteu`
+     - **punctuator**
+     - **name**
+   * - :dp:`fls_9g1godm0jp0z`
+     - ``+``
+     - Plus
+   * - :dp:`fls_6oith9q0soot`
+     - ``-``
+     - Minus
+   * - :dp:`fls_1dledwdc8fa6`
+     - ``*``
+     - Star
+   * - :dp:`fls_lunw7ucj5ius`
+     - ``/``
+     - Slash
+   * - :dp:`fls_a4oiuhz95uiv`
+     - ``%``
+     - Percent
+   * - :dp:`fls_137x9s6guj6h`
+     - ``^``
+     - Caret
+   * - :dp:`fls_y0wdb09cpp1w`
+     - ``!``
+     - Not
+   * - :dp:`fls_48b7mepiuupz`
+     - ``&``
+     - And
+   * - :dp:`fls_g9h9bsvrsmk1`
+     - ``|``
+     - Or
+   * - :dp:`fls_fxne2xd0zzzo`
+     - ``&&``
+     - And and, lazy boolean and
+   * - :dp:`fls_il7zv5x3aw0q`
+     - ``||``
+     - Or or, lazy boolean or
+   * - :dp:`fls_ovcs1qm86ss9`
+     - ``<<``
+     - Shift left
+   * - :dp:`fls_wmhlvjm0b0j9`
+     - ``>>``
+     - Shift right
+   * - :dp:`fls_gg42klb2gn9v`
+     - ``+=``
+     - Plus equals
+   * - :dp:`fls_icahptg5enj4`
+     - ``-=``
+     - Minus equals
+   * - :dp:`fls_baawlxoi7yd4`
+     - ``*=``
+     - Start equals
+   * - :dp:`fls_m7gt3wfbtm81`
+     - ``/=``
+     - Slash equals
+   * - :dp:`fls_6ewl7gn3sjm2`
+     - ``%=``
+     - Percent equals
+   * - :dp:`fls_nb8q6oq8txv3`
+     - ``^=``
+     - Caret equals
+   * - :dp:`fls_4nnky9ansr9j`
+     - ``&=``
+     - And equals
+   * - :dp:`fls_h1gvudehmnn9`
+     - ``|=``
+     - Or equals
+   * - :dp:`fls_6yj1c3lh691s`
+     - ``<<=``
+     - Shift left equals
+   * - :dp:`fls_2d3oo9nou9vv`
+     - ``>>=``
+     - Shift right equals
+   * - :dp:`fls_st2vhcy14ud9`
+     - ``=``
+     - Equals
+   * - :dp:`fls_9gdyw71dl25`
+     - ``==``
+     - Equals equals
+   * - :dp:`fls_sp8ufz28l9w3`
+     - ``!=``
+     - Not equals
+   * - :dp:`fls_7kdr8biodxvz`
+     - ``>``
+     - Greater than
+   * - :dp:`fls_pf92l9bkte2u`
+     - ``<``
+     - Less than
+   * - :dp:`fls_ui40thspgyav`
+     - ``>=``
+     - Greater than equals
+   * - :dp:`fls_h33qzachmimc`
+     - ``<=``
+     - Less than equals
+   * - :dp:`fls_13ud1clgdnyv`
+     - ``@``
+     - At
+   * - :dp:`fls_7fosi8l2ktz2`
+     - ``_``
+     - Underscore
+   * - :dp:`fls_9qitp6r75ia6`
+     - ``.``
+     - Dot
+   * - :dp:`fls_g0umao9roi2l`
+     - ``..``
+     - Dot dot, exclusive range
+   * - :dp:`fls_lamrpdpko48`
+     - ``...``
+     - Dot dot dot, ellipsis
+   * - :dp:`fls_s4lte9onbmqb`
+     - ``..=``
+     - Dot dot equals, inclusive range
+   * - :dp:`fls_ywc297y8s0dt`
+     - ``,``
+     - Comma
+   * - :dp:`fls_ijb0fws4gshu`
+     - ``;``
+     - Semicolon
+   * - :dp:`fls_c25ur4xwbpk0`
+     - ``:``
+     - Colon
+   * - :dp:`fls_9dd9479zzq30`
+     - ``::``
+     - Path separator
+   * - :dp:`fls_kwsu9d3ppv3f`
+     - ``->``
+     - Right arrow
+   * - :dp:`fls_oh62j9unw4mg`
+     - ``=>``
+     - Fat arrow
+   * - :dp:`fls_g0tltt8qmbum`
+     - ``#``
+     - Pound
+   * - :dp:`fls_ounkw8b8tk4f`
+     - ``$``
+     - Dollar sign
+   * - :dp:`fls_8ywv8gftsfr1`
+     - ``?``
+     - Question mark
+   * - :dp:`fls_hsn6zc29ifyx`
+     - ``{``
+     - Left curly brace
+   * - :dp:`fls_o3amqe3ca82d`
+     - ``}``
+     - Right curly brace
+   * - :dp:`fls_lkevfpj7sqd3`
+     - ``[``
+     - Left square bracket
+   * - :dp:`fls_ff05ge2189z`
+     - ``]``
+     - Right square bracket
+   * - :dp:`fls_nplkudde6oxf`
+     - ``(``
+     - Left parenthesis
+   * - :dp:`fls_qwnrklmbz0b`
+     - ``)``
+     - Right parenthesis
 
 Identifiers
 -----------
@@ -414,7 +414,6 @@ Identifiers
 .. rubric:: Syntax
 
 .. syntax::
-
 
    Identifier ::=
        NonKeywordIdentifier
@@ -440,72 +439,67 @@ Identifiers
    Renaming ::=
        $$as$$ IdentifierOrUnderscore
 
-
-:def_p:`fls_ls7ymvgd5kfa`
-A :def_syntax:`RawIdentifierKeyword` is any :term:`keyword` in category
-:syntax:`Keyword`, except ``crate``, ``self``, ``Self``, and ``super``.
+:dp:`fls_ls7ymvgd5kfa`
+A :ds:`RawIdentifierKeyword` is any :t:`keyword` in category :s:`Keyword`,
+except ``crate``, ``self``, ``Self``, and ``super``.
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_xsdmun5uqy4c`
-An :term:`identifier` is a :term:`lexical element` that refers to a
-:term:`name`.
+:dp:`fls_xsdmun5uqy4c`
+An :t:`identifier` is a :t:`lexical element` that refers to a :t:`name`.
 
-:def_p:`fls_ktnf6zkrdy45`
-A :term:`pure identifier` is an :term:`identifier` that does not include
-:term:`[weak keyword]s`.
+:dp:`fls_ktnf6zkrdy45`
+A :t:`pure identifier` is an :t:`identifier` that does not include :t:`[weak
+keyword]s`.
 
-:def_p:`fls_jpecw46eh061`
-A :term:`pure identifier` shall follow the specification in Unicode Standard
-Annex #31 for :term:`Unicode` version 13.0, with the following profile:
+:dp:`fls_jpecw46eh061`
+A :t:`pure identifier` shall follow the specification in Unicode Standard Annex
+#31 for :t:`Unicode` version 13.0, with the following profile:
 
-* :def_p:`fls_lwcflgezgs5z`
+* :dp:`fls_lwcflgezgs5z`
   ``Start = XID_Start``, plus character 0x5F (low line).
 
-* :def_p:`fls_uts0hywaw1rq`
+* :dp:`fls_uts0hywaw1rq`
   ``Continue = XID_Continue``
 
-* :def_p:`fls_lju1avcn0pfd`
+* :dp:`fls_lju1avcn0pfd`
   ``Medial =`` empty
 
-:def_p:`fls_cs6cbw625np1`
+:dp:`fls_cs6cbw625np1`
 Characters 0x200C (zero width non-joiner) and 0x200D (zero width joiner) shall
-not appear in a :term:`pure identifier`.
+not appear in a :t:`pure identifier`.
 
-:def_p:`fls_irwcldiotei2`
-A :term:`pure identifier` shall be restricted to characters in category
-:syntax:`AsciiCharacter` in the following contexts:
+:dp:`fls_irwcldiotei2`
+A :t:`pure identifier` shall be restricted to characters in category
+:s:`AsciiCharacter` in the following contexts:
 
-* :def_p:`fls_6qo63nlkr0s8`
-  :term:`[External crate import]s`,
+* :dp:`fls_6qo63nlkr0s8`
+  :t:`[External crate import]s`,
 
-* :def_p:`fls_w473jevurlt1`
-  :term:`[Name]s` of :term:`[external crate]s` represented in a :term:`simple
-  path`, when the :term:`simple path` that starts with namespace qualifier
-  ``::``,
+* :dp:`fls_w473jevurlt1`
+  :t:`[Name]s` of :t:`[external crate]s` represented in a :t:`simple path`, when
+  the :t:`simple path` that starts with namespace qualifier ``::``,
 
-* :def_p:`fls_mt1u4m3simhc`
-  :term:`[Name]s` of :term:`[outline module]s` that lack attribute
-  :codeterm:`path`,
+* :dp:`fls_mt1u4m3simhc`
+  :t:`[Name]s` of :t:`[outline module]s` that lack attribute :c:`path`,
 
-* :def_p:`fls_e2v58o233lvd`
-  :term:`[Name]s` of :term:`[item]s` that are subject to attribute
-  :codeterm:`no_mangle`,
+* :dp:`fls_e2v58o233lvd`
+  :t:`[Name]s` of :t:`[item]s` that are subject to attribute :c:`no_mangle`,
 
-* :def_p:`fls_op0lp1i065di`
-  :term:`[Name]s` of :term:`[item]s` within :term:`[external block]s`.
+* :dp:`fls_op0lp1i065di`
+  :t:`[Name]s` of :t:`[item]s` within :t:`[external block]s`.
 
-:def_p:`fls_vde7gev5rz4q`
-:term:`[Identifier]s` are normalized using Normalization Form C as defined in
+:dp:`fls_vde7gev5rz4q`
+:t:`[Identifier]s` are normalized using Normalization Form C as defined in
 Unicode Standard Annex #15.
 
-:def_p:`fls_j9yh8j8jgdeu`
-Two :term:`[identifier]s` are considered the same if they consist of the same
+:dp:`fls_j9yh8j8jgdeu`
+Two :t:`[identifier]s` are considered the same if they consist of the same
 sequence of characters after performing normalization.
 
-:def_p:`fls_jejt5z8m1yew`
-:term:`[Procedural macro]s` and :term:`[declarative macro]s` shall receive
-normalized :term:`[identifier]s` in their input.
+:dp:`fls_jejt5z8m1yew`
+:t:`[Procedural macro]s` and :t:`[declarative macro]s` shall receive normalized
+:t:`[identifier]s` in their input.
 
 .. rubric:: Examples
 
@@ -533,8 +527,8 @@ Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_s76un78zyd0j`
-A :term:`literal` is a fixed :term:`value` in program text.
+:dp:`fls_s76un78zyd0j`
+A :t:`literal` is a fixed :t:`value` in program text.
 
 Byte Literals
 ~~~~~~~~~~~~~
@@ -550,9 +544,8 @@ Byte Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_q0qwr83frszx`
-A :term:`byte literal` is a :term:`literal` that denotes a fixed byte
-:term:`value`.
+:dp:`fls_q0qwr83frszx`
+A :t:`byte literal` is a :t:`literal` that denotes a fixed byte :t:`value`.
 
 Simple Byte Literals
 ^^^^^^^^^^^^^^^^^^^^
@@ -581,21 +574,19 @@ Simple Byte Literals
    AsciiControlEscape ::=
        $$\x$$ AsciiControlCharacter
 
-
-:def_p:`fls_3hpzf12h60u4`
-A :def_syntax:`SimpleByteCharacter` is any character in category
-:syntax:`AsciiCharacter` except characters 0x09 (horizontal tabulation),
-0x0A (new line), 0x0D (carriage return), 0x27 (apostrophe), and 0x5C (reverse
-solidus).
+:dp:`fls_3hpzf12h60u4`
+A :ds:`SimpleByteCharacter` is any character in category :s:`AsciiCharacter`
+except characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
+return), 0x27 (apostrophe), and 0x5C (reverse solidus).
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_i67zy734o6e3`
-A :term:`simple byte literal` is a :term:`byte literal` that consists of exactly
-one byte character.
+:dp:`fls_i67zy734o6e3`
+A :t:`simple byte literal` is a :t:`byte literal` that consists of exactly one
+byte character.
 
-:def_p:`fls_fggytrv5jvw0`
-The :term:`type` of a :term:`simple byte literal` is :codeterm:`u8`.
+:dp:`fls_fggytrv5jvw0`
+The :t:`type` of a :t:`simple byte literal` is :c:`u8`.
 
 .. rubric:: Examples
 
@@ -620,21 +611,20 @@ Byte String Literals
      | ByteStringCharacter
      | StringContinuation
 
-
-:def_p:`fls_3dcqhuosqb84`
-A :def_syntax:`ByteStringCharacter` is any character in category
-:syntax:`AsciiCharacter` except characters 0x0D (carriage return), 0x22
-(quotation mark), and 0x5C (reverse solidus).
+:dp:`fls_3dcqhuosqb84`
+A :ds:`ByteStringCharacter` is any character in category :s:`AsciiCharacter`
+except characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C
+(reverse solidus).
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_moe3zfx39ox2`
-A :term:`byte string literal` is a :term:`byte literal` that consists of
-multiple byte characters.
+:dp:`fls_moe3zfx39ox2`
+A :t:`byte string literal` is a :t:`byte literal` that consists of multiple
+byte characters.
 
-:def_p:`fls_vffxb6arj9jf`
-The :term:`type` of a :term:`byte string literal` of size ``N`` is ``&'static
-[u8; N]``.
+:dp:`fls_vffxb6arj9jf`
+The :t:`type` of a :t:`byte string literal` of size ``N`` is ``&'static [u8;
+N]``.
 
 .. rubric:: Examples
 
@@ -665,16 +655,15 @@ Raw Byte String Literals
    RawByteStringCharacter ::=
        $$"$$ AsciiCharacter* $$"$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_yyw7nv651580`
-A :term:`raw byte string literal` is a :term:`simple byte literal` that does not
-recognize :term:`[escaped character]s`.
+:dp:`fls_yyw7nv651580`
+A :t:`raw byte string literal` is a :t:`simple byte literal` that does not
+recognize :t:`[escaped character]s`.
 
-:def_p:`fls_5ybq0euwya42`
-The :term:`type` of a :term:`raw byte string literal` of size ``N`` is
-``&'static [u8; N]``.
+:dp:`fls_5ybq0euwya42`
+The :t:`type` of a :t:`raw byte string literal` of size ``N`` is ``&'static
+[u8; N]``.
 
 .. rubric:: Examples
 
@@ -697,8 +686,8 @@ Numeric Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_fqpqnku27v99`
-A :term:`numeric literal` is a :term:`literal` that denotes a number.
+:dp:`fls_fqpqnku27v99`
+A :t:`numeric literal` is a :t:`literal` that denotes a number.
 
 Integer Literals
 ^^^^^^^^^^^^^^^^
@@ -770,92 +759,89 @@ Integer Literals
      | $$u128$$
      | $$usize$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_vkk2krfn93ry`
-An :term:`integer literal` is a :term:`numeric literal` that denotes a whole
-number.
+:dp:`fls_vkk2krfn93ry`
+An :t:`integer literal` is a :t:`numeric literal` that denotes a whole number.
 
-:def_p:`fls_nxqncu5yq4eu`
-A :term:`binary literal` is an :term:`integer literal` in base 2.
+:dp:`fls_nxqncu5yq4eu`
+A :t:`binary literal` is an :t:`integer literal` in base 2.
 
-:def_p:`fls_rn8xfd66yvst`
-A :term:`decimal literal` is an :term:`integer literal` in base 10.
+:dp:`fls_rn8xfd66yvst`
+A :t:`decimal literal` is an :t:`integer literal` in base 10.
 
-:def_p:`fls_2268lchxkzjp`
-A :term:`hexadecimal literal` is an :term:`integer literal` in base 16.
+:dp:`fls_2268lchxkzjp`
+A :t:`hexadecimal literal` is an :t:`integer literal` in base 16.
 
-:def_p:`fls_4v7awnutbpoe`
-An :term:`octal literal` is an :term:`integer literal` in base 8.
+:dp:`fls_4v7awnutbpoe`
+An :t:`octal literal` is an :t:`integer literal` in base 8.
 
-:def_p:`fls_f1e29aj0sqvl`
-An :term:`integer suffix` is a component of an :term:`integer literal` that
-specifies an explicit :term:`integer type`.
+:dp:`fls_f1e29aj0sqvl`
+An :t:`integer suffix` is a component of an :t:`integer literal` that specifies
+an explicit :t:`integer type`.
 
-:def_p:`fls_u83mffscqm6`
-A :term:`suffixed integer` is an :term:`integer literal` with an :term:`integer
+:dp:`fls_u83mffscqm6`
+A :t:`suffixed integer` is an :t:`integer literal` with an :t:`integer suffix`.
+
+:dp:`fls_g10nuv14q4jn`
+An :t:`unsuffixed integer` is an :t:`integer literal` without an :t:`integer
 suffix`.
 
-:def_p:`fls_g10nuv14q4jn`
-An :term:`unsuffixed integer` is an :term:`integer literal` without an
-:term:`integer suffix`.
+:dp:`fls_hpkkvuj1z1ez`
+The :t:`type` of a :t:`suffixed integer` is determined by its :t:`integer
+suffix` as follows:
 
-:def_p:`fls_hpkkvuj1z1ez`
-The :term:`type` of a :term:`suffixed integer` is determined by its
-:term:`integer suffix` as follows:
+* :dp:`fls_7yq2fep848ky`
+  Suffix ``i8`` specifies type :c:`i8`.
 
-* :def_p:`fls_7yq2fep848ky`
-  Suffix ``i8`` specifies type :codeterm:`i8`.
+* :dp:`fls_bzm8lwq3qlat`
+  Suffix ``i16`` specifies type :c:`i16`.
 
-* :def_p:`fls_bzm8lwq3qlat`
-  Suffix ``i16`` specifies type :codeterm:`i16`.
+* :dp:`fls_l4cx36brc1r5`
+  Suffix ``i32`` specifies type :c:`i32`.
 
-* :def_p:`fls_l4cx36brc1r5`
-  Suffix ``i32`` specifies type :codeterm:`i32`.
+* :dp:`fls_wthchinwx996`
+  Suffix ``i64`` specifies type :c:`i64`.
 
-* :def_p:`fls_wthchinwx996`
-  Suffix ``i64`` specifies type :codeterm:`i64`.
+* :dp:`fls_7uoaet2pm3am`
+  Suffix ``i128`` specifies type :c:`i128`.
 
-* :def_p:`fls_7uoaet2pm3am`
-  Suffix ``i128`` specifies type :codeterm:`i128`.
+* :dp:`fls_p4rw583o2qbi`
+  Suffix ``isize`` specifies type :c:`isize`.
 
-* :def_p:`fls_p4rw583o2qbi`
-  Suffix ``isize`` specifies type :codeterm:`isize`.
+* :dp:`fls_xrv4q56lmoo3`
+  Suffix ``u8`` specifies type :c:`u8`.
 
-* :def_p:`fls_xrv4q56lmoo3`
-  Suffix ``u8`` specifies type :codeterm:`u8`.
+* :dp:`fls_66e3q5um6cwc`
+  Suffix ``u16`` specifies type :c:`u16`.
 
-* :def_p:`fls_66e3q5um6cwc`
-  Suffix ``u16`` specifies type :codeterm:`u16`.
+* :dp:`fls_5asyk66y7c9d`
+  Suffix ``u32`` specifies type :c:`u32`.
 
-* :def_p:`fls_5asyk66y7c9d`
-  Suffix ``u32`` specifies type :codeterm:`u32`.
+* :dp:`fls_76fifqjka0lx`
+  Suffix ``u64`` specifies type :c:`u64`.
 
-* :def_p:`fls_76fifqjka0lx`
-  Suffix ``u64`` specifies type :codeterm:`u64`.
+* :dp:`fls_fsaimo419gf0`
+  Suffix ``u128`` specifies type :c:`u128`.
 
-* :def_p:`fls_fsaimo419gf0`
-  Suffix ``u128`` specifies type :codeterm:`u128`.
+* :dp:`fls_hvzacbu7yiwc`
+  Suffix ``usize`` specifies type :c:`usize`.
 
-* :def_p:`fls_hvzacbu7yiwc`
-  Suffix ``usize`` specifies type :codeterm:`usize`.
+:dp:`fls_50qipwqi3arw`
+The :t:`type` of an :t:`unsuffixed integer` is determined by :t:`type inference`
+as follows:
 
-:def_p:`fls_50qipwqi3arw`
-The :term:`type` of an :term:`unsuffixed integer` is determined by :term:`type
-inference` as follows:
+* :dp:`fls_idzhusp2l908`
+  If an :t:`integer type` can be uniquely determined from the surrounding
+  program context, then the :t:`unsuffixed integer` has that :t:`type`.
 
-* :def_p:`fls_idzhusp2l908`
-  If an :term:`integer type` can be uniquely determined from the surrounding
-  program context, then the :term:`unsuffixed integer` has that :term:`type`.
+* :dp:`fls_qqrqyc6uhol`
+  If the program context under-constrains the :t:`type`, then the :t:`inferred
+  type` is :c:`i32`.
 
-* :def_p:`fls_qqrqyc6uhol`
-  If the program context under-constrains the :term:`type`, then the
-  :term:`inferred type` is :codeterm:`i32`.
-
-* :def_p:`fls_pexi5jazthq6`
-  If the program context over-constrains the :term:`type`, then this is
-  considered a static type error.
+* :dp:`fls_pexi5jazthq6`
+  If the program context over-constrains the :t:`type`, then this is considered
+  a static type error.
 
 .. rubric:: Examples
 
@@ -897,50 +883,46 @@ Float Literals
        $$f32$$
      | $$f64$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_rzi7oeqokd6e`
-A :term:`float literal` is a :term:`numeric literal` that denotes a fractional
-number.
+:dp:`fls_rzi7oeqokd6e`
+A :t:`float literal` is a :t:`numeric literal` that denotes a fractional number.
 
-:def_p:`fls_2ru1zyrykd37`
-A :term:`float suffix` is a component of a :term:`float literal` that specifies
-an explicit :term:`floating-point type`.
+:dp:`fls_2ru1zyrykd37`
+A :t:`float suffix` is a component of a :t:`float literal` that specifies an
+explicit :t:`floating-point type`.
 
-:def_p:`fls_21mhnhplzam7`
-A :term:`suffixed float` is a :term:`float literal` with a :term:`float suffix`.
+:dp:`fls_21mhnhplzam7`
+A :t:`suffixed float` is a :t:`float literal` with a :t:`float suffix`.
 
-:def_p:`fls_drqh80k0sfkb`
-An :term:`unsuffixed float` is a :term:`float literal` without a :term:`float
-suffix`.
+:dp:`fls_drqh80k0sfkb`
+An :t:`unsuffixed float` is a :t:`float literal` without a :t:`float suffix`.
 
-:def_p:`fls_cbs7j9pjpusw`
-The :term:`type` of a :term:`suffixed float` is determined by the :term:`float
-suffix` as follows:
+:dp:`fls_cbs7j9pjpusw`
+The :t:`type` of a :t:`suffixed float` is determined by the :t:`float suffix`
+as follows:
 
-* :def_p:`fls_b9w7teaw1f8f`
-  Suffix ``f32`` specifies type :codeterm:`f32`.
+* :dp:`fls_b9w7teaw1f8f`
+  Suffix ``f32`` specifies type :c:`f32`.
 
-* :def_p:`fls_eawxng4ndhv0`
-  Suffix ``f64`` specifies type :codeterm:`f64`.
+* :dp:`fls_eawxng4ndhv0`
+  Suffix ``f64`` specifies type :c:`f64`.
 
-:def_p:`fls_yuhza1muo7o`
-The :term:`type` of an :term:`unsuffixed float` is determined by :term:`type
-inference` as follows:
+:dp:`fls_yuhza1muo7o`
+The :t:`type` of an :t:`unsuffixed float` is determined by :t:`type inference`
+as follows:
 
-* :def_p:`fls_4sxt1ct7fyen`
-  If a :term:`floating-point type` can be uniquely determined from the
-  surrounding program context, then the :term:`unsuffixed float` has that
-  :term:`type`.
+* :dp:`fls_4sxt1ct7fyen`
+  If a :t:`floating-point type` can be uniquely determined from the surrounding
+  program context, then the :t:`unsuffixed float` has that :t:`type`.
 
-* :def_p:`fls_wa72rssp0jnt`
-  If the program context under-constrains the :term:`type`, then the
-  :term:`inferred type` is :codeterm:`f64`.
+* :dp:`fls_wa72rssp0jnt`
+  If the program context under-constrains the :t:`type`, then the :t:`inferred
+  type` is :c:`f64`.
 
-* :def_p:`fls_x2cw7g8g56f8`
-  If the program context over-constrains the :term:`type`, then this is
-  considered a static type error.
+* :dp:`fls_x2cw7g8g56f8`
+  If the program context over-constrains the :t:`type`, then this is considered
+  a static type error.
 
 .. rubric:: Examples
 
@@ -980,23 +962,23 @@ Character Literals
    AsciiCharacter ::=
        [$$\u{00}$$-$$\u{7F}$$]
 
-:def_p:`fls_5vi0uc2oshd`
-An :def_syntax:`AsciiControlCharacter` is any character in category
-:syntax:`AsciiCharacter` whose General Category is defined to be "Control".
+:dp:`fls_5vi0uc2oshd`
+An :ds:`AsciiControlCharacter` is any character in category :s:`AsciiCharacter`
+whose General Category is defined to be "Control".
 
-:def_p:`fls_j9q9ton57rvl`
-A :def_syntax:`CharacterLiteralCharacter` is any :term:`Unicode` character
-except characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
+:dp:`fls_j9q9ton57rvl`
+A :ds:`CharacterLiteralCharacter` is any :t:`Unicode` character except
+characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
 return), 0x27 (apostrophe), and 0x5c (reverse solidus).
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_vag2oy4q7d4n`
-A :term:`character literal` is a :term:`literal` that denotes a fixed
-:term:`Unicode` character.
+:dp:`fls_vag2oy4q7d4n`
+A :t:`character literal` is a :t:`literal` that denotes a fixed :t:`Unicode`
+character.
 
-:def_p:`fls_n8z6p6g564r2`
-The :term:`type` of a :term:`character literal` is :codeterm:`char`.
+:dp:`fls_n8z6p6g564r2`
+The :t:`type` of a :t:`character literal` is :c:`char`.
 
 .. rubric:: Examples
 
@@ -1020,9 +1002,8 @@ String Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_7fuctvtvdi7x`
-A :term:`string literal` is a :term:`literal` that consists of multiple
-characters.
+:dp:`fls_7fuctvtvdi7x`
+A :t:`string literal` is a :t:`literal` that consists of multiple characters.
 
 Simple String Literals
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1039,24 +1020,22 @@ Simple String Literals
      | SimpleStringCharacter
      | StringContinuation
 
+:dp:`fls_1pdzwkt5txfj`
+A :ds:`SimpleStringCharacter` is any :t:`Unicode` character except characters
+0x0D (carriage return), 0x22 (quotation mark), and 0x5C (reverse solidus).
 
-:def_p:`fls_1pdzwkt5txfj`
-A :def_syntax:`SimpleStringCharacter` is any :term:`Unicode` character except
-characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C (reverse
-solidus).
-
-:def_p:`fls_wawtu6j3fiqn`
-:def_syntax:`StringContinuation` is the character sequence 0x5C 0x0A (reverse
-solidus, new line).
+:dp:`fls_wawtu6j3fiqn`
+:ds:`StringContinuation` is the character sequence 0x5C 0x0A (reverse solidus,
+new line).
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ycy5ee6orjx`
-A :term:`simple string literal` is a :term:`string literal` where the characters
-are :term:`Unicode` characters.
+:dp:`fls_ycy5ee6orjx`
+A :t:`simple string literal` is a :t:`string literal` where the characters are
+:t:`Unicode` characters.
 
-:def_p:`fls_6nt5kls21xes`
-The :term:`type` of a :term:`simple string literal` is ``&'static str``.
+:dp:`fls_6nt5kls21xes`
+The :t:`type` of a :t:`simple string literal` is ``&'static str``.
 
 .. rubric:: Examples
 
@@ -1094,12 +1073,12 @@ Raw String Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_36suwhbwmq1t`
-A :term:`raw string literal` is a :term:`simple string literal` that does not
-recognize :term:`[escaped character]s`.
+:dp:`fls_36suwhbwmq1t`
+A :t:`raw string literal` is a :t:`simple string literal` that does not
+recognize :t:`[escaped character]s`.
 
-:def_p:`fls_ms43w1towz40`
-The :term:`type` of a :term:`raw string literal` is ``&'static str``.
+:dp:`fls_ms43w1towz40`
+The :t:`type` of a :t:`raw string literal` is ``&'static str``.
 
 .. rubric:: Examples
 
@@ -1122,12 +1101,12 @@ Boolean Literals
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_1lll64ftupjd`
-A :term:`boolean literal` is a :term:`literal` that denotes the truth
-:term:`[value]s` of logic and Boolean algebra.
+:dp:`fls_1lll64ftupjd`
+A :t:`boolean literal` is a :t:`literal` that denotes the truth :t:`[value]s` of
+logic and Boolean algebra.
 
-:def_p:`fls_pgngble3ilyx`
-The :term:`type` of a :term:`boolean literal` is :codeterm:`bool`.
+:dp:`fls_pgngble3ilyx`
+The :t:`type` of a :t:`boolean literal` is :c:`bool`.
 
 .. rubric:: Examples
 
@@ -1179,61 +1158,59 @@ Comments
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_8obn3dtzpe5f`
-A :term:`comment` is a :term:`lexical element` that acts as an annotation or an
+:dp:`fls_8obn3dtzpe5f`
+A :t:`comment` is a :t:`lexical element` that acts as an annotation or an
 explanation in program text.
 
-:def_p:`fls_qsbnl11be35s`
-A :term:`block comment` is a :term:`comment` that spans one or more
-:term:`[line]s`.
+:dp:`fls_qsbnl11be35s`
+A :t:`block comment` is a :t:`comment` that spans one or more :t:`[line]s`.
 
-:def_p:`fls_nayisy85kyq2`
-A :term:`line comment` is a :term:`comment` that spans exactly one :term:`line`.
+:dp:`fls_nayisy85kyq2`
+A :t:`line comment` is a :t:`comment` that spans exactly one :t:`line`.
 
-:def_p:`fls_k3hj30hjkdhw`
-An :term:`inner block doc` is a :term:`block comment` that applies to an
-enclosing :term:`non-[comment]` :term:`construct`.
+:dp:`fls_k3hj30hjkdhw`
+An :t:`inner block doc` is a :t:`block comment` that applies to an enclosing
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_tspijl68lduc`
-An :term:`inner line doc` is a :term:`line doc` that applies to an enclosing
-:term:`non-[comment]` :term:`construct`.
+:dp:`fls_tspijl68lduc`
+An :t:`inner line doc` is a :t:`line doc` that applies to an enclosing
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_63gzofa9ktic`
-An :term:`outer block doc` is a :term:`block comment` that applies to a
-subsequent :term:`non-[comment]` :term:`construct`.
+:dp:`fls_63gzofa9ktic`
+An :t:`outer block doc` is a :t:`block comment` that applies to a subsequent
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_scko7crha0um`
-An :term:`outer line doc` is a :term:`line comment` that applies to a subsequent
-:term:`non-[comment]` :term:`construct`.
+:dp:`fls_scko7crha0um`
+An :t:`outer line doc` is a :t:`line comment` that applies to a subsequent
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_7n6d3jx61ose`
-A :term:`doc comment` is a :term:`comment` class that includes :term:`[inner
-block doc]s`, :term:`[inner line doc]s`, :term:`[outer block doc]s`, and
-:term:`[outer line doc]s`.
+:dp:`fls_7n6d3jx61ose`
+A :t:`doc comment` is a :t:`comment` class that includes :t:`[inner block
+doc]s`, :t:`[inner line doc]s`, :t:`[outer block doc]s`, and :t:`[outer line
+doc]s`.
 
-:def_p:`fls_6fxcs17n4kw`
-Character 0x0D (carriage return) shall not appear in a :term:`comment`.
+:dp:`fls_6fxcs17n4kw`
+Character 0x0D (carriage return) shall not appear in a :t:`comment`.
 
-:def_p:`fls_uze7l7cxonk1`
-:term:`[Block comment]s`, :term:`[inner block doc]s`, and :term:`[outer block
-doc]s` shall extend one or more :term:`[line]s`.
+:dp:`fls_uze7l7cxonk1`
+:t:`[Block comment]s`, :t:`[inner block doc]s`, and :t:`[outer block doc]s`
+shall extend one or more :t:`[line]s`.
 
-:def_p:`fls_gy23lwlqw2mc`
-:term:`[Line comment]s`, :term:`[inner line doc]s`, and :term:`[outer line
-doc]s` shall extend exactly one :term:`line`.
+:dp:`fls_gy23lwlqw2mc`
+:t:`[Line comment]s`, :t:`[inner line doc]s`, and :t:`[outer line doc]s` shall
+extend exactly one :t:`line`.
 
-:def_p:`fls_w7d0skpov1is`
-:term:`[Outer block doc]s` and :term:`[outer line doc]s` shall apply to a
-subsequent :term:`non-[comment]` :term:`construct`.
+:dp:`fls_w7d0skpov1is`
+:t:`[Outer block doc]s` and :t:`[outer line doc]s` shall apply to a subsequent
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_32ncjvj2kn7z`
-:term:`[Inner block doc]s` and :term:`[inner line doc]s` shall apply to an
-enclosing :term:`non-[comment]` :term:`construct`.
+:dp:`fls_32ncjvj2kn7z`
+:t:`[Inner block doc]s` and :t:`[inner line doc]s` shall apply to an enclosing
+:t:`non-[comment]` :t:`construct`.
 
-:def_p:`fls_ok0zvo9vcmzo`
-:term:`[Inner block doc]s`, :term:`[inner line doc]s`, :term:`[outer block
-doc]s`, and :term:`[outer line doc]s` are equivalent to  :term:`attribute`
-:codeterm:`doc`.
+:dp:`fls_ok0zvo9vcmzo`
+:t:`[Inner block doc]s`, :t:`[inner line doc]s`, :t:`[outer block doc]s`, and
+:t:`[outer line doc]s` are equivalent to  :t:`attribute` :c:`doc`.
 
 .. rubric:: Examples
 
@@ -1273,11 +1250,11 @@ Keywords
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_dti0uu7rz81w`
-A :term:`keyword` is a word in program text that has special meaning.
+:dp:`fls_dti0uu7rz81w`
+A :t:`keyword` is a word in program text that has special meaning.
 
-:def_p:`fls_sxg1o4oxql51`
-:term:`[Keyword]s` are case sensitive.
+:dp:`fls_sxg1o4oxql51`
+:t:`[Keyword]s` are case sensitive.
 
 Strict Keywords
 ~~~~~~~~~~~~~~~
@@ -1327,9 +1304,8 @@ Strict Keywords
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_bsh7qsyvox21`
-A :term:`strict keyword` is a :term:`keyword` that always holds its special
-meaning.
+:dp:`fls_bsh7qsyvox21`
+A :t:`strict keyword` is a :t:`keyword` that always holds its special meaning.
 
 Reserved Keywords
 ~~~~~~~~~~~~~~~~~
@@ -1355,8 +1331,8 @@ Reserved Keywords
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_w4b97ewwnql`
-A :term:`reserved keyword` is a :term:`keyword` that is not yet in use.
+:dp:`fls_w4b97ewwnql`
+A :t:`reserved keyword` is a :t:`keyword` that is not yet in use.
 
 Weak Keywords
 ~~~~~~~~~~~~~
@@ -1372,19 +1348,19 @@ Weak Keywords
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_bv87t1gvj7bz`
-A :term:`weak keyword` is a :term:`keyword` whose special meaning depends on
-the context.
+:dp:`fls_bv87t1gvj7bz`
+A :t:`weak keyword` is a :t:`keyword` whose special meaning depends on the
+context.
 
-:def_p:`fls_bl55g03jmayf`
-Word ``macro_rules`` acts as a :term:`keyword` only when used in the context of
-a :syntax:`MacroRulesDefinition`.
+:dp:`fls_bl55g03jmayf`
+Word ``macro_rules`` acts as a :t:`keyword` only when used in the context of a
+:s:`MacroRulesDefinition`.
 
-:def_p:`fls_c354oryv513p`
-Word ``'static`` acts as a :term:`keyword` only when used in the context of a
-:syntax:`LifetimeIndication`.
+:dp:`fls_c354oryv513p`
+Word ``'static`` acts as a :t:`keyword` only when used in the context of a
+:s:`LifetimeIndication`.
 
-:def_p:`fls_r9fhuiq1ys1p`
-Word ``union`` acts as a :term:`keyword` only when used in the context of a
-:syntax:`UnionDeclaration`.
+:dp:`fls_r9fhuiq1ys1p`
+Word ``union`` acts as a :t:`keyword` only when used in the context of a
+:s:`UnionDeclaration`.
 

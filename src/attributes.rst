@@ -40,17 +40,17 @@ Attributes
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_rnzxj1t0hehl`
-An :term:`attribute` is a general, free-form metadatum that is interpreted based
-on its :term:`name`, convention, language, and tool.
+:dp:`fls_rnzxj1t0hehl`
+An :t:`attribute` is a general, free-form metadatum that is interpreted based on
+its :t:`name`, convention, language, and tool.
 
-:def_p:`fls_yd0ehw5csaur`
-An :term:`inner attribute` is an :term:`attribute` that applies to an enclosing
-:term:`item`.
+:dp:`fls_yd0ehw5csaur`
+An :t:`inner attribute` is an :t:`attribute` that applies to an enclosing
+:t:`item`.
 
-:def_p:`fls_8o6vmzbw1b1j`
-An :term:`outer attribute` is an :term:`attribute` that applies to a subsequent
-:term:`item`.
+:dp:`fls_8o6vmzbw1b1j`
+An :t:`outer attribute` is an :t:`attribute` that applies to a subsequent
+:t:`item`.
 
 .. rubric:: Examples
 
@@ -68,32 +68,32 @@ Attribute Properties
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_p4potvq7x532`
-An :term:`active attribute` is an :term:`attribute` that is removed from the
-:term:`item` it decorates.
+:dp:`fls_p4potvq7x532`
+An :t:`active attribute` is an :t:`attribute` that is removed from the :t:`item`
+it decorates.
 
-:def_p:`fls_xk7lb2g02sy7`
-An :term:`inert attribute` is an :term:`attribute` that remains with the
-:term:`item` it decorates.
+:dp:`fls_xk7lb2g02sy7`
+An :t:`inert attribute` is an :t:`attribute` that remains with the :t:`item`
+it decorates.
 
-:def_p:`fls_q8wl7pidx2za`
-The following :term:`[attribute]s` are :term:`[active attribute]s`:
+:dp:`fls_q8wl7pidx2za`
+The following :t:`[attribute]s` are :t:`[active attribute]s`:
 
-* :def_p:`fls_jottio69o9e7`
-  :term:`[Attribute macro]s`.
+* :dp:`fls_jottio69o9e7`
+  :t:`[Attribute macro]s`.
 
-* :def_p:`fls_gzyx9lfi5pvd`
-  :term:`Attribute` :codeterm:`cfg`.
+* :dp:`fls_gzyx9lfi5pvd`
+  :t:`Attribute` :c:`cfg`.
 
-* :def_p:`fls_elsfqsiqor1y`
-  :term:`Attribute` :codeterm:`cfg_attr`.
+* :dp:`fls_elsfqsiqor1y`
+  :t:`Attribute` :c:`cfg_attr`.
 
-:def_p:`fls_4xu1rwecd9au`
-:term:`Attribute` :codeterm:`test` is an :term:`inert attribute` when compiling
-for testing purposes, otherwise it is an :term:`active attribute`.
+:dp:`fls_4xu1rwecd9au`
+:t:`Attribute` :c:`test` is an :t:`inert attribute` when compiling for testing
+purposes, otherwise it is an :t:`active attribute`.
 
-:def_p:`fls_n3737i320qum`
-All remaining :term:`[attribute]s` are :term:`[inert attribute]s`.
+:dp:`fls_n3737i320qum`
+All remaining :t:`[attribute]s` are :t:`[inert attribute]s`.
 
 Built-in Attributes
 -------------------
@@ -150,189 +150,181 @@ Built-in Attributes
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_92tqo8uas8kd`
-A :term:`built-in attribute` is a language-defined :term:`attribute`.
+:dp:`fls_92tqo8uas8kd`
+A :t:`built-in attribute` is a language-defined :t:`attribute`.
 
-:def_p:`fls_bxucstrfcco8`
-The following :term:`[built-in attribute]s` are :def_term:`code generation
+:dp:`fls_bxucstrfcco8`
+The following :t:`[built-in attribute]s` are :dt:`code generation attribute`\ s:
+
+* :dp:`fls_wle815gb9ai2`
+  :t:`Attribute` :c:`cold`.
+
+* :dp:`fls_tvn08dtuilue`
+  :t:`Attribute` :c:`inline`.
+
+* :dp:`fls_q4c023zdsfgn`
+  :t:`Attribute` :c:`no_builtins`.
+
+* :dp:`fls_xtu3p0kzwn7b`
+  :t:`Attribute` :c:`target_feature`.
+
+* :dp:`fls_gxxbf6eag3et`
+  :t:`Attribute` :c:`track_caller`.
+
+:dp:`fls_87o6n9et9jio`
+The following :t:`[built-in attribute]s` are :dt:`conditional compilation
 attribute`\ s:
 
-* :def_p:`fls_wle815gb9ai2`
-  :term:`Attribute` :codeterm:`cold`.
+* :dp:`fls_ui0i3rpt5v5u`
+  :t:`Attribute` :c:`cfg`.
 
-* :def_p:`fls_tvn08dtuilue`
-  :term:`Attribute` :codeterm:`inline`.
+* :dp:`fls_6utorag4adlv`
+  :t:`Attribute` :c:`cfg_attr`.
 
-* :def_p:`fls_q4c023zdsfgn`
-  :term:`Attribute` :codeterm:`no_builtins`.
+:dp:`fls_d8spdkjzp496`
+The following :t:`[built-in attribute]s` are :dt:`derivation attribute`\ s:
 
-* :def_p:`fls_xtu3p0kzwn7b`
-  :term:`Attribute` :codeterm:`target_feature`.
+* :dp:`fls_vidbcv25dyud`
+  :t:`Attribute` :c:`automatically_derived`.
 
-* :def_p:`fls_gxxbf6eag3et`
-  :term:`Attribute` :codeterm:`track_caller`.
+* :dp:`fls_d0298bmlyuu4`
+  :t:`Attribute` :c:`derive`.
 
-:def_p:`fls_87o6n9et9jio`
-The following :term:`[built-in attribute]s` are :def_term:`conditional
-compilation attribute`\ s:
+:dp:`fls_dtb3t5ht5ngf`
+The following :t:`[built-in attribute]s` are :dt:`diagnostics attribute`\ s:
 
-* :def_p:`fls_ui0i3rpt5v5u`
-  :term:`Attribute` :codeterm:`cfg`.
+* :dp:`fls_c5n4gzgs79vv`
+  :t:`Attribute` :c:`allow`.
 
-* :def_p:`fls_6utorag4adlv`
-  :term:`Attribute` :codeterm:`cfg_attr`.
+* :dp:`fls_xheohvupr8kb`
+  :t:`Attribute` :c:`deny`.
 
-:def_p:`fls_d8spdkjzp496`
-The following :term:`[built-in attribute]s` are :def_term:`derivation
+* :dp:`fls_s5z2q5pl14p4`
+  :t:`Attribute` :c:`deprecated`.
+
+* :dp:`fls_5ko0q9jnxv5a`
+  :t:`Attribute` :c:`forbid`.
+
+* :dp:`fls_rgjf5ibhurda`
+  :t:`Attribute` :c:`must_use`.
+
+* :dp:`fls_29y8icoou1gx`
+  :t:`Attribute` :c:`warn`.
+
+:dp:`fls_3fxhz0olhbcy`
+The following :t:`[built-in attribute]s` are :dt:`documentation attribute`\ s:
+
+* :dp:`fls_oexj0952o05u`
+  :t:`Attribute` :c:`doc`.
+
+:dp:`fls_q579e97n1m8j`
+The following :t:`[built-in attribute]s` are :dt:`foreign function interface
 attribute`\ s:
 
-* :def_p:`fls_vidbcv25dyud`
-  :term:`Attribute` :codeterm:`automatically_derived`.
+* :dp:`fls_sn43rofpq6ld`
+  :t:`Attribute` :c:`crate_name`.
 
-* :def_p:`fls_d0298bmlyuu4`
-  :term:`Attribute` :codeterm:`derive`.
+* :dp:`fls_56d70gkmin4p`
+  :t:`Attribute` :c:`crate_type`.
 
-:def_p:`fls_dtb3t5ht5ngf`
-The following :term:`[built-in attribute]s` are :def_term:`diagnostics
-attribute`\ s:
+* :dp:`fls_mgb1xipm0qwo`
+  :t:`Attribute` :c:`export_name`.
 
-* :def_p:`fls_c5n4gzgs79vv`
-  :term:`Attribute` :codeterm:`allow`.
+* :dp:`fls_rmhlssasdtkj`
+  :t:`Attribute` :c:`link`.
 
-* :def_p:`fls_xheohvupr8kb`
-  :term:`Attribute` :codeterm:`deny`.
+* :dp:`fls_josaywt6g3rq`
+  :t:`Attribute` :c:`link_name`.
 
-* :def_p:`fls_s5z2q5pl14p4`
-  :term:`Attribute` :codeterm:`deprecated`.
+* :dp:`fls_qk4vkn42c2jh`
+  :t:`Attribute` :c:`link_section`.
 
-* :def_p:`fls_5ko0q9jnxv5a`
-  :term:`Attribute` :codeterm:`forbid`.
+* :dp:`fls_f21azsygoovw`
+  :t:`Attribute` :c:`no_link`.
 
-* :def_p:`fls_rgjf5ibhurda`
-  :term:`Attribute` :codeterm:`must_use`.
+* :dp:`fls_4d31lwzblg91`
+  :t:`Attribute` :c:`no_main`.
 
-* :def_p:`fls_29y8icoou1gx`
-  :term:`Attribute` :codeterm:`warn`.
+* :dp:`fls_muucfla1s8yn`
+  :t:`Attribute` :c:`no_mangle`.
 
-:def_p:`fls_3fxhz0olhbcy`
-The following :term:`[built-in attribute]s` are :def_term:`documentation
-attribute`\ s:
+* :dp:`fls_wbdtpntjr95w`
+  :t:`Attribute` :c:`repr`.
 
-* :def_p:`fls_oexj0952o05u`
-  :term:`Attribute` :codeterm:`doc`.
+* :dp:`fls_lglwcbsvi9yj`
+  :t:`Attribute` :c:`used`.
 
-:def_p:`fls_q579e97n1m8j`
-The following :term:`[built-in attribute]s` are :def_term:`foreign function
-interface attribute`\ s:
+:dp:`fls_1gyg8hfb13n7`
+The following :t:`[built-in attribute]s` are :dt:`limits attribute`\ s:
 
-* :def_p:`fls_sn43rofpq6ld`
-  :term:`Attribute` :codeterm:`crate_name`.
+* :dp:`fls_6005g57evfbp`
+  :t:`Attribute` :c:`recursion_limit`.
 
-* :def_p:`fls_56d70gkmin4p`
-  :term:`Attribute` :codeterm:`crate_type`.
+* :dp:`fls_3y4o8kq58dt8`
+  :t:`Attribute` :c:`type_length_limit`.
 
-* :def_p:`fls_mgb1xipm0qwo`
-  :term:`Attribute` :codeterm:`export_name`.
+:dp:`fls_vsix3pqf519x`
+The following :t:`[built-in attribute]s` are :dt:`macro attribute`\ s:
 
-* :def_p:`fls_rmhlssasdtkj`
-  :term:`Attribute` :codeterm:`link`.
+* :dp:`fls_c8uqw8p0qrh5`
+  :t:`Attribute` :c:`macro_export`.
 
-* :def_p:`fls_josaywt6g3rq`
-  :term:`Attribute` :codeterm:`link_name`.
+* :dp:`fls_b3jobjxmqppy`
+  :t:`Attribute` :c:`macro_use`.
 
-* :def_p:`fls_qk4vkn42c2jh`
-  :term:`Attribute` :codeterm:`link_section`.
+* :dp:`fls_xyhoxm30i7wn`
+  :t:`Attribute` :c:`proc_macro`.
 
-* :def_p:`fls_f21azsygoovw`
-  :term:`Attribute` :codeterm:`no_link`.
+* :dp:`fls_nowfw1ffhupd`
+  :t:`Attribute` :c:`proc_macro_attribute`.
 
-* :def_p:`fls_4d31lwzblg91`
-  :term:`Attribute` :codeterm:`no_main`.
+* :dp:`fls_5i27houut1mu`
+  :t:`Attribute` :c:`proc_macro_derive`.
 
-* :def_p:`fls_muucfla1s8yn`
-  :term:`Attribute` :codeterm:`no_mangle`.
+:dp:`fls_1v9p4vr1nszn`
+The following :t:`[built-in attribute]s` are :dt:`modules attribute`\ s:
 
-* :def_p:`fls_wbdtpntjr95w`
-  :term:`Attribute` :codeterm:`repr`.
+* :dp:`fls_jvkgtnulrqgh`
+  :t:`Attribute` :c:`path`.
 
-* :def_p:`fls_lglwcbsvi9yj`
-  :term:`Attribute` :codeterm:`used`.
+:dp:`fls_k9p2xrs3dotn`
+The following :t:`[built-in attribute]s` are :dt:`prelude attribute`\ s:
 
-:def_p:`fls_1gyg8hfb13n7`
-The following :term:`[built-in attribute]s` are :def_term:`limits attribute`\ s:
+* :dp:`fls_73n30xdcx8e`
+  :t:`Attribute` :c:`no_implicit_prelude`.
 
-* :def_p:`fls_6005g57evfbp`
-  :term:`Attribute` :codeterm:`recursion_limit`.
+* :dp:`fls_e7zusnfka5dt`
+  :t:`Attribute` :c:`no_std`.
 
-* :def_p:`fls_3y4o8kq58dt8`
-  :term:`Attribute` :codeterm:`type_length_limit`.
+:dp:`fls_85ul6x76ew9`
+The following :t:`[built-in attribute]s` are :dt:`runtime attribute`\ s:
 
-:def_p:`fls_vsix3pqf519x`
-The following :term:`[built-in attribute]s` are :def_term:`macro attribute`\ s:
+* :dp:`fls_xkhm1sht2ju5`
+  :t:`Attribute` :c:`global_allocator`.
 
-* :def_p:`fls_c8uqw8p0qrh5`
-  :term:`Attribute` :codeterm:`macro_export`.
+* :dp:`fls_w9za4moh6gb3`
+  :t:`Attribute` :c:`panic_handler`.
 
-* :def_p:`fls_b3jobjxmqppy`
-  :term:`Attribute` :codeterm:`macro_use`.
+* :dp:`fls_3vubhygy9jje`
+  :t:`Attribute` :c:`windows_subsystem`.
 
-* :def_p:`fls_xyhoxm30i7wn`
-  :term:`Attribute` :codeterm:`proc_macro`.
+:dp:`fls_mhaplbf40j02`
+The following :t:`[built-in attribute]s` are :dt:`testing attribute`\ s:
 
-* :def_p:`fls_nowfw1ffhupd`
-  :term:`Attribute` :codeterm:`proc_macro_attribute`.
+* :dp:`fls_23huzf3c4arx`
+  :t:`Attribute` :c:`ignore`.
 
-* :def_p:`fls_5i27houut1mu`
-  :term:`Attribute` :codeterm:`proc_macro_derive`.
+* :dp:`fls_i63y9xnnwq2z`
+  :t:`Attribute` :c:`should_panic`.
 
-:def_p:`fls_1v9p4vr1nszn`
-The following :term:`[built-in attribute]s` are :def_term:`modules attribute`\
-s:
+* :dp:`fls_yic8ksed28no`
+  :t:`Attribute` :c:`test`.
 
-* :def_p:`fls_jvkgtnulrqgh`
-  :term:`Attribute` :codeterm:`path`.
+:dp:`fls_p1ugiol1e5v5`
+The following :t:`[built-in attribute]s` are :dt:`type attribute`\ s:
 
-:def_p:`fls_k9p2xrs3dotn`
-The following :term:`[built-in attribute]s` are :def_term:`prelude attribute`\
-s:
-
-* :def_p:`fls_73n30xdcx8e`
-  :term:`Attribute` :codeterm:`no_implicit_prelude`.
-
-* :def_p:`fls_e7zusnfka5dt`
-  :term:`Attribute` :codeterm:`no_std`.
-
-:def_p:`fls_85ul6x76ew9`
-The following :term:`[built-in attribute]s` are :def_term:`runtime attribute`\
-s:
-
-* :def_p:`fls_xkhm1sht2ju5`
-  :term:`Attribute` :codeterm:`global_allocator`.
-
-* :def_p:`fls_w9za4moh6gb3`
-  :term:`Attribute` :codeterm:`panic_handler`.
-
-* :def_p:`fls_3vubhygy9jje`
-  :term:`Attribute` :codeterm:`windows_subsystem`.
-
-:def_p:`fls_mhaplbf40j02`
-The following :term:`[built-in attribute]s` are :def_term:`testing attribute`\
-s:
-
-* :def_p:`fls_23huzf3c4arx`
-  :term:`Attribute` :codeterm:`ignore`.
-
-* :def_p:`fls_i63y9xnnwq2z`
-  :term:`Attribute` :codeterm:`should_panic`.
-
-* :def_p:`fls_yic8ksed28no`
-  :term:`Attribute` :codeterm:`test`.
-
-:def_p:`fls_p1ugiol1e5v5`
-The following :term:`[built-in attribute]s` are :def_term:`type attribute`\ s:
-
-* :def_p:`fls_7xh2iphiteam`
-  :term:`Attribute` :codeterm:`non_exhaustive`.
+* :dp:`fls_7xh2iphiteam`
+  :t:`Attribute` :c:`non_exhaustive`.
 
 Code Generation Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -349,12 +341,12 @@ Attribute ``cold``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_x860jl4103p`
-:term:`Attribute` :codeterm:`cold` shall apply to :term:`[function]s`.
+:dp:`fls_x860jl4103p`
+:t:`Attribute` :c:`cold` shall apply to :t:`[function]s`.
 
-:def_p:`fls_8zdexi5lgm2f`
-:term:`Attribute` :def_codeterm:`cold` indicates that its related
-:term:`function` is unlikely to be called.
+:dp:`fls_8zdexi5lgm2f`
+:t:`Attribute` :dc:`cold` indicates that its related :t:`function` is unlikely
+to be called.
 
 .. rubric:: Examples
 
@@ -378,29 +370,28 @@ Attribute ``inline``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_jwyhky49ssup`
-:term:`Attribute` :codeterm:`inline` shall apply to :term:`[function]s`.
+:dp:`fls_jwyhky49ssup`
+:t:`Attribute` :c:`inline` shall apply to :t:`[function]s`.
 
-:def_p:`fls_s7bf7tf9206d`
-:term:`Attribute` :def_codeterm:`inline` marks its related :term:`function` as
-:def_term:`inlined`. The process of replacing a :term:`call expression` to an
-:term:`inlined` :term:`function` with the :term:`function body` is referred to
-as :def_term:`inlining`.
+:dp:`fls_s7bf7tf9206d`
+:t:`Attribute` :dc:`inline` marks its related :t:`function` as :dt:`inlined`.
+The process of replacing a :t:`call expression` to an :t:`inlined` :t:`function`
+with the :t:`function body` is referred to as :dt:`inlining`.
 
-:def_p:`fls_930o6urn669w`
-:term:`Attribute` :codeterm:`inline` without an :syntax:`InlineHint` suggests to
-a tool that :term:`inlining` should be performed.
+:dp:`fls_930o6urn669w`
+:t:`Attribute` :c:`inline` without an :s:`InlineHint` suggests to a tool that
+:t:`inlining` should be performed.
 
-:def_p:`fls_z7ufiqqujgdh`
-:term:`Attribute` :codeterm:`inline` with :syntax:`InlineHint` ``always``
-suggests to a tool that :term:`inlining` should always be performed.
+:dp:`fls_z7ufiqqujgdh`
+:t:`Attribute` :c:`inline` with :s:`InlineHint` ``always`` suggests to a tool
+that :t:`inlining` should always be performed.
 
-:def_p:`fls_f0n4g5uky9tp`
-:term:`Attribute` :codeterm:`inline` with :syntax:`InlineHint` ``never``
-suggests to a tool that :term:`inlining` should never be performed.
+:dp:`fls_f0n4g5uky9tp`
+:t:`Attribute` :c:`inline` with :s:`InlineHint` ``never`` suggests to a tool
+that :t:`inlining` should never be performed.
 
-:def_p:`fls_r3p4din7rjz8`
-A tool is not obliged to perform :term:`inlining`.
+:dp:`fls_r3p4din7rjz8`
+A tool is not obliged to perform :t:`inlining`.
 
 .. rubric:: Examples
 
@@ -427,12 +418,12 @@ Attribute ``no_builtins``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_x36c6j1ivbvp`
-:term:`Attribute` :codeterm:`no_builtins` shall apply to :term:`[crate]s`.
+:dp:`fls_x36c6j1ivbvp`
+:t:`Attribute` :c:`no_builtins` shall apply to :t:`[crate]s`.
 
-:def_p:`fls_k2k10qtn6f0g`
-:term:`Attribute` :def_codeterm:`no_builtins` prevents the tool from replacing
-certain code patterns with calls to intrinsic functions.
+:dp:`fls_k2k10qtn6f0g`
+:t:`Attribute` :dc:`no_builtins` prevents the tool from replacing certain code
+patterns with calls to intrinsic functions.
 
 .. rubric:: Examples
 
@@ -481,157 +472,122 @@ Attribute ``target_feature``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_3qj3jvmtxvx6`
-:term:`Attribute` :codeterm:`target_feature` shall apply to :term:`[unsafe
-function]s`.
+:dp:`fls_3qj3jvmtxvx6`
+:t:`Attribute` :c:`target_feature` shall apply to :t:`[unsafe function]s`.
 
-:def_p:`fls_agpkz1v3c281`
-:term:`Attribute` :def_codeterm:`target_feature` enables target architecture
-features for its related :term:`function`.
+:dp:`fls_agpkz1v3c281`
+:t:`Attribute` :dc:`target_feature` enables target architecture features for its
+related :t:`function`.
 
-:def_p:`fls_91b7nd6qslsb`
+:dp:`fls_91b7nd6qslsb`
 The target architecture features are as follows:
 
 .. list-table::
 
-   * - .. rubric:: Feature
-     - .. rubric:: implicitly enables
-     - .. rubric:: Description
-   * - :def_p:`fls_pdyotoq8uqi2`
-       adx
+   * - :dp:`fls_yz4itbk700ot`
+     - **Feature**
+     - **implicitly enables**
+     - **Description**
+   * - :dp:`fls_pdyotoq8uqi2`
+     - adx
      -
-     - :def_p:`fls_xvt9lkunjrw3`
-       Intel Multi-Precision Add-Cary Instruction Extensions
-   * - :def_p:`fls_vdbjoy6gbk7l`
-       aes
-     - :def_p:`fls_z3o1rym18tc`
-       sse2
-     - :def_p:`fls_fz0qdrxf2b8x`
-       Advanced Encryption Standard
-   * - :def_p:`fls_k3szii6nviza`
-       avx
-     - :def_p:`fls_xu7n574yhvjy`
-       sse4.2
-     - :def_p:`fls_kohbxvhxjofj`
-       Advanced Vector Extensions
-   * - :def_p:`fls_xsdkkfgv0pz6`
-       avx2
-     - :def_p:`fls_a50km9mt56it`
-       avx
-     - :def_p:`fls_lzss4v5m9dr2`
-       Advanced Vector Extensions 2
-   * - :def_p:`fls_eglaup5zyfsk`
-       bmi1
+     - Intel Multi-Precision Add-Cary Instruction Extensions
+   * - :dp:`fls_vdbjoy6gbk7l`
+     - aes
+     - sse2
+     - Advanced Encryption Standard
+   * - :dp:`fls_k3szii6nviza`
+     - avx
+     - sse4.2
+     - Advanced Vector Extensions
+   * - :dp:`fls_xsdkkfgv0pz6`
+     - avx2
+     - avx
+     - Advanced Vector Extensions 2
+   * - :dp:`fls_eglaup5zyfsk`
+     - bmi1
      -
-     - :def_p:`fls_21okiye0af0a`
-       Bit Manipulation Instruction Sets
-   * - :def_p:`fls_tkayqh7li81o`
-       bmi2
+     - Bit Manipulation Instruction Sets
+   * - :dp:`fls_tkayqh7li81o`
+     - bmi2
      -
-     - :def_p:`fls_8nx4bgmopzn`
-       Bit Manipulation Instruction Sets 2
-   * - :def_p:`fls_vv8o31s0zmli`
-       fma
-     - :def_p:`fls_zederqobnh28`
-       avx
-     - :def_p:`fls_bquwsgvc6izr`
-       Three-operand fused multiply-add
-   * - :def_p:`fls_g0762ekvl2ah`
-       fxsr
+     - Bit Manipulation Instruction Sets 2
+   * - :dp:`fls_vv8o31s0zmli`
+     - fma
+     - avx
+     - Three-operand fused multiply-add
+   * - :dp:`fls_g0762ekvl2ah`
+     - fxsr
      -
-     - :def_p:`fls_h9bwinhtew3q`
-       Save and restore x87 FPU, MMX technology, and SSE state
-   * - :def_p:`fls_406ltkru11tk`
-       lzcnt
+     - Save and restore x87 FPU, MMX technology, and SSE state
+   * - :dp:`fls_406ltkru11tk`
+     - lzcnt
      -
-     - :def_p:`fls_8090mly3ohqc`
-       Leading zeros count
-   * - :def_p:`fls_4mhyvwj8pbpk`
-       pclmulqdq
-     - :def_p:`fls_6o32ezkodp35`
-       sse2
-     - :def_p:`fls_banskie1ogan`
-       Packed carry-less multiplication quadword
-   * - :def_p:`fls_ijsmqk7pgyiz`
-       popcnt
+     - Leading zeros count
+   * - :dp:`fls_4mhyvwj8pbpk`
+     - pclmulqdq
+     - sse2
+     - Packed carry-less multiplication quadword
+   * - :dp:`fls_ijsmqk7pgyiz`
+     - popcnt
      -
-     - :def_p:`fls_qwzx3pf2075`
-       Count of bits set to 1
-   * - :def_p:`fls_a1jggfetycxh`
-       rdrand
+     - Count of bits set to 1
+   * - :dp:`fls_a1jggfetycxh`
+     - rdrand
      -
-     - :def_p:`fls_ryzbgf8esqey`
-       Read random number
-   * - :def_p:`fls_rmbadmoeaoxu`
-       rdseed
+     - Read random number
+   * - :dp:`fls_rmbadmoeaoxu`
+     - rdseed
      -
-     - :def_p:`fls_ejwoescy1jfe`
-       Read random seed
-   * - :def_p:`fls_f9ydn049isbv`
-       sha
-     - :def_p:`fls_kkmfoiesmqxv`
-       sse2
-     - :def_p:`fls_ccd6hrx8xf3g`
-       Secure Hash Algorithm
-   * - :def_p:`fls_7c31e21g6bdj`
-       sse
+     - Read random seed
+   * - :dp:`fls_f9ydn049isbv`
+     - sha
+     - sse2
+     - Secure Hash Algorithm
+   * - :dp:`fls_7c31e21g6bdj`
+     - sse
      -
-     - :def_p:`fls_6betbnzf8ycc`
-       Streaming SIMD Extensions
-   * - :def_p:`fls_6d5a375j2775`
-       sse2
-     - :def_p:`fls_xc6owtvwre9p`
-       sse
-     - :def_p:`fls_2qddgeh2s1e6`
-       Streaming SIMD Extensions 2
-   * - :def_p:`fls_xthidh2nyrno`
-       sse3
-     - :def_p:`fls_hm2nubqjce7e`
-       sse2
-     - :def_p:`fls_68kp86qghcv1`
-       Streaming SIMD Extensions 3
-   * - :def_p:`fls_w02pk6kf9w9e`
-       sse4.1
-     - :def_p:`fls_umd8dyjptnc3`
-       sse3
-     - :def_p:`fls_uieos7d2fk6a`
-       Streaming SIMD Extensions 4.1
-   * - :def_p:`fls_lzl1gpco3osx`
-       sse4.2.
-     - :def_p:`fls_77lnhn2bi3h0`
-       sse4.1
-     - :def_p:`fls_qvwb3wpv7sgn`
-       Streaming SIMD Extensions 4.2
-   * - :def_p:`fls_9x2on8w44k4f`
-       ssse3
-     - :def_p:`fls_ioa5uo8ybad7`
-       sse3
-     - :def_p:`fls_s5fq1r31yi5u`
-       Supplemental Streaming SIMD Extensions 3
-   * - :def_p:`fls_rilqwazchfpp`
-       xsave
+     - Streaming SIMD Extensions
+   * - :dp:`fls_6d5a375j2775`
+     - sse2
+     - sse
+     - Streaming SIMD Extensions 2
+   * - :dp:`fls_xthidh2nyrno`
+     - sse3
+     - sse2
+     - Streaming SIMD Extensions 3
+   * - :dp:`fls_w02pk6kf9w9e`
+     - sse4.1
+     - sse3
+     - Streaming SIMD Extensions 4.1
+   * - :dp:`fls_lzl1gpco3osx`
+     - sse4.2.
+     - sse4.1
+     - Streaming SIMD Extensions 4.2
+   * - :dp:`fls_9x2on8w44k4f`
+     - ssse3
+     - sse3
+     - Supplemental Streaming SIMD Extensions 3
+   * - :dp:`fls_rilqwazchfpp`
+     - xsave
      -
-     - :def_p:`fls_j0v7eqn0eohk`
-       Save processor extended status
-   * - :def_p:`fls_f0of1395z9pn`
-       xsavec
+     - Save processor extended status
+   * - :dp:`fls_f0of1395z9pn`
+     - xsavec
      -
-     - :def_p:`fls_gi67qivyplxp`
-       Save processor extended status with compaction
-   * - :def_p:`fls_v9gf6selc17l`
-       xsaveopt
+     - Save processor extended status with compaction
+   * - :dp:`fls_v9gf6selc17l`
+     - xsaveopt
      -
-     - :def_p:`fls_ht97aq7xd5hd`
-       Save processor extended states optimized
-   * - :def_p:`fls_jyb5s2r8w1po`
-       xsaves
+     - Save processor extended states optimized
+   * - :dp:`fls_jyb5s2r8w1po`
+     - xsaves
      -
-     - :def_p:`fls_m7ejnghh2n51`
-       Save processor extended states supervizor
+     - Save processor extended states supervizor
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_xx51fjkbgg5g`
+:dp:`fls_xx51fjkbgg5g`
 It is undefined behavior to execute a program compiled with target architecture
 features that are not supported.
 
@@ -654,36 +610,34 @@ Attribute ``track_caller``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_h8yepgchjxv9`
-:term:`Attribute` :codeterm:`track_caller` shall apply to :term:`non-[main
-function]s` with :term:`ABI` "Rust".
+:dp:`fls_h8yepgchjxv9`
+:t:`Attribute` :c:`track_caller` shall apply to :t:`non-[main function]s` with
+:t:`ABI` "Rust".
 
-:def_p:`fls_w1pxtzp7acty`
-:term:`Attribute` :def_codeterm:`track_caller` allows the :term:`function body`
-of its related :term:`function` to obtain a :codeterm:`core::panic::Location`
-which indicates the topmost untracked caller that ultimately led to the
-invocation of the :term:`function`.
+:dp:`fls_w1pxtzp7acty`
+:t:`Attribute` :dc:`track_caller` allows the :t:`function body` of its related
+:t:`function` to obtain a :c:`core::panic::Location` which indicates the topmost
+untracked caller that ultimately led to the invocation of the :t:`function`.
 
-:def_p:`fls_zch43jpetmdu`
+:dp:`fls_zch43jpetmdu`
 A tool is not required to implement this indication in an effective manner.
 
-:def_p:`fls_y1e258p4rby5`
-When applied to an :term:`associated trait function`, :term:`attribute`
-:codeterm:`track_caller` applies to all :term:`[implementing function]s`. If the
-:term:`associated trait function` has a :term:`default implementation`, then the
-:term:`attribute` applies to all :term:`[overriding function]s`.
+:dp:`fls_y1e258p4rby5`
+When applied to an :t:`associated trait function`, :t:`attribute`
+:c:`track_caller` applies to all :t:`[implementing function]s`. If the
+:t:`associated trait function` has a :t:`default implementation`, then the
+:t:`attribute` applies to all :t:`[overriding function]s`.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_vkz8t751gfhk`
-It is undefined behavior when :term:`attribute` :codeterm:`track_caller`
-applies to an :term:`external function` but does not apply to all linked
-:term:`[implementation]s`.
+:dp:`fls_vkz8t751gfhk`
+It is undefined behavior when :t:`attribute` :c:`track_caller` applies to an
+:t:`external function` but does not apply to all linked :t:`[implementation]s`.
 
-:def_p:`fls_ddg0u5lej74x`
-It is undefined behavior when :term:`attribute` :codeterm:`track_caller` is
-applied to an :term:`exported function` but the :term:`external function` it
-links to is missing the :term:`attribute`.
+:dp:`fls_ddg0u5lej74x`
+It is undefined behavior when :t:`attribute` :c:`track_caller` is applied to
+an :t:`exported function` but the :t:`external function` it links to is missing
+the :t:`attribute`.
 
 .. rubric:: Examples
 
@@ -734,28 +688,28 @@ Attribute ``cfg``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_xrjp7xw9jutz`
-:term:`Attribute` :def_codeterm:`cfg` enables :term:`conditional compilation`.
+:dp:`fls_xrjp7xw9jutz`
+:t:`Attribute` :dc:`cfg` enables :t:`conditional compilation`.
 
-:def_p:`fls_l96kyix5xsof`
-A :term:`configuration predicate` evaluates statically to either ``true`` or
+:dp:`fls_l96kyix5xsof`
+A :t:`configuration predicate` evaluates statically to either ``true`` or
 ``false``.
 
-:def_p:`fls_tncxxsyutppf`
-An :term:`all configuration predicate` evaluates statically to ``true`` when
-either all nested configuration predicates evaluate to ``true``, or there are no
-nested configuration predicates.
+:dp:`fls_tncxxsyutppf`
+An :t:`all configuration predicate` evaluates statically to ``true`` when either
+all nested configuration predicates evaluate to ``true``, or there are no nested
+configuration predicates.
 
-:def_p:`fls_m0zxktz168e0`
-An :term:`any configuration predicate` evaluates statically to ``true`` when any
+:dp:`fls_m0zxktz168e0`
+An :t:`any configuration predicate` evaluates statically to ``true`` when any
 nested configuration predicate evaluates to ``true``.
 
-:def_p:`fls_tvsadfy9uibu`
-A :term:`[not configuration predicate ]evaluates` statically to ``true`` when
-its nested configuration predicate evaluates to ``false``.
+:dp:`fls_tvsadfy9uibu`
+A :t:`not configuration predicate` evaluates statically to ``true`` when its
+nested configuration predicate evaluates to ``false``.
 
-:def_p:`fls_jbl9xyynjo0g`
-The :term:`evaluation` of a configuration option is tool-defined.
+:dp:`fls_jbl9xyynjo0g`
+The :t:`evaluation` of a configuration option is tool-defined.
 
 .. rubric:: Examples
 
@@ -776,15 +730,14 @@ Attribute ``cfg_attr``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_r66jhict6rlq`
-:term:`Attribute` :def_codeterm:`cfg_attr` enables :term:`conditional
-compilation`.
+:dp:`fls_r66jhict6rlq`
+:t:`Attribute` :dc:`cfg_attr` enables :t:`conditional compilation`.
 
-:def_p:`fls_rzw12sagm585`
-An :term:`attribute` :codeterm:`cfg_attr` where the related :term:`configuration
-predicate` evaluates to ``true`` is replaced with a new :term:`attribute`
-for each :syntax:`AttributeContent` enumerated in the :term:`[attribute]'s`
-:syntax:`AttributeContentList`.
+:dp:`fls_rzw12sagm585`
+An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration
+predicate` evaluates to ``true`` is replaced with a new :t:`attribute`
+for each :s:`AttributeContent` enumerated in the :t:`[attribute]'s`
+:s:`AttributeContentList`.
 
 .. rubric:: Examples
 
@@ -808,10 +761,10 @@ Attribute ``automatically_derived``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_5u1e0lkt0ab1`
-:term:`Attribute` :def_codeterm:`automatically_derived` is automatically
-added to :term:`[implementation]s` that are created by :term:`attribute`
-:codeterm:`derive` for :term:`[built-in trait]s`.
+:dp:`fls_5u1e0lkt0ab1`
+:t:`Attribute` :dc:`automatically_derived` is automatically added to
+:t:`[implementation]s` that are created by :t:`attribute` :c:`derive` for
+:t:`[built-in trait]s`.
 
 Attribute ``derive``
 ^^^^^^^^^^^^^^^^^^^^
@@ -825,13 +778,12 @@ Attribute ``derive``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_4btm6zwf445a`
-:term:`Attribute` :codeterm:`derive` shall apply to an :term:`abstract data
-type`.
+:dp:`fls_4btm6zwf445a`
+:t:`Attribute` :c:`derive` shall apply to an :t:`abstract data type`.
 
-:def_p:`fls_pjmbmj2b35y8`
-:term:`Attribute` :def_codeterm:`derive` lists :term:`[derive macro]s` for
-automatic implementation by a tool.
+:dp:`fls_pjmbmj2b35y8`
+:t:`Attribute` :dc:`derive` lists :t:`[derive macro]s` for automatic
+implementation by a tool.
 
 .. rubric:: Examples
 
@@ -842,7 +794,7 @@ automatic implementation by a tool.
        field: T
    }
 
-:def_p:`fls_xtty2ino4vwc`
+:dp:`fls_xtty2ino4vwc`
 Attribute ``derive`` causes trait :std:`core::cmp::PartialEq` to be
 automatically implemented for struct ``S<T>`` as follows:
 
@@ -861,8 +813,8 @@ automatically implemented for struct ``S<T>`` as follows:
 Diagnostics Attributes
 ~~~~~~~~~~~~~~~~~~~~~~
 
-:def_p:`fls_ghumzt9ybtit`
-Diagnostic :term:`[attribute]s` are related to linting, and are not defined in
+:dp:`fls_ghumzt9ybtit`
+Diagnostic :t:`[attribute]s` are related to linting, and are not defined in
 this document.
 
 Documentation Attributes
@@ -871,7 +823,7 @@ Documentation Attributes
 Attribute ``doc``
 ^^^^^^^^^^^^^^^^^
 
-:def_p:`fls_5cqi7is713f1`
+:dp:`fls_5cqi7is713f1`
 `Rust
 <https://doc.rust-lang.org/stable/rustdoc/the-doc-attribute.html#the-doc-attribu
 te>`_
@@ -899,7 +851,7 @@ te>`_
    $$)$$
 
    AttrOption ::=
-       $$attr( $$AttributeContentList $$)$$
+       $$attr($$ AttributeContentList $$)$$
 
    NoCreateInjectOption ::=
        $$no_crate_inject$$
@@ -928,14 +880,13 @@ te>`_
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_1ee9qjcgbwme`
-The :term:`inner attribute` version and the :term:`outer attribute` version
-of :term:`attribute` :def_codeterm:`doc` associate documentation with a
-:term:`construct`.
+:dp:`fls_1ee9qjcgbwme`
+The :t:`inner attribute` version and the :t:`outer attribute` version of
+:t:`attribute` :dc:`doc` associate documentation with a :t:`construct`.
 
 .. rubric:: Examples
 
-:def_p:`fls_necp8a7v255c`
+:dp:`fls_necp8a7v255c`
 **???**
 
 Foreign Function Interface Attributes
@@ -953,13 +904,12 @@ Attribute ``crate_name``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_tsdk8jyajcg`
-:term:`Attribute` :codeterm:`crate_name` shall appear at the :term:`crate
-level`.
+:dp:`fls_tsdk8jyajcg`
+:t:`Attribute` :c:`crate_name` shall appear at the :t:`crate level`.
 
-:def_p:`fls_6riphqysh0gd`
-:term:`Attribute` :def_codeterm:`crate_name` shall specify the name of the
-related :term:`crate`.
+:dp:`fls_6riphqysh0gd`
+:t:`Attribute` :dc:`crate_name` shall specify the name of the related
+:t:`crate`.
 
 .. rubric:: Examples
 
@@ -988,13 +938,12 @@ Attribute ``crate_type``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_2i2g55nqqpc1`
-:term:`Attribute` :codeterm:`crate_type` shall appear at the :term:`crate
-level`.
+:dp:`fls_2i2g55nqqpc1`
+:t:`Attribute` :c:`crate_type` shall appear at the :t:`crate level`.
 
-:def_p:`fls_1zziddjuzjeq`
-:term:`Attribute` :def_codeterm:`crate_type` shall specify the linkage
-:term:`type` of the :term:`crate` it appears in.
+:dp:`fls_1zziddjuzjeq`
+:t:`Attribute` :dc:`crate_type` shall specify the linkage :t:`type` of the
+:t:`crate` it appears in.
 
 .. rubric:: Examples
 
@@ -1014,13 +963,13 @@ Attribute ``export_name``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_r3fwpuuaoeie`
-:term:`Attribute` :codeterm:`export_name` shall apply to :term:`[function]s`
-and :term:`[static]s`.
+:dp:`fls_r3fwpuuaoeie`
+:t:`Attribute` :c:`export_name` shall apply to :t:`[function]s` and
+:t:`[static]s`.
 
-:def_p:`fls_spwr6gf7kpds`
-:term:`Attribute` :def_codeterm:`export_name` shall specify the exported symbol
-of the related :term:`function` or :term:`static`.
+:dp:`fls_spwr6gf7kpds`
+:t:`Attribute` :dc:`export_name` shall specify the exported symbol of the
+related :t:`function` or :t:`static`.
 
 .. rubric:: Examples
 
@@ -1063,41 +1012,39 @@ Attribute ``link``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_yslpkdngo8hj`
-:term:`Attribute` :codeterm:`link` shall apply to :term:`[external block]s`.
+:dp:`fls_yslpkdngo8hj`
+:t:`Attribute` :c:`link` shall apply to :t:`[external block]s`.
 
-:def_p:`fls_6rohnk4swj6c`
-:term:`Attribute` :def_codeterm:`link` shall specify the name of a native
-library that a tool should link with.
+:dp:`fls_6rohnk4swj6c`
+:t:`Attribute` :dc:`link` shall specify the name of a native library that a tool
+should link with.
 
-:def_p:`fls_o83pf3bcrzma`
+:dp:`fls_o83pf3bcrzma`
 The following native library kinds are available:
 
 .. list-table::
 
-   * - .. rubric:: Native Library Kind
-     - .. rubric:: Description
-   * - :def_p:`fls_wpqawdpevkj6`
-       dylib
-     - :def_p:`fls_vvrzw1ki1gzm`
-       Dynamic library
-   * - :def_p:`fls_h9dfs6kzmobp`
-       framework
-     - :def_p:`fls_c9s192hstdy`
-       macOS framework
-   * - :def_p:`fls_3a3r4jf7hzqr`
-       static
-     - :def_p:`fls_u8sta6llysr`
-       Static library
+   * - :dp:`fls_5541q1qoxdpf`
+     - **Native Library Kind**
+     - **Description**
+   * - :dp:`fls_wpqawdpevkj6`
+     - dylib
+     - Dynamic library
+   * - :dp:`fls_h9dfs6kzmobp`
+     - framework
+     - macOS framework
+   * - :dp:`fls_3a3r4jf7hzqr`
+     - static
+     - Static library
 
-:def_p:`fls_1tdheukgm6ai`
-When :term:`attribute` :codeterm:`link` appears without a native library kind,
-its native library kind defaults to ``dylib``. Native library kind framework is
-only valid on macOS targets.
+:dp:`fls_1tdheukgm6ai`
+When :t:`attribute` :c:`link` appears without a native library kind, its native
+library kind defaults to ``dylib``. Native library kind framework is only valid
+on macOS targets.
 
-:def_p:`fls_3i9ijypnh8nx`
-If :term:`attribute` :codeterm:`link` appears without a WebAssembly module name,
-then the WebAssembly module name defaults to ``env``.
+:dp:`fls_3i9ijypnh8nx`
+If :t:`attribute` :c:`link` appears without a WebAssembly module name, then the
+WebAssembly module name defaults to ``env``.
 
 .. rubric:: Examples
 
@@ -1118,13 +1065,13 @@ Attribute ``link_name``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_g09jhukl0ez2`
-:term:`Attribute` :codeterm:`link_name` shall apply to :term:`[external
-function]s` and :term:`[external static]s`.
+:dp:`fls_g09jhukl0ez2`
+:t:`Attribute` :c:`link_name` shall apply to :t:`[external function]s` and
+:t:`[external static]s`.
 
-:def_p:`fls_d00wni4edi8f`
-:term:`Attribute` :def_codeterm:`link_name` shall specify the linking symbol of
-the related :term:`external function` or :term:`external static`.
+:dp:`fls_d00wni4edi8f`
+:t:`Attribute` :dc:`link_name` shall specify the linking symbol of the related
+:t:`external function` or :t:`external static`.
 
 .. rubric:: Examples
 
@@ -1147,14 +1094,13 @@ Attribute ``link_section``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_5loqzajiz34m`
-:term:`Attribute` :codeterm:`link_section` shall apply to :term:`[function]s`
-and :term:`[static]s`.
+:dp:`fls_5loqzajiz34m`
+:t:`Attribute` :c:`link_section` shall apply to :t:`[function]s` and
+:t:`[static]s`.
 
-:def_p:`fls_cyxk12wuicml`
-:term:`Attribute` :def_codeterm:`link_section` specifies the object file section
-where the symbol of the related :term:`function` or :term:`static` will be
-placed.
+:dp:`fls_cyxk12wuicml`
+:t:`Attribute` :dc:`link_section` specifies the object file section where the
+symbol of the related :t:`function` or :t:`static` will be placed.
 
 .. rubric:: Examples
 
@@ -1175,13 +1121,12 @@ Attribute ``no_link``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ayhn6g6sgt3h`
-:term:`Attribute` :codeterm:`no_link` shall apply to :term:`[external crate
-import]s`.
+:dp:`fls_ayhn6g6sgt3h`
+:t:`Attribute` :c:`no_link` shall apply to :t:`[external crate import]s`.
 
-:def_p:`fls_76ox8n3eef5`
-:term:`Attribute` :def_codeterm:`no_link` indicates that the imported
-:term:`external crate` will not be linked into the resulting binary or library.
+:dp:`fls_76ox8n3eef5`
+:t:`Attribute` :dc:`no_link` indicates that the imported :t:`external crate`
+will not be linked into the resulting binary or library.
 
 .. rubric:: Examples
 
@@ -1202,12 +1147,12 @@ Attribute ``no_main``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_84a9k0fzmnfk`
-:term:`Attribute` :codeterm:`no_main` shall appear at the :term:`crate level`.
+:dp:`fls_84a9k0fzmnfk`
+:t:`Attribute` :c:`no_main` shall appear at the :t:`crate level`.
 
-:def_p:`fls_6qig3s3qpj0i`
-:term:`Attribute` :def_codeterm:`no_main` indicates that the symbols of the
-:term:`main function` will not be present in a binary.
+:dp:`fls_6qig3s3qpj0i`
+:t:`Attribute` :dc:`no_main` indicates that the symbols of the :t:`main
+function` will not be present in a binary.
 
 .. rubric:: Examples
 
@@ -1227,16 +1172,16 @@ Attribute ``no_mangle``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_q5swm5meafmx`
-:term:`Attribute` :codeterm:`no_mangle` shall apply to an :term:`entity`.
+:dp:`fls_q5swm5meafmx`
+:t:`Attribute` :c:`no_mangle` shall apply to an :t:`entity`.
 
-:def_p:`fls_esaew4fqk8mm`
-:term:`Attribute` :def_codeterm:`no_mangle` indicates that the :term:`name` of
-the related :term:`entity` will be used as the symbol for that :term:`entity`.
+:dp:`fls_esaew4fqk8mm`
+:t:`Attribute` :dc:`no_mangle` indicates that the :t:`name` of the related
+:t:`entity` will be used as the symbol for that :t:`entity`.
 
-:def_p:`fls_lvnclpxbye9u`
-:term:`Attribute` :codeterm:`no_mangle` causes the related :term:`entity` to be
-publicly exported from the produced library or object file.
+:dp:`fls_lvnclpxbye9u`
+:t:`Attribute` :c:`no_mangle` causes the related :t:`entity` to be publicly
+exported from the produced library or object file.
 
 .. rubric:: Examples
 
@@ -1285,12 +1230,12 @@ Attribute ``repr``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_vetjq9sw84qc`
-:term:`Attribute` :codeterm:`repr` shall apply to an :term:`abstract data type`.
+:dp:`fls_vetjq9sw84qc`
+:t:`Attribute` :c:`repr` shall apply to an :t:`abstract data type`.
 
-:def_p:`fls_is2esjz1sy36`
-:term:`Attribute` :def_codeterm:`repr` shall indicate the :term:`type
-representation` of the related :term:`type`.
+:dp:`fls_is2esjz1sy36`
+:t:`Attribute` :dc:`repr` shall indicate the :t:`type representation` of the
+related :t:`type`.
 
 .. rubric:: Examples
 
@@ -1314,13 +1259,13 @@ Attribute ``used``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_s4ii078wgpk`
-:term:`Attribute` :codeterm:`used` shall apply to :term:`[static]s`.
+:dp:`fls_s4ii078wgpk`
+:t:`Attribute` :c:`used` shall apply to :t:`[static]s`.
 
-:def_p:`fls_k293nzcffks4`
-:term:`Attribute` :def_codeterm:`used` forces a tool to keep the related
-:term:`static` in the output object file even if the :term:`static` is not used
-or referenced by other :term:`[item]s` in the :term:`crate`.
+:dp:`fls_k293nzcffks4`
+:t:`Attribute` :dc:`used` forces a tool to keep the related :t:`static` in the
+output object file even if the :t:`static` is not used or referenced by other
+:t:`[item]s` in the :t:`crate`.
 
 .. rubric:: Examples
 
@@ -1344,13 +1289,12 @@ Attribute ``recursion_limit``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_o55cxc67sya7`
-:term:`Attribute` :codeterm:`recursion_limit` shall appear at the :term:`crate
-level`.
+:dp:`fls_o55cxc67sya7`
+:t:`Attribute` :c:`recursion_limit` shall appear at the :t:`crate level`.
 
-:def_p:`fls_o9p8fa8zhe15`
-:term:`Attribute` :def_codeterm:`recursion_limit` sets the maximum depth of
-:term:`macro expansion` and :term:`auto-dereferencing`.
+:dp:`fls_o9p8fa8zhe15`
+:t:`Attribute` :dc:`recursion_limit` sets the maximum depth of :t:`macro
+expansion` and :t:`auto-dereferencing`.
 
 .. rubric:: Examples
 
@@ -1370,13 +1314,12 @@ Attribute ``type_length_limit``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_dfnkzj8ob3uq`
-:term:`Attribute` :codeterm:`type_length_limit` shall appear at the :term:`crate
-level`.
+:dp:`fls_dfnkzj8ob3uq`
+:t:`Attribute` :c:`type_length_limit` shall appear at the :t:`crate level`.
 
-:def_p:`fls_61vt1r8g51nh`
-:term:`Attribute` :def_codeterm:`type_length_limit` sets the maximum number of
-:term:`[type substitution]s` when constructing a :term:`concrete type`.
+:dp:`fls_61vt1r8g51nh`
+:t:`Attribute` :dc:`type_length_limit` sets the maximum number of :t:`[type
+substitution]s` when constructing a :t:`concrete type`.
 
 .. rubric:: Examples
 
@@ -1399,14 +1342,13 @@ Attribute ``macro_export``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_3ma7zkk6john`
-:term:`Attribute` :codeterm:`macro_export` shall apply to :term:`[declarative
-macro]s`.
+:dp:`fls_3ma7zkk6john`
+:t:`Attribute` :c:`macro_export` shall apply to :t:`[declarative macro]s`.
 
-:def_p:`fls_h26iw5wh4lla`
-:term:`Attribute` :def_codeterm:`macro_export` changes the :term:`visibility` of
-the related :term:`declarative macro` to :term:`public` and brings the name of
-the :term:`declarative macro` into :term:`path scope`.
+:dp:`fls_h26iw5wh4lla`
+:t:`Attribute` :dc:`macro_export` changes the :t:`visibility` of the related
+:t:`declarative macro` to :t:`public` and brings the name of the :t:`declarative
+macro` into :t:`path scope`.
 
 .. rubric:: Examples
 
@@ -1432,28 +1374,28 @@ Attribute ``macro_use``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_uua0nthq9id`
-:term:`Attribute` :codeterm:`macro_use` shall apply to :term:`[external crate
-import]s` and :term:`[module]s`.
+:dp:`fls_uua0nthq9id`
+:t:`Attribute` :c:`macro_use` shall apply to :t:`[external crate import]s` and
+:t:`[module]s`.
 
-:def_p:`fls_oq4kyo5z5tj5`
-An :syntax:`ImportedMacroList` enumerates macros-to-import. A macro-to-import
-shall be subject to attribute :codeterm:`macro_export`.
+:dp:`fls_oq4kyo5z5tj5`
+An :s:`ImportedMacroList` enumerates macros-to-import. A macro-to-import shall
+be subject to attribute :c:`macro_export`.
 
-:def_p:`fls_skexvtpbjknn`
-When applied to an :term:`external crate import`, :term:`attribute`
-:def_codeterm:`macro_use` imports from the related :term:`crate` either:
+:dp:`fls_skexvtpbjknn`
+When applied to an :t:`external crate import`, :t:`attribute` :dc:`macro_use`
+imports from the related :t:`crate` either:
 
-* :def_p:`fls_v03924dr0u0z`
+* :dp:`fls_v03924dr0u0z`
   The enumerated macros-to-import, or
 
-* :def_p:`fls_eha2hoey857x`
-  If no macros-to-import have been specified, all :term:`[macro]s` subject to
-  :term:`attribute` :codeterm:`macro_export`.
+* :dp:`fls_eha2hoey857x`
+  If no macros-to-import have been specified, all :t:`[macro]s` subject to
+  :t:`attribute` :c:`macro_export`.
 
-:def_p:`fls_p6jlgmn2sg7j`
-When applied to a :term:`module`, :term:`attribute` :codeterm:`macro_use`
-extends the :term:`scope` of the related :term:`macro`.
+:dp:`fls_p6jlgmn2sg7j`
+When applied to a :t:`module`, :t:`attribute` :c:`macro_use` extends the
+:t:`scope` of the related :t:`macro`.
 
 .. rubric:: Examples
 
@@ -1476,13 +1418,13 @@ Attribute ``proc_macro``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_u48dtmh97g`
-:term:`Attribute` :codeterm:`proc_macro` shall apply to public
-:term:`[function]s` in the crate root.
+:dp:`fls_u48dtmh97g`
+:t:`Attribute` :c:`proc_macro` shall apply to public :t:`[function]s` in the
+crate root.
 
-:def_p:`fls_t4ez0zg1m569`
-:term:`Attribute` :def_codeterm:`proc_macro` turns the related :term:`function`
-into a :term:`function-like macro`.
+:dp:`fls_t4ez0zg1m569`
+:t:`Attribute` :dc:`proc_macro` turns the related :t:`function` into a
+:t:`function-like macro`.
 
 .. rubric:: Examples
 
@@ -1503,13 +1445,12 @@ Attribute ``proc_macro_attribute``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_huznzmkuhdky`
-:term:`Attribute` :codeterm:`proc_macro_attribute` shall apply to
-:term:`[function]s`.
+:dp:`fls_huznzmkuhdky`
+:t:`Attribute` :c:`proc_macro_attribute` shall apply to :t:`[function]s`.
 
-:def_p:`fls_gc3ly8fsodf1`
-:term:`Attribute` :def_codeterm:`proc_macro_attribute` turns the related
-:term:`function` into an :term:`attribute macro`.
+:dp:`fls_gc3ly8fsodf1`
+:t:`Attribute` :dc:`proc_macro_attribute` turns the related :t:`function` into
+an :t:`attribute macro`.
 
 .. rubric:: Examples
 
@@ -1542,15 +1483,13 @@ Attribute ``proc_macro_derive``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_l82yswg0k3px`
-:term:`Attribute` :codeterm:`proc_macro_derive` shall apply to
-:term:`[function]s`.
+:dp:`fls_l82yswg0k3px`
+:t:`Attribute` :c:`proc_macro_derive` shall apply to :t:`[function]s`.
 
-:def_p:`fls_ir9i4i2x5gyx`
-:term:`Attribute` :def_codeterm:`proc_macro_derive` turns the related
-:term:`function` into a :term:`derive macro`, where :syntax:`DeriveName` defines
-the :term:`name` of the :term:`derive macro` available to :term:`attribute`
-:codeterm:`derive`.
+:dp:`fls_ir9i4i2x5gyx`
+:t:`Attribute` :dc:`proc_macro_derive` turns the related :t:`function` into a
+:t:`derive macro`, where :s:`DeriveName` defines the :t:`name` of the :t:`derive
+macro` available to :t:`attribute` :c:`derive`.
 
 .. rubric:: Examples
 
@@ -1581,15 +1520,15 @@ Attribute ``path``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_lht4pcezmbxw`
-:term:`Attribute` :codeterm:`path` shall apply to :term:`[module]s`.
+:dp:`fls_lht4pcezmbxw`
+:t:`Attribute` :c:`path` shall apply to :t:`[module]s`.
 
-:def_p:`fls_qb6anohvc03k`
-:term:`Attribute` :def_codeterm:`path` specifies the :def_term:`module path` of
-the respective :term:`module` as a :term:`string literal`.
+:dp:`fls_qb6anohvc03k`
+:t:`Attribute` :dc:`path` specifies the :dt:`module path` of the respective
+:t:`module` as a :t:`string literal`.
 
-:def_p:`fls_18tcecx4p2wp`
-A tool is free to define the format of a :term:`module path`.
+:dp:`fls_18tcecx4p2wp`
+A tool is free to define the format of a :t:`module path`.
 
 .. rubric:: Examples
 
@@ -1616,19 +1555,17 @@ Attribute ``no_implicit_prelude``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_tki5k5uo74gw`
-The :term:`inner attribute` version of :term:`attribute`
-:codeterm:`no_implicit_prelude` shall apply at the :term:`crate level` or to
-:term:`[module]s`.
+:dp:`fls_tki5k5uo74gw`
+The :t:`inner attribute` version of :t:`attribute` :c:`no_implicit_prelude`
+shall apply at the :t:`crate level` or to :t:`[module]s`.
 
-:def_p:`fls_cmrqxc5oax4r`
-The :term:`outer attribute` version of :term:`attribute`
-:codeterm:`no_implicit_prelude` shall apply to :term:`[module]s`.
+:dp:`fls_cmrqxc5oax4r`
+The :t:`outer attribute` version of :t:`attribute` :c:`no_implicit_prelude`
+shall apply to :t:`[module]s`.
 
-:def_p:`fls_c7v2hbdb7g2d`
-:term:`Attribute` :def_codeterm:`no_implicit_prelude` prevents the import
-of the :term:`extern prelude`, the :term:`standard library prelude`, and the
-:term:`tool prelude`.
+:dp:`fls_c7v2hbdb7g2d`
+:t:`Attribute` :dc:`no_implicit_prelude` prevents the import of the :t:`extern
+prelude`, the :t:`standard library prelude`, and the :t:`tool prelude`.
 
 .. rubric:: Examples
 
@@ -1649,21 +1586,21 @@ Attribute ``no_std``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_qnxihxsvkyf6`
-:term:`Attribute` :codeterm:`no_std` shall apply at the :term:`crate level`.
+:dp:`fls_qnxihxsvkyf6`
+:t:`Attribute` :c:`no_std` shall apply at the :t:`crate level`.
 
-:def_p:`fls_kxav9vw59ts4`
-:term:`Attribute` :def_codeterm:`no_std` has the following effects:
+:dp:`fls_kxav9vw59ts4`
+:t:`Attribute` :dc:`no_std` has the following effects:
 
-* :def_p:`fls_ve1shwjq09pl`
-  Prevents the import of the :term:`standard library prelude`.
+* :dp:`fls_ve1shwjq09pl`
+  Prevents the import of the :t:`standard library prelude`.
 
-* :def_p:`fls_wgwsn7laoju7`
-  Imports the :term:`core prelude`.
+* :dp:`fls_wgwsn7laoju7`
+  Imports the :t:`core prelude`.
 
-* :def_p:`fls_lxkd6hdboav4`
-  Imports all :term:`[exported macro]s` of the :term:`core crate` into the
-  :term:`macro_use prelude`.
+* :dp:`fls_lxkd6hdboav4`
+  Imports all :t:`[exported macro]s` of the :t:`core crate` into the
+  :t:`macro_use prelude`.
 
 .. rubric:: Examples
 
@@ -1686,14 +1623,13 @@ Attribute ``global_allocator``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_5b8aewlgeon8`
-:term:`Attribute` :codeterm:`global_allocator` shall apply to :term:`[static]s`
-whose :term:`[type]s` implement the :codeterm:`core::alloc::GlobalAlloc`
-:term:`trait`.
+:dp:`fls_5b8aewlgeon8`
+:t:`Attribute` :c:`global_allocator` shall apply to :t:`[static]s` whose
+:t:`[type]s` implement the :c:`core::alloc::GlobalAlloc` :t:`trait`.
 
-:def_p:`fls_homoidh8mu1r`
-:term:`Attribute` :def_codeterm:`global_allocator` sets the global allocator to
-the related :term:`static`.
+:dp:`fls_homoidh8mu1r`
+:t:`Attribute` :dc:`global_allocator` sets the global allocator to the related
+:t:`static`.
 
 .. rubric:: Examples
 
@@ -1714,17 +1650,17 @@ Attribute ``panic_handler``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ryz8qy1wdnma`
-:term:`Attribute` :codeterm:`panic_handler` shall apply to :term:`[function]s`
-with :term:`function signature` ``fn(&core::panic::PanicInfo) -> !``.
+:dp:`fls_ryz8qy1wdnma`
+:t:`Attribute` :c:`panic_handler` shall apply to :t:`[function]s` with
+:t:`function signature` ``fn(&core::panic::PanicInfo) -> !``.
 
-:def_p:`fls_8gqun8lma9wz`
-:term:`Attribute` :def_codeterm:`panic_handler` indicates that its related
-:term:`function` defines the behavior of :term:`[panic]s`.
+:dp:`fls_8gqun8lma9wz`
+:t:`Attribute` :dc:`panic_handler` indicates that its related :t:`function`
+defines the behavior of :t:`[panic]s`.
 
-:def_p:`fls_ka66jcu8gir7`
-A :term:`crate` graph shall contain exactly one :term:`function` subject to
-:term:`attribute` :codeterm:`panic_handler`.
+:dp:`fls_ka66jcu8gir7`
+A :t:`crate` graph shall contain exactly one :t:`function` subject to
+:t:`attribute` :c:`panic_handler`.
 
 .. rubric:: Examples
 
@@ -1748,17 +1684,16 @@ Attribute ``windows_subsystem``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_7mzjahvdzpy5`
-:term:`Attribute` :codeterm:`windows_subsystem` shall appear at the :term:`crate
-level` of a :term:`binary crate`.
+:dp:`fls_7mzjahvdzpy5`
+:t:`Attribute` :c:`windows_subsystem` shall appear at the :t:`crate level` of a
+:t:`binary crate`.
 
-:def_p:`fls_t3c0t3lcnebk`
-:term:`Attribute` :def_codeterm:`windows_subsystem` specifies the subsystem
-on Windows.
+:dp:`fls_t3c0t3lcnebk`
+:t:`Attribute` :dc:`windows_subsystem` specifies the subsystem on Windows.
 
-:def_p:`fls_go7pfkgpjk2t`
-If :term:`attribute` :codeterm:`windows_subsystem` is missing, the subsystem of
-the related :term:`binary crate` defaults to ``console``.
+:dp:`fls_go7pfkgpjk2t`
+If :t:`attribute` :c:`windows_subsystem` is missing, the subsystem of the
+related :t:`binary crate` defaults to ``console``.
 
 .. rubric:: Examples
 
@@ -1784,12 +1719,12 @@ Attribute ``ignore``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_qmdylxse9yhu`
-:term:`Attribute` :codeterm:`ignore` shall apply to :term:`[testing function]s`.
+:dp:`fls_qmdylxse9yhu`
+:t:`Attribute` :c:`ignore` shall apply to :t:`[testing function]s`.
 
-:def_p:`fls_9m8e59fc1tyh`
-:term:`Attribute` :def_codeterm:`ignore` prevents the execution of its related
-:term:`testing function`.
+:dp:`fls_9m8e59fc1tyh`
+:t:`Attribute` :dc:`ignore` prevents the execution of its related :t:`testing
+function`.
 
 .. rubric:: Examples
 
@@ -1814,18 +1749,17 @@ Attribute ``should_panic``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_w7dq8gnzel36`
-:term:`Attribute` :codeterm:`should_panic` shall apply to :term:`[testing
-function]s`.
+:dp:`fls_w7dq8gnzel36`
+:t:`Attribute` :c:`should_panic` shall apply to :t:`[testing function]s`.
 
-:def_p:`fls_bm5x846zfnb8`
-:term:`Attribute` :def_codeterm:`should_panic` indicates that for the related
-:term:`testing function` to pass, it should :term:`panic`.
+:dp:`fls_bm5x846zfnb8`
+:t:`Attribute` :dc:`should_panic` indicates that for the related :t:`testing
+function` to pass, it should :t:`panic`.
 
-:def_p:`fls_bcoq5aus8nkr`
-If :syntax:`ExpectedPanicMessage` is specified, then the related :term:`testing
-function` passes only when the :term:`panic` message contains the
-:syntax:`ExpectedPanicMessage`.
+:dp:`fls_bcoq5aus8nkr`
+If :s:`ExpectedPanicMessage` is specified, then the related :t:`testing
+function` passes only when the :t:`panic` message contains the
+:s:`ExpectedPanicMessage`.
 
 .. rubric:: Examples
 
@@ -1849,39 +1783,39 @@ Attribute ``test``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_o2elhg5w1rj9`
-:term:`Attribute` :codeterm:`test` shall apply to a :term:`function` that:
+:dp:`fls_o2elhg5w1rj9`
+:t:`Attribute` :c:`test` shall apply to a :t:`function` that:
 
-* :def_p:`fls_ert22u8rvkxt`
-  Is not an :term:`async function`, and
+* :dp:`fls_ert22u8rvkxt`
+  Is not an :t:`async function`, and
 
-* :def_p:`fls_c9ckjrq6emdj`
-  Is not an :term:`unsafe function`, and
+* :dp:`fls_c9ckjrq6emdj`
+  Is not an :t:`unsafe function`, and
 
-* :def_p:`fls_4uykzqpq6svl`
-  Lacks :term:`[generic parameter]s`, and
+* :dp:`fls_4uykzqpq6svl`
+  Lacks :t:`[generic parameter]s`, and
 
-* :def_p:`fls_aqzd30s267pt`
-  Lacks :term:`[function parameter]s`, and
+* :dp:`fls_aqzd30s267pt`
+  Lacks :t:`[function parameter]s`, and
 
-* :def_p:`fls_n3hjhh3d7tyx`
-  Its :term:`return type` is the :term:`unit type`.
+* :dp:`fls_n3hjhh3d7tyx`
+  Its :t:`return type` is the :t:`unit type`.
 
-:def_p:`fls_ze6cs75y9aft`
-:term:`Attribute` :def_codeterm:`test` indicates that the respective
-:term:`function` is a :def_term:`testing function`.
+:dp:`fls_ze6cs75y9aft`
+:t:`Attribute` :dc:`test` indicates that the respective :t:`function` is a
+:dt:`testing function`.
 
-:def_p:`fls_pcs0prrh23y3`
-A :term:`testing function` that returns the :term:`unit type` passes when it
-terminates and does not :term:`panic`.
+:dp:`fls_pcs0prrh23y3`
+A :t:`testing function` that returns the :t:`unit type` passes when it
+terminates and does not :t:`panic`.
 
-:def_p:`fls_niky8lbkvej9`
-A :term:`testing function` that returns ``core::result::Result<(), E>`` passes
-when it returns ``core::result::Result::OK(())``.
+:dp:`fls_niky8lbkvej9`
+A :t:`testing function` that returns ``core::result::Result<(), E>`` passes when
+it returns ``core::result::Result::OK(())``.
 
-:def_p:`fls_qfuntdm2g184`
-A :term:`testing function` that does not terminate shall pass and fail according
-to the tool.
+:dp:`fls_qfuntdm2g184`
+A :t:`testing function` that does not terminate shall pass and fail according to
+the tool.
 
 .. rubric:: Examples
 
@@ -1909,37 +1843,35 @@ Attribute ``non_exhaustive``
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_szvrd79cgzsg`
-:term:`Attribute` :codeterm:`non_exhaustive` shall apply to :term:`[enum
-type]s`, :term:`[enum variant]s`, and :term:`[struct type]s`.
+:dp:`fls_szvrd79cgzsg`
+:t:`Attribute` :c:`non_exhaustive` shall apply to :t:`[enum type]s`, :t:`[enum
+variant]s`, and :t:`[struct type]s`.
 
-:def_p:`fls_1of56vl2ewq0`
-:term:`Attribute` :def_codeterm:`non_exhaustive` indicates that the
-related :term:`type` or :term:`enum variant` may have more :term:`[field]s`
-or :term:`[enum variant]s` added in the future. A :term:`type` subject
-to :term:`attribute` :codeterm:`non_exhaustive` is referred to as a
-:def_term:`non-exhaustive type`.
+:dp:`fls_1of56vl2ewq0`
+:t:`Attribute` :dc:`non_exhaustive` indicates that the related :t:`type` or
+:t:`enum variant` may have more :t:`[field]s` or :t:`[enum variant]s` added
+in the future. A :t:`type` subject to :t:`attribute` :c:`non_exhaustive` is
+referred to as a :dt:`non-exhaustive type`.
 
-:def_p:`fls_hkyzdmmdyoin`
-A :term:`non-exhaustive type` shall not be constructed outside of its defining
-:term:`crate`.
+:dp:`fls_hkyzdmmdyoin`
+A :t:`non-exhaustive type` shall not be constructed outside of its defining
+:t:`crate`.
 
-:def_p:`fls_7b0fvwrmz0mh`
-An :term:`enum variant` subject to :term:`attribute` :codeterm:`non_exhaustive`
-is referred to as a :def_term:`non-exhaustive variant`.
+:dp:`fls_7b0fvwrmz0mh`
+An :t:`enum variant` subject to :t:`attribute` :c:`non_exhaustive` is referred
+to as a :dt:`non-exhaustive variant`.
 
-:def_p:`fls_oqfrg9tqgaj8`
-A :term:`non-exhaustive variant` shall not be constructed outside of its
-defining :term:`crate`.
+:dp:`fls_oqfrg9tqgaj8`
+A :t:`non-exhaustive variant` shall not be constructed outside of its defining
+:t:`crate`.
 
-:def_p:`fls_aql3c89840ix`
-:term:`Pattern matching` a :term:`non-exhaustive variant` shall require
-a :term:`struct pattern` with a :term:`rest pattern` outside its defining
-:term:`crate`.
+:dp:`fls_aql3c89840ix`
+:t:`Pattern matching` a :t:`non-exhaustive variant` shall require a :t:`struct
+pattern` with a :t:`rest pattern` outside its defining :t:`crate`.
 
-:def_p:`fls_cez7yxfc376c`
-:term:`Pattern matching` a :term:`non-exhaustive variant` does not contribute
-towards the exhaustiveness of :term:`[match arm]s`.
+:dp:`fls_cez7yxfc376c`
+:t:`Pattern matching` a :t:`non-exhaustive variant` does not contribute towards
+the exhaustiveness of :t:`[match arm]s`.
 
 .. rubric:: Examples
 

@@ -60,53 +60,51 @@ Expressions
    RightOperand ::=
        Operand
 
+:dp:`fls_pwut2jbmk66k`
+A :ds:`SubjectExpression` is any expression in category :s:`Expression`, except
+:s:`IndexedTupleStructExpression` and :s:`RecordStructExpression`.
 
-:def_p:`fls_pwut2jbmk66k`
-A :def_syntax:`SubjectExpression` is any expression in category
-:syntax:`Expression`, except :syntax:`IndexedTupleStructExpression` and
-:syntax:`RecordStructExpression`.
-
-:def_p:`fls_361q9ljc6ybz`
-A :def_syntax:`SubjectLetExpression` is any expression in category
-:syntax:`SubjectExpression`, except :syntax:`LazyBooleanExpression`.
+:dp:`fls_361q9ljc6ybz`
+A :ds:`SubjectLetExpression` is any expression in category
+:s:`SubjectExpression`, except :s:`LazyBooleanExpression`.
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_h5o6tgul4yor`
-An :term:`expression` is a :term:`construct` that produces a :term:`value`, and
-may have side effects at run-time.
+:dp:`fls_h5o6tgul4yor`
+An :t:`expression` is a :t:`construct` that produces a :t:`value`, and may have
+side effects at run-time.
 
-:def_p:`fls_xmklb3070sp`
-An :term:`expression-with-block` is an :term:`expression` whose structure
-involves a :term:`block expression`.
+:dp:`fls_xmklb3070sp`
+An :t:`expression-with-block` is an :t:`expression` whose structure involves a
+:t:`block expression`.
 
-:def_p:`fls_p15oeage4j0e`
-An :term:`expression-without-block` is an :term:`expression` whose structure
-does not involve a :term:`block expression`.
+:dp:`fls_p15oeage4j0e`
+An :t:`expression-without-block` is an :t:`expression` whose structure does not
+involve a :t:`block expression`.
 
-:def_p:`fls_gwgttltgjma4`
-An :term:`operand` is an :term:`expression` nested within an :term:`expression`.
+:dp:`fls_gwgttltgjma4`
+An :t:`operand` is an :t:`expression` nested within an :t:`expression`.
 
-:def_p:`fls_1r29rtnjlkql`
-A :term:`left operand` is an :term:`operand` that appears on the left-hand side
-of a :term:`binary operator`.
+:dp:`fls_1r29rtnjlkql`
+A :t:`left operand` is an :t:`operand` that appears on the left-hand side of a
+:t:`binary operator`.
 
-:def_p:`fls_qxdpyf4u3hbz`
-A :term:`right operand` is an :term:`operand` that appears on the right-hand
-side of a :term:`binary operator`.
+:dp:`fls_qxdpyf4u3hbz`
+A :t:`right operand` is an :t:`operand` that appears on the right-hand side of a
+:t:`binary operator`.
 
-:def_p:`fls_2j132xueobfv`
-A :term:`subject expression` is an :term:`expression` that controls :term:`[for
-loop]s`, :term:`[if expression]s`, and :term:`[match expression]s`.
+:dp:`fls_2j132xueobfv`
+A :t:`subject expression` is an :t:`expression` that controls :t:`[for loop]s`,
+:t:`[if expression]s`, and :t:`[match expression]s`.
 
-:def_p:`fls_a243nclqqjlu`
-A :term:`subject let expression` is an :term:`expression` that controls
-:term:`[if let expression]s` and :term:`[while let loop]s`.
+:dp:`fls_a243nclqqjlu`
+A :t:`subject let expression` is an :t:`expression` that controls :t:`[if let
+expression]s` and :t:`[while let loop]s`.
 
 .. rubric:: Dynamic Semantics
 
-:term:`Evaluation` is the process by which an :term:`expression` achieves its
-runtime effects.
+:t:`Evaluation` is the process by which an :t:`expression` achieves its runtime
+effects.
 
 Expression Classification
 -------------------------
@@ -114,294 +112,341 @@ Expression Classification
 Assignee Expressions
 ~~~~~~~~~~~~~~~~~~~~
 
-An :term:`assignee expression` is an :term:`expression` that appears as
-the :term:`left operand` of an :term:`assignment expression`. The following
-:term:`[expression]s` are :term:`[assignee expression]s`:
+.. rubric:: Legality Rules
 
-* :term:`[Place expression]s`,
+An :t:`assignee expression` is an :t:`expression` that appears as the :t:`left
+operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
+:t:`[assignee expression]s`:
 
-* :term:`[Underscore expression]s`,
+* :t:`[Place expression]s`,
 
-* :term:`[Array expression]s` of :term:`[assignee expression]s`,
+* :t:`[Underscore expression]s`,
 
-* :term:`[Tuple expression]s` of :term:`[assignee expression]s`,
+* :t:`[Array expression]s` of :t:`[assignee expression]s`,
 
-* :term:`[Struct expression]s` of :term:`[assignee expression]s`,
+* :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
 
-* :term:`[Tuple struct expression]s` of :term:`[assignee expression]s`,
+* :t:`[Struct expression]s` of :t:`[assignee expression]s`,
 
-* :term:`[Unit struct expression]s`.
+* :t:`[Tuple struct expression]s` of :t:`[assignee expression]s`,
 
-:term:`[Parenthesized expression]s` are allowed to appear anywhere in
-:term:`[assignee expression]s`.
+* :t:`[Unit struct expression]s`.
+
+:t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
+expression]s`.
 
 Constant Expressions
 ~~~~~~~~~~~~~~~~~~~~
 
-:def_p:`fls_1ji7368ieg0b`
-A :term:`constant expression` is an :term:`expression` that can be evaluated
-statically. The following :term:`[construct]s` are :term:`[constant
-expression]s` as long as their :term:`[operand]s` are also :term:`[constant
-expression]s` and do not involve :term:`[type]s` that require
-:term:`destruction`:
+.. rubric:: Legality Rules
 
-* :def_p:`fls_y6ore0iwx7e0`
-  :term:`[Arithmetic expression]s` of :term:`[scalar type]s`,
+:dp:`fls_1ji7368ieg0b`
+A :t:`constant expression` is an :t:`expression` that can be evaluated
+statically. The following :t:`[construct]s` are :t:`[constant expression]s` as
+long as their :t:`[operand]s` are also :t:`[constant expression]s` and do not
+involve :t:`[type]s` that require :t:`destruction`:
 
-* :def_p:`fls_xguga84v3j8u`
-  :term:`[Array expression]s`,
+* :dp:`fls_y6ore0iwx7e0`
+  :t:`[Arithmetic expression]s` of :t:`[scalar type]s`,
 
-* :def_p:`fls_rpapnm3afan8`
-  :term:`[Array index expression]s`,
+* :dp:`fls_xguga84v3j8u`
+  :t:`[Array expression]s`,
 
-* :def_p:`fls_idxf02p7jogu`
-  :term:`[Assignment expression]s`,
+* :dp:`fls_rpapnm3afan8`
+  :t:`[Array index expression]s`,
 
-* :def_p:`fls_6z45ss502alt`
-  :term:`[Bit expression]s` of :term:`[scalar type]s`,
+* :dp:`fls_idxf02p7jogu`
+  :t:`[Assignment expression]s`,
 
-* :def_p:`fls_wqs0792nud4e`
-  :term:`[Block expression]s`,
+* :dp:`fls_6z45ss502alt`
+  :t:`[Bit expression]s` of :t:`[scalar type]s`,
 
-* :def_p:`fls_8nyu6phm1nji`
-  :term:`[Closure expression]s` that do not :term:`capture`,
+* :dp:`fls_wqs0792nud4e`
+  :t:`[Block expression]s`,
 
-* :def_p:`fls_8wux08bmpse`
-  :term:`[Comparison expression]s` of scalar types,
+* :dp:`fls_490a1b74fut6`
+  :t:`[Call expression]s` where the callee is a :t:`constant function`,
 
-* :def_p:`fls_ppmnogx8mxk3`
-  :term:`[Compound assignment expression]s`,
+* :dp:`fls_8nyu6phm1nji`
+  :t:`[Closure expression]s` that do not :t:`capture`,
 
-* :def_p:`fls_6fq6bvxxvhsr`
-  :term:`[Constant parameter]s`,
+* :dp:`fls_8wux08bmpse`
+  :t:`[Comparison expression]s` of :t:`[scalar type]s`,
 
-* :def_p:`fls_to4e7imq2c0w`
-  :term:`[Dereference expression]s` when the :term:`operand` is not of a
-  :term:`raw pointer type`,
+* :dp:`fls_v1bnk7neb82a`
+  :t:`[Compound assignment expression]s`,
 
-* :def_p:`fls_krtbrpwf3mh0`
-  :term:`[Expression statement]s`,
+* :dp:`fls_6fq6bvxxvhsr`
+  :t:`[Constant parameter]s`,
 
-* :def_p:`fls_3etom5uu8y4u`
-  :term:`[Field access expression]s`,
+* :dp:`fls_to4e7imq2c0w`
+  :t:`[Dereference expression]s` when the :t:`operand` is not of a :t:`raw
+  pointer type`,
 
-* :def_p:`fls_qls0wj8bmupz`
-  :term:`[If expression]s`,
+* :dp:`fls_krtbrpwf3mh0`
+  :t:`[Expression statement]s`,
 
-* :def_p:`fls_b5fraqx07wuo`
-  :term:`[If let expression]s`,
+* :dp:`fls_3etom5uu8y4u`
+  :t:`[Field access expression]s` that do not invoke the :c:`core::ops::Deref`
+  :t:`trait`,
 
-* :def_p:`fls_fc62yaqyjpl2`
-  :term:`[Infinite loop expression]s`,
+* :dp:`fls_qls0wj8bmupz`
+  :t:`[If expression]s`,
 
-* :def_p:`fls_kwg8a351vc7`
-  :term:`[Lazy boolean expression]s` of :term:`[scalar type]s`,
+* :dp:`fls_b5fraqx07wuo`
+  :t:`[If let expression]s`,
 
-* :def_p:`fls_7mjv1xd45qr4`
-  :term:`[Let statement]s`,
+* :t:`[Immutable borrow expression]s` where the borrowed :t:`type` is not
+  subject to :t:`interior mutability`.
 
-* :def_p:`fls_g7hoyfqy9mu1`
-  :term:`[Literal expression]s`,
+* :dp:`fls_fc62yaqyjpl2`
+  :t:`[Infinite loop expression]s`,
 
-* :def_p:`fls_br4g7qwfczig`
-  :term:`[Match expression]s`,
+* :dp:`fls_kwg8a351vc7`
+  :t:`[Lazy boolean expression]s` of :t:`[scalar type]s`,
 
-* :def_p:`fls_y1ezabo61nyk`
-  :term:`[Negation expression]s` of :term:`[scalar type]s`,
+* :dp:`fls_7mjv1xd45qr4`
+  :t:`[Let statement]s`,
 
-* :def_p:`fls_6tb74n6lu0wf`
-  :term:`[Parenthesized expression]s`,
+* :dp:`fls_g7hoyfqy9mu1`
+  :t:`[Literal expression]s`,
 
-* :def_p:`fls_axwrv7b3zt55`
-  :term:`[Path expression]s` that resolve to :term:`[constant]s`,
-  :term:`[function]s`, and :term:`[static]s`,
+* :dp:`fls_br4g7qwfczig`
+  :t:`[Match expression]s`,
 
-* :def_p:`fls_3bucpdj828bq`
-  :term:`[Range expression]s`,
+* :dp:`fls_w4lpq9bs8tsc`
+  :t:`[Method call expression]s` where the callee is a :t:`constant function` or
+  do not invoke the :c:`core::ops::Deref` :t:`trait`,
 
-* :def_p:`fls_hkbwa8xx2fwx`
-  :term:`[Shared borrow]s` that do not involve :term:`[type]s` with
-  :term:`interior mutability`,
+* :dp:`fls_y1ezabo61nyk`
+  :t:`[Negation expression]s` of :t:`[scalar type]s`,
 
-* :def_p:`fls_fobs8ebt7dhc`
-  :term:`[Struct expression]s`,
+* :dp:`fls_6tb74n6lu0wf`
+  :t:`[Parenthesized expression]s`,
 
-* :def_p:`fls_dyo3o1h3keqr`
-  :term:`[Tuple expression]s`,
+* :dp:`fls_axwrv7b3zt55`
+  :t:`[Path expression]s` that resolve to :t:`[associated constant]s`,
+  :t:`[constant]s`, :t:`[constant generic parameter]s`, :t:`[function]s`,
+  :t:`[static]s`, :t:`[tuple struct]s`, and  :t:`[unit struct]s`,
 
-* :def_p:`fls_e0a1e8ddph7`
-  :term:`[Type cast expression]s` that are not :term:`[pointer-to-address
-  cast]s`,  :term:`[function-pointer-to-address cast]s`, and :term:`[unsized
-  cast]s` that involve a :term:`trait object type`,
+* :dp:`fls_3bucpdj828bq`
+  :t:`[Range expression]s`,
 
-* :def_p:`fls_pbpzkfo1fgtz`
-  :term:`[While let loop expression]s`,
+* :dp:`fls_8lmf1mb4ccpe`
+  :t:`[Record struct constructor]s`,
 
-* :def_p:`fls_qvofy4wkql0s`
-  :term:`[While loop expression]s`.
+* :dp:`fls_hkbwa8xx2fwx`
+  :t:`[Shared borrow]s` that do not involve :t:`[type]s` with :t:`interior
+  mutability`,
 
-:def_p:`fls_kjhma680hz3g`
-A :term:`constant context` is a :term:`construct` that requires a
-:term:`constant expression`. The following :term:`[construct]s` are
-:term:`[constant context]s`:
+* :dp:`fls_fobs8ebt7dhc`
+  :t:`[Struct expression]s`,
 
-* :def_p:`fls_ljc6jq5ksbcs`
-  The :term:`constant initializer` of a :term:`constant`,
+* :dp:`fls_dyo3o1h3keqr`
+  :t:`[Tuple expression]s`,
 
-* :def_p:`fls_icra98id84mk`
-  The :term:`constant parameter` of a :term:`generic`,
+* :dp:`fls_e0a1e8ddph7`
+  :t:`[Type cast expression]s` that are not :t:`[pointer-to-address cast]s`,
+  :t:`[function-pointer-to-address cast]s`, and :t:`[unsized cast]s` that
+  involve a :t:`trait object type`,
 
-* :def_p:`fls_66m2hwkju0vv`
-  The :term:`discriminant initializer` of a :term:`discriminant`,
+* :dp:`fls_zcuzhw7qkzkr`
+  :t:`[Unsafe block expression]s`,
 
-* :def_p:`fls_fsn32kmwg65u`
-  The :term:`size operand` of an :term:`array repetition constructor`,
+* :dp:`fls_pbpzkfo1fgtz`
+  :t:`[While let loop expression]s`,
 
-* :def_p:`fls_j6kffhbxdm7o`
-  The :term:`size operand` of an :term:`array type`,
+* :dp:`fls_qvofy4wkql0s`
+  :t:`[While loop expression]s`.
 
-* :def_p:`fls_ib8p7dfwddx2`
-  The :term:`static initializer` of a :term:`static`.
+:dp:`fls_3i7efddbsmn0`
+An :t:`expression` is not considered a :t:`constant expression` when it
+explicitly invokes an :t:`associated trait function` or uses :t:`[arithmetic
+operator]s` of non-builtin :t:`[type]s` that invoke :c:`core::ops`
+:t:`[trait]s`.
+
+:dp:`fls_9mrrosm8jnn7`
+An :t:`arithmetic expression` that operates with :t:`[floating point value]s` is
+not considered a :t:`constant expression` when it appears inside the body of a
+:t:`constant function`.
+
+:dp:`fls_kjhma680hz3g`
+A :t:`constant context` is a :t:`construct` that requires a :t:`constant
+expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
+
+* :dp:`fls_ljc6jq5ksbcs`
+  The :t:`constant initializer` of an :t:`associated constant` or a
+  :t:`constant`,
+
+* The :t:`constant argument` for a :t:`constant generic parameter`,
+
+* :dp:`fls_icra98id84mk`
+  The :t:`constant parameter` of a :t:`generic`,
+
+* The :t:`default value` of a :t:`constant generic parameter`,
+
+* :dp:`fls_66m2hwkju0vv`
+  The :t:`discriminant initializer` of an :t:`enum variant`,
+
+* :dp:`fls_fsn32kmwg65u`
+  The :t:`size operand` of an :t:`array repetition constructor`,
+
+* :dp:`fls_j6kffhbxdm7o`
+  The :t:`size operand` of an :t:`array type`,
+
+* :dp:`fls_ib8p7dfwddx2`
+  The :t:`static initializer` of a :t:`static`.
+
+It is a static error to create a :t:`mutable reference` in a :t:`constant
+context`.
+
+An invocation of the ``addr_of!()`` :t:`macro` expands to a :t:`constant
+expression` allowed in any :t:`constant context` and :t:`constant function`,
+subject to the same restrictions as a :t:`shared borrow expression`.
+
+An invocation of the ``panic!()`` :t:`macro` expands to a :t:`constant
+expression` allowed in any :t:`constant context` and :t:`constant function`,
+as long as the :t:`macro` is either invoked without :t:`[argument]s`, or
+with a single :t:`string literal` that does not :t:`capture` formatting
+:t:`[argument]s`.
 
 Place Expressions
 ~~~~~~~~~~~~~~~~~
 
-:def_p:`fls_qbrcg3cl9td`
-A :term:`place expression` is an :term:`expression` that represents a memory
-location. The following :term:`[expression]s` are :term:`[place expression]s`:
+.. rubric:: Legality Rules
 
-* :def_p:`fls_lj7x5dgbmg9i`
-  :term:`[Array index expression]s`,
+:dp:`fls_qbrcg3cl9td`
+A :t:`place expression` is an :t:`expression` that represents a memory location.
+The following :t:`[expression]s` are :t:`[place expression]s`:
 
-* :def_p:`fls_jpmhibm4omm7`
-  :term:`[Dereference expression]s`,
+* :dp:`fls_lj7x5dgbmg9i`
+  :t:`[Array index expression]s`,
 
-* :def_p:`fls_none1dykbn8c`
-  :term:`[Field access expression]s`,
+* :dp:`fls_jpmhibm4omm7`
+  :t:`[Dereference expression]s`,
 
-* :def_p:`fls_anzidgx02lly`
-  :term:`[Parenthesized expression]s` where the :term:`operand` is a
-  :term:`place expression`,
+* :dp:`fls_none1dykbn8c`
+  :t:`[Field access expression]s`,
 
-* :def_p:`fls_ya05djl1d154`
-  :term:`[Path expression]s` that resolve to a :term:`binding` or a
-  :term:`static`.
+* :dp:`fls_anzidgx02lly`
+  :t:`[Parenthesized expression]s` where the :t:`operand` is a :t:`place
+  expression`,
 
-:def_p:`fls_4vxi1ji93dxb`
-A :term:`place expression context` is a :term:`construct` that requires a
-:term:`place expression`. The following :term:`[construct]s` are :term:`[place
-expression context]s`:
+* :dp:`fls_ya05djl1d154`
+  :t:`[Path expression]s` that resolve to a :t:`binding` or a :t:`static`.
 
-* :def_p:`fls_qytgkbhqr5ln`
-  The :term:`indexed array operand` of an :term:`array index expression`,
+:dp:`fls_4vxi1ji93dxb`
+A :t:`place expression context` is a :t:`construct` that requires a :t:`place
+expression`. The following :t:`[construct]s` are :t:`[place expression
+context]s`:
 
-* :def_p:`fls_5gy92rsi2mqm`
-  The :term:`assignee operand` of an :term:`assignment expression` or a
-  :term:`compound assignment expression`,
+* :dp:`fls_qytgkbhqr5ln`
+  The :t:`indexed array operand` of an :t:`array index expression`,
 
-* :def_p:`fls_u80htrnr2ebz`
-  The :term:`operand` of a :term:`borrow expression`,
+* :dp:`fls_5gy92rsi2mqm`
+  The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
+  assignment expression`,
 
-* :def_p:`fls_o0feajus3jtu`
-  The :term:`operand` of a :term:`dereference expression`,
+* :dp:`fls_u80htrnr2ebz`
+  The :t:`operand` of a :t:`borrow expression`,
 
-* :def_p:`fls_ffjx1d5dseo4`
-  The :term:`container operand` of :term:`field access expression`,
+* :dp:`fls_o0feajus3jtu`
+  The :t:`operand` of a :t:`dereference expression`,
 
-* :def_p:`fls_9r7dopqf1nzl`
-  The :term:`subject let expression` of an :term:`if let expression` or a
-  :term:`while let loop expression`,
+* :dp:`fls_ffjx1d5dseo4`
+  The :t:`container operand` of :t:`field access expression`,
 
-* :def_p:`fls_ka5b87tkf8t6`
-  The initialization :term:`expression` of a :term:`let statement`,
+* :dp:`fls_9r7dopqf1nzl`
+  The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
+  let loop expression`,
 
-* :def_p:`fls_brwv1zwu37e8`
-  The :term:`subject expression` of :term:`a match expression,`
+* :dp:`fls_ka5b87tkf8t6`
+  The initialization :t:`expression` of a :t:`let statement`,
 
-* :def_p:`fls_qewvbxvk81d`
-  The :term:`base initializer` of a :term:`struct expression`,
+* :dp:`fls_brwv1zwu37e8`
+  The :t:`subject expression` of :t:`a match expression,`
 
-* :def_p:`fls_qaqwmxa3bxw1`
-  The :term:`operand` of an :term:`implicit borrow`.
+* :dp:`fls_qewvbxvk81d`
+  The :t:`base initializer` of a :t:`struct expression`,
 
-:def_p:`fls_konzgoybhfqm`
-A :term:`place expression` can be moved out of when it denotes
+* :dp:`fls_qaqwmxa3bxw1`
+  The :t:`operand` of an :t:`implicit borrow`.
 
-* :def_p:`fls_vk1xhvdaakh0`
-  A :term:`binding` which is not currently :term:`borrowed`, or
+:dp:`fls_konzgoybhfqm`
+A :t:`place expression` can be moved out of when it denotes
 
-* :def_p:`fls_4bnbv7mqod57`
-  A :term:`field` of a :term:`place expression` that can be moved out of and
-  does not implement the :codeterm:`core::ops::Drop` :term:`trait`, or
+* :dp:`fls_vk1xhvdaakh0`
+  A :t:`binding` which is not currently :t:`borrowed`, or
 
-* :def_p:`fls_3xk3p1unbjy5`
-  A :term:`temporary` created for a :term:`value expression`.
+* :dp:`fls_4bnbv7mqod57`
+  A :t:`field` of a :t:`place expression` that can be moved out of and does not
+  implement the :c:`core::ops::Drop` :t:`trait`, or
 
-:def_p:`fls_wuqjaigxdq3r`
-After a :term:`place expression` is moved out, the memory location it
-represented is deinitialized and shall not be read from until reinitialized.
+* :dp:`fls_3xk3p1unbjy5`
+  A :t:`temporary` created for a :t:`value expression`.
 
-:def_p:`fls_ku38h562vfyl`
-A :term:`mutable place expression` is a :term:`place expression` whose memory
-location can be modified. The following :term:`[place expression]s` are
-:term:`[mutable place expression]s`:
+:dp:`fls_wuqjaigxdq3r`
+After a :t:`place expression` is moved out, the memory location it represented
+is deinitialized and shall not be read from until reinitialized.
 
-* :def_p:`fls_bt50fltfqcvn`
-  An :term:`array index expression` whose :term:`type` implements the
-  :codeterm:`core::ops::IndexMut` :term:`trait`,
+:dp:`fls_ku38h562vfyl`
+A :t:`mutable place expression` is a :t:`place expression` whose memory location
+can be modified. The following :t:`[place expression]s` are :t:`[mutable place
+expression]s`:
 
-* :def_p:`fls_6b4rwkrc1ap6`
-  A :term:`dereference expression` whose :term:`type` is ``*mut T``,
+* :dp:`fls_bt50fltfqcvn`
+  An :t:`array index expression` whose :t:`type` implements the
+  :c:`core::ops::IndexMut` :t:`trait`,
 
-* :def_p:`fls_s4bhrpykzmm7`
-  A :term:`dereference expression` of a :term:`field` or :term:`binding` whose
-  :term:`type` is ``&mut T``,
+* :dp:`fls_6b4rwkrc1ap6`
+  A :t:`dereference expression` whose :t:`type` is ``*mut T``,
 
-* :def_p:`fls_1tq2o2huda9l`
-  A :term:`dereference expression` whose :term:`type` implements the
-  :codeterm:`core::ops::DerefMut` :term:`trait`,
+* :dp:`fls_s4bhrpykzmm7`
+  A :t:`dereference expression` of a :t:`field` or :t:`binding` whose :t:`type`
+  is ``&mut T``,
 
-* :def_p:`fls_xm0gm2q27x2e`
-  A :term:`field access expression` where the :term:`type` of the
-  :term:`container operand` is :term:`mutable`,
+* :dp:`fls_1tq2o2huda9l`
+  A :t:`dereference expression` whose :t:`type` implements the
+  :c:`core::ops::DerefMut` :t:`trait`,
 
-* :def_p:`fls_m0gbw9myylv2`
-  A :term:`path expression` that resolves to a :term:`mutable binding` that is
-  not currently borrowed,
+* :dp:`fls_xm0gm2q27x2e`
+  A :t:`field access expression` where the :t:`type` of the :t:`container
+  operand` is :t:`mutable`,
 
-* :def_p:`fls_ilaqmj3hc5uv`
-  A :term:`path expression` that resolves to a :term:`mutable static`,
+* :dp:`fls_m0gbw9myylv2`
+  A :t:`path expression` that resolves to a :t:`mutable binding` that is not
+  currently borrowed,
 
-* :def_p:`fls_dcm3yr3y9y0a`
-  A :term:`temporary` created for a :term:`value expression`.
+* :dp:`fls_ilaqmj3hc5uv`
+  A :t:`path expression` that resolves to a :t:`mutable static`,
+
+* :dp:`fls_dcm3yr3y9y0a`
+  A :t:`temporary` created for a :t:`value expression`.
 
 .. rubric:: Dynamic Semantics
 
-The :term:`evaluation` of a :term:`place expression` in the context of a
-:term:`value expression` or the :term:`evaluation` of a :term:`place expression`
-that is bound *by value* in a :term:`pattern` proceeds as follows:
+The :t:`evaluation` of a :t:`place expression` in the context of a :t:`value
+expression` or the :t:`evaluation` of a :t:`place expression` that is bound *by
+value* in a :t:`pattern` proceeds as follows:
 
-#. The :term:`place expression` denotes the :term:`value` held in that memory
+#. The :t:`place expression` denotes the :t:`value` held in that memory
    location.
 
-#. If the :term:`type` of the held :term:`value` implements the
-   :codeterm:`core::marker::Copy` :term:`trait`, then the held :term:`value`
-   is copied.
+#. If the :t:`type` of the held :t:`value` implements the
+   :c:`core::marker::Copy` :t:`trait`, then the held :t:`value` is copied.
 
-#. If the :term:`type` of the held :term:`value` implements the
-   :codeterm:`core::marker::Sized` :term:`trait`, then the held :term:`value`
-   is moved.
+#. If the :t:`type` of the held :t:`value` implements the
+   :c:`core::marker::Sized` :t:`trait`, then the held :t:`value` is moved.
 
-#. Otherwise the :term:`evaluation` results in a static error.
+#. Otherwise the :t:`evaluation` results in a static error.
 
 Value Expressions
 ~~~~~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_7q4hrt6yfr9b`
-A :term:`value expression` is an :term:`expression` that represents a
-:term:`value`.
+:dp:`fls_7q4hrt6yfr9b`
+A :t:`value expression` is an :t:`expression` that represents a :t:`value`.
 
 Literal Expressions
 -------------------
@@ -413,28 +458,26 @@ Literal Expressions
    LiteralExpression ::=
        Literal
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_rbwwczom3agt`
-A :term:`literal expression` is an :term:`expression` that denotes a
-:term:`literal`.
+:dp:`fls_rbwwczom3agt`
+A :t:`literal expression` is an :t:`expression` that denotes a :t:`literal`.
 
-:def_p:`fls_utbjihhwgxr1`
-A :term:`literal expression` is a :term:`value expression`.
+:dp:`fls_utbjihhwgxr1`
+A :t:`literal expression` is a :t:`value expression`.
 
-:def_p:`fls_w30su9x4q13r`
-The :term:`type` of a :term:`literal expression` is the :term:`type` of the
-corresponding :term:`literal`.
+:dp:`fls_w30su9x4q13r`
+The :t:`type` of a :t:`literal expression` is the :t:`type` of the corresponding
+:t:`literal`.
 
-:def_p:`fls_wdpbg5xzgmwu`
-The :term:`value` of a :term:`literal expression` is the :term:`value` of the
-corresponding :term:`literal`.
+:dp:`fls_wdpbg5xzgmwu`
+The :t:`value` of a :t:`literal expression` is the :t:`value` of the
+corresponding :t:`literal`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_g061yzws1m45`
-The :term:`evaluation` of a :term:`literal expression` has no effect.
+:dp:`fls_g061yzws1m45`
+The :t:`evaluation` of a :t:`literal expression` has no effect.
 
 .. rubric:: Examples
 
@@ -457,29 +500,28 @@ Path Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_gvanx4874ycy`
-A :term:`path expression` is an :term:`expression` that denotes a :term:`path`.
+:dp:`fls_gvanx4874ycy`
+A :t:`path expression` is an :t:`expression` that denotes a :t:`path`.
 
-:def_p:`fls_t8bdzvtnv249`
-A :term:`path expression` that resolves to a :term:`binding` or a :term:`static`
-is a :term:`place expression`, otherwise it is a :term:`value expression`.
+:dp:`fls_t8bdzvtnv249`
+A :t:`path expression` that resolves to a :t:`binding` or a :t:`static` is a
+:t:`place expression`, otherwise it is a :t:`value expression`.
 
-:def_p:`fls_gz67ju6l7uhn`
-A :term:`path expression` that resolves to a :term:`mutable static` shall
-require :term:`unsafe context`.
+:dp:`fls_gz67ju6l7uhn`
+A :t:`path expression` that resolves to a :t:`mutable static` shall require
+:t:`unsafe context`.
 
-:def_p:`fls_cjywisyiyti6`
-The :term:`type` of a :term:`path expression` is the :term:`type` of the
-:term:`entity` that it resolved to.
+:dp:`fls_cjywisyiyti6`
+The :t:`type` of a :t:`path expression` is the :t:`type` of the :t:`entity` that
+it resolved to.
 
-:def_p:`fls_5ifai8nkp5ek`
-The :term:`value` of a :term:`path expression` is the :term:`entity` that it
-resolved to.
+:dp:`fls_5ifai8nkp5ek`
+The :t:`value` of a :t:`path expression` is the :t:`entity` that it resolved to.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ed9w4jwx059`
-The :term:`evaluation` of a :term:`path expression` has no effect.
+:dp:`fls_ed9w4jwx059`
+The :t:`evaluation` of a :t:`path expression` has no effect.
 
 .. rubric:: Examples
 
@@ -503,52 +545,51 @@ Block Expressions
    StatementList ::=
        Statement* Expression?
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_nf65p0l0v0gr`
-A :term:`block expression` is an :term:`expression` that sequences
-:term:`[expression]s` and :term:`[statement]s`.
+:dp:`fls_nf65p0l0v0gr`
+A :t:`block expression` is an :t:`expression` that sequences :t:`[expression]s`
+and :t:`[statement]s`.
 
-:def_p:`fls_tn3hj7k2lliu`
-A :term:`tail expression` is the last :term:`expression` within a :term:`block
+:dp:`fls_tn3hj7k2lliu`
+A :t:`tail expression` is the last :t:`expression` within a :t:`block
 expression`.
 
-:def_p:`fls_wiv8wpw3i79z`
-A :term:`block expression` is a :term:`value expression`.
+:dp:`fls_wiv8wpw3i79z`
+A :t:`block expression` is a :t:`value expression`.
 
-:def_p:`fls_u4gj2lnkq9ub`
-The :term:`type` of a :term:`block expression` is determined as follows:
+:dp:`fls_u4gj2lnkq9ub`
+The :t:`type` of a :t:`block expression` is determined as follows:
 
-* :def_p:`fls_ob76y2ymdd27`
-  If the :term:`block expression` has an :term:`expression`, then the
-  :term:`type` is the :term:`type` of the :term:`expression`.
+* :dp:`fls_ob76y2ymdd27`
+  If the :t:`block expression` has an :t:`expression`, then the :t:`type` is the
+  :t:`type` of the :t:`expression`.
 
-* :def_p:`fls_u0avbm147nyh`
-  If the :term:`block expression` does not have an :term:`expression`, then the
-  :term:`type` is the :term:`unit type`.
+* :dp:`fls_u0avbm147nyh`
+  If the :t:`block expression` does not have an :t:`expression`, then the
+  :t:`type` is the :t:`unit type`.
 
-:def_p:`fls_1hzup0sf8l7l`
-The :term:`value` of a :term:`block expression` is determined as follows:
+:dp:`fls_1hzup0sf8l7l`
+The :t:`value` of a :t:`block expression` is determined as follows:
 
-* :def_p:`fls_9nmssjseq3jt`
-  If the :term:`block expression` has an :term:`expression`, then the
-  :term:`value` is the :term:`value` of the :term:`expression`.
+* :dp:`fls_9nmssjseq3jt`
+  If the :t:`block expression` has an :t:`expression`, then the :t:`value` is
+  the :t:`value` of the :t:`expression`.
 
-* :def_p:`fls_a3ulnvyc1ut`
-  If the :term:`block expression` does not have an :term:`expression`, then the
-  :term:`value` of the :term:`block expression` is the :term:`unit value`.
+* :dp:`fls_a3ulnvyc1ut`
+  If the :t:`block expression` does not have an :t:`expression`, then the
+  :t:`value` of the :t:`block expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_elcl73psruxw`
-The :term:`evaluation` of a :term:`block expression` proceeds as follows:
+:dp:`fls_elcl73psruxw`
+The :t:`evaluation` of a :t:`block expression` proceeds as follows:
 
-#. :def_p:`fls_13b5n127rj92`
-   Each :term:`statement` is executed in declarative order.
+#. :dp:`fls_13b5n127rj92`
+   Each :t:`statement` is executed in declarative order.
 
-#. :def_p:`fls_nzdpw59plr2g`
-   The :term:`expression` is evaluated.
+#. :dp:`fls_nzdpw59plr2g`
+   The :t:`expression` is evaluated.
 
 .. rubric:: Examples
 
@@ -571,30 +612,30 @@ async Blocks
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_hhidi5ukxo`
-An :term:`async block expression` is a :term:`block expression` that **???**.
+:dp:`fls_hhidi5ukxo`
+An :t:`async block expression` is a :t:`block expression` that **???**.
 
-:def_p:`fls_eam1cqbjlfs0`
-An :term:`async block expression` is a :term:`value expression`.
+:dp:`fls_eam1cqbjlfs0`
+An :t:`async block expression` is a :t:`value expression`.
 
-:def_p:`fls_tzclkasinpoq`
-An :term:`async block expression` is subject to :term:`capturing`.
+:dp:`fls_tzclkasinpoq`
+An :t:`async block expression` is subject to :t:`capturing`.
 
-:def_p:`fls_oisws5qykedi`
-An :term:`async block expression` denotes a new :term:`control flow boundary`.
+:dp:`fls_oisws5qykedi`
+An :t:`async block expression` denotes a new :t:`control flow boundary`.
 
-:def_p:`fls_ncd0wkgtldem`
-The :term:`type` of an :term:`async block expression` shall implement the
-:codeterm:`core::future::Future` trait.
+:dp:`fls_ncd0wkgtldem`
+The :t:`type` of an :t:`async block expression` shall implement the
+:c:`core::future::Future` trait.
 
-:def_p:`fls_pvnofoomgwl5`
-The :term:`value` of an :term:`async block expression` is a :term:`future`.
+:dp:`fls_pvnofoomgwl5`
+The :t:`value` of an :t:`async block expression` is a :t:`future`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_9ghp5yet75y6`
-The :term:`evaluation` of an :term:`async block expression` produces an
-anonymous :term:`object` that captures the related :term:`future`.
+:dp:`fls_9ghp5yet75y6`
+The :t:`evaluation` of an :t:`async block expression` produces an anonymous
+:t:`object` that captures the related :t:`future`.
 
 .. rubric:: Examples
 
@@ -612,32 +653,31 @@ unsafe Blocks
    UnsafeBlockExpression ::=
        $$unsafe$$ BlockExpression
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_2az5huhcxzzy`
-An :term:`unsafe block expression` is a :term:`block expression` that is marked
-as :term:`unsafe`.
+:dp:`fls_2az5huhcxzzy`
+An :t:`unsafe block expression` is a :t:`block expression` that is marked as
+:t:`unsafe`.
 
-:def_p:`fls_5ucvvja4dzoc`
-An :term:`unsafe block expression` allows :term:`unsafety`.
+:dp:`fls_5ucvvja4dzoc`
+An :t:`unsafe block expression` allows :t:`unsafety`.
 
-:def_p:`fls_2nzwo1hbsg9g`
-An :term:`unsafe block expression` is a :term:`value expression`.
+:dp:`fls_2nzwo1hbsg9g`
+An :t:`unsafe block expression` is a :t:`value expression`.
 
-:def_p:`fls_j3mmg317q442`
-The :term:`type` of the :term:`unsafe block expression` is the :term:`type` of
-its :term:`block expression`.
+:dp:`fls_j3mmg317q442`
+The :t:`type` of the :t:`unsafe block expression` is the :t:`type` of its
+:t:`block expression`.
 
-:def_p:`fls_nygurv3x3wq6`
-The :term:`value` of the :term:`unsafe block expression` is the :term:`value` of
-its :term:`block expression`.
+:dp:`fls_nygurv3x3wq6`
+The :t:`value` of the :t:`unsafe block expression` is the :t:`value` of its
+:t:`block expression`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_pv5gcy3tbjwo`
-The :term:`evaluation` of an :term:`unsafe block expression` evaluates its
-:term:`block expression`.
+:dp:`fls_pv5gcy3tbjwo`
+The :t:`evaluation` of an :t:`unsafe block expression` evaluates its :t:`block
+expression`.
 
 .. rubric:: Examples
 
@@ -667,12 +707,10 @@ Operator Expressions
      | NegationExpression
      | TypeCastExpression
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_ursc5ynymoy`
-An :term:`operator expression` is an :term:`expression` that involves an
-operator.
+:dp:`fls_ursc5ynymoy`
+An :t:`operator expression` is an :t:`expression` that involves an operator.
 
 Borrow Expression
 ~~~~~~~~~~~~~~~~~
@@ -686,54 +724,51 @@ Borrow Expression
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_nnqfkl228hjx`
-A :term:`borrow expression` is an :term:`expression` that borrows the
-:term:`value` of its :term:`operand` and creates a :term:`reference` to the
-memory location of its :term:`operand`.
+:dp:`fls_nnqfkl228hjx`
+A :t:`borrow expression` is an :t:`expression` that borrows the :t:`value` of
+its :t:`operand` and creates a :t:`reference` to the memory location of its
+:t:`operand`.
 
-:def_p:`fls_r7ix8webgqlm`
-An :term:`immutable borrow expression` is a :term:`borrow expression` that lacks
-:term:`keyword` ``mut``.
+:dp:`fls_r7ix8webgqlm`
+An :t:`immutable borrow expression` is a :t:`borrow expression` that lacks
+:t:`keyword` ``mut``.
 
-:def_p:`fls_50j167r4v61b`
-A :term:`mutable borrow expression` is a :term:`borrow expression` that has
-:term:`keyword` ``mut``.
+:dp:`fls_50j167r4v61b`
+A :t:`mutable borrow expression` is a :t:`borrow expression` that has
+:t:`keyword` ``mut``.
 
-:def_p:`fls_ya77l2zgtilp`
-When the :term:`operand` of a :term:`borrow expression` is a :term:`place
-expression`, the :term:`borrow expression` produces a :term:`reference` to the
-memory location indicated by the :term:`operand`. The memory location is placed
-in a borrowed state, or simply :term:`borrowed`.
+:dp:`fls_ya77l2zgtilp`
+When the :t:`operand` of a :t:`borrow expression` is a :t:`place expression`,
+the :t:`borrow expression` produces a :t:`reference` to the memory location
+indicated by the :t:`operand`. The memory location is placed in a borrowed
+state, or simply :t:`borrowed`.
 
-:def_p:`fls_8uhfwqurbyqf`
-When the :term:`operand` of a :term:`borrow expression` is a :term:`value
-expression`, a :term:`temporary` is allocated and the :term:`borrow expression`
-produces a :term:`reference` to the memory location of the :term:`temporary`.
+:dp:`fls_8uhfwqurbyqf`
+When the :t:`operand` of a :t:`borrow expression` is a :t:`value expression`,
+a :t:`temporary` is allocated and the :t:`borrow expression` produces a
+:t:`reference` to the memory location of the :t:`temporary`.
 
-:def_p:`fls_xrq41zaq6bza`
-A :term:`borrow expression` is a :term:`value expression`.
+:dp:`fls_xrq41zaq6bza`
+A :t:`borrow expression` is a :t:`value expression`.
 
-:def_p:`fls_chr03xll75d`
-The :term:`type` of a :term:`borrow expression` is determined as follows:
+:dp:`fls_chr03xll75d`
+The :t:`type` of a :t:`borrow expression` is determined as follows:
 
-* :def_p:`fls_5b2x5ri2w54r`
-  If the :term:`borrow expression` denotes a :term:`shared reference`, then the
-  :term:`type` is ``&T`` where ``T`` is the :term:`type` of the :term:`operand`.
+* :dp:`fls_5b2x5ri2w54r`
+  If the :t:`borrow expression` denotes a :t:`shared reference`, then the
+  :t:`type` is ``&T`` where ``T`` is the :t:`type` of the :t:`operand`.
 
-* :def_p:`fls_agl09ia869rk`
-  If the :term:`borrow expression` denotes a :term:`mutable reference`,
-  then the :term:`type` is ``&mut T`` where ``T`` is the :term:`type` of the
-  :term:`operand`.
+* :dp:`fls_agl09ia869rk`
+  If the :t:`borrow expression` denotes a :t:`mutable reference`, then the
+  :t:`type` is ``&mut T`` where ``T`` is the :t:`type` of the :t:`operand`.
 
-:def_p:`fls_8cvmee9bzs40`
-The :term:`value` of a :term:`borrow expression` is the address of its
-:term:`operand`.
+:dp:`fls_8cvmee9bzs40`
+The :t:`value` of a :t:`borrow expression` is the address of its :t:`operand`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_2jd0mgw4zja4`
-The :term:`evaluation` of a :term:`borrow expression` evaluates its
-:term:`operand`.
+:dp:`fls_2jd0mgw4zja4`
+The :t:`evaluation` of a :t:`borrow expression` evaluates its :t:`operand`.
 
 .. rubric:: Examples
 
@@ -741,12 +776,10 @@ The :term:`evaluation` of a :term:`borrow expression` evaluates its
 
    let mut answer = 42;
 
-
-:def_p:`fls_350qejoq9i23`
+:dp:`fls_350qejoq9i23`
 Mutable borrow.
 
 .. syntax::
-
 
    let ref_answer = &mut answer;
 
@@ -762,84 +795,81 @@ Dereference Expression
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_f6wktzofzdn1`
-A :term:`dereference expression` is an :term:`expression` that obtains the
-pointed-to memory location of its :term:`operand`.
+:dp:`fls_f6wktzofzdn1`
+A :t:`dereference expression` is an :t:`expression` that obtains the pointed-to
+memory location of its :t:`operand`.
 
-:def_p:`fls_aeh5pzpcjveq`
-When the :term:`operand` of a :term:`dereference expression` is of a
-:term:`pointer type`, the :term:`dereference expression` denotes the pointed-to
-memory location of the :term:`operand`, or the :term:`dereference` of the
-:term:`operand`.
+:dp:`fls_aeh5pzpcjveq`
+When the :t:`operand` of a :t:`dereference expression` is of a :t:`pointer
+type`, the :t:`dereference expression` denotes the pointed-to memory location of
+the :t:`operand`, or the :t:`dereference` of the :t:`operand`.
 
-:def_p:`fls_9cc0ml2sru6x`
-The :term:`dereference` is assignable when
+:dp:`fls_9cc0ml2sru6x`
+The :t:`dereference` is assignable when
 
-* :def_p:`fls_m0cc62tcf6b7`
-  The :term:`operand` is of :term:`type` ``&mut T`` or ``*mut T``, and
+* :dp:`fls_m0cc62tcf6b7`
+  The :t:`operand` is of :t:`type` ``&mut T`` or ``*mut T``, and
 
-* :def_p:`fls_llzt4s3uwt95`
-  The :term:`operand` is a :term:`binding` or a possibly nested :term:`field` of
-  a :term:`binding`, or
+* :dp:`fls_llzt4s3uwt95`
+  The :t:`operand` is a :t:`binding` or a possibly nested :t:`field` of a
+  :t:`binding`, or
 
-* :def_p:`fls_908xdt291via`
-  The :term:`operand` denotes a :term:`mutable place expression`.
+* :dp:`fls_908xdt291via`
+  The :t:`operand` denotes a :t:`mutable place expression`.
 
-* :def_p:`fls_b96mek2ojcl`
-  The :term:`operand` is of another :term:`type` that implements the
-  :codeterm:`core::ops::DerefMut` :term:`trait`.
+* :dp:`fls_b96mek2ojcl`
+  The :t:`operand` is of another :t:`type` that implements the
+  :c:`core::ops::DerefMut` :t:`trait`.
 
-:def_p:`fls_8i4jzksxlrw0`
-Dereferencing a :term:`raw pointer` shall require :term:`unsafe context`.
+:dp:`fls_8i4jzksxlrw0`
+Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
 
-:def_p:`fls_d68ddlse4zp`
-If the context of a :term:`dereference expression` is an :term:`immutable
-place expression`, then the :term:`dereference expression` is equivalent to
-:term:`expression` ``*core::ops::Deref::deref(&operand)``.
+:dp:`fls_d68ddlse4zp`
+If the context of a :t:`dereference expression` is an :t:`immutable
+place expression`, then the :t:`dereference expression` is equivalent to
+:t:`expression` ``*core::ops::Deref::deref(&operand)``.
 
-:def_p:`fls_g73vguanbs1x`
-If the context of a :term:`dereference expression` is a :term:`mutable
-place expression`, then the :term:`dereference expression` is equivalent to
-:term:`expression` ``*core::ops::DerefMut::deref_mut(&mut operand)``.
+:dp:`fls_g73vguanbs1x`
+If the context of a :t:`dereference expression` is a :t:`mutable place
+expression`, then the :t:`dereference expression` is equivalent to
+:t:`expression` ``*core::ops::DerefMut::deref_mut(&mut operand)``.
 
-:def_p:`fls_8ibfqxtnahzx`
-The :term:`type` of a :term:`dereference expression` is determined as follows:
+:dp:`fls_8ibfqxtnahzx`
+The :t:`type` of a :t:`dereference expression` is determined as follows:
 
-* :def_p:`fls_7e7tka4f2f1a`
-  If the :term:`type` of the :term:`operand` is ``&mut T``, ``&T``, ``*mut T``,
-  or ``*const T``, then the :term:`type` is ``T``\ ``.``
+* :dp:`fls_7e7tka4f2f1a`
+  If the :t:`type` of the :t:`operand` is ``&mut T``, ``&T``, ``*mut T``, or
+  ``*const T``, then the :t:`type` is ``T``\ ``.``
 
-* :def_p:`fls_y9bc691kkh6v`
-  Otherwise the :term:`type` is :term:`associated type`
-  :codeterm:`core::ops::Deref::Target`.
+* :dp:`fls_y9bc691kkh6v`
+  Otherwise the :t:`type` is :t:`associated type` :c:`core::ops::Deref::Target`.
 
-:def_p:`fls_gw49nukfveib`
-The :term:`value` of a :term:`dereference expression` is determined as follows:
+:dp:`fls_gw49nukfveib`
+The :t:`value` of a :t:`dereference expression` is determined as follows:
 
-* :def_p:`fls_jjf3sz9ddfhy`
-  If the :term:`type` of the :term:`operand` is ``&mut T``, ``&T``, ``*mut T``,
-  or ``*const T``, then the :term:`value` is the pointed-to :term:`value`\ ``.``
+* :dp:`fls_jjf3sz9ddfhy`
+  If the :t:`type` of the :t:`operand` is ``&mut T``, ``&T``, ``*mut T``, or
+  ``*const T``, then the :t:`value` is the pointed-to :t:`value`\ ``.``
 
-* :def_p:`fls_fyend8kkpqq4`
-  Otherwise the :term:`value` is the result of evaluating :term:`expression`
-  ``*core::ops::Deref::deref(&operand)`` or :term:`expression`
+* :dp:`fls_fyend8kkpqq4`
+  Otherwise the :t:`value` is the result of evaluating :t:`expression`
+  ``*core::ops::Deref::deref(&operand)`` or :t:`expression`
   ``*core::ops::DerefMut::deref_mut(&mut operand)`` respectively.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_72bpdsxxbgeq`
-The :term:`evaluation` of a :term:`dereference expression` evaluates its
-:term:`operand`.
+:dp:`fls_72bpdsxxbgeq`
+The :t:`evaluation` of a :t:`dereference expression` evaluates its :t:`operand`.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_9wgldua1u8yt`
-It is undefined behavior to dereference a :term:`raw pointer` that is either
-:term:`dangling` or unaligned.
+:dp:`fls_9wgldua1u8yt`
+It is undefined behavior to dereference a :t:`raw pointer` that is either
+:t:`dangling` or unaligned.
 
 .. rubric:: Examples
 
-:def_p:`fls_9ifaterm8nop`
+:dp:`fls_9ifaterm8nop`
 See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``ref_answer``.
 
 .. code-block:: text
@@ -861,50 +891,48 @@ Error Propagation Expression
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_8q59wbumrt5s`
-An :term:`error propagation expression` is an :term:`expression` that either
-evaluates to a :term:`value` of its :term:`operand` or returns a value to the
-next control flow boundary.
+:dp:`fls_8q59wbumrt5s`
+An :t:`error propagation expression` is an :t:`expression` that either evaluates
+to a :t:`value` of its :t:`operand` or returns a value to the next control flow
+boundary.
 
-:def_p:`fls_mq2h4seoxah`
-An :term:`error propagation expression` shall appear within a :term:`control
-flow boundary`.
+:dp:`fls_mq2h4seoxah`
+An :t:`error propagation expression` shall appear within a :t:`control flow
+boundary`.
 
-:def_p:`fls_ab4vhq4nwn7f`
-The :term:`type` of an :term:`error propagation expression` is :term:`associated
-type` :codeterm:`core::ops::Try::Output`.
+:dp:`fls_ab4vhq4nwn7f`
+The :t:`type` of an :t:`error propagation expression` is :t:`associated type`
+:c:`core::ops::Try::Output`.
 
-:def_p:`fls_z4zikxy2b1em`
-The :term:`value` of an :term:`error propagation expression` is determined as
-follows:
+:dp:`fls_z4zikxy2b1em`
+The :t:`value` of an :t:`error propagation expression` is determined as follows:
 
-* :def_p:`fls_a09614kgsspt`
-  If the :term:`evaluation` of the :term:`error propagation expression`
-  executed ``core::ops::Try::branch(operand)``, then the :term:`value` is the
-  :term:`value` of the :codeterm:`core::ops::ControlFlow::Continue` variant.
+* :dp:`fls_a09614kgsspt`
+  If the :t:`evaluation` of the :t:`error propagation expression` executed
+  ``core::ops::Try::branch(operand)``, then the :t:`value` is the :t:`value` of
+  the :c:`core::ops::ControlFlow::Continue` variant.
 
-* :def_p:`fls_8df018q7y6g`
-  Otherwise control flow is returned to the end of the enclosing :term:`control
+* :dp:`fls_8df018q7y6g`
+  Otherwise control flow is returned to the end of the enclosing :t:`control
   flow boundary`.
 
-:def_p:`fls_9sriwut951xv`
-The expression context for the :term:`operand` of the :term:`error propagation
-expression` is a :term:`value expression` context.
+:dp:`fls_9sriwut951xv`
+The expression context for the :t:`operand` of the :t:`error propagation
+expression` is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_alk4qvfprnvy`
-The :term:`evaluation` of an :term:`error propagation operator` of the form
+:dp:`fls_alk4qvfprnvy`
+The :t:`evaluation` of an :t:`error propagation operator` of the form
 
 .. code-block:: text
 
    expression?
 
-:def_p:`fls_1nnhjcgy8kdh`
-is equivalent to the :term:`evaluation` the following :term:`expression`:
+:dp:`fls_1nnhjcgy8kdh`
+is equivalent to the :t:`evaluation` the following :t:`expression`:
 
 .. syntax::
-
 
    match core::ops::Try::branch(expression) {
        core::ops::ControlFlow::Continue(value) =>
@@ -949,83 +977,76 @@ Negation Expression
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_pfa81kv2mru8`
-A :term:`negation expression` is an :term:`expression` that negates its
-:term:`operand`.
+:dp:`fls_pfa81kv2mru8`
+A :t:`negation expression` is an :t:`expression` that negates its :t:`operand`.
 
-:def_p:`fls_plcut8vzdwox`
-The :term:`type` of the :term:`operand` of a :term:`negation expression` with a
-:syntax:`BitwiseNegationOperator` shall implement the :codeterm:`core::ops::Not`
-:term:`trait`.
+:dp:`fls_plcut8vzdwox`
+The :t:`type` of the :t:`operand` of a :t:`negation expression` with a
+:s:`BitwiseNegationOperator` shall implement the :c:`core::ops::Not` :t:`trait`.
 
-:def_p:`fls_ohu0kljfexd3`
-The :term:`type` of a :term:`negation expression` with a
-:syntax:`BitwiseNegationOperator` is :term:`associated type`
-:codeterm:`core::ops::Not::Output`.
+:dp:`fls_ohu0kljfexd3`
+The :t:`type` of a :t:`negation expression` with a :s:`BitwiseNegationOperator`
+is :t:`associated type` :c:`core::ops::Not::Output`.
 
-:def_p:`fls_ghqvj8q71o97`
-The :term:`value` of a :term:`negation expression` with
-a :syntax:`BitwiseNegationOperator` is the result of
-``core::ops::Not::not(operand)``.
+:dp:`fls_ghqvj8q71o97`
+The :t:`value` of a :t:`negation expression` with a :s:`BitwiseNegationOperator`
+is the result of ``core::ops::Not::not(operand)``.
 
-:def_p:`fls_3m4mgqnzqhri`
-The :term:`type` of the :term:`operand` of a :term:`negation expression` with
-a :syntax:`SignNegationOperator` shall implement the :codeterm:`core::ops::Neg`
-:term:`trait`.
+:dp:`fls_3m4mgqnzqhri`
+The :t:`type` of the :t:`operand` of a :t:`negation expression` with a
+:s:`SignNegationOperator` shall implement the :c:`core::ops::Neg` :t:`trait`.
 
-:def_p:`fls_u7gzm6n75rzm`
-The :term:`type` of a :term:`negation expression` with a
-:syntax:`SignNegationOperator` shall be :term:`associated type`
-:codeterm:`core::ops::Neg::Output`.
+:dp:`fls_u7gzm6n75rzm`
+The :t:`type` of a :t:`negation expression` with a :s:`SignNegationOperator`
+shall be :t:`associated type` :c:`core::ops::Neg::Output`.
 
-:def_p:`fls_9rmq7iaf092d`
-The :term:`value` of a :term:`negation expression`
-with a :syntax:`SignNegationOperator` is the result of
-``core::ops::Neg::neg(operand)``.
+:dp:`fls_9rmq7iaf092d`
+The :t:`value` of a :t:`negation expression` with a :s:`SignNegationOperator` is
+the result of ``core::ops::Neg::neg(operand)``.
 
-:def_p:`fls_2eou0x2lxmk6`
-The expression context for the :term:`operand` of the :term:`negation
-expression` is a :term:`value expression` context.
+:dp:`fls_2eou0x2lxmk6`
+The expression context for the :t:`operand` of the :t:`negation expression` is a
+:t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_yzt6pcsvj3a`
-The :term:`evaluation` of a :term:`negation expression` with a
-:syntax:`BitwiseNegationOperator` proceeds as follows:
+:dp:`fls_yzt6pcsvj3a`
+The :t:`evaluation` of a :t:`negation expression` with a
+:s:`BitwiseNegationOperator` proceeds as follows:
 
-#. :def_p:`fls_8tgxtprtifrr`
-   The :term:`operand` is evaluated.
+#. :dp:`fls_8tgxtprtifrr`
+   The :t:`operand` is evaluated.
 
-#. :def_p:`fls_gn3dnuxm2h8m`
+#. :dp:`fls_gn3dnuxm2h8m`
    ``core::ops::Not::not(operand)`` is invoked.
 
-:def_p:`fls_tsou6yz4mfte`
-The :term:`evaluation` of a :term:`negation expression` with a
-:syntax:`SignNegationOperator` proceeds as follows:
+:dp:`fls_tsou6yz4mfte`
+The :t:`evaluation` of a :t:`negation expression` with a
+:s:`SignNegationOperator` proceeds as follows:
 
-#. :def_p:`fls_zdfgqky85r1f`
-   The :term:`operand` is evaluated.
+#. :dp:`fls_zdfgqky85r1f`
+   The :t:`operand` is evaluated.
 
-#. :def_p:`fls_uldh10k77sng`
+#. :dp:`fls_uldh10k77sng`
    ``core::ops::Neg::neg(operand)`` is invoked.
 
 .. rubric:: Examples
 
-:def_p:`fls_uo6vv2yf8usx`
+:dp:`fls_uo6vv2yf8usx`
 Sign negation.
 
 .. code-block:: text
 
    -42
 
-:def_p:`fls_hbrg0d98jak5`
+:dp:`fls_hbrg0d98jak5`
 Bitwise negation.
 
 .. code-block:: text
 
    !42
 
-:def_p:`fls_kqtr9c3jorvg`
+:dp:`fls_kqtr9c3jorvg`
 Logical negation.
 
 .. code-block:: text
@@ -1063,168 +1084,161 @@ Arithmetic Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_asibqpe3z95h`
-An :term:`arithmetic expression` is an :term:`expression` that computes a
-:term:`value` from two :term:`[operand]s` using arithmetic.
+:dp:`fls_asibqpe3z95h`
+An :t:`arithmetic expression` is an :t:`expression` that computes a :t:`value`
+from two :t:`[operand]s` using arithmetic.
 
-:def_p:`fls_dstca76y08ge`
-A :term:`division expression` is an :term:`arithmetic expression` that uses
+:dp:`fls_dstca76y08ge`
+A :t:`division expression` is an :t:`arithmetic expression` that uses division.
+
+:dp:`fls_kf41bphvlse3`
+A :t:`multiplication expression` is an :t:`arithmetic expression` that uses
+multiplication.
+
+:dp:`fls_3de9ulyzuoa`
+A :t:`remainder expression` is an :t:`arithmetic expression` that uses remainder
 division.
 
-:def_p:`fls_kf41bphvlse3`
-A :term:`multiplication expression` is an :term:`arithmetic expression` that
-uses multiplication.
-
-:def_p:`fls_3de9ulyzuoa`
-A :term:`remainder expression` is an :term:`arithmetic expression` that uses
-remainder division.
-
-:def_p:`fls_aalxhbvu8kdi`
-A :term:`subtraction expression` is an :term:`arithmetic expression` that uses
+:dp:`fls_aalxhbvu8kdi`
+A :t:`subtraction expression` is an :t:`arithmetic expression` that uses
 subtraction.
 
-:def_p:`fls_8imzo7agyx0k`
-The :term:`type` of the :term:`left operand` of an :term:`addition expression`
-shall implement the :codeterm:`core::ops::Add` :term:`trait` with the
-:term:`type` of the :term:`right operand` as the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_8imzo7agyx0k`
+The :t:`type` of the :t:`left operand` of an :t:`addition expression` shall
+implement the :c:`core::ops::Add` :t:`trait` with the :t:`type` of the :t:`right
+operand` as the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_vk17mfv47wk9`
-The :term:`type` of an :term:`addition expression` is :term:`associated type`
-:codeterm:`core::ops::Add::Output`.
+:dp:`fls_vk17mfv47wk9`
+The :t:`type` of an :t:`addition expression` is :t:`associated type`
+:c:`core::ops::Add::Output`.
 
-:def_p:`fls_ryzhdpxgm7ii`
-The :term:`value` of an :term:`addition expression` is the result of
+:dp:`fls_ryzhdpxgm7ii`
+The :t:`value` of an :t:`addition expression` is the result of
 ``core::ops::Add::add(left_operand, right_operand)``.
 
-:def_p:`fls_f1puss9t4btz`
-The :term:`type` of the :term:`left operand` of a :term:`division expression`
-shall implement the :codeterm:`core::ops::Div` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_f1puss9t4btz`
+The :t:`type` of the :t:`left operand` of a :t:`division expression` shall
+implement the :c:`core::ops::Div` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_5rdrkvspw57z`
-The :term:`type` of a :term:`division expression` is :term:`associated type`
-:codeterm:`core::ops::Div::Output`.
+:dp:`fls_5rdrkvspw57z`
+The :t:`type` of a :t:`division expression` is :t:`associated type`
+:c:`core::ops::Div::Output`.
 
-:def_p:`fls_thyq4h55mx55`
-The :term:`value` of a :term:`division expression` is the result of
+:dp:`fls_thyq4h55mx55`
+The :t:`value` of a :t:`division expression` is the result of
 ``core::ops::Div::div(left_operand, right_operand)``.
 
-:def_p:`fls_hrml95g2txcj`
-The :term:`type` of the :term:`left operand` of a :term:`multiplication
-expression` shall implement the :codeterm:`core::ops::Mul` :term:`trait`
-where the :term:`type` of the :term:`right operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_hrml95g2txcj`
+The :t:`type` of the :t:`left operand` of a :t:`multiplication expression`
+shall implement the :c:`core::ops::Mul` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_ittf4yggk7do`
-The :term:`type` of a :term:`multiplication expression` is :term:`associated
-type` :codeterm:`core::ops::Mul::Output`.
+:dp:`fls_ittf4yggk7do`
+The :t:`type` of a :t:`multiplication expression` is :t:`associated type`
+:c:`core::ops::Mul::Output`.
 
-:def_p:`fls_ylqm6wucq2sw`
-The :term:`value` of a :term:`multiplication expression` is the result of
+:dp:`fls_ylqm6wucq2sw`
+The :t:`value` of a :t:`multiplication expression` is the result of
 ``core::ops::Mul::mul(left_operand, right_operand)``.
 
-:def_p:`fls_8fbhreyynhid`
-The :term:`type` of the :term:`left operand` of a :term:`remainder expression`
-shall implement the :codeterm:`core::ops::Rem` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_8fbhreyynhid`
+The :t:`type` of the :t:`left operand` of a :t:`remainder expression` shall
+implement the :c:`core::ops::Rem` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_u3jwnrqun5kl`
-The :term:`type` of a :term:`remainder expression` is :term:`associated type`
-:codeterm:`core::ops::Rem::Output`.
+:dp:`fls_u3jwnrqun5kl`
+The :t:`type` of a :t:`remainder expression` is :t:`associated type`
+:c:`core::ops::Rem::Output`.
 
-:def_p:`fls_2ude3wrxji2p`
-The :term:`value` of a :term:`remainder expression` is the result of
+:dp:`fls_2ude3wrxji2p`
+The :t:`value` of a :t:`remainder expression` is the result of
 ``core::ops::Rem::rem(left_operand, right_operand)``.
 
-:def_p:`fls_fjcv1nm8tlgf`
-The :term:`type` of the :term:`left operand` of a :term:`subtraction expression`
-shall implement the :codeterm:`core::ops::Sub` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_fjcv1nm8tlgf`
+The :t:`type` of the :t:`left operand` of a :t:`subtraction expression`
+shall implement the :c:`core::ops::Sub` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_9x2i1zlsm364`
-The :term:`type` of a :term:`subtraction expression` is :term:`associated type`
-:codeterm:`core::ops::Sub::Output`.
+:dp:`fls_9x2i1zlsm364`
+The :t:`type` of a :t:`subtraction expression` is :t:`associated type`
+:c:`core::ops::Sub::Output`.
 
-:def_p:`fls_v8vekngd27sz`
-The :term:`value` of a :term:`subtraction expression` is the result of
+:dp:`fls_v8vekngd27sz`
+The :t:`value` of a :t:`subtraction expression` is the result of
 ``core::ops::Sub::sub(left_operand, right_operand)``.
 
-:def_p:`fls_69r1m88mxzx5`
-The expression context for the :term:`[operand]s` of an :term:`arithmetic
-expression` is a :term:`value expression` context.
+:dp:`fls_69r1m88mxzx5`
+The expression context for the :t:`[operand]s` of an :t:`arithmetic expression`
+is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_5nsa9zefz9cv`
-The :term:`evaluation` of an :term:`addition expression` proceeds as follows:
+:dp:`fls_5nsa9zefz9cv`
+The :t:`evaluation` of an :t:`addition expression` proceeds as follows:
 
-#. :def_p:`fls_u3pstd6xe43y`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_u3pstd6xe43y`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_jjmc1xgny77`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_jjmc1xgny77`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_cayhj5hcuhcg`
+#. :dp:`fls_cayhj5hcuhcg`
    ``core::ops::Add::add(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_43knkymqpj7t`
-The :term:`evaluation` of a :term:`division expression` proceeds as follows:
+:dp:`fls_43knkymqpj7t`
+The :t:`evaluation` of a :t:`division expression` proceeds as follows:
 
-#. :def_p:`fls_62gpbubfj30w`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_62gpbubfj30w`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_bveocgaagk1n`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_bveocgaagk1n`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_qd6ggdgq2hob`
+#. :dp:`fls_qd6ggdgq2hob`
    ``core::ops::Div::div(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_lr2a21v5en59`
-The :term:`evaluation` of a :term:`multiplication expression` proceeds as
-follows:
+:dp:`fls_lr2a21v5en59`
+The :t:`evaluation` of a :t:`multiplication expression` proceeds as follows:
 
-#. :def_p:`fls_kpbxcdaflb06`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_kpbxcdaflb06`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_b94ojbfukhvd`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_b94ojbfukhvd`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_blyr18iao20n`
+#. :dp:`fls_blyr18iao20n`
    ``core::ops::Mul::mul(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_g28igfbnwfe0`
-The :term:`evaluation` of a :term:`remainder expression` proceeds as follows:
+:dp:`fls_g28igfbnwfe0`
+The :t:`evaluation` of a :t:`remainder expression` proceeds as follows:
 
-#. :def_p:`fls_thcumw8n8xbw`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_thcumw8n8xbw`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_gld1u9fnsj6d`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_gld1u9fnsj6d`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_k7lmxvpkxtub`
+#. :dp:`fls_k7lmxvpkxtub`
    ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_bndpd66973ev`
-The :term:`evaluation` of a :term:`subtraction expression` proceeds as follows:
+:dp:`fls_bndpd66973ev`
+The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
 
-#. :def_p:`fls_izmfimd4yg27`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_izmfimd4yg27`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_ad9tc6ki8vcq`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_ad9tc6ki8vcq`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_b9g0r9vc4rou`
+#. :dp:`fls_b9g0r9vc4rou`
    ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_8dkygceg0oo`
-It is undefined behavior for an :term:`arithmetic operation` to cause overflow
-with :term:`[value]s` of :term:`[numeric type]s`.
+:dp:`fls_8dkygceg0oo`
+It is undefined behavior for an :t:`arithmetic operation` to cause overflow with
+:t:`[value]s` of :t:`[numeric type]s`.
 
 .. rubric:: Examples
 
@@ -1267,164 +1281,157 @@ Bit Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_3zd59yuywz6l`
-A :term:`bit expression` is an :term:`expression` that computes a :term:`value`
-from two :term:`[operand]s` using bit arithmetic.
+:dp:`fls_3zd59yuywz6l`
+A :t:`bit expression` is an :t:`expression` that computes a :t:`value` from two
+:t:`[operand]s` using bit arithmetic.
 
-:def_p:`fls_f6mmva3lbj1i`
-A :term:`bit and expression` is a :term:`bit expression` that uses bit and
+:dp:`fls_f6mmva3lbj1i`
+A :t:`bit and expression` is a :t:`bit expression` that uses bit and arithmetic.
+
+:dp:`fls_3136k1y6x3cu`
+A :t:`bit or expression` is a :t:`bit expression` that uses bit or arithmetic.
+
+:dp:`fls_j7ujcuthga1i`
+A :t:`bit xor expression` is a :t:`bit expression` that uses bit exclusive or
 arithmetic.
 
-:def_p:`fls_3136k1y6x3cu`
-A :term:`bit or expression` is a :term:`bit expression` that uses bit or
+:dp:`fls_caxn774ij8lk`
+A :t:`shift left expression` is a :t:`bit expression` that uses bit shift left
 arithmetic.
 
-:def_p:`fls_j7ujcuthga1i`
-A :term:`bit xor expression` is a :term:`bit expression` that uses bit exclusive
-or arithmetic.
+:dp:`fls_t709sl4co3al`
+A :t:`shift right expression` is a :t:`bit expression` that uses bit shift right
+arithmetic.
 
-:def_p:`fls_caxn774ij8lk`
-A :term:`shift left expression` is a :term:`bit expression` that uses bit shift
-left arithmetic.
+:dp:`fls_cmowpfrcelke`
+The :t:`type` of the :t:`left operand` of a :t:`bit and expression` shall
+implement the :c:`core::ops::BitAnd` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_t709sl4co3al`
-A :term:`shift right expression` is a :term:`bit expression` that uses bit shift
-right arithmetic.
+:dp:`fls_kchprk9z6xun`
+The :t:`type` of a :t:`bit and expression` is :t:`associated type`
+:c:`core::ops::BitAnd::Output`.
 
-:def_p:`fls_cmowpfrcelke`
-The :term:`type` of the :term:`left operand` of a :term:`bit and expression`
-shall implement the :codeterm:`core::ops::BitAnd` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
-
-:def_p:`fls_kchprk9z6xun`
-The :term:`type` of a :term:`bit and expression` is :term:`associated type`
-:codeterm:`core::ops::BitAnd::Output`.
-
-:def_p:`fls_dimu987fw4kg`
-The :term:`value` of a :term:`bit and expression` is the result of
+:dp:`fls_dimu987fw4kg`
+The :t:`value` of a :t:`bit and expression` is the result of
 ``core::ops::BitAnd::bitand(left_operand, right_operand)``.
 
-:def_p:`fls_oo2ynd8e1ys6`
-The :term:`type` of the :term:`left operand` of a :term:`bit or expression`
-shall implement the :codeterm:`core::ops::BitOr` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_oo2ynd8e1ys6`
+The :t:`type` of the :t:`left operand` of a :t:`bit or expression` shall
+implement the :c:`core::ops::BitOr` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_s6hkt5fg598y`
-The :term:`type` of a :term:`bit or expression` is :term:`associated type`
-:codeterm:`core::ops::BitOr::Output`.
+:dp:`fls_s6hkt5fg598y`
+The :t:`type` of a :t:`bit or expression` is :t:`associated type`
+:c:`core::ops::BitOr::Output`.
 
-:def_p:`fls_osfse0t6ua8a`
-The :term:`value` of a :term:`bit or expression` is the result of
+:dp:`fls_osfse0t6ua8a`
+The :t:`value` of a :t:`bit or expression` is the result of
 ``core::ops::BitOr::bitor(left_operand, right_operand)``.
 
-:def_p:`fls_fnywefl9nty2`
-The :term:`type` of the :term:`left operand` of a :term:`bit xor expression`
-shall implement the :codeterm:`core::ops::BitXor` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_fnywefl9nty2`
+The :t:`type` of the :t:`left operand` of a :t:`bit xor expression` shall
+implement the :c:`core::ops::BitXor` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_4f24nyx0ix0j`
-The :term:`type` of a :term:`bit xor expression` is :term:`associated type`
-:codeterm:`core::ops::BitXor::Output`.
+:dp:`fls_4f24nyx0ix0j`
+The :t:`type` of a :t:`bit xor expression` is :t:`associated type`
+:c:`core::ops::BitXor::Output`.
 
-:def_p:`fls_8tb22c6zbp3`
-The :term:`value` of a :term:`bit xor expression` is the result of
+:dp:`fls_8tb22c6zbp3`
+The :t:`value` of a :t:`bit xor expression` is the result of
 ``core::ops::BitXor::bitxor(left_operand, right_operand)``.
 
-:def_p:`fls_1f4pc612f2a8`
-The :term:`type` of the :term:`left operand` of a :term:`shift left expression`
-shall implement the :codeterm:`core::ops::Shl` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_1f4pc612f2a8`
+The :t:`type` of the :t:`left operand` of a :t:`shift left expression` shall
+implement the :c:`core::ops::Shl` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_8trozue35xe4`
-The :term:`type` of a :term:`shift left expression` is :term:`associated type`
-:codeterm:`core::ops::Shl::Output`.
+:dp:`fls_8trozue35xe4`
+The :t:`type` of a :t:`shift left expression` is :t:`associated type`
+:c:`core::ops::Shl::Output`.
 
-:def_p:`fls_kqntxbwnc58v`
-The :term:`value` of a :term:`shift left expression` is the result of
+:dp:`fls_kqntxbwnc58v`
+The :t:`value` of a :t:`shift left expression` is the result of
 ``core::ops::Shl::shl(left_operand, right_operand)``.
 
-:def_p:`fls_onutb0b9p9zj`
-The :term:`type` of the :term:`left operand` of a :term:`shift right operation`
-shall implement the :codeterm:`core::ops::Shr` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_onutb0b9p9zj`
+The :t:`type` of the :t:`left operand` of a :t:`shift right operation` shall
+implement the :c:`core::ops::Shr` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_yq8rtwfp3nv0`
-The :term:`type` of a :term:`shift right operation` is :term:`associated type`
-:codeterm:`core::ops::Shr::Output`.
+:dp:`fls_yq8rtwfp3nv0`
+The :t:`type` of a :t:`shift right operation` is :t:`associated type`
+:c:`core::ops::Shr::Output`.
 
-:def_p:`fls_fbazfgd5m1ot`
-The :term:`value` of a :term:`shift right operation` is the result of
+:dp:`fls_fbazfgd5m1ot`
+The :t:`value` of a :t:`shift right operation` is the result of
 ``core::ops::Shr::shr(left_operand, right_operand)``.
 
-:def_p:`fls_2z6wble3u8ec`
-The expression context for the :term:`[operand]s` of a :term:`bit expression` is
-a :term:`value expression` context.
+:dp:`fls_2z6wble3u8ec`
+The expression context for the :t:`[operand]s` of a :t:`bit expression` is a
+:t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_f4o8xlu67okn`
-The :term:`evaluation` of a :term:`bit and expression` proceeds as follows:
+:dp:`fls_f4o8xlu67okn`
+The :t:`evaluation` of a :t:`bit and expression` proceeds as follows:
 
-#. :def_p:`fls_kp747xqekyrr`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_kp747xqekyrr`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_m0pdk78dah6n`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_m0pdk78dah6n`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_m2hsk41hwm2j`
+#. :dp:`fls_m2hsk41hwm2j`
    ``core::ops::BitAnd::bitand(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_p9rlmjhbnbao`
-The :term:`evaluation` of a :term:`bit or expression` proceeds as follows:
+:dp:`fls_p9rlmjhbnbao`
+The :t:`evaluation` of a :t:`bit or expression` proceeds as follows:
 
-#. :def_p:`fls_vprp53kv64q6`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_vprp53kv64q6`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_d456ummq6vrk`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_d456ummq6vrk`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_n269ufyesndz`
+#. :dp:`fls_n269ufyesndz`
    ``core::ops::BitOr::bitor(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_i9iqtobheivu`
-The :term:`evaluation` of a :term:`bit xor expression` proceeds as follows:
+:dp:`fls_i9iqtobheivu`
+The :t:`evaluation` of a :t:`bit xor expression` proceeds as follows:
 
-#. :def_p:`fls_htw2tpujktwt`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_htw2tpujktwt`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_gf9tyu1idpjk`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_gf9tyu1idpjk`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_u5irwqswbsvu`
+#. :dp:`fls_u5irwqswbsvu`
    ``core::ops::BitXor::bitxor(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_2kkpr955i4lm`
-The :term:`evaluation` of a :term:`shift left expression` proceeds as follows:
+:dp:`fls_2kkpr955i4lm`
+The :t:`evaluation` of a :t:`shift left expression` proceeds as follows:
 
-#. :def_p:`fls_7p64lgnjxylz`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_7p64lgnjxylz`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_ieh1itrkcnf6`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_ieh1itrkcnf6`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_f0p70y92k14f`
+#. :dp:`fls_f0p70y92k14f`
    ``core::ops::Shl::shl(left_operand, right_operand)`` is invoked.
 
-:def_p:`fls_303r0u6ug215`
-The :term:`evaluation` of a :term:`shift right expression` proceeds as follows:
+:dp:`fls_303r0u6ug215`
+The :t:`evaluation` of a :t:`shift right expression` proceeds as follows:
 
-#. :def_p:`fls_4gxj18t6cnzq`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_4gxj18t6cnzq`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_gurl2ve58drz`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_gurl2ve58drz`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_xkyj83mcb9d5`
+#. :dp:`fls_xkyj83mcb9d5`
    ``core::ops::Shr::shr(left_operand, right_operand)`` is invoked.
 
 .. rubric:: Examples
@@ -1470,204 +1477,195 @@ Comparison Expressions
    NotEqualsExpression ::=
        LeftOperand $$!=$$ RightOperand
 
-
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_yzuceqx6nxwa`
-A :term:`comparison expression` is an :term:`expression` that compares the
-:term:`[value]s` of two :term:`[operand]s`.
+:dp:`fls_yzuceqx6nxwa`
+A :t:`comparison expression` is an :t:`expression` that compares the
+:t:`[value]s` of two :t:`[operand]s`.
 
-:def_p:`fls_ruyho6cu7rxg`
-An :term:`equals expression` is a :term:`comparison expression` that tests
-equality.
+:dp:`fls_ruyho6cu7rxg`
+An :t:`equals expression` is a :t:`comparison expression` that tests equality.
 
-:def_p:`fls_wapl0ir7uvbp`
-A :term:`greater-than expression` is a :term:`comparison expression` that tests
-for a greater-than relationship.
+:dp:`fls_wapl0ir7uvbp`
+A :t:`greater-than expression` is a :t:`comparison expression` that tests for a
+greater-than relationship.
 
-:def_p:`fls_7n5gol6a8lod`
-A :term:`greater-than-or-equals expression` is a :term:`comparison expression`
-that tests for a greater-than-or-equals relationship.
+:dp:`fls_7n5gol6a8lod`
+A :t:`greater-than-or-equals expression` is a :t:`comparison expression` that
+tests for a greater-than-or-equals relationship.
 
-:def_p:`fls_yd4qqi39w248`
-A :term:`less-than expression` is a :term:`comparison expression` that tests for
-a less-than relationship.
+:dp:`fls_yd4qqi39w248`
+A :t:`less-than expression` is a :t:`comparison expression` that tests for a
+less-than relationship.
 
-:def_p:`fls_yxwe1o27u6ns`
-A :term:`less-than-or-equals expression` is a :term:`comparison expression` that
-tests for a less-than-or-equals relationship.
+:dp:`fls_yxwe1o27u6ns`
+A :t:`less-than-or-equals expression` is a :t:`comparison expression` that tests
+for a less-than-or-equals relationship.
 
-:def_p:`fls_w71j7i3n1kit`
-A :term:`not-equals expression` is a :term:`comparison expression` that tests
-for inequality.
+:dp:`fls_w71j7i3n1kit`
+A :t:`not-equals expression` is a :t:`comparison expression` that tests for
+inequality.
 
-:def_p:`fls_asfrqemqviad`
-A :term:`comparison expression` implicitly takes :term:`[shared borrow]s` of
-its :term:`[operand]s`.
+:dp:`fls_asfrqemqviad`
+A :t:`comparison expression` implicitly takes :t:`[shared borrow]s` of its
+:t:`[operand]s`.
 
-:def_p:`fls_9s4re3ujnfis`
-The :term:`type` of a :term:`comparison expression` is :term:`type`
-:codeterm:`bool`.
+:dp:`fls_9s4re3ujnfis`
+The :t:`type` of a :t:`comparison expression` is :t:`type` :c:`bool`.
 
-:def_p:`fls_8echqk9po1cf`
-The :term:`type` of the :term:`left operand` of an :term:`equals expression`
-shall implement the :codeterm:`core::cmp::PartialEq` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_8echqk9po1cf`
+The :t:`type` of the :t:`left operand` of an :t:`equals expression` shall
+implement the :c:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_d62qfloqk2ub`
-The :term:`value` of an :term:`equals expression` is the result of
+:dp:`fls_d62qfloqk2ub`
+The :t:`value` of an :t:`equals expression` is the result of
 ``core::cmp::PartialEq::eq(&left_operand, &right_operand)``.
 
-:def_p:`fls_x2s6ydvj5zyd`
-The :term:`type` of the :term:`left operand` of a :term:`greater-than
-expression` shall implement the :codeterm:`core::cmp::PartialOrd` :term:`trait`
-where the :term:`type` of the :term:`right operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_x2s6ydvj5zyd`
+The :t:`type` of the :t:`left operand` of a :t:`greater-than expression` shall
+implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_pso38dowbk91`
-The :term:`value` of a :term:`greater-than expression` is the result of
+:dp:`fls_pso38dowbk91`
+The :t:`value` of a :t:`greater-than expression` is the result of
 ``core::cmp::PartialOrd::gt(&left_operand, &right_operand)``.
 
-:def_p:`fls_hholzcbp5u3n`
-The :term:`type` of the :term:`left operand` of a :term:`greater-than-or-equals
-expression` shall implement the :codeterm:`core::cmp::PartialOrd` :term:`trait`
-where the :term:`type` of the :term:`right operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_hholzcbp5u3n`
+The :t:`type` of the :t:`left operand` of a :t:`greater-than-or-equals
+expression` shall implement the :c:`core::cmp::PartialOrd` :t:`trait` where the
+:t:`type` of the :t:`right operand` is the :t:`trait implementation` :t:`type
+parameter`.
 
-:def_p:`fls_wytygse41vzm`
-The :term:`value` of a :term:`greater-than-or-equals expression` is the result
-of ``core::cmp::PartialOrd::ge(&left_operand, &right_operand)``.
+:dp:`fls_wytygse41vzm`
+The :t:`value` of a :t:`greater-than-or-equals expression` is the result of
+``core::cmp::PartialOrd::ge(&left_operand, &right_operand)``.
 
-:def_p:`fls_ynibdcke3etb`
-The :term:`type` of the :term:`left operand` of a :term:`less-than expression`
-shall implement the :codeterm:`core::cmp::PartialOrd` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_ynibdcke3etb`
+The :t:`type` of the :t:`left operand` of a :t:`less-than expression` shall
+implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_xmtxkit3qpw7`
-The :term:`value` of a :term:`less-than expression` is the result of
+:dp:`fls_xmtxkit3qpw7`
+The :t:`value` of a :t:`less-than expression` is the result of
 ``core::cmp::PartialOrd::lt(&left_operand, &right_operand)``.
 
-:def_p:`fls_6dgfieyxdan0`
-The :term:`type` of the :term:`left operand` of a :term:`less-than-or-equals
-expression` shall implement the :codeterm:`core::cmp::PartialOrd` :term:`trait`
-where the :term:`type` of the :term:`right operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_6dgfieyxdan0`
+The :t:`type` of the :t:`left operand` of a :t:`less-than-or-equals expression`
+shall implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of
+the :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_7pfsqby2saag`
-The :term:`value` of a :term:`less-than-or-equals expression` is the result of
+:dp:`fls_7pfsqby2saag`
+The :t:`value` of a :t:`less-than-or-equals expression` is the result of
 ``core::cmp::PartialOrd::le(&left_operand, &right_operand)``.
 
-:def_p:`fls_qzo1torhv5i3`
-The :term:`type` of the :term:`left operand` of a :term:`not-equals expression`
-shall implement the :codeterm:`core::cmp::PartialEq` :term:`trait` where the
-:term:`type` of the :term:`right operand` is the :term:`trait implementation`
-:term:`type parameter`.
+:dp:`fls_qzo1torhv5i3`
+The :t:`type` of the :t:`left operand` of a :t:`not-equals expression` shall
+implement the :c:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_kodwkh58hmdv`
-The :term:`value` of a :term:`not-equals expression` is the result of
+:dp:`fls_kodwkh58hmdv`
+The :t:`value` of a :t:`not-equals expression` is the result of
 ``core::cmp::PartialEq::ne(&left_operand, &right_operand)``.
 
-:def_p:`fls_8qbrzb9bxyf`
-The expression context for the :term:`[operand]s` of a :term:`comparison
-expression` is a :term:`place expression` context.
+:dp:`fls_8qbrzb9bxyf`
+The expression context for the :t:`[operand]s` of a :t:`comparison expression`
+is a :t:`place expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ydt9zvh0h5ex`
-The :term:`evaluation` of an :term:`equals expression` proceeds as follows:
+:dp:`fls_ydt9zvh0h5ex`
+The :t:`evaluation` of an :t:`equals expression` proceeds as follows:
 
-#. :def_p:`fls_4vbrc31r0o60`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_4vbrc31r0o60`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_hyy974ksbbrq`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_hyy974ksbbrq`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_htrjqxiv3avh`
+#. :dp:`fls_htrjqxiv3avh`
    ``core::cmp::PartialEq::eq(&left_operand, &right_operand)`` ``is invoked.``
 
-:def_p:`fls_1udbc4aom6ok`
-The :term:`evaluation` of a :term:`greater-than expression` proceeds as follows:
+:dp:`fls_1udbc4aom6ok`
+The :t:`evaluation` of a :t:`greater-than expression` proceeds as follows:
 
-#. :def_p:`fls_96mt7gx5ogo0`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_96mt7gx5ogo0`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_or0i2cqxwl8o`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_or0i2cqxwl8o`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_udnhkbxpk83m`
+#. :dp:`fls_udnhkbxpk83m`
    ``core::cmp::PartialOrd::gt(&left_operand, &right_operand)`` is invoked.
 
-:def_p:`fls_mab6yirx77zl`
-The :term:`evaluation` of a :term:`greater-than-or-equals expression` proceeds
-as follows:
+:dp:`fls_mab6yirx77zl`
+The :t:`evaluation` of a :t:`greater-than-or-equals expression` proceeds as
+follows:
 
-#. :def_p:`fls_2ggb7a7nhrk9`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_2ggb7a7nhrk9`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_ukm97arfzsk1`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_ukm97arfzsk1`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_wrftg7onlkmm`
+#. :dp:`fls_wrftg7onlkmm`
    ``core::cmp::PartialOrd::ge(&left_operand, &right_operand)`` is invoked.
 
-:def_p:`fls_irlqykpbtvd`
-The :term:`evaluation` of a :term:`less-than expression` proceeds as follows:
+:dp:`fls_irlqykpbtvd`
+The :t:`evaluation` of a :t:`less-than expression` proceeds as follows:
 
-#. :def_p:`fls_udonl4c7f6pz`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_udonl4c7f6pz`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_ebvyhqbb921g`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_ebvyhqbb921g`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_rfomib80bnn2`
+#. :dp:`fls_rfomib80bnn2`
    ``core::cmp::PartialOrd::lt(&left_operand, &right_operand)`` is invoked.
 
-:def_p:`fls_6cb4wg59wmef`
-The :term:`evaluation` of a :term:`less-than-or-equals expression` proceeds
-as follows:
+:dp:`fls_6cb4wg59wmef`
+The :t:`evaluation` of a :t:`less-than-or-equals expression` proceeds as
+follows:
 
-#. :def_p:`fls_dkbjn7noq8n2`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_dkbjn7noq8n2`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_kezynx2xc1q7`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_kezynx2xc1q7`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_8luq5sellcaq`
+#. :dp:`fls_8luq5sellcaq`
    ``core::cmp::PartialOrd::le(&left_operand, &right_operand)`` is invoked.
 
-:def_p:`fls_c93pacid548a`
-The :term:`evaluation` of a :term:`not-equals expression` proceeds as follows:
+:dp:`fls_c93pacid548a`
+The :t:`evaluation` of a :t:`not-equals expression` proceeds as follows:
 
-#. :def_p:`fls_gqy6uuowij9e`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_gqy6uuowij9e`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_s6sq6p8th5nt`
-   The :term:`right operand` is evaluated.
+#. :dp:`fls_s6sq6p8th5nt`
+   The :t:`right operand` is evaluated.
 
-#. :def_p:`fls_kdga59xx4nx3`
+#. :dp:`fls_kdga59xx4nx3`
    ``core::cmp::PartialEq::ne(&left_operand, &right_operand)`` is invoked.
 
 .. rubric:: Examples
 
-:def_p:`fls_777hlnpac9h1`
+:dp:`fls_777hlnpac9h1`
 12 == 12
 
-:def_p:`fls_xx7ugkxmk06p`
+:dp:`fls_xx7ugkxmk06p`
 42 > 12
 
-:def_p:`fls_pfym2t99i6x4`
+:dp:`fls_pfym2t99i6x4`
 42 >= 35
 
-:def_p:`fls_nnvf94dbxwte`
+:dp:`fls_nnvf94dbxwte`
 42 < 109
 
-:def_p:`fls_4h896fhds7jk`
+:dp:`fls_4h896fhds7jk`
 42 <= 42
 
-:def_p:`fls_rm0hk0svq4v7`
+:dp:`fls_rm0hk0svq4v7`
 12 != 42
 
 Lazy Boolean Expressions
@@ -1689,67 +1687,66 @@ Lazy Boolean Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_gpbvus89iy4c`
-A :term:`lazy boolean expression` is an :term:`expression` that performs short
-circuit Boolean arithmetic.
+:dp:`fls_gpbvus89iy4c`
+A :t:`lazy boolean expression` is an :t:`expression` that performs short circuit
+Boolean arithmetic.
 
-:def_p:`fls_40jya46h62yi`
-A :term:`lazy and expression` is a :term:`lazy boolean expression` that uses
-short circuit and arithmetic.
+:dp:`fls_40jya46h62yi`
+A :t:`lazy and expression` is a :t:`lazy boolean expression` that uses short
+circuit and arithmetic.
 
-:def_p:`fls_k8u77ow5bb6c`
-A :term:`lazy or expression` is a :term:`lazy boolean expression` that uses
-short circuit or arithmetic.
+:dp:`fls_k8u77ow5bb6c`
+A :t:`lazy or expression` is a :t:`lazy boolean expression` that uses short
+circuit or arithmetic.
 
-:def_p:`fls_u0gwo0s2l0tn`
-The :term:`[type]s` of the :term:`[operand]s` of a :term:`lazy boolean
-expression` shall be :term:`type` :codeterm:`bool`.
+:dp:`fls_u0gwo0s2l0tn`
+The :t:`[type]s` of the :t:`[operand]s` of a :t:`lazy boolean expression` shall
+be :t:`type` :c:`bool`.
 
-:def_p:`fls_zas0lizgq2hn`
-The :term:`type` of a :term:`lazy boolean expression` is :term:`type`
-:codeterm:`bool`.
+:dp:`fls_zas0lizgq2hn`
+The :t:`type` of a :t:`lazy boolean expression` is :t:`type` :c:`bool`.
 
-:def_p:`fls_xdgvrd58nkoa`
-The :term:`value` of a :term:`lazy boolean expression` is either ``true`` or
+:dp:`fls_xdgvrd58nkoa`
+The :t:`value` of a :t:`lazy boolean expression` is either ``true`` or
 ``false``.
 
-:def_p:`fls_bov5j5t1bx0a`
-The expression context for the :term:`[operand]s` of the :term:`lazy boolean
-expression` is a :term:`value expression` context.
+:dp:`fls_bov5j5t1bx0a`
+The expression context for the :t:`[operand]s` of the :t:`lazy boolean
+expression` is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ufre0ko2cwh2`
-The :term:`evaluation` of a :term:`lazy and expression` proceeds as follows:
+:dp:`fls_ufre0ko2cwh2`
+The :t:`evaluation` of a :t:`lazy and expression` proceeds as follows:
 
-#. :def_p:`fls_jugckad775kq`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_jugckad775kq`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_tmfmu3syxp2q`
-   If the :term:`left operand` evaluated to ``true``, then
+#. :dp:`fls_tmfmu3syxp2q`
+   If the :t:`left operand` evaluated to ``true``, then
 
-   #. :def_p:`fls_edj00fp6bqdk`
-      The :term:`right operand` is evaluated and returned as the :term:`[lazy
-      and expression]'s` :term:`value`.
+   #. :dp:`fls_edj00fp6bqdk`
+      The :t:`right operand` is evaluated and returned as the :t:`[lazy and
+      expression]'s` :t:`value`.
 
-#. :def_p:`fls_srfv1d4idxy9`
-   Otherwise the :term:`lazy and expression` evaluates to ``false``.
+#. :dp:`fls_srfv1d4idxy9`
+   Otherwise the :t:`lazy and expression` evaluates to ``false``.
 
-:def_p:`fls_tflikh8cmxvc`
-The :term:`evaluation` of a :term:`lazy or expression` proceeds as follows:
+:dp:`fls_tflikh8cmxvc`
+The :t:`evaluation` of a :t:`lazy or expression` proceeds as follows:
 
-#. :def_p:`fls_p0rafjsridre`
-   The :term:`left operand` is evaluated.
+#. :dp:`fls_p0rafjsridre`
+   The :t:`left operand` is evaluated.
 
-#. :def_p:`fls_yg1348rlziw3`
-   If the :term:`left operand` evaluated to ``false``, then
+#. :dp:`fls_yg1348rlziw3`
+   If the :t:`left operand` evaluated to ``false``, then
 
-   #. :def_p:`fls_ds8cr5dxc9em`
-      The :term:`right operand` is evaluated and returned as the :term:`[lazy or
-      expression]'s` :term:`value`.
+   #. :dp:`fls_ds8cr5dxc9em`
+      The :t:`right operand` is evaluated and returned as the :t:`[lazy or
+      expression]'s` :t:`value`.
 
-#. :def_p:`fls_yffozo2vq5xz`
-   Otherwise the :term:`lazy or expression` evaluates to ``true``.
+#. :dp:`fls_yffozo2vq5xz`
+   Otherwise the :t:`lazy or expression` evaluates to ``true``.
 
 .. rubric:: Examples
 
@@ -1770,200 +1767,187 @@ Type Cast Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ltioqbhl14g0`
-A :term:`type cast expression` is an :term:`expression` that changes the
-:term:`type` of an :term:`operand`.
+:dp:`fls_ltioqbhl14g0`
+A :t:`type cast expression` is an :t:`expression` that changes the :t:`type` of
+an :t:`operand`.
 
-:def_p:`fls_99kvyh4puy57`
-:term:`Cast` or :term:`casting` is the process of changing the :term:`type` of
-an :term:`expression`.
+:dp:`fls_99kvyh4puy57`
+:t:`Cast` or :t:`casting` is the process of changing the :t:`type` of an
+:t:`expression`.
 
-:def_p:`fls_a6midh2m0w0b`
-The ``TypeSpecificationWithoutBounds`` describes the :def_term:`target type` of
-the :term:`type cast expression`.
+:dp:`fls_a6midh2m0w0b`
+The ``TypeSpecificationWithoutBounds`` describes the :dt:`target type` of the
+:t:`type cast expression`.
 
-:def_p:`fls_otaxe9okhdr1`
-A :term:`type cast expression` with the following characteristics performs a
-:def_term:`specialized cast`:
+:dp:`fls_otaxe9okhdr1`
+A :t:`type cast expression` with the following characteristics performs a
+:dt:`specialized cast`:
 
-* :def_p:`fls_4s69s9pcvbn7`
-  An :term:`operand` of a :term:`numeric type` and a target :term:`numeric type`
-  perform a :term:`numeric cast`.
+* :dp:`fls_4s69s9pcvbn7`
+  An :t:`operand` of a :t:`numeric type` and a target :t:`numeric type` perform
+  a :t:`numeric cast`.
 
-* :def_p:`fls_le6bchl25ewz`
-  An :term:`operand` of an :term:`enum type` and a target :term:`integer type`
-  perform :term:`enum cast`. An\ * enum cast* converts the :term:`operand` to
-  its :term:`discriminant`, followed by a :term:`numeric cast`.
+* :dp:`fls_le6bchl25ewz`
+  An :t:`operand` of an :t:`enum type` and a target :t:`integer type`
+  perform :t:`enum cast`. An *enum cast* converts the :t:`operand` to its
+  :t:`discriminant`, followed by a :t:`numeric cast`.
 
-* :def_p:`fls_pcromhosmnf0`
-  An operand of :term:`type` :codeterm:`bool` or :term:`type` :codeterm:`char`
-  and a target :term:`integer type` perform :term:`primitive-to-integer cast`. A
-  :def_term:`primitive-to-integer cast`
+* :dp:`fls_pcromhosmnf0`
+  An operand of :t:`type` :c:`bool` or :t:`type` :c:`char` and a
+  target :t:`integer type` perform :t:`primitive-to-integer cast`. A
+  :dt:`primitive-to-integer cast`
 
-  * :def_p:`fls_al9f1t7vlsxi`
-    Converts an :term:`operand` of :term:`type` :codeterm:`bool` with
-    :term:`value` ``false`` to zero.
+  * :dp:`fls_al9f1t7vlsxi`
+    Converts an :t:`operand` of :t:`type` :c:`bool` with :t:`value` ``false``
+    to zero.
 
-  * :def_p:`fls_jea17f39fmsg`
-    Converts an :term:`operand` of type :codeterm:`bool` with :term:`value`
-    ``true`` to one.
+  * :dp:`fls_jea17f39fmsg`
+    Converts an :t:`operand` of type :c:`bool` with :t:`value` ``true`` to one.
 
-  * :def_p:`fls_eb00s8fxlvjb`
-    Convert an :term:`operand` of type :codeterm:`char` to the :term:`value` of
-    the corresponding :term:`code point`, followed by a :term:`numeric cast`.
+  * :dp:`fls_eb00s8fxlvjb`
+    Convert an :t:`operand` of type :c:`char` to the :t:`value` of the
+    corresponding :t:`code point`, followed by a :t:`numeric cast`.
 
-* :def_p:`fls_qk5trk8wkvxb`
-  An :term:`operand` of :term:`type` :codeterm:`u8` and a target :term:`type`
-  :codeterm:`char` performs :term:`u8-to-char cast`. A :def_term:`u8-to-char
-  cast` converts an :term:`operand` of :term:`type` :codeterm:`u8` to the
-  :term:`value` of the corresponding :term:`code point`.
+* :dp:`fls_qk5trk8wkvxb`
+  An :t:`operand` of :t:`type` :c:`u8` and a target :t:`type` :c:`char` performs
+  :t:`u8-to-char cast`. A :dt:`u8-to-char cast` converts an :t:`operand` of
+  :t:`type` :c:`u8` to the :t:`value` of the corresponding :t:`code point`.
 
-* :def_p:`fls_t16yzaxro5ew`
-  An :term:`operand` of :term:`type` ``*const T`` or ``*mut T``
-  and a :term:`target type` ``*const V`` or ``*mut V`` where ``V``
-  implements the :codeterm:`core::marker::Sized` :term:`trait` performs
-  :term:`pointer-to-pointer cast`.
+* :dp:`fls_t16yzaxro5ew`
+  An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` and a :t:`target type`
+  ``*const V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
+  :t:`trait` performs :t:`pointer-to-pointer cast`.
 
-* :def_p:`fls_i4zsbbmfa2fl`
-  An :term:`operand` of :term:`type` ``*const T`` or ``*mut T`` where
-  ``T`` implements the :codeterm:`core::marker::Sized` :term:`trait` and
-  a target :term:`integer type` perform :term:`pointer-to-address cast`.
-  A :def_term:`pointer-to-address cast` produces an :term:`integer` that
-  represents the machine address of the referenced memory. If the :term:`integer
-  type` is smaller than the :term:`type` of the :term:`operand`, the address
-  is truncated.
+* :dp:`fls_i4zsbbmfa2fl`
+  An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` where ``T`` implements
+  the :c:`core::marker::Sized` :t:`trait` and a target :t:`integer type` perform
+  :t:`pointer-to-address cast`. A :dt:`pointer-to-address cast` produces an
+  :t:`integer` that represents the machine address of the referenced memory. If
+  the :t:`integer type` is smaller than the :t:`type` of the :t:`operand`, the
+  address is truncated.
 
-* :def_p:`fls_59mpteeczzo`
-  An :term:`operand` of :term:`integer type` and :term:`target type` ``*const
-  V`` or ``*mut V`` where ``V`` implements the :codeterm:`core::marker::Sized`
-  :term:`trait` perform :term:`address-to-pointer cast`. An
-  :def_term:`address-to-pointer cast` produces a :term:`pointer` that interprets
-  the :term:`integer` as a machine address.
+* :dp:`fls_59mpteeczzo`
+  An :t:`operand` of :t:`integer type` and :t:`target type` ``*const V`` or
+  ``*mut V`` where ``V`` implements the :c:`core::marker::Sized` :t:`trait`
+  perform :t:`address-to-pointer cast`. An :dt:`address-to-pointer cast`
+  produces a :t:`pointer` that interprets the :t:`integer` as a machine address.
 
-* :def_p:`fls_8ccwlliqw9jx`
-  An :term:`operand` of :term:`type` ``&mut [T; N]`` and a :term:`target type`
-  ``*const T`` perform :term:`array-to-pointer cast`.
+* :dp:`fls_8ccwlliqw9jx`
+  An :t:`operand` of :t:`type` ``&mut [T; N]`` and a :t:`target type` ``*const
+  T`` perform :t:`array-to-pointer cast`.
 
-* :def_p:`fls_i8txki3htx92`
-  An :term:`operand` of a :term:`function item type` and a
-  :term:`target type` ``*const V`` or ``*mut V`` where ``V``
-  implements the :codeterm:`core::marker::Sized` :term:`trait` perform
-  :term:`function-item-to-pointer cast`.
+* :dp:`fls_i8txki3htx92`
+  An :t:`operand` of a :t:`function item type` and a :t:`target type` ``*const
+  V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
+  :t:`trait` perform :t:`function-item-to-pointer cast`.
 
-* :def_p:`fls_6hbkvbb1c8aj`
-  An :term:`operand` of a :term:`function item type` and a target :term:`integer
-  type` perform :term:`function-to-address cast`.
+* :dp:`fls_6hbkvbb1c8aj`
+  An :t:`operand` of a :t:`function item type` and a target :t:`integer type`
+  perform :t:`function-to-address cast`.
 
-* :def_p:`fls_133j6xw8k4qe`
-  An :term:`operand` of a :term:`function pointer type` and a
-  :term:`target type` ``*const V`` or ``*mut V`` where ``V``
-  implements the :codeterm:`core::marker::Sized` :term:`trait` perform
-  :term:`function-pointer-to-pointer cast`.
+* :dp:`fls_133j6xw8k4qe`
+  An :t:`operand` of a :t:`function pointer type` and a :t:`target type`
+  ``*const V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
+  :t:`trait` perform :t:`function-pointer-to-pointer cast`.
 
-* :def_p:`fls_bhw2j9wjpf2x`
-  An :term:`operand` of a :term:`function pointer type` and a target
-  :term:`integer type` perform :term:`function-pointer-to-address cast`.
+* :dp:`fls_bhw2j9wjpf2x`
+  An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
+  perform :t:`function-pointer-to-address cast`.
 
-:def_p:`fls_3ww5gbk9w4ys`
-A :term:`cast` is legal when it either performs :term:`type coercion` or is a
-:term:`specialized cast`.
+:dp:`fls_3ww5gbk9w4ys`
+A :t:`cast` is legal when it either performs :t:`type coercion` or is a
+:t:`specialized cast`.
 
-:def_p:`fls_hhxawo12cndy`
-The :term:`type` of a :term:`type cast expression` is the :term:`target type`.
+:dp:`fls_hhxawo12cndy`
+The :t:`type` of a :t:`type cast expression` is the :t:`target type`.
 
-:def_p:`fls_uuayaksl8059`
-The :term:`value` of a :term:`type cast expression` is the :term:`value` of the
-:term:`operand` after the :term:`cast`.
+:dp:`fls_uuayaksl8059`
+The :t:`value` of a :t:`type cast expression` is the :t:`value` of the
+:t:`operand` after the :t:`cast`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_syk2li8ft3rx`
-The :term:`evaluation` of a :term:`type cast expression` evaluates its
-:term:`operand`.
+:dp:`fls_syk2li8ft3rx`
+The :t:`evaluation` of a :t:`type cast expression` evaluates its :t:`operand`.
 
-:def_p:`fls_uqv32nthva6y`
-The :term:`evaluation` of a :def_term:`numeric cast` proceeds as follows:
+:dp:`fls_uqv32nthva6y`
+The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 
-* :def_p:`fls_kc3gwj9x3jnr`
-  Casting an :term:`operand` of an :term:`integer type` to a target
-  :term:`integer type` of the same :term:`size` has no effect.
+* :dp:`fls_kc3gwj9x3jnr`
+  Casting an :t:`operand` of an :t:`integer type` to a target :t:`integer type`
+  of the same :t:`size` has no effect.
 
-* :def_p:`fls_76eq3bd6birr`
-  Casting an :term:`operand` of an :term:`integer type` to a target
-  :term:`integer type` with smaller :term:`size` truncates the :term:`value` of
-  the :term:`operand`.
+* :dp:`fls_76eq3bd6birr`
+  Casting an :t:`operand` of an :t:`integer type` to a target :t:`integer type`
+  with smaller :t:`size` truncates the :t:`value` of the :t:`operand`.
 
-* :def_p:`fls_ldiritt32h2w`
-  Casting an :term:`operand` of an :term:`integer type` to a target
-  :term:`integer type` with a larger :term:`size` either
+* :dp:`fls_ldiritt32h2w`
+  Casting an :t:`operand` of an :t:`integer type` to a target :t:`integer type`
+  with a larger :t:`size` either
 
-* :def_p:`fls_h9sxg3pxn7i2`
-  Zero-extends the :term:`operand` if the :term:`[operand]'s` :term:`type` is
-  unsigned, or
+* :dp:`fls_h9sxg3pxn7i2`
+  Zero-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is unsigned,
+  or
 
-* :def_p:`fls_shy6e0e30bco`
-  Sign-extends the :term:`operand` if the :term:`[operand]'s` :term:`type` is
-  signed.
+* :dp:`fls_shy6e0e30bco`
+  Sign-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is signed.
 
-* :def_p:`fls_4xldaoj5ac6t`
-  Casting an :term:`operand` of a :term:`floating-point type` to a target
-  :term:`integer type` rounds the :term:`value` of the :term:`operand` towards
-  zero. In addition, the :term:`type cast expression`
+* :dp:`fls_4xldaoj5ac6t`
+  Casting an :t:`operand` of a :t:`floating-point type` to a target :t:`integer
+  type` rounds the :t:`value` of the :t:`operand` towards zero. In addition, the
+  :t:`type cast expression`
 
-* :def_p:`fls_50714cvaqkfv`
-  Returns zero if the :term:`operand` denotes :codeterm:`f32::NaN` or
-  :codeterm:`f64::NaN` respectively.
-
-* :def_p:`fls_g3xbmp8zx1yh`
-  Saturates the :term:`value` of the :term:`operand` to the maximum
-  :term:`value` of the target :term:`integer type` if the :term:`[operand]'s`
-  :term:`value` exceeds the maximum :term:`value` of the target :term:`integer
-  type` or denotes :codeterm:`f32::INFINITY` or :codeterm:`f64::INFINITY`
+* :dp:`fls_50714cvaqkfv`
+  Returns zero if the :t:`operand` denotes :c:`f32::NaN` or :c:`f64::NaN`
   respectively.
 
-* :def_p:`fls_hcc5odh52bk7`
-  Saturates the :term:`value` of the :term:`operand` to the minimum
-  :term:`value` of the target :term:`integer type` if the :term:`[operand]'s`
-  :term:`value` exceeds the minimum :term:`value` of the target
-  :term:`integer type` or denotes :codeterm:`f32::NEG_INFINITY` or
-  :codeterm:`f64::NEG_INFINITY` respectively.
+* :dp:`fls_g3xbmp8zx1yh`
+  Saturates the :t:`value` of the :t:`operand` to the maximum :t:`value`
+  of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
+  exceeds the maximum :t:`value` of the target :t:`integer type` or denotes
+  :c:`f32::INFINITY` or :c:`f64::INFINITY` respectively.
 
-* :def_p:`fls_o2ep4b6t287z`
-  Casting an :term:`operand` of an :term:`integer type` to a target
-  :term:`floating-point type` produces the closest possible floating point
-  :term:`value`. In addition, the :term:`type cast expression`
+* :dp:`fls_hcc5odh52bk7`
+  Saturates the :t:`value` of the :t:`operand` to the minimum :t:`value`
+  of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
+  exceeds the minimum :t:`value` of the target :t:`integer type` or denotes
+  :c:`f32::NEG_INFINITY` or :c:`f64::NEG_INFINITY` respectively.
 
-* :def_p:`fls_vfofk2aagsj5`
-  Rounds the :term:`value` of the :term:`operand` preferring the :term:`value`
-  with an even least significant digit if exactly halfway between two floating
-  point numbers.
+* :dp:`fls_o2ep4b6t287z`
+  Casting an :t:`operand` of an :t:`integer type` to a target :t:`floating-point
+  type` produces the closest possible floating point :t:`value`. In addition,
+  the :t:`type cast expression`
 
-* :def_p:`fls_cx86k8yfjhht`
-  Produc	es :codeterm:`f32::INFINITY` or :codeterm:`f64::INFINITY` of the same
-  sign as the :term:`value` of the :term:`operand` when the :term:`value` of the
-  :term:`operand` causes overflow.
+* :dp:`fls_vfofk2aagsj5`
+  Rounds the :t:`value` of the :t:`operand` preferring the :t:`value` with an
+  even least significant digit if exactly halfway between two floating point
+  numbers.
 
-* :def_p:`fls_gzmdwibl5s4w`
-  Casting an :term:`operand` of :term:`type` :codeterm:`f32` to a :term:`target
-  type` :codeterm:`f64` is perfect and lossless.
-
-* :def_p:`fls_mjqvjt7v8a25`
-  Casting an :term:`operand` of :term:`type` :codeterm:`f64` to :term:`target
-  type` :codeterm:`f32` produces the closest possible :codeterm:`f32`
-  :term:`value`. In addition, the :term:`type cast expression`
-
-* :def_p:`fls_4fd5vkh0jt4`
-  Prefers the nearest :term:`value` with an even least significant digit if
-  exactly halfway between two floating point numbers.
-
-* :def_p:`fls_2etd73f8jg2n`
-  Produces :codeterm:`f32::INFINITY` of the same sign as the :term:`value`
-  of the :term:`operand` when the :term:`value` of the :term:`operand` causes
+* :dp:`fls_cx86k8yfjhht`
+  Produc	es :c:`f32::INFINITY` or :c:`f64::INFINITY` of the same sign as the
+  :t:`value` of the :t:`operand` when the :t:`value` of the :t:`operand` causes
   overflow.
+
+* :dp:`fls_gzmdwibl5s4w`
+  Casting an :t:`operand` of :t:`type` :c:`f32` to a :t:`target type` :c:`f64`
+  is perfect and lossless.
+
+* :dp:`fls_mjqvjt7v8a25`
+  Casting an :t:`operand` of :t:`type` :c:`f64` to :t:`target type` :c:`f32`
+  produces the closest possible :c:`f32` :t:`value`. In addition, the :t:`type
+  cast expression`
+
+* :dp:`fls_4fd5vkh0jt4`
+  Prefers the nearest :t:`value` with an even least significant digit if exactly
+  halfway between two floating point numbers.
+
+* :dp:`fls_2etd73f8jg2n`
+  Produces :c:`f32::INFINITY` of the same sign as the :t:`value` of the
+  :t:`operand` when the :t:`value` of the :t:`operand` causes overflow.
 
 .. rubric:: Examples
 
-:def_p:`fls_vdxkpvmpwl3s`
+:dp:`fls_vdxkpvmpwl3s`
 See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``answer``.
 
 .. code-block:: text
@@ -1988,59 +1972,58 @@ Assignment Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_nhgexeu2h6wi`
-An :term:`assignment expression` is an :term:`expression` that assigns the
-:term:`value` of a :term:`value operand` to an :term:`assignee operand`.
+:dp:`fls_nhgexeu2h6wi`
+An :t:`assignment expression` is an :t:`expression` that assigns the :t:`value`
+of a :t:`value operand` to an :t:`assignee operand`.
 
-:def_p:`fls_bsjw6f4a3wol`
-An :term:`assignee operand` is the target :term:`operand` of an
-:term:`assignment expression`.
-
-:def_p:`fls_uinh05sslxeo`
-A :term:`value operand` is an :term:`operand` that supplies the :term:`value`
-that is assigned to an :term:`assignee operand` by an :term:`assignment
+:dp:`fls_bsjw6f4a3wol`
+An :t:`assignee operand` is the target :t:`operand` of an :t:`assignment
 expression`.
 
-:def_p:`fls_kh6rp9e0wwl`
-An :term:`assignee operand` shall denote a :term:`mutable assignee expression`.
+:dp:`fls_uinh05sslxeo`
+A :t:`value operand` is an :t:`operand` that supplies the :t:`value` that is
+assigned to an :t:`assignee operand` by an :t:`assignment expression`.
 
-:def_p:`fls_3wragak9hglw`
-A :term:`value operand` shall denote a :term:`value expression`.
+:dp:`fls_kh6rp9e0wwl`
+An :t:`assignee operand` shall denote a :t:`mutable assignee expression`.
 
-:def_p:`fls_qengy157fa4a`
-The :term:`type` of an :term:`assignment expression` is the :term:`unit type`.
+:dp:`fls_3wragak9hglw`
+A :t:`value operand` shall denote a :t:`value expression`.
 
-:def_p:`fls_bwwtgqprbxrm`
-The :term:`value` of an :term:`assignment expression` is the :term:`unit value`.
+:dp:`fls_qengy157fa4a`
+The :t:`type` of an :t:`assignment expression` is the :t:`unit type`.
+
+:dp:`fls_bwwtgqprbxrm`
+The :t:`value` of an :t:`assignment expression` is the :t:`unit value`.
 
 Basic Assignment
 ^^^^^^^^^^^^^^^^
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_uhcodvq75nlr`
-A :term:`basic assignment` is an :term:`assignment expression` that is not a
-:term:`destructuring assignment`.
+:dp:`fls_uhcodvq75nlr`
+A :t:`basic assignment` is an :t:`assignment expression` that is not a
+:t:`destructuring assignment`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_esn5ceoldta`
-The :term:`evaluation` of a :term:`basic assignment` proceeds as follows:
+:dp:`fls_esn5ceoldta`
+The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
 
-#. :def_p:`fls_t8eqzc64ivin`
-   The :term:`value operand` is evaluated.
+#. :dp:`fls_t8eqzc64ivin`
+   The :t:`value operand` is evaluated.
 
-#. :def_p:`fls_b0mqcn5fejhk`
-   The :term:`assignee operand` is evaluated.
+#. :dp:`fls_b0mqcn5fejhk`
+   The :t:`assignee operand` is evaluated.
 
-#. :def_p:`fls_9i0ctuo099bp`
-   The :term:`value` denoted by the :term:`assignee operand` is :term:`dropped`,
-   unless the :term:`assignee operand` denotes an uninitialized :term:`binding`
-   or an uninitialized :term:`field` of a :term:`binding`.
+#. :dp:`fls_9i0ctuo099bp`
+   The :t:`value` denoted by the :t:`assignee operand` is :t:`dropped`, unless
+   the :t:`assignee operand` denotes an uninitialized :t:`binding` or an
+   uninitialized :t:`field` of a :t:`binding`.
 
-#. :def_p:`fls_hc01gtvlxba`
-   The :term:`value` of the :term:`value operand` is :term:`copied` or
-   :term:`moved` into the place of the :term:`assignee operand`.
+#. :dp:`fls_hc01gtvlxba`
+   The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
+   the place of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2053,95 +2036,92 @@ Destructuring Assignment
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_2eheo4yo2orm`
-A :term:`destructuring assignment` is an :term:`assignment expression` where the
-:term:`assignee operand` is either an :term:`array expression`, a :term:`struct
-expression`, a :term:`tuple expression`, or a :term:`union expression`.
+:dp:`fls_2eheo4yo2orm`
+A :t:`destructuring assignment` is an :t:`assignment expression` where
+the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
+expression`, a :t:`tuple expression`, or a :t:`union expression`.
 
-:def_p:`fls_z8c3b9s9de3x`
-The :term:`assignee operand` of a :term:`destructuring assignment` corresponds
-to an :term:`assignee pattern` according to its kind, as follows:
+:dp:`fls_z8c3b9s9de3x`
+The :t:`assignee operand` of a :t:`destructuring assignment` corresponds to an
+:t:`assignee pattern` according to its kind, as follows:
 
-* :def_p:`fls_du5eybf8mocy`
-  A :term:`place expression` corresponds to an :term:`identifier pattern` with
-  a unique :term:`identifier` and without :term:`keyword` ``ref``, keyword
-  ``mut``, or a :term:`bound pattern`.
+* :dp:`fls_du5eybf8mocy`
+  A :t:`place expression` corresponds to an :t:`identifier pattern` with a
+  unique :t:`identifier` and without :t:`keyword` ``ref``, keyword ``mut``, or a
+  :t:`bound pattern`.
 
-* :def_p:`fls_q90ikfi7ewoi`
-  An :term:`underscore expression` corresponds to an :term:`underscore pattern`.
+* :dp:`fls_q90ikfi7ewoi`
+  An :t:`underscore expression` corresponds to an :t:`underscore pattern`.
 
-* :def_p:`fls_uydzlfc4hjbx`
-  A :term:`tuple expression` corresponds to a :term:`tuple pattern` with all the
-  :term:`[subexpression]s` lowered to their corresponding :term:`[pattern]s`.
+* :dp:`fls_uydzlfc4hjbx`
+  A :t:`tuple expression` corresponds to a :t:`tuple pattern` with all the
+  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :def_p:`fls_fa14yfvxsbx3`
-  A :term:`tuple struct expression` corresponds to a :term:`tuple struct
-  pattern` with all the :term:`[subexpression]s` lowered to their corresponding
-  :term:`[pattern]s`.
+* :dp:`fls_fa14yfvxsbx3`
+  A :t:`tuple struct expression` corresponds to a :t:`tuple struct pattern` with
+  all the :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :def_p:`fls_hj6srmzbobid`
-  A :term:`struct expression` corresponds to a :term:`struct pattern`
-  with all the :term:`[subexpression]s` lowered to their corresponding
-  :term:`[pattern]s`.
+* :dp:`fls_hj6srmzbobid`
+  A :t:`struct expression` corresponds to a :t:`struct pattern` with all the
+  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :def_p:`fls_c4pto819yc8j`
-  A :term:`unit struct expression` corresponds to a :term:`unit struct pattern`.
+* :dp:`fls_c4pto819yc8j`
+  A :t:`unit struct expression` corresponds to a :t:`unit struct pattern`.
 
-* :def_p:`fls_vqb89rkkjw81`
-  A :term:`slice expression` corresponds to a :term:`slice pattern` with all the
-  :term:`[subexpression]s` lowered to their corresponding :term:`[pattern]s`.
+* :dp:`fls_vqb89rkkjw81`
+  A :t:`slice expression` corresponds to a :t:`slice pattern` with all the
+  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :def_p:`fls_vqj7ljrrd7wi`
-  A :term:`full range expression` corresponds to a :term:`rest pattern` if
-  inside a :term:`slice expression`, otherwise this is a static error.
+* :dp:`fls_vqj7ljrrd7wi`
+  A :t:`full range expression` corresponds to a :t:`rest pattern` if inside a
+  :t:`slice expression`, otherwise this is a static error.
 
-:def_p:`fls_4bb07tn28ivw`
-The :term:`pattern` that corresponds to a :term:`destructuring assignment` shall
-be :term:`irrefutable`.
+:dp:`fls_4bb07tn28ivw`
+The :t:`pattern` that corresponds to a :t:`destructuring assignment` shall be
+:t:`irrefutable`.
 
-:def_p:`fls_g80a92tr2ser`
-A :term:`destructuring assignment` is equivalent to a :term:`block expression`
-of the following form:
+:dp:`fls_g80a92tr2ser`
+A :t:`destructuring assignment` is equivalent to a :t:`block expression` of the
+following form:
 
-* :def_p:`fls_u0iqhbw37xvq`
-  The first :term:`statement` is a :term:`let statement` with its
-  :term:`pattern` equivalent to the lowered :term:`assignee pattern` and its
-  :term:`initialization expression` equivalent to the :term:`value operand`.
+* :dp:`fls_u0iqhbw37xvq`
+  The first :t:`statement` is a :t:`let statement` with its :t:`pattern`
+  equivalent to the lowered :t:`assignee pattern` and its :t:`initialization
+  expression` equivalent to the :t:`value operand`.
 
-* :def_p:`fls_wsfhd3udt6fq`
-  Then each bound :term:`identifier` of the :term:`assignee pattern` is an
-  :term:`assignment expression` used as a :term:`statement`, as follows:
+* :dp:`fls_wsfhd3udt6fq`
+  Then each bound :t:`identifier` of the :t:`assignee pattern` is an
+  :t:`assignment expression` used as a :t:`statement`, as follows:
 
-* :def_p:`fls_ll6h6qcaos65`
-  The bound :term:`identifier` becomes the :term:`value operand` of the new
-  :term:`assignment expression`, and
+* :dp:`fls_ll6h6qcaos65`
+  The bound :t:`identifier` becomes the :t:`value operand` of the new
+  :t:`assignment expression`, and
 
-* :def_p:`fls_ajbdn54qe6wc`
-  The corresponding :term:`expression` from the :term:`assignee operand` of the
-  :term:`destructuring assignment` becomes the :term:`assignee operand` of the
-  new :term:`assignment expression`.
+* :dp:`fls_ajbdn54qe6wc`
+  The corresponding :t:`expression` from the :t:`assignee operand` of the
+  :t:`destructuring assignment` becomes the :t:`assignee operand` of the new
+  :t:`assignment expression`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_l4u5hhw8tnvs`
-The :term:`evaluation` of a :term:`destructuring assignment` proceeds as
-follows:
+:dp:`fls_l4u5hhw8tnvs`
+The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
 
-#. :def_p:`fls_dd62w8c9n9sd`
-   The :term:`value operand` is evaluated.
+#. :dp:`fls_dd62w8c9n9sd`
+   The :t:`value operand` is evaluated.
 
-#. :def_p:`fls_jqu2u6mdccgi`
-   The :term:`assignee operand` is evaluated by evaluating its
-   :term:`[operand]s` in a left-to-right order.
+#. :dp:`fls_jqu2u6mdccgi`
+   The :t:`assignee operand` is evaluated by evaluating its :t:`[operand]s` in a
+   left-to-right order.
 
-#. :def_p:`fls_n7nuj1lvpspc`
-   Each :term:`value` denoted by the :term:`assignee operand` is :term:`dropped`
-   in left-to-right order, unless the :term:`assignee operand` denotes an
-   uninitialized :term:`binding` or an uninitialized field of a :term:`binding`.
+#. :dp:`fls_n7nuj1lvpspc`
+   Each :t:`value` denoted by the :t:`assignee operand` is :t:`dropped`
+   in left-to-right order, unless the :t:`assignee operand` denotes an
+   uninitialized :t:`binding` or an uninitialized field of a :t:`binding`.
 
-#. :def_p:`fls_qb8u5skn8bc4`
-   The :term:`value` of the :term:`value operand` is :term:`copied` or
-   :term:`moved` into the place of the :term:`assignee operand`.
+#. :dp:`fls_qb8u5skn8bc4`
+   The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
+   the place of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2205,204 +2185,193 @@ Compound Assignment Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_3bu3g8o5nopc`
-A :term:`compound assignment expression` is an expression that first computes
-a :term:`value` from two :term:`[operand]s` and then assigns the value to an
-:term:`assigned operand`.
+:dp:`fls_3bu3g8o5nopc`
+A :t:`compound assignment expression` is an expression that first computes
+a :t:`value` from two :t:`[operand]s` and then assigns the value to an
+:t:`assigned operand`.
 
-:def_p:`fls_w2hbhb989yr4`
-A :term:`bit and assignment expression` is a :term:`compound assignment
-expression` that uses bit and arithmetic.
+:dp:`fls_w2hbhb989yr4`
+A :t:`bit and assignment expression` is a :t:`compound assignment expression`
+that uses bit and arithmetic.
 
-:def_p:`fls_ak4g5112jkl`
-A :term:`bit or assignment expression` is a :term:`compound assignment
-expression` that uses bit or arithmetic.
+:dp:`fls_ak4g5112jkl`
+A :t:`bit or assignment expression` is a :t:`compound assignment expression`
+that uses bit or arithmetic.
 
-:def_p:`fls_lkjwyy78m2vx`
-A :term:`bit xor assignment expression` is a :term:`compound assignment
-expression` that uses bit exclusive or arithmetic.
+:dp:`fls_lkjwyy78m2vx`
+A :t:`bit xor assignment expression` is a :t:`compound assignment expression`
+that uses bit exclusive or arithmetic.
 
-:def_p:`fls_pkzj0uigfcgm`
-A :term:`division assignment expression` is a :term:`compound assignment
-expression` that uses division.
+:dp:`fls_pkzj0uigfcgm`
+A :t:`division assignment expression` is a :t:`compound assignment expression`
+that uses division.
 
-:def_p:`fls_ndlv3k9uclz2`
-A :term:`multiplication assignment expression` is a :term:`compound assignment
+:dp:`fls_ndlv3k9uclz2`
+A :t:`multiplication assignment expression` is a :t:`compound assignment
 expression` that uses multiplication.
 
-:def_p:`fls_fbp5dojti27r`
-A :term:`remainder assignment expression` is a :term:`compound assignment
-expression` that uses remainder division.
+:dp:`fls_fbp5dojti27r`
+A :t:`remainder assignment expression` is a :t:`compound assignment expression`
+that uses remainder division.
 
-:def_p:`fls_oy9ur11k78t`
-A :term:`shift left assignment expression` is a :term:`compound assignment
-expression` that uses bit shift left arithmetic.
+:dp:`fls_oy9ur11k78t`
+A :t:`shift left assignment expression` is a :t:`compound assignment expression`
+that uses bit shift left arithmetic.
 
-:def_p:`fls_s7rey2bndfei`
-A :term:`shift right assignment expression` is a :term:`compound assignment
+:dp:`fls_s7rey2bndfei`
+A :t:`shift right assignment expression` is a :t:`compound assignment
 expression` that uses bit shift right arithmetic.
 
-:def_p:`fls_7l7v7vigw3fu`
-A :term:`subtraction assignment expression` is a :term:`compound assignment
+:dp:`fls_7l7v7vigw3fu`
+A :t:`subtraction assignment expression` is a :t:`compound assignment
 expression` that uses subtraction.
 
-:def_p:`fls_dvy201zd6oym`
-An :term:`assigned operand` is the target :term:`operand` of a :term:`compound
-assignment expression`.
-
-:def_p:`fls_9v09ayi2azpe`
-A :term:`modifying operand` is an :term:`operand` that supplies the
-:term:`value` that is used in the calculation of a :term:`compound assignment
+:dp:`fls_dvy201zd6oym`
+An :t:`assigned operand` is the target :t:`operand` of a :t:`compound assignment
 expression`.
 
-:def_p:`fls_row7saf53vwd`
-An :term:`assigned operand` shall denote a :term:`mutable assignee expression`.
+:dp:`fls_9v09ayi2azpe`
+A :t:`modifying operand` is an :t:`operand` that supplies the :t:`value` that is
+used in the calculation of a :t:`compound assignment expression`.
 
-:def_p:`fls_gulql06xp9f3`
-A :term:`modifying operand` shall denote a :term:`value expression`.
+:dp:`fls_row7saf53vwd`
+An :t:`assigned operand` shall denote a :t:`mutable assignee expression`.
 
-:def_p:`fls_xmgcdw9yhb55`
-The :term:`type` of a :term:`compound assignment` is the :term:`unit type`.
+:dp:`fls_gulql06xp9f3`
+A :t:`modifying operand` shall denote a :t:`value expression`.
 
-:def_p:`fls_yeh6mvyvb4dp`
-The :term:`value` of a :term:`compound assignment` is the :term:`unit value`.
+:dp:`fls_xmgcdw9yhb55`
+The :t:`type` of a :t:`compound assignment` is the :t:`unit type`.
 
-:def_p:`fls_657knnsobdyu`
-The :term:`type` of the :term:`assigned operand` of an :term:`addition
-assignment` shall implement the :codeterm:`core::ops::AddAssign` trait where the
-type of the right operand is the trait implementation type parameter.
+:dp:`fls_yeh6mvyvb4dp`
+The :t:`value` of a :t:`compound assignment` is the :t:`unit value`.
 
-:def_p:`fls_m942dwwmr2cl`
-The :term:`type` of the :term:`assigned operand` of a :term:`bit and assignment`
-shall implement the :codeterm:`core::ops::BitAndAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_657knnsobdyu`
+The :t:`type` of the :t:`assigned operand` of an :t:`addition assignment`
+shall implement the :c:`core::ops::AddAssign` trait where the type of the right
+operand is the trait implementation type parameter.
 
-:def_p:`fls_np33oqrz33mp`
-The :term:`type` of the :term:`assigned operand` of a :term:`bit or assignment`
-shall implement the :codeterm:`core::ops::BitOrAssign` :term:`trait` where
-the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_m942dwwmr2cl`
+The :t:`type` of the :t:`assigned operand` of a :t:`bit and assignment` shall
+implement the :c:`core::ops::BitAndAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_atdpr8be2o2r`
-The :term:`type` of the :term:`assigned operand` of a :term:`bit xor assignment`
-shall implement the :codeterm:`core::ops::BitXorAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_np33oqrz33mp`
+The :t:`type` of the :t:`assigned operand` of a :t:`bit or assignment` shall
+implement the :c:`core::ops::BitOrAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_fbgwb3pdfgz`
-The :term:`type` of the :term:`assigned operand` of a :term:`division
-assignment` shall implement the :codeterm:`core::ops::DivAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_atdpr8be2o2r`
+The :t:`type` of the :t:`assigned operand` of a :t:`bit xor assignment` shall
+implement the :c:`core::ops::BitXorAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_8tbxq95x06yt`
-The :term:`type` of the :term:`assigned operand` of a :term:`multiplication
-assignment` shall implement the :codeterm:`core::ops::MulAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_fbgwb3pdfgz`
+The :t:`type` of the :t:`assigned operand` of a :t:`division assignment` shall
+implement the :c:`core::ops::DivAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_9oy9zo3x3fy3`
-The :term:`type` of the :term:`assigned operand` of a :term:`remainder
-assignment` shall implement the :codeterm:`core::ops::RemAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_8tbxq95x06yt`
+The :t:`type` of the :t:`assigned operand` of a :t:`multiplication assignment`
+shall implement the :c:`core::ops::MulAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_pdgj2xekdead`
-The :term:`type` of the :term:`assigned operand` of a :term:`shift left
-assignment` shall implement the :codeterm:`core::ops::ShlAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_9oy9zo3x3fy3`
+The :t:`type` of the :t:`assigned operand` of a :t:`remainder assignment` shall
+implement the :c:`core::ops::RemAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_4uoi6k8r7mvc`
-The :term:`type` of the :term:`assigned operand` of a :term:`shift right
-assignment` shall implement the :codeterm:`core::ops::ShrAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_pdgj2xekdead`
+The :t:`type` of the :t:`assigned operand` of a :t:`shift left assignment` shall
+implement the :c:`core::ops::ShlAssign` :t:`trait` where the :t:`type` of the
+:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
-:def_p:`fls_fjaz4m90cagr`
-The :term:`type` of the :term:`assigned operand` of a :term:`subtraction
-assignment` shall implement the :codeterm:`core::ops::SubAssign` :term:`trait`
-where the :term:`type` of the :term:`modifying operand` is the :term:`trait
-implementation` :term:`type parameter`.
+:dp:`fls_4uoi6k8r7mvc`
+The :t:`type` of the :t:`assigned operand` of a :t:`shift right assignment`
+shall implement the :c:`core::ops::ShrAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+
+:dp:`fls_fjaz4m90cagr`
+The :t:`type` of the :t:`assigned operand` of a :t:`subtraction assignment`
+shall implement the :c:`core::ops::SubAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_eesn9kuylim`
-The :term:`evaluation` of a :term:`compound assignment` proceeds as follows:
+:dp:`fls_eesn9kuylim`
+The :t:`evaluation` of a :t:`compound assignment` proceeds as follows:
 
-#. :def_p:`fls_4nnqz4etisgw`
-   If the :term:`[type]s` of both :term:`[operand]s` are :term:`[primitive
-   type]s`, then
+#. :dp:`fls_4nnqz4etisgw`
+   If the :t:`[type]s` of both :t:`[operand]s` are :t:`[primitive type]s`, then
 
-   #. :def_p:`fls_a2g4hs15jpiu`
-      The :term:`modifying operand` is evaluated.
+   #. :dp:`fls_a2g4hs15jpiu`
+      The :t:`modifying operand` is evaluated.
 
-   #. :def_p:`fls_kuet16jp6ps9`
-      The :term:`assigned operand` is evaluated.
+   #. :dp:`fls_kuet16jp6ps9`
+      The :t:`assigned operand` is evaluated.
 
-   #. :def_p:`fls_hovju0sni9gr`
-      The appropriate :term:`function` is invoked as indicated below.
+   #. :dp:`fls_hovju0sni9gr`
+      The appropriate :t:`function` is invoked as indicated below.
 
-#. :def_p:`fls_ngimpabunzis`
+#. :dp:`fls_ngimpabunzis`
    Otherwise
 
-   #. :def_p:`fls_4sbpfi12frwe`
-      The :term:`assigned operand` is evaluated.
+   #. :dp:`fls_4sbpfi12frwe`
+      The :t:`assigned operand` is evaluated.
 
-   #. :def_p:`fls_n5ds6ydgckvo`
-      The :term:`modifying operand` is evaluated.
+   #. :dp:`fls_n5ds6ydgckvo`
+      The :t:`modifying operand` is evaluated.
 
-   #. :def_p:`fls_xjdu0y1slsg9`
-      The appropriate :term:`function` is invoked as indicated below.
+   #. :dp:`fls_xjdu0y1slsg9`
+      The appropriate :t:`function` is invoked as indicated below.
 
-:def_p:`fls_ijfmnnrdlu8n`
-For an :term:`addition assignment`, ``core::ops::AddAssign::add_assign(&mut
+:dp:`fls_ijfmnnrdlu8n`
+For an :t:`addition assignment`, ``core::ops::AddAssign::add_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_6x7j9x354pkb`
-For a :term:`bit and assignment`, ``core::ops::BitAndAssign::bitand_assign(&mut
+:dp:`fls_6x7j9x354pkb`
+For a :t:`bit and assignment`, ``core::ops::BitAndAssign::bitand_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_h2cpbz2t74hy`
-For a :term:`bit or assignment`, ``core::ops::BitOrAssign::bitor_assign(&mut
+:dp:`fls_h2cpbz2t74hy`
+For a :t:`bit or assignment`, ``core::ops::BitOrAssign::bitor_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_whj50spxz3bh`
-For a :term:`bit xor assignment`, ``core::ops::BitXorAssign::bitxor_assign(&mut
+:dp:`fls_whj50spxz3bh`
+For a :t:`bit xor assignment`, ``core::ops::BitXorAssign::bitxor_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_d1cxq1zbt5fq`
-For a :term:`division assignment`, ``core::ops::DivAssign::div_assign(&mut
+:dp:`fls_d1cxq1zbt5fq`
+For a :t:`division assignment`, ``core::ops::DivAssign::div_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_48i245an2449`
-For a :term:`multiplication assignment`, ``core::ops::MulAssign::mul_assign(&mut
+:dp:`fls_48i245an2449`
+For a :t:`multiplication assignment`, ``core::ops::MulAssign::mul_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_69wr03rt0ali`
-For a :term:`remainder assignment`, ``core::ops::RemAssign::rem_assign(&mut
+:dp:`fls_69wr03rt0ali`
+For a :t:`remainder assignment`, ``core::ops::RemAssign::rem_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_9d970yfwmj2d`
-For a :term:`shift left assignment`, ``core::ops::ShlAssign::shl_assign(&mut
+:dp:`fls_9d970yfwmj2d`
+For a :t:`shift left assignment`, ``core::ops::ShlAssign::shl_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_p9687v3xckps`
-For a :term:`shift right assignment`, ``core::ops::ShrAssign::shr_assign(&mut
+:dp:`fls_p9687v3xckps`
+For a :t:`shift right assignment`, ``core::ops::ShrAssign::shr_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
-:def_p:`fls_8j408kckzzud`
-For a :term:`subtraction assignment`, ``core::ops::SubAssign::sub_assign(&mut
+:dp:`fls_8j408kckzzud`
+For a :t:`subtraction assignment`, ``core::ops::SubAssign::sub_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_uywamh3nzl6p`
-It is undefined behavior for an :term:`addition assignment`, a :term:`division
-assignment`, a :term:`multiplication assignment`, a :term:`remainder
-assignment`, or a :term:`subtraction assignment` to cause overflow with
-:term:`[value]s` of :term:`[numeric type]s`.
+:dp:`fls_uywamh3nzl6p`
+It is undefined behavior for an :t:`addition assignment`, a :t:`division
+assignment`, a :t:`multiplication assignment`, a :t:`remainder assignment`, or a
+:t:`subtraction assignment` to cause overflow with :t:`[value]s` of :t:`[numeric
+type]s`.
 
 .. rubric:: Examples
 
@@ -2432,13 +2401,13 @@ Underscore Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_pydmv629vfuu`
-An :term:`underscore expression` is an :term:`expression` that acts as a
-placeholder in a :term:`destructuring assignment`.
+:dp:`fls_pydmv629vfuu`
+An :t:`underscore expression` is an :t:`expression` that acts as a placeholder
+in a :t:`destructuring assignment`.
 
-:def_p:`fls_wms3dbwjwyu4`
-An :term:`underscore expression` shall appear in the :term:`assigned operand` of
-a :term:`destructuring statement`.
+:dp:`fls_wms3dbwjwyu4`
+An :t:`underscore expression` shall appear in the :t:`assigned operand` of a
+:t:`destructuring statement`.
 
 .. rubric:: Examples
 
@@ -2460,31 +2429,31 @@ Parenthesized Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_jhazc75w5vj`
-A :term:`parenthesized expression` is an :term:`expression` that groups other
-:term:`[expression]s`.
+:dp:`fls_jhazc75w5vj`
+A :t:`parenthesized expression` is an :t:`expression` that groups other
+:t:`[expression]s`.
 
-:def_p:`fls_ew9y5vaseehy`
-A :term:`parenthesized expression` is a :term:`place expression` when its
-:term:`operand` is a :term:`place expression`.
+:dp:`fls_ew9y5vaseehy`
+A :t:`parenthesized expression` is a :t:`place expression` when its :t:`operand`
+is a :t:`place expression`.
 
-:def_p:`fls_n4dhc0hvwwfk`
-A :term:`parenthesized expression` is a :term:`value expression` when its
-:term:`operand` is a :term:`value expression`.
+:dp:`fls_n4dhc0hvwwfk`
+A :t:`parenthesized expression` is a :t:`value expression` when its :t:`operand`
+is a :t:`value expression`.
 
-:def_p:`fls_5d66h7naoup6`
-The :term:`type` of a :term:`parenthesized expression` is the :term:`type` of
-its :term:`operand`.
+:dp:`fls_5d66h7naoup6`
+The :t:`type` of a :t:`parenthesized expression` is the :t:`type` of its
+:t:`operand`.
 
-:def_p:`fls_xp9whcj2obk8`
-The :term:`value` of a :term:`parenthesized expression` is the :term:`value` of
-its :term:`operand`.
+:dp:`fls_xp9whcj2obk8`
+The :t:`value` of a :t:`parenthesized expression` is the :t:`value` of its
+:t:`operand`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_2po52gv0m021`
-The :term:`evaluation` of a :term:`parenthesized expression` evaluates its
-:term:`operand`.
+:dp:`fls_2po52gv0m021`
+The :t:`evaluation` of a :t:`parenthesized expression` evaluates its
+:t:`operand`.
 
 .. rubric:: Examples
 
@@ -2522,89 +2491,84 @@ Array Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ya9res33oxt6`
-An :term:`array expression` is an :term:`expression` that constructs an
-:term:`array`.
+:dp:`fls_ya9res33oxt6`
+An :t:`array expression` is an :t:`expression` that constructs an :t:`array`.
 
-:def_p:`fls_fwtd3b10veiw`
-An :term:`array element constructor` is an :term:`array expression` that lists
-all elements of the :term:`array` being constructed.
+:dp:`fls_fwtd3b10veiw`
+An :t:`array element constructor` is an :t:`array expression` that lists all
+elements of the :t:`array` being constructed.
 
-:def_p:`fls_81jf78m5uga4`
-An :term:`array repetition constructor` is an :term:`array expression` that
-specifies how many times an element is repeated in the :term:`array` being
-constructed.
+:dp:`fls_81jf78m5uga4`
+An :t:`array repetition constructor` is an :t:`array expression` that specifies
+how many times an element is repeated in the :t:`array` being constructed.
 
-:def_p:`fls_3y69y9ga4at7`
-A :term:`repeat operand` is an :term:`operand` that specifies the element being
-repeated in an :term:`array repetition constructor`.
+:dp:`fls_3y69y9ga4at7`
+A :t:`repeat operand` is an :t:`operand` that specifies the element being
+repeated in an :t:`array repetition constructor`.
 
-:def_p:`fls_2l9objtb23zn`
-A :term:`size operand` is an :term:`operand` that specifies the size of an
-:term:`array` or an :term:`array type`.
+:dp:`fls_2l9objtb23zn`
+A :t:`size operand` is an :t:`operand` that specifies the size of an :t:`array`
+or an :t:`array type`.
 
-:def_p:`fls_l0gbcyybzdv0`
-An :term:`array expression` is a :term:`value expression`.
+:dp:`fls_l0gbcyybzdv0`
+An :t:`array expression` is a :t:`value expression`.
 
-:def_p:`fls_by21pey7k423`
-The :term:`[type]s` of the :term:`[operand]s` of an :term:`array element
-constructor` shall be :term:`unifiable`.
+:dp:`fls_by21pey7k423`
+The :t:`[type]s` of the :t:`[operand]s` of an :t:`array element constructor`
+shall be :t:`unifiable`.
 
-:def_p:`fls_x2xu2pynxy1u`
-If the :term:`size operand` is greater than one, then the :term:`type` of
-the :term:`repeat operand` shall implement the :codeterm:`core::copy::Copy`
-:term:`trait` or the :term:`repeat operand` shall be a :term:`path expression`
-resolving to a :term:`constant`.
+:dp:`fls_x2xu2pynxy1u`
+If the :t:`size operand` is greater than one, then the :t:`type` of the
+:t:`repeat operand` shall implement the :c:`core::copy::Copy` :t:`trait`
+or the :t:`repeat operand` shall be a :t:`path expression` resolving to a
+:t:`constant`.
 
-:def_p:`fls_qplsh3pdqitq`
-The :term:`type` of the :term:`size operand` shall be :term:`type`
-:codeterm:`usize`.
+:dp:`fls_qplsh3pdqitq`
+The :t:`type` of the :t:`size operand` shall be :t:`type` :c:`usize`.
 
-:def_p:`fls_9gmnjvs83d8o`
-The :term:`value` of the :term:`size operand` shall be a :term:`constant
-expression`.
+:dp:`fls_9gmnjvs83d8o`
+The :t:`value` of the :t:`size operand` shall be a :t:`constant expression`.
 
-:def_p:`fls_wmsekin1gd2y`
-The :term:`type` of an :term:`array expression` is ``[T; N]``, where ``T`` is
-the element type and ``N`` is the size of the array. The :term:`size` of an
-:term:`array` is determined as follows:
+:dp:`fls_wmsekin1gd2y`
+The :t:`type` of an :t:`array expression` is ``[T; N]``, where ``T`` is the
+element type and ``N`` is the size of the array. The :t:`size` of an :t:`array`
+is determined as follows:
 
-* :def_p:`fls_2gto5kp9bjw8`
-  If the :term:`array expression` appears with an :term:`array element
-  constructor`, then the :term:`size` is the number of :term:`[operand]s` in the
-  :term:`array element constructor`.
+* :dp:`fls_2gto5kp9bjw8`
+  If the :t:`array expression` appears with an :t:`array element constructor`,
+  then the :t:`size` is the number of :t:`[operand]s` in the :t:`array element
+  constructor`.
 
-* :def_p:`fls_guop34ayjw2`
-  Otherwise the :term:`size` is the :term:`value` of :term:`size operand`.
+* :dp:`fls_guop34ayjw2`
+  Otherwise the :t:`size` is the :t:`value` of :t:`size operand`.
 
-:def_p:`fls_aj6tbe54v5jl`
-The :term:`value` of an :term:`array expression` is the constructed
-:term:`array`.
+:dp:`fls_aj6tbe54v5jl`
+The :t:`value` of an :t:`array expression` is the constructed :t:`array`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_t52in1kkyli3`
-The :term:`evaluation` of an :term:`array expression` with an :term:`array
-element constructor` evaluates its :term:`[operand]s` in left-to-right order.
+:dp:`fls_t52in1kkyli3`
+The :t:`evaluation` of an :t:`array expression` with an :t:`array element
+constructor` evaluates its :t:`[operand]s` in left-to-right order.
 
-:def_p:`fls_1kj8nlc5eb8a`
-The :term:`evaluation` of an :term:`array expression` with an :term:`array
-repetition constructor` proceeds as follows:
+:dp:`fls_1kj8nlc5eb8a`
+The :t:`evaluation` of an :t:`array expression` with an :t:`array repetition
+constructor` proceeds as follows:
 
-#. :def_p:`fls_f3izbkm8607z`
-   If the :term:`value` of the :term:`size operand` is greater than zero, then:
+#. :dp:`fls_f3izbkm8607z`
+   If the :t:`value` of the :t:`size operand` is greater than zero, then:
 
-   #. :def_p:`fls_qbyysx30pjzs`
-      If the :term:`repeat operand` denotes a :term:`constant`, the
-      :term:`repeat operand` is evaluated once and its :term:`value` is
-      :term:`copied` :term:`[size operand]'s` :term:`value` times.
+   #. :dp:`fls_qbyysx30pjzs`
+      If the :t:`repeat operand` denotes a :t:`constant`, the :t:`repeat
+      operand` is evaluated once and its :t:`value` is :t:`copied` :t:`[size
+      operand]'s` :t:`value` times.
 
-   #. :def_p:`fls_1m0laldldh7j`
-      Otherwise the :term:`repeat operand` is evaluated :term:`[size operand]'s`
-      :term:`value` times.
+   #. :dp:`fls_1m0laldldh7j`
+      Otherwise the :t:`repeat operand` is evaluated :t:`[size operand]'s`
+      :t:`value` times.
 
-#. :def_p:`fls_5cs68nm54l31`
-   Otherwise the :term:`repeat operand` is evaluated once.
+#. :dp:`fls_5cs68nm54l31`
+   Otherwise the :t:`repeat operand` is evaluated once.
 
 .. rubric:: Examples
 
@@ -2613,20 +2577,17 @@ repetition constructor` proceeds as follows:
    [1, 2, 3]
    ["one", "two", "three",]
 
-:def_p:`fls_p7hcqryal5cm`
+:dp:`fls_p7hcqryal5cm`
 Two dimensional array.
 
 .. syntax::
 
-
    [[0, 0], [0, 1], [1, 0], [1, 1]]
 
-
-:def_p:`fls_izlpt6100gvk`
+:dp:`fls_izlpt6100gvk`
 An array of nine 42s.
 
 .. syntax::
-
 
    [42; 9]
 
@@ -2648,85 +2609,79 @@ Array and Slice Indexing Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_42ijvuqqqlvh`
-An :term:`array index expression` is an :term:`expression` that indexes into an
-:term:`array` or a :term:`slice`.
+:dp:`fls_42ijvuqqqlvh`
+An :t:`array index expression` is an :t:`expression` that indexes into an
+:t:`array` or a :t:`slice`.
 
-:def_p:`fls_pc0c22asgzvw`
-An :term:`indexed array operand` is an :term:`operand` which indicates the
-:term:`array` or :term:`slice` being indexed into by an :term:`array index
-expression`.
+:dp:`fls_pc0c22asgzvw`
+An :t:`indexed array operand` is an :t:`operand` which indicates the :t:`array`
+or :t:`slice` being indexed into by an :t:`array index expression`.
 
-:def_p:`fls_ff3sgpldn52o`
-An :term:`indexing operand` is an :term:`operand` which specifies the index of
-the :term:`array` or :term:`slice` being indexed into by an :term:`array index
-expression`.
+:dp:`fls_ff3sgpldn52o`
+An :t:`indexing operand` is an :t:`operand` which specifies the index of the
+:t:`array` or :t:`slice` being indexed into by an :t:`array index expression`.
 
-:def_p:`fls_w96p9oyv5mqt`
-An :term:`array index expression` is a :term:`constant expression` if the
-:term:`indexing operand` is a :term:`constant expression`.
+:dp:`fls_w96p9oyv5mqt`
+An :t:`array index expression` is a :t:`constant expression` if the :t:`indexing
+operand` is a :t:`constant expression`.
 
-:def_p:`fls_u9sl7h4i8hqu`
-The :term:`type` of the :term:`indexing operand` is the :term:`generic
-parameter` of the :codeterm:`core::ops::Index` implementation of the
-:term:`type` of the :term:`indexed array operand`.
+:dp:`fls_u9sl7h4i8hqu`
+The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
+:c:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed array
+operand`.
 
-:def_p:`fls_98qeczwv7fmy`
-If the :term:`indexed array operand` is evaluated in a :term:`value expression
+:dp:`fls_98qeczwv7fmy`
+If the :t:`indexed array operand` is evaluated in a :t:`value expression
 context`, then
 
-* :def_p:`fls_jxdiknkwglak`
-  The :term:`array index expression` is a :term:`value expression`.
+* :dp:`fls_jxdiknkwglak`
+  The :t:`array index expression` is a :t:`value expression`.
 
-* :def_p:`fls_sb2b8gszzaxq`
-  The :term:`type` of the :term:`indexed array operand` shall implement the
-  :codeterm:`core::ops::Index` :term:`trait`.
+* :dp:`fls_sb2b8gszzaxq`
+  The :t:`type` of the :t:`indexed array operand` shall implement the
+  :c:`core::ops::Index` :t:`trait`.
 
-* :def_p:`fls_issaykiuha75`
-  The :term:`type` of the :term:`array index expression` is ``&T``, where ``T``
-  is :term:`associated type` :codeterm:`core::ops::Index::Output`.
+* :dp:`fls_issaykiuha75`
+  The :t:`type` of the :t:`array index expression` is ``&T``, where ``T`` is
+  :t:`associated type` :c:`core::ops::Index::Output`.
 
-:def_p:`fls_y3sduoma6q9v`
-If the :term:`indexed array operand` is :term:`mutable` and the :term:`array
-index expression` is evaluated in a :term:`mutable place expression context`,
-then
+:dp:`fls_y3sduoma6q9v`
+If the :t:`indexed array operand` is :t:`mutable` and the :t:`array index
+expression` is evaluated in a :t:`mutable place expression context`, then
 
-* :def_p:`fls_pjmoo8mjgxz3`
-  The :term:`array index expression` is a :term:`mutable place expression`.
+* :dp:`fls_pjmoo8mjgxz3`
+  The :t:`array index expression` is a :t:`mutable place expression`.
 
-* :def_p:`fls_ld7lbvqms5i6`
-  The :term:`type` of the :term:`indexed array operand` shall implement the
-  :codeterm:`core::ops::IndexMut` :term:`trait`.
+* :dp:`fls_ld7lbvqms5i6`
+  The :t:`type` of the :t:`indexed array operand` shall implement the
+  :c:`core::ops::IndexMut` :t:`trait`.
 
-* :def_p:`fls_nw705fpon79b`
-  The :term:`type` of the :term:`array index expression` is ``&mut T``,
-  where ``T`` is the element type of the :term:`[indexed array operand]'s`
-  :term:`type`.
+* :dp:`fls_nw705fpon79b`
+  The :t:`type` of the :t:`array index expression` is ``&mut T``, where ``T`` is
+  the element type of the :t:`[indexed array operand]'s` :t:`type`.
 
-:def_p:`fls_fouu0z3jwoad`
-The :term:`value` of an :term:`array index expression` is the indexed memory
-location.
+:dp:`fls_fouu0z3jwoad`
+The :t:`value` of an :t:`array index expression` is the indexed memory location.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_6sgj0ltt21i`
-The :term:`evaluation` of an :term:`array index expression` proceeds as follows:
+:dp:`fls_6sgj0ltt21i`
+The :t:`evaluation` of an :t:`array index expression` proceeds as follows:
 
-#. :def_p:`fls_e5l4y3dy69xi`
-   The :term:`indexed array operand` is evaluated.
+#. :dp:`fls_e5l4y3dy69xi`
+   The :t:`indexed array operand` is evaluated.
 
-#. :def_p:`fls_fza3omn8yw7s`
-   The :term:`indexing operand` is evaluated.
+#. :dp:`fls_fza3omn8yw7s`
+   The :t:`indexing operand` is evaluated.
 
-#. :def_p:`fls_ehamppbq4gmg`
-   If the :term:`array index expression` is evaluated as a :term:`mutable place
-   expression`, then :term:`expression` ``*core::ops::IndexMut::index_mut(&mut
+#. :dp:`fls_ehamppbq4gmg`
+   If the :t:`array index expression` is evaluated as a :t:`mutable place
+   expression`, then :t:`expression` ``*core::ops::IndexMut::index_mut(&mut
    indexed_array_operand, inexing_operand)`` is evaluated.
 
-#. :def_p:`fls_i68oxj659hc1`
-   Otherwise :term:`expression`
-   ``*core::ops::Index::index(&indexed_array_operand, inexing_operand)`` is
-   evaluated.
+#. :dp:`fls_i68oxj659hc1`
+   Otherwise :t:`expression` ``*core::ops::Index::index(&indexed_array_operand,
+   inexing_operand)`` is evaluated.
 
 .. rubric:: Examples
 
@@ -2735,7 +2690,7 @@ The :term:`evaluation` of an :term:`array index expression` proceeds as follows:
    let a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
    a[1][2]
 
-:def_p:`fls_esvpmh6razg3`
+:dp:`fls_esvpmh6razg3`
 Evaluates to 6.
 
 Tuple Expressions
@@ -2752,37 +2707,36 @@ Tuple Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_87rp1hfwvjel`
-A :term:`tuple expression` is an :term:`expression` that constructs a
-:term:`tuple`.
+:dp:`fls_87rp1hfwvjel`
+A :t:`tuple expression` is an :t:`expression` that constructs a :t:`tuple`.
 
-:def_p:`fls_581y6jq1eyn8`
-A :term:`tuple initializer` is an :term:`operand` that provides the
-:term:`value` of a :term:`tuple field` in a :term:`tuple expression`.
+:dp:`fls_581y6jq1eyn8`
+A :t:`tuple initializer` is an :t:`operand` that provides the :t:`value` of a
+:t:`tuple field` in a :t:`tuple expression`.
 
-:def_p:`fls_3dmehkxewz6d`
-A :term:`tuple expression` is a :term:`value expression`.
+:dp:`fls_3dmehkxewz6d`
+A :t:`tuple expression` is a :t:`value expression`.
 
-:def_p:`fls_ljz3sxmfzflm`
-The :term:`type` of a :term:`tuple expression` is ``(T1, T2, ..., TN)``, where
-``T1`` is the :term:`type` of the first :term:`tuple initializer`, ``T2`` is
-the :term:`type` of the second :term:`tuple initializer`, and ``TN`` is the
-:term:`type` of the ``N``-th :term:`tuple initializer`.
+:dp:`fls_ljz3sxmfzflm`
+The :t:`type` of a :t:`tuple expression` is ``(T1, T2, ..., TN)``, where ``T1``
+is the :t:`type` of the first :t:`tuple initializer`, ``T2`` is the :t:`type` of
+the second :t:`tuple initializer`, and ``TN`` is the :t:`type` of the ``N``-th
+:t:`tuple initializer`.
 
-:def_p:`fls_k2aznqo9j49p`
-The :term:`value` of a :term:`tuple expression` is ``(V1, V2, ..., VN)``, where
-``V1`` is the :term:`value` of the first :term:`tuple initializer`, ``V2`` is
-the :term:`value` of the second :term:`tuple initializer`, and ``VN`` is the
-:term:`value` of the ``N``-th :term:`tuple initializer`.
+:dp:`fls_k2aznqo9j49p`
+The :t:`value` of a :t:`tuple expression` is ``(V1, V2, ..., VN)``, where ``V1``
+is the :t:`value` of the first :t:`tuple initializer`, ``V2`` is the :t:`value`
+of the second :t:`tuple initializer`, and ``VN`` is the :t:`value` of the
+``N``-th :t:`tuple initializer`.
 
-:def_p:`fls_fgthjiu980rr`
-The :term:`value` of a :term:`tuple expression` without any :term:`[tuple
-initializer]s` is the :term:`unit value`.
+:dp:`fls_fgthjiu980rr`
+The :t:`value` of a :t:`tuple expression` without any :t:`[tuple initializer]s`
+is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_waf55yd3mpsq`
-The :term:`evaluation` of a :term:`tuple expression` evaluates its :term:`[tuple
+:dp:`fls_waf55yd3mpsq`
+The :t:`evaluation` of a :t:`tuple expression` evaluates its :t:`[tuple
 initializer]s` in left-to-right order.
 
 .. rubric:: Examples
@@ -2852,168 +2806,161 @@ Struct Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_jc45bpgsfnmr`
-A :term:`struct expression` is an :term:`expression` that constructs a
-:term:`struct` or a :term:`union`.
+:dp:`fls_jc45bpgsfnmr`
+A :t:`struct expression` is an :t:`expression` that constructs a :t:`struct` or
+a :t:`union`.
 
-:def_p:`fls_fan2lkcxk7bg`
-A :term:`record struct constructor` is a :term:`struct expression` that
-constructs a :term:`record struct`.
+:dp:`fls_fan2lkcxk7bg`
+A :t:`record struct constructor` is a :t:`struct expression` that constructs a
+:t:`record struct`.
 
-:def_p:`fls_1e1rgq9k6n1i`
-A :term:`tuple struct constructor` is a :term:`struct expression` that
-constructs a :term:`tuple struct`.
+:dp:`fls_1e1rgq9k6n1i`
+A :t:`tuple struct constructor` is a :t:`struct expression` that constructs a
+:t:`tuple struct`.
 
-:def_p:`fls_9yi0cxjnjlx9`
-A :term:`union constructor` is a :term:`struct expression` that constructs
-a :term:`union`.
+:dp:`fls_9yi0cxjnjlx9`
+A :t:`union constructor` is a :t:`struct expression` that constructs a
+:t:`union`.
 
-:def_p:`fls_lowrnb3nk318`
-A :term:`unit struct constructor` is a :term:`struct expression` that constructs
-a :term:`unit struct`.
+:dp:`fls_lowrnb3nk318`
+A :t:`unit struct constructor` is a :t:`struct expression` that constructs a
+:t:`unit struct`.
 
-:def_p:`fls_lb2wr5o9sjm7`
-A :term:`base initializer` is a :term:`construct` that specifies a
-:term:`struct` to be used as a base for construction in a :term:`struct
-expression`.
+:dp:`fls_lb2wr5o9sjm7`
+A :t:`base initializer` is a :t:`construct` that specifies a :t:`struct` to be
+used as a base for construction in a :t:`struct expression`.
 
-:def_p:`fls_gfxzhlqlkwmq`
-An :term:`indexed initializer` is a :term:`construct` that specifies the index
-and initial :term:`value` of a :term:`field` in a :term:`struct expression`.
+:dp:`fls_gfxzhlqlkwmq`
+An :t:`indexed initializer` is a :t:`construct` that specifies the index and
+initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
-:def_p:`fls_auimxoels34d`
-A :term:`named initializer` is a :term:`construct` that specifies the name and
-initial :term:`value` of a :term:`field` in a :term:`struct expression`.
+:dp:`fls_auimxoels34d`
+A :t:`named initializer` is a :t:`construct` that specifies the name and initial
+:t:`value` of a :t:`field` in a :t:`struct expression`.
 
-:def_p:`fls_9qhnzeoox7o7`
-A :term:`positional initializer` is a :term:`construct` that specifies the
-initial :term:`value` of a :term:`field` in a :term:`struct expression`.
+:dp:`fls_9qhnzeoox7o7`
+A :t:`positional initializer` is a :t:`construct` that specifies the initial
+:t:`value` of a :t:`field` in a :t:`struct expression`.
 
-:def_p:`fls_1gs6rdyz8as0`
-A :term:`shorthand initializer` is a :term:`construct` that specifies the
-:term:`name` of a :term:`field` in a :term:`struct expression`.
+:dp:`fls_1gs6rdyz8as0`
+A :t:`shorthand initializer` is a :t:`construct` that specifies the :t:`name` of
+a :t:`field` in a :t:`struct expression`.
 
-:def_p:`fls_b6idto4dffmr`
-The :term:`construction type` indicates the :term:`type` of the :term:`struct`
-being constructed by a :term:`struct expression`.
+:dp:`fls_b6idto4dffmr`
+The :t:`construction type` indicates the :t:`type` of the :t:`struct` being
+constructed by a :t:`struct expression`.
 
-:def_p:`fls_i6dj8n6jmt2a`
-A :syntax:`RecordStructConstructor` without a
-:syntax:`RecordStructIndexedFieldInitializerList` is a :term:`record struct
+:dp:`fls_i6dj8n6jmt2a`
+A :s:`RecordStructConstructor` without a
+:s:`RecordStructIndexedFieldInitializerList` is a :t:`record struct
 constructor`.
 
-:def_p:`fls_fn1tjfjcn8zp`
-A :syntax:`UnitStructConstructor` and a :syntax:`RecordStructConstructor`
-without a :syntax:`RecordStructInitializer` are :term:`[unit struct
-constructor]s`.
+:dp:`fls_fn1tjfjcn8zp`
+A :s:`UnitStructConstructor` and a :s:`RecordStructConstructor` without a
+:s:`RecordStructInitializer` are :t:`[unit struct constructor]s`.
 
-:def_p:`fls_ub9cu2w16so9`
-A :syntax:`TupleStructConstructor` and a :syntax:`RecordStructConstructor`
-without a :syntax:`RecordStructFieldInitializerList` are :term:`[tuple struct
-constructor]s`.
+:dp:`fls_ub9cu2w16so9`
+A :s:`TupleStructConstructor` and a :s:`RecordStructConstructor` without a
+:s:`RecordStructFieldInitializerList` are :t:`[tuple struct constructor]s`.
 
-:def_p:`fls_a1c89b6cb6ya`
-A :syntax:`RecordStructConstructor` with a
-:syntax:`RecordStructFieldInitializerList` is a :term:`union constructor`.
+:dp:`fls_a1c89b6cb6ya`
+A :s:`RecordStructConstructor` with a :s:`RecordStructFieldInitializerList` is a
+:t:`union constructor`.
 
-:def_p:`fls_2pgvvgrs72it`
-A :term:`struct expression` is a :term:`value expression`.
+:dp:`fls_2pgvvgrs72it`
+A :t:`struct expression` is a :t:`value expression`.
 
-:def_p:`fls_fez5ukkeoac6`
-The :term:`type` of a :term:`struct expression` is the :term:`construction
-type`.
+:dp:`fls_fez5ukkeoac6`
+The :t:`type` of a :t:`struct expression` is the :t:`construction type`.
 
-:def_p:`fls_yz7wlyye9e3x`
-The :term:`value` of a :term:`struct expression` is the :term:`struct` or
-:term:`union` in construction.
+:dp:`fls_yz7wlyye9e3x`
+The :t:`value` of a :t:`struct expression` is the :t:`struct` or :t:`union`
+in construction.
 
-:def_p:`fls_sazanondyx35`
-The :term:`type` of a :term:`base initializer` is the :term:`type` of its
-:term:`operand`. The :term:`type` of a :term:`base initializer` shall be the
-same as the :term:`construction type`.
+:dp:`fls_sazanondyx35`
+The :t:`type` of a :t:`base initializer` is the :t:`type` of its :t:`operand`.
+The :t:`type` of a :t:`base initializer` shall be the same as the
+:t:`construction type`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_yy6qrnohm34`
-The :term:`evaluation` of a :term:`struct expression` evaluates its
-:term:`[operand]s` in a left-to-right order.
+:dp:`fls_yy6qrnohm34`
+The :t:`evaluation` of a :t:`struct expression` evaluates its :t:`[operand]s` in
+a left-to-right order.
 
 Record Struct Construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_cn4qaxx68auy`
-The :term:`construction type` of a :term:`struct constructor` shall resolve to a
-:term:`struct type`.
+:dp:`fls_cn4qaxx68auy`
+The :t:`construction type` of a :t:`struct constructor` shall resolve to a
+:t:`struct type`.
 
-:def_p:`fls_gyponpgtgz91`
-A :term:`named initializer` matches a :term:`field` of the :term:`construction
-type` when its :term:`identifier` and the :term:`name` of the :term:`field` are
-the same.
+:dp:`fls_gyponpgtgz91`
+A :t:`named initializer` matches a :t:`field` of the :t:`construction type` when
+its :t:`identifier` and the :t:`name` of the :t:`field` are the same.
 
-:def_p:`fls_dwn0sqraaifm`
-The :term:`type` of a :term:`named initializer` and the :term:`type` of the
-matched :term:`field` shall be :term:`unifiable`.
+:dp:`fls_dwn0sqraaifm`
+The :t:`type` of a :t:`named initializer` and the :t:`type` of the matched
+:t:`field` shall be :t:`unifiable`.
 
-:def_p:`fls_aqd0u86gtk6q`
-The :term:`value` of a :term:`named initializer` is the :term:`value` of its
-:term:`expression`.
+:dp:`fls_aqd0u86gtk6q`
+The :t:`value` of a :t:`named initializer` is the :t:`value` of its
+:t:`expression`.
 
-:def_p:`fls_i2ip2s14clr2`
-A :term:`named initializer` that matches a :term:`field` is referred to as a
-:def_term:`matched named initializer`.
+:dp:`fls_i2ip2s14clr2`
+A :t:`named initializer` that matches a :t:`field` is referred to as a
+:dt:`matched named initializer`.
 
-:def_p:`fls_ex7vtlyaor8d`
-A :term:`shorthand initializer` matches a :term:`field` of the
-:term:`construction type` when its :term:`identifier` and the :term:`name` of
-the :term:`field` are the same.
+:dp:`fls_ex7vtlyaor8d`
+A :t:`shorthand initializer` matches a :t:`field` of the :t:`construction type`
+when its :t:`identifier` and the :t:`name` of the :t:`field` are the same.
 
-:def_p:`fls_2p4542ffuu8x`
-The :term:`type` of a :term:`shorthand initializer` and the :term:`type` of the
-matched :term:`field` shall be :term:`unifiable`.
+:dp:`fls_2p4542ffuu8x`
+The :t:`type` of a :t:`shorthand initializer` and the :t:`type` of the matched
+:t:`field` shall be :t:`unifiable`.
 
-:def_p:`fls_cdgpb5lgmk7l`
-The :term:`value` of a :term:`shorthand initializer` is the :term:`value` of
-its :term:`identifier`.
+:dp:`fls_cdgpb5lgmk7l`
+The :t:`value` of a :t:`shorthand initializer` is the :t:`value` of its
+:t:`identifier`.
 
-:def_p:`fls_2wbtuiugiuu4`
-A :term:`shorthand initializer` that matches a :term:`field` is referred to as a
-:def_term:`matched shorthand initializer`.
+:dp:`fls_2wbtuiugiuu4`
+A :t:`shorthand initializer` that matches a :t:`field` is referred to as a
+:dt:`matched shorthand initializer`.
 
-:def_p:`fls_6at70p40nzdx`
-A :term:`shorthand initializer` is equivalent to a :term:`named initializer`
-where both the :term:`identifier` and the :term:`expression` of the :term:`named
-initializer` denote the :term:`identifier` of the :term:`shorthand initializer`.
+:dp:`fls_6at70p40nzdx`
+A :t:`shorthand initializer` is equivalent to a :t:`named initializer` where
+both the :t:`identifier` and the :t:`expression` of the :t:`named initializer`
+denote the :t:`identifier` of the :t:`shorthand initializer`.
 
-:def_p:`fls_b5xkmxd0mqzq`
-For each :term:`field` of the :term:`construction type`, the :term:`record
-struct constructor` shall either:
+:dp:`fls_b5xkmxd0mqzq`
+For each :t:`field` of the :t:`construction type`, the :t:`record struct
+constructor` shall either:
 
-* :def_p:`fls_4mftx1nnv3z`
-  Contain a :term:`matched named initializer`, or
+* :dp:`fls_4mftx1nnv3z`
+  Contain a :t:`matched named initializer`, or
 
-* :def_p:`fls_jj4x358nm3do`
-  Contain a :term:`matched shorthand initializer`, or
+* :dp:`fls_jj4x358nm3do`
+  Contain a :t:`matched shorthand initializer`, or
 
-* :def_p:`fls_t34yselx5psr`
-  Have a :syntax:`RecordStructInitializer` with a :term:`base initializer` or a
-  :syntax:`RecordStructFieldInitializerList` with a :term:`base initializer`.
+* :dp:`fls_t34yselx5psr`
+  Have a :s:`RecordStructInitializer` with a :t:`base initializer` or a
+  :s:`RecordStructFieldInitializerList` with a :t:`base initializer`.
 
-:def_p:`fls_3gav2vg20xgi`
-The :term:`value` of a :term:`field` of a :term:`struct` in construction shall
-be either:
+:dp:`fls_3gav2vg20xgi`
+The :t:`value` of a :t:`field` of a :t:`struct` in construction shall be either:
 
-* :def_p:`fls_eclbzmm2fyx3`
-  The :term:`value` of a :term:`matched named initializer`, or
+* :dp:`fls_eclbzmm2fyx3`
+  The :t:`value` of a :t:`matched named initializer`, or
 
-* :def_p:`fls_yhtz73hx66r3`
-  The :term:`value` of a :term:`matched shorthand initializer`, or
+* :dp:`fls_yhtz73hx66r3`
+  The :t:`value` of a :t:`matched shorthand initializer`, or
 
-* :def_p:`fls_hm6uwir33qte`
-  The :term:`value` of the corresponding :term:`field` of the :term:`struct`
-  indicated by the :term:`base initializer`, where the :term:`value` is either
-  :term:`copied` or :term:`moved`.
+* :dp:`fls_hm6uwir33qte`
+  The :t:`value` of the corresponding :t:`field` of the :t:`struct` indicated
+  by the :t:`base initializer`, where the :t:`value` is either :t:`copied` or
+  :t:`moved`.
 
 .. rubric:: Examples
 
@@ -3042,23 +2989,21 @@ be either:
 
    let bob = Employee {
 
-
-:def_p:`fls_44xrpe2k6d6p`
+:dp:`fls_44xrpe2k6d6p`
 Matched named initializer.
 
 .. syntax::
 
-
        name: "Bob".to_string(),
 
-:def_p:`fls_8piw0m60trwg`
+:dp:`fls_8piw0m60trwg`
 Matched shorthand initializer.
 
 .. code-block:: text
 
        age,
 
-:def_p:`fls_lrjhfc1mnx4a`
+:dp:`fls_lrjhfc1mnx4a`
 Base initializer, equivalent to ``alice.occupation`` and ``alice.compensation``.
 
 .. code-block:: text
@@ -3071,83 +3016,78 @@ Tuple Struct Construction
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ciwtgajyevdk`
-The :term:`construction type` of a :term:`tuple struct constructor` shall
-resolve to a :term:`tuple struct type`.
+:dp:`fls_ciwtgajyevdk`
+The :t:`construction type` of a :t:`tuple struct constructor` shall resolve to a
+:t:`tuple struct type`.
 
-:def_p:`fls_6t6r55rnjn6n`
-A :term:`tuple struct constructor` shall contain one :term:`positional
-initializer` for each :term:`field` of the :term:`construction type`.
+:dp:`fls_6t6r55rnjn6n`
+A :t:`tuple struct constructor` shall contain one :t:`positional initializer`
+for each :t:`field` of the :t:`construction type`.
 
-:def_p:`fls_tofndxu1cwam`
-A :term:`positional initializer` matches a :term:`field` of the
-:term:`construction type` when the position of the :term:`positional
-initializer` and the position of the :term:`field` in the :term:`construction
-type` are the same.
+:dp:`fls_tofndxu1cwam`
+A :t:`positional initializer` matches a :t:`field` of the :t:`construction type`
+when the position of the :t:`positional initializer` and the position of the
+:t:`field` in the :t:`construction type` are the same.
 
-:def_p:`fls_wm1zje7mtqht`
-The :term:`type` of the :term:`operand` of a :term:`positional initializer` and
-the :term:`type` of the matched :term:`field` shall be :term:`unifiable`.
+:dp:`fls_wm1zje7mtqht`
+The :t:`type` of the :t:`operand` of a :t:`positional initializer` and the
+:t:`type` of the matched :t:`field` shall be :t:`unifiable`.
 
-:def_p:`fls_i8d8mly7wbx7`
-The :term:`value` of a :term:`positional initializer` is the :term:`value` of
-its :term:`operand`.
+:dp:`fls_i8d8mly7wbx7`
+The :t:`value` of a :t:`positional initializer` is the :t:`value` of its
+:t:`operand`.
 
-:def_p:`fls_wwjecv46x8p8`
-A :term:`positional initializer` that matches a :term:`field` is referred to as
-a :def_term:`matched positional initializer`.
+:dp:`fls_wwjecv46x8p8`
+A :t:`positional initializer` that matches a :t:`field` is referred to as a
+:dt:`matched positional initializer`.
 
-:def_p:`fls_v59g8ki099ma`
-The :syntax:`RecordStructIndexedFieldInitializerList` of a :term:`record struct
+:dp:`fls_v59g8ki099ma`
+The :s:`RecordStructIndexedFieldInitializerList` of a :t:`record struct
 constructor` shall:
 
-* :def_p:`fls_wc5090dwk0zf`
-  Contain an :term:`indexed initializer` for each :term:`field` of the
-  :term:`construction type`, covering all indices of the :term:`construction
-  type`, or
+* :dp:`fls_wc5090dwk0zf`
+  Contain an :t:`indexed initializer` for each :t:`field` of the
+  :t:`construction type`, covering all indices of the :t:`construction type`, or
 
-* :def_p:`fls_v6c2mpue9v65`
-  Have a :syntax:`RecordStructInitializer` with a :term:`base initializer`
-  or a :syntax:`RecordStructIndexedFieldInitializerList` with a :term:`base
-  initializer`\ ``.``
+* :dp:`fls_v6c2mpue9v65`
+  Have a :s:`RecordStructInitializer` with a :t:`base initializer` or a
+  :s:`RecordStructIndexedFieldInitializerList` with a :t:`base initializer`\
+  ``.``
 
-:def_p:`fls_491ix17yzb6k`
-An :term:`indexed initializer` matches a :term:`field` of the
-:term:`construction type` when the :term:`tuple index` of the :term:`indexed
-initializer` resolves to a valid position of a :term:`field` in the
-:term:`construction type`.
+:dp:`fls_491ix17yzb6k`
+An :t:`indexed initializer` matches a :t:`field` of the :t:`construction type`
+when the :t:`tuple index` of the :t:`indexed initializer` resolves to a valid
+position of a :t:`field` in the :t:`construction type`.
 
-:def_p:`fls_kwt27bhyfe39`
-The :term:`type` of the :term:`operand` of an :term:`indexed initializer` and
-the :term:`type` of the matched :term:`field` shall be :term:`unifiable`.
+:dp:`fls_kwt27bhyfe39`
+The :t:`type` of the :t:`operand` of an :t:`indexed initializer` and the
+:t:`type` of the matched :t:`field` shall be :t:`unifiable`.
 
-:def_p:`fls_ixzyz4np4piy`
-The :term:`value` of an :term:`indexed initializer` is the :term:`value` of
-its :term:`operand`.
+:dp:`fls_ixzyz4np4piy`
+The :t:`value` of an :t:`indexed initializer` is the :t:`value` of its
+:t:`operand`.
 
-:def_p:`fls_da507av76xq6`
-An :term:`indexed initializer` that matches a :term:`field` is referred to as a
-:def_term:`matched indexed initializer`.
+:dp:`fls_da507av76xq6`
+An :t:`indexed initializer` that matches a :t:`field` is referred to as a
+:dt:`matched indexed initializer`.
 
-:def_p:`fls_54rkrj5ajo6`
-The :term:`value` of a :term:`field` of a :term:`tuple in construction` is
-either:
+:dp:`fls_54rkrj5ajo6`
+The :t:`value` of a :t:`field` of a :t:`tuple in construction` is either:
 
-* :def_p:`fls_r7bzxwxd6364`
-  The :term:`value` of a :term:`matched indexed initializer`, or
+* :dp:`fls_r7bzxwxd6364`
+  The :t:`value` of a :t:`matched indexed initializer`, or
 
-* :def_p:`fls_mopq56aafcee`
-  The :term:`value` of a :term:`matched positional initializer`, or
+* :dp:`fls_mopq56aafcee`
+  The :t:`value` of a :t:`matched positional initializer`, or
 
-* :def_p:`fls_kihfh0h7o8nj`
-  The :term:`value` of the corresponding :term:`field` of the :term:`tuple
-  indicated` by the :term:`base initializer`, where the :term:`value` is either
-  :term:`copied` or :term:`moved`.
+* :dp:`fls_kihfh0h7o8nj`
+  The :t:`value` of the corresponding :t:`field` of the :t:`tuple indicated`
+  by the :t:`base initializer`, where the :t:`value` is either :t:`copied` or
+  :t:`moved`.
 
 .. rubric:: Examples
 
 .. syntax::
-
 
    struct Point3D (
        f64,
@@ -3163,16 +3103,14 @@ either:
 
    let indexed_point = Point3D {
 
-
-:def_p:`fls_voqgzdvwh9k5`
+:dp:`fls_voqgzdvwh9k5`
 Matched indexed initializer.
 
 .. code-block:: text
 
-
        1: 1.1,
 
-:def_p:`fls_gjs024orub2v`
+:dp:`fls_gjs024orub2v`
 Base initializer, equivalent to ``origin.0`` and ``origin.2``.
 
 .. code-block:: text
@@ -3185,24 +3123,24 @@ Union Construction
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_6oi54di0tndy`
-The :term:`construction type` of a :term:`union constructor` shall resolve to a
-:term:`union type`.
+:dp:`fls_6oi54di0tndy`
+The :t:`construction type` of a :t:`union constructor` shall resolve to a
+:t:`union type`.
 
-:def_p:`fls_x8yd82t572hc`
-The :syntax:`RecordStructFieldInitializerList` of a :term:`union constructor`
-shall contain exactly one :syntax:`RecordStructFieldInitializer` and no
-:term:`base initializer`.
+:dp:`fls_x8yd82t572hc`
+The :s:`RecordStructFieldInitializerList` of a :t:`union constructor`
+shall contain exactly one :s:`RecordStructFieldInitializer` and no :t:`base
+initializer`.
 
-:def_p:`fls_paqsgracxc7h`
-For the single :term:`field` of the :term:`construction type`, a :term:`unit
-constructor` shall either:
+:dp:`fls_paqsgracxc7h`
+For the single :t:`field` of the :t:`construction type`, a :t:`unit constructor`
+shall either:
 
-* :def_p:`fls_cedzp2z2fk69`
-  Contain a :term:`matched named initializer`, or
+* :dp:`fls_cedzp2z2fk69`
+  Contain a :t:`matched named initializer`, or
 
-* :def_p:`fls_ymiajqhy4v43`
-  Contain a :term:`matched shorthand initializer`.
+* :dp:`fls_ymiajqhy4v43`
+  Contain a :t:`matched shorthand initializer`.
 
 .. rubric:: Examples
 
@@ -3221,14 +3159,13 @@ Unit Struct Construction
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_fyzdvmc4yuzr`
-The :term:`construction type` of a :term:`unit struct constructor` shall resolve
-to a :term:`unit struct type`.
+:dp:`fls_fyzdvmc4yuzr`
+The :t:`construction type` of a :t:`unit struct constructor` shall resolve to a
+:t:`unit struct type`.
 
 .. rubric:: Examples
 
 .. syntax::
-
 
    struct Empty;
 
@@ -3252,114 +3189,107 @@ Call Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_fvgfx17ossd9`
-A :term:`call expression` is an :term:`expression` that invokes a
-:term:`function`.
+:dp:`fls_fvgfx17ossd9`
+A :t:`call expression` is an :t:`expression` that invokes a :t:`function`.
 
-:def_p:`fls_jvz5z3eqxb39`
-An :term:`argument operand` is an :term:`operand` which is used as an argument
-in a :term:`call expression` or a :term:`method call expression`.
+:dp:`fls_jvz5z3eqxb39`
+An :t:`argument operand` is an :t:`operand` which is used as an argument in a
+:t:`call expression` or a :t:`method call expression`.
 
-:def_p:`fls_7ql1c71eidg8`
-A :term:`call operand` is the :term:`function` being invoked by a :term:`call
+:dp:`fls_7ql1c71eidg8`
+A :t:`call operand` is the :t:`function` being invoked by a :t:`call
 expression`.
 
-:def_p:`fls_4t6imtiw6kzt`
-A :term:`callee type` is either a :term:`function item type`, a
-:term:`function pointer type`, or a :term:`type` that implements any
-of the :codeterm:`core::ops::Fn`, :codeterm:`core::ops::FnMut`, or
-:codeterm:`core::ops::FnOnce` :term:`[trait]s`.
+:dp:`fls_4t6imtiw6kzt`
+A :t:`callee type` is either a :t:`function item type`, a :t:`function
+pointer type`, or a :t:`type` that implements any of the :c:`core::ops::Fn`,
+:c:`core::ops::FnMut`, or :c:`core::ops::FnOnce` :t:`[trait]s`.
 
-:def_p:`fls_aafrvlmiwfon`
-The :term:`call operand` is subject to :term:`auto dereferencing` until a
-:term:`callee type` is found, otherwise this is a static error.
+:dp:`fls_aafrvlmiwfon`
+The :t:`call operand` is subject to :t:`auto dereferencing` until a :t:`callee
+type` is found, otherwise this is a static error.
 
-:def_p:`fls_d8rewso3dm6r`
-An :term:`adjusted call operand` is a :term:`call operand` with possible
-:term:`auto dereferencing` adjustments.
+:dp:`fls_d8rewso3dm6r`
+An :t:`adjusted call operand` is a :t:`call operand` with possible :t:`auto
+dereferencing` adjustments.
 
-:def_p:`fls_bu6i3mcvnbin`
-The :term:`type` of a :term:`call expression` is the :term:`return
-type` of the :term:`invoked function` or :term:`associated type`
-:codeterm:`core::ops::FnOnce::Output`.
+:dp:`fls_bu6i3mcvnbin`
+The :t:`type` of a :t:`call expression` is the :t:`return type` of the
+:t:`invoked function` or :t:`associated type` :c:`core::ops::FnOnce::Output`.
 
-:def_p:`fls_8ljrgdept7s8`
-A :term:`call expression` whose :term:`callee type` is either an :term:`external
-function item type`, an :term:`unsafe function item type` or an :term:`unsafe
-function pointer type` shall require :term:`unsafe context`.
+:dp:`fls_8ljrgdept7s8`
+A :t:`call expression` whose :t:`callee type` is either an :t:`external function
+item type`, an :t:`unsafe function item type` or an :t:`unsafe function pointer
+type` shall require :t:`unsafe context`.
 
-:def_p:`fls_7p6zrjbpj0kl`
-The :term:`value` of a :term:`call expression` is determined as follows:
+:dp:`fls_7p6zrjbpj0kl`
+The :t:`value` of a :t:`call expression` is determined as follows:
 
-* :def_p:`fls_yrr1s0tucgvh`
-  If the :term:`callee type` is a :term:`function item type` or a
-  :term:`function pointer type`, then the :term:`value` is the result of
-  invoking the corresponding :term:`function` with the :term:`[argument
-  operand]s`.
+* :dp:`fls_yrr1s0tucgvh`
+  If the :t:`callee type` is a :t:`function item type` or a :t:`function
+  pointer type`, then the :t:`value` is the result of invoking the corresponding
+  :t:`function` with the :t:`[argument operand]s`.
 
-* :def_p:`fls_s3q3sej1hgho`
-  If the :term:`callee type` implements the :codeterm:`core::ops::Fn`
-  :term:`trait`, then the :term:`value` is the result of invoking
+* :dp:`fls_s3q3sej1hgho`
+  If the :t:`callee type` implements the :c:`core::ops::Fn`
+  :t:`trait`, then the :t:`value` is the result of invoking
   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)``,
-  where ``adjusted_call_operand`` is the :term:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`[argument
+  where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
+  ``argument_operand_tuple`` is a :t:`tuple` that wraps the :t:`[argument
   operand]s`.
 
-* :def_p:`fls_cu2ubdm3tfwb`
-  If the :term:`call operand` implements the :codeterm:`core::ops::FnMut`
-  :term:`trait`, then the :term:`value` is the result of invoking
+* :dp:`fls_cu2ubdm3tfwb`
+  If the :t:`call operand` implements the :c:`core::ops::FnMut`
+  :t:`trait`, then the :t:`value` is the result of invoking
   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple),``
-  where ``adjusted_call_operand`` is the :term:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`[argument
+  where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
+  ``argument_operand_tuple`` is a :t:`tuple` that wraps the :t:`[argument
   operand]s`.
 
-* :def_p:`fls_9bbewx1l7h5h`
-  If the :term:`call operand` implements the :codeterm:`core::ops::FnOnce`
-  :term:`trait`, then the :term:`value` is the result of
-  invoking ``core::ops::FnOnce::call_once(adjusted_call_operand,
-  argument_operand_tuple),`` where ``adjusted_call_operand`` is the
-  :term:`adjusted call operand`, and ``argument_operand_tuple`` is a
-  :term:`tuple` that wraps the :term:`[argument operand]s`.
+* :dp:`fls_9bbewx1l7h5h`
+  If the :t:`call operand` implements the :c:`core::ops::FnOnce`
+  :t:`trait`, then the :t:`value` is the result of invoking
+  ``core::ops::FnOnce::call_once(adjusted_call_operand,
+  argument_operand_tuple),`` where ``adjusted_call_operand`` is the :t:`adjusted
+  call operand`, and ``argument_operand_tuple`` is a :t:`tuple` that wraps the
+  :t:`[argument operand]s`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ggr5i91vur0r`
-The :term:`evaluation` of a :term:`call expression` proceeds as follows:
+:dp:`fls_ggr5i91vur0r`
+The :t:`evaluation` of a :t:`call expression` proceeds as follows:
 
-#. :def_p:`fls_hwalzgdidbfz`
-   The :term:`call operand` is evaluated.
+#. :dp:`fls_hwalzgdidbfz`
+   The :t:`call operand` is evaluated.
 
-#. :def_p:`fls_p52mfvpadu7w`
-   The :term:`[argument operand]s` are evaluated in left-to-right order.
+#. :dp:`fls_p52mfvpadu7w`
+   The :t:`[argument operand]s` are evaluated in left-to-right order.
 
-#. :def_p:`fls_1cyo5qhbl1j9`
-   If the :term:`adjusted call operand` is a :term:`function item type` or
-   :term:`function pointer type`, then corresponding :term:`function` is
-   invoked.
+#. :dp:`fls_1cyo5qhbl1j9`
+   If the :t:`adjusted call operand` is a :t:`function item type` or
+   :t:`function pointer type`, then corresponding :t:`function` is invoked.
 
-#. :def_p:`fls_nb0eqky2akzt`
-   If the :term:`type` of the :term:`call operand` implements
-   the :codeterm:`core::ops::Fn` :term:`trait`, then
-   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)`` is
-   invoked.
+#. :dp:`fls_nb0eqky2akzt`
+   If the :t:`type` of the :t:`call operand` implements the :c:`core::ops::Fn`
+   :t:`trait`, then ``core::ops::Fn::call(adjusted_call_operand,
+   argument_operand_tuple)`` is invoked.
 
-#. :def_p:`fls_9lt4wh9ql5ae`
-   If the :term:`type` of the :term:`call operand` implements
-   the :codeterm:`core::ops::FnMut` :term:`trait`, then
-   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple)``
-   is invoked.
+#. :dp:`fls_9lt4wh9ql5ae`
+   If the :t:`type` of the :t:`call operand` implements the :c:`core::ops::FnMut`
+   :t:`trait`, then ``core::ops::FnMut::call_mut(adjusted_call_operand,
+   argument_operand_tuple)`` is invoked.
 
-#. :def_p:`fls_ixebnlcccmit`
-   If the :term:`type` of the :term:`call operand` implements
-   the :codeterm:`core::ops::FnOnce` :term:`trait`, then
+#. :dp:`fls_ixebnlcccmit`
+   If the :t:`type` of the :t:`call operand` implements
+   the :c:`core::ops::FnOnce` :t:`trait`, then
    ``core::ops::FnOnce::call_once(adjusted_call_operand,
    argument_operand_tuple)`` is invoked.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_5yeq4oah58dl`
-It is undefined behavior to call a :term:`function` with an :term:`ABI` other
-than the :term:`ABI` the :term:`function` was defined with.
+:dp:`fls_5yeq4oah58dl`
+It is undefined behavior to call a :t:`function` with an :t:`ABI` other than the
+:t:`ABI` the :t:`function` was defined with.
 
 .. rubric:: Examples
 
@@ -3382,38 +3312,38 @@ Method Call Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_b7i26954j1hc`
-A :term:`method call expression` is an :term:`expression` that invokes a
-:term:`method` of an :term:`object`.
+:dp:`fls_b7i26954j1hc`
+A :t:`method call expression` is an :t:`expression` that invokes a :t:`method`
+of an :t:`object`.
 
-:def_p:`fls_jx3ryre0xs88`
-A :term:`receiver operand` is an :term:`operand` that denotes the :term:`value`
-whose :term:`method` is being invoked by a :term:`method call expression`.
+:dp:`fls_jx3ryre0xs88`
+A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
+:t:`method` is being invoked by a :t:`method call expression`.
 
-:def_p:`fls_y7bj7y6davlh`
-A :term:`method call expression` is subject to :term:`method resolution`.
+:dp:`fls_y7bj7y6davlh`
+A :t:`method call expression` is subject to :t:`method resolution`.
 
-:def_p:`fls_11glzggtbgb3`
-The :term:`type` of a :term:`method call expression` is the :term:`return type`
-of the invoked :term:`method`.
+:dp:`fls_11glzggtbgb3`
+The :t:`type` of a :t:`method call expression` is the :t:`return type` of the
+invoked :t:`method`.
 
-:def_p:`fls_ljvj1f9fv085`
-The :term:`value` of a :term:`method call expression` is the :term:`value`
-returned by the invoked :term:`method`.
+:dp:`fls_ljvj1f9fv085`
+The :t:`value` of a :t:`method call expression` is the :t:`value` returned by
+the invoked :t:`method`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_oxxk3snd7ya0`
-The :term:`evaluation` of a :term:`method call expression` proceeds as follows:
+:dp:`fls_oxxk3snd7ya0`
+The :t:`evaluation` of a :t:`method call expression` proceeds as follows:
 
-#. :def_p:`fls_gmpq15g77o20`
-   The :term:`receiver operand` is evaluated.
+#. :dp:`fls_gmpq15g77o20`
+   The :t:`receiver operand` is evaluated.
 
-#. :def_p:`fls_pu0n9hakkym2`
-   The :term:`[argument operand]s` are evaluated in left-to-right order.
+#. :dp:`fls_pu0n9hakkym2`
+   The :t:`[argument operand]s` are evaluated in left-to-right order.
 
-#. :def_p:`fls_cawdkgvvd1x6`
-   The :term:`method` is invoked.
+#. :dp:`fls_cawdkgvvd1x6`
+   The :t:`method` is invoked.
 
 .. rubric:: Examples
 
@@ -3459,85 +3389,82 @@ Field Access Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_hr8qvwlhd9ts`
-A :term:`field access expression` is an :term:`expression` that accesses a
-:term:`field` of an :term:`object`.
+:dp:`fls_hr8qvwlhd9ts`
+A :t:`field access expression` is an :t:`expression` that accesses a :t:`field`
+of an :t:`object`.
 
-:def_p:`fls_s2vpn4ihenpe`
-A :term:`container operand` is an :term:`operand` that indicates the
-:term:`object` whose :term:`field` is selected in a :term:`field access
+:dp:`fls_s2vpn4ihenpe`
+A :t:`container operand` is an :t:`operand` that indicates the :t:`object` whose
+:t:`field` is selected in a :t:`field access expression`.
+
+:dp:`fls_yeuayil6uxzx`
+A :t:`field selector` is a :t:`construct` that selects the :t:`field` to be
+accessed in a :t:`field access expression`.
+
+:dp:`fls_qqrconpa92i3`
+A :t:`selected field` is a :t:`field` that is selected by a :t:`field access
 expression`.
 
-:def_p:`fls_yeuayil6uxzx`
-A :term:`field selector` is a :term:`construct` that selects the :term:`field`
-to be accessed in a :term:`field access expression`.
+:dp:`fls_t9xakmda134a`
+A :t:`field access expression` with an :s:`IndexedFieldSelector` is referred to
+as an :dt:`indexed field access`.
 
-:def_p:`fls_qqrconpa92i3`
-A :term:`selected field` is a :term:`field` that is selected by a :term:`field
-access expression`.
+:dp:`fls_dch5i39ycw7s`
+A :t:`field access expression` with a :s:`NamedFieldSelector` is referred to as
+a :dt:`named field access`.
 
-:def_p:`fls_t9xakmda134a`
-A :term:`field access expression` with an :syntax:`IndexedFieldSelector` is
-referred to as an :def_term:`indexed field access`.
+:dp:`fls_1l92izxtm1t8`
+A :t:`field access expression` is a :t:`place expression`.
 
-:def_p:`fls_dch5i39ycw7s`
-A :term:`field access expression` with a :syntax:`NamedFieldSelector` is
-referred to as a :def_term:`named field access`.
+:dp:`fls_1bbbw0qj0h0q`
+A :t:`field access expression` is a :t:`mutable place expression` when its
+:t:`container operand` is :t:`mutable`.
 
-:def_p:`fls_1l92izxtm1t8`
-A :term:`field access expression` is a :term:`place expression`.
+:dp:`fls_fovs9il2h9xg`
+The :t:`type` of a :t:`field access expression` is the :t:`type` of the
+:t:`selected field`.
 
-:def_p:`fls_1bbbw0qj0h0q`
-A :term:`field access expression` is a :term:`mutable place expression` when its
-:term:`container operand` is :term:`mutable`.
-
-:def_p:`fls_fovs9il2h9xg`
-The :term:`type` of a :term:`field access expression` is the :term:`type` of the
-:term:`selected field`.
-
-:def_p:`fls_r1b4n12i93pg`
-The :term:`value` of a :term:`field access expression` is the :term:`value` of
-the :term:`selected field`.
+:dp:`fls_r1b4n12i93pg`
+The :t:`value` of a :t:`field access expression` is the :t:`value` of the
+:t:`selected field`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_6uzouesw2sod`
-The :term:`evaluation` of a :term:`field access expression` evaluates its
-:term:`container operand`.
+:dp:`fls_6uzouesw2sod`
+The :t:`evaluation` of a :t:`field access expression` evaluates its
+:t:`container operand`.
 
 Named Field Access
 ~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_kddnnz8uc15b`
-Reading the :term:`selected field` of a :term:`union` shall require
-:term:`unsafe context`.
+:dp:`fls_kddnnz8uc15b`
+Reading the :t:`selected field` of a :t:`union` shall require :t:`unsafe
+context`.
 
-:def_p:`fls_an3no949lvfw`
-Writing to the :term:`selected field` of a :term:`union` where the :term:`type`
-of the :term:`selected field` implements the :codeterm:`core::marker::Copy`
-:term:`trait` or the :codeterm:`core::mem::ManuallyDrop` :term:`trait` shall
-require :term:`safe context`.
+:dp:`fls_an3no949lvfw`
+Writing to the :t:`selected field` of a :t:`union` where the :t:`type` of the
+:t:`selected field` implements the :c:`core::marker::Copy` :t:`trait` or the
+:c:`core::mem::ManuallyDrop` :t:`trait` shall require :t:`safe context`.
 
-:def_p:`fls_t6xmsm2nk1bc`
-Writing to and then reading from the :term:`selected field` of a :term:`union`
-subject to :term:`attribute` :codeterm:`repr` is equivalent to invoking
-:term:`function` ``core::mem::transmute<write_type, read_type>(field_bits)``
-where ``write_type`` is the :term:`type` used at the time of writing the
-:term:`selected field`, ``read_type`` is the :term:`type` used at the time of
-reading the :term:`selected field`, and ``field_bits`` is the bit representation
-of the :term:`selected field`.
+:dp:`fls_t6xmsm2nk1bc`
+Writing to and then reading from the :t:`selected field` of a :t:`union`
+subject to :t:`attribute` :c:`repr` is equivalent to invoking :t:`function`
+``core::mem::transmute<write_type, read_type>(field_bits)`` where ``write_type``
+is the :t:`type` used at the time of writing the :t:`selected field`,
+``read_type`` is the :t:`type` used at the time of reading the :t:`selected
+field`, and ``field_bits`` is the bit representation of the :t:`selected field`.
 
 .. rubric:: Undefined Behavior
 
-:def_p:`fls_sdnafipirg8w`
-It is undefined behavior when the :term:`type` of the :term:`container operand`
-is a :term:`union type` and the :term:`selected field` contains invalid data.
+:dp:`fls_sdnafipirg8w`
+It is undefined behavior when the :t:`type` of the :t:`container operand` is a
+:t:`union type` and the :t:`selected field` contains invalid data.
 
 .. rubric:: Examples
 
-:def_p:`fls_x27yayh4z787`
+:dp:`fls_x27yayh4z787`
 See :p:`6.8.1. <fls_hv4grs2tcuiw>` for the declaration of ``alice``.
 
 .. code-block:: text
@@ -3549,14 +3476,13 @@ Indexed Field Access
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_zexojym4ak6f`
-The :term:`decimal literal` of an :term:`indexed field access` shall denote
-a valid index of a :term:`field` of the :term:`[container operand]'s`
-:term:`type`.
+:dp:`fls_zexojym4ak6f`
+The :t:`decimal literal` of an :t:`indexed field access` shall denote a valid
+index of a :t:`field` of the :t:`[container operand]'s` :t:`type`.
 
 .. rubric:: Examples
 
-:def_p:`fls_dimto84ifanr`
+:dp:`fls_dimto84ifanr`
 The following indexed field access evaluates to ``42``.
 
 .. code-block:: text
@@ -3586,43 +3512,40 @@ Closure Expressions
    ClosureParameter ::=
        OuterAttributeOrDoc* PatternWithoutAlternation TypeAscription?
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_2d141c9a0yui`
-A :term:`closure expression` is an :term:`expression` that defines a
-:term:`closure type`.
+:dp:`fls_2d141c9a0yui`
+A :t:`closure expression` is an :t:`expression` that defines a :t:`closure
+type`.
 
-:def_p:`fls_srbl7ptknjyk`
-A :term:`closure body` is a :term:`construct` that represents the executable
-portion of a :term:`closure expression`.
+:dp:`fls_srbl7ptknjyk`
+A :t:`closure body` is a :t:`construct` that represents the executable portion
+of a :t:`closure expression`.
 
-:def_p:`fls_oey0ivaiu1l`
-A :term:`closure body` denotes a new :term:`control flow boundary`.
+:dp:`fls_oey0ivaiu1l`
+A :t:`closure body` denotes a new :t:`control flow boundary`.
 
-:def_p:`fls_fg8lx0yyt6oq`
-A :term:`closure body` is subject to :term:`capturing`.
+:dp:`fls_fg8lx0yyt6oq`
+A :t:`closure body` is subject to :t:`capturing`.
 
-:def_p:`fls_yn30xuejcfxo`
-The :term:`type` of a :term:`closure expression` is the anonymous unique
-:term:`closure type` defined by it.
+:dp:`fls_yn30xuejcfxo`
+The :t:`type` of a :t:`closure expression` is the anonymous unique :t:`closure
+type` defined by it.
 
-:def_p:`fls_sje6cdvifgv5`
-The :term:`value` of a :term:`closure expression` is the :term:`value` of
-the anonymous unique :term:`closure type` instantiated with the selected
-:term:`[capture]s`.
+:dp:`fls_sje6cdvifgv5`
+The :t:`value` of a :t:`closure expression` is the :t:`value` of the anonymous
+unique :t:`closure type` instantiated with the selected :t:`[capture]s`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_f59fw17gsasn`
-The :term:`evaluation` of a :term:`closure expression` proceeds as follows:
+:dp:`fls_f59fw17gsasn`
+The :t:`evaluation` of a :t:`closure expression` proceeds as follows:
 
-#. :def_p:`fls_7w15ccc1zzxl`
-   An anonymous :term:`value` of an anonymous unique :term:`closure type` is
-   created.
+#. :dp:`fls_7w15ccc1zzxl`
+   An anonymous :t:`value` of an anonymous unique :t:`closure type` is created.
 
-#. :def_p:`fls_b8w9y73pvdnm`
-   The :term:`closure body` is evaluated.
+#. :dp:`fls_b8w9y73pvdnm`
+   The :t:`closure body` is evaluated.
 
 .. rubric:: Examples
 
@@ -3654,45 +3577,45 @@ Loop Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_y1d8kd1bdlmx`
-A :term:`loop expression` is an :term:`expression` that evaluates a :term:`block
+:dp:`fls_y1d8kd1bdlmx`
+A :t:`loop expression` is an :t:`expression` that evaluates a :t:`block
 expression` continuously as long as some criterion holds true.
 
-:def_p:`fls_eg93m93gvwal`
-An :term:`anonymous loop` is a :term:`loop expression` without a :term:`label`.
+:dp:`fls_eg93m93gvwal`
+An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
 
-:def_p:`fls_phpoq9ho8f1v`
-A :term:`named loop` is a :term:`loop expression` with a :term:`label`.
+:dp:`fls_phpoq9ho8f1v`
+A :t:`named loop` is a :t:`loop expression` with a :t:`label`.
 
-:def_p:`fls_b314wjbv0zwe`
-The :term:`type` of a :term:`loop expression` is determined as follows:
+:dp:`fls_b314wjbv0zwe`
+The :t:`type` of a :t:`loop expression` is determined as follows:
 
-* :def_p:`fls_rpedapxnv8w3`
-  If the :term:`loop expression` does not contain a :term:`break expression`,
-  then the :term:`type` is the :term:`never type`.
+* :dp:`fls_rpedapxnv8w3`
+  If the :t:`loop expression` does not contain a :t:`break expression`, then the
+  :t:`type` is the :t:`never type`.
 
-* :def_p:`fls_wf11yp1jwf53`
-  If the :term:`loop expression` contains at least one :term:`break expression`,
-  then the :term:`type` is the :term:`unified type` of the :term:`[break type]s`
-  of all :term:`[break expression]s`.
+* :dp:`fls_wf11yp1jwf53`
+  If the :t:`loop expression` contains at least one :t:`break expression`,
+  then the :t:`type` is the :t:`unified type` of the :t:`[break type]s` of all
+  :t:`[break expression]s`.
 
-:def_p:`fls_q3qpcf2fz7h`
-The :term:`value` of a :term:`loop expression` is determined as follows:
+:dp:`fls_q3qpcf2fz7h`
+The :t:`value` of a :t:`loop expression` is determined as follows:
 
-* :def_p:`fls_2ulbzmuuny3g`
-  If the :term:`loop expression` does not contain a :term:`break expression`,
-  then the :term:`value` is the :term:`unit value`.
+* :dp:`fls_2ulbzmuuny3g`
+  If the :t:`loop expression` does not contain a :t:`break expression`, then the
+  :t:`value` is the :t:`unit value`.
 
-* :def_p:`fls_99imks9hj3kp`
-  If the :term:`loop expression` contains at least one :term:`break expression`,
-  then the :term:`value` is the :term:`break value` of the :term:`break
-  expression` that broke out of the :term:`loop expression`.
+* :dp:`fls_99imks9hj3kp`
+  If the :t:`loop expression` contains at least one :t:`break expression`, then
+  the :t:`value` is the :t:`break value` of the :t:`break expression` that broke
+  out of the :t:`loop expression`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_aw6qczl4zpko`
-A :term:`loop expression` is :term:`terminated` when its :term:`block
-expression` is no longer evaluated.
+:dp:`fls_aw6qczl4zpko`
+A :t:`loop expression` is :t:`terminated` when its :t:`block expression` is no
+longer evaluated.
 
 For Loops
 ~~~~~~~~~
@@ -3706,19 +3629,19 @@ For Loops
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_1bh2alh37frz`
-A :term:`for loop expression` is a :term:`loop expression` that continues to
-evaluate its :term:`block expression` as long as its :term:`subject expression`
-yields a :term:`value`.
+:dp:`fls_1bh2alh37frz`
+A :t:`for loop expression` is a :t:`loop expression` that continues to evaluate
+its :t:`block expression` as long as its :t:`subject expression` yields a
+:t:`value`.
 
-:def_p:`fls_fkgbin6ydkm4`
-The :term:`type` of a :term:`subject expression` shall implement the
-:codeterm:`core::iter::IntoIterator` :term:`trait`.
+:dp:`fls_fkgbin6ydkm4`
+The :t:`type` of a :t:`subject expression` shall implement the
+:c:`core::iter::IntoIterator` :t:`trait`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_kuxo0on3vit6`
-The :term:`evaluation` of a :term:`for loop expression` of the form
+:dp:`fls_kuxo0on3vit6`
+The :t:`evaluation` of a :t:`for loop expression` of the form
 
 .. code-block:: text
 
@@ -3726,9 +3649,8 @@ The :term:`evaluation` of a :term:`for loop expression` of the form
        /* loop body */
    }
 
-:def_p:`fls_2lrzrtjhsdes`
-is equivalent to the :term:`evaluation` of the following :term:`block
-expression`:
+:dp:`fls_2lrzrtjhsdes`
+is equivalent to the :t:`evaluation` of the following :t:`block expression`:
 
 .. code-block:: text
 
@@ -3772,23 +3694,21 @@ Infinite Loops
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_p11qw6mtxlda`
-An :term:`infinite loop expression` is a :term:`loop expression` that continues
-to evaluate its :term:`block expression` indefinitely unless :term:`terminated`
-with a :term:`break expression` or a :term:`return expression`.
+:dp:`fls_p11qw6mtxlda`
+An :t:`infinite loop expression` is a :t:`loop expression` that continues to
+evaluate its :t:`block expression` indefinitely unless :t:`terminated` with a
+:t:`break expression` or a :t:`return expression`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_w4tj5gofwih1`
-The :term:`evaluation` of an :term:`infinite loop expression` proceeds as
-follows:
+:dp:`fls_w4tj5gofwih1`
+The :t:`evaluation` of an :t:`infinite loop expression` proceeds as follows:
 
-#. :def_p:`fls_pg3r6nyl865`
-   The :term:`block expression` is evaluated.
+#. :dp:`fls_pg3r6nyl865`
+   The :t:`block expression` is evaluated.
 
-#. :def_p:`fls_lp15ilkul2uv`
-   Control restarts the :term:`evaluation` of the :term:`infinite loop
-   expression`.
+#. :dp:`fls_lp15ilkul2uv`
+   Control restarts the :t:`evaluation` of the :t:`infinite loop expression`.
 
 .. rubric:: Examples
 
@@ -3813,36 +3733,34 @@ While Loops
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ajby242tnu7c`
-A :term:`while loop expression` is a :term:`loop expression` that continues
-to evaluate its :term:`block expression` as long as its :term:`iteration
-expression` holds true.
+:dp:`fls_ajby242tnu7c`
+A :t:`while loop expression` is a :t:`loop expression` that continues to
+evaluate its :t:`block expression` as long as its :t:`iteration expression`
+holds true.
 
-:def_p:`fls_13hmhzqz82v6`
-An :term:`iteration expression` is an :term:`expression` that provides the
-criterion of a :term:`while loop expression`.
+:dp:`fls_13hmhzqz82v6`
+An :t:`iteration expression` is an :t:`expression` that provides the criterion
+of a :t:`while loop expression`.
 
-:def_p:`fls_d7ofrq3777kq`
-The :term:`type` of an :term:`iteration expression` shall be :term:`type`
-:codeterm:`bool`.
+:dp:`fls_d7ofrq3777kq`
+The :t:`type` of an :t:`iteration expression` shall be :t:`type` :c:`bool`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_1i7hm645h7ox`
-The :term:`evaluation` of a :term:`while loop expression` proceeds as follows:
+:dp:`fls_1i7hm645h7ox`
+The :t:`evaluation` of a :t:`while loop expression` proceeds as follows:
 
-#. :def_p:`fls_5x0du3u1jwd3`
-   The :term:`iteration expression` is evaluated.
+#. :dp:`fls_5x0du3u1jwd3`
+   The :t:`iteration expression` is evaluated.
 
-#. :def_p:`fls_23uluvhhoct6`
-   If the :term:`iteration expression` evaluated to ``true``, then:
+#. :dp:`fls_23uluvhhoct6`
+   If the :t:`iteration expression` evaluated to ``true``, then:
 
-   #. :def_p:`fls_k7g4cac93617`
-      The :term:`block expression` is evaluated.
+   #. :dp:`fls_k7g4cac93617`
+      The :t:`block expression` is evaluated.
 
-   #. :def_p:`fls_j08k3brdpgno`
-      Control restarts the :term:`evaluation` of the :term:`while loop
-      expression`.
+   #. :dp:`fls_j08k3brdpgno`
+      Control restarts the :t:`evaluation` of the :t:`while loop expression`.
 
 .. rubric:: Examples
 
@@ -3867,16 +3785,15 @@ While Let Loops
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_fmdlyp9r9zl7`
-A :term:`while let loop expression` is a :term:`loop expression` that continues
-to evaluate its :term:`block expression` as long as its :term:`subject
-let expression` yields a :term:`value` that can be matched against its
-:term:`pattern`.
+:dp:`fls_fmdlyp9r9zl7`
+A :t:`while let loop expression` is a :t:`loop expression` that continues to
+evaluate its :t:`block expression` as long as its :t:`subject let expression`
+yields a :t:`value` that can be matched against its :t:`pattern`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_z2ht5iaat5ag`
-The :term:`evaluation` of a :term:`while let loop expression` of the form
+:dp:`fls_z2ht5iaat5ag`
+The :t:`evaluation` of a :t:`while let loop expression` of the form
 
 .. code-block:: text
 
@@ -3884,9 +3801,8 @@ The :term:`evaluation` of a :term:`while let loop expression` of the form
        /* loop body */
    }
 
-:def_p:`fls_pacf1uavh1qt`
-shall be equivalent to the :term:`evaluation` the following :term:`infinite
-loop`:
+:dp:`fls_pacf1uavh1qt`
+shall be equivalent to the :t:`evaluation` the following :t:`infinite loop`:
 
 .. code-block:: text
 
@@ -3919,14 +3835,13 @@ Loop Labels
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_tx5u743391h7`
-A :term:`label indication` is a :term:`construct` that indicates a
-:term:`label`.
+:dp:`fls_tx5u743391h7`
+A :t:`label indication` is a :t:`construct` that indicates a :t:`label`.
 
-:def_p:`fls_7hc8yboeaho0`
-A :term:`label indication` shall indicate a :term:`label` of an enclosing
-:term:`named loop` that does not pass a :term:`control flow boundary` in order
-to reach the enclosing :term:`named loop`.
+:dp:`fls_7hc8yboeaho0`
+A :t:`label indication` shall indicate a :t:`label` of an enclosing :t:`named
+loop` that does not pass a :t:`control flow boundary` in order to reach the
+enclosing :t:`named loop`.
 
 Break Expressions
 ~~~~~~~~~~~~~~~~~
@@ -3940,78 +3855,76 @@ Break Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_i5ko1t2wbgxe`
-A :term:`break expression` is an :term:`expression` that terminates a
-:term:`loop expression`.
-
-:def_p:`fls_jiykbp51909f`
-A :term:`break expression` shall appear within a :term:`loop expression`.
-
-:def_p:`fls_7frvr2nm2mcj`
-The :term:`label indication` of a :term:`break expression` shall resolve to the
-:term:`label` of an enclosing :term:`named loop`.
-
-:def_p:`fls_ghxns2nggffj`
-A :term:`break expression` without a :term:`label indication` is associated with
-the innermost enclosing :term:`loop expression`.
-
-:def_p:`fls_54d5uydc87td`
-A :term:`break expression` with a :term:`label indication` is associated with
-a :term:`named loop` whose :term:`label` is indicated by the :term:`label
-indication`.
-
-:def_p:`fls_6x15ig8drne8`
-A :term:`break expression` shall have an :term:`operand` only when it is
-associated with an :term:`infinite loop`.
-
-:def_p:`fls_dnnq1zym8ii0`
-The :term:`type` of a :term:`break expression` is the :term:`never type`.
-
-:def_p:`fls_1wdybpfldj7q`
-:term:`Break type` is the :term:`type` of the :term:`operand` of a :term:`break
+:dp:`fls_i5ko1t2wbgxe`
+A :t:`break expression` is an :t:`expression` that terminates a :t:`loop
 expression`.
 
-:def_p:`fls_8yore99adr22`
-The :term:`break type` is determined as follows:
+:dp:`fls_jiykbp51909f`
+A :t:`break expression` shall appear within a :t:`loop expression`.
 
-* :def_p:`fls_60imbzwg3e2x`
-  If the :term:`break expression` lacks an :term:`operand`, then the
-  :term:`break type` is the :term:`unit type`.
+:dp:`fls_7frvr2nm2mcj`
+The :t:`label indication` of a :t:`break expression` shall resolve to the
+:t:`label` of an enclosing :t:`named loop`.
 
-* :def_p:`fls_l0c05wa9q97w`
-  If the :term:`break expression` has an :term:`operand`, then the :term:`break
-  type` is the :term:`type` of its :term:`operand`.
+:dp:`fls_ghxns2nggffj`
+A :t:`break expression` without a :t:`label indication` is associated with the
+innermost enclosing :t:`loop expression`.
 
-:def_p:`fls_bgd7d5q69q0g`
-:term:`Break value` is the :term:`value` of the :term:`operand` of a
-:term:`break expression`.
+:dp:`fls_54d5uydc87td`
+A :t:`break expression` with a :t:`label indication` is associated with a
+:t:`named loop` whose :t:`label` is indicated by the :t:`label indication`.
 
-:def_p:`fls_yb8jv4mkmki0`
-The :term:`break value` is determined as follows:
+:dp:`fls_6x15ig8drne8`
+A :t:`break expression` shall have an :t:`operand` only when it is associated
+with an :t:`infinite loop`.
 
-* :def_p:`fls_d7l1y2qbe8br`
-  If the :term:`break expression` lacks an :term:`operand`, then the
-  :term:`break value` is the :term:`unit value`.
+:dp:`fls_dnnq1zym8ii0`
+The :t:`type` of a :t:`break expression` is the :t:`never type`.
 
-* :def_p:`fls_56szfyilc06`
-  If the :term:`break expression` has an :term:`operand`, then the :term:`break
-  value` is the :term:`value` of its :term:`operand`.
+:dp:`fls_1wdybpfldj7q`
+:t:`Break type` is the :t:`type` of the :t:`operand` of a :t:`break expression`.
+
+:dp:`fls_8yore99adr22`
+The :t:`break type` is determined as follows:
+
+* :dp:`fls_60imbzwg3e2x`
+  If the :t:`break expression` lacks an :t:`operand`, then the :t:`break type`
+  is the :t:`unit type`.
+
+* :dp:`fls_l0c05wa9q97w`
+  If the :t:`break expression` has an :t:`operand`, then the :t:`break type` is
+  the :t:`type` of its :t:`operand`.
+
+:dp:`fls_bgd7d5q69q0g`
+:t:`Break value` is the :t:`value` of the :t:`operand` of a :t:`break
+expression`.
+
+:dp:`fls_yb8jv4mkmki0`
+The :t:`break value` is determined as follows:
+
+* :dp:`fls_d7l1y2qbe8br`
+  If the :t:`break expression` lacks an :t:`operand`, then the :t:`break value`
+  is the :t:`unit value`.
+
+* :dp:`fls_56szfyilc06`
+  If the :t:`break expression` has an :t:`operand`, then the :t:`break value` is
+  the :t:`value` of its :t:`operand`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_jnpx8mx1oa7n`
-The :term:`evaluation` of a :term:`break expression` proceeds as follows:
+:dp:`fls_jnpx8mx1oa7n`
+The :t:`evaluation` of a :t:`break expression` proceeds as follows:
 
-#. :def_p:`fls_l2kp8mw6bjj0`
-   The :term:`operand` is evaluated.
+#. :dp:`fls_l2kp8mw6bjj0`
+   The :t:`operand` is evaluated.
 
-#. :def_p:`fls_2nmadhe3ismj`
-   All enclosing :term:`[loop expression]s` upto and including the associated
-   :term:`loop expression` are :term:`terminated`.
+#. :dp:`fls_2nmadhe3ismj`
+   All enclosing :t:`[loop expression]s` upto and including the associated
+   :t:`loop expression` are :t:`terminated`.
 
 .. rubric:: Examples
 
-:def_p:`fls_32fwis9pxh77`
+:dp:`fls_32fwis9pxh77`
 The following break expression terminates both the inner and the outer loop.
 
 .. code-block:: text
@@ -4034,41 +3947,39 @@ Continue Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_wzs6kz9ffqzt`
-A :term:`continue expression` shall appear within a :term:`loop expression`.
+:dp:`fls_wzs6kz9ffqzt`
+A :t:`continue expression` shall appear within a :t:`loop expression`.
 
-:def_p:`fls_r5ke7b9n7k3s`
-A :term:`continue expression` without a :term:`label indication` is associated
-with the innermost enclosing :term:`loop expression`.
+:dp:`fls_r5ke7b9n7k3s`
+A :t:`continue expression` without a :t:`label indication` is associated with
+the innermost enclosing :t:`loop expression`.
 
-:def_p:`fls_ckm6i9c3s6j8`
-A :term:`continue expression` with a :term:`label indication` is associated
-with a :term:`named loop` whose :term:`label` is indicated by the :term:`label
-indication`.
+:dp:`fls_ckm6i9c3s6j8`
+A :t:`continue expression` with a :t:`label indication` is associated with a
+:t:`named loop` whose :t:`label` is indicated by the :t:`label indication`.
 
-:def_p:`fls_d0bmw8xiw5nk`
-The :term:`type` of a :term:`continue expression` is the :term:`never type`.
+:dp:`fls_d0bmw8xiw5nk`
+The :t:`type` of a :t:`continue expression` is the :t:`never type`.
 
-:def_p:`fls_b7m0h2i3mot1`
-The :term:`value` of a :term:`continue expression` is the :term:`unit value`.
+:dp:`fls_b7m0h2i3mot1`
+The :t:`value` of a :t:`continue expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_vmyuuptfnwek`
-The :term:`evaluation` of a :term:`continue expression` proceeds as follows:
+:dp:`fls_vmyuuptfnwek`
+The :t:`evaluation` of a :t:`continue expression` proceeds as follows:
 
-#. :def_p:`fls_gm74eo754rq9`
-   If the :term:`continue expression` appears with a :term:`label indication`,
-   then all enclosing :term:`[loop expression]s` upto and including the
-   associated :term:`loop expression` are :term:`terminated`.
+#. :dp:`fls_gm74eo754rq9`
+   If the :t:`continue expression` appears with a :t:`label indication`, then
+   all enclosing :t:`[loop expression]s` upto and including the associated
+   :t:`loop expression` are :t:`terminated`.
 
-#. :def_p:`fls_gvuesa5ekeif`
-   The :term:`evaluation` of the associated :term:`loop expression` is
-   restarted.
+#. :dp:`fls_gvuesa5ekeif`
+   The :t:`evaluation` of the associated :t:`loop expression` is restarted.
 
 .. rubric:: Examples
 
-:def_p:`fls_767gv7zhqamh`
+:dp:`fls_767gv7zhqamh`
 The following continue expression terminates and restarts ``game_loop``.
 
 .. code-block:: text
@@ -4119,104 +4030,98 @@ Range Expressions
    RangeExpressionHighBound ::=
        Operand
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_bi82rusji8g0`
-A :term:`range expression` is an :term:`expression` that constructs a range.
+:dp:`fls_bi82rusji8g0`
+A :t:`range expression` is an :t:`expression` that constructs a range.
 
-:def_p:`fls_msyv4oyk5zp9`
-A :term:`range expression low bound` is an :term:`operand` that specifies the
-start of a range.
+:dp:`fls_msyv4oyk5zp9`
+A :t:`range expression low bound` is an :t:`operand` that specifies the start of
+a range.
 
-:def_p:`fls_f648uuxxh4vk`
-A :term:`range expression high bound` is an :term:`operand` that specifies the
-end of a range.
+:dp:`fls_f648uuxxh4vk`
+A :t:`range expression high bound` is an :t:`operand` that specifies the end of
+a range.
 
-:def_p:`fls_9pl4629t54yq`
-If a :term:`range expression` has two :term:`[operand]s`, then the
-:term:`[type]s` of the :term:`[operand]s` shall be :term:`unifiable`.
+:dp:`fls_9pl4629t54yq`
+If a :t:`range expression` has two :t:`[operand]s`, then the :t:`[type]s` of the
+:t:`[operand]s` shall be :t:`unifiable`.
 
-:def_p:`fls_xaumwogwbv3g`
-A :term:`range-from expression` is a :term:`range expression` that specifies an
-included :term:`range expression low bound`.
+:dp:`fls_xaumwogwbv3g`
+A :t:`range-from expression` is a :t:`range expression` that specifies an
+included :t:`range expression low bound`.
 
-:def_p:`fls_exa2ufugnpgc`
-The :term:`type` of a :term:`range-from expression` is
-:codeterm:`core::ops::RangeFrom`.
+:dp:`fls_exa2ufugnpgc`
+The :t:`type` of a :t:`range-from expression` is :c:`core::ops::RangeFrom`.
 
-:def_p:`fls_jqy0p155btca`
-The :term:`value` of a :term:`range-from expression` is ``core::ops::RangeFrom {
+:dp:`fls_jqy0p155btca`
+The :t:`value` of a :t:`range-from expression` is ``core::ops::RangeFrom {
 start: range_expression_low_bound }``.
 
-:def_p:`fls_ppustuqdji7b`
-A :term:`range-from-to expression` is a :term:`range expression` that specifies
-an included :term:`range expression low bound` and an excluded :term:`range
-expression high bound`.
+:dp:`fls_ppustuqdji7b`
+A :t:`range-from-to expression` is a :t:`range expression` that specifies an
+included :t:`range expression low bound` and an excluded :t:`range expression
+high bound`.
 
-:def_p:`fls_ke2fpgodq84u`
-The :term:`type` of a :term:`range-from-to expression` is
-:codeterm:`core::ops::Range`.
+:dp:`fls_ke2fpgodq84u`
+The :t:`type` of a :t:`range-from-to expression` is :c:`core::ops::Range`.
 
-:def_p:`fls_zb6jk6qykun6`
-The :term:`value` of a :term:`range-from-to expression` is ``core::ops::Range {
-start: range_expression_low_bound, end: range_expression_high_bound }``.
+:dp:`fls_zb6jk6qykun6`
+The :t:`value` of a :t:`range-from-to expression` is ``core::ops::Range { start:
+range_expression_low_bound, end: range_expression_high_bound }``.
 
-:def_p:`fls_x67xo25n0qlz`
-A :term:`range-full expression` is a :term:`range expression` that covers the
-whole range of a :term:`type`.
+:dp:`fls_x67xo25n0qlz`
+A :t:`range-full expression` is a :t:`range expression` that covers the whole
+range of a :t:`type`.
 
-:def_p:`fls_m6n0gvg3ct1b`
-The :term:`type` of a :term:`range-full expression` is
-:codeterm:`core::ops::RangeFull`.
+:dp:`fls_m6n0gvg3ct1b`
+The :t:`type` of a :t:`range-full expression` is :c:`core::ops::RangeFull`.
 
-:def_p:`fls_yvh5cdgzevni`
-The :term:`value` of a :term:`range-full expression` is ``core::ops::RangeFull
-{}``.
+:dp:`fls_yvh5cdgzevni`
+The :t:`value` of a :t:`range-full expression` is ``core::ops::RangeFull {}``.
 
-:def_p:`fls_lh9my7g8oflq`
-A :term:`range-inclusive expression` is a :term:`range expression` that
-specifies an included :term:`range expression low bound` and an included
-:term:`range expression high bound`.
+:dp:`fls_lh9my7g8oflq`
+A :t:`range-inclusive expression` is a :t:`range expression` that specifies an
+included :t:`range expression low bound` and an included :t:`range expression
+high bound`.
 
-:def_p:`fls_livflk52xaj9`
-The :term:`type` of a :term:`range-inclusive expression` is
-:codeterm:`core::ops::RangeInclusive`.
+:dp:`fls_livflk52xaj9`
+The :t:`type` of a :t:`range-inclusive expression` is
+:c:`core::ops::RangeInclusive`.
 
-:def_p:`fls_vj213j9bj61y`
-The :term:`value` of a :term:`range-inclusive expression` is
+:dp:`fls_vj213j9bj61y`
+The :t:`value` of a :t:`range-inclusive expression` is
 ``core::ops::RangeInclusive::new(range_expression_low_bound,
 range_expression_high_bound)``.
 
-:def_p:`fls_5a1uivj19kob`
-A :term:`range-to expression` is a :term:`range expression` that specifies an
-excluded :term:`range expression high bound`.
+:dp:`fls_5a1uivj19kob`
+A :t:`range-to expression` is a :t:`range expression` that specifies an excluded
+:t:`range expression high bound`.
 
-:def_p:`fls_k611yoc8hk0n`
-The :term:`type` of a :term:`range-to expression` is
-:codeterm:`core::ops::RangeTo`.
+:dp:`fls_k611yoc8hk0n`
+The :t:`type` of a :t:`range-to expression` is :c:`core::ops::RangeTo`.
 
-:def_p:`fls_m0slikrulnvd`
-The :term:`value` of a :term:`range-to expression` is ``core::ops::RangeTo {
-end: range_expression_high_bound }``.
+:dp:`fls_m0slikrulnvd`
+The :t:`value` of a :t:`range-to expression` is ``core::ops::RangeTo { end:
+range_expression_high_bound }``.
 
-:def_p:`fls_1gc436ee1nzm`
-A :term:`range-to-inclusive expression` is a :term:`range expression` that
-specifies an included :term:`range expression high bound`.
+:dp:`fls_1gc436ee1nzm`
+A :t:`range-to-inclusive expression` is a :t:`range expression` that specifies
+an included :t:`range expression high bound`.
 
-:def_p:`fls_8sfjw83irpre`
-The :term:`type` of a :term:`range-to-inclusive expression` is
-:codeterm:`core::ops::RangeToInclusive`.
+:dp:`fls_8sfjw83irpre`
+The :t:`type` of a :t:`range-to-inclusive expression` is
+:c:`core::ops::RangeToInclusive`.
 
-:def_p:`fls_5xw4opkbxhsc`
-The :term:`value` of a :term:`range-to-inclusive expression` is
+:dp:`fls_5xw4opkbxhsc`
+The :t:`value` of a :t:`range-to-inclusive expression` is
 ``core::ops::RangeToInclusive { end: range_expression_high_bound }``.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ehseim1p479z`
-The :term:`evaluation` of a :term:`range expression` evaluates its
-:term:`[operand]s` in left-to-right order.
+:dp:`fls_ehseim1p479z`
+The :t:`evaluation` of a :t:`range expression` evaluates its :t:`[operand]s` in
+left-to-right order.
 
 .. rubric:: Examples
 
@@ -4246,60 +4151,59 @@ If Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_2i4fbxbbvpf1`
-An :term:`if expression` is an :term:`expression` that evaluates either
-a :term:`block expression` or an :term:`else expression` depending on the
-:term:`value` of its :term:`subject expression`.
+:dp:`fls_2i4fbxbbvpf1`
+An :t:`if expression` is an :t:`expression` that evaluates either a :t:`block
+expression` or an :t:`else expression` depending on the :t:`value` of its
+:t:`subject expression`.
 
-:def_p:`fls_5azwlk7hav1k`
-An :term:`else expression` is an :term:`expression` that represents either
-a :term:`block expression`, an :term:`if expression`, or an :term:`if let
+:dp:`fls_5azwlk7hav1k`
+An :t:`else expression` is an :t:`expression` that represents either a :t:`block
+expression`, an :t:`if expression`, or an :t:`if let expression`.
+
+:dp:`fls_r7gzxo16esri`
+The :t:`type` of the :t:`subject expression` of an :t:`if expression` shall be
+:t:`type` :c:`bool`.
+
+:dp:`fls_iv9t4nfs4f6w`
+The :t:`type` of an :t:`if expression` is the :t:`type` of its :t:`block
 expression`.
 
-:def_p:`fls_r7gzxo16esri`
-The :term:`type` of the :term:`subject expression` of an :term:`if expression`
-shall be :term:`type` :codeterm:`bool`.
+:dp:`fls_i9sxf2q5jjqt`
+The :t:`value` of an :t:`if expression` is the :t:`value` of its :t:`block
+expression`.
 
-:def_p:`fls_iv9t4nfs4f6w`
-The :term:`type` of an :term:`if expression` is the :term:`type` of its
-:term:`block expression`.
+:dp:`fls_1e8qer6bh2f3`
+The :t:`type` of an :t:`else expression` is the :t:`type` of its :t:`block
+expression`, :t:`if expression`, or :t:`if let expression`.
 
-:def_p:`fls_i9sxf2q5jjqt`
-The :term:`value` of an :term:`if expression` is the :term:`value` of its
-:term:`block expression`.
+:dp:`fls_p5pjxk5xfcbx`
+The :t:`value` of an :t:`else expression` is the :t:`value` of its :t:`block
+expression`, :t:`if expression`, or :t:`if let expression`.
 
-:def_p:`fls_1e8qer6bh2f3`
-The :term:`type` of an :term:`else expression` is the :term:`type` of its
-:term:`block expression`, :term:`if expression`, or :term:`if let expression`.
-
-:def_p:`fls_p5pjxk5xfcbx`
-The :term:`value` of an :term:`else expression` is the :term:`value` of its
-:term:`block expression`, :term:`if expression`, or :term:`if let expression`.
-
-:def_p:`fls_mpq7gicosgkt`
-The :term:`type` of an :term:`if expression` and the :term:`type` of an
-:term:`else expression` shall be :term:`unifiable`.
+:dp:`fls_mpq7gicosgkt`
+The :t:`type` of an :t:`if expression` and the :t:`type` of an :t:`else
+expression` shall be :t:`unifiable`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_yhlyzef9h97q`
-The :term:`evaluation` of an :term:`if expression` proceeds as follows:
+:dp:`fls_yhlyzef9h97q`
+The :t:`evaluation` of an :t:`if expression` proceeds as follows:
 
-#. :def_p:`fls_w7lq4dkoyuf7`
-   The :term:`subject expression` is evaluated.
+#. :dp:`fls_w7lq4dkoyuf7`
+   The :t:`subject expression` is evaluated.
 
-#. :def_p:`fls_5udx9zyeg5ga`
-   If the :term:`subject expression` evaluated to ``true``, then the
-   :term:`block expression` is evaluated.
+#. :dp:`fls_5udx9zyeg5ga`
+   If the :t:`subject expression` evaluated to ``true``, then the :t:`block
+   expression` is evaluated.
 
-#. :def_p:`fls_67l4j48n6p7o`
-   If the :term:`subject expression` evaluated to ``false`` and the :term:`if
-   expression` has an :term:`else expression`, then the :term:`[else
-   expressio]n` is evaluated.
+#. :dp:`fls_67l4j48n6p7o`
+   If the :t:`subject expression` evaluated to ``false`` and the :t:`if
+   expression` has an :t:`else expression`, then the :t:`[else expressio]n`
+   is evaluated.
 
-:def_p:`fls_e8gd5lzcaifw`
-The :term:`evaluation` of an :term:`else expression` evaluates its :term:`block
-expression`, :term:`if expression`, or :term:`if let expression`.
+:dp:`fls_e8gd5lzcaifw`
+The :t:`evaluation` of an :t:`else expression` evaluates its :t:`block
+expression`, :t:`if expression`, or :t:`if let expression`.
 
 .. rubric:: Examples
 
@@ -4327,23 +4231,23 @@ If Let Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_dsrjup2umr9`
-An :term:`if let expression` is an :term:`expression` that evaluates either a
-:term:`block expression` or an :term:`else expression` depending on whether its
-:term:`pattern` can be matched against its :term:`subject let expression`.
+:dp:`fls_dsrjup2umr9`
+An :t:`if let expression` is an :t:`expression` that evaluates either a
+:t:`block expression` or an :t:`else expression` depending on whether its
+:t:`pattern` can be matched against its :t:`subject let expression`.
 
-:def_p:`fls_4vyrufo4qdeg`
-The :term:`type` of an :term:`if let expression` is the :term:`type` of its
-:term:`block expression`.
+:dp:`fls_4vyrufo4qdeg`
+The :t:`type` of an :t:`if let expression` is the :t:`type` of its :t:`block
+expression`.
 
-:def_p:`fls_qfnwwvzxsl3`
-The :term:`value` of an :term:`if let expression` is the :term:`value` of its
-:term:`block expression`.
+:dp:`fls_qfnwwvzxsl3`
+The :t:`value` of an :t:`if let expression` is the :t:`value` of its :t:`block
+expression`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_ijo73wtz1sy`
-The :term:`evaluation` of an :term:`if let expression` of the form
+:dp:`fls_ijo73wtz1sy`
+The :t:`evaluation` of an :t:`if let expression` of the form
 
 .. code-block:: text
 
@@ -4351,9 +4255,8 @@ The :term:`evaluation` of an :term:`if let expression` of the form
        /* body */
    }
 
-:def_p:`fls_qeho5iqiy59`
-is equivalent to the :term:`evaluation` of the following :term:`match
-expression`:
+:dp:`fls_qeho5iqiy59`
+is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 
 .. code-block:: text
 
@@ -4362,8 +4265,8 @@ expression`:
        _ => ()
    }
 
-:def_p:`fls_nhngr8y850dt`
-The :term:`evaluation` of an :term:`if let expression` of the form
+:dp:`fls_nhngr8y850dt`
+The :t:`evaluation` of an :t:`if let expression` of the form
 
 .. code-block:: text
 
@@ -4373,9 +4276,8 @@ The :term:`evaluation` of an :term:`if let expression` of the form
        /* else */
    }
 
-:def_p:`fls_8fg2ufaxjkv5`
-is equivalent to the :term:`evaluation` of the following :term:`match
-expression`:
+:dp:`fls_8fg2ufaxjkv5`
+is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 
 .. code-block:: text
 
@@ -4423,134 +4325,131 @@ Match Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ei4pbeksd1v8`
-A :term:`match expression` is an :term:`expression` that tries to match one of
-its multiple :term:`[pattern]s` against its :term:`subject expression` and if it
-succeeds, evaluates an :term:`operand`.
+:dp:`fls_ei4pbeksd1v8`
+A :t:`match expression` is an :t:`expression` that tries to match one of its
+multiple :t:`[pattern]s` against its :t:`subject expression` and if it succeeds,
+evaluates an :t:`operand`.
 
-:def_p:`fls_l45i24ikfavm`
-A :term:`match arm` is a :term:`construct` that consists of a :term:`match arm
-matcher` and a :term:`match arm body`.
+:dp:`fls_l45i24ikfavm`
+A :t:`match arm` is a :t:`construct` that consists of a :t:`match arm matcher`
+and a :t:`match arm body`.
 
-:def_p:`fls_d9gerg12hm2d`
-An :term:`intermediate match arm` is any :term:`non-[final match arm]` of a
-:term:`match expression`.
-
-:def_p:`fls_oj8dg28xw5yp`
-A :term:`final match arm` is the last :term:`match arm` of a :term:`match
+:dp:`fls_d9gerg12hm2d`
+An :t:`intermediate match arm` is any :t:`non-[final match arm]` of a :t:`match
 expression`.
 
-:def_p:`fls_lrdrtedyz28i`
-A :term:`match arm matcher` is a :term:`construct` that consists of a
-:term:`pattern` and a :term:`match arm guard`.
+:dp:`fls_oj8dg28xw5yp`
+A :t:`final match arm` is the last :t:`match arm` of a :t:`match expression`.
 
-:def_p:`fls_8wjdichfxp0y`
-A :term:`match arm body` is the :term:`operand` of a :term:`match arm`.
+:dp:`fls_lrdrtedyz28i`
+A :t:`match arm matcher` is a :t:`construct` that consists of a :t:`pattern` and
+a :t:`match arm guard`.
 
-:def_p:`fls_hs1rr54hu18w`
-A :term:`match arm guard` is a :term:`construct` that provides additional
-filtering to a :term:`match arm matcher`.
+:dp:`fls_8wjdichfxp0y`
+A :t:`match arm body` is the :t:`operand` of a :t:`match arm`.
 
-:def_p:`fls_s4483f30nwf`
-A :term:`match expression` is a :term:`place expression` when its :term:`subject
-expression` is a :term:`place expression`. When a :term:`match expression`
-is a :term:`place expression`, the :term:`value` produced by evaluating its
-:term:`subject expression` is :term:`copied` or :term:`moved`.
+:dp:`fls_hs1rr54hu18w`
+A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
+a :t:`match arm matcher`.
 
-:def_p:`fls_9t5pmb9wzmpy`
-A :term:`match expression` is a :term:`value expression` when its :term:`subject
-expression` is a :term:`value expression`. When the :term:`match expression`
-is a :term:`value expression`, the :term:`value` produced by evaluating its
-:term:`subject expression` is captured in a :term:`temporary`.
+:dp:`fls_s4483f30nwf`
+A :t:`match expression` is a :t:`place expression` when its :t:`subject
+expression` is a :t:`place expression`. When a :t:`match expression` is a
+:t:`place expression`, the :t:`value` produced by evaluating its :t:`subject
+expression` is :t:`copied` or :t:`moved`.
 
-:def_p:`fls_knv1affr2o8t`
-The :term:`type` of the :term:`subject expression` and the :term:`[type]s`
-of all :term:`[pattern]s` of all :term:`[match arm matcher]s` shall be
-:term:`unifiable`.
+:dp:`fls_9t5pmb9wzmpy`
+A :t:`match expression` is a :t:`value expression` when its :t:`subject
+expression` is a :t:`value expression`. When the :t:`match expression` is a
+:t:`value expression`, the :t:`value` produced by evaluating its :t:`subject
+expression` is captured in a :t:`temporary`.
 
-:def_p:`fls_bzhz5wjd90ii`
-The :term:`type` of the :term:`operand` of a :term:`match arm guard` shall be
-:term:`type` :codeterm:`bool`.
+:dp:`fls_knv1affr2o8t`
+The :t:`type` of the :t:`subject expression` and the :t:`[type]s` of all
+:t:`[pattern]s` of all :t:`[match arm matcher]s` shall be :t:`unifiable`.
 
-:def_p:`fls_17ag0wzdbxv6`
-The :term:`[type]s` of all :term:`match arm bodies` shall be :term:`unifiable`.
+:dp:`fls_bzhz5wjd90ii`
+The :t:`type` of the :t:`operand` of a :t:`match arm guard` shall be :t:`type`
+:c:`bool`.
 
-:def_p:`fls_5w964phrru82`
-The :term:`type` of a :term:`match expression` is the :term:`unified type` of
-the :term:`[type]s` of the :term:`[operand]s` of all :term:`[match arm]s`.
+:dp:`fls_17ag0wzdbxv6`
+The :t:`[type]s` of all :t:`match arm bodies` shall be :t:`unifiable`.
 
-:def_p:`fls_g6xyz0beps3o`
-A :term:`match arm` is selected when its :term:`pattern` matches the
-:term:`subject expression` and its :term:`match arm guard` (if any) evaluates
-to ``true``.
+:dp:`fls_5w964phrru82`
+The :t:`type` of a :t:`match expression` is the :t:`unified type` of the
+:t:`[type]s` of the :t:`[operand]s` of all :t:`[match arm]s`.
 
-:def_p:`fls_8dba4o5qg8js`
-:term:`Match arm` selection happens in declarative order.
+:dp:`fls_g6xyz0beps3o`
+A :t:`match arm` is selected when its :t:`pattern` matches the :t:`subject
+expression` and its :t:`match arm guard` (if any) evaluates to ``true``.
 
-:def_p:`fls_e02um1gb89d0`
-The :term:`[pattern]s` of all :term:`[match arm]s` taken together shall
-exhaustively match the :term:`[subject expression]'s` :term:`type`.
+:dp:`fls_8dba4o5qg8js`
+:t:`Match arm` selection happens in declarative order.
 
-:def_p:`fls_4sh2yrslszvb`
-The :term:`value` of a :term:`match expression` is the :term:`value` of the
-:term:`operand` of the selected :term:`match arm`.
+:dp:`fls_e02um1gb89d0`
+The :t:`[pattern]s` of all :t:`[match arm]s` taken together shall exhaustively
+match the :t:`[subject expression]'s` :t:`type`.
+
+:dp:`fls_4sh2yrslszvb`
+The :t:`value` of a :t:`match expression` is the :t:`value` of the :t:`operand`
+of the selected :t:`match arm`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_g551l8r8yh6d`
-The :term:`evaluation` of a :term:`match expression` proceeds as follows:
+:dp:`fls_g551l8r8yh6d`
+The :t:`evaluation` of a :t:`match expression` proceeds as follows:
 
-#. :def_p:`fls_y44jzkbv74bv`
-   The :term:`subject expression` is evaluated.
+#. :dp:`fls_y44jzkbv74bv`
+   The :t:`subject expression` is evaluated.
 
-#. :def_p:`fls_jwxykea99psw`
-   Each :term:`match arm` is evaluated in declarative order as follows:
+#. :dp:`fls_jwxykea99psw`
+   Each :t:`match arm` is evaluated in declarative order as follows:
 
-   #. :def_p:`fls_pgulnjeoxwtj`
-      The :term:`match arm marcher` of the :term:`match arm` is evaluated.
+   #. :dp:`fls_pgulnjeoxwtj`
+      The :t:`match arm marcher` of the :t:`match arm` is evaluated.
 
-   #. :def_p:`fls_2dg7wl68z7ar`
-      If the :term:`match arm marcher` succeeds, then
+   #. :dp:`fls_2dg7wl68z7ar`
+      If the :t:`match arm marcher` succeeds, then
 
-      #. :def_p:`fls_yv11febo0kyb`
-         The :term:`operand` of the :term:`match arm` is evaluated.
+      #. :dp:`fls_yv11febo0kyb`
+         The :t:`operand` of the :t:`match arm` is evaluated.
 
-      #. :def_p:`fls_mvi9z1x836qu`
-         Control stops the :term:`evaluation` of the :term:`match expression`.
+      #. :dp:`fls_mvi9z1x836qu`
+         Control stops the :t:`evaluation` of the :t:`match expression`.
 
-   #. :def_p:`fls_81nnizrxgrsm`
-      Otherwise control proceeds with the :term:`evaluation` of the next
-      :term:`match arm`.
+   #. :dp:`fls_81nnizrxgrsm`
+      Otherwise control proceeds with the :t:`evaluation` of the next :t:`match
+      arm`.
 
-:def_p:`fls_4dv7x9nh2h4e`
-The :term:`evaluation` of a :term:`match arm marcher` proceeds as follows:
+:dp:`fls_4dv7x9nh2h4e`
+The :t:`evaluation` of a :t:`match arm marcher` proceeds as follows:
 
-#. :def_p:`fls_k7kliy101m0f`
-   The :term:`pattern` of the :term:`match arm marcher` is evaluated.
+#. :dp:`fls_k7kliy101m0f`
+   The :t:`pattern` of the :t:`match arm marcher` is evaluated.
 
-#. :def_p:`fls_k68zkb6jv0vz`
-   If the :term:`pattern` succeeds, then
+#. :dp:`fls_k68zkb6jv0vz`
+   If the :t:`pattern` succeeds, then
 
-   #. :def_p:`fls_gbb6wbmher5z`
-      If the :term:`match arm marcher` has a :term:`match arm guard`, then
+   #. :dp:`fls_gbb6wbmher5z`
+      If the :t:`match arm marcher` has a :t:`match arm guard`, then
 
-      #. :def_p:`fls_jl4av757yx8j`
-         The :term:`match arm guard` is evaluated.
+      #. :dp:`fls_jl4av757yx8j`
+         The :t:`match arm guard` is evaluated.
 
-      #. :def_p:`fls_wkh5wztauwhu`
-         If the :term:`match arm guard` evaluates to ``true``, then the
-         :term:`match arm marcher` succeeds.
+      #. :dp:`fls_wkh5wztauwhu`
+         If the :t:`match arm guard` evaluates to ``true``, then the :t:`match
+         arm marcher` succeeds.
 
-   #. :def_p:`fls_f5f0x8jstp1g`
-      Otherwise the :term:`match arm marcher` fails.
+   #. :dp:`fls_f5f0x8jstp1g`
+      Otherwise the :t:`match arm marcher` fails.
 
-#. :def_p:`fls_yk8l9zjh7i0d`
-   Otherwise the :term:`match arm marcher` fails.
+#. :dp:`fls_yk8l9zjh7i0d`
+   Otherwise the :t:`match arm marcher` fails.
 
-:def_p:`fls_sbtx1l6n2tp2`
-The :term:`evaluation` of a :term:`match arm guard` evaluates its
-:term:`operand`. A :term:`match arm guard` evaluates to ``true`` when its
-:term:`operand` evaluates to ``true``, otherwise it evaluates to ``false``.
+:dp:`fls_sbtx1l6n2tp2`
+The :t:`evaluation` of a :t:`match arm guard` evaluates its :t:`operand`. A
+:t:`match arm guard` evaluates to ``true`` when its :t:`operand` evaluates to
+``true``, otherwise it evaluates to ``false``.
 
 .. rubric:: Examples
 
@@ -4577,54 +4476,54 @@ Return Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_u7jk4j8gkho`
-A :term:`return expression` is an :term:`expression` that optionally yields a
-:term:`value` and causes control flow to return to the caller.
+:dp:`fls_u7jk4j8gkho`
+A :t:`return expression` is an :t:`expression` that optionally yields a
+:t:`value` and causes control flow to return to the caller.
 
-:def_p:`fls_5v3j5ghhw8j8`
-A :term:`return expression` shall appear within a :term:`control flow boundary`.
+:dp:`fls_5v3j5ghhw8j8`
+A :t:`return expression` shall appear within a :t:`control flow boundary`.
 
-:def_p:`fls_m4e00bju2dy4`
-The :term:`type` of a :term:`return expression` is determined as follows:
+:dp:`fls_m4e00bju2dy4`
+The :t:`type` of a :t:`return expression` is determined as follows:
 
-* :def_p:`fls_xpp027s2m7ue`
-  If the :term:`return expression` has an :term:`operand`, then the :term:`type`
-  is the :term:`type` of the :term:`operand`.
+* :dp:`fls_xpp027s2m7ue`
+  If the :t:`return expression` has an :t:`operand`, then the :t:`type` is the
+  :t:`type` of the :t:`operand`.
 
-* :def_p:`fls_cqduumpsjfut`
-  If the :term:`return expression` does not have an :term:`operand`, then the
-  :term:`type` is the :term:`never type`.
+* :dp:`fls_cqduumpsjfut`
+  If the :t:`return expression` does not have an :t:`operand`, then the
+  :t:`type` is the :t:`never type`.
 
-:def_p:`fls_r610t5vsi7bx`
-The :term:`value` of a :term:`return expression` is determined as follows:
+:dp:`fls_r610t5vsi7bx`
+The :t:`value` of a :t:`return expression` is determined as follows:
 
-* :def_p:`fls_njndlx2rps2k`
-  If the :term:`return expression` has an :term:`operand`, then the
-  :term:`value` is the :term:`value` of the :term:`operand`.
+* :dp:`fls_njndlx2rps2k`
+  If the :t:`return expression` has an :t:`operand`, then the :t:`value` is the
+  :t:`value` of the :t:`operand`.
 
-* :def_p:`fls_tjksia7prao1`
-  If the :term:`return expression` does not have an :term:`operand`, then the
-  :term:`value` is the :term:`unit value`.
+* :dp:`fls_tjksia7prao1`
+  If the :t:`return expression` does not have an :t:`operand`, then the
+  :t:`value` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_bqmwlona6l5w`
-The :term:`evaluation` of a :term:`return expression` proceeds as follows:
+:dp:`fls_bqmwlona6l5w`
+The :t:`evaluation` of a :t:`return expression` proceeds as follows:
 
-#. :def_p:`fls_d9avvfi548t7`
-   If the :term:`return expression` has an :term:`operand`, then
+#. :dp:`fls_d9avvfi548t7`
+   If the :t:`return expression` has an :t:`operand`, then
 
-   #. :def_p:`fls_o3fc1z2mn8zc`
-      The :term:`operand` is evaluated.
+   #. :dp:`fls_o3fc1z2mn8zc`
+      The :t:`operand` is evaluated.
 
-   #. :def_p:`fls_bbf54ukld7j9`
-      The :term:`value` of the :term:`operand` is :term:`moved` into the
-      designated output location of the enclosing control flow boundary.
+   #. :dp:`fls_bbf54ukld7j9`
+      The :t:`value` of the :t:`operand` is :t:`moved` into the designated
+      output location of the enclosing control flow boundary.
 
-#. :def_p:`fls_99ea30a5mulj`
+#. :dp:`fls_99ea30a5mulj`
    Control destroys the current activation frame.
 
-#. :def_p:`fls_ubwj8uj6sbgt`
+#. :dp:`fls_ubwj8uj6sbgt`
    Control is transferred to the caller frame.
 
 .. rubric:: Examples
@@ -4653,71 +4552,66 @@ Await Expressions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_sjz5s71hwm7l`
-An :term:`await expression` is an :term:`expression` that polls a
-:term:`future`, suspending the :term:`execution` of the :term:`future` until the
-:term:`future` is ready.
+:dp:`fls_sjz5s71hwm7l`
+An :t:`await expression` is an :t:`expression` that polls a :t:`future`,
+suspending the :t:`execution` of the :t:`future` until the :t:`future` is ready.
 
-:def_p:`fls_vhchgab59jvd`
-A :term:`future operand` is an :term:`operand` whose :term:`future` is being
-awaited by an :term:`await expression`.
+:dp:`fls_vhchgab59jvd`
+A :t:`future operand` is an :t:`operand` whose :t:`future` is being awaited by
+an :t:`await expression`.
 
-:def_p:`fls_k9pncajmhgk1`
-An :term:`await expression` shall appear within
+:dp:`fls_k9pncajmhgk1`
+An :t:`await expression` shall appear within
 
-* :def_p:`fls_xilkqy5piyh0`
-  An :term:`async block expression`.
+* :dp:`fls_xilkqy5piyh0`
+  An :t:`async block expression`.
 
-* :def_p:`fls_cr61i8so7cty`
-  An :term:`async function`.
+* :dp:`fls_cr61i8so7cty`
+  An :t:`async function`.
 
-:def_p:`fls_9uw5pd7kbrx3`
-The :term:`type` of a :term:`future operand` shall implement the
-:codeterm:`core::future::Future` :term:`trait`.
+:dp:`fls_9uw5pd7kbrx3`
+The :t:`type` of a :t:`future operand` shall implement the
+:c:`core::future::Future` :t:`trait`.
 
-:def_p:`fls_c6mxfzef2qop`
-The :term:`type` of an :term:`await expression` is ``<_ as
+:dp:`fls_c6mxfzef2qop`
+The :t:`type` of an :t:`await expression` is ``<_ as
 core::future::Future>::Output``.
 
-:def_p:`fls_l396mo6k9ox7`
-The :term:`value` of an :term:`await expression` is the :term:`value` held by
-:codeterm:`core::task::Poll::Ready`.
+:dp:`fls_l396mo6k9ox7`
+The :t:`value` of an :t:`await expression` is the :t:`value` held by
+:c:`core::task::Poll::Ready`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_1ppywe40s62c`
-The :term:`evaluation` of an :term:`await expression` proceeds as follows:
+:dp:`fls_1ppywe40s62c`
+The :t:`evaluation` of an :t:`await expression` proceeds as follows:
 
-#. :def_p:`fls_eymcs2rgv3qw`
-   The :term:`future operand` is evaluated to a :term:`temporary`.
+#. :dp:`fls_eymcs2rgv3qw`
+   The :t:`future operand` is evaluated to a :t:`temporary`.
 
-#. :def_p:`fls_qshnnpirkasz`
-   The :term:`temporary` is pinned using
-   :codeterm:`core::pin::Pin::new_unchecked`.
+#. :dp:`fls_qshnnpirkasz`
+   The :t:`temporary` is pinned using :c:`core::pin::Pin::new_unchecked`.
 
-#. :def_p:`fls_umevprl99y6c`
-   The pinned :term:`temporary` is polled using
-   :codeterm:`core::future::Future::poll`, passing in the
-   :codeterm:`core::task::Context` of the current task.
+#. :dp:`fls_umevprl99y6c`
+   The pinned :t:`temporary` is polled using :c:`core::future::Future::poll`,
+   passing in the :c:`core::task::Context` of the current task.
 
-#. :def_p:`fls_k76d8ady623m`
-   If :codeterm:`core::future::Future::poll` returns
-   :codeterm:`core::task::Poll::Pending`, then the current :term:`future`
-   yields.
+#. :dp:`fls_k76d8ady623m`
+   If :c:`core::future::Future::poll` returns :c:`core::task::Poll::Pending`,
+   then the current :t:`future` yields.
 
-#. :def_p:`fls_frwtufwe8dya`
-   If :codeterm:`core::future::Future::poll` returns
-   :codeterm:`core::task::Poll::Ready`, then
+#. :dp:`fls_frwtufwe8dya`
+   If :c:`core::future::Future::poll` returns :c:`core::task::Poll::Ready`, then
 
-   #. :def_p:`fls_u72ylhlmqge3`
-      The :term:`value` held within is unwrapped.
+   #. :dp:`fls_u72ylhlmqge3`
+      The :t:`value` held within is unwrapped.
 
-   #. :def_p:`fls_tn3vwidct3ks`
-      Control stops the evaluation of the :term:`await expression`.
+   #. :dp:`fls_tn3vwidct3ks`
+      Control stops the evaluation of the :t:`await expression`.
 
 .. rubric:: Examples
 
-:def_p:`fls_la9boykzmfac`
+:dp:`fls_la9boykzmfac`
 **provide an example**
 
 Expression Precedence
@@ -4725,277 +4619,260 @@ Expression Precedence
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_cwt7afsbgs7w`
-Certain :term:`[expression]s` are subject to :term:`precedence` and
-:term:`associativity`.
+:dp:`fls_cwt7afsbgs7w`
+Certain :t:`[expression]s` are subject to :t:`precedence` and
+:t:`associativity`.
 
-:def_p:`fls_ya23jjg5wjl`
-:term:`Precedence` is the order by which :term:`[expression]s` are evaluated in
-the presence of other :term:`[expression]s`.
+:dp:`fls_ya23jjg5wjl`
+:t:`Precedence` is the order by which :t:`[expression]s` are evaluated in the
+presence of other :t:`[expression]s`.
 
-:def_p:`fls_bezkcuwp5qol`
-:term:`Associativity` is the order by which :term:`[operand]s` are evaluated
-within a single :term:`expression`.
+:dp:`fls_bezkcuwp5qol`
+:t:`Associativity` is the order by which :t:`[operand]s` are evaluated within a
+single :t:`expression`.
 
-:def_p:`fls_48br7odx6nke`
-The :term:`precedence` and :term:`associativity` of qualifying
-:term:`[expression]s` are as follows:
+:dp:`fls_48br7odx6nke`
+The :t:`precedence` and :t:`associativity` of qualifying :t:`[expression]s` are
+as follows:
 
 .. list-table::
 
-   * - .. rubric:: Expression
-     - .. rubric:: Precedence
-     - .. rubric:: Associativity
-   * - :def_p:`fls_jtdnf0vmn6xt`
-       :term:`Array expression`
+   * - :dp:`fls_mk2yk99p6nvp`
+     - **Expression**
+     - **Precedence**
+     - **Associativity**
+   * - :dp:`fls_1i7atfw6z0c6`
+     - :dp:`fls_jtdnf0vmn6xt`
+       :t:`Array expression`
 
-       :def_p:`fls_pko7c3suw18p`
-       :term:`Block expression`
+       :dp:`fls_pko7c3suw18p`
+       :t:`Block expression`
 
-       :def_p:`fls_5ernwvbjzd6d`
-       :term:`Continue expression`
+       :dp:`fls_5ernwvbjzd6d`
+       :t:`Continue expression`
 
-       :def_p:`fls_xc0bqiptpur4`
-       :term:`If expression`
+       :dp:`fls_xc0bqiptpur4`
+       :t:`If expression`
 
-       :def_p:`fls_p1xm2f9xkyro`
-       :term:`If let expression`
+       :dp:`fls_p1xm2f9xkyro`
+       :t:`If let expression`
 
-       :def_p:`fls_3hbf564rvp0k`
-       :term:`Literal expression`
+       :dp:`fls_3hbf564rvp0k`
+       :t:`Literal expression`
 
-       :def_p:`fls_w62578xv5jkv`
-       :term:`Loop expression`
+       :dp:`fls_w62578xv5jkv`
+       :t:`Loop expression`
 
-       :def_p:`fls_o8hd0vlldsm9`
-       :term:`Match expression`
+       :dp:`fls_o8hd0vlldsm9`
+       :t:`Match expression`
 
-       :def_p:`fls_u44p4fz3rkll`
-       :term:`Parenthesized expression`
+       :dp:`fls_u44p4fz3rkll`
+       :t:`Parenthesized expression`
 
-       :def_p:`fls_uj567walo9o8`
-       :term:`Path expression`
+       :dp:`fls_uj567walo9o8`
+       :t:`Path expression`
 
-       :def_p:`fls_ljs7zaa6n5d7`
-       :term:`Struct expression`
+       :dp:`fls_ljs7zaa6n5d7`
+       :t:`Struct expression`
 
-       :def_p:`fls_bnxs8i53x3i9`
-       :term:`Tuple expression`
+       :dp:`fls_bnxs8i53x3i9`
+       :t:`Tuple expression`
 
-       :def_p:`fls_r5acfjshejmh`
-       :term:`Underscore expression`
-     - :def_p:`fls_1i7atfw6z0c6`
-       highest
-     - :def_p:`fls_qoiys31tbe6p`
-       none
-   * - :def_p:`fls_qurz25skmryg`
-       :term:`Method call expression`
+       :dp:`fls_r5acfjshejmh`
+       :t:`Underscore expression`
+     - highest
+     - none
+   * - :dp:`fls_qurz25skmryg`
+     - :t:`Method call expression`
      -
-     - :def_p:`fls_ixo8jlfl90wj`
-       none
-   * - :def_p:`fls_ywqn5nixelkz`
-       \ | :term:`Await expression`
-       | :term:`Field access expression`
+     - none
+   * - :dp:`fls_ywqn5nixelkz`
+     - \ | :t:`Await expression`
+       | :t:`Field access expression`
      -
-     - :def_p:`fls_kha0vjr5shwe`
-       left-to-right
-   * - :def_p:`fls_k3ohh8k888c`
-       \ | :term:`Array index expression`
-       | :term:`Call expression`
+     - left-to-right
+   * - :dp:`fls_k3ohh8k888c`
+     - \ | :t:`Array index expression`
+       | :t:`Call expression`
      -
-     - :def_p:`fls_kif1ywa2cw3x`
-       none
-   * - :def_p:`fls_41n6z85h1z47`
-       :term:`Error propagation expression`
+     - none
+   * - :dp:`fls_41n6z85h1z47`
+     - :t:`Error propagation expression`
      -
-     - :def_p:`fls_5radv61jswjq`
-       none
-   * - :def_p:`fls_f39rzauxrlcl`
-       \ | :term:`Borrow expression`
-       | :term:`Dereference expression`
-       | :term:`Negation expression`
+     - none
+   * - :dp:`fls_f39rzauxrlcl`
+     - \ | :t:`Borrow expression`
+       | :t:`Dereference expression`
+       | :t:`Negation expression`
      -
-     - :def_p:`fls_dcw9fdgvu8xb`
-       none
-   * - :def_p:`fls_djphr5mk0t6f`
-       :term:`Type cast expression`
+     - none
+   * - :dp:`fls_djphr5mk0t6f`
+     - :t:`Type cast expression`
      -
-     - :def_p:`fls_t4s6plcgrwfv`
-       left-to-right
-   * - :def_p:`fls_sif2aqky96j6`
-       \ | :term:`Division expression`
-       | :term:`Multiplication expression`
+     - left-to-right
+   * - :dp:`fls_e3loqntvo54t`
+     - :dp:`fls_sif2aqky96j6`
+       \ | :t:`Division expression`
+       | :t:`Multiplication expression`
 
-       :def_p:`fls_9igfpqwxex7l`
-       :term:`Remainder expression`
+       :dp:`fls_9igfpqwxex7l`
+       :t:`Remainder expression`
      -
-     - :def_p:`fls_e3loqntvo54t`
-       left-to-right
-   * - :def_p:`fls_d7x817v8xzea`
-       :term:`Addition expression`
+     - left-to-right
+   * - :dp:`fls_96ojqb37wzud`
+     - :dp:`fls_d7x817v8xzea`
+       :t:`Addition expression`
 
-       :def_p:`fls_dfipk06akxgr`
-       :term:`Subtraction expression`
+       :dp:`fls_dfipk06akxgr`
+       :t:`Subtraction expression`
      -
-     - :def_p:`fls_96ojqb37wzud`
-       left-to-right
-   * - :def_p:`fls_1f5ibdkz3l51`
-       :term:`Shift left expression`
+     - left-to-right
+   * - :dp:`fls_aw4n1ufi93ey`
+     - :dp:`fls_1f5ibdkz3l51`
+       :t:`Shift left expression`
 
-       :def_p:`fls_52j8skuhqw9s`
-       :term:`Shift right expression`
+       :dp:`fls_52j8skuhqw9s`
+       :t:`Shift right expression`
      -
-     - :def_p:`fls_aw4n1ufi93ey`
-       left-to-right
-   * - :def_p:`fls_t1zqnab8a752`
-       :term:`Bit and expression`
+     - left-to-right
+   * - :dp:`fls_t1zqnab8a752`
+     - :t:`Bit and expression`
      -
-     - :def_p:`fls_h9ck3hljx7w2`
-       left-to-right
-   * - :def_p:`fls_f6in3h5cj8i6`
-       :term:`Bit xor expression`
+     - left-to-right
+   * - :dp:`fls_f6in3h5cj8i6`
+     - :t:`Bit xor expression`
      -
-     - :def_p:`fls_mjbkpccftmk2`
-       left-to-right
-   * - :def_p:`fls_hxa1avitfvrq`
-       :term:`Bit or expression`
+     - left-to-right
+   * - :dp:`fls_hxa1avitfvrq`
+     - :t:`Bit or expression`
      -
-     - :def_p:`fls_6puftczanrgb`
-       left-to-right
-   * - :def_p:`fls_sy2xzzq06i0x`
-       :term:`Comparison expression`
+     - left-to-right
+   * - :dp:`fls_sy2xzzq06i0x`
+     - :t:`Comparison expression`
      -
-     - :def_p:`fls_k248rk69wkny`
-       requires parentheses
-   * - :def_p:`fls_hish3qfmawd`
-       :term:`Lazy and expression`
+     - requires parentheses
+   * - :dp:`fls_hish3qfmawd`
+     - :t:`Lazy and expression`
      -
-     - :def_p:`fls_l5x6434yce6h`
-       left-to-right
-   * - :def_p:`fls_ruy7e6yccsqk`
-       :term:`Lazy or expression`
+     - left-to-right
+   * - :dp:`fls_ruy7e6yccsqk`
+     - :t:`Lazy or expression`
      -
-     - :def_p:`fls_mkpiht18rd1n`
-       left-to-right
-   * - :def_p:`fls_9qcm0dx9rolw`
-       :term:`Range expression`
+     - left-to-right
+   * - :dp:`fls_9qcm0dx9rolw`
+     - :t:`Range expression`
      -
-     - :def_p:`fls_xt6ol3nlmyra`
-       requires parentheses
-   * - :def_p:`fls_1l3rgtm6o54s`
-       :term:`Assignment expression`
+     - requires parentheses
+   * - :dp:`fls_i7nmdvd04rca`
+     - :dp:`fls_1l3rgtm6o54s`
+       :t:`Assignment expression`
 
-       :def_p:`fls_9q1d9t3eoh1z`
-       :term:`Compound assignment expression`
+       :dp:`fls_9q1d9t3eoh1z`
+       :t:`Compound assignment expression`
      -
-     - :def_p:`fls_i7nmdvd04rca`
-       right-to-left
-   * - :def_p:`fls_hr4kokysrjop`
-       :term:`Break expression`
+     - right-to-left
+   * - :dp:`fls_rkhos8dg9te6`
+     - :dp:`fls_hr4kokysrjop`
+       :t:`Break expression`
 
-       :def_p:`fls_mi2sttbjkqrh`
-       :term:`Closure expression`
+       :dp:`fls_mi2sttbjkqrh`
+       :t:`Closure expression`
 
-       :def_p:`fls_35v53lpzvzqu`
-       :term:`Return expression`
-     - :def_p:`fls_rkhos8dg9te6`
-       lowest
-     - :def_p:`fls_f245hom9s6m2`
-       none
+       :dp:`fls_35v53lpzvzqu`
+       :t:`Return expression`
+     - lowest
+     - none
 
 Capturing
 ---------
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_iamnzlm430ef`
-A :term:`capturing expression` is either an :term:`async block expression` or a
-:term:`closure expression`.
+:dp:`fls_iamnzlm430ef`
+A :t:`capturing expression` is either an :t:`async block expression` or a
+:t:`closure expression`.
 
-:def_p:`fls_eca6tl7j0afx`
-A :term:`capture target` is either a :term:`binding` or a :term:`field` of
-a :term:`binding`.
+:dp:`fls_eca6tl7j0afx`
+A :t:`capture target` is either a :t:`binding` or a :t:`field` of a
+:t:`binding`.
 
-:def_p:`fls_e70ywb8191h`
-The :term:`capturing environment` of a :term:`capturing expression` consists
-of all :term:`[capture target]s` that are defined outside the :term:`capture
-expression`.
+:dp:`fls_e70ywb8191h`
+The :t:`capturing environment` of a :t:`capturing expression` consists of all
+:t:`[capture target]s` that are defined outside the :t:`capture expression`.
 
-:def_p:`fls_1y2ttb466m9c`
-:term:`Capturing` is the process of saving the :term:`[capture target]s` of a
-:term:`[capturing expression]'s` :term:`capturing environment`.
+:dp:`fls_1y2ttb466m9c`
+:t:`Capturing` is the process of saving the :t:`[capture target]s` of a
+:t:`[capturing expression]'s` :t:`capturing environment`.
 
-:def_p:`fls_ip81lt2mm940`
-A :term:`capturing target` requires :term:`capturing` when it is part of the
-:term:`[capturing expression]'s` :term:`capture environment` and it is used by
-the :term:`capturing expression`. Such a :term:`capturing target` is said to be
-:def_term:`captured`.
+:dp:`fls_ip81lt2mm940`
+A :t:`capturing target` requires :t:`capturing` when it is part of the
+:t:`[capturing expression]'s` :t:`capture environment` and it is used by
+the :t:`capturing expression`. Such a :t:`capturing target` is said to be
+:dt:`captured`.
 
-:def_p:`fls_y9n1i4hbq8sf`
-:term:`Capture mode` is the mechanism by which a :term:`capture target` is
-captured.
+:dp:`fls_y9n1i4hbq8sf`
+:t:`Capture mode` is the mechanism by which a :t:`capture target` is captured.
 
-:def_p:`fls_t695ps4lfh6z`
-The :term:`capture mode` is determined based on the use of the :term:`capture
-target` within the :term:`capturing expression`, as follows:
+:dp:`fls_t695ps4lfh6z`
+The :t:`capture mode` is determined based on the use of the :t:`capture target`
+within the :t:`capturing expression`, as follows:
 
-#. :def_p:`fls_6j8cr7d5zs1l`
-   If the :term:`capturing expression` is subject to :term:`keyword` ``move``,
-   then
+#. :dp:`fls_6j8cr7d5zs1l`
+   If the :t:`capturing expression` is subject to :t:`keyword` ``move``, then
 
-   #. :def_p:`fls_dd8sc7y2vi3u`
-      If the :term:`type` of the :term:`capture target` is a :term:`by copy
-      type`, then the :term:`capture mode` is :term:`by copy mode`.
+   #. :dp:`fls_dd8sc7y2vi3u`
+      If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
+      the :t:`capture mode` is :t:`by copy mode`.
 
-   #. :def_p:`fls_sq1wam8j1d0a`
-      Otherwise the :term:`capture mode` is :term:`by move mode`.
+   #. :dp:`fls_sq1wam8j1d0a`
+      Otherwise the :t:`capture mode` is :t:`by move mode`.
 
-#. :def_p:`fls_l8e98pyhm08g`
-   Otherwise the :term:`capture mode` is determined based on the following
+#. :dp:`fls_l8e98pyhm08g`
+   Otherwise the :t:`capture mode` is determined based on the following
    precedence:
 
-   #. :def_p:`fls_33hfay24hx8u`
-      :term:`By immutable borrow mode`, if the :term:`capture target` is
-      immutably borrowed.
-
-   #. :def_p:`fls_wmxsd0i2yemf`
-      :term:`By unique immutable borrow mode`, if the :term:`capture target` is
-      a :term:`mutable reference` that is being modified.
-
-   #. :def_p:`fls_lu779ufqhggl`
-      :term:`By mutable borrow mode`, if the :term:`capture target` is mutably
+   #. :dp:`fls_33hfay24hx8u`
+      :t:`By immutable borrow mode`, if the :t:`capture target` is immutably
       borrowed.
 
-   #. :def_p:`fls_uqy5w9uc8gla`
-      If the :term:`type` of the :term:`capture target` is a :term:`by copy
-      type`, then the :term:`capture mode` is :term:`by copy mode`, otherwise it
-      is :term:`by move mode`.
+   #. :dp:`fls_wmxsd0i2yemf`
+      :t:`By unique immutable borrow mode`, if the :t:`capture target` is a
+      :t:`mutable reference` that is being modified.
 
-:def_p:`fls_wvob7114tfat`
-A tool selects the first :term:`capture mode` that is compatible with the use of
-the :term:`capture target`.
+   #. :dp:`fls_lu779ufqhggl`
+      :t:`By mutable borrow mode`, if the :t:`capture target` is mutably
+      borrowed.
 
-:def_p:`fls_c3hla8dqymvn`
-The :term:`capture mode` dictates the :term:`capturing` of the :term:`capture
-target` as follows:
+   #. :dp:`fls_uqy5w9uc8gla`
+      If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
+      the :t:`capture mode` is :t:`by copy mode`, otherwise it is :t:`by move
+      mode`.
 
-* :def_p:`fls_60g4jyiphzs`
-  If the :term:`capture mode` is :def_term:`by copy mode`, then the
-  :term:`capture target` is transferred :term:`by copy`.
+:dp:`fls_wvob7114tfat`
+A tool selects the first :t:`capture mode` that is compatible with the use of
+the :t:`capture target`.
 
-* :def_p:`fls_1juvkmh2aoyo`
-  If the :term:`capture mode` is :def_term:`by move mode`, then the
-  :term:`capture target` is transferred :term:`by move`.
+:dp:`fls_c3hla8dqymvn`
+The :t:`capture mode` dictates the :t:`capturing` of the :t:`capture target`
+as follows:
 
-* :def_p:`fls_ctvot5k6jsdx`
-  If the :term:`capture mode` is :def_term:`by immutable borrow mode`, then the
-  :term:`capture target` is immutably borrowed.
+* :dp:`fls_60g4jyiphzs`
+  If the :t:`capture mode` is :dt:`by copy mode`, then the :t:`capture target`
+  is transferred :t:`by copy`.
 
-* :def_p:`fls_teyva6i05akb`
-  If the :term:`capture mode` is :def_term:`by unique immutable borrow mode`,
-  then the :term:`capture target` is uniquely immutably borrowed.
+* :dp:`fls_1juvkmh2aoyo`
+  If the :t:`capture mode` is :dt:`by move mode`, then the :t:`capture target`
+  is transferred :t:`by move`.
 
-* :def_p:`fls_wik2g15r7vye`
-  If the :term:`capture mode` is :def_term:`by mutable borrow mode`, then the
-  :term:`capture target` is mutably borrowed.
+* :dp:`fls_ctvot5k6jsdx`
+  If the :t:`capture mode` is :dt:`by immutable borrow mode`, then the
+  :t:`capture target` is immutably borrowed.
+
+* :dp:`fls_teyva6i05akb`
+  If the :t:`capture mode` is :dt:`by unique immutable borrow mode`, then the
+  :t:`capture target` is uniquely immutably borrowed.
+
+* :dp:`fls_wik2g15r7vye`
+  If the :t:`capture mode` is :dt:`by mutable borrow mode`, then the :t:`capture
+  target` is mutably borrowed.
 

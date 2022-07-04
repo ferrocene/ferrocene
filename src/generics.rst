@@ -41,36 +41,36 @@ A :term:`generic parameter` is a placeholder for a :term:`constant`, a
 by a :term:`generic argument`.
 
 :def_p:`fls_dalqke3rznrb`
-All :syntax:`LifetimeParameter`\ s in a :syntax:`GenericParameterList` shall
-precede all :syntax:`ConstantParameter`\ s and :syntax:`TypeParameter`\ s.
+All :syntax:`[LifetimeParameter]s` in a :syntax:`GenericParameterList` shall
+precede all :syntax:`[ConstantParameter]s` and :syntax:`[TypeParameter]s`.
 
 :def_p:`fls_gw8gutq2215z`
 A :syntax:`LifetimeParameterList` shall be terminated by character 0x2C (comma)
 when followed by a :syntax:`ConstantOrTypeParameterList`.
 
 :def_p:`fls_pi6eukz7kc99`
-A :term:`generic enum` is an :term:`enum` with :term:`generic parameter`\ s.
+A :term:`generic enum` is an :term:`enum` with :term:`[generic parameter]s`.
 
 :def_p:`fls_ixmgqupxvf73`
-A :term:`generic function` is a :term:`function` with :term:`generic parameter`\
-s.
+A :term:`generic function` is a :term:`function` with :term:`[generic
+parameter]s`.
 
 :def_p:`fls_z311nxou9yi3`
 A :term:`generic implementation` is an :term:`implementation` with
-:term:`generic parameter`\ s.
+:term:`[generic parameter]s`.
 
 :def_p:`fls_wmcp0n36jlbr`
-A :term:`generic struct` is a :term:`struct` with :term:`generic parameter`\ s.
+A :term:`generic struct` is a :term:`struct` with :term:`[generic parameter]s`.
 
 :def_p:`fls_h42kg56vsefx`
-A :term:`generic trait` is a :term:`trait` with :term:`generic parameter`\ s.
+A :term:`generic trait` is a :term:`trait` with :term:`[generic parameter]s`.
 
 :def_p:`fls_372h3oevejih`
-A :term:`generic type alias` is a :term:`type alias` with :term:`generic
-parameter`\ s.
+A :term:`generic type alias` is a :term:`type alias` with :term:`[generic
+parameter]s`.
 
 :def_p:`fls_u8mqct93yimd`
-A :term:`generic union` is a :term:`union` with :term:`generic parameter`\ s.
+A :term:`generic union` is a :term:`union` with :term:`[generic parameter]s`.
 
 :def_p:`fls_vpcqgec83ybt`
 A :term:`constant parameter` is a :term:`generic parameter` for a
@@ -84,19 +84,19 @@ A :term:`lifetime parameter` is a :term:`generic parameter` for a
 A :term:`type parameter` is a :term:`generic parameter` for a :term:`type`.
 
 :def_p:`fls_x4s7p2v981r6`
-A :term:`generic enum` shall use all of its :term:`type parameter`\ s and
-:term:`lifetime parameter`\ s at least once in at least one of its :term:`enum
-variant`\ s.
+A :term:`generic enum` shall use all of its :term:`[type parameter]s` and
+:term:`[lifetime parameter]s` at least once in at least one of its :term:`[enum
+variant]s`.
 
 :def_p:`fls_jzfk9fspzqja`
-A :term:`generic struct` shall use all of its :term:`type parameter`\ s
-and :term:`lifetime parameter`\ s at least once in at least one of its
-:term:`field`\ s.
+A :term:`generic struct` shall use all of its :term:`[type parameter]s`
+and :term:`[lifetime parameter]s` at least once in at least one of its
+:term:`[field]s`.
 
 :def_p:`fls_6j616ydf2mnh`
-A :term:`generic union` shall use all of its :term:`type parameter`\ s
-and :term:`lifetime parameter`\ s at least once in at least one of its
-:term:`field`\ s.
+A :term:`generic union` shall use all of its :term:`[type parameter]s`
+and :term:`[lifetime parameter]s` at least once in at least one of its
+:term:`[field]s`.
 
 :def_p:`fls_hyi2jnp38v1n`
 A :term:`generic parameter` is said to :term:`constrain` an
@@ -110,8 +110,8 @@ one of the following:
   The :term:`implementing type`, or
 
 * :def_p:`fls_sseo6u6pbcki`
-  As a :term:`binding argument` in the :term:`bound`\ s of a :term:`type` that
-  contains another :term:`generic parameter` that :term:`constrain`\ s the
+  As a :term:`binding argument` in the :term:`[bound]s` of a :term:`type` that
+  contains another :term:`generic parameter` that :term:`[constrain]s` the
   :term:`implementation`.
 
 :def_p:`fls_ua3w16qo9o4`
@@ -122,7 +122,7 @@ parameter` of an :term:`implementation` does not :term:`constrain` the
 :def_p:`fls_w9ol06mldwb`
 It is a static error if a :term:`lifetime parameter` of an
 :term:`implementation` is used in an :term:`associated type` without
-:term:`constrain`\ ing the :term:`implementation`.
+:term:`[constrain]ing` the :term:`implementation`.
 
 :def_p:`fls_g2pfrqhmeys8`
 The :term:`type` of a :term:`constant parameter` shall be a :term:`scalar type`.
@@ -137,7 +137,7 @@ A :term:`constant parameter` shall be used in the following contexts:
   In the :term:`initialization expression` of an :term:`associated constant`.
 
 * :def_p:`fls_5r7ontjlmgwj`
-  As a :term:`constant argument` of an :term:`associated type`'s
+  As a :term:`constant argument` of an :term:`[associated type]'s`
   :syntax:`InitializationType`.
 
 * :def_p:`fls_prbwj1pmng6k`
@@ -213,12 +213,12 @@ for the supplied generic arguments.
 
 :def_p:`fls_fhy4rsmmbvyy`
 A :term:`where clause predicate` is a :term:`construct` that specifies lifetime
-bounds on :term:`lifetime parameter`\ s and trait :term:`bound`\ s and lifetimes
+bounds on :term:`[lifetime parameter]s` and trait :term:`[bound]s` and lifetimes
 bounds on types.
 
 :def_p:`fls_1xgw1dq60quz`
 A :term:`trivial predicate` is a :term:`where clause predicate` that does not
-use the :term:`generic parameter`\ s or :term:`higher-ranked lifetime`\ s of the
+use the :term:`[generic parameter]s` or :term:`[higher-ranked lifetime]s` of the
 related :term:`construct`.
 
 :def_p:`fls_47s8i7pzb9gg`
@@ -268,13 +268,13 @@ A :term:`generic argument` supplies a static input for an :term:`associated
 trait type` or a  :term:`generic parameter`.
 
 :def_p:`fls_ky39fb2vcom6`
-A :syntax:`BindingArgument` shall follow :syntax:`ConstantArgument`\
-s, :syntax:`LifetimeArgument`\ s, and :syntax:`TypeArgument`\ s in a
+A :syntax:`BindingArgument` shall follow :syntax:`[ConstantArgument]s`,
+:syntax:`[LifetimeArgument]s`, and :syntax:`[TypeArgument]s` in a
 :syntax:`GenericArgumentList`.
 
 :def_p:`fls_9n1ejjili06h`
-A :syntax:`LifetimeArgument` shall precede :syntax:`BindingArgument`\
-s, :syntax:`ConstantArgument`\ s, and :syntax:`TypeArgument`\ s in a
+A :syntax:`LifetimeArgument` shall precede :syntax:`[BindingArgument]s`,
+:syntax:`[ConstantArgument]s`, and :syntax:`[TypeArgument]s` in a
 :syntax:`GenericArgumentList`.
 
 :def_p:`fls_i3z9ueoe99zd`
@@ -299,7 +299,7 @@ expression`, optionally inside a :term:`block expression`, inside of a
 :term:`type` or :term:`array repeat expression`.
 
 :def_p:`fls_ukarc98ceesz`
-:term:`Generic argument`\ s are subject to :term:`generic conformance`.
+:term:`[Generic argument]s` are subject to :term:`generic conformance`.
 
 .. rubric:: Examples
 
@@ -334,7 +334,7 @@ Generic Conformance
 
 :def_p:`fls_gb3mpt5rxjoa`
 A :term:`constant argument` is conformant with a :term:`constant parameter`
-when the :term:`type`\ s of the :term:`constant argument` and :term:`constant
+when the :term:`[type]s` of the :term:`constant argument` and :term:`constant
 parameter` are :term:`unifiable`.
 
 :def_p:`fls_kdeltu9dsd0d`
@@ -343,37 +343,37 @@ it outlives the lifetimes specified by the :term:`lifetime parameter`\ **.**
 
 :def_p:`fls_ws1h57fk1mkh`
 A :term:`type argument` is conformant with a :term:`type parameter` when the
-:term:`type` of the :term:`type argument` fulfills the required :term:`trait
-bound`\ s of the :term:`type parameter`.
+:term:`type` of the :term:`type argument` fulfills the required :term:`[trait
+bound]s` of the :term:`type parameter`.
 
 :def_p:`fls_ltch5eivxgaa`
 A :term:`binding argument` is conformant with an :term:`associated type` when
 the supplied :term:`type` of the :term:`binding argument` fulfills the required
-:term:`trait bound`\ s of the :term:`associated type`.
+:term:`[trait bound]s` of the :term:`associated type`.
 
 :def_p:`fls_w0ozotuwtr9`
-:term:`Generic argument`\ s are conformant with :term:`generic parameter`\
-s when
+:term:`[Generic argument]s` are conformant with :term:`[generic parameter]s`
+when
 
 * :def_p:`fls_91bylteu35bi`
-  The :term:`generic argument`\ s consist only of conformant :term:`constant
-  argument`\ s, conformant :term:`lifetime argument`\ s, conformant :term:`type
-  argument`\ s, and conformant :term:`binding argument`\ s, and
+  The :term:`[generic argument]s` consist only of conformant :term:`[constant
+  argument]s`, conformant :term:`[lifetime argument]s`, conformant :term:`[type
+  argument]s`, and conformant :term:`[binding argument]s`, and
 
 * :def_p:`fls_j6xtrxc6aik`
-  Any remaining :term:`generic parameter`\ s without corresponding conformant
-  :term:`generic argument`\ s are :term:`lifetime parameter`\ s with either
-  :term:`inferred lifetime argument`\ s or :term:`elided lifetime`\ s, and
+  Any remaining :term:`[generic parameter]s` without corresponding conformant
+  :term:`[generic argument]s` are :term:`[lifetime parameter]s` with either
+  :term:`[inferred lifetime argument]s` or :term:`[elided lifetime]s`, and
 
 * :def_p:`fls_us7d30cbwgpz`
-  All :term:`lifetime argument`\ s come first, followed by :term:`constant
-  argument`\ s and :term:`type argument`\ s in the order as defined by the
-  :term:`generic parameter`\ s, followed by :term:`binding argument`\ s, and
+  All :term:`[lifetime argument]s` come first, followed by :term:`[constant
+  argument]s` and :term:`[type argument]s` in the order as defined by the
+  :term:`[generic parameter]s`, followed by :term:`[binding argument]s`, and
 
 * :def_p:`fls_dp3hpvf0fmr8`
-  All :term:`lifetime argument`\ s, :term:`constant argument`\ s and :term:`type
-  argument`\ s have a corresponding :term:`generic parameter`.
+  All :term:`[lifetime argument]s`, :term:`[constant argument]s` and
+  :term:`[type argument]s` have a corresponding :term:`generic parameter`.
 
 :def_p:`fls_mg45zcguxxg5`
-:term:`Generic argument`\ s shall be conformant.
+:term:`[Generic argument]s` shall be conformant.
 

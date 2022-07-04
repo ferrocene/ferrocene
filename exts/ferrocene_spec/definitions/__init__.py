@@ -28,11 +28,16 @@ class DefIdNode(nodes.Element):
 
 class DefRefNode(nodes.Element):
     def __init__(self, kind, source_doc, text):
+        target = text
+        if "[" in text and "]" in text:
+            target = target[target.find("[") + 1 : target.rfind("]")]
+            text = text.replace("[", "").replace("]", "")
+
         super().__init__(
             ref_kind=kind,
             ref_source_doc=source_doc,
             ref_text=text,
-            ref_target=id_from_text(text),
+            ref_target=id_from_text(target),
         )
 
     def astext(self):

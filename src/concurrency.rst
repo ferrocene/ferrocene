@@ -8,7 +8,7 @@ Concurrency
 
 :def_p:`fls_opt7v0mopxc8`
 The Rust programming language provides features for concurrent programming
-without :term:`data race`\ s, whose rules are presented in this chapter.
+without :term:`[data race]s`, whose rules are presented in this chapter.
 
 .. rubric:: Legality Rules
 
@@ -29,7 +29,7 @@ Send and Sync
 
 :def_p:`fls_n5l17mlglq11`
 The Rust programming language provides synchronization facilities for
-:term:`type`\ s through the :codeterm:`core::marker::Send` :term:`trait` and the
+:term:`[type]s` through the :codeterm:`core::marker::Send` :term:`trait` and the
 :codeterm:`core::marker::Sync` :term:`trait`.
 
 :def_p:`fls_2jujsujpjp3w`
@@ -38,11 +38,11 @@ A :term:`send type` is a :term:`type` that implements the
 
 :def_p:`fls_cax6fe4em23k`
 An :term:`abstract data type` automatically implements the
-:codeterm:`core::marker::Send` :term:`trait` if the :term:`type`\ s of all its
-:term:`field`\ s are :term:`send type`\ s.
+:codeterm:`core::marker::Send` :term:`trait` if the :term:`[type]s` of all its
+:term:`[field]s` are :term:`[send type]s`.
 
 :def_p:`fls_4ypqdehn7b0v`
-A :term:`send type` shall have :term:`value`\ s that are safe to transfer across
+A :term:`send type` shall have :term:`[value]s` that are safe to transfer across
 thread boundaries.
 
 :def_p:`fls_dekskhk4g895`
@@ -51,11 +51,11 @@ A :term:`sync type` is a :term:`type` that implements the
 
 :def_p:`fls_y0iqr5ibnbfe`
 An :term:`abstract data type` automatically implements the
-:codeterm:`core::marker::Sync` :term:`trait` if the :term:`type`\ s of all its
-:term:`field`\ s are :term:`sync type`\ s.
+:codeterm:`core::marker::Sync` :term:`trait` if the :term:`[type]s` of all its
+:term:`[field]s` are :term:`[sync type]s`.
 
 :def_p:`fls_zgemofbs5q2x`
-A :term:`sync type` shall have :term:`reference`\ s that are safe to transfer
+A :term:`sync type` shall have :term:`[reference]s` that are safe to transfer
 across thread boundaries.
 
 Atomics
@@ -65,11 +65,11 @@ Atomics
 
 :def_p:`fls_3pjla9s93mhd`
 An :term:`atomic type` is a :term:`type` defined in :term:`module`
-:codeterm:`core::sync::atomic`. :term:`Atomic type`\ s provide primitive
+:codeterm:`core::sync::atomic`. :term:`[Atomic type]s` provide primitive
 shared-memory communication between threads.
 
 :def_p:`fls_wn4ynaio8u47`
-:term:`Atomic type`\ s are related to :term:`type`\ s as follows:
+:term:`[Atomic type]s` are related to :term:`[type]s` as follows:
 
 .. list-table::
 

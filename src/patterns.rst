@@ -61,17 +61,17 @@ The :term:`expected type` of a :term:`pattern` is the :term:`type` of the
 :term:`value` the :term:`pattern` is being matched against.
 
 :def_p:`fls_8luyomzppck`
-Any two :term:`pattern-without-alternation`\ s that are or-ed using character
+Any two :term:`[pattern-without-alternation]s` that are or-ed using character
 0x7C (vertical line) are subject to the following restrictions:
 
 * :def_p:`fls_rpvdfmy3n05a`
-  The :term:`type`\ s of the two :term:`pattern-without-alternation`\ s shall
+  The :term:`[type]s` of the two :term:`[pattern-without-alternation]s` shall
   be :term:`unifiable`.
 
 * :def_p:`fls_kv533rntni1x`
-  The :term:`binding`\ s of the two :term:`pattern-without-alternation`\ s shall
-  be the same, shall have :term:`unifiable type`\ s, and shall have the same
-  :term:`binding mode`\ s.
+  The :term:`[binding]s` of the two :term:`[pattern-without-alternation]s` shall
+  be the same, shall have :term:`[unifiable type]s`, and shall have the same
+  :term:`[binding mode]s`.
 
 Identifier Patterns
 ~~~~~~~~~~~~~~~~~~~
@@ -238,7 +238,7 @@ Parenthesized Patterns
 
 :def_p:`fls_kvqzmt7my5dh`
 A :term:`parenthesized pattern` is a :term:`pattern` that controls the
-precedence of its :term:`subpattern`\ s.
+precedence of its :term:`[subpattern]s`.
 
 :def_p:`fls_mrjhpiq5refe`
 A :term:`parenthesized pattern` is :term:`irrefutable` when its nested
@@ -283,7 +283,7 @@ Path Patterns
 
 :def_p:`fls_1crq0mexo5r1`
 A :term:`path pattern` is a :term:`pattern` that matches a :term:`constant`,
-an :term:`enum variant` without :term:`field`\ s, or a :term:`unit struct`
+an :term:`enum variant` without :term:`[field]s`, or a :term:`unit struct`
 indicated by a :term:`path`.
 
 :def_p:`fls_xz5otkhogn31`
@@ -309,11 +309,11 @@ A :term:`path pattern` is :term:`irrefutable` when it refers to:
 
 * :def_p:`fls_rnppz6y5z8pi`
   An :term:`enum variant` of an :term:`enum type` with a single :term:`enum
-  variant` where the :term:`type`\ s of all :term:`field`\ s are
+  variant` where the :term:`[type]s` of all :term:`[field]s` are
   :term:`irrefutable`, or
 
 * :def_p:`fls_ag6m4mvpturw`
-  A :term:`struct` where the :term:`type`\ s of all :term:`field`\ s are
+  A :term:`struct` where the :term:`[type]s` of all :term:`[field]s` are
   :term:`irrefutable`.
 
 :def_p:`fls_pedy2pqrvnx7`
@@ -379,7 +379,7 @@ Range Patterns
 .. rubric:: Legality Rules
 
 :def_p:`fls_okupyoav13rm`
-A :term:`range pattern` is a :term:`pattern` that matches :term:`value`\ s which
+A :term:`range pattern` is a :term:`pattern` that matches :term:`[value]s` which
 fall within a range.
 
 :def_p:`fls_jhchm7dy927k`
@@ -420,10 +420,10 @@ pattern`.
 
 :def_p:`fls_4o4ge6x9a8rs`
 A :term:`range pattern` is :term:`irrefutable` only when it spans the entire set
-of possible :term:`value`\ s of a :term:`type`.
+of possible :term:`[value]s` of a :term:`type`.
 
 :def_p:`fls_6o995ak4hywq`
-The :term:`type`\ s of the :term:`range pattern low bound` and the :term:`range
+The :term:`[type]s` of the :term:`range pattern low bound` and the :term:`range
 pattern high bound` of a :term:`range pattern` shall be :term:`unifiable`.
 
 :def_p:`fls_3js1645tgh31`
@@ -432,7 +432,7 @@ The :term:`type` of a :term:`range pattern` is determined as follows:
 * :def_p:`fls_wfqrbwrogjnq`
   If the :term:`range pattern` is expressed as an :term:`inclusive range
   pattern` or an :term:`obsolete range pattern`, then the :term:`type` is the
-  :term:`unified type` of the :term:`type`\ s of the :term:`range pattern low
+  :term:`unified type` of the :term:`[type]s` of the :term:`range pattern low
   bound` and the :term:`range pattern high bound`.
 
 * :def_p:`fls_rgr7t33s0m7m`
@@ -540,7 +540,7 @@ the :term:`rest pattern` is determined as follows:
 * :def_p:`fls_x8ylgxrf9ca`
   If the :term:`type` of the :term:`slice pattern` is an :term:`array type`,
   then the :term:`type` is ``[T; N]`` where ``T`` is the :term:`element type` of
-  the :term:`array type`, and ``N`` is the :term:`array type`'s size minus the
+  the :term:`array type`, and ``N`` is the :term:`[array type]'s` size minus the
   number of matched elements of the :term:`slice pattern`.
 
 * :def_p:`fls_zgoke73xrhk3`
@@ -586,8 +586,8 @@ Slice Patterns
 .. rubric:: Legality Rules
 
 :def_p:`fls_qqiu594hki8g`
-A :term:`slice pattern` is a :term:`pattern` that matches :term:`array`\ s of
-fixed size and :term:`slice`\ s of dynamic size.
+A :term:`slice pattern` is a :term:`pattern` that matches :term:`[array]s` of
+fixed size and :term:`[slice]s` of dynamic size.
 
 :def_p:`fls_h6x9xlxi7y5n`
 A :term:`slice pattern` is :term:`irrefutable` when it refers to:
@@ -682,7 +682,7 @@ A :term:`struct pattern` is a :term:`pattern` that matches a :term:`struct`.
 
 :def_p:`fls_mqhest816lo2`
 A :term:`tuple struct pattern` is a :term:`struct pattern` that matches
-:term:`enum variant`\ s and :term:`tuple struct`\ s.
+:term:`[enum variant]s` and :term:`[tuple struct]s`.
 
 :def_p:`fls_d8cyh5v25s0x`
 A :term:`union pattern` is a :term:`record struct pattern` that matches a
@@ -714,9 +714,9 @@ A :syntax:`RecordStructPattern` without a
 pattern`.
 
 :def_p:`fls_1tjp0z3v9ukg`
-A :syntax:`TupleStructPattern` and a :syntax:`RecordStructPattern` without a
-:syntax:`RecordStructFieldDeconstructorList` are :term:`tuple struct pattern`\
-s.
+A :syntax:`TupleStructPattern` and a :syntax:`RecordStructPattern` without
+a :syntax:`RecordStructFieldDeconstructorList` are :term:`[tuple struct
+pattern]s`.
 
 :def_p:`fls_y8qclm82nun8`
 A :syntax:`RecordStructPattern` with a
@@ -725,8 +725,8 @@ A :syntax:`RecordStructPattern` with a
 :def_p:`fls_j1lux391rmgg`
 A :syntax:`UnitStructPattern` and a :syntax:`RecordStructPattern`
 without a :syntax:`RecordStructFieldDeconstructorList` and a
-:syntax:`RecordStructIndexedFieldDeconstructorList` are :term:`unit struct
-pattern`\ s.
+:syntax:`RecordStructIndexedFieldDeconstructorList` are :term:`[unit struct
+pattern]s`.
 
 :def_p:`fls_2rgip6uruvt5`
 A :term:`struct pattern` is interpreted based on the :term:`deconstruction
@@ -744,7 +744,7 @@ It is a static error if a :term:`shorthand deconstructor` has only
 
 :def_p:`fls_5vjoxrgeq3bg`
 A :term:`struct pattern` is :term:`irrefutable` when all of its
-:term:`subpattern`\ s are :term:`irrefutable`.
+:term:`[subpattern]s` are :term:`irrefutable`.
 
 Record Struct Patterns
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -942,11 +942,11 @@ Tuple Patterns
 
 :def_p:`fls_e2manugp4e0b`
 A :term:`tuple pattern` is a :term:`pattern` that matches a :term:`tuple` which
-satisfies all criteria defined by its :term:`subpattern`\ s.
+satisfies all criteria defined by its :term:`[subpattern]s`.
 
 :def_p:`fls_xk8udu4k61kj`
 A :term:`tuple pattern` is :term:`irrefutable` when all of its
-:term:`subpattern`\ s are :term:`irrefutable`.
+:term:`[subpattern]s` are :term:`irrefutable`.
 
 :def_p:`fls_yhcaz6v49ub2`
 The :term:`type` of a :term:`tuple pattern` is the :term:`type` of the
@@ -1006,7 +1006,7 @@ Refutability
 .. rubric:: Legality Rules
 
 :def_p:`fls_9ntc4qmjmo90`
-:term:`Refutability` is a property of :term:`pattern`\ s that expresses the
+:term:`Refutability` is a property of :term:`[pattern]s` that expresses the
 ability to match all possible values of a :term:`type`.
 
 :def_p:`fls_9fjspnefoyvz`
@@ -1066,13 +1066,13 @@ A :term:`binding pattern` is either an :term:`identifier pattern` or a
 :term:`shorthand deconstructor`.
 
 :def_p:`fls_dqe75i8h2fie`
-A :term:`non-reference pattern` is any :term:`pattern` except non-:term:`binding
-pattern`\ s, :term:`path pattern`\ s, :term:`reference pattern`\ s, and
-:term:`wildcard pattern`\ s.
+A :term:`non-reference pattern` is any :term:`pattern` except
+:term:`non-[binding pattern]s`, :term:`[path pattern]s`, :term:`[reference
+pattern]s`, and :term:`[wildcard pattern]s`.
 
 :def_p:`fls_y3wuvj1y5j20`
 If a :term:`binding pattern` does not explicitly specify :term:`keyword`
-``ref``, :term:`keyword` ``mut``, or :term:`keyword`\ s ``ref mut``, then its
+``ref``, :term:`keyword` ``mut``, or :term:`[keyword]s` ``ref mut``, then its
 :term:`binding mode` uses the current :term:`binding mode` of :term:`pattern
 matching`.
 
@@ -1081,7 +1081,7 @@ Initially, the :term:`binding mode` of a :term:`binding` is "by value".
 
 :def_p:`fls_qcaf2kup7zn0`
 During the process of :term:`pattern matching`, each time a :term:`reference`
-is matched against a non-:term:`reference pattern`, the :term:`reference` is
+is matched against a :term:`non-[reference pattern]`, the :term:`reference` is
 dereferenced and the :term:`binding mode` is updated as follows:
 
 * :def_p:`fls_6acdqz8rwnn`
@@ -1099,7 +1099,7 @@ The process repeats if the dereferenced :term:`value` is a :term:`reference`.
 .. rubric:: Dynamic Semantics
 
 :def_p:`fls_t34oqarwcusu`
-A :term:`binding pattern`\ s binds its :term:`binding` to a matched
+A :term:`[binding pattern]s` binds its :term:`binding` to a matched
 :term:`value` as follows:
 
 * :def_p:`fls_7gxb74u1np36`
@@ -1178,7 +1178,7 @@ Pattern Matching
       Otherwise :term:`pattern matching` fails.
 
 :def_p:`fls_vstdqifqipbh`
-Only the :term:`binding`\ s of a matched :term:`pattern-without-alternation` are
+Only the :term:`[binding]s` of a matched :term:`pattern-without-alternation` are
 introduced to the corresponding :term:`scope`.
 
 Identifier Pattern Matching
@@ -1263,7 +1263,7 @@ Range Pattern Matching
    If the :term:`range pattern` is expressed as a :term:`half-open range
    pattern` and the context :term:`value` is in the inclusive range from
    the :term:`range pattern low bound` to the maximum :term:`value` of the
-   :term:`range pattern low bound`'s :term:`type`, then matching succeeds.
+   :term:`[range pattern low bound]'s` :term:`type`, then matching succeeds.
 
 #. :def_p:`fls_6kgj2fjccoig`
    If the :term:`range pattern` is expressed as either an :term:`inclusive range
@@ -1299,13 +1299,13 @@ Slice Pattern Matching
 :term:`type` is an :term:`array type` or a :term:`slice type`:
 
 #. :def_p:`fls_69bnxrtj0nar`
-   If the number of :term:`subpattern`\ s of the :term:`slice pattern` is
+   If the number of :term:`[subpattern]s` of the :term:`slice pattern` is
    greater than the length of the context :term:`value`, then matching fails.
 
 #. :def_p:`fls_twhwiy213ibf`
-   If the number of :term:`subpattern`\ s of the :term:`slice pattern`
+   If the number of :term:`[subpattern]s` of the :term:`slice pattern`
    is less than the size of the context :term:`value` and one of those
-   :term:`subpattern`\ s is not a :term:`rest pattern`, then matching fails.
+   :term:`[subpattern]s` is not a :term:`rest pattern`, then matching fails.
 
 #. :def_p:`fls_ei7y4ul6n6hu`
    For each :term:`subpattern` of the :term:`slice pattern`
@@ -1313,7 +1313,7 @@ Slice Pattern Matching
    #. :def_p:`fls_ad2jud5h1rfp`
       Perform :term:`pattern matching` with the :term:`subpattern` and the
       corresponding :term:`value` from the context :term:`value`, ignoring
-      :term:`rest pattern`\ s.
+      :term:`[rest pattern]s`.
 
    #. :def_p:`fls_pc97m47p34wq`
       If matching the :term:`subpattern` fails, then matching fails.
@@ -1327,14 +1327,14 @@ Struct Pattern Matching
 :def_term:`Struct pattern matching` proceeds as follows:
 
 #. :def_p:`fls_osc8aj1htgqo`
-   If the number of :term:`subpattern`\ s of the :term:`struct pattern` is
-   greater than the number of :term:`field`\ s of the context :term:`value`,
+   If the number of :term:`[subpattern]s` of the :term:`struct pattern` is
+   greater than the number of :term:`[field]s` of the context :term:`value`,
    then this is a static error.
 
 #. :def_p:`fls_bde1hpvrosui`
-   If the number of :term:`subpattern`\ s of the :term:`struct pattern` is less
-   than the number of :term:`field`\ s of the context :term:`value` and one
-   of those :term:`subpattern`\ s is not a :term:`rest pattern`, then matching
+   If the number of :term:`[subpattern]s` of the :term:`struct pattern` is less
+   than the number of :term:`[field]s` of the context :term:`value` and one
+   of those :term:`[subpattern]s` is not a :term:`rest pattern`, then matching
    fails.
 
 #. :def_p:`fls_447s4hc07ozn`
@@ -1349,7 +1349,7 @@ Struct Pattern Matching
    #. :def_p:`fls_yfk52fr7trw3`
       Otherwise perform :term:`pattern matching` with the :term:`subpattern` and
       the corresponding :term:`field` from the context :term:`value`, ignoring
-      :term:`rest pattern`\ s.
+      :term:`[rest pattern]s`.
 
    #. :def_p:`fls_6sdcykdrpe5d`
       If matching the :term:`subpattern` fails, then matching fails.
@@ -1363,14 +1363,14 @@ Tuple Pattern Matching
 :def_term:`Tuple pattern matching` proceeds as follows:
 
 #. :def_p:`fls_9lujsrwrrvqs`
-   If the number of :term:`subpattern`\ s of the :term:`tuple pattern` is
-   greater than the number of :term:`field`\ s of the context :term:`value`,
+   If the number of :term:`[subpattern]s` of the :term:`tuple pattern` is
+   greater than the number of :term:`[field]s` of the context :term:`value`,
    then this is a static error.
 
 #. :def_p:`fls_wsd605jlyzs2`
-   If the number of :term:`subpattern`\ s of the :term:`tuple pattern` is less
-   than the number of :term:`field`\ s of the context :term:`value` and one of
-   those :term:`subpattern`\ s is not a :term:`rest pattern`, then this is a
+   If the number of :term:`[subpattern]s` of the :term:`tuple pattern` is less
+   than the number of :term:`[field]s` of the context :term:`value` and one of
+   those :term:`[subpattern]s` is not a :term:`rest pattern`, then this is a
    static error.
 
 #. :def_p:`fls_vnx1bpval595`
@@ -1379,7 +1379,7 @@ Tuple Pattern Matching
    #. :def_p:`fls_dzf32f40y7fr`
       Perform :term:`pattern matching` with the :term:`subpattern` and the
       corresponding :term:`field` from the context :term:`value`, ignoring
-      :term:`rest pattern`\ s.
+      :term:`[rest pattern]s`.
 
    #. :def_p:`fls_krl32txvxxkz`
       If matching the :term:`subpattern` fails, then matching fails.
@@ -1393,14 +1393,14 @@ Tuple Struct Pattern Matching
 :def_term:`Tuple struct pattern matching` proceeds as follows:
 
 #. :def_p:`fls_daj9ds77r27b`
-   If the number of :term:`subpattern`\ s of the :term:`tuple struct pattern`
-   is greater than the number of :term:`field`\ s of the context :term:`value`,
+   If the number of :term:`[subpattern]s` of the :term:`tuple struct pattern`
+   is greater than the number of :term:`[field]s` of the context :term:`value`,
    then this is a static error.
 
 #. :def_p:`fls_z8dqrgmk24n0`
-   If the number of :term:`subpattern`\ s of the :term:`tuple struct pattern` is
-   less than the number of :term:`field`\ s of the context :term:`value` and one
-   of those :term:`subpattern`\ s is not a :term:`rest pattern`, then this is a
+   If the number of :term:`[subpattern]s` of the :term:`tuple struct pattern` is
+   less than the number of :term:`[field]s` of the context :term:`value` and one
+   of those :term:`[subpattern]s` is not a :term:`rest pattern`, then this is a
    static error.
 
 #. :def_p:`fls_boc7juqj69hw`
@@ -1409,7 +1409,7 @@ Tuple Struct Pattern Matching
    #. :def_p:`fls_4dr1stiw82v9`
       Otherwise perform :term:`pattern matching` with the :term:`subpattern` and
       the corresponding :term:`field` from the context :term:`value`, ignoring
-      :term:`rest pattern`\ s.
+      :term:`[rest pattern]s`.
 
    #. :def_p:`fls_h14emtt6iyk3`
       If matching the :term:`subpattern` fails, then matching fails.

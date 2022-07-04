@@ -96,12 +96,12 @@ A :term:`right operand` is an :term:`operand` that appears on the right-hand
 side of a :term:`binary operator`.
 
 :def_p:`fls_2j132xueobfv`
-A :term:`subject expression` is an :term:`expression` that controls :term:`for
-loop`\ s, :term:`if expression`\ s, and :term:`match expression`\ s.
+A :term:`subject expression` is an :term:`expression` that controls :term:`[for
+loop]s`, :term:`[if expression]s`, and :term:`[match expression]s`.
 
 :def_p:`fls_a243nclqqjlu`
 A :term:`subject let expression` is an :term:`expression` that controls
-:term:`if let expression`\ s and :term:`while let loop`\ s.
+:term:`[if let expression]s` and :term:`[while let loop]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -116,133 +116,134 @@ Assignee Expressions
 
 An :term:`assignee expression` is an :term:`expression` that appears as
 the :term:`left operand` of an :term:`assignment expression`. The following
-:term:`expression`\ s are :term:`assignee expression`\ s:
+:term:`[expression]s` are :term:`[assignee expression]s`:
 
-* :term:`Place expression`\ s,
+* :term:`[Place expression]s`,
 
-* :term:`Underscore expression`\ s,
+* :term:`[Underscore expression]s`,
 
-* :term:`Array expression`\ s of :term:`assignee expression`\ s,
+* :term:`[Array expression]s` of :term:`[assignee expression]s`,
 
-* :term:`Tuple expression`\ s of :term:`assignee expression`\ s,
+* :term:`[Tuple expression]s` of :term:`[assignee expression]s`,
 
-* :term:`Struct expression`\ s of :term:`assignee expression`\ s,
+* :term:`[Struct expression]s` of :term:`[assignee expression]s`,
 
-* :term:`Tuple struct expression`\ s of :term:`assignee expression`\ s,
+* :term:`[Tuple struct expression]s` of :term:`[assignee expression]s`,
 
-* :term:`Unit struct expression`\ s.
+* :term:`[Unit struct expression]s`.
 
-:term:`Parenthesized expression`\ s are allowed to appear anywhere in
-:term:`assignee expression`\ s.
+:term:`[Parenthesized expression]s` are allowed to appear anywhere in
+:term:`[assignee expression]s`.
 
 Constant Expressions
 ~~~~~~~~~~~~~~~~~~~~
 
 :def_p:`fls_1ji7368ieg0b`
 A :term:`constant expression` is an :term:`expression` that can be evaluated
-statically. The following :term:`construct`\ s are :term:`constant expression`\
-s as long as their :term:`operand`\ s are also :term:`constant expression`\ s
-and do not involve :term:`type`\ s that require :term:`destruction`:
+statically. The following :term:`[construct]s` are :term:`[constant
+expression]s` as long as their :term:`[operand]s` are also :term:`[constant
+expression]s` and do not involve :term:`[type]s` that require
+:term:`destruction`:
 
 * :def_p:`fls_y6ore0iwx7e0`
-  :term:`Arithmetic expression`\ s of :term:`scalar type`\ s,
+  :term:`[Arithmetic expression]s` of :term:`[scalar type]s`,
 
 * :def_p:`fls_xguga84v3j8u`
-  :term:`Array expression`\ s,
+  :term:`[Array expression]s`,
 
 * :def_p:`fls_rpapnm3afan8`
-  :term:`Array index expression`\ s,
+  :term:`[Array index expression]s`,
 
 * :def_p:`fls_idxf02p7jogu`
-  :term:`Assignment expression`\ s,
+  :term:`[Assignment expression]s`,
 
 * :def_p:`fls_6z45ss502alt`
-  :term:`Bit expression`\ s of :term:`scalar type`\ s,
+  :term:`[Bit expression]s` of :term:`[scalar type]s`,
 
 * :def_p:`fls_wqs0792nud4e`
-  :term:`Block expression`\ s,
+  :term:`[Block expression]s`,
 
 * :def_p:`fls_8nyu6phm1nji`
-  :term:`Closure expression`\ s that do not :term:`capture`,
+  :term:`[Closure expression]s` that do not :term:`capture`,
 
 * :def_p:`fls_8wux08bmpse`
-  :term:`Comparison expression`\ s of scalar types,
+  :term:`[Comparison expression]s` of scalar types,
 
 * :def_p:`fls_ppmnogx8mxk3`
-  :term:`Compound assignment expression`\ s,
+  :term:`[Compound assignment expression]s`,
 
 * :def_p:`fls_6fq6bvxxvhsr`
-  :term:`Constant parameter`\ s,
+  :term:`[Constant parameter]s`,
 
 * :def_p:`fls_to4e7imq2c0w`
-  :term:`Dereference expression`\ s when the :term:`operand` is not of a
+  :term:`[Dereference expression]s` when the :term:`operand` is not of a
   :term:`raw pointer type`,
 
 * :def_p:`fls_krtbrpwf3mh0`
-  :term:`Expression statement`\ s,
+  :term:`[Expression statement]s`,
 
 * :def_p:`fls_3etom5uu8y4u`
-  :term:`Field access expression`\ s,
+  :term:`[Field access expression]s`,
 
 * :def_p:`fls_qls0wj8bmupz`
-  :term:`If expression`\ s,
+  :term:`[If expression]s`,
 
 * :def_p:`fls_b5fraqx07wuo`
-  :term:`If let expression`\ s,
+  :term:`[If let expression]s`,
 
 * :def_p:`fls_fc62yaqyjpl2`
-  :term:`Infinite loop expression`\ s,
+  :term:`[Infinite loop expression]s`,
 
 * :def_p:`fls_kwg8a351vc7`
-  :term:`Lazy boolean expression`\ s of :term:`scalar type`\ s,
+  :term:`[Lazy boolean expression]s` of :term:`[scalar type]s`,
 
 * :def_p:`fls_7mjv1xd45qr4`
-  :term:`Let statement`\ s,
+  :term:`[Let statement]s`,
 
 * :def_p:`fls_g7hoyfqy9mu1`
-  :term:`Literal expression`\ s,
+  :term:`[Literal expression]s`,
 
 * :def_p:`fls_br4g7qwfczig`
-  :term:`Match expression`\ s,
+  :term:`[Match expression]s`,
 
 * :def_p:`fls_y1ezabo61nyk`
-  :term:`Negation expression`\ s of :term:`scalar type`\ s,
+  :term:`[Negation expression]s` of :term:`[scalar type]s`,
 
 * :def_p:`fls_6tb74n6lu0wf`
-  :term:`Parenthesized expression`\ s,
+  :term:`[Parenthesized expression]s`,
 
 * :def_p:`fls_axwrv7b3zt55`
-  :term:`Path expression`\ s that resolve to :term:`constant`\ s,
-  :term:`function`\ s, and :term:`static`\ s,
+  :term:`[Path expression]s` that resolve to :term:`[constant]s`,
+  :term:`[function]s`, and :term:`[static]s`,
 
 * :def_p:`fls_3bucpdj828bq`
-  :term:`Range expression`\ s,
+  :term:`[Range expression]s`,
 
 * :def_p:`fls_hkbwa8xx2fwx`
-  :term:`Shared borrow`\ s that do not involve :term:`type`\ s with
+  :term:`[Shared borrow]s` that do not involve :term:`[type]s` with
   :term:`interior mutability`,
 
 * :def_p:`fls_fobs8ebt7dhc`
-  :term:`Struct expression`\ s,
+  :term:`[Struct expression]s`,
 
 * :def_p:`fls_dyo3o1h3keqr`
-  :term:`Tuple expression`\ s,
+  :term:`[Tuple expression]s`,
 
 * :def_p:`fls_e0a1e8ddph7`
-  :term:`Type cast expression`\ s that are not :term:`pointer-to-address cast`\
-  s,  :term:`function-pointer-to-address cast`\ s, and :term:`unsized cast`\ s
-  that involve a :term:`trait object type`,
+  :term:`[Type cast expression]s` that are not :term:`[pointer-to-address
+  cast]s`,  :term:`[function-pointer-to-address cast]s`, and :term:`[unsized
+  cast]s` that involve a :term:`trait object type`,
 
 * :def_p:`fls_pbpzkfo1fgtz`
-  :term:`While let loop expression`\ s,
+  :term:`[While let loop expression]s`,
 
 * :def_p:`fls_qvofy4wkql0s`
-  :term:`While loop expression`\ s.
+  :term:`[While loop expression]s`.
 
 :def_p:`fls_kjhma680hz3g`
 A :term:`constant context` is a :term:`construct` that requires a
-:term:`constant expression`. The following :term:`construct`\ s are
-:term:`constant context`\ s:
+:term:`constant expression`. The following :term:`[construct]s` are
+:term:`[constant context]s`:
 
 * :def_p:`fls_ljc6jq5ksbcs`
   The :term:`constant initializer` of a :term:`constant`,
@@ -267,29 +268,29 @@ Place Expressions
 
 :def_p:`fls_qbrcg3cl9td`
 A :term:`place expression` is an :term:`expression` that represents a memory
-location. The following :term:`expression`\ s are :term:`place expression`\ s:
+location. The following :term:`[expression]s` are :term:`[place expression]s`:
 
 * :def_p:`fls_lj7x5dgbmg9i`
-  :term:`Array index expression`\ s,
+  :term:`[Array index expression]s`,
 
 * :def_p:`fls_jpmhibm4omm7`
-  :term:`Dereference expression`\ s,
+  :term:`[Dereference expression]s`,
 
 * :def_p:`fls_none1dykbn8c`
-  :term:`Field access expression`\ s,
+  :term:`[Field access expression]s`,
 
 * :def_p:`fls_anzidgx02lly`
-  :term:`Parenthesized expression`\ s where the :term:`operand` is a
+  :term:`[Parenthesized expression]s` where the :term:`operand` is a
   :term:`place expression`,
 
 * :def_p:`fls_ya05djl1d154`
-  :term:`Path expression`\ s that resolve to a :term:`binding` or a
+  :term:`[Path expression]s` that resolve to a :term:`binding` or a
   :term:`static`.
 
 :def_p:`fls_4vxi1ji93dxb`
 A :term:`place expression context` is a :term:`construct` that requires a
-:term:`place expression`. The following :term:`construct`\ s are :term:`place
-expression context`\ s:
+:term:`place expression`. The following :term:`[construct]s` are :term:`[place
+expression context]s`:
 
 * :def_p:`fls_qytgkbhqr5ln`
   The :term:`indexed array operand` of an :term:`array index expression`,
@@ -342,8 +343,8 @@ represented is deinitialized and shall not be read from until reinitialized.
 
 :def_p:`fls_ku38h562vfyl`
 A :term:`mutable place expression` is a :term:`place expression` whose memory
-location can be modified. The following :term:`place expression`\ s are
-:term:`mutable place expression`\ s:
+location can be modified. The following :term:`[place expression]s` are
+:term:`[mutable place expression]s`:
 
 * :def_p:`fls_bt50fltfqcvn`
   An :term:`array index expression` whose :term:`type` implements the
@@ -507,7 +508,7 @@ Block Expressions
 
 :def_p:`fls_nf65p0l0v0gr`
 A :term:`block expression` is an :term:`expression` that sequences
-:term:`expression`\ s and :term:`statement`\ s.
+:term:`[expression]s` and :term:`[statement]s`.
 
 :def_p:`fls_tn3hj7k2lliu`
 A :term:`tail expression` is the last :term:`expression` within a :term:`block
@@ -1064,7 +1065,7 @@ Arithmetic Expressions
 
 :def_p:`fls_asibqpe3z95h`
 An :term:`arithmetic expression` is an :term:`expression` that computes a
-:term:`value` from two :term:`operand`\ s using arithmetic.
+:term:`value` from two :term:`[operand]s` using arithmetic.
 
 :def_p:`fls_dstca76y08ge`
 A :term:`division expression` is an :term:`arithmetic expression` that uses
@@ -1153,7 +1154,7 @@ The :term:`value` of a :term:`subtraction expression` is the result of
 ``core::ops::Sub::sub(left_operand, right_operand)``.
 
 :def_p:`fls_69r1m88mxzx5`
-The expression context for the :term:`operand`\ s of an :term:`arithmetic
+The expression context for the :term:`[operand]s` of an :term:`arithmetic
 expression` is a :term:`value expression` context.
 
 .. rubric:: Dynamic Semantics
@@ -1223,7 +1224,7 @@ The :term:`evaluation` of a :term:`subtraction expression` proceeds as follows:
 
 :def_p:`fls_8dkygceg0oo`
 It is undefined behavior for an :term:`arithmetic operation` to cause overflow
-with :term:`value`\ s of :term:`numeric type`\ s.
+with :term:`[value]s` of :term:`[numeric type]s`.
 
 .. rubric:: Examples
 
@@ -1268,7 +1269,7 @@ Bit Expressions
 
 :def_p:`fls_3zd59yuywz6l`
 A :term:`bit expression` is an :term:`expression` that computes a :term:`value`
-from two :term:`operand`\ s using bit arithmetic.
+from two :term:`[operand]s` using bit arithmetic.
 
 :def_p:`fls_f6mmva3lbj1i`
 A :term:`bit and expression` is a :term:`bit expression` that uses bit and
@@ -1361,7 +1362,7 @@ The :term:`value` of a :term:`shift right operation` is the result of
 ``core::ops::Shr::shr(left_operand, right_operand)``.
 
 :def_p:`fls_2z6wble3u8ec`
-The expression context for the :term:`operand`\ s of a :term:`bit expression` is
+The expression context for the :term:`[operand]s` of a :term:`bit expression` is
 a :term:`value expression` context.
 
 .. rubric:: Dynamic Semantics
@@ -1475,7 +1476,7 @@ Comparison Expressions
 
 :def_p:`fls_yzuceqx6nxwa`
 A :term:`comparison expression` is an :term:`expression` that compares the
-:term:`value`\ s of two :term:`operand`\ s.
+:term:`[value]s` of two :term:`[operand]s`.
 
 :def_p:`fls_ruyho6cu7rxg`
 An :term:`equals expression` is a :term:`comparison expression` that tests
@@ -1502,8 +1503,8 @@ A :term:`not-equals expression` is a :term:`comparison expression` that tests
 for inequality.
 
 :def_p:`fls_asfrqemqviad`
-A :term:`comparison expression` implicitly takes :term:`shared borrow`\ s of its
-:term:`operand`\ s.
+A :term:`comparison expression` implicitly takes :term:`[shared borrow]s` of
+its :term:`[operand]s`.
 
 :def_p:`fls_9s4re3ujnfis`
 The :term:`type` of a :term:`comparison expression` is :term:`type`
@@ -1570,7 +1571,7 @@ The :term:`value` of a :term:`not-equals expression` is the result of
 ``core::cmp::PartialEq::ne(&left_operand, &right_operand)``.
 
 :def_p:`fls_8qbrzb9bxyf`
-The expression context for the :term:`operand`\ s of a :term:`comparison
+The expression context for the :term:`[operand]s` of a :term:`comparison
 expression` is a :term:`place expression` context.
 
 .. rubric:: Dynamic Semantics
@@ -1701,7 +1702,7 @@ A :term:`lazy or expression` is a :term:`lazy boolean expression` that uses
 short circuit or arithmetic.
 
 :def_p:`fls_u0gwo0s2l0tn`
-The :term:`type`\ s of the :term:`operand`\ s of a :term:`lazy boolean
+The :term:`[type]s` of the :term:`[operand]s` of a :term:`lazy boolean
 expression` shall be :term:`type` :codeterm:`bool`.
 
 :def_p:`fls_zas0lizgq2hn`
@@ -1713,7 +1714,7 @@ The :term:`value` of a :term:`lazy boolean expression` is either ``true`` or
 ``false``.
 
 :def_p:`fls_bov5j5t1bx0a`
-The expression context for the :term:`operand`\ s of the :term:`lazy boolean
+The expression context for the :term:`[operand]s` of the :term:`lazy boolean
 expression` is a :term:`value expression` context.
 
 .. rubric:: Dynamic Semantics
@@ -1728,8 +1729,8 @@ The :term:`evaluation` of a :term:`lazy and expression` proceeds as follows:
    If the :term:`left operand` evaluated to ``true``, then
 
    #. :def_p:`fls_edj00fp6bqdk`
-      The :term:`right operand` is evaluated and returned as the :term:`lazy and
-      expression`'s :term:`value`.
+      The :term:`right operand` is evaluated and returned as the :term:`[lazy
+      and expression]'s` :term:`value`.
 
 #. :def_p:`fls_srfv1d4idxy9`
    Otherwise the :term:`lazy and expression` evaluates to ``false``.
@@ -1744,8 +1745,8 @@ The :term:`evaluation` of a :term:`lazy or expression` proceeds as follows:
    If the :term:`left operand` evaluated to ``false``, then
 
    #. :def_p:`fls_ds8cr5dxc9em`
-      The :term:`right operand` is evaluated and returned as the :term:`lazy or
-      expression`'s :term:`value`.
+      The :term:`right operand` is evaluated and returned as the :term:`[lazy or
+      expression]'s` :term:`value`.
 
 #. :def_p:`fls_yffozo2vq5xz`
    Otherwise the :term:`lazy or expression` evaluates to ``true``.
@@ -1897,11 +1898,11 @@ The :term:`evaluation` of a :def_term:`numeric cast` proceeds as follows:
   :term:`integer type` with a larger :term:`size` either
 
 * :def_p:`fls_h9sxg3pxn7i2`
-  Zero-extends the :term:`operand` if the :term:`operand`'s :term:`type` is
+  Zero-extends the :term:`operand` if the :term:`[operand]'s` :term:`type` is
   unsigned, or
 
 * :def_p:`fls_shy6e0e30bco`
-  Sign-extends the :term:`operand` if the :term:`operand`'s :term:`type` is
+  Sign-extends the :term:`operand` if the :term:`[operand]'s` :term:`type` is
   signed.
 
 * :def_p:`fls_4xldaoj5ac6t`
@@ -1915,14 +1916,14 @@ The :term:`evaluation` of a :def_term:`numeric cast` proceeds as follows:
 
 * :def_p:`fls_g3xbmp8zx1yh`
   Saturates the :term:`value` of the :term:`operand` to the maximum
-  :term:`value` of the target :term:`integer type` if the :term:`operand`'s
+  :term:`value` of the target :term:`integer type` if the :term:`[operand]'s`
   :term:`value` exceeds the maximum :term:`value` of the target :term:`integer
   type` or denotes :codeterm:`f32::INFINITY` or :codeterm:`f64::INFINITY`
   respectively.
 
 * :def_p:`fls_hcc5odh52bk7`
   Saturates the :term:`value` of the :term:`operand` to the minimum
-  :term:`value` of the target :term:`integer type` if the :term:`operand`'s
+  :term:`value` of the target :term:`integer type` if the :term:`[operand]'s`
   :term:`value` exceeds the minimum :term:`value` of the target
   :term:`integer type` or denotes :codeterm:`f32::NEG_INFINITY` or
   :codeterm:`f64::NEG_INFINITY` respectively.
@@ -2071,24 +2072,24 @@ to an :term:`assignee pattern` according to its kind, as follows:
 
 * :def_p:`fls_uydzlfc4hjbx`
   A :term:`tuple expression` corresponds to a :term:`tuple pattern` with all the
-  :term:`subexpression`\ s lowered to their corresponding :term:`pattern`\ s.
+  :term:`[subexpression]s` lowered to their corresponding :term:`[pattern]s`.
 
 * :def_p:`fls_fa14yfvxsbx3`
   A :term:`tuple struct expression` corresponds to a :term:`tuple struct
-  pattern` with all the :term:`subexpression`\ s lowered to their corresponding
-  :term:`pattern`\ s.
+  pattern` with all the :term:`[subexpression]s` lowered to their corresponding
+  :term:`[pattern]s`.
 
 * :def_p:`fls_hj6srmzbobid`
-  A :term:`struct expression` corresponds to a :term:`struct pattern` with all
-  the :term:`subexpression`\ s lowered to their corresponding :term:`pattern`\
-  s.
+  A :term:`struct expression` corresponds to a :term:`struct pattern`
+  with all the :term:`[subexpression]s` lowered to their corresponding
+  :term:`[pattern]s`.
 
 * :def_p:`fls_c4pto819yc8j`
   A :term:`unit struct expression` corresponds to a :term:`unit struct pattern`.
 
 * :def_p:`fls_vqb89rkkjw81`
   A :term:`slice expression` corresponds to a :term:`slice pattern` with all the
-  :term:`subexpression`\ s lowered to their corresponding :term:`pattern`\ s.
+  :term:`[subexpression]s` lowered to their corresponding :term:`[pattern]s`.
 
 * :def_p:`fls_vqj7ljrrd7wi`
   A :term:`full range expression` corresponds to a :term:`rest pattern` if
@@ -2130,8 +2131,8 @@ follows:
    The :term:`value operand` is evaluated.
 
 #. :def_p:`fls_jqu2u6mdccgi`
-   The :term:`assignee operand` is evaluated by evaluating its :term:`operand`\
-   s in a left-to-right order.
+   The :term:`assignee operand` is evaluated by evaluating its
+   :term:`[operand]s` in a left-to-right order.
 
 #. :def_p:`fls_n7nuj1lvpspc`
    Each :term:`value` denoted by the :term:`assignee operand` is :term:`dropped`
@@ -2206,7 +2207,7 @@ Compound Assignment Expressions
 
 :def_p:`fls_3bu3g8o5nopc`
 A :term:`compound assignment expression` is an expression that first computes
-a :term:`value` from two :term:`operand`\ s and then assigns the value to an
+a :term:`value` from two :term:`[operand]s` and then assigns the value to an
 :term:`assigned operand`.
 
 :def_p:`fls_w2hbhb989yr4`
@@ -2331,8 +2332,8 @@ implementation` :term:`type parameter`.
 The :term:`evaluation` of a :term:`compound assignment` proceeds as follows:
 
 #. :def_p:`fls_4nnqz4etisgw`
-   If the :term:`type`\ s of both :term:`operand`\ s are :term:`primitive type`\
-   s, then
+   If the :term:`[type]s` of both :term:`[operand]s` are :term:`[primitive
+   type]s`, then
 
    #. :def_p:`fls_a2g4hs15jpiu`
       The :term:`modifying operand` is evaluated.
@@ -2401,7 +2402,7 @@ assigned_operand, modifying_operand)`` is invoked.
 It is undefined behavior for an :term:`addition assignment`, a :term:`division
 assignment`, a :term:`multiplication assignment`, a :term:`remainder
 assignment`, or a :term:`subtraction assignment` to cause overflow with
-:term:`value`\ s of :term:`numeric type`\ s.
+:term:`[value]s` of :term:`[numeric type]s`.
 
 .. rubric:: Examples
 
@@ -2461,7 +2462,7 @@ Parenthesized Expressions
 
 :def_p:`fls_jhazc75w5vj`
 A :term:`parenthesized expression` is an :term:`expression` that groups other
-:term:`expression`\ s.
+:term:`[expression]s`.
 
 :def_p:`fls_ew9y5vaseehy`
 A :term:`parenthesized expression` is a :term:`place expression` when its
@@ -2546,7 +2547,7 @@ A :term:`size operand` is an :term:`operand` that specifies the size of an
 An :term:`array expression` is a :term:`value expression`.
 
 :def_p:`fls_by21pey7k423`
-The :term:`type`\ s of the :term:`operand`\ s of an :term:`array element
+The :term:`[type]s` of the :term:`[operand]s` of an :term:`array element
 constructor` shall be :term:`unifiable`.
 
 :def_p:`fls_x2xu2pynxy1u`
@@ -2570,7 +2571,7 @@ the element type and ``N`` is the size of the array. The :term:`size` of an
 
 * :def_p:`fls_2gto5kp9bjw8`
   If the :term:`array expression` appears with an :term:`array element
-  constructor`, then the :term:`size` is the number of :term:`operand`\ s in the
+  constructor`, then the :term:`size` is the number of :term:`[operand]s` in the
   :term:`array element constructor`.
 
 * :def_p:`fls_guop34ayjw2`
@@ -2584,7 +2585,7 @@ The :term:`value` of an :term:`array expression` is the constructed
 
 :def_p:`fls_t52in1kkyli3`
 The :term:`evaluation` of an :term:`array expression` with an :term:`array
-element constructor` evaluates its :term:`operand`\ s in left-to-right order.
+element constructor` evaluates its :term:`[operand]s` in left-to-right order.
 
 :def_p:`fls_1kj8nlc5eb8a`
 The :term:`evaluation` of an :term:`array expression` with an :term:`array
@@ -2596,10 +2597,10 @@ repetition constructor` proceeds as follows:
    #. :def_p:`fls_qbyysx30pjzs`
       If the :term:`repeat operand` denotes a :term:`constant`, the
       :term:`repeat operand` is evaluated once and its :term:`value` is
-      :term:`copied` :term:`size operand`'s :term:`value` times.
+      :term:`copied` :term:`[size operand]'s` :term:`value` times.
 
    #. :def_p:`fls_1m0laldldh7j`
-      Otherwise the :term:`repeat operand` is evaluated :term:`size operand`'s
+      Otherwise the :term:`repeat operand` is evaluated :term:`[size operand]'s`
       :term:`value` times.
 
 #. :def_p:`fls_5cs68nm54l31`
@@ -2698,8 +2699,9 @@ then
   :codeterm:`core::ops::IndexMut` :term:`trait`.
 
 * :def_p:`fls_nw705fpon79b`
-  The :term:`type` of the :term:`array index expression` is ``&mut T``, where
-  ``T`` is the element type of the :term:`indexed array operand`'s :term:`type`.
+  The :term:`type` of the :term:`array index expression` is ``&mut T``,
+  where ``T`` is the element type of the :term:`[indexed array operand]'s`
+  :term:`type`.
 
 :def_p:`fls_fouu0z3jwoad`
 The :term:`value` of an :term:`array index expression` is the indexed memory
@@ -2774,14 +2776,14 @@ the :term:`value` of the second :term:`tuple initializer`, and ``VN`` is the
 :term:`value` of the ``N``-th :term:`tuple initializer`.
 
 :def_p:`fls_fgthjiu980rr`
-The :term:`value` of a :term:`tuple expression` without any :term:`tuple
-initializer`\ s is the :term:`unit value`.
+The :term:`value` of a :term:`tuple expression` without any :term:`[tuple
+initializer]s` is the :term:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
 :def_p:`fls_waf55yd3mpsq`
-The :term:`evaluation` of a :term:`tuple expression` evaluates its :term:`tuple
-initializer`\ s in left-to-right order.
+The :term:`evaluation` of a :term:`tuple expression` evaluates its :term:`[tuple
+initializer]s` in left-to-right order.
 
 .. rubric:: Examples
 
@@ -2902,13 +2904,13 @@ constructor`.
 
 :def_p:`fls_fn1tjfjcn8zp`
 A :syntax:`UnitStructConstructor` and a :syntax:`RecordStructConstructor`
-without a :syntax:`RecordStructInitializer` are :term:`unit struct constructor`\
-s.
+without a :syntax:`RecordStructInitializer` are :term:`[unit struct
+constructor]s`.
 
 :def_p:`fls_ub9cu2w16so9`
 A :syntax:`TupleStructConstructor` and a :syntax:`RecordStructConstructor`
-without a :syntax:`RecordStructFieldInitializerList` are :term:`tuple struct
-constructor`\ s.
+without a :syntax:`RecordStructFieldInitializerList` are :term:`[tuple struct
+constructor]s`.
 
 :def_p:`fls_a1c89b6cb6ya`
 A :syntax:`RecordStructConstructor` with a
@@ -2934,7 +2936,7 @@ same as the :term:`construction type`.
 
 :def_p:`fls_yy6qrnohm34`
 The :term:`evaluation` of a :term:`struct expression` evaluates its
-:term:`operand`\ s in a left-to-right order.
+:term:`[operand]s` in a left-to-right order.
 
 Record Struct Construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3266,7 +3268,7 @@ expression`.
 A :term:`callee type` is either a :term:`function item type`, a
 :term:`function pointer type`, or a :term:`type` that implements any
 of the :codeterm:`core::ops::Fn`, :codeterm:`core::ops::FnMut`, or
-:codeterm:`core::ops::FnOnce` :term:`trait`\ s.
+:codeterm:`core::ops::FnOnce` :term:`[trait]s`.
 
 :def_p:`fls_aafrvlmiwfon`
 The :term:`call operand` is subject to :term:`auto dereferencing` until a
@@ -3292,24 +3294,24 @@ The :term:`value` of a :term:`call expression` is determined as follows:
 * :def_p:`fls_yrr1s0tucgvh`
   If the :term:`callee type` is a :term:`function item type` or a
   :term:`function pointer type`, then the :term:`value` is the result of
-  invoking the corresponding :term:`function` with the :term:`argument operand`\
-  s.
+  invoking the corresponding :term:`function` with the :term:`[argument
+  operand]s`.
 
 * :def_p:`fls_s3q3sej1hgho`
   If the :term:`callee type` implements the :codeterm:`core::ops::Fn`
   :term:`trait`, then the :term:`value` is the result of invoking
   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)``,
   where ``adjusted_call_operand`` is the :term:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`argument
-  operand`\ s.
+  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`[argument
+  operand]s`.
 
 * :def_p:`fls_cu2ubdm3tfwb`
   If the :term:`call operand` implements the :codeterm:`core::ops::FnMut`
   :term:`trait`, then the :term:`value` is the result of invoking
   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple),``
   where ``adjusted_call_operand`` is the :term:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`argument
-  operand`\ s.
+  ``argument_operand_tuple`` is a :term:`tuple` that wraps the :term:`[argument
+  operand]s`.
 
 * :def_p:`fls_9bbewx1l7h5h`
   If the :term:`call operand` implements the :codeterm:`core::ops::FnOnce`
@@ -3317,7 +3319,7 @@ The :term:`value` of a :term:`call expression` is determined as follows:
   invoking ``core::ops::FnOnce::call_once(adjusted_call_operand,
   argument_operand_tuple),`` where ``adjusted_call_operand`` is the
   :term:`adjusted call operand`, and ``argument_operand_tuple`` is a
-  :term:`tuple` that wraps the :term:`argument operand`\ s.
+  :term:`tuple` that wraps the :term:`[argument operand]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3328,7 +3330,7 @@ The :term:`evaluation` of a :term:`call expression` proceeds as follows:
    The :term:`call operand` is evaluated.
 
 #. :def_p:`fls_p52mfvpadu7w`
-   The :term:`argument operand`\ s are evaluated in left-to-right order.
+   The :term:`[argument operand]s` are evaluated in left-to-right order.
 
 #. :def_p:`fls_1cyo5qhbl1j9`
    If the :term:`adjusted call operand` is a :term:`function item type` or
@@ -3408,7 +3410,7 @@ The :term:`evaluation` of a :term:`method call expression` proceeds as follows:
    The :term:`receiver operand` is evaluated.
 
 #. :def_p:`fls_pu0n9hakkym2`
-   The :term:`argument operand`\ s are evaluated in left-to-right order.
+   The :term:`[argument operand]s` are evaluated in left-to-right order.
 
 #. :def_p:`fls_cawdkgvvd1x6`
    The :term:`method` is invoked.
@@ -3548,8 +3550,9 @@ Indexed Field Access
 .. rubric:: Legality Rules
 
 :def_p:`fls_zexojym4ak6f`
-The :term:`decimal literal` of an :term:`indexed field access` shall denote a
-valid index of a :term:`field` of the :term:`container operand`'s :term:`type`.
+The :term:`decimal literal` of an :term:`indexed field access` shall denote
+a valid index of a :term:`field` of the :term:`[container operand]'s`
+:term:`type`.
 
 .. rubric:: Examples
 
@@ -3607,7 +3610,7 @@ The :term:`type` of a :term:`closure expression` is the anonymous unique
 :def_p:`fls_sje6cdvifgv5`
 The :term:`value` of a :term:`closure expression` is the :term:`value` of
 the anonymous unique :term:`closure type` instantiated with the selected
-:term:`capture`\ s.
+:term:`[capture]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3670,8 +3673,8 @@ The :term:`type` of a :term:`loop expression` is determined as follows:
 
 * :def_p:`fls_wf11yp1jwf53`
   If the :term:`loop expression` contains at least one :term:`break expression`,
-  then the :term:`type` is the :term:`unified type` of the :term:`break type`\ s
-  of all :term:`break expression`\ s.
+  then the :term:`type` is the :term:`unified type` of the :term:`[break type]s`
+  of all :term:`[break expression]s`.
 
 :def_p:`fls_q3qpcf2fz7h`
 The :term:`value` of a :term:`loop expression` is determined as follows:
@@ -4003,7 +4006,7 @@ The :term:`evaluation` of a :term:`break expression` proceeds as follows:
    The :term:`operand` is evaluated.
 
 #. :def_p:`fls_2nmadhe3ismj`
-   All enclosing :term:`loop expression`\ s upto and including the associated
+   All enclosing :term:`[loop expression]s` upto and including the associated
    :term:`loop expression` are :term:`terminated`.
 
 .. rubric:: Examples
@@ -4056,7 +4059,7 @@ The :term:`evaluation` of a :term:`continue expression` proceeds as follows:
 
 #. :def_p:`fls_gm74eo754rq9`
    If the :term:`continue expression` appears with a :term:`label indication`,
-   then all enclosing :term:`loop expression`\ s upto and including the
+   then all enclosing :term:`[loop expression]s` upto and including the
    associated :term:`loop expression` are :term:`terminated`.
 
 #. :def_p:`fls_gvuesa5ekeif`
@@ -4131,8 +4134,8 @@ A :term:`range expression high bound` is an :term:`operand` that specifies the
 end of a range.
 
 :def_p:`fls_9pl4629t54yq`
-If a :term:`range expression` has two :term:`operand`\ s, then the :term:`type`\
-s of the :term:`operand`\ s shall be :term:`unifiable`.
+If a :term:`range expression` has two :term:`[operand]s`, then the
+:term:`[type]s` of the :term:`[operand]s` shall be :term:`unifiable`.
 
 :def_p:`fls_xaumwogwbv3g`
 A :term:`range-from expression` is a :term:`range expression` that specifies an
@@ -4213,7 +4216,7 @@ The :term:`value` of a :term:`range-to-inclusive expression` is
 
 :def_p:`fls_ehseim1p479z`
 The :term:`evaluation` of a :term:`range expression` evaluates its
-:term:`operand`\ s in left-to-right order.
+:term:`[operand]s` in left-to-right order.
 
 .. rubric:: Examples
 
@@ -4291,8 +4294,8 @@ The :term:`evaluation` of an :term:`if expression` proceeds as follows:
 
 #. :def_p:`fls_67l4j48n6p7o`
    If the :term:`subject expression` evaluated to ``false`` and the :term:`if
-   expression` has an :term:`else expression`, then the :term:`else expressio`\
-   n is evaluated.
+   expression` has an :term:`else expression`, then the :term:`[else
+   expressio]n` is evaluated.
 
 :def_p:`fls_e8gd5lzcaifw`
 The :term:`evaluation` of an :term:`else expression` evaluates its :term:`block
@@ -4422,7 +4425,7 @@ Match Expressions
 
 :def_p:`fls_ei4pbeksd1v8`
 A :term:`match expression` is an :term:`expression` that tries to match one of
-its multiple :term:`pattern`\ s against its :term:`subject expression` and if it
+its multiple :term:`[pattern]s` against its :term:`subject expression` and if it
 succeeds, evaluates an :term:`operand`.
 
 :def_p:`fls_l45i24ikfavm`
@@ -4430,7 +4433,7 @@ A :term:`match arm` is a :term:`construct` that consists of a :term:`match arm
 matcher` and a :term:`match arm body`.
 
 :def_p:`fls_d9gerg12hm2d`
-An :term:`intermediate match arm` is any non-:term:`final match arm` of a
+An :term:`intermediate match arm` is any :term:`non-[final match arm]` of a
 :term:`match expression`.
 
 :def_p:`fls_oj8dg28xw5yp`
@@ -4461,8 +4464,8 @@ is a :term:`value expression`, the :term:`value` produced by evaluating its
 :term:`subject expression` is captured in a :term:`temporary`.
 
 :def_p:`fls_knv1affr2o8t`
-The :term:`type` of the :term:`subject expression` and the :term:`type`\
-s of all :term:`pattern`\ s of all :term:`match arm matcher`\ s shall be
+The :term:`type` of the :term:`subject expression` and the :term:`[type]s`
+of all :term:`[pattern]s` of all :term:`[match arm matcher]s` shall be
 :term:`unifiable`.
 
 :def_p:`fls_bzhz5wjd90ii`
@@ -4470,11 +4473,11 @@ The :term:`type` of the :term:`operand` of a :term:`match arm guard` shall be
 :term:`type` :codeterm:`bool`.
 
 :def_p:`fls_17ag0wzdbxv6`
-The :term:`type`\ s of all :term:`match arm bodies` shall be :term:`unifiable`.
+The :term:`[type]s` of all :term:`match arm bodies` shall be :term:`unifiable`.
 
 :def_p:`fls_5w964phrru82`
 The :term:`type` of a :term:`match expression` is the :term:`unified type` of
-the :term:`type`\ s of the :term:`operand`\ s of all :term:`match arm`\ s.
+the :term:`[type]s` of the :term:`[operand]s` of all :term:`[match arm]s`.
 
 :def_p:`fls_g6xyz0beps3o`
 A :term:`match arm` is selected when its :term:`pattern` matches the
@@ -4485,8 +4488,8 @@ to ``true``.
 :term:`Match arm` selection happens in declarative order.
 
 :def_p:`fls_e02um1gb89d0`
-The :term:`pattern`\ s of all :term:`match arm`\ s taken together shall
-exhaustively match the :term:`subject expression`'s :term:`type`.
+The :term:`[pattern]s` of all :term:`[match arm]s` taken together shall
+exhaustively match the :term:`[subject expression]'s` :term:`type`.
 
 :def_p:`fls_4sh2yrslszvb`
 The :term:`value` of a :term:`match expression` is the :term:`value` of the
@@ -4723,20 +4726,20 @@ Expression Precedence
 .. rubric:: Legality Rules
 
 :def_p:`fls_cwt7afsbgs7w`
-Certain :term:`expression`\ s are subject to :term:`precedence` and
+Certain :term:`[expression]s` are subject to :term:`precedence` and
 :term:`associativity`.
 
 :def_p:`fls_ya23jjg5wjl`
-:term:`Precedence` is the order by which :term:`expression`\ s are evaluated in
-the presence of other :term:`expression`\ s.
+:term:`Precedence` is the order by which :term:`[expression]s` are evaluated in
+the presence of other :term:`[expression]s`.
 
 :def_p:`fls_bezkcuwp5qol`
-:term:`Associativity` is the order by which :term:`operand`\ s are evaluated
+:term:`Associativity` is the order by which :term:`[operand]s` are evaluated
 within a single :term:`expression`.
 
 :def_p:`fls_48br7odx6nke`
 The :term:`precedence` and :term:`associativity` of qualifying
-:term:`expression`\ s are as follows:
+:term:`[expression]s` are as follows:
 
 .. list-table::
 
@@ -4915,16 +4918,16 @@ a :term:`binding`.
 
 :def_p:`fls_e70ywb8191h`
 The :term:`capturing environment` of a :term:`capturing expression` consists
-of all :term:`capture target`\ s that are defined outside the :term:`capture
+of all :term:`[capture target]s` that are defined outside the :term:`capture
 expression`.
 
 :def_p:`fls_1y2ttb466m9c`
-:term:`Capturing` is the process of saving the :term:`capture target`\ s of a
-:term:`capturing expression`'s :term:`capturing environment`.
+:term:`Capturing` is the process of saving the :term:`[capture target]s` of a
+:term:`[capturing expression]'s` :term:`capturing environment`.
 
 :def_p:`fls_ip81lt2mm940`
 A :term:`capturing target` requires :term:`capturing` when it is part of the
-:term:`capturing expression`'s :term:`capture environment` and it is used by
+:term:`[capturing expression]'s` :term:`capture environment` and it is used by
 the :term:`capturing expression`. Such a :term:`capturing target` is said to be
 :def_term:`captured`.
 

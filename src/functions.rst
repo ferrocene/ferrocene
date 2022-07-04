@@ -95,8 +95,8 @@ A :term:`function body` is the :term:`block expression` of a :term:`function`.
 
 :def_p:`fls_owdlsaaygtho`
 A :term:`function signature` is a unique identification of a :term:`function`
-that encompases of its :term:`function qualifier`\ s, :term:`name`,
-:term:`generic parameter`\ s, :term:`function parameter`\ s, :term:`return
+that encompases of its :term:`[function qualifier]s`, :term:`name`,
+:term:`[generic parameter]s`, :term:`[function parameter]s`, :term:`return
 type`, and :term:`where clause`.
 
 :def_p:`fls_2049qu3ji5x7`
@@ -144,7 +144,7 @@ A :term:`main function` is a :term:`function` that acts as an entry point into a
 program. A :term:`main function` is subject to the following restrictions:
 
 * :def_p:`fls_o4fxok23134r`
-  It lacks :term:`function qualifier`\ s ``async`` and ``unsafe``,
+  It lacks :term:`[function qualifier]s` ``async`` and ``unsafe``,
 
 * :def_p:`fls_bk755pvc1l53`
   Its :term:`ABI` is Rust,
@@ -153,10 +153,10 @@ program. A :term:`main function` is subject to the following restrictions:
   Its :term:`name` is the word ``main``,
 
 * :def_p:`fls_a3je4wc53bmo`
-  It lacks :term:`generic parameter`\ s,
+  It lacks :term:`[generic parameter]s`,
 
 * :def_p:`fls_w8q15zp7kyl0`
-  It lacks :term:`function parameter`\ s,
+  It lacks :term:`[function parameter]s`,
 
 * :def_p:`fls_4psnfphsgdek`
   It lacks a :term:`return type`,

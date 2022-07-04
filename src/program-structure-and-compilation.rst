@@ -32,8 +32,8 @@ Source Files
 .. rubric:: Legality Rules
 
 :def_p:`fls_4vicosdeaqmp`
-A :term:`source file` contains the program text consisting of :term:`inner
-attribute`\ s, :term:`inner doc comment`\ s and :term:`item`\ s. The location of
+A :term:`source file` contains the program text consisting of :term:`[inner
+attribute]s`, :term:`[inner doc comment]s` and :term:`[item]s`. The location of
 a :term:`source file` is tool defined.
 
 :def_p:`fls_ann3cha1xpek`
@@ -65,7 +65,7 @@ Modules
 .. rubric:: Legality Rules
 
 :def_p:`fls_odd1hj3y1mgu`
-A :term:`module` is a container for zero or more :term:`item`\ s.
+A :term:`module` is a container for zero or more :term:`[item]s`.
 
 :def_p:`fls_l4ne3w8dgghv`
 An :term:`unsafe module` is a :term:`module` subject to :term:`keyword`
@@ -73,7 +73,7 @@ An :term:`unsafe module` is a :term:`module` subject to :term:`keyword`
 
 :def_p:`fls_whgv72emrm47`
 The ``unsafe`` :term:`keyword` of an :term:`unsafe module` is rejected, but may
-still be consumed by :term:`macro`\ s.
+still be consumed by :term:`[macro]s`.
 
 :def_p:`fls_qypjjpcf8uwq`
 An :term:`inline module` is a :term:`module` with an
@@ -93,7 +93,7 @@ The location of a :term:`module` :term:`source file` can be specified using
 :term:`attribute` :codeterm:`path`.
 
 :def_p:`fls_xtfx03s99egy`
-The following :term:`attribute`\ s apply to :term:`module`\ s:
+The following :term:`[attribute]s` apply to :term:`[module]s`:
 
 * :def_p:`fls_na6trldagfzb`
   :term:`Attribute` :codeterm:`cfg`.
@@ -129,7 +129,7 @@ Crates
 
 :def_p:`fls_qwghk79ok5h0`
 A :term:`crate` is a unit of compilation and linking. A :term:`crate` contains a
-tree of nested :term:`module` :term:`scope`\ s.
+tree of nested :term:`module` :term:`[scope]s`.
 
 :def_p:`fls_9ub6ks8qrang`
 A :term:`binary crate` is a :term:`crate` that contains a :term:`main function`.
@@ -182,7 +182,7 @@ process of resolving a :syntax:`CrateIndication` to an external :term:`crate`
 is tool-defined.
 
 :def_p:`fls_bfxkmm9px6k8`
-The following :term:`attribute`\ s apply to :term:`crate import`\ s:
+The following :term:`[attribute]s` apply to :term:`[crate import]s`:
 
 * :def_p:`fls_d6eu6xiczpxk`
   :term:`Attribute` :codeterm:`no_link`.
@@ -194,7 +194,7 @@ Compilation Roots
 
 :def_p:`fls_fhiqvgdamq5`
 A :term:`crate root module` is the root of the nested :term:`module`
-:term:`scope`\ s tree of a :term:`crate`.
+:term:`[scope]s` tree of a :term:`crate`.
 
 :def_p:`fls_tk8tl2e0a34`
 A tool can define a :term:`crate root module` for a single :term:`crate`.
@@ -210,8 +210,8 @@ Conditional Compilation
 
 :def_p:`fls_9stc6nul6vq9`
 :term:`Conditionally-compiled source code` is source code that may or may
-not be considered a part of a Rust program depending on :term:`configuration
-predicate`\ s.
+not be considered a part of a Rust program depending on :term:`[configuration
+predicate]s`.
 
 :def_p:`fls_a0u9nnaf6drz`
 :term:`Conditional compilation` is the process of compiling

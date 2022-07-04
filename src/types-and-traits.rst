@@ -43,10 +43,10 @@ Type Classification
 .. rubric:: Legality Rules
 
 :def_p:`fls_c4xe3pkn0n3o`
-:term:`Type`\ s are organized in the following categories:
+:term:`[Type]s` are organized in the following categories:
 
 * :def_p:`fls_69zyas59o8ff`
-  :term:`Scalar type`\ s
+  :term:`[Scalar type]s`
 
   * :def_p:`fls_65hcyqizo1da`
     :term:`Bool` :term:`type`
@@ -55,7 +55,7 @@ Type Classification
     :codeterm:`Char` :term:`type`
 
   * :def_p:`fls_vizoconv3ir`
-    :term:`Numeric type`\ s
+    :term:`[Numeric type]s`
 
     * :def_p:`fls_ne6bgnh1eyrj`
       :term:`Floating-point type`
@@ -64,7 +64,7 @@ Type Classification
       :term:`Integer type`
 
 * :def_p:`fls_eek1jn1rwjh9`
-  :term:`Sequence type`\ s
+  :term:`[Sequence type]s`
 
   * :def_p:`fls_s0aduyvz4i7f`
     :term:`Array type`
@@ -79,7 +79,7 @@ Type Classification
     :term:`Tuple type`
 
 * :def_p:`fls_u43jnp9jnw29`
-  :term:`Abstract data type`\ s
+  :term:`[Abstract data type]s`
 
   * :def_p:`fls_lric8bf631nw`
     :term:`Enum type`
@@ -91,7 +91,7 @@ Type Classification
     :term:`Union type`
 
 * :def_p:`fls_9x5atvhdq0j2`
-  :term:`Function type`\ s
+  :term:`[Function type]s`
 
   * :def_p:`fls_n5rgqgnxk9to`
     :term:`Closure type`
@@ -100,7 +100,7 @@ Type Classification
     :term:`Function item type`
 
 * :def_p:`fls_jrohsv7hx7yw`
-  :term:`Indirection type`\ s
+  :term:`[Indirection type]s`
 
   * :def_p:`fls_1kg1mknf4yx7`
     :term:`Function pointer type`
@@ -112,7 +112,7 @@ Type Classification
     :term:`Reference type`
 
 * :def_p:`fls_lh52q6f6snfh`
-  :term:`Trait type`\ s
+  :term:`[Trait type]s`
 
   * :def_p:`fls_qqg0uixrd1a4`
     :term:`Impl trait type`
@@ -121,7 +121,7 @@ Type Classification
     :term:`Trait object type`
 
 * :def_p:`fls_m5vtcars8aga`
-  Other :term:`type`\ s
+  Other :term:`[type]s`
 
   * :def_p:`fls_lw38557rqikt`
     :term:`Inferred type`
@@ -141,8 +141,8 @@ Bool Type
 .. rubric:: Legality Rules
 
 :def_p:`fls_h5994su1yft3`
-:term:`Bool` is a :term:`type` whose :term:`value`\ s denote the truth
-:term:`value`\ s of logic and Boolean algebra.
+:term:`Bool` is a :term:`type` whose :term:`[value]s` denote the truth
+:term:`[value]s` of logic and Boolean algebra.
 
 :def_p:`fls_v8atmrwz6wzk`
 :term:`Type` :codeterm:`bool` appears in the :term:`language prelude` under the
@@ -360,7 +360,7 @@ Char Type
 .. rubric:: Legality Rules
 
 :def_p:`fls_vnwbs0exbwcn`
-:codeterm:`Char` is a :term:`type` whose :term:`value`\ s are represented as a
+:codeterm:`Char` is a :term:`type` whose :term:`[value]s` are represented as a
 32-bit unsigned word in the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive
 ranges of :term:`Unicode`.
 
@@ -393,7 +393,7 @@ Integer Types
 .. rubric:: Legality Rules
 
 :def_p:`fls_cokwseo3nnr`
-:term:`Unsigned integer type`\ s define the following inclusive ranges over the
+:term:`[Unsigned integer type]s` define the following inclusive ranges over the
 domain of whole numbers:
 
 .. list-table::
@@ -437,7 +437,7 @@ domain of whole numbers:
 :term:`pointer type`, and at least 16-bits wide.
 
 :def_p:`fls_p2shoji3xg5a`
-:term:`Signed integer type`\ s define the following inclusive ranges over the
+:term:`[Signed integer type]s` define the following inclusive ranges over the
 domain of whole numbers:
 
 .. list-table::
@@ -593,7 +593,7 @@ Tuple Type
 
 :def_p:`fls_bn7wmf681ngt`
 A :term:`tuple type` is a :term:`sequence type` that represents a heterogeneous
-list of other :term:`type`\ s.
+list of other :term:`[type]s`.
 
 :def_p:`fls_s9a36zsrfqew`
 If the :term:`type` of a :term:`tuple field` is a :term:`dynamically-sized
@@ -644,20 +644,20 @@ Enum Type
 .. rubric:: Legality Rules
 
 :def_p:`fls_gbdd37seqoab`
-An :term:`enum type` is an :term:`abstract data type` that contains :term:`enum
-variant`\ s. An :term:`enum variant` specifies a :term:`value` of an :term:`enum
+An :term:`enum type` is an :term:`abstract data type` that contains :term:`[enum
+variant]s`. An :term:`enum variant` specifies a :term:`value` of an :term:`enum
 type`.
 
 :def_p:`fls_il9a1olqmu38`
-A :term:`zero-variant enum type` has no :term:`value`\ s.
+A :term:`zero-variant enum type` has no :term:`[value]s`.
 
 :def_p:`fls_g5qle7xzaoif`
 The :term:`name` of an :term:`enum variant` shall denote a unique :term:`name`
 within the related :syntax:`EnumDeclaration`.
 
 :def_p:`fls_hp5frc752dam`
-A :term:`discriminant initializer` shall be specified only when all :term:`enum
-variant`\ s appear without an :syntax:`EnumVariantKind`.
+A :term:`discriminant initializer` shall be specified only when all :term:`[enum
+variant]s` appear without an :syntax:`EnumVariantKind`.
 
 :def_p:`fls_pijczoq4k9ij`
 The :term:`type` of the :term:`expression` of a :term:`discriminant initializer`
@@ -691,8 +691,8 @@ determined as follows:
    :term:`discriminant` of the previous :term:`enum variant`.
 
 :def_p:`fls_w9xj26ej869w`
-It is a static error if two :term:`enum variant`\ s have the same
-:term:`discriminant`\ s with the same :term:`value`.
+It is a static error if two :term:`[enum variant]s` have the same
+:term:`[discriminant]s` with the same :term:`value`.
 
 :def_p:`fls_wqbuof7kxsrg`
 It is a static error if the :term:`value` of a :term:`discriminant` exceeds
@@ -763,7 +763,7 @@ Struct Type
 
 :def_p:`fls_g1azfj548136`
 A :term:`struct type` is an :term:`abstract data type` that is a product of
-other :term:`type`\ s.
+other :term:`[type]s`.
 
 :def_p:`fls_r885av95eivp`
 The :term:`name` of a :term:`record struct field` shall denote a unique
@@ -836,22 +836,22 @@ Closure Type
 
 :def_p:`fls_bsykgnbatpmi`
 A :term:`closure type` is a unique anonymous :term:`function type` that
-encapsulates all :term:`captured variable`\ s of a :term:`closure expression`.
+encapsulates all :term:`[captured variable]s` of a :term:`closure expression`.
 
 :def_p:`fls_zfj4l8bigdg0`
 A :term:`closure type` implements the :codeterm:`core::ops::FnOnce`
 :term:`trait`.
 
 :def_p:`fls_bn0ueivujnqk`
-A :term:`closure type` that does not move out its :term:`captured variable`\ s
+A :term:`closure type` that does not move out its :term:`[captured variable]s`
 implements the :codeterm:`core::ops::FnMut` :term:`trait`.
 
 :def_p:`fls_u01kt5glbuz8`
-A :term:`closure type` that does not move or mutate its :term:`captured
-variable`\ s implements the :codeterm:`core::ops::Fn` :term:`trait`.
+A :term:`closure type` that does not move or mutate its :term:`[captured
+variable]s` implements the :codeterm:`core::ops::Fn` :term:`trait`.
 
 :def_p:`fls_3jeootwe6ucu`
-A :term:`closure type` that does not encapsulate :term:`captured variable`\ s is
+A :term:`closure type` that does not encapsulate :term:`[captured variable]s` is
 :term:`coercible` to a :term:`function pointer type`.
 
 :def_p:`fls_63jqtyw0rz8c`
@@ -859,11 +859,11 @@ A :term:`closure type` implicitly implements the :codeterm:`core::marker::Copy`
 :term:`trait` if
 
 * :def_p:`fls_az5hkn72e3fz`
-  It does not encapsulate :term:`captured variable`\ s :term:`by unique
+  It does not encapsulate :term:`[captured variable]s` :term:`by unique
   immutable borrow` or :term:`by mutable reference`, or
 
 * :def_p:`fls_vvc8c910dmeh`
-  The :term:`type`\ s of all :term:`captured variable`\ s implement the
+  The :term:`[type]s` of all :term:`[captured variable]s` implement the
   :codeterm:`core::marker::Copy` :term:`trait`.
 
 :def_p:`fls_3c4g9njja5s5`
@@ -871,11 +871,11 @@ A :term:`closure type` implicitly implements the :codeterm:`core::marker::Clone`
 :term:`trait` if
 
 * :def_p:`fls_yr55fbspw7s9`
-  It does not encapsulate :term:`captured variable`\ s :term:`by unique
+  It does not encapsulate :term:`[captured variable]s` :term:`by unique
   immutable borrow` or :term:`by mutable reference`, or
 
 * :def_p:`fls_pt65037r6hjr`
-  The :term:`type`\ s of all :term:`captured variable`\ s implement the
+  The :term:`[type]s` of all :term:`[captured variable]s` implement the
   :codeterm:`core::marker::Clone` :term:`trait`.
 
 :def_p:`fls_2nuhy0ujgq18`
@@ -883,20 +883,20 @@ A :term:`closure type` implicitly implements the :codeterm:`core::marker::Send`
 :term:`trait` if:
 
 * :def_p:`fls_vamgwed199ct`
-  The :term:`type`\ s of all :term:`captured variable`\ s that employ
+  The :term:`[type]s` of all :term:`[captured variable]s` that employ
   :term:`by immutable borrow`, :term:`by mutable borrow`, or :term:`by
   move` :term:`capture mode` implement the :codeterm:`core::marker::Sync`
   :term:`trait`, and
 
 * :def_p:`fls_f96a5r1v7te7`
-  The :term:`type`\ s of all :term:`captured variable`\ s that employ
+  The :term:`[type]s` of all :term:`[captured variable]s` that employ
   :term:`by unique immutable borrow`, :term:`by mutable reference`,
   :term:`by copy`, or :term:`by move` :term:`capture mode` implement the
   :codeterm:`core::marker::Send` :term:`trait`.
 
 :def_p:`fls_5jh07heok8sy`
 A :term:`closure type` implicitly implements the :codeterm:`core::marker::Sync`
-:term:`trait` if the :term:`type`\ s of all :term:`captured variable`\ s
+:term:`trait` if the :term:`[type]s` of all :term:`[captured variable]s`
 implement the :codeterm:`core::marker::Sync` :term:`trait`.
 
 Function Item Type
@@ -996,8 +996,8 @@ A :term:`raw pointer type` is an :term:`indirection type` without validity
 guarantees.
 
 :def_p:`fls_hrum767l6dte`
-Comparing two :term:`value`\ s of :term:`raw pointer type`\ s compares the
-addresses of the :term:`value`\ s.
+Comparing two :term:`[value]s` of :term:`[raw pointer type]s` compares the
+addresses of the :term:`[value]s`.
 
 :def_p:`fls_k6ues2936pjq`
 Comparing a :term:`value` of a :term:`raw pointer type` to a :term:`value` of a
@@ -1114,15 +1114,15 @@ where the :term:`type` is not known at compile time.
 
 :def_p:`fls_9z8oleh0wdel`
 The first :term:`trait bound` of a :term:`trait object type` shall denote an
-:term:`object safe trait`. Any subsequent :term:`trait bound`\ s shall denote
-:term:`auto trait`\ s.
+:term:`object safe trait`. Any subsequent :term:`[trait bound]s` shall denote
+:term:`[auto trait]s`.
 
 :def_p:`fls_s0oy2c8t4yz9`
-A :term:`trait object type` shall not contain :term:`opt-out trait bound`\ s.
+A :term:`trait object type` shall not contain :term:`[opt-out trait bound]s`.
 
 :def_p:`fls_88b9bmhra55f`
 A :term:`trait object type` is a :term:`dynamically sized type`. A :term:`trait
-object type` permits late binding of :term:`method`\ s. A :term:`method` invoked
+object type` permits late binding of :term:`[method]s`. A :term:`method` invoked
 via a :term:`trait object type` involves dynamic dispatching.
 
 .. rubric:: Examples
@@ -1182,7 +1182,7 @@ The :term:`never type` is a :term:`type` that represents the result of a
 computation that never completes.
 
 :def_p:`fls_xmtc10qzw0ui`
-The :term:`never type` has no :term:`value`\ s.
+The :term:`never type` has no :term:`[value]s`.
 
 .. rubric:: Undefined Behavior
 
@@ -1209,7 +1209,7 @@ Parenthesized Type
 
 :def_p:`fls_1dvo1epstrdv`
 A :term:`parenthesized type` is a :term:`type` that disambiguates the
-interpretation of :term:`lexical element`\ s
+interpretation of :term:`[lexical element]s`
 
 .. rubric:: Examples
 
@@ -1242,7 +1242,7 @@ is an :term:`associated item`.
 
 :def_p:`fls_drxl7u3etfp9`
 The last :term:`where clause` is rejected, but may still be consumed by
-:term:`macro`\ s.
+:term:`[macro]s`.
 
 .. rubric:: Examples
 
@@ -1259,7 +1259,7 @@ Type Layout
 .. rubric:: Legality Rules
 
 :def_p:`fls_kdbq02iguzgl`
-All :term:`value`\ s have an :term:`alignment` and a :term:`size`.
+All :term:`[value]s` have an :term:`alignment` and a :term:`size`.
 
 :def_p:`fls_muxfn9soi47l`
 The :term:`alignment` of a :term:`value` specifies which addresses are valid for
@@ -1274,7 +1274,7 @@ elements in :term:`array type` ``[T, N]`` where ``T`` is the :term:`type` of the
 multiple of the :term:`alignment`.
 
 :def_p:`fls_bk3nm2n47afu`
-The :term:`size` of :term:`scalar type`\ s is as follows:
+The :term:`size` of :term:`[scalar type]s` is as follows:
 
 .. list-table::
 
@@ -1361,7 +1361,7 @@ For a :term:`struct type`, the memory layout is undefined, unless the
 :def_p:`fls_gt3tkbn4bsa6`
 For a :term:`union type`, the memory layout is undefined, unless the
 :term:`union type` is subject to :term:`attribute` :codeterm:`repr`. All
-:term:`union field`\ s share a common storage.
+:term:`[union field]s` share a common storage.
 
 :def_p:`fls_njvdevz0xqc0`
 The :term:`size` of a :term:`recursive type` shall be finite.
@@ -1372,11 +1372,11 @@ Type Representation
 .. rubric:: Legality Rules
 
 :def_p:`fls_mpqlyi3lgrfv`
-:term:`Type representation` specifies the :term:`layout` of :term:`field`\
-s of :term:`abstract data type`\ s. :term:`Type representation` changes the
-bit padding between :term:`field`\ s of :term:`abstract data type`\ s as well
-as their order, but does not change the :term:`layout` of the :term:`field`\
-s themselves.
+:term:`Type representation` specifies the :term:`layout` of :term:`[field]s`
+of :term:`[abstract data type]s`. :term:`Type representation` changes the bit
+padding between :term:`[field]s` of :term:`[abstract data type]s` as well as
+their order, but does not change the :term:`layout` of the :term:`[field]s`
+themselves.
 
 :def_p:`fls_9dhnanv21y9z`
 :term:`Type representation` is classified into:
@@ -1402,7 +1402,7 @@ interoperable with the C language.
 
 :def_p:`fls_7plbkqlmed0r`
 :term:`Primitive representation` is the :term:`type representation` of
-individual :term:`integer type`\ s. :term:`Primitive representation` applies
+individual :term:`[integer type]s`. :term:`Primitive representation` applies
 only to an :term:`enum type` that is not a :term:`zero-variant enum type`.
 It is possible to combine :term:`C representation` and :term:`primitive
 representation`.
@@ -1411,10 +1411,10 @@ representation`.
 :term:`Transparent representation` applies only to an :term:`enum type` with
 a :term:`single variant` or a :term:`struct type` where the :term:`struct
 type` has a single :term:`field` of non-zero :term:`size` and any number of
-:term:`field`\ s of :term:`size` zero and :term:`alignment` one.
+:term:`[field]s` of :term:`size` zero and :term:`alignment` one.
 
 :def_p:`fls_9q2iqzbup8oy`
-:term:`Type`\ s subject to :term:`transparent representation` have the same
+:term:`[Type]s` subject to :term:`transparent representation` have the same
 :term:`type representation` as a :term:`struct type` with a single :term:`field`
 of a non-zero :term:`size`.
 
@@ -1426,8 +1426,8 @@ of a non-zero :term:`size`.
 
 :def_p:`fls_qkkc8x2oghst`
 :term:`Type representation` may be modified using :term:`attribute`
-:codeterm:`repr`'s :codeterm:`align` and :codeterm:`packed`
-:term:`representation modifier`\ s. A :term:`representation modifier` shall
+:codeterm:`[repr]'s` :codeterm:`align` and :codeterm:`packed`
+:term:`[representation modifier]s`. A :term:`representation modifier` shall
 apply only to a :term:`struct type` or a :term:`union type` subject to :term:`C
 representation` or :term:`default representation`.
 
@@ -1437,12 +1437,12 @@ Enum Type Representation
 .. rubric:: Legality Rules
 
 :def_p:`fls_p0c62ejo1u1t`
-:term:`Zero-variant enum type`\ s shall not be subject to :term:`C
+:term:`[Zero-variant enum type]s` shall not be subject to :term:`C
 representation`.
 
 :def_p:`fls_efp1kfgkpba8`
 The :term:`size` and :term:`alignment` of an :term:`enum type` without
-:term:`field`\ s subject to :term:`C representation`, :term:`default
+:term:`[field]s` subject to :term:`C representation`, :term:`default
 representation`, or :term:`primitive representation` are those of its
 :term:`discriminant`.
 
@@ -1462,7 +1462,7 @@ representation`.
 
 :def_p:`fls_ryvqkcx48u74`
 It is a static error if the :term:`discriminant type` cannot hold all the
-:term:`discriminant` :term:`value`\ s of an :term:`enum type`.
+:term:`discriminant` :term:`[value]s` of an :term:`enum type`.
 
 :def_p:`fls_zhle0rb0vhpc`
 An :term:`enum type` subject to :term:`transparent representation` shall have a
@@ -1472,7 +1472,7 @@ single :term:`variant` with
   a single :term:`field` of non-zero :term:`size`, or
 
 * :def_p:`fls_hz012yus6b4g`
-  any number of :term:`field`\ s of zero :term:`size` and :term:`alignment` one.
+  any number of :term:`[field]s` of zero :term:`size` and :term:`alignment` one.
 
 :def_p:`fls_q5akku2idrwh`
 An :term:`enum type` subject to :term:`C representation` or :term:`primitive
@@ -1488,8 +1488,8 @@ with :term:`C representation` that is laid out as follows:
     the :term:`discriminant type` of the :term:`enum type`.
 
   * :def_p:`fls_ebs77rxvk9st`
-    The remaining :term:`field`\ s of the :term:`struct type` are the
-    :term:`field`\ s of the :term:`enum variant`, in the same declarative order.
+    The remaining :term:`[field]s` of the :term:`struct type` are the
+    :term:`[field]s` of the :term:`enum variant`, in the same declarative order.
 
 :def_p:`fls_k907i6w83s2`
 An :term:`enum type` subject to :term:`transparent representation` has the same
@@ -1521,7 +1521,7 @@ determined as follows:
       Calculate the :term:`size` and :term:`alignment` of the :term:`field`.
 
    #. :def_p:`fls_fa5nkvu07jlp`
-      If the current offset is not a multiple of the :term:`field`'s
+      If the current offset is not a multiple of the :term:`[field]'s`
       :term:`alignment`, add byte padding to the current offset until it is a
       multiple of the :term:`alignment`. The offset of the :term:`field` is the
       current offset.
@@ -1533,8 +1533,8 @@ determined as follows:
       Proceed with the next :term:`field`.
 
 #. :def_p:`fls_2npku94ookdn`
-   Round up the current offset to the nearest multiple of the :term:`struct
-   type`'s :term:`alignment`.
+   Round up the current offset to the nearest multiple of the :term:`[struct
+   type]'s` :term:`alignment`.
 
 #. :def_p:`fls_h7nvs25rsi0y`
    The :term:`size` of the :term:`struct type` is the current offset.
@@ -1546,7 +1546,7 @@ A :term:`struct type` subject to :term:`transparent representation` shall have:
   A single :term:`field` of non-zero :term:`size`, or
 
 * :def_p:`fls_gwhceoy0m3or`
-  Any number of :term:`field`\ s of :term:`size` zero and :term:`alignment` one.
+  Any number of :term:`[field]s` of :term:`size` zero and :term:`alignment` one.
 
 :def_p:`fls_hvkalvr4e2v0`
 A :term:`struct type` subject to :term:`transparent representation` has the same
@@ -1561,13 +1561,13 @@ Union Type Representation
 
 :def_p:`fls_opz1p1neldsg`
 The :term:`size` of a :term:`union type` subject to :term:`C representation` is
-the maximum of the :term:`size`\ s of all its :term:`field`\ s, rounded up to
+the maximum of the :term:`[size]s` of all its :term:`[field]s`, rounded up to
 :term:`alignment` of the :term:`union type`.
 
 :def_p:`fls_y5qtvbx5m90g`
 The :term:`alignment` of a :term:`union type` subject to :term:`C
-representation` is the maximum of the :term:`alignment`\ s of all of its
-:term:`field`\ s.
+representation` is the maximum of the :term:`[alignment]s` of all of its
+:term:`[field]s`.
 
 Type Model
 ----------
@@ -1579,7 +1579,7 @@ Recursive Types
 
 :def_p:`fls_z22std1crl49`
 A :term:`recursive type` is a category of :term:`type` that may define other
-:term:`type`\ s within its :term:`type specification`.
+:term:`[type]s` within its :term:`type specification`.
 
 :def_p:`fls_eddnwlr0rz59`
 A :term:`recursive type` shall include at least one :term:`abstract data type`
@@ -1600,12 +1600,13 @@ Type Unification
 .. rubric:: Legality Rules
 
 :def_p:`fls_ryvdhkgm7vzj`
-:term:`Type unification` is a measure of compatibility between two :term:`type`\
-s. A :term:`type` is said to :term:`unify` with another :term:`type` when the
-domains, ranges and structures of both :term:`type`\ s are compatible.
+:term:`Type unification` is a measure of compatibility between two
+:term:`[type]s`. A :term:`type` is said to :term:`unify` with another
+:term:`type` when the domains, ranges and structures of both :term:`[type]s`
+are compatible.
 
 :def_p:`fls_aie0tr62vhw5`
-Two types that :term:`unify` are said to be :term:`unifiable type`\ s.
+Two types that :term:`unify` are said to be :term:`[unifiable type]s`.
 
 :def_p:`fls_dhksyjrvx9a`
 A :term:`scalar type` is unifiable only with itself.
@@ -1617,14 +1618,14 @@ The :term:`never type` is unifiable with any other :term:`type`.
 An :term:`array type` is unifiable only with another :term:`array type` when
 
 * :def_p:`fls_m6d9qj9q9u1i`
-  The :term:`element type`\ s of both :term:`array type`\ s are unifiable, and
+  The :term:`[element type]s` of both :term:`[array type]s` are unifiable, and
 
 * :def_p:`fls_gg3x25qvymmq`
-  The sizes of both :term:`array type`\ s are the same.
+  The sizes of both :term:`[array type]s` are the same.
 
 :def_p:`fls_ni296ev8x9v9`
 A :term:`slice type` is unifiable only with another :term:`slice type` when the
-:term:`element type`\ s of both :term:`slice type`\ s are unifiable.
+:term:`[element type]s` of both :term:`[slice type]s` are unifiable.
 
 :def_p:`fls_i1m41c4wkfc0`
 Type :codeterm:`str` is unifiable only with itself.
@@ -1633,46 +1634,46 @@ Type :codeterm:`str` is unifiable only with itself.
 A :term:`tuple type` is unifiable only with another :term:`tuple type` when:
 
 * :def_p:`fls_kcr8npsmy0e5`
-  The :term:`arity` of both :term:`tuple type`\ s is the same, and
+  The :term:`arity` of both :term:`[tuple type]s` is the same, and
 
 * :def_p:`fls_kq3lv1zbangz`
-  The :term:`type`\ s of the corresponding :term:`tuple field`\ s are unifiable.
+  The :term:`[type]s` of the corresponding :term:`[tuple field]s` are unifiable.
 
 :def_p:`fls_so2cgqmawlm7`
 An :term:`abstract data type` is unifiable only with another :term:`abstract
 data type` when:
 
 * :def_p:`fls_vsax8w6y794m`
-  The two :term:`abstract data type`\ s are the same :term:`type`, and
+  The two :term:`[abstract data type]s` are the same :term:`type`, and
 
 * :def_p:`fls_1j1wc3uxs7h6`
-  The corresponding :term:`generic substitution`\ s are unifiable.
+  The corresponding :term:`[generic substitution]s` are unifiable.
 
 :def_p:`fls_9dpea9ty0c2l`
 A :term:`closure type` is unifiable only with another :term:`closure type` when:
 
 * :def_p:`fls_42oj1ekjihq1`
-  The :term:`two closure type`\ s are the same closure, and
+  The :term:`[two closure type]s` are the same closure, and
 
 * :def_p:`fls_gebpqqqvvklf`
-  The corresponding :term:`generic substitution`\ s are unifiable.
+  The corresponding :term:`[generic substitution]s` are unifiable.
 
 :def_p:`fls_i221hm7rssik`
 A :term:`function item type` is unifiable only with another :term:`function item
 type` when:
 
 * :def_p:`fls_74cug5zfv2wv`
-  The :term:`two function item type`\ s are the same function, and
+  The :term:`[two function item type]s` are the same function, and
 
 * :def_p:`fls_keezxl8v4snf`
-  The corresponding :term:`generic substitution`\ s are unifiable.
+  The corresponding :term:`[generic substitution]s` are unifiable.
 
 :def_p:`fls_wz2etmkpvxed`
 A :term:`function pointer type` is unifiable only with another :term:`function
 pointer type` when:
 
 * :def_p:`fls_rmqcbb5ja4va`
-  The :term:`lifetime`\ s are :term:`variant` conformant, and
+  The :term:`[lifetime]s` are :term:`variant` conformant, and
 
 * :def_p:`fls_uu8je75y5pss`
   The :term:`safety` is the same, and
@@ -1681,17 +1682,17 @@ pointer type` when:
   The :term:`ABI` is the same, and
 
 * :def_p:`fls_52ymp79ert2`
-  The number of :term:`function parameter`\ s is the same, and
+  The number of :term:`[function parameter]s` is the same, and
 
 * :def_p:`fls_g2u1dfhphrrg`
-  The :term:`type`\ s of the corresponding :term:`function parameter`\ s are
+  The :term:`[type]s` of the corresponding :term:`[function parameter]s` are
   unifiable, and
 
 * :def_p:`fls_2xgq66qp3h95`
   The presence of a :term:`variadic part` is the same, and
 
 * :def_p:`fls_5dh8c5gg0hmk`
-  The :term:`return type`\ s are unifiable.
+  The :term:`[return type]s` are unifiable.
 
 :def_p:`fls_ismr7wwvek4q`
 A :term:`raw pointer type` is unifiable only with another :term:`raw pointer
@@ -1701,7 +1702,7 @@ type` when:
   The :term:`mutability` is the same, and
 
 * :def_p:`fls_mizmcykgdisb`
-  The :term:`target type`\ s are unifiable.
+  The :term:`[target type]s` are unifiable.
 
 :def_p:`fls_paoh0wttde2z`
 A :term:`reference type` is unifiable only with another :term:`reference type`
@@ -1711,16 +1712,16 @@ when:
   The :term:`mutability` is the same, and
 
 * :def_p:`fls_8gldjjxbyyb4`
-  The :term:`target type`\ s are unifiable.
+  The :term:`[target type]s` are unifiable.
 
 :def_p:`fls_8jad1ztcuxha`
 An :term:`anonymous return type` is unifiable with another :term:`type` when:
 
 * :def_p:`fls_j3w9ap9zaqud`
-  The :term:`lifetime`\ s are :term:`variant` conformant, and
+  The :term:`[lifetime]s` are :term:`variant` conformant, and
 
 * :def_p:`fls_yvllot5qnc4s`
-  The other :term:`type` implements all :term:`trait`\ s specified by the
+  The other :term:`type` implements all :term:`[trait]s` specified by the
   :term:`anonymous return type`, and
 
 :def_p:`fls_hza5n5eb18ta`
@@ -1731,10 +1732,10 @@ A :term:`trait object type` is unifiable only with another :term:`trait object
 type` when:
 
 * :def_p:`fls_bnp6or49voxp`
-  The :term:`bound`\ s are unifiable, and
+  The :term:`[bound]s` are unifiable, and
 
 * :def_p:`fls_hdo4c849q3lo`
-  The :term:`lifetime`\ s are unifiable.
+  The :term:`[lifetime]s` are unifiable.
 
 :def_p:`fls_zh5hhq2x9h4q`
 A :term:`general type variable` is unifiable with any other type.
@@ -1765,7 +1766,7 @@ A :term:`type coercion` takes place at a :term:`coercion site` or within a
 :term:`coercion-propagating expression`.
 
 :def_p:`fls_j3kbaf43sgpj`
-The following :term:`construct`\ s constitute a :def_term:`coercion site`:
+The following :term:`[construct]s` constitute a :def_term:`coercion site`:
 
 * :def_p:`fls_sp794uzfiofr`
   A :term:`let statement` with an explicit :term:`type specification`.
@@ -1777,7 +1778,7 @@ The following :term:`construct`\ s constitute a :def_term:`coercion site`:
   A :term:`static` declaration.
 
 * :def_p:`fls_wxrugvlazy6v`
-  The :term:`argument`\ s of a :term:`call expression` or a :term:`method call
+  The :term:`[argument]s` of a :term:`call expression` or a :term:`method call
   expression`.
 
 * :def_p:`fls_eu4bt3dw1b8c`
@@ -1787,7 +1788,7 @@ The following :term:`construct`\ s constitute a :def_term:`coercion site`:
   A :term:`function` result.
 
 :def_p:`fls_u0e42y7nvn7e`
-The following :term:`expression`\ s constitute a :def_term:`coercion-propagating
+The following :term:`[expression]s` constitute a :def_term:`coercion-propagating
 expression`:
 
 * :def_p:`fls_p8hp5y506nam`
@@ -1907,8 +1908,8 @@ where
 and the target ``type`` is ``S<..., U, ...>``.
 
 :def_p:`fls_da4w32rsrwxc`
-:def_term:`Least upper bound coercion` is a multi-:term:`type coercion` that is
-used in the following scenarios:
+:def_term:`Least upper bound coercion` is a :term:`multi-[type coercion]` that
+is used in the following scenarios:
 
 * :def_p:`fls_zi5311z1w7re`
   To find the common :term:`type` of multiple :term:`if expression` branches.
@@ -1919,23 +1920,23 @@ used in the following scenarios:
 
 * :def_p:`fls_agw1aej616vf`
   To find the common :term:`type` for multiple :term:`match expression`
-  :term:`match arm`\ s.
+  :term:`[match arm]s`.
 
 * :def_p:`fls_tnbga5dl4gz8`
-  To find the common :term:`type` of :term:`array expression` :term:`operand`\
-  s.
+  To find the common :term:`type` of :term:`array expression`
+  :term:`[operand]s`.
 
 * :def_p:`fls_yoreux8tn65x`
   To find the :term:`return type` of a :term:`closure expression` with multiple
-  :term:`return expression`\ s.
+  :term:`[return expression]s`.
 
 * :def_p:`fls_r11shke69uu6`
   To find the :term:`return type` of a :term:`function` with multiple
-  :term:`return expression`\ s.
+  :term:`[return expression]s`.
 
 :def_p:`fls_ky7ykpufb95t`
-:term:`Least upper bound coercion` considers a set of source :term:`type`\
-s ``T1``, ``T2``, ``...``, ``TN`` and target :term:`type` ``U``. The target
+:term:`Least upper bound coercion` considers a set of source :term:`[type]s`
+``T1``, ``T2``, ``...``, ``TN`` and target :term:`type` ``U``. The target
 :term:`type` is obtained as follows:
 
 #. :def_p:`fls_8kvme0u4u8r6`
@@ -1967,9 +1968,9 @@ Type Inference
 .. rubric:: Legality Rules
 
 :def_p:`fls_h8sedxew0d4u`
-:term:`Constant` declarations, :term:`let statement`\ s, and :term:`static
-declaration`\ s impose an :def_term:`expected type` on their respective
-initialization :term:`expression`\ s. :term:`Type inference` is the process of
+:term:`Constant` declarations, :term:`[let statement]s`, and :term:`[static
+declaration]s` impose an :def_term:`expected type` on their respective
+initialization :term:`[expression]s`. :term:`Type inference` is the process of
 deducing the expected :term:`type` of an arbitrary :term:`value`.
 
 :def_p:`fls_uvvn4usfsbhr`
@@ -1997,13 +1998,13 @@ The :term:`expected type` of the :term:`static initializer` of a :term:`static`
 is the :term:`type` specified by its :term:`type ascription`.
 
 :def_p:`fls_biyyicl3c3kn`
-:term:`Arithmetic expression`\ s, :term:`await expression`\ s, :term:`block
-expression`\ s, :term:`borrow expression`\ s, :term:`dereference expression`\
-s, :term:`call expression`\ s, :term:`else expression`\ s, :term:`error
-propagation expression`\ s, :term:`if expression`\ s, :term:`if let expression`\
-s, :term:`logical expression`\ s, :term:`loop expression`\ s, :term:`match
-expression`\ s, :term:`negation expression`\ s, and :term:`parenthesized
-expression`\ s are :def_term:`type imposing expression`\ s.
+:term:`[Arithmetic expression]s`, :term:`[await expression]s`, :term:`[block
+expression]s`, :term:`[borrow expression]s`, :term:`[dereference expression]s`,
+:term:`[call expression]s`, :term:`[else expression]s`, :term:`[error
+propagation expression]s`, :term:`[if expression]s`, :term:`[if let
+expression]s`, :term:`[logical expression]s`, :term:`[loop expression]s`,
+:term:`[match expression]s`, :term:`[negation expression]s`, and
+:term:`[parenthesized expression]s` are :def_term:`type imposing expression`\ s.
 
 :def_p:`fls_o94mhge1j3iw`
 A :term:`type imposing expression` imposes its :term:`expected type` onto a
@@ -2089,7 +2090,7 @@ nested :term:`construct`, as follows:
 
 * :def_p:`fls_gmojdinhct0b`
   A :term:`lazy boolean expression` imposes its :term:`expected type` onto its
-  :term:`operand`\ s.
+  :term:`[operand]s`.
 
 * :def_p:`fls_d8f7xb8r3aud`
   A :term:`loop expression` imposes its :term:`expected type` onto its
@@ -2114,12 +2115,12 @@ nested :term:`construct`, as follows:
   :term:`operand`.
 
 :def_p:`fls_aaumn7viouu7`
-:term:`Array expression`\ s, :term:`array index expression`\ s,
-:term:`assignment expression`\ s, :term:`closure expression`\ s,
-:term:`comparison expression`\ s, :term:`compound assignment expression`\
-s, :term:`field access expression`\ s, :term:`lazy boolean expression`\ s,
-:term:`method call expression`\ s, :term:`range expression`\ s, :term:`struct
-expression`\ s, :term:`tuple expression`\ s, and :term:`type cast expression`\ s
+:term:`[Array expression]s`, :term:`[array index expression]s`,
+:term:`[assignment expression]s`, :term:`[closure expression]s`,
+:term:`[comparison expression]s`, :term:`[compound assignment expression]s`,
+:term:`[field access expression]s`, :term:`[lazy boolean expression]s`,
+:term:`[method call expression]s`, :term:`[range expression]s`, :term:`[struct
+expression]s`, :term:`[tuple expression]s`, and :term:`[type cast expression]s`
 are :def_term:`type resolving expression`\ s.
 
 :def_p:`fls_r7dyhfmdentz`
@@ -2128,7 +2129,7 @@ is the :term:`type` of the :term:`expression` itself.
 
 :def_p:`fls_3hv3wxkhjjp1`
 A :term:`floating-point type variable` is a :term:`type variable` that can refer
-only to :term:`floating-point type`\ s.
+only to :term:`[floating-point type]s`.
 
 :def_p:`fls_8zkvwpkgob6d`
 The :term:`resolving type` of a :term:`float literal` is determined as follows:
@@ -2144,7 +2145,7 @@ The :term:`resolving type` of a :term:`float literal` is determined as follows:
 
 :def_p:`fls_7ov36fpd9mwe`
 An :term:`integer type variable` is a :term:`type variable` that can refer only
-to :term:`integer type`\ s.
+to :term:`[integer type]s`.
 
 :def_p:`fls_v9lyy98dgm98`
 The :term:`resolving type` of an :term:`integer literal` is determined as
@@ -2159,9 +2160,9 @@ follows:
    Otherwise the :term:`resolving type` is an :term:`integer type variable`.
 
 :def_p:`fls_ybvrhh96fc7y`
-:term:`Constant argument`\ s, :term:`constant` declarations, :term:`function`\
-s, and :term:`static` declarations are referred to as :def_term:`type inference
-root`\ s.
+:term:`[Constant argument]s`, :term:`constant` declarations,
+:term:`[function]s`, and :term:`static` declarations are referred to as
+:def_term:`type inference root`\ s.
 
 :def_p:`fls_j28usox2uzep`
 :term:`Type inference` for a single :term:`type inference root` proceeds as
@@ -2195,17 +2196,17 @@ follows:
          Resolve ``ET`` against ``RT``.
 
 #. :def_p:`fls_ynsjdua73fcl`
-   If there are :term:`expression`\ s whose :term:`type` ``T`` is a
+   If there are :term:`[expression]s` whose :term:`type` ``T`` is a
    :term:`floating-point type variable`, replace ``T`` with :term:`type`
    :codeterm:`f64`.
 
 #. :def_p:`fls_oz057wsgk05e`
-   If there are :term:`expression`\ s whose :term:`type` ``T`` is
+   If there are :term:`[expression]s` whose :term:`type` ``T`` is
    an :term:`integer type variable`, replace ``T`` with :term:`type`
    :codeterm:`i32`.
 
 #. :def_p:`fls_2eu3zcuznfrk`
-   If there are :term:`expression`\ s whose :term:`type` is a :term:`global type
+   If there are :term:`[expression]s` whose :term:`type` is a :term:`global type
    variable`, then this is a static error.
 
 :def_p:`fls_iqf4muk5nrot`
@@ -2219,19 +2220,19 @@ an :term:`expression` proceeds as follows:
 #. :def_p:`fls_yqsl1gg27b5o`
    If ``ET`` denotes a :term:`global type variable` and ``RT`` denotes a
    :term:`concrete type`, then ``ET`` is replaced with ``RT``, effectively
-   changing the :term:`type` of all :term:`expression`\ s that previously held
+   changing the :term:`type` of all :term:`[expression]s` that previously held
    ``ET``.
 
 #. :def_p:`fls_c4i80gd8cdub`
    If ``ET`` denotes a :term:`floating-point type variable` and ``RT`` denotes a
    :term:`floating point type`, then ``ET`` is replaced with ``RT``, effectively
-   changing the :term:`type` of all :term:`expression`\ s that previously held
+   changing the :term:`type` of all :term:`[expression]s` that previously held
    ``ET``.
 
 #. :def_p:`fls_acd7b3m1qm3a`
    If ``ET`` denotes an :term:`integer type variable` and ``RT`` denotes an
    :term:`integer type`, then ``ET`` is replaced with ``RT``, effectively
-   changing the :term:`type` of all :term:`expression`\ s that previously held
+   changing the :term:`type` of all :term:`[expression]s` that previously held
    ``ET``.
 
 #. :def_p:`fls_riivz4mlwr4y`
@@ -2316,16 +2317,16 @@ Object Safety
 A trait is :term:`object safe` when:
 
 * :def_p:`fls_5wlltclogfkw`
-  Its :term:`supertrait`\ s are :term:`object safe`, and
+  Its :term:`[supertrait]s` are :term:`object safe`, and
 
 * :def_p:`fls_droy0w5gtqaw`
   :codeterm:`core::marker::Sized` is not a :term:`supertrait`, and
 
 * :def_p:`fls_46gd1q80c6bn`
-  It lacks :term:`associated constant`\ s, and
+  It lacks :term:`[associated constant]s`, and
 
 * :def_p:`fls_kwo4cknx0yat`
-  Its :term:`associated function`\ s are :term:`object safe`.
+  Its :term:`[associated function]s` are :term:`object safe`.
 
 :def_p:`fls_uixekv82g2e5`
 An :term:`associated function` is :term:`object safe` when it is either an
@@ -2336,7 +2337,7 @@ non-dispatchable :term:`function`.
 A dispatchable :term:`function` is :term:`object safe` when:
 
 * :def_p:`fls_j7nb34o87l1z`
-  It lacks :term:`generic parameter`\ s, and
+  It lacks :term:`[generic parameter]s`, and
 
 * :def_p:`fls_k1vc9vd8at92`
   Is a :term:`method` that does not use :codeterm:`Self` except as the
@@ -2344,8 +2345,8 @@ A dispatchable :term:`function` is :term:`object safe` when:
 
 * :def_p:`fls_32nk904hwjao`
   Is a :term:`method` whose :term:`receiver` is either ``&Self``, ``&mut Self``,
-  or ``core::pin::Pin<T>`` where T is one of the previous :term:`receiver`\
-  s, and
+  or ``core::pin::Pin<T>`` where T is one of the previous :term:`[receiver]s`,
+  and
 
 * :def_p:`fls_kqylg31sm5wv`
   It lacks a :term:`where clause` that specifies the
@@ -2353,7 +2354,7 @@ A dispatchable :term:`function` is :term:`object safe` when:
 
 :def_p:`fls_aer3gaur7avp`
 A non-dispatchable :term:`function` is :term:`object safe` when it specifies a
-:codeterm:`core::marker::Sized` t\ :term:`rait bound` for :codeterm:`Self`.
+:codeterm:`core::marker::Sized` :term:`t[rait bound]` for :codeterm:`Self`.
 
 Trait and Lifetime Bounds
 -------------------------
@@ -2390,24 +2391,24 @@ Trait and Lifetime Bounds
 .. rubric:: Legality Rules
 
 :def_p:`fls_5g508z6c7q5f`
-A :term:`bound` imposes a constraint on :term:`generic parameter`\ s by limiting
-the set of possible :term:`generic substitution`\ s.
+A :term:`bound` imposes a constraint on :term:`[generic parameter]s` by limiting
+the set of possible :term:`[generic substitution]s`.
 
 :def_p:`fls_grby8tmmd8sb`
 A :term:`lifetime bound` is a :term:`bound` that imposes a constraint on the
-:term:`lifetime`\ s of :term:`generic parameter`\ s.
+:term:`[lifetime]s` of :term:`[generic parameter]s`.
 
 :def_p:`fls_knut10hoz6wc`
 A :term:`trait bound` is a :term:`bound` that imposes a constraint on the
-:term:`trait`\ s of :term:`generic parameter`\ s.
+:term:`[trait]s` of :term:`[generic parameter]s`.
 
 :def_p:`fls_sf6zg0ez9hbb`
-A :term:`ForGenericParameterList` shall not specify :syntax:`ConstantParameter`\
-s or :syntax:`TypeParameter`\ s.
+A :term:`ForGenericParameterList` shall not specify
+:syntax:`[ConstantParameter]s` or :syntax:`[TypeParameter]s`.
 
 :def_p:`fls_vujl3fblz6x2`
 A :term:`higher-ranked trait bound` is a :term:`bound` that specifies an
-infinite list of :term:`bound`\ s for all possible :term:`lifetime`\ s specified
+infinite list of :term:`[bound]s` for all possible :term:`[lifetime]s` specified
 by the ``ForGenericParameterList.``
 
 :def_p:`fls_tx4uspewnk7w`
@@ -2415,7 +2416,7 @@ by the ``ForGenericParameterList.``
 ``'a`` lasts as long as ``'b``.
 
 :def_p:`fls_5kj8bmvb8xfc`
-:term:`Bound` ``T: 'a`` indicates that all :term:`lifetime parameter`\ s of
+:term:`Bound` ``T: 'a`` indicates that all :term:`[lifetime parameter]s` of
 ``T`` outlive ``'a``.
 
 .. rubric:: Examples
@@ -2446,8 +2447,8 @@ Lifetime
 A :term:`lifetime` specifies the expected longevity of a :term:`value`.
 
 :def_p:`fls_vbclxg9dq4yo`
-A :term:`lifetime bound` shall apply to :term:`type`\ s and other
-:term:`lifetime`\ s.
+A :term:`lifetime bound` shall apply to :term:`[type]s` and other
+:term:`[lifetime]s`.
 
 .. rubric:: Examples
 
@@ -2465,14 +2466,14 @@ Subtyping and Variance
 .. rubric:: Legality Rules
 
 :def_p:`fls_atq2cltx487m`
-:term:`Subtyping` is a property of :term:`type`\ s, allowing one :term:`type` to
+:term:`Subtyping` is a property of :term:`[type]s`, allowing one :term:`type` to
 be used where another :term:`type` is expected.
 
 :def_p:`fls_df87d44kgwcv`
-:term:`Variance` is a property of :term:`lifetime parameter`\ s and :term:`type
-parameter`\ s that describes the circumstances under which a :term:`generic
+:term:`Variance` is a property of :term:`[lifetime parameter]s` and :term:`[type
+parameter]s` that describes the circumstances under which a :term:`generic
 type` is a :term:`subtype` of an instantiation of itself with different
-:term:`generic argument`\ s.
+:term:`[generic argument]s`.
 
 :def_p:`fls_7ex941yysuhq`
 A :term:`type` is its own :term:`subtype`.
@@ -2568,7 +2569,7 @@ A :term:`trait` is :term:`invariant` in all inputs, including the :term:`Self`
 parameter.
 
 :def_p:`fls_xkzo7nj40rbn`
-:term:`Lifetime parameter`\ s and :term:`type parameter`\ s are subject to
+:term:`[Lifetime parameter]s` and :term:`[type parameter]s` are subject to
 :term:`variance`.
 
 :def_p:`fls_abn5ycx11zpm`
@@ -2606,11 +2607,11 @@ Lifetime Elision
 .. rubric:: Legality Rules
 
 :def_p:`fls_9wtuclhm7yz5`
-:term:`Lifetime elision` is a set of relaxations on the use of :term:`lifetime`\
-s.
+:term:`Lifetime elision` is a set of relaxations on the use of
+:term:`[lifetime]s`.
 
 :def_p:`fls_dpudys82dhdc`
-An :def_term:`input lifetime` is one of the following :term:`lifetime`\ s:
+An :def_term:`input lifetime` is one of the following :term:`[lifetime]s`:
 
 * :def_p:`fls_pjil71kk0r25`
   Any :term:`lifetime` related to a :term:`function parameter`.
@@ -2619,16 +2620,16 @@ An :def_term:`input lifetime` is one of the following :term:`lifetime`\ s:
   Any :term:`lifetime` related to a :term:`function pointer type parameter`.
 
 * :def_p:`fls_2p29p1fvi182`
-  Any :term:`lifetime` related to the :term:`function parameter`\ s
+  Any :term:`lifetime` related to the :term:`[function parameter]s`
   of the :codeterm:`core::ops::Fn`, :codeterm:`core::ops::FnMut`, and
-  :codeterm:`core::ops::FnOnce` :term:`trait`\ s.
+  :codeterm:`core::ops::FnOnce` :term:`[trait]s`.
 
 * :def_p:`fls_ks8wlufmhz6d`
   Any :term:`lifetime` related to an :term:`implementing type` and an
   :term:`implemented trait` of an :term:`implementation`.
 
 :def_p:`fls_hsg9kfyvh35m`
-An :def_term:`output lifetime` is one of the following :term:`lifetime`\ s:
+An :def_term:`output lifetime` is one of the following :term:`[lifetime]s`:
 
 * :def_p:`fls_ofqy10q4a9jk`
   Any :term:`lifetime` related to the :term:`return type` of a :term:`function`.
@@ -2638,9 +2639,9 @@ An :def_term:`output lifetime` is one of the following :term:`lifetime`\ s:
   pointer type`.
 
 * :def_p:`fls_vf7cxiir91ps`
-  Any :term:`lifetime` related to the :term:`return type`\ s of
+  Any :term:`lifetime` related to the :term:`[return type]s` of
   the :codeterm:`core::ops::Fn`, :codeterm:`core::ops::FnMut`, and
-  :codeterm:`core::ops::FnOnce` :term:`trait`\ s.
+  :codeterm:`core::ops::FnOnce` :term:`[trait]s`.
 
 :def_p:`fls_g56br27hq2zj`
 :term:`Lifetime elision` proceeds as follows:
@@ -2650,15 +2651,15 @@ An :def_term:`output lifetime` is one of the following :term:`lifetime`\ s:
    parameter` in its related :term:`construct`.
 
 #. :def_p:`fls_6km3cbchuxr2`
-   If a :term:`construct` has exactly one :term:`input lifetime`, then that
-   :term:`lifetime` is assigned to all :term:`elided` :term:`output lifetime`\
-   s.
+   If a :term:`construct` has exactly one :term:`input lifetime`, then
+   that :term:`lifetime` is assigned to all :term:`elided` :term:`[output
+   lifetime]s`.
 
 #. :def_p:`fls_crb6m6b3cdwh`
    If a :term:`function` has a :term:`receiver` of the form ``&self``, ``&mut
    self``, or ``self: T`` where ``T`` is a :term:`type` with a :term:`lifetime`,
    then the :term:`lifetime` of the :term:`receiver` is assigned to all
-   :term:`elided` :term:`output lifetime`\ s.
+   :term:`elided` :term:`[output lifetime]s`.
 
 #. :def_p:`fls_ac9tdlfwp5et`
    Otherwise this is a static error.

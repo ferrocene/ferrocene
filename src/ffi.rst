@@ -8,29 +8,28 @@ FFI
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_djlglv2eaihl`
-:term:`Foreign Function Interface` or :term:`FFI` employs :term:`ABI`,
-:term:`[attribute]s`, :term:`external blocks`, :term:`[external function]s`,
-linkage, and :term:`type` :term:`layout` to interface a Rust program with
-foreign code.
+:dp:`fls_djlglv2eaihl`
+:t:`Foreign Function Interface` or :t:`FFI` employs :t:`ABI`, :t:`[attribute]s`,
+:t:`external blocks`, :t:`[external function]s`, linkage, and :t:`type`
+:t:`layout` to interface a Rust program with foreign code.
 
-:def_p:`fls_k1hiwghzxtfa`
-The following :term:`[attribute]s` affect :term:`FFI`:
+:dp:`fls_k1hiwghzxtfa`
+The following :t:`[attribute]s` affect :t:`FFI`:
 
-* :def_p:`fls_3cgtdk4698hm`
-  :term:`Attribute` :codeterm:`export_name`.
+* :dp:`fls_3cgtdk4698hm`
+  :t:`Attribute` :c:`export_name`.
 
-* :def_p:`fls_shzmgci4f7o5`
-  :term:`Attribute` :codeterm:`link`.
+* :dp:`fls_shzmgci4f7o5`
+  :t:`Attribute` :c:`link`.
 
-* :def_p:`fls_m7x5odt4nb23`
-  :term:`Attribute` :codeterm:`link_section`
+* :dp:`fls_m7x5odt4nb23`
+  :t:`Attribute` :c:`link_section`
 
-* :def_p:`fls_4akfvpq1yg4g`
-  :term:`Attribute` :codeterm:`no_mangle`.
+* :dp:`fls_4akfvpq1yg4g`
+  :t:`Attribute` :c:`no_mangle`.
 
-* :def_p:`fls_9d8v0xeyi0f`
-  :term:`Attribute` :codeterm:`used`.
+* :dp:`fls_9d8v0xeyi0f`
+  :t:`Attribute` :c:`used`.
 
 ABI
 ---
@@ -48,64 +47,64 @@ ABI
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_xangrq3tfze0`
-:term:`Application Binary Interface` or :term:`ABI` is a set of conventions that
+:dp:`fls_xangrq3tfze0`
+:t:`Application Binary Interface` or :t:`ABI` is a set of conventions that
 dictate how data and computation cross language boundaries.
 
-:def_p:`fls_2w0xi6rxw3uz`
-The :term:`ABI kind` indicates the :term:`ABI` of a :term:`construct`.
+:dp:`fls_2w0xi6rxw3uz`
+The :t:`ABI kind` indicates the :t:`ABI` of a :t:`construct`.
 
-:def_p:`fls_9zitf1fvvfk8`
-The following :term:`[ABI]s` are supported:
+:dp:`fls_9zitf1fvvfk8`
+The following :t:`[ABI]s` are supported:
 
-* :def_p:`fls_x7ct9k82fpgn`
-  ``extern "C"`` - The default :term:`ABI` of C code, referred to as
-  :def_term:`extern C ABI`.
+* :dp:`fls_x7ct9k82fpgn`
+  ``extern "C"`` - The default :t:`ABI` of C code, referred to as :dt:`extern
+  C ABI`.
 
-* :def_p:`fls_a2d8ltpgtvn6`
-  ``extern "Rust"`` - The default :term:`ABI` of a Rust program, referred to as
-  :def_term:`Rust ABI`.
+* :dp:`fls_a2d8ltpgtvn6`
+  ``extern "Rust"`` - The default :t:`ABI` of a Rust program, referred to as
+  :dt:`Rust ABI`.
 
-* :def_p:`fls_8m7pc3riokst`
-  ``extern "system"`` - The operating system-dependent :term:`ABI`, referred to
-  as :def_term:`external system ABI`.
+* :dp:`fls_8m7pc3riokst`
+  ``extern "system"`` - The operating system-dependent :t:`ABI`, referred to as
+  :dt:`external system ABI`.
 
-:def_p:`fls_r2drzo3dixe4`
-A :term:`function` without an explicit :term:`ABI` has implicit :term:`Rust
-ABI`, unless it appears within an :term:`external block`.
+:dp:`fls_r2drzo3dixe4`
+A :t:`function` without an explicit :t:`ABI` has implicit :t:`Rust ABI`, unless
+it appears within an :t:`external block`.
 
-:def_p:`fls_z2kzyin8dyr7`
-A :term:`function` with an :term:`ABI` but without a specified :term:`ABI kind`
-has implicit :term:`external C ABI`.
+:dp:`fls_z2kzyin8dyr7`
+A :t:`function` with an :t:`ABI` but without a specified :t:`ABI kind` has
+implicit :t:`external C ABI`.
 
 .. rubric:: Implementation Permissions
 
-:def_p:`fls_j6pqchx27ast`
-A tool is allowed to specify additional :term:`[ABI]s`. These :term:`[ABI]s` may
+:dp:`fls_j6pqchx27ast`
+A tool is allowed to specify additional :t:`[ABI]s`. These :t:`[ABI]s` may
 include, but may not be limited to, the following:
 
-* :def_p:`fls_dbbfqaqa80r8`
-  ``extern "aapcs"`` - The ARM :term:`ABI`.
+* :dp:`fls_dbbfqaqa80r8`
+  ``extern "aapcs"`` - The ARM :t:`ABI`.
 
-* :def_p:`fls_36qrs2fxxvi7`
-  ``extern "cdecl"`` - The x86_32 :term:`ABI` of C code.
+* :dp:`fls_36qrs2fxxvi7`
+  ``extern "cdecl"`` - The x86_32 :t:`ABI` of C code.
 
-* :def_p:`fls_6rtj6rwqxojh`
-  ``extern "fastcall"`` - The ``fastcall`` :term:`ABI` that corresponds to
-  MSVC's ``__fastcall`` and GCC and clang's ``__attribute__((fastcall))``.
+* :dp:`fls_6rtj6rwqxojh`
+  ``extern "fastcall"`` - The ``fastcall`` :t:`ABI` that corresponds to MSVC's
+  ``__fastcall`` and GCC and clang's ``__attribute__((fastcall))``.
 
-* :def_p:`fls_d3nmpc5mtg27`
-  ``extern "stdcall"`` - The x86_32 :term:`ABI` of the Win32 API.
+* :dp:`fls_d3nmpc5mtg27`
+  ``extern "stdcall"`` - The x86_32 :t:`ABI` of the Win32 API.
 
-* :def_p:`fls_7t7yxh94wnbl`
-  ``extern "sysv64"`` - The x86_64 non-Windows :term:`ABI` of C code.
+* :dp:`fls_7t7yxh94wnbl`
+  ``extern "sysv64"`` - The x86_64 non-Windows :t:`ABI` of C code.
 
-* :def_p:`fls_sxj4vy39sj4g`
-  ``extern "vectorcall"`` - The ``vectorcall`` :term:`ABI` that corresponds to
+* :dp:`fls_sxj4vy39sj4g`
+  ``extern "vectorcall"`` - The ``vectorcall`` :t:`ABI` that corresponds to
   MSVC's ``__vectorcall`` and clang's ``__attribute__((vectorcall))``.
 
-* :def_p:`fls_tyjs1x4j8ovp`
-  ``extern "win64"`` - The x86_64 Windows :term:`ABI` of C code.
+* :dp:`fls_tyjs1x4j8ovp`
+  ``extern "win64"`` - The x86_64 Windows :t:`ABI` of C code.
 
 .. rubric:: Examples
 
@@ -138,13 +137,13 @@ External Blocks
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_4dje9t5y2dia`
-An :term:`external block` is a :term:`construct` that provides the declarations
-of foreign :term:`[function]s` as unchecked imports.
+:dp:`fls_4dje9t5y2dia`
+An :t:`external block` is a :t:`construct` that provides the declarations of
+foreign :t:`[function]s` as unchecked imports.
 
-:def_p:`fls_iaimuqcclstl`
-The ``unsafe`` :term:`keyword` of an :term:`external block` is rejected, but may
-still be consumed by :term:`[macro]s`.
+:dp:`fls_iaimuqcclstl`
+The ``unsafe`` :t:`keyword` of an :t:`external block` is rejected, but may still
+be consumed by :t:`[macro]s`.
 
 .. rubric:: Examples
 
@@ -166,41 +165,39 @@ External Functions
 
 .. rubric:: Legality Rules
 
-:term:`[External function]s` and :term:`[external static]s` inherit the
-:term:`ABI` of their enclosing :term:`external block`.
+:t:`[External function]s` and :t:`[external static]s` inherit the :t:`ABI` of
+their enclosing :t:`external block`.
 
-An :term:`external function` is an unchecked import of a foreign
-:term:`function`.
+An :t:`external function` is an unchecked import of a foreign :t:`function`.
 
-An :term:`external function` shall be invoked from an :term:`unsafe context`.
+An :t:`external function` shall be invoked from an :t:`unsafe context`.
 
-An :term:`external function` shall not specify a
-:syntax:`FunctionQualifierList`.
+An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
 
-An :term:`external function` shall not specify a :syntax:`GenericParameterList`
-containing :term:`[constant parameter]s` or :term:`[type parameter]s`.
+An :t:`external function` shall not specify a :s:`GenericParameterList`
+containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
 
-An :term:`external function` shall not specify a :syntax:`FunctionBody`.
+An :t:`external function` shall not specify a :s:`FunctionBody`.
 
-An :term:`external function` shall not specify patterns other than identifier
+An :t:`external function` shall not specify patterns other than identifier
 patterns and underscore patterns.
 
-Only the last parameter :syntax:`FunctionParameter` of an :term:`external
-function` may specify a :syntax:`FunctionParameterVariadicPart`.
+Only the last parameter :s:`FunctionParameter` of an :t:`external function` may
+specify a :s:`FunctionParameterVariadicPart`.
 
 External Statics
 ----------------
 
 .. rubric:: Legality Rules
 
-An :term:`external static` is an import of a foreign :term:`variable`.
+An :t:`external static` is an import of a foreign :t:`variable`.
 
-An :term:`external static` shall be referenced from an :term:`unsafe context`.
+An :t:`external static` shall be referenced from an :t:`unsafe context`.
 
-An :term:`external static` shall not specify a :term:`StaticInitializer`.
+An :t:`external static` shall not specify a :t:`StaticInitializer`.
 
 .. rubric:: Dynamic Semantics
 
-An :term:`immutable` :term:`external static` shall be initialized before Rust
-code is executed.
+An :t:`immutable` :t:`external static` shall be initialized before Rust code
+is executed.
 

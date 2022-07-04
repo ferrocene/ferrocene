@@ -22,75 +22,73 @@ Associated Items
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_ckzd25qd213t`
-An :term:`associated item` is an :term:`item` that appears within an
-:term:`implementation` or a :term:`trait`.
+:dp:`fls_ckzd25qd213t`
+An :t:`associated item` is an :t:`item` that appears within an
+:t:`implementation` or a :t:`trait`.
 
-:def_p:`fls_5y6ae0xqux57`
-An :term:`associated constant` is a :term:`constant` that appears as an
-:term:`associated item`.
+:dp:`fls_5y6ae0xqux57`
+An :t:`associated constant` is a :t:`constant` that appears as an :t:`associated
+item`.
 
-:def_p:`fls_lj7492aq7fzo`
-An :term:`associated function` is a :term:`function` that appears as an
-:term:`associated item`.
+:dp:`fls_lj7492aq7fzo`
+An :t:`associated function` is a :t:`function` that appears as an :t:`associated
+item`.
 
-:def_p:`fls_8cz4rdrklaj4`
-An :term:`associated type` is a :term:`type alias` that appears as an
-:term:`associated item`.
+:dp:`fls_8cz4rdrklaj4`
+An :t:`associated type` is a :t:`type alias` that appears as an :t:`associated
+item`.
 
-:def_p:`fls_w8nu8suy7t5`
-An :term:`associated type` shall not be used in the :term:`path-in-expression`
-of a :term:`struct expression`\ ``.``
+:dp:`fls_w8nu8suy7t5`
+An :t:`associated type` shall not be used in the :t:`path-in-expression` of a
+:t:`struct expression`\ ``.``
 
-:def_p:`fls_wasocqdnuzd1`
-An :term:`associated type` with a :syntax:`TypeBoundList` shall appear only as
-an :term:`associated trait type`.
+:dp:`fls_wasocqdnuzd1`
+An :t:`associated type` with a :s:`TypeBoundList` shall appear only as an
+:t:`associated trait type`.
 
-:def_p:`fls_l3iwn56n1uz8`
-An :term:`associated implementation constant` is an :term:`associated constant`
-that appears within an :term:`implementation`.
+:dp:`fls_l3iwn56n1uz8`
+An :t:`associated implementation constant` is an :t:`associated constant` that
+appears within an :t:`implementation`.
 
-:def_p:`fls_4ftfefcotb4g`
-An :term:`associated implementation constant` shall have a :term:`constant
+:dp:`fls_4ftfefcotb4g`
+An :t:`associated implementation constant` shall have a :t:`constant
 initializer`.
 
-:def_p:`fls_qb5qpfe0uwk`
-An :term:`associated implementation function` is an :term:`associated function`
-that appears within an :term:`implementation`.
+:dp:`fls_qb5qpfe0uwk`
+An :t:`associated implementation function` is an :t:`associated function` that
+appears within an :t:`implementation`.
 
-:def_p:`fls_1zlkeb6fz10j`
-An :term:`associated implementation function` shall have a :term:`function
-body`.
+:dp:`fls_1zlkeb6fz10j`
+An :t:`associated implementation function` shall have a :t:`function body`.
 
-:def_p:`fls_tw8u0cc5867l`
-An :term:`associated implementation type` is an :term:`associated type` that
-appears within an :term:`implementation`.
+:dp:`fls_tw8u0cc5867l`
+An :t:`associated implementation type` is an :t:`associated type` that appears
+within an :t:`implementation`.
 
-:def_p:`fls_bx7931x4155h`
-An :term:`associated implementation type` shall have an :term:`initialization
-type`.
+:dp:`fls_bx7931x4155h`
+An :t:`associated implementation type` shall have an :t:`initialization type`.
 
-:def_p:`fls_x564isbhobym`
-An :term:`associated trait constant` is an :term:`associated constant` that
-appears within a :term:`trait`.
+:dp:`fls_x564isbhobym`
+An :t:`associated trait constant` is an :t:`associated constant` that appears
+within a :t:`trait`.
 
-:def_p:`fls_b6nns7oqvdpm`
-An :term:`associated trait function` is an :term:`associated function` that
-appears within a :term:`trait`.
+:dp:`fls_b6nns7oqvdpm`
+An :t:`associated trait function` is an :t:`associated function` that appears
+within a :t:`trait`.
 
-:def_p:`fls_yyhebj4qyk34`
-An :term:`associated trait type` is an :term:`associated type` that appears
-within a :term:`trait`.
+:dp:`fls_yyhebj4qyk34`
+An :t:`associated trait type` is an :t:`associated type` that appears within
+a :t:`trait`.
 
-:def_p:`fls_kl9p3ycl5mzf`
-An :term:`associated trait type` shall not have an :term:`initialization type`.
+:dp:`fls_kl9p3ycl5mzf`
+An :t:`associated trait type` shall not have an :t:`initialization type`.
 
-:def_p:`fls_a5prbmuruma4`
-An :term:`associated trait type` has an implicit :codeterm:`core::marker::Sized`
-:term:`bound`.
+:dp:`fls_a5prbmuruma4`
+An :t:`associated trait type` has an implicit :c:`core::marker::Sized`
+:t:`bound`.
 
-:def_p:`fls_vp2ov6ykueue`
-An :term:`associated trait type` of the form
+:dp:`fls_vp2ov6ykueue`
+An :t:`associated trait type` of the form
 
 .. code-block:: text
 
@@ -98,8 +96,8 @@ An :term:`associated trait type` of the form
    	    type X: Bound;
    	}
 
-:def_p:`fls_5uf74nvdm64o`
-is equivalent to a :term:`where clause` of the following form:
+:dp:`fls_5uf74nvdm64o`
+is equivalent to a :t:`where clause` of the following form:
 
 .. code-block:: text
 
@@ -107,8 +105,8 @@ is equivalent to a :term:`where clause` of the following form:
    	    type X;
    	}
 
-:def_p:`fls_oy92gzxgc273`
-A :term:`method` is an :term:`associated function` with a :term:`receiver`.
+:dp:`fls_oy92gzxgc273`
+A :t:`method` is an :t:`associated function` with a :t:`receiver`.
 
 .. rubric:: Examples
 

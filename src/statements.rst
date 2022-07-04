@@ -17,29 +17,27 @@ Statements
      | TerminatedMacroInvocation
      | $$;$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_kdxe1ukmgl1`
-An :term:`item statement` is a :term:`statement` that is expressed as an
-:term:`item`.
+:dp:`fls_kdxe1ukmgl1`
+An :t:`item statement` is a :t:`statement` that is expressed as an :t:`item`.
 
-:def_p:`fls_fftdnwe22xrb`
-An :term:`empty statement` is a :term:`statement` expressed as character 0x3B
+:dp:`fls_fftdnwe22xrb`
+An :t:`empty statement` is a :t:`statement` expressed as character 0x3B
 (semicolon).
 
-:def_p:`fls_or125cqtxg9j`
-A :term:`macro statement` is a :term:`statement` expressed as a
-:term:`terminated macro invocation`.
+:dp:`fls_or125cqtxg9j`
+A :t:`macro statement` is a :t:`statement` expressed as a :t:`terminated macro
+invocation`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_estqu395zxgk`
-:term:`Execution` is the process by which a :term:`statement` achieves its
-runtime effects.
+:dp:`fls_estqu395zxgk`
+:t:`Execution` is the process by which a :t:`statement` achieves its runtime
+effects.
 
-:def_p:`fls_dl763ssb54q1`
-The :term:`execution` of an :term:`empty statement` has no effect.
+:dp:`fls_dl763ssb54q1`
+The :t:`execution` of an :t:`empty statement` has no effect.
 
 Let Statements
 --------------
@@ -48,59 +46,57 @@ Let Statements
 
 .. syntax::
 
-
    LetStatement ::=
        OuterAttributeOrDoc* $$let$$ PatternWithoutAlternation TypeAscription? ($$=$$ Expression)? $$;$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_ct7pp7jnfr86`
-A :term:`let statement` is a :term:`statement` that introduces new
-:term:`[binding]s` produced by its :term:`pattern-without-alternation`.
+:dp:`fls_ct7pp7jnfr86`
+A :t:`let statement` is a :t:`statement` that introduces new :t:`[binding]s`
+produced by its :t:`pattern-without-alternation`.
 
-:def_p:`fls_1prqh1trybwz`
-The :term:`type` of a :term:`binding` introduced by a :term:`let statement` is
+:dp:`fls_1prqh1trybwz`
+The :t:`type` of a :t:`binding` introduced by a :t:`let statement` is determined
+as follows:
+
+* :dp:`fls_djkm8r2iuu6u`
+  If the :t:`let statement` appears with a :t:`type ascription`, then the
+  :t:`type` is the :t:`type` specified by the :t:`type ascription`.
+
+* :dp:`fls_ppj9gvhp8wcj`
+  If the :t:`let statement` lacks a :t:`type ascription`, then the :t:`type` is
+  :t:`inferred` using :t:`type inference`.
+
+:dp:`fls_m8a7gesa4oim`
+The :t:`value` of a :t:`binding` introduced by a :t:`let statement` is
 determined as follows:
 
-* :def_p:`fls_djkm8r2iuu6u`
-  If the :term:`let statement` appears with a :term:`type ascription`, then the
-  :term:`type` is the :term:`type` specified by the :term:`type ascription`.
+* :dp:`fls_oaxnre7m9s10`
+  If the :t:`let statement` appears with an :t:`expression`, then the :t:`value`
+  is the :t:`value` of the :t:`expression`.
 
-* :def_p:`fls_ppj9gvhp8wcj`
-  If the :term:`let statement` lacks a :term:`type ascription`, then the
-  :term:`type` is :term:`inferred` using :term:`type inference`.
+* :dp:`fls_t5bjwluyv8za`
+  If the :t:`let statement` lacks an :t:`expression`, then the :t:`binding`
+  is uninitialized.
 
-:def_p:`fls_m8a7gesa4oim`
-The :term:`value` of a :term:`binding` introduced by a :term:`let statement` is
-determined as follows:
-
-* :def_p:`fls_oaxnre7m9s10`
-  If the :term:`let statement` appears with an :term:`expression`, then the
-  :term:`value` is the :term:`value` of the :term:`expression`.
-
-* :def_p:`fls_t5bjwluyv8za`
-  If the :term:`let statement` lacks an :term:`expression`, then the
-  :term:`binding` is uninitialized.
-
-:def_p:`fls_iqar7vvtw22c`
-The :term:`pattern-without-alternation` of a :term:`let statement` shall be
-:term:`irrefutable`.
+:dp:`fls_iqar7vvtw22c`
+The :t:`pattern-without-alternation` of a :t:`let statement` shall be
+:t:`irrefutable`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_4j9riqyf4p9`
-The :term:`execution` of a :term:`let statement` proceeds as follows:
+:dp:`fls_4j9riqyf4p9`
+The :t:`execution` of a :t:`let statement` proceeds as follows:
 
-#. :def_p:`fls_mvvigioc1ozm`
-   If the :term:`let statement` appears with an :term:`expression`, then:
+#. :dp:`fls_mvvigioc1ozm`
+   If the :t:`let statement` appears with an :t:`expression`, then:
 
-   #. :def_p:`fls_t53g5hlabqw1`
-      The :term:`expression` is evaluated.
+   #. :dp:`fls_t53g5hlabqw1`
+      The :t:`expression` is evaluated.
 
-   #. :def_p:`fls_7j4qlwg72ege`
-      The :term:`value` of the :term:`expression` is assigned to each
-      :term:`binding` introduced by the :term:`let statement`.
+   #. :dp:`fls_7j4qlwg72ege`
+      The :t:`value` of the :t:`expression` is assigned to each :t:`binding`
+      introduced by the :t:`let statement`.
 
 .. rubric:: Examples
 
@@ -121,27 +117,25 @@ Expression Statements
        ExpressionWithBlock $$;$$?
      | ExpressionWithoutBlock $$;$$
 
-
 .. rubric:: Legality Rules
 
-:def_p:`fls_xmdj8uj7ixoe`
-An :term:`expression statement` is an :term:`expression` whose result is
-ignored.
+:dp:`fls_xmdj8uj7ixoe`
+An :t:`expression statement` is an :t:`expression` whose result is ignored.
 
-:def_p:`fls_gzzmudc1hl6s`
-The :term:`expected type` of an :term:`expression statement` without character
-0x3B (semicolon) is the :term:`unit type`.
+:dp:`fls_gzzmudc1hl6s`
+The :t:`expected type` of an :t:`expression statement` without character 0x3B
+(semicolon) is the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_kc99n8qrszxh`
-The :term:`execution` of an :term:`expression statement` proceeds as follows:
+:dp:`fls_kc99n8qrszxh`
+The :t:`execution` of an :t:`expression statement` proceeds as follows:
 
-#. :def_p:`fls_r8poocwqaglf`
-   The :term:`operand` is evaluated.
+#. :dp:`fls_r8poocwqaglf`
+   The :t:`operand` is evaluated.
 
-#. :def_p:`fls_88e6s3erk8tj`
-   The :term:`value` of the :term:`operand` is :term:`dropped`.
+#. :dp:`fls_88e6s3erk8tj`
+   The :t:`value` of the :t:`operand` is :t:`dropped`.
 
 .. rubric:: Examples
 
@@ -149,21 +143,17 @@ The :term:`execution` of an :term:`expression statement` proceeds as follows:
 
    let mut values = vec![1, 2, 3];
 
-
-:def_p:`fls_4q90jb39apwr`
+:dp:`fls_4q90jb39apwr`
 The following expression statement ignores the result from ``pop()``.
 
 .. code-block:: text
 
-
    values.pop();
 
-
-:def_p:`fls_xqtztcu8ibwq`
+:dp:`fls_xqtztcu8ibwq`
 The following expression statement does not require a semicolon.
 
 .. code-block:: text
-
 
    if values.is_empty() {
        values.push(42);
@@ -172,12 +162,10 @@ The following expression statement does not require a semicolon.
        values.remove(0);
    }
 
-
-:def_p:`fls_2p9xnt519nbw`
+:dp:`fls_2p9xnt519nbw`
 The following expression statement is not an array index expression.
 
 .. code-block:: text
-
 
    [42];
 

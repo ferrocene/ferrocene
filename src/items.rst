@@ -36,14 +36,14 @@ Items
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_s3b1cba9lfj5`
-The :term:`expansion` of a :term:`terminated macro invocation` is treated as
-zero or more :term:`[item]s` if the :term:`terminated macro invocation` appears
-as an :term:`item`.
+:dp:`fls_s3b1cba9lfj5`
+The :t:`expansion` of a :t:`terminated macro invocation` is treated as zero
+or more :t:`[item]s` if the :t:`terminated macro invocation` appears as an
+:t:`item`.
 
 .. rubric:: Dynamic Semantics
 
-:def_p:`fls_hil5f7y4xdhe`
-:term:`Elaboration` is the process by which a :term:`declaration` achieves its
-runtime effects.
+:dp:`fls_hil5f7y4xdhe`
+:t:`Elaboration` is the process by which a :t:`declaration` achieves its runtime
+effects.
 

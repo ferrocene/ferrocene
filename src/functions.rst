@@ -24,7 +24,7 @@ Functions
        OuterAttributeOrDoc* (FunctionParameterPattern | TypeSpecification | $$...$$)
 
    FunctionParameterPattern ::=
-       PatternWithoutAlternation (TypeAscription | ($$: $$FunctionParameterVariadicPart))
+       PatternWithoutAlternation (TypeAscription | ($$:$$ FunctionParameterVariadicPart))
 
    FunctionParameterVariadicPart ::=
        $$...$$
@@ -48,71 +48,68 @@ Functions
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_yfm0jh62oaxr`
-A :term:`function` shall have a :syntax:`FunctionBody` unless it is an
-:term:`associated trait function` or :term:`external function`.
+:dp:`fls_yfm0jh62oaxr`
+A :t:`function` shall have a :s:`FunctionBody` unless it is an :t:`associated
+trait function` or :t:`external function`.
 
-:def_p:`fls_ijbt4tgnl95n`
-A :term:`function` shall not specify a :syntax:`SelfParameter` unless it is an
-:term:`associated function`.
+:dp:`fls_ijbt4tgnl95n`
+A :t:`function` shall not specify a :s:`SelfParameter` unless it is an
+:t:`associated function`.
 
-:def_p:`fls_icdzs1mjh0n4`
-A :term:`function` shall not specify a :syntax:`FunctionParameterVariadicPart`
-unless it is an :term:`external function`.
+:dp:`fls_icdzs1mjh0n4`
+A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
+is an :t:`external function`.
 
-A :term:`self parameter` or a :term:`receiver` is a :term:`function parameter`
-expressed by :term:`keyword` ``self``.
+A :t:`self parameter` or a :t:`receiver` is a :t:`function parameter` expressed
+by :t:`keyword` ``self``.
 
-:def_p:`fls_gn1ngtx2tp2s`
-A :term:`function` is a :term:`value` of a :term:`function type` that models
-a behavior.
+:dp:`fls_gn1ngtx2tp2s`
+A :t:`function` is a :t:`value` of a :t:`function type` that models a behavior.
 
-:def_p:`fls_nwywh1vjt6rr`
-A :term:`function` shall not be subject to both :term:`keyword` ``async`` and
-:term:`keyword` ``const``.
+:dp:`fls_nwywh1vjt6rr`
+A :t:`function` shall not be subject to both :t:`keyword` ``async`` and
+:t:`keyword` ``const``.
 
-:def_p:`fls_bdx9gnnjxru3`
-A :term:`function` declares a unique :term:`function item type` for itself.
+:dp:`fls_bdx9gnnjxru3`
+A :t:`function` declares a unique :t:`function item type` for itself.
 
-:def_p:`fls_87jnkimc15gi`
-A :term:`function qualifier` is a :term:`construct` that determines the role of
-a :term:`function`.
+:dp:`fls_87jnkimc15gi`
+A :t:`function qualifier` is a :t:`construct` that determines the role of
+a :t:`function`.
 
-:def_p:`fls_uwuthzfgslif`
-A :term:`function parameter` is a :term:`construct` that matches an input
-:term:`value` at the site of a :term:`call expression` or a :term:`method call
-expression` to a pattern.
+:dp:`fls_uwuthzfgslif`
+A :t:`function parameter` is a :t:`construct` that matches an input :t:`value`
+at the site of a :t:`call expression` or a :t:`method call expression` to
+a pattern.
 
-:def_p:`fls_lxzinvqveuqh`
-A :term:`function parameter` is an :term:`irrefutable pattern`.
+:dp:`fls_lxzinvqveuqh`
+A :t:`function parameter` is an :t:`irrefutable pattern`.
 
-:def_p:`fls_vljy4mm0zca2`
-A :term:`return type` is the :term:`type` of the result a :term:`function`
-returns.
+:dp:`fls_vljy4mm0zca2`
+A :t:`return type` is the :t:`type` of the result a :t:`function` returns.
 
-:def_p:`fls_927nfm5mkbsp`
-A :term:`function body` is the :term:`block expression` of a :term:`function`.
+:dp:`fls_927nfm5mkbsp`
+A :t:`function body` is the :t:`block expression` of a :t:`function`.
 
-:def_p:`fls_owdlsaaygtho`
-A :term:`function signature` is a unique identification of a :term:`function`
-that encompases of its :term:`[function qualifier]s`, :term:`name`,
-:term:`[generic parameter]s`, :term:`[function parameter]s`, :term:`return
-type`, and :term:`where clause`.
+:dp:`fls_owdlsaaygtho`
+A :t:`function signature` is a unique identification of a :t:`function`
+that encompases of its :t:`[function qualifier]s`, :t:`name`, :t:`[generic
+parameter]s`, :t:`[function parameter]s`, :t:`return type`, and :t:`where
+clause`.
 
-:def_p:`fls_2049qu3ji5x7`
-A :term:`constant function` is a :term:`function` subject to :term:`keyword`
-``const``.
+:dp:`fls_2049qu3ji5x7`
+A :t:`constant function` is a :t:`function` subject to :t:`keyword` ``const``.
 
-:def_p:`fls_7mlanuh5mvpn`
-The :term:`function body` of a :term:`constant function` shall be a
-:term:`constant expression`.
+:dp:`fls_7mlanuh5mvpn`
+The :t:`function body` of a :t:`constant function` shall be a :t:`constant
+expression`.
 
-:def_p:`fls_otr3hgp8lj1q`
-A :term:`constant function` shall be callable from a :term:`constant context`.
+:dp:`fls_otr3hgp8lj1q`
+A :t:`constant function` shall be callable from a :t:`constant context`.
 
-:def_p:`fls_m3jiunibqj81`
-An :term:`async function` is a :term:`function` subject to :term:`keyword`
-``async``. An :term:`async function` of the form
+:dp:`fls_m3jiunibqj81`
+An :t:`async function` is a :t:`function` subject to :t:`keyword` ``async``. An
+:t:`async function` of the form
 
 .. code-block:: text
 
@@ -120,8 +117,8 @@ An :term:`async function` is a :term:`function` subject to :term:`keyword`
        /* tail expression */
    }
 
-:def_p:`fls_7vogmqyd87ey`
-is equivalent to :term:`function`
+:dp:`fls_7vogmqyd87ey`
+is equivalent to :t:`function`
 
 .. code-block:: text
 
@@ -131,41 +128,39 @@ is equivalent to :term:`function`
        }
    }
 
-:def_p:`fls_7ucwmzqtittv`
-An :term:`unsafe function` is a :term:`function` subject to :term:`keyword`
-``unsafe``.
+:dp:`fls_7ucwmzqtittv`
+An :t:`unsafe function` is a :t:`function` subject to :t:`keyword` ``unsafe``.
 
-:def_p:`fls_5hn8fkf7rcvz`
-The invocation of an :term:`unsafe function` shall require :term:`unsafe
-context`.
+:dp:`fls_5hn8fkf7rcvz`
+The invocation of an :t:`unsafe function` shall require :t:`unsafe context`.
 
-:def_p:`fls_nw49shkqx40b`
-A :term:`main function` is a :term:`function` that acts as an entry point into a
-program. A :term:`main function` is subject to the following restrictions:
+:dp:`fls_nw49shkqx40b`
+A :t:`main function` is a :t:`function` that acts as an entry point into a
+program. A :t:`main function` is subject to the following restrictions:
 
-* :def_p:`fls_o4fxok23134r`
-  It lacks :term:`[function qualifier]s` ``async`` and ``unsafe``,
+* :dp:`fls_o4fxok23134r`
+  It lacks :t:`[function qualifier]s` ``async`` and ``unsafe``,
 
-* :def_p:`fls_bk755pvc1l53`
-  Its :term:`ABI` is Rust,
+* :dp:`fls_bk755pvc1l53`
+  Its :t:`ABI` is Rust,
 
-* :def_p:`fls_5j2vbkt2hitj`
-  Its :term:`name` is the word ``main``,
+* :dp:`fls_5j2vbkt2hitj`
+  Its :t:`name` is the word ``main``,
 
-* :def_p:`fls_a3je4wc53bmo`
-  It lacks :term:`[generic parameter]s`,
+* :dp:`fls_a3je4wc53bmo`
+  It lacks :t:`[generic parameter]s`,
 
-* :def_p:`fls_w8q15zp7kyl0`
-  It lacks :term:`[function parameter]s`,
+* :dp:`fls_w8q15zp7kyl0`
+  It lacks :t:`[function parameter]s`,
 
-* :def_p:`fls_4psnfphsgdek`
-  It lacks a :term:`return type`,
+* :dp:`fls_4psnfphsgdek`
+  It lacks a :t:`return type`,
 
-* :def_p:`fls_m7xfrhqif74`
-  It lacks a :term:`where clause`,
+* :dp:`fls_m7xfrhqif74`
+  It lacks a :t:`where clause`,
 
-* :def_p:`fls_qq9fzrw4aykd`
-  It has a :term:`function body`.
+* :dp:`fls_qq9fzrw4aykd`
+  It has a :t:`function body`.
 
 .. rubric:: Examples
 

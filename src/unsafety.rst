@@ -8,36 +8,36 @@ Unsafety
 
 .. rubric:: Legality Rules
 
-:def_p:`fls_8kqo952gjhaf`
-:term:`Unsafety` is the presence of :term:`[unsafe operation]s` in program text.
+:dp:`fls_8kqo952gjhaf`
+:t:`Unsafety` is the presence of :t:`[unsafe operation]s` in program text.
 
-:def_p:`fls_ovn9czwnwxue`
-An :term:`unsafe operation` is an operation that can potentially violate the
-memory-safety guarantees of Rust. :term:`[Unsafe operation]s` are referred to as
-:term:`unsafe Rust`.
+:dp:`fls_ovn9czwnwxue`
+An :t:`unsafe operation` is an operation that can potentially violate the
+memory-safety guarantees of Rust. :t:`[Unsafe operation]s` are referred to as
+:t:`unsafe Rust`.
 
-:def_p:`fls_pfhmcafsjyf7`
-The :term:`[unsafe operation]s` are:
+:dp:`fls_pfhmcafsjyf7`
+The :t:`[unsafe operation]s` are:
 
-* :def_p:`fls_jd1inwz7ulyw`
-  Dereferencing a :term:`value` of a :term:`raw pointer type`.
+* :dp:`fls_jd1inwz7ulyw`
+  Dereferencing a :t:`value` of a :t:`raw pointer type`.
 
-* :def_p:`fls_3ra8s1v1vbek`
-  Reading or writing an :term:`external static`.
+* :dp:`fls_3ra8s1v1vbek`
+  Reading or writing an :t:`external static`.
 
-* :def_p:`fls_6ipl0xo5qjyl`
-  Reading or writing a :term:`mutable static`.
+* :dp:`fls_6ipl0xo5qjyl`
+  Reading or writing a :t:`mutable static`.
 
-* :def_p:`fls_ucghxcnpaq2t`
-  Accessing a :term:`field` of a :term:`union`, other than to assign to it.
+* :dp:`fls_ucghxcnpaq2t`
+  Accessing a :t:`field` of a :t:`union`, other than to assign to it.
 
-* :def_p:`fls_ljocmnaz2m49`
-  Calling an :term:`unsafe function`.
+* :dp:`fls_ljocmnaz2m49`
+  Calling an :t:`unsafe function`.
 
-:def_p:`fls_jb6krd90tjmc`
-An :term:`unsafe context` is either an :term:`unsafe block` or an :term:`unsafe
+:dp:`fls_jb6krd90tjmc`
+An :t:`unsafe context` is either an :t:`unsafe block` or an :t:`unsafe
 function`.
 
-:def_p:`fls_ybnpe7ppq1vh`
-An :term:`unsafe operation` shall be used only within an :term:`unsafe context`.
+:dp:`fls_ybnpe7ppq1vh`
+An :t:`unsafe operation` shall be used only within an :t:`unsafe context`.
 

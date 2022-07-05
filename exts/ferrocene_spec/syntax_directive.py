@@ -119,7 +119,7 @@ class Lexer:
                 buffer = char
                 while True:
                     peeked = self.peek()
-                    if peeked is None or not peeked.isalpha():
+                    if peeked is None or not (peeked.isalpha() or peeked == "_"):
                         break
                     buffer += self.next()
                 yield Token("identifier", buffer)
@@ -155,6 +155,13 @@ def is_syntax_identifier(identifier):
     EXPECT_ANY = 0
     EXPECT_UPPER = 1
     EXPECT_LOWER = 2
+
+    # Some of the identifier referring to Unicode categories are called
+    # XID_Category. The problem is that the XID_ portion is not a valid
+    # identifier based on our rules. This code special-case that by ignoring
+    # the problematic part of the identifier.
+    if identifier.startswith("XID_"):
+        identifier = identifier[len("XID_") :]
 
     expected = EXPECT_UPPER
     for char in identifier:

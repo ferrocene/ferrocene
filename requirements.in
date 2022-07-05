@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Critical Section GmbH
 
 sphinx
+sphinx-autobuild
 
 # Sphinx dependencies used for compatibility with Python 3.6. They're not
 # installed by default when running pip-tools on newer systems because they're

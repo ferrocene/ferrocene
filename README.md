@@ -33,6 +33,13 @@ building:
 
 The rendered version will be available in `build/html/`.
 
+You can also start a local server on port 8000 with automatic rebuild and
+reload whenever you change a file by passing the `-s` flag:
+
+```
+./make.py -s
+```
+
 ## Checking links consistency
 
 It's possible to run Rust's linkchecker tool on the rendered documentation, to

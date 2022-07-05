@@ -8,27 +8,31 @@
 
 from pathlib import Path
 import argparse
-import shutil
 import subprocess
 import venv
 
 
-def build_docs(root, env, clear):
+def build_docs(root, env, clear, serve):
     dest = root / "build"
 
-    if clear and dest.is_dir():
-        shutil.rmtree(dest)
+    args = ["-b", "html", "-d", dest / "doctrees"]
+    if clear:
+        args.append("-E")
+    if serve:
+        args += ["--watch", root / "exts"]
 
-    subprocess.run(
-        [
-            env.bin("sphinx-build"),
-            "-M",
-            "html",
-            root / "src",
-            dest,
-        ],
-        check=False,
-    )
+    try:
+        subprocess.run(
+            [
+                env.bin("sphinx-autobuild" if serve else "sphinx-build"),
+                *args,
+                root / "src",
+                dest / "html",
+            ],
+            check=False,
+        )
+    except KeyboardInterrupt:
+        pass
 
     return dest / "html"
 
@@ -98,7 +102,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c", "--clear", help="disable incremental builds", action="store_true"
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-s",
+        "--serve",
+        help="start a local server with live reload",
+        action="store_true",
+    )
+    group.add_argument(
         "--check-links", help="Check whether all links are valid", action="store_true"
     )
     args = parser.parse_args()
@@ -106,7 +117,7 @@ if __name__ == "__main__":
     root = Path(__file__).parent.resolve()
 
     env = VirtualEnv(root, root / ".venv")
-    rendered = build_docs(root, env, args.clear)
+    rendered = build_docs(root, env, args.clear, args.serve)
 
     if args.check_links:
         linkchecker = build_linkchecker(root)

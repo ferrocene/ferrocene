@@ -28,10 +28,15 @@ class DefIdNode(nodes.Element):
 
 class DefRefNode(nodes.Element):
     def __init__(self, kind, source_doc, text):
-        target = text
-        if "[" in text and "]" in text:
-            target = target[target.find("[") + 1 : target.rfind("]")]
+        if "<" in text and text.endswith(">"):
+            target_start = text.rfind("<")
+            target = text[target_start + 1 : len(text) - 1]
+            text = text[:target_start].rstrip()
+        elif "[" in text and "]" in text:
+            target = text[text.find("[") + 1 : text.rfind("]")]
             text = text.replace("[", "").replace("]", "")
+        else:
+            target = text
 
         super().__init__(
             ref_kind=kind,

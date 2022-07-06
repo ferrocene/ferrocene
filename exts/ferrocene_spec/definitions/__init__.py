@@ -94,7 +94,7 @@ class DefinitionsCollector(EnvironmentCollector):
                     del refs[i - removed]
                     removed += 1
 
-    def merge_others(self, app, env, docnames, other):
+    def merge_other(self, app, env, docnames, other):
         """
         Merge the collected informations from two environments into one.
 

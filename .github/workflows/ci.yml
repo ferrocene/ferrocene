@@ -9,6 +9,11 @@ on:
     branches: [staging, trying]
   pull_request: {}
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
 jobs:
   ci:
     name: CI
@@ -44,3 +49,23 @@ jobs:
           cname: spec.ferrocene.dev
           token: ${{ secrets.GITHUB_TOKEN }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+
+      - name: Authenticate with AWS
+        uses: ferrous-systems/shared-github-actions/aws-oidc@main
+        with:
+          role: arn:aws:iam::886866542769:role/publish-specification-preview
+        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'
+
+      - name: Upload specification preview to AWS
+        run: aws s3 cp --recursive build/html "s3://ferrocene-specification-preview/${GITHUB_SHA}"
+        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'
+
+      - name: Post comment in the PR with the preview link
+        run: |
+          # https://stackoverflow.com/a/66365284
+          # Extract the PR number from the commit message, or return code 128
+          pr="$(git show --format="%s" | head -n 1 | sed 's/^Try #\([0-9]\+\):.*$/\1/; t; q 128')"
+          curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pr}/comments -d "{\"body\": \"[Open the preview for this pull request!](https://ferrocene-specification-preview.s3.us-east-1.amazonaws.com/${GITHUB_SHA}/index.html)\"}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/trying'

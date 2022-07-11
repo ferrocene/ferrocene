@@ -149,7 +149,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: 2.5em 0 1em 0;
 }
 
-h1 span.section-number, h2.section-number, h3.section-number, h4.section-number, h5.section-number, h6.section-number {
+h1 span.section-number, h2 span.section-number, h3 span.section-number, h4 span.section-number, h5 span.section-number, h6 span.section-number {
     display: block;
     position: absolute;
     left: 0;

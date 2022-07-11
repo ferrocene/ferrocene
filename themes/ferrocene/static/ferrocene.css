@@ -90,6 +90,11 @@
     --footer-border: #dbdbdb;
     --footer-fg: #5f5f5f;
 
+    --admonition-green-bg: #d6f9d6;
+    --admonition-blue-bg: #daf3ff;
+    --admonition-yellow-bg: #fff7ca;
+    --admonition-red-bg: #fdd7cf;
+
     --numbers-width: 5rem;
     --numbers-fg: #747474;
 
@@ -480,6 +485,43 @@ td > :last-child, th > :last-child {
 
 td span.spec-paragraph-id, th span.spec-paragraph-id {
     margin-top: -0.8em;
+}
+
+/*******************
+ *   Admonitions   *
+ *******************/
+
+div.admonition {
+    margin: 1em 0;
+    padding: 1em;
+    border-radius: 0.4em;
+}
+
+div.admonition.tip, div.admonition.hint {
+    background: var(--admonition-green-bg);
+}
+
+div.admonition.note {
+    background: var(--admonition-blue-bg);
+}
+
+div.admonition.warning, div.admonition.caution, div.admonition.important {
+    background: var(--admonition-yellow-bg);
+}
+
+div.admonition.danger, div.admonition.error {
+    background: var(--admonition-red-bg);
+}
+
+div.admonition p {
+    margin: 0.5em 0 0 0;
+}
+
+div.admonition p.admonition-title {
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
 }
 
 /**************************************************

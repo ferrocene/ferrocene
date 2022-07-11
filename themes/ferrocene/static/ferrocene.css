@@ -1,0 +1,487 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: Critical Section GmbH */
+
+/*************
+ *   Fonts   *
+ *************/
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/raleway-400.ttf') format('truetype'), url('fonts/raleway-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 400;
+    font-style: italic;
+    src: url('fonts/raleway-400-italic.ttf') format('truetype'), url('fonts/raleway-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 700;
+    font-style: normal;
+    src: url('fonts/raleway-700.ttf') format('truetype'), url('fonts/raleway-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 700;
+    font-style: italic;
+    src: url('fonts/raleway-700-italic.ttf') format('truetype'), url('fonts/raleway-700-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/roboto-mono-400.ttf') format('truetype'), url('fonts/roboto-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 400;
+    font-style: italic;
+    src: url('fonts/roboto-mono-400-italic.ttf') format('truetype'), url('fonts/roboto-mono-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 700;
+    font-style: normal;
+    src: url('fonts/roboto-mono-700.ttf') format('truetype'), url('fonts/roboto-mono-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-weight: 700;
+    font-style: italic;
+    src: url('fonts/roboto-mono-700-italic.ttf') format('truetype'), url('fonts/roboto-mono-700-italic.woff2') format('woff2');
+}
+
+/*********************
+ *   Basic styling   *
+ *********************/
+
+:root {
+    --text-fg: #1b1b1b;
+    --link-fg: #3168b0;
+    --inline-code-bg: #ebebeb;
+    --code-block-bg: #f7f7f7;
+    --focus-border: #68a4e8;
+    --table-border: #dbdbdb;
+
+    --body-bg: #fff;
+    --header-fg: #194e80;
+
+    --sidebar-width: 21rem;
+    --sidebar-bg: #f7f7f7;
+    --sidebar-inactive-fg: var(--text-fg);
+    --sidebar-active-fg: var(--link-fg);
+
+    --sidebar-search-border: #dbdbdb;
+    --sidebar-search-bg: #fff;
+    --sidebar-search-placeholder-fg: #5f5f5f;
+    --sidebar-search-button-fg: var(--text-fg);
+    --sidebar-search-button-hover-fg: #194e80;
+
+    --numbers-width: 5rem;
+    --numbers-fg: #747474;
+
+    --content-width: 50rem;
+
+    --spec-error-fg: #f00;
+    --spec-syntax-literal-bg: #dbdbdb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Raleway', sans-serif;
+    color: var(--text-fg);
+    background: var(--body-bg);
+    margin: 0;
+}
+
+:focus {
+    outline: 2px solid var(--focus-border);
+}
+
+/************
+ *   Text   *
+ ************/
+
+a {
+    color: var(--link-fg);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+p {
+    margin: 1em 0;
+    line-height: 1.5em;
+}
+
+a {
+    color: var(--link-fg);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/****************
+ *   Headings   *
+ ****************/
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 2.5em 0 1em 0;
+}
+
+h1 span.section-number, h2.section-number, h3.section-number, h4.section-number, h5.section-number, h6.section-number {
+    display: block;
+    position: absolute;
+    left: 0;
+
+    color: var(--numbers-fg);
+    width: var(--numbers-width);
+    padding-right: 1rem;
+    text-align: right;
+}
+
+a.headerlink {
+    display: none;
+}
+
+a.headerlink:hover {
+    text-decoration: none;
+}
+
+h1:hover a.headerlink, h2:hover a.headerlink, h3:hover a.headerlink, h4:hover a.headerlink, h5:hover a.headerlink, h6:hover a.headerlink {
+    display: inline-block;
+    margin-left: 1rem;
+    color: var(--link-fg);
+}
+
+p.rubric {
+    margin: 2em 0 1em 0;
+    font-weight: 700;
+    text-align: center;
+}
+
+h1 + p.rubric, h2 + p.rubric, h3 + p.rubric, h4 + p.rubric, h5 + p.rubric, h6 + p.rubric {
+    margin-top: 1rem;
+}
+
+/********************************
+ *   Code snippets and blocks   *
+ ********************************/
+
+pre, code {
+    font-family: 'Roboto Mono', monospace;
+}
+
+pre {
+    background: var(--code-block-bg);
+    padding: 1rem;
+    border-radius: 0.3rem;
+    line-height: 1.5em;
+    font-size: 0.9rem;
+    overflow-y: scroll;
+}
+
+code {
+    display: inline-block;
+    background: var(--inline-code-bg);
+    padding: 0 0.3em;
+    border-radius: 0.2em;
+}
+
+pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+a:hover code {
+    text-decoration: underline;
+}
+
+/*************
+ *   Lists   *
+ *************/
+
+li {
+    margin: 0.5em 0;
+}
+
+/* Sphinx generates a <p> inside each <li>. */
+li > p:first-child {
+    margin-top: 0;
+}
+
+li > p:last-child {
+    margin-bottom: 0;
+}
+
+/**************
+ *   Layout   *
+ **************/
+
+@media (max-width: 55rem) {
+
+    div.wrapper div.sidebar div.toctree {
+        display: none;
+    }
+
+    div.wrapper div.sidebar input#toggle-toctree:checked + div.toctree {
+        display: block;
+    }
+}
+
+@media (min-width: 55rem) {
+    div.wrapper {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    div.wrapper div.sidebar {
+        position: sticky;
+        top: 0;
+        width: var(--sidebar-width);
+        max-height: 100vh;
+        overflow-y: scroll;
+        flex-shrink: 0;
+    }
+
+    div.wrapper div.sidebar label.toggle {
+        display: none;
+    }
+
+    div.wrapper div.content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    div.wrapper div.content div.page {
+        max-width: calc(var(--numbers-width) + var(--content-width));
+    }
+}
+
+input#toggle-toctree {
+    display: none;
+}
+
+/**********************
+ *   Header styling   *
+ **********************/
+
+header a {
+    display: block;
+    padding: 1.25rem;
+}
+
+header a:hover {
+    text-decoration: none;
+}
+
+header img {
+    display: block;
+    width: 10rem;
+    margin: auto;
+}
+
+header h1 {
+    color: var(--header-fg);
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-align: center;
+    margin: 0.4rem 0 0 0;
+}
+
+/**************************
+ *   Search box styling   *
+ **************************/
+
+form.side-search {
+    display: flex;
+    margin: 0 1rem;
+}
+
+form.side-search input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+
+    border: 1px solid var(--sidebar-search-border);
+    border-right: 0;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    background: var(--sidebar-search-bg);
+}
+
+form.side-search input::placeholder {
+    color: var(--sidebar-search-placeholder-fg);
+    opacity: 1;
+}
+
+form.side-search button {
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+
+    background: var(--sidebar-search-bg);
+    border: 1px solid var(--sidebar-search-border);
+    border-left: 0;
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+form.side-search button svg {
+    height: 1rem;
+    fill: var(--sidebar-search-button-fg);
+}
+
+form.side-search button:hover {
+    cursor: pointer;
+}
+
+form.side-search button:hover svg {
+    fill: var(--sidebar-search-button-hover-fg);
+}
+
+/***********************
+ *   Sidebar styling   *
+ ***********************/
+
+div.sidebar {
+    background: var(--sidebar-bg);
+}
+
+/**************************
+ *   Navigation styling   *
+ **************************/
+
+nav label.toggle {
+    display: block;
+    cursor: pointer;
+    text-align: center;
+    padding: 1rem;
+}
+
+nav label.toggle:hover {
+    color: var(--sidebar-active-fg);
+}
+
+nav p.caption {
+    font-weight: 700;
+    margin: 1.25rem 1rem 0.5rem 1rem;
+}
+
+nav ul {
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    margin: 0;
+    list-style: none;
+}
+
+nav a {
+    color: var(--sidebar-inactive-fg);
+    text-decoration: none;
+    padding: 0.35rem 1rem;
+    display: block;
+}
+
+nav a:hover,
+nav a.current {
+    color: var(--sidebar-active-fg);
+    text-decoration: none;
+}
+
+div.toctree {
+    padding-bottom: 1rem;
+}
+
+/********************
+ *   Page styling   *
+ ********************/
+
+div.page {
+    padding: 2rem 1rem 2rem var(--numbers-width);
+    position: relative;
+    margin: auto;
+}
+
+div.page > section > :first-child {
+    margin-top: 0;
+}
+
+div.page > section > :last-child {
+    margin-bottom: 0;
+}
+
+/**************
+ *   Tables   *
+ **************/
+
+table {
+    border-collapse: collapse;
+}
+
+table td, table th {
+    padding: 0.4em;
+    border-bottom: 1px solid var(--table-border);
+}
+
+table tr:last-child td {
+    border: 0;
+}
+
+td > :first-child, th > :first-child {
+    margin-top: 0;
+}
+
+td > :last-child, th > :last-child {
+    margin-bottom: 0;
+}
+
+td span.spec-paragraph-id, th span.spec-paragraph-id {
+    margin-top: -0.8em;
+}
+
+/**************************************************
+ *   Ferrocene Language Specification extension   *
+ **************************************************/
+
+span.spec-paragraph-id {
+    display: block;
+    position: absolute;
+    left: 0;
+
+    color: var(--numbers-fg);
+    width: var(--numbers-width);
+    padding-right: 1rem;
+    text-align: right;
+}
+
+span.spec-paragraph-id {
+    font-size: 0.8em;
+}
+
+.spec-missing-ref {
+    color: var(--spec-error-fg);
+}
+
+pre.spec-syntax .spec-syntax-literal {
+    font-weight: 700;
+    background: var(--spec-syntax-literal-bg);
+    border-radius: 0.2em;
+}

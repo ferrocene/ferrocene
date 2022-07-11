@@ -19,7 +19,7 @@ def build_docs(root, env, clear, serve):
     if clear:
         args.append("-E")
     if serve:
-        args += ["--watch", root / "exts"]
+        args += ["--watch", root / "exts", "--watch", root / "themes"]
 
     try:
         subprocess.run(

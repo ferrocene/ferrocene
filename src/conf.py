@@ -39,11 +39,9 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "nature"
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [
-    "../exts/ferrocene_spec/static/",
-]
+html_theme = "ferrocene"
+html_theme_path = ["../themes"]
+
+html_title = "Ferrocene Language Specification"
+html_short_title = "Language Specification"

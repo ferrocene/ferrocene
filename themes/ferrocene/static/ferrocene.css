@@ -428,11 +428,11 @@ div.page {
     margin: auto;
 }
 
-div.page > section > :first-child {
+div.page > :first-child, div.page > section:first-child > :first-child {
     margin-top: 0;
 }
 
-div.page > section > :last-child {
+div.page > :last-child, div.page > section:last-child > :last-child {
     margin-bottom: 0;
 }
 

@@ -87,6 +87,9 @@
     --sidebar-search-button-fg: var(--text-fg);
     --sidebar-search-button-hover-fg: #194e80;
 
+    --footer-border: #dbdbdb;
+    --footer-fg: #5f5f5f;
+
     --numbers-width: 5rem;
     --numbers-fg: #747474;
 
@@ -425,6 +428,28 @@ div.page > section > :first-child {
 }
 
 div.page > section > :last-child {
+    margin-bottom: 0;
+}
+
+/**************
+ *   Footer   *
+ **************/
+
+footer {
+    border-top: 1px solid var(--footer-border);
+    color: var(--footer-fg);
+    padding: 1rem;
+}
+
+footer p {
+    margin: 0.35em 0;
+}
+
+footer :first-child {
+    margin-top: 0;
+}
+
+footer :last-child {
     margin-bottom: 0;
 }
 

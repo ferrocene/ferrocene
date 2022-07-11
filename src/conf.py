@@ -43,5 +43,9 @@ exclude_patterns = []
 html_theme = "ferrocene"
 html_theme_path = ["../themes"]
 
+html_theme_options = {
+    "license": "MIT or Apache 2.0",
+}
+
 html_title = "Ferrocene Language Specification"
 html_short_title = "Language Specification"

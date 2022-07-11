@@ -21,15 +21,19 @@ class SpecDomain(Domain):
     def get_objects(self):
         return definitions.get_objects(self.env)
 
+    def merge_domaindata(self, docnames, other):
+        def is_empty(data):
+            return not data or list(data.keys()) == ["version"]
+
+        if not is_empty(self.data) or not is_empty(other):
+            raise NotImplementedError(
+                "there is data in the domain, merge_domaindata should be implemented"
+            )
+
 
 def setup(app):
     app.add_domain(SpecDomain)
     definitions.setup(app)
-
-    # This works because `ext/ferrocene_spec/static` is added to the list of
-    # HTML static paths in `conf.py`. Unfortunately there is no non-hackish way
-    # to add a stylesheet from an extension.
-    app.add_css_file("spec.css")
 
     app.add_config_value(
         name="spec_std_docs_url",

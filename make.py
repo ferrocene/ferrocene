@@ -15,11 +15,11 @@ import venv
 def build_docs(root, env, clear, serve):
     dest = root / "build"
 
-    args = ["-b", "html", "-d", dest / "doctrees"]
+    args = ["-b", "html", "-d", dest / "doctrees", "-j", "auto"]
     if clear:
         args.append("-E")
     if serve:
-        args += ["--watch", root / "exts"]
+        args += ["--watch", root / "exts", "--watch", root / "themes"]
 
     try:
         subprocess.run(

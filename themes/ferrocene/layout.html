@@ -1,0 +1,40 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: Critical Section GmbH #}
+
+{% extends "basic/layout.html" %}
+{% from "fontawesome.html" import icon_search %}
+
+{% block content %}
+<div class="wrapper">
+    <div class="sidebar">
+        <header>
+            <a href="{{ pathto('index') }}">
+                <img src="{{ pathto('_static/ferrocene.svg', 1) }}" alt="Ferrocene logo">
+                <h1>{{ shorttitle }}</h1>
+            </a>
+        </header>
+        <form action="{{ pathto('search') }}" method="get" class="side-search">
+            <input type="text" name="q" placeholder="Search...">
+            <button type="submit">{{ icon_search() }}</button>
+        </form>
+        <nav>
+            <label for="toggle-toctree" class="toggle">Toggle navigation</label>
+            <input type="checkbox" id="toggle-toctree">
+            <div class="toctree">
+                {{ toctree(includehidden=false, collapse=false, maxdepth=1) }}
+            </div>
+        </nav>
+    </div>
+    <div class="content">
+        <div class="page">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# The blocks below, defined in the basic layout, are effectively removed from
+   the template as we replace their contents with an empty string. #}
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+{% block footer %}{% endblock %}

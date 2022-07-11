@@ -22,6 +22,8 @@ Ferrocene Language Specification
    implementations
    generics
    attributes
+   names-and-resolution
+   ownership-and-deconstruction
    exceptions-and-errors
    concurrency
    program-structure-and-compilation

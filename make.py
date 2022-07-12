@@ -21,6 +21,10 @@ def build_docs(root, env, clear, serve):
     if serve:
         args += ["--watch", root / "exts", "--watch", root / "themes"]
 
+    commit = current_git_commit(root)
+    if commit is not None:
+        args += ["-D", f"html_theme_options.commit={commit}"]
+
     try:
         subprocess.run(
             [
@@ -66,6 +70,27 @@ def build_linkchecker(root):
         subprocess.run(["cargo", "build", "--release"], cwd=src, check=True)
 
     return bin
+
+
+def current_git_commit(root):
+    try:
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                check=True,
+                stdout=subprocess.PIPE,
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
+    # `git` executable missing from the system
+    except FileNotFoundError:
+        print("warning: failed to detect git commit: missing executable git")
+        return
+    # `git` returned an error (git will print the actual error to stderr)
+    except subprocess.CalledProcessError:
+        print("warning: failed to detect git commit: git returned an error")
+        return
 
 
 class VirtualEnv:

@@ -33,6 +33,13 @@ templates_path = []
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+rst_prolog = """
+.. caution::
+
+   You're reading a pre-release draft of the Ferrocene Language Specification.
+   Some parts of this document might be missing, incomplete or incorrect.
+"""
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -42,6 +49,10 @@ exclude_patterns = []
 
 html_theme = "ferrocene"
 html_theme_path = ["../themes"]
+
+html_theme_options = {
+    "license": "MIT or Apache 2.0",
+}
 
 html_title = "Ferrocene Language Specification"
 html_short_title = "Language Specification"

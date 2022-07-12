@@ -524,6 +524,11 @@ div.admonition p.admonition-title {
     margin: 0;
 }
 
+/* Fix margin when admonitions are added at the top of the page */
+div.page > div.admonition:first-child + section h1 {
+    margin-top: 1.5em;
+}
+
 /**************************************************
  *   Ferrocene Language Specification extension   *
  **************************************************/

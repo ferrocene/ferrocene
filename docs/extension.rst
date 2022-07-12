@@ -5,10 +5,10 @@
 FLS Sphinx Extension
 ====================
 
-To enhance the Ferrocene Language Specification, and to make authoring,
-updating, and testing it easier, we developed and use a custom Sphinx extension
-that adds new roles and directives. The source code of the extension is in the
-``exts/ferrocene_spec`` directory.
+To enhance the Ferrocene Language Specification, and to facilitate its
+authoring, updating, and testing it easier, we developed and use a custom
+Sphinx extension that adds new roles and directives. The source code of the
+extension is in the ``exts/ferrocene_spec`` directory.
 
 .. contents:: In this document:
 
@@ -143,9 +143,9 @@ Paragraph IDs
 =============
 
 Ferrocene's test suite needs each paragraph in the FLS to have a unique ID
-attached to it. To ensure that happens, the extension provides a way to easily
-define the ID for each paragraph, and to use that ID to link to the paragraph
-from other parts of the FLS.
+attached to it. To ensure that this happens, the extension provides a way to
+easily define the ID for each paragraph, and to use that ID to link to the
+paragraph from other parts of the FLS.
 
 Paragraph IDs can be added to a paragraph with the ``:dp:`id``` role. The role must
 contain an unique random ID prefixed with ``fls_``, and the role must appear at

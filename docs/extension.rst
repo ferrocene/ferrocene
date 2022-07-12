@@ -156,7 +156,8 @@ the start of a paragraph:
    :dp:`fls_qTgd9xuAY3n3`
    This is a paragraph with an ID.
 
-You can generate a list of random IDs by running the following command::
+You can generate a list of random IDs by running the following command from the
+root of the specification repository::
 
    ./generate-random-ids.py
 

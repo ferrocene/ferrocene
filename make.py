@@ -74,12 +74,15 @@ def build_linkchecker(root):
 
 def current_git_commit(root):
     try:
-        return subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            check=True,
-            text=True,
-            stdout=subprocess.PIPE,
-        ).stdout.strip()
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                check=True,
+                stdout=subprocess.PIPE,
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
     # `git` executable missing from the system
     except FileNotFoundError:
         print("warning: failed to detect git commit: missing executable git")

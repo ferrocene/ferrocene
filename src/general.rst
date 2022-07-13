@@ -469,6 +469,7 @@ Situations that result in unbounded errors.
 
 .. rubric:: Implementation Requirements
 
+:dp:`fls_o4rdsbc7u98`
 Additional requirements for conforming tools.
 
 .. rubric:: Examples
@@ -563,7 +564,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		FloatExponent
+   FloatExponent
 
 * :dp:`fls_pts29mb5ld68`
   Words in **bold** font are used to indicate literal words and :t:`[keyword]s`,
@@ -571,7 +572,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		$$crate$$
+   $$crate$$
    $$proc_macro_derive$$
    $$Self$$
    $$tt$$
@@ -582,7 +583,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		$$1$$
+   $$1$$
    $$F$$
    $${$$
    $$&&$$
@@ -594,7 +595,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		$$\t$$
+   $$\t$$
    $$\\$$
 
 * :dp:`fls_pp9vtjlyblrl`
@@ -603,7 +604,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		CrateRenaming?
+   CrateRenaming?
 
 * :dp:`fls_6e2vd9fvhsmk`
   A prefix followed by ``*`` (asterisk) is used to denote zero or more
@@ -611,7 +612,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		OuterAttributeOrDoc*
+   OuterAttributeOrDoc*
 
 * :dp:`fls_4onq0kkrt6qv`
   A prefix followed by ``+`` (plus sign) is used to denote one or more
@@ -619,7 +620,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		MacroMatch+
+   MacroMatch+
 
 * :dp:`fls_qu4rsmnq659w`
   A prefix followed by ``L-H`` is used to denote the number of repetitions of
@@ -627,14 +628,14 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		HexadecimalDigit1-6
+   HexadecimalDigit1-6
 
 * :dp:`fls_rllu7aksf17e`
   ``[ ]`` (square brackets) indicate any character within, for example:
 
 .. syntax::
 
-   		[$$8$$ $$a$$ $$\r$$ $$:$$]
+   [$$8$$ $$a$$ $$\r$$ $$:$$]
 
 * :dp:`fls_blvsfqeevosr`
   ``~[ ]`` (square brackets preceded by tilde) indicate any character except the
@@ -642,7 +643,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		~[$$8$$ $$a$$ $$\r$$ $$:$$]
+   ~[$$8$$ $$a$$ $$\r$$ $$:$$]
 
 * :dp:`fls_lwcjq3wzjyvb`
   ``[ - ]`` indicates any character within the specified range, inclusive. For
@@ -650,21 +651,21 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   		[$$a$$-$$f$$]
+   [$$a$$-$$f$$]
 
 * :dp:`fls_v7wd5yk00im6`
   A ``|`` (vertical line) separates alternative items, for example:
 
 .. syntax::
 
-   		$$self$$ | Identifier | $$_$$
+   $$self$$ | Identifier | $$_$$
 
 * :dp:`fls_nf8alga8uz6c`
   ``( )`` (parentheses) are used to group items, for example:
 
 .. syntax::
 
-   		($$,$$ ConfigurationPredicate)
+   ($$,$$ ConfigurationPredicate)
 
 :dp:`fls_u5ryccs9cpex`
 Whenever the run-time semantics define certain actions to happen in an arbitrary

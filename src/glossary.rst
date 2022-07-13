@@ -337,7 +337,7 @@ atomic type
 
 :dp:`fls_cycpv4fopgx2`
 An :dt:`atomic type` is a :t:`type` defined in :t:`module`
-:c:`core::sync::atomic`.
+:std:`core::sync::atomic`.
 
 attribute
 ^^^^^^^^^
@@ -525,7 +525,7 @@ bool
 ^^^^
 
 :dp:`fls_wtmaf5amvleh`
-:dt:`bool` is a :t:`type` whose :t:`[value]s` denote the truth values of logic
+:dc:`bool` is a :t:`type` whose :t:`[value]s` denote the truth values of logic
 and Boolean algebra.
 
 boolean literal
@@ -665,8 +665,15 @@ callee type
 
 :dp:`fls_o21myf6wnnn6`
 A :dt:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :c:`core::ops::Fn`,
-:c:`core::ops::FnMut`, or :c:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
+:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
+
+canonical path
+^^^^^^^^^^^^^^
+
+:dp:`fls_drdjwsejmq6r`
+A :dt:`canonical path` is a :t:`path` that fully qualifies a :t:`name` starting
+from the current :t:`crate`.
 
 capture mode
 ^^^^^^^^^^^^
@@ -843,12 +850,6 @@ constant context
 A :dt:`constant context` is a :t:`construct` that requires a :t:`constant
 expression`.
 
-constant evaluation
-^^^^^^^^^^^^^^^^^^^
-
-:dt:`Constant evaluation` is the process of computing the result of a
-:t:`constant expression`.
-
 constant expression
 ^^^^^^^^^^^^^^^^^^^
 
@@ -875,13 +876,16 @@ See :s:`ConstantInitializer`.
 constant parameter
 ^^^^^^^^^^^^^^^^^^
 
+:dp:`fls_z7e491m3dx4u`
 A :dt:`constant parameter` is a :t:`generic parameter` for a :t:`constant`.
 
+:dp:`fls_9093wziwxk1g`
 See :s:`ConstantParameter`.
 
 constrain
 ^^^^^^^^^
 
+:dp:`fls_rm92m5qe7jrx`
 A :t:`generic parameter` is said to :t:`constrain` an :t:`implementation` if it
 makes the :t:`[implementation]'s` applicability more narrow.
 
@@ -936,6 +940,16 @@ A :dt:`crate import` specifies a dependency on an external :t:`crate`.
 
 :dp:`fls_nmdxagg39hz6`
 See :s:`ExternCrateImport`.
+
+create public modifier
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_dj7fmrqhbhsv`
+A :t:`crate public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the current :t:`crate` only.
+
+:dp:`fls_wjfupeyeczp0`
+See :s:`CratePublicModifier`.
 
 crate root
 ^^^^^^^^^^
@@ -1088,7 +1102,7 @@ dynamically sized type
 
 :dp:`fls_eeyxu730z2pw`
 A :dt:`dynamically sized type` is a :t:`type` that does not implement the
-:c:`core::marker::Sized` :t:`trait`.
+:std:`core::marker::Sized` :t:`trait`.
 
 elaboration
 ^^^^^^^^^^^
@@ -1144,6 +1158,13 @@ end of line
 :dp:`fls_tmqt52j5w4f`
 An :dt:`end of line` is a sequence of one or more :s:`[FormatEffector]s` other
 than character 0x09 (horizontal tabulation).
+
+entity
+^^^^^^
+
+:dp:`fls_mdbck557k8sy`
+An :dt:`entity` is a :t:`construct` that can be referred to within a program by
+using a :t:`path`.
 
 enum
 ^^^^
@@ -1239,8 +1260,10 @@ See :s:`Expression`.
 expression statement
 ^^^^^^^^^^^^^^^^^^^^
 
+:dp:`fls_ds0pspiqk4am`
 An :dt:`expression statement` is an :t:`expression` whose result is ignored.
 
+:dp:`fls_41jt1h3audzv`
 See :s:`ExpressionStatement`.
 
 expression-with-block
@@ -1367,7 +1390,7 @@ fixed sized type
 
 :dp:`fls_eadiywl20jo4`
 A :dt:`fixed sized type` is a :t:`type` that implements the
-:c:`core::marker::Sized` :t:`trait`.
+:std:`core::marker::Sized` :t:`trait`.
 
 float literal
 ^^^^^^^^^^^^^
@@ -1458,6 +1481,7 @@ identifies a :t:`function`.
 function parameter
 ^^^^^^^^^^^^^^^^^^
 
+:dp:`fls_2feq1ky9pla1`
 A :dt:`function parameter` is a :t:`construct` that matches an input :t:`value`
 at the site of a :t:`call expression` or a :t:`method call expression` to
 a pattern.
@@ -1503,6 +1527,7 @@ function type
 function-like macro
 ^^^^^^^^^^^^^^^^^^^
 
+:dp:`fls_psnab9cuq4bu`
 A :dt:`function-like macro` is a :t:`procedural macro` that consumes a stream of
 :t:`[token]s` and produces a stream of tokens, and is invoked directly.
 
@@ -1511,7 +1536,8 @@ future
 
 :dp:`fls_pvigospl4n3g`
 A :dt:`future` represents a :t:`value` of a :t:`type` that implements the
-:c:`core::future::Future` :t:`trait` which may not have finished computing yet.
+:std:`core::future::Future` :t:`trait` which may not have finished computing
+yet.
 
 future operand
 ^^^^^^^^^^^^^^
@@ -1586,6 +1612,23 @@ generic union
 
 :dp:`fls_93rxr0yjx1e7`
 A :dt:`generic union` is a :t:`union` with :t:`[generic parameter]s`.
+
+glob import
+^^^^^^^^^^^
+
+:dp:`fls_90qsib7g8e9j`
+A :t:`glob import` is a :t:`use import` that brings all :t:`[name]s` with
+:t:`public visibility` prefixed by its :t:`path` prefix into :t:`scope`.
+
+:dp:`fls_n4plc55cij0j`
+See :s:`GlobImport`.
+
+global path
+^^^^^^^^^^^
+
+:dp:`fls_msg8jw9momfw`
+A :dt:`global path` is a :t:`path` that starts with :t:`namespace qualifier`
+``::``.
 
 global type variable
 ^^^^^^^^^^^^^^^^^^^^
@@ -1778,6 +1821,7 @@ See :s:`ImplementedTrait`.
 implementing type
 ^^^^^^^^^^^^^^^^^
 
+:dp:`fls_vs5ia3uupdcc`
 An :dt:`implementing type` is the :t:`type` that the :t:`[associated item]s` of
 an :t:`implementation` are associated with.
 
@@ -1789,6 +1833,12 @@ implicit borrow
 
 :dp:`fls_q2v9ejpcvtwg`
 An :dt:`implicit borrow` is a :t:`borrow` that **???**.
+
+in scope
+^^^^^^^^
+
+:dp:`fls_sy380geqvf2l`
+A :t:`name` is :dt:`in scope` when it can be referred to.
 
 inclusive range pattern
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2266,20 +2316,24 @@ See :s:`LiteralPattern`.
 local variable
 ^^^^^^^^^^^^^^
 
+:dp:`fls_3inlcyi6444u`
 A :dt:`local variable` is a :t:`variable` that refers to a :t:`value` allocated
 directly on the stack.
 
 loop
 ^^^^
 
+:dp:`fls_omjnvxva07z2`
 See :t:`loop expression`.
 
 loop expression
 ^^^^^^^^^^^^^^^
 
+:dp:`fls_2yypq3m1kquj`
 A :dt:`loop expression` is an :t:`expression` that evaluates a :t:`block
 expression` continuously as long as some criterion holds true.
 
+:dp:`fls_o2dyznhq7rez`
 See :s:`LoopExpression`.
 
 macro
@@ -2556,8 +2610,7 @@ name
 ^^^^
 
 :dp:`fls_jjpzrs38vs3y`
-A :dt:`name` is an :t:`identifier` that defines an :t:`entity` within the
-program text.
+A :dt:`name` identifies an :t:`entity` within the program text.
 
 :dp:`fls_yrzevg5kd4bi`
 See :s:`Name`.
@@ -2606,6 +2659,16 @@ A :dt:`negation expression` is an :t:`expression` that negates its :t:`operand`.
 
 :dp:`fls_o1f35ud4klvv`
 See :s:`NegationExpression`.
+
+nesting import
+^^^^^^^^^^^^^^
+
+:dp:`fls_nhkqkdqo32xs`
+A :dt:`nesting import` is a :t:`use import` that provides a common :t:`path`
+prefix for its nested :t:`[use import]s`.
+
+:dp:`fls_z4d611glen13`
+See :s:`NestingImport`.
 
 never type
 ^^^^^^^^^^
@@ -2766,7 +2829,7 @@ panic
 
 :dp:`fls_t3kpbnmohtp6`
 A :dt:`panic` is an abnormal program state caused by invoking :t:`macro`
-:c:`core::panic`.
+:std:`core::panic`.
 
 parenthesized expression
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2798,6 +2861,13 @@ of :t:`[lexical element]s`.
 :dp:`fls_lovkvqoni3xs`
 See :s:`ParenthesizedTypeSpecification`.
 
+path
+^^^^
+
+:dp:`fls_u3jyud6mhy1f`
+A :dt:`path` is a sequence of :t:`[path segment]s` logically separated by
+:dt:`namespace qualifier` ``::`` that resolves to a :t:`name`.
+
 path expression
 ^^^^^^^^^^^^^^^
 
@@ -2816,6 +2886,15 @@ variant` without :t:`[field]s`, or a :t:`unit struct` indicated by a :t:`path`.
 
 :dp:`fls_9fudbxoyq8k4`
 See :s:`PathPattern`.
+
+path segment
+^^^^^^^^^^^^
+
+:dp:`fls_gsumebjc2bsp`
+A :dt:`path segment` is a constituent of a :t:`path`.
+
+:dp:`fls_m067uq7fo66i`
+See :s:`PathSegment`, :s:`SimplePathSegment`, :s:`TypePathSegment`.
 
 pattern
 ^^^^^^^
@@ -2846,18 +2925,21 @@ See :s:`PatternWithoutAlternation`.
 place expression
 ^^^^^^^^^^^^^^^^
 
+:dp:`fls_z6mgu2mk142r`
 A :dt:`place expression` is an :t:`expression` that represents a memory
 location.
 
 place expression context
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
+:dp:`fls_fqcx8suiy5k`
 A :dt:`place expression context` is a :t:`construct` that requires a :t:`place
 expression`.
 
 plane
 ^^^^^
 
+:dp:`fls_x1wbguoqdsf9`
 In :t:`Unicode`, a :dt:`plane` is a continuous group of 65,536 :t:`[code
 point]s`.
 
@@ -2897,12 +2979,28 @@ A :dt:`primitive type` is a :t:`type` class that includes the :t:`never type`,
 It might be that the reference (where I assume we copied some usages from) was
 referring to a broader set of types as primitives.**
 
+private visibility
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_duop22hyaweq`
+:dt:`Private visibility` is a kind of :t:`visibility` that allows a :t:`name`
+to be referred to only by the current :t:`module` of the :t:`entity`, and its
+descendant :t:`[module]s`.
+
 procedural macro
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_u4utpx4zgund`
 A :dt:`procedural macro` is a :t:`macro` that encapsulates syntactic
 transformations in a :t:`function`.
+
+public visibility
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_6cfxqtl921ko`
+:dt:`Public visibility` is a kind of :t:`visibility` that allows a :t:`name`
+to be referred to from arbitrary :t:`module` ``M`` as long as the ancestor
+:t:`[module]s` of the related :t:`entity` can be referred to from ``M``.
 
 pure identifier
 ^^^^^^^^^^^^^^^
@@ -3316,6 +3414,12 @@ rustc
 Rust-c (or :dt:`rustc`) is a compiler that implements the Ferrocene Language
 Specification.
 
+scope
+^^^^^
+
+:dp:`fls_fachaj550cq1`
+A :dt:`scope` is a region of program text where a :t:`name` can be referred to.
+
 selected field
 ^^^^^^^^^^^^^^
 
@@ -3338,11 +3442,21 @@ self parameter
 A :dt:`self parameter` is a :t:`function parameter` expressed by keyword
 ``self``.
 
+self public modifier
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ln3bzqgctfym`
+A :t:`self public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`private visibility`.
+
+:dp:`fls_21cvbfjpckkt`
+See :s:`SelfPublicModifier`.
+
 send type
 ^^^^^^^^^
 
 :dp:`fls_qfkng98dw6yy`
-A :dt:`send type` is a :t:`type` that implements the :c:`core::marker::Send`
+A :dt:`send type` is a :t:`type` that implements the :std:`core::marker::Send`
 :t:`trait`.
 
 separator
@@ -3452,6 +3566,36 @@ simple byte literal
 \ | A :dt:`simple byte literal` is a :t:`byte literal` that consists of exactly
 one byte character.
 | See ``SimpleByteLiteral.``
+
+simple import
+^^^^^^^^^^^^^
+
+:dp:`fls_jrlzpoauui9g`
+A :t:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
+local :t:`name` by using an optional :t:`renaming`.
+
+:dp:`fls_ta5t4h25unsw`
+See :s:`SimpleImport`.
+
+simple path public modifier
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_mby9r0jm6uyv`
+A :dt:`simple path public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the provided :t:`simple path` only.
+
+:dp:`fls_mud4hw74kuh6`
+See :s:`SimplePathPublicModifier`.
+
+simple public modifier
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ce1ounn1g68`
+A :dt:`simple public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility`.
+
+:dp:`fls_rd68vm2f2qy5`
+See :s:`SelfPublicModifier`.
 
 simple string literal
 ^^^^^^^^^^^^^^^^^^^^^
@@ -3677,6 +3821,16 @@ suffixed integer
 :dp:`fls_ltzetxu3sq7k`
 A :dt:`suffixed integer` is an :t:`integer literal` with an :t:`integer suffix`.
 
+super public modifier
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_vry5mhs3a5wv`
+A :dt:`super public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the parent :t:`module` only.
+
+:dp:`fls_4a1s9bcrk5oy`
+See :s:`SuperPublicModifier`.
+
 supertrait
 ^^^^^^^^^^
 
@@ -3688,7 +3842,7 @@ sync type
 ^^^^^^^^^
 
 :dp:`fls_rpc0c8qx3nbo`
-A :dt:`sync type` is a :t:`type` that implements the :c:`core::marker::Sync`
+A :dt:`sync type` is a :t:`type` that implements the :std:`core::marker::Sync`
 :t:`trait`.
 
 syntactic category
@@ -3761,7 +3915,7 @@ tokens
 ^^^^^^
 
 :dp:`fls_v23kqvyvscd7`
-:dt:`Token`\ s are a subset of :t:`[lexical element]s` consumed by
+:dt:`[Token]s` are a subset of :t:`[lexical element]s` consumed by
 :t:`[macro]s`.
 
 trait
@@ -3917,6 +4071,13 @@ of other :t:`[type]s`.
 
 :dp:`fls_rkugxsau1w78`
 See :s:`TupleTypeSpecification`.
+
+type
+^^^^
+
+:dp:`fls_nhlh7vvgsbwo`
+A :dt:`type` defines a set of :t:`[value]s` and a set of operations that act on
+those :t:`[value]s`.
 
 type alias
 ^^^^^^^^^^
@@ -4281,6 +4442,16 @@ unsuffixed integer
 An :dt:`unsuffixed integer` is an :t:`integer literal` without an :t:`integer
 suffix`.
 
+use import
+^^^^^^^^^^
+
+:dp:`fls_uccv9zthh5vt`
+A :dt:`use import` brings :t:`[name]s` into :t:`scope` within the :t:`module` or
+:t:`block expression` where the :t:`use import` resides.
+
+:dp:`fls_ib5wf62j4uhr`
+See :s:`UseImport`.
+
 usize
 ^^^^^
 
@@ -4332,6 +4503,20 @@ variance
 parameter]s` that describes the circumstances under which a :t:`generic type`
 is a :t:`subtype` of an instantiation of itself with different :t:`[generic
 argument]s`.
+
+visibility
+^^^^^^^^^^
+
+:dp:`fls_sadmsqhptlho`
+:dt:`Visibility` is a property of :t:`[item]s` that determines which
+:t:`[module]s` can refer to the :t:`name` of an :t:`item`.
+
+visibility modifier
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ze7befho4jhs`
+A :dt:`visibility modifier` sets the :t:`visibility` of the :t:`name` of an
+:t:`item`.
 
 weak keyword
 ^^^^^^^^^^^^

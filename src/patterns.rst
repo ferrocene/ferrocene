@@ -288,7 +288,7 @@ When a :t:`path pattern` expressed as a :t:`path-in-expression` refers to
 a :t:`constant`, the :t:`constant` shall not be of a :t:`union type`. If
 the :t:`constant` is of an :t:`enum type` or :t:`struct type`, then the
 :t:`constant` shall be subject to :t:`attribute` :c:`derive` with arguments
-:c:`core::cmp::Eq` and :c:`core::cmp::PartialEq`.
+:std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
 
 :dp:`fls_bv9psmitxfuw`
 A :t:`path pattern` expressed as a :t:`qualified path-in-expression` shall refer
@@ -982,8 +982,10 @@ it is being matched against.
 A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
 matching the :t:`value` it is being matched against.
 
+:dp:`fls_mtkx414qk66c`
 An :t:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
 
+:dp:`fls_sccfjvu95qfr`
 A :t:`refutable type` is a :t:`type` that has more than one :t:`value`.
 
 :dp:`fls_l76ycteulo8e`
@@ -994,12 +996,14 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 
 .. rubric:: Examples
 
+:dp:`fls_sgu9bnp7xajv`
 ``x`` is an irrefutable pattern because it always matches ``42``.
 
 .. code-block:: text
 
    let x = 42;
 
+:dp:`fls_cl1g4fxfa020`
 ``y`` is a refutable pattern because it does not match ``value`` when ``value``
 denotes :std:`core::option::Option::None`.
 
@@ -1075,8 +1079,8 @@ follows:
 * :dp:`fls_pxvtqxke1enp`
   If the :t:`binding mode` is "by value", then the :t:`binding` is bound
   to a copy of the matched :t:`value` if its :t:`type` implements the
-  :c:`core::marker::Copy` :t:`trait`, otherwise the :t:`binding` is bound to the
-  move of the matched :t:`value`.
+  :std:`core::marker::Copy` :t:`trait`, otherwise the :t:`binding` is bound to
+  the move of the matched :t:`value`.
 
 Pattern Matching
 ----------------

@@ -84,7 +84,7 @@ a :t:`trait`.
 An :t:`associated trait type` shall not have an :t:`initialization type`.
 
 :dp:`fls_a5prbmuruma4`
-An :t:`associated trait type` has an implicit :c:`core::marker::Sized`
+An :t:`associated trait type` has an implicit :std:`core::marker::Sized`
 :t:`bound`.
 
 :dp:`fls_vp2ov6ykueue`

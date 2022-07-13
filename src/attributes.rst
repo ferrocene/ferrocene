@@ -154,7 +154,7 @@ Built-in Attributes
 A :t:`built-in attribute` is a language-defined :t:`attribute`.
 
 :dp:`fls_bxucstrfcco8`
-The following :t:`[built-in attribute]s` are :dt:`code generation attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[code generation attribute]s`:
 
 * :dp:`fls_wle815gb9ai2`
   :t:`Attribute` :c:`cold`.
@@ -172,8 +172,8 @@ The following :t:`[built-in attribute]s` are :dt:`code generation attribute`\ s:
   :t:`Attribute` :c:`track_caller`.
 
 :dp:`fls_87o6n9et9jio`
-The following :t:`[built-in attribute]s` are :dt:`conditional compilation
-attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[conditional compilation
+attribute]s`:
 
 * :dp:`fls_ui0i3rpt5v5u`
   :t:`Attribute` :c:`cfg`.
@@ -182,7 +182,7 @@ attribute`\ s:
   :t:`Attribute` :c:`cfg_attr`.
 
 :dp:`fls_d8spdkjzp496`
-The following :t:`[built-in attribute]s` are :dt:`derivation attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[derivation attribute]s`:
 
 * :dp:`fls_vidbcv25dyud`
   :t:`Attribute` :c:`automatically_derived`.
@@ -191,7 +191,7 @@ The following :t:`[built-in attribute]s` are :dt:`derivation attribute`\ s:
   :t:`Attribute` :c:`derive`.
 
 :dp:`fls_dtb3t5ht5ngf`
-The following :t:`[built-in attribute]s` are :dt:`diagnostics attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[diagnostics attribute]s`:
 
 * :dp:`fls_c5n4gzgs79vv`
   :t:`Attribute` :c:`allow`.
@@ -212,14 +212,14 @@ The following :t:`[built-in attribute]s` are :dt:`diagnostics attribute`\ s:
   :t:`Attribute` :c:`warn`.
 
 :dp:`fls_3fxhz0olhbcy`
-The following :t:`[built-in attribute]s` are :dt:`documentation attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:
 
 * :dp:`fls_oexj0952o05u`
   :t:`Attribute` :c:`doc`.
 
 :dp:`fls_q579e97n1m8j`
-The following :t:`[built-in attribute]s` are :dt:`foreign function interface
-attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[foreign function interface
+attribute]s`:
 
 * :dp:`fls_sn43rofpq6ld`
   :t:`Attribute` :c:`crate_name`.
@@ -255,7 +255,7 @@ attribute`\ s:
   :t:`Attribute` :c:`used`.
 
 :dp:`fls_1gyg8hfb13n7`
-The following :t:`[built-in attribute]s` are :dt:`limits attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[limits attribute]s`:
 
 * :dp:`fls_6005g57evfbp`
   :t:`Attribute` :c:`recursion_limit`.
@@ -264,7 +264,7 @@ The following :t:`[built-in attribute]s` are :dt:`limits attribute`\ s:
   :t:`Attribute` :c:`type_length_limit`.
 
 :dp:`fls_vsix3pqf519x`
-The following :t:`[built-in attribute]s` are :dt:`macro attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[macro attribute]s`:
 
 * :dp:`fls_c8uqw8p0qrh5`
   :t:`Attribute` :c:`macro_export`.
@@ -282,13 +282,13 @@ The following :t:`[built-in attribute]s` are :dt:`macro attribute`\ s:
   :t:`Attribute` :c:`proc_macro_derive`.
 
 :dp:`fls_1v9p4vr1nszn`
-The following :t:`[built-in attribute]s` are :dt:`modules attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[modules attribute]s`:
 
 * :dp:`fls_jvkgtnulrqgh`
   :t:`Attribute` :c:`path`.
 
 :dp:`fls_k9p2xrs3dotn`
-The following :t:`[built-in attribute]s` are :dt:`prelude attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[prelude attribute]s`:
 
 * :dp:`fls_73n30xdcx8e`
   :t:`Attribute` :c:`no_implicit_prelude`.
@@ -297,7 +297,7 @@ The following :t:`[built-in attribute]s` are :dt:`prelude attribute`\ s:
   :t:`Attribute` :c:`no_std`.
 
 :dp:`fls_85ul6x76ew9`
-The following :t:`[built-in attribute]s` are :dt:`runtime attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[runtime attribute]s`:
 
 * :dp:`fls_xkhm1sht2ju5`
   :t:`Attribute` :c:`global_allocator`.
@@ -309,7 +309,7 @@ The following :t:`[built-in attribute]s` are :dt:`runtime attribute`\ s:
   :t:`Attribute` :c:`windows_subsystem`.
 
 :dp:`fls_mhaplbf40j02`
-The following :t:`[built-in attribute]s` are :dt:`testing attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[testing attribute]s`:
 
 * :dp:`fls_23huzf3c4arx`
   :t:`Attribute` :c:`ignore`.
@@ -321,7 +321,7 @@ The following :t:`[built-in attribute]s` are :dt:`testing attribute`\ s:
   :t:`Attribute` :c:`test`.
 
 :dp:`fls_p1ugiol1e5v5`
-The following :t:`[built-in attribute]s` are :dt:`type attribute`\ s:
+The following :t:`[built-in attribute]s` are :dt:`[type attribute]s`:
 
 * :dp:`fls_7xh2iphiteam`
   :t:`Attribute` :c:`non_exhaustive`.
@@ -615,9 +615,10 @@ Attribute ``track_caller``
 :t:`ABI` "Rust".
 
 :dp:`fls_w1pxtzp7acty`
-:t:`Attribute` :dc:`track_caller` allows the :t:`function body` of its related
-:t:`function` to obtain a :c:`core::panic::Location` which indicates the topmost
-untracked caller that ultimately led to the invocation of the :t:`function`.
+:t:`Attribute` :dc:`track_caller` allows the :t:`function body` of its
+related :t:`function` to obtain a :std:`core::panic::Location` which indicates
+the topmost untracked caller that ultimately led to the invocation of the
+:t:`function`.
 
 :dp:`fls_zch43jpetmdu`
 A tool is not required to implement this indication in an effective manner.
@@ -822,11 +823,6 @@ Documentation Attributes
 
 Attribute ``doc``
 ^^^^^^^^^^^^^^^^^
-
-:dp:`fls_5cqi7is713f1`
-`Rust
-<https://doc.rust-lang.org/stable/rustdoc/the-doc-attribute.html#the-doc-attribu
-te>`_
 
 .. rubric:: Syntax
 
@@ -1625,7 +1621,7 @@ Attribute ``global_allocator``
 
 :dp:`fls_5b8aewlgeon8`
 :t:`Attribute` :c:`global_allocator` shall apply to :t:`[static]s` whose
-:t:`[type]s` implement the :c:`core::alloc::GlobalAlloc` :t:`trait`.
+:t:`[type]s` implement the :std:`core::alloc::GlobalAlloc` :t:`trait`.
 
 :dp:`fls_homoidh8mu1r`
 :t:`Attribute` :dc:`global_allocator` sets the global allocator to the related

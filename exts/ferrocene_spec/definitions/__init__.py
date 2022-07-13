@@ -20,7 +20,8 @@ KINDS = [
 
 class DefIdNode(nodes.Element):
     def __init__(self, kind, text):
-        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(text))
+        text, id = parse_target_from_text(text)
+        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(id))
 
     def astext(self):
         return self["def_text"]
@@ -28,15 +29,7 @@ class DefIdNode(nodes.Element):
 
 class DefRefNode(nodes.Element):
     def __init__(self, kind, source_doc, text):
-        if "<" in text and text.endswith(">"):
-            target_start = text.rfind("<")
-            target = text[target_start + 1 : len(text) - 1]
-            text = text[:target_start].rstrip()
-        elif "[" in text and "]" in text:
-            target = text[text.find("[") + 1 : text.rfind("]")]
-            text = text.replace("[", "").replace("]", "")
-        else:
-            target = text
+        text, target = parse_target_from_text(text)
 
         super().__init__(
             ref_kind=kind,
@@ -47,6 +40,20 @@ class DefRefNode(nodes.Element):
 
     def astext(self):
         return self["ref_text"]
+
+
+def parse_target_from_text(text):
+    if "<" in text and text.endswith(">"):
+        target_start = text.rfind("<")
+        target = text[target_start + 1 : len(text) - 1]
+        text = text[:target_start].rstrip()
+    elif "[" in text and "]" in text:
+        target = text[text.find("[") + 1 : text.rfind("]")]
+        text = text.replace("[", "").replace("]", "")
+    else:
+        target = text
+
+    return text, target
 
 
 class DefIdRole(SphinxRole):

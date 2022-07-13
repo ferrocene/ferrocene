@@ -33,6 +33,7 @@ Two :t:`[value]s` :t:`overlap` when
 An :t:`object` relates a :t:`value` to a :t:`name`, and dictates how the
 :t:`value` is initialized and modified.
 
+:dp:`fls_prxicw2q70lj`
 An :t:`object` is :t:`valid` when it has been :t:`initialized` by all reachable
 control flow paths.
 
@@ -70,7 +71,7 @@ The :t:`type specification` of a :t:`constant` shall have a :t:`static
 lifetime`.
 
 :dp:`fls_vt9tlkd676ql`
-The :t:`type` of a :t:`constant` shall implement the :c:`core::marker::Sized`
+The :t:`type` of a :t:`constant` shall implement the :std:`core::marker::Sized`
 :t:`trait`.
 
 :dp:`fls_ndmfqxjpvsqy`
@@ -94,6 +95,9 @@ A use of a :t:`constant` is a :t:`value expression` and creates a copy of the
 constant's value.
 
 .. rubric:: Dynamic Semantics
+
+:dp:`fls_xezt9hl069h4`
+The :t:`elaboration` of a :t:`constant` evaluates its :t:`constant initializer`.
 
 :dp:`fls_ndobth7s92if`
 A :t:`path` that refers to a :t:`constant` is replaced with the :t:`value` of
@@ -132,7 +136,7 @@ all :t:`[instantiation]s`.
 The :t:`type specification` of a :t:`static` shall have a :t:`static lifetime`.
 
 :dp:`fls_b6ods85htuyn`
-The :t:`type` of a :t:`static` shall implement the :c:`core::marker::Sized`
+The :t:`type` of a :t:`static` shall implement the :std:`core::marker::Sized`
 :t:`trait`.
 
 :dp:`fls_doi4z6u55bi7`
@@ -145,8 +149,8 @@ Access to a :t:`mutable static` shall require :t:`unsafe context`.
 An :t:`immutable static` is a :t:`static` whose :t:`value` cannot be modified.
 
 :dp:`fls_k4tyqb1j6zjo`
-The type of an :t:`immutable static` shall implement the :c:`core::marker::Sync`
-:t:`trait`.
+The type of an :t:`immutable static` shall implement the
+:std:`core::marker::Sync` :t:`trait`.
 
 :dp:`fls_t17h5h6a6v4c`
 A :t:`static initializer` is a :t:`construct` that provides the :t:`value` of
@@ -166,6 +170,9 @@ location of the :t:`static`.
 
 .. rubric:: Dynamic Semantics
 
+:dp:`fls_w0nb0mphho7b`
+The :t:`elaboration` of a :t:`static` evaluates its :t:`static initializer`.
+
 :dp:`fls_eeocxst9vafn`
 All :t:`[path]s` that refer to a :t:`static` refer to the same memory location.
 
@@ -178,6 +185,7 @@ in read-only memory.
 
 .. rubric:: Undefined Behavior
 
+:dp:`fls_b5wsmii7vz3v`
 It is undefined behavior to mutate an :t:`immutable static` that is not
 :t:`interiorly mutable`.
 
@@ -192,6 +200,7 @@ Temporaries
 
 .. rubric:: Legality Rules
 
+:dp:`fls_awpw61yofckz`
 A :t:`temporary` is an anonymous :t:`object` that holds the result of some
 intermediate computation.
 
@@ -215,6 +224,7 @@ The following :t:`[construct]s` are :t:`[variable]s`:
 * :dp:`fls_adqfhc5k051x`
   A named :t:`function parameter`.
 
+:dp:`fls_xfiuc52r672i`
 A :t:`local variable` is a :t:`variable` that refers to a :t:`value` allocated
 directly on the stack.
 
@@ -226,44 +236,4 @@ all reachable control flow paths.
 
 :dp:`fls_g8etd5lsgn9j`
 A :t:`local variable` is not initialized when allocated.
-
-Constant Evaluation
--------------------
-
-.. rubric:: Legality Rules
-
-:t:`Constant evaluation` is the process of computing the result of a
-:t:`constant expression`.
-
-Inside an :t:`expression` that denotes the length of an :t:`array type`, or
-the length of an :t:`array repeat expression`, operations whose outcome depends
-on :t:`[generic parameter]s` are not permitted and shall be reported as static
-errors.
-
-Within a const context, it is permissible to refer to a path whose value is
-itself determined by the evaluation of a :t:`constant expression` in a :t:`const
-context` (subject to the restrictions specified above).
-
-A static error shall be reported if such path referencing forms a cycle, even if
-the cycle does not occur during evaluation.
-
-An implementation shall evaluate every expression in a :t:`const context`
-according to the rules laid out in this specification, when the expression's
-value is needed.
-
-An implementation shall evaluate the initializer of every :t:`static` and
-non-associated :t:`const`, even when the item is unused.
-
-Evaluation of :t:`[constant expression]s` that result in arithmetic overflow
-will panic.
-
-If the evaluation of a :t:`constant expression` results in a panic, either by
-reaching an invocation of the ``panic!()`` macro, or by invoking one of the
-:t:`[built-in panic condition]s`, a static error shall be reported.
-
-.. rubric:: Dynamic Semantics
-
-Expressions used in :t:`[constant context]s` do not have dynamic semantics.
-Invocations of :t:`[constant function]s` follow the dynamic semantics of
-:t:`non-[constant function]` invocations.
 

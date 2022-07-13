@@ -19,6 +19,9 @@ Statements
 
 .. rubric:: Legality Rules
 
+:dp:`fls_7zh6ziglo5iy`
+An :t:`expression statement` is an :t:`expression` whose result is ignored.
+
 :dp:`fls_kdxe1ukmgl1`
 An :t:`item statement` is a :t:`statement` that is expressed as an :t:`item`.
 

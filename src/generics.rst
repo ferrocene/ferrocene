@@ -145,7 +145,7 @@ A :t:`constant parameter` shall be used in the following contexts:
   As a :t:`value` of any :t:`expression` within a :t:`function body`.
 
 :dp:`fls_hidfwkwr2r73`
-A :t:`type parameter` has an implicit :c:`core::marker::Sized` bound, unless a
+A :t:`type parameter` has an implicit :std:`core::marker::Sized` bound, unless a
 ``?core::marker::Sized`` bound is present.
 
 :dp:`fls_m0bzw4jap6sg`

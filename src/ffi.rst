@@ -165,23 +165,31 @@ External Functions
 
 .. rubric:: Legality Rules
 
+:dp:`fls_w00qi1gx204e`
 :t:`[External function]s` and :t:`[external static]s` inherit the :t:`ABI` of
 their enclosing :t:`external block`.
 
+:dp:`fls_v24ino4hix3m`
 An :t:`external function` is an unchecked import of a foreign :t:`function`.
 
+:dp:`fls_l88r9fj82650`
 An :t:`external function` shall be invoked from an :t:`unsafe context`.
 
+:dp:`fls_qwchgvvnp0qe`
 An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
 
+:dp:`fls_m7tu4w4lk8v`
 An :t:`external function` shall not specify a :s:`GenericParameterList`
 containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
 
+:dp:`fls_rdu4723vp0oo`
 An :t:`external function` shall not specify a :s:`FunctionBody`.
 
+:dp:`fls_9div9yusw64h`
 An :t:`external function` shall not specify patterns other than identifier
 patterns and underscore patterns.
 
+:dp:`fls_juob30rst11r`
 Only the last parameter :s:`FunctionParameter` of an :t:`external function` may
 specify a :s:`FunctionParameterVariadicPart`.
 
@@ -190,14 +198,18 @@ External Statics
 
 .. rubric:: Legality Rules
 
+:dp:`fls_8ddsytjr4il6`
 An :t:`external static` is an import of a foreign :t:`variable`.
 
+:dp:`fls_fo9with6xumo`
 An :t:`external static` shall be referenced from an :t:`unsafe context`.
 
+:dp:`fls_tr7purzcldn0`
 An :t:`external static` shall not specify a :t:`StaticInitializer`.
 
 .. rubric:: Dynamic Semantics
 
+:dp:`fls_en2h09ehj0j3`
 An :t:`immutable` :t:`external static` shall be initialized before Rust code
 is executed.
 

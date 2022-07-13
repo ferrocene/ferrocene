@@ -103,6 +103,7 @@ expression]s` and :t:`[while let loop]s`.
 
 .. rubric:: Dynamic Semantics
 
+:dp:`fls_1223lwh4nq49`
 :t:`Evaluation` is the process by which an :t:`expression` achieves its runtime
 effects.
 
@@ -114,24 +115,33 @@ Assignee Expressions
 
 .. rubric:: Legality Rules
 
+:dp:`fls_oqj7s9fi3j3j`
 An :t:`assignee expression` is an :t:`expression` that appears as the :t:`left
 operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
 :t:`[assignee expression]s`:
 
-* :t:`[Place expression]s`,
+* :dp:`fls_skopz71arbwa`
+  :t:`[Place expression]s`,
 
-* :t:`[Underscore expression]s`,
+* :dp:`fls_vxrg6preh46x`
+  :t:`[Underscore expression]s`,
 
-* :t:`[Array expression]s` of :t:`[assignee expression]s`,
+* :dp:`fls_yso6dmog0an2`
+  :t:`[Array expression]s` of :t:`[assignee expression]s`,
 
-* :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
+* :dp:`fls_hier3b8knpuq`
+  :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
 
-* :t:`[Struct expression]s` of :t:`[assignee expression]s`,
+* :dp:`fls_1tsdlpgkgb2u`
+  :t:`[Struct expression]s` of :t:`[assignee expression]s`,
 
-* :t:`[Tuple struct expression]s` of :t:`[assignee expression]s`,
+* :dp:`fls_horl3qcfdb0k`
+  :t:`[Tuple struct expression]s` of :t:`[assignee expression]s`,
 
-* :t:`[Unit struct expression]s`.
+* :dp:`fls_nriu5ajnu2i6`
+  :t:`[Unit struct expression]s`.
 
+:dp:`fls_1smb3tj9pxsq`
 :t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
 expression]s`.
 
@@ -187,7 +197,7 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Expression statement]s`,
 
 * :dp:`fls_3etom5uu8y4u`
-  :t:`[Field access expression]s` that do not invoke the :c:`core::ops::Deref`
+  :t:`[Field access expression]s` that do not invoke the :std:`core::ops::Deref`
   :t:`trait`,
 
 * :dp:`fls_qls0wj8bmupz`
@@ -196,7 +206,8 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_b5fraqx07wuo`
   :t:`[If let expression]s`,
 
-* :t:`[Immutable borrow expression]s` where the borrowed :t:`type` is not
+* :dp:`fls_6g7c1kjrmfnr`
+  :t:`[Immutable borrow expression]s` where the borrowed :t:`type` is not
   subject to :t:`interior mutability`.
 
 * :dp:`fls_fc62yaqyjpl2`
@@ -216,7 +227,7 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_w4lpq9bs8tsc`
   :t:`[Method call expression]s` where the callee is a :t:`constant function` or
-  do not invoke the :c:`core::ops::Deref` :t:`trait`,
+  do not invoke the :std:`core::ops::Deref` :t:`trait`,
 
 * :dp:`fls_y1ezabo61nyk`
   :t:`[Negation expression]s` of :t:`[scalar type]s`,
@@ -231,9 +242,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_3bucpdj828bq`
   :t:`[Range expression]s`,
-
-* :dp:`fls_8lmf1mb4ccpe`
-  :t:`[Record struct constructor]s`,
 
 * :dp:`fls_hkbwa8xx2fwx`
   :t:`[Shared borrow]s` that do not involve :t:`[type]s` with :t:`interior
@@ -262,13 +270,17 @@ involve :t:`[type]s` that require :t:`destruction`:
 :dp:`fls_3i7efddbsmn0`
 An :t:`expression` is not considered a :t:`constant expression` when it
 explicitly invokes an :t:`associated trait function` or uses :t:`[arithmetic
-operator]s` of non-builtin :t:`[type]s` that invoke :c:`core::ops`
+operator]s` of non-builtin :t:`[type]s` that invoke :std:`core::ops`
 :t:`[trait]s`.
 
 :dp:`fls_9mrrosm8jnn7`
 An :t:`arithmetic expression` that operates with :t:`[floating point value]s` is
 not considered a :t:`constant expression` when it appears inside the body of a
 :t:`constant function`.
+
+:dp:`fls_fmqar6o1bwqk`
+It is a static error if the :t:`size operand` of an :t:`array repetition
+constructor` or an :t:`array type` depends on :t:`[generic parameter]s`.
 
 :dp:`fls_kjhma680hz3g`
 A :t:`constant context` is a :t:`construct` that requires a :t:`constant
@@ -278,12 +290,14 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
   The :t:`constant initializer` of an :t:`associated constant` or a
   :t:`constant`,
 
-* The :t:`constant argument` for a :t:`constant generic parameter`,
+* :dp:`fls_3of516eo0kkx`
+  The :t:`constant argument` for a :t:`constant generic parameter`,
 
 * :dp:`fls_icra98id84mk`
   The :t:`constant parameter` of a :t:`generic`,
 
-* The :t:`default value` of a :t:`constant generic parameter`,
+* :dp:`fls_yiks5bvojncc`
+  The :t:`default value` of a :t:`constant generic parameter`,
 
 * :dp:`fls_66m2hwkju0vv`
   The :t:`discriminant initializer` of an :t:`enum variant`,
@@ -297,18 +311,39 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
 * :dp:`fls_ib8p7dfwddx2`
   The :t:`static initializer` of a :t:`static`.
 
+:dp:`fls_ox6sgl9n43g2`
 It is a static error to create a :t:`mutable reference` in a :t:`constant
 context`.
 
+:dp:`fls_od0h3v40kjp6`
 An invocation of the ``addr_of!()`` :t:`macro` expands to a :t:`constant
 expression` allowed in any :t:`constant context` and :t:`constant function`,
 subject to the same restrictions as a :t:`shared borrow expression`.
 
+:dp:`fls_6sc556tz4oxd`
 An invocation of the ``panic!()`` :t:`macro` expands to a :t:`constant
 expression` allowed in any :t:`constant context` and :t:`constant function`,
 as long as the :t:`macro` is either invoked without :t:`[argument]s`, or
 with a single :t:`string literal` that does not :t:`capture` formatting
 :t:`[argument]s`.
+
+:dp:`fls_b1vfpvsdv38`
+A :t:`constant expression` is evaluated statically whenever its :t:`value` is
+needed.
+
+:dp:`fls_b46nyamfqxdu`
+The :t:`evaluation` of a :t:`constant expression` that results in arithmetic
+overflow :t:`[panic]s`.
+
+:dp:`fls_ms9vey2wymqp`
+It is a static error if a :t:`constant expression` either :t:`[panic]s` or
+control reaches the invocation of :t:`macro` :std:`core::panic`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_tg0kya5125jt`
+The invocation of a :t:`constant function` follows the dynamic semantics of a
+:t:`non-[constant function]` invocation.
 
 Place Expressions
 ~~~~~~~~~~~~~~~~~
@@ -380,7 +415,7 @@ A :t:`place expression` can be moved out of when it denotes
 
 * :dp:`fls_4bnbv7mqod57`
   A :t:`field` of a :t:`place expression` that can be moved out of and does not
-  implement the :c:`core::ops::Drop` :t:`trait`, or
+  implement the :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
   A :t:`temporary` created for a :t:`value expression`.
@@ -396,7 +431,7 @@ expression]s`:
 
 * :dp:`fls_bt50fltfqcvn`
   An :t:`array index expression` whose :t:`type` implements the
-  :c:`core::ops::IndexMut` :t:`trait`,
+  :std:`core::ops::IndexMut` :t:`trait`,
 
 * :dp:`fls_6b4rwkrc1ap6`
   A :t:`dereference expression` whose :t:`type` is ``*mut T``,
@@ -407,7 +442,7 @@ expression]s`:
 
 * :dp:`fls_1tq2o2huda9l`
   A :t:`dereference expression` whose :t:`type` implements the
-  :c:`core::ops::DerefMut` :t:`trait`,
+  :std:`core::ops::DerefMut` :t:`trait`,
 
 * :dp:`fls_xm0gm2q27x2e`
   A :t:`field access expression` where the :t:`type` of the :t:`container
@@ -425,20 +460,25 @@ expression]s`:
 
 .. rubric:: Dynamic Semantics
 
+:dp:`fls_malm0kcczgyg`
 The :t:`evaluation` of a :t:`place expression` in the context of a :t:`value
 expression` or the :t:`evaluation` of a :t:`place expression` that is bound *by
 value* in a :t:`pattern` proceeds as follows:
 
-#. The :t:`place expression` denotes the :t:`value` held in that memory
+#. :dp:`fls_iuxjvxd91h06`
+   The :t:`place expression` denotes the :t:`value` held in that memory
    location.
 
-#. If the :t:`type` of the held :t:`value` implements the
-   :c:`core::marker::Copy` :t:`trait`, then the held :t:`value` is copied.
+#. :dp:`fls_oq11btd97wpz`
+   If the :t:`type` of the held :t:`value` implements the
+   :std:`core::marker::Copy` :t:`trait`, then the held :t:`value` is copied.
 
-#. If the :t:`type` of the held :t:`value` implements the
-   :c:`core::marker::Sized` :t:`trait`, then the held :t:`value` is moved.
+#. :dp:`fls_zada4g3qmjqo`
+   If the :t:`type` of the held :t:`value` implements the
+   :std:`core::marker::Sized` :t:`trait`, then the held :t:`value` is moved.
 
-#. Otherwise the :t:`evaluation` results in a static error.
+#. :dp:`fls_gq35gqagw35`
+   Otherwise the :t:`evaluation` results in a static error.
 
 Value Expressions
 ~~~~~~~~~~~~~~~~~
@@ -626,7 +666,7 @@ An :t:`async block expression` denotes a new :t:`control flow boundary`.
 
 :dp:`fls_ncd0wkgtldem`
 The :t:`type` of an :t:`async block expression` shall implement the
-:c:`core::future::Future` trait.
+:std:`core::future::Future` trait.
 
 :dp:`fls_pvnofoomgwl5`
 The :t:`value` of an :t:`async block expression` is a :t:`future`.
@@ -641,7 +681,9 @@ The :t:`evaluation` of an :t:`async block expression` produces an anonymous
 
 .. code-block:: text
 
-   async {}
+   async {
+       42
+   }
 
 unsafe Blocks
 ~~~~~~~~~~~~~
@@ -819,7 +861,7 @@ The :t:`dereference` is assignable when
 
 * :dp:`fls_b96mek2ojcl`
   The :t:`operand` is of another :t:`type` that implements the
-  :c:`core::ops::DerefMut` :t:`trait`.
+  :std:`core::ops::DerefMut` :t:`trait`.
 
 :dp:`fls_8i4jzksxlrw0`
 Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
@@ -842,7 +884,8 @@ The :t:`type` of a :t:`dereference expression` is determined as follows:
   ``*const T``, then the :t:`type` is ``T``\ ``.``
 
 * :dp:`fls_y9bc691kkh6v`
-  Otherwise the :t:`type` is :t:`associated type` :c:`core::ops::Deref::Target`.
+  Otherwise the :t:`type` is :t:`associated type`
+  :std:`core::ops::Deref::Target`.
 
 :dp:`fls_gw49nukfveib`
 The :t:`value` of a :t:`dereference expression` is determined as follows:
@@ -902,7 +945,7 @@ boundary`.
 
 :dp:`fls_ab4vhq4nwn7f`
 The :t:`type` of an :t:`error propagation expression` is :t:`associated type`
-:c:`core::ops::Try::Output`.
+:std:`core::ops::Try::Output`.
 
 :dp:`fls_z4zikxy2b1em`
 The :t:`value` of an :t:`error propagation expression` is determined as follows:
@@ -910,7 +953,7 @@ The :t:`value` of an :t:`error propagation expression` is determined as follows:
 * :dp:`fls_a09614kgsspt`
   If the :t:`evaluation` of the :t:`error propagation expression` executed
   ``core::ops::Try::branch(operand)``, then the :t:`value` is the :t:`value` of
-  the :c:`core::ops::ControlFlow::Continue` variant.
+  the :std:`core::ops::ControlFlow::Continue` variant.
 
 * :dp:`fls_8df018q7y6g`
   Otherwise control flow is returned to the end of the enclosing :t:`control
@@ -982,11 +1025,12 @@ A :t:`negation expression` is an :t:`expression` that negates its :t:`operand`.
 
 :dp:`fls_plcut8vzdwox`
 The :t:`type` of the :t:`operand` of a :t:`negation expression` with a
-:s:`BitwiseNegationOperator` shall implement the :c:`core::ops::Not` :t:`trait`.
+:s:`BitwiseNegationOperator` shall implement the :std:`core::ops::Not`
+:t:`trait`.
 
 :dp:`fls_ohu0kljfexd3`
 The :t:`type` of a :t:`negation expression` with a :s:`BitwiseNegationOperator`
-is :t:`associated type` :c:`core::ops::Not::Output`.
+is :t:`associated type` :std:`core::ops::Not::Output`.
 
 :dp:`fls_ghqvj8q71o97`
 The :t:`value` of a :t:`negation expression` with a :s:`BitwiseNegationOperator`
@@ -994,11 +1038,11 @@ is the result of ``core::ops::Not::not(operand)``.
 
 :dp:`fls_3m4mgqnzqhri`
 The :t:`type` of the :t:`operand` of a :t:`negation expression` with a
-:s:`SignNegationOperator` shall implement the :c:`core::ops::Neg` :t:`trait`.
+:s:`SignNegationOperator` shall implement the :std:`core::ops::Neg` :t:`trait`.
 
 :dp:`fls_u7gzm6n75rzm`
 The :t:`type` of a :t:`negation expression` with a :s:`SignNegationOperator`
-shall be :t:`associated type` :c:`core::ops::Neg::Output`.
+shall be :t:`associated type` :std:`core::ops::Neg::Output`.
 
 :dp:`fls_9rmq7iaf092d`
 The :t:`value` of a :t:`negation expression` with a :s:`SignNegationOperator` is
@@ -1105,12 +1149,12 @@ subtraction.
 
 :dp:`fls_8imzo7agyx0k`
 The :t:`type` of the :t:`left operand` of an :t:`addition expression` shall
-implement the :c:`core::ops::Add` :t:`trait` with the :t:`type` of the :t:`right
-operand` as the :t:`trait implementation` :t:`type parameter`.
+implement the :std:`core::ops::Add` :t:`trait` with the :t:`type` of the
+:t:`right operand` as the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_vk17mfv47wk9`
 The :t:`type` of an :t:`addition expression` is :t:`associated type`
-:c:`core::ops::Add::Output`.
+:std:`core::ops::Add::Output`.
 
 :dp:`fls_ryzhdpxgm7ii`
 The :t:`value` of an :t:`addition expression` is the result of
@@ -1118,12 +1162,12 @@ The :t:`value` of an :t:`addition expression` is the result of
 
 :dp:`fls_f1puss9t4btz`
 The :t:`type` of the :t:`left operand` of a :t:`division expression` shall
-implement the :c:`core::ops::Div` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::Div` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_5rdrkvspw57z`
 The :t:`type` of a :t:`division expression` is :t:`associated type`
-:c:`core::ops::Div::Output`.
+:std:`core::ops::Div::Output`.
 
 :dp:`fls_thyq4h55mx55`
 The :t:`value` of a :t:`division expression` is the result of
@@ -1131,12 +1175,12 @@ The :t:`value` of a :t:`division expression` is the result of
 
 :dp:`fls_hrml95g2txcj`
 The :t:`type` of the :t:`left operand` of a :t:`multiplication expression`
-shall implement the :c:`core::ops::Mul` :t:`trait` where the :t:`type` of the
+shall implement the :std:`core::ops::Mul` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_ittf4yggk7do`
 The :t:`type` of a :t:`multiplication expression` is :t:`associated type`
-:c:`core::ops::Mul::Output`.
+:std:`core::ops::Mul::Output`.
 
 :dp:`fls_ylqm6wucq2sw`
 The :t:`value` of a :t:`multiplication expression` is the result of
@@ -1144,25 +1188,25 @@ The :t:`value` of a :t:`multiplication expression` is the result of
 
 :dp:`fls_8fbhreyynhid`
 The :t:`type` of the :t:`left operand` of a :t:`remainder expression` shall
-implement the :c:`core::ops::Rem` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::Rem` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_u3jwnrqun5kl`
 The :t:`type` of a :t:`remainder expression` is :t:`associated type`
-:c:`core::ops::Rem::Output`.
+:std:`core::ops::Rem::Output`.
 
 :dp:`fls_2ude3wrxji2p`
 The :t:`value` of a :t:`remainder expression` is the result of
 ``core::ops::Rem::rem(left_operand, right_operand)``.
 
 :dp:`fls_fjcv1nm8tlgf`
-The :t:`type` of the :t:`left operand` of a :t:`subtraction expression`
-shall implement the :c:`core::ops::Sub` :t:`trait` where the :t:`type` of the
+The :t:`type` of the :t:`left operand` of a :t:`subtraction expression` shall
+implement the :std:`core::ops::Sub` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_9x2i1zlsm364`
 The :t:`type` of a :t:`subtraction expression` is :t:`associated type`
-:c:`core::ops::Sub::Output`.
+:std:`core::ops::Sub::Output`.
 
 :dp:`fls_v8vekngd27sz`
 The :t:`value` of a :t:`subtraction expression` is the result of
@@ -1305,12 +1349,12 @@ arithmetic.
 
 :dp:`fls_cmowpfrcelke`
 The :t:`type` of the :t:`left operand` of a :t:`bit and expression` shall
-implement the :c:`core::ops::BitAnd` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::BitAnd` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_kchprk9z6xun`
 The :t:`type` of a :t:`bit and expression` is :t:`associated type`
-:c:`core::ops::BitAnd::Output`.
+:std:`core::ops::BitAnd::Output`.
 
 :dp:`fls_dimu987fw4kg`
 The :t:`value` of a :t:`bit and expression` is the result of
@@ -1318,12 +1362,12 @@ The :t:`value` of a :t:`bit and expression` is the result of
 
 :dp:`fls_oo2ynd8e1ys6`
 The :t:`type` of the :t:`left operand` of a :t:`bit or expression` shall
-implement the :c:`core::ops::BitOr` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::BitOr` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_s6hkt5fg598y`
 The :t:`type` of a :t:`bit or expression` is :t:`associated type`
-:c:`core::ops::BitOr::Output`.
+:std:`core::ops::BitOr::Output`.
 
 :dp:`fls_osfse0t6ua8a`
 The :t:`value` of a :t:`bit or expression` is the result of
@@ -1331,12 +1375,12 @@ The :t:`value` of a :t:`bit or expression` is the result of
 
 :dp:`fls_fnywefl9nty2`
 The :t:`type` of the :t:`left operand` of a :t:`bit xor expression` shall
-implement the :c:`core::ops::BitXor` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::BitXor` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_4f24nyx0ix0j`
 The :t:`type` of a :t:`bit xor expression` is :t:`associated type`
-:c:`core::ops::BitXor::Output`.
+:std:`core::ops::BitXor::Output`.
 
 :dp:`fls_8tb22c6zbp3`
 The :t:`value` of a :t:`bit xor expression` is the result of
@@ -1344,12 +1388,12 @@ The :t:`value` of a :t:`bit xor expression` is the result of
 
 :dp:`fls_1f4pc612f2a8`
 The :t:`type` of the :t:`left operand` of a :t:`shift left expression` shall
-implement the :c:`core::ops::Shl` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::Shl` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_8trozue35xe4`
 The :t:`type` of a :t:`shift left expression` is :t:`associated type`
-:c:`core::ops::Shl::Output`.
+:std:`core::ops::Shl::Output`.
 
 :dp:`fls_kqntxbwnc58v`
 The :t:`value` of a :t:`shift left expression` is the result of
@@ -1357,12 +1401,12 @@ The :t:`value` of a :t:`shift left expression` is the result of
 
 :dp:`fls_onutb0b9p9zj`
 The :t:`type` of the :t:`left operand` of a :t:`shift right operation` shall
-implement the :c:`core::ops::Shr` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::Shr` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_yq8rtwfp3nv0`
 The :t:`type` of a :t:`shift right operation` is :t:`associated type`
-:c:`core::ops::Shr::Output`.
+:std:`core::ops::Shr::Output`.
 
 :dp:`fls_fbazfgd5m1ot`
 The :t:`value` of a :t:`shift right operation` is the result of
@@ -1515,7 +1559,7 @@ The :t:`type` of a :t:`comparison expression` is :t:`type` :c:`bool`.
 
 :dp:`fls_8echqk9po1cf`
 The :t:`type` of the :t:`left operand` of an :t:`equals expression` shall
-implement the :c:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
+implement the :std:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_d62qfloqk2ub`
@@ -1524,7 +1568,7 @@ The :t:`value` of an :t:`equals expression` is the result of
 
 :dp:`fls_x2s6ydvj5zyd`
 The :t:`type` of the :t:`left operand` of a :t:`greater-than expression` shall
-implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
+implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_pso38dowbk91`
@@ -1533,9 +1577,9 @@ The :t:`value` of a :t:`greater-than expression` is the result of
 
 :dp:`fls_hholzcbp5u3n`
 The :t:`type` of the :t:`left operand` of a :t:`greater-than-or-equals
-expression` shall implement the :c:`core::cmp::PartialOrd` :t:`trait` where the
-:t:`type` of the :t:`right operand` is the :t:`trait implementation` :t:`type
-parameter`.
+expression` shall implement the :std:`core::cmp::PartialOrd` :t:`trait` where
+the :t:`type` of the :t:`right operand` is the :t:`trait implementation`
+:t:`type parameter`.
 
 :dp:`fls_wytygse41vzm`
 The :t:`value` of a :t:`greater-than-or-equals expression` is the result of
@@ -1543,7 +1587,7 @@ The :t:`value` of a :t:`greater-than-or-equals expression` is the result of
 
 :dp:`fls_ynibdcke3etb`
 The :t:`type` of the :t:`left operand` of a :t:`less-than expression` shall
-implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
+implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_xmtxkit3qpw7`
@@ -1552,8 +1596,8 @@ The :t:`value` of a :t:`less-than expression` is the result of
 
 :dp:`fls_6dgfieyxdan0`
 The :t:`type` of the :t:`left operand` of a :t:`less-than-or-equals expression`
-shall implement the :c:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of
-the :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
+shall implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type`
+of the :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_7pfsqby2saag`
 The :t:`value` of a :t:`less-than-or-equals expression` is the result of
@@ -1561,7 +1605,7 @@ The :t:`value` of a :t:`less-than-or-equals expression` is the result of
 
 :dp:`fls_qzo1torhv5i3`
 The :t:`type` of the :t:`left operand` of a :t:`not-equals expression` shall
-implement the :c:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
+implement the :std:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_kodwkh58hmdv`
@@ -1814,21 +1858,21 @@ A :t:`type cast expression` with the following characteristics performs a
   :t:`type` :c:`u8` to the :t:`value` of the corresponding :t:`code point`.
 
 * :dp:`fls_t16yzaxro5ew`
-  An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` and a :t:`target type`
-  ``*const V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
-  :t:`trait` performs :t:`pointer-to-pointer cast`.
+  An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` and a
+  :t:`target type` ``*const V`` or ``*mut V`` where ``V`` implements the
+  :std:`core::marker::Sized` :t:`trait` performs :t:`pointer-to-pointer cast`.
 
 * :dp:`fls_i4zsbbmfa2fl`
   An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` where ``T`` implements
-  the :c:`core::marker::Sized` :t:`trait` and a target :t:`integer type` perform
-  :t:`pointer-to-address cast`. A :dt:`pointer-to-address cast` produces an
-  :t:`integer` that represents the machine address of the referenced memory. If
-  the :t:`integer type` is smaller than the :t:`type` of the :t:`operand`, the
-  address is truncated.
+  the :std:`core::marker::Sized` :t:`trait` and a target :t:`integer type`
+  perform :t:`pointer-to-address cast`. A :dt:`pointer-to-address cast` produces
+  an :t:`integer` that represents the machine address of the referenced memory.
+  If the :t:`integer type` is smaller than the :t:`type` of the :t:`operand`,
+  the address is truncated.
 
 * :dp:`fls_59mpteeczzo`
   An :t:`operand` of :t:`integer type` and :t:`target type` ``*const V`` or
-  ``*mut V`` where ``V`` implements the :c:`core::marker::Sized` :t:`trait`
+  ``*mut V`` where ``V`` implements the :std:`core::marker::Sized` :t:`trait`
   perform :t:`address-to-pointer cast`. An :dt:`address-to-pointer cast`
   produces a :t:`pointer` that interprets the :t:`integer` as a machine address.
 
@@ -1838,7 +1882,7 @@ A :t:`type cast expression` with the following characteristics performs a
 
 * :dp:`fls_i8txki3htx92`
   An :t:`operand` of a :t:`function item type` and a :t:`target type` ``*const
-  V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
+  V`` or ``*mut V`` where ``V`` implements the :std:`core::marker::Sized`
   :t:`trait` perform :t:`function-item-to-pointer cast`.
 
 * :dp:`fls_6hbkvbb1c8aj`
@@ -1846,9 +1890,10 @@ A :t:`type cast expression` with the following characteristics performs a
   perform :t:`function-to-address cast`.
 
 * :dp:`fls_133j6xw8k4qe`
-  An :t:`operand` of a :t:`function pointer type` and a :t:`target type`
-  ``*const V`` or ``*mut V`` where ``V`` implements the :c:`core::marker::Sized`
-  :t:`trait` perform :t:`function-pointer-to-pointer cast`.
+  An :t:`operand` of a :t:`function pointer type` and a :t:`target
+  type` ``*const V`` or ``*mut V`` where ``V`` implements the
+  :std:`core::marker::Sized` :t:`trait` perform :t:`function-pointer-to-pointer
+  cast`.
 
 * :dp:`fls_bhw2j9wjpf2x`
   An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
@@ -2247,54 +2292,57 @@ The :t:`type` of a :t:`compound assignment` is the :t:`unit type`.
 The :t:`value` of a :t:`compound assignment` is the :t:`unit value`.
 
 :dp:`fls_657knnsobdyu`
-The :t:`type` of the :t:`assigned operand` of an :t:`addition assignment`
-shall implement the :c:`core::ops::AddAssign` trait where the type of the right
+The :t:`type` of the :t:`assigned operand` of an :t:`addition assignment` shall
+implement the :std:`core::ops::AddAssign` trait where the type of the right
 operand is the trait implementation type parameter.
 
 :dp:`fls_m942dwwmr2cl`
 The :t:`type` of the :t:`assigned operand` of a :t:`bit and assignment` shall
-implement the :c:`core::ops::BitAndAssign` :t:`trait` where the :t:`type` of the
-:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+implement the :std:`core::ops::BitAndAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_np33oqrz33mp`
 The :t:`type` of the :t:`assigned operand` of a :t:`bit or assignment` shall
-implement the :c:`core::ops::BitOrAssign` :t:`trait` where the :t:`type` of the
-:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+implement the :std:`core::ops::BitOrAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_atdpr8be2o2r`
 The :t:`type` of the :t:`assigned operand` of a :t:`bit xor assignment` shall
-implement the :c:`core::ops::BitXorAssign` :t:`trait` where the :t:`type` of the
-:t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+implement the :std:`core::ops::BitXorAssign` :t:`trait` where the :t:`type` of
+the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_fbgwb3pdfgz`
 The :t:`type` of the :t:`assigned operand` of a :t:`division assignment` shall
-implement the :c:`core::ops::DivAssign` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::DivAssign` :t:`trait` where the :t:`type` of the
 :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_8tbxq95x06yt`
 The :t:`type` of the :t:`assigned operand` of a :t:`multiplication assignment`
-shall implement the :c:`core::ops::MulAssign` :t:`trait` where the :t:`type` of
-the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+shall implement the :std:`core::ops::MulAssign` :t:`trait` where the :t:`type`
+of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
+parameter`.
 
 :dp:`fls_9oy9zo3x3fy3`
 The :t:`type` of the :t:`assigned operand` of a :t:`remainder assignment` shall
-implement the :c:`core::ops::RemAssign` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::RemAssign` :t:`trait` where the :t:`type` of the
 :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_pdgj2xekdead`
 The :t:`type` of the :t:`assigned operand` of a :t:`shift left assignment` shall
-implement the :c:`core::ops::ShlAssign` :t:`trait` where the :t:`type` of the
+implement the :std:`core::ops::ShlAssign` :t:`trait` where the :t:`type` of the
 :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_4uoi6k8r7mvc`
 The :t:`type` of the :t:`assigned operand` of a :t:`shift right assignment`
-shall implement the :c:`core::ops::ShrAssign` :t:`trait` where the :t:`type` of
-the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+shall implement the :std:`core::ops::ShrAssign` :t:`trait` where the :t:`type`
+of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
+parameter`.
 
 :dp:`fls_fjaz4m90cagr`
 The :t:`type` of the :t:`assigned operand` of a :t:`subtraction assignment`
-shall implement the :c:`core::ops::SubAssign` :t:`trait` where the :t:`type` of
-the :t:`modifying operand` is the :t:`trait implementation` :t:`type parameter`.
+shall implement the :std:`core::ops::SubAssign` :t:`trait` where the :t:`type`
+of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
+parameter`.
 
 .. rubric:: Dynamic Semantics
 
@@ -2519,7 +2567,7 @@ shall be :t:`unifiable`.
 
 :dp:`fls_x2xu2pynxy1u`
 If the :t:`size operand` is greater than one, then the :t:`type` of the
-:t:`repeat operand` shall implement the :c:`core::copy::Copy` :t:`trait`
+:t:`repeat operand` shall implement the :std:`core::copy::Copy` :t:`trait`
 or the :t:`repeat operand` shall be a :t:`path expression` resolving to a
 :t:`constant`.
 
@@ -2627,7 +2675,7 @@ operand` is a :t:`constant expression`.
 
 :dp:`fls_u9sl7h4i8hqu`
 The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
-:c:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed array
+:std:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed array
 operand`.
 
 :dp:`fls_98qeczwv7fmy`
@@ -2639,11 +2687,11 @@ context`, then
 
 * :dp:`fls_sb2b8gszzaxq`
   The :t:`type` of the :t:`indexed array operand` shall implement the
-  :c:`core::ops::Index` :t:`trait`.
+  :std:`core::ops::Index` :t:`trait`.
 
 * :dp:`fls_issaykiuha75`
   The :t:`type` of the :t:`array index expression` is ``&T``, where ``T`` is
-  :t:`associated type` :c:`core::ops::Index::Output`.
+  :t:`associated type` :std:`core::ops::Index::Output`.
 
 :dp:`fls_y3sduoma6q9v`
 If the :t:`indexed array operand` is :t:`mutable` and the :t:`array index
@@ -2654,7 +2702,7 @@ expression` is evaluated in a :t:`mutable place expression context`, then
 
 * :dp:`fls_ld7lbvqms5i6`
   The :t:`type` of the :t:`indexed array operand` shall implement the
-  :c:`core::ops::IndexMut` :t:`trait`.
+  :std:`core::ops::IndexMut` :t:`trait`.
 
 * :dp:`fls_nw705fpon79b`
   The :t:`type` of the :t:`array index expression` is ``&mut T``, where ``T`` is
@@ -3202,8 +3250,8 @@ expression`.
 
 :dp:`fls_4t6imtiw6kzt`
 A :t:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :c:`core::ops::Fn`,
-:c:`core::ops::FnMut`, or :c:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
+:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
 
 :dp:`fls_aafrvlmiwfon`
 The :t:`call operand` is subject to :t:`auto dereferencing` until a :t:`callee
@@ -3215,7 +3263,7 @@ dereferencing` adjustments.
 
 :dp:`fls_bu6i3mcvnbin`
 The :t:`type` of a :t:`call expression` is the :t:`return type` of the
-:t:`invoked function` or :t:`associated type` :c:`core::ops::FnOnce::Output`.
+:t:`invoked function` or :t:`associated type` :std:`core::ops::FnOnce::Output`.
 
 :dp:`fls_8ljrgdept7s8`
 A :t:`call expression` whose :t:`callee type` is either an :t:`external function
@@ -3231,7 +3279,7 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   :t:`function` with the :t:`[argument operand]s`.
 
 * :dp:`fls_s3q3sej1hgho`
-  If the :t:`callee type` implements the :c:`core::ops::Fn`
+  If the :t:`callee type` implements the :std:`core::ops::Fn`
   :t:`trait`, then the :t:`value` is the result of invoking
   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)``,
   where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
@@ -3239,7 +3287,7 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   operand]s`.
 
 * :dp:`fls_cu2ubdm3tfwb`
-  If the :t:`call operand` implements the :c:`core::ops::FnMut`
+  If the :t:`call operand` implements the :std:`core::ops::FnMut`
   :t:`trait`, then the :t:`value` is the result of invoking
   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple),``
   where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
@@ -3247,7 +3295,7 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   operand]s`.
 
 * :dp:`fls_9bbewx1l7h5h`
-  If the :t:`call operand` implements the :c:`core::ops::FnOnce`
+  If the :t:`call operand` implements the :std:`core::ops::FnOnce`
   :t:`trait`, then the :t:`value` is the result of invoking
   ``core::ops::FnOnce::call_once(adjusted_call_operand,
   argument_operand_tuple),`` where ``adjusted_call_operand`` is the :t:`adjusted
@@ -3270,18 +3318,19 @@ The :t:`evaluation` of a :t:`call expression` proceeds as follows:
    :t:`function pointer type`, then corresponding :t:`function` is invoked.
 
 #. :dp:`fls_nb0eqky2akzt`
-   If the :t:`type` of the :t:`call operand` implements the :c:`core::ops::Fn`
+   If the :t:`type` of the :t:`call operand` implements the :std:`core::ops::Fn`
    :t:`trait`, then ``core::ops::Fn::call(adjusted_call_operand,
    argument_operand_tuple)`` is invoked.
 
 #. :dp:`fls_9lt4wh9ql5ae`
-   If the :t:`type` of the :t:`call operand` implements the :c:`core::ops::FnMut`
-   :t:`trait`, then ``core::ops::FnMut::call_mut(adjusted_call_operand,
-   argument_operand_tuple)`` is invoked.
+   If the :t:`type` of the :t:`call operand` implements
+   the :std:`core::ops::FnMut` :t:`trait`, then
+   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple)``
+   is invoked.
 
 #. :dp:`fls_ixebnlcccmit`
    If the :t:`type` of the :t:`call operand` implements
-   the :c:`core::ops::FnOnce` :t:`trait`, then
+   the :std:`core::ops::FnOnce` :t:`trait`, then
    ``core::ops::FnOnce::call_once(adjusted_call_operand,
    argument_operand_tuple)`` is invoked.
 
@@ -3445,8 +3494,8 @@ context`.
 
 :dp:`fls_an3no949lvfw`
 Writing to the :t:`selected field` of a :t:`union` where the :t:`type` of the
-:t:`selected field` implements the :c:`core::marker::Copy` :t:`trait` or the
-:c:`core::mem::ManuallyDrop` :t:`trait` shall require :t:`safe context`.
+:t:`selected field` implements the :std:`core::marker::Copy` :t:`trait` or the
+:std:`core::mem::ManuallyDrop` :t:`trait` shall require :t:`safe context`.
 
 :dp:`fls_t6xmsm2nk1bc`
 Writing to and then reading from the :t:`selected field` of a :t:`union`
@@ -3636,7 +3685,7 @@ its :t:`block expression` as long as its :t:`subject expression` yields a
 
 :dp:`fls_fkgbin6ydkm4`
 The :t:`type` of a :t:`subject expression` shall implement the
-:c:`core::iter::IntoIterator` :t:`trait`.
+:std:`core::iter::IntoIterator` :t:`trait`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4052,7 +4101,7 @@ A :t:`range-from expression` is a :t:`range expression` that specifies an
 included :t:`range expression low bound`.
 
 :dp:`fls_exa2ufugnpgc`
-The :t:`type` of a :t:`range-from expression` is :c:`core::ops::RangeFrom`.
+The :t:`type` of a :t:`range-from expression` is :std:`core::ops::RangeFrom`.
 
 :dp:`fls_jqy0p155btca`
 The :t:`value` of a :t:`range-from expression` is ``core::ops::RangeFrom {
@@ -4064,7 +4113,7 @@ included :t:`range expression low bound` and an excluded :t:`range expression
 high bound`.
 
 :dp:`fls_ke2fpgodq84u`
-The :t:`type` of a :t:`range-from-to expression` is :c:`core::ops::Range`.
+The :t:`type` of a :t:`range-from-to expression` is :std:`core::ops::Range`.
 
 :dp:`fls_zb6jk6qykun6`
 The :t:`value` of a :t:`range-from-to expression` is ``core::ops::Range { start:
@@ -4075,7 +4124,7 @@ A :t:`range-full expression` is a :t:`range expression` that covers the whole
 range of a :t:`type`.
 
 :dp:`fls_m6n0gvg3ct1b`
-The :t:`type` of a :t:`range-full expression` is :c:`core::ops::RangeFull`.
+The :t:`type` of a :t:`range-full expression` is :std:`core::ops::RangeFull`.
 
 :dp:`fls_yvh5cdgzevni`
 The :t:`value` of a :t:`range-full expression` is ``core::ops::RangeFull {}``.
@@ -4087,7 +4136,7 @@ high bound`.
 
 :dp:`fls_livflk52xaj9`
 The :t:`type` of a :t:`range-inclusive expression` is
-:c:`core::ops::RangeInclusive`.
+:std:`core::ops::RangeInclusive`.
 
 :dp:`fls_vj213j9bj61y`
 The :t:`value` of a :t:`range-inclusive expression` is
@@ -4099,7 +4148,7 @@ A :t:`range-to expression` is a :t:`range expression` that specifies an excluded
 :t:`range expression high bound`.
 
 :dp:`fls_k611yoc8hk0n`
-The :t:`type` of a :t:`range-to expression` is :c:`core::ops::RangeTo`.
+The :t:`type` of a :t:`range-to expression` is :std:`core::ops::RangeTo`.
 
 :dp:`fls_m0slikrulnvd`
 The :t:`value` of a :t:`range-to expression` is ``core::ops::RangeTo { end:
@@ -4111,7 +4160,7 @@ an included :t:`range expression high bound`.
 
 :dp:`fls_8sfjw83irpre`
 The :t:`type` of a :t:`range-to-inclusive expression` is
-:c:`core::ops::RangeToInclusive`.
+:std:`core::ops::RangeToInclusive`.
 
 :dp:`fls_5xw4opkbxhsc`
 The :t:`value` of a :t:`range-to-inclusive expression` is
@@ -4571,7 +4620,7 @@ An :t:`await expression` shall appear within
 
 :dp:`fls_9uw5pd7kbrx3`
 The :t:`type` of a :t:`future operand` shall implement the
-:c:`core::future::Future` :t:`trait`.
+:std:`core::future::Future` :t:`trait`.
 
 :dp:`fls_c6mxfzef2qop`
 The :t:`type` of an :t:`await expression` is ``<_ as
@@ -4579,7 +4628,7 @@ core::future::Future>::Output``.
 
 :dp:`fls_l396mo6k9ox7`
 The :t:`value` of an :t:`await expression` is the :t:`value` held by
-:c:`core::task::Poll::Ready`.
+:std:`core::task::Poll::Ready`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4590,18 +4639,19 @@ The :t:`evaluation` of an :t:`await expression` proceeds as follows:
    The :t:`future operand` is evaluated to a :t:`temporary`.
 
 #. :dp:`fls_qshnnpirkasz`
-   The :t:`temporary` is pinned using :c:`core::pin::Pin::new_unchecked`.
+   The :t:`temporary` is pinned using :std:`core::pin::Pin::new_unchecked`.
 
 #. :dp:`fls_umevprl99y6c`
-   The pinned :t:`temporary` is polled using :c:`core::future::Future::poll`,
-   passing in the :c:`core::task::Context` of the current task.
+   The pinned :t:`temporary` is polled using :std:`core::future::Future::poll`,
+   passing in the :std:`core::task::Context` of the current task.
 
 #. :dp:`fls_k76d8ady623m`
-   If :c:`core::future::Future::poll` returns :c:`core::task::Poll::Pending`,
-   then the current :t:`future` yields.
+   If :std:`core::future::Future::poll` returns
+   :std:`core::task::Poll::Pending`, then the current :t:`future` yields.
 
 #. :dp:`fls_frwtufwe8dya`
-   If :c:`core::future::Future::poll` returns :c:`core::task::Poll::Ready`, then
+   If :std:`core::future::Future::poll` returns :std:`core::task::Poll::Ready`,
+   then
 
    #. :dp:`fls_u72ylhlmqge3`
       The :t:`value` held within is unwrapped.
@@ -4611,8 +4661,10 @@ The :t:`evaluation` of an :t:`await expression` proceeds as follows:
 
 .. rubric:: Examples
 
-:dp:`fls_la9boykzmfac`
-**provide an example**
+.. code-block:: text
+
+   let future = async { expensive_function() };
+   future.await;
 
 Expression Precedence
 ---------------------
@@ -4641,44 +4693,31 @@ as follows:
      - **Expression**
      - **Precedence**
      - **Associativity**
-   * - :dp:`fls_1i7atfw6z0c6`
-     - :dp:`fls_jtdnf0vmn6xt`
-       :t:`Array expression`
+   * - :dp:`fls_jtdnf0vmn6xt`
+     - :t:`Array expression`
 
-       :dp:`fls_pko7c3suw18p`
        :t:`Block expression`
 
-       :dp:`fls_5ernwvbjzd6d`
        :t:`Continue expression`
 
-       :dp:`fls_xc0bqiptpur4`
        :t:`If expression`
 
-       :dp:`fls_p1xm2f9xkyro`
        :t:`If let expression`
 
-       :dp:`fls_3hbf564rvp0k`
        :t:`Literal expression`
 
-       :dp:`fls_w62578xv5jkv`
        :t:`Loop expression`
 
-       :dp:`fls_o8hd0vlldsm9`
        :t:`Match expression`
 
-       :dp:`fls_u44p4fz3rkll`
        :t:`Parenthesized expression`
 
-       :dp:`fls_uj567walo9o8`
        :t:`Path expression`
 
-       :dp:`fls_ljs7zaa6n5d7`
        :t:`Struct expression`
 
-       :dp:`fls_bnxs8i53x3i9`
        :t:`Tuple expression`
 
-       :dp:`fls_r5acfjshejmh`
        :t:`Underscore expression`
      - highest
      - none
@@ -4687,13 +4726,15 @@ as follows:
      -
      - none
    * - :dp:`fls_ywqn5nixelkz`
-     - \ | :t:`Await expression`
-       | :t:`Field access expression`
+     - :t:`Await expression`
+
+       :t:`Field access expression`
      -
      - left-to-right
    * - :dp:`fls_k3ohh8k888c`
-     - \ | :t:`Array index expression`
-       | :t:`Call expression`
+     - :t:`Array index expression`
+
+       :t:`Call expression`
      -
      - none
    * - :dp:`fls_41n6z85h1z47`
@@ -4701,37 +4742,34 @@ as follows:
      -
      - none
    * - :dp:`fls_f39rzauxrlcl`
-     - \ | :t:`Borrow expression`
-       | :t:`Dereference expression`
-       | :t:`Negation expression`
+     - :t:`Borrow expression`
+
+       :t:`Dereference expression`
+
+       :t:`Negation expression`
      -
      - none
    * - :dp:`fls_djphr5mk0t6f`
      - :t:`Type cast expression`
      -
      - left-to-right
-   * - :dp:`fls_e3loqntvo54t`
-     - :dp:`fls_sif2aqky96j6`
-       \ | :t:`Division expression`
-       | :t:`Multiplication expression`
+   * - :dp:`fls_sif2aqky96j6`
+     - :t:`Division expression`
 
-       :dp:`fls_9igfpqwxex7l`
+       :t:`Multiplication expression`
+
        :t:`Remainder expression`
      -
      - left-to-right
-   * - :dp:`fls_96ojqb37wzud`
-     - :dp:`fls_d7x817v8xzea`
-       :t:`Addition expression`
+   * - :dp:`fls_d7x817v8xzea`
+     - :t:`Addition expression`
 
-       :dp:`fls_dfipk06akxgr`
        :t:`Subtraction expression`
      -
      - left-to-right
-   * - :dp:`fls_aw4n1ufi93ey`
-     - :dp:`fls_1f5ibdkz3l51`
-       :t:`Shift left expression`
+   * - :dp:`fls_1f5ibdkz3l51`
+     - :t:`Shift left expression`
 
-       :dp:`fls_52j8skuhqw9s`
        :t:`Shift right expression`
      -
      - left-to-right
@@ -4763,22 +4801,17 @@ as follows:
      - :t:`Range expression`
      -
      - requires parentheses
-   * - :dp:`fls_i7nmdvd04rca`
-     - :dp:`fls_1l3rgtm6o54s`
-       :t:`Assignment expression`
+   * - :dp:`fls_1l3rgtm6o54s`
+     - :t:`Assignment expression`
 
-       :dp:`fls_9q1d9t3eoh1z`
        :t:`Compound assignment expression`
      -
      - right-to-left
-   * - :dp:`fls_rkhos8dg9te6`
-     - :dp:`fls_hr4kokysrjop`
-       :t:`Break expression`
+   * - :dp:`fls_hr4kokysrjop`
+     - :t:`Break expression`
 
-       :dp:`fls_mi2sttbjkqrh`
        :t:`Closure expression`
 
-       :dp:`fls_35v53lpzvzqu`
        :t:`Return expression`
      - lowest
      - none

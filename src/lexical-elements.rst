@@ -167,7 +167,7 @@ A :dt:`simple punctuator` is one of the following characters:
 
 .. syntax::
 
-   	$$+$$
+   $$+$$
    $$-$$
    $$*$$
    $$/$$
@@ -201,7 +201,7 @@ characters:
 
 .. syntax::
 
-   	$$&&$$
+   $$&&$$
    $$||$$
    $$<<$$
    $$>>$$
@@ -227,11 +227,12 @@ characters:
    $$=>$$
 
 :dp:`fls_vm86olkeecer`
-The following :t:`[compound punctuator]s` are *[flexible compound punctuator]s*.
+The following :t:`[compound punctuator]s` are :dt:`[flexible compound
+punctuator]s`.
 
 .. syntax::
 
-   	$$&&$$
+   $$&&$$
    $$||$$
    $$<<$$
    $$>>$$
@@ -503,7 +504,7 @@ sequence of characters after performing normalization.
 
 .. rubric:: Examples
 
-.. syntax::
+.. code-block:: text
 
    foo
    _identifier
@@ -982,7 +983,7 @@ The :t:`type` of a :t:`character literal` is :c:`char`.
 
 .. rubric:: Examples
 
-.. syntax::
+.. code-block:: text
 
    'a'
    '\t'

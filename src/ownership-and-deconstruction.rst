@@ -117,8 +117,8 @@ The :t:`transfer` of a :t:`value` occurs when the :t:`value` is
   **More?**
 
 :dp:`fls_mxzibussnlpz`
-A :dt:`by copy type` is a :t:`type` that implements the :c:`core::marker::Copy`
-:t:`trait`.
+A :dt:`by copy type` is a :t:`type` that implements the
+:std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_9jmn63arik30`
 A :t:`value` of a :t:`by copy type` is transferred :dt:`by copy`. Transferring
@@ -126,7 +126,7 @@ A :t:`value` of a :t:`by copy type` is transferred :dt:`by copy`. Transferring
 
 :dp:`fls_ljfwr5dc9ixo`
 A :dt:`by move type` is a :t:`type` that does not implement the
-:c:`core::marker::Copy` :t:`trait`.
+:std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_kg0lq5938rg4`
 A :t:`value` of a :t:`by move type` is transferred :dt:`by move`. Transferring
@@ -143,7 +143,7 @@ target :t:`owner` proceeds as follows:
    :t:`owner` is invoked.
 
 #. :dp:`fls_fs8pbfoi7co2`
-   The result of :c:`core::marker::Copy::clone` is assigned to the target
+   The result of :std:`core::marker::Copy::clone` is assigned to the target
    :t:`owner`.
 
 :dp:`fls_j42hzl4rfq1s`
@@ -328,7 +328,7 @@ Destructors
 .. rubric:: Legality Rules
 
 :dp:`fls_9m0gszdle0qb`
-A :dt:`drop type` is a :t:`type` that implements the :c:`core::ops:Drop`
+A :dt:`drop type` is a :t:`type` that implements the :std:`core::ops:Drop`
 :t:`trait` or contains a :t:`field` that is of a :t:`drop type`. (**should this
 include the field portion?**)
 
@@ -349,7 +349,7 @@ An :t:`uninitialized` :t:`object` is not :t:`dropped`.
 :t:`Dropping` an :t:`initialized` :t:`object` proceeds as follows:
 
 #. :dp:`fls_bync24y6gp93`
-   If the :t:`drop type` implements the :c:`core::ops:Drop` :t:`trait`, then
+   If the :t:`drop type` implements the :std:`core::ops:Drop` :t:`trait`, then
    ``core::ops:Drop::drop()`` is invoked.
 
 #. :dp:`fls_jzancf72i95f`

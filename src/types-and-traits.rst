@@ -6,6 +6,10 @@
 Types and Traits
 ================
 
+:dp:`fls_4rhjpdu4zfqj`
+A :t:`type` defines a set of :t:`[value]s` and a set of operations that act on
+those :t:`[value]s`.
+
 .. rubric:: Syntax
 
 .. syntax::
@@ -400,23 +404,23 @@ domain of whole numbers:
      - **Maximum**
    * - :dp:`fls_p9ffvtajr832`
      - :c:`i8`
-     - - (2\ :sup:`7`)
+     - \- (2\ :sup:`7`)
      - 2\ :sup:`7` - 1
    * - :dp:`fls_j6xan9f8udw7`
      - :c:`i16`
-     - - (2\ :sup:`15`)
+     - \- (2\ :sup:`15`)
      - 2\ :sup:`15` - 1
    * - :dp:`fls_4t39p3ibkzu7`
      - :c:`i32`
-     - - (2\ :sup:`31`)
+     - \- (2\ :sup:`31`)
      - 2\ :sup:`31` - 1
    * - :dp:`fls_egfoxke0lzje`
      - :c:`i64`
-     - - (2\ :sup:`63`)
+     - \- (2\ :sup:`63`)
      - 2\ :sup:`63` - 1
    * - :dp:`fls_4c4qpel1tbqs`
      - :c:`i128`
-     - - (2\ :sup:`127`)
+     - \- (2\ :sup:`127`)
      - 2\ :sup:`127` - 1
 
 :dp:`fls_t9oyfmgqka6u`
@@ -780,23 +784,23 @@ A :t:`closure type` is a unique anonymous :t:`function type` that encapsulates
 all :t:`[captured variable]s` of a :t:`closure expression`.
 
 :dp:`fls_zfj4l8bigdg0`
-A :t:`closure type` implements the :c:`core::ops::FnOnce` :t:`trait`.
+A :t:`closure type` implements the :std:`core::ops::FnOnce` :t:`trait`.
 
 :dp:`fls_bn0ueivujnqk`
 A :t:`closure type` that does not move out its :t:`[captured variable]s`
-implements the :c:`core::ops::FnMut` :t:`trait`.
+implements the :std:`core::ops::FnMut` :t:`trait`.
 
 :dp:`fls_u01kt5glbuz8`
 A :t:`closure type` that does not move or mutate its :t:`[captured variable]s`
-implements the :c:`core::ops::Fn` :t:`trait`.
+implements the :std:`core::ops::Fn` :t:`trait`.
 
 :dp:`fls_3jeootwe6ucu`
 A :t:`closure type` that does not encapsulate :t:`[captured variable]s` is
 :t:`coercible` to a :t:`function pointer type`.
 
 :dp:`fls_63jqtyw0rz8c`
-A :t:`closure type` implicitly implements the :c:`core::marker::Copy` :t:`trait`
-if
+A :t:`closure type` implicitly implements the :std:`core::marker::Copy`
+:t:`trait` if
 
 * :dp:`fls_az5hkn72e3fz`
   It does not encapsulate :t:`[captured variable]s` :t:`by unique immutable
@@ -804,10 +808,10 @@ if
 
 * :dp:`fls_vvc8c910dmeh`
   The :t:`[type]s` of all :t:`[captured variable]s` implement the
-  :c:`core::marker::Copy` :t:`trait`.
+  :std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_3c4g9njja5s5`
-A :t:`closure type` implicitly implements the :c:`core::marker::Clone`
+A :t:`closure type` implicitly implements the :std:`core::marker::Clone`
 :t:`trait` if
 
 * :dp:`fls_yr55fbspw7s9`
@@ -816,26 +820,26 @@ A :t:`closure type` implicitly implements the :c:`core::marker::Clone`
 
 * :dp:`fls_pt65037r6hjr`
   The :t:`[type]s` of all :t:`[captured variable]s` implement the
-  :c:`core::marker::Clone` :t:`trait`.
+  :std:`core::marker::Clone` :t:`trait`.
 
 :dp:`fls_2nuhy0ujgq18`
-A :t:`closure type` implicitly implements the :c:`core::marker::Send` :t:`trait`
-if:
+A :t:`closure type` implicitly implements the :std:`core::marker::Send`
+:t:`trait` if:
 
 * :dp:`fls_vamgwed199ct`
   The :t:`[type]s` of all :t:`[captured variable]s` that employ :t:`by immutable
   borrow`, :t:`by mutable borrow`, or :t:`by move` :t:`capture mode` implement
-  the :c:`core::marker::Sync` :t:`trait`, and
+  the :std:`core::marker::Sync` :t:`trait`, and
 
 * :dp:`fls_f96a5r1v7te7`
   The :t:`[type]s` of all :t:`[captured variable]s` that employ :t:`by unique
   immutable borrow`, :t:`by mutable reference`, :t:`by copy`, or :t:`by move`
-  :t:`capture mode` implement the :c:`core::marker::Send` :t:`trait`.
+  :t:`capture mode` implement the :std:`core::marker::Send` :t:`trait`.
 
 :dp:`fls_5jh07heok8sy`
-A :t:`closure type` implicitly implements the :c:`core::marker::Sync`
+A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
 :t:`trait` if the :t:`[type]s` of all :t:`[captured variable]s` implement the
-:c:`core::marker::Sync` :t:`trait`.
+:std:`core::marker::Sync` :t:`trait`.
 
 Function Item Type
 ~~~~~~~~~~~~~~~~~~
@@ -858,10 +862,11 @@ An :t:`unsafe function item type` is a :t:`function item type` where the related
 A :t:`function item type` is :t:`coercible` to a :t:`function pointer type`.
 
 :dp:`fls_1941wid94hlg`
-A :t:`function item type` implements the :c:`core::ops::Fn` :t:`trait`, the
-:c:`core::ops::FnMut` :t:`trait`, the :c:`core::ops::FnOnce` :t:`trait`, the
-:c:`core::marker::Copy` :t:`trait`, the :c:`core::marker::Clone` :t:`trait`, the
-:c:`core::marker::Send` :t:`trait`, and the :c:`core::marker::Sync` :t:`trait`.
+A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the
+:std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`, the
+:std:`core::marker::Copy` :t:`trait`, the :std:`core::marker::Clone` :t:`trait`,
+the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync`
+:t:`trait`.
 
 Indirection Types
 -----------------
@@ -964,8 +969,8 @@ A :t:`shared reference type` prevents the direct mutation of a referenced
 :t:`value`.
 
 :dp:`fls_15zdiqsm1q3p`
-A :t:`shared reference type` implements the :c:`core::marker::Copy` :t:`trait`.
-Copying a :t:`shared reference` performs a shallow copy.
+A :t:`shared reference type` implements the :std:`core::marker::Copy`
+:t:`trait`. Copying a :t:`shared reference` performs a shallow copy.
 
 :dp:`fls_csdjfwczlzfd`
 Releasing a :t:`shared reference` has no effect on the :t:`value` it refers to.
@@ -1904,8 +1909,8 @@ expression]s`, :t:`[borrow expression]s`, :t:`[dereference expression]s`,
 :t:`[call expression]s`, :t:`[else expression]s`, :t:`[error propagation
 expression]s`, :t:`[if expression]s`, :t:`[if let expression]s`, :t:`[logical
 expression]s`, :t:`[loop expression]s`, :t:`[match expression]s`, :t:`[negation
-expression]s`, and :t:`[parenthesized expression]s` are :dt:`type imposing
-expression`\ s.
+expression]s`, and :t:`[parenthesized expression]s` are :dt:`[type imposing
+expression]s`.
 
 :dp:`fls_o94mhge1j3iw`
 A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
@@ -1913,7 +1918,7 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 
 * :dp:`fls_3ihttknfccxr`
   An :t:`addition expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::Add::Output`.
+  type` :std:`core::ops::Add::Output`.
 
 * :dp:`fls_rta6ehkzp3hg`
   A :t:`division expression` imposes its :t:`expected type` onto :t:`associated
@@ -1921,39 +1926,39 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 
 * :dp:`fls_f2whukg3x1yo`
   A :t:`multiplication expression` imposes its :t:`expected type` onto
-  :t:`associated type` :c:`core::ops::Mul::Output`.
+  :t:`associated type` :std:`core::ops::Mul::Output`.
 
 * :dp:`fls_w9fp1usbb15`
   A :t:`remainder expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::Rem::Output`.
+  type` :std:`core::ops::Rem::Output`.
 
 * :dp:`fls_5s2eh0qjq6vk`
   A :t:`subtraction expression` imposes its :t:`expected type` onto
-  :t:`associated type` :c:`core::ops::Sub::Output`.
+  :t:`associated type` :std:`core::ops::Sub::Output`.
 
 * :dp:`fls_rpxxg2u4hzhc`
   An :t:`await expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::future::Future::Output`.
+  type` :std:`core::future::Future::Output`.
 
 * :dp:`fls_vj1071lxoyyv`
   A :t:`bit and expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::BitAnd::Output`.
+  type` :std:`core::ops::BitAnd::Output`.
 
 * :dp:`fls_y6owsf8jnx35`
   A :t:`bit xor expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::BitXor::Output`.
+  type` :std:`core::ops::BitXor::Output`.
 
 * :dp:`fls_i9dhdmiqde99`
   A :t:`bit or expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::BitOr::Output`.
+  type` :std:`core::ops::BitOr::Output`.
 
 * :dp:`fls_bystnhv1olg5`
   A :t:`shift left expression` imposes its :t:`expected type` onto
-  :t:`associated type` :c:`core::ops::Shl::Output`.
+  :t:`associated type` :std:`core::ops::Shl::Output`.
 
 * :dp:`fls_trvksnbx7opg`
   A :t:`shift right expression` imposes its :t:`expected type` onto
-  :t:`associated type` :c:`core::ops::Shr::Output`.
+  :t:`associated type` :std:`core::ops::Shr::Output`.
 
 * :dp:`fls_8ct11ekq3p5q`
   A :t:`block expression` imposes its :t:`expected type` onto its :t:`tail
@@ -1973,7 +1978,7 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 
 * :dp:`fls_kviulvlfvww2`
   A :t:`call expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::FnOnce::Output`.
+  type` :std:`core::ops::FnOnce::Output`.
 
 * :dp:`fls_4hsgi1voem9y`
   An :t:`error propagation expression` imposes its :t:`expected type` onto its
@@ -2003,7 +2008,7 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 
 * :dp:`fls_xhax58ebkqik`
   A :t:`negation expression` imposes its :t:`expected type` onto :t:`associated
-  type` :c:`core::ops::Neg::Output`.
+  type` :std:`core::ops::Neg::Output`.
 
 * :dp:`fls_m896wu8zax5k`
   A :t:`parenthesized expression` imposes its :t:`expected type` onto its
@@ -2018,7 +2023,7 @@ expression]s`, :t:`[closure expression]s`, :t:`[comparison expression]s`,
 :t:`[compound assignment expression]s`, :t:`[field access expression]s`,
 :t:`[lazy boolean expression]s`, :t:`[method call expression]s`, :t:`[range
 expression]s`, :t:`[struct expression]s`, :t:`[tuple expression]s`, and
-:t:`[type cast expression]s` are :dt:`type resolving expression`\ s.
+:t:`[type cast expression]s` are :dt:`[type resolving expression]s`.
 
 :dp:`fls_r7dyhfmdentz`
 A :t:`type resolving expression` provides a :dt:`resolving type`, which is the
@@ -2054,7 +2059,7 @@ The :t:`resolving type` of an :t:`integer literal` is determined as follows:
 
 :dp:`fls_ybvrhh96fc7y`
 :t:`[Constant argument]s`, :t:`constant` declarations, :t:`[function]s`, and
-:t:`static` declarations are referred to as :dt:`type inference root`\ s.
+:t:`static` declarations are referred to as :dt:`[type inference root]s`.
 
 :dp:`fls_j28usox2uzep`
 :t:`Type inference` for a single :t:`type inference root` proceeds as follows:
@@ -2201,7 +2206,7 @@ A trait is :t:`object safe` when:
   Its :t:`[supertrait]s` are :t:`object safe`, and
 
 * :dp:`fls_droy0w5gtqaw`
-  :c:`core::marker::Sized` is not a :t:`supertrait`, and
+  :std:`core::marker::Sized` is not a :t:`supertrait`, and
 
 * :dp:`fls_46gd1q80c6bn`
   It lacks :t:`[associated constant]s`, and
@@ -2229,12 +2234,12 @@ A dispatchable :t:`function` is :t:`object safe` when:
   ``core::pin::Pin<T>`` where T is one of the previous :t:`[receiver]s`, and
 
 * :dp:`fls_kqylg31sm5wv`
-  It lacks a :t:`where clause` that specifies the :c:`core::marker::Sized`
+  It lacks a :t:`where clause` that specifies the :std:`core::marker::Sized`
   :t:`trait`.
 
 :dp:`fls_aer3gaur7avp`
 A non-dispatchable :t:`function` is :t:`object safe` when it specifies a
-:c:`core::marker::Sized` :t:`t[rait bound]` for :c:`Self`.
+:std:`core::marker::Sized` :t:`t[rait bound]` for :c:`Self`.
 
 Trait and Lifetime Bounds
 -------------------------
@@ -2482,7 +2487,7 @@ An :dt:`input lifetime` is one of the following :t:`[lifetime]s`:
 
 * :dp:`fls_2p29p1fvi182`
   Any :t:`lifetime` related to the :t:`[function parameter]s` of the
-  :c:`core::ops::Fn`, :c:`core::ops::FnMut`, and :c:`core::ops::FnOnce`
+  :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and :std:`core::ops::FnOnce`
   :t:`[trait]s`.
 
 * :dp:`fls_ks8wlufmhz6d`
@@ -2501,7 +2506,7 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
 
 * :dp:`fls_vf7cxiir91ps`
   Any :t:`lifetime` related to the :t:`[return type]s` of the
-  :c:`core::ops::Fn`, :c:`core::ops::FnMut`, and :c:`core::ops::FnOnce`
+  :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and :std:`core::ops::FnOnce`
   :t:`[trait]s`.
 
 :dp:`fls_g56br27hq2zj`

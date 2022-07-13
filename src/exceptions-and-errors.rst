@@ -14,41 +14,38 @@ the language uses the following tiered error handling scheme:
 
 * :dp:`fls_ebangxc36t74`
   A possibly absent :t:`value` is represented usually using :t:`enum`
-  :c:`core::option::Option`.
+  :std:`core::option::Option`.
 
 * :dp:`fls_ckeitwiv326r`
   The result of a possibly erroneous computation is represented usually using
-  :t:`enum` :c:`core::result::Result`.
+  :t:`enum` :std:`core::result::Result`.
 
 * :dp:`fls_eg0orgibg98m`
-  Erroneous behavior is signaled using :t:`macro` :c:`core::panic`.
+  Erroneous behavior is signaled using :t:`macro` :std:`core::panic`.
 
 :dp:`fls_ko1x0gp9e7y3`
-:t:`Enum` :c:`core::option::Option` indicates whether a :t:`value` is
-either present using :c:`core::option::Option::Some` or absent using
-:c:`core::option::Option::None`.
+:t:`Enum` :std:`core::option::Option` indicates whether a :t:`value` is
+either present using :std:`core::option::Option::Some` or absent using
+:std:`core::option::Option::None`.
 
 :dp:`fls_gwu4cn4ziabe`
-:t:`Enum` :c:`core::result::Result` indicates whether a computation completed
-successfully and produced a :t:`value` using :c:`core::result::Result::Ok` or
-the computation failed with an error using :c:`core::result::Result::Err`.
+:t:`Enum` :std:`core::result::Result` indicates whether a computation completed
+successfully and produced a :t:`value` using :std:`core::result::Result::Ok` or
+the computation failed with an error using :std:`core::result::Result::Err`.
 
 Panic
 -----
-
-:dp:`fls_m3r7wvepljhs`
-`Rust <https://rustc-dev-guide.rust-lang.org/panic-implementation.html>`_
 
 .. rubric:: Legality Rules
 
 :dp:`fls_a554v4n0khye`
 A :t:`panic` is an abnormal program state caused by invoking :t:`macro`
-:c:`core::panic`.
+:std:`core::panic`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_i9njhpte5l0t`
-Invoking :t:`macro` :c:`core::panic` has the following runtime effects:
+Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
 
 #. :dp:`fls_n6q7bksyn1m`
    Control flow halts the execution of the current thread.

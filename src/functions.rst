@@ -60,6 +60,7 @@ A :t:`function` shall not specify a :s:`SelfParameter` unless it is an
 A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
 is an :t:`external function`.
 
+:dp:`fls_ymeo93t4mz4`
 A :t:`self parameter` or a :t:`receiver` is a :t:`function parameter` expressed
 by :t:`keyword` ``self``.
 

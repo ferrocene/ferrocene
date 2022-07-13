@@ -262,11 +262,11 @@ subject to the following restrictions:
 * :dp:`fls_etyo9bmzxby6`
   The :t:`macro implementation function` shall have a single :t:`function
   parameter` whose :t:`type specification` indicates :t:`type`
-  :c:`proc_macro::TokenStream`,
+  :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_mkl9b38m0sf1`
   The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates :t:`type` :c:`proc_macro::TokenStream`.
+  :t:`type specification` indicates :t:`type` :std:`proc_macro::TokenStream`.
 
 :dp:`fls_lfmb22bfnrye`
 A :t:`function-like macro` is invoked using a :t:`macro invocation`.
@@ -316,11 +316,11 @@ to the following restrictions:
 * :dp:`fls_npnze2cg8ae`
   The :t:`macro implementation function` shall have a single :t:`function
   parameter` whose :t:`type specification` indicates :t:`type`
-  :c:`proc_macro::TokenStream`,
+  :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_w2h4lk6bmht`
   The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates :t:`type` :c:`proc_macro::TokenStream`.
+  :t:`type specification` indicates :t:`type` :std:`proc_macro::TokenStream`.
 
 :dp:`fls_x96a0xzcyrko`
 A :t:`derive macro` is invoked using :t:`attribute` :c:`derive`.
@@ -375,11 +375,11 @@ subject to the following restrictions:
 * :dp:`fls_4g932k8ueyqp`
   The :t:`macro implementation function` shall have two :t:`[function
   parameter]s` whose :t:`[type specification]s` indicate :t:`type`
-  :c:`proc_macro::TokenStream`,
+  :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_f5qy1pnlbpng`
   The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates type :c:`proc_macro::TokenStream`.
+  :t:`type specification` indicates type :std:`proc_macro::TokenStream`.
 
 :dp:`fls_rzn48xylk4yj`
 An :t:`attribute macro` is invoked using an :t:`attribute` of the form
@@ -561,16 +561,16 @@ invocation`.
 Expansion of :t:`[function-like macro]s` proceeds as follows:
 
 #. :dp:`fls_srtqkdceaz5t`
-   The :c:`proc_macro::TokenStream` of the :t:`macro invocation` is passed to
+   The :std:`proc_macro::TokenStream` of the :t:`macro invocation` is passed to
    the sole :t:`function parameter` of the :t:`macro implementation function`.
-   The :c:`proc_macro::TokenStream` captures the :s:`DelimitedTokenTree` without
-   the outer :s:`[Delimiter]s`.
+   The :std:`proc_macro::TokenStream` captures the :s:`DelimitedTokenTree`
+   without the outer :s:`[Delimiter]s`.
 
 #. :dp:`fls_mi92etjtpamu`
    The :t:`macro implementation function` produces its :t:`output
    proc_macro::TokenStream`. It is a static error if the
    :t:`macro implementation function` fails to produce its output
-   :c:`proc_macro::TokenStream`.
+   :std:`proc_macro::TokenStream`.
 
 #. :dp:`fls_n8beqlt54rhy`
    The :t:`macro invocation` is replaced with the result of the :t:`macro
@@ -606,51 +606,52 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 Expansion of :t:`[derive macro]s` proceeds as follows:
 
 #. :dp:`fls_grtiwf7q8jah`
-   The :c:`proc_macro::TokenStream` of the related :t:`item` is passed to the
-   sole :t:`function parameter` of the :t:`macro implementation function`. The
-   :c:`proc_macro::TokenStream` captures the :t:`item` subject to the :t:`derive
-   macro` excluding the invoking :t:`attribute` :c:`derive` as well as any
-   preceding :c:`derive` :t:`[attribute]s`.
+   The :std:`proc_macro::TokenStream` of the related :t:`item` is passed to
+   the sole :t:`function parameter` of the :t:`macro implementation function`.
+   The :std:`proc_macro::TokenStream` captures the :t:`item` subject to the
+   :t:`derive macro` excluding the invoking :t:`attribute` :c:`derive` as well
+   as any preceding :c:`derive` :t:`[attribute]s`.
 
 #. :dp:`fls_tbe2qq7whq10`
    The :t:`macro implementation function` produces its output
-   :c:`proc_macro::TokenStream`. It is a static error if the
+   :std:`proc_macro::TokenStream`. It is a static error if the
    :t:`macro implementation function` fails to produce its output
-   :c:`proc_macro::TokenStream`.
+   :std:`proc_macro::TokenStream`.
 
 #. :dp:`fls_my93neopj9x0`
-   The output :c:`proc_macro::TokenStream` is appended to the enclosing
+   The output :std:`proc_macro::TokenStream` is appended to the enclosing
    :t:`block expression` or :t:`module` where the related :s:`EnumDeclaration`,
    :s:`StructDeclaration`, or :s:`UnionDeclaration` resides. It is a static
-   error if the output :c:`proc_macro::TokenStream` does not constitute zero or
-   more :t:`[item]s`.
+   error if the output :std:`proc_macro::TokenStream` does not constitute zero
+   or more :t:`[item]s`.
 
 :dp:`fls_zat7kwi5vc5c`
 The expansion of :t:`[attribute macro]s` proceeds as follows:
 
 #. :dp:`fls_tjn92evtlflq`
-   The :c:`proc_macro::TokenStream` of the invoking :t:`attribute` is passed to
-   the first :t:`function parameter` of the :t:`macro implementation function`.
-   The :c:`proc_macro::TokenStream` captures the :s:`DelimitedTokenTree` without
-   the outer :s:`[Delimiter]s`. If no :s:`DelimitedTokenTree` is provided, then
-   an empty :c:`proc_macro::TokenStream` is passed.
+   The :std:`proc_macro::TokenStream` of the invoking :t:`attribute`
+   is passed to the first :t:`function parameter` of the :t:`macro
+   implementation function`. The :std:`proc_macro::TokenStream` captures
+   the :s:`DelimitedTokenTree` without the outer :s:`[Delimiter]s`.
+   If no :s:`DelimitedTokenTree` is provided, then an empty
+   :std:`proc_macro::TokenStream` is passed.
 
 #. :dp:`fls_mpgh22bi8caz`
-   The :c:`proc_macro::TokenStream` of the related :t:`item` is passed to the
+   The :std:`proc_macro::TokenStream` of the related :t:`item` is passed to the
    second :t:`function parameter` of the :t:`macro implementation function`. The
-   :c:`proc_macro::TokenStream` captures the :t:`item` subject to the invoking
+   :std:`proc_macro::TokenStream` captures the :t:`item` subject to the invoking
    :t:`attribute`, excluding the invoking :t:`attribute`.
 
 #. :dp:`fls_ul7nhfyvyzh`
    The :t:`macro implementation function` produces its output
-   :c:`proc_macro::TokenStream`. It is a static error if the
+   :std:`proc_macro::TokenStream`. It is a static error if the
    :t:`macro implementation function` fails to produce its output
-   :c:`proc_macro::TokenStream`.
+   :std:`proc_macro::TokenStream`.
 
 #. :dp:`fls_z6xfhf71w10a`
-   The :t:`item` is replaced with the output :c:`proc_macro::TokenStream`. It is
-   a static error if the output :c:`proc_macro::TokenStream` does not constitute
-   zero or more :t:`[item]s`.
+   The :t:`item` is replaced with the output :std:`proc_macro::TokenStream`.
+   It is a static error if the output :std:`proc_macro::TokenStream` does not
+   constitute zero or more :t:`[item]s`.
 
 Macro Matching
 ~~~~~~~~~~~~~~

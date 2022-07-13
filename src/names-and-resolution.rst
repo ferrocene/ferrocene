@@ -15,12 +15,12 @@ Names and Resolution
 
 .. rubric:: Legality Rules
 
-:dp:`fls_yf5r11o1kevr`
-A :dt:`name` identifies an entity within the program text.
+:dp:`fls_s79wluq3u5wv`
+An :t:`entity` is a :t:`construct` that can be referred to within a program by
+using a :t:`path`.
 
-:dp:`fls_w5snt8shnkbn`
-An :dt:`entity` is a construct that can be referred to within a program by using
-a :t:`path`.
+:dp:`fls_yf5r11o1kevr`
+A :t:`name` identifies an :t:`entity` within the program text.
 
 Visibility
 ----------
@@ -53,83 +53,69 @@ Visibility
 
 .. rubric:: Legality Rules
 
-:dp:`fls_59qhsxbly73f`
-A :s:`VisibilityModifier` shall denote either a ``CratePublicModifier``,
-a ``SelfPublicModifier``, a ``SimplePathPublicModifier``, a
-``SimplePublicModifier``, or a ``SuperPublicModifier``.
+:dp:`fls_7kpepal8ghuj`
+:t:`Visibility` is a property of :t:`[item]s` that determines which
+:t:`[module]s` can refer to a :t:`name` of an :t:`item`.
 
-:dp:`fls_2tp6zj9b79ma`
-A :s:`CratePublicModifier` shall start with :t:`keyword` ``pub``, followed by
-character 0x28 (left parenthesis), followed by keyword ``crate``, followed by
-character 0x29 (right parenthesis).
+:dp:`fls_qo0itr5il1kk`
+:t:`Public visibility` is a kind of :t:`visibility` that allows for a :t:`name`
+to be referred to from arbitrary :t:`module` ``M`` as long as the ancestor
+:t:`[module]s` of the related :t:`entity` can be referred to from ``M``.
 
-:dp:`fls_1nz0w1yaqwka`
-A :s:`SelfPublicModifier` shall start with keyword ``pub``, followed by
-character 0x28 (left parenthesis), followed by keyword ``self``, followed by
-character 0x29 (right parenthesis).
+:dp:`fls_knjruq5wppv`
+:t:`Private visibility` is a kind of :t:`visibility` that allows a :t:`name`
+to be referred to only by the current :t:`module` of the :t:`entity`, and its
+descendant :t:`[module]s`.
 
-:dp:`fls_rji599qcit8g`
-A :s:`SelfPublicModifier` shall start with keyword ``pub``, followed by
-character 0x28 (left parenthesis), followed by keyword ``in``, followed by a
-:s:`SimplePath`, followed by character 0x29 (right parenthesis).
-
-:dp:`fls_3zbkfw1yf2ko`
-A :s:`SimplePublicModifier` shall denote keyword ``pub``.
-
-:dp:`fls_as9yn24nwug0`
-A :s:`SuperPublicModifier` shall start with keyword ``pub``, followed by
-character 0x28 (left parenthesis), followed by keyword ``super``, followed by
-character 0x29 (right parenthesis).
-
-:dp:`fls_siva1u877xi`
-A ``VisibilityModifier`` describes the visibility of a :t:`name`.
-:dt:`Visibility` is a property that determines which modules can refer to the
-name.
-
-:dp:`fls_7e4u7eo1ifm5`
-A name with :dt:`public visibility` can be referred to from arbitrary module
-``M`` as long as the ancestor modules of the related entity can be referred to
-from ``M``. Such a name is said to be :dt:`public`.
-
-:dp:`fls_h1mhi47vae1q`
-A name with :dt:`private visibility` can be referred to only by the current
-module of the entity, and its descendant modules. Such a name is said to be
-:dt:`private`.
+:dp:`fls_t7i4n19qdgn4`
+A :t:`visibility modifier` sets the :t:`visibility` of the :t:`name` of an
+:t:`item`.
 
 :dp:`fls_aa4f3rvir9lm`
-A ``CratePublicModifier`` makes a name public within the current :t:`crate`
-only.
+A :t:`crate public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the current :t:`crate` only.
 
 :dp:`fls_tnh7o3pb4e22`
-A ``SelfPublicModifier`` makes a name public within the current module
-and any descendant modules. A ``SelfPublicModifier`` is equivalent to a
-``SimplePathPublicModifier`` where the ``SimplePath`` denotes keyword ``self``.
+A :t:`self public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`private visibility`. A :t:`self public modifier` is equivalent
+to a :t:`simple path public modifier` where the :t:`simple path` denotes
+:t:`keyword` ``self``.
 
 :dp:`fls_yymgpyi67dty`
-A ``SimplePathPublicModifier`` makes a name public within the provided
-``SimplePath`` only. The ``SimplePath`` of a ``SimplePathPublicModifier``
-shall start with a ``SimplePathSegment`` expressed by either keyword ``crate``,
-keyword ``self``, or keyword ``super``. The ``SimplePath`` shall resolve to an
-ancestor module of the current module or the current module itself.
+A :t:`simple path public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the provided :t:`simple path` only.
+
+:dp:`fls_hc121mxknq03`
+The :t:`simple path` of a :t:`simple path public modifier` shall start
+with a :t:`simple path segment` expressed by either :t:`keyword` ``crate``,
+:t:`keyword` ``self``, or :t:`keyword` ``super``.
+
+:dp:`fls_icztzxjpm1du`
+The :t:`simple path` of a :t:`simple path public modifier` shall resolve to
+an ancestor :t:`module` of the current :t:`module` or the current :t:`module`
+itself.
 
 :dp:`fls_np8aghofjqhm`
-A ``SimplePublicModifier`` makes a name public.
+A :t:`simple public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility`.
 
 :dp:`fls_quzvhzpr0124`
-A ``SuperPublicModifier`` makes a name public within the parent module only. A
-``SuperPublicModifier`` is equivalent to a ``SimplePathPublicModifier`` where
-the ``SimplePath`` denotes keyword ``super``.
+A :t:`super public modifier` is a :t:`visibility modifier` that grants a
+:t:`name` :t:`public visibility` within the parent :t:`module` only. A :t:`super
+public modifier` is equivalent to a :t:`simple path public modifier` where the
+:t:`simple path` denotes :t:`keyword` ``super``.
 
 :dp:`fls_utgjx6l5zwfl`
 An :t:`external item`, a :t:`field`, or an :t:`item` that appears without a
-``VisibilityModifier`` is private by default.
+:t:`visibility modifier` has :t:`private visibility` by default.
 
 :dp:`fls_jifg2st5bfd6`
-An :t:`associated item` of a public :t:`trait` is public by default.
+An :t:`associated item` of a :t:`trait` with :t:`public visibility` has
+:t:`public visibility` by default.
 
 :dp:`fls_dm0xr424ine1`
-An :t:`enum variant and its fields` have the same visibility as the containing
-:t:`enum type`.
+An :t:`enum variant` and its :t:`[field]s` have the same :t:`visibility` as the
+containing :t:`enum type`.
 
 .. rubric:: Examples
 
@@ -221,101 +207,31 @@ Paths
 
 .. rubric:: Legality Rules
 
-:dp:`fls_pur93emodd9f`
-A :s:`SimplePath` shall start with optional character sequence 0x3A 0x3A (colon,
-colon), followed by a ``SimplePathSegment``, followed by a sequence of zero or
-more of character sequence 0x3A 0x3A (colon, colon) and ``SimplePathSegment``.
+:dp:`fls_klcltwcwrw6i`
+A :t:`path` is a sequence of :t:`[path segment]s` logically separated by
+:t:`namespace qualifier` ``::`` that resolves to a :t:`name`.
 
-:dp:`fls_xmvr3jrcp2ym`
-A :s:`SimplePathList` shall start with a ``SimplePath``, followed by a sequence
-of zero or more of character 0x2C (comma) and ``SimplePath``, followed by
-optional character 0x2C (comma).
-
-:dp:`fls_43a9n1al8udf`
-A :s:`SimplePathSegment` shall denote either an :s:`Identifier`, :t:`keyword`
-``crate``, keyword ``$crate``, keyword ``self``, or keyword ``super``.
-
-:dp:`fls_92phcct5f0ln`
-A :s:`PathInExpression` shall start with optional character sequence 0x3A
-0x3A (colon, colon), followed by a ``PathInExpressionSegment``, followed by
-a sequence of zero or more of character sequence 0x3A 0x3A (colon, colon) and
-``PathInExpressionSegment``.
-
-:dp:`fls_o9te6bmngc8i`
-A :s:`PathInExpressionSegment` shall start with a ``PathSegment``,
-followed by optional character sequence 0x3A 0x3A (colon, colon) and
-:s:`GenericArgumentList`.
-
-:dp:`fls_za8qfqx116qf`
-A :s:`PathSegment` shall denote either an ``Identifier``, keyword ``crate``,
-keyword ``$crate``, keyword ``self``, keyword ``Self``, or keyword ``super``.
-
-:dp:`fls_akqey3or732n`
-A :s:`TypePath` shall start with optional character sequence 0x3A 0x3A (colon,
-colon), followed by a ``TypePathSegment``, followed by a sequence of zero or
-more of character sequence 0x3A 0x3A (colon, colon) and ``TypePathSegment``.
-
-:dp:`fls_2fl9gkl19k0k`
-A :s:`TypePathSegment` shall start with a ``PathSegment``, followed by
-optional character sequence 0x3A 0x3A (colon, colon), followed by optional
-``GenericArgumentList`` or ``TypePathFn``.
-
-:dp:`fls_8od85h7qez4`
-A :s:`TypePathFn` shall start with character 0x28 (left parenthesis), followed
-by an optional :s:`TypeSpecificationList`, followed by character 0x29 (right
-parenthesis), followed by optional :s:`ReturnType`.
-
-:dp:`fls_ucjm04s4609b`
-A :s:`QualifiedPathInExpression` shall start with a ``QualifiedPathType``,
-followed by a sequence of one or more of character sequence 0x3A 0x3A (colon,
-colon) and ``PathInExpressionSegment``.
-
-:dp:`fls_81o41wytt2hd`
-A :s:`QualifiedPathType` shall start with character 0x3C (less-than
-sign), followed by a :s:`TypeSpecification`, followed by an optional
-``TypePathRenaming``, followed by character 0x3E (greater-than sign).
-
-:dp:`fls_6it6jhgeqc1z`
-A :s:`TypePathRenaming` shall start with keyword ``as``, followed by a
-``TypePath``.
-
-:dp:`fls_1c3ge9nimif0`
-A :s:`QualifiedPathInType` shall start with a ``QualifiedPathType``, followed
-by a sequence of one or more of character sequence 0x3A 0x3A (colon, colon) and
-``TypePathSegment``.
-
-:dp:`fls_uo6mu0tx3pk8`
-A ``SimplePath`` describes a :dt:`simple path`. A ``PathInExpression`` describes
-a :dt:`path-in-expression`. A ``TypePath`` describes a :dt:`type path`. A
-``QualifiedPathInExpression`` describes a :dt:`qualified path-in-expression`. A
-``QualifiedPathInType`` describes a :dt:`qualified path-in-type`. Collectively,
-simple paths, paths-in-expressions, type paths, qualified paths-in-expressions,
-and qualified paths-in-types are referred to as :dt:`path`\ s.
-
-:dp:`fls_cnk0t4oj3yg4`
-A ``PathSegment``, ``SimplePathSegment``, and ``TypePathSegment`` describe a
-:dt:`path segment`.
-
-:dp:`fls_75s5ivc2cesf`
-A path is a sequence of one or more path segments logically separated by
-:dt:`namespace qualifier` ``::`` that ultimately resolves to an :t:`entity`. A
-path that starts with namespace qualifier ``::`` is referred to as a :dt:`global
-path`.
-
-:dp:`fls_23lpzxs14wnk`
-A path that starts with qualifier ``$crate`` shall appear only within a
+:dp:`fls_pu0qwlmndtwf`
+A :t:`path` that starts with qualifier ``$crate`` shall appear only within a
 :t:`macro transcriber`.
+
+:dp:`fls_hwxjhdx10xlm`
+A :t:`global path` is a :t:`path` that starts with :t:`namespace qualifier`
+``::``.
+
+:dp:`fls_ylkv4ut37v2m`
+A :t:`path segment` is a constituent of a :t:`path`.
 
 :dp:`fls_uheh0jvg6yie`
 **Should talk about the effects of a QualifiedPathType with respect to
 generics.**
 
-:dp:`fls_uldqdgn520vs`
-The :dt:`canonical path` of an :t:`entity` is the fully qualified path to that
-entity's :t:`name` starting from the current :t:`crate`.
+:dp:`fls_wv9anw30msgq`
+A :t:`canonical path` is a :t:`path` that fully qualifies a :t:`name` starting
+from the current :t:`crate`.
 
 :dp:`fls_tjwehd9ofzrj`
-The following :t:`[construct]s` do not have a canonical path:
+The following :t:`[construct]s` do not have a :t:`canonical path`:
 
 * :dp:`fls_j5m34x689twd`
   :t:`[Associated item]s`.
@@ -330,8 +246,8 @@ The following :t:`[construct]s` do not have a canonical path:
   :t:`[Item]s` declared in :t:`[block expression]s`.
 
 * :dp:`fls_7hr4d9gmnd2u`
-  Items declared in a :t:`module` where the module does not have a canonical
-  path.
+  :t:`[Item]s` declared in a :t:`module` where the :t:`module` does not have a
+  :t:`canonical path`.
 
 .. rubric:: Examples
 
@@ -408,55 +324,24 @@ Use Imports
 
 .. rubric:: Legality Rules
 
-:dp:`fls_e4gdr1on8fqr`
-A :s:`UseImport` shall start with :t:`keyword` ``use``, followed by a
-``UseImportContent``, followed by character 0x3B (semicolon).
-
-:dp:`fls_po9tfbhn7sgs`
-A :s:`UseImportContent` shall denote either a ``GlobImport``, a
-``SimpleImport``, or a ``NestingImport``.
-
-:dp:`fls_uotjut4lw2y8`
-A :s:`GlobImport` shall start with an optional ``SimplePathPrefix``, followed by
-character 0x2A (asterisk).
-
-:dp:`fls_gt0dq4n94ej`
-A :s:`SimpleImport` shall start with a :s:`SimplePath`, followed by an optional
-:s:`Renaming`.
-
-:dp:`fls_o46ntzgb8hmy`
-A :s:`NestingImport` shall start with an optional ``SimplePathPrefix``,
-followed by character 0x7B (left curly bracket), followed by an optional
-``UseImportContentList``, followed by character 0x7D (right curly bracket).
-
-:dp:`fls_tc86789gq2v0`
-A :s:`SimplePathPrefix` shall start with an optional ``SimplePath``, followed by
-character sequence 0x3A 0x3A (colon, colon).
-
-:dp:`fls_8h2irgmeqpea`
-A :s:`UseImportContentList` shall start with a ``UseImportContent``, followed by
-a sequence of zero or more of character 0x2C (comma) and ``UseImportContent``,
-followed by optional character 0x2C (comma).
-
 :dp:`fls_4qgflb8tsdo8`
-A ``UseImport`` describes a :dt:`use import` or simply an import. An
-:dt:`import` brings :t:`[name]s` into :t:`scope` within the :t:`module` or block
-expression where the use import resides.
+A :t:`use import` brings :t:`[name]s` into :t:`scope` within the :t:`module` or
+:t:`block expression` where the :t:`use import` resides.
 
 :dp:`fls_xpn0gi2euo01`
-A ``GlobImport`` describes a glob import. A :dt:`glob import` brings all
-:t:`public` names prefixed by its ``SimplePathPrefix`` into scope.
+A :t:`glob import` is a :t:`use import` that brings all :t:`[name]s` with
+:t:`public visibility` prefixed by its :t:`path` prefix into :t:`scope`.
 
 :dp:`fls_wln1ydrlaqy`
-A glob import shall contain a ``SimplePath``.
+A :t:`glob import` shall contain a :t:`simple path`.
 
 :dp:`fls_lahpu2vk6aqu`
-A ``NestingImport`` describes a nesting import. A :dt:`nesting import` provides
-a common path prefix for its nested use imports.
+A :t:`nesting import` is a :t:`use import` that provides a common :t:`path`
+prefix for its nested :t:`[use import]s`.
 
 :dp:`fls_t64jr6jd1723`
-A ``SimpleImport`` describes a simple import. A :dt:`simple import` binds a
-:t:`simple path` to a local name by using an optional :t:`renaming`.
+A :t:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
+local :t:`name` by using an optional :t:`renaming`.
 
 :dp:`fls_w4s3ed1btre3`
 use self as foo -> imports the current module under the name "foo"
@@ -484,8 +369,8 @@ shall be a simple import with a renaming.
 When keyword ``crate``
 
 :dp:`fls_htp8rum8mo5x`
-An import with public visibility is said to :dt:`re-export` imported names.
-**What does this do exactly? What are the effects?**
+A :t:`use import` with :t:`public visibility` is said to :dt:`re-export`
+imported :t:`[name]s`. **What does this do exactly? What are the effects?**
 
 .. rubric:: Examples
 
@@ -527,8 +412,8 @@ Scopes
 .. rubric:: Legality Rules
 
 :dp:`fls_5x5xykocwyiy`
-A :dt:`scope` is a region of program text where a :t:`name` can be referred to.
-Such a name is said to be :dt:`in scope`.
+A :t:`scope` is a region of program text where a :t:`name` can be referred to. A
+:t:`name` is :t:`in scope` when it can be referred to.
 
 :dp:`fls_ia3eeqrio5ur`
 **How are hierarchies of scopes formed?**
@@ -551,24 +436,24 @@ The :t:`binding` of a :t:`closure parameter` is :t:`in scope` within the related
 :t:`closure body`.
 
 :dp:`fls_8yyomyq38ony`
-The binding of a :t:`function parameter` is in scope within the related
-:t:`function body`.
+The :t:`binding` of a :t:`function parameter` is :t:`in scope` within the
+related :t:`function body`.
 
 :dp:`fls_abk12gxkjddd`
-The binding of a :t:`for loop` or a :t:`while let loop` is in scope within the
-related :t:`loop body`.
+The :t:`binding` of a :t:`for loop` or a :t:`while let loop` is :t:`in scope`
+within the related :t:`loop body`.
 
 :dp:`fls_dm0b4sczajlj`
-The binding of an :t:`if let expression` is in scope within the related
-:t:`block expression`.
+The :t:`binding` of an :t:`if let expression` is :t:`in scope` within the
+related :t:`block expression`.
 
 :dp:`fls_3l9vcbay6obm`
-The binding of a :t:`let statement` is in scope after the related let statement
-until the end of the :t:`block expression` where the related let statement
-appears.
+The :t:`binding` of a :t:`let statement` is :t:`in scope` after the related
+:t:`let statement` until the end of the :t:`block expression` where the related
+:t:`let statement` appears.
 
 :dp:`fls_dirjv2g18zuu`
-The binding of a :t:`match arm` is in scope within its related
+The :t:`binding` of a :t:`match arm` is :t:`in scope` within its related
 :t:`[expression]s` and related :t:`match arm guard`.
 
 Declarative Macro Scope
@@ -577,9 +462,9 @@ Declarative Macro Scope
 .. rubric:: Legality Rules
 
 :dp:`fls_xbgri34o3zff`
-The name of a declarative macro is in scope after the related macro rules
-declaration until the end of the :t:`block expression` or the enclosing
-:t:`module` where the macro rules declaration appears.
+The :t:`name` of a :t:`declarative macro` is :t:`in scope` after the related
+:t:`macro rules` declaration until the end of the :t:`block expression` or the
+enclosing :t:`module` where the :t:`macro rules` declaration appears.
 
 Generic Parameter Scope
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -591,8 +476,8 @@ The :t:`name` of a :t:`generic parameter` of a :t:`construct` is :t:`in scope`
 within the related construct.
 
 :dp:`fls_uocarmzavgsk`
-The name of a generic parameter is not in scope within :t:`[item]s` declared
-inside a :t:`function`.
+The :t:`name` of a :t:`generic parameter` is not :t:`in scope` within
+:t:`[item]s` declared inside a :t:`function`.
 
 Item Scope
 ~~~~~~~~~~
@@ -601,16 +486,17 @@ Item Scope
 
 :dp:`fls_7aym7k1mtv5`
 The :t:`name` of an :t:`item` declared within a :t:`module` is :t:`in scope`
-within the related module. Such a name is not in scope within nested modules.
+within the related :t:`module`. Such a :t:`name` is not :t:`in scope` within
+nested :t:`[module]s`.
 
 :dp:`fls_l26n2qc5lmti`
-The name of an item declared within a :t:`block expression` is in scope within
-the related block expression.
+The :t:`name` of an :t:`item` declared within a :t:`block expression` is :t:`in
+scope` within the related :t:`block expression`.
 
 :dp:`fls_xjzmxub1bg8v`
-It is a static error to declare an item within a block expression or a module
-where the name of the item is already used by another item within the same block
-expression or module.
+It is a static error to declare an :t:`item` within a :t:`block expression` or
+a :t:`module` where the :t:`name` of the :t:`item` is already used by another
+:t:`item` within the same :t:`block expression` or :t:`module`.
 
 Lifetime Parameter Scope
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -623,8 +509,8 @@ The :t:`name` of a :t:`lifetime parameter` is :t:`in scope` within the related
 Parameter Scopes?**)
 
 :dp:`fls_uhxkmj9y8l4z`
-The name of a lifetime parameter is not in scope in :t:`[constant]s` and
-:t:`[static]s`. (**isn't this redundant?**)
+The :t:`name` of a :t:`lifetime parameter` is not :t:`in scope` in
+:t:`[constant]s` and :t:`[static]s`. (**isn't this redundant?**)
 
 Loop Label Scope
 ~~~~~~~~~~~~~~~~
@@ -633,12 +519,12 @@ Loop Label Scope
 
 :dp:`fls_bb6zwflhg91t`
 The :t:`label` of a :t:`loop expression` is :t:`in scope` from its declaration
-until the end of the related loop expression.
+until the end of the related :t:`loop expression`.
 
 :dp:`fls_i0c9ergp782r`
-The label of a loop expression is not in scope in :t:`[async block]s`,
-:t:`[closure]s`, :t:`[constant argument]s`, :t:`[constant context]s`,
-:t:`[item]s`, and the iterator expression of the related :t:`for loop`.
+The :t:`label` of a :t:`loop expression` is not :t:`in scope` in :t:`[async
+block]s`, :t:`[closure]s`, :t:`[constant argument]s`, :t:`[constant context]s`,
+:t:`[item]s`, and the :t:`iterator expression` of the related :t:`for loop`.
 
 Prelude Scopes
 ~~~~~~~~~~~~~~
@@ -687,45 +573,45 @@ Shadowing
 .. rubric:: Legality Rules
 
 :dp:`fls_w7d1sil7gh8z`
-:dt:`Shadowing` is a property of :t:`[name]s`. A name is said to be
-:dt:`shadowed` when another name with the same characters is introduced in the
-same scope within the same namespace, effectively hiding it. A name cannot be
-referred to by any means once it is shadowed.
+:dt:`Shadowing` is a property of :t:`[name]s`. A :t:`name` is said to be
+:dt:`shadowed` when another :t:`name` with the same characters is introduced
+in the same :t:`scope` within the same :t:`namespace`, effectively hiding it. A
+:t:`name` cannot be referred to by any means once it is :t:`shadowed`.
 
 :dp:`fls_ifrl9p79surf`
-The name of :t:`[built-in attribute]s` shall not be shadowed.
+The :t:`name` of :t:`[built-in attribute]s` shall not be :t:`shadowed`.
 
 :dp:`fls_jgs0q9seyx7g`
-The name of a :t:`generic parameter` shall not be shadowed.
+The :t:`name` of a :t:`generic parameter` shall not be :t:`shadowed`.
 
 :dp:`fls_9kwknx9ycjcf`
-The name of an :t:`item` declared within a :t:`module` may shadow a :t:`prelude
-name`. (**is this rule needed?**)
+The :t:`name` of an :t:`item` declared within a :t:`module` may shadow a
+:t:`prelude name`. (**is this rule needed?**)
 
 :dp:`fls_3eekxbuih7wc`
-A :t:`binding` shall not shadow the name of a :t:`constant parameter`, a
-:t:`constant`, an :t:`enum constructor`, a :t:`static`, or a :t:`struct
+A :t:`binding` shall not shadow the :t:`name` of a :t:`constant parameter`,
+a :t:`constant`, an :t:`enum constructor`, a :t:`static`, or a :t:`struct
 constructor`.
 
 :dp:`fls_5c7p3459gnn1`
-A :t:`prelude name` shadows other prelude names depending on which
-:t:`[prelude]s` are included in a module. The order of shadowing is as follows,
-where a later prelude name shadows earlier prelude name:
+A :t:`prelude name` shadows other :t:`[prelude name]s` depending on which
+:t:`[prelude]s` are included in a :t:`module`. The order of shadowing is as
+follows, where a later :t:`prelude name` shadows earlier :t:`prelude name`:
 
 #. :dp:`fls_c28gfhfk8gn4`
-   :t:`Language prelude` names.
+   :t:`Language prelude` :t:`[name]s`.
 
 #. :dp:`fls_nyuutp3uvclb`
-   :t:`Standard library prelude` names.
+   :t:`Standard library prelude` :t:`[name]s`.
 
 #. :dp:`fls_mohwxdi59ouq`
-   :t:`macro_use prelude` names.
+   :t:`macro_use prelude` :t:`[name]s`.
 
 #. :dp:`fls_ogzke6s92qme`
-   :t:`Tool prelude` names.
+   :t:`Tool prelude` :t:`[name]s`.
 
 #. :dp:`fls_qdyf00tq52p6`
-   :t:`External prelude` names.
+   :t:`External prelude` :t:`[name]s`.
 
 Namespaces
 ----------
@@ -733,28 +619,30 @@ Namespaces
 .. rubric:: Legality Rules
 
 :dp:`fls_8xbtcifiyvwh`
-A :dt:`namespace` is a logical grouping of :t:`[name]s`. Names are segregated
-into separate namespaces based on the kind of :t:`entity` the name belongs to.
-Within a namespace, names are organized into a hierarchy of :t:`[scope]s`.
+A :dt:`namespace` is a logical grouping of :t:`[name]s`. :t:`[Name]s` are
+segregated into separate :t:`[namespace]s` based on the kind of :t:`entity` the
+:t:`name` belongs to. Within a :t:`namespace`, :t:`[name]s` are organized into a
+hierarchy of :t:`[scope]s`.
 
 :dp:`fls_mt7qi7yh8y0n`
-A namespace is classified as either an anonymous namespace, a label namespace, a
-lifetime namespace, a macro namespace, a type namespace, or a value namespace.
+A :t:`namespace` is classified as either an :t:`anonymous namespace`, a
+:t:`label namespace`, a :t:`lifetime namespace`, a :t:`macro namespace`, a
+:t:`type namespace`, or a :t:`value namespace`.
 
 :dp:`fls_swgq8k4wybdw`
-A :dt:`label namespace` contains the names of the following entities:
+A :dt:`label namespace` contains the :t:`[name]s` of the following entities:
 
 * :dp:`fls_2mj3v7nwt58s`
   :t:`[Label]s` of :t:`[loop expression]s`.
 
 :dp:`fls_thplejq7vwaw`
-A :dt:`lifetime namespace` contains the names of the following entities:
+A :dt:`lifetime namespace` contains the :t:`[name]s` of the following entities:
 
 * :dp:`fls_32k27skptc8d`
   :t:`[Lifetime parameter]s` of :t:`[generic]s`.
 
 :dp:`fls_h5gkq5ghq9uw`
-A :dt:`macro namespace` contains the names of the following entities:
+A :dt:`macro namespace` contains the :t:`[name]s` of the following entities:
 
 * :dp:`fls_riizlyw5thuy`
   :t:`[Attribute macro]s`.
@@ -772,7 +660,7 @@ A :dt:`macro namespace` contains the names of the following entities:
   :t:`[Function-like macro]s`.
 
 :dp:`fls_3z1xgyaoq85f`
-A :dt:`type namespace` contains the names of the following entities:
+A :dt:`type namespace` contains the :t:`[name]s` of the following entities:
 
 * :dp:`fls_vg2e7fmqqk3g`
   :t:`[Associated type]s`.
@@ -820,7 +708,7 @@ A :dt:`type namespace` contains the names of the following entities:
   :t:`[Union type]s`.
 
 :dp:`fls_19ul1yb8mvg9`
-A :dt:`value namespace` contains the names of the following entities:
+A :dt:`value namespace` contains the :t:`[name]s` of the following entities:
 
 * :dp:`fls_cq5kqtyh6kbk`
   :t:`[Associated constant]s`.
@@ -829,13 +717,13 @@ A :dt:`value namespace` contains the names of the following entities:
   :t:`[Associated function]s`.
 
 * :dp:`fls_sxmju66ot5mo`
-  Captured :t:`closure` variables.
+  Captured :t:`closure` :t:`[variable]s`.
 
 * :dp:`fls_mhsfm533cwls`
   :t:`[Constant]s`.
 
 * :dp:`fls_fu7jp3y2tu24`
-  :t:`[Constant parameter]s` of generics.
+  :t:`[Constant parameter]s` of :t:`[generic]s`.
 
 * :dp:`fls_pi2tpb9376hk`
   :t:`[Enum variant constructor]s`.
@@ -859,7 +747,7 @@ A :dt:`value namespace` contains the names of the following entities:
   :t:`[Struct constructor]s`.
 
 :dp:`fls_jhha0nr3vsgq`
-The names of the following entities are not part of any namespace:
+The :t:`[name]s` of the following entities are not part of any :t:`namespace`:
 
 * :dp:`fls_dicnt0l6pite`
   :t:`[Enum field]s`.
@@ -877,22 +765,23 @@ Preludes
 
 :dp:`fls_9bo3y5s1fxa1`
 A :dt:`prelude` is a collection of :t:`[name]s` that are automatically brought
-:t:`in scope` of every :t:`module` in a :t:`crate`. Such names are referred to
-as :dt:`prelude name`\ s.
+:t:`in scope` of every :t:`module` in a :t:`crate`. Such :t:`[name]s` are
+referred to as :dt:`[prelude name]s`.
 
 :dp:`fls_z33lxzlfb14t`
-The :dt:`core prelude` is a prelude that **???**.
+The :dt:`core prelude` is a :t:`prelude` that **???**.
 
 :dp:`fls_xqeud0y6tkds`
-An :dt:`external prelude` is a prelude that brings in scope of the :t:`root
-module` the names of the crates imported using :t:`[external crate import]s`.
-If the external crate import uses a :t:`renaming`, then the renaming is instead
-added to the external prelude. The core crate is always added to the external
-prelude unless the crate root is subject to attribute ``no_core``.
+An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of
+the :t:`root module` the :t:`[name]s` of the :t:`[crate]s` imported using
+:t:`[external crate import]s`. If the :t:`external crate import` uses a
+:t:`renaming`, then the :t:`renaming` is instead added to the :t:`external
+prelude`. The :t:`core crate` is always added to the :t:`external prelude`
+unless the :t:`crate root` is subject to :t:`attribute` :c:`no_core`.
 
 :dp:`fls_s7vhr3ipu9y`
-The :dt:`language prelude` is a prelude that brings in scope of every module the
-following names:
+The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
+:t:`module` the following :t:`[name]s`:
 
 * :dp:`fls_up3442238u2u`
   :t:`Boolean type` :c:`bool`.
@@ -911,9 +800,9 @@ following names:
   :t:`[Textual type]s` :c:`char` and :c:`str`.
 
 :dp:`fls_7csxtbclebly`
-The :dt:`macro_use prelude` is a prelude that brings in scope of the root module
-the names of :t:`[macro]s` from :t:`[external crate]s` that were imported using
-an external crate import.
+The :dt:`macro_use prelude` is a :t:`prelude` that brings :t:`in scope` of the
+:t:`root module` the :t:`[name]s` of :t:`[macro]s` from :t:`[external crate]s`
+that were imported using an :t:`external crate import`.
 
 .. rubric:: Legality Rules
 
@@ -924,94 +813,98 @@ Name Resolution
 
 :dp:`fls_s8fa9sxj9dxe`
 :dt:`Name resolution` is the process of relating a :t:`path` to a :t:`name` by
-considering :t:`[namespace]s`, :t:`[scope]s`, and :t:`visibility`. A path that
-is successfully related to a name is said to be :dt:`resolved`.
+considering :t:`[namespace]s`, :t:`[scope]s`, and :t:`visibility`. A :t:`path`
+that is successfully related to a :t:`name` is said to be :dt:`resolved`.
 
 :dp:`fls_ch2hhrbzqz2k`
-:dt:`Containment name resolution` is a kind of name resolution that relates the
-:t:`identifier` of a :t:`path segment` to a name that is expected to be defined
-in a given module, as follows:
+:dt:`Containment name resolution` is a kind of :t:`name resolution` that relates
+the :t:`identifier` of a :t:`path segment` to a :t:`name` that is expected to be
+defined in a given :t:`module`, as follows:
 
 #. :dp:`fls_auzozbud012u`
-   Make the scope of the given module where the identifier resides be the
-   current scope.
+   Make the :t:`scope` of the given :t:`module` where the :t:`identifier`
+   resides be the current :t:`scope`.
 
 #. :dp:`fls_hcn2ac9rqzk`
-   If the given module contains a name that matches the characters of the
-   identifier, then relate the identifier to the matched name.
+   If the given :t:`module` contains a :t:`name` that matches the characters
+   of the :t:`identifier`, then relate the :t:`identifier` to the matched
+   :t:`name`.
 
 #. :dp:`fls_e2w6rf1eww6`
    Otherwise this is a static error.
 
 :dp:`fls_dxnbwhqyjlev`
-:dt:`Macro name resolution` is a kind of name resolution that relates the
-identifier of a path segment to the name of a :t:`declarative macro` as follows:
+:dt:`Macro name resolution` is a kind of :t:`name resolution` that relates the
+:t:`identifier` of a :t:`path segment` to the :t:`name` of a :t:`declarative
+macro` as follows:
 
 #. :dp:`fls_o08avj1e2q5l`
-   Make the scope where the identifier resides be the current scope.
+   Make the :t:`scope` where the :t:`identifier` resides be the current
+   :t:`scope`.
 
 #. :dp:`fls_y4d9yecnjpll`
-   While there is a current scope
+   While there is a current :t:`scope`
 
    #. :dp:`fls_4tc9yagzdxwl`
-      If the current scope contains a name of a declarative macro that matches
-      the characters of the identifier, then
+      If the current :t:`scope` contains a :t:`name` of a :t:`declarative macro`
+      that matches the characters of the :t:`identifier`, then
 
       #. :dp:`fls_94fzpnkf579`
-         Relate the identifier to the matched name.
+         Relate the :t:`identifier` to the matched :t:`name`.
 
       #. :dp:`fls_jv3v4dddhk63`
-         Stop the macro name resolution.
+         Stop the :t:`macro name resolution`.
 
    #. :dp:`fls_8vhwna9f7ub0`
-      Otherwise make the current scope be the enclosing scope of the current
-      scope.
+      Otherwise make the current :t:`scope` be the enclosing :t:`scope` of the
+      current :t:`scope`.
 
 #. :dp:`fls_kxjlf6t8tuwn`
-   If the :t:`macro scope` contains a name of a declarative macro that matches
-   the characters of the identifier, then relate the identifier to the matched
-   name.
+   If the :t:`macro scope` contains a :t:`name` of a :t:`declarative macro`
+   that matches the characters of the :t:`identifier`, then relate the
+   :t:`identifier` to the matched :t:`name`.
 
 #. :dp:`fls_zh3nt3nwbblt`
    Otherwise this is a static error.
 
 :dp:`fls_8kq4piz1w2gx`
-:dt:`Nearest enclosing name resolution` is a kind of name resolution that
-relates the identifier of a path segment to a name that is expected to be
-declared in a given namespace, as follows:
+:dt:`Nearest enclosing name resolution` is a kind of :t:`name resolution`
+that relates the :t:`identifier` of a :t:`path segment` to a :t:`name` that is
+expected to be declared in a given :t:`namespace`, as follows:
 
 #. :dp:`fls_yxrimll8as6d`
-   Make the scope of the given namespace where the identifier resides be the
-   current scope.
+   Make the :t:`scope` of the given :t:`namespace` where the :t:`identifier`
+   resides be the current :t:`scope`.
 
 #. :dp:`fls_lnb9mlgyhz9f`
-   While there is a current scope
+   While there is a current :t:`scope`
 
    #. :dp:`fls_4g4375us47yb`
-      If the current scope contains a name that matches the characters of the
-      identifier, then
+      If the current :t:`scope` contains a :t:`name` that matches the characters
+      of the :t:`identifier`, then
 
       #. :dp:`fls_c225wy3moan2`
-         Relate the identifier to the matched name.
+         Relate the :t:`identifier` to the matched :t:`name`.
 
       #. :dp:`fls_722t9zdg5dih`
-         Stop the nearest enclosing name resolution.
+         Stop the :t:`nearest enclosing name resolution`.
 
    #. :dp:`fls_2wag4633ktz1`
-      Otherwise make the current scope be the enclosing scope of the current
-      scope.
+      Otherwise make the current :t:`scope` be the enclosing :t:`scope` of the
+      current :t:`scope`.
 
 #. :dp:`fls_xsqflv4vzsdv`
-   If the :t:`prelude scope` contains a name that matches the characters of the
-   identifier, then relate the identifier to the matched name.
+   If the :t:`prelude scope` contains a :t:`name` that matches the characters
+   of the :t:`identifier`, then relate the :t:`identifier` to the matched
+   :t:`name`.
 
 #. :dp:`fls_8ob8cwl8uqhc`
    Otherwise this is a static error.
 
 :dp:`fls_mnlz6v5ut9q2`
-:dt:`Type name resolution` is a kind of name resolution that relates the
-identifier of a path segment to a name that is expected to be declared in an
-implementation of a type, as follows:
+:dt:`Type name resolution` is a kind of :t:`name resolution` that relates the
+:t:`identifier` of a :t:`path segment` to a :t:`name` that is expected to be
+declared in an :t:`implementation` of a :t:`type`, as follows:
 
 * :dp:`fls_73rswlz0rkwk`
   **Explain**
@@ -1020,91 +913,94 @@ implementation of a type, as follows:
   **I can't figure out how to hook this into the algorithm below**
 
 :dp:`fls_ydyjavnku9bg`
-If a path consists of multiple path segments, then the path is resolved as
-follows:
+If a :t:`path` consists of multiple :t:`[path segment]s`, then the :t:`path` is
+resolved as follows:
 
 #. :dp:`fls_56e0pov11z3o`
-   Make the first path segment be the current path segment.
+   Make the first :t:`path segment` be the current :t:`path segment`.
 
 #. :dp:`fls_yfarrr5cz8zg`
-   Perform nearest enclosing name resolution, where the path segment is the
-   current path segment and the namespace is the :t:`type namespace`.
+   Perform :t:`nearest enclosing name resolution`, where the :t:`path segment`
+   is the current :t:`path segment` and the :t:`namespace` is the :t:`type
+   namespace`.
 
 #. :dp:`fls_4m7tv3tyizv0`
-   If the current path segment did not resolve to a :t:`module`, then this is a
-   static error.
+   If the current :t:`path segment` did not resolve to a :t:`module`, then this
+   is a static error.
 
 #. :dp:`fls_oxjlvkxt08ey`
-   Make the current path segment be the previous path segment.
+   Make the current :t:`path segment` be the previous :t:`path segment`.
 
 #. :dp:`fls_nkv9qmwz32rj`
-   Make the next path segment be the current path segment.
+   Make the next :t:`path segment` be the current :t:`path segment`.
 
 #. :dp:`fls_nzs8j9kivsw4`
-   While the current path segment is not the last segment
+   While the current :t:`path segment` is not the last :t:`path segment`
 
    #. :dp:`fls_fz70hv7pzpzx`
-      Perform containment name resolution, where the path segment is the current
-      path segment and the module is the module that the previous path segment
-      resolved to.
+      Perform :t:`containment name resolution`, where the :t:`path segment` is
+      the current :t:`path segment` and the :t:`module` is the :t:`module` that
+      the previous path segment resolved to.
 
    #. :dp:`fls_6eya9q7jir3k`
-      If the current path segment did not resolve to a module, then this is a
-      static error.
+      If the current :t:`path segment` did not resolve to a :t:`module`, then
+      this is a static error.
 
    #. :dp:`fls_min9nnblcc7g`
-      Make the current path segment be the previous path segment.
+      Make the current :t:`path segment` be the previous :t:`path segment`.
 
    #. :dp:`fls_4smxzvsncyp8`
-      Make the next path segment be the current path segment.
+      Make the next :t:`path segment` be the current :t:`path segment`.
 
 #. :dp:`fls_pgepm7dqj9b4`
-   Perform containment name resolution, where the path segment is the current
-   path segment and the module is the module that the previous path segment
-   resolved to. (**more?**)
+   Perform :t:`containment name resolution`, where the :t:`path segment` is the
+   current :t:`path segment` and the :t:`module` is the :t:`module` that the
+   previous :t:`path segment` resolved to. (**more?**)
 
 :dp:`fls_gz9sxvudppg7`
-It is a static error is a path that consists of multiple path segments cannot be
-related to the name of an item.
+It is a static error if a :t:`path` that consists of multiple :t:`[path
+segment]s` cannot be related to a :t:`name` of an :t:`item`.
 
 :dp:`fls_py6hxo1edqvo`
 A :t:`global path` is resolved starting from the :t:`external prelude`.
 
 :dp:`fls_vj7ctoj65ft`
-If a path starts with qualifier ``crate``, then the path is resolved relative to
-the current :t:`crate`.
+If a :t:`path` starts with qualifier ``crate``, then the :t:`path` is resolved
+relative to the current :t:`crate`.
 
 :dp:`fls_u70rq8qvont3`
-If a path starts with qualifier ``$crate``, then the path is resolved relative
-to the crate where the related :t:`macro` is declared.
+If a :t:`path` starts with qualifier ``$crate``, then the :t:`path` is resolved
+relative to the :t:`crate` where the related :t:`macro` is declared.
 
 :dp:`fls_sfd92kxfe3o`
-If a path starts with qualifier ``self``, then the path is resolved relative to
-the current module.
+If a :t:`path` starts with qualifier ``self``, then the :t:`path` is resolved
+relative to the current :t:`module`.
 
 :dp:`fls_uqqqsrqyg9k8`
-If a path starts with qualifier ``Self``, then the path is resolved relative to
-the :t:`implementing type` within an :t:`implementation` or a :t:`trait`.
+If a :t:`path` starts with qualifier ``Self``, then the :t:`path` is resolved
+relative to the :t:`implementing type` within an :t:`implementation` or a
+:t:`trait`.
 
 :dp:`fls_q76k2ln276hw`
-If a path starts with qualifier ``super``, then the path is resolved relative to
-the parent module.
+If a :t:`path` starts with qualifier ``super``, then the :t:`path` is resolved
+relative to the parent :t:`module`.
 
 :dp:`fls_yx78nuv60zdv`
-If a path consists of a single path segment, then the path is resolved as
-follows:
+If a :t:`path` consists of a single :t:`path segment`, then the :t:`path` is
+resolved as follows:
 
 #. :dp:`fls_rxgorbvuujjn`
-   Make the first path segment be the current path segment.
+   Make the first :t:`path segment` be the current :t:`path segment`.
 
 #. :dp:`fls_dr5zn2g13x9l`
-   Perform nearest enclosing name resolution where the path segment is the
-   current path segment, and the namespace is **which one???**.
+   Perform :t:`nearest enclosing name resolution` where the :t:`path segment` is
+   the current :t:`path segment`, and the :t:`namespace` is **which one???**.
 
 :dp:`fls_4ldkkufsajm0`
-It is a static error if a path that consists of a single path segment cannot be
-related to the name of a locally declared item or a locally declared variable.
+It is a static error if a :t:`path` that consists of a single :t:`path segment`
+cannot be related to the :t:`name` of a locally declared :t:`item` or a locally
+declared :t:`variable`.
 
 :dp:`fls_wqrttnn5py4y`
-A macro invocation is resolved using macro name resolution.
+A :t:`macro invocation` is resolved using :t:`macro name resolution`.
 

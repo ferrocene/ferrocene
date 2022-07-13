@@ -29,28 +29,30 @@ Send and Sync
 
 :dp:`fls_n5l17mlglq11`
 The Rust programming language provides synchronization facilities for
-:t:`[type]s` through the :c:`core::marker::Send` :t:`trait` and the
-:c:`core::marker::Sync` :t:`trait`.
+:t:`[type]s` through the :std:`core::marker::Send` :t:`trait` and the
+:std:`core::marker::Sync` :t:`trait`.
 
 :dp:`fls_2jujsujpjp3w`
-A :t:`send type` is a :t:`type` that implements the :c:`core::marker::Send`
+A :t:`send type` is a :t:`type` that implements the :std:`core::marker::Send`
 :t:`trait`.
 
 :dp:`fls_cax6fe4em23k`
-An :t:`abstract data type` automatically implements the :c:`core::marker::Send`
-:t:`trait` if the :t:`[type]s` of all its :t:`[field]s` are :t:`[send type]s`.
+An :t:`abstract data type` automatically implements the
+:std:`core::marker::Send` :t:`trait` if the :t:`[type]s` of all its
+:t:`[field]s` are :t:`[send type]s`.
 
 :dp:`fls_4ypqdehn7b0v`
 A :t:`send type` shall have :t:`[value]s` that are safe to transfer across
 thread boundaries.
 
 :dp:`fls_dekskhk4g895`
-A :t:`sync type` is a :t:`type` that implements the :c:`core::marker::Sync`
+A :t:`sync type` is a :t:`type` that implements the :std:`core::marker::Sync`
 :t:`trait`.
 
 :dp:`fls_y0iqr5ibnbfe`
-An :t:`abstract data type` automatically implements the :c:`core::marker::Sync`
-:t:`trait` if the :t:`[type]s` of all its :t:`[field]s` are :t:`[sync type]s`.
+An :t:`abstract data type` automatically implements the
+:std:`core::marker::Sync` :t:`trait` if the :t:`[type]s` of all its
+:t:`[field]s` are :t:`[sync type]s`.
 
 :dp:`fls_zgemofbs5q2x`
 A :t:`sync type` shall have :t:`[reference]s` that are safe to transfer across
@@ -63,7 +65,7 @@ Atomics
 
 :dp:`fls_3pjla9s93mhd`
 An :t:`atomic type` is a :t:`type` defined in :t:`module`
-:c:`core::sync::atomic`. :t:`[Atomic type]s` provide primitive shared-memory
+:std:`core::sync::atomic`. :t:`[Atomic type]s` provide primitive shared-memory
 communication between threads.
 
 :dp:`fls_wn4ynaio8u47`
@@ -76,40 +78,40 @@ communication between threads.
      - **Atomic Type**
    * - :dp:`fls_jx0784jzxy00`
      - :c:`bool`
-     - :c:`core::sync::atomic::AtomicBool`
+     - :std:`core::sync::atomic::AtomicBool`
    * - :dp:`fls_vzuwnpx7mt08`
      - :c:`i8`
-     - :c:`core::sync::atomic::AtomicI8`
+     - :std:`core::sync::atomic::AtomicI8`
    * - :dp:`fls_cpcd0vexfbhj`
      - :c:`i16`
-     - :c:`core::sync::atomic::AtomicI16`
+     - :std:`core::sync::atomic::AtomicI16`
    * - :dp:`fls_jt7rfq9atbiv`
      - :c:`i32`
-     - :c:`core::sync::atomic::AtomicI32`
+     - :std:`core::sync::atomic::AtomicI32`
    * - :dp:`fls_2hqmfwswc6k`
      - :c:`i64`
-     - :c:`core::sync::atomic::AtomicI64`
+     - :std:`core::sync::atomic::AtomicI64`
    * - :dp:`fls_5ab2sw3gwmt3`
      - :c:`isize`
-     - :c:`core::sync::atomic::AtomicIsize`
+     - :std:`core::sync::atomic::AtomicIsize`
    * - :dp:`fls_w2mw833g28eb`
      - ``*mut T``
-     - :c:`core::sync::atomic::AtomicPtr`
+     - :std:`core::sync::atomic::AtomicPtr`
    * - :dp:`fls_mjq1l1y0vmz4`
      - :c:`u8`
-     - :c:`core::sync::atomic::AtomicU8`
+     - :std:`core::sync::atomic::AtomicU8`
    * - :dp:`fls_906978wtss6n`
      - :c:`u16`
-     - :c:`core::sync::atomic::AtomicU16`
+     - :std:`core::sync::atomic::AtomicU16`
    * - :dp:`fls_4urmnh4mfehl`
      - :c:`u32`
-     - :c:`core::sync::atomic::AtomicU32`
+     - :std:`core::sync::atomic::AtomicU32`
    * - :dp:`fls_2qkrcd5eovpe`
      - :c:`u64`
-     - :c:`core::sync::atomic::AtomicU64`
+     - :std:`core::sync::atomic::AtomicU64`
    * - :dp:`fls_cry1e78gp19q`
      - :c:`usize`
-     - :c:`core::sync::atomic::AtomicUsize`
+     - :std:`core::sync::atomic::AtomicUsize`
 
 Asynchronous Computation
 ------------------------
@@ -118,17 +120,18 @@ Asynchronous Computation
 
 :dp:`fls_g40xp4andj5g`
 The Rust programming language provides asynchronous computation through
-:t:`module` :c:`core::task` and the :c:`core::future::Future` :t:`trait`.
+:t:`module` :std:`core::task` and the :std:`core::future::Future` :t:`trait`.
 
 :dp:`fls_fte085hi1yqj`
 A :t:`future` represents a :t:`value` of a :t:`type` that implements the
-:c:`core::future::Future` :t:`trait` which may not have finished computing yet.
+:std:`core::future::Future` :t:`trait` which may not have finished computing
+yet.
 
 :dp:`fls_7muubin2wn1v`
 The computed :t:`value` of a :t:`future` is obtained by using an :t:`await
-expression` or by invoking :c:`core::future::Future::poll`.
+expression` or by invoking :std:`core::future::Future::poll`.
 
 :dp:`fls_ftzey2156ha`
-:c:`core::future::Future::poll` shall not be invoked on a :t:`future` that has
-already returned :c:`core::task::Poll::Ready`.
+:std:`core::future::Future::poll` shall not be invoked on a :t:`future` that has
+already returned :std:`core::task::Poll::Ready`.
 

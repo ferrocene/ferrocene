@@ -3,8 +3,12 @@
 
 .. default-domain:: spec
 
+.. _fls_m55piel7xc04:
+
 Patterns
 ========
+
+.. _fls_xgqh0ju6bmbn:
 
 Patterns
 --------
@@ -70,6 +74,8 @@ Any two :t:`[pattern-without-alternation]s` that are or-ed using character 0x7C
   The :t:`[binding]s` of the two :t:`[pattern-without-alternation]s` shall
   be the same, shall have :t:`[unifiable type]s`, and shall have the same
   :t:`[binding mode]s`.
+
+.. _fls_7bxv8lybxm18:
 
 Identifier Patterns
 ~~~~~~~~~~~~~~~~~~~
@@ -161,19 +167,21 @@ its :t:`binding` is determined as follows:
 :dp:`fls_sfyfdxhvhk44`
 An identifier pattern in the context of a let expression.
 
-.. code-block:: text
+.. code-block:: rust
 
    let x = 42;
 
 :dp:`fls_as0pqqmo1des`
 An identifier pattern with a bound pattern in the context of a match expression.
 
-.. code-block:: text
+.. code-block:: rust
 
    match x {
        small @ 1 ..= 5 => (),
        _ => (),
    }
+
+.. _fls_2krxnq8q9ef1:
 
 Literal Patterns
 ~~~~~~~~~~~~~~~~
@@ -210,13 +218,15 @@ The :t:`type` of a :t:`literal pattern` is the :t:`type` of the specified
 Two literal patterns in the context of a match expression. See :p:`5.1.1.
 <fls_yeajwokikkdi>` for the declaration of ``x``.
 
-.. code-block:: text
+.. code-block:: rust
 
    match x {
        -2 => (),
        36 => (),
        _  => (),
    }
+
+.. _fls_1xit18et4ohh:
 
 Parenthesized Patterns
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -247,7 +257,7 @@ The :t:`type` of a :t:`parenthesized pattern` is the :t:`type` of its nested
 :dp:`fls_2xq8852gihn9`
 See :p:`5.1.1. <fls_yeajwokikkdi>` for the declaration of ``x``.
 
-.. code-block:: text
+.. code-block:: rust
 
    let ref_x = &x;
 
@@ -255,12 +265,14 @@ See :p:`5.1.1. <fls_yeajwokikkdi>` for the declaration of ``x``.
 A parenthesized pattern inside a reference pattern in the context of a match
 expression.
 
-.. code-block:: text
+.. code-block:: rust
 
    match ref_x {
        &(1 ..= 5) => (),
        _ => (),
    }
+
+.. _fls_uloyjbaso8pz:
 
 Path Patterns
 ~~~~~~~~~~~~~
@@ -314,7 +326,7 @@ The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    mod module {
    	pub const ZERO: i32 = 0;
@@ -325,13 +337,15 @@ The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
 :dp:`fls_u59rilepu8z9`
 See :p:`5.1.1. <fls_yeajwokikkdi>` for the declaration of ``x``.
 
-.. code-block:: text
+.. code-block:: rust
 
    match x {
        module::ZERO => (),
        Enum::Variant => (),
        _  => (),
    }
+
+.. _fls_6tl1fx99yn6c:
 
 Range Patterns
 ~~~~~~~~~~~~~~
@@ -441,13 +455,15 @@ A :t:`qualified path-in-expression` of a :t:`range pattern` shall refer to an
 Two range patterns in the context of a match expression. See :p:`5.1.1.
 <fls_yeajwokikkdi>` for the declaration of ``x``.
 
-.. code-block:: text
+.. code-block:: rust
 
    match x {
        -30 ..= 2 => (),
        57 .. => (),
        _ => (),
    }
+
+.. _fls_d2sc9hl3v0mk:
 
 Reference Patterns
 ~~~~~~~~~~~~~~~~~~
@@ -489,12 +505,14 @@ The :t:`type` of a :t:`reference pattern` is determined as follows:
 A reference pattern in the context of a match expression. See :p:`5.1.3.
 <fls_yowuqu7bcu7b>` for the declaration of ``ref_x``.
 
-.. code-block:: text
+.. code-block:: rust
 
    match ref_x {
        &23 => (),
        _ => (),
    }
+
+.. _fls_7wpgnp4kjq82:
 
 Rest Patterns
 ~~~~~~~~~~~~~
@@ -541,7 +559,7 @@ determined as follows:
 A rest pattern in an identifier pattern of a slice pattern, followed by a rest
 pattern in a slice pattern.
 
-.. code-block:: text
+.. code-block:: rust
 
    match slice {
        [1, 5, .., 7] => (),
@@ -558,6 +576,8 @@ Rest patterns in tuple patterns.
        (.., 5) => (),
        (..) => (),
    }
+
+.. _fls_qte70mgzpras:
 
 Slice Patterns
 ~~~~~~~~~~~~~~
@@ -604,6 +624,8 @@ A slice pattern in the context of a match expression.
        [a, b, c] => (),
        _ => ()
    }
+
+.. _fls_7dbd5t2750ce:
 
 Struct Patterns
 ~~~~~~~~~~~~~~~
@@ -722,6 +744,8 @@ It is a static error if a :t:`shorthand deconstructor` has only :t:`keyword`
 A :t:`struct pattern` is :t:`irrefutable` when all of its :t:`[subpattern]s`
 are :t:`irrefutable`.
 
+.. _fls_xxz6vhk0idhn:
+
 Record Struct Patterns
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -782,6 +806,8 @@ deconstructor` shall either:
    let Struct { field, .. };
    let Struct { .. };
 
+.. _fls_cbj864ya6vli:
+
 Tuple Struct Patterns
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -834,6 +860,8 @@ deconstructor` shall either:
    let Tuple(first, ..);
    let Tuple(..);
 
+.. _fls_tk5tslj2h2h7:
+
 Union Patterns
 ^^^^^^^^^^^^^^
 
@@ -874,6 +902,8 @@ A :t:`union pattern` shall require :t:`unsafe context`.
        let Union { int } = Union { int: 0 };
    }
 
+.. _fls_i4225qweny6e:
+
 Unit Struct Patterns
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -891,6 +921,8 @@ to a :t:`unit struct type`.
 
    let Empty = Empty;
    let Empty = Empty{};
+
+.. _fls_urbr5rg9206v:
 
 Tuple Patterns
 ~~~~~~~~~~~~~~
@@ -922,7 +954,7 @@ destructured.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let pair = (1, "two");
 
@@ -932,6 +964,8 @@ A tuple pattern in the context of a let statement.
 .. syntax::
 
    let (first, second) = pair;
+
+.. _fls_qfsfnql1t7m:
 
 Wildcard Patterns
 ~~~~~~~~~~~~~~~~~
@@ -961,9 +995,11 @@ it matches.
 A wildcard pattern in the context of a let statement. See :p:`5.1.10.
 <fls_fo48m62q2y0v>` for the declaration of ``pair``.
 
-.. code-block:: text
+.. code-block:: rust
 
    let (first, _) = pair;
+
+.. _fls_uh76pw6ykd57:
 
 Refutability
 ------------
@@ -999,7 +1035,7 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 :dp:`fls_sgu9bnp7xajv`
 ``x`` is an irrefutable pattern because it always matches ``42``.
 
-.. code-block:: text
+.. code-block:: rust
 
    let x = 42;
 
@@ -1007,9 +1043,11 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 ``y`` is a refutable pattern because it does not match ``value`` when ``value``
 denotes :std:`core::option::Option::None`.
 
-.. code-block:: text
+.. code-block:: rust
 
    if let core::option::Option::Some(y) = value {
+
+.. _fls_qssijtofa9i8:
 
 Binding Modes
 -------------
@@ -1023,13 +1061,13 @@ Binding Modes
 
 .. rubric:: Legality Rules
 
-:dp:`fls_vnh9wfrvumdz`
-A :t:`binding` is a :t:`variable` of an :t:`identifier pattern` or a
-:t:`shorthand deconstructor` that binds a matched :t:`value`.
-
-:dp:`fls_jrv4ghj4fr20`
+:dp:`fls_7xby6d1903kw`
 A :t:`binding pattern` is either an :t:`identifier pattern` or a :t:`shorthand
 deconstructor`.
+
+:dp:`fls_vnh9wfrvumdz`
+A :t:`binding` is a :t:`variable` of a :t:`binding pattern` that binds a matched
+:t:`value`.
 
 :dp:`fls_dqe75i8h2fie`
 A :t:`non-reference pattern` is any :t:`pattern` except :t:`non-[binding
@@ -1042,7 +1080,7 @@ If a :t:`binding pattern` does not explicitly specify :t:`keyword` ``ref``,
 uses the current :t:`binding mode` of :t:`pattern matching`.
 
 :dp:`fls_55jtzh6a292x`
-Initially, the :t:`binding mode` of a :t:`binding` is "by value".
+Initially, the :t:`binding mode` of a :t:`binding` is :t:`by value`.
 
 :dp:`fls_qcaf2kup7zn0`
 During the process of :t:`pattern matching`, each time a :t:`reference`
@@ -1051,7 +1089,7 @@ dereferenced and the :t:`binding mode` is updated as follows:
 
 * :dp:`fls_6acdqz8rwnn`
   If the :t:`reference` is an :t:`immutable reference`, then the :t:`binding
-  mode` is updated to "by reference".
+  mode` is updated to :t:`by reference`.
 
 * :dp:`fls_tv0avib387bv`
   If the :t:`reference` is a :t:`mutable reference` and the :t:`binding mode` is
@@ -1067,20 +1105,22 @@ A :t:`[binding pattern]s` binds its :t:`binding` to a matched :t:`value` as
 follows:
 
 * :dp:`fls_7gxb74u1np36`
-  If the :t:`binding mode` is "by reference" or the :t:`binding pattern`
+  If the :t:`binding mode` is :t:`by reference` or the :t:`binding pattern`
   appears only with :t:`keyword` ``ref``, then the :t:`binding` is bound to a
   :t:`reference` of the matched :t:`value`.
 
 * :dp:`fls_7y56d0ulxomf`
-  If the :t:`binding mode` is "by mutable reference" or the :t:`binding pattern`
-  appears with keywords ``ref`` ``mut``, then the :t:`binding` is bound to a
-  :t:`mutable reference` of the matched :t:`value`.
+  If the :t:`binding mode` is :t:`by mutable reference` or the :t:`binding
+  pattern` appears with keywords ``ref`` ``mut``, then the :t:`binding` is bound
+  to a :t:`mutable reference` of the matched :t:`value`.
 
 * :dp:`fls_pxvtqxke1enp`
-  If the :t:`binding mode` is "by value", then the :t:`binding` is bound
-  to a copy of the matched :t:`value` if its :t:`type` implements the
+  If the :t:`binding mode` is :t:`by value`, then the :t:`binding` is
+  bound to a copy of the matched :t:`value` if its :t:`type` implements the
   :std:`core::marker::Copy` :t:`trait`, otherwise the :t:`binding` is bound to
   the move of the matched :t:`value`.
+
+.. _fls_jm6l7b90h6wa:
 
 Pattern Matching
 ----------------
@@ -1145,6 +1185,8 @@ proceeds as follows:
 Only the :t:`[binding]s` of a matched :t:`pattern-without-alternation` are
 introduced to the corresponding :t:`scope`.
 
+.. _fls_vnai6ag4qrdb:
+
 Identifier Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1176,6 +1218,8 @@ context :t:`value` is a :t:`mutable place expression`.
 #. :dp:`fls_h1er04t0yta7`
    Matching succeeds.
 
+.. _fls_azzf1llv3wf:
+
 Literal Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1191,6 +1235,8 @@ Literal Pattern Matching
 #. :dp:`fls_294jtwbfq3p9`
    Otherwise matching fails.
 
+.. _fls_5loglxds6zik:
+
 Parenthesized Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1199,6 +1245,8 @@ Parenthesized Pattern Matching
 :dp:`fls_jajvvwoy3399`
 :dt:`Parenthesized pattern matching` performs :t:`pattern matching` with its
 :t:`subpattern` and the same context :t:`value`.
+
+.. _fls_d44aflefat88:
 
 Path Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1214,6 +1262,8 @@ Path Pattern Matching
 
 #. :dp:`fls_h3y8r4298s53`
    Otherwise matching fails.
+
+.. _fls_fyskeih6twyb:
 
 Range Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1238,6 +1288,8 @@ Range Pattern Matching
 #. :dp:`fls_n4t3xah1pk7i`
    Otherwise matching fails.
 
+.. _fls_org6hqv397fp:
+
 Reference Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1252,6 +1304,8 @@ Reference Pattern Matching
 #. :dp:`fls_l2nwz166curc`
    Perform :t:`pattern matching` with its :t:`subpattern` and the dereferenced
    :t:`value`.
+
+.. _fls_57ic33pwdvp3:
 
 Slice Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1281,6 +1335,8 @@ Slice Pattern Matching
 
    #. :dp:`fls_pc97m47p34wq`
       If matching the :t:`subpattern` fails, then matching fails.
+
+.. _fls_asj8rgccvkoe:
 
 Struct Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1317,6 +1373,8 @@ Struct Pattern Matching
    #. :dp:`fls_6sdcykdrpe5d`
       If matching the :t:`subpattern` fails, then matching fails.
 
+.. _fls_rce8bb7nz2jy:
+
 Tuple Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1346,6 +1404,8 @@ Tuple Pattern Matching
    #. :dp:`fls_krl32txvxxkz`
       If matching the :t:`subpattern` fails, then matching fails.
 
+.. _fls_eexupzdsu7f:
+
 Tuple Struct Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1374,6 +1434,8 @@ Tuple Struct Pattern Matching
 
    #. :dp:`fls_h14emtt6iyk3`
       If matching the :t:`subpattern` fails, then matching fails.
+
+.. _fls_yc4xm4hrfyw7:
 
 Wildcard Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~

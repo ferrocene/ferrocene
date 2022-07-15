@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_wdicg3sqa98e:
+
 Statements
 ==========
 
@@ -41,6 +43,8 @@ effects.
 
 :dp:`fls_dl763ssb54q1`
 The :t:`execution` of an :t:`empty statement` has no effect.
+
+.. _fls_yivm43r5wnp1:
 
 Let Statements
 --------------
@@ -103,11 +107,13 @@ The :t:`execution` of a :t:`let statement` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let local = 0;
    let local: u32;
    let (a, b) = (0, 0);
+
+.. _fls_1pg5ig740tg1:
 
 Expression Statements
 ---------------------
@@ -142,21 +148,21 @@ The :t:`execution` of an :t:`expression statement` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let mut values = vec![1, 2, 3];
 
 :dp:`fls_4q90jb39apwr`
 The following expression statement ignores the result from ``pop()``.
 
-.. code-block:: text
+.. code-block:: rust
 
    values.pop();
 
 :dp:`fls_xqtztcu8ibwq`
 The following expression statement does not require a semicolon.
 
-.. code-block:: text
+.. code-block:: rust
 
    if values.is_empty() {
        values.push(42);
@@ -168,7 +174,7 @@ The following expression statement does not require a semicolon.
 :dp:`fls_2p9xnt519nbw`
 The following expression statement is not an array index expression.
 
-.. code-block:: text
+.. code-block:: rust
 
    [42];
 

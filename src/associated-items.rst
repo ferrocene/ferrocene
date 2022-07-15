@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_l21tjqjkkaa0:
+
 Associated Items
 ================
 
@@ -90,7 +92,7 @@ An :t:`associated trait type` has an implicit :std:`core::marker::Sized`
 :dp:`fls_vp2ov6ykueue`
 An :t:`associated trait type` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    	trait T {
    	    type X: Bound;
@@ -99,7 +101,7 @@ An :t:`associated trait type` of the form
 :dp:`fls_5uf74nvdm64o`
 is equivalent to a :t:`where clause` of the following form:
 
-.. code-block:: text
+.. code-block:: rust
 
    	trait T where Self::X: Bound {
    	    type X;
@@ -110,7 +112,7 @@ A :t:`method` is an :t:`associated function` with a :t:`receiver`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Greeter {
        const MAX_GREETINGS: i32;

@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_osd6c4utyjb3:
+
 FFI
 ===
 
@@ -30,6 +32,8 @@ The following :t:`[attribute]s` affect :t:`FFI`:
 
 * :dp:`fls_9d8v0xeyi0f`
   :t:`Attribute` :c:`used`.
+
+.. _fls_usgd0xlijoxv:
 
 ABI
 ---
@@ -108,10 +112,12 @@ include, but may not be limited to, the following:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    extern
    extern "C"
+
+.. _fls_tmoh3y9oyqsy:
 
 External Blocks
 ---------------
@@ -147,7 +153,7 @@ be consumed by :t:`[macro]s`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    extern "C" {
        static MAX_LENGTH: size_t;
@@ -159,6 +165,8 @@ be consumed by :t:`[macro]s`.
             compressed_length: *mut size_t) -> c_int;
        fn log(msg: *const c_char, ...);
    }
+
+.. _fls_yztwtek0y34v:
 
 External Functions
 ------------------
@@ -192,6 +200,8 @@ patterns and underscore patterns.
 :dp:`fls_juob30rst11r`
 Only the last parameter :s:`FunctionParameter` of an :t:`external function` may
 specify a :s:`FunctionParameterVariadicPart`.
+
+.. _fls_s4yt19sptl7d:
 
 External Statics
 ----------------

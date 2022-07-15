@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_dzq9cdz4ibsz:
+
 Exceptions and Errors
 =====================
 
@@ -32,6 +34,8 @@ either present using :std:`core::option::Option::Some` or absent using
 :t:`Enum` :std:`core::result::Result` indicates whether a computation completed
 successfully and produced a :t:`value` using :std:`core::result::Result::Ok` or
 the computation failed with an error using :std:`core::result::Result::Err`.
+
+.. _fls_k02nt1m5fq1z:
 
 Panic
 -----
@@ -63,9 +67,11 @@ interface` boundary.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    panic!("This was a terrible mistake!");
+
+.. _fls_hi1iz0gbnksi:
 
 Abort
 -----

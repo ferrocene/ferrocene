@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_3v733mnewssy:
+
 Concurrency
 ===========
 
@@ -21,6 +23,8 @@ a modification.
 
 :dp:`fls_isypweqewe78`
 It is undefined behavior if two or more threads engage in a :t:`data race`.
+
+.. _fls_eiw4by8z75di:
 
 Send and Sync
 -------------
@@ -57,6 +61,8 @@ An :t:`abstract data type` automatically implements the
 :dp:`fls_zgemofbs5q2x`
 A :t:`sync type` shall have :t:`[reference]s` that are safe to transfer across
 thread boundaries.
+
+.. _fls_vyc9vcuamlph:
 
 Atomics
 -------
@@ -112,6 +118,8 @@ communication between threads.
    * - :dp:`fls_cry1e78gp19q`
      - :c:`usize`
      - :std:`core::sync::atomic::AtomicUsize`
+
+.. _fls_mtuwzinpfvkl:
 
 Asynchronous Computation
 ------------------------

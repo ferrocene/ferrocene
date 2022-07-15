@@ -3,8 +3,12 @@
 
 .. default-domain:: spec
 
+.. _fls_hdwwrsyunir:
+
 Program Structure and Compilation
 =================================
+
+.. _fls_s35hob3i7lr:
 
 Source Files
 ------------
@@ -36,6 +40,8 @@ attribute]s`, :t:`[inner doc comment]s` and :t:`[item]s`. The location of a
 
 :dp:`fls_ann3cha1xpek`
 A :s:`Shebang` does not have an effect on the compilation.
+
+.. _fls_e9hwvqsib5d5:
 
 Modules
 -------
@@ -105,7 +111,7 @@ The following :t:`[attribute]s` apply to :t:`[module]s`:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[path = "path/to/module"]
    pub mod module {
@@ -113,6 +119,8 @@ The following :t:`[attribute]s` apply to :t:`[module]s`:
    struct Struct;
    pub mod other;
    }
+
+.. _fls_maw4u1o8q37u:
 
 Crates
 ------
@@ -131,6 +139,8 @@ can compile a :t:`binary crate` to an executable.
 A :t:`library crate` is either a :t:`crate` without a :t:`main function` or a
 :t:`crate` subject to :t:`attribute` :c:`no_main`. A tool is free to compile a
 :t:`library crate` to a shared library.
+
+.. _fls_gklst7joeo33:
 
 External Crates
 ---------------
@@ -176,6 +186,8 @@ The following :t:`[attribute]s` apply to :t:`[crate import]s`:
 * :dp:`fls_d6eu6xiczpxk`
   :t:`Attribute` :c:`no_link`.
 
+.. _fls_5w50kf83oo1u:
+
 Compilation Roots
 -----------------
 
@@ -191,6 +203,8 @@ A tool can define a :t:`crate root module` for a single :t:`crate`.
 :dp:`fls_bsyfxdk3ap1t`
 A :t:`compilation root` is an input to a compilation performed by a tool. A
 :t:`crate root module` is a :t:`compilation root`.
+
+.. _fls_u1afezy1ye99:
 
 Conditional Compilation
 -----------------------

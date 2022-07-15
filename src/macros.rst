@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_83182bfa9uqb:
+
 Macros
 ======
 
@@ -24,6 +26,8 @@ distinct forms:
 
 :dp:`fls_rnty1c8l5495`
 :t:`[Token]s` are a subset of :t:`[lexical element]s` consumed by :t:`[macro]s`.
+
+.. _fls_xa7lp0zg1ol2:
 
 Declarative Macros
 ------------------
@@ -89,11 +93,13 @@ A :t:`declarative macro` is invoked using a :t:`macro invocation`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    macro_rules! answer_to_life {
        () => { 42 };
    }
+
+.. _fls_8nzypdu9j3ge:
 
 Metavariables
 ~~~~~~~~~~~~~
@@ -144,11 +150,13 @@ a :t:`metavariable`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    macro_rules! square {
        ($e:expr) => { $e * $e };
    }
+
+.. _fls_k01lsksqtq1r:
 
 Repetition
 ~~~~~~~~~~
@@ -202,13 +210,15 @@ The effects of a :t:`repetition operator` are as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    macro_rules! generate_pairs {
        ( $( $first:ident )* ; $( &second:ident )* )
            =>
        { $( $first, $second )* };
    }
+
+.. _fls_wn1i6hzg2ff7:
 
 Procedural Macros
 -----------------
@@ -231,6 +241,8 @@ syntactic transformations of a :t:`procedural macro`.
 :dp:`fls_mewfehvgm16r`
 A :t:`macro implementation function` enters the :t:`name` of the :t:`procedural
 macro` into the :t:`macro namespace`.
+
+.. _fls_2d6bqnpy6tvs:
 
 Function-like Macros
 ~~~~~~~~~~~~~~~~~~~~
@@ -278,12 +290,14 @@ invocation`, excluding outer :s:`[Delimiter]s`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro]
    pub fn make_answer_to_life(_items: TokenStream) -> TokenStream {
        "fn answer_to_life() -> u32 { 42 }".parse().unwrap()
    }
+
+.. _fls_o8s3r7m90q59:
 
 Derive Macros
 ~~~~~~~~~~~~~
@@ -336,12 +350,14 @@ A :dt:`helper attribute` is an :t:`inert` :t:`attribute` that acts as a hint to
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro_derive(Answer)]
    pub fn derive_answer_to_life(_items: TokenStream) -> TokenStream {
        "fn answer_to_life() -> u32 { 42 }".parse().unwrap()
    }
+
+.. _fls_4vjbkm4ceymk:
 
 Attribute Macros
 ~~~~~~~~~~~~~~~~
@@ -404,7 +420,7 @@ all :t:`[outer attribute]s` that apply to that :t:`item`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro_attribute]
    pub fn output_and_return_item
@@ -414,6 +430,8 @@ all :t:`[outer attribute]s` that apply to that :t:`item`.
        println!("item: \"{}\"", item.to_string());
        item
    }
+
+.. _fls_vnvt40pa48n8:
 
 Macro Invocation
 ----------------
@@ -460,21 +478,21 @@ as a :t:`statement`.
 :dp:`fls_338rmbazl67o`
 See :p:`20.1. <fls_yrq1n547uzp>` for the declaration of ``answer_to_life``.
 
-.. code-block:: text
+.. code-block:: rust
 
    answer_to_life!();
 
 :dp:`fls_lrr7gg8tian`
 See :p:`20.1.1. <fls_mej9pty172v4>` for the declaration of ``square``.
 
-.. code-block:: text
+.. code-block:: rust
 
    square!(5);
 
 :dp:`fls_8qxwwf4trnl`
 See :p:`20.1.2. <fls_b45ng0j84lli>` for the declaration of ``generate_pairs``.
 
-.. code-block:: text
+.. code-block:: rust
 
    generate_pairs!(1, 2, 3; 9, 8, 7);
 
@@ -482,14 +500,14 @@ See :p:`20.1.2. <fls_b45ng0j84lli>` for the declaration of ``generate_pairs``.
 See :p:`20.2.1. <fls_33w6tcb743j0>` for the declaration of
 ``make_answer_to_life``.
 
-.. code-block:: text
+.. code-block:: rust
 
    make_answer_to_life!();
 
 :dp:`fls_d9w3dn2yn7mo`
 See :p:`20.2.2. <fls_uqp2svg2kntl>` for the declaration of ``Answer``.
 
-.. code-block:: text
+.. code-block:: rust
 
    #[derive(Answer)]
    struct derive_macro_invoker;
@@ -498,10 +516,12 @@ See :p:`20.2.2. <fls_uqp2svg2kntl>` for the declaration of ``Answer``.
 See :p:`20.2.3. <fls_r5isidirsy03>` for the declaration of
 ``output_and_return_item``.
 
-.. code-block:: text
+.. code-block:: rust
 
    #[output_and_return_item]
    fn attribute_macro_invoker() {}
+
+.. _fls_wjldgtio5o75:
 
 Macro Expansion
 ---------------
@@ -653,8 +673,12 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
    It is a static error if the output :std:`proc_macro::TokenStream` does not
    constitute zero or more :t:`[item]s`.
 
+.. _fls_4apk1exafxii:
+
 Macro Matching
 ~~~~~~~~~~~~~~
+
+.. _fls_n3ktmjqf87qb:
 
 Rule Matching
 ^^^^^^^^^^^^^
@@ -691,6 +715,8 @@ resolved :t:`declarative macro`.
 
 #. :dp:`fls_r878ysvsy4jb`
    It is a static error if no :t:`macro matcher` is selected.
+
+.. _fls_qpx6lgapce57:
 
 Token Matching
 ^^^^^^^^^^^^^^
@@ -815,6 +841,8 @@ Any other :t:`token` in a :t:`macro matcher` is matched literally against the
 It is a static error if the :s:`TokenTree` of the :t:`macro invocation` contains
 leftover :t:`[token]s` after :t:`macro matching`.
 
+.. _fls_ym00b6ewf4n3:
+
 Macro Transcription
 ~~~~~~~~~~~~~~~~~~~
 
@@ -935,7 +963,7 @@ Given a repetition in a macro invocation of the form
 :dp:`fls_95rn4cvgznmd`
 Given a macro invocation with N metavariable actuals, a macro of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    macro_rules! m {
        ( $(param: expr)* ) => {
@@ -946,7 +974,7 @@ Given a macro invocation with N metavariable actuals, a macro of the form
 :dp:`fls_yg4c9x7049y4`
 is equivalent to a macro of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    macro_rules! m {
        ( $param_1: expr $param_2: expr ... $param_N: expr) => {
@@ -960,6 +988,8 @@ and the metavariable indications of the macro repetition in transcription are
 repeated N times. Invoking such a macro relates the first metavariable actual
 of the macro invocation with the first metavariable of the macro repetition in
 matching, the second metavariable actual with the second metavariable, etc.
+
+.. _fls_xlfo7di0gsqz:
 
 Hygiene
 -------

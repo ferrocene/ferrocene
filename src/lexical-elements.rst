@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_411up5z0b6n6:
+
 Lexical Elements
 ================
 
@@ -11,6 +13,8 @@ The text of a Rust program consists of :t:`[module]s` organized into :t:`[source
 file]s`. The text of a :t:`source file` is a sequence of :t:`[lexical
 element]s`, each composed of characters, whose rules are presented in this
 chapter.
+
+.. _fls_2i089jvv8j5g:
 
 Character Set
 -------------
@@ -67,6 +71,8 @@ A :t:`whitespace string` is a string that consists of one or more
 
 :dp:`fls_2brw13n9ldgy`
 The coded representation of a character is tool-defined.
+
+.. _fls_fgnllgz5k3e6:
 
 Lexical Elements, Separators, and Punctuation
 ---------------------------------------------
@@ -143,7 +149,7 @@ Lexical Elements, Separators, and Punctuation
 :dp:`fls_d4nvxsvxj537`
 The text of a :t:`source file` is a sequence of separate :t:`[lexical
 element]s`. The meaning of a program depends only on the particular sequence of
-:t:`[lexical element]s`, excluding :t:`[non-doc comment]s`.
+:t:`[lexical element]s`, excluding :t:`non-[doc comment]s`.
 
 :dp:`fls_a1zylpqha73x`
 A :t:`lexical element` is the most basic syntactic element in program text.
@@ -243,7 +249,7 @@ punctuator` or two adjacent :t:`[simple punctuator]s`.
 
 :dp:`fls_x89vkq9rwlyt`
 Each of the special characters listed for single character :t:`punctuator`
-is a :t:`single punctuator` except if this character is used as a character
+is a :t:`simple punctuator` except if this character is used as a character
 of a :t:`compound punctuator`, or a character of a :t:`character literal`, a
 :t:`comment`, a :t:`numeric literal`, or a :t:`string literal`.
 
@@ -409,6 +415,8 @@ The following names are used when referring to :t:`[punctuator]s`:
      - ``)``
      - Right parenthesis
 
+.. _fls_21vnag69kbwe:
+
 Identifiers
 -----------
 
@@ -444,6 +452,10 @@ Identifiers
 A :ds:`RawIdentifierKeyword` is any :t:`keyword` in category :s:`Keyword`,
 except ``crate``, ``self``, ``Self``, and ``super``.
 
+:dp:`fls_aqj9aguczgqs`
+:ds:`XID_Start` and :ds:`XID_Continue` are defined in Unicode Standard Annex
+#31.
+
 .. rubric:: Legality Rules
 
 :dp:`fls_xsdmun5uqy4c`
@@ -474,11 +486,11 @@ not appear in a :t:`pure identifier`.
 A :t:`pure identifier` shall be restricted to characters in category
 :s:`AsciiCharacter` in the following contexts:
 
-* :dp:`fls_6qo63nlkr0s8`
-  :t:`[External crate import]s`,
+* :dp:`fls_g72rxs2z5960`
+  :t:`[Crate import]s`,
 
 * :dp:`fls_w473jevurlt1`
-  :t:`[Name]s` of :t:`[external crate]s` represented in a :t:`simple path`, when
+  :t:`[Name]s` of external :t:`[crate]s` represented in a :t:`simple path`, when
   the :t:`simple path` that starts with namespace qualifier ``::``,
 
 * :dp:`fls_mt1u4m3simhc`
@@ -504,13 +516,15 @@ sequence of characters after performing normalization.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    foo
    _identifier
    r#true
    Москва
    東京
+
+.. _fls_nrkd5wpi64oo:
 
 Literals
 --------
@@ -531,6 +545,8 @@ Literals
 :dp:`fls_s76un78zyd0j`
 A :t:`literal` is a fixed :t:`value` in program text.
 
+.. _fls_2ifjqwnw03ms:
+
 Byte Literals
 ~~~~~~~~~~~~~
 
@@ -547,6 +563,8 @@ Byte Literals
 
 :dp:`fls_q0qwr83frszx`
 A :t:`byte literal` is a :t:`literal` that denotes a fixed byte :t:`value`.
+
+.. _fls_gve6jak6wrrp:
 
 Simple Byte Literals
 ^^^^^^^^^^^^^^^^^^^^
@@ -591,11 +609,13 @@ The :t:`type` of a :t:`simple byte literal` is :c:`u8`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    b'h'
    b'\n'
    b'\x1B'
+
+.. _fls_fqaffyrjob7v:
 
 Byte String Literals
 ^^^^^^^^^^^^^^^^^^^^
@@ -629,12 +649,14 @@ N]``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    b""
    b"a\tb"
    b"Multi\
    line"
+
+.. _fls_jps9102q0qfi:
 
 Raw Byte String Literals
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -668,11 +690,13 @@ The :t:`type` of a :t:`raw byte string literal` of size ``N`` is ``&'static
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    br""
    br#""#
    br##"left #"# right"##
+
+.. _fls_hv9jtycp0o1y:
 
 Numeric Literals
 ~~~~~~~~~~~~~~~~
@@ -689,6 +713,8 @@ Numeric Literals
 
 :dp:`fls_fqpqnku27v99`
 A :t:`numeric literal` is a :t:`literal` that denotes a number.
+
+.. _fls_2ed4axpsy9u0:
 
 Integer Literals
 ^^^^^^^^^^^^^^^^
@@ -846,12 +872,14 @@ as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    0b0010_1110_u8
    1___2_3
    0x4D8a
    0o77_52i128
+
+.. _fls_29tlg1vyqay2:
 
 Float Literals
 ^^^^^^^^^^^^^^
@@ -927,12 +955,14 @@ as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    45.
    8E+1_820
    3.14e5
    8_031.4_e-12f64
+
+.. _fls_ypa86oqxhn9u:
 
 Character Literals
 ~~~~~~~~~~~~~~~~~~
@@ -983,12 +1013,14 @@ The :t:`type` of a :t:`character literal` is :c:`char`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    'a'
    '\t'
    '\x1b'
    '\u1F30'
+
+.. _fls_boyhlu5srp6u:
 
 String Literals
 ~~~~~~~~~~~~~~~
@@ -1005,6 +1037,8 @@ String Literals
 
 :dp:`fls_7fuctvtvdi7x`
 A :t:`string literal` is a :t:`literal` that consists of multiple characters.
+
+.. _fls_hucd52suu6it:
 
 Simple String Literals
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1040,7 +1074,7 @@ The :t:`type` of a :t:`simple string literal` is ``&'static str``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    ""
    "cat"
@@ -1051,6 +1085,8 @@ The :t:`type` of a :t:`simple string literal` is ``&'static str``.
    multi\
    line\
    string"
+
+.. _fls_usr6iuwpwqqh:
 
 Raw String Literals
 ^^^^^^^^^^^^^^^^^^^
@@ -1083,11 +1119,13 @@ The :t:`type` of a :t:`raw string literal` is ``&'static str``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    r""
    r#""#
    r##"left #"# right"##
+
+.. _fls_jkab8eevzbte:
 
 Boolean Literals
 ~~~~~~~~~~~~~~~~
@@ -1111,9 +1149,11 @@ The :t:`type` of a :t:`boolean literal` is :c:`bool`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    true
+
+.. _fls_q8l2jza7d9xa:
 
 Comments
 --------
@@ -1215,7 +1255,7 @@ extend exactly one :t:`line`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    // This is a stand-alone line comment. So is the next line.
 
@@ -1237,6 +1277,8 @@ extend exactly one :t:`line`.
            and is considered documentation. */
    }
 
+.. _fls_lish33a1naw5:
+
 Keywords
 --------
 
@@ -1256,6 +1298,8 @@ A :t:`keyword` is a word in program text that has special meaning.
 
 :dp:`fls_sxg1o4oxql51`
 :t:`[Keyword]s` are case sensitive.
+
+.. _fls_mec5cg5aptf8:
 
 Strict Keywords
 ~~~~~~~~~~~~~~~
@@ -1308,6 +1352,8 @@ Strict Keywords
 :dp:`fls_bsh7qsyvox21`
 A :t:`strict keyword` is a :t:`keyword` that always holds its special meaning.
 
+.. _fls_cbsgp6k0qa82:
+
 Reserved Keywords
 ~~~~~~~~~~~~~~~~~
 
@@ -1334,6 +1380,8 @@ Reserved Keywords
 
 :dp:`fls_w4b97ewwnql`
 A :t:`reserved keyword` is a :t:`keyword` that is not yet in use.
+
+.. _fls_9kjpxri0axvg:
 
 Weak Keywords
 ~~~~~~~~~~~~~

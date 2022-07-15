@@ -3,8 +3,12 @@
 
 .. default-domain:: spec
 
+.. _fls_y2k5paj8m8ug:
+
 Generics
 ========
+
+.. _fls_vhpwge5123cm:
 
 Generic Parameters
 ------------------
@@ -151,7 +155,7 @@ A :t:`type parameter` has an implicit :std:`core::marker::Sized` bound, unless a
 :dp:`fls_m0bzw4jap6sg`
 A :t:`generic parameter` with a :t:`bound` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    	<X: Bound>
 
@@ -159,13 +163,13 @@ A :t:`generic parameter` with a :t:`bound` of the form
 is equivalent to the :t:`generic parameter` without the bound and a :t:`where
 clause` of the following form:
 
-.. code-block:: text
+.. code-block:: rust
 
    	where X: Bound
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    struct Array<T, const N: usize>([T; N])
 
@@ -174,6 +178,8 @@ clause` of the following form:
    struct Reference<'a, T: 'a> {
        the_reference: &'a T
    }
+
+.. _fls_7nv8ualeaqe3:
 
 Where Clauses
 -------------
@@ -223,11 +229,13 @@ It is a static error to create a :t:`trivial predicate` that does not hold.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    struct Clause<T> where T: Iterator {
        field: T
    }
+
+.. _fls_utuu8mdbuyxm:
 
 Generic Arguments
 -----------------
@@ -300,7 +308,7 @@ expression`, optionally inside a :t:`block expression`, inside of a :t:`type` or
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Trait {
        type Assoc;
@@ -309,7 +317,7 @@ expression`, optionally inside a :t:`block expression`, inside of a :t:`type` or
 :dp:`fls_l88o2snx9qbt`
 The following is a generic function with a binding argument.
 
-.. code-block:: text
+.. code-block:: rust
 
    fn func<'lifetime, T, const C: usize>() where T: Trait<Assoc = usize> {}
 
@@ -319,6 +327,8 @@ The following are generic arguments for ``func``.
 .. syntax::
 
    func::<'static, u32, 0>();
+
+.. _fls_i7g2n7hfg3ch:
 
 Generic Conformance
 -------------------

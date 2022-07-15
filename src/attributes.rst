@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_gvwd0kf72jt:
+
 Attributes
 ==========
 
@@ -54,7 +56,7 @@ An :t:`outer attribute` is an :t:`attribute` that applies to a subsequent
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[cfg[target_os = "linux"]
    mod linux_only_module {
@@ -62,6 +64,8 @@ An :t:`outer attribute` is an :t:`attribute` that applies to a subsequent
 
        let unused = ();
    }
+
+.. _fls_i52cujixq9qs:
 
 Attribute Properties
 --------------------
@@ -94,6 +98,8 @@ purposes, otherwise it is an :t:`active attribute`.
 
 :dp:`fls_n3737i320qum`
 All remaining :t:`[attribute]s` are :t:`[inert attribute]s`.
+
+.. _fls_ahmnqhm8anlb:
 
 Built-in Attributes
 -------------------
@@ -326,8 +332,12 @@ The following :t:`[built-in attribute]s` are :dt:`[type attribute]s`:
 * :dp:`fls_7xh2iphiteam`
   :t:`Attribute` :c:`non_exhaustive`.
 
+.. _fls_h4k49eadninz:
+
 Code Generation Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _fls_kpwbpp5hc00s:
 
 Attribute ``cold``
 ^^^^^^^^^^^^^^^^^^
@@ -350,10 +360,12 @@ to be called.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[cold]
    fn rarely_called_function () {}
+
+.. _fls_ypio6boj3pwf:
 
 Attribute ``inline``
 ^^^^^^^^^^^^^^^^^^^^
@@ -395,7 +407,7 @@ A tool is not obliged to perform :t:`inlining`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[inline]
    fn suggests_inlining() {}
@@ -405,6 +417,8 @@ A tool is not obliged to perform :t:`inlining`.
 
    #[inline(never)]
    fn requests_suppressed_inlining() {}
+
+.. _fls_zakwockktml8:
 
 Attribute ``no_builtins``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -430,6 +444,8 @@ patterns with calls to intrinsic functions.
 .. syntax::
 
    $$#![no_builtins]$$
+
+.. _fls_spdmit5fy7el:
 
 Attribute ``target_feature``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -593,10 +609,12 @@ features that are not supported.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[target_feature(enable="bmi1,sse4.1")]
    fn requires_target_architecture_features () {}
+
+.. _fls_6qj249hphj1s:
 
 Attribute ``track_caller``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -642,13 +660,17 @@ the :t:`attribute`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[track_caller]
    fn who_called_me () {}
 
+.. _fls_cdx9zb1yxcc8:
+
 Conditional Compilation Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _fls_fymvsy6ig99a:
 
 Attribute ``cfg``
 ^^^^^^^^^^^^^^^^^
@@ -714,10 +736,12 @@ The :t:`evaluation` of a configuration option is tool-defined.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[cfg(all(unix, target_pointer_width = "32"))]
    fn on_32bit_unix() {}
+
+.. _fls_dd9xh3wdjudo:
 
 Attribute ``cfg_attr``
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -742,13 +766,17 @@ for each :s:`AttributeContent` enumerated in the :t:`[attribute]'s`
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[cfg_attr(windows, path="windows.rs")]
    mod os;
 
+.. _fls_wednba84zi3y:
+
 Derivation Attributes
 ~~~~~~~~~~~~~~~~~~~~~
+
+.. _fls_bqw87nz4qbrb:
 
 Attribute ``automatically_derived``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -766,6 +794,8 @@ Attribute ``automatically_derived``
 :t:`Attribute` :dc:`automatically_derived` is automatically added to
 :t:`[implementation]s` that are created by :t:`attribute` :c:`derive` for
 :t:`[built-in trait]s`.
+
+.. _fls_r6gj1p4gajnq:
 
 Attribute ``derive``
 ^^^^^^^^^^^^^^^^^^^^
@@ -788,7 +818,7 @@ implementation by a tool.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[derive(PartialEq)]
    struct S<T> {
@@ -799,7 +829,7 @@ implementation by a tool.
 Attribute ``derive`` causes trait :std:`core::cmp::PartialEq` to be
 automatically implemented for struct ``S<T>`` as follows:
 
-.. code-block:: text
+.. code-block:: rust
 
    impl<T: core::cmp::PartialEq> core::cmp::PartialEq for S<T> {
        fn eq(&self, other: &S<T>) -> bool {
@@ -811,6 +841,8 @@ automatically implemented for struct ``S<T>`` as follows:
        }
    }
 
+.. _fls_t2590yyvclgb:
+
 Diagnostics Attributes
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -818,8 +850,12 @@ Diagnostics Attributes
 Diagnostic :t:`[attribute]s` are related to linting, and are not defined in
 this document.
 
+.. _fls_8wcliky2svcs:
+
 Documentation Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _fls_63v1fqedzwfd:
 
 Attribute ``doc``
 ^^^^^^^^^^^^^^^^^
@@ -885,8 +921,12 @@ The :t:`inner attribute` version and the :t:`outer attribute` version of
 :dp:`fls_necp8a7v255c`
 **???**
 
+.. _fls_pgp7ezcc9lh8:
+
 Foreign Function Interface Attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. _fls_sun645voqex6:
 
 Attribute ``crate_name``
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -909,9 +949,11 @@ Attribute ``crate_name``
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![crate_name = "factories"]
+
+.. _fls_ujig607lmwbm:
 
 Attribute ``crate_type``
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -943,9 +985,11 @@ Attribute ``crate_type``
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![crate_type = "cdylib"]
+
+.. _fls_olzilmy8n0nl:
 
 Attribute ``export_name``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -969,10 +1013,12 @@ related :t:`function` or :t:`static`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[export_name = "exported_symbol"]
    pub fn rust_name() {}
+
+.. _fls_o0f9ae22ug1x:
 
 Attribute ``link``
 ^^^^^^^^^^^^^^^^^^
@@ -1044,10 +1090,12 @@ WebAssembly module name defaults to ``env``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[link(name = "CoreFoundation", kind = "framework")]
    extern {}
+
+.. _fls_p44fky7fifc:
 
 Attribute ``link_name``
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1071,12 +1119,14 @@ Attribute ``link_name``
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    extern {
        #[link_name = "linking_symbol"]
        pub fn rust_name() {}
    }
+
+.. _fls_hffpo88r61rh:
 
 Attribute ``link_section``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1100,10 +1150,12 @@ symbol of the related :t:`function` or :t:`static` will be placed.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[link_section = ".example_section"]
    pub static THE_ANSWER: u32 = 42;
+
+.. _fls_ch9nkxkloozv:
 
 Attribute ``no_link``
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1126,10 +1178,12 @@ will not be linked into the resulting binary or library.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[no_link]
    extern crate do_not_link;
+
+.. _fls_fh27ljezn3qz:
 
 Attribute ``no_main``
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1152,9 +1206,11 @@ function` will not be present in a binary.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![no_main]
+
+.. _fls_mvd7nz8k3wcy:
 
 Attribute ``no_mangle``
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1181,10 +1237,12 @@ exported from the produced library or object file.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[no_mangle]
    pub fn symbol_name() {}
+
+.. _fls_aibb2quva4mn:
 
 Attribute ``repr``
 ^^^^^^^^^^^^^^^^^^
@@ -1235,13 +1293,15 @@ related :t:`type`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[repr(C, align(8))]
    struct c_struct {
        first_field: i16,
        second_field: i8
    }
+
+.. _fls_7skf24auayqy:
 
 Attribute ``used``
 ^^^^^^^^^^^^^^^^^^
@@ -1265,13 +1325,17 @@ output object file even if the :t:`static` is not used or referenced by other
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[used]
    pub static THE_ANSWER: u32 = 42;
 
+.. _fls_cjq792yj6vft:
+
 Limits Attributes
 ~~~~~~~~~~~~~~~~~
+
+.. _fls_u2hzlzpzh7yy:
 
 Attribute ``recursion_limit``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1294,9 +1358,11 @@ expansion` and :t:`auto-dereferencing`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![recursion_limit = "42"]
+
+.. _fls_tdjjuwbr7mkg:
 
 Attribute ``type_length_limit``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1319,12 +1385,16 @@ substitution]s` when constructing a :t:`concrete type`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![type_length_limit = "42"]
 
+.. _fls_2084b06dr0wz:
+
 Macros Attributes
 ~~~~~~~~~~~~~~~~~
+
+.. _fls_e0a96eb6ux3y:
 
 Attribute ``macro_export``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1348,12 +1418,14 @@ macro` into :t:`path scope`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[macro_export]
    macro_rules! m {
        () => {};
    }
+
+.. _fls_qxjy0f758x5s:
 
 Attribute ``macro_use``
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1395,12 +1467,14 @@ When applied to a :t:`module`, :t:`attribute` :c:`macro_use` extends the
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[macro_use(first_macro, second_macro)]
    extern crate macros;
    #[macro_use]
    mod module {}
+
+.. _fls_qkmkev85o5jf:
 
 Attribute ``proc_macro``
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1424,12 +1498,14 @@ crate root.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro]
    pub fn make_answer_to_life(_items: TokenStream) -> TokenStream {
        "fn answer_to_life() -> u32 { 42 }".parse().unwrap()
    }
+
+.. _fls_ejhlylrcajo:
 
 Attribute ``proc_macro_attribute``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1450,7 +1526,7 @@ an :t:`attribute macro`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro_attribute]
    pub fn output_and_return_item
@@ -1460,6 +1536,8 @@ an :t:`attribute macro`.
        println!("item: \"{}\"", item.to_string());
        item
    }
+
+.. _fls_q6qecp6e413:
 
 Attribute ``proc_macro_derive``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1489,7 +1567,7 @@ macro` available to :t:`attribute` :c:`derive`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[proc_macro_derive(Answer, attributes(marker))]
    pub fn derive_answer_to_life(_items: TokenStream) -> TokenStream {
@@ -1501,8 +1579,12 @@ macro` available to :t:`attribute` :c:`derive`.
        #[marker] field: ()
    }
 
+.. _fls_7bb5ua4g06k8:
+
 Modules Attributes
 ~~~~~~~~~~~~~~~~~~
+
+.. _fls_1zbaajz5prpn:
 
 Attribute ``path``
 ^^^^^^^^^^^^^^^^^^
@@ -1528,7 +1610,7 @@ A tool is free to define the format of a :t:`module path`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[path = "path/to/inline_module"]
    mod inline_module {
@@ -1536,8 +1618,12 @@ A tool is free to define the format of a :t:`module path`.
        mod outline_module;
    }
 
+.. _fls_go457hpaf7ov:
+
 Prelude Attributes
 ~~~~~~~~~~~~~~~~~~
+
+.. _fls_iikmhqsp1r5a:
 
 Attribute ``no_implicit_prelude``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1565,10 +1651,12 @@ prelude`, the :t:`standard library prelude`, and the :t:`tool prelude`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[no_implicit_prelude]
    mod module {}
+
+.. _fls_9xnaxd7qbakp:
 
 Attribute ``no_std``
 ^^^^^^^^^^^^^^^^^^^^
@@ -1600,12 +1688,16 @@ Attribute ``no_std``
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![no_std]
 
+.. _fls_nbbvukrdngev:
+
 Runtime Attributes
 ~~~~~~~~~~~~~~~~~~
+
+.. _fls_fs0lcfllamj:
 
 Attribute ``global_allocator``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1629,10 +1721,12 @@ Attribute ``global_allocator``
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[global_allocator]
    pub static THE_ANSWER: u32 = 42;
+
+.. _fls_ls5eryuoxlp9:
 
 Attribute ``panic_handler``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1660,10 +1754,12 @@ A :t:`crate` graph shall contain exactly one :t:`function` subject to
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[panic_handler]
    fn panic(info: &core::panic::PanicInfo) -> ! {}
+
+.. _fls_1l4mnlfk5rr2:
 
 Attribute ``windows_subsystem``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1693,12 +1789,16 @@ related :t:`binary crate` defaults to ``console``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #![windows_subsystem = "console"]
 
+.. _fls_riyi0gy48fxw:
+
 Testing Attributes
 ~~~~~~~~~~~~~~~~~~
+
+.. _fls_x849a4u7h82j:
 
 Attribute ``ignore``
 ^^^^^^^^^^^^^^^^^^^^
@@ -1724,11 +1824,13 @@ function`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[test]
    #[ignore = "not implemented yet"]
    fn unit_testing_function() {}
+
+.. _fls_aes2d94g12b9:
 
 Attribute ``should_panic``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1759,13 +1861,15 @@ function` passes only when the :t:`panic` message contains the
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[test]
    #[should_panic(expected = "did not get meaning of life")]
    fn test_meaning_of_life() {
        assert_eq!(meaning_of_life(), 42, "did not get meaning of life");
    }
+
+.. _fls_dv2j1fvvnk1t:
 
 Attribute ``test``
 ^^^^^^^^^^^^^^^^^^
@@ -1815,7 +1919,7 @@ the tool.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[test]
    fn test_the_thing() -> core::result::Result<()> {
@@ -1824,8 +1928,12 @@ the tool.
        core::result::Result::Ok(());
    }
 
+.. _fls_r3zwgf9sg1xp:
+
 Type Attributes
 ~~~~~~~~~~~~~~~
+
+.. _fls_9tmvuqrmk3ug:
 
 Attribute ``non_exhaustive``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1871,7 +1979,7 @@ the exhaustiveness of :t:`[match arm]s`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    #[non_exhaustive]
    enum enum_with_future_variants {

@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_gdeyap4or1db:
+
 Names and Resolution
 ====================
 
@@ -21,6 +23,8 @@ using a :t:`path`.
 
 :dp:`fls_yf5r11o1kevr`
 A :t:`name` identifies an :t:`entity` within the program text.
+
+.. _fls_jdknpu3kf865:
 
 Visibility
 ----------
@@ -119,7 +123,7 @@ containing :t:`enum type`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    pub mod outer_module {
        pub mod inner_module {
@@ -149,6 +153,8 @@ containing :t:`enum type`.
        outer_module::inner_module::crate_visible_function();
        outer_module::inner_module::visible_function();
    }
+
+.. _fls_9i5msiuuyihf:
 
 Paths
 -----
@@ -215,6 +221,10 @@ A :t:`path` is a sequence of :t:`[path segment]s` logically separated by
 A :t:`path` that starts with qualifier ``$crate`` shall appear only within a
 :t:`macro transcriber`.
 
+:dp:`fls_8e03ie9p08ib`
+A :t:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
+:t:`[identifier]s` or certain :t:`[keyword]s`.
+
 :dp:`fls_hwxjhdx10xlm`
 A :t:`global path` is a :t:`path` that starts with :t:`namespace qualifier`
 ``::``.
@@ -255,21 +265,21 @@ The following :t:`[construct]s` do not have a :t:`canonical path`:
 The following is a simple path. See :p:`14.2. <fls_q13sty1g9jtn>` for the
 declaration of ``crate_visible_function``.
 
-.. code-block:: text
+.. code-block:: rust
 
    crate::outer_module::inner_module::crate_visible_function();
 
 :dp:`fls_no853u27p4f3`
 The following is a path-in-expression.
 
-.. code-block:: text
+.. code-block:: rust
 
    Vec::<u8>::with_capacity(42);
 
 :dp:`fls_28c21rzc6rsp`
 The following is a path-in-type.
 
-.. code-block:: text
+.. code-block:: rust
 
    std::boxed::Box<dyn std::ops::FnOnce(isize) -> size>;
 
@@ -285,12 +295,14 @@ The following is a path-in-type.
 :dp:`fls_4s2n95h4rd1q`
 The following is a path-in-type. The call expression invokes T's function.
 
-.. code-block:: text
+.. code-block:: rust
 
    <S as T>::f();
 
 :dp:`fls_ojdntg5i79pb`
 **Add an example for qualified path-in-expression.**
+
+.. _fls_9gprp17h6t1q:
 
 Use Imports
 -----------
@@ -380,7 +392,7 @@ for the declaration of modules and functions. The imported functions
 are ``create_visible_function``, ``outer_module_visible_function``,
 ``visible_function``.
 
-.. code-block:: text
+.. code-block:: rust
 
    use outer_module::inner_module::*;
 
@@ -388,7 +400,7 @@ are ``create_visible_function``, ``outer_module_visible_function``,
 The following is a renaming import. The imported function is
 ``visible_function`` under the name ``f``.
 
-.. code-block:: text
+.. code-block:: rust
 
    use outer_module::inner_module::visible_function as f;
 
@@ -396,10 +408,12 @@ The following is a renaming import. The imported function is
 The following is a selective import. The imported functions are
 ``crate_visible_function`` and ``visible_function``.
 
-.. code-block:: text
+.. code-block:: rust
 
    use outer_module::inner_module
        {crate_visible_function, visible_function}
+
+.. _fls_izl8iuhoz9e0:
 
 Scopes
 ------
@@ -418,6 +432,8 @@ A :t:`scope` is a region of program text where a :t:`name` can be referred to. A
 :dp:`fls_ia3eeqrio5ur`
 **How are hierarchies of scopes formed?**
 
+.. _fls_jnknu1xzrgh4:
+
 Associated Item Scope
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -425,6 +441,8 @@ Associated Item Scope
 
 :dp:`fls_27x1a6byib4b`
 The :t:`name` of an :t:`associated item` is never :t:`in scope`.
+
+.. _fls_4gh34bv0oii5:
 
 Binding Scopes
 ~~~~~~~~~~~~~~
@@ -456,6 +474,8 @@ The :t:`binding` of a :t:`let statement` is :t:`in scope` after the related
 The :t:`binding` of a :t:`match arm` is :t:`in scope` within its related
 :t:`[expression]s` and related :t:`match arm guard`.
 
+.. _fls_x6wok0k52um2:
+
 Declarative Macro Scope
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -465,6 +485,8 @@ Declarative Macro Scope
 The :t:`name` of a :t:`declarative macro` is :t:`in scope` after the related
 :t:`macro rules` declaration until the end of the :t:`block expression` or the
 enclosing :t:`module` where the :t:`macro rules` declaration appears.
+
+.. _fls_ftphlagzd2te:
 
 Generic Parameter Scope
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -478,6 +500,8 @@ within the related construct.
 :dp:`fls_uocarmzavgsk`
 The :t:`name` of a :t:`generic parameter` is not :t:`in scope` within
 :t:`[item]s` declared inside a :t:`function`.
+
+.. _fls_bsypfus3olxu:
 
 Item Scope
 ~~~~~~~~~~
@@ -498,6 +522,8 @@ It is a static error to declare an :t:`item` within a :t:`block expression` or
 a :t:`module` where the :t:`name` of the :t:`item` is already used by another
 :t:`item` within the same :t:`block expression` or :t:`module`.
 
+.. _fls_1oe31hyqcwmq:
+
 Lifetime Parameter Scope
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -511,6 +537,8 @@ Parameter Scopes?**)
 :dp:`fls_uhxkmj9y8l4z`
 The :t:`name` of a :t:`lifetime parameter` is not :t:`in scope` in
 :t:`[constant]s` and :t:`[static]s`. (**isn't this redundant?**)
+
+.. _fls_euiehnmeugd:
 
 Loop Label Scope
 ~~~~~~~~~~~~~~~~
@@ -526,6 +554,8 @@ The :t:`label` of a :t:`loop expression` is not :t:`in scope` in :t:`[async
 block]s`, :t:`[closure]s`, :t:`[constant argument]s`, :t:`[constant context]s`,
 :t:`[item]s`, and the :t:`iterator expression` of the related :t:`for loop`.
 
+.. _fls_n4enftia76e5:
+
 Prelude Scopes
 ~~~~~~~~~~~~~~
 
@@ -533,6 +563,8 @@ Prelude Scopes
 
 :dp:`fls_ri6pmto8jej3`
 :t:`[Prelude name]s` are :t:`in scope` of every :t:`module`.
+
+.. _fls_kgbi26212eof:
 
 ``Self`` Scope
 ~~~~~~~~~~~~~~
@@ -542,6 +574,8 @@ Prelude Scopes
 :dp:`fls_2o0gn3xnjqel`
 The :c:`Self` :t:`type` is :t:`in scope` within :t:`[abstract data type]s`,
 :t:`[implementation]s`, and :t:`[trait]s`.
+
+.. _fls_kegoxt2k6t8l:
 
 Trait Bound Scopes
 ~~~~~~~~~~~~~~~~~~
@@ -566,6 +600,8 @@ path.
 :dp:`fls_yhul6w8m9gnr`
 As a [_BareFunctionType_] the declared lifetimes are in scope within the
 function parameters and return type.
+
+.. _fls_ydmnb7qnmzzq:
 
 Shadowing
 ---------
@@ -612,6 +648,8 @@ follows, where a later :t:`prelude name` shadows earlier :t:`prelude name`:
 
 #. :dp:`fls_qdyf00tq52p6`
    :t:`External prelude` :t:`[name]s`.
+
+.. _fls_dq403wq5yrs:
 
 Namespaces
 ----------
@@ -758,6 +796,8 @@ The :t:`[name]s` of the following entities are not part of any :t:`namespace`:
 * :dp:`fls_j4rmmu1opec8`
   :t:`[Union field]s`.
 
+.. _fls_c140hwzhup95:
+
 Preludes
 --------
 
@@ -805,6 +845,8 @@ The :dt:`macro_use prelude` is a :t:`prelude` that brings :t:`in scope` of the
 that were imported using an :t:`external crate import`.
 
 .. rubric:: Legality Rules
+
+.. _fls_40xoego2thsp:
 
 Name Resolution
 ---------------

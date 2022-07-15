@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_qcb1n9c0e5hz:
+
 Functions
 =========
 
@@ -112,7 +114,7 @@ A :t:`constant function` shall be callable from a :t:`constant context`.
 An :t:`async function` is a :t:`function` subject to :t:`keyword` ``async``. An
 :t:`async function` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    async fn async_fn(param: &param_type) -> return_type {
        /* tail expression */
@@ -121,7 +123,7 @@ An :t:`async function` is a :t:`function` subject to :t:`keyword` ``async``. An
 :dp:`fls_7vogmqyd87ey`
 is equivalent to :t:`function`
 
-.. code-block:: text
+.. code-block:: rust
 
    fn async_fn<'a>(param: &'a param_type) -> impl Future<Output = return_type> + 'a {
        async move {
@@ -165,7 +167,7 @@ program. A :t:`main function` is subject to the following restrictions:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn eucledian_distance(left: &Point, right: &Point) -> f64 {
        let x_delta_squared: f64 = (right.x - left.x).powi(2);

@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_94a8v54bufn8:
+
 Values and Objects
 ==================
 
@@ -41,6 +43,8 @@ control flow paths.
 
 :dp:`fls_6lg0oaaopc26`
 It is undefined behavior to create a :t:`value` from uninitialized memory.
+
+.. _fls_ixjc5jaamx84:
 
 Constants
 ---------
@@ -105,9 +109,11 @@ the :t:`constant`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    const ZERO: u32 = 0;
+
+.. _fls_xdvdl2ssnhlo:
 
 Statics
 -------
@@ -191,9 +197,11 @@ It is undefined behavior to mutate an :t:`immutable static` that is not
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    static mut GLOBAL: u32 = 0;
+
+.. _fls_cleoffpn5ew6:
 
 Temporaries
 -----------
@@ -203,6 +211,8 @@ Temporaries
 :dp:`fls_awpw61yofckz`
 A :t:`temporary` is an anonymous :t:`object` that holds the result of some
 intermediate computation.
+
+.. _fls_gho955gmob73:
 
 Variables
 ---------

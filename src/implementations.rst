@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_fk2m2irwpeof:
+
 Implementations
 ===============
 
@@ -80,7 +82,7 @@ only if it :t:`[implement]s` an :t:`unsafe trait`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Shape {
        fn area(self) -> f64;
@@ -89,7 +91,7 @@ only if it :t:`[implement]s` an :t:`unsafe trait`.
 :dp:`fls_yuyesijndu9n`
 ``Circle`` is an implementing type.
 
-.. code-block:: text
+.. code-block:: rust
 
    struct Circle {
        radius: f64
@@ -98,7 +100,7 @@ only if it :t:`[implement]s` an :t:`unsafe trait`.
 :dp:`fls_o62i75sjzp9y`
 The following is an inherent implementation:
 
-.. code-block:: text
+.. code-block:: rust
 
    impl Circle {
        fn set_radius(mut self, new_radius: f64) {
@@ -109,13 +111,15 @@ The following is an inherent implementation:
 :dp:`fls_a2utf0tmuhy4`
 The following is a trait implementation:
 
-.. code-block:: text
+.. code-block:: rust
 
    impl Shape for Circle {
        fn area(self) -> f64 {
            self.radius.powi(2) * std::f64::consts::PI
        }
    }
+
+.. _fls_46ork6fz5o2e:
 
 Implementation Coherence
 ------------------------
@@ -149,6 +153,8 @@ with another :t:`trait implementation`.
 
 :dp:`fls_koy70k770ayu`
 A :t:`trait implementation` shall be coherent.
+
+.. _fls_e1pgdlv81vul:
 
 Implementation Conformance
 --------------------------

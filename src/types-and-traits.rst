@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_vgb6ev541b2r:
+
 Types and Traits
 ================
 
@@ -40,6 +42,8 @@ those :t:`[value]s`.
 
    TypeAscription ::=
    	$$:$$ TypeSpecification
+
+.. _fls_963gsjp2jas2:
 
 Type Classification
 -------------------
@@ -136,8 +140,12 @@ Type Classification
   * :dp:`fls_a81tweobvm0p`
     :t:`Parenthesized type`
 
+.. _fls_id66vnaqw0zt:
+
 Scalar Types
 ------------
+
+.. _fls_tiqp1gxf116z:
 
 Bool Type
 ~~~~~~~~~
@@ -322,6 +330,8 @@ Operation ``a <= b`` shall be equivalent to ``a == b | a < b``.
 It is undefined behavior for a :t:`value` of :t:`type` :c:`bool` to have a bit
 pattern other than ``0x00`` and ``0x01``.
 
+.. _fls_wrvjizrqf3po:
+
 Char Type
 ~~~~~~~~~
 
@@ -338,8 +348,12 @@ of :t:`Unicode`.
 It is undefined behavior for a :t:`value` of :t:`type` :c:`char` to be outside
 the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive ranges of :t:`Unicode`.
 
+.. _fls_qwljwqr07slp:
+
 Numeric Types
 ~~~~~~~~~~~~~
+
+.. _fls_b4xporvr64s:
 
 Floating Point Types
 ^^^^^^^^^^^^^^^^^^^^
@@ -351,6 +365,8 @@ Floating Point Types
 
 :dp:`fls_yqflrq9s6p6n`
 :t:`Type` :c:`f64` is equivalent to the IEEE 754-2008 binary64 :t:`type`.
+
+.. _fls_3qnpv2z7yjil:
 
 Integer Types
 ^^^^^^^^^^^^^
@@ -427,8 +443,12 @@ domain of whole numbers:
 :t:`Type` :c:`isize` has the same number of bits as the platform's :t:`pointer
 type`, and at least 16-bits wide.
 
+.. _fls_fbchw64p6n2x:
+
 Sequence Types
 --------------
+
+.. _fls_uj0kpjwyld60:
 
 Array Type
 ~~~~~~~~~~
@@ -463,9 +483,11 @@ The :t:`type` of the :t:`size operand` is :t:`type` :c:`usize`.
 :dp:`fls_9vjijqi9w8wn`
 An array type in the context of a let statement:
 
-.. code-block:: text
+.. code-block:: rust
 
    let array: [i32; 3] = [1, 2, 3];
+
+.. _fls_vpbikb73dw4k:
 
 Slice Type
 ~~~~~~~~~~
@@ -494,9 +516,11 @@ A :t:`slice type` is a :t:`dynamically sized type`.
 :dp:`fls_nsny832ap4v1`
 See :p:`4.3.1. <fls_eyrdzuv0r9l4>` for the declaration of ``array``.
 
-.. code-block:: text
+.. code-block:: rust
 
    let slice: &[i32] = &array[0..1];
+
+.. _fls_4agmmu5al6gt:
 
 Str Type
 ~~~~~~~~
@@ -519,6 +543,8 @@ characters.
 :dp:`fls_wacoqrtzvrwu`
 It is undefined behavior for a :t:`value` of :t:`type` :c:`str` to denote an
 invalid UTF-8 sequence of characters.
+
+.. _fls_4ckl3n2ko3i4:
 
 Tuple Type
 ~~~~~~~~~~
@@ -548,14 +574,18 @@ then the :t:`tuple field` shall be the last :t:`tuple field` in the
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    ()
    (char,)
    (i32, f64, Vec<String>)
 
+.. _fls_wdec78luqh5b:
+
 Abstract Data Types
 -------------------
+
+.. _fls_szibmtfv117b:
 
 Enum Type
 ~~~~~~~~~
@@ -653,7 +683,7 @@ type`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    enum ZeroVariantEnumType {}
 
@@ -671,6 +701,8 @@ type`.
        Fifth = 34,  // The discriminant is 34.
        Sixth        // The discriminant is 35.
    }
+
+.. _fls_9ucqbbd0s2yo:
 
 Struct Type
 ~~~~~~~~~~~
@@ -726,7 +758,7 @@ the :s:`TupleStructFieldList`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    struct UnitStruct;
 
@@ -741,6 +773,8 @@ the :s:`TupleStructFieldList`.
        f64,
        u8
    );
+
+.. _fls_fmdn7n7s413d:
 
 Union Type
 ~~~~~~~~~~
@@ -763,7 +797,7 @@ related :s:`RecordStructDeclaration`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    union LeafNode {
        int: i32,
@@ -771,8 +805,12 @@ related :s:`RecordStructDeclaration`.
        double: f64
    }
 
+.. _fls_hbbek3z4wtcs:
+
 Function Types
 --------------
+
+.. _fls_xd2oxlebhs14:
 
 Closure Type
 ~~~~~~~~~~~~
@@ -841,6 +879,8 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
 :t:`trait` if the :t:`[type]s` of all :t:`[captured variable]s` implement the
 :std:`core::marker::Sync` :t:`trait`.
 
+.. _fls_airvr79xkcag:
+
 Function Item Type
 ~~~~~~~~~~~~~~~~~~
 
@@ -868,8 +908,12 @@ A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the
 the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync`
 :t:`trait`.
 
+.. _fls_3i4ou0dq64ny:
+
 Indirection Types
 -----------------
+
+.. _fls_xztr1kebz8bo:
 
 Function Pointer Type
 ~~~~~~~~~~~~~~~~~~~~~
@@ -915,9 +959,11 @@ that is :c:`null`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    unsafe extern "C" fn (value: i32, ...) -> f64
+
+.. _fls_ppd1xwve3tr7:
 
 Raw Pointer Type
 ~~~~~~~~~~~~~~~~
@@ -944,10 +990,12 @@ Comparing a :t:`value` of a :t:`raw pointer type` to a :t:`value` of a
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    *const i128
    *mut bool
+
+.. _fls_142vncdktbin:
 
 Reference Type
 ~~~~~~~~~~~~~~
@@ -990,13 +1038,17 @@ It is undefined behavior if a :t:`value` of a :t:`reference type` is :c:`null`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    &i16
    &'a mut f32
 
+.. _fls_1ompd93w7c9f:
+
 Trait Types
 -----------
+
+.. _fls_3xqobbu7wfsf:
 
 Impl Trait Type
 ~~~~~~~~~~~~~~~
@@ -1023,12 +1075,14 @@ the :t:`return type` of a :t:`function`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn anonymous_type_parameter
        (arg: impl Copy + Send + Sync) { ... }
 
    fn anonymous_return_type () -> impl MyTrait { ... }
+
+.. _fls_qa98qdi42orq:
 
 Trait Object Type
 ~~~~~~~~~~~~~~~~~
@@ -1064,14 +1118,18 @@ type` permits late binding of :t:`[method]s`. A :t:`method` invoked via a
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    dyn MyTrait
    dyn MyTrait + Send
    dyn MyTrait + 'static + Copy
 
+.. _fls_3pbipk8ki18d:
+
 Other Types
 -----------
+
+.. _fls_s45k21yn4qur:
 
 Inferred Type
 ~~~~~~~~~~~~~
@@ -1097,9 +1155,11 @@ An :t:`inferred type` forces a tool to :t:`infer` a :t:`type`, if possible.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let values: Vec<_> = (0 .. 10).collect();
+
+.. _fls_98lnexk53ru4:
 
 Never Type
 ~~~~~~~~~~
@@ -1127,9 +1187,11 @@ It is undefined behavior to have a :t:`value` of the :t:`never type`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let never_completes: ! = panic!();
+
+.. _fls_olbj67eyxz2k:
 
 Parenthesized Type
 ~~~~~~~~~~~~~~~~~~
@@ -1149,9 +1211,11 @@ of :t:`[lexical element]s`
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    &'a (dyn MyTrait + Send)
+
+.. _fls_kgvleup5mdhq:
 
 Type Aliasing
 -------------
@@ -1181,12 +1245,16 @@ The last :t:`where clause` is rejected, but may still be consumed by
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    type Point = (f64, f64);
 
+.. _fls_7pby13muw48o:
+
 Representation
 --------------
+
+.. _fls_g1z6bpyjqxkz:
 
 Type Layout
 ~~~~~~~~~~~
@@ -1291,6 +1359,8 @@ common storage.
 :dp:`fls_njvdevz0xqc0`
 The :t:`size` of a :t:`recursive type` shall be finite.
 
+.. _fls_ohhsmifo0urd:
+
 Type Representation
 ~~~~~~~~~~~~~~~~~~~
 
@@ -1351,6 +1421,8 @@ representation` as a :t:`struct type` with a single :t:`field` of a non-zero
 :c:`align` and :c:`packed` :t:`[representation modifier]s`. A :t:`representation
 modifier` shall apply only to a :t:`struct type` or a :t:`union type` subject to
 :t:`C representation` or :t:`default representation`.
+
+.. _fls_xc1hof4qbf6p:
 
 Enum Type Representation
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1415,6 +1487,8 @@ An :t:`enum type` subject to :t:`transparent representation` has the same
 :t:`variant` if one is present, otherwise the :t:`enum type` has :t:`size` zero
 and :t:`alignment` one.
 
+.. _fls_rjxpof29a3nl:
+
 Struct Type Representation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1471,6 +1545,8 @@ A :t:`struct type` subject to :t:`transparent representation` has the same
 is present, otherwise the :t:`struct type` has :t:`size` zero and :t:`alignment`
 one.
 
+.. _fls_cmq8ogs84ivh:
+
 Union Type Representation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1485,8 +1561,12 @@ the maximum of the :t:`[size]s` of all its :t:`[field]s`, rounded up to
 The :t:`alignment` of a :t:`union type` subject to :t:`C representation` is the
 maximum of the :t:`[alignment]s` of all of its :t:`[field]s`.
 
+.. _fls_j02707n615z0:
+
 Type Model
 ----------
+
+.. _fls_3gapgqys3ceb:
 
 Recursive Types
 ~~~~~~~~~~~~~~~
@@ -1503,12 +1583,14 @@ its recursion.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    struct List<T> {
        Nil,
        Cons(T, Box<List<T>>)
    }
+
+.. _fls_exe4zodlwfez:
 
 Type Unification
 ~~~~~~~~~~~~~~~~
@@ -1665,6 +1747,8 @@ An :t:`integer type variable` is unifiable only with an :t:`integer type`.
 A :t:`type alias` is unifiable with another :t:`type` when the aliased :t:`type`
 is unifiable with the other :t:`type`.
 
+.. _fls_dw33yt5g6m0k:
+
 Type Coercion
 ~~~~~~~~~~~~~
 
@@ -1786,7 +1870,7 @@ target :t:`type` is allowed to occur when:
 * :dp:`fls_j8rcy0xvd155`
   The source type is
 
-.. code-block:: text
+.. code-block:: rust
 
                S<..., T, ...> {
                    ...
@@ -1868,6 +1952,8 @@ obtained as follows:
 
    #. :dp:`fls_ju4ypa5ysga0`
       Continue with the next source :t:`type`.
+
+.. _fls_lv7w7aalpwm5:
 
 Type Inference
 ~~~~~~~~~~~~~~
@@ -2128,6 +2214,8 @@ Resolving :t:`expected type` ``ET`` against :t:`resolving type` ``RT`` for an
 #. :dp:`fls_riivz4mlwr4y`
    Otherwise this is a static error.
 
+.. _fls_85vx1qfa061i:
+
 Traits
 ------
 
@@ -2156,20 +2244,20 @@ A :t:`subtrait` shall not be its own :t:`supertrait`.
 :dp:`fls_vucd1u38sq7i`
 A :t:`trait` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    	trait T : Bound {}
 
 :dp:`fls_kyr81mi01me2`
 is equivalent to a :t:`where clause` of the following form:
 
-.. code-block:: text
+.. code-block:: rust
 
    	trait T where Self: Bound {}
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Sequence<T> {
        fn length(&self) -> u32;
@@ -2179,7 +2267,7 @@ is equivalent to a :t:`where clause` of the following form:
 :dp:`fls_mjg7yrq66hh0`
 Shape is a supertrait of Circle.
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Shape {
        fn area(&self) -> f64;
@@ -2188,11 +2276,13 @@ Shape is a supertrait of Circle.
 :dp:`fls_ydowwijzirmm`
 Circle is a subtrait of Shape.
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Circle : Shape {
        fn radius(&self) -> f64;
    }
+
+.. _fls_4ikc07mfrez5:
 
 Object Safety
 ~~~~~~~~~~~~~
@@ -2240,6 +2330,8 @@ A dispatchable :t:`function` is :t:`object safe` when:
 :dp:`fls_aer3gaur7avp`
 A non-dispatchable :t:`function` is :t:`object safe` when it specifies a
 :std:`core::marker::Sized` :t:`t[rait bound]` for :c:`Self`.
+
+.. _fls_jeoas4n6su4:
 
 Trait and Lifetime Bounds
 -------------------------
@@ -2306,9 +2398,11 @@ outlive ``'a``.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn draw<T: Shape>(shape: T) { ... }
+
+.. _fls_yqcygq3y6m5j:
 
 Lifetime
 ~~~~~~~~
@@ -2336,13 +2430,15 @@ A :t:`lifetime bound` shall apply to :t:`[type]s` and other :t:`[lifetime]s`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    &'a i32
    &'static Shape
 
 :dp:`fls_gcszhqg6hnva`
 See :p:`4.12. <fls_t515k9ywp2rd>` for the declaration of Shape.
+
+.. _fls_ikfvbeewame7:
 
 Subtyping and Variance
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -2468,6 +2564,8 @@ an :t:`tuple type` is determined as follows:
    #. :dp:`fls_9ae3idezsths`
       It is a static error if :t:`variance` ``V`` is ``any``.
 
+.. _fls_l9ebxrlxyawd:
+
 Lifetime Elision
 ~~~~~~~~~~~~~~~~
 
@@ -2541,14 +2639,14 @@ The :t:`lifetime` of an :t:`associated trait constant` shall not be :t:`elided`.
 :dp:`fls_qtjc7334wzhj`
 Given function ``f`` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    fn f <'a, 'b, T: ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command;
 
 :dp:`fls_vcmmkp9uruhr`
 its lifetime elided form is
 
-.. code-block:: text
+.. code-block:: rust
 
    fn f <T: ToCStr>(&mut self, args: &[T]) -> &mut Command;
 

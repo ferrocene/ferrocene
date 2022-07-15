@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. _fls_ckvjj4tt1hh2:
+
 Expressions
 ===========
 
@@ -107,8 +109,12 @@ expression]s` and :t:`[while let loop]s`.
 :t:`Evaluation` is the process by which an :t:`expression` achieves its runtime
 effects.
 
+.. _fls_isyftqu120l:
+
 Expression Classification
 -------------------------
+
+.. _fls_3ut3biyra4r9:
 
 Assignee Expressions
 ~~~~~~~~~~~~~~~~~~~~
@@ -144,6 +150,8 @@ operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
 :dp:`fls_1smb3tj9pxsq`
 :t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
 expression]s`.
+
+.. _fls_66m4rnbssgig:
 
 Constant Expressions
 ~~~~~~~~~~~~~~~~~~~~
@@ -293,9 +301,6 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
 * :dp:`fls_3of516eo0kkx`
   The :t:`constant argument` for a :t:`constant generic parameter`,
 
-* :dp:`fls_icra98id84mk`
-  The :t:`constant parameter` of a :t:`generic`,
-
 * :dp:`fls_yiks5bvojncc`
   The :t:`default value` of a :t:`constant generic parameter`,
 
@@ -344,6 +349,8 @@ control reaches the invocation of :t:`macro` :std:`core::panic`.
 :dp:`fls_tg0kya5125jt`
 The invocation of a :t:`constant function` follows the dynamic semantics of a
 :t:`non-[constant function]` invocation.
+
+.. _fls_6ydylimiv553:
 
 Place Expressions
 ~~~~~~~~~~~~~~~~~
@@ -480,6 +487,8 @@ value* in a :t:`pattern` proceeds as follows:
 #. :dp:`fls_gq35gqagw35`
    Otherwise the :t:`evaluation` results in a static error.
 
+.. _fls_e7zgqroy2qxn:
+
 Value Expressions
 ~~~~~~~~~~~~~~~~~
 
@@ -487,6 +496,8 @@ Value Expressions
 
 :dp:`fls_7q4hrt6yfr9b`
 A :t:`value expression` is an :t:`expression` that represents a :t:`value`.
+
+.. _fls_h0dvogc64tfh:
 
 Literal Expressions
 -------------------
@@ -521,11 +532,13 @@ The :t:`evaluation` of a :t:`literal expression` has no effect.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    5
    'a'
    "hello"
+
+.. _fls_6l60b5hwnjbm:
 
 Path Expressions
 ----------------
@@ -565,10 +578,12 @@ The :t:`evaluation` of a :t:`path expression` has no effect.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    globals::STATIC_VARIABLE
    Vec::<i32>::push
+
+.. _fls_hndm19t57wby:
 
 Block Expressions
 -----------------
@@ -633,12 +648,14 @@ The :t:`evaluation` of a :t:`block expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    {
        fn_call();
        42
    }
+
+.. _fls_aadan19t5006:
 
 async Blocks
 ~~~~~~~~~~~~
@@ -679,11 +696,13 @@ The :t:`evaluation` of an :t:`async block expression` produces an anonymous
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    async {
        42
    }
+
+.. _fls_8wnyln2nmg4y:
 
 unsafe Blocks
 ~~~~~~~~~~~~~
@@ -723,11 +742,13 @@ expression`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    unsafe {
        unsafe_fn_call()
    }
+
+.. _fls_izdv9i4spokw:
 
 Operator Expressions
 --------------------
@@ -753,6 +774,8 @@ Operator Expressions
 
 :dp:`fls_ursc5ynymoy`
 An :t:`operator expression` is an :t:`expression` that involves an operator.
+
+.. _fls_qztk0bkju9u:
 
 Borrow Expression
 ~~~~~~~~~~~~~~~~~
@@ -814,7 +837,7 @@ The :t:`evaluation` of a :t:`borrow expression` evaluates its :t:`operand`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let mut answer = 42;
 
@@ -824,6 +847,8 @@ Mutable borrow.
 .. syntax::
 
    let ref_answer = &mut answer;
+
+.. _fls_5cm4gkt55hjh:
 
 Dereference Expression
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -915,9 +940,11 @@ It is undefined behavior to dereference a :t:`raw pointer` that is either
 :dp:`fls_9ifaterm8nop`
 See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``ref_answer``.
 
-.. code-block:: text
+.. code-block:: rust
 
    let deref_asnwer = *ref_answer;
+
+.. _fls_pocsh1neugpc:
 
 Error Propagation Expression
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -968,7 +995,7 @@ expression` is a :t:`value expression` context.
 :dp:`fls_alk4qvfprnvy`
 The :t:`evaluation` of an :t:`error propagation operator` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    expression?
 
@@ -987,7 +1014,7 @@ is equivalent to the :t:`evaluation` the following :t:`expression`:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn try_to_parse() -> Result<i32, ParseIntError> {
        "42".parse()?
@@ -997,6 +1024,8 @@ is equivalent to the :t:`evaluation` the following :t:`expression`:
        let val = Some(42)?;
        Some(val)
    }
+
+.. _fls_wrecura8u5ar:
 
 Negation Expression
 ~~~~~~~~~~~~~~~~~~~
@@ -1079,23 +1108,25 @@ The :t:`evaluation` of a :t:`negation expression` with a
 :dp:`fls_uo6vv2yf8usx`
 Sign negation.
 
-.. code-block:: text
+.. code-block:: rust
 
    -42
 
 :dp:`fls_hbrg0d98jak5`
 Bitwise negation.
 
-.. code-block:: text
+.. code-block:: rust
 
    !42
 
 :dp:`fls_kqtr9c3jorvg`
 Logical negation.
 
-.. code-block:: text
+.. code-block:: rust
 
    !false
+
+.. _fls_1k9mkv7rbezi:
 
 Arithmetic Expressions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1286,13 +1317,15 @@ It is undefined behavior for an :t:`arithmetic operation` to cause overflow with
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    1 + 2
    4.0 / 3.29
    8.4 * 5.3
    10 % 4
    3 - 2
+
+.. _fls_abp6tjbz8tpn:
 
 Bit Expressions
 ~~~~~~~~~~~~~~~
@@ -1480,13 +1513,15 @@ The :t:`evaluation` of a :t:`shift right expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    0b1010 & 0b1100
    0b1010 | 0b0011
    0b1010 ^ 0b1001
    13 << 3
    -10 >> 2
+
+.. _fls_nsvzzbldhq53:
 
 Comparison Expressions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -1712,6 +1747,8 @@ The :t:`evaluation` of a :t:`not-equals expression` proceeds as follows:
 :dp:`fls_rm0hk0svq4v7`
 12 != 42
 
+.. _fls_lstusiu2c8lu:
+
 Lazy Boolean Expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1794,10 +1831,12 @@ The :t:`evaluation` of a :t:`lazy or expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    false && panic!()
    this || that
+
+.. _fls_1qhsun1vyarz:
 
 Type Cast Expressions
 ~~~~~~~~~~~~~~~~~~~~~
@@ -1995,9 +2034,11 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 :dp:`fls_vdxkpvmpwl3s`
 See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``answer``.
 
-.. code-block:: text
+.. code-block:: rust
 
    answer as f64
+
+.. _fls_y4by2i8dl05o:
 
 Assignment Expressions
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -2041,6 +2082,8 @@ The :t:`type` of an :t:`assignment expression` is the :t:`unit type`.
 :dp:`fls_bwwtgqprbxrm`
 The :t:`value` of an :t:`assignment expression` is the :t:`unit value`.
 
+.. _fls_nnqlae9zp80s:
+
 Basic Assignment
 ^^^^^^^^^^^^^^^^
 
@@ -2072,9 +2115,11 @@ The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    this = 42
+
+.. _fls_9beohh5475s2:
 
 Destructuring Assignment
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2170,9 +2215,11 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    (four, two) = (4, 2)
+
+.. _fls_290jmzfh7x4e:
 
 Compound Assignment Expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2423,7 +2470,7 @@ type]s`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let mut result = 42;
    result += 1
@@ -2436,6 +2483,8 @@ type]s`.
    result <<= 2
    result >>= 3
    result -= 0
+
+.. _fls_tpwp86mronn2:
 
 Underscore Expressions
 ----------------------
@@ -2459,11 +2508,13 @@ An :t:`underscore expression` shall appear in the :t:`assigned operand` of a
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let pair = (1, 2);
    let mut second = 0;
    (_, second) = pair;
+
+.. _fls_g0uyl7qw4c7w:
 
 Parenthesized Expressions
 -------------------------
@@ -2505,12 +2556,16 @@ The :t:`evaluation` of a :t:`parenthesized expression` evaluates its
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    (1 + 2) * 3
 
+.. _fls_gqncxyuok4ss:
+
 Array and Array Index Expressions
 ---------------------------------
+
+.. _fls_xinykul167l:
 
 Array Expressions
 ~~~~~~~~~~~~~~~~~
@@ -2620,7 +2675,7 @@ constructor` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    [1, 2, 3]
    ["one", "two", "three",]
@@ -2638,6 +2693,8 @@ An array of nine 42s.
 .. syntax::
 
    [42; 9]
+
+.. _fls_sxcr4aa098i6:
 
 Array and Slice Indexing Expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2733,13 +2790,15 @@ The :t:`evaluation` of an :t:`array index expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
    a[1][2]
 
 :dp:`fls_esvpmh6razg3`
 Evaluates to 6.
+
+.. _fls_k64tfywtn0g8:
 
 Tuple Expressions
 -----------------
@@ -2789,11 +2848,13 @@ initializer]s` in left-to-right order.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    ()
    (1.2, 3.4)
    ("hello", 42i16, true)
+
+.. _fls_8tsynkj2cufj:
 
 Struct Expressions
 ------------------
@@ -2936,6 +2997,8 @@ The :t:`type` of a :t:`base initializer` shall be the same as the
 The :t:`evaluation` of a :t:`struct expression` evaluates its :t:`[operand]s` in
 a left-to-right order.
 
+.. _fls_inepxsuhpu4u:
+
 Record Struct Construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -3012,7 +3075,7 @@ The :t:`value` of a :t:`field` of a :t:`struct` in construction shall be either:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    enum Occupation {
        Engineer,
@@ -3047,17 +3110,19 @@ Matched named initializer.
 :dp:`fls_8piw0m60trwg`
 Matched shorthand initializer.
 
-.. code-block:: text
+.. code-block:: rust
 
        age,
 
 :dp:`fls_lrjhfc1mnx4a`
 Base initializer, equivalent to ``alice.occupation`` and ``alice.compensation``.
 
-.. code-block:: text
+.. code-block:: rust
 
        .. alice
    };
+
+.. _fls_m9pkmrafqhr0:
 
 Tuple Struct Construction
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3154,17 +3219,19 @@ The :t:`value` of a :t:`field` of a :t:`tuple in construction` is either:
 :dp:`fls_voqgzdvwh9k5`
 Matched indexed initializer.
 
-.. code-block:: text
+.. code-block:: rust
 
        1: 1.1,
 
 :dp:`fls_gjs024orub2v`
 Base initializer, equivalent to ``origin.0`` and ``origin.2``.
 
-.. code-block:: text
+.. code-block:: rust
 
        .. origin
    };
+
+.. _fls_h260ko7skajb:
 
 Union Construction
 ~~~~~~~~~~~~~~~~~~
@@ -3192,7 +3259,7 @@ shall either:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    union Union {
    	int: u32,
@@ -3201,6 +3268,8 @@ shall either:
 
    let it = Union { int: 0 };
    let it = Union { float: 0.0 };
+
+.. _fls_owc8urot5ws8:
 
 Unit Struct Construction
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3219,6 +3288,8 @@ The :t:`construction type` of a :t:`unit struct constructor` shall resolve to a
 
    let unit1 = Empty;
    let unit2 = Empty{};
+
+.. _fls_xa4nbfas01cj:
 
 Call Expressions
 ----------------
@@ -3342,9 +3413,11 @@ It is undefined behavior to call a :t:`function` with an :t:`ABI` other than the
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let three: i32 = add(1, 2);
+
+.. _fls_z7q8kbjwdc7g:
 
 Method Call Expressions
 -----------------------
@@ -3396,7 +3469,7 @@ The :t:`evaluation` of a :t:`method call expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    trait Command {
        fn execute(&self);
@@ -3412,6 +3485,8 @@ The :t:`evaluation` of a :t:`method call expression` proceeds as follows:
 
    let click = ClickCommand { ... };
    click.execute();
+
+.. _fls_18k3uajrgq5f:
 
 Field Access Expressions
 ------------------------
@@ -3483,6 +3558,8 @@ The :t:`value` of a :t:`field access expression` is the :t:`value` of the
 The :t:`evaluation` of a :t:`field access expression` evaluates its
 :t:`container operand`.
 
+.. _fls_yx65ucoaimdp:
+
 Named Field Access
 ~~~~~~~~~~~~~~~~~~
 
@@ -3516,9 +3593,11 @@ It is undefined behavior when the :t:`type` of the :t:`container operand` is a
 :dp:`fls_x27yayh4z787`
 See :p:`6.8.1. <fls_hv4grs2tcuiw>` for the declaration of ``alice``.
 
-.. code-block:: text
+.. code-block:: rust
 
    alice.name
+
+.. _fls_e4q0018ch25g:
 
 Indexed Field Access
 ~~~~~~~~~~~~~~~~~~~~
@@ -3534,9 +3613,11 @@ index of a :t:`field` of the :t:`[container operand]'s` :t:`type`.
 :dp:`fls_dimto84ifanr`
 The following indexed field access evaluates to ``42``.
 
-.. code-block:: text
+.. code-block:: rust
 
    ("hello", 42i16, true).1
+
+.. _fls_tjyexqrx0fx5:
 
 Closure Expressions
 -------------------
@@ -3598,7 +3679,7 @@ The :t:`evaluation` of a :t:`closure expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn do_ten_times<F>(consumer: F) where F: Fn(i32) {
        for times in 0 .. 10 {
@@ -3607,6 +3688,8 @@ The :t:`evaluation` of a :t:`closure expression` proceeds as follows:
    }
 
    do_ten_times(|value: i32| { println!("value: {}", value)});
+
+.. _fls_rr908hgunja7:
 
 Loop Expressions
 ----------------
@@ -3666,6 +3749,8 @@ The :t:`value` of a :t:`loop expression` is determined as follows:
 A :t:`loop expression` is :t:`terminated` when its :t:`block expression` is no
 longer evaluated.
 
+.. _fls_onfyolkcbeh3:
+
 For Loops
 ~~~~~~~~~
 
@@ -3692,7 +3777,7 @@ The :t:`type` of a :t:`subject expression` shall implement the
 :dp:`fls_kuxo0on3vit6`
 The :t:`evaluation` of a :t:`for loop expression` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    'label: for pattern in subject_expression {
        /* loop body */
@@ -3701,7 +3786,7 @@ The :t:`evaluation` of a :t:`for loop expression` of the form
 :dp:`fls_2lrzrtjhsdes`
 is equivalent to the :t:`evaluation` of the following :t:`block expression`:
 
-.. code-block:: text
+.. code-block:: rust
 
    {
        let result =
@@ -3723,13 +3808,15 @@ is equivalent to the :t:`evaluation` of the following :t:`block expression`:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let favorite_fruits = &["apples", "pears", "strawberries"];
 
    for fruit in favorite_fruits {
        println!("I like eating {}.", fruit);
    }
+
+.. _fls_sf4qnd43z2wc:
 
 Infinite Loops
 ~~~~~~~~~~~~~~
@@ -3761,11 +3848,13 @@ The :t:`evaluation` of an :t:`infinite loop expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    loop {
        println!("I am alive!");
    }
+
+.. _fls_5jjm1kt43axd:
 
 While Loops
 ~~~~~~~~~~~
@@ -3813,7 +3902,7 @@ The :t:`evaluation` of a :t:`while loop expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let mut counter = 0;
 
@@ -3821,6 +3910,8 @@ The :t:`evaluation` of a :t:`while loop expression` proceeds as follows:
        counter += 1;
        println("iteration {}", counter);
    }
+
+.. _fls_m6kd5i9dy8dx:
 
 While Let Loops
 ~~~~~~~~~~~~~~~
@@ -3844,7 +3935,7 @@ yields a :t:`value` that can be matched against its :t:`pattern`.
 :dp:`fls_z2ht5iaat5ag`
 The :t:`evaluation` of a :t:`while let loop expression` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    'label: let pattern = subject_let_expression {
        /* loop body */
@@ -3853,7 +3944,7 @@ The :t:`evaluation` of a :t:`while let loop expression` of the form
 :dp:`fls_pacf1uavh1qt`
 shall be equivalent to the :t:`evaluation` the following :t:`infinite loop`:
 
-.. code-block:: text
+.. code-block:: rust
 
    'label: loop {
        match subject_let_expression {
@@ -3864,13 +3955,15 @@ shall be equivalent to the :t:`evaluation` the following :t:`infinite loop`:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let mut favorite_animals = vec!["cats", "dogs", "otters"];
 
    while let Some(animal) = favorite_animals.pop() {
        println!("I like petting {}", animal);
    }
+
+.. _fls_uusi0zej55is:
 
 Loop Labels
 ~~~~~~~~~~~
@@ -3891,6 +3984,8 @@ A :t:`label indication` is a :t:`construct` that indicates a :t:`label`.
 A :t:`label indication` shall indicate a :t:`label` of an enclosing :t:`named
 loop` that does not pass a :t:`control flow boundary` in order to reach the
 enclosing :t:`named loop`.
+
+.. _fls_jr4tpuyksr75:
 
 Break Expressions
 ~~~~~~~~~~~~~~~~~
@@ -3976,13 +4071,15 @@ The :t:`evaluation` of a :t:`break expression` proceeds as follows:
 :dp:`fls_32fwis9pxh77`
 The following break expression terminates both the inner and the outer loop.
 
-.. code-block:: text
+.. code-block:: rust
 
    'outer: loop {
        'inner: loop {
            break 'outer;
        }
    }
+
+.. _fls_sjwrlwvpulp:
 
 Continue Expressions
 ~~~~~~~~~~~~~~~~~~~~
@@ -4031,7 +4128,7 @@ The :t:`evaluation` of a :t:`continue expression` proceeds as follows:
 :dp:`fls_767gv7zhqamh`
 The following continue expression terminates and restarts ``game_loop``.
 
-.. code-block:: text
+.. code-block:: rust
 
    'game_loop: loop {
        if is_paused() {
@@ -4039,6 +4136,8 @@ The following continue expression terminates and restarts ``game_loop``.
        }
        . . .
    }
+
+.. _fls_18swodqqzadj:
 
 Range Expressions
 -----------------
@@ -4174,7 +4273,7 @@ left-to-right order.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    1 ..
    42 .. 86
@@ -4182,8 +4281,12 @@ left-to-right order.
    dawn ..= dusk
    ..= 5
 
+.. _fls_nlzksiu8y3z9:
+
 If and If Let Expressions
 -------------------------
+
+.. _fls_mkut7gut49gi:
 
 If Expressions
 ~~~~~~~~~~~~~~
@@ -4256,7 +4359,7 @@ expression`, :t:`if expression`, or :t:`if let expression`.
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    if age <= 14 {
        println!("child");
@@ -4267,6 +4370,8 @@ expression`, :t:`if expression`, or :t:`if let expression`.
    } else {
        println!("senior");
    }
+
+.. _fls_p0t1ch115tra:
 
 If Let Expressions
 ~~~~~~~~~~~~~~~~~~
@@ -4298,7 +4403,7 @@ expression`.
 :dp:`fls_ijo73wtz1sy`
 The :t:`evaluation` of an :t:`if let expression` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    if let pattern = subject_let_expression {
        /* body */
@@ -4307,7 +4412,7 @@ The :t:`evaluation` of an :t:`if let expression` of the form
 :dp:`fls_qeho5iqiy59`
 is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 
-.. code-block:: text
+.. code-block:: rust
 
    match subject_let_expression {
        pattern => { /* body */ },
@@ -4317,7 +4422,7 @@ is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 :dp:`fls_nhngr8y850dt`
 The :t:`evaluation` of an :t:`if let expression` of the form
 
-.. code-block:: text
+.. code-block:: rust
 
    if let pattern = subject_let_expression {
        /* body */
@@ -4328,7 +4433,7 @@ The :t:`evaluation` of an :t:`if let expression` of the form
 :dp:`fls_8fg2ufaxjkv5`
 is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 
-.. code-block:: text
+.. code-block:: rust
 
    match subject_let_expression {
        pattern => { /* body */ },
@@ -4337,13 +4442,15 @@ is equivalent to the :t:`evaluation` of the following :t:`match expression`:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let dish = ("Ham", "Eggs");
 
    if let ("Ham", side) = dish {
        println!("Ham is served with {}", side);
    }
+
+.. _fls_e5td0fa92fay:
 
 Match Expressions
 -----------------
@@ -4502,7 +4609,7 @@ The :t:`evaluation` of a :t:`match arm guard` evaluates its :t:`operand`. A
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn quantify(number_of_things: i32) {
        match number_of_things {
@@ -4512,6 +4619,8 @@ The :t:`evaluation` of a :t:`match arm guard` evaluates its :t:`operand`. A
            _ => println!("lots")
        }
    }
+
+.. _fls_8l74abhlxzdl:
 
 Return Expressions
 ------------------
@@ -4577,7 +4686,7 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    fn max(left: i32, right: i32) -> i32 {
        if left > right {
@@ -4585,6 +4694,8 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
        }
        return right;
    }
+
+.. _fls_hyrbmfmf6r8g:
 
 Await Expressions
 -----------------
@@ -4661,10 +4772,12 @@ The :t:`evaluation` of an :t:`await expression` proceeds as follows:
 
 .. rubric:: Examples
 
-.. code-block:: text
+.. code-block:: rust
 
    let future = async { expensive_function() };
    future.await;
+
+.. _fls_kw25194gpael:
 
 Expression Precedence
 ---------------------
@@ -4816,6 +4929,8 @@ as follows:
      - lowest
      - none
 
+.. _fls_jmjn8jkbzujm:
+
 Capturing
 ---------
 
@@ -4855,57 +4970,30 @@ within the :t:`capturing expression`, as follows:
 
    #. :dp:`fls_dd8sc7y2vi3u`
       If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
-      the :t:`capture mode` is :t:`by copy mode`.
+      the :t:`capture mode` is :t:`by copy`.
 
    #. :dp:`fls_sq1wam8j1d0a`
-      Otherwise the :t:`capture mode` is :t:`by move mode`.
+      Otherwise the :t:`capture mode` is :t:`by move`.
 
 #. :dp:`fls_l8e98pyhm08g`
    Otherwise the :t:`capture mode` is determined based on the following
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      :t:`By immutable borrow mode`, if the :t:`capture target` is immutably
-      borrowed.
+      By :t:`immutable borrow` mode.
 
    #. :dp:`fls_wmxsd0i2yemf`
-      :t:`By unique immutable borrow mode`, if the :t:`capture target` is a
+      By :t:`unique immutable borrow` mode, if the :t:`capture target` is a
       :t:`mutable reference` that is being modified.
 
    #. :dp:`fls_lu779ufqhggl`
-      :t:`By mutable borrow mode`, if the :t:`capture target` is mutably
-      borrowed.
+      By :t:`mutable borrow` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
       If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
-      the :t:`capture mode` is :t:`by copy mode`, otherwise it is :t:`by move
-      mode`.
+      the :t:`capture mode` is :t:`by copy`, otherwise it is :t:`by move`.
 
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of
 the :t:`capture target`.
-
-:dp:`fls_c3hla8dqymvn`
-The :t:`capture mode` dictates the :t:`capturing` of the :t:`capture target`
-as follows:
-
-* :dp:`fls_60g4jyiphzs`
-  If the :t:`capture mode` is :dt:`by copy mode`, then the :t:`capture target`
-  is transferred :t:`by copy`.
-
-* :dp:`fls_1juvkmh2aoyo`
-  If the :t:`capture mode` is :dt:`by move mode`, then the :t:`capture target`
-  is transferred :t:`by move`.
-
-* :dp:`fls_ctvot5k6jsdx`
-  If the :t:`capture mode` is :dt:`by immutable borrow mode`, then the
-  :t:`capture target` is immutably borrowed.
-
-* :dp:`fls_teyva6i05akb`
-  If the :t:`capture mode` is :dt:`by unique immutable borrow mode`, then the
-  :t:`capture target` is uniquely immutably borrowed.
-
-* :dp:`fls_wik2g15r7vye`
-  If the :t:`capture mode` is :dt:`by mutable borrow mode`, then the :t:`capture
-  target` is mutably borrowed.
 

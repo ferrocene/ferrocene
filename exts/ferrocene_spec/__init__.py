@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from . import definitions, syntax_directive, std_role
+from . import definitions, syntax_directive, std_role, paragraph_ids
 from sphinx.domains import Domain
 
 
@@ -34,6 +34,7 @@ class SpecDomain(Domain):
 def setup(app):
     app.add_domain(SpecDomain)
     definitions.setup(app)
+    paragraph_ids.setup(app)
 
     app.add_config_value(
         name="spec_std_docs_url",

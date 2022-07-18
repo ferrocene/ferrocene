@@ -12,10 +12,10 @@ import subprocess
 import venv
 
 
-def build_docs(root, env, clear, serve):
+def build_docs(root, env, builder, clear, serve):
     dest = root / "build"
 
-    args = ["-b", "html", "-d", dest / "doctrees", "-j", "auto"]
+    args = ["-b", builder, "-d", dest / "doctrees", "-j", "auto"]
     if clear:
         args.append("-E")
     if serve:
@@ -31,14 +31,14 @@ def build_docs(root, env, clear, serve):
                 env.bin("sphinx-autobuild" if serve else "sphinx-build"),
                 *args,
                 root / "src",
-                dest / "html",
+                dest / builder,
             ],
             check=False,
         )
     except KeyboardInterrupt:
         pass
 
-    return dest / "html"
+    return dest / builder
 
 
 def build_linkchecker(root):
@@ -137,12 +137,17 @@ if __name__ == "__main__":
     group.add_argument(
         "--check-links", help="Check whether all links are valid", action="store_true"
     )
+    group.add_argument(
+        "--xml", help="Generate Sphinx XML rather than HTML", action="store_true"
+    )
     args = parser.parse_args()
 
     root = Path(__file__).parent.resolve()
 
     env = VirtualEnv(root, root / ".venv")
-    rendered = build_docs(root, env, args.clear, args.serve)
+    rendered = build_docs(
+        root, env, "xml" if args.xml else "html", args.clear, args.serve
+    )
 
     if args.check_links:
         linkchecker = build_linkchecker(root)

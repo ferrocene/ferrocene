@@ -34,6 +34,7 @@ def write_paragraph_ids(app):
                 "number": ".".join(
                     str(n) for n in env.toc_secnumbers[section.document][section.anchor]
                 ),
+                "title": section.title,
                 "link": app.builder.get_target_uri(section.document) + section.anchor,
                 "paragraphs": paragraphs_by_section[section.id],
             }
@@ -111,13 +112,21 @@ class SectionsCollector(EnvironmentCollector):
             except utils.NoSectionIdError:
                 continue
 
+            title = None
+            for child in section.children:
+                if isinstance(child, nodes.title):
+                    title = child.astext()
+            if title is None:
+                raise RuntimeError(f"section without title: {section}")
+
             env.spec_sections.append(
-                Section(id=id, anchor=anchor, document=env.docname)
+                Section(id=id, title=title, anchor=anchor, document=env.docname)
             )
 
 
 class Section:
-    def __init__(self, id, anchor, document):
+    def __init__(self, id, title, anchor, document):
         self.id = id
+        self.title = title
         self.anchor = anchor
         self.document = document

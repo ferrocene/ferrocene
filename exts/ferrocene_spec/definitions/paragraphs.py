@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
+from .. import utils
 from collections import defaultdict
 from docutils import nodes
 import hashlib
@@ -12,16 +13,17 @@ PRETTY_NAME = "paragraph"
 
 
 class Paragraph:
-    def __init__(self, id, document, section, plaintext, sequential):
+    def __init__(self, id, document, section_anchor, section_id, plaintext, sequential):
         self.id = id
         self.document = document
-        self.section = section
+        self.section_anchor = section_anchor
+        self.section_id = section_id
         self.plaintext = plaintext
         self.sequential = sequential
 
     def number(self, env):
         section = ".".join(
-            str(n) for n in env.toc_secnumbers[self.document][self.section]
+            str(n) for n in env.toc_secnumbers[self.document][self.section_anchor]
         )
         return f"{section}:{self.sequential}"
 
@@ -32,28 +34,31 @@ class Paragraph:
         return False
 
     def display_name(self, env):
-        # Include the hash of the paragraph contents in `objects.inv`. This
-        # will be used by the tooling in ferrocene/ferrocene to generate
-        # lockfiles, requiring tests to be updated whenever the corresponding
-        # paragraph's contents change.
+        return f"{self.number(env)} {self.content_checksum()}"
+
+    def content_checksum(self):
         sha256 = hashlib.sha256()
         sha256.update(self.plaintext.encode("utf-8"))
+        return sha256.hexdigest()
 
-        return f"{self.number(env)} {sha256.hexdigest()}"
 
-
-def collect_items_in_document(app, nodes):
+def collect_items_in_document(app, nodes_to_collect):
     ids = defaultdict(lambda: 1)
-    for node in nodes:
-        section = find_section(node)
+    for node in nodes_to_collect:
+        section_node = find_parent_of_type(node, nodes.section)
+        if section_node is None:
+            raise RuntimeError(f"could not find section for {node!r}")
+
+        section_id, section_anchor = utils.section_id_and_anchor(section_node)
         yield Paragraph(
             id=node["def_id"],
             document=app.env.docname,
-            section=section,
+            section_anchor=section_anchor,
+            section_id=section_id,
             plaintext=plaintext_paragraph(node),
-            sequential=ids[section],
+            sequential=ids[section_id],
         )
-        ids[section] += 1
+        ids[section_id] += 1
 
 
 def replace_id_node(app, node, paragraph):
@@ -76,16 +81,6 @@ def plaintext_paragraph(node):
     if paragraph is None:
         paragraph = node
     return paragraph.astext().replace("\n", " ")
-
-
-def find_section(node):
-    section = find_parent_of_type(node, nodes.section)
-    if section is None:
-        raise RuntimeError(f"could not find section for {node!r}")
-    if section.parent is not None and isinstance(section.parent, nodes.document):
-        return ""
-    else:
-        return "#" + section["ids"][0]
 
 
 def find_parent_of_type(node, ty):

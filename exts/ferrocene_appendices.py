@@ -54,7 +54,8 @@ class TocTreeCollectorWithAppendices(TocTreeCollector):
     def __replace_toctree(self, env, toctree):
         within_appendices = "are_appendices" in toctree
         for _, ref in toctree["entries"]:
-            env.titles[ref]["secnumber"] = make_letter(env.titles[ref]["secnumber"])
+            if within_appendices:
+                env.titles[ref]["secnumber"] = make_letter(env.titles[ref]["secnumber"])
             if ref in env.tocs:
                 self.__replace_toc(env, ref, env.tocs[ref], within_appendices)
 

@@ -182,7 +182,6 @@ h1:hover a.headerlink, h2:hover a.headerlink, h3:hover a.headerlink, h4:hover a.
 p.rubric {
     margin: 2em 0 1em 0;
     font-weight: 700;
-    text-align: center;
 }
 
 h1 + p.rubric, h2 + p.rubric, h3 + p.rubric, h4 + p.rubric, h5 + p.rubric, h6 + p.rubric {

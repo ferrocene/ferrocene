@@ -5,13 +5,13 @@
 
 .. _fls_kd7fcvfrwks0:
 
-Appendix A: Licenses
-====================
+Licenses
+========
 
 .. _fls_mwoe9jy6l7er:
 
-A.1. Ada Reference Manual Copyright Notice
-------------------------------------------
+Ada Reference Manual Copyright Notice
+-------------------------------------
 
 :dp:`fls_9rpvtm5tjrpp`
 **Fourth Edition (Ada** 202x\ **)**
@@ -43,8 +43,8 @@ HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 .. _fls_w6b35kn6la40:
 
-A.2. Rust Reference Apache License
-----------------------------------
+Rust Reference Apache License
+-----------------------------
 
 :dp:`fls_wn4kcs3skqra`
 Apache License
@@ -272,8 +272,8 @@ specific language governing permissions and limitations under the License.
 
 .. _fls_un9oqipiretc:
 
-A.3. Rust Reference MIT License
--------------------------------
+Rust Reference MIT License
+--------------------------
 
 :dp:`fls_bkxw1o1hanmk`
 **Copyright (c) 2010 The Rust Project Developers**

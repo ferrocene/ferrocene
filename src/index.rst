@@ -34,7 +34,7 @@ Ferrocene Language Specification
 .. appendices::
    :numbered:
    :maxdepth: 1
-   :caption: Appendixes:
+   :caption: Appendices:
 
    licenses
    glossary

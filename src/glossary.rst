@@ -5,8 +5,8 @@
 
 .. _fls_bc2qwbfibrcs:
 
-Appendix B: Glossary
-====================
+Glossary
+========
 
 .. _fls_m98yg554tj9s:
 

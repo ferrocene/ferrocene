@@ -43,7 +43,7 @@ You can build the rendered version by running::
 
    ./make.py
 
-By default Sphinx uses incremental rebuilds to only generate the content that
+By default, Sphinx uses incremental rebuilds to generate the content that
 changed since the last invocation. If you notice a problem with incremental
 rebuilds, you can pass the ``-c`` flag to clear the existing artifacts before
 building::
@@ -73,10 +73,11 @@ rendered documentation.
 Updating build dependencies
 ===========================
 
-FLS uses ``pip-tools`` to manage the Python dependencies used for builds, as it
-allows pinning hashes for the dependencies. While it doesn't add any additional
-burden when installing dependencies (the format it outputs is understood by
-`pip`), you have to install it when regenerating the ``requirements.txt`` file.
+The FLS uses ``pip-tools`` to manage the Python dependencies used for builds,
+as it allows pinning hashes for the dependencies. While it doesn't add any
+additional burden when installing dependencies (the format it outputs is
+understood by `pip`), you have to install it when regenerating the
+``requirements.txt`` file.
 
 To install `pip-tools`, we recommend first installing `pipx`_, and then
 running::

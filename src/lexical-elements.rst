@@ -516,7 +516,7 @@ sequence of characters after performing normalization.
 
 .. rubric:: Examples
 
-.. code-block:: rust
+.. code-block:: text
 
    foo
    _identifier
@@ -1013,7 +1013,7 @@ The :t:`type` of a :t:`character literal` is :c:`char`.
 
 .. rubric:: Examples
 
-.. code-block:: rust
+.. code-block:: text
 
    'a'
    '\t'

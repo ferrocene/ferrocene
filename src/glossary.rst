@@ -817,6 +817,15 @@ byte characters.
 :dp:`fls_4yhag19z61bl`
 See ``ByteStringLiteral.``
 
+.. _fls_lfjgrkwra22i:
+
+C
+^
+
+:dp:`fls_d4q2ro4nsnop`
+:dt:`C` is the programming language described in the ISO/IEC 9899:2018
+International Standard.
+
 .. _fls_wenn1wdsicfz:
 
 C representation

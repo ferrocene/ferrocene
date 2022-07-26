@@ -36,10 +36,7 @@ but not limited to:
   The categories of syntactic and semantic rules.
 
 :dp:`fls_tq9jcv5ddvwn`
-Consult `Appendix A: Licenses
-<https://docs.google.com/document/d/1MXGXAwVo714GETP447NuFKaeqjxO4vMYLhLHTDwOTbc
-/edit#bookmark=id.kd7fcvfrwks0>`_ for the relevant copyright notices and
-licenses.
+Consult :doc:`licenses` for the relevant copyright notices and licenses.
 
 .. _fls_fo1c7pg2mw1:
 
@@ -132,19 +129,13 @@ The specification of the Rust language is separated into:
   Chapters 1 through 21,
 
 * :dp:`fls_xw3grr2g5zgi`
-  `Appendix A: Licenses
-  <https://docs.google.com/document/d/1MXGXAwVo714GETP447NuFKaeqjxO4vMYLhLHTDwOT
-  bc/edit#bookmark=id.kd7fcvfrwks0>`_,
+  :doc:`licenses`
 
 * :dp:`fls_k6obg07c1i71`
-  `Appendix B: Glossary
-  <https://docs.google.com/document/d/1I5cxk43bG70JdhSJI2PZloQaj540ntY1IQSoFzo5R
-  yI/edit#bookmark=id.bc2qwbfibrcs>`_,
+  :doc:`glossary`
 
 * :dp:`fls_az3jhtedgvyi`
-  `Appendix C: Syntax Summary.
-  <https://docs.google.com/document/d/1TzjQ-n2NS0ZUzwg6VDmD7-kAjW7iGID7h4KEdbfro
-  Dk/edit#bookmark=id.h61cd8uat4jc>`_
+  Syntax Summary
 
 :dp:`fls_6srbinvnyd54`
 The specification is normative, except for the material in each of the items
@@ -160,19 +151,13 @@ listed below, which is informative:
 The following appendices are informative:
 
 * :dp:`fls_enkvrkfqwyt8`
-  `Appendix A: Licenses
-  <https://docs.google.com/document/d/1MXGXAwVo714GETP447NuFKaeqjxO4vMYLhLHTDwOT
-  bc/edit#bookmark=id.kd7fcvfrwks0>`_,
+  :doc:`licenses`
 
 * :dp:`fls_yfyiaipc9omp`
-  `Appendix B: Glossary
-  <https://docs.google.com/document/d/1I5cxk43bG70JdhSJI2PZloQaj540ntY1IQSoFzo5R
-  yI/edit#bookmark=id.bc2qwbfibrcs>`_,
+  :doc:`glossary`
 
 * :dp:`fls_qt3pzt1xhoup`
-  `Appendix C: Syntax Summary.
-  <https://docs.google.com/document/d/1TzjQ-n2NS0ZUzwg6VDmD7-kAjW7iGID7h4KEdbfro
-  Dk/edit#bookmark=id.h61cd8uat4jc>`_
+  Syntax Summary
 
 :dp:`fls_jc4upf6685bw`
 Each chapter is divided into subchapters that have a common structure. Each
@@ -445,9 +430,7 @@ Other terms not defined in this document are to be interpreted according to the
 Webster's Third New International Dictionary of the English Language.
 
 :dp:`fls_qeolgxvcy75`
-The definitions of terms are available in `Appendix B: Glossary
-<https://docs.google.com/document/d/1I5cxk43bG70JdhSJI2PZloQaj540ntY1IQSoFzo5RyI
-/edit#bookmark=id.bc2qwbfibrcs>`_.
+The definitions of terms are available in :doc:`glossary`.
 
 :dp:`fls_h2m244agxaxs`
 A rule is a requirement imposed on the programmer, stated in normative language

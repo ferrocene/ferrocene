@@ -15,7 +15,7 @@ class AppendicesDirective(TocTree):
         def compat_check(condition):
             if not condition:
                 raise RuntimeError(
-                    "bug: the toctre Sphinx directive used by appendix emitted "
+                    "bug: the toctree Sphinx directive used by appendix emitted "
                     "unexpected nodes, please update the extension to handle that"
                 )
 

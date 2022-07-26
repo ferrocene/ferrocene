@@ -55,7 +55,7 @@ correctness as a specification.
 This document is made available for contribution and review as it is useful
 outside of the Ferrocene effort and can be a place of shared understanding. It
 is not intended as a discussion ground for language evolution. It is also not
-indented as a document enabling conformance between compilers.
+intended as a document enabling conformance between compilers.
 
 :dp:`fls_osh9tiwpnsn1`
 Contribution and review is managed by the Ferrocene project developers.

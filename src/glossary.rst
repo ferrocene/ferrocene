@@ -833,7 +833,7 @@ C representation
 
 :dp:`fls_g9pdb06m5fto`
 :dt:`C representation` is a :t:`type representation` that lays out :t:`[type]s`
-such that they are interoperable with the C language.
+such that they are interoperable with the :t:`C` language.
 
 .. _fls_xeo59ol6uh5i:
 
@@ -5507,7 +5507,7 @@ union type
 ^^^^^^^^^^
 
 :dp:`fls_af2sscrep7mc`
-A :dt:`union type` is an :t:`abstract data type` similar to a C-like union.
+A :dt:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 
 :dp:`fls_fgvjogfz8ink`
 See :s:`UnionDeclaration`.

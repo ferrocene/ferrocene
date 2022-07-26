@@ -31,10 +31,10 @@ Ferrocene Language Specification
    macros
    ffi
 
-.. toctree::
+.. appendices::
    :numbered:
    :maxdepth: 1
-   :caption: Appendixes:
+   :caption: Appendices:
 
    licenses
    glossary

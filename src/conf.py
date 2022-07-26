@@ -23,6 +23,7 @@ author = "Critical Section GmbH"
 # ones.
 extensions = [
     "ferrocene_spec",
+    "ferrocene_appendices",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

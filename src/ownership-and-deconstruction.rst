@@ -403,7 +403,7 @@ Destructors
 .. rubric:: Legality Rules
 
 :dp:`fls_9m0gszdle0qb`
-A :t:`drop type` is a :t:`type` that implements the :std:`core::ops:Drop`
+A :t:`drop type` is a :t:`type` that implements the :std:`core::ops::Drop`
 :t:`trait` or contains a :t:`field` that has a :t:`destructor`.
 
 :dp:`fls_4nkzidytpi6`
@@ -423,8 +423,8 @@ An :t:`uninitialized` :t:`object` is not :t:`dropped`.
 :t:`Dropping` an :t:`initialized` :t:`object` proceeds as follows:
 
 #. :dp:`fls_bync24y6gp93`
-   If the :t:`drop type` implements the :std:`core::ops:Drop` :t:`trait`, then
-   ``core::ops:Drop::drop()`` is invoked.
+   If the :t:`drop type` implements the :std:`core::ops::Drop` :t:`trait`, then
+   ``core::ops::Drop::drop()`` is invoked.
 
 #. :dp:`fls_jzancf72i95f`
    If the :t:`drop type` is an :t:`array type`, then its elements are

@@ -1463,7 +1463,7 @@ drop type
 ^^^^^^^^^
 
 :dp:`fls_ot3e31kwixil`
-A :dt:`drop type` is a :t:`type` that implements the :std:`core::ops:Drop`
+A :dt:`drop type` is a :t:`type` that implements the :std:`core::ops::Drop`
 :t:`trait` or contains a :t:`field` that has a :t:`destructor`.
 
 .. _fls_68cl4paduzx2:

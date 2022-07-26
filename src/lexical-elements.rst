@@ -308,7 +308,7 @@ The following names are used when referring to :t:`[punctuator]s`:
      - Minus equals
    * - :dp:`fls_baawlxoi7yd4`
      - ``*=``
-     - Start equals
+     - Star equals
    * - :dp:`fls_m7gt3wfbtm81`
      - ``/=``
      - Slash equals

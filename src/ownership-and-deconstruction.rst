@@ -369,7 +369,7 @@ atomic ``42``.
    use core::sync::atomic::AtomicI32;
 
    let x: AtomicI32 = AtomicI32::new(42);
-   let x: AtomicI32 = y;
+   let y: AtomicI32 = x;
 
 :dp:`fls_7wm8lvfuiou`
 Type ``&i32`` is a by reference type. By the end of the second statement, ``x``

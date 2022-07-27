@@ -15,7 +15,7 @@ Ferrocene Language Specification
    types-and-traits
    patterns
    expressions
-   values-and-objects
+   values
    statements
    functions
    associated-items

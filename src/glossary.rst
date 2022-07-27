@@ -512,11 +512,11 @@ binding
 ^^^^^^^
 
 :dp:`fls_89qi3unjvwd7`
-A :dt:`binding` is a :t:`variable` of an :t:`identifier pattern` or a
-:t:`shorthand deconstructor` that binds a matched :t:`value`.
+A :dt:`binding` is a :t:`variable` of a :t:`binding pattern` that binds a
+matched :t:`value`.
 
 :dp:`fls_lujdci4bphek`
-See :c:`Binding`.
+See :s:`Binding`.
 
 .. _fls_glblhx8vzd3z:
 
@@ -1069,8 +1069,8 @@ constant
 ^^^^^^^^
 
 :dp:`fls_p8rjw2qok85b`
-A :dt:`constant` is an immutable :t:`object` that is not associated with a
-specific memory location.
+A :dt:`constant` is an immutable :t:`value` whose uses are substituted by the
+:t:`value`.
 
 :dp:`fls_hlouedpdg1zd`
 See :s:`ConstantDeclaration`.
@@ -1181,7 +1181,7 @@ container operand
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_stjmobac6wyd`
-A :dt:`container operand` is an :t:`operand` that indicates the :t:`object`
+A :dt:`container operand` is an :t:`operand` that indicates the :t:`value`
 whose :t:`field` is selected in a :t:`field access expression`.
 
 :dp:`fls_hgm1ssicc8j4`
@@ -1356,8 +1356,8 @@ destruction
 ^^^^^^^^^^^
 
 :dp:`fls_58i2nfhxze3j`
-:dt:`Destruction` is the process of recovering resources associated with an
-:t:`object` as it goes out of scope.
+:dt:`Destruction` is the process of recovering resources associated with a
+:t:`value` as it goes out of scope.
 
 .. _fls_kwxpy451gtc:
 
@@ -1366,7 +1366,7 @@ destructor
 
 :dp:`fls_79pp7o1xooja`
 A :dt:`destructor` is an anonymous :t:`function` that performs the
-:t:`destruction` of an :t:`object` of a :t:`drop type`.
+:t:`destruction` of a :t:`value` of a :t:`drop type`.
 
 .. _fls_2fuu3zr9rn2q:
 
@@ -1481,7 +1481,7 @@ dropping
 ^^^^^^^^
 
 :dp:`fls_k4mguykh8ey`
-:dt:`Dropping` an :t:`object` is the act of invoking the :t:`destructor` of the
+:dt:`Dropping` a :t:`value` is the act of invoking the :t:`destructor` of the
 related :t:`type`.
 
 .. _fls_6uovyjjzh6km:
@@ -1816,7 +1816,7 @@ field access expression
 
 :dp:`fls_gdl348a04d15`
 A :dt:`field access expression` is an :t:`expression` that accesses a :t:`field`
-of an :t:`object`.
+of a :t:`value`.
 
 :dp:`fls_luetyuwu54d6`
 See :s:`FieldAccessExpression`.
@@ -2596,8 +2596,8 @@ initialization
 ^^^^^^^^^^^^^^
 
 :dp:`fls_xi07ycze6mo0`
-:dt:`Initialization` is the act of supplying an initial :t:`value` to an
-:t:`object`.
+:dt:`Initialization` is the act of supplying an initial :t:`value` to a
+:t:`constant`, a :t:`static`, or a :t:`variable`.
 
 .. _fls_pd30dl2envjn:
 
@@ -3033,8 +3033,7 @@ local variable
 ^^^^^^^^^^^^^^
 
 :dp:`fls_3inlcyi6444u`
-A :dt:`local variable` is a :t:`variable` that refers to a :t:`value` allocated
-directly on the stack.
+For :dt:`local variable`, see :t:`variable`.
 
 .. _fls_kdqa8zs8tk6g:
 
@@ -3272,7 +3271,7 @@ method call expression
 
 :dp:`fls_367sod24edts`
 A :dt:`method call expression` is an :t:`expression` that invokes a :t:`method`
-of an :t:`object`.
+of a :t:`variable`.
 
 :dp:`fls_ohhcvxcaqv11`
 See :s:`MethodCallExpression`.
@@ -3531,15 +3530,6 @@ numeric type
 :dp:`fls_cpdsj94l57af`
 A :dt:`numeric type` is a :t:`type` whose :t:`[value]s` denote numbers.
 
-.. _fls_p86xdprmatcj:
-
-object
-^^^^^^
-
-:dp:`fls_pwed0368vc09`
-An :dt:`object` relates a :t:`value` to a :t:`name`, and dictates how the value
-is initialized and modified.
-
 .. _fls_a226qzrb4iq9:
 
 object safe
@@ -3666,7 +3656,7 @@ owner
 ^^^^^
 
 :dp:`fls_7vwwhberexeb`
-An :dt:`owner` is an :t:`object` that holds a :t:`value`.
+An :dt:`owner` is a :t:`variable` that holds a :t:`value`.
 
 .. _fls_1gmetz8qtr0l:
 
@@ -4705,7 +4695,7 @@ slice
 ^^^^^
 
 :dp:`fls_p1sv01ml2ark`
-A :dt:`slice` is an :t:`object` of a :t:`slice type`.
+A :dt:`slice` is a :t:`value` of a :t:`slice type`.
 
 .. _fls_1s3a31o9zx1a:
 
@@ -4760,7 +4750,7 @@ static
 ^^^^^^
 
 :dp:`fls_srx4v1e20yxa`
-A :dt:`static` is an :t:`object` that is associated with a specific memory
+A :dt:`static` is a :t:`value` that is associated with a specific memory
 location.
 
 :dp:`fls_1b7gpk8e98pw`
@@ -4995,8 +4985,8 @@ temporary
 ^^^^^^^^^
 
 :dp:`fls_fathkxu9kxvw`
-A :dt:`temporary` is an anonymous :t:`object` that holds the result of some
-intermediate computation.
+A :dt:`temporary` is an anonymous :t:`variable` produced by some intermediate
+computation.
 
 .. _fls_ihv02usuziw8:
 
@@ -5194,7 +5184,7 @@ tuple struct
 ^^^^^^^^^^^^
 
 :dp:`fls_pdcpmapiq491`
-A :dt:`tuple struct` is an :t:`object` of a :t:`tuple struct type`.
+A :dt:`tuple struct` is a :t:`value` of a :t:`tuple struct type`.
 
 .. _fls_81mx81sy0qxv:
 
@@ -5791,7 +5781,7 @@ variable
 ^^^^^^^^
 
 :dp:`fls_9ab12k4vwsio`
-A :dt:`variable` is an :t:`object` that is a component of a stack frame.
+A :dt:`variable` is a placeholder for a value that is allocated on the stack.
 
 .. _fls_q0xplb4tbzpq:
 

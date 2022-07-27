@@ -106,11 +106,11 @@ with :t:`keyword` ``mut`` yields a :t:`mutable binding`.
 
 :dp:`fls_24c95c56tugl`
 The :t:`identifier pattern` enters its :t:`binding` into :t:`pattern scope` in
-the :t:`value namespace` if it does not resolve to a :t:`constant`.
+the :t:`value namespace` if it does not resolve to a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
 
 :dp:`fls_twcavjk7iquy`
 It is a static error if the :t:`identifier pattern` consists of anything other
-than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`.
+than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
 
 :dp:`fls_hw26hy33guk5`
 An :t:`identifier pattern` is :t:`irrefutable` when:
@@ -124,7 +124,7 @@ An :t:`identifier pattern` is :t:`irrefutable` when:
 
 * :dp:`fls_r2mb8v2lh3x0`
   It does not have a :t:`bound pattern` and its :t:`binding` does not resolve to
-  a :t:`constant`.
+  a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
 
 :dp:`fls_7oioaitb075g`
 If the :t:`identifier pattern` does not have a :t:`bound pattern`, then the
@@ -288,18 +288,20 @@ Path Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_1crq0mexo5r1`
-A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, an :t:`enum
-variant` without :t:`[field]s`, or a :t:`unit struct` indicated by a :t:`path`.
+A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, an :t:`unit enum
+variant`, or an :t:`unit struct`.
 
 :dp:`fls_xz5otkhogn31`
 A :t:`path pattern` expressed as a :t:`path-in-expression` shall refer to either
 an :t:`associated constant`, or a :t:`constant`.
 
 :dp:`fls_t8sjzsif2ilf`
-When a :t:`path pattern` expressed as a :t:`path-in-expression` refers to
-a :t:`constant`, the :t:`constant` shall not be of a :t:`union type`. If
-the :t:`constant` is of an :t:`enum type` or :t:`struct type`, then the
-:t:`constant` shall be subject to :t:`attribute` :c:`derive` with arguments
+When a :t:`path pattern` refers to a :t:`constant`, the :t:`constant` shall not
+be of a :t:`union type`.
+
+:dp:`fls_hF19K8sWU8FF`
+When the type of the :t:`path pattern` is of an :t:`enum type` or :t:`struct type`, then the
+:t:`enum type` or :t:`struct type` shall be subject to :t:`attribute` :c:`derive` with arguments
 :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
 
 :dp:`fls_bv9psmitxfuw`
@@ -322,7 +324,7 @@ A :t:`path pattern` is :t:`irrefutable` when it refers to:
 
 :dp:`fls_pedy2pqrvnx7`
 The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
-:t:`enum`, or :t:`struct` the :t:`path` resolved to.
+:t:`unit enum variant`, or :t:`unit struct` the :t:`path` resolved to.
 
 .. rubric:: Examples
 
@@ -1257,7 +1259,7 @@ Path Pattern Matching
 :dt:`Path pattern matching` proceeds as follows:
 
 #. :dp:`fls_fqt5w3qsykca`
-   If the :t:`constant` the :t:`path` of the :t:`path pattern` resolved to and
+   If the :t:`constant`, :t:`unit enum variant` or :t:`unit struct` the :t:`path` of the :t:`path pattern` resolved to and
    the context :t:`value` are equal, then matching succeeds.
 
 #. :dp:`fls_h3y8r4298s53`

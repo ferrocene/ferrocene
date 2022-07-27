@@ -161,8 +161,7 @@ The following appendices are informative:
 
 :dp:`fls_jc4upf6685bw`
 Each chapter is divided into subchapters that have a common structure. Each
-chapter is divided into subchapters that have a common structure. Each chapter
-and subchapter is then organized to include the following segments as is
+chapter and subchapter is then organized to include the following segments as is
 relevant to the topic:
 
 .. rubric:: Syntax

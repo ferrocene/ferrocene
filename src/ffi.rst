@@ -62,7 +62,7 @@ The :t:`ABI kind` indicates the :t:`ABI` of a :t:`construct`.
 The following :t:`[ABI]s` are supported:
 
 * :dp:`fls_x7ct9k82fpgn`
-  ``extern "C"`` - The default :t:`ABI` of C code, referred to as :dt:`extern
+  ``extern "C"`` - The default :t:`ABI` of :t:`C` code, referred to as :dt:`extern
   C ABI`.
 
 * :dp:`fls_a2d8ltpgtvn6`
@@ -91,7 +91,7 @@ include, but may not be limited to, the following:
   ``extern "aapcs"`` - The ARM :t:`ABI`.
 
 * :dp:`fls_36qrs2fxxvi7`
-  ``extern "cdecl"`` - The x86_32 :t:`ABI` of C code.
+  ``extern "cdecl"`` - The x86_32 :t:`ABI` of :t:`C` code.
 
 * :dp:`fls_6rtj6rwqxojh`
   ``extern "fastcall"`` - The ``fastcall`` :t:`ABI` that corresponds to MSVC's
@@ -101,14 +101,14 @@ include, but may not be limited to, the following:
   ``extern "stdcall"`` - The x86_32 :t:`ABI` of the Win32 API.
 
 * :dp:`fls_7t7yxh94wnbl`
-  ``extern "sysv64"`` - The x86_64 non-Windows :t:`ABI` of C code.
+  ``extern "sysv64"`` - The x86_64 non-Windows :t:`ABI` of :t:`C` code.
 
 * :dp:`fls_sxj4vy39sj4g`
   ``extern "vectorcall"`` - The ``vectorcall`` :t:`ABI` that corresponds to
   MSVC's ``__vectorcall`` and clang's ``__attribute__((vectorcall))``.
 
 * :dp:`fls_tyjs1x4j8ovp`
-  ``extern "win64"`` - The x86_64 Windows :t:`ABI` of C code.
+  ``extern "win64"`` - The x86_64 Windows :t:`ABI` of :t:`C` code.
 
 .. rubric:: Examples
 

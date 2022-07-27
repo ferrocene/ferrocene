@@ -789,7 +789,7 @@ Union Type
 .. rubric:: Legality Rules
 
 :dp:`fls_nskmnzq95yqm`
-A :t:`union type` is an :t:`abstract data type` similar to a C-like union.
+A :t:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 
 :dp:`fls_1caus8ybmfli`
 The :t:`name` of a :t:`union field` shall denote a unique :t:`name` within the
@@ -1389,7 +1389,7 @@ does not change the :t:`layout` of the :t:`[field]s` themselves.
 
 :dp:`fls_8s1vddh8vdhy`
 :t:`C representation` lays out a :t:`type` such that the :t:`type` is
-interoperable with the C language.
+interoperable with the :t:`C` language.
 
 :dp:`fls_b005bktrkrxy`
 :t:`Default representation` makes no guarantees about the :t:`layout`.
@@ -1439,7 +1439,7 @@ representation` are those of its :t:`discriminant`.
 
 :dp:`fls_s9c0a0lg6c0p`
 The :t:`discriminant type` of an :t:`enum type` with :t:`C representation` is
-the :t:`type` of a C ``enum`` for the target platform's C :t:`ABI`.
+the :t:`type` of a :t:`C` ``enum`` for the target platform's :t:`C` :t:`ABI`.
 
 :dp:`fls_slhvf3gmqz4h`
 The :t:`discriminant type` of an :t:`enum type` with :t:`default representation`

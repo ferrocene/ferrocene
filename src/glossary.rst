@@ -817,6 +817,15 @@ byte characters.
 :dp:`fls_4yhag19z61bl`
 See ``ByteStringLiteral.``
 
+.. _fls_lfjgrkwra22i:
+
+C
+^
+
+:dp:`fls_d4q2ro4nsnop`
+:dt:`C` is the programming language described in the ISO/IEC 9899:2018
+International Standard.
+
 .. _fls_wenn1wdsicfz:
 
 C representation
@@ -824,7 +833,7 @@ C representation
 
 :dp:`fls_g9pdb06m5fto`
 :dt:`C representation` is a :t:`type representation` that lays out :t:`[type]s`
-such that they are interoperable with the C language.
+such that they are interoperable with the :t:`C` language.
 
 .. _fls_xeo59ol6uh5i:
 
@@ -5498,7 +5507,7 @@ union type
 ^^^^^^^^^^
 
 :dp:`fls_af2sscrep7mc`
-A :dt:`union type` is an :t:`abstract data type` similar to a C-like union.
+A :dt:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 
 :dp:`fls_fgvjogfz8ink`
 See :s:`UnionDeclaration`.

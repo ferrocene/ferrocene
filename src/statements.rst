@@ -63,8 +63,8 @@ A :t:`let statement` is a :t:`statement` that introduces new :t:`[binding]s`
 produced by its :t:`pattern-without-alternation`.
 
 :dp:`fls_1prqh1trybwz`
-The :t:`type` of a :t:`binding` introduced by a :t:`let statement` is determined
-as follows:
+The :t:`type` of a :t:`variable` introduced by a :t:`let statement` is
+determined as follows:
 
 * :dp:`fls_djkm8r2iuu6u`
   If the :t:`let statement` appears with a :t:`type ascription`, then the
@@ -75,7 +75,7 @@ as follows:
   :t:`inferred` using :t:`type inference`.
 
 :dp:`fls_m8a7gesa4oim`
-The :t:`value` of a :t:`binding` introduced by a :t:`let statement` is
+The :t:`value` of a :t:`variable` introduced by a :t:`let statement` is
 determined as follows:
 
 * :dp:`fls_oaxnre7m9s10`
@@ -83,7 +83,7 @@ determined as follows:
   is the :t:`value` of the :t:`expression`.
 
 * :dp:`fls_t5bjwluyv8za`
-  If the :t:`let statement` lacks an :t:`expression`, then the :t:`binding`
+  If the :t:`let statement` lacks an :t:`expression`, then the :t:`variable`
   is uninitialized.
 
 :dp:`fls_iqar7vvtw22c`
@@ -102,7 +102,7 @@ The :t:`execution` of a :t:`let statement` proceeds as follows:
       The :t:`expression` is evaluated.
 
    #. :dp:`fls_7j4qlwg72ege`
-      The :t:`value` of the :t:`expression` is assigned to each :t:`binding`
+      The :t:`value` of the :t:`expression` is assigned to each :t:`variable`
       introduced by the :t:`let statement`.
 
 .. rubric:: Examples

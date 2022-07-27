@@ -5763,6 +5763,15 @@ value expression
 :dp:`fls_mn6tcuz5j3p`
 A :dt:`value expression` is an :t:`expression` that represents a :t:`value`.
 
+.. _fls_aP9ZaU01Dsg5:
+
+value holder
+^^^^^^^^^^^^
+
+:dp:`fls_RssUVCMKCNBx`
+A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a 
+:t:`variable`.
+
 .. _fls_a5xof9jlpc2e:
 
 value operand

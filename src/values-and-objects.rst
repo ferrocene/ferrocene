@@ -32,7 +32,7 @@ Two :t:`[value]s` :t:`overlap` when
   Both :t:`[value]s` are elements of the same :t:`array`.
 
 :dp:`fls_prxicw2q70lj`
-An :t:`object` is :t:`valid` when it has been :t:`initialized` by all reachable
+An :t:`value` is :t:`valid` when it has been :t:`initialized` by all reachable
 control flow paths.
 
 .. rubric:: Undefined Behavior
@@ -222,7 +222,7 @@ stack.
 The following :t:`[construct]s` are :t:`[variable]s`:
 
 * :dp:`fls_3p0sb9ppmg3w`
-  An anonymous :t:`temporary`.
+  A :t:`temporary`.
 
 * :dp:`fls_81dlbula47nu`
   A named :t:`binding`.
@@ -230,16 +230,12 @@ The following :t:`[construct]s` are :t:`[variable]s`:
 * :dp:`fls_adqfhc5k051x`
   A named :t:`function parameter`.
 
-:dp:`fls_xfiuc52r672i`
-A :t:`local variable` is a :t:`variable` that refers to a :t:`value` allocated
-directly on the stack.
-
 :dp:`fls_r9km9f969bu8`
-A :t:`local variable` shall be used only after it has been initialized through
-all reachable control flow paths.
+A :t:`variable` shall be used only after it has been initialized through all
+reachable control flow paths.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_g8etd5lsgn9j`
-A :t:`local variable` is not initialized when allocated.
+A :t:`variable` is not initialized when allocated.
 

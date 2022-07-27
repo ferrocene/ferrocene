@@ -32,20 +32,24 @@ Initialization
 
 .. rubric:: Legality Rules
 
+A :t:`value holder` is either a :t:`constant`, a :t:`static`, or a
+:t:`variable`.
+
 :dp:`fls_drfzu02bo7oe`
 :t:`Initialization` is the act of supplying an initial :t:`value` to a
-:t:`constant`, a :t:`static`, or a :t:`variable`.
+:t:`value holder`.
 
 :dp:`fls_wnhci8phdu4m`
-When an :t:`object` holds a :t:`value`, the :t:`object` is considered to be
-:dt:`initialized`.
+When a :t:`value holder` holds a :t:`value`, the :t:`value holder` is
+considered to be :dt:`initialized`.
 
 :dp:`fls_ch2lvm50olqd`
-When an :t:`object` lacks a :t:`value` or its :t:`value` has been transferred
-:t:`by move`, the :t:`object` is considered to be :dt:`uninitialized`.
+When a :t:`value holder` lacks a :t:`value` or its :t:`value` has been
+transferred :t:`by move`, the :t:`value holder` is considered to be
+:dt:`uninitialized`.
 
 :dp:`fls_46910buiwvv9`
-An :t:`object` shall be :t:`initialized` before it is used.
+A :t:`value holder` shall be :t:`initialized` before it is used.
 
 .. rubric:: Runtime Semantics
 
@@ -415,12 +419,12 @@ A :t:`destructor` is an anonymous :t:`function` that performs the
 related :t:`type`. Such an object is said to be :dt:`dropped`.
 
 :dp:`fls_gfvm70iqu1l4`
-An :t:`uninitialized` :t:`object` is not :t:`dropped`.
+An :t:`uninitialized` :t:`value hilder` is not :t:`dropped`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_l2xkdjeydqtx`
-:t:`Dropping` an :t:`initialized` :t:`object` proceeds as follows:
+:t:`Dropping` an :t:`initialized` :t:`value holder` proceeds as follows:
 
 #. :dp:`fls_bync24y6gp93`
    If the :t:`drop type` implements the :std:`core::ops::Drop` :t:`trait`, then

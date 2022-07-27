@@ -20,7 +20,7 @@ Ownership
 management model of Rust.
 
 :dp:`fls_ckcnkbb6y3cq`
-An :t:`owner` is an :t:`object` that holds a :t:`value`.
+An :t:`owner` is a :t:`variable` that holds a :t:`value`.
 
 :dp:`fls_ze0u9gfylmhn`
 A :t:`value` shall have only one :t:`owner`.
@@ -33,8 +33,8 @@ Initialization
 .. rubric:: Legality Rules
 
 :dp:`fls_drfzu02bo7oe`
-:t:`Initialization` is the act of supplying an initial :t:`value` to an
-:t:`object`.
+:t:`Initialization` is the act of supplying an initial :t:`value` to a
+:t:`constant`, a :t:`static`, or a :t:`variable`.
 
 :dp:`fls_wnhci8phdu4m`
 When an :t:`object` holds a :t:`value`, the :t:`object` is considered to be
@@ -392,8 +392,8 @@ Destruction
 .. rubric:: Legality Rules
 
 :dp:`fls_e7ucq87s806d`
-:t:`Destruction` is the process of recovering resources associated with an
-:t:`object` as it goes out of scope.
+:t:`Destruction` is the process of recovering resources associated with a
+:t:`value` as it goes out of scope.
 
 .. _fls_u2mzjgiwbkz0:
 
@@ -408,10 +408,10 @@ A :t:`drop type` is a :t:`type` that implements the :std:`core::ops::Drop`
 
 :dp:`fls_4nkzidytpi6`
 A :t:`destructor` is an anonymous :t:`function` that performs the
-:t:`destruction` of an :t:`object` of a :t:`drop type`.
+:t:`destruction` of a :t:`value` of a :t:`drop type`.
 
 :dp:`fls_wzuwapjqtyyy`
-:t:`Dropping` an :t:`object` is the act of invoking the :t:`destructor` of the
+:t:`Dropping` a :t:`value` is the act of invoking the :t:`destructor` of the
 related :t:`type`. Such an object is said to be :dt:`dropped`.
 
 :dp:`fls_gfvm70iqu1l4`

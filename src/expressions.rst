@@ -3436,7 +3436,7 @@ Method Call Expressions
 
 :dp:`fls_b7i26954j1hc`
 A :t:`method call expression` is an :t:`expression` that invokes a :t:`method`
-of an :t:`object`.
+of a :t:`variable`.
 
 :dp:`fls_jx3ryre0xs88`
 A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
@@ -3515,10 +3515,10 @@ Field Access Expressions
 
 :dp:`fls_hr8qvwlhd9ts`
 A :t:`field access expression` is an :t:`expression` that accesses a :t:`field`
-of an :t:`object`.
+of a :t:`value`.
 
 :dp:`fls_s2vpn4ihenpe`
-A :t:`container operand` is an :t:`operand` that indicates the :t:`object` whose
+A :t:`container operand` is an :t:`operand` that indicates the :t:`value` whose
 :t:`field` is selected in a :t:`field access expression`.
 
 :dp:`fls_yeuayil6uxzx`

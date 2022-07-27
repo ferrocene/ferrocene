@@ -31,10 +31,6 @@ Two :t:`[value]s` :t:`overlap` when
 * :dp:`fls_eoak5mdl6ma`
   Both :t:`[value]s` are elements of the same :t:`array`.
 
-:dp:`fls_jmwhiz1qrtmy`
-An :t:`object` relates a :t:`value` to a :t:`name`, and dictates how the
-:t:`value` is initialized and modified.
-
 :dp:`fls_prxicw2q70lj`
 An :t:`object` is :t:`valid` when it has been :t:`initialized` by all reachable
 control flow paths.
@@ -62,9 +58,8 @@ Constants
 .. rubric:: Legality Rules
 
 :dp:`fls_5o5iu4j8in4l`
-A :t:`constant` is an :t:`immutable` :t:`object` that is not associated with a
-specific memory location. The address of a :t:`constant` may differ from other
-:t:`[object]s` derived from the same :t:`constant`.
+A :t:`constant` is an :t:`immutable` :t:`value` whose uses are substituted by
+the :t:`value`.
 
 :dp:`fls_3mhj0kkupwuz`
 An :t:`unnamed constant` is a :t:`constant` declared with character 0x5F (low
@@ -131,7 +126,7 @@ Statics
 .. rubric:: Legality Rules
 
 :dp:`fls_ibrmiwfypldh`
-A :t:`static` is an :t:`object` that is associated with a specific memory
+A :t:`static` is a :t:`value` that is associated with a specific memory
 location.
 
 :dp:`fls_mt94jvoot9dx`
@@ -209,8 +204,8 @@ Temporaries
 .. rubric:: Legality Rules
 
 :dp:`fls_awpw61yofckz`
-A :t:`temporary` is an anonymous :t:`object` that holds the result of some
-intermediate computation.
+A :t:`temporary` is an anonymous :t:`variable` produced by some intermediate
+computation.
 
 .. _fls_gho955gmob73:
 
@@ -220,7 +215,8 @@ Variables
 .. rubric:: Legality Rules
 
 :dp:`fls_hl5tnd9yy252`
-A :t:`variable` is an :t:`object` that is a component of a stack frame.
+A :t:`variable` is a placeholder for a :t:`value` that is allocated on the
+stack.
 
 :dp:`fls_vgi0gh5zmoiu`
 The following :t:`[construct]s` are :t:`[variable]s`:

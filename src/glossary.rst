@@ -5781,7 +5781,8 @@ variable
 ^^^^^^^^
 
 :dp:`fls_9ab12k4vwsio`
-A :dt:`variable` is a placeholder for a value that is allocated on the stack.
+A :dt:`variable` is a placeholder for a :t:`value` that is allocated on the
+stack.
 
 .. _fls_q0xplb4tbzpq:
 

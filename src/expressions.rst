@@ -375,7 +375,7 @@ The following :t:`[expression]s` are :t:`[place expression]s`:
   expression`,
 
 * :dp:`fls_ya05djl1d154`
-  :t:`[Path expression]s` that resolve to a :t:`binding` or a :t:`static`.
+  :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`variable`.
 
 :dp:`fls_4vxi1ji93dxb`
 A :t:`place expression context` is a :t:`construct` that requires a :t:`place
@@ -417,15 +417,15 @@ context]s`:
 :dp:`fls_konzgoybhfqm`
 A :t:`place expression` can be moved out of when it denotes
 
-* :dp:`fls_vk1xhvdaakh0`
-  A :t:`binding` which is not currently :t:`borrowed`, or
-
 * :dp:`fls_4bnbv7mqod57`
   A :t:`field` of a :t:`place expression` that can be moved out of and does not
   implement the :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
-  A :t:`temporary` created for a :t:`value expression`.
+  A :t:`temporary` created for a :t:`value expression`, or
+
+* :dp:`fls_vk1xhvdaakh0`
+  A :t:`variable` which is not currently :t:`borrowed`.
 
 :dp:`fls_wuqjaigxdq3r`
 After a :t:`place expression` is moved out, the memory location it represented
@@ -444,8 +444,8 @@ expression]s`:
   A :t:`dereference expression` whose :t:`type` is ``*mut T``,
 
 * :dp:`fls_s4bhrpykzmm7`
-  A :t:`dereference expression` of a :t:`field` or :t:`binding` whose :t:`type`
-  is ``&mut T``,
+  A :t:`dereference expression` of a :t:`field` or a :t:`variable` whose
+  :t:`type` is ``&mut T``,
 
 * :dp:`fls_1tq2o2huda9l`
   A :t:`dereference expression` whose :t:`type` implements the
@@ -455,12 +455,12 @@ expression]s`:
   A :t:`field access expression` where the :t:`type` of the :t:`container
   operand` is :t:`mutable`,
 
-* :dp:`fls_m0gbw9myylv2`
-  A :t:`path expression` that resolves to a :t:`mutable binding` that is not
-  currently borrowed,
-
 * :dp:`fls_ilaqmj3hc5uv`
   A :t:`path expression` that resolves to a :t:`mutable static`,
+
+* :dp:`fls_m0gbw9myylv2`
+  A :t:`path expression` that resolves to a :t:`mutable variable` that is not
+  currently borrowed,
 
 * :dp:`fls_dcm3yr3y9y0a`
   A :t:`temporary` created for a :t:`value expression`.
@@ -557,7 +557,7 @@ Path Expressions
 A :t:`path expression` is an :t:`expression` that denotes a :t:`path`.
 
 :dp:`fls_t8bdzvtnv249`
-A :t:`path expression` that resolves to a :t:`binding` or a :t:`static` is a
+A :t:`path expression` that resolves to a :t:`static` or a :t:`variable` is a
 :t:`place expression`, otherwise it is a :t:`value expression`.
 
 :dp:`fls_gz67ju6l7uhn`
@@ -691,8 +691,8 @@ The :t:`value` of an :t:`async block expression` is a :t:`future`.
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_9ghp5yet75y6`
-The :t:`evaluation` of an :t:`async block expression` produces an anonymous
-:t:`object` that captures the related :t:`future`.
+The :t:`evaluation` of an :t:`async block expression` produces a :t:`temporary`
+that captures the related :t:`future`.
 
 .. rubric:: Examples
 
@@ -878,8 +878,8 @@ The :t:`dereference` is assignable when
   The :t:`operand` is of :t:`type` ``&mut T`` or ``*mut T``, and
 
 * :dp:`fls_llzt4s3uwt95`
-  The :t:`operand` is a :t:`binding` or a possibly nested :t:`field` of a
-  :t:`binding`, or
+  The :t:`operand` is a :t:`variable` or a possibly nested :t:`field` of a
+  :t:`variable`, or
 
 * :dp:`fls_908xdt291via`
   The :t:`operand` denotes a :t:`mutable place expression`.
@@ -2106,8 +2106,8 @@ The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
 
 #. :dp:`fls_9i0ctuo099bp`
    The :t:`value` denoted by the :t:`assignee operand` is :t:`dropped`, unless
-   the :t:`assignee operand` denotes an uninitialized :t:`binding` or an
-   uninitialized :t:`field` of a :t:`binding`.
+   the :t:`assignee operand` denotes an uninitialized :t:`variable` or an
+   uninitialized :t:`field` of a :t:`variable`.
 
 #. :dp:`fls_hc01gtvlxba`
    The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
@@ -2207,7 +2207,7 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
 #. :dp:`fls_n7nuj1lvpspc`
    Each :t:`value` denoted by the :t:`assignee operand` is :t:`dropped`
    in left-to-right order, unless the :t:`assignee operand` denotes an
-   uninitialized :t:`binding` or an uninitialized field of a :t:`binding`.
+   uninitialized :t:`variable` or an uninitialized field of a :t:`variable`.
 
 #. :dp:`fls_qb8u5skn8bc4`
    The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
@@ -3436,7 +3436,7 @@ Method Call Expressions
 
 :dp:`fls_b7i26954j1hc`
 A :t:`method call expression` is an :t:`expression` that invokes a :t:`method`
-of an :t:`object`.
+of a :t:`variable`.
 
 :dp:`fls_jx3ryre0xs88`
 A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
@@ -3515,10 +3515,10 @@ Field Access Expressions
 
 :dp:`fls_hr8qvwlhd9ts`
 A :t:`field access expression` is an :t:`expression` that accesses a :t:`field`
-of an :t:`object`.
+of a :t:`value`.
 
 :dp:`fls_s2vpn4ihenpe`
-A :t:`container operand` is an :t:`operand` that indicates the :t:`object` whose
+A :t:`container operand` is an :t:`operand` that indicates the :t:`value` whose
 :t:`field` is selected in a :t:`field access expression`.
 
 :dp:`fls_yeuayil6uxzx`
@@ -4941,8 +4941,8 @@ A :t:`capturing expression` is either an :t:`async block expression` or a
 :t:`closure expression`.
 
 :dp:`fls_eca6tl7j0afx`
-A :t:`capture target` is either a :t:`binding` or a :t:`field` of a
-:t:`binding`.
+A :t:`capture target` is either a :t:`variable` or a :t:`field` of a
+:t:`variable`.
 
 :dp:`fls_e70ywb8191h`
 The :t:`capturing environment` of a :t:`capturing expression` consists of all

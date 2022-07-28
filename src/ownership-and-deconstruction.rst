@@ -20,7 +20,7 @@ Ownership
 management model of Rust.
 
 :dp:`fls_ckcnkbb6y3cq`
-An :t:`owner` is an :t:`object` that holds a :t:`value`.
+An :t:`owner` is a :t:`value holder` that holds a :t:`value`.
 
 :dp:`fls_ze0u9gfylmhn`
 A :t:`value` shall have only one :t:`owner`.
@@ -32,20 +32,24 @@ Initialization
 
 .. rubric:: Legality Rules
 
+A :t:`value holder` is either a :t:`constant`, a :t:`static`, or a
+:t:`variable`.
+
 :dp:`fls_drfzu02bo7oe`
-:t:`Initialization` is the act of supplying an initial :t:`value` to an
-:t:`object`.
+:t:`Initialization` is the act of supplying an initial :t:`value` to a
+:t:`value holder`.
 
 :dp:`fls_wnhci8phdu4m`
-When an :t:`object` holds a :t:`value`, the :t:`object` is considered to be
-:dt:`initialized`.
+When a :t:`value holder` holds a :t:`value`, the :t:`value holder` is
+considered to be :dt:`initialized`.
 
 :dp:`fls_ch2lvm50olqd`
-When an :t:`object` lacks a :t:`value` or its :t:`value` has been transferred
-:t:`by move`, the :t:`object` is considered to be :dt:`uninitialized`.
+When a :t:`value holder` lacks a :t:`value` or its :t:`value` has been
+transferred :t:`by move`, the :t:`value holder` is considered to be
+:dt:`uninitialized`.
 
 :dp:`fls_46910buiwvv9`
-An :t:`object` shall be :t:`initialized` before it is used.
+A :t:`value holder` shall be :t:`initialized` before it is used.
 
 .. rubric:: Runtime Semantics
 
@@ -392,8 +396,8 @@ Destruction
 .. rubric:: Legality Rules
 
 :dp:`fls_e7ucq87s806d`
-:t:`Destruction` is the process of recovering resources associated with an
-:t:`object` as it goes out of scope.
+:t:`Destruction` is the process of recovering resources associated with a
+:t:`value` as it goes out of scope.
 
 .. _fls_u2mzjgiwbkz0:
 
@@ -408,19 +412,19 @@ A :t:`drop type` is a :t:`type` that implements the :std:`core::ops::Drop`
 
 :dp:`fls_4nkzidytpi6`
 A :t:`destructor` is an anonymous :t:`function` that performs the
-:t:`destruction` of an :t:`object` of a :t:`drop type`.
+:t:`destruction` of a :t:`value` of a :t:`drop type`.
 
 :dp:`fls_wzuwapjqtyyy`
-:t:`Dropping` an :t:`object` is the act of invoking the :t:`destructor` of the
+:t:`Dropping` a :t:`value` is the act of invoking the :t:`destructor` of the
 related :t:`type`. Such an object is said to be :dt:`dropped`.
 
 :dp:`fls_gfvm70iqu1l4`
-An :t:`uninitialized` :t:`object` is not :t:`dropped`.
+An :t:`uninitialized` :t:`value hilder` is not :t:`dropped`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_l2xkdjeydqtx`
-:t:`Dropping` an :t:`initialized` :t:`object` proceeds as follows:
+:t:`Dropping` an :t:`initialized` :t:`value holder` proceeds as follows:
 
 #. :dp:`fls_bync24y6gp93`
    If the :t:`drop type` implements the :std:`core::ops::Drop` :t:`trait`, then

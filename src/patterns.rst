@@ -124,7 +124,7 @@ An :t:`identifier pattern` is :t:`irrefutable` when:
 
 * :dp:`fls_r2mb8v2lh3x0`
   It does not have a :t:`bound pattern` and its :t:`binding` does not resolve to
-  a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
+  a :t:`constant`, an :t:`unit struct`, or an :t:`unit enum variant`.
 
 :dp:`fls_7oioaitb075g`
 If the :t:`identifier pattern` does not have a :t:`bound pattern`, then the
@@ -734,12 +734,12 @@ is a static error if a :t:`struct pattern` cannot be interpreted.
 
 :dp:`fls_wi3yo3z5mn5w`
 A :t:`shorthand deconstructor` binds the :t:`value` of a matched :t:`field` to a
-:t:`variable`. A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
-:t:`mutable` :t:`variable`.
+:t:`binding`. A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
+:t:`mutable` :t:`binding`.
 
 :dp:`fls_g5t53fj9ghk0`
 It is a static error if a :t:`shorthand deconstructor` has only :t:`keyword`
-``ref`` or :t:`keywords` ``ref`` ``mut``, and its :t:`variable` shadows a
+``ref`` or :t:`keywords` ``ref`` ``mut``, and its :t:`binding` shadows a
 :t:`constant`.
 
 :dp:`fls_5vjoxrgeq3bg`

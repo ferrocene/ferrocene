@@ -2003,7 +2003,7 @@ function signature
 
 :dp:`fls_ndld48kg6o8d`
 A :dt:`function signature` is a unique identification of a :t:`function`
-that encompases of its :t:`[function qualifier]s`, :t:`name`, :t:`[generic
+that encompasses of its :t:`[function qualifier]s`, :t:`name`, :t:`[generic
 parameter]s`, :t:`[function parameter]s`, :t:`return type`, and :t:`where
 clause`.
 

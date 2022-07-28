@@ -20,7 +20,7 @@ Ownership
 management model of Rust.
 
 :dp:`fls_ckcnkbb6y3cq`
-An :t:`owner` is a :t:`variable` that holds a :t:`value`.
+An :t:`owner` is a :t:`value holder` that holds a :t:`value`.
 
 :dp:`fls_ze0u9gfylmhn`
 A :t:`value` shall have only one :t:`owner`.

@@ -3656,7 +3656,7 @@ owner
 ^^^^^
 
 :dp:`fls_7vwwhberexeb`
-An :dt:`owner` is a :t:`variable` that holds a :t:`value`.
+An :dt:`owner` is a :t:`value holder` that holds a :t:`value`.
 
 .. _fls_1gmetz8qtr0l:
 

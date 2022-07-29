@@ -1348,11 +1348,6 @@ Struct Pattern Matching
 :dp:`fls_evuhau2rwm8i`
 :dt:`Struct pattern matching` proceeds as follows:
 
-#. :dp:`fls_osc8aj1htgqo`
-   If the number of :t:`[subpattern]s` of the :t:`struct pattern` is greater
-   than the number of :t:`[field]s` of the context :t:`value`, then this is a
-   static error.
-
 #. :dp:`fls_bde1hpvrosui`
    If the number of :t:`[subpattern]s` of the :t:`struct pattern` is less
    than the number of :t:`[field]s` of the context :t:`value` and one of those
@@ -1385,16 +1380,6 @@ Tuple Pattern Matching
 :dp:`fls_w4xypnrnhycb`
 :dt:`Tuple pattern matching` proceeds as follows:
 
-#. :dp:`fls_9lujsrwrrvqs`
-   If the number of :t:`[subpattern]s` of the :t:`tuple pattern` is greater than
-   the number of :t:`[field]s` of the context :t:`value`, then this is a static
-   error.
-
-#. :dp:`fls_wsd605jlyzs2`
-   If the number of :t:`[subpattern]s` of the :t:`tuple pattern` is less than
-   the number of :t:`[field]s` of the context :t:`value` and one of those
-   :t:`[subpattern]s` is not a :t:`rest pattern`, then this is a static error.
-
 #. :dp:`fls_vnx1bpval595`
    For each :t:`subpattern` of the :t:`tuple pattern`
 
@@ -1415,16 +1400,6 @@ Tuple Struct Pattern Matching
 
 :dp:`fls_dexg9g9cct30`
 :dt:`Tuple struct pattern matching` proceeds as follows:
-
-#. :dp:`fls_daj9ds77r27b`
-   If the number of :t:`[subpattern]s` of the :t:`tuple struct pattern` is
-   greater than the number of :t:`[field]s` of the context :t:`value`, then this
-   is a static error.
-
-#. :dp:`fls_z8dqrgmk24n0`
-   If the number of :t:`[subpattern]s` of the :t:`tuple struct pattern` is less
-   than the number of :t:`[field]s` of the context :t:`value` and one of those
-   :t:`[subpattern]s` is not a :t:`rest pattern`, then this is a static error.
 
 #. :dp:`fls_boc7juqj69hw`
    For each :t:`subpattern` of the :t:`tuple struct pattern`

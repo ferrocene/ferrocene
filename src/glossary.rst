@@ -153,6 +153,15 @@ from two :t:`[operand]s` using arithmetic.
 :dp:`fls_in59ccg4g3we`
 See :s:`ArithmeticExpression`.
 
+.. _fls_vZ1H57x9OFSZ:
+
+arithmetic overflow
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_jbytOQvIddAl`
+:dt:`arithmetic overflow` occurs if an :t:`arithmetic expression` computes a :t:`value` of a
+:t:`scalar type` that lies outside of the range of valid :t:`[value]s` for the :t:`scalar type`.
+
 .. _fls_9aice4qbiqxf:
 
 arity
@@ -5769,7 +5778,7 @@ value holder
 ^^^^^^^^^^^^
 
 :dp:`fls_RssUVCMKCNBx`
-A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a 
+A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a
 :t:`variable`.
 
 .. _fls_a5xof9jlpc2e:

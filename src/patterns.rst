@@ -112,6 +112,9 @@ the :t:`value namespace` if it does not resolve to a :t:`constant`, an :t:`unit 
 It is a static error if the :t:`identifier pattern` consists of anything other
 than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
 
+:dp:`fls_k1yBTstX7jEE`
+It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
+
 :dp:`fls_hw26hy33guk5`
 An :t:`identifier pattern` is :t:`irrefutable` when:
 

@@ -1309,8 +1309,8 @@ The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
    ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_35oSMqAMFYWl`
-   If :t:`arithmetic overflow` occurs, the computed :t:`value` shall wrap around or the program
-   shall either panic or abort execution.
+If :t:`arithmetic overflow` occurs, the computed :t:`value` shall wrap around or the program
+shall either :t:`panic` or :t:`abort` execution.
 
 .. rubric:: Examples
 

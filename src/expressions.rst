@@ -337,8 +337,7 @@ A :t:`constant expression` is evaluated statically whenever its :t:`value` is
 needed.
 
 :dp:`fls_b46nyamfqxdu`
-The :t:`evaluation` of a :t:`constant expression` that results in arithmetic
-overflow :t:`[panic]s`.
+The :t:`evaluation` of a :t:`constant expression` that results in :t:`arithmetic overflow` :t:`[panic]s`.
 
 :dp:`fls_ms9vey2wymqp`
 It is a static error if a :t:`constant expression` either :t:`[panic]s` or
@@ -1309,11 +1308,9 @@ The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
 #. :dp:`fls_b9g0r9vc4rou`
    ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
 
-.. rubric:: Undefined Behavior
-
-:dp:`fls_8dkygceg0oo`
-It is undefined behavior for an :t:`arithmetic operation` to cause overflow with
-:t:`[value]s` of :t:`[numeric type]s`.
+:dp:`fls_35oSMqAMFYWl`
+   If :t:`arithmetic overflow` occurs, the computed :t:`value` shall wrap around or the program
+   shall either panic or abort execution.
 
 .. rubric:: Examples
 
@@ -2008,9 +2005,9 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
   numbers.
 
 * :dp:`fls_cx86k8yfjhht`
-  Produc	es :c:`f32::INFINITY` or :c:`f64::INFINITY` of the same sign as the
+  Produces :c:`f32::INFINITY` or :c:`f64::INFINITY` of the same sign as the
   :t:`value` of the :t:`operand` when the :t:`value` of the :t:`operand` causes
-  overflow.
+  :t:`arithmetic overflow`.
 
 * :dp:`fls_gzmdwibl5s4w`
   Casting an :t:`operand` of :t:`type` :c:`f32` to a :t:`target type` :c:`f64`
@@ -2027,7 +2024,7 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 
 * :dp:`fls_2etd73f8jg2n`
   Produces :c:`f32::INFINITY` of the same sign as the :t:`value` of the
-  :t:`operand` when the :t:`value` of the :t:`operand` causes overflow.
+  :t:`operand` when the :t:`value` of the :t:`operand` causes :t:`arithmetic overflow`.
 
 .. rubric:: Examples
 
@@ -2459,14 +2456,6 @@ assigned_operand, modifying_operand)`` is invoked.
 :dp:`fls_8j408kckzzud`
 For a :t:`subtraction assignment`, ``core::ops::SubAssign::sub_assign(&mut
 assigned_operand, modifying_operand)`` is invoked.
-
-.. rubric:: Undefined Behavior
-
-:dp:`fls_uywamh3nzl6p`
-It is undefined behavior for an :t:`addition assignment`, a :t:`division
-assignment`, a :t:`multiplication assignment`, a :t:`remainder assignment`, or a
-:t:`subtraction assignment` to cause overflow with :t:`[value]s` of :t:`[numeric
-type]s`.
 
 .. rubric:: Examples
 

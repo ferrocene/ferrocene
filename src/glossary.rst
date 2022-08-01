@@ -1307,17 +1307,17 @@ of syntactic transformation rules.
 :dp:`fls_1te2kfi9lt6c`
 See :s:`MacroRulesDeclaration`.
 
-.. _fls_bkkqm3z6ty47:
+.. _fls_GAlaslkO8gLG:
 
-deconstruction type
-^^^^^^^^^^^^^^^^^^^
+deconstructee
+^^^^^^^^^^^^^
 
-:dp:`fls_vsz2v8na8clu`
-The :dt:`deconstruction type` indicates the :t:`type` of the :t:`struct` being
+:dp:`fls_QsvWOdoFWtUO`
+A :dt:`deconstructee` indicates the :t:`enum variant` or :t:`type` that is being
 deconstructed by a :t:`struct pattern`.
 
-:dp:`fls_f172fp8v2bic`
-See :s:`DeconstructionType`.
+:dp:`fls_TkFjmV7AR7lp`
+See :s:`Deconstructee`.
 
 .. _fls_g9v8ubx8m1sq:
 
@@ -2494,8 +2494,8 @@ indexed deconstructor
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7eta38vw0ig`
-An :dt:`indexed deconstructor` is a :t:`construct` that matches the position of
-a :t:`field` of a :t:`tuple`.
+An :dt:`indexed deconstructor` is a :t:`construct` that matches the position of a
+:t:`tuple field`.
 
 :dp:`fls_gryv4audvann`
 See :s:`IndexedDeconstructor`.
@@ -3417,8 +3417,8 @@ named deconstructor
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_g3k1hy3j4qn9`
-A :dt:`named deconstructor` is a :t:`construct` that matches the :t:`name` of a
-:t:`field` of a :t:`struct`.
+A :dt:`named deconstructor` is a :t:`construct` that matches the :t:`name` of
+a :t:`field`.
 
 :dp:`fls_ujreg07979g8`
 See :s:`NamedDeconstructor`.
@@ -4189,8 +4189,9 @@ record struct pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7njznxhmmw`
-A :dt:`record struct pattern` is a :t:`struct pattern` that matches a :t:`record
-struct`.
+A :dt:`record struct pattern` is a :t:`pattern` that matches a :t:`record enum
+variant`, a :t:`record struct`, a :t:`tuple enum variant`, a :t:`tuple struct`,
+a :t:`union`, a :t:`unit enum variant`, or a :t:`unit struct`.
 
 :dp:`fls_viwieu1p3hds`
 See :s:`RecordStructPattern`.
@@ -4588,7 +4589,8 @@ shorthand deconstructor
 
 :dp:`fls_22yxrde244w8`
 A :dt:`shorthand deconstructor` is a :t:`construct` that matches the :t:`name`
-of a :t:`field` of a :t:`struct`.
+of a :t:`field` and binds the :t:`value` of the matched :t:`field` to a
+:t:`binding`.
 
 :dp:`fls_rlo4237bgbwt`
 See :s:`ShorthandDeconstructor`.
@@ -4842,7 +4844,8 @@ struct pattern
 ^^^^^^^^^^^^^^
 
 :dp:`fls_xbtoiwegp8gu`
-A :dt:`struct pattern` is a :t:`pattern` that matches a :t:`struct`.
+A :dt:`struct pattern` is a :t:`pattern` that matches an :t:`enum`, a
+:t:`struct`, or a :t:`union`.
 
 :dp:`fls_pn8e50ep2fln`
 See :s:`StructPattern`.
@@ -5240,8 +5243,8 @@ tuple struct pattern
 ^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_gu1mfurivnfz`
-A :dt:`tuple struct pattern` is a :t:`struct pattern` that matches :t:`[enum
-variant]s` and :t:`[tuple struct]s`.
+A :dt:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
+variant` or a :t:`tuple struct`.
 
 :dp:`fls_3jx5683mdm10`
 See :s:`TupleStructPattern`.
@@ -5513,17 +5516,6 @@ union field
 :dp:`fls_6t2fbnlndz8y`
 A :dt:`union field` is a :t:`field` of a :t:`union type`.
 
-.. _fls_e43y70uo2lzc:
-
-union pattern
-^^^^^^^^^^^^^
-
-:dp:`fls_kn1e52a5orcr`
-A :dt:`union pattern` is a :t:`record struct pattern` that matches a :t:`union`.
-
-:dp:`fls_gsdp2mdfb34v`
-See :s:`RecordStructPattern`.
-
 .. _fls_nrgyga1rztb3:
 
 union type
@@ -5554,18 +5546,6 @@ A :dt:`unit struct constructor` is a :t:`struct expression` that constructs a
 
 :dp:`fls_7hd6xdukhw5h`
 See :s:`UnitStructConstructor`.
-
-.. _fls_5pdqeutotyq8:
-
-unit struct pattern
-^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_9bspp5qb4tt5`
-A :dt:`unit struct pattern` is a :t:`struct pattern` that matches a :t:`unit
-struct`.
-
-:dp:`fls_j6f2b0s2e82p`
-See :s:`UnitStructPattern`.
 
 .. _fls_wmn9mcqae88q:
 

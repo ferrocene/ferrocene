@@ -849,7 +849,7 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Copy`
   :std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_3c4g9njja5s5`
-A :t:`closure type` implicitly implements the :std:`core::marker::Clone`
+A :t:`closure type` implicitly implements the :std:`core::clone::Clone`
 :t:`trait` if
 
 * :dp:`fls_yr55fbspw7s9`
@@ -858,7 +858,7 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Clone`
 
 * :dp:`fls_pt65037r6hjr`
   The :t:`[type]s` of all :t:`[captured variable]s` implement the
-  :std:`core::marker::Clone` :t:`trait`.
+  :std:`core::clone::Clone` :t:`trait`.
 
 :dp:`fls_2nuhy0ujgq18`
 A :t:`closure type` implicitly implements the :std:`core::marker::Send`
@@ -904,7 +904,7 @@ A :t:`function item type` is :t:`coercible` to a :t:`function pointer type`.
 :dp:`fls_1941wid94hlg`
 A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the
 :std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`, the
-:std:`core::marker::Copy` :t:`trait`, the :std:`core::marker::Clone` :t:`trait`,
+:std:`core::marker::Copy` :t:`trait`, the :std:`core::clone::Clone` :t:`trait`,
 the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync`
 :t:`trait`.
 

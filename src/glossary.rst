@@ -4141,7 +4141,7 @@ record enum variant
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_NWyvPQmOIjo2`
-A :dt:`record enum variant` is a :t:`variant` with named :t:`[field]s` of an :t:`enum type`.
+A :dt:`record enum variant` is an :t:`enum variant` with named :t:`[field]s`.
 
 .. _fls_jdd6h8pdp30x:
 
@@ -5142,7 +5142,7 @@ tuple enum variant
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_eduQhUYBEkVx`
-A :dt:`tuple enum variant` is a :t:`variant` with anonymous :t:`[field]s` of an :t:`enum type`.
+A :dt:`tuple enum variant` is an :t:`enum variant` with anonymous :t:`[field]s`.
 
 .. _fls_udl6ujjg1jae:
 
@@ -5494,7 +5494,7 @@ unit enum variant
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_y6fI5L3Tghie`
-A :dt:`unit enum variant` is a :t:`variant` without any :t:`[field]s` of an :t:`enum type`.
+A :dt:`unit enum variant` is an :t:`enum variant` without any :t:`[field]s`.
 
 .. _fls_71xvazpwi8p0:
 

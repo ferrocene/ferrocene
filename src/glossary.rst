@@ -1304,7 +1304,7 @@ deconstructee
 ^^^^^^^^^^^^^
 
 :dp:`fls_QsvWOdoFWtUO`
-A :t:`deconstructee` indicates the :t:`enum variant` or :t:`type` that is being
+A :dt:`deconstructee` indicates the :t:`enum variant` or :t:`type` that is being
 deconstructed by a :t:`struct pattern`.
 
 :dp:`fls_TkFjmV7AR7lp`
@@ -2485,7 +2485,7 @@ indexed deconstructor
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7eta38vw0ig`
-An :t:`indexed deconstructor` is a :t:`construct` that matches the position of a
+An :dt:`indexed deconstructor` is a :t:`construct` that matches the position of a
 :t:`tuple field`.
 
 :dp:`fls_gryv4audvann`
@@ -3408,7 +3408,7 @@ named deconstructor
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_g3k1hy3j4qn9`
-A :t:`named deconstructor` is a :t:`construct` that matches the :t:`name` of
+A :dt:`named deconstructor` is a :t:`construct` that matches the :t:`name` of
 a :t:`field`.
 
 :dp:`fls_ujreg07979g8`
@@ -4172,7 +4172,7 @@ record struct pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7njznxhmmw`
-A :t:`record struct pattern` is a :t:`pattern` that matches a :t:`record enum
+A :dt:`record struct pattern` is a :t:`pattern` that matches a :t:`record enum
 variant`, a :t:`record struct`, a :t:`tuple enum variant`, a :t:`tuple struct`,
 a :t:`union`, a :t:`unit enum variant`, or a :t:`unit struct`.
 
@@ -4571,7 +4571,7 @@ shorthand deconstructor
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_22yxrde244w8`
-A :t:`shorthand deconstructor` is a :t:`construct` that matches the :t:`name`
+A :dt:`shorthand deconstructor` is a :t:`construct` that matches the :t:`name`
 of a :t:`field` and binds the :t:`value` of the matched :t:`field` to a
 :t:`binding`.
 
@@ -4827,7 +4827,7 @@ struct pattern
 ^^^^^^^^^^^^^^
 
 :dp:`fls_xbtoiwegp8gu`
-A :t:`struct pattern` is a :t:`pattern` that matches an :t:`enum`, a
+A :dt:`struct pattern` is a :t:`pattern` that matches an :t:`enum`, a
 :t:`struct`, or a :t:`union`.
 
 :dp:`fls_pn8e50ep2fln`
@@ -5218,7 +5218,7 @@ tuple struct pattern
 ^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_gu1mfurivnfz`
-A :t:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
+A :dt:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
 variant` or a :t:`tuple struct`.
 
 :dp:`fls_3jx5683mdm10`

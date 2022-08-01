@@ -1298,18 +1298,6 @@ of syntactic transformation rules.
 :dp:`fls_1te2kfi9lt6c`
 See :s:`MacroRulesDeclaration`.
 
-.. _fls_bkkqm3z6ty47:
-
-deconstruction type
-^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_vsz2v8na8clu`
-The :dt:`deconstruction type` indicates the :t:`type` of the :t:`struct` being
-deconstructed by a :t:`struct pattern`.
-
-:dp:`fls_f172fp8v2bic`
-See :s:`DeconstructionType`.
-
 .. _fls_GAlaslkO8gLG:
 
 deconstructee
@@ -5492,17 +5480,6 @@ union field
 :dp:`fls_6t2fbnlndz8y`
 A :dt:`union field` is a :t:`field` of a :t:`union type`.
 
-.. _fls_e43y70uo2lzc:
-
-union pattern
-^^^^^^^^^^^^^
-
-:dp:`fls_kn1e52a5orcr`
-A :dt:`union pattern` is a :t:`record struct pattern` that matches a :t:`union`.
-
-:dp:`fls_gsdp2mdfb34v`
-See :s:`RecordStructPattern`.
-
 .. _fls_nrgyga1rztb3:
 
 union type
@@ -5533,18 +5510,6 @@ A :dt:`unit struct constructor` is a :t:`struct expression` that constructs a
 
 :dp:`fls_7hd6xdukhw5h`
 See :s:`UnitStructConstructor`.
-
-.. _fls_5pdqeutotyq8:
-
-unit struct pattern
-^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_9bspp5qb4tt5`
-A :dt:`unit struct pattern` is a :t:`struct pattern` that matches a :t:`unit
-struct`.
-
-:dp:`fls_j6f2b0s2e82p`
-See :s:`UnitStructPattern`.
 
 .. _fls_wmn9mcqae88q:
 

@@ -4144,6 +4144,14 @@ A :dt:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
 :dp:`fls_4rme1x6romeg`
 See :s:`ReceiverOperand`.
 
+.. _fls_nG6ikjLsCW7m:
+
+record enum variant
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_NWyvPQmOIjo2`
+A :dt:`record enum variant` is an :t:`enum variant` with named :t:`[field]s`.
+
 .. _fls_jdd6h8pdp30x:
 
 record struct
@@ -5137,6 +5145,14 @@ tuple
 :dp:`fls_yhcfqz6p0059`
 A :dt:`tuple` is a :t:`value` of a :t:`tuple type`.
 
+.. _fls_1XEHpJOK9DKB:
+
+tuple enum variant
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_eduQhUYBEkVx`
+A :dt:`tuple enum variant` is an :t:`enum variant` with anonymous :t:`[field]s`.
+
 .. _fls_udl6ujjg1jae:
 
 tuple expression
@@ -5480,6 +5496,14 @@ union constructor
 :dp:`fls_2qa7a5rcjn42`
 A :dt:`union constructor` is a :t:`struct expression` that constructs a
 :t:`union`.
+
+.. _fls_Rwtgq904NoaL:
+
+unit enum variant
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_y6fI5L3Tghie`
+A :dt:`unit enum variant` is an :t:`enum variant` without any :t:`[field]s`.
 
 .. _fls_71xvazpwi8p0:
 

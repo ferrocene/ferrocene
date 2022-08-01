@@ -1310,6 +1310,18 @@ deconstructed by a :t:`struct pattern`.
 :dp:`fls_f172fp8v2bic`
 See :s:`DeconstructionType`.
 
+.. _fls_GAlaslkO8gLG:
+
+deconstructee
+^^^^^^^^^^^^^
+
+:dp:`fls_QsvWOdoFWtUO`
+A :t:`deconstructee` indicates the :t:`enum variant` or :t:`type` that is being
+deconstructed by a :t:`struct pattern`.
+
+:dp:`fls_TkFjmV7AR7lp`
+See :s:`Deconstructee`.
+
 .. _fls_g9v8ubx8m1sq:
 
 default representation
@@ -5769,7 +5781,7 @@ value holder
 ^^^^^^^^^^^^
 
 :dp:`fls_RssUVCMKCNBx`
-A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a 
+A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a
 :t:`variable`.
 
 .. _fls_a5xof9jlpc2e:

@@ -711,16 +711,16 @@ The :t:`deconstructee` of a :t:`record struct pattern` shall resolve to an
 
 :dp:`fls_mnh35ehva8tx`
 An :t:`indexed deconstructor` is a :t:`construct` that matches the position of a
-tuple :t:`field`.
+:t:`tuple field`.
 
 :dp:`fls_p2rjnlbvifaa`
-An :t:`index deconstructor` matches a :t:`field` of the :t:`deconstructee`
+An :t:`indexed deconstructor` matches a :t:`field` of the :t:`deconstructee`
 when its :t:`tuple index` and the position of the :t:`field` in the
-:t:`deconstructee` are the same. Such an :t:`index deconstructor` is a
-:dt:`matched index deconstructor`.
+:t:`deconstructee` are the same. Such an :t:`indexed deconstructor` is a
+:dt:`matched indexed deconstructor`.
 
 :dp:`fls_23be2x50at14`
-The :t:`type` of a :t:`matched index deconstructor` and the :t:`type` of the
+The :t:`type` of a :t:`matched indexed deconstructor` and the :t:`type` of the
 matched :t:`field` shall be :t:`unifiable`.
 
 :dp:`fls_46u4ddj0yf93`
@@ -792,7 +792,7 @@ variant` or a :t:`tuple struct`, then
   shall either:
 
   * :dp:`fls_1thgpx95lfg5`
-    Contain at most one :t:`matched index deconstructor`, or
+    Contain at most one :t:`matched indexed deconstructor`, or
 
   * :dp:`fls_rpo1wimbmzhc`
     Have exactly one ``RecordStructRestPattern.``
@@ -806,8 +806,10 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union`, then
 
 * :dp:`fls_pfz8xlwezbw1`
   The :s:`RecordStructPatternContent` of the :t:`record struct
-  pattern` shall contain exactly one :s:`FieldDeconstructor` and no
-  :s:`RecordStructRestPattern`.
+  pattern` shall contain exactly one :s:`FieldDeconstructor`.
+
+* :dp:`fls_XFKBJZe6k1o2`
+  The :t:`record struct pattern`` shall not contain a :s:`RecordStructRestPattern`.
 
 * :dp:`fls_mu166csowj71`
   For the single :t:`field` of the :t:`deconstructee`, the :t:`record struct

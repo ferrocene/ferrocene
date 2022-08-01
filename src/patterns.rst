@@ -739,7 +739,10 @@ matched :t:`field` shall be :t:`unifiable`.
 :dp:`fls_9wfizujx0szd`
 A :t:`shorthand deconstructor` is a :t:`construct` that matches the :t:`name`
 of a :t:`field` and binds the :t:`value` of the matched :t:`field` to a
-:t:`binding`. A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
+:t:`binding`.
+
+:dp:`fls_jTh9Hur0qsIb`
+A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
 :t:`mutable binding`.
 
 :dp:`fls_as54u97xis8z`

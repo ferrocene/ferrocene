@@ -67,6 +67,8 @@ A :dt:`whitespace character` is one of the following characters:
 A :t:`whitespace string` is a string that consists of one or more
 :t:`[whitespace character]s`.
 
+An :ds:`AsciiCharacter` is any :t:`Unicode` character in the range 0x00 - 0x7F, both inclusive.
+
 .. rubric:: Legality Rules
 
 :dp:`fls_2brw13n9ldgy`
@@ -484,7 +486,7 @@ not appear in a :t:`pure identifier`.
 
 :dp:`fls_irwcldiotei2`
 A :t:`pure identifier` shall be restricted to characters in category
-:t:`Ascii` in the following contexts:
+:s:`AsciiCharacter` in the following contexts:
 
 * :dp:`fls_g72rxs2z5960`
   :t:`[Crate import]s`,
@@ -573,7 +575,7 @@ Byte Literals
      | $$\x$$ OctalDigit HexadecimalDigit
 
 :dp:`fls_3hpzf12h60u4`
-A :ds:`ByteCharacter` is any character in category :t:`Ascii` character
+A :ds:`ByteCharacter` is any character in category :s:`AsciiCharacter`
 except characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
 return), 0x27 (apostrophe), and 0x5C (reverse solidus).
 
@@ -628,7 +630,7 @@ Simple Byte String Literals
      | StringContinuation
 
 :dp:`fls_3dcqhuosqb84`
-A :ds:`SimpleByteStringCharacter` is any character in category :t:`Ascii` character
+A :ds:`SimpleByteStringCharacter` is any character in category :s:`AsciiCharacter`
 except characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C
 (reverse solidus).
 
@@ -636,7 +638,7 @@ except characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C
 
 :dp:`fls_moe3zfx39ox2`
 A :t:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
-:t:`Ascii` characters.
+:s:`AsciiCharacter`.
 
 :dp:`fls_vffxb6arj9jf`
 The :t:`type` of a :t:`simple byte string literal` of size ``N`` is ``&'static [u8;
@@ -983,10 +985,6 @@ Character Literals
 
    UnicodeEscape ::=
        $$\u{$$ (HexadecimalDigit $$_$$*)1-6 $$}$$
-
-:dp:`fls_5vi0uc2oshd`
-An :ds:`AsciiControlCharacter` is any character in category :t:`Ascii` character
-whose General Category is defined to be "Control".
 
 :dp:`fls_j9q9ton57rvl`
 A :ds:`CharacterLiteralCharacter` is any :t:`Unicode` character except

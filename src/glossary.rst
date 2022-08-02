@@ -237,14 +237,6 @@ of elements.
 :dp:`fls_wre34hexlv6s`
 See :s:`ArrayTypeSpecification`.
 
-.. _fls_zxxBvpJU10eb:
-
-Ascii
-^^^^^
-
-:dp:`fls_CzAjt4nOqUnE`
-:dt:`Ascii` is the colloquial name for the American Standard Code for Information Interchange.
-
 .. _fls_l78iam7w8w38:
 
 assigned operand
@@ -4632,7 +4624,7 @@ simple byte string literal
 
 :dp:`fls_XpbU4Up0Aza8`
 A :dt:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
-:t:`Ascii` characters.
+:s:`AsciiCharacter`.
 
 :dp:`fls_OfI70zK68TnQ`
 See ``SimpleByteStringLiteral.``

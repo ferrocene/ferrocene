@@ -410,8 +410,7 @@ The following is a selective import. The imported functions are
 
 .. code-block:: rust
 
-   use outer_module::inner_module
-       {crate_visible_function, visible_function}
+   use outer_module::inner_module::{crate_visible_function, visible_function}
 
 .. _fls_izl8iuhoz9e0:
 

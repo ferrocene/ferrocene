@@ -851,7 +851,8 @@ call expression
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_a9ap0tyk2eou`
-A :dt:`call expression` is an :t:`expression` that invokes a :t:`function`.
+A :dt:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
+:t:`tuple struct` or :t:`tuple enum variant`.
 
 :dp:`fls_aibti9uqrmmd`
 See :s:`CallExpression`.
@@ -862,8 +863,8 @@ call operand
 ^^^^^^^^^^^^
 
 :dp:`fls_cqnko94y4xbs`
-A :dt:`call operand` is the :t:`function` being invoked by a :t:`call
-expression`.
+A :dt:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
+:t:`tuple enum variant` being constructed by a :t:`call expression`.
 
 :dp:`fls_w6wu4wi6srjj`
 See :s:`CallOperand`.
@@ -875,8 +876,9 @@ callee type
 
 :dp:`fls_o21myf6wnnn6`
 A :dt:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
-:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
+:std:`core::ops::FnOnce` :t:`[trait]s`.
 
 .. _fls_ubzcpmqig48m:
 

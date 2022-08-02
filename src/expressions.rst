@@ -3108,20 +3108,22 @@ Call Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_fvgfx17ossd9`
-A :t:`call expression` is an :t:`expression` that invokes a :t:`function`.
+A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
+:t:`tuple struct` or :t:`tuple enum variant`.
 
 :dp:`fls_jvz5z3eqxb39`
 An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_7ql1c71eidg8`
-A :t:`call operand` is the :t:`function` being invoked by a :t:`call
-expression`.
+A :t:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
+:t:`tuple enum variant` being constructed by a :t:`call expression`.
 
 :dp:`fls_4t6imtiw6kzt`
 A :t:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
-:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
+:std:`core::ops::FnOnce` :t:`[trait]s`.
 
 :dp:`fls_aafrvlmiwfon`
 The :t:`call operand` is subject to :t:`auto dereferencing` until a :t:`callee
@@ -3133,7 +3135,9 @@ dereferencing` adjustments.
 
 :dp:`fls_bu6i3mcvnbin`
 The :t:`type` of a :t:`call expression` is the :t:`return type` of the
-:t:`invoked function` or :t:`associated type` :std:`core::ops::FnOnce::Output`.
+:t:`invoked function`, the :t:`type` of the :t:`tuple struct` or
+the :t:`tuple enum variant` being constructed, or :t:`associated type`
+:std:`core::ops::FnOnce::Output`.
 
 :dp:`fls_8ljrgdept7s8`
 A :t:`call expression` whose :t:`callee type` is either an :t:`external function
@@ -3147,6 +3151,11 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   If the :t:`callee type` is a :t:`function item type` or a :t:`function
   pointer type`, then the :t:`value` is the result of invoking the corresponding
   :t:`function` with the :t:`[argument operand]s`.
+
+* :dp:`fls_RZjFs9koNOk8`
+  If the :t:`callee type` is a :t:`tuple struct type` or a :t:`tuple enum variant`,
+  then the :t:`value` is the result of constructing the :t:`tuple struct` or :t:`tuple enum variant`
+  with the :t:`[argument operand]s`.
 
 * :dp:`fls_s3q3sej1hgho`
   If the :t:`callee type` implements the :std:`core::ops::Fn`

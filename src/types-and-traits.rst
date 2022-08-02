@@ -1585,7 +1585,7 @@ its recursion.
 
 .. code-block:: rust
 
-   struct List<T> {
+   enum List<T> {
        Nil,
        Cons(T, Box<List<T>>)
    }

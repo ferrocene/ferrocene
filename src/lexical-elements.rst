@@ -60,6 +60,9 @@ A :dt:`whitespace character` is one of the following characters:
 * :dp:`fls_8mxmrxvhn3by`
   0x200F (right-to-left mark)
 
+* :dp:`fls_bc6D1ATvmJJr`
+  0x2028 (line separator)
+
 * :dp:`fls_zfs15iel08y0`
   0x2029 (paragraph separator)
 

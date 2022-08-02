@@ -237,6 +237,14 @@ of elements.
 :dp:`fls_wre34hexlv6s`
 See :s:`ArrayTypeSpecification`.
 
+.. _fls_zxxBvpJU10eb:
+
+Ascii
+^^^^^
+
+:dp:`fls_CzAjt4nOqUnE`
+:dt:`Ascii` is the colloquial name for the American Standard Code for Information Interchange.
+
 .. _fls_l78iam7w8w38:
 
 assigned operand
@@ -820,7 +828,7 @@ byte string literal
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_my4r1l3ilyt2`
-A :dt:`byte string literal` is a :t:`byte literal` that consists of multiple
+A :dt:`byte string literal` is a :t:`literal` that consists of multiple
 byte characters.
 
 :dp:`fls_4yhag19z61bl`
@@ -4086,7 +4094,7 @@ raw byte string literal
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_8v5k3wemy4tl`
-A :dt:`raw byte string literal` is a :t:`simple byte literal` that does not
+A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does not
 recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
@@ -4616,15 +4624,18 @@ signed integer type
 A :dt:`signed integer type` is an :t:`integer type` whose :t:`[value]s` denote
 negative whole numbers, zero, and positive whole numbers.
 
-.. _fls_rtlvndojae30:
 
-simple byte literal
-^^^^^^^^^^^^^^^^^^^
+.. _fls_4GvXiDfcPlRD:
 
-:dp:`fls_5sx43csoavvp`
-\ | A :dt:`simple byte literal` is a :t:`byte literal` that consists of exactly
-one byte character.
-| See ``SimpleByteLiteral.``
+simple byte string literal
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_XpbU4Up0Aza8`
+A :dt:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
+:t:`Ascii` characters.
+
+:dp:`fls_OfI70zK68TnQ`
+See ``SimpleByteStringLiteral.``
 
 .. _fls_6mcm7xdcyn40:
 

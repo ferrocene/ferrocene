@@ -484,7 +484,7 @@ not appear in a :t:`pure identifier`.
 
 :dp:`fls_irwcldiotei2`
 A :t:`pure identifier` shall be restricted to characters in category
-:s:`AsciiCharacter` in the following contexts:
+:t:`Ascii` in the following contexts:
 
 * :dp:`fls_g72rxs2z5960`
   :t:`[Crate import]s`,
@@ -536,6 +536,7 @@ Literals
    Literal ::=
        BooleanLiteral
      | ByteLiteral
+     | ByteStringLiteral
      | CharacterLiteral
      | NumericLiteral
      | StringLiteral
@@ -555,33 +556,13 @@ Byte Literals
 .. syntax::
 
    ByteLiteral ::=
-       ByteStringLiteral
-     | RawByteStringLiteral
-     | SimpleByteLiteral
+       $$b'$$ ByteContent $$'$$
 
-.. rubric:: Legality Rules
-
-:dp:`fls_q0qwr83frszx`
-A :t:`byte literal` is a :t:`literal` that denotes a fixed byte :t:`value`.
-
-.. _fls_gve6jak6wrrp:
-
-Simple Byte Literals
-^^^^^^^^^^^^^^^^^^^^
-
-.. rubric:: Syntax
-
-.. syntax::
-
-   SimpleByteLiteral ::=
-       $$b'$$ SimpleByteContent $$'$$
-
-   SimpleByteContent ::=
+   ByteContent ::=
        ByteEscape
-     | SimpleByteCharacter
+     | ByteCharacter
 
    ByteEscape ::=
-       AsciiControlEscape
      | $$\0$$
      | $$\"$$
      | $$\'$$
@@ -589,23 +570,20 @@ Simple Byte Literals
      | $$\n$$
      | $$\r$$
      | $$\\$$
-
-   AsciiControlEscape ::=
-       $$\x$$ AsciiControlCharacter
+     | $$\x$$ OctalDigit HexadecimalDigit
 
 :dp:`fls_3hpzf12h60u4`
-A :ds:`SimpleByteCharacter` is any character in category :s:`AsciiCharacter`
+A :ds:`ByteCharacter` is any character in category :t:`Ascii` character
 except characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
 return), 0x27 (apostrophe), and 0x5C (reverse solidus).
 
 .. rubric:: Legality Rules
 
-:dp:`fls_i67zy734o6e3`
-A :t:`simple byte literal` is a :t:`byte literal` that consists of exactly one
-byte character.
+:dp:`fls_q0qwr83frszx`
+A :t:`byte literal` is a :t:`literal` that denotes a fixed byte :t:`value`.
 
 :dp:`fls_fggytrv5jvw0`
-The :t:`type` of a :t:`simple byte literal` is :c:`u8`.
+The :t:`type` of a :t:`byte literal` is :c:`u8`.
 
 .. rubric:: Examples
 
@@ -618,33 +596,50 @@ The :t:`type` of a :t:`simple byte literal` is :c:`u8`.
 .. _fls_fqaffyrjob7v:
 
 Byte String Literals
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+   ByteStringLiteral ::=
+       RawByteStringLiteral
+       | SimpleByteStringLiteral
+
+.. rubric:: Legality Rules
+
+:dp:`fls_t63zfv5JdUhj`
+A :t:`byte string literal` is a :t:`literal` that consists of multiple byte characters.
+
+.. _fls_msbaxfC09VkK:
+
+Simple Byte String Literals
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Syntax
 
 .. syntax::
 
-   ByteStringLiteral ::=
-       $$b"$$ ByteStringContent* $$"$$
+   SimpleByteStringLiteral ::=
+       $$b"$$ SimpleByteStringContent* $$"$$
 
-   ByteStringContent ::=
+   SimpleByteStringContent ::=
        ByteEscape
-     | ByteStringCharacter
+     | SimpleByteStringCharacter
      | StringContinuation
 
 :dp:`fls_3dcqhuosqb84`
-A :ds:`ByteStringCharacter` is any character in category :s:`AsciiCharacter`
+A :ds:`SimpleByteStringCharacter` is any character in category :t:`Ascii` character
 except characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C
 (reverse solidus).
 
 .. rubric:: Legality Rules
 
 :dp:`fls_moe3zfx39ox2`
-A :t:`byte string literal` is a :t:`byte literal` that consists of multiple
-byte characters.
+A :t:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
+:t:`Ascii` characters.
 
 :dp:`fls_vffxb6arj9jf`
-The :t:`type` of a :t:`byte string literal` of size ``N`` is ``&'static [u8;
+The :t:`type` of a :t:`simple byte string literal` of size ``N`` is ``&'static [u8;
 N]``.
 
 .. rubric:: Examples
@@ -670,18 +665,15 @@ Raw Byte String Literals
 
    RawByteStringContent ::=
        NestedRawByteStringContent
-     | RawByteStringCharacter
+     | $$"$$ AsciiCharacter* $$"$$
 
    NestedRawByteStringContent ::=
        $$#$$ RawByteStringContent $$#$$
 
-   RawByteStringCharacter ::=
-       $$"$$ AsciiCharacter* $$"$$
-
 .. rubric:: Legality Rules
 
 :dp:`fls_yyw7nv651580`
-A :t:`raw byte string literal` is a :t:`simple byte literal` that does not
+A :t:`raw byte string literal` is a :t:`simple byte string literal` that does not
 recognize :t:`[escaped character]s`.
 
 :dp:`fls_5ybq0euwya42`
@@ -976,10 +968,10 @@ Character Literals
 
    CharacterContent ::=
        AsciiEscape
+     | UnicodeEscape
      | CharacterLiteralCharacter
 
    AsciiEscape ::=
-     | UnicodeEscape
      | $$\0$$
      | $$\"$$
      | $$\'$$
@@ -987,14 +979,13 @@ Character Literals
      | $$\n$$
      | $$\r$$
      | $$\\$$
+     | $$\x$$ OctalDigit HexadecimalDigit
+
    UnicodeEscape ::=
        $$\u{$$ (HexadecimalDigit $$_$$*)1-6 $$}$$
 
-   AsciiCharacter ::=
-       [$$\u{00}$$-$$\u{7F}$$]
-
 :dp:`fls_5vi0uc2oshd`
-An :ds:`AsciiControlCharacter` is any character in category :s:`AsciiCharacter`
+An :ds:`AsciiControlCharacter` is any character in category :t:`Ascii` character
 whose General Category is defined to be "Control".
 
 :dp:`fls_j9q9ton57rvl`
@@ -1018,7 +1009,7 @@ The :t:`type` of a :t:`character literal` is :c:`char`.
    'a'
    '\t'
    '\x1b'
-   '\u1F30'
+   '\u{1F30}'
 
 .. _fls_boyhlu5srp6u:
 
@@ -1052,6 +1043,7 @@ Simple String Literals
 
    SimpleStringContent ::=
        AsciiEscape
+     | UnicodeEscape
      | SimpleStringCharacter
      | StringContinuation
 
@@ -1100,13 +1092,10 @@ Raw String Literals
 
    RawStringContent ::=
        NestedRawStringContent
-     | RawStringCharacter
+     | $$"$$ ~[$$\r$$]* $$"$$
 
    NestedRawStringContent ::=
        $$#$$ RawStringContent $$#$$
-
-   RawStringCharacter ::=
-       $$"$$ ~[$$\r$$]* $$"$$
 
 .. rubric:: Legality Rules
 

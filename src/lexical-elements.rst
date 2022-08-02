@@ -605,12 +605,12 @@ Byte String Literals
 .. syntax::
    ByteStringLiteral ::=
        RawByteStringLiteral
-       | SimpleByteStringLiteral
+     | SimpleByteStringLiteral
 
 .. rubric:: Legality Rules
 
 :dp:`fls_t63zfv5JdUhj`
-A :t:`byte string literal` is a :t:`literal` that consists of multiple byte characters.
+A :t:`byte string literal` is a :t:`literal` that consists of multiple `:s:`AsciiCharacter`s.
 
 .. _fls_msbaxfC09VkK:
 
@@ -638,7 +638,7 @@ except characters 0x0D (carriage return), 0x22 (quotation mark), and 0x5C
 
 :dp:`fls_moe3zfx39ox2`
 A :t:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
-:s:`AsciiCharacter`.
+:s:`AsciiCharacter`s.
 
 :dp:`fls_vffxb6arj9jf`
 The :t:`type` of a :t:`simple byte string literal` of size ``N`` is ``&'static [u8;
@@ -970,8 +970,8 @@ Character Literals
 
    CharacterContent ::=
        AsciiEscape
-     | UnicodeEscape
      | CharacterLiteralCharacter
+     | UnicodeEscape
 
    AsciiEscape ::=
      | $$\0$$
@@ -1041,9 +1041,9 @@ Simple String Literals
 
    SimpleStringContent ::=
        AsciiEscape
-     | UnicodeEscape
      | SimpleStringCharacter
      | StringContinuation
+     | UnicodeEscape
 
 :dp:`fls_1pdzwkt5txfj`
 A :ds:`SimpleStringCharacter` is any :t:`Unicode` character except characters

@@ -30,13 +30,13 @@ Expressions
    ExpressionWithoutBlock ::=
        OuterAttributeOrDoc* (
            ArrayExpression
-         | Array
          | AwaitExpression
          | BreakExpression
          | CallExpression
          | ClosureExpression
          | ContinueExpression
          | FieldAccessExpression
+         | IndexExpression
          | LiteralExpression
          | MethodCallExpression
          | MacroInvocation
@@ -2698,17 +2698,19 @@ Indexing Expressions
 
 .. rubric:: Legality Rules
 
+:dp:`fls_X9kdEAPTqsAe`
+A :t:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
+
 :dp:`fls_42ijvuqqqlvh`
 An :t:`index expression` is an :t:`expression` that indexes into a :t:`value`
-of a :t:`type`.
+of an :t:`indexable type`.
 
 :dp:`fls_pc0c22asgzvw`
-An :t:`indexed operand` is an :t:`operand` which indicates the :t:`value` of a :t:`type` implementing
-:std:`core::ops::Index` being indexed into by an :t:`index expression`.
+An :t:`indexed operand` is an :t:`operand` which indicates the :t:`value`
+being indexed into by an :t:`index expression`.
 
 :dp:`fls_ff3sgpldn52o`
-An :t:`indexing operand` is an :t:`operand` which specifies the index for the :t:`indexed operand`
-being indexed into by an :t:`index expression`.
+An :t:`indexing operand` is an :t:`operand` which specifies the index of an :t:`index expression`.
 
 :dp:`fls_w96p9oyv5mqt`
 An :t:`index expression` is a :t:`constant expression` if the :t:`indexing
@@ -4828,9 +4830,9 @@ as follows:
      -
      - left-to-right
    * - :dp:`fls_k3ohh8k888c`
-     - :t:`index expression`
+     - :t:`Call expression`
 
-       :t:`Call expression`
+       :t:`Index expression`
      -
      - none
    * - :dp:`fls_41n6z85h1z47`

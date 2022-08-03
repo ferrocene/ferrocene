@@ -820,7 +820,7 @@ byte string literal
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_my4r1l3ilyt2`
-A :dt:`byte string literal` is a :t:`literal` that consists of multiple :s:`AsciiCharacter`s.
+A :dt:`byte string literal` is a :t:`literal` that consists of multiple :s:`[AsciiCharacter]s`.
 
 :dp:`fls_4yhag19z61bl`
 See :s:`ByteStringLiteral`.
@@ -4623,7 +4623,7 @@ simple byte string literal
 
 :dp:`fls_XpbU4Up0Aza8`
 A :dt:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
-:s:`AsciiCharacter`.
+:s:`[AsciiCharacter]s`.
 
 :dp:`fls_OfI70zK68TnQ`
 See :s:`SimpleByteStringLiteral`.

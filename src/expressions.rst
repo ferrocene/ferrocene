@@ -64,7 +64,7 @@ Expressions
 
 :dp:`fls_pwut2jbmk66k`
 A :ds:`SubjectExpression` is any expression in category :s:`Expression`, except
-:s:`IndexedTupleStructExpression` and :s:`RecordStructExpression`.
+:s:`StructExpression`.
 
 :dp:`fls_361q9ljc6ybz`
 A :ds:`SubjectLetExpression` is any expression in category
@@ -2853,27 +2853,28 @@ Struct Expressions
 .. syntax::
 
    StructExpression ::=
-       RecordStructConstructor
-     | TupleStructConstructor
-     | UnitStructConstructor
+       Constructee $${$$ StructExpressionContent? $$}$$
 
-   RecordStructConstructor ::=
-       ConstructionType $${$$ RecordStructInitializer? $$}$$
+   Constructee ::=
+       PathInExpression
 
-   RecordStructInitializer ::=
+   StructExpressionContent ::=
        BaseInitializer
-     | RecordStructFieldInitializerList
-     | RecordStructIndexedFieldInitializerList
+     | FieldInitializerList ($$,$$ BaseInitializer | $$,$$?)
 
    BaseInitializer ::=
        $$..$$ Operand
 
-   RecordStructFieldInitializerList ::=
-       RecordStructFieldInitializer ($$,$$ RecordStructFieldInitializer)* ($$,$$ BaseInitializer | $$,$$?)
+   FieldInitializerList ::=
+       FieldInitializer ($$,$$ FieldInitializer)*
 
-   RecordStructFieldInitializer ::=
-       NamedInitializer
+   FieldInitializer ::=
+       IndexedInitializer
+     | NamedInitializer
      | ShorthandInitializer
+
+   IndexedInitializer ::=
+       TupleIndex : Expression
 
    NamedInitializer ::=
        Identifier : Expression
@@ -2881,186 +2882,172 @@ Struct Expressions
    ShorthandInitializer ::=
        Identifier
 
-   RecordStructIndexedFieldInitializerList ::=
-       IndexedInitializer (, IndexedInitializer)* ($$,$$ BaseInitializer | $$,$$?)
-
-   IndexedInitializer ::=
-       TupleIndex : Operand
-
-   TupleStructConstructor ::=
-       ConstructionType $$($$ TupleStructFieldInitializerList? $$)$$
-
-   TupleStructFieldInitializerList ::=
-       PositionalInitializer (, PositionalInitializer)* ,?
-
-   PositionalInitializer ::=
-       Operand
-
-   UnitStructConstructor ::=
-       ConstructionType
-
-   ConstructionType ::=
-       PathInExpression
-
 .. rubric:: Legality Rules
 
-:dp:`fls_jc45bpgsfnmr`
-A :t:`struct expression` is an :t:`expression` that constructs a :t:`struct` or
-a :t:`union`.
+:dp:`fls_ij8rebvupb85`
+A :t:`struct expression` is an :t:`expression` that constructs an :t:`enum`, a
+:t:`struct`, or a :t:`union`.
 
-:dp:`fls_fan2lkcxk7bg`
-A :t:`record struct constructor` is a :t:`struct expression` that constructs a
-:t:`record struct`.
+:dp:`fls_4z91ymz3ciup`
+A :t:`constructee` indicates the :t:`enum variant` or :t:`type` whose value is
+being constructed by a :t:`struct expression`.
 
-:dp:`fls_1e1rgq9k6n1i`
-A :t:`tuple struct constructor` is a :t:`struct expression` that constructs a
-:t:`tuple struct`.
+:dp:`fls_uib1ml41mfrn`
+A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum`,
+a :t:`struct`, or a :t:`union` to be used as a base for construction in a
+:t:`struct expression`.
 
-:dp:`fls_9yi0cxjnjlx9`
-A :t:`union constructor` is a :t:`struct expression` that constructs a
-:t:`union`.
+:dp:`fls_gfu267bpl9ql`
+The :t:`type` of a :t:`base initializer` is the :t:`type` of its :t:`operand`.
+The :t:`type` of a :t:`base initializer` shall be the same as the :t:`type` of
+the :t:`constructee`.
 
-:dp:`fls_lowrnb3nk318`
-A :t:`unit struct constructor` is a :t:`struct expression` that constructs a
-:t:`unit struct`.
-
-:dp:`fls_lb2wr5o9sjm7`
-A :t:`base initializer` is a :t:`construct` that specifies a :t:`struct` to be
-used as a base for construction in a :t:`struct expression`.
-
-:dp:`fls_gfxzhlqlkwmq`
+:dp:`fls_ph7fsphbpbv4`
 An :t:`indexed initializer` is a :t:`construct` that specifies the index and
 initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
-:dp:`fls_auimxoels34d`
+:dp:`fls_y3p6rtm7ek3l`
+An :t:`indexed initializer` matches a :t:`field` of the :t:`construction type`
+when the :t:`tuple index` of the :t:`indexed initializer` resolves to a valid
+position of a :t:`field` in the :t:`construction type`. Such an :t:`indexed
+initializer` is a :dt:`matched indexed initializer`.
+
+:dp:`fls_dfajs3xaxbv`
+The :t:`type` of the :t:`operand` of an :t:`indexed initializer` and the
+:t:`type` of the matched :t:`field` shall be :t:`unifiable`.
+
+:dp:`fls_e5b9n910z1cp`
+The :t:`value` of an :t:`indexed initializer` is the :t:`value` of its
+:t:`operand`.
+
+:dp:`fls_lwyq3vyc91rn`
 A :t:`named initializer` is a :t:`construct` that specifies the name and initial
 :t:`value` of a :t:`field` in a :t:`struct expression`.
 
-:dp:`fls_9qhnzeoox7o7`
-A :t:`positional initializer` is a :t:`construct` that specifies the initial
-:t:`value` of a :t:`field` in a :t:`struct expression`.
+:dp:`fls_qed1pps827dv`
+A :t:`named initializer` matches a :t:`field` of the :t:`constructee` when
+its :t:`identifier` and the :t:`name` of the :t:`field` are the same. Such a
+:t:`named initializer` is a :dt:`matched named initializer`.
 
-:dp:`fls_1gs6rdyz8as0`
-A :t:`shorthand initializer` is a :t:`construct` that specifies the :t:`name` of
-a :t:`field` in a :t:`struct expression`.
-
-:dp:`fls_b6idto4dffmr`
-The :t:`construction type` indicates the :t:`type` of the :t:`struct` being
-constructed by a :t:`struct expression`.
-
-:dp:`fls_i6dj8n6jmt2a`
-A :s:`RecordStructConstructor` without a
-:s:`RecordStructIndexedFieldInitializerList` is a :t:`record struct
-constructor`.
-
-:dp:`fls_fn1tjfjcn8zp`
-A :s:`UnitStructConstructor` and a :s:`RecordStructConstructor` without a
-:s:`RecordStructInitializer` are :t:`[unit struct constructor]s`.
-
-:dp:`fls_ub9cu2w16so9`
-A :s:`TupleStructConstructor` and a :s:`RecordStructConstructor` without a
-:s:`RecordStructFieldInitializerList` are :t:`[tuple struct constructor]s`.
-
-:dp:`fls_a1c89b6cb6ya`
-A :s:`RecordStructConstructor` with a :s:`RecordStructFieldInitializerList` is a
-:t:`union constructor`.
-
-:dp:`fls_2pgvvgrs72it`
-A :t:`struct expression` is a :t:`value expression`.
-
-:dp:`fls_fez5ukkeoac6`
-The :t:`type` of a :t:`struct expression` is the :t:`construction type`.
-
-:dp:`fls_yz7wlyye9e3x`
-The :t:`value` of a :t:`struct expression` is the :t:`struct` or :t:`union`
-in construction.
-
-:dp:`fls_sazanondyx35`
-The :t:`type` of a :t:`base initializer` is the :t:`type` of its :t:`operand`.
-The :t:`type` of a :t:`base initializer` shall be the same as the
-:t:`construction type`.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_yy6qrnohm34`
-The :t:`evaluation` of a :t:`struct expression` evaluates its :t:`[operand]s` in
-a left-to-right order.
-
-.. _fls_inepxsuhpu4u:
-
-Record Struct Construction
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_cn4qaxx68auy`
-The :t:`construction type` of a :t:`struct constructor` shall resolve to a
-:t:`struct type`.
-
-:dp:`fls_gyponpgtgz91`
-A :t:`named initializer` matches a :t:`field` of the :t:`construction type` when
-its :t:`identifier` and the :t:`name` of the :t:`field` are the same.
-
-:dp:`fls_dwn0sqraaifm`
+:dp:`fls_b60omrhc7t73`
 The :t:`type` of a :t:`named initializer` and the :t:`type` of the matched
 :t:`field` shall be :t:`unifiable`.
 
-:dp:`fls_aqd0u86gtk6q`
+:dp:`fls_z3gj1v6g605r`
 The :t:`value` of a :t:`named initializer` is the :t:`value` of its
 :t:`expression`.
 
-:dp:`fls_i2ip2s14clr2`
-A :t:`named initializer` that matches a :t:`field` is referred to as a
-:dt:`matched named initializer`.
+:dp:`fls_57t368kema7h`
+A :t:`shorthand initializer` is a :t:`construct` that specifies the :t:`name` of
+a :t:`field` in a :t:`struct expression`.
 
-:dp:`fls_ex7vtlyaor8d`
-A :t:`shorthand initializer` matches a :t:`field` of the :t:`construction type`
-when its :t:`identifier` and the :t:`name` of the :t:`field` are the same.
-
-:dp:`fls_2p4542ffuu8x`
-The :t:`type` of a :t:`shorthand initializer` and the :t:`type` of the matched
-:t:`field` shall be :t:`unifiable`.
-
-:dp:`fls_cdgpb5lgmk7l`
-The :t:`value` of a :t:`shorthand initializer` is the :t:`value` of its
-:t:`identifier`.
-
-:dp:`fls_2wbtuiugiuu4`
-A :t:`shorthand initializer` that matches a :t:`field` is referred to as a
-:dt:`matched shorthand initializer`.
-
-:dp:`fls_6at70p40nzdx`
+:dp:`fls_sm2hx8sh4agb`
 A :t:`shorthand initializer` is equivalent to a :t:`named initializer` where
 both the :t:`identifier` and the :t:`expression` of the :t:`named initializer`
 denote the :t:`identifier` of the :t:`shorthand initializer`.
 
-:dp:`fls_b5xkmxd0mqzq`
-For each :t:`field` of the :t:`construction type`, the :t:`record struct
-constructor` shall either:
+:dp:`fls_yjx1t3x6qpfg`
+A :t:`shorthand initializer` matches a :t:`field` of the :t:`construction type`
+when its :t:`identifier` and the :t:`name` of the :t:`field` are the same. Such
+a :t:`shorthand initializer` is a :dt:`matched shorthand initializer`.
 
-* :dp:`fls_4mftx1nnv3z`
-  Contain a :t:`matched named initializer`, or
+:dp:`fls_2dajkhq58cdp`
+The :t:`type` of a :t:`shorthand initializer` and the :t:`type` of the matched
+:t:`field` shall be :t:`unifiable`.
 
-* :dp:`fls_jj4x358nm3do`
-  Contain a :t:`matched shorthand initializer`, or
+:dp:`fls_9s4znhi0u3ys`
+The :t:`value` of a :t:`shorthand initializer` is the :t:`value` its
+:t:`identifier` resolves to.
 
-* :dp:`fls_t34yselx5psr`
-  Have a :s:`RecordStructInitializer` with a :t:`base initializer` or a
-  :s:`RecordStructFieldInitializerList` with a :t:`base initializer`.
+:dp:`fls_3dialm6x0x7a`
+A :t:`struct expression` is a :t:`value expression`.
 
-:dp:`fls_3gav2vg20xgi`
-The :t:`value` of a :t:`field` of a :t:`struct` in construction shall be either:
+:dp:`fls_i31rodt42m0z`
+The :t:`type` of a :t:`struct expression` is the :t:`type` of the
+:t:`constructee`.
 
-* :dp:`fls_eclbzmm2fyx3`
-  The :t:`value` of a :t:`matched named initializer`, or
+:dp:`fls_sjwd8o5mknjo`
+The :t:`value` of a :t:`struct expression` is the :t:`enum`, :t:`struct`, or
+:t:`union` in construction.
 
-* :dp:`fls_yhtz73hx66r3`
-  The :t:`value` of a :t:`matched shorthand initializer`, or
+:dp:`fls_ccqomsereni2`
+If the :t:`constructee` is a :t:`record enum variant` or a :t:`record struct`,
+then
 
-* :dp:`fls_hm6uwir33qte`
-  The :t:`value` of the corresponding :t:`field` of the :t:`struct` indicated
-  by the :t:`base initializer`, where the :t:`value` is either :t:`copied` or
-  :t:`moved`.
+* :dp:`fls_pivpdyr4seez`
+  For each :t:`field` of the :t:`constructee`, the :t:`struct expression` shall
+  either:
+
+  * :dp:`fls_bbmm5vir9xos`
+    Contain at most one :t:`matched named initializer`, or
+
+  * :dp:`fls_9370n5xkkzce`
+    Contain at most one :t:`matched shorthand initializer`, or
+
+  * :dp:`fls_rclgwzdhfjj`
+    Have exactly one :t:`base initializer`.
+
+* :dp:`fls_lmxz5768v5d8`
+  A :t:`base initializer` is allowed even if all :t:`[field]s` of the
+  :t:`constructee` have been matched.
+
+:dp:`fls_939cugbxju5e`
+If the :t:`constructee` is a :t:`tuple enum variant` or a :t:`tuple struct`,
+then
+
+* :dp:`fls_c34qwhaq2asm`
+  For each :t:`field` of the :t:`constructee`, the :t:`struct expression` shall
+  either:
+
+  * :dp:`fls_j2kmp1fee0g4`
+    Contain at most one :t:`matched indexed initializer`, or
+
+  * :dp:`fls_90q7krxazc6u`
+    Have exactly one :t:`base initializer`.
+
+* :dp:`fls_qo05owpmtag0`
+  A :t:`base initializer` is allowed even if all :t:`[field]s` of the
+  :t:`constructee` have been matched.
+
+:dp:`fls_ywh3nk6emwmw`
+If the :t:`constructee` is a :t:`union`, then
+
+* :dp:`fls_5w9lj5dc84p`
+  The :t:`struct expression` shall not contain a :t:`base initializer`.
+
+* :dp:`fls_5zceer19mhdu`
+  For the single :t:`field` of the :t:`constructee`, the :t:`struct expression`
+  shall either:
+
+  * :dp:`fls_mq80i8fof7sx`
+    Contain exactly one :t:`matched named initializer`, or
+
+  * :dp:`fls_raon1c1vrhx7`
+    Contain exactly one :t:`matched shorthand initializer`.
+
+:dp:`fls_njder5r7y5fg`
+If the :t:`constructee` is a :t:`unit enum variant` or a :t:`unit struct`, then
+the :t:`struct expression` shall have at most one :t:`base initializer`.
+
+:dp:`fls_w7x9wy6t0qcp`
+If a :t:`base initializer` is supplied, then for each :t:`field` that was not
+matched in the :t:`struct expression`:
+
+* :dp:`fls_24kqbc9oytaq`
+  If the :t:`type` of the :t:`field` is a :t:`by copy type`, then the :t:`value`
+  of the :t:`field` is copied and the copy becomes the initial :t:`value` of the
+  :t:`field` of the :t:`constructee`, or
+
+* :dp:`fls_rsc4c09tuqx9`
+  If the :t:`type` of the :t:`field` is a :t:`by move type`, then the :t:`value`
+  of the :t:`field` is moved and becomes the initial :t:`value` of the
+  :t:`field` of the :t:`constructee`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_vsxsbqps64o`
+The :t:`evaluation` of a :t:`struct expression` evaluates its :t:`[operand]s` in
+a left-to-right order.
 
 .. rubric:: Examples
 
@@ -3088,195 +3075,18 @@ The :t:`value` of a :t:`field` of a :t:`struct` in construction shall be either:
    let age = 45;
 
    let bob = Employee {
-
-:dp:`fls_44xrpe2k6d6p`
-Matched named initializer.
-
-.. syntax::
-
-       name: "Bob".to_string(),
-
-:dp:`fls_8piw0m60trwg`
-Matched shorthand initializer.
-
-.. code-block:: rust
-
-       age,
-
-:dp:`fls_lrjhfc1mnx4a`
-Base initializer, equivalent to ``alice.occupation`` and ``alice.compensation``.
-
-.. code-block:: rust
-
-       .. alice
+       name: "Bob".to_string(), // matched named initializer
+       age, // matched shorthand initializer
+       .. alice // equivalent to alice.occupation, alice.compensation
    };
-
-.. _fls_m9pkmrafqhr0:
-
-Tuple Struct Construction
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_ciwtgajyevdk`
-The :t:`construction type` of a :t:`tuple struct constructor` shall resolve to a
-:t:`tuple struct type`.
-
-:dp:`fls_6t6r55rnjn6n`
-A :t:`tuple struct constructor` shall contain one :t:`positional initializer`
-for each :t:`field` of the :t:`construction type`.
-
-:dp:`fls_tofndxu1cwam`
-A :t:`positional initializer` matches a :t:`field` of the :t:`construction type`
-when the position of the :t:`positional initializer` and the position of the
-:t:`field` in the :t:`construction type` are the same.
-
-:dp:`fls_wm1zje7mtqht`
-The :t:`type` of the :t:`operand` of a :t:`positional initializer` and the
-:t:`type` of the matched :t:`field` shall be :t:`unifiable`.
-
-:dp:`fls_i8d8mly7wbx7`
-The :t:`value` of a :t:`positional initializer` is the :t:`value` of its
-:t:`operand`.
-
-:dp:`fls_wwjecv46x8p8`
-A :t:`positional initializer` that matches a :t:`field` is referred to as a
-:dt:`matched positional initializer`.
-
-:dp:`fls_v59g8ki099ma`
-The :s:`RecordStructIndexedFieldInitializerList` of a :t:`record struct
-constructor` shall:
-
-* :dp:`fls_wc5090dwk0zf`
-  Contain an :t:`indexed initializer` for each :t:`field` of the
-  :t:`construction type`, covering all indices of the :t:`construction type`, or
-
-* :dp:`fls_v6c2mpue9v65`
-  Have a :s:`RecordStructInitializer` with a :t:`base initializer` or a
-  :s:`RecordStructIndexedFieldInitializerList` with a :t:`base initializer`\
-  ``.``
-
-:dp:`fls_491ix17yzb6k`
-An :t:`indexed initializer` matches a :t:`field` of the :t:`construction type`
-when the :t:`tuple index` of the :t:`indexed initializer` resolves to a valid
-position of a :t:`field` in the :t:`construction type`.
-
-:dp:`fls_kwt27bhyfe39`
-The :t:`type` of the :t:`operand` of an :t:`indexed initializer` and the
-:t:`type` of the matched :t:`field` shall be :t:`unifiable`.
-
-:dp:`fls_ixzyz4np4piy`
-The :t:`value` of an :t:`indexed initializer` is the :t:`value` of its
-:t:`operand`.
-
-:dp:`fls_da507av76xq6`
-An :t:`indexed initializer` that matches a :t:`field` is referred to as a
-:dt:`matched indexed initializer`.
-
-:dp:`fls_54rkrj5ajo6`
-The :t:`value` of a :t:`field` of a :t:`tuple in construction` is either:
-
-* :dp:`fls_r7bzxwxd6364`
-  The :t:`value` of a :t:`matched indexed initializer`, or
-
-* :dp:`fls_mopq56aafcee`
-  The :t:`value` of a :t:`matched positional initializer`, or
-
-* :dp:`fls_kihfh0h7o8nj`
-  The :t:`value` of the corresponding :t:`field` of the :t:`tuple indicated`
-  by the :t:`base initializer`, where the :t:`value` is either :t:`copied` or
-  :t:`moved`.
-
-.. rubric:: Examples
-
-.. syntax::
-
-   struct Point3D (
-       f64,
-       f64,
-       f64
-   );
-
-   let positional_point = Point3D (
-       0.0,
-       1.1,
-       2.2
-   );
-
-   let indexed_point = Point3D {
-
-:dp:`fls_voqgzdvwh9k5`
-Matched indexed initializer.
-
-.. code-block:: rust
-
-       1: 1.1,
-
-:dp:`fls_gjs024orub2v`
-Base initializer, equivalent to ``origin.0`` and ``origin.2``.
-
-.. code-block:: rust
-
-       .. origin
-   };
-
-.. _fls_h260ko7skajb:
-
-Union Construction
-~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_6oi54di0tndy`
-The :t:`construction type` of a :t:`union constructor` shall resolve to a
-:t:`union type`.
-
-:dp:`fls_x8yd82t572hc`
-The :s:`RecordStructFieldInitializerList` of a :t:`union constructor`
-shall contain exactly one :s:`RecordStructFieldInitializer` and no :t:`base
-initializer`.
-
-:dp:`fls_paqsgracxc7h`
-For the single :t:`field` of the :t:`construction type`, a :t:`unit constructor`
-shall either:
-
-* :dp:`fls_cedzp2z2fk69`
-  Contain a :t:`matched named initializer`, or
-
-* :dp:`fls_ymiajqhy4v43`
-  Contain a :t:`matched shorthand initializer`.
-
-.. rubric:: Examples
-
-.. code-block:: rust
 
    union Union {
    	int: u32,
    	float: f32
    }
 
-   let it = Union { int: 0 };
-   let it = Union { float: 0.0 };
-
-.. _fls_owc8urot5ws8:
-
-Unit Struct Construction
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_fyzdvmc4yuzr`
-The :t:`construction type` of a :t:`unit struct constructor` shall resolve to a
-:t:`unit struct type`.
-
-.. rubric:: Examples
-
-.. syntax::
-
-   struct Empty;
-
-   let unit1 = Empty;
-   let unit2 = Empty{};
+   let u1 = Union { int: 0 };
+   let u2 = Union { float: 0.0 };
 
 .. _fls_xa4nbfas01cj:
 
@@ -3298,20 +3108,22 @@ Call Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_fvgfx17ossd9`
-A :t:`call expression` is an :t:`expression` that invokes a :t:`function`.
+A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
+:t:`tuple struct` or :t:`tuple enum variant`.
 
 :dp:`fls_jvz5z3eqxb39`
 An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_7ql1c71eidg8`
-A :t:`call operand` is the :t:`function` being invoked by a :t:`call
-expression`.
+A :t:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
+:t:`tuple enum variant` being constructed by a :t:`call expression`.
 
 :dp:`fls_4t6imtiw6kzt`
 A :t:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
-:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
+:std:`core::ops::FnOnce` :t:`[trait]s`.
 
 :dp:`fls_aafrvlmiwfon`
 The :t:`call operand` is subject to :t:`auto dereferencing` until a :t:`callee
@@ -3323,7 +3135,9 @@ dereferencing` adjustments.
 
 :dp:`fls_bu6i3mcvnbin`
 The :t:`type` of a :t:`call expression` is the :t:`return type` of the
-:t:`invoked function` or :t:`associated type` :std:`core::ops::FnOnce::Output`.
+:t:`invoked function`, the :t:`type` of the :t:`tuple struct` or
+the :t:`tuple enum variant` being constructed, or :t:`associated type`
+:std:`core::ops::FnOnce::Output`.
 
 :dp:`fls_8ljrgdept7s8`
 A :t:`call expression` whose :t:`callee type` is either an :t:`external function
@@ -3337,6 +3151,11 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   If the :t:`callee type` is a :t:`function item type` or a :t:`function
   pointer type`, then the :t:`value` is the result of invoking the corresponding
   :t:`function` with the :t:`[argument operand]s`.
+
+* :dp:`fls_RZjFs9koNOk8`
+  If the :t:`callee type` is a :t:`tuple struct type` or a :t:`tuple enum variant`,
+  then the :t:`value` is the result of constructing the :t:`tuple struct` or :t:`tuple enum variant`
+  with the :t:`[argument operand]s`.
 
 * :dp:`fls_s3q3sej1hgho`
   If the :t:`callee type` implements the :std:`core::ops::Fn`

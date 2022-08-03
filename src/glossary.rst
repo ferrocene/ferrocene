@@ -473,8 +473,9 @@ base initializer
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_dnuwn2tnvtgy`
-A :dt:`base initializer` is a :t:`construct` that specifies a :t:`struct` to be
-used as a base for construction in a :t:`struct expression`.
+A :dt:`base initializer` is a :t:`construct` that specifies an :t:`enum`,
+a :t:`struct`, or a :t:`union` to be used as a base for construction in a
+:t:`struct expression`.
 
 :dp:`fls_mprzem71zlhy`
 See :s:`BaseInitializer`.
@@ -849,7 +850,8 @@ call expression
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_a9ap0tyk2eou`
-A :dt:`call expression` is an :t:`expression` that invokes a :t:`function`.
+A :dt:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
+:t:`tuple struct` or :t:`tuple enum variant`.
 
 :dp:`fls_aibti9uqrmmd`
 See :s:`CallExpression`.
@@ -860,8 +862,8 @@ call operand
 ^^^^^^^^^^^^
 
 :dp:`fls_cqnko94y4xbs`
-A :dt:`call operand` is the :t:`function` being invoked by a :t:`call
-expression`.
+A :dt:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
+:t:`tuple enum variant` being constructed by a :t:`call expression`.
 
 :dp:`fls_w6wu4wi6srjj`
 See :s:`CallOperand`.
@@ -873,8 +875,9 @@ callee type
 
 :dp:`fls_o21myf6wnnn6`
 A :dt:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, or a :t:`type` that implements any of the :std:`core::ops::Fn`,
-:std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
+pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
+:std:`core::ops::FnOnce` :t:`[trait]s`.
 
 .. _fls_ubzcpmqig48m:
 
@@ -1171,17 +1174,14 @@ construct
 A :dt:`construct` is a piece of program text that is an instance of a
 :t:`syntactic category`.
 
-.. _fls_1taijvohu5nn:
+.. _fls_fBGjoTVhYvUe:
 
-construction type
-^^^^^^^^^^^^^^^^^
+constructee
+^^^^^^^^^^^
 
-:dp:`fls_9ftmbtnazqf6`
-The :dt:`construction type` indicates the :t:`type` of the :t:`struct` being
-constructed by a :t:`struct expression`.
-
-:dp:`fls_836hyvbh966v`
-See :s:`ConstructionType`.
+:dp:`fls_Twbu94uGW4Cb`
+A :dt:`constructee` indicates the :t:`enum variant` or :t:`type` whose value is
+being constructed by a :t:`struct expression`.
 
 .. _fls_39s6od9hj4g6:
 
@@ -3440,8 +3440,8 @@ named initializer
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_xwvz8i4jim7a`
-A :dt:`named initializer` is a :t:`construct` that specifies the name and
-initial :t:`value` of a :t:`field` in a :t:`struct expression`.
+A :dt:`named initializer` is a :t:`construct` that specifies the name and initial
+:t:`value` of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_aueznbw3lohl`
 See :s:`NamedInitializer`.
@@ -3831,18 +3831,6 @@ plane
 In :t:`Unicode`, a :dt:`plane` is a continuous group of 65,536 :t:`[code
 point]s`.
 
-.. _fls_4ars83p7utj5:
-
-positional initializer
-^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_qw7s3tn9zqfh`
-A :dt:`positional initializer` is a :t:`construct` that specifies the initial
-:t:`value` of a :t:`field` in a :t:`struct expression`.
-
-:dp:`fls_5pqo7d66eww`
-See :s:`PositionalInitializer`.
-
 .. _fls_ukvdoqo68y5b:
 
 precedence
@@ -4158,18 +4146,6 @@ record struct
 
 :dp:`fls_qyd7kqnpjs2`
 A :dt:`record struct` is a :t:`value` of a :t:`record struct type`.
-
-.. _fls_lris83z0swiw:
-
-record struct constructor
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_xb0zm4w0p23s`
-A :dt:`record struct constructor` is a :t:`struct expression` that constructs a
-:t:`record struct`.
-
-:dp:`fls_tkbmmodqe44i`
-See :s:`RecordStructConstructor`.
 
 .. _fls_hzkwzbk5wp54:
 
@@ -4600,8 +4576,8 @@ shorthand initializer
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_bgxxg48snck1`
-A :dt:`shorthand initializer` is a :t:`construct` that specifies the :t:`name`
-of a :t:`field` in a :t:`struct expression`.
+A :dt:`shorthand initializer` is a :t:`construct` that specifies the :t:`name` of
+a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_qc08ydgmqudi`
 See :s:`ShorthandInitializer`.
@@ -5216,18 +5192,6 @@ tuple struct
 :dp:`fls_pdcpmapiq491`
 A :dt:`tuple struct` is a :t:`value` of a :t:`tuple struct type`.
 
-.. _fls_81mx81sy0qxv:
-
-tuple struct constructor
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_oj5rhvj4on4a`
-A :dt:`tuple struct constructor` is a :t:`struct expression` that constructs a
-:t:`tuple struct`.
-
-:dp:`fls_z9022t5tn97u`
-See :s:`TupleStructConstructor`.
-
 .. _fls_xx4slbg8s63e:
 
 tuple struct field
@@ -5493,15 +5457,6 @@ union
 :dp:`fls_x3oibk39dvem`
 A :dt:`union` is a :t:`value` of a :t:`union type`.
 
-.. _fls_xh2hrh7ainl5:
-
-union constructor
-^^^^^^^^^^^^^^^^^
-
-:dp:`fls_2qa7a5rcjn42`
-A :dt:`union constructor` is a :t:`struct expression` that constructs a
-:t:`union`.
-
 .. _fls_Rwtgq904NoaL:
 
 unit enum variant
@@ -5536,18 +5491,6 @@ unit struct
 
 :dp:`fls_9t7fu8fcak6k`
 A :dt:`unit struct` is a :t:`record struct type` without any :t:`[field]s`.
-
-.. _fls_94fo6s4sldxs:
-
-unit struct constructor
-^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_acy0yaovdp0g`
-A :dt:`unit struct constructor` is a :t:`struct expression` that constructs a
-:t:`unit struct`.
-
-:dp:`fls_7hd6xdukhw5h`
-See :s:`UnitStructConstructor`.
 
 .. _fls_wmn9mcqae88q:
 

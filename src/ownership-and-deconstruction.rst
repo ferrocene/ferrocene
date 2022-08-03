@@ -165,7 +165,7 @@ An :t:`implicit borrow` is a :t:`borrow` that is not present syntactically in
 program text. An :t:`implicit borrow` occurs in the following contexts:
 
 * :dp:`fls_kky9ufexrvaw`
-  The :t:`indexed array operand` of an :t:`array index expression`,
+  The :t:`indexed array operand` of an :t:`index expression`,
 
 * :dp:`fls_nordokzfy36d`
   The :t:`call operand` of a :t:`call expression`,

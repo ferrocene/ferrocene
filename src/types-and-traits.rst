@@ -2104,7 +2104,7 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
   A :t:`return expression` imposes its :t:`expected type` onto its :t:`operand`.
 
 :dp:`fls_aaumn7viouu7`
-:t:`[Array expression]s`, :t:`[array index expression]s`, :t:`[assignment
+:t:`[Array expression]s`, :t:`[index expression]s`, :t:`[assignment
 expression]s`, :t:`[closure expression]s`, :t:`[comparison expression]s`,
 :t:`[compound assignment expression]s`, :t:`[field access expression]s`,
 :t:`[lazy boolean expression]s`, :t:`[method call expression]s`, :t:`[range

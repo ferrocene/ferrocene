@@ -30,13 +30,13 @@ Expressions
    ExpressionWithoutBlock ::=
        OuterAttributeOrDoc* (
            ArrayExpression
-         | ArrayIndexExpression
          | AwaitExpression
          | BreakExpression
          | CallExpression
          | ClosureExpression
          | ContinueExpression
          | FieldAccessExpression
+         | IndexExpression
          | LiteralExpression
          | MethodCallExpression
          | MacroInvocation
@@ -170,9 +170,6 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_xguga84v3j8u`
   :t:`[Array expression]s`,
 
-* :dp:`fls_rpapnm3afan8`
-  :t:`[Array index expression]s`,
-
 * :dp:`fls_idxf02p7jogu`
   :t:`[Assignment expression]s`,
 
@@ -217,6 +214,9 @@ involve :t:`[type]s` that require :t:`destruction`:
 * :dp:`fls_6g7c1kjrmfnr`
   :t:`[Immutable borrow expression]s` where the borrowed :t:`type` is not
   subject to :t:`interior mutability`.
+
+* :dp:`fls_rpapnm3afan8`
+  :t:`[Index expression]s`,
 
 * :dp:`fls_fc62yaqyjpl2`
   :t:`[Infinite loop expression]s`,
@@ -360,14 +360,14 @@ Place Expressions
 A :t:`place expression` is an :t:`expression` that represents a memory location.
 The following :t:`[expression]s` are :t:`[place expression]s`:
 
-* :dp:`fls_lj7x5dgbmg9i`
-  :t:`[Array index expression]s`,
-
 * :dp:`fls_jpmhibm4omm7`
   :t:`[Dereference expression]s`,
 
 * :dp:`fls_none1dykbn8c`
   :t:`[Field access expression]s`,
+
+* :dp:`fls_lj7x5dgbmg9i`
+  :t:`[Index expression]s`,
 
 * :dp:`fls_anzidgx02lly`
   :t:`[Parenthesized expression]s` where the :t:`operand` is a :t:`place
@@ -382,7 +382,7 @@ expression`. The following :t:`[construct]s` are :t:`[place expression
 context]s`:
 
 * :dp:`fls_qytgkbhqr5ln`
-  The :t:`indexed array operand` of an :t:`array index expression`,
+  The :t:`indexed operand` of an :t:`index expression`,
 
 * :dp:`fls_5gy92rsi2mqm`
   The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
@@ -436,7 +436,7 @@ can be modified. The following :t:`[place expression]s` are :t:`[mutable place
 expression]s`:
 
 * :dp:`fls_bt50fltfqcvn`
-  An :t:`array index expression` whose :t:`type` implements the
+  An :t:`index expression` whose :t:`type` implements the
   :std:`core::ops::IndexMut` :t:`trait`,
 
 * :dp:`fls_6b4rwkrc1ap6`
@@ -2549,15 +2549,10 @@ The :t:`evaluation` of a :t:`parenthesized expression` evaluates its
 
    (1 + 2) * 3
 
-.. _fls_gqncxyuok4ss:
-
-Array and Array Index Expressions
----------------------------------
-
 .. _fls_xinykul167l:
 
 Array Expressions
-~~~~~~~~~~~~~~~~~
+-----------------
 
 .. rubric:: Syntax
 
@@ -2685,17 +2680,17 @@ An array of nine 42s.
 
 .. _fls_sxcr4aa098i6:
 
-Array and Slice Indexing Expressions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Indexing Expressions
+--------------------
 
 .. rubric:: Syntax
 
 .. syntax::
 
-   ArrayIndexExpression ::=
-       IndexedArrayOperand $$[$$ IndexingOperand $$]$$
+   IndexExpression ::=
+       IndexedOperand $$[$$ IndexingOperand $$]$$
 
-   IndexedArrayOperand ::=
+   IndexedOperand ::=
        Operand
 
    IndexingOperand ::=
@@ -2703,79 +2698,80 @@ Array and Slice Indexing Expressions
 
 .. rubric:: Legality Rules
 
+:dp:`fls_X9kdEAPTqsAe`
+A :t:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
+
 :dp:`fls_42ijvuqqqlvh`
-An :t:`array index expression` is an :t:`expression` that indexes into an
-:t:`array` or a :t:`slice`.
+An :t:`index expression` is an :t:`expression` that indexes into a :t:`value`
+of an :t:`indexable type`.
 
 :dp:`fls_pc0c22asgzvw`
-An :t:`indexed array operand` is an :t:`operand` which indicates the :t:`array`
-or :t:`slice` being indexed into by an :t:`array index expression`.
+An :t:`indexed operand` is an :t:`operand` which indicates the :t:`value`
+being indexed into by an :t:`index expression`.
 
 :dp:`fls_ff3sgpldn52o`
-An :t:`indexing operand` is an :t:`operand` which specifies the index of the
-:t:`array` or :t:`slice` being indexed into by an :t:`array index expression`.
+An :t:`indexing operand` is an :t:`operand` which specifies the index of an :t:`index expression`.
 
 :dp:`fls_w96p9oyv5mqt`
-An :t:`array index expression` is a :t:`constant expression` if the :t:`indexing
-operand` is a :t:`constant expression`.
+An :t:`index expression` is a :t:`constant expression` if the :t:`indexing
+operand` and :t:`indexed operand` are :t:`[constant expression]s`.
 
 :dp:`fls_u9sl7h4i8hqu`
 The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
-:std:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed array
-operand`.
+:std:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed operand`.
 
 :dp:`fls_98qeczwv7fmy`
-If the :t:`indexed array operand` is evaluated in a :t:`value expression
+If the :t:`indexed operand` is evaluated in a :t:`value expression
 context`, then
 
 * :dp:`fls_jxdiknkwglak`
-  The :t:`array index expression` is a :t:`value expression`.
+  The :t:`index expression` is a :t:`value expression`.
 
 * :dp:`fls_sb2b8gszzaxq`
-  The :t:`type` of the :t:`indexed array operand` shall implement the
+  The :t:`type` of the :t:`indexed operand` shall implement the
   :std:`core::ops::Index` :t:`trait`.
 
 * :dp:`fls_issaykiuha75`
-  The :t:`type` of the :t:`array index expression` is ``&T``, where ``T`` is
+  The :t:`type` of the :t:`index expression` is ``&T``, where ``T`` is
   :t:`associated type` :std:`core::ops::Index::Output`.
 
 :dp:`fls_y3sduoma6q9v`
-If the :t:`indexed array operand` is :t:`mutable` and the :t:`array index
+If the :t:`indexed operand` is :t:`mutable` and the :t:`index
 expression` is evaluated in a :t:`mutable place expression context`, then
 
 * :dp:`fls_pjmoo8mjgxz3`
-  The :t:`array index expression` is a :t:`mutable place expression`.
+  The :t:`index expression` is a :t:`mutable place expression`.
 
 * :dp:`fls_ld7lbvqms5i6`
-  The :t:`type` of the :t:`indexed array operand` shall implement the
+  The :t:`type` of the :t:`indexed operand` shall implement the
   :std:`core::ops::IndexMut` :t:`trait`.
 
 * :dp:`fls_nw705fpon79b`
-  The :t:`type` of the :t:`array index expression` is ``&mut T``, where ``T`` is
-  the element type of the :t:`[indexed array operand]'s` :t:`type`.
+  The :t:`type` of the :t:`index expression` is ``&mut T``, where ``T`` is
+  the element type of the :t:`[indexed operand]'s` :t:`type`.
 
 :dp:`fls_fouu0z3jwoad`
-The :t:`value` of an :t:`array index expression` is the indexed memory location.
+The :t:`value` of an :t:`index expression` is the indexed memory location.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_6sgj0ltt21i`
-The :t:`evaluation` of an :t:`array index expression` proceeds as follows:
+The :t:`evaluation` of an :t:`index expression` proceeds as follows:
 
 #. :dp:`fls_e5l4y3dy69xi`
-   The :t:`indexed array operand` is evaluated.
+   The :t:`indexed operand` is evaluated.
 
 #. :dp:`fls_fza3omn8yw7s`
    The :t:`indexing operand` is evaluated.
 
 #. :dp:`fls_ehamppbq4gmg`
-   If the :t:`array index expression` is evaluated as a :t:`mutable place
+   If the :t:`index expression` is evaluated as a :t:`mutable place
    expression`, then :t:`expression` ``*core::ops::IndexMut::index_mut(&mut
-   indexed_array_operand, inexing_operand)`` is evaluated.
+   indexed_operand, indexing_operand)`` is evaluated.
 
 #. :dp:`fls_i68oxj659hc1`
-   Otherwise :t:`expression` ``*core::ops::Index::index(&indexed_array_operand,
-   inexing_operand)`` is evaluated.
+   Otherwise :t:`expression` ``*core::ops::Index::index(&indexed_operand,
+   indexing_operand)`` is evaluated.
 
 .. rubric:: Examples
 
@@ -4653,9 +4649,9 @@ as follows:
      -
      - left-to-right
    * - :dp:`fls_k3ohh8k888c`
-     - :t:`Array index expression`
+     - :t:`Call expression`
 
-       :t:`Call expression`
+       :t:`Index expression`
      -
      - none
    * - :dp:`fls_41n6z85h1z47`

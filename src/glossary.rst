@@ -201,18 +201,6 @@ An :dt:`array expression` is an :t:`expression` that constructs an :t:`array`.
 :dp:`fls_vua1xy4y9irp`
 See :s:`ArrayExpression`.
 
-.. _fls_6tysvlg2ifr3:
-
-array index expression
-^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_1f7e9q8n431n`
-An :dt:`array index expression` is an :t:`expression` that indexes into an
-:t:`array` or a :t:`slice`.
-
-:dp:`fls_xm2er7vuo07g`
-See :s:`ArrayIndexExpression`.
-
 .. _fls_6jkgj61m49vg:
 
 array repetition constructor
@@ -2475,17 +2463,29 @@ incomplete associated type
 An :dt:`incomplete associated type` is an :t:`associated type` without an
 :t:`initialization type`.
 
+.. _fls_6tysvlg2ifr3:
+
+index expression
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_1f7e9q8n431n`
+An :dt:`index expression` is an :t:`expression` that indexes into a :t:`value`
+of a :t:`type`.
+
+:dp:`fls_xm2er7vuo07g`
+See :s:`IndexExpression`.
+
 .. _fls_irp9ive4e66r:
 
-indexed array operand
-^^^^^^^^^^^^^^^^^^^^^
+indexed operand
+^^^^^^^^^^^^^^^
 
 :dp:`fls_dvmm47wnl33e`
-An :dt:`indexed array operand` is an :t:`operand` which indicates the :t:`array`
-or :t:`slice` being indexed into by an :t:`array index expression`.
+An :dt:`indexed operand` is an :t:`operand` which indicates the :t:`value` of a :t:`type` implementing
+:std:`core::ops::Index` being indexed into by an :t:`index expression`.
 
 :dp:`fls_je8eh3a02riq`
-See :s:`IndexedArrayOperand`.
+See :s:`IndexedOperand`.
 
 .. _fls_qs654p61ivpx:
 
@@ -2529,8 +2529,8 @@ indexing operand
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_ipw4tfrserbu`
-An :dt:`indexing operand` is an :t:`operand` which specifies the index of the
-:t:`array` or :t:`slice` being indexed into by an :t:`array index expression`.
+An :dt:`indexing operand` is an :t:`operand` which specifies the index for the :t:`indexed operand`
+being indexed into by an :t:`index expression`.
 
 :dp:`fls_t2j8vzlrlvb0`
 See :s:`IndexingOperand`.

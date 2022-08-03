@@ -172,7 +172,7 @@ The following expression statement does not require a semicolon.
    }
 
 :dp:`fls_2p9xnt519nbw`
-The following expression statement is not an array index expression.
+The following expression statement is not an index expression.
 
 .. code-block:: rust
 

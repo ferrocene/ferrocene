@@ -820,11 +820,10 @@ byte string literal
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_my4r1l3ilyt2`
-A :dt:`byte string literal` is a :t:`byte literal` that consists of multiple
-byte characters.
+A :dt:`byte string literal` is a :t:`literal` that consists of multiple :s:`[AsciiCharacter]s`.
 
 :dp:`fls_4yhag19z61bl`
-See ``ByteStringLiteral.``
+See :s:`ByteStringLiteral`.
 
 .. _fls_lfjgrkwra22i:
 
@@ -4086,7 +4085,7 @@ raw byte string literal
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_8v5k3wemy4tl`
-A :dt:`raw byte string literal` is a :t:`simple byte literal` that does not
+A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does not
 recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
@@ -4616,15 +4615,18 @@ signed integer type
 A :dt:`signed integer type` is an :t:`integer type` whose :t:`[value]s` denote
 negative whole numbers, zero, and positive whole numbers.
 
-.. _fls_rtlvndojae30:
 
-simple byte literal
-^^^^^^^^^^^^^^^^^^^
+.. _fls_4GvXiDfcPlRD:
 
-:dp:`fls_5sx43csoavvp`
-\ | A :dt:`simple byte literal` is a :t:`byte literal` that consists of exactly
-one byte character.
-| See ``SimpleByteLiteral.``
+simple byte string literal
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_XpbU4Up0Aza8`
+A :dt:`simple byte string literal` is a :t:`byte string literal` that consists of multiple
+:s:`[AsciiCharacter]s`.
+
+:dp:`fls_OfI70zK68TnQ`
+See :s:`SimpleByteStringLiteral`.
 
 .. _fls_6mcm7xdcyn40:
 

@@ -67,6 +67,7 @@ A :dt:`whitespace character` is one of the following characters:
 A :t:`whitespace string` is a string that consists of one or more
 :t:`[whitespace character]s`.
 
+:dp:`fls_PIDKEm8GiLNL`
 An :ds:`AsciiCharacter` is any :t:`Unicode` character in the range 0x00 - 0x7F, both inclusive.
 
 .. rubric:: Legality Rules
@@ -610,7 +611,7 @@ Byte String Literals
 .. rubric:: Legality Rules
 
 :dp:`fls_t63zfv5JdUhj`
-A :t:`byte string literal` is a :t:`literal` that consists of multiple `:s:`AsciiCharacter`s.
+A :t:`byte string literal` is a :t:`literal` that consists of multiple :s:`AsciiCharacter`s.
 
 .. _fls_msbaxfC09VkK:
 

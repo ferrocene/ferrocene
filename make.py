@@ -10,6 +10,7 @@ from pathlib import Path
 import argparse
 import subprocess
 import venv
+import sys
 
 
 def build_docs(root, env, builder, clear, serve):
@@ -103,7 +104,10 @@ class VirtualEnv:
             self.create()
 
     def bin(self, name):
-        return self.path / "bin" / name
+        if sys.platform == "win32":
+            return self.path / "scripts" / name
+        else:
+            return self.path / "bin" / name
 
     def up_to_date(self):
         if self.installed_requirements.exists():

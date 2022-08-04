@@ -1952,7 +1952,7 @@ Attribute ``non_exhaustive``
 variant]s`, and :t:`[struct type]s`.
 
 :dp:`fls_1of56vl2ewq0`
-:t:`Attribute` :dc:`non_exhaustive` indicates that the related :t:`type` or
+:t:`Attribute` :dc:`non_exhaustive` indicates that the related :t:`abstract data type` or
 :t:`enum variant` may have more :t:`[field]s` or :t:`[enum variant]s` added
 in the future. A :t:`type` subject to :t:`attribute` :c:`non_exhaustive` is
 referred to as a :dt:`non-exhaustive type`.

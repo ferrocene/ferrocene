@@ -105,11 +105,11 @@ with :t:`keyword` ``mut`` yields a :t:`mutable binding`.
 
 :dp:`fls_24c95c56tugl`
 The :t:`identifier pattern` enters its :t:`binding` into :t:`pattern scope` in
-the :t:`value namespace` if it does not resolve to a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
+the :t:`value namespace` if it does not resolve to a :t:`constant`, a :t:`unit struct constant` or a :t:`unit enum variant`.
 
 :dp:`fls_twcavjk7iquy`
 It is a static error if the :t:`identifier pattern` consists of anything other
-than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, an :t:`unit struct` or an :t:`unit enum variant`.
+than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, a :t:`unit struct constant` or a :t:`unit enum variant`.
 
 :dp:`fls_k1yBTstX7jEE`
 It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
@@ -126,7 +126,7 @@ An :t:`identifier pattern` is :t:`irrefutable` when:
 
 * :dp:`fls_r2mb8v2lh3x0`
   It does not have a :t:`bound pattern` and its :t:`binding` does not resolve to
-  a :t:`constant`, an :t:`unit struct`, or an :t:`unit enum variant`.
+  a :t:`constant`, a :t:`unit struct constant`, or a :t:`unit enum variant`.
 
 :dp:`fls_7oioaitb075g`
 If the :t:`identifier pattern` does not have a :t:`bound pattern`, then the
@@ -290,8 +290,8 @@ Path Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_1crq0mexo5r1`
-A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, an :t:`unit enum
-variant`, or an :t:`unit struct`.
+A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a :t:`unit enum
+variant`, or a :t:`unit struct constant` indicated by a :t:`path`.
 
 :dp:`fls_xz5otkhogn31`
 A :t:`path pattern` expressed as a :t:`path-in-expression` shall refer to either
@@ -326,7 +326,7 @@ A :t:`path pattern` is :t:`irrefutable` when it refers to:
 
 :dp:`fls_pedy2pqrvnx7`
 The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
-:t:`unit enum variant`, or :t:`unit struct` the :t:`path` resolved to.
+:t:`unit enum variant`, or :t:`unit struct constant` the :t:`path` resolved to.
 
 .. rubric:: Examples
 
@@ -648,8 +648,8 @@ Struct Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_vjdkpr3zml51`
-A :t:`struct pattern` is a :t:`pattern` that matches an :t:`enum`, a
-:t:`struct`, or a :t:`union`.
+A :t:`struct pattern` is a :t:`pattern` that matches an :t:`enum value`, a
+:t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_6o3x101wo478`
 A :t:`deconstructee` indicates the :t:`enum variant` or :t:`type` that is being
@@ -704,9 +704,8 @@ Record Struct Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_g6dytd6aq62d`
-A :t:`record struct pattern` is a :t:`pattern` that matches a :t:`record enum
-variant`, a :t:`record struct`, a :t:`tuple enum variant`, a :t:`tuple struct`,
-a :t:`union`, a :t:`unit enum variant`, or a :t:`unit struct`.
+A :t:`record struct pattern` is a :t:`pattern` that matches a :t:`enum
+variant value`, a :t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_3px4oiweg9dm`
 The :t:`deconstructee` of a :t:`record struct pattern` shall resolve to an
@@ -751,7 +750,7 @@ A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
 :dp:`fls_as54u97xis8z`
 It is a static error if a :t:`shorthand deconstructor` has only :t:`keyword`
 ``ref`` or :t:`keywords` ``ref`` ``mut``, and its :t:`binding` shadows a
-:t:`constant`, a :t:`unit enum variant`, or a :t:`unit struct`.
+:t:`constant`, a :t:`unit enum variant`, or a :t:`unit struct constant`.
 
 :dp:`fls_8364ueejn5y3`
 A :t:`shorthand deconstructor` is equivalent to a :t:`named deconstructor` where
@@ -791,7 +790,7 @@ variant` or a :t:`record struct`, then
 
 :dp:`fls_8bi8q3usubby`
 If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`tuple enum
-variant` or a :t:`tuple struct`, then
+variant` or a :t:`tuple struct type`, then
 
 * :dp:`fls_1x0o71kxj3yq`
   For each :t:`field` of the :t:`deconstructee`, the :t:`record struct pattern`
@@ -808,7 +807,7 @@ variant` or a :t:`tuple struct`, then
   :t:`deconstructee` have been matched.
 
 :dp:`fls_jwz3arnfkxwn`
-If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union`, then
+If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`, then
 
 * :dp:`fls_pfz8xlwezbw1`
   The :s:`RecordStructPatternContent` of the :t:`record struct
@@ -896,7 +895,7 @@ Tuple Struct Patterns
 
 :dp:`fls_ks6y1syab2bp`
 A :t:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
-variant` or a :t:`tuple struct`.
+variant value` or a :t:`tuple struct value`.
 
 :dp:`fls_t1mrijw16k9a`
 The :t:`deconstructee` of a :t:`tuple struct pattern` shall resolve to a

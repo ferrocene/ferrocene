@@ -461,8 +461,8 @@ base initializer
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_dnuwn2tnvtgy`
-A :dt:`base initializer` is a :t:`construct` that specifies an :t:`enum`,
-a :t:`struct`, or a :t:`union` to be used as a base for construction in a
+A :dt:`base initializer` is a :t:`construct` that specifies an :t:`enum value`,
+a :t:`struct value`, or a :t:`union value` to be used as a base for construction in a
 :t:`struct expression`.
 
 :dp:`fls_mprzem71zlhy`
@@ -839,7 +839,7 @@ call expression
 
 :dp:`fls_a9ap0tyk2eou`
 A :dt:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
-:t:`tuple struct` or :t:`tuple enum variant`.
+:t:`tuple struct value` or :t:`tuple enum variant value`.
 
 :dp:`fls_aibti9uqrmmd`
 See :s:`CallExpression`.
@@ -850,8 +850,9 @@ call operand
 ^^^^^^^^^^^^
 
 :dp:`fls_cqnko94y4xbs`
-A :dt:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
-:t:`tuple enum variant` being constructed by a :t:`call expression`.
+A :dt:`call operand` is the :t:`function` being invoked or the :t:`tuple struct value` or
+:t:`tuple enum variant value` being constructed by a :t:`call expression`.
+
 
 :dp:`fls_w6wu4wi6srjj`
 See :s:`CallOperand`.
@@ -863,7 +864,7 @@ callee type
 
 :dp:`fls_o21myf6wnnn6`
 A :dt:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant` or a :t:`type`
 that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
 :std:`core::ops::FnOnce` :t:`[trait]s`.
 
@@ -1168,7 +1169,7 @@ constructee
 ^^^^^^^^^^^
 
 :dp:`fls_Twbu94uGW4Cb`
-A :dt:`constructee` indicates the :t:`enum variant` or :t:`type` whose value is
+A :dt:`constructee` indicates the :t:`enum variant`, :t:`struct` or :t:`union` whose value is
 being constructed by a :t:`struct expression`.
 
 .. _fls_39s6od9hj4g6:
@@ -1573,7 +1574,7 @@ enum
 ^^^^
 
 :dp:`fls_9o0ig19xh2f5`
-An :dt:`enum` is a :t:`value` of an :t:`enum type`.
+An :dt:`enum` is an :t:`item` that declares an :t:`enum type`.
 
 .. _fls_grlluqa4ucp3:
 
@@ -1587,16 +1588,33 @@ variant]s`.
 :dp:`fls_o6ih6n1z1566`
 See :s:`EnumDeclaration`.
 
+.. _fls_H6aUAUjNlx6z:
+
+enum value
+^^^^^^^^^^
+
+:dp:`fls_QdBTdVLB2xHk`
+An :dt:`enum value` is a :t:`value` of an :t:`enum type`.
+
 .. _fls_klwlx5jixwud:
 
 enum variant
 ^^^^^^^^^^^^
 
 :dp:`fls_9jq4keg9y94u`
-An :dt:`enum variant` specifies a :t:`value` of an :t:`enum type`.
+An :dt:`enum variant` is a construct that declares one of the
+possible variations of an :t:`enum`.
 
 :dp:`fls_tj2s55onen6b`
 See :s:`EnumVariant`.
+
+.. _fls_mKxBWCojhnWu:
+
+enum variant value
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_VQRqNPFFWmDp`
+An :dt:`enum variant value` is the :t:`enum value` of the corresponding :t:`enum` of the :t:`enum variant`.
 
 .. _fls_alifv570nx7q:
 
@@ -3755,8 +3773,8 @@ path pattern
 ^^^^^^^^^^^^
 
 :dp:`fls_vacvk3t26ctg`
-A :dt:`path pattern` is a :t:`pattern` that matches a :t:`constant`, an :t:`enum
-variant` without :t:`[field]s`, or a :t:`unit struct` indicated by a :t:`path`.
+A :dt:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a :t:`unit enum
+variant`, or a :t:`unit struct constant` indicated by a :t:`path`.
 
 :dp:`fls_9fudbxoyq8k4`
 See :s:`PathPattern`.
@@ -4145,7 +4163,7 @@ record struct
 ^^^^^^^^^^^^^
 
 :dp:`fls_qyd7kqnpjs2`
-A :dt:`record struct` is a :t:`value` of a :t:`record struct type`.
+A :dt:`record struct` is a :t:`struct` with named :t:`[field]s`.
 
 .. _fls_hzkwzbk5wp54:
 
@@ -4164,9 +4182,8 @@ record struct pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7njznxhmmw`
-A :dt:`record struct pattern` is a :t:`pattern` that matches a :t:`record enum
-variant`, a :t:`record struct`, a :t:`tuple enum variant`, a :t:`tuple struct`,
-a :t:`union`, a :t:`unit enum variant`, or a :t:`unit struct`.
+A :dt:`record struct pattern` is a :t:`pattern` that matches a :t:`enum
+variant value`, a :t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_viwieu1p3hds`
 See :s:`RecordStructPattern`.
@@ -4177,10 +4194,18 @@ record struct type
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_mgrz3o51gbis`
-A :dt:`record struct type` is a :t:`struct type` with named :t:`[field]s`.
+A :dt:`record struct type` is the :t:`type` of a :t:`record struct`.
 
 :dp:`fls_rqs5rdnhkwnx`
 See :s:`RecordStructDeclaration`.
+
+.. _fls_cPs5C1chWmce:
+
+record struct value
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_SMBIc0JMck1H`
+A :dt:`record struct value` is a :t:`value` of a :t:`record struct type`.
 
 .. _fls_94fkxohlnq9i:
 
@@ -4802,7 +4827,7 @@ struct
 ^^^^^^
 
 :dp:`fls_rufylj7qxs1w`
-A :dt:`struct` is a :t:`value` of a :t:`struct type`.
+A :dt:`struct` is an :t:`item` that declares a :t:`struct type`.
 
 .. _fls_dxfyejkbiz3p:
 
@@ -4810,8 +4835,8 @@ struct expression
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_m8n9e0sxyb95`
-A :dt:`struct expression` is an :t:`expression` that constructs a :t:`struct` or
-a :t:`union`.
+A :dt:`struct expression` is an :t:`expression` that constructs an :t:`enum value`, a
+:t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_odm68rhu2j1`
 See :s:`StructExpression`.
@@ -4822,8 +4847,8 @@ struct pattern
 ^^^^^^^^^^^^^^
 
 :dp:`fls_xbtoiwegp8gu`
-A :dt:`struct pattern` is a :t:`pattern` that matches an :t:`enum`, a
-:t:`struct`, or a :t:`union`.
+A :dt:`struct pattern` is a :t:`pattern` that matches an :t:`enum value`, a
+:t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_pn8e50ep2fln`
 See :s:`StructPattern`.
@@ -4839,6 +4864,15 @@ A :dt:`struct type` is an :t:`abstract data type` that is a product of other
 
 :dp:`fls_dhlww4yrnb2v`
 See :s:`StructDeclaration`.
+
+
+.. _fls_GOnQHAsYw1oi:
+
+struct value
+^^^^^^^^^^^^
+
+:dp:`fls_YmZfW9kWlbIX`
+A :dt:`struct value` is a :t:`value` of a :t:`struct type`.
 
 .. _fls_wee9stfk0abp:
 
@@ -5190,7 +5224,7 @@ tuple struct
 ^^^^^^^^^^^^
 
 :dp:`fls_pdcpmapiq491`
-A :dt:`tuple struct` is a :t:`value` of a :t:`tuple struct type`.
+A :dt:`tuple struct` is a :t:`struct` with anonymous :t:`[field]s`.
 
 .. _fls_xx4slbg8s63e:
 
@@ -5210,7 +5244,7 @@ tuple struct pattern
 
 :dp:`fls_gu1mfurivnfz`
 A :dt:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
-variant` or a :t:`tuple struct`.
+variant value` or a :t:`tuple struct value`.
 
 :dp:`fls_3jx5683mdm10`
 See :s:`TupleStructPattern`.
@@ -5221,10 +5255,19 @@ tuple struct type
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hhikx5ajx3bl`
-A :dt:`tuple struct type` is a :t:`struct type` with anonymous :t:`[field]s`.
+A :dt:`tuple struct type` is the :t:`type` of a :t:`tuple struct`.
 
 :dp:`fls_1tj4p05m4wdf`
 See :s:`TupleStructDeclaration`.
+
+.. _fls_x4ALCJKhVDZF:
+
+tuple struct value
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_xz1p4pss2Ocn`
+A :dt:`tuple struct value` is a :t:`value` of a :t:`tuple struct type`.
+
 
 .. _fls_k4yz7i2pf9wp:
 
@@ -5455,15 +5498,7 @@ union
 ^^^^^
 
 :dp:`fls_x3oibk39dvem`
-A :dt:`union` is a :t:`value` of a :t:`union type`.
-
-.. _fls_Rwtgq904NoaL:
-
-unit enum variant
-^^^^^^^^^^^^^^^^^
-
-:dp:`fls_y6fI5L3Tghie`
-A :dt:`unit enum variant` is an :t:`enum variant` without any :t:`[field]s`.
+A :dt:`union` is an :t:`item` that declares a :t:`union type`.
 
 .. _fls_71xvazpwi8p0:
 
@@ -5484,13 +5519,53 @@ A :dt:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 :dp:`fls_fgvjogfz8ink`
 See :s:`UnionDeclaration`.
 
+.. _fls_2QRQMeA3OSVl:
+
+union value
+^^^^^^^^^^^
+
+:dp:`fls_9BPrxky3a4nE`
+A :dt:`union value` is a :t:`value` of a :t:`union type`.
+
+.. _fls_Rwtgq904NoaL:
+
+unit enum variant
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_y6fI5L3Tghie`
+A :dt:`unit enum variant` is an :t:`enum variant` without any :t:`[field]s`.
+
 .. _fls_f3hmx9qya258:
 
 unit struct
 ^^^^^^^^^^^
 
 :dp:`fls_9t7fu8fcak6k`
-A :dt:`unit struct` is a :t:`record struct type` without any :t:`[field]s`.
+A :dt:`unit struct` is a :t:`struct` without any :t:`[field]s`.
+
+.. _fls_jdvEnl8F7I8R:
+
+unit struct constant
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_lLGn4JqddeAg`:
+A :dt:`unit struct constant` is a :t:`constant` implicitly created by a :t:`unit struct`.
+
+.. _fls_6j2wnOmBILJa:
+
+unit struct type
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_oIzmvACNeQpE`
+A :dt:`unit struct type` is the :t:`type` of a :t:`unit struct`.
+
+.. _fls_CXp8fgPrBVUe:
+
+unit struct value
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Kr9nGIjx3N4R`
+A :dt:`unit struct value` is a :t:`value` of a :t:`unit struct type`.
 
 .. _fls_wmn9mcqae88q:
 

@@ -45,10 +45,10 @@ Scope
 
 :dp:`fls_srdq4mota5pr`
 This document specifies the form and meaning of programs written in the
-programming language Rust, as implemented by the :c:`rustc` compiler shipped
+programming language Rust, as implemented by the :t:`rustc` compiler shipped
 with Ferrocene. It documents the current understanding for the purposes of
 compiler validation. As such, given any doubt, it prefers documenting behavior
-of :c:`rustc` as included in the associated Ferrocene release over claiming
+of :t:`rustc` as included in the associated Ferrocene release over claiming
 correctness as a specification.
 
 :dp:`fls_dv1qish8svc`
@@ -120,7 +120,7 @@ Structure
 ~~~~~~~~~
 
 :dp:`fls_6lrqailxjb02`
-This document contains 21 chapters, 4 appendices, and an index.
+This document contains 21 chapters, 2 appendices, and an index.
 
 :dp:`fls_tys7ciqnp8bn`
 The specification of the Rust language is separated into:
@@ -133,9 +133,6 @@ The specification of the Rust language is separated into:
 
 * :dp:`fls_k6obg07c1i71`
   :doc:`glossary`
-
-* :dp:`fls_az3jhtedgvyi`
-  Syntax Summary
 
 :dp:`fls_6srbinvnyd54`
 The specification is normative, except for the material in each of the items
@@ -155,9 +152,6 @@ The following appendices are informative:
 
 * :dp:`fls_yfyiaipc9omp`
   :doc:`glossary`
-
-* :dp:`fls_qt3pzt1xhoup`
-  Syntax Summary
 
 :dp:`fls_jc4upf6685bw`
 Each chapter is divided into subchapters that have a common structure. Each
@@ -246,8 +240,8 @@ external interactions:
   exported :t:`function` to an external caller;
 
 * :dp:`fls_qx9fxf4py0j0`
-  The :t:`[value]s` of imported and exported :t:`[object]s` at the time of any
-  other interaction with the external environment.
+  The imported and exported :t:`[value]s` at the time of any other interaction
+  with the external environment.
 
 :dp:`fls_pl0fyjcwslqm`
 A tool that conforms to this document shall produce for the execution of a given
@@ -329,7 +323,7 @@ Backus-Naur form. In particular:
 
 .. syntax::
 
-   CrateRenaming?
+   IntegerSuffix?
 
 * :dp:`fls_6e2vd9fvhsmk`
   A prefix followed by ``*`` (asterisk) is used to denote zero or more

@@ -5224,7 +5224,7 @@ tuple struct
 ^^^^^^^^^^^^
 
 :dp:`fls_pdcpmapiq491`
-A :dt:`tuple struct type` is a :t:`struct` with anonymous :t:`[field]s`.
+A :dt:`tuple struct` is a :t:`struct` with anonymous :t:`[field]s`.
 
 .. _fls_xx4slbg8s63e:
 

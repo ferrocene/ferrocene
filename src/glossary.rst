@@ -1588,12 +1588,12 @@ variant]s`.
 :dp:`fls_o6ih6n1z1566`
 See :s:`EnumDeclaration`.
 
-.. _FIXME:
+.. _fls_H6aUAUjNlx6z:
 
 enum value
 ^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_QdBTdVLB2xHk`
 An :dt:`enum value` is a :t:`value` of an :t:`enum type`.
 
 .. _fls_klwlx5jixwud:
@@ -1608,12 +1608,12 @@ possible variations of an :t:`enum`.
 :dp:`fls_tj2s55onen6b`
 See :s:`EnumVariant`.
 
-.. _FIXME:
+.. _fls_mKxBWCojhnWu:
 
 enum variant value
 ^^^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_VQRqNPFFWmDp`
 An :dt:`enum variant value` is the :t:`enum value` of the corresponding :t:`enum` of the :t:`enum variant`.
 
 .. _fls_alifv570nx7q:
@@ -4199,12 +4199,12 @@ A :dt:`record struct type` is the :t:`type` of a :t:`record struct`.
 :dp:`fls_rqs5rdnhkwnx`
 See :s:`RecordStructDeclaration`.
 
-.. _FIXME:
+.. _fls_cPs5C1chWmce:
 
 record struct value
 ^^^^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_SMBIc0JMck1H`
 A :dt:`record struct value` is a :t:`value` of a :t:`record struct type`.
 
 .. _fls_94fkxohlnq9i:
@@ -4866,12 +4866,12 @@ A :dt:`struct type` is an :t:`abstract data type` that is a product of other
 See :s:`StructDeclaration`.
 
 
-.. _FIXME:
+.. _fls_GOnQHAsYw1oi:
 
 struct value
 ^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_YmZfW9kWlbIX`
 A :dt:`struct value` is a :t:`value` of a :t:`struct type`.
 
 .. _fls_wee9stfk0abp:
@@ -5260,12 +5260,12 @@ A :dt:`tuple struct type` is the :t:`type` of a :t:`tuple struct`.
 :dp:`fls_1tj4p05m4wdf`
 See :s:`TupleStructDeclaration`.
 
-.. _FIXME:
+.. _fls_x4ALCJKhVDZF:
 
 tuple struct value
 ^^^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_xz1p4pss2Ocn`
 A :dt:`tuple struct value` is a :t:`value` of a :t:`tuple struct type`.
 
 
@@ -5500,15 +5500,6 @@ union
 :dp:`fls_x3oibk39dvem`
 A :dt:`union` is an :t:`item` that declares a :t:`union type`.
 
-.. _fls_xh2hrh7ainl5:
-
-union constructor
-^^^^^^^^^^^^^^^^^
-
-:dp:`fls_2qa7a5rcjn42`
-A :dt:`union constructor` is a :t:`struct expression` that constructs a
-:t:`union`.
-
 .. _fls_71xvazpwi8p0:
 
 union field
@@ -5528,12 +5519,12 @@ A :dt:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 :dp:`fls_fgvjogfz8ink`
 See :s:`UnionDeclaration`.
 
-.. _FIXME:
+.. _fls_2QRQMeA3OSVl:
 
 union value
 ^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_9BPrxky3a4nE`
 A :dt:`union value` is a :t:`value` of a :t:`union type`.
 
 .. _fls_Rwtgq904NoaL:
@@ -5552,28 +5543,28 @@ unit struct
 :dp:`fls_9t7fu8fcak6k`
 A :dt:`unit struct` is a :t:`struct` without any :t:`[field]s`.
 
-.. _FIXME:
+.. _fls_jdvEnl8F7I8R:
 
 unit struct constant
 ^^^^^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`:
+:dp:`fls_lLGn4JqddeAg`:
 A :dt:`unit struct constant` is a :t:`constant` implicitly created by a :t:`unit struct`.
 
-.. _FIXME:
+.. _fls_6j2wnOmBILJa:
 
 unit struct type
 ^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_oIzmvACNeQpE`
 A :dt:`unit struct type` is the :t:`type` of a :t:`unit struct`.
 
-.. _FIXME:
+.. _fls_CXp8fgPrBVUe:
 
 unit struct value
 ^^^^^^^^^^^^^^^^^
 
-:dp:`FIXME`
+:dp:`fls_Kr9nGIjx3N4R`
 A :dt:`unit struct value` is a :t:`value` of a :t:`unit struct type`.
 
 .. _fls_wmn9mcqae88q:

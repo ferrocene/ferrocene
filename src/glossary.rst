@@ -1213,7 +1213,7 @@ crate import
 A :dt:`crate import` specifies a dependency on an external :t:`crate`.
 
 :dp:`fls_nmdxagg39hz6`
-See :s:`ExternCrateImport`.
+See :s:`ExternalCrateImport`.
 
 .. _fls_yf9yjzzhw0rn:
 

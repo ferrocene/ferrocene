@@ -19,8 +19,8 @@ Items
        VisibilityModifier? (
            ConstantDeclaration
          | EnumDeclaration
-         | ExternBlock
-         | ExternCrateImport
+         | ExternalBlock
+         | ExternalCrateImport
          | FunctionDeclaration
          | Implementation
          | ModuleDeclaration
@@ -39,9 +39,9 @@ Items
 .. rubric:: Legality Rules
 
 :dp:`fls_s3b1cba9lfj5`
-The :t:`expansion` of a :t:`terminated macro invocation` is treated as zero
-or more :t:`[item]s` if the :t:`terminated macro invocation` appears as an
-:t:`item`.
+The :t:`macro expansion` of a :t:`terminated macro invocation` is treated as
+zero or more :t:`[item]s` if the :t:`terminated macro invocation` appears as
+an :t:`item`.
 
 .. rubric:: Dynamic Semantics
 

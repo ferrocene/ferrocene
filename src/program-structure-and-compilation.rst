@@ -149,7 +149,7 @@ External Crates
 
 .. syntax::
 
-   ExternCrateImport ::=
+   ExternalCrateImport ::=
        $$extern$$ $$crate$$ CrateIndication Renaming? $$;$$
 
    CrateIndication ::=

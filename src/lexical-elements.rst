@@ -443,6 +443,7 @@ Identifiers
 
    RawIdentifier ::=
        $$r#$$ (PureIdentifier | RawIdentifierKeyword)
+
    PureIdentifier ::=
        XID_Start XID_Continue*
      | $$_$$ XID_Continue+
@@ -565,8 +566,8 @@ Byte Literals
        $$b'$$ ByteContent $$'$$
 
    ByteContent ::=
-       ByteEscape
-     | ByteCharacter
+       ByteCharacter
+     | ByteEscape
 
    ByteEscape ::=
      | $$\0$$
@@ -752,16 +753,21 @@ Integer Literals
 
    HexadecimalLiteral ::=
        $$0x$$ HexadecimalDigitOrUnderscore* HexadecimalDigit HexadecimalDigitOrUnderscore*
+
    HexadecimalDigitOrUnderscore ::=
        HexadecimalDigit
      | $$_$$
+
    HexadecimalDigit ::=
        [$$0$$-$$9$$ $$a$$-$$f$$ $$A$$-$$F$$]
+
    OctalLiteral ::=
        $$0o$$ OctalDigitOrUnderscore* OctalDigit OctalDigitOrUnderscore*
+
    OctalDigitOrUnderscore ::=
        OctalDigit
      | $$_$$
+
    OctalDigit ::=
        [$$0$$-$$7$$]
 
@@ -776,6 +782,7 @@ Integer Literals
      | $$i64$$
      | $$i128$$
      | $$isize$$
+
    UnsignedIntegerSuffix ::=
        $$u8$$
      | $$u16$$
@@ -1205,7 +1212,7 @@ An :t:`inner block doc` is a :t:`block comment` that applies to an enclosing
 :t:`non-[comment]` :t:`construct`.
 
 :dp:`fls_tspijl68lduc`
-An :t:`inner line doc` is a :t:`line doc` that applies to an enclosing
+An :t:`inner line doc` is a :t:`line comment` that applies to an enclosing
 :t:`non-[comment]` :t:`construct`.
 
 :dp:`fls_63gzofa9ktic`

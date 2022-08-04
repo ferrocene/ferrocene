@@ -2678,7 +2678,7 @@ inner line doc
 ^^^^^^^^^^^^^^
 
 :dp:`fls_vtwavwjhgvlz`
-An :dt:`inner line doc` is a :t:`line doc` that applies to an enclosing
+An :dt:`inner line doc` is a :t:`line comment` that applies to an enclosing
 :t:`non-[comment]` :t:`construct`.
 
 :dp:`fls_8cnikewkqs7`

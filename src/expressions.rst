@@ -2881,16 +2881,16 @@ Struct Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_ij8rebvupb85`
-A :t:`struct expression` is an :t:`expression` that constructs an :t:`enum`, a
-:t:`struct`, or a :t:`union`.
+A :t:`struct expression` is an :t:`expression` that constructs an :t:`enum value`, a
+:t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_4z91ymz3ciup`
-A :t:`constructee` indicates the :t:`enum variant` or :t:`type` whose value is
+A :t:`constructee` indicates the :t:`enum variant`, :t:`struct` or :t:`union` whose value is
 being constructed by a :t:`struct expression`.
 
 :dp:`fls_uib1ml41mfrn`
-A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum`,
-a :t:`struct`, or a :t:`union` to be used as a base for construction in a
+A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`,
+a :t:`struct value`, or a :t:`union value` to be used as a base for construction in a
 :t:`struct expression`.
 
 :dp:`fls_gfu267bpl9ql`
@@ -2963,8 +2963,8 @@ The :t:`type` of a :t:`struct expression` is the :t:`type` of the
 :t:`constructee`.
 
 :dp:`fls_sjwd8o5mknjo`
-The :t:`value` of a :t:`struct expression` is the :t:`enum`, :t:`struct`, or
-:t:`union` in construction.
+The :t:`value` of a :t:`struct expression` is the :t:`enum value`, :t:`struct value`, or
+:t:`union value` in construction.
 
 :dp:`fls_ccqomsereni2`
 If the :t:`constructee` is a :t:`record enum variant` or a :t:`record struct`,
@@ -3006,7 +3006,7 @@ then
   :t:`constructee` have been matched.
 
 :dp:`fls_ywh3nk6emwmw`
-If the :t:`constructee` is a :t:`union`, then
+If the :t:`constructee` is a :t:`union type`, then
 
 * :dp:`fls_5w9lj5dc84p`
   The :t:`struct expression` shall not contain a :t:`base initializer`.
@@ -3105,19 +3105,19 @@ Call Expressions
 
 :dp:`fls_fvgfx17ossd9`
 A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
-:t:`tuple struct` or :t:`tuple enum variant`.
+:t:`tuple struct value` or :t:`tuple enum variant value`.
 
 :dp:`fls_jvz5z3eqxb39`
 An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_7ql1c71eidg8`
-A :t:`call operand` is the :t:`function` being invoked or the :t:`tuple struct` or
-:t:`tuple enum variant` being constructed by a :t:`call expression`.
+A :t:`call operand` is the :t:`function` being invoked or the :t:`tuple struct value` or
+:t:`tuple enum variant value` being constructed by a :t:`call expression`.
 
 :dp:`fls_4t6imtiw6kzt`
 A :t:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, a :t:`tuple struct`, a :t:`tuple enum variant` or a :t:`type`
+pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant` or a :t:`type`
 that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
 :std:`core::ops::FnOnce` :t:`[trait]s`.
 
@@ -3376,7 +3376,7 @@ context`.
 :dp:`fls_an3no949lvfw`
 Writing to the :t:`selected field` of a :t:`union` where the :t:`type` of the
 :t:`selected field` implements the :std:`core::marker::Copy` :t:`trait` or the
-:std:`core::mem::ManuallyDrop` :t:`trait` shall require :t:`safe context`.
+:std:`core::mem::ManuallyDrop` :t:`trait` shall not require :t:`unsafe context`.
 
 :dp:`fls_t6xmsm2nk1bc`
 Writing to and then reading from the :t:`selected field` of a :t:`union`

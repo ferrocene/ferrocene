@@ -621,7 +621,7 @@ Enum Type
 
 :dp:`fls_gbdd37seqoab`
 An :t:`enum type` is an :t:`abstract data type` that contains :t:`[enum
-variant]s`. An :t:`enum variant` specifies a :t:`value` of an :t:`enum type`.
+variant]s`.
 
 :dp:`fls_il9a1olqmu38`
 A :t:`zero-variant enum type` has no :t:`[value]s`.

@@ -305,6 +305,13 @@ Passing :dt:`by value` is either passing :t:`by copy` or passing :t:`by move`.
 A :t:`value` of a :t:`reference type` is passed :dt:`by reference`. Passing
 :t:`by reference` temporarily changes the :t:`owner` of the :t:`value`.
 
+:dp:`fls_JUNnLwhPSwUO`
+Passing :dt:`by immutable reference` is passing :t:`by reference` where the
+:t:`value` is :t:`immutable`.
+
+:dp:`fls_WW0GvbiEnyiW`
+Passing :dt:`by unique immutable reference` is ??? HELP LUKAS!
+
 :dp:`fls_v4eqq6tst4gs`
 Passing :dt:`by mutable reference` is passing :t:`by reference` where the
 :t:`value` is :t:`mutable`.

@@ -14,7 +14,7 @@ ABI
 ^^^
 
 :dp:`fls_4ko8qcah0f9k`
-See :t:`Abstract Binary Interface`.
+For :dt:`ABI`, see :t:`Abstract Binary Interface`.
 
 .. _fls_g791aj7w5iz1:
 
@@ -443,13 +443,21 @@ An :dt:`attribute macro` is a :t:`procedural macro` that consumes two streams
 of :t:`[token]s` to produce a stream of tokens, and defines a new :t:`outer
 attribute` that can be attached to :t:`[item]s`.
 
+.. _fls_24iVIlHhvnVO:
+
+auto trait
+^^^^^^^^^^
+
+:dp:`fls_d84nTOR4pZq5`
+An :dt:`auto trait` is ??? HELP LUKAS!
+
 .. _fls_n4oo89apywk4:
 
 await expression
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_psbc3b8pec47`
-An :t:`await expression` is an :t:`expression` that polls a :t:`future`,
+An :dt:`await expression` is an :t:`expression` that polls a :t:`future`,
 suspending the execution of the future until the future is ready.
 
 :dp:`fls_29gkp9bpo1hi`
@@ -1394,6 +1402,14 @@ A :dt:`discriminant initializer` provides the :t:`value` of a :t:`discriminant`.
 :dp:`fls_g5obc23vigng`
 See :s:`DiscriminantInitializer`.
 
+.. _fls_a0ezuPLtENme:
+
+discriminant type
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_t4yeovFm83Wo`
+A :dt:`discriminant type` is the :t:`type` of a :t:`discriminant`.
+
 .. _fls_ccv27fji08ou:
 
 division assignment expression
@@ -1517,7 +1533,7 @@ elided
 ^^^^^^
 
 :dp:`fls_lo3c3n9wy6qz`
-See :t:`elided lifetime`.
+For :dt:`elided`, see :t:`elided lifetime`.
 
 .. _fls_l2181y5566ck:
 
@@ -1602,7 +1618,7 @@ enum variant
 ^^^^^^^^^^^^
 
 :dp:`fls_9jq4keg9y94u`
-An :dt:`enum variant` is a construct that declares one of the
+An :dt:`enum variant` is a :t:`construct` that declares one of the
 possible variations of an :t:`enum`.
 
 :dp:`fls_tj2s55onen6b`
@@ -1633,9 +1649,9 @@ error propagation expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_5kebgodxtqqt`
-An :t:`error propagation expression` is an :t:`expression` that either evaluates
-to a :t:`value` of its :t:`operand` or returns a value to the next control flow
-boundary.
+An :dt:`error propagation expression` is an :t:`expression` that either
+evaluates to a :t:`value` of its :t:`operand` or returns a value to the next
+control flow boundary.
 
 :dp:`fls_agyqvyda3rcj`
 See :s:`ErrorPropagationExpression`.
@@ -1823,6 +1839,14 @@ Foreign Function Interface
 :t:`external block`, :t:`[external function]s`, linkage, and :t:`type`
 :t:`layout` to interface a Rust program with foreign code.
 
+.. _fls_7gCAbHnGEIl6:
+
+field
+^^^^^
+
+:dp:`fls_uAkrgfFTK2YV`
+A :dt:`field` is an element of an :t:`abstract data type`.
+
 .. _fls_yipl7ajrbs6y:
 
 field access expression
@@ -2006,6 +2030,18 @@ A :dt:`function pointer type` is an :t:`indirection type` that refers to a
 :dp:`fls_t50umpk5abjy`
 See :s:`FunctionPointerTypeSpecification`.
 
+.. _fls_v3V6K4S5UhIF:
+
+function pointer type parameter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_nF1k90JJWq2K`
+A :dt:`function pointer type parameter` is a :t:`function parameter` of a
+:t:`function pointer type`.
+
+:dp:`fls_vvy6qogy0xnb`
+See :s:`FunctionPointerTypeParameter`.
+
 .. _fls_2uvom1x42dcs:
 
 function qualifier
@@ -2035,7 +2071,8 @@ function type
 ^^^^^^^^^^^^^
 
 :dp:`fls_4e19116glgtv`
-**What are the characteristics of a function type?**
+A :dt:`function type` is either a :t:`closure type` or a
+:t:`function item type`.
 
 .. _fls_gzybxk1gosm6:
 
@@ -2126,6 +2163,15 @@ generic struct
 :dp:`fls_mcb2mlklith8`
 A :dt:`generic struct` is a :t:`struct` with :t:`[generic parameter]s`.
 
+.. _fls_VBEBshUrAOKE:
+
+generic substitution
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Led1Nxfcd70K`
+A :dt:`generic substitution` is the replacement of a :t:`generic parameter`
+with a :t:`generic actual`.
+
 .. _fls_hppo1v3ia4wu:
 
 generic trait
@@ -2133,6 +2179,14 @@ generic trait
 
 :dp:`fls_h515f11akr91`
 A :dt:`generic trait` is a :t:`trait` with :t:`[generic parameter]s`.
+
+.. _fls_3Ss6jDgtF1of:
+
+generic type
+^^^^^^^^^^^^
+
+:dp:`fls_Zn2pIsMZoTry`
+A :dt:`generic type` is ??? HELP LUKAS!
 
 .. _fls_18ow0q8at1pi:
 
@@ -2800,6 +2854,14 @@ defines the compile- and run-time semantics of a program.
 :dp:`fls_xd997kd2i73a`
 See :s:`Item`.
 
+.. _fls_2yPpT2kPT5ys:
+
+item signature
+^^^^^^^^^^^^^^
+
+:dp:`fls_jZ7vlrcEDDLg`
+An :dt:`item signature` is ??? HELP LUKAS!
+
 .. _fls_yaurxo4ogfsh:
 
 item statement
@@ -3357,6 +3419,14 @@ multiplication.
 :dp:`fls_34bkl5i75q5`
 See :s:`MultiplicationExpression`.
 
+.. _fls_yM11Bcxn4p7c:
+
+mutability
+^^^^^^^^^^
+
+:dp:`fls_lBrXj9lo4s6o`
+:dt:`Mutability` determines whether a :t:`construct` can modify a :t:`value`.
+
 .. _fls_wvejcadmzt5p:
 
 mutable
@@ -3627,6 +3697,14 @@ An :dt:`operator expression` is an :t:`expression` that involves an operator.
 :dp:`fls_qdszbyeuo7w1`
 See :s:`OperatorExpression`.
 
+.. _fls_C5DiCsvsaBsj:
+
+opt-out trait bound
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_wS4EzN0N1GDP`
+An :dt:`opt-out trait bound` is ??? HELP LUKAS!
+
 .. _fls_gllzixm9yt9w:
 
 outer attribute
@@ -3856,6 +3934,14 @@ plane
 :dp:`fls_x1wbguoqdsf9`
 In :t:`Unicode`, a :dt:`plane` is a continuous group of 65,536 :t:`[code
 point]s`.
+
+.. _fls_o5o1ssqqD7Jg:
+
+pointer type
+^^^^^^^^^^^^
+
+:dp:`fls_F2dUxEa4nheL`
+A :dt:`pointer type` is a :t:`type` whose values indicate memory locations.
 
 .. _fls_ukvdoqo68y5b:
 
@@ -4143,7 +4229,7 @@ receiver
 ^^^^^^^^
 
 :dp:`fls_7043m672z8w`
-See :t:`self parameter`.
+For :dt:`receiver`, see :t:`self parameter`.
 
 .. _fls_nfb3ciarl50w:
 
@@ -4442,6 +4528,15 @@ rustc
 Rust-c (or :dt:`rustc`) is a compiler that implements the Ferrocene Language
 Specification.
 
+.. _fls_XeMNghZZOBqL:
+
+scalar type
+^^^^^^^^^^^
+
+:dp:`fls_GgBqFW2NywoA`
+A :dt:`scalar type` is either a :c:`bool` :t:`type`, a :c:`char` :t:`type`, or
+a :t:`numeric type`.
+
 .. _fls_fj8mdxi967px:
 
 scope
@@ -4465,7 +4560,7 @@ Self
 ^^^^
 
 :dp:`fls_q6whqbfusswf`
-:dt:`Self` is either an implicit :t:`type parameter` in :t:`[trait]s` or an
+:dc:`Self` is either an implicit :t:`type parameter` in :t:`[trait]s` or an
 implicit :t:`type alias` in :t:`[implementation]s`. :t:`Self` refers to the
 :t:`type` that implements a :t:`trait`.
 
@@ -4719,6 +4814,14 @@ or an :t:`array type`.
 :dp:`fls_228ioayvdguv`
 See :s:`SizeOperand`.
 
+.. _fls_oiaoWEQQDE7I:
+
+sized type
+^^^^^^^^^^
+
+:dp:`fls_pwcgsRCNSwKn`
+A :dt:`sized type` is a :t:`type` with statically known size.
+
 .. _fls_srkftses9sxn:
 
 slice
@@ -4769,7 +4872,7 @@ statement
 ^^^^^^^^^
 
 :dp:`fls_faijgwg4lhp9`
-:t:`A statement is a component of a block expression.`
+A :dt:`statement` is a component of a block expression.
 
 :dp:`fls_th7edvxml3mn`
 :t:`See Statement.`
@@ -4848,6 +4951,14 @@ A :dt:`struct expression` is an :t:`expression` that constructs an :t:`enum valu
 
 :dp:`fls_odm68rhu2j1`
 See :s:`StructExpression`.
+
+.. _fls_OT6dJ7CWkSTG:
+
+struct field
+^^^^^^^^^^^^
+
+:dp:`fls_8Z9YWMnrHXJS`
+A :dt:`struct field` is a :t:`field` of a :t:`struct type`.
 
 .. _fls_ook43xes5t34:
 
@@ -4945,6 +5056,14 @@ subtrait
 
 :dp:`fls_wnj95vozis6n`
 A :dt:`subtrait` is a :t:`trait` with a :t:`supertrait`.
+
+.. _fls_pu4zqJ1tGrfH:
+
+subtype
+^^^^^^^
+
+:dp:`fls_pmkjOWsieQog`
+A :dt:`subtype` is a :t:`type` with additional constraints.
 
 .. _fls_f5dxz8pvs1kz:
 
@@ -5142,6 +5261,15 @@ A :dt:`trait object type` is a :t:`type` that implements a :t:`trait`, where the
 :dp:`fls_d632mc5c8qwt`
 See :s:`TraitObjectTypeSpecification`, :s:`TraitObjectTypeSpecificationOneBound`.
 
+.. _fls_nfdfeFVZRC5F:
+
+trait type
+^^^^^^^^^^
+
+:dp:`fls_JQsQnQ0dTHlS`
+A :dt:`trait type` is either an :t:`impl trait type` or a
+:t:`trait object type`.
+
 .. _fls_sl62718i1kkn:
 
 transparent representation
@@ -5193,7 +5321,7 @@ tuple field
 ^^^^^^^^^^^
 
 :dp:`fls_8rq1gbzij5tk`
-A :dt:`tuple field` is an element of a :t:`tuple type`.
+A :dt:`tuple field` is a :t:`field` of a :t:`tuple type`.
 
 .. _fls_6uwwat9j4x7y:
 
@@ -5483,13 +5611,21 @@ Unicode
 :dt:`Unicode` is the colloquial name for the ISO/IEC 10646:2017 Universal Coded
 Character Set standard.
 
+.. _fls_y7m6AentM6Ik:
+
+unifiable
+^^^^^^^^^
+
+:dp:`fls_01BNTCL4u8Gn`
+For :dt:`unifiable`, see :t:`unify`.
+
 .. _fls_u03p4rvz1jhs:
 
 unifiable types
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_jsbggfitv9xk`
-Two :t:`[type]s` that :t:`unify` are said to be *[unifiable type]s*.
+Two :t:`[type]s` that :t:`unify` are said to be :dt:`[unifiable type]s`.
 
 .. _fls_da6ssnmmsevo:
 
@@ -5498,7 +5634,7 @@ unify
 
 :dp:`fls_mango4gffb9e`
 A :t:`type` is said to :dt:`unify` with another type when the domains, ranges,
-and structures of both types are compatible.
+and structures of both :t:`[type]s` are compatible.
 
 .. _fls_8qljy9e1jjcb:
 
@@ -5534,6 +5670,14 @@ union value
 
 :dp:`fls_9BPrxky3a4nE`
 A :dt:`union value` is a :t:`value` of a :t:`union type`.
+
+.. _fls_Is9hWLC6Q0g5:
+
+unique immutable borrow
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_eXrivAmNxzmv`
+HELP LUKAS!
 
 .. _fls_Rwtgq904NoaL:
 
@@ -5584,7 +5728,7 @@ unit tuple
 ^^^^^^^^^^
 
 :dp:`fls_vo1jw6rmu4yy`
-See :t:`unit type`.
+A :dt:`unit tuple` is a :t:`value` of the :t:`unit type`.
 
 .. _fls_t32yfzmpid5a:
 
@@ -5743,6 +5887,14 @@ unsized coercion
 An :dt:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized
 type` into an :t:`unsized type`.
 
+.. _fls_KiVgO7I3UUhh:
+
+unsized type
+^^^^^^^^^^^^
+
+:dp:`fls_M9NpzBH8Wf4z`
+An :dt:`unsized type` is a :t:`type` with statically unknown size.
+
 .. _fls_4ph9cact2scc:
 
 unsuffixed float
@@ -5847,6 +5999,26 @@ variance
 parameter]s` that describes the circumstances under which a :t:`generic type`
 is a :t:`subtype` of an instantiation of itself with different :t:`[generic
 argument]s`.
+
+.. _fls_RIe80XOF8VlA:
+
+variadic part
+^^^^^^^^^^^^^
+
+:dp:`fls_ePnTyLoqJ1i7`
+A :dt:`variadic part` indicates the presence of :t:`C`-like optional
+parameters.
+
+:dp:`fls_z9D86gBFbKB5`
+See :s:`VariadicPart`.
+
+.. _fls_AYmsHgbNcW8r:
+
+variant conformant
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_MfiPifTsTzgM`
+HELP LUKAS!
 
 .. _fls_svx87y4p8fdx:
 

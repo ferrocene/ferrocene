@@ -1841,7 +1841,7 @@ field list
 ^^^^^^^^^^
 
 :dp:`fls_xMZsrxMc9Cni`
-A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList.
+A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList`.
 
 .. _fls_kqbata8slp1y:
 

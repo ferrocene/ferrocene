@@ -1835,13 +1835,13 @@ of a :t:`value`.
 :dp:`fls_luetyuwu54d6`
 See :s:`FieldAccessExpression`.
 
-.. _fls_8qLL14WfXXNN
+.. _fls_8qLL14WfXXNN:
 
 field list
 ^^^^^^^^^^
 
 :dp:`fls_xMZsrxMc9Cni`
-A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList.
+A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList`.
 
 .. _fls_kqbata8slp1y:
 

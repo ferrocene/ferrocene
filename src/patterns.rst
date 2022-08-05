@@ -961,6 +961,49 @@ See :p:`5.1.9.1. <fls_nruvg0es3kx7>` for the declarations of ``TupleStruct`` and
        TupleStruct ( .. ) => (),
    }
 
+.. _fls_urbr5rg9206v:
+
+Tuple Patterns
+~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   TuplePattern ::=
+       $$($$ TuplePatternElementList? $$)$$
+   TuplePatternElementList ::=
+       Pattern $$,$$
+     | PatternList
+     | RestPattern
+
+.. rubric:: Legality Rules
+
+:dp:`fls_e2manugp4e0b`
+A :t:`tuple pattern` is a :t:`pattern` that matches a :t:`tuple` which satisfies
+all criteria defined by its :t:`[subpattern]s`.
+
+:dp:`fls_xk8udu4k61kj`
+A :t:`tuple pattern` is :t:`irrefutable` when all of its :t:`[subpattern]s`
+are :t:`irrefutable`.
+
+:dp:`fls_yhcaz6v49ub2`
+The :t:`type` of a :t:`tuple pattern` is the :t:`type` of the :t:`tuple` being
+destructured.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   let pair = (1, "two");
+
+:dp:`fls_8r81vtv5hnrd`
+A tuple pattern in the context of a let statement.
+
+.. syntax::
+
+   let (first, second) = pair;
+
 .. _fls_qfsfnql1t7m:
 
 Wildcard Patterns

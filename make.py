@@ -34,7 +34,7 @@ def build_docs(root, env, builder, clear, serve):
                 dest / builder,
             ],
             check=False,
-        )
+        ).check_returncode()
     except KeyboardInterrupt:
         pass
 

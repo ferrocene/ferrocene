@@ -1835,6 +1835,14 @@ of a :t:`value`.
 :dp:`fls_luetyuwu54d6`
 See :s:`FieldAccessExpression`.
 
+.. _fls_8qLL14WfXXNN
+
+field list
+^^^^^^^^^^
+
+:dp:`fls_xMZsrxMc9Cni`
+A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList.
+
 .. _fls_kqbata8slp1y:
 
 field selector
@@ -4155,7 +4163,7 @@ record enum variant
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_NWyvPQmOIjo2`
-A :dt:`record enum variant` is an :t:`enum variant` with named :t:`[field]s`.
+A :dt:`record enum variant` is an :t:`enum variant` with a :s:`RecordStructFieldList`.
 
 .. _fls_jdd6h8pdp30x:
 
@@ -4163,7 +4171,10 @@ record struct
 ^^^^^^^^^^^^^
 
 :dp:`fls_qyd7kqnpjs2`
-A :dt:`record struct` is a :t:`struct` with named :t:`[field]s`.
+A :dt:`record struct` is a :t:`struct` with a :s:`RecordStructFieldList`.
+
+:dp:`fls_rqs5rdnhkwnx`
+See :s:`RecordStructDeclaration`.
 
 .. _fls_hzkwzbk5wp54:
 
@@ -4195,9 +4206,6 @@ record struct type
 
 :dp:`fls_mgrz3o51gbis`
 A :dt:`record struct type` is the :t:`type` of a :t:`record struct`.
-
-:dp:`fls_rqs5rdnhkwnx`
-See :s:`RecordStructDeclaration`.
 
 .. _fls_cPs5C1chWmce:
 
@@ -5166,7 +5174,7 @@ tuple enum variant
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_eduQhUYBEkVx`
-A :dt:`tuple enum variant` is an :t:`enum variant` with anonymous :t:`[field]s`.
+A :dt:`tuple enum variant` is an :t:`enum variant` with a :s:`TupleStructFieldList`.
 
 .. _fls_udl6ujjg1jae:
 
@@ -5224,7 +5232,10 @@ tuple struct
 ^^^^^^^^^^^^
 
 :dp:`fls_pdcpmapiq491`
-A :dt:`tuple struct` is a :t:`struct` with anonymous :t:`[field]s`.
+A :dt:`tuple struct` is a :t:`struct` with a :s:`TupleStructFieldList`.
+
+:dp:`fls_1tj4p05m4wdf`
+See :s:`TupleStructDeclaration`.
 
 .. _fls_xx4slbg8s63e:
 
@@ -5256,9 +5267,6 @@ tuple struct type
 
 :dp:`fls_hhikx5ajx3bl`
 A :dt:`tuple struct type` is the :t:`type` of a :t:`tuple struct`.
-
-:dp:`fls_1tj4p05m4wdf`
-See :s:`TupleStructDeclaration`.
 
 .. _fls_x4ALCJKhVDZF:
 
@@ -5533,7 +5541,7 @@ unit enum variant
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_y6fI5L3Tghie`
-A :dt:`unit enum variant` is an :t:`enum variant` without any :t:`[field]s`.
+A :dt:`unit enum variant` is an :t:`enum variant` without a :t:`field list`.
 
 .. _fls_f3hmx9qya258:
 
@@ -5541,7 +5549,10 @@ unit struct
 ^^^^^^^^^^^
 
 :dp:`fls_9t7fu8fcak6k`
-A :dt:`unit struct` is a :t:`struct` without any :t:`[field]s`.
+A :dt:`unit struct` is a :t:`struct` without a :t:`field list`.
+
+:dp:`fls_mSuiysAVczPx`
+See :s:`UnitStructDeclaration`.
 
 .. _fls_jdvEnl8F7I8R:
 

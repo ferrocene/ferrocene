@@ -605,17 +605,11 @@ Enum Type
 
    EnumVariantKind ::=
        DiscriminantInitializer
-     | RecordEnumVariant
-     | TupleEnumVariant
+     | RecordStructFieldList
+     | TupleStructFieldList
 
    DiscriminantInitializer ::=
        $$=$$ Expression
-
-   RecordEnumVariant ::=
-       $${$$ RecordStructFieldList? $$}$$
-
-   TupleEnumVariant ::=
-       $$($$ TupleStructFieldList? $$)$$
 
 .. rubric:: Legality Rules
 
@@ -714,27 +708,28 @@ Struct Type
    StructDeclaration ::=
        RecordStructDeclaration
      | TupleStructDeclaration
+     | UnitStructDeclaration
 
    RecordStructDeclaration ::=
-       $$struct$$ Name GenericParameterList? WhereClause? (RecordStructSpecification | $$;$$)
-
-   RecordStructSpecification ::=
-       $${$$ RecordStructFieldList? $$}$$
+       $$struct$$ Name GenericParameterList? WhereClause? RecordStructFieldList
 
    RecordStructFieldList ::=
-       RecordStructField ($$,$$ RecordStructField)* $$,$$?
+       $${$$ (RecordStructField ($$,$$ RecordStructField)* $$,$$?)? $$}$$
 
    RecordStructField ::=
        OuterAttributeOrDoc* VisibilityModifier? Name TypeAscription
 
    TupleStructDeclaration ::=
-       $$struct$$ Name GenericParameterList? $$($$ TupleStructFieldList? $$)$$ WhereClause? $$;$$
+       $$struct$$ Name GenericParameterList? TupleStructFieldList WhereClause? $$;$$
 
    TupleStructFieldList ::=
-       TupleStructField ($$,$$ TupleStructField)* $$,$$?
+       $$($$ (TupleStructField ($$,$$ TupleStructField)* $$,$$?)? $$)$$
 
    TupleStructField ::=
        OuterAttributeOrDoc* VisibilityModifier? TypeSpecification
+
+   UnitStructDeclaration ::=
+       $$struct$$ Name GenericParameterList? WhereClause? $$;$$
 
 .. rubric:: Legality Rules
 
@@ -784,7 +779,7 @@ Union Type
 .. syntax::
 
    UnionDeclaration ::=
-       $$union$$ Name GenericParameterList? WhereClause? RecordStructSpecification
+       $$union$$ Name GenericParameterList? WhereClause? RecordStructFieldList
 
 .. rubric:: Legality Rules
 

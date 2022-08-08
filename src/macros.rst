@@ -149,7 +149,7 @@ A :t:`fragment specifier` is a :t:`construct` that indicates the :t:`type` of
 a :t:`metavariable`.
 
 :dp:`fls_8o9mcV2KrKac`
-:t:`[metavariable]s` with the following :t:`[fragment specifier]s` have restrictions on what may follow them in a :s:`MacroMatcher`:
+:t:`[metavariable]s` have :t:`[fragment specifier restriction]s` on what may follow them in a :s:`MacroMatcher`:
 
 * :dp:`fls_PxR9vNHsaFnI`
   ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
@@ -178,6 +178,9 @@ a :t:`metavariable`.
   any token that may begin a :s:`TypeSpecification`, or a :t:`metavariable` with
   the ``ident``, ``ty`` or ``block`` :t:`fragment specifier` kind.
 
+* :dp:`fls_lZ8F1zUJju33`
+  Any other kind may be followed by any token.
+
 .. rubric:: Examples
 
 .. code-block:: rust
@@ -196,7 +199,10 @@ Repetition
 .. syntax::
 
    MacroRepetitionMatch ::=
-       $$$$$ $$($$ MacroMatch* $$)$$ MacroRepetitionSeparator? MacroRepetitionOperator
+       $$$$$ $$($$ MacroRepetitionMatchContent $$)$$ MacroRepetitionSeparator? MacroRepetitionOperator
+
+   MacroRepetitionMatchContent ::=
+       MacroMatch*
 
    MacroRepetitionTranscriber ::=
        $$$$$ $$($$ TokenTree* $$)$$ MacroRepetitionSeparator? MacroRepetitionOperator
@@ -237,6 +243,34 @@ The effects of a :t:`repetition operator` are as follows:
 
 * :dp:`fls_10lsg5212ffb`
   ``?`` - Zero or one repetition.
+
+:dp:`fls_UnfvR9NB1Nze`
+A :t:`repetition` has the following additional restrictions:
+
+* :dp:`fls_Sm4qVsHKYLY2`
+  If the :t:`repetition` has a :t:`separator`, the :t:`separator` shall be
+  allowed by the :s:`MacroRepetitionMatchContent`'s
+  :t:`[fragment specifier restriction]s`.
+
+* :dp:`fls_Rdvs8Dz6OUU7`
+  If the :t:`repetition operator` is ``*`` or ``+``, then the
+  possible beginnings of the :s:`MacroRepetitionMatchContent` shall be allowed
+  by its :s:`MacroRepetitionMatchContent`'s
+  :t:`[fragment specifier restriction]s`.
+
+* :dp:`fls_UIlj6Csow81w`
+  If the :t:`repetition operator` is ``?`` or ``*``, then the succeeding
+  :s:`MacroMatch` must be allowed by the preceding :s:`MacroMatch`'s
+  :t:`[fragment specifier restriction]s`.
+
+* :dp:`fls_yp2XxDv4DzEi`
+  The possible beginnings of the :s:`MacroRepetitionMatchContent` must be
+  allowed by the preceding :s:`MacroMatch`'s
+  :t:`[fragment specifier restriction]s`.
+
+* :dp:`fls_n5TkJKWiDhCD`
+  The succeeding :s:`MacroMatch` must be allowed by the possible endings of the
+  :s:`MacroRepetitionMatchContent`'s :t:`[fragment specifier restriction]s`.
 
 .. rubric:: Examples
 

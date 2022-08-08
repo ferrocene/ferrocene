@@ -1680,7 +1680,7 @@ A :t:`function pointer type` is unifiable only with another :t:`function pointer
 type` when:
 
 * :dp:`fls_rmqcbb5ja4va`
-  The :t:`[lifetime]s` are :t:`variant` conformant, and
+  The :t:`[lifetime]s` are :t:`variance`-conformant, and
 
 * :dp:`fls_uu8je75y5pss`
   The :t:`unsafety` is the same, and
@@ -1724,7 +1724,7 @@ A :t:`reference type` is unifiable only with another :t:`reference type` when:
 An :t:`anonymous return type` is unifiable with another :t:`type` when:
 
 * :dp:`fls_j3w9ap9zaqud`
-  The :t:`[lifetime]s` are :t:`variant` conformant, and
+  The :t:`[lifetime]s` are :t:`variance`-conformant, and
 
 * :dp:`fls_yvllot5qnc4s`
   The other :t:`type` implements all :t:`[trait]s` specified by the

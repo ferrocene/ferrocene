@@ -449,7 +449,7 @@ auto trait
 ^^^^^^^^^^
 
 :dp:`fls_d84nTOR4pZq5`
-An :dt:`auto trait` is ??? HELP LUKAS!
+An :dt:`auto trait` is a :t:`trait` declared with :t:`keyword` ``auto``.
 
 .. _fls_n4oo89apywk4:
 
@@ -2186,7 +2186,7 @@ generic type
 ^^^^^^^^^^^^
 
 :dp:`fls_Zn2pIsMZoTry`
-A :dt:`generic type` is ??? HELP LUKAS!
+A :dt:`generic type` is a :t:`type` with a :t:`generic parameter`.
 
 .. _fls_18ow0q8at1pi:
 
@@ -3703,7 +3703,8 @@ opt-out trait bound
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_wS4EzN0N1GDP`
-An :dt:`opt-out trait bound` is ??? HELP LUKAS!
+An :dt:`opt-out trait bound` is a :t:`trait bound` which negates the
+:t:`implementation` of a :t:`trait`.
 
 .. _fls_gllzixm9yt9w:
 
@@ -6011,14 +6012,6 @@ parameters.
 
 :dp:`fls_z9D86gBFbKB5`
 See :s:`VariadicPart`.
-
-.. _fls_AYmsHgbNcW8r:
-
-variant conformant
-^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_MfiPifTsTzgM`
-HELP LUKAS!
 
 .. _fls_svx87y4p8fdx:
 

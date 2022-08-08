@@ -113,7 +113,7 @@ Lexical Elements, Separators, and Punctuation
      | $$-=$$
      | $$*=$$
      | $$/=$$
-     | $$&=$$
+     | $$%=$$
      | $$^=$$
      | $$&=$$
      | $$|=$$

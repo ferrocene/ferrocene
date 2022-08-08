@@ -392,7 +392,7 @@ The following names are used when referring to :t:`[punctuator]s`:
      - Right arrow
    * - :dp:`fls_oh62j9unw4mg`
      - ``=>``
-     - Fat arrow
+     - Fat arrow, Hashrocket
    * - :dp:`fls_g0tltt8qmbum`
      - ``#``
      - Pound

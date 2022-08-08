@@ -148,6 +148,36 @@ A :t:`metavariable` is a :t:`macro match` that describes a :t:`variable`.
 A :t:`fragment specifier` is a :t:`construct` that indicates the :t:`type` of
 a :t:`metavariable`.
 
+:dp:`fls_8o9mcV2KrKac`
+:t:`[metavariable]s` with the following :t:`[fragment specifier]s` have restrictions on what may follow them in a :s:`MacroMatcher`:
+
+* :dp:`fls_PxR9vNHsaFnI`
+  ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
+
+* :dp:`fls_DFMRwsWI8e5z`
+  ``stmt`` shall only be followed by ``=>``, ``,``, or ``;``.
+
+* :dp:`fls_80cOMpIMU2gx`
+  ``pat_param`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
+
+* :dp:`fls_ePyoTeJJ11N0`
+  ``pat`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
+
+* :dp:`fls_0j7VOV4ewfeY`
+  ``path`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,
+  ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with the ``block`` :t:`fragment
+  specifier` kind.
+
+* :dp:`fls_BoIGgrFdyhwH`
+  ``ty`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,
+  ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with the ``block`` :t:`fragment
+  specifier` kind.
+
+* :dp:`fls_NBbygZwUxjFp`
+  ``vis`` shall only be followed by ``,``, an :t:`identifier` except for ``priv``,
+  any token that may begin a :s:`TypeSpecification`, or a :t:`metavariable` with
+  the ``ident``, ``ty`` or ``block`` :t:`fragment specifier` kind.
+
 .. rubric:: Examples
 
 .. code-block:: rust

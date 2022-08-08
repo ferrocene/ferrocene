@@ -154,12 +154,6 @@ a :t:`metavariable`.
 * :dp:`fls_PxR9vNHsaFnI`
   ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
 
-* :dp:`fls_DFMRwsWI8e5z`
-  ``stmt`` shall only be followed by ``=>``, ``,``, or ``;``.
-
-* :dp:`fls_80cOMpIMU2gx`
-  ``pat_param`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
-
 * :dp:`fls_ePyoTeJJ11N0`
   ``pat`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
 
@@ -167,6 +161,12 @@ a :t:`metavariable`.
   ``path`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,
   ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with the ``block`` :t:`fragment
   specifier` kind.
+
+* :dp:`fls_80cOMpIMU2gx`
+  ``pat_param`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
+
+* :dp:`fls_DFMRwsWI8e5z`
+  ``stmt`` shall only be followed by ``=>``, ``,``, or ``;``.
 
 * :dp:`fls_BoIGgrFdyhwH`
   ``ty`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,

@@ -973,12 +973,9 @@ transcription, the metavariable indication is replaced with the matched sequence
 of :t:`[token]s` of the corresponding iteration of the repetition. metavariable
 taken from the ordered collection.
 
-:dp:`fls_vqc2lsa9dozk`
-When transcribing a metavariable
-
 :dp:`fls_9n46ugmcqmix`
 A metavariable indication in a macro repetition in transcription shall be
-transcribed to the matched tokens in order,
+transcribed to the matched tokens in order, as follows:
 
 .. code-block:: rust
 
@@ -998,7 +995,7 @@ transcribed to the matched tokens in order,
      2
    }
 
-   0;1;2;
+yields ``0;1;2;``
 
 :dp:`fls_95rn4cvgznmd`
 Given a macro invocation with N metavariable actuals, a macro of the form

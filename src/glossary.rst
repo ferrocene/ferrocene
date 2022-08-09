@@ -3444,7 +3444,6 @@ mutable binding
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_v2pGKVaQjtcl`
-
 A :dt:`mutable binding` is a :t:`binding` whose :t:`value` can be modified.
 
 .. _fls_iku91jwdtdr1:

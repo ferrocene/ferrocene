@@ -240,15 +240,15 @@ Mutably :t:`borrowing` a :t:`value` proceeds as follows:
 
 .. code-block:: rust
 
-   let immutable_borrow = &42;
+   let mutable_borrow = &42;
 
 :dp:`fls_lfgophgm7jd8`
-Variable ``immutable_borrow`` is captured as a unique immutable borrow.
+Variable ``mutable_borrow`` is captured as a unique immutable borrow.
 
 .. code-block:: rust
 
-   let unique_immutable_borrow = || *immutable_borrow = 1;
-   let mutable_borrow = &mut 42;
+   let unique_immutable_borrow = || *mutable_borrow = 1;
+   let immutable_borrow = &mut 42;
 
 .. _fls_77scxuomlbgs:
 

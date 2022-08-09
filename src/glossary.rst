@@ -5670,7 +5670,9 @@ unique immutable borrow
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_eXrivAmNxzmv`
-HELP LUKAS!
+A :dt:`unique immutable borrow` is an :t:`immutable reference` produced by
+:t:`capturing` that is asserted to be the only live :t:`reference` to the :t:`value`
+while the :t:`reference` exists.
 
 .. _fls_Rwtgq904NoaL:
 

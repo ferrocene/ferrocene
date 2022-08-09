@@ -1159,17 +1159,21 @@ inference`.
 :dp:`fls_3abhsuaa8nas`
 An :t:`inferred type` shall not appear in the following positions:
 
-  * :dp:`fls_gE9VC8JXrl1N`
-  within the :s:`TypeAscription` of a :s:`ConstantDeclaration`, :s:`StaticDeclaration`, :s:`ConstantParameter`, :s:`RecordStructField`, `:s:`TypedSelf` or :s:`FunctionParameterPattern`,
-
   * :dp:`fls_hBXlJhbhuoHY`
-  within the :s:`InitializationType` of a :s:`TypeAliasDeclaration`,
-
-  * :dp:`fls_ybyQjFamI1Q5`
-  within the :s:`TypeSpecification` of a :s:`TypeParameter`, :s:`TypeBoundPredicate`, :s:`ImplementingType`, :s:`FunctionParameter` or :s:`TupleStructField`,
+  Within the :s:`InitializationType` of a :s:`TypeAliasDeclaration`,
 
   * :dp:`fls_Vxlr9ZcqiOvY`
-  within the :s:`ReturnType` of a :s:`FunctionDeclaration`.
+  Within the :s:`ReturnType` of a :s:`FunctionDeclaration`,
+
+  * :dp:`fls_gE9VC8JXrl1N`
+  Within the :s:`TypeAscription` of a :s:`ConstantDeclaration`, a
+  :s:`ConstantParameter`, a :s:`FunctionParameterPattern`, a
+  :s:`RecordStructField`, a :s:`StaticDeclaration`, or a `:s:`TypedSelf`,
+
+  * :dp:`fls_ybyQjFamI1Q5`
+  Within the :s:`TypeSpecification` of a :s:`FunctionParameter`, an
+  :s:`ImplementingType`, a :s:`TupleStructField`, a :s:`TypeBoundPredicate`, or
+  a :s:`TypeParameter`.
 
 :dp:`fls_9d8wbugmar1m`
 An :t:`inferred type` forces a tool to deduce a :t:`type`, if possible.

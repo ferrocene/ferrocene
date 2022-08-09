@@ -4784,7 +4784,7 @@ within the :t:`capturing expression`, as follows:
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      :t:`By immutable borrow` mode.
+      :t:`By immutable reference` mode.
 
    #. :dp:`fls_wmxsd0i2yemf`
       :t:`By unique immutable reference` mode, if the :t:`capture target` is a

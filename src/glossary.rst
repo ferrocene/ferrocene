@@ -5666,13 +5666,13 @@ A :dt:`union value` is a :t:`value` of a :t:`union type`.
 
 .. _fls_Is9hWLC6Q0g5:
 
-unique immutable borrow
-^^^^^^^^^^^^^^^^^^^^^^^
+unique immutable reference
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_eXrivAmNxzmv`
-A :dt:`unique immutable borrow` is an :t:`immutable reference` produced by
-:t:`capturing` that is asserted to be the only live :t:`reference` to the :t:`value`
-while the :t:`reference` exists.
+A :dt:`unique immutable reference` is an :t:`immutable reference` produced by
+:t:`capturing` what is asserted to be the only live :t:`reference` to a
+:t:`value` while the :t:`reference` exists.
 
 .. _fls_Rwtgq904NoaL:
 

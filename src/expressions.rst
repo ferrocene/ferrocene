@@ -139,13 +139,7 @@ operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
   :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
 
 * :dp:`fls_1tsdlpgkgb2u`
-  :t:`[Struct expression]s` of :t:`[assignee expression]s`,
-
-* :dp:`fls_horl3qcfdb0k`
-  :t:`[Tuple struct expression]s` of :t:`[assignee expression]s`,
-
-* :dp:`fls_nriu5ajnu2i6`
-  :t:`[Unit struct expression]s`.
+  :t:`[Struct expression]s` of :t:`[assignee expression]s`.
 
 :dp:`fls_1smb3tj9pxsq`
 :t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
@@ -245,7 +239,7 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_axwrv7b3zt55`
   :t:`[Path expression]s` that resolve to :t:`[associated constant]s`,
-  :t:`[constant]s`, :t:`[constant generic parameter]s`, :t:`[function]s`,
+  :t:`[constant]s`, :t:`[constant parameter]s`, :t:`[function]s`,
   :t:`[static]s`, :t:`[tuple struct]s`, and  :t:`[unit struct]s`,
 
 * :dp:`fls_3bucpdj828bq`
@@ -282,7 +276,7 @@ operator]s` of non-builtin :t:`[type]s` that invoke :std:`core::ops`
 :t:`[trait]s`.
 
 :dp:`fls_9mrrosm8jnn7`
-An :t:`arithmetic expression` that operates with :t:`[floating point value]s` is
+An :t:`arithmetic expression` that operates with :t:`[floating-point value]s` is
 not considered a :t:`constant expression` when it appears inside the body of a
 :t:`constant function`.
 
@@ -299,10 +293,10 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
   :t:`constant`,
 
 * :dp:`fls_3of516eo0kkx`
-  The :t:`constant argument` for a :t:`constant generic parameter`,
+  The :t:`constant argument` for a :t:`constant parameter`,
 
 * :dp:`fls_yiks5bvojncc`
-  The :t:`default value` of a :t:`constant generic parameter`,
+  The :t:`default value` of a :t:`constant parameter`,
 
 * :dp:`fls_66m2hwkju0vv`
   The :t:`discriminant initializer` of an :t:`enum variant`,
@@ -323,21 +317,22 @@ context`.
 :dp:`fls_od0h3v40kjp6`
 An invocation of the ``addr_of!()`` :t:`macro` expands to a :t:`constant
 expression` allowed in any :t:`constant context` and :t:`constant function`,
-subject to the same restrictions as a :t:`shared borrow expression`.
+subject to the same restrictions as a :t:`mutable borrow expression`.
 
 :dp:`fls_6sc556tz4oxd`
 An invocation of the ``panic!()`` :t:`macro` expands to a :t:`constant
 expression` allowed in any :t:`constant context` and :t:`constant function`,
-as long as the :t:`macro` is either invoked without :t:`[argument]s`, or
+as long as the :t:`macro` is either invoked without arguments, or
 with a single :t:`string literal` that does not :t:`capture` formatting
-:t:`[argument]s`.
+arguments.
 
 :dp:`fls_b1vfpvsdv38`
 A :t:`constant expression` is evaluated statically whenever its :t:`value` is
 needed.
 
 :dp:`fls_b46nyamfqxdu`
-The :t:`evaluation` of a :t:`constant expression` that results in :t:`arithmetic overflow` :t:`[panic]s`.
+The :t:`evaluation` of a :t:`constant expression` that results in
+:t:`arithmetic overflow` :t:`[panic]s`.
 
 :dp:`fls_ms9vey2wymqp`
 It is a static error if a :t:`constant expression` either :t:`[panic]s` or
@@ -405,7 +400,7 @@ context]s`:
   The initialization :t:`expression` of a :t:`let statement`,
 
 * :dp:`fls_brwv1zwu37e8`
-  The :t:`subject expression` of :t:`a match expression,`
+  The :t:`subject expression` of a :t:`match expression,`
 
 * :dp:`fls_qewvbxvk81d`
   The :t:`base initializer` of a :t:`struct expression`,
@@ -429,6 +424,12 @@ A :t:`place expression` can be moved out of when it denotes
 :dp:`fls_wuqjaigxdq3r`
 After a :t:`place expression` is moved out, the memory location it represented
 is deinitialized and shall not be read from until reinitialized.
+
+:dp:`fls_cPEMHZtPkctX`
+An :t:`immutable place expression` is a :t:`place expression` whose memory
+location cannot be modified.
+
+HELP LUKAS! What are the immutable place expressions?
 
 :dp:`fls_ku38h562vfyl`
 A :t:`mutable place expression` is a :t:`place expression` whose memory location
@@ -669,7 +670,9 @@ async Blocks
 .. rubric:: Legality Rules
 
 :dp:`fls_hhidi5ukxo`
-An :t:`async block expression` is a :t:`block expression` that **???**.
+An :t:`async block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``async`` and encapsulates behavior which is executed in
+asynchronous manner.
 
 :dp:`fls_eam1cqbjlfs0`
 An :t:`async block expression` is a :t:`value expression`.
@@ -716,8 +719,8 @@ unsafe Blocks
 .. rubric:: Legality Rules
 
 :dp:`fls_2az5huhcxzzy`
-An :t:`unsafe block expression` is a :t:`block expression` that is marked as
-:t:`unsafe`.
+An :t:`unsafe block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``unsafe``.
 
 :dp:`fls_5ucvvja4dzoc`
 An :t:`unsafe block expression` allows :t:`unsafety`.
@@ -953,10 +956,7 @@ Error Propagation Expression
 .. syntax::
 
    ErrorPropagationExpression ::=
-       Operand ErrorPropagationOperator
-
-   ErrorPropagationOperator ::=
-       $$?$$
+       Operand $$?$$
 
 .. rubric:: Legality Rules
 
@@ -992,7 +992,7 @@ expression` is a :t:`value expression` context.
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_alk4qvfprnvy`
-The :t:`evaluation` of an :t:`error propagation operator` of the form
+The :t:`evaluation` of an :t:`error propagation expression` of the form
 
 .. code-block:: rust
 
@@ -1001,7 +1001,7 @@ The :t:`evaluation` of an :t:`error propagation operator` of the form
 :dp:`fls_1nnhjcgy8kdh`
 is equivalent to the :t:`evaluation` the following :t:`expression`:
 
-.. syntax::
+.. code-block:: rust
 
    match core::ops::Try::branch(expression) {
        core::ops::ControlFlow::Continue(value) =>
@@ -1430,16 +1430,16 @@ The :t:`value` of a :t:`shift left expression` is the result of
 ``core::ops::Shl::shl(left_operand, right_operand)``.
 
 :dp:`fls_onutb0b9p9zj`
-The :t:`type` of the :t:`left operand` of a :t:`shift right operation` shall
+The :t:`type` of the :t:`left operand` of a :t:`shift right expression` shall
 implement the :std:`core::ops::Shr` :t:`trait` where the :t:`type` of the
 :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_yq8rtwfp3nv0`
-The :t:`type` of a :t:`shift right operation` is :t:`associated type`
+The :t:`type` of a :t:`shift right expression` is :t:`associated type`
 :std:`core::ops::Shr::Output`.
 
 :dp:`fls_fbazfgd5m1ot`
-The :t:`value` of a :t:`shift right operation` is the result of
+The :t:`value` of a :t:`shift right expression` is the result of
 ``core::ops::Shr::shr(left_operand, right_operand)``.
 
 :dp:`fls_2z6wble3u8ec`
@@ -1869,7 +1869,7 @@ A :t:`type cast expression` with the following characteristics performs a
 
 * :dp:`fls_le6bchl25ewz`
   An :t:`operand` of an :t:`enum type` and a target :t:`integer type`
-  perform :t:`enum cast`. An *enum cast* converts the :t:`operand` to its
+  perform :t:`enum cast`. An :dt:`enum cast` converts the :t:`operand` to its
   :t:`discriminant`, followed by a :t:`numeric cast`.
 
 * :dp:`fls_pcromhosmnf0`
@@ -1882,10 +1882,11 @@ A :t:`type cast expression` with the following characteristics performs a
     to zero.
 
   * :dp:`fls_jea17f39fmsg`
-    Converts an :t:`operand` of type :c:`bool` with :t:`value` ``true`` to one.
+    Converts an :t:`operand` of :t:`type` :c:`bool` with :t:`value` ``true``
+    to one.
 
   * :dp:`fls_eb00s8fxlvjb`
-    Convert an :t:`operand` of type :c:`char` to the :t:`value` of the
+    Convert an :t:`operand` of :t:`type` :c:`char` to the :t:`value` of the
     corresponding :t:`code point`, followed by a :t:`numeric cast`.
 
 * :dp:`fls_qk5trk8wkvxb`
@@ -1896,44 +1897,44 @@ A :t:`type cast expression` with the following characteristics performs a
 * :dp:`fls_t16yzaxro5ew`
   An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` and a
   :t:`target type` ``*const V`` or ``*mut V`` where ``V`` implements the
-  :std:`core::marker::Sized` :t:`trait` performs :t:`pointer-to-pointer cast`.
+  :std:`core::marker::Sized` :t:`trait` performs pointer-to-pointer cast.
 
 * :dp:`fls_i4zsbbmfa2fl`
   An :t:`operand` of :t:`type` ``*const T`` or ``*mut T`` where ``T`` implements
   the :std:`core::marker::Sized` :t:`trait` and a target :t:`integer type`
   perform :t:`pointer-to-address cast`. A :dt:`pointer-to-address cast` produces
-  an :t:`integer` that represents the machine address of the referenced memory.
-  If the :t:`integer type` is smaller than the :t:`type` of the :t:`operand`,
-  the address is truncated.
+  an integer that represents the machine address of the referenced memory. If
+  the :t:`integer type` is smaller than the :t:`type` of the :t:`operand`, the
+  address is truncated.
 
 * :dp:`fls_59mpteeczzo`
   An :t:`operand` of :t:`integer type` and :t:`target type` ``*const V`` or
   ``*mut V`` where ``V`` implements the :std:`core::marker::Sized` :t:`trait`
   perform :t:`address-to-pointer cast`. An :dt:`address-to-pointer cast`
-  produces a :t:`pointer` that interprets the :t:`integer` as a machine address.
+  produces a :t:`pointer` that interprets the integer as a machine address.
 
 * :dp:`fls_8ccwlliqw9jx`
   An :t:`operand` of :t:`type` ``&mut [T; N]`` and a :t:`target type` ``*const
-  T`` perform :t:`array-to-pointer cast`.
+  T`` perform array-to-pointer cast.
 
 * :dp:`fls_i8txki3htx92`
   An :t:`operand` of a :t:`function item type` and a :t:`target type` ``*const
   V`` or ``*mut V`` where ``V`` implements the :std:`core::marker::Sized`
-  :t:`trait` perform :t:`function-item-to-pointer cast`.
+  :t:`trait` perform function-item-to-pointer cast.
 
 * :dp:`fls_6hbkvbb1c8aj`
   An :t:`operand` of a :t:`function item type` and a target :t:`integer type`
-  perform :t:`function-to-address cast`.
+  perform function-to-address cast.
 
 * :dp:`fls_133j6xw8k4qe`
   An :t:`operand` of a :t:`function pointer type` and a :t:`target
   type` ``*const V`` or ``*mut V`` where ``V`` implements the
-  :std:`core::marker::Sized` :t:`trait` perform :t:`function-pointer-to-pointer
-  cast`.
+  :std:`core::marker::Sized` :t:`trait` perform function-pointer-to-pointer
+  cast.
 
 * :dp:`fls_bhw2j9wjpf2x`
   An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
-  perform :t:`function-pointer-to-address cast`.
+  perform function-pointer-to-address cast.
 
 :dp:`fls_3ww5gbk9w4ys`
 A :t:`cast` is legal when it either performs :t:`type coercion` or is a
@@ -1979,33 +1980,33 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
   :t:`type cast expression`
 
 * :dp:`fls_50714cvaqkfv`
-  Returns zero if the :t:`operand` denotes :c:`f32::NaN` or :c:`f64::NaN`
+  Returns zero if the :t:`operand` denotes :std:`f32::NaN` or :std:`f64::NaN`
   respectively.
 
 * :dp:`fls_g3xbmp8zx1yh`
   Saturates the :t:`value` of the :t:`operand` to the maximum :t:`value`
   of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
   exceeds the maximum :t:`value` of the target :t:`integer type` or denotes
-  :c:`f32::INFINITY` or :c:`f64::INFINITY` respectively.
+  :std:`f32::INFINITY` or :std:`f64::INFINITY` respectively.
 
 * :dp:`fls_hcc5odh52bk7`
   Saturates the :t:`value` of the :t:`operand` to the minimum :t:`value`
   of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
   exceeds the minimum :t:`value` of the target :t:`integer type` or denotes
-  :c:`f32::NEG_INFINITY` or :c:`f64::NEG_INFINITY` respectively.
+  :std:`f32::NEG_INFINITY` or :std:`f64::NEG_INFINITY` respectively.
 
 * :dp:`fls_o2ep4b6t287z`
   Casting an :t:`operand` of an :t:`integer type` to a target :t:`floating-point
-  type` produces the closest possible floating point :t:`value`. In addition,
+  type` produces the closest possible floating-point :t:`value`. In addition,
   the :t:`type cast expression`
 
 * :dp:`fls_vfofk2aagsj5`
   Rounds the :t:`value` of the :t:`operand` preferring the :t:`value` with an
-  even least significant digit if exactly halfway between two floating point
+  even least significant digit if exactly halfway between two floating-point
   numbers.
 
 * :dp:`fls_cx86k8yfjhht`
-  Produces :c:`f32::INFINITY` or :c:`f64::INFINITY` of the same sign as the
+  Produces :std:`f32::INFINITY` or :std:`f64::INFINITY` of the same sign as the
   :t:`value` of the :t:`operand` when the :t:`value` of the :t:`operand` causes
   :t:`arithmetic overflow`.
 
@@ -2020,11 +2021,12 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 
 * :dp:`fls_4fd5vkh0jt4`
   Prefers the nearest :t:`value` with an even least significant digit if exactly
-  halfway between two floating point numbers.
+  halfway between two floating-point numbers.
 
 * :dp:`fls_2etd73f8jg2n`
-  Produces :c:`f32::INFINITY` of the same sign as the :t:`value` of the
-  :t:`operand` when the :t:`value` of the :t:`operand` causes :t:`arithmetic overflow`.
+  Produces :std:`f32::INFINITY` of the same sign as the :t:`value` of the
+  :t:`operand` when the :t:`value` of the :t:`operand` causes
+  :t:`arithmetic overflow`.
 
 .. rubric:: Examples
 
@@ -2107,8 +2109,8 @@ The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
    uninitialized :t:`field` of a :t:`variable`.
 
 #. :dp:`fls_hc01gtvlxba`
-   The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
-   the place of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is passed :t:`by value` into the
+   place of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2126,7 +2128,7 @@ Destructuring Assignment
 :dp:`fls_2eheo4yo2orm`
 A :t:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
-expression`, a :t:`tuple expression`, or a :t:`union expression`.
+expression`, or a :t:`tuple expression`.
 
 :dp:`fls_z8c3b9s9de3x`
 The :t:`assignee operand` of a :t:`destructuring assignment` corresponds to an

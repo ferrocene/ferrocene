@@ -153,6 +153,14 @@ from two :t:`[operand]s` using arithmetic.
 :dp:`fls_in59ccg4g3we`
 See :s:`ArithmeticExpression`.
 
+.. _fls_kSuc3Gi7cdly:
+
+arithmetic operator
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Qf7DckakqvRq`
+An :dt:`arithmetic operator` is the operator of an :t:`arithmetic expression`.
+
 .. _fls_vZ1H57x9OFSZ:
 
 arithmetic overflow
@@ -386,7 +394,7 @@ async block
 ^^^^^^^^^^^
 
 :dp:`fls_pf6lrmcjywoj`
-See :t:`async block`.
+For :dt:`async block`, see :t:`async block expression`.
 
 .. _fls_n5m58be9jnjj:
 
@@ -394,7 +402,9 @@ async block expression
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_p6nvfs7bfoxd`
-An :dt:`async block expression` is a :t:`block expression` that **???**.
+An :dt:`async block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``async`` and encapsulates behavior which is executed in
+asynchronous manner.
 
 :dp:`fls_je689rormhd6`
 See :s:`AsyncBlockExpression`.
@@ -885,6 +895,14 @@ canonical path
 A :dt:`canonical path` is a :t:`path` that fully qualifies a :t:`name` starting
 from the current :t:`crate`.
 
+.. _fls_jnfI7rL43dhn:
+
+capture
+^^^^^^^
+
+:dp:`fls_53Q933UcjtJY`
+For :dt:`capture`, see :t:`capturing`.
+
 .. _fls_s78gd8yxx2yv:
 
 capture mode
@@ -1204,6 +1222,14 @@ restarts a :t:`loop expression`.
 :dp:`fls_smwcz2xw9o1f`
 See :s:`ContinueExpression`.
 
+.. _fls_nC4Knv4tpenW:
+
+control flow boundary
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_SmipZJDp02ij`
+A :dt:`control flow boundary` is a ??? HELP LUKAS!
+
 .. _fls_kf8yukhxudw8:
 
 crate
@@ -1381,7 +1407,7 @@ destructuring assignment
 :dp:`fls_7jienn9uzn5k`
 A :dt:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
-expression`, a :t:`tuple expression`, or a :t:`union expression`.
+expression`, or a :t:`tuple expression`.
 
 .. _fls_7vg56eeo0zlg:
 
@@ -1941,13 +1967,21 @@ floating-point type variable
 A :dt:`floating-point type variable` is a :t:`type variable` that can refer only
 to :t:`[floating-point type]s`.
 
+.. _fls_nE6SWuVH7X68:
+
+floating-point value
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rx8cvWPlvel5`
+A :dt:`floating-point value` is a :t:`value` of a :t:`floating-point type`.
+
 .. _fls_dwnvkq8n94h1:
 
 for loop
 ^^^^^^^^
 
 :dp:`fls_gmhh56arsbw8`
-See :t:`for loop expression`.
+For :dt:`for loop`, see :t:`for loop expression`.
 
 .. _fls_vfkqbovqbw86:
 
@@ -2413,6 +2447,15 @@ immutable borrow expression
 An :dt:`immutable borrow expression` is a :t:`borrow expression` that lacks
 :t:`keyword` ``mut``.
 
+.. _fls_TXQzFM77s4uj:
+
+immutable place expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_MXBEZjzBxw5Z`
+An :dt:`immutable place expression` is a :t:`place expression` whose memory
+location cannot be modified.
+
 .. _fls_my7jjwi0ncen:
 
 immutable static
@@ -2651,7 +2694,7 @@ infinite loop
 ^^^^^^^^^^^^^
 
 :dp:`fls_xpm53i3rkuu0`
-See :t:`infinite loop expression`.
+For :dt:`infinite loop`, see :t:`infinite loop expression`.
 
 .. _fls_o2eei5aqgds6:
 
@@ -3437,6 +3480,15 @@ mutable
 
 :dp:`fls_dqm58deu1orn`
 A :t:`value` is :dt:`mutable` when it can be modified.
+
+.. _fls_TEVPHHiCMByO:
+
+mutable assignee expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_0RSlFbwrB3gp`
+A :t:`mutable assignee expression` is an :t:`assignee expression` whose
+:t:`value` can be modified.
 
 .. _fls_ntaA0NtJ9z5h:
 
@@ -5840,7 +5892,7 @@ unsafe block
 ^^^^^^^^^^^^
 
 :dp:`fls_8tkolhmd6xfp`
-See :t:`unsafe block expression`.
+For :dt:`unsafe block`, see :t:`unsafe block expression`.
 
 .. _fls_u8sdp2fxz9pn:
 
@@ -5848,8 +5900,8 @@ unsafe block expression
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_et2h89jyivhs`
-An :dt:`unsafe block expression` is a :t:`block expression` that is marked as
-:t:`unsafe`.
+An :dt:`unsafe block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``unsafe``.
 
 :dp:`fls_c94rudunhp5b`
 See :s:`UnsafeBlockExpression`.
@@ -6130,7 +6182,7 @@ while let loop
 ^^^^^^^^^^^^^^
 
 :dp:`fls_ovutw52qtx71`
-See :t:`while let loop expression`.
+For :dt:`while let loop`, see :t:`while let loop expression`.
 
 .. _fls_gme4odk59x6d:
 
@@ -6151,7 +6203,7 @@ while loop
 ^^^^^^^^^^
 
 :dp:`fls_ug9cxoml9ged`
-See :t:`while loop expression`.
+For :dt:`while loop`, see :t:`while loop expression`.
 
 .. _fls_1qxi3h3qmgso:
 

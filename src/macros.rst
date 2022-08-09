@@ -980,49 +980,25 @@ When transcribing a metavariable
 A metavariable indication in a macro repetition in transcription shall be
 transcribed to the matched tokens in order,
 
-:dp:`fls_u2lq0lr12kdt`
-macro_rules! foo {
+.. code-block:: rust
 
-:dp:`fls_q0fmdb243bbj`
-( $($expr:expr)* ) => {
+   macro_rules! foo {
+       ( $($expr:expr)* ) => {
+           $( $expr ; )*
+           // $expr is an error
+       };
+       ( $( $( $expr:expr )*  )*  ) => {
+           $($($expr)*)*
+       }
+   }
 
-:dp:`fls_5ybrepv7esk8`
-$( $expr ; )*
+   foo! {
+     0
+     1
+     2
+   }
 
-:dp:`fls_2624w1db6ln3`
-// $expr is an error
-
-:dp:`fls_717qmew9z4vs`
-};
-
-:dp:`fls_azsyrzry1gxs`
-| ( $( $( $expr:expr )*  )*  )  => {
-| 		$($($expr)*)*
-|             }
-
-:dp:`fls_aup3whtatvpi`
-}
-
-:dp:`fls_bh3bl0tz392e`
-foo! {
-
-:dp:`fls_2kh21hqfbf30`
-0
-
-:dp:`fls_5xluznklusm1`
-1
-
-:dp:`fls_gsct98unzlne`
-2
-
-:dp:`fls_wcyzipq58fm2`
-}
-
-:dp:`fls_x5oa26asdh9q`
-0;1;2;
-
-:dp:`fls_xu5esg3v2u6i`
-Given a repetition in a macro invocation of the form
+   0;1;2;
 
 :dp:`fls_95rn4cvgznmd`
 Given a macro invocation with N metavariable actuals, a macro of the form

@@ -408,8 +408,13 @@ The sole parameter of the :t:`macro implementation function` captures
 the :t:`token` stream produced from the related :s:`EnumDeclaration`,
 :s:`StructDeclaration`, or :s:`UnionDeclaration`.
 
+:dp:`fls_H5ipqqlH3pJh`
+A :t:`derive macro` adds all its declared :t:`[derive helper attribute]s` into
+the :t:`abstract data type scope` of the :t:`abstract data type` the
+:t:`attribute` is attached to.
+
 :dp:`fls_mobky5ck1mi`
-A :dt:`helper attribute` is an :t:`inert` :t:`attribute` that acts as a hint to
+A :dt:`derive helper attribute` is an :t:`inert` :t:`attribute` that acts as a hint to
 :t:`attribute` :c:`derive`.
 
 .. rubric:: Examples

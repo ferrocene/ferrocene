@@ -1565,6 +1565,10 @@ Attribute ``proc_macro_derive``
 :t:`derive macro`, where :s:`DeriveName` defines the :t:`name` of the :t:`derive
 macro` available to :t:`attribute` :c:`derive`.
 
+:dp:`fls_NydVxyb43TH6`
+The :s:`HelperAttributeList` declares the :t:`[derive helper attribute]s` of
+the :t:`derive macro`.
+
 .. rubric:: Examples
 
 .. code-block:: rust

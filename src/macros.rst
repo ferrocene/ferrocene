@@ -650,20 +650,18 @@ invocation`.
 Expansion of :t:`[function-like macro]s` proceeds as follows:
 
 #. :dp:`fls_srtqkdceaz5t`
-   The :std:`proc_macro::TokenStream` of the :t:`macro invocation` is passed to
-   the sole :t:`function parameter` of the :t:`macro implementation function`.
-   The :std:`proc_macro::TokenStream` captures the :s:`DelimitedTokenTree`
-   without the outer :s:`[Delimiter]s`.
+   The :s:`TokenTree` of the :t:`macro invocation` is transformed into a
+   corresponding :std:`proc_macro::TokenStream`.
 
 #. :dp:`fls_mi92etjtpamu`
-   The :t:`macro implementation function` produces its :t:`output
-   proc_macro::TokenStream`. It is a static error if the
-   :t:`macro implementation function` fails to produce its output
-   :std:`proc_macro::TokenStream`.
+   The :t:`macro implementation function` is called with the
+   :std:`proc_macro::TokenStream` as its sole argument. It is a static error
+   if the :t:`macro implementation function` call fails.
 
 #. :dp:`fls_n8beqlt54rhy`
-   The :t:`macro invocation` is replaced with the result of the :t:`macro
-   transcriber`. It is a static error if the result can not be parsed according
+   The :t:`macro invocation` is replaced with the returned
+   :std:`proc_macro::TokenStream` of the :t:`macro implementation function`
+   call. It is a static error if the result can not be parsed according
    to the expected expansion syntax of the context where the :t:`macro
    invocation` resides. The expected expansion syntax is as follows:
 
@@ -695,20 +693,19 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 Expansion of :t:`[derive macro]s` proceeds as follows:
 
 #. :dp:`fls_grtiwf7q8jah`
-   The :std:`proc_macro::TokenStream` of the related :t:`item` is passed to
-   the sole :t:`function parameter` of the :t:`macro implementation function`.
-   The :std:`proc_macro::TokenStream` captures the :t:`item` subject to the
-   :t:`derive macro` excluding the invoking :t:`attribute` :c:`derive` as well
-   as any preceding :c:`derive` :t:`[attribute]s`.
+   The :t:`item` subject to the :t:`derive macro` is transformed into a
+   corresponding :std:`proc_macro::TokenStream` without the
+   invoking :c:`derive` :t:`attribute` as well as any preceding :c:`derive`
+   :t:`[attribute]s`.
 
 #. :dp:`fls_tbe2qq7whq10`
-   The :t:`macro implementation function` produces its output
-   :std:`proc_macro::TokenStream`. It is a static error if the
-   :t:`macro implementation function` fails to produce its output
-   :std:`proc_macro::TokenStream`.
+   The :t:`macro implementation function` is called with the
+   :std:`proc_macro::TokenStream` as its sole argument. It is a static error
+   if the :t:`macro implementation function` call fails.
 
 #. :dp:`fls_my93neopj9x0`
-   The output :std:`proc_macro::TokenStream` is appended to the enclosing
+   The returned :std:`proc_macro::TokenStream` of the
+   :t:`macro implementation function` call is appended to the enclosing
    :t:`block expression` or :t:`module` where the related :s:`EnumDeclaration`,
    :s:`StructDeclaration`, or :s:`UnionDeclaration` resides. It is a static
    error if the output :std:`proc_macro::TokenStream` does not constitute zero
@@ -718,28 +715,28 @@ Expansion of :t:`[derive macro]s` proceeds as follows:
 The expansion of :t:`[attribute macro]s` proceeds as follows:
 
 #. :dp:`fls_tjn92evtlflq`
-   The :std:`proc_macro::TokenStream` of the invoking :t:`attribute`
-   is passed to the first :t:`function parameter` of the :t:`macro
-   implementation function`. The :std:`proc_macro::TokenStream` captures
-   the :s:`DelimitedTokenTree` without the outer :s:`[Delimiter]s`.
-   If no :s:`DelimitedTokenTree` is provided, then an empty
-   :std:`proc_macro::TokenStream` is passed.
+   The :s:`DelimitedTokenTree` of the invoking :t:`attribute macro` is
+   transformed into a corresponding :std:`proc_macro::TokenStream` without
+   the outer :s:`[Delimiter]s`. If no :s:`DelimitedTokenTree` is provided,
+   and empty :std:`proc_macro::TokenStream` is used. This
+   :std:`proc_macro::TokenStream` constitutes the first :t:`function parameter`
+   of the :t:`macro implementation function`.
 
 #. :dp:`fls_mpgh22bi8caz`
-   The :std:`proc_macro::TokenStream` of the related :t:`item` is passed to the
-   second :t:`function parameter` of the :t:`macro implementation function`. The
-   :std:`proc_macro::TokenStream` captures the :t:`item` subject to the invoking
-   :t:`attribute`, excluding the invoking :t:`attribute`.
+   The :t:`item` subject to the :t:`attribute macro` is transformed into a
+   corresponding :std:`proc_macro::TokenStream` without the invoking
+   :t:`attribute`. This :std:`proc_macro::TokenStream` constitutes the second
+   :t:`function parameter` of the :t:`macro implementation function`.
 
 #. :dp:`fls_ul7nhfyvyzh`
-   The :t:`macro implementation function` produces its output
-   :std:`proc_macro::TokenStream`. It is a static error if the
-   :t:`macro implementation function` fails to produce its output
-   :std:`proc_macro::TokenStream`.
+   The :t:`macro implementation function` is called with the two
+   :std:`[proc_macro::TokenStream]s` as the two arguments. It is a static error
+   if the :t:`macro implementation function` call fails.
 
 #. :dp:`fls_z6xfhf71w10a`
-   The :t:`item` is replaced with the output :std:`proc_macro::TokenStream`.
-   It is a static error if the output :std:`proc_macro::TokenStream` does not
+   The :t:`item` subject to the :t:`attribute macro` is replaced with the
+   returned :std:`proc_macro::TokenStream` of the
+   :t:`macro implementation function` call. It is a static error if the output :std:`proc_macro::TokenStream` does not
    constitute zero or more :t:`[item]s`.
 
 .. _fls_4apk1exafxii:
@@ -978,56 +975,29 @@ transcription, the metavariable indication is replaced with the matched sequence
 of :t:`[token]s` of the corresponding iteration of the repetition. metavariable
 taken from the ordered collection.
 
-:dp:`fls_vqc2lsa9dozk`
-When transcribing a metavariable
-
 :dp:`fls_9n46ugmcqmix`
 A metavariable indication in a macro repetition in transcription shall be
-transcribed to the matched tokens in order,
+transcribed to the matched tokens in order, as follows:
 
-:dp:`fls_u2lq0lr12kdt`
-macro_rules! foo {
+.. code-block:: rust
 
-:dp:`fls_q0fmdb243bbj`
-( $($expr:expr)* ) => {
+   macro_rules! foo {
+       ( $($expr:expr)* ) => {
+           $( $expr ; )*
+           // $expr is an error
+       };
+       ( $( $( $expr:expr )*  )*  ) => {
+           $($($expr)*)*
+       }
+   }
 
-:dp:`fls_5ybrepv7esk8`
-$( $expr ; )*
+   foo! {
+     0
+     1
+     2
+   }
 
-:dp:`fls_2624w1db6ln3`
-// $expr is an error
-
-:dp:`fls_717qmew9z4vs`
-};
-
-:dp:`fls_azsyrzry1gxs`
-| ( $( $( $expr:expr )*  )*  )  => {
-| 		$($($expr)*)*
-|             }
-
-:dp:`fls_aup3whtatvpi`
-}
-
-:dp:`fls_bh3bl0tz392e`
-foo! {
-
-:dp:`fls_2kh21hqfbf30`
-0
-
-:dp:`fls_5xluznklusm1`
-1
-
-:dp:`fls_gsct98unzlne`
-2
-
-:dp:`fls_wcyzipq58fm2`
-}
-
-:dp:`fls_x5oa26asdh9q`
-0;1;2;
-
-:dp:`fls_xu5esg3v2u6i`
-Given a repetition in a macro invocation of the form
+yields ``0;1;2;``
 
 :dp:`fls_95rn4cvgznmd`
 Given a macro invocation with N metavariable actuals, a macro of the form

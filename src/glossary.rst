@@ -2814,7 +2814,7 @@ irrefutable
 ^^^^^^^^^^^
 
 :dp:`fls_vJvIKJhrraSc`
-For :dt:`irrefutabe`, see :t:`irrefutable pattern`.
+For :dt:`irrefutable`, see :t:`irrefutable pattern`.
 
 .. _fls_fgmvmcw2kw5i:
 

@@ -2808,6 +2808,14 @@ expression`.
 :dp:`fls_8713j5lrwqvs`
 See :s:`IntermediateMatchArm`.
 
+.. _fls_rTYsa2QDaulP:
+
+irrefutable
+^^^^^^^^^^^
+
+:dp:`fls_vJvIKJhrraSc`
+For :dt:`irrefutabe`, see :t:`irrefutable pattern`.
+
 .. _fls_fgmvmcw2kw5i:
 
 irrefutable constant
@@ -3430,6 +3438,15 @@ mutable
 :dp:`fls_dqm58deu1orn`
 A :t:`value` is :dt:`mutable` when it can be modified.
 
+.. _fls_ntaA0NtJ9z5h:
+
+mutable binding
+^^^^^^^^^^^^^^^
+
+:dp:`fls_v2pGKVaQjtcl`
+
+A :dt:`mutable binding` is a :t:`binding` whose :t:`value` can be modified.
+
 .. _fls_iku91jwdtdr1:
 
 mutable borrow
@@ -3849,6 +3866,18 @@ A :dt:`path expression` is an :t:`expression` that denotes a :t:`path`.
 :dp:`fls_3qjpjqm0legc`
 See :s:`PathExpression`.
 
+.. _fls_5UBwGysaQNuQ:
+
+path-in-expression
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_E42QYGorjSbn`
+A :dt:`path-in-expression` is a :t:`path` that appears in an :t:`expression`
+context.
+
+:dp:`fls_2lWoYOLQnJOv`
+See :s:`PathInExpression`.
+
 .. _fls_ptikwcw3b20l:
 
 path pattern
@@ -3930,6 +3959,14 @@ plane
 :dp:`fls_x1wbguoqdsf9`
 In :t:`Unicode`, a :dt:`plane` is a continuous group of 65,536 :t:`[code
 point]s`.
+
+.. _fls_HnJEHyUiTpb1:
+
+pointer
+^^^^^^^
+
+:dp:`fls_DRjhMWo9mjoF`
+A :dt:`pointer` is a :t:`value` of a :t:`pointer type`.
 
 .. _fls_o5o1ssqqD7Jg:
 
@@ -4017,6 +4054,15 @@ pure identifier
 :dp:`fls_6pez8fyiew0k`
 A :dt:`pure identifier` is an :t:`identifier` that does not include :t:`[weak
 keyword]s`.
+
+.. _fls_O6CFtnpN3UEE:
+
+qualified path-in-expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_wKAS6FxqGmTf`
+A :dt:`qualified path-in-expression` is a :t:`path-in-expression` that contains
+a :t:`qualified type`.
 
 .. _fls_tbvugpuvcluj:
 
@@ -4353,6 +4399,14 @@ refutability
 :dp:`fls_gzjrfx19fg40`
 :dt:`Refutability` is a property of :t:`[pattern]s` that expresses the ability
 to match all possible :t:`[value]s` of a :t:`type`.
+
+.. _fls_G0DzfqOMTMis:
+
+refutable
+^^^^^^^^^
+
+:dp:`fls_cGo03p6WDCnG`
+For :dt:`refutable`, see :t:`refutable pattern`.
 
 .. _fls_v99joc4m6cup:
 
@@ -5300,6 +5354,14 @@ tuple enum variant
 :dp:`fls_eduQhUYBEkVx`
 A :dt:`tuple enum variant` is an :t:`enum variant` with a :s:`TupleStructFieldList`.
 
+.. _fls_sP7uHoLxGfRO:
+
+tuple enum variant value
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ORURxipGqNrZ`
+A :dt:`tuple enum variant value` is a :t:`value` of a :t:`tuple enum variant`.
+
 .. _fls_udl6ujjg1jae:
 
 tuple expression
@@ -5321,13 +5383,16 @@ A :dt:`tuple field` is a :t:`field` of a :t:`tuple type`.
 
 .. _fls_6uwwat9j4x7y:
 
-tuple field index
-^^^^^^^^^^^^^^^^^
+tuple index
+^^^^^^^^^^^
 
 :dp:`fls_6061r871qgbj`
-A :dt:`tuple field index` is the position of a :t:`tuple field` within a
-:t:`tuple type`. The first tuple field has a tuple field index of zero, the Nth
-tuple field has a tuple field index of N-1.
+A :dt:`tuple index` is the position of a :t:`tuple field` within a
+:t:`tuple type`. The first :t:`tuple field` has a :t:`tuple index` of zero,
+the Nth :t:`tuple field` has a :t:`tuple index` of N-1.
+
+:dp:`fls_IDYKXUIL845x`
+See :s:`TupleIndex`.
 
 .. _fls_zfvvbf7ncrhj:
 
@@ -5622,6 +5687,14 @@ unifiable types
 
 :dp:`fls_jsbggfitv9xk`
 Two :t:`[type]s` that :t:`unify` are said to be :dt:`[unifiable type]s`.
+
+.. _fls_9RfuDiI6qrzZ:
+
+unified type
+^^^^^^^^^^^^
+
+:dp:`fls_tqRwIe6z3a4j`
+A :dt:`unified type` is a :t:`type` produced by :t:`type unification`.
 
 .. _fls_da6ssnmmsevo:
 

@@ -240,15 +240,16 @@ Mutably :t:`borrowing` a :t:`value` proceeds as follows:
 
 .. code-block:: rust
 
+   let mutable_borrow = &mut 42;
    let immutable_borrow = &42;
 
 :dp:`fls_lfgophgm7jd8`
-Variable ``immutable_borrow`` is captured as a unique immutable borrow.
+Variable ``x`` is captured using a unique immutable borrow.
 
 .. code-block:: rust
 
-   let unique_immutable_borrow = || *immutable_borrow = 1;
-   let mutable_borrow = &mut 42;
+   let x = &mut 42;
+   let unique_immutable_borrow = || *x = 1;
 
 .. _fls_77scxuomlbgs:
 
@@ -304,6 +305,15 @@ Passing :dt:`by value` is either passing :t:`by copy` or passing :t:`by move`.
 :dp:`fls_xis57dxiomwz`
 A :t:`value` of a :t:`reference type` is passed :dt:`by reference`. Passing
 :t:`by reference` temporarily changes the :t:`owner` of the :t:`value`.
+
+:dp:`fls_JUNnLwhPSwUO`
+Passing :dt:`by immutable reference` is passing :t:`by reference` where the
+:t:`value` is :t:`immutable`.
+
+:dp:`fls_WW0GvbiEnyiW`
+Passing :dt:`by unique immutable reference` is passing
+:t:`by immutable reference` where it is asserted that the :t:`reference` to 
+the :t:`value` is the only live :t:`reference`.
 
 :dp:`fls_v4eqq6tst4gs`
 Passing :dt:`by mutable reference` is passing :t:`by reference` where the

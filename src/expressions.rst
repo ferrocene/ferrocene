@@ -4784,14 +4784,14 @@ within the :t:`capturing expression`, as follows:
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      By :t:`immutable borrow` mode.
+      :t:`By immutable reference` mode.
 
    #. :dp:`fls_wmxsd0i2yemf`
-      By :t:`unique immutable borrow` mode, if the :t:`capture target` is a
+      :t:`By unique immutable reference` mode, if the :t:`capture target` is a
       :t:`mutable reference` that is being modified.
 
    #. :dp:`fls_lu779ufqhggl`
-      By :t:`mutable borrow` mode.
+      :t:`By mutable reference` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
       If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then

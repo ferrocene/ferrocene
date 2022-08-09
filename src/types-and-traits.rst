@@ -41,7 +41,7 @@ those :t:`[value]s`.
      | TypePath
 
    TypeAscription ::=
-   	$$:$$ TypeSpecification
+       $$:$$ TypeSpecification
 
 .. _fls_963gsjp2jas2:
 
@@ -57,7 +57,7 @@ Type Classification
   :t:`[Scalar type]s`
 
   * :dp:`fls_65hcyqizo1da`
-    :t:`Bool` :t:`type`
+    :c:`Bool` :t:`type`
 
   * :dp:`fls_zge99l49az8w`
     :c:`Char` :t:`type`
@@ -75,70 +75,70 @@ Type Classification
   :t:`[Sequence type]s`
 
   * :dp:`fls_s0aduyvz4i7f`
-    :t:`Array type`
+    :t:`[Array type]s`
 
   * :dp:`fls_zb5e79ai7w5i`
-    :t:`Slice type`
+    :t:`[Slice type]s`
 
   * :dp:`fls_yjp19vt46asy`
     :c:`Str` :t:`type`
 
   * :dp:`fls_xflj5df6upc7`
-    :t:`Tuple type`
+    :t:`[Tuple type]s`
 
 * :dp:`fls_u43jnp9jnw29`
   :t:`[Abstract data type]s`
 
   * :dp:`fls_lric8bf631nw`
-    :t:`Enum type`
+    :t:`[Enum type]s`
 
   * :dp:`fls_98djh9avlqc0`
-    :t:`Struct type`
+    :t:`[Struct type]s`
 
   * :dp:`fls_b3ymsm8dmo4`
-    :t:`Union type`
+    :t:`[Union type]s`
 
 * :dp:`fls_9x5atvhdq0j2`
   :t:`[Function type]s`
 
   * :dp:`fls_n5rgqgnxk9to`
-    :t:`Closure type`
+    :t:`[Closure type]s`
 
   * :dp:`fls_s7ndqc5sizdy`
-    :t:`Function item type`
+    :t:`[Function item type]s`
 
 * :dp:`fls_jrohsv7hx7yw`
   :t:`[Indirection type]s`
 
   * :dp:`fls_1kg1mknf4yx7`
-    :t:`Function pointer type`
+    :t:`[Function pointer type]s`
 
   * :dp:`fls_bw8zutjcteki`
-    :t:`Raw pointer type`
+    :t:`[Raw pointer type]s`
 
   * :dp:`fls_nqezuc9u6wpn`
-    :t:`Reference type`
+    :t:`[Reference type]s`
 
 * :dp:`fls_lh52q6f6snfh`
   :t:`[Trait type]s`
 
   * :dp:`fls_qqg0uixrd1a4`
-    :t:`Impl trait type`
+    :t:`[Impl trait type]s`
 
   * :dp:`fls_b8ecqp2argmn`
-    :t:`Trait object type`
+    :t:`[Trait object type]s`
 
 * :dp:`fls_m5vtcars8aga`
   Other :t:`[type]s`
 
   * :dp:`fls_lw38557rqikt`
-    :t:`Inferred type`
+    :t:`[Inferred type]s`
 
   * :dp:`fls_jxn63ow9xby3`
     :t:`Never type`
 
   * :dp:`fls_a81tweobvm0p`
-    :t:`Parenthesized type`
+    :t:`[Parenthesized type]s`
 
 .. _fls_id66vnaqw0zt:
 
@@ -153,7 +153,7 @@ Bool Type
 .. rubric:: Legality Rules
 
 :dp:`fls_h5994su1yft3`
-:t:`Bool` is a :t:`type` whose :t:`[value]s` denote the truth :t:`[value]s` of
+:c:`Bool` is a :t:`type` whose :t:`[value]s` denote the truth :t:`[value]s` of
 logic and Boolean algebra.
 
 :dp:`fls_v8atmrwz6wzk`
@@ -450,8 +450,8 @@ Sequence Types
 
 .. _fls_uj0kpjwyld60:
 
-Array Type
-~~~~~~~~~~
+Array Types
+~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -489,8 +489,8 @@ An array type in the context of a let statement:
 
 .. _fls_vpbikb73dw4k:
 
-Slice Type
-~~~~~~~~~~
+Slice Types
+~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -514,7 +514,7 @@ A :t:`slice type` is a :t:`dynamically sized type`.
 .. rubric:: Examples
 
 :dp:`fls_nsny832ap4v1`
-See :p:`4.3.1. <fls_eyrdzuv0r9l4>` for the declaration of ``array``.
+See :p:`4.3.1. <fls_uj0kpjwyld60>` for the declaration of ``array``.
 
 .. code-block:: rust
 
@@ -546,8 +546,8 @@ invalid UTF-8 sequence of characters.
 
 .. _fls_4ckl3n2ko3i4:
 
-Tuple Type
-~~~~~~~~~~
+Tuple Types
+~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -555,6 +555,7 @@ Tuple Type
 
    TupleTypeSpecification ::=
        $$($$ TupleFieldList? $$)$$
+
    TupleFieldList ::=
        TupleField (, TupleField)* ,?
 
@@ -587,8 +588,8 @@ Abstract Data Types
 
 .. _fls_szibmtfv117b:
 
-Enum Type
-~~~~~~~~~
+Enum Types
+~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -620,9 +621,16 @@ variant]s`.
 :dp:`fls_il9a1olqmu38`
 A :t:`zero-variant enum type` has no :t:`[value]s`.
 
+:dp:`fls_wQTFwl88VujQ`
+An :dt:`enum variant` is a :t:`construct` that declares one of the
+possible variations of an :t:`enum`.
+
 :dp:`fls_g5qle7xzaoif`
 The :t:`name` of an :t:`enum variant` shall denote a unique :t:`name` within the
 related :s:`EnumDeclaration`.
+
+:dp:`fls_t4yeovFm83Wo`
+A :t:`discriminant` is an opaque integer that identifies an :t:`enum variant`.
 
 :dp:`fls_hp5frc752dam`
 A :t:`discriminant initializer` shall be specified only when all :t:`[enum
@@ -698,8 +706,8 @@ type`.
 
 .. _fls_9ucqbbd0s2yo:
 
-Struct Type
-~~~~~~~~~~~
+Struct Types
+~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -743,12 +751,12 @@ within the :s:`RecordStructDeclaration`.
 
 :dp:`fls_auurdv1zvzb`
 If the :t:`type` of a :t:`record struct field` is a :t:`dynamically sized type`,
-then :t:`the record struct field` shall be the last :t:`record struct field` in
+then the :t:`record struct field` shall be the last :t:`record struct field` in
 the :s:`RecordStructFieldList`.
 
 :dp:`fls_vce7w0904du5`
 If the :t:`type` of a :t:`tuple struct field` is a :t:`dynamically sized type`,
-then the :t:`tuple struct field` shall be the last :t:`record tuple field` in
+then the :t:`tuple struct field` shall be the last :t:`tuple struct field` in
 the :s:`TupleStructFieldList`.
 
 .. rubric:: Examples
@@ -771,8 +779,8 @@ the :s:`TupleStructFieldList`.
 
 .. _fls_fmdn7n7s413d:
 
-Union Type
-~~~~~~~~~~
+Union Types
+~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -807,40 +815,40 @@ Function Types
 
 .. _fls_xd2oxlebhs14:
 
-Closure Type
-~~~~~~~~~~~~
+Closure Types
+~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
 
 :dp:`fls_bsykgnbatpmi`
 A :t:`closure type` is a unique anonymous :t:`function type` that encapsulates
-all :t:`[captured variable]s` of a :t:`closure expression`.
+all :t:`[capture target]s` of a :t:`closure expression`.
 
 :dp:`fls_zfj4l8bigdg0`
 A :t:`closure type` implements the :std:`core::ops::FnOnce` :t:`trait`.
 
 :dp:`fls_bn0ueivujnqk`
-A :t:`closure type` that does not move out its :t:`[captured variable]s`
+A :t:`closure type` that does not move out its :t:`[capture target]s`
 implements the :std:`core::ops::FnMut` :t:`trait`.
 
 :dp:`fls_u01kt5glbuz8`
-A :t:`closure type` that does not move or mutate its :t:`[captured variable]s`
+A :t:`closure type` that does not move or mutate its :t:`[capture target]s`
 implements the :std:`core::ops::Fn` :t:`trait`.
 
 :dp:`fls_3jeootwe6ucu`
-A :t:`closure type` that does not encapsulate :t:`[captured variable]s` is
-:t:`coercible` to a :t:`function pointer type`.
+A :t:`closure type` that does not encapsulate :t:`[capture target]s` is
+coercible to a :t:`function pointer type`.
 
 :dp:`fls_63jqtyw0rz8c`
 A :t:`closure type` implicitly implements the :std:`core::marker::Copy`
 :t:`trait` if
 
 * :dp:`fls_az5hkn72e3fz`
-  It does not encapsulate :t:`[captured variable]s` :t:`by unique immutable
-  borrow` or :t:`by mutable reference`, or
+  It does not encapsulate :t:`[capture target]s` by :t:`by unique immutable
+  reference` or :t:`by mutable reference`, or
 
 * :dp:`fls_vvc8c910dmeh`
-  The :t:`[type]s` of all :t:`[captured variable]s` implement the
+  The :t:`[type]s` of all :t:`[capture target]s` implement the
   :std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_3c4g9njja5s5`
@@ -848,11 +856,11 @@ A :t:`closure type` implicitly implements the :std:`core::clone::Clone`
 :t:`trait` if
 
 * :dp:`fls_yr55fbspw7s9`
-  It does not encapsulate :t:`[captured variable]s` :t:`by unique immutable
-  borrow` or :t:`by mutable reference`, or
+  It does not encapsulate :t:`[capture target]s` :t:`by unique immutable
+  reference` or :t:`by mutable reference`, or
 
 * :dp:`fls_pt65037r6hjr`
-  The :t:`[type]s` of all :t:`[captured variable]s` implement the
+  The :t:`[type]s` of all :t:`[capture target]s` implement the
   :std:`core::clone::Clone` :t:`trait`.
 
 :dp:`fls_2nuhy0ujgq18`
@@ -860,24 +868,24 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Send`
 :t:`trait` if:
 
 * :dp:`fls_vamgwed199ct`
-  The :t:`[type]s` of all :t:`[captured variable]s` that employ :t:`by immutable
-  borrow`, :t:`by mutable borrow`, or :t:`by move` :t:`capture mode` implement
-  the :std:`core::marker::Sync` :t:`trait`, and
+  The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by immutable
+  reference`, :t:`by mutable reference`, or :t:`by move` :t:`capture mode`
+  implement the :std:`core::marker::Sync` :t:`trait`, and
 
 * :dp:`fls_f96a5r1v7te7`
-  The :t:`[type]s` of all :t:`[captured variable]s` that employ :t:`by unique
-  immutable borrow`, :t:`by mutable reference`, :t:`by copy`, or :t:`by move`
+  The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by unique
+  immutable reference`, :t:`by mutable reference`, :t:`by copy`, or :t:`by move`
   :t:`capture mode` implement the :std:`core::marker::Send` :t:`trait`.
 
 :dp:`fls_5jh07heok8sy`
 A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
-:t:`trait` if the :t:`[type]s` of all :t:`[captured variable]s` implement the
+:t:`trait` if the :t:`[type]s` of all :t:`[capture target]s` implement the
 :std:`core::marker::Sync` :t:`trait`.
 
 .. _fls_airvr79xkcag:
 
-Function Item Type
-~~~~~~~~~~~~~~~~~~
+Function Item Types
+~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
 
@@ -894,7 +902,7 @@ An :t:`unsafe function item type` is a :t:`function item type` where the related
 :t:`function` is an :t:`unsafe function`.
 
 :dp:`fls_e9x4f7qxvvjv`
-A :t:`function item type` is :t:`coercible` to a :t:`function pointer type`.
+A :t:`function item type` is coercible to a :t:`function pointer type`.
 
 :dp:`fls_1941wid94hlg`
 A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the
@@ -910,21 +918,23 @@ Indirection Types
 
 .. _fls_xztr1kebz8bo:
 
-Function Pointer Type
-~~~~~~~~~~~~~~~~~~~~~
+Function Pointer Types
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
 .. syntax::
 
    FunctionPointerTypeSpecification ::=
-       ForGenericParameterList? FunctionPointerTypeQualifierList $$fn$$ $$($$ FunctionPointerTypeParameterList? $$)$$ ReturnTypeWithoutBounds?
+       ForGenericParameterList? FunctionPointerTypeQualifierList $$fn$$
+         $$($$ FunctionPointerTypeParameterList? $$)$$ ReturnTypeWithoutBounds?
 
    FunctionPointerTypeQualifierList ::=
        $$unsafe$$? AbiSpecification?
 
    FunctionPointerTypeParameterList ::=
-       FunctionPointerTypeParameter ($$,$$ FunctionPointerTypeParameter)* ($$,$$ VariadicPart | $$,$$?)
+       FunctionPointerTypeParameter ($$,$$ FunctionPointerTypeParameter)*
+         ($$,$$ VariadicPart | $$,$$?)
 
    VariadicPart ::=
        OuterAttributeOrDoc* $$...$$
@@ -942,8 +952,12 @@ A :t:`function pointer type` is an :t:`indirection type` that refers to a
 An :t:`unsafe function pointer type` is a function pointer type subject to
 :t:`keyword` ``unsafe``.
 
+:dp:`fls_B0SMXRqQMS1E`
+A :t:`variadic part` indicates the presence of :t:`C`-like optional
+parameters.
+
 :dp:`fls_hbn1l42xmr3h`
-A :s:`VariadicPart` shall be specified only when the :t:`ABI` of the
+A :t:`variadic part` shall be specified only when the :t:`ABI` of the
 :t:`function pointer type` is either ``extern "C"`` or ``extern "cdecl"``.
 
 .. rubric:: Undefined Behavior
@@ -960,8 +974,8 @@ that is :c:`null`.
 
 .. _fls_ppd1xwve3tr7:
 
-Raw Pointer Type
-~~~~~~~~~~~~~~~~
+Raw Pointer Types
+~~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -992,8 +1006,8 @@ Comparing a :t:`value` of a :t:`raw pointer type` to a :t:`value` of a
 
 .. _fls_142vncdktbin:
 
-Reference Type
-~~~~~~~~~~~~~~
+Reference Types
+~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -1023,7 +1037,7 @@ A :t:`mutable reference type` allows the direct mutation of a referenced
 :t:`value`.
 
 :dp:`fls_n6ffcms5pr0r`
-A :t:`mutable reference type` does not implement the :c:`copy::marker::Copy`
+A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy`
 :t:`trait`.
 
 .. rubric:: Undefined Behavior
@@ -1045,15 +1059,15 @@ Trait Types
 
 .. _fls_3xqobbu7wfsf:
 
-Impl Trait Type
-~~~~~~~~~~~~~~~
+Impl Trait Types
+~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
 .. syntax::
 
    ImplTraitTypeSpecification ::=
-       $$impl$$ TypeParameterBoundList
+       $$impl$$ TypeBoundList
 
    ImplTraitTypeSpecificationOneBound ::=
        $$impl$$ TraitBound
@@ -1079,15 +1093,15 @@ the :t:`return type` of a :t:`function`.
 
 .. _fls_qa98qdi42orq:
 
-Trait Object Type
-~~~~~~~~~~~~~~~~~
+Trait Object Types
+~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
 .. syntax::
 
    TraitObjectTypeSpecification ::=
-       $$dyn$$? TypeParameterBoundList
+       $$dyn$$? TypeBoundList
 
    TraitObjectTypeSpecificationOneBound ::=
        $$dyn$$? TraitBound
@@ -1100,7 +1114,7 @@ A :t:`trait object type` is a :t:`type` that implements a :t:`trait`, where the
 
 :dp:`fls_9z8oleh0wdel`
 The first :t:`trait bound` of a :t:`trait object type` shall denote an
-:t:`object safe trait`. Any subsequent :t:`[trait bound]s` shall denote
+:t:`object safe` :t:`trait`. Any subsequent :t:`[trait bound]s` shall denote
 :t:`[auto trait]s`.
 
 :dp:`fls_s0oy2c8t4yz9`
@@ -1126,8 +1140,8 @@ Other Types
 
 .. _fls_s45k21yn4qur:
 
-Inferred Type
-~~~~~~~~~~~~~
+Inferred Types
+~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -1143,10 +1157,26 @@ An :t:`inferred type` is a placeholder for a :t:`type` deduced by :t:`type
 inference`.
 
 :dp:`fls_3abhsuaa8nas`
-An :t:`inferred type` shall not appear within an :t:`item signature`.
+An :t:`inferred type` shall not appear in the following positions:
+
+* :dp:`fls_hBXlJhbhuoHY`
+  Within the :s:`InitializationType` of a :s:`TypeAliasDeclaration`,
+
+* :dp:`fls_Vxlr9ZcqiOvY`
+  Within the :s:`ReturnType` of a :s:`FunctionDeclaration`,
+
+* :dp:`fls_gE9VC8JXrl1N`
+  Within the :s:`TypeAscription` of a :s:`ConstantDeclaration`, a
+  :s:`ConstantParameter`, a :s:`FunctionParameterPattern`, a
+  :s:`RecordStructField`, a :s:`StaticDeclaration`, or a :s:`TypedSelf`,
+
+* :dp:`fls_ybyQjFamI1Q5`
+  Within the :s:`TypeSpecification` of a :s:`FunctionParameter`, an
+  :s:`ImplementingType`, a :s:`TupleStructField`, a :s:`TypeBoundPredicate`, or
+  a :s:`TypeParameter`.
 
 :dp:`fls_9d8wbugmar1m`
-An :t:`inferred type` forces a tool to :t:`infer` a :t:`type`, if possible.
+An :t:`inferred type` forces a tool to deduce a :t:`type`, if possible.
 
 .. rubric:: Examples
 
@@ -1188,8 +1218,8 @@ It is undefined behavior to have a :t:`value` of the :t:`never type`.
 
 .. _fls_olbj67eyxz2k:
 
-Parenthesized Type
-~~~~~~~~~~~~~~~~~~
+Parenthesized Types
+~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -1212,15 +1242,16 @@ of :t:`[lexical element]s`
 
 .. _fls_kgvleup5mdhq:
 
-Type Aliasing
--------------
+Type Aliases
+------------
 
 .. rubric:: Syntax
 
 .. syntax::
 
    TypeAliasDeclaration ::=
-       $$type$$ Name GenericParameterList? ($$:$$ TypeParameterBoundList)? WhereClause? $$=$$ InitializationType WhereClause? $$;$$
+       $$type$$ Name GenericParameterList? ($$:$$ TypeBoundList)? WhereClause?
+         $$=$$ InitializationType WhereClause? $$;$$
 
    InitializationType ::=
        TypeSpecification
@@ -1231,7 +1262,7 @@ Type Aliasing
 A :t:`type alias` is an :t:`item` that defines a :t:`name` for a :t:`type`.
 
 :dp:`fls_rosdkeck5ax2`
-A :t:`type alias` shall not have a :s:`TypeParameterBoundList` unless it is an
+A :t:`type alias` shall not have a :s:`TypeBoundList` unless it is an
 :t:`associated item`.
 
 :dp:`fls_drxl7u3etfp9`
@@ -1312,7 +1343,7 @@ Types :c:`usize` and :c:`isize` have :t:`size` big enough to contain every
 address on the target platform.
 
 :dp:`fls_pzi6izljfv0f`
-For :t:`string type` :c:`str`, the :t:`layout` is that of :t:`slice type`
+For :t:`type` :c:`str`, the :t:`layout` is that of :t:`slice type`
 ``[u8]``.
 
 :dp:`fls_7cjbxleo998q`
@@ -1340,7 +1371,7 @@ are at least those of a :t:`thin pointer`.
 
 :dp:`fls_hlbsjggfxnt2`
 For a :t:`trait object type`, the :t:`layout` is the same as the :t:`value`
-being :t:`coerced` into the :t:`trait object type` at runtime.
+being coerced into the :t:`trait object type` at runtime.
 
 :dp:`fls_sdrb0k2r18my`
 For a :t:`struct type`, the memory layout is undefined, unless the :t:`struct
@@ -1397,7 +1428,7 @@ representation` and :t:`primitive representation`.
 
 :dp:`fls_ml4khttq3w5k`
 :t:`Transparent representation` applies only to an :t:`enum type` with a
-:t:`single variant` or a :t:`struct type` where the :t:`struct type` has a
+single :t:`enum variant` or a :t:`struct type` where the :t:`struct type` has a
 single :t:`field` of non-zero :t:`size` and any number of :t:`[field]s` of
 :t:`size` zero and :t:`alignment` one.
 
@@ -1451,7 +1482,7 @@ It is a static error if the :t:`discriminant type` cannot hold all the
 
 :dp:`fls_zhle0rb0vhpc`
 An :t:`enum type` subject to :t:`transparent representation` shall have a single
-:t:`variant` with
+:t:`enum variant` with
 
 * :dp:`fls_45f57s1gmmh5`
   a single :t:`field` of non-zero :t:`size`, or
@@ -1479,8 +1510,8 @@ representation` has the same :t:`type representation` as a :t:`union type` with
 :dp:`fls_k907i6w83s2`
 An :t:`enum type` subject to :t:`transparent representation` has the same
 :t:`type representation` as the single :t:`field` of non-zero :t:`size` of its
-:t:`variant` if one is present, otherwise the :t:`enum type` has :t:`size` zero
-and :t:`alignment` one.
+:t:`enum variant` if one is present, otherwise the :t:`enum type` has :t:`size`
+zero and :t:`alignment` one.
 
 .. _fls_rjxpof29a3nl:
 
@@ -1645,7 +1676,7 @@ type` when:
 A :t:`closure type` is unifiable only with another :t:`closure type` when:
 
 * :dp:`fls_42oj1ekjihq1`
-  The :t:`[two closure type]s` are the same closure, and
+  The two :t:`[closure type]s` are the same closure, and
 
 * :dp:`fls_gebpqqqvvklf`
   The corresponding :t:`[generic substitution]s` are unifiable.
@@ -1655,7 +1686,7 @@ A :t:`function item type` is unifiable only with another :t:`function item type`
 when:
 
 * :dp:`fls_74cug5zfv2wv`
-  The :t:`[two function item type]s` are the same function, and
+  The two :t:`[function item type]s` are the same function, and
 
 * :dp:`fls_keezxl8v4snf`
   The corresponding :t:`[generic substitution]s` are unifiable.
@@ -1665,10 +1696,10 @@ A :t:`function pointer type` is unifiable only with another :t:`function pointer
 type` when:
 
 * :dp:`fls_rmqcbb5ja4va`
-  The :t:`[lifetime]s` are :t:`variant` conformant, and
+  The :t:`[lifetime]s` are :t:`variance`-conformant, and
 
 * :dp:`fls_uu8je75y5pss`
-  The :t:`safety` is the same, and
+  The :t:`unsafety` is the same, and
 
 * :dp:`fls_oksjiq3nmq2k`
   The :t:`ABI` is the same, and
@@ -1709,7 +1740,7 @@ A :t:`reference type` is unifiable only with another :t:`reference type` when:
 An :t:`anonymous return type` is unifiable with another :t:`type` when:
 
 * :dp:`fls_j3w9ap9zaqud`
-  The :t:`[lifetime]s` are :t:`variant` conformant, and
+  The :t:`[lifetime]s` are :t:`variance`-conformant, and
 
 * :dp:`fls_yvllot5qnc4s`
   The other :t:`type` implements all :t:`[trait]s` specified by the
@@ -1729,7 +1760,7 @@ when:
   The :t:`[lifetime]s` are unifiable.
 
 :dp:`fls_zh5hhq2x9h4q`
-A :t:`general type variable` is unifiable with any other type.
+A :t:`global type variable` is unifiable with any other type.
 
 :dp:`fls_3xpp05fm0zpb`
 A :t:`floating-point type variable` is unifiable only with a :t:`floating-point
@@ -1771,7 +1802,7 @@ The following :t:`[construct]s` constitute a :dt:`coercion site`:
   A :t:`static` declaration.
 
 * :dp:`fls_wxrugvlazy6v`
-  The :t:`[argument]s` of a :t:`call expression` or a :t:`method call
+  The :t:`argument [operand]s` of a :t:`call expression` or a :t:`method call
   expression`.
 
 * :dp:`fls_eu4bt3dw1b8c`
@@ -1956,8 +1987,8 @@ Type Inference
 .. rubric:: Legality Rules
 
 :dp:`fls_h8sedxew0d4u`
-:t:`Constant` declarations, :t:`[let statement]s`, and :t:`[static
-declaration]s` impose an :dt:`expected type` on their respective initialization
+:t:`Constant` declarations, :t:`[let statement]s`, and :t:`static`
+declarations impose an :dt:`expected type` on their respective initialization
 :t:`[expression]s`. :t:`Type inference` is the process of deducing the expected
 :t:`type` of an arbitrary :t:`value`.
 
@@ -1978,20 +2009,20 @@ statement` is determined as follows:
    :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
 
 #. :dp:`fls_7vdr0mh7kmpz`
-   Otherwise the :t:`expected type` is a :t:`general type variable`.
+   Otherwise the :t:`expected type` is a :t:`global type variable`.
 
 :dp:`fls_qlovdtcj1v1b`
 The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
 :t:`type` specified by its :t:`type ascription`.
 
 :dp:`fls_biyyicl3c3kn`
-:t:`[Arithmetic expression]s`, :t:`[await expression]s`, :t:`[block
-expression]s`, :t:`[borrow expression]s`, :t:`[dereference expression]s`,
-:t:`[call expression]s`, :t:`[else expression]s`, :t:`[error propagation
-expression]s`, :t:`[if expression]s`, :t:`[if let expression]s`, :t:`[logical
-expression]s`, :t:`[loop expression]s`, :t:`[match expression]s`, :t:`[negation
-expression]s`, and :t:`[parenthesized expression]s` are :dt:`[type imposing
-expression]s`.
+:t:`[Arithmetic expression]s`, :t:`[await expression]s`,
+:t:`[bit expression]s`, :t:`[block expression]s`, :t:`[borrow expression]s`,
+:t:`[dereference expression]s`, :t:`[call expression]s`,
+:t:`[else expression]s`, :t:`[error propagation expression]s`,
+:t:`[if expression]s`, :t:`[if let expression]s`, :t:`[loop expression]s`,
+:t:`[match expression]s`, :t:`[negation expression]s`, and
+:t:`[parenthesized expression]s` are :dt:`[type imposing expression]s`.
 
 :dp:`fls_o94mhge1j3iw`
 A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
@@ -2225,7 +2256,7 @@ Traits
        $$}$$
 
    SupertraitList ::=
-       TypeParameterBoundList
+       TypeBoundList
 
 .. rubric:: Legality Rules
 
@@ -2241,7 +2272,7 @@ A :t:`trait` of the form
 
 .. code-block:: rust
 
-   	trait T : Bound {}
+   	trait T: Bound {}
 
 :dp:`fls_kyr81mi01me2`
 is equivalent to a :t:`where clause` of the following form:
@@ -2273,7 +2304,7 @@ Circle is a subtrait of Shape.
 
 .. code-block:: rust
 
-   trait Circle : Shape {
+   trait Circle: Shape {
        fn radius(&self) -> f64;
    }
 
@@ -2324,7 +2355,7 @@ A dispatchable :t:`function` is :t:`object safe` when:
 
 :dp:`fls_aer3gaur7avp`
 A non-dispatchable :t:`function` is :t:`object safe` when it specifies a
-:std:`core::marker::Sized` :t:`t[rait bound]` for :c:`Self`.
+:std:`core::marker::Sized` :t:`[trait bound]` for :c:`Self`.
 
 .. _fls_jeoas4n6su4:
 
@@ -2375,13 +2406,13 @@ A :t:`trait bound` is a :t:`bound` that imposes a constraint on the
 :t:`[trait]s` of :t:`[generic parameter]s`.
 
 :dp:`fls_sf6zg0ez9hbb`
-A :t:`ForGenericParameterList` shall not specify :s:`[ConstantParameter]s` or
+A :s:`ForGenericParameterList` shall not specify :s:`[ConstantParameter]s` or
 :s:`[TypeParameter]s`.
 
 :dp:`fls_vujl3fblz6x2`
 A :t:`higher-ranked trait bound` is a :t:`bound` that specifies an infinite
 list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
-``ForGenericParameterList.``
+:s:`ForGenericParameterList`.
 
 :dp:`fls_tx4uspewnk7w`
 :t:`Bound` ``'a: 'b`` is read as ``'a`` outlives ``'b``, or in other words,
@@ -2399,8 +2430,8 @@ outlive ``'a``.
 
 .. _fls_yqcygq3y6m5j:
 
-Lifetime
-~~~~~~~~
+Lifetimes
+~~~~~~~~~
 
 .. rubric:: Syntax
 
@@ -2431,7 +2462,7 @@ A :t:`lifetime bound` shall apply to :t:`[type]s` and other :t:`[lifetime]s`.
    &'static Shape
 
 :dp:`fls_gcszhqg6hnva`
-See :p:`4.12. <fls_t515k9ywp2rd>` for the declaration of Shape.
+See :p:`4.12. <fls_85vx1qfa061i>` for the declaration of Shape.
 
 .. _fls_ikfvbeewame7:
 
@@ -2526,7 +2557,7 @@ A :t:`type` is its own :t:`subtype`.
      - :t:`invariant`
 
 :dp:`fls_yknymnlsasyw`
-A :t:`trait` is :t:`invariant` in all inputs, including the :t:`Self` parameter.
+A :t:`trait` is :t:`invariant` in all inputs, including the :c:`Self` parameter.
 
 :dp:`fls_xkzo7nj40rbn`
 :t:`[Lifetime parameter]s` and :t:`[type parameter]s` are subject to

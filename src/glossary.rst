@@ -2854,14 +2854,6 @@ defines the compile- and run-time semantics of a program.
 :dp:`fls_xd997kd2i73a`
 See :s:`Item`.
 
-.. _fls_2yPpT2kPT5ys:
-
-item signature
-^^^^^^^^^^^^^^
-
-:dp:`fls_jZ7vlrcEDDLg`
-An :dt:`item signature` is ??? HELP LUKAS!
-
 .. _fls_yaurxo4ogfsh:
 
 item statement

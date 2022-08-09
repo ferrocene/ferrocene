@@ -2170,7 +2170,7 @@ generic substitution
 
 :dp:`fls_Led1Nxfcd70K`
 A :dt:`generic substitution` is the replacement of a :t:`generic parameter`
-with a :t:`generic actual`.
+with a :t:`generic argument`.
 
 .. _fls_hppo1v3ia4wu:
 

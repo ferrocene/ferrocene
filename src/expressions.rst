@@ -2133,6 +2133,7 @@ expression`, or a :t:`tuple expression`.
 :dp:`fls_z8c3b9s9de3x`
 The :t:`assignee operand` of a :t:`destructuring assignment` corresponds to an
 :t:`assignee pattern` according to its kind, as follows:
+LUKAS, that is an "assignee pattern"?
 
 * :dp:`fls_du5eybf8mocy`
   A :t:`place expression` corresponds to an :t:`identifier pattern` with a
@@ -2140,26 +2141,21 @@ The :t:`assignee operand` of a :t:`destructuring assignment` corresponds to an
   :t:`bound pattern`.
 
 * :dp:`fls_q90ikfi7ewoi`
-  An :t:`underscore expression` corresponds to an :t:`underscore pattern`.
+  An :t:`underscore expression` corresponds to an :t:`wildcard pattern`.
 
 * :dp:`fls_uydzlfc4hjbx`
   A :t:`tuple expression` corresponds to a :t:`tuple pattern` with all the
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :dp:`fls_fa14yfvxsbx3`
-  A :t:`tuple struct expression` corresponds to a :t:`tuple struct pattern` with
-  all the :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
-
 * :dp:`fls_hj6srmzbobid`
   A :t:`struct expression` corresponds to a :t:`struct pattern` with all the
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :dp:`fls_c4pto819yc8j`
-  A :t:`unit struct expression` corresponds to a :t:`unit struct pattern`.
-
 * :dp:`fls_vqb89rkkjw81`
   A :t:`slice expression` corresponds to a :t:`slice pattern` with all the
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
+  LUKAS, there is no such thing as "slice expression". Did you mean "array
+  expression"?
 
 * :dp:`fls_vqj7ljrrd7wi`
   A :t:`full range expression` corresponds to a :t:`rest pattern` if inside a
@@ -2209,8 +2205,8 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
    uninitialized :t:`variable` or an uninitialized field of a :t:`variable`.
 
 #. :dp:`fls_qb8u5skn8bc4`
-   The :t:`value` of the :t:`value operand` is :t:`copied` or :t:`moved` into
-   the place of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is passed :t:`by value` into the
+   place of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2238,6 +2234,7 @@ Compound Assignment Expressions
      | ShiftLeftAssignmentExpression
      | ShiftRightAssignmentExpression
      | SubtractionAssignmentExpression
+
    AdditionAssignmentExpression ::=
        AssignedOperand $$+=$$ ModifyingOperand
 
@@ -2495,7 +2492,7 @@ in a :t:`destructuring assignment`.
 
 :dp:`fls_wms3dbwjwyu4`
 An :t:`underscore expression` shall appear in the :t:`assigned operand` of a
-:t:`destructuring statement`.
+:t:`destructuring assignment`.
 
 .. rubric:: Examples
 
@@ -2562,6 +2559,7 @@ Array Expressions
 
    ArrayExpression ::=
        $$[$$ ArrayElementExpression? $$]$$
+
    ArrayElementExpression ::=
        ArrayElementConstructor
      | ArrayRepetitionConstructor
@@ -2649,8 +2647,8 @@ constructor` proceeds as follows:
 
    #. :dp:`fls_qbyysx30pjzs`
       If the :t:`repeat operand` denotes a :t:`constant`, the :t:`repeat
-      operand` is evaluated once and its :t:`value` is :t:`copied` :t:`[size
-      operand]'s` :t:`value` times.
+      operand` is evaluated once and its :t:`value` is passed :t:`by copy`
+      :t:`[size operand]'s` :t:`value` times.
 
    #. :dp:`fls_1m0laldldh7j`
       Otherwise the :t:`repeat operand` is evaluated :t:`[size operand]'s`
@@ -2720,11 +2718,13 @@ operand` and :t:`indexed operand` are :t:`[constant expression]s`.
 
 :dp:`fls_u9sl7h4i8hqu`
 The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
-:std:`core::ops::Index` implementation of the :t:`type` of the :t:`indexed operand`.
+:std:`core::ops::Index` implementation of the :t:`type` of the
+:t:`indexed operand`.
 
 :dp:`fls_98qeczwv7fmy`
-If the :t:`indexed operand` is evaluated in a :t:`value expression
-context`, then
+If the :t:`indexed operand` is evaluated in a :t:`value expression context`,
+then
+LUKAS, what is a "value expression context"?
 
 * :dp:`fls_jxdiknkwglak`
   The :t:`index expression` is a :t:`value expression`.
@@ -2738,8 +2738,9 @@ context`, then
   :t:`associated type` :std:`core::ops::Index::Output`.
 
 :dp:`fls_y3sduoma6q9v`
-If the :t:`indexed operand` is :t:`mutable` and the :t:`index
-expression` is evaluated in a :t:`mutable place expression context`, then
+If the :t:`indexed operand` is :t:`mutable` and the :t:`index expression` is
+evaluated in a :t:`mutable place expression context`, then
+LUKAS, what is a "mutable place expression context"?
 
 * :dp:`fls_pjmoo8mjgxz3`
   The :t:`index expression` is a :t:`mutable place expression`.
@@ -2796,6 +2797,7 @@ Tuple Expressions
 
    TupleExpression ::=
        $$($$ TupleInitializerList? $$)$$
+
    TupleInitializerList ::=
        ExpressionList
 
@@ -2905,9 +2907,9 @@ An :t:`indexed initializer` is a :t:`construct` that specifies the index and
 initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_y3p6rtm7ek3l`
-An :t:`indexed initializer` matches a :t:`field` of the :t:`construction type`
+An :t:`indexed initializer` matches a :t:`field` of the :t:`constructee`
 when the :t:`tuple index` of the :t:`indexed initializer` resolves to a valid
-position of a :t:`field` in the :t:`construction type`. Such an :t:`indexed
+position of a :t:`field` in the :t:`constructee`. Such an :t:`indexed
 initializer` is a :dt:`matched indexed initializer`.
 
 :dp:`fls_dfajs3xaxbv`
@@ -2945,7 +2947,7 @@ both the :t:`identifier` and the :t:`expression` of the :t:`named initializer`
 denote the :t:`identifier` of the :t:`shorthand initializer`.
 
 :dp:`fls_yjx1t3x6qpfg`
-A :t:`shorthand initializer` matches a :t:`field` of the :t:`construction type`
+A :t:`shorthand initializer` matches a :t:`field` of the :t:`constructee`
 when its :t:`identifier` and the :t:`name` of the :t:`field` are the same. Such
 a :t:`shorthand initializer` is a :dt:`matched shorthand initializer`.
 
@@ -3097,6 +3099,7 @@ Call Expressions
 
    CallExpression ::=
        CallOperand $$($$ ArgumentOperandList? $$)$$
+
    CallOperand ::=
        Operand
 
@@ -3106,35 +3109,37 @@ Call Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_fvgfx17ossd9`
-A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or constructs a
-:t:`tuple struct value` or :t:`tuple enum variant value`.
+A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or
+constructs a :t:`tuple struct value` or :t:`tuple enum variant value`.
 
 :dp:`fls_jvz5z3eqxb39`
 An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_7ql1c71eidg8`
-A :t:`call operand` is the :t:`function` being invoked or the :t:`tuple struct value` or
-:t:`tuple enum variant value` being constructed by a :t:`call expression`.
+A :t:`call operand` is the :t:`function` being invoked or the
+:t:`tuple struct value` or :t:`tuple enum variant value` being constructed by a
+:t:`call expression`.
 
 :dp:`fls_4t6imtiw6kzt`
-A :t:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant` or a :t:`type`
-that implements any of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or
-:std:`core::ops::FnOnce` :t:`[trait]s`.
+A :t:`callee type` is either a :t:`function item type`,
+a :t:`function pointer type`, a :t:`tuple struct type`,
+a :t:`tuple enum variant` or a :t:`type` that implements any of the
+:std:`core::ops::Fn`, :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce`
+:t:`[trait]s`.
 
 :dp:`fls_aafrvlmiwfon`
-The :t:`call operand` is subject to :t:`auto dereferencing` until a :t:`callee
-type` is found, otherwise this is a static error.
+The :t:`call operand` is subject to :t:`auto dereferencing` until a
+:t:`callee type` is found, otherwise this is a static error.
 
 :dp:`fls_d8rewso3dm6r`
-An :t:`adjusted call operand` is a :t:`call operand` with possible :t:`auto
-dereferencing` adjustments.
+An :t:`adjusted call operand` is a :t:`call operand` with possible
+:t:`auto dereferencing` adjustments.
 
 :dp:`fls_bu6i3mcvnbin`
-The :t:`type` of a :t:`call expression` is the :t:`return type` of the
-:t:`invoked function`, the :t:`type` of the :t:`tuple struct` or
-the :t:`tuple enum variant` being constructed, or :t:`associated type`
+The :t:`type` of a :t:`call expression` is the :t:`return type` of the invoked
+:t:`function`, the :t:`type` of the :t:`tuple struct` or the
+:t:`tuple enum variant` being constructed, or :t:`associated type`
 :std:`core::ops::FnOnce::Output`.
 
 :dp:`fls_8ljrgdept7s8`
@@ -3233,7 +3238,7 @@ Method Call Expressions
 .. syntax::
 
    MethodCallExpression ::=
-       ReceiverOperand $$.$$ PathExpressionSegment $$($$ ArgumentOperandList? $$)$$
+       ReceiverOperand $$.$$ PathInExpressionSegment $$($$ ArgumentOperandList? $$)$$
 
    ReceiverOperand ::=
        Operand
@@ -3433,15 +3438,18 @@ Closure Expressions
 .. syntax::
 
    ClosureExpression ::=
-       $$move$$? $$|$$ ClosureParameterList? $$|$$ (ClosureBody | ClosureBodyWithReturnType)
+       $$move$$? $$|$$ ClosureParameterList? $$|$$
+         (ClosureBody | ClosureBodyWithReturnType)
 
    ClosureBody ::=
        Expression
 
    ClosureBodyWithReturnType ::=
        ReturnTypeWithoutBounds BlockExpression
+
    ReturnTypeWithoutBounds ::=
        $$->$$ TypeSpecificationWithoutBounds
+
    ClosureParameterList ::=
        ClosureParameter ($$,$$ ClosureParameter)* $$,$$?
 
@@ -3470,7 +3478,7 @@ type` defined by it.
 
 :dp:`fls_sje6cdvifgv5`
 The :t:`value` of a :t:`closure expression` is the :t:`value` of the anonymous
-unique :t:`closure type` instantiated with the selected :t:`[capture]s`.
+unique :t:`closure type` instantiated with the selected :t:`[capture target]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3506,6 +3514,9 @@ Loop Expressions
 
    LoopExpression ::=
        Label? LoopContent
+
+   Label ::=
+       $$'$$ NonKeywordIdentifier
 
    LoopContent ::=
        ForLoopExpression
@@ -4187,7 +4198,8 @@ If Let Expressions
 .. syntax::
 
    IfLetExpression ::=
-       $$if$$ $$let$$ Pattern $$=$$ SubjectLetExpression BlockExpression ElseExpression?
+       $$if$$ $$let$$ Pattern $$=$$ SubjectLetExpression BlockExpression
+         ElseExpression?
 
 .. rubric:: Legality Rules
 
@@ -4270,11 +4282,13 @@ Match Expressions
          InnerAttributeOrDoc*
          MatchArmList?
        $$}$$
+
    MatchArmList ::=
        IntermediateMatchArm* FinalMatchArm
 
    IntermediateMatchArm ::=
-       MatchArmMatcher $$=>$$ $$($$ ExpressionWithBlock $$,$$? | ExpressionWithoutBlock $$,$$ $$)$$
+       MatchArmMatcher $$=>$$
+         $$($$ ExpressionWithBlock $$,$$? | ExpressionWithoutBlock $$,$$ $$)$$
 
    FinalMatchArm ::=
        MatchArmMatcher $$=>$$ Operand $$,$$?
@@ -4318,7 +4332,7 @@ a :t:`match arm matcher`.
 A :t:`match expression` is a :t:`place expression` when its :t:`subject
 expression` is a :t:`place expression`. When a :t:`match expression` is a
 :t:`place expression`, the :t:`value` produced by evaluating its :t:`subject
-expression` is :t:`copied` or :t:`moved`.
+expression` is passed :t:`by value`.
 
 :dp:`fls_9t5pmb9wzmpy`
 A :t:`match expression` is a :t:`value expression` when its :t:`subject
@@ -4335,7 +4349,7 @@ The :t:`type` of the :t:`operand` of a :t:`match arm guard` shall be :t:`type`
 :c:`bool`.
 
 :dp:`fls_17ag0wzdbxv6`
-The :t:`[type]s` of all :t:`match arm bodies` shall be :t:`unifiable`.
+The :t:`[type]s` of all :t:`[match arm body]ies` shall be :t:`unifiable`.
 
 :dp:`fls_5w964phrru82`
 The :t:`type` of a :t:`match expression` is the :t:`unified type` of the
@@ -4481,8 +4495,8 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
       The :t:`operand` is evaluated.
 
    #. :dp:`fls_bbf54ukld7j9`
-      The :t:`value` of the :t:`operand` is :t:`moved` into the designated
-      output location of the enclosing control flow boundary.
+      The :t:`value` of the :t:`operand` is passed :t:`by moved` into the
+      designated output location of the enclosing control flow boundary.
 
 #. :dp:`fls_99ea30a5mulj`
    Control destroys the current activation frame.
@@ -4752,16 +4766,16 @@ A :t:`capture target` is either a :t:`variable` or a :t:`field` of a
 
 :dp:`fls_e70ywb8191h`
 The :t:`capturing environment` of a :t:`capturing expression` consists of all
-:t:`[capture target]s` that are defined outside the :t:`capture expression`.
+:t:`[capture target]s` that are defined outside the :t:`capturing expression`.
 
 :dp:`fls_1y2ttb466m9c`
 :t:`Capturing` is the process of saving the :t:`[capture target]s` of a
 :t:`[capturing expression]'s` :t:`capturing environment`.
 
 :dp:`fls_ip81lt2mm940`
-A :t:`capturing target` requires :t:`capturing` when it is part of the
-:t:`[capturing expression]'s` :t:`capture environment` and it is used by
-the :t:`capturing expression`. Such a :t:`capturing target` is said to be
+A :t:`capture target` requires :t:`capturing` when it is part of the
+:t:`[capturing expression]'s` :t:`capturing environment` and it is used by
+the :t:`capturing expression`. Such a :t:`capture target` is said to be
 :dt:`captured`.
 
 :dp:`fls_y9n1i4hbq8sf`

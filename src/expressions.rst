@@ -135,11 +135,11 @@ operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
 * :dp:`fls_yso6dmog0an2`
   :t:`[Array expression]s` of :t:`[assignee expression]s`,
 
-* :dp:`fls_hier3b8knpuq`
-  :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
-
 * :dp:`fls_1tsdlpgkgb2u`
   :t:`[Struct expression]s` of :t:`[assignee expression]s`.
+
+* :dp:`fls_hier3b8knpuq`
+  :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
 
 :dp:`fls_1smb3tj9pxsq`
 :t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
@@ -400,7 +400,7 @@ context]s`:
   The initialization :t:`expression` of a :t:`let statement`,
 
 * :dp:`fls_brwv1zwu37e8`
-  The :t:`subject expression` of a :t:`match expression,`
+  The :t:`subject expression` of a :t:`match expression`,
 
 * :dp:`fls_qewvbxvk81d`
   The :t:`base initializer` of a :t:`struct expression`,
@@ -597,6 +597,7 @@ Block Expressions
          InnerAttributeOrDoc*
          StatementList
        $$}$$
+
    StatementList ::=
        Statement* Expression?
 
@@ -1726,23 +1727,14 @@ The :t:`evaluation` of a :t:`not-equals expression` proceeds as follows:
 
 .. rubric:: Examples
 
-:dp:`fls_777hlnpac9h1`
-12 == 12
+.. code-block:: rust
 
-:dp:`fls_xx7ugkxmk06p`
-42 > 12
-
-:dp:`fls_pfym2t99i6x4`
-42 >= 35
-
-:dp:`fls_nnvf94dbxwte`
-42 < 109
-
-:dp:`fls_4h896fhds7jk`
-42 <= 42
-
-:dp:`fls_rm0hk0svq4v7`
-12 != 42
+   12 == 12
+   42 > 12
+   42 >= 35
+   42 < 109
+   42 <= 42
+   12 != 42
 
 .. _fls_lstusiu2c8lu:
 
@@ -2071,6 +2063,7 @@ assigned to an :t:`assignee operand` by an :t:`assignment expression`.
 
 :dp:`fls_kh6rp9e0wwl`
 An :t:`assignee operand` shall denote a :t:`mutable assignee expression`.
+LUKAS, what is a "mutable assignee expression"?
 
 :dp:`fls_3wragak9hglw`
 A :t:`value operand` shall denote a :t:`value expression`.
@@ -4167,7 +4160,7 @@ The :t:`evaluation` of an :t:`if expression` proceeds as follows:
 
 #. :dp:`fls_67l4j48n6p7o`
    If the :t:`subject expression` evaluated to ``false`` and the :t:`if
-   expression` has an :t:`else expression`, then the :t:`[else expressio]n`
+   expression` has an :t:`else expression`, then the :t:`else expression`
    is evaluated.
 
 :dp:`fls_e8gd5lzcaifw`
@@ -4382,10 +4375,10 @@ The :t:`evaluation` of a :t:`match expression` proceeds as follows:
    Each :t:`match arm` is evaluated in declarative order as follows:
 
    #. :dp:`fls_pgulnjeoxwtj`
-      The :t:`match arm marcher` of the :t:`match arm` is evaluated.
+      The :t:`match arm matcher` of the :t:`match arm` is evaluated.
 
    #. :dp:`fls_2dg7wl68z7ar`
-      If the :t:`match arm marcher` succeeds, then
+      If the :t:`match arm matcher` succeeds, then
 
       #. :dp:`fls_yv11febo0kyb`
          The :t:`operand` of the :t:`match arm` is evaluated.
@@ -4398,29 +4391,29 @@ The :t:`evaluation` of a :t:`match expression` proceeds as follows:
       arm`.
 
 :dp:`fls_4dv7x9nh2h4e`
-The :t:`evaluation` of a :t:`match arm marcher` proceeds as follows:
+The :t:`evaluation` of a :t:`match arm matcher` proceeds as follows:
 
 #. :dp:`fls_k7kliy101m0f`
-   The :t:`pattern` of the :t:`match arm marcher` is evaluated.
+   The :t:`pattern` of the :t:`match arm matcher` is evaluated.
 
 #. :dp:`fls_k68zkb6jv0vz`
    If the :t:`pattern` succeeds, then
 
    #. :dp:`fls_gbb6wbmher5z`
-      If the :t:`match arm marcher` has a :t:`match arm guard`, then
+      If the :t:`match arm matcher` has a :t:`match arm guard`, then
 
       #. :dp:`fls_jl4av757yx8j`
          The :t:`match arm guard` is evaluated.
 
       #. :dp:`fls_wkh5wztauwhu`
-         If the :t:`match arm guard` evaluates to ``true``, then the :t:`match
-         arm marcher` succeeds.
+         If the :t:`match arm guard` evaluates to ``true``, then the
+         :t:`match arm matcher` succeeds.
 
    #. :dp:`fls_f5f0x8jstp1g`
-      Otherwise the :t:`match arm marcher` fails.
+      Otherwise the :t:`match arm matcher` fails.
 
 #. :dp:`fls_yk8l9zjh7i0d`
-   Otherwise the :t:`match arm marcher` fails.
+   Otherwise the :t:`match arm matcher` fails.
 
 :dp:`fls_sbtx1l6n2tp2`
 The :t:`evaluation` of a :t:`match arm guard` evaluates its :t:`operand`. A
@@ -4495,7 +4488,7 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
       The :t:`operand` is evaluated.
 
    #. :dp:`fls_bbf54ukld7j9`
-      The :t:`value` of the :t:`operand` is passed :t:`by moved` into the
+      The :t:`value` of the :t:`operand` is passed :t:`by move` into the
       designated output location of the enclosing control flow boundary.
 
 #. :dp:`fls_99ea30a5mulj`

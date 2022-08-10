@@ -138,7 +138,7 @@ If the :t:`identifier pattern` does not have a :t:`bound pattern`, then the
   determined by :t:`type inference`.
 
 * :dp:`fls_pivz0v7ey6sw`
-  If the :t:`identifier pattern` has :t:`keywords` ``ref`` ``mut``, then the
+  If the :t:`identifier pattern` has :t:`[keyword]s` ``ref`` ``mut``, then the
   :t:`type` is ``&mut inferred_type``, where ``inferred_type`` is the :t:`type`
   determined by :t:`type inference`.
 
@@ -156,7 +156,7 @@ its :t:`binding` is determined as follows:
   :t:`type` of the :t:`bound pattern`.
 
 * :dp:`fls_d3fs2h7oqjl0`
-  If the :t:`identifier pattern` has :t:`keywords` ``ref mut``, then the
+  If the :t:`identifier pattern` has :t:`[keyword]s` ``ref mut``, then the
   :t:`type` is ``&mut bound_pattern_type``, where ``bound_pattern_type`` is the
   :t:`type` of the :t:`bound pattern`.
 
@@ -701,6 +701,9 @@ Record Struct Patterns
    ShorthandDeconstructor ::=
        $$ref$$? $$mut$$? Binding
 
+   TupleIndex ::=
+       DecimalLiteral
+
 .. rubric:: Legality Rules
 
 :dp:`fls_g6dytd6aq62d`
@@ -749,7 +752,7 @@ A :t:`shorthand deconstructor` with :t:`keyword` ``mut`` yields a
 
 :dp:`fls_as54u97xis8z`
 It is a static error if a :t:`shorthand deconstructor` has only :t:`keyword`
-``ref`` or :t:`keywords` ``ref`` ``mut``, and its :t:`binding` shadows a
+``ref`` or :t:`[keyword]s` ``ref`` ``mut``, and its :t:`binding` shadows a
 :t:`constant`, a :t:`unit enum variant`, or a :t:`unit struct constant`.
 
 :dp:`fls_8364ueejn5y3`
@@ -814,7 +817,7 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`, 
   pattern` shall contain exactly one :s:`FieldDeconstructor`.
 
 * :dp:`fls_XFKBJZe6k1o2`
-  The :t:`record struct pattern`` shall not contain a :s:`RecordStructRestPattern`.
+  The :t:`record struct pattern` shall not contain a :s:`RecordStructRestPattern`.
 
 * :dp:`fls_mu166csowj71`
   For the single :t:`field` of the :t:`deconstructee`, the :t:`record struct
@@ -972,6 +975,7 @@ Tuple Patterns
 
    TuplePattern ::=
        $$($$ TuplePatternElementList? $$)$$
+
    TuplePatternElementList ::=
        Pattern $$,$$
      | PatternList

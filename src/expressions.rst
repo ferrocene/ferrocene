@@ -429,8 +429,6 @@ is deinitialized and shall not be read from until reinitialized.
 An :t:`immutable place expression` is a :t:`place expression` whose memory
 location cannot be modified.
 
-HELP LUKAS! What are the immutable place expressions?
-
 :dp:`fls_ku38h562vfyl`
 A :t:`mutable place expression` is a :t:`place expression` whose memory location
 can be modified. The following :t:`[place expression]s` are :t:`[mutable place

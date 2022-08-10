@@ -927,14 +927,6 @@ canonical path
 A :dt:`canonical path` is a :t:`path` that fully qualifies a :t:`name` starting
 from the current :t:`crate`.
 
-.. _fls_jnfI7rL43dhn:
-
-capture
-^^^^^^^
-
-:dp:`fls_53Q933UcjtJY`
-For :dt:`capture`, see :t:`capturing`.
-
 .. _fls_s78gd8yxx2yv:
 
 capture mode
@@ -3581,7 +3573,7 @@ mutable assignee expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_0RSlFbwrB3gp`
-A :t:`mutable assignee expression` is an :t:`assignee expression` whose
+A :dt:`mutable assignee expression` is an :t:`assignee expression` whose
 :t:`value` can be modified.
 
 .. _fls_ntaA0NtJ9z5h:

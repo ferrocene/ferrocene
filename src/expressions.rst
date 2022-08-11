@@ -277,8 +277,8 @@ operator]s` of non-builtin :t:`[type]s` that invoke :std:`core::ops`
 
 :dp:`fls_9mrrosm8jnn7`
 An :t:`arithmetic expression` that operates with :t:`[floating-point value]s` is
-not considered a :t:`constant expression` when it appears inside the body of a
-:t:`constant function`.
+not considered a :t:`constant expression` when it appears inside the
+:t:`function body` of a :t:`constant function`.
 
 :dp:`fls_fmqar6o1bwqk`
 It is a static error if the :t:`size operand` of an :t:`array repetition
@@ -961,8 +961,8 @@ Error Propagation Expression
 
 :dp:`fls_8q59wbumrt5s`
 An :t:`error propagation expression` is an :t:`expression` that either evaluates
-to a :t:`value` of its :t:`operand` or returns a value to the next control flow
-boundary.
+to a :t:`value` of its :t:`operand` or returns a value to the enclosing control
+flow boundary.
 
 :dp:`fls_mq2h4seoxah`
 An :t:`error propagation expression` shall appear within a :t:`control flow
@@ -4447,7 +4447,8 @@ Return Expressions
 
 :dp:`fls_u7jk4j8gkho`
 A :t:`return expression` is an :t:`expression` that optionally yields a
-:t:`value` and causes control flow to return to the caller.
+:t:`value` and causes control flow to return to the end of the enclosing
+:t:`control flow boundary`.
 
 :dp:`fls_5v3j5ghhw8j8`
 A :t:`return expression` shall appear within a :t:`control flow boundary`.
@@ -4487,7 +4488,7 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
 
    #. :dp:`fls_bbf54ukld7j9`
       The :t:`value` of the :t:`operand` is passed :t:`by move` into the
-      designated output location of the enclosing control flow boundary.
+      designated output location of the enclosing :t:`control flow boundary`.
 
 #. :dp:`fls_99ea30a5mulj`
    Control destroys the current activation frame.
@@ -4532,13 +4533,20 @@ A :t:`future operand` is an :t:`operand` whose :t:`future` is being awaited by
 an :t:`await expression`.
 
 :dp:`fls_k9pncajmhgk1`
-An :t:`await expression` shall appear within
+An :t:`await expression` shall appear within an :t:`async control flow boundary`.
+
+:dp:`fls_xtG3Lw2XgGS2`
+An :dt:`async control flow boundary` is a :t:`control flow boundary` with
+asynchronous control flow.
+
+:dp:`fls_Rr2Wl6mp4oXS`
+The following constructs are :t:`[async control flow boundary]ies`:
 
 * :dp:`fls_xilkqy5piyh0`
   An :t:`async block expression`.
 
 * :dp:`fls_cr61i8so7cty`
-  An :t:`async function`.
+  The :t:`function body`` of an :t:`async function`.
 
 :dp:`fls_9uw5pd7kbrx3`
 The :t:`type` of a :t:`future operand` shall implement the

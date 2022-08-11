@@ -1260,7 +1260,9 @@ control flow boundary
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_SmipZJDp02ij`
-A :dt:`control flow boundary` is a ??? HELP LUKAS!
+A :dt:`control flow boundary` is a :t:`construct` that limits control flow from
+returning beyond :t:`construct`, acting as the target of control flow returning
+operations.
 
 .. _fls_kf8yukhxudw8:
 

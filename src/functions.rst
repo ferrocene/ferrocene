@@ -94,6 +94,9 @@ A :t:`return type` is the :t:`type` of the result a :t:`function` returns.
 :dp:`fls_927nfm5mkbsp`
 A :t:`function body` is the :t:`block expression` of a :t:`function`.
 
+:dp:`fls_bHwy8FLzEUi3`
+A :t:`function body` denotes a :t:`control flow boundary`.
+
 :dp:`fls_owdlsaaygtho`
 A :t:`function signature` is a unique identification of a :t:`function`
 that encompasses of its :t:`[function qualifier]s`, :t:`name`, :t:`[generic

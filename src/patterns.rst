@@ -38,7 +38,7 @@ Patterns
      | SlicePattern
      | StructPattern
      | TuplePattern
-     | WildcardPattern
+     | UnderscorePattern
 
 .. rubric:: Legality Rules
 
@@ -1010,32 +1010,32 @@ A tuple pattern in the context of a let statement.
 
 .. _fls_qfsfnql1t7m:
 
-Wildcard Patterns
-~~~~~~~~~~~~~~~~~
+Underscore Patterns
+~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Syntax
 
 .. syntax::
 
-   WildcardPattern ::=
+   UnderscorePattern ::=
        $$_$$
 
 .. rubric:: Legality Rules
 
 :dp:`fls_dreny9e0ei6r`
-A :t:`wildcard pattern` is a :t:`pattern` that matches any single :t:`value`.
+An :t:`underscore pattern` is a :t:`pattern` that matches any single :t:`value`.
 
 :dp:`fls_42fye1v0th8l`
-A :t:`wildcard pattern` is always :t:`irrefutable`.
+An :t:`underscore pattern` is always :t:`irrefutable`.
 
 :dp:`fls_b87mvrcc13f2`
-The :t:`type` of a :t:`wildcard pattern` is the :t:`type` of the :t:`value`
+The :t:`type` of an :t:`underscore pattern` is the :t:`type` of the :t:`value`
 it matches.
 
 .. rubric:: Examples
 
 :dp:`fls_j3u6x1ensrbe`
-A wildcard pattern in the context of a let statement. See :p:`5.1.10.
+An underscore pattern in the context of a let statement. See :p:`5.1.10.
 <fls_fo48m62q2y0v>` for the declaration of ``pair``.
 
 .. code-block:: rust
@@ -1113,9 +1113,9 @@ A :t:`binding` is a :t:`variable` of a :t:`binding pattern` that binds a matched
 :t:`value`.
 
 :dp:`fls_dqe75i8h2fie`
-A :t:`non-reference pattern` is any :t:`pattern` except :t:`non-[binding
-pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`, and :t:`[wildcard
-pattern]s`.
+A :t:`non-reference pattern` is any :t:`pattern` except
+:t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
+and :t:`[underscore pattern]s`.
 
 :dp:`fls_y3wuvj1y5j20`
 If a :t:`binding pattern` does not explicitly specify :t:`keyword` ``ref``,
@@ -1218,8 +1218,8 @@ proceeds as follows:
       then perform :t:`tuple struct pattern matching`.
 
    #. :dp:`fls_uxysntb3u03j`
-      If the :t:`pattern-without-alternation` is a :t:`wildcard pattern`, then
-      perform :t:`wildcard pattern matching`.
+      If the :t:`pattern-without-alternation` is an :t:`underscore pattern`,
+      then perform :t:`underscore pattern matching`.
 
    #. :dp:`fls_wh201rmh6u6d`
       Otherwise :t:`pattern matching` fails.
@@ -1455,13 +1455,13 @@ Tuple Struct Pattern Matching
 
 .. _fls_yc4xm4hrfyw7:
 
-Wildcard Pattern Matching
+Underscore Pattern Matching
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_dvk7r1gf7pwp`
-:dt:`Wildcard pattern matching` proceeds as follows:
+:dt:`Underscore pattern matching` proceeds as follows:
 
 #. :dp:`fls_e0uprihqn1y6`
    The context :t:`value` is matched unconditionally.

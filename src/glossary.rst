@@ -1261,8 +1261,8 @@ control flow boundary
 
 :dp:`fls_SmipZJDp02ij`
 A :dt:`control flow boundary` is a :t:`construct` that limits control flow from
-returning beyond :t:`construct`, acting as the target of control flow returning
-operations.
+returning beyond the :t:`construct`, and acts as the target of control flow
+returning operations.
 
 .. _fls_kf8yukhxudw8:
 
@@ -3742,9 +3742,9 @@ non-reference pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_tejled5izyue`
-A :dt:`non-reference pattern` is any :t:`pattern` except :t:`non-[binding
-pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`, and :t:`[wildcard
-pattern]s`.
+A :dt:`non-reference pattern` is any :t:`pattern` except
+:t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
+and :t:`[underscore pattern]s`.
 
 .. _fls_shgatqvpdqkg:
 
@@ -5843,6 +5843,18 @@ in a :t:`destructuring assignment`.
 :dp:`fls_qbo267kdjcgs`
 See :s:`UnderscoreExpression`.
 
+.. _fls_fhwqe6afup2o:
+
+underscore pattern
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_f6yroesif1q4`
+An :dt:`underscore pattern` is a :t:`pattern` that matches any single
+:t:`value`.
+
+:dp:`fls_bktuchv7o4dd`
+See :s:`UnderscorePattern`.
+
 .. _fls_kafgmevvzl5t:
 
 Unicode
@@ -6355,17 +6367,6 @@ whitespace string
 :dp:`fls_nljkmadklwdp`
 A :dt:`whitespace string` is a string that consists of one or more
 :t:`[whitespace character]s`.
-
-.. _fls_fhwqe6afup2o:
-
-wildcard pattern
-^^^^^^^^^^^^^^^^
-
-:dp:`fls_f6yroesif1q4`
-A :dt:`wildcard pattern` is a :t:`pattern` that matches any single :t:`value`.
-
-:dp:`fls_bktuchv7o4dd`
-See :s:`WildcardPattern`.
 
 .. _fls_a5lrxgucl3be:
 

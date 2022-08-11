@@ -317,7 +317,7 @@ context`.
 :dp:`fls_od0h3v40kjp6`
 An invocation of the ``addr_of!()`` :t:`macro` expands to a :t:`constant
 expression` allowed in any :t:`constant context` and :t:`constant function`,
-subject to the same restrictions as a :t:`mutable borrow expression`.
+subject to the same restrictions as a :t:`immutable borrow expression`.
 
 :dp:`fls_6sc556tz4oxd`
 An invocation of the ``panic!()`` :t:`macro` expands to a :t:`constant
@@ -2060,8 +2060,7 @@ A :t:`value operand` is an :t:`operand` that supplies the :t:`value` that is
 assigned to an :t:`assignee operand` by an :t:`assignment expression`.
 
 :dp:`fls_kh6rp9e0wwl`
-An :t:`assignee operand` shall denote a :t:`mutable assignee expression`.
-LUKAS, what is a "mutable assignee expression"?
+An :t:`assignee operand` shall denote a :t:`mutable place expression`.
 
 :dp:`fls_3wragak9hglw`
 A :t:`value operand` shall denote a :t:`value expression`.
@@ -2122,35 +2121,32 @@ the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
 expression`, or a :t:`tuple expression`.
 
 :dp:`fls_z8c3b9s9de3x`
-The :t:`assignee operand` of a :t:`destructuring assignment` corresponds to an
-:t:`assignee pattern` according to its kind, as follows:
-LUKAS, that is an "assignee pattern"?
+The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
+:dt:`assignee pattern` depending on its kind, as follows:
+
+* :dp:`fls_vqb89rkkjw81`
+  An :t:`array expression` corresponds to a :t:`slice pattern` with all the
+  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
+
+* :dp:`fls_vqj7ljrrd7wi`
+  A :t:`full range expression` corresponds to a :t:`rest pattern` if inside a
+  :t:`slice expression`, otherwise this is a static error.
 
 * :dp:`fls_du5eybf8mocy`
   A :t:`place expression` corresponds to an :t:`identifier pattern` with a
   unique :t:`identifier` and without :t:`keyword` ``ref``, keyword ``mut``, or a
   :t:`bound pattern`.
 
-* :dp:`fls_q90ikfi7ewoi`
-  An :t:`underscore expression` corresponds to an :t:`wildcard pattern`.
+* :dp:`fls_hj6srmzbobid`
+  A :t:`struct expression` corresponds to a :t:`struct pattern` with all the
+  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
 * :dp:`fls_uydzlfc4hjbx`
   A :t:`tuple expression` corresponds to a :t:`tuple pattern` with all the
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
-* :dp:`fls_hj6srmzbobid`
-  A :t:`struct expression` corresponds to a :t:`struct pattern` with all the
-  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
-
-* :dp:`fls_vqb89rkkjw81`
-  A :t:`slice expression` corresponds to a :t:`slice pattern` with all the
-  :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
-  LUKAS, there is no such thing as "slice expression". Did you mean "array
-  expression"?
-
-* :dp:`fls_vqj7ljrrd7wi`
-  A :t:`full range expression` corresponds to a :t:`rest pattern` if inside a
-  :t:`slice expression`, otherwise this is a static error.
+* :dp:`fls_q90ikfi7ewoi`
+  An :t:`underscore expression` corresponds to an :t:`underscore pattern`.
 
 :dp:`fls_4bb07tn28ivw`
 The :t:`pattern` that corresponds to a :t:`destructuring assignment` shall be
@@ -2715,7 +2711,6 @@ The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
 :dp:`fls_98qeczwv7fmy`
 If the :t:`indexed operand` is evaluated in a :t:`value expression context`,
 then
-LUKAS, what is a "value expression context"?
 
 * :dp:`fls_jxdiknkwglak`
   The :t:`index expression` is a :t:`value expression`.
@@ -2731,7 +2726,6 @@ LUKAS, what is a "value expression context"?
 :dp:`fls_y3sduoma6q9v`
 If the :t:`indexed operand` is :t:`mutable` and the :t:`index expression` is
 evaluated in a :t:`mutable place expression context`, then
-LUKAS, what is a "mutable place expression context"?
 
 * :dp:`fls_pjmoo8mjgxz3`
   The :t:`index expression` is a :t:`mutable place expression`.
@@ -3147,9 +3141,10 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   :t:`function` with the :t:`[argument operand]s`.
 
 * :dp:`fls_RZjFs9koNOk8`
-  If the :t:`callee type` is a :t:`tuple struct type` or a :t:`tuple enum variant`,
-  then the :t:`value` is the result of constructing the :t:`tuple struct` or :t:`tuple enum variant`
-  with the :t:`[argument operand]s`.
+  If the :t:`callee type` is a :t:`tuple struct type` or a
+  :t:`tuple enum variant`, then the :t:`value` is the result of constructing
+  the :t:`tuple struct` or :t:`tuple enum variant` with the
+  :t:`[argument operand]s`.
 
 * :dp:`fls_s3q3sej1hgho`
   If the :t:`callee type` implements the :std:`core::ops::Fn`
@@ -3507,7 +3502,7 @@ Loop Expressions
        Label? LoopContent
 
    Label ::=
-       $$'$$ NonKeywordIdentifier
+       $$'$$ NonKeywordIdentifier $$:$$
 
    LoopContent ::=
        ForLoopExpression
@@ -4340,7 +4335,8 @@ The :t:`type` of the :t:`operand` of a :t:`match arm guard` shall be :t:`type`
 :c:`bool`.
 
 :dp:`fls_17ag0wzdbxv6`
-The :t:`[type]s` of all :t:`[match arm body]ies` shall be :t:`unifiable`.
+The :t:`[type]s` of all :t:`match arm bodies <match arm body>` shall be
+:t:`unifiable`.
 
 :dp:`fls_5w964phrru82`
 The :t:`type` of a :t:`match expression` is the :t:`unified type` of the

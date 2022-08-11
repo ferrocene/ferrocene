@@ -64,6 +64,14 @@ active attribute
 An :dt:`active attribute` is an :t:`attribute` that is removed from the
 :t:`item` it decorates.
 
+.. _fls_xqZapSv9tM1F:
+
+addition assignment
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_FVgKeCXlmuPe`
+For :dt:`addition assignment`, see :t:`addition assignment expression`.
+
 .. _fls_iw30dqjaeqle:
 
 addition assignment expression
@@ -152,6 +160,14 @@ from two :t:`[operand]s` using arithmetic.
 
 :dp:`fls_in59ccg4g3we`
 See :s:`ArithmeticExpression`.
+
+.. _fls_kSuc3Gi7cdly:
+
+arithmetic operator
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Qf7DckakqvRq`
+An :dt:`arithmetic operator` is the operator of an :t:`arithmetic expression`.
 
 .. _fls_vZ1H57x9OFSZ:
 
@@ -386,7 +402,7 @@ async block
 ^^^^^^^^^^^
 
 :dp:`fls_pf6lrmcjywoj`
-See :t:`async block`.
+For :dt:`async block`, see :t:`async block expression`.
 
 .. _fls_n5m58be9jnjj:
 
@@ -394,7 +410,9 @@ async block expression
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_p6nvfs7bfoxd`
-An :dt:`async block expression` is a :t:`block expression` that **???**.
+An :dt:`async block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``async`` and encapsulates behavior which is executed in
+asynchronous manner.
 
 :dp:`fls_je689rormhd6`
 See :s:`AsyncBlockExpression`.
@@ -563,6 +581,14 @@ A :dt:`bit expression` is an :t:`expression` that computes a :t:`value` from two
 :dp:`fls_iw1k2cfwfjou`
 See :s:`BitExpression`.
 
+.. _fls_clut5DWMQin8:
+
+bit and assignment
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_wIl0K7O6lTXJ`
+For :dt:`bit and assignment`, see :t:`bit and assignment expression`.
+
 .. _fls_y72vyr2tmdyb:
 
 bit and assignment expression
@@ -587,6 +613,14 @@ arithmetic.
 :dp:`fls_vbsvu0troqci`
 See :s:`BitAndExpression`.
 
+.. _fls_90E3eiBYgicI:
+
+bit or assignment
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_21iFIDCu7Pk4`
+For :dt:`bit or assignment`, see :t:`bit or assignment expression`.
+
 .. _fls_ehorb0lul906:
 
 bit or assignment expression
@@ -609,6 +643,14 @@ A :dt:`bit or expression` is a :t:`bit expression` that uses bit or arithmetic.
 
 :dp:`fls_ctqsjp653tbt`
 See :s:`BitOrExpression`.
+
+.. _fls_jEnv7RjEUZvm:
+
+bit xor assignment
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_VJpCPVCuszs1`
+For :dt:`bit xor assignment`, see :t:`bit xor assignment expression`.
 
 .. _fls_u3fcq7jjyxux:
 
@@ -1032,6 +1074,14 @@ compilation root
 :dp:`fls_stwsfyvov2fx`
 A :dt:`compilation root` is an input to a compilation performed by a tool.
 
+.. _fls_pTMrfPXETibe:
+
+compound assignment
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_lGV9QvCmYGcH`
+For :dt:`compound assignment`, see :t:`compound assignment expression`.
+
 .. _fls_iktiir89xbo2:
 
 compound assignment expression
@@ -1203,6 +1253,16 @@ restarts a :t:`loop expression`.
 
 :dp:`fls_smwcz2xw9o1f`
 See :s:`ContinueExpression`.
+
+.. _fls_nC4Knv4tpenW:
+
+control flow boundary
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_SmipZJDp02ij`
+A :dt:`control flow boundary` is a :t:`construct` that limits control flow from
+returning beyond the :t:`construct`, and acts as the target of control flow
+returning operations.
 
 .. _fls_kf8yukhxudw8:
 
@@ -1381,7 +1441,7 @@ destructuring assignment
 :dp:`fls_7jienn9uzn5k`
 A :dt:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
-expression`, a :t:`tuple expression`, or a :t:`union expression`.
+expression`, or a :t:`tuple expression`.
 
 .. _fls_7vg56eeo0zlg:
 
@@ -1409,6 +1469,14 @@ discriminant type
 
 :dp:`fls_t4yeovFm83Wo`
 A :dt:`discriminant type` is the :t:`type` of a :t:`discriminant`.
+
+.. _fls_0lpT9Ncj7S9X:
+
+division assignment
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_kvQskrzE1y97`
+For :dt:`division assignment`, see :t:`division assignment expression`.
 
 .. _fls_ccv27fji08ou:
 
@@ -1941,13 +2009,21 @@ floating-point type variable
 A :dt:`floating-point type variable` is a :t:`type variable` that can refer only
 to :t:`[floating-point type]s`.
 
+.. _fls_nE6SWuVH7X68:
+
+floating-point value
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rx8cvWPlvel5`
+A :dt:`floating-point value` is a :t:`value` of a :t:`floating-point type`.
+
 .. _fls_dwnvkq8n94h1:
 
 for loop
 ^^^^^^^^
 
 :dp:`fls_gmhh56arsbw8`
-See :t:`for loop expression`.
+For :dt:`for loop`, see :t:`for loop expression`.
 
 .. _fls_vfkqbovqbw86:
 
@@ -1973,6 +2049,15 @@ a :t:`metavariable`.
 
 :dp:`fls_drfn9yqrihgx`
 See ``MacroFragmentSpecifier``.
+
+.. _fls_tWp1PLe8m83K:
+
+full range expression
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_NIb9UOIRjMqa`
+A :dt:`full range expression` is a :t:`range expression` that covers the full
+range of a :t:`type`.
 
 .. _fls_yllg093syzdi:
 
@@ -2413,6 +2498,15 @@ immutable borrow expression
 An :dt:`immutable borrow expression` is a :t:`borrow expression` that lacks
 :t:`keyword` ``mut``.
 
+.. _fls_TXQzFM77s4uj:
+
+immutable place expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_MXBEZjzBxw5Z`
+An :dt:`immutable place expression` is a :t:`place expression` whose memory
+location cannot be modified.
+
 .. _fls_my7jjwi0ncen:
 
 immutable static
@@ -2555,6 +2649,14 @@ of a :t:`type`.
 :dp:`fls_xm2er7vuo07g`
 See :s:`IndexExpression`.
 
+.. _fls_S0pnJKPJPU0i:
+
+indexable type
+^^^^^^^^^^^^^^
+
+:dp:`fls_AdVGyKZFvvUS`
+A :dt:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
+
 .. _fls_irp9ive4e66r:
 
 indexed operand
@@ -2651,7 +2753,7 @@ infinite loop
 ^^^^^^^^^^^^^
 
 :dp:`fls_xpm53i3rkuu0`
-See :t:`infinite loop expression`.
+For :dt:`infinite loop`, see :t:`infinite loop expression`.
 
 .. _fls_o2eei5aqgds6:
 
@@ -2686,6 +2788,15 @@ initialization
 :dp:`fls_xi07ycze6mo0`
 :dt:`Initialization` is the act of supplying an initial :t:`value` to a
 :t:`constant`, a :t:`static`, or a :t:`variable`.
+
+.. _fls_ctusGvpQvJue:
+
+initialization expression
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_KUeiSByPUc4w`
+An :dt:`initialization expression` is either a :t:`constant initializer` or a
+:t:`static initializer`.
 
 .. _fls_pd30dl2envjn:
 
@@ -2892,6 +3003,17 @@ A :dt:`keyword` is a word in program text that has special meaning.
 
 :dp:`fls_yvnf2mu4pr75`
 See :s:`Keyword`.
+
+.. _fls_uVUoHmNtPRtS:
+
+label
+^^^^^
+
+:dp:`fls_iAAf2rLmgmGQ`
+A :dt:`label` is the :t:`name` of a :t:`loop expression`.
+
+:dp:`fls_HicurdHIiLX2`
+See :s:`Label`.
 
 .. _fls_dw5s7jhk4v8s:
 
@@ -3137,7 +3259,7 @@ loop
 ^^^^
 
 :dp:`fls_omjnvxva07z2`
-See :t:`loop expression`.
+For :dt:`loop`, see :t:`loop expression`.
 
 .. _fls_an1s2hnapd59:
 
@@ -3398,6 +3520,15 @@ A :dt:`module` is a container for zero or more :t:`[item]s`.
 :dp:`fls_os60q6vvm71c`
 See :s:`ModuleDeclaration`.
 
+.. _fls_lpSCLhnaxeCg:
+
+multiplication assignment
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_llUb5VHKjwW4`
+For :dt:`multiplication assignment`, see
+:t:`multiplication assignment expression`.
+
 .. _fls_yo4k6lk0tizn:
 
 multiplication assignment expression
@@ -3437,6 +3568,15 @@ mutable
 
 :dp:`fls_dqm58deu1orn`
 A :t:`value` is :dt:`mutable` when it can be modified.
+
+.. _fls_TEVPHHiCMByO:
+
+mutable assignee expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_0RSlFbwrB3gp`
+A :dt:`mutable assignee expression` is an :t:`assignee expression` whose
+:t:`value` can be modified.
 
 .. _fls_ntaA0NtJ9z5h:
 
@@ -3602,9 +3742,9 @@ non-reference pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_tejled5izyue`
-A :dt:`non-reference pattern` is any :t:`pattern` except :t:`non-[binding
-pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`, and :t:`[wildcard
-pattern]s`.
+A :dt:`non-reference pattern` is any :t:`pattern` except
+:t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
+and :t:`[underscore pattern]s`.
 
 .. _fls_shgatqvpdqkg:
 
@@ -4432,6 +4572,14 @@ refutable type
 :dp:`fls_l2yz6jeehm52`
 A :dt:`refutable type` is a :t:`type` that has more than one :t:`value`.
 
+.. _fls_JnhUWipah0nO:
+
+remainder assignment
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_58eDC2XtQcaR`
+For :dt:`remainder assignment`, see :t:`remainder assignment expression`.
+
 .. _fls_mio7pagghcks:
 
 remainder assignment expression
@@ -4686,6 +4834,14 @@ shared reference type
 A :dt:`shared reference type` is a :t:`reference type` declared without
 :t:`keyword` ``mut``.
 
+.. _fls_o8EVuKgr0Y98:
+
+shift left assignment
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_6adWrtvab6Tw`
+For :dt:`shift left assignment`, see :t:`shift left assignment expression`.
+
 .. _fls_29n0oe4d7lwa:
 
 shift left assignment expression
@@ -4709,6 +4865,14 @@ arithmetic.
 
 :dp:`fls_56lu9kenzig9`
 See :s:`ShiftLeftExpression`.
+
+.. _fls_V5LMAe8ijiMQ:
+
+shift right assignment
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_XuwcHjwHdyA8`
+For :dt:`shift right assignment`, see :t:`shift right assignment expression`.
 
 .. _fls_cqfzbsasnd1t:
 
@@ -5042,6 +5206,15 @@ struct value
 :dp:`fls_YmZfW9kWlbIX`
 A :dt:`struct value` is a :t:`value` of a :t:`struct type`.
 
+.. _fls_feZ3iDff05Cb:
+
+subexpression
+^^^^^^^^^^^^^
+
+:dp:`fls_bNSHwD4Kpfm0`
+A :dt:`subexpression` is an :t:`expression` nested within another
+:t:`expression`.
+
 .. _fls_wee9stfk0abp:
 
 subject expression
@@ -5072,7 +5245,15 @@ subpattern
 ^^^^^^^^^^
 
 :dp:`fls_942ulj9qsdes`
-A :dt:`subpattern` is a :t:`pattern` nested within another pattern.
+A :dt:`subpattern` is a :t:`pattern` nested within another :t:`pattern`.
+
+.. _fls_0hf1gNf90qKr:
+
+subtraction assignment
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_75Eyk2YXO2j4`
+For :dt:`subtraction assignment`, see :t:`subtraction assignment`.
 
 .. _fls_a4iu72zn4h0:
 
@@ -5662,6 +5843,18 @@ in a :t:`destructuring assignment`.
 :dp:`fls_qbo267kdjcgs`
 See :s:`UnderscoreExpression`.
 
+.. _fls_fhwqe6afup2o:
+
+underscore pattern
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_f6yroesif1q4`
+An :dt:`underscore pattern` is a :t:`pattern` that matches any single
+:t:`value`.
+
+:dp:`fls_bktuchv7o4dd`
+See :s:`UnderscorePattern`.
+
 .. _fls_kafgmevvzl5t:
 
 Unicode
@@ -5840,7 +6033,7 @@ unsafe block
 ^^^^^^^^^^^^
 
 :dp:`fls_8tkolhmd6xfp`
-See :t:`unsafe block expression`.
+For :dt:`unsafe block`, see :t:`unsafe block expression`.
 
 .. _fls_u8sdp2fxz9pn:
 
@@ -5848,8 +6041,8 @@ unsafe block expression
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_et2h89jyivhs`
-An :dt:`unsafe block expression` is a :t:`block expression` that is marked as
-:t:`unsafe`.
+An :dt:`unsafe block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``unsafe``.
 
 :dp:`fls_c94rudunhp5b`
 See :s:`UnsafeBlockExpression`.
@@ -6130,7 +6323,7 @@ while let loop
 ^^^^^^^^^^^^^^
 
 :dp:`fls_ovutw52qtx71`
-See :t:`while let loop expression`.
+For :dt:`while let loop`, see :t:`while let loop expression`.
 
 .. _fls_gme4odk59x6d:
 
@@ -6151,7 +6344,7 @@ while loop
 ^^^^^^^^^^
 
 :dp:`fls_ug9cxoml9ged`
-See :t:`while loop expression`.
+For :dt:`while loop`, see :t:`while loop expression`.
 
 .. _fls_1qxi3h3qmgso:
 
@@ -6174,17 +6367,6 @@ whitespace string
 :dp:`fls_nljkmadklwdp`
 A :dt:`whitespace string` is a string that consists of one or more
 :t:`[whitespace character]s`.
-
-.. _fls_fhwqe6afup2o:
-
-wildcard pattern
-^^^^^^^^^^^^^^^^
-
-:dp:`fls_f6yroesif1q4`
-A :dt:`wildcard pattern` is a :t:`pattern` that matches any single :t:`value`.
-
-:dp:`fls_bktuchv7o4dd`
-See :s:`WildcardPattern`.
 
 .. _fls_a5lrxgucl3be:
 

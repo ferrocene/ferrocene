@@ -542,6 +542,7 @@ A :t:`value expression` is an :t:`expression` that represents a :t:`value`.
 All :t:`[expression]s` that are not :t:`[place expression]s` are
 :t:`[value expression]s`.
 
+:dp:`fls_pB6xlp4uAg37`
 A :t:`value expression context` is an :t:`expression context` that is not a
 :t:`place expression context`.
 
@@ -919,7 +920,7 @@ type`, the :t:`dereference expression` denotes the pointed-to memory location of
 the :t:`operand`, or the :t:`dereference` of the :t:`operand`.
 
 :dp:`fls_9cc0ml2sru6x`
-The :t:`dereference` is assignable when it the :t:`dereference expression` is a
+The :t:`dereference` is assignable when the :t:`dereference expression` is a
 :t:`mutable place expression`.
 
 :dp:`fls_8i4jzksxlrw0`

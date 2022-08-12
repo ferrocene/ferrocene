@@ -5606,6 +5606,15 @@ A :dt:`tuple struct` is a :t:`struct` with a :s:`TupleStructFieldList`.
 :dp:`fls_1tj4p05m4wdf`
 See :s:`TupleStructDeclaration`.
 
+.. _fls_UYCpeq4Z87My:
+
+tuple struct call expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_DQaCUkskfXzk`
+A :dt:`tuple struct call expression` is a :t:`call expression` where the
+:t:`call operand` resolves to a :t:`tuple struct`.
+
 .. _fls_xx4slbg8s63e:
 
 tuple struct field

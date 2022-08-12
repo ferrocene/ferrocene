@@ -2121,7 +2121,7 @@ Destructuring Assignment
 :dp:`fls_2eheo4yo2orm`
 A :t:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
-expression`, a :t:`tuple struct call expression` or a :t:`tuple expression`.
+expression`, a :t:`tuple expression` or a :t:`tuple struct call expression`.
 
 :dp:`fls_z8c3b9s9de3x`
 The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an

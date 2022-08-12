@@ -1456,7 +1456,7 @@ Tuple Struct Pattern Matching
 .. _fls_yc4xm4hrfyw7:
 
 Underscore Pattern Matching
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Dynamic Semantics
 

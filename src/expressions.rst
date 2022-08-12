@@ -352,8 +352,8 @@ Place Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_qbrcg3cl9td`
-A :t:`place expression` is an :t:`expression` that represents a memory location.
-The following :t:`[expression]s` are :t:`[place expression]s`:
+A :t:`place expression` is an :t:`expression` that represents a memory
+location. The following :t:`[expression]s` are :t:`[place expression]s`:
 
 * :dp:`fls_jpmhibm4omm7`
   :t:`[Dereference expression]s`,
@@ -369,28 +369,110 @@ The following :t:`[expression]s` are :t:`[place expression]s`:
   expression`,
 
 * :dp:`fls_ya05djl1d154`
-  :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`variable`.
+  :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`local
+  variable`.
+
+:dp:`fls_ku38h562vfyl`
+A :t:`mutable place expression` is a :t:`place expression` that allows
+modification of the value at its memory location. The following :t:`[place
+expression]s` are :t:`[mutable place expression]s`:
+
+* :dp:`fls_bt50fltfqcvn`
+  An :t:`index expression` whose :t:`type` implements the
+  :std:`core::ops::IndexMut` :t:`trait`,
+
+* :dp:`fls_6b4rwkrc1ap6`
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
+  raw pointer type`,
+
+* :dp:`fls_s4bhrpykzmm7`
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
+  reference type`,
+
+* :dp:`fls_1tq2o2huda9l`
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` implements the
+  :std:`core::ops::DerefMut` :t:`trait`,
+
+* :dp:`fls_xm0gm2q27x2e`
+  A :t:`field access expression` where the :t:`container operand` is a
+  :t:`mutable place expression`,
+
+* :dp:`fls_ilaqmj3hc5uv`
+  A :t:`path expression` that resolves to a :t:`mutable static`,
+
+* :dp:`fls_m0gbw9myylv2`
+  A :t:`path expression` that resolves to a :t:`mutable variable` that is not
+  currently borrowed,
+
+* :dp:`fls_dcm3yr3y9y0a`
+  A :t:`temporary`.
+
+:dp:`fls_cPEMHZtPkctX`
+An :t:`immutable place expression` is a :t:`place expression` whose memory
+location cannot be modified. All :t:`[place expression]s` that are not
+:t:`[mutable place expression]s` are :t:`[immutable place expression]s`.
 
 :dp:`fls_4vxi1ji93dxb`
-A :t:`place expression context` is a :t:`construct` that requires a :t:`place
-expression`. The following :t:`[construct]s` are :t:`[place expression
+A :t:`place expression context` is a :t:`construct` that may evaluate its
+:t:`operand` as a memory location.
+The following :t:`[construct]s` are :t:`[place expression
 context]s`:
 
-* :dp:`fls_qytgkbhqr5ln`
+* :dp:`fls_giZ7w1G02JSg`
   The :t:`indexed operand` of an :t:`index expression`,
+
+* :dp:`fls_ZED5wJQVO6nf`
+  The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
+  assignment expression`,
+
+* :dp:`fls_Ufz9W5vyZkv3`
+  The :t:`operand` of a :t:`borrow expression`,
+
+* :dp:`fls_KxWIzoh9WwK7`
+  The :t:`operand` of a :t:`dereference expression`,
+
+* :dp:`fls_oV9Hd6OiFAZX`
+  The :t:`container operand` of :t:`field access expression`,
+
+* :dp:`fls_5yXuTLQOQ3cc`
+  The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
+  let loop expression`,
+
+* :dp:`fls_NnGiNsH6Zgmp`
+  The initialization :t:`expression` of a :t:`let statement`,
+
+* :dp:`fls_nman7mJVSQlm`
+  The :t:`subject expression` of a :t:`match expression`,
+
+* :dp:`fls_JBfZuFDQg3mU`
+  The :t:`base initializer` of a :t:`struct expression`,
+
+* :dp:`fls_jLZlxIHr4w2v`
+  The :t:`operand` of an :t:`implicit borrow`.
+
+:dp:`fls_wxGAOWEVT77u`
+A :t:`mutable place expression context` is a :t:`place expression context` that
+may evaluate its :t:`operand` as a mutable memory location. The following
+:t:`[construct]s` are :t:`[mutable place expression context]s`:
+
+* :dp:`fls_qytgkbhqr5ln`
+  The :t:`indexed operand` of an :t:`index expression` if evaluated in a
+  :t:`mutable place expression context`,
 
 * :dp:`fls_5gy92rsi2mqm`
   The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
   assignment expression`,
 
 * :dp:`fls_u80htrnr2ebz`
-  The :t:`operand` of a :t:`borrow expression`,
+  The :t:`operand` of a mutable :t:`borrow expression`,
 
 * :dp:`fls_o0feajus3jtu`
-  The :t:`operand` of a :t:`dereference expression`,
+  The :t:`operand` of a :t:`dereference expression` if evaluated in a
+  :t:`mutable place expression context`,
 
 * :dp:`fls_ffjx1d5dseo4`
-  The :t:`container operand` of :t:`field access expression`,
+  The :t:`container operand` of :t:`field access expression` if evaluated in a
+  :t:`mutable place expression context`,
 
 * :dp:`fls_9r7dopqf1nzl`
   The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
@@ -402,21 +484,20 @@ context]s`:
 * :dp:`fls_brwv1zwu37e8`
   The :t:`subject expression` of a :t:`match expression`,
 
-* :dp:`fls_qewvbxvk81d`
-  The :t:`base initializer` of a :t:`struct expression`,
-
-* :dp:`fls_qaqwmxa3bxw1`
-  The :t:`operand` of an :t:`implicit borrow`.
+:dp:`fls_4axr4V0icdBP`
+A :t:`place expression` that is evaluated in a :t:`value expression context`
+or bound *by value* in a :t:`pattern` denotes the :t:`value` held in the memory
+location of the :t:`place expression`.
 
 :dp:`fls_konzgoybhfqm`
 A :t:`place expression` can be moved out of when it denotes
 
 * :dp:`fls_4bnbv7mqod57`
-  A :t:`field` of a :t:`place expression` that can be moved out of and does not
-  implement the :std:`core::ops::Drop` :t:`trait`, or
+  A :t:`field` of a :t:`place expression` that can be moved out of and whose
+  type does not implement the :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
-  A :t:`temporary` created for a :t:`value expression`, or
+  A :t:`temporary`, or
 
 * :dp:`fls_vk1xhvdaakh0`
   A :t:`variable` which is not currently :t:`borrowed`.
@@ -425,49 +506,16 @@ A :t:`place expression` can be moved out of when it denotes
 After a :t:`place expression` is moved out, the memory location it represented
 is deinitialized and shall not be read from until reinitialized.
 
-:dp:`fls_cPEMHZtPkctX`
-An :t:`immutable place expression` is a :t:`place expression` whose memory
-location cannot be modified.
-
-:dp:`fls_ku38h562vfyl`
-A :t:`mutable place expression` is a :t:`place expression` whose memory location
-can be modified. The following :t:`[place expression]s` are :t:`[mutable place
-expression]s`:
-
-* :dp:`fls_bt50fltfqcvn`
-  An :t:`index expression` whose :t:`type` implements the
-  :std:`core::ops::IndexMut` :t:`trait`,
-
-* :dp:`fls_6b4rwkrc1ap6`
-  A :t:`dereference expression` whose :t:`type` is ``*mut T``,
-
-* :dp:`fls_s4bhrpykzmm7`
-  A :t:`dereference expression` of a :t:`field` or a :t:`variable` whose
-  :t:`type` is ``&mut T``,
-
-* :dp:`fls_1tq2o2huda9l`
-  A :t:`dereference expression` whose :t:`type` implements the
-  :std:`core::ops::DerefMut` :t:`trait`,
-
-* :dp:`fls_xm0gm2q27x2e`
-  A :t:`field access expression` where the :t:`type` of the :t:`container
-  operand` is :t:`mutable`,
-
-* :dp:`fls_ilaqmj3hc5uv`
-  A :t:`path expression` that resolves to a :t:`mutable static`,
-
-* :dp:`fls_m0gbw9myylv2`
-  A :t:`path expression` that resolves to a :t:`mutable variable` that is not
-  currently borrowed,
-
-* :dp:`fls_dcm3yr3y9y0a`
-  A :t:`temporary` created for a :t:`value expression`.
+:dp:`fls_gq35gqagw35`
+A :t:`place expression` shall not be evaluated in a :t:`value expression
+context` or be bound *by value* in a :t:`pattern` unless it implements
+:std:`core::marker::Copy` or :std:`core::marker::Sized`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_malm0kcczgyg`
-The :t:`evaluation` of a :t:`place expression` in the context of a :t:`value
-expression` or the :t:`evaluation` of a :t:`place expression` that is bound *by
+The :t:`evaluation` of a :t:`place expression` in a :t:`value expression
+context` or the :t:`evaluation` of a :t:`place expression` that is bound *by
 value* in a :t:`pattern` proceeds as follows:
 
 #. :dp:`fls_iuxjvxd91h06`
@@ -482,9 +530,6 @@ value* in a :t:`pattern` proceeds as follows:
    If the :t:`type` of the held :t:`value` implements the
    :std:`core::marker::Sized` :t:`trait`, then the held :t:`value` is moved.
 
-#. :dp:`fls_gq35gqagw35`
-   Otherwise the :t:`evaluation` results in a static error.
-
 .. _fls_e7zgqroy2qxn:
 
 Value Expressions
@@ -494,6 +539,11 @@ Value Expressions
 
 :dp:`fls_7q4hrt6yfr9b`
 A :t:`value expression` is an :t:`expression` that represents a :t:`value`.
+All :t:`[expression]s` that are not :t:`[place expression]s` are
+:t:`[value expression]s`.
+
+A :t:`value expression context` is an :t:`expression context` that is not a
+:t:`place expression context`.
 
 .. _fls_h0dvogc64tfh:
 
@@ -553,10 +603,6 @@ Path Expressions
 
 :dp:`fls_gvanx4874ycy`
 A :t:`path expression` is an :t:`expression` that denotes a :t:`path`.
-
-:dp:`fls_t8bdzvtnv249`
-A :t:`path expression` that resolves to a :t:`static` or a :t:`variable` is a
-:t:`place expression`, otherwise it is a :t:`value expression`.
 
 :dp:`fls_gz67ju6l7uhn`
 A :t:`path expression` that resolves to a :t:`mutable static` shall require
@@ -873,33 +919,20 @@ type`, the :t:`dereference expression` denotes the pointed-to memory location of
 the :t:`operand`, or the :t:`dereference` of the :t:`operand`.
 
 :dp:`fls_9cc0ml2sru6x`
-The :t:`dereference` is assignable when
-
-* :dp:`fls_m0cc62tcf6b7`
-  The :t:`operand` is of :t:`type` ``&mut T`` or ``*mut T``, and
-
-* :dp:`fls_llzt4s3uwt95`
-  The :t:`operand` is a :t:`variable` or a possibly nested :t:`field` of a
-  :t:`variable`, or
-
-* :dp:`fls_908xdt291via`
-  The :t:`operand` denotes a :t:`mutable place expression`.
-
-* :dp:`fls_b96mek2ojcl`
-  The :t:`operand` is of another :t:`type` that implements the
-  :std:`core::ops::DerefMut` :t:`trait`.
+The :t:`dereference` is assignable when it the :t:`dereference expression` is a
+:t:`mutable place expression`.
 
 :dp:`fls_8i4jzksxlrw0`
 Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
 
 :dp:`fls_d68ddlse4zp`
 If the context of a :t:`dereference expression` is an :t:`immutable
-place expression`, then the :t:`dereference expression` is equivalent to
+place expression context`, then the :t:`dereference expression` is equivalent to
 :t:`expression` ``*core::ops::Deref::deref(&operand)``.
 
 :dp:`fls_g73vguanbs1x`
 If the context of a :t:`dereference expression` is a :t:`mutable place
-expression`, then the :t:`dereference expression` is equivalent to
+expression context`, then the :t:`dereference expression` is equivalent to
 :t:`expression` ``*core::ops::DerefMut::deref_mut(&mut operand)``.
 
 :dp:`fls_8ibfqxtnahzx`
@@ -983,10 +1016,6 @@ The :t:`value` of an :t:`error propagation expression` is determined as follows:
 * :dp:`fls_8df018q7y6g`
   Otherwise control flow is returned to the end of the enclosing :t:`control
   flow boundary`.
-
-:dp:`fls_9sriwut951xv`
-The expression context for the :t:`operand` of the :t:`error propagation
-expression` is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
@@ -1074,10 +1103,6 @@ shall be :t:`associated type` :std:`core::ops::Neg::Output`.
 :dp:`fls_9rmq7iaf092d`
 The :t:`value` of a :t:`negation expression` with a :s:`SignNegationOperator` is
 the result of ``core::ops::Neg::neg(operand)``.
-
-:dp:`fls_2eou0x2lxmk6`
-The expression context for the :t:`operand` of the :t:`negation expression` is a
-:t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
@@ -1240,10 +1265,6 @@ The :t:`type` of a :t:`subtraction expression` is :t:`associated type`
 :dp:`fls_v8vekngd27sz`
 The :t:`value` of a :t:`subtraction expression` is the result of
 ``core::ops::Sub::sub(left_operand, right_operand)``.
-
-:dp:`fls_69r1m88mxzx5`
-The expression context for the :t:`[operand]s` of an :t:`arithmetic expression`
-is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
@@ -1440,10 +1461,6 @@ The :t:`type` of a :t:`shift right expression` is :t:`associated type`
 :dp:`fls_fbazfgd5m1ot`
 The :t:`value` of a :t:`shift right expression` is the result of
 ``core::ops::Shr::shr(left_operand, right_operand)``.
-
-:dp:`fls_2z6wble3u8ec`
-The expression context for the :t:`[operand]s` of a :t:`bit expression` is a
-:t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
@@ -1643,10 +1660,6 @@ implement the :std:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
 The :t:`value` of a :t:`not-equals expression` is the result of
 ``core::cmp::PartialEq::ne(&left_operand, &right_operand)``.
 
-:dp:`fls_8qbrzb9bxyf`
-The expression context for the :t:`[operand]s` of a :t:`comparison expression`
-is a :t:`place expression` context.
-
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_ydt9zvh0h5ex`
@@ -1777,10 +1790,6 @@ The :t:`type` of a :t:`lazy boolean expression` is :t:`type` :c:`bool`.
 :dp:`fls_xdgvrd58nkoa`
 The :t:`value` of a :t:`lazy boolean expression` is either ``true`` or
 ``false``.
-
-:dp:`fls_bov5j5t1bx0a`
-The expression context for the :t:`[operand]s` of the :t:`lazy boolean
-expression` is a :t:`value expression` context.
 
 .. rubric:: Dynamic Semantics
 
@@ -2058,9 +2067,6 @@ expression`.
 :dp:`fls_uinh05sslxeo`
 A :t:`value operand` is an :t:`operand` that supplies the :t:`value` that is
 assigned to an :t:`assignee operand` by an :t:`assignment expression`.
-
-:dp:`fls_kh6rp9e0wwl`
-An :t:`assignee operand` shall denote a :t:`mutable place expression`.
 
 :dp:`fls_3wragak9hglw`
 A :t:`value operand` shall denote a :t:`value expression`.
@@ -2507,10 +2513,6 @@ Parenthesized Expressions
 A :t:`parenthesized expression` is an :t:`expression` that groups other
 :t:`[expression]s`.
 
-:dp:`fls_ew9y5vaseehy`
-A :t:`parenthesized expression` is a :t:`place expression` when its :t:`operand`
-is a :t:`place expression`.
-
 :dp:`fls_n4dhc0hvwwfk`
 A :t:`parenthesized expression` is a :t:`value expression` when its :t:`operand`
 is a :t:`value expression`.
@@ -2712,9 +2714,6 @@ The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
 If the :t:`indexed operand` is evaluated in a :t:`value expression context`,
 then
 
-* :dp:`fls_jxdiknkwglak`
-  The :t:`index expression` is a :t:`value expression`.
-
 * :dp:`fls_sb2b8gszzaxq`
   The :t:`type` of the :t:`indexed operand` shall implement the
   :std:`core::ops::Index` :t:`trait`.
@@ -2726,9 +2725,6 @@ then
 :dp:`fls_y3sduoma6q9v`
 If the :t:`indexed operand` is :t:`mutable` and the :t:`index expression` is
 evaluated in a :t:`mutable place expression context`, then
-
-* :dp:`fls_pjmoo8mjgxz3`
-  The :t:`index expression` is a :t:`mutable place expression`.
 
 * :dp:`fls_ld7lbvqms5i6`
   The :t:`type` of the :t:`indexed operand` shall implement the
@@ -2753,9 +2749,10 @@ The :t:`evaluation` of an :t:`index expression` proceeds as follows:
    The :t:`indexing operand` is evaluated.
 
 #. :dp:`fls_ehamppbq4gmg`
-   If the :t:`index expression` is evaluated as a :t:`mutable place
-   expression`, then :t:`expression` ``*core::ops::IndexMut::index_mut(&mut
-   indexed_operand, indexing_operand)`` is evaluated.
+   If the :t:`index expression` is evaluated in a :t:`mutable place
+   expression context`, then :t:`expression`
+   ``*core::ops::IndexMut::index_mut(&mut indexed_operand, indexing_operand)``
+   is evaluated.
 
 #. :dp:`fls_i68oxj659hc1`
    Otherwise :t:`expression` ``*core::ops::Index::index(&indexed_operand,
@@ -3333,13 +3330,6 @@ as an :dt:`indexed field access`.
 :dp:`fls_dch5i39ycw7s`
 A :t:`field access expression` with a :s:`NamedFieldSelector` is referred to as
 a :dt:`named field access`.
-
-:dp:`fls_1l92izxtm1t8`
-A :t:`field access expression` is a :t:`place expression`.
-
-:dp:`fls_1bbbw0qj0h0q`
-A :t:`field access expression` is a :t:`mutable place expression` when its
-:t:`container operand` is :t:`mutable`.
 
 :dp:`fls_fovs9il2h9xg`
 The :t:`type` of a :t:`field access expression` is the :t:`type` of the
@@ -4313,12 +4303,6 @@ A :t:`match arm body` is the :t:`operand` of a :t:`match arm`.
 :dp:`fls_hs1rr54hu18w`
 A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
 a :t:`match arm matcher`.
-
-:dp:`fls_s4483f30nwf`
-A :t:`match expression` is a :t:`place expression` when its :t:`subject
-expression` is a :t:`place expression`. When a :t:`match expression` is a
-:t:`place expression`, the :t:`value` produced by evaluating its :t:`subject
-expression` is passed :t:`by value`.
 
 :dp:`fls_9t5pmb9wzmpy`
 A :t:`match expression` is a :t:`value expression` when its :t:`subject

@@ -2507,13 +2507,14 @@ immutable place expression
 An :dt:`immutable place expression` is a :t:`place expression` whose memory
 location cannot be modified.
 
-.. _fls_my7jjwi0ncen:
+.. _fls_RghQKP3lsXEb:
 
-immutable static
-^^^^^^^^^^^^^^^^
+immutable raw pointer type
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:dp:`fls_eonlhz79ur3d`
-An :dt:`immutable static` is a :t:`static` whose :t:`value` cannot be modified.
+:dp:`fls_2GzYItDXvMhB`
+An :dt:`immutable raw pointer type` is a :t:`raw pointer type` subject to
+:t:`keyword` ``const``.
 
 .. _fls_bhx0l676dmgc:
 
@@ -2523,6 +2524,14 @@ immutable reference
 :dp:`fls_u9kne5zfmhoe`
 An :dt:`immutable reference` is a :t:`value` of a :t:`shared reference type`,
 and prevents the mutation of its :t:`referent`.
+
+.. _fls_my7jjwi0ncen:
+
+immutable static
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_eonlhz79ur3d`
+An :dt:`immutable static` is a :t:`static` whose :t:`value` cannot be modified.
 
 .. _fls_8xrhfwgep3nk:
 
@@ -3612,6 +3621,14 @@ mutable place expression
 A :dt:`mutable place expression` is a :t:`place expression` whose memory
 location can be modified.
 
+.. _fls_wOvlW47jKEWF:
+
+.. _mutable raw pointer type:
+
+:dp:`fls_86SFxSDRcC06`
+A :dt:`mutable raw pointer type` is a :t:`raw pointer type` subject to
+:t:`keyword` ``mut``.
+
 .. _fls_jtzj092hyjkz:
 
 mutable reference
@@ -3627,8 +3644,8 @@ mutable reference type
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q06p9tclwaaw`
-A :dt:`mutable reference type` is a :t:`reference type` declared with
-:t:`keyword` ``mut``.
+A :dt:`mutable reference type` is a :t:`reference type` subject to :t:`keyword`
+``mut``.
 
 .. _fls_omgyj7yxwgua:
 
@@ -4831,7 +4848,7 @@ shared reference type
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_8z9wb3eu5yp1`
-A :dt:`shared reference type` is a :t:`reference type` declared without
+A :dt:`shared reference type` is a :t:`reference type` not subject to
 :t:`keyword` ``mut``.
 
 .. _fls_o8EVuKgr0Y98:

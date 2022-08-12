@@ -141,6 +141,9 @@ operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
 * :dp:`fls_hier3b8knpuq`
   :t:`[Tuple expression]s` of :t:`[assignee expression]s`,
 
+* :dp:`fls_horl3qcfdb0k`
+  :t:`[Tuple struct call expression]s` of :t:`[assignee expression]s`,
+
 :dp:`fls_1smb3tj9pxsq`
 :t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
 expression]s`.
@@ -2118,7 +2121,7 @@ Destructuring Assignment
 :dp:`fls_2eheo4yo2orm`
 A :t:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a :t:`struct
-expression`, or a :t:`tuple expression`.
+expression`, a :t:`tuple expression` or a :t:`tuple struct call expression`.
 
 :dp:`fls_z8c3b9s9de3x`
 The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
@@ -2144,6 +2147,11 @@ The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
 * :dp:`fls_uydzlfc4hjbx`
   A :t:`tuple expression` corresponds to a :t:`tuple pattern` with all the
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
+
+* :dp:`fls_fa14yfvxsbx3`
+  A :t:`tuple struct call expression` corresponds to a:t:`tuple struct
+  pattern` with all the :t:`[subexpression]s` lowered to their corresponding
+  :t:`[pattern]s`.
 
 * :dp:`fls_q90ikfi7ewoi`
   An :t:`underscore expression` corresponds to an :t:`underscore pattern`.
@@ -3105,6 +3113,10 @@ An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 A :t:`call operand` is the :t:`function` being invoked or the
 :t:`tuple struct value` or :t:`tuple enum variant value` being constructed by a
 :t:`call expression`.
+
+:dp:`fls_QpBu34U6hXn9`
+A :t:`tuple struct call expression` is a :t:`call expression` where the
+:t:`call operand` resolves to a :t:`tuple struct`.
 
 :dp:`fls_4t6imtiw6kzt`
 A :t:`callee type` is either a :t:`function item type`,

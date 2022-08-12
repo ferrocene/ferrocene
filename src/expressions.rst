@@ -373,13 +373,13 @@ location. The following :t:`[expression]s` are :t:`[place expression]s`:
   variable`.
 
 :dp:`fls_ku38h562vfyl`
-A :t:`mutable place expression` is a :t:`place expression` that allows
-modification of the value at its memory location. The following :t:`[place
-expression]s` are :t:`[mutable place expression]s`:
+A :dt:`mutable place expression` is a :t:`place expression` whose memory
+location can be modified. The following :t:`[place expression]s` are
+:t:`[mutable place expression]s`:
 
-* :dp:`fls_bt50fltfqcvn`
-  An :t:`index expression` whose :t:`type` implements the
-  :std:`core::ops::IndexMut` :t:`trait`,
+* :dp:`fls_1tq2o2huda9l`
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` implements the
+  :std:`core::ops::DerefMut` :t:`trait`,
 
 * :dp:`fls_6b4rwkrc1ap6`
   A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
@@ -389,13 +389,13 @@ expression]s` are :t:`[mutable place expression]s`:
   A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
   reference type`,
 
-* :dp:`fls_1tq2o2huda9l`
-  A :t:`dereference expression` whose :t:`operand`'s :t:`type` implements the
-  :std:`core::ops::DerefMut` :t:`trait`,
-
 * :dp:`fls_xm0gm2q27x2e`
   A :t:`field access expression` where the :t:`container operand` is a
   :t:`mutable place expression`,
+
+* :dp:`fls_bt50fltfqcvn`
+  An :t:`index expression` whose :t:`type` implements the
+  :std:`core::ops::IndexMut` :t:`trait`,
 
 * :dp:`fls_ilaqmj3hc5uv`
   A :t:`path expression` that resolves to a :t:`mutable static`,
@@ -415,11 +415,9 @@ location cannot be modified. All :t:`[place expression]s` that are not
 :dp:`fls_4vxi1ji93dxb`
 A :t:`place expression context` is a :t:`construct` that may evaluate its
 :t:`operand` as a memory location.
+
 The following :t:`[construct]s` are :t:`[place expression
 context]s`:
-
-* :dp:`fls_giZ7w1G02JSg`
-  The :t:`indexed operand` of an :t:`index expression`,
 
 * :dp:`fls_ZED5wJQVO6nf`
   The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
@@ -432,23 +430,26 @@ context]s`:
   The :t:`operand` of a :t:`dereference expression`,
 
 * :dp:`fls_oV9Hd6OiFAZX`
-  The :t:`container operand` of :t:`field access expression`,
+  The :t:`container operand` of a :t:`field access expression`,
+
+* :dp:`fls_NnGiNsH6Zgmp`
+  The initialization :t:`expression` of a :t:`let statement`,
+
+* :dp:`fls_jLZlxIHr4w2v`
+  The :t:`operand` of an :t:`implicit borrow`,
+
+* :dp:`fls_giZ7w1G02JSg`
+  The :t:`indexed operand` of an :t:`index expression`,
 
 * :dp:`fls_5yXuTLQOQ3cc`
   The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
   let loop expression`,
 
-* :dp:`fls_NnGiNsH6Zgmp`
-  The initialization :t:`expression` of a :t:`let statement`,
-
 * :dp:`fls_nman7mJVSQlm`
   The :t:`subject expression` of a :t:`match expression`,
 
 * :dp:`fls_JBfZuFDQg3mU`
-  The :t:`base initializer` of a :t:`struct expression`,
-
-* :dp:`fls_jLZlxIHr4w2v`
-  The :t:`operand` of an :t:`implicit borrow`.
+  The :t:`base initializer` of a :t:`struct expression`.
 
 :dp:`fls_wxGAOWEVT77u`
 A :t:`mutable place expression context` is a :t:`place expression context` that
@@ -486,7 +487,7 @@ may evaluate its :t:`operand` as a mutable memory location. The following
 
 :dp:`fls_4axr4V0icdBP`
 A :t:`place expression` that is evaluated in a :t:`value expression context`
-or bound *by value* in a :t:`pattern` denotes the :t:`value` held in the memory
+or bound :t:`by value` in a :t:`pattern` denotes the :t:`value` held in the memory
 location of the :t:`place expression`.
 
 :dp:`fls_konzgoybhfqm`
@@ -508,7 +509,7 @@ is deinitialized and shall not be read from until reinitialized.
 
 :dp:`fls_gq35gqagw35`
 A :t:`place expression` shall not be evaluated in a :t:`value expression
-context` or be bound *by value* in a :t:`pattern` unless it implements
+context` or be bound :t:`by value` in a :t:`pattern` unless it implements
 :std:`core::marker::Copy` or :std:`core::marker::Sized`.
 
 .. rubric:: Dynamic Semantics

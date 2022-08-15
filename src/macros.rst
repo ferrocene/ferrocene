@@ -1050,7 +1050,7 @@ within them, which aims to eliminate the syntactic interference between a
   environment of a :s:`MacroInvocation`, and are considered :t:`hygienic`.
 
 * :dp:`fls_puqhytfzfsg6`
-  :d:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
+  :t:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
   :t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
   of the :s:`MacroRulesDeclaration`, can reference the environment of the
   :s:`MacroInvocation`, and are considered :t:`unhygienic`.

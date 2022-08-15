@@ -2378,6 +2378,16 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s`.
 :dp:`fls_m3nrsdvxxg6j`
 See :s:`ForLifetimeList`.
 
+.. _fls_GuMMjhEMMLvF:
+
+hygiene
+^^^^^^^
+
+:dt:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s`` that appear
+within them, which aims to eliminate the syntactic interference between a
+:t:`macro` and its environment.
+
+
 .. _fls_obiv2a6ywfhh:
 
 i8

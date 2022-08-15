@@ -1034,31 +1034,31 @@ Hygiene
 -------
 
 :dp:`fls_7ezc7ncs678f`
-:dt:`Hygiene` is a property of macros and identifiers that appear within them,
-which aims to eliminate the syntactic interference between a macro and its
-environment.
+:t:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s`` that appear
+within them, which aims to eliminate the syntactic interference between a
+:t:`macro` and its environment.
 
 .. rubric:: Legality Rules
 
 :dp:`fls_3axjf28xb1nt`
-Hygiene is categorized as follows:
+:t:`Hygiene` is categorized as follows:
 
 * :dp:`fls_dz2mvodl818d`
-  :dt:`Definition site hygiene`, which resolves to the ``MacroDeclaration``
-  site. ``Identifier``\ s with definition site hygiene cannot reference
-  the environment of the ``MacroDeclaration``, cannot be referenced by the
-  environment of a ``MacroInvocation``, and are considered *hygienic*.
+  :dt:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+  site. :t:`Identifier` with :t:`definition site hygiene` cannot reference
+  the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
+  environment of a :s:`MacroInvocation`, and are considered *hygienic*.
 
 * :dp:`fls_puqhytfzfsg6`
-  :dt:`Call site hygiene`, which resolves to the ``MacroInvocation`` site.
-  ``Identifier``\ s with call site hygiene can reference the environment
-  of the ``MacroDeclaration``, can reference the environment of the
-  ``MacroInvocation``, and are considered *unhygienic*.
+  :dt:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
+  :t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
+  of the :s:`MacroRulesDeclaration`, can reference the environment of the
+  :s:`MacroInvocation`, and are considered *unhygienic*.
 
 * :dp:`fls_uyvnq88y9gk3`
-  :dt:`Mixed site hygiene`, which resolves to the ``MacroDeclaration`` site for
-  variables, :t:`[label]s`, and the ``$crate`` metavariable, and to the
-  ``MacroInvocation`` site otherwise, and is considered *partially hygienic*.
+  :dt:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration` site for
+  :t:`[variable]s`, :t:`[label]s`, and the ``$crate`` metavariable, and to the
+  :s:`MacroInvocation` site otherwise, and is considered *partially hygienic*.
 
 :dp:`fls_yxqcr19dig18`
 Every macro has associated :t:`hygiene` that depends on its kind:

@@ -739,8 +739,8 @@ The :t:`value` of an :t:`async block expression` is a :t:`future`.
 
 :dp:`fls_9ghp5yet75y6`
 The :t:`evaluation` of an :t:`async block expression` produces an anonymous
-:t:`value` of an anonymous unique :t:`type` that implements
-:std:`core::future::Future`.
+:t:`value` of an anonymous unique :t:`type` that implements the
+:std:`core::future::Future` :t:`trait`.
 
 .. rubric:: Examples
 

@@ -567,9 +567,6 @@ Literal Expressions
 :dp:`fls_rbwwczom3agt`
 A :t:`literal expression` is an :t:`expression` that denotes a :t:`literal`.
 
-:dp:`fls_utbjihhwgxr1`
-A :t:`literal expression` is a :t:`value expression`.
-
 :dp:`fls_w30su9x4q13r`
 The :t:`type` of a :t:`literal expression` is the :t:`type` of the corresponding
 :t:`literal`.
@@ -660,9 +657,6 @@ and :t:`[statement]s`.
 A :t:`tail expression` is the last :t:`expression` within a :t:`block
 expression`.
 
-:dp:`fls_wiv8wpw3i79z`
-A :t:`block expression` is a :t:`value expression`.
-
 :dp:`fls_u4gj2lnkq9ub`
 The :t:`type` of a :t:`block expression` is determined as follows:
 
@@ -724,9 +718,6 @@ An :t:`async block expression` is a :t:`block expression` that is specified
 with :t:`keyword` ``async`` and encapsulates behavior which is executed in
 asynchronous manner.
 
-:dp:`fls_eam1cqbjlfs0`
-An :t:`async block expression` is a :t:`value expression`.
-
 :dp:`fls_tzclkasinpoq`
 An :t:`async block expression` is subject to :t:`capturing`.
 
@@ -774,9 +765,6 @@ with :t:`keyword` ``unsafe``.
 
 :dp:`fls_5ucvvja4dzoc`
 An :t:`unsafe block expression` allows :t:`unsafety`.
-
-:dp:`fls_2nzwo1hbsg9g`
-An :t:`unsafe block expression` is a :t:`value expression`.
 
 :dp:`fls_j3mmg317q442`
 The :t:`type` of the :t:`unsafe block expression` is the :t:`type` of its
@@ -864,9 +852,6 @@ state, or simply :t:`borrowed`.
 When the :t:`operand` of a :t:`borrow expression` is a :t:`value expression`,
 a :t:`temporary` is allocated and the :t:`borrow expression` produces a
 :t:`reference` to the memory location of the :t:`temporary`.
-
-:dp:`fls_xrq41zaq6bza`
-A :t:`borrow expression` is a :t:`value expression`.
 
 :dp:`fls_chr03xll75d`
 The :t:`type` of a :t:`borrow expression` is determined as follows:
@@ -2073,9 +2058,6 @@ expression`.
 A :t:`value operand` is an :t:`operand` that supplies the :t:`value` that is
 assigned to an :t:`assignee operand` by an :t:`assignment expression`.
 
-:dp:`fls_3wragak9hglw`
-A :t:`value operand` shall denote a :t:`value expression`.
-
 :dp:`fls_qengy157fa4a`
 The :t:`type` of an :t:`assignment expression` is the :t:`unit type`.
 
@@ -2328,9 +2310,6 @@ used in the calculation of a :t:`compound assignment expression`.
 :dp:`fls_row7saf53vwd`
 An :t:`assigned operand` shall denote a :t:`mutable assignee expression`.
 
-:dp:`fls_gulql06xp9f3`
-A :t:`modifying operand` shall denote a :t:`value expression`.
-
 :dp:`fls_xmgcdw9yhb55`
 The :t:`type` of a :t:`compound assignment` is the :t:`unit type`.
 
@@ -2523,10 +2502,6 @@ Parenthesized Expressions
 A :t:`parenthesized expression` is an :t:`expression` that groups other
 :t:`[expression]s`.
 
-:dp:`fls_n4dhc0hvwwfk`
-A :t:`parenthesized expression` is a :t:`value expression` when its :t:`operand`
-is a :t:`value expression`.
-
 :dp:`fls_5d66h7naoup6`
 The :t:`type` of a :t:`parenthesized expression` is the :t:`type` of its
 :t:`operand`.
@@ -2595,9 +2570,6 @@ repeated in an :t:`array repetition constructor`.
 :dp:`fls_2l9objtb23zn`
 A :t:`size operand` is an :t:`operand` that specifies the size of an :t:`array`
 or an :t:`array type`.
-
-:dp:`fls_l0gbcyybzdv0`
-An :t:`array expression` is a :t:`value expression`.
 
 :dp:`fls_by21pey7k423`
 The :t:`[type]s` of the :t:`[operand]s` of an :t:`array element constructor`
@@ -2802,9 +2774,6 @@ A :t:`tuple expression` is an :t:`expression` that constructs a :t:`tuple`.
 A :t:`tuple initializer` is an :t:`operand` that provides the :t:`value` of a
 :t:`tuple field` in a :t:`tuple expression`.
 
-:dp:`fls_3dmehkxewz6d`
-A :t:`tuple expression` is a :t:`value expression`.
-
 :dp:`fls_ljz3sxmfzflm`
 The :t:`type` of a :t:`tuple expression` is ``(T1, T2, ..., TN)``, where ``T1``
 is the :t:`type` of the first :t:`tuple initializer`, ``T2`` is the :t:`type` of
@@ -2950,9 +2919,6 @@ The :t:`type` of a :t:`shorthand initializer` and the :t:`type` of the matched
 :dp:`fls_9s4znhi0u3ys`
 The :t:`value` of a :t:`shorthand initializer` is the :t:`value` its
 :t:`identifier` resolves to.
-
-:dp:`fls_3dialm6x0x7a`
-A :t:`struct expression` is a :t:`value expression`.
 
 :dp:`fls_i31rodt42m0z`
 The :t:`type` of a :t:`struct expression` is the :t:`type` of the
@@ -4317,12 +4283,6 @@ A :t:`match arm body` is the :t:`operand` of a :t:`match arm`.
 :dp:`fls_hs1rr54hu18w`
 A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
 a :t:`match arm matcher`.
-
-:dp:`fls_9t5pmb9wzmpy`
-A :t:`match expression` is a :t:`value expression` when its :t:`subject
-expression` is a :t:`value expression`. When the :t:`match expression` is a
-:t:`value expression`, the :t:`value` produced by evaluating its :t:`subject
-expression` is captured in a :t:`temporary`.
 
 :dp:`fls_knv1affr2o8t`
 The :t:`type` of the :t:`subject expression` and the :t:`[type]s` of all

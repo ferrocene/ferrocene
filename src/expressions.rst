@@ -550,6 +550,10 @@ All :t:`[expression]s` that are not :t:`[place expression]s` are
 A :t:`value expression context` is an :t:`expression context` that is not a
 :t:`place expression context`.
 
+:dp:`fls_8uhfwqurbyqf`
+The evaluation of a :t:`value expression` in a :t:`place expression context` may
+produce a :t:`temporary`.
+
 .. _fls_h0dvogc64tfh:
 
 Literal Expressions
@@ -734,8 +738,9 @@ The :t:`value` of an :t:`async block expression` is a :t:`future`.
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_9ghp5yet75y6`
-The :t:`evaluation` of an :t:`async block expression` produces a :t:`temporary`
-that captures the related :t:`future`.
+The :t:`evaluation` of an :t:`async block expression` produces an anonymous
+:t:`value` of an anonymous unique :t:`type` that implements
+:std:`core::future::Future`.
 
 .. rubric:: Examples
 
@@ -847,11 +852,6 @@ When the :t:`operand` of a :t:`borrow expression` is a :t:`place expression`,
 the :t:`borrow expression` produces a :t:`reference` to the memory location
 indicated by the :t:`operand`. The memory location is placed in a borrowed
 state, or simply :t:`borrowed`.
-
-:dp:`fls_8uhfwqurbyqf`
-When the :t:`operand` of a :t:`borrow expression` is a :t:`value expression`,
-a :t:`temporary` is allocated and the :t:`borrow expression` produces a
-:t:`reference` to the memory location of the :t:`temporary`.
 
 :dp:`fls_chr03xll75d`
 The :t:`type` of a :t:`borrow expression` is determined as follows:

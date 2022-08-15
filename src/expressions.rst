@@ -482,6 +482,9 @@ may evaluate its :t:`operand` as a mutable memory location. The following
   The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
   let loop expression`,
 
+* :dp:`fls_o76QXHyrrJPG`
+  The :t:`operand` of a mutable :t:`implicit borrow`,
+
 * :dp:`fls_ka5b87tkf8t6`
   The initialization :t:`expression` of a :t:`let statement`,
 

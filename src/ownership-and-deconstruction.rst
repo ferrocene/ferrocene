@@ -185,6 +185,10 @@ program text. An :t:`implicit borrow` occurs in the following contexts:
 * :dp:`fls_o5oq4jfswr4q`
   The :t:`receiver operand` of a :t:`method call expression`.
 
+:dp:`fls_MT69AGRXH9pS``
+An :t:`implicit borrow` may be an :t:`immutable borrow` or a :t:`mutable borrow`
+if required.
+
 :dp:`fls_hyl4bdjbuzbw`
 An :t:`immutable borrow` is an :t:`immutable reference` produced by
 :t:`borrowing`.
@@ -312,7 +316,7 @@ Passing :dt:`by immutable reference` is passing :t:`by reference` where the
 
 :dp:`fls_WW0GvbiEnyiW`
 Passing :dt:`by unique immutable reference` is passing
-:t:`by immutable reference` where it is asserted that the :t:`reference` to 
+:t:`by immutable reference` where it is asserted that the :t:`reference` to
 the :t:`value` is the only live :t:`reference`.
 
 :dp:`fls_v4eqq6tst4gs`

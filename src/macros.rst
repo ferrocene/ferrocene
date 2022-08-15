@@ -1045,32 +1045,32 @@ within them, which aims to eliminate the syntactic interference between a
 
 * :dp:`fls_dz2mvodl818d`
   :t:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
-  site. :t:`Identifier` with :t:`definition site hygiene` cannot reference
+  site. :t:`[Identifier]s` with :t:`definition site hygiene` cannot reference
   the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
-  environment of a :s:`MacroInvocation`, and are considered :dt:`hygienic`.
+  environment of a :s:`MacroInvocation`, and are considered :t:`hygienic`.
 
 * :dp:`fls_puqhytfzfsg6`
   :d:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
   :t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
   of the :s:`MacroRulesDeclaration`, can reference the environment of the
-  :s:`MacroInvocation`, and are considered :dt:`unhygienic`.
+  :s:`MacroInvocation`, and are considered :t:`unhygienic`.
 
 * :dp:`fls_uyvnq88y9gk3`
-  :t:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration` site for
-  :t:`[variable]s`, :t:`[label]s`, and the ``$crate`` metavariable, and to the
-  :s:`MacroInvocation` site otherwise, and is considered :dt:`partially hygienic`.
+  :t:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+  site for :t:`[variable]s`, :t:`[label]s`, and the ``$crate``
+  :t:`metavariable`, and to the :s:`MacroInvocation` site otherwise, and is
+  considered :dt:`partially hygienic`.
 
 :dp:`fls_yxqcr19dig18`
-Every macro has associated :t:`hygiene` that depends on its kind:
+Every :t:`macro` has associated :t:`hygiene` that depends on its kind:
 
 * :dp:`fls_kx25olky1jov`
   :t:`[Declarative macro]s` have :t:`mixed site hygiene`.
 
 * :dp:`fls_v46v0t2vh6x4`
   :t:`[Procedural macro]s` have :t:`call site hygiene` and :t:`mixed site
-  hygiene` depending on the implementation fo the :t:`procedural macro`.
+  hygiene` depending on the implementation of the :t:`procedural macro`.
 
 :dp:`fls_7eqqk2cj0clr`
 The :t:`metavariable` ``$crate`` in a :t:`declarative macro`'s expansion refers
 to the crate the :t:`declarative macro` was declared in.
-

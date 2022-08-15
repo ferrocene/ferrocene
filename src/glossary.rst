@@ -914,10 +914,10 @@ call site hygiene
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_YTQmXotFOXWU`
-:dt:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
-:t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
-of the :s:`MacroRulesDeclaration`, can reference the environment of the
-:s:`MacroInvocation`, and are considered :dt:`unhygienic`.
+:dt:`Call site hygiene` is a type of :t:`hygiene` which resolves to the
+:s:`MacroInvocation` site. :t:`[Identifier]s` with :t:`call site hygiene` can
+reference the environment of the :s:`MacroRulesDeclaration`, can reference the
+environment of the :s:`MacroInvocation`, and are considered :t:`unhygienic`.
 
 .. _fls_luuc01g4ffog:
 
@@ -1402,10 +1402,11 @@ definition site hygiene
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_2Y1Dpw5ZEqT3`
-:dt:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
-site. :t:`Identifier` with :t:`definition site hygiene` cannot reference
-the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
-environment of a :s:`MacroInvocation`, and are considered :dt:`hygienic`.
+:dt:`Definition site hygiene` is a type of :t:`hygiene` which resolves to the
+:s:`MacroRulesDeclaration` site. :t:`[Identifier]s` with
+:t:`definition site hygiene` cannot reference the environment of the
+:s:`MacroRulesDeclaration`, cannot be referenced by the environment of a
+:s:`MacroInvocation`, and are considered :t:`hygienic`.
 
 .. _fls_127n1n5ssk2b:
 
@@ -2417,7 +2418,7 @@ hygienic
 ^^^^^^^^
 
 :dp:`fls_hiDddAkNH5Ms`
-See :t:`definition site hygiene`.
+An :t:`identifier` is :dt:`hygienic` when it has :t:`definition site hygiene`.
 
 .. _fls_obiv2a6ywfhh:
 
@@ -3553,9 +3554,10 @@ mixed site hygiene
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hjJpNmKiZxlT`
-:dt:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration` site for
-:t:`[variable]s`, :t:`[label]s`, and the ``$crate`` metavariable, and to the
-:s:`MacroInvocation` site otherwise, and is considered :dt:`partially hygienic`.
+:dt:`Mixed site hygiene` is a type of :t:`hygiene` which resolves to the
+:s:`MacroRulesDeclaration` site for :t:`[variable]s`, :t:`[label]s`, and the
+``$crate`` :t:`metavariable`, and to the :s:`MacroInvocation` site otherwise,
+and is considered :t:`partially hygienic`.
 
 .. _fls_5hoe1v960xfi:
 
@@ -4050,7 +4052,8 @@ partially hygienic
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_Qh8V0Y08dNoa`
-See :t:`mixed site hygiene`.
+An :t:`identifier` is :dt:`partially hygienic` when it has
+:t:`mixed site hygiene`.
 
 .. _fls_wqbd5lxki2al:
 
@@ -5946,7 +5949,7 @@ unhygienic
 ^^^^^^^^^^
 
 :dp:`fls_0t4lFZLkNieR`
-See :t:`call site hygiene`.
+An :t:`identifier` is :dt:`unhygienic` when it has :t:`call site hygiene`.
 
 .. _fls_kafgmevvzl5t:
 

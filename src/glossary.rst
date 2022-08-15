@@ -907,6 +907,18 @@ A :dt:`call operand` is the :t:`function` being invoked or the :t:`tuple struct 
 :dp:`fls_w6wu4wi6srjj`
 See :s:`CallOperand`.
 
+
+.. _fls_AK8mL1LeftO0:
+
+call site hygiene
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_YTQmXotFOXWU`
+:dt:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
+:t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
+of the :s:`MacroRulesDeclaration`, can reference the environment of the
+:s:`MacroInvocation`, and are considered :dt:`unhygienic`.
+
 .. _fls_luuc01g4ffog:
 
 callee type
@@ -1383,6 +1395,17 @@ default representation
 :dp:`fls_e85fsp10acnh`
 :dt:`Default representation` is a :t:`type representation` that does not make
 any guarantees about :t:`layout`.
+
+.. _fls_FrfnICpg81sr:
+
+definition site hygiene
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_2Y1Dpw5ZEqT3`
+:dt:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+site. :t:`Identifier` with :t:`definition site hygiene` cannot reference
+the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
+environment of a :s:`MacroInvocation`, and are considered :dt:`hygienic`.
 
 .. _fls_127n1n5ssk2b:
 
@@ -2383,10 +2406,18 @@ See :s:`ForLifetimeList`.
 hygiene
 ^^^^^^^
 
+:dp:`fls_AQg0MqAQZqkz`
 :dt:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s`` that appear
 within them, which aims to eliminate the syntactic interference between a
 :t:`macro` and its environment.
 
+.. _fls_95h0aWZ7xx6U:
+
+hygienic
+^^^^^^^^
+
+:dp:`fls_hiDddAkNH5Ms`
+See :t:`definition site hygiene`.
 
 .. _fls_obiv2a6ywfhh:
 
@@ -3516,6 +3547,16 @@ of a :t:`variable`.
 :dp:`fls_ohhcvxcaqv11`
 See :s:`MethodCallExpression`.
 
+.. _fls_2FFRdj5cO0ks:
+
+mixed site hygiene
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_hjJpNmKiZxlT`
+:dt:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration` site for
+:t:`[variable]s`, :t:`[label]s`, and the ``$crate`` metavariable, and to the
+:s:`MacroInvocation` site otherwise, and is considered :dt:`partially hygienic`.
+
 .. _fls_5hoe1v960xfi:
 
 modifying operand
@@ -4002,6 +4043,14 @@ of :t:`[lexical element]s`.
 
 :dp:`fls_lovkvqoni3xs`
 See :s:`ParenthesizedTypeSpecification`.
+
+.. _fls_fULM1oCKSakS:
+
+partially hygienic
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Qh8V0Y08dNoa`
+See :t:`mixed site hygiene`.
 
 .. _fls_wqbd5lxki2al:
 
@@ -5890,6 +5939,14 @@ An :dt:`underscore pattern` is a :t:`pattern` that matches any single
 
 :dp:`fls_bktuchv7o4dd`
 See :s:`UnderscorePattern`.
+
+.. _fls_HpUSWMvNS5f4:
+
+unhygienic
+^^^^^^^^^^
+
+:dp:`fls_0t4lFZLkNieR`
+See :t:`call site hygiene`.
 
 .. _fls_kafgmevvzl5t:
 

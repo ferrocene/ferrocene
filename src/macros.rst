@@ -1034,47 +1034,43 @@ Hygiene
 -------
 
 :dp:`fls_7ezc7ncs678f`
-:dt:`Hygiene` is a property of macros and identifiers that appear within them,
-which aims to eliminate the syntactic interference between a macro and its
-environment.
+:t:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s`` that appear
+within them, which aims to eliminate the syntactic interference between a
+:t:`macro` and its environment.
 
 .. rubric:: Legality Rules
 
 :dp:`fls_3axjf28xb1nt`
-Hygiene is categorized as follows:
+:t:`Hygiene` is categorized as follows:
 
 * :dp:`fls_dz2mvodl818d`
-  *Definition site hygiene*, which resolves to the ``MacroDeclaration``
-  site. ``Identifier``\ s with definition site hygiene cannot reference
-  the environment of the ``MacroDeclaration``, cannot be referenced by the
-  environment of a ``MacroInvocation``, and are considered *hygienic*.
+  :t:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+  site. :t:`[Identifier]s` with :t:`definition site hygiene` cannot reference
+  the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
+  environment of a :s:`MacroInvocation`, and are considered :t:`hygienic`.
 
 * :dp:`fls_puqhytfzfsg6`
-  *Call site hygiene*, which resolves to the ``MacroInvocation`` site.
-  ``Identifier``\ s with call site hygiene can reference the environment
-  of the ``MacroDeclaration``, can reference the environment of the
-  ``MacroInvocation``, and are considered *unhygienic*.
+  :t:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
+  :t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
+  of the :s:`MacroRulesDeclaration`, can reference the environment of the
+  :s:`MacroInvocation`, and are considered :t:`unhygienic`.
 
 * :dp:`fls_uyvnq88y9gk3`
-  *Mixed hygiene*, which resolves to either the ``MacroDeclaration`` or the
-  ``MacroInvocation`` site, depending on the ``Identifier``, and is considered
-  *partially hygienic*.
+  :t:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+  site for :t:`[variable]s`, :t:`[label]s`, and the ``$crate``
+  :t:`metavariable`, and to the :s:`MacroInvocation` site otherwise, and is
+  considered :dt:`partially hygienic`.
 
 :dp:`fls_yxqcr19dig18`
-Every macro has associated hygiene that depends on its kind:
+Every :t:`macro` has associated :t:`hygiene` that depends on its kind:
 
 * :dp:`fls_kx25olky1jov`
-  Declarative macros have definition site hygiene only for locally declared
-  variables, ``Label``\ s, and the ``$crate`` metavariable, otherwise they have
-  mixed hygiene.
+  :t:`[Declarative macro]s` have :t:`mixed site hygiene`.
 
 * :dp:`fls_v46v0t2vh6x4`
-  Procedural macros have call site hygiene.
+  :t:`[Procedural macro]s` have :t:`call site hygiene` and :t:`mixed site
+  hygiene` depending on the implementation of the :t:`procedural macro`.
 
 :dp:`fls_7eqqk2cj0clr`
-When a macro references items within its defining crate, the macro shall use the
-``$crate`` metavariable to fully qualify all paths.
-
-:dp:`fls_d6g5g1b8k8v5`
-**Are there other rules?**
-
+The :t:`metavariable` ``$crate`` in a :t:`declarative macro`'s expansion refers
+to the crate the :t:`declarative macro` was declared in.

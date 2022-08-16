@@ -376,7 +376,7 @@ location. The following :t:`[expression]s` are :t:`[place expression]s`:
   variable`.
 
 :dp:`fls_ku38h562vfyl`
-A :dt:`mutable place expression` is a :t:`place expression` whose memory
+A :t:`mutable place expression` is a :t:`place expression` whose memory
 location can be modified. The following :t:`[place expression]s` are
 :t:`[mutable place expression]s`:
 
@@ -551,7 +551,7 @@ All :t:`[expression]s` that are not :t:`[place expression]s` are
 :t:`[value expression]s`.
 
 :dp:`fls_pB6xlp4uAg37`
-A :t:`value expression context` is an :t:`expression context` that is not a
+A :t:`value expression context` is an expression context that is not a
 :t:`place expression context`.
 
 :dp:`fls_8uhfwqurbyqf`

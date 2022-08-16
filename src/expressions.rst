@@ -3431,6 +3431,14 @@ A :t:`closure body` denotes a new :t:`control flow boundary`.
 :dp:`fls_fg8lx0yyt6oq`
 A :t:`closure body` is subject to :t:`capturing`.
 
+:dp:`fls_c3rzwUxjmBMY`
+A :t:`closure parameter` is a :t:`construct` that matches an input :t:`value`
+at the site of a :t:`call expression` or a :t:`method call expression` to
+a pattern.
+
+:dp:`fls_r6gWLoNR7JMR`
+The :t:`pattern` of a :t:`closure parameter` shall be :t:`irrefutable`.
+
 :dp:`fls_yn30xuejcfxo`
 The :t:`type` of a :t:`closure expression` is the anonymous unique :t:`closure
 type` defined by it.

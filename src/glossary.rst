@@ -5435,7 +5435,7 @@ syntactic category
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_f981e3m7kq50`
-A :dt:`syntax category` is a nonterminal in the Backus-Naur Form grammar
+A :dt:`syntactic category` is a nonterminal in the Backus-Naur Form grammar
 definition of the Rust programming language.
 
 .. _fls_psd2ll10ixs:

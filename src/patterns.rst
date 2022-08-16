@@ -1356,28 +1356,44 @@ Slice Pattern Matching
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_hzyv4ofu0ny`
-:dt:`Slice pattern matching` proceeds as follows if the expected :t:`type` is an
-:t:`array type` or a :t:`slice type`:
+:dt:`Slice pattern matching` proceeds as follows:
 
-#. :dp:`fls_69bnxrtj0nar`
-   If the number of :t:`[subpattern]s` of the :t:`slice pattern` is greater than
-   the length of the context :t:`value`, then matching fails.
+#. :dp:`fls_x10AKxoXXbs8`
+   If the expected :t:`type` is a :t:`slice type` then,
 
-#. :dp:`fls_twhwiy213ibf`
-   If the number of :t:`[subpattern]s` of the :t:`slice pattern` is less than
-   the size of the context :t:`value` and one of those :t:`[subpattern]s` is not
-   a :t:`rest pattern`, then matching fails.
+   #. :dp:`fls_69bnxrtj0nar`
+      If the number of :t:`[subpattern]s` of the :t:`slice pattern` is greater than
+      the length of the context :t:`value`, then matching fails.
 
-#. :dp:`fls_ei7y4ul6n6hu`
-   For each :t:`subpattern` of the :t:`slice pattern`
+   #. :dp:`fls_twhwiy213ibf`
+      If the number of :t:`[subpattern]s` of the :t:`slice pattern` is less than
+      the size of the context :t:`value` and one of those :t:`[subpattern]s` is not
+      a :t:`rest pattern`, then matching fails.
 
-   #. :dp:`fls_ad2jud5h1rfp`
-      Perform :t:`pattern matching` with the :t:`subpattern` and the
-      corresponding :t:`value` from the context :t:`value`, ignoring :t:`[rest
-      pattern]s`.
+   #. :dp:`fls_ei7y4ul6n6hu`
+      For each :t:`subpattern` of the :t:`slice pattern`
 
-   #. :dp:`fls_pc97m47p34wq`
-      If matching the :t:`subpattern` fails, then matching fails.
+      #. :dp:`fls_ad2jud5h1rfp`
+         Perform :t:`pattern matching` with the :t:`subpattern` and the
+         corresponding :t:`value` from the context :t:`value`, ignoring :t:`[rest
+         pattern]s`.
+
+      #. :dp:`fls_pc97m47p34wq`
+         If matching the :t:`subpattern` fails, then matching fails.
+
+#. :dp:`fls_kwQyiSoyAwZ8`
+   Otherwise if the expected :t:`type` is an :t:`array type`
+
+   #. :dp:`fls_zAdtysiuUwBX`
+      For each :t:`subpattern` of the :t:`slice pattern`
+
+      #. :dp:`fls_SezcYXcSlEq7`
+         Perform :t:`pattern matching` with the :t:`subpattern` and the
+         corresponding :t:`value` from the context :t:`value`, ignoring :t:`[rest
+         pattern]s`.
+
+      #. :dp:`fls_6xRXEt2pGnZi`
+         If matching the :t:`subpattern` fails, then matching fails.
 
 .. _fls_asj8rgccvkoe:
 

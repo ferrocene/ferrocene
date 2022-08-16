@@ -21,7 +21,7 @@ Patterns
        $$|$$? PatternWithoutAlternation ($$|$$ PatternWithoutAlternation)*
 
    PatternList ::=
-       Pattern ($$,$$ Pattern)+ $$,$$?
+       Pattern ($$,$$ Pattern)* $$,$$?
 
    PatternWithoutAlternation ::=
        PatternWithoutRange
@@ -693,7 +693,7 @@ Record Struct Patterns
        )
 
    IndexedDeconstructor ::=
-       TupleIndex $$:$$ Pattern
+       FieldIndex $$:$$ Pattern
 
    NamedDeconstructor ::=
        Identifier $$:$$ Pattern
@@ -701,7 +701,7 @@ Record Struct Patterns
    ShorthandDeconstructor ::=
        $$ref$$? $$mut$$? Binding
 
-   TupleIndex ::=
+   FieldIndex ::=
        DecimalLiteral
 
 .. rubric:: Legality Rules
@@ -716,11 +716,11 @@ The :t:`deconstructee` of a :t:`record struct pattern` shall resolve to an
 
 :dp:`fls_mnh35ehva8tx`
 An :t:`indexed deconstructor` is a :t:`construct` that matches the position of a
-:t:`tuple field`.
+:t:`field`.
 
 :dp:`fls_p2rjnlbvifaa`
 An :t:`indexed deconstructor` matches a :t:`field` of the :t:`deconstructee`
-when its :t:`tuple index` and the position of the :t:`field` in the
+when its :t:`field index` and the position of the :t:`field` in the
 :t:`deconstructee` are the same. Such an :t:`indexed deconstructor` is a
 :dt:`matched indexed deconstructor`.
 
@@ -908,7 +908,7 @@ The :t:`deconstructee` of a :t:`tuple struct pattern` shall resolve to a
 A :t:`subpattern` of a :t:`tuple struct pattern` matches a :t:`field` of the
 :t:`deconstructee` when its position and the position of the :t:`field` in
 the :t:`deconstructee` are the same. Such a :t:`subpattern` is a :dt:`matched
-subpattern`.
+tuple struct subpattern`.
 
 :dp:`fls_ehf9r6halgh1`
 The position of a :t:`subpattern` is determined as follows:
@@ -939,10 +939,10 @@ For each :t:`field` of the :t:`deconstructee`, the :t:`tuple struct pattern`
 shall either:
 
 * :dp:`fls_rco3fwlx2a76`
-  Contain at most one :t:`matched subpattern`, or
+  Contain at most one :t:`matched tuple struct subpattern`, or
 
 * :dp:`fls_4vrnxslad09e`
-  Have exactly one ``RecordStructRestPattern.``
+  Have exactly one :s:`RecordStructRestPattern`.
 
 :dp:`fls_qgilaqy5zx7q`
 A :s:`RecordStructRestPattern` is allowed even if all :t:`[field]s` of the
@@ -974,12 +974,7 @@ Tuple Patterns
 .. syntax::
 
    TuplePattern ::=
-       $$($$ TuplePatternElementList? $$)$$
-
-   TuplePatternElementList ::=
-       Pattern $$,$$
-     | PatternList
-     | RestPattern
+       $$($$ PatternList? $$)$$
 
 .. rubric:: Legality Rules
 
@@ -994,6 +989,50 @@ are :t:`irrefutable`.
 :dp:`fls_yhcaz6v49ub2`
 The :t:`type` of a :t:`tuple pattern` is the :t:`type` of the :t:`tuple` being
 destructured.
+
+:dp:`fls_6WCm0Ra8NQl4`
+A :t:`subpattern` of a :t:`tuple pattern` matches a :t:`tuple field` of the
+:t:`tuple type` when its position and the position of the :t:`tuple field` in
+the :t:`tuple type` are the same. Such a :t:`subpattern` is a :dt:`matched
+tuple subpattern`.
+
+:dp:`fls_a3qvQjyilORx`
+The position of a :t:`subpattern` is determined as follows:
+
+* :dp:`fls_KmIHFxlBYelZ`
+  If the :t:`tuple pattern` has a :s:`RestPattern`, then
+
+  * :dp:`fls_5bXqIaKiFcLg`
+    If the :t:`subpattern` precedes the :s:`RestPattern`, then its
+    position is the position within the :s:`PatternList` in left-to-right order,
+    starting from zero.
+
+  * :dp:`fls_soHCAVfGlv5f`
+    If the :t:`subpattern` succeeds the :s:`RestPattern`, then its
+    position is the position within the :s:`PatternList` list in right-to-left
+    order, starting from the :t:`arity` of the :t:`tuple type` minus one.
+
+* :dp:`fls_iiKvYs61959S`
+  Otherwise the position is the position within the :s:`PatternList` in
+  left-to-right order, starting from zero.
+
+:dp:`fls_F4k6ljuP8Amf`
+The :t:`type` of the :t:`subpattern` of a :t:`tuple pattern` and the
+:t:`type` of the matched :t:`tuple field` shall be :t:`unifiable`.
+
+:dp:`fls_GjjCDkVJPQS8`
+For each :t:`tuple field` of the :t:`tuple type`, the :t:`tuple pattern` shall
+either:
+
+* :dp:`fls_9Qw9N87swwNe`
+  Contain at most one :t:`matched tuple subpattern`, or
+
+* :dp:`fls_CQ84wkLyrAJv`
+  Have exactly one :s:`RestPattern`.
+
+:dp:`fls_cC6ohNuiltfL`
+A :s:`RestPattern` is allowed even if all :t:`[tuple field]s` of the :t:`tuple
+type` have been matched.
 
 .. rubric:: Examples
 

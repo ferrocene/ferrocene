@@ -1951,6 +1951,19 @@ of a :t:`value`.
 :dp:`fls_luetyuwu54d6`
 See :s:`FieldAccessExpression`.
 
+.. _fls_6uwwat9j4x7y:
+
+field index
+^^^^^^^^^^^
+
+:dp:`fls_6061r871qgbj`
+A :dt:`field index` is the position of a :t:`field` within a :t:`tuple struct
+type` or :t:`tuple enum variant`. The first :t:`field` has a :t:`field index` of
+zero, the Nth :t:`field` has a :t:`field index` of N-1.
+
+:dp:`fls_IDYKXUIL845x`
+See :s:`FieldIndex`.
+
 .. _fls_8qLL14WfXXNN:
 
 field list
@@ -5639,19 +5652,6 @@ tuple field
 
 :dp:`fls_8rq1gbzij5tk`
 A :dt:`tuple field` is a :t:`field` of a :t:`tuple type`.
-
-.. _fls_6uwwat9j4x7y:
-
-tuple index
-^^^^^^^^^^^
-
-:dp:`fls_6061r871qgbj`
-A :dt:`tuple index` is the position of a :t:`tuple field` within a
-:t:`tuple type`. The first :t:`tuple field` has a :t:`tuple index` of zero,
-the Nth :t:`tuple field` has a :t:`tuple index` of N-1.
-
-:dp:`fls_IDYKXUIL845x`
-See :s:`TupleIndex`.
 
 .. _fls_zfvvbf7ncrhj:
 

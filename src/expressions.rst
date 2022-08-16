@@ -708,7 +708,7 @@ The :t:`evaluation` of a :t:`block expression` proceeds as follows:
 
 .. _fls_aadan19t5006:
 
-async Blocks
+Async Blocks
 ~~~~~~~~~~~~
 
 .. rubric:: Syntax
@@ -723,20 +723,23 @@ async Blocks
 :dp:`fls_hhidi5ukxo`
 An :t:`async block expression` is a :t:`block expression` that is specified
 with :t:`keyword` ``async`` and encapsulates behavior which is executed in
-asynchronous manner.
+an asynchronous manner.
 
 :dp:`fls_tzclkasinpoq`
 An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_oisws5qykedi`
-An :t:`async block expression` denotes a new :t:`control flow boundary`.
+An :t:`async block expression` denotes a new :t:`async control flow boundary`.
+
+:dp:`fls_eodEo8qRE0JH`
+An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_ncd0wkgtldem`
-The :t:`type` of an :t:`async block expression` shall implement the
-:std:`core::future::Future` trait.
+The :t:`type` of an :t:`async block expression` is an anonymous unique :t:`type`
+that implement the :std:`core::future::Future` trait.
 
 :dp:`fls_pvnofoomgwl5`
-The :t:`value` of an :t:`async block expression` is a :t:`future`.
+The :t:`value` of an :t:`async block expression` is a :t:`future` value.
 
 .. rubric:: Dynamic Semantics
 
@@ -755,7 +758,7 @@ The :t:`evaluation` of an :t:`async block expression` produces an anonymous
 
 .. _fls_8wnyln2nmg4y:
 
-unsafe Blocks
+Unsafe Blocks
 ~~~~~~~~~~~~~
 
 .. rubric:: Syntax
@@ -3419,7 +3422,7 @@ Closure Expressions
 
 :dp:`fls_2d141c9a0yui`
 A :t:`closure expression` is an :t:`expression` that defines a :t:`closure
-type`.
+type` and constructs a value of such a :t:`type`.
 
 :dp:`fls_srbl7ptknjyk`
 A :t:`closure body` is a :t:`construct` that represents the executable portion
@@ -4490,20 +4493,8 @@ A :t:`future operand` is an :t:`operand` whose :t:`future` is being awaited by
 an :t:`await expression`.
 
 :dp:`fls_k9pncajmhgk1`
-An :t:`await expression` shall appear within an :t:`async control flow boundary`.
-
-:dp:`fls_xtG3Lw2XgGS2`
-An :dt:`async control flow boundary` is a :t:`control flow boundary` with
-asynchronous control flow.
-
-:dp:`fls_Rr2Wl6mp4oXS`
-The following constructs are :t:`[async control flow boundary]ies`:
-
-* :dp:`fls_xilkqy5piyh0`
-  An :t:`async block expression`.
-
-* :dp:`fls_cr61i8so7cty`
-  The :t:`function body`` of an :t:`async function`.
+An :t:`await expression` shall appear within an :t:`async control flow
+boundary`. Only the innermost :t:`control flow boundary` shall be considered.
 
 :dp:`fls_9uw5pd7kbrx3`
 The :t:`type` of a :t:`future operand` shall implement the

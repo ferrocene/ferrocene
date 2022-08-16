@@ -412,10 +412,19 @@ async block expression
 :dp:`fls_p6nvfs7bfoxd`
 An :dt:`async block expression` is a :t:`block expression` that is specified
 with :t:`keyword` ``async`` and encapsulates behavior which is executed in
-asynchronous manner.
+an asynchronous manner.
 
 :dp:`fls_je689rormhd6`
 See :s:`AsyncBlockExpression`.
+
+.. _fls_lYrTaCM1LcXU:
+
+control flow boundary
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_EXoGOkCRsfKK`
+An :dt:`async control flow boundary` is a :t:`control flow boundary` that
+additionally allows suspending the execution via :t:`[await expression]s`.
 
 .. _fls_nlafxy2z1moc:
 
@@ -1031,7 +1040,7 @@ closure expression
 
 :dp:`fls_x87rhn9ikz00`
 A :dt:`closure expression` is an :t:`expression` that defines a :t:`closure
-type`.
+type` and constructs a value of such a :t:`type`.
 
 :dp:`fls_psd18dkzplf6`
 See :s:`ClosureExpression`.

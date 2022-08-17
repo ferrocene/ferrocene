@@ -16,11 +16,16 @@ import sys
 def build_docs(root, env, builder, clear, serve):
     dest = root / "build"
 
-    args = ["-b", builder, "-d", dest / "doctrees", "-j", "auto"]
+    args = ["-b", builder, "-d", dest / "doctrees"]
+    # Enable parallel builds:
+    args += ["-j", "auto"]
     if clear:
         args.append("-E")
     if serve:
         args += ["--watch", root / "exts", "--watch", root / "themes"]
+    else:
+        # Error out at the *end* of the build if there are warnings:
+        args += ["-W", "--keep-going"]
 
     commit = current_git_commit(root)
     if commit is not None:

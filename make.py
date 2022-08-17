@@ -39,10 +39,10 @@ def build_docs(root, env, builder, clear, serve):
                 root / "src",
                 dest / builder,
             ],
-            check=False,
-        ).check_returncode()
-    except KeyboardInterrupt:
-        pass
+            check=True,
+        )
+    except (KeyboardInterrupt, subprocess.CalledProcessError):
+        exit(1)
 
     return dest / builder
 

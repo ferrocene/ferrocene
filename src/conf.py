@@ -63,3 +63,5 @@ html_short_title = "Language Specification"
 # -- Options for linting -----------------------------------------------------
 
 lint_alphabetical_section_titles = ["glossary"]
+
+lint_no_paragraph_ids = ["index"]

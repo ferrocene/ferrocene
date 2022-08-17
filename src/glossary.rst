@@ -27,6 +27,14 @@ The :dt:`ABI kind` indicates the :t:`ABI` of a :t:`construct`.
 :dp:`fls_rd4kpubxygie`
 See :s:`AbiKind`.
 
+.. _fls_ymnz0mt7i4m8:
+
+abort
+^^^^^
+
+:dp:`fls_u4o7tda3ilv0`
+:dt:`Abort` is the immediate termination of a program.
+
 .. _fls_pcum2wpmgskk:
 
 Abstract Binary Interface
@@ -38,14 +46,6 @@ and computation cross language boundaries.
 
 :dp:`fls_8dgmmsp34lgc`
 See :s:`AbiSpecification`.
-
-.. _fls_ymnz0mt7i4m8:
-
-abort
-^^^^^
-
-:dp:`fls_u4o7tda3ilv0`
-:dt:`Abort` is the immediate termination of a program.
 
 .. _fls_g40une2uudez:
 
@@ -569,18 +569,6 @@ binding pattern
 A :dt:`binding pattern` is either an :t:`identifier pattern` or a :t:`shorthand
 deconstructor`.
 
-.. _fls_ed6yltkt0gb1:
-
-bit expression
-^^^^^^^^^^^^^^
-
-:dp:`fls_b3p5xqsfolqo`
-A :dt:`bit expression` is an :t:`expression` that computes a :t:`value` from two
-:t:`[operand]s` using bit arithmetic.
-
-:dp:`fls_iw1k2cfwfjou`
-See :s:`BitExpression`.
-
 .. _fls_clut5DWMQin8:
 
 bit and assignment
@@ -612,6 +600,18 @@ arithmetic.
 
 :dp:`fls_vbsvu0troqci`
 See :s:`BitAndExpression`.
+
+.. _fls_ed6yltkt0gb1:
+
+bit expression
+^^^^^^^^^^^^^^
+
+:dp:`fls_b3p5xqsfolqo`
+A :dt:`bit expression` is an :t:`expression` that computes a :t:`value` from two
+:t:`[operand]s` using bit arithmetic.
+
+:dp:`fls_iw1k2cfwfjou`
+See :s:`BitExpression`.
 
 .. _fls_90E3eiBYgicI:
 
@@ -1297,8 +1297,8 @@ See :s:`ExternalCrateImport`.
 
 .. _fls_yf9yjzzhw0rn:
 
-create public modifier
-^^^^^^^^^^^^^^^^^^^^^^
+crate public modifier
+^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_dj7fmrqhbhsv`
 A :t:`crate public modifier` is a :t:`visibility modifier` that grants a
@@ -1921,16 +1921,6 @@ FFI
 :dp:`fls_z363fu89mj1c`
 See :t:`Foreign Function Interface`.
 
-.. _fls_fo7vyxs4l3yh:
-
-Foreign Function Interface
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_240yj1kym1kh`
-:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`,
-:t:`external block`, :t:`[external function]s`, linkage, and :t:`type`
-:t:`layout` to interface a Rust program with foreign code.
-
 .. _fls_7gCAbHnGEIl6:
 
 field
@@ -2061,6 +2051,16 @@ its :t:`block expression` as long as its :t:`subject expression` yields a
 
 :dp:`fls_yn4d35pvmn87`
 See :s:`ForLoopExpression`.
+
+.. _fls_fo7vyxs4l3yh:
+
+Foreign Function Interface
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_240yj1kym1kh`
+:dt:`Foreign Function Interface` employs :t:`ABI`, :t:`[attribute]s`,
+:t:`external block`, :t:`[external function]s`, linkage, and :t:`type`
+:t:`layout` to interface a Rust program with foreign code.
 
 .. _fls_pi7j0t7h1y86:
 
@@ -2708,18 +2708,6 @@ indexable type
 :dp:`fls_AdVGyKZFvvUS`
 A :dt:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
 
-.. _fls_irp9ive4e66r:
-
-indexed operand
-^^^^^^^^^^^^^^^
-
-:dp:`fls_dvmm47wnl33e`
-An :dt:`indexed operand` is an :t:`operand` which indicates the :t:`value` of a :t:`type` implementing
-:std:`core::ops::Index` being indexed into by an :t:`index expression`.
-
-:dp:`fls_je8eh3a02riq`
-See :s:`IndexedOperand`.
-
 .. _fls_qs654p61ivpx:
 
 indexed deconstructor
@@ -2755,6 +2743,18 @@ initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_werlw98l3ra0`
 See :s:`IndexedInitializer`.
+
+.. _fls_irp9ive4e66r:
+
+indexed operand
+^^^^^^^^^^^^^^^
+
+:dp:`fls_dvmm47wnl33e`
+An :dt:`indexed operand` is an :t:`operand` which indicates the :t:`value` of a :t:`type` implementing
+:std:`core::ops::Index` being indexed into by an :t:`index expression`.
+
+:dp:`fls_je8eh3a02riq`
+See :s:`IndexedOperand`.
 
 .. _fls_a350zwl1or4g:
 
@@ -4084,18 +4084,6 @@ A :dt:`path expression` is an :t:`expression` that denotes a :t:`path`.
 :dp:`fls_3qjpjqm0legc`
 See :s:`PathExpression`.
 
-.. _fls_5UBwGysaQNuQ:
-
-path-in-expression
-^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_E42QYGorjSbn`
-A :dt:`path-in-expression` is a :t:`path` that appears in an :t:`expression`
-context.
-
-:dp:`fls_2lWoYOLQnJOv`
-See :s:`PathInExpression`.
-
 .. _fls_ptikwcw3b20l:
 
 path pattern
@@ -4118,6 +4106,18 @@ A :dt:`path segment` is a constituent of a :t:`path`.
 
 :dp:`fls_m067uq7fo66i`
 See :s:`PathSegment`, :s:`SimplePathSegment`, :s:`TypePathSegment`.
+
+.. _fls_5UBwGysaQNuQ:
+
+path-in-expression
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_E42QYGorjSbn`
+A :dt:`path-in-expression` is a :t:`path` that appears in an :t:`expression`
+context.
+
+:dp:`fls_2lWoYOLQnJOv`
+See :s:`PathInExpression`.
 
 .. _fls_uj1o721im5lb:
 
@@ -4317,6 +4317,54 @@ of a range.
 :dp:`fls_vmb2z7oh6gzm`
 See :s:`RangeExpressionLowBound`.
 
+.. _fls_6pxg401r6juc:
+
+range pattern
+^^^^^^^^^^^^^
+
+:dp:`fls_vf42zdyq23lc`
+A :dt:`range pattern` is a :t:`pattern` that matches :t:`[value]s` which fall
+within a range.
+
+:dp:`fls_r36uf3y2denr`
+See ``RangePattern.``
+
+.. _fls_3ls9xlgt8ei1:
+
+range pattern bound
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_l9xq96bjs4o2`
+A :dt:`range pattern bound` is a constraint on the range of a :t:`range
+pattern`.
+
+:dp:`fls_80736cs3axo4`
+See :s:`RangePatternBound`.
+
+.. _fls_y4rv5cbowvwg:
+
+range pattern high bound
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_arp7y7yme7yp`
+A :dt:`range pattern high bound` is a :t:`range pattern bound` that specifies
+the end of a range.
+
+:dp:`fls_dnwqcswftw71`
+See :s:`RangePatternHighBound`.
+
+.. _fls_laev4lmmv0cw:
+
+range pattern low bound
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rt7q0msh3op4`
+A :dt:`range pattern low bound` is a :t:`range pattern bound` that specifies the
+start of a range.
+
+:dp:`fls_j695o93wsu3i`
+See :s:`RangePatternLowBound`.
+
 .. _fls_iqpxlg7w3cvf:
 
 range-from expression
@@ -4390,54 +4438,6 @@ an included :t:`range expression high bound`.
 
 :dp:`fls_krei7lc6lo8q`
 See :s:`RangeToInclusiveExpression`.
-
-.. _fls_6pxg401r6juc:
-
-range pattern
-^^^^^^^^^^^^^
-
-:dp:`fls_vf42zdyq23lc`
-A :dt:`range pattern` is a :t:`pattern` that matches :t:`[value]s` which fall
-within a range.
-
-:dp:`fls_r36uf3y2denr`
-See ``RangePattern.``
-
-.. _fls_3ls9xlgt8ei1:
-
-range pattern bound
-^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_l9xq96bjs4o2`
-A :dt:`range pattern bound` is a constraint on the range of a :t:`range
-pattern`.
-
-:dp:`fls_80736cs3axo4`
-See :s:`RangePatternBound`.
-
-.. _fls_y4rv5cbowvwg:
-
-range pattern high bound
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_arp7y7yme7yp`
-A :dt:`range pattern high bound` is a :t:`range pattern bound` that specifies
-the end of a range.
-
-:dp:`fls_dnwqcswftw71`
-See :s:`RangePatternHighBound`.
-
-.. _fls_laev4lmmv0cw:
-
-range pattern low bound
-^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_rt7q0msh3op4`
-A :dt:`range pattern low bound` is a :t:`range pattern bound` that specifies the
-start of a range.
-
-:dp:`fls_j695o93wsu3i`
-See :s:`RangePatternLowBound`.
 
 .. _fls_ipeh92kh17ze:
 
@@ -5766,17 +5766,6 @@ A :dt:`type alias` is an :t:`item` that defines a :t:`name` for a :t:`type`.
 :dp:`fls_qfzskp1t3h5w`
 See :s:`TypeAliasDeclaration`.
 
-.. _fls_1n50v16et5e6:
-
-type ascription
-^^^^^^^^^^^^^^^
-
-:dp:`fls_pm5jytclqn7y`
-A :dt:`type ascription` specifies the :t:`type` of a :t:`construct`.
-
-:dp:`fls_c3xtiputfxea`
-See :s:`TypeAscription`.
-
 .. _fls_89ollsdjx3uy:
 
 type argument
@@ -5788,6 +5777,17 @@ a :t:`type parameter`.
 
 :dp:`fls_91tqk65qiygf`
 See :s:`TypeArgument`.
+
+.. _fls_1n50v16et5e6:
+
+type ascription
+^^^^^^^^^^^^^^^
+
+:dp:`fls_pm5jytclqn7y`
+A :dt:`type ascription` specifies the :t:`type` of a :t:`construct`.
+
+:dp:`fls_c3xtiputfxea`
+See :s:`TypeAscription`.
 
 .. _fls_k24jb967nu1q:
 
@@ -6348,17 +6348,6 @@ variable
 A :dt:`variable` is a placeholder for a :t:`value` that is allocated on the
 stack.
 
-.. _fls_q0xplb4tbzpq:
-
-variance
-^^^^^^^^
-
-:dp:`fls_il0krrsf09f8`
-:dt:`Variance` is a property of :t:`[lifetime parameter]s` and :t:`[type
-parameter]s` that describes the circumstances under which a :t:`generic type`
-is a :t:`subtype` of an instantiation of itself with different :t:`[generic
-argument]s`.
-
 .. _fls_RIe80XOF8VlA:
 
 variadic part
@@ -6370,6 +6359,17 @@ parameters.
 
 :dp:`fls_z9D86gBFbKB5`
 See :s:`VariadicPart`.
+
+.. _fls_q0xplb4tbzpq:
+
+variance
+^^^^^^^^
+
+:dp:`fls_il0krrsf09f8`
+:dt:`Variance` is a property of :t:`[lifetime parameter]s` and :t:`[type
+parameter]s` that describes the circumstances under which a :t:`generic type`
+is a :t:`subtype` of an instantiation of itself with different :t:`[generic
+argument]s`.
 
 .. _fls_svx87y4p8fdx:
 

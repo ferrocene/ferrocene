@@ -23,6 +23,7 @@ author = "Critical Section GmbH"
 # ones.
 extensions = [
     "ferrocene_spec",
+    "ferrocene_spec_lints",
     "ferrocene_appendices",
 ]
 
@@ -58,3 +59,7 @@ html_theme_options = {
 
 html_title = "Ferrocene Language Specification"
 html_short_title = "Language Specification"
+
+# -- Options for linting -----------------------------------------------------
+
+lint_alphabetical_section_titles = ["glossary"]

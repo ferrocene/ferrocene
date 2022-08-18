@@ -680,7 +680,7 @@ Attribute ``cfg``
 .. syntax::
 
    CfgContent ::=
-       $$cfg$$ $$($$ CondigurationPredicate $$)$$
+       $$cfg$$ $$($$ ConfigurationPredicate $$)$$
 
    ConfigurationPredicate ::=
        ConfigurationOption
@@ -751,7 +751,7 @@ Attribute ``cfg_attr``
 .. syntax::
 
    CfgAttrContent ::=
-       $$cfg_attr$$ $$($$ CondigurationPredicate $$,$$ AttributeContentList $$)$$
+       $$cfg_attr$$ $$($$ ConfigurationPredicate $$,$$ AttributeContentList $$)$$
 
 .. rubric:: Legality Rules
 

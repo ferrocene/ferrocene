@@ -4810,9 +4810,8 @@ safety invariant
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_wRZfAmTmMGTX`
-A :dt:`safety invariant` is an invariant that programs are free to assume to be
-upheld for their execution and when violated may result in :t:`undefined
-behavior`.
+A :dt:`safety invariant` is an invariant that when violated may result in
+:t:`undefined behavior`.
 
 .. _fls_XeMNghZZOBqL:
 
@@ -5935,7 +5934,7 @@ undefined behavior
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_WpwmltUMQGZa`
-Situations that result in unbounded errors.
+:dt:`Undefined behavior`` is a situation that results in an unbounded error.
 
 .. _fls_57kis2vnt3cv:
 
@@ -6325,7 +6324,7 @@ validity invariant
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_3ebC3l839ajF`
-A :dt:`validity invariant` is an invariant that when not uphold will result in
+A :dt:`validity invariant` is an invariant that when violated results in
 immediate :t:`undefined behavior`.
 
 .. _fls_tg866bc926ms:

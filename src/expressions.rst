@@ -2839,7 +2839,7 @@ Struct Expressions
      | ShorthandInitializer
 
    IndexedInitializer ::=
-       TupleIndex : Expression
+       FieldIndex : Expression
 
    NamedInitializer ::=
        Identifier : Expression
@@ -2873,7 +2873,7 @@ initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_y3p6rtm7ek3l`
 An :t:`indexed initializer` matches a :t:`field` of the :t:`constructee`
-when the :t:`tuple index` of the :t:`indexed initializer` resolves to a valid
+when the :t:`field index` of the :t:`indexed initializer` resolves to a valid
 position of a :t:`field` in the :t:`constructee`. Such an :t:`indexed
 initializer` is a :dt:`matched indexed initializer`.
 

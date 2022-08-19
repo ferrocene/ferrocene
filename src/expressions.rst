@@ -735,7 +735,7 @@ An :t:`async block expression` denotes a new :t:`async control flow boundary`.
 An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_ncd0wkgtldem`
-The :t:`type` of an :t:`async block expression` is an anonymous unique :t:`type`
+The :t:`type` of an :t:`async block expression` is an unique anonymous :t:`type`
 that implement the :std:`core::future::Future` trait.
 
 :dp:`fls_pvnofoomgwl5`
@@ -745,7 +745,7 @@ The :t:`value` of an :t:`async block expression` is a :t:`future` value.
 
 :dp:`fls_9ghp5yet75y6`
 The :t:`evaluation` of an :t:`async block expression` produces an anonymous
-:t:`value` of an anonymous unique :t:`type` that implements the
+:t:`value` of an unique anonymous :t:`type` that implements the
 :std:`core::future::Future` :t:`trait`.
 
 .. rubric:: Examples
@@ -3422,7 +3422,7 @@ Closure Expressions
 
 :dp:`fls_2d141c9a0yui`
 A :t:`closure expression` is an :t:`expression` that defines a :t:`closure
-type` and constructs a value of such a :t:`type`.
+type` and constructs a value of that :t:`type`.
 
 :dp:`fls_srbl7ptknjyk`
 A :t:`closure body` is a :t:`construct` that represents the executable portion
@@ -3435,12 +3435,13 @@ A :t:`closure body` denotes a new :t:`control flow boundary`.
 A :t:`closure body` is subject to :t:`capturing`.
 
 :dp:`fls_yn30xuejcfxo`
-The :t:`type` of a :t:`closure expression` is the anonymous unique :t:`closure
+The :t:`type` of a :t:`closure expression` is the unique anonymous :t:`closure
 type` defined by it.
 
 :dp:`fls_sje6cdvifgv5`
-The :t:`value` of a :t:`closure expression` is the :t:`value` of the anonymous
-unique :t:`closure type` instantiated with the selected :t:`[capture target]s`.
+The :t:`value` of a :t:`closure expression` is the :t:`value` of the unique
+anonymous :t:`closure type` instantiated with the selected :t:`[capture
+target]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3448,7 +3449,7 @@ unique :t:`closure type` instantiated with the selected :t:`[capture target]s`.
 The :t:`evaluation` of a :t:`closure expression` proceeds as follows:
 
 #. :dp:`fls_7w15ccc1zzxl`
-   An anonymous :t:`value` of an anonymous unique :t:`closure type` is created.
+   An anonymous :t:`value` of an unique anonymous :t:`closure type` is created.
 
 #. :dp:`fls_b8w9y73pvdnm`
    The :t:`closure body` is evaluated.

@@ -6339,8 +6339,8 @@ A :dt:`value expression` is an :t:`expression` that represents a :t:`value`.
 
 .. _fls_7xiaXXSwy4GP:
 
-mutable place expression context
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+value expression context
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_NGGZEbmoLRbD`
 A :dt:`value expression context` is an expression context that is not a

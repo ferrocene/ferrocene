@@ -1752,14 +1752,14 @@ following restrictions:
   It lacks :t:`function qualifiers`,
 
 * :dp:`fls_jzIHzPkJqVm8`
-  It's :t:`ABI` is Rust,
+  Its :t:`ABI` is Rust,
 
 * :dp:`fls_qXii07xWRUoT`
   It lacks :t:`generic parameters`,
 
 * :dp:`fls_ZEjvn4mmfSct`
-  It has a single :t:`function parameter` with the type being a :t:`shared
-  reference type` whose inner :t:`type` is :std:`core::panic::PanicInfo`,
+  It has a single :t:`function parameter` whose :t:`type` ``&``
+  :std:`core::panic::PanicInfo`,
 
 * :dp:`fls_iWPw0QFE5TrP`
   It has the :t:`never type` as its :t:`return type`,

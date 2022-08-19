@@ -614,6 +614,11 @@ Path Expressions
 :dp:`fls_gvanx4874ycy`
 A :t:`path expression` is an :t:`expression` that denotes a :t:`path`.
 
+:dp:`fls_EOkrcIj9CuhV`
+A :t:`path expression` shall resolve to either a :t:`constant parameter`,
+:t:`constant`, :t:`function`, :t:`local variable`, :t:`static`, :t:`tuple enum
+variant`, :t:`tuple struct`, :t:`unit enum variant`, or :t:`unit struct`.
+
 :dp:`fls_gz67ju6l7uhn`
 A :t:`path expression` that resolves to a :t:`mutable static` shall require
 :t:`unsafe context`.
@@ -624,11 +629,6 @@ it resolved to.
 
 :dp:`fls_5ifai8nkp5ek`
 The :t:`value` of a :t:`path expression` is the :t:`entity` that it resolved to.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_ed9w4jwx059`
-The :t:`evaluation` of a :t:`path expression` has no effect.
 
 .. rubric:: Examples
 

@@ -146,7 +146,7 @@ A tool is free to compile a :t:`proc-macro crate` to a shared library.
 
 :dp:`fls_cXLyCjs9T3Mj`
 A :t:`proc-macro crate` shall not declare :t:`[item]s` with :t:`public
-visibility` unless the :t:`item` is a  :t:`procedural macro`.
+visibility` unless the :t:`item` is a :t:`procedural macro`.
 
 :dp:`fls_h93C3wfbAoz1`
 Only a :t:`proc-macro crate` shall declare :t:`[procedural macro]s`

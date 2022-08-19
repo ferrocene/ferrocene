@@ -26,7 +26,7 @@ Source Files
    ZeroWidthNoBreakSpace ::=
        $$\u{FEFF}$$
    Shebang ::=
-       $$#!$$ ~[NewLine]+
+       $$#!$$ ~[NewLine]*
 
    NewLine ::=
        $$\n$$

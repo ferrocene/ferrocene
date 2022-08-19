@@ -1036,6 +1036,16 @@ type`.
 :dp:`fls_psd18dkzplf6`
 See :s:`ClosureExpression`.
 
+.. _fls_f5RBXj9g5iab:`
+
+closure parameter
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_yQBZHBLhPswn`
+A :dt:`closure parameter` is a :t:`construct` that matches an input :t:`value`
+at the site of a :t:`call expression` or a :t:`method call expression` to
+a pattern.
+
 .. _fls_xjudl8ykbisi:
 
 closure type

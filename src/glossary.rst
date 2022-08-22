@@ -2562,6 +2562,16 @@ immutable place expression
 An :dt:`immutable place expression` is a :t:`place expression` whose memory
 location cannot be modified.
 
+
+.. _fls_O0924m8mSfIa:
+
+immutable place expression context
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_UvrQ49dSoQGc`
+An :dt:`immutable place expression context` is a :t:`place expression context`
+whose memory location cannot be modified.
+
 .. _fls_RghQKP3lsXEb:
 
 immutable raw pointer type
@@ -3687,6 +3697,15 @@ mutable place expression
 A :dt:`mutable place expression` is a :t:`place expression` whose memory
 location can be modified.
 
+.. _fls_x5BKVLc4KDlK:
+
+mutable place expression context
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_2ixH8LWGHi3k`
+A :dt:`mutable place expression context` is a :t:`place expression context` that
+may evaluate its :t:`operand` as a mutable memory location.
+
 .. _fls_wOvlW47jKEWF:
 
 .. _mutable raw pointer type:
@@ -4179,8 +4198,8 @@ place expression context
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_fqcx8suiy5k`
-A :dt:`place expression context` is a :t:`construct` that requires a :t:`place
-expression`.
+A :dt:`place expression context` is a :t:`construct` that may evaluate its
+operand as a memory location.
 
 .. _fls_dr6wbsqjd2qm:
 
@@ -6322,6 +6341,15 @@ value expression
 
 :dp:`fls_mn6tcuz5j3p`
 A :dt:`value expression` is an :t:`expression` that represents a :t:`value`.
+
+.. _fls_7xiaXXSwy4GP:
+
+value expression context
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_NGGZEbmoLRbD`
+A :dt:`value expression context` is an expression context that is not a
+:t:`place expression context`.
 
 .. _fls_aP9ZaU01Dsg5:
 

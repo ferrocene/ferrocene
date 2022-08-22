@@ -327,8 +327,8 @@ Operation ``a <= b`` shall be equivalent to ``a == b | a < b``.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_2sd39mj05mb9`
-It is undefined behavior for a :t:`value` of :t:`type` :c:`bool` to have a bit
-pattern other than ``0x00`` and ``0x01``.
+It is a :t:`validity invariant` for a :t:`value` of :t:`type` :c:`bool` to have
+a bit pattern of ``0x00`` and ``0x01``.
 
 .. _fls_wrvjizrqf3po:
 
@@ -345,7 +345,7 @@ of :t:`Unicode`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_juysxea25owj`
-It is undefined behavior for a :t:`value` of :t:`type` :c:`char` to be outside
+It is a :t:`validty invariant` for a :t:`value` of :t:`type` :c:`char` to be inside
 the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive ranges of :t:`Unicode`.
 
 .. _fls_qwljwqr07slp:
@@ -541,8 +541,8 @@ characters.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_wacoqrtzvrwu`
-It is undefined behavior for a :t:`value` of :t:`type` :c:`str` to denote an
-invalid UTF-8 sequence of characters.
+It is a :t:`safety invariant` for a :t:`value` of :t:`type` :c:`str` to denote
+a valid UTF-8 sequence of characters.
 
 .. _fls_4ckl3n2ko3i4:
 
@@ -679,9 +679,8 @@ initializer`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_f046du2fkgr6`
-It is undefined behavior for a :t:`value` of an :t:`enum type` to have a
-:t:`discriminant` other than a :t:`discriminant` specified by the :t:`enum
-type`.
+It is a :t:`validity invariant` for a :t:`value` of an :t:`enum type` to have a
+:t:`discriminant` specified by the :t:`enum type`.
 
 .. rubric:: Examples
 
@@ -963,8 +962,8 @@ A :t:`variadic part` shall be specified only when the :t:`ABI` of the
 .. rubric:: Undefined Behavior
 
 :dp:`fls_52thmi9hnoks`
-It is undefined behavior to have a :t:`value` of a :t:`function pointer type`
-that is :c:`null`.
+It is a :t:`validty invariant` for a :t:`value` of a :t:`function pointer type`
+to be not :c:`null`.
 
 .. rubric:: Examples
 
@@ -1059,7 +1058,8 @@ A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy`
 .. rubric:: Undefined Behavior
 
 :dp:`fls_ezh8aq6fmdvz`
-It is undefined behavior if a :t:`value` of a :t:`reference type` is :c:`null`.
+It is :t:`validty invariant` for a :t:`value` of a :t:`reference type` to be not
+:c:`null`.
 
 .. rubric:: Examples
 
@@ -1224,7 +1224,7 @@ The :t:`never type` has no :t:`[value]s`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_22e8quna7ed5`
-It is undefined behavior to have a :t:`value` of the :t:`never type`.
+It is :t:`validity variant` to not have a :t:`value` of the :t:`never type`.
 
 .. rubric:: Examples
 

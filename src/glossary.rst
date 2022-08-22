@@ -4860,6 +4860,15 @@ rustc
 Rust-c (or :dt:`rustc`) is a compiler that implements the Ferrocene Language
 Specification.
 
+.. _fls_Q4MRIo7cWv5K:
+
+safety invariant
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_wRZfAmTmMGTX`
+A :dt:`safety invariant` is an invariant that when violated may result in
+:t:`undefined behavior`.
+
 .. _fls_XeMNghZZOBqL:
 
 scalar type
@@ -5962,6 +5971,14 @@ unary operator
 :dp:`fls_p6mk2zrwgwem`
 A :dt:`unary operator` operates on one :t:`operand`.
 
+.. _fls_WuLL4SvSKavZ:
+
+undefined behavior
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_WpwmltUMQGZa`
+:dt:`Undefined behavior`` is a situation that results in an unbounded error.
+
 .. _fls_57kis2vnt3cv:
 
 underscore expression
@@ -6343,6 +6360,15 @@ valid
 :dp:`fls_jrosf84umqj0`
 A :t:`variable` is :dt:`valid` when it has been :t:`initialized` by all
 reachable control flow paths.
+
+.. _fls_A5K8aOBsI3BG:
+
+validity invariant
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_3ebC3l839ajF`
+A :dt:`validity invariant` is an invariant that when violated results in
+immediate :t:`undefined behavior`.
 
 .. _fls_tg866bc926ms:
 

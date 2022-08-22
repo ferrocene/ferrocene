@@ -34,8 +34,6 @@ Functions
    ReturnType ::=
        $$->$$ TypeSpecification
 
-
-
    FunctionBody ::=
        BlockExpression
 
@@ -86,7 +84,7 @@ at the site of a :t:`call expression` or a :t:`method call expression` to
 a pattern.
 
 :dp:`fls_lxzinvqveuqh`
-A :t:`function parameter` is an :t:`irrefutable pattern`.
+The :t:`pattern` of a :t:`function parameter` shall be :t:`irrefutable`.
 
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function` returns.

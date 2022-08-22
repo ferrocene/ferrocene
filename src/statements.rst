@@ -87,8 +87,7 @@ determined as follows:
   is uninitialized.
 
 :dp:`fls_iqar7vvtw22c`
-The :t:`pattern-without-alternation` of a :t:`let statement` shall be
-:t:`irrefutable`.
+The :t:`pattern` of a :t:`let statement` shall be :t:`irrefutable`.
 
 .. rubric:: Dynamic Semantics
 

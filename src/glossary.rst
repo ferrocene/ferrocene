@@ -4249,6 +4249,11 @@ private visibility
 to be referred to only by the current :t:`module` of the :t:`entity`, and its
 descendant :t:`[module]s`.
 
+.. _fls_AjjdLZWiL9Tq:
+
+:dp:`fls_DfTszT1PjV7o`
+A :dt:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
+
 .. _fls_sp5wdsxwmxf:
 
 procedural macro

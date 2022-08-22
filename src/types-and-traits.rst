@@ -868,8 +868,8 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Send`
 
 * :dp:`fls_vamgwed199ct`
   The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by immutable
-  reference`, :t:`by mutable reference`, or :t:`by move` :t:`capture mode`
-  implement the :std:`core::marker::Sync` :t:`trait`, and
+  reference` or by :t:`by mutable reference` implement the
+  :std:`core::marker::Sync` :t:`trait`, and
 
 * :dp:`fls_f96a5r1v7te7`
   The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by unique

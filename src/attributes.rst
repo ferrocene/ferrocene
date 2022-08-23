@@ -15,7 +15,7 @@ Attributes
    InnerAttributeOrDoc ::=
        InnerAttribute
      | InnerBuiltinAttribute
-     | InnerDocBlock
+     | InnerBlockDoc
      | InnerLineDoc
 
    InnerAttribute ::=
@@ -24,7 +24,7 @@ Attributes
    OuterAttributeOrDoc ::=
        OuterAttribute
      | OuterBuiltinAttribute
-     | OuterDocBlock
+     | OuterBlockDoc
      | OuterLineDoc
 
    OuterAttribute ::=
@@ -1745,8 +1745,30 @@ Attribute ``panic_handler``
 .. rubric:: Legality Rules
 
 :dp:`fls_ryz8qy1wdnma`
-:t:`Attribute` :c:`panic_handler` shall apply to :t:`[function]s` with
-:t:`function signature` ``fn(&core::panic::PanicInfo) -> !``.
+:t:`Attribute` :c:`panic_handler` shall apply to :t:`[function]s` with the
+following restrictions:
+
+* :dp:`fls_ncyod5gegMqL`
+  It lacks :t:`function qualifiers`,
+
+* :dp:`fls_jzIHzPkJqVm8`
+  Its :t:`ABI` is Rust,
+
+* :dp:`fls_qXii07xWRUoT`
+  It lacks :t:`generic parameters`,
+
+* :dp:`fls_ZEjvn4mmfSct`
+  It has a single :t:`function parameter` whose :t:`type` is ``&``
+  :std:`core::panic::PanicInfo`,
+
+* :dp:`fls_iWPw0QFE5TrP`
+  It has the :t:`never type` as its :t:`return type`,
+
+* :dp:`fls_WirXqd7UV4M0`
+  It lacks a :t:`where clause`,
+
+* :dp:`fls_5CGTQTuT0I5v`
+  It has a :t:`function body`.
 
 :dp:`fls_8gqun8lma9wz`
 :t:`Attribute` :dc:`panic_handler` indicates that its related :t:`function`

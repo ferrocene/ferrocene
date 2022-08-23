@@ -383,8 +383,8 @@ Attribute ``inline``
 .. rubric:: Legality Rules
 
 :dp:`fls_jwyhky49ssup`
-:t:`Attribute` :c:`inline` shall apply to :t:`[function]s` and :t:`[closure
-expression]s`.
+:t:`Attribute` :c:`inline` shall apply to :t:`[closure expression]s` and
+:t:`[function]s`.
 
 :dp:`fls_s7bf7tf9206d`
 :t:`Attribute` :dc:`inline` marks its related :t:`function` as :dt:`inlined`.

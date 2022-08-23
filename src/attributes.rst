@@ -1758,7 +1758,7 @@ following restrictions:
   It lacks :t:`generic parameters`,
 
 * :dp:`fls_ZEjvn4mmfSct`
-  It has a single :t:`function parameter` whose :t:`type` ``&``
+  It has a single :t:`function parameter` whose :t:`type` is ``&``
   :std:`core::panic::PanicInfo`,
 
 * :dp:`fls_iWPw0QFE5TrP`

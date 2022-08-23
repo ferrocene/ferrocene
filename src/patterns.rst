@@ -61,6 +61,12 @@ a possibly nested :t:`identifier pattern` of a :t:`slice pattern`\ ``.``
 The :t:`expected type` of a :t:`pattern` is the :t:`type` of the :t:`value` the
 :t:`pattern` is being matched against.
 
+:dp:`fls_TUanRT7WU14E`
+It is a static error when :t:`[lexical element]s` match multiple alternations of a
+:s:`PatternWithoutRange`, except for when the :t:`pattern` is ``&mut``
+:s:`Identifier`. Such a :t:`pattern` is interpreted as a :t:`reference pattern`
+with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
+
 :dp:`fls_8luyomzppck`
 Any two :t:`[pattern-without-alternation]s` that are or-ed using character 0x7C
 (vertical line) are subject to the following restrictions:

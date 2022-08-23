@@ -4287,6 +4287,11 @@ private visibility
 to be referred to only by the current :t:`module` of the :t:`entity`, and its
 descendant :t:`[module]s`.
 
+.. _fls_kCA6SW8bUq5x:
+
+proc-macro crate
+^^^^^^^^^^^^^^^^
+
 .. _fls_AjjdLZWiL9Tq:
 
 :dp:`fls_DfTszT1PjV7o`

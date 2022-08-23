@@ -58,7 +58,7 @@ An :t:`outer attribute` is an :t:`attribute` that applies to a subsequent
 
 .. code-block:: rust
 
-   #[cfg[target_os = "linux"]
+   #[cfg[target_os = "linux"]]
    mod linux_only_module {
        #![allow(unused_variables)]
 
@@ -383,7 +383,8 @@ Attribute ``inline``
 .. rubric:: Legality Rules
 
 :dp:`fls_jwyhky49ssup`
-:t:`Attribute` :c:`inline` shall apply to :t:`[function]s`.
+:t:`Attribute` :c:`inline` shall apply to :t:`[closure expression]s` and
+:t:`[function]s`.
 
 :dp:`fls_s7bf7tf9206d`
 :t:`Attribute` :dc:`inline` marks its related :t:`function` as :dt:`inlined`.
@@ -433,7 +434,7 @@ Attribute ``no_builtins``
 .. rubric:: Legality Rules
 
 :dp:`fls_x36c6j1ivbvp`
-:t:`Attribute` :c:`no_builtins` shall apply to :t:`[crate]s`.
+:t:`Attribute` :c:`no_builtins` shall appear at the :t:`crate level`.
 
 :dp:`fls_k2k10qtn6f0g`
 :t:`Attribute` :dc:`no_builtins` prevents the tool from replacing certain code
@@ -810,7 +811,7 @@ Attribute ``derive``
 .. rubric:: Legality Rules
 
 :dp:`fls_4btm6zwf445a`
-:t:`Attribute` :c:`derive` shall apply to an :t:`abstract data type`.
+:t:`Attribute` :c:`derive` shall apply to :t:`[abstract data type]s`.
 
 :dp:`fls_pjmbmj2b35y8`
 :t:`Attribute` :dc:`derive` lists :t:`[derive macro]s` for automatic
@@ -1225,7 +1226,8 @@ Attribute ``no_mangle``
 .. rubric:: Legality Rules
 
 :dp:`fls_q5swm5meafmx`
-:t:`Attribute` :c:`no_mangle` shall apply to an :t:`entity`.
+:t:`Attribute` :c:`no_mangle` shall apply to :t:`[function]s` and
+:t:`[static]s`.
 
 :dp:`fls_esaew4fqk8mm`
 :t:`Attribute` :dc:`no_mangle` indicates that the :t:`name` of the related
@@ -1285,7 +1287,7 @@ Attribute ``repr``
 .. rubric:: Legality Rules
 
 :dp:`fls_vetjq9sw84qc`
-:t:`Attribute` :c:`repr` shall apply to an :t:`abstract data type`.
+:t:`Attribute` :c:`repr` shall apply to :t:`[abstract data type]s`.
 
 :dp:`fls_is2esjz1sy36`
 :t:`Attribute` :dc:`repr` shall indicate the :t:`type representation` of the
@@ -1490,7 +1492,7 @@ Attribute ``proc_macro``
 
 :dp:`fls_u48dtmh97g`
 :t:`Attribute` :c:`proc_macro` shall apply to public :t:`[function]s` in the
-crate root.
+crate root of a :t:`proc-macro crate`.
 
 :dp:`fls_t4ez0zg1m569`
 :t:`Attribute` :dc:`proc_macro` turns the related :t:`function` into a
@@ -1518,7 +1520,8 @@ Attribute ``proc_macro_attribute``
 .. rubric:: Legality Rules
 
 :dp:`fls_huznzmkuhdky`
-:t:`Attribute` :c:`proc_macro_attribute` shall apply to :t:`[function]s`.
+:t:`Attribute` :c:`proc_macro_attribute` shall apply to public :t:`[function]s` in the
+crate root of a :t:`proc-macro crate`.
 
 :dp:`fls_gc3ly8fsodf1`
 :t:`Attribute` :dc:`proc_macro_attribute` turns the related :t:`function` into
@@ -1558,7 +1561,8 @@ Attribute ``proc_macro_derive``
 .. rubric:: Legality Rules
 
 :dp:`fls_l82yswg0k3px`
-:t:`Attribute` :c:`proc_macro_derive` shall apply to :t:`[function]s`.
+:t:`Attribute` :c:`proc_macro_derive` shall apply to public :t:`[function]s` in the
+crate root of a :t:`proc-macro crate`.
 
 :dp:`fls_ir9i4i2x5gyx`
 :t:`Attribute` :dc:`proc_macro_derive` turns the related :t:`function` into a
@@ -1910,7 +1914,7 @@ Attribute ``test``
 .. rubric:: Legality Rules
 
 :dp:`fls_o2elhg5w1rj9`
-:t:`Attribute` :c:`test` shall apply to a :t:`function` that:
+:t:`Attribute` :c:`test` shall apply to :t:`[function]s` that:
 
 * :dp:`fls_ert22u8rvkxt`
   Is not an :t:`async function`, and

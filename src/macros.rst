@@ -605,6 +605,11 @@ invocation`.
 :dp:`fls_nz5stwcc41gk`
 :t:`Macro expansion` of :t:`[declarative macro]s` proceeds as follows:
 
+#. :dp:`fls_40xq8Ri1OMZZ`
+   The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
+   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   equivalent :t:`attribute` :c:`doc` representation.
+
 #. :dp:`fls_76prdp6k1fga`
    The :s:`TokenTree` of the :t:`macro invocation` is matched against the
    :t:`[macro rule]s` of the resolved :t:`macro` by considering individual
@@ -649,6 +654,11 @@ invocation`.
 :dp:`fls_417hvhvj2554`
 Expansion of :t:`[function-like macro]s` proceeds as follows:
 
+#. :dp:`fls_nNrs4EC3ff5T`
+   The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
+   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   equivalent :t:`attribute` :c:`doc` representation.
+
 #. :dp:`fls_srtqkdceaz5t`
    The :s:`TokenTree` of the :t:`macro invocation` is transformed into a
    corresponding :std:`proc_macro::TokenStream`.
@@ -692,6 +702,11 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 :dp:`fls_qi5kyvj1e8th`
 Expansion of :t:`[derive macro]s` proceeds as follows:
 
+#. :dp:`fls_vqIZaEl4EKu5`
+   The :t:`item` subject to the :t:`derive macro` has all :t:`[outer block
+   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   equivalent :t:`attribute` :c:`doc` representation.
+
 #. :dp:`fls_grtiwf7q8jah`
    The :t:`item` subject to the :t:`derive macro` is transformed into a
    corresponding :std:`proc_macro::TokenStream` without the
@@ -721,6 +736,11 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
    and empty :std:`proc_macro::TokenStream` is used. This
    :std:`proc_macro::TokenStream` constitutes the first :t:`function parameter`
    of the :t:`macro implementation function`.
+
+#. :dp:`fls_AJmPrhHfZo6J`
+   The :t:`item` subject to the :t:`attribute macro` has all :t:`[outer block
+   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_mpgh22bi8caz`
    The :t:`item` subject to the :t:`attribute macro` is transformed into a

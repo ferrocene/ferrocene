@@ -1117,10 +1117,10 @@ Trait Object Types
 .. syntax::
 
    TraitObjectTypeSpecification ::=
-       $$dyn$$? TypeBoundList
+       $$dyn$$ TypeBoundList
 
    TraitObjectTypeSpecificationOneBound ::=
-       $$dyn$$? TraitBound
+       $$dyn$$ TraitBound
 
 .. rubric:: Legality Rules
 

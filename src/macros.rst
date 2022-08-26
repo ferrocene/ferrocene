@@ -830,11 +830,11 @@ A :t:`metavariable` in a :t:`macro matcher` is matched against a sequence of
   :t:`Fragment specifier` **meta** requires an :t:`attribute content`.
 
 * :dp:`fls_iorqt9q4ie9j`
-  :t:`Fragment specifier` **pat** requires a :t:`pattern-without-alternation`.
+  :t:`Fragment specifier` **pat** requires a :t:`pattern`.
 
 * :dp:`fls_2zjed913qpvi`
-  :t:`Fragment specifier` **pat_param** is the same as :t:`fragment specifier`
-  **pat**.
+  :t:`Fragment specifier` **pat_param** requires a
+  :t:`pattern-without-alternation`.
 
 * :dp:`fls_3zdts0fsa36u`
   :t:`Fragment specifier` **path** requires a :t:`type path`.

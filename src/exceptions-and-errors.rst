@@ -55,9 +55,8 @@ Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
    Control flow halts the execution of the current thread.
 
 #. :dp:`fls_xmtt04lw517w`
-   Control flow invokes the :t:`function` subject to :t:`attribute`
-   :c:`panic_handler`. The :t:`function` may choose to loop infinitely or
-   :t:`abort` the program.
+   Control flow of the current thread resumes execution by invoking the
+   :t:`function` subject to :t:`attribute` :c:`panic_handler`.
 
 .. rubric:: Undefined Behavior
 

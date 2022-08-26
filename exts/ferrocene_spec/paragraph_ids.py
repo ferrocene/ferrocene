@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from . import definitions, utils
+from . import definitions, informational, utils
 from collections import defaultdict
 from docutils import nodes
 from sphinx.environment.collectors import EnvironmentCollector
@@ -47,6 +47,7 @@ def write_paragraph_ids(app):
                 "title": title.astext(),
                 "link": app.builder.get_target_uri(docname),
                 "sections": sections_by_document[docname],
+                "informational": docname in informational.get_storage(env),
             }
         )
 

@@ -615,7 +615,12 @@ Byte String Literals
 .. rubric:: Legality Rules
 
 :dp:`fls_t63zfv5JdUhj`
-A :t:`byte string literal` is a :t:`literal` that consists of multiple :s:`[AsciiCharacter]s`.
+A :t:`byte string literal` is a :t:`literal` that consists of multiple
+:s:`[AsciiCharacter]s`.
+
+:dp:`fls_Xd6LnfzMb7t7`
+The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+(new line) inside of a :t:`byte string literal`
 
 .. _fls_msbaxfC09VkK:
 
@@ -1037,6 +1042,10 @@ String Literals
 
 :dp:`fls_7fuctvtvdi7x`
 A :t:`string literal` is a :t:`literal` that consists of multiple characters.
+
+:dp:`fls_NyiCpU2tzJlQ`
+The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+(new line) inside of a :t:`string literal`
 
 .. _fls_hucd52suu6it:
 

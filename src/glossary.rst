@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. informational-page::
+
 .. _fls_bc2qwbfibrcs:
 
 Glossary

@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. informational-page::
+
 .. _fls_kd7fcvfrwks0:
 
 Licenses

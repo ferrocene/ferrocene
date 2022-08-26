@@ -3,6 +3,8 @@
 
 .. default-domain:: spec
 
+.. informational-page::
+
 .. _fls_48qldfwwh493:
 
 General

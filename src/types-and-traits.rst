@@ -1995,6 +1995,41 @@ obtained as follows:
    #. :dp:`fls_ju4ypa5ysga0`
       Continue with the next source :t:`type`.
 
+
+.. _fls_wsfw8xF3vniL:
+
+Structural Equality
+~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_uVTpA7gbLCYX`
+A :t:`type` is :t:`structurally equal` when its :t:`values` can be compared
+for equality by structure.
+
+:dp:`fls_2DZAP6JJjJ9h`
+The following :t:`[type]s` are :t:`structurally equal`:
+
+* :dp:`fls_emcNJzl2tHSA`
+  :c:`Bool`, :c:`char`, :t:`[function pointer type]s`, :t:`[integer type]s`,
+  :c:`str`,  and :t:`[raw pointer type]s`.
+
+* :dp:`fls_HpWSAfaTA1Dz`
+  An :t:`abstract data type` if it implements the :t:`[trait]s`
+  :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq` via the use of the
+  :t:`[derive macro]s` :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
+
+* :dp:`fls_5RcnETrW6f9m`
+  :t:`[Array type]s` and :t:`[slice type]s` if the :t:`[element type]` contained
+  within is :t:`structurally equal`.
+
+* :dp:`fls_hBFlaUrrhqZ6`
+  :t:`[Tuple type]s` if the :t:`[type]s` of the :t:`[tuple field]s` are
+  :t:`structurally equal`.
+
+* :dp:`fls_jMeWhn4sNTPF`
+  :t:`[Reference type]s` if their inner :t:`type` is :t:`structurally equal`.
+
 .. _fls_lv7w7aalpwm5:
 
 Type Inference

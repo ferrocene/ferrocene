@@ -5357,6 +5357,15 @@ struct value
 :dp:`fls_YmZfW9kWlbIX`
 A :dt:`struct value` is a :t:`value` of a :t:`struct type`.
 
+.. _fls_P7920ALJisrH:
+
+structurally equal
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_glRZUKhmaWmP`
+A :t:`type` is :dt:`structurally equal` when its :t:`values` can be compared
+for equality by structure.
+
 .. _fls_feZ3iDff05Cb:
 
 subexpression

@@ -2004,29 +2004,31 @@ Structural Equality
 .. rubric:: Legality Rules
 
 :dp:`fls_uVTpA7gbLCYX`
-A :t:`structurally equal` :t:`type` can be :t:`pattern matched <pattern
-matching>` on via the use of an :t:`associated constant` or :t:`constant`.
+A :t:`type` is a :t:`structurally equal` when its :t:`values` can be compared
+for equality by structure.
 
-:dp:`fls_emcNJzl2tHSA`
-:t:`[Bool]`, :t:`Char`, :t:`[integer type]s`, :t:`str`, :t:`[function pointer
-type]s` and :t:`[raw pointer type]s` are :t:`structurally equal`.
+:dp:`fls_2DZAP6JJjJ9h`
+The following :t:`[type]s` are structurally equal:
 
-:dp:`fls_HpWSAfaTA1Dz`
-An :t:`abstract data type` is :t:`structurally equal` if it implements the
-:t:`[trait]s` :std:`core::marker::PartialEq` and `core::marker::Eq` via the use
-of the :t:`derive` attribute.
+* :dp:`fls_emcNJzl2tHSA`
+  :c:`Bool`, :c:`char`, :t:`[function pointer type]s`, :t:`[integer type]s`,
+  :c:`str`,  and :t:`[raw pointer type]s`.
 
-:dp:`fls_5RcnETrW6f9m`
-:t:`[Slice type]s` and :t:`[array type]s` are :t:`structurally equal` if the
-:t:[`element type]` contained within is :t:`structurally equal`.
+* :dp:`fls_HpWSAfaTA1Dz`
+  An :t:`abstract data type` if it implements the :t:`[trait]s`
+  :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq` via the use of the
+  :t:`[derive macro]s` :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
 
-:dp:`fls_hBFlaUrrhqZ6`
-:t:`[Tuple type]s` are :t:`structurally equal` if the inner :t:`[type]s` are
-:t:`structurally equal`.
+* :dp:`fls_5RcnETrW6f9m`
+  :t:`[Array type]s` and :t:`[slice type]s` if the :t:`[element type]` contained
+  within is :t:`structurally equal`.
 
-:dp:`fls_jMeWhn4sNTPF`
-:t:`[Reference type]s` are :t:`structurally equal` if their inner :t:`type` is
-:t:`structurally equal`.
+* :dp:`fls_hBFlaUrrhqZ6`
+  :t:`[Tuple type]s` if the :t:`[type]s` of the :t:`[tuple field]s` are
+  :t:`structurally equal`.
+
+* :dp:`fls_jMeWhn4sNTPF`
+  :t:`[Reference type]s` if their inner :t:`type` is :t:`structurally equal`.
 
 .. _fls_lv7w7aalpwm5:
 

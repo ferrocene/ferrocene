@@ -5363,8 +5363,8 @@ structurally equal
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_glRZUKhmaWmP`
-A :dt:`structurally equal` :t:`type` can be :t:`pattern matched <pattern
-matching>` on via the use of an :t:`associated constant` or :t:`constant`.
+A :dt:`type` is a :t:`structurally equal` when its :t:`values` can be compared
+for equality by structure.
 
 .. _fls_feZ3iDff05Cb:
 

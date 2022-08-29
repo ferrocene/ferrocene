@@ -1257,8 +1257,16 @@ extend exactly one :t:`line`.
 :t:`non-[comment]` :t:`construct`.
 
 :dp:`fls_ok0zvo9vcmzo`
-:t:`[Inner block doc]s`, :t:`[inner line doc]s`, :t:`[outer block doc]s`, and
-:t:`[outer line doc]s` are equivalent to  :t:`attribute` :c:`doc`.
+:t:`[Inner block doc]s` and :t:`[inner line doc]s` are equivalent to
+:t:`attribute` :c:`doc` of the form ``#![doc = content]``, where content is a
+:t:`string literal` form of the :t:`comment` without the leading ``//!``,
+``/*!`` amd trailing ``*/`` characters.
+
+:dp:`fls_nWtKuPi8Fw6v`
+:t:`[Outer block doc]s` and :t:`[outer line doc]s` are equivalent to
+:t:`attribute` :c:`doc` of the form ``#[doc = content]``, where content is a
+:t:`string literal` form of the :t:`comment` without the leading ``///``,
+``/**`` and trailing ``*/`` characters.
 
 .. rubric:: Examples
 

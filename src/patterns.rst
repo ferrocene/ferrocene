@@ -304,8 +304,14 @@ A :t:`path pattern` expressed as a :t:`path-in-expression` shall refer to either
 an :t:`associated constant`, or a :t:`constant`.
 
 :dp:`fls_t8sjzsif2ilf`
-When a :t:`path pattern` refers to a :t:`constant`, the :t:`constant` shall not
-be of a :t:`union type`.
+When a :t:`path pattern` refers to an :t:`associated constant` or a
+:t:`constant`, the :t:`associated constant` or :t:`constant` shall not be of a
+:t:`union type`.
+
+:dp:`fls_zCswsyuitexI`
+When a :t:`path pattern` refers to an :t:`associated constant` or a
+:t:`constant`, the :t:`type` of the :t:`associated constant` or :t:`constant`
+shall be :t:`structurally equal`.
 
 :dp:`fls_hF19K8sWU8FF`
 When the type of the :t:`path pattern` is of an :t:`enum type` or :t:`struct type`, then the

@@ -5363,7 +5363,7 @@ structurally equal
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_glRZUKhmaWmP`
-A :dt:`type` is a :t:`structurally equal` when its :t:`values` can be compared
+A :t:`type` is :dt:`structurally equal` when its :t:`values` can be compared
 for equality by structure.
 
 .. _fls_feZ3iDff05Cb:

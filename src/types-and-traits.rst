@@ -1996,7 +1996,7 @@ obtained as follows:
       Continue with the next source :t:`type`.
 
 
-.. _fls_emcNJzl2tHSA:
+.. _fls_wsfw8xF3vniL:
 
 Structural Equality
 ~~~~~~~~~~~~~~~~~~~
@@ -2004,11 +2004,11 @@ Structural Equality
 .. rubric:: Legality Rules
 
 :dp:`fls_uVTpA7gbLCYX`
-A :t:`type` is a :t:`structurally equal` when its :t:`values` can be compared
+A :t:`type` is :t:`structurally equal` when its :t:`values` can be compared
 for equality by structure.
 
 :dp:`fls_2DZAP6JJjJ9h`
-The following :t:`[type]s` are structurally equal:
+The following :t:`[type]s` are :t:`structurally equal`:
 
 * :dp:`fls_emcNJzl2tHSA`
   :c:`Bool`, :c:`char`, :t:`[function pointer type]s`, :t:`[integer type]s`,

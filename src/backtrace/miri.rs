@@ -102,6 +102,8 @@ unsafe fn trace_unsynchronized<F: FnMut(&super::Frame) -> bool>(mut cb: F) {
 
     for ptr in frames.iter() {
         let frame = resolve_addr(*ptr as *mut c_void);
-        cb(&super::Frame { inner: frame });
+        if !cb(&super::Frame { inner: frame }) {
+            return;
+        }
     }
 }

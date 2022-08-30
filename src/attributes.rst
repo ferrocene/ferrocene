@@ -34,7 +34,7 @@ Attributes
        SimplePath AttributeInput?
 
    AttributeInput ::=
-       DelimitedTokenTree
+       $$($$ TokenTree* $$)$$
      | $$=$$ Expression
 
    AttributeContentList ::=
@@ -866,61 +866,23 @@ Attribute ``doc``
 .. syntax::
 
    DocContent ::=
-       $$This needs to be discussed$$
+       $$doc$$ DocInput
 
-   AttributeDocInner ::=
-       $$#![doc$$ DocInnerOption? $$]$$
-
-   DocInnerOption ::=
-       $$($$ SourceOption | TestOption | UrlOption $$)$$
-
-   SourceOption ::=
-       $$html_no_source$$
-
-   TestOption ::=
-   $$test($$
-   AttrOption
-     		| NoCreateInjectOption
-   $$)$$
-
-   AttrOption ::=
-       $$attr($$ AttributeContentList $$)$$
-
-   NoCreateInjectOption ::=
-       $$no_crate_inject$$
-
-   UrlOption ::=
-       UrlKind $$=$$ StringLiteral
-
-   UrlKind ::=
-       $$html_favicon_url$$
-     | $$html_logo_url$$
-     | $$html_playground_url$$
-     | $$html_root_url$$
-     | $$issue_tracker_base_url$$
-
-   AttributeDocOuter ::=
-       $$#[doc$$ $$($$ DocOuterOption? $$)$$ $$]$$
-
-   DocOuterOption ::=
-       AliasOption
-     | $$hidden$$
-     | $$inline$$
-     | $$no_inline$$
-
-   AliasOption ::=
-       $$alias$$ $$=$$ StringLiteral
+   DocInput ::=
+       $$=$$ MacroInvocation
+     | $$=$$ StringLiteral
+     | $$($$ TokenTree* $$)$$
 
 .. rubric:: Legality Rules
 
 :dp:`fls_1ee9qjcgbwme`
-The :t:`inner attribute` version and the :t:`outer attribute` version of
-:t:`attribute` :dc:`doc` associate documentation with a :t:`construct`.
+:t:`Attribute` :dc:`doc` associates documentation with a :t:`construct`.
 
 .. rubric:: Examples
 
 :dp:`fls_necp8a7v255c`
-**???**
+
+   #![doc = "This is a doc comment written as an attribute."]
 
 .. _fls_pgp7ezcc9lh8:
 

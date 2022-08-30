@@ -1226,8 +1226,8 @@ Attribute ``no_mangle``
 .. rubric:: Legality Rules
 
 :dp:`fls_q5swm5meafmx`
-:t:`Attribute` :c:`no_mangle` shall apply to :t:`[function]s` and
-:t:`[static]s`.
+:t:`Attribute` :c:`no_mangle` has no effect on :t:`[construct]s` other than
+:t:`[function]s` and :t:`[static]s`.
 
 :dp:`fls_esaew4fqk8mm`
 :t:`Attribute` :dc:`no_mangle` indicates that the :t:`name` of the related

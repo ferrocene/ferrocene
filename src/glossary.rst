@@ -1823,6 +1823,14 @@ exported function
 :dp:`fls_QotMF1iaEYod`
 An :dt:`exported function` is an export of a :t:`function`.
 
+.. _fls_zkq5ZkJwsyoD:
+
+exported static
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_aolCSvb349ZU`
+An :dt:`exported static` is an export of a :t:`static`.
+
 .. _fls_q8ofwncggngd:
 
 expression

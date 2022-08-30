@@ -866,13 +866,12 @@ Attribute ``doc``
 .. syntax::
 
    DocContent ::=
-       $$doc$$ DocString | DocOptions
+       $$doc$$ DocInput
 
-   DocString ::=
-       $$=$$ StringLiteral | MacroInvocation
-
-   DocOptions ::=
-       $$($$ TokenTree* $$)$$
+   DocInput ::=
+       $$=$$ MacroInvocation
+     | $$=$$ StringLiteral
+     | $$($$ TokenTree* $$)$$
 
 .. rubric:: Legality Rules
 

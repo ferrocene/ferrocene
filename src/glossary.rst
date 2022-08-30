@@ -1815,6 +1815,14 @@ execution
 :dt:`Execution` is the process by which a :t:`statement` achieves its runtime
 effects.
 
+.. _fls_5oQllRM7Wjsg:
+
+exported function
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_QotMF1iaEYod`
+An :dt:`exported function` is an export of a :t:`function`.
+
 .. _fls_q8ofwncggngd:
 
 expression

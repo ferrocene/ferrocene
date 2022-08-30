@@ -239,7 +239,7 @@ external interactions:
 
 * :dp:`fls_3iekobt8qqi`
   Any result returned or :t:`panic` propagated from a :t:`main function` or an
-  exported :t:`function` to an external caller;
+  :t:`exported function` to an external caller;
 
 * :dp:`fls_qx9fxf4py0j0`
   The imported and exported :t:`[value]s` at the time of any other interaction

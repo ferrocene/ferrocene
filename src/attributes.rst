@@ -1231,11 +1231,20 @@ Attribute ``no_mangle``
 
 :dp:`fls_esaew4fqk8mm`
 :t:`Attribute` :dc:`no_mangle` indicates that the :t:`name` of the related
-:t:`entity` will be used as the symbol for that :t:`entity`.
+:t:`function` or :t:`static` will be used as the symbol for that :t:`function`
+or :t:`static`.
 
 :dp:`fls_lvnclpxbye9u`
-:t:`Attribute` :c:`no_mangle` causes the related :t:`entity` to be publicly
-exported from the produced library or object file.
+:t:`Attribute` :c:`no_mangle` causes the related :t:`function` or :t:`static` to
+be publicly exported from the produced library or object file.
+
+:dp:`fls_VKuSiswPMll7`
+An :t:`exported function` is a :t:`function` subject to :t:`attribute`
+:c:`no_mangle`.
+
+:dp:`fls_I029Rvr5BX5P`
+An :t:`exported static` is a :t:`function` subject to :t:`attribute`
+:c:`no_mangle`.
 
 .. rubric:: Examples
 

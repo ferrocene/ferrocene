@@ -33,8 +33,6 @@ jobs:
             rust: stable-i686-msvc
           - os: windows-latest
             rust: stable-x86_64-gnu
-          - os: windows-latest
-            rust: stable-i686-gnu
     steps:
     - uses: actions/checkout@v1
       with:

@@ -1243,7 +1243,7 @@ An :t:`exported function` is a :t:`function` subject to :t:`attribute`
 :c:`no_mangle`.
 
 :dp:`fls_I029Rvr5BX5P`
-An :t:`exported static` is a :t:`function` subject to :t:`attribute`
+An :t:`exported static` is a :t:`static` subject to :t:`attribute`
 :c:`no_mangle`.
 
 .. rubric:: Examples

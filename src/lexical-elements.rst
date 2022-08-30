@@ -1279,6 +1279,10 @@ extend exactly one :t:`line`.
    /* This is a stand-alone
       block comment. */
 
+   /*
+     /* This is a nested block comment */
+   */
+
    /// This outer line comment applies to commented_module.
 
    /** This outer block comment applies to commented_module,

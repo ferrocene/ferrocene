@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText:  GmbH
 
 from . import definitions, informational, syntax_directive, std_role, paragraph_ids
 from sphinx.domains import Domain

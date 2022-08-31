@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 # Convenience script to generate a list of random paragraph IDs, ready to be
 # copy-pasted as you write new paragraphs.

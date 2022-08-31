@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 from . import definitions, informational, utils
 from collections import defaultdict

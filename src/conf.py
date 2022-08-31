@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 # -- Path setup --------------------------------------------------------------
 
@@ -12,8 +12,8 @@ sys.path.insert(0, os.path.abspath("../exts"))
 # -- Project information -----------------------------------------------------
 
 project = "Ferrocene Language Specification"
-copyright = "Critical Section GmbH"
-author = "Critical Section GmbH"
+copyright = "Ferrous Systems and AdaCore"
+author = "Ferrous Systems and AdaCore"
 
 
 # -- General configuration ---------------------------------------------------

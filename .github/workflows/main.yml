@@ -242,4 +242,4 @@ jobs:
         rustup toolchain install nightly --component miri
         rustup override set nightly
         cargo miri setup
-    - run: MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-strict-provenance" cargo miri test
+    - run: MIRIFLAGS="-Zmiri-disable-isolation" cargo miri test

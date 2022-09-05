@@ -72,13 +72,6 @@ class DefRefRole(SphinxRole):
         return [DefRefNode(self.kind, self.env.docname, self.text)], []
 
 
-class Reference:
-    def __init__(self, kind, id, document):
-        self.kind = kind
-        self.id = id
-        self.document = document
-
-
 class DefinitionsCollector(EnvironmentCollector):
     def clear_doc(self, app, env, docname):
         """
@@ -93,13 +86,6 @@ class DefinitionsCollector(EnvironmentCollector):
             for item in list(storage.values()):
                 if item.document == docname:
                     del storage[item.id]
-
-            refs = get_refs_storage(env, kind)
-            removed = 0
-            for i, ref in enumerate(list(refs)):
-                if ref.document == docname:
-                    del refs[i - removed]
-                    removed += 1
 
     def merge_other(self, app, env, docnames, other):
         """
@@ -117,11 +103,6 @@ class DefinitionsCollector(EnvironmentCollector):
                 if item.document in docnames:
                     storage[item.id] = item
 
-            refs = get_refs_storage(env, kind)
-            other_refs = get_refs_storage(other, kind)
-            for ref in other_refs:
-                refs.append(ref)
-
     def process_doc(self, app, document):
         """
         Collect all the definitions and references present in the document.
@@ -138,18 +119,6 @@ class DefinitionsCollector(EnvironmentCollector):
             )
             for item in kind.collect_items_in_document(app, nodes):
                 storage[item.id] = item
-
-            refs = get_refs_storage(app.env, kind)
-            for node in document.findall(DefRefNode):
-                if node["ref_kind"] != kind.NAME:
-                    continue
-                refs.append(
-                    Reference(
-                        kind=node["ref_kind"],
-                        document=node["ref_source_doc"],
-                        id=node["ref_target"],
-                    )
-                )
 
 
 class DefinitionsTransform(SphinxTransform):
@@ -224,13 +193,6 @@ def get_storage(env, kind):
     key = f"spec_items_{kind.NAME}"
     if not hasattr(env, key):
         setattr(env, key, {})
-    return getattr(env, key)
-
-
-def get_refs_storage(env, kind):
-    key = "spec_refs_{kind.NAME}"
-    if not hasattr(env, key):
-        setattr(env, key, [])
     return getattr(env, key)
 
 

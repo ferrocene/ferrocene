@@ -12,6 +12,8 @@ import sphinx
 
 def write_paragraph_ids(app):
     env = app.env
+    informational_storage = informational.get_storage(env)
+    print(informational_storage)
 
     paragraphs_by_section = defaultdict(list)
     for paragraph in definitions.get_storage(env, definitions.paragraphs).values():
@@ -37,6 +39,9 @@ def write_paragraph_ids(app):
                 "title": section.title,
                 "link": app.builder.get_target_uri(section.document) + section.anchor,
                 "paragraphs": paragraphs_by_section[section.id],
+                "informational": (
+                    section.anchor in informational_storage[section.document]
+                ),
             }
         )
 
@@ -47,7 +52,9 @@ def write_paragraph_ids(app):
                 "title": title.astext(),
                 "link": app.builder.get_target_uri(docname),
                 "sections": sections_by_document[docname],
-                "informational": docname in informational.get_storage(env),
+                "informational": (
+                    informational.WHOLE_PAGE in informational_storage[docname]
+                ),
             }
         )
 

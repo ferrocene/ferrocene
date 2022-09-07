@@ -555,8 +555,9 @@ A :t:`value expression context` is an expression context that is not a
 :t:`place expression context`.
 
 :dp:`fls_8uhfwqurbyqf`
-The evaluation of a :t:`value expression` in a :t:`place expression context` may
-produce a :t:`temporary`.
+The evaluation of a :t:`value expression` in a :t:`place expression context`
+shall evaluate the :t:`value expression` as a :t:`temporary` and then use the
+:t:`temporary` in the :t:`place expression context`.
 
 .. _fls_h0dvogc64tfh:
 

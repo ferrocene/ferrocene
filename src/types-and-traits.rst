@@ -48,8 +48,6 @@ those :t:`[value]s`.
 Type Classification
 -------------------
 
-.. informational-section::
-
 .. rubric:: Legality Rules
 
 :dp:`fls_c4xe3pkn0n3o`
@@ -964,7 +962,7 @@ A :t:`variadic part` shall be specified only when the :t:`ABI` of the
 .. rubric:: Undefined Behavior
 
 :dp:`fls_52thmi9hnoks`
-It is a :t:`validty invariant` for a :t:`value` of a :t:`function pointer type`
+It is a :t:`safety invariant` for a :t:`value` of a :t:`function pointer type`
 to be not :c:`null`.
 
 .. rubric:: Examples

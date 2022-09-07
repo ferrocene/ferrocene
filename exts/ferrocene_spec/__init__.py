@@ -14,7 +14,8 @@ class SpecDomain(Domain):
     }
     directives = {
         "syntax": syntax_directive.SyntaxDirective,
-        "informational-page": informational.InformationalPageDirective,
+        "informational-page": informational.build_directive("page"),
+        "informational-section": informational.build_directive("section"),
     }
     object_types = definitions.get_object_types()
     indices = {}
@@ -49,4 +50,12 @@ def setup(app):
         "version": "0",
         "parallel_read_safe": True,
         "parallel_write_safe": True,
+        # The version needs to be updated whenever there is a breaking change
+        # in the data stored in the environment. Bumping the version number
+        # will ensure Sphinx will do a clean build.
+        #
+        # Version history:
+        # - 0: initial implementation
+        # - 1: changed how informational sections and pages are stored
+        "env_version": "1",
     }

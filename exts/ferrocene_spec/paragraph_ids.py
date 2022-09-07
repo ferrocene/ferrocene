@@ -13,7 +13,6 @@ import sphinx
 def write_paragraph_ids(app):
     env = app.env
     informational_storage = informational.get_storage(env)
-    print(informational_storage)
 
     paragraphs_by_section = defaultdict(list)
     for paragraph in definitions.get_storage(env, definitions.paragraphs).values():

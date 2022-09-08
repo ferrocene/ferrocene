@@ -2436,7 +2436,7 @@ Trait and Lifetime Bounds
        LifetimeIndication ($$+$$ LifetimeIndication)* $$+$$?
 
    ParenthesizedTraitBound ::=
-       $$($$ $$?$$? ForGenericParameterList? TypePath $$)$$
+       $$($$ TraitBound $$)$$
 
    TraitBound ::=
        $$?$$? ForGenericParameterList? TypePath

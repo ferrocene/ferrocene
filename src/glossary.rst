@@ -2668,6 +2668,24 @@ type` by extending its functionality.
 :dp:`fls_z4ij5skptoay`
 See :s:`Implementation`.
 
+.. _fls_41GLrzVxcOV6:
+
+implementation coherence
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_hAmKcuYT9hHi`
+A :t:`trait implementation` exhibits :dt:`implementation coherence` when it is
+valid and does not overlap with another :t:`trait implementation`.
+
+.. _fls_SBkTVa8bzGDx:
+
+implementation conformance
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Gpq4EP1SsYJR`
+A :t:`trait implementation` exhibits :dt:`implementation conformance` when it
+satisfies the constraints of its :t:`implemented trait`.
+
 .. _fls_c0xxvivt8t1u:
 
 implemented trait
@@ -3355,6 +3373,22 @@ A :dt:`literal pattern` is a :t:`pattern` that matches a :t:`literal`.
 
 :dp:`fls_o7q7wfjulc24`
 See :s:`LiteralPattern`.
+
+.. _fls_bYpBl5zfTibF:
+
+local trait
+^^^^^^^^^^^
+
+:dp:`fls_I9JaKZelMiby`
+A :dt:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
+
+.. _fls_cexgUIGUUKS4:
+
+local type
+^^^^^^^^^^
+
+:dp:`fls_HvGPB3CsN4Ah`
+A :dt:`local type` is a :t:`type` that is defined in the current :t:`crate`.
 
 .. _fls_lkxiws55xhpq:
 

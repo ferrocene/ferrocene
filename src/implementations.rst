@@ -67,14 +67,14 @@ An :t:`unsafe trait implementation` is a :t:`trait implementation` subject to
 
 :dp:`fls_47x0ep8of8wr`
 An :t:`implemented trait` is a :t:`trait` whose functionality has been
-implemented by an :t:`implementation type`.
+implemented by an :t:`implementing type`.
 
 :dp:`fls_agitlryvyc16`
 The :t:`type path` of a :t:`trait implementation` shall resolve to a :t:`trait`.
 
 :dp:`fls_mx5xjcejwa6u`
 A :t:`trait implementation` shall be an :t:`unsafe trait implementation` if and
-only if it :t:`[implement]s` an :t:`unsafe trait`.
+only if it implements an :t:`unsafe trait`.
 
 :dp:`fls_z78dg261oob6`
 :t:`[Trait implementation]s` are subject to :t:`implementation coherence` and
@@ -126,9 +126,13 @@ Implementation Coherence
 
 .. rubric:: Legality Rules
 
+:dp:`fls_fv1l4yjuut7p`
+A :t:`trait implementation` exhibits :t:`implementation coherence` when it is
+valid and does not overlap with another :t:`trait implementation`.
+
 :dp:`fls_swdusjwzgksx`
 Two :t:`[trait implementation]s` of the same :t:`implemented trait` overlap when
-the intersection of the :t:`[implemented type]s` is non-empty.
+the intersection of the :t:`[implementing type]s` is non-empty.
 
 :dp:`fls_ir7hp941ky8t`
 Given :t:`trait implementation` ``impl<P1, P2, .., PN> Trait<T1, T2, .., TN> for
@@ -147,10 +151,6 @@ T0``, the :t:`trait implementation` is considered valid when
     No :t:`type parameter` of ``P1, P2, .., PN`` that is not used in another
     :t:`type` may appear in the :t:`non-[local type]s` of ``T0, T1, .., TN``.
 
-:dp:`fls_fv1l4yjuut7p`
-A :t:`trait implementation` is coherent when it is valid and does not overlap
-with another :t:`trait implementation`.
-
 :dp:`fls_koy70k770ayu`
 A :t:`trait implementation` shall be coherent.
 
@@ -160,6 +160,10 @@ Implementation Conformance
 --------------------------
 
 .. rubric:: Legality Rules
+
+:dp:`fls_YyUSuAYG4lX6`
+A :t:`trait implementation` exhibits :t:`implementation conformance` when it
+satisfies the constraints of its :t:`implemented trait`.
 
 :dp:`fls_v31idwjau90d`
 An :t:`associated trait constant` is conformant with an :t:`associated constant`
@@ -177,9 +181,9 @@ of an :t:`implemented trait` when the :t:`[function signature]s` of both
 :t:`[function]s` are the same.
 
 * :dp:`fls_2500ivh0cc3y`
-  The :t:`signature` of the :t:`associated function` of the :t:`implemented
-  trait` is a :t:`subtype` of the :t:`signature` of the :t:`associated trait
-  function`, and
+  The :t:`function signature` of the :t:`associated function` of the
+  :t:`implemented trait` is a :t:`subtype` of the :t:`function signature` of
+  the :t:`associated trait function`, and
 
 * :dp:`fls_18gimgfy0kw9`
   The :t:`[bound]s` of the :t:`associated function` of the :t:`implemented
@@ -204,8 +208,7 @@ A :t:`trait implementation` is conformant with an :t:`implemented trait` when:
 * :dp:`fls_ldu9bmb9cy10`
   The :t:`trait implementation` has a conformant :t:`associated constant`
   for each :t:`associated constant` of the :t:`implemented trait`, unless the
-  :t:`associated constant` of the :t:`implemented trait` has a :t:`default
-  value`,
+  :t:`associated constant` of the :t:`implemented trait` has a default value,
 
 * :dp:`fls_5cr6un2gzdft`
   The :t:`trait implementation` has a conformant :t:`associated function`

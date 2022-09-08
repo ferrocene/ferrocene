@@ -8,9 +8,10 @@
 Types and Traits
 ================
 
-:dp:`fls_4rhjpdu4zfqj`
-A :t:`type` defines a set of :t:`[value]s` and a set of operations that act on
-those :t:`[value]s`.
+.. _fls_kwsBxMQNTRnL:
+
+Types
+-----
 
 .. rubric:: Syntax
 
@@ -42,6 +43,15 @@ those :t:`[value]s`.
 
    TypeAscription ::=
        $$:$$ TypeSpecification
+
+.. rubric:: Legality Rules
+
+:dp:`fls_4rhjpdu4zfqj`
+A :t:`type` defines a set of :t:`[value]s` and a set of operations that act on
+those :t:`[value]s`.
+
+:dp:`fls_0yaYKnFrJkhG`
+A :t:`local type` is a :t:`type` that is defined in the current :t:`crate`.
 
 .. _fls_963gsjp2jas2:
 
@@ -2315,6 +2325,16 @@ Traits
 
 :dp:`fls_tani6lesan9u`
 A :t:`trait` is an :t:`item` that describes an interface a :t:`type` can
+implement.
+
+:dp:`fls_0yaYKnFrJkhG`
+A :t:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
+
+:dp:`fls_I9JaKZelMiby`
+A :t:`subtrait` is a :t:`trait` with a :t:`supertrait`.
+
+:dp:`fls_CYtxPjK3zq2T`
+A :t:`supertrait` is a transitive :t:`trait` that a :t:`type` must additionally
 implement.
 
 :dp:`fls_ytn5cdonytyn`

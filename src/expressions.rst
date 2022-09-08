@@ -737,18 +737,19 @@ An :t:`async block expression` denotes a new :t:`async control flow boundary`.
 An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_ncd0wkgtldem`
-The :t:`type` of an :t:`async block expression` is an unique anonymous :t:`type`
+The :t:`type` of an :t:`async block expression` is a unique anonymous :t:`type`
 that implement the :std:`core::future::Future` trait.
 
 :dp:`fls_pvnofoomgwl5`
-The :t:`value` of an :t:`async block expression` is a :t:`future` value.
+The :t:`value` of an :t:`async block expression` is a :t:`value` of the
+:t:`async block expression`'s :t:`type`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_9ghp5yet75y6`
-The :t:`evaluation` of an :t:`async block expression` produces an anonymous
-:t:`value` of an unique anonymous :t:`type` that implements the
-:std:`core::future::Future` :t:`trait`.
+The :t:`evaluation` of an :t:`async block expression` produces a :t:`value` of
+the :t:`type` of the :t:`async block expression` that :t:`captures <capturing>`
+the :t:`[capture target]s` of the :t:`async block expression`.
 
 .. rubric:: Examples
 
@@ -2593,7 +2594,7 @@ or the :t:`repeat operand` shall be a :t:`path expression` resolving to a
 The :t:`type` of the :t:`size operand` shall be :t:`type` :c:`usize`.
 
 :dp:`fls_9gmnjvs83d8o`
-The :t:`value` of the :t:`size operand` shall be a :t:`constant expression`.
+The the :t:`size operand` shall be a :t:`constant expression`.
 
 :dp:`fls_wmsekin1gd2y`
 The :t:`type` of an :t:`array expression` is ``[T; N]``, where ``T`` is the
@@ -2689,7 +2690,8 @@ An :t:`indexed operand` is an :t:`operand` which indicates the :t:`value`
 being indexed into by an :t:`index expression`.
 
 :dp:`fls_ff3sgpldn52o`
-An :t:`indexing operand` is an :t:`operand` which specifies the index of an :t:`index expression`.
+An :t:`indexing operand` is an :t:`operand` which specifies the index of an
+:t:`index expression`.
 
 :dp:`fls_w96p9oyv5mqt`
 An :t:`index expression` is a :t:`constant expression` if the :t:`indexing
@@ -2793,10 +2795,6 @@ The :t:`value` of a :t:`tuple expression` is ``(V1, V2, ..., VN)``, where ``V1``
 is the :t:`value` of the first :t:`tuple initializer`, ``V2`` is the :t:`value`
 of the second :t:`tuple initializer`, and ``VN`` is the :t:`value` of the
 ``N``-th :t:`tuple initializer`.
-
-:dp:`fls_fgthjiu980rr`
-The :t:`value` of a :t:`tuple expression` without any :t:`[tuple initializer]s`
-is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3509,30 +3507,6 @@ An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
 :dp:`fls_phpoq9ho8f1v`
 A :t:`named loop` is a :t:`loop expression` with a :t:`label`.
 
-:dp:`fls_b314wjbv0zwe`
-The :t:`type` of a :t:`loop expression` is determined as follows:
-
-* :dp:`fls_rpedapxnv8w3`
-  If the :t:`loop expression` does not contain a :t:`break expression`, then the
-  :t:`type` is the :t:`never type`.
-
-* :dp:`fls_wf11yp1jwf53`
-  If the :t:`loop expression` contains at least one :t:`break expression`,
-  then the :t:`type` is the :t:`unified type` of the :t:`[break type]s` of all
-  :t:`[break expression]s`.
-
-:dp:`fls_q3qpcf2fz7h`
-The :t:`value` of a :t:`loop expression` is determined as follows:
-
-* :dp:`fls_2ulbzmuuny3g`
-  If the :t:`loop expression` does not contain a :t:`break expression`, then the
-  :t:`value` is the :t:`unit value`.
-
-* :dp:`fls_99imks9hj3kp`
-  If the :t:`loop expression` contains at least one :t:`break expression`, then
-  the :t:`value` is the :t:`break value` of the :t:`break expression` that broke
-  out of the :t:`loop expression`.
-
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_aw6qczl4zpko`
@@ -3561,6 +3535,12 @@ its :t:`block expression` as long as its :t:`subject expression` yields a
 :dp:`fls_fkgbin6ydkm4`
 The :t:`type` of a :t:`subject expression` shall implement the
 :std:`core::iter::IntoIterator` :t:`trait`.
+
+:dp:`fls_bmTjhKdpfgCB`
+The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
+
+:dp:`fls_FkxLf91WKiIo`
+The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3625,6 +3605,30 @@ An :t:`infinite loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`block expression` indefinitely unless :t:`terminated` with a
 :t:`break expression` or a :t:`return expression`.
 
+:dp:`fls_b314wjbv0zwe`
+The :t:`type` of a :t:`infinite loop expression` is determined as follows:
+
+* :dp:`fls_rpedapxnv8w3`
+  If the :t:`infinite loop expression` does not contain a :t:`break expression`,
+  then the :t:`type` is the :t:`never type`.
+
+* :dp:`fls_wf11yp1jwf53`
+  If the :t:`infinite loop expression` contains at least one :t:`break
+  expression`, then the :t:`type` is the :t:`unified type` of the :t:`[break
+  type]s` of all :t:`[break expression]s`.
+
+:dp:`fls_q3qpcf2fz7h`
+The :t:`value` of a :t:`infinite loop expression` is determined as follows:
+
+* :dp:`fls_2ulbzmuuny3g`
+  If the :t:`infinite loop expression` does not contain a :t:`break expression`,
+  then the :t:`value` is the :t:`unit value`.
+
+* :dp:`fls_99imks9hj3kp`
+  If the :t:`infinite loop expression` contains at least one :t:`break
+  expression`, then the :t:`value` is the :t:`break value` of the :t:`break
+  expression` that broke out of the :t:`loop expression`.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_w4tj5gofwih1`
@@ -3673,6 +3677,13 @@ of a :t:`while loop expression`.
 :dp:`fls_d7ofrq3777kq`
 The :t:`type` of an :t:`iteration expression` shall be :t:`type` :c:`bool`.
 
+:dp:`fls_P8iyTN6KZCVA`
+The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
+
+:dp:`fls_s6hRa5spz64w`
+The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
+
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_1i7hm645h7ox`
@@ -3719,6 +3730,12 @@ While Let Loops
 A :t:`while let loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`block expression` as long as its :t:`subject let expression`
 yields a :t:`value` that can be matched against its :t:`pattern`.
+
+:dp:`fls_gTfSLePwHTES`
+The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
+
+:dp:`fls_pTq4LIGIoAtN`
+The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3896,9 +3913,6 @@ A :t:`continue expression` with a :t:`label indication` is associated with a
 
 :dp:`fls_d0bmw8xiw5nk`
 The :t:`type` of a :t:`continue expression` is the :t:`never type`.
-
-:dp:`fls_b7m0h2i3mot1`
-The :t:`value` of a :t:`continue expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4424,19 +4438,11 @@ A :t:`return expression` is an :t:`expression` that optionally yields a
 :dp:`fls_5v3j5ghhw8j8`
 A :t:`return expression` shall appear within a :t:`control flow boundary`.
 
-:dp:`fls_m4e00bju2dy4`
-The :t:`type` of a :t:`return expression` is determined as follows:
-
-* :dp:`fls_xpp027s2m7ue`
-  If the :t:`return expression` has an :t:`operand`, then the :t:`type` is the
-  :t:`type` of the :t:`operand`.
-
-* :dp:`fls_cqduumpsjfut`
-  If the :t:`return expression` does not have an :t:`operand`, then the
-  :t:`type` is the :t:`never type`.
+:dp:`fls_7Ck4LMQMeQCv`
+The :t:`type` of a :t:`return expression` is the :t:`never type`.
 
 :dp:`fls_r610t5vsi7bx`
-The :t:`value` of a :t:`return expression` is determined as follows:
+The returned :t:`value` of a :t:`return expression` is determined as follows:
 
 * :dp:`fls_njndlx2rps2k`
   If the :t:`return expression` has an :t:`operand`, then the :t:`value` is the

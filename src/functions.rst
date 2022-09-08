@@ -23,7 +23,7 @@ Functions
      | (SelfParameter ($$,$$ FunctionParameter)* $$,$$?)
 
    FunctionParameter ::=
-       OuterAttributeOrDoc* (FunctionParameterPattern | TypeSpecification | $$...$$)
+       OuterAttributeOrDoc* (FunctionParameterPattern | FunctionParameterVariadicPart | TypeSpecification)
 
    FunctionParameterPattern ::=
        PatternWithoutAlternation (TypeAscription | ($$:$$ FunctionParameterVariadicPart))
@@ -48,28 +48,8 @@ Functions
 
 .. rubric:: Legality Rules
 
-:dp:`fls_yfm0jh62oaxr`
-A :t:`function` shall have a :s:`FunctionBody` unless it is an :t:`associated
-trait function` or :t:`external function`.
-
-:dp:`fls_ijbt4tgnl95n`
-A :t:`function` shall not specify a :s:`SelfParameter` unless it is an
-:t:`associated function`.
-
-:dp:`fls_icdzs1mjh0n4`
-A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
-is an :t:`external function`.
-
-:dp:`fls_ymeo93t4mz4`
-A :t:`self parameter` or a :t:`receiver` is a :t:`function parameter` expressed
-by :t:`keyword` ``self``.
-
 :dp:`fls_gn1ngtx2tp2s`
 A :t:`function` is a :t:`value` of a :t:`function type` that models a behavior.
-
-:dp:`fls_nwywh1vjt6rr`
-A :t:`function` shall not be subject to both :t:`keyword` ``async`` and
-:t:`keyword` ``const``.
 
 :dp:`fls_bdx9gnnjxru3`
 A :t:`function` declares a unique :t:`function item type` for itself.
@@ -78,10 +58,26 @@ A :t:`function` declares a unique :t:`function item type` for itself.
 A :t:`function qualifier` is a :t:`construct` that determines the role of
 a :t:`function`.
 
+:dp:`fls_nwywh1vjt6rr`
+A :t:`function` shall not be subject to both :t:`keyword` ``async`` and
+:t:`keyword` ``const``.
+
 :dp:`fls_uwuthzfgslif`
 A :t:`function parameter` is a :t:`construct` that matches an input :t:`value`
 at the site of a :t:`call expression` or a :t:`method call expression` to
 a pattern.
+
+:dp:`fls_ymeo93t4mz4`
+A :t:`self parameter` or a :t:`receiver` is a :t:`function parameter` expressed
+by :t:`keyword` ``self``.
+
+:dp:`fls_ijbt4tgnl95n`
+A :t:`function` shall not specify a :t:`self parameter` unless it is an
+:t:`associated function`.
+
+:dp:`fls_icdzs1mjh0n4`
+A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
+is an :t:`external function`.
 
 :dp:`fls_lxzinvqveuqh`
 The :t:`pattern` of a :t:`function parameter` shall be :t:`irrefutable`.
@@ -91,6 +87,10 @@ A :t:`return type` is the :t:`type` of the result a :t:`function` returns.
 
 :dp:`fls_927nfm5mkbsp`
 A :t:`function body` is the :t:`block expression` of a :t:`function`.
+
+:dp:`fls_yfm0jh62oaxr`
+A :t:`function` shall have a :t:`function body` unless it is an
+:t:`associated trait function` or :t:`external function`.
 
 :dp:`fls_bHwy8FLzEUi3`
 A :t:`function body` denotes a :t:`control flow boundary`.

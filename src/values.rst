@@ -130,9 +130,8 @@ A :t:`static` is a :t:`value` that is associated with a specific memory
 location.
 
 :dp:`fls_mt94jvoot9dx`
-A :t:`static` defined within a :t:`generic implementation` or a
-:t:`generic trait` is declared once and shared between all
-:t:`[instantiation]s`.
+A :t:`static` defined within a :t:`generic function` exists once in the
+output executable or library.
 
 :dp:`fls_k0r2c6uq29tu`
 The :t:`type specification` of a :t:`static` shall have a ``'static``

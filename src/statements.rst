@@ -72,7 +72,7 @@ determined as follows:
 
 * :dp:`fls_ppj9gvhp8wcj`
   If the :t:`let statement` lacks a :t:`type ascription`, then the :t:`type` is
-  :t:`inferred` using :t:`type inference`.
+  inferred using :t:`type inference`.
 
 :dp:`fls_m8a7gesa4oim`
 The :t:`value` of a :t:`variable` introduced by a :t:`let statement` is

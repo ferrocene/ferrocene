@@ -1227,6 +1227,18 @@ A :dt:`constant parameter` is a :t:`generic parameter` for a :t:`constant`.
 :dp:`fls_9093wziwxk1g`
 See :s:`ConstantParameter`.
 
+.. _fls_sIvXMhYaZVjD:
+
+constant parameter initializer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_OXD2YaOkfjcI`
+A :dt:`constant parameter initializer` is a :t:`construct` that provides the
+default `:t:`value` of its related :t:`constant parameter`.
+
+:dp:`fls_CMsyUCxGm8Xs`
+See :s:`ConstantParameterInitializer`.
+
 .. _fls_f95c9hrk7t2p:
 
 constant promotion
@@ -5913,6 +5925,18 @@ A :dt:`type parameter` is a :t:`generic parameter` for a :t:`type`.
 
 :dp:`fls_vquy0tsvd93x`
 See :s:`TypeParameter`.
+
+.. _fls_Fq2zTHYRpK2V:
+
+type parameter initializer
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Xpz47JLNsOXI`
+A :dt:`type parameter initializer` is a :t:`construct` that provides the
+default :t:`value` of its related :t:`type parameter`.
+
+:dp:`fls_6Ap26AcSadP8`
+See :s:`TypeParameterInitializer`.
 
 .. _fls_u1zkh2m8p92:
 

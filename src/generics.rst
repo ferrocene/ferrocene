@@ -22,19 +22,27 @@ Generic Parameters
 
    GenericParameter ::=
        OuterAttributeOrDoc* (
-           LifetimeParameter
-         | ConstantParameter
+           ConstantParameter
+         | LifetimeParameter
          | TypeParameter
        )
+
+   ConstantParameter ::=
+      $$const$$ Name TypeAscription ($$=$$ ConstantParameterInitializer)?
+
+   ConstantParameterInitializer ::=
+       BlockExpression
+     | Identifier
+     | $$-$$? LiteralExpression
 
    LifetimeParameter ::=
        Lifetime ($$:$$ LifetimeIndicationList)?
 
-   ConstantParameter ::=
-      $$const$$ Name TypeAscription
-
    TypeParameter ::=
-      Name ($$:$$ TypeBounds?)? ($$=$$ TypeSpecification)?
+       Name ($$:$$ TypeBounds?)? ($$=$$ TypeParameterInitializer)?
+
+   TypeParameterInitializer ::=
+       TypeSpecification
 
 .. rubric:: Legality Rules
 
@@ -80,6 +88,18 @@ A :t:`generic union` is a :t:`union` with :t:`[generic parameter]s`.
 :dp:`fls_vpcqgec83ybt`
 A :t:`constant parameter` is a :t:`generic parameter` for a :t:`constant`.
 
+:dp:`fls_3SjMBlc0b7qo`
+A :t:`constant parameter initializer` is a :t:`construct` that provides the
+default :t:`value` of its related :t:`constant parameter`.
+
+:dp:`fls_p4yb8EAXlRU0`
+A :t:`constant parameter initializer` shall be a :t:`constant expression`.
+
+:dp:`fls_FnMfBo5zFXJd`
+The :t:`type` of a :t:`constant parameter initializer` of a
+:t:`constant parameter` and the :t:`type` of the :t:`type ascription` of
+the :t:`constant parameter` shall be :t:`unifiable`.
+
 :dp:`fls_s0nrjwqg2wox`
 A :t:`lifetime parameter` is a :t:`generic parameter` for a :t:`lifetime`.
 
@@ -89,6 +109,14 @@ except for the ``'static`` :t:`lifetime`.
 
 :dp:`fls_95eooah0vcqx`
 A :t:`type parameter` is a :t:`generic parameter` for a :t:`type`.
+
+:dp:`fls_ahCqtkh0m5sR`
+A :t:`type parameter initializer` is a :t:`construct` that provides the
+default :t:`value` of its related :t:`type parameter`.
+
+:dp:`fls_3qZRBp9j26w3`
+The :t:`type` of the :t:`type parameter initializer` of a :t:`type parameter`
+shall satisfy the :t:`type bounds` of the :t:`type parameter`.
 
 :dp:`fls_x4s7p2v981r6`
 A :t:`generic enum` shall use all of its :t:`[type parameter]s` and
@@ -133,10 +161,11 @@ The :t:`type` of a :t:`constant parameter` shall be a :t:`scalar type`.
 A :t:`constant parameter` shall be used in the following contexts:
 
 * :dp:`fls_sh669lnc5o1b`
-  As a :t:`constant argument` in the signature and fields of an item.
+  As a :t:`constant argument` in the signature and :t:`[field]s` of an
+  :t:`item`.
 
 * :dp:`fls_h6kx8dxh5u96`
-  In the :t:`initialization expression` of an :t:`associated constant`.
+  In the :t:`constant initializer` of an :t:`associated constant`.
 
 * :dp:`fls_5r7ontjlmgwj`
   As a :t:`constant argument` of an :t:`[associated type]'s`
@@ -253,12 +282,13 @@ Generic Arguments
      | LifetimeArgument
      | TypeArgument
 
+   BindingArgument ::=
+       Identifier $$=$$ TypeSpecification
+
    ConstantArgument ::=
        BlockExpression
      | $$-$$? LiteralExpression
      | SimplePathSegment
-   BindingArgument ::=
-       Identifier $$=$$ TypeSpecification
 
    LifetimeArgument ::=
        LifetimeIndication
@@ -300,11 +330,17 @@ of an :t:`associated trait type`.
 
 :dp:`fls_al4dhmqodvwc`
 A :t:`constant argument` may only appear as a single segment :t:`path
-expression`, optionally inside a :t:`block expression`, inside of a :t:`type` or
-:t:`array repeat expression`.
+expression`, optionally encapsulated in a :t:`block expression`, within an
+:t:`array repeat expression` or a :t:`type`.
 
 :dp:`fls_ukarc98ceesz`
 :t:`[Generic argument]s` are subject to :t:`generic conformance`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_eZBsyyEOogEn`
+The :t:`evaluation` of a :t:`constant argument` evaluates its
+:t:`block expression` or :t:`literal expression`.
 
 .. rubric:: Examples
 
@@ -335,6 +371,11 @@ Generic Conformance
 
 .. rubric:: Legality Rules
 
+:dp:`fls_ltch5eivxgaa`
+A :t:`binding argument` is conformant with an :t:`associated type` when the
+supplied :t:`type` of the :t:`binding argument` fulfills the required :t:`[trait
+bound]s` of the :t:`associated type`.
+
 :dp:`fls_gb3mpt5rxjoa`
 A :t:`constant argument` is conformant with a :t:`constant parameter` when
 the :t:`[type]s` of the :t:`constant argument` and :t:`constant parameter` are
@@ -349,33 +390,59 @@ A :t:`type argument` is conformant with a :t:`type parameter` when the :t:`type`
 of the :t:`type argument` fulfills the required :t:`[trait bound]s` of the
 :t:`type parameter`.
 
-:dp:`fls_ltch5eivxgaa`
-A :t:`binding argument` is conformant with an :t:`associated type` when the
-supplied :t:`type` of the :t:`binding argument` fulfills the required :t:`[trait
-bound]s` of the :t:`associated type`.
-
 :dp:`fls_w0ozotuwtr9`
 :t:`[Generic argument]s` are conformant with :t:`[generic parameter]s` when
 
 * :dp:`fls_91bylteu35bi`
-  The :t:`[generic argument]s` consist only of conformant :t:`[constant
-  argument]s`, conformant :t:`[lifetime argument]s`, conformant :t:`[type
-  argument]s`, and conformant :t:`[binding argument]s`, and
+  The :t:`[generic argument]s` consist only of conformant
+  :t:`[binding argument]s`, conformant :t:`[constant argument]s`, conformant
+  :t:`[lifetime argument]s`, conformant :t:`[type argument]s`, and conformant
+  :t:`[binding argument]s`, and
 
 * :dp:`fls_j6xtrxc6aik`
   Any remaining :t:`[generic parameter]s` without corresponding conformant
-  :t:`[generic argument]s` are :t:`[lifetime parameter]s` with either
-  :t:`[inferred lifetime argument]s` or :t:`[elided lifetime]s`, and
+  :t:`[generic argument]s` are :t:`[constant parameter]s` with
+  :t:`[constant parameter initializer]s`, :t:`[lifetime parameter]s` with
+  either :t:`[inferred lifetime argument]s` or :t:`[elided lifetime]s`,
+  :t:`[type parameter]s` with :t:`[type parameter initializer]s`, and
 
 * :dp:`fls_us7d30cbwgpz`
   All :t:`[lifetime argument]s` come first, followed by :t:`[constant
-  argument]s` and :t:`[type argument]s` in the order as defined by the
+  argument]s` and :t:`[type argument]s` in the order defined by the
   :t:`[generic parameter]s`, followed by :t:`[binding argument]s`, and
 
 * :dp:`fls_dp3hpvf0fmr8`
-  All :t:`[lifetime argument]s`, :t:`[constant argument]s` and :t:`[type
+  All :t:`[constant argument]s`, :t:`[lifetime argument]s`, and :t:`[type
   argument]s` have a corresponding :t:`generic parameter`.
 
 :dp:`fls_mg45zcguxxg5`
 :t:`[Generic argument]s` shall be conformant.
 
+:dp:`fls_mDgq5XjzKAl3`
+The :t:`value` of a :t:`constant parameter` is determined as follows:
+
+* :dp:`fls_YufUgB25ovh3`
+  If the :t:`constant parameter` has a conformant :t:`constant argument`, then
+  the :t:`value` is that of the :t:`constant argument`.
+
+* :dp:`fls_OhVxhJ23x7W2`
+  Otherwise, if the :t:`constant parameter` has a
+  :t:`constant parameter initializer`, then the :t:`value` is that of the
+  :t:`constant parameter initializer`.
+
+* :dp:`fls_Kyar0jH9BqeW`
+  Otherwise this is a static error.
+
+:dp:`fls_sVTgsE9WwRvm`
+The :t:`value` of a :t:`type parameter` is determined as follows:
+
+* :dp:`fls_nFwbc2vX3Ar9`
+  If the :t:`type parameter` has a conformant :t:`type argument`, then the
+  :t:`value` is that of the :t:`type argument`.
+
+* :dp:`fls_MaEZ8U4uF8Hz`
+  Otherwise, if the :t:`type parameter` has a :t:`type parameter initializer`,
+  then the :t:`value` is that of the :t:`type parameter initializer`.
+
+* :dp:`fls_x98oSjktXHNN`
+  Otherwise this is a static error.

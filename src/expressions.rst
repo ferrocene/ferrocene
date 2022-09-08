@@ -2594,7 +2594,7 @@ or the :t:`repeat operand` shall be a :t:`path expression` resolving to a
 The :t:`type` of the :t:`size operand` shall be :t:`type` :c:`usize`.
 
 :dp:`fls_9gmnjvs83d8o`
-The the :t:`size operand` shall be a :t:`constant expression`.
+The :t:`size operand` shall be a :t:`constant expression`.
 
 :dp:`fls_wmsekin1gd2y`
 The :t:`type` of an :t:`array expression` is ``[T; N]``, where ``T`` is the
@@ -4442,7 +4442,7 @@ A :t:`return expression` shall appear within a :t:`control flow boundary`.
 The :t:`type` of a :t:`return expression` is the :t:`never type`.
 
 :dp:`fls_r610t5vsi7bx`
-The returned :t:`value` of a :t:`return expression` is determined as follows:
+The :t:`value` returned by a :t:`return expression` is determined as follows:
 
 * :dp:`fls_njndlx2rps2k`
   If the :t:`return expression` has an :t:`operand`, then the :t:`value` is the

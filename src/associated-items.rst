@@ -19,7 +19,7 @@ Associated Items
        VisibilityModifier? (
            ConstantDeclaration
          | FunctionDeclaration
-         | TypeDeclaration
+         | TypeAliasDeclaration
        )
 
 .. rubric:: Legality Rules

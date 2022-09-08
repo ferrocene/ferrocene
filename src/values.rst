@@ -66,8 +66,8 @@ An :t:`unnamed constant` is a :t:`constant` declared with character 0x5F (low
 line).
 
 :dp:`fls_ka4y2yd100dx`
-The :t:`type specification` of a :t:`constant` shall have a :t:`static
-lifetime`.
+The :t:`type specification` of a :t:`constant` shall have a ``'static``
+:t:`lifetime`.
 
 :dp:`fls_vt9tlkd676ql`
 The :t:`type` of a :t:`constant` shall implement the :std:`core::marker::Sized`
@@ -121,7 +121,7 @@ Statics
        $$static$$ $$mut$$? Name TypeAscription StaticInitializer? $$;$$
 
    StaticInitializer ::=
-   $$=$$ Expression
+       $$=$$ Expression
 
 .. rubric:: Legality Rules
 
@@ -130,11 +130,13 @@ A :t:`static` is a :t:`value` that is associated with a specific memory
 location.
 
 :dp:`fls_mt94jvoot9dx`
-A :t:`static` defined within a :t:`generic` is declared once and shared between
-all :t:`[instantiation]s`.
+A :t:`static` defined within a :t:`generic implementation` or a
+:t:`generic trait` is declared once and shared between all
+:t:`[instantiation]s`.
 
 :dp:`fls_k0r2c6uq29tu`
-The :t:`type specification` of a :t:`static` shall have a :t:`static lifetime`.
+The :t:`type specification` of a :t:`static` shall have a ``'static``
+:t:`lifetime`.
 
 :dp:`fls_b6ods85htuyn`
 The :t:`type` of a :t:`static` shall implement the :std:`core::marker::Sized`
@@ -181,14 +183,14 @@ All :t:`[path]s` that refer to a :t:`static` refer to the same memory location.
 A :t:`static` is not :t:`dropped` during :t:`destruction`.
 
 :dp:`fls_dowxbphqvk3n`
-A :t:`mutable static` whose :t:`type` is not :t:`interiorly mutable` may reside
-in read-only memory.
+A :t:`mutable static` whose :t:`type` is not subject to
+:t:`interior mutability` may reside in read-only memory.
 
 .. rubric:: Undefined Behavior
 
 :dp:`fls_b5wsmii7vz3v`
-It is undefined behavior to mutate an :t:`immutable static` that is not
-:t:`interiorly mutable`.
+It is undefined behavior to mutate an :t:`immutable static` whose :t:`type` is
+not subject to :t:`interior mutability`.
 
 .. rubric:: Examples
 

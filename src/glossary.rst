@@ -116,6 +116,18 @@ alignment
 The :dt:`alignment` of a :t:`value` specifies which addresses are valid for
 storing the value.
 
+.. _fls_jZKpckU1t2lR:
+
+all configuration predicate
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_IyMZWiTnkYPv`
+An :dt:`all configuration predicate` is a :t:`configuration predicate` that
+models existential quantifier ALL.
+
+:dp:`fls_0fEw9Bx8xX8q`
+See :s:`ConfigurationPredicateAll`.
+
 .. _fls_du8uevac5q7j:
 
 anonymous loop
@@ -141,6 +153,18 @@ anonymous type parameter
 :dp:`fls_brqaq0736o09`
 An :dt:`anonymous type parameter` is an :t:`impl trait type` ascribed to a
 :t:`function parameter`.
+
+.. _fls_jrzM6C5B6AMt:
+
+any configuration predicate
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_0nWHML8eoozG`
+An :dt:`any configuration predicate` is a :t:`configuration predicate` that
+models existential quantifier ANY.
+
+:dp:`fls_xhhXonDldWQY`
+See :s:`ConfigurationPredicateAny`.
 
 .. _fls_dd008npswhij:
 
@@ -835,6 +859,14 @@ A :dt:`built-in attribute` is a language-defined :t:`attribute`.
 :dp:`fls_ooq5g8zffyfb`
 See :s:`InnerBuiltinAttribute`, :s:`OuterBuiltinAttribute`.
 
+.. _fls_QzAif2NyVJbk:
+
+built-in trait
+^^^^^^^^^^^^^^
+
+:dp:`fls_IgzD9l8o6R50`
+A :dt:`built-in trait` is a language-defined :t:`trait`.
+
 .. _fls_lnwxm6ffy15w:
 
 by copy type
@@ -1153,6 +1185,18 @@ conditionally-compiled source code
 :dp:`fls_hs4lnrdxpj2g`
 :dt:`Conditionally-compiled source code` is source code that may or may not be
 considered a part of a Rust program depending on certain conditions.
+
+.. _fls_vRjPmHYEVVAf:
+
+configuration predicate
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_TyKIUQMxO9Si`
+A :dt:`configuration predicate` is a :t:`construct` that evaluates statically
+to either ``true`` or ``false``, and controls :t:`conditional compilation`.
+
+:dp:`fls_99ioki0M64fD`
+See :s:`ConfigurationPredicate`.
 
 .. _fls_yw57di94gwpf:
 
@@ -3950,6 +3994,18 @@ non-reference pattern
 A :dt:`non-reference pattern` is any :t:`pattern` except
 :t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
 and :t:`[underscore pattern]s`.
+
+.. _fls_5u8ihVDp4mdb:
+
+not configuration predicate
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_BVMlBterkFYq`
+A :dt:`not configuration predicate` is a :t:`configuration predicate` that
+negates the Boolean :t:`value` of its nested :t:`configuration predicate`.
+
+:dp:`fls_9j9AaNcv0VNA`
+See :s:`ConfigurationPredicateNot`.
 
 .. _fls_shgatqvpdqkg:
 

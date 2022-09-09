@@ -6380,7 +6380,7 @@ unsafe Rust
 ^^^^^^^^^^^
 
 :dp:`fls_30asi010yf1a`
-See :t:`unsafe operation`.
+For :dt:`unsafe Rust`, see :t:`[unsafe operation]s`.
 
 .. _fls_38ae1t48h9cb:
 

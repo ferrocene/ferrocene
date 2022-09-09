@@ -66,7 +66,7 @@ An :t:`unnamed constant` is a :t:`constant` declared with character 0x5F (low
 line).
 
 :dp:`fls_ka4y2yd100dx`
-The :t:`type specification` of a :t:`constant` shall have a ``'static``
+The :t:`type specification` of a :t:`constant` shall have ``'static``
 :t:`lifetime`.
 
 :dp:`fls_vt9tlkd676ql`
@@ -134,7 +134,7 @@ A :t:`static` defined within a :t:`generic function` exists once in the
 output executable or library.
 
 :dp:`fls_k0r2c6uq29tu`
-The :t:`type specification` of a :t:`static` shall have a ``'static``
+The :t:`type specification` of a :t:`static` shall have ``'static``
 :t:`lifetime`.
 
 :dp:`fls_b6ods85htuyn`

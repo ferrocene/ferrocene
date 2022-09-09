@@ -200,22 +200,22 @@ The following :t:`[built-in attribute]s` are :dt:`[derivation attribute]s`:
 The following :t:`[built-in attribute]s` are :dt:`[diagnostics attribute]s`:
 
 * :dp:`fls_c5n4gzgs79vv`
-  :t:`Attribute` :c:`allow`.
+  :t:`Attribute` ``allow``.
 
 * :dp:`fls_xheohvupr8kb`
-  :t:`Attribute` :c:`deny`.
+  :t:`Attribute` ``deny``.
 
 * :dp:`fls_s5z2q5pl14p4`
-  :t:`Attribute` :c:`deprecated`.
+  :t:`Attribute` ``deprecated``.
 
 * :dp:`fls_5ko0q9jnxv5a`
-  :t:`Attribute` :c:`forbid`.
+  :t:`Attribute` ``forbid``.
 
 * :dp:`fls_rgjf5ibhurda`
-  :t:`Attribute` :c:`must_use`.
+  :t:`Attribute` ``must_use``.
 
 * :dp:`fls_29y8icoou1gx`
-  :t:`Attribute` :c:`warn`.
+  :t:`Attribute` ``warn``.
 
 :dp:`fls_3fxhz0olhbcy`
 The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:
@@ -434,7 +434,7 @@ Attribute ``no_builtins``
 .. rubric:: Legality Rules
 
 :dp:`fls_x36c6j1ivbvp`
-:t:`Attribute` :c:`no_builtins` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`no_builtins` shall apply to the :t:`crate root module`.
 
 :dp:`fls_k2k10qtn6f0g`
 :t:`Attribute` :dc:`no_builtins` prevents the tool from replacing certain code
@@ -644,9 +644,10 @@ A tool is not required to implement this indication in an effective manner.
 
 :dp:`fls_y1e258p4rby5`
 When applied to an :t:`associated trait function`, :t:`attribute`
-:c:`track_caller` applies to all :t:`[implementing function]s`. If the
-:t:`associated trait function` has a :t:`default implementation`, then the
-:t:`attribute` applies to all :t:`[overriding function]s`.
+:c:`track_caller` applies to all :t:`[associated function]s` of the
+:t:`implemented trait`. If the :t:`associated trait function` has a default
+:t:`implementation`, then the :t:`attribute` applies to all overriding
+:t:`[function]s`.
 
 .. rubric:: Undefined Behavior
 
@@ -716,17 +717,29 @@ Attribute ``cfg``
 :t:`Attribute` :dc:`cfg` enables :t:`conditional compilation`.
 
 :dp:`fls_l96kyix5xsof`
-A :t:`configuration predicate` evaluates statically to either ``true`` or
-``false``.
+A :t:`configuration predicate` is a :t:`construct` that evaluates statically
+to either ``tue`` or ``false``, and controls :t:`conditional compilation`.
+
+:dp:`fls_y1MUhnKCxK6T`
+An :t:`all configuration predicate` is a :t:`configuration predicate` that
+models existential quantifier ALL.
 
 :dp:`fls_tncxxsyutppf`
 An :t:`all configuration predicate` evaluates statically to ``true`` when either
 all nested configuration predicates evaluate to ``true``, or there are no nested
 configuration predicates.
 
+:dp:`fls_Rp73YEE3aFdI`
+An :t:`any configuration predicate` is a :t:`configuration predicate` that
+models existential quantifier ANY.
+
 :dp:`fls_m0zxktz168e0`
 An :t:`any configuration predicate` evaluates statically to ``true`` when any
 nested configuration predicate evaluates to ``true``.
+
+:dp:`fls_XsxeOd32JI8x`
+A :t:`not configuration predicate` is a :t:`configuration predicate` that
+negates the Boolean :t:`value` of its nested :t:`configuration predicate`.
 
 :dp:`fls_tvsadfy9uibu`
 A :t:`not configuration predicate` evaluates statically to ``true`` when its
@@ -904,7 +917,7 @@ Attribute ``crate_name``
 .. rubric:: Legality Rules
 
 :dp:`fls_tsdk8jyajcg`
-:t:`Attribute` :c:`crate_name` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`crate_name` shall apply to the :t:`crate root module`.
 
 :dp:`fls_6riphqysh0gd`
 :t:`Attribute` :dc:`crate_name` shall specify the name of the related
@@ -940,7 +953,7 @@ Attribute ``crate_type``
 .. rubric:: Legality Rules
 
 :dp:`fls_2i2g55nqqpc1`
-:t:`Attribute` :c:`crate_type` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`crate_type` shall apply to the :t:`crate root module`.
 
 :dp:`fls_1zziddjuzjeq`
 :t:`Attribute` :dc:`crate_type` shall specify the linkage :t:`type` of the
@@ -1133,10 +1146,10 @@ Attribute ``no_link``
 .. rubric:: Legality Rules
 
 :dp:`fls_ayhn6g6sgt3h`
-:t:`Attribute` :c:`no_link` shall apply to :t:`[external crate import]s`.
+:t:`Attribute` :c:`no_link` shall apply to :t:`[crate import]s`.
 
 :dp:`fls_76ox8n3eef5`
-:t:`Attribute` :dc:`no_link` indicates that the imported :t:`external crate`
+:t:`Attribute` :dc:`no_link` indicates that the imported external :t:`crate`
 will not be linked into the resulting binary or library.
 
 .. rubric:: Examples
@@ -1161,7 +1174,7 @@ Attribute ``no_main``
 .. rubric:: Legality Rules
 
 :dp:`fls_84a9k0fzmnfk`
-:t:`Attribute` :c:`no_main` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`no_main` shall apply to the :t:`crate root module`.
 
 :dp:`fls_6qig3s3qpj0i`
 :t:`Attribute` :dc:`no_main` indicates that the symbols of the :t:`main
@@ -1234,9 +1247,11 @@ Attribute ``repr``
        PrimitiveRepresentation
      | $$C$$
      | $$transparent$$
+
    Alignment ::=
        AlignmentDecrease
      | AlignmentIncrease
+
    PrimitiveRepresentation ::=
        $$i8$$
      | $$i16$$
@@ -1250,8 +1265,10 @@ Attribute ``repr``
      | $$u64$$
      | $$u128$$
      | $$usize$$
+
    AlignmentDecrease ::=
        $$packed$$ $$($$ DecimalLiteral $$)$$
+
    AlignmentIncrease ::=
        $$align$$ $$($$ DecimalLiteral $$)$$
 
@@ -1323,7 +1340,7 @@ Attribute ``recursion_limit``
 .. rubric:: Legality Rules
 
 :dp:`fls_o55cxc67sya7`
-:t:`Attribute` :c:`recursion_limit` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`recursion_limit` shall apply to the :t:`crate root module`.
 
 :dp:`fls_o9p8fa8zhe15`
 :t:`Attribute` :dc:`recursion_limit` sets the maximum depth of :t:`macro
@@ -1350,11 +1367,13 @@ Attribute ``type_length_limit``
 .. rubric:: Legality Rules
 
 :dp:`fls_dfnkzj8ob3uq`
-:t:`Attribute` :c:`type_length_limit` shall appear at the :t:`crate level`.
+:t:`Attribute` :c:`type_length_limit` shall apply to the
+:t:`crate root module`.
 
 :dp:`fls_61vt1r8g51nh`
-:t:`Attribute` :dc:`type_length_limit` sets the maximum number of :t:`[type
-substitution]s` when constructing a :t:`concrete type`.
+:t:`Attribute` :dc:`type_length_limit` sets the maximum number of
+:t:`[generic substitution]s` for :t:`type parameters` when constructing a
+:t:`concrete type`.
 
 .. rubric:: Examples
 
@@ -1386,8 +1405,9 @@ Attribute ``macro_export``
 
 :dp:`fls_h26iw5wh4lla`
 :t:`Attribute` :dc:`macro_export` changes the :t:`visibility` of the related
-:t:`declarative macro` to :t:`public` and brings the name of the :t:`declarative
-macro` into :t:`path scope`.
+:t:`declarative macro` to :t:`public visibility` and introduces the :t:`name`
+of the :t:`declarative macro` into the :t:`scope` of the
+:t:`crate root module`.
 
 .. rubric:: Examples
 
@@ -1416,7 +1436,7 @@ Attribute ``macro_use``
 .. rubric:: Legality Rules
 
 :dp:`fls_uua0nthq9id`
-:t:`Attribute` :c:`macro_use` shall apply to :t:`[external crate import]s` and
+:t:`Attribute` :c:`macro_use` shall apply to :t:`[crate import]s` and
 :t:`[module]s`.
 
 :dp:`fls_oq4kyo5z5tj5`
@@ -1424,7 +1444,7 @@ An :s:`ImportedMacroList` enumerates macros-to-import. A macro-to-import shall
 be subject to attribute :c:`macro_export`.
 
 :dp:`fls_skexvtpbjknn`
-When applied to an :t:`external crate import`, :t:`attribute` :dc:`macro_use`
+When applied to a :t:`crate import`, :t:`attribute` :dc:`macro_use`
 imports from the related :t:`crate` either:
 
 * :dp:`fls_v03924dr0u0z`
@@ -1618,15 +1638,16 @@ Attribute ``no_implicit_prelude``
 
 :dp:`fls_tki5k5uo74gw`
 The :t:`inner attribute` version of :t:`attribute` :c:`no_implicit_prelude`
-shall apply at the :t:`crate level` or to :t:`[module]s`.
+shall apply to the :t:`crate root module` or to :t:`[module]s`.
 
 :dp:`fls_cmrqxc5oax4r`
 The :t:`outer attribute` version of :t:`attribute` :c:`no_implicit_prelude`
 shall apply to :t:`[module]s`.
 
 :dp:`fls_c7v2hbdb7g2d`
-:t:`Attribute` :dc:`no_implicit_prelude` prevents the import of the :t:`extern
-prelude`, the :t:`standard library prelude`, and the :t:`tool prelude`.
+:t:`Attribute` :dc:`no_implicit_prelude` prevents the import of the
+:t:`external prelude`, the :t:`standard library prelude`, and the
+:t:`tool prelude`.
 
 .. rubric:: Examples
 
@@ -1650,7 +1671,7 @@ Attribute ``no_std``
 .. rubric:: Legality Rules
 
 :dp:`fls_qnxihxsvkyf6`
-:t:`Attribute` :c:`no_std` shall apply at the :t:`crate level`.
+:t:`Attribute` :c:`no_std` shall apply to the :t:`crate root module`.
 
 :dp:`fls_kxav9vw59ts4`
 :t:`Attribute` :dc:`no_std` has the following effects:
@@ -1662,8 +1683,8 @@ Attribute ``no_std``
   Imports the :t:`core prelude`.
 
 * :dp:`fls_lxkd6hdboav4`
-  Imports all :t:`[exported macro]s` of the :t:`core crate` into the
-  :t:`macro_use prelude`.
+  Imports all :t:`[declarative macro]s` subject to :t:`attribute`
+  :c:`macro_export` of the ``core`` :t:`crate` into the :t:`macro_use prelude`.
 
 .. rubric:: Examples
 
@@ -1724,13 +1745,13 @@ Attribute ``panic_handler``
 following restrictions:
 
 * :dp:`fls_ncyod5gegMqL`
-  It lacks :t:`function qualifiers`,
+  It lacks :t:`[function qualifier]s`,
 
 * :dp:`fls_jzIHzPkJqVm8`
   Its :t:`ABI` is Rust,
 
 * :dp:`fls_qXii07xWRUoT`
-  It lacks :t:`generic parameters`,
+  It lacks :t:`[generic parameter]s`,
 
 * :dp:`fls_ZEjvn4mmfSct`
   It has a single :t:`function parameter` whose :t:`type` is ``&``
@@ -1771,6 +1792,7 @@ Attribute ``windows_subsystem``
 
    WindowsSubsystemContent ::=
        $$windows_subsystem$$ $$=$$ $$"$$ SubsystemKind $$"$$
+
    SubsystemKind ::=
        $$console$$
      | $$windows$$
@@ -1778,8 +1800,8 @@ Attribute ``windows_subsystem``
 .. rubric:: Legality Rules
 
 :dp:`fls_7mzjahvdzpy5`
-:t:`Attribute` :c:`windows_subsystem` shall appear at the :t:`crate level` of a
-:t:`binary crate`.
+:t:`Attribute` :c:`windows_subsystem` shall apply to the :t:`crate root module`
+of a :t:`binary crate`.
 
 :dp:`fls_t3c0t3lcnebk`
 :t:`Attribute` :dc:`windows_subsystem` specifies the subsystem on Windows.

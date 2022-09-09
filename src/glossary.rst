@@ -1227,6 +1227,18 @@ A :dt:`constant parameter` is a :t:`generic parameter` for a :t:`constant`.
 :dp:`fls_9093wziwxk1g`
 See :s:`ConstantParameter`.
 
+.. _fls_sIvXMhYaZVjD:
+
+constant parameter initializer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_OXD2YaOkfjcI`
+A :dt:`constant parameter initializer` is a :t:`construct` that provides the
+default `:t:`value` of its related :t:`constant parameter`.
+
+:dp:`fls_CMsyUCxGm8Xs`
+See :s:`ConstantParameterInitializer`.
+
 .. _fls_f95c9hrk7t2p:
 
 constant promotion
@@ -2668,6 +2680,24 @@ type` by extending its functionality.
 :dp:`fls_z4ij5skptoay`
 See :s:`Implementation`.
 
+.. _fls_41GLrzVxcOV6:
+
+implementation coherence
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_hAmKcuYT9hHi`
+A :t:`trait implementation` exhibits :dt:`implementation coherence` when it is
+valid and does not overlap with another :t:`trait implementation`.
+
+.. _fls_SBkTVa8bzGDx:
+
+implementation conformance
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Gpq4EP1SsYJR`
+A :t:`trait implementation` exhibits :dt:`implementation conformance` when it
+satisfies the constraints of its :t:`implemented trait`.
+
 .. _fls_c0xxvivt8t1u:
 
 implemented trait
@@ -3355,6 +3385,22 @@ A :dt:`literal pattern` is a :t:`pattern` that matches a :t:`literal`.
 
 :dp:`fls_o7q7wfjulc24`
 See :s:`LiteralPattern`.
+
+.. _fls_bYpBl5zfTibF:
+
+local trait
+^^^^^^^^^^^
+
+:dp:`fls_I9JaKZelMiby`
+A :dt:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
+
+.. _fls_cexgUIGUUKS4:
+
+local type
+^^^^^^^^^^
+
+:dp:`fls_HvGPB3CsN4Ah`
+A :dt:`local type` is a :t:`type` that is defined in the current :t:`crate`.
 
 .. _fls_lkxiws55xhpq:
 
@@ -5913,6 +5959,18 @@ A :dt:`type parameter` is a :t:`generic parameter` for a :t:`type`.
 
 :dp:`fls_vquy0tsvd93x`
 See :s:`TypeParameter`.
+
+.. _fls_Fq2zTHYRpK2V:
+
+type parameter initializer
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Xpz47JLNsOXI`
+A :dt:`type parameter initializer` is a :t:`construct` that provides the
+default :t:`value` of its related :t:`type parameter`.
+
+:dp:`fls_6Ap26AcSadP8`
+See :s:`TypeParameterInitializer`.
 
 .. _fls_u1zkh2m8p92:
 

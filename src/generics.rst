@@ -95,11 +95,6 @@ default :t:`value` of its related :t:`constant parameter`.
 :dp:`fls_p4yb8EAXlRU0`
 A :t:`constant parameter initializer` shall be a :t:`constant expression`.
 
-:dp:`fls_FnMfBo5zFXJd`
-The :t:`type` of a :t:`constant parameter initializer` of a
-:t:`constant parameter` and the :t:`type` of the :t:`type ascription` of
-the :t:`constant parameter` shall be :t:`unifiable`.
-
 :dp:`fls_s0nrjwqg2wox`
 A :t:`lifetime parameter` is a :t:`generic parameter` for a :t:`lifetime`.
 
@@ -335,12 +330,6 @@ expression`, optionally encapsulated in a :t:`block expression`, within an
 
 :dp:`fls_ukarc98ceesz`
 :t:`[Generic argument]s` are subject to :t:`generic conformance`.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_eZBsyyEOogEn`
-The :t:`evaluation` of a :t:`constant argument` evaluates its
-:t:`block expression` or :t:`literal expression`.
 
 .. rubric:: Examples
 

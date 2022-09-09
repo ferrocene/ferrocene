@@ -2327,7 +2327,7 @@ Traits
 A :t:`trait` is an :t:`item` that describes an interface a :t:`type` can
 implement.
 
-:dp:`fls_0yaYKnFrJkhG`
+:dp:`fls_AdbbUZZgMEsQ`
 A :t:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
 
 :dp:`fls_I9JaKZelMiby`

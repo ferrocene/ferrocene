@@ -1193,7 +1193,7 @@ configuration predicate
 
 :dp:`fls_TyKIUQMxO9Si`
 A :dt:`configuration predicate` is a :t:`construct` that evaluates statically
-to either ``tue`` or ``false``, and controls :t:`conditional compilation`.
+to either ``true`` or ``false``, and controls :t:`conditional compilation`.
 
 :dp:`fls_99ioki0M64fD`
 See :s:`ConfigurationPredicate`.

@@ -718,7 +718,7 @@ Attribute ``cfg``
 
 :dp:`fls_l96kyix5xsof`
 A :t:`configuration predicate` is a :t:`construct` that evaluates statically
-to either ``tue`` or ``false``, and controls :t:`conditional compilation`.
+to either ``true`` or ``false``, and controls :t:`conditional compilation`.
 
 :dp:`fls_y1MUhnKCxK6T`
 An :t:`all configuration predicate` is a :t:`configuration predicate` that

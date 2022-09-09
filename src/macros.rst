@@ -1,4 +1,4 @@
-.. SPDX-License-Identifier: MIT OR Apache-2.0
+ .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 .. default-domain:: spec
@@ -43,6 +43,7 @@ Declarative Macros
        $$($$ MacroRuleList $$)$$ $$;$$
      | $$[$$ MacroRuleList $$]$$ $$;$$
      | $${$$ MacroRuleList $$}$$
+
    MacroRuleList ::=
        MacroRule ($$;$$ MacroRule)* $$;$$?
 
@@ -149,37 +150,45 @@ A :t:`fragment specifier` is a :t:`construct` that indicates the :t:`type` of
 a :t:`metavariable`.
 
 :dp:`fls_8o9mcV2KrKac`
-:t:`[metavariable]s` have :t:`[fragment specifier restriction]s` on what may follow them in a :s:`MacroMatcher`:
+:t:`Fragment specifier` kinds impose the following
+:dt:`[fragment specifier restruction]s` on the :t:`[token]s` that follow them:
 
 * :dp:`fls_PxR9vNHsaFnI`
   ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
 
 * :dp:`fls_ePyoTeJJ11N0`
-  ``pat`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
+  ``pat`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or
+  ``in``.
 
 * :dp:`fls_0j7VOV4ewfeY`
-  ``path`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,
-  ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with the ``block`` :t:`fragment
-  specifier` kind.
+  ``path`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``,
+  ``>``, ``>>``, ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with
+  the ``block`` :t:`fragment specifier` kind.
 
 * :dp:`fls_80cOMpIMU2gx`
-  ``pat_param`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``, or ``in``.
+  ``pat_param`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``if``,
+  or ``in``.
 
 * :dp:`fls_DFMRwsWI8e5z`
   ``stmt`` shall only be followed by ``=>``, ``,``, or ``;``.
 
 * :dp:`fls_BoIGgrFdyhwH`
-  ``ty`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``, ``>``, ``>>``,
-  ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with the ``block`` :t:`fragment
-  specifier` kind.
+  ``ty`` shall only be followed by ``=>``, ``,``, ``=``, ``|``, ``;``, ``:``,
+  ``>``, ``>>``, ``[``, ``{``, ``as``, ``where``, or a :t:`metavariable` with
+  the ``block`` :t:`fragment specifier` kind.
 
 * :dp:`fls_NBbygZwUxjFp`
-  ``vis`` shall only be followed by ``,``, an :t:`identifier` except for ``priv``,
-  any token that may begin a :s:`TypeSpecification`, or a :t:`metavariable` with
-  the ``ident``, ``ty`` or ``block`` :t:`fragment specifier` kind.
+  ``vis`` shall only be followed by ``,``, an :t:`identifier` except for
+  ``priv``, any token that may begin a :s:`TypeSpecification`, or a
+  :t:`metavariable` with the ``ident``, ``ty`` or ``block``
+  :t:`fragment specifier` kind.
 
 * :dp:`fls_lZ8F1zUJju33`
   Any other kind may be followed by any token.
+
+:dp:`fls_ephlmLsGTMgw`
+A :t:`metavariable indication` is a :t:`construct` that indicates a
+:t:`metavariable`.
 
 .. rubric:: Examples
 
@@ -227,6 +236,10 @@ zero or multiple times during :t:`macro matching`.
 A :t:`macro repetition in transcription` allows for a syntactic pattern to be
 transcribed zero or multiple times during :t:`macro transcription`.
 
+:dp:`fls_V1WRuzZUWUGj`
+A :t:`macro repetition` is either a :t:`macro repetition in matching` or a
+:t:`macro repetition in transcription`.
+
 :dp:`fls_u86j0zm2jshf`
 A :t:`repetition operator` is a :t:`construct` that indicates the number
 of times a :t:`macro repetition in matching` or a :t:`macro repetition in
@@ -245,11 +258,11 @@ The effects of a :t:`repetition operator` are as follows:
   ``?`` - Zero or one repetition.
 
 :dp:`fls_UnfvR9NB1Nze`
-A :t:`repetition` has the following additional restrictions:
+A :t:`macro repetition` has the following additional restrictions:
 
 * :dp:`fls_Sm4qVsHKYLY2`
-  If the :t:`repetition` has a :t:`separator`, the :t:`separator` shall be
-  allowed by the :s:`MacroRepetitionMatchContent`'s
+  If the :t:`macro repetition` has a :t:`separator`, the :t:`separator` shall
+  be allowed by the :s:`MacroRepetitionMatchContent`'s
   :t:`[fragment specifier restriction]s`.
 
 * :dp:`fls_Rdvs8Dz6OUU7`
@@ -412,10 +425,11 @@ the :t:`token` stream produced from the related :s:`EnumDeclaration`,
 A :t:`derive macro` adds all its declared :t:`[derive helper attribute]s` into
 the :t:`abstract data type scope` of the :t:`abstract data type` the
 :t:`attribute` is attached to.
+IS THIS RELEVANT NOW? WHICH SCOPE?
 
 :dp:`fls_mobky5ck1mi`
-A :dt:`derive helper attribute` is an :t:`inert` :t:`attribute` that acts as a hint to
-:t:`attribute` :c:`derive`.
+A :dt:`derive helper attribute` is an :t:`inert attribute` that acts as a
+hint to :t:`attribute` :c:`derive`.
 
 .. rubric:: Examples
 
@@ -643,12 +657,13 @@ invocation`.
 
    #. :dp:`fls_y20pmwo3v3uu`
       If the :t:`macro invocation` appears as part of an :t:`associated item`,
-      an :t:`external item`, or a :t:`macro item`, the output is required to
-      constitute zero or more :t:`[item]s`.
+      an :t:`item` within an :t:`external block`, or another
+      :t:`macro invocation`, the output is required to constitute zero or more
+      :t:`[item]s`.
 
    #. :dp:`fls_t89sw6az99z7`
       If the :t:`macro invocation` appears as part of a
-      :t:`type-specification-without-bounds`, the output is required to
+      :t:`type specification` without :t:`[bound]s`, the output is required to
       constitute a :t:`type`.
 
 :dp:`fls_417hvhvj2554`
@@ -691,12 +706,13 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 
    #. :dp:`fls_vd3dzvr6re19`
       If the :t:`macro invocation` appears as part of an :t:`associated item`,
-      an :t:`external item`, or a :t:`macro item`, the output is required to
-      constitute zero or more :t:`[item]s`.
+      an :t:`item` within an :t:`external block`, or another 
+      :t:`macro invocation`, the output is required to constitute zero or more 
+      :t:`[item]s`.
 
    #. :dp:`fls_u11o90szy68s`
       If the :t:`macro invocation` appears as part of a
-      :t:`type-specification-without-bounds`, the output is required to
+      :t:`type specification` without :t:`[bound]s`, the output is required to
       constitute a :t:`type`.
 
 :dp:`fls_qi5kyvj1e8th`
@@ -763,6 +779,12 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
 
 Macro Matching
 ~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_ZmQZ8HQWv77L`
+:t:`Macro matching` is the process of performing :t:`rule matching` and
+:t:`token matching`.
 
 .. _fls_n3ktmjqf87qb:
 
@@ -972,8 +994,9 @@ transcription` shall depend on its :t:`repetition operator`, as follows:
   repetition.
 
 :dp:`fls_eacyb6jap9ru`
-A :t:`metavariable indication` that is matched inside of a repetition shall not
-be used outside of a :t:`macro repetition in transcription`.
+A :t:`metavariable indication` that is matched inside of a
+:t:`macro repetition` shall not be used outside of a
+:t:`macro repetition in transcription`.
 
 :dp:`fls_y4podc7ee8lf`
 A :t:`metavariable indication` shall be used in a :t:`macro repetition in
@@ -982,8 +1005,8 @@ appears in the :t:`macro matcher`.
 
 :dp:`fls_wbys0m4a1omg`
 A :t:`metavariable indication` within a :t:`macro repetition in transcription`
-shall repeat the same number of times in its matching :t:`repetition` if the
-:t:`repetition` occurs at the same nesting depth.
+shall repeat the same number of times in its matching :t:`macro repetition` if
+the :t:`macro repetition` occurs at the same nesting depth.
 
 :dp:`fls_g445ovedgo4q`
 Multiple transcribed :t:`[metavariable indication]s` in the same :t:`macro

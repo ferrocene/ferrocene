@@ -49,6 +49,10 @@ the criteria of the :t:`pattern`.
 :dp:`fls_mp6i4blzexnu`
 A :t:`pattern-without-alternation` is a :t:`pattern` that cannot be alternated.
 
+:dp:`fls_JJ1fJa1SsaWh`
+A :t:`pattern-without-range` is a :t:`pattern-without-alternation` that
+excludes :t:`[range pattern]s`.
+
 :dp:`fls_6xx34zr069bj`
 A :t:`subpattern` is a :t:`pattern` nested within another pattern.
 

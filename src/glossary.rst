@@ -1316,6 +1316,17 @@ A :dt:`crate import` specifies a dependency on an external :t:`crate`.
 :dp:`fls_nmdxagg39hz6`
 See :s:`ExternalCrateImport`.
 
+.. _fls_CXvNvsO10pLL:
+
+crate indiciation
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_XUSFUErxQRRA`
+A :dt:`crate indication` is a :t:`construct` that indicates a :t:`crate`.
+
+:dp:`fls_s1eFklbzjLxQ`
+See :s:`CrateIndication`.
+
 .. _fls_yf9yjzzhw0rn:
 
 crate public modifier
@@ -2956,6 +2967,15 @@ An :dt:`inner block doc` is a :t:`block comment` that applies to an enclosing
 :dp:`fls_lmpaznk198ga`
 See :s:`InnerBlockDoc`.
 
+.. _fls_vR1ucGTBKjlH:
+
+inner doc comment
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_6KunKwZf9QaF`
+An :dt:`inner doc comment` is either an :t:`inner block doc` or an
+:t:`inner line doc`.
+
 .. _fls_xgm53126q9c4:
 
 inner line doc
@@ -4019,6 +4039,15 @@ An :dt:`outer block doc` is a :t:`block comment` that applies to a subsequent
 
 :dp:`fls_ddy9a66tpytp`
 See :s:`OuterBlockDoc`.
+
+.. _fls_PuTD100sWO5N:
+
+outer doc comment
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_mgSEUNUPcPBs`
+An :dt:`outer doc comment` is either an :t:`outer block doc` or an
+:t:`outer line doc`.
 
 .. _fls_eqjbv8sovvfl:
 

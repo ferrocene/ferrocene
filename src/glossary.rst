@@ -4934,7 +4934,7 @@ self parameter
 ^^^^^^^^^^^^^^
 
 :dp:`fls_ksne48eip15`
-A :dt:`self parameter` is a :t:`function parameter` expressed by keyword
+A :dt:`self parameter` is a :t:`function parameter` expressed by :t:`keyword`
 ``self``.
 
 .. _fls_jq213cesxhyp:

@@ -1224,6 +1224,10 @@ An :t:`inner block doc` is a :t:`block comment` that applies to an enclosing
 An :t:`inner line doc` is a :t:`line comment` that applies to an enclosing
 :t:`non-[comment]` :t:`construct`.
 
+:dp:`fls_KZp0yiFLTqxb`
+An :t:`inner doc comment` is either an :t:`inner block doc` or an
+:t:`inner line doc`.
+
 :dp:`fls_63gzofa9ktic`
 An :t:`outer block doc` is a :t:`block comment` that applies to a subsequent
 :t:`non-[comment]` :t:`construct`.
@@ -1231,6 +1235,10 @@ An :t:`outer block doc` is a :t:`block comment` that applies to a subsequent
 :dp:`fls_scko7crha0um`
 An :t:`outer line doc` is a :t:`line comment` that applies to a subsequent
 :t:`non-[comment]` :t:`construct`.
+
+:dp:`fls_RYVL9KgaxKvl`
+An :t:`outer doc comment` is either an :t:`outer block doc` or an
+:t:`outer line doc`.
 
 :dp:`fls_7n6d3jx61ose`
 A :t:`doc comment` is a :t:`comment` class that includes :t:`[inner block

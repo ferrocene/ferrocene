@@ -25,6 +25,7 @@ Source Files
 
    ZeroWidthNoBreakSpace ::=
        $$\u{FEFF}$$
+
    Shebang ::=
        $$#!$$ ~[NewLine]*
 
@@ -53,7 +54,7 @@ Modules
    ModuleDeclaration ::=
        $$unsafe$$? $$mod$$ Name ModuleSpecification
 
-   ModuleSpecification =
+   ModuleSpecification ::=
        InlineModuleSpecification
      | OutlineModuleSpecification
 
@@ -63,7 +64,8 @@ Modules
          Item*
        $$}$$
 
-   OutlineModuleSpecification = $$;$$
+   OutlineModuleSpecification ::=
+       $$;$$
 
 .. rubric:: Legality Rules
 
@@ -98,7 +100,7 @@ The following :t:`[attribute]s` apply to :t:`[module]s`:
   :t:`Attribute` :c:`cfg`.
 
 * :dp:`fls_renjf86vcve0`
-  :t:`Attribute` :c:`deprecated`.
+  :t:`Attribute` ``deprecated``.
 
 * :dp:`fls_3dcjkx4c1ui1`
   :t:`Attribute` :c:`doc`.
@@ -149,7 +151,7 @@ A :t:`proc-macro crate` shall not declare :t:`[item]s` with :t:`public
 visibility` unless the :t:`item` is a :t:`procedural macro`.
 
 :dp:`fls_h93C3wfbAoz1`
-Only a :t:`proc-macro crate` shall declare :t:`[procedural macro]s`
+Only a :t:`proc-macro crate` shall declare :t:`[procedural macro]s`.
 
 .. _fls_gklst7joeo33:
 
@@ -172,11 +174,14 @@ External Crates
 :dp:`fls_d0pa807s5d5h`
 A :t:`crate import` specifies a required dependency on an external :t:`crate`.
 
+:dp:`fls_vfam3wzeAiah`
+A :t:`crate indication` is a :t:`construct` that indicates a :t:`crate`.
+
 :dp:`fls_ft860vkz0lkc`
-A :t:`crate import` binds an external :t:`crate` to its :s:`CrateIndication`.
+A :t:`crate import` binds an external :t:`crate` to its :t:`crate indication`.
 
 :dp:`fls_k90qtnf8kgu1`
-:s:`CrateIndication` ``self`` shall require a :t:`renaming`.
+:t:`Crate indication` ``self`` shall require a :t:`renaming`.
 
 :dp:`fls_siv8bl6s2ndu`
 A :t:`crate import` with a :t:`renaming` binds the external :t:`crate` to
@@ -184,12 +189,12 @@ a local :t:`name` and introduces the local :t:`name` into the enclosing
 :t:`scope`.
 
 :dp:`fls_7vz5n3x6jo1s`
-If a :t:`crate import` appears at the :t:`crate root module`, then the :t:`crate
-indication` is added to the :t:`external prelude`.
+If a :t:`crate import` appears at the :t:`crate root module`, then the
+:t:`crate indication` is added to the :t:`external prelude`.
 
 :dp:`fls_3bgpc8m8yk4p`
-A :s:`CrateIndication` shall resolve to an external :t:`crate`. The process of
-resolving a :s:`CrateIndication` to an external :t:`crate` is tool-defined.
+A :t:`crate indication` shall resolve to an external :t:`crate`. The process of
+resolving a :t:`crate indication` to an external :t:`crate` is tool-defined.
 
 :dp:`fls_bfxkmm9px6k8`
 The following :t:`[attribute]s` apply to :t:`[crate import]s`:

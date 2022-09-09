@@ -1318,8 +1318,8 @@ See :s:`ExternalCrateImport`.
 
 .. _fls_CXvNvsO10pLL:
 
-crate indiciation
-^^^^^^^^^^^^^^^^^
+crate indication
+^^^^^^^^^^^^^^^^
 
 :dp:`fls_XUSFUErxQRRA`
 A :dt:`crate indication` is a :t:`construct` that indicates a :t:`crate`.

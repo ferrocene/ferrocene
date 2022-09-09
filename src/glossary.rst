@@ -1186,7 +1186,7 @@ conditionally-compiled source code
 :dt:`Conditionally-compiled source code` is source code that may or may not be
 considered a part of a Rust program depending on certain conditions.
 
-.. fls_vRjPmHYEVVAf:
+.. _fls_vRjPmHYEVVAf:
 
 configuration predicate
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -3975,7 +3975,7 @@ A :dt:`non-reference pattern` is any :t:`pattern` except
 :t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
 and :t:`[underscore pattern]s`.
 
-.. fls_5u8ihVDp4mdb:
+.. _fls_5u8ihVDp4mdb:
 
 not configuration predicate
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1372,7 +1372,7 @@ Attribute ``type_length_limit``
 
 :dp:`fls_61vt1r8g51nh`
 :t:`Attribute` :dc:`type_length_limit` sets the maximum number of
-:t:`[generic substitution]s` for :t:`type parameters` when constructing a
+:t:`[generic substitution]s` for :t:`[type parameter]s` when constructing a
 :t:`concrete type`.
 
 .. rubric:: Examples

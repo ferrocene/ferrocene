@@ -48,6 +48,8 @@ those :t:`[value]s`.
 Type Classification
 -------------------
 
+.. informational-section::
+
 .. rubric:: Legality Rules
 
 :dp:`fls_c4xe3pkn0n3o`

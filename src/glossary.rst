@@ -486,6 +486,18 @@ attribute
 An :dt:`attribute` is a general, free-form metadatum that is interpreted based
 on its name, convention, language, and tool.
 
+.. _fls_SsMRqkHLDAgG:
+
+attribute content
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_sn0GvVmM3o38`
+An :dt:`attribute content` is a :t:`construct` that provides the content of
+an :t:`attribute`.
+
+:dp:`fls_YwyrWC8fcmRm`
+See :s:`AttributeContent`.
+
 .. _fls_x1fafbpo0mlu:
 
 attribute macro
@@ -3558,6 +3570,24 @@ that a :t:`macro` must match.
 :dp:`fls_ioyegc6ggd7o`
 See :s:`MacroMatcher`.
 
+.. _fls_ao7GhE0C8MQO:
+
+macro matching
+^^^^^^^^^^^^^^
+
+:dp:`fls_RrDmFXuZrhFT`
+:dt:`Macro matching` is the process of performing :t:`rule matching` and
+:t:`token matching`.
+
+.. _fls_kddW7EirSn0g:
+
+macro repetition
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_sDomcFWIeUAT`
+A :dt:`macro repetition` is either a :t:`macro repetition in matching` or a
+:t:`macro repetition in transcription`.
+
 .. _fls_a5j2hztrjfv5:
 
 macro repetition in matching
@@ -3697,6 +3727,18 @@ A :dt:`metavariable` is a :t:`macro match` that describes a :t:`variable`.
 
 :dp:`fls_k4xaw93z8x33`
 See :s:`MacroMetavariable`.
+
+.. _fls_5P2594jy7uDE:
+
+metavariable indication
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_r1FxbWffC9Wt`
+A :dt:`metavariable indication` is a :t:`construct` that indicates a
+:t:`metavariable`.
+
+:dp:`fls_bcMO2a0e0gXJ`
+See :s:`MacroMetavariableIndication`.
 
 .. _fls_bi3g8xkk9ekf:
 
@@ -4350,6 +4392,18 @@ A :dt:`pattern-without-alternation` is a :t:`pattern` that cannot be alternated.
 
 :dp:`fls_fmysn3eezr54`
 See :s:`PatternWithoutAlternation`.
+
+.. _fls_yeQOZKPoNzw3:
+
+pattern-without-range
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_LSEOvAwUM7g6`
+A :dt:`pattern-without-range` is a :t:`pattern-without-alternation` that
+excludes :t:`[range pattern]s`.
+
+:dp:`fls_Rj8ir4k0K811`
+See :s:`PatternWithoutRange`.
 
 .. _fls_7x6jhh0sz2f:
 

@@ -54,6 +54,10 @@ An :t:`inner attribute` is an :t:`attribute` that applies to an enclosing
 An :t:`outer attribute` is an :t:`attribute` that applies to a subsequent
 :t:`item`.
 
+:dp:`fls_9TMRVlQwAdTB`
+An :t:`attribute content` is a :t:`construct` that provides the content of
+an :t:`attribute`.
+
 .. rubric:: Examples
 
 .. code-block:: rust

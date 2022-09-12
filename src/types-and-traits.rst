@@ -2785,6 +2785,22 @@ The :t:`lifetime` of an :t:`associated implementation constant` shall not be
 :dp:`fls_xi86he5vvill`
 The :t:`lifetime` of an :t:`associated trait constant` shall not be :t:`elided`.
 
+.. rubric:: Examples
+
+:dp:`fls_2GKCEI9MwMn9`
+Given static ``S`` of the form
+
+.. code-block:: rust
+
+   static S: &[&usize] = &[];
+
+:dp:`fls_f3yZ31dRuTPG`
+its lifetime elided form is
+
+.. code-block:: rust
+
+   static S: &'static [&'static usize] = &[];
+
 .. _fls_XTBOhK2Yk4lA:
 
 Trait Object Lifetime Elision
@@ -2828,3 +2844,19 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
 
 * :dp:`fls_cglZigwAnASl`
   Otherwise it is a stic error to infer the :t:`lifetime` :t:`bound`.
+
+.. rubric:: Examples
+
+:dp:`fls_MipY2emZFF6d`
+Given static ``S`` of the form
+
+.. code-block:: rust
+
+   type T<'a> = &'a dyn Trait;
+
+:dp:`fls_YPesUZqYHVUX`
+its lifetime elided form is
+
+.. code-block:: rust
+
+   type T<'a> = &'a (dyn Trait + 'a);

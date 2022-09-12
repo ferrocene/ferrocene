@@ -357,7 +357,7 @@ of :t:`Unicode`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_juysxea25owj`
-It is a :t:`validty invariant` for a :t:`value` of :t:`type` :c:`char` to be inside
+It is a :t:`validity invariant` for a :t:`value` of :t:`type` :c:`char` to be inside
 the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive ranges of :t:`Unicode`.
 
 .. _fls_qwljwqr07slp:
@@ -974,7 +974,7 @@ A :t:`variadic part` shall be specified only when the :t:`ABI` of the
 .. rubric:: Undefined Behavior
 
 :dp:`fls_52thmi9hnoks`
-It is a :t:`validty invariant` for a :t:`value` of a :t:`function pointer type`
+It is a :t:`validity invariant` for a :t:`value` of a :t:`function pointer type`
 to be not :c:`null`.
 
 .. rubric:: Examples
@@ -1070,7 +1070,7 @@ A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy`
 .. rubric:: Undefined Behavior
 
 :dp:`fls_ezh8aq6fmdvz`
-It is :t:`validty invariant` for a :t:`value` of a :t:`reference type` to be not
+It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be not
 :c:`null`.
 
 .. rubric:: Examples

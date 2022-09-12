@@ -2685,7 +2685,7 @@ Function Lifetime Elision
 
 :dp:`fls_lAdIRCFFlydD`
 :t:`Function lifetime elision` is a form of :t:`lifetime elision` that applies
-to :t:`[function]s`, :t:`function pointer type parameter` and :t:`[path]s`
+to :t:`[function]s`, :t:`[function pointer type parameter]s` and :t:`[path]s`
 resolving to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
 :std:`core::ops::FnOnce` :t:`[trait]s`.
 
@@ -2745,14 +2745,14 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
 .. rubric:: Examples
 
 :dp:`fls_qtjc7334wzhj`
-Given function ``f`` of the form
+Given :t:`function` ``f`` of the form
 
 .. code-block:: rust
 
    fn f <'a, 'b, T: ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command;
 
 :dp:`fls_vcmmkp9uruhr`
-its lifetime elided form is
+its :t:`lifetime` :t:`elided`` form is
 
 .. code-block:: rust
 
@@ -2767,7 +2767,7 @@ Static Lifetime Elision
 
 :dp:`fls_l4RDXaFwnQZ6`
 :t:`Static lifetime elision` is a form of :t:`lifetime elision` that applies to
-:t:`[static]s` and :t:`[constant]s`.
+:t:`[constant]s` and :t:`[static]s`.
 
 :dp:`fls_8irr97rZWfSC`
 An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
@@ -2788,14 +2788,14 @@ The :t:`lifetime` of an :t:`associated trait constant` shall not be :t:`elided`.
 .. rubric:: Examples
 
 :dp:`fls_2GKCEI9MwMn9`
-Given static ``S`` of the form
+Given :t:`static` ``S`` of the form
 
 .. code-block:: rust
 
    static S: &[&usize] = &[];
 
 :dp:`fls_f3yZ31dRuTPG`
-its lifetime elided form is
+its :t:`lifetime` :t:`elided` form is
 
 .. code-block:: rust
 
@@ -2818,44 +2818,44 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
 * :dp:`fls_SHhw6lYHeYyQ`
   If the :t:`trait object type` is used as the :t:`type specification` of a
   :t:`reference type`, then the :t:`lifetime` of the :t:`reference type` is the
-  elided :t:`lifetime`,
+  :t:`elided` :t:`lifetime`,
 
 * :dp:`fls_lC2rwdPLRwaf`
   If the :t:`trait object type` is used as a :t:`generic argument` and
 
   * :dp:`fls_e36Hh4oJvfhv`
-    if the corresponding :t:`generic parameter` has exactly one :t:`lifetime`
-    :t:`bound`, then the :t:`lifetime` of that :t:`bound` is the elided
+    if the corresponding :t:`generic parameter` has exactly one :t:`lifetime
+    bound`, then the :t:`lifetime` of that :t:`bound` is the :t:`elided`
     :t:`lifetime`,
 
   * :dp:`fls_ptejalcnIQtm`
     Otherwise it is a static error to infer the :t:`lifetime` :t:`bound`.
 
 * :dp:`fls_rGbdKtTijby4`
-  If the :t:`trait` of the :t:`trait object type` has exactly one :t:`lifetime`
-  :t:`bound` specified, then the :t:`lifetime` of that :t:`bound` is the
-  inffered :t:`lifetime`,
+  If the :t:`trait` of the :t:`trait object type` has exactly one :t:`lifetime
+  bound` specified, then the :t:`lifetime` of that :t:`bound` is the inferred
+  :t:`lifetime`,
 
 * :dp:`fls_JhmQpUoExiNZ`
-  If the :t:`trait` of the :t:`trait object type` has no :t:`lifetime`
-  :t:`[bound]s` specified, then the elided :t:`lifetime` is the ``'static``
-  :t:`lifetime` unless it is elided in :t:`[expression]s` where it instead is
-  inferred,
+  If the :t:`trait` of the :t:`trait object type` has no :t:`[lifetime bound]s`
+  specified, then the :t:`elided` :t:`lifetime` is the ``'static``
+  :t:`lifetime` unless it is :t:`elided` in :t:`[expression]s` where it is
+  instead inferred,
 
 * :dp:`fls_cglZigwAnASl`
-  Otherwise it is a stic error to infer the :t:`lifetime` :t:`bound`.
+  Otherwise it is a stic error to infer the :t:`lifetime bound`.
 
 .. rubric:: Examples
 
 :dp:`fls_MipY2emZFF6d`
-Given static ``S`` of the form
+Given :t:`static` ``S`` of the form
 
 .. code-block:: rust
 
    type T<'a> = &'a dyn Trait;
 
 :dp:`fls_YPesUZqYHVUX`
-its lifetime elided form is
+its :t:`lifetime` :t:`elided` form is
 
 .. code-block:: rust
 

@@ -177,34 +177,36 @@ A :t:`type parameter` has an implicit :std:`core::marker::Sized` :t:`bound`, unl
 ``?core::marker::Sized`` bound is present.
 
 :dp:`fls_yaYedRNaxhTe`
-A :t:`type parameter` declared on an :t:`abstract data type` has implicit
-:t:`lifetime` :t:`[bound]s` depending on its usages in the :t:`abstract data
-type`'s fields as follows:
+A :t:`type parameter` of an :t:`abstract data type` has implicit
+:t:`lifetime` :t:`[bound]s` depending on its usage in the :t:`[field]s` of the
+:t:`abstract data type` as follows:
 
 * :dp:`fls_axMVssU7an8p`
-  If the :t:`type parameter` is used in a :t:`reference type` it has an implicit
-  `lifetime` :t:`bound` for the :t:`reference type`'s lifetime,
+  If the :t:`type parameter` is used in a :t:`reference type`, then the :t:`type
+  parameter` has an implicit `lifetime` :t:`bound` for the :t:`lifetime` of the
+  :t:`reference type`,
 
 * :dp:`fls_iAnCoxISuxxb`
   If the :t:`type parameter` is used as a :t:`generic argument` of an
   :t:`abstract data type`, the :t:`type parameter` inherits all the
-  :t:`lifetime` :t:`[bound]s` of the corresponding :t:`generic parameter` of the
-  :t:`generic argument`.
+  :t:`lifetime` :t:`[bound]s` from the corresponding :t:`generic parameter` of
+  the :t:`generic argument`.
 
 :dp:`fls_wUwJEGzjCUAT`
-A :t:`type parameter` declared on a :t:`function` has implicit :t:`lifetime`
+A :t:`type parameter` of a :t:`function` has implicit :t:`lifetime`
 :t:`[bound]s` depending on its usages in the :t:`[parameter]s` and :t:`return
 type` as follows:
 
 * :dp:`fls_BN5nUuvq9AwY`
-  If the :t:`type parameter` is used in a :t:`reference type` it has an implicit
-  `lifetime` :t:`bound` for the :t:`reference type`'s lifetime,
+  If the :t:`type parameter` is used in a :t:`reference type`, then the :t:`type
+  parameter` has an implicit `lifetime` :t:`bound` for the :t:`lifetime` of the
+  :t:`reference type`,
 
 * :dp:`fls_ouOm2TQKNsP3`
   If the :t:`type parameter` is used as a :t:`generic argument` of an
   :t:`abstract data type`, the :t:`type parameter` inherits all the
-  :t:`lifetime` :t:`[bound]s` of the corresponding :t:`generic parameter` of the
-  :t:`generic argument`.
+  :t:`lifetime` :t:`[bound]s` from the corresponding :t:`generic parameter` of
+  the :t:`generic argument`.
 
 :dp:`fls_m0bzw4jap6sg`
 A :t:`generic parameter` with a :t:`bound` of the form

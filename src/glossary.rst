@@ -2231,6 +2231,17 @@ function item type
 A :dt:`function item type` is a unique anonymous :t:`function type` that
 identifies a :t:`function`.
 
+.. _fls_WMaE58yv1joW:
+
+function lifetime elision
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_tZMmRHua1S8K`
+:dt:`Function lifetime elision` is a set of relaxations on the use of
+:t:`[lifetime]s` in :t:`[function]s`, :t:`function pointer type parameter` and
+:t:`[path]s` resolving to one of the :std:`core::ops::Fn`,
+:std:`core::ops::FnMut`, and :std:`core::ops::FnOnce` :t:`[trait]s`.
+
 .. _fls_xn800gcjnln1:
 
 function parameter

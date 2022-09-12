@@ -162,8 +162,8 @@ macro_rules! ffi {
         ffi!($($rest)*);
     );
 
-    (extern "system" { $(pub fn $name:ident($($args:tt)*) -> $ret:ty;)* } $($rest:tt)*) => (
-        extern "system" {
+    ($(#[$meta:meta])* extern "system" { $(pub fn $name:ident($($args:tt)*) -> $ret:ty;)* } $($rest:tt)*) => (
+        $(#[$meta])* extern "system" {
             $(pub fn $name($($args)*) -> $ret;)*
         }
 
@@ -371,6 +371,7 @@ ffi! {
     pub type LPCVOID = *const c_void;
     pub type LPMODULEENTRY32W = *mut MODULEENTRY32W;
 
+    #[link(name = "kernel32")]
     extern "system" {
         pub fn GetCurrentProcess() -> HANDLE;
         pub fn GetCurrentThread() -> HANDLE;
@@ -438,6 +439,7 @@ ffi! {
 
 #[cfg(target_pointer_width = "64")]
 ffi! {
+    #[link(name = "kernel32")]
     extern "system" {
         pub fn RtlLookupFunctionEntry(
             ControlPc: DWORD64,

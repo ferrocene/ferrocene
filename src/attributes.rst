@@ -864,6 +864,8 @@ automatically implemented for struct ``S<T>`` as follows:
 Diagnostics Attributes
 ~~~~~~~~~~~~~~~~~~~~~~
 
+.. informational-section::
+
 :dp:`fls_ghumzt9ybtit`
 Diagnostic :t:`[attribute]s` are related to linting, and are not defined in
 this document.

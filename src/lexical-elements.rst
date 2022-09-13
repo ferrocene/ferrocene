@@ -8,6 +8,8 @@
 Lexical Elements
 ================
 
+.. informational-section::
+
 :dp:`fls_pqwpf87b84tr`
 The text of a Rust program consists of :t:`[module]s` organized into :t:`[source
 file]s`. The text of a :t:`source file` is a sequence of :t:`[lexical

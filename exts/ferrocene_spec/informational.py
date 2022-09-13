@@ -71,7 +71,14 @@ class InformationalPagesCollector(EnvironmentCollector):
             warn("informational-section must be inside a section", node)
             return
 
-        _id, anchor = utils.section_id_and_anchor(node.parent)
+        try:
+            _id, anchor = utils.section_id_and_anchor(node.parent)
+        except utils.NoSectionIdError:
+            warn(
+                "informational-section must be inside a section with an ID "
+                "starting with fls_"
+            )
+            return
         storage[app.env.docname].add(anchor)
 
 

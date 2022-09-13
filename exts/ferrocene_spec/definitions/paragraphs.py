@@ -5,6 +5,7 @@ from .. import utils
 from collections import defaultdict
 from docutils import nodes
 import hashlib
+import sphinx
 
 
 ROLE = "p"
@@ -49,7 +50,16 @@ def collect_items_in_document(app, nodes_to_collect):
         if section_node is None:
             raise RuntimeError(f"could not find section for {node!r}")
 
-        section_id, section_anchor = utils.section_id_and_anchor(section_node)
+        try:
+            section_id, section_anchor = utils.section_id_and_anchor(section_node)
+        except utils.NoSectionIdError:
+            logger = sphinx.util.logging.getLogger(__name__)
+            logger.warn(
+                "paragraph inside a section tha doesn't have an id starting with fls_",
+                location=node,
+            )
+            return
+
         yield Paragraph(
             id=node["def_id"],
             document=app.env.docname,

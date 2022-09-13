@@ -55,7 +55,7 @@ def collect_items_in_document(app, nodes_to_collect):
         except utils.NoSectionIdError:
             logger = sphinx.util.logging.getLogger(__name__)
             logger.warn(
-                "paragraph inside a section tha doesn't have an id starting with fls_",
+                "paragraph inside a section that doesn't have an id starting with fls_",
                 location=node,
             )
             return

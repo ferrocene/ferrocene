@@ -1148,6 +1148,9 @@ The first :t:`trait bound` of a :t:`trait object type` shall denote an
 :dp:`fls_s0oy2c8t4yz9`
 A :t:`trait object type` shall not contain :t:`[opt-out trait bound]s`.
 
+:dp:`fls_CcoUug6b9ohU`
+A :t:`trait object type` shall contain at most one :t:`lifetime bound`.
+
 :dp:`fls_88b9bmhra55f`
 A :t:`trait object type` is a :t:`dynamically sized type`. A :t:`trait object
 type` permits late binding of :t:`[method]s`. A :t:`method` invoked via a
@@ -2673,6 +2676,19 @@ Lifetime Elision
 :dp:`fls_9wtuclhm7yz5`
 :t:`Lifetime elision` is a set of relaxations on the use of :t:`[lifetime]s`.
 
+.. _fls_HEtHxXBcg7JA:
+
+Function Lifetime Elision
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Legality Rules
+
+:dp:`fls_lAdIRCFFlydD`
+:t:`Function lifetime elision` is a form of :t:`lifetime elision` that applies
+to :t:`[function]s`, :t:`[function pointer type parameter]s` and :t:`[path]s`
+resolving to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
+:std:`core::ops::FnOnce` :t:`[trait]s`.
+
 :dp:`fls_dpudys82dhdc`
 An :dt:`input lifetime` is one of the following :t:`[lifetime]s`:
 
@@ -2726,6 +2742,42 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
 #. :dp:`fls_ac9tdlfwp5et`
    Otherwise this is a static error.
 
+.. rubric:: Examples
+
+:dp:`fls_qtjc7334wzhj`
+Given :t:`function` ``f`` of the form
+
+.. code-block:: rust
+
+   fn f <'a, 'b, T: ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command;
+
+:dp:`fls_vcmmkp9uruhr`
+its :t:`lifetime` :t:`elided`` form is
+
+.. code-block:: rust
+
+   fn f <T: ToCStr>(&mut self, args: &[T]) -> &mut Command;
+
+.. _fls_u5lQkU2rS6uV:
+
+Static Lifetime Elision
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Legality Rules
+
+:dp:`fls_l4RDXaFwnQZ6`
+:t:`Static lifetime elision` is a form of :t:`lifetime elision` that applies to
+:t:`[constant]s` and :t:`[static]s`.
+
+:dp:`fls_8irr97rZWfSC`
+An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
+:t:`type specification` of a :t:`constant` or :t:`static` is inferred to be the
+``'static'`` lifetime.
+
+:dp:`fls_VynJanlhsF8e`
+If :t:`function lifetime elision` is applicable for a :t:`lifetime`, :t:`static
+lifetime elision` is not applied for that :t:`lifetime`.
+
 :dp:`fls_37udexenqv3p`
 The :t:`lifetime` of an :t:`associated implementation constant` shall not be
 :t:`elided`.
@@ -2735,17 +2787,76 @@ The :t:`lifetime` of an :t:`associated trait constant` shall not be :t:`elided`.
 
 .. rubric:: Examples
 
-:dp:`fls_qtjc7334wzhj`
-Given function ``f`` of the form
+:dp:`fls_2GKCEI9MwMn9`
+Given :t:`static` ``S`` of the form
 
 .. code-block:: rust
 
-   fn f <'a, 'b, T: ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command;
+   static S: &[&usize] = &[];
 
-:dp:`fls_vcmmkp9uruhr`
-its lifetime elided form is
+:dp:`fls_f3yZ31dRuTPG`
+its :t:`lifetime` :t:`elided` form is
 
 .. code-block:: rust
 
-   fn f <T: ToCStr>(&mut self, args: &[T]) -> &mut Command;
+   static S: &'static [&'static usize] = &[];
 
+.. _fls_XTBOhK2Yk4lA:
+
+Trait Object Lifetime Elision
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Legality Rules
+
+:dp:`fls_fuBYWRrgxlbQ`
+:t:`Trait object lifetime elision` is a form of :t:`lifetime elision` that
+applies to :t:`[trait object type]s`.
+
+:dp:`fls_URl9CeIVsiWs`
+An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
+
+* :dp:`fls_SHhw6lYHeYyQ`
+  If the :t:`trait object type` is used as the :t:`type specification` of a
+  :t:`reference type`, then the :t:`lifetime` of the :t:`reference type` is the
+  :t:`elided` :t:`lifetime`,
+
+* :dp:`fls_lC2rwdPLRwaf`
+  If the :t:`trait object type` is used as a :t:`generic argument` and
+
+  * :dp:`fls_e36Hh4oJvfhv`
+    if the corresponding :t:`generic parameter` has exactly one :t:`lifetime
+    bound`, then the :t:`lifetime` of that :t:`bound` is the :t:`elided`
+    :t:`lifetime`,
+
+  * :dp:`fls_ptejalcnIQtm`
+    Otherwise it is a static error to infer the :t:`lifetime` :t:`bound`.
+
+* :dp:`fls_rGbdKtTijby4`
+  If the :t:`trait` of the :t:`trait object type` has exactly one :t:`lifetime
+  bound` specified, then the :t:`lifetime` of that :t:`bound` is the inferred
+  :t:`lifetime`,
+
+* :dp:`fls_JhmQpUoExiNZ`
+  If the :t:`trait` of the :t:`trait object type` has no :t:`[lifetime bound]s`
+  specified, then the :t:`elided` :t:`lifetime` is the ``'static``
+  :t:`lifetime` unless it is :t:`elided` in :t:`[expression]s` where it is
+  instead inferred,
+
+* :dp:`fls_cglZigwAnASl`
+  Otherwise it is a stic error to infer the :t:`lifetime bound`.
+
+.. rubric:: Examples
+
+:dp:`fls_MipY2emZFF6d`
+Given :t:`static` ``S`` of the form
+
+.. code-block:: rust
+
+   type T<'a> = &'a dyn Trait;
+
+:dp:`fls_YPesUZqYHVUX`
+its :t:`lifetime` :t:`elided` form is
+
+.. code-block:: rust
+
+   type T<'a> = &'a (dyn Trait + 'a);

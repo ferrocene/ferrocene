@@ -2243,6 +2243,17 @@ function item type
 A :dt:`function item type` is a unique anonymous :t:`function type` that
 identifies a :t:`function`.
 
+.. _fls_WMaE58yv1joW:
+
+function lifetime elision
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_tZMmRHua1S8K`
+:dt:`Function lifetime elision` is a form of :t:`lifetime elision` that applies
+to :t:`[function]s`, :t:`[function pointer type parameter]s` and :t:`[path]s`
+resolving to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
+:std:`core::ops::FnOnce` :t:`[trait]s`.
+
 .. _fls_xn800gcjnln1:
 
 function parameter
@@ -5466,6 +5477,15 @@ its related :t:`static`.
 :dp:`fls_igbl5uv0dlhl`
 See :s:`StaticInitializer`.
 
+.. _fls_jCqiKgW9g8n5:
+
+static lifetime elision
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_NbVewjYRnQPF`
+:dt:`Static lifetime elision` is a form of :t:`lifetime elision` that applies to
+:t:`[constant]s` and :t:`[static]s`.
+
 .. _fls_1ricdj86o457:
 
 str
@@ -5839,6 +5859,15 @@ specified by a :t:`trait`.
 
 :dp:`fls_rytylyyxh27f`
 See :s:`TraitImplementation`.
+
+.. _fls_TCIzYoMeGtub:
+
+trait object lifetime elision
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rALP9b6qjlp9`
+:dt:`Trait object lifetime elision` is a form of :t:`lifetime elision` that
+applies to :t:`[trait object type]s`.
 
 .. _fls_7qtbro7ipndr:
 

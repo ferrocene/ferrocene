@@ -13,12 +13,20 @@ import venv
 import sys
 
 
-def build_docs(root, env, builder, clear, serve):
+def build_docs(root, env, builder, clear, serve, debug):
     dest = root / "build"
 
     args = ["-b", builder, "-d", dest / "doctrees"]
-    # Enable parallel builds:
-    args += ["-j", "auto"]
+    if debug:
+        # Disable parallel builds and show exceptions in debug mode.
+        #
+        # We can't show exceptions in parallel mode because in parallel mode
+        # all exceptions will be swallowed up by Python's multiprocessing.
+        # That's also why we don't show exceptions outside of debug mode.
+        args += ["-j", "1", "-T"]
+    else:
+        # Enable parallel builds:
+        args += ["-j", "auto"]
     if clear:
         args.append("-E")
     if serve:
@@ -41,7 +49,10 @@ def build_docs(root, env, builder, clear, serve):
             ],
             check=True,
         )
-    except (KeyboardInterrupt, subprocess.CalledProcessError):
+    except KeyboardInterrupt:
+        exit(1)
+    except subprocess.CalledProcessError:
+        print("\nhint: if you see an exception, pass --debug to see the full traceback")
         exit(1)
 
     return dest / builder
@@ -149,13 +160,18 @@ if __name__ == "__main__":
     group.add_argument(
         "--xml", help="Generate Sphinx XML rather than HTML", action="store_true"
     )
+    group.add_argument(
+        "--debug",
+        help="Debug mode for the extensions, showing exceptions",
+        action="store_true",
+    )
     args = parser.parse_args()
 
     root = Path(__file__).parent.resolve()
 
     env = VirtualEnv(root, root / ".venv")
     rendered = build_docs(
-        root, env, "xml" if args.xml else "html", args.clear, args.serve
+        root, env, "xml" if args.xml else "html", args.clear, args.serve, args.debug
     )
 
     if args.check_links:

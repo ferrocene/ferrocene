@@ -2366,6 +2366,15 @@ type` or a :t:`generic parameter`.
 :dp:`fls_8bvdmdgbu17l`
 See :s:`GenericArgumentList`.
 
+.. _fls_3uFg0NK5fYQ6:
+
+generic conformance
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_PfvELNsNySLT`
+:dt:`Generic conformance` measures the compatibility between a set of
+:t:`[generic parameter]s` and a set of :t:`[generic argument]s`.
+
 .. _fls_3tj3i83eoi36:
 
 generic enum
@@ -6748,6 +6757,19 @@ A :dt:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
 
 :dp:`fls_k32hnug33eo9`
 See :s:`WhereClause`.
+
+.. _fls_myNeYCm4VI0R:
+
+where clause predicate
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_0LACQVmZpDQF`
+A :dt:`where clause predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` on :t:`[lifetime parameter]s` as well as
+:t:`[lifetime bound]s` and :t:`[trait bound]s` on :t:`[type]s`.
+
+:dp:`fls_Jk7V1SOKE4Gm`
+See :s:`WhereClausePredicate`.
 
 .. _fls_8hcsablipi17:
 

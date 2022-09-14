@@ -39,7 +39,7 @@ Generic Parameters
        Lifetime ($$:$$ LifetimeIndicationList)?
 
    TypeParameter ::=
-       Name ($$:$$ TypeBounds?)? ($$=$$ TypeParameterInitializer)?
+       Name ($$:$$ TypeBoundList?)? ($$=$$ TypeParameterInitializer)?
 
    TypeParameterInitializer ::=
        TypeSpecification
@@ -48,20 +48,20 @@ Generic Parameters
 
 :dp:`fls_sye3d17l9bf5`
 A :t:`generic parameter` is a placeholder for a :t:`constant`, a :t:`lifetime`,
-or a :t:`type` whose :t:`value` is supplied statically by a :t:`generic
-argument`.
+or a :t:`type` whose :t:`value` is supplied statically by a
+:t:`generic argument`.
 
 :dp:`fls_4a2qshaf5se7`
-It is a static error to use a :t:`generic parameter` in the :t:`discriminant
-initializer` of an :t:`enum variant`.
+It is a static error to use a :t:`generic parameter` in the
+:t:`discriminant initializer` of an :t:`enum variant`.
 
 :dp:`fls_dalqke3rznrb`
 All :s:`[LifetimeParameter]s` in a :s:`GenericParameterList` shall precede all
 :s:`[ConstantParameter]s` and :s:`[TypeParameter]s`.
 
 :dp:`fls_gw8gutq2215z`
-A :s:`LifetimeParameterList` shall be terminated by character 0x2C (comma) when
-followed by a :s:`ConstantOrTypeParameterList`.
+A sequence of :s:`[LifetimeParameter]s` shall be terminated by character
+0x2C (comma) when followed by a :s:`ConstantParameter` or a :s:`TypeParameter`.
 
 :dp:`fls_pi6eukz7kc99`
 A :t:`generic enum` is an :t:`enum` with :t:`[generic parameter]s`.
@@ -70,8 +70,8 @@ A :t:`generic enum` is an :t:`enum` with :t:`[generic parameter]s`.
 A :t:`generic function` is a :t:`function` with :t:`[generic parameter]s`.
 
 :dp:`fls_z311nxou9yi3`
-A :t:`generic implementation` is an :t:`implementation` with :t:`[generic
-parameter]s`.
+A :t:`generic implementation` is an :t:`implementation` with
+:t:`[generic parameter]s`.
 
 :dp:`fls_wmcp0n36jlbr`
 A :t:`generic struct` is a :t:`struct` with :t:`[generic parameter]s`.
@@ -111,12 +111,12 @@ default :t:`value` of its related :t:`type parameter`.
 
 :dp:`fls_3qZRBp9j26w3`
 The :t:`type` of the :t:`type parameter initializer` of a :t:`type parameter`
-shall satisfy the :t:`type bounds` of the :t:`type parameter`.
+shall satisfy the :t:`[type bound]s` of the :t:`type parameter`.
 
 :dp:`fls_x4s7p2v981r6`
 A :t:`generic enum` shall use all of its :t:`[type parameter]s` and
-:t:`[lifetime parameter]s` at least once in at least one of its :t:`[enum
-variant]s`.
+:t:`[lifetime parameter]s` at least once in at least one of its
+:t:`[enum variant]s`.
 
 :dp:`fls_jzfk9fspzqja`
 A :t:`generic struct` shall use all of its :t:`[type parameter]s` and
@@ -127,7 +127,7 @@ A :t:`generic union` shall use all of its :t:`[type parameter]s` and
 :t:`[lifetime parameter]s` at least once in at least one of its :t:`[field]s`.
 
 :dp:`fls_hyi2jnp38v1n`
-A :t:`generic parameter` is said to :t:`constrain` an :t:`implementation` if the
+A :t:`generic parameter` is said to constrain an :t:`implementation` if the
 :t:`generic parameter` appears at least once in one of the following:
 
 * :dp:`fls_62b59qvom3nm`
@@ -138,15 +138,15 @@ A :t:`generic parameter` is said to :t:`constrain` an :t:`implementation` if the
 
 * :dp:`fls_sseo6u6pbcki`
   As a :t:`binding argument` in the :t:`[bound]s` of a :t:`type` that contains
-  another :t:`generic parameter` that :t:`[constrain]s` the :t:`implementation`.
+  another :t:`generic parameter` that constrains the :t:`implementation`.
 
 :dp:`fls_ua3w16qo9o4`
 It is a static error if a :t:`type parameter` or :t:`constant parameter` of an
-:t:`implementation` does not :t:`constrain` the :t:`implementation`.
+:t:`implementation` does not constrain the :t:`implementation`.
 
 :dp:`fls_w9ol06mldwb`
 It is a static error if a :t:`lifetime parameter` of an :t:`implementation`
-is used in an :t:`associated type` without :t:`[constrain]ing` the
+is used in an :t:`associated type` without constraining the
 :t:`implementation`.
 
 :dp:`fls_g2pfrqhmeys8`
@@ -173,39 +173,39 @@ A :t:`constant parameter` shall be used in the following contexts:
   As a :t:`value` of any :t:`expression` within a :t:`function body`.
 
 :dp:`fls_hidfwkwr2r73`
-A :t:`type parameter` has an implicit :std:`core::marker::Sized` :t:`bound`, unless a
-``?core::marker::Sized`` bound is present.
+A :t:`type parameter` has an implicit :std:`core::marker::Sized` :t:`bound`,
+unless a ``?core::marker::Sized`` bound is present.
 
 :dp:`fls_yaYedRNaxhTe`
 A :t:`type parameter` of an :t:`abstract data type` has implicit
-:t:`lifetime` :t:`[bound]s` depending on its usage in the :t:`[field]s` of the
+:t:`[lifetime bound]s` depending on its usage in the :t:`[field]s` of the
 :t:`abstract data type` as follows:
 
 * :dp:`fls_axMVssU7an8p`
-  If the :t:`type parameter` is used in a :t:`reference type`, then the :t:`type
-  parameter` has an implicit `lifetime` :t:`bound` for the :t:`lifetime` of the
-  :t:`reference type`,
+  If the :t:`type parameter` is used in a :t:`reference type`, then the
+  :t:`type parameter` has an implicit :t:`lifetime bound` for the
+  :t:`lifetime` of the :t:`reference type`,
 
 * :dp:`fls_iAnCoxISuxxb`
   If the :t:`type parameter` is used as a :t:`generic argument` of an
   :t:`abstract data type`, the :t:`type parameter` inherits all the
-  :t:`lifetime` :t:`[bound]s` from the corresponding :t:`generic parameter` of
+  :t:`[lifetime bound]s` from the corresponding :t:`generic parameter` of
   the :t:`generic argument`.
 
 :dp:`fls_wUwJEGzjCUAT`
-A :t:`type parameter` of a :t:`function` has implicit :t:`lifetime`
-:t:`[bound]s` depending on its usages in the :t:`[parameter]s` and :t:`return
-type` as follows:
+A :t:`type parameter` of a :t:`function` has implicit :t:`[lifetime bound]s`
+depending on its usages in the :t:`[function parameter]s` and :t:`return type`
+as follows:
 
 * :dp:`fls_BN5nUuvq9AwY`
-  If the :t:`type parameter` is used in a :t:`reference type`, then the :t:`type
-  parameter` has an implicit `lifetime` :t:`bound` for the :t:`lifetime` of the
-  :t:`reference type`,
+  If the :t:`type parameter` is used in a :t:`reference type`, then the
+  :t:`type parameter` has an implicit :t:`lifetime bound` for the :t:`lifetime`
+  of the :t:`reference type`,
 
 * :dp:`fls_ouOm2TQKNsP3`
   If the :t:`type parameter` is used as a :t:`generic argument` of an
   :t:`abstract data type`, the :t:`type parameter` inherits all the
-  :t:`lifetime` :t:`[bound]s` from the corresponding :t:`generic parameter` of
+  :t:`[lifetime bound]s` from the corresponding :t:`generic parameter` of
   the :t:`generic argument`.
 
 :dp:`fls_m0bzw4jap6sg`
@@ -216,8 +216,8 @@ A :t:`generic parameter` with a :t:`bound` of the form
    	<X: Bound>
 
 :dp:`fls_vo7mgm34hwg2`
-is equivalent to the :t:`generic parameter` without the bound and a :t:`where
-clause` of the following form:
+is equivalent to the :t:`generic parameter` without the bound and a
+:t:`where clause` of the following form:
 
 .. code-block:: rust
 
@@ -263,17 +263,17 @@ Where Clauses
 .. rubric:: Legality Rules
 
 :dp:`fls_3nqb7p5ifvio`
-A :t:`where clause` is a :t:`construct` that specifies when a :t:`construct`
-with generic arguments supplied is valid.
-
-:dp:`fls_ytk74dyxuy6d`
-A :t:`construct` is valid when all of its where clause predicates hold true for
-the supplied generic arguments.
+A :t:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
+:t:`[lifetime parameter]s` and :t:`[type parameter]s`.
 
 :dp:`fls_fhy4rsmmbvyy`
-A :t:`where clause predicate` is a :t:`construct` that specifies lifetime bounds
-on :t:`[lifetime parameter]s` and trait :t:`[bound]s` and lifetimes bounds on
-types.
+A :t:`where clause predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` on :t:`[lifetime parameter]s` as well as 
+:t:`[lifetime bound]s` and :t:`[trait bound]s` on :t:`[type]s`.
+
+:dp:`fls_ytk74dyxuy6d`
+A :t:`construct` is valid when all of its :t:`[where clause predicate]s` hold
+true for the supplied :t:`[generic argument]s`.
 
 :dp:`fls_1xgw1dq60quz`
 A :t:`trivial predicate` is a :t:`where clause predicate` that does not use
@@ -326,8 +326,8 @@ Generic Arguments
 .. rubric:: Legality Rules
 
 :dp:`fls_3x6qd8vt5uus`
-A :t:`generic argument` supplies a static input for an :t:`associated trait
-type` or a  :t:`generic parameter`.
+A :t:`generic argument` supplies a static input for an
+:t:`associated trait type` or a :t:`generic parameter`.
 
 :dp:`fls_ky39fb2vcom6`
 A :s:`BindingArgument` shall follow :s:`[ConstantArgument]s`,
@@ -340,12 +340,12 @@ A :s:`LifetimeArgument` shall precede :s:`[BindingArgument]s`,
 :s:`GenericArgumentList`.
 
 :dp:`fls_i3z9ueoe99zd`
-A :t:`constant argument` is a :t:`generic argument` that supplies the :t:`value`
-of a :t:`constant parameter`.
+A :t:`constant argument` is a :t:`generic argument` that supplies the
+:t:`value` of a :t:`constant parameter`.
 
 :dp:`fls_d4vdvpihoeb1`
-A :t:`type argument` is a :t:`generic argument` that supplies the :t:`type` of a
-:t:`type parameter`.
+A :t:`type argument` is a :t:`generic argument` that supplies the :t:`type` of
+a :t:`type parameter`.
 
 :dp:`fls_10k9gdxlpuls`
 A :t:`lifetime argument` is a :t:`generic argument` that supplies the
@@ -358,7 +358,7 @@ of an :t:`associated trait type`.
 :dp:`fls_al4dhmqodvwc`
 A :t:`constant argument` may only appear as a single segment :t:`path
 expression`, optionally encapsulated in a :t:`block expression`, within an
-:t:`array repeat expression` or a :t:`type`.
+:t:`array repetition constructor` or a :t:`type`.
 
 :dp:`fls_ukarc98ceesz`
 :t:`[Generic argument]s` are subject to :t:`generic conformance`.
@@ -392,10 +392,14 @@ Generic Conformance
 
 .. rubric:: Legality Rules
 
+:dp:`fls_CBWyxBJeYeb2`
+:t:`Generic conformance` measures the compatibility between a set of 
+:t:`[generic parameter]s` and a set of :t:`[generic argument]s`.
+
 :dp:`fls_ltch5eivxgaa`
 A :t:`binding argument` is conformant with an :t:`associated type` when the
-supplied :t:`type` of the :t:`binding argument` fulfills the required :t:`[trait
-bound]s` of the :t:`associated type`.
+supplied :t:`type` of the :t:`binding argument` fulfills the required
+:t:`[trait bound]s` of the :t:`associated type`.
 
 :dp:`fls_gb3mpt5rxjoa`
 A :t:`constant argument` is conformant with a :t:`constant parameter` when
@@ -404,12 +408,12 @@ the :t:`[type]s` of the :t:`constant argument` and :t:`constant parameter` are
 
 :dp:`fls_kdeltu9dsd0d`
 A :t:`lifetime argument` is conformant with a :t:`lifetime parameter` when it
-outlives the lifetimes specified by the :t:`lifetime parameter`\ **.**
+outlives the :t:`lifetime` specified by the :t:`lifetime parameter`.
 
 :dp:`fls_ws1h57fk1mkh`
-A :t:`type argument` is conformant with a :t:`type parameter` when the :t:`type`
-of the :t:`type argument` fulfills the required :t:`[trait bound]s` of the
-:t:`type parameter`.
+A :t:`type argument` is conformant with a :t:`type parameter` when the
+:t:`type` of the :t:`type argument` fulfills the required :t:`[trait bound]s`
+of the :t:`type parameter`.
 
 :dp:`fls_w0ozotuwtr9`
 :t:`[Generic argument]s` are conformant with :t:`[generic parameter]s` when
@@ -424,17 +428,17 @@ of the :t:`type argument` fulfills the required :t:`[trait bound]s` of the
   Any remaining :t:`[generic parameter]s` without corresponding conformant
   :t:`[generic argument]s` are :t:`[constant parameter]s` with
   :t:`[constant parameter initializer]s`, :t:`[lifetime parameter]s` with
-  either :t:`[inferred lifetime argument]s` or :t:`[elided lifetime]s`,
+  either inferred :t:`[lifetime argument]s` or :t:`[elided lifetime]s`,
   :t:`[type parameter]s` with :t:`[type parameter initializer]s`, and
 
 * :dp:`fls_us7d30cbwgpz`
-  All :t:`[lifetime argument]s` come first, followed by :t:`[constant
-  argument]s` and :t:`[type argument]s` in the order defined by the
-  :t:`[generic parameter]s`, followed by :t:`[binding argument]s`, and
+  All :t:`[lifetime argument]s` come first, followed by
+  :t:`[constant argument]s` and :t:`[type argument]s` in the order defined by
+  the :t:`[generic parameter]s`, followed by :t:`[binding argument]s`, and
 
 * :dp:`fls_dp3hpvf0fmr8`
-  All :t:`[constant argument]s`, :t:`[lifetime argument]s`, and :t:`[type
-  argument]s` have a corresponding :t:`generic parameter`.
+  All :t:`[constant argument]s`, :t:`[lifetime argument]s`, and
+  :t:`[type argument]s` have a corresponding :t:`generic parameter`.
 
 :dp:`fls_mg45zcguxxg5`
 :t:`[Generic argument]s` shall be conformant.

@@ -240,3 +240,50 @@ reachable control flow paths.
 :dp:`fls_g8etd5lsgn9j`
 A :t:`variable` is not initialized when allocated.
 
+.. _fls_wttihxen35as:
+
+Constant Promotion
+~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_udn9lyf3m0z6`
+:t:`Constant promotion` is the process of converting a :t:`value expression`
+into a :t:`constant`.
+
+:dp:`fls_yvkdcs4pmxjf`
+:t:`Constant promotion` is possible only when
+
+* :dp:`fls_n570za6a9nqd`
+  The :t:`value expression` is a :t:`constant expression`, and
+
+* :dp:`fls_tms5r9f5ogcb`
+  The :t:`type` of the :t:`value expression` does not have a :t:`destructor`,
+  and
+
+* :dp:`fls_bysv5r7iuf5j`
+  The :t:`value expression` does not employ a :t:`struct expression`
+  constructing a :std:`core::cell::UnsafeCell`, and
+
+* :dp:`fls_3h5vr7xk2rrt`
+  The :t:`value expression` only consists of operations that will always succeed
+  evaluation, and
+
+* :dp:`fls_3BGncWvMumEt`
+  The :t:`value expression` is the :t:`operand` of an :t:`immutable borrow
+  expression`.
+
+:dp:`fls_m690b8qg9d9r`
+:t:`Constant promotion` is always possible for :t:`expression` ``&mut []``,
+promoting the produced :t:`mutable borrow` to have ``'static`` :t:`lifetime`.
+
+:dp:`fls_uf0sg25awre6`
+:t:`Constant promotion` proceeds as follows:
+
+#. :dp:`fls_o7cqfdnr253y`
+   An anonymous :t:`constant` is created, whose :t:`constant initializer` holds
+   the result of the :t:`value expression`.
+
+#. :dp:`fls_ap85svxyuhvg`
+   The :t:`value` of the anonymous :t:`constant` is :t:`borrowed` with
+   ``'static`` :t:`lifetime`.

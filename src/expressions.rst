@@ -3052,6 +3052,7 @@ a left-to-right order.
    let u1 = Union { int: 0 };
    let u2 = Union { float: 0.0 };
 
+.. _fls_mjVXiDQRIAzU:
 
 Call Expressions and Method Call Expressions
 --------------------------------------------
@@ -3278,12 +3279,13 @@ Call Conformance
 :dp:`fls_tsn6SUUG9LvW`
 A :t:`method call expression` is equivalent to a :t:`call expression` where the
 :t:`call operand` is the resolved :t:`method` and the adjusted :t:`receiver
-operand` prepended to the :t:`[argument operand]s`.
+operand` is prepended to the :t:`[argument operand]s`.
 
 :dp:`fls_c40C6rg6rGv6`
-An :t:`argument operand` matches a :t:`function parameter` or :t:`field` of the :t:`callee type` when its position and the position of the
-:t:`parameter` or :t:`field` of the :t:`callee type` are the same. Such an
-:t:`argument operand` is a :dt:`matched argument operand`.
+An :t:`argument operand` matches a :t:`function parameter` or :t:`field` of the
+:t:`callee type` when its position and the position of the :t:`function
+parameter` or :t:`field` are the same. Such an :t:`argument operand` is a
+:dt:`matched argument operand`.
 
 :dp:`fls_Gr1ixJ9vFjUm`
 The :t:`type` of a :t:`matched argument operand` and the :t:`type` of the

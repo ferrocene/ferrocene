@@ -632,55 +632,6 @@ A :t:`function parameter` is associated with the :t:`drop scope` of the related
 A :t:`function argument` is associated with the :t:`drop scope` of the related
 :t:`call expression` or :t:`method call expression`.
 
-.. _fls_wttihxen35as:
-
-Constant Promotion
-~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_le2ip4najsot`
-**Is this the right place for this subchapter?**
-
-:dp:`fls_udn9lyf3m0z6`
-:t:`Constant promotion` is the process of converting a :t:`value expression`
-into a :t:`constant`.
-
-:dp:`fls_yvkdcs4pmxjf`
-:t:`Constant promotion` is possible only when
-
-* :dp:`fls_n570za6a9nqd`
-  The :t:`value expression` is a :t:`constant expression`, and
-
-* :dp:`fls_tms5r9f5ogcb`
-  The :t:`type` of the :t:`value expression` does not have a :t:`destructor`,
-  and
-
-* :dp:`fls_bysv5r7iuf5j`
-  The :t:`type` of the :t:`value expression` is not subject to :t:`interior
-  mutability`, and
-
-* :dp:`fls_3h5vr7xk2rrt`
-  The :t:`evaluation` of the :t:`value expression` succeeds.
-
-:dp:`fls_m690b8qg9d9r`
-:t:`Constant promotion` is always possible for :t:`expression` ``&mut []``.
-
-:dp:`fls_uf0sg25awre6`
-:t:`Constant promotion` proceeds as follows:
-
-#. :dp:`fls_o7cqfdnr253y`
-   An anonymous :t:`constant` is created, whose :t:`constant initializer` holds
-   the result of the :t:`value expression`.
-
-#. :dp:`fls_ap85svxyuhvg`
-   The :t:`value` of the anonymous :t:`constant` is :t:`borrowed`.
-
-#. :dp:`fls_v9c0aaxotpe8`
-   The :t:`borrow` is dereferenced in the original context where the :t:`value
-   expression` resided. (**does the borrow replace the original value
-   expression?**)
-
 .. _fls_omaq7psg83n3:
 
 Interior Mutability

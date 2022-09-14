@@ -16,7 +16,7 @@ ABI
 ^^^
 
 :dp:`fls_4ko8qcah0f9k`
-For :dt:`ABI`, see :t:`Abstract Binary Interface`.
+For :dt:`ABI`, see :t:`Application Binary Interface`.
 
 .. _fls_g791aj7w5iz1:
 
@@ -36,18 +36,6 @@ abort
 
 :dp:`fls_u4o7tda3ilv0`
 :dt:`Abort` is the immediate termination of a program.
-
-.. _fls_pcum2wpmgskk:
-
-Abstract Binary Interface
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_ew4babc9467c`
-:dt:`Abstract Binary Interface` is a set of conventions that dictate how data
-and computation cross language boundaries.
-
-:dp:`fls_8dgmmsp34lgc`
-See :s:`AbiSpecification`.
 
 .. _fls_g40une2uudez:
 
@@ -165,6 +153,18 @@ models existential quantifier ANY.
 
 :dp:`fls_xhhXonDldWQY`
 See :s:`ConfigurationPredicateAny`.
+
+.. _fls_pcum2wpmgskk:
+
+Application Binary Interface
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ew4babc9467c`
+:dt:`Application Binary Interface` is a set of conventions that dictate how
+data and computation cross language boundaries.
+
+:dp:`fls_8dgmmsp34lgc`
+See :s:`AbiSpecification`.
 
 .. _fls_dd008npswhij:
 
@@ -2035,7 +2035,7 @@ FFI
 ^^^
 
 :dp:`fls_z363fu89mj1c`
-See :t:`Foreign Function Interface`.
+For :dt:`FFI`, see :t:`Foreign Function Interface`.
 
 .. _fls_7gCAbHnGEIl6:
 

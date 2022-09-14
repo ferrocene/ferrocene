@@ -937,6 +937,15 @@ C representation
 :dt:`C representation` is a :t:`type representation` that lays out :t:`[type]s`
 such that they are interoperable with the :t:`C` language.
 
+.. _fls_Egfa8tdbqllA:
+
+Call conformance
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_Jr1gUX7Ju4Oh`
+:dt:`Call conformance` measures the compatibility between a set of :t:`[argument
+operand]s` and a set if :t:`[function parameter]s` or :t:`[field]s`.
+
 .. _fls_xeo59ol6uh5i:
 
 call expression
@@ -2782,8 +2791,8 @@ implementation conformance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_Gpq4EP1SsYJR`
-A :t:`trait implementation` exhibits :dt:`implementation conformance` when it
-satisfies the constraints of its :t:`implemented trait`.
+:dt:`Implementation conformance` measures the compatibility between a :t:`trait
+implementation` and the :t:`implemented trait`.
 
 .. _fls_c0xxvivt8t1u:
 

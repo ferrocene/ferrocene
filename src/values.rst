@@ -271,7 +271,7 @@ into a :t:`constant`.
 
 * :dp:`fls_3BGncWvMumEt`
   The :t:`value expression` is the :t:`operand` of an :t:`immutable borrow
-  expression.
+  expression`.
 
 :dp:`fls_m690b8qg9d9r`
 :t:`Constant promotion` is always possible for :t:`expression` ``&mut []``,

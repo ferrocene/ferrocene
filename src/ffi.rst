@@ -11,9 +11,9 @@ FFI
 .. rubric:: Legality Rules
 
 :dp:`fls_djlglv2eaihl`
-:t:`Foreign Function Interface` or :t:`FFI` employs :t:`ABI`, :t:`[attribute]s`,
-:t:`external blocks`, :t:`[external function]s`, linkage, and :t:`type`
-:t:`layout` to interface a Rust program with foreign code.
+:t:`Foreign Function Interface` or :t:`FFI` employs :t:`ABI`,
+:t:`[attribute]s`, :t:`[external block]s`, :t:`[external function]s`, linkage,
+and :t:`type` :t:`layout` to interface a Rust program with foreign code.
 
 :dp:`fls_k1hiwghzxtfa`
 The following :t:`[attribute]s` affect :t:`FFI`:
@@ -62,8 +62,8 @@ The :t:`ABI kind` indicates the :t:`ABI` of a :t:`construct`.
 The following :t:`[ABI]s` are supported:
 
 * :dp:`fls_x7ct9k82fpgn`
-  ``extern "C"`` - The default :t:`ABI` of :t:`C` code, referred to as :dt:`extern
-  C ABI`.
+  ``extern "C"`` - The default :t:`ABI` of :t:`C` code, referred to as
+  :dt:`extern C ABI`.
 
 * :dp:`fls_a2d8ltpgtvn6`
   ``extern "Rust"`` - The default :t:`ABI` of a Rust program, referred to as
@@ -79,7 +79,7 @@ it appears within an :t:`external block`.
 
 :dp:`fls_z2kzyin8dyr7`
 A :t:`function` with an :t:`ABI` but without a specified :t:`ABI kind` has
-implicit :t:`external C ABI`.
+implicit :t:`extern C ABI`.
 
 .. rubric:: Implementation Permissions
 
@@ -148,8 +148,8 @@ An :t:`external block` is a :t:`construct` that provides the declarations of
 foreign :t:`[function]s` as unchecked imports.
 
 :dp:`fls_iaimuqcclstl`
-The ``unsafe`` :t:`keyword` of an :t:`external block` is rejected, but may still
-be consumed by :t:`[macro]s`.
+The ``unsafe`` :t:`keyword` of an :t:`external block` is rejected, but may
+still be consumed by :t:`[macro]s`.
 
 .. rubric:: Examples
 
@@ -215,7 +215,7 @@ An :t:`external static` is an import of a foreign :t:`variable`.
 An :t:`external static` shall be referenced from an :t:`unsafe context`.
 
 :dp:`fls_tr7purzcldn0`
-An :t:`external static` shall not specify a :t:`StaticInitializer`.
+An :t:`external static` shall not specify a :t:`static initializer`.
 
 .. rubric:: Dynamic Semantics
 

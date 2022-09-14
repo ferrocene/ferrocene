@@ -166,8 +166,8 @@ A :t:`lexical element` is the most basic syntactic element in program text.
 The text of a :t:`source file` is divided into :t:`[line]s`.
 
 :dp:`fls_efdfq9nhpmp5`
-A :t:`line` is a sequence of zero or more characters followed by an :t:`end
-of line`.
+A :t:`line` is a sequence of zero or more characters followed by an end of
+line.
 
 :dp:`fls_go25sisi5fdp`
 The representation of an :t:`end of line` is tool-defined.

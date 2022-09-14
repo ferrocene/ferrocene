@@ -6483,8 +6483,8 @@ unsafe context
 ^^^^^^^^^^^^^^
 
 :dp:`fls_qn1s845ejbu0`
-An :dt:`unsafe context` is either an :t:`unsafe block`,
-an :t:`unsafe function`, an :t:`unsafe module`, or an :t:`unsafe trait`.
+An :dt:`unsafe context` is either an :t:`unsafe block` or an
+:t:`unsafe function`.
 
 .. _fls_ua64pv82skaw:
 

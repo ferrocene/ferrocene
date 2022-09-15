@@ -434,7 +434,7 @@ A :t:`destructor` is an anonymous :t:`function` that performs the
 related :t:`type`. Such an object is said to be :dt:`dropped`.
 
 :dp:`fls_gfvm70iqu1l4`
-An :t:`uninitialized` :t:`value hilder` is not :t:`dropped`.
+An :t:`uninitialized` :t:`value holder` is not :t:`dropped`.
 
 .. rubric:: Dynamic Semantics
 

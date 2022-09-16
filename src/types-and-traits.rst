@@ -2848,7 +2848,7 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
 .. rubric:: Examples
 
 :dp:`fls_MipY2emZFF6d`
-Given :t:`static` ``S`` of the form
+Given :t:`type alias` ``T`` of the form
 
 .. code-block:: rust
 

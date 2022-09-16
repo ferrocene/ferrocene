@@ -814,7 +814,7 @@ bound
 ^^^^^
 
 :dp:`fls_q6mxhn1fxjs6`
-A :dt:`bound` imposes a constraint on :t:`[generic parameter]s` by limiting the
+A :dt:`bound` imposes a constraint on a :t:`generic parameter` by limiting the
 set of possible :t:`[generic substitution]s`.
 
 :dp:`fls_rxabhhigp5uy`

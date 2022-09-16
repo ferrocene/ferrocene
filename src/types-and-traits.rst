@@ -2470,8 +2470,12 @@ Trait and Lifetime Bounds
 .. rubric:: Legality Rules
 
 :dp:`fls_5g508z6c7q5f`
-A :t:`bound` imposes a constraint on :t:`[generic parameter]s` by limiting the
+A :t:`bound` imposes a constraint on a :t:`generic parameter` by limiting the
 set of possible :t:`[generic substitution]s`.
+
+:dp:`fls_BqLPVaSyyXRG`
+A :t:`bound` does not impose a constraint on a :t:`generic parameter` of a
+:t:`type alias` unless it is an :t:`associated item`.
 
 :dp:`fls_grby8tmmd8sb`
 A :t:`lifetime bound` is a :t:`bound` that imposes a constraint on the

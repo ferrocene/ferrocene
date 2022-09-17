@@ -88,7 +88,7 @@ This document specifies:
   attempting to translate or execute a program containing such violations;
 
 * :dp:`fls_5pbrl8lhuth1`
-  The violations that a conforming implementation is not required to detect.
+  The violations that a conforming tool is not required to detect.
 
 :dp:`fls_o8fc3e53vp7g`
 This document does not specify:

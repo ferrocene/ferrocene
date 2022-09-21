@@ -80,6 +80,11 @@ only if it implements an :t:`unsafe trait`.
 :t:`[Trait implementation]s` are subject to :t:`implementation coherence` and
 :t:`implementation conformance`.
 
+:dp:`fls_89yNjGNB7KI3`
+:t:`[Inherent implementation]s` of the same :t:`implementing type` shall not
+define more than one :t:`associated item` with the same :t:`name` in the same
+:t:`namespace`.
+
 .. rubric:: Examples
 
 .. code-block:: rust

@@ -145,6 +145,10 @@ transcription`.
 :dp:`fls_4zdait30exvn`
 A :t:`metavariable` is a :t:`macro match` that describes a :t:`variable`.
 
+:dp:`fls_2HguXbL7DjKH`
+A :t:`metavariable` is visible in the :t:`macro transcriber` of the :t:`macro
+rule` of the :t:`macro matcher` it is declared in.
+
 :dp:`fls_8zypylq60zba`
 A :t:`fragment specifier` is a :t:`construct` that indicates the :t:`type` of
 a :t:`metavariable`.
@@ -620,7 +624,7 @@ invocation`.
 
 #. :dp:`fls_40xq8Ri1OMZZ`
    The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   doc]s` and :t:`[outer line doc]s` contained within replaced by their
    equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_76prdp6k1fga`
@@ -670,7 +674,7 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 
 #. :dp:`fls_nNrs4EC3ff5T`
    The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   doc]s` and :t:`[outer line doc]s` contained within replaced by their
    equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_srtqkdceaz5t`
@@ -705,8 +709,8 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
 
    #. :dp:`fls_vd3dzvr6re19`
       If the :t:`macro invocation` appears as part of an :t:`associated item`,
-      an :t:`item` within an :t:`external block`, or another 
-      :t:`macro invocation`, the output is required to constitute zero or more 
+      an :t:`item` within an :t:`external block`, or another
+      :t:`macro invocation`, the output is required to constitute zero or more
       :t:`[item]s`.
 
    #. :dp:`fls_u11o90szy68s`
@@ -719,7 +723,7 @@ Expansion of :t:`[derive macro]s` proceeds as follows:
 
 #. :dp:`fls_vqIZaEl4EKu5`
    The :t:`item` subject to the :t:`derive macro` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   doc]s` and :t:`[outer line doc]s` contained within replaced by their
    equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_grtiwf7q8jah`
@@ -754,7 +758,7 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
 
 #. :dp:`fls_AJmPrhHfZo6J`
    The :t:`item` subject to the :t:`attribute macro` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s contained within replaced by their
+   doc]s` and :t:`[outer line doc]s` contained within replaced by their
    equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_mpgh22bi8caz`

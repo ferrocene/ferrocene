@@ -226,10 +226,7 @@ The following :t:`[construct]s` are :t:`[variable]s`:
   A :t:`temporary`.
 
 * :dp:`fls_81dlbula47nu`
-  A named :t:`binding`.
-
-* :dp:`fls_adqfhc5k051x`
-  A named :t:`function parameter`.
+  A :t:`binding`.
 
 :dp:`fls_r9km9f969bu8`
 A :t:`variable` shall be used only after it has been initialized through all

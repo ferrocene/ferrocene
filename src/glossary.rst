@@ -585,8 +585,8 @@ binding
 ^^^^^^^
 
 :dp:`fls_89qi3unjvwd7`
-A :dt:`binding` is a :t:`variable` of a :t:`binding pattern` that binds a
-matched :t:`value`.
+A :dt:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
+:t:`name`.
 
 :dp:`fls_lujdci4bphek`
 See :s:`Binding`.

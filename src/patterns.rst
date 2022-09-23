@@ -113,6 +113,7 @@ A :t:`bound pattern` is a :t:`pattern` that imposes a constraint on a related
 An :t:`identifier pattern` yields a :t:`binding`. An :t:`identifier pattern`
 with :t:`keyword` ``mut`` yields a :t:`mutable binding`.
 
+:dp:`fls_joIQdDn44oIT`
 An :t:`identifier pattern` with :t:`keyword` ``ref`` is a :t:`reference
 identifier pattern`.
 

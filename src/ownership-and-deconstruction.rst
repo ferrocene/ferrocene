@@ -666,7 +666,7 @@ An :dt:`extending expression` is either
 
 * :dp:`fls_gjd1ow3l7swe`
   The :t:`operand` of an :t:`extending expression` that is :t:`array
-  expression`, a :t:`borrow expression`, a :t:`cast expression`, a :t:`struct
+  expression`, a :t:`borrow expression`, a :t:`type cast expression`, a :t:`struct
   expression`, or a :t:`tuple expression`, or
 
 * :dp:`fls_iqw0d1l1lj3i`

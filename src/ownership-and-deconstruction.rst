@@ -129,6 +129,10 @@ prevents the mutation of its :t:`referent`.
 A :t:`mutable reference` is a :t:`value` of a :t:`mutable reference type`, and
 allows the mutation of its :t:`referent`.
 
+:dp:`fls_hqxsuyn285he`
+The :t:`referent` of an :t:`immutable reference` shall be mutated only when the
+:t:`type of the `:t:`referent` is subject to :t:`interior mutability`.
+
 :dp:`fls_i1ny0k726a4a`
 While a :t:`mutable reference` is :t:`active`, no other :t:`reference` shall
 refer to a :t:`value` that :t:`[overlap]s` with the :t:`referent` of the

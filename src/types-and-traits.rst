@@ -2056,8 +2056,8 @@ Interior Mutability
 :t:`Interior mutability` is a property of :t:`[type]s` whose :t:`[value]s` can
 be modified through :t:`[immutable reference]s`.
 
-:dp:`fls_hqxsuyn285he`
-An :t:`immutable reference` shall be mutated only when the :t:`referent` is a
+:dp:`fls_sWiU26n2xS3r`
+A :t:`type` is subject to :t:`interior mutability` when it contains a
 :std:`core::cell::UnsafeCell`.
 
 .. _fls_lv7w7aalpwm5:

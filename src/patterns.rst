@@ -113,16 +113,22 @@ A :t:`bound pattern` is a :t:`pattern` that imposes a constraint on a related
 An :t:`identifier pattern` yields a :t:`binding`. An :t:`identifier pattern`
 with :t:`keyword` ``mut`` yields a :t:`mutable binding`.
 
+An :t:`identifier pattern` with :t:`keyword` ``ref`` is a :t:`reference
+identifier pattern`.
+
 :dp:`fls_24c95c56tugl`
 The :t:`identifier pattern` enters its :t:`binding` into :t:`pattern scope` in
-the :t:`value namespace` if it does not resolve to a :t:`constant`, a :t:`unit struct constant` or a :t:`unit enum variant`.
+the :t:`value namespace` if it does not resolve to a :t:`constant`, a :t:`unit
+struct constant` or a :t:`unit enum variant`.
 
 :dp:`fls_twcavjk7iquy`
 It is a static error if the :t:`identifier pattern` consists of anything other
-than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, a :t:`unit struct constant` or a :t:`unit enum variant`.
+than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, a
+:t:`unit struct constant` or a :t:`unit enum variant`.
 
 :dp:`fls_k1yBTstX7jEE`
-It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves to a :t:`tuple struct` or a :t:`tuple enum variant`.
+It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves
+to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 :dp:`fls_hw26hy33guk5`
 An :t:`identifier pattern` is :t:`irrefutable` when:

@@ -645,12 +645,12 @@ associated with a :t:`temporary` to prevent the premature :t:`dropping` of the
 An :dt:`extending pattern` is either
 
 * :dp:`fls_965wt48ooqyw`
-  An :t:`identifier pattern` whose :t:`binding mode` is :t:`by reference` or
-  :t:`by mutable reference`, or
+  A :t:`reference identifier pattern`, or
 
 * :dp:`fls_r8nt0zp8dnyp`
-  A :t:`slice pattern`, a :t:`struct pattern`, or a :t:`tuple pattern` that
-  contains at least one :t:`subpattern` that is an :t:`extending pattern`.
+  A :t:`slice pattern`, a :t:`struct pattern`, :t:`tuple pattern` or a :t:`tuple
+  struct pattern` that contains at least one :t:`subpattern` that is an
+  :t:`extending pattern`.
 
 :dp:`fls_3ycn4u1fe9h`
 If the :t:`pattern-without-alternation` of a :t:`let statement` is an
@@ -665,17 +665,29 @@ An :dt:`extending expression` is either
   The :t:`expression` of a :t:`let statement`, or
 
 * :dp:`fls_gjd1ow3l7swe`
-  The :t:`operand` of an extending :t:`array expression`, an extending
-  :t:`borrow expression`, an extending :t:`cast expression`, an extending
-  :t:`struct expression`, or an extending :t:`tuple expression` (**what are
-  these?**), or
+  The :t:`operand` of an :t:`extending expression` that is :t:`array
+  expression`, a :t:`borrow expression`, a :t:`cast expression`, a :t:`struct
+  expression`, or a :t:`tuple expression`, or
 
 * :dp:`fls_iqw0d1l1lj3i`
-  The :t:`tail expression` of an extending :t:`block expression`.
+  The :t:`tail expression` of a :t:`block expression` that is an :t:`extending
+  expression`.
 
 :dp:`fls_aq01wjpkxhq9`
-The :t:`drop scope` of an :t:`extending expression` is extended to the :t:`drop
-scope` of the enclosing :t:`statement`.
+The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression` that is an
+:t:`extending expression` is extended to the :t:`drop scope` of the :t:`block
+expression` that contains the :t:`let statement`.
+
+:dp:`fls_VDPi1dJzJMUb`
+The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression`, a
+:t:`dereference expression`, or a :t:`field access expression` that has an
+extended :t:`drop scope` is extended to the :t:`drop scope` of the
+:t:`expression`.
+
+:dp:`fls_elGH7HSawMRb`
+The :t:`drop scope` of the :t:`indexed operand` of an :t:`index expression` that
+has an extended :t:`drop scope` is extended to the :t:`drop scope` of the
+:t:`expression`.
 
 .. rubric:: Examples
 

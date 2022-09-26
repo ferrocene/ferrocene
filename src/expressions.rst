@@ -3571,6 +3571,9 @@ The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
 :dp:`fls_FkxLf91WKiIo`
 The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
 
+:dp:`fls_XEc0cIkpkyzJ`
+The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_kuxo0on3vit6`
@@ -3658,6 +3661,9 @@ The :t:`value` of a :t:`infinite loop expression` is determined as follows:
   expression`, then the :t:`value` is the :t:`break value` of the :t:`break
   expression` that broke out of the :t:`loop expression`.
 
+:dp:`fls_wqvdHgMpp6NL`
+The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_w4tj5gofwih1`
@@ -3712,6 +3718,8 @@ The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
 :dp:`fls_s6hRa5spz64w`
 The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
 
+:dp:`fls_qpQrEALKvRkU`
+The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3765,6 +3773,9 @@ The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
 
 :dp:`fls_pTq4LIGIoAtN`
 The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
+
+:dp:`fls_rphW1DPnNKDQ`
+The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 

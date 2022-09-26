@@ -3336,15 +3336,7 @@ accessed in a :t:`field access expression`.
 
 :dp:`fls_qqrconpa92i3`
 A :t:`selected field` is a :t:`field` that is selected by a :t:`field access
-expression`.
-
-:dp:`fls_t9xakmda134a`
-A :t:`field access expression` with an :s:`IndexedFieldSelector` is referred to
-as an :dt:`indexed field access`.
-
-:dp:`fls_dch5i39ycw7s`
-A :t:`field access expression` with a :s:`NamedFieldSelector` is referred to as
-a :dt:`named field access`.
+expression` with :t:`field resolution`.
 
 :dp:`fls_fovs9il2h9xg`
 The :t:`type` of a :t:`field access expression` is the :t:`type` of the
@@ -3353,19 +3345,6 @@ The :t:`type` of a :t:`field access expression` is the :t:`type` of the
 :dp:`fls_r1b4n12i93pg`
 The :t:`value` of a :t:`field access expression` is the :t:`value` of the
 :t:`selected field`.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_6uzouesw2sod`
-The :t:`evaluation` of a :t:`field access expression` evaluates its
-:t:`container operand`.
-
-.. _fls_yx65ucoaimdp:
-
-Named Field Access
-~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
 
 :dp:`fls_kddnnz8uc15b`
 Reading the :t:`selected field` of a :t:`union` shall require :t:`unsafe
@@ -3387,8 +3366,14 @@ field`, and ``field_bits`` is the bit representation of the :t:`selected field`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_sdnafipirg8w`
-It is undefined behavior when the :t:`type` of the :t:`container operand` is a
-:t:`union type` and the :t:`selected field` contains invalid data.
+It is undefined behavior when reading the :t:`selected field` of a :t:`union
+type` when it contains invalid data.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_6uzouesw2sod`
+The :t:`evaluation` of a :t:`field access expression` evaluates its
+:t:`container operand`.
 
 .. rubric:: Examples
 
@@ -3398,19 +3383,6 @@ See :p:`6.8.1. <fls_hv4grs2tcuiw>` for the declaration of ``alice``.
 .. code-block:: rust
 
    alice.name
-
-.. _fls_e4q0018ch25g:
-
-Indexed Field Access
-~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Legality Rules
-
-:dp:`fls_zexojym4ak6f`
-The :t:`decimal literal` of an :t:`indexed field access` shall denote a valid
-index of a :t:`field` of the :t:`[container operand]'s` :t:`type`.
-
-.. rubric:: Examples
 
 :dp:`fls_dimto84ifanr`
 The following indexed field access evaluates to ``42``.
@@ -4820,4 +4792,3 @@ within the :t:`capturing expression`, as follows:
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of
 the :t:`capture target`.
-

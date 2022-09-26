@@ -1565,7 +1565,7 @@ destructor
 ^^^^^^^^^^
 
 :dp:`fls_79pp7o1xooja`
-A :dt:`destructor` is an anonymous :t:`function` that performs the
+A :dt:`destructor` is a :t:`function` that is invoked immediately before the
 :t:`destruction` of a :t:`value` of a :t:`drop type`.
 
 .. _fls_2fuu3zr9rn2q:
@@ -4867,6 +4867,15 @@ reference
 
 :dp:`fls_s82y4hsuytiq`
 A :dt:`reference` is a :t:`value` of a :t:`reference type`.
+
+.. _fls_1XGsXRZIFnqL:
+
+reference identifier pattern
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_jQs6oJ4RFBPN`
+A :dt:`reference identifier pattern` is an :t:`identifier pattern` with
+:t:`keyword` ``ref``.
 
 .. _fls_kiy6b1wbn0a3:
 

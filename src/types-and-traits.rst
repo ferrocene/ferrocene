@@ -2045,6 +2045,21 @@ The following :t:`[type]s` are :t:`structurally equal`:
 * :dp:`fls_jMeWhn4sNTPF`
   :t:`[Reference type]s` if their inner :t:`type` is :t:`structurally equal`.
 
+.. _fls_omaq7psg83n3:
+
+Interior Mutability
+~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_khy2e23i9o7z`
+:t:`Interior mutability` is a property of :t:`[type]s` whose :t:`[value]s` can
+be modified through :t:`[immutable reference]s`.
+
+:dp:`fls_sWiU26n2xS3r`
+A :t:`type` is subject to :t:`interior mutability` when it contains a
+:std:`core::cell::UnsafeCell`.
+
 .. _fls_lv7w7aalpwm5:
 
 Type Inference

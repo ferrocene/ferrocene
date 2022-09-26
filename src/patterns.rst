@@ -1164,8 +1164,8 @@ A :t:`binding pattern` is either an :t:`identifier pattern` or a :t:`shorthand
 deconstructor`.
 
 :dp:`fls_vnh9wfrvumdz`
-A :t:`binding` is a :t:`variable` of a :t:`binding pattern` that binds a matched
-:t:`value`.
+A :t:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
+:t:`name`.
 
 :dp:`fls_dqe75i8h2fie`
 A :t:`non-reference pattern` is any :t:`pattern` except

@@ -1107,9 +1107,12 @@ closure parameter
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_yQBZHBLhPswn`
-A :dt:`closure parameter` is a :t:`construct` that matches an input :t:`value`
-at the site of a :t:`call expression` or a :t:`method call expression` to
-a pattern.
+A :dt:`closure parameter` is a :t:`construct` that yields a set of
+:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+site of a :t:`call expression` or a :t:`method call expression`.
+
+:dp:`fls_Dus3fBU3TwR4`
+See :s:`ClosureParameter`.
 
 .. _fls_xjudl8ykbisi:
 
@@ -2297,12 +2300,12 @@ function parameter
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_2feq1ky9pla1`
-A :dt:`function parameter` is a :t:`construct` that matches an input :t:`value`
-at the site of a :t:`call expression` or a :t:`method call expression` to
-a pattern.
+A :dt:`function parameter` is a :t:`construct` that yields a set of
+:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_4tf20svi3rjx`
-See :s:`FunctionParameterList`.
+See :s:`FunctionParameter`.
 
 .. _fls_fqwzlg78k503:
 

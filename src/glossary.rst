@@ -5344,14 +5344,6 @@ Self
 implicit :t:`type alias` in :t:`[implementation]s`. :t:`Self` refers to the
 :t:`type` that implements a :t:`trait`.
 
-.. _fls_exMZlNMxQvP7:
-
-Self scope
-^^^^^^^^^^
-
-:dp:`fls_pSvqWGRmFmH0`
-A :dt:`Self scope` is a :t:`scope` for :c:`Self`.
-
 .. _fls_6wjlbzmlx9n4:
 
 self parameter
@@ -5372,6 +5364,14 @@ A :dt:`self public modifier` is a :t:`visibility modifier` that grants a
 
 :dp:`fls_21cvbfjpckkt`
 See :s:`SelfPublicModifier`.
+
+.. _fls_exMZlNMxQvP7:
+
+Self scope
+^^^^^^^^^^
+
+:dp:`fls_pSvqWGRmFmH0`
+A :dt:`Self scope` is a :t:`scope` for :c:`Self`.
 
 .. _fls_8spw41g0dbqw:
 
@@ -5569,15 +5569,6 @@ A :dt:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :dp:`fls_cm7ysyfrdwom`
 See :s:`SimplePath`.
 
-.. _fls_gT5rZ4qC3pHo:
-
-simple path resolution
-^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_CQlepoN6PmKq`
-:dt:`Simple path resolution` is a kind of :t:`path resolution` that applies to
-:t:`[simple path]s`.
-
 .. _fls_23G6TAntJXqa:
 
 simple path prefix
@@ -5601,6 +5592,15 @@ A :dt:`simple path public modifier` is a :t:`visibility modifier` that grants a
 
 :dp:`fls_mud4hw74kuh6`
 See :s:`SimplePathPublicModifier`.
+
+.. _fls_gT5rZ4qC3pHo:
+
+simple path resolution
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_CQlepoN6PmKq`
+:dt:`Simple path resolution` is a kind of :t:`path resolution` that applies to
+:t:`[simple path]s`.
 
 .. _fls_k5uqt5oj7wvl:
 

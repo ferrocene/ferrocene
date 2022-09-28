@@ -484,9 +484,6 @@ A :t:`generic parameter` is :t:`in scope` of a :s:`GenericParameterList`.
 A :t:`generic parameter` of an :t:`enum type` is :t:`in scope` within the
 related :t:`[enum variant]s` and :t:`where clause`.
 
-:dp:`fls_wt6z4x2obydw`
-(**add term "implementation body"**)
-
 :dp:`fls_t9ztg017itkp`
 A :t:`generic parameter` of a :t:`function pointer type` is :t:`in scope` within
 the related :t:`type specification`.
@@ -498,9 +495,6 @@ related :t:`implementation body` and :t:`where clause`.
 :dp:`fls_67dtv1z3arbl`
 A :t:`generic parameter` of a :t:`struct type` is :t:`in scope` within the
 related :t:`[field]s` and :t:`where clause`.
-
-:dp:`fls_8vh85gxxk6b8`
-(**add term "trait body"**)
 
 :dp:`fls_y8j4isk9libl`
 A :t:`generic parameter` of a :t:`trait` is :t:`in scope` within the related
@@ -1157,15 +1151,9 @@ A :dt:`candidate field` is a :t:`field` of a :t:`candidate container type`
 that is visible from the location of the :t:`field access expression` :t:`under
 resolution`.
 
-:dp:`fls_bdp8ftfoand5`
-(**add test indexed field selector**)
-
 :dp:`fls_jzoon4x89zp7`
 A :dt:`candidate indexed field` is a :t:`candidate field` whose position in the
 :t:`candidate operand type` matches the index of an :t:`indexed field selector`.
-
-:dp:`fls_e53xesnmg3tt`
-(**add test named field selector**)
 
 :dp:`fls_r80pixfoe5hk`
 A :dt:`candidate named field` is a :t:`candidate field` whose :t:`name` matches
@@ -1212,12 +1200,6 @@ Method Resolution
 ~~~~~~~~~~~~~~~~~
 
 .. rubric:: Legality Rules
-
-:dp:`fls_1gspzydnk4vn`
-(**update the grammar of MethodCallExpression to use "method operand"**)
-
-:dp:`fls_26thqngdqm8s`
-(**add an entry for "method operand" in the Glossary**)
 
 :dp:`fls_e5a5z5yht26l`
 :t:`Method resolution` is a kind of :t:`resolution` that applies to the

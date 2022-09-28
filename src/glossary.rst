@@ -2812,6 +2812,19 @@ An :dt:`implementation` is an :t:`item` that supplements an
 :dp:`fls_z4ij5skptoay`
 See :s:`Implementation`.
 
+.. _fls_vofxuHcXpt6X:
+
+implementation body
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_1iS30Nv9myEd`
+An :dt:`implementation body` is a :t:`construct` that encapsulates the
+:t:`[associated item]s`, :t:`[inner attribute]s`, and 
+:t:`[inner doc comment]s` of an :t:`implementation`.
+
+:dp:`fls_u75iHi53PnNP`
+See :s:`ImplementationBody`.
+
 .. _fls_41GLrzVxcOV6:
 
 implementation coherence
@@ -3850,6 +3863,18 @@ of a :t:`variable`.
 :dp:`fls_ohhcvxcaqv11`
 See :s:`MethodCallExpression`.
 
+.. _fls_l6eJxvmplLqQ:
+
+method operand
+^^^^^^^^^^^^^^
+
+:dp:`fls_VLLAFjAxCfkE`
+A :dt:`method operand` is an :t:`operand` that denotes the :t:`method` being
+invoked by a :t:`method call expression`.
+
+:dp:`fls_Pkgr4fJQZpJ6`
+See :s:`MethodOperand`.
+
 .. _fls_05yFh5Ud0YkW:
 
 method resolution
@@ -4486,18 +4511,6 @@ A :dt:`path segment` is a constituent of a :t:`path`.
 
 :dp:`fls_m067uq7fo66i`
 See :s:`PathSegment`, :s:`SimplePathSegment`, :s:`TypePathSegment`.
-
-.. _fls_5UBwGysaQNuQ:
-
-path-in-expression
-^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_E42QYGorjSbn`
-A :dt:`path-in-expression` is a :t:`path` that appears in an :t:`expression`
-context.
-
-:dp:`fls_2lWoYOLQnJOv`
-See :s:`PathInExpression`.
 
 .. _fls_uj1o721im5lb:
 
@@ -6110,6 +6123,19 @@ implement.
 
 :dp:`fls_ypjhwvuyrns`
 See :s:`TraitDeclaration`.
+
+.. _fls_5hNydsQDrICq:
+
+trait body
+^^^^^^^^^^
+
+:dp:`fls_u221Me58aZmY`
+A :dt:`trait body` is a :t:`construct` that encapsulates the
+:t:`[associated item]s`, :t:`[inner attribute]s`, and
+:t:`[inner doc comment]s` of a :t:`trait`.
+
+:dp:`fls_dITFx04TB4h0`
+See :s:`TraitBody`.
 
 .. _fls_868cgnb1soeh:
 

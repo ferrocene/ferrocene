@@ -33,7 +33,7 @@ Types
      | MacroInvocation
      | NeverType
      | ParenthesizedTypeSpecification
-     | QualifiedPathInType
+     | QualifiedPathType
      | RawPointerTypeSpecification
      | ReferenceTypeSpecification
      | SliceTypeSpecification
@@ -2331,19 +2331,27 @@ Traits
 .. syntax::
 
    TraitDeclaration ::=
-       $$unsafe$$? $$trait$$ Name GenericParameterList? ($$:$$ SupertraitList?)? WhereClause? $${$$
-         InnerAttributeOrDoc*
-         AssociatedItem*
-       $$}$$
+       $$unsafe$$? $$trait$$ Name GenericParameterList? ($$:$$ SupertraitList?)? WhereClause? TraitBody
 
    SupertraitList ::=
        TypeBoundList
+
+   TraitBody ::=
+       $${$$
+         InnerAttributeOrDoc*
+         AssociatedItem*
+       $$}$$
 
 .. rubric:: Legality Rules
 
 :dp:`fls_tani6lesan9u`
 A :t:`trait` is an :t:`item` that describes an interface a :t:`type` can
 implement.
+
+:dp:`fls_PiAR1B26SoZV`
+A :t:`trait body` is a :t:`construct` that encapsulates the
+:t:`[associated item]s`, :t:`[inner attribute]s`, and 
+:t:`[inner doc comment]s` of a :t:`trait`.
 
 :dp:`fls_AdbbUZZgMEsQ`
 A :t:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.

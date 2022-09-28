@@ -17,22 +17,22 @@ Implementations
      | TraitImplementation
 
    InherentImplementation ::=
-       $$impl$$ GenericParameterList? ImplementingType WhereClause? $${$$
-         InnerAttributeOrDoc*
-         AssociatedItem*
-       $$}$$
+       $$impl$$ GenericParameterList? ImplementingType WhereClause? ImplementationBody
 
    TraitImplementation ::=
-       $$unsafe$$? $$impl$$ GenericParameterList? $$!$$? ImplementedTrait $$for$$ ImplementingType WhereClause? $${$$
-         InnerAttributeOrDoc*
-         AssociatedItem*
-       $$}$$
+       $$unsafe$$? $$impl$$ GenericParameterList? $$!$$? ImplementedTrait $$for$$ ImplementingType WhereClause? ImplementationBody
 
    ImplementingType ::=
        TypeSpecification
 
    ImplementedTrait ::=
        TypePath
+
+   ImplementationBody ::=
+       $${$$
+         InnerAttributeOrDoc*
+         AssociatedItem*
+       $$}$$
 
 .. rubric:: Legality Rules
 
@@ -43,6 +43,11 @@ type` by extending its functionality.
 :dp:`fls_yopmjbnw8tbl`
 An :t:`implementing type` is the :t:`type` that the :t:`[associated item]s` of
 an :t:`implementation` are associated with.
+
+:dp:`fls_Mcpdzzcw43M7`
+An :t:`implementation body` is a :t:`construct` that encapsulates the
+:t:`[associated item]s`, :t:`[inner attribute]s`, and
+:t:`[inner doc comment]s` of an :t:`implementation`.
 
 :dp:`fls_v0n0bna40dqr`
 An :t:`inherent implementation` is an :t:`implementation` that adds direct

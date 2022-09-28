@@ -301,8 +301,8 @@ Path Patterns
 .. syntax::
 
    PathPattern ::=
-       PathInExpression
-     | QualifiedPathInExpression
+       PathExpression
+     | QualifiedPathExpression
 
 .. rubric:: Legality Rules
 
@@ -311,7 +311,7 @@ A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a :t:`unit e
 variant`, or a :t:`unit struct constant` indicated by a :t:`path`.
 
 :dp:`fls_xz5otkhogn31`
-A :t:`path pattern` expressed as a :t:`path-in-expression` shall refer to either
+A :t:`path pattern` expressed as a :t:`path expression` shall refer to either
 an :t:`associated constant`, or a :t:`constant`.
 
 :dp:`fls_t8sjzsif2ilf`
@@ -330,7 +330,7 @@ When the type of the :t:`path pattern` is of an :t:`enum type` or :t:`struct typ
 :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
 
 :dp:`fls_bv9psmitxfuw`
-A :t:`path pattern` expressed as a :t:`qualified path-in-expression` shall refer
+A :t:`path pattern` expressed as a :t:`qualified path expression` shall refer
 to an :t:`associated constant`.
 
 :dp:`fls_sl47k9oj5p7t`
@@ -405,8 +405,8 @@ Range Patterns
        ByteLiteral
      | CharacterLiteral
      | $$-$$? NumericLiteral
-     | PathInExpression
-     | QualifiedPathInExpression
+     | PathExpression
+     | QualifiedPathExpression
 
 .. rubric:: Legality Rules
 
@@ -469,11 +469,11 @@ The :t:`type` of a :t:`range pattern` is determined as follows:
   Otherwise the :t:`type` is the :t:`type` of the :t:`range pattern low bound`.
 
 :dp:`fls_5ey5mj8t8knd`
-A :t:`path-in-expression` of a :t:`range pattern` shall refer to a :t:`constant`
+A :t:`path expression` of a :t:`range pattern` shall refer to a :t:`constant`
 of a :t:`scalar type`.
 
 :dp:`fls_z4js96mchcsv`
-A :t:`qualified path-in-expression` of a :t:`range pattern` shall refer to an
+A :t:`qualified path expression` of a :t:`range pattern` shall refer to an
 :t:`associated constant` of a :t:`scalar type`.
 
 .. rubric:: Examples
@@ -666,7 +666,7 @@ Struct Patterns
      | TupleStructPattern
 
    Deconstructee ::=
-       PathInExpression
+       PathExpression
 
 .. rubric:: Legality Rules
 

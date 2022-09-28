@@ -607,8 +607,8 @@ Path Expressions
 .. syntax::
 
    PathExpression ::=
-       PathInExpression
-     | QualifiedPathInExpression
+       PathExpression
+     | QualifiedPathExpression
 
 .. rubric:: Legality Rules
 
@@ -2823,7 +2823,7 @@ Struct Expressions
        Constructee $${$$ StructExpressionContent? $$}$$
 
    Constructee ::=
-       PathInExpression
+       PathExpression
 
    StructExpressionContent ::=
        BaseInitializer
@@ -3212,10 +3212,13 @@ Method Call Expressions
 .. syntax::
 
    MethodCallExpression ::=
-       ReceiverOperand $$.$$ PathInExpressionSegment $$($$ ArgumentOperandList? $$)$$
+       ReceiverOperand $$.$$ MethodOperand $$($$ ArgumentOperandList? $$)$$
 
    ReceiverOperand ::=
        Operand
+
+   MethodOperand ::=
+       PathExpressionSegment
 
 .. rubric:: Legality Rules
 
@@ -3226,6 +3229,10 @@ of a :t:`variable`.
 :dp:`fls_jx3ryre0xs88`
 A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
 :t:`method` is being invoked by a :t:`method call expression`.
+
+:dp:`fls_3AQUOBo7akXu`
+A :t:`method operand` is an :t:`operand` that denotes the :t:`method` being
+invoked by a :t:`method call expression`.
 
 :dp:`fls_y7bj7y6davlh`
 A :t:`method call expression` is subject to :t:`method resolution`.

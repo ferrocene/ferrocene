@@ -618,6 +618,14 @@ binding pattern
 A :dt:`binding pattern` is either an :t:`identifier pattern` or a
 :t:`shorthand deconstructor`.
 
+.. _fls_5ep4xSGZwtoL:
+
+binding scope
+^^^^^^^^^^^^^
+
+:dp:`fls_6qPYH5NJ8usI`
+A :dt:`binding scope` is a :t:`scope` for :t:`[binding]s`.
+
 .. _fls_clut5DWMQin8:
 
 bit and assignment
@@ -995,15 +1003,6 @@ A :dt:`callee type` is either a :t:`function item type`, a :t:`function
 pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant` or a
 :t:`type` that implements any of the :std:`core::ops::Fn`,
 :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
-
-.. _fls_ubzcpmqig48m:
-
-canonical path
-^^^^^^^^^^^^^^
-
-:dp:`fls_drdjwsejmq6r`
-A :dt:`canonical path` is a :t:`path` that fully qualifies a :t:`name` starting
-from the current :t:`crate`.
 
 .. _fls_s78gd8yxx2yv:
 
@@ -1471,8 +1470,8 @@ declaration
 ^^^^^^^^^^^
 
 :dp:`fls_kct7ducpli6k`
-A :dt:`declaration` specifies the :t:`name` and describes the structure of
-a :t:`construct`.
+A :dt:`declaration` is a :t:`construct` that introduces a :t:`name` for an
+:t:`entity`.
 
 .. _fls_5944xn0lz8e:
 
@@ -1539,6 +1538,23 @@ pointed-to memory location of its :t:`operand`.
 
 :dp:`fls_hx0jwahdb1nf`
 See :s:`DereferenceExpression`.
+
+.. _fls_xbN0GtcH8emc:
+
+dereference type
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_HfuUQ7IaoI5j`
+A :dt:`dereference type` is either a :t:`reference type` or a :t:`type` that
+implements the :std:`core::ops::Deref` :t:`trait`.
+
+.. _fls_T380NdEsFxIp:
+
+dereference type chain
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_kIzoAEf069HE`
+A :dt:`dereference type chain` is a sequence of :t:`[dereference type]s`.
 
 .. _fls_7ipdj78o7ln:
 
@@ -1775,8 +1791,8 @@ entity
 ^^^^^^
 
 :dp:`fls_mdbck557k8sy`
-An :dt:`entity` is a :t:`construct` that can be referred to within a program by
-using a :t:`path`.
+An :dt:`entity` is a :t:`construct` that can be referred to within program
+text, usually via a :t:`field access expression` or a :t:`path`.
 
 .. _fls_xnhj9fqlfs2p:
 
@@ -1896,6 +1912,15 @@ execution
 :dp:`fls_e5jbii84hd5g`
 :dt:`Execution` is the process by which a :t:`statement` achieves its runtime
 effects.
+
+.. _fls_lqxcnZqvwcsH:
+
+explicitly declared entity
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_shpNJ0JCSCwa`
+An :dt:`explicitly declared entity` is an :t:`entity` that has a
+:t:`declaration`.
 
 .. _fls_5oQllRM7Wjsg:
 
@@ -2080,6 +2105,15 @@ field list
 
 :dp:`fls_xMZsrxMc9Cni`
 A :dt:`field list` is a :s:`RecordStructFieldList` or :s:`TupleStructFieldList`.
+
+.. _fls_BlZwxp6H62sS:
+
+field resolution
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_nL8UuclgxfGL`
+:dt:`Field resolution` is a form of :t:`resolution` that applies to the
+:t:`field selector` of a :t:`field access expression`.
 
 .. _fls_kqbata8slp1y:
 
@@ -2415,6 +2449,14 @@ A :dt:`generic parameter` is a placeholder for a :t:`constant`, a
 
 :dp:`fls_jvxpoob39632`
 See :s:`GenericParameterList`.
+
+.. _fls_CzudKdaYbfBF:
+
+generic parameter scope
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_e2tICijmLkj4`
+A :dt:`generic parameter scope` is a :t:`scope` for :t:`[generic parameter]s`.
 
 .. _fls_cgtu4v2vxvh:
 
@@ -2821,6 +2863,15 @@ implicit borrow
 An :dt:`implicit borrow` is a :t:`borrow` that is not present syntactically in
 program text.
 
+.. _fls_i3iB9xP8h8Ci:
+
+implicitly declared entity
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_VQs1jd4Nx3qR`
+An :dt:`implicitly declared entity` is an :t:`entity` that lacks an explicit
+:t:`declaration`.
+
 .. _fls_3lo8ygoyxxyf:
 
 in scope
@@ -3214,6 +3265,14 @@ defines the compile- and run-time semantics of a program.
 :dp:`fls_xd997kd2i73a`
 See :s:`Item`.
 
+.. _fls_wojJZZ4gYGfl:
+
+item scope
+^^^^^^^^^^
+
+:dp:`fls_mW7IwWGSjrl2`
+An :dt:`item scope` is a :t:`scope` for :t:`[item]s`.
+
 .. _fls_yaurxo4ogfsh:
 
 item statement
@@ -3266,6 +3325,14 @@ A :dt:`label indication` is a :t:`construct` that indicates a :t:`label`.
 
 :dp:`fls_g6iqfqooz8th`
 See :s:`LabelIndication`.
+
+.. _fls_P0on44EAB3cn:
+
+label scope
+^^^^^^^^^^^
+
+:dp:`fls_2H6HkQ102hVS`
+A :dt:`label scope` is a :t:`scope` for :t:`[label]s`.
 
 .. _fls_w5gslebevlya:
 
@@ -3783,6 +3850,15 @@ of a :t:`variable`.
 :dp:`fls_ohhcvxcaqv11`
 See :s:`MethodCallExpression`.
 
+.. _fls_05yFh5Ud0YkW:
+
+method resolution
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_LbW4z6OTuD1l`
+:dt:`Method resolution` is a kind of :t:`resolution` that applies to the
+:t:`method operand` of a :t:`method call expression`.
+
 .. _fls_2FFRdj5cO0ks:
 
 mixed site hygiene
@@ -3816,6 +3892,15 @@ A :dt:`module` is a container for zero or more :t:`[item]s`.
 
 :dp:`fls_os60q6vvm71c`
 See :s:`ModuleDeclaration`.
+
+.. _fls_iw2vYgmLhlsg:
+
+multi segment path
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_T4Xd6W6EqPSb`
+A :dt:`multi segment path` is a :t:`path` consisting of more than one
+:t:`path segment`.
 
 .. _fls_lpSCLhnaxeCg:
 
@@ -3967,7 +4052,7 @@ name
 ^^^^
 
 :dp:`fls_jjpzrs38vs3y`
-A :dt:`name` identifies an :t:`entity` within the program text.
+A :dt:`name` is an :t:`identifier` that refers to an :t:`entity`.
 
 :dp:`fls_yrzevg5kd4bi`
 See :s:`Name`.
@@ -4015,6 +4100,16 @@ named loop
 
 :dp:`fls_440dr5qix3ns`
 A :dt:`named loop` is a :t:`loop expression` with a :t:`label`.
+
+.. _fls_GesmsWSVhv3f:
+
+namespace
+^^^^^^^^^
+
+:dp:`fls_er8lcvnEqxa5`
+A :dt:`namespace` is a logical grouping of :t:`[name]s` such that the
+occurrence of a :t:`name` in one :t:`namespace` does not conflict with an
+occurrence of the same :t:`name` in another :t:`namespace`.
 
 .. _fls_3sp4twvfvb32:
 
@@ -4337,7 +4432,7 @@ path
 
 :dp:`fls_u3jyud6mhy1f`
 A :dt:`path` is a sequence of :t:`[path segment]s` logically separated by
-:dt:`namespace qualifier` ``::`` that resolves to a :t:`name`.
+:t:`namespace qualifier` ``::`` that resolves to an :t:`entity`.
 
 .. _fls_1xdj34py8zc3:
 
@@ -4345,10 +4440,19 @@ path expression
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_4ik66nmvx5hn`
-A :dt:`path expression` is an :t:`expression` that denotes a :t:`path`.
+A :dt:`path expression` is a :t:`path` that acts as an :t:`expression`.
 
 :dp:`fls_3qjpjqm0legc`
 See :s:`PathExpression`.
+
+.. _fls_EIFtIeLGZNy5:
+
+path expression resolution
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_WYcEVyc3SHuK`
+:dt:`Path expression resolution` is a form of :t:`path resolution` that applies
+to :t:`path expressions`.
 
 .. _fls_ptikwcw3b20l:
 
@@ -4362,6 +4466,15 @@ A :dt:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a
 
 :dp:`fls_9fudbxoyq8k4`
 See :s:`PathPattern`.
+
+.. _fls_J8kiBhcawvnj:
+
+path resolution
+^^^^^^^^^^^^^^^
+
+:dp:`fls_uy9Ai9vwTkjB`
+:dt:`Path resolution` is a form of :t:`resolution` that applies to
+:t:`[path]s`.
 
 .. _fls_xb54s9cs7h08:
 
@@ -4482,6 +4595,31 @@ precedence
 :dt:`Precedence` is the order by which :t:`[expression]s` are evaluated in the
 presence of other expressions.
 
+.. _fls_8Gn72FJBarfb:
+
+prelude
+^^^^^^^
+
+:dp:`fls_D0PJioOZjKNN`
+A :dt:`prelude` is a collection of :t:`entities` that are automatically brought
+:t:`in scope` of every :t:`module` in a :t:`crate`.
+
+.. _fls_AWySDxPgypiw:
+
+prelude entity
+^^^^^^^^^^^^^^
+
+:dp:`fls_2lU7RUjzFlsz`
+A :dt:`prelude entity` is an :t:`entity` declared in a :t:`prelude`.
+
+.. _fls_FYn5JqPOhiIs:
+
+prelude name
+^^^^^^^^^^^^
+
+:dp:`fls_6Jk7fUAK122A`
+A :dt:`prelude name` is a :t:`name` of a :t:`prelude entity`.
+
 .. _fls_fikexts17v7a:
 
 primitive representation
@@ -4564,12 +4702,52 @@ A :dt:`pure identifier` is an :t:`identifier` that does not include
 
 .. _fls_O6CFtnpN3UEE:
 
-qualified path-in-expression
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+qualified path expression
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_wKAS6FxqGmTf`
-A :dt:`qualified path-in-expression` is a :t:`path-in-expression` that contains
-a :t:`qualified type`.
+A :dt:`qualified path expression` is a :t:`path expression` that resolves
+through a :t:`qualified type`.
+
+:dp:`fls_MXxJn64eJpC5`
+See :s:`QualifiedPathExpression`.
+
+.. _fls_Qv0UvhSfwBuM:
+
+qualified type
+^^^^^^^^^^^^^^
+
+:dp:`fls_e7YyZXOFo6ei`
+A :dt:`qualified type` is a :t:`type` that is restricted to a set of
+:t:`[implementation]s` that exhibit :t:`implementation conformance` to a
+:t:`qualifying trait`.
+
+:dp:`fls_a4heXjzO3jem`
+See :s:`QualifiedType`.
+
+.. _fls_koVlQq8aPdPv:
+
+qualified type path
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_S0QT9ib38i8E`
+A :dt:`qualified type path` is a :t:`type path` that resolves through a
+:t:`qualified type`.
+
+:dp:`fls_RR8fFLD7Rxlt`
+See :s:`QualifiedTypePath`.
+
+.. _fls_B0m82A8jIerQ:
+
+qualifying trait
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_zKY1dWBMrqXZ`
+A :dt:`qualifying trait` is a :t:`trait` that imposes a restriction on a
+:t:`qualified type`.
+
+:dp:`fls_z6OeUWBnec90`
+See :s:`QualifyingTrait`.
 
 .. _fls_tbvugpuvcluj:
 
@@ -5037,6 +5215,15 @@ A :dt:`reserved keyword` is a :t:`keyword` that is not yet in use.
 :dp:`fls_hp9iqdrkt0cg`
 See :s:`ReservedKeyword`.
 
+.. _fls_O5iuGATZgyBu:
+
+resolution
+^^^^^^^^^^
+
+:dp:`fls_PQjEvLs5cE4y`
+:dt:`Resolution` is the process of finding a unique interpretation for a
+:t:`construct` in a program.
+
 .. _fls_uuo1qvrz1i0k:
 
 rest pattern
@@ -5129,6 +5316,15 @@ scope
 :dp:`fls_fachaj550cq1`
 A :dt:`scope` is a region of program text where a :t:`name` can be referred to.
 
+.. _fls_xZUiNkBN5e00:
+
+scope hierarchy
+^^^^^^^^^^^^^^^
+
+:dp:`fls_Spcc3L9X939d`
+The :dt:`scope hierarchy` reflects the nesting of :t:`[scope]s` as introduced
+by :t:`[scoping construct]s`.
+
 .. _fls_rfk06mm3pdxg:
 
 selected field
@@ -5147,6 +5343,14 @@ Self
 :dc:`Self` is either an implicit :t:`type parameter` in :t:`[trait]s` or an
 implicit :t:`type alias` in :t:`[implementation]s`. :t:`Self` refers to the
 :t:`type` that implements a :t:`trait`.
+
+.. _fls_exMZlNMxQvP7:
+
+Self scope
+^^^^^^^^^^
+
+:dp:`fls_pSvqWGRmFmH0`
+A :dt:`Self scope` is a :t:`scope` for :c:`Self`.
 
 .. _fls_6wjlbzmlx9n4:
 
@@ -5194,6 +5398,16 @@ sequence type
 
 :dp:`fls_lk1oslxh8h9p`
 A :dt:`sequence type` represents a sequence of elements.
+
+.. _fls_HUklMSWzx8Mg:
+
+shadowing
+^^^^^^^^^
+
+:dp:`fls_li3NXOPEH9cL`
+:dt:`Shadowing` is a property of :t:`[name]s`. A :t:`name` is said to be
+:dt:`shadowed` when another :t:`name` with the same characters is introduced
+in the same :t:`scope` within the same :t:`namespace`, effectively hiding it.
 
 .. _fls_c9xwhhg639u5:
 
@@ -5355,6 +5569,27 @@ A :dt:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :dp:`fls_cm7ysyfrdwom`
 See :s:`SimplePath`.
 
+.. _fls_gT5rZ4qC3pHo:
+
+simple path resolution
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_CQlepoN6PmKq`
+:dt:`Simple path resolution` is a kind of :t:`path resolution` that applies to
+:t:`[simple path]s`.
+
+.. _fls_23G6TAntJXqa:
+
+simple path prefix
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ijc2yHQuIltY`
+A :dt:`simple path prefix` is the leading :t:`simple path` of a
+:t:`glob import` or a :t:`nesting import`.
+
+:dp:`fls_ImHceyHhK6OZ`
+See :s:`SimplePathPrefix`.
+
 .. _fls_sgy9q06yt6cl:
 
 simple path public modifier
@@ -5390,6 +5625,15 @@ A :dt:`simple string literal` is a :t:`string literal` where the characters are
 
 :dp:`fls_osj0c4dmr6e0`
 See :s:`SimpleStringLiteral`.
+
+.. _fls_JS91BDzd03Qj:
+
+single segment path
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Hun5BCZsqd6k`
+A :dt:`single segment path` is a :t:`path` consisting of exactly one
+:t:`path segment`.
 
 .. _fls_oy5xy5pm1enx:
 
@@ -5802,6 +6046,14 @@ as a :t:`statement`.
 :dp:`fls_tcvfi2zgdm58`
 See :s:`TerminatedMacroInvocation`.
 
+.. _fls_AVZGZPd6WXXO:
+
+textual macro scope
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_xyeYk6vrmlWp`
+A :dt:`textual macro scope` is a :t:`scope` for :t:`[declarative macro]s`.
+
 .. _fls_mdcbhy96hrau:
 
 textual type
@@ -6164,6 +6416,26 @@ default :t:`value` of its related :t:`type parameter`.
 :dp:`fls_6Ap26AcSadP8`
 See :s:`TypeParameterInitializer`.
 
+.. _fls_QDCiXh7uSj9r:
+
+type path
+^^^^^^^^^
+
+:dp:`fls_UBR5czHrMTrx`
+A :dt:`type path` is a :t:`path` that acts as a :t:`type specification`.
+
+:dp:`fls_7CbNAZYSZayW`
+See :s:`TypePath`.
+
+.. _fls_wa3biT0rQ102:
+
+type path resolution
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Xv6JbfdIyvA3`
+:dt:`Type path resolution` is a form of :t:`path resolution` that applies to
+:t:`[type path]s`.
+
 .. _fls_u1zkh2m8p92:
 
 type representation
@@ -6260,6 +6532,14 @@ undefined behavior
 
 :dp:`fls_WpwmltUMQGZa`
 :dt:`Undefined behavior` is a situation that results in an unbounded error.
+
+.. _fls_X6XjWwYeTnVR:
+
+under resolution
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_BppwXSVUWtEu`
+A :t:`construct` that is being resolved is said to be :dt:`under resolution`.
 
 .. _fls_57kis2vnt3cv:
 
@@ -6620,8 +6900,9 @@ use import
 ^^^^^^^^^^
 
 :dp:`fls_uccv9zthh5vt`
-A :dt:`use import` brings :t:`[name]s` into :t:`scope` within the :t:`module`
-or :t:`block expression` where the :t:`use import` resides.
+A :t:`use import` brings :t:`[entitie]s` :t:`in scope` within the
+:t:`block expression` of an :t:`expression-with-block` or :t:`module` where the
+:t:`use import` resides.
 
 :dp:`fls_ib5wf62j4uhr`
 See :s:`UseImport`.
@@ -6738,8 +7019,8 @@ visibility
 ^^^^^^^^^^
 
 :dp:`fls_sadmsqhptlho`
-:dt:`Visibility` is a property of :t:`[item]s` that determines which
-:t:`[module]s` can refer to the :t:`name` of an :t:`item`.
+:dt:`Visibility` is a property of :t:`[field]s` and :t:`[item]s` that determines
+which :t:`[module]s` can refer to the :t:`name` of the :t:`field` or :t:`item`.
 
 .. _fls_xqjk8avt7t51:
 

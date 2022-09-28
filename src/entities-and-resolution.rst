@@ -180,9 +180,9 @@ A :t:`simple public modifier` is a :t:`visibility modifier` that grants a
 
 :dp:`fls_quzvhzpr0124`
 A :t:`super public modifier` is a :t:`visibility modifier` that grants a
-:t:`name` :t:`public visibility` within the parent :t:`module` only. A :t:`super
-public modifier` is equivalent to a :t:`simple path public modifier` where the
-:t:`simple path` denotes :t:`keyword` ``super``.
+:t:`name` :t:`public visibility` within the parent :t:`module` only. A
+:t:`super public modifier` is equivalent to a :t:`simple path public modifier`
+where the :t:`simple path` denotes :t:`keyword` ``super``.
 
 :dp:`fls_utgjx6l5zwfl`
 An :t:`external item`, a :t:`field`, or an :t:`item` that appears without a
@@ -316,17 +316,17 @@ A :t:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 above.
 
 :dp:`fls_iuzvtr3oax1o`
-If a :t:`simple path` appears in a :t:`use import` and starts with a :t:`path
-segment` expressed as either :t:`keyword` ``crate``, :t:`keyword` ``$crate``,
-:t:`keyword` ``self``, or :t:`keyword` ``super``, then the :t:`path` shall be
-the :t:`simple path prefix` of a :t:`glob import` or a :t:`nesting import`, or
-the :t:`simple path` of a :t:`simple import`.
+If a :t:`simple path` appears in a :t:`use import` and starts with a
+:t:`path segment` expressed as either :t:`keyword` ``crate``, :t:`keyword`
+``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``super``, then the
+:t:`path` shall be the :t:`simple path prefix` of a :t:`glob import` or a
+:t:`nesting import`, or the :t:`simple path` of a :t:`simple import`.
 
 :dp:`fls_cw006jhlboa`
-If a :t:`simple path` appears in a :t:`use import` and starts with a :t:`path
-segment` expressed as :t:`keyword` ``self``, then the :t:`path` shall be part of
-the :s:`UseImportContent` of a :t:`nesting import` as long as the :t:`path` is a
-:t:`single segment path`.
+If a :t:`simple path` appears in a :t:`use import` and starts with a
+:t:`path segment` expressed as :t:`keyword` ``self``, then the :t:`path` shall
+be part of the :s:`UseImportContent` of a :t:`nesting import` as long as the
+:t:`path` is a :t:`single segment path`.
 
 :dp:`fls_kv5bpq8rf1j9`
 A :t:`simple path` is subject to :t:`simple path resolution`.
@@ -374,8 +374,9 @@ A :dt:`qualified fn trait` is a :t:`construct` that refers to the
 :t:`trait`.
 
 :dp:`fls_cy7vza3flqi9`
-If a :t:`path` contains a :t:`path segment` with a :t:`qualified fn trait`, then
-the :t:`path segment` shall be the last :t:`path segment` of the :t:`path`.
+If a :t:`path` contains a :t:`path segment` with a :t:`qualified fn trait`,
+then the :t:`path segment` shall be the last :t:`path segment` of the
+:t:`path`.
 
 .. rubric:: Examples
 
@@ -443,8 +444,8 @@ Binding Scopes
 A :t:`binding scope` is a :t:`scope` for :t:`[binding]s`.
 
 :dp:`fls_u52mx4xw8zod`
-The :t:`binding` of a :t:`closure parameter` is :t:`in scope` within the related
-:t:`closure body`.
+The :t:`binding` of a :t:`closure parameter` is :t:`in scope` within the
+related :t:`closure body`.
 
 :dp:`fls_t9mk8kasobea`
 The :t:`binding` of a :t:`function parameter` is :t:`in scope` within the
@@ -460,8 +461,8 @@ related :t:`block expression`.
 
 :dp:`fls_74nk389rk075`
 The :t:`binding` of a :t:`let statement` is :t:`in scope` after the related
-:t:`let statement`, until the end of the :t:`block expression` where the related
-:t:`let statement` appears.
+:t:`let statement`, until the end of the :t:`block expression` where the
+related :t:`let statement` appears.
 
 :dp:`fls_xbnki64un70v`
 The :t:`binding` of a :t:`match arm` is :t:`in scope` within its related
@@ -485,8 +486,8 @@ A :t:`generic parameter` of an :t:`enum type` is :t:`in scope` within the
 related :t:`[enum variant]s` and :t:`where clause`.
 
 :dp:`fls_t9ztg017itkp`
-A :t:`generic parameter` of a :t:`function pointer type` is :t:`in scope` within
-the related :t:`type specification`.
+A :t:`generic parameter` of a :t:`function pointer type` is :t:`in scope`
+within the related :t:`type specification`.
 
 :dp:`fls_pmo939jw9m1m`
 A :t:`generic parameter` of an :t:`implementation` is :t:`in scope` within the
@@ -517,8 +518,8 @@ A :t:`generic parameter` of a :t:`union type` is :t:`in scope` within the
 related :t:`[field]s` and :t:`where clause`.
 
 :dp:`fls_95z5mytvfjia`
-A :t:`generic parameter` is not :t:`in scope` within nested :t:`[item]s`, except
-within :t:`[associated item]s`.
+A :t:`generic parameter` is not :t:`in scope` within nested :t:`[item]s`,
+except within :t:`[associated item]s`.
 
 .. _fls_m0z7omni9hp0:
 
@@ -532,8 +533,8 @@ An :t:`item scope` is a :t:`scope` for :t:`[item]s`.
 
 :dp:`fls_huvo0mp2i6fb`
 An :t:`item` declared within the :t:`block expression` of an
-:t:`expression-with-block` is :t:`in scope` within the related :t:`block
-expression`.
+:t:`expression-with-block` is :t:`in scope` within the related
+:t:`block expression`.
 
 :dp:`fls_x8r0oppuc1t6`
 An :t:`item` declared within a :t:`module` is :t:`in scope` within the
@@ -569,8 +570,8 @@ Self Scope
 A :t:`Self scope` is a :t:`scope` for :c:`Self`.
 
 :dp:`fls_kxdwq4b136tl`
-:c:`Self` of an :t:`enum type` is :t:`in scope` within the related :t:`[enum
-variant]s`, :t:`[generic parameter]s`, and :t:`where clause`.
+:c:`Self` of an :t:`enum type` is :t:`in scope` within the related
+:t:`[enum variant]s`, :t:`[generic parameter]s`, and :t:`where clause`.
 
 :dp:`fls_nf4g82gi12ij`
 :c:`Self` of an :t:`implementation` is :t:`in scope` within the related
@@ -581,8 +582,8 @@ variant]s`, :t:`[generic parameter]s`, and :t:`where clause`.
 :t:`[field]s`, :t:`[generic parameter]s`, and :t:`where clause`.
 
 :dp:`fls_cha4ddwfqwvj`
-:c:`Self` of a :t:`trait` is :t:`in scope` within the related :t:`[generic
-parameter]s`, :t:`trait body`, and :t:`where clause`.
+:c:`Self` of a :t:`trait` is :t:`in scope` within the related
+:t:`[generic parameter]s`, :t:`trait body`, and :t:`where clause`.
 
 :dp:`fls_ql4i021ut2n8`
 :c:`Self` of a :t:`union type` is :t:`in scope` within the related
@@ -608,9 +609,9 @@ declaration, until the end of the :t:`block expression` or the enclosing
 
 :dp:`fls_cbfuh9y87y6i`
 If the :t:`textual macro scope` is introduced by a :t:`module` and the
-:t:`module` is subject to :t:`attribute` :c:`macro_use`, then the :t:`textual
-macro scope` extends until the end of the :t:`scope` introduced by the enclosing
-:t:`block` or :t:`module`.
+:t:`module` is subject to :t:`attribute` :c:`macro_use`, then the
+:t:`textual macro scope` extends until the end of the :t:`scope` introduced by
+the enclosing :t:`block` or :t:`module`.
 
 .. _fls_lnpyb285qdiy:
 
@@ -627,8 +628,8 @@ enclosing :t:`scoping construct`.
 
 :dp:`fls_ns4eog3od4kw`
 A :dt:`scoping construct` is a :t:`construct` that introduces :t:`[scope]s`
-into the :t:`scope hierarchy`. The following :t:`[construct]s` are :t:`[scoping
-construct]s`:
+into the :t:`scope hierarchy`. The following :t:`[construct]s` are
+:t:`[scoping construct]s`:
 
 * :dp:`fls_kqmykyzdb1k6`
   :t:`[Block expression]s`,
@@ -685,36 +686,38 @@ construct]s`:
   :t:`Union type` :t:`[declaration]s`.
 
 :dp:`fls_nuobrpnymym1`
-A :t:`closure expression` introduces a :t:`binding scope` into the :t:`scoping
-hierarchy`.
+A :t:`closure expression` introduces a :t:`binding scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_r0x9sw7dwnww`
 A :t:`declarative macro` introduces a :t:`textual macro scope` into the
 :t:`scoping hierarchy`.
 
 :dp:`fls_ve7svuy7xvh0`
-The :t:`declaration` of an :t:`enum type` introduces a :t:`generic parameter
-scope` and a :t:`Self scope` into the :t:`scoping hierarchy`.
+The :t:`declaration` of an :t:`enum type` introduces a
+:t:`generic parameter scope` and a :t:`Self scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_pvfqhtts3qsa`
 The :t:`declaration` of a :t:`function` introduces a :t:`binding scope` and a
 :t:`generic parameter scope` into the :t:`scoping hierarchy`.
 
 :dp:`fls_9k9hourczbv7`
-The :t:`specification` of a :t:`function pointer type` introduces a :t:`generic
-parameter scope` into the :t:`scoping hierarchy`.
+The :t:`specification` of a :t:`function pointer type` introduces a
+:t:`generic parameter scope` into the :t:`scoping hierarchy`.
 
 :dp:`fls_p6wiuhkeypzs`
-An :t:`if let expression` introduces a :t:`binding scope` into the :t:`scoping
-hierarchy`.
+An :t:`if let expression` introduces a :t:`binding scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_34usianesmf6`
-The :t:`declaration` of an :t:`implementation` introduces a :t:`generic
-parameter scope` and a :t:`Self scope` into the :t:`scoping hierarchy`.
+The :t:`declaration` of an :t:`implementation` introduces a
+:t:`generic parameter scope` and a :t:`Self scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_n1a41d8i0rot`
-A :t:`let statement` introduces a :t:`binding scope` into the :t:`scoping
-hierarchy`.
+A :t:`let statement` introduces a :t:`binding scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_amhi3d9dd3i3`
 A :t:`for loop expression` or a :t:`while let loop expression` introduces a
@@ -725,16 +728,17 @@ An :t:`infinite loop expression` or a :t:`while loop expression` introduces a
 :t:`label scope` into the :t:`scoping hierarchy`.
 
 :dp:`fls_fiyj50u6cg2n`
-A :t:`match arm` introduces a :t:`binding scope` into the :t:`scoping
-hierarchy`.
+A :t:`match arm` introduces a :t:`binding scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_azjx3y5yezoi`
 The :t:`declaration` of a :t:`module` introduces an :t:`item scope` into the
 :t:`scoping hierarchy`.
 
 :dp:`fls_puly43s4x360`
-The :t:`declaration` of a :t:`struct type` introduces a :t:`generic parameter
-scope` and a :t:`Self scope` into the :t:`scoping hierarchy`.
+The :t:`declaration` of a :t:`struct type` introduces a
+:t:`generic parameter scope` and a :t:`Self scope` into the
+:t:`scoping hierarchy`.
 
 :dp:`fls_pxtlu7ud6w2h`
 The :t:`declaration` of a :t:`trait` introduces a :t:`generic parameter scope`
@@ -745,16 +749,17 @@ A :t:`trait bound` introduces a :t:`generic parameter scope` into the
 :t:`scoping hierarchy`.
 
 :dp:`fls_qofr9vme46wp`
-The :t:`declaration` of a :t:`type alias` introduces a :t:`generic parameter
-scope`.
+The :t:`declaration` of a :t:`type alias` introduces a
+:t:`generic parameter scope`.
 
 :dp:`fls_gjvfty9m84a9`
 A :t:`type bound predicate` introduces a :t:`generic parameter scope` into the
 :t:`scoping hierarchy`.
 
 :dp:`fls_xr9wors6oa7w`
-The :t:`declaration` of a :t:`union type` introduces a :t:`generic parameter
-scope` and a :t:`Self scope` into the :t:`scoping hierarchy`.
+The :t:`declaration` of a :t:`union type` introduces a
+:t:`generic parameter scope` and a :t:`Self scope` into the
+:t:`scoping hierarchy`.
 
 .. _fls_4df1tsti1693:
 
@@ -769,15 +774,15 @@ of a :t:`name` in one :t:`namespace` does not conflict with an occurrence of
 the same :t:`name` in another :t:`namespace`.
 
 :dp:`fls_avsua7bho205`
-:t:`[Name]s` are segregated into one of five :t:`[namespace]s` based on the kind
-of :t:`entity` the :t:`name` refers to.
+:t:`[Name]s` are segregated into one of five :t:`[namespace]s` based on the
+kind of :t:`entity` the :t:`name` refers to.
 
 :dp:`fls_9e3xeza853wx`
 A :dt:`label namespace` contains :t:`[label]s`.
 
 :dp:`fls_w625tk3ogdui`
-A :dt:`lifetime namespace` contains the :t:`[name]s` of :t:`[lifetime
-parameter]s`.
+A :dt:`lifetime namespace` contains the :t:`[name]s` of
+:t:`[lifetime parameter]s`.
 
 :dp:`fls_crwfafrmydr7`
 A :dt:`macro namespace` contains the :t:`[name]s` of the following kinds of
@@ -902,17 +907,18 @@ referred to as :t:`prelude entities`. The :t:`name` of a :t:`prelude entity`
 is referred to as a :t:`prelude name`.
 
 :dp:`fls_n4102qskkmz2`
-The :dt:`core prelude` is a :t:`prelude` that brings :t:`in
-scope` of every :t:`module` all re-exported :t:`entities` from the
+The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
+:t:`module` all re-exported :t:`entities` from the
 :std:`core::prelude::rust_2021` :t:`module`.
 
 :dp:`fls_atvnwly4w8g2`
-An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of
-the :t:`root module` the :t:`entities` of the :t:`[crate]s` imported using
+An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
+:t:`root module` the :t:`entities` of the :t:`[crate]s` imported using
 :t:`[external crate import]s`. If the :t:`external crate import` uses a
-:t:`renaming`, then the :t:`renaming` is instead added to the :t:`external
-prelude`. The :t:`core crate` is always added to the :t:`external prelude`
-unless the :t:`crate root` is subject to :t:`attribute` :c:`no_core`.
+:t:`renaming`, then the :t:`renaming` is instead added to the
+:t:`external prelude`. The :t:`core crate` is always added to the
+:t:`external prelude` unless the :t:`crate root` is subject to :t:`attribute`
+:c:`no_core`.
 
 :dp:`fls_pbc7ktlu0pl`
 The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
@@ -987,8 +993,8 @@ A :t:`glob import` is a :t:`use import` that brings all :t:`[entitie]s` with
 :t:`public visibility` prefixed by its :t:`simple path prefix` into :t:`scope`.
 
 :dp:`fls_ldr7tsuqw34s`
-A :t:`nesting import` is a :t:`use import` that provides a common :t:`simple
-path prefix` for its nested :t:`[use import]s`.
+A :t:`nesting import` is a :t:`use import` that provides a common
+:t:`simple path prefix` for its nested :t:`[use import]s`.
 
 :dp:`fls_2bkcn83smy2y`
 A :t:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
@@ -1112,13 +1118,13 @@ implements the :std:`core::ops::Deref` :t:`trait`.
 
 :dp:`fls_4hulwazdu20i`
 A :t:`dereference type chain` is a sequence of :t:`[dereference type]s`. A
-:t:`dereference type chain` with an initial :t:`dereference type`. From then on,
-the :t:`dereference type chain` continues as follows:
+:t:`dereference type chain` with an initial :t:`dereference type`. From then
+on, the :t:`dereference type chain` continues as follows:
 
 * :dp:`fls_ptocwx5p25lj`
   If the previous :t:`dereference type` is a :t:`reference type`, then the
-  :t:`dereference type chain` continues with the inner :t:`type` of the previous
-  :t:`dereference type`.
+  :t:`dereference type chain` continues with the inner :t:`type` of the
+  previous :t:`dereference type`.
 
 * :dp:`fls_ygam5nisv98c`
   Otherwise the :t:`dereference type chain` continues with :t:`type`
@@ -1140,20 +1146,22 @@ A :dt:`candidate container type` is the :t:`type` of the :t:`container operand`
 of a :t:`field access expression` :t:`under resolution`.
 
 :dp:`fls_jrk3gzqvqr8e`
-A :t:`candidate container type chain` is a sequence of :t:`[candidate container
-type]s`. The :t:`candidate container type chain` starts with the :t:`type`
-of the :t:`container operand` of the :t:`field access expression` :t:`under
-resolution`. From then on, the :t:`candidate container type chain` is treated as
-a :t:`dereference type chain`.
+A :t:`candidate container type chain` is a sequence of
+:t:`[candidate container type]s`. The :t:`candidate container type chain`
+starts with the :t:`type` of the :t:`container operand` of the
+:t:`field access expression` :t:`under resolution`. From then on, the
+:t:`candidate container type chain` is treated as a
+:t:`dereference type chain`.
 
 :dp:`fls_asn20qx16sr6`
 A :dt:`candidate field` is a :t:`field` of a :t:`candidate container type`
-that is visible from the location of the :t:`field access expression` :t:`under
-resolution`.
+that is visible from the location of the :t:`field access expression`
+:t:`under resolution`.
 
 :dp:`fls_jzoon4x89zp7`
 A :dt:`candidate indexed field` is a :t:`candidate field` whose position in the
-:t:`candidate operand type` matches the index of an :t:`indexed field selector`.
+:t:`candidate operand type` matches the index of an
+:t:`indexed field selector`.
 
 :dp:`fls_r80pixfoe5hk`
 A :dt:`candidate named field` is a :t:`candidate field` whose :t:`name` matches
@@ -1163,28 +1171,28 @@ the characters of a :t:`named field selector`.
 :t:`Field resolution` of an :t:`indexed field access` proceeds as follows:
 
 #. :dp:`fls_2bp1zs7qaz7o`
-   For each :t:`candidate container type` of the :t:`candidate container type
-   chain`
+   For each :t:`candidate container type` of the
+   :t:`candidate container type chain`
 
    #. :dp:`fls_s14fegwhwnc8`
-      Try to locate a :t:`candidate indexed field` of the :t:`[candidate
-      container typ]e`.
+      Try to locate a :t:`candidate indexed field` of the
+      :t:`candidate container type`.
 
    #. :dp:`fls_tfjm27ydiake`
-      If such a :t:`candidate indexed field` exists, the :t:`indexed field
-      access` resolves to that :t:`candidate indexed field` and :t:`field
-      resolution` stops.
+      If such a :t:`candidate indexed field` exists, the
+      :t:`indexed field access` resolves to that :t:`candidate indexed field`
+      and :t:`field resolution` stops.
 
 :dp:`fls_p6hgoqo0kcx`
 :t:`Field resolution` of a :t:`named field access` proceeds as follows:
 
 #. :dp:`fls_e7sj392ohvbd`
-   For each :t:`candidate container type` of the :t:`candidate container type
-   chain`
+   For each :t:`candidate container type` of the
+   :t:`candidate container type chain`
 
    #. :dp:`fls_z6qt9obbhhcg`
-      Try to locate a :t:`candidate named field` of the :t:`candidate operand
-      type`.
+      Try to locate a :t:`candidate named field` of the
+      :t:`candidate operand type`.
 
    #. :dp:`fls_ljnjxex3u5o`
       If such a :t:`candidate named field` exists, the :t:`named field access`
@@ -1206,27 +1214,27 @@ Method Resolution
 :t:`method operand` of a :t:`method call expression`.
 
 :dp:`fls_z80ylmlu1f3q`
-A :dt:`candidate receiver type` is the :t:`type` of the :t:`receiver operand` of
-a :t:`method call expression` :t:`under resolution`.
+A :dt:`candidate receiver type` is the :t:`type` of the :t:`receiver operand`
+of a :t:`method call expression` :t:`under resolution`.
 
 :dp:`fls_e1029pvq706h`
-A :dt:`candidate receiver type chain` is a sequence of :t:`[candidate receiver
-type]s`. The :t:`candidate receiver type chain` starts with the :t:`type`
-of the :t:`receiver operand` of the :t:`method call expression` :t:`under
-resolution`. From then on, the :t:`candidate receiver type chain` is treated as
-a :t:`dereference type chain`.
+A :dt:`candidate receiver type chain` is a sequence of
+:t:`[candidate receiver type]s`. The :t:`candidate receiver type chain` starts
+with the :t:`type` of the :t:`receiver operand` of the
+:t:`method call expression` :t:`under resolution`. From then on, the
+:t:`candidate receiver type chain` is treated as a :t:`dereference type chain`.
 
 :dp:`fls_w3ik83d43fr1`
 A :dt:`candidate method` is a method of a :t:`candidate receiver type` that
-is visible from the location of the :t:`method call expression` :t:`under
-resolution`.
+is visible from the location of the :t:`method call expression`
+:t:`under resolution`.
 
 :dp:`fls_pybv4krsvktv`
 :t:`Method resolution` proceeds as follows:
 
 #. :dp:`fls_m2njj6no0p1i`
-   For each :t:`candidate receiver type` of the :t:`candidate receiver type
-   chain`
+   For each :t:`candidate receiver type` of the
+   :t:`candidate receiver type chain`
 
    #. :dp:`fls_16l2q1wpcnbp`
       Perform :t:`method resolution receiver candidate lookup` for the
@@ -1234,9 +1242,9 @@ resolution`.
 
    #. :dp:`fls_fcnahkqxomuo`
       If the last :t:`candidate receiver type` is an :t:`array type`, then
-      perform :t:`method resolution receiver candidate lookup` for a :t:`slice
-      type` where the :t:`slice type` has the same :t:`element type` as the
-      :t:`array type`.
+      perform :t:`method resolution receiver candidate lookup` for a
+      :t:`slice type` where the :t:`slice type` has the same :t:`element type`
+      as the :t:`array type`.
 
 :dp:`fls_ii0fdpekn1qt`
 :dt:`Method resolution receiver candidate lookup` for a :t:`receiver type`
@@ -1255,8 +1263,8 @@ proceeds as follows:
    :t:`mutable borrow` of the :t:`receiver type`.
 
 :dp:`fls_bb4cbmvui8fk`
-:dt:`Method resolution implementation candidate lookup` for a :t:`receiver type`
-proceeds as follows:
+:dt:`Method resolution implementation candidate lookup` for a
+:t:`receiver type` proceeds as follows:
 
 #. :dp:`fls_5wny1yxbyuz0`
    Perform :t:`method resolution inherent implementation candidate lookup` for
@@ -1277,23 +1285,23 @@ proceeds as follows:
    For each :t:`dereference type` in the :t:`dereference type chain`
 
    #. :dp:`fls_bsf4hy9x7c2e`
-      For each :t:`inherent implementation` in the set of :t:`[inherent
-      implementation]s` of the :t:`dereference type` where the :t:`implementing
-      type` :t:`unifies` with the :t:`dereference type`
+      For each :t:`inherent implementation` in the set of
+      :t:`[inherent implementation]s` of the :t:`dereference type` where the
+      :t:`implementing type` unifies with the :t:`dereference type`
 
       #. :dp:`fls_cnn5hkf1z5q4`
          Try to locate a :t:`candidate method` in the :t:`inherent
-         implementation`, where the :t:`type` of the :t:`self parameter` unifies
-         with the :t:`receiver type`.
+         implementation`, where the :t:`type` of the :t:`self parameter`
+         unifies with the :t:`receiver type`.
 
       #. :dp:`fls_j9ho6xc2fj0w`
-         If such a :t:`candidate method` exists, then the :t:`method call
-         expression` resolves to that :t:`candidate method` and :t:`method
-         resolution` stops.
+         If such a :t:`candidate method` exists, then the
+         :t:`method call expression` resolves to that :t:`candidate method` and
+         :t:`method resolution` stops.
 
 :dp:`fls_1y94elgpg0uk`
-:dt:`Method resolution trait implementation candidate lookup` for a :t:`receiver
-type` proceeds as follows:
+:dt:`Method resolution trait implementation candidate lookup` for a
+:t:`receiver type` proceeds as follows:
 
 #. :dp:`fls_npsdxrtcslcf`
    Construct the :t:`dereference type chain` for the :t:`receiver type`.
@@ -1306,14 +1314,14 @@ type` proceeds as follows:
       :t:`implemented trait` is :t:`in scope`
 
       #. :dp:`fls_1azkiu20r0e4`
-         Try to locate a :t:`candidate method` in the :t:`trait implementation`,
-         where the :t:`type` of the :t:`self parameter` unifies with the
-         :t:`receiver type`.
+         Try to locate a :t:`candidate method` in the
+         :t:`trait implementation`, where the :t:`type` of the
+         :t:`self parameter` unifies with the :t:`receiver type`.
 
       #. :dp:`fls_ose5m4bhkg57`
-         If such a :t:`candidate method` exists, then the :t:`method call
-         expression` resolves to that :t:`candidate method` and :t:`method
-         resolution` stops.
+         If such a :t:`candidate method` exists, then the
+         :t:`method call expression` resolves to that :t:`candidate method` and
+         :t:`method resolution` stops.
 
 :dp:`fls_jw2yv23cduu4`
 A :t:`method call expression` shall resolve to exactly one :t:`method`.
@@ -1329,8 +1337,8 @@ Path Resolution
 :t:`Path resolution` is a form of :t:`resolution` that applies to :t:`[path]s`.
 
 :dp:`fls_nmev0tnzgw35`
-:t:`Path resolution` resolves a :t:`path` by resolving individual :t:`[path
-segment]s` in sequence, starting from the leftmost :t:`path segment`.
+:t:`Path resolution` resolves a :t:`path` by resolving individual
+:t:`[path segment]s` in sequence, starting from the leftmost :t:`path segment`.
 
 :dp:`fls_p23q1ob2qitz`
 A :t:`path segment` shall resolve to exactly one :t:`entity`.
@@ -1338,14 +1346,14 @@ A :t:`path segment` shall resolve to exactly one :t:`entity`.
 :dp:`fls_e9rv8dfa0arl`
 A :dt:`candidate direct entity` is an :t:`entity` that is visible from the
 location of a :t:`path` :t:`under resolution` and is located by first examining
-:t:`[textual macro scope]s`, followed by examining the :t:`scope hierarchy` from
-the innermost :t:`scope` enclosing the :t:`path` to the outermost :t:`scope`,
-followed by examining :t:`[prelude]s`.
+:t:`[textual macro scope]s`, followed by examining the :t:`scope hierarchy`
+from the innermost :t:`scope` enclosing the :t:`path` to the outermost
+:t:`scope`, followed by examining :t:`[prelude]s`.
 
 :dp:`fls_yule33qm1ok`
-A :dt:`candidate external prelude entity` is an :t:`entity` that is visible from
-the location of a :t:`path` :t:`under resolution` and is located by examining
-the :t:`external prelude`.
+A :dt:`candidate external prelude entity` is an :t:`entity` that is visible
+from the location of a :t:`path` :t:`under resolution` and is located by
+examining the :t:`external prelude`.
 
 :dp:`fls_7xmhm2lf2h8f`
 A :dt:`candidate selected entity` is an :t:`entity` that is visible from
@@ -1357,8 +1365,9 @@ A :dt:`namespace context` is a set of :t:`[namespace]s` where the :t:`[name]s`
 of :t:`candidate selected entities` reside.
 
 :dp:`fls_9tedg9lpewqa`
-A :dt:`resolution context` is a set of :t:`entities` that informs :t:`path
-resolution` by restricting the number of :t:`candidate selected entities`.
+A :dt:`resolution context` is a set of :t:`entities` that informs
+:t:`path resolution` by restricting the number of
+:t:`candidate selected entities`.
 
 :dp:`fls_mvymlhp7192e`
 The resolution of the leftmost :t:`path segment` of a :t:`path` proceeds as
@@ -1366,24 +1375,24 @@ follows:
 
 * :dp:`fls_cs485plo4z49`
   If the leftmost :t:`path segment` is expressed as :t:`keyword` ``crate``,
-  then what the leftmost :t:`path segment` resolves to and its :t:`resolution
-  context` is the :t:`entity` of the current :t:`crate`.
+  then what the leftmost :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the current :t:`crate`.
 
 * :dp:`fls_yrpem8vhxpr5`
   If the leftmost :t:`path segment` is expressed as :t:`keyword` ``$crate``,
-  then what the leftmost :t:`path segment` resolves to and its :t:`resolution
-  context` is the :t:`entity` of the :t:`crate` that declares the :t:`macro`
-  that is being expanded.
+  then what the leftmost :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the :t:`crate` that declares
+  the :t:`macro` that is being expanded.
 
 * :dp:`fls_ri50nc2dg7c4`
   If the leftmost :t:`path segment` is expressed as :t:`keyword` ``self``,
-  then what the leftmost :t:`path segment` resolves to and its :t:`resolution
-  context` is the :t:`entity` of the current :t:`module`.
+  then what the leftmost :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the current :t:`module`.
 
 * :dp:`fls_to52oma1bvx3`
   If the leftmost :t:`path segment` is expressed as :t:`keyword` ``Self``,
-  then what the leftmost :t:`path segment` resolves to and its :t:`resolution
-  context` is
+  then what the leftmost :t:`path segment` resolves to and its
+  :t:`resolution context` is
 
   * :dp:`fls_kpn2y7xb3s8q`
     The :t:`entity` of the :t:`abstract data type`, if the :t:`path` appears
@@ -1399,25 +1408,25 @@ follows:
 
 * :dp:`fls_l2y464skbuta`
   If the leftmost :t:`path segment` is expressed as :t:`keyword` ``super``,
-  then what the leftmost :t:`path segment` resolves to and its :t:`resolution
-  context` is the :t:`entity` of the parent :t:`module` of the current
-  :t:`module`.
+  then what the leftmost :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the parent :t:`module` of the
+  current :t:`module`.
 
 * :dp:`fls_n2x13sg5szbl`
   If the leftmost :t:`path segment` is an :t:`identifier`, then
 
   * :dp:`fls_53kd7eb1qzuz`
-    If the :t:`path` is a :t:`global path`, then try to find a :t:`candidate
-    external prelude entity` whose :t:`name` matches the characters of the
-    leftmost :t:`path segment`. What the leftmost :t:`path segment` resolves
-    to and its :t:`resolution context` is that :t:`candidate external prelude
-    entity`.
+    If the :t:`path` is a :t:`global path`, then try to find a
+    :t:`candidate external prelude entity` whose :t:`name` matches the
+    characters of the leftmost :t:`path segment`. What the leftmost
+    :t:`path segment` resolves to and its :t:`resolution context` is that
+    :t:`candidate external prelude entity`.
 
   * :dp:`fls_3spnlz9tqnhj`
-    Otherwise try to find a :t:`candidate direct entity` whose :t:`name` matches
-    the characters of the leftmost :t:`path segment`. What the leftmost :t:`path
-    segment` resolves to and its :t:`resolution context` is that :t:`candidate
-    direct entity`.
+    Otherwise try to find a :t:`candidate direct entity` whose :t:`name`
+    matches the characters of the leftmost :t:`path segment`. What the leftmost
+    :t:`path segment` resolves to and its :t:`resolution context` is that
+    :t:`candidate direct entity`.
 
 * :dp:`fls_lxa7uhmdoy9d`
   If the leftmost :t:`path segment` starts with a :t:`qualified type`, then
@@ -1432,14 +1441,14 @@ follows:
   * :dp:`fls_wypnvfklnmc1`
     Otherwise the :t:`resolution context` of the leftmost :t:`path segment`
     consists of the :t:`entity` of the :t:`qualified type`, the :t:`entities`
-    of all its :t:`[inherent implementation]s`, and the :t:`entities` of all its
-    :t:`[trait implementation]s` of :t:`[trait]s` that are :t:`in scope`. **What
-    does the path segment resolve to?**
+    of all its :t:`[inherent implementation]s`, and the :t:`entities` of all
+    its :t:`[trait implementation]s` of :t:`[trait]s` that are :t:`in scope`.
+    **What does the path segment resolve to?**
 
 :dp:`fls_zi46lmwsn4rg`
 The resolution of the rightmost :t:`path segment` is determined based on the
-:t:`path resolution` kind, where the :t:`name` of the :t:`candidate selected
-entity` is restricted by the :t:`namespace context`.
+:t:`path resolution` kind, where the :t:`name` of the
+:t:`candidate selected entity` is restricted by the :t:`namespace context`.
 
 .. _fls_bbso3c45kr9z:
 
@@ -1457,13 +1466,14 @@ The :t:`namespace context` of :t:`simple path resolution` is determined as
 follows:
 
 * :dp:`fls_mk0ufkeggot6`
-  If the :t:`simple path` is part of an :t:`attribute` or a :t:`macro
-  invocation`, then the :t:`namespace context` is the :t:`macro namespace`.
+  If the :t:`simple path` is part of an :t:`attribute` or a
+  :t:`macro invocation`, then the :t:`namespace context` is the
+  :t:`macro namespace`.
 
 * :dp:`fls_ayv8okec9fwb`
-  If the :t:`simple path` is part of a :t:`use import`, then the :t:`namespace
-  context` consists of the :t:`macro namespace`, the :t:`type namespace`, and
-  the :t:`value namespace`.
+  If the :t:`simple path` is part of a :t:`use import`, then the
+  :t:`namespace context` consists of the :t:`macro namespace`, the
+  :t:`type namespace`, and the :t:`value namespace`.
 
 * :dp:`fls_ppoc6wcplab6`
   If the :t:`simple path` is part of a :t:`visibility modifier`, then the
@@ -1476,18 +1486,18 @@ left-to-right order, as follows:
 
 * :dp:`fls_jhivcca0xcqj`
   If the current :t:`path segment` is expressed as :t:`keyword` ``super``, then
-  what the current :t:`path segment` resolves to and its :t:`resolution context`
-  is the :t:`entity` of the parent :t:`module` of the previous :t:`[path
-  segment]'s` :t:`resolution context`.
+  what the current :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the parent :t:`module` of the
+  previous :t:`[path segment]'s` :t:`resolution context`.
 
 * :dp:`fls_tfsgutcpube2`
-  Otherwise try to find a :t:`candidate selected entity` whose :t:`name` matches
-  the characters of the current :t:`path segment` within the previous :t:`[path
-  segment]'s` :t:`resolution context`, where if the current :t:`path segment` is
-  not the rightmost :t:`path segment`, the :t:`resolution context` is restricted
-  to the :t:`entities` of :t:`modules`. What the current :t:`path segment`
-  resolves to and its :t:`resolution context` is that :t:`candidate selected
-  entity`.
+  Otherwise try to find a :t:`candidate selected entity` whose :t:`name`
+  matches the characters of the current :t:`path segment` within the previous
+  :t:`[path segment]'s` :t:`resolution context`, where if the current
+  :t:`path segment` is not the rightmost :t:`path segment`, the
+  :t:`resolution context` is restricted to the :t:`entities` of :t:`modules`.
+  What the current :t:`path segment` resolves to and its
+  :t:`resolution context` is that :t:`candidate selected entity`.
 
 .. _fls_o9u2h5m17kpz:
 
@@ -1501,19 +1511,19 @@ Path Expression Resolution
 to :t:`path expressions`.
 
 :dp:`fls_xyzdajtf4u2t`
-The :t:`namespace context` of :t:`path expression resolution` is the :t:`value
-namespace`.
+The :t:`namespace context` of :t:`path expression resolution` is the
+:t:`value namespace`.
 
 :dp:`fls_d45vu3iazi3`
 The leftmost :t:`path segment` of a :t:`path expression` is resolved using
-general :t:`path resolution`. The remaining :t:`[path segment]s` are resolved in
-left-to-right order, as follows:
+general :t:`path resolution`. The remaining :t:`[path segment]s` are resolved
+in left-to-right order, as follows:
 
 * :dp:`fls_9pjhok9rctty`
   If the current :t:`path segment` is expressed as :t:`keyword` ``super``, then
-  what the current :t:`path segment` resolves to and its :t:`resolution context`
-  is the :t:`entity` of the parent :t:`module` of the previous :t:`[path
-  segment]'s` :t:`resolution context`.
+  what the current :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the parent :t:`module` of the
+  previous :t:`[path segment]'s` :t:`resolution context`.
 
 * :dp:`fls_2wbpr9lvz5yq`
   If the current :t:`path segment` is the rightmost :t:`path segment`, then
@@ -1521,11 +1531,11 @@ left-to-right order, as follows:
   * :dp:`fls_u5nyv6ii1g2l`
     If the previous :t:`[path segment]'s` :t:`resolution context` is an
     :t:`enum type`, then try to find a :t:`candidate selected entity` whose
-    :t:`name` matches the characters of the current :t:`path segment`, where the
-    :t:`resolution context` is restricted to the :t:`entities` of the :t:`[enum
-    variant]s` of that :t:`enum type`. What the current :t:`path segment`
-    resolves to and its :t:`resolution context` is that :t:`candidate selected
-    entity`.
+    :t:`name` matches the characters of the current :t:`path segment`, where
+    the :t:`resolution context` is restricted to the :t:`entities` of the
+    :t:`[enum variant]s` of that :t:`enum type`. What the current
+    :t:`path segment` resolves to and its :t:`resolution context` is that
+    :t:`candidate selected entity`.
 
   * :dp:`fls_bscg48os5otx`
     If the previous :t:`[path segment]'s` :t:`[resolution contex]t` is a
@@ -1536,9 +1546,9 @@ left-to-right order, as follows:
 
   * :dp:`fls_qbmp0blpoxx9`
     If the previous :t:`[path segment]'s` :t:`resolution context` is a
-    :t:`trait` or a :t:`type`, then perform :t:`path expression resolution
-    implementation candidate lookup` for the current :t:`path segment` and that
-    :t:`trait` or :t:`type`.
+    :t:`trait` or a :t:`type`, then perform
+    :t:`path expression resolution implementation candidate lookup` for the
+    current :t:`path segment` and that :t:`trait` or :t:`type`.
 
 * :dp:`fls_ydni5laqv6gp`
   Otherwise
@@ -1549,8 +1559,8 @@ left-to-right order, as follows:
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`module`, where the :t:`resolution context` is restricted to the
     :t:`entities` whose :t:`[name]s` reside in the :t:`type namespace`. What
-    the current :t:`path segment` resolves to and its :t:`resolution context` is
-    that :t:`candidate selected entity`.
+    the current :t:`path segment` resolves to and its :t:`resolution context`
+    is that :t:`candidate selected entity`.
 
   * :dp:`fls_x1n7w8w6lwm`
     If the previous :t:`[path segment]'s` :t:`resolution context` is a
@@ -1566,28 +1576,30 @@ left-to-right order, as follows:
     :t:`type`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`type`, where the :t:`resolution context` is restricted to the
-    :t:`entities` of all :t:`[associated item]s` from its :t:`[inherent
-    implementation]s`, and the :t:`entities` of all its :t:`[trait
-    implementation]s` of :t:`[trait]s` that are :t:`in scope`. What the current
-    :t:`path segment` resolves to and its :t:`resolution context` is that
-    :t:`candidate selected entity`.
+    :t:`entities` of all :t:`[associated item]s` from its
+    :t:`[inherent implementation]s`, and the :t:`entities` of all its
+    :t:`[trait implementation]s` of :t:`[trait]s` that are :t:`in scope`. What
+    the current :t:`path segment` resolves to and its :t:`resolution context`
+    is that :t:`candidate selected entity`.
 
   * :dp:`fls_j6px1hxcsqer`
     If the current :t:`path segment` has :t:`[generic argument]s`, then the
-    :t:`[generic argument]s` are passed (**better term?**) to the :t:`resolution
-    context` of the current :t:`path segment`.
+    :t:`[generic argument]s` are passed (**better term?**) to the
+    :t:`resolution context` of the current :t:`path segment`.
 
 :dp:`fls_utfpnwlo0v99`
-:dt:`Path expression resolution implementation candidate lookup` for a :t:`path
-segment` and a :t:`trait` or :t:`type` proceeds as follows:
+:dt:`Path expression resolution implementation candidate lookup` for a
+:t:`path segment` and a :t:`trait` or :t:`type` proceeds as follows:
 
 #. :dp:`fls_1p8ocf1w5bp4`
-   Perform :t:`path expression resolution inherent implementation candidate
-   lookup` for the :t:`path segment` and the :t:`trait` or :t:`type`.
+   Perform
+   :t:`path expression resolution inherent implementation candidate lookup` for
+   the :t:`path segment` and the :t:`trait` or :t:`type`.
 
 #. :dp:`fls_qb5yo7j5gnvf`
-   Perform :t:`path expression resolution trait implementation candidate lookup`
-   for the :t:`path segment` and the :t:`trait` or :t:`type`.
+   Perform
+   :t:`path expression resolution trait implementation candidate lookup` for
+   the :t:`path segment` and the :t:`trait` or :t:`type`.
 
 :dp:`fls_o1g0forw6xw`
 :dt:`Path expression resolution inherent implementation candidate lookup` for a
@@ -1595,8 +1607,8 @@ segment` and a :t:`trait` or :t:`type` proceeds as follows:
 
 #. :dp:`fls_bcqe13q696zg`
    For each :t:`inherent implementation` in the set of :t:`[inherent
-   implementation]s` of the :t:`trait` or :t:`type` where the :t:`implementing
-   type` :t:`unifies` with the :t:`trait` or :t:`type`
+   implementation]s` of the :t:`trait` or :t:`type` where the
+   :t:`implementing type` :t:`unifies` with the :t:`trait` or :t:`type`
 
    #. :dp:`fls_3sceutaqpqha`
       Try to locate a visible :t:`function` in the :t:`inherent implementation`
@@ -1634,8 +1646,8 @@ Type Path Resolution
 :t:`[type path]s`.
 
 :dp:`fls_bv5cj918dqqe`
-The :t:`namespace context` of :t:`type path resolution` is the :t:`type
-namespace`.
+The :t:`namespace context` of :t:`type path resolution` is the
+:t:`type namespace`.
 
 :dp:`fls_bsakzuteuh5s`
 The leftmost :t:`path segment` of a :t:`type path` is resolved using general
@@ -1644,9 +1656,9 @@ left-to-right order, as follows:
 
 * :dp:`fls_j1ewjisx0mc2`
   If the current :t:`path segment` is expressed as :t:`keyword` ``super``, then
-  what the current :t:`path segment` resolves to and its :t:`resolution context`
-  is the :t:`entity` of the parent :t:`module` of the previous :t:`[path
-  segment]'s` :t:`resolution context`.
+  what the current :t:`path segment` resolves to and its
+  :t:`resolution context` is the :t:`entity` of the parent :t:`module` of the
+  previous :t:`[path segment]'s` :t:`resolution context`.
 
 * :dp:`fls_o4snu1him277`
   If the previous :t:`[path segment]'s` :t:`resolution context` is a
@@ -1656,13 +1668,13 @@ left-to-right order, as follows:
   :t:`resolution context` is that :t:`candidate selected entity`.
 
 * :dp:`fls_goe8q52toik2`
-  If the previous :t:`[path segment]'s` :t:`resolution context` is a :t:`trait`,
-  then try to find a :t:`candidate selected entity` whose :t:`name` matches
-  the characters of the current :t:`path segment` within that :t:`trait`,
-  where the :t:`resolution context` is restricted to the :t:`entities` of all
-  :t:`[associated item]s` of that :t:`trait`. What the current :t:`path segment`
-  resolves to and its :t:`resolution context` is that :t:`candidate selected
-  entity`.
+  If the previous :t:`[path segment]'s` :t:`resolution context` is a
+  :t:`trait`, then try to find a :t:`candidate selected entity` whose :t:`name`
+  matches the characters of the current :t:`path segment` within that
+  :t:`trait`, where the :t:`resolution context` is restricted to the
+  :t:`entities` of all :t:`[associated item]s` of that :t:`trait`. What the
+  current :t:`path segment` resolves to and its :t:`resolution context` is that
+  :t:`candidate selected entity`.
 
 * :dp:`fls_4rs35f6ydckj`
   If the previous :t:`[path segment]'s` :t:`resolution context` is a :t:`type`,
@@ -1676,11 +1688,10 @@ left-to-right order, as follows:
 
 * :dp:`fls_wm3sglgg29h6`
   If the current :t:`path segment` has :t:`[generic argument]s`, then the
-  :t:`[generic argument]s` are passed (**better term?**) to the :t:`resolution
-  context` of the current :t:`path segment`.
+  :t:`[generic argument]s` are passed (**better term?**) to the
+  :t:`resolution context` of the current :t:`path segment`.
 
 * :dp:`fls_jh4db1p7or0x`
   If the current :t:`path segment` has a :t:`qualified fn trait`, then the
   current :t:`path segment` shall resolve to either the :std:`core::ops::Fn`,
   :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`trait`.
-

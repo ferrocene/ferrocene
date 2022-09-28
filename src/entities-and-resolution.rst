@@ -166,7 +166,7 @@ A :t:`simple path public modifier` is a :t:`visibility modifier` that grants a
 
 :dp:`fls_hc121mxknq03`
 The :t:`simple path` of a :t:`simple path public modifier` shall start
-with a :t:`simple path segment` expressed by either :t:`keyword` ``crate``,
+with a :t:`path segment` expressed by either :t:`keyword` ``crate``,
 :t:`keyword` ``self``, or :t:`keyword` ``super``.
 
 :dp:`fls_icztzxjpm1du`
@@ -185,7 +185,7 @@ A :t:`super public modifier` is a :t:`visibility modifier` that grants a
 where the :t:`simple path` denotes :t:`keyword` ``super``.
 
 :dp:`fls_utgjx6l5zwfl`
-An :t:`external item`, a :t:`field`, or an :t:`item` that appears without a
+An external :t:`item`, a :t:`field`, or an :t:`item` that appears without a
 :t:`visibility modifier` has :t:`private visibility` by default.
 
 :dp:`fls_jifg2st5bfd6`
@@ -603,15 +603,15 @@ Textual Macro Scope
 A :t:`textual macro scope` is a :t:`scope` for :t:`[declarative macro]s`.
 
 :dp:`fls_iec3otx863yp`
-A :t:`declarative macro` is :t:`in scope` after the related :t:`macro rules`
+A :t:`declarative macro` is :t:`in scope` after the related :t:`macro`
 declaration, until the end of the :t:`block expression` or the enclosing
-:t:`module` where the :t:`macro rules` declaration appears.
+:t:`module` where the :t:`macro` declaration appears.
 
 :dp:`fls_cbfuh9y87y6i`
 If the :t:`textual macro scope` is introduced by a :t:`module` and the
 :t:`module` is subject to :t:`attribute` :c:`macro_use`, then the
 :t:`textual macro scope` extends until the end of the :t:`scope` introduced by
-the enclosing :t:`block` or :t:`module`.
+the enclosing :t:`block expression` or :t:`module`.
 
 .. _fls_lnpyb285qdiy:
 
@@ -647,7 +647,7 @@ into the :t:`scope hierarchy`. The following :t:`[construct]s` are
   :t:`Function` :t:`[declaration]s`,
 
 * :dp:`fls_d1cp5pt5wn0z`
-  :t:`Function pointer type` :t:`[specification]s`,
+  :t:`Function pointer type` :t:`specifications <type specification>`,
 
 * :dp:`fls_ibmm8y748z4`
   :t:`[If let expression]s`,
@@ -687,66 +687,66 @@ into the :t:`scope hierarchy`. The following :t:`[construct]s` are
 
 :dp:`fls_nuobrpnymym1`
 A :t:`closure expression` introduces a :t:`binding scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_r0x9sw7dwnww`
 A :t:`declarative macro` introduces a :t:`textual macro scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_ve7svuy7xvh0`
 The :t:`declaration` of an :t:`enum type` introduces a
 :t:`generic parameter scope` and a :t:`Self scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_pvfqhtts3qsa`
 The :t:`declaration` of a :t:`function` introduces a :t:`binding scope` and a
-:t:`generic parameter scope` into the :t:`scoping hierarchy`.
+:t:`generic parameter scope` into the :t:`scope hierarchy`.
 
 :dp:`fls_9k9hourczbv7`
-The :t:`specification` of a :t:`function pointer type` introduces a
-:t:`generic parameter scope` into the :t:`scoping hierarchy`.
+The :t:`type specification` of a :t:`function pointer type` introduces a
+:t:`generic parameter scope` into the :t:`scope hierarchy`.
 
 :dp:`fls_p6wiuhkeypzs`
 An :t:`if let expression` introduces a :t:`binding scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_34usianesmf6`
 The :t:`declaration` of an :t:`implementation` introduces a
 :t:`generic parameter scope` and a :t:`Self scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_n1a41d8i0rot`
 A :t:`let statement` introduces a :t:`binding scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_amhi3d9dd3i3`
 A :t:`for loop expression` or a :t:`while let loop expression` introduces a
-:t:`binding scope` and a :t:`label scope` into the :t:`scoping hierarchy`.
+:t:`binding scope` and a :t:`label scope` into the :t:`scope hierarchy`.
 
 :dp:`fls_nu8xj3vza55j`
 An :t:`infinite loop expression` or a :t:`while loop expression` introduces a
-:t:`label scope` into the :t:`scoping hierarchy`.
+:t:`label scope` into the :t:`scope hierarchy`.
 
 :dp:`fls_fiyj50u6cg2n`
 A :t:`match arm` introduces a :t:`binding scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_azjx3y5yezoi`
 The :t:`declaration` of a :t:`module` introduces an :t:`item scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_puly43s4x360`
 The :t:`declaration` of a :t:`struct type` introduces a
 :t:`generic parameter scope` and a :t:`Self scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_pxtlu7ud6w2h`
 The :t:`declaration` of a :t:`trait` introduces a :t:`generic parameter scope`
-and a :t:`Self scope` into the :t:`scoping hierarchy`.
+and a :t:`Self scope` into the :t:`scope hierarchy`.
 
 :dp:`fls_ddxxt11u0yal`
 A :t:`trait bound` introduces a :t:`generic parameter scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_qofr9vme46wp`
 The :t:`declaration` of a :t:`type alias` introduces a
@@ -754,12 +754,12 @@ The :t:`declaration` of a :t:`type alias` introduces a
 
 :dp:`fls_gjvfty9m84a9`
 A :t:`type bound predicate` introduces a :t:`generic parameter scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 :dp:`fls_xr9wors6oa7w`
 The :t:`declaration` of a :t:`union type` introduces a
 :t:`generic parameter scope` and a :t:`Self scope` into the
-:t:`scoping hierarchy`.
+:t:`scope hierarchy`.
 
 .. _fls_4df1tsti1693:
 
@@ -811,7 +811,7 @@ A :dt:`type namespace` contains the :t:`[name]s` of the following kinds of
   :t:`[Associated type]s`,
 
 * :dp:`fls_nj7sep7ht7lg`
-  :t:`[Boolean type]s`,
+  :c:`bool` :t:`[type]s`,
 
 * :dp:`fls_g8h6t5x6yprm`
   :t:`[Enum type]s`,
@@ -838,7 +838,7 @@ A :dt:`type namespace` contains the :t:`[name]s` of the following kinds of
   :t:`[Trait]s`,
 
 * :dp:`fls_dcz1bxjjfsq`
-  :t:`[Type aliase]s`,
+  :t:`[Type alias]es`,
 
 * :dp:`fls_wt9kgsi6n6ep`
   :t:`[Type parameter]s`,
@@ -866,19 +866,19 @@ A :dt:`value namespace` contains the :t:`[name]s` of the following kinds of
   :t:`[Constant parameter]s`,
 
 * :dp:`fls_qmf7lk6h96sv`
-  :t:`[Enum variant constructor]s`,
+  :t:`Enum variant` constructors,
 
 * :dp:`fls_ufp3btk8pet5`
   :t:`[Function]s`,
 
 * :dp:`fls_t3bnpkfazw4z`
-  :t:`[Self constructor]s`,
+  :c:`Self` constructors,
 
 * :dp:`fls_y0shlli54n5y`
   :t:`[Static]s`,
 
 * :dp:`fls_tghgxcju5u2t`
-  :t:`[Struct constructor]s`.
+  :t:`Struct` constructors.
 
 :dp:`fls_yesesxynpq6s`
 The :t:`[name]s` of the following kinds of :t:`entities <entity>` are not part
@@ -914,19 +914,19 @@ The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
 
 :dp:`fls_atvnwly4w8g2`
 An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
-:t:`root module` the :t:`entities <entity>` of the :t:`[crate]s` imported using
-:t:`[external crate import]s`. If the :t:`external crate import` uses a
+:t:`crate root module` the :t:`entities <entity>` of the :t:`[crate]s` imported
+using external :t:`[crate import]s`. If the external :t:`crate import` uses a
 :t:`renaming`, then the :t:`renaming` is instead added to the
-:t:`external prelude`. The :t:`core crate` is always added to the
+:t:`external prelude`. The core :t:`crate` is always added to the
 :t:`external prelude` unless the :t:`crate root` is subject to :t:`attribute`
-:c:`no_core`.
+``no_core``.
 
 :dp:`fls_pbc7ktlu0pl`
 The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
 :t:`module` the following :t:`entities <entity>`:
 
 * :dp:`fls_frjv68kqqxfh`
-  :t:`Boolean type` :c:`bool`.
+  Boolean type :c:`bool`.
 
 * :dp:`fls_rf6a2ae3y7vu`
   :t:`[Built-in attribute]s`.
@@ -943,8 +943,8 @@ The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
 
 :dp:`fls_of4n3vv15l5z`
 The :dt:`macro_use prelude` is a :t:`prelude` that brings :t:`in scope` of the
-:t:`root module` the :t:`entities <entity>` of :t:`[macro]s` from
-:t:`[external crate]s` that were imported using an :t:`external crate import`.
+:t:`crate root module` the :t:`entities <entity>` of :t:`[macro]s` from
+external :t:`[crate]s` that were imported using an external :t:`crate import`.
 
 .. _fls_623n65ppmm4z:
 
@@ -981,7 +981,7 @@ Use Imports
 .. rubric:: Legality Rules
 
 :dp:`fls_lyw4t098sxrj`
-A :t:`use import` brings :t:`[entitie]s` :t:`in scope` within the
+A :t:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 :t:`block expression` of an :t:`expression-with-block` or :t:`module` where the
 :t:`use import` resides.
 
@@ -990,8 +990,9 @@ A :t:`simple path prefix` is the leading :t:`simple path` of a :t:`glob import`
 or a :t:`nesting import`.
 
 :dp:`fls_v3a6y2ze44v2`
-A :t:`glob import` is a :t:`use import` that brings all :t:`[entitie]s` with
-:t:`public visibility` prefixed by its :t:`simple path prefix` into :t:`scope`.
+A :t:`glob import` is a :t:`use import` that brings all :t:`entities <entity>`
+with :t:`public visibility` prefixed by its :t:`simple path prefix` into
+:t:`scope`.
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common
@@ -1067,7 +1068,7 @@ A :t:`name` cannot be referred to by any means once it is :t:`shadowed`.
 No :t:`name` shall be :t:`shadowed` except for
 
 * :dp:`fls_hp3f4r3399kt`
-  :t:`Prelude names`,
+  :t:`[Prelude name]s`,
 
 * :dp:`fls_z8qjpskt13yq`
   The :t:`[name]s` of :t:`[macro]s` within :t:`textual macro scope`,
@@ -1085,19 +1086,19 @@ A :t:`prelude name` shadows other :t:`[prelude name]s` depending on which
 follows, where a later :t:`prelude name` shadows earlier :t:`prelude name`:
 
 #. :dp:`fls_are9qz67p7b6`
-   :t:`Language prelude` :t:`[name]s`.
+   :t:`Language prelude` :t:`names <prelude name>`.
 
 #. :dp:`fls_4tis5syofyg0`
-   :t:`Standard library prelude` :t:`[name]s`.
+   Standard library :t:`prelude` :t:`names <prelude name>`.
 
 #. :dp:`fls_u0tsnkhacr06`
-   :t:`macro_use prelude` :t:`[name]s`.
+   :t:`macro_use prelude` :t:`names <prelude name>`.
 
 #. :dp:`fls_iaklf84guczc`
-   :t:`Tool prelude` :t:`[name]s`.
+   Tool :t:`prelude` :t:`names <prelude name>`.
 
 #. :dp:`fls_a0zovslu2v4u`
-   :t:`External prelude` :t:`[name]s`.
+   :t:`External prelude` :t:`names <prelude name>`.
 
 .. _fls_40xoego2thsp:
 
@@ -1147,7 +1148,7 @@ A :dt:`candidate container type` is the :t:`type` of the :t:`container operand`
 of a :t:`field access expression` :t:`under resolution`.
 
 :dp:`fls_jrk3gzqvqr8e`
-A :t:`candidate container type chain` is a sequence of
+A :dt:`candidate container type chain` is a sequence of
 :t:`[candidate container type]s`. The :t:`candidate container type chain`
 starts with the :t:`type` of the :t:`container operand` of the
 :t:`field access expression` :t:`under resolution`. From then on, the
@@ -1161,7 +1162,7 @@ that is visible from the location of the :t:`field access expression`
 
 :dp:`fls_jzoon4x89zp7`
 A :dt:`candidate indexed field` is a :t:`candidate field` whose position in the
-:t:`candidate operand type` matches the index of an
+:t:`type` of the :t:`container operand` matches the index of an
 :t:`indexed field selector`.
 
 :dp:`fls_r80pixfoe5hk`
@@ -1169,7 +1170,8 @@ A :dt:`candidate named field` is a :t:`candidate field` whose :t:`name` matches
 the characters of a :t:`named field selector`.
 
 :dp:`fls_40oa0j6aiop3`
-:t:`Field resolution` of an :t:`indexed field access` proceeds as follows:
+:t:`Field resolution` of a :t:`field access expression` with an
+:t:`indexed field selector` proceeds as follows:
 
 #. :dp:`fls_2bp1zs7qaz7o`
    For each :t:`candidate container type` of the
@@ -1180,12 +1182,13 @@ the characters of a :t:`named field selector`.
       :t:`candidate container type`.
 
    #. :dp:`fls_tfjm27ydiake`
-      If such a :t:`candidate indexed field` exists, the
-      :t:`indexed field access` resolves to that :t:`candidate indexed field`
-      and :t:`field resolution` stops.
+      If such a :t:`candidate indexed field` exists, then the
+      :t:`field access expression` resolves to that
+      :t:`candidate indexed field` and :t:`field resolution` stops.
 
 :dp:`fls_p6hgoqo0kcx`
-:t:`Field resolution` of a :t:`named field access` proceeds as follows:
+:t:`Field resolution` of a :t:`field access expression` with a
+:t:`named field selector` proceeds as follows:
 
 #. :dp:`fls_e7sj392ohvbd`
    For each :t:`candidate container type` of the
@@ -1193,12 +1196,12 @@ the characters of a :t:`named field selector`.
 
    #. :dp:`fls_z6qt9obbhhcg`
       Try to locate a :t:`candidate named field` of the
-      :t:`candidate operand type`.
+      :t:`candidate container type`.
 
    #. :dp:`fls_ljnjxex3u5o`
-      If such a :t:`candidate named field` exists, the :t:`named field access`
-      resolves to that :t:`candidate named field` and :t:`field resolution`
-      stops.
+      If such a :t:`candidate named field` exists, then the
+      :t:`field access expression` resolves to that :t:`candidate named field`
+      and :t:`field resolution` stops.
 
 :dp:`fls_nm06mru40tyg`
 A :t:`field access expression` shall resolve to exactly one :t:`field`.
@@ -1288,12 +1291,13 @@ proceeds as follows:
    #. :dp:`fls_bsf4hy9x7c2e`
       For each :t:`inherent implementation` in the set of
       :t:`[inherent implementation]s` of the :t:`dereference type` where the
-      :t:`implementing type` unifies with the :t:`dereference type`
+      :t:`implementing type` :t:`unifies <unify>` with the
+      :t:`dereference type`
 
       #. :dp:`fls_cnn5hkf1z5q4`
          Try to locate a :t:`candidate method` in the :t:`inherent
          implementation`, where the :t:`type` of the :t:`self parameter`
-         unifies with the :t:`receiver type`.
+         :t:`unifies <unify>` with the :t:`receiver type`.
 
       #. :dp:`fls_j9ho6xc2fj0w`
          If such a :t:`candidate method` exists, then the
@@ -1317,7 +1321,7 @@ proceeds as follows:
       #. :dp:`fls_1azkiu20r0e4`
          Try to locate a :t:`candidate method` in the
          :t:`trait implementation`, where the :t:`type` of the
-         :t:`self parameter` unifies with the :t:`receiver type`.
+         :t:`self parameter` :t:`unifies <unify>` with the :t:`receiver type`.
 
       #. :dp:`fls_ose5m4bhkg57`
          If such a :t:`candidate method` exists, then the
@@ -1498,7 +1502,7 @@ left-to-right order, as follows:
   :t:`[path segment]'s` :t:`resolution context`, where if the current
   :t:`path segment` is not the rightmost :t:`path segment`, the
   :t:`resolution context` is restricted to the :t:`entities <entity>` of
-  :t:`modules`. What the current :t:`path segment` resolves to and its
+  :t:`[module]s`. What the current :t:`path segment` resolves to and its
   :t:`resolution context` is that :t:`candidate selected entity`.
 
 .. _fls_o9u2h5m17kpz:
@@ -1510,7 +1514,7 @@ Path Expression Resolution
 
 :dp:`fls_akjlqm3a2lb1`
 :t:`Path expression resolution` is a form of :t:`path resolution` that applies
-to :t:`path expressions`.
+to :t:`[path expression]s`.
 
 :dp:`fls_xyzdajtf4u2t`
 The :t:`namespace context` of :t:`path expression resolution` is the
@@ -1540,7 +1544,7 @@ in left-to-right order, as follows:
     :t:`candidate selected entity`.
 
   * :dp:`fls_bscg48os5otx`
-    If the previous :t:`[path segment]'s` :t:`[resolution contex]t` is a
+    If the previous :t:`[path segment]'s` :t:`resolution context` is a
     :t:`module`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`module`. What the current :t:`path segment` resolves to and its
@@ -1610,7 +1614,7 @@ in left-to-right order, as follows:
 #. :dp:`fls_bcqe13q696zg`
    For each :t:`inherent implementation` in the set of :t:`[inherent
    implementation]s` of the :t:`trait` or :t:`type` where the
-   :t:`implementing type` :t:`unifies` with the :t:`trait` or :t:`type`
+   :t:`implementing type` :t:`unifies <unify>` with the :t:`trait` or :t:`type`
 
    #. :dp:`fls_3sceutaqpqha`
       Try to locate a visible :t:`function` in the :t:`inherent implementation`

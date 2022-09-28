@@ -3503,11 +3503,17 @@ Loop Expressions
      | WhileLetLoopExpression
      | WhileLoopExpression
 
+   LoopBody ::=
+       BlockExpression
+
 .. rubric:: Legality Rules
 
 :dp:`fls_y1d8kd1bdlmx`
 A :t:`loop expression` is an :t:`expression` that evaluates a :t:`block
 expression` continuously as long as some criterion holds true.
+
+:dp:`fls_BjZjuiFnPtFd`
+A :t:`loop body` is the :t:`block expression` of a :t:`loop expression`.
 
 :dp:`fls_eg93m93gvwal`
 An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
@@ -3531,7 +3537,7 @@ For Loops
 .. syntax::
 
    ForLoopExpression ::=
-       $$for$$ Pattern $$in$$ SubjectExpression BlockExpression
+       $$for$$ Pattern $$in$$ SubjectExpression LoopBody
 
 .. rubric:: Legality Rules
 
@@ -3607,7 +3613,7 @@ Infinite Loops
 .. syntax::
 
    InfiniteLoopExpression ::=
-       $$loop$$ BlockExpression
+       $$loop$$ LoopBody
 
 .. rubric:: Legality Rules
 
@@ -3672,7 +3678,7 @@ While Loops
 .. syntax::
 
    WhileLoopExpression ::=
-       $$while$$ IterationExpression BlockExpression
+       $$while$$ IterationExpression LoopBody
 
    IterationExpression ::=
        Expression
@@ -3738,7 +3744,7 @@ While Let Loops
 .. syntax::
 
    WhileLetLoopExpression ::=
-       $$while$$ $$let$$ Pattern $$=$$ SubjectLetExpression BlockExpression
+       $$while$$ $$let$$ Pattern $$=$$ SubjectLetExpression LoopBody
 
 .. rubric:: Legality Rules
 

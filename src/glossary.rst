@@ -1806,6 +1806,14 @@ enum
 :dp:`fls_9o0ig19xh2f5`
 An :dt:`enum` is an :t:`item` that declares an :t:`enum type`.
 
+.. _fls_zrRydWZgm03k:
+
+enum field
+^^^^^^^^^^
+
+:dp:`fls_J8udq05QGiEj`
+An :dt:`enum field` is a :t:`field` of an :t:`enum variant`.
+
 .. _fls_grlluqa4ucp3:
 
 enum type
@@ -3601,6 +3609,17 @@ loop
 :dp:`fls_omjnvxva07z2`
 For :dt:`loop`, see :t:`loop expression`.
 
+.. _fls_5vt0Ph5BfDnU:
+
+loop body
+^^^^^^^^^
+
+:dp:`fls_fRWcWPeKgx9g`
+A :dt:`loop body` is the :t:`block expression` of a :t:`loop expression`.
+
+:dp:`fls_vWuR2TET712r`
+See :s:`LoopBody`.
+
 .. _fls_an1s2hnapd59:
 
 loop expression
@@ -4461,7 +4480,7 @@ path
 
 :dp:`fls_u3jyud6mhy1f`
 A :dt:`path` is a sequence of :t:`[path segment]s` logically separated by
-:t:`namespace qualifier` ``::`` that resolves to an :t:`entity`.
+:dt:`namespace qualifier` ``::`` that resolves to an :t:`entity`.
 
 .. _fls_1xdj34py8zc3:
 
@@ -4986,6 +5005,14 @@ A :dt:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
 
 :dp:`fls_4rme1x6romeg`
 See :s:`ReceiverOperand`.
+
+.. _fls_Kpkm0J40xq5J:
+
+receiver type
+^^^^^^^^^^^^^
+
+:dp:`fls_vgQmMlpFas5t`
+A :dt:`receiver type` is the :t:`type` of a :t:`receiver`.
 
 .. _fls_nG6ikjLsCW7m:
 
@@ -6930,7 +6957,7 @@ use import
 ^^^^^^^^^^
 
 :dp:`fls_uccv9zthh5vt`
-A :t:`use import` brings :t:`[entitie]s` :t:`in scope` within the
+A :dt:`use import` brings :t:`[entitie]s` :t:`in scope` within the
 :t:`block expression` of an :t:`expression-with-block` or :t:`module` where the
 :t:`use import` resides.
 

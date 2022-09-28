@@ -33,7 +33,7 @@ Types
      | MacroInvocation
      | NeverType
      | ParenthesizedTypeSpecification
-     | QualifiedPathType
+     | QualifiedTypePath
      | RawPointerTypeSpecification
      | ReferenceTypeSpecification
      | SliceTypeSpecification

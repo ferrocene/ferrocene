@@ -1108,7 +1108,7 @@ closure parameter
 
 :dp:`fls_yQBZHBLhPswn`
 A :dt:`closure parameter` is a :t:`construct` that yields a set of
-:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+:t:`[binding]s` that bind matched input :t:`[value]s` to :t:`[name]s` at the
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_Dus3fBU3TwR4`
@@ -2310,7 +2310,7 @@ function parameter
 
 :dp:`fls_2feq1ky9pla1`
 A :dt:`function parameter` is a :t:`construct` that yields a set of
-:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+:t:`[binding]s` that bind matched input :t:`[value]s` to :t:`[name]s` at the
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_4tf20svi3rjx`
@@ -4500,7 +4500,7 @@ path expression resolution
 
 :dp:`fls_WYcEVyc3SHuK`
 :dt:`Path expression resolution` is a form of :t:`path resolution` that applies
-to :t:`path expressions`.
+to :t:`[path expression]s`.
 
 .. _fls_ptikwcw3b20l:
 
@@ -4637,8 +4637,8 @@ prelude
 ^^^^^^^
 
 :dp:`fls_D0PJioOZjKNN`
-A :dt:`prelude` is a collection of :t:`entities` that are automatically brought
-:t:`in scope` of every :t:`module` in a :t:`crate`.
+A :dt:`prelude` is a collection of :t:`entities <entity>` that are
+automatically brought :t:`in scope` of every :t:`module` in a :t:`crate`.
 
 .. _fls_AWySDxPgypiw:
 
@@ -5385,7 +5385,7 @@ Self
 
 :dp:`fls_q6whqbfusswf`
 :dc:`Self` is either an implicit :t:`type parameter` in :t:`[trait]s` or an
-implicit :t:`type alias` in :t:`[implementation]s`. :t:`Self` refers to the
+implicit :t:`type alias` in :t:`[implementation]s`. :c:`Self` refers to the
 :t:`type` that implements a :t:`trait`.
 
 .. _fls_6wjlbzmlx9n4:
@@ -6957,7 +6957,7 @@ use import
 ^^^^^^^^^^
 
 :dp:`fls_uccv9zthh5vt`
-A :dt:`use import` brings :t:`[entitie]s` :t:`in scope` within the
+A :dt:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 :t:`block expression` of an :t:`expression-with-block` or :t:`module` where the
 :t:`use import` resides.
 

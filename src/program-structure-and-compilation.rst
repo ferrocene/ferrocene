@@ -130,8 +130,8 @@ Crates
 .. rubric:: Legality Rules
 
 :dp:`fls_qwghk79ok5h0`
-A :t:`crate` is a unit of compilation and linking. A :t:`crate` contains a tree
-of nested :t:`module` :t:`[scope]s`.
+A :t:`crate` is a unit of compilation and linking that contains a tree of
+nested :t:`[module]s`.
 
 :dp:`fls_9ub6ks8qrang`
 A :t:`binary crate` is a :t:`crate` that contains a :t:`main function`. A tool
@@ -210,8 +210,8 @@ Compilation Roots
 .. rubric:: Legality Rules
 
 :dp:`fls_fhiqvgdamq5`
-A :t:`crate root module` is the root of the nested :t:`module` :t:`[scope]s`
-tree of a :t:`crate`.
+A :t:`crate root module` is the root of the nested :t:`module` tree of a 
+:t:`crate`.
 
 :dp:`fls_tk8tl2e0a34`
 A tool can define a :t:`crate root module` for a single :t:`crate`.

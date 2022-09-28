@@ -53,11 +53,6 @@ An :t:`implementation body` is a :t:`construct` that encapsulates the
 An :t:`inherent implementation` is an :t:`implementation` that adds direct
 functionality.
 
-:dp:`fls_gufjaib913d6`
-An :t:`implementing type` may have multiple :t:`[inherent implementation]s`.
-:t:`[Inherent implementation]s` of the same :t:`implementing type` share a
-common :t:`scope`.
-
 :dp:`fls_797etpdk5dyb`
 :t:`[Inherent implementation]s` of the same :t:`implementing type` shall be
 defined within the same :t:`crate`.

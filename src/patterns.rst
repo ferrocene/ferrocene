@@ -120,7 +120,7 @@ identifier pattern`.
 :dp:`fls_24c95c56tugl`
 The :t:`identifier pattern` enters its :t:`binding` into :t:`pattern scope` in
 the :t:`value namespace` if it does not resolve to a :t:`constant`, a :t:`unit
-struct constant` or a :t:`unit enum variant`.
+struct constant` or a :t:`unit enum variant`. **There is no pattern scope.**
 
 :dp:`fls_twcavjk7iquy`
 It is a static error if the :t:`identifier pattern` consists of anything other

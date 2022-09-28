@@ -1384,7 +1384,8 @@ crate
 ^^^^^
 
 :dp:`fls_qplsjzb2uyim`
-A :dt:`crate` is a unit of compilation and linking.
+A :dt:`crate` is a unit of compilation and linking that contains a tree of
+nested :t:`[module]s`.
 
 .. _fls_xwbmmcbbowtu:
 
@@ -1434,8 +1435,8 @@ crate root module
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_oo4nmqv78wno`
-A :dt:`crate root module` is the root of the nested :t:`module` scopes tree of
-a :t:`crate`.
+A :dt:`crate root module` is the root of the nested :t:`module` tree of a
+:t:`crate`.
 
 .. _fls_76cj65bptdpn:
 

@@ -35,8 +35,8 @@ A :t:`declaration` is a :t:`construct` that introduces a :t:`name` for an
 
 :dp:`fls_94l2d7ti0hjw`
 An :t:`explicitly declared entity` is an :t:`entity` that has a
-:t:`declaration`. The following :t:`entities` are
-:t:`explicitly declared entities`:
+:t:`declaration`. The following :t:`entities <entity>` are
+:t:`explicitly declared entities <explicitly declared entity>`:
 
 * :dp:`fls_kvdqmo8gmdxi`
   :t:`[Associated item]s`,
@@ -91,14 +91,14 @@ An :t:`explicitly declared entity` is an :t:`entity` that has a
 
 :dp:`fls_ig1l38gpy5gy`
 An :t:`implicitly declared entity` is an :t:`entity` that lacks an explicit
-:t:`declaration`. The following :t:`entities` are
-:t:`implicitly declared entities`:
+:t:`declaration`. The following :t:`entities <entity>` are
+:t:`implicitly declared entities <implicitly declared entity>`:
 
 * :dp:`fls_ed0t6u7fo3fi`
   :t:`[Built-in attribute]s`.
 
 * :dp:`fls_gjps01c8l6aa`
-  :t:`Language prelude` :t:`entities`.
+  :t:`Language prelude` :t:`entities <entity>`.
 
 .. _fls_jdknpu3kf865:
 
@@ -786,7 +786,7 @@ A :dt:`lifetime namespace` contains the :t:`[name]s` of
 
 :dp:`fls_crwfafrmydr7`
 A :dt:`macro namespace` contains the :t:`[name]s` of the following kinds of
-:t:`entities`:
+:t:`entities <entity>`:
 
 * :dp:`fls_t8fcpm8ldv1y`
   :t:`[Attribute macro]s`,
@@ -805,7 +805,7 @@ A :dt:`macro namespace` contains the :t:`[name]s` of the following kinds of
 
 :dp:`fls_ckptn88o6lla`
 A :dt:`type namespace` contains the :t:`[name]s` of the following kinds of
-:t:`entities`:
+:t:`entities <entity>`:
 
 * :dp:`fls_3ma5v1fop98p`
   :t:`[Associated type]s`,
@@ -848,7 +848,7 @@ A :dt:`type namespace` contains the :t:`[name]s` of the following kinds of
 
 :dp:`fls_u1533bngb0yv`
 A :dt:`value namespace` contains the :t:`[name]s` of the following kinds of
-:t:`entities`:
+:t:`entities <entity>`:
 
 * :dp:`fls_e8v4g45v5ry2`
   :t:`[Associated constant]s`,
@@ -881,8 +881,8 @@ A :dt:`value namespace` contains the :t:`[name]s` of the following kinds of
   :t:`[Struct constructor]s`.
 
 :dp:`fls_yesesxynpq6s`
-The :t:`[name]s` of the following kinds of :t:`entities` are not part of any
-:t:`namespace`:
+The :t:`[name]s` of the following kinds of :t:`entities <entity>` are not part
+of any :t:`namespace`:
 
 * :dp:`fls_40o8y6exr3df`
   :t:`[Enum field]s`,
@@ -901,19 +901,20 @@ Preludes
 .. rubric:: Legality Rules
 
 :dp:`fls_po4gw6t2ptwu`
-A :t:`prelude` is a collection of :t:`entities` that are automatically brought
-:t:`in scope` of every :t:`module` in a :t:`crate`. Such :t:`entities` are
-referred to as :t:`prelude entities`. The :t:`name` of a :t:`prelude entity`
+A :t:`prelude` is a collection of :t:`entities <entity>` that are automatically
+brought :t:`in scope` of every :t:`module` in a :t:`crate`. Such
+:t:`entities <entity>` are referred to as
+:t:`prelude entities <prelude entity>`. The :t:`name` of a :t:`prelude entity`
 is referred to as a :t:`prelude name`.
 
 :dp:`fls_n4102qskkmz2`
 The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
-:t:`module` all re-exported :t:`entities` from the
+:t:`module` all re-exported :t:`entities <entity>` from the
 :std:`core::prelude::rust_2021` :t:`module`.
 
 :dp:`fls_atvnwly4w8g2`
 An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
-:t:`root module` the :t:`entities` of the :t:`[crate]s` imported using
+:t:`root module` the :t:`entities <entity>` of the :t:`[crate]s` imported using
 :t:`[external crate import]s`. If the :t:`external crate import` uses a
 :t:`renaming`, then the :t:`renaming` is instead added to the
 :t:`external prelude`. The :t:`core crate` is always added to the
@@ -922,7 +923,7 @@ An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
 
 :dp:`fls_pbc7ktlu0pl`
 The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
-:t:`module` the following :t:`entities`:
+:t:`module` the following :t:`entities <entity>`:
 
 * :dp:`fls_frjv68kqqxfh`
   :t:`Boolean type` :c:`bool`.
@@ -942,8 +943,8 @@ The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
 
 :dp:`fls_of4n3vv15l5z`
 The :dt:`macro_use prelude` is a :t:`prelude` that brings :t:`in scope` of the
-:t:`root module` the :t:`entities` of :t:`[macro]s` from :t:`[external crate]s`
-that were imported using an :t:`external crate import`.
+:t:`root module` the :t:`entities <entity>` of :t:`[macro]s` from
+:t:`[external crate]s` that were imported using an :t:`external crate import`.
 
 .. _fls_623n65ppmm4z:
 
@@ -1362,12 +1363,12 @@ the location of a :t:`path` :t:`under resolution` and is located within a
 
 :dp:`fls_ec4wo8odusqp`
 A :dt:`namespace context` is a set of :t:`[namespace]s` where the :t:`[name]s`
-of :t:`candidate selected entities` reside.
+of :t:`candidate selected entities <candidate selected entity>` reside.
 
 :dp:`fls_9tedg9lpewqa`
-A :dt:`resolution context` is a set of :t:`entities` that informs
+A :dt:`resolution context` is a set of :t:`entities <entity>` that informs
 :t:`path resolution` by restricting the number of
-:t:`candidate selected entities`.
+:t:`candidate selected entities <candidate selected entity>`.
 
 :dp:`fls_mvymlhp7192e`
 The resolution of the leftmost :t:`path segment` of a :t:`path` proceeds as
@@ -1434,15 +1435,16 @@ follows:
   * :dp:`fls_xujlscsir05f`
     If the :t:`qualified type` is subject to a :t:`qualifying trait`, then the
     :t:`resolution context` of the leftmost :t:`path segment` consists of the
-    :t:`entities` of all :t:`[implementation]s` of the :t:`qualified type` that
-    implement the :t:`qualifying trait`. **What does the path segment resolve
-    to?**
+    :t:`entities <entity>` of all :t:`[implementation]s` of the
+    :t:`qualified type` that implement the :t:`qualifying trait`.
+    **What does the path segment resolve to?**
 
   * :dp:`fls_wypnvfklnmc1`
     Otherwise the :t:`resolution context` of the leftmost :t:`path segment`
-    consists of the :t:`entity` of the :t:`qualified type`, the :t:`entities`
-    of all its :t:`[inherent implementation]s`, and the :t:`entities` of all
-    its :t:`[trait implementation]s` of :t:`[trait]s` that are :t:`in scope`.
+    consists of the :t:`entity` of the :t:`qualified type`, the
+    :t:`entities <entity>` of all its :t:`[inherent implementation]s`, and the
+    :t:`entities <entity>` of all its :t:`[trait implementation]s` of
+    :t:`[trait]s` that are :t:`in scope`.
     **What does the path segment resolve to?**
 
 :dp:`fls_zi46lmwsn4rg`
@@ -1495,8 +1497,8 @@ left-to-right order, as follows:
   matches the characters of the current :t:`path segment` within the previous
   :t:`[path segment]'s` :t:`resolution context`, where if the current
   :t:`path segment` is not the rightmost :t:`path segment`, the
-  :t:`resolution context` is restricted to the :t:`entities` of :t:`modules`.
-  What the current :t:`path segment` resolves to and its
+  :t:`resolution context` is restricted to the :t:`entities <entity>` of
+  :t:`modules`. What the current :t:`path segment` resolves to and its
   :t:`resolution context` is that :t:`candidate selected entity`.
 
 .. _fls_o9u2h5m17kpz:
@@ -1532,8 +1534,8 @@ in left-to-right order, as follows:
     If the previous :t:`[path segment]'s` :t:`resolution context` is an
     :t:`enum type`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment`, where
-    the :t:`resolution context` is restricted to the :t:`entities` of the
-    :t:`[enum variant]s` of that :t:`enum type`. What the current
+    the :t:`resolution context` is restricted to the :t:`entities <entity>` of
+    the :t:`[enum variant]s` of that :t:`enum type`. What the current
     :t:`path segment` resolves to and its :t:`resolution context` is that
     :t:`candidate selected entity`.
 
@@ -1558,26 +1560,26 @@ in left-to-right order, as follows:
     :t:`module`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`module`, where the :t:`resolution context` is restricted to the
-    :t:`entities` whose :t:`[name]s` reside in the :t:`type namespace`. What
-    the current :t:`path segment` resolves to and its :t:`resolution context`
-    is that :t:`candidate selected entity`.
+    :t:`entities <entity>` whose :t:`[name]s` reside in the
+    :t:`type namespace`. What the current :t:`path segment` resolves to and its
+    :t:`resolution context` is that :t:`candidate selected entity`.
 
   * :dp:`fls_x1n7w8w6lwm`
     If the previous :t:`[path segment]'s` :t:`resolution context` is a
     :t:`trait`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`trait`, where the :t:`resolution context` is restricted to the
-    :t:`entities` of all :t:`[associated item]s` of that :t:`trait`. What the
-    current :t:`path segment` resolves to and its :t:`resolution context` is
-    that :t:`candidate selected entity`.
+    :t:`entities <entity>` of all :t:`[associated item]s` of that :t:`trait`.
+    What the current :t:`path segment` resolves to and its
+    :t:`resolution context` is that :t:`candidate selected entity`.
 
   * :dp:`fls_v1h4frnbqruu`
     If the previous :t:`[path segment]'s` :t:`resolution context` is a
     :t:`type`, then try to find a :t:`candidate selected entity` whose
     :t:`name` matches the characters of the current :t:`path segment` within
     that :t:`type`, where the :t:`resolution context` is restricted to the
-    :t:`entities` of all :t:`[associated item]s` from its
-    :t:`[inherent implementation]s`, and the :t:`entities` of all its
+    :t:`entities <entity>` of all :t:`[associated item]s` from its
+    :t:`[inherent implementation]s`, and the :t:`entities <entity>` of all its
     :t:`[trait implementation]s` of :t:`[trait]s` that are :t:`in scope`. What
     the current :t:`path segment` resolves to and its :t:`resolution context`
     is that :t:`candidate selected entity`.
@@ -1672,19 +1674,20 @@ left-to-right order, as follows:
   :t:`trait`, then try to find a :t:`candidate selected entity` whose :t:`name`
   matches the characters of the current :t:`path segment` within that
   :t:`trait`, where the :t:`resolution context` is restricted to the
-  :t:`entities` of all :t:`[associated item]s` of that :t:`trait`. What the
-  current :t:`path segment` resolves to and its :t:`resolution context` is that
-  :t:`candidate selected entity`.
+  :t:`entities <entity>` of all :t:`[associated item]s` of that :t:`trait`.
+  What the current :t:`path segment` resolves to and its
+  :t:`resolution context` is that :t:`candidate selected entity`.
 
 * :dp:`fls_4rs35f6ydckj`
   If the previous :t:`[path segment]'s` :t:`resolution context` is a :t:`type`,
   then try to find a :t:`candidate selected entity` whose :t:`name` matches
   the characters of the current :t:`path segment` within that :t:`type`,
-  where the :t:`resolution context` is restricted to the :t:`entities` of all
-  :t:`[associated item]s` from its :t:`[inherent implementation]s`, and the
-  :t:`entities` of all its :t:`[trait implementation]s` of :t:`[trait]s` that
-  are :t:`in scope`. What the current :t:`path segment` resolves to and its
-  :t:`resolution context` is that :t:`candidate selected entity`.
+  where the :t:`resolution context` is restricted to the :t:`entities <entity>`
+  of all :t:`[associated item]s` from its :t:`[inherent implementation]s`, and
+  the :t:`entities <entity>` of all its :t:`[trait implementation]s` of
+  :t:`[trait]s` that are :t:`in scope`. What the current :t:`path segment`
+  resolves to and its :t:`resolution context` is that
+  :t:`candidate selected entity`.
 
 * :dp:`fls_wm3sglgg29h6`
   If the current :t:`path segment` has :t:`[generic argument]s`, then the

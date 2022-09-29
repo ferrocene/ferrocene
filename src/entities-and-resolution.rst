@@ -1436,12 +1436,14 @@ follows:
 * :dp:`fls_lxa7uhmdoy9d`
   If the leftmost :t:`path segment` starts with a :t:`qualified type`, then
 
+  * :dp:`fls_EcaZauRXEGcs`
+    The leftmost :t:`path segment` resolves to the :t:`qualified type`, and
+
   * :dp:`fls_xujlscsir05f`
     If the :t:`qualified type` is subject to a :t:`qualifying trait`, then the
     :t:`resolution context` of the leftmost :t:`path segment` consists of the
     :t:`entities <entity>` of all :t:`[implementation]s` of the
     :t:`qualified type` that implement the :t:`qualifying trait`.
-    **What does the path segment resolve to?**
 
   * :dp:`fls_wypnvfklnmc1`
     Otherwise the :t:`resolution context` of the leftmost :t:`path segment`
@@ -1449,7 +1451,6 @@ follows:
     :t:`entities <entity>` of all its :t:`[inherent implementation]s`, and the
     :t:`entities <entity>` of all its :t:`[trait implementation]s` of
     :t:`[trait]s` that are :t:`in scope`.
-    **What does the path segment resolve to?**
 
 :dp:`fls_zi46lmwsn4rg`
 The resolution of the rightmost :t:`path segment` is determined based on the

@@ -3505,6 +3505,18 @@ A :dt:`lifetime bound` is a :t:`bound` that imposes a constraint on the
 :dp:`fls_ivcjmp54hdej`
 See :s:`LifetimeIndication`.
 
+.. _fls_fV8sP0roRyBN:
+
+lifetime bound predicate
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_AHftLKgSP9Xk`
+A :dt:`lifetime bound predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` on a :t:`lifetime parameter`.
+
+:dp:`fls_8WIod9Rm5IXa`
+See :s:`LifetimeBoundPredicate`.
+
 .. _fls_al39r9uz2zmy:
 
 lifetime elision
@@ -6420,6 +6432,18 @@ A :dt:`type ascription` specifies the :t:`type` of a :t:`construct`.
 :dp:`fls_c3xtiputfxea`
 See :s:`TypeAscription`.
 
+.. _fls_zDdXv5I4bW9H:
+
+type bound predicate
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_j6WKoybB4cep`
+A :dt:`type bound predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` and :t:`[trait bound]s` on a :t:`type`.
+
+:dp:`fls_oMlPNgoDjnoW`
+See :s:`TypeBoundPredicate`.
+
 .. _fls_k24jb967nu1q:
 
 type cast expression
@@ -7118,9 +7142,8 @@ where clause predicate
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_0LACQVmZpDQF`
-A :dt:`where clause predicate` is a :t:`construct` that specifies
-:t:`[lifetime bound]s` on :t:`[lifetime parameter]s` as well as
-:t:`[lifetime bound]s` and :t:`[trait bound]s` on :t:`[type]s`.
+A :dt:`where clause predicate` is either a :t:`lifetime bound predicate` or a
+:t:`type bound predicate`.
 
 :dp:`fls_Jk7V1SOKE4Gm`
 See :s:`WhereClausePredicate`.

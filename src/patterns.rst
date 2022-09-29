@@ -1174,6 +1174,18 @@ deconstructor`.
 A :t:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
 :t:`name`.
 
+:dp:`fls_RViC5UEZPQUV`
+A :t:`binding` with :t:`binding mode` :dt:`by value` binds the matched :t:`value`
+by :t:[pass]ing` to the :t:`name`.
+
+:dp:`fls_6lXtoxebD5It`
+A :t:`binding` with :t:`binding mode` :dt:`by reference` binds an :t:`immutable
+reference` to the matched :t:`value` to the :t:`name`.
+
+:dp:`fls_xNxQN8sgpZ3O`
+A :t:`binding` with :t:`binding mode` :dt:`by mutable reference` binds a
+:t:`mutable reference` to the matched :t:`value` to the :t:`name`.
+
 :dp:`fls_dqe75i8h2fie`
 A :t:`non-reference pattern` is any :t:`pattern` except
 :t:`non-[binding pattern]s`, :t:`[path pattern]s`, :t:`[reference pattern]s`,
@@ -1198,7 +1210,8 @@ dereferenced and the :t:`binding mode` is updated as follows:
 
 * :dp:`fls_tv0avib387bv`
   If the :t:`reference` is a :t:`mutable reference` and the :t:`binding mode` is
-  "by value", then the :t:`binding mode` is updated to "by mutable reference".
+  :t:`by value`, then the :t:`binding mode` is updated to :t:`by mutable
+  reference`.
 
 :dp:`fls_dbgmwldye42e`
 The process repeats if the dereferenced :t:`value` is a :t:`reference`.

@@ -891,24 +891,6 @@ built-in trait
 :dp:`fls_IgzD9l8o6R50`
 A :dt:`built-in trait` is a language-defined :t:`trait`.
 
-.. _fls_lnwxm6ffy15w:
-
-by copy type
-^^^^^^^^^^^^
-
-:dp:`fls_j7r33ecacyh`
-A :dt:`by copy type` is a :t:`type` that implements the
-:std:`core::marker::Copy` :t:`trait`.
-
-.. _fls_gnucgrytswa4:
-
-by move type
-^^^^^^^^^^^^
-
-:dp:`fls_ri37ez31gai8`
-A :dt:`by move type` is a :t:`type` that does not implement the
-:std:`core::marker::Copy` :t:`trait`.
-
 .. _fls_e8rokiw23i9t:
 
 byte literal
@@ -1379,6 +1361,15 @@ control flow boundary
 A :dt:`control flow boundary` is a :t:`construct` that limits control flow from
 returning beyond the :t:`construct`, and acts as the target of control flow
 returning operations.
+
+.. _fls_lnwxm6ffy15w:
+
+copy type
+^^^^^^^^^
+
+:dp:`fls_j7r33ecacyh`
+A :dt:`copy type` is a :t:`type` that implements the
+:std:`core::marker::Copy` :t:`trait`.
 
 .. _fls_kf8yukhxudw8:
 
@@ -2833,7 +2824,7 @@ implementation body
 
 :dp:`fls_1iS30Nv9myEd`
 An :dt:`implementation body` is a :t:`construct` that encapsulates the
-:t:`[associated item]s`, :t:`[inner attribute]s`, and 
+:t:`[associated item]s`, :t:`[inner attribute]s`, and
 :t:`[inner doc comment]s` of an :t:`implementation`.
 
 :dp:`fls_u75iHi53PnNP`
@@ -3955,6 +3946,15 @@ A :dt:`module` is a container for zero or more :t:`[item]s`.
 :dp:`fls_os60q6vvm71c`
 See :s:`ModuleDeclaration`.
 
+.. _fls_gnucgrytswa4:
+
+move type
+^^^^^^^^^
+
+:dp:`fls_ri37ez31gai8`
+A :dt:`move type` is a :t:`type` that implements the :std:`core::marker::Sized`
+:t:`trait` and that is not a :t:`copy type`.
+
 .. _fls_iw2vYgmLhlsg:
 
 multi segment path
@@ -4478,14 +4478,23 @@ partially hygienic
 An :t:`identifier` is :dt:`partially hygienic` when it has
 :t:`mixed site hygiene`.
 
+.. _fls_wqbd5lxkddddl:
+
+passing
+^^^^^^^
+
+:dp:`fls_eqgsg8j9btic`
+:dt:`Passing <pass>` is the mechanism by which a :t:`value` is transferred between
+:t:`[place]s`.
+
 .. _fls_wqbd5lxki2al:
 
 passing convention
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_eqgsg8j9btic`
-A :dt:`passing convention` is a mechanism by which a :t:`value` is passed to
-and from a :t:`function`.
+A :dt:`passing convention` is the mechanism that defines how a :t:`value` is
+transferred between :t:`[place]s`.
 
 .. _fls_9zl72vtkgkuo:
 

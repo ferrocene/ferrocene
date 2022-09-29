@@ -494,49 +494,9 @@ may evaluate its :t:`operand` as a mutable memory location. The following
 
 :dp:`fls_4axr4V0icdBP`
 A :t:`place expression` that is evaluated in a :t:`value expression context`
-or bound :t:`by value` in a :t:`pattern` denotes the :t:`value` held in the memory
-location of the :t:`place expression`.
-
-:dp:`fls_konzgoybhfqm`
-A :t:`place expression` can be moved out of when it denotes
-
-* :dp:`fls_4bnbv7mqod57`
-  A :t:`field` of a :t:`place expression` that can be moved out of and whose
-  type does not implement the :std:`core::ops::Drop` :t:`trait`, or
-
-* :dp:`fls_3xk3p1unbjy5`
-  A :t:`temporary`, or
-
-* :dp:`fls_vk1xhvdaakh0`
-  A :t:`variable` which is not currently :t:`borrowed`.
-
-:dp:`fls_wuqjaigxdq3r`
-After a :t:`place expression` is moved out, the memory location it represented
-is deinitialized and shall not be read from until reinitialized.
-
-:dp:`fls_gq35gqagw35`
-A :t:`place expression` shall not be evaluated in a :t:`value expression
-context` or be bound :t:`by value` in a :t:`pattern` unless it implements
-:std:`core::marker::Copy` or :std:`core::marker::Sized`.
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_malm0kcczgyg`
-The :t:`evaluation` of a :t:`place expression` in a :t:`value expression
-context` or the :t:`evaluation` of a :t:`place expression` that is bound *by
-value* in a :t:`pattern` proceeds as follows:
-
-#. :dp:`fls_iuxjvxd91h06`
-   The :t:`place expression` denotes the :t:`value` held in that memory
-   location.
-
-#. :dp:`fls_oq11btd97wpz`
-   If the :t:`type` of the held :t:`value` implements the
-   :std:`core::marker::Copy` :t:`trait`, then the held :t:`value` is copied.
-
-#. :dp:`fls_zada4g3qmjqo`
-   If the :t:`type` of the held :t:`value` implements the
-   :std:`core::marker::Sized` :t:`trait`, then the held :t:`value` is moved.
+or bound :t:`by value` in a :t:`pattern` denotes the :t:`value` held in the
+memory location of the :t:`place expression`. Such an evaluation is subject to
+:t:`[passing convention]s`.
 
 .. _fls_e7zgqroy2qxn:
 
@@ -732,9 +692,6 @@ An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_oisws5qykedi`
 An :t:`async block expression` denotes a new :t:`async control flow boundary`.
-
-:dp:`fls_eodEo8qRE0JH`
-An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_ncd0wkgtldem`
 The :t:`type` of an :t:`async block expression` is a unique anonymous :t:`type`
@@ -2106,8 +2063,8 @@ The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
    uninitialized :t:`field` of a :t:`variable`.
 
 #. :dp:`fls_hc01gtvlxba`
-   The :t:`value` of the :t:`value operand` is passed :t:`by value` into the
-   place of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is :t:`passed` into the
+   :t:`place` of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2204,8 +2161,8 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
    uninitialized :t:`variable` or an uninitialized field of a :t:`variable`.
 
 #. :dp:`fls_qb8u5skn8bc4`
-   The :t:`value` of the :t:`value operand` is passed :t:`by value` into the
-   place of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is :t:`passed` into the
+   :t:`place` of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -3000,17 +2957,9 @@ the :t:`struct expression` shall have at most one :t:`base initializer`.
 
 :dp:`fls_w7x9wy6t0qcp`
 If a :t:`base initializer` is supplied, then for each :t:`field` that was not
-matched in the :t:`struct expression`:
-
-* :dp:`fls_24kqbc9oytaq`
-  If the :t:`type` of the :t:`field` is a :t:`by copy type`, then the :t:`value`
-  of the :t:`field` is copied and the copy becomes the initial :t:`value` of the
-  :t:`field` of the :t:`constructee`, or
-
-* :dp:`fls_rsc4c09tuqx9`
-  If the :t:`type` of the :t:`field` is a :t:`by move type`, then the :t:`value`
-  of the :t:`field` is moved and becomes the initial :t:`value` of the
-  :t:`field` of the :t:`constructee`.
+matched in the :t:`struct expression` the :t:`value` of the corresponding
+:t:`field` of the :t:`base initializer` is :t:`[pass]ed` to the :t:`field` of
+the :t:`constructee`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4497,7 +4446,7 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
       The :t:`operand` is evaluated.
 
    #. :dp:`fls_bbf54ukld7j9`
-      The :t:`value` of the :t:`operand` is passed :t:`by move` into the
+      The :t:`value` of the :t:`operand` is :t:`[pass]ed` :t:`by move` into the
       designated output location of the enclosing :t:`control flow boundary`.
 
 #. :dp:`fls_99ea30a5mulj`
@@ -4786,7 +4735,7 @@ within the :t:`capturing expression`, as follows:
    If the :t:`capturing expression` is subject to :t:`keyword` ``move``, then
 
    #. :dp:`fls_dd8sc7y2vi3u`
-      If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
+      If the :t:`type` of the :t:`capture target` is a :t:`copy type`, then
       the :t:`capture mode` is :t:`by copy`.
 
    #. :dp:`fls_sq1wam8j1d0a`
@@ -4807,7 +4756,7 @@ within the :t:`capturing expression`, as follows:
       :t:`By mutable reference` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
-      If the :t:`type` of the :t:`capture target` is a :t:`by copy type`, then
+      If the :t:`type` of the :t:`capture target` is a :t:`copy type`, then
       the :t:`capture mode` is :t:`by copy`, otherwise it is :t:`by move`.
 
 :dp:`fls_wvob7114tfat`

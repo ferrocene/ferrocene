@@ -42,7 +42,7 @@ When a :t:`variable` holds a :t:`value`, the :t:`variable` is considered to be
 
 :dp:`fls_ch2lvm50olqd`
 When a :t:`variable` lacks a :t:`value` or its :t:`value` has been
-transferred :t:`by move`, the :t:`variable` is considered to be
+:t:`[pass]ed` :t:`by move`, the :t:`variable` is considered to be
 :dt:`uninitialized`.
 
 :dp:`fls_46910buiwvv9`
@@ -110,8 +110,8 @@ upto the last use of the :t:`reference`, prior to another assignment to the
 :t:`reference` or the end of the :t:`scope` of the :t:`reference`.
 
 :dp:`fls_v69rptdjao42`
-A :t:`referent` shall not be passed :t:`by move` while a :t:`reference` to it
-is :t:`active`.
+A :t:`referent` shall not be :t:`[pass]ed` :t:`by move` while a :t:`reference`
+to it is :t:`active`.
 
 :dp:`fls_vg9h6tz6z37w`
 A :t:`referent` shall not be modified while a :t:`reference` to it is
@@ -252,71 +252,55 @@ Variable ``x`` is captured using a unique immutable borrow.
 
 .. _fls_77scxuomlbgs:
 
-Passing Conventions
--------------------
+Value Passing
+-------------
 
 .. rubric:: Legality Rules
 
+:dp:`fls_v4djthWlamKC`
+:t:`Passing <pass>` is the mechanism by which a :t:`value` is transferred between
+:t:`[place]s`. **place is not the appropriate term here**
+
 :dp:`fls_fvwx2ufeyzcs`
-A :t:`passing convention` is a mechanism by which a :t:`value` is passed to and
-from a :t:`function`.
-
-:dp:`fls_1gyeqfpe7m1m`
-A :t:`value` is subject to a :t:`passing convention` when the :t:`value` is
-
-* :dp:`fls_jag0ud2lv08`
-  Assigned using an :t:`assignment expression`,
-
-* :dp:`fls_bkuz12srez4`
-  Bound to a :t:`function parameter` in a :t:`call expression`,
-
-* :dp:`fls_owltkb5i2lah`
-  Bound to a :t:`pattern`,
-
-* :dp:`fls_olqpm32j8va6`
-  Captured by a :t:`capture expression`,
-
-* :dp:`fls_czune894326w`
-  Returned from a :t:`function`.
-
-* :dp:`fls_qi148dixkp0w`
-  **More?**
+A :t:`passing convention` is the mechanism that defines how a :t:`value` is
+transferred between :t:`[place]s`.
 
 :dp:`fls_h2pgsij1rbms`
-A :t:`by copy type` is a :t:`type` that implements the :std:`core::marker::Copy`
+A :t:`copy type` is a :t:`type` that implements the :std:`core::marker::Copy`
 :t:`trait`.
 
 :dp:`fls_yx2knbby70fy`
-A :t:`value` of a :t:`by copy type` is passed :dt:`by copy`. Passing :t:`by
+A :t:`value` of a :t:`copy type` is :t:`[pass]ed` :dt:`by copy`. Passing :t:`by
 copy` does not change the :t:`owner` of the :t:`value`.
 
 :dp:`fls_6ul3f6v0foma`
-A :t:`by move type` is a :t:`type` that does not implement the
-:std:`core::marker::Copy` :t:`trait`.
+A :t:`move type` is a :t:`type` that implements the :std:`core::marker::Sized`
+:t:`trait` and that is not a :t:`copy type`.
 
 :dp:`fls_3ztdz02efeoc`
-A :t:`value` of a :t:`by move type` is passed :dt:`by move`. Passing :t:`by
+A :t:`value` of a :t:`move type` is :t:`[pass]ed` :dt:`by move`. Passing :t:`by
 move` changes the :t:`owner` of the :t:`value`.
 
-:dp:`fls_ljc1k8ms16gp`
-Passing :dt:`by value` is either passing :t:`by copy` or passing :t:`by move`.
+:dp:`fls_konzgoybhfqm`
+A :t:`value` of a :t:`place expression` shall be :t:`[pass]ed` :t:`by move` only
+when it denotes:
 
-:dp:`fls_xis57dxiomwz`
-A :t:`value` of a :t:`reference type` is passed :dt:`by reference`. Passing
-:t:`by reference` temporarily changes the :t:`owner` of the :t:`value`.
+* :dp:`fls_4bnbv7mqod57`
+  A :t:`field` of a :t:`place expression` that can be :t:`[pass]ed` :t:`by move`
+  and whose type does not implement the :std:`core::ops::Drop` :t:`trait`, or
 
-:dp:`fls_JUNnLwhPSwUO`
-Passing :dt:`by immutable reference` is passing :t:`by reference` where the
-:t:`value` is :t:`immutable`.
+* :dp:`fls_3xk3p1unbjy5`
+  A :t:`temporary`, or
 
-:dp:`fls_WW0GvbiEnyiW`
-Passing :dt:`by unique immutable reference` is passing
-:t:`by immutable reference` where it is asserted that the :t:`reference` to
-the :t:`value` is the only live :t:`reference`.
+* :dp:`fls_vk1xhvdaakh0`
+  A :t:`variable` which is not currently :t:`borrowed`.
 
-:dp:`fls_v4eqq6tst4gs`
-Passing :dt:`by mutable reference` is passing :t:`by reference` where the
-:t:`value` is :t:`mutable`.
+:dp:`fls_vveEJn7lngT8`
+A :t:`value` of a :t:`value expression` is always :t:`[pass]ed` :t:`by move`.
+
+:dp:`fls_gq35gqagw35`
+A :t:`value` not subject to :t:`by copy` or :t:`by move` :t:`passing convention`
+shall not be :t:`[pass]ed` between :t:`[place]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -325,12 +309,10 @@ Passing a :t:`value` :t:`by copy` from a source :t:`owner` to a target
 :t:`owner` proceeds as follows:
 
 #. :dp:`fls_go9gdlk5d3km`
-   The ``core::marker::Copy::clone(&value)`` :t:`function` of the source
-   :t:`owner` is invoked.
+   The :t:`value` of the source :t:`owner` is copied.
 
 #. :dp:`fls_459xx6febmf0`
-   The result of :std:`core::marker::Copy::clone` is assigned to the target
-   :t:`owner`.
+   The copy of is assigned to the target :t:`owner`.
 
 :dp:`fls_3xyq50abdiv6`
 Passing a :t:`value` :t:`by move` from a source :t:`owner` to a target
@@ -342,29 +324,10 @@ Passing a :t:`value` :t:`by move` from a source :t:`owner` to a target
 #. :dp:`fls_i4hrifsb9msr`
    The :t:`value` is assigned to the target :t:`owner`.
 
-:dp:`fls_uj7zg9f43m0m`
-Passing a :t:`value` :t:`by reference` from a source :t:`owner` to a target
-:t:`owner` proceeds as follows:
-
-#. :dp:`fls_ltpn1zrm40tt`
-   The :t:`value` is unassigned from the source :t:`owner`.
-
-#. :dp:`fls_wjbog6rj2it9`
-   The :t:`value` is assigned to the target :t:`owner`.
-
-#. :dp:`fls_umueqrkgiv27`
-   Once the context of the target :t:`owner` completes, then
-
-   #. :dp:`fls_qa6hdrae3zcj`
-      The :t:`value` is unassigned from the target :t:`owner`.
-
-   #. :dp:`fls_leb8fsbee5er`
-      The :t:`value` is assigned back to the source :t:`owner`.
-
 .. rubric:: Examples
 
 :dp:`fls_7tadh1zel0fc`
-Type ``i32`` is a by copy type. By the end of the second let statement, ``x`` is
+Type ``i32`` is a copy type. By the end of the second let statement, ``x`` is
 the owner of the original ``42`` and ``y`` is the owner of a cloned ``42``.
 
 .. code-block:: rust
@@ -373,7 +336,7 @@ the owner of the original ``42`` and ``y`` is the owner of a cloned ``42``.
    let y: i32 = x;
 
 :dp:`fls_ywt328hcieka`
-Type :std:`core::sync::atomic::AtomicI32` is a by move type. By the end of the
+Type :std:`core::sync::atomic::AtomicI32` is a move type. By the end of the
 second let statement, ``x`` is uninitialized and ``y`` is the sole owner of the
 atomic ``42``.
 
@@ -383,19 +346,6 @@ atomic ``42``.
 
    let x: AtomicI32 = AtomicI32::new(42);
    let y: AtomicI32 = x;
-
-:dp:`fls_7wm8lvfuiou`
-Type ``&i32`` is a by reference type. By the end of the second statement, ``x``
-is the owner of the original ``42``.
-
-.. code-block:: rust
-
-   fn add_one(value: &i32) -> i32 {
-       *value + 1
-   }
-
-   let x: i32 = 42;
-   let y: i32 = add_one(&x);
 
 .. _fls_4jiw35pan7vn:
 

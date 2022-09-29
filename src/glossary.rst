@@ -2124,8 +2124,8 @@ field resolution
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_nL8UuclgxfGL`
-:dt:`Field resolution` is a form of :t:`resolution` that applies to the
-:t:`field selector` of a :t:`field access expression`.
+:dt:`Field resolution` is a form of :t:`resolution` that applies to a
+:t:`field access expression`.
 
 .. _fls_kqbata8slp1y:
 
@@ -3916,8 +3916,8 @@ method resolution
 ^^^^^^^^^^^^^^^^^
 
 :dp:`fls_LbW4z6OTuD1l`
-:dt:`Method resolution` is a kind of :t:`resolution` that applies to the
-:t:`method operand` of a :t:`method call expression`.
+:dt:`Method resolution` is a kind of :t:`resolution` that applies to a
+:t:`method call expression`.
 
 .. _fls_2FFRdj5cO0ks:
 
@@ -4512,7 +4512,7 @@ path expression resolution
 
 :dp:`fls_WYcEVyc3SHuK`
 :dt:`Path expression resolution` is a form of :t:`path resolution` that applies
-to :t:`[path expression]s`.
+to a :t:`path expression`.
 
 .. _fls_ptikwcw3b20l:
 
@@ -4533,8 +4533,7 @@ path resolution
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_uy9Ai9vwTkjB`
-:dt:`Path resolution` is a form of :t:`resolution` that applies to
-:t:`[path]s`.
+:dt:`Path resolution` is a form of :t:`resolution` that applies to a :t:`path`.
 
 .. _fls_xb54s9cs7h08:
 
@@ -5278,7 +5277,7 @@ resolution
 
 :dp:`fls_PQjEvLs5cE4y`
 :dt:`Resolution` is the process of finding a unique interpretation for a
-:t:`construct` in a program.
+:t:`field access expression`, a :t:`method call expression`, or a :t:`path`.
 
 .. _fls_uuo1qvrz1i0k:
 
@@ -5656,7 +5655,7 @@ simple path resolution
 
 :dp:`fls_CQlepoN6PmKq`
 :dt:`Simple path resolution` is a kind of :t:`path resolution` that applies to
-:t:`[simple path]s`.
+a :t:`simple path`.
 
 .. _fls_k5uqt5oj7wvl:
 
@@ -6515,7 +6514,7 @@ type path resolution
 
 :dp:`fls_Xv6JbfdIyvA3`
 :dt:`Type path resolution` is a form of :t:`path resolution` that applies to
-:t:`[type path]s`.
+a :t:`type path`.
 
 .. _fls_u1zkh2m8p92:
 

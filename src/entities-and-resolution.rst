@@ -1109,7 +1109,7 @@ Resolution
 
 :dp:`fls_ho4kem1slcxg`
 :t:`Resolution` is the process of finding a unique interpretation for a
-:t:`construct` in a program.
+:t:`field access expression`, a :t:`method call expression`, or a :t:`path`.
 
 :dp:`fls_7le2vcdbtxbq`
 A :t:`construct` that is being resolved is said to be :t:`under resolution`.
@@ -1140,8 +1140,8 @@ Field Resolution
 .. rubric:: Legality Rules
 
 :dp:`fls_1nxknwjdp0am`
-:t:`Field resolution` is a form of :t:`resolution` that applies to the
-:t:`field selector` of a :t:`field access expression`.
+:t:`Field resolution` is a form of :t:`resolution` that applies to a
+:t:`field access expression`.
 
 :dp:`fls_j1bip4w30q8`
 A :dt:`candidate container type` is the :t:`type` of the :t:`container operand`
@@ -1214,8 +1214,8 @@ Method Resolution
 .. rubric:: Legality Rules
 
 :dp:`fls_e5a5z5yht26l`
-:t:`Method resolution` is a kind of :t:`resolution` that applies to the
-:t:`method operand` of a :t:`method call expression`.
+:t:`Method resolution` is a kind of :t:`resolution` that applies to a
+:t:`method call expression`.
 
 :dp:`fls_z80ylmlu1f3q`
 A :dt:`candidate receiver type` is the :t:`type` of the :t:`receiver operand`
@@ -1339,7 +1339,7 @@ Path Resolution
 .. rubric:: Legality Rules
 
 :dp:`fls_8slvisr3jfja`
-:t:`Path resolution` is a form of :t:`resolution` that applies to :t:`[path]s`.
+:t:`Path resolution` is a form of :t:`resolution` that applies to a :t:`path`.
 
 :dp:`fls_nmev0tnzgw35`
 :t:`Path resolution` resolves a :t:`path` by resolving individual
@@ -1465,7 +1465,7 @@ Simple Path Resolution
 
 :dp:`fls_uml24jw5jo7a`
 :t:`Simple path resolution` is a kind of :t:`path resolution` that applies to
-:t:`[simple path]s`.
+a :t:`simple path`.
 
 :dp:`fls_59wd7loxst43`
 The :t:`namespace context` of :t:`simple path resolution` is determined as
@@ -1514,7 +1514,7 @@ Path Expression Resolution
 
 :dp:`fls_akjlqm3a2lb1`
 :t:`Path expression resolution` is a form of :t:`path resolution` that applies
-to :t:`[path expression]s`.
+to a :t:`path expression`.
 
 :dp:`fls_xyzdajtf4u2t`
 The :t:`namespace context` of :t:`path expression resolution` is the
@@ -1649,7 +1649,7 @@ Type Path Resolution
 
 :dp:`fls_2zuncql8ir5k`
 :t:`Type path resolution` is a form of :t:`path resolution` that applies to
-:t:`[type path]s`.
+a :t:`type path`.
 
 :dp:`fls_bv5cj918dqqe`
 The :t:`namespace context` of :t:`type path resolution` is the

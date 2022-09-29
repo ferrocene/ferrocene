@@ -4712,20 +4712,40 @@ A :t:`capture target` is either a :t:`variable` or a :t:`field` of a
 
 :dp:`fls_e70ywb8191h`
 The :t:`capturing environment` of a :t:`capturing expression` consists of all
-:t:`[capture target]s` that are defined outside the :t:`capturing expression`.
+:t:`captured` :t:`capture target` :t:`[value]s`.
 
 :dp:`fls_1y2ttb466m9c`
 :t:`Capturing` is the process of saving the :t:`[capture target]s` of a
 :t:`[capturing expression]'s` :t:`capturing environment`.
 
 :dp:`fls_ip81lt2mm940`
-A :t:`capture target` requires :t:`capturing` when it is part of the
-:t:`[capturing expression]'s` :t:`capturing environment` and it is used by
-the :t:`capturing expression`. Such a :t:`capture target` is said to be
-:dt:`captured`.
+A :t:`capture target` requires :t:`capturing` when it is used by
+the :t:`capturing expression` and it is defined outside of the :t:`capturing
+expression`. Such a :t:`capture target` is said to be :dt:`captured`.
 
 :dp:`fls_y9n1i4hbq8sf`
 :t:`Capture mode` is the mechanism by which a :t:`capture target` is captured.
+
+:dp:`fls_O6WYL8AUyPje`
+A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by copy capture`
+:t:`[pass]es` the :t:`value` of the :t:`capture target` into the :t:`capturing
+environment`.
+
+:dp:`fls_aCxt2Ovmb5He`
+A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by immutable
+reference capture` binds an :t:`immutable reference` to the :t:`capture target`
+and passes the :t:`immutable reference` into the :t:`capturing environment`.
+
+:dp:`fls_xTNFfkxHm5yy`
+A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by mutable
+reference capture` binds a :t:`mutable reference` to the :t:`capture target`
+and passes the :t:`mutable reference` into the :t:`capturing environment`.
+
+:dp:`fls_8HLaLAIZgYfs`
+A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by unique
+immutable reference capture` binds a :t:`unique immutable reference` to the
+:t:`capture target` and passes the :t:`mutable reference` into the :t:`capturing
+environment`.
 
 :dp:`fls_t695ps4lfh6z`
 The :t:`capture mode` is determined based on the use of the :t:`capture target`
@@ -4733,31 +4753,24 @@ within the :t:`capturing expression`, as follows:
 
 #. :dp:`fls_6j8cr7d5zs1l`
    If the :t:`capturing expression` is subject to :t:`keyword` ``move``, then
-
-   #. :dp:`fls_dd8sc7y2vi3u`
-      If the :t:`type` of the :t:`capture target` is a :t:`copy type`, then
-      the :t:`capture mode` is :t:`by copy`.
-
-   #. :dp:`fls_sq1wam8j1d0a`
-      Otherwise the :t:`capture mode` is :t:`by move`.
+   the :t:`capture mode` is :t:`by value capture`.
 
 #. :dp:`fls_l8e98pyhm08g`
    Otherwise the :t:`capture mode` is determined based on the following
    precedence:
 
    #. :dp:`fls_33hfay24hx8u`
-      :t:`By immutable reference` mode.
+      :t:`By immutable reference capture`.
 
    #. :dp:`fls_wmxsd0i2yemf`
-      :t:`By unique immutable reference` mode, if the :t:`capture target` is a
-      :t:`mutable reference` that is being modified.
+      :t:`By unique immutable reference capture` mode, if the :t:`capture
+      target` is a :t:`mutable reference` that is being modified.
 
    #. :dp:`fls_lu779ufqhggl`
-      :t:`By mutable reference` mode.
+      :t:`By mutable reference capture` mode.
 
    #. :dp:`fls_uqy5w9uc8gla`
-      If the :t:`type` of the :t:`capture target` is a :t:`copy type`, then
-      the :t:`capture mode` is :t:`by copy`, otherwise it is :t:`by move`.
+      :t:`By value capture`.
 
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of

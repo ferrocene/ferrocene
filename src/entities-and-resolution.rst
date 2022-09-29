@@ -358,10 +358,19 @@ A :t:`type path` is subject to :t:`type path resolution`.
 A :t:`qualifying trait` is a :t:`trait` that imposes a restriction on a
 :t:`qualified type`.
 
+:dp:`fls_Ai1jN5a8h3Dz`
+A :t:`qualifying trait` shall resolve to a :t:`trait`.
+
 :dp:`fls_ybv0tdu7dnj5`
 A :t:`qualified type` is a :t:`type` that is restricted to a set of
 :t:`[implementation]s` that exhibit :t:`implementation conformance` to a
 :t:`qualifying trait`.
+
+:dp:`fls_qkYF2J7GVah8`
+A :t:`qualified type` shall resolve to a :t:`type`.
+
+:dp:`fls_QjNQbQhUcRTT`
+A :t:`qualified type` shall implement its related :t:`qualifying trait`.
 
 :dp:`fls_7sm3206va03c`
 A :t:`qualified path expression` is a :t:`path expression` that resolves
@@ -1592,11 +1601,6 @@ in left-to-right order, as follows:
     the current :t:`path segment` resolves to and its :t:`resolution context`
     is that :t:`candidate selected entity`.
 
-  * :dp:`fls_j6px1hxcsqer`
-    If the current :t:`path segment` has :t:`[generic argument]s`, then the
-    :t:`[generic argument]s` are passed (**better term?**) to the
-    :t:`resolution context` of the current :t:`path segment`.
-
 :dp:`fls_utfpnwlo0v99`
 :dt:`Path expression resolution implementation candidate lookup` for a
 :t:`path segment` and a :t:`trait` or :t:`type` proceeds as follows:
@@ -1621,12 +1625,14 @@ in left-to-right order, as follows:
    :t:`implementing type` :t:`unifies <unify>` with the :t:`trait` or :t:`type`
 
    #. :dp:`fls_3sceutaqpqha`
-      Try to locate a visible :t:`function` in the :t:`inherent implementation`
-      whose :t:`name` matches the characters of the :t:`path segment`.
+      Try to locate a visible :t:`constant` or a visible :t:`function` in the
+      :t:`inherent implementation` whose :t:`name` matches the characters of
+      the :t:`path segment`.
 
    #. :dp:`fls_6q9cwqlvxmd1`
-      If such a :t:`function` exists, then the :t:`path segment` resolves to
-      that :t:`function` and :t:`path expression resolution` stops.
+      If such a :t:`constant` or :t:`function` exists, then the
+      :t:`path segment` resolves to that :t:`constant` or :t:`function` and
+      :t:`path expression resolution` stops.
 
 :dp:`fls_qeym3vbi36iv`
 :dt:`Path expression resolution trait implementation candidate lookup` for a
@@ -1637,12 +1643,14 @@ in left-to-right order, as follows:
    :t:`implemented trait` is :t:`in scope`
 
    #. :dp:`fls_pp09gmrnasjp`
-      Try to locate a visible :t:`function` in the :t:`trait implementation`
-      whose :t:`name` matches the characters of the :t:`path segment`.
+      Try to locate a visible :t:`constant` or a visible :t:`function` in the
+      :t:`trait implementation` whose :t:`name` matches the characters of the
+      :t:`path segment`.
 
    #. :dp:`fls_q0jt6n2j1hsx`
-      If such a :t:`function` exists, then the :t:`path segment` resolves to
-      that :t:`function` and :t:`path expression resolution` stops.
+      If such a :t:`constant` or :t:`function` exists, then the 
+      :t:`path segment` resolves to that :t:`constant` or :t:`function` and 
+      :t:`path expression resolution` stops.
 
 .. _fls_1h0olpc7vbui:
 
@@ -1696,11 +1704,6 @@ left-to-right order, as follows:
   :t:`[trait]s` that are :t:`in scope`. What the current :t:`path segment`
   resolves to and its :t:`resolution context` is that
   :t:`candidate selected entity`.
-
-* :dp:`fls_wm3sglgg29h6`
-  If the current :t:`path segment` has :t:`[generic argument]s`, then the
-  :t:`[generic argument]s` are passed (**better term?**) to the
-  :t:`resolution context` of the current :t:`path segment`.
 
 * :dp:`fls_jh4db1p7or0x`
   If the current :t:`path segment` has a :t:`qualified fn trait`, then the

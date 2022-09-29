@@ -3234,9 +3234,6 @@ A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
 A :t:`method operand` is an :t:`operand` that denotes the :t:`method` being
 invoked by a :t:`method call expression`.
 
-:dp:`fls_y7bj7y6davlh`
-A :t:`method call expression` is subject to :t:`method resolution`.
-
 :dp:`fls_11glzggtbgb3`
 The :t:`type` of a :t:`method call expression` is the :t:`return type` of the
 invoked :t:`method`.
@@ -3244,6 +3241,9 @@ invoked :t:`method`.
 :dp:`fls_ljvj1f9fv085`
 The :t:`value` of a :t:`method call expression` is the :t:`value` returned by
 the invoked :t:`method`.
+
+:dp:`fls_y7bj7y6davlh`
+A :t:`method call expression` is subject to :t:`method resolution`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3343,7 +3343,7 @@ accessed in a :t:`field access expression`.
 
 :dp:`fls_qqrconpa92i3`
 A :t:`selected field` is a :t:`field` that is selected by a :t:`field access
-expression` with :t:`field resolution`.
+expression`.
 
 :dp:`fls_fovs9il2h9xg`
 The :t:`type` of a :t:`field access expression` is the :t:`type` of the
@@ -3369,6 +3369,9 @@ subject to :t:`attribute` :c:`repr` is equivalent to invoking :t:`function`
 is the :t:`type` used at the time of writing the :t:`selected field`,
 ``read_type`` is the :t:`type` used at the time of reading the :t:`selected
 field`, and ``field_bits`` is the bit representation of the :t:`selected field`.
+
+:dp:`fls_jjnyuU9KIaGy`
+A :t:`field access expression` is subject to :t:`field resolution`.
 
 .. rubric:: Undefined Behavior
 

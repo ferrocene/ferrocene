@@ -291,6 +291,9 @@ A :t:`path` is a sequence of :t:`[path segment]s` logically separated by
 :dp:`fls_y1z7kougmahd`
 A :t:`path segment` is an element of a :t:`path`.
 
+:dp:`fls_8q8nqfpSz7Ly`
+A :t:`path` is subject to :t:`path resolution`.
+
 :dp:`fls_opn5n5t2mo3m`
 If a :t:`path segment` is expressed as either :t:`keyword` ``crate``,
 :t:`keyword` ``$crate``, :t:`keyword` ``self``, or :t:`keyword` ``Self``, then

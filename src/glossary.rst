@@ -4411,7 +4411,7 @@ owner
 ^^^^^
 
 :dp:`fls_7vwwhberexeb`
-An :dt:`owner` is a :t:`value holder` that holds a :t:`value`.
+An :dt:`owner` is a :t:`variable` that holds a :t:`value`.
 
 .. _fls_1gmetz8qtr0l:
 
@@ -7039,15 +7039,6 @@ value expression context
 :dp:`fls_NGGZEbmoLRbD`
 A :dt:`value expression context` is an expression context that is not a
 :t:`place expression context`.
-
-.. _fls_aP9ZaU01Dsg5:
-
-value holder
-^^^^^^^^^^^^
-
-:dp:`fls_RssUVCMKCNBx`
-A :dt:`value holder` is either a :t:`constant`, a :t:`static`, or a
-:t:`variable`.
 
 .. _fls_a5xof9jlpc2e:
 

@@ -20,7 +20,7 @@ Ownership
 management model of Rust.
 
 :dp:`fls_ckcnkbb6y3cq`
-An :t:`owner` is a :t:`value holder` that holds a :t:`value`.
+An :t:`owner` is a :t:`variable` that holds a :t:`value`.
 
 :dp:`fls_ze0u9gfylmhn`
 A :t:`value` shall have only one :t:`owner`.
@@ -32,25 +32,21 @@ Initialization
 
 .. rubric:: Legality Rules
 
-:dp:`fls_3QyMS128AUOr`
-A :t:`value holder` is either a :t:`constant`, a :t:`static`, or a
-:t:`variable`.
-
 :dp:`fls_drfzu02bo7oe`
 :t:`Initialization` is the act of supplying an initial :t:`value` to a
-:t:`value holder`.
+:t:`variable`.
 
 :dp:`fls_wnhci8phdu4m`
-When a :t:`value holder` holds a :t:`value`, the :t:`value holder` is
-considered to be :dt:`initialized`.
+When a :t:`variable` holds a :t:`value`, the :t:`variable` is considered to be
+:dt:`initialized`.
 
 :dp:`fls_ch2lvm50olqd`
-When a :t:`value holder` lacks a :t:`value` or its :t:`value` has been
-transferred :t:`by move`, the :t:`value holder` is considered to be
+When a :t:`variable` lacks a :t:`value` or its :t:`value` has been
+transferred :t:`by move`, the :t:`variable` is considered to be
 :dt:`uninitialized`.
 
 :dp:`fls_46910buiwvv9`
-A :t:`value holder` shall be :t:`initialized` before it is accessed.
+A :t:`variable` shall be :t:`initialized` before it is accessed.
 
 .. rubric:: Runtime Semantics
 
@@ -432,12 +428,12 @@ A :t:`destructor` is a :t:`function` that is invoked immediately before the
 related :t:`type`. Such an object is said to be :dt:`dropped`.
 
 :dp:`fls_gfvm70iqu1l4`
-An :t:`uninitialized` :t:`value holder` is not :t:`dropped`.
+An :t:`uninitialized` :t:`variable` is not :t:`dropped`.
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_l2xkdjeydqtx`
-:t:`Dropping` an :t:`initialized` :t:`value holder` proceeds as follows:
+:t:`Dropping` an :t:`initialized` :t:`variable` proceeds as follows:
 
 #. :dp:`fls_bync24y6gp93`
    If the :t:`drop type` implements the :std:`core::ops::Drop` :t:`trait`, then

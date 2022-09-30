@@ -876,6 +876,11 @@ The :t:`type` of a :t:`borrow expression` is determined as follows:
 :dp:`fls_8cvmee9bzs40`
 The :t:`value` of a :t:`borrow expression` is the address of its :t:`operand`.
 
+:dp:`fls_LuaPBicDlDTT`
+It is a static error if a :t:`borrow expression` would create an unaligned
+reference to a :t:`field` in an :t:`abstract data type` subject to
+:t:`attribute` :c:`repr`.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_2jd0mgw4zja4`

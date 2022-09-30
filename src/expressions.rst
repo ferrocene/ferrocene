@@ -1330,7 +1330,7 @@ The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
    The :t:`right operand` is evaluated.
 
 #. :dp:`fls_b9g0r9vc4rou`
-   ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
+   ``core::ops::Sub::sub(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_35oSMqAMFYWl`
 If :t:`arithmetic overflow` occurs, the computed :t:`value` shall wrap around or the program

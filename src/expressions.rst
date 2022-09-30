@@ -607,8 +607,8 @@ Path Expressions
 .. syntax::
 
    PathExpression ::=
-       PathInExpression
-     | QualifiedPathInExpression
+       PathExpression
+     | QualifiedPathExpression
 
 .. rubric:: Legality Rules
 
@@ -2823,7 +2823,7 @@ Struct Expressions
        Constructee $${$$ StructExpressionContent? $$}$$
 
    Constructee ::=
-       PathInExpression
+       PathExpression
 
    StructExpressionContent ::=
        BaseInitializer
@@ -3212,10 +3212,13 @@ Method Call Expressions
 .. syntax::
 
    MethodCallExpression ::=
-       ReceiverOperand $$.$$ PathInExpressionSegment $$($$ ArgumentOperandList? $$)$$
+       ReceiverOperand $$.$$ MethodOperand $$($$ ArgumentOperandList? $$)$$
 
    ReceiverOperand ::=
        Operand
+
+   MethodOperand ::=
+       PathExpressionSegment
 
 .. rubric:: Legality Rules
 
@@ -3227,8 +3230,9 @@ of a :t:`variable`.
 A :t:`receiver operand` is an :t:`operand` that denotes the :t:`value` whose
 :t:`method` is being invoked by a :t:`method call expression`.
 
-:dp:`fls_y7bj7y6davlh`
-A :t:`method call expression` is subject to :t:`method resolution`.
+:dp:`fls_3AQUOBo7akXu`
+A :t:`method operand` is an :t:`operand` that denotes the :t:`method` being
+invoked by a :t:`method call expression`.
 
 :dp:`fls_11glzggtbgb3`
 The :t:`type` of a :t:`method call expression` is the :t:`return type` of the
@@ -3237,6 +3241,9 @@ invoked :t:`method`.
 :dp:`fls_ljvj1f9fv085`
 The :t:`value` of a :t:`method call expression` is the :t:`value` returned by
 the invoked :t:`method`.
+
+:dp:`fls_y7bj7y6davlh`
+A :t:`method call expression` is subject to :t:`method resolution`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3336,7 +3343,7 @@ accessed in a :t:`field access expression`.
 
 :dp:`fls_qqrconpa92i3`
 A :t:`selected field` is a :t:`field` that is selected by a :t:`field access
-expression` with :t:`field resolution`.
+expression`.
 
 :dp:`fls_fovs9il2h9xg`
 The :t:`type` of a :t:`field access expression` is the :t:`type` of the
@@ -3362,6 +3369,9 @@ subject to :t:`attribute` :c:`repr` is equivalent to invoking :t:`function`
 is the :t:`type` used at the time of writing the :t:`selected field`,
 ``read_type`` is the :t:`type` used at the time of reading the :t:`selected
 field`, and ``field_bits`` is the bit representation of the :t:`selected field`.
+
+:dp:`fls_jjnyuU9KIaGy`
+A :t:`field access expression` is subject to :t:`field resolution`.
 
 .. rubric:: Undefined Behavior
 
@@ -3436,9 +3446,9 @@ A :t:`closure body` denotes a new :t:`control flow boundary`.
 A :t:`closure body` is subject to :t:`capturing`.
 
 :dp:`fls_c3rzwUxjmBMY`
-A :t:`closure parameter` is a :t:`construct` that matches an input :t:`value`
-at the site of a :t:`call expression` or a :t:`method call expression` to
-a pattern.
+A :t:`closure parameter` is a :t:`construct` that yields a set of
+:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_r6gWLoNR7JMR`
 The :t:`pattern` of a :t:`closure parameter` shall be :t:`irrefutable`.
@@ -3496,11 +3506,17 @@ Loop Expressions
      | WhileLetLoopExpression
      | WhileLoopExpression
 
+   LoopBody ::=
+       BlockExpression
+
 .. rubric:: Legality Rules
 
 :dp:`fls_y1d8kd1bdlmx`
 A :t:`loop expression` is an :t:`expression` that evaluates a :t:`block
 expression` continuously as long as some criterion holds true.
+
+:dp:`fls_BjZjuiFnPtFd`
+A :t:`loop body` is the :t:`block expression` of a :t:`loop expression`.
 
 :dp:`fls_eg93m93gvwal`
 An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
@@ -3524,7 +3540,7 @@ For Loops
 .. syntax::
 
    ForLoopExpression ::=
-       $$for$$ Pattern $$in$$ SubjectExpression BlockExpression
+       $$for$$ Pattern $$in$$ SubjectExpression LoopBody
 
 .. rubric:: Legality Rules
 
@@ -3600,7 +3616,7 @@ Infinite Loops
 .. syntax::
 
    InfiniteLoopExpression ::=
-       $$loop$$ BlockExpression
+       $$loop$$ LoopBody
 
 .. rubric:: Legality Rules
 
@@ -3665,7 +3681,7 @@ While Loops
 .. syntax::
 
    WhileLoopExpression ::=
-       $$while$$ IterationExpression BlockExpression
+       $$while$$ IterationExpression LoopBody
 
    IterationExpression ::=
        Expression
@@ -3731,7 +3747,7 @@ While Let Loops
 .. syntax::
 
    WhileLetLoopExpression ::=
-       $$while$$ $$let$$ Pattern $$=$$ SubjectLetExpression BlockExpression
+       $$while$$ $$let$$ Pattern $$=$$ SubjectLetExpression LoopBody
 
 .. rubric:: Legality Rules
 

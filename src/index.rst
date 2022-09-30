@@ -22,7 +22,7 @@ Ferrocene Language Specification
    implementations
    generics
    attributes
-   names-and-resolution
+   entities-and-resolution
    ownership-and-deconstruction
    exceptions-and-errors
    concurrency

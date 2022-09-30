@@ -41,8 +41,8 @@ An :t:`associated type` is a :t:`type alias` that appears as an :t:`associated
 item`.
 
 :dp:`fls_w8nu8suy7t5`
-An :t:`associated type` shall not be used in the :t:`path-in-expression` of a
-:t:`struct expression`\ ``.``
+An :t:`associated type` shall not be used in the :t:`path expression` of a
+:t:`struct expression`.
 
 :dp:`fls_wasocqdnuzd1`
 An :t:`associated type` with a :s:`TypeBoundList` shall appear only as an

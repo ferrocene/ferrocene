@@ -1412,7 +1412,7 @@ Attribute ``macro_export``
 :dp:`fls_h26iw5wh4lla`
 :t:`Attribute` :dc:`macro_export` changes the :t:`visibility` of the related
 :t:`declarative macro` to :t:`public visibility` and introduces the :t:`name`
-of the :t:`declarative macro` into the :t:`scope` of the
+of the :t:`declarative macro` into the :t:`item scope` of the
 :t:`crate root module`.
 
 .. rubric:: Examples
@@ -1462,7 +1462,7 @@ imports from the related :t:`crate` either:
 
 :dp:`fls_p6jlgmn2sg7j`
 When applied to a :t:`module`, :t:`attribute` :c:`macro_use` extends the
-:t:`scope` of the related :t:`macro`.
+:t:`textual macro scope` of the related :t:`macro`.
 
 .. rubric:: Examples
 

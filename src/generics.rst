@@ -251,10 +251,10 @@ Where Clauses
        WhereClausePredicate (, WhereClausePredicate)* $$,$$?
 
    WhereClausePredicate ::=
-       LifetimePredicate
+       LifetimeBoundPredicate
      | TypeBoundPredicate
 
-   LifetimePredicate ::=
+   LifetimeBoundPredicate ::=
       LifetimeIndication $$:$$ LifetimeIndicationList?
 
    TypeBoundPredicate ::=
@@ -267,9 +267,16 @@ A :t:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
 :t:`[lifetime parameter]s` and :t:`[type parameter]s`.
 
 :dp:`fls_fhy4rsmmbvyy`
-A :t:`where clause predicate` is a :t:`construct` that specifies
-:t:`[lifetime bound]s` on :t:`[lifetime parameter]s` as well as 
-:t:`[lifetime bound]s` and :t:`[trait bound]s` on :t:`[type]s`.
+A :t:`where clause predicate` is either a :t:`lifetime bound predicate` or a
+:t:`type bound predicate`.
+
+:dp:`fls_V4PKFqtCsAv6`
+A :t:`lifetime bound predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` on a :t:`lifetime parameter`.
+
+:dp:`fls_cslGPmVjujHD`
+A :t:`type bound predicate` is a :t:`construct` that specifies
+:t:`[lifetime bound]s` and :t:`[trait bound]s` on a :t:`type`.
 
 :dp:`fls_ytk74dyxuy6d`
 A :t:`construct` is valid when all of its :t:`[where clause predicate]s` hold

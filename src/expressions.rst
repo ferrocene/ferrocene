@@ -1119,11 +1119,12 @@ The :t:`evaluation` of a :t:`negation expression` with a
 
 #. :dp:`fls_rFFlt33a5RsZ`
    If the type of the :t:`operand` is an :t:`integer type`, the
-   :t:`negation expression` evaluates to the bitwise negation of the integer.
+   :t:`negation expression` evaluates to the bitwise negation of the
+   :t:`operand`.
 
 #. :dp:`fls_h7pIl1WZ8Y2t`
    If the type of the :t:`operand` is :c:`bool`, the result is computed as
-   follows, depending on the value of the :t:`operand`:
+   follows, depending on the :t:`value` of the :t:`operand`:
 
   .. list-table::
 
@@ -1150,17 +1151,17 @@ The :t:`evaluation` of a :t:`negation expression` with a
 
 #. :dp:`fls_CutpaCFCGHQs`
    If the type of the :t:`operand` is an :t:`integer type`, the
-   :t:`negation expression` evaluates to the value of the operand, with its sign
-   inverted.
+   :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
+   with its sign inverted.
 
    #. :dp:`fls_MrvYkkEr4xKy`
-      If the result of the negation does not fit within the range of the
-      :t:`operand` type, :t:`arithmetic overflow` occurs.
+      If the result of the :t:`negation expression` does not fit within the
+      range of the :t:`operand` type, :t:`arithmetic overflow` occurs.
 
 #. :dp:`fls_B2eKGWaJhFKD`
    If the type of the :t:`operand` is a :t:`floating-point type`, the
-   :t:`negation expression` evaluates to the value of the operand, with its sign
-   inverted. No overflow is possible.
+   :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
+   with its sign inverted. No overflow is possible.
 
 #. :dp:`fls_uldh10k77sng`
    If the type of the :t:`operand` is neither an :t:`integer type`, nor a

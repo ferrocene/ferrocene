@@ -2380,6 +2380,36 @@ is equivalent to a :t:`where clause` of the following form:
 
    	trait T where Self: Bound {}
 
+:dp:`fls_YynbrIceKmsJ`
+An :t:`auto trait` is a :t:`trait` that is implicitly and automatically
+implemented by a :t:`type` when the types of its constituent :t:`[field]s`
+implement the :t:`trait`.
+
+:dp:`fls_Bd4HwdrRuXMm`
+A :t:`type` that has no :t:`[field]s` implements all :t:`[auto trait]s`.
+
+:dp:`fls_UzfG5ic8PUIH`
+If determining whether a :t:`type` ``T`` implements an :t:`auto trait`
+would recursively depend on whether ``T`` implements said :t:`auto trait`, this
+requirement is ignored and assumed to hold.
+
+:dp:`fls_02D6ku4Sd6yL`
+The following :t:`[trait]s` are :t:`[auto trait]s`:
+
+* :dp:`fls_RLFIzQeAPhG6`
+  :std:`core::marker::Send`
+* :dp:`fls_avSxO0LEka2x`
+  :std:`core::marker::Sync`
+* :dp:`fls_ft8axGGOe3aL`
+  :std:`core::marker::Unpin`
+* :dp:`fls_M4EoT1NMyxJS`
+  :std:`core::panic::UnwindSafe`
+* :dp:`fls_Tir2kpKNP1KC`
+  :std:`core::panic::RefUnwindSafe`
+
+:dp:`fls_WxHiKr8BGGvz`
+No other :t:`[trait]s` are :t:`[auto trait]s`.
+
 .. rubric:: Examples
 
 .. code-block:: rust

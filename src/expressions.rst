@@ -1281,8 +1281,20 @@ The :t:`evaluation` of an :t:`addition expression` proceeds as follows:
 #. :dp:`fls_jjmc1xgny77`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_NcLf4o1dpniS`
+   If the types of both operands are the same :t:`integer type` or
+   :t:`floating-point type`, the :t:`addition expression` evaluates to the sum
+   of the operands, following the rules of unsigned integer addition for
+   :t:`[unsigned integer type]s`, two's complement addition for
+   :t:`[signed integer type]s`, or floating-point addition for
+   :t:`[floating-point type]s`.
+
+   #. :dp:`fls_zeGcAQBRcTJs`
+      If unsigned integer addition or two's complement addition is performed,
+      the operation may result in an :t:`arithmetic overflow`.
+
 #. :dp:`fls_cayhj5hcuhcg`
-   ``core::ops::Add::add(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Add::add(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_43knkymqpj7t`
 The :t:`evaluation` of a :t:`division expression` proceeds as follows:
@@ -1293,8 +1305,25 @@ The :t:`evaluation` of a :t:`division expression` proceeds as follows:
 #. :dp:`fls_bveocgaagk1n`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_zLroZh43MOtN`
+   If the types of both operands are the same :t:`integer type` or
+   :t:`floating-point type`, the :t:`division expression` evaluates to the
+   quotient of the operands, following the rules of unsigned integer division
+   for :t:`[unsigned integer type]s`, two's complement division for
+   :t:`[signed integer type]s`, or floating-point division for
+   :t:`[floating-point type]s`.
+
+   #. :dp:`fls_Q9dhNiICGIfr`
+      If unsigned integer division is performed and the :t:`right operand` is 0,
+      the operation results in a :t:`panic`.
+
+   #. :dp:`fls_albbLSTYtmyq`
+      If two's complement division is performed and the :t:`right operand` is 0
+      or the result does not fit in the target type, the operation results in a
+      :t:`panic`.
+
 #. :dp:`fls_qd6ggdgq2hob`
-   ``core::ops::Div::div(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Div::div(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_lr2a21v5en59`
 The :t:`evaluation` of a :t:`multiplication expression` proceeds as follows:
@@ -1305,8 +1334,20 @@ The :t:`evaluation` of a :t:`multiplication expression` proceeds as follows:
 #. :dp:`fls_b94ojbfukhvd`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_Et5gp1I7VqBX`
+   If the types of both operands are the same :t:`integer type` or
+   :t:`floating-point type`, the :t:`multiplication expression` evaluates to the
+   product of the operands, following the rules of unsigned integer
+   multiplication for :t:`[unsigned integer type]s`, two's complement
+   multiplication for :t:`[signed integer type]s`, or floating-point
+   multiplication for :t:`[floating-point type]s`.
+
+   #. :dp:`fls_sxBHh3Doj4UU`
+      If unsigned integer multiplication or two's complement multiplication is
+      performed, the operation may result in an :t:`arithmetic overflow`.
+
 #. :dp:`fls_blyr18iao20n`
-   ``core::ops::Mul::mul(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Mul::mul(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_g28igfbnwfe0`
 The :t:`evaluation` of a :t:`remainder expression` proceeds as follows:
@@ -1317,8 +1358,26 @@ The :t:`evaluation` of a :t:`remainder expression` proceeds as follows:
 #. :dp:`fls_gld1u9fnsj6d`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_Kdr6fLrRj0Du`
+   If the types of both operands are the same :t:`integer type` or
+   :t:`floating-point type`, the :t:`remainder expression` evaluates to the
+   remainder of the division of the :t:`left operand` by the :t:`right operand`,
+   following the rules of unsigned integer division for
+   :t:`[unsigned integer type]s`, two's complement division for
+   :t:`[signed integer type]s`, or floating-point division for
+   :t:`[floating-point type]s`.
+
+   #. :dp:`fls_FxLnXeGT2n9u`
+      If unsigned integer division is performed and the :t:`right operand` is 0,
+      the operation results in a :t:`panic`.
+
+   #. :dp:`fls_kN0HnldvDXSg`
+      If two's complement division is performed and the :t:`right operand` is 0
+      or the resulting remainder does not fit in the target type, the operation
+      results in a :t:`panic`.
+
 #. :dp:`fls_k7lmxvpkxtub`
-   ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_bndpd66973ev`
 The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
@@ -1329,8 +1388,20 @@ The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
 #. :dp:`fls_ad9tc6ki8vcq`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_Vy0DyZqfy7Iv`
+   If the types of both operands are the same :t:`integer type` or
+   :t:`floating-point type`, the :t:`subtraction expression` evaluates to the
+   difference of the operands, following the rules of unsigned integer
+   subtraction for :t:`[unsigned integer type]s`, two's complement subtraction
+   for :t:`[signed integer type]s`, or floating-point subtraction for
+   :t:`[floating-point type]s`.
+
+   #. :dp:`fls_doxvcimvtAca`
+      If unsigned integer subtraction or two's complement subtraction is
+      performed, the operation may result in an :t:`arithmetic overflow`.
+
 #. :dp:`fls_b9g0r9vc4rou`
-   ``core::ops::Sub::sub(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Sub::sub(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_35oSMqAMFYWl`
 If :t:`arithmetic overflow` occurs, the computed :t:`value` shall wrap around or the program
@@ -4813,3 +4884,25 @@ within the :t:`capturing expression`, as follows:
 :dp:`fls_wvob7114tfat`
 A tool selects the first :t:`capture mode` that is compatible with the use of
 the :t:`capture target`.
+
+.. _fls_ZfIBiJMf8qE1:
+
+Arithmetic Overflow
+-------------------
+
+:dp:`fls_oFIRXBPXu6Zv`
+An :dt:`arithmetic overflow` occurs if an :t:`arithmetic expression` or a
+:t:`negation expression` computes a :t:`value` of a :t:`scalar type` that lies
+outside of the range of valid :t:`[value]s` for the :t:`scalar type`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_8fU3h8PLasqA`
+There are two allowed behaviors for :t:`arithmetic overflow`:
+
+#. :dp:`fls_R48VKcEIbfXC`
+   Evaluation of the expression may result in a :t:`panic`.
+
+#. :dp:`fls_QMpI8K43K2yU`
+   The resulting value of the expression may be truncated, discarding the most
+   significant bits that do not fit in the target type.

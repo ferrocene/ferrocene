@@ -480,7 +480,7 @@ related :t:`let statement` appears.
 The :t:`binding` of a :t:`match arm` is :t:`in scope` within its related
 :t:`[expression]s` and related :t:`match arm guard`.
 
-.. _fls_do6x6xe0rlwz:
+.. _fls_ftphlagzd2te:
 
 Generic Parameter Scope
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -571,7 +571,7 @@ A :t:`label` is :t:`in scope` within the :t:`block expression` of the related
 A :t:`label` is not :t:`in scope` within nested :t:`[async block]s`,
 :t:`[closure expression]s`, :t:`[constant context]s`, and :t:`[item]s`.
 
-.. _fls_5v3an4n7x3:
+.. _fls_kgbi26212eof:
 
 Self Scope
 ~~~~~~~~~~
@@ -773,7 +773,7 @@ The :t:`declaration` of a :t:`union type` introduces a
 :t:`generic parameter scope` and a :t:`Self scope` into the
 :t:`scope hierarchy`.
 
-.. _fls_4df1tsti1693:
+.. _fls_dq403wq5yrs:
 
 Namespaces
 ----------
@@ -905,7 +905,7 @@ of any :t:`namespace`:
 * :dp:`fls_3np518s1su4w`
   :t:`[Union field]s`.
 
-.. _fls_ld0ize96cm6m:
+.. _fls_c140hwzhup95:
 
 Preludes
 --------
@@ -958,7 +958,7 @@ The :dt:`macro_use prelude` is a :t:`prelude` that brings :t:`in scope` of the
 :t:`crate root module` the :t:`entities <entity>` of :t:`[macro]s` from
 external :t:`[crate]s` that were imported using an external :t:`crate import`.
 
-.. _fls_623n65ppmm4z:
+.. _fls_9gprp17h6t1q:
 
 Use Imports
 -----------
@@ -1063,7 +1063,7 @@ The following is a selective import. The imported functions are
 
 .. rubric:: Legality Rules
 
-.. _fls_23xcf5jsjr0v:
+.. _fls_ydmnb7qnmzzq:
 
 Shadowing
 ---------

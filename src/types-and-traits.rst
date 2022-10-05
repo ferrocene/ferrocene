@@ -852,46 +852,27 @@ coercible to a :t:`function pointer type`.
 
 :dp:`fls_63jqtyw0rz8c`
 A :t:`closure type` implicitly implements the :std:`core::marker::Copy`
-:t:`trait` if
-
-* :dp:`fls_az5hkn72e3fz`
-  It does not encapsulate :t:`[capture target]s` by :t:`by unique immutable
-  reference` or :t:`by mutable reference`, or
-
-* :dp:`fls_vvc8c910dmeh`
-  The :t:`[type]s` of all :t:`[capture target]s` implement the
-  :std:`core::marker::Copy` :t:`trait`.
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
+environment` implement the :std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_3c4g9njja5s5`
 A :t:`closure type` implicitly implements the :std:`core::clone::Clone`
-:t:`trait` if
-
-* :dp:`fls_yr55fbspw7s9`
-  It does not encapsulate :t:`[capture target]s` :t:`by unique immutable
-  reference` or :t:`by mutable reference`, or
-
-* :dp:`fls_pt65037r6hjr`
-  The :t:`[type]s` of all :t:`[capture target]s` implement the
-  :std:`core::clone::Clone` :t:`trait`.
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
+environment` implement the :std:`core::clone::Clone` :t:`trait`.
 
 :dp:`fls_2nuhy0ujgq18`
 A :t:`closure type` implicitly implements the :std:`core::marker::Send`
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
+environment` implement the :std:`core::marker::Send` :t:`trait`.
+A :t:`closure type` implicitly implements the :std:`core::marker::Send`
 :t:`trait` if:
-
-* :dp:`fls_vamgwed199ct`
-  The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by immutable
-  reference` or by :t:`by mutable reference` implement the
-  :std:`core::marker::Sync` :t:`trait`, and
-
-* :dp:`fls_f96a5r1v7te7`
-  The :t:`[type]s` of all :t:`[capture target]s` that employ :t:`by unique
-  immutable reference`, :t:`by mutable reference`, :t:`by copy`, or :t:`by move`
-  :t:`capture mode` implement the :std:`core::marker::Send` :t:`trait`.
 
 :dp:`fls_5jh07heok8sy`
 A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
-:t:`trait` if the :t:`[type]s` of all :t:`[capture target]s` implement the
-:std:`core::marker::Sync` :t:`trait`.
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
+environment` implement the :std:`core::marker::Send` :t:`trait`.
+A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
+:t:`trait` if:
 
 .. _fls_airvr79xkcag:
 

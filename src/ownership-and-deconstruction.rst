@@ -283,7 +283,7 @@ convention>` :t:`by move` only when it denotes:
 
 * :dp:`fls_4bnbv7mqod57`
   A :t:`field` of a :t:`place expression` that can be :t:`passed <passing
-  convention>` :t:`by move` and whose type does not implement the
+  convention>` :t:`by move` and whose :t:`type` does not implement the
   :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
@@ -293,8 +293,8 @@ convention>` :t:`by move` only when it denotes:
   A :t:`variable` which is not currently :t:`borrowed`.
 
 :dp:`fls_vveEJn7lngT8`
-A :t:`value` of a :t:`value expression` is always :t:`passed <passing
-convention>` :t:`by move`.
+A :t:`value` of a :t:`value expression` is always
+:t:`passed <passing convention>` :t:`by move`.
 
 :dp:`fls_gq35gqagw35`
 A :t:`value` not subject to :t:`by copy` or :t:`by move` :t:`passing convention`

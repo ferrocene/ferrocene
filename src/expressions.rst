@@ -4712,8 +4712,8 @@ A :t:`capture target` is either a :t:`variable` or a :t:`field` of a
 :t:`variable`.
 
 :dp:`fls_e70ywb8191h`
-The :t:`capturing environment` of a :t:`capturing expression` consists of all
-:t:`captured` :t:`capture target` :t:`[value]s`.
+The :t:`capturing environment` of a :t:`capturing expression` consists of the
+:t:`[value]s` of all :t:`captured` :t:`[capture target]s`.
 
 :dp:`fls_1y2ttb466m9c`
 :t:`Capturing` is the process of saving the :t:`[capture target]s` of a

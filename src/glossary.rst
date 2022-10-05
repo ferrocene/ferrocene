@@ -4598,7 +4598,7 @@ place
 ^^^^^
 
 :dp:`fls_uCTiUBWHMPY9`
-A :dt:`place` is a location where a :t:`value` resides at.
+A :dt:`place` is a location where a :t:`value` resides.
 
 .. _fls_7x6jhh0sz2f:
 

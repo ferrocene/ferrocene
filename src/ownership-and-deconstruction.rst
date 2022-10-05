@@ -42,8 +42,8 @@ When a :t:`variable` holds a :t:`value`, the :t:`variable` is considered to be
 
 :dp:`fls_ch2lvm50olqd`
 When a :t:`variable` lacks a :t:`value` or its :t:`value` has been
-:t:`[pass]ed` :t:`by move`, the :t:`variable` is considered to be
-:dt:`uninitialized`.
+:t:`passed <passing convention>` :t:`by move`, the :t:`variable` is considered
+to be :dt:`uninitialized`.
 
 :dp:`fls_46910buiwvv9`
 A :t:`variable` shall be :t:`initialized` before it is accessed.
@@ -110,8 +110,8 @@ upto the last use of the :t:`reference`, prior to another assignment to the
 :t:`reference` or the end of the :t:`scope` of the :t:`reference`.
 
 :dp:`fls_v69rptdjao42`
-A :t:`referent` shall not be :t:`[pass]ed` :t:`by move` while a :t:`reference`
-to it is :t:`active`.
+A :t:`referent` shall not be :t:`passed <passing convention>` :t:`by move` while
+a :t:`reference` to it is :t:`active`.
 
 :dp:`fls_vg9h6tz6z37w`
 A :t:`referent` shall not be modified while a :t:`reference` to it is
@@ -252,42 +252,39 @@ Variable ``x`` is captured using a unique immutable borrow.
 
 .. _fls_77scxuomlbgs:
 
-Value Passing
--------------
+Passing Conventions
+-------------------
 
 .. rubric:: Legality Rules
 
-:dp:`fls_v4djthWlamKC`
-:t:`Passing <pass>` is the mechanism by which a :t:`value` is transferred between
-:t:`[place]s`. **place is not the appropriate term here**
-
 :dp:`fls_fvwx2ufeyzcs`
 A :t:`passing convention` is the mechanism that defines how a :t:`value` is
-transferred between :t:`[place]s`.
+transferred between :t:`[place]s`. **place is not the appropriate term here**
 
 :dp:`fls_h2pgsij1rbms`
 A :t:`copy type` is a :t:`type` that implements the :std:`core::marker::Copy`
 :t:`trait`.
 
 :dp:`fls_yx2knbby70fy`
-A :t:`value` of a :t:`copy type` is :t:`[pass]ed` :dt:`by copy`. Passing :t:`by
-copy` does not change the :t:`owner` of the :t:`value`.
+A :t:`value` of a :t:`copy type` is :t:`passed <passing convention>` :dt:`by
+copy`. Passing :t:`by copy` does not change the :t:`owner` of the :t:`value`.
 
 :dp:`fls_6ul3f6v0foma`
 A :t:`move type` is a :t:`type` that implements the :std:`core::marker::Sized`
 :t:`trait` and that is not a :t:`copy type`.
 
 :dp:`fls_3ztdz02efeoc`
-A :t:`value` of a :t:`move type` is :t:`[pass]ed` :dt:`by move`. Passing :t:`by
-move` changes the :t:`owner` of the :t:`value`.
+A :t:`value` of a :t:`move type` is :t:`passed <passing convention>` :dt:`by
+move`. Passing :t:`by move` changes the :t:`owner` of the :t:`value`.
 
 :dp:`fls_konzgoybhfqm`
-A :t:`value` of a :t:`place expression` shall be :t:`[pass]ed` :t:`by move` only
-when it denotes:
+A :t:`value` of a :t:`place expression` shall be :t:`passed <passing
+convention>` :t:`by move` only when it denotes:
 
 * :dp:`fls_4bnbv7mqod57`
-  A :t:`field` of a :t:`place expression` that can be :t:`[pass]ed` :t:`by move`
-  and whose type does not implement the :std:`core::ops::Drop` :t:`trait`, or
+  A :t:`field` of a :t:`place expression` that can be :t:`passed <passing
+  convention>` :t:`by move` and whose type does not implement the
+  :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
   A :t:`temporary`, or
@@ -296,11 +293,12 @@ when it denotes:
   A :t:`variable` which is not currently :t:`borrowed`.
 
 :dp:`fls_vveEJn7lngT8`
-A :t:`value` of a :t:`value expression` is always :t:`[pass]ed` :t:`by move`.
+A :t:`value` of a :t:`value expression` is always :t:`passed <passing
+convention>` :t:`by move`.
 
 :dp:`fls_gq35gqagw35`
 A :t:`value` not subject to :t:`by copy` or :t:`by move` :t:`passing convention`
-shall not be :t:`[pass]ed` between :t:`[place]s`.
+shall not be :t:`passed <passing convention>` between :t:`[place]s`.
 
 .. rubric:: Dynamic Semantics
 

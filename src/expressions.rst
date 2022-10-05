@@ -2063,8 +2063,8 @@ The :t:`evaluation` of a :t:`basic assignment` proceeds as follows:
    uninitialized :t:`field` of a :t:`variable`.
 
 #. :dp:`fls_hc01gtvlxba`
-   The :t:`value` of the :t:`value operand` is :t:`passed` into the
-   :t:`place` of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is :t:`passed <passing convention>`
+   into the :t:`place` of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2161,8 +2161,8 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
    uninitialized :t:`variable` or an uninitialized field of a :t:`variable`.
 
 #. :dp:`fls_qb8u5skn8bc4`
-   The :t:`value` of the :t:`value operand` is :t:`passed` into the
-   :t:`place` of the :t:`assignee operand`.
+   The :t:`value` of the :t:`value operand` is :t:`passed <passing convention>`
+   into the :t:`place` of the :t:`assignee operand`.
 
 .. rubric:: Examples
 
@@ -2589,8 +2589,8 @@ constructor` proceeds as follows:
 
    #. :dp:`fls_qbyysx30pjzs`
       If the :t:`repeat operand` denotes a :t:`constant`, the :t:`repeat
-      operand` is evaluated once and its :t:`value` is passed :t:`by copy`
-      :t:`[size operand]'s` :t:`value` times.
+      operand` is evaluated once and its :t:`value` is :t:`passed <passing
+      convention>` :t:`by copy` :t:`[size operand]'s` :t:`value` times.
 
    #. :dp:`fls_1m0laldldh7j`
       Otherwise the :t:`repeat operand` is evaluated :t:`[size operand]'s`
@@ -2958,8 +2958,8 @@ the :t:`struct expression` shall have at most one :t:`base initializer`.
 :dp:`fls_w7x9wy6t0qcp`
 If a :t:`base initializer` is supplied, then for each :t:`field` that was not
 matched in the :t:`struct expression` the :t:`value` of the corresponding
-:t:`field` of the :t:`base initializer` is :t:`[pass]ed` to the :t:`field` of
-the :t:`constructee`.
+:t:`field` of the :t:`base initializer` is :t:`passed <passing convention>` to
+the :t:`field` of the :t:`constructee`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4446,8 +4446,9 @@ The :t:`evaluation` of a :t:`return expression` proceeds as follows:
       The :t:`operand` is evaluated.
 
    #. :dp:`fls_bbf54ukld7j9`
-      The :t:`value` of the :t:`operand` is :t:`[pass]ed` :t:`by move` into the
-      designated output location of the enclosing :t:`control flow boundary`.
+      The :t:`value` of the :t:`operand` is :t:`passed <passing convention>`
+      :t:`by move` into the designated output location of the enclosing
+      :t:`control flow boundary`.
 
 #. :dp:`fls_99ea30a5mulj`
    Control destroys the current activation frame.
@@ -4728,8 +4729,8 @@ expression`. Such a :t:`capture target` is said to be :dt:`captured`.
 
 :dp:`fls_O6WYL8AUyPje`
 A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by copy capture`
-:t:`[pass]es` the :t:`value` of the :t:`capture target` into the :t:`capturing
-environment`.
+:t:`passes <passing convention>` the :t:`value` of the :t:`capture target` into
+the :t:`capturing environment`.
 
 :dp:`fls_aCxt2Ovmb5He`
 A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by immutable

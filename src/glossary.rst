@@ -4478,15 +4478,6 @@ partially hygienic
 An :t:`identifier` is :dt:`partially hygienic` when it has
 :t:`mixed site hygiene`.
 
-.. _fls_wqbd5lxkddddl:
-
-passing
-^^^^^^^
-
-:dp:`fls_OCB1BC4PTvO1`
-:dt:`Passing <pass>` is the mechanism by which a :t:`value` is transferred between
-:t:`[place]s`.
-
 .. _fls_wqbd5lxki2al:
 
 passing convention

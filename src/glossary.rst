@@ -4592,6 +4592,14 @@ excludes :t:`[range pattern]s`.
 :dp:`fls_Rj8ir4k0K811`
 See :s:`PatternWithoutRange`.
 
+.. _fls_5zjHBZMsCqJZ:
+
+place
+^^^^^
+
+:dp:`fls_uCTiUBWHMPY9`
+A :dt:`place` is a location where a :t:`value` resides at.
+
 .. _fls_7x6jhh0sz2f:
 
 place expression

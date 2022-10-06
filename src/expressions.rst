@@ -1074,8 +1074,30 @@ The :t:`evaluation` of a :t:`negation expression` with a
 #. :dp:`fls_8tgxtprtifrr`
    The :t:`operand` is evaluated.
 
+#. :dp:`fls_rFFlt33a5RsZ`
+   If the type of the :t:`operand` is an :t:`integer type`, the
+   :t:`negation expression` evaluates to the bitwise negation of the
+   :t:`operand`.
+
+#. :dp:`fls_h7pIl1WZ8Y2t`
+   If the type of the :t:`operand` is :c:`bool`, the result is computed as
+   follows, depending on the :t:`value` of the :t:`operand`:
+
+  .. list-table::
+
+    * - :dp:`fls_yfK3pGHzUo3x`
+      - **Operand**
+      - **Result**
+    * - :dp:`fls_dcNtgLq2hRZb`
+      - ``true``
+      - ``false``
+    * - :dp:`fls_sxLwuITs62sN`
+      - ``false``
+      - ``true``
+
 #. :dp:`fls_gn3dnuxm2h8m`
-   ``core::ops::Not::not(operand)`` is invoked.
+   If the type of :t:`operand` is neither an :t:`integer type`, nor
+   :c:`bool`, ``core::ops::Not::not(operand)`` is invoked.
 
 :dp:`fls_tsou6yz4mfte`
 The :t:`evaluation` of a :t:`negation expression` with a
@@ -1084,8 +1106,23 @@ The :t:`evaluation` of a :t:`negation expression` with a
 #. :dp:`fls_zdfgqky85r1f`
    The :t:`operand` is evaluated.
 
+#. :dp:`fls_CutpaCFCGHQs`
+   If the type of the :t:`operand` is an :t:`integer type`, the
+   :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
+   with its sign inverted.
+
+   #. :dp:`fls_MrvYkkEr4xKy`
+      If the result of the :t:`negation expression` does not fit within the
+      range of the :t:`operand` type, :t:`arithmetic overflow` occurs.
+
+#. :dp:`fls_B2eKGWaJhFKD`
+   If the type of the :t:`operand` is a :t:`floating-point type`, the
+   :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
+   with its sign inverted. No overflow is possible.
+
 #. :dp:`fls_uldh10k77sng`
-   ``core::ops::Neg::neg(operand)`` is invoked.
+   If the type of the :t:`operand` is neither an :t:`integer type`, nor a
+   :t:`floating-point type`, ``core::ops::Neg::neg(operand)`` is invoked.
 
 .. rubric:: Examples
 

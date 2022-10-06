@@ -2119,7 +2119,7 @@ The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
 
 :dp:`fls_4bb07tn28ivw`
 The :t:`pattern` that corresponds to a :t:`destructuring assignment` shall be
-:t:`irrefutable`.
+an :t:`irrefutable pattern`.
 
 :dp:`fls_g80a92tr2ser`
 A :t:`destructuring assignment` is equivalent to a :t:`block expression` of the
@@ -3405,7 +3405,8 @@ A :t:`closure parameter` is a :t:`construct` that yields a set of
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_r6gWLoNR7JMR`
-The :t:`pattern` of a :t:`closure parameter` shall be :t:`irrefutable`.
+The :t:`pattern` of a :t:`closure parameter` shall be an :t:`irrefutable
+pattern`.
 
 :dp:`fls_yn30xuejcfxo`
 The :t:`type` of a :t:`closure expression` is the unique anonymous :t:`closure

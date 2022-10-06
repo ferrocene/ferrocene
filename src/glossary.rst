@@ -3229,14 +3229,6 @@ An :dt:`intermediate match arm` is any :t:`non-[final match arm]` of a
 :dp:`fls_8713j5lrwqvs`
 See :s:`IntermediateMatchArm`.
 
-.. _fls_rTYsa2QDaulP:
-
-irrefutable
-^^^^^^^^^^^
-
-:dp:`fls_vJvIKJhrraSc`
-For :dt:`irrefutable`, see :t:`irrefutable pattern`.
-
 .. _fls_fgmvmcw2kw5i:
 
 irrefutable constant
@@ -5159,14 +5151,6 @@ refutability
 :dp:`fls_gzjrfx19fg40`
 :dt:`Refutability` is a property of :t:`[pattern]s` that expresses the ability
 to match all possible :t:`[value]s` of a :t:`type`.
-
-.. _fls_G0DzfqOMTMis:
-
-refutable
-^^^^^^^^^
-
-:dp:`fls_cGo03p6WDCnG`
-For :dt:`refutable`, see :t:`refutable pattern`.
 
 .. _fls_v99joc4m6cup:
 

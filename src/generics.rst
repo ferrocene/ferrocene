@@ -48,20 +48,12 @@ Generic Parameters
 
 :dp:`fls_sye3d17l9bf5`
 A :t:`generic parameter` is a placeholder for a :t:`constant`, a :t:`lifetime`,
-or a :t:`type` whose :t:`value` is supplied statically by a
-:t:`generic argument`.
-
-:dp:`fls_4a2qshaf5se7`
-It is a static error to use a :t:`generic parameter` in the
-:t:`discriminant initializer` of an :t:`enum variant`.
+or a :t:`type` whose :t:`constant`, :t:`lifetime`, or :t:`type` is supplied
+statically by a :t:`generic argument`.
 
 :dp:`fls_dalqke3rznrb`
 All :s:`[LifetimeParameter]s` in a :s:`GenericParameterList` shall precede all
 :s:`[ConstantParameter]s` and :s:`[TypeParameter]s`.
-
-:dp:`fls_gw8gutq2215z`
-A sequence of :s:`[LifetimeParameter]s` shall be terminated by character
-0x2C (comma) when followed by a :s:`ConstantParameter` or a :s:`TypeParameter`.
 
 :dp:`fls_pi6eukz7kc99`
 A :t:`generic enum` is an :t:`enum` with :t:`[generic parameter]s`.
@@ -94,6 +86,10 @@ default :t:`value` of its related :t:`constant parameter`.
 
 :dp:`fls_p4yb8EAXlRU0`
 A :t:`constant parameter initializer` shall be a :t:`constant expression`.
+
+:dp:`fls_4a2qshaf5se7`
+It is a static error to use a :t:`generic parameter` in the
+:t:`discriminant initializer` of an :t:`enum variant`.
 
 :dp:`fls_s0nrjwqg2wox`
 A :t:`lifetime parameter` is a :t:`generic parameter` for a :t:`lifetime`.
@@ -174,7 +170,8 @@ A :t:`constant parameter` shall be used in the following contexts:
 
 :dp:`fls_hidfwkwr2r73`
 A :t:`type parameter` has an implicit :std:`core::marker::Sized` :t:`bound`,
-unless a ``?core::marker::Sized`` bound is present.
+unless an :t:`opt-out trait bound` for the :std:`core::marker::Sized` :t:`trait`
+is present.
 
 :dp:`fls_yaYedRNaxhTe`
 A :t:`type parameter` of an :t:`abstract data type` has implicit
@@ -264,7 +261,8 @@ Where Clauses
 
 :dp:`fls_3nqb7p5ifvio`
 A :t:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
-:t:`[lifetime parameter]s` and :t:`[type parameter]s`.
+:t:`[lifetime parameter]s`, :t:`[type parameter]s` and :t:`[type]s` that have to
+hold for a :t:`construct` subject to the :t:`where clause` to be valid.
 
 :dp:`fls_fhy4rsmmbvyy`
 A :t:`where clause predicate` is either a :t:`lifetime bound predicate` or a
@@ -363,9 +361,9 @@ A :t:`binding argument` is a :t:`generic argument` that supplies the :t:`type`
 of an :t:`associated trait type`.
 
 :dp:`fls_al4dhmqodvwc`
-A :t:`constant argument` may only appear as a single segment :t:`path
-expression`, optionally encapsulated in a :t:`block expression`, within an
-:t:`array repetition constructor` or a :t:`type`.
+A :t:`constant argument` may only appear as a single segment
+:t:`path expression`, optionally encapsulated in a :t:`block expression`, within
+an :t:`array repetition constructor` or a :t:`type`.
 
 :dp:`fls_ukarc98ceesz`
 :t:`[Generic argument]s` are subject to :t:`generic conformance`.
@@ -400,7 +398,7 @@ Generic Conformance
 .. rubric:: Legality Rules
 
 :dp:`fls_CBWyxBJeYeb2`
-:t:`Generic conformance` measures the compatibility between a set of 
+:t:`Generic conformance` measures the compatibility between a set of
 :t:`[generic parameter]s` and a set of :t:`[generic argument]s`.
 
 :dp:`fls_ltch5eivxgaa`

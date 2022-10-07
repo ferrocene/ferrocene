@@ -4297,6 +4297,10 @@ A :t:`match arm body` is the :t:`operand` of a :t:`match arm`.
 A :t:`match arm guard` is a :t:`construct` that provides additional filtering to
 a :t:`match arm matcher`.
 
+:dp:`fls_RPMOAaZ6lflI`
+:t:`[Binding]s` introduced in the :t:`pattern` of a :t:`match arm matcher` are
+:t:`immutable` in the :t:`match arm guard`.
+
 :dp:`fls_knv1affr2o8t`
 The :t:`type` of the :t:`subject expression` and the :t:`[type]s` of all
 :t:`[pattern]s` of all :t:`[match arm matcher]s` shall be :t:`unifiable`.

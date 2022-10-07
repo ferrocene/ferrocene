@@ -201,9 +201,9 @@ arithmetic overflow
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_jbytOQvIddAl`
-:dt:`arithmetic overflow` occurs if an :t:`arithmetic expression` computes a
-:t:`value` of a :t:`scalar type` that lies outside of the range of valid
-:t:`[value]s` for the :t:`scalar type`.
+An :dt:`arithmetic overflow` occurs if an :t:`arithmetic expression` or a
+:t:`negation expression` computes a :t:`value` of a :t:`scalar type` that lies
+outside of the range of valid :t:`[value]s` for the :t:`scalar type`.
 
 .. _fls_9aice4qbiqxf:
 

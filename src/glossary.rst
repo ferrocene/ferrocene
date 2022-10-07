@@ -4338,8 +4338,8 @@ opt-out trait bound
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_wS4EzN0N1GDP`
-An :dt:`opt-out trait bound` is a :t:`trait bound` which negates the
-:t:`implementation` of a :t:`trait`.
+An :dt:`opt-out trait bound` is a :t:`trait bound` that nullifies an implicitly
+added :t:`trait bound`.
 
 .. _fls_gllzixm9yt9w:
 

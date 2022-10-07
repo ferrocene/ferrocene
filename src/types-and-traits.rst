@@ -1091,6 +1091,9 @@ An :t:`impl trait type` is a :t:`type` that implements a :t:`trait`, where the
 An :t:`impl trait type` shall appear only within a :t:`function parameter` or
 the :t:`return type` of a :t:`function`.
 
+:dp:`fls_ECjhEI7eCwAj`
+An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
+
 .. rubric:: Examples
 
 .. code-block:: rust
@@ -2331,7 +2334,7 @@ implement.
 
 :dp:`fls_PiAR1B26SoZV`
 A :t:`trait body` is a :t:`construct` that encapsulates the
-:t:`[associated item]s`, :t:`[inner attribute]s`, and 
+:t:`[associated item]s`, :t:`[inner attribute]s`, and
 :t:`[inner doc comment]s` of a :t:`trait`.
 
 :dp:`fls_AdbbUZZgMEsQ`
@@ -2527,6 +2530,9 @@ A :s:`ForGenericParameterList` shall not specify :s:`[ConstantParameter]s` or
 A :t:`higher-ranked trait bound` is a :t:`bound` that specifies an infinite
 list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 :s:`ForGenericParameterList`.
+
+:dp:`fls_AzuZmR9DXSQh`
+A :t:`trait bound` with :s:`punctuation` ``?`` is an :t:`opt-out trait bound`.
 
 :dp:`fls_tx4uspewnk7w`
 :t:`Bound` ``'a: 'b`` is read as ``'a`` outlives ``'b``, or in other words,

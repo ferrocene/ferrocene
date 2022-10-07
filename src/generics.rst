@@ -48,7 +48,7 @@ Generic Parameters
 
 :dp:`fls_sye3d17l9bf5`
 A :t:`generic parameter` is a placeholder for a :t:`constant`, a :t:`lifetime`,
-or a :t:`type` whose :t:`constant`, :t:`lifetime`, or :t:`type` is supplied
+or a :t:`type`, whose :t:`constant`, :t:`lifetime`, or :t:`type` is supplied
 statically by a :t:`generic argument`.
 
 :dp:`fls_dalqke3rznrb`

@@ -8,11 +8,6 @@
 Patterns
 ========
 
-.. _fls_xgqh0ju6bmbn:
-
-Patterns
---------
-
 .. rubric:: Syntax
 
 .. syntax::
@@ -83,6 +78,58 @@ Any two :t:`[pattern-without-alternation]s` that are or-ed using character 0x7C
   The :t:`[binding]s` of the two :t:`[pattern-without-alternation]s` shall
   be the same, shall have :t:`[unifiable type]s`, and shall have the same
   :t:`[binding mode]s`.
+
+.. _fls_uh76pw6ykd57:
+
+Refutability
+------------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_9ntc4qmjmo90`
+:t:`Refutability` is a property of :t:`[pattern]s` that expresses the ability to
+match all possible values of a :t:`type`.
+
+:dp:`fls_9fjspnefoyvz`
+An :t:`irrefutable pattern` is a :t:`pattern` that always matches the :t:`value`
+it is being matched against.
+
+:dp:`fls_uq7ftuuq1sig`
+A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
+matching the :t:`value` it is being matched against.
+
+:dp:`fls_mnbyt7jfYAZ9`
+A :t:`pattern` that is not an :t:`irrefutable pattern` is a
+:t:`refutable pattern`.
+
+:dp:`fls_mtkx414qk66c`
+An :t:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
+
+:dp:`fls_sccfjvu95qfr`
+A :t:`refutable type` is a :t:`type` that has more than one :t:`value`.
+
+:dp:`fls_l76ycteulo8e`
+An :t:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
+
+:dp:`fls_lh0d85tl4qvy`
+A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
+
+.. rubric:: Examples
+
+:dp:`fls_sgu9bnp7xajv`
+``x`` is an :t:`irrefutable pattern` because it always matches ``42``.
+
+.. code-block:: rust
+
+   let x = 42;
+
+:dp:`fls_cl1g4fxfa020`
+``y`` is a :t:`refutable pattern` because it does not match ``value`` when
+``value`` denotes :std:`core::option::Option::None`.
+
+.. code-block:: rust
+
+   if let core::option::Option::Some(y) = value {
 
 .. _fls_7bxv8lybxm18:
 
@@ -1102,58 +1149,6 @@ An underscore pattern in the context of a let statement. See :p:`5.1.10.
 .. code-block:: rust
 
    let (first, _) = pair;
-
-.. _fls_uh76pw6ykd57:
-
-Refutability
-------------
-
-.. rubric:: Legality Rules
-
-:dp:`fls_9ntc4qmjmo90`
-:t:`Refutability` is a property of :t:`[pattern]s` that expresses the ability to
-match all possible values of a :t:`type`.
-
-:dp:`fls_9fjspnefoyvz`
-An :t:`irrefutable pattern` is a :t:`pattern` that always matches the :t:`value`
-it is being matched against.
-
-:dp:`fls_uq7ftuuq1sig`
-A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching the :t:`value` it is being matched against.
-
-:dp:`fls_mnbyt7jfYAZ9`
-A :t:`pattern` that is not an :t:`irrefutable pattern` is a
-:t:`refutable pattern`.
-
-:dp:`fls_mtkx414qk66c`
-An :t:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
-
-:dp:`fls_sccfjvu95qfr`
-A :t:`refutable type` is a :t:`type` that has more than one :t:`value`.
-
-:dp:`fls_l76ycteulo8e`
-An :t:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
-
-:dp:`fls_lh0d85tl4qvy`
-A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
-
-.. rubric:: Examples
-
-:dp:`fls_sgu9bnp7xajv`
-``x`` is an :t:`irrefutable pattern` because it always matches ``42``.
-
-.. code-block:: rust
-
-   let x = 42;
-
-:dp:`fls_cl1g4fxfa020`
-``y`` is a :t:`refutable pattern` because it does not match ``value`` when
-``value`` denotes :std:`core::option::Option::None`.
-
-.. code-block:: rust
-
-   if let core::option::Option::Some(y) = value {
 
 .. _fls_qssijtofa9i8:
 

@@ -102,14 +102,9 @@ matching the :t:`value` it is being matched against.
 A :t:`pattern` that is not an :t:`irrefutable pattern` is a
 :t:`refutable pattern`.
 
-:dp:`fls_mtkx414qk66c`
-An :t:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
-
-:dp:`fls_sccfjvu95qfr`
-A :t:`refutable type` is a :t:`type` that has more than one :t:`value`.
-
 :dp:`fls_l76ycteulo8e`
-An :t:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
+An :t:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
+one :t:`value`.
 
 :dp:`fls_lh0d85tl4qvy`
 A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.

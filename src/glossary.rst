@@ -3235,7 +3235,9 @@ irrefutable constant
 ^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hd02jah50qzl`
-An :dt:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
+An :dt:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
+one :t:`value`.
+
 
 .. _fls_ckz7pujdnuo5:
 
@@ -3245,14 +3247,6 @@ irrefutable pattern
 :dp:`fls_y421hdrbs6ak`
 An :dt:`irrefutable pattern` is a :t:`pattern` that always matches the
 :t:`value` it is being matched against.
-
-.. _fls_xa8ckn83jl98:
-
-irrefutable type
-^^^^^^^^^^^^^^^^
-
-:dp:`fls_4l5t7bf3cb4w`
-An :dt:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
 
 .. _fls_vt44bvhm4duk:
 

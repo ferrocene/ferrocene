@@ -1615,12 +1615,12 @@ Recursive Types
 .. rubric:: Legality Rules
 
 :dp:`fls_z22std1crl49`
-A :t:`recursive type` is a category of :t:`type` that may define other
-:t:`[type]s` within its :t:`type specification`.
+A :t:`recursive type` is a :t:`type` whose contained :t:`[type]s` refer back to
+the containing :t:`type`, either directly or by referring to another :t:`type`
+which refers back to the original :t:`recursive type`.
 
 :dp:`fls_eddnwlr0rz59`
-A :t:`recursive type` shall include at least one :t:`abstract data type` in
-its recursion.
+A :t:`type` that is not an :t:`abstract data type` shall not be recursive.
 
 .. rubric:: Examples
 

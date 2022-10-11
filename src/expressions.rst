@@ -3159,14 +3159,6 @@ a :t:`tuple enum variant` or a :t:`type` that implements any of the
 :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce`
 :t:`[trait]s`.
 
-:dp:`fls_aafrvlmiwfon`
-The :t:`call operand` is subject to :t:`auto dereferencing` until a
-:t:`callee type` is found, otherwise this is a static error.
-
-:dp:`fls_d8rewso3dm6r`
-An :t:`adjusted call operand` is a :t:`call operand` with possible
-:t:`auto dereferencing` adjustments.
-
 :dp:`fls_bu6i3mcvnbin`
 The :t:`type` of a :t:`call expression` is the :t:`return type` of the invoked
 :t:`function`, the :t:`type` of the :t:`tuple struct` or the

@@ -1443,14 +1443,13 @@ representation` and :t:`primitive representation`.
 
 :dp:`fls_ml4khttq3w5k`
 :t:`Transparent representation` applies only to an :t:`enum type` with a
-single :t:`enum variant` or a :t:`struct type` where the :t:`struct type` has a
-single :t:`field` of non-zero :t:`size` and any number of :t:`[field]s` of
-:t:`size` zero and :t:`alignment` one.
+single :t:`enum variant` or a :t:`struct type` where the :t:`struct type` or
+:t:`enum variant` has a single :t:`field` of non-zero :t:`size` and any number
+of :t:`[field]s` of :t:`size` zero and :t:`alignment` one.
 
 :dp:`fls_9q2iqzbup8oy`
 :t:`[Type]s` subject to :t:`transparent representation` have the same :t:`type
-representation` as a :t:`struct type` with a single :t:`field` of a non-zero
-:t:`size`.
+representation` as the :t:`type` of their :t:`field` with non-zero :t:`size`.
 
 :dp:`fls_fsbf6ist38ix`
 :t:`Type representation` may be specified using :t:`attribute` :c:`repr`. An

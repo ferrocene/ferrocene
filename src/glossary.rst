@@ -3229,21 +3229,15 @@ An :dt:`intermediate match arm` is any :t:`non-[final match arm]` of a
 :dp:`fls_8713j5lrwqvs`
 See :s:`IntermediateMatchArm`.
 
-.. _fls_rTYsa2QDaulP:
-
-irrefutable
-^^^^^^^^^^^
-
-:dp:`fls_vJvIKJhrraSc`
-For :dt:`irrefutable`, see :t:`irrefutable pattern`.
-
 .. _fls_fgmvmcw2kw5i:
 
 irrefutable constant
 ^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hd02jah50qzl`
-An :dt:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
+An :dt:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
+one :t:`value`.
+
 
 .. _fls_ckz7pujdnuo5:
 
@@ -3253,14 +3247,6 @@ irrefutable pattern
 :dp:`fls_y421hdrbs6ak`
 An :dt:`irrefutable pattern` is a :t:`pattern` that always matches the
 :t:`value` it is being matched against.
-
-.. _fls_xa8ckn83jl98:
-
-irrefutable type
-^^^^^^^^^^^^^^^^
-
-:dp:`fls_4l5t7bf3cb4w`
-An :dt:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
 
 .. _fls_vt44bvhm4duk:
 
@@ -5159,14 +5145,6 @@ refutability
 :dp:`fls_gzjrfx19fg40`
 :dt:`Refutability` is a property of :t:`[pattern]s` that expresses the ability
 to match all possible :t:`[value]s` of a :t:`type`.
-
-.. _fls_G0DzfqOMTMis:
-
-refutable
-^^^^^^^^^
-
-:dp:`fls_cGo03p6WDCnG`
-For :dt:`refutable`, see :t:`refutable pattern`.
 
 .. _fls_v99joc4m6cup:
 

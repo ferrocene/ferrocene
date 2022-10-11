@@ -80,7 +80,8 @@ A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
 is an :t:`external function`.
 
 :dp:`fls_lxzinvqveuqh`
-The :t:`pattern` of a :t:`function parameter` shall be :t:`irrefutable`.
+The :t:`pattern` of a :t:`function parameter` shall be an :t:`irrefutable
+pattern`.
 
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function` returns.

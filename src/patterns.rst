@@ -3,15 +3,10 @@
 
 .. default-domain:: spec
 
-.. _fls_m55piel7xc04:
-
-Patterns
-========
-
 .. _fls_xgqh0ju6bmbn:
 
 Patterns
---------
+========
 
 .. rubric:: Syntax
 
@@ -84,6 +79,53 @@ Any two :t:`[pattern-without-alternation]s` that are or-ed using character 0x7C
   be the same, shall have :t:`[unifiable type]s`, and shall have the same
   :t:`[binding mode]s`.
 
+.. _fls_uh76pw6ykd57:
+
+Refutability
+------------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_9ntc4qmjmo90`
+:t:`Refutability` is a property of :t:`[pattern]s` that expresses the ability to
+match all possible values of a :t:`type`.
+
+:dp:`fls_9fjspnefoyvz`
+An :t:`irrefutable pattern` is a :t:`pattern` that always matches the :t:`value`
+it is being matched against.
+
+:dp:`fls_uq7ftuuq1sig`
+A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
+matching the :t:`value` it is being matched against.
+
+:dp:`fls_mnbyt7jfYAZ9`
+A :t:`pattern` that is not an :t:`irrefutable pattern` is a
+:t:`refutable pattern`.
+
+:dp:`fls_l76ycteulo8e`
+An :t:`irrefutable constant` is a :t:`constant` of a :t:`type` that has at most
+one :t:`value`.
+
+:dp:`fls_lh0d85tl4qvy`
+A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
+
+.. rubric:: Examples
+
+:dp:`fls_sgu9bnp7xajv`
+``x`` is an :t:`irrefutable pattern` because it always matches ``42``.
+
+.. code-block:: rust
+
+   let x = 42;
+
+:dp:`fls_cl1g4fxfa020`
+``y`` is a :t:`refutable pattern` because it does not match ``value`` when
+``value`` denotes :std:`core::option::Option::None`.
+
+.. code-block:: rust
+
+   if let core::option::Option::Some(y) = value {
+
 .. _fls_7bxv8lybxm18:
 
 Identifier Patterns
@@ -132,10 +174,11 @@ It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves
 to a :t:`tuple struct` or a :t:`tuple enum variant`.
 
 :dp:`fls_hw26hy33guk5`
-An :t:`identifier pattern` is :t:`irrefutable` when:
+An :t:`identifier pattern` is an :t:`irrefutable pattern` when:
 
 * :dp:`fls_svfxwz4yy5i`
-  It has a :t:`bound pattern` and the :t:`bound pattern` is :t:`irrefutable`, or
+  It has a :t:`bound pattern` and the :t:`bound pattern` is an :t:`irrefutable
+  pattern`, or
 
 * :dp:`fls_x6f6q22b5jpc`
   It does not have a :t:`bound pattern` and its :t:`binding` resolves to an
@@ -224,9 +267,6 @@ Literal Patterns
 :dp:`fls_pah15qa54irs`
 A :t:`literal pattern` is a :t:`pattern` that matches a :t:`literal`.
 
-:dp:`fls_v7iv7x9gy9qm`
-A :t:`literal pattern` is always :t:`refutable`.
-
 :dp:`fls_co60bzvwashg`
 The :t:`type` of a :t:`literal pattern` is the :t:`type` of the specified
 :t:`literal`.
@@ -264,8 +304,8 @@ A :t:`parenthesized pattern` is a :t:`pattern` that controls the precedence of
 its :t:`[subpattern]s`.
 
 :dp:`fls_mrjhpiq5refe`
-A :t:`parenthesized pattern` is :t:`irrefutable` when its nested :t:`pattern`
-is :t:`irrefutable`.
+A :t:`parenthesized pattern` is an :t:`irrefutable pattern` when its nested
+:t:`pattern` is an :t:`irrefutable pattern`.
 
 :dp:`fls_pe5kh8y8u664`
 The :t:`type` of a :t:`parenthesized pattern` is the :t:`type` of its nested
@@ -334,18 +374,19 @@ A :t:`path pattern` expressed as a :t:`qualified path expression` shall refer
 to an :t:`associated constant`.
 
 :dp:`fls_sl47k9oj5p7t`
-A :t:`path pattern` is :t:`irrefutable` when it refers to:
+A :t:`path pattern` is an :t:`irrefutable pattern` when it refers to:
 
 * :dp:`fls_cfoy86mkmqa4`
-  A :t:`constant` whose :t:`type` is :t:`irrefutable`, or
+  A :t:`constant` whose :t:`type` is an :t:`irrefutable pattern`, or
 
 * :dp:`fls_rnppz6y5z8pi`
   An :t:`enum variant` of an :t:`enum type` with a single :t:`enum variant`
-  where the :t:`[type]s` of all :t:`[field]s` are :t:`irrefutable`, or
+  where the :t:`[type]s` of all :t:`[field]s` are :t:`[irrefutable pattern]s`,
+  or
 
 * :dp:`fls_ag6m4mvpturw`
   A :t:`struct` where the :t:`[type]s` of all :t:`[field]s` are
-  :t:`irrefutable`.
+  :t:`[irrefutable pattern]s`.
 
 :dp:`fls_pedy2pqrvnx7`
 The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
@@ -449,8 +490,8 @@ less than or equal to its :t:`range pattern high bound`.
 An :t:`obsolete range pattern` is equivalent to an :t:`inclusive range pattern`.
 
 :dp:`fls_4o4ge6x9a8rs`
-A :t:`range pattern` is :t:`irrefutable` only when it spans the entire set of
-possible :t:`[value]s` of a :t:`type`.
+A :t:`range pattern` is an :t:`irrefutable pattern` only when it spans the
+entire set of possible :t:`[value]s` of a :t:`type`.
 
 :dp:`fls_6o995ak4hywq`
 The :t:`[type]s` of the :t:`range pattern low bound` and the :t:`range pattern
@@ -509,7 +550,7 @@ A :t:`reference pattern` is a :t:`pattern` that dereferences a :t:`pointer` that
 is being matched.
 
 :dp:`fls_x0bmzl1315gq`
-A :t:`reference pattern` is always :t:`irrefutable`.
+A :t:`reference pattern` is an :t:`irrefutable pattern`.
 
 :dp:`fls_fedo8zhgpla5`
 The :t:`type` of a :t:`reference pattern` is determined as follows:
@@ -563,7 +604,7 @@ A :t:`rest pattern` shall appear at most once within a :t:`slice pattern`, an
 :t:`tuple struct pattern`.
 
 :dp:`fls_rsqyza99vl3x`
-A :t:`rest pattern` is always :t:`irrefutable`.
+A :t:`rest pattern` is an :t:`irrefutable pattern`.
 
 :dp:`fls_w1pw40phsv2o`
 If a :t:`rest pattern` appears within a :t:`slice pattern` or the :t:`identifier
@@ -623,10 +664,10 @@ A :t:`slice pattern` is a :t:`pattern` that matches :t:`[array]s` of fixed size
 and :t:`[slice]s` of dynamic size.
 
 :dp:`fls_h6x9xlxi7y5n`
-A :t:`slice pattern` is :t:`irrefutable` when it refers to:
+A :t:`slice pattern` is an :t:`irrefutable pattern` when it refers to:
 
 * :dp:`fls_jbmxu7y5fnm6`
-  An :t:`array`, where each :t:`subpattern` is :t:`irrefutable`, or
+  An :t:`array`, where each :t:`subpattern` is an :t:`irrefutable pattern`, or
 
 * :dp:`fls_r78zzw7yyg34`
   A :t:`slice`, where the :s:`PatternList` consists of a single :t:`rest
@@ -683,8 +724,8 @@ A :t:`struct pattern` is interpreted based on the :t:`deconstructee`. It is a
 static error if a :t:`struct pattern` cannot be interpreted.
 
 :dp:`fls_r8rat3qmc4hy`
-A :t:`struct pattern` is :t:`irrefutable` when all of its :t:`[subpattern]s`
-are :t:`irrefutable`.
+A :t:`struct pattern` is an :t:`irrefutable pattern` when all of its
+:t:`[subpattern]s` are :t:`[irrefutable pattern]s`.
 
 .. _fls_nruvg0es3kx7:
 
@@ -1006,8 +1047,8 @@ A :t:`tuple pattern` is a :t:`pattern` that matches a :t:`tuple` which satisfies
 all criteria defined by its :t:`[subpattern]s`.
 
 :dp:`fls_xk8udu4k61kj`
-A :t:`tuple pattern` is :t:`irrefutable` when all of its :t:`[subpattern]s`
-are :t:`irrefutable`.
+A :t:`tuple pattern` is an :t:`irrefutable pattern` when all of its
+:t:`[subpattern]s` are :t:`[irrefutable pattern]s`.
 
 :dp:`fls_yhcaz6v49ub2`
 The :t:`type` of a :t:`tuple pattern` is the :t:`type` of the :t:`tuple` being
@@ -1088,7 +1129,7 @@ Underscore Patterns
 An :t:`underscore pattern` is a :t:`pattern` that matches any single :t:`value`.
 
 :dp:`fls_42fye1v0th8l`
-An :t:`underscore pattern` is always :t:`irrefutable`.
+An :t:`underscore pattern` is an :t:`irrefutable pattern`.
 
 :dp:`fls_b87mvrcc13f2`
 The :t:`type` of an :t:`underscore pattern` is the :t:`type` of the :t:`value`
@@ -1103,54 +1144,6 @@ An underscore pattern in the context of a let statement. See :p:`5.1.10.
 .. code-block:: rust
 
    let (first, _) = pair;
-
-.. _fls_uh76pw6ykd57:
-
-Refutability
-------------
-
-.. rubric:: Legality Rules
-
-:dp:`fls_9ntc4qmjmo90`
-:t:`Refutability` is a property of :t:`[pattern]s` that expresses the ability to
-match all possible values of a :t:`type`.
-
-:dp:`fls_9fjspnefoyvz`
-An :t:`irrefutable pattern` is a :t:`pattern` that always matches the :t:`value`
-it is being matched against.
-
-:dp:`fls_uq7ftuuq1sig`
-A :t:`refutable pattern` is a :t:`pattern` that has a possibility of not
-matching the :t:`value` it is being matched against.
-
-:dp:`fls_mtkx414qk66c`
-An :t:`irrefutable type` is a :t:`type` that has at most one :t:`value`.
-
-:dp:`fls_sccfjvu95qfr`
-A :t:`refutable type` is a :t:`type` that has more than one :t:`value`.
-
-:dp:`fls_l76ycteulo8e`
-An :t:`irrefutable constant` is a :t:`constant` of an :t:`irrefutable type`.
-
-:dp:`fls_lh0d85tl4qvy`
-A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
-
-.. rubric:: Examples
-
-:dp:`fls_sgu9bnp7xajv`
-``x`` is an irrefutable pattern because it always matches ``42``.
-
-.. code-block:: rust
-
-   let x = 42;
-
-:dp:`fls_cl1g4fxfa020`
-``y`` is a refutable pattern because it does not match ``value`` when ``value``
-denotes :std:`core::option::Option::None`.
-
-.. code-block:: rust
-
-   if let core::option::Option::Some(y) = value {
 
 .. _fls_qssijtofa9i8:
 

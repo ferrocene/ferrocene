@@ -2055,9 +2055,9 @@ Type Inference
 :t:`[expression]s` and :t:`[pattern]s` within a :t:`type inference root`.
 
 :dp:`fls_ybvrhh96fc7y`
-A :dt:`type inference root` is an :t:`expression` whose contained
-:t:`[expression]s` and :t:`[pattern]s` are subject to :t:`type inference`
-independently of other inference roots.
+A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+and :t:`[pattern]s` are subject to :t:`type inference` independently of other
+:t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
 The :t:`[type inference root]s` are:

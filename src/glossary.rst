@@ -516,7 +516,7 @@ auto trait
 ^^^^^^^^^^
 
 :dp:`fls_d84nTOR4pZq5`
-An :t:`auto trait` is a :t:`trait` that is implicitly and automatically
+An :dt:`auto trait` is a :t:`trait` that is implicitly and automatically
 implemented by a :t:`type` when the types of its constituent :t:`[field]s`
 implement the :t:`trait`.
 

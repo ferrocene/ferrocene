@@ -177,7 +177,7 @@ Boolean :t:`value` ``false`` has bit pattern ``0x00``. Boolean :t:`value`
 ``true`` has bit pattern ``0x01``.
 
 :dp:`fls_7nd5tixyqir8`
-The following operations are defined on :t:`type` :c:`bool`:
+The following operations are defined on :t:`[value]s` of :t:`type` :c:`bool`:
 
 :dp:`fls_w2dzqq54fjhb`
 **Logical not**
@@ -334,7 +334,7 @@ Operation ``a >= b`` is equivalent to ``a == b | a > b``.
 Operation ``a < b`` is equivalent to ``!(a >= b)``.
 
 :dp:`fls_d09l2rl0161l`
-Operation ``a <= b`` shall be equivalent to ``a == b | a < b``.
+Operation ``a <= b`` is equivalent to ``a == b | a < b``.
 
 .. rubric:: Undefined Behavior
 
@@ -351,14 +351,15 @@ Char Type
 
 :dp:`fls_vnwbs0exbwcn`
 :c:`Char` is a :t:`type` whose :t:`[value]s` are represented as a 32-bit
-unsigned word in the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive ranges
+unsigned word in the 0x000 - 0xD7FF or the 0xE000 - 0x10FFFF inclusive ranges
 of :t:`Unicode`.
 
 .. rubric:: Undefined Behavior
 
 :dp:`fls_juysxea25owj`
-It is a :t:`validity invariant` for a :t:`value` of :t:`type` :c:`char` to be inside
-the 0x000 to 0xD7FF or the 0xE000 to 0x10FFFF inclusive ranges of :t:`Unicode`.
+It is a :t:`validity invariant` for a :t:`value` of :t:`type` :c:`char` to be
+inside the 0x000 - 0xD7FF or the 0xE000 - 0x10FFFF inclusive ranges of
+:t:`Unicode`.
 
 .. _fls_qwljwqr07slp:
 
@@ -417,8 +418,8 @@ domain of whole numbers:
      - 2\ :sup:`128` - 1
 
 :dp:`fls_75lntwhg20l`
-:t:`Type` :c:`usize` has the same number of bits as the platform's :t:`pointer
-type`, and at least 16-bits wide.
+:t:`Type` :c:`usize` has the same number of bits as the platform's
+:t:`pointer type`, and is at least 16-bits wide.
 
 :dp:`fls_p2shoji3xg5a`
 :t:`[Signed integer type]s` define the following inclusive ranges over the
@@ -452,8 +453,8 @@ domain of whole numbers:
      - 2\ :sup:`127` - 1
 
 :dp:`fls_t9oyfmgqka6u`
-:t:`Type` :c:`isize` has the same number of bits as the platform's :t:`pointer
-type`, and at least 16-bits wide.
+:t:`Type` :c:`isize` has the same number of bits as the platform's
+:t:`pointer type`, and is at least 16-bits wide.
 
 .. _fls_fbchw64p6n2x:
 
@@ -526,10 +527,11 @@ A :t:`slice type` is a :t:`dynamically sized type`.
 .. rubric:: Examples
 
 :dp:`fls_nsny832ap4v1`
-See :p:`4.3.1. <fls_uj0kpjwyld60>` for the declaration of ``array``.
+A slice type in the context of a let statement:
 
 .. code-block:: rust
 
+   let array: [i32; 3] = [1, 2, 3];
    let slice: &[i32] = &array[0..1];
 
 .. _fls_4agmmu5al6gt:
@@ -581,8 +583,8 @@ A :t:`tuple type` is a :t:`sequence type` that represents a heterogeneous list
 of other :t:`[type]s`.
 
 :dp:`fls_s9a36zsrfqew`
-If the :t:`type` of a :t:`tuple field` is a :t:`dynamically-sized type`,
-then the :t:`tuple field` shall be the last :t:`tuple field` in the
+If the :t:`type` of a :t:`tuple field` is a :t:`dynamically-sized type`, then
+the :t:`tuple field` shall be the last :t:`tuple field` in the
 :s:`TupleFieldList`.
 
 .. rubric:: Examples
@@ -627,19 +629,19 @@ Enum Types
 .. rubric:: Legality Rules
 
 :dp:`fls_gbdd37seqoab`
-An :t:`enum type` is an :t:`abstract data type` that contains :t:`[enum
-variant]s`.
+An :t:`enum type` is an :t:`abstract data type` that contains
+:t:`[enum variant]s`.
 
 :dp:`fls_il9a1olqmu38`
 A :t:`zero-variant enum type` has no :t:`[value]s`.
 
 :dp:`fls_wQTFwl88VujQ`
-An :dt:`enum variant` is a :t:`construct` that declares one of the
+An :t:`enum variant` is a :t:`construct` that declares one of the
 possible variations of an :t:`enum`.
 
 :dp:`fls_g5qle7xzaoif`
-The :t:`name` of an :t:`enum variant` shall denote a unique :t:`name` within the
-related :s:`EnumDeclaration`.
+The :t:`name` of an :t:`enum variant` shall be unique within the related
+:s:`EnumDeclaration`.
 
 :dp:`fls_t4yeovFm83Wo`
 A :t:`discriminant` is an opaque integer that identifies an :t:`enum variant`.
@@ -672,7 +674,7 @@ as follows:
    :t:`value` is the value of its :t:`expression`.
 
 #. :dp:`fls_t36rk3wikq28`
-   Else, if the :t:`enum variant` is the first :t:`enum variant` in the
+   Otherwise, if the :t:`enum variant` is the first :t:`enum variant` in the
    :s:`EnumVariantList`, then the :t:`value` is zero.
 
 #. :dp:`fls_8ajw5trd23wi`
@@ -680,8 +682,8 @@ as follows:
    :t:`discriminant` of the previous :t:`enum variant`.
 
 :dp:`fls_w9xj26ej869w`
-It is a static error if two :t:`[enum variant]s` have the same
-:t:`[discriminant]s` with the same :t:`value`.
+It is a static error if two :t:`[enum variant]s` have :t:`[discriminant]s`
+with the same :t:`value`.
 
 :dp:`fls_wqbuof7kxsrg`
 It is a static error if the :t:`value` of a :t:`discriminant` exceeds the
@@ -757,8 +759,8 @@ A :t:`struct type` is an :t:`abstract data type` that is a product of other
 :t:`[type]s`.
 
 :dp:`fls_r885av95eivp`
-The :t:`name` of a :t:`record struct field` shall denote a unique :t:`name`
-within the :s:`RecordStructDeclaration`.
+The :t:`name` of a :t:`record struct field` shall be unique within the
+related :s:`RecordStructDeclaration`.
 
 :dp:`fls_auurdv1zvzb`
 If the :t:`type` of a :t:`record struct field` is a :t:`dynamically sized type`,
@@ -806,8 +808,8 @@ Union Types
 A :t:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
 
 :dp:`fls_1caus8ybmfli`
-The :t:`name` of a :t:`union field` shall denote a unique :t:`name` within the
-related :s:`RecordStructDeclaration`.
+The :t:`name` of a :t:`union field` shall be unique within the related
+:s:`RecordStructDeclaration`.
 
 .. rubric:: Examples
 
@@ -843,7 +845,7 @@ A :t:`closure type` that does not move out its :t:`[capture target]s`
 implements the :std:`core::ops::FnMut` :t:`trait`.
 
 :dp:`fls_u01kt5glbuz8`
-A :t:`closure type` that does not move or mutate its :t:`[capture target]s`
+A :t:`closure type` that does not move out or mutate its :t:`[capture target]s`
 implements the :std:`core::ops::Fn` :t:`trait`.
 
 :dp:`fls_3jeootwe6ucu`
@@ -852,27 +854,23 @@ coercible to a :t:`function pointer type`.
 
 :dp:`fls_63jqtyw0rz8c`
 A :t:`closure type` implicitly implements the :std:`core::marker::Copy`
-:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
-environment` implement the :std:`core::marker::Copy` :t:`trait`.
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the
+:t:`capturing environment` implement the :std:`core::marker::Copy` :t:`trait`.
 
 :dp:`fls_3c4g9njja5s5`
 A :t:`closure type` implicitly implements the :std:`core::clone::Clone`
-:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
-environment` implement the :std:`core::clone::Clone` :t:`trait`.
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the
+:t:`capturing environment` implement the :std:`core::clone::Clone` :t:`trait`.
 
 :dp:`fls_2nuhy0ujgq18`
 A :t:`closure type` implicitly implements the :std:`core::marker::Send`
-:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
-environment` implement the :std:`core::marker::Send` :t:`trait`.
-A :t:`closure type` implicitly implements the :std:`core::marker::Send`
-:t:`trait` if:
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the
+:t:`capturing environment` implement the :std:`core::marker::Send` :t:`trait`.
 
 :dp:`fls_5jh07heok8sy`
 A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
 :t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
 environment` implement the :std:`core::marker::Send` :t:`trait`.
-A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
-:t:`trait` if:
 
 .. _fls_airvr79xkcag:
 
@@ -897,9 +895,9 @@ An :t:`unsafe function item type` is a :t:`function item type` where the related
 A :t:`function item type` is coercible to a :t:`function pointer type`.
 
 :dp:`fls_1941wid94hlg`
-A :t:`function item type` implements the :std:`core::ops::Fn` :t:`trait`, the
-:std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`, the
-:std:`core::marker::Copy` :t:`trait`, the :std:`core::clone::Clone` :t:`trait`,
+A :t:`function item type` implements the :std:`core::clone::Clone` :t:`trait`,
+the :std:`core::marker::Copy` :t:`trait`, the :std:`core::ops::Fn` :t:`trait`,
+the :std:`core::ops::FnMut` :t:`trait`, the :std:`core::ops::FnOnce` :t:`trait`,
 the :std:`core::marker::Send` :t:`trait`, and the :std:`core::marker::Sync`
 :t:`trait`.
 
@@ -1051,8 +1049,8 @@ A :t:`mutable reference type` does not implement the :std:`copy::marker::Copy`
 .. rubric:: Undefined Behavior
 
 :dp:`fls_ezh8aq6fmdvz`
-It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be not
-:c:`null`.
+It is :t:`validity invariant` for a :t:`value` of a :t:`reference type` to be
+not :c:`null`.
 
 .. rubric:: Examples
 
@@ -1136,9 +1134,9 @@ A :t:`trait object type` shall not contain :t:`[opt-out trait bound]s`.
 A :t:`trait object type` shall contain at most one :t:`lifetime bound`.
 
 :dp:`fls_88b9bmhra55f`
-A :t:`trait object type` is a :t:`dynamically sized type`. A :t:`trait object
-type` permits late binding of :t:`[method]s`. A :t:`method` invoked via a
-:t:`trait object type` involves dynamic dispatching.
+A :t:`trait object type` is a :t:`dynamically sized type`. A
+:t:`trait object type` permits late binding of :t:`[method]s`. A :t:`method`
+invoked via a :t:`trait object type` involves dynamic dispatching.
 
 .. rubric:: Examples
 
@@ -1168,8 +1166,8 @@ Inferred Types
 .. rubric:: Legality Rules
 
 :dp:`fls_xdtgr5toulpb`
-An :t:`inferred type` is a placeholder for a :t:`type` deduced by :t:`type
-inference`.
+An :t:`inferred type` is a placeholder for a :t:`type` deduced by
+:t:`type inference`.
 
 :dp:`fls_3abhsuaa8nas`
 An :t:`inferred type` shall not appear in the following positions:
@@ -1223,7 +1221,7 @@ The :t:`never type` has no :t:`[value]s`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_22e8quna7ed5`
-It is :t:`validity variant` to not have a :t:`value` of the :t:`never type`.
+It is :t:`validity invariant` to not have a :t:`value` of the :t:`never type`.
 
 .. rubric:: Examples
 
@@ -1247,7 +1245,7 @@ Parenthesized Types
 
 :dp:`fls_1dvo1epstrdv`
 A :t:`parenthesized type` is a :t:`type` that disambiguates the interpretation
-of :t:`[lexical element]s`
+of :t:`[lexical element]s`.
 
 .. rubric:: Examples
 
@@ -1389,13 +1387,13 @@ For a :t:`trait object type`, the :t:`layout` is the same as the :t:`value`
 being coerced into the :t:`trait object type` at runtime.
 
 :dp:`fls_sdrb0k2r18my`
-For a :t:`struct type`, the memory layout is undefined, unless the :t:`struct
-type` is subject to :t:`attribute` :c:`repr`.
+For a :t:`struct type`, the memory layout is undefined, unless the
+:t:`struct type` is subject to :t:`attribute` :c:`repr`.
 
 :dp:`fls_gt3tkbn4bsa6`
-For a :t:`union type`, the memory layout is undefined, unless the :t:`union
-type` is subject to :t:`attribute` :c:`repr`. All :t:`[union field]s` share a
-common storage.
+For a :t:`union type`, the memory layout is undefined, unless the
+:t:`union type` is subject to :t:`attribute` :c:`repr`. All :t:`[union field]s`
+share a common storage.
 
 :dp:`fls_njvdevz0xqc0`
 The :t:`size` of a :t:`recursive type` shall be finite.
@@ -1437,9 +1435,9 @@ interoperable with the :t:`C` language.
 
 :dp:`fls_7plbkqlmed0r`
 :t:`Primitive representation` is the :t:`type representation` of individual
-:t:`[integer type]s`. :t:`Primitive representation` applies only to an :t:`enum
-type` that is not a :t:`zero-variant enum type`. It is possible to combine :t:`C
-representation` and :t:`primitive representation`.
+:t:`[integer type]s`. :t:`Primitive representation` applies only to an
+:t:`enum type` that is not a :t:`zero-variant enum type`. It is possible to
+combine :t:`C representation` and :t:`primitive representation`.
 
 :dp:`fls_ml4khttq3w5k`
 :t:`Transparent representation` applies only to an :t:`enum type` with a
@@ -1448,8 +1446,9 @@ single :t:`enum variant` or a :t:`struct type` where the :t:`struct type` or
 of :t:`[field]s` of :t:`size` zero and :t:`alignment` one.
 
 :dp:`fls_9q2iqzbup8oy`
-:t:`[Type]s` subject to :t:`transparent representation` have the same :t:`type
-representation` as the :t:`type` of their :t:`field` with non-zero :t:`size`.
+:t:`[Type]s` subject to :t:`transparent representation` have the same
+:t:`type representation` as the :t:`type` of their :t:`field` with non-zero
+:t:`size`.
 
 :dp:`fls_fsbf6ist38ix`
 :t:`Type representation` may be specified using :t:`attribute` :c:`repr`. An
@@ -1457,10 +1456,10 @@ representation` as the :t:`type` of their :t:`field` with non-zero :t:`size`.
 :t:`attribute` :c:`repr` has :t:`default representation`.
 
 :dp:`fls_qkkc8x2oghst`
-:t:`Type representation` may be modified using :t:`attribute` :c:`[repr]'s`
-:c:`align` and :c:`packed` :t:`[representation modifier]s`. A :t:`representation
-modifier` shall apply only to a :t:`struct type` or a :t:`union type` subject to
-:t:`C representation` or :t:`default representation`.
+:t:`Type representation` may be modified using :t:`attribute` :c:`[repr]`'s
+:c:`align` and :c:`packed` :t:`[representation modifier]s`. A
+:t:`representation modifier` shall apply only to a :t:`struct type` or a
+:t:`union type` subject to :t:`C representation` or :t:`default representation`.
 
 .. _fls_xc1hof4qbf6p:
 
@@ -1474,8 +1473,8 @@ Enum Type Representation
 
 :dp:`fls_efp1kfgkpba8`
 The :t:`size` and :t:`alignment` of an :t:`enum type` without :t:`[field]s`
-subject to :t:`C representation`, :t:`default representation`, or :t:`primitive
-representation` are those of its :t:`discriminant`.
+subject to :t:`C representation`, :t:`default representation`, or
+:t:`primitive representation` are those of its :t:`discriminant`.
 
 :dp:`fls_s9c0a0lg6c0p`
 The :t:`discriminant type` of an :t:`enum type` with :t:`C representation` is
@@ -1486,9 +1485,9 @@ The :t:`discriminant type` of an :t:`enum type` with :t:`default representation`
 is tool-defined.
 
 :dp:`fls_u1zy06510m56`
-The :t:`discriminant type` of an :t:`enum type` with :t:`primitive
-representation` is the :t:`primitive type` specified by the :t:`primitive
-representation`.
+The :t:`discriminant type` of an :t:`enum type` with
+:t:`primitive representation` is the :t:`primitive type` specified by the
+:t:`primitive representation`.
 
 :dp:`fls_ryvqkcx48u74`
 It is a static error if the :t:`discriminant type` cannot hold all the
@@ -1535,8 +1534,8 @@ Struct Type Representation
 .. rubric:: Legality Rules
 
 :dp:`fls_jr9dykj6rydn`
-The :t:`alignment` of a :t:`struct type` subject to :t:`C representation` is the
-:t:`alignment` of the most-aligned :t:`field` in it.
+The :t:`alignment` of a :t:`struct type` subject to :t:`C representation` is
+the :t:`alignment` of the most-aligned :t:`field` in it.
 
 :dp:`fls_6ck71twmnbg5`
 The :t:`size` of a :t:`struct type` subject to :t:`C representation` is
@@ -1639,8 +1638,8 @@ Type Unification
 
 :dp:`fls_ryvdhkgm7vzj`
 :t:`Type unification` is a measure of compatibility between two :t:`[type]s`. A
-:t:`type` is said to :t:`unify` with another :t:`type` when the domains, ranges
-and structures of both :t:`[type]s` are compatible.
+:t:`type` is said to :t:`unify` with another :t:`type` when the domains,
+ranges, and structures of both :t:`[type]s` are compatible.
 
 :dp:`fls_aie0tr62vhw5`
 Two types that :t:`unify` are said to be :t:`[unifiable type]s`.
@@ -1665,7 +1664,7 @@ A :t:`slice type` is unifiable only with another :t:`slice type` when the
 :t:`[element type]s` of both :t:`[slice type]s` are unifiable.
 
 :dp:`fls_i1m41c4wkfc0`
-Type :c:`str` is unifiable only with itself.
+:t:`Type` :c:`str` is unifiable only with itself.
 
 :dp:`fls_mpq64eal9jo3`
 A :t:`tuple type` is unifiable only with another :t:`tuple type` when:
@@ -1677,8 +1676,8 @@ A :t:`tuple type` is unifiable only with another :t:`tuple type` when:
   The :t:`[type]s` of the corresponding :t:`[tuple field]s` are unifiable.
 
 :dp:`fls_so2cgqmawlm7`
-An :t:`abstract data type` is unifiable only with another :t:`abstract data
-type` when:
+An :t:`abstract data type` is unifiable only with another
+:t:`abstract data type` when:
 
 * :dp:`fls_vsax8w6y794m`
   The two :t:`[abstract data type]s` are the same :t:`type`, and
@@ -1706,8 +1705,8 @@ when:
   The corresponding :t:`[generic substitution]s` are unifiable.
 
 :dp:`fls_wz2etmkpvxed`
-A :t:`function pointer type` is unifiable only with another :t:`function pointer
-type` when:
+A :t:`function pointer type` is unifiable only with another
+:t:`function pointer type` when:
 
 * :dp:`fls_rmqcbb5ja4va`
   The :t:`[lifetime]s` are :t:`variance`-conformant, and
@@ -1758,7 +1757,7 @@ An :t:`anonymous return type` is unifiable with another :t:`type` when:
 
 * :dp:`fls_yvllot5qnc4s`
   The other :t:`type` implements all :t:`[trait]s` specified by the
-  :t:`anonymous return type`, and
+  :t:`anonymous return type`.
 
 :dp:`fls_hza5n5eb18ta`
 An :t:`impl trait type` is unifiabe only with itself.
@@ -1806,28 +1805,28 @@ A :t:`type coercion` takes place at a :t:`coercion site` or within a
 :dp:`fls_j3kbaf43sgpj`
 The following :t:`[construct]s` constitute a :dt:`coercion site`:
 
-* :dp:`fls_sp794uzfiofr`
-  A :t:`let statement` with an explicit :t:`type specification`.
+* :dp:`fls_wxrugvlazy6v`
+  The :t:`[argument operand]s` of a :t:`call expression` or a
+  :t:`method call expression`.
 
 * :dp:`fls_bhzmble1itog`
   A :t:`constant` declaration.
 
-* :dp:`fls_xfqny6bwzsu9`
-  A :t:`static` declaration.
-
-* :dp:`fls_wxrugvlazy6v`
-  The :t:`argument [operand]s` of a :t:`call expression` or a :t:`method call
-  expression`.
-
 * :dp:`fls_eu4bt3dw1b8c`
-  The :t:`instantiation` of a :t:`field` of an :t:`abstract data type`.
+  A :t:`field` of an :t:`abstract data type`.
 
 * :dp:`fls_apstt4elv2k7`
   A :t:`function` result.
 
+* :dp:`fls_sp794uzfiofr`
+  A :t:`let statement` with an explicit :t:`type specification`.
+
+* :dp:`fls_xfqny6bwzsu9`
+  A :t:`static` declaration.
+
 :dp:`fls_u0e42y7nvn7e`
-The following :t:`[expression]s` constitute a :dt:`coercion-propagating
-expression`:
+The following :t:`[expression]s` constitute a
+:dt:`coercion-propagating expression`:
 
 * :dp:`fls_p8hp5y506nam`
   Each :t:`operand` of an :t:`array expression`.
@@ -1878,9 +1877,9 @@ occur when:
 
 * :dp:`fls_6r3kn0nk5b8o`
   The source :t:`type` is ``type_constructor(T)`` and the target :t:`type` is
-  ``type_constructor(U)``, where ``type_constructor`` is one of ``&W``, ``&mut
-  W``, ``*const W``, or ``*mut W``, and ``U`` can be obtained from ``T`` using
-  :t:`unsized coercion`.
+  ``type_constructor(U)``, where ``type_constructor`` is one of ``&W``,
+  ``&mut W``, ``*const W``, or ``*mut W``, and ``U`` can be obtained from ``T``
+  using :t:`unsized coercion`.
 
 * :dp:`fls_ulcdetwp6x96`
   The source :t:`type` is a :t:`function item type` and the target :t:`type` is
@@ -1930,8 +1929,8 @@ where
   ``last_field`` is a :t:`struct field` of ``S``,
 
 * :dp:`fls_4wbk7pqj010i`
-  The :t:`type` of ``last_field`` involves ``T`` and if the
-  :t:`type` of ``last_field`` is ``W<T>``, then ``W<T>`` implements
+  The :t:`type` of ``last_field`` involves ``T`` and if the :t:`type` of
+  ``last_field`` is ``W<T>``, then ``W<T>`` implements
   ``core::marker::Unsize<W<U>>``,
 
 * :dp:`fls_47u0039t0l8f`
@@ -1951,8 +1950,8 @@ the following scenarios:
   To find the common :t:`type` of multiple :t:`if let expression` branches.
 
 * :dp:`fls_agw1aej616vf`
-  To find the common :t:`type` for multiple :t:`match expression` :t:`[match
-  arm]s`.
+  To find the common :t:`type` for multiple :t:`match expression`
+  :t:`[match arm]s`.
 
 * :dp:`fls_tnbga5dl4gz8`
   To find the common :t:`type` of :t:`array expression` :t:`[operand]s`.
@@ -1962,8 +1961,8 @@ the following scenarios:
   :t:`[return expression]s`.
 
 * :dp:`fls_r11shke69uu6`
-  To find the :t:`return type` of a :t:`function` with multiple :t:`[return
-  expression]s`.
+  To find the :t:`return type` of a :t:`function` with multiple
+  :t:`[return expression]s`.
 
 :dp:`fls_ky7ykpufb95t`
 :t:`Least upper bound coercion` considers a set of source :t:`[type]s` ``T1``,
@@ -2002,7 +2001,7 @@ Structural Equality
 .. rubric:: Legality Rules
 
 :dp:`fls_uVTpA7gbLCYX`
-A :t:`type` is :t:`structurally equal` when its :t:`values` can be compared
+A :t:`type` is :t:`structurally equal` when its :t:`[value]s` can be compared
 for equality by structure.
 
 :dp:`fls_2DZAP6JJjJ9h`
@@ -2013,20 +2012,20 @@ The following :t:`[type]s` are :t:`structurally equal`:
   :c:`str`,  and :t:`[raw pointer type]s`.
 
 * :dp:`fls_HpWSAfaTA1Dz`
-  An :t:`abstract data type` if it implements the :t:`[trait]s`
-  :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq` via the use of the
+  An :t:`abstract data type`, if it implements the
+  :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq` :t:`[trait]s` using
   :t:`[derive macro]s` :std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
 
 * :dp:`fls_5RcnETrW6f9m`
-  :t:`[Array type]s` and :t:`[slice type]s` if the :t:`[element type]` contained
-  within is :t:`structurally equal`.
-
-* :dp:`fls_hBFlaUrrhqZ6`
-  :t:`[Tuple type]s` if the :t:`[type]s` of the :t:`[tuple field]s` are
+  :t:`[Array type]s` and :t:`[slice type]s`, if the :t:`[element type]` is
   :t:`structurally equal`.
 
 * :dp:`fls_jMeWhn4sNTPF`
-  :t:`[Reference type]s` if their inner :t:`type` is :t:`structurally equal`.
+  :t:`[Reference type]s`, if their inner :t:`type` is :t:`structurally equal`.
+
+* :dp:`fls_hBFlaUrrhqZ6`
+  :t:`[Tuple type]s`, if the :t:`[type]s` of the :t:`[tuple field]s` are
+  :t:`structurally equal`.
 
 .. _fls_omaq7psg83n3:
 
@@ -2060,26 +2059,35 @@ and :t:`[pattern]s` are subject to :t:`type inference` independently of other
 :t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
-The :t:`[type inference root]s` are:
+The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 
 * :dp:`fls_NYSzcvf5nQpi`
-  :t:`[Constant argument]s`.
+  A :t:`constant argument`.
 
 * :dp:`fls_htLp5J5ObgNh`
-  A :t:`constant initializer` or :t:`static initializer`.
-
-* :dp:`fls_Sowatt1V988J`
-  A :t:`function body`.
+  A :t:`constant initializer`.
 
 * :dp:`fls_KphY5qHev0Dc`
   The :t:`discriminant initializer` of an :t:`enum variant`.
 
+* :dp:`fls_Sowatt1V988J`
+  A :t:`function body`.
+
 * :dp:`fls_A1NVYkepoaMk`
   The :t:`size operand` of an :t:`array expression` or an :t:`array type`.
 
+* :dp:`fls_cPlCLGCcl7EK`
+  A :t:`static initializer`.
+
+:dp:`fls_J77VeAlD8rsv`
+A :t:`type inference root` imposes an :dt:`expected type`.
+
 :dp:`fls_uvvn4usfsbhr`
-A :t:`type variable` is a placeholder for a :t:`type`. A :t:`global type
-variable` is a :t:`type variable` that can refer to any :t:`type`.
+A :t:`type variable` is a placeholder for a :t:`type`.
+
+:dp:`fls_gDalJm1XS0mi`
+A :t:`global type variable` is a :t:`type variable` that can refer to any
+:t:`type`.
 
 :dp:`fls_5d4hw3gj4w4n`
 The :t:`expected type` of the :t:`constant initializer` of a :t:`constant` is
@@ -2114,40 +2122,40 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 :t:`construct`, as follows:
 
 * :dp:`fls_3ihttknfccxr`
-  An :t:`addition expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::Add::Output`.
+  An :t:`addition expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::Add::Output`.
 
 * :dp:`fls_rta6ehkzp3hg`
-  A :t:`division expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::Div::Output`.
+  A :t:`division expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::Div::Output`.
 
 * :dp:`fls_f2whukg3x1yo`
   A :t:`multiplication expression` imposes its :t:`expected type` onto
   :t:`associated type` :std:`core::ops::Mul::Output`.
 
 * :dp:`fls_w9fp1usbb15`
-  A :t:`remainder expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::Rem::Output`.
+  A :t:`remainder expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::Rem::Output`.
 
 * :dp:`fls_5s2eh0qjq6vk`
   A :t:`subtraction expression` imposes its :t:`expected type` onto
   :t:`associated type` :std:`core::ops::Sub::Output`.
 
 * :dp:`fls_rpxxg2u4hzhc`
-  An :t:`await expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::future::Future::Output`.
+  An :t:`await expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::future::Future::Output`.
 
 * :dp:`fls_vj1071lxoyyv`
-  A :t:`bit and expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::BitAnd::Output`.
+  A :t:`bit and expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::BitAnd::Output`.
 
 * :dp:`fls_y6owsf8jnx35`
-  A :t:`bit xor expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::BitXor::Output`.
+  A :t:`bit xor expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::BitXor::Output`.
 
 * :dp:`fls_i9dhdmiqde99`
-  A :t:`bit or expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::BitOr::Output`.
+  A :t:`bit or expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::BitOr::Output`.
 
 * :dp:`fls_bystnhv1olg5`
   A :t:`shift left expression` imposes its :t:`expected type` onto
@@ -2158,13 +2166,13 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
   :t:`associated type` :std:`core::ops::Shr::Output`.
 
 * :dp:`fls_8ct11ekq3p5q`
-  A :t:`block expression` imposes its :t:`expected type` onto its :t:`tail
-  expression`. If the :t:`block expression` is associated with a :t:`loop
-  expression`, then the :t:`block expression` imposes its :t:`expected type`
-  onto each :t:`break expression` within its :t:`statement` list. If the
-  :t:`block expression` is associated with a :t:`function`, then the :t:`block
-  expression` imposes its :t:`expected type` onto each :t:`return expression`
-  within its :t:`statement` list.
+  A :t:`block expression` imposes its :t:`expected type` onto its
+  :t:`tail expression`. If the :t:`block expression` is associated with a
+  :t:`loop expression`, then the :t:`block expression` imposes its
+  :t:`expected type` onto each :t:`break expression` within its :t:`statement`
+  list. If the :t:`block expression` is associated with a :t:`function`, then
+  the :t:`block expression` imposes its :t:`expected type` onto each
+  :t:`return expression` within its :t:`statement` list.
 
 * :dp:`fls_eee1t7hynswa`
   A :t:`borrow expression` imposes its :t:`expected type` onto its :t:`operand`.
@@ -2174,38 +2182,38 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
   :t:`operand`.
 
 * :dp:`fls_kviulvlfvww2`
-  A :t:`call expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::FnOnce::Output`.
+  A :t:`call expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::FnOnce::Output`.
 
 * :dp:`fls_4hsgi1voem9y`
   An :t:`error propagation expression` imposes its :t:`expected type` onto its
   operand.
 
 * :dp:`fls_8zpltmxy41rd`
-  An :t:`if expression` imposes its :t:`expected type` onto its :t:`block
-  expression` and else expression.
+  An :t:`if expression` imposes its :t:`expected type` onto its
+  :t:`block expression` and else expression.
 
 * :dp:`fls_qdmyerpgnwha`
-  An :t:`if let expression` imposes its :t:`expected type` onto its :t:`block
-  expression` and :t:`else expression`.
+  An :t:`if let expression` imposes its :t:`expected type` onto its
+  :t:`block expression` and :t:`else expression`.
 
 * :dp:`fls_gmojdinhct0b`
   A :t:`lazy boolean expression` imposes its :t:`expected type` onto its
   :t:`[operand]s`.
 
 * :dp:`fls_d8f7xb8r3aud`
-  A :t:`loop expression` imposes its :t:`expected type` onto its :t:`block
-  expression`.
+  A :t:`loop expression` imposes its :t:`expected type` onto its
+  :t:`block expression`.
 
 * :dp:`fls_ds3nkfar77in`
   A :t:`match expression` imposes its :t:`expected type` onto the
   :t:`expression-with-block` or :t:`expression-without-block` of every
-  :t:`intermediate match arm` and the :t:`expression` of its :t:`final match
-  arm`.
+  :t:`intermediate match arm` and the :t:`expression` of its
+  :t:`final match arm`.
 
 * :dp:`fls_xhax58ebkqik`
-  A :t:`negation expression` imposes its :t:`expected type` onto :t:`associated
-  type` :std:`core::ops::Neg::Output`.
+  A :t:`negation expression` imposes its :t:`expected type` onto
+  :t:`associated type` :std:`core::ops::Neg::Output`.
 
 * :dp:`fls_m896wu8zax5k`
   A :t:`parenthesized expression` imposes its :t:`expected type` onto its
@@ -2215,11 +2223,12 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
   A :t:`return expression` imposes its :t:`expected type` onto its :t:`operand`.
 
 :dp:`fls_aaumn7viouu7`
-:t:`[Array expression]s`, :t:`[index expression]s`, :t:`[assignment
-expression]s`, :t:`[closure expression]s`, :t:`[comparison expression]s`,
-:t:`[compound assignment expression]s`, :t:`[field access expression]s`,
-:t:`[lazy boolean expression]s`, :t:`[method call expression]s`, :t:`[range
-expression]s`, :t:`[struct expression]s`, :t:`[tuple expression]s`, and
+:t:`[Array expression]s`, :t:`[index expression]s`,
+:t:`[assignment expression]s`, :t:`[closure expression]s`,
+:t:`[comparison expression]s`, :t:`[compound assignment expression]s`,
+:t:`[field access expression]s`, :t:`[lazy boolean expression]s`,
+:t:`[method call expression]s`, :t:`[range expression]s`,
+:t:`[struct expression]s`, :t:`[tuple expression]s`, and
 :t:`[type cast expression]s` are :dt:`[type resolving expression]s`.
 
 :dp:`fls_r7dyhfmdentz`
@@ -2234,8 +2243,8 @@ to :t:`[floating-point type]s`.
 The :t:`resolving type` of a :t:`float literal` is determined as follows:
 
 #. :dp:`fls_1dvk2vvdw0oj`
-   If the :t:`float literal` has a :t:`float suffix`, then the :t:`resolving
-   type` is the :t:`type` specified by its :t:`float suffix`.
+   If the :t:`float literal` has a :t:`float suffix`, then the
+   :t:`resolving type` is the :t:`type` specified by its :t:`float suffix`.
 
 #. :dp:`fls_gp9gcxiapfxv`
    Otherwise the :t:`resolving type` is a :t:`floating-point type variable`.
@@ -2398,12 +2407,16 @@ The following :t:`[trait]s` are :t:`[auto trait]s`:
 
 * :dp:`fls_RLFIzQeAPhG6`
   :std:`core::marker::Send`
+
 * :dp:`fls_avSxO0LEka2x`
   :std:`core::marker::Sync`
+
 * :dp:`fls_ft8axGGOe3aL`
   :std:`core::marker::Unpin`
+
 * :dp:`fls_M4EoT1NMyxJS`
   :std:`core::panic::UnwindSafe`
+
 * :dp:`fls_Tir2kpKNP1KC`
   :std:`core::panic::RefUnwindSafe`
 
@@ -2445,7 +2458,7 @@ Object Safety
 .. rubric:: Legality Rules
 
 :dp:`fls_lrdki56hpc3k`
-A trait is :t:`object safe` when:
+A :t:`trait` is :t:`object safe` when:
 
 * :dp:`fls_5wlltclogfkw`
   Its :t:`[supertrait]s` are :t:`object safe`, and
@@ -2460,9 +2473,9 @@ A trait is :t:`object safe` when:
   Its :t:`[associated function]s` are :t:`object safe`.
 
 :dp:`fls_uixekv82g2e5`
-An :t:`associated function` is :t:`object safe` when it is either an :t:`object
-safe` dispatchable :t:`function` or an :t:`object safe` non-dispatchable
-:t:`function`.
+An :t:`associated function` is :t:`object safe` when it is either an
+:t:`object safe` dispatchable :t:`function` or an :t:`object safe`
+non-dispatchable :t:`function`.
 
 :dp:`fls_72tvfoemwpyy`
 A dispatchable :t:`function` is :t:`object safe` when:
@@ -2548,10 +2561,10 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 :s:`ForGenericParameterList`.
 
 :dp:`fls_AzuZmR9DXSQh`
-A :t:`trait bound` with :s:`punctuation` ``?`` is an :t:`opt-out trait bound`.
+A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.
 
 :dp:`fls_tx4uspewnk7w`
-:t:`Bound` ``'a: 'b`` is read as ``'a`` outlives ``'b``, or in other words,
+:t:`Bound` ``'a: 'b`` is read as "``'a`` outlives ``'b``", or in other words,
 ``'a`` lasts as long as ``'b``.
 
 :dp:`fls_5kj8bmvb8xfc`
@@ -2612,10 +2625,10 @@ Subtyping and Variance
 where another :t:`type` is expected.
 
 :dp:`fls_df87d44kgwcv`
-:t:`Variance` is a property of :t:`[lifetime parameter]s` and :t:`[type
-parameter]s` that describes the circumstances under which a :t:`generic type`
-is a :t:`subtype` of an instantiation of itself with different :t:`[generic
-argument]s`.
+:t:`Variance` is a property of :t:`[lifetime parameter]s` and
+:t:`[type parameter]s` that describes the circumstances under which a
+:t:`generic type` is a :t:`subtype` of an instantiation of itself with
+different :t:`[generic argument]s`.
 
 :dp:`fls_7ex941yysuhq`
 A :t:`type` is its own :t:`subtype`.
@@ -2624,11 +2637,11 @@ A :t:`type` is its own :t:`subtype`.
 ``F<T>`` is said to be
 
 * :dp:`fls_wpm0p0gtctvi`
-  :dt:`Covariant` over ``T`` when ``T`` being a :t:`subtype` of ``U`` implies
+  :dt:`Covariant` over ``T``, when ``T`` being a :t:`subtype` of ``U`` implies
   that ``F<T>`` is a :t:`subtype` of ``F<U>``, or
 
 * :dp:`fls_3rfs58i2kg6l`
-  :dt:`Contravariant` over ``T`` when ``T`` being a :t:`subtype` of ``U``
+  :dt:`Contravariant` over ``T``, when ``T`` being a :t:`subtype` of ``U``
   implies that ``F<U>`` is a :t:`subtype` of ``F<T>``, or
 
 * :dp:`fls_kbo3e3bosr0m`
@@ -2704,13 +2717,14 @@ The :t:`variance` of a :t:`generic parameter` of an :t:`abstract data type` or
 an :t:`tuple type` is determined as follows:
 
 #. :dp:`fls_hvfyog9ygn6q`
-   For each :t:`generic parameter` ``G``
+   For each :t:`generic parameter` ``G``:
 
    #. :dp:`fls_mduolmcawb30`
       Initialize :t:`variance` ``V`` of the :t:`generic parameter` to ``any``.
 
    #. :dp:`fls_y81gmqweqc9w`
-      For each :t:`field` of the :t:`abstract data type` or the :t:`tuple type`
+      For each :t:`field` of the :t:`abstract data type` or the
+      :t:`tuple type`:
 
       #. :dp:`fls_etgfvgvymn8o`
          If :t:`field` :t:`type` ``T`` uses ``G``, then
@@ -2745,8 +2759,8 @@ Function Lifetime Elision
 
 :dp:`fls_lAdIRCFFlydD`
 :t:`Function lifetime elision` is a form of :t:`lifetime elision` that applies
-to :t:`[function]s`, :t:`[function pointer type parameter]s` and :t:`[path]s`
-resolving to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
+to :t:`[function]s`, :t:`[function pointer type parameter]s`, and :t:`[path]s`
+that resolve to one of the :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and
 :std:`core::ops::FnOnce` :t:`[trait]s`.
 
 :dp:`fls_dpudys82dhdc`
@@ -2764,8 +2778,8 @@ An :dt:`input lifetime` is one of the following :t:`[lifetime]s`:
   :t:`[trait]s`.
 
 * :dp:`fls_ks8wlufmhz6d`
-  Any :t:`lifetime` related to an :t:`implementing type` and an :t:`implemented
-  trait` of an :t:`implementation`.
+  Any :t:`lifetime` related to an :t:`implementing type` and an
+  :t:`implemented trait` of an :t:`implementation`.
 
 :dp:`fls_hsg9kfyvh35m`
 An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
@@ -2774,8 +2788,8 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
   Any :t:`lifetime` related to the :t:`return type` of a :t:`function`.
 
 * :dp:`fls_yofbo96tjppf`
-  Any :t:`lifetime` related to the :t:`return type` of a :t:`function pointer
-  type`.
+  Any :t:`lifetime` related to the :t:`return type` of a
+  :t:`function pointer type`.
 
 * :dp:`fls_vf7cxiir91ps`
   Any :t:`lifetime` related to the :t:`[return type]s` of the
@@ -2796,8 +2810,8 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
 #. :dp:`fls_crb6m6b3cdwh`
    If a :t:`function` has a :t:`receiver` of the form ``&self``, ``&mut self``,
    or ``self: T`` where ``T`` is a :t:`type` with a :t:`lifetime`, then the
-   :t:`lifetime` of the :t:`receiver` is assigned to all :t:`elided` :t:`[output
-   lifetime]s`.
+   :t:`lifetime` of the :t:`receiver` is assigned to all :t:`elided`
+   :t:`[output lifetime]s`.
 
 #. :dp:`fls_ac9tdlfwp5et`
    Otherwise this is a static error.
@@ -2812,7 +2826,7 @@ Given :t:`function` ``f`` of the form
    fn f <'a, 'b, T: ToCStr>(&'a mut self, args: &'b [T]) -> &'a mut Command;
 
 :dp:`fls_vcmmkp9uruhr`
-its :t:`lifetime` :t:`elided`` form is
+its :t:`lifetime` :t:`elided` form is
 
 .. code-block:: rust
 
@@ -2835,8 +2849,8 @@ An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
 ``'static'`` lifetime.
 
 :dp:`fls_VynJanlhsF8e`
-If :t:`function lifetime elision` is applicable for a :t:`lifetime`, :t:`static
-lifetime elision` is not applied for that :t:`lifetime`.
+If :t:`function lifetime elision` is applicable for a :t:`lifetime`,
+:t:`static lifetime elision` is not applied for that :t:`lifetime`.
 
 :dp:`fls_37udexenqv3p`
 The :t:`lifetime` of an :t:`associated implementation constant` shall not be
@@ -2884,17 +2898,17 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
   If the :t:`trait object type` is used as a :t:`generic argument` and
 
   * :dp:`fls_e36Hh4oJvfhv`
-    if the corresponding :t:`generic parameter` has exactly one :t:`lifetime
-    bound`, then the :t:`lifetime` of that :t:`bound` is the :t:`elided`
-    :t:`lifetime`,
+    if the corresponding :t:`generic parameter` has exactly one
+    :t:`lifetime bound`, then the :t:`lifetime` of that :t:`bound` is the
+    :t:`elided` :t:`lifetime`,
 
   * :dp:`fls_ptejalcnIQtm`
     Otherwise it is a static error to infer the :t:`lifetime` :t:`bound`.
 
 * :dp:`fls_rGbdKtTijby4`
-  If the :t:`trait` of the :t:`trait object type` has exactly one :t:`lifetime
-  bound` specified, then the :t:`lifetime` of that :t:`bound` is the inferred
-  :t:`lifetime`,
+  If the :t:`trait` of the :t:`trait object type` has exactly one
+  :t:`lifetime bound` specified, then the :t:`lifetime` of that :t:`bound` is
+  the inferred :t:`lifetime`,
 
 * :dp:`fls_JhmQpUoExiNZ`
   If the :t:`trait` of the :t:`trait object type` has no :t:`[lifetime bound]s`

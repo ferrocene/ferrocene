@@ -61,8 +61,8 @@ The :t:`expected type` of a :t:`pattern` is the :t:`type` of the :t:`value` the
 :t:`pattern` is being matched against.
 
 :dp:`fls_TUanRT7WU14E`
-It is a static error when :t:`[lexical element]s` match multiple alternations of a
-:s:`PatternWithoutRange`, except for when the :t:`pattern` is ``&mut``
+It is a static error when :t:`[lexical element]s` match multiple alternations
+of a :t:`pattern-without-range`, except for when the :t:`pattern` is ``&mut``
 :s:`Identifier`. Such a :t:`pattern` is interpreted as a :t:`reference pattern`
 with :t:`keyword` ``mut`` containing an :t:`identifier pattern`.
 
@@ -156,18 +156,18 @@ An :t:`identifier pattern` yields a :t:`binding`. An :t:`identifier pattern`
 with :t:`keyword` ``mut`` yields a :t:`mutable binding`.
 
 :dp:`fls_joIQdDn44oIT`
-An :t:`identifier pattern` with :t:`keyword` ``ref`` is a :t:`reference
-identifier pattern`.
+An :t:`identifier pattern` with :t:`keyword` ``ref`` is a
+:t:`reference identifier pattern`.
 
 :dp:`fls_24c95c56tugl`
 The :t:`identifier pattern` enters its :t:`binding` into :t:`binding scope` in
-the :t:`value namespace` if it does not resolve to a :t:`constant`, a :t:`unit
-struct constant` or a :t:`unit enum variant`.
+the :t:`value namespace` if it does not resolve to a :t:`constant`, a
+:t:`unit struct constant` or a :t:`unit enum variant`.
 
 :dp:`fls_twcavjk7iquy`
 It is a static error if the :t:`identifier pattern` consists of anything other
 than a :t:`binding` when the :t:`binding` resolves to a :t:`constant`, a
-:t:`unit struct constant` or a :t:`unit enum variant`.
+:t:`unit struct constant`, or a :t:`unit enum variant`.
 
 :dp:`fls_k1yBTstX7jEE`
 It is a static error if the :t:`binding` of an :t:`identifier pattern` resolves
@@ -177,8 +177,8 @@ to a :t:`tuple struct` or a :t:`tuple enum variant`.
 An :t:`identifier pattern` is an :t:`irrefutable pattern` when:
 
 * :dp:`fls_svfxwz4yy5i`
-  It has a :t:`bound pattern` and the :t:`bound pattern` is an :t:`irrefutable
-  pattern`, or
+  It has a :t:`bound pattern` and the :t:`bound pattern` is an
+  :t:`irrefutable pattern`, or
 
 * :dp:`fls_x6f6q22b5jpc`
   It does not have a :t:`bound pattern` and its :t:`binding` resolves to an
@@ -347,8 +347,8 @@ Path Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_1crq0mexo5r1`
-A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a :t:`unit enum
-variant`, or a :t:`unit struct constant` indicated by a :t:`path`.
+A :t:`path pattern` is a :t:`pattern` that matches a :t:`constant`, a
+:t:`unit enum variant`, or a :t:`unit struct constant` indicated by a :t:`path`.
 
 :dp:`fls_xz5otkhogn31`
 A :t:`path pattern` expressed as a :t:`path expression` shall refer to either
@@ -365,9 +365,10 @@ When a :t:`path pattern` refers to an :t:`associated constant` or a
 shall be :t:`structurally equal`.
 
 :dp:`fls_hF19K8sWU8FF`
-When the type of the :t:`path pattern` is of an :t:`enum type` or :t:`struct type`, then the
-:t:`enum type` or :t:`struct type` shall be subject to :t:`attribute` :c:`derive` with arguments
-:std:`core::cmp::Eq` and :std:`core::cmp::PartialEq`.
+When the type of the :t:`path pattern` is of an :t:`enum type` or
+:t:`struct type`, then the :t:`enum type` or :t:`struct type` shall be subject
+to :t:`attribute` :c:`derive` with arguments :std:`core::cmp::Eq` and
+:std:`core::cmp::PartialEq`.
 
 :dp:`fls_bv9psmitxfuw`
 A :t:`path pattern` expressed as a :t:`qualified path expression` shall refer
@@ -456,12 +457,12 @@ A :t:`range pattern` is a :t:`pattern` that matches :t:`[value]s` which fall
 within a range.
 
 :dp:`fls_jhchm7dy927k`
-A :t:`half-open range pattern` is a :t:`range pattern` with only a :t:`range
-pattern low bound`.
+A :t:`half-open range pattern` is a :t:`range pattern` with only a
+:t:`range pattern low bound`.
 
 :dp:`fls_q86j23iiqv8w`
-An :t:`inclusive range pattern` is a :t:`range pattern` with both a :t:`range
-pattern low bound` and a :t:`range pattern high bound`.
+An :t:`inclusive range pattern` is a :t:`range pattern` with both a
+:t:`range pattern low bound` and a :t:`range pattern high bound`.
 
 :dp:`fls_akf9x5r6e0ta`
 An :t:`obsolete range pattern` is a :t:`range pattern` that uses obsolete syntax
@@ -480,7 +481,7 @@ end of a range.
 
 :dp:`fls_2hpuccwh2xml`
 A :t:`half-open range pattern` shall appear within a :t:`parenthesized pattern`
-when context is a :t:`slice pattern`.
+when the context is a :t:`slice pattern`.
 
 :dp:`fls_9kk81isk0mlp`
 The :t:`range pattern low bound` of an :t:`inclusive range pattern` shall be
@@ -494,8 +495,8 @@ A :t:`range pattern` is an :t:`irrefutable pattern` only when it spans the
 entire set of possible :t:`[value]s` of a :t:`type`.
 
 :dp:`fls_6o995ak4hywq`
-The :t:`[type]s` of the :t:`range pattern low bound` and the :t:`range pattern
-high bound` of a :t:`range pattern` shall be :t:`unifiable`.
+The :t:`[type]s` of the :t:`range pattern low bound` and the
+:t:`range pattern high bound` of a :t:`range pattern` shall be :t:`unifiable`.
 
 :dp:`fls_3js1645tgh31`
 The :t:`type` of a :t:`range pattern` is determined as follows:
@@ -503,8 +504,8 @@ The :t:`type` of a :t:`range pattern` is determined as follows:
 * :dp:`fls_wfqrbwrogjnq`
   If the :t:`range pattern` is expressed as an :t:`inclusive range pattern` or
   an :t:`obsolete range pattern`, then the :t:`type` is the :t:`unified type` of
-  the :t:`[type]s` of the :t:`range pattern low bound` and the :t:`range pattern
-  high bound`.
+  the :t:`[type]s` of the :t:`range pattern low bound` and the
+  :t:`range pattern high bound`.
 
 * :dp:`fls_rgr7t33s0m7m`
   Otherwise the :t:`type` is the :t:`type` of the :t:`range pattern low bound`.
@@ -607,15 +608,15 @@ A :t:`rest pattern` shall appear at most once within a :t:`slice pattern`, an
 A :t:`rest pattern` is an :t:`irrefutable pattern`.
 
 :dp:`fls_w1pw40phsv2o`
-If a :t:`rest pattern` appears within a :t:`slice pattern` or the :t:`identifier
-pattern` of a :t:`slice pattern`, then the :t:`type` of the :t:`rest pattern` is
-determined as follows:
+If a :t:`rest pattern` appears within a :t:`slice pattern` or the
+:t:`identifier pattern` of a :t:`slice pattern`, then the :t:`type` of the
+:t:`rest pattern` is determined as follows:
 
 * :dp:`fls_x8ylgxrf9ca`
   If the :t:`type` of the :t:`slice pattern` is an :t:`array type`, then the
-  :t:`type` is ``[T; N]`` where ``T`` is the :t:`element type` of the :t:`array
-  type`, and ``N`` is the :t:`[array type]'s` size minus the number of matched
-  elements of the :t:`slice pattern`.
+  :t:`type` is ``[T; N]`` where ``T`` is the :t:`element type` of the
+  :t:`array type`, and ``N`` is the :t:`[array type]'s` size minus the number
+  of matched elements of the :t:`slice pattern`.
 
 * :dp:`fls_zgoke73xrhk3`
   If the :t:`type` of the :t:`slice pattern` is a :t:`slice type`, then the
@@ -670,9 +671,9 @@ A :t:`slice pattern` is an :t:`irrefutable pattern` when it refers to:
   An :t:`array`, where each :t:`subpattern` is an :t:`irrefutable pattern`, or
 
 * :dp:`fls_r78zzw7yyg34`
-  A :t:`slice`, where the :s:`PatternList` consists of a single :t:`rest
-  pattern`, or a single possibly nested :t:`identifier pattern` whose last
-  :t:`bound pattern` is a :t:`rest pattern`.
+  A :t:`slice`, where the :s:`PatternList` consists of a single
+  :t:`rest pattern`, or a single possibly nested :t:`identifier pattern` whose
+  last :t:`bound pattern` is a :t:`rest pattern`.
 
 :dp:`fls_ndor56nou676`
 The :t:`type` of a :t:`slice pattern` is the same as the :t:`expected type`.
@@ -771,8 +772,8 @@ Record Struct Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_g6dytd6aq62d`
-A :t:`record struct pattern` is a :t:`pattern` that matches a :t:`enum
-variant value`, a :t:`struct value`, or a :t:`union value`.
+A :t:`record struct pattern` is a :t:`pattern` that matches a
+:t:`enum variant value`, a :t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_3px4oiweg9dm`
 The :t:`deconstructee` of a :t:`record struct pattern` shall resolve to an
@@ -835,8 +836,8 @@ The :t:`type` of a :t:`matched shorthand deconstructor` and the :t:`type` of the
 matched :t:`field` shall be :t:`unifiable`.
 
 :dp:`fls_m91ith3rjy79`
-If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`record enum
-variant` or a :t:`record struct`, then
+If the :t:`deconstructee` of a :t:`record struct pattern` is a
+:t:`record enum variant` or a :t:`record struct`, then
 
 * :dp:`fls_c09jf2vpcr58`
   For each :t:`field` of the :t:`deconstructee`, the :t:`record struct pattern`
@@ -856,8 +857,8 @@ variant` or a :t:`record struct`, then
   :t:`deconstructee` have been matched.
 
 :dp:`fls_8bi8q3usubby`
-If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`tuple enum
-variant` or a :t:`tuple struct type`, then
+If the :t:`deconstructee` of a :t:`record struct pattern` is a
+:t:`tuple enum variant` or a :t:`tuple struct type`, then
 
 * :dp:`fls_1x0o71kxj3yq`
   For each :t:`field` of the :t:`deconstructee`, the :t:`record struct pattern`
@@ -881,11 +882,12 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`, 
   pattern` shall contain exactly one :s:`FieldDeconstructor`.
 
 * :dp:`fls_XFKBJZe6k1o2`
-  The :t:`record struct pattern` shall not contain a :s:`RecordStructRestPattern`.
+  The :t:`record struct pattern` shall not contain a
+  :s:`RecordStructRestPattern`.
 
 * :dp:`fls_mu166csowj71`
-  For the single :t:`field` of the :t:`deconstructee`, the :t:`record struct
-  pattern` shall either:
+  For the single :t:`field` of the :t:`deconstructee`, the
+  :t:`record struct pattern` shall either:
 
   * :dp:`fls_y09fygnglu3n`
     Contain exactly one :t:`matched named deconstructor`, or
@@ -897,9 +899,9 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`, 
   The :t:`record struct pattern` shall require :t:`unsafe context`.
 
 :dp:`fls_9y1gbv47z23o`
-If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`unit enum
-variant` or a :t:`unit struct`, then the :t:`record struct pattern` shall have
-at most one :s:`RecordStructRestPattern`.
+If the :t:`deconstructee` of a :t:`record struct pattern` is a
+:t:`unit enum variant` or a :t:`unit struct`, then the
+:t:`record struct pattern` shall have at most one :s:`RecordStructRestPattern`.
 
 .. rubric:: Examples
 
@@ -961,8 +963,8 @@ Tuple Struct Patterns
 .. rubric:: Legality Rules
 
 :dp:`fls_ks6y1syab2bp`
-A :t:`tuple struct pattern` is a :t:`pattern` that matches a :t:`tuple enum
-variant value` or a :t:`tuple struct value`.
+A :t:`tuple struct pattern` is a :t:`pattern` that matches a
+:t:`tuple enum variant value`, or a :t:`tuple struct value`.
 
 :dp:`fls_t1mrijw16k9a`
 The :t:`deconstructee` of a :t:`tuple struct pattern` shall resolve to a
@@ -971,8 +973,8 @@ The :t:`deconstructee` of a :t:`tuple struct pattern` shall resolve to a
 :dp:`fls_ryfcrqrkp28y`
 A :t:`subpattern` of a :t:`tuple struct pattern` matches a :t:`field` of the
 :t:`deconstructee` when its position and the position of the :t:`field` in
-the :t:`deconstructee` are the same. Such a :t:`subpattern` is a :dt:`matched
-tuple struct subpattern`.
+the :t:`deconstructee` are the same. Such a :t:`subpattern` is a
+:dt:`matched tuple struct subpattern`.
 
 :dp:`fls_ehf9r6halgh1`
 The position of a :t:`subpattern` is determined as follows:
@@ -1057,8 +1059,8 @@ destructured.
 :dp:`fls_6WCm0Ra8NQl4`
 A :t:`subpattern` of a :t:`tuple pattern` matches a :t:`tuple field` of the
 :t:`tuple type` when its position and the position of the :t:`tuple field` in
-the :t:`tuple type` are the same. Such a :t:`subpattern` is a :dt:`matched
-tuple subpattern`.
+the :t:`tuple type` are the same. Such a :t:`subpattern` is a
+:dt:`matched tuple subpattern`.
 
 :dp:`fls_a3qvQjyilORx`
 The position of a :t:`subpattern` is determined as follows:
@@ -1095,20 +1097,17 @@ either:
   Have exactly one :s:`RestPattern`.
 
 :dp:`fls_cC6ohNuiltfL`
-A :s:`RestPattern` is allowed even if all :t:`[tuple field]s` of the :t:`tuple
-type` have been matched.
+A :s:`RestPattern` is allowed even if all :t:`[tuple field]s` of the
+:t:`tuple type` have been matched.
 
 .. rubric:: Examples
-
-.. code-block:: rust
-
-   let pair = (1, "two");
 
 :dp:`fls_8r81vtv5hnrd`
 A tuple pattern in the context of a let statement.
 
-.. syntax::
+.. code-block:: rust
 
+   let pair = (1, "two");
    let (first, second) = pair;
 
 .. _fls_qfsfnql1t7m:
@@ -1160,8 +1159,8 @@ Binding Modes
 .. rubric:: Legality Rules
 
 :dp:`fls_7xby6d1903kw`
-A :t:`binding pattern` is either an :t:`identifier pattern` or a :t:`shorthand
-deconstructor`.
+A :t:`binding pattern` is either an :t:`identifier pattern` or a
+:t:`shorthand deconstructor`.
 
 :dp:`fls_vnh9wfrvumdz`
 A :t:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
@@ -1169,12 +1168,12 @@ A :t:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
 
 :dp:`fls_RViC5UEZPQUV`
 A :t:`binding` with :t:`binding mode` :dt:`by value` binds the matched
-:t:`value` by :t:[pass]ing` the :t:`value` to the :t:`place` indicated by the
+:t:`value` by :t:`[pass]ing` the :t:`value` to the :t:`place` indicated by the
 :t:`name`.
 
 :dp:`fls_6lXtoxebD5It`
-A :t:`binding` with :t:`binding mode` :dt:`by reference` binds an :t:`immutable
-reference` to the matched :t:`value` to the :t:`name`.
+A :t:`binding` with :t:`binding mode` :dt:`by reference` binds an
+:t:`immutable reference` to the matched :t:`value` to the :t:`name`.
 
 :dp:`fls_xNxQN8sgpZ3O`
 A :t:`binding` with :t:`binding mode` :dt:`by mutable reference` binds a
@@ -1199,13 +1198,13 @@ is matched against a :t:`non-[reference pattern]`, the :t:`reference` is
 dereferenced and the :t:`binding mode` is updated as follows:
 
 * :dp:`fls_6acdqz8rwnn`
-  If the :t:`reference` is an :t:`immutable reference`, then the :t:`binding
-  mode` is updated to :t:`by reference`.
+  If the :t:`reference` is an :t:`immutable reference`, then the
+  :t:`binding mode` is updated to :t:`by reference`.
 
 * :dp:`fls_tv0avib387bv`
-  If the :t:`reference` is a :t:`mutable reference` and the :t:`binding mode` is
-  :t:`by value`, then the :t:`binding mode` is updated to :t:`by mutable
-  reference`.
+  If the :t:`reference` is a :t:`mutable reference` and the :t:`binding mode`
+  is :t:`by value`, then the :t:`binding mode` is updated to
+  :t:`by mutable reference`.
 
 :dp:`fls_dbgmwldye42e`
 The process repeats if the dereferenced :t:`value` is a :t:`reference`.
@@ -1244,7 +1243,7 @@ Pattern Matching
 proceeds as follows:
 
 #. :dp:`fls_67ajub7d2b4c`
-   For each :t:`pattern-without-alternation` of the :t:`pattern`
+   For each :t:`pattern-without-alternation` of the :t:`pattern`:
 
    #. :dp:`fls_62626ws222op`
       If the :t:`pattern-without-alternation` is an :t:`identifier pattern`,
@@ -1275,16 +1274,16 @@ proceeds as follows:
       perform :t:`slice pattern matching`.
 
    #. :dp:`fls_r307spfk6cs9`
-      If the :t:`pattern-without-alternation` is a :t:`struct pattern`, then
-      perform :t:`struct pattern matching`.
-
-   #. :dp:`fls_drb114dtvlpt`
-      If the :t:`pattern-without-alternation` is a :t:`tuple pattern`, then
-      perform :t:`tuple pattern matching`.
+      If the :t:`pattern-without-alternation` is a :t:`record struct pattern`,
+      then perform :t:`record struct pattern matching`.
 
    #. :dp:`fls_qhdofvbso3gl`
       If the :t:`pattern-without-alternation` is a :t:`tuple struct pattern`,
       then perform :t:`tuple struct pattern matching`.
+
+   #. :dp:`fls_drb114dtvlpt`
+      If the :t:`pattern-without-alternation` is a :t:`tuple pattern`, then
+      perform :t:`tuple pattern matching`.
 
    #. :dp:`fls_uxysntb3u03j`
       If the :t:`pattern-without-alternation` is an :t:`underscore pattern`,
@@ -1295,7 +1294,7 @@ proceeds as follows:
 
 :dp:`fls_vstdqifqipbh`
 Only the :t:`[binding]s` of a matched :t:`pattern-without-alternation` are
-introduced to the corresponding :t:`scope`.
+introduced into a :t:`binding scope`.
 
 .. _fls_vnai6ag4qrdb:
 
@@ -1324,8 +1323,8 @@ context :t:`value` is a :t:`mutable place expression`.
       If matching the :t:`bound pattern` fails, then matching fails.
 
 #. :dp:`fls_u6o5ndnezwbe`
-   The context :t:`value` is bound to the :t:`binding` of the :t:`identifier
-   pattern` according to the :t:`binding mode`.
+   The context :t:`value` is bound to the :t:`binding` of the
+   :t:`identifier pattern` according to the :t:`binding mode`.
 
 #. :dp:`fls_h1er04t0yta7`
    Matching succeeds.
@@ -1369,8 +1368,9 @@ Path Pattern Matching
 :dt:`Path pattern matching` proceeds as follows:
 
 #. :dp:`fls_fqt5w3qsykca`
-   If the :t:`constant`, :t:`unit enum variant` or :t:`unit struct` the :t:`path` of the :t:`path pattern` resolved to and
-   the context :t:`value` are equal, then matching succeeds.
+   If the :t:`constant`, :t:`unit enum variant` or :t:`unit struct` the
+   :t:`path` of the :t:`path pattern` resolved to and the context :t:`value`
+   are equal, then matching succeeds.
 
 #. :dp:`fls_h3y8r4298s53`
    Otherwise matching fails.
@@ -1387,15 +1387,15 @@ Range Pattern Matching
 
 #. :dp:`fls_7nxkgls0a5os`
    If the :t:`range pattern` is expressed as a :t:`half-open range pattern` and
-   the context :t:`value` is in the inclusive range from the :t:`range pattern
-   low bound` to the maximum :t:`value` of the :t:`[range pattern low bound]'s`
-   :t:`type`, then matching succeeds.
+   the context :t:`value` is in the inclusive range from the
+   :t:`range pattern low bound` to the maximum :t:`value` of the
+   :t:`range pattern low bound`'s :t:`type`, then matching succeeds.
 
 #. :dp:`fls_6kgj2fjccoig`
    If the :t:`range pattern` is expressed as either an :t:`inclusive range
    pattern` or an :t:`obsolete range pattern` and the context :t:`value` is in
-   the inclusive range from the :t:`range pattern low bound` to the :t:`range
-   pattern high bound`, then matching succeeds.
+   the inclusive range from the :t:`range pattern low bound` to the
+   :t:`range pattern high bound`, then matching succeeds.
 
 #. :dp:`fls_n4t3xah1pk7i`
    Otherwise matching fails.
@@ -1431,51 +1431,51 @@ Slice Pattern Matching
    If the expected :t:`type` is a :t:`slice type` then,
 
    #. :dp:`fls_69bnxrtj0nar`
-      If the number of :t:`[subpattern]s` of the :t:`slice pattern` is greater than
-      the length of the context :t:`value`, then matching fails.
+      If the number of :t:`[subpattern]s` of the :t:`slice pattern` is greater
+      than the length of the context :t:`value`, then matching fails.
 
    #. :dp:`fls_twhwiy213ibf`
       If the number of :t:`[subpattern]s` of the :t:`slice pattern` is less than
-      the size of the context :t:`value` and one of those :t:`[subpattern]s` is not
-      a :t:`rest pattern`, then matching fails.
+      the size of the context :t:`value` and one of those :t:`[subpattern]s` is
+      not a :t:`rest pattern`, then matching fails.
 
    #. :dp:`fls_ei7y4ul6n6hu`
-      For each :t:`subpattern` of the :t:`slice pattern`
+      For each :t:`subpattern` of the :t:`slice pattern`:
 
       #. :dp:`fls_ad2jud5h1rfp`
          Perform :t:`pattern matching` with the :t:`subpattern` and the
-         corresponding :t:`value` from the context :t:`value`, ignoring :t:`[rest
-         pattern]s`.
+         corresponding :t:`value` from the context :t:`value`, ignoring
+         :t:`[rest pattern]s`.
 
       #. :dp:`fls_pc97m47p34wq`
          If matching the :t:`subpattern` fails, then matching fails.
 
 #. :dp:`fls_kwQyiSoyAwZ8`
-   Otherwise if the expected :t:`type` is an :t:`array type`
+   Otherwise, if the expected :t:`type` is an :t:`array type`, then
 
    #. :dp:`fls_zAdtysiuUwBX`
-      For each :t:`subpattern` of the :t:`slice pattern`
+      For each :t:`subpattern` of the :t:`slice pattern`:
 
       #. :dp:`fls_SezcYXcSlEq7`
          Perform :t:`pattern matching` with the :t:`subpattern` and the
-         corresponding :t:`value` from the context :t:`value`, ignoring :t:`[rest
-         pattern]s`.
+         corresponding :t:`value` from the context :t:`value`, ignoring
+         :t:`[rest pattern]s`.
 
       #. :dp:`fls_6xRXEt2pGnZi`
          If matching the :t:`subpattern` fails, then matching fails.
 
 .. _fls_asj8rgccvkoe:
 
-Struct Pattern Matching
-~~~~~~~~~~~~~~~~~~~~~~~
+Record Struct Pattern Matching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_evuhau2rwm8i`
-:dt:`Struct pattern matching` proceeds as follows:
+:dt:`Record struct pattern matching` proceeds as follows:
 
 #. :dp:`fls_bde1hpvrosui`
-   If the number of :t:`[subpattern]s` of the :t:`struct pattern` is less
+   If the number of :t:`[subpattern]s` of the :t:`record struct pattern` is less
    than the number of :t:`[field]s` of the context :t:`value` and one of those
    :t:`[subpattern]s` is not a :t:`rest pattern`, then matching fails.
 
@@ -1496,27 +1496,6 @@ Struct Pattern Matching
    #. :dp:`fls_6sdcykdrpe5d`
       If matching the :t:`subpattern` fails, then matching fails.
 
-.. _fls_rce8bb7nz2jy:
-
-Tuple Pattern Matching
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. rubric:: Dynamic Semantics
-
-:dp:`fls_w4xypnrnhycb`
-:dt:`Tuple pattern matching` proceeds as follows:
-
-#. :dp:`fls_vnx1bpval595`
-   For each :t:`subpattern` of the :t:`tuple pattern`
-
-   #. :dp:`fls_dzf32f40y7fr`
-      Perform :t:`pattern matching` with the :t:`subpattern` and the
-      corresponding :t:`field` from the context :t:`value`, ignoring :t:`[rest
-      pattern]s`.
-
-   #. :dp:`fls_krl32txvxxkz`
-      If matching the :t:`subpattern` fails, then matching fails.
-
 .. _fls_eexupzdsu7f:
 
 Tuple Struct Pattern Matching
@@ -1532,10 +1511,31 @@ Tuple Struct Pattern Matching
 
    #. :dp:`fls_4dr1stiw82v9`
       Otherwise perform :t:`pattern matching` with the :t:`subpattern` and the
-      corresponding :t:`field` from the context :t:`value`, ignoring :t:`[rest
-      pattern]s`.
+      corresponding :t:`field` from the context :t:`value`, ignoring
+      :t:`[rest pattern]s`.
 
    #. :dp:`fls_h14emtt6iyk3`
+      If matching the :t:`subpattern` fails, then matching fails.
+
+.. _fls_rce8bb7nz2jy:
+
+Tuple Pattern Matching
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_w4xypnrnhycb`
+:dt:`Tuple pattern matching` proceeds as follows:
+
+#. :dp:`fls_vnx1bpval595`
+   For each :t:`subpattern` of the :t:`tuple pattern`
+
+   #. :dp:`fls_dzf32f40y7fr`
+      Perform :t:`pattern matching` with the :t:`subpattern` and the
+      corresponding :t:`field` from the context :t:`value`, ignoring
+      :t:`[rest pattern]s`.
+
+   #. :dp:`fls_krl32txvxxkz`
       If matching the :t:`subpattern` fails, then matching fails.
 
 .. _fls_yc4xm4hrfyw7:

@@ -15,7 +15,7 @@ This document is influenced by the `Ada Reference Manual
 <http://www.ada-auth.org/standards/2xrm/html/RM-TTL.html>`_
 Ada 202x edition, as well as the `Rust Language Reference
 <https://doc.rust-lang.org/stable/reference/>`_, the `Rust
-Guidebook <https://doc.rust-lang.org/book/>`_ and the `Rustonomicon
+Guidebook <https://doc.rust-lang.org/book/>`_, and the `Rustonomicon
 <https://doc.rust-lang.org/nomicon/>`_.
 
 :dp:`fls_gxqbj0qoiaio`
@@ -77,7 +77,7 @@ This document specifies:
   The effect of translating and executing such a program;
 
 * :dp:`fls_jiryupa5fxgf`
-  The manner in which :t:`[module]s` and :t:`[crate]s` may be combined to form
+  The manner in which :t:`[crate]s` and :t:`[module]s` may be combined to form
   Rust programs;
 
 * :dp:`fls_sph1a3sapinh`
@@ -141,7 +141,7 @@ The specification is normative, except for the material in each of the items
 listed below, which is informative:
 
 * :dp:`fls_ciixfg9jhv42`
-  Text under an Examples heading.
+  Text under an "Examples" heading.
 
 * :dp:`fls_ej94lm2682kg`
   Each subchapter whose title starts with the word "Example" or "Examples".
@@ -428,11 +428,11 @@ Webster's Third New International Dictionary of the English Language.
 The definitions of terms are available in :doc:`glossary`.
 
 :dp:`fls_h2m244agxaxs`
-A rule is a requirement imposed on the programmer, stated in normative language
-such as "shall", "shall not", "must", "must not", except for text under
-Implementation Requirements heading.
+A *rule* is a requirement imposed on the programmer, stated in normative
+language such as "shall", "shall not", "must", "must not", except for text
+under Implementation Requirements heading.
 
 :dp:`fls_47svine904xk`
-A fact is a requirement imposed on a conforming tool, stated in informative
+A *fact* is a requirement imposed on a conforming tool, stated in informative
 language such as "is", "is not", "can", "cannot".
 

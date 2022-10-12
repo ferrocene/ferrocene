@@ -6461,6 +6461,16 @@ type inference
 :dt:`Type inference` is the process of deducing the expected :t:`type` of an
 arbitrary :t:`value`.
 
+.. _fls_0jri0m3F1fAT:
+
+type inference root
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_hLI7lCixs48z`
+A :dt:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+and :t:`[pattern]s` are subject to :t:`type inference` independently of other
+:t:`[type inference root]s`.
+
 .. _fls_uv2damik654e:
 
 type parameter

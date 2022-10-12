@@ -2051,10 +2051,31 @@ Type Inference
 .. rubric:: Legality Rules
 
 :dp:`fls_h8sedxew0d4u`
-:t:`Constant` declarations, :t:`[let statement]s`, and :t:`static`
-declarations impose an :dt:`expected type` on their respective initialization
-:t:`[expression]s`. :t:`Type inference` is the process of deducing the expected
-:t:`type` of an arbitrary :t:`value`.
+:t:`Type inference` is the process of automatically determining the :t:`type` of
+:t:`[expression]s` and :t:`[pattern]s` within a :t:`type inference root`.
+
+:dp:`fls_ybvrhh96fc7y`
+A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+and :t:`[pattern]s` are subject to :t:`type inference` independently of other
+:t:`[type inference root]s`.
+
+:dp:`fls_EWBilpepaDcX`
+The :t:`[type inference root]s` are:
+
+* :dp:`fls_NYSzcvf5nQpi`
+  :t:`[Constant argument]s`.
+
+* :dp:`fls_htLp5J5ObgNh`
+  A :t:`constant initializer` or :t:`static initializer`.
+
+* :dp:`fls_Sowatt1V988J`
+  A :t:`function body`.
+
+* :dp:`fls_KphY5qHev0Dc`
+  The :t:`discriminant initializer` of an :t:`enum variant`.
+
+* :dp:`fls_A1NVYkepoaMk`
+  The :t:`size operand` of an :t:`array expression` or an :t:`array type`.
 
 :dp:`fls_uvvn4usfsbhr`
 A :t:`type variable` is a placeholder for a :t:`type`. A :t:`global type
@@ -2232,10 +2253,6 @@ The :t:`resolving type` of an :t:`integer literal` is determined as follows:
 
 #. :dp:`fls_z03x5pk7q9dd`
    Otherwise the :t:`resolving type` is an :t:`integer type variable`.
-
-:dp:`fls_ybvrhh96fc7y`
-:t:`[Constant argument]s`, :t:`constant` declarations, :t:`[function]s`, and
-:t:`static` declarations are referred to as :dt:`[type inference root]s`.
 
 :dp:`fls_j28usox2uzep`
 :t:`Type inference` for a single :t:`type inference root` proceeds as follows:

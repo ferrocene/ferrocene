@@ -170,14 +170,14 @@ A :t:`line` is a sequence of zero or more characters followed by an end of
 line.
 
 :dp:`fls_go25sisi5fdp`
-The representation of an :t:`end of line` is tool-defined.
+The representation of an end of line is tool-defined.
 
 :dp:`fls_a6t53o8h1vdk`
 A :t:`separator` is a character or a string that separates adjacent :t:`[lexical
 element]s`. A :t:`whitespace string` is a :t:`separator`.
 
 :dp:`fls_8fv63w6f4udl`
-A :dt:`simple punctuator` is one of the following characters:
+A :dt:`simple punctuator` is one of the following special characters:
 
 .. syntax::
 
@@ -479,13 +479,13 @@ A :t:`pure identifier` shall follow the specification in Unicode Standard Annex
 #31 for :t:`Unicode` version 13.0, with the following profile:
 
 * :dp:`fls_lwcflgezgs5z`
-  ``Start = XID_Start``, plus character 0x5F (low line).
+  ``Start`` = ``XID_Start``, plus character 0x5F (low line).
 
 * :dp:`fls_uts0hywaw1rq`
-  ``Continue = XID_Continue``
+  ``Continue`` = ``XID_Continue``
 
 * :dp:`fls_lju1avcn0pfd`
-  ``Medial =`` empty
+  ``Medial`` = empty
 
 :dp:`fls_cs6cbw625np1`
 Characters 0x200C (zero width non-joiner) and 0x200D (zero width joiner) shall
@@ -500,13 +500,14 @@ A :t:`pure identifier` shall be restricted to characters in category
 
 * :dp:`fls_w473jevurlt1`
   :t:`[Name]s` of external :t:`[crate]s` represented in a :t:`simple path`, when
-  the :t:`simple path` that starts with namespace qualifier ``::``,
+  the :t:`simple path` starts with namespace qualifier ``::``,
 
 * :dp:`fls_mt1u4m3simhc`
-  :t:`[Name]s` of :t:`[outline module]s` that lack attribute :c:`path`,
+  :t:`[Name]s` of :t:`[outline module]s` that lack :t:`attribute` :c:`path`,
 
 * :dp:`fls_e2v58o233lvd`
-  :t:`[Name]s` of :t:`[item]s` that are subject to attribute :c:`no_mangle`,
+  :t:`[Name]s` of :t:`[item]s` that are subject to :t:`attribute`
+  :c:`no_mangle`,
 
 * :dp:`fls_op0lp1i065di`
   :t:`[Name]s` of :t:`[item]s` within :t:`[external block]s`.
@@ -520,7 +521,7 @@ Two :t:`[identifier]s` are considered the same if they consist of the same
 sequence of characters after performing normalization.
 
 :dp:`fls_jejt5z8m1yew`
-:t:`[Procedural macro]s` and :t:`[declarative macro]s` shall receive normalized
+:t:`[Declarative macro]s` and :t:`[procedural macro]s` shall receive normalized
 :t:`[identifier]s` in their input.
 
 .. rubric:: Examples
@@ -622,7 +623,7 @@ A :t:`byte string literal` is a :t:`literal` that consists of multiple
 
 :dp:`fls_Xd6LnfzMb7t7`
 The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
-(new line) inside of a :t:`byte string literal`
+(new line) inside of a :t:`byte string literal`.
 
 .. _fls_msbaxfC09VkK:
 
@@ -880,7 +881,7 @@ as follows:
 
 * :dp:`fls_pexi5jazthq6`
   If the program context over-constrains the :t:`type`, then this is considered
-  a static type error.
+  a static error.
 
 .. rubric:: Examples
 
@@ -963,7 +964,7 @@ as follows:
 
 * :dp:`fls_x2cw7g8g56f8`
   If the program context over-constrains the :t:`type`, then this is considered
-  a static type error.
+  a static error.
 
 .. rubric:: Examples
 
@@ -1047,7 +1048,7 @@ A :t:`string literal` is a :t:`literal` that consists of multiple characters.
 
 :dp:`fls_NyiCpU2tzJlQ`
 The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
-(new line) inside of a :t:`string literal`
+(new line) inside of a :t:`string literal`.
 
 .. _fls_hucd52suu6it:
 
@@ -1268,14 +1269,14 @@ extend exactly one :t:`line`.
 
 :dp:`fls_ok0zvo9vcmzo`
 :t:`[Inner block doc]s` and :t:`[inner line doc]s` are equivalent to
-:t:`attribute` :c:`doc` of the form ``#![doc = content]``, where content is a
-:t:`string literal` form of the :t:`comment` without the leading ``//!``,
+:t:`attribute` :c:`doc` of the form ``#![doc = content]``, where ``content``
+is a :t:`string literal` form of the :t:`comment` without the leading ``//!``,
 ``/*!`` amd trailing ``*/`` characters.
 
 :dp:`fls_nWtKuPi8Fw6v`
 :t:`[Outer block doc]s` and :t:`[outer line doc]s` are equivalent to
-:t:`attribute` :c:`doc` of the form ``#[doc = content]``, where content is a
-:t:`string literal` form of the :t:`comment` without the leading ``///``,
+:t:`attribute` :c:`doc` of the form ``#[doc = content]``, where ``content``
+is a :t:`string literal` form of the :t:`comment` without the leading ``///``,
 ``/**`` and trailing ``*/`` characters.
 
 .. rubric:: Examples

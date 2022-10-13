@@ -29,16 +29,16 @@ An :t:`associated item` is an :t:`item` that appears within an
 :t:`implementation` or a :t:`trait`.
 
 :dp:`fls_5y6ae0xqux57`
-An :t:`associated constant` is a :t:`constant` that appears as an :t:`associated
-item`.
+An :t:`associated constant` is a :t:`constant` that appears as an
+:t:`associated item`.
 
 :dp:`fls_lj7492aq7fzo`
-An :t:`associated function` is a :t:`function` that appears as an :t:`associated
-item`.
+An :t:`associated function` is a :t:`function` that appears as an
+:t:`associated item`.
 
 :dp:`fls_8cz4rdrklaj4`
-An :t:`associated type` is a :t:`type alias` that appears as an :t:`associated
-item`.
+An :t:`associated type` is a :t:`type alias` that appears as an
+:t:`associated item`.
 
 :dp:`fls_w8nu8suy7t5`
 An :t:`associated type` shall not be used in the :t:`path expression` of a

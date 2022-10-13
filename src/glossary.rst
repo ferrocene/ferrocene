@@ -2217,8 +2217,8 @@ for loop expression
 
 :dp:`fls_f0gp7qxoc4o4`
 A :dt:`for loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` as long as its :t:`subject expression`
-yields a :t:`value`.
+evaluate its :t:`loop body` as long as its :t:`subject expression` yields a
+:t:`value`.
 
 :dp:`fls_yn4d35pvmn87`
 See :s:`ForLoopExpression`.
@@ -2955,7 +2955,8 @@ indexable type
 ^^^^^^^^^^^^^^
 
 :dp:`fls_AdVGyKZFvvUS`
-A :dt:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
+A :dt:`indexable type` is a :t:`type` that implements the
+:std:`core::ops::Index` :t:`trait`.
 
 .. _fls_qs654p61ivpx:
 
@@ -3063,7 +3064,7 @@ infinite loop expression
 
 :dp:`fls_mvplpa4t1f2p`
 An :dt:`infinite loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` indefinitely unless :t:`terminated` with a
+evaluate its :t:`loop body` indefinitely unless :t:`terminated` by a
 :t:`break expression` or a :t:`return expression`.
 
 :dp:`fls_2gipk6b62hme`
@@ -7151,8 +7152,8 @@ while let loop expression
 
 :dp:`fls_g35gn7n88acp`
 A :dt:`while let loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` as long as its :t:`subject let expression`
-yields a :t:`value` that can be matched against its :t:`pattern`.
+evaluate its :t:`loop body` as long as its :t:`subject let expression` yields a
+:t:`value` that can be matched against its :t:`pattern`.
 
 :dp:`fls_q3jcb4nodqba`
 See :s:`WhileLetLoopExpression`.
@@ -7172,8 +7173,8 @@ while loop expression
 
 :dp:`fls_fq0zyup4djyh`
 A :dt:`while loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` as long as its :t:`iteration expression`
-holds true.
+evaluate its :t:`loop body` as long as its :t:`iteration expression` holds
+true.
 
 :dp:`fls_7htwpbmyq83u`
 See :s:`WhileLoopExpression`.

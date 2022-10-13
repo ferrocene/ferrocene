@@ -100,8 +100,8 @@ A :t:`subject expression` is an :t:`expression` that controls :t:`[for loop]s`,
 :t:`[if expression]s`, and :t:`[match expression]s`.
 
 :dp:`fls_a243nclqqjlu`
-A :t:`subject let expression` is an :t:`expression` that controls :t:`[if let
-expression]s` and :t:`[while let loop]s`.
+A :t:`subject let expression` is an :t:`expression` that controls
+:t:`[if let expression]s` and :t:`[while let loop]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -122,9 +122,9 @@ Assignee Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_oqj7s9fi3j3j`
-An :t:`assignee expression` is an :t:`expression` that appears as the :t:`left
-operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
-:t:`[assignee expression]s`:
+An :t:`assignee expression` is an :t:`expression` that appears as the
+:t:`left operand` of an :t:`assignment expression`. The following
+:t:`[expression]s` are :t:`[assignee expression]s`:
 
 * :dp:`fls_skopz71arbwa`
   :t:`[Place expression]s`,
@@ -145,8 +145,8 @@ operand` of an :t:`assignment expression`. The following :t:`[expression]s` are
   :t:`[Tuple struct call expression]s` of :t:`[assignee expression]s`,
 
 :dp:`fls_1smb3tj9pxsq`
-:t:`[Parenthesized expression]s` are allowed to appear anywhere in :t:`[assignee
-expression]s`.
+:t:`[Parenthesized expression]s` are allowed to appear anywhere in
+:t:`[assignee expression]s`.
 
 .. _fls_66m4rnbssgig:
 
@@ -180,7 +180,7 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Call expression]s` where the callee is a :t:`constant function`,
 
 * :dp:`fls_8nyu6phm1nji`
-  :t:`[Closure expression]s` that do not :t:`capture`,
+  :t:`[Closure expression]s` that do not :t:`capture <capturing>`,
 
 * :dp:`fls_8wux08bmpse`
   :t:`[Comparison expression]s` of :t:`[scalar type]s`,
@@ -192,8 +192,8 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Constant parameter]s`,
 
 * :dp:`fls_to4e7imq2c0w`
-  :t:`[Dereference expression]s` when the :t:`operand` is not of a :t:`raw
-  pointer type`,
+  :t:`[Dereference expression]s` when the :t:`operand` is not of a
+  :t:`raw pointer type`,
 
 * :dp:`fls_krtbrpwf3mh0`
   :t:`[Expression statement]s`,
@@ -249,8 +249,8 @@ involve :t:`[type]s` that require :t:`destruction`:
   :t:`[Range expression]s`,
 
 * :dp:`fls_hkbwa8xx2fwx`
-  :t:`[Shared borrow]s` that do not involve :t:`[type]s` with :t:`interior
-  mutability`,
+  :t:`[Shared borrow]s` that do not involve :t:`[type]s` with
+  :t:`interior mutability`,
 
 * :dp:`fls_fobs8ebt7dhc`
   :t:`[Struct expression]s`,
@@ -274,9 +274,9 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 :dp:`fls_3i7efddbsmn0`
 An :t:`expression` is not considered a :t:`constant expression` when it
-explicitly invokes an :t:`associated trait function` or uses :t:`[arithmetic
-operator]s` of non-builtin :t:`[type]s` that invoke :std:`core::ops`
-:t:`[trait]s`.
+explicitly invokes an :t:`associated trait function` or uses
+:t:`[arithmetic operator]s` of non-builtin :t:`[type]s` that invoke
+:std:`core::ops` :t:`[trait]s`.
 
 :dp:`fls_9mrrosm8jnn7`
 An :t:`arithmetic expression` that operates with :t:`[floating-point value]s` is
@@ -284,12 +284,14 @@ not considered a :t:`constant expression` when it appears inside the
 :t:`function body` of a :t:`constant function`.
 
 :dp:`fls_fmqar6o1bwqk`
-It is a static error if the :t:`size operand` of an :t:`array repetition
-constructor` or an :t:`array type` depends on :t:`[generic parameter]s`.
+It is a static error if the :t:`size operand` of an
+:t:`array repetition constructor` or an :t:`array type` depends on
+:t:`[generic parameter]s`.
 
 :dp:`fls_kjhma680hz3g`
-A :t:`constant context` is a :t:`construct` that requires a :t:`constant
-expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
+A :t:`constant context` is a :t:`construct` that requires a
+:t:`constant expression`. The following :t:`[construct]s` are
+:t:`[constant context]s`:
 
 * :dp:`fls_ljc6jq5ksbcs`
   The :t:`constant initializer` of an :t:`associated constant` or a
@@ -299,7 +301,7 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
   The :t:`constant argument` for a :t:`constant parameter`,
 
 * :dp:`fls_yiks5bvojncc`
-  The :t:`default value` of a :t:`constant parameter`,
+  The default :t:`value` of a :t:`constant parameter`,
 
 * :dp:`fls_66m2hwkju0vv`
   The :t:`discriminant initializer` of an :t:`enum variant`,
@@ -314,20 +316,21 @@ expression`. The following :t:`[construct]s` are :t:`[constant context]s`:
   The :t:`static initializer` of a :t:`static`.
 
 :dp:`fls_ox6sgl9n43g2`
-It is a static error to create a :t:`mutable reference` in a :t:`constant
-context`.
+It is a static error to create a :t:`mutable reference` in a
+:t:`constant context`.
 
 :dp:`fls_od0h3v40kjp6`
-An invocation of the ``addr_of!()`` :t:`macro` expands to a :t:`constant
-expression` allowed in any :t:`constant context` and :t:`constant function`,
-subject to the same restrictions as a :t:`immutable borrow expression`.
+An invocation of the :std:`core::ptr::addr_of` :t:`macro` expands to a
+:t:`constant expression` allowed in any :t:`constant context` and
+:t:`constant function`, subject to the same restrictions as a
+:t:`immutable borrow expression`.
 
 :dp:`fls_6sc556tz4oxd`
-An invocation of the ``panic!()`` :t:`macro` expands to a :t:`constant
-expression` allowed in any :t:`constant context` and :t:`constant function`,
-as long as the :t:`macro` is either invoked without arguments, or
-with a single :t:`string literal` that does not :t:`capture` formatting
-arguments.
+An invocation of the :std:`core::panic` :t:`macro` expands to a
+:t:`constant expression` allowed in any :t:`constant context` and
+:t:`constant function`, as long as the :t:`macro` is either invoked without
+arguments, or with a single :t:`string literal` that does not
+:t:`capture <capturing>` formatting arguments.
 
 :dp:`fls_b1vfpvsdv38`
 A :t:`constant expression` is evaluated statically whenever its :t:`value` is
@@ -368,12 +371,11 @@ location. The following :t:`[expression]s` are :t:`[place expression]s`:
   :t:`[Index expression]s`,
 
 * :dp:`fls_anzidgx02lly`
-  :t:`[Parenthesized expression]s` where the :t:`operand` is a :t:`place
-  expression`,
+  :t:`[Parenthesized expression]s` where the :t:`operand` is a
+  :t:`place expression`,
 
 * :dp:`fls_ya05djl1d154`
-  :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`local
-  variable`.
+  :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`variable`.
 
 :dp:`fls_ku38h562vfyl`
 A :t:`mutable place expression` is a :t:`place expression` whose memory
@@ -385,12 +387,12 @@ location can be modified. The following :t:`[place expression]s` are
   :std:`core::ops::DerefMut` :t:`trait`,
 
 * :dp:`fls_6b4rwkrc1ap6`
-  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
-  raw pointer type`,
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a
+  :t:`mutable raw pointer type`,
 
 * :dp:`fls_s4bhrpykzmm7`
-  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a :t:`mutable
-  reference type`,
+  A :t:`dereference expression` whose :t:`operand`'s :t:`type` is a
+  :t:`mutable reference type`,
 
 * :dp:`fls_xm0gm2q27x2e`
   A :t:`field access expression` where the :t:`container operand` is a
@@ -420,12 +422,11 @@ A :t:`place expression context` is a :t:`construct` that may evaluate its
 :t:`operand` as a memory location.
 
 :dp:`fls_fzsrdrHnndRd`
-The following :t:`[construct]s` are :t:`[place expression
-context]s`:
+The following :t:`[construct]s` are :t:`[place expression context]s`:
 
 * :dp:`fls_ZED5wJQVO6nf`
-  The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
-  assignment expression`,
+  The :t:`assignee operand` of an :t:`assignment expression` or a
+  :t:`compound assignment expression`,
 
 * :dp:`fls_Ufz9W5vyZkv3`
   The :t:`operand` of a :t:`borrow expression`,
@@ -446,8 +447,8 @@ context]s`:
   The :t:`indexed operand` of an :t:`index expression`,
 
 * :dp:`fls_5yXuTLQOQ3cc`
-  The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
-  let loop expression`,
+  The :t:`subject let expression` of an :t:`if let expression` or a
+  :t:`while let loop expression`,
 
 * :dp:`fls_nman7mJVSQlm`
   The :t:`subject expression` of a :t:`match expression`,
@@ -465,8 +466,8 @@ may evaluate its :t:`operand` as a mutable memory location. The following
   :t:`mutable place expression context`,
 
 * :dp:`fls_5gy92rsi2mqm`
-  The :t:`assignee operand` of an :t:`assignment expression` or a :t:`compound
-  assignment expression`,
+  The :t:`assignee operand` of an :t:`assignment expression` or a
+  :t:`compound assignment expression`,
 
 * :dp:`fls_u80htrnr2ebz`
   The :t:`operand` of a mutable :t:`borrow expression`,
@@ -480,8 +481,8 @@ may evaluate its :t:`operand` as a mutable memory location. The following
   :t:`mutable place expression context`,
 
 * :dp:`fls_9r7dopqf1nzl`
-  The :t:`subject let expression` of an :t:`if let expression` or a :t:`while
-  let loop expression`,
+  The :t:`subject let expression` of an :t:`if let expression` or a
+  :t:`while let loop expression`,
 
 * :dp:`fls_o76QXHyrrJPG`
   The :t:`operand` of a mutable :t:`implicit borrow`,
@@ -576,9 +577,10 @@ Path Expressions
 A :t:`path expression` is an :t:`expression` that denotes a :t:`path`.
 
 :dp:`fls_EOkrcIj9CuhV`
-A :t:`path expression` shall resolve to either a :t:`constant parameter`,
-:t:`constant`, :t:`function`, :t:`local variable`, :t:`static`, :t:`tuple enum
-variant`, :t:`tuple struct`, :t:`unit enum variant`, or :t:`unit struct`.
+A :t:`path expression` shall resolve to either a :t:`constant parameter`, a
+:t:`constant`, a :t:`function`, a :t:`static`, a :t:`tuple enum variant`, a
+:t:`tuple struct`, a :t:`unit enum variant`, a :t:`unit struct`, or a
+:t:`variable`.
 
 :dp:`fls_gz67ju6l7uhn`
 A :t:`path expression` that resolves to a :t:`mutable static` shall require
@@ -630,22 +632,22 @@ expression`.
 The :t:`type` of a :t:`block expression` is determined as follows:
 
 * :dp:`fls_ob76y2ymdd27`
-  If the :t:`block expression` has an :t:`expression`, then the :t:`type` is the
-  :t:`type` of the :t:`expression`.
+  If the :t:`block expression` has a :t:`tail expression`, then the :t:`type`
+  is the :t:`type` of the :t:`tail expression`.
 
 * :dp:`fls_u0avbm147nyh`
-  If the :t:`block expression` does not have an :t:`expression`, then the
+  If the :t:`block expression` does not have an :t:`tail expression`, then the
   :t:`type` is the :t:`unit type`.
 
 :dp:`fls_1hzup0sf8l7l`
 The :t:`value` of a :t:`block expression` is determined as follows:
 
 * :dp:`fls_9nmssjseq3jt`
-  If the :t:`block expression` has an :t:`expression`, then the :t:`value` is
-  the :t:`value` of the :t:`expression`.
+  If the :t:`block expression` has a :t:`tail expression`, then the :t:`value`
+  is the :t:`value` of the :t:`tail expression`.
 
 * :dp:`fls_a3ulnvyc1ut`
-  If the :t:`block expression` does not have an :t:`expression`, then the
+  If the :t:`block expression` does not have an :t:`tail expression`, then the
   :t:`value` of the :t:`block expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
@@ -657,7 +659,7 @@ The :t:`evaluation` of a :t:`block expression` proceeds as follows:
    Each :t:`statement` is executed in declarative order.
 
 #. :dp:`fls_nzdpw59plr2g`
-   The :t:`expression` is evaluated.
+   The :t:`tail expression` is evaluated.
 
 .. rubric:: Examples
 
@@ -687,11 +689,11 @@ An :t:`async block expression` is a :t:`block expression` that is specified
 with :t:`keyword` ``async`` and encapsulates behavior which is executed in
 an asynchronous manner.
 
-:dp:`fls_tzclkasinpoq`
-An :t:`async block expression` is subject to :t:`capturing`.
-
 :dp:`fls_oisws5qykedi`
 An :t:`async block expression` denotes a new :t:`async control flow boundary`.
+
+:dp:`fls_tzclkasinpoq`
+An :t:`async block expression` is subject to :t:`capturing`.
 
 :dp:`fls_ncd0wkgtldem`
 The :t:`type` of an :t:`async block expression` is a unique anonymous :t:`type`
@@ -748,8 +750,8 @@ The :t:`value` of the :t:`unsafe block expression` is the :t:`value` of its
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_pv5gcy3tbjwo`
-The :t:`evaluation` of an :t:`unsafe block expression` evaluates its :t:`block
-expression`.
+The :t:`evaluation` of an :t:`unsafe block expression` evaluates its
+:t:`block expression`.
 
 .. rubric:: Examples
 
@@ -824,11 +826,11 @@ The :t:`type` of a :t:`borrow expression` is determined as follows:
 
 * :dp:`fls_5b2x5ri2w54r`
   If the :t:`borrow expression` denotes a :t:`shared reference`, then the
-  :t:`type` is ``&T`` where ``T`` is the :t:`type` of the :t:`operand`.
+  :t:`type` is ``&T``, where ``T`` is the :t:`type` of the :t:`operand`.
 
 * :dp:`fls_agl09ia869rk`
   If the :t:`borrow expression` denotes a :t:`mutable reference`, then the
-  :t:`type` is ``&mut T`` where ``T`` is the :t:`type` of the :t:`operand`.
+  :t:`type` is ``&mut T``, where ``T`` is the :t:`type` of the :t:`operand`.
 
 :dp:`fls_8cvmee9bzs40`
 The :t:`value` of a :t:`borrow expression` is the address of its :t:`operand`.
@@ -887,21 +889,22 @@ The :t:`dereference` is assignable when the :t:`dereference expression` is a
 Dereferencing a :t:`raw pointer` shall require :t:`unsafe context`.
 
 :dp:`fls_d68ddlse4zp`
-If the context of a :t:`dereference expression` is an :t:`immutable
-place expression context`, then the :t:`dereference expression` is equivalent to
-:t:`expression` ``*core::ops::Deref::deref(&operand)``.
+If the context of a :t:`dereference expression` is an
+:t:`immutable place expression context`, then the :t:`dereference expression`
+is equivalent to :t:`expression` ``*core::ops::Deref::deref(&operand)``.
 
 :dp:`fls_g73vguanbs1x`
-If the context of a :t:`dereference expression` is a :t:`mutable place
-expression context`, then the :t:`dereference expression` is equivalent to
-:t:`expression` ``*core::ops::DerefMut::deref_mut(&mut operand)``.
+If the context of a :t:`dereference expression` is a
+:t:`mutable place expression context`, then the :t:`dereference expression`
+is equivalent to :t:`expression`
+``*core::ops::DerefMut::deref_mut(&mut operand)``.
 
 :dp:`fls_8ibfqxtnahzx`
 The :t:`type` of a :t:`dereference expression` is determined as follows:
 
 * :dp:`fls_7e7tka4f2f1a`
   If the :t:`type` of the :t:`operand` is ``&mut T``, ``&T``, ``*mut T``, or
-  ``*const T``, then the :t:`type` is ``T``\ ``.``
+  ``*const T``, then the :t:`type` is ``T``.
 
 * :dp:`fls_y9bc691kkh6v`
   Otherwise the :t:`type` is :t:`associated type`
@@ -912,7 +915,7 @@ The :t:`value` of a :t:`dereference expression` is determined as follows:
 
 * :dp:`fls_jjf3sz9ddfhy`
   If the :t:`type` of the :t:`operand` is ``&mut T``, ``&T``, ``*mut T``, or
-  ``*const T``, then the :t:`value` is the pointed-to :t:`value`\ ``.``
+  ``*const T``, then the :t:`value` is the pointed-to :t:`value`.
 
 * :dp:`fls_fyend8kkpqq4`
   Otherwise the :t:`value` is the result of evaluating :t:`expression`
@@ -971,7 +974,7 @@ The :t:`value` of an :t:`error propagation expression` is determined as follows:
 
 * :dp:`fls_a09614kgsspt`
   If the :t:`evaluation` of the :t:`error propagation expression` executed
-  ``core::ops::Try::branch(operand)``, then the :t:`value` is the :t:`value` of
+  :std:`core::ops::Try::branch`, then the :t:`value` is the :t:`value` of
   the :std:`core::ops::ControlFlow::Continue` variant.
 
 * :dp:`fls_8df018q7y6g`
@@ -1075,12 +1078,12 @@ The :t:`evaluation` of a :t:`negation expression` with a
    The :t:`operand` is evaluated.
 
 #. :dp:`fls_rFFlt33a5RsZ`
-   If the type of the :t:`operand` is an :t:`integer type`, the
+   If the type of the :t:`operand` is an :t:`integer type`, then the
    :t:`negation expression` evaluates to the bitwise negation of the
    :t:`operand`.
 
 #. :dp:`fls_h7pIl1WZ8Y2t`
-   If the type of the :t:`operand` is :c:`bool`, the result is computed as
+   If the type of the :t:`operand` is :c:`bool`, then the result is computed as
    follows, depending on the :t:`value` of the :t:`operand`:
 
   .. list-table::
@@ -1096,8 +1099,8 @@ The :t:`evaluation` of a :t:`negation expression` with a
       - ``true``
 
 #. :dp:`fls_gn3dnuxm2h8m`
-   If the type of :t:`operand` is neither an :t:`integer type`, nor
-   :c:`bool`, ``core::ops::Not::not(operand)`` is invoked.
+   If the type of :t:`operand` is neither an :t:`integer type` nor
+   :c:`bool`, then ``core::ops::Not::not(operand)`` is invoked.
 
 :dp:`fls_tsou6yz4mfte`
 The :t:`evaluation` of a :t:`negation expression` with a
@@ -1107,22 +1110,20 @@ The :t:`evaluation` of a :t:`negation expression` with a
    The :t:`operand` is evaluated.
 
 #. :dp:`fls_CutpaCFCGHQs`
-   If the type of the :t:`operand` is an :t:`integer type`, the
+   If the type of the :t:`operand` is an :t:`integer type`, then the
    :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
-   with its sign inverted.
-
-   #. :dp:`fls_MrvYkkEr4xKy`
-      If the result of the :t:`negation expression` does not fit within the
-      range of the :t:`operand` type, :t:`arithmetic overflow` occurs.
+   with its sign inverted. If the result of the :t:`negation expression` does
+   not fit within the range of the :t:`operand` type, then
+   :t:`arithmetic overflow` occurs.
 
 #. :dp:`fls_B2eKGWaJhFKD`
-   If the type of the :t:`operand` is a :t:`floating-point type`, the
+   If the type of the :t:`operand` is a :t:`floating-point type`, then the
    :t:`negation expression` evaluates to the :t:`value` of the :t:`operand`,
-   with its sign inverted. No overflow is possible.
+   with its sign inverted. No :t:`arithmetic overflow` is possible.
 
 #. :dp:`fls_uldh10k77sng`
-   If the type of the :t:`operand` is neither an :t:`integer type`, nor a
-   :t:`floating-point type`, ``core::ops::Neg::neg(operand)`` is invoked.
+   If the type of the :t:`operand` is neither an :t:`integer type` nor a
+   :t:`floating-point type`, then ``core::ops::Neg::neg(operand)`` is invoked.
 
 .. rubric:: Examples
 
@@ -1184,20 +1185,8 @@ Arithmetic Expressions
 An :t:`arithmetic expression` is an :t:`expression` that computes a :t:`value`
 from two :t:`[operand]s` using arithmetic.
 
-:dp:`fls_dstca76y08ge`
-A :t:`division expression` is an :t:`arithmetic expression` that uses division.
-
-:dp:`fls_kf41bphvlse3`
-A :t:`multiplication expression` is an :t:`arithmetic expression` that uses
-multiplication.
-
-:dp:`fls_3de9ulyzuoa`
-A :t:`remainder expression` is an :t:`arithmetic expression` that uses remainder
-division.
-
-:dp:`fls_aalxhbvu8kdi`
-A :t:`subtraction expression` is an :t:`arithmetic expression` that uses
-subtraction.
+:dp:`fls_kr8Opj3c7uvb`
+An :t:`addition expression` is an :t:`arithmetic expression` that uses addition.
 
 :dp:`fls_8imzo7agyx0k`
 The :t:`type` of the :t:`left operand` of an :t:`addition expression` shall
@@ -1212,6 +1201,9 @@ The :t:`type` of an :t:`addition expression` is :t:`associated type`
 The :t:`value` of an :t:`addition expression` is the result of
 ``core::ops::Add::add(left_operand, right_operand)``.
 
+:dp:`fls_dstca76y08ge`
+A :t:`division expression` is an :t:`arithmetic expression` that uses division.
+
 :dp:`fls_f1puss9t4btz`
 The :t:`type` of the :t:`left operand` of a :t:`division expression` shall
 implement the :std:`core::ops::Div` :t:`trait` where the :t:`type` of the
@@ -1224,6 +1216,10 @@ The :t:`type` of a :t:`division expression` is :t:`associated type`
 :dp:`fls_thyq4h55mx55`
 The :t:`value` of a :t:`division expression` is the result of
 ``core::ops::Div::div(left_operand, right_operand)``.
+
+:dp:`fls_kf41bphvlse3`
+A :t:`multiplication expression` is an :t:`arithmetic expression` that uses
+multiplication.
 
 :dp:`fls_hrml95g2txcj`
 The :t:`type` of the :t:`left operand` of a :t:`multiplication expression`
@@ -1238,6 +1234,10 @@ The :t:`type` of a :t:`multiplication expression` is :t:`associated type`
 The :t:`value` of a :t:`multiplication expression` is the result of
 ``core::ops::Mul::mul(left_operand, right_operand)``.
 
+:dp:`fls_3de9ulyzuoa`
+A :t:`remainder expression` is an :t:`arithmetic expression` that uses remainder
+division.
+
 :dp:`fls_8fbhreyynhid`
 The :t:`type` of the :t:`left operand` of a :t:`remainder expression` shall
 implement the :std:`core::ops::Rem` :t:`trait` where the :t:`type` of the
@@ -1250,6 +1250,10 @@ The :t:`type` of a :t:`remainder expression` is :t:`associated type`
 :dp:`fls_2ude3wrxji2p`
 The :t:`value` of a :t:`remainder expression` is the result of
 ``core::ops::Rem::rem(left_operand, right_operand)``.
+
+:dp:`fls_aalxhbvu8kdi`
+A :t:`subtraction expression` is an :t:`arithmetic expression` that uses
+subtraction.
 
 :dp:`fls_fjcv1nm8tlgf`
 The :t:`type` of the :t:`left operand` of a :t:`subtraction expression` shall
@@ -1277,15 +1281,13 @@ The :t:`evaluation` of an :t:`addition expression` proceeds as follows:
 
 #. :dp:`fls_NcLf4o1dpniS`
    If the :t:`type` of both :t:`[operand]s` is the same :t:`integer type` or
-   :t:`floating-point type`, the :t:`addition expression` evaluates to the sum
-   of the :t:`[operand]s`, following the rules of unsigned integer addition for
-   :t:`[unsigned integer type]s`, two's complement addition for
+   :t:`floating-point type`, then the :t:`addition expression` evaluates to the
+   sum of the :t:`[operand]s`, following the rules of unsigned integer addition
+   for :t:`[unsigned integer type]s`, two's complement addition for
    :t:`[signed integer type]s`, or floating-point addition for
-   :t:`[floating-point type]s`.
-
-   #. :dp:`fls_zeGcAQBRcTJs`
-      If unsigned integer addition or two's complement addition is performed,
-      the operation may result in an :t:`arithmetic overflow`.
+   :t:`[floating-point type]s`. If unsigned integer addition or two's
+   complement addition is performed, then the operation may result in an
+   :t:`arithmetic overflow`.
 
 #. :dp:`fls_cayhj5hcuhcg`
    Otherwise, ``core::ops::Add::add(left_operand, right_operand)`` is invoked.
@@ -1301,20 +1303,20 @@ The :t:`evaluation` of a :t:`division expression` proceeds as follows:
 
 #. :dp:`fls_zLroZh43MOtN`
    If the :t:`type` of both :t:`[operand]s` is the same :t:`integer type` or
-   :t:`floating-point type`, the :t:`division expression` evaluates to the
+   :t:`floating-point type`, then the :t:`division expression` evaluates to the
    quotient of the :t:`[operand]s`, following the rules of unsigned integer
    division for :t:`[unsigned integer type]s`, two's complement division for
    :t:`[signed integer type]s`, or floating-point division for
    :t:`[floating-point type]s`.
 
    #. :dp:`fls_Q9dhNiICGIfr`
-      If unsigned integer division is performed and the :t:`right operand` is 0,
-      the operation results in a :t:`panic`.
+      If unsigned integer division is performed and the :t:`right operand` is
+      0, then the operation results in a :t:`panic`.
 
    #. :dp:`fls_albbLSTYtmyq`
       If two's complement division is performed and the :t:`right operand` is 0
-      or the result does not fit in the target type, the operation results in a
-      :t:`panic`.
+      or the result does not fit in the target type, then the operation results
+      in a :t:`panic`.
 
 #. :dp:`fls_qd6ggdgq2hob`
    Otherwise, ``core::ops::Div::div(left_operand, right_operand)`` is invoked.
@@ -1330,15 +1332,13 @@ The :t:`evaluation` of a :t:`multiplication expression` proceeds as follows:
 
 #. :dp:`fls_Et5gp1I7VqBX`
    If the :t:`type` of both :t:`[operand]s` is the same :t:`integer type` or
-   :t:`floating-point type`, the :t:`multiplication expression` evaluates to the
-   product of the :t:`[operand]s`, following the rules of unsigned integer
-   multiplication for :t:`[unsigned integer type]s`, two's complement
+   :t:`floating-point type`, then the :t:`multiplication expression` evaluates
+   to the product of the :t:`[operand]s`, following the rules of unsigned
+   integer multiplication for :t:`[unsigned integer type]s`, two's complement
    multiplication for :t:`[signed integer type]s`, or floating-point
-   multiplication for :t:`[floating-point type]s`.
-
-   #. :dp:`fls_sxBHh3Doj4UU`
-      If unsigned integer multiplication or two's complement multiplication is
-      performed, the operation may result in an :t:`arithmetic overflow`.
+   multiplication for :t:`[floating-point type]s`. If unsigned integer
+   multiplication or two's complement multiplication is performed, then the
+   operation may result in an :t:`arithmetic overflow`.
 
 #. :dp:`fls_blyr18iao20n`
    Otherwise, ``core::ops::Mul::mul(left_operand, right_operand)`` is invoked.
@@ -1354,21 +1354,21 @@ The :t:`evaluation` of a :t:`remainder expression` proceeds as follows:
 
 #. :dp:`fls_Kdr6fLrRj0Du`
    If the :t:`type` of both :t:`[operand]s` is the same :t:`integer type` or
-   :t:`floating-point type`, the :t:`remainder expression` evaluates to the
-   remainder of the division of the :t:`left operand` by the :t:`right operand`,
-   following the rules of unsigned integer division for
+   :t:`floating-point type`, then the :t:`remainder expression` evaluates to
+   the remainder of the division of the :t:`left operand` by the
+   :t:`right operand`, following the rules of unsigned integer division for
    :t:`[unsigned integer type]s`, two's complement division for
    :t:`[signed integer type]s`, or floating-point division for
    :t:`[floating-point type]s`.
 
    #. :dp:`fls_FxLnXeGT2n9u`
-      If unsigned integer division is performed and the :t:`right operand` is 0,
-      the operation results in a :t:`panic`.
+      If unsigned integer division is performed and the :t:`right operand` is
+      0, then the operation results in a :t:`panic`.
 
    #. :dp:`fls_kN0HnldvDXSg`
       If two's complement division is performed and the :t:`right operand` is 0
-      or the resulting remainder does not fit in the target type, the operation
-      results in a :t:`panic`.
+      or the resulting remainder does not fit in the target type, then the
+      operation results in a :t:`panic`.
 
 #. :dp:`fls_k7lmxvpkxtub`
    Otherwise, ``core::ops::Rem::rem(left_operand, right_operand)`` is invoked.
@@ -1384,15 +1384,13 @@ The :t:`evaluation` of a :t:`subtraction expression` proceeds as follows:
 
 #. :dp:`fls_Vy0DyZqfy7Iv`
    If the :t:`type` of both :t:`[operand]s` is the same :t:`integer type` or
-   :t:`floating-point type`, the :t:`subtraction expression` evaluates to the
-   difference of the :t:`[operand]s`, following the rules of unsigned integer
-   subtraction for :t:`[unsigned integer type]s`, two's complement subtraction
-   for :t:`[signed integer type]s`, or floating-point subtraction for
-   :t:`[floating-point type]s`.
-
-   #. :dp:`fls_doxvcimvtAca`
-      If unsigned integer subtraction or two's complement subtraction is
-      performed, the operation may result in an :t:`arithmetic overflow`.
+   :t:`floating-point type`, then the :t:`subtraction expression` evaluates to
+   the difference of the :t:`[operand]s`, following the rules of unsigned
+   integer subtraction for :t:`[unsigned integer type]s`, two's complement
+   subtraction for :t:`[signed integer type]s`, or floating-point subtraction
+   for :t:`[floating-point type]s`. If unsigned integer subtraction or two's
+   complement subtraction is performed, then the operation may result in an
+   :t:`arithmetic overflow`.
 
 #. :dp:`fls_b9g0r9vc4rou`
    Otherwise, ``core::ops::Sub::sub(left_operand, right_operand)`` is invoked.
@@ -1447,21 +1445,6 @@ A :t:`bit expression` is an :t:`expression` that computes a :t:`value` from two
 :dp:`fls_f6mmva3lbj1i`
 A :t:`bit and expression` is a :t:`bit expression` that uses bit and arithmetic.
 
-:dp:`fls_3136k1y6x3cu`
-A :t:`bit or expression` is a :t:`bit expression` that uses bit or arithmetic.
-
-:dp:`fls_j7ujcuthga1i`
-A :t:`bit xor expression` is a :t:`bit expression` that uses bit exclusive or
-arithmetic.
-
-:dp:`fls_caxn774ij8lk`
-A :t:`shift left expression` is a :t:`bit expression` that uses bit shift left
-arithmetic.
-
-:dp:`fls_t709sl4co3al`
-A :t:`shift right expression` is a :t:`bit expression` that uses bit shift right
-arithmetic.
-
 :dp:`fls_cmowpfrcelke`
 The :t:`type` of the :t:`left operand` of a :t:`bit and expression` shall
 implement the :std:`core::ops::BitAnd` :t:`trait` where the :t:`type` of the
@@ -1474,6 +1457,9 @@ The :t:`type` of a :t:`bit and expression` is :t:`associated type`
 :dp:`fls_dimu987fw4kg`
 The :t:`value` of a :t:`bit and expression` is the result of
 ``core::ops::BitAnd::bitand(left_operand, right_operand)``.
+
+:dp:`fls_3136k1y6x3cu`
+A :t:`bit or expression` is a :t:`bit expression` that uses bit or arithmetic.
 
 :dp:`fls_oo2ynd8e1ys6`
 The :t:`type` of the :t:`left operand` of a :t:`bit or expression` shall
@@ -1488,6 +1474,10 @@ The :t:`type` of a :t:`bit or expression` is :t:`associated type`
 The :t:`value` of a :t:`bit or expression` is the result of
 ``core::ops::BitOr::bitor(left_operand, right_operand)``.
 
+:dp:`fls_j7ujcuthga1i`
+A :t:`bit xor expression` is a :t:`bit expression` that uses bit exclusive or
+arithmetic.
+
 :dp:`fls_fnywefl9nty2`
 The :t:`type` of the :t:`left operand` of a :t:`bit xor expression` shall
 implement the :std:`core::ops::BitXor` :t:`trait` where the :t:`type` of the
@@ -1501,6 +1491,10 @@ The :t:`type` of a :t:`bit xor expression` is :t:`associated type`
 The :t:`value` of a :t:`bit xor expression` is the result of
 ``core::ops::BitXor::bitxor(left_operand, right_operand)``.
 
+:dp:`fls_caxn774ij8lk`
+A :t:`shift left expression` is a :t:`bit expression` that uses bit shift left
+arithmetic.
+
 :dp:`fls_1f4pc612f2a8`
 The :t:`type` of the :t:`left operand` of a :t:`shift left expression` shall
 implement the :std:`core::ops::Shl` :t:`trait` where the :t:`type` of the
@@ -1513,6 +1507,10 @@ The :t:`type` of a :t:`shift left expression` is :t:`associated type`
 :dp:`fls_kqntxbwnc58v`
 The :t:`value` of a :t:`shift left expression` is the result of
 ``core::ops::Shl::shl(left_operand, right_operand)``.
+
+:dp:`fls_t709sl4co3al`
+A :t:`shift right expression` is a :t:`bit expression` that uses bit shift right
+arithmetic.
 
 :dp:`fls_onutb0b9p9zj`
 The :t:`type` of the :t:`left operand` of a :t:`shift right expression` shall
@@ -1640,35 +1638,15 @@ Comparison Expressions
 A :t:`comparison expression` is an :t:`expression` that compares the
 :t:`[value]s` of two :t:`[operand]s`.
 
-:dp:`fls_ruyho6cu7rxg`
-An :t:`equals expression` is a :t:`comparison expression` that tests equality.
-
-:dp:`fls_wapl0ir7uvbp`
-A :t:`greater-than expression` is a :t:`comparison expression` that tests for a
-greater-than relationship.
-
-:dp:`fls_7n5gol6a8lod`
-A :t:`greater-than-or-equals expression` is a :t:`comparison expression` that
-tests for a greater-than-or-equals relationship.
-
-:dp:`fls_yd4qqi39w248`
-A :t:`less-than expression` is a :t:`comparison expression` that tests for a
-less-than relationship.
-
-:dp:`fls_yxwe1o27u6ns`
-A :t:`less-than-or-equals expression` is a :t:`comparison expression` that tests
-for a less-than-or-equals relationship.
-
-:dp:`fls_w71j7i3n1kit`
-A :t:`not-equals expression` is a :t:`comparison expression` that tests for
-inequality.
-
 :dp:`fls_asfrqemqviad`
 A :t:`comparison expression` implicitly takes :t:`[shared borrow]s` of its
 :t:`[operand]s`.
 
 :dp:`fls_9s4re3ujnfis`
 The :t:`type` of a :t:`comparison expression` is :t:`type` :c:`bool`.
+
+:dp:`fls_ruyho6cu7rxg`
+An :t:`equals expression` is a :t:`comparison expression` that tests equality.
 
 :dp:`fls_8echqk9po1cf`
 The :t:`type` of the :t:`left operand` of an :t:`equals expression` shall
@@ -1679,6 +1657,10 @@ implement the :std:`core::cmp::PartialEq` :t:`trait` where the :t:`type` of the
 The :t:`value` of an :t:`equals expression` is the result of
 ``core::cmp::PartialEq::eq(&left_operand, &right_operand)``.
 
+:dp:`fls_wapl0ir7uvbp`
+A :t:`greater-than expression` is a :t:`comparison expression` that tests for a
+greater-than relationship.
+
 :dp:`fls_x2s6ydvj5zyd`
 The :t:`type` of the :t:`left operand` of a :t:`greater-than expression` shall
 implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
@@ -1688,24 +1670,36 @@ implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
 The :t:`value` of a :t:`greater-than expression` is the result of
 ``core::cmp::PartialOrd::gt(&left_operand, &right_operand)``.
 
+:dp:`fls_7n5gol6a8lod`
+A :t:`greater-than-or-equals expression` is a :t:`comparison expression` that
+tests for a greater-than-or-equals relationship.
+
 :dp:`fls_hholzcbp5u3n`
-The :t:`type` of the :t:`left operand` of a :t:`greater-than-or-equals
-expression` shall implement the :std:`core::cmp::PartialOrd` :t:`trait` where
-the :t:`type` of the :t:`right operand` is the :t:`trait implementation`
-:t:`type parameter`.
+The :t:`type` of the :t:`left operand` of a
+:t:`greater-than-or-equals expression` shall implement the
+:std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
+:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_wytygse41vzm`
 The :t:`value` of a :t:`greater-than-or-equals expression` is the result of
 ``core::cmp::PartialOrd::ge(&left_operand, &right_operand)``.
 
+:dp:`fls_yd4qqi39w248`
+A :t:`less-than expression` is a :t:`comparison expression` that tests for a
+less-than relationship.
+
 :dp:`fls_ynibdcke3etb`
 The :t:`type` of the :t:`left operand` of a :t:`less-than expression` shall
-implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of the
-:t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
+implement the :std:`core::cmp::PartialOrd` :t:`trait` where the :t:`type` of
+the :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 
 :dp:`fls_xmtxkit3qpw7`
 The :t:`value` of a :t:`less-than expression` is the result of
 ``core::cmp::PartialOrd::lt(&left_operand, &right_operand)``.
+
+:dp:`fls_yxwe1o27u6ns`
+A :t:`less-than-or-equals expression` is a :t:`comparison expression` that tests
+for a less-than-or-equals relationship.
 
 :dp:`fls_6dgfieyxdan0`
 The :t:`type` of the :t:`left operand` of a :t:`less-than-or-equals expression`
@@ -1715,6 +1709,10 @@ of the :t:`right operand` is the :t:`trait implementation` :t:`type parameter`.
 :dp:`fls_7pfsqby2saag`
 The :t:`value` of a :t:`less-than-or-equals expression` is the result of
 ``core::cmp::PartialOrd::le(&left_operand, &right_operand)``.
+
+:dp:`fls_w71j7i3n1kit`
+A :t:`not-equals expression` is a :t:`comparison expression` that tests for
+inequality.
 
 :dp:`fls_qzo1torhv5i3`
 The :t:`type` of the :t:`left operand` of a :t:`not-equals expression` shall
@@ -1737,7 +1735,7 @@ The :t:`evaluation` of an :t:`equals expression` proceeds as follows:
    The :t:`right operand` is evaluated.
 
 #. :dp:`fls_htrjqxiv3avh`
-   ``core::cmp::PartialEq::eq(&left_operand, &right_operand)`` ``is invoked.``
+   ``core::cmp::PartialEq::eq(&left_operand, &right_operand)`` is invoked.
 
 :dp:`fls_1udbc4aom6ok`
 The :t:`evaluation` of a :t:`greater-than expression` proceeds as follows:
@@ -1865,11 +1863,8 @@ The :t:`evaluation` of a :t:`lazy and expression` proceeds as follows:
    The :t:`left operand` is evaluated.
 
 #. :dp:`fls_tmfmu3syxp2q`
-   If the :t:`left operand` evaluated to ``true``, then
-
-   #. :dp:`fls_edj00fp6bqdk`
-      The :t:`right operand` is evaluated and returned as the :t:`[lazy and
-      expression]'s` :t:`value`.
+   If the :t:`left operand` evaluated to ``true``, then the :t:`right operand`
+   is evaluated and returned as the :t:`[lazy and expression]'s` :t:`value`.
 
 #. :dp:`fls_srfv1d4idxy9`
    Otherwise the :t:`lazy and expression` evaluates to ``false``.
@@ -1881,11 +1876,8 @@ The :t:`evaluation` of a :t:`lazy or expression` proceeds as follows:
    The :t:`left operand` is evaluated.
 
 #. :dp:`fls_yg1348rlziw3`
-   If the :t:`left operand` evaluated to ``false``, then
-
-   #. :dp:`fls_ds8cr5dxc9em`
-      The :t:`right operand` is evaluated and returned as the :t:`[lazy or
-      expression]'s` :t:`value`.
+   If the :t:`left operand` evaluated to ``false``, then the :t:`right operand`
+   is evaluated and returned as the :t:`[lazy or expression]'s` :t:`value`.
 
 #. :dp:`fls_yffozo2vq5xz`
    Otherwise the :t:`lazy or expression` evaluates to ``true``.
@@ -1978,21 +1970,21 @@ A :t:`type cast expression` with the following characteristics performs a
   produces a :t:`pointer` that interprets the integer as a machine address.
 
 * :dp:`fls_8ccwlliqw9jx`
-  An :t:`operand` of :t:`type` ``&mut [T; N]`` and a :t:`target type` ``*const
-  T`` perform array-to-pointer cast.
+  An :t:`operand` of :t:`type` ``&mut [T; N]`` and a :t:`target type`
+  ``*const T`` perform array-to-pointer cast.
 
 * :dp:`fls_i8txki3htx92`
-  An :t:`operand` of a :t:`function item type` and a :t:`target type` ``*const
-  V`` or ``*mut V`` where ``V`` implements the :std:`core::marker::Sized`
-  :t:`trait` perform function-item-to-pointer cast.
+  An :t:`operand` of a :t:`function item type` and a :t:`target type`
+  ``*const V`` or ``*mut V`` where ``V`` implements the
+  :std:`core::marker::Sized` :t:`trait` perform function-item-to-pointer cast.
 
 * :dp:`fls_6hbkvbb1c8aj`
   An :t:`operand` of a :t:`function item type` and a target :t:`integer type`
   perform function-to-address cast.
 
 * :dp:`fls_133j6xw8k4qe`
-  An :t:`operand` of a :t:`function pointer type` and a :t:`target
-  type` ``*const V`` or ``*mut V`` where ``V`` implements the
+  An :t:`operand` of a :t:`function pointer type` and a :t:`target type`
+  ``*const V`` or ``*mut V`` where ``V`` implements the
   :std:`core::marker::Sized` :t:`trait` perform function-pointer-to-pointer
   cast.
 
@@ -2031,48 +2023,48 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
   Casting an :t:`operand` of an :t:`integer type` to a target :t:`integer type`
   with a larger :t:`size` either
 
-* :dp:`fls_h9sxg3pxn7i2`
-  Zero-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is unsigned,
-  or
+  * :dp:`fls_h9sxg3pxn7i2`
+    Zero-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is
+    unsigned, or
 
-* :dp:`fls_shy6e0e30bco`
-  Sign-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is signed.
+  * :dp:`fls_shy6e0e30bco`
+    Sign-extends the :t:`operand` if the :t:`[operand]'s` :t:`type` is signed.
 
 * :dp:`fls_4xldaoj5ac6t`
-  Casting an :t:`operand` of a :t:`floating-point type` to a target :t:`integer
-  type` rounds the :t:`value` of the :t:`operand` towards zero. In addition, the
-  :t:`type cast expression`
+  Casting an :t:`operand` of a :t:`floating-point type` to a target
+  :t:`integer type` rounds the :t:`value` of the :t:`operand` towards zero. In
+  addition, the :t:`type cast expression`
 
-* :dp:`fls_50714cvaqkfv`
-  Returns zero if the :t:`operand` denotes :std:`f32::NaN` or :std:`f64::NaN`
-  respectively.
+  * :dp:`fls_50714cvaqkfv`
+    Returns zero if the :t:`operand` denotes :std:`f32::NaN` or :std:`f64::NaN`
+    respectively.
 
-* :dp:`fls_g3xbmp8zx1yh`
-  Saturates the :t:`value` of the :t:`operand` to the maximum :t:`value`
-  of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
-  exceeds the maximum :t:`value` of the target :t:`integer type` or denotes
-  :std:`f32::INFINITY` or :std:`f64::INFINITY` respectively.
+  * :dp:`fls_g3xbmp8zx1yh`
+    Saturates the :t:`value` of the :t:`operand` to the maximum :t:`value`
+    of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
+    exceeds the maximum :t:`value` of the target :t:`integer type` or denotes
+    :std:`f32::INFINITY` or :std:`f64::INFINITY` respectively.
 
-* :dp:`fls_hcc5odh52bk7`
-  Saturates the :t:`value` of the :t:`operand` to the minimum :t:`value`
-  of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
-  exceeds the minimum :t:`value` of the target :t:`integer type` or denotes
-  :std:`f32::NEG_INFINITY` or :std:`f64::NEG_INFINITY` respectively.
+  * :dp:`fls_hcc5odh52bk7`
+    Saturates the :t:`value` of the :t:`operand` to the minimum :t:`value`
+    of the target :t:`integer type` if the :t:`[operand]'s` :t:`value`
+    exceeds the minimum :t:`value` of the target :t:`integer type` or denotes
+    :std:`f32::NEG_INFINITY` or :std:`f64::NEG_INFINITY` respectively.
 
 * :dp:`fls_o2ep4b6t287z`
-  Casting an :t:`operand` of an :t:`integer type` to a target :t:`floating-point
-  type` produces the closest possible floating-point :t:`value`. In addition,
-  the :t:`type cast expression`
+  Casting an :t:`operand` of an :t:`integer type` to a target
+  :t:`floating-point type` produces the closest possible floating-point
+  :t:`value`. In addition, the :t:`type cast expression`
 
-* :dp:`fls_vfofk2aagsj5`
-  Rounds the :t:`value` of the :t:`operand` preferring the :t:`value` with an
-  even least significant digit if exactly halfway between two floating-point
-  numbers.
+  * :dp:`fls_vfofk2aagsj5`
+    Rounds the :t:`value` of the :t:`operand` preferring the :t:`value` with an
+    even least significant digit if exactly halfway between two floating-point
+    numbers.
 
-* :dp:`fls_cx86k8yfjhht`
-  Produces :std:`f32::INFINITY` or :std:`f64::INFINITY` of the same sign as the
-  :t:`value` of the :t:`operand` when the :t:`value` of the :t:`operand` causes
-  :t:`arithmetic overflow`.
+  * :dp:`fls_cx86k8yfjhht`
+    Produces :std:`f32::INFINITY` or :std:`f64::INFINITY` of the same sign as
+    the :t:`value` of the :t:`operand` when the :t:`value` of the :t:`operand`
+    causes :t:`arithmetic overflow`.
 
 * :dp:`fls_gzmdwibl5s4w`
   Casting an :t:`operand` of :t:`type` :c:`f32` to a :t:`target type` :c:`f64`
@@ -2080,17 +2072,17 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 
 * :dp:`fls_mjqvjt7v8a25`
   Casting an :t:`operand` of :t:`type` :c:`f64` to :t:`target type` :c:`f32`
-  produces the closest possible :c:`f32` :t:`value`. In addition, the :t:`type
-  cast expression`
+  produces the closest possible :c:`f32` :t:`value`. In addition, the
+  :t:`type cast expression`
 
-* :dp:`fls_4fd5vkh0jt4`
-  Prefers the nearest :t:`value` with an even least significant digit if exactly
-  halfway between two floating-point numbers.
+  * :dp:`fls_4fd5vkh0jt4`
+    Prefers the nearest :t:`value` with an even least significant digit if
+    exactly halfway between two floating-point numbers.
 
-* :dp:`fls_2etd73f8jg2n`
-  Produces :std:`f32::INFINITY` of the same sign as the :t:`value` of the
-  :t:`operand` when the :t:`value` of the :t:`operand` causes
-  :t:`arithmetic overflow`.
+  * :dp:`fls_2etd73f8jg2n`
+    Produces :std:`f32::INFINITY` of the same sign as the :t:`value` of the
+    :t:`operand` when the :t:`value` of the :t:`operand` causes
+    :t:`arithmetic overflow`.
 
 .. rubric:: Examples
 
@@ -2126,8 +2118,8 @@ An :t:`assignment expression` is an :t:`expression` that assigns the :t:`value`
 of a :t:`value operand` to an :t:`assignee operand`.
 
 :dp:`fls_bsjw6f4a3wol`
-An :t:`assignee operand` is the target :t:`operand` of an :t:`assignment
-expression`.
+An :t:`assignee operand` is the target :t:`operand` of an
+:t:`assignment expression`.
 
 :dp:`fls_uinh05sslxeo`
 A :t:`value operand` is an :t:`operand` that supplies the :t:`value` that is
@@ -2197,13 +2189,13 @@ The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
 * :dp:`fls_vqj7ljrrd7wi`
-  A :t:`full range expression` corresponds to a :t:`rest pattern` if inside a
-  :t:`slice expression`, otherwise this is a static error.
+  A :t:`full range expression` corresponds to a :t:`rest pattern` if inside an
+  :t:`array expression`, otherwise this is a static error.
 
 * :dp:`fls_du5eybf8mocy`
   A :t:`place expression` corresponds to an :t:`identifier pattern` with a
-  unique :t:`identifier` and without :t:`keyword` ``ref``, keyword ``mut``, or a
-  :t:`bound pattern`.
+  unique :t:`identifier` and without :t:`keyword` ``ref``, keyword ``mut``, or
+  a :t:`bound pattern`.
 
 * :dp:`fls_hj6srmzbobid`
   A :t:`struct expression` corresponds to a :t:`struct pattern` with all the
@@ -2214,9 +2206,9 @@ The :t:`assignee operand` of a :t:`destructuring assignment` is treated as an
   :t:`[subexpression]s` lowered to their corresponding :t:`[pattern]s`.
 
 * :dp:`fls_fa14yfvxsbx3`
-  A :t:`tuple struct call expression` corresponds to a:t:`tuple struct
-  pattern` with all the :t:`[subexpression]s` lowered to their corresponding
-  :t:`[pattern]s`.
+  A :t:`tuple struct call expression` corresponds to a
+  :t:`tuple struct pattern` with all the :t:`[subexpression]s` lowered to their
+  corresponding :t:`[pattern]s`.
 
 * :dp:`fls_q90ikfi7ewoi`
   An :t:`underscore expression` corresponds to an :t:`underscore pattern`.
@@ -2231,8 +2223,8 @@ following form:
 
 * :dp:`fls_u0iqhbw37xvq`
   The first :t:`statement` is a :t:`let statement` with its :t:`pattern`
-  equivalent to the lowered :t:`assignee pattern` and its :t:`initialization
-  expression` equivalent to the :t:`value operand`.
+  equivalent to the lowered :t:`assignee pattern` and its
+  :t:`initialization expression` equivalent to the :t:`value operand`.
 
 * :dp:`fls_wsfhd3udt6fq`
   Then each bound :t:`identifier` of the :t:`assignee pattern` is an
@@ -2256,8 +2248,8 @@ The :t:`evaluation` of a :t:`destructuring assignment` proceeds as follows:
    The :t:`value operand` is evaluated.
 
 #. :dp:`fls_jqu2u6mdccgi`
-   The :t:`assignee operand` is evaluated by evaluating its :t:`[operand]s` in a
-   left-to-right order.
+   The :t:`assignee operand` is evaluated by evaluating its :t:`[operand]s` in
+   a left-to-right order.
 
 #. :dp:`fls_n7nuj1lvpspc`
    Each :t:`value` denoted by the :t:`assignee operand` is :t:`dropped`
@@ -2355,8 +2347,8 @@ A :t:`division assignment expression` is a :t:`compound assignment expression`
 that uses division.
 
 :dp:`fls_ndlv3k9uclz2`
-A :t:`multiplication assignment expression` is a :t:`compound assignment
-expression` that uses multiplication.
+A :t:`multiplication assignment expression` is a
+:t:`compound assignment expression` that uses multiplication.
 
 :dp:`fls_fbp5dojti27r`
 A :t:`remainder assignment expression` is a :t:`compound assignment expression`
@@ -2367,20 +2359,20 @@ A :t:`shift left assignment expression` is a :t:`compound assignment expression`
 that uses bit shift left arithmetic.
 
 :dp:`fls_s7rey2bndfei`
-A :t:`shift right assignment expression` is a :t:`compound assignment
-expression` that uses bit shift right arithmetic.
+A :t:`shift right assignment expression` is a
+:t:`compound assignment expression` that uses bit shift right arithmetic.
 
 :dp:`fls_7l7v7vigw3fu`
-A :t:`subtraction assignment expression` is a :t:`compound assignment
-expression` that uses subtraction.
+A :t:`subtraction assignment expression` is a
+:t:`compound assignment expression` that uses subtraction.
 
 :dp:`fls_dvy201zd6oym`
-An :t:`assigned operand` is the target :t:`operand` of a :t:`compound assignment
-expression`.
+An :t:`assigned operand` is the target :t:`operand` of a
+:t:`compound assignment expression`.
 
 :dp:`fls_9v09ayi2azpe`
-A :t:`modifying operand` is an :t:`operand` that supplies the :t:`value` that is
-used in the calculation of a :t:`compound assignment expression`.
+A :t:`modifying operand` is an :t:`operand` that supplies the :t:`value` that
+is used in the calculation of a :t:`compound assignment expression`.
 
 :dp:`fls_row7saf53vwd`
 An :t:`assigned operand` shall denote a :t:`mutable assignee expression`.
@@ -2419,8 +2411,8 @@ implement the :std:`core::ops::DivAssign` :t:`trait` where the :t:`type` of the
 :dp:`fls_8tbxq95x06yt`
 The :t:`type` of the :t:`assigned operand` of a :t:`multiplication assignment`
 shall implement the :std:`core::ops::MulAssign` :t:`trait` where the :t:`type`
-of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
-parameter`.
+of the :t:`modifying operand` is the :t:`trait implementation`
+:t:`type parameter`.
 
 :dp:`fls_9oy9zo3x3fy3`
 The :t:`type` of the :t:`assigned operand` of a :t:`remainder assignment` shall
@@ -2435,14 +2427,14 @@ implement the :std:`core::ops::ShlAssign` :t:`trait` where the :t:`type` of the
 :dp:`fls_4uoi6k8r7mvc`
 The :t:`type` of the :t:`assigned operand` of a :t:`shift right assignment`
 shall implement the :std:`core::ops::ShrAssign` :t:`trait` where the :t:`type`
-of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
-parameter`.
+of the :t:`modifying operand` is the :t:`trait implementation`
+:t:`type parameter`.
 
 :dp:`fls_fjaz4m90cagr`
 The :t:`type` of the :t:`assigned operand` of a :t:`subtraction assignment`
 shall implement the :std:`core::ops::SubAssign` :t:`trait` where the :t:`type`
-of the :t:`modifying operand` is the :t:`trait implementation` :t:`type
-parameter`.
+of the :t:`modifying operand` is the :t:`trait implementation`
+:t:`type parameter`.
 
 .. rubric:: Dynamic Semantics
 
@@ -2474,44 +2466,54 @@ The :t:`evaluation` of a :t:`compound assignment` proceeds as follows:
       The appropriate :t:`function` is invoked as indicated below.
 
 :dp:`fls_ijfmnnrdlu8n`
-For an :t:`addition assignment`, ``core::ops::AddAssign::add_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For an :t:`addition assignment`,
+``core::ops::AddAssign::add_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_6x7j9x354pkb`
-For a :t:`bit and assignment`, ``core::ops::BitAndAssign::bitand_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`bit and assignment`,
+``core::ops::BitAndAssign::bitand_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_h2cpbz2t74hy`
-For a :t:`bit or assignment`, ``core::ops::BitOrAssign::bitor_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`bit or assignment`,
+``core::ops::BitOrAssign::bitor_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_whj50spxz3bh`
-For a :t:`bit xor assignment`, ``core::ops::BitXorAssign::bitxor_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`bit xor assignment`,
+``core::ops::BitXorAssign::bitxor_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_d1cxq1zbt5fq`
-For a :t:`division assignment`, ``core::ops::DivAssign::div_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`division assignment`,
+``core::ops::DivAssign::div_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_48i245an2449`
-For a :t:`multiplication assignment`, ``core::ops::MulAssign::mul_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`multiplication assignment`,
+``core::ops::MulAssign::mul_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_69wr03rt0ali`
-For a :t:`remainder assignment`, ``core::ops::RemAssign::rem_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`remainder assignment`,
+``core::ops::RemAssign::rem_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_9d970yfwmj2d`
-For a :t:`shift left assignment`, ``core::ops::ShlAssign::shl_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`shift left assignment`,
+``core::ops::ShlAssign::shl_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_p9687v3xckps`
-For a :t:`shift right assignment`, ``core::ops::ShrAssign::shr_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`shift right assignment`,
+``core::ops::ShrAssign::shr_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 :dp:`fls_8j408kckzzud`
-For a :t:`subtraction assignment`, ``core::ops::SubAssign::sub_assign(&mut
-assigned_operand, modifying_operand)`` is invoked.
+For a :t:`subtraction assignment`,
+``core::ops::SubAssign::sub_assign(&mut assigned_operand, modifying_operand)``
+is invoked.
 
 .. rubric:: Examples
 
@@ -2646,6 +2648,9 @@ repeated in an :t:`array repetition constructor`.
 A :t:`size operand` is an :t:`operand` that specifies the size of an :t:`array`
 or an :t:`array type`.
 
+:dp:`fls_9gmnjvs83d8o`
+The :t:`size operand` shall be a :t:`constant expression`.
+
 :dp:`fls_by21pey7k423`
 The :t:`[type]s` of the :t:`[operand]s` of an :t:`array element constructor`
 shall be :t:`unifiable`.
@@ -2659,18 +2664,15 @@ or the :t:`repeat operand` shall be a :t:`path expression` resolving to a
 :dp:`fls_qplsh3pdqitq`
 The :t:`type` of the :t:`size operand` shall be :t:`type` :c:`usize`.
 
-:dp:`fls_9gmnjvs83d8o`
-The :t:`size operand` shall be a :t:`constant expression`.
-
 :dp:`fls_wmsekin1gd2y`
 The :t:`type` of an :t:`array expression` is ``[T; N]``, where ``T`` is the
-element type and ``N`` is the size of the array. The :t:`size` of an :t:`array`
-is determined as follows:
+:t:`element type` and ``N`` is the size of the array. The :t:`size` of an
+:t:`array` is determined as follows:
 
 * :dp:`fls_2gto5kp9bjw8`
   If the :t:`array expression` appears with an :t:`array element constructor`,
-  then the :t:`size` is the number of :t:`[operand]s` in the :t:`array element
-  constructor`.
+  then the :t:`size` is the number of :t:`[operand]s` in the
+  :t:`array element constructor`.
 
 * :dp:`fls_guop34ayjw2`
   Otherwise the :t:`size` is the :t:`value` of :t:`size operand`.
@@ -2681,20 +2683,22 @@ The :t:`value` of an :t:`array expression` is the constructed :t:`array`.
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_t52in1kkyli3`
-The :t:`evaluation` of an :t:`array expression` with an :t:`array element
-constructor` evaluates its :t:`[operand]s` in left-to-right order.
+The :t:`evaluation` of an :t:`array expression` with an
+:t:`array element constructor` evaluates its :t:`[operand]s` in left-to-right
+order.
 
 :dp:`fls_1kj8nlc5eb8a`
-The :t:`evaluation` of an :t:`array expression` with an :t:`array repetition
-constructor` proceeds as follows:
+The :t:`evaluation` of an :t:`array expression` with an
+:t:`array repetition constructor` proceeds as follows:
 
 #. :dp:`fls_f3izbkm8607z`
    If the :t:`value` of the :t:`size operand` is greater than zero, then:
 
    #. :dp:`fls_qbyysx30pjzs`
-      If the :t:`repeat operand` denotes a :t:`constant`, the :t:`repeat
-      operand` is evaluated once and its :t:`value` is :t:`passed <passing
-      convention>` :t:`by copy` :t:`[size operand]'s` :t:`value` times.
+      If the :t:`repeat operand` denotes a :t:`constant`, the
+      :t:`repeat operand` is evaluated once and its :t:`value` is
+      :t:`passed <passing convention>` :t:`by copy` :t:`[size operand]'s`
+      :t:`value` times.
 
    #. :dp:`fls_1m0laldldh7j`
       Otherwise the :t:`repeat operand` is evaluated :t:`[size operand]'s`
@@ -2745,7 +2749,8 @@ Indexing Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_X9kdEAPTqsAe`
-A :t:`indexable type` is a :t:`type` that implements :std:`core::ops::Index`.
+A :t:`indexable type` is a :t:`type` that implements the
+:std:`core::ops::Index` :t:`trait`.
 
 :dp:`fls_42ijvuqqqlvh`
 An :t:`index expression` is an :t:`expression` that indexes into a :t:`value`
@@ -2760,12 +2765,12 @@ An :t:`indexing operand` is an :t:`operand` which specifies the index of an
 :t:`index expression`.
 
 :dp:`fls_w96p9oyv5mqt`
-An :t:`index expression` is a :t:`constant expression` if the :t:`indexing
-operand` and :t:`indexed operand` are :t:`[constant expression]s`.
+An :t:`index expression` is a :t:`constant expression` if the
+:t:`indexing operand` and :t:`indexed operand` are :t:`[constant expression]s`.
 
 :dp:`fls_u9sl7h4i8hqu`
 The :t:`type` of the :t:`indexing operand` is the :t:`generic parameter` of the
-:std:`core::ops::Index` implementation of the :t:`type` of the
+:std:`core::ops::Index` :t:`implementation` of the :t:`type` of the
 :t:`indexed operand`.
 
 :dp:`fls_98qeczwv7fmy`
@@ -2790,7 +2795,7 @@ evaluated in a :t:`mutable place expression context`, then
 
 * :dp:`fls_nw705fpon79b`
   The :t:`type` of the :t:`index expression` is ``&mut T``, where ``T`` is
-  the element type of the :t:`[indexed operand]'s` :t:`type`.
+  the element type of the :t:`indexed operand`'s :t:`type`.
 
 :dp:`fls_fouu0z3jwoad`
 The :t:`value` of an :t:`index expression` is the indexed memory location.
@@ -2865,8 +2870,8 @@ of the second :t:`tuple initializer`, and ``VN`` is the :t:`value` of the
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_waf55yd3mpsq`
-The :t:`evaluation` of a :t:`tuple expression` evaluates its :t:`[tuple
-initializer]s` in left-to-right order.
+The :t:`evaluation` of a :t:`tuple expression` evaluates its
+:t:`[tuple initializer]s` in left-to-right order.
 
 .. rubric:: Examples
 
@@ -2918,17 +2923,17 @@ Struct Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_ij8rebvupb85`
-A :t:`struct expression` is an :t:`expression` that constructs an :t:`enum value`, a
-:t:`struct value`, or a :t:`union value`.
+A :t:`struct expression` is an :t:`expression` that constructs an
+:t:`enum value`, a :t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_4z91ymz3ciup`
-A :t:`constructee` indicates the :t:`enum variant`, :t:`struct` or :t:`union` whose value is
-being constructed by a :t:`struct expression`.
+A :t:`constructee` indicates the :t:`enum variant`, :t:`struct`, or :t:`union`
+whose value is being constructed by a :t:`struct expression`.
 
 :dp:`fls_uib1ml41mfrn`
 A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`,
-a :t:`struct value`, or a :t:`union value` to be used as a base for construction in a
-:t:`struct expression`.
+a :t:`struct value`, or a :t:`union value` to be used as a base for
+construction in a :t:`struct expression`.
 
 :dp:`fls_gfu267bpl9ql`
 The :t:`type` of a :t:`base initializer` is the :t:`type` of its :t:`operand`.
@@ -2942,8 +2947,8 @@ initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 :dp:`fls_y3p6rtm7ek3l`
 An :t:`indexed initializer` matches a :t:`field` of the :t:`constructee`
 when the :t:`field index` of the :t:`indexed initializer` resolves to a valid
-position of a :t:`field` in the :t:`constructee`. Such an :t:`indexed
-initializer` is a :dt:`matched indexed initializer`.
+position of a :t:`field` in the :t:`constructee`. Such an
+:t:`indexed initializer` is a :dt:`matched indexed initializer`.
 
 :dp:`fls_dfajs3xaxbv`
 The :t:`type` of the :t:`operand` of an :t:`indexed initializer` and the
@@ -2954,8 +2959,8 @@ The :t:`value` of an :t:`indexed initializer` is the :t:`value` of its
 :t:`operand`.
 
 :dp:`fls_lwyq3vyc91rn`
-A :t:`named initializer` is a :t:`construct` that specifies the name and initial
-:t:`value` of a :t:`field` in a :t:`struct expression`.
+A :t:`named initializer` is a :t:`construct` that specifies the name and
+initial :t:`value` of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_qed1pps827dv`
 A :t:`named initializer` matches a :t:`field` of the :t:`constructee` when
@@ -2971,8 +2976,8 @@ The :t:`value` of a :t:`named initializer` is the :t:`value` of its
 :t:`expression`.
 
 :dp:`fls_57t368kema7h`
-A :t:`shorthand initializer` is a :t:`construct` that specifies the :t:`name` of
-a :t:`field` in a :t:`struct expression`.
+A :t:`shorthand initializer` is a :t:`construct` that specifies the :t:`name`
+of a :t:`field` in a :t:`struct expression`.
 
 :dp:`fls_sm2hx8sh4agb`
 A :t:`shorthand initializer` is equivalent to a :t:`named initializer` where
@@ -2997,8 +3002,8 @@ The :t:`type` of a :t:`struct expression` is the :t:`type` of the
 :t:`constructee`.
 
 :dp:`fls_sjwd8o5mknjo`
-The :t:`value` of a :t:`struct expression` is the :t:`enum value`, :t:`struct value`, or
-:t:`union value` in construction.
+The :t:`value` of a :t:`struct expression` is the :t:`enum value`,
+:t:`struct value`, or :t:`union value` in construction.
 
 :dp:`fls_ccqomsereni2`
 If the :t:`constructee` is a :t:`record enum variant` or a :t:`record struct`,
@@ -3112,8 +3117,8 @@ a left-to-right order.
 
 .. _fls_mjVXiDQRIAzU:
 
-Call Expressions and Method Call Expressions
---------------------------------------------
+Invocation Expressions
+----------------------
 
 .. _fls_xa4nbfas01cj:
 
@@ -3137,7 +3142,7 @@ Call Expressions
 
 :dp:`fls_fvgfx17ossd9`
 A :t:`call expression` is an :t:`expression` that invokes a :t:`function` or
-constructs a :t:`tuple struct value` or :t:`tuple enum variant value`.
+constructs a :t:`tuple enum variant value` or a :t:`tuple struct value`.
 
 :dp:`fls_jvz5z3eqxb39`
 An :t:`argument operand` is an :t:`operand` which is used as an argument in a
@@ -3145,67 +3150,67 @@ An :t:`argument operand` is an :t:`operand` which is used as an argument in a
 
 :dp:`fls_7ql1c71eidg8`
 A :t:`call operand` is the :t:`function` being invoked or the
-:t:`tuple struct value` or :t:`tuple enum variant value` being constructed by a
-:t:`call expression`.
+:t:`tuple enum variant value` or the :t:`tuple struct value` being constructed
+by a :t:`call expression`.
 
 :dp:`fls_QpBu34U6hXn9`
 A :t:`tuple struct call expression` is a :t:`call expression` where the
 :t:`call operand` resolves to a :t:`tuple struct`.
 
 :dp:`fls_4t6imtiw6kzt`
-A :t:`callee type` is either a :t:`function item type`,
-a :t:`function pointer type`, a :t:`tuple struct type`,
-a :t:`tuple enum variant` or a :t:`type` that implements any of the
+A :t:`callee type` is either a :t:`function item type`, a
+:t:`function pointer type`, a :t:`tuple enum variant`, a
+:t:`tuple struct type`, or a :t:`type` that implements any of the
 :std:`core::ops::Fn`, :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce`
 :t:`[trait]s`.
 
 :dp:`fls_bu6i3mcvnbin`
 The :t:`type` of a :t:`call expression` is the :t:`return type` of the invoked
-:t:`function`, the :t:`type` of the :t:`tuple struct` or the
-:t:`tuple enum variant` being constructed, or :t:`associated type`
+:t:`function`, the :t:`type` of the :t:`tuple enum variant` or the
+:t:`tuple struct` being constructed, or :t:`associated type`
 :std:`core::ops::FnOnce::Output`.
 
 :dp:`fls_8ljrgdept7s8`
-A :t:`call expression` whose :t:`callee type` is either an :t:`external function
-item type`, an :t:`unsafe function item type` or an :t:`unsafe function pointer
-type` shall require :t:`unsafe context`.
+A :t:`call expression` whose :t:`callee type` is either an
+:t:`external function item type`, an :t:`unsafe function item type`, or an
+:t:`unsafe function pointer type` shall require :t:`unsafe context`.
 
 :dp:`fls_7p6zrjbpj0kl`
 The :t:`value` of a :t:`call expression` is determined as follows:
 
 * :dp:`fls_yrr1s0tucgvh`
-  If the :t:`callee type` is a :t:`function item type` or a :t:`function
-  pointer type`, then the :t:`value` is the result of invoking the corresponding
-  :t:`function` with the :t:`[argument operand]s`.
+  If the :t:`callee type` is a :t:`function item type` or a
+  :t:`function pointer type`, then the :t:`value` is the result of invoking the
+  corresponding :t:`function` with the :t:`[argument operand]s`.
 
 * :dp:`fls_RZjFs9koNOk8`
-  If the :t:`callee type` is a :t:`tuple struct type` or a
-  :t:`tuple enum variant`, then the :t:`value` is the result of constructing
-  the :t:`tuple struct` or :t:`tuple enum variant` with the
+  If the :t:`callee type` is a :t:`tuple enum variant` or a
+  :t:`tuple struct type`, then the :t:`value` is the result of constructing
+  the :t:`tuple enum variant` or the :t:`tuple struct` with the
   :t:`[argument operand]s`.
 
 * :dp:`fls_s3q3sej1hgho`
-  If the :t:`callee type` implements the :std:`core::ops::Fn`
-  :t:`trait`, then the :t:`value` is the result of invoking
+  If the :t:`callee type` implements the :std:`core::ops::Fn` :t:`trait`, then
+  the :t:`value` is the result of invoking
   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)``,
   where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :t:`tuple` that wraps the :t:`[argument
-  operand]s`.
+  ``argument_operand_tuple`` is a :t:`tuple` that wraps the
+  :t:`[argument operand]s`.
 
 * :dp:`fls_cu2ubdm3tfwb`
-  If the :t:`call operand` implements the :std:`core::ops::FnMut`
-  :t:`trait`, then the :t:`value` is the result of invoking
+  If the :t:`call operand` implements the :std:`core::ops::FnMut` :t:`trait`,
+  then the :t:`value` is the result of invoking
   ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple),``
   where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
-  ``argument_operand_tuple`` is a :t:`tuple` that wraps the :t:`[argument
-  operand]s`.
+  ``argument_operand_tuple`` is a :t:`tuple` that wraps the
+  :t:`[argument operand]s`.
 
 * :dp:`fls_9bbewx1l7h5h`
-  If the :t:`call operand` implements the :std:`core::ops::FnOnce`
-  :t:`trait`, then the :t:`value` is the result of invoking
-  ``core::ops::FnOnce::call_once(adjusted_call_operand,
-  argument_operand_tuple),`` where ``adjusted_call_operand`` is the :t:`adjusted
-  call operand`, and ``argument_operand_tuple`` is a :t:`tuple` that wraps the
+  If the :t:`call operand` implements the :std:`core::ops::FnOnce` :t:`trait`,
+  then the :t:`value` is the result of invoking
+  ``core::ops::FnOnce::call_once(adjusted_call_operand, argument_operand_tuple),``
+  where ``adjusted_call_operand`` is the :t:`adjusted call operand`, and
+  ``argument_operand_tuple`` is a :t:`tuple` that wraps the
   :t:`[argument operand]s`.
 
 .. rubric:: Dynamic Semantics
@@ -3224,21 +3229,22 @@ The :t:`evaluation` of a :t:`call expression` proceeds as follows:
    :t:`function pointer type`, then corresponding :t:`function` is invoked.
 
 #. :dp:`fls_nb0eqky2akzt`
-   If the :t:`type` of the :t:`call operand` implements the :std:`core::ops::Fn`
-   :t:`trait`, then ``core::ops::Fn::call(adjusted_call_operand,
-   argument_operand_tuple)`` is invoked.
+   If the :t:`type` of the :t:`call operand` implements the
+   :std:`core::ops::Fn` :t:`trait`, then
+   ``core::ops::Fn::call(adjusted_call_operand, argument_operand_tuple)`` is
+   invoked.
 
 #. :dp:`fls_9lt4wh9ql5ae`
-   If the :t:`type` of the :t:`call operand` implements
-   the :std:`core::ops::FnMut` :t:`trait`, then
+   If the :t:`type` of the :t:`call operand` implements the
+   :std:`core::ops::FnMut` :t:`trait`, then
    ``core::ops::FnMut::call_mut(adjusted_call_operand, argument_operand_tuple)``
    is invoked.
 
 #. :dp:`fls_ixebnlcccmit`
-   If the :t:`type` of the :t:`call operand` implements
-   the :std:`core::ops::FnOnce` :t:`trait`, then
-   ``core::ops::FnOnce::call_once(adjusted_call_operand,
-   argument_operand_tuple)`` is invoked.
+   If the :t:`type` of the :t:`call operand` implements the
+   :std:`core::ops::FnOnce` :t:`trait`, then
+   ``core::ops::FnOnce::call_once(adjusted_call_operand, argument_operand_tuple)``
+   is invoked.
 
 .. rubric:: Undefined Behavior
 
@@ -3335,14 +3341,14 @@ Call Conformance
 
 :dp:`fls_tsn6SUUG9LvW`
 A :t:`method call expression` is equivalent to a :t:`call expression` where the
-:t:`call operand` is the resolved :t:`method` and the adjusted :t:`receiver
-operand` is prepended to the :t:`[argument operand]s`.
+:t:`call operand` is the resolved :t:`method` and the adjusted
+:t:`receiver operand` is prepended to the :t:`[argument operand]s`.
 
 :dp:`fls_c40C6rg6rGv6`
 An :t:`argument operand` matches a :t:`function parameter` or :t:`field` of the
-:t:`callee type` when its position and the position of the :t:`function
-parameter` or :t:`field` are the same. Such an :t:`argument operand` is a
-:dt:`matched argument operand`.
+:t:`callee type` when its position and the position of the
+:t:`function parameter` or :t:`field` are the same. Such an
+:t:`argument operand` is a :dt:`matched argument operand`.
 
 :dp:`fls_Gr1ixJ9vFjUm`
 The :t:`type` of a :t:`matched argument operand` and the :t:`type` of the
@@ -3392,8 +3398,8 @@ A :t:`field selector` is a :t:`construct` that selects the :t:`field` to be
 accessed in a :t:`field access expression`.
 
 :dp:`fls_qqrconpa92i3`
-A :t:`selected field` is a :t:`field` that is selected by a :t:`field access
-expression`.
+A :t:`selected field` is a :t:`field` that is selected by a
+:t:`field access expression`.
 
 :dp:`fls_fovs9il2h9xg`
 The :t:`type` of a :t:`field access expression` is the :t:`type` of the
@@ -3404,8 +3410,8 @@ The :t:`value` of a :t:`field access expression` is the :t:`value` of the
 :t:`selected field`.
 
 :dp:`fls_kddnnz8uc15b`
-Reading the :t:`selected field` of a :t:`union` shall require :t:`unsafe
-context`.
+Reading the :t:`selected field` of a :t:`union` shall require
+:t:`unsafe context`.
 
 :dp:`fls_an3no949lvfw`
 Writing to the :t:`selected field` of a :t:`union` where the :t:`type` of the
@@ -3417,8 +3423,9 @@ Writing to and then reading from the :t:`selected field` of a :t:`union`
 subject to :t:`attribute` :c:`repr` is equivalent to invoking :t:`function`
 ``core::mem::transmute<write_type, read_type>(field_bits)`` where ``write_type``
 is the :t:`type` used at the time of writing the :t:`selected field`,
-``read_type`` is the :t:`type` used at the time of reading the :t:`selected
-field`, and ``field_bits`` is the bit representation of the :t:`selected field`.
+``read_type`` is the :t:`type` used at the time of reading the
+:t:`selected field`, and ``field_bits`` is the bit representation of the
+:t:`selected field`.
 
 :dp:`fls_jjnyuU9KIaGy`
 A :t:`field access expression` is subject to :t:`field resolution`.
@@ -3426,8 +3433,8 @@ A :t:`field access expression` is subject to :t:`field resolution`.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_sdnafipirg8w`
-It is undefined behavior when reading the :t:`selected field` of a :t:`union
-type` when it contains invalid data.
+It is undefined behavior when reading the :t:`selected field` of a
+:t:`union type` when it contains invalid data.
 
 .. rubric:: Dynamic Semantics
 
@@ -3482,8 +3489,8 @@ Closure Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_2d141c9a0yui`
-A :t:`closure expression` is an :t:`expression` that defines a :t:`closure
-type` and constructs a value of that :t:`type`.
+A :t:`closure expression` is an :t:`expression` that defines a
+:t:`closure type` and constructs a value of that :t:`type`.
 
 :dp:`fls_srbl7ptknjyk`
 A :t:`closure body` is a :t:`construct` that represents the executable portion
@@ -3497,21 +3504,21 @@ A :t:`closure body` is subject to :t:`capturing`.
 
 :dp:`fls_c3rzwUxjmBMY`
 A :t:`closure parameter` is a :t:`construct` that yields a set of
-:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+:t:`[binding]s` that bind matched input :t:`[value]s` to :t:`[name]s` at the
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_r6gWLoNR7JMR`
-The :t:`pattern` of a :t:`closure parameter` shall be an :t:`irrefutable
-pattern`.
+The :t:`pattern` of a :t:`closure parameter` shall be an
+:t:`irrefutable pattern`.
 
 :dp:`fls_yn30xuejcfxo`
-The :t:`type` of a :t:`closure expression` is the unique anonymous :t:`closure
-type` defined by it.
+The :t:`type` of a :t:`closure expression` is the unique anonymous
+:t:`closure type` defined by it.
 
 :dp:`fls_sje6cdvifgv5`
 The :t:`value` of a :t:`closure expression` is the :t:`value` of the unique
-anonymous :t:`closure type` instantiated with the selected :t:`[capture
-target]s`.
+anonymous :t:`closure type` instantiated with the selected
+:t:`[capture target]s`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3569,6 +3576,9 @@ expression` continuously as long as some criterion holds true.
 :dp:`fls_BjZjuiFnPtFd`
 A :t:`loop body` is the :t:`block expression` of a :t:`loop expression`.
 
+:dp:`fls_XEc0cIkpkyzJ`
+The :t:`type` of the :t:`loop body` shall be the :t:`unit type`.
+
 :dp:`fls_eg93m93gvwal`
 An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
 
@@ -3597,8 +3607,7 @@ For Loops
 
 :dp:`fls_1bh2alh37frz`
 A :t:`for loop expression` is a :t:`loop expression` that continues to evaluate
-its :t:`block expression` as long as its :t:`subject expression` yields a
-:t:`value`.
+its :t:`loop body` as long as its :t:`subject expression` yields a :t:`value`.
 
 :dp:`fls_fkgbin6ydkm4`
 The :t:`type` of a :t:`subject expression` shall implement the
@@ -3609,9 +3618,6 @@ The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
 
 :dp:`fls_FkxLf91WKiIo`
 The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
-
-:dp:`fls_XEc0cIkpkyzJ`
-The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3673,7 +3679,7 @@ Infinite Loops
 
 :dp:`fls_p11qw6mtxlda`
 An :t:`infinite loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` indefinitely unless :t:`terminated` with a
+evaluate its :t:`loop body` indefinitely unless :t:`terminated` by a
 :t:`break expression` or a :t:`return expression`.
 
 :dp:`fls_b314wjbv0zwe`
@@ -3684,9 +3690,9 @@ The :t:`type` of a :t:`infinite loop expression` is determined as follows:
   then the :t:`type` is the :t:`never type`.
 
 * :dp:`fls_wf11yp1jwf53`
-  If the :t:`infinite loop expression` contains at least one :t:`break
-  expression`, then the :t:`type` is the :t:`unified type` of the :t:`[break
-  type]s` of all :t:`[break expression]s`.
+  If the :t:`infinite loop expression` contains at least one
+  :t:`break expression`, then the :t:`type` is the :t:`unified type` of the
+  :t:`[break type]s` of all :t:`[break expression]s`.
 
 :dp:`fls_q3qpcf2fz7h`
 The :t:`value` of a :t:`infinite loop expression` is determined as follows:
@@ -3696,12 +3702,9 @@ The :t:`value` of a :t:`infinite loop expression` is determined as follows:
   then the :t:`value` is the :t:`unit value`.
 
 * :dp:`fls_99imks9hj3kp`
-  If the :t:`infinite loop expression` contains at least one :t:`break
-  expression`, then the :t:`value` is the :t:`break value` of the :t:`break
-  expression` that broke out of the :t:`loop expression`.
-
-:dp:`fls_wqvdHgMpp6NL`
-The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
+  If the :t:`infinite loop expression` contains at least one
+  :t:`break expression`, then the :t:`value` is the :t:`break value` of the
+  :t:`break expression` that broke out of the :t:`loop expression`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3741,8 +3744,8 @@ While Loops
 
 :dp:`fls_ajby242tnu7c`
 A :t:`while loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` as long as its :t:`iteration expression`
-holds true.
+evaluate its :t:`loop body` as long as its :t:`iteration expression` holds
+true.
 
 :dp:`fls_13hmhzqz82v6`
 An :t:`iteration expression` is an :t:`expression` that provides the criterion
@@ -3756,9 +3759,6 @@ The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
 
 :dp:`fls_s6hRa5spz64w`
 The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
-
-:dp:`fls_qpQrEALKvRkU`
-The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3804,17 +3804,14 @@ While Let Loops
 
 :dp:`fls_fmdlyp9r9zl7`
 A :t:`while let loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`block expression` as long as its :t:`subject let expression`
-yields a :t:`value` that can be matched against its :t:`pattern`.
+evaluate its :t:`loop body` as long as its :t:`subject let expression` yields
+a :t:`value` that can be matched against its :t:`pattern`.
 
 :dp:`fls_gTfSLePwHTES`
 The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
 
 :dp:`fls_pTq4LIGIoAtN`
 The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
-
-:dp:`fls_rphW1DPnNKDQ`
-The :t:`type` of the :t:`block expression` shall be the :t:`unit type`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3867,9 +3864,9 @@ Loop Labels
 A :t:`label indication` is a :t:`construct` that indicates a :t:`label`.
 
 :dp:`fls_7hc8yboeaho0`
-A :t:`label indication` shall indicate a :t:`label` of an enclosing :t:`named
-loop` that does not pass a :t:`control flow boundary` in order to reach the
-enclosing :t:`named loop`.
+A :t:`label indication` shall indicate a :t:`label` of an enclosing
+:t:`named loop` that does not pass a :t:`control flow boundary` in order to
+reach the enclosing :t:`named loop`.
 
 .. _fls_jr4tpuyksr75:
 
@@ -3886,11 +3883,11 @@ Break Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_i5ko1t2wbgxe`
-A :t:`break expression` is an :t:`expression` that terminates a :t:`loop
-expression`.
+A :t:`break expression` is an :t:`expression` that terminates a
+:t:`loop expression`.
 
 :dp:`fls_jiykbp51909f`
-A :t:`break expression` shall appear within a :t:`loop expression`.
+A :t:`break expression` shall appear within a :t:`loop body`.
 
 :dp:`fls_7frvr2nm2mcj`
 The :t:`label indication` of a :t:`break expression` shall resolve to the
@@ -3926,8 +3923,8 @@ The :t:`break type` is determined as follows:
   the :t:`type` of its :t:`operand`.
 
 :dp:`fls_bgd7d5q69q0g`
-:t:`Break value` is the :t:`value` of the :t:`operand` of a :t:`break
-expression`.
+:t:`Break value` is the :t:`value` of the :t:`operand` of a
+:t:`break expression`.
 
 :dp:`fls_yb8jv4mkmki0`
 The :t:`break value` is determined as follows:
@@ -4086,20 +4083,20 @@ included :t:`range expression low bound`.
 The :t:`type` of a :t:`range-from expression` is :std:`core::ops::RangeFrom`.
 
 :dp:`fls_jqy0p155btca`
-The :t:`value` of a :t:`range-from expression` is ``core::ops::RangeFrom {
-start: range_expression_low_bound }``.
+The :t:`value` of a :t:`range-from expression` is
+``core::ops::RangeFrom { start: range_expression_low_bound }``.
 
 :dp:`fls_ppustuqdji7b`
 A :t:`range-from-to expression` is a :t:`range expression` that specifies an
-included :t:`range expression low bound` and an excluded :t:`range expression
-high bound`.
+included :t:`range expression low bound` and an excluded
+:t:`range expression high bound`.
 
 :dp:`fls_ke2fpgodq84u`
 The :t:`type` of a :t:`range-from-to expression` is :std:`core::ops::Range`.
 
 :dp:`fls_zb6jk6qykun6`
-The :t:`value` of a :t:`range-from-to expression` is ``core::ops::Range { start:
-range_expression_low_bound, end: range_expression_high_bound }``.
+The :t:`value` of a :t:`range-from-to expression` is
+``core::ops::Range { start: range_expression_low_bound, end: range_expression_high_bound }``.
 
 :dp:`fls_x67xo25n0qlz`
 A :t:`range-full expression` is a :t:`range expression` that covers the whole
@@ -4113,8 +4110,8 @@ The :t:`value` of a :t:`range-full expression` is ``core::ops::RangeFull {}``.
 
 :dp:`fls_lh9my7g8oflq`
 A :t:`range-inclusive expression` is a :t:`range expression` that specifies an
-included :t:`range expression low bound` and an included :t:`range expression
-high bound`.
+included :t:`range expression low bound` and an included
+:t:`range expression high bound`.
 
 :dp:`fls_livflk52xaj9`
 The :t:`type` of a :t:`range-inclusive expression` is
@@ -4122,8 +4119,7 @@ The :t:`type` of a :t:`range-inclusive expression` is
 
 :dp:`fls_vj213j9bj61y`
 The :t:`value` of a :t:`range-inclusive expression` is
-``core::ops::RangeInclusive::new(range_expression_low_bound,
-range_expression_high_bound)``.
+``core::ops::RangeInclusive::new(range_expression_low_bound, range_expression_high_bound)``.
 
 :dp:`fls_5a1uivj19kob`
 A :t:`range-to expression` is a :t:`range expression` that specifies an excluded
@@ -4133,8 +4129,8 @@ A :t:`range-to expression` is a :t:`range expression` that specifies an excluded
 The :t:`type` of a :t:`range-to expression` is :std:`core::ops::RangeTo`.
 
 :dp:`fls_m0slikrulnvd`
-The :t:`value` of a :t:`range-to expression` is ``core::ops::RangeTo { end:
-range_expression_high_bound }``.
+The :t:`value` of a :t:`range-to expression` is
+``core::ops::RangeTo { end: range_expression_high_bound }``.
 
 :dp:`fls_1gc436ee1nzm`
 A :t:`range-to-inclusive expression` is a :t:`range expression` that specifies
@@ -4187,37 +4183,37 @@ If Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_2i4fbxbbvpf1`
-An :t:`if expression` is an :t:`expression` that evaluates either a :t:`block
-expression` or an :t:`else expression` depending on the :t:`value` of its
-:t:`subject expression`.
+An :t:`if expression` is an :t:`expression` that evaluates either a
+:t:`block expression` or an :t:`else expression` depending on the :t:`value` of
+its :t:`subject expression`.
 
 :dp:`fls_5azwlk7hav1k`
-An :t:`else expression` is an :t:`expression` that represents either a :t:`block
-expression`, an :t:`if expression`, or an :t:`if let expression`.
+An :t:`else expression` is an :t:`expression` that represents either a
+:t:`block expression`, an :t:`if expression`, or an :t:`if let expression`.
 
 :dp:`fls_r7gzxo16esri`
 The :t:`type` of the :t:`subject expression` of an :t:`if expression` shall be
 :t:`type` :c:`bool`.
 
 :dp:`fls_iv9t4nfs4f6w`
-The :t:`type` of an :t:`if expression` is the :t:`type` of its :t:`block
-expression`.
+The :t:`type` of an :t:`if expression` is the :t:`type` of its
+:t:`block expression`.
 
 :dp:`fls_i9sxf2q5jjqt`
-The :t:`value` of an :t:`if expression` is the :t:`value` of its :t:`block
-expression`.
+The :t:`value` of an :t:`if expression` is the :t:`value` of its
+:t:`block expression`.
 
 :dp:`fls_1e8qer6bh2f3`
-The :t:`type` of an :t:`else expression` is the :t:`type` of its :t:`block
-expression`, :t:`if expression`, or :t:`if let expression`.
+The :t:`type` of an :t:`else expression` is the :t:`type` of its
+:t:`block expression`, :t:`if expression`, or :t:`if let expression`.
 
 :dp:`fls_p5pjxk5xfcbx`
-The :t:`value` of an :t:`else expression` is the :t:`value` of its :t:`block
-expression`, :t:`if expression`, or :t:`if let expression`.
+The :t:`value` of an :t:`else expression` is the :t:`value` of its
+:t:`block expression`, :t:`if expression`, or :t:`if let expression`.
 
 :dp:`fls_mpq7gicosgkt`
-The :t:`type` of an :t:`if expression` and the :t:`type` of an :t:`else
-expression` shall be :t:`unifiable`.
+The :t:`type` of an :t:`if expression` and the :t:`type` of an
+:t:`else expression` shall be :t:`unifiable`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4228,17 +4224,17 @@ The :t:`evaluation` of an :t:`if expression` proceeds as follows:
    The :t:`subject expression` is evaluated.
 
 #. :dp:`fls_5udx9zyeg5ga`
-   If the :t:`subject expression` evaluated to ``true``, then the :t:`block
-   expression` is evaluated.
+   If the :t:`subject expression` evaluated to ``true``, then the
+   :t:`block expression` is evaluated.
 
 #. :dp:`fls_67l4j48n6p7o`
-   If the :t:`subject expression` evaluated to ``false`` and the :t:`if
-   expression` has an :t:`else expression`, then the :t:`else expression`
+   If the :t:`subject expression` evaluated to ``false`` and the
+   :t:`if expression` has an :t:`else expression`, then the :t:`else expression`
    is evaluated.
 
 :dp:`fls_e8gd5lzcaifw`
-The :t:`evaluation` of an :t:`else expression` evaluates its :t:`block
-expression`, :t:`if expression`, or :t:`if let expression`.
+The :t:`evaluation` of an :t:`else expression` evaluates its
+:t:`block expression`, :t:`if expression`, or :t:`if let expression`.
 
 .. rubric:: Examples
 
@@ -4275,12 +4271,16 @@ An :t:`if let expression` is an :t:`expression` that evaluates either a
 :t:`pattern` can be matched against its :t:`subject let expression`.
 
 :dp:`fls_4vyrufo4qdeg`
-The :t:`type` of an :t:`if let expression` is the :t:`type` of its :t:`block
-expression`.
+The :t:`type` of an :t:`if let expression` is the :t:`type` of its
+:t:`block expression`.
 
 :dp:`fls_qfnwwvzxsl3`
-The :t:`value` of an :t:`if let expression` is the :t:`value` of its :t:`block
-expression`.
+The :t:`value` of an :t:`if let expression` is the :t:`value` of its
+:t:`block expression`.
+
+:dp:`fls_lEr4iqwdBcbA`
+The :t:`type` of an :t:`if let expression` and the :t:`type` of an
+:t:`else expression` shall be :t:`unifiable`.
 
 .. rubric:: Dynamic Semantics
 
@@ -4377,8 +4377,8 @@ A :t:`match arm` is a :t:`construct` that consists of a :t:`match arm matcher`
 and a :t:`match arm body`.
 
 :dp:`fls_d9gerg12hm2d`
-An :t:`intermediate match arm` is any :t:`non-[final match arm]` of a :t:`match
-expression`.
+An :t:`intermediate match arm` is any :t:`non-[final match arm]` of a
+:t:`match expression`.
 
 :dp:`fls_oj8dg28xw5yp`
 A :t:`final match arm` is the last :t:`match arm` of a :t:`match expression`.
@@ -4415,8 +4415,9 @@ The :t:`type` of a :t:`match expression` is the :t:`unified type` of the
 :t:`[type]s` of the :t:`[operand]s` of all :t:`[match arm]s`.
 
 :dp:`fls_g6xyz0beps3o`
-A :t:`match arm` is selected when its :t:`pattern` matches the :t:`subject
-expression` and its :t:`match arm guard` (if any) evaluates to ``true``.
+A :t:`match arm` is selected when its :t:`pattern` matches the
+:t:`subject expression` and its :t:`match arm guard` (if any) evaluates to
+``true``.
 
 :dp:`fls_8dba4o5qg8js`
 :t:`Match arm` selection happens in declarative order.
@@ -4453,8 +4454,8 @@ The :t:`evaluation` of a :t:`match expression` proceeds as follows:
          Control stops the :t:`evaluation` of the :t:`match expression`.
 
    #. :dp:`fls_81nnizrxgrsm`
-      Otherwise control proceeds with the :t:`evaluation` of the next :t:`match
-      arm`.
+      Otherwise control proceeds with the :t:`evaluation` of the next
+      :t:`match arm`.
 
 :dp:`fls_4dv7x9nh2h4e`
 The :t:`evaluation` of a :t:`match arm matcher` proceeds as follows:
@@ -4594,16 +4595,17 @@ A :t:`future operand` is an :t:`operand` whose :t:`future` is being awaited by
 an :t:`await expression`.
 
 :dp:`fls_k9pncajmhgk1`
-An :t:`await expression` shall appear within an :t:`async control flow
-boundary`. Only the innermost :t:`control flow boundary` shall be considered.
+An :t:`await expression` shall appear within an
+:t:`async control flow boundary`. Only the innermost :t:`control flow boundary`
+shall be considered.
 
 :dp:`fls_9uw5pd7kbrx3`
 The :t:`type` of a :t:`future operand` shall implement the
 :std:`core::future::Future` :t:`trait`.
 
 :dp:`fls_c6mxfzef2qop`
-The :t:`type` of an :t:`await expression` is ``<_ as
-core::future::Future>::Output``.
+The :t:`type` of an :t:`await expression` is
+``<_ as core::future::Future>::Output``.
 
 :dp:`fls_l396mo6k9ox7`
 The :t:`value` of an :t:`await expression` is the :t:`value` held by
@@ -4822,8 +4824,9 @@ The :t:`capturing environment` of a :t:`capturing expression` consists of the
 
 :dp:`fls_ip81lt2mm940`
 A :t:`capture target` requires :t:`capturing` when it is used by
-the :t:`capturing expression` and it is defined outside of the :t:`capturing
-expression`. Such a :t:`capture target` is said to be :dt:`captured`.
+the :t:`capturing expression` and it is defined outside of the
+:t:`capturing expression`. Such a :t:`capture target` is said to be
+:dt:`captured`.
 
 :dp:`fls_y9n1i4hbq8sf`
 :t:`Capture mode` is the mechanism by which a :t:`capture target` is captured.
@@ -4834,20 +4837,22 @@ A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by copy capture`
 the :t:`capturing environment`.
 
 :dp:`fls_aCxt2Ovmb5He`
-A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by immutable
-reference capture` binds an :t:`immutable reference` to the :t:`capture target`
-and passes the :t:`immutable reference` into the :t:`capturing environment`.
+A :t:`captured` :t:`capture target` with :t:`capture mode`
+:dt:`by immutable reference capture` binds an :t:`immutable reference` to the
+:t:`capture target` and passes the :t:`immutable reference` into the
+:t:`capturing environment`.
 
 :dp:`fls_xTNFfkxHm5yy`
-A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by mutable
-reference capture` binds a :t:`mutable reference` to the :t:`capture target`
-and passes the :t:`mutable reference` into the :t:`capturing environment`.
+A :t:`captured` :t:`capture target` with :t:`capture mode`
+:dt:`by mutable reference capture` binds a :t:`mutable reference` to the
+:t:`capture target` and passes the :t:`mutable reference` into the
+:t:`capturing environment`.
 
 :dp:`fls_8HLaLAIZgYfs`
-A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by unique
-immutable reference capture` binds a :t:`unique immutable reference` to the
-:t:`capture target` and passes the :t:`mutable reference` into the :t:`capturing
-environment`.
+A :t:`captured` :t:`capture target` with :t:`capture mode`
+:dt:`by unique immutable reference capture` binds a
+:t:`unique immutable reference` to the :t:`capture target` and passes the
+:t:`mutable reference` into the :t:`capturing environment`.
 
 :dp:`fls_t695ps4lfh6z`
 The :t:`capture mode` is determined based on the use of the :t:`capture target`
@@ -4865,8 +4870,8 @@ within the :t:`capturing expression`, as follows:
       :t:`By immutable reference capture`.
 
    #. :dp:`fls_wmxsd0i2yemf`
-      :t:`By unique immutable reference capture` mode, if the :t:`capture
-      target` is a :t:`mutable reference` that is being modified.
+      :t:`By unique immutable reference capture` mode, if the
+      :t:`capture target` is a :t:`mutable reference` that is being modified.
 
    #. :dp:`fls_lu779ufqhggl`
       :t:`By mutable reference capture` mode.
@@ -4884,7 +4889,7 @@ Arithmetic Overflow
 -------------------
 
 :dp:`fls_oFIRXBPXu6Zv`
-An :t:`arithmetic overflow` occurs if an :t:`arithmetic expression` or a
+An :t:`arithmetic overflow` occurs when an :t:`arithmetic expression` or a
 :t:`negation expression` computes a :t:`value` of a :t:`scalar type` that lies
 outside of the range of valid :t:`[value]s` for the :t:`scalar type`.
 

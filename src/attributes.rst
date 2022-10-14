@@ -182,8 +182,8 @@ The following :t:`[built-in attribute]s` are :dt:`[code generation attribute]s`:
   :t:`Attribute` :c:`track_caller`.
 
 :dp:`fls_87o6n9et9jio`
-The following :t:`[built-in attribute]s` are :dt:`[conditional compilation
-attribute]s`:
+The following :t:`[built-in attribute]s` are
+:dt:`[conditional compilation attribute]s`:
 
 * :dp:`fls_ui0i3rpt5v5u`
   :t:`Attribute` :c:`cfg`.
@@ -228,8 +228,8 @@ The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:
   :t:`Attribute` :c:`doc`.
 
 :dp:`fls_q579e97n1m8j`
-The following :t:`[built-in attribute]s` are :dt:`[foreign function interface
-attribute]s`:
+The following :t:`[built-in attribute]s` are
+:dt:`[foreign function interface attribute]s`:
 
 * :dp:`fls_sn43rofpq6ld`
   :t:`Attribute` :c:`crate_name`.
@@ -777,10 +777,10 @@ Attribute ``cfg_attr``
 :t:`Attribute` :dc:`cfg_attr` enables :t:`conditional compilation`.
 
 :dp:`fls_rzw12sagm585`
-An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration
-predicate` evaluates to ``true`` is replaced with a new :t:`attribute`
-for each :s:`AttributeContent` enumerated in the :t:`[attribute]'s`
-:s:`AttributeContentList`.
+An :t:`attribute` :c:`cfg_attr` where the related
+:t:`configuration predicate` evaluates to ``true`` is replaced with a new
+:t:`attribute` for each :s:`AttributeContent` enumerated in the
+:t:`[attribute]'s` :s:`AttributeContentList`.
 
 .. rubric:: Examples
 
@@ -899,7 +899,7 @@ Attribute ``doc``
 
 .. rubric:: Examples
 
-:dp:`fls_necp8a7v255c`
+.. code-block:: rust
 
    #![doc = "This is a doc comment written as an attribute."]
 
@@ -1183,8 +1183,8 @@ Attribute ``no_main``
 :t:`Attribute` :c:`no_main` shall apply to the :t:`crate root module`.
 
 :dp:`fls_6qig3s3qpj0i`
-:t:`Attribute` :dc:`no_main` indicates that the symbols of the :t:`main
-function` will not be present in a binary.
+:t:`Attribute` :dc:`no_main` indicates that the symbols of the
+:t:`main function` will not be present in a binary.
 
 .. rubric:: Examples
 
@@ -1349,8 +1349,8 @@ Attribute ``recursion_limit``
 :t:`Attribute` :c:`recursion_limit` shall apply to the :t:`crate root module`.
 
 :dp:`fls_o9p8fa8zhe15`
-:t:`Attribute` :dc:`recursion_limit` sets the maximum depth of :t:`macro
-expansion` and :t:`auto-dereferencing`.
+:t:`Attribute` :dc:`recursion_limit` sets the maximum depth of
+:t:`macro expansion` and :t:`auto-dereferencing`.
 
 .. rubric:: Examples
 
@@ -1489,7 +1489,7 @@ Attribute ``proc_macro``
 
 :dp:`fls_u48dtmh97g`
 :t:`Attribute` :c:`proc_macro` shall apply to public :t:`[function]s` in the
-crate root of a :t:`proc-macro crate`.
+:t:`crate root module` of a :t:`proc-macro crate`.
 
 :dp:`fls_t4ez0zg1m569`
 :t:`Attribute` :dc:`proc_macro` turns the related :t:`function` into a
@@ -1517,8 +1517,8 @@ Attribute ``proc_macro_attribute``
 .. rubric:: Legality Rules
 
 :dp:`fls_huznzmkuhdky`
-:t:`Attribute` :c:`proc_macro_attribute` shall apply to public :t:`[function]s` in the
-crate root of a :t:`proc-macro crate`.
+:t:`Attribute` :c:`proc_macro_attribute` shall apply to public :t:`[function]s`
+in the :t:`crate root module` of a :t:`proc-macro crate`.
 
 :dp:`fls_gc3ly8fsodf1`
 :t:`Attribute` :dc:`proc_macro_attribute` turns the related :t:`function` into
@@ -1558,13 +1558,13 @@ Attribute ``proc_macro_derive``
 .. rubric:: Legality Rules
 
 :dp:`fls_l82yswg0k3px`
-:t:`Attribute` :c:`proc_macro_derive` shall apply to public :t:`[function]s` in the
-crate root of a :t:`proc-macro crate`.
+:t:`Attribute` :c:`proc_macro_derive` shall apply to public :t:`[function]s` in
+the :t:`crate root module` of a :t:`proc-macro crate`.
 
 :dp:`fls_ir9i4i2x5gyx`
 :t:`Attribute` :dc:`proc_macro_derive` turns the related :t:`function` into a
-:t:`derive macro`, where :s:`DeriveName` defines the :t:`name` of the :t:`derive
-macro` available to :t:`attribute` :c:`derive`.
+:t:`derive macro`, where :s:`DeriveName` defines the :t:`name` of the
+:t:`derive macro` available to :t:`attribute` :c:`derive`.
 
 :dp:`fls_NydVxyb43TH6`
 The :s:`HelperAttributeList` declares the :t:`[derive helper attribute]s` of
@@ -1652,8 +1652,8 @@ shall apply to :t:`[module]s`.
 
 :dp:`fls_c7v2hbdb7g2d`
 :t:`Attribute` :dc:`no_implicit_prelude` prevents the import of the
-:t:`external prelude`, the :t:`standard library prelude`, and the
-:t:`tool prelude`.
+:t:`external prelude`, the standard library :t:`prelude`, and the tool
+:t:`prelude`.
 
 .. rubric:: Examples
 
@@ -1683,7 +1683,7 @@ Attribute ``no_std``
 :t:`Attribute` :dc:`no_std` has the following effects:
 
 * :dp:`fls_ve1shwjq09pl`
-  Prevents the import of the :t:`standard library prelude`.
+  Prevents the import of the standard library :t:`prelude`.
 
 * :dp:`fls_wgwsn7laoju7`
   Imports the :t:`core prelude`.
@@ -1848,8 +1848,8 @@ Attribute ``ignore``
 :t:`Attribute` :c:`ignore` shall apply to :t:`[testing function]s`.
 
 :dp:`fls_9m8e59fc1tyh`
-:t:`Attribute` :dc:`ignore` prevents the execution of its related :t:`testing
-function`.
+:t:`Attribute` :dc:`ignore` prevents the execution of its related
+:t:`testing function`.
 
 .. rubric:: Examples
 
@@ -1880,12 +1880,12 @@ Attribute ``should_panic``
 :t:`Attribute` :c:`should_panic` shall apply to :t:`[testing function]s`.
 
 :dp:`fls_bm5x846zfnb8`
-:t:`Attribute` :dc:`should_panic` indicates that for the related :t:`testing
-function` to pass, it should :t:`panic`.
+:t:`Attribute` :dc:`should_panic` indicates that for the related
+:t:`testing function` to pass, it should :t:`panic`.
 
 :dp:`fls_bcoq5aus8nkr`
-If :s:`ExpectedPanicMessage` is specified, then the related :t:`testing
-function` passes only when the :t:`panic` message contains the
+If :s:`ExpectedPanicMessage` is specified, then the related
+:t:`testing function` passes only when the :t:`panic` message contains the
 :s:`ExpectedPanicMessage`.
 
 .. rubric:: Examples
@@ -1977,14 +1977,14 @@ Attribute ``non_exhaustive``
 .. rubric:: Legality Rules
 
 :dp:`fls_szvrd79cgzsg`
-:t:`Attribute` :c:`non_exhaustive` shall apply to :t:`[enum type]s`, :t:`[enum
-variant]s`, and :t:`[struct type]s`.
+:t:`Attribute` :c:`non_exhaustive` shall apply to :t:`[enum type]s`,
+:t:`[enum variant]s`, and :t:`[struct type]s`.
 
 :dp:`fls_1of56vl2ewq0`
-:t:`Attribute` :dc:`non_exhaustive` indicates that the related :t:`abstract data type` or
-:t:`enum variant` may have more :t:`[field]s` or :t:`[enum variant]s` added
-in the future. A :t:`type` subject to :t:`attribute` :c:`non_exhaustive` is
-referred to as a :dt:`non-exhaustive type`.
+:t:`Attribute` :dc:`non_exhaustive` indicates that the related
+:t:`abstract data type` or :t:`enum variant` may have more :t:`[field]s` or
+:t:`[enum variant]s` added in the future. A :t:`type` subject to :t:`attribute`
+:c:`non_exhaustive` is referred to as a :dt:`non-exhaustive type`.
 
 :dp:`fls_hkyzdmmdyoin`
 A :t:`non-exhaustive type` shall not be constructed outside of its defining
@@ -1999,8 +1999,8 @@ A :t:`non-exhaustive variant` shall not be constructed outside of its defining
 :t:`crate`.
 
 :dp:`fls_aql3c89840ix`
-:t:`Pattern matching` a :t:`non-exhaustive variant` shall require a :t:`struct
-pattern` with a :t:`rest pattern` outside its defining :t:`crate`.
+:t:`Pattern matching` a :t:`non-exhaustive variant` shall require a
+:t:`struct pattern` with a :t:`rest pattern` outside its defining :t:`crate`.
 
 :dp:`fls_cez7yxfc376c`
 :t:`Pattern matching` a :t:`non-exhaustive variant` does not contribute towards

@@ -126,19 +126,19 @@ A :t:`generic union` shall use all of its :t:`[type parameter]s` and
 A :t:`generic parameter` is said to constrain an :t:`implementation` if the
 :t:`generic parameter` appears at least once in one of the following:
 
+* :dp:`fls_sseo6u6pbcki`
+  As a :t:`binding argument` in the :t:`[bound]s` of a :t:`type` that contains
+  another :t:`generic parameter` that constrains the :t:`implementation`, or
+
 * :dp:`fls_62b59qvom3nm`
   The :t:`implemented trait`, or
 
 * :dp:`fls_oq76uff9gp0k`
-  The :t:`implementing type`, or
-
-* :dp:`fls_sseo6u6pbcki`
-  As a :t:`binding argument` in the :t:`[bound]s` of a :t:`type` that contains
-  another :t:`generic parameter` that constrains the :t:`implementation`.
+  The :t:`implementing type`.
 
 :dp:`fls_ua3w16qo9o4`
-It is a static error if a :t:`type parameter` or :t:`constant parameter` of an
-:t:`implementation` does not constrain the :t:`implementation`.
+It is a static error if a :t:`constant parameter` or a :t:`type parameter` of
+an :t:`implementation` does not constrain the :t:`implementation`.
 
 :dp:`fls_w9ol06mldwb`
 It is a static error if a :t:`lifetime parameter` of an :t:`implementation`
@@ -261,8 +261,8 @@ Where Clauses
 
 :dp:`fls_3nqb7p5ifvio`
 A :t:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
-:t:`[lifetime parameter]s`, :t:`[type parameter]s` and :t:`[type]s` that have to
-hold for a :t:`construct` subject to the :t:`where clause` to be valid.
+:t:`[lifetime parameter]s`, :t:`[type parameter]s`, and :t:`[type]s` that have
+to hold for the :t:`construct` subject to the :t:`where clause` to be valid.
 
 :dp:`fls_fhy4rsmmbvyy`
 A :t:`where clause predicate` is either a :t:`lifetime bound predicate` or a
@@ -344,26 +344,26 @@ A :s:`LifetimeArgument` shall precede :s:`[BindingArgument]s`,
 :s:`[ConstantArgument]s`, and :s:`[TypeArgument]s` in a
 :s:`GenericArgumentList`.
 
-:dp:`fls_i3z9ueoe99zd`
-A :t:`constant argument` is a :t:`generic argument` that supplies the
-:t:`value` of a :t:`constant parameter`.
-
-:dp:`fls_d4vdvpihoeb1`
-A :t:`type argument` is a :t:`generic argument` that supplies the :t:`type` of
-a :t:`type parameter`.
-
-:dp:`fls_10k9gdxlpuls`
-A :t:`lifetime argument` is a :t:`generic argument` that supplies the
-:t:`lifetime` of a :t:`lifetime parameter`.
-
 :dp:`fls_9pda3ja0ihks`
 A :t:`binding argument` is a :t:`generic argument` that supplies the :t:`type`
 of an :t:`associated trait type`.
+
+:dp:`fls_i3z9ueoe99zd`
+A :t:`constant argument` is a :t:`generic argument` that supplies the
+:t:`value` of a :t:`constant parameter`.
 
 :dp:`fls_al4dhmqodvwc`
 A :t:`constant argument` may only appear as a single segment
 :t:`path expression`, optionally encapsulated in a :t:`block expression`, within
 an :t:`array repetition constructor` or a :t:`type`.
+
+:dp:`fls_10k9gdxlpuls`
+A :t:`lifetime argument` is a :t:`generic argument` that supplies the
+:t:`lifetime` of a :t:`lifetime parameter`.
+
+:dp:`fls_d4vdvpihoeb1`
+A :t:`type argument` is a :t:`generic argument` that supplies the :t:`type` of
+a :t:`type parameter`.
 
 :dp:`fls_ukarc98ceesz`
 :t:`[Generic argument]s` are subject to :t:`generic conformance`.
@@ -408,8 +408,8 @@ supplied :t:`type` of the :t:`binding argument` fulfills the required
 
 :dp:`fls_gb3mpt5rxjoa`
 A :t:`constant argument` is conformant with a :t:`constant parameter` when
-the :t:`[type]s` of the :t:`constant argument` and :t:`constant parameter` are
-:t:`unifiable`.
+the :t:`[type]s` of the :t:`constant argument` and the :t:`constant parameter`
+are :t:`unifiable`.
 
 :dp:`fls_kdeltu9dsd0d`
 A :t:`lifetime argument` is conformant with a :t:`lifetime parameter` when it
@@ -426,8 +426,7 @@ of the :t:`type parameter`.
 * :dp:`fls_91bylteu35bi`
   The :t:`[generic argument]s` consist only of conformant
   :t:`[binding argument]s`, conformant :t:`[constant argument]s`, conformant
-  :t:`[lifetime argument]s`, conformant :t:`[type argument]s`, and conformant
-  :t:`[binding argument]s`, and
+  :t:`[lifetime argument]s`, and conformant :t:`[type argument]s`, and
 
 * :dp:`fls_j6xtrxc6aik`
   Any remaining :t:`[generic parameter]s` without corresponding conformant

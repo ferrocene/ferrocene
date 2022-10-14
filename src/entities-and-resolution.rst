@@ -1620,8 +1620,8 @@ in left-to-right order, as follows:
 :t:`path segment` and a :t:`trait` or :t:`type` proceeds as follows:
 
 #. :dp:`fls_bcqe13q696zg`
-   For each :t:`inherent implementation` in the set of :t:`[inherent
-   implementation]s` of the :t:`trait` or :t:`type` where the
+   For each :t:`inherent implementation` in the set of
+   :t:`[inherent implementation]s` of the :t:`trait` or :t:`type` where the
    :t:`implementing type` :t:`unifies <unify>` with the :t:`trait` or :t:`type`
 
    #. :dp:`fls_3sceutaqpqha`

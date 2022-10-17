@@ -177,7 +177,7 @@ Boolean :t:`value` ``false`` has bit pattern ``0x00``. Boolean :t:`value`
 ``true`` has bit pattern ``0x01``.
 
 :dp:`fls_7nd5tixyqir8`
-The following operations are defined on :t:`[value]s` of :t:`type` :c:`bool`:
+The following operations are defined on :t:`type` :c:`bool`:
 
 :dp:`fls_w2dzqq54fjhb`
 **Logical not**

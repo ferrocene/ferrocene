@@ -682,12 +682,12 @@ When a :t:`drop scope` is left, all :t:`[value]s` associated with that
 When a :t:`drop scope` of a :t:`function` is left, then each
 :t:`function parameter` is :t:`dropped` from right to left as follows:
 
-# :dp:`fls_K8whhUwAUVqR`
-  All :t:`[binding]s` introduced by the :t:`pattern` of the
-  :t:`function parameter` are :t:`dropped` in reverse declaration order,
+#. :dp:`fls_K8whhUwAUVqR`
+   All :t:`[binding]s` introduced by the :t:`pattern` of the
+   :t:`function parameter` are :t:`dropped` in reverse declaration order,
 
-# :dp:`fls_NpCrm4t03oQg`
-  The :t:`value` of the :t:`function parameter` is :t:`dropped`.
+#. :dp:`fls_NpCrm4t03oQg`
+   The :t:`value` of the :t:`function parameter` is :t:`dropped`.
 
 :dp:`fls_3i348l3pbtrx`
 When multiple :t:`[drop scope]s` are left at once, the :t:`[value]s` are

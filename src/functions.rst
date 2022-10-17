@@ -64,7 +64,7 @@ A :t:`function` shall not be subject to both :t:`keyword` ``async`` and
 
 :dp:`fls_uwuthzfgslif`
 A :t:`function parameter` is a :t:`construct` that yields a set of
-:t:`[binding]s` that bind matched input :t:`values` to :t:`[name]s` at the
+:t:`[binding]s` that bind matched input :t:`[value]s` to :t:`[name]s` at the
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_ymeo93t4mz4`
@@ -76,8 +76,8 @@ A :t:`function` shall not specify a :t:`self parameter` unless it is an
 :t:`associated function`.
 
 :dp:`fls_icdzs1mjh0n4`
-A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless it
-is an :t:`external function`.
+A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless
+it is an :t:`external function`.
 
 :dp:`fls_lxzinvqveuqh`
 The :t:`pattern` of a :t:`function parameter` shall be an :t:`irrefutable
@@ -91,26 +91,27 @@ A :t:`function body` is the :t:`block expression` of a :t:`function`.
 
 :dp:`fls_yfm0jh62oaxr`
 A :t:`function` shall have a :t:`function body` unless it is an
-:t:`associated trait function` or :t:`external function`.
+:t:`associated trait function` or an :t:`external function`.
 
 :dp:`fls_bHwy8FLzEUi3`
 A :t:`function body` denotes a :t:`control flow boundary`.
 
 :dp:`fls_5Q861wb08DU3`
-A :t:`function body` of an :t:`async function` denotes an :t:`async control flow boundary`.
+A :t:`function body` of an :t:`async function` denotes an
+:t:`async control flow boundary`.
 
 :dp:`fls_owdlsaaygtho`
 A :t:`function signature` is a unique identification of a :t:`function`
-that encompasses of its :t:`[function qualifier]s`, :t:`name`, :t:`[generic
-parameter]s`, :t:`[function parameter]s`, :t:`return type`, and :t:`where
-clause`.
+that encompasses of its :t:`[function qualifier]s`, :t:`name`,
+:t:`[generic parameter]s`, :t:`[function parameter]s`, :t:`return type`, and
+:t:`where clause`.
 
 :dp:`fls_2049qu3ji5x7`
 A :t:`constant function` is a :t:`function` subject to :t:`keyword` ``const``.
 
 :dp:`fls_7mlanuh5mvpn`
-The :t:`function body` of a :t:`constant function` shall be a :t:`constant
-expression`.
+The :t:`function body` of a :t:`constant function` shall be a
+:t:`constant expression`.
 
 :dp:`fls_otr3hgp8lj1q`
 A :t:`constant function` shall be callable from a :t:`constant context`.

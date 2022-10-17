@@ -32,8 +32,8 @@ An :t:`empty statement` is a :t:`statement` expressed as character 0x3B
 (semicolon).
 
 :dp:`fls_or125cqtxg9j`
-A :t:`macro statement` is a :t:`statement` expressed as a :t:`terminated macro
-invocation`.
+A :t:`macro statement` is a :t:`statement` expressed as a
+:t:`terminated macro invocation`.
 
 .. rubric:: Dynamic Semantics
 
@@ -63,7 +63,7 @@ A :t:`let statement` is a :t:`statement` that introduces new :t:`[binding]s`
 produced by its :t:`pattern-without-alternation`.
 
 :dp:`fls_1prqh1trybwz`
-The :t:`type` of a :t:`variable` introduced by a :t:`let statement` is
+The :t:`type` of a :t:`binding` introduced by a :t:`let statement` is
 determined as follows:
 
 * :dp:`fls_djkm8r2iuu6u`
@@ -75,7 +75,7 @@ determined as follows:
   inferred using :t:`type inference`.
 
 :dp:`fls_m8a7gesa4oim`
-The :t:`value` of a :t:`variable` introduced by a :t:`let statement` is
+The :t:`value` of a :t:`binding` introduced by a :t:`let statement` is
 determined as follows:
 
 * :dp:`fls_oaxnre7m9s10`

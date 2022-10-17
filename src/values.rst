@@ -26,7 +26,7 @@ Two :t:`[value]s` :t:`overlap` when
 
 * :dp:`fls_dfr4yqo93fsn`
   One :t:`value` denotes an :t:`array` and the other denotes an element of the
-  same :t:`array`, or
+  same :t:`value`, or
 
 * :dp:`fls_eoak5mdl6ma`
   Both :t:`[value]s` are elements of the same :t:`array`.
@@ -82,12 +82,12 @@ A :t:`constant` shall have a :t:`constant initializer`, unless it is an
 :t:`associated trait constant`.
 
 :dp:`fls_vnc3ttnid1qr`
-The :t:`expression` of a :t:`constant initializer` shall be a :t:`constant
-expression`.
+The :t:`expression` of a :t:`constant initializer` shall be a
+:t:`constant expression`.
 
 :dp:`fls_deuo1pn8cjd6`
-The value of a :t:`constant` is determined by evaluating its :t:`constant
-initializer`.
+The value of a :t:`constant` is determined by evaluating its
+:t:`constant initializer`.
 
 :dp:`fls_5x0jv4cgbolx`
 A use of a :t:`constant` is a :t:`value expression` and creates a copy of the
@@ -159,12 +159,12 @@ A :t:`static initializer` is a :t:`construct` that provides the :t:`value` of
 its related :t:`static`.
 
 :dp:`fls_yq0hpy4jx2qb`
-A :t:`static` shall have a :t:`static initializer`, unless it is an :t:`external
-static`.
+A :t:`static` shall have a :t:`static initializer`, unless it is an
+:t:`external static`.
 
 :dp:`fls_vgidvfwzm4ks`
-The :t:`expression` of a :t:`static initializer` shall be a :t:`constant
-expression`.
+The :t:`expression` of a :t:`static initializer` shall be a
+:t:`constant expression`.
 
 :dp:`fls_8dcldbvu7lav`
 A use of a :t:`static` is a :t:`place expression` referring to the unique
@@ -222,11 +222,11 @@ stack.
 :dp:`fls_vgi0gh5zmoiu`
 The following :t:`[construct]s` are :t:`[variable]s`:
 
-* :dp:`fls_3p0sb9ppmg3w`
-  A :t:`temporary`.
-
 * :dp:`fls_81dlbula47nu`
   A :t:`binding`.
+
+* :dp:`fls_3p0sb9ppmg3w`
+  A :t:`temporary`.
 
 :dp:`fls_r9km9f969bu8`
 A :t:`variable` shall be used only after it has been initialized through all
@@ -267,8 +267,8 @@ into a :t:`constant`.
   evaluation, and
 
 * :dp:`fls_3BGncWvMumEt`
-  The :t:`value expression` is the :t:`operand` of an :t:`immutable borrow
-  expression`.
+  The :t:`value expression` is the :t:`operand` of an
+  :t:`immutable borrow expression`.
 
 :dp:`fls_m690b8qg9d9r`
 :t:`Constant promotion` is always possible for :t:`expression` ``&mut []``,

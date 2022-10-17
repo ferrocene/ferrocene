@@ -3064,8 +3064,7 @@ infinite loop expression
 
 :dp:`fls_mvplpa4t1f2p`
 An :dt:`infinite loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`loop body` indefinitely unless :t:`terminated` by a
-:t:`break expression` or a :t:`return expression`.
+evaluate its :t:`loop body` indefinitely.
 
 :dp:`fls_2gipk6b62hme`
 See :s:`InfiniteLoopExpression`.

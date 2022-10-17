@@ -3679,8 +3679,7 @@ Infinite Loops
 
 :dp:`fls_p11qw6mtxlda`
 An :t:`infinite loop expression` is a :t:`loop expression` that continues to
-evaluate its :t:`loop body` indefinitely unless :t:`terminated` by a
-:t:`break expression` or a :t:`return expression`.
+evaluate its :t:`loop body` indefinitely.
 
 :dp:`fls_b314wjbv0zwe`
 The :t:`type` of a :t:`infinite loop expression` is determined as follows:

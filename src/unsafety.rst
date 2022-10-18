@@ -37,8 +37,8 @@ The :t:`[unsafe operation]s` are:
   Calling an :t:`unsafe function`.
 
 :dp:`fls_jb6krd90tjmc`
-An :t:`unsafe context` is either an :t:`unsafe block` or an :t:`unsafe
-function`.
+An :t:`unsafe context` is either an :t:`unsafe block` or an
+:t:`unsafe function`.
 
 :dp:`fls_ybnpe7ppq1vh`
 An :t:`unsafe operation` shall be used only within an :t:`unsafe context`.

@@ -173,10 +173,6 @@ External Functions
 
 .. rubric:: Legality Rules
 
-:dp:`fls_w00qi1gx204e`
-:t:`[External function]s` and :t:`[external static]s` inherit the :t:`ABI` of
-their enclosing :t:`external block`.
-
 :dp:`fls_v24ino4hix3m`
 An :t:`external function` is an unchecked import of a foreign :t:`function`.
 
@@ -186,6 +182,10 @@ An :t:`external function` shall be invoked from an :t:`unsafe context`.
 :dp:`fls_qwchgvvnp0qe`
 An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
 
+:dp:`fls_w00qi1gx204e`
+An :t:`external function` inherits the :t:`ABI` of its enclosing 
+:t:`external block`.
+
 :dp:`fls_m7tu4w4lk8v`
 An :t:`external function` shall not specify a :s:`GenericParameterList`
 containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
@@ -194,8 +194,8 @@ containing :t:`[constant parameter]s` or :t:`[type parameter]s`.
 An :t:`external function` shall not specify a :s:`FunctionBody`.
 
 :dp:`fls_9div9yusw64h`
-An :t:`external function` shall not specify patterns other than identifier
-patterns and underscore patterns.
+An :t:`external function` shall not specify :t:`[pattern]s` other than
+:t:`[identifier pattern]s` and :t:`[underscore pattern]s`.
 
 :dp:`fls_juob30rst11r`
 Only the last parameter :s:`FunctionParameter` of an :t:`external function` may
@@ -210,6 +210,10 @@ External Statics
 
 :dp:`fls_8ddsytjr4il6`
 An :t:`external static` is an import of a foreign :t:`variable`.
+
+:dp:`fls_H0cg9XMaGz0y`
+An :t:`external static` inherits the :t:`ABI` of its enclosing
+:t:`external block`.
 
 :dp:`fls_fo9with6xumo`
 An :t:`external static` shall be referenced from an :t:`unsafe context`.

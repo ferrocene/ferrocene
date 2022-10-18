@@ -2080,8 +2080,8 @@ The following :t:`[expression]s` are considered :t:`[type inference root]s`:
   The :t:`size operand` of an :t:`array expression` or an :t:`array type`.
 
 :dp:`fls_J77VeAlD8rsv`
-A :t:`type inference root` imposes an :dt:`expected type` depending on the
-:t:`type inference root` as follows:
+A :t:`type inference root` imposes an :dt:`expected type` on its :t:`expression`
+depending on the :t:`type inference root` as follows:
 
 * :dp:`fls_P9uiamxA4HE3`
   The :t:`expected type` of a :t:`constant argument` is the :t:`type ascription`

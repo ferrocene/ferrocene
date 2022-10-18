@@ -33,8 +33,8 @@ Send and Sync
 
 :dp:`fls_n5l17mlglq11`
 The Rust programming language provides synchronization facilities for
-:t:`[type]s` through the :std:`core::marker::Send` :t:`trait` and the
-:std:`core::marker::Sync` :t:`trait`.
+:t:`[type]s` through the :std:`core::marker::Send` and
+:std:`core::marker::Sync` :t:`[trait]s`.
 
 :dp:`fls_2jujsujpjp3w`
 A :t:`send type` is a :t:`type` that implements the :std:`core::marker::Send`
@@ -136,8 +136,8 @@ A :t:`future` represents a :t:`value` of a :t:`type` that implements the
 yet.
 
 :dp:`fls_7muubin2wn1v`
-The computed :t:`value` of a :t:`future` is obtained by using an :t:`await
-expression` or by invoking :std:`core::future::Future::poll`.
+The computed :t:`value` of a :t:`future` is obtained by using an
+:t:`await expression` or by invoking :std:`core::future::Future::poll`.
 
 :dp:`fls_ftzey2156ha`
 :std:`core::future::Future::poll` shall not be invoked on a :t:`future` that has

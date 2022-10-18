@@ -15,11 +15,11 @@ The Rust programming language lacks exceptions and exception handlers. Instead,
 the language uses the following tiered error handling scheme:
 
 * :dp:`fls_ebangxc36t74`
-  A possibly absent :t:`value` is represented usually using :t:`enum`
+  A possibly absent :t:`value` is usually represented using :t:`enum`
   :std:`core::option::Option`.
 
 * :dp:`fls_ckeitwiv326r`
-  The result of a possibly erroneous computation is represented usually using
+  The result of a possibly erroneous computation is usually represented using
   :t:`enum` :std:`core::result::Result`.
 
 * :dp:`fls_eg0orgibg98m`
@@ -61,8 +61,8 @@ Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
 .. rubric:: Undefined Behavior
 
 :dp:`fls_krhb07mvojph`
-It is undefined behavior when a :t:`panic` crosses a :t:`foreign function
-interface` boundary.
+It is undefined behavior when a :t:`panic` crosses a
+:t:`foreign function interface` boundary.
 
 .. rubric:: Examples
 

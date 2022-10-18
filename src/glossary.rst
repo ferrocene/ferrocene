@@ -3927,7 +3927,8 @@ module
 ^^^^^^
 
 :dp:`fls_ujlsg58bskl5`
-A :dt:`module` is a container for zero or more :t:`[item]s`.
+A :dt:`module` is a container for zero or more :t:`[inner attribute]s`,
+:t:`[inner doc comment]s`, and :t:`[item]s`.
 
 :dp:`fls_os60q6vvm71c`
 See :s:`ModuleDeclaration`.

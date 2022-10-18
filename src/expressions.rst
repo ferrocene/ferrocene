@@ -371,7 +371,8 @@ program flow to diverge from the normal evaluation order.
   :t:`[Return expression]s`,
 
 * :dp:`fls_fU91m6DCB0ip`
-  :t:`[Loop expression]s` that do not contain any :t:`[break expression]s`,
+  :t:`[Loop expression]s` that are not the target of any
+  :t:`[break expression]s`,
 
 * :dp:`fls_4wDpAHhnWZAB`
   :t:`[Call expression]s` and :t:`[method call expression]s` if the :t:`return

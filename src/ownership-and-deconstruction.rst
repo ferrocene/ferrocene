@@ -127,7 +127,7 @@ allows the mutation of its :t:`referent`.
 
 :dp:`fls_hqxsuyn285he`
 The :t:`referent` of an :t:`immutable reference` shall be mutated only when the
-:t:`type of the `:t:`referent` is subject to :t:`interior mutability`.
+:t:`type` of the :t:`referent` is subject to :t:`interior mutability`.
 
 :dp:`fls_i1ny0k726a4a`
 While a :t:`mutable reference` is :t:`active`, no other :t:`reference` shall
@@ -159,23 +159,23 @@ A :t:`borrow` is a :t:`reference` produced by :t:`borrowing`.
 An :t:`implicit borrow` is a :t:`borrow` that is not present syntactically in
 program text. An :t:`implicit borrow` occurs in the following contexts:
 
-* :dp:`fls_kky9ufexrvaw`
-  The :t:`indexed array operand` of an :t:`index expression`,
-
 * :dp:`fls_nordokzfy36d`
   The :t:`call operand` of a :t:`call expression`,
 
-* :dp:`fls_yfmy4v5zlgw9`
-  The :t:`assigned operand` of a :t:`compound assignment expression`,
-
 * :dp:`fls_bjf3futso849`
   The :t:`[operand]s` of a :t:`comparison expression`,
+
+* :dp:`fls_yfmy4v5zlgw9`
+  The :t:`assigned operand` of a :t:`compound assignment expression`,
 
 * :dp:`fls_jv18y618j2s3`
   The :t:`operand` of a :t:`field access expression`,
 
 * :dp:`fls_g4i0jb27iryr`
   The :t:`operand` of a :t:`dereference expression`,
+
+* :dp:`fls_kky9ufexrvaw`
+  The :t:`indexed operand` of an :t:`index expression`,
 
 * :dp:`fls_o5oq4jfswr4q`
   The :t:`receiver operand` of a :t:`method call expression`.
@@ -205,14 +205,14 @@ Immutably :t:`borrowing` a :t:`value` proceeds as follows:
 #. :dp:`fls_8q5ly4x104ai`
    An :t:`immutable borrow` of :t:`type` ``&'a T`` is created, where
    :t:`lifetime` ``'a`` is replaced by a :t:`lifetime inference variable`, and
-   :t:`T` is replaced by the borrowed :t:`type`.
+   ``T`` is replaced by the borrowed :t:`type`.
 
 #. :dp:`fls_yhchu2bpil4m`
    Lifetime inference is performed.
 
 #. :dp:`fls_568o7nyihndd`
-   The :t:`immutable borrow` is checked against other :t:`[borrow]s` and :t:`by
-   move` passing within the enclosing :t:`item`.
+   The :t:`immutable borrow` is checked against other :t:`[borrow]s` and
+   :t:`by move` passing within the enclosing :t:`item`.
 
 :dp:`fls_g4aefz28pl04`
 Uniquely immutably :t:`borrowing` a :t:`value` proceeds as follows:
@@ -226,14 +226,14 @@ Mutably :t:`borrowing` a :t:`value` proceeds as follows:
 #. :dp:`fls_w5bjgaov8w60`
    A :t:`mutable borrow` of :t:`type` ``&'a mut T`` is created, where
    :t:`lifetime` ``'a`` is replaced by a :t:`lifetime inference variable`, and
-   :t:`T` is replaced by the borrowed :t:`type`.
+   ``T`` is replaced by the borrowed :t:`type`.
 
 #. :dp:`fls_gbqizu6gu6kk`
    Lifetime inference is performed.
 
 #. :dp:`fls_ovkkxeybumvt`
-   The :t:`mutable borrow` is checked against other :t:`[borrow]s` and :t:`by
-   move` passing within the enclosing :t:`item`.
+   The :t:`mutable borrow` is checked against other :t:`[borrow]s` and
+   :t:`by move` passing within the enclosing :t:`item`.
 
 .. rubric:: Examples
 
@@ -266,25 +266,26 @@ A :t:`copy type` is a :t:`type` that implements the :std:`core::marker::Copy`
 :t:`trait`.
 
 :dp:`fls_yx2knbby70fy`
-A :t:`value` of a :t:`copy type` is :t:`passed <passing convention>` :dt:`by
-copy`. Passing :t:`by copy` does not change the :t:`owner` of the :t:`value`.
+A :t:`value` of a :t:`copy type` is :t:`passed <passing convention>`
+:dt:`by copy`. Passing :t:`by copy` does not change the :t:`owner` of the
+:t:`value`.
 
 :dp:`fls_6ul3f6v0foma`
 A :t:`move type` is a :t:`type` that implements the :std:`core::marker::Sized`
-:t:`trait` and that is not a :t:`copy type`.
+:t:`trait` and is not a :t:`copy type`.
 
 :dp:`fls_3ztdz02efeoc`
-A :t:`value` of a :t:`move type` is :t:`passed <passing convention>` :dt:`by
-move`. Passing :t:`by move` changes the :t:`owner` of the :t:`value`.
+A :t:`value` of a :t:`move type` is :t:`passed <passing convention>`
+:dt:`by move`. Passing :t:`by move` changes the :t:`owner` of the :t:`value`.
 
 :dp:`fls_konzgoybhfqm`
-A :t:`value` of a :t:`place expression` shall be :t:`passed <passing
-convention>` :t:`by move` only when it denotes:
+A :t:`value` of a :t:`place expression` shall be
+:t:`passed <passing convention>` :t:`by move` only when it denotes:
 
 * :dp:`fls_4bnbv7mqod57`
-  A :t:`field` of a :t:`place expression` that can be :t:`passed <passing
-  convention>` :t:`by move` and whose :t:`type` does not implement the
-  :std:`core::ops::Drop` :t:`trait`, or
+  A :t:`field` of a :t:`place expression` that can be
+  :t:`passed <passing convention>` :t:`by move` and whose :t:`type` does not
+  implement the :std:`core::ops::Drop` :t:`trait`, or
 
 * :dp:`fls_3xk3p1unbjy5`
   A :t:`temporary`, or
@@ -310,7 +311,7 @@ Passing a :t:`value` :t:`by copy` from a source :t:`owner` to a target
    The :t:`value` of the source :t:`owner` is copied.
 
 #. :dp:`fls_459xx6febmf0`
-   The copy of is assigned to the target :t:`owner`.
+   The copy is assigned to the target :t:`owner`.
 
 :dp:`fls_3xyq50abdiv6`
 Passing a :t:`value` :t:`by move` from a source :t:`owner` to a target
@@ -456,9 +457,9 @@ Drop Scopes
 
 :dp:`fls_7uav7vkcv4pz`
 A :t:`drop scope` is a region of program text that governs the :t:`dropping` of
-:t:`[object]s`. When control flow leaves a :t:`drop scope`, all :t:`[object]s`
-associated with that :t:`drop scope` are :t:`dropped` based on a :t:`drop
-order`.
+:t:`[value]s`. When control flow leaves a :t:`drop scope`, all :t:`[value]s`
+associated with that :t:`drop scope` are :t:`dropped` based on a
+:t:`drop order`.
 
 :dp:`fls_txvxrn6wbyql`
 A :t:`drop construct` is a :t:`construct` that employs a :t:`drop scope`. The
@@ -500,8 +501,8 @@ following :t:`[construct]s` are :t:`[drop construct]s`:
 
 * :dp:`fls_lbsfhg42yiqy`
   The parent :t:`drop scope` of the :t:`operand` of a :t:`match arm guard` is
-  the :t:`drop scope` of the :t:`match arm` that contains the :t:`match arm
-  guard`.
+  the :t:`drop scope` of the :t:`match arm` that contains the
+  :t:`match arm guard`.
 
 * :dp:`fls_5m3u3k6f00bd`
   The parent :t:`drop scope` of the :t:`operand` of a :t:`match arm` is the
@@ -512,30 +513,31 @@ following :t:`[construct]s` are :t:`[drop construct]s`:
   related :t:`match expression`.
 
 * :dp:`fls_bewcu5xceu8i`
-  The parent :t:`drop scope` of all other :t:`[drop scope]s` is the :t:`drop
-  scope` of the immediately enclosing :t:`expression`.
+  The parent :t:`drop scope` of all other :t:`[drop scope]s` is the
+  :t:`drop scope` of the immediately enclosing :t:`expression`.
 
-:dp:`fls_vrqgac634wpr`
-A :t:`binding` declared in a :t:`let statement` is associated with the :t:`drop
-scope` of the :t:`block expression` that contains the :t:`let statement`.
-
-:dp:`fls_fnvr5w2wzxns`
-A :t:`binding` declared in a :t:`match expression` is associated with the
-:t:`drop scope` of the :t:`match arm` of the :t:`match expression`.
+:dp:`fls_iHHhlxCiqNWZ`
+A :t:`binding` declared in a :t:`for loop expression` is associated with
+the :t:`drop scope` of the :t:`block expression` of the
+:t:`for loop expression`.
 
 :dp:`fls_swXXkbZGLPKa`
 A :t:`binding` declared in an :t:`if let expression` is associated with the
 :t:`drop scope` of the :t:`block expression` of the :t:`if let expression`.
 
+:dp:`fls_vrqgac634wpr`
+A :t:`binding` declared in a :t:`let statement` is associated with the
+:t:`drop scope` of the :t:`block expression` that contains the
+:t:`let statement`.
+
+:dp:`fls_fnvr5w2wzxns`
+A :t:`binding` declared in a :t:`match expression` is associated with the
+:t:`drop scope` of the :t:`match arm` of the :t:`match expression`.
+
 :dp:`fls_1vZFa5mDEbXW`
 A :t:`binding` declared in a :t:`while let loop expression` is associated with
-the :t:`drop scope` of the :t:`block expression` of the :t:`while let loop
-expression`.
-
-:dp:`fls_iHHhlxCiqNWZ`
-A :t:`binding` declared in a :t:`for loop expression` is associated with
-the :t:`drop scope` of the :t:`block expression` of the :t:`for loop
-expression`.
+the :t:`drop scope` of the :t:`block expression` of the
+:t:`while let loop expression`.
 
 :dp:`fls_3jtU8grRaMM9`
 A :t:`value` or :t:`binding` of a :t:`function parameter` is associated with the
@@ -564,8 +566,8 @@ possible :t:`[drop scope]s` are as follows:
   The :t:`drop scope` of the :t:`subject expression` of an :t:`if expression`.
 
 * :dp:`fls_8cunkfc6x24q`
-  The :t:`drop scope` of the :t:`iteration expression` of a :t:`while loop
-  expression`.
+  The :t:`drop scope` of the :t:`iteration expression` of a
+  :t:`while loop expression`.
 
 * :dp:`fls_n108lvc4otoc`
   The :t:`drop scope` of the :t:`operand` of a :t:`match arm`.
@@ -574,8 +576,8 @@ possible :t:`[drop scope]s` are as follows:
   The :t:`drop scope` of the :t:`operand` of a :t:`match arm guard`.
 
 * :dp:`fls_dltmd8e8c5ia`
-  The :t:`drop scope` of the :t:`right operand` of a :t:`lazy boolean
-  expression`.
+  The :t:`drop scope` of the :t:`right operand` of a
+  :t:`lazy boolean expression`.
 
 .. _fls_5eima0pd31c0:
 
@@ -596,15 +598,15 @@ An :dt:`extending pattern` is either
   A :t:`reference identifier pattern`, or
 
 * :dp:`fls_r8nt0zp8dnyp`
-  A :t:`slice pattern`, a :t:`struct pattern`, :t:`tuple pattern` or a :t:`tuple
-  struct pattern` that contains at least one :t:`subpattern` that is an
-  :t:`extending pattern`.
+  A :t:`slice pattern`, a :t:`struct pattern`, :t:`tuple pattern` or a
+  :t:`tuple struct pattern` that contains at least one :t:`subpattern` that is
+  an :t:`extending pattern`.
 
 :dp:`fls_3ycn4u1fe9h`
 If the :t:`pattern-without-alternation` of a :t:`let statement` is an
 :t:`extending pattern`, then the :t:`drop scope` of the :t:`expression` of
-the :t:`let statement` is extended to the :t:`drop scope` of the :t:`block
-expression` that contains the :t:`let statement`.
+the :t:`let statement` is extended to the :t:`drop scope` of the
+:t:`block expression` that contains the :t:`let statement`.
 
 :dp:`fls_wyzau8hhq74d`
 An :dt:`extending expression` is either
@@ -613,18 +615,18 @@ An :dt:`extending expression` is either
   The :t:`expression` of a :t:`let statement`, or
 
 * :dp:`fls_gjd1ow3l7swe`
-  The :t:`operand` of an :t:`extending expression` that is :t:`array
-  expression`, a :t:`borrow expression`, a :t:`type cast expression`, a :t:`struct
-  expression`, or a :t:`tuple expression`, or
+  The :t:`operand` of an :t:`extending expression` that is an
+  :t:`array expression`, a :t:`borrow expression`, a :t:`struct expression`, a
+  :t:`tuple expression`, or a :t:`type cast expression`, or
 
 * :dp:`fls_iqw0d1l1lj3i`
-  The :t:`tail expression` of a :t:`block expression` that is an :t:`extending
-  expression`.
+  The :t:`tail expression` of a :t:`block expression` that is an
+  :t:`extending expression`.
 
 :dp:`fls_aq01wjpkxhq9`
 The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression` that is an
-:t:`extending expression` is extended to the :t:`drop scope` of the :t:`block
-expression` that contains the :t:`let statement`.
+:t:`extending expression` is extended to the :t:`drop scope` of the
+:t:`block expression` that contains the :t:`let statement`.
 
 :dp:`fls_VDPi1dJzJMUb`
 The :t:`drop scope` of the :t:`operand` of a :t:`borrow expression`, a
@@ -663,34 +665,34 @@ Drop Order
 .. rubric:: Legality Rules
 
 :dp:`fls_n6o1xzjiz8cv`
-:t:`Drop order` is the order by which :t:`[object]s` are :t:`dropped` when a
+:t:`Drop order` is the order by which :t:`[value]s` are :t:`dropped` when a
 :t:`drop scope` is left.
 
 :dp:`fls_jwofws3022ar`
-When a :t:`drop scope` is left, all :t:`[object]s` associated with that :t:`drop
-scope` are :t:`dropped` as follows:
+When a :t:`drop scope` is left, all :t:`[value]s` associated with that
+:t:`drop scope` are :t:`dropped` as follows:
 
 * :dp:`fls_g07zq3n55094`
-  :t:`[Bindings]s` are :t:`dropped` in reverse declaration order.
+  :t:`[Binding]s` are :t:`dropped` in reverse declaration order.
 
 * :dp:`fls_a5tmilqxdb6f`
-  :t:`[Temporaries <temporary>]` are :t:`dropped` in reverse creation order.
+  :t:`Temporaries <temporary>` are :t:`dropped` in reverse creation order.
 
 :dp:`fls_zQGkVGWIzMQ7`
-When a :t:`drop scope` of a :t:`function` is left, then each :t:`function
-parameter` is :t:`dropped` from right to left as follows:
+When a :t:`drop scope` of a :t:`function` is left, then each
+:t:`function parameter` is :t:`dropped` from right to left as follows:
 
-* :dp:`fls_K8whhUwAUVqR`
-  All :t:`[binding]s` introduced by the :t:`pattern` of the :t:`function parameter`
-  are :t:`dropped` in reverse declaration order,
+#. :dp:`fls_K8whhUwAUVqR`
+   All :t:`[binding]s` introduced by the :t:`pattern` of the
+   :t:`function parameter` are :t:`dropped` in reverse declaration order,
 
-* :dp:`fls_NpCrm4t03oQg`
-  and then the :t:`value` of the :t:`function parameter` is :t:`dropped`.
+#. :dp:`fls_NpCrm4t03oQg`
+   The :t:`value` of the :t:`function parameter` is :t:`dropped`.
 
 :dp:`fls_3i348l3pbtrx`
-When multiple :t:`[drop scope]s` are left at once, the :t:`[object]s` are
-:t:`dropped` from the innermost :t:`drop scope` to the outermost :t:`drop
-scope`.
+When multiple :t:`[drop scope]s` are left at once, the :t:`[value]s` are
+:t:`dropped` from the innermost :t:`drop scope` to the outermost
+:t:`drop scope`.
 
 .. rubric:: Examples
 

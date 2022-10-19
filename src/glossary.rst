@@ -1619,6 +1619,24 @@ discriminant type
 :dp:`fls_t4yeovFm83Wo`
 A :dt:`discriminant type` is the :t:`type` of a :t:`discriminant`.
 
+.. _fls_gDFsAj1Bvx7A:
+
+diverging expression
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_fLlNzmB34cj9`
+A :dt:`diverging expression` is an :t:`expression` whose :t:`evaluation` causes
+program flow to diverge from the normal :t:`evaluation` order.
+
+.. _fls_9DuaIn6cRbXf:
+
+diverging type variable
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_sxyL7yOp3H9s`
+A :dt:`diverging type variable` is a :t:`type variable` that can refer to any
+:t:`type` and originates from a :t:`diverging expression`.
+
 .. _fls_0lpT9Ncj7S9X:
 
 division assignment
@@ -6553,7 +6571,8 @@ type variable
 ^^^^^^^^^^^^^
 
 :dp:`fls_j9eusnwze4rz`
-A :dt:`type variable` is a placeholder for a :t:`type`.
+A :t:`type variable` is a placeholder used during :t:`type inference` to stand
+in for an undetermined :t:`type`.
 
 .. _fls_44uvj9l7q98z:
 

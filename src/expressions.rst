@@ -350,6 +350,41 @@ control reaches the invocation of :t:`macro` :std:`core::panic`.
 The invocation of a :t:`constant function` follows the dynamic semantics of a
 :t:`non-[constant function]` invocation.
 
+.. _fls_zJOAmSr3Dbqk:
+
+Diverging Expressions
+~~~~~~~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_oth9vFtcb9l4`
+A :t:`diverging expression` is an :t:`expression` whose :t:`evaluation` causes
+program flow to diverge from the normal :t:`evaluation` order.
+
+:dp:`fls_cmBVodJMjZi7`
+:t:`[Diverging expression]s` are:
+
+* :dp:`fls_xsOgdiIzysP1`
+  :t:`[Break expression]s`,
+
+* :dp:`fls_xqxdHziqgWf5`
+  :t:`[Return expression]s`,
+
+* :dp:`fls_fU91m6DCB0ip`
+  :t:`[Loop expression]s` that are not the target of any
+  :t:`[break expression]s`,
+
+* :dp:`fls_4wDpAHhnWZAB`
+  :t:`[Call expression]s` and :t:`[method call expression]s` if the :t:`return
+  type` of the :t:`call operand` is the :t:`never type`,
+
+* :dp:`fls_7HA5UThwjbQj`
+  Invocations of the :std:`core::panic` :t:`macro`,
+
+* :dp:`fls_pdDr8Lk1GQ0T`
+  Any :t:`expression` whose :t:`evaluation` requires the :t:`evaluation` of a
+  diverging :t:`subexpression` on all reachable control flow paths.
+
 .. _fls_6ydylimiv553:
 
 Place Expressions

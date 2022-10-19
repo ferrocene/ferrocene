@@ -2055,17 +2055,20 @@ Type Inference
 
 :dp:`fls_ybvrhh96fc7y`
 A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
-and :t:`[pattern]s` are subject to :t:`type inference` independently of other
-:t:`[type inference root]s`.
+and :t:`[pattern]s` are subject to :t:`type inference` independently of those
+found in other :t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
-The following :t:`[construct]s` are considered :t:`[type inference root]s`:
+The following :t:`[expression]s` are considered :t:`[type inference root]s`:
 
 * :dp:`fls_NYSzcvf5nQpi`
   A :t:`constant argument`.
 
 * :dp:`fls_htLp5J5ObgNh`
   A :t:`constant initializer`.
+
+* :dp:`fls_cPlCLGCcl7EK`
+  A :t:`static initializer`.
 
 * :dp:`fls_KphY5qHev0Dc`
   The :t:`discriminant initializer` of an :t:`enum variant`.
@@ -2076,22 +2079,61 @@ The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_A1NVYkepoaMk`
   The :t:`size operand` of an :t:`array expression` or an :t:`array type`.
 
-* :dp:`fls_cPlCLGCcl7EK`
-  A :t:`static initializer`.
-
 :dp:`fls_J77VeAlD8rsv`
-A :t:`type inference root` imposes an :dt:`expected type`.
+A :t:`type inference root` imposes an :dt:`expected type` on its :t:`expression`
+depending on the :t:`type inference root` as follows:
+
+* :dp:`fls_P9uiamxA4HE3`
+  The :t:`expected type` of a :t:`constant argument` is the :t:`type ascription`
+  of the :t:`constant parameter`.
+
+* :dp:`fls_5d4hw3gj4w4n`
+  The :t:`expected type` of the :t:`constant initializer` of a :t:`constant` is
+  the :t:`type` specified by its :t:`type ascription`.
+
+* :dp:`fls_qlovdtcj1v1b`
+  The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
+  :t:`type` specified by its :t:`type ascription`.
+
+* :dp:`fls_Z5gKFjZW5rRA`
+  The :t:`expected type` of the :t:`discriminant initializer` of an
+  :t:`enum variant` depends on the containing :t:`enum`:
+
+  * :dp:`fls_vYvumjTQH9Xg`
+    If the :t:`enum` is subject to :t:`attribute` :c:`repr` that specifies a
+    :t:`primitive representation`, the :t:`expected type` is the specified
+    :t:`primitive type`.
+  
+  * :dp:`fls_QaGKt99CmvF6`
+    Otherwise, the :t:`expected type` is :c:`isize`.
+
+* :dp:`fls_RJIeW597XRvS`
+  The :t:`expected type` of a :t:`function body` is the :t:`return type` of the
+  :t:`function`.
+
+* :dp:`fls_veG2D64fIXvo`
+  The :t:`expected type` of a :t:`size operand` of an :t:`array expression` or
+  an :t:`array type` is :c:`usize`.
 
 :dp:`fls_uvvn4usfsbhr`
-A :t:`type variable` is a placeholder for a :t:`type`.
+A :t:`type variable` is a placeholder used during :t:`type inference` to stand
+in for an undetermined :t:`type`.
 
 :dp:`fls_gDalJm1XS0mi`
 A :t:`global type variable` is a :t:`type variable` that can refer to any
 :t:`type`.
 
-:dp:`fls_5d4hw3gj4w4n`
-The :t:`expected type` of the :t:`constant initializer` of a :t:`constant` is
-the :t:`type` specified by its :t:`type ascription`.
+:dp:`fls_7ov36fpd9mwe`
+An :t:`integer type variable` is a :t:`type variable` that can refer only to
+:t:`[integer type]s`.
+
+:dp:`fls_3hv3wxkhjjp1`
+A :t:`floating-point type variable` is a :t:`type variable` that can refer only
+to :t:`[floating-point type]s`.
+
+:dp:`fls_bXQ63GYYDuMp`
+A :t:`diverging type variable` is a :t:`type variable` that can refer to any
+:t:`type` and originates from a :t:`diverging expression`.
 
 :dp:`fls_v6z48i1b7vxv`
 The :t:`expected type` of the initialization :t:`expression` of a :t:`let
@@ -2103,10 +2145,6 @@ statement` is determined as follows:
 
 #. :dp:`fls_7vdr0mh7kmpz`
    Otherwise the :t:`expected type` is a :t:`global type variable`.
-
-:dp:`fls_qlovdtcj1v1b`
-The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
-:t:`type` specified by its :t:`type ascription`.
 
 :dp:`fls_biyyicl3c3kn`
 :t:`[Arithmetic expression]s`, :t:`[await expression]s`,
@@ -2235,10 +2273,6 @@ A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
 A :t:`type resolving expression` provides a :dt:`resolving type`, which is the
 :t:`type` of the :t:`expression` itself.
 
-:dp:`fls_3hv3wxkhjjp1`
-A :t:`floating-point type variable` is a :t:`type variable` that can refer only
-to :t:`[floating-point type]s`.
-
 :dp:`fls_8zkvwpkgob6d`
 The :t:`resolving type` of a :t:`float literal` is determined as follows:
 
@@ -2248,10 +2282,6 @@ The :t:`resolving type` of a :t:`float literal` is determined as follows:
 
 #. :dp:`fls_gp9gcxiapfxv`
    Otherwise the :t:`resolving type` is a :t:`floating-point type variable`.
-
-:dp:`fls_7ov36fpd9mwe`
-An :t:`integer type variable` is a :t:`type variable` that can refer only to
-:t:`[integer type]s`.
 
 :dp:`fls_v9lyy98dgm98`
 The :t:`resolving type` of an :t:`integer literal` is determined as follows:

@@ -139,15 +139,15 @@ Metavariables
 
 :dp:`fls_g93r3teei8wo`
 :t:`[Declarative macro]s` employ :t:`[metavariable]s` to match a :t:`token` of
-a particular kind and bind its :t:`value` to a name for use during :t:`macro
-transcription`.
+a particular kind and bind its :t:`value` to a name for use during
+:t:`macro transcription`.
 
 :dp:`fls_4zdait30exvn`
 A :t:`metavariable` is a :t:`macro match` that describes a :t:`variable`.
 
 :dp:`fls_2HguXbL7DjKH`
-A :t:`metavariable` is visible in the :t:`macro transcriber` of the :t:`macro
-rule` of the :t:`macro matcher` it is declared in.
+A :t:`metavariable` is visible in the :t:`macro transcriber` of the
+:t:`macro rule` of the :t:`macro matcher` it is declared in.
 
 :dp:`fls_8zypylq60zba`
 A :t:`fragment specifier` is a :t:`construct` that indicates the :t:`type` of
@@ -155,7 +155,7 @@ a :t:`metavariable`.
 
 :dp:`fls_8o9mcV2KrKac`
 :t:`Fragment specifier` kinds impose the following
-:dt:`[fragment specifier restruction]s` on the :t:`[token]s` that follow them:
+:dt:`[fragment specifier restriction]s` on the :t:`[token]s` that follow them:
 
 * :dp:`fls_PxR9vNHsaFnI`
   ``expr`` shall only be followed by ``=>``, ``,``, or ``;``.
@@ -246,8 +246,8 @@ A :t:`macro repetition` is either a :t:`macro repetition in matching` or a
 
 :dp:`fls_u86j0zm2jshf`
 A :t:`repetition operator` is a :t:`construct` that indicates the number
-of times a :t:`macro repetition in matching` or a :t:`macro repetition in
-transcription` can be repeated.
+of times a :t:`macro repetition in matching` or a
+:t:`macro repetition in transcription` can be repeated.
 
 :dp:`fls_h5f8x4jdnvbu`
 The effects of a :t:`repetition operator` are as follows:
@@ -320,8 +320,8 @@ A :t:`macro implementation function` is the :t:`function` that encapsulates the
 syntactic transformations of a :t:`procedural macro`.
 
 :dp:`fls_mewfehvgm16r`
-A :t:`macro implementation function` enters the :t:`name` of the :t:`procedural
-macro` into the :t:`macro namespace`.
+A :t:`macro implementation function` enters the :t:`name` of the
+:t:`procedural macro` into the :t:`macro namespace`.
 
 .. _fls_2d6bqnpy6tvs:
 
@@ -339,35 +339,32 @@ The :t:`macro implementation function` of a :t:`function-like macro` shall be
 subject to the following restrictions:
 
 * :dp:`fls_ljkjmegynhiy`
-  The :t:`macro implementation function` shall be subject to :t:`attribute`
-  :c:`proc_macro`,
+  It shall be subject to :t:`attribute` :c:`proc_macro`,
 
 * :dp:`fls_8a8qhzjw5hax`
-  The :t:`macro implementation function` shall be subject to visibility modifier
-  ``pub``,
+  It shall be subject to :t:`visibility modifier` ``pub``,
 
 * :dp:`fls_ofzql79i9if`
-  The :t:`macro implementation function` shall lack :t:`[function qualifier]s`,
+  It shall lack :t:`[function qualifier]s`,
 
 * :dp:`fls_j1wsyzip2qb3`
-  The :t:`macro implementation function` shall lack :t:`[generic parameter]s`,
+  It shall lack :t:`[generic parameter]s`,
 
 * :dp:`fls_etyo9bmzxby6`
-  The :t:`macro implementation function` shall have a single :t:`function
-  parameter` whose :t:`type specification` indicates :t:`type`
-  :std:`proc_macro::TokenStream`,
+  It shall have a single :t:`function parameter` whose :t:`type specification`
+  indicates :t:`type` :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_mkl9b38m0sf1`
-  The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates :t:`type` :std:`proc_macro::TokenStream`.
+  It shall have a :t:`return type` whose :t:`type specification` indicates
+  :t:`type` :std:`proc_macro::TokenStream`.
 
 :dp:`fls_lfmb22bfnrye`
 A :t:`function-like macro` is invoked using a :t:`macro invocation`.
 
 :dp:`fls_fbgal48cgj44`
 The sole parameter of the :t:`macro implementation function` captures the
-:t:`token` stream produced from the :s:`DelimitedTokenTree` of the :t:`macro
-invocation`, excluding outer :s:`[Delimiter]s`.
+:t:`token` stream produced from the :s:`DelimitedTokenTree` of the
+:t:`macro invocation`, excluding outer :s:`[Delimiter]s`.
 
 .. rubric:: Examples
 
@@ -395,27 +392,24 @@ The :t:`macro implementation function` of a :t:`derive macro` shall be subject
 to the following restrictions:
 
 * :dp:`fls_7gcnui9beky`
-  The :t:`macro implementation function` shall be subject to :t:`attribute`
-  :c:`proc_macro_derive`,
+  It shall be subject to :t:`attribute` :c:`proc_macro_derive`,
 
 * :dp:`fls_ef30ropg7dhx`
-  The :t:`macro implementation function` shall be subject to visibility modifier
-  ``pub``,
+  It shall be subject to :t:`visibility modifier` ``pub``,
 
 * :dp:`fls_mo00vqm9xfqc`
-  The :t:`macro implementation function` shall lack :t:`[function qualifier]s`,
+  It shall lack :t:`[function qualifier]s`,
 
 * :dp:`fls_gr9wugeqyb3b`
-  The :t:`macro implementation function` shall lack :t:`[generic parameter]s`,
+  It shall lack :t:`[generic parameter]s`,
 
 * :dp:`fls_npnze2cg8ae`
-  The :t:`macro implementation function` shall have a single :t:`function
-  parameter` whose :t:`type specification` indicates :t:`type`
-  :std:`proc_macro::TokenStream`,
+  It shall have a single :t:`function parameter` whose :t:`type specification`
+  indicates :t:`type` :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_w2h4lk6bmht`
-  The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates :t:`type` :std:`proc_macro::TokenStream`.
+  It shall have a :t:`return type` whose :t:`type specification` indicates
+  :t:`type` :std:`proc_macro::TokenStream`.
 
 :dp:`fls_x96a0xzcyrko`
 A :t:`derive macro` is invoked using :t:`attribute` :c:`derive`.
@@ -453,35 +447,33 @@ Attribute Macros
 :dp:`fls_l3epi1dqpi8o`
 An :t:`attribute macro` is a :t:`procedural macro` that consumes two streams
 of :t:`[token]s` to produce a single stream of :t:`[token]s`, and defines a
-new :t:`outer attribute` that can be attached to :t:`[item]s`. :t:`[Attribute
-macro]s` are used to replace :t:`[item]s` with other :t:`[item]s`.
+new :t:`outer attribute` that can be attached to :t:`[item]s`.
+:t:`[Attribute macro]s` are used to replace :t:`[item]s` with other
+:t:`[item]s`.
 
 :dp:`fls_3sublbi9bz7k`
 The :t:`macro implementation function` of an :t:`attribute macro` shall be
 subject to the following restrictions:
 
 * :dp:`fls_eb8jxl70wmeh`
-  The :t:`macro implementation function` shall be subject to :t:`attribute`
-  :c:`proc_macro_attribute`,
+  It shall be subject to :t:`attribute` :c:`proc_macro_attribute`,
 
 * :dp:`fls_7ugtmobgb2t9`
-  The :t:`macro implementation function` shall be subject to visibility modifier
-  ``pub``,
+  It shall be subject to :t:`visibility modifier` ``pub``,
 
 * :dp:`fls_y700oif45wum`
-  The :t:`macro implementation function` shall lack :t:`[function qualifier]s`,
+  It shall lack :t:`[function qualifier]s`,
 
 * :dp:`fls_hhsf1a9p6o55`
-  The :t:`macro implementation function` shall lack :t:`[generic parameter]s`,
+  It shall lack :t:`[generic parameter]s`,
 
 * :dp:`fls_4g932k8ueyqp`
-  The :t:`macro implementation function` shall have two :t:`[function
-  parameter]s` whose :t:`[type specification]s` indicate :t:`type`
-  :std:`proc_macro::TokenStream`,
+  It shall have two :t:`[function parameter]s` whose :t:`[type specification]s`
+  indicate :t:`type` :std:`proc_macro::TokenStream`,
 
 * :dp:`fls_f5qy1pnlbpng`
-  The :t:`macro implementation function` shall have a :t:`return type` whose
-  :t:`type specification` indicates type :std:`proc_macro::TokenStream`.
+  It shall have a :t:`return type` whose :t:`type specification` indicates type
+  :std:`proc_macro::TokenStream`.
 
 :dp:`fls_rzn48xylk4yj`
 An :t:`attribute macro` is invoked using an :t:`attribute` of the form
@@ -545,8 +537,7 @@ Macro Invocation
 
 :dp:`fls_wushtmw9qt3y`
 A :ds:`NonDelimitedToken` is any :t:`lexical element` in category
-:s:`LexicalElement`, except delimiters ``(``, ``)``, ``[``, ``]``, ``{``, and
-``}``.
+:s:`LexicalElement`, except category :s:`Delimiter`.
 
 .. rubric:: Legality Rules
 
@@ -615,17 +606,17 @@ Macro Expansion
 .. rubric:: Legality Rules
 
 :dp:`fls_xscdaxvs4wx4`
-:t:`Macro expansion` is the process of statically executing a :t:`macro
-invocation` and replacing it with the produced output of the :t:`macro
-invocation`.
+:t:`Macro expansion` is the process of statically executing a
+:t:`macro invocation` and replacing it with the produced output of the
+:t:`macro invocation`.
 
 :dp:`fls_nz5stwcc41gk`
 :t:`Macro expansion` of :t:`[declarative macro]s` proceeds as follows:
 
 #. :dp:`fls_40xq8Ri1OMZZ`
-   The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s` contained within replaced by their
-   equivalent :t:`attribute` :c:`doc` representation.
+   The :s:`TokenTree` of the :t:`macro invocation` has all
+   :t:`[outer block doc]s` and :t:`[outer line doc]s` contained within replaced
+   by their equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_76prdp6k1fga`
    The :s:`TokenTree` of the :t:`macro invocation` is matched against the
@@ -639,14 +630,16 @@ invocation`.
    error if the :t:`macro transcriber` fails to produce its result.
 
 #. :dp:`fls_lakpily1zwfl`
-   The :t:`macro invocation` is replaced with the result of the :t:`macro
-   transcriber`. It is a static error if the result cannot be parsed according
-   to the expected expansion syntax of the context where the :t:`macro
-   invocation` resides. The expected expansion syntax is as follows:
+   The :t:`macro invocation` is replaced with the result of the
+   :t:`macro transcriber`. It is a static error if the result cannot be parsed
+   according to the expected expansion syntax of the context where the
+   :t:`macro invocation` resides. The expected expansion syntax is as follows:
 
-   #. :dp:`fls_3zn4dz19nyvq`
-      If the :t:`macro invocation` appears as part of a :t:`statement`, the
-      output is required to constitute zero or more :t:`[statement]s`.
+   #. :dp:`fls_y20pmwo3v3uu`
+      If the :t:`macro invocation` appears as part of an :t:`associated item`,
+      an :t:`item` within an :t:`external block`, or another
+      :t:`macro invocation`, the output is required to constitute zero or more
+      :t:`[item]s`.
 
    #. :dp:`fls_nsh2vwx8oiw`
       If the :t:`macro invocation` appears as part of an
@@ -658,11 +651,9 @@ invocation`.
       :t:`pattern-without-range`, the output is required to constitute zero or
       more :t:`[pattern]s`.
 
-   #. :dp:`fls_y20pmwo3v3uu`
-      If the :t:`macro invocation` appears as part of an :t:`associated item`,
-      an :t:`item` within an :t:`external block`, or another
-      :t:`macro invocation`, the output is required to constitute zero or more
-      :t:`[item]s`.
+   #. :dp:`fls_3zn4dz19nyvq`
+      If the :t:`macro invocation` appears as part of a :t:`statement`, the
+      output is required to constitute zero or more :t:`[statement]s`.
 
    #. :dp:`fls_t89sw6az99z7`
       If the :t:`macro invocation` appears as part of a
@@ -670,7 +661,7 @@ invocation`.
       constitute a :t:`type`.
 
 :dp:`fls_417hvhvj2554`
-Expansion of :t:`[function-like macro]s` proceeds as follows:
+:t:`Macro expansion` of :t:`[function-like macro]s` proceeds as follows:
 
 #. :dp:`fls_nNrs4EC3ff5T`
    The :s:`TokenTree` of the :t:`macro invocation` has all :t:`[outer block
@@ -693,9 +684,11 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
    to the expected expansion syntax of the context where the :t:`macro
    invocation` resides. The expected expansion syntax is as follows:
 
-   #. :dp:`fls_stseor6tln22`
-      If the :t:`macro invocation` appears as part of a :t:`statement`, the
-      output is required to constitute zero or more :t:`[statement]s`.
+   #. :dp:`fls_vd3dzvr6re19`
+      If the :t:`macro invocation` appears as part of an :t:`associated item`,
+      an :t:`item` within an :t:`external block`, or another
+      :t:`macro invocation`, the output is required to constitute zero or more
+      :t:`[item]s`.
 
    #. :dp:`fls_l8j2jiuuao4f`
       If the :t:`macro invocation` appears as part of an
@@ -707,11 +700,9 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
       :t:`pattern-without-range`, the output is required to constitute zero or
       more :t:`[pattern]s`.
 
-   #. :dp:`fls_vd3dzvr6re19`
-      If the :t:`macro invocation` appears as part of an :t:`associated item`,
-      an :t:`item` within an :t:`external block`, or another
-      :t:`macro invocation`, the output is required to constitute zero or more
-      :t:`[item]s`.
+   #. :dp:`fls_stseor6tln22`
+      If the :t:`macro invocation` appears as part of a :t:`statement`, the
+      output is required to constitute zero or more :t:`[statement]s`.
 
    #. :dp:`fls_u11o90szy68s`
       If the :t:`macro invocation` appears as part of a
@@ -719,12 +710,12 @@ Expansion of :t:`[function-like macro]s` proceeds as follows:
       constitute a :t:`type`.
 
 :dp:`fls_qi5kyvj1e8th`
-Expansion of :t:`[derive macro]s` proceeds as follows:
+:t:`Macro expansion` of :t:`[derive macro]s` proceeds as follows:
 
 #. :dp:`fls_vqIZaEl4EKu5`
-   The :t:`item` subject to the :t:`derive macro` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s` contained within replaced by their
-   equivalent :t:`attribute` :c:`doc` representation.
+   The :t:`item` subject to the :t:`derive macro` has all
+   :t:`[outer block doc]s` and :t:`[outer line doc]s` contained within replaced
+   by their equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_grtiwf7q8jah`
    The :t:`item` subject to the :t:`derive macro` is transformed into a
@@ -746,7 +737,7 @@ Expansion of :t:`[derive macro]s` proceeds as follows:
    or more :t:`[item]s`.
 
 :dp:`fls_zat7kwi5vc5c`
-The expansion of :t:`[attribute macro]s` proceeds as follows:
+:t:`Macro expansion` of :t:`[attribute macro]s` proceeds as follows:
 
 #. :dp:`fls_tjn92evtlflq`
    The :s:`DelimitedTokenTree` of the invoking :t:`attribute macro` is
@@ -757,9 +748,9 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
    of the :t:`macro implementation function`.
 
 #. :dp:`fls_AJmPrhHfZo6J`
-   The :t:`item` subject to the :t:`attribute macro` has all :t:`[outer block
-   doc]s` and :t:`[outer line doc]s` contained within replaced by their
-   equivalent :t:`attribute` :c:`doc` representation.
+   The :t:`item` subject to the :t:`attribute macro` has all
+   :t:`[outer block doc]s` and :t:`[outer line doc]s` contained within replaced
+   by their equivalent :t:`attribute` :c:`doc` representation.
 
 #. :dp:`fls_mpgh22bi8caz`
    The :t:`item` subject to the :t:`attribute macro` is transformed into a
@@ -775,8 +766,8 @@ The expansion of :t:`[attribute macro]s` proceeds as follows:
 #. :dp:`fls_z6xfhf71w10a`
    The :t:`item` subject to the :t:`attribute macro` is replaced with the
    returned :std:`proc_macro::TokenStream` of the
-   :t:`macro implementation function` call. It is a static error if the output :std:`proc_macro::TokenStream` does not
-   constitute zero or more :t:`[item]s`.
+   :t:`macro implementation function` call. It is a static error if the output
+   :std:`proc_macro::TokenStream` does not constitute zero or more :t:`[item]s`.
 
 .. _fls_4apk1exafxii:
 
@@ -813,13 +804,8 @@ resolved :t:`declarative macro`.
 #. :dp:`fls_3qzes4lr8yuv`
    The :t:`macro match` of a candidate :t:`macro matcher` is tried against
    the :s:`TokenTree` of the :t:`macro invocation` by matching individual
-   :t:`[token]s`, in left-to-right order.
-
-#. :dp:`fls_lrpxlag31r3e`
-   Matching does not employ lookahead. It is a static error if matching a
-   candidate :t:`macro matcher` is ambiguous.
-
-#. :dp:`fls_ksy2h7ixf9ha`
+   :t:`[token]s`, in left-to-right order. Matching does not employ lookahead.
+   It is a static error if matching a candidate :t:`macro matcher` is ambiguous.
    Matching does not employ backtracking. It is a static error if matching a
    candidate :t:`macro matcher` fails while parsing into a :t:`metavariable` and
    having consumed at least one :t:`token` while parsing the :t:`metavariable`.
@@ -843,8 +829,8 @@ belongs to a resolved :t:`declarative macro`.
 :t:`Token matching` proceeds as follows:
 
 :dp:`fls_g1rml9tavh8v`
-The outer :s:`[Delimiter]s` of a macro matcher match any outer ``Delimiter``\ s
-in the :t:`macro invocation`.
+The outer :s:`[Delimiter]s` of a :t:`macro matcher` match any outer
+:s:`[Delimiter]s` in the :t:`macro invocation`.
 
 :dp:`fls_h7x3tc208zpk`
 A :t:`metavariable` in a :t:`macro matcher` is matched against a sequence of
@@ -926,19 +912,19 @@ the :s:`TokenTree` of the :t:`macro invocation`, as follows:
   The succeeding :t:`pattern` must be able to follow the repeated :t:`pattern`.
 
 :dp:`fls_finzfb5ljkf8`
-A repetition index is a monotonically increasing number that is initialized to
-zero, and incremented by one.
+A :dt:`repetition index` is a monotonically increasing number that is
+initialized to zero, and incremented by one.
 
 :dp:`fls_s1ccs6jocsgr`
-Once a metavariable is matched, the matching sequence of tokens is treated as
-follows:
+Once a :t:`metavariable` is matched, the matching sequence of :t:`[token]s` is
+treated as follows:
 
 #. :dp:`fls_wpi2i6hoj3li`
-   The matching sequence of tokens is stored in an ordered collection at the
-   current repetition index.
+   The matching sequence of :t:`[token]s` is stored in an ordered collection at
+   the current :t:`repetition index`.
 
 #. :dp:`fls_uuey421a8n96`
-   The current repetition index is incremented by one.
+   The current :t:`repetition index` is incremented by one.
 
 :dp:`fls_b5u47tuu136r`
 Each matched :t:`metavariable` in a :t:`macro repetition in matching` is bound
@@ -946,7 +932,7 @@ separately, where the matches are stored in an ordered collection.
 
 :dp:`fls_rb1tu4e7dpma`
 Any other :t:`token` in a :t:`macro matcher` is matched literally against the
-:s:`TokenTree` of the :t:`macro invocation`\ ``.``
+:s:`TokenTree` of the :t:`macro invocation`.
 
 :dp:`fls_c76sdvos5xeo`
 It is a static error if the :s:`TokenTree` of the :t:`macro invocation` contains
@@ -981,8 +967,9 @@ Every :t:`macro repetition in transcription` found in the
 repeatedly transcribing the :t:`[token]s` inside of it.
 
 :dp:`fls_g3dtpw4rtgdr`
-The number of transcription repetitions for a :t:`macro repetition in
-transcription` shall depend on its :t:`repetition operator`, as follows:
+The number of transcription repetitions for a
+:t:`macro repetition in transcription` shall depend on its
+:t:`repetition operator`, as follows:
 
 * :dp:`fls_pvp6dxykuv66`
   A :t:`repetition operator` denoted by ``+`` shall require one or more
@@ -1002,9 +989,9 @@ A :t:`metavariable indication` that is matched inside of a
 :t:`macro repetition in transcription`.
 
 :dp:`fls_y4podc7ee8lf`
-A :t:`metavariable indication` shall be used in a :t:`macro repetition in
-transcription` of the same nesting depth as its corresponding :t:`metavariable`
-appears in the :t:`macro matcher`.
+A :t:`metavariable indication` shall be used in a
+:t:`macro repetition in transcription` of the same nesting depth as its
+corresponding :t:`metavariable` appears in the :t:`macro matcher`.
 
 :dp:`fls_wbys0m4a1omg`
 A :t:`metavariable indication` within a :t:`macro repetition in transcription`
@@ -1016,14 +1003,14 @@ Multiple transcribed :t:`[metavariable indication]s` in the same :t:`macro
 repetition in transcription` shall repeat the same number of times.
 
 :dp:`fls_ctzthi6keit2`
-When transcribing a metavariable indication in a macro repetition in
-transcription, the metavariable indication is replaced with the matched sequence
-of :t:`[token]s` of the corresponding iteration of the repetition. metavariable
-taken from the ordered collection.
+When transcribing a :t:`metavariable indication` in a
+:t:`macro repetition in transcription`, the :t:`metavariable indication` is
+replaced with the matched sequence of :t:`[token]s` of the corresponding
+iteration of the repetition :t:`metavariable` taken from the ordered collection.
 
 :dp:`fls_9n46ugmcqmix`
-A metavariable indication in a macro repetition in transcription shall be
-transcribed to the matched tokens in order, as follows:
+A :t:`metavariable indication` in a :t:`macro repetition in transcription` shall
+be transcribed to the matched :t:`[token]s` in order, as follows:
 
 .. code-block:: rust
 
@@ -1047,7 +1034,8 @@ transcribed to the matched tokens in order, as follows:
 yields ``0;1;2;``
 
 :dp:`fls_95rn4cvgznmd`
-Given a macro invocation with N metavariable actuals, a macro of the form
+Given a :t:`macro invocation` with ``N`` :t:`metavariable` arguments, a
+:t:`macro` of the form
 
 .. code-block:: rust
 
@@ -1058,7 +1046,7 @@ Given a macro invocation with N metavariable actuals, a macro of the form
    }
 
 :dp:`fls_yg4c9x7049y4`
-is equivalent to a macro of the form
+is equivalent to a :t:`macro` of the form
 
 .. code-block:: rust
 
@@ -1069,11 +1057,13 @@ is equivalent to a macro of the form
    }
 
 :dp:`fls_o9rwz9z0a2h4`
-where the metavariable of the macro repetition in matching are repeated N times,
-and the metavariable indications of the macro repetition in transcription are
-repeated N times. Invoking such a macro relates the first metavariable actual
-of the macro invocation with the first metavariable of the macro repetition in
-matching, the second metavariable actual with the second metavariable, etc.
+where the :t:`metavariable` of the :t:`macro repetition in matching` are
+repeated ``N`` times, and the :t:`[metavariable indication]s` of the
+:t:`macro repetition in transcription` are repeated ``N`` times. Invoking such
+a :t:`macro` relates the first :t:`metavariable` argument of the
+:t:`macro invocation` with the first :t:`metavariable` of the
+:t:`macro repetition in matching`, the second :t:`metavariable` argument with
+the second :t:`metavariable`, and so on.
 
 .. _fls_xlfo7di0gsqz:
 
@@ -1081,7 +1071,7 @@ Hygiene
 -------
 
 :dp:`fls_7ezc7ncs678f`
-:t:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s`` that appear
+:t:`Hygiene` is a property of :t:`[macro]s` and :t:`[identifier]s` that appear
 within them, which aims to eliminate the syntactic interference between a
 :t:`macro` and its environment.
 
@@ -1091,20 +1081,20 @@ within them, which aims to eliminate the syntactic interference between a
 :t:`Hygiene` is categorized as follows:
 
 * :dp:`fls_dz2mvodl818d`
-  :t:`Definition site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
+  :t:`Definition site hygiene`, which resolves to a :s:`MacroRulesDeclaration`
   site. :t:`[Identifier]s` with :t:`definition site hygiene` cannot reference
   the environment of the :s:`MacroRulesDeclaration`, cannot be referenced by the
   environment of a :s:`MacroInvocation`, and are considered :t:`hygienic`.
 
 * :dp:`fls_puqhytfzfsg6`
-  :t:`Call site hygiene`, which resolves to the :s:`MacroInvocation` site.
+  :t:`Call site hygiene`, which resolves to a :s:`MacroInvocation` site.
   :t:`[Identifier]s` with :t:`call site hygiene` can reference the environment
   of the :s:`MacroRulesDeclaration`, can reference the environment of the
   :s:`MacroInvocation`, and are considered :t:`unhygienic`.
 
 * :dp:`fls_uyvnq88y9gk3`
-  :t:`Mixed site hygiene`, which resolves to the :s:`MacroRulesDeclaration`
-  site for :t:`[variable]s`, :t:`[label]s`, and the ``$crate``
+  :t:`Mixed site hygiene`, which resolves to a :s:`MacroRulesDeclaration`
+  site for :t:`[label]s`, :t:`[variable]s`, and the ``$crate``
   :t:`metavariable`, and to the :s:`MacroInvocation` site otherwise, and is
   considered :dt:`partially hygienic`.
 
@@ -1115,9 +1105,11 @@ Every :t:`macro` has associated :t:`hygiene` that depends on its kind:
   :t:`[Declarative macro]s` have :t:`mixed site hygiene`.
 
 * :dp:`fls_v46v0t2vh6x4`
-  :t:`[Procedural macro]s` have :t:`call site hygiene` and :t:`mixed site
-  hygiene` depending on the implementation of the :t:`procedural macro`.
+  :t:`[Procedural macro]s` have :t:`call site hygiene` and
+  :t:`mixed site hygiene` depending on the implementation of the
+  :t:`procedural macro`.
 
 :dp:`fls_7eqqk2cj0clr`
 The :t:`metavariable` ``$crate`` in a :t:`declarative macro`'s expansion refers
 to the crate the :t:`declarative macro` was declared in.
+

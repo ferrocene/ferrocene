@@ -36,7 +36,7 @@ Source Files
 
 :dp:`fls_4vicosdeaqmp`
 A :t:`source file` contains the program text consisting of :t:`[inner
-attribute]s`, :t:`[inner doc comment]s` and :t:`[item]s`. The location of a
+attribute]s`, :t:`[inner doc comment]s`, and :t:`[item]s`. The location of a
 :t:`source file` is tool defined.
 
 :dp:`fls_ann3cha1xpek`
@@ -86,30 +86,12 @@ An :t:`inline module` is a :t:`module` with an :s:`InlineModuleSpecification`.
 An :t:`outline module` is a :t:`module` with an :s:`OutlineModuleSpecification`.
 
 :dp:`fls_plepew2319g4`
-An :t:`outline module` loads a :t:`source file` that considers the text of the
+An :t:`outline module` loads a :t:`source file` and considers the text of the
 :t:`source file` to be inlined within the context of the :t:`outline module`.
 
 :dp:`fls_1aruwps62c4p`
 The location of a :t:`module` :t:`source file` can be specified using
 :t:`attribute` :c:`path`.
-
-:dp:`fls_xtfx03s99egy`
-The following :t:`[attribute]s` apply to :t:`[module]s`:
-
-* :dp:`fls_na6trldagfzb`
-  :t:`Attribute` :c:`cfg`.
-
-* :dp:`fls_renjf86vcve0`
-  :t:`Attribute` ``deprecated``.
-
-* :dp:`fls_3dcjkx4c1ui1`
-  :t:`Attribute` :c:`doc`.
-
-* :dp:`fls_ihtj1e11hm88`
-  :t:`Attribute` :c:`no_implicit_prelude`.
-
-* :dp:`fls_3glucm48a5fy`
-  :t:`Attribute` :c:`path`.
 
 .. rubric:: Examples
 
@@ -118,8 +100,9 @@ The following :t:`[attribute]s` apply to :t:`[module]s`:
    #[path = "path/to/module"]
    pub mod module {
    	#![allow(dead_code)]
-   struct Struct;
-   pub mod other;
+
+        struct Struct;
+        pub mod other;
    }
 
 .. _fls_maw4u1o8q37u:
@@ -147,16 +130,16 @@ A :t:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
 A tool is free to compile a :t:`proc-macro crate` to a shared library.
 
 :dp:`fls_cXLyCjs9T3Mj`
-A :t:`proc-macro crate` shall not declare :t:`[item]s` with :t:`public
-visibility` unless the :t:`item` is a :t:`procedural macro`.
+A :t:`proc-macro crate` shall not declare :t:`[item]s` with
+:t:`public visibility` unless the :t:`item` is a :t:`procedural macro`.
 
 :dp:`fls_h93C3wfbAoz1`
 Only a :t:`proc-macro crate` shall declare :t:`[procedural macro]s`.
 
 .. _fls_gklst7joeo33:
 
-External Crates
----------------
+Crate Imports
+-------------
 
 .. rubric:: Syntax
 
@@ -196,12 +179,6 @@ If a :t:`crate import` appears at the :t:`crate root module`, then the
 A :t:`crate indication` shall resolve to an external :t:`crate`. The process of
 resolving a :t:`crate indication` to an external :t:`crate` is tool-defined.
 
-:dp:`fls_bfxkmm9px6k8`
-The following :t:`[attribute]s` apply to :t:`[crate import]s`:
-
-* :dp:`fls_d6eu6xiczpxk`
-  :t:`Attribute` :c:`no_link`.
-
 .. _fls_5w50kf83oo1u:
 
 Compilation Roots
@@ -229,8 +206,8 @@ Conditional Compilation
 
 :dp:`fls_9stc6nul6vq9`
 :t:`Conditionally-compiled source code` is source code that may or may
-not be considered a part of a Rust program depending on :t:`[configuration
-predicate]s`.
+not be considered a part of a Rust program depending on
+:t:`[configuration predicate]s`.
 
 :dp:`fls_a0u9nnaf6drz`
 :t:`Conditional compilation` is the process of compiling
@@ -244,9 +221,4 @@ Rust program.
 :dp:`fls_h6b1fuw4nvi1`
 An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate`
 evaluates to ``false`` is not considered part of a Rust program.
-
-:dp:`fls_212qrhdifs5e`
-An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate`
-evaluates to ``true`` is replaced with a new :t:`attribute` for each
-:s:`AttributeContent` in the attribute's :s:`AttributeContentList`.
 

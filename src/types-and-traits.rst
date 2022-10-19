@@ -2778,9 +2778,9 @@ Lifetime Elision
 .. rubric:: Legality Rules
 
 :dp:`fls_9wtuclhm7yz5`
-:t:`Lifetime elision` is a set of rules that automatically insert :t:`[lifetime
-parameter]s` and/or :t:`[lifetime argument]s` when they are elided in the source
-code.
+:t:`Lifetime elision` is a set of rules that automatically insert
+:t:`[lifetime parameter]s` and/or :t:`[lifetime argument]s` when they are
+elided in the source code.
 
 :dp:`fls_JmP6O9zj8fkV`
 A :t:`lifetime` may be elided either implicitly or explicitly.
@@ -2804,9 +2804,9 @@ It is a static error to elide a :t:`lifetime` in a position where no
 :t:`lifetime elision` rules are active.
 
 :dp:`fls_sA4Lqc5o6cX3`
-:t:`[Lifetime]s` cannot be implicitly elided within :t:`[impl trait type]s`:
+:t:`[Lifetime]s` cannot be implicitly elided within :t:`[impl trait type]s`.
 If no :t:`lifetime bound` is present, the :t:`impl trait type` is not considered
-to be bound by any lifetime.
+to be bound by any :t:`lifetime`.
 
 .. _fls_HEtHxXBcg7JA:
 
@@ -3012,5 +3012,5 @@ The :t:`impl header lifetime elision` rules are as follows:
   An implicitly elided :t:`lifetime` is a static error.
 
 * :dp:`fls_PfS5AlkN6ANl`
-  Every explicitly elided :t:`lifetime` is replaced with a new :t:`lifetime
-  parameter` defined on the :t:`implementation`.
+  Every explicitly elided :t:`lifetime` is replaced with a new
+  :t:`lifetime parameter` defined on the :t:`implementation`.

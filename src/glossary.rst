@@ -3531,9 +3531,9 @@ lifetime elision
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_dq5wkd61ry3l`
-:dt:`Lifetime elision` is a set of rules that automatically insert :t:`[lifetime
-parameter]s` and/or :t:`[lifetime argument]s` when they are elided in the source
-code.
+:dt:`Lifetime elision` is a set of rules that automatically insert
+:t:`[lifetime parameter]s` and/or :t:`[lifetime argument]s` when they are
+elided in the source code.
 
 .. _fls_md7ii59zobrc:
 

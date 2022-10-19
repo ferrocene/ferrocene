@@ -359,7 +359,7 @@ Diverging Expressions
 
 :dp:`fls_oth9vFtcb9l4`
 A :t:`diverging expression` is an :t:`expression` whose :t:`evaluation` causes
-program flow to diverge from the normal evaluation order.
+program flow to diverge from the normal :t:`evaluation` order.
 
 :dp:`fls_cmBVodJMjZi7`
 :t:`[Diverging expression]s` are:

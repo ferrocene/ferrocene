@@ -1625,7 +1625,7 @@ diverging expression
 
 :dp:`fls_fLlNzmB34cj9`
 A :dt:`diverging expression` is an :t:`expression` whose :t:`evaluation` causes
-program flow to diverge from the normal evaluation order.
+program flow to diverge from the normal :t:`evaluation` order.
 
 .. _fls_9DuaIn6cRbXf:
 
@@ -6566,7 +6566,8 @@ type variable
 ^^^^^^^^^^^^^
 
 :dp:`fls_j9eusnwze4rz`
-A :dt:`type variable` is a placeholder for a :t:`type`.
+A :t:`type variable` is a placeholder used during :t:`type inference` to stand
+in for an undetermined :t:`type`.
 
 .. _fls_44uvj9l7q98z:
 

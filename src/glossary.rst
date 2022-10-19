@@ -275,8 +275,8 @@ assigned operand
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_g714mnh7s7fx`
-An :dt:`assigned operand` is the target :t:`operand` of a :t:`compound
-assignment expression`.
+An :dt:`assigned operand` is the target :t:`operand` of a
+:t:`compound assignment expression`.
 
 :dp:`fls_z0amfuj9vsqe`
 See :s:`AssignedOperand`.
@@ -938,8 +938,9 @@ Call conformance
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_Jr1gUX7Ju4Oh`
-:dt:`Call conformance` measures the compatibility between a set of :t:`[argument
-operand]s` and a set if :t:`[function parameter]s` or :t:`[field]s`.
+:dt:`Call conformance` measures the compatibility between a set of
+:t:`[argument operand]s` and a set if :t:`[function parameter]s` or
+:t:`[field]s`.
 
 .. _fls_xeo59ol6uh5i:
 
@@ -983,9 +984,9 @@ callee type
 ^^^^^^^^^^^
 
 :dp:`fls_o21myf6wnnn6`
-A :dt:`callee type` is either a :t:`function item type`, a :t:`function
-pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant` or a
-:t:`type` that implements any of the :std:`core::ops::Fn`,
+A :dt:`callee type` is either a :t:`function item type`, a
+:t:`function pointer type`, a :t:`tuple struct type`, a :t:`tuple enum variant`
+or a :t:`type` that implements any of the :std:`core::ops::Fn`,
 :std:`core::ops::FnMut`, or :std:`core::ops::FnOnce` :t:`[trait]s`.
 
 .. _fls_s78gd8yxx2yv:
@@ -2096,9 +2097,9 @@ field index
 ^^^^^^^^^^^
 
 :dp:`fls_6061r871qgbj`
-A :dt:`field index` is the position of a :t:`field` within a :t:`tuple struct
-type` or :t:`tuple enum variant`. The first :t:`field` has a :t:`field index`
-of zero, the Nth :t:`field` has a :t:`field index` of N-1.
+A :dt:`field index` is the position of a :t:`field` within a
+:t:`tuple struct type` or :t:`tuple enum variant`. The first :t:`field` has a
+:t:`field index` of zero, the Nth :t:`field` has a :t:`field index` of N-1.
 
 :dp:`fls_IDYKXUIL845x`
 See :s:`FieldIndex`.
@@ -2439,8 +2440,8 @@ generic implementation
 ^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_jic937ujpnar`
-A :dt:`generic implementation` is an :t:`implementation` with :t:`[generic
-parameter]s`.
+A :dt:`generic implementation` is an :t:`implementation` with
+:t:`[generic parameter]s`.
 
 .. _fls_s2syghgn74e2:
 
@@ -2845,8 +2846,8 @@ implementation conformance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_Gpq4EP1SsYJR`
-:dt:`Implementation conformance` measures the compatibility between a :t:`trait
-implementation` and the :t:`implemented trait`.
+:dt:`Implementation conformance` measures the compatibility between a
+:t:`trait implementation` and the :t:`implemented trait`.
 
 .. _fls_c0xxvivt8t1u:
 
@@ -2855,7 +2856,7 @@ implemented trait
 
 :dp:`fls_7twlizi3v8cb`
 An :dt:`implemented trait` is a :t:`trait` whose functionality has been
-implemented by an :t:`implementating type`.
+implemented by an :t:`implementing type`.
 
 :dp:`fls_2brvfx5wmvkf`
 See :s:`ImplementedTrait`.
@@ -4261,8 +4262,8 @@ object safe
 ^^^^^^^^^^^
 
 :dp:`fls_oa2jiklr5nl2`
-A :t:`trait` is :dt:`object safe` when it can be used as a :t:`trait object
-type`.
+A :t:`trait` is :dt:`object safe` when it can be used as a
+:t:`trait object type`.
 
 .. _fls_vomlqv7i1fc4:
 
@@ -5058,8 +5059,8 @@ record struct pattern
 ^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_q7njznxhmmw`
-A :dt:`record struct pattern` is a :t:`pattern` that matches a :t:`enum
-variant value`, a :t:`struct value`, or a :t:`union value`.
+A :dt:`record struct pattern` is a :t:`pattern` that matches a
+:t:`enum variant value`, a :t:`struct value`, or a :t:`union value`.
 
 :dp:`fls_viwieu1p3hds`
 See :s:`RecordStructPattern`.
@@ -5233,8 +5234,8 @@ repetition operator
 
 :dp:`fls_67907pk7uogl`
 A :dt:`repetition operator` is a :t:`construct` that indicates the number
-of times a :t:`macro repetition in matching` or a :t:`macro repetition in
-transcription` can be repeated.
+of times a :t:`macro repetition in matching` or a
+:t:`macro repetition in transcription` can be repeated.
 
 :dp:`fls_hiasmmpr2jks`
 See :s:`MacroRepetitionOperator`.
@@ -5524,8 +5525,8 @@ shift right assignment expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_1jpnp7hatlmu`
-A :dt:`shift right assignment expression` is a :t:`compound assignment
-expression` that uses bit shift right arithmetic.
+A :dt:`shift right assignment expression` is a
+:t:`compound assignment expression` that uses bit shift right arithmetic.
 
 :dp:`fls_naqzlebew1uf`
 See :s:`ShiftRightAssignmentExpression`.
@@ -5761,7 +5762,7 @@ statement
 A :dt:`statement` is a component of a block expression.
 
 :dp:`fls_th7edvxml3mn`
-See :s:`Statement.`
+See :s:`Statement`.
 
 .. _fls_tpazbmuq9hag:
 
@@ -5952,8 +5953,8 @@ subtraction assignment expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_4pb85nl4r7vs`
-A :dt:`subtraction assignment expression` is a :t:`compound assignment
-expression` that uses subtraction.
+A :dt:`subtraction assignment expression` is a
+:t:`compound assignment expression` that uses subtraction.
 
 :dp:`fls_mye9yj5tc8hr`
 See :s:`SubtractionAssignmentExpression`.
@@ -6056,8 +6057,8 @@ tail expression
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_6k873f1knasi`
-A :dt:`tail expression` is the last :t:`expression` within a :t:`block
-expression`.
+A :dt:`tail expression` is the last :t:`expression` within a
+:t:`block expression`.
 
 .. _fls_4omay4i65dwz:
 
@@ -6228,7 +6229,11 @@ transparent representation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hb3e72rhzpnv`
-:dt:`Transparent representation` is a :t:`type representation` that **???**.
+:dt:`Transparent representation` is a :t:`type representation` that applies
+only to an :t:`enum type` with a single :t:`enum variant` or a :t:`struct type`
+where the :t:`struct type` or :t:`enum variant` has a single :t:`field` of
+non-zero :t:`size` and any number of :t:`[field]s` of :t:`size` zero and
+:t:`alignment` one.
 
 .. _fls_soqkluvirlsd:
 
@@ -6969,8 +6974,8 @@ unsuffixed integer
 ^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_t419z3zder0q`
-An :dt:`unsuffixed integer` is an :t:`integer literal` without an :t:`integer
-suffix`.
+An :dt:`unsuffixed integer` is an :t:`integer literal` without an
+:t:`integer suffix`.
 
 .. _fls_fow1bnvduafi:
 

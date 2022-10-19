@@ -70,8 +70,7 @@ Modules
 .. rubric:: Legality Rules
 
 :dp:`fls_odd1hj3y1mgu`
-A :t:`module` is a container for zero or more :t:`[inner attribute]s`,
-:t:`[inner doc comment]s`, and :t:`[item]s`.
+A :t:`module` is a container for zero or more :t:`[item]s`.
 
 :dp:`fls_l4ne3w8dgghv`
 An :t:`unsafe module` is a :t:`module` subject to :t:`keyword` ``unsafe``.

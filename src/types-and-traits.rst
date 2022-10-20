@@ -2796,8 +2796,8 @@ A :t:`lifetime` is elided implicitly if it is absent.
 be nested.
 
 :dp:`fls_dIyisjNIx9dC`
-If an elided :t:`lifetime` is encountered, the innermost set of :t:`lifetime
-elision` rules applies.
+An elided :t:`lifetime` is subject to the set of :t:`lifetime elision` rules
+introduced by the innermost :t:`construct` containing the elided :t:`lifetime`.
 
 :dp:`fls_cD0ZYi23VqWg`
 It is a static error to elide a :t:`lifetime` in a position where no

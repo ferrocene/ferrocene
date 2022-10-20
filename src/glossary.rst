@@ -2812,6 +2812,16 @@ immutable variable
 An :dt:`immutable variable` is a :t:`variable` whose :t:`value` cannot be
 modified.
 
+.. _fls_L9XTxPSujx4v:
+
+impl header lifetime elision
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_PvYGu85UAyFb`
+:dt:`Impl header lifetime elision` is a form of :t:`lifetime elision` that
+applies to the :t:`implementing type` and :t:`implemented trait` (if any) of an
+:t:`implementation`.
+
 .. _fls_l20o3hutbfpf:
 
 impl trait type
@@ -3521,7 +3531,9 @@ lifetime elision
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_dq5wkd61ry3l`
-:dt:`Lifetime elision` is a set of relaxations on the use of :t:`[lifetime]s`.
+:dt:`Lifetime elision` is a set of rules that automatically insert
+:t:`[lifetime parameter]s` and/or :t:`[lifetime argument]s` when they are
+elided in the source code.
 
 .. _fls_md7ii59zobrc:
 

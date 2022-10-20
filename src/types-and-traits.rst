@@ -2778,7 +2778,35 @@ Lifetime Elision
 .. rubric:: Legality Rules
 
 :dp:`fls_9wtuclhm7yz5`
-:t:`Lifetime elision` is a set of relaxations on the use of :t:`[lifetime]s`.
+:t:`Lifetime elision` is a set of rules that automatically insert
+:t:`[lifetime parameter]s` and/or :t:`[lifetime argument]s` when they are
+elided in the source code.
+
+:dp:`fls_JmP6O9zj8fkV`
+A :t:`lifetime` may be elided either implicitly or explicitly.
+
+:dp:`fls_5ZAQ9p7jQuc2`
+A :t:`lifetime` is elided explicitly if it is the ``'_`` :t:`lifetime`.
+
+:dp:`fls_YmUQ8ZiQuycp`
+A :t:`lifetime` is elided implicitly if it is absent.
+
+:dp:`fls_sIMN6Sd8xUZz`
+:t:`Lifetime elision` rules are introduced by certain :t:`[construct]s` and may
+be nested.
+
+:dp:`fls_dIyisjNIx9dC`
+An elided :t:`lifetime` is subject to the set of :t:`lifetime elision` rules
+introduced by the innermost :t:`construct` containing the elided :t:`lifetime`.
+
+:dp:`fls_cD0ZYi23VqWg`
+It is a static error to elide a :t:`lifetime` in a position where no
+:t:`lifetime elision` rules are active.
+
+:dp:`fls_sA4Lqc5o6cX3`
+:t:`[Lifetime]s` cannot be implicitly elided within :t:`[impl trait type]s`.
+If no :t:`lifetime bound` is present, the :t:`impl trait type` is not considered
+to be bound by any :t:`lifetime`.
 
 .. _fls_HEtHxXBcg7JA:
 
@@ -2871,16 +2899,12 @@ Static Lifetime Elision
 
 :dp:`fls_l4RDXaFwnQZ6`
 :t:`Static lifetime elision` is a form of :t:`lifetime elision` that applies to
-:t:`[constant]s` and :t:`[static]s`.
+the :t:`type ascription` of :t:`[constant]s` and :t:`[static]s`.
 
 :dp:`fls_8irr97rZWfSC`
 An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
 :t:`type specification` of a :t:`constant` or :t:`static` is inferred to be the
 ``'static'`` lifetime.
-
-:dp:`fls_VynJanlhsF8e`
-If :t:`function lifetime elision` is applicable for a :t:`lifetime`,
-:t:`static lifetime elision` is not applied for that :t:`lifetime`.
 
 :dp:`fls_37udexenqv3p`
 The :t:`lifetime` of an :t:`associated implementation constant` shall not be
@@ -2947,7 +2971,7 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
   instead inferred,
 
 * :dp:`fls_cglZigwAnASl`
-  Otherwise it is a stic error to infer the :t:`lifetime bound`.
+  Otherwise it is a static error to infer the :t:`lifetime bound`.
 
 .. rubric:: Examples
 
@@ -2964,3 +2988,25 @@ its :t:`lifetime` :t:`elided` form is
 .. code-block:: rust
 
    type T<'a> = &'a (dyn Trait + 'a);
+
+.. _fls_ZQPv1ybdDsE1:
+
+Impl Header Lifetime Elision
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Legality Rules
+
+:dp:`fls_FUdsmzN0T8XP`
+:t:`Impl header lifetime elision` is a form of :t:`lifetime elision` that
+applies to the :t:`implementing type` and :t:`implemented trait` (if any) of an
+:t:`implementation`.
+
+:dp:`fls_3p5BdLn3JbKz`
+The :t:`impl header lifetime elision` rules are as follows:
+
+* :dp:`fls_mWxIQ5wagMpa`
+  An implicitly elided :t:`lifetime` is a static error.
+
+* :dp:`fls_PfS5AlkN6ANl`
+  Every explicitly elided :t:`lifetime` is replaced with a new
+  :t:`lifetime parameter` defined on the :t:`implementation`.

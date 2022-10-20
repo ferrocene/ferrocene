@@ -2971,7 +2971,7 @@ An :t:`elided` :t:`lifetime` of a :t:`trait object type` is inferred as follows:
   instead inferred,
 
 * :dp:`fls_cglZigwAnASl`
-  Otherwise it is a stic error to infer the :t:`lifetime bound`.
+  Otherwise it is a static error to infer the :t:`lifetime bound`.
 
 .. rubric:: Examples
 

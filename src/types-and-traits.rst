@@ -2899,16 +2899,12 @@ Static Lifetime Elision
 
 :dp:`fls_l4RDXaFwnQZ6`
 :t:`Static lifetime elision` is a form of :t:`lifetime elision` that applies to
-:t:`[constant]s` and :t:`[static]s`.
+the :t:`type ascription` of :t:`[constant]s` and :t:`[static]s`.
 
 :dp:`fls_8irr97rZWfSC`
 An :t:`elided` :t:`lifetime` of a :t:`reference type` or :t:`path` in the
 :t:`type specification` of a :t:`constant` or :t:`static` is inferred to be the
 ``'static'`` lifetime.
-
-:dp:`fls_VynJanlhsF8e`
-If :t:`function lifetime elision` is applicable for a :t:`lifetime`,
-:t:`static lifetime elision` is not applied for that :t:`lifetime`.
 
 :dp:`fls_37udexenqv3p`
 The :t:`lifetime` of an :t:`associated implementation constant` shall not be

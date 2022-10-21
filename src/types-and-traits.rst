@@ -1981,13 +1981,18 @@ obtained as follows:
       :t:`type`.
 
    #. :dp:`fls_sr8d5har4s03`
-      Otherwise if ``U`` can be coerced to ``TC``, make ``TC`` the target
+      Otherwise, if ``U`` can be coerced to ``TC``, make ``TC`` the target
       :t:`type` ``U``.
 
    #. :dp:`fls_92pwnd1xbp5r`
-      Otherwise compute the mutual supertype of ``TC`` and ``U``, make the
-      mutual supertype be target :t:`type` ``U``. It is a static error if the
-      mutual supertype of ``TC`` and ``U`` cannot be computed.
+      Otherwise, if ``TC`` and ``U`` are non-capturing :t:`[closure type]s`,
+      :t:`[function item type]s`, :t:`[function pointer type]s`, or a
+      combination of those :t:`[type]s`, and a :t:`function pointer type` exists
+      that both ``TC`` and ``U`` can coerce to, make that
+      :t:`function pointer type` be target :t:`type` ``U``.
+
+   #. :dp:`fls_bWHQIL4DSN4S`
+      Otherwise, no coercion is performed.
 
    #. :dp:`fls_ju4ypa5ysga0`
       Continue with the next source :t:`type`.

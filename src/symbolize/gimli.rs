@@ -184,6 +184,8 @@ cfg_if::cfg_if! {
     ))] {
         mod libs_dl_iterate_phdr;
         use libs_dl_iterate_phdr::native_libraries;
+        #[path = "gimli/parse_running_mmaps_unix.rs"]
+        mod parse_running_mmaps;
     } else if #[cfg(target_env = "libnx")] {
         mod libs_libnx;
         use libs_libnx::native_libraries;

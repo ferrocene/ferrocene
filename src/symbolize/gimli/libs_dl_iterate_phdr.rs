@@ -17,6 +17,20 @@ pub(super) fn native_libraries() -> Vec<Library> {
     return ret;
 }
 
+fn infer_current_exe(base_addr: usize) -> OsString {
+    if let Ok(entries) = super::parse_running_mmaps::parse_maps() {
+        let opt_path = entries
+            .iter()
+            .find(|e| e.ip_matches(base_addr) && e.pathname().len() > 0)
+            .map(|e| e.pathname())
+            .cloned();
+        if let Some(path) = opt_path {
+            return path;
+        }
+    }
+    env::current_exe().map(|e| e.into()).unwrap_or_default()
+}
+
 // `info` should be a valid pointers.
 // `vec` should be a valid pointer to a `std::Vec`.
 unsafe extern "C" fn callback(
@@ -28,8 +42,12 @@ unsafe extern "C" fn callback(
     let libs = &mut *(vec as *mut Vec<Library>);
     let is_main_prog = info.dlpi_name.is_null() || *info.dlpi_name == 0;
     let name = if is_main_prog {
+        // The man page for dl_iterate_phdr says that the first object visited by
+        // callback is the main program; so the first time we encounter a
+        // nameless entry, we can assume its the main program and try to infer its path.
+        // After that, we cannot continue that assumption, and we use an empty string.
         if libs.is_empty() {
-            env::current_exe().map(|e| e.into()).unwrap_or_default()
+            infer_current_exe(info.dlpi_addr as usize)
         } else {
             OsString::new()
         }

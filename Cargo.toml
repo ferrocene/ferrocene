@@ -130,3 +130,8 @@ edition = '2018'
 name = "concurrent-panics"
 required-features = ["std"]
 harness = false
+
+[[test]]
+name = "current-exe-mismatch"
+required-features = ["std"]
+harness = false

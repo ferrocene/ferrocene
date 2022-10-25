@@ -1659,42 +1659,42 @@ with :t:`type` ``B``, then ``B`` also unifies with ``A`` and such
 If one of the two :t:`[type]s` is a :t:`type variable`, :t:`type unification`
 proceeds as follows:
 
-* :dp:`fls_EoEbldkKBQW0`
-  If either :t:`type` is a :t:`global type variable`, the
-  :t:`global type variable` is assigned the :t:`type` of the other unification
-  operand.
+#. :dp:`fls_EoEbldkKBQW0`
+   If either :t:`type` is a :t:`global type variable`, the
+   :t:`global type variable` is assigned the :t:`type` of the other unification
+   operand.
 
-* :dp:`fls_16ZDp8PaKi5P`
-  Otherwise, if either :t:`type` is a :t:`diverging type variable`, the
-  :t:`diverging type variable` is assigned the :t:`type` of the other
-  unification operand.
+#. :dp:`fls_16ZDp8PaKi5P`
+   Otherwise, if either :t:`type` is a :t:`diverging type variable`, the
+   :t:`diverging type variable` is assigned the :t:`type` of the other
+   unification operand.
 
-* :dp:`fls_pGRLTACDvzv2`
-  Otherwise, if one :t:`type` ``T`` is an :t:`integer type variable`, behavior
-  depends on the other :t:`type` ``U``:
+#. :dp:`fls_pGRLTACDvzv2`
+   Otherwise, if one :t:`type` ``T`` is an :t:`integer type variable`, behavior
+   depends on the other :t:`type` ``U``:
+ 
+   #. :dp:`fls_fTy3FVt0fK9g`
+      If ``U`` is an :t:`integer type` or an :t:`integer type variable`, the
+      :t:`integer type variable` ``T`` is assigned :t:`type` ``U``.
+ 
+   #. :dp:`fls_7IsrfUoPXSZU`
+      Otherwise, :t:`type unification` fails.
 
-  * :dp:`fls_fTy3FVt0fK9g`
-    If ``U`` is an :t:`integer type` or an :t:`integer type variable`, the
-    :t:`integer type variable` ``T`` is assigned :t:`type` ``U``.
+#. :dp:`fls_Hb95CPyUpCmc`
+   Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
+   behavior depends on the other :t:`type` ``U``:
+ 
+   #. :dp:`fls_jEZVWlfVPevb`
+      If ``U`` is an :t:`floating-point type` or an
+      :t:`floating-point type variable`, the :t:`floating-point type variable`
+      ``T`` is assigned :t:`type` ``U``.
+ 
+   #. :dp:`fls_nKcqFo7yIDBe`
+      Otherwise, :t:`type unification` fails.
 
-  * :dp:`fls_7IsrfUoPXSZU`
-    Otherwise, :t:`type unification` fails.
-
-* :dp:`fls_Hb95CPyUpCmc`
-  Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
-  behavior depends on the other :t:`type` ``U``:
-
-  * :dp:`fls_jEZVWlfVPevb`
-    If ``U`` is an :t:`floating-point type` or an
-    :t:`floating-point type variable`, the :t:`floating-point type variable`
-    ``T`` is assigned :t:`type` ``U``.
-
-  * :dp:`fls_nKcqFo7yIDBe`
-    Otherwise, :t:`type unification` fails.
-
-* :dp:`fls_jkaiBnApJAtt`
-  Otherwise, neither :t:`type` is a :t:`type variable`, and the rules below
-  are in effect.
+#. :dp:`fls_jkaiBnApJAtt`
+   Otherwise, neither :t:`type` is a :t:`type variable`, and the rules below
+   are in effect.
 
 :dp:`fls_dhksyjrvx9a`
 A :t:`scalar type` is unifiable only with itself.

@@ -7,6 +7,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../exts"))
+sys.path.insert(1, os.path.abspath("../shared/exts"))
 
 
 # -- Project information -----------------------------------------------------
@@ -51,7 +52,7 @@ rst_prolog = """
 #
 
 html_theme = "ferrocene"
-html_theme_path = ["../themes"]
+html_theme_path = ["../shared/themes"]
 
 html_theme_options = {
     "license": "MIT or Apache 2.0",

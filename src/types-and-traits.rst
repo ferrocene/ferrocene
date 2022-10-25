@@ -1639,7 +1639,7 @@ Type Unification
 :dp:`fls_ryvdhkgm7vzj`
 :t:`Type unification` is the process by which :t:`type inference` propagates
 known :t:`[type]s` across the :t:`type inference root` and assigns concrete
-:t:`[type]s` to :t:`[type variable]s`, and also a general mechanism to check
+:t:`[type]s` to :t:`[type variable]s`, as well as a general mechanism to check
 for compatibility between two :t:`[type]s` during :t:`method resolution`.
 
 :dp:`fls_67VZrx6dw68H`
@@ -1651,8 +1651,8 @@ rules detailed below.
 Two types that :t:`unify` are said to be :t:`[unifiable type]s`.
 
 :dp:`fls_3U7Ue6Xzuv9M`
-:t:`Type unification` is a symmetric operation. If a :t:`type` ``A`` unifies
-with a :t:`type` ``B``, then ``B`` also unifies with ``A`` and such
+:t:`Type unification` is a symmetric operation. If :t:`type` ``A`` unifies
+with :t:`type` ``B``, then ``B`` also unifies with ``A`` and such
 :t:`type unification` results in the same observable effects.
 
 :dp:`fls_tIiw5WkTRNf7`
@@ -1694,7 +1694,7 @@ proceeds as follows:
 
 * :dp:`fls_jkaiBnApJAtt`
   Otherwise, neither :t:`type` is a :t:`type variable`, and the rules below
-  apply instead.
+  are in effect.
 
 :dp:`fls_dhksyjrvx9a`
 A :t:`scalar type` is unifiable only with itself.

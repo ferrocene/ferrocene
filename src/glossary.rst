@@ -6577,7 +6577,7 @@ type unification
 :dp:`fls_3vyodut341b5`
 :dt:`Type unification` is the process by which :t:`type inference` propagates
 known :t:`[type]s` across the :t:`type inference root` and assigns concrete
-:t:`[type]s` to :t:`[type variable]s`, and also a general mechanism to check
+:t:`[type]s` to :t:`[type variable]s`, as well as a general mechanism to check
 for compatibility between two :t:`[type]s` during :t:`method resolution`.
 
 .. _fls_6zhffgxtytku:

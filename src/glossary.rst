@@ -6575,7 +6575,10 @@ type unification
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_3vyodut341b5`
-:dt:`Type unification` is a measure of compatibility between two :t:`[type]s`.
+:dt:`Type unification` is the process by which :t:`type inference` propagates
+known :t:`[type]s` across the :t:`type inference root` and assigns concrete
+:t:`[type]s` to :t:`[type variable]s`, and also a general mechanism to check
+for compatibility between two :t:`[type]s` during :t:`method resolution`.
 
 .. _fls_6zhffgxtytku:
 
@@ -6583,7 +6586,7 @@ type variable
 ^^^^^^^^^^^^^
 
 :dp:`fls_j9eusnwze4rz`
-A :t:`type variable` is a placeholder used during :t:`type inference` to stand
+A :dt:`type variable` is a placeholder used during :t:`type inference` to stand
 in for an undetermined :t:`type`.
 
 .. _fls_44uvj9l7q98z:

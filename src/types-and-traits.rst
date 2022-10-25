@@ -1637,12 +1637,64 @@ Type Unification
 .. rubric:: Legality Rules
 
 :dp:`fls_ryvdhkgm7vzj`
-:t:`Type unification` is a measure of compatibility between two :t:`[type]s`. A
-:t:`type` is said to :t:`unify` with another :t:`type` when the domains,
-ranges, and structures of both :t:`[type]s` are compatible.
+:t:`Type unification` is the process by which :t:`type inference` propagates
+known :t:`[type]s` across the :t:`type inference root` and assigns concrete
+:t:`[type]s` to :t:`[type variable]s`, as well as a general mechanism to check
+for compatibility between two :t:`[type]s` during :t:`method resolution`.
+
+:dp:`fls_67VZrx6dw68H`
+A :t:`type` is said to :t:`unify` with another :t:`type` when the domains,
+ranges, and structures of both :t:`[type]s` are compatible according to the
+rules detailed below.
 
 :dp:`fls_aie0tr62vhw5`
 Two types that :t:`unify` are said to be :t:`[unifiable type]s`.
+
+:dp:`fls_3U7Ue6Xzuv9M`
+:t:`Type unification` is a symmetric operation. If :t:`type` ``A`` unifies
+with :t:`type` ``B``, then ``B`` also unifies with ``A`` and such
+:t:`type unification` results in the same observable effects.
+
+:dp:`fls_tIiw5WkTRNf7`
+If one of the two :t:`[type]s` is a :t:`type variable`, :t:`type unification`
+proceeds as follows:
+
+#. :dp:`fls_EoEbldkKBQW0`
+   If either :t:`type` is a :t:`global type variable`, the
+   :t:`global type variable` is assigned the :t:`type` of the other unification
+   operand.
+
+#. :dp:`fls_16ZDp8PaKi5P`
+   Otherwise, if either :t:`type` is a :t:`diverging type variable`, the
+   :t:`diverging type variable` is assigned the :t:`type` of the other
+   unification operand.
+
+#. :dp:`fls_pGRLTACDvzv2`
+   Otherwise, if one :t:`type` ``T`` is an :t:`integer type variable`, behavior
+   depends on the other :t:`type` ``U``:
+ 
+   #. :dp:`fls_fTy3FVt0fK9g`
+      If ``U`` is an :t:`integer type` or an :t:`integer type variable`, the
+      :t:`integer type variable` ``T`` is assigned :t:`type` ``U``.
+ 
+   #. :dp:`fls_7IsrfUoPXSZU`
+      Otherwise, :t:`type unification` fails.
+
+#. :dp:`fls_Hb95CPyUpCmc`
+   Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
+   behavior depends on the other :t:`type` ``U``:
+ 
+   #. :dp:`fls_jEZVWlfVPevb`
+      If ``U`` is an :t:`floating-point type` or an
+      :t:`floating-point type variable`, the :t:`floating-point type variable`
+      ``T`` is assigned :t:`type` ``U``.
+ 
+   #. :dp:`fls_nKcqFo7yIDBe`
+      Otherwise, :t:`type unification` fails.
+
+#. :dp:`fls_jkaiBnApJAtt`
+   Otherwise, neither :t:`type` is a :t:`type variable`, and the rules below
+   are in effect.
 
 :dp:`fls_dhksyjrvx9a`
 A :t:`scalar type` is unifiable only with itself.
@@ -1771,16 +1823,6 @@ when:
 
 * :dp:`fls_hdo4c849q3lo`
   The :t:`[lifetime]s` are unifiable.
-
-:dp:`fls_zh5hhq2x9h4q`
-A :t:`global type variable` is unifiable with any other type.
-
-:dp:`fls_3xpp05fm0zpb`
-A :t:`floating-point type variable` is unifiable only with a :t:`floating-point
-type`.
-
-:dp:`fls_qtuq6q3ylic`
-An :t:`integer type variable` is unifiable only with an :t:`integer type`.
 
 :dp:`fls_w9dx5h7m31sj`
 A :t:`type alias` is unifiable with another :t:`type` when the aliased :t:`type`

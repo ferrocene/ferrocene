@@ -113,8 +113,8 @@ fn native_library(i: u32) -> Option<Library> {
     // file offset 0 with a nonzero size. For whatever reason when this
     // is present it appears to mean that the symbol table is relative
     // to just the vmaddr slide for the library. If it's *not* present
-    // then the symbol table is relative to the the vmaddr slide plus
-    // the segment's stated address.
+    // then the symbol table is relative to the vmaddr slide plus the
+    // segment's stated address.
     //
     // To handle this situation if we *don't* find a text section at
     // file offset zero then we increase the bias by the first text

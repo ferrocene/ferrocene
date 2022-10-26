@@ -135,7 +135,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
             symbol.name(),
             // TODO: this isn't great that we don't end up printing anything
             // with non-utf8 filenames. Thankfully almost everything is utf8 so
-            // this shouldn't be too too bad.
+            // this shouldn't be too bad.
             symbol
                 .filename()
                 .and_then(|p| Some(BytesOrWideString::Bytes(p.to_str()?.as_bytes()))),

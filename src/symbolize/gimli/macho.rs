@@ -13,7 +13,7 @@ type MachSection = <Mach as MachHeader>::Section;
 type MachNlist = <Mach as MachHeader>::Nlist;
 
 impl Mapping {
-    // The loading path for OSX is is so different we just have a completely
+    // The loading path for OSX is so different we just have a completely
     // different implementation of the function here. On OSX we need to go
     // probing the filesystem for a bunch of files.
     pub fn new(path: &Path) -> Option<Mapping> {

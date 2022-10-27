@@ -110,10 +110,18 @@ def current_git_commit(root):
         return
 
 
+def fetch_submodules(root):
+    subprocess.run(
+        ["git", "submodule", "update", "--init"],
+        check=True,
+        cwd=root,
+    )
+
+
 class VirtualEnv:
     def __init__(self, root, path):
         self.path = path
-        self.requirements = root / "requirements.txt"
+        self.requirements = root / "shared" / "requirements.txt"
         self.installed_requirements = path / "installed-requirements.txt"
 
         if not self.up_to_date():
@@ -168,6 +176,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     root = Path(__file__).parent.resolve()
+
+    fetch_submodules(root)
 
     env = VirtualEnv(root, root / ".venv")
     rendered = build_docs(

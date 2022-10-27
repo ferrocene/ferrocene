@@ -1,10 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
-[theme]
-inherit = basic
-stylesheet = ferrocene.css
-
-[options]
-license =
-commit =
+[submodule "shared"]
+	path = shared
+	url = https://github.com/ferrocene/sphinx-shared-resources

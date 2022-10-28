@@ -4,7 +4,7 @@ use backtrace::Backtrace;
 // function for frames which reports the starting address of a symbol. As a
 // result it's only enabled on a few platforms.
 const ENABLED: bool = cfg!(all(
-    // Windows hasn't really been tested, and OSX doesn't support actually
+    // Windows hasn't really been tested, and macOS doesn't support actually
     // finding an enclosing frame, so disable this
     target_os = "linux",
     // On ARM finding the enclosing function is simply returning the ip itself.

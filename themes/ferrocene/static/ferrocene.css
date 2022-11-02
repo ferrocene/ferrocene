@@ -457,6 +457,14 @@ footer :last-child {
     margin-bottom: 0;
 }
 
+/****************
+ *   TocTrees   *
+ ****************/
+
+div.toctree-wrapper p.caption {
+    font-weight: 700;
+}
+
 /**************
  *   Tables   *
  **************/

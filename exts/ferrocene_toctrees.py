@@ -38,9 +38,23 @@ class AppendicesDirective(TocTree):
 # replacing the EnvironmentCollector responsible for assigning section numbers.
 #
 # We let the builtin Sphinx logic assign section numbers, and as soon as it
-# finishes we go over the sections and replace the first number with a letter.
-# This ensures the rest of the build always sees the correct ID for sections.
+# finishes we go over the sections and replace the first number of appendices
+# with a letter, and we offset everything based on the previous toctrees (to
+# support multiple toctrees in a site).
+#
+# Doing this as part of TocTreeCollector ensures the rest of the build always
+# sees the correct ID for sections, as no Sphinx code runs between the upstream
+# number assigning and us modifying them.
 class TocTreeCollectorWithAppendices(TocTreeCollector):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.__within_appendices = False
+        self.__chapter_offset = 0
+        self.__appendix_offset = 0
+        self.__chapter_max = 0
+        self.__appendix_max = 0
+
     def assign_section_numbers(self, env):
         result = super().assign_section_numbers(env)
 
@@ -49,37 +63,47 @@ class TocTreeCollectorWithAppendices(TocTreeCollector):
             for toctree in doctree.findall(sphinxnodes.toctree):
                 self.__replace_toctree(env, toctree)
 
+                self.__chapter_offset = self.__chapter_max
+                self.__appendix_offset = self.__appendix_max
+
         return result
 
     def __replace_toctree(self, env, toctree):
-        within_appendices = "are_appendices" in toctree
+        self.__within_appendices = "are_appendices" in toctree
         for _, ref in toctree["entries"]:
-            if within_appendices:
-                env.titles[ref]["secnumber"] = make_letter(env.titles[ref]["secnumber"])
+            env.titles[ref]["secnumber"] = self.__renumber(env.titles[ref]["secnumber"])
             if ref in env.tocs:
-                self.__replace_toc(env, ref, env.tocs[ref], within_appendices)
+                self.__replace_toc(env, ref, env.tocs[ref])
 
-    def __replace_toc(self, env, ref, node, within_appendices):
-        if within_appendices and isinstance(node, nodes.reference):
-            fixed_number = make_letter(node["secnumber"])
+    def __replace_toc(self, env, ref, node):
+        if isinstance(node, nodes.reference):
+            fixed_number = self.__renumber(node["secnumber"])
             node["secnumber"] = fixed_number
             env.toc_secnumbers[ref][node["anchorname"]] = fixed_number
 
         elif isinstance(node, sphinxnodes.toctree):
-            self.__replace_toctree(env, node)
+            raise RuntimeError("nested toctrees are not supported")
 
         else:
             for child in node.children:
-                self.__replace_toc(env, ref, child, within_appendices)
+                self.__replace_toc(env, ref, child)
 
+    def __renumber(self, number):
+        if not number:
+            return number
 
-def make_letter(section_number):
-    if not section_number:
-        return section_number
-    if section_number[0] > 26:
-        raise RuntimeError("more than 26 appendices are not supported")
+        if self.__within_appendices:
+            with_offset = self.__appendix_offset + number[0]
+            if with_offset > 26:
+                raise RuntimeError("more than 26 appendices are not supported")
 
-    return (chr(ord("A") - 1 + section_number[0]), *section_number[1:])
+            fixed = chr(ord("A") - 1 + with_offset)
+            self.__appendix_max = max(self.__appendix_max, with_offset)
+        else:
+            fixed = self.__chapter_offset + number[0]
+            self.__chapter_max = max(self.__chapter_max, fixed)
+
+        return (fixed, *number[1:])
 
 
 # This extension needs to replace the builtin TocTreeCollector, so it's safer

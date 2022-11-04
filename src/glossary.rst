@@ -116,13 +116,23 @@ models existential quantifier ALL.
 :dp:`fls_0fEw9Bx8xX8q`
 See :s:`ConfigurationPredicateAll`.
 
+.. _fls_eg1wsZzoiTzK:
+
+anonymous block expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ZU8eI3kyzw3z`
+An :dt:`anonymous block expression` is a :t:`block expression` without a
+:t:`label`.
+
 .. _fls_du8uevac5q7j:
 
-anonymous loop
-^^^^^^^^^^^^^^
+anonymous loop expression
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_csss2a8yk52k`
-An :dt:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
+An :dt:`anonymous loop expression` is a :t:`loop expression` without a
+:t:`label`.
 
 .. _fls_dgxkklxcrrl0:
 
@@ -849,7 +859,7 @@ break expression
 
 :dp:`fls_8ys8hlqgizoa`
 A :dt:`break expression` is an :t:`expression` that terminates a
-:t:`loop expression`.
+:t:`loop expression` or a :t:`named block expression`.
 
 :dp:`fls_fd1xpst5fki2`
 See :s:`BreakExpression`.
@@ -4136,6 +4146,14 @@ A :dt:`name` is an :t:`identifier` that refers to an :t:`entity`.
 :dp:`fls_yrzevg5kd4bi`
 See :s:`Name`.
 
+.. _fls_CxzbzLu4pWPY:
+
+named block expression
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ivFb8uAMVY3Q`
+A :dt:`named block expression` is a :t:`block expression` with a :t:`label`.
+
 .. _fls_dgs9y3nan69v:
 
 named deconstructor
@@ -4174,11 +4192,11 @@ See :s:`NamedInitializer`.
 
 .. _fls_biwn3hxza37n:
 
-named loop
-^^^^^^^^^^
+named loop expression
+^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_440dr5qix3ns`
-A :dt:`named loop` is a :t:`loop expression` with a :t:`label`.
+A :dt:`named loop expression` is a :t:`loop expression` with a :t:`label`.
 
 .. _fls_GesmsWSVhv3f:
 

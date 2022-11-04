@@ -662,6 +662,9 @@ and :t:`[statement]s`.
 :dp:`fls_gOxD5xdYLaQG`
 A :t:`named block expression` is a :t:`block expression` with a :t:`label`.
 
+:dp:`fls_ZEX9YIxHlnVr`
+A :t:`named block expression` shall appear within a :t:`block expression`.
+
 :dp:`fls_osLgtbU8OfbD`
 An :t:`anonymous block expression` is a :t:`block expression` without a
 :t:`label`.

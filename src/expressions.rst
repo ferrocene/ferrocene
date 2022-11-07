@@ -662,9 +662,6 @@ and :t:`[statement]s`.
 :dp:`fls_gOxD5xdYLaQG`
 A :t:`named block expression` is a :t:`block expression` with a :t:`label`.
 
-:dp:`fls_ZEX9YIxHlnVr`
-A :t:`named block expression` shall appear within a :t:`block expression`.
-
 :dp:`fls_osLgtbU8OfbD`
 An :t:`anonymous block expression` is a :t:`block expression` without a
 :t:`label`.
@@ -3951,36 +3948,28 @@ A :t:`break expression` is an :t:`expression` that terminates a
 A :t:`break expression` shall appear within a :t:`loop body` or a
 :t:`named block expression`.
 
+:dp:`fls_gnupTkuafKNi`
+If a :t:`break expression` appears within a :t:`named block expression`, then
+the :t:`break expression` shall have a :t:`label indication`.
+
 :dp:`fls_7frvr2nm2mcj`
 The :t:`label indication` of a :t:`break expression` shall resolve to the
 :t:`label` of an enclosing :t:`named block expression` or
 :t:`named loop expression`.
 
-:dp:`fls_gnupTkuafKNi`
-If a :t:`break expression` appears within a :t:`named block expression`, then
+:dp:`fls_54d5uydc87td`
+A :t:`break expression` with a :t:`label indication` is associated with the
+:t:`named block expression` or :t:`named loop expression` whose :t:`label` is
+indicated by the :t:`label indication`.
 
-  * :dp:`fls_y3Fza5M6qUGd`
-    The :t:`break expression` shall have a :t:`label indication`.
-
-  * :dp:`fls_lHPRhLfmyzuT`
-    A :t:`break expression` is associated with the :t:`named block expression`
-    whose :t:`label` is indicated by the :t:`label indication`.
+:dp:`fls_ghxns2nggffj`
+A :t:`break expression` without a :t:`label indication` is associated with the
+innermost enclosing :t:`loop expression`.
 
 :dp:`fls_3hI7FU42sVyX`
-If a :t:`break expression` appears within a :t:`loop expression`, then
-
-  * :dp:`fls_ghxns2nggffj`
-     A :t:`break expression` without a :t:`label indication` is associated with
-    the innermost enclosing :t:`loop expression`.
-
-  * :dp:`fls_54d5uydc87td`
-    A :t:`break expression` with a :t:`label indication` is associated with the
-    :t:`named loop expression` whose :t:`label` is indicated by the
-    :t:`label indication`.
-
-  * :dp:`fls_6x15ig8drne8`
-    The :t:`break expression` shall have an :t:`operand` only when it is
-    associated with an :t:`infinite loop`.
+If a :t:`break expression` appears within a :t:`loop expression`, then the
+:t:`break expression` shall have an :t:`operand` only when it is associated
+with an :t:`infinite loop`.
 
 :dp:`fls_dnnq1zym8ii0`
 The :t:`type` of a :t:`break expression` is the :t:`never type`.

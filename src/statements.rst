@@ -57,13 +57,7 @@ Let Statements
        OuterAttributeOrDoc* $$let$$ PatternWithoutAlternation TypeAscription? LetInitializer? $$;$$
 
    LetInitializer ::=
-       $$=$$ LetExpression ($$else$$ LetBlockExpression)?
-
-   LetExpression ::=
-       Expression
-
-   LetBlockExpression ::=
-       BlockExpression
+       $$=$$ Expression ($$else$$ BlockExpression)?
 
 .. rubric:: Legality Rules
 
@@ -74,19 +68,12 @@ initialized to a :t:`value`.
 
 :dp:`fls_SR3dIgR5K0Kq`
 A :t:`let initializer` is a :t:`construct` that provides the :t:`value` of
-the :t:`[binding]s` of the :t:`let statement` using a :t:`let expression`,
-or alternatively executes a :t:`let block expression`.
-
-:dp:`fls_7xFnf6UZnMyy`
-A :t:`let expression` is the :t:`expression` of a :t:`let initializer`.
-
-:dp:`fls_XlFksj3W9dKK`
-A :t:`let block expression` is the :t:`block expression` of a
-:t:`let initializer`.
+the :t:`[binding]s` of the :t:`let statement` using an :t:`expression`, or
+alternatively executes a :t:`block expression`.
 
 :dp:`fls_iqar7vvtw22c`
-If a :t:`let statement` lacks a :t:`let block expression`, then the 
-:t:`pattern` of the :t:`let statement` shall be an :t:`irrefutable pattern`.
+If a :t:`let statement` lacks a :t:`block expression`, then the :t:`pattern` of
+the :t:`let statement` shall be an :t:`irrefutable pattern`.
 
 :dp:`fls_1prqh1trybwz`
 The :t:`type` of a :t:`binding` introduced by a :t:`let statement` is
@@ -101,7 +88,8 @@ determined as follows:
   inferred using :t:`type inference`.
 
 :dp:`fls_1eBQDZdBuDsN`
-The :t:`type` of a :t:`let block expression` shall be the :t:`never type`.
+The :t:`type` of the :t:`block expression` of a :t:`let statement` shall be the
+:t:`never type`.
 
 :dp:`fls_m8a7gesa4oim`
 The :t:`value` of a :t:`binding` introduced by a :t:`let statement` is
@@ -109,10 +97,11 @@ determined as follows:
 
 * :dp:`fls_oaxnre7m9s10`
   If the :t:`let statement` appears with a :t:`let initializer`, then the
-  :t:`value` is the :t:`value` of the :t:`let expression`.
+  :t:`value` is the :t:`value` of the :t:`expression` of the
+  :t:`let initializer`.
 
 * :dp:`fls_t5bjwluyv8za`
-  Otherwise the :t:`variable` is uninitialized.
+  Otherwise the :t:`binding` is uninitialized.
 
 .. rubric:: Dynamic Semantics
 
@@ -121,15 +110,15 @@ The :t:`execution` of a :t:`let statement` with a :t:`let initializer` proceeds
 as follows:
 
 #. :dp:`fls_t53g5hlabqw1`
-   The :t:`let expression` is evaluated.
+   The :t:`expression` of the :t:`let initializer` is evaluated.
 
 #. :dp:`fls_7j4qlwg72ege`
-   If the :t:`value` of the :t:`let expression` is matched successfully against
-   the :t:`pattern-without-alternation`, then the :t:`value` is assigned to
+   If the :t:`value` of the :t:`expression` is matched successfully against the
+   :t:`pattern` of the :t:`let statement`, then the :t:`value` is assigned to
    each :t:`binding` introduced by the :t:`let statement`.
 
 #. :dp:`fls_ea9bRFZjH8Im`
-   Otherwise the :t:`let block expression` is evaluated.
+   Otherwise the :t:`block expression` of the :t:`let initializer` is evaluated.
 
 .. rubric:: Examples
 

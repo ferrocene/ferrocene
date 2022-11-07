@@ -3458,29 +3458,6 @@ tests for a less-than-or-equals relationship.
 :dp:`fls_ft5aeo4ilgwc`
 See :s:`LessThanOrEqualsExpression`.
 
-.. _fls_BYYrMPR36wgO:
-
-let block expression
-^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_zqSpw5k9qcVq`
-A :dt:`let block expression` is the :t:`block expression` of a
-:t:`let initializer`.
-
-:dp:`fls_ZVUD6Yh7GrB4`
-See :s:`LetBlockExpression`.
-
-.. _fls_U8lnlYU7jQRO:
-
-let expression
-^^^^^^^^^^^^^^
-
-:dp:`fls_PzzqLjbsA2Ho`
-A :dt:`let expression` is the :t:`expression` of a :t:`let initializer`.
-
-:dp:`fls_EcYNQaHb8waU`
-See :S:`LetExpression`.
-
 .. _fls_hqj80jHcxEBB:
 
 let initializer
@@ -3488,8 +3465,8 @@ let initializer
 
 :dp:`fls_jtTpBZ4ujZRc`
 A :dt:`let initializer` is a :t:`construct` that provides the :t:`value` of
-the :t:`[binding]s` of the :t:`let statement` using a :t:`let expression`, or
-alternatively executes a :t:`let block expression`.
+the :t:`[binding]s` of the :t:`let statement` using an :t:`expression`, or
+alternatively executes a :t:`block expression`.
 
 :dp:`fls_GmHsJb6FICfA`
 See :s:`LetInitializer`.

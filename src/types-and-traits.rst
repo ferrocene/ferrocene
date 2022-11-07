@@ -2101,12 +2101,12 @@ Type Inference
 :t:`[expression]s` and :t:`[pattern]s` within a :t:`type inference root`.
 
 :dp:`fls_ybvrhh96fc7y`
-A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+A :t:`type inference root` is a :t:`construct` whose inner :t:`[expression]s`
 and :t:`[pattern]s` are subject to :t:`type inference` independently of those
 found in other :t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
-The following :t:`[expression]s` are considered :t:`[type inference root]s`:
+The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 
 * :dp:`fls_NYSzcvf5nQpi`
   A :t:`constant argument`.

@@ -6534,7 +6534,7 @@ type inference root
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hLI7lCixs48z`
-A :dt:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+A :dt:`type inference root` is a :t:`construct` whose inner :t:`[expression]s`
 and :t:`[pattern]s` are subject to :t:`type inference` independently of other
 :t:`[type inference root]s`.
 

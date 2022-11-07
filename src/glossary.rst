@@ -3487,8 +3487,8 @@ let initializer
 ^^^^^^^^^^^^^^^
 
 :dp:`fls_jtTpBZ4ujZRc`
-A :t:`let initializer` is a :t:`construct` that provides the :t:`value` of the
-:t:`[binding]s` of the :t:`let statement` using a :t:`let expression`, or
+A :dt:`let initializer` is a :t:`construct` that provides the :t:`value` of
+the :t:`[binding]s` of the :t:`let statement` using a :t:`let expression`, or
 alternatively executes a :t:`let block expression`.
 
 :dp:`fls_GmHsJb6FICfA`

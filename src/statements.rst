@@ -57,7 +57,7 @@ Let Statements
        OuterAttributeOrDoc* $$let$$ PatternWithoutAlternation TypeAscription? LetInitializer? $$;$$
 
    LetInitializer ::=
-       $$=$$ LetExpression $$else$$ LetBlockExpression?
+       $$=$$ LetExpression ($$else$$ LetBlockExpression)?
 
    LetExpression ::=
        Expression
@@ -73,9 +73,9 @@ produced by its :t:`pattern-without-alternation` that are optionally
 initialized to a :t:`value`.
 
 :dp:`fls_SR3dIgR5K0Kq`
-A :t:`let initializer` is a :t:`construct` that provides the :t:`value` of the
-:t:`[binding]s` of the :t:`let statement` using a :t:`let expression`, or
-alternatively executes a :t:`let block expression`.
+A :t:`let initializer` is a :t:`construct` that provides the :t:`value` of
+the :t:`[binding]s` of the :t:`let statement` using a :t:`let expression`,
+or alternatively executes a :t:`let block expression`.
 
 :dp:`fls_7xFnf6UZnMyy`
 A :t:`let expression` is the :t:`expression` of a :t:`let initializer`.
@@ -123,13 +123,13 @@ as follows:
 #. :dp:`fls_t53g5hlabqw1`
    The :t:`let expression` is evaluated.
 
-   #. :dp:`fls_7j4qlwg72ege`
-      If the :t:`value` of the :t:`let expression` is matched against the
-      :t:`pattern-without-alternation`, then the :t:`value` is assigned to
-      each :t:`binding` introduced by the :t:`let statement`.
+#. :dp:`fls_7j4qlwg72ege`
+   If the :t:`value` of the :t:`let expression` is matched successfully against
+   the :t:`pattern-without-alternation`, then the :t:`value` is assigned to
+   each :t:`binding` introduced by the :t:`let statement`.
 
-   #. :dp:`fls_ea9bRFZjH8Im`
-      Otherwise the :t:`let block expression` is evaluated.
+#. :dp:`fls_ea9bRFZjH8Im`
+   Otherwise the :t:`let block expression` is evaluated.
 
 .. rubric:: Examples
 

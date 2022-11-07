@@ -3051,9 +3051,13 @@ applies to the :t:`implementing type` and :t:`implemented trait` (if any) of an
 :dp:`fls_3p5BdLn3JbKz`
 The :t:`impl header lifetime elision` rules are as follows:
 
-* :dp:`fls_mWxIQ5wagMpa`
-  An implicitly elided :t:`lifetime` is a static error.
-
 * :dp:`fls_PfS5AlkN6ANl`
   Every explicitly elided :t:`lifetime` is replaced with a new
   :t:`lifetime parameter` defined on the :t:`implementation`.
+
+* :dp:`fls_QV6zE5Mdor5E`
+  An implicitly elided :t:`lifetime` of a :t:`reference` is also replaced with a
+  new :t:`lifetime parameter` defined on the :t:`implementation`.
+
+* :dp:`fls_P2V1DqrdCjCi`
+  An implicitly elided :t:`lifetime` in any other :t:`type` is a static error.

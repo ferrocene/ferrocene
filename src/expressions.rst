@@ -4064,7 +4064,7 @@ the innermost enclosing :t:`loop expression`.
 :dp:`fls_ckm6i9c3s6j8`
 A :t:`continue expression` with a :t:`label indication` is associated with a
 :t:`named loop expression` whose :t:`label` is indicated by the
- :t:`label indication`.
+:t:`label indication`.
 
 :dp:`fls_d0bmw8xiw5nk`
 The :t:`type` of a :t:`continue expression` is the :t:`never type`.

@@ -645,7 +645,7 @@ Block Expressions
 .. syntax::
 
    BlockExpression ::=
-       $${$$
+       Label? $${$$
          InnerAttributeOrDoc*
          StatementList
        $$}$$
@@ -659,6 +659,13 @@ Block Expressions
 A :t:`block expression` is an :t:`expression` that sequences :t:`[expression]s`
 and :t:`[statement]s`.
 
+:dp:`fls_gOxD5xdYLaQG`
+A :t:`named block expression` is a :t:`block expression` with a :t:`label`.
+
+:dp:`fls_osLgtbU8OfbD`
+An :t:`anonymous block expression` is a :t:`block expression` without a
+:t:`label`.
+
 :dp:`fls_tn3hj7k2lliu`
 A :t:`tail expression` is the last :t:`expression` within a :t:`block
 expression`.
@@ -666,24 +673,39 @@ expression`.
 :dp:`fls_u4gj2lnkq9ub`
 The :t:`type` of a :t:`block expression` is determined as follows:
 
+* :dp:`fls_ltEygvWDtHXE`
+  If the :t:`block expression` contains at least one :t:`break expression` and
+  has a :t:`tail expression`, then the :t:`type` is the :t:`unified type` of
+  the :t:`break types` of all :t:`[break expression]s` and the :t:`type` of the
+  :t:`tail expression`.
+
+* :dp:`fls_97v4fnekrRXI`
+  Otherwise, if the :t:`block expression` contains at least one
+  :t:`break expression`, then the :t:`type` is the :t:`unified type` of the
+  :t:`break types` of all :t:`[break expression]s`.
+
 * :dp:`fls_ob76y2ymdd27`
-  If the :t:`block expression` has a :t:`tail expression`, then the :t:`type`
-  is the :t:`type` of the :t:`tail expression`.
+  Otherwise, if the :t:`block expression` has a :t:`tail expression`, then the
+  :t:`type` is the :t:`type` of the :t:`tail expression`.
 
 * :dp:`fls_u0avbm147nyh`
-  If the :t:`block expression` does not have an :t:`tail expression`, then the
-  :t:`type` is the :t:`unit type`.
+  Otherwise the :t:`type` is the :t:`unit type`.
 
 :dp:`fls_1hzup0sf8l7l`
 The :t:`value` of a :t:`block expression` is determined as follows:
 
+* :dp:`fls_kKZPKvJ902cw`
+  If the :t:`block expression` contains at least one :t:`break expression` and
+  a :t:`break expression` broke out the :t:`block expression`, then the
+  :t:`value` is the :t:`break value` of the :t:`break expression` that
+  broke out of the :t:`block expression`.
+
 * :dp:`fls_9nmssjseq3jt`
-  If the :t:`block expression` has a :t:`tail expression`, then the :t:`value`
-  is the :t:`value` of the :t:`tail expression`.
+  Otherwise, if the :t:`block expression` has a :t:`tail expression`, then the
+  :t:`value` is the :t:`value` of the :t:`tail expression`.
 
 * :dp:`fls_a3ulnvyc1ut`
-  If the :t:`block expression` does not have an :t:`tail expression`, then the
-  :t:`value` of the :t:`block expression` is the :t:`unit value`.
+  Otherwise the :t:`value` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3615,10 +3637,11 @@ A :t:`loop body` is the :t:`block expression` of a :t:`loop expression`.
 The :t:`type` of the :t:`loop body` shall be the :t:`unit type`.
 
 :dp:`fls_eg93m93gvwal`
-An :t:`anonymous loop` is a :t:`loop expression` without a :t:`label`.
+An :t:`anonymous loop expression` is a :t:`loop expression` without a
+:t:`label`.
 
 :dp:`fls_phpoq9ho8f1v`
-A :t:`named loop` is a :t:`loop expression` with a :t:`label`.
+A :t:`named loop expression` is a :t:`loop expression` with a :t:`label`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3899,8 +3922,9 @@ A :t:`label indication` is a :t:`construct` that indicates a :t:`label`.
 
 :dp:`fls_7hc8yboeaho0`
 A :t:`label indication` shall indicate a :t:`label` of an enclosing
-:t:`named loop` that does not pass a :t:`control flow boundary` in order to
-reach the enclosing :t:`named loop`.
+:t:`named block expression` or :t:`named loop expression` that does not pass a
+:t:`control flow boundary` in order to reach the enclosing
+:t:`named block expression` or :t:`named loop expression`.
 
 .. _fls_jr4tpuyksr75:
 
@@ -3918,25 +3942,33 @@ Break Expressions
 
 :dp:`fls_i5ko1t2wbgxe`
 A :t:`break expression` is an :t:`expression` that terminates a
-:t:`loop expression`.
+:t:`loop expression` or a :t:`named block expression`.
 
 :dp:`fls_jiykbp51909f`
-A :t:`break expression` shall appear within a :t:`loop body`.
+A :t:`break expression` shall appear within a :t:`loop body` or a
+:t:`named block expression`.
+
+:dp:`fls_gnupTkuafKNi`
+If a :t:`break expression` appears within a :t:`named block expression`, then
+the :t:`break expression` shall have a :t:`label indication`.
 
 :dp:`fls_7frvr2nm2mcj`
 The :t:`label indication` of a :t:`break expression` shall resolve to the
-:t:`label` of an enclosing :t:`named loop`.
+:t:`label` of an enclosing :t:`named block expression` or
+:t:`named loop expression`.
+
+:dp:`fls_54d5uydc87td`
+A :t:`break expression` with a :t:`label indication` is associated with the
+:t:`named block expression` or :t:`named loop expression` whose :t:`label` is
+indicated by the :t:`label indication`.
 
 :dp:`fls_ghxns2nggffj`
 A :t:`break expression` without a :t:`label indication` is associated with the
 innermost enclosing :t:`loop expression`.
 
-:dp:`fls_54d5uydc87td`
-A :t:`break expression` with a :t:`label indication` is associated with a
-:t:`named loop` whose :t:`label` is indicated by the :t:`label indication`.
-
-:dp:`fls_6x15ig8drne8`
-A :t:`break expression` shall have an :t:`operand` only when it is associated
+:dp:`fls_3hI7FU42sVyX`
+If a :t:`break expression` appears within a :t:`loop expression`, then the
+:t:`break expression` shall have an :t:`operand` only when it is associated
 with an :t:`infinite loop`.
 
 :dp:`fls_dnnq1zym8ii0`
@@ -3974,7 +4006,8 @@ The :t:`break value` is determined as follows:
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_jnpx8mx1oa7n`
-The :t:`evaluation` of a :t:`break expression` proceeds as follows:
+If a :t:`break expression` appears within a :t:`loop expression`, then the
+:t:`evaluation` of the :t:`break expression` proceeds as follows:
 
 #. :dp:`fls_l2kp8mw6bjj0`
    The :t:`operand` is evaluated.
@@ -3982,6 +4015,17 @@ The :t:`evaluation` of a :t:`break expression` proceeds as follows:
 #. :dp:`fls_2nmadhe3ismj`
    All enclosing :t:`[loop expression]s` upto and including the associated
    :t:`loop expression` are :t:`terminated`.
+
+:dp:`fls_XpFLrL78QMe1`
+If a :t:`break expression` appears within a :t:`named block expression`, then
+the :t:`evaluation` of the :t:`break expression` proceeds as follows:
+
+#. :dp:`fls_WFAW1PG1YXdM`
+   The :t:`operand` is evaluated.
+
+#. :dp:`fls_AurifMM8RpDp`
+   All enclosing :t:`[named block expression]s` upto and including the
+   associated :t:`named block expression` are terminated.
 
 .. rubric:: Examples
 
@@ -4019,7 +4063,8 @@ the innermost enclosing :t:`loop expression`.
 
 :dp:`fls_ckm6i9c3s6j8`
 A :t:`continue expression` with a :t:`label indication` is associated with a
-:t:`named loop` whose :t:`label` is indicated by the :t:`label indication`.
+:t:`named loop expression` whose :t:`label` is indicated by the
+:t:`label indication`.
 
 :dp:`fls_d0bmw8xiw5nk`
 The :t:`type` of a :t:`continue expression` is the :t:`never type`.

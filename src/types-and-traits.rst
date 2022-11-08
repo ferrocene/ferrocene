@@ -2129,26 +2129,6 @@ The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_cPlCLGCcl7EK`
   A :t:`static initializer`.
 
-:dp:`fls_uvvn4usfsbhr`
-A :t:`type variable` is a placeholder used during :t:`type inference` to stand
-in for an undetermined :t:`type`.
-
-:dp:`fls_gDalJm1XS0mi`
-A :t:`global type variable` is a :t:`type variable` that can refer to any
-:t:`type`.
-
-:dp:`fls_7ov36fpd9mwe`
-An :t:`integer type variable` is a :t:`type variable` that can refer only to
-:t:`[integer type]s`.
-
-:dp:`fls_3hv3wxkhjjp1`
-A :t:`floating-point type variable` is a :t:`type variable` that can refer only
-to :t:`[floating-point type]s`.
-
-:dp:`fls_bXQ63GYYDuMp`
-A :t:`diverging type variable` is a :t:`type variable` that can refer to any
-:t:`type` and originates from a :t:`diverging expression`.
-
 :dp:`fls_J77VeAlD8rsv`
 A :t:`type inference root` imposes an :dt:`expected type` on its :t:`expression`
 depending on the :t:`type inference root` as follows:
@@ -2177,16 +2157,6 @@ depending on the :t:`type inference root` as follows:
   The :t:`expected type` of a :t:`function body` is the :t:`return type` of the
   :t:`function`.
 
-* :dp:`fls_zHpBXxfUWDz3`
-  The :t:`expected type` of a :t:`let initializer` is determined as follows:
-
-  * :dp:`fls_qob4wjgza3i8`
-    If the :t:`let statement` appears with a :t:`type ascription`, then the
-    :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
-
-  * :dp:`fls_7vdr0mh7kmpz`
-    Otherwise the :t:`expected type` is a :t:`global type variable`.
-
 * :dp:`fls_veG2D64fIXvo`
   The :t:`expected type` of a :t:`size operand` of an :t:`array expression` or
   an :t:`array type` is :c:`usize`.
@@ -2194,6 +2164,37 @@ depending on the :t:`type inference root` as follows:
 * :dp:`fls_qlovdtcj1v1b`
   The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
   :t:`type` specified by its :t:`type ascription`.
+
+:dp:`fls_uvvn4usfsbhr`
+A :t:`type variable` is a placeholder used during :t:`type inference` to stand
+in for an undetermined :t:`type`.
+
+:dp:`fls_gDalJm1XS0mi`
+A :t:`global type variable` is a :t:`type variable` that can refer to any
+:t:`type`.
+
+:dp:`fls_7ov36fpd9mwe`
+An :t:`integer type variable` is a :t:`type variable` that can refer only to
+:t:`[integer type]s`.
+
+:dp:`fls_3hv3wxkhjjp1`
+A :t:`floating-point type variable` is a :t:`type variable` that can refer only
+to :t:`[floating-point type]s`.
+
+:dp:`fls_bXQ63GYYDuMp`
+A :t:`diverging type variable` is a :t:`type variable` that can refer to any
+:t:`type` and originates from a :t:`diverging expression`.
+
+:dp:`fls_zHpBXxfUWDz3`
+The :t:`expected type` of a :t:`let initializer` of a :t:`let statement` is
+determined as follows:
+
+* :dp:`fls_qob4wjgza3i8`
+  If the :t:`let statement` appears with a :t:`type ascription`, then the
+  :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
+
+* :dp:`fls_7vdr0mh7kmpz`
+  Otherwise the :t:`expected type` is a :t:`global type variable`.
 
 :dp:`fls_biyyicl3c3kn`
 :t:`[Arithmetic expression]s`, :t:`[await expression]s`,

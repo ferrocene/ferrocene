@@ -67,7 +67,7 @@ the related :t:`implementation` or :t:`trait` has at least one
 :t:`generic associated type`, and the intersection of all such imposed
 :t:`[lifetime bound]s` is not empty.
 
-* :dp:`fls_hOqX2N1iKxWW`
+:dp:`fls_hOqX2N1iKxWW`
 A :t:`generic associated type` shall not be subject to the ``'static``
 :t:`lifetime bound`.
 

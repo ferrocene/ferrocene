@@ -52,24 +52,22 @@ An :t:`associated type` with a :s:`TypeBoundList` shall appear only as an
 A :t:`generic associated type` is an :t:`associated type` with
 :t:`[generic parameter]s`.
 
-:dp:`fls_Y7yIkAbxJpvp`
-A :t:`generic associated type` shall require a :t:`lifetime parameter` when
-the related :t:`implementation` or :t:`trait` has at least one
-:t:`associated function` that imposes a :t:`lifetime bound` on the
-:t:`generic associated type`.
+:dp:`fls_3foYUch29ZtF`
+A :t:`lifetime parameter` of a :t:`generic associated type` requires a
+:t:`bound` of the form ``T: 'lifetime``, where ``T`` is a :t:`type parameter`
+or :c:`Self` and ``'lifetime`` is the :t:`lifetime parameter`, when
 
-:dp:`fls_1DZOklVBn2AZ`
-A :t:`generic associated type` shall be subject to a :t:`where clause` of
-the form ``where Self: 'lifetime_parameter``, where ``lifetime_parameter`` is
-the :t:`lifetime parameter` of the :t:`generic associated type`, when the
-the related :t:`implementation` or :t:`trait` has at least one
-:t:`associated function` that imposes a :t:`lifetime bound` on the
-:t:`generic associated type`, and the intersection of all such imposed
-:t:`[lifetime bound]s` is not empty.
+* :dp:`fls_SnQc0zZS57Cz`
+  The :t:`generic associated type` is used in an :t:`associated function` of
+  the same :t:`trait`, and
 
-:dp:`fls_hOqX2N1iKxWW`
-A :t:`generic associated type` shall not be subject to the ``'static``
-:t:`lifetime bound`.
+* :dp:`fls_6Z05BK2JSzpP`
+  The corresponding :t:`lifetime argument` in the use is not the ``'static``
+  :t:`lifetime` and has either an explicit :t:`bound` or an :t:`implicit bound`
+  that constrains the :t:`type parameter`, and
+
+* :dp:`fls_AtItgS1UvwiX`
+  The intersection of all such uses is not empty.
 
 :dp:`fls_l3iwn56n1uz8`
 An :t:`associated implementation constant` is an :t:`associated constant` that
@@ -158,3 +156,13 @@ A :t:`method` is an :t:`associated function` with a :t:`receiver`.
        }
    }
 
+:dp:`fls_znfADVeOvXHD`
+Generic associated type with lifetime bound.
+
+.. code-block:: rust
+
+   trait LendingIterator {
+       type Item<'x> where Self: 'x;
+
+       fn next<'a>(&'a mut self) -> Self::Item<'a>;
+   }

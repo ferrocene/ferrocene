@@ -2714,7 +2714,7 @@ also applies to the :t:`abstract data type` where the :t:`field` resides.
 :dp:`fls_Uw6y5ZlaK6RY`
 If an :t:`implied bound` applies to an :t:`abstract data type`, then the
 :t:`implied bound` also applies to all :t:`[function]s` that use the
-:t:`abstract data type` and all :t:`[path]s` that resolve to the
+:t:`abstract data type` and to all :t:`[path]s` that resolve to the
 :t:`abstract data type`.
 
 :dp:`fls_AzuZmR9DXSQh`

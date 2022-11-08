@@ -2693,6 +2693,10 @@ A :t:`higher-ranked trait bound` is a :t:`bound` that specifies an infinite
 list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 :s:`ForGenericParameterList`.
 
+:dp:`fls_J9DEsd06Ttu9`
+An :t:`implied bound` is a :t:`bound` that is not expressed directly in syntax,
+and is the byproduct of other :t:`[bound]s`.
+
 :dp:`fls_AzuZmR9DXSQh`
 A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.
 

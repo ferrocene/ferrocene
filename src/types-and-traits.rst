@@ -1264,7 +1264,7 @@ Type Aliases
 
    TypeAliasDeclaration ::=
        $$type$$ Name GenericParameterList? ($$:$$ TypeBoundList)? WhereClause?
-         $$=$$ InitializationType WhereClause? $$;$$
+         ($$=$$ InitializationType WhereClause?)? $$;$$
 
    InitializationType ::=
        TypeSpecification

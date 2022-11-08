@@ -3035,8 +3035,9 @@ implied bound
 ^^^^^^^^^^^^^
 
 :dp:`fls_t77d8xwG1l9Q`
-An :dt:`implied bound` is a :t:`bound` that is not expressed directly in syntax,
-and is the byproduct of relationships between :t:`[generic parameter]s`.
+An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
+is the byproduct of relations between the :t:`[generic parameter]s` of
+:t:`[abstract data type]s` or :t:`[function]s`.
 
 .. _fls_3lo8ygoyxxyf:
 

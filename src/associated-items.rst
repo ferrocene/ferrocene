@@ -48,6 +48,29 @@ An :t:`associated type` shall not be used in the :t:`path expression` of a
 An :t:`associated type` with a :s:`TypeBoundList` shall appear only as an
 :t:`associated trait type`.
 
+:dp:`fls_PeD0DzjK57be`
+A :t:`generic associated type` is an :t:`associated type` with
+:t:`[generic parameter]s`.
+
+:dp:`fls_Y7yIkAbxJpvp`
+A :t:`generic associated type` shall require a :t:`lifetime parameter` when
+the related :t:`implementation` or :t:`trait` has at least one
+:t:`associated function` that imposes a :t:`lifetime bound` on the
+:t:`generic associated type`.
+
+:dp:`fls_1DZOklVBn2AZ`
+A :t:`generic associated type` shall be subject to a :t:`where clause` of
+the form ``where Self: 'lifetime_parameter``, where ``lifetime_parameter`` is
+the :t:`lifetime parameter` of the :t:`generic associated type`, when the
+the related :t:`implementation` or :t:`trait` has at least one
+:t:`associated function` that imposes a :t:`lifetime bound` on the
+:t:`generic associated type`, and the intersection of all such imposed
+:t:`[lifetime bound]s` is not empty.
+
+* :dp:`fls_hOqX2N1iKxWW`
+A :t:`generic associated type` shall not be subject to the ``'static``
+:t:`lifetime bound`.
+
 :dp:`fls_l3iwn56n1uz8`
 An :t:`associated implementation constant` is an :t:`associated constant` that
 appears within an :t:`implementation`.

@@ -2694,8 +2694,9 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 :s:`ForGenericParameterList`.
 
 :dp:`fls_J9DEsd06Ttu9`
-An :t:`implied bound` is a :t:`bound` that is not expressed directly in syntax,
-and is the byproduct of relationships between :t:`[generic parameter]s`.
+An :t:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
+is the byproduct of relations between the :t:`[generic parameter]s` of
+:t:`[abstract data type]s` or :t:`[function]s`.
 
 :dp:`fls_IfHRxSasGAih`
 A :t:`reference` of the form ``&'a T``, where ``'a`` is a
@@ -2709,6 +2710,12 @@ A :t:`reference` of the form ``&'a &'b``, where ``'a`` and ``'b`` are
 :dp:`fls_K8nPGP5xbLb7`
 If an :t:`implied bound` applies to a :t:`field`, then the :t:`implied bound`
 also applies to the :t:`abstract data type` where the :t:`field` resides.
+
+:dp:`fls_Uw6y5ZlaK6RY`
+If an :t:`implied bound` applies to an :t:`abstract data type`, then the
+:t:`implied bound` also applies to all :t:`[function]s` that use the
+:t:`abstract data type` and all :t:`[path]s` that resolve to the
+:t:`abstract data type`.
 
 :dp:`fls_AzuZmR9DXSQh`
 A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.

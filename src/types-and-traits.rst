@@ -2695,7 +2695,20 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 
 :dp:`fls_J9DEsd06Ttu9`
 An :t:`implied bound` is a :t:`bound` that is not expressed directly in syntax,
-and is the byproduct of other :t:`[bound]s`.
+and is the byproduct of relationships between :t:`[generic parameter]s`.
+
+:dp:`fls_IfHRxSasGAih`
+A :t:`reference` of the form ``&'a T``, where ``'a`` is a
+:t:`lifetime parameter` and ``T`` is a :t:`type parameter`, yields
+:t:`implied bound` ``T: 'a``.
+
+:dp:`fls_SMbHOyJgVeKB`
+A :t:`reference` of the form ``&'a &'b``, where ``'a`` and ``'b`` are
+:t:`[lifetime parameter]s``, yields :t:`implied bound` ``'a: 'b``.
+
+:dp:`fls_K8nPGP5xbLb7`
+If an :t:`implied bound` applies to a :t:`field`, then the :t:`implied bound`
+also applies to the :t:`abstract data type` where the :t:`field` resides.
 
 :dp:`fls_AzuZmR9DXSQh`
 A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.

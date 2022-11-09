@@ -2114,20 +2114,17 @@ The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_htLp5J5ObgNh`
   A :t:`constant initializer`.
 
+* :dp:`fls_cPlCLGCcl7EK`
+  A :t:`static initializer`.
+
 * :dp:`fls_KphY5qHev0Dc`
   The :t:`discriminant initializer` of an :t:`enum variant`.
 
 * :dp:`fls_Sowatt1V988J`
   A :t:`function body`.
 
-* :dp:`fls_dF4kA29a4iMF`
-  A :t:`let initializer`.
-
 * :dp:`fls_A1NVYkepoaMk`
   The :t:`size operand` of an :t:`array expression` or an :t:`array type`.
-
-* :dp:`fls_cPlCLGCcl7EK`
-  A :t:`static initializer`.
 
 :dp:`fls_J77VeAlD8rsv`
 A :t:`type inference root` imposes an :dt:`expected type` on its :t:`expression`
@@ -2140,6 +2137,10 @@ depending on the :t:`type inference root` as follows:
 * :dp:`fls_5d4hw3gj4w4n`
   The :t:`expected type` of the :t:`constant initializer` of a :t:`constant` is
   the :t:`type` specified by its :t:`type ascription`.
+
+* :dp:`fls_qlovdtcj1v1b`
+  The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
+  :t:`type` specified by its :t:`type ascription`.
 
 * :dp:`fls_Z5gKFjZW5rRA`
   The :t:`expected type` of the :t:`discriminant initializer` of an
@@ -2160,10 +2161,6 @@ depending on the :t:`type inference root` as follows:
 * :dp:`fls_veG2D64fIXvo`
   The :t:`expected type` of a :t:`size operand` of an :t:`array expression` or
   an :t:`array type` is :c:`usize`.
-
-* :dp:`fls_qlovdtcj1v1b`
-  The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
-  :t:`type` specified by its :t:`type ascription`.
 
 :dp:`fls_uvvn4usfsbhr`
 A :t:`type variable` is a placeholder used during :t:`type inference` to stand

@@ -3061,3 +3061,23 @@ The :t:`impl header lifetime elision` rules are as follows:
 
 * :dp:`fls_P2V1DqrdCjCi`
   An implicitly elided :t:`lifetime` in any other :t:`type` is a static error.
+
+.. rubric:: Examples
+
+:dp:`fls_MBa35hfS8J9l`
+Given an :t:`implementation` of the form
+
+.. code-block:: rust
+
+    impl Trait<&u8, Strukt<'_>> for &i32 {}
+
+:dp:`fls_w0vwdmO8qV9j`
+its :t:`lifetime` :t:`elided` form is
+
+.. code-block:: rust
+
+    impl<'a, 'b, 'c> Trait<&'a u8, Strukt<'b>> for &'c i32 {}
+
+:dp:`fls_vImY3BrpNvNY`
+where ``'a``, ``'b``, and ``'c`` are anonymous :t:`[lifetime parameter]s` that
+cannot be named by user-written code.

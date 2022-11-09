@@ -3458,6 +3458,19 @@ tests for a less-than-or-equals relationship.
 :dp:`fls_ft5aeo4ilgwc`
 See :s:`LessThanOrEqualsExpression`.
 
+.. _fls_hqj80jHcxEBB:
+
+let initializer
+^^^^^^^^^^^^^^^
+
+:dp:`fls_jtTpBZ4ujZRc`
+A :dt:`let initializer` is a :t:`construct` that provides the :t:`value` of
+the :t:`[binding]s` of the :t:`let statement` using an :t:`expression`, or
+alternatively executes a :t:`block expression`.
+
+:dp:`fls_GmHsJb6FICfA`
+See :s:`LetInitializer`.
+
 .. _fls_39k0ebr7snb0:
 
 let statement
@@ -3465,7 +3478,8 @@ let statement
 
 :dp:`fls_yh7hn6jjv3ur`
 A :dt:`let statement` is a :t:`statement` that introduces new :t:`[variable]s`
-given by the :t:`[binding]s` produced by its :t:`pattern-without-alternation`.
+given by the :t:`[binding]s` produced by its :t:`pattern-without-alternation`
+that are optionally initialized to a :t:`value`.
 
 :dp:`fls_tsem3c6zqmh4`
 See :s:`LetStatement`.
@@ -6520,7 +6534,7 @@ type inference root
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_hLI7lCixs48z`
-A :dt:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+A :dt:`type inference root` is a :t:`construct` whose inner :t:`[expression]s`
 and :t:`[pattern]s` are subject to :t:`type inference` independently of other
 :t:`[type inference root]s`.
 

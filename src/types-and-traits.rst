@@ -2101,12 +2101,12 @@ Type Inference
 :t:`[expression]s` and :t:`[pattern]s` within a :t:`type inference root`.
 
 :dp:`fls_ybvrhh96fc7y`
-A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
+A :t:`type inference root` is a :t:`construct` whose inner :t:`[expression]s`
 and :t:`[pattern]s` are subject to :t:`type inference` independently of those
 found in other :t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
-The following :t:`[expression]s` are considered :t:`[type inference root]s`:
+The following :t:`[construct]s` are considered :t:`[type inference root]s`:
 
 * :dp:`fls_NYSzcvf5nQpi`
   A :t:`constant argument`.
@@ -2144,11 +2144,11 @@ depending on the :t:`type inference root` as follows:
 
 * :dp:`fls_Z5gKFjZW5rRA`
   The :t:`expected type` of the :t:`discriminant initializer` of an
-  :t:`enum variant` depends on the containing :t:`enum`:
+  :t:`enum variant` is determined as follows:
 
   * :dp:`fls_vYvumjTQH9Xg`
-    If the :t:`enum` is subject to :t:`attribute` :c:`repr` that specifies a
-    :t:`primitive representation`, the :t:`expected type` is the specified
+    If the :t:`enum type` is subject to :t:`attribute` :c:`repr` that specifies
+    a :t:`primitive representation`, the :t:`expected type` is the specified
     :t:`primitive type`.
   
   * :dp:`fls_QaGKt99CmvF6`
@@ -2182,16 +2182,16 @@ to :t:`[floating-point type]s`.
 A :t:`diverging type variable` is a :t:`type variable` that can refer to any
 :t:`type` and originates from a :t:`diverging expression`.
 
-:dp:`fls_v6z48i1b7vxv`
-The :t:`expected type` of the initialization :t:`expression` of a :t:`let
-statement` is determined as follows:
+:dp:`fls_zHpBXxfUWDz3`
+The :t:`expected type` of a :t:`let initializer` of a :t:`let statement` is
+determined as follows:
 
-#. :dp:`fls_qob4wjgza3i8`
-   If the :t:`let statement` appears with a :t:`type ascription`, then the
-   :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
+* :dp:`fls_qob4wjgza3i8`
+  If the :t:`let statement` appears with a :t:`type ascription`, then the
+  :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
 
-#. :dp:`fls_7vdr0mh7kmpz`
-   Otherwise the :t:`expected type` is a :t:`global type variable`.
+* :dp:`fls_7vdr0mh7kmpz`
+  Otherwise the :t:`expected type` is a :t:`global type variable`.
 
 :dp:`fls_biyyicl3c3kn`
 :t:`[Arithmetic expression]s`, :t:`[await expression]s`,

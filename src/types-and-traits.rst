@@ -2699,17 +2699,15 @@ is the byproduct of relations between the :t:`[generic parameter]s` of
 :t:`[abstract data type]s` or :t:`[function]s`.
 
 :dp:`fls_IfHRxSasGAih`
-A :t:`reference` of the form ``&'a T``, where ``'a`` is a
-:t:`lifetime parameter` and ``T`` is a :t:`type parameter`, yields
-:t:`implied bound` ``T: 'a``.
-
-:dp:`fls_SMbHOyJgVeKB`
-A :t:`reference` of the form ``&'a &'b``, where ``'a`` and ``'b`` are
-:t:`[lifetime parameter]s``, yields :t:`implied bound` ``'a: 'b``.
+A :t:`reference` of the form ``&'a generic_parameter``, where ``'a`` is a
+:t:`lifetime parameter` and ``generic_parameter`` is an arbitrary
+:t:`generic parameter`, yields :t:`implied bound``
+``generic_parameter: 'a``.
 
 :dp:`fls_K8nPGP5xbLb7`
-If an :t:`implied bound` applies to a :t:`field`, then the :t:`implied bound`
-also applies to the :t:`abstract data type` where the :t:`field` resides.
+If an :t:`implied bound` applies to the :t:`type` of a :t:`field`, then the
+:t:`implied bound` also applies to the :t:`abstract data type` where the
+:t:`field` resides.
 
 :dp:`fls_Uw6y5ZlaK6RY`
 If an :t:`implied bound` applies to an :t:`abstract data type`, then the

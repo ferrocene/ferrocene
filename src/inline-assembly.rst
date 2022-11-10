@@ -526,7 +526,7 @@ A :t:`register class name` is a target-specific string that identifies a
    * - :dp:`fls_2wdcrocczwyi`
      - x86
      - ``reg``
-     - ``ax``, ``bp``, **bx**, **cx**, ``di``, **dx**, ``r[8-15]``, ``si``
+     - ``ax``, ``bp``, ``bx``, ``cx``, ``di``, ``dx``, ``r[8-15]``, ``si``
    * - :dp:`fls_v04te7p28dth`
      - x86
      - ``reg_abcd``

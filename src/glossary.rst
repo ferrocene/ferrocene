@@ -1659,6 +1659,19 @@ A :dt:`destructuring assignment` is an :t:`assignment expression` where
 the :t:`assignee operand` is either an :t:`array expression`, a
 :t:`struct expression`, or a :t:`tuple expression`.
 
+.. _fls_ugIFZlAzDK6H:
+
+direction modifier
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_8DY7xPVX4nXx`
+A :dt:`direction modifier` is a :t:`construct` that indicates whether a
+:t:`register argument` initializes a :t:`register`, assigns the :t:`value` of a
+:t:`register` to an :t:`expression`, or both.
+
+:dp:`fls_lRKEzY3fQ3B2`
+See :s:`DirectionModifier`.
+
 .. _fls_7vg56eeo0zlg:
 
 discriminant
@@ -4859,7 +4872,7 @@ positional register argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_GJd6i52P3KM3`
-A :t:`positional register argument` is a :t:`register argument` whose
+A :dt:`positional register argument` is a :t:`register argument` whose
 configuration is not bound to an :t:`identifier`.
 
 .. _fls_ukvdoqo68y5b:
@@ -5488,7 +5501,7 @@ register parameter
 :dp:`fls_JicHMIj5dlxJ`
 A :dt:`register parameter` is a substring delimited by characters 0x7B (left
 curly bracket) and 0x7D (right curly bracket) that is substituted with a
-:t:`register argument`.
+:t:`register argument` in an :t:`assembly instruction`.
 
 .. _fls_NDpKXnlmnN7M:
 

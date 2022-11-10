@@ -428,7 +428,7 @@ Register Classes
 .. rubric:: Legality Rules
 
 :dp:`fls_7gxb7ztpuofj`
-A :d:`register class` represents a set of :t:`[register]s`.
+A :t:`register class` represents a set of :t:`[register]s`.
 
 :dp:`fls_on0i2cpk254y`
 A :t:`register class name` is a target-specific string that identifies a
@@ -566,8 +566,8 @@ then
 
 * :dp:`fls_drg7v8hxb5ca`
   On RISC-V architectures, if the :t:`register` belongs to :t:`register class`
-  ``freg``, then :c:`f32` :t:`[value]s` are :t:`NaN-boxed`. in a :c:`f64`
-  :t:`value`.
+  ``freg``, then :c:`f32` :t:`[value]s` are :t:`NaN-boxed <NaN-boxing>`. in a
+  :c:`f64` :t:`value`.
 
 * :dp:`fls_78gb8z1fyluc`
   Otherwise, for an :t:`input register`, the upper bits of the :t:`register`
@@ -629,7 +629,7 @@ and output of a :t:`register`, and optionally binds the configuration to an
 A :t:`register argument` shall be used within an :t:`assembly instruction`.
 
 :dp:`fls_uddjvkz4g899`
-A :dt:`named register argument` is a :t:`register argument` whose configuration
+A :t:`named register argument` is a :t:`register argument` whose configuration
 is bound to an :t:`identifier`.
 
 :dp:`fls_sqs5to20p0te`
@@ -657,7 +657,7 @@ A :t:`register class argument` causes an assembler to select a suitable
 :t:`register` from the related :t:`register class`.
 
 :dp:`fls_5a3vfresnv5z`
-A :dt:`direction modifier` is a :t:`construct` that indicates whether a
+A :t:`direction modifier` is a :t:`construct` that indicates whether a
 :t:`register argument` initializes a :t:`register`, assigns the :t:`value` of a
 :t:`register` to an :t:`expression`, or both.
 
@@ -727,7 +727,7 @@ depend on the architecture and the target feature in effect, as follows:
      - RISC-V
      - ``freg``
      - ``f``
-     - :c:`f43`
+     - :c:`f32`
    * - :dp:`fls_xweobiwapog1`
      - RISC-V
      - ``freg``
@@ -896,11 +896,11 @@ The :t:`evaluation` of a :t:`register argument` proceeds as follows:
   If a :t:`register argument` has an :t:`input-output register expression`,
   then
 
-#. :dp:`fls_nbkkz6krcngi`
-   The :t:`input register expression` is evaluated.
+  #. :dp:`fls_nbkkz6krcngi`
+     The :t:`input register expression` is evaluated.
 
-#. :dp:`fls_utrvenwrettz`
-   The :t:`output register expression` is evaluated.
+  #. :dp:`fls_utrvenwrettz`
+     The :t:`output register expression` is evaluated.
 
 * :dp:`fls_n85sjh925x`
   If a :t:`register argument` has a :t:`simple register expression`, then the
@@ -972,7 +972,7 @@ contiguously in successive addresses.
 :dp:`fls_xugsn2ghh73c`
 A :t:`register parameter` is a substring delimited by characters 0x7B (left
 curly bracket) and 0x7D (right curly bracket) that is substituted with a
-:t:`register argument`.
+:t:`register argument` in an :t:`assembly instruction`.
 
 :dp:`fls_opnxq5kyw9jo`
 On x86 architectures, direction flag ``DF`` in :t:`register` ``EFLAGS`` shall
@@ -1606,9 +1606,6 @@ Macros asm and global_asm
        $$($$ AssemblyCodeBlock ($$,$$ RegisterArgument)* ($$,$$ AssemblyOption)* $$,$$? $$)$$
 
 .. rubric:: Legality Rules
-
-:dp:`fls_99jx6nnqn25z`
-**TODO: Update unsafety to include macro invocations of asm and global_asm.**
 
 :dp:`fls_ecteot716j8j`
 :t:`[Assembly code block]s` are embedded within Rust source code using

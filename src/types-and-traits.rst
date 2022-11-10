@@ -2136,12 +2136,12 @@ depending on the :t:`type inference root` as follows:
 
 * :dp:`fls_5d4hw3gj4w4n`
   The :t:`expected type` of the :t:`expression` of a :t:`constant initializer`
-  is the :t:`type` specified by the :t:`type ascription` of the containing
+  is the :t:`type` specified by the :t:`type ascription` of the related
   :t:`constant`.
 
 * :dp:`fls_qlovdtcj1v1b`
   The :t:`expected type` of the :t:`expression` of a :t:`static initializer` is
-  the :t:`type` specified by the :t:`type ascription` of the containing
+  the :t:`type` specified by the :t:`type ascription` of the related
   :t:`static`.
 
 * :dp:`fls_Z5gKFjZW5rRA`
@@ -2149,7 +2149,7 @@ depending on the :t:`type inference root` as follows:
   :t:`discriminant initializer` is determined as follows:
 
   * :dp:`fls_vYvumjTQH9Xg`
-    If the :t:`enum type` containing the :t:`discriminant` is subject to
+    If the :t:`enum type` that contains the :t:`discriminant` is subject to
     :t:`attribute` :c:`repr` that specifies a :t:`primitive representation`, the
     :t:`expected type` is the specified :t:`primitive type`.
   
@@ -2166,7 +2166,7 @@ depending on the :t:`type inference root` as follows:
 
 :dp:`fls_uvvn4usfsbhr`
 A :t:`type variable` is a placeholder used during :t:`type inference` to stand
-in for an undetermined :t:`type` of an :t:`expression` or :t:`pattern`.
+in for an undetermined :t:`type` of an :t:`expression` or a :t:`pattern`.
 
 :dp:`fls_gDalJm1XS0mi`
 A :t:`global type variable` is a :t:`type variable` that can refer to any
@@ -2198,24 +2198,24 @@ error occurs when :t:`type unification` fails.
    :t:`type inference root` in program order.
 
    #. :dp:`fls_1rnssw39aRWn`
-      For each :t:`statement`, apply the :t:`statement` inference rules below.
+      For each :t:`statement`, apply the :t:`statement` inference rules outlined below.
    
    #. :dp:`fls_aYJaZXcOVVyk`
-      For each :t:`expression`, apply the :t:`expression` inference rules below.
+      For each :t:`expression`, apply the :t:`expression` inference rules outlined below.
 
 #. :dp:`fls_X8kLC7JwiF0A`
    If there are any remaining :t:`[integer type variable]s` that have not been
    unified with a concrete :t:`integer type`, perform integer type fallback by
-   unifying them with ``i32``.
+   unifying them with :c:`i32`.
 
 #. :dp:`fls_ZFQhOxO3jpby`
    If there are any remaining :t:`[floating-point type variable]s` that have not
    been unified with a concrete :t:`floating-point type`, perform floating-point
-   type fallback by unifying them with ``f64``.
+   type fallback by unifying them with :c:`f64`.
 
 #. :dp:`fls_l1G52a0qqEes`
    If there are any remaining :t:`[diverging type variable]s` that have not been
-   unified with a concrete :t:`type`, unify them with ``()``.
+   unified with a concrete :t:`type`, unify them with the :t:`unit type`.
 
 #. :dp:`fls_Tx4Sx4Qy8y2d`
    If there are any remaining :t:`[global type variable]s` that have not been
@@ -2228,8 +2228,8 @@ The :t:`type inference` rules for :t:`[statement]s` are as follows:
   :t:`[Item statement]s` are not subject to :t:`type inference`.
 
 * :dp:`fls_97Fxlv2KN6QF`
-  :t:`[Expression statement]s` apply the :t:`expression` inference rules below
-  to the contained :t:`expression`, without any :t:`expected type` set.
+  :t:`[Expression statement]s` apply the :t:`expression` inference rules outlined below
+  to the related :t:`expression`, without any :t:`expected type` set.
 
 * :dp:`fls_hzXqj6YT1mFr`
   :t:`[Let statement]s` are inferred as follows:
@@ -2240,14 +2240,14 @@ The :t:`type inference` rules for :t:`[statement]s` are as follows:
 
   #. :dp:`fls_5v6TR7oqOwFM`
      If the :t:`let statement` has a :t:`let initializer`, apply the
-     :t:`expression` inference rules below to the contained :t:`expression`,
+     :t:`expression` inference rules outlined below to the contained :t:`expression`,
      with the :t:`expected type` set to the type of the :t:`pattern`.
 
   #. :dp:`fls_Gwx0Kfx68DXL`
      If the :t:`let statement` has a :t:`let initializer` with a
-     :t:`block expression`, apply the :t:`expression` inference rules below to
+     :t:`block expression`, apply the :t:`expression` inference rules outlined below to
      the contained :t:`block expression`, with the :t:`expected type` set to
-     ``!``.
+     the :t:`never type`.
 
 :dp:`fls_biyyicl3c3kn`
 :t:`[Arithmetic expression]s`, :t:`[await expression]s`,

@@ -2101,24 +2101,24 @@ Type Inference
 :t:`[expression]s` and :t:`[pattern]s` within a :t:`type inference root`.
 
 :dp:`fls_ybvrhh96fc7y`
-A :t:`type inference root` is a :t:`construct` whose inner :t:`[expression]s`
+A :t:`type inference root` is an :t:`expression` whose inner :t:`[expression]s`
 and :t:`[pattern]s` are subject to :t:`type inference` independently of those
 found in other :t:`[type inference root]s`.
 
 :dp:`fls_EWBilpepaDcX`
-The following :t:`[construct]s` are considered :t:`[type inference root]s`:
+The following :t:`[expression]s` are considered :t:`[type inference root]s`:
 
 * :dp:`fls_NYSzcvf5nQpi`
   A :t:`constant argument`.
 
 * :dp:`fls_htLp5J5ObgNh`
-  A :t:`constant initializer`.
+  The :t:`expression` of a :t:`constant initializer`.
 
 * :dp:`fls_cPlCLGCcl7EK`
-  A :t:`static initializer`.
+  The :t:`expression` of a :t:`static initializer`.
 
 * :dp:`fls_KphY5qHev0Dc`
-  The :t:`discriminant initializer` of an :t:`enum variant`.
+  The :t:`expression` of a :t:`discriminant initializer`.
 
 * :dp:`fls_Sowatt1V988J`
   A :t:`function body`.
@@ -2135,21 +2135,23 @@ depending on the :t:`type inference root` as follows:
   of the :t:`constant parameter`.
 
 * :dp:`fls_5d4hw3gj4w4n`
-  The :t:`expected type` of the :t:`constant initializer` of a :t:`constant` is
-  the :t:`type` specified by its :t:`type ascription`.
+  The :t:`expected type` of the :t:`expression` of a :t:`constant initializer`
+  is the :t:`type` specified by the :t:`type ascription` of the related
+  :t:`constant`.
 
 * :dp:`fls_qlovdtcj1v1b`
-  The :t:`expected type` of the :t:`static initializer` of a :t:`static` is the
-  :t:`type` specified by its :t:`type ascription`.
+  The :t:`expected type` of the :t:`expression` of a :t:`static initializer` is
+  the :t:`type` specified by the :t:`type ascription` of the related
+  :t:`static`.
 
 * :dp:`fls_Z5gKFjZW5rRA`
-  The :t:`expected type` of the :t:`discriminant initializer` of an
-  :t:`enum variant` is determined as follows:
+  The :t:`expected type` of the :t:`expression` of a
+  :t:`discriminant initializer` is determined as follows:
 
   * :dp:`fls_vYvumjTQH9Xg`
-    If the :t:`enum type` is subject to :t:`attribute` :c:`repr` that specifies
-    a :t:`primitive representation`, the :t:`expected type` is the specified
-    :t:`primitive type`.
+    If the :t:`enum type` that contains the :t:`discriminant` is subject to
+    :t:`attribute` :c:`repr` that specifies a :t:`primitive representation`, the
+    :t:`expected type` is the specified :t:`primitive type`.
   
   * :dp:`fls_QaGKt99CmvF6`
     Otherwise, the :t:`expected type` is :c:`isize`.
@@ -2164,7 +2166,7 @@ depending on the :t:`type inference root` as follows:
 
 :dp:`fls_uvvn4usfsbhr`
 A :t:`type variable` is a placeholder used during :t:`type inference` to stand
-in for an undetermined :t:`type`.
+in for an undetermined :t:`type` of an :t:`expression` or a :t:`pattern`.
 
 :dp:`fls_gDalJm1XS0mi`
 A :t:`global type variable` is a :t:`type variable` that can refer to any
@@ -2182,16 +2184,70 @@ to :t:`[floating-point type]s`.
 A :t:`diverging type variable` is a :t:`type variable` that can refer to any
 :t:`type` and originates from a :t:`diverging expression`.
 
-:dp:`fls_zHpBXxfUWDz3`
-The :t:`expected type` of a :t:`let initializer` of a :t:`let statement` is
-determined as follows:
+:dp:`fls_rvj3XspFZ1u3`
+The :t:`type inference` algorithm uses :t:`type unification` to propagate known
+:t:`[type]s` of :t:`[expression]s` and :t:`[pattern]s` across the
+:t:`type inference root` being inferred. In the rules detailed below, a static
+error occurs when :t:`type unification` fails.
 
-* :dp:`fls_qob4wjgza3i8`
-  If the :t:`let statement` appears with a :t:`type ascription`, then the
-  :t:`expected type` is the :t:`type` specified by its :t:`type ascription`.
+:dp:`fls_SZgixDCAx6PQ`
+:t:`Type inference` for a :t:`type inference root` proceeds as follows:
 
-* :dp:`fls_7vdr0mh7kmpz`
-  Otherwise the :t:`expected type` is a :t:`global type variable`.
+#. :dp:`fls_XYY1U9h9HlAa`
+   Recursively process all :t:`[expression]s` and :t:`[statement]s` in the
+   :t:`type inference root` in program order.
+
+   #. :dp:`fls_1rnssw39aRWn`
+      For each :t:`statement`, apply the :t:`statement` inference rules outlined below.
+   
+   #. :dp:`fls_aYJaZXcOVVyk`
+      For each :t:`expression`, apply the :t:`expression` inference rules outlined below.
+
+#. :dp:`fls_X8kLC7JwiF0A`
+   If there are any remaining :t:`[integer type variable]s` that have not been
+   unified with a concrete :t:`integer type`, perform integer type fallback by
+   unifying them with :c:`i32`.
+
+#. :dp:`fls_ZFQhOxO3jpby`
+   If there are any remaining :t:`[floating-point type variable]s` that have not
+   been unified with a concrete :t:`floating-point type`, perform floating-point
+   type fallback by unifying them with :c:`f64`.
+
+#. :dp:`fls_l1G52a0qqEes`
+   If there are any remaining :t:`[diverging type variable]s` that have not been
+   unified with a concrete :t:`type`, unify them with the :t:`unit type`.
+
+#. :dp:`fls_Tx4Sx4Qy8y2d`
+   If there are any remaining :t:`[global type variable]s` that have not been
+   unified with a concrete :t:`type`, raise a static error.
+
+:dp:`fls_hISRWZUuqE4Q`
+The :t:`type inference` rules for :t:`[statement]s` are as follows:
+
+* :dp:`fls_ygi1ACJ0RkfS`
+  :t:`[Item statement]s` are not subject to :t:`type inference`.
+
+* :dp:`fls_97Fxlv2KN6QF`
+  :t:`[Expression statement]s` apply the :t:`expression` inference rules outlined below
+  to the related :t:`expression`, without any :t:`expected type` set.
+
+* :dp:`fls_hzXqj6YT1mFr`
+  :t:`[Let statement]s` are inferred as follows:
+
+  #. :dp:`fls_Kv0dzoMODtdy`
+     If the :t:`let statement` has a :t:`type ascription`, :t:`unify` that
+     :t:`type` with the :t:`type` of the :t:`pattern`.
+
+  #. :dp:`fls_5v6TR7oqOwFM`
+     If the :t:`let statement` has a :t:`let initializer`, apply the
+     :t:`expression` inference rules outlined below to the contained :t:`expression`,
+     with the :t:`expected type` set to the type of the :t:`pattern`.
+
+  #. :dp:`fls_Gwx0Kfx68DXL`
+     If the :t:`let statement` has a :t:`let initializer` with a
+     :t:`block expression`, apply the :t:`expression` inference rules outlined below to
+     the contained :t:`block expression`, with the :t:`expected type` set to
+     the :t:`never type`.
 
 :dp:`fls_biyyicl3c3kn`
 :t:`[Arithmetic expression]s`, :t:`[await expression]s`,

@@ -6619,7 +6619,7 @@ type variable
 
 :dp:`fls_j9eusnwze4rz`
 A :dt:`type variable` is a placeholder used during :t:`type inference` to stand
-in for an undetermined :t:`type`.
+in for an undetermined :t:`type` of an :t:`expression` or a :t:`pattern`.
 
 .. _fls_44uvj9l7q98z:
 

@@ -30,6 +30,7 @@ Ferrocene Language Specification
    unsafety
    macros
    ffi
+   inline-assembly
 
 .. appendices::
    :numbered:

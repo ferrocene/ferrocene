@@ -18,6 +18,19 @@ ABI
 :dp:`fls_4ko8qcah0f9k`
 For :dt:`ABI`, see :t:`Application Binary Interface`.
 
+.. _fls_zOdDwoObYHC0:
+
+ABI clobber
+^^^^^^^^^^^
+
+:dp:`fls_OVX4RFcWKfP9`
+An :dt:`ABI clobber` is an :t:`assembly directive` which indicates that the
+:t:`[value]s` of selected :t:`[register]s` might be overwritten during the
+:t:`execution` of an :t:`assembly code block`.
+
+:dp:`fls_pMNTKjDMCHia`
+See :s:`AbiClobber`.
+
 .. _fls_g791aj7w5iz1:
 
 ABI kind
@@ -278,6 +291,50 @@ elements.
 
 :dp:`fls_wre34hexlv6s`
 See :s:`ArrayTypeSpecification`.
+
+.. _fls_et0NKXAYyDmh:
+
+assembly code block
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_d1ojwFwKpvm3`
+An :dt:`assembly code block` is a sequence of :t:`[assembly instruction]s`.
+
+:dp:`fls_gXVUuW6iyNhZ`
+See :s:`AssemblyCodeBlock`.
+
+.. _fls_iUnmWXxcuzif:
+
+assembly directive
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_FP2KbO6c3cpq`
+An :dt:`assembly directive` is a request to the assembler to perform a
+particular action or change a setting.
+
+.. _fls_HliSgbSzPO2r:
+
+assembly instruction
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_VLu28hOvCy2o`
+An :dt:`assembly instruction` is a :t:`string literal` that represents a
+low-level assembly operation or an :t:`assembly directive`.
+
+:dp:`fls_EYHuB5cCldbm`
+See :s:`AssemblyInstruction`.
+
+.. _fls_1iVIUoVDsYph:
+
+assembly option
+^^^^^^^^^^^^^^^
+
+:dp:`fls_F5I3okDKIYnE`
+An :dt:`assembly option` is used to specify a characteristic of or a restriction
+on the related :t:`assembly code block`.
+
+:dp:`fls_31NQgPGb73Hy`
+See :s:`AssemblyOption`.
 
 .. _fls_l78iam7w8w38:
 
@@ -1947,6 +2004,27 @@ execution
 :dt:`Execution` is the process by which a :t:`statement` achieves its runtime
 effects.
 
+.. _fls_B1qkkSvc69J4:
+
+explicit register argument
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_2o6S1WGDrMh3`
+An :dt:`explicit register argument` is a :t:`register argument` that uses an
+:t:`explicit register name`.
+
+.. _fls_uc7PnSbVVd9X:
+
+explicit register name
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_UcMk6RRLrkB5`
+An :dt:`explicit register name` is a target-specific string that identifies
+a :t:`register`.
+
+:dp:`fls_Z3WDh75VpSUU`
+See :s:`ExplicitRegisterName`.
+
 .. _fls_lqxcnZqvwcsH:
 
 explicitly declared entity
@@ -3150,6 +3228,15 @@ An :dt:`initialization type` is the :t:`type` a :t:`type alias` defines a
 :dp:`fls_3r85y1lh1oxo`
 See :s:`InitializationType`.
 
+.. _fls_lbL2b9wyg6es:
+
+inline assembly
+^^^^^^^^^^^^^^^
+
+:dp:`fls_1MtaLEA7YfSv`
+:dt:`Inline assembly` is hand-written assembly code that is integrated into a
+Rust program.
+
 .. _fls_c54lmkluwbwr:
 
 inline module
@@ -3205,6 +3292,40 @@ An :dt:`inner line doc` is a :t:`line comment` that applies to an enclosing
 
 :dp:`fls_8cnikewkqs7`
 See :s:`InnerLineDoc`.
+
+.. _fls_DTb5xegDqm9S:
+
+input register
+^^^^^^^^^^^^^^
+
+:dp:`fls_dTvdQaFpncCj`
+An :dt:`input register` is a :t:`register` whose :t:`register name` is used in
+a :t:`register argument` subject to :t:`direction modifier` ``in``, ``inout``,
+or ``inlateout``.
+
+.. _fls_Tmju2kXErYhJ:
+
+input register expression
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rvbuHSgg2RHt`
+An :dt:`input register expression` is an :t:`expression` that provides the
+initial :t:`value` of a :t:`register`.
+
+:dp:`fls_NqjRr9khzpl2`
+See :s:`InputRegisterExpression`.
+
+.. _fls_y9EOkstHPckB:
+
+input-output register expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_lLQw3EFl7x5z`
+An :dt:`input-output register expression` is a :t:`construct` that specifies
+both an :t:`input register expression` and an :t:`output register expression`.
+
+:dp:`fls_FnMGXi2nPgUH`
+See :s:`InputOutputRegisterExpression`.
 
 .. _fls_e2kizieowvuh:
 
@@ -4212,6 +4333,15 @@ named loop expression
 :dp:`fls_440dr5qix3ns`
 A :dt:`named loop expression` is a :t:`loop expression` with a :t:`label`.
 
+.. _fls_WT1ZdxTZwUUE:
+
+named register argument
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_QBWHppNO8FPk`
+A :dt:`named register argument` is a :t:`register argument` whose configuration
+is bound to an :t:`identifier`.
+
 .. _fls_GesmsWSVhv3f:
 
 namespace
@@ -4221,6 +4351,15 @@ namespace
 A :dt:`namespace` is a logical grouping of :t:`[name]s` such that the
 occurrence of a :t:`name` in one :t:`namespace` does not conflict with an
 occurrence of the same :t:`name` in another :t:`namespace`.
+
+.. _fls_z3lxbjF4gaqV:
+
+NaN-boxing
+^^^^^^^^^^
+
+:dp:`fls_s956sJGwOa6z`
+:dt:`NaN-boxing` is a technique for encoding :t:`[value]s` using the low order
+bits of the mantissa of a 64-bit IEEE floating-point ``NaN``.
 
 .. _fls_3sp4twvfvb32:
 
@@ -4446,6 +4585,28 @@ An :dt:`outline module` is a :t:`module` with an
 
 :dp:`fls_wu5wqylzx9ke`
 See :s:`OutlineModuleSpecification`.
+
+.. _fls_XsGnaA47Nen0:
+
+output register
+^^^^^^^^^^^^^^^
+
+:dp:`fls_4METI8qE9JiY`
+An :dt:`output register` is a :t:`register` whose :t:`register name` is
+used in a :t:`register argument` subject to :t:`direction modifier` ``out``,
+``lateout``, ``inout``, or ``inlateout``.
+
+.. _fls_t79aKPilX8jk:
+
+output register expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_w95YRZ4JjBxl`
+An :dt:`output register expression` is an :t:`expression` that is assigned the
+:t:`value` of a :t:`register`.
+
+:dp:`fls_8B3ldFZVy7PA`
+See :s:`OutputRegisterExpression`.
 
 .. _fls_nhamq7xtz384:
 
@@ -4691,6 +4852,15 @@ pointer type
 
 :dp:`fls_F2dUxEa4nheL`
 A :dt:`pointer type` is a :t:`type` whose values indicate memory locations.
+
+.. _fls_Q0r8JkqAP6Of:
+
+positional register argument
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_GJd6i52P3KM3`
+A :t:`positional register argument` is a :t:`register argument` whose
+configuration is not bound to an :t:`identifier`.
 
 .. _fls_ukvdoqo68y5b:
 
@@ -5234,6 +5404,102 @@ refutable type
 :dp:`fls_l2yz6jeehm52`
 A :dt:`refutable type` is a :t:`type` that has more than one :t:`value`.
 
+.. _fls_T84qaJMZzMbb:
+
+register
+^^^^^^^^
+
+:dp:`fls_fVdSybu8DW8w`
+A :dt:`register` is a hardware component capable of holding data that can be
+read and written.
+
+.. _fls_ISWWmgKjfYwt:
+
+register argument
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_rNoFdCKbVmRC`
+A :dt:`register argument` is a :t:`construct` that configures the input
+and output of a :t:`register`, and optionally binds the configuration to an
+:t:`identifier`.
+
+:dp:`fls_aof7O9XREo2S`
+See :s:`RegisterArgument`.
+
+.. _fls_2qKUiHcfmZQ6:
+
+register class
+^^^^^^^^^^^^^^
+
+:dp:`fls_2H0OYS733VJl`
+A :dt:`register class` represents a set of :t:`[register]s`.
+
+.. _fls_8gC17CgCS9n1:
+
+register class argument
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ksLXAyPLx9IL`
+A :dt:`register class argument` is a :t:`register argument` that uses a
+:t:`register class name`.
+
+.. _fls_xZTkANlRsKRt:
+
+register class name
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_QsSFoL0UyRRB`
+A :dt:`register class name` is a target-specific string that identifies a
+:t:`register class`.
+
+:dp:`fls_Y1ZpiFAV2c1A`
+See :s:`RegisterClassName`.
+
+.. _fls_7KIReJZLKdeK:
+
+register expression
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_2cVy6XfOQ4QG`
+A :dt:`register expression` is either an :t:`input-output register expression`
+or a :t:`simple register expression`.
+
+:dp:`fls_YEzo09cqWUUy`
+See :s:`RegisterExpression`.
+
+.. _fls_kbBK666iBS2X:
+
+register name
+^^^^^^^^^^^^^
+
+:dp:`fls_U5r8Ypnjah5E`
+A :dt:`register name` is either the :t:`explicit register name` of a
+:t:`register`, or the :t:`register class name` of the :t:`register class` a
+:t:`register` belongs to.
+
+:dp:`fls_WeyiFrnGgWPn`
+See :s:`RegisterName`.
+
+.. _fls_foh6xELWBsY9:
+
+register parameter
+^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_JicHMIj5dlxJ`
+A :dt:`register parameter` is a substring delimited by characters 0x7B (left
+curly bracket) and 0x7D (right curly bracket) that is substituted with a
+:t:`register argument`.
+
+.. _fls_NDpKXnlmnN7M:
+
+register parameter modifier
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_8BdOnxHZS0Qi`
+A :dt:`register parameter modifier` is a substring that starts with character
+0x3A (colon), follows a :t:`register parameter`, and changes the formatting of
+the related :t:`register parameter`.
+
 .. _fls_JnhUWipah0nO:
 
 remainder assignment
@@ -5719,6 +5985,18 @@ A :dt:`simple public modifier` is a :t:`visibility modifier` that grants a
 
 :dp:`fls_rd68vm2f2qy5`
 See :s:`SelfPublicModifier`.
+
+.. _fls_JDB3eBO0DY4o:
+
+simple register expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_4Yp4R7gXucL2`
+A :dt:`simple register expression` is either an :t:`expression` or an
+:t:`underscore expression`.
+
+:dp:`fls_kKaqHDxPTTUC`
+See :s:`SimpleRegisterExpression`.
 
 .. _fls_dpod2gc7a0u:
 

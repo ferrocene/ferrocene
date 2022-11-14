@@ -24,9 +24,9 @@ ABI clobber
 ^^^^^^^^^^^
 
 :dp:`fls_OVX4RFcWKfP9`
-An :dt:`ABI clobber` is an :t:`assembly directive` which indicates that the
-:t:`[value]s` of selected :t:`[register]s` might be overwritten during the
-:t:`execution` of an :t:`assembly code block`.
+An :dt:`ABI clobber` is an argument to :t:`macro` :std:`core::arch::asm` which
+indicates that the :t:`[value]s` of selected :t:`[register]s` might be
+overwritten during the :t:`execution` of an :t:`assembly code block`.
 
 :dp:`fls_pMNTKjDMCHia`
 See :s:`AbiClobber`.

@@ -112,6 +112,11 @@ An :t:`output register` is a :t:`register` whose :t:`register name` is
 used in a :t:`register argument` subject to :t:`direction modifier` ``out``,
 ``lateout``, ``inout``, or ``inlateout``.
 
+:dp:`fls_HV3Y1A2xn0zr`
+A :t:`register` that is not specified as an :t:`output register` shall have the
+same :t:`value` upon exit from an :t:`assembly code block` as it did upon entry
+into the :t:`assembly code block`.
+
 :dp:`fls_vesfzh8h6qzu`
 A :t:`register name` is either the :t:`explicit register name` of a
 :t:`register`, or the :t:`register class name` of the :t:`register class` a
@@ -390,6 +395,14 @@ architectures, as follows:
 
 :dp:`fls_vy8alu9yuza9`
 It is a static error to use an unsupported :t:`explicit register name`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_zEtLZ5KjQcHS`
+It is undefined behavior if a :t:`register` that is not specified as an
+:t:`output register` has a different :t:`value` upon exit from an
+:t:`assembly code block` from the :t:`value` it had upon entry into the
+:t:`assembly code block`.
 
 .. _fls_pz2ioqchjtym:
 
@@ -1364,16 +1377,9 @@ ABI Clobbers
 .. rubric:: Legality Rules
 
 :dp:`fls_xa11ggykg0sh`
-An :t:`ABI clobber` is an :t:`assembly directive` which indicates that the
-:t:`[value]s` of selected :t:`[register]s` might be overwritten during the
-:t:`execution` of an :t:`assembly code block`.
-
-:dp:`fls_v5s1crs1hffs`
-An :t:`ABI clobber` applies clobber constraints to a :t:`function` subject to a
-particular :t:`ABI`. If the :t:`ABI` does not fully preserve the :t:`value` of
-a :t:`register` across a call, then a :t:`register argument` with
-:t:`direction modifier` ``lateout`` and :t:`underscore expression` for that
-:t:`register` is implicitly specified for the :t:`assembly code block`.
+An :t:`ABI clobber` is an argument to :t:`macro` :std:`core::arch::asm` which
+indicates that the :t:`[value]s` of selected :t:`[register]s` might be
+overwritten during the :t:`execution` of an :t:`assembly code block`.
 
 :dp:`fls_e43sj9inlsym`
 Multiple :t:`[ABI clobber]s` may be specified for an :t:`assembly code block`.
@@ -1659,5 +1665,6 @@ The :t:`execution` of an :t:`assembly code block` produced by
 .. rubric:: Examples
 
 :dp:`fls_f8zyoshnms5w`
-**Someone needs to write a sensible example.**
+**Someone needs to write a sensible example to showcase assembly instructions,
+register arguments, ABI clobbers, assembly options, and directives.**
 

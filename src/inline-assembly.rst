@@ -1664,7 +1664,33 @@ The :t:`execution` of an :t:`assembly code block` produced by
 
 .. rubric:: Examples
 
-:dp:`fls_f8zyoshnms5w`
-**Someone needs to write a sensible example to showcase assembly instructions,
-register arguments, ABI clobbers, assembly options, and directives.**
+.. code-block:: rust
 
+   fn asm_example() -> u32 {
+       let basepri;
+       unsafe {
+           asm!("
+               mrs {}, BASEPRI
+           ",
+           out(reg) basepri,
+           options(nomem, nostack, preserves_flags))
+       }
+       basepri
+   }
+
+   global_asm!("
+       do_nothing:
+           push {r7, lr}
+           mov  r7, sp
+           pop  {r7, pc}
+       ",
+       options(raw)
+   );
+
+   fn global_asm_example() {
+       extern "C" {
+           fn do_nothing();
+       }
+
+       unsafe { do_nothing() }
+   }

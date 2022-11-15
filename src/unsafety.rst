@@ -36,6 +36,9 @@ The :t:`[unsafe operation]s` are:
 * :dp:`fls_ljocmnaz2m49`
   Calling an :t:`unsafe function`.
 
+* :dp:`fls_s5nfhBFOk8Bu`
+  Calling :t:`macro` :std:`core::arch::asm`.
+
 :dp:`fls_jb6krd90tjmc`
 An :t:`unsafe context` is either an :t:`unsafe block` or an
 :t:`unsafe function`.

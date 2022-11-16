@@ -2699,7 +2699,7 @@ that nullifies an implicitly added :t:`trait bound`.
 
 :dp:`fls_1Sm2Yq1Ow76f`
 An :t:`outlives bound` is a :t:`trait bound` which requires that a
-:t:`generic parameter` outlives a :t:`lifetime parameter`.
+:t:`lifetime parameter` or :t:`type` outlives a :t:`lifetime parameter`.
 
 :dp:`fls_tx4uspewnk7w`
 :t:`Outlives bound` ``'a: 'b`` indicates that ``'a`` outlives ``'b``.

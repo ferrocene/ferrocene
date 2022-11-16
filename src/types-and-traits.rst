@@ -2721,7 +2721,7 @@ A :t:`reference` of the form ``&'a T``, where ``'a`` is a
 
 :dp:`fls_K8nPGP5xbLb7`
 If an :t:`outlives bound` applies to the :t:`type` of a :t:`field`, then this
-abound also applies to the related :t:`abstract data type` as an
+bound also applies to the related :t:`abstract data type` as an
 :t:`implied bound`.
 
 :dp:`fls_Uw6y5ZlaK6RY`

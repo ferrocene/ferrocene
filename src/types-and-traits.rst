@@ -2695,6 +2695,10 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 
 :dp:`fls_J9DEsd06Ttu9`
 An :t:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
+is the byproduct of relations between :t:`[lifetime parameter]s` and
+:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
+:t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
+
 is the byproduct of relations between the :t:`[generic parameter]s` of
 :t:`[abstract data type]s` or :t:`[function]s`.
 
@@ -2705,15 +2709,14 @@ A :t:`reference` of the form ``&'a generic_parameter``, where ``'a`` is a
 ``generic_parameter: 'a``.
 
 :dp:`fls_K8nPGP5xbLb7`
-If an :t:`implied bound` applies to the :t:`type` of a :t:`field`, then the
-:t:`implied bound` also applies to the :t:`abstract data type` where the
-:t:`field` resides.
+If an explicit :t:`bound` or an :t:`implied bound` applies to the :t:`type` of
+a :t:`field`, then this abound also applies to the related
+:t:`abstract data type` as an :t:`implied bound`.
 
 :dp:`fls_Uw6y5ZlaK6RY`
-If an :t:`implied bound` applies to an :t:`abstract data type`, then the
-:t:`implied bound` also applies to all :t:`[function]s` that use the
-:t:`abstract data type` and to all :t:`[path]s` that resolve to the
-:t:`abstract data type`.
+If an explicit :t:`bound` or an :t:`implied bound` applies to the :t:`type` of
+a :t:`function parameter` or to a :t:`return type`, then this bound also
+applies to the related :t:`function` as an :t:`implied bound`.
 
 :dp:`fls_AzuZmR9DXSQh`
 A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.

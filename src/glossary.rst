@@ -2528,6 +2528,15 @@ A :dt:`generic argument` supplies a static input for an
 :dp:`fls_8bvdmdgbu17l`
 See :s:`GenericArgumentList`.
 
+.. _fls_nooYIxMnV8Ps:
+
+generic associated type
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_O4wckPZPmree`
+A :dt:`generic associated type` is an :t:`associated type` with 
+:t:`[generic parameter]s`.
+
 .. _fls_3uFg0NK5fYQ6:
 
 generic conformance

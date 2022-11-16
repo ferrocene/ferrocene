@@ -48,6 +48,27 @@ An :t:`associated type` shall not be used in the :t:`path expression` of a
 An :t:`associated type` with a :s:`TypeBoundList` shall appear only as an
 :t:`associated trait type`.
 
+:dp:`fls_PeD0DzjK57be`
+A :t:`generic associated type` is an :t:`associated type` with
+:t:`[generic parameter]s`.
+
+:dp:`fls_3foYUch29ZtF`
+A :t:`lifetime parameter` of a :t:`generic associated type` requires a
+:t:`bound` of the form ``T: 'lifetime``, where ``T`` is a :t:`type parameter`
+or :c:`Self` and ``'lifetime`` is the :t:`lifetime parameter`, when
+
+* :dp:`fls_SnQc0zZS57Cz`
+  The :t:`generic associated type` is used in an :t:`associated function` of
+  the same :t:`trait`, and
+
+* :dp:`fls_6Z05BK2JSzpP`
+  The corresponding :t:`lifetime argument` in the use is not the ``'static``
+  :t:`lifetime` and has either an explicit :t:`bound` or an :t:`implicit bound`
+  that constrains the :t:`type parameter`, and
+
+* :dp:`fls_AtItgS1UvwiX`
+  The intersection of all such uses is not empty.
+
 :dp:`fls_l3iwn56n1uz8`
 An :t:`associated implementation constant` is an :t:`associated constant` that
 appears within an :t:`implementation`.
@@ -135,3 +156,13 @@ A :t:`method` is an :t:`associated function` with a :t:`receiver`.
        }
    }
 
+:dp:`fls_znfADVeOvXHD`
+Generic associated type with lifetime bound.
+
+.. code-block:: rust
+
+   trait LendingIterator {
+       type Item<'x> where Self: 'x;
+
+       fn next<'a>(&'a mut self) -> Self::Item<'a>;
+   }

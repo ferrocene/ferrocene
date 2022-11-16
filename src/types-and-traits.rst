@@ -2200,7 +2200,7 @@ some other :t:`lifetime`. Such requirements are referred to as
 If insufficient :t:`type` information is available at the time an
 :t:`obligation` is introduced, it may be deferred to be resolved later.
 Any time new :t:`type` information is derived during :t:`type inference`, the
-tool shall attempt to resolve all outstanding :t:`[obligation]s` and propagate
+tool attempts to resolve all outstanding :t:`[obligation]s` and propagate
 any resulting :t:`type` information via :t:`type unification`.
 
 :dp:`fls_v5dWGuBKvQSJ`
@@ -2292,33 +2292,33 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
   inference rules below to it.
 
 * :dp:`fls_QZWTS0Giy3I3`
-  An :t:`if-let expression` is inferred by inferring its
+  An :t:`if let expression` is inferred by inferring its
   :t:`subject let expression` with the :t:`expected type` set to the :t:`type`
   of its :t:`pattern`, then inferring its :t:`block expression` with the
   :t:`expected type` of the :t:`if-let expression`. If the
-  :t:`if-let expression` has an :t:`else expression`, apply the inference rules
+  :t:`if let expression` has an :t:`else expression`, apply the inference rules
   below to it.
 
 * :dp:`fls_KJsIu1lgVZxP`
   An :t:`else expression` that is part of an :t:`if expression` or
-  :t:`if-let expression` is inferred as follows:
+  :t:`if let expression` is inferred as follows:
 
   * :dp:`fls_KRQxdSav1KBA`
     If the :t:`else expression` has a :t:`block expression`, infer the
     :t:`block expression` with the :t:`expected type` of the :t:`if expression`
-    or :t:`if-let expression`.
+    or :t:`if let expression`.
 
   * :dp:`fls_Mcpwyvz47SoG`
     If the :t:`else expression` has an :t:`if expression`, infer that nested
     :t:`if expression` with the :t:`expected type` of the original
     :t:`if expression`, then :t:`unify` its :t:`type` with the :t:`type` of
-    the original :t:`if expression` or :t:`if-let expression`.
+    the original :t:`if expression` or :t:`if let expression`.
 
   * :dp:`fls_34AQ9g7xhdUj`
-    Otherwise, the :t:`else expression` has an :t:`if-let expression`. Infer
-    that nested :t:`if-let expression` with the :t:`expected type` of the
+    Otherwise, the :t:`else expression` has an :t:`if let expression`. Infer
+    that nested :t:`if let expression` with the :t:`expected type` of the
     original :t:`if expression`, then :t:`unify` its :t:`type` with the
-    :t:`type` of the original :t:`if expression` or :t:`if-let expression`.
+    :t:`type` of the original :t:`if expression` or :t:`if let expression`.
 
 * :dp:`fls_4ZT35povCL04`
   A :t:`match expression` is inferred as follows:
@@ -2338,8 +2338,8 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
 * :dp:`fls_Esa4ST7lLp8T`
   A :t:`for loop expression` is inferred by unifying the :t:`type` of its
-  :t:`pattern` with the :t:`type` ``<$T as core::iter::IntoIterator>::Item``,
-  where ``$T`` is the :t:`type` of the :t:`subject expression`, and then
+  :t:`pattern` with the :t:`type` ``<T as core::iter::IntoIterator>::Item``,
+  where ``T`` is the :t:`type` of the :t:`subject expression`, and then
   inferring its :t:`loop body`.
 
 * :dp:`fls_9GDElCkL1UbH`
@@ -2374,8 +2374,8 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
   #. :dp:`fls_lDkPMB5UI58B`
      Infer the :t:`type` of the :t:`expression` to be the :t:`associated type`
-     ``<$T as $Trait>::Output``, where ``$T`` is the :t:`type` of the
-     :t:`operand`, and ``$Trait`` is the operator :t:`trait` determined from
+     ``<T as Trait>::Output``, where ``T`` is the :t:`type` of the
+     :t:`operand`, and ``Trait`` is the operator :t:`trait` determined from
      the table above.
 
 * :dp:`fls_JKZHF3ZDHshw`
@@ -2435,9 +2435,9 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
   #. :dp:`fls_mCISAdm7sjRs`
      Infer the :t:`type` of the :t:`expression` to be the :t:`associated type`
-     ``<$L as $Trait<$R>>::Output``, where ``$L`` is the :t:`type` of the
-     :t:`left operand`, ``$Trait`` is the operator :t:`trait` determined from
-     the table above, and ``$R`` is the :t:`type` of the :t:`right operand`.
+     ``<L as Trait<R>>::Output``, where ``L`` is the :t:`type` of the
+     :t:`left operand`, ``Trait`` is the operator :t:`trait` determined from
+     the table above, and ``R`` is the :t:`type` of the :t:`right operand`.
 
 * :dp:`fls_Fv8fj9R8prUV`
   A :t:`compound assignment expression` is inferred as follows:
@@ -2483,9 +2483,9 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
          - :std:`core::ops::ShrAssign`
 
   #. :dp:`fls_CVfHkJq1PixR`
-     Introduce an :t:`obligation` ``$L: $Trait<$R>``, where ``$L`` is the
-     :t:`type` of the :t:`assigned operand`, ``$Trait`` is the operator
-     :t:`trait` determined from the table above, and ``$R`` is the :t:`type` of
+     Introduce an :t:`obligation` ``L: $Trait<R>``, where ``L`` is the
+     :t:`type` of the :t:`assigned operand`, ``Trait`` is the operator
+     :t:`trait` determined from the table above, and ``R`` is the :t:`type` of
      the :t:`modifying operand`.
 
   #. :dp:`fls_0RZ7w0YqmzE3`
@@ -2493,8 +2493,8 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
 * :dp:`fls_YppNCEPMYqWJ`
   A :t:`comparison expression` is inferred by introducing an :t:`obligation`
-  ``$L: PartialEq<$R>``, where ``$L`` is the :t:`type` of the :t:`left operand`,
-  and ``$R`` is the :t:`type` of the :t:`right operand`. The :t:`type` of the
+  ``L: PartialEq<R>``, where ``L`` is the :t:`type` of the :t:`left operand`,
+  and ``R`` is the :t:`type` of the :t:`right operand`. The :t:`type` of the
   :t:`expression` is :c:`bool`.
 
 * :dp:`fls_SZmiJjI43fQL`

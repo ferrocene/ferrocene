@@ -2190,6 +2190,25 @@ The :t:`type inference` algorithm uses :t:`type unification` to propagate known
 :t:`type inference root` being inferred. In the rules detailed below, a static
 error occurs when :t:`type unification` fails.
 
+:dp:`fls_6GrNr2izovRN`
+Performing :t:`type inference` may introduce a requirement that some :t:`type`
+must implement a :t:`trait`, or that a :t:`type` or :t:`lifetime` must outlive
+some other :t:`lifetime`. Such requirements are referred to as
+:dt:`[obligation]s` and are detailed in the inference rules below.
+
+:dp:`fls_9dSltJ6U98Fo`
+If insufficient :t:`type` information is available at the time an
+:t:`obligation` is introduced, it may be deferred to be resolved later.
+Any time new :t:`type` information is derived during :t:`type inference`, the
+tool attempts to resolve all outstanding :t:`[obligation]s` and propagate
+any resulting :t:`type` information via :t:`type unification`.
+
+:dp:`fls_v5dWGuBKvQSJ`
+When an :t:`associated type` ``<Type as Trait>::Assoc`` is referenced within a
+:t:`type inference root` (either explicitly within the source code, or via the
+inferece rules below), an :t:`obligation` requiring that ``Type`` implements
+``Trait`` is introduced.
+
 :dp:`fls_SZgixDCAx6PQ`
 :t:`Type inference` for a :t:`type inference root` proceeds as follows:
 
@@ -2221,6 +2240,10 @@ error occurs when :t:`type unification` fails.
    If there are any remaining :t:`[global type variable]s` that have not been
    unified with a concrete :t:`type`, raise a static error.
 
+#. :dp:`fls_Nbdth8N0PSRq`
+   If there are any remaining :t:`[obligation]s` that do not hold or cannot be
+   resolved with the available :t:`type` information, raise a static error.
+
 :dp:`fls_hISRWZUuqE4Q`
 The :t:`type inference` rules for :t:`[statement]s` are as follows:
 
@@ -2249,219 +2272,242 @@ The :t:`type inference` rules for :t:`[statement]s` are as follows:
      the contained :t:`block expression`, with the :t:`expected type` set to
      the :t:`never type`.
 
-:dp:`fls_biyyicl3c3kn`
-:t:`[Arithmetic expression]s`, :t:`[await expression]s`,
-:t:`[bit expression]s`, :t:`[block expression]s`, :t:`[borrow expression]s`,
-:t:`[dereference expression]s`, :t:`[call expression]s`,
-:t:`[else expression]s`, :t:`[error propagation expression]s`,
-:t:`[if expression]s`, :t:`[if let expression]s`, :t:`[loop expression]s`,
-:t:`[match expression]s`, :t:`[negation expression]s`, and
-:t:`[parenthesized expression]s` are :dt:`[type imposing expression]s`.
+:dp:`fls_J6ydUCCJp1Sn`
+:t:`Type inference` of :t:`[expression]s` may incorporate an :t:`expected type`,
+derived from the context the :t:`expression` appears in. If the :t:`expression`
+is a :t:`coercion site` or a :t:`coercion-propagating expression`, the :t:`type`
+derived via :t:`type inference` may be coerced to the :t:`expected type`. If no
+:t:`type coercion` to the :t:`expected type` is possible, or the :t:`expression`
+is not a :t:`coercion site` or a :t:`coercion-propagating expression`, the
+inferred :t:`expression` :t:`type` is unified with the :t:`expected type`.
 
-:dp:`fls_o94mhge1j3iw`
-A :t:`type imposing expression` imposes its :t:`expected type` onto a nested
-:t:`construct`, as follows:
+:dp:`fls_FSQqHs8T4bUx`
+The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
-* :dp:`fls_3ihttknfccxr`
-  An :t:`addition expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Add::Output`.
+* :dp:`fls_0HHC1iOk5dwz`
+  An :t:`if expression` is inferred by inferring its :t:`subject expression`
+  with an :t:`expected type` of :c:`bool`, then inferring its
+  :t:`block expression` with the :t:`expected type` of the :t:`if expression`.
+  Then, if the :t:`if expression` has an :t:`else expression`, apply the
+  inference rules below to it.
 
-* :dp:`fls_rta6ehkzp3hg`
-  A :t:`division expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Div::Output`.
+* :dp:`fls_QZWTS0Giy3I3`
+  An :t:`if let expression` is inferred by inferring its
+  :t:`subject let expression` with the :t:`expected type` set to the :t:`type`
+  of its :t:`pattern`, then inferring its :t:`block expression` with the
+  :t:`expected type` of the :t:`if-let expression`. If the
+  :t:`if let expression` has an :t:`else expression`, apply the inference rules
+  below to it.
 
-* :dp:`fls_f2whukg3x1yo`
-  A :t:`multiplication expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Mul::Output`.
+* :dp:`fls_KJsIu1lgVZxP`
+  An :t:`else expression` that is part of an :t:`if expression` or
+  :t:`if let expression` is inferred as follows:
 
-* :dp:`fls_w9fp1usbb15`
-  A :t:`remainder expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Rem::Output`.
+  * :dp:`fls_KRQxdSav1KBA`
+    If the :t:`else expression` has a :t:`block expression`, infer the
+    :t:`block expression` with the :t:`expected type` of the :t:`if expression`
+    or :t:`if let expression`.
 
-* :dp:`fls_5s2eh0qjq6vk`
-  A :t:`subtraction expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Sub::Output`.
+  * :dp:`fls_Mcpwyvz47SoG`
+    If the :t:`else expression` has an :t:`if expression`, infer that nested
+    :t:`if expression` with the :t:`expected type` of the original
+    :t:`if expression`, then :t:`unify` its :t:`type` with the :t:`type` of
+    the original :t:`if expression` or :t:`if let expression`.
 
-* :dp:`fls_rpxxg2u4hzhc`
-  An :t:`await expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::future::Future::Output`.
+  * :dp:`fls_34AQ9g7xhdUj`
+    Otherwise, the :t:`else expression` has an :t:`if let expression`. Infer
+    that nested :t:`if let expression` with the :t:`expected type` of the
+    original :t:`if expression`, then :t:`unify` its :t:`type` with the
+    :t:`type` of the original :t:`if expression` or :t:`if let expression`.
 
-* :dp:`fls_vj1071lxoyyv`
-  A :t:`bit and expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::BitAnd::Output`.
+* :dp:`fls_4ZT35povCL04`
+  A :t:`match expression` is inferred as follows:
+  
+  #. :dp:`fls_62OcWZaVN9hh`
+     :t:`Unify` the :t:`[type]s` of the :t:`[pattern]s` of every :t:`match arm`,
+     then infer the :t:`subject expression` with the :t:`expected type` set to
+     the :t:`type` of the :t:`[pattern]s`.
 
-* :dp:`fls_y6owsf8jnx35`
-  A :t:`bit xor expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::BitXor::Output`.
+  #. :dp:`fls_st9onPgDrc8y`
+     Infer the :t:`[operand]s` of all :t:`[match arm guard]s` with
+     :t:`expected type` :c:`bool`.
 
-* :dp:`fls_i9dhdmiqde99`
-  A :t:`bit or expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::BitOr::Output`.
+  #. :dp:`fls_F999gqcBfff9`
+     Infer the :t:`match arm body` of every :t:`match arm` with the
+     :t:`expected type` of the :t:`match expression`.
 
-* :dp:`fls_bystnhv1olg5`
-  A :t:`shift left expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Shl::Output`.
+* :dp:`fls_Esa4ST7lLp8T`
+  A :t:`for loop expression` is inferred by unifying the :t:`type` of its
+  :t:`pattern` with the :t:`type` ``<T as core::iter::IntoIterator>::Item``,
+  where ``T`` is the :t:`type` of the :t:`subject expression`, and then
+  inferring its :t:`loop body`.
 
-* :dp:`fls_trvksnbx7opg`
-  A :t:`shift right expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Shr::Output`.
+* :dp:`fls_9GDElCkL1UbH`
+  A :t:`while let loop expression` is inferred by unifying the :t:`type` of its
+  :t:`subject let expression` with the :t:`type` of its :t:`pattern`, and then
+  inferring its :t:`loop body`.
 
-* :dp:`fls_8ct11ekq3p5q`
-  A :t:`block expression` imposes its :t:`expected type` onto its
-  :t:`tail expression`. If the :t:`block expression` is associated with a
-  :t:`loop expression`, then the :t:`block expression` imposes its
-  :t:`expected type` onto each :t:`break expression` within its :t:`statement`
-  list. If the :t:`block expression` is associated with a :t:`function`, then
-  the :t:`block expression` imposes its :t:`expected type` onto each
-  :t:`return expression` within its :t:`statement` list.
+* :dp:`fls_0eATa6RtDNtA`
+  An :t:`array expression` using an :t:`array element constructor` is inferred
+  by attempting a :t:`least upper bound coercion` from each element :t:`type` to
+  the :t:`expected type`. If no such :t:`type coercion` is possible, all element
+  :t:`[type]s` are unified instead.
 
-* :dp:`fls_eee1t7hynswa`
-  A :t:`borrow expression` imposes its :t:`expected type` onto its :t:`operand`.
+* :dp:`fls_q1JZZMxqWXCk`
+  A :t:`negation expression` is inferred as follows:
 
-* :dp:`fls_ax86vtmz4hrb`
-  A :t:`dereference expression` imposes its :t:`expected type` onto its
-  :t:`operand`.
+  #. :dp:`fls_hH58ftCxBYzm`
+     Determine the :t:`trait` corresponding to the operator according to the
+     following table:
 
-* :dp:`fls_kviulvlfvww2`
-  A :t:`call expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::FnOnce::Output`.
+     .. list-table::
 
-* :dp:`fls_4hsgi1voem9y`
-  An :t:`error propagation expression` imposes its :t:`expected type` onto its
-  operand.
+       * - :dp:`fls_aiSI99pbAYqT`
+         - **Operator**
+         - **Trait**
+       * - :dp:`fls_zRdxowO4eDMN`
+         - ``!``
+         - :std:`core::ops::Not`
+       * - :dp:`fls_IoceMi7HfqsK`
+         - ``-``
+         - :std:`core::ops::Neg`
 
-* :dp:`fls_8zpltmxy41rd`
-  An :t:`if expression` imposes its :t:`expected type` onto its
-  :t:`block expression` and else expression.
+  #. :dp:`fls_lDkPMB5UI58B`
+     Infer the :t:`type` of the :t:`expression` to be the :t:`associated type`
+     ``<T as Trait>::Output``, where ``T`` is the :t:`type` of the
+     :t:`operand`, and ``Trait`` is the operator :t:`trait` determined from
+     the table above.
 
-* :dp:`fls_qdmyerpgnwha`
-  An :t:`if let expression` imposes its :t:`expected type` onto its
-  :t:`block expression` and :t:`else expression`.
+* :dp:`fls_JKZHF3ZDHshw`
+  A :t:`bit expression` or :t:`arithmetic expression` is inferred as follows:
 
-* :dp:`fls_gmojdinhct0b`
-  A :t:`lazy boolean expression` imposes its :t:`expected type` onto its
-  :t:`[operand]s`.
+  #. :dp:`fls_rT6zpG3cYhaF`
+     Determine the :t:`trait` corresponding to the operator according to the
+     following table:
 
-* :dp:`fls_d8f7xb8r3aud`
-  A :t:`loop expression` imposes its :t:`expected type` onto its
-  :t:`block expression`.
+     .. list-table::
 
-* :dp:`fls_ds3nkfar77in`
-  A :t:`match expression` imposes its :t:`expected type` onto the
-  :t:`expression-with-block` or :t:`expression-without-block` of every
-  :t:`intermediate match arm` and the :t:`expression` of its
-  :t:`final match arm`.
+       * - :dp:`fls_UFMyHzk6ucsT`
+         - **Operator**
+         - **Trait**
+       * - :dp:`fls_hPZmcfQiNasT`
+         - ``+``
+         - :std:`core::ops::Add`
+       * - :dp:`fls_rgC3Iea5p9Kr`
+         - ``-``
+         - :std:`core::ops::Sub`
+       * - :dp:`fls_5jDBPymVKzDv`
+         - ``*``
+         - :std:`core::ops::Mul`
+       * - :dp:`fls_f21GNntBOxaz`
+         - ``/``
+         - :std:`core::ops::Div`
+       * - :dp:`fls_NpwLzJJH9cGw`
+         - ``%``
+         - :std:`core::ops::Mod`
+       * - :dp:`fls_56J8BlLOuvr4`
+         - ``&``
+         - :std:`core::ops::BitAnd`
+       * - :dp:`fls_jK2pIVxOmtJ8`
+         - ``|``
+         - :std:`core::ops::BitOr`
+       * - :dp:`fls_fjV22WcosNnt`
+         - ``^``
+         - :std:`core::ops::BitXor`
+       * - :dp:`fls_h3OVuCdsKPhV`
+         - ``<<``
+         - :std:`core::ops::Shl`
+       * - :dp:`fls_be2djziKJw3I`
+         - ``>>``
+         - :std:`core::ops::Shr`
 
-* :dp:`fls_xhax58ebkqik`
-  A :t:`negation expression` imposes its :t:`expected type` onto
-  :t:`associated type` :std:`core::ops::Neg::Output`.
+  #. :dp:`fls_nHt0LVSiwTB3`
+     If the :t:`expression` is a :t:`shift left expression` or a
+     :t:`shift right expression`, and the :t:`expected type` is an
+     :t:`integer type`, :t:`unify` the :t:`type` of the :t:`left operand` with
+     the :t:`expected type`.
 
-* :dp:`fls_m896wu8zax5k`
-  A :t:`parenthesized expression` imposes its :t:`expected type` onto its
-  :t:`operand`.
+  #. :dp:`fls_sLCBZ3vG1AWs`
+     If the :t:`expression` is neither a :t:`shift left expression` nor a
+     :t:`shift right expression`, and the :t:`expected type` is a
+     :t:`numeric type`, :t:`unify` the :t:`[type]s` of both :t:`[operand]s` with
+     the :t:`expected type`.
 
-* :dp:`fls_8ft8d4x1q08p`
-  A :t:`return expression` imposes its :t:`expected type` onto its :t:`operand`.
+  #. :dp:`fls_mCISAdm7sjRs`
+     Infer the :t:`type` of the :t:`expression` to be the :t:`associated type`
+     ``<L as Trait<R>>::Output``, where ``L`` is the :t:`type` of the
+     :t:`left operand`, ``Trait`` is the operator :t:`trait` determined from
+     the table above, and ``R`` is the :t:`type` of the :t:`right operand`.
 
-:dp:`fls_aaumn7viouu7`
-:t:`[Array expression]s`, :t:`[index expression]s`,
-:t:`[assignment expression]s`, :t:`[closure expression]s`,
-:t:`[comparison expression]s`, :t:`[compound assignment expression]s`,
-:t:`[field access expression]s`, :t:`[lazy boolean expression]s`,
-:t:`[method call expression]s`, :t:`[range expression]s`,
-:t:`[struct expression]s`, :t:`[tuple expression]s`, and
-:t:`[type cast expression]s` are :dt:`[type resolving expression]s`.
+* :dp:`fls_Fv8fj9R8prUV`
+  A :t:`compound assignment expression` is inferred as follows:
 
-:dp:`fls_r7dyhfmdentz`
-A :t:`type resolving expression` provides a :dt:`resolving type`, which is the
-:t:`type` of the :t:`expression` itself.
+  #. :dp:`fls_QDWVv2nTufX7`
+     Determine the :t:`trait` corresponding to the operator according to the
+     following table:
 
-:dp:`fls_8zkvwpkgob6d`
-The :t:`resolving type` of a :t:`float literal` is determined as follows:
+     .. list-table::
 
-#. :dp:`fls_1dvk2vvdw0oj`
-   If the :t:`float literal` has a :t:`float suffix`, then the
-   :t:`resolving type` is the :t:`type` specified by its :t:`float suffix`.
+       * - :dp:`fls_O2r51Xrmmj38`
+         - **Operator**
+         - **Trait**
+       * - :dp:`fls_b96Zca6oFn82`
+         - ``+=``
+         - :std:`core::ops::AddAssign`
+       * - :dp:`fls_07AIc06bGnZt`
+         - ``-=``
+         - :std:`core::ops::SubAssign`
+       * - :dp:`fls_A36NBOl1FTCb`
+         - ``*=``
+         - :std:`core::ops::MulAssign`
+       * - :dp:`fls_h3mmmIBR72kV`
+         - ``/=``
+         - :std:`core::ops::DivAssign`
+       * - :dp:`fls_8edzBBIo7jF7`
+         - ``%=``
+         - :std:`core::ops::ModAssign`
+       * - :dp:`fls_lUg26vFuSePP`
+         - ``&=``
+         - :std:`core::ops::BitAndAssign`
+       * - :dp:`fls_21ay7EUUUmhx`
+         - ``|=``
+         - :std:`core::ops::BitOrAssign`
+       * - :dp:`fls_8VgAhOgDOk0y`
+         - ``^=``
+         - :std:`core::ops::BitXorAssign`
+       * - :dp:`fls_OVVY9CE0pGtJ`
+         - ``<<=``
+         - :std:`core::ops::ShlAssign`
+       * - :dp:`fls_FojOvB6l3lAh`
+         - ``>>=``
+         - :std:`core::ops::ShrAssign`
 
-#. :dp:`fls_gp9gcxiapfxv`
-   Otherwise the :t:`resolving type` is a :t:`floating-point type variable`.
+  #. :dp:`fls_CVfHkJq1PixR`
+     Introduce an :t:`obligation` ``L: $Trait<R>``, where ``L`` is the
+     :t:`type` of the :t:`assigned operand`, ``Trait`` is the operator
+     :t:`trait` determined from the table above, and ``R`` is the :t:`type` of
+     the :t:`modifying operand`.
 
-:dp:`fls_v9lyy98dgm98`
-The :t:`resolving type` of an :t:`integer literal` is determined as follows:
+  #. :dp:`fls_0RZ7w0YqmzE3`
+     The :t:`type` of the :t:`expression` is the :t:`unit type`.
 
-#. :dp:`fls_i3v9yqp7j4n`
-   If the :t:`integer literal` has an :t:`integer suffix`, then the
-   :t:`resolving type` is the :t:`type` specified by its :t:`integer suffix`.
+* :dp:`fls_YppNCEPMYqWJ`
+  A :t:`comparison expression` is inferred by introducing an :t:`obligation`
+  ``L: PartialEq<R>``, where ``L`` is the :t:`type` of the :t:`left operand`,
+  and ``R`` is the :t:`type` of the :t:`right operand`. The :t:`type` of the
+  :t:`expression` is :c:`bool`.
 
-#. :dp:`fls_z03x5pk7q9dd`
-   Otherwise the :t:`resolving type` is an :t:`integer type variable`.
+* :dp:`fls_SZmiJjI43fQL`
+  An :t:`assignment expression` is inferred by unifying the :t:`type` of its
+  :t:`assignee operand` with the :t:`type` of its :t:`value operand`.
 
-:dp:`fls_j28usox2uzep`
-:t:`Type inference` for a single :t:`type inference root` proceeds as follows:
+* :dp:`fls_TAJ3JJwIeDbQ`
+  Other :t:`[expression]s` are inferred by applying the typing rules specified
+  in the section for that :t:`expression`.
 
-#. :dp:`fls_7pwr5jeis2n8`
-   Determine unique :t:`expected type` ``ET`` for the :t:`type inference root`.
-
-#. :dp:`fls_wqyw2u3tjzmv`
-   Resolve the initialization :t:`expression` of the :t:`type inference root`
-   against ``ET`` as follows:
-
-   #. :dp:`fls_a0d3x44wboz4`
-      If the :t:`expression` is a :t:`type imposing expression`, then
-
-      #. :dp:`fls_62yj5vkp0iox`
-         Make ``ET`` the :t:`type` of the :t:`expression`.
-
-      #. :dp:`fls_h0e7634x6go9`
-         Impose ``ET`` on any nested :t:`construct` depending on the nature of
-         the :t:`expression`, recursively.
-
-   #. :dp:`fls_7zzz1ao7k42e`
-      If the :t:`expression` is a :t:`type resolving expression`, then
-
-      #. :dp:`fls_9swsddkfjw1r`
-         Determine :t:`resolving type` ``RT`` the :t:`expression`.
-
-      #. :dp:`fls_59p9pd4jo8wt`
-         Resolve ``ET`` against ``RT``.
-
-#. :dp:`fls_ynsjdua73fcl`
-   If there are :t:`[expression]s` whose :t:`type` ``T`` is a :t:`floating-point
-   type variable`, replace ``T`` with :t:`type` :c:`f64`.
-
-#. :dp:`fls_oz057wsgk05e`
-   If there are :t:`[expression]s` whose :t:`type` ``T`` is an :t:`integer type
-   variable`, replace ``T`` with :t:`type` :c:`i32`.
-
-#. :dp:`fls_2eu3zcuznfrk`
-   If there are :t:`[expression]s` whose :t:`type` is a :t:`global type
-   variable`, then this is a static error.
-
-:dp:`fls_iqf4muk5nrot`
-Resolving :t:`expected type` ``ET`` against :t:`resolving type` ``RT`` for an
-:t:`expression` proceeds as follows:
-
-#. :dp:`fls_qdpf7tahw1go`
-   If both ``ET`` and ``RT`` denote a :t:`concrete type`, then ``ET`` and ``RT``
-   shall be :t:`unifiable`.
-
-#. :dp:`fls_yqsl1gg27b5o`
-   If ``ET`` denotes a :t:`global type variable` and ``RT`` denotes a
-   :t:`concrete type`, then ``ET`` is replaced with ``RT``, effectively changing
-   the :t:`type` of all :t:`[expression]s` that previously held ``ET``.
-
-#. :dp:`fls_c4i80gd8cdub`
-   If ``ET`` denotes a :t:`floating-point type variable` and ``RT`` denotes a
-   :t:`floating point type`, then ``ET`` is replaced with ``RT``, effectively
-   changing the :t:`type` of all :t:`[expression]s` that previously held ``ET``.
-
-#. :dp:`fls_acd7b3m1qm3a`
-   If ``ET`` denotes an :t:`integer type variable` and ``RT`` denotes an
-   :t:`integer type`, then ``ET`` is replaced with ``RT``, effectively changing
-   the :t:`type` of all :t:`[expression]s` that previously held ``ET``.
-
-#. :dp:`fls_riivz4mlwr4y`
-   Otherwise this is a static error.
+:dp:`fls_VrpaTruoBwtF`
+If an :t:`expression` is a :t:`diverging expression`, its :t:`type` is a new
+:t:`diverging type variable`.
 
 .. _fls_85vx1qfa061i:
 

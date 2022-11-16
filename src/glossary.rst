@@ -4559,8 +4559,8 @@ opt-out trait bound
 ^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_wS4EzN0N1GDP`
-An :dt:`opt-out trait bound` is a :t:`trait bound` that nullifies an implicitly
-added :t:`trait bound`.
+An :dt:`opt-out trait bound` is a :t:`trait bound` with :s:`Punctuation` ``?``
+that nullifies an implicitly added :t:`trait bound`.
 
 .. _fls_gllzixm9yt9w:
 
@@ -4618,6 +4618,15 @@ An :dt:`outline module` is a :t:`module` with an
 
 :dp:`fls_wu5wqylzx9ke`
 See :s:`OutlineModuleSpecification`.
+
+.. _fls_5LhIr1kOIEO5:
+
+outlives bound
+^^^^^^^^^^^^^^
+
+:dp:`fls_J5dt34II7Pm6`
+An :dt:`outlives bound` is a :t:`trait bound` which requires that a
+:t:`generic parameter` outlives a :t:`lifetime parameter`.
 
 .. _fls_XsGnaA47Nen0:
 

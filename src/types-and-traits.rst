@@ -2703,10 +2703,9 @@ is the byproduct of relations between the :t:`[generic parameter]s` of
 :t:`[abstract data type]s` or :t:`[function]s`.
 
 :dp:`fls_IfHRxSasGAih`
-A :t:`reference` of the form ``&'a generic_parameter``, where ``'a`` is a
-:t:`lifetime parameter` and ``generic_parameter`` is an arbitrary
-:t:`generic parameter`, yields :t:`implied bound``
-``generic_parameter: 'a``.
+A :t:`reference` of the form ``&'lifetime Type``, where ``'lifetime`` is a
+:t:`lifetime parameter` and ``Type`` is a :t:`type`, yields :t:`implied bound``
+``Type: 'lifetime``.
 
 :dp:`fls_K8nPGP5xbLb7`
 If an explicit :t:`bound` or an :t:`implied bound` applies to the :t:`type` of

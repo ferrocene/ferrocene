@@ -2740,15 +2740,40 @@ list of :t:`[bound]s` for all possible :t:`[lifetime]s` specified by the
 :s:`ForGenericParameterList`.
 
 :dp:`fls_AzuZmR9DXSQh`
-A :t:`trait bound` with :s:`Punctuation` ``?`` is an :t:`opt-out trait bound`.
+An :t:`opt-out trait bound` is a :t:`trait bound` with :s:`Punctuation` ``?``
+that nullifies an implicitly added :t:`trait bound`.
+
+:dp:`fls_1Sm2Yq1Ow76f`
+An :t:`outlives bound` is a :t:`trait bound` which requires that a
+:t:`lifetime parameter` or :t:`type` outlives a :t:`lifetime parameter`.
 
 :dp:`fls_tx4uspewnk7w`
-:t:`Bound` ``'a: 'b`` is read as "``'a`` outlives ``'b``", or in other words,
-``'a`` lasts as long as ``'b``.
+:t:`Outlives bound` ``'a: 'b`` indicates that ``'a`` outlives ``'b``.
 
 :dp:`fls_5kj8bmvb8xfc`
-:t:`Bound` ``T: 'a`` indicates that all :t:`[lifetime parameter]s` of ``T``
-outlive ``'a``.
+:t:`Outlives bound` ``T: 'a`` indicates that all :t:`[lifetime parameter]s` of
+``T`` outlive ``'a``.
+
+:dp:`fls_J9DEsd06Ttu9`
+An :t:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
+is the byproduct of relations between :t:`[lifetime parameter]s` and
+:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
+:t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
+
+:dp:`fls_IfHRxSasGAih`
+A :t:`reference` of the form ``&'a T``, where ``'a`` is a
+:t:`lifetime parameter` and ``T`` is a :t:`type`, yields :t:`implied bound`
+``T: 'a``.
+
+:dp:`fls_K8nPGP5xbLb7`
+If an :t:`outlives bound` applies to the :t:`type` of a :t:`field`, then this
+bound also applies to the related :t:`abstract data type` as an
+:t:`implied bound`.
+
+:dp:`fls_Uw6y5ZlaK6RY`
+If an :t:`outlives bound` applies to the :t:`type` of a :t:`function parameter`
+or to a :t:`return type`, then this bound also applies to the related
+:t:`function` as an :t:`implied bound`.
 
 .. rubric:: Examples
 

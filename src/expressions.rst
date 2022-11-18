@@ -4680,11 +4680,11 @@ shall be considered.
 
 :dp:`fls_9uw5pd7kbrx3`
 The :t:`type` of a :t:`future operand` shall implement the
-:std:`core::future::Future` :t:`trait`.
+:std:`core::future::IntoFuture` :t:`trait`.
 
 :dp:`fls_c6mxfzef2qop`
 The :t:`type` of an :t:`await expression` is
-``<_ as core::future::Future>::Output``.
+``<_ as core::future::IntoFuture>::Output``.
 
 :dp:`fls_l396mo6k9ox7`
 The :t:`value` of an :t:`await expression` is the :t:`value` held by
@@ -4696,7 +4696,8 @@ The :t:`value` of an :t:`await expression` is the :t:`value` held by
 The :t:`evaluation` of an :t:`await expression` proceeds as follows:
 
 #. :dp:`fls_eymcs2rgv3qw`
-   The :t:`future operand` is evaluated to a :t:`temporary`.
+   The :t:`future operand` is evaluated to a :t:`temporary` by invoking
+   :std:`core::future::IntoFuture::into_future` with the :t:`future operand`.
 
 #. :dp:`fls_qshnnpirkasz`
    The :t:`temporary` is pinned using :std:`core::pin::Pin::new_unchecked`.

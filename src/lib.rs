@@ -248,5 +248,3 @@ mod lock {
     not(target_vendor = "uwp")
 ))]
 mod dbghelp;
-#[cfg(windows)]
-mod windows;

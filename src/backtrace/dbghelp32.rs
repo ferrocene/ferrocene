@@ -11,7 +11,12 @@
 
 #![allow(bad_style)]
 
-use super::super::{dbghelp, windows::*};
+use windows_sys::{
+    Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
+    Win32::System::SystemInformation::*, Win32::System::Threading::*,
+};
+
+use super::super::dbghelp;
 use core::ffi::c_void;
 use core::mem;
 
@@ -129,7 +134,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     match (*dbghelp.dbghelp()).StackWalkEx() {
         Some(StackWalkEx) => {
             let mut inner: STACKFRAME_EX = mem::zeroed();
-            inner.StackFrameSize = mem::size_of::<STACKFRAME_EX>() as DWORD;
+            inner.StackFrameSize = mem::size_of::<STACKFRAME_EX>() as u32;
             let mut frame = super::Frame {
                 inner: Frame {
                     stack_frame: StackFrame::New(inner),
@@ -143,7 +148,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             };
 
             while StackWalkEx(
-                image as DWORD,
+                image as u32,
                 process,
                 thread,
                 frame_ptr,
@@ -153,7 +158,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 Some(get_module_base),
                 None,
                 0,
-            ) == TRUE
+            ) == 1
             {
                 frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
 
@@ -176,7 +181,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             };
 
             while dbghelp.StackWalk64()(
-                image as DWORD,
+                image as _,
                 process,
                 thread,
                 frame_ptr,
@@ -185,7 +190,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 Some(function_table_access),
                 Some(get_module_base),
                 None,
-            ) == TRUE
+            ) == 1
             {
                 frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
 
@@ -198,7 +203,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 }
 
 #[cfg(target_arch = "x86")]
-fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
+fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> u16 {
     frame.addr_pc_mut().Offset = ctx.Eip as u64;
     frame.addr_pc_mut().Mode = AddrModeFlat;
     frame.addr_stack_mut().Offset = ctx.Esp as u64;
@@ -210,7 +215,7 @@ fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
 }
 
 #[cfg(target_arch = "arm")]
-fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
+fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> u16 {
     frame.addr_pc_mut().Offset = ctx.Pc as u64;
     frame.addr_pc_mut().Mode = AddrModeFlat;
     frame.addr_stack_mut().Offset = ctx.Sp as u64;

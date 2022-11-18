@@ -63,7 +63,7 @@ jobs:
     - run: cargo build
     - run: cargo test
     - run: cargo test --features "serialize-serde"
-    - run: cargo test --features "verify-winapi"
+    - run: cargo test --features "verify-windows-sys"
     - run: cargo test --features "cpp_demangle"
     - run: cargo test --no-default-features
     - run: cargo test --no-default-features --features "std"
@@ -144,7 +144,7 @@ jobs:
       shell: bash
     - run: rustup target add aarch64-pc-windows-msvc
     - run: cargo test --no-run --target aarch64-pc-windows-msvc
-    - run: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-winapi
+    - run: cargo test --no-run --target aarch64-pc-windows-msvc --features verify-windows-sys
 
   ios:
     name: iOS

@@ -482,6 +482,16 @@ associated type
 An :dt:`associated type` is a :t:`type alias` that appears as an
 :t:`associated item`.
 
+.. _fls_zOe783MlE9i9:
+
+associated type projection
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_4moFUY6epk0v`
+An :dt:`associated type projection` is a :t:`qualified type path` of the form
+``<type as trait>::associated_type``, where ``type`` is a :t:`type`, ``trait``
+is a :t:`qualifying trait`, and ``associated type`` is an :t:`associated type`.
+
 .. _fls_fczijre8123c:
 
 associativity

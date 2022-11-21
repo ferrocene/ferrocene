@@ -3585,9 +3585,6 @@ The :t:`evaluation` of a :t:`closure expression` proceeds as follows:
 #. :dp:`fls_7w15ccc1zzxl`
    An anonymous :t:`value` of an unique anonymous :t:`closure type` is created.
 
-#. :dp:`fls_b8w9y73pvdnm`
-   The :t:`closure body` is evaluated.
-
 .. rubric:: Examples
 
 .. code-block:: rust

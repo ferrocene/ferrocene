@@ -2944,6 +2944,72 @@ an :t:`tuple type` is determined as follows:
    #. :dp:`fls_9ae3idezsths`
       It is a static error if :t:`variance` ``V`` is ``any``.
 
+:dp:`fls_WD6uyTCziRac`
+:t:`[Expression]s` and :t:`[statement]s` may impose :t:`subtyping` requirements
+on their subexpressions. Such requirements are applied after
+:t:`type inference`, on the inferred :t:`[type]s` of the respective
+:t:`[expression]s` and :t:`[pattern]s`.
+
+:dp:`fls_xURR0owesaIE`
+It is a static error if any :t:`subtyping` requirements are not met.
+
+:dp:`fls_CvZNYIfnOUcc`
+The :t:`subtyping` requirements for :t:`[statement]s` are as follows:
+
+* :dp:`fls_xrLYQX7W9OnR`
+  :t:`[Item statement]s` impose no additional :t:`subtyping` requirements.
+
+* :dp:`fls_DWPN8DRysgMa`
+  :t:`[Let statement]s` require that the :t:`type` of the :t:`expression` of the
+  :t:`let initializer` (if any) is a :t:`subtype` of the :t:`type` of the
+  :t:`let statement`'s :t:`pattern`.
+
+* :dp:`fls_tOn5oKtp300J`
+  :t:`[Expression statement]s` impose the :t:`subtyping` requirements for the
+  contained :t:`expression`, as outlined below.
+
+:dp:`fls_HqXTVi7gr9wR`
+The :t:`subtyping` requirements for :t:`[expression]s` are as follows:
+
+* :dp:`fls_lxfPvK7NDNlj`
+  The requirements for any :t:`arithmetic expression`, :t:`bit expression`,
+  :t:`comparison expression`, :t:`compound assignment expression`,
+  :t:`negation expression` or :t:`index expression` are the same requirements
+  as for an explicit invocation of the corresponding operator :t:`trait`
+  :t:`method`.
+
+* :dp:`fls_awJeqcAHn5O3`
+  An :t:`assignment expression` requires that the :t:`type` of its
+  :t:`value operand` is a :t:`subtype` of the :t:`type` of its
+  :t:`assignee operand`.
+
+* :dp:`fls_AD1IXzsnlwyg`
+  A :t:`type cast expression` requires that the :t:`type` of its :t:`operand` is
+  a :t:`subtype` of its :t:`target type`.
+
+* :dp:`fls_p2II8E6cc9zt`
+  A :t:`call expression` or :t:`method call expression` requires that the
+  :t:`[type]s` of its :t:`[argument operand]s` are :t:`[subtype]s` of the
+  :t:`[type]s` of the corresponding parameter.
+
+* :dp:`fls_pN5C4FHWEWdK`
+  A :t:`return expression` requires that the :t:`type` of its :t:`operand` is
+  a :t:`subtype` of the :t:`return type` of the containing :t:`function` or
+  :t:`closure expression`.
+
+* :dp:`fls_RdqV0hI8h8BI`
+  A :t:`break expression` requires that its :t:`break type` is a :t:`subtype` of
+  the :t:`type` of the :t:`block expression` or :t:`loop expression` that the
+  :t:`break expression` breaks out of.
+
+* :dp:`fls_Uv5CcMHPX79J`
+  Other :t:`[expression]s` do not impose any additional :t:`subtyping`
+  requirements.
+
+:dp:`fls_LyvV4pOG7E4l`
+Any :t:`type coercion` resulting in a :t:`method` invocation imposes the same
+:t:`subtyping` requirements as an explicit invocation of that :t:`method` would.
+
 .. _fls_l9ebxrlxyawd:
 
 Lifetime Elision

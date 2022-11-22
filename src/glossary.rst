@@ -2509,6 +2509,7 @@ of :t:`[token]s` and produces a stream of tokens, and is invoked directly.
 fundamental
 ^^^^^^^^^^^
 
+:dp:`fls_e0dRD4NTE0UP`
 A :t:`trait` or :t:`type` is :dt:`fundamental` when its
 :t:`implementation coherence` rules are relaxed and the :t:`trait` or :t:`type`
 is always treated as if it was a :t:`local trait` or a :t:`local type`.

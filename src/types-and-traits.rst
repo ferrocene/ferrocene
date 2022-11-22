@@ -2946,8 +2946,8 @@ an :t:`tuple type` is determined as follows:
 
 :dp:`fls_WD6uyTCziRac`
 :t:`[Expression]s` and :t:`[statement]s` may impose :t:`subtyping` requirements
-on their subexpressions. Such requirements are applied after
-:t:`type inference`, on the inferred :t:`[type]s` of the respective
+on their :t:`[subexpression]s`. Such requirements are applied after
+:t:`type inference`, on the :t:`[inferred type]s` of the respective
 :t:`[expression]s` and :t:`[pattern]s`.
 
 :dp:`fls_xURR0owesaIE`
@@ -2974,7 +2974,7 @@ The :t:`subtyping` requirements for :t:`[expression]s` are as follows:
 * :dp:`fls_lxfPvK7NDNlj`
   The requirements for any :t:`arithmetic expression`, :t:`bit expression`,
   :t:`comparison expression`, :t:`compound assignment expression`,
-  :t:`negation expression` or :t:`index expression` are the same requirements
+  :t:`index expression`, or :t:`negation expression` are the same requirements
   as for an explicit invocation of the corresponding operator :t:`trait`
   :t:`method`.
 

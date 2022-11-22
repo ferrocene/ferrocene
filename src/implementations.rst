@@ -145,17 +145,51 @@ Given :t:`trait implementation`
 :t:`trait implementation` is considered valid when
 
 * :dp:`fls_3tbm20k2ixol`
-  ``Trait`` is a :t:`local trait`, or
+  ``Trait`` is :t:`fundamental` or a :t:`local trait`, or
 
 * :dp:`fls_lscc9ileg3gm`
   All of
 
   * :dp:`fls_9klwbsh3vlxu`
-    At least one of :t:`[type]s` ``T0, T1, .., TN`` is a :t:`local type`, and
+    At least one of :t:`[type]s` ``T0, T1, .., TN`` is :T:`fundamental` or a
+    :t:`local type`, and
 
   * :dp:`fls_9gmc1tcscq9v`
     No :t:`type parameter` of ``P1, P2, .., PN`` that is not used in another
-    :t:`type` may appear in the :t:`non-[local type]s` of ``T0, T1, .., TN``.
+    :t:`type` may appear in the :t:`non-[local type]s` and
+    :t:`non-[fundamental]` :t:`[type]s` of ``T0, T1, .., TN``.
+
+:dp:`fls_UkQhjEWSJpDq`
+A :t:`trait` or :t:`type` is :t:`fundamental` when its
+:t:`implementation coherence` rules are relaxed and the :t:`trait` or :t:`type`
+is always treated as if it was a :t:`local trait` or a :t:`local type`.
+
+:dp:`fls_fSybUG40hA5r`
+The following :t:`[type]s` are :t:`fundamental`:
+
+* :dp:`fls_z8APl0CEF7a0`
+  :t:`[reference type]s`
+
+* :dp:`fls_RJJafhpVsi6M`
+  :std:`core::pin::Pin`
+
+..
+  also `alloc::boxed::Box`
+
+:dp:`fls_dtUJxhNkl8Ty`
+The following :t:`[trait]s` are :t:`fundamental`:
+
+* :dp:`fls_zJKovQrXQWdU`
+  :std:`core::ops::Fn`
+
+* :dp:`fls_V6R8yQtsqNyv`
+  :std:`core::ops::FnMut`
+
+* :dp:`fls_CpC6XQN1iWqU`
+  :std:`core::ops::FnOnce`
+
+* :dp:`fls_dj7YGw4e4i4H`
+  :std:`core::marker::Sized`
 
 :dp:`fls_koy70k770ayu`
 A :t:`trait implementation` shall be coherent.

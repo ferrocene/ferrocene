@@ -2504,6 +2504,16 @@ function-like macro
 A :dt:`function-like macro` is a :t:`procedural macro` that consumes a stream
 of :t:`[token]s` and produces a stream of tokens, and is invoked directly.
 
+.. _fls_OFMoUA3eFtuC:
+
+fundamental
+^^^^^^^^^^^
+
+:dp:`fls_e0dRD4NTE0UP`
+A :t:`trait` or :t:`type` is :dt:`fundamental` when its
+:t:`implementation coherence` rules are relaxed and the :t:`trait` or :t:`type`
+is always treated as if it was a :t:`local trait` or a :t:`local type`.
+
 .. _fls_yxzpexco8ag3:
 
 future

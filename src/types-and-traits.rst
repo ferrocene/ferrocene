@@ -2501,6 +2501,30 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
   An :t:`assignment expression` is inferred by unifying the :t:`type` of its
   :t:`assignee operand` with the :t:`type` of its :t:`value operand`.
 
+* :dp:`fls_ipWTrhF4xakC`
+  A :t:`closure expression` is inferred by deducing its signature from the
+  surrounding context, unifying the deduced :t:`closure parameter` :t:`[type]s`
+  and return :t:`type` with the user-written :t:`closure parameter`
+  :t:`[pattern]s` and :t:`[type ascription]s` and return :t:`type`, and then
+  inferring the :t:`closure body` with the :t:`expected type` set to the
+  closure's return :t:`type`. The closure signature is deduced as follows:
+
+  * :dp:`fls_zgRFKbfdI6ro`
+    If the :t:`expected type` is a :t:`function pointer type`, the closure
+    signature is the signature of that :t:`function pointer type`.
+
+  * :dp:`fls_z2UkZX5Qdmws`
+    Otherwise, if there is a pending :t:`obligation` requiring that the
+    :t:`expected type` implements :std:`core::ops::FnOnce` or a :t:`trait` that
+    has :std:`core::ops::FnOnce` as one of its :t:`[supertrait]s`, derive the
+    closure signature from the parameters and return :t:`type` of the
+    :std:`core::ops::FnOnce` :t:`bound` or :t:`supertrait`.
+
+  * :dp:`fls_U46IXItEKMCB`
+    Otherwise, the closure signature remains undeduced. No outside type
+    information is provided and the parameter :t:`[type]s` and return :t:`type`
+    are subject to regular :t:`type inference`.
+
 * :dp:`fls_TAJ3JJwIeDbQ`
   Other :t:`[expression]s` are inferred by applying the typing rules specified
   in the section for that :t:`expression`.

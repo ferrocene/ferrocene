@@ -2515,9 +2515,10 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
   * :dp:`fls_z2UkZX5Qdmws`
     Otherwise, if there is a pending :t:`obligation` requiring that the
-    :t:`expected type` implements a :t:`trait` that has :std:`core::ops::FnOnce`
-    as one of its :t:`[supertrait]s`, derive the closure signature from the
-    parameters and return :t:`type` of that :t:`bound`.
+    :t:`expected type` implements :std:`core::ops::FnOnce` or a :t:`trait` that
+    has :std:`core::ops::FnOnce` as one of its :t:`[supertrait]s`, derive the
+    closure signature from the parameters and return :t:`type` of the
+    :std:`core::ops::FnOnce` :t:`bound` or :t:`supertrait`.
 
   * :dp:`fls_U46IXItEKMCB`
     Otherwise, the closure signature remains undeduced. No outside type

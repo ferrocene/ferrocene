@@ -179,7 +179,8 @@ of an :t:`implemented trait` when
   The :t:`[name]s` of both :t:`[associated constant]s` are the same, and
 
 * :dp:`fls_11qrqfuc3rmh`
-  The :t:`[type]s` of both :t:`[associated constant]s` are the same.
+  The :t:`type` of the :t:`associated constant` in the :t:`implementation` is a
+  :t:`subtype` of the :t:`type` of the :t:`associated trait constant`.
 
 :dp:`fls_qmhduwunxww0`
 An :t:`associated trait function` is conformant with an :t:`associated function`

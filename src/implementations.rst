@@ -44,6 +44,10 @@ type` by extending its functionality.
 An :t:`implementing type` is the :t:`type` that the :t:`[associated item]s` of
 an :t:`implementation` are associated with.
 
+:dp:`fls_eIHc8Y9fBtr0`
+Within an :t:`implementation`, the :t:`type` :c:`Self` acts as a :t:`type alias`
+for the :t:`implementing type`.
+
 :dp:`fls_Mcpdzzcw43M7`
 An :t:`implementation body` is a :t:`construct` that encapsulates the
 :t:`[associated item]s`, :t:`[inner attribute]s`, and

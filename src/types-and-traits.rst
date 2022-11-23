@@ -2565,6 +2565,10 @@ A :t:`trait body` is a :t:`construct` that encapsulates the
 :t:`[associated item]s`, :t:`[inner attribute]s`, and
 :t:`[inner doc comment]s` of a :t:`trait`.
 
+:dp:`fls_Y28596CVBzDG`
+Within a :t:`trait`, the :t:`type` :c:`Self` acts as a placeholder for a
+:t:`type` implementing the :t:`trait`, and behaves like a :t:`type parameter`.
+
 :dp:`fls_AdbbUZZgMEsQ`
 A :t:`local trait` is a :t:`trait` that is defined in the current :t:`crate`.
 

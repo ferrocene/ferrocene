@@ -14,9 +14,9 @@ Unsafety
 :t:`Unsafety` is the presence of :t:`[unsafe operation]s` in program text.
 
 :dp:`fls_ovn9czwnwxue`
-An :t:`unsafe operation` is an operation that can potentially violate the
-memory-safety guarantees of Rust. :t:`[Unsafe operation]s` are referred to as
-:t:`unsafe Rust`.
+An :t:`unsafe operation` is an operation that may result in
+:t:`undefined behavior` that is not diagnosed as a static error.
+:t:`[Unsafe operation]s` are referred to as :t:`unsafe Rust`.
 
 :dp:`fls_pfhmcafsjyf7`
 The :t:`[unsafe operation]s` are:

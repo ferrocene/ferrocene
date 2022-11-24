@@ -1199,9 +1199,10 @@ the characters of a :t:`named field selector`.
       :t:`candidate container type`.
 
    #. :dp:`fls_tfjm27ydiake`
-      If such a :t:`candidate indexed field` exists, then the
-      :t:`field access expression` resolves to that
-      :t:`candidate indexed field` and :t:`field resolution` stops.
+      If such a :t:`candidate indexed field` exists and is visible at the point
+      of the :t:`field access expression`, then the :t:`field access expression`
+      resolves to that :t:`candidate indexed field` and :t:`field resolution`
+      stops.
 
 :dp:`fls_p6hgoqo0kcx`
 :t:`Field resolution` of a :t:`field access expression` with a
@@ -1216,9 +1217,10 @@ the characters of a :t:`named field selector`.
       :t:`candidate container type`.
 
    #. :dp:`fls_ljnjxex3u5o`
-      If such a :t:`candidate named field` exists, then the
-      :t:`field access expression` resolves to that :t:`candidate named field`
-      and :t:`field resolution` stops.
+      If such a :t:`candidate named field` exists and is visible at the point
+      of the :t:`field access expression`, then the :t:`field access expression`
+      resolves to that :t:`candidate named field` and :t:`field resolution`
+      stops.
 
 :dp:`fls_nm06mru40tyg`
 A :t:`field access expression` shall resolve to exactly one :t:`field`.

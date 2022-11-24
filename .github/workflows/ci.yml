@@ -17,7 +17,9 @@ permissions:
 jobs:
   ci:
     name: CI
-    runs-on: ubuntu-latest
+    # Ubuntu 22.04 does not support actions/setup-python with Python 3.6 as of
+    # 2022-11-24. See https://github.com/actions/setup-python/issues/544.
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
 

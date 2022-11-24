@@ -7304,8 +7304,9 @@ unsafe operation
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_34h60ubicgsj`
-An :dt:`unsafe operation` is an operation that can potentially violate the
-memory-safety guarantees of Rust.
+An :dt:`unsafe operation` is an operation that may result in
+:t:`undefined behavior` that is not diagnosed as a static error.
+:t:`[Unsafe operation]s` are referred to as :t:`unsafe Rust`.
 
 .. _fls_4f6mppoenj3b:
 

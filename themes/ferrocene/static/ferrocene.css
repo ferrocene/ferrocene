@@ -87,8 +87,7 @@
     --sidebar-search-button-fg: var(--text-fg);
     --sidebar-search-button-hover-fg: #194e80;
 
-    --footer-border: #dbdbdb;
-    --footer-fg: #5f5f5f;
+    --footer-fg: #747474;
 
     --admonition-green-border: #7ddd83;
     --admonition-blue-border: #88cff0;
@@ -283,6 +282,16 @@ li > p:last-child {
     }
 }
 
+div.wrapper div.content {
+    display: flex;
+    flex-direction: column;
+}
+
+div.wrapper div.content div.page {
+    width: 100%;
+    flex: 1;
+}
+
 input#toggle-toctree {
     display: none;
 }
@@ -426,7 +435,7 @@ nav a.current {
  ********************/
 
 div.page {
-    padding: 2rem 1rem 2rem var(--numbers-width);
+    padding: 2rem 1rem 1rem var(--numbers-width);
     position: relative;
 }
 
@@ -443,13 +452,13 @@ div.page > :last-child, div.page > section:last-child > :last-child {
  **************/
 
 footer {
-    border-top: 1px solid var(--footer-border);
     color: var(--footer-fg);
     padding: 1rem;
+    text-align: center;
 }
 
 footer p {
-    margin: 0.35em 0;
+    margin: 0.3em 0;
 }
 
 footer :first-child {

@@ -34,23 +34,23 @@
         <div class="page">
             {% block body %}{% endblock %}
         </div>
+        <footer>
+            <p>
+                Copyright &copy; {{ copyright }}.
+                {% if theme_license %}
+                    Contents released under the {{ theme_license }} license.
+                {% endif %}
+            </p>
+            {% if document_id %}
+                <p>Document ID: <code>{{ document_id }}</code></p>
+            {% endif %}
+            {% if theme_commit %}
+                <p>Built from commit: <code>{{ theme_commit }}</code></p>
+            {% endif %}
+            <p>Ferrocene is a registered trademark of Critical Section GmbH.</p>
+        </footer>
     </div>
 </div>
-<footer>
-    <p>
-        Copyright &copy; {{ copyright }}.
-        {% if theme_license %}
-            Contents released under the {{ theme_license }} license.
-        {% endif %}
-    </p>
-    {% if document_id %}
-        <p>Document ID: <code>{{ document_id }}</code></p>
-    {% endif %}
-    {% if theme_commit %}
-        <p>Built from commit: <code>{{ theme_commit }}</code></p>
-    {% endif %}
-    <p>Ferrocene is a registered trademark of Critical Section GmbH.</p>
-</footer>
 {% endblock %}
 
 {# The blocks below, defined in the basic layout, are effectively removed from

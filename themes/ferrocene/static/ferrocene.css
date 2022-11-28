@@ -385,9 +385,17 @@ nav label.toggle:hover {
     color: var(--sidebar-active-fg);
 }
 
+nav div.toctree {
+    padding: 1.25rem 0 1rem 0;
+}
+
 nav p.caption {
     font-weight: 700;
     margin: 1.25rem 1rem 0.5rem 1rem;
+}
+
+nav p.caption:first-child {
+    margin-top: 0;
 }
 
 nav ul {
@@ -411,10 +419,6 @@ nav a:hover,
 nav a.current {
     color: var(--sidebar-active-fg);
     text-decoration: none;
-}
-
-div.toctree {
-    padding-bottom: 1rem;
 }
 
 /********************

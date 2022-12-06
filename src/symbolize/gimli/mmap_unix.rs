@@ -4,6 +4,11 @@ use core::ops::Deref;
 use core::ptr;
 use core::slice;
 
+#[cfg(not(all(target_os = "linux", target_env = "gnu")))]
+use libc::mmap as mmap64;
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+use libc::mmap64;
+
 pub struct Mmap {
     ptr: *mut libc::c_void,
     len: usize,
@@ -11,7 +16,7 @@ pub struct Mmap {
 
 impl Mmap {
     pub unsafe fn map(file: &File, len: usize) -> Option<Mmap> {
-        let ptr = libc::mmap(
+        let ptr = mmap64(
             ptr::null_mut(),
             len,
             libc::PROT_READ,

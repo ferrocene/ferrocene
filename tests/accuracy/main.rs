@@ -31,6 +31,8 @@ fn doit() {
             dir.push("dylib_dep.dll");
         } else if cfg!(target_os = "macos") {
             dir.push("libdylib_dep.dylib");
+        } else if cfg!(target_os = "aix") {
+            dir.push("libdylib_dep.a");
         } else {
             dir.push("libdylib_dep.so");
         }

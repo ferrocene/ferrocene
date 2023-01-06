@@ -1,6 +1,27 @@
 use backtrace::Frame;
 use std::thread;
 
+fn get_actual_fn_pointer(fp: usize) -> usize {
+    // On AIX, the function name references a function descriptor.
+    // A function descriptor consists of (See https://reviews.llvm.org/D62532)
+    // * The address of the entry point of the function.
+    // * The TOC base address for the function.
+    // * The environment pointer.
+    // Deref `fp` directly so that we can get the address of `fp`'s
+    // entry point in text section.
+    //
+    // For TOC, one can find more information in
+    // https://www.ibm.com/docs/en/aix/7.2?topic=program-understanding-programming-toc
+    if cfg!(target_os = "aix") {
+        unsafe {
+            let actual_fn_entry = *(fp as *const usize);
+            actual_fn_entry
+        }
+    } else {
+        fp
+    }
+}
+
 #[test]
 // FIXME: shouldn't ignore this test on i686-msvc, unsure why it's failing
 #[cfg_attr(all(target_arch = "x86", target_env = "msvc"), ignore)]
@@ -20,7 +41,7 @@ fn smoke_test_frames() {
         // Various platforms have various bits of weirdness about their
         // backtraces. To find a good starting spot let's search through the
         // frames
-        let target = frame_4 as usize;
+        let target = get_actual_fn_pointer(frame_4 as usize);
         let offset = v
             .iter()
             .map(|frame| frame.symbol_address() as usize)
@@ -39,7 +60,7 @@ fn smoke_test_frames() {
 
         assert_frame(
             frames.next().unwrap(),
-            frame_4 as usize,
+            get_actual_fn_pointer(frame_4 as usize),
             "frame_4",
             "tests/smoke.rs",
             start_line + 6,
@@ -47,7 +68,7 @@ fn smoke_test_frames() {
         );
         assert_frame(
             frames.next().unwrap(),
-            frame_3 as usize,
+            get_actual_fn_pointer(frame_3 as usize),
             "frame_3",
             "tests/smoke.rs",
             start_line + 3,
@@ -55,7 +76,7 @@ fn smoke_test_frames() {
         );
         assert_frame(
             frames.next().unwrap(),
-            frame_2 as usize,
+            get_actual_fn_pointer(frame_2 as usize),
             "frame_2",
             "tests/smoke.rs",
             start_line + 2,
@@ -63,7 +84,7 @@ fn smoke_test_frames() {
         );
         assert_frame(
             frames.next().unwrap(),
-            frame_1 as usize,
+            get_actual_fn_pointer(frame_1 as usize),
             "frame_1",
             "tests/smoke.rs",
             start_line + 1,
@@ -71,7 +92,7 @@ fn smoke_test_frames() {
         );
         assert_frame(
             frames.next().unwrap(),
-            smoke_test_frames as usize,
+            get_actual_fn_pointer(smoke_test_frames as usize),
             "smoke_test_frames",
             "",
             0,

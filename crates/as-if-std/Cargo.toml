@@ -22,7 +22,7 @@ miniz_oxide = { version = "0.7", default-features = false }
 version = "0.31.1"
 default-features = false
 optional = true
-features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
+features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
 [features]
 default = ['backtrace']

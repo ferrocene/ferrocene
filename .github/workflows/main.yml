@@ -15,11 +15,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             rust: stable
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             rust: beta
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             rust: nightly
           - os: macos-latest
             rust: stable
@@ -34,7 +34,7 @@ jobs:
           - os: windows-latest
             rust: stable-x86_64-gnu
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust (rustup)
@@ -118,7 +118,7 @@ jobs:
     name: Windows AArch64
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust
@@ -141,7 +141,7 @@ jobs:
         - target: x86_64-apple-ios
           sdk: iphonesimulator
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - run: rustup target add ${{ matrix.target }}
@@ -154,7 +154,7 @@ jobs:
 
   docker:
     name: Docker
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         target:
@@ -174,7 +174,7 @@ jobs:
         - i686-linux-android
         - x86_64-linux-android
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust
@@ -187,9 +187,9 @@ jobs:
 
   rustfmt:
     name: Rustfmt
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust
@@ -198,7 +198,7 @@ jobs:
 
   build:
     name: Build Targets
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         target:
@@ -208,7 +208,7 @@ jobs:
         - x86_64-fortanix-unknown-sgx
         - x86_64-unknown-illumos
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust
@@ -221,9 +221,9 @@ jobs:
 
   msrv:
     name: MSRV
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Rust
@@ -232,9 +232,9 @@ jobs:
 
   miri:
     name: Miri
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Install Miri

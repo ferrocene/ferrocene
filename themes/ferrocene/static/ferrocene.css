@@ -474,6 +474,10 @@ div.toctree-wrapper p.caption {
 
 table {
     border-collapse: collapse;
+
+    /* Let the table overflow on the right */
+    white-space: nowrap;
+    overflow-x: visible;
 }
 
 table td, table th {

@@ -90,10 +90,10 @@
     --footer-border: #dbdbdb;
     --footer-fg: #5f5f5f;
 
-    --admonition-green-bg: #d6f9d6;
-    --admonition-blue-bg: #daf3ff;
-    --admonition-yellow-bg: #fff7ca;
-    --admonition-red-bg: #fdd7cf;
+    --admonition-green-border: #7ddd83;
+    --admonition-blue-border: #88cff0;
+    --admonition-yellow-border: #ffe033;
+    --admonition-red-border: #ee7f68;
 
     --numbers-width: 5rem;
     --numbers-fg: #747474;
@@ -504,24 +504,24 @@ td span.spec-paragraph-id, th span.spec-paragraph-id {
 
 div.admonition {
     margin: 1em 0;
-    padding: 1em;
-    border-radius: 0.4em;
+    padding-left: 1em;
+    border-left: 0.2rem solid transparent;
 }
 
 div.admonition.tip, div.admonition.hint {
-    background: var(--admonition-green-bg);
+    border-color: var(--admonition-green-border);
 }
 
 div.admonition.note {
-    background: var(--admonition-blue-bg);
+    border-color: var(--admonition-blue-border);
 }
 
 div.admonition.warning, div.admonition.caution, div.admonition.important {
-    background: var(--admonition-yellow-bg);
+    border-color: var(--admonition-yellow-border);
 }
 
 div.admonition.danger, div.admonition.error {
-    background: var(--admonition-red-bg);
+    border-color: var(--admonition-red-border);
 }
 
 div.admonition p {
@@ -532,7 +532,7 @@ div.admonition p.admonition-title {
     font-size: 0.8em;
     font-weight: 700;
     text-transform: uppercase;
-    margin: 0;
+    margin: 0 0 -0.25em 0;
 }
 
 /* Fix margin when admonitions are added at the top of the page */

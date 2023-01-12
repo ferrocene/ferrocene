@@ -43,6 +43,9 @@
             Contents released under the {{ theme_license }} license.
         {% endif %}
     </p>
+    {% if document_id %}
+        <p>Document ID: <code>{{ document_id }}</code></p>
+    {% endif %}
     {% if theme_commit %}
         <p>Built from commit: <code>{{ theme_commit }}</code></p>
     {% endif %}

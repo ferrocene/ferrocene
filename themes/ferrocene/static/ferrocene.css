@@ -428,7 +428,6 @@ nav a.current {
 div.page {
     padding: 2rem 1rem 2rem var(--numbers-width);
     position: relative;
-    margin: auto;
 }
 
 div.page > :first-child, div.page > section:first-child > :first-child {

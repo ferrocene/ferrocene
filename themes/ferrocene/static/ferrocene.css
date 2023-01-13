@@ -480,6 +480,10 @@ table {
     overflow-x: visible;
 }
 
+table .hide-inside-tables {
+    display: none;
+}
+
 table td, table th {
     padding: 0.4em;
     border-bottom: 1px solid var(--table-border);

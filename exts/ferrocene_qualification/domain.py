@@ -4,7 +4,7 @@
 from docutils import nodes
 from sphinx.directives import ObjectDescription
 from sphinx.transforms import SphinxTransform
-from sphinx.domains import Domain
+from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
 import sphinx
 
@@ -46,6 +46,9 @@ class QualificationDomain(Domain):
     roles = {
         "id": XRefRole(),
     }
+    object_types = {
+        "id": ObjType("Identifier", "id"),
+    }
 
     initial_data = {"ids": {}}
     # Bump whenever the format of the data changes!
@@ -77,6 +80,11 @@ class QualificationDomain(Domain):
         return sphinx.util.nodes.make_refnode(
             builder, fromdocname, id.document, id.id, contnode
         )
+
+    def get_objects(self):
+        for id in self.data["ids"].values():
+            # (name, display_name, type, document, anchor, priority)
+            yield id.id, id.id, "id", id.document, id.id, 1
 
 
 def setup(app):

@@ -101,6 +101,10 @@
 
     --spec-error-fg: #f00;
     --spec-syntax-literal-bg: #dbdbdb;
+
+    /* Vertical offset for the page. Defaults to 0, but can be set to an higher
+     * value by additional CSS files. */
+    --header-offset: 0rem;
 }
 
 * {
@@ -256,14 +260,14 @@ li > p:last-child {
 @media (min-width: 55rem) {
     div.wrapper {
         display: flex;
-        min-height: 100vh;
+        min-height: calc(100vh - var(--header-offset));
     }
 
     div.wrapper div.sidebar {
         position: sticky;
-        top: 0;
+        top: var(--header-offset);
         width: var(--sidebar-width);
-        max-height: 100vh;
+        max-height: calc(100vh - var(--header-offset));
         overflow-y: scroll;
         flex-shrink: 0;
     }

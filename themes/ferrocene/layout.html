@@ -10,6 +10,9 @@
 {% endblock %}
 
 {% block content %}
+{% if theme_include_in_header %}
+    {% include theme_include_in_header %}
+{% endif %}
 <div class="wrapper">
     <div class="sidebar">
         <header>

@@ -188,6 +188,31 @@ h1 + p.rubric, h2 + p.rubric, h3 + p.rubric, h4 + p.rubric, h5 + p.rubric, h6 + 
     margin-top: 1rem;
 }
 
+/* Prevent too much margin with one header after the other */
+/* I am sorry, browser's CSS engine */
+section > h1:first-child + section > h2:first-child,
+section > h2:first-child + section > h3:first-child,
+section > h3:first-child + section > h4:first-child,
+section > h4:first-child + section > h5:first-child,
+section > h5:first-child + section > h6:first-child,
+section > h1:first-child + section > span[id]:first-child + h2,
+section > h2:first-child + section > span[id]:first-child + h3,
+section > h3:first-child + section > span[id]:first-child + h4,
+section > h4:first-child + section > span[id]:first-child + h5,
+section > h5:first-child + section > span[id]:first-child + h6,
+section > span[id]:first-child + h1 + section > h2:first-child,
+section > span[id]:first-child + h2 + section > h3:first-child,
+section > span[id]:first-child + h3 + section > h4:first-child,
+section > span[id]:first-child + h4 + section > h5:first-child,
+section > span[id]:first-child + h5 + section > h6:first-child,
+section > span[id]:first-child + h1 + section > span[id]:first-child + h2,
+section > span[id]:first-child + h2 + section > span[id]:first-child + h3,
+section > span[id]:first-child + h3 + section > span[id]:first-child + h4,
+section > span[id]:first-child + h4 + section > span[id]:first-child + h5,
+section > span[id]:first-child + h5 + section > span[id]:first-child + h6 {
+    margin-top: 0;
+}
+
 /********************************
  *   Code snippets and blocks   *
  ********************************/

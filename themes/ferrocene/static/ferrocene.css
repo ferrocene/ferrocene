@@ -509,9 +509,16 @@ table .hide-inside-tables {
     display: none;
 }
 
+table caption {
+    text-align: left;
+    font-weight: bold;
+    padding-left: 0.4em;
+}
+
 table td, table th {
     padding: 0.4em;
     border-bottom: 1px solid var(--table-border);
+    text-align: left;
 }
 
 table tr:last-child td {

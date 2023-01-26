@@ -90,6 +90,37 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    let mut traits = TSV::new(
+        &out_dir.join("traits.tsv"),
+        [
+            "Module",
+            "Path",
+            "Visibility",
+            "Stability",
+            "Feature Gate",
+            "Required methods",
+            "Default methods",
+            "Implementations",
+        ],
+    )?;
+    for trait_ in &collector.traits {
+        let counters = &collector
+            .trait_counters
+            .remove(&trait_.id)
+            .unwrap_or_default();
+
+        traits.add([
+            &trait_.module,
+            &trait_.name,
+            trait_.public_str(),
+            trait_.stable_str(),
+            trait_.feature_str(),
+            &counters.required_methods.to_string(),
+            &counters.default_methods.to_string(),
+            &trait_.implementations.to_string(),
+        ])?;
+    }
+
     Ok(())
 }
 

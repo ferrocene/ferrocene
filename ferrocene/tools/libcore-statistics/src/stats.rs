@@ -12,6 +12,8 @@ pub(crate) struct StatsCollector {
     pub(crate) functions: Vec<Function>,
     pub(crate) types: Vec<Type>,
     pub(crate) type_counters: HashMap<rustdoc_types::Id, TypeCounters>,
+    pub(crate) traits: Vec<Trait>,
+    pub(crate) trait_counters: HashMap<rustdoc_types::Id, TraitCounters>,
 }
 
 impl StatsCollector {
@@ -25,6 +27,8 @@ impl StatsCollector {
             functions: Vec::new(),
             types: Vec::new(),
             type_counters: HashMap::new(),
+            traits: Vec::new(),
+            trait_counters: HashMap::new(),
         }
     }
 
@@ -41,7 +45,7 @@ impl StatsCollector {
             module: self.module_stack.join("::"),
             public: match &self.inside {
                 Inside::TraitImpl { public, .. } => *public,
-                Inside::TraitDefinition { public } => *public,
+                Inside::TraitDefinition { public, .. } => *public,
                 _ => item.visibility == rustdoc_types::Visibility::Public,
             },
             stability: self.stability_stack.last().cloned(),
@@ -140,8 +144,15 @@ impl Visitor for StatsCollector {
     ) {
         self.override_inside(|this| {
             this.inside = Inside::TraitDefinition {
+                id: item.id.clone(),
                 public: item.visibility == rustdoc_types::Visibility::Public,
             };
+
+            this.traits.push(Trait {
+                common: this.gather_common(item),
+                implementations: trait_.implementations.len(),
+            });
+
             this.walk_trait(crate_, item, trait_);
         })
     }
@@ -175,7 +186,14 @@ impl Visitor for StatsCollector {
                     counters.trait_methods += 1;
                 }
             }
-            Inside::TraitDefinition { .. } => {}
+            Inside::TraitDefinition { id, .. } => {
+                let counters = self.trait_counters.entry(id.clone()).or_default();
+                if function.has_body {
+                    counters.default_methods += 1;
+                } else {
+                    counters.required_methods += 1;
+                }
+            }
         }
 
         self.functions.push(Function {
@@ -250,6 +268,7 @@ enum Inside {
         public: bool,
     },
     TraitDefinition {
+        id: rustdoc_types::Id,
         public: bool,
     },
 }
@@ -337,6 +356,11 @@ pub(crate) struct Type {
     pub(crate) kind: TypeKind,
 }
 
+pub(crate) struct Trait {
+    pub(crate) common: Common,
+    pub(crate) implementations: usize,
+}
+
 #[derive(Default)]
 pub(crate) struct TypeCounters {
     pub(crate) blanket_impls: usize,
@@ -344,6 +368,12 @@ pub(crate) struct TypeCounters {
     pub(crate) trait_impls: usize,
     pub(crate) methods: usize,
     pub(crate) trait_methods: usize,
+}
+
+#[derive(Default)]
+pub(crate) struct TraitCounters {
+    pub(crate) required_methods: usize,
+    pub(crate) default_methods: usize,
 }
 
 macro_rules! deref_common {
@@ -360,3 +390,4 @@ macro_rules! deref_common {
 
 deref_common!(impl Deref for Function);
 deref_common!(impl Deref for Type);
+deref_common!(impl Deref for Trait);

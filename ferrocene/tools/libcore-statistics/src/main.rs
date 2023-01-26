@@ -38,6 +38,8 @@ fn main() -> Result<(), Error> {
             "Visibility",
             "Stability",
             "Feature gate",
+            "Trait name",
+            "Lines of code",
             "Impl",
         ],
     )?;
@@ -49,6 +51,11 @@ fn main() -> Result<(), Error> {
             function.public_str(),
             function.stable_str(),
             function.feature_str(),
+            match &function.trait_id {
+                Some(id) => &collector.traits[id].name,
+                None => "",
+            },
+            &function.lines_of_code.to_string(),
             function.impl_.as_deref().unwrap_or(""),
         ])?;
     }
@@ -103,7 +110,7 @@ fn main() -> Result<(), Error> {
             "Implementations",
         ],
     )?;
-    for trait_ in &collector.traits {
+    for trait_ in collector.traits.values() {
         let counters = &collector
             .trait_counters
             .remove(&trait_.id)

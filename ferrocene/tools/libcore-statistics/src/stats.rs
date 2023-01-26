@@ -1,19 +1,20 @@
 use crate::render::render_impl;
 use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
+use rustdoc_types::Id;
 use std::collections::{HashMap, HashSet};
 
 pub(crate) struct StatsCollector {
-    seen: HashSet<rustdoc_types::Id>,
+    seen: HashSet<Id>,
     name_stack: Vec<String>,
     module_stack: Vec<String>,
     stability_stack: Vec<Stability>,
     inside: Inside,
     pub(crate) functions: Vec<Function>,
     pub(crate) types: Vec<Type>,
-    pub(crate) type_counters: HashMap<rustdoc_types::Id, TypeCounters>,
-    pub(crate) traits: Vec<Trait>,
-    pub(crate) trait_counters: HashMap<rustdoc_types::Id, TraitCounters>,
+    pub(crate) type_counters: HashMap<Id, TypeCounters>,
+    pub(crate) traits: HashMap<Id, Trait>,
+    pub(crate) trait_counters: HashMap<Id, TraitCounters>,
 }
 
 impl StatsCollector {
@@ -27,7 +28,7 @@ impl StatsCollector {
             functions: Vec::new(),
             types: Vec::new(),
             type_counters: HashMap::new(),
-            traits: Vec::new(),
+            traits: HashMap::new(),
             trait_counters: HashMap::new(),
         }
     }
@@ -105,6 +106,7 @@ impl Visitor for StatsCollector {
                 let trait_ = crate_.index.get(&trait_.id).unwrap();
                 this.inside = Inside::TraitImpl {
                     type_: impl_.for_.clone(),
+                    trait_id: trait_.id.clone(),
                     signature,
                     public: trait_.visibility == rustdoc_types::Visibility::Public,
                 };
@@ -148,10 +150,13 @@ impl Visitor for StatsCollector {
                 public: item.visibility == rustdoc_types::Visibility::Public,
             };
 
-            this.traits.push(Trait {
-                common: this.gather_common(item),
-                implementations: trait_.implementations.len(),
-            });
+            this.traits.insert(
+                item.id.clone(),
+                Trait {
+                    common: this.gather_common(item),
+                    implementations: trait_.implementations.len(),
+                },
+            );
 
             this.walk_trait(crate_, item, trait_);
         })
@@ -196,6 +201,8 @@ impl Visitor for StatsCollector {
             }
         }
 
+        let span = item.span.as_ref().unwrap();
+
         self.functions.push(Function {
             common: self.gather_common(item),
             kind: match self.inside {
@@ -206,11 +213,16 @@ impl Visitor for StatsCollector {
                     has_default: function.has_body,
                 },
             },
+            trait_id: match &self.inside {
+                Inside::TraitImpl { trait_id, .. } => Some(trait_id.clone()),
+                _ => None,
+            },
             impl_: match &self.inside {
                 Inside::ItemImpl { signature, .. } => Some(signature.clone()),
                 Inside::TraitImpl { signature, .. } => Some(signature.clone()),
                 _ => None,
             },
+            lines_of_code: span.end.0 - span.begin.0 + 1,
         });
     }
 
@@ -264,11 +276,12 @@ enum Inside {
     },
     TraitImpl {
         type_: rustdoc_types::Type,
+        trait_id: Id,
         signature: String,
         public: bool,
     },
     TraitDefinition {
-        id: rustdoc_types::Id,
+        id: Id,
         public: bool,
     },
 }
@@ -314,7 +327,7 @@ impl std::fmt::Display for TypeKind {
 }
 
 pub(crate) struct Common {
-    pub(crate) id: rustdoc_types::Id,
+    pub(crate) id: Id,
     pub(crate) name: String,
     pub(crate) module: String,
     pub(crate) public: bool,
@@ -349,6 +362,8 @@ pub(crate) struct Function {
     pub(crate) common: Common,
     pub(crate) kind: FunctionKind,
     pub(crate) impl_: Option<String>,
+    pub(crate) trait_id: Option<Id>,
+    pub(crate) lines_of_code: usize,
 }
 
 pub(crate) struct Type {

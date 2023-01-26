@@ -3,20 +3,20 @@ use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
 use std::collections::HashSet;
 
-pub(crate) enum Kind {
+pub(crate) enum FunctionKind {
     Function,
     Method,
     TraitMethod,
     TraitMethodDefinition { has_default: bool },
 }
 
-impl std::fmt::Display for Kind {
+impl std::fmt::Display for FunctionKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Kind::Function => f.write_str("function"),
-            Kind::Method => f.write_str("method"),
-            Kind::TraitMethod => f.write_str("trait method"),
-            Kind::TraitMethodDefinition { has_default } => {
+            FunctionKind::Function => f.write_str("function"),
+            FunctionKind::Method => f.write_str("method"),
+            FunctionKind::TraitMethod => f.write_str("trait method"),
+            FunctionKind::TraitMethodDefinition { has_default } => {
                 if *has_default {
                     f.write_str("definition of default trait method")
                 } else {
@@ -27,25 +27,25 @@ impl std::fmt::Display for Kind {
     }
 }
 
-pub(crate) struct Item {
+pub(crate) struct Function {
     pub(crate) name: String,
     pub(crate) module: String,
-    pub(crate) kind: Kind,
+    pub(crate) kind: FunctionKind,
     pub(crate) impl_: Option<String>,
     pub(crate) public: bool,
     pub(crate) stability: Option<Stability>,
 }
 
-pub(crate) struct FunctionsCollector {
+pub(crate) struct StatsCollector {
     seen: HashSet<rustdoc_types::Id>,
     name_stack: Vec<String>,
     module_stack: Vec<String>,
     stability_stack: Vec<Stability>,
     inside: Inside,
-    pub(crate) found: Vec<Item>,
+    pub(crate) functions: Vec<Function>,
 }
 
-impl FunctionsCollector {
+impl StatsCollector {
     pub(crate) fn new() -> Self {
         Self {
             seen: HashSet::new(),
@@ -53,7 +53,7 @@ impl FunctionsCollector {
             module_stack: Vec::new(),
             stability_stack: Vec::new(),
             inside: Inside::None,
-            found: Vec::new(),
+            functions: Vec::new(),
         }
     }
 
@@ -64,7 +64,7 @@ impl FunctionsCollector {
     }
 }
 
-impl Visitor for FunctionsCollector {
+impl Visitor for StatsCollector {
     fn visit_item(&mut self, crate_: &rustdoc_types::Crate, item: &rustdoc_types::Item) {
         if self.seen.insert(item.id.clone()) {
             let mut pop_name = false;
@@ -145,14 +145,14 @@ impl Visitor for FunctionsCollector {
         item: &rustdoc_types::Item,
         function: &rustdoc_types::Function,
     ) {
-        self.found.push(Item {
+        self.functions.push(Function {
             name: self.name_stack.join("::"),
             module: self.module_stack.join("::"),
             kind: match self.inside {
-                Inside::None => Kind::Function,
-                Inside::ItemImpl { .. } => Kind::Method,
-                Inside::TraitImpl { .. } => Kind::TraitMethod,
-                Inside::TraitDefinition { .. } => Kind::TraitMethodDefinition {
+                Inside::None => FunctionKind::Function,
+                Inside::ItemImpl { .. } => FunctionKind::Method,
+                Inside::TraitImpl { .. } => FunctionKind::TraitMethod,
+                Inside::TraitDefinition { .. } => FunctionKind::TraitMethodDefinition {
                     has_default: function.has_body,
                 },
             },

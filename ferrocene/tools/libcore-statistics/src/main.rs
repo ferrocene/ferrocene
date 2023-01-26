@@ -4,7 +4,7 @@ mod stats;
 mod visitor;
 
 use crate::stability::Stability;
-use crate::stats::FunctionsCollector;
+use crate::stats::StatsCollector;
 use crate::visitor::Visitor;
 use anyhow::Error;
 use rustdoc_types::Crate;
@@ -22,7 +22,7 @@ fn main() -> Result<(), Error> {
     let contents = std::fs::read(&path)?;
     let root: Crate = serde_json::from_slice(&contents)?;
 
-    let mut collector = FunctionsCollector::new();
+    let mut collector = StatsCollector::new();
     collector.visit_crate(&root);
 
     let out_dir = PathBuf::from(out_dir);
@@ -42,22 +42,22 @@ fn main() -> Result<(), Error> {
             "Impl",
         ],
     )?;
-    for item in &collector.found {
+    for function in &collector.functions {
         functions.add([
-            &item.module,
-            &item.name,
-            &item.kind.to_string(),
-            if item.public { "public" } else { "private" },
-            match &item.stability {
+            &function.module,
+            &function.name,
+            &function.kind.to_string(),
+            if function.public { "public" } else { "private" },
+            match &function.stability {
                 Some(Stability { stable: true, .. }) => "stable",
                 Some(Stability { stable: false, .. }) => "unstable",
                 None => "",
             },
-            match &item.stability {
+            match &function.stability {
                 Some(Stability { feature, .. }) => &feature,
                 None => "",
             },
-            item.impl_.as_deref().unwrap_or(""),
+            function.impl_.as_deref().unwrap_or(""),
         ])?;
     }
 

@@ -207,7 +207,7 @@ fn render_term(buf: &mut String, crate_: &Crate, term: &Term) {
     }
 }
 
-fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
+pub(crate) fn render_type(buf: &mut String, crate_: &Crate, type_: &Type) {
     match type_ {
         Type::ResolvedPath(path) => render_path(buf, crate_, path),
         Type::Generic(generic) => buf.push_str(generic),

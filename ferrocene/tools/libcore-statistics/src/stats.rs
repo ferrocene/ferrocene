@@ -1,4 +1,4 @@
-use crate::render::render_impl;
+use crate::render::{render_impl, render_type};
 use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
 use rustdoc_types::Id;
@@ -15,6 +15,7 @@ pub(crate) struct StatsCollector {
     pub(crate) type_counters: HashMap<Id, TypeCounters>,
     pub(crate) traits: HashMap<Id, Trait>,
     pub(crate) trait_counters: HashMap<Id, TraitCounters>,
+    pub(crate) items: Vec<Item>,
 }
 
 impl StatsCollector {
@@ -30,6 +31,7 @@ impl StatsCollector {
             type_counters: HashMap::new(),
             traits: HashMap::new(),
             trait_counters: HashMap::new(),
+            items: Vec::new(),
         }
     }
 
@@ -264,6 +266,35 @@ impl Visitor for StatsCollector {
         });
         self.walk_union(crate_, item, union_);
     }
+
+    fn visit_constant(
+        &mut self,
+        crate_: &rustdoc_types::Crate,
+        item: &rustdoc_types::Item,
+        constant: &rustdoc_types::Constant,
+    ) {
+        let mut type_ = String::new();
+        render_type(&mut type_, crate_, &constant.type_);
+
+        self.items.push(Item {
+            common: self.gather_common(item),
+            kind: ItemKind::Const,
+            type_,
+            value: constant.expr.clone(),
+        });
+    }
+
+    fn visit_static(&mut self, crate_: &rustdoc_types::Crate, item: &rustdoc_types::Item, static_: &rustdoc_types::Static) {
+        let mut type_ = String::new();
+        render_type(&mut type_, crate_, &static_.type_);
+
+        self.items.push(Item {
+            common: self.gather_common(item),
+            kind: ItemKind::Static,
+            type_,
+            value: static_.expr.clone(),
+        });
+    }
 }
 
 #[derive(Default, Clone)]
@@ -326,6 +357,20 @@ impl std::fmt::Display for TypeKind {
     }
 }
 
+pub(crate) enum ItemKind {
+    Static,
+    Const,
+}
+
+impl std::fmt::Display for ItemKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ItemKind::Static => f.write_str("static"),
+            ItemKind::Const => f.write_str("const"),
+        }
+    }
+}
+
 pub(crate) struct Common {
     pub(crate) id: Id,
     pub(crate) name: String,
@@ -376,6 +421,13 @@ pub(crate) struct Trait {
     pub(crate) implementations: usize,
 }
 
+pub(crate) struct Item {
+    pub(crate) common: Common,
+    pub(crate) kind: ItemKind,
+    pub(crate) type_: String,
+    pub(crate) value: String,
+}
+
 #[derive(Default)]
 pub(crate) struct TypeCounters {
     pub(crate) blanket_impls: usize,
@@ -406,3 +458,4 @@ macro_rules! deref_common {
 deref_common!(impl Deref for Function);
 deref_common!(impl Deref for Type);
 deref_common!(impl Deref for Trait);
+deref_common!(impl Deref for Item);

@@ -128,6 +128,32 @@ fn main() -> Result<(), Error> {
         ])?;
     }
 
+    let mut items = TSV::new(
+        &out_dir.join("items.tsv"),
+        [
+            "Module",
+            "Path",
+            "Kind",
+            "Visibility",
+            "Stability",
+            "Feature Gate",
+            "Type",
+            "Value"
+        ]
+    )?;
+    for item in &collector.items {
+        items.add([
+            &item.module,
+            &item.name,
+            &item.kind.to_string(),
+            item.public_str(),
+            item.stable_str(),
+            item.feature_str(),
+            &item.type_,
+            &item.value,
+        ])?;
+    }
+
     Ok(())
 }
 

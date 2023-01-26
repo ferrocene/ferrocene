@@ -3,7 +3,6 @@ mod stability;
 mod stats;
 mod visitor;
 
-use crate::stability::Stability;
 use crate::stats::StatsCollector;
 use crate::visitor::Visitor;
 use anyhow::Error;
@@ -47,17 +46,47 @@ fn main() -> Result<(), Error> {
             &function.module,
             &function.name,
             &function.kind.to_string(),
-            if function.public { "public" } else { "private" },
-            match &function.stability {
-                Some(Stability { stable: true, .. }) => "stable",
-                Some(Stability { stable: false, .. }) => "unstable",
-                None => "",
-            },
-            match &function.stability {
-                Some(Stability { feature, .. }) => &feature,
-                None => "",
-            },
+            function.public_str(),
+            function.stable_str(),
+            function.feature_str(),
             function.impl_.as_deref().unwrap_or(""),
+        ])?;
+    }
+
+    let mut types = TSV::new(
+        &out_dir.join("types.tsv"),
+        [
+            "Module",
+            "Path",
+            "Kind",
+            "Visibility",
+            "Stability",
+            "Feature Gate",
+            "Traits implemented",
+            "Auto traits implemented",
+            "Blanket traits implemented",
+            "Methods",
+            "Trait methods",
+        ],
+    )?;
+    for type_ in &collector.types {
+        let counters = &collector
+            .type_counters
+            .remove(&type_.id)
+            .unwrap_or_default();
+
+        types.add([
+            &type_.module,
+            &type_.name,
+            &type_.kind.to_string(),
+            type_.public_str(),
+            type_.stable_str(),
+            type_.feature_str(),
+            &counters.trait_impls.to_string(),
+            &counters.auto_impls.to_string(),
+            &counters.blanket_impls.to_string(),
+            &counters.methods.to_string(),
+            &counters.trait_methods.to_string(),
         ])?;
     }
 

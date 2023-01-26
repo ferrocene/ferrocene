@@ -1,7 +1,9 @@
 mod render;
+mod stability;
 mod stats;
 mod visitor;
 
+use crate::stability::Stability;
 use crate::stats::FunctionsCollector;
 use crate::visitor::Visitor;
 use anyhow::Error;
@@ -46,8 +48,15 @@ fn main() -> Result<(), Error> {
             &item.name,
             &item.kind.to_string(),
             if item.public { "public" } else { "private" },
-            "TODO",
-            "TODO",
+            match &item.stability {
+                Some(Stability { stable: true, .. }) => "stable",
+                Some(Stability { stable: false, .. }) => "unstable",
+                None => "",
+            },
+            match &item.stability {
+                Some(Stability { feature, .. }) => &feature,
+                None => "",
+            },
             item.impl_.as_deref().unwrap_or(""),
         ])?;
     }

@@ -21,6 +21,7 @@ dependencies = [
  "anyhow",
  "rustdoc-types",
  "serde_json",
+ "syn",
 ]
 
 [[package]]

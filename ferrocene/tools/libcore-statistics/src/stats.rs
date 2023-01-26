@@ -1,4 +1,5 @@
 use crate::render::render_impl;
+use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
 use std::collections::HashSet;
 
@@ -32,12 +33,14 @@ pub(crate) struct Item {
     pub(crate) kind: Kind,
     pub(crate) impl_: Option<String>,
     pub(crate) public: bool,
+    pub(crate) stability: Option<Stability>,
 }
 
 pub(crate) struct FunctionsCollector {
     seen: HashSet<rustdoc_types::Id>,
     name_stack: Vec<String>,
     module_stack: Vec<String>,
+    stability_stack: Vec<Stability>,
     inside: Inside,
     pub(crate) found: Vec<Item>,
 }
@@ -48,6 +51,7 @@ impl FunctionsCollector {
             seen: HashSet::new(),
             name_stack: Vec::new(),
             module_stack: Vec::new(),
+            stability_stack: Vec::new(),
             inside: Inside::None,
             found: Vec::new(),
         }
@@ -62,16 +66,27 @@ impl FunctionsCollector {
 
 impl Visitor for FunctionsCollector {
     fn visit_item(&mut self, crate_: &rustdoc_types::Crate, item: &rustdoc_types::Item) {
-        if let Some(name) = &item.name {
-            self.name_stack.push(name.clone());
-        }
-
         if self.seen.insert(item.id.clone()) {
-            self.walk_item(crate_, item);
-        }
+            let mut pop_name = false;
+            let mut pop_stability = false;
 
-        if item.name.is_some() {
-            self.name_stack.pop();
+            if let Some(name) = &item.name {
+                self.name_stack.push(name.clone());
+                pop_name = true;
+            }
+            if let Some(stability) = parse_stability(&item.attrs) {
+                self.stability_stack.push(stability);
+                pop_stability = true;
+            }
+
+            self.walk_item(crate_, item);
+
+            if pop_stability {
+                self.stability_stack.pop();
+            }
+            if pop_name {
+                self.name_stack.pop();
+            }
         }
     }
 
@@ -151,6 +166,7 @@ impl Visitor for FunctionsCollector {
                 Inside::TraitDefinition { public } => *public,
                 _ => item.visibility == rustdoc_types::Visibility::Public,
             },
+            stability: self.stability_stack.last().cloned(),
         });
     }
 }

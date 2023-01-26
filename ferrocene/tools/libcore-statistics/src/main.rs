@@ -138,8 +138,8 @@ fn main() -> Result<(), Error> {
             "Stability",
             "Feature Gate",
             "Type",
-            "Value"
-        ]
+            "Value",
+        ],
     )?;
     for item in &collector.items {
         items.add([
@@ -151,6 +151,28 @@ fn main() -> Result<(), Error> {
             item.feature_str(),
             &item.type_,
             &item.value,
+        ])?;
+    }
+
+    let mut macros = TSV::new(
+        &out_dir.join("macros.tsv"),
+        [
+            "Module",
+            "Path",
+            "Kind",
+            "Visibility",
+            "Stability",
+            "Feature Gate",
+        ],
+    )?;
+    for macro_ in &collector.macros {
+        macros.add([
+            &macro_.module,
+            &macro_.name,
+            &macro_.kind.to_string(),
+            macro_.public_str(),
+            macro_.stable_str(),
+            macro_.feature_str(),
         ])?;
     }
 

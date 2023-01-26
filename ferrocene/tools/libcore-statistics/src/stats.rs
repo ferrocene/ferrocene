@@ -16,6 +16,7 @@ pub(crate) struct StatsCollector {
     pub(crate) traits: HashMap<Id, Trait>,
     pub(crate) trait_counters: HashMap<Id, TraitCounters>,
     pub(crate) items: Vec<Item>,
+    pub(crate) macros: Vec<Macro>,
 }
 
 impl StatsCollector {
@@ -32,6 +33,7 @@ impl StatsCollector {
             traits: HashMap::new(),
             trait_counters: HashMap::new(),
             items: Vec::new(),
+            macros: Vec::new(),
         }
     }
 
@@ -284,7 +286,12 @@ impl Visitor for StatsCollector {
         });
     }
 
-    fn visit_static(&mut self, crate_: &rustdoc_types::Crate, item: &rustdoc_types::Item, static_: &rustdoc_types::Static) {
+    fn visit_static(
+        &mut self,
+        crate_: &rustdoc_types::Crate,
+        item: &rustdoc_types::Item,
+        static_: &rustdoc_types::Static,
+    ) {
         let mut type_ = String::new();
         render_type(&mut type_, crate_, &static_.type_);
 
@@ -294,6 +301,34 @@ impl Visitor for StatsCollector {
             type_,
             value: static_.expr.clone(),
         });
+    }
+
+    fn visit_macro(
+        &mut self,
+        _crate_: &rustdoc_types::Crate,
+        item: &rustdoc_types::Item,
+        _macro_: &str,
+    ) {
+        self.macros.push(Macro {
+            common: self.gather_common(item),
+            kind: MacroKind::ByExample,
+        });
+    }
+
+    fn visit_proc_macro(
+        &mut self,
+        _crate_: &rustdoc_types::Crate,
+        item: &rustdoc_types::Item,
+        proc_macro: &rustdoc_types::ProcMacro,
+    ) {
+        self.macros.push(Macro {
+            common: self.gather_common(item),
+            kind: match &proc_macro.kind {
+                rustdoc_types::MacroKind::Bang => MacroKind::ProcBang,
+                rustdoc_types::MacroKind::Attr => MacroKind::ProcAttribute,
+                rustdoc_types::MacroKind::Derive => MacroKind::ProcDerive,
+            },
+        })
     }
 }
 
@@ -371,6 +406,24 @@ impl std::fmt::Display for ItemKind {
     }
 }
 
+pub(crate) enum MacroKind {
+    ByExample,
+    ProcBang,
+    ProcDerive,
+    ProcAttribute,
+}
+
+impl std::fmt::Display for MacroKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MacroKind::ByExample => f.write_str("macro by example"),
+            MacroKind::ProcBang => f.write_str("proc macro"),
+            MacroKind::ProcDerive => f.write_str("proc macro (derive)"),
+            MacroKind::ProcAttribute => f.write_str("proc macro (attribute)"),
+        }
+    }
+}
+
 pub(crate) struct Common {
     pub(crate) id: Id,
     pub(crate) name: String,
@@ -428,6 +481,11 @@ pub(crate) struct Item {
     pub(crate) value: String,
 }
 
+pub(crate) struct Macro {
+    pub(crate) common: Common,
+    pub(crate) kind: MacroKind,
+}
+
 #[derive(Default)]
 pub(crate) struct TypeCounters {
     pub(crate) blanket_impls: usize,
@@ -459,3 +517,4 @@ deref_common!(impl Deref for Function);
 deref_common!(impl Deref for Type);
 deref_common!(impl Deref for Trait);
 deref_common!(impl Deref for Item);
+deref_common!(impl Deref for Macro);

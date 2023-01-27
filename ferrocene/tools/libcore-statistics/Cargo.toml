@@ -10,3 +10,5 @@ anyhow = "1.0.68"
 rustdoc-types = "0.20.0"
 serde_json = "1.0.91"
 syn = { version = "1.0.107", default-features = false, features = ["derive", "parsing"] }
+tempfile = "3.3.0"
+tokei = "12.1.2"

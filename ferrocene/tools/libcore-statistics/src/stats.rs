@@ -1,3 +1,4 @@
+use crate::loc::LOC;
 use crate::render::{render_impl, render_type};
 use crate::stability::{parse_stability, Stability};
 use crate::visitor::Visitor;
@@ -5,6 +6,7 @@ use rustdoc_types::Id;
 use std::collections::{HashMap, HashSet};
 
 pub(crate) struct StatsCollector {
+    loc: LOC,
     seen: HashSet<Id>,
     name_stack: Vec<String>,
     module_stack: Vec<String>,
@@ -20,8 +22,9 @@ pub(crate) struct StatsCollector {
 }
 
 impl StatsCollector {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(loc: LOC) -> Self {
         Self {
+            loc,
             seen: HashSet::new(),
             name_stack: Vec::new(),
             module_stack: Vec::new(),
@@ -226,7 +229,10 @@ impl Visitor for StatsCollector {
                 Inside::TraitImpl { signature, .. } => Some(signature.clone()),
                 _ => None,
             },
-            lines_of_code: span.end.0 - span.begin.0 + 1,
+            lines_of_code: self
+                .loc
+                .stats_for(&span.filename, span.begin.0, span.end.0)
+                .unwrap(),
         });
     }
 

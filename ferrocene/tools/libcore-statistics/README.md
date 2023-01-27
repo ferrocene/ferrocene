@@ -7,7 +7,7 @@ TSV files (tab-separated CSV).
 To run the tool, execute:
 
 ```
-cargo run --release path/to/core.json path/to/output/dir/
+cargo run --release path/to/core.json path/to/output/dir/ path/to/rust/checkout/
 ```
 
 ## Obtaining the rustdoc JSON representation

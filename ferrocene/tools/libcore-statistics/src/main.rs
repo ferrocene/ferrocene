@@ -44,6 +44,7 @@ fn main() -> Result<(), Error> {
             "Feature gate",
             "Trait name",
             "Lines of code",
+            "Lines of documentation",
             "File",
             "Impl",
         ],
@@ -61,6 +62,7 @@ fn main() -> Result<(), Error> {
                 None => "",
             },
             &function.lines_of_code.to_string(),
+            &function.lines_of_docs.to_string(),
             &function.file,
             function.impl_.as_deref().unwrap_or(""),
         ])?;

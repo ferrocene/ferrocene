@@ -233,6 +233,11 @@ impl Visitor for StatsCollector {
                 .loc
                 .stats_for(&span.filename, span.begin.0, span.end.0)
                 .unwrap(),
+            lines_of_docs: item
+                .docs
+                .as_ref()
+                .map(|d| d.trim().chars().filter(|c| *c == '\n').count())
+                .unwrap_or(0),
             file: span.filename.to_str().unwrap().to_string(),
         });
     }
@@ -470,6 +475,7 @@ pub(crate) struct Function {
     pub(crate) trait_id: Option<Id>,
     pub(crate) file: String,
     pub(crate) lines_of_code: usize,
+    pub(crate) lines_of_docs: usize,
 }
 
 pub(crate) struct Type {

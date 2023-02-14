@@ -37,6 +37,11 @@ class Hasher:
         else:
             self.state.update(struct.pack("<Q", len(node.non_default_attributes())))
             for name, value in node.attlist():
+                # The <document source=".."> attribute contains absolute paths
+                # in it, breaking reproducibility.
+                if isinstance(node, nodes.document) and name == "source":
+                    continue
+
                 self.string(name)
                 self.string(repr(value))
 

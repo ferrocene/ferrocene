@@ -17,6 +17,7 @@
 from sphinx.builders import Builder
 from sphinx.builders.html import StandaloneHTMLBuilder
 import json
+import sphinx
 
 
 class IntersphinxBuilder(Builder):
@@ -27,6 +28,19 @@ class IntersphinxBuilder(Builder):
 
     def init(self):
         self.standalone_html_builder = StandaloneHTMLBuilder(self.app, self.env)
+
+        # Do not emit any warning in the ferrocene-intersphinx builder: there
+        # will be warnings when using the builder, as the rest of the documents
+        # won't be built yet, but we don't care about them.
+        #
+        # Keeping the warnings will confuse people who read the build logs,
+        # thinking they should fix them while they're expected to happen.
+        #
+        # Unfortunately the only reliable way to suppress the warnings is
+        # monkey-patching Sphinx's code, as you cannot set a global filter in
+        # Python's logging module.
+        sphinx.util.logging.WarningStreamHandler.emit = lambda _self, _record: None
+
 
     def build(self, *args, **kwargs):
         # Normally you're not supposed to override the build() method, as

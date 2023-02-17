@@ -25,7 +25,7 @@ const PT_NOTE: u32 = 4;
 
 // Now we have to replicate, bit for bit, the structure of the dl_phdr_info
 // type used by fuchsia's current dynamic linker. Chromium also has this ABI
-// boundary as well as crashpad. Eventully we'd like to move these cases to
+// boundary as well as crashpad. Eventually we'd like to move these cases to
 // use elf-search but we'd need to provide that in the SDK and that has not
 // yet been done. Thus we (and they) are stuck having to use this method
 // which incurs a tight coupling with the fuchsia libc.

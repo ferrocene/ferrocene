@@ -6,7 +6,7 @@ use core::ptr;
 use core::slice;
 
 pub struct Mmap {
-    // keep the file alive to prevent it from ebeing deleted which would cause
+    // keep the file alive to prevent it from being deleted which would cause
     // us to read bad data.
     _file: File,
     ptr: *mut c_void,

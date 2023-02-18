@@ -79,7 +79,7 @@ macro_rules! dbghelp {
         static mut DBGHELP: Dbghelp = Dbghelp {
             // Initially we haven't loaded the DLL
             dll: 0 as *mut _,
-            // Initiall all functions are set to zero to say they need to be
+            // Initially all functions are set to zero to say they need to be
             // dynamically loaded.
             $($name: 0,)*
         };

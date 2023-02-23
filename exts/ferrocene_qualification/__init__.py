@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LicenseRef-Ferrocene
 # SPDX-FileCopyrightText: Critical Section GmbH
 
-from . import substitutions, document_id, domain
+from . import substitutions, document_id, domain, signature_page
 import string
 
 
@@ -9,10 +9,12 @@ def setup(app):
     substitutions.setup(app)
     document_id.setup(app)
     domain.setup(app)
+    signature_page.setup(app)
 
     app.connect("config-inited", validate_config)
     app.add_config_value("ferrocene_id", None, "env", [str])
     app.add_config_value("ferrocene_substitutions_path", None, "env", [str])
+    app.add_config_value("ferrocene_signed", False, "env", [str])
 
     return {
         "version": "0",

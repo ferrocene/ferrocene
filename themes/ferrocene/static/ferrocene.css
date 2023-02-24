@@ -97,6 +97,8 @@
     --numbers-width: 5.5rem;
     --numbers-fg: #747474;
 
+    --blockquote-border: #dbdbdb;
+
     --content-width: 50rem;
 
     --spec-error-fg: #f00;
@@ -635,6 +637,21 @@ figure img {
 
 figure figcaption {
     font-style: italic;
+}
+
+/*******************
+ *   Blockquotes   *
+ *******************/
+
+blockquote {
+    margin: 1em 0;
+    padding-left: 1.5em;
+    border-left: 0.3rem solid var(--blockquote-border);
+    font-style: italic;
+}
+
+blockquote code {
+    font-style: normal;
 }
 
 /**************************************************

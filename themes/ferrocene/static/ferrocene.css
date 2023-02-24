@@ -621,6 +621,22 @@ dl dd > p:last-child {
     margin-bottom: 0;
 }
 
+/***************
+ *   Figures   *
+ ***************/
+
+figure {
+    margin: 1.5em 0;
+}
+
+figure img {
+    max-width: 100%;
+}
+
+figure figcaption {
+    font-style: italic;
+}
+
 /**************************************************
  *   Ferrocene Language Specification extension   *
  **************************************************/

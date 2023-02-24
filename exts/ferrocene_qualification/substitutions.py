@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LicenseRef-Ferrocene
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 # We use substitutions across all our documents, sharing a lot of them (like
 # the name of the product). This extension sets some default substitutions, and

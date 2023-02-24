@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LicenseRef-Ferrocene
-# SPDX-FileCopyrightText: Critical Section GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 import datetime
 import json

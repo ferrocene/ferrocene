@@ -68,7 +68,8 @@
 :root {
     --text-fg: #1b1b1b;
     --link-fg: #3168b0;
-    --inline-code-bg: #f4f4f4;
+    --inline-code-bg: #fafafa;
+    --inline-code-border: #ebebeb;
     --code-block-bg: #f7f7f7;
     --focus-border: #68a4e8;
     --table-border: #dbdbdb;
@@ -238,14 +239,16 @@ pre {
 code {
     display: inline-block;
     background: var(--inline-code-bg);
-    padding: 0 0.3em;
+    padding: 0 0.2em;
     border-radius: 0.2em;
+    outline: 0.1em solid var(--inline-code-border);
 }
 
 pre code {
     background: transparent;
     padding: 0;
     border-radius: 0;
+    outline: none;
 }
 
 a:hover code {

@@ -596,6 +596,31 @@ div.page > div.admonition:first-child + section h1 {
     margin-top: 1.5em;
 }
 
+/*******************
+ *   Definitions   *
+ *******************/
+
+dl dt {
+    margin-top: 1.5em;
+    font-weight: 700;
+}
+
+dl dt:first-child {
+    margin-top: 0;
+}
+
+dl dd {
+    margin-left: 0;
+}
+
+dl dd > p:first-child {
+    margin-top: 0.25em;
+}
+
+dl dd > p:last-child {
+    margin-bottom: 0;
+}
+
 /**************************************************
  *   Ferrocene Language Specification extension   *
  **************************************************/

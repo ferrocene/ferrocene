@@ -114,6 +114,12 @@
     box-sizing: border-box;
 }
 
+html {
+    /* Ensure we always scroll to the right position, even when there is a
+     * fixed header at the top of the page */
+    scroll-padding-top: var(--header-offset);
+}
+
 body {
     font-family: 'Raleway', sans-serif;
     color: var(--text-fg);

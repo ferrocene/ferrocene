@@ -37,11 +37,6 @@ templates_path = []
 exclude_patterns = []
 
 rst_prolog = """
-.. caution::
-
-   You're reading a draft of the Ferrocene Language Specification. Some parts
-   of this document might be missing, incomplete or incorrect. Our aim is to
-   have the specification ready by the end of 2022.
 """
 
 

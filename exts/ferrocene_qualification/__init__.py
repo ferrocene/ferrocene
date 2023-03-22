@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: LicenseRef-Ferrocene
+# SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 from . import substitutions, document_id, domain, signature_page

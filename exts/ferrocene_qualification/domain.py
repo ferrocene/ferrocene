@@ -3,7 +3,6 @@
 
 from docutils import nodes
 from sphinx.directives import ObjectDescription
-from sphinx.transforms import SphinxTransform
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
 import sphinx

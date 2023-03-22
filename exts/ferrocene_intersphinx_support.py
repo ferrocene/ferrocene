@@ -41,7 +41,6 @@ class IntersphinxBuilder(Builder):
         # Python's logging module.
         sphinx.util.logging.WarningStreamHandler.emit = lambda _self, _record: None
 
-
     def build(self, *args, **kwargs):
         # Normally you're not supposed to override the build() method, as
         # Sphinx calls all the relevant overrideable methods from it.

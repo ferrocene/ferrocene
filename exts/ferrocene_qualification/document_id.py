@@ -58,10 +58,6 @@ class HashDocument(SphinxTransform):
     default_priority = 999
 
     def apply(self):
-        import time
-
-        start = time.time()
-
         hasher = Hasher()
         hasher.node(self.document)
 

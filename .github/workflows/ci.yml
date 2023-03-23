@@ -23,11 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Some Ferrocene builders require the use of Python 3.6. Use that on CI
+      # Some Ferrocene builders require the use of Python 3.9. Use that on CI
       # to make sure there are no surprises when we import into Ferrocene.
       - uses: actions/setup-python@v3
         with:
-          python-version: "3.6.x"
+          python-version: "3.9.x"
 
       - name: Build documentation and check links
         run: ./make.py --check-links

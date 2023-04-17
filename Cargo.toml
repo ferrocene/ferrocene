@@ -41,7 +41,7 @@ addr2line = { version = "0.20.0", default-features = false }
 miniz_oxide = { version = "0.7.0", default-features = false }
 
 [dependencies.object]
-version = "0.30.0"
+version = "0.31.0"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 

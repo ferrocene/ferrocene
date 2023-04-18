@@ -45,7 +45,7 @@ impl Mapping {
             let (macho, data) = find_header(data)?;
             let endian = macho.endian().ok()?;
             let obj = Object::parse(macho, endian, data)?;
-            Context::new(stash, obj, None)
+            Context::new(stash, obj, None, None)
         })
     }
 
@@ -82,7 +82,7 @@ impl Mapping {
                     return None;
                 }
                 let obj = Object::parse(macho, endian, data)?;
-                Context::new(stash, obj, None)
+                Context::new(stash, obj, None, None)
             });
             if let Some(candidate) = candidate {
                 return Some(candidate);
@@ -309,7 +309,7 @@ fn object_mapping(path: &[u8]) -> Option<Mapping> {
         let (macho, data) = find_header(data)?;
         let endian = macho.endian().ok()?;
         let obj = Object::parse(macho, endian, data)?;
-        Context::new(stash, obj, None)
+        Context::new(stash, obj, None, None)
     })
 }
 

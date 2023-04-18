@@ -105,6 +105,7 @@ impl Mapping {
 struct Context<'a> {
     dwarf: addr2line::Context<EndianSlice<'a, Endian>>,
     object: Object<'a>,
+    package: Option<gimli::DwarfPackage<EndianSlice<'a, Endian>>>,
 }
 
 impl<'data> Context<'data> {
@@ -112,6 +113,7 @@ impl<'data> Context<'data> {
         stash: &'data Stash,
         object: Object<'data>,
         sup: Option<Object<'data>>,
+        dwp: Option<Object<'data>>,
     ) -> Option<Context<'data>> {
         let mut sections = gimli::Dwarf::load(|id| -> Result<_, ()> {
             let data = object.section(stash, id.name()).unwrap_or(&[]);
@@ -129,7 +131,52 @@ impl<'data> Context<'data> {
         }
         let dwarf = addr2line::Context::from_dwarf(sections).ok()?;
 
-        Some(Context { dwarf, object })
+        let mut package = None;
+        if let Some(dwp) = dwp {
+            package = Some(
+                gimli::DwarfPackage::load(
+                    |id| -> Result<_, gimli::Error> {
+                        let data = dwp.section(stash, id.dwo_name().unwrap()).unwrap_or(&[]);
+                        Ok(EndianSlice::new(data, Endian))
+                    },
+                    EndianSlice::new(&[], Endian),
+                )
+                .ok()?,
+            );
+        }
+
+        Some(Context {
+            dwarf,
+            object,
+            package,
+        })
+    }
+
+    fn find_frames(
+        &'_ self,
+        probe: u64,
+    ) -> gimli::Result<addr2line::FrameIter<'_, EndianSlice<'data, Endian>>> {
+        use addr2line::{LookupContinuation, LookupResult};
+        use alloc::sync::Arc;
+
+        let mut l = self.dwarf.find_frames(probe);
+        loop {
+            let (load, continuation) = match l {
+                LookupResult::Output(output) => break output,
+                LookupResult::Load { load, continuation } => (load, continuation),
+            };
+
+            let mut r: Option<Arc<gimli::Dwarf<_>>> = None;
+            if let Some(dwp) = self.package.as_ref() {
+                if let Ok(Some(cu)) = dwp.find_cu(load.dwo_id, &load.parent) {
+                    r = Some(Arc::new(cu));
+                }
+            }
+
+            // TODO: support unpacked split DWARF.
+
+            l = continuation.resume(r);
+        }
     }
 }
 
@@ -358,7 +405,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
             None => return,
         };
         let mut any_frames = false;
-        if let Ok(mut frames) = cx.dwarf.find_frames(addr as u64) {
+        if let Ok(mut frames) = cx.find_frames(addr as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 any_frames = true;
                 let name = match frame.function {
@@ -374,7 +421,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         }
         if !any_frames {
             if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
-                if let Ok(mut frames) = object_cx.dwarf.find_frames(object_addr) {
+                if let Ok(mut frames) = object_cx.find_frames(object_addr) {
                     while let Ok(Some(frame)) = frames.next() {
                         any_frames = true;
                         call(Symbol::Frame {

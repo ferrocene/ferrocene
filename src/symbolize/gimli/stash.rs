@@ -10,6 +10,7 @@ use core::cell::UnsafeCell;
 pub struct Stash {
     buffers: UnsafeCell<Vec<Vec<u8>>>,
     mmap_aux: UnsafeCell<Option<Mmap>>,
+    mmap_dwp: UnsafeCell<Option<Mmap>>,
 }
 
 impl Stash {
@@ -17,6 +18,7 @@ impl Stash {
         Stash {
             buffers: UnsafeCell::new(Vec::new()),
             mmap_aux: UnsafeCell::new(None),
+            mmap_dwp: UnsafeCell::new(None),
         }
     }
 
@@ -47,6 +49,23 @@ impl Stash {
             assert!(mmap_aux.is_none());
             *mmap_aux = Some(map);
             mmap_aux.as_ref().unwrap()
+        }
+    }
+
+    /// Stores a `Mmap` for the lifetime of this `Stash`, returning a pointer
+    /// which is scoped to just this lifetime.
+    pub fn set_mmap_dwp(&self, map: Mmap) -> &[u8] {
+        // SAFETY: this is the only location for a mutable pointer to
+        // `mmap_dwp`, and this structure isn't threadsafe to shared across
+        // threads either. This also is careful to store at most one `mmap_dwp`
+        // since overwriting a previous one would invalidate the previous
+        // pointer. Given that though we can safely return a pointer to our
+        // interior-owned contents.
+        unsafe {
+            let mmap_dwp = &mut *self.mmap_dwp.get();
+            assert!(mmap_dwp.is_none());
+            *mmap_dwp = Some(map);
+            mmap_dwp.as_ref().unwrap()
         }
     }
 }

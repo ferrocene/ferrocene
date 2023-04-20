@@ -322,3 +322,11 @@ fn split_archive_path(path: &[u8]) -> Option<(&[u8], &[u8])> {
     let (archive, rest) = path.split_at(index);
     Some((archive, &rest[1..]))
 }
+
+pub(super) fn handle_split_dwarf<'data>(
+    package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    stash: &'data Stash,
+    load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
+    None
+}

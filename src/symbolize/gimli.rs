@@ -58,7 +58,7 @@ struct Mapping {
     // 'static lifetime is a lie to hack around lack of support for self-referential structs.
     cx: Context<'static>,
     _map: Mmap,
-    _stash: Stash,
+    stash: Stash,
 }
 
 enum Either<A, B> {
@@ -97,7 +97,7 @@ impl Mapping {
             // only borrow `map` and `stash` and we're preserving them below.
             cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
             _map: data,
-            _stash: stash,
+            stash: stash,
         })
     }
 }
@@ -136,7 +136,10 @@ impl<'data> Context<'data> {
             package = Some(
                 gimli::DwarfPackage::load(
                     |id| -> Result<_, gimli::Error> {
-                        let data = dwp.section(stash, id.dwo_name().unwrap()).unwrap_or(&[]);
+                        let data = id
+                            .dwo_name()
+                            .and_then(|name| dwp.section(stash, name))
+                            .unwrap_or(&[]);
                         Ok(EndianSlice::new(data, Endian))
                     },
                     EndianSlice::new(&[], Endian),
@@ -154,10 +157,10 @@ impl<'data> Context<'data> {
 
     fn find_frames(
         &'_ self,
+        stash: &'data Stash,
         probe: u64,
     ) -> gimli::Result<addr2line::FrameIter<'_, EndianSlice<'data, Endian>>> {
         use addr2line::{LookupContinuation, LookupResult};
-        use alloc::sync::Arc;
 
         let mut l = self.dwarf.find_frames(probe);
         loop {
@@ -166,16 +169,7 @@ impl<'data> Context<'data> {
                 LookupResult::Load { load, continuation } => (load, continuation),
             };
 
-            let mut r: Option<Arc<gimli::Dwarf<_>>> = None;
-            if let Some(dwp) = self.package.as_ref() {
-                if let Ok(Some(cu)) = dwp.find_cu(load.dwo_id, &load.parent) {
-                    r = Some(Arc::new(cu));
-                }
-            }
-
-            // TODO: support unpacked split DWARF.
-
-            l = continuation.resume(r);
+            l = continuation.resume(handle_split_dwarf(self.package.as_ref(), stash, load));
         }
     }
 }
@@ -189,7 +183,7 @@ fn mmap(path: &Path) -> Option<Mmap> {
 cfg_if::cfg_if! {
     if #[cfg(windows)] {
         mod coff;
-        use self::coff::Object;
+        use self::coff::{handle_split_dwarf, Object};
     } else if #[cfg(any(
         target_os = "macos",
         target_os = "ios",
@@ -197,10 +191,10 @@ cfg_if::cfg_if! {
         target_os = "watchos",
     ))] {
         mod macho;
-        use self::macho::Object;
+        use self::macho::{handle_split_dwarf, Object};
     } else {
         mod elf;
-        use self::elf::Object;
+        use self::elf::{handle_split_dwarf, Object};
     }
 }
 
@@ -349,7 +343,7 @@ impl Cache {
             .next()
     }
 
-    fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<&'a mut Context<'a>> {
+    fn mapping_for_lib<'a>(&'a mut self, lib: usize) -> Option<(&'a mut Context<'a>, &'a Stash)> {
         let idx = self.mappings.iter().position(|(idx, _)| *idx == lib);
 
         // Invariant: after this conditional completes without early returning
@@ -375,10 +369,15 @@ impl Cache {
             self.mappings.insert(0, (lib, mapping));
         }
 
-        let cx: &'a mut Context<'static> = &mut self.mappings[0].1.cx;
+        let mapping = &mut self.mappings[0].1;
+        let cx: &'a mut Context<'static> = &mut mapping.cx;
+        let stash: &'a Stash = &mapping.stash;
         // don't leak the `'static` lifetime, make sure it's scoped to just
         // ourselves
-        Some(unsafe { mem::transmute::<&'a mut Context<'static>, &'a mut Context<'a>>(cx) })
+        Some((
+            unsafe { mem::transmute::<&'a mut Context<'static>, &'a mut Context<'a>>(cx) },
+            stash,
+        ))
     }
 }
 
@@ -400,12 +399,12 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
 
         // Finally, get a cached mapping or create a new mapping for this file, and
         // evaluate the DWARF info to find the file/line/name for this address.
-        let cx = match cache.mapping_for_lib(lib) {
-            Some(cx) => cx,
+        let (cx, stash) = match cache.mapping_for_lib(lib) {
+            Some((cx, stash)) => (cx, stash),
             None => return,
         };
         let mut any_frames = false;
-        if let Ok(mut frames) = cx.find_frames(addr as u64) {
+        if let Ok(mut frames) = cx.find_frames(stash, addr as u64) {
             while let Ok(Some(frame)) = frames.next() {
                 any_frames = true;
                 let name = match frame.function {
@@ -421,7 +420,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         }
         if !any_frames {
             if let Some((object_cx, object_addr)) = cx.object.search_object_map(addr as u64) {
-                if let Ok(mut frames) = object_cx.find_frames(object_addr) {
+                if let Ok(mut frames) = object_cx.find_frames(stash, object_addr) {
                     while let Ok(Some(frame)) = frames.next() {
                         any_frames = true;
                         call(Symbol::Frame {

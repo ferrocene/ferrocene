@@ -3,7 +3,8 @@ use super::mystd::fs;
 use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
 use super::mystd::path::{Path, PathBuf};
 use super::Either;
-use super::{Context, Mapping, Stash, Vec};
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash, Vec};
+use alloc::sync::Arc;
 use core::convert::{TryFrom, TryInto};
 use core::str;
 use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
@@ -56,7 +57,7 @@ impl Mapping {
             let mut sup = None;
             if let Some((path_sup, build_id_sup)) = object.gnu_debugaltlink_path(&path) {
                 if let Some(map_sup) = super::mmap(&path_sup) {
-                    let map_sup = stash.set_mmap_aux(map_sup);
+                    let map_sup = stash.cache_mmap(map_sup);
                     if let Some(sup_) = Object::parse(map_sup) {
                         if sup_.build_id() == Some(build_id_sup) {
                             sup = Some(sup_);
@@ -84,7 +85,7 @@ impl Mapping {
             .unwrap_or_else(|| "dwp".into());
         path_dwp.set_extension(dwp_extension);
         if let Some(map_dwp) = super::mmap(&path_dwp) {
-            let map_dwp = stash.set_mmap_dwp(map_dwp);
+            let map_dwp = stash.cache_mmap(map_dwp);
             if let Some(dwp_) = Object::parse(map_dwp) {
                 return Some(dwp_);
             }
@@ -447,4 +448,54 @@ fn locate_debugaltlink(path: &Path, filename: &[u8], build_id: &[u8]) -> Option<
     }
 
     locate_build_id(build_id)
+}
+
+fn convert_path<R: gimli::Reader>(r: &R) -> Result<PathBuf, gimli::Error> {
+    let bytes = r.to_slice()?;
+    Ok(PathBuf::from(OsStr::from_bytes(&bytes)))
+}
+
+pub(super) fn handle_split_dwarf<'data>(
+    package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    stash: &'data Stash,
+    load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
+    if let Some(dwp) = package.as_ref() {
+        if let Ok(Some(cu)) = dwp.find_cu(load.dwo_id, &load.parent) {
+            return Some(Arc::new(cu));
+        }
+    }
+
+    let mut path = PathBuf::new();
+    if let Some(p) = load.comp_dir.as_ref() {
+        if let Ok(p) = convert_path(p) {
+            path.push(p);
+        }
+    }
+
+    if let Some(p) = load.path.as_ref() {
+        if let Ok(p) = convert_path(p) {
+            path.push(p);
+        }
+    }
+
+    if let Some(map_dwo) = super::mmap(&path) {
+        let map_dwo = stash.cache_mmap(map_dwo);
+        if let Some(dwo) = Object::parse(map_dwo) {
+            return gimli::Dwarf::load(|id| -> Result<_, ()> {
+                let data = id
+                    .dwo_name()
+                    .and_then(|name| dwo.section(stash, name))
+                    .unwrap_or(&[]);
+                Ok(EndianSlice::new(data, Endian))
+            })
+            .ok()
+            .map(|mut dwo_dwarf| {
+                dwo_dwarf.make_dwo(&load.parent);
+                Arc::new(dwo_dwarf)
+            });
+        }
+    }
+
+    None
 }

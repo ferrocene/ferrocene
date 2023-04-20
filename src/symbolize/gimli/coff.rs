@@ -1,4 +1,5 @@
-use super::{Context, Mapping, Path, Stash, Vec};
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
+use alloc::sync::Arc;
 use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
@@ -108,9 +109,9 @@ impl<'a> Object<'a> {
 }
 
 pub(super) fn handle_split_dwarf<'data>(
-    package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
-    stash: &'data Stash,
-    load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+    _package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    _stash: &'data Stash,
+    _load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
 ) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
     None
 }

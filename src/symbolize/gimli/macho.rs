@@ -1,4 +1,5 @@
-use super::{Box, Context, Mapping, Path, Stash, Vec};
+use super::{gimli, Box, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
+use alloc::sync::Arc;
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};
@@ -324,9 +325,9 @@ fn split_archive_path(path: &[u8]) -> Option<(&[u8], &[u8])> {
 }
 
 pub(super) fn handle_split_dwarf<'data>(
-    package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
-    stash: &'data Stash,
-    load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+    _package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    _stash: &'data Stash,
+    _load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
 ) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
     None
 }

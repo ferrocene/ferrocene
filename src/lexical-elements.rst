@@ -1010,6 +1010,10 @@ A :ds:`CharacterLiteralCharacter` is any :t:`Unicode` character except
 characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
 return), 0x27 (apostrophe), and 0x5c (reverse solidus).
 
+A :ds:`UnicodeEscape` is any :t:`Unicode` codepoint between U+00000
+and U+10FFFF, except Unicode surrogate codepoints, which exist between
+the range of U+D800 and U+DFFF, inclusive.
+
 .. rubric:: Legality Rules
 
 :dp:`fls_vag2oy4q7d4n`

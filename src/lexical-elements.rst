@@ -1002,18 +1002,17 @@ Character Literals
      | $$\\$$
      | $$\x$$ OctalDigit HexadecimalDigit
 
-   UnicodeEscape ::=
-       $$\u{$$ (HexadecimalDigit $$_$$*)1-6 $$}$$
-
 :dp:`fls_j9q9ton57rvl`
 A :ds:`CharacterLiteralCharacter` is any :t:`Unicode` character except
 characters 0x09 (horizontal tabulation), 0x0A (new line), 0x0D (carriage
 return), 0x27 (apostrophe), and 0x5c (reverse solidus).
 
 :dp:`fls_5v9gx22g5wPm`
-A :ds:`UnicodeEscape` is any :t:`Unicode` codepoint between U+00000
-and U+10FFFF, inclusive, except Unicode surrogate codepoints, which exist
-between the range of U+D800 and U+DFFF, inclusive.
+A :ds:`UnicodeEscape` starts with a ``\u{`` character, followed by 1 to 6
+instances of a :s:`HexadecimalDigit`, inclusive, followed by a ``}`` character.
+It can represent any :t:`Unicode` codepoint between U+00000 and U+10FFFF,
+inclusive, except :t:`Unicode` surrogate codepoints, which exist between
+the range of U+D800 and U+DFFF, inclusive.
 
 .. rubric:: Legality Rules
 

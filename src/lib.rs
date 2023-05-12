@@ -86,7 +86,6 @@
 //! time, but otherwise it's important to be aware of the limitations of
 //! unwinding-based backtraces!
 
-#![doc(html_root_url = "https://docs.rs/backtrace")]
 #![deny(missing_docs)]
 #![no_std]
 #![cfg_attr(

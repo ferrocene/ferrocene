@@ -468,16 +468,10 @@ pub(super) fn handle_split_dwarf<'data>(
 
     let mut path = PathBuf::new();
     if let Some(p) = load.comp_dir.as_ref() {
-        if let Ok(p) = convert_path(p) {
-            path.push(p);
-        }
+        path.push(convert_path(p).ok()?);
     }
 
-    if let Some(p) = load.path.as_ref() {
-        if let Ok(p) = convert_path(p) {
-            path.push(p);
-        }
-    }
+    path.push(convert_path(load.path.as_ref()?).ok()?);
 
     if let Some(map_dwo) = super::mmap(&path) {
         let map_dwo = stash.cache_mmap(map_dwo);

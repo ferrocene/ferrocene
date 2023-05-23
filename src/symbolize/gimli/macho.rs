@@ -1,4 +1,5 @@
-use super::{Box, Context, Mapping, Path, Stash, Vec};
+use super::{gimli, Box, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
+use alloc::sync::Arc;
 use core::convert::TryInto;
 use object::macho;
 use object::read::macho::{MachHeader, Nlist, Section, Segment as _};
@@ -45,7 +46,7 @@ impl Mapping {
             let (macho, data) = find_header(data)?;
             let endian = macho.endian().ok()?;
             let obj = Object::parse(macho, endian, data)?;
-            Context::new(stash, obj, None)
+            Context::new(stash, obj, None, None)
         })
     }
 
@@ -82,7 +83,7 @@ impl Mapping {
                     return None;
                 }
                 let obj = Object::parse(macho, endian, data)?;
-                Context::new(stash, obj, None)
+                Context::new(stash, obj, None, None)
             });
             if let Some(candidate) = candidate {
                 return Some(candidate);
@@ -309,7 +310,7 @@ fn object_mapping(path: &[u8]) -> Option<Mapping> {
         let (macho, data) = find_header(data)?;
         let endian = macho.endian().ok()?;
         let obj = Object::parse(macho, endian, data)?;
-        Context::new(stash, obj, None)
+        Context::new(stash, obj, None, None)
     })
 }
 
@@ -321,4 +322,12 @@ fn split_archive_path(path: &[u8]) -> Option<(&[u8], &[u8])> {
     let index = path.iter().position(|&x| x == b'(')?;
     let (archive, rest) = path.split_at(index);
     Some((archive, &rest[1..]))
+}
+
+pub(super) fn handle_split_dwarf<'data>(
+    _package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    _stash: &'data Stash,
+    _load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
+    None
 }

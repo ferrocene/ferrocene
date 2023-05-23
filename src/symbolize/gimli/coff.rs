@@ -1,4 +1,5 @@
-use super::{Context, Mapping, Path, Stash, Vec};
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
+use alloc::sync::Arc;
 use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
@@ -14,7 +15,7 @@ impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
         Mapping::mk(map, |data, stash| {
-            Context::new(stash, Object::parse(data)?, None)
+            Context::new(stash, Object::parse(data)?, None, None)
         })
     }
 }
@@ -105,4 +106,12 @@ impl<'a> Object<'a> {
     pub(super) fn search_object_map(&self, _addr: u64) -> Option<(&Context<'_>, u64)> {
         None
     }
+}
+
+pub(super) fn handle_split_dwarf<'data>(
+    _package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
+    _stash: &'data Stash,
+    _load: addr2line::SplitDwarfLoad<EndianSlice<'data, Endian>>,
+) -> Option<Arc<gimli::Dwarf<EndianSlice<'data, Endian>>>> {
+    None
 }

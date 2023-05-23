@@ -9,14 +9,14 @@ use core::cell::UnsafeCell;
 /// A simple arena allocator for byte buffers.
 pub struct Stash {
     buffers: UnsafeCell<Vec<Vec<u8>>>,
-    mmap_aux: UnsafeCell<Option<Mmap>>,
+    mmaps: UnsafeCell<Vec<Mmap>>,
 }
 
 impl Stash {
     pub fn new() -> Stash {
         Stash {
             buffers: UnsafeCell::new(Vec::new()),
-            mmap_aux: UnsafeCell::new(None),
+            mmaps: UnsafeCell::new(Vec::new()),
         }
     }
 
@@ -35,18 +35,16 @@ impl Stash {
 
     /// Stores a `Mmap` for the lifetime of this `Stash`, returning a pointer
     /// which is scoped to just this lifetime.
-    pub fn set_mmap_aux(&self, map: Mmap) -> &[u8] {
+    pub fn cache_mmap(&self, map: Mmap) -> &[u8] {
         // SAFETY: this is the only location for a mutable pointer to
-        // `mmap_aux`, and this structure isn't threadsafe to shared across
-        // threads either. This also is careful to store at most one `mmap_aux`
-        // since overwriting a previous one would invalidate the previous
-        // pointer. Given that though we can safely return a pointer to our
-        // interior-owned contents.
+        // `mmaps`, and this structure isn't threadsafe to shared across
+        // threads either. We also never remove elements from `self.mmaps`,
+        // so a reference to the data inside the map will live as long as
+        // `self` does.
         unsafe {
-            let mmap_aux = &mut *self.mmap_aux.get();
-            assert!(mmap_aux.is_none());
-            *mmap_aux = Some(map);
-            mmap_aux.as_ref().unwrap()
+            let mmaps = &mut *self.mmaps.get();
+            mmaps.push(map);
+            mmaps.last().unwrap()
         }
     }
 }

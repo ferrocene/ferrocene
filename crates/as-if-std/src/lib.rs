@@ -14,7 +14,8 @@ mod __internal {
     pub use std::*;
 }
 
-pub use __internal::*;
+#[allow(unused_imports)]
+use __internal::*;
 
 // This is the magical part which we hope works.
 #[path = "../../../src/lib.rs"]

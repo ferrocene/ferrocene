@@ -86,6 +86,15 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
         // Currently a no-op-- including this hook to allow for future additions.
         Ok(())
     }
+
+    /// Inserts a message in the backtrace output.
+    ///
+    /// This allows information to be inserted between frames,
+    /// and won't increment the `frame_index` unlike the `frame`
+    /// method.
+    pub fn message(&mut self, msg: &str) -> fmt::Result {
+        self.fmt.write_str(msg)
+    }
 }
 
 /// A formatter for just one frame of a backtrace.

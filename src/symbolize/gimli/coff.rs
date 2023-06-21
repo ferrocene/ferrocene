@@ -2,6 +2,7 @@ use super::{gimli, Context, Endian, EndianSlice, Mapping, Path, Stash, Vec};
 use alloc::sync::Arc;
 use core::convert::TryFrom;
 use object::pe::{ImageDosHeader, ImageSymbol};
+use object::read::coff::ImageSymbol as _;
 use object::read::pe::{ImageNtHeaders, ImageOptionalHeader, SectionTable};
 use object::read::StringTable;
 use object::LittleEndian as LE;

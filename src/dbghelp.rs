@@ -239,6 +239,23 @@ pub struct Init {
 pub fn init() -> Result<Init, ()> {
     use core::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 
+    // Helper function for generating a name that's unique to the process.
+    fn mutex_name() -> [u8; 33] {
+        let mut name: [u8; 33] = *b"Local\\RustBacktraceMutex00000000\0";
+        let mut id = unsafe { GetCurrentProcessId() };
+        // Quick and dirty no alloc u32 to hex.
+        let mut index = name.len() - 1;
+        while id > 0 {
+            name[index - 1] = match (id & 0xF) as u8 {
+                h @ 0..=9 => b'0' + h,
+                h => b'A' + (h - 10),
+            };
+            id >>= 4;
+            index -= 1;
+        }
+        name
+    }
+
     unsafe {
         // First thing we need to do is to synchronize this function. This can
         // be called concurrently from other threads or recursively within one
@@ -277,11 +294,8 @@ pub fn init() -> Result<Init, ()> {
         static LOCK: AtomicUsize = AtomicUsize::new(0);
         let mut lock = LOCK.load(SeqCst);
         if lock == 0 {
-            lock = CreateMutexA(
-                ptr::null_mut(),
-                0,
-                "Local\\RustBacktraceMutex\0".as_ptr() as _,
-            ) as usize;
+            let name = mutex_name();
+            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr().cast::<i8>()) as usize;
             if lock == 0 {
                 return Err(());
             }

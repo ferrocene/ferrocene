@@ -97,15 +97,10 @@ impl FromStr for MapsEntry {
         let pathname_str = parts.next().unwrap_or(""); // pathname may be omitted.
 
         let hex = |s| usize::from_str_radix(s, 16).map_err(|_| "Couldn't parse hex number");
-        let address = {
-            // This could use `range_str.split_once('-')` once the MSRV passes 1.52.
-            if let Some(idx) = range_str.find('-') {
-                let (start, rest) = range_str.split_at(idx);
-                let (_div, limit) = rest.split_at(1);
-                (hex(start)?, hex(limit)?)
-            } else {
-                return Err("Couldn't parse address range");
-            }
+        let address = if let Some((start, limit)) = range_str.split_once('-') {
+            (hex(start)?, hex(limit)?)
+        } else {
+            return Err("Couldn't parse address range");
         };
         let perms: [char; 4] = {
             let mut chars = perms_str.chars();
@@ -117,15 +112,10 @@ impl FromStr for MapsEntry {
             perms
         };
         let offset = hex(offset_str)?;
-        let dev = {
-            // This could use `dev_str.split_once(':')` once the MSRV passes 1.52.
-            if let Some(idx) = dev_str.find(':') {
-                let (major, rest) = dev_str.split_at(idx);
-                let (_div, minor) = rest.split_at(1);
-                (hex(major)?, hex(minor)?)
-            } else {
-                return Err("Couldn't parse dev")?;
-            }
+        let dev = if let Some((major, minor)) = dev_str.split_once(':') {
+            (hex(major)?, hex(minor)?)
+        } else {
+            return Err("Couldn't parse dev");
         };
         let inode = hex(inode_str)?;
         let pathname = pathname_str.into();

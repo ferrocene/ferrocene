@@ -219,6 +219,7 @@ cfg_if::cfg_if! {
             target_os = "fuchsia",
             target_os = "freebsd",
             target_os = "openbsd",
+            target_os = "netbsd",
             all(target_os = "android", feature = "dl_iterate_phdr"),
         ),
         not(target_env = "uclibc"),

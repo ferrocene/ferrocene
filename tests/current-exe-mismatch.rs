@@ -118,11 +118,8 @@ fn find_interpreter(me: &Path) -> Result<PathBuf, EarlyExit> {
             let line = line?;
             let line = line.trim();
             let prefix = "[Requesting program interpreter: ";
-            // This could use `line.split_once` and `suffix.rsplit_once` once the MSRV passes 1.52
-            if let Some(idx) = line.find(prefix) {
-                let (_, suffix) = line.split_at(idx + prefix.len());
-                if let Some(idx) = suffix.rfind("]") {
-                    let (found_path, _ignore_remainder) = suffix.split_at(idx);
+            if let Some((_, suffix)) = line.split_once(prefix) {
+                if let Some((found_path, _)) = suffix.rsplit_once("]") {
                     return Ok(found_path.into());
                 }
             }

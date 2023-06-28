@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libc6-dev
 
 COPY android-ndk.sh /
-RUN /android-ndk.sh x86
-ENV PATH=$PATH:/android-toolchain/bin
+RUN /android-ndk.sh
+ENV PATH=$PATH:/android-toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin
 
 # TODO: run tests in an emulator eventually
-ENV CARGO_TARGET_I686_LINUX_ANDROID_LINKER=i686-linux-android-gcc \
+ENV CARGO_TARGET_I686_LINUX_ANDROID_LINKER=i686-linux-android19-clang \
     CARGO_TARGET_I686_LINUX_ANDROID_RUNNER=echo

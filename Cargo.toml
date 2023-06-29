@@ -1,6 +1,6 @@
 [package]
 name = "backtrace"
-version = "0.3.67"
+version = "0.3.68"
 authors = ["The Rust Project Developers"]
 build = "build.rs"
 license = "MIT OR Apache-2.0"
@@ -27,7 +27,7 @@ exclude = [
 [dependencies]
 cfg-if = "1.0"
 rustc-demangle = "0.1.4"
-libc = { version = "0.2.94", default-features = false }
+libc = { version = "0.2.146", default-features = false }
 
 # Optionally enable the ability to serialize a `Backtrace`, controlled through
 # the `serialize-*` features below.
@@ -41,7 +41,7 @@ addr2line = { version = "0.20.0", default-features = false }
 miniz_oxide = { version = "0.7.0", default-features = false }
 
 [dependencies.object]
-version = "0.31.0"
+version = "0.31.1"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 

@@ -13,13 +13,13 @@ bench = false
 
 [dependencies]
 cfg-if = "1.0"
-rustc-demangle = "0.1.4"
-libc = { version = "0.2.45", default-features = false }
+rustc-demangle = "0.1.21"
+libc = { version = "0.2.146", default-features = false }
 addr2line = { version = "0.20.0", default-features = false, optional = true }
-miniz_oxide = { version = "0.4.0", default-features = false }
+miniz_oxide = { version = "0.7", default-features = false }
 
 [dependencies.object]
-version = "0.31"
+version = "0.31.1"
 default-features = false
 optional = true
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']

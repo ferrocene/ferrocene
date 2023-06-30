@@ -90,6 +90,14 @@ class RemoveInformationalMarkerNodesTransform(SphinxTransform):
             node.parent.remove(node)
 
 
+def is_document_informational(env, docname):
+    return WHOLE_PAGE in get_storage(env)[docname]
+
+
+def is_section_informational(env, docname, anchor):
+    return anchor in get_storage(env)[docname]
+
+
 def get_storage(env):
     key = "spec_informational"
     if not hasattr(env, key):

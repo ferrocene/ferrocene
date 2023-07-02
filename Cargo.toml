@@ -15,6 +15,7 @@ autoexamples = true
 autotests = true
 edition = "2021"
 exclude = ["/ci/"]
+rust-version = "1.65.0"
 
 [workspace]
 members = ['crates/cpp_smoke_test', 'crates/as-if-std']

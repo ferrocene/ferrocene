@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
     use backtrace::Backtrace;
     use libc::c_void;
+    use std::path::Path;
 
     pub type Callback = extern "C" fn(data: *mut c_void);
 
@@ -15,11 +15,12 @@ mod tests {
         unsafe { *(data as *mut Option<Backtrace>) = Some(bt) };
     }
 
-    fn assert_contains(backtrace: &Backtrace,
-                       expected_name: &str,
-                       expected_file: &str,
-                       expected_line: u32) {
-
+    fn assert_contains(
+        backtrace: &Backtrace,
+        expected_name: &str,
+        expected_file: &str,
+        expected_line: u32,
+    ) {
         let expected_file = Path::new(expected_file);
 
         for frame in backtrace.frames() {
@@ -34,7 +35,7 @@ mod tests {
             }
         }
 
-        panic!("symbol {:?} not found in backtrace: {:?}", expected_name, backtrace);
+        panic!("symbol {expected_name:?} not found in backtrace: {backtrace:?}");
     }
 
     /// Verifies that when debug info includes only lines tables the generated

@@ -150,9 +150,7 @@ fn smoke_test_frames() {
         if cfg!(debug_assertions) {
             assert!(
                 name.contains(expected_name),
-                "didn't find `{}` in `{}`",
-                expected_name,
-                name
+                "didn't find `{expected_name}` in `{name}`"
             );
         }
 
@@ -164,18 +162,13 @@ fn smoke_test_frames() {
             if !expected_file.is_empty() {
                 assert!(
                     file.ends_with(expected_file),
-                    "{:?} didn't end with {:?}",
-                    file,
-                    expected_file
+                    "{file:?} didn't end with {expected_file:?}"
                 );
             }
             if expected_line != 0 {
                 assert!(
                     line == expected_line,
-                    "bad line number on frame for `{}`: {} != {}",
-                    expected_name,
-                    line,
-                    expected_line
+                    "bad line number on frame for `{expected_name}`: {line} != {expected_line}"
                 );
             }
 
@@ -185,10 +178,7 @@ fn smoke_test_frames() {
                 if expected_col != 0 {
                     assert!(
                         col == expected_col,
-                        "bad column number on frame for `{}`: {} != {}",
-                        expected_name,
-                        col,
-                        expected_col
+                        "bad column number on frame for `{expected_name}`: {col} != {expected_col}",
                     );
                 }
             }

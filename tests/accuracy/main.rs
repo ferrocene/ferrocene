@@ -103,7 +103,7 @@ fn verify(filelines: &[Pos]) {
         loop {
             let sym = match symbols.next() {
                 Some(sym) => sym,
-                None => panic!("failed to find {}:{}", file, line),
+                None => panic!("failed to find {file}:{line}"),
             };
             if let Some(filename) = sym.filename() {
                 if let Some(lineno) = sym.lineno() {

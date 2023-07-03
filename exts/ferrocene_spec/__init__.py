@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText:  GmbH
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
 
 from . import definitions, informational, syntax_directive, std_role, paragraph_ids
+from . import items_with_rubric
 from sphinx.domains import Domain
 
 
@@ -16,6 +17,7 @@ class SpecDomain(Domain):
         "syntax": syntax_directive.SyntaxDirective,
         "informational-page": informational.build_directive("page"),
         "informational-section": informational.build_directive("section"),
+        "items-with-rubric": items_with_rubric.ItemsWithRubricDirective,
     }
     object_types = definitions.get_object_types()
     indices = {}
@@ -38,6 +40,7 @@ def setup(app):
     definitions.setup(app)
     paragraph_ids.setup(app)
     informational.setup(app)
+    items_with_rubric.setup(app)
 
     app.add_config_value(
         name="spec_std_docs_url",

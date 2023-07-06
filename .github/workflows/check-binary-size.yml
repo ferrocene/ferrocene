@@ -33,7 +33,7 @@ jobs:
         run: |
           printf "[llvm]\ndownload-ci-llvm = true\n\n[rust]\nincremental = false\n" > config.toml
           cd library/backtrace
-          git remote add kobzol https://github.com/kobzol/backtrace-rs
+          git remote add head-pr https://github.com/${{ github.event.pull_request.head.repo.full_name }}
           git fetch --all
           git checkout ${{ github.event.pull_request.base.sha }}
           cd ../..

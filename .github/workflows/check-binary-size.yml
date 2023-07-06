@@ -69,13 +69,14 @@ jobs:
             const diff_str = `${plus}${diff}B`;
 
             if (diff !== 0) {
+              const percent = (((updated / reference) - 1) * 100).toFixed(2);
               // The body is created here and wrapped so "weirdly" to avoid whitespace at the start of the lines,
               // which is interpreted as a code block by Markdown.
               const body = `Below is the size of a hello-world Rust program linked with libstd with backtrace.
 
             Original binary size: **${reference}B**
             Updated binary size: **${updated}B**
-            Difference: **${diff_str}**`;
+            Difference: **${diff_str}** (${percent}%)`;
 
               github.rest.issues.createComment({
                 issue_number: context.issue.number,

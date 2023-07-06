@@ -471,7 +471,7 @@ cfg_if::cfg_if! {
         mod dbghelp;
         use dbghelp as imp;
     } else if #[cfg(all(
-        any(unix, windows),
+        any(unix, all(windows, target_env = "gnu")),
         not(target_vendor = "uwp"),
         not(target_os = "emscripten"),
         any(not(backtrace_in_libstd), feature = "backtrace"),

@@ -15,10 +15,12 @@ bench = false
 cfg-if = "1.0"
 rustc-demangle = "0.1.21"
 libc = { version = "0.2.146", default-features = false }
-addr2line = { version = "0.21.0", default-features = false, optional = true }
-miniz_oxide = { version = "0.7", default-features = false }
 
-[dependencies.object]
+[target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies]
+miniz_oxide = { version = "0.7.0", optional = true, default-features = false }
+addr2line = { version = "0.21.0", optional = true, default-features = false }
+
+[target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies.object]
 version = "0.32.0"
 default-features = false
 optional = true
@@ -30,4 +32,4 @@ cc = "1.0.67"
 
 [features]
 default = ['backtrace']
-backtrace = ['addr2line', 'object']
+backtrace = ['addr2line', 'miniz_oxide', 'object']

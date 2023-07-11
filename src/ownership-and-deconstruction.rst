@@ -134,7 +134,7 @@ While a :t:`mutable reference` is :t:`active`, no other :t:`reference` shall
 refer to a :t:`value` that :t:`[overlap]s` with the :t:`referent` of the
 :t:`mutable reference`.
 
-.. rublic:: Undefined Behavior
+.. rubric:: Undefined Behavior
 
 :dp:`fls_eT1hnLOx6vxk`
 It is undefined behavior to access a :t:`value` through aliasing

@@ -39,8 +39,6 @@ jobs:
           cd ../..
           git add library/backtrace
           python3 x.py build library --stage 0
-          cp -r ./build/x86_64-unknown-linux-gnu/stage0/bin ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin
-          cp -r ./build/x86_64-unknown-linux-gnu/stage0/lib/*.so ./build/x86_64-unknown-linux-gnu/stage0-sysroot/lib
           ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin/rustc -O foo.rs -o binary-reference
       - name: Build binary with PR version of backtrace
         run: |
@@ -50,8 +48,6 @@ jobs:
           git add library/backtrace
           rm -rf build/x86_64-unknown-linux-gnu/stage0-std
           python3 x.py build library --stage 0
-          cp -r ./build/x86_64-unknown-linux-gnu/stage0/bin ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin
-          cp -r ./build/x86_64-unknown-linux-gnu/stage0/lib/*.so ./build/x86_64-unknown-linux-gnu/stage0-sysroot/lib
           ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin/rustc -O foo.rs -o binary-updated
       - name: Display binary size
         run: |

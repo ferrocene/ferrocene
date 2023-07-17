@@ -177,9 +177,9 @@ macro_rules! ffi {
                     assert_eq!($name as usize, winapi::$name as usize);
                     let mut x: unsafe extern "system" fn($($args)*) -> $ret;
                     x = $name;
-                    drop(x);
+                    let _ = x;
                     x = winapi::$name;
-                    drop(x);
+                    let _ = x;
                 }
             }
         )*

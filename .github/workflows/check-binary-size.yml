@@ -9,12 +9,15 @@ on:
     branches:
       - master
 
+# Responsibility is divided between two jobs "measure" and "report", so that the
+# job that builds (and potentnially runs) untrusted code does not have PR write
+# permission, and vice-versa.
 jobs:
-  test:
+  measure:
     name: Check binary size
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      contents: read
     env:
       # This cannot be used as a context variable in the 'uses' key later. If it
       # changes, update those steps too.
@@ -23,6 +26,9 @@ jobs:
       TEST_MAIN_RS: foo.rs
       BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
       HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
+    outputs:
+      binary-size-reference: ${{ steps.size-reference.outputs.test-binary-size }}
+      binary-size-updated: ${{ steps.size-updated.outputs.test-binary-size }}
     steps:
       - name: Print info
         shell: bash
@@ -81,11 +87,18 @@ jobs:
           main-rs: ${{ env.TEST_MAIN_RS }}
           rustc-dir: ${{ env.RUSTC_DIR }}
         id: size-updated
+  report:
+    name: Report binary size changes
+    runs-on: ubuntu-latest
+    needs: measure
+    permissions:
+      pull-requests: write
+    steps:
       - name: Post a PR comment if the size has changed
         uses: actions/github-script@v6
         env:
-          SIZE_REFERENCE: ${{ steps.size-reference.outputs.test-binary-size }}
-          SIZE_UPDATED: ${{ steps.size-updated.outputs.test-binary-size }}
+          SIZE_REFERENCE: ${{ needs.measure.outputs.binary-size-reference }}
+          SIZE_UPDATED: ${{ needs.measure.outputs.binary-size-updated }}
         with:
           script: |
             const reference = process.env.SIZE_REFERENCE;

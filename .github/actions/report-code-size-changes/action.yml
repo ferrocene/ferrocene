@@ -33,19 +33,34 @@ runs:
             return;
           }
 
+          const formatter = Intl.NumberFormat("en", {useGrouping: "always"});
+
+          const updated_str = formatter.format(updated);
+          const reference_str = formatter.format(reference);
+
           const diff = updated - reference;
-          const plus = diff > 0 ? "+" : "";
-          const diff_str = `${plus}${diff}B`;
+          const diff_pct = (updated / reference) - 1;
+
+          const diff_str = Intl.NumberFormat("en", {
+            useGrouping: "always",
+            sign: "exceptZero"
+          }).format(diff);
+
+          const diff_pct_str = Intl.NumberFormat("en", {
+            style: "percent",
+            useGrouping: "always",
+            sign: "exceptZero",
+            maximumFractionDigits: 2
+          }).format(diff_pct);
 
           if (diff !== 0) {
-            const percent = (((updated / reference) - 1) * 100).toFixed(2);
             // The body is created here and wrapped so "weirdly" to avoid whitespace at the start of the lines,
             // which is interpreted as a code block by Markdown.
             const body = `Below is the size of a hello-world Rust program linked with libstd with backtrace.
 
-          Original binary size: **${reference}B**
-          Updated binary size: **${updated}B**
-          Difference: **${diff_str}** (${percent}%)`;
+          Original binary size: **${reference_str} B**
+          Updated binary size: **${updated_str} B**
+          Difference: **${diff_str} B** (${diff_pct_str})`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,

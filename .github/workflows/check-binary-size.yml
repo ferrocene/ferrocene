@@ -9,13 +9,20 @@ on:
     branches:
       - master
 
+# Both the "measure" and "report" jobs need to know this.
+env:
+  SIZE_DATA_DIR: sizes
+
 # Responsibility is divided between two jobs "measure" and "report", so that the
 # job that builds (and potentnially runs) untrusted code does not have PR write
 # permission, and vice-versa.
 jobs:
   measure:
     name: Check binary size
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
     permissions:
       contents: read
     env:
@@ -26,9 +33,7 @@ jobs:
       TEST_MAIN_RS: foo.rs
       BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
       HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
-    outputs:
-      binary-size-reference: ${{ steps.size-reference.outputs.test-binary-size }}
-      binary-size-updated: ${{ steps.size-updated.outputs.test-binary-size }}
+      SIZE_DATA_FILE: size-${{ strategy.job-index }}.json
     steps:
       - name: Print info
         shell: bash
@@ -37,7 +42,7 @@ jobs:
           echo "Base SHA: $BASE_COMMIT"
       # Note: the backtrace source that's cloned here is NOT the version to be
       # patched in to std. It's cloned here to access the Github action for
-      # building the test binary and measuring its size.
+      # building and measuring the test binary.
       - name: Clone backtrace to access Github action
         uses: actions/checkout@v3
         with:
@@ -87,6 +92,45 @@ jobs:
           main-rs: ${{ env.TEST_MAIN_RS }}
           rustc-dir: ${{ env.RUSTC_DIR }}
         id: size-updated
+      # There is no built-in way to "collect" all the outputs of a set of jobs
+      # run with a matrix strategy. Subsequent jobs that have a "needs"
+      # dependency on this one will be run once, when the last matrix job is
+      # run. Appending data to a single file within a matrix is subject to race
+      # conditions. So we write the size data to files with distinct names
+      # generated from the job index.
+      - name: Write sizes to file
+        uses: actions/github-script@v6
+        env:
+          SIZE_REFERENCE: ${{ steps.size-reference.outputs.test-binary-size }}
+          SIZE_UPDATED: ${{ steps.size-updated.outputs.test-binary-size }}
+          PLATFORM: ${{ matrix.platform }}
+        with:
+          script: |
+            const fs = require("fs");
+            const path = require("path");
+
+            fs.mkdirSync(process.env.SIZE_DATA_DIR, {recursive: true});
+
+            const output_data = JSON.stringify({
+              platform: process.env.PLATFORM,
+              reference: process.env.SIZE_REFERENCE,
+              updated: process.env.SIZE_UPDATED,
+            });
+
+            // The "wx" flag makes this fail if the file exists, which we want,
+            // because there should be no collisions.
+            fs.writeFileSync(
+              path.join(process.env.SIZE_DATA_DIR, process.env.SIZE_DATA_FILE),
+              output_data,
+              { flag: "wx" },
+            );
+      - name: Upload size data
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-files
+          path: ${{ env.SIZE_DATA_DIR }}/${{ env.SIZE_DATA_FILE }}
+          retention-days: 1
+          if-no-files-found: error
   report:
     name: Report binary size changes
     runs-on: ubuntu-latest
@@ -96,8 +140,12 @@ jobs:
     steps:
       # Clone backtrace to access Github composite actions to report size.
       - uses: actions/checkout@v3
-      # Run the size reporting action.
-      - uses: ./.github/actions/report-code-size-changes
+      - name: Download size data
+        uses: actions/download-artifact@v3
         with:
-          reference: ${{ needs.measure.outputs.binary-size-reference }}
-          updated: ${{ needs.measure.outputs.binary-size-updated }}
+          name: size-files
+          path: ${{ env.SIZE_DATA_DIR }}
+      - name: Analyze and report size changes
+        uses: ./.github/actions/report-code-size-changes
+        with:
+          data-directory: ${{ env.SIZE_DATA_DIR }}

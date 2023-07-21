@@ -15,7 +15,11 @@ class ItemsWithRubricMarkerNode(nodes.Element):
     def __init__(self, rubric, location):
         super().__init__()
         self["rubric"] = rubric
-        self["location"] = location
+
+        # Make the node's source location be the same as the directive, so that
+        # later transforms can retrieve the location for error reporting.
+        self.source = location[0]
+        self.line = location[1]
 
 
 class ItemsWithRubricDirective(SphinxDirective):
@@ -29,7 +33,7 @@ class ItemsWithRubricDirective(SphinxDirective):
             )
             return []
 
-        return [ItemsWithRubricMarkerNode(self.content[0], self.get_location())]
+        return [ItemsWithRubricMarkerNode(self.content[0], self.get_source_info())]
 
 
 class RubricCollector(EnvironmentCollector):
@@ -58,14 +62,14 @@ class RubricCollector(EnvironmentCollector):
         rubric_name = rubric.astext()
 
         if not isinstance(rubric.parent, nodes.section):
-            warn("rubric is not directly inside a section", rubric["location"])
+            warn("rubric is not directly inside a section", rubric)
             return
 
         title_node = next(rubric.parent.findall(nodes.title))
         if title_node is None:
             warn(
                 "section containing this rubric doesn't have a title",
-                rubric["location"],
+                rubric,
             )
             return
         section_title = title_node.astext()
@@ -90,9 +94,12 @@ class InjectContentTransform(SphinxTransform):
     def replace_node(self, node):
         items = get_storage(self.env)[node["rubric"]]
         if not items:
-            warn(f"no items with rubric {node['rubric']}", node["location"])
+            warn(f"no items with rubric {node['rubric']}", node)
             node.parent.remove(node)
             return
+
+        # Ensure the items are in a sorted order to guarantee reproducibility.
+        items.sort(key=lambda item: (item.section_title, item.section_id))
 
         bullet_list = nodes.bullet_list()
         for item in items:

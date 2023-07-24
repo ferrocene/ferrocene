@@ -95,22 +95,22 @@ impl FromStr for MapsEntry {
         }
 
         let (perms_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
-        if range_str.is_empty() {
+        if perms_str.is_empty() {
             return Err("Couldn't find permissions");
         }
 
         let (offset_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
-        if range_str.is_empty() {
+        if offset_str.is_empty() {
             return Err("Couldn't find offset");
         }
 
         let (dev_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
-        if range_str.is_empty() {
+        if dev_str.is_empty() {
             return Err("Couldn't find dev");
         }
 
         let (inode_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
-        if range_str.is_empty() {
+        if inode_str.is_empty() {
             return Err("Couldn't find inode");
         }
 

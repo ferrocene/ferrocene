@@ -89,27 +89,27 @@ impl FromStr for MapsEntry {
     // Note that paths may contain spaces, so we can't use `str::split` for parsing (until
     // Split::remainder is stabalized #77998).
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (range_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
+        let (range_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if range_str.is_empty() {
             return Err("Couldn't find address");
         }
 
-        let (perms_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
+        let (perms_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if perms_str.is_empty() {
             return Err("Couldn't find permissions");
         }
 
-        let (offset_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
+        let (offset_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if offset_str.is_empty() {
             return Err("Couldn't find offset");
         }
 
-        let (dev_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
+        let (dev_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if dev_str.is_empty() {
             return Err("Couldn't find dev");
         }
 
-        let (inode_str, s) = s.trim().split_once(' ').unwrap_or((s, ""));
+        let (inode_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if inode_str.is_empty() {
             return Err("Couldn't find inode");
         }
@@ -276,6 +276,20 @@ fn check_maps_entry_parsing_32bit() {
             dev: (0x08, 0x01),
             inode: 0x60662705,
             pathname: "/executable/path/with  multiple-continues    spaces".into(),
+        }
+    );
+    assert_eq!(
+        "  b7c79000-b7e02000  r--p  00000000  08:01  60662705   \
+                /executable/path/starts-with-spaces"
+            .parse::<MapsEntry>()
+            .unwrap(),
+        MapsEntry {
+            address: (0xb7c79000, 0xb7e02000),
+            perms: ['r', '-', '-', 'p'],
+            offset: 0x00000000,
+            dev: (0x08, 0x01),
+            inode: 0x60662705,
+            pathname: "/executable/path/starts-with-spaces".into(),
         }
     );
 }

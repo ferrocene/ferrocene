@@ -264,4 +264,18 @@ fn check_maps_entry_parsing_32bit() {
             pathname: "/executable/path/with some spaces".into(),
         }
     );
+    assert_eq!(
+        "b7c79000-b7e02000 r--p 00000000 08:01 60662705   \
+                /executable/path/with  multiple-continues    spaces  "
+            .parse::<MapsEntry>()
+            .unwrap(),
+        MapsEntry {
+            address: (0xb7c79000, 0xb7e02000),
+            perms: ['r', '-', '-', 'p'],
+            offset: 0x00000000,
+            dev: (0x08, 0x01),
+            inode: 0x60662705,
+            pathname: "/executable/path/with  multiple-continues    spaces".into(),
+        }
+    );
 }

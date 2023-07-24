@@ -115,7 +115,7 @@ impl FromStr for MapsEntry {
         }
 
         // Pathname may be omitted in which case it will be empty
-        let pathname_str = s.trim();
+        let pathname_str = s.trim_start();
 
         let hex = |s| usize::from_str_radix(s, 16).map_err(|_| "Couldn't parse hex number");
         let address = if let Some((start, limit)) = range_str.split_once('-') {
@@ -275,7 +275,7 @@ fn check_maps_entry_parsing_32bit() {
             offset: 0x00000000,
             dev: (0x08, 0x01),
             inode: 0x60662705,
-            pathname: "/executable/path/with  multiple-continues    spaces".into(),
+            pathname: "/executable/path/with  multiple-continues    spaces  ".into(),
         }
     );
     assert_eq!(

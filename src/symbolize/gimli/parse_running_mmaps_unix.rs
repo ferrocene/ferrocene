@@ -275,7 +275,7 @@ fn check_maps_entry_parsing_32bit() {
             offset: 0x00000000,
             dev: (0x08, 0x01),
             inode: 0x60662705,
-            pathname: "/executable/path/with  multiple-continues    spaces  ".into(),
+            pathname: "/executable/path/with  multiple-continuous    spaces  ".into(),
         }
     );
     assert_eq!(

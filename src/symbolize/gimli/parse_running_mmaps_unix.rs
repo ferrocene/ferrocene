@@ -266,7 +266,7 @@ fn check_maps_entry_parsing_32bit() {
     );
     assert_eq!(
         "b7c79000-b7e02000 r--p 00000000 08:01 60662705   \
-                /executable/path/with  multiple-continues    spaces  "
+                /executable/path/with  multiple-continuous    spaces  "
             .parse::<MapsEntry>()
             .unwrap(),
         MapsEntry {

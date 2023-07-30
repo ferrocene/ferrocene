@@ -87,7 +87,7 @@ impl FromStr for MapsEntry {
     // e.g.: "35b1a21000-35b1a22000 rw-p 00000000 00:00 0"
     //
     // Note that paths may contain spaces, so we can't use `str::split` for parsing (until
-    // Split::remainder is stabalized #77998).
+    // Split::remainder is stabilized #77998).
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (range_str, s) = s.trim_start().split_once(' ').unwrap_or((s, ""));
         if range_str.is_empty() {

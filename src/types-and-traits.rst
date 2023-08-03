@@ -1478,7 +1478,8 @@ subject to :t:`C representation`, :t:`default representation`, or
 
 :dp:`fls_s9c0a0lg6c0p`
 The :t:`discriminant type` of an :t:`enum type` with :t:`C representation` is
-the :t:`type` of a :t:`C` ``enum`` for the target platform's :t:`C` :t:`ABI`.
+the corresponding :t:`c signed int type` for the target platform's :t:`C`
+:t:`ABI`.
 
 :dp:`fls_slhvf3gmqz4h`
 The :t:`discriminant type` of an :t:`enum type` with :t:`default representation`

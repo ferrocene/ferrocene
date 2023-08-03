@@ -5646,6 +5646,18 @@ representation
 :dp:`fls_69j7pq2o1iu`
 See :t:`type representation`.
 
+.. _fls_TSbBt6WzropN:
+
+representation modifier
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_BCvXL7HkXqdZ`
+A :dt:`representation modifier` is a :t:`construct` that modifies the
+:t:`alignment` of a :t:`type`.
+
+:dp:`fls_TAVyjj66UBUo`
+See :s:`Alignment`.
+
 .. _fls_x7yd6o4akrrg:
 
 reserved keyword

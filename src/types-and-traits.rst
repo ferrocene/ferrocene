@@ -1456,10 +1456,11 @@ of :t:`[field]s` of :t:`size` zero and :t:`alignment` one.
 :t:`attribute` :c:`repr` has :t:`default representation`.
 
 :dp:`fls_qkkc8x2oghst`
-:t:`Type representation` may be modified using :t:`attribute` :c:`[repr]`'s
-:c:`align` and :c:`packed` :t:`[representation modifier]s`. A
-:t:`representation modifier` shall apply only to a :t:`struct type` or a
-:t:`union type` subject to :t:`C representation` or :t:`default representation`.
+:t:`Type representation` may be specified using :t:`attribute` :c:`[repr]` and
+modified further using :t:`attribute` :c:`[repr]`'s :s:`Alignment`
+:t:`[representation modifier]s`. A :t:`representation modifier` shall apply only
+to a :t:`struct type` or a :t:`union type` subject to :t:`C representation` or
+:t:`default representation`.
 
 .. _fls_xc1hof4qbf6p:
 

@@ -134,6 +134,7 @@ Built-in Attributes
      | LinkContent
      | LinkNameContent
      | LinkSectionContent
+     | LinkOrdinalContent
      | MacroExportContent
      | MacroUseContent
      | NoBinutilsContent
@@ -1031,6 +1032,7 @@ Attribute ``link``
 
    NativeLibrayKindType ::=
        $$dylib$$
+     | $$raw-dylib$$
      | $$framework$$
      | $$static$$
 
@@ -1054,6 +1056,9 @@ The following native library kinds are available:
    * - :dp:`fls_wpqawdpevkj6`
      - dylib
      - Dynamic library
+   * - :dp:`fls_HPl6poXGiAqV`
+     - raw-dylib
+     - Dynamic library
    * - :dp:`fls_h9dfs6kzmobp`
      - framework
      - macOS framework
@@ -1069,6 +1074,15 @@ on macOS targets.
 :dp:`fls_3i9ijypnh8nx`
 If :t:`attribute` :c:`link` appears without a WebAssembly module name, then the
 WebAssembly module name defaults to ``env``.
+
+:dp:`fls_iDjcQczFQknm`
+When :t:`attribute` :c:`link` appears with ``raw-dylib`` as the native library
+kind, the supplied name must include the file extension.
+
+:dp:`fls_rcERq1PfKPJI`
+When :t:`attribute` :c:`link` appears with ``raw-dylib`` as the native library
+kind, the :t:`[external function]s` and :t:`[external static]s` of the related
+:t:`external block` shall not be subject to :t:`attribute` :c:`no_mangle`.
 
 .. rubric:: Examples
 
@@ -1098,6 +1112,11 @@ Attribute ``link_name``
 :dp:`fls_d00wni4edi8f`
 :t:`Attribute` :dc:`link_name` shall specify the linking symbol of the related
 :t:`external function` or :t:`external static`.
+
+:dp:`fls_0Athv8KFA5FO`
+:t:`Attribute` :dc:`link_name` shall not be applied to :t:`[external function]s`
+and :t:`[external static]s` that are annotated with :t:`Attribute`
+:c:`link_ordinal`.
 
 .. rubric:: Examples
 
@@ -1136,6 +1155,43 @@ symbol of the related :t:`function` or :t:`static` will be placed.
 
    #[link_section = ".example_section"]
    pub static THE_ANSWER: u32 = 42;
+
+.. _fls_Obik2w9gvhLN:
+
+Attribute ``link_ordinal``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   LinkOrdinalContent ::=
+       $$link_ordinal$$ $$($$ DecimalLiteral $$)$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_fuv29BIqcawW`
+:t:`Attribute` :c:`link_ordinal` shall apply to :t:`[external function]s` and
+:t:`[external static]s`.
+
+:dp:`fls_qh5sXG4znAXa`
+The related :t:`extern block` of the :t:`[external function]` or
+:t:`[external static]` shall be subject to :t:`attribute` :c:`link` with
+``raw-dylib`` as the native library kind.
+
+:dp:`fls_d00wni4edi8f`
+:t:`Attribute` :dc:`link_ordinal` shall specify the linking symbol of the
+related :t:`external function` or :t:`external static` by ordinal number.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   #[link(name = "lib.dll", kind = "raw-dylib")]
+   extern "system" {
+       #[link_ordinal(16)]
+       fn function();
+   }
 
 .. _fls_ch9nkxkloozv:
 

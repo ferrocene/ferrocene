@@ -65,6 +65,10 @@ The following :t:`[ABI]s` are supported:
   ``extern "C"`` - The default :t:`ABI` of :t:`C` code, referred to as
   :dt:`extern C ABI`.
 
+* :dp:`fls_LfjvLXvI6TFL`
+  ``extern "C-unwind"`` - The same as ``extern "C"`` with the addition that
+  unwinding across FFI is expected.
+
 * :dp:`fls_a2d8ltpgtvn6`
   ``extern "Rust"`` - The default :t:`ABI` of a Rust program, referred to as
   :dt:`Rust ABI`.
@@ -183,7 +187,7 @@ An :t:`external function` shall be invoked from an :t:`unsafe context`.
 An :t:`external function` shall not specify a :s:`FunctionQualifierList`.
 
 :dp:`fls_w00qi1gx204e`
-An :t:`external function` inherits the :t:`ABI` of its enclosing 
+An :t:`external function` inherits the :t:`ABI` of its enclosing
 :t:`external block`.
 
 :dp:`fls_m7tu4w4lk8v`

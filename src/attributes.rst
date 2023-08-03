@@ -1114,7 +1114,7 @@ Attribute ``link_name``
 :t:`external function` or :t:`external static`.
 
 :dp:`fls_0Athv8KFA5FO`
-:t:`Attribute` :dc:`link_name` shall not be applied to :t:`[external function]s`
+:t:`Attribute` :c:`link_name` shall not be applied to :t:`[external function]s`
 and :t:`[external static]s` that are annotated with :t:`Attribute`
 :c:`link_ordinal`.
 
@@ -1179,7 +1179,7 @@ The related :t:`extern block` of the :t:`[external function]` or
 :t:`[external static]` shall be subject to :t:`attribute` :c:`link` with
 ``raw-dylib`` as the native library kind.
 
-:dp:`fls_d00wni4edi8f`
+:dp:`fls_ASnJJiXWGlKI`
 :t:`Attribute` :dc:`link_ordinal` shall specify the linking symbol of the
 related :t:`external function` or :t:`external static` by ordinal number.
 

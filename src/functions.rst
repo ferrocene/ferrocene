@@ -68,8 +68,8 @@ A :t:`function parameter` is a :t:`construct` that yields a set of
 site of a :t:`call expression` or a :t:`method call expression`.
 
 :dp:`fls_ymeo93t4mz4`
-A :t:`self parameter` or a :t:`receiver` is a :t:`function parameter` expressed
-by :t:`keyword` ``self``.
+A :t:`self parameter` is a :t:`function parameter` expressed by :t:`keyword`
+``self``.
 
 :dp:`fls_ijbt4tgnl95n`
 A :t:`function` shall not specify a :t:`self parameter` unless it is an

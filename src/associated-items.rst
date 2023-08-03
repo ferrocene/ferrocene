@@ -137,7 +137,7 @@ is equivalent to a :t:`where clause` of the following form:
    	}
 
 :dp:`fls_oy92gzxgc273`
-A :t:`method` is an :t:`associated function` with a :t:`receiver`.
+A :t:`method` is an :t:`associated function` with a :t:`self parameter`.
 
 :dp:`fls_oHxzyaiT7Qm6`
 The :t:`visibility modifier` of an :t:`associated trait item` or :t:`associated

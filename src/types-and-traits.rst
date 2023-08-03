@@ -2702,7 +2702,7 @@ A dispatchable :t:`function` is :t:`object safe` when:
 
 * :dp:`fls_k1vc9vd8at92`
   Is a :t:`method` that does not use :c:`Self` in its :t:`function signature`
-  except in the :t:`type` of its :t:`receiver` or as the :t:`type` of a
+  except in the :t:`type` of its :t:`self parameter` or as the :t:`type` of a
   :t:`type bound predicate`, and
 
 * :dp:`fls_kqylg31sm5wv`
@@ -3144,10 +3144,10 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
    :t:`lifetime` is assigned to all :t:`elided` :t:`[output lifetime]s`.
 
 #. :dp:`fls_crb6m6b3cdwh`
-   If a :t:`function` has a :t:`receiver` of the form ``&self``, ``&mut self``,
-   or ``self: T`` where ``T`` is a :t:`type` with a :t:`lifetime`, then the
-   :t:`lifetime` of the :t:`receiver` is assigned to all :t:`elided`
-   :t:`[output lifetime]s`.
+   If a :t:`function` has a :t:`self parameter` of the form ``&self``,
+   ``&mut self``, or ``self: T`` where ``T`` is a :t:`type` with a
+   :t:`lifetime`, then the :t:`lifetime` of the :t:`self parameter` is assigned
+   to all :t:`elided` :t:`[output lifetime]s`.
 
 #. :dp:`fls_ac9tdlfwp5et`
    Otherwise this is a static error.

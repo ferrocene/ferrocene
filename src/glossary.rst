@@ -4118,7 +4118,7 @@ method
 ^^^^^^
 
 :dp:`fls_n4opbiofu9q6`
-A :dt:`method` is an :t:`associated function` with a :t:`receiver`.
+A :dt:`method` is an :t:`associated function` with a :t:`self parameter`.
 
 .. _fls_l4wel2551cw9:
 
@@ -5314,14 +5314,6 @@ recognize :t:`[escaped character]s`.
 :dp:`fls_26ol7lrnux94`
 See :s:`RawStringLiteral`.
 
-.. _fls_ar3zb025d0t7:
-
-receiver
-^^^^^^^^
-
-:dp:`fls_7043m672z8w`
-For :dt:`receiver`, see :t:`self parameter`.
-
 .. _fls_nfb3ciarl50w:
 
 receiver operand
@@ -5340,7 +5332,7 @@ receiver type
 ^^^^^^^^^^^^^
 
 :dp:`fls_vgQmMlpFas5t`
-A :dt:`receiver type` is the :t:`type` of a :t:`receiver`.
+A :dt:`receiver type` is the :t:`type` of a :t:`receiver operand`.
 
 .. _fls_nG6ikjLsCW7m:
 

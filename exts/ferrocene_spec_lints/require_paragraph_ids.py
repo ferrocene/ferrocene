@@ -15,13 +15,13 @@ def check(app, raise_error):
 
 
 def check_has_ids(node, raise_error):
-    is_paragraph = type(node) == nodes.paragraph
+    is_paragraph = nodes.paragraph is type(node)
 
-    if is_paragraph and type(node.parent) == nodes.section:
+    if is_paragraph and nodes.section is type(node.parent):
         should_have_id(node, "paragraph", raise_error)
-    elif is_paragraph and type(node.parent) == nodes.list_item:
+    elif is_paragraph and nodes.list_item is type(node.parent):
         should_have_id(node, "list item", raise_error)
-    elif is_paragraph and type(node.parent) == nodes.entry:
+    elif is_paragraph and nodes.entry is type(node.parent):
         if node.parent.parent.index(node.parent) == 0:
             should_have_id(node, "first cell of a table row", raise_error)
         else:
@@ -30,7 +30,7 @@ def check_has_ids(node, raise_error):
                 "second or later cell of a table row",
                 raise_error,
             )
-    elif type(node) == nodes.section:
+    elif nodes.section is type(node):
         if not any(name.startswith("fls_") for name in node["names"]):
             raise_error("section should have an id", location=node)
     else:
@@ -41,7 +41,7 @@ def check_has_ids(node, raise_error):
 
 
 def check_does_not_have_ids(node, raise_error):
-    if type(node) == nodes.section:
+    if nodes.section is type(node):
         if any(name.startswith("fls_") for name in node["names"]):
             raise_error("section should not have an id", location=node)
     else:
@@ -65,7 +65,7 @@ def should_not_have_id(node, what, raise_error):
 
 def is_definition(node):
     return (
-        type(node) == DefIdNode
+        DefIdNode is type(node)
         and node["def_kind"] == "paragraph"
         and node["def_id"].startswith("fls_")
     )

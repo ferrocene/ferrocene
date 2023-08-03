@@ -19,7 +19,7 @@ def recursive_check(node, raise_error):
     for child in node.children:
         recursive_check(child, raise_error)
 
-        if type(child) == nodes.section:
+        if nodes.section is type(child):
             title_node = next(child.findall(nodes.title))
             title = title_node.astext()
             if prev_title is not None and not compare_titles(prev_title, title):

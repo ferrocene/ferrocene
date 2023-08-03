@@ -139,6 +139,25 @@ is equivalent to a :t:`where clause` of the following form:
 :dp:`fls_oy92gzxgc273`
 A :t:`method` is an :t:`associated function` with a :t:`self parameter`.
 
+:dp:`fls_WXnCWfJGoQx3`
+The type of a :t:`self parameter` shall be one of the following:
+
+* :dp:`fls_OaszUw4IFobz`
+  A :t:`type specification` resolving to the :t:`implementing type` of the
+  related :t:`implementation`, or
+
+* :dp:`fls_Wd2FZRomB5yn`
+  ``&T`` where ``T`` is one of the the :t:`[type]s` listed in this enumeration,
+  or
+
+* :dp:`fls_lcEyToYIlcmf`
+  ``&mut T`` where ``T`` is one of the the :t:`[type]s` listed in this
+  enumeration, or
+
+* :dp:`fls_IKSPR7ZQMErU`
+  :std:`core::pin::Pin<T> <core::pin::Pin>` where ``T`` is one of the the :t:`[type]s` listed in this
+  enumeration.
+
 :dp:`fls_oHxzyaiT7Qm6`
 The :t:`visibility modifier` of an :t:`associated trait item` or :t:`associated
 trait implementation item` is rejected, but may still be consumed by

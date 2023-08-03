@@ -60,14 +60,14 @@ class InformationalPagesCollector(EnvironmentCollector):
                 raise RuntimeError("unknown directive kind: " + node["kind"])
 
     def process_page(self, app, storage, node):
-        if type(node.parent) != addnodes.document:
+        if addnodes.document is not type(node.parent):
             warn("informational-page must be at the top of the document", node)
             return
 
         storage[app.env.docname].add(WHOLE_PAGE)
 
     def process_section(self, app, storage, node):
-        if type(node.parent) != nodes.section:
+        if nodes.section is not type(node.parent):
             warn("informational-section must be inside a section", node)
             return
 

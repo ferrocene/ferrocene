@@ -210,7 +210,7 @@ Immutably :t:`borrowing` a :t:`value` proceeds as follows:
 
 #. :dp:`fls_8q5ly4x104ai`
    An :t:`immutable borrow` of :t:`type` ``&'a T`` is created, where
-   :t:`lifetime` ``'a`` is replaced by a :t:`lifetime inference variable`, and
+   :t:`lifetime` ``'a`` is replaced by a :t:`lifetime variable`, and
    ``T`` is replaced by the borrowed :t:`type`.
 
 #. :dp:`fls_yhchu2bpil4m`
@@ -220,18 +220,19 @@ Immutably :t:`borrowing` a :t:`value` proceeds as follows:
    The :t:`immutable borrow` is checked against other :t:`[borrow]s` and
    :t:`by move` passing within the enclosing :t:`item`.
 
-:dp:`fls_g4aefz28pl04`
-Uniquely immutably :t:`borrowing` a :t:`value` proceeds as follows:
+#. :dp:`fls_Z2n7EJiLY5CT`
+   An :t:`immutable reference` to the borrowed :t:`value` is produced.
 
-#. :dp:`fls_dpe3ubsd67ra`
-   **???**
+#. :dp:`fls_ibi9mqGeHNLp`
+   The :t:`immutable borrow` is released immediately after the last usage of its
+   related :t:`immutable reference`.
 
 :dp:`fls_f9we73i8vwq3`
 Mutably :t:`borrowing` a :t:`value` proceeds as follows:
 
 #. :dp:`fls_w5bjgaov8w60`
    A :t:`mutable borrow` of :t:`type` ``&'a mut T`` is created, where
-   :t:`lifetime` ``'a`` is replaced by a :t:`lifetime inference variable`, and
+   :t:`lifetime` ``'a`` is replaced by a :t:`lifetime variable`, and
    ``T`` is replaced by the borrowed :t:`type`.
 
 #. :dp:`fls_gbqizu6gu6kk`
@@ -241,20 +242,19 @@ Mutably :t:`borrowing` a :t:`value` proceeds as follows:
    The :t:`mutable borrow` is checked against other :t:`[borrow]s` and
    :t:`by move` passing within the enclosing :t:`item`.
 
+#. :dp:`fls_7Kzu0qXiBUCb`
+   A :t:`mutable reference` to the borrowed :t:`value` is produced.
+
+#. :dp:`fls_VDHBP4oAoqT5`
+   The :t:`mutable borrow` is released immediately after the last usage of its
+   related :t:`mutable reference`.
+
 .. rubric:: Examples
 
 .. code-block:: rust
 
    let mutable_borrow = &mut 42;
    let immutable_borrow = &42;
-
-:dp:`fls_lfgophgm7jd8`
-Variable ``x`` is captured using a unique immutable borrow.
-
-.. code-block:: rust
-
-   let x = &mut 42;
-   let unique_immutable_borrow = || *x = 1;
 
 .. _fls_77scxuomlbgs:
 
@@ -265,7 +265,7 @@ Passing Conventions
 
 :dp:`fls_fvwx2ufeyzcs`
 A :t:`passing convention` is the mechanism that defines how a :t:`value` is
-transferred between :t:`[place]s`. **place is not the appropriate term here**
+transferred between :t:`[place]s`.
 
 :dp:`fls_h2pgsij1rbms`
 A :t:`copy type` is a :t:`type` that implements the :std:`core::marker::Copy`

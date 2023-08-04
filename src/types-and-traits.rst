@@ -2186,6 +2186,10 @@ to :t:`[floating-point type]s`.
 A :t:`diverging type variable` is a :t:`type variable` that can refer to any
 :t:`type` and originates from a :t:`diverging expression`.
 
+:dp:`fls_JryXiKBIFvF3`
+A :dt:`lifetime variable` is a placeholder used during :t:`type inference` to
+stand in for an undetermined :t:`lifetime` of a :t:`type`.
+
 :dp:`fls_rvj3XspFZ1u3`
 The :t:`type inference` algorithm uses :t:`type unification` to propagate known
 :t:`[type]s` of :t:`[expression]s` and :t:`[pattern]s` across the

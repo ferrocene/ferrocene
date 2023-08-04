@@ -2123,7 +2123,7 @@ The following :t:`[expression]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_67Bf5kR5OtYW`
   The :t:`expression` of a :t:`constant parameter initializer`.
 
-* :dp:`fls_67Bf5kR5OtYW`
+* :dp:`fls_sAS3vQpkjksr`
   The :t:`expression` of a :t:`constant argument`.
 
 * :dp:`fls_Sowatt1V988J`

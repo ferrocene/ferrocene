@@ -1273,7 +1273,7 @@ Attribute ``repr``
      | $$usize$$
 
    AlignmentDecrease ::=
-       $$packed$$ $$($$ DecimalLiteral $$)$$
+       $$packed$$
 
    AlignmentIncrease ::=
        $$align$$ $$($$ DecimalLiteral $$)$$

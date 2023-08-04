@@ -1009,6 +1009,14 @@ C representation
 :dt:`C representation` is a :t:`type representation` that lays out :t:`[type]s`
 such that they are interoperable with the :t:`C` language.
 
+.. _fls_fls_J0xUy4Mcxoe6:
+
+C signed int type
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_8QIcvapJehqY`
+:dt:`C signed int type` is the `signed int` :t:`type` of the :t:`C` language.
+
 .. _fls_Egfa8tdbqllA:
 
 Call conformance
@@ -2554,7 +2562,7 @@ generic associated type
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_O4wckPZPmree`
-A :dt:`generic associated type` is an :t:`associated type` with 
+A :dt:`generic associated type` is an :t:`associated type` with
 :t:`[generic parameter]s`.
 
 .. _fls_3uFg0NK5fYQ6:
@@ -3057,7 +3065,7 @@ implied bound
 :dp:`fls_t77d8xwG1l9Q`
 An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
 is the byproduct of relations between :t:`[lifetime parameter]s` and
-:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a 
+:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
 :t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
 
 .. _fls_3lo8ygoyxxyf:
@@ -5637,6 +5645,18 @@ representation
 
 :dp:`fls_69j7pq2o1iu`
 See :t:`type representation`.
+
+.. _fls_TSbBt6WzropN:
+
+representation modifier
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_BCvXL7HkXqdZ`
+A :dt:`representation modifier` is a :t:`construct` that modifies the
+:t:`alignment` of a :t:`type`.
+
+:dp:`fls_TAVyjj66UBUo`
+See :s:`Alignment`.
 
 .. _fls_x7yd6o4akrrg:
 

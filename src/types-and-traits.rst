@@ -1456,10 +1456,11 @@ of :t:`[field]s` of :t:`size` zero and :t:`alignment` one.
 :t:`attribute` :c:`repr` has :t:`default representation`.
 
 :dp:`fls_qkkc8x2oghst`
-:t:`Type representation` may be modified using :t:`attribute` :c:`[repr]`'s
-:c:`align` and :c:`packed` :t:`[representation modifier]s`. A
-:t:`representation modifier` shall apply only to a :t:`struct type` or a
-:t:`union type` subject to :t:`C representation` or :t:`default representation`.
+:t:`Type representation` may be specified using :t:`attribute` :c:`[repr]` and
+modified further using :t:`attribute` :c:`[repr]`'s :s:`Alignment`
+:t:`[representation modifier]s`. A :t:`representation modifier` shall apply only
+to a :t:`struct type` or a :t:`union type` subject to :t:`C representation` or
+:t:`default representation`.
 
 .. _fls_xc1hof4qbf6p:
 
@@ -1478,7 +1479,8 @@ subject to :t:`C representation`, :t:`default representation`, or
 
 :dp:`fls_s9c0a0lg6c0p`
 The :t:`discriminant type` of an :t:`enum type` with :t:`C representation` is
-the :t:`type` of a :t:`C` ``enum`` for the target platform's :t:`C` :t:`ABI`.
+the corresponding :t:`c signed int type` for the target platform's :t:`C`
+:t:`ABI`.
 
 :dp:`fls_slhvf3gmqz4h`
 The :t:`discriminant type` of an :t:`enum type` with :t:`default representation`
@@ -1672,23 +1674,23 @@ proceeds as follows:
 #. :dp:`fls_pGRLTACDvzv2`
    Otherwise, if one :t:`type` ``T`` is an :t:`integer type variable`, behavior
    depends on the other :t:`type` ``U``:
- 
+
    #. :dp:`fls_fTy3FVt0fK9g`
       If ``U`` is an :t:`integer type` or an :t:`integer type variable`, the
       :t:`integer type variable` ``T`` is assigned :t:`type` ``U``.
- 
+
    #. :dp:`fls_7IsrfUoPXSZU`
       Otherwise, :t:`type unification` fails.
 
 #. :dp:`fls_Hb95CPyUpCmc`
    Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
    behavior depends on the other :t:`type` ``U``:
- 
+
    #. :dp:`fls_jEZVWlfVPevb`
       If ``U`` is an :t:`floating-point type` or an
       :t:`floating-point type variable`, the :t:`floating-point type variable`
       ``T`` is assigned :t:`type` ``U``.
- 
+
    #. :dp:`fls_nKcqFo7yIDBe`
       Otherwise, :t:`type unification` fails.
 
@@ -2152,7 +2154,7 @@ depending on the :t:`type inference root` as follows:
     If the :t:`enum type` that contains the :t:`discriminant` is subject to
     :t:`attribute` :c:`repr` that specifies a :t:`primitive representation`, the
     :t:`expected type` is the specified :t:`primitive type`.
-  
+
   * :dp:`fls_QaGKt99CmvF6`
     Otherwise, the :t:`expected type` is :c:`isize`.
 
@@ -2218,7 +2220,7 @@ inferece rules below), an :t:`obligation` requiring that ``Type`` implements
 
    #. :dp:`fls_1rnssw39aRWn`
       For each :t:`statement`, apply the :t:`statement` inference rules outlined below.
-   
+
    #. :dp:`fls_aYJaZXcOVVyk`
       For each :t:`expression`, apply the :t:`expression` inference rules outlined below.
 
@@ -2322,7 +2324,7 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
 * :dp:`fls_4ZT35povCL04`
   A :t:`match expression` is inferred as follows:
-  
+
   #. :dp:`fls_62OcWZaVN9hh`
      :t:`Unify` the :t:`[type]s` of the :t:`[pattern]s` of every :t:`match arm`,
      then infer the :t:`subject expression` with the :t:`expected type` set to
@@ -2691,20 +2693,20 @@ A dispatchable :t:`function` is :t:`object safe` when:
   It lacks :t:`[generic parameter]s`, and
 
 * :dp:`fls_k1vc9vd8at92`
-  Is a :t:`method` that does not use :c:`Self` except as the :t:`type` of its
-  :t:`receiver`, and
-
-* :dp:`fls_32nk904hwjao`
-  Is a :t:`method` whose :t:`receiver` is either ``&Self``, ``&mut Self``, or
-  ``core::pin::Pin<T>`` where T is one of the previous :t:`[receiver]s`, and
+  Is a :t:`method` that does not use :c:`Self` in its :t:`function signature`
+  except in the :t:`type` of its :t:`receiver` or as the :t:`type` of a
+  :t:`type bound predicate`, and
 
 * :dp:`fls_kqylg31sm5wv`
-  It lacks a :t:`where clause` that specifies the :std:`core::marker::Sized`
-  :t:`trait`.
+  It lacks :t:`[type bound predicate]s` with :c:`Self` as the predicate's
+  :t:`type` and :t:`[trait]s` as the predicate's :t:`[trait bound]s` other than
+  :std:`core::marker::Send`, :std:`core::marker::Sync` and
+  :std:`core::marker::Unpin`
 
 :dp:`fls_aer3gaur7avp`
-A non-dispatchable :t:`function` is :t:`object safe` when it specifies a
-:std:`core::marker::Sized` :t:`[trait bound]` for :c:`Self`.
+A :t:`function` is :t:`object safe` when it specifies a
+:std:`core::marker::Sized` :t:`[trait bound]` for :c:`Self` in a
+:t:`type bound predicate`.
 
 .. _fls_jeoas4n6su4:
 

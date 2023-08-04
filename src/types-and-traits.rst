@@ -2122,6 +2122,12 @@ The following :t:`[expression]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_KphY5qHev0Dc`
   The :t:`expression` of a :t:`discriminant initializer`.
 
+* :dp:`fls_67Bf5kR5OtYW`
+  The :t:`expression` of a :t:`constant parameter initializer`.
+
+* :dp:`fls_sAS3vQpkjksr`
+  The :t:`expression` of a :t:`constant argument`.
+
 * :dp:`fls_Sowatt1V988J`
   A :t:`function body`.
 
@@ -2254,7 +2260,9 @@ The :t:`type inference` rules for :t:`[statement]s` are as follows:
 
 * :dp:`fls_97Fxlv2KN6QF`
   :t:`[Expression statement]s` apply the :t:`expression` inference rules outlined below
-  to the related :t:`expression`, without any :t:`expected type` set.
+  to the related :t:`expression`, with the :t:`expected type` set to the
+  :t:`unit type` if the :t:`expression statement` lacks the character 0x3B
+  (semicolon), unset otherwise.
 
 * :dp:`fls_hzXqj6YT1mFr`
   :t:`[Let statement]s` are inferred as follows:

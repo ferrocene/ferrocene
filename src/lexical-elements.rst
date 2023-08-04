@@ -343,7 +343,7 @@ The following names are used when referring to :t:`[punctuator]s`:
      - Equals
    * - :dp:`fls_9gdyw71dl25`
      - ``==``
-     - Equals equals
+     - Equals equals, logical equality
    * - :dp:`fls_sp8ufz28l9w3`
      - ``!=``
      - Not equals
@@ -355,10 +355,10 @@ The following names are used when referring to :t:`[punctuator]s`:
      - Less than
    * - :dp:`fls_ui40thspgyav`
      - ``>=``
-     - Greater than equals
+     - Greater than equals, greater than or equal to
    * - :dp:`fls_h33qzachmimc`
      - ``<=``
-     - Less than equals
+     - Less than equals, less than or equal to
    * - :dp:`fls_13ud1clgdnyv`
      - ``@``
      - At
@@ -388,7 +388,7 @@ The following names are used when referring to :t:`[punctuator]s`:
      - Colon
    * - :dp:`fls_9dd9479zzq30`
      - ``::``
-     - Path separator
+     - Colon colon, path separator
    * - :dp:`fls_kwsu9d3ppv3f`
      - ``->``
      - Right arrow

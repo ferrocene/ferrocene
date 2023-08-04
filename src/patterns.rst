@@ -1169,8 +1169,8 @@ A :t:`binding` of a :t:`binding pattern` binds a matched :t:`value` to a
 
 :dp:`fls_RViC5UEZPQUV`
 A :t:`binding` with :t:`binding mode` :dt:`by value` binds the matched
-:t:`value` by :t:`[pass]ing` the :t:`value` to the :t:`place` indicated by the
-:t:`name`.
+:t:`value` by :t:`passing <passing convention>` the :t:`value` to the :t:`place`
+indicated by the :t:`name`.
 
 :dp:`fls_6lXtoxebD5It`
 A :t:`binding` with :t:`binding mode` :dt:`by reference` binds an

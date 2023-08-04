@@ -11,7 +11,8 @@ Unsafety
 .. rubric:: Legality Rules
 
 :dp:`fls_8kqo952gjhaf`
-:t:`Unsafety` is the presence of :t:`[unsafe operation]s` in program text.
+:t:`Unsafety` is the presence of :t:`[unsafe operation]s` and :t:`[unsafe trait
+implementation]s` in program text.
 
 :dp:`fls_ovn9czwnwxue`
 An :t:`unsafe operation` is an operation that may result in

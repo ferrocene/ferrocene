@@ -142,7 +142,8 @@ The :t:`type` of a :t:`static` shall implement the :std:`core::marker::Sized`
 :t:`trait`.
 
 :dp:`fls_doi4z6u55bi7`
-A :t:`mutable static` is a :t:`static` whose :t:`value` can be modified.
+A :t:`mutable static` is a :t:`static` with :t:`keyword` ``mut`` whose
+:t:`value` can be modified.
 
 :dp:`fls_74hp208pto22`
 Access to a :t:`mutable static` shall require :t:`unsafe context`.

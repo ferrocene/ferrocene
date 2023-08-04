@@ -32,9 +32,9 @@ Send and Sync
 .. rubric:: Legality Rules
 
 :dp:`fls_n5l17mlglq11`
-The Rust programming language provides synchronization facilities for
-:t:`[type]s` through the :std:`core::marker::Send` and
-:std:`core::marker::Sync` :t:`[trait]s`.
+The Rust programming language provides the :std:`core::marker::Send` and
+:std:`core::marker::Sync` :t:`[trait]s` for preventing data races at the
+:t:`type` level.
 
 :dp:`fls_2jujsujpjp3w`
 A :t:`send type` is a :t:`type` that implements the :std:`core::marker::Send`
@@ -59,8 +59,8 @@ An :t:`abstract data type` automatically implements the
 :t:`[field]s` are :t:`[sync type]s`.
 
 :dp:`fls_zgemofbs5q2x`
-A :t:`sync type` shall have :t:`[reference]s` that are safe to transfer across
-thread boundaries.
+A :t:`sync type` shall have :t:`[value]s` that are allowed to be shared across
+multiple threads at any given time without incurring data races.
 
 .. _fls_vyc9vcuamlph:
 

@@ -1236,6 +1236,10 @@ Method Resolution
 :t:`Method resolution` is a kind of :t:`resolution` that applies to a
 :t:`method call expression`.
 
+:dp:`fls_mbdS0xiNlj92`
+A :dt:`receiver type` is the :t:`type` of the :t:`receiver operand`
+of a :t:`method call expression`.
+
 :dp:`fls_z80ylmlu1f3q`
 A :dt:`candidate receiver type` is the :t:`type` of the :t:`receiver operand`
 of a :t:`method call expression` :t:`under resolution`.
@@ -1655,8 +1659,8 @@ in left-to-right order, as follows:
       :t:`path segment`.
 
    #. :dp:`fls_q0jt6n2j1hsx`
-      If such a :t:`constant` or :t:`function` exists, then the 
-      :t:`path segment` resolves to that :t:`constant` or :t:`function` and 
+      If such a :t:`constant` or :t:`function` exists, then the
+      :t:`path segment` resolves to that :t:`constant` or :t:`function` and
       :t:`path expression resolution` stops.
 
 .. _fls_1h0olpc7vbui:

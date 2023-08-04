@@ -433,7 +433,8 @@ of the :t:`type parameter`.
   :t:`[generic argument]s` are :t:`[constant parameter]s` with
   :t:`[constant parameter initializer]s`, :t:`[lifetime parameter]s` with
   either inferred :t:`[lifetime argument]s` or :t:`[elided lifetime]s`,
-  :t:`[type parameter]s` with :t:`[type parameter initializer]s`, and
+  :t:`[type parameter]s` with :t:`[type parameter initializer]s` or inferred
+  :t:`[type argument]s`, and
 
 * :dp:`fls_us7d30cbwgpz`
   All :t:`[lifetime argument]s` come first, followed by
@@ -460,18 +461,4 @@ The :t:`value` of a :t:`constant parameter` is determined as follows:
   :t:`constant parameter initializer`.
 
 * :dp:`fls_Kyar0jH9BqeW`
-  Otherwise this is a static error.
-
-:dp:`fls_sVTgsE9WwRvm`
-The :t:`value` of a :t:`type parameter` is determined as follows:
-
-* :dp:`fls_nFwbc2vX3Ar9`
-  If the :t:`type parameter` has a conformant :t:`type argument`, then the
-  :t:`value` is that of the :t:`type argument`.
-
-* :dp:`fls_MaEZ8U4uF8Hz`
-  Otherwise, if the :t:`type parameter` has a :t:`type parameter initializer`,
-  then the :t:`value` is that of the :t:`type parameter initializer`.
-
-* :dp:`fls_x98oSjktXHNN`
   Otherwise this is a static error.

@@ -3270,6 +3270,9 @@ The :t:`value` of a :t:`call expression` is determined as follows:
   ``argument_operand_tuple`` is a :t:`tuple` that wraps the
   :t:`[argument operand]s`.
 
+:dp:`fls_ZSkcro52q097`
+A :t:`call expression` is subject to :t:`call resolution`.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_ggr5i91vur0r`

@@ -3770,6 +3770,16 @@ A :dt:`lifetime parameter` is a :t:`generic parameter` for a :t:`lifetime`.
 :dp:`fls_z1wl2uiwip98`
 See :s:`LifetimeParameter`.
 
+.. _fls_joDjnHu1L9Lp:
+
+lifetime variable
+^^^^^^^^^^^^^^^^^
+
+:dp:`fls_ucZnCBWxXl6n`
+A :dt:`lifetime variable` is a placeholder used during :t:`type inference` to
+stand in for an undetermined :t:`lifetime` of a :t:`type`.
+
+
 .. _fls_8qputmx0i7ku:
 
 line

@@ -464,6 +464,24 @@ associated trait function
 An :dt:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+.. _fls_47xtji9Pk8Lw:
+
+associated trait implementation item
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_PaENehzTVgfB`
+An :dt:`associated trait implementation item` is an :t:`associated item` that
+appears within a :t:`trait implementation`.
+
+.. _fls_J946yIcmlAyV:
+
+associated trait item
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_IlRrVLm05GTf`
+An :dt:`associated trait item` is an :t:`associated item` that appears
+within a :t:`trait`.
+
 .. _fls_azz308k3ra99:
 
 associated trait type
@@ -2554,7 +2572,7 @@ generic associated type
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_O4wckPZPmree`
-A :dt:`generic associated type` is an :t:`associated type` with 
+A :dt:`generic associated type` is an :t:`associated type` with
 :t:`[generic parameter]s`.
 
 .. _fls_3uFg0NK5fYQ6:
@@ -3057,7 +3075,7 @@ implied bound
 :dp:`fls_t77d8xwG1l9Q`
 An :dt:`implied bound` is a :t:`bound` that is not expressed in syntax, but is
 is the byproduct of relations between :t:`[lifetime parameter]s` and
-:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a 
+:t:`[function parameter]s`, between :t:`[lifetime parameter]s` and a
 :t:`return type`, and between :t:`[lifetime parameter]s` and :t:`[field]s`.
 
 .. _fls_3lo8ygoyxxyf:

@@ -91,6 +91,14 @@ within an :t:`implementation`.
 :dp:`fls_bx7931x4155h`
 An :t:`associated implementation type` shall have an :t:`initialization type`.
 
+:dp:`fls_bnTcCbDvdp94`
+An :t:`associated trait item` is an :t:`associated item` that appears
+within a :t:`trait`.
+
+:dp:`fls_N3cdn4lCZ2Bf`
+An :t:`associated trait implementation item` is an :t:`associated item` that
+appears within a :t:`trait implementation`.
+
 :dp:`fls_x564isbhobym`
 An :t:`associated trait constant` is an :t:`associated constant` that appears
 within a :t:`trait`.
@@ -130,6 +138,11 @@ is equivalent to a :t:`where clause` of the following form:
 
 :dp:`fls_oy92gzxgc273`
 A :t:`method` is an :t:`associated function` with a :t:`receiver`.
+
+:dp:`fls_oHxzyaiT7Qm6`
+The :t:`visibility modifier` of an :t:`associated trait item` or :t:`associated
+trait implementation item` is rejected, but may still be consumed by
+:t:`[macro]s`.
 
 .. rubric:: Examples
 

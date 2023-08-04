@@ -107,7 +107,7 @@ default :t:`value` of its related :t:`type parameter`.
 
 :dp:`fls_3qZRBp9j26w3`
 The :t:`type` of the :t:`type parameter initializer` of a :t:`type parameter`
-shall satisfy the :t:`[type bound]s` of the :t:`type parameter`.
+shall satisfy the :t:`[trait bound]s` of the :t:`type parameter`.
 
 :dp:`fls_x4s7p2v981r6`
 A :t:`generic enum` shall use all of its :t:`[type parameter]s` and
@@ -282,7 +282,7 @@ true for the supplied :t:`[generic argument]s`.
 
 :dp:`fls_1xgw1dq60quz`
 A :t:`trivial predicate` is a :t:`where clause predicate` that does not use
-the :t:`[generic parameter]s` or :t:`[higher-ranked lifetime]s` of the related
+the :t:`[generic parameter]s` or :t:`[higher-ranked trait bound]s` of the related
 :t:`construct`.
 
 :dp:`fls_47s8i7pzb9gg`
@@ -320,7 +320,7 @@ Generic Arguments
    ConstantArgument ::=
        BlockExpression
      | $$-$$? LiteralExpression
-     | SimplePathSegment
+     | Identifier
 
    LifetimeArgument ::=
        LifetimeIndication

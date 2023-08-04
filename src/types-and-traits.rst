@@ -1672,23 +1672,23 @@ proceeds as follows:
 #. :dp:`fls_pGRLTACDvzv2`
    Otherwise, if one :t:`type` ``T`` is an :t:`integer type variable`, behavior
    depends on the other :t:`type` ``U``:
- 
+
    #. :dp:`fls_fTy3FVt0fK9g`
       If ``U`` is an :t:`integer type` or an :t:`integer type variable`, the
       :t:`integer type variable` ``T`` is assigned :t:`type` ``U``.
- 
+
    #. :dp:`fls_7IsrfUoPXSZU`
       Otherwise, :t:`type unification` fails.
 
 #. :dp:`fls_Hb95CPyUpCmc`
    Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
    behavior depends on the other :t:`type` ``U``:
- 
+
    #. :dp:`fls_jEZVWlfVPevb`
       If ``U`` is an :t:`floating-point type` or an
       :t:`floating-point type variable`, the :t:`floating-point type variable`
       ``T`` is assigned :t:`type` ``U``.
- 
+
    #. :dp:`fls_nKcqFo7yIDBe`
       Otherwise, :t:`type unification` fails.
 
@@ -2120,6 +2120,12 @@ The following :t:`[expression]s` are considered :t:`[type inference root]s`:
 * :dp:`fls_KphY5qHev0Dc`
   The :t:`expression` of a :t:`discriminant initializer`.
 
+* :dp:`fls_67Bf5kR5OtYW`
+  The :t:`expression` of a :t:`constant parameter initializer`.
+
+* :dp:`fls_67Bf5kR5OtYW`
+  The :t:`expression` of a :t:`constant argument`.
+
 * :dp:`fls_Sowatt1V988J`
   A :t:`function body`.
 
@@ -2152,7 +2158,7 @@ depending on the :t:`type inference root` as follows:
     If the :t:`enum type` that contains the :t:`discriminant` is subject to
     :t:`attribute` :c:`repr` that specifies a :t:`primitive representation`, the
     :t:`expected type` is the specified :t:`primitive type`.
-  
+
   * :dp:`fls_QaGKt99CmvF6`
     Otherwise, the :t:`expected type` is :c:`isize`.
 
@@ -2218,7 +2224,7 @@ inferece rules below), an :t:`obligation` requiring that ``Type`` implements
 
    #. :dp:`fls_1rnssw39aRWn`
       For each :t:`statement`, apply the :t:`statement` inference rules outlined below.
-   
+
    #. :dp:`fls_aYJaZXcOVVyk`
       For each :t:`expression`, apply the :t:`expression` inference rules outlined below.
 
@@ -2252,7 +2258,9 @@ The :t:`type inference` rules for :t:`[statement]s` are as follows:
 
 * :dp:`fls_97Fxlv2KN6QF`
   :t:`[Expression statement]s` apply the :t:`expression` inference rules outlined below
-  to the related :t:`expression`, without any :t:`expected type` set.
+  to the related :t:`expression`, with the :t:`expected type` set to the
+  :t:`unit type` if the :t:`expression statement` lacks the character 0x3B
+  (semicolon), unset otherwise.
 
 * :dp:`fls_hzXqj6YT1mFr`
   :t:`[Let statement]s` are inferred as follows:
@@ -2322,7 +2330,7 @@ The :t:`type inference` rules for :t:`[expression]s` are as follows:
 
 * :dp:`fls_4ZT35povCL04`
   A :t:`match expression` is inferred as follows:
-  
+
   #. :dp:`fls_62OcWZaVN9hh`
      :t:`Unify` the :t:`[type]s` of the :t:`[pattern]s` of every :t:`match arm`,
      then infer the :t:`subject expression` with the :t:`expected type` set to

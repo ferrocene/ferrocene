@@ -904,6 +904,13 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a
 :t:`unit enum variant` or a :t:`unit struct`, then the
 :t:`record struct pattern` shall have at most one :s:`RecordStructRestPattern`.
 
+.. rubric:: Undefined Behavior
+
+:dp:`fls_dHtV2BPRFVBB`
+It is undefined behavior reading the :t:`field` of a :t:`deconstructee` that is
+a :t:`union type` when the :t:`field` contains data that is invalid for the
+:t:`field`'s type.
+
 .. rubric:: Examples
 
 .. code-block:: rust

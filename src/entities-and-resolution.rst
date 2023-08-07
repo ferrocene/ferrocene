@@ -1126,7 +1126,8 @@ Resolution
 
 :dp:`fls_ho4kem1slcxg`
 :t:`Resolution` is the process of finding a unique interpretation for a
-:t:`field access expression`, a :t:`method call expression`, or a :t:`path`.
+:t:`field access expression`, a :t:`method call expression`, a :t:`call
+expression` or a :t:`path`.
 
 :dp:`fls_7le2vcdbtxbq`
 A :t:`construct` that is being resolved is said to be :t:`under resolution`.
@@ -1353,6 +1354,39 @@ proceeds as follows:
 
 :dp:`fls_jw2yv23cduu4`
 A :t:`method call expression` shall resolve to exactly one :t:`method`.
+
+.. _fls_TelBKNKodx3d:
+
+Call Resolution
+~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_ZjJ7y9r6QQMW`
+:t:`Call resolution` is a form of :t:`resolution` that applies to a
+:t:`call expression`.
+
+:dp:`fls_zBSloU2Gjv7x`
+A :dt:`candidate callee type` is the :t:`type` of the :t:`call operand`
+of a :t:`call expression` :t:`under resolution`.
+
+:dp:`fls_XBakDylF7aOG`
+A :dt:`candidate callee type chain` is a sequence of :t:`[candidate callee type]s`.
+The :t:`candidate callee type chain` starts with the :t:`type` of the :t:`call
+operand` of the:t:`call expression` :t:`under resolution`. From then on, the
+:t:`candidate callee type chain` is treated as a :t:`dereference type chain`.
+
+:dp:`fls_kzovwqIw7ghc`
+:t:`Call resolution` of a :t:`call expression` proceeds as follows:
+
+#. :dp:`fls_4iBdtE0Ji4Tf`
+   For each :t:`candidate callee type` of the
+   :t:`candidate callee type chain`
+
+   #. :dp:`fls_TWR5GIUxPcaJ`
+      If the :t:`candidate call type` is a :t:`callee type`, then the :t:`callee
+      type` of the :t:`call expression` is that :t:`candidate call type` and
+      :t:`call resolution` stops.
 
 .. _fls_i6qzga6dyaee:
 

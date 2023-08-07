@@ -805,11 +805,32 @@ Union Types
 .. rubric:: Legality Rules
 
 :dp:`fls_nskmnzq95yqm`
-A :t:`union type` is an :t:`abstract data type` similar to a :t:`C`-like union.
+A :t:`union type` is an :t:`abstract data type` that is a sum of other
+:t:`types`.
 
 :dp:`fls_1caus8ybmfli`
 The :t:`name` of a :t:`union field` shall be unique within the related
 :s:`RecordStructDeclaration`.
+
+:dp:`fls_ZJG2Q6lJYXhY`
+The :t:`type` of a :t:`union field` shall be either:
+
+* :dp:`fls_hLTnHnZuaHve`
+  A :t:`copy type`, or
+
+* :dp:`fls_JWgSckDtN13c`
+  A :t:`mutable reference type`, or
+
+* :dp:`fls_sXZknxozJxtC`
+  :std:`core::mem::ManuallyDrop`, or
+
+* :dp:`fls_vgNK01SXacnx`
+  A :t:`tuple type` whose :t:`[tuple field]s`' :t:`[type]s` are all valid
+  :t:`union field` :t:`[type]s`, or
+
+* :dp:`fls_bQhh3zHAKjSu`
+  An :t:`array type` whose :t:`element type` is a valid :t:`union field`
+  :t:`[type]s`.
 
 .. rubric:: Examples
 

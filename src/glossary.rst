@@ -7330,14 +7330,6 @@ unsafe function pointer type
 An :dt:`unsafe function pointer type` is a function pointer type subject to
 :t:`keyword` ``unsafe``.
 
-.. _fls_x4bogbrebnk:
-
-unsafe module
-^^^^^^^^^^^^^
-
-:dp:`fls_fc0ft9v4duyt`
-An :dt:`unsafe module` is a :t:`module` subject to :t:`keyword` ``unsafe``.
-
 .. _fls_e2wyfbem6vwn:
 
 unsafe operation

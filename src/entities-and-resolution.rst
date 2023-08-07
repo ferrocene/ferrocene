@@ -318,6 +318,10 @@ A :t:`simple path` is a :t:`path` whose :t:`[path segment]s` consist of either
 :t:`[identifier]s` or certain :t:`[keyword]s` as defined in the syntax rules
 above.
 
+:dp:`fls_YnUsdSM4x9eq`
+A :dt:`path prefix` is a :t:`path` with its last :t:`path segment` and
+:t:`namespace qualifier` ``::`` stripped.
+
 :dp:`fls_iuzvtr3oax1o`
 If a :t:`simple path` appears in a :t:`use import` and starts with a
 :t:`path segment` expressed as either :t:`keyword` ``crate``, :t:`keyword`
@@ -1006,36 +1010,108 @@ A :t:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 A :t:`simple path prefix` is the leading :t:`simple path` of a :t:`glob import`
 or a :t:`nesting import`.
 
+
+.. TODO simple path prefix, path prefix and import path prefix, need better terms
+
+:dp:`fls_WAA4WmohGu6T`
+An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
+:t:`use import`. An :t:`import path prefix` for a given
+:t:`simple import` or :t:`glob import` is constructed as follows:
+
+#. :dp:`fls_IPYvldMqduf4`
+   Start the :t:`import path prefix` as follows:
+
+   * :dp:`fls_MOXId37fcNPY`
+     If the :t:`use import` is a :t:`simple import` then start with the
+     :t:`[path segment]s` of the :t:`simple import`'s :t:`simple path`
+     :t:`path prefix`.
+
+   * :dp:`fls_2UyFcB6Our1v`
+     If the :t:`use import` is a :t:`glob import` then start with the
+     :t:`[path segment]s` of the :t:`glob import`'s :t:`simple path prefix`.
+
+   * :dp:`fls_irdKqoYzBM0M`
+     If the :t:`use import` is a :t:`nesting import` then start with the
+     :t:`[path segment]s` of the :t:`nesting import`'s :t:`simple path prefix`.
+
+#. :dp:`fls_gAWsqibl4GLq`
+   Then if the current :t:`use import` is the child of a :t:`nesting import`,
+   prepend the :t:`nesting import`'s :t:`simple path prefix` to the
+   :t:`import path prefix`. Repeat this step with the :t:`nesting import` as
+   the current :t:`use import`.
+
+:dp:`fls_2bkcn83smy2y`
+A :t:`simple import` is a :t:`use import` that brings all :t:`entities <entity>`
+it refers to into scope, optionally with a different
+:t:`name` than they are declared with by using a :t:`renaming`.
+
 :dp:`fls_v3a6y2ze44v2`
 A :t:`glob import` is a :t:`use import` that brings all :t:`entities <entity>`
-with :t:`public visibility` prefixed by its :t:`simple path prefix` into
-:t:`scope`.
+exported by the :t:`module` or :t:`enum` its :t:`import path prefix` resolves to
+into :t:`scope`.
+
+:dp:`fls_JHU0ersYB6eL`
+An :t:`import path prefix` shall resolve to a :t:`module` or :t:`enum`.
+
+:dp:`fls_jlNKxkuhsvX4`
+A :t:`glob import` brings :t:`[name]s` into :t:`scope` as follows:
+
+* :dp:`fls_q0KFfNALMslq`
+  If the :t:`import path prefix` resolves to a :t:`module`, bring all
+  :t:`[name]s` in the :t:`module` that are visible from the location of the
+  :t:`glob import` into :t:`scope`.
+
+* :dp:`fls_Hy17LzOFGfOp`
+  If the :t:`import path prefix` resolves to an :t:`enum`, bring the
+  :t:`[name]s` of all of the :t:`enum`'s :t:`[enum variant]s` into :t:`scope`.
+
+:dp:`fls_90hQvSh7Bfyg`
+A :dt:`simple import path` is the :t:`path` constructed by appending the last
+:t:`path segment` of a :t:`simple import`'s :t:`simple path` to the
+:t:`import path prefix`.
+
+:dp:`fls_wRmvtgQkFA6w`
+A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
+
+* :dp:`fls_kz2Gij5wHXnl`
+  If the :t:`simple path` is keyword ``self`` and:
+
+  * :dp:`fls_yY58pFpkig9o`
+    The :t:`simple import` is in a :t:`nesting import`, then bring the
+    :t:`entity` in :t:`type namespace` that the :t:`import path prefix` resolves
+    to into :t:`scope`.
+
+  * :dp:`fls_ar03D5rxjzy0`
+    Otherwise bring the containing :t:`module` into :t:`scope`.
+
+* :dp:`fls_ce73bg0BqV1X`
+  Otherwise bring all :t:`entities <entity>` that the :t:`simple import path`
+  resolves to that are visible from the location of the
+  :t:`simple import` into :t:`scope`.
+
+:dp:`fls_FILuR3pfwjw3`
+An :t:`Entity` imported by a :t:`simple import` subject to a
+:t:`renaming` is brought into :t:`scope` under the :t:`name` declared by the
+renaming.
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common
 :t:`simple path prefix` for its nested :t:`[use import]s`.
 
-:dp:`fls_2bkcn83smy2y`
-A :t:`simple import` is a :t:`use import` that binds a :t:`simple path` to a
-local :t:`name` by using an optional :t:`renaming`.
+:dp:`fls_iNUBX5fJAI1N`
+A :t:`glob import` outside of a :t:`nesting import` without a :t:`simple path
+prefix` is rejected, but may still be consumed by :t:`[macro]s`.
 
-:dp:`fls_60pldfz61amr`
-use self as foo -> imports the current module under the name "foo"
+:dp:`fls_RUiFQ17bmRLt`
+A :t:`simple import` with a :t:`simple path` with a single :t:`path segment` of
+keyword ``self`` shall be subject to the following:
 
-:dp:`fls_hipvjvigycwq`
-use blah::{self} -> imports "blah"
+* :dp:`fls_hv3xT2CjZuxc`
+  It shall either appear in a :t:`nesting import` with a non-empty
+  :t:`import path prefix`, or
 
-:dp:`fls_h5fftft9i0vo`
-use blah::{self as foo} -> imports blah under the name "foo"
-
-:dp:`fls_do95zsjb7opx`
-use blah::gah::{self} -> imports "gah"
-
-:dp:`fls_husf96ez1wao`
-use blah::{gah::{self as foo}} -> imports gah under the name "foo"
-
-:dp:`fls_39sywf5n3qfg`
-**The above imports the names in the type namespace only**
+* :dp:`fls_Pxc0Ts8Y7pfW`
+  It shall be subject to a :t:`renaming`.
 
 .. rubric:: Examples
 
@@ -1138,8 +1214,8 @@ implements the :std:`core::ops::Deref` :t:`trait`.
 
 :dp:`fls_4hulwazdu20i`
 A :t:`dereference type chain` is a sequence of :t:`[dereference type]s`. A
-:t:`dereference type chain` with an initial :t:`dereference type`. From then
-on, the :t:`dereference type chain` continues as follows:
+:t:`dereference type chain` starts with an initial :t:`dereference type`. From
+then on, the :t:`dereference type chain` continues as follows:
 
 * :dp:`fls_ptocwx5p25lj`
   If the previous :t:`dereference type` is a :t:`reference type`, then the

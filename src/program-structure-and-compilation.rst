@@ -72,11 +72,8 @@ Modules
 :dp:`fls_odd1hj3y1mgu`
 A :t:`module` is a container for zero or more :t:`[item]s`.
 
-:dp:`fls_l4ne3w8dgghv`
-An :t:`unsafe module` is a :t:`module` subject to :t:`keyword` ``unsafe``.
-
 :dp:`fls_whgv72emrm47`
-The ``unsafe`` :t:`keyword` of an :t:`unsafe module` is rejected, but may still
+The ``unsafe`` :t:`keyword` of an :t:`module` is rejected, but may still
 be consumed by :t:`[macro]s`.
 
 :dp:`fls_qypjjpcf8uwq`
@@ -187,7 +184,7 @@ Compilation Roots
 .. rubric:: Legality Rules
 
 :dp:`fls_fhiqvgdamq5`
-A :t:`crate root module` is the root of the nested :t:`module` tree of a 
+A :t:`crate root module` is the root of the nested :t:`module` tree of a
 :t:`crate`.
 
 :dp:`fls_tk8tl2e0a34`

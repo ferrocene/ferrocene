@@ -38,7 +38,8 @@ control flow paths.
 .. rubric:: Undefined Behavior
 
 :dp:`fls_6lg0oaaopc26`
-It is undefined behavior to create a :t:`value` from uninitialized memory.
+It is undefined behavior to create a :t:`value` from uninitialized memory unless
+the :t:`type` of the :t:`value` is a :t:`union type`.
 
 .. _fls_ixjc5jaamx84:
 

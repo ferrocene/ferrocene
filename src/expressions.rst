@@ -3496,9 +3496,10 @@ A :t:`field access expression` is subject to :t:`field resolution`.
 
 .. rubric:: Undefined Behavior
 
-:dp:`fls_sdnafipirg8w`
-It is undefined behavior when reading the :t:`selected field` of a
-:t:`union type` when it contains invalid data.
+:dp:`fls_Vani4665hiJY`
+It is undefined behavior reading the :t:`selected field` of a
+:t:`union type` when it contains data that is invalid for the :t:`selected
+field`'s type.
 
 .. rubric:: Dynamic Semantics
 

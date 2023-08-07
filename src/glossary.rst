@@ -5324,6 +5324,15 @@ recognize :t:`[escaped character]s`.
 :dp:`fls_26ol7lrnux94`
 See :s:`RawStringLiteral`.
 
+.. _fls_sAe1HaaVSPvP:
+
+reachable control flow path
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_IxrvzuBg8j3E`
+A :dt:`reachable control flow path` is a control flow path that can be
+taken by the execution of a program between two given points in the program.
+
 .. _fls_nfb3ciarl50w:
 
 receiver operand
@@ -7445,15 +7454,6 @@ usize
 :dp:`fls_r22k1l8799k6`
 :dc:`usize` is an :t:`unsigned integer type` with the same number of bits as
 the platform's :t:`pointer type`, and is at least 16-bits wide.
-
-.. _fls_fu203hv8juox:
-
-valid
-^^^^^
-
-:dp:`fls_jrosf84umqj0`
-A :t:`variable` is :dt:`valid` when it has been :t:`initialized` by all
-reachable control flow paths.
 
 .. _fls_A5K8aOBsI3BG:
 

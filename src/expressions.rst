@@ -670,6 +670,10 @@ An :t:`anonymous block expression` is a :t:`block expression` without a
 A :t:`tail expression` is the last :t:`expression` within a :t:`block
 expression`.
 
+:dp:`fls_DfCne8YWevLE`
+When the remaining :t:`[lexical element]s` of a :s:`StatementList` match either
+an :s:`Expression` or :s:`Statement` they are interpreted as an :s:`Expression`.
+
 :dp:`fls_u4gj2lnkq9ub`
 The :t:`type` of a :t:`block expression` is determined as follows:
 

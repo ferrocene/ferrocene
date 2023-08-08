@@ -164,9 +164,9 @@ A :t:`crate import` binds an external :t:`crate` to its :t:`crate indication`.
 :t:`Crate indication` ``self`` shall require a :t:`renaming`.
 
 :dp:`fls_siv8bl6s2ndu`
-A :t:`crate import` with a :t:`renaming` binds the external :t:`crate` to
-a local :t:`name` and introduces the local :t:`name` into the enclosing
-:t:`scope`.
+A :t:`crate import` with a :t:`renaming` with an :t:`identifier` binds the
+external :t:`crate` to a local :t:`name` and introduces the local :t:`name` into
+the enclosing :t:`scope`.
 
 :dp:`fls_7vz5n3x6jo1s`
 If a :t:`crate import` appears at the :t:`crate root module`, then the

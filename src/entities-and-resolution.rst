@@ -937,8 +937,8 @@ The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
 An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
 :t:`crate root module` the :t:`entities <entity>` of the :t:`[crate]s` imported
 using external :t:`[crate import]s`. If the external :t:`crate import` uses a
-:t:`renaming`, then the :t:`renaming` is instead added to the
-:t:`external prelude`. The core :t:`crate` is always added to the
+:t:`renaming`, then the :t:`identifier of the `:t:`renaming` is instead added to
+the :t:`external prelude`. The core :t:`crate` is always added to the
 :t:`external prelude` unless the :t:`crate root` is subject to :t:`attribute`
 ``no_core``.
 
@@ -1091,8 +1091,13 @@ A :t:`simple import` brings :t:`[name]s` into :t:`scope` as follows:
 
 :dp:`fls_FILuR3pfwjw3`
 An :t:`Entity` imported by a :t:`simple import` subject to a
-:t:`renaming` is brought into :t:`scope` under the :t:`name` declared by the
-renaming.
+:t:`renaming` with :t:`identifier` is brought into :t:`scope` under the
+:t:`name` declared by the :t:`renaming`.
+
+:dp:`fls_iQOgxNihUEr7`
+A :t:`trait` imported by a :t:`simple import` subject to a
+:t:`renaming` with character underscore ``_`` is added into :t:`scope` without
+a :t:`name`.
 
 :dp:`fls_ldr7tsuqw34s`
 A :t:`nesting import` is a :t:`use import` that provides a common

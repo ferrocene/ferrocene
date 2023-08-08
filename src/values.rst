@@ -31,10 +31,6 @@ Two :t:`[value]s` :t:`overlap` when
 * :dp:`fls_eoak5mdl6ma`
   Both :t:`[value]s` are elements of the same :t:`array`.
 
-:dp:`fls_prxicw2q70lj`
-An :t:`value` is :t:`valid` when it has been :t:`initialized` by all reachable
-control flow paths.
-
 .. rubric:: Undefined Behavior
 
 :dp:`fls_6lg0oaaopc26`
@@ -232,7 +228,7 @@ The following :t:`[construct]s` are :t:`[variable]s`:
 
 :dp:`fls_r9km9f969bu8`
 A :t:`variable` shall be used only after it has been initialized through all
-reachable control flow paths.
+:t:`[reachable control flow path]s` up to the point of its usage.
 
 .. rubric:: Dynamic Semantics
 

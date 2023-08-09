@@ -127,8 +127,9 @@ A :t:`generic parameter` is said to constrain an :t:`implementation` if the
 :t:`generic parameter` appears at least once in one of the following:
 
 * :dp:`fls_sseo6u6pbcki`
-  As a :t:`binding argument` in the :t:`[bound]s` of a :t:`type` that contains
-  another :t:`generic parameter` that constrains the :t:`implementation`, or
+  As a :t:`binding argument` in the :t:`[trait bound]s` of a :t:`type` that
+  contains another :t:`generic parameter` that constrains the
+  :t:`implementation`, or
 
 * :dp:`fls_62b59qvom3nm`
   The :t:`implemented trait`, or
@@ -261,7 +262,7 @@ Where Clauses
 
 :dp:`fls_3nqb7p5ifvio`
 A :t:`where clause` is a :t:`construct` that specifies :t:`[bound]s` on
-:t:`[lifetime parameter]s`, :t:`[type parameter]s`, and :t:`[type]s` that have
+:t:`[lifetime parameter]s` and :t:`[type]s` that have
 to hold for the :t:`construct` subject to the :t:`where clause` to be valid.
 
 :dp:`fls_fhy4rsmmbvyy`

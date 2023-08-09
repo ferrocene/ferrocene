@@ -412,6 +412,9 @@ location. The following :t:`[expression]s` are :t:`[place expression]s`:
 * :dp:`fls_ya05djl1d154`
   :t:`[Path expression]s` that resolve to a :t:`static` or a :t:`variable`.
 
+* :dp:`fls_gv4M0DE3OMwk`
+  A :t:`temporary`.
+
 :dp:`fls_ku38h562vfyl`
 A :t:`mutable place expression` is a :t:`place expression` whose memory
 location can be modified. The following :t:`[place expression]s` are
@@ -436,6 +439,10 @@ location can be modified. The following :t:`[place expression]s` are
 * :dp:`fls_bt50fltfqcvn`
   An :t:`index expression` whose :t:`type` implements the
   :std:`core::ops::IndexMut` :t:`trait`,
+
+* :dp:`fls_Sgfxp186GMvz`
+  :t:`[Parenthesized expression]s` where the :t:`operand` is a
+  :t:`mutable place expression`,
 
 * :dp:`fls_ilaqmj3hc5uv`
   A :t:`path expression` that resolves to a :t:`mutable static`,

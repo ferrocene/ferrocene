@@ -1218,6 +1218,23 @@ An :t:`inferred type` forces a tool to deduce a :t:`type`, if possible.
 
    let values: Vec<_> = (0 .. 10).collect();
 
+.. _fls_XJCXBAJHzP3D:
+
+Type Parameters
+~~~~~~~~~~~~~~~
+
+.. rubric:: Legality Rules
+
+:dp:`fls_dCIIVXGhXDlO`
+A :t:`type parameter type` is a placeholder :t:`type` of a :t:`type parameter`
+to be substituted by :t:`generic substitution`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   fn type_parameter<T>(parameter: T) {}
+
 .. _fls_98lnexk53ru4:
 
 Never Type

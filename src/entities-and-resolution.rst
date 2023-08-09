@@ -429,15 +429,22 @@ The following is a type path with a generic argument.
    impl T for S {}
 
 :dp:`fls_4s2n95h4rd1q`
-The following is a qualified type path (**isn't it a qualified path
-expression?**). The call expression invokes T's function.
+The following is a :t:`qualified path expression`. The :t:`call expression`
+invokes the :t:`associated function` of ``S``'s :t:`trait implementation` of
+:t:`trait` ``T``.
 
 .. code-block:: rust
 
    <S as T>::f();
 
 :dp:`fls_ojdntg5i79pb`
-**Add an example for qualified path expression.**
+The following is a :t:`qualified type path`. It resolves to the :t:`associated
+type` of ``S``'s :t:`trait implementation` of :t:`trait` ``T``.
+
+.. code-block:: rust
+
+   type T = <S as T>::Assoc;
+
 
 .. _fls_izl8iuhoz9e0:
 

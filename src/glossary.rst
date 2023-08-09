@@ -6950,6 +6950,15 @@ default :t:`value` of its related :t:`type parameter`.
 :dp:`fls_6Ap26AcSadP8`
 See :s:`TypeParameterInitializer`.
 
+.. _fls_HghjWqvyj5bN:
+
+type parameter type
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_EuHHxwHd0RHV`
+A :dt:`type parameter type` is a placeholder :t:`type` of a :t:`type parameter`
+to be substituted by :t:`generic substitution`.
+
 .. _fls_QDCiXh7uSj9r:
 
 type path

@@ -1509,7 +1509,7 @@ is tool-defined.
 
 :dp:`fls_u1zy06510m56`
 The :t:`discriminant type` of an :t:`enum type` with
-:t:`primitive representation` is the :t:`primitive type` specified by the
+:t:`primitive representation` is the :t:`integer type` specified by the
 :t:`primitive representation`.
 
 :dp:`fls_ryvqkcx48u74`
@@ -2180,7 +2180,7 @@ depending on the :t:`type inference root` as follows:
   * :dp:`fls_vYvumjTQH9Xg`
     If the :t:`enum type` that contains the :t:`discriminant` is subject to
     :t:`attribute` :c:`repr` that specifies a :t:`primitive representation`, the
-    :t:`expected type` is the specified :t:`primitive type`.
+    :t:`expected type` is the specified :t:`integer type`.
 
   * :dp:`fls_QaGKt99CmvF6`
     Otherwise, the :t:`expected type` is :c:`isize`.

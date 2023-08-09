@@ -2503,7 +2503,7 @@ of the :t:`modifying operand` is the :t:`trait implementation`
 The :t:`evaluation` of a :t:`compound assignment` proceeds as follows:
 
 #. :dp:`fls_4nnqz4etisgw`
-   If the :t:`[type]s` of both :t:`[operand]s` are :t:`[primitive type]s`, then
+   If the :t:`[type]s` of both :t:`[operand]s` are :t:`[integer type]s` or :t:`[floating-point type]s`, then
 
    #. :dp:`fls_a2g4hs15jpiu`
       The :t:`modifying operand` is evaluated.

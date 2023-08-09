@@ -5003,20 +5003,6 @@ primitive representation
 :dt:`Primitive representation` is the :t:`type representation` of
 :t:`[integer type]s`.
 
-.. _fls_iiww3jogl3x0:
-
-primitive type
-^^^^^^^^^^^^^^
-
-:dp:`fls_xu454ni4ls4k`
-A :dt:`primitive type` is a :t:`type` class that includes the :t:`never type`,
-:t:`[scalar type]s`, and type :c:`str`.
-
-:dp:`fls_cn82v86wr8z0`
-**Setting as a reminder, we'll have to check the usages of primitive types.
-It might be that the reference (where I assume we copied some usages from) was
-referring to a broader set of types as primitives.**
-
 .. _fls_v1u1mevpj0kj:
 
 private visibility

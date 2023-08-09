@@ -72,11 +72,8 @@ Modules
 :dp:`fls_odd1hj3y1mgu`
 A :t:`module` is a container for zero or more :t:`[item]s`.
 
-:dp:`fls_l4ne3w8dgghv`
-An :t:`unsafe module` is a :t:`module` subject to :t:`keyword` ``unsafe``.
-
 :dp:`fls_whgv72emrm47`
-The ``unsafe`` :t:`keyword` of an :t:`unsafe module` is rejected, but may still
+The ``unsafe`` :t:`keyword` of an :t:`module` is rejected, but may still
 be consumed by :t:`[macro]s`.
 
 :dp:`fls_qypjjpcf8uwq`
@@ -167,9 +164,9 @@ A :t:`crate import` binds an external :t:`crate` to its :t:`crate indication`.
 :t:`Crate indication` ``self`` shall require a :t:`renaming`.
 
 :dp:`fls_siv8bl6s2ndu`
-A :t:`crate import` with a :t:`renaming` binds the external :t:`crate` to
-a local :t:`name` and introduces the local :t:`name` into the enclosing
-:t:`scope`.
+A :t:`crate import` with a :t:`renaming` with an :t:`identifier` binds the
+external :t:`crate` to a local :t:`name` and introduces the local :t:`name` into
+the enclosing :t:`scope`.
 
 :dp:`fls_7vz5n3x6jo1s`
 If a :t:`crate import` appears at the :t:`crate root module`, then the
@@ -187,7 +184,7 @@ Compilation Roots
 .. rubric:: Legality Rules
 
 :dp:`fls_fhiqvgdamq5`
-A :t:`crate root module` is the root of the nested :t:`module` tree of a 
+A :t:`crate root module` is the root of the nested :t:`module` tree of a
 :t:`crate`.
 
 :dp:`fls_tk8tl2e0a34`

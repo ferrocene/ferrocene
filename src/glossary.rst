@@ -901,8 +901,8 @@ borrowed
 ^^^^^^^^
 
 :dp:`fls_3gnps2s95ck4`
-A memory location is :dt:`borrowed` when it acts as the :t:`operand` of a
-:t:`borrow expression`. **This explanation is not good enough.**
+A memory location is :dt:`borrowed` when a :t:`reference` pointing to it is
+:t:`active`.
 
 .. _fls_95c5cbc2jvpc:
 

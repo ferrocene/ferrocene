@@ -901,8 +901,8 @@ borrowed
 ^^^^^^^^
 
 :dp:`fls_3gnps2s95ck4`
-A memory location is :dt:`borrowed` when it acts as the :t:`operand` of a
-:t:`borrow expression`. **This explanation is not good enough.**
+A memory location is :dt:`borrowed` when a :t:`reference` pointing to it is
+:t:`active`.
 
 .. _fls_95c5cbc2jvpc:
 
@@ -5002,20 +5002,6 @@ primitive representation
 :dp:`fls_bydly1rt63pf`
 :dt:`Primitive representation` is the :t:`type representation` of
 :t:`[integer type]s`.
-
-.. _fls_iiww3jogl3x0:
-
-primitive type
-^^^^^^^^^^^^^^
-
-:dp:`fls_xu454ni4ls4k`
-A :dt:`primitive type` is a :t:`type` class that includes the :t:`never type`,
-:t:`[scalar type]s`, and type :c:`str`.
-
-:dp:`fls_cn82v86wr8z0`
-**Setting as a reminder, we'll have to check the usages of primitive types.
-It might be that the reference (where I assume we copied some usages from) was
-referring to a broader set of types as primitives.**
 
 .. _fls_v1u1mevpj0kj:
 

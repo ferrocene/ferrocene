@@ -943,11 +943,11 @@ The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
 :dp:`fls_atvnwly4w8g2`
 An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
 :t:`crate root module` the :t:`entities <entity>` of the :t:`[crate]s` imported
-using external :t:`[crate import]s`. If the external :t:`crate import` uses a
-:t:`renaming`, then the :t:`identifier of the `:t:`renaming` is instead added to
-the :t:`external prelude`. The core :t:`crate` is always added to the
-:t:`external prelude` unless the :t:`crate root` is subject to :t:`attribute`
-``no_core``.
+using external :t:`[crate import]s` or supplied by a tool. If the external
+:t:`crate import` uses a :t:`renaming`, then the :t:`identifier of the
+`:t:`renaming` is instead added to the :t:`external prelude`. The core
+:t:`crate` is always added to the :t:`external prelude` unless the :t:`crate
+root` is subject to :t:`attribute` ``no_core``.
 
 :dp:`fls_pbc7ktlu0pl`
 The :dt:`language prelude` is a :t:`prelude` that brings :t:`in scope` of every
@@ -1016,9 +1016,6 @@ A :t:`use import` brings :t:`entities <entity>` :t:`in scope` within the
 :dp:`fls_sxo1jb25pl8a`
 A :t:`simple path prefix` is the leading :t:`simple path` of a :t:`glob import`
 or a :t:`nesting import`.
-
-
-.. TODO simple path prefix, path prefix and import path prefix, need better terms
 
 :dp:`fls_WAA4WmohGu6T`
 An :dt:`import path prefix` is the fully constructed :t:`path` prefix of a
@@ -1124,6 +1121,15 @@ keyword ``self`` shall be subject to the following:
 
 * :dp:`fls_Pxc0Ts8Y7pfW`
   It shall be subject to a :t:`renaming`.
+
+:dp:`fls_wB3fVglLOqbZ`
+It is a static error if two :t:`[glob import]s` import the same :t:`name` in the
+same :t:`namespace` but refer to different :t:`entities` if the :t:`name` is
+used or :t:`shadowed <shadowing>`.
+
+:dp:`fls_zmYSBW995kSN`
+If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
+the :t:`visibility` of the :t:`name` is the most permissive one.
 
 .. rubric:: Examples
 
@@ -1601,6 +1607,10 @@ follows:
 The resolution of the rightmost :t:`path segment` is determined based on the
 :t:`path resolution` kind, where the :t:`name` of the
 :t:`candidate selected entity` is restricted by the :t:`namespace context`.
+
+:dp:`fls_bATFGtxjKq0B`
+It is a static error if the leftmost :t:`path segment` is an :t:`identifier`
+introduced by the :t:`external prelude` that is also :t:`shadowed <shadowing>`.
 
 .. _fls_bbso3c45kr9z:
 

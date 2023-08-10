@@ -1187,10 +1187,6 @@ No :t:`name` shall be :t:`shadowed` except for
 * :dp:`fls_i0gp1y38lr73`
   The :t:`[name]s` of :t:`[variable]s`.
 
-:dp:`fls_saf1meo443fq`
-(**this needs to mention about builtin type and module collisions, builtin
-attribute and macro collisions**)
-
 :dp:`fls_7pif12rt4s4s`
 A :t:`prelude name` shadows other :t:`[prelude name]s` depending on which
 :t:`[prelude]s` are included in a :t:`module`. The order of shadowing is as
@@ -1580,9 +1576,19 @@ follows:
 
   * :dp:`fls_3spnlz9tqnhj`
     Otherwise try to find a :t:`candidate direct entity` whose :t:`name`
-    matches the characters of the leftmost :t:`path segment`. What the leftmost
-    :t:`path segment` resolves to and its :t:`resolution context` is that
-    :t:`candidate direct entity`.
+    matches the characters of the leftmost :t:`path segment` and
+
+    * :dp:`fls_Mt6xKI08viYw`
+      If the :t:`candidate direct entity` is a :t:`module`, and the
+      :t:`namespace context` is the :t:`type namespace` or the :t:`path` has
+      more than one :t:`[path segment]s`, and the :t:`identifier` is a :t:`name`
+      of a :t:`type` of the :t:`language prelude`, then resolution of the
+      leftmost :t:`path segment` and its :t:`resolution context` is the
+      :t:`type` of the :t:`language prelude`.
+
+    * :dp:`fls_7hK059djudGN`
+      Otherwise the resolution of the leftmost :t:`path segment` and its
+      :t:`resolution context` is that :t:`candidate direct entity`.
 
 * :dp:`fls_lxa7uhmdoy9d`
   If the leftmost :t:`path segment` starts with a :t:`qualified type`, then

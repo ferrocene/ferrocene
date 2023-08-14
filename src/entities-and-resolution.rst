@@ -944,8 +944,8 @@ The :dt:`core prelude` is a :t:`prelude` that brings :t:`in scope` of every
 An :dt:`external prelude` is a :t:`prelude` that brings :t:`in scope` of the
 :t:`crate root module` the :t:`entities <entity>` of the :t:`[crate]s` imported
 using external :t:`[crate import]s` or supplied by a tool. If the external
-:t:`crate import` uses a :t:`renaming`, then the :t:`identifier of the
-`:t:`renaming` is instead added to the :t:`external prelude`. The core
+:t:`crate import` uses a :t:`renaming`, then the :t:`identifier` of the
+:t:`renaming` is instead added to the :t:`external prelude`. The core
 :t:`crate` is always added to the :t:`external prelude` unless the :t:`crate
 root` is subject to :t:`attribute` ``no_core``.
 
@@ -1124,8 +1124,8 @@ keyword ``self`` shall be subject to the following:
 
 :dp:`fls_wB3fVglLOqbZ`
 It is a static error if two :t:`[glob import]s` import the same :t:`name` in the
-same :t:`namespace` but refer to different :t:`entities` if the :t:`name` is
-used or :t:`shadowed <shadowing>`.
+same :t:`namespace` but refer to different :t:`entities <entity>` if the
+:t:`name` is used or :t:`shadowed <shadowing>`.
 
 :dp:`fls_zmYSBW995kSN`
 If two :t:`[glob import]s` import the same :t:`entity` under the same :t:`name`,
@@ -1474,8 +1474,8 @@ operand` of the:t:`call expression` :t:`under resolution`. From then on, the
    :t:`candidate callee type chain`
 
    #. :dp:`fls_TWR5GIUxPcaJ`
-      If the :t:`candidate call type` is a :t:`callee type`, then the :t:`callee
-      type` of the :t:`call expression` is that :t:`candidate call type` and
+      If the :t:`candidate callee type` is a :t:`callee type`, then the :t:`callee
+      type` of the :t:`call expression` is that :t:`candidate callee type` and
       :t:`call resolution` stops.
 
 .. _fls_i6qzga6dyaee:

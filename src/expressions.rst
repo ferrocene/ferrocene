@@ -260,7 +260,7 @@ involve :t:`[type]s` that require :t:`destruction`:
 
 * :dp:`fls_e0a1e8ddph7`
   :t:`[Type cast expression]s` that are not :t:`[pointer-to-address cast]s`,
-  :t:`[function-pointer-to-address cast]s`, and :t:`[unsized cast]s` that
+  :t:`[function-pointer-to-address cast]s`, and :t:`[unsized coercion]s` that
   involve a :t:`trait object type`,
 
 * :dp:`fls_zcuzhw7qkzkr`
@@ -2053,12 +2053,16 @@ A :t:`type cast expression` with the following characteristics performs a
 * :dp:`fls_133j6xw8k4qe`
   An :t:`operand` of a :t:`function pointer type` and a :t:`target type`
   ``*const V`` or ``*mut V`` where ``V`` implements the
-  :std:`core::marker::Sized` :t:`trait` perform function-pointer-to-pointer
-  cast.
+  :std:`core::marker::Sized` :t:`trait` perform
+  :dt:`function-pointer-to-pointer cast`.
 
 * :dp:`fls_bhw2j9wjpf2x`
   An :t:`operand` of a :t:`function pointer type` and a target :t:`integer type`
-  perform function-pointer-to-address cast.
+  perform :t:`function-pointer-to-address` cast. A
+  :dt:`function-pointer-to-address cast` produces an integer that represents the
+  machine address of the referenced :t:`function`. If the :t:`integer type` is
+  smaller than the size of the :t:`function pointer type`, the address is
+  truncated.
 
 :dp:`fls_3ww5gbk9w4ys`
 A :t:`cast` is legal when it either performs :t:`type coercion` or is a
@@ -4924,7 +4928,7 @@ the :t:`capturing expression` and it is defined outside of the
 :t:`Capture mode` is the mechanism by which a :t:`capture target` is captured.
 
 :dp:`fls_O6WYL8AUyPje`
-A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by copy capture`
+A :t:`captured` :t:`capture target` with :t:`capture mode` :dt:`by value capture`
 :t:`passes <passing convention>` the :t:`value` of the :t:`capture target` into
 the :t:`capturing environment`.
 

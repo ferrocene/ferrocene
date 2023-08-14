@@ -1070,6 +1070,16 @@ A :dt:`call operand` is the :t:`function` being invoked or the
 :dp:`fls_w6wu4wi6srjj`
 See :s:`CallOperand`.
 
+.. _fls_zSh4enFjxeaN:
+
+call resolution
+^^^^^^^^^^^^^^^
+
+:dp:`fls_fS1ZjGGypvbn`
+:dt:`Call resolution` is a kind of :t:`resolution` that applies to a
+:t:`call expression`.
+
+
 .. _fls_AK8mL1LeftO0:
 
 call site hygiene

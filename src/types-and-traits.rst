@@ -1348,7 +1348,7 @@ and always a power of two. A :t:`value` of :t:`alignment` ``N`` is stored at an
 address that is a multiple of ``N``.
 
 :dp:`fls_1pbwigq6f3ha`
-The :t:`size` of a :t:`value` is the offset in bytes between successive elements
+The :t:`size` of a :t:`type` is the offset in bytes between successive elements
 in :t:`array type` ``[T, N]`` where ``T`` is the :t:`type` of the :t:`value`,
 including any padding for :t:`alignment`. :t:`Size` is a multiple of the
 :t:`alignment`.
@@ -1415,6 +1415,10 @@ For a :t:`closure type`, the :t:`layout` is tool-defined.
 :dp:`fls_18ke90udyp67`
 For a :t:`thin pointer`, the :t:`size` and :t:`alignment` are those of :t:`type`
 :c:`usize`.
+
+:dp:`fls_nrqG8i3fmpm4`
+For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of
+a :c:`thin pointer`.
 
 :dp:`fls_e5hivr6m5s3h`
 For a :t:`fat pointer`, the :t:`size` and :t:`alignment` are tool-defined, but

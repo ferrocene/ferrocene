@@ -83,7 +83,8 @@ impl<'a, 'b> BacktraceFmt<'a, 'b> {
     /// This is currently a no-op but is added for future compatibility with
     /// backtrace formats.
     pub fn finish(&mut self) -> fmt::Result {
-        // Currently a no-op-- including this hook to allow for future additions.
+        #[cfg(target_os = "fuchsia")]
+        fuchsia::finish_context(self.fmt)?;
         Ok(())
     }
 

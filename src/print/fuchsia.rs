@@ -425,7 +425,7 @@ impl DsoPrinter<'_, '_> {
 
 /// This function prints the Fuchsia symbolizer markup for all information contained in a DSO.
 pub fn print_dso_context(out: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    out.write_str("{{{reset}}}\n")?;
+    out.write_str("{{{reset:begin}}}\n")?;
     let mut visitor = DsoPrinter {
         writer: out,
         module_count: 0,
@@ -433,4 +433,9 @@ pub fn print_dso_context(out: &mut core::fmt::Formatter<'_>) -> core::fmt::Resul
     };
     for_each_dso(&mut visitor);
     visitor.error
+}
+
+/// This function prints the Fuchsia symbolizer markup to end the backtrace.
+pub fn finish_context(out: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    out.write_str("{{{reset:end}}}\n")
 }

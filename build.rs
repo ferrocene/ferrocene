@@ -1,8 +1,10 @@
 extern crate cc;
 
 use std::env;
+use std::path::Path;
 
-fn main() {
+// Must be public so the build script of `std` can call it.
+pub fn main() {
     match env::var("CARGO_CFG_TARGET_OS").unwrap_or_default().as_str() {
         "android" => build_android(),
         _ => {}
@@ -10,7 +12,13 @@ fn main() {
 }
 
 fn build_android() {
-    let expansion = match cc::Build::new().file("src/android-api.c").try_expand() {
+    // Resolve `src/android-api.c` relative to this file.
+    // Required to support calling this from the `std` build script.
+    let android_api_c = Path::new(file!())
+        .parent()
+        .unwrap()
+        .join("src/android-api.c");
+    let expansion = match cc::Build::new().file(android_api_c).try_expand() {
         Ok(result) => result,
         Err(e) => {
             println!("failed to run C compiler: {}", e);

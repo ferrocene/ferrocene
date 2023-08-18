@@ -24,6 +24,10 @@ default-features = false
 optional = true
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
 
+[build-dependencies]
+# Dependency of the `backtrace` crate
+cc = "1.0.67"
+
 [features]
 default = ['backtrace']
 backtrace = ['addr2line', 'object']

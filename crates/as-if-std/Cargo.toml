@@ -15,11 +15,11 @@ bench = false
 cfg-if = "1.0"
 rustc-demangle = "0.1.21"
 libc = { version = "0.2.146", default-features = false }
-addr2line = { version = "0.20.0", default-features = false, optional = true }
+addr2line = { version = "0.21.0", default-features = false, optional = true }
 miniz_oxide = { version = "0.7", default-features = false }
 
 [dependencies.object]
-version = "0.31.1"
+version = "0.32.0"
 default-features = false
 optional = true
 features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']

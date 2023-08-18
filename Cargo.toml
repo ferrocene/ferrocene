@@ -14,6 +14,7 @@ A library to acquire a stack trace (backtrace) at runtime in a Rust program.
 autoexamples = true
 autotests = true
 edition = "2018"
+exclude = ["/ci/"]
 
 [workspace]
 members = ['crates/cpp_smoke_test', 'crates/as-if-std']

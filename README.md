@@ -55,6 +55,20 @@ fn main() {
 }
 ```
 
+# Supported Rust Versions
+
+The `backtrace` crate is a core component of the standard library, and must
+at times keep up with the evolution of various platforms in order to serve
+the standard library's needs. This often means using recent libraries
+that provide unwinding and symbolication for various platforms.
+Thus `backtrace` is likely to use recent Rust features or depend on a library
+which itself uses them. Its minimum supported Rust version, by policy, is
+within a few versions of current stable, approximately "stable - 2".
+
+This policy takes precedence over any Rust version stated anywhere else:
+the Cargo.toml `rust-version` may reflect what actually builds in CI instead.
+It is not a guarantee the version remains as-is from release to release.
+
 # License
 
 This project is licensed under either of

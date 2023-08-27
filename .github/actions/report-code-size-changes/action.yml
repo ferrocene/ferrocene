@@ -1,0 +1,56 @@
+# Github composite action to report on code size changes
+name: Report binary size changes on PR
+description: |
+  Report on code size changes resulting from a PR as a comment on the PR
+  (accessed via context).
+inputs:
+   reference:
+    description: The size in bytes of the reference binary (base of PR).
+    required: true
+   updated:
+    description: The size in bytes of the updated binary (head of PR).
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Post a PR comment if the size has changed
+      uses: actions/github-script@v6
+      env:
+        SIZE_REFERENCE: ${{ inputs.reference }}
+        SIZE_UPDATED: ${{ inputs.updated }}
+      with:
+        script: |
+          const reference = process.env.SIZE_REFERENCE;
+          const updated = process.env.SIZE_UPDATED;
+
+          if (!(reference > 0)) {
+            core.setFailed(`Reference size invalid: ${reference}`);
+            return;
+          }
+
+          if (!(updated > 0)) {
+            core.setFailed(`Updated size invalid: ${updated}`);
+            return;
+          }
+
+          const diff = updated - reference;
+          const plus = diff > 0 ? "+" : "";
+          const diff_str = `${plus}${diff}B`;
+
+          if (diff !== 0) {
+            const percent = (((updated / reference) - 1) * 100).toFixed(2);
+            // The body is created here and wrapped so "weirdly" to avoid whitespace at the start of the lines,
+            // which is interpreted as a code block by Markdown.
+            const body = `Below is the size of a hello-world Rust program linked with libstd with backtrace.
+
+          Original binary size: **${reference}B**
+          Updated binary size: **${updated}B**
+          Difference: **${diff_str}** (${percent}%)`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+          }

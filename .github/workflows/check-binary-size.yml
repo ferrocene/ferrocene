@@ -94,44 +94,10 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Post a PR comment if the size has changed
-        uses: actions/github-script@v6
-        env:
-          SIZE_REFERENCE: ${{ needs.measure.outputs.binary-size-reference }}
-          SIZE_UPDATED: ${{ needs.measure.outputs.binary-size-updated }}
+      # Clone backtrace to access Github composite actions to report size.
+      - uses: actions/checkout@v3
+      # Run the size reporting action.
+      - uses: ./.github/actions/report-code-size-changes
         with:
-          script: |
-            const reference = process.env.SIZE_REFERENCE;
-            const updated = process.env.SIZE_UPDATED;
-
-            if (!(reference > 0)) {
-              core.setFailed(`Reference size invalid: ${reference}`);
-              return;
-            }
-
-            if (!(updated > 0)) {
-              core.setFailed(`Updated size invalid: ${updated}`);
-              return;
-            }
-
-            const diff = updated - reference;
-            const plus = diff > 0 ? "+" : "";
-            const diff_str = `${plus}${diff}B`;
-
-            if (diff !== 0) {
-              const percent = (((updated / reference) - 1) * 100).toFixed(2);
-              // The body is created here and wrapped so "weirdly" to avoid whitespace at the start of the lines,
-              // which is interpreted as a code block by Markdown.
-              const body = `Below is the size of a hello-world Rust program linked with libstd with backtrace.
-
-            Original binary size: **${reference}B**
-            Updated binary size: **${updated}B**
-            Difference: **${diff_str}** (${percent}%)`;
-
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body
-              })
-            }
+          reference: ${{ needs.measure.outputs.binary-size-reference }}
+          updated: ${{ needs.measure.outputs.binary-size-updated }}

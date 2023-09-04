@@ -65,9 +65,7 @@ Thus `backtrace` is likely to use recent Rust features or depend on a library
 which itself uses them. Its minimum supported Rust version, by policy, is
 within a few versions of current stable, approximately "stable - 2".
 
-This policy takes precedence over any Rust version stated anywhere else:
-the Cargo.toml `rust-version` may reflect what actually builds in CI instead.
-It is not a guarantee the version remains as-is from release to release.
+This policy takes precedence over versions written anywhere else in this repo.
 
 # License
 

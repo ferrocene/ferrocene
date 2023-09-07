@@ -58,12 +58,6 @@ Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
    Control flow of the current thread resumes execution by invoking the
    :t:`function` subject to :t:`attribute` :c:`panic_handler`.
 
-.. rubric:: Undefined Behavior
-
-:dp:`fls_krhb07mvojph`
-It is undefined behavior when a :t:`panic` crosses a
-:t:`foreign function interface` boundary.
-
 .. rubric:: Examples
 
 .. code-block:: rust

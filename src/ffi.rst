@@ -67,7 +67,7 @@ The following :t:`[ABI]s` are supported:
 
 * :dp:`fls_LfjvLXvI6TFL`
   ``extern "C-unwind"`` - The same as ``extern "C"`` with the addition that
-  unwinding across FFI is expected.
+  unwinding across FFI is permitted.
 
 * :dp:`fls_a2d8ltpgtvn6`
   ``extern "Rust"`` - The default :t:`ABI` of a Rust program, referred to as
@@ -113,6 +113,13 @@ include, but may not be limited to, the following:
 
 * :dp:`fls_tyjs1x4j8ovp`
   ``extern "win64"`` - The x86_64 Windows :t:`ABI` of :t:`C` code.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_M4LqHf8hbPA8`
+It is undefined behavior when a foreign exception crosses a
+:t:`foreign function interface` boundary with an :t:`ABI` other than
+``extern "C-unwind"``.
 
 .. rubric:: Examples
 

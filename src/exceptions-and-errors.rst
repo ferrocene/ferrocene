@@ -58,10 +58,6 @@ Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
    Control flow of the current thread resumes execution by invoking the
    :t:`function` subject to :t:`attribute` :c:`panic_handler`.
 
-#. :dp:`fls_xmtt04lw517w`
-   The process :t:`[abort]s` after control flow has been yielded by the
-   :t:`function` subject to :t:`attribute` :c:`panic_handler`.
-
 .. rubric:: Examples
 
 .. code-block:: rust

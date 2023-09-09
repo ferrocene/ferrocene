@@ -24,7 +24,7 @@ addr2line = { version = "0.21.0", optional = true, default-features = false }
 version = "0.32.0"
 default-features = false
 optional = true
-features = ['read_core', 'elf', 'macho', 'pe', 'unaligned', 'archive']
+features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
 [build-dependencies]
 # Dependency of the `backtrace` crate

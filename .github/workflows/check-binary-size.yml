@@ -9,75 +9,143 @@ on:
     branches:
       - master
 
+# Both the "measure" and "report" jobs need to know this.
+env:
+  SIZE_DATA_DIR: sizes
+
+# Responsibility is divided between two jobs "measure" and "report", so that the
+# job that builds (and potentnially runs) untrusted code does not have PR write
+# permission, and vice-versa.
 jobs:
-  test:
+  measure:
     name: Check binary size
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
     permissions:
-      pull-requests: write
+      contents: read
+    env:
+      # This cannot be used as a context variable in the 'uses' key later. If it
+      # changes, update those steps too.
+      BACKTRACE_DIR: backtrace
+      RUSTC_DIR: rustc
+      TEST_MAIN_RS: foo.rs
+      BASE_COMMIT: ${{ github.event.pull_request.base.sha }}
+      HEAD_COMMIT: ${{ github.event.pull_request.head.sha }}
+      SIZE_DATA_FILE: size-${{ strategy.job-index }}.json
     steps:
       - name: Print info
+        shell: bash
         run: |
-          echo "Current SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "Current SHA: $HEAD_COMMIT"
+          echo "Base SHA: $BASE_COMMIT"
+      # Note: the backtrace source that's cloned here is NOT the version to be
+      # patched in to std. It's cloned here to access the Github action for
+      # building and measuring the test binary.
+      - name: Clone backtrace to access Github action
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.BACKTRACE_DIR }}
       - name: Clone Rustc
         uses: actions/checkout@v3
         with:
           repository: rust-lang/rust
-          fetch-depth: 1
-      - name: Fetch backtrace
-        run: git submodule update --init library/backtrace
-      - name: Create hello world program that uses backtrace
-        run: printf "fn main() { panic!(); }" > foo.rs
-      - name: Build binary with base version of backtrace
+          path: ${{ env.RUSTC_DIR }}
+      - name: Set up std repository and backtrace submodule for size test
+        shell: bash
+        working-directory: ${{ env.RUSTC_DIR }}
+        env:
+          PR_SOURCE_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
-          printf "[llvm]\ndownload-ci-llvm = true\n\n[rust]\nincremental = false\n" > config.toml
+          # Bootstrap config
+          cat <<EOF > config.toml
+          [llvm]
+          download-ci-llvm = true
+          [rust]
+          incremental = false
+          EOF
+
+          # Test program source
+          cat <<EOF > $TEST_MAIN_RS
+          fn main() {
+            panic!();
+          }
+          EOF
+
+          git submodule update --init library/backtrace
+
           cd library/backtrace
-          git remote add head-pr https://github.com/${{ github.event.pull_request.head.repo.full_name }}
+          git remote add head-pr "https://github.com/$PR_SOURCE_REPO"
           git fetch --all
-          git checkout ${{ github.event.pull_request.base.sha }}
-          cd ../..
-          git add library/backtrace
-          python3 x.py build library --stage 0
-          ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin/rustc -O foo.rs -o binary-reference
+      - name: Build binary with base version of backtrace
+        uses: ./backtrace/.github/actions/build-with-patched-std
+        with:
+          backtrace-commit: ${{ env.BASE_COMMIT }}
+          main-rs: ${{ env.TEST_MAIN_RS }}
+          rustc-dir: ${{ env.RUSTC_DIR }}
+        id: size-reference
       - name: Build binary with PR version of backtrace
-        run: |
-          cd library/backtrace
-          git checkout ${{ github.event.pull_request.head.sha }}
-          cd ../..
-          git add library/backtrace
-          rm -rf build/x86_64-unknown-linux-gnu/stage0-std
-          python3 x.py build library --stage 0
-          ./build/x86_64-unknown-linux-gnu/stage0-sysroot/bin/rustc -O foo.rs -o binary-updated
-      - name: Display binary size
-        run: |
-          ls -la binary-*
-          echo "SIZE_REFERENCE=$(stat -c '%s' binary-reference)" >> "$GITHUB_ENV"
-          echo "SIZE_UPDATED=$(stat -c '%s' binary-updated)" >> "$GITHUB_ENV"
-      - name: Post a PR comment if the size has changed
+        uses: ./backtrace/.github/actions/build-with-patched-std
+        with:
+          backtrace-commit: ${{ env.HEAD_COMMIT }}
+          main-rs: ${{ env.TEST_MAIN_RS }}
+          rustc-dir: ${{ env.RUSTC_DIR }}
+        id: size-updated
+      # There is no built-in way to "collect" all the outputs of a set of jobs
+      # run with a matrix strategy. Subsequent jobs that have a "needs"
+      # dependency on this one will be run once, when the last matrix job is
+      # run. Appending data to a single file within a matrix is subject to race
+      # conditions. So we write the size data to files with distinct names
+      # generated from the job index.
+      - name: Write sizes to file
         uses: actions/github-script@v6
+        env:
+          SIZE_REFERENCE: ${{ steps.size-reference.outputs.test-binary-size }}
+          SIZE_UPDATED: ${{ steps.size-updated.outputs.test-binary-size }}
+          PLATFORM: ${{ matrix.platform }}
         with:
           script: |
-            const reference = process.env.SIZE_REFERENCE;
-            const updated = process.env.SIZE_UPDATED;
-            const diff = updated - reference;
-            const plus = diff > 0 ? "+" : "";
-            const diff_str = `${plus}${diff}B`;
+            const fs = require("fs");
+            const path = require("path");
 
-            if (diff !== 0) {
-              const percent = (((updated / reference) - 1) * 100).toFixed(2);
-              // The body is created here and wrapped so "weirdly" to avoid whitespace at the start of the lines,
-              // which is interpreted as a code block by Markdown.
-              const body = `Below is the size of a hello-world Rust program linked with libstd with backtrace.
+            fs.mkdirSync(process.env.SIZE_DATA_DIR, {recursive: true});
 
-            Original binary size: **${reference}B**
-            Updated binary size: **${updated}B**
-            Difference: **${diff_str}** (${percent}%)`;
+            const output_data = JSON.stringify({
+              platform: process.env.PLATFORM,
+              reference: process.env.SIZE_REFERENCE,
+              updated: process.env.SIZE_UPDATED,
+            });
 
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body
-              })
-            }
+            // The "wx" flag makes this fail if the file exists, which we want,
+            // because there should be no collisions.
+            fs.writeFileSync(
+              path.join(process.env.SIZE_DATA_DIR, process.env.SIZE_DATA_FILE),
+              output_data,
+              { flag: "wx" },
+            );
+      - name: Upload size data
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-files
+          path: ${{ env.SIZE_DATA_DIR }}/${{ env.SIZE_DATA_FILE }}
+          retention-days: 1
+          if-no-files-found: error
+  report:
+    name: Report binary size changes
+    runs-on: ubuntu-latest
+    needs: measure
+    permissions:
+      pull-requests: write
+    steps:
+      # Clone backtrace to access Github composite actions to report size.
+      - uses: actions/checkout@v3
+      - name: Download size data
+        uses: actions/download-artifact@v3
+        with:
+          name: size-files
+          path: ${{ env.SIZE_DATA_DIR }}
+      - name: Analyze and report size changes
+        uses: ./.github/actions/report-code-size-changes
+        with:
+          data-directory: ${{ env.SIZE_DATA_DIR }}

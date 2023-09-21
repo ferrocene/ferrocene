@@ -40,7 +40,18 @@ impl Frame {
             Frame::Raw(ctx) => ctx,
             Frame::Cloned { ip, .. } => return ip,
         };
-        unsafe { uw::_Unwind_GetIP(ctx) as *mut c_void }
+        #[allow(unused_mut)]
+        let mut ip = unsafe { uw::_Unwind_GetIP(ctx) as *mut c_void };
+
+        // To reduce TCB size in SGX enclaves, we do not want to implement
+        // symbol resolution functionality. Rather, we can print the offset of
+        // the address here, which could be later mapped to correct function.
+        #[cfg(all(target_env = "sgx", target_vendor = "fortanix"))]
+        {
+            let image_base = super::get_image_base();
+            ip = usize::wrapping_sub(ip as usize, image_base as _) as _;
+        }
+        ip
     }
 
     pub fn sp(&self) -> *mut c_void {

@@ -125,6 +125,37 @@ impl fmt::Debug for Frame {
     }
 }
 
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
+mod sgx_no_std_image_base {
+    use core::sync::atomic::{AtomicU64, Ordering::SeqCst};
+
+    static IMAGE_BASE: AtomicU64 = AtomicU64::new(0);
+
+    /// Set the image base address. This is only available for Fortanix SGX
+    /// target when the `std` feature is not enabled. This can be used in the
+    /// standard library to set the correct base address.
+    pub fn set_image_base(base_addr: u64) {
+        IMAGE_BASE.store(base_addr, SeqCst);
+    }
+
+    pub(crate) fn get_image_base() -> u64 {
+        IMAGE_BASE.load(SeqCst)
+    }
+}
+
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
+pub use self::sgx_no_std_image_base::set_image_base;
+
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
+#[deny(unused)]
+pub(crate) use self::sgx_no_std_image_base::get_image_base;
+
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", feature = "std"))]
+#[deny(unused)]
+pub(crate) fn get_image_base() -> u64 {
+    std::os::fortanix_sgx::mem::image_base()
+}
+
 cfg_if::cfg_if! {
     // This needs to come first, to ensure that
     // Miri takes priority over the host platform

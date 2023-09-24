@@ -1856,7 +1856,7 @@ An :t:`anonymous return type` is unifiable with another :t:`type` when:
   :t:`anonymous return type`.
 
 :dp:`fls_hza5n5eb18ta`
-An :t:`impl trait type` is unifiabe only with itself.
+An :t:`impl trait type` is unifiable only with itself.
 
 :dp:`fls_ww16urcjrj6i`
 A :t:`trait object type` is unifiable only with another :t:`trait object type`

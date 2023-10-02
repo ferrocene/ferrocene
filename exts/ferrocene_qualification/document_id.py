@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # This module is responsible for generating the ID of the whole document. This
 # ID is supposed to uniquely identify the revision of the document, and it must

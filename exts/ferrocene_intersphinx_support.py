@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # This extension adds some helpers needed to integrate Ferrocene's build system
 # with InterSphinx. More specifically, the extension:

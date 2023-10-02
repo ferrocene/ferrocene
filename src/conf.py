@@ -1,20 +1,20 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # -- Path setup --------------------------------------------------------------
 
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../exts"))
-sys.path.insert(1, os.path.abspath("../shared/exts"))
+sys.path.append(os.path.abspath("../exts"))
+sys.path.append(os.path.abspath("../shared/exts"))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "Ferrocene Language Specification"
-copyright = "Ferrous Systems and AdaCore"
-author = "Ferrous Systems and AdaCore"
+copyright = "The Ferrocene Developers"
+author = "The Ferrocene Developers"
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,7 +35,6 @@ templates_path = []
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
-
 
 # -- Options for HTML output -------------------------------------------------
 

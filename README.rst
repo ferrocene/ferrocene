@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 ================================
 Ferrocene Language Specification
@@ -11,11 +11,10 @@ Ferrocene Language Specification
    specification &raquo;</a></p>
 
 The Ferrocene Language Specification (FLS) is a document describing the Rust
-language. It was created by a joint effort between `Ferrous Systems`_ and
-`AdaCore`_ as one of the prerequisites for qualifying `Ferrocene`_, a Rust
-toolchain qualified for safety-critical environments. The FLS is compiled of
-existing Rust documentation, but presented with a rigorous structure in order
-to meet the requirements of qualification.
+language. It was created as one of the prerequisites for qualifying
+`Ferrocene`_, a Rust toolchain qualified for safety-critical environments. The
+FLS is compiled of existing Rust documentation, but presented with a rigorous
+structure in order to meet the requirements of qualification.
 
 The FLS is not intended to be used as the normative specification of the Rust
 language nor is it's meant to replace the decision-making processes of the Rust
@@ -27,8 +26,6 @@ or ``Apache-2.0`` licenses, at your option. Individual files might have
 different licensing. Licensing metadata is present in each file, and the full
 licenses text is present in the ``LICENSES/`` directory.
 
-.. _Ferrous Systems: https://ferrous-systems.com
-.. _AdaCore: https://adacore.com
 .. _Ferrocene: https://ferrocene.dev
 
 Building the specification

@@ -134,6 +134,7 @@ mod sgx_no_std_image_base {
     /// Set the image base address. This is only available for Fortanix SGX
     /// target when the `std` feature is not enabled. This can be used in the
     /// standard library to set the correct base address.
+    #[doc(hidden)]
     pub fn set_image_base(base_addr: u64) {
         IMAGE_BASE.store(base_addr, SeqCst);
     }

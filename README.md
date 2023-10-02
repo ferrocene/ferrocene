@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
-<!-- SPDX-FileCopyrightText: Ferrous Systems and AdaCore -->
+<!-- SPDX-FileCopyrightText: The Ferrocene Developers -->
 
 # Ferrocene's shared Sphinx resources
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 from . import substitutions, document_id, domain, signature_page
 import string
@@ -14,7 +14,10 @@ def setup(app):
     app.connect("config-inited", validate_config)
     app.add_config_value("ferrocene_id", None, "env", [str])
     app.add_config_value("ferrocene_substitutions_path", None, "env", [str])
-    app.add_config_value("ferrocene_signed", False, "env", [str])
+    app.add_config_value("ferrocene_signature", None, "env", [str])
+    app.add_config_value("ferrocene_private_signature_files_dir", None, "env", [str])
+    app.add_config_value("ferrocene_version", None, "env", [str])
+    app.add_config_value("rust_version", None, "env", [str])
 
     return {
         "version": "0",

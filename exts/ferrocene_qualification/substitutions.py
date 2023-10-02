@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # We use substitutions across all our documents, sharing a lot of them (like
 # the name of the product). This extension sets some default substitutions, and
@@ -28,8 +28,17 @@ class AddCustomSubstitutions(SphinxTransform):
         for key, value in substitutions.items():
             self.add_substitution(key, value)
 
+        # look at sphinx-substitutions.toml for the rest of the substitutions
         self.add_substitution("doc_title", self.app.config["html_short_title"])
         self.add_substitution("doc_short_title", self.app.config["ferrocene_id"])
+        self.add_substitution(
+            "ferrocene_version",
+            self.app.config["ferrocene_version"],
+        )
+        self.add_substitution(
+            "rust_version",
+            self.app.config["rust_version"],
+        )
 
     def add_substitution(self, name, value):
         substitution = nodes.substitution_definition()

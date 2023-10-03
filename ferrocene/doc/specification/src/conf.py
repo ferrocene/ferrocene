@@ -23,9 +23,12 @@ author = "The Ferrocene Developers"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "ferrocene_intersphinx_support",
+    "ferrocene_qualification",
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
+    "sphinx.ext.intersphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -35,6 +38,8 @@ templates_path = []
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+ferrocene_id = "FLS"
 
 # -- Options for HTML output -------------------------------------------------
 

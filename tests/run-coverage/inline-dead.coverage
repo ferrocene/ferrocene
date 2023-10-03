@@ -25,4 +25,6 @@
    LL|      0|fn dead() -> u32 {
    LL|      0|    42
    LL|      0|}
+   LL|       |
+   LL|       |// ferrocene-annotations: um_rustc_C_debug_assertions
 

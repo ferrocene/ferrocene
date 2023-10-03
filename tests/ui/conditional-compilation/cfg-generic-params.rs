@@ -38,3 +38,5 @@ fn main() {
     f_lt::<'static>();
     f_ty::<u8>();
 }
+
+// ferrocene-annotations: um_rustc_cfg

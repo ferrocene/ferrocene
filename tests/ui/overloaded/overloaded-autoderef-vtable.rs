@@ -37,3 +37,15 @@ pub fn main() {
         DerefWithHelper { helper: Some(Foo {x: 5}), value: Foo { x: 2 } };
     assert_eq!(x.foo(), 5);
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

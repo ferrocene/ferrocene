@@ -36,3 +36,27 @@ fn main() {
     foo::<i8>(x_f32); //~ ERROR mismatched types
     foo::<f32>(x_f64); //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

@@ -18,3 +18,9 @@ fn main() {
     let _c = a;
     let _d = a;
 }
+
+// ferrocene-annotations: fls_o8s3r7m90q59
+// Derive Macros
+//
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use

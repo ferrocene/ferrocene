@@ -56,3 +56,9 @@ fn foo_no_never() {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

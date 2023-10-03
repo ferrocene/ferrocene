@@ -60,3 +60,6 @@ fn main() {
     ptr_call(<() as TrackedTrait>::trait_tracked_default);
     ptr_call(<() as TraitBlanketTracked>::tracked_blanket);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

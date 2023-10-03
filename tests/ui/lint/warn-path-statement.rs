@@ -15,3 +15,5 @@ fn main() {
     let z = (Droppy,);
     z; //~ ERROR path statement drops value
 }
+
+// ferrocene-annotations: um_rustc_D

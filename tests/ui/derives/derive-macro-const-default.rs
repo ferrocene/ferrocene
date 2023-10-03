@@ -9,3 +9,10 @@ fn main() {
         let _c = format!("{:?}", a);
     }
 }
+
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

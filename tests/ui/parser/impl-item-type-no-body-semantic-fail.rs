@@ -18,3 +18,9 @@ impl X {
     //~^ ERROR associated type in `impl` without body
     //~| ERROR inherent associated types are unstable
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

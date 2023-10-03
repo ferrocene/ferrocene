@@ -33,3 +33,6 @@ fn main() {
     let mut a = Arr { ptr: Box::new([1, 2, 3]) };
     foo(&mut a);
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

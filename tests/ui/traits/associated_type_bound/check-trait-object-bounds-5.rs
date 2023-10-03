@@ -25,3 +25,9 @@ fn f(x: &dyn Obj<U = i32, V = i64>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

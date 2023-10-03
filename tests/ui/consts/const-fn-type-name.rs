@@ -35,3 +35,6 @@ fn main() {
 
     assert_eq!(CONST_STRUCT_NAME, non_const_struct_name);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

@@ -33,3 +33,9 @@ fn main() {
     a::<_>([], &Foo as &dyn Test, SomeStruct{t:&Foo,u:&Foo});
     b::<_>(0u8, &Foo as &dyn Test, SomeStruct{t:&Foo,u:&Foo});
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

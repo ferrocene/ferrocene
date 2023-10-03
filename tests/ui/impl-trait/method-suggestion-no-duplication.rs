@@ -7,3 +7,6 @@ fn main() {
     foo(|s| s.is_empty());
     //~^ ERROR no method named `is_empty` found
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

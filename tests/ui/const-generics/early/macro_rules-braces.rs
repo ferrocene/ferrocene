@@ -71,3 +71,10 @@ fn test<const N: usize>() {
 fn main() {
     test::<3>();
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion

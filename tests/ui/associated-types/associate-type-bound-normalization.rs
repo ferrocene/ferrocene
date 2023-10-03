@@ -23,3 +23,6 @@ fn f<T: Matrix>() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and lifetime bounds

@@ -21,3 +21,9 @@ fn f<T: std::fmt::Display>(y: T) {
 fn main() {
     f("S");
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

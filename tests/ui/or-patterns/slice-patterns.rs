@@ -49,3 +49,9 @@ fn main() {
     // path 4
     assert_eq!(test(&foo[4..]), MatchArm::Wild);
 }
+
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

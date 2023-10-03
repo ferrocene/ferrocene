@@ -46,3 +46,6 @@ pub fn main() {
     }
     foo!(x);
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

@@ -17,3 +17,9 @@ pub fn main() {
       thing::c => { x = false; }
     }
 }
+
+// ferrocene-annotations: fls_d44aflefat88
+// Path pattern matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path patterns

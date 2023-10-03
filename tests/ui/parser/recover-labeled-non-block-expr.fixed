@@ -24,3 +24,12 @@ fn main() {
     let other = 3;
     let _val = 'label: { (1, if other == 3 { break 'label (2, 3) } else { other }) }; //~ ERROR expected `while`, `for`, `loop` or `{` after a label
 }
+
+// ferrocene-annotations: fls_rr908hgunja7
+// Loop Expressions
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

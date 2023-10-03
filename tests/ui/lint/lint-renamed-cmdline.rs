@@ -6,3 +6,5 @@
 
 #[deny(unused)]
 fn main() { let unused = (); }
+
+// ferrocene-annotations: um_rustc_D

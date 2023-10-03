@@ -62,3 +62,5 @@ fn check_x86_64() {
     assert!(cfg!(target_feature = "sse4.2"));
     assert!(cfg!(not(target_feature = "crc32")));
 }
+
+// ferrocene-annotations: um_rustc_C_target_feature

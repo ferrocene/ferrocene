@@ -133,3 +133,6 @@ fn main() {
     // Final count must be 10 now if all
     assert_eq!(count, 10);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

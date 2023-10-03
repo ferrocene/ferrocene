@@ -18,3 +18,9 @@ fn main() {
     if let ::NUM1 ..= ::m::NUM2 = 11 {} else { panic!() }
     if let -13 ..= -10 = 12 { panic!() } else {}
 }
+
+// ferrocene-annotations: fls_fyskeih6twyb
+// Range pattern matching
+//
+// ferrocene-annotations: fls_6tl1fx99yn6c
+// Range patterns

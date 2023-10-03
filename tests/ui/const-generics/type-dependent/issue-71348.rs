@@ -36,3 +36,12 @@ fn main() {
     let foo = Foo { i: 123 };
     assert_eq!(foo.ask::<"int">(), &123);
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation conformance
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

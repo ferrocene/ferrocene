@@ -8,3 +8,8 @@ fn main() {
     let _ = dbg!(a);
     let _ = dbg!(a); //~ ERROR use of moved value
 }
+
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion

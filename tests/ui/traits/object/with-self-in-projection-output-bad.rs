@@ -48,3 +48,8 @@ fn main() {
     let _y: Box<dyn NormalizableHelper<Target=i32>> = Box::new(2u32);
     //~^ ERROR the value of the associated type `Output` (from trait `Base`) must be specified
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

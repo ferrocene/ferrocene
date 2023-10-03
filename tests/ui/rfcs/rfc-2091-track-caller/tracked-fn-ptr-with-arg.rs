@@ -60,3 +60,6 @@ fn main() {
     pass_to_ptr_call(<() as TrackedTrait>::trait_tracked_unit_default, ());
     pass_to_ptr_call(<() as BlanketTrackedTrait>::tracked_blanket, ());
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

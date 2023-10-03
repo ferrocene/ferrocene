@@ -12,3 +12,12 @@ impl A {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_ftphlagzd2te
+// Generic Parameter Scope

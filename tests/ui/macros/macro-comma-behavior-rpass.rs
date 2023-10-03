@@ -96,3 +96,14 @@ fn to_format_or_not_to_format() {
     // write!(&mut stdout, "{}",); // see check-fail
     // writeln!(&mut stdout, "{}",); // see check-fail
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: um_rustc_test

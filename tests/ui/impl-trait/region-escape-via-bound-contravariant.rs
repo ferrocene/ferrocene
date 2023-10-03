@@ -20,3 +20,9 @@ where 'x: 'y
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

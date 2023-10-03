@@ -8,3 +8,6 @@ fn foo<'a, 'b>(_x: &mut Foo<'a, 'b>) {}
 //~^ ERROR expected one of `,` or `>`, found `;`
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

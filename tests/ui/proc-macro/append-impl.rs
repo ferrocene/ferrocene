@@ -20,3 +20,6 @@ struct A {
 fn main() {
     A { inner: 3 }.foo();
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

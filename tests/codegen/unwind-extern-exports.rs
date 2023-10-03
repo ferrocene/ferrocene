@@ -15,3 +15,5 @@ pub extern "C-unwind" fn foo_unwind() {}
 // "Rust"
 // (`extern "Rust"` could be removed as all `fn` get it implicitly; we leave it in for clarity.)
 pub fn bar() {}
+
+// ferrocene-annotations: um_rustc_C_opt_level

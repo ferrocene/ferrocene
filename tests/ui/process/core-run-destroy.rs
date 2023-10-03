@@ -86,3 +86,5 @@ fn test_destroy_actually_kills() {
     }
     tx.send(());
 }
+
+// ferrocene-annotations: um_rustc_test

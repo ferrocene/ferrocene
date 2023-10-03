@@ -6,3 +6,6 @@ fn main() {
     let _ = 3 as bool;
     //~^ ERROR cannot cast as `bool`
 }
+
+// ferrocene-annotations: fls_tiqp1gxf116z
+// Bool Type

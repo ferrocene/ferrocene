@@ -6,3 +6,9 @@ fn main() {
     [_] = [1, 2];
     //~^ ERROR pattern requires 1 element but array has 2
 }
+
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

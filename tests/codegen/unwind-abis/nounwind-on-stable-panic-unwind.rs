@@ -16,3 +16,5 @@ pub unsafe extern "C" fn foo() {
 }
 
 // Note that this test will get removed when `C-unwind` is fully stabilized
+
+// ferrocene-annotations: um_rustc_C_opt_level

@@ -12,3 +12,6 @@ impl Enum {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns

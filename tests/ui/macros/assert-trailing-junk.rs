@@ -25,3 +25,5 @@ fn main() {
     assert!(false || true "error message");
     //~^ ERROR unexpected string literal
 }
+
+// ferrocene-annotations: um_rustc_cfg

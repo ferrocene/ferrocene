@@ -9,3 +9,8 @@ use core::panic::PanicInfo;
 fn panic() -> ! { //~ ERROR function should have one argument
     loop {}
 }
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main
+//
+// ferrocene-annotations: um_rustc_C_panic

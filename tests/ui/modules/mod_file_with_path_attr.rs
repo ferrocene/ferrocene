@@ -8,3 +8,6 @@ mod m;
 pub fn main() {
     assert_eq!(m::foo(), 10);
 }
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

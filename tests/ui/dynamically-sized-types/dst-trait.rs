@@ -102,3 +102,6 @@ pub fn main() {
         &Fat { f1: 5, f2: "some str", ptr: Fat { f1: 8, f2: "deep str", ptr: Bar1 {f :42}} };
     baz(f5);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

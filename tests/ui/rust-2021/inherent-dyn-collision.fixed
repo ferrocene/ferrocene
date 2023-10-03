@@ -51,3 +51,27 @@ fn get_dyn_trait() -> Box<dyn TryIntoU32> {
 fn main() {
     dbg!(inner::test());
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports
+//
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

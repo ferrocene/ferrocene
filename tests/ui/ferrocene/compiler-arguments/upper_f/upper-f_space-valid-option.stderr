@@ -1,0 +1,10 @@
+error: missing documentation for the crate
+  --> $DIR/upper-f_space-valid-option.rs:6:1
+   |
+LL | fn main() {}
+   | ^^^^^^^^^^^^
+   |
+   = note: requested on the command line with `-F missing-docs`
+
+error: aborting due to previous error
+

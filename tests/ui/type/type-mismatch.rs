@@ -76,3 +76,12 @@ fn have_foo_foo_b_a(f: Foo<foo, B, A>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

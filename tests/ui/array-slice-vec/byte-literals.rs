@@ -65,3 +65,21 @@ pub fn main() {
     assert_eq!(br###"a"##b"###, expected);
     assert_eq!(br###"a"##b"###, b"a\"##b");
 }
+
+// ferrocene-annotations: fls_2ifjqwnw03ms
+// Byte literals
+//
+// ferrocene-annotations: fls_fqaffyrjob7v
+// Byte string literals
+//
+// ferrocene-annotations: fls_jps9102q0qfi
+// Raw byte string literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

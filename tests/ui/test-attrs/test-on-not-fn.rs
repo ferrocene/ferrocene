@@ -78,3 +78,5 @@ mod real_tests {
         foo();
     }
 }
+
+// ferrocene-annotations: um_rustc_test

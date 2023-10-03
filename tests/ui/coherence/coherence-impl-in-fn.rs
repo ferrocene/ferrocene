@@ -12,3 +12,6 @@ pub fn main() {
         fn ne(&self, other: &x) -> bool { !(*self).eq(other) }
     }
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

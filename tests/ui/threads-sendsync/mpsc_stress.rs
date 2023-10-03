@@ -198,3 +198,5 @@ fn with_minimum_timer_resolution(f: impl Fn()) {
         f();
     }
 }
+
+// ferrocene-annotations: um_rustc_test

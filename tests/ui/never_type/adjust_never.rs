@@ -8,3 +8,6 @@ fn main() {
     let x: ! = panic!();
     let y: u32 = x;
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

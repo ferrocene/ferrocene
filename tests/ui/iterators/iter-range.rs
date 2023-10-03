@@ -12,3 +12,6 @@ pub fn main() {
     range_(0, 100, |x| sum += x );
     println!("{}", sum);
 }
+
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

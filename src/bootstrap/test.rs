@@ -1125,7 +1125,8 @@ help: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
         builder.info("tidy check");
         builder.run_delaying_failure(&mut cmd);
 
-        builder.ensure(ExpandYamlAnchors);
+        // Ferrocene: disable this step as we don't use upstream's GitHub Actions configuration.
+        //builder.ensure(ExpandYamlAnchors {});
 
         builder.info("x.py completions check");
         let [bash, fish, powershell] = ["x.py.sh", "x.py.fish", "x.py.ps1"]
@@ -1664,6 +1665,11 @@ note: if you're sure you want to do this, please open an issue as to why. In the
             cmd.arg(&exclude);
         }
 
+        for ignored in crate::ferrocene::ignored_tests_for_suite(builder, self.target, self.path) {
+            cmd.arg("--skip");
+            cmd.arg(&ignored);
+        }
+
         // Get paths from cmd args
         let paths = match &builder.config.cmd {
             Subcommand::Test { .. } => &builder.config.paths[..],
@@ -2199,7 +2205,7 @@ impl Step for CrateLibrustc {
 /// Given a `cargo test` subcommand, add the appropriate flags and run it.
 ///
 /// Returns whether the test succeeded.
-fn run_cargo_test<'a>(
+pub(crate) fn run_cargo_test<'a>(
     cargo: impl Into<Command>,
     libtest_args: &[&str],
     crates: &[Interned<String>],
@@ -2384,7 +2390,7 @@ impl Step for Crate {
 
         run_cargo_test(
             cargo,
-            &[],
+            if target.contains("ferrocenecoretest") { &["--test-threads", "1"] } else { &[] },
             &self.crates,
             &self.crates[0],
             &*crate_description(&self.crates),

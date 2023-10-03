@@ -11,3 +11,8 @@ fn foo<'a,'b,T>(x: &'a T, y: &'b T)
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

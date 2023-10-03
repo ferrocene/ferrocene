@@ -1,0 +1,124 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Backporting in Ferrocene relies on a set of labels starting with "backport:"
+# to drive the automation. This workflow is responsible for updating them
+# whenever something relevant happens.
+
+---
+
+name: Backport labels
+run-name: "Update backport labels for PR #${{ github.event.pull_request.number }}"
+on:
+  pull_request_target:
+    types:
+      - labeled
+      - closed
+
+jobs:
+  # Add the backport:maybe label if the PR has been merged and there is no
+  # other backport: label (either backport:never or backport:1.NN).
+  add-backport-maybe:
+    name: Add backport:maybe
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            let should_add_label = true;
+            context.payload.pull_request.labels.forEach(label => {
+              if (label.name.startsWith("backport:")) {
+                should_add_label = false;
+              }
+            });
+            if (should_add_label) {
+              github.rest.issues.addLabels({
+                issue_number: context.payload.pull_request.number,
+                owner: context.payload.repository.owner.login,
+                repo: context.payload.repository.name,
+                labels: ["backport:maybe"],
+              });
+            }
+
+  # Remove the backport:1.NN label once a PR with the "Ferrocene-backport-of"
+  # message in the commit is merged into the release/1.NN branch.
+  mark-backport-as-succeeded:
+    name: Mark backport as succeeded
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.base.ref, 'release/')
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Fetch the whole history
+          fetch-depth: 0
+
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            let range_start = context.payload.pull_request.base.sha;
+            let range_end = context.payload.pull_request.head.sha;
+
+            let output = "";
+            await exec.exec("git", ["log", "--format=%B", range_start + "..." + range_end], {
+              listeners: {
+                stdout: data => output += data.toString(),
+              },
+            });
+
+            let version = context.payload.pull_request.base.ref.replace("release/", "");
+            output.split("\n").forEach(line => {
+              line = line.trim();
+              if (line.startsWith("Ferrocene-backport-of: #")) {
+                let pr = parseInt(line.replace(/^Ferrocene-backport-of: #/, ""));
+
+                github.rest.issues.removeLabel({
+                  issue_number: pr,
+                  owner: context.payload.repository.owner.login,
+                  repo: context.payload.repository.name,
+                  name: "backport:" + version,
+                });
+                context.payload.pull_request.labels.forEach(label => {
+                  if (label.name === "backport:manual") {
+                    github.rest.issues.removeLabel({
+                      issue_number: pr,
+                      owner: context.payload.repository.owner.login,
+                      repo: context.payload.repository.name,
+                      name: "backport:manual",
+                    });
+                  }
+                });
+              }
+            })
+
+  # Remove the backport:maybe label if another backport: label has been added
+  # to the PR (either backport:never or backport:1.NN).
+  remove-backport-maybe:
+    name: Remove backport:maybe
+    runs-on: ubuntu-latest
+    if: github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'backport:maybe')
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            let remove = false;
+            context.payload.pull_request.labels.forEach(label => {
+              if (label.name.startsWith("backport:") && label.name != "backport:maybe") {
+                remove = true;
+              }
+            });
+            if (remove) {
+              github.rest.issues.removeLabel({
+                issue_number: context.payload.pull_request.number,
+                owner: context.payload.repository.owner.login,
+                repo: context.payload.repository.name,
+                name: "backport:maybe",
+              });
+            }

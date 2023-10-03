@@ -10,3 +10,5 @@ pub fn another_dyn_debug() {
     let _d = &u as &dyn crate::Object;
     _d.method()
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

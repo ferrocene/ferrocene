@@ -15,3 +15,5 @@ pub unsafe fn call_through_plt() -> *mut u8 {
 
 // Ensure intrinsics also skip the PLT
 // CHECK: !"RtLibUseGOT"
+
+// ferrocene-annotations: um_rustc_C_relocation_model

@@ -6,3 +6,6 @@ fn main() {
         let y: Y = "hello"; //~ ERROR mismatched types
     }
 }
+
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

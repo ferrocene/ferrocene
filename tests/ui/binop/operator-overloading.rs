@@ -79,3 +79,18 @@ pub fn main() {
 }
 
 fn result(i: isize) { }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_wrecura8u5ar
+// Negation Expression
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

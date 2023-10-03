@@ -9,3 +9,9 @@ unsafe extern "C" fn ordering4<'a, F: H<&'static &'a ()>>(_: (), ...) {}
 //~^ ERROR: in type `&'static &'a ()`, reference has a longer lifetime than the data it references [E0491]
 
 fn main() {}
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

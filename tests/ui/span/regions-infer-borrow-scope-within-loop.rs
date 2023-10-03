@@ -20,3 +20,15 @@ fn foo<C, M>(mut cond: C, mut make_box: M) where
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership

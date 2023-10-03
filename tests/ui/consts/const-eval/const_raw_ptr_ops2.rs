@@ -8,3 +8,6 @@ const Z2: i32 = unsafe { *(42 as *const i32) }; //~ ERROR evaluation of constant
 //~| is a dangling pointer
 const Z3: i32 = unsafe { *(44 as *const i32) }; //~ ERROR evaluation of constant value failed
 //~| is a dangling pointer
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type

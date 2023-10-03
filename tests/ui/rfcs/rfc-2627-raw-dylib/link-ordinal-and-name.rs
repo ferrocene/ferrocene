@@ -11,3 +11,6 @@ extern "C" {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_p44fky7fifc
+// Attribute link_name

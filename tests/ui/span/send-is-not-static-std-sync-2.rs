@@ -37,3 +37,15 @@ fn channel() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

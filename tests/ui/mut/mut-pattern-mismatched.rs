@@ -18,3 +18,15 @@ fn main() {
                //~| types differ in mutability
          = bar;
 }
+
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -24,3 +24,9 @@ fn main() {
     f1.foo(1usize);
     //~^ error: the trait bound `Bar: Foo<usize>` is not satisfied
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

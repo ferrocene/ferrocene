@@ -19,3 +19,12 @@ macro_rules! foo3 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_k01lsksqtq1r
+// Repetition

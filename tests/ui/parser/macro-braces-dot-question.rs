@@ -9,3 +9,6 @@ fn main() -> Result<(), std::io::Error> {
     [0]; // separate statement, not indexing into the result of println.
     Ok(())
 }
+
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation

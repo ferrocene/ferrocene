@@ -30,3 +30,10 @@ fn main() {
         }
     }
 }
+
+//
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Type
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

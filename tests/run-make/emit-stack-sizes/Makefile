@@ -10,3 +10,5 @@ include ../tools.mk
 all:
 	$(RUSTC) -C opt-level=3 -Z emit-stack-sizes --emit=obj foo.rs
 	size -A $(TMPDIR)/foo.o | $(CGREP) .stack_sizes
+
+# ferrocene-annotations: um_rustc_C_opt_level

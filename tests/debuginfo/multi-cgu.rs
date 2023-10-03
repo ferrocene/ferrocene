@@ -56,3 +56,5 @@ fn main() {
 
 #[inline(never)]
 fn _zzz() {}
+
+// ferrocene-annotations: um_rustc_C_codegen_units

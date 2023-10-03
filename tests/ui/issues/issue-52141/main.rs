@@ -14,3 +14,6 @@ fn main() {
     some_name::hello();
     foo::hello();
 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

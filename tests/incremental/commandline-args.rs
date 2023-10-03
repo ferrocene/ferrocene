@@ -23,3 +23,5 @@
 pub fn main() {
     // empty
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

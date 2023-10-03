@@ -14,3 +14,6 @@ fn main() {
         //~^ ERROR type annotations needed
     };
 }
+
+// ferrocene-annotations: fls_aadan19t5006
+// async Blocks

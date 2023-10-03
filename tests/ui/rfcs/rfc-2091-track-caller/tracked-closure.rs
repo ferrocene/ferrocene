@@ -152,3 +152,6 @@ fn main() {
     test_closure();
     test_generator();
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

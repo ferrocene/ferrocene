@@ -8,3 +8,6 @@ pub fn main() {
                       //~|HELP use `..=` instead
                       //~|NOTE inclusive ranges end with a single equals sign
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

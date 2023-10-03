@@ -293,6 +293,9 @@ pub enum Subcommand {
         /// open the docs in a browser
         open: bool,
         #[arg(long)]
+        /// start a live-relodaing web server
+        serve: bool,
+        #[arg(long)]
         /// render the documentation in JSON format in addition to the usual HTML format
         json: bool,
     },
@@ -391,6 +394,9 @@ pub enum Subcommand {
         /// arguments for the tool
         #[arg(long, allow_hyphen_values(true))]
         args: Vec<String>,
+        #[arg(long)]
+        /// update all files of failing tests
+        bless: bool,
     },
     /// Set up the environment for development
     #[clap(long_about = format!(
@@ -420,6 +426,9 @@ Arguments:
         #[arg(long)]
         run: bool,
     },
+    /// Sign Ferrocene qualification documents
+    #[clap(long_about = "\n")]
+    Sign,
 }
 
 impl Subcommand {
@@ -438,6 +447,7 @@ impl Subcommand {
             Subcommand::Install { .. } => Kind::Install,
             Subcommand::Run { .. } => Kind::Run,
             Subcommand::Setup { .. } => Kind::Setup,
+            Subcommand::Sign { .. } => Kind::Sign,
             Subcommand::Suggest { .. } => Kind::Suggest,
         }
     }
@@ -476,6 +486,7 @@ impl Subcommand {
     pub fn bless(&self) -> bool {
         match *self {
             Subcommand::Test { bless, .. } => bless,
+            Subcommand::Run { bless, .. } => bless,
             _ => false,
         }
     }
@@ -532,6 +543,13 @@ impl Subcommand {
     pub fn open(&self) -> bool {
         match *self {
             Subcommand::Doc { open, .. } => open,
+            _ => false,
+        }
+    }
+
+    pub fn serve(&self) -> bool {
+        match *self {
+            Subcommand::Doc { serve, .. } => serve,
             _ => false,
         }
     }

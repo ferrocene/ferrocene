@@ -32,3 +32,13 @@ fn main() {
     Alias::SingleVariant(a, b) = Alias::SingleVariant(9, 10);
     assert_eq!((a, b), (9, 10));
 }
+
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

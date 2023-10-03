@@ -2759,11 +2759,6 @@ pub fn build_session_options(
     let debug_assertions = cg.debug_assertions.unwrap_or(opt_level == OptLevel::No);
     let debuginfo = select_debuginfo(matches, &cg);
 
-    let mut search_paths = vec![];
-    for s in &matches.opt_strs("L") {
-        search_paths.push(SearchPath::from_cli_opt(handler, s));
-    }
-
     let libs = parse_libs(handler, matches);
 
     let test = matches.opt_present("test");
@@ -2816,6 +2811,11 @@ pub fn build_session_options(
         // Only use this directory if it has a file we can expect to always find.
         candidate.join("library/std/src/lib.rs").is_file().then_some(candidate)
     };
+
+    let mut search_paths = vec![];
+    for s in &matches.opt_strs("L") {
+        search_paths.push(SearchPath::from_cli_opt(Some(&sysroot), &target_triple, handler, s));
+    }
 
     let working_dir = std::env::current_dir().unwrap_or_else(|e| {
         handler.early_error(format!("Current directory is invalid: {e}"));

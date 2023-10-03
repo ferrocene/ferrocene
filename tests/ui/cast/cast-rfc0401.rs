@@ -167,3 +167,21 @@ fn main()
     assert!(foo as *const u32 != first);
 }
 fn foo() { }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Type
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Type

@@ -35,3 +35,12 @@ fn main() {
     ((a, .., b), .., (..)) = ((4, 5), ());
     assert_eq!((a, b), (4, 5));
 }
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

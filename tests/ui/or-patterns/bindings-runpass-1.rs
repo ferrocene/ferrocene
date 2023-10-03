@@ -21,3 +21,18 @@ fn main() {
     assert_eq!(two_bindings(&((true, false), 3)), 20);
     assert_eq!(two_bindings(&((true, true), 3)), 20);
 }
+
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_k64tfywtn0g8
+// Tuple Expressions
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

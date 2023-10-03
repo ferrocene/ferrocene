@@ -91,3 +91,12 @@ fn main() {
     tuple();
     tuple_struct();
 }
+
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple pattern matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple patterns

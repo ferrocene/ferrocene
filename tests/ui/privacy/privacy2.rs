@@ -27,3 +27,6 @@ fn test2() {
 }
 
 #[start] fn main(_: isize, _: *const *const u8) -> isize { 3 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

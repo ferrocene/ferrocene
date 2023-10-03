@@ -5,3 +5,6 @@
 mod m; //~ ERROR couldn't read
 
 fn main() {}
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

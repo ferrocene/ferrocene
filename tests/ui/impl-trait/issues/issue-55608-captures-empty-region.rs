@@ -20,3 +20,6 @@ fn segment2<F>(_fn: F) -> Map2<F> where F: Fn() -> Result<(), ()> {
 }
 
 fn main() { server(); }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

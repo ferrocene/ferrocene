@@ -11,3 +11,5 @@
 fn main() {
     let x: &'static u32 = &(0u32 - 1);
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

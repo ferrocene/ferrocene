@@ -14,3 +14,6 @@ macro_rules! define_vec {
 define_vec![];
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

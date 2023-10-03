@@ -8,3 +8,5 @@ fn main() {
     let mut example = String::new();
     write!(&mut example, "{}", 42); //~WARN must be used
 }
+
+// ferrocene-annotations: um_rustc_W

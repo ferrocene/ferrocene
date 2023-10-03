@@ -77,3 +77,5 @@ pub fn main() {
       let n = 1_isize << BITS; //~ WARN: arithmetic operation will overflow
       let n = 1_usize << BITS; //~ WARN: arithmetic operation will overflow
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

@@ -18,3 +18,9 @@ fn bar<const N: i32>(i: i32) -> bool {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

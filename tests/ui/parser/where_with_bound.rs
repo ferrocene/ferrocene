@@ -3,3 +3,6 @@ fn foo<T>() where <T>::Item: ToString, T: Iterator { }
 //~| ERROR cannot find type `Item` in the crate root
 
 fn main() {}
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

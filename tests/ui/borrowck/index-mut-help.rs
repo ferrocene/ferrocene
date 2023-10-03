@@ -11,3 +11,7 @@ fn main() {
     map["peter"] = "0".to_string(); //~ ERROR
     let _ = &mut map["peter"];      //~ ERROR
 }
+
+//
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Array and Slice Indexing Expressions

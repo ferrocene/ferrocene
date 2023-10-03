@@ -16,3 +16,5 @@ pub fn g() {}
 pub fn h() {}
 
 pub fn main() {}
+
+// ferrocene-annotations: um_rustc_cfg

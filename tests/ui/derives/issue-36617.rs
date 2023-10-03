@@ -14,3 +14,6 @@
 //~^ ERROR `global_allocator` attribute cannot be used at crate level
 
 fn main() {}
+
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates

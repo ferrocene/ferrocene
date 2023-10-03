@@ -6,3 +6,5 @@
 
 // CHECK-NOT: .cfi_startproc
 pub fn foo() {}
+
+// ferrocene-annotations: um_rustc_C_panic

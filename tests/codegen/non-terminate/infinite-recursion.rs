@@ -12,3 +12,5 @@ fn infinite_recursion() -> u8 {
     // CHECK-NOT: ret i8 undef
     infinite_recursion()
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

@@ -32,3 +32,8 @@ fn main() {
     let y = covariant(&Foo([], PhantomData));
     println!("{:?}", y.0);
 }
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

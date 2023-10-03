@@ -21,3 +21,6 @@ impl<K, V> Map for BTreeMap<K, V> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

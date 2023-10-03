@@ -21,3 +21,6 @@ fn main() {
     let x = sum_foo(vec![11, 10, 1].into_iter());
     assert_eq!(x, 22);
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

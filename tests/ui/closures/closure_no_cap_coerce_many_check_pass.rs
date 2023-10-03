@@ -164,3 +164,9 @@ fn main() {
     let x = |a| 2;
     let _ = [foo as FnPointer, bar as FnPointer, x];
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

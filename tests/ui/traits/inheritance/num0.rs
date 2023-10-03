@@ -22,3 +22,6 @@ fn greater_than_one<T:NumExt>(n: &T) -> bool {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

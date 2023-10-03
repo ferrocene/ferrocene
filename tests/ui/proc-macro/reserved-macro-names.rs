@@ -17,3 +17,6 @@ pub fn cfg_attr(_: TokenStream, input: TokenStream) -> TokenStream {
     //~^ ERROR name `cfg_attr` is reserved in attribute namespace
     input
 }
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr

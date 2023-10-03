@@ -32,3 +32,9 @@ enum E {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Types

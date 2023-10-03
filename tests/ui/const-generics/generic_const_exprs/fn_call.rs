@@ -28,3 +28,6 @@ fn main() {
     assert_eq!([0; 8], test_simple::<u64>());
     assert_eq!([0; 12], test_with_args::<u64, 4>());
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

@@ -29,3 +29,9 @@ type C<'a, 'b> = <A<'a> as Trait>::Bar;
 //~| NOTE expected 1 lifetime argument
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliasing

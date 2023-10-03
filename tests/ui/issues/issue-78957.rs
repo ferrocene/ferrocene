@@ -27,3 +27,6 @@ pub struct Baz3<#[repr(C)] T>(PhantomData<T>);
 //~^ ERROR attribute should be applied to a struct, enum, or union
 
 fn main() {}
+
+// ferrocene-annotations: fls_kpwbpp5hc00s
+// Attribute cold

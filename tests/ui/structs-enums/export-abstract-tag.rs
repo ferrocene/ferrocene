@@ -13,3 +13,9 @@ mod foo {
 }
 
 pub fn main() { let _v: foo::t = foo::f(); }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

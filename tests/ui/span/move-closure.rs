@@ -4,3 +4,6 @@
 fn main() {
     let x: () = move || (); //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

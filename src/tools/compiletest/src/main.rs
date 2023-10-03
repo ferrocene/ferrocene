@@ -1,9 +1,11 @@
 use std::{env, sync::Arc};
 
-use compiletest::{common::Mode, log_config, parse_config, run_tests};
+use compiletest::{common::Mode, ferrocene_annotations, log_config, parse_config, run_tests};
 
 fn main() {
     tracing_subscriber::fmt::init();
+
+    ferrocene_annotations::maybe_collect_and_exit();
 
     let config = Arc::new(parse_config(env::args().collect()));
 

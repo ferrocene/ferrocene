@@ -30,3 +30,9 @@ pub fn main() {
     let bar = F { a: F {a: 1 } };
     bar.serialize(2);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

@@ -44,3 +44,18 @@ pub fn main() {
           340282356779733661637539395458142568448.0);
     test!(u128::MAX, u128 -> f64, 340282366920938463463374607431768211455.0);
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

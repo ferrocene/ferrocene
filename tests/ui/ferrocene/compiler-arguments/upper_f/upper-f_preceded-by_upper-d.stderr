@@ -1,0 +1,10 @@
+error: missing documentation for the crate
+  --> $DIR/upper-f_preceded-by_upper-d.rs:6:1
+   |
+LL | fn main() {}
+   | ^^^^^^^^^^^^
+   |
+   = note: requested on the command line with `-D missing-docs`
+
+error: aborting due to previous error
+

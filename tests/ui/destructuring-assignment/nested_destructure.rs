@@ -16,3 +16,6 @@ fn main() {
     // unnested underscore: just discard
     _ = 1;
 }
+
+// ferrocene-annotations: fls_tpwp86mronn2
+// Underscore Expressions

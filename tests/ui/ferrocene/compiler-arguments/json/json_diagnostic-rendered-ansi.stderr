@@ -1,0 +1,72 @@
+{"message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
+
+Erroneous code examples:
+
+```compile_fail,E0425
+something_that_doesnt_exist::foo;
+// error: unresolved name `something_that_doesnt_exist::foo`
+
+// or:
+
+trait Foo {
+    fn bar() {
+        Self; // error: unresolved name `Self`
+    }
+}
+
+// or:
+
+let x = unknown_variable;  // error: unresolved name `unknown_variable`
+```
+
+Please verify that the name wasn't misspelled and ensure that the
+identifier being referred to is valid for the given situation. Example:
+
+```
+enum something_that_does_exist {
+    Foo,
+}
+```
+
+Or:
+
+```
+mod something_that_does_exist {
+    pub static foo : i32 = 0i32;
+}
+
+something_that_does_exist::foo; // ok!
+```
+
+Or:
+
+```
+let unknown_variable = 12u32;
+let x = unknown_variable; // ok!
+```
+
+If the item is not defined in the current module, it must be imported using a
+`use` statement, like so:
+
+```
+# mod foo { pub fn bar() {} }
+# fn main() {
+use foo::bar;
+bar();
+# }
+```
+
+If the item you are importing is not defined in some super-module of the
+current module, then it must also be declared as public (e.g., `pub fn`).
+"},"level":"error","spans":[{"file_name":"$DIR/json_diagnostic-rendered-ansi.rs","byte_start":109,"byte_end":110,"line_start":5,"line_end":5,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;
+\u001b[0m  \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m--> \u001b[0m\u001b[0m$DIR/json_diagnostic-rendered-ansi.rs:5:13\u001b[0m
+\u001b[0m   \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m|\u001b[0m
+\u001b[0m\u001b[1m\u001b[38;5;12mLL\u001b[0m\u001b[0m \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m|\u001b[0m\u001b[0m \u001b[0m\u001b[0m    let x = x;
+\u001b[0m   \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m| \u001b[0m\u001b[0m            \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;9m^\u001b[0m\u001b[0m \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;9mnot found in this scope\u001b[0m
+
+"}
+{"message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1m\u001b[38;5;9merror\u001b[0m\u001b[0m\u001b[1m: aborting due to previous error\u001b[0m
+
+"}
+{"message":"For more information about this error, try `rustc --explain E0425`.","code":null,"level":"failure-note","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1mFor more information about this error, try `rustc --explain E0425`.\u001b[0m
+"}

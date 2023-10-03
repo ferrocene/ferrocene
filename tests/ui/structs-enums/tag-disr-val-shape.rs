@@ -18,3 +18,6 @@ pub fn main() {
     assert_eq!("green".to_string(), format!("{:?}", color::green));
     assert_eq!("white".to_string(), format!("{:?}", color::white));
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

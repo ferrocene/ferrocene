@@ -15,3 +15,15 @@ fn main() {
     1193182.foo(tx);
     assert_eq!(rx.recv(), 1193182);
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

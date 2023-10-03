@@ -14,3 +14,5 @@
 extern crate panic_unwind;
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_C_panic

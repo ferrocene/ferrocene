@@ -13,3 +13,6 @@ impl Drop for Foo {
 pub fn main() {
     let _x: Foo = Foo { x: 3 };
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

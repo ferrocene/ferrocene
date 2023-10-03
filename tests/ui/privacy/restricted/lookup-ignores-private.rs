@@ -32,3 +32,6 @@ fn main() {
     let _: bool = s.x;
     let _: bool = s.f();
 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

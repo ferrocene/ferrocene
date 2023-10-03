@@ -12,3 +12,9 @@ fn main() {
     let x2: u32 = whatever2();
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

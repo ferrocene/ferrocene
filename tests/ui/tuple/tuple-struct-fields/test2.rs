@@ -13,3 +13,6 @@ mod foo {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion

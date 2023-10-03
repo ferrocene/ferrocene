@@ -11,3 +11,6 @@ fn main() {
     let _ = auxiliary::namespaced_enums::Foo::A;
     let _ = auxiliary::nonexistent_file::Foo::A;
 }
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr

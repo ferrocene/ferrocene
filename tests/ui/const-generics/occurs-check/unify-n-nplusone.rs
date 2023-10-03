@@ -14,3 +14,6 @@ fn main() {
     arr = bind(arr); //~ ERROR mismatched types
     sink(arr);
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type unification

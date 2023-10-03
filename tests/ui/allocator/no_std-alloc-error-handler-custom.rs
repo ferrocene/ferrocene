@@ -82,3 +82,5 @@ fn main(_argc: i32, _argv: *const *const u8) -> isize {
     helper::work_with(&zero);
     1
 }
+
+// ferrocene-annotations: um_rustc_C_panic

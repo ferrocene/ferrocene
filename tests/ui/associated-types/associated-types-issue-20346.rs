@@ -33,3 +33,6 @@ fn test_adapter<T, I: Iterator<Item=Option<T>>>(it: I) {
     is_iterator_of::<T, _>(&adapter); // OK
     is_iterator_of::<Option<T>, _>(&adapter); //~ ERROR type mismatch
 }
+
+// ferrocene-annotations: fls_iikmhqsp1r5a
+// Attribute no_implicit_prelude

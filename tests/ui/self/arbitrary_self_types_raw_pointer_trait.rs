@@ -59,3 +59,24 @@ fn main() {
     assert_eq!(18, unsafe { valid_u32_fat.bar() });
 
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

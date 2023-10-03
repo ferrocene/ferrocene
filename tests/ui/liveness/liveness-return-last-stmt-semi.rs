@@ -16,3 +16,9 @@ fn baz(x: u64) -> u32 { //~ ERROR mismatched types
 fn main() {
     test!();
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

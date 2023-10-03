@@ -13,3 +13,6 @@ fn main() {
     }
     m!({}); //~ ERROR labeled expression must be followed by `:`
 }
+
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels

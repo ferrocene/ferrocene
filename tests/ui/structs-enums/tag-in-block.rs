@@ -13,3 +13,6 @@ fn foo() {
 }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

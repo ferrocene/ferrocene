@@ -21,3 +21,6 @@ impl Foo for Blah {
 fn main() {
     Blah.smeg();
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

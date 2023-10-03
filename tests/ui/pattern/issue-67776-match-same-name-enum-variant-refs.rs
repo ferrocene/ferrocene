@@ -38,3 +38,12 @@ fn fn3(e: &mut &&mut Foo) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

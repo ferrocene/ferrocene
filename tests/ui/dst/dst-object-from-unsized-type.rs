@@ -25,3 +25,6 @@ fn test4(x: &[u8]) {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

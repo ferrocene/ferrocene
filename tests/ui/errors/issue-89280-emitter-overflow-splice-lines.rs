@@ -8,3 +8,8 @@ trait X {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

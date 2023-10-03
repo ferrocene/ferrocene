@@ -17,3 +17,6 @@ impl Foo for NotClone {
 fn main() {
     Bar::<NotClone> { x: 1 }.clone(); //~ ERROR
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

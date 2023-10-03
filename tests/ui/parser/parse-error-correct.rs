@@ -8,3 +8,9 @@ fn main() {
                    //~^ ERROR expected function, found `{integer}`
     let x = y.foo; //~ ERROR `{integer}` is a primitive type and therefore doesn't have fields [E061
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

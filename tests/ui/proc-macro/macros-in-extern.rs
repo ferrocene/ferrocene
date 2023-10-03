@@ -22,3 +22,6 @@ extern "C" {
         fn rust_dbg_extern_identity_u32(arg: u32) -> u32;
     );
 }
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks

@@ -10,3 +10,6 @@ pub fn main() {
    let x = asBlock(|| 22);
    assert_eq!(x, 22);
 }
+
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

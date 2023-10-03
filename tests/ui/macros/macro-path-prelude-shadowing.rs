@@ -31,3 +31,15 @@ mod m3 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_ld0ize96cm6m
+// Preludes
+//
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing

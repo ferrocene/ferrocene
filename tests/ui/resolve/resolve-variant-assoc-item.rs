@@ -5,3 +5,6 @@ fn main() {
     E::V::associated_item; //~ ERROR failed to resolve: `V` is a variant, not a module
     V::associated_item; //~ ERROR failed to resolve: `V` is a variant, not a module
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

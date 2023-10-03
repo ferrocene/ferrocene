@@ -5,3 +5,5 @@
 
 #[start]
 fn start(_: isize, _: *const *const u8) -> isize { panic!(); }
+
+// ferrocene-annotations: um_rustc_test

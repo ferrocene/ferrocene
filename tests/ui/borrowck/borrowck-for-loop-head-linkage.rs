@@ -8,3 +8,7 @@ fn main() {
         vector[1] = 5;   //~ ERROR cannot borrow
     }
 }
+
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

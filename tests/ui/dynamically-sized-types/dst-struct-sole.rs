@@ -74,3 +74,6 @@ pub fn main() {
     let f5: &Fat<[Bar]> = &Fat { ptr: [] };
     assert!(f5.ptr.is_empty());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

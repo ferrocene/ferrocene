@@ -29,3 +29,18 @@ fn main() {
         panic!("this should be unreachable.");
     }
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

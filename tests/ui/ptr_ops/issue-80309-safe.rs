@@ -14,3 +14,9 @@ fn main() {
     let z = vec![42, 43];
     println!("{}", qux(&z));
 }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

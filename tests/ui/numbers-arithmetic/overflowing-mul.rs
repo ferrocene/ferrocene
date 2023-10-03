@@ -9,3 +9,5 @@
 fn main() {
     let x = 200u8 * 4;
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

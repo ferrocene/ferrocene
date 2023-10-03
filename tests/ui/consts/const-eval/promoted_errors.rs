@@ -50,3 +50,6 @@ const Y: () = {
 fn main() {
     Y;
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

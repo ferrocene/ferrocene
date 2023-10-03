@@ -29,3 +29,12 @@ static mut INTERIOR_MUT_AND_DROP_REF: &'static &'static [std::cell::RefCell<Vec<
 };
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

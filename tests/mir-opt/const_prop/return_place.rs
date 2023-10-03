@@ -11,3 +11,5 @@ fn add() -> u32 {
 fn main() {
     add();
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

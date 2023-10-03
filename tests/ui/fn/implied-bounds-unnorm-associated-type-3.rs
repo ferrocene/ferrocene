@@ -20,3 +20,9 @@ impl<T> ZeroCopyFrom<[T]> for &'static [T] {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

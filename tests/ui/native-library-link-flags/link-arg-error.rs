@@ -2,3 +2,5 @@
 // error-pattern: linking modifier `bundle` is only compatible with `static` linking kind
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_l

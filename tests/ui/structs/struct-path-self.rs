@@ -35,3 +35,6 @@ impl S {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope

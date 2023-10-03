@@ -14,3 +14,6 @@ static y: TestStruct = TestStruct { x: x as *const u8 };
 pub fn main() {
     assert_eq!(x as *const u8, y.x);
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

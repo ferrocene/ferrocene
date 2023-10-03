@@ -16,3 +16,6 @@ fn start(_argc: isize, _argv: *const *const u8) -> isize {
     foo::test();
     0
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

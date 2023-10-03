@@ -64,3 +64,6 @@ fn get_color_if(color: color) -> String {
     else if color == orange {"orange".to_string()}
     else {"unknown".to_string()}
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

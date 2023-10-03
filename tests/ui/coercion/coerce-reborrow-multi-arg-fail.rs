@@ -4,3 +4,6 @@ fn main() {
     test(&mut 7, &7);
     //~^ mismatched types
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

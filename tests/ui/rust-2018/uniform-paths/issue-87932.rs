@@ -13,3 +13,9 @@ fn main() {
     A::deserialize();
     //~^ ERROR no function or associated item named `deserialize` found for struct `A`
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

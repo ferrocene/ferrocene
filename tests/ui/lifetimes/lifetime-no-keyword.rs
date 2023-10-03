@@ -5,3 +5,6 @@ fn baz<'let>(a: &'let isize) { } //~ ERROR lifetimes cannot use keyword names
 fn zab<'self>(a: &'self isize) { } //~ ERROR lifetimes cannot use keyword names
 //~^ ERROR lifetimes cannot use keyword names
 fn main() { }
+
+// ferrocene-annotations: fls_mec5cg5aptf8
+// Strict Keywords

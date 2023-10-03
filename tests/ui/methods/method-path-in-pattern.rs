@@ -30,3 +30,9 @@ fn main() {
     if let Foo::trait_bar = 0u32 {}
     //~^ ERROR expected unit struct, unit variant or constant, found associated function
 }
+
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

@@ -24,3 +24,5 @@ impl<T> MyTrait<T> for MyStruct<{true}> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_error_format

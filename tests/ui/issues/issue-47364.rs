@@ -57,3 +57,5 @@ mod nom_sql {
         }
     }
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

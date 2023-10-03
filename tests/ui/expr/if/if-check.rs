@@ -15,3 +15,6 @@ fn foo(x: usize) {
 }
 
 pub fn main() { foo(2); }
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

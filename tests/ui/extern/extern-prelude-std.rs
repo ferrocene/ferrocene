@@ -10,3 +10,6 @@ mod foo {
 fn main() {
     foo::test();
 }
+
+// ferrocene-annotations: fls_ld0ize96cm6m
+// Preludes

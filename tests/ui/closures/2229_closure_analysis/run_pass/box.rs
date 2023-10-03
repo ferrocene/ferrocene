@@ -90,3 +90,6 @@ fn main() {
     box_4();
     box_5();
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

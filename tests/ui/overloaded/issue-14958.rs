@@ -29,3 +29,6 @@ fn main() {
     let baz = &Baz;
     bar(baz);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

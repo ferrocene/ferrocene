@@ -26,3 +26,6 @@ fn main() {
 
     *py = 20
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

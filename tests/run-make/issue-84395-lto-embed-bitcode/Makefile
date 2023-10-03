@@ -9,3 +9,7 @@ all:
 	$(RUSTC) test.rs --target $(TARGET) -Clink-arg=-fuse-ld=lld -Clinker-plugin-lto -Clinker=$(CLANG) -Clink-arg=-Wl,--plugin-opt=-lto-embed-bitcode=optimized -Zemit-thin-lto=no
 	$(LLVM_BIN_DIR)/objcopy --dump-section .llvmbc=$(TMPDIR)/test.bc $(TMPDIR)/test
 	$(LLVM_BIN_DIR)/llvm-dis $(TMPDIR)/test.bc
+
+# ferrocene-annotations: um_rustc_C_link_arg
+#
+# ferrocene-annotations: um_rustc_C_linker

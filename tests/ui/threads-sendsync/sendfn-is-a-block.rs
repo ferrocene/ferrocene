@@ -9,3 +9,6 @@ pub fn main() {
     let y = test(|x| 4 * x);
     assert_eq!(y, 88);
 }
+
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Types

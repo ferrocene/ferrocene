@@ -13,3 +13,9 @@ fn c<'a>(x: &'a u32) -> &'a u32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

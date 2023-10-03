@@ -117,3 +117,6 @@ fn main() {
     test8();
     test9();
 }
+
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching

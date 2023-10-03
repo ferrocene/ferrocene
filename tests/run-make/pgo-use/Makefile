@@ -16,7 +16,7 @@ include ../tools.mk
 # it adds the profiling instrumentation). Disabling this pass leads to
 # rather predictable IR which we need for this test to be stable.
 
-COMMON_FLAGS=-Copt-level=2 -Ccodegen-units=1 -Cllvm-args=-disable-preinline
+COMMON_FLAGS=-Copt-level=2 -Ccodegen-units=1 -Cllvm-args=-disable-preinline --target $(TARGET)
 
 ifeq ($(UNAME),Darwin)
 # macOS does not have the `tac` command, but `tail -r` does the same thing
@@ -44,3 +44,6 @@ all:
 	# FileCheck only supports checking that something matches on the next line,
 	# but not if something matches on the previous line.
 	$(TAC) "$(TMPDIR)"/main.ll | "$(LLVM_FILECHECK)" filecheck-patterns.txt
+
+# ferrocene-annotations: um_rustc_C_opt_level
+# ferrocene-annotations: um_rustc_C_codegen_units

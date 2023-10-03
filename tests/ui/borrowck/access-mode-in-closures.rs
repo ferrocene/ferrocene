@@ -8,3 +8,7 @@ fn main() {
         match *s { S(v) => v } //~ ERROR cannot move out
     });
 }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

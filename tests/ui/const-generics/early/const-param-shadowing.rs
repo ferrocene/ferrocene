@@ -5,3 +5,6 @@ fn test<const N: usize>() -> Foo<N> { //~ ERROR type provided when
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing

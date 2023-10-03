@@ -34,3 +34,6 @@ fn maybe() -> bool {
 fn takes_fnonce(_: impl FnOnce()) {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

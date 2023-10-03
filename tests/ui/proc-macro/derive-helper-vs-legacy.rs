@@ -10,3 +10,6 @@ extern crate test_macros;
 struct S;
 
 fn main() {}
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

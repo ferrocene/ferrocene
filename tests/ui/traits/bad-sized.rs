@@ -7,3 +7,6 @@ pub fn main() {
     //~| ERROR the size for values of type
     //~| ERROR the size for values of type
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

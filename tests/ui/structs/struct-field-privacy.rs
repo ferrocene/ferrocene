@@ -36,3 +36,6 @@ fn test(a: A, b: inner::A, c: inner::B, d: xc::A, e: xc::B, z: inner::Z) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

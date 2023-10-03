@@ -12,3 +12,6 @@ static NONE_REF_REF: &&Option<String> = {
 fn main() {
     println!("{:?}", NONE_REF_REF);
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

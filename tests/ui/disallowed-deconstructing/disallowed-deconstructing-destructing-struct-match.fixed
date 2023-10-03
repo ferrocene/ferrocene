@@ -17,3 +17,12 @@ fn main() {
         X { x: ref y } => println!("contents: {}", y)
     }
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns

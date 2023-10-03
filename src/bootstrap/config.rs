@@ -293,6 +293,27 @@ pub struct Config {
     pub initial_rustfmt: RefCell<RustfmtState>,
 
     pub paths: Vec<PathBuf>,
+
+    // Ferrocene-specific configuration
+    pub ferrocene_aws_profile: Option<String>,
+    pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
+    pub ferrocene_test_outcomes_dir: Option<PathBuf>,
+    pub ferrocene_oxidos_src: Option<String>,
+    pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
+    pub ferrocene_document_signatures_s3_bucket: String,
+    pub ferrocene_ignore_document_signatures: bool,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum FerroceneTraceabilityMatrixMode {
+    Ci,
+    Local,
+}
+
+impl Default for FerroceneTraceabilityMatrixMode {
+    fn default() -> Self {
+        FerroceneTraceabilityMatrixMode::Local
+    }
 }
 
 #[derive(Default, Deserialize, Clone)]
@@ -547,7 +568,8 @@ pub struct Target {
 impl Target {
     pub fn from_triple(triple: &str) -> Self {
         let mut target: Self = Default::default();
-        if triple.contains("-none")
+        if triple.contains("lynxos178")
+            || triple.contains("-none")
             || triple.contains("nvptx")
             || triple.contains("switch")
             || triple.contains("-uefi")
@@ -572,6 +594,7 @@ struct TomlConfig {
     rust: Option<Rust>,
     target: Option<HashMap<String, TomlTarget>>,
     dist: Option<Dist>,
+    ferrocene: Option<Ferrocene>,
     profile: Option<String>,
 }
 
@@ -593,7 +616,17 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
-        TomlConfig { build, install, llvm, rust, dist, target, profile: _, changelog_seen }: Self,
+        TomlConfig {
+            build,
+            install,
+            llvm,
+            rust,
+            dist,
+            target,
+            ferrocene,
+            profile: _,
+            changelog_seen,
+        }: Self,
         replace: ReplaceOpt,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>, replace: ReplaceOpt) {
@@ -611,6 +644,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.llvm, llvm, replace);
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
+        do_merge(&mut self.ferrocene, ferrocene, replace);
         assert!(target.is_none(), "merging target-specific config is not currently supported");
     }
 }
@@ -1052,6 +1086,18 @@ define_config! {
         wasi_root: Option<String> = "wasi-root",
         qemu_rootfs: Option<String> = "qemu-rootfs",
         no_std: Option<bool> = "no-std",
+    }
+}
+
+define_config! {
+    struct Ferrocene {
+        aws_profile: Option<String> = "aws-profile",
+        traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
+        test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
+        oxidos_src: Option<String> = "oxidos-src",
+        tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
+        document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
+        ignore_document_signatures: Option<bool> = "ignore-document-signatures",
     }
 }
 
@@ -1627,6 +1673,24 @@ impl Config {
             }
         }
 
+        if let Some(f) = toml.ferrocene {
+            config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
+            {
+                Some("local") | None => FerroceneTraceabilityMatrixMode::Local,
+                Some("ci") => FerroceneTraceabilityMatrixMode::Ci,
+                Some(other) => panic!("unknown traceability matrix mode: {other}"),
+            };
+            config.ferrocene_aws_profile = f.aws_profile;
+            config.ferrocene_test_outcomes_dir = f.test_outcomes_dir;
+            config.ferrocene_oxidos_src = f.oxidos_src;
+            config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
+            config.ferrocene_document_signatures_s3_bucket = f
+                .document_signatures_s3_bucket
+                .unwrap_or_else(|| "ferrocene-document-signatures".into());
+            config.ferrocene_ignore_document_signatures =
+                f.ignore_document_signatures.unwrap_or(false);
+        }
+
         if config.llvm_from_ci {
             let triple = &config.build.triple;
             let ci_llvm_bin = config.ci_llvm_root().join("bin");
@@ -1713,6 +1777,7 @@ impl Config {
             | Subcommand::Fix { .. }
             | Subcommand::Run { .. }
             | Subcommand::Setup { .. }
+            | Subcommand::Sign { .. }
             | Subcommand::Format { .. }
             | Subcommand::Suggest { .. } => flags.stage.unwrap_or(0),
         };
@@ -1739,6 +1804,7 @@ impl Config {
                 | Subcommand::Fix { .. }
                 | Subcommand::Run { .. }
                 | Subcommand::Setup { .. }
+                | Subcommand::Sign { .. }
                 | Subcommand::Format { .. }
                 | Subcommand::Suggest { .. } => {}
             }

@@ -22,3 +22,9 @@ fn main() {
     core::panic!(false, 123);
     //~^ ERROR must be a string literal
 }
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

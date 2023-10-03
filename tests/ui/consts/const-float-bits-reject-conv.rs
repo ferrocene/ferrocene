@@ -66,3 +66,6 @@ fn main() {
     f32();
     f64();
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float literals

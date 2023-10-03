@@ -8,3 +8,6 @@ fn other() {
   example::<[usize; 4+5]>();
   //~^ ERROR type provided when a const
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

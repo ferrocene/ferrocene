@@ -7,3 +7,6 @@
 
 #[lang = "eh_personality"]
 fn eh() {}
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main

@@ -38,3 +38,6 @@ pub fn main() {
 
     assert_eq!(function_with_my_str::<{ MyStr::new("hello") }>().as_str(), "hello");
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

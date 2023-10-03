@@ -27,3 +27,6 @@ fn main() {
 
     XE::Empty1 {}; //~ ERROR no variant named `Empty1` found for enum `empty_struct::XE`
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

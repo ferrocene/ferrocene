@@ -46,3 +46,15 @@ fn main() {
 
     assert_eq!(CheckIfSend::check(hide(0_i32)), false);
 }
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

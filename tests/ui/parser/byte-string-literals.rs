@@ -7,3 +7,12 @@ pub fn main() {
     br##"é"##;  //~ ERROR non-ASCII character in raw byte string literal
     b"a  //~ ERROR unterminated double quote byte string
 }
+
+// ferrocene-annotations: fls_fqaffyrjob7v
+// Byte String Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

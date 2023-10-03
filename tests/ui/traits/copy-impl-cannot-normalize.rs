@@ -23,3 +23,9 @@ impl<T> Copy for Foo<T> {}
 //~^ ERROR the trait bound `T: TraitFoo` is not satisfied
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

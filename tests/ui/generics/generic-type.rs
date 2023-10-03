@@ -9,3 +9,6 @@ pub fn main() {
     assert_eq!(x.x, 10);
     assert_eq!(x.y, 12);
 }
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

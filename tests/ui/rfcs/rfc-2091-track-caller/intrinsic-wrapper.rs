@@ -20,3 +20,8 @@ fn main() {
     assert_eq!(loc2.line(), 18);
     assert_eq!(loc2.column(), 16);
 }
+
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion

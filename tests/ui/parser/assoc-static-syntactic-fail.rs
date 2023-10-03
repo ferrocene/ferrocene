@@ -31,3 +31,6 @@ impl T for S {
     pub default static TD: u8; //~ ERROR associated `static` items are not allowed
     //~^ ERROR a static item cannot be `default`
 }
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

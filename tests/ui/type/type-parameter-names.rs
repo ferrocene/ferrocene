@@ -10,3 +10,8 @@ fn foo<Foo, Bar>(x: Foo) -> Bar {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

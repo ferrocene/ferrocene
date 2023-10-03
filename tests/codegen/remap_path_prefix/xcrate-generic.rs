@@ -12,3 +12,5 @@ pub fn foo() {
 
 // Here we check that local debuginfo is mapped correctly.
 // CHECK: !DIFile(filename: "/the/aux-src/xcrate-generic.rs", directory: ""
+
+// ferrocene-annotations: um_rustc_C_metadata

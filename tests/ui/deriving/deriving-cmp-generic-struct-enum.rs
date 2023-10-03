@@ -46,3 +46,12 @@ pub fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

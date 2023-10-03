@@ -26,3 +26,5 @@ fn main() {
     hello!(whoah. hi di hi di ho); //~ ERROR hello to you, too!
     hello!(hi good hi and good bye); //~ ERROR hello to you, too!
 }
+
+// ferrocene-annotations: um_rustc_error_format

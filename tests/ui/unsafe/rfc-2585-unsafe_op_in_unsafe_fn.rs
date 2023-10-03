@@ -83,3 +83,18 @@ fn main() {
         //[thir]~^^ ERROR call to unsafe function `unsf` is unsafe and requires unsafe function or block
     }
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks

@@ -19,3 +19,13 @@ pub fn main() {
     f(p, 10, 20);
     f(p2, 10, 20);
 }
+
+
+// ferrocene-annotations: fls_k64tfywtn0g8
+// Tuple Expressions
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

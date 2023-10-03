@@ -19,3 +19,5 @@ let mut prev = 0;
 
     v
 }
+
+// ferrocene-annotations: um_rustc_W

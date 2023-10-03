@@ -36,3 +36,6 @@ pub fn main() {
     let value = MyType { dummy: 256 + 22 };
     test_eq(value, value);
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

@@ -29,3 +29,6 @@ fn main() {
     test::<FooCipher, 128>();
     test::<BarCipher, 64>();
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items

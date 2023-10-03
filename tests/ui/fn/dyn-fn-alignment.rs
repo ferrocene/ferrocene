@@ -21,3 +21,9 @@ fn main() {
     let addr = f2(0)();
     assert_eq!(addr as usize % 256, 0, "addr: {:?}", addr);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

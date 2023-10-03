@@ -35,3 +35,6 @@ fn main() {
     assert_eq!(call_foo_uint(), 1);
     assert_eq!(call_foo_int(), 2);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

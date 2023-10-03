@@ -20,3 +20,7 @@ pub fn main() {
     scalar_layout();
     scalarpair_layout();
 }
+
+
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

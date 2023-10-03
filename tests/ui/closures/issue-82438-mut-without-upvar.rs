@@ -26,3 +26,6 @@ fn main() {
 
     A.f(participant_name, &mut c); //~ ERROR cannot borrow
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

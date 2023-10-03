@@ -20,3 +20,7 @@ fn main() {
     let bad = v[0];
     //~^ ERROR cannot move out of index of `MyVec<Box<i32>>`
 }
+
+//
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Array and Slice Indexing Expressions

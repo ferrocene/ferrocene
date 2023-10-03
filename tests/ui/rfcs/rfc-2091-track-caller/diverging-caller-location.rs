@@ -15,3 +15,6 @@ fn doesnt_return() -> ! {
 fn main() {
     doesnt_return();
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

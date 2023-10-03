@@ -28,3 +28,6 @@ fn main() {
     let ans = s();
     assert_eq!(ans, 9);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

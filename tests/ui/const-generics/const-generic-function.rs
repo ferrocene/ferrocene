@@ -19,3 +19,6 @@ fn main() {
     foo::<bar(1, 1)>(); //~ ERROR expected type, found `1`
     foo::<bar(FOO, 2)>(); //~ ERROR expected type, found `2`
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

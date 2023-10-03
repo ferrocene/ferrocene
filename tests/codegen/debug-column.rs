@@ -22,3 +22,5 @@ extern "C" {
     fn giraffe();
     fn turtle();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

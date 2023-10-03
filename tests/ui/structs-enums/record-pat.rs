@@ -17,3 +17,6 @@ pub fn main() {
     assert_eq!(m(t3::c(T2 {x: t1::a(10), y: 5}, 4)), 10);
     assert_eq!(m(t3::c(T2 {x: t1::b(10), y: 5}, 4)), 19);
 }
+
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns

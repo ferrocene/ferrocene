@@ -29,3 +29,6 @@ fn main() {
     // discussion: https://github.com/rust-lang/rust/pull/108403
     assert_eq!(s, "a\x0cb");
 }
+
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals

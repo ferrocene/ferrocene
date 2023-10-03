@@ -5,3 +5,6 @@ pub fn main() {
     let j = i;
     assert_eq!(*j, 100);
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

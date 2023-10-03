@@ -10,3 +10,6 @@ pub fn main() {
 
     assert_eq!(a, b);
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

@@ -8,3 +8,9 @@ fn main() {
         //~^ ERROR does not have a field named `0x1`
     }
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns

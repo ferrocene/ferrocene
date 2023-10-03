@@ -16,3 +16,5 @@ pub fn normal_uwtable() {
 #[no_mangle]
 pub extern fn extern_uwtable() {
 }
+
+// ferrocene-annotations: um_rustc_C_panic

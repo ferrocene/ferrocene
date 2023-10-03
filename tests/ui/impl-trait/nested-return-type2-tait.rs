@@ -32,3 +32,12 @@ fn foo() -> impl Trait<Assoc = Sendable> {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

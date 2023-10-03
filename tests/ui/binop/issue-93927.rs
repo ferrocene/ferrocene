@@ -18,3 +18,9 @@ fn cond<T: PartialEq>(val: MyType<T>) -> bool {
 fn main() {
     cond(MyType(0));
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

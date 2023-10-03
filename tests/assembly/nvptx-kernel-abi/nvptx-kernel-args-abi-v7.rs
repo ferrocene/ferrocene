@@ -252,3 +252,5 @@ pub unsafe extern "ptx-kernel" fn f_tuple_u32_u32_arg(_a: (u32, u32)) {}
 // CHECK: .param .align 4 .b8 f_tuple_u8_u8_u32_arg_param_0[8]
 #[no_mangle]
 pub unsafe extern "ptx-kernel" fn f_tuple_u8_u8_u32_arg(_a: (u8, u8, u32)) {}
+
+// ferrocene-annotations: um_rustc_C_target_cpu

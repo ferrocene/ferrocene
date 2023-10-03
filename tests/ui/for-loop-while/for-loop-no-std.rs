@@ -12,3 +12,6 @@ fn start(_argc: isize, _argv: *const *const u8) -> isize {
     for _ in [1,2,3].iter() { }
     0
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

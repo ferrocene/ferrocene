@@ -7,3 +7,9 @@ fn main() {
     let x = foo as fn(&'static str);
     let _ = x == foo;
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

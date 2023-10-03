@@ -30,3 +30,9 @@ fn main() {
     v.push(1);
     assert_eq!(*v, vec![0, 1]);
 }
+
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

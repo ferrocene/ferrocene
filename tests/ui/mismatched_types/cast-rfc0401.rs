@@ -70,3 +70,9 @@ fn main()
 
     vec![0.0].iter().map(|s| s as f32).collect::<Vec<f32>>(); //~ ERROR is invalid
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

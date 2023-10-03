@@ -31,3 +31,12 @@ pub fn main() {
     assert_eq!(x, 6);
     assert_eq!(y, 60);
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

@@ -13,3 +13,6 @@ impl<T> Drop for Test<T> {
 pub fn main() {
     assert_eq!(size_of::<isize>(), size_of::<Test<isize>>());
 }
+
+// ferrocene-annotations: fls_ohhsmifo0urd
+// Type Representation

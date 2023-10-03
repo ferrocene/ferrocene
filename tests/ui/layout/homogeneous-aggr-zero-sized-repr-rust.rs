@@ -70,3 +70,6 @@ pub type Test5 = WithEmptyRustEnum;
 //~^ ERROR homogeneous_aggregate: Ok(Homogeneous(Reg { kind: Float, size: Size(4 bytes) }))
 
 fn main() {}
+
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation

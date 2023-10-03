@@ -11,3 +11,9 @@ fn check<'a>() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_olbj67eyxz2k
+// Parenthesized Types
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

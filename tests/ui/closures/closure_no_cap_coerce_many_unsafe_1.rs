@@ -21,3 +21,9 @@ fn main() {
     };
     assert_eq!(unsafe { foo(5, 5) }, 0);
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

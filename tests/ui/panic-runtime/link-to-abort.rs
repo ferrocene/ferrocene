@@ -9,3 +9,5 @@
 extern crate panic_abort;
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_C_panic

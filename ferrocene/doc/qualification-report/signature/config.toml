@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[roles.engineer]
+role-name = "Certification Engineer"
+name = "Tshepang Mbambo"
+email = "tshepang.mbambo@ferrous-systems.com"
+
+[roles.verifier]
+role-name = "Verifier"
+name = "Sebastian Ziebell"
+email = "sebastian.ziebell@ferrous-systems.com"

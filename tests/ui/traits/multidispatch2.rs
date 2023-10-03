@@ -37,3 +37,6 @@ pub fn main() {
     let value = MyType { dummy: 256 + 22 };
     test_eq(value, value.dummy);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

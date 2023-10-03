@@ -4,3 +4,9 @@ extern "C" {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+//
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

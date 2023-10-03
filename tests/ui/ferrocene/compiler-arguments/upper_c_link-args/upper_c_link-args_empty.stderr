@@ -1,0 +1,2 @@
+error: codegen option `link-args` requires a space-separated list of strings (C link-args=<value>)
+

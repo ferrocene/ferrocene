@@ -17,3 +17,6 @@ fn main() {
     let and_once_more: f32 = 0o20;
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_hv9jtycp0o1y
+// Numeric Literals

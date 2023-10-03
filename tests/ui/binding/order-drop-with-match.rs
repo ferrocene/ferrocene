@@ -55,3 +55,12 @@ fn main() {
         assert_eq!(expected, ORDER);
     }
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop order
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop scopes

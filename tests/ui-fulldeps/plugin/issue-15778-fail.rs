@@ -7,3 +7,5 @@
 //~^ WARN use of deprecated attribute `plugin`
 
 pub fn main() { }
+
+// ferrocene-annotations: um_rustc_D

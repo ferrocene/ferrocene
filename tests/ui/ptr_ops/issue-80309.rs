@@ -11,3 +11,9 @@ fn main() {
     let x = 42;
     println!("{}", unsafe { foo(&x) });
 }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

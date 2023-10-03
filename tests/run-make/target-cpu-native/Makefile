@@ -18,3 +18,5 @@ all: $(TMPDIR)/out.log
 $(TMPDIR)/out.log:
 	$(RUSTC) foo.rs -C target-cpu=native 2>&1 | tee $(TMPDIR)/out.log
 	$(call RUN,foo)
+
+# ferrocene-annotations: um_rustc_C_target_cpu

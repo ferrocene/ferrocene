@@ -11,3 +11,9 @@ fn foo() -> [u8; 3] {
 fn main() {
     assert_eq!([0; _], foo());
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array expressions
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array type

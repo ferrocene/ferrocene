@@ -8,3 +8,6 @@ fn main() {
     //~^ ERROR non-primitive cast
     y(x());
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

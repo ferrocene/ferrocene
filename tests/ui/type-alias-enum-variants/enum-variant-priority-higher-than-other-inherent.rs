@@ -21,3 +21,6 @@ fn main() {
     <E>::V(); //~ ERROR this enum variant takes 1 argument but 0 arguments were supplied
     let _: u8 = <E2>::V; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

@@ -4,3 +4,6 @@ fn main() {
     //~| WARN cannot specify lifetime arguments explicitly if late bound
     //~| WARN this was previously accepted by the compiler
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

@@ -92,3 +92,9 @@ pub fn main() {
     assert_eq!(receiver.recv().ok(), None);
     drop(t.join());
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

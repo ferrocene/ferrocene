@@ -12,3 +12,6 @@ impl issue_41652_b::Tr for S {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types

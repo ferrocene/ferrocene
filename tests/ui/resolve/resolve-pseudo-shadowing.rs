@@ -9,3 +9,6 @@ fn check<Clone>(_c: Clone) {
 }
 
 fn main() { check(()); }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

@@ -72,3 +72,15 @@ pub fn main() {
     // Check the final state.
     assert_eq!(*p, Point {x: 3, y: 0});
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

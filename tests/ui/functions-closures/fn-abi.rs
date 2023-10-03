@@ -16,3 +16,6 @@ pub fn main() {
     // same ABI
     let _p: unsafe extern "C" fn() = foo;
 }
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

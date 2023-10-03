@@ -9,3 +9,6 @@ fn main() {
     let _: Vec;
     //~^ ERROR missing generics for struct `Vec`
 }
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

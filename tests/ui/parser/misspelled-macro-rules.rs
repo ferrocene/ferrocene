@@ -11,3 +11,9 @@ marco_rules! thing {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

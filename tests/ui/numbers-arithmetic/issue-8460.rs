@@ -50,3 +50,15 @@ fn main() {
         1i64 % i64::zero()
     ];
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

@@ -19,3 +19,9 @@ impl<Baz> Foo<Baz> for Bar {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing
+//
+// ferrocene-annotations: fls_ftphlagzd2te
+// Generic Parameter Scope

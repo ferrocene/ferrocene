@@ -42,3 +42,12 @@ pub fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

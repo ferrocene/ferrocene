@@ -137,3 +137,18 @@ pub fn main() {
     };
     assert!(value);
 }
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

@@ -22,3 +22,6 @@ pub fn main() {
     // The auto slot for the result of make(i) should not leak.
     while make(i) != t::a { i += 1; }
 }
+
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

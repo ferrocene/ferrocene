@@ -3,3 +3,5 @@
 
 #![crate_type = "rlib"]
 #![no_std]
+
+// ferrocene-annotations: um_rustc_C_panic

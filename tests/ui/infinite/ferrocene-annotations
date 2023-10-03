@@ -1,0 +1,4 @@
+// Tests for infinite recursion limit
+// Nothing about this in FLS.
+// FLS has a paragraph about the recursion_limit attribute, but tests to
+// cover this paragraph are in src/test/ui/recursion_limit

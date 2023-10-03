@@ -43,3 +43,9 @@ pub fn main() {
     assert_eq!(BLOCK_FN(300), 300);
     assert_eq!(BLOCK_ENUM_CONSTRUCTOR(200), Some(200));
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant expressions
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

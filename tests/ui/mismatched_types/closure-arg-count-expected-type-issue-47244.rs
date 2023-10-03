@@ -18,3 +18,6 @@ fn main() {
         b.to_string()
     });
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

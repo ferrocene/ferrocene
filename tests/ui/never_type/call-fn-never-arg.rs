@@ -12,3 +12,6 @@ fn foo(x: !) -> ! {
 fn main() {
     foo(panic!("wowzers!"))
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

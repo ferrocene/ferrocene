@@ -20,3 +20,7 @@ fn main() {
     t.0 = 1;
     //~^ ERROR E0381
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

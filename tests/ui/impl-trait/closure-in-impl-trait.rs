@@ -12,3 +12,6 @@ fn main() {
     for _item in ok::<u32>() {}
     for _item in bug::<u32>() {}
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

@@ -10,3 +10,6 @@ fn main() {
 
     assert!(Bar::Qux < Bar::Quux(42));
 }
+
+// ferrocene-annotations: fls_9xnaxd7qbakp
+// Attribute no_std

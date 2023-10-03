@@ -58,3 +58,9 @@ pub fn main() {
     id_u64(j);
     id_u64(18_446_744_073_709_551_615);
 }
+
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

@@ -40,3 +40,12 @@ fn main() {
     let _: [&'static str; generic(1)] = ["hi"];
     let _: [&'static str; generic_arr([1])] = ["hi"];
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic expressions
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

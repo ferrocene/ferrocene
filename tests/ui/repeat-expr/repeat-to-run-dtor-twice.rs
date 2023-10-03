@@ -17,3 +17,6 @@ fn main() {
     let _ = [ a; 5 ];
     //~^ ERROR the trait bound `Foo: Copy` is not satisfied [E0277]
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

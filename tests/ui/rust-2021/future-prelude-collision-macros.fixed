@@ -43,3 +43,24 @@ fn main() {
     //~^ WARNING trait-associated function `try_from` will become ambiguous in Rust 2021
     //~| WARNING this is accepted in the current edition
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

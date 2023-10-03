@@ -3,3 +3,6 @@ fn foo(_: *()) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

@@ -23,3 +23,18 @@ pub fn main() {
         assert!((*x % 2 != 0));
     }
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

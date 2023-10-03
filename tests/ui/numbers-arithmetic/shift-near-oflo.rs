@@ -98,3 +98,20 @@ fn test_right_shift() {
     tests!(i64, u64, 63, i64::MIN,
            0x4000_0000_0000_0000_u64, 0x8000_0000_0000_0000_u64);
 }
+
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: um_rustc_C_debug_assertions

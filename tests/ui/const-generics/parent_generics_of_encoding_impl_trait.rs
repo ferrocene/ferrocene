@@ -9,3 +9,6 @@ fn main() {
     generics_of_parent_impl_trait::foo([()]);
     //~^ error: type annotations needed
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

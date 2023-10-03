@@ -12,3 +12,12 @@ fn main() {
     assert_eq!(((1u64 << 63) + 1).next_power_of_two(), 0);
     assert_eq!(((1u128 << 127) + 1).next_power_of_two(), 0);
 }
+
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

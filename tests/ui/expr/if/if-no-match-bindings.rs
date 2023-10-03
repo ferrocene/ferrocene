@@ -26,3 +26,10 @@ fn main() {
     while &true {} //~ ERROR mismatched types [E0308]
     while &mut true {} //~ ERROR mismatched types [E0308]
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

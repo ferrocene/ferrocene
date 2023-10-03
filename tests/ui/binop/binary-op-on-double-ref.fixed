@@ -7,3 +7,6 @@ fn main() {
     });
     println!("{:?}", vr);
 }
+
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

@@ -14,3 +14,5 @@ pub fn function(_x: Box<SomeTrait>) {}
 //~| WARN this is accepted in the current edition
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_A

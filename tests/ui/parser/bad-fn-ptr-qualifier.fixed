@@ -24,3 +24,12 @@ pub type FTT6 = for<'a>   unsafe extern "C" fn();
 //~| ERROR an `fn` pointer type cannot be `async`
 
 fn main() {}
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

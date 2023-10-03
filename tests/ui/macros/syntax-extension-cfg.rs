@@ -22,3 +22,5 @@ pub fn main() {
     if ! cfg!(not(not_a_cfg)) { panic!() }
     if ! cfg!(all(not(not_a_cfg), foo, qux="foo")) { panic!() }
 }
+
+// ferrocene-annotations: um_rustc_cfg

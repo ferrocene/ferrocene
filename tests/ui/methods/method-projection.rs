@@ -59,3 +59,9 @@ fn main() {
     let x = SomeOtherStruct { field: 44 };
     assert_eq!(foo(&x), format!("44"));
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

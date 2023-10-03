@@ -36,3 +36,9 @@ fn main() {
     assert_eq!(x.0, 1);
     assert_eq!(x.1, 5);
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

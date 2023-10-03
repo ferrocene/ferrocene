@@ -6,3 +6,9 @@ fn main() {
     //~^^^^ HELP Unicode character '”' (Right Double Quotation Mark) looks like '"' (Quotation Mark), but it is not
     //~^^^^^ ERROR expected `,`, found `world`
 }
+
+// ferrocene-annotations: fls_2i089jvv8j5g
+// Character Set
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals

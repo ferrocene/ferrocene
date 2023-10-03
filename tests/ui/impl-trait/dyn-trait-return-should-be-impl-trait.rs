@@ -72,3 +72,6 @@ fn bay() -> dyn Trait { //~ ERROR E0746
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

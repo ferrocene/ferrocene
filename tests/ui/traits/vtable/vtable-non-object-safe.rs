@@ -16,3 +16,6 @@ fn foo(_a: &mut dyn A<Item=u8>) {
 fn main() {
     foo(&mut vec![0, 1, 2, 3].into_iter());
 }
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object Safety

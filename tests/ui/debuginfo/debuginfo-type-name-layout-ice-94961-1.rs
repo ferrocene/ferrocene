@@ -14,3 +14,5 @@ pub struct Foo<T>([T; usize::MAX]);
 pub fn foo() -> usize {
     std::mem::size_of::<Foo<u8>>()
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

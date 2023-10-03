@@ -11,7 +11,7 @@ include ../tools.mk
 # instrumentation sections correctly. Neither Gold nor LLD have that problem.
 ifeq ($(UNAME),Linux)
 ifneq (,$(findstring x86,$(TARGET)))
-COMMON_FLAGS=-Clink-args=-fuse-ld=gold
+COMMON_FLAGS=-Clink-args=-fuse-ld=gold --target $(TARGET)
 endif
 endif
 
@@ -33,3 +33,7 @@ all:
 		-Cprofile-use="$(TMPDIR)/prof_data_dir/merged.profdata" -O \
 		-Ccodegen-units=1 --emit=llvm-ir || exit 1
 	cat "$(TMPDIR)/interesting.ll" | "$(LLVM_FILECHECK)" filecheck-patterns.txt
+
+# ferrocene-annotations: um_rustc_C_link_args
+#
+# ferrocene-annotations: um_rustc_C_codegen_units

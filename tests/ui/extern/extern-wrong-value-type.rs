@@ -9,3 +9,10 @@ fn main() {
     is_fn(f);
     //~^ ERROR expected a `Fn<()>` closure, found `extern "C" fn() {f}`
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

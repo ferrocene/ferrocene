@@ -19,3 +19,6 @@ fn main() {
     assert_eq!(val.impl_method(), 17);
     assert_eq!(A::<2>::associated_non_method(), 17);
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

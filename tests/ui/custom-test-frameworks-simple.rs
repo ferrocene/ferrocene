@@ -20,3 +20,5 @@ fn test1(i: usize) {
 fn test2(i: usize) {
     println!("Hey #{}", i);
 }
+
+// ferrocene-annotations: um_rustc_test

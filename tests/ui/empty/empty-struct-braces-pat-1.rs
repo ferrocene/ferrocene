@@ -32,3 +32,8 @@ fn main() {
     //~^ ERROR expected unit struct, unit variant or constant, found struct variant `XE::XEmpty3`
     }
 }
+
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

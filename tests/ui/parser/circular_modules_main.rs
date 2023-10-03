@@ -10,3 +10,6 @@ pub fn hi_str() -> String {
 fn main() {
     circular_modules_hello::say_hello();
 }
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

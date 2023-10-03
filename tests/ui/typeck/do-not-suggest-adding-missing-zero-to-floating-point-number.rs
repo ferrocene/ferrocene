@@ -19,3 +19,9 @@ fn main() {
 
     42.a; //~ERROR `{integer}` is a primitive type and therefore doesn't have fields
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

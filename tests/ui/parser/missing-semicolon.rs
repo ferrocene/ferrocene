@@ -6,3 +6,6 @@ macro_rules! m {
 }
 
 fn main() { m!(0, 0; 0, 0); }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

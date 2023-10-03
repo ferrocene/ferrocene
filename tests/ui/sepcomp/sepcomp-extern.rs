@@ -31,3 +31,5 @@ fn main() {
     assert_eq!(a::call2(), 1234);
     assert_eq!(b::call3(), 1234);
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

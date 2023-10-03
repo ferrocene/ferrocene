@@ -21,3 +21,9 @@ pub fn main() {
 
     t.join();
 }
+
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Types
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

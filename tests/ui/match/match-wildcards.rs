@@ -19,3 +19,9 @@ fn cmp() -> isize {
 fn main() {
     println!("{}", cmp());
 }
+
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Wildcard Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

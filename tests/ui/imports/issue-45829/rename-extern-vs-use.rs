@@ -9,3 +9,6 @@ extern crate issue_45829_b as bar;
 //~^ ERROR the name `bar` is defined multiple times
 
 fn main() {}
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

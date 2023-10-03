@@ -10,3 +10,7 @@ fn main() {
     f();
     f();
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

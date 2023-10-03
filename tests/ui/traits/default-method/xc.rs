@@ -79,3 +79,12 @@ pub fn main() {
     assert!(neq(&a, &b));
     assert!(!neq(&a, &a));
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

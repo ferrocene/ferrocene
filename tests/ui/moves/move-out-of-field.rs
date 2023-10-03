@@ -25,3 +25,9 @@ pub fn main() {
     let str = to_string(sb);
     assert_eq!(str, "Hello, World!");
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

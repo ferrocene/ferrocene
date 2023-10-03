@@ -28,3 +28,6 @@ fn main() {
     let a = Arr { ptr: Box::new([1, 2, 3]) };
     foo(&a);
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

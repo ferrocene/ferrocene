@@ -13,3 +13,12 @@ fn main() {
     *foo += 1; //~ ERROR cannot assign to `*foo` because it is borrowed
     drop(x);
 }
+
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns

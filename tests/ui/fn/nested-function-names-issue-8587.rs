@@ -40,3 +40,6 @@ pub fn main() {
     // This test `h` used to fail.
     assert_eq!(n.h(), 2);
 }
+
+// ferrocene-annotations: fls_ypio6boj3pwf
+// Attribute inline

@@ -37,3 +37,12 @@ fn main() {
 use deny as allow;
 #[allow(unused)] //~ ERROR `allow` is ambiguous
 fn builtin_renamed() {}
+
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

@@ -13,3 +13,6 @@ fn ufcs() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

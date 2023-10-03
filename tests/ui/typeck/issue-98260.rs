@@ -7,3 +7,6 @@ trait A {
 }
 
 enum B {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

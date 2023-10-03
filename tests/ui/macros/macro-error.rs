@@ -7,3 +7,9 @@ fn main() {
 
     let _: cfg!(foo) = (); //~ ERROR non-type macro in type position
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

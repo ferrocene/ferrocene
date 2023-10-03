@@ -16,3 +16,6 @@ fn transmute<T, U>(t: T) -> U {
 fn main() {
     println!("{:?}", transmute::<&str, (*const u8, u64)>("type safety"));
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

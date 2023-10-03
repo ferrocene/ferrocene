@@ -38,3 +38,15 @@ pub fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

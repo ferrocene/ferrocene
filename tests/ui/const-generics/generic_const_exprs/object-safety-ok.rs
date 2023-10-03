@@ -19,3 +19,6 @@ fn use_dyn<const N: usize>(v: &dyn Foo<N>) where [u8; N + 1]: Sized {
 fn main() {
     use_dyn::<3>(&());
 }
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object safety

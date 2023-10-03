@@ -29,3 +29,12 @@ pub fn main() {
   assert_eq!(cat("Spreckles".to_string()).get_name(),
                  "Spreckles".to_string());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

@@ -9,3 +9,6 @@ impl DataWrapper<'_> {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_wdec78luqh5b
+// Abstract Data Types

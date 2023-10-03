@@ -3,3 +3,6 @@ const b: *const i8 = &a as *const i8; //~ ERROR mismatched types
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

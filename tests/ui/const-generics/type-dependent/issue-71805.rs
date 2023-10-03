@@ -36,3 +36,12 @@ fn main() {
     let mut foos = [0u64; 9].iter().cloned();
     let _bar: [u64; 9] = foos.collect_array::<9_usize>();
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation conformance
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

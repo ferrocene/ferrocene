@@ -18,3 +18,9 @@ fn main() {
     //~^ ERROR type annotations needed
     //~| ERROR type annotations needed
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

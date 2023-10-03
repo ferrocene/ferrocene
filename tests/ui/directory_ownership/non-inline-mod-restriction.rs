@@ -3,3 +3,6 @@
 fn main() {
     mod foo; //~ ERROR cannot declare a non-inline module inside a block
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules

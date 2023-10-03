@@ -14,3 +14,6 @@ impl<T> Foo for T {
 fn foo(x: &str, y: &str) -> impl Foo<Item = dyn Bar> { () }
 
 fn main() { }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

@@ -41,3 +41,6 @@ fn main() {
     let y: &'static _ = &Y; //~ ERROR temporary value dropped while borrowed
     let z: &'static _ = &Z; //~ ERROR temporary value dropped while borrowed
 }
+
+// ferrocene-annotations: fls_omaq7psg83n3
+// Interior Mutability

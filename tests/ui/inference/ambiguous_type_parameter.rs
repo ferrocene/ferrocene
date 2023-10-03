@@ -15,3 +15,6 @@ impl<K> Store<String, HashMap<K, String>> for InMemoryStore {
 fn main() {
     InMemoryStore.get_raw(&String::default()); //~ ERROR type annotations needed
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

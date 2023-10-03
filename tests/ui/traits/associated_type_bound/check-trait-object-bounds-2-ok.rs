@@ -13,3 +13,6 @@ fn f<T: for<'r> X<'r> + ?Sized>() {
 fn main() {
     f::<dyn for<'x> X<'x, F = fn(&i32) -> &'x i32>>();
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

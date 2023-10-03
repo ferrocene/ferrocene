@@ -76,3 +76,9 @@ impl S {
 
 #[rustc_layout(debug)]
 type Impossible = (str, str); //~ ERROR: cannot be known at compilation time
+
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation
+//
+// ferrocene-annotations: fls_cmq8ogs84ivh
+// Union Type Representation

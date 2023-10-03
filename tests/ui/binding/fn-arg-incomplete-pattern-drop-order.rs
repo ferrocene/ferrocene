@@ -67,3 +67,18 @@ fn main() {
     (0..=4).for_each(|i| test_drop_order(i, bindings_with_let));
     (0..=4).for_each(|i| test_drop_order(i, |(_x, _), (_, _y)| {}));
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop order
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop scopes
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple pattern matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple patterns

@@ -47,3 +47,6 @@ fn main() {
     //~^ ERROR are too big for the current architecture
 
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

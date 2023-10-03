@@ -22,3 +22,5 @@ fn main() {
     // produce the error expected above).
     assert_eq!(x, 1_i8);
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

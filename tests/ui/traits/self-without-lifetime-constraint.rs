@@ -51,3 +51,12 @@ impl FromSql for &str {
 pub fn main() {
     println!("{}", "Hello World");
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

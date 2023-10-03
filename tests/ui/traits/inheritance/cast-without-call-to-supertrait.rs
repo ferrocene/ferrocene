@@ -31,3 +31,11 @@ pub fn main() {
     assert_eq!(afoo.f(), 10);
     assert_eq!(abar.g(), 20);
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

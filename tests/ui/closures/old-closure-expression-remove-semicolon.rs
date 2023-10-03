@@ -10,3 +10,9 @@ fn main() {
         foo(); //~ HELP remove this semicolon to return this value
     };
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

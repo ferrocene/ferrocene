@@ -17,3 +17,9 @@ fn bar<const N: u8>(_: A) {}
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_izl8iuhoz9e0
+// Scopes
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

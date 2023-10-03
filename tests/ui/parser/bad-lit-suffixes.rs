@@ -42,3 +42,36 @@ extern "C" {}
 #[rustc_layout_scalar_valid_range_start(0suffix)]
 //~^ ERROR invalid suffix `suffix` for number literal
 struct S;
+
+// ferrocene-annotations: fls_fqaffyrjob7v
+// Byte String Literals
+//
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_jps9102q0qfi
+// Raw Byte String Literals
+//
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals
+//
+// ferrocene-annotations: fls_msbaxfc09vkk
+// Simple Byte String Literals
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

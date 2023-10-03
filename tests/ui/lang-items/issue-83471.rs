@@ -21,3 +21,6 @@ fn call_through_fn_trait() {
     a()
     //~^ ERROR: cannot find function
 }
+
+// ferrocene-annotations: fls_olzilmy8n0nl
+// Attribute export_name

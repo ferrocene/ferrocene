@@ -14,3 +14,9 @@ fn _foo (f: Foo) {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_dq403wq5yrs
+// Namespaces

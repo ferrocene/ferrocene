@@ -36,3 +36,6 @@ impl T for i32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_bqw87nz4qbrb
+// Attribute automatically_derived

@@ -7,3 +7,5 @@
 use std::option; //~ WARN
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_cap_lints

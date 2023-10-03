@@ -109,3 +109,9 @@ pub fn main() {
 fn round_up(x: usize, a: usize) -> usize {
     ((x + (a - 1)) / a) * a
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

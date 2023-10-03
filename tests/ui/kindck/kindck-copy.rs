@@ -69,3 +69,6 @@ fn test<'a,T,U:Copy>(_: &'a isize) {
 
 pub fn main() {
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

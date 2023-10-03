@@ -106,3 +106,6 @@ const TEST_ICE_89765: () = {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

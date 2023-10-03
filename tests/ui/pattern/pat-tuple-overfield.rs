@@ -72,3 +72,15 @@ fn main() {
         E1::Z1(_, _) => {} //~ ERROR this pattern has 2 fields, but the corresponding tuple variant has 0 fields
     }
 }
+
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

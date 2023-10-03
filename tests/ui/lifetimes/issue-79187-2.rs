@@ -27,3 +27,6 @@ fn main() {
         t
     }
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

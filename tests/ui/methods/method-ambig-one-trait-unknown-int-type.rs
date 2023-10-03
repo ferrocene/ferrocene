@@ -34,3 +34,9 @@ fn m2() {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

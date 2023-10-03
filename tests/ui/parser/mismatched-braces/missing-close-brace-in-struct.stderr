@@ -1,5 +1,5 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/missing-close-brace-in-struct.rs:13:65
+  --> $DIR/missing-close-brace-in-struct.rs:16:65
    |
 LL | pub(crate) struct Bar<T> {
    |                          - unclosed delimiter

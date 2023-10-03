@@ -12,3 +12,9 @@ fn main() {
     let y = foo(&x);
     assert_eq!(x, y);
 }
+
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice pattern matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice patterns

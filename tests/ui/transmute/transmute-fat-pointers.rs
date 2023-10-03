@@ -31,3 +31,6 @@ fn f<T, U: ?Sized>(x: &T) -> &U {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

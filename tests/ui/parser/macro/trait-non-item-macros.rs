@@ -11,3 +11,6 @@ trait Bar {
 fn main() {
     let _recovery_witness: () = 0; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables

@@ -29,3 +29,5 @@ pub mod lit_test {
         println!("{}", ::lit::A);
     }
 }
+
+// ferrocene-annotations: um_rustc_test

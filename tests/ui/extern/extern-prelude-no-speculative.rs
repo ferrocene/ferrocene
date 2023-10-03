@@ -11,3 +11,6 @@ fn main() {
     // to resolve this as an extern crate and load that crate
     let s = m::LooksLikeExternCrate {};
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

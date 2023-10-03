@@ -12,3 +12,9 @@ fn main() {
     let (_, &b) = x;
     surprise(b);
 }
+
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference Pattern Matching
+//
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference Patterns

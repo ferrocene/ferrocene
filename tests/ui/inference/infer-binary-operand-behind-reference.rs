@@ -28,3 +28,9 @@ fn main() {
     let _ = &0 + 0;
     let _ = &0 + &0;
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

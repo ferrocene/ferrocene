@@ -16,3 +16,9 @@ fn want_foo<B:?Sized+Foo>() { }
 fn main() {
     want_foo::<dyn Bar>();
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

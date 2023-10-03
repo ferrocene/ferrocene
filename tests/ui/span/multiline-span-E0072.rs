@@ -8,3 +8,9 @@ ListNode
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types
+//
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout

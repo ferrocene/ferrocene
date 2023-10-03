@@ -8,3 +8,6 @@ fn main() {
     //~| found reference `&{integer}`
     //~| types differ in mutability
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

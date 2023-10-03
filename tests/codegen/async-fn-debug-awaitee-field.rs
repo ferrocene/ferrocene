@@ -21,3 +21,5 @@ pub async fn foo() {}
 // NONMSVC: [[AWAITEE_TYPE]] = !DICompositeType(tag: DW_TAG_structure_type, name: "{async_fn_env#0}", scope: [[AWAITEE_SCOPE:![0-9]*]],
 // MSVC: [[AWAITEE_TYPE]] = !DICompositeType(tag: DW_TAG_union_type, name: "enum2$<async_fn_debug_awaitee_field::foo::async_fn_env$0>",
 // NONMSVC: [[AWAITEE_SCOPE]] = !DINamespace(name: "foo",
+
+// ferrocene-annotations: um_rustc_C_debuginfo

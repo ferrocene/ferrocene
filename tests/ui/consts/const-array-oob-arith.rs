@@ -12,3 +12,6 @@ const BOO: [i32; (ARR[0] - 41) as usize] = [5, 99];
 fn main() {
     let _ = VAL;
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array type

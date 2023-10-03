@@ -22,3 +22,6 @@ fn ice(x: OuterAlias) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

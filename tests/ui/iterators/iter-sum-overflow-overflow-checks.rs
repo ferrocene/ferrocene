@@ -25,3 +25,5 @@ fn main() {
     });
     assert!(r.is_err());
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

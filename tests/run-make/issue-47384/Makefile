@@ -10,3 +10,5 @@ all: main.rs
 	objdump -s -j".static" $(TMPDIR)/libmain.so
 	# Ensure `#[no_mangle]` symbol is there
 	nm $(TMPDIR)/libmain.so | $(CGREP) bar
+
+# ferrocene-annotations: um_rustc_C_link_args

@@ -1,3 +1,6 @@
+[submodule "ferrocene/doc/specification/shared"]
+    path = ferrocene/doc/specification/shared
+    url = https://github.com/ferrocene/sphinx-shared-resources.git
 [submodule "src/doc/nomicon"]
 	path = src/doc/nomicon
 	url = https://github.com/rust-lang/nomicon.git

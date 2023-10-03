@@ -14,3 +14,9 @@ pub fn main() {
     };
     assert_eq!(s.f0, "Hello, world!");
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

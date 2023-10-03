@@ -23,3 +23,6 @@ fn main() {
     let _: fn(&mut dyn FnMut(&mut [u8])) = explicit;
     let _: &dyn Fn(&mut dyn FnMut(&mut [u8])) = &explicit;
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type

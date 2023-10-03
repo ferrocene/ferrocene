@@ -77,3 +77,7 @@ pub fn main() {
     let f5: &Fat<[Bar]> = &([],);
     assert!(f5.0.is_empty());
 }
+
+
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

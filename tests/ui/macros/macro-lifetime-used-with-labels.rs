@@ -34,3 +34,36 @@ fn main() {
         panic!("failed");
     }
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_4apk1exafxii
+// Macro Matching
+//
+// ferrocene-annotations: fls_ym00b6ewf4n3
+// Macro Transcription
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule Matching
+//
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token Matching

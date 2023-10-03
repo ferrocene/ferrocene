@@ -137,3 +137,12 @@ const _: () = {
     // assert that the following line fails.
     let _ = assert_impls_default::<NonExhaustiveDefaultGeneric<NotDefault>>;
 };
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_qezwyridmjob
+// Macros asm and global_asm

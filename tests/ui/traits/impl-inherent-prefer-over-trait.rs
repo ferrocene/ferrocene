@@ -28,3 +28,12 @@ fn main() {
     // N.B: `<Trait>::bar` would be ambiguous.
     <dyn Trait>::baz(&Foo);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

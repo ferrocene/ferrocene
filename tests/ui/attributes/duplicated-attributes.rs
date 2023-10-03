@@ -39,3 +39,11 @@ struct S;
 struct S2;
 
 fn main() {}
+
+// ferrocene-annotations: fls_ypio6boj3pwf
+// Attribute inline
+//
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: um_rustc_test

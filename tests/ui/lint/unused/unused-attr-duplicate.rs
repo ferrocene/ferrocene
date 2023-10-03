@@ -103,3 +103,9 @@ pub fn no_mangle_test() {}
 static FOO: u32 = 0;
 
 fn main() {}
+
+// ferrocene-annotations: fls_kpwbpp5hc00s
+// Attribute cold
+//
+// ferrocene-annotations: fls_zakwockktml8
+// Attribute no_builtins

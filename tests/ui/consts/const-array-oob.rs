@@ -8,3 +8,6 @@ const BLUB: [u32; FOO[4]] = [5, 6];
 fn main() {
     let _ = BAR;
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array type

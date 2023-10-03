@@ -16,3 +16,15 @@ extern "C" {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+//
+// ferrocene-annotations: fls_s4yt19sptl7d
+// External Statics

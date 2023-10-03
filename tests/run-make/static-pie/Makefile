@@ -16,3 +16,6 @@ test-%:
 		readelf -l $(call RUN_BINFILE,test-aslr) | $(CGREP) DYNAMIC; \
 		$(call RUN,test-aslr) --test-aslr; \
 	fi
+
+# ferrocene-annotations: um_rustc_C_linker_flavor
+# ferrocene-annotations: um_rustc_C_linker

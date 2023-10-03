@@ -34,3 +34,12 @@ pub fn main() {
     p = p + 1;
     assert_eq!(p, Point {x: 112, y: 123});
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

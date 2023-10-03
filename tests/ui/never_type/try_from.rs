@@ -35,3 +35,6 @@ impl<T> Into<Vec<T>> for Foo<T> {
 pub fn main() {
     let _: Result<Vec<i32>, Infallible> = Foo { t: 10 }.try_into();
 }
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

@@ -14,3 +14,6 @@ pub fn foo() {
 // CHECK: @bar() unnamed_addr #0
 // CHECK: attributes #0 = { {{.*}}nounwind{{.*}} }
 }
+
+// ferrocene-annotations: um_rustc_C_panic
+// ferrocene-annotations: um_rustc_C_metadata

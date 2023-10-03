@@ -25,3 +25,5 @@ fn live<const B: bool>() -> u32 {
 fn dead() -> u32 {
     42
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

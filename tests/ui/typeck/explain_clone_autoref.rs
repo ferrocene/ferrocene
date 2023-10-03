@@ -127,3 +127,9 @@ fn clone_thing11(nc: &NotClone) -> NotClone {
     //~^ ERROR mismatched type
     //~| NOTE expected `NotClone`, found `&NotClone`
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

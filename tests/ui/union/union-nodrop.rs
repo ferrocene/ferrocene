@@ -60,3 +60,24 @@ fn main() {
     assert!(needs_drop::<ActuallyDrop<u8>>());
     assert!(needs_drop::<ActuallyDrop<Box<u8>>>());
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_5eima0pd31c0
+// Drop Scope Extension
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order

@@ -12,3 +12,6 @@ static NON_ELIDABLE_FN: &fn(&u8, &u8) -> &u8 =
     //~| ERROR non-primitive cast
 
 fn main() {}
+
+// ferrocene-annotations: fls_u5lqku2rs6uv
+// Static Lifetime Elision

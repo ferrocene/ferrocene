@@ -5,3 +5,6 @@ struct ListNode { //~ ERROR has infinite size
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

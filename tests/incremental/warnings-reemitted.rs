@@ -7,3 +7,5 @@
 fn main() {
     let _ = 255u8 + 1; //~ WARNING operation will overflow
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

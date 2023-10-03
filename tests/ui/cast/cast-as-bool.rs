@@ -47,3 +47,6 @@ fn main() {
     //~^ ERROR casting `&'static str` as `bool` is invalid
     //~| HELP consider using the `is_empty` method on `&'static str` to determine if it contains anything
 }
+
+// ferrocene-annotations: fls_tiqp1gxf116z
+// Bool Type

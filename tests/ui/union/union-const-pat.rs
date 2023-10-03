@@ -11,3 +11,12 @@ fn main() {
         _ => {}
     }
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

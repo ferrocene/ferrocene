@@ -1,0 +1,3 @@
+// Most tests here are only the diagnostic output length
+// They are related to `--diagnostic-width=20` compiler flag
+// and `--error-format=json` compiler flag.

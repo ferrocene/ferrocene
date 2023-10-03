@@ -8,3 +8,6 @@ const C: &&[u32; 1] = &&{ 1 };
 //~^ ERROR mismatched types
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

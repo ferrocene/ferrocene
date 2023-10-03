@@ -164,3 +164,39 @@ pub fn main() {
 
     label_break_macro();
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_ym00b6ewf4n3
+// Macro Transcription
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule Matching
+//
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token Matching
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

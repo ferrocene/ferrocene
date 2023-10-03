@@ -42,6 +42,7 @@ complete -c x.py -n "__fish_use_subcommand" -f -a "install" -d 'Install distribu
 complete -c x.py -n "__fish_use_subcommand" -f -a "run" -d 'Run tools contained in this repository'
 complete -c x.py -n "__fish_use_subcommand" -f -a "setup" -d 'Set up the environment for development'
 complete -c x.py -n "__fish_use_subcommand" -f -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
+complete -c x.py -n "__fish_use_subcommand" -f -a "sign" -d 'Sign Ferrocene qualification documents'
 complete -c x.py -n "__fish_seen_subcommand_from build" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_seen_subcommand_from build" -l build -d 'build target of the stage0 compiler' -r -f
@@ -223,6 +224,7 @@ complete -c x.py -n "__fish_seen_subcommand_from doc" -l llvm-profile-use -d 'us
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l set -d 'override options in config.toml' -r -f
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l open -d 'open the docs in a browser'
+complete -c x.py -n "__fish_seen_subcommand_from doc" -l serve -d 'start a live-relodaing web server'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -s i -l incremental -d 'use incremental compilation'
@@ -420,6 +422,7 @@ complete -c x.py -n "__fish_seen_subcommand_from run" -l rust-profile-use -d 'us
 complete -c x.py -n "__fish_seen_subcommand_from run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from run" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x.py -n "__fish_seen_subcommand_from run" -l set -d 'override options in config.toml' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from run" -l bless -d 'update all files of failing tests'
 complete -c x.py -n "__fish_seen_subcommand_from run" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_seen_subcommand_from run" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_seen_subcommand_from run" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -488,3 +491,33 @@ complete -c x.py -n "__fish_seen_subcommand_from suggest" -l dry-run -d 'dry run
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -l json-output -d 'use message-format=json'
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -s h -l help -d 'Print help (see more with \'--help\')'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l config -d 'TOML configuration file for build' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l build -d 'build target of the stage0 compiler' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l host -d 'host targets to build' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l target -d 'target targets to build' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l exclude -d 'build paths to exclude' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l skip -d 'build paths to skip' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l rustc-error-format -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l on-fail -d 'command to run on failure' -r -f -a "(__fish_complete_command)"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l stage -d 'stage to build (indicates compiler to use/test, e.g., stage 0 uses the bootstrap compiler, stage 1 the stage 0 rustc artifacts, etc.)' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l keep-stage -d 'stage(s) to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny	,warn	,default	}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l error-format -d 'rustc error format' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always	,never	,auto	}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-skip-rebuild -d 'whether rebuilding llvm should be skipped, overriding `skip-rebuld` in config.toml' -r -f -a "{true	,false	}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l set -d 'override options in config.toml' -r -f
+complete -c x.py -n "__fish_seen_subcommand_from sign" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -s i -l incremental -d 'use incremental compilation'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l include-default-paths -d 'include default paths in addition to the provided ones'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l dry-run -d 'dry run; don\'t build anything'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -s h -l help -d 'Print help (see more with \'--help\')'

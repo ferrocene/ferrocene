@@ -13,3 +13,6 @@ pub fn main() {
     println!("{}", odds);
     assert_eq!(odds, 4);
 }
+
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

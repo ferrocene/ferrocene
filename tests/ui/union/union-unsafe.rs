@@ -76,3 +76,24 @@ fn main() {
     u3.a = ManuallyDrop::new(String::from("new")); // OK (assignment does not drop)
     *u3.a = String::from("new"); //~ ERROR access to union field is unsafe
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_g0uyl7qw4c7w
+// Parenthesized Expressions
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

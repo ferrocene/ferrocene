@@ -1,0 +1,64 @@
+{"message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
+
+Erroneous code examples:
+
+```compile_fail,E0425
+something_that_doesnt_exist::foo;
+// error: unresolved name `something_that_doesnt_exist::foo`
+
+// or:
+
+trait Foo {
+    fn bar() {
+        Self; // error: unresolved name `Self`
+    }
+}
+
+// or:
+
+let x = unknown_variable;  // error: unresolved name `unknown_variable`
+```
+
+Please verify that the name wasn't misspelled and ensure that the
+identifier being referred to is valid for the given situation. Example:
+
+```
+enum something_that_does_exist {
+    Foo,
+}
+```
+
+Or:
+
+```
+mod something_that_does_exist {
+    pub static foo : i32 = 0i32;
+}
+
+something_that_does_exist::foo; // ok!
+```
+
+Or:
+
+```
+let unknown_variable = 12u32;
+let x = unknown_variable; // ok!
+```
+
+If the item is not defined in the current module, it must be imported using a
+`use` statement, like so:
+
+```
+# mod foo { pub fn bar() {} }
+# fn main() {
+use foo::bar;
+bar();
+# }
+```
+
+If the item you are importing is not defined in some super-module of the
+current module, then it must also be declared as public (e.g., `pub fn`).
+"},"level":"error","spans":[{"file_name":"$DIR/json_diagnostic-short.rs","byte_start":101,"byte_end":102,"line_start":5,"line_end":5,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;
+"}
+{"message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to previous error
+"}

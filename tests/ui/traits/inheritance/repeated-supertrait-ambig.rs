@@ -41,3 +41,6 @@ fn with_ufcs2<C:CompareToInts>(c: &C) -> bool {
 fn main() {
     assert_eq!(22_i64.same_as(22), true); //~ ERROR `i64: CompareTo<i32>` is not satisfied
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

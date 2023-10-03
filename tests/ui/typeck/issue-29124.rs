@@ -17,3 +17,9 @@ fn main() {
     func.x();
     //~^ ERROR no method named `x` found
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

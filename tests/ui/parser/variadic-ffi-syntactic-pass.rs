@@ -51,3 +51,9 @@ trait T {
     fn t_f5(..., x: isize) {}
     fn t_f6(..., x: isize);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

@@ -13,3 +13,6 @@ pub fn main() {
     foors_mod::inline::innie::foo();
     attr_mod::inner_modrs_mod::innest::foo();
 }
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

@@ -39,3 +39,16 @@ fn it_writes_to_stdio() {
     writeln!(std::io::stdout(), "testing123").unwrap();
     writeln!(std::io::stderr(), "testing321").unwrap();
 }
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_aes2d94g12b9
+// Attribute should_panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions
+//
+// ferrocene-annotations: um_rustc_test
+//
+// ferrocene-annotations: um_rustc_C_panic

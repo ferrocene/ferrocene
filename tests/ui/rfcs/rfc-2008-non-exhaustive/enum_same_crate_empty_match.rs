@@ -35,3 +35,6 @@ fn main() {
     match NormalEnum::Unit {}
     //~^ ERROR `NormalEnum::Unit`, `NormalEnum::Tuple(_)` and `NormalEnum::Struct { .. }` not covered [E0004]
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

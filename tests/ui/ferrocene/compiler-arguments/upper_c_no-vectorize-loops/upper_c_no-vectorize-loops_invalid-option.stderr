@@ -1,0 +1,2 @@
+error: incorrect value `false` for codegen option `no-vectorize-loops` - no value was expected
+

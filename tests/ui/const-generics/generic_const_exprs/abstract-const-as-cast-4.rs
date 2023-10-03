@@ -27,3 +27,6 @@ pub fn use_trait_impl_2<const N: usize>() where EvaluatableU128<{N as _}>:, {
 
 
 fn main() {}
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

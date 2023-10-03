@@ -12,3 +12,7 @@ fn foo() -> isize {
 }
 
 fn main() { println!("{}", foo()); }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

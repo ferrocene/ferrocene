@@ -24,3 +24,6 @@ pub fn g(_: TokenStream, a: TokenStream) -> TokenStream { a }
 
 #[proc_macro_attribute(x)] //~ ERROR malformed `proc_macro_attribute` attribute
 pub fn h(_: TokenStream, a: TokenStream) -> TokenStream { a }
+
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test

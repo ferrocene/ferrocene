@@ -8,3 +8,9 @@ pub fn main() {
     new_name::check_local();
     assert_eq!(increment!(5), 6);
 }
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use
+//
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

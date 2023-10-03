@@ -11,3 +11,6 @@ fn main() {
     //~| WARN this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
     5; //~ NOTE not a function
 }
+
+// ferrocene-annotations: fls_kpwbpp5hc00s
+// Attribute cold

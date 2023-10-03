@@ -15,3 +15,6 @@ bar!(Foo<N> { baz!{ M } });
 fn main() {
     assert_eq!(Foo::<7>.test::<3>(), 3);
 }
+
+// ferrocene-annotations: fls_xlfo7di0gsqz
+// Hygiene

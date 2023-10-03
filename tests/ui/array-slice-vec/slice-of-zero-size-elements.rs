@@ -51,3 +51,5 @@ pub fn main() {
 
     assert!(foo_mut(slice).is_some())
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

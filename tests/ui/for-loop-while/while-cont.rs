@@ -9,3 +9,9 @@ pub fn main() {
         continue;
     }
 }
+
+// ferrocene-annotations: fls_sjwrlwvpulp
+// Continue Expressions
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

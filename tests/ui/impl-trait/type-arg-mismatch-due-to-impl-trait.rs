@@ -14,3 +14,6 @@ impl Foo for u32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

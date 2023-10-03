@@ -20,3 +20,5 @@ all:
 	mv $(TMPDIR)/libfoo.rlib $(TMPDIR)/other
 	$(RUSTC) foo.rs --crate-type=rlib
 	$(RUSTC) bar.rs -L $(TMPDIR)/other
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

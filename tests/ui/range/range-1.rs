@@ -14,3 +14,6 @@ pub fn main() {
     let range = *arr..;
     //~^ ERROR the size for values of type
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

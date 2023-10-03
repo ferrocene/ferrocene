@@ -13,3 +13,10 @@ fn main() {
         //~^ ERROR cannot move out of `y`, a captured variable in an `Fn` closure
     });
 }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

@@ -16,3 +16,6 @@ pub fn main() {
     assert_eq!(up.x, 0);
     assert_eq!(up.y, 10);
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

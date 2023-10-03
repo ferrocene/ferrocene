@@ -1,0 +1,10 @@
+Available relocation models:
+    static
+    pic
+    pie
+    dynamic-no-pic
+    ropi
+    rwpi
+    ropi-rwpi
+    default
+

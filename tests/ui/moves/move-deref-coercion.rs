@@ -31,3 +31,18 @@ fn use_method(val: Foo) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_6ydylimiv553
+// Place Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

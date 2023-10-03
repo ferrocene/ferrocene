@@ -150,3 +150,24 @@ fn main() {
             false | true) => {}
     }
 }
+
+// ferrocene-annotations: fls_5loglxds6zik
+// Parenthesized Pattern Matching
+//
+// ferrocene-annotations: fls_1xit18et4ohh
+// Parenthesized Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

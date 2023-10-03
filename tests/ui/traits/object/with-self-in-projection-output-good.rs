@@ -26,3 +26,8 @@ impl Helper for u32
 fn main() {
     let _x: Box<dyn Helper<Target=i32, Output=i32>> = Box::new(2u32);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

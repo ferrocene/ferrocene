@@ -283,6 +283,11 @@ macro_rules! bootstrap_tool {
 }
 
 bootstrap_tool!(
+    // Ferrocene-specific
+    FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
+    FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
+    FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
+
     Rustbook, "src/tools/rustbook", "rustbook";
     UnstableBookGen, "src/tools/unstable-book-gen", "unstable-book-gen";
     Tidy, "src/tools/tidy", "tidy";

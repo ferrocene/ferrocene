@@ -22,3 +22,5 @@ fn main() {
 }
 
 // EMIT_MIR const_debuginfo.main.ConstDebugInfo.diff
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

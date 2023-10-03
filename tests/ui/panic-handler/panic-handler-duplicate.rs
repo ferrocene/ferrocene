@@ -15,3 +15,8 @@ fn panic(info: &PanicInfo) -> ! {
 fn panic2(info: &PanicInfo) -> ! { //~ ERROR found duplicate lang item `panic_impl`
     loop {}
 }
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main
+//
+// ferrocene-annotations: um_rustc_C_panic

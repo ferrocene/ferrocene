@@ -49,3 +49,9 @@ fn main() {
         assert_eq!(COUNT, 12);
     }
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

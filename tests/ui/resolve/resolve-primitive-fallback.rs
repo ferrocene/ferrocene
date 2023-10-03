@@ -8,3 +8,6 @@ fn main() {
     let _: ::u8;
     //~^ ERROR cannot find type `u8` in the crate root
 }
+
+// ferrocene-annotations: fls_qwljwqr07slp
+// Numeric Types

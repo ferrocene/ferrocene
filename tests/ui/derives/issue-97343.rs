@@ -6,3 +6,6 @@ pub struct Irrelevant<Irrelevant> { //~ ERROR type arguments are not allowed on 
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

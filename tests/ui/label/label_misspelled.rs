@@ -60,3 +60,15 @@ fn bar() {
         //~^ ERROR `break` with value from a `for` loop
     };
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

@@ -11,3 +11,9 @@ fn main() {
     assert_eq!(size_of_val(&b), 0);
     assert_eq!((a(), b()), (1, 2));
 }
+
+// ferrocene-annotations: fls_airvr79xkcag
+// Function Item Type
+//
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout

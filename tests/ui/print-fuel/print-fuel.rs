@@ -11,3 +11,5 @@ struct S3(u8, u16, u8);
 
 fn main() {
 }
+
+// ferrocene-annotations: um_rustc_error_format

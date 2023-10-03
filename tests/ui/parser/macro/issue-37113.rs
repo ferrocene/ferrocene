@@ -9,3 +9,9 @@ macro_rules! test_macro {
 fn main() {
     test_macro!(String,);
 }
+
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_k01lsksqtq1r
+// Repetition

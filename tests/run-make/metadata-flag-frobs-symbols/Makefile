@@ -9,3 +9,5 @@ all:
 		--extern foo2=$(TMPDIR)/libfoo-b.rlib \
 		--print link-args
 	$(call RUN,bar)
+
+# ferrocene-annotations: um_rustc_C_metadata

@@ -35,3 +35,9 @@ fn main() {
 
     d.update();
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

@@ -37,3 +37,6 @@ impl S {
 fn main() {
     S.hello_method(); //~ no method named `hello_method` found
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

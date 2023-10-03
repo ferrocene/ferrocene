@@ -11,3 +11,5 @@ fn lintme() { } //~ ERROR item is named 'lintme'
 pub fn main() {
     lintme();
 }
+
+// ferrocene-annotations: um_rustc_D

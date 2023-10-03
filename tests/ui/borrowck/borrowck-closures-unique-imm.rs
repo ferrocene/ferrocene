@@ -16,3 +16,7 @@ pub fn main() {
 
 trait Fake { fn use_mut(&mut self) { } fn use_ref(&self) { }  }
 impl<T> Fake for T { }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

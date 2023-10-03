@@ -9,3 +9,5 @@
 fn main() {
     let _x = 42u8 - (42u8 + 1);
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

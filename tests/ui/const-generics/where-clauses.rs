@@ -28,3 +28,6 @@ fn main() {
     Faz::<3>::test::<u8>();
     <u8 as Fiz<13>>::fiz::<u8>();
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

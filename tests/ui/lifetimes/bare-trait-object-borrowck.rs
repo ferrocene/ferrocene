@@ -22,3 +22,12 @@ where
 fn main() {
     let _ = new_format(0..32, " | ", |i, f| f(&format_args!("0x{:x}", i)));
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

@@ -28,3 +28,7 @@ fn main() {
     let _moved = (line2.origin, line2.middle);
     line2.consume(); //~ ERROR [E0382]
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

@@ -41,3 +41,17 @@ fn main() {
     assert_eq!(CONTAINED.line(), 24);
     assert_eq!(CONTAINED.column(), 5);
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

@@ -23,3 +23,12 @@ static EH_CATCH_TYPEINFO: u8 = 0;
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

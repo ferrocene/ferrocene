@@ -11,3 +11,6 @@ pub struct S;
 m!(); // OK
 
 fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

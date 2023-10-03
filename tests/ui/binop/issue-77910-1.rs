@@ -9,3 +9,6 @@ fn main() {
     //~^ ERROR binary operation `==` cannot be applied to type
     //~| ERROR `for<'a> fn(&'a i32) -> &'a i32 {foo}` doesn't implement `Debug`
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

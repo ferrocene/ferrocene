@@ -16,3 +16,11 @@ struct S {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: um_rustc_cfg

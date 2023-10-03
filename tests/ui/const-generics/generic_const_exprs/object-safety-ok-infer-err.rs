@@ -19,3 +19,6 @@ fn main() {
     use_dyn(&());
     //~^ ERROR type annotations needed
 }
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object safety

@@ -9,3 +9,9 @@ impl List {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

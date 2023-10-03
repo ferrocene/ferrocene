@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[package]
+name = "ferrocene-self-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+atty = "0.2.14"
+tempfile = "3.3.0"

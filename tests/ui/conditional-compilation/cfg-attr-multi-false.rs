@@ -17,3 +17,6 @@ impl Struct {
 fn main() {
     Struct::new();
 }
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr

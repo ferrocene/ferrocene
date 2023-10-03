@@ -1,0 +1,73 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: The Ferrocene Developers */
+
+:root {
+    --header-offset: 2.5rem;
+}
+
+div.breadcrumbs {
+    height: var(--header-offset);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    color: #fff;
+    background: #194e80;
+    font-size: 0.9em;
+
+    display: flex;
+    align-items: center;
+}
+
+div.breadcrumbs :focus {
+    outline: 2px solid #68a4e8;
+}
+
+div.breadcrumbs a, div.breadcrumbs span.text {
+    color: inherit;
+    text-decoration: none;
+
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 0.5em;
+}
+
+div.breadcrumbs > a:first-child,
+div.breadcrumbs > span.text:first-child {
+    padding-left: 1em;
+}
+
+div.breadcrumbs > a:last-child,
+div.breadcrumbs > span.text:last-child {
+    padding-right: 1em;
+}
+
+div.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+div.breadcrumbs svg {
+    height: 1em;
+    width: auto;
+    fill: #fff;
+
+    display: inline-block;
+    margin-right: 0.6em;
+}
+
+div.breadcrumbs span.text.invalid-signature {
+    background: #a04633;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+div.breadcrumbs span.spacer {
+    flex: 1;
+}
+
+div.breadcrumbs .hidden {
+    display: none !important;
+}

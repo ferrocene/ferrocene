@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+
+name: Automatic backport
+on:
+  # Run from Monday to Friday at 5:00 UTC
+  schedule:
+    - cron: '0 5 * * 1-5'
+  # Allow to run this manually from the GitHub UI
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    name: Create PR
+    runs-on: ubuntu-latest
+
+    environment: automation-backport
+
+    steps:
+      - name: Checkout the Ferrocene repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all the history
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            python3-requests
+
+      - name: Configure git authorship information
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      # The builtin GitHub token doesn't have the "workflows" permissions, and
+      # so it can't create new branches with the .github/workflows directory in
+      # them. To work around that we're using a fresh token from an ad-hoc
+      # GitHub App with access to push new branches to this repo.
+      - name: Authenticate with GitHub to create branches
+        run: ferrocene/ci/github-app-auth.py
+        env:
+          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-backport
+          APP_ID: 298770
+          APP_PRIVATE_KEY: "${{ secrets.BACKPORT_APP_PRIVATE_KEY }}"
+        id: github_app_auth
+
+      - name: Run the backport automation
+        run: python3 ferrocene/tools/backport/all.py
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          PYTHONUNBUFFERED: "true"

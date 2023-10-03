@@ -13,3 +13,6 @@ pub fn main() {
     let x = Foo::new();
     println!("{}", x.x);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

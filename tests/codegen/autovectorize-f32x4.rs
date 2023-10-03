@@ -40,3 +40,5 @@ pub fn auto_vectorize_array_from_fn(a: [f32; 4], b: [f32; 4]) -> [f32; 4] {
 // CHECK: store <4 x float>
     std::array::from_fn(|i| a[i] + b[i])
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

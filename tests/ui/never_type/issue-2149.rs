@@ -13,3 +13,8 @@ fn main() {
     ["hi"].bind(|x| [x] );
     //~^ ERROR no method named `bind` found
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -36,3 +36,6 @@ fn never_match(x: Result<(), !>) {
 }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values

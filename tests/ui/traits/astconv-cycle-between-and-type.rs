@@ -27,3 +27,6 @@ impl Trait1 for u32 { }
 impl Trait2<SomeType<u32>> for u32 { }
 
 fn main() { }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

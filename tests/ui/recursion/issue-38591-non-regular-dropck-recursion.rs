@@ -14,3 +14,6 @@ fn main() {
     // Force instantiation.
     f as fn(_);
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

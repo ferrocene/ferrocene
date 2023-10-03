@@ -24,3 +24,5 @@ mod foo {
 pub fn main() {
     assert!(bar!())
 }
+
+// ferrocene-annotations: um_rustc_cfg

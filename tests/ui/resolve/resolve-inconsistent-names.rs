@@ -34,3 +34,6 @@ fn main() {
         //~| HELP if you meant to match on constant `m::Const2`, use the full path in the pattern
     }
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

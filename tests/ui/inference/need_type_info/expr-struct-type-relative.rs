@@ -19,3 +19,9 @@ impl Foo for u8 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

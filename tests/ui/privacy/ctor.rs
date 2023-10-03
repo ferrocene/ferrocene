@@ -14,3 +14,9 @@ fn main() {
     ctor_aux::x.g();
     ctor_aux::y.g();
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

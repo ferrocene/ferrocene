@@ -18,3 +18,9 @@ pub fn main() {
 
     return enum; //~ ERROR expected one of `;`, `}`, or an operator, found keyword `enum`
 }
+
+// ferrocene-annotations: fls_8l74abhlxzdl
+// Return Expressions
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

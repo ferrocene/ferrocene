@@ -59,3 +59,15 @@ impl AssocTy for i32 {
     type Assoc = Bar<_, _>;
     //~^ ERROR the placeholder `_` is not allowed within types on item signatures for associated types
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic parameters
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

@@ -14,3 +14,6 @@ fn first_ten<F>(mut it: F) where F: FnMut(isize) {
     let mut i: isize = 0;
     while i < 10 { println!("first_ten"); it(i); i = i + 1; }
 }
+
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

@@ -32,3 +32,6 @@ fn main() {
     //~^ ERROR mismatched types [E0308]
     //~| ERROR invalid left-hand side of assignment [E0070]
 }
+
+// ferrocene-annotations: fls_y4by2i8dl05o
+// Assignment Expressions

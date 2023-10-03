@@ -11,3 +11,6 @@ mod foo {
         mod baz; // This was an error before.
     }
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules

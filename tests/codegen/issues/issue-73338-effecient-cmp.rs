@@ -37,3 +37,5 @@ pub fn compare_greater(a: Foo, b: Foo)->bool{
     // CHECK-NOT: br {{.*}}
     a > b
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

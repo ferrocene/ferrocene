@@ -17,3 +17,6 @@ produce_it!(MyName);
 fn main() {
     println!("Hello, world!");
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

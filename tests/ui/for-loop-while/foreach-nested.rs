@@ -14,3 +14,6 @@ pub fn main() {
     assert_eq!(a[2], 10);
     assert_eq!(a[3], 11);
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

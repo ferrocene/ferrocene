@@ -90,3 +90,5 @@ fn eq_slice_of_option_of_nonzero(x: &[Option<NonZeroI16>], y: &[Option<NonZeroI1
     // CHECK-SAME: , [[USIZE]]{{( noundef)?}} %[[BYTES]])
     x == y
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

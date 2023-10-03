@@ -37,3 +37,6 @@ pub fn main() {
     let t = Test { x: 1 };
     do_something(&t);
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

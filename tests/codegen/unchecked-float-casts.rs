@@ -34,3 +34,5 @@ pub fn f64_to_u16(x: f64) -> u16 {
     // CHECK-NOT: select
     unsafe { x.to_int_unchecked() }
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

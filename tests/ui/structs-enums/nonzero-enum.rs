@@ -28,3 +28,6 @@ fn main() {
         panic!();
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

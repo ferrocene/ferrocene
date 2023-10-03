@@ -56,3 +56,12 @@ fn main() {
     e(r);
     g(r2);
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

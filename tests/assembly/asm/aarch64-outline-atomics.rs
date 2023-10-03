@@ -4,6 +4,7 @@
 // needs-llvm-components: aarch64
 // only-aarch64
 // only-linux
+// ignore-aarch64-unknown-ferrocenecoretest
 
 #![crate_type = "rlib"]
 

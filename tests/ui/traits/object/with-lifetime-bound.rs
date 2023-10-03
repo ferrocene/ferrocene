@@ -32,3 +32,6 @@ fn main() {
     let o = extension(&w);
     assert_eq!(o.n(), 10);
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

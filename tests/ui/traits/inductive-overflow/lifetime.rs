@@ -29,3 +29,8 @@ fn main() {
     is_send::<X<C<'static>>>();
     //~^ ERROR overflow evaluating
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+// ferrocene-annotations: fls_u2hzlzpzh7yy
+// Attribute recursion_limit

@@ -30,3 +30,9 @@ pub fn main() {
   let _nyan : cat<isize> = cat::<isize>(52, 99);
   //  let mut kitty = cat(1000, 2);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

@@ -22,3 +22,6 @@ fn november<'a>(s: &'a str) -> &'a str {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

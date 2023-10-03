@@ -6,3 +6,6 @@ enum Bug<S> { //~ ERROR parameter `S` is never used
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

@@ -105,3 +105,15 @@ pub fn main() {
     assert!((spotty.contains_key(&2)));
     assert_eq!(spotty.get(&3), &cat_type::tuxedo);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

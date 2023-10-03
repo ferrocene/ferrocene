@@ -32,3 +32,12 @@ fn main() {
     move_elem_mut(&mut [d(), d(), d(), d()]);
     move_subarr_mut(&mut [d(), d(), d(), d()]);
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

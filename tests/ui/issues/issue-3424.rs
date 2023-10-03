@@ -18,3 +18,5 @@ fn tester()
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: um_rustc_test

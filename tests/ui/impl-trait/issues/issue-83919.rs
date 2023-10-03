@@ -30,3 +30,6 @@ impl Foo for Implementor {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_aadan19t5006
+// async Blocks

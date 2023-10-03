@@ -9,3 +9,5 @@
 
 #[test]
 fn do_nothing() {}
+
+// ferrocene-annotations: um_rustc_test

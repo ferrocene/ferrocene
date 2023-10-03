@@ -4,3 +4,6 @@ fn main() {
     //~| HELP if a comment was intended use `//`
     ;
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

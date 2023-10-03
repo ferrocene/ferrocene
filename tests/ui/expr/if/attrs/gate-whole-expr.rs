@@ -13,3 +13,10 @@ fn main() {
     }
     assert_eq!(x, 1);
 }
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+// ferrocene-annotations: fls_u1afezy1ye99
+// Conditional Compilation
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

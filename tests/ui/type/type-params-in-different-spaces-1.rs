@@ -16,3 +16,8 @@ pub fn main() {
     let x: u8 = foo.broken_add("hello darkness my old friend".to_string());
     println!("{}", x);
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

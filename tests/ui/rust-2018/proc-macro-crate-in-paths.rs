@@ -14,3 +14,15 @@ use proc_macro::TokenStream;
 pub fn derive_template(input: TokenStream) -> TokenStream {
     input
 }
+
+// ferrocene-annotations: fls_ujig607lmwbm
+// Attribute crate_type
+//
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates
+//
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive
+//
+// ferrocene-annotations: fls_o8s3r7m90q59
+// Derive Macros

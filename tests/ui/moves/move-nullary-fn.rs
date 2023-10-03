@@ -11,3 +11,6 @@ fn f<F>(thing: F) where F: FnOnce() {
 pub fn main() {
     f(|| {});
 }
+
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Types

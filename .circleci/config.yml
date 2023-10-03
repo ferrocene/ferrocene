@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# This uses CircleCI's dynamic configuration feature to calculate some
+# parameters before executing the workflows. You're probably looking for
+# `.circleci/workflows.yml` if you need to change the CI configuration.
+
+---
+version: 2.1
+setup: true
+
+orbs:
+  aws-cli: circleci/aws-cli@4.0
+  continuation: circleci/continuation@0.2.0
+
+jobs:
+  setup:
+    docker:
+      - image: cimg/python:3.9
+    resource_class: small # 1-core
+    steps:
+      - aws-cli/install
+
+      - run:
+          name: Prepare environment for AWS authentication
+          command: |
+            # Load the JWT token into a file
+            touch /tmp/awsjwt
+            chmod 0600 /tmp/awsjwt
+            echo "${CIRCLE_OIDC_TOKEN_V2}" > /tmp/awsjwt
+
+            set_env() {
+              echo "export $1=\"$2\"" >> "${BASH_ENV}"
+            }
+
+            # Set environment variables to authenticate with OIDC
+            set_env AWS_WEB_IDENTITY_TOKEN_FILE /tmp/awsjwt
+            set_env AWS_ROLE_SESSION_NAME circleci
+            set_env AWS_DEFAULT_REGION eu-central-1
+
+            # Avoid reaching out to the EC2 metadata server, which just
+            # timeouts outside of EC2.
+            set_env AWS_EC2_METADATA_DISABLED true
+
+            # Some versions of AWS CLI fail if `less` is not installed, so
+            # disable pager support to suppress the error.
+            set_env AWS_PAGER ""
+
+      - run:
+          name: Authenticate with AWS
+          command: aws sts get-caller-identity
+
+      - run:
+          name: Checkout the source code
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com &>> ~/.ssh/known_hosts
+
+            git init .
+            git remote add origin "${CIRCLE_REPOSITORY_URL}"
+            git fetch --depth=1 origin "${CIRCLE_SHA1}"
+            git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
+
+      - run:
+          name: Install Python dependencies
+          command: pip install --user pyyaml boto3
+
+      - run:
+          name: Calculate the parameters for the workflow
+          command: |
+            python3 .circleci/calculate-parameters.py > /tmp/continue-parameters.json
+            cat /tmp/continue-parameters.json
+
+      - continuation/continue:
+          configuration_path: .circleci/workflows.yml
+          parameters: /tmp/continue-parameters.json
+
+workflows:
+  version: 2
+  setup:
+    jobs: [setup]

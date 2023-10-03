@@ -33,3 +33,6 @@ pub static VAR3: E = E::B(1.);
 #[no_mangle]
 #[link_section = ".test_four"]
 pub fn fn1() {}
+
+// ferrocene-annotations: fls_hffpo88r61rh
+// Attribute link_section

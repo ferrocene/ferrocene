@@ -9,3 +9,6 @@ fn main() {
     //~^ WARNING type annotations needed
     //~| WARNING this is accepted in the current edition
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type

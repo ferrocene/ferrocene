@@ -8,3 +8,5 @@ fn main() {
         let y = std::mem::transmute::<&i32, &mut i32>(&5); //~WARN: undefined behavior
     }
 }
+
+// ferrocene-annotations: um_rustc_A

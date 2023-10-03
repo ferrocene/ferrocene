@@ -15,3 +15,6 @@ fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision

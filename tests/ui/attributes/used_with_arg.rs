@@ -17,3 +17,6 @@ static mut USED_COMPILER_LINKER2: [usize; 1] = [0];
 static mut USED_COMPILER_LINKER3: [usize; 1] = [0];
 
 fn main() {}
+
+// ferrocene-annotations: fls_7skf24auayqy
+// Attribute used

@@ -30,3 +30,6 @@ pub fn main() {
 
     assert_eq!(ptr as *const usize as usize, ptr2 as usize);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

@@ -28,3 +28,9 @@ fn main() {
     };
     accept_fn(c3);
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

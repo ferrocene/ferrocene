@@ -7,3 +7,6 @@ extern "C" { //~ NOTE while parsing this item list starting here
     //~| HELP there is already a visibility modifier, remove one
     //~| NOTE explicit visibility first seen here
 } //~ NOTE the item list ends here
+
+// ferrocene-annotations: fls_wb86edg02t6a
+// Items

@@ -32,3 +32,12 @@ fn main() {
     assert_eq!(b, d);
     assert_eq!(c, d);
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Type
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

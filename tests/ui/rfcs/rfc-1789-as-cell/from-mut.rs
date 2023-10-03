@@ -18,3 +18,6 @@ fn main() {
     array_cell[0].set(99);
     assert_eq!(array, [99, 2, 3]);
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

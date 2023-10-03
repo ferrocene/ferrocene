@@ -16,3 +16,9 @@ pub fn main() {
         drop(x);
     });
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

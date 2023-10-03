@@ -13,3 +13,6 @@ fn a() -> Foo {
     // This is not a defining use, it doesn't actually constrain the opaque type.
     panic!()
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

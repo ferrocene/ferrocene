@@ -19,3 +19,9 @@ impl<T> Foo<T> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -10,3 +10,6 @@ use cross_crate::*;
 fn main() {
     let _: built_in_type; // OK
 }
+
+// ferrocene-annotations: fls_ahmnqhm8anlb
+// Built-in Attributes

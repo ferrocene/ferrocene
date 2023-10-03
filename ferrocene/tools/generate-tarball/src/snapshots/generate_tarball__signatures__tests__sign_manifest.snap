@@ -1,0 +1,33 @@
+---
+source: ferrocene/tools/generate-tarball/src/signatures.rs
+assertion_line: 148
+expression: "serde_json::to_string_pretty(&deserialized.signed.into_verified(&keychain)?)?"
+---
+{
+  "product": "ferrocene",
+  "package": "demo-package",
+  "commit": "000000",
+  "files": [
+    {
+      "path": "bin/rustc",
+      "posix-mode": 33261,
+      "sha256": "uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=",
+      "needs-proxy": true
+    },
+    {
+      "path": "lib/librustc_driver.so",
+      "posix-mode": 33188,
+      "sha256": "lX4IzN2GdNJIl185uuaM8vab87ZA1p+/LnK0r/JdSH8=",
+      "needs-proxy": false
+    },
+    {
+      "path": "lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd.rlib",
+      "posix-mode": 33188,
+      "sha256": "rOyXaUDGSIqZ/eBYpOQK6GJ7ufWvSq9RaAEsPCsyDvw=",
+      "needs-proxy": false
+    }
+  ],
+  "managed-prefixes": [
+    "lib/rustlib/x86_64-unknown-linux-gnu/lib/"
+  ]
+}

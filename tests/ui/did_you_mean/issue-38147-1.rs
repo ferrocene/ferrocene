@@ -19,3 +19,6 @@ impl<'a> Foo<'a> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

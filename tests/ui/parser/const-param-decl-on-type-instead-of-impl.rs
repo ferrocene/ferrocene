@@ -13,3 +13,6 @@ fn chaenomeles() {
     //~^ ERROR unexpected `const` parameter declaration
     //~| ERROR failed to resolve: use of undeclared crate or module `path`
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

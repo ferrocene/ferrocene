@@ -19,3 +19,6 @@ pub fn f<'a, 'b, 'd, 'e> (
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type

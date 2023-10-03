@@ -9,3 +9,6 @@ fn main() {
     let _ = namespaced_enums::C { a: 10 };
     //~^ ERROR cannot find struct, variant or union type `C`
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

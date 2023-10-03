@@ -29,3 +29,9 @@ fn test_tag() {
 }
 
 pub fn main() { test_rec(); test_tag(); }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

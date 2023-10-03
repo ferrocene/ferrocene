@@ -18,3 +18,6 @@ fn main() {
     1 + call_nested_expr!();
     call_nested_expr_sum!();
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

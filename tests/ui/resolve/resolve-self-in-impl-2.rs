@@ -5,3 +5,6 @@ impl Self for S {} //~ ERROR expected trait, found self type `Self`
 impl Self::N for S {} //~ ERROR cannot find trait `N` in `Self`
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope

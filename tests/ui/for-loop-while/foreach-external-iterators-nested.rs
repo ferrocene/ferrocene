@@ -13,3 +13,6 @@ pub fn main() {
     }
     assert_eq!(q, 1010100);
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

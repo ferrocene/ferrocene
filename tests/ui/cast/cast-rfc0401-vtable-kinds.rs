@@ -60,3 +60,12 @@ fn main() {
         assert_eq!(&(*u_u32).1, &[0, 1, 2]);
     }
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

@@ -11,3 +11,6 @@ fn main() {
     foo(Box::new(move || y = !y) as Box<_>);
     //~^ ERROR cannot assign to `y`, as it is not declared as mutable
 }
+
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

@@ -20,3 +20,9 @@ fn main() {
     ImportedVec::<u8>::new();
     env_imported!("PATH");
 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports
+//
+// ferrocene-annotations: fls_ld0ize96cm6m
+// Preludes

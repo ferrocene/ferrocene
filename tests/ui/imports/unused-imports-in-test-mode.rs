@@ -100,3 +100,5 @@ mod test_has_no_attr {
 }
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_test

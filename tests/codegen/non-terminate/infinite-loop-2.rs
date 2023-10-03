@@ -17,3 +17,5 @@ fn test() -> u8 {
     let x = infinite_loop();
     x
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

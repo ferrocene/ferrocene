@@ -9,3 +9,5 @@ include ../tools.mk
 
 all:
 	$(RUSTC) hello.rs -C link-args=-Wl,-z,text
+
+# ferrocene-annotations: um_rustc_C_link_args

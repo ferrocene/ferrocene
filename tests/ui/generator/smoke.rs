@@ -175,3 +175,5 @@ fn send_over_threads() {
         }
     }).join().unwrap();
 }
+
+// ferrocene-annotations: um_rustc_test

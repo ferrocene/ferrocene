@@ -23,3 +23,12 @@ pub fn main() {
     assert_eq!(15_u32.add(6u32), 21_u32);
     assert_eq!(15_u64.add(6u64), 21_u64);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

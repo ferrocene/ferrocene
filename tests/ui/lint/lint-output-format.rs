@@ -11,3 +11,5 @@ fn main() {
     let _x = foo();
     let _y = bar(); //~ ERROR use of unstable library feature
 }
+
+// ferrocene-annotations: um_rustc_F

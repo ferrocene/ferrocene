@@ -5,3 +5,8 @@ pub fn main() {
         [first, remainder @ ..] => {},
     };
 }
+
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

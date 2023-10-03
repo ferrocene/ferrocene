@@ -36,3 +36,6 @@ fn main() {
     let h = MyStruct { #![allow(warnings)] field: 0 };
     //~^ ERROR an inner attribute is not permitted in this context
 }
+
+// ferrocene-annotations: fls_gvwd0kf72jt
+// Attributes

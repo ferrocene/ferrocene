@@ -1,0 +1,2 @@
+error: incorrect value `3` for codegen option `debuginfo` - either an integer (0, 1, 2), `none`, `line-directives-only`, `line-tables-only`, `limited`, or `full` was expected
+

@@ -11,3 +11,18 @@ fn main() {
         println!("{}", x + 3);
     }
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

@@ -47,3 +47,12 @@ type A = &A + B;
 //~^ ERROR expected a path on the left-hand side of `+`, not `&A`
 
 fn main() {}
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

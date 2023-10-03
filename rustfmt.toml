@@ -39,4 +39,7 @@ ignore = [
     # these are ignored by a standard cargo fmt run
     "compiler/rustc_codegen_cranelift/y.rs", # running rustfmt breaks this file
     "compiler/rustc_codegen_cranelift/scripts",
+
+    "ferrocene/library/libc",
+    "ferrocene/library/getrandom-0.1",
 ]

@@ -23,3 +23,8 @@ fn main() {
     let [_, _] = a.arr;
     assert_eq!(a.value(), 2);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

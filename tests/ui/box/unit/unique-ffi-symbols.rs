@@ -14,3 +14,15 @@ fn main() {
     assert!(a != b);
     assert_eq!((a(), b()), (0, 5));
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_hbbek3z4wtcs
+// Function Types

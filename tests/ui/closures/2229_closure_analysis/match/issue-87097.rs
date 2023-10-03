@@ -33,3 +33,6 @@ fn main() {
     discriminant_is_a_ref();
     discriminant_is_a_field();
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

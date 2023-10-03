@@ -12,3 +12,9 @@ mod m1 {
 fn bar(x: m1::foo) { match x { m1::foo::foo1 => { } m1::foo::foo2 => { } } }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_d44aflefat88
+// Path pattern matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path patterns

@@ -17,3 +17,9 @@ where
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision
+//
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

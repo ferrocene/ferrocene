@@ -97,3 +97,9 @@ fn main() {
     STATIC_BAZ(BYTES); // BYTES has static lifetime
     CONST_BAZ(y); // interestingly this does not get reported
 }
+
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision
+//
+// ferrocene-annotations: fls_u5lqku2rs6uv
+// Static Lifetime Elision

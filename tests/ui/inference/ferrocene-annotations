@@ -1,0 +1,11 @@
+// Some tests are not individually annotated because they are specifically
+// testing suggestions, not errors.
+//
+// ferrocene-annotations: fls_vgb6ev541b2r
+// Types and Traits
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

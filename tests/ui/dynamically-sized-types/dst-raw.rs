@@ -136,3 +136,15 @@ pub fn main() {
         assert_eq!(len, 3);
     }
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

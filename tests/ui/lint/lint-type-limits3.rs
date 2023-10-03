@@ -11,3 +11,5 @@ fn qux() {
         i += 1;
     }
 }
+
+// ferrocene-annotations: um_rustc_D

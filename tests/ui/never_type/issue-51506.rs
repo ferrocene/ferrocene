@@ -39,3 +39,6 @@ fn f<T: Trait>(a: T) {
 pub fn main() {
     f(10);
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

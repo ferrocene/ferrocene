@@ -197,8 +197,12 @@ impl Config {
         let _ = try_run(self, patchelf.arg(fname));
     }
 
-    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
+    pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
         self.verbose(&format!("download {url}"));
+        if self.dry_run() {
+            return;
+        }
+
         // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
         let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
         // While bootstrap itself only supports http and https downloads, downstream forks might
@@ -208,8 +212,9 @@ impl Config {
             Some("http") | Some("https") => {
                 self.download_http_with_retries(&tempfile, url, help_on_error)
             }
+            Some("s3") => crate::ferrocene::download_from_s3(self, url, &tempfile, help_on_error),
             Some(other) => panic!("unsupported protocol {other} in {url}"),
-            None => panic!("no protocol in {url}"),
+            None => crate::ferrocene::download_from_local_filesystem(url, &tempfile, help_on_error),
         }
         t!(std::fs::rename(&tempfile, dest_path));
     }
@@ -229,6 +234,8 @@ impl Config {
             tempfile.to_str().unwrap(),
             "--retry",
             "3",
+            "-Sf",
+            "-L", // Follow redirects
             "-SRf",
         ]);
         // Don't print progress in CI; the \r wrapping looks bad and downloads don't take long enough for progress to be useful.
@@ -263,7 +270,7 @@ impl Config {
         }
     }
 
-    fn unpack(&self, tarball: &Path, dst: &Path, pattern: &str) {
+    pub(crate) fn unpack(&self, tarball: &Path, dst: &Path, pattern: &str) {
         eprintln!("extracting {} to {}", tarball.display(), dst.display());
         if !dst.exists() {
             t!(fs::create_dir_all(dst));
@@ -294,11 +301,21 @@ impl Config {
             if original_path == directory_prefix {
                 continue;
             }
-            let mut short_path = t!(original_path.strip_prefix(directory_prefix));
-            if !short_path.starts_with(pattern) {
-                continue;
-            }
-            short_path = t!(short_path.strip_prefix(pattern));
+
+            // Ferrocene tarballs' contents are different. Compared to upstream, this handles
+            // Ferrocene and upstream tarballs seamlessly together.
+            let short_path = match original_path.strip_prefix(directory_prefix) {
+                // Upstream tarballs:
+                Ok(short_path) => match short_path.strip_prefix(pattern) {
+                    Ok(short_path) => short_path,
+                    Err(_) => continue, // Path does not begin with pattern
+                },
+                // Ferrocene tarballs:
+                // For Ferrocene we don't check the pattern, as it's used to filter down the
+                // contents of upstream tarballs.
+                Err(_) => &original_path,
+            };
+
             let dst_path = dst.join(short_path);
             self.verbose(&format!("extracting {} to {}", original_path.display(), dst.display()));
             if !t!(member.unpack_in(dst)) {
@@ -320,18 +337,21 @@ impl Config {
     }
 
     /// Returns whether the SHA256 checksum of `path` matches `expected`.
-    fn verify(&self, path: &Path, expected: &str) -> bool {
+    pub fn verify(&self, path: &Path, expected: &str) -> bool {
         use sha2::Digest;
 
         self.verbose(&format!("verifying {}", path.display()));
+        if self.dry_run() {
+            return true;
+        }
         let mut hasher = sha2::Sha256::new();
         // FIXME: this is ok for rustfmt (4.1 MB large at time of writing), but it seems memory-intensive for rustc and larger components.
         // Consider using streaming IO instead?
-        let contents = if self.dry_run() { vec![] } else { t!(fs::read(path)) };
+        let contents = t!(fs::read(path));
         hasher.update(&contents);
         let found = hex::encode(hasher.finalize().as_slice());
         let verified = found == expected;
-        if !verified && !self.dry_run() {
+        if !verified {
             println!(
                 "invalid checksum: \n\
                 found:    {found}\n\

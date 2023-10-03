@@ -28,3 +28,5 @@ pub extern "system-unwind" fn rust_item_that_can_unwind() {
 // CHECK: attributes #1 = {
 // CHECK-NOT: nounwind
 // CHECK: }
+
+// ferrocene-annotations: um_rustc_C_opt_level

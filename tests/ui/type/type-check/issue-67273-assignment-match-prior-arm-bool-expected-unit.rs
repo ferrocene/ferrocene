@@ -25,3 +25,10 @@ fn main() {
         _ => (),
     }
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

@@ -18,3 +18,12 @@ fn main() {
     Struct { .. } = Struct { a: 1, b: 4 };
     assert_eq!((a, b), (1, 2));
 }
+
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

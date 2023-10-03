@@ -16,3 +16,6 @@ fn main() {
     let pth = panic!("bye");
     let _rs: T = T { t: pth };
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

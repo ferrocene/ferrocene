@@ -66,3 +66,12 @@ fn main() {}
 
 fn use_mut<T>(_: &mut T) { }
 fn use_imm<T>(_: &T) { }
+
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership
+//
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

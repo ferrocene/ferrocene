@@ -31,3 +31,9 @@ fn foo<T: ?Sized>() {
     let s = 0 as *const T;
     //~^ ERROR cannot cast `usize` to a pointer that may be wide
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Type

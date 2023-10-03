@@ -45,3 +45,6 @@ pub struct Masked;
 //~^ ERROR this attribute cannot be applied to an `extern crate self` item
 //~| WARN is being phased out
 pub extern crate self as reexport;
+
+// ferrocene-annotations: fls_63v1fqedzwfd
+// Attribute doc

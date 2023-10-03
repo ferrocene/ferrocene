@@ -23,3 +23,9 @@ rust-executable:
 	$(RUSTC) -Clinker-plugin-lto=on -L$(TMPDIR) -Copt-level=2 -Clinker=$(CLANG) -Clink-arg=-fuse-ld=lld ./main.rs -o $(TMPDIR)/rsmain
 	"$(LLVM_BIN_DIR)"/llvm-objdump -d $(TMPDIR)/rsmain | $(CGREP) -e "call.*c_never_inlined"
 	"$(LLVM_BIN_DIR)"/llvm-objdump -d $(TMPDIR)/rsmain | $(CGREP) -v -e "call.*c_always_inlined"
+
+# ferrocene-annotations: um_rustc_C_link_arg
+# ferrocene-annotations: um_rustc_C_opt_level
+# ferrocene-annotations: um_rustc_C_linker
+#
+# ferrocene-annotations: um_rustc_C_codegen_units

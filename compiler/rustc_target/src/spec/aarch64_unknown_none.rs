@@ -6,14 +6,13 @@
 //
 // For example, `-C target-cpu=cortex-a53`.
 
-use super::{
-    Cc, LinkerFlavor, Lld, PanicStrategy, RelocModel, SanitizerSet, Target, TargetOptions,
-};
+use super::{PanicStrategy, RelocModel, SanitizerSet, Target, TargetOptions};
 
 pub fn target() -> Target {
     let opts = TargetOptions {
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
-        linker: Some("rust-lld".into()),
+        // FERROCENE: use the default linker rather than rust-lld
+        //linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        //linker: Some("rust-lld".into()),
         features: "+v8a,+strict-align,+neon,+fp-armv8".into(),
         supported_sanitizers: SanitizerSet::KCFI | SanitizerSet::KERNELADDRESS,
         relocation_model: RelocModel::Static,

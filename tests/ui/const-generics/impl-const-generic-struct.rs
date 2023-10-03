@@ -10,3 +10,6 @@ impl<const X: u32> S<X> {
 fn main() {
     assert_eq!(S::<19>::x(), 19);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

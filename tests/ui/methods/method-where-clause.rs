@@ -32,3 +32,6 @@ fn main() {
     assert_eq!(check(Some(23u32)), (23, 22));
     assert_eq!(check(Some(23)), (23, 22));
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

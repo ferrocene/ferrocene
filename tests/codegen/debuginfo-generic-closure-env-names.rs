@@ -87,3 +87,6 @@ pub fn instantiate_generics() {
     let _async_block_u32 = generic_async_block(64u32);
     let _async_block_foo = generic_async_block(Foo);
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo
+// ferrocene-annotations: um_rustc_C_opt_level

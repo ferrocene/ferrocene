@@ -12,3 +12,6 @@ fn main() {
     let _c: [bool; '\n' as usize] = [true; '\n' as usize];
     let _d: [bool; true as usize] = [true; true as usize];
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

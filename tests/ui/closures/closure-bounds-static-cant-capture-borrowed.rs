@@ -11,3 +11,6 @@ fn foo(x: &()) {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

@@ -9,3 +9,6 @@ macro_rules! one_arg_macro {
 fn main() {
     one_arg_macro!(/**/); //~ ERROR unexpected end
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

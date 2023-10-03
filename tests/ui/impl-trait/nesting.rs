@@ -13,3 +13,6 @@ fn main() {
     println!("{:?}", foo(42).into());
     println!("{:?}", bar().into());
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

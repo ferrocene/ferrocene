@@ -14,3 +14,9 @@ fn main() {
     demo(1..10);
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

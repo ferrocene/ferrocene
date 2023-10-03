@@ -28,3 +28,9 @@ pub fn direct() -> Result<(), impl Debug> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_pocsh1neugpc
+// Error Propagation Expression
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

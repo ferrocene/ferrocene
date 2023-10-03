@@ -12,3 +12,6 @@ use Tr::{}; // FIXME, this and `use Tr::{self};` should be an error
 use Nonexistent::{}; //~ ERROR unresolved import `Nonexistent`
 
 fn main () {}
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

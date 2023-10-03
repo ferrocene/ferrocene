@@ -28,6 +28,9 @@ on:
       allow-duplicate:
         description: Allow duplicate releases
         type: boolean
+      verbatim-ref:
+        description: Do not resolve ref, keep it verbatim
+        type: boolean
 
 
 permissions:

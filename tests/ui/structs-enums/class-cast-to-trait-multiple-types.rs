@@ -92,3 +92,12 @@ pub fn main() {
   assert_eq!(nyan.meow_count(), 10_usize);
   assert_eq!(whitefang.volume, 1);
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

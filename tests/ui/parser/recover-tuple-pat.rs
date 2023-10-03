@@ -10,3 +10,6 @@ fn main() {
         (1, 2, 3, 4) => {}
     }
 }
+
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

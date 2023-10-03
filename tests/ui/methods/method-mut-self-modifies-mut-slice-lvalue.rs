@@ -42,3 +42,9 @@ fn main() {
 
     assert_eq!(buf, [0, 1, 2, 3, 4, 5]);
 }
+
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

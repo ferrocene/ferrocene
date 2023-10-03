@@ -19,3 +19,6 @@ impl<const P: *const u32> Const<P> { //~ ERROR: using raw pointers as const gene
 fn main() {
     assert_eq!(Const::<{&A as *const _}>::get(), 3)
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

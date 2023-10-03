@@ -56,3 +56,5 @@ fn check_sve2_includes_neon() {
     assert!(cfg!(target_feature = "neon"));
     assert!(cfg!(target_feature = "sve2"));
 }
+
+// ferrocene-annotations: um_rustc_C_target_feature

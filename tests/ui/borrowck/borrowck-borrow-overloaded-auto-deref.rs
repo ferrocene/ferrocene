@@ -101,3 +101,13 @@ fn assign_method3<'a>(x: &'a mut Rc<Point>) {
 }
 
 pub fn main() {}
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression/ References
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

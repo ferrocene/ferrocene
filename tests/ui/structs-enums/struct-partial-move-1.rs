@@ -19,3 +19,15 @@ pub fn main() {
     let p = f((S::new(3), S::new(4)), |S { val: z }| S::new(z+1));
     assert_eq!(p, Partial { x: S::new(3), y: S::new(5) });
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns

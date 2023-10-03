@@ -6,3 +6,6 @@ fn main() {}
 
 #[cfg(FALSE)]
 const X: u8;
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants

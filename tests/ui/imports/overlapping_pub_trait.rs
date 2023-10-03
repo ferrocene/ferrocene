@@ -13,3 +13,6 @@ fn main() {
     //~^ ERROR no method named `method` found for struct `S` in the current scope [E0599]
     //~| HELP items from traits can only be used if the trait is in scope
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

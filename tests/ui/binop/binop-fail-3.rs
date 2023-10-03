@@ -9,3 +9,9 @@ fn foo() -> ! {
 fn main() {
     foo() == foo(); // these types wind up being defaulted to ()
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

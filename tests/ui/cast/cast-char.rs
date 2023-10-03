@@ -8,3 +8,6 @@ fn main() {
     const ZYX: char = '\u{01F888}';
     println!("{}", XYZ);
 }
+
+// ferrocene-annotations: fls_wrvjizrqf3po
+// Char Type

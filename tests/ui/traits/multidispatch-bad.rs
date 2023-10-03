@@ -20,3 +20,12 @@ fn a() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

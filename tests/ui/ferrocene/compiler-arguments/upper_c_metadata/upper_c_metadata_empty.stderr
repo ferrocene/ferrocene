@@ -1,0 +1,2 @@
+error: codegen option `metadata` requires a space-separated list of strings (C metadata=<value>)
+

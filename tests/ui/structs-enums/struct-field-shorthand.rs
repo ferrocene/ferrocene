@@ -24,3 +24,6 @@ pub fn main() {
     assert_eq!(c.y, y);
     assert_eq!(c.z, z);
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

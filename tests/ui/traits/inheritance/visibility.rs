@@ -18,3 +18,6 @@ fn f<T:Quux>(x: &T) {
 pub fn main() {
     f(&0)
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

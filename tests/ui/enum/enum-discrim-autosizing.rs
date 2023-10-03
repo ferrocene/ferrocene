@@ -12,3 +12,6 @@ enum Eu64 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

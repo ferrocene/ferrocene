@@ -14,3 +14,6 @@ macro_rules! expand_it {
 fn main() {
     expand_it!()
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

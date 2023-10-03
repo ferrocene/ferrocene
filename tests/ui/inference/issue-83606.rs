@@ -8,3 +8,6 @@ fn main() {
     let _ = foo("foo");
     //~^ ERROR: type annotations needed for `[usize; N]`
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

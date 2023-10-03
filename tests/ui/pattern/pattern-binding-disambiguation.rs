@@ -55,3 +55,12 @@ fn main() {
     let STATIC = doesnt_matter; //~ ERROR let bindings cannot shadow statics
     let function = doesnt_matter; // OK, `function` is a fresh binding
 }
+
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns

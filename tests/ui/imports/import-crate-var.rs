@@ -6,3 +6,6 @@ fn main() {
     m!();
     //~^ ERROR `$crate` may not be imported
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

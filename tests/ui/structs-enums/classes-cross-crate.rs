@@ -11,3 +11,9 @@ pub fn main() {
     for _ in 1_usize..10_usize { nyan.speak(); };
     assert!((nyan.eat()));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates

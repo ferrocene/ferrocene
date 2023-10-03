@@ -33,3 +33,5 @@ impl dynamic_runner::Testable for IsFoo {
 
 #[test_case]
 const TEST_2: AllFoo = AllFoo("foo foo");
+
+// ferrocene-annotations: um_rustc_test

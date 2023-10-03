@@ -22,3 +22,9 @@ pub fn main() {
     assert_eq!(ff(a), 10);
     assert_eq!(gg(a), 20);
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

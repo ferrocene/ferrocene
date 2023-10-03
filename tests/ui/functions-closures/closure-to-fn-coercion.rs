@@ -33,3 +33,6 @@ fn main() {
     assert_eq!({ BAR[4](&mut a); a }, 10);
     assert_eq!(generic(0i8)(), 1);
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

@@ -11,3 +11,6 @@ fn foo(res: Result<u32, &R>) -> u32 {
 fn main() {
     foo(Ok(23));
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

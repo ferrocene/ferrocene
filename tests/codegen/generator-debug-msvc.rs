@@ -57,3 +57,5 @@ fn generator_test() -> impl Generator<Yield = i32, Return = ()> {
 fn main() {
     let _dummy = generator_test();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

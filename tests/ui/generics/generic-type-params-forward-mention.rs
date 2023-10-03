@@ -4,3 +4,6 @@ struct Foo<T = Option<U>, U = bool>(T, U);
 fn main() {
     let x: Foo;
 }
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

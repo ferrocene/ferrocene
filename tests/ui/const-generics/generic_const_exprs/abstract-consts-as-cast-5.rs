@@ -9,3 +9,9 @@ fn foo<const N: u8>(a: [(); N as usize]) {
 fn bar<const N: usize>() {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic parameters
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

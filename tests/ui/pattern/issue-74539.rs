@@ -13,3 +13,15 @@ fn main() {
         }
     };
 }
+
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

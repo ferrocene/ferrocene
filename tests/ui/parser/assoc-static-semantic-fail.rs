@@ -50,3 +50,6 @@ impl T for S {
     //~| ERROR visibility qualifiers are not permitted here
     //~| ERROR a static item cannot be `default`
 }
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

@@ -15,3 +15,6 @@ fn main() {
         FOO => { }
     }
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types

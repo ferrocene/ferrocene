@@ -11,3 +11,9 @@ fn wants_display(g: impl Debug) { } //~ ERROR expected trait, found derive macro
 fn wants_clone(g: impl Clone) { }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

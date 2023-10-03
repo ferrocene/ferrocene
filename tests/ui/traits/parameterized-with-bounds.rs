@@ -19,3 +19,12 @@ fn foo4<'a, T>(_: Box<dyn C<'a, T> + 'static + Send>) {}
 fn foo5<'a, T>(_: Box<dyn foo::D<'a, T> + 'static + Send>) {}
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

@@ -11,3 +11,6 @@ fn test() {
 pub fn main() {
     test();
 }
+
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops

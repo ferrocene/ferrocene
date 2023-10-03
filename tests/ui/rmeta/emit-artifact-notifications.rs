@@ -6,3 +6,6 @@
 // A very basic test for the emission of artifact notifications in JSON output.
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_json
+// ferrocene-annotations: um_rustc_error_format

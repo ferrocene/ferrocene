@@ -50,6 +50,7 @@ mod config;
 mod dist;
 mod doc;
 mod download;
+mod ferrocene;
 mod flags;
 mod format;
 mod install;
@@ -308,11 +309,18 @@ pub enum Mode {
     /// anything that needs a fully functional rustc, such as rustdoc, clippy,
     /// cargo, rls, rustfmt, miri, etc.
     ToolRustc,
+
+    ToolCustom {
+        name: &'static str,
+    },
 }
 
 impl Mode {
     pub fn is_tool(&self) -> bool {
-        matches!(self, Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd)
+        matches!(
+            self,
+            Mode::ToolBootstrap | Mode::ToolRustc | Mode::ToolStd | Mode::ToolCustom { .. }
+        )
     }
 
     pub fn must_support_dlopen(&self) -> bool {
@@ -700,7 +708,13 @@ impl Build {
                 self.config.dry_run = DryRun::SelfCheck;
                 let builder = builder::Builder::new(&self);
                 builder.execute_cli();
+
+                if builder.is_serve_flag_unsupported() {
+                    eprintln!("error: --serve flag is not supported for the requested path");
+                    exit!(1);
+                }
             }
+
             self.config.dry_run = DryRun::Disabled;
             let builder = builder::Builder::new(&self);
             builder.execute_cli();
@@ -810,14 +824,26 @@ impl Build {
     ///
     /// The mode indicates what the root directory is for.
     fn stage_out(&self, compiler: Compiler, mode: Mode) -> PathBuf {
+        let mut subdir = None;
         let suffix = match mode {
             Mode::Std => "-std",
             Mode::Rustc => "-rustc",
             Mode::Codegen => "-codegen",
             Mode::ToolBootstrap => "-bootstrap-tools",
             Mode::ToolStd | Mode::ToolRustc => "-tools",
+            Mode::ToolCustom { name } => {
+                subdir = Some(name);
+                "-tools-custom"
+            }
         };
-        self.out.join(&*compiler.host.triple).join(format!("stage{}{}", compiler.stage, suffix))
+        let mut out = self
+            .out
+            .join(&*compiler.host.triple)
+            .join(format!("stage{}{}", compiler.stage, suffix));
+        if let Some(subdir) = subdir {
+            out = out.join(subdir)
+        }
+        out
     }
 
     /// Returns the root output directory for all Cargo output in a given stage,

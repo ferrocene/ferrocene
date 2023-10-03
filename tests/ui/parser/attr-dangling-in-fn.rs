@@ -6,3 +6,6 @@ fn f() {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_gvwd0kf72jt
+// Attributes

@@ -51,3 +51,9 @@ pub fn main() {
     #[cfg(target_pointer_width = "32")]
     assert_eq!(size_of::<Ei64>(), 4);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

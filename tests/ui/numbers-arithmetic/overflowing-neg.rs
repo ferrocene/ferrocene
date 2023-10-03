@@ -8,3 +8,5 @@
 fn main() {
     let _x = -i8::MIN;
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

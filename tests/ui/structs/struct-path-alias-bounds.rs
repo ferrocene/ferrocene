@@ -9,3 +9,6 @@ fn main() {
     let s = A { a: NoClone };
     //~^ ERROR the trait bound `NoClone: Clone` is not satisfied
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

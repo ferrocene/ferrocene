@@ -17,3 +17,5 @@ all:
 	crateB::try_bar\(bar2\);.*\
 	expected trait \`crateA::bar::Bar\`, found trait \`Bar\`.*\
 	different versions of crate \`crateA\`"
+
+# ferrocene-annotations: um_rustc_C_metadata

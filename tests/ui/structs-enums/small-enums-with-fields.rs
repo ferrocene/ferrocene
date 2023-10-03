@@ -31,3 +31,6 @@ pub fn main() {
            Either::Left(132), "Left(132)",
            Either::Right(-20000), "Right(-20000)");
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

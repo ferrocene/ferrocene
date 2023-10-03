@@ -10,3 +10,5 @@ mod m {
         panic!("ran an unexported test");
     }
 }
+
+// ferrocene-annotations: um_rustc_test

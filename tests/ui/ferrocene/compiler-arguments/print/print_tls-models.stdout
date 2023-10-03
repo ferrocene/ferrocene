@@ -1,0 +1,6 @@
+Available TLS models:
+    global-dynamic
+    local-dynamic
+    initial-exec
+    local-exec
+

@@ -17,3 +17,9 @@ fn main() {
     //~^ ERROR E0277
     //~| ERROR E0277
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

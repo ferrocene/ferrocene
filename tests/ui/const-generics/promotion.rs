@@ -7,3 +7,6 @@ fn promotion_test<const N: usize>() -> &'static usize {
 fn main() {
     assert_eq!(promotion_test::<13>(), &16);
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

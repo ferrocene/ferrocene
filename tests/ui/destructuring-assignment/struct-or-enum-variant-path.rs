@@ -32,3 +32,6 @@ impl E {
         (Self::V, a) = (E::V, ());
     }
 }
+
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns

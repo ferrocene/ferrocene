@@ -49,3 +49,6 @@ fn main() {
     assert_eq!(mem::size_of::<U>(), 4);
     assert_eq!(mem::align_of::<U>(), 2);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

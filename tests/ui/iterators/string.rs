@@ -4,3 +4,6 @@ fn main() {
     for _ in "" {}
     //~^ ERROR `&str` is not an iterator
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

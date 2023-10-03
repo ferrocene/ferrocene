@@ -6,3 +6,8 @@ fn foo() {}
 fn main() {
     foo(); //~ ERROR cannot find function `foo` in this scope
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: um_rustc_cfg

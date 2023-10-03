@@ -24,3 +24,6 @@ pub fn main() {
     nonzero_size();
     zst();
 }
+
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

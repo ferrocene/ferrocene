@@ -25,3 +25,6 @@ pub fn main() {
     assert!(x != y);
     assert_eq!(x, z);
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

@@ -24,3 +24,6 @@ use foo::Bar;
 use foobar::Baz; //~ ERROR unresolved import `foobar`
 
 fn main() { }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

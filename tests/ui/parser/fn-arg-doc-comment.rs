@@ -28,3 +28,6 @@ fn main() {
     //~| NOTE arguments to this function are incorrect
     //~| NOTE expected `i32`, found `&str`
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

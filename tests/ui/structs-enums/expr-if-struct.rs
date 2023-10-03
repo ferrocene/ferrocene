@@ -30,3 +30,9 @@ fn test_tag() {
 }
 
 pub fn main() { test_rec(); test_tag(); }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

@@ -24,3 +24,5 @@ fn main() {
         //[rwpi]~^ cannot use register `r9`
     }
 }
+
+// ferrocene-annotations: um_rustc_C_relocation_model

@@ -64,3 +64,17 @@ trait A {
 }
 
 fn main() {}
+
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+// ferrocene-annotations: fls_wn1i6hzg2ff7
+// Procedural Macros

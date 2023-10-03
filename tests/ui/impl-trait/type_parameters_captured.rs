@@ -10,3 +10,6 @@ fn foo<T>(x: T) -> impl Any + 'static {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

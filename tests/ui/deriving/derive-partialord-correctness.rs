@@ -7,3 +7,6 @@ struct FloatWrapper(f64);
 fn main() {
     assert!((0.0 / 0.0 >= 0.0) == (FloatWrapper(0.0 / 0.0) >= FloatWrapper(0.0)))
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

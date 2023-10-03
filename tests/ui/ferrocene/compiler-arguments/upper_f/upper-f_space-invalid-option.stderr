@@ -1,0 +1,16 @@
+warning[E0602]: unknown lint: `invalid_lint_code`
+   |
+   = note: requested on the command line with `-F invalid_lint_code`
+   = note: `#[warn(unknown_lints)]` on by default
+
+warning[E0602]: unknown lint: `invalid_lint_code`
+   |
+   = note: requested on the command line with `-F invalid_lint_code`
+
+warning[E0602]: unknown lint: `invalid_lint_code`
+   |
+   = note: requested on the command line with `-F invalid_lint_code`
+
+warning: 3 warnings emitted
+
+For more information about this error, try `rustc --explain E0602`.

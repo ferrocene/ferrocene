@@ -93,3 +93,15 @@ type TestBaz4 = Baz4;
 //~^ ERROR homogeneous_aggregate: Ok(Homogeneous
 
 fn main() { }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type
+//
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Type
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

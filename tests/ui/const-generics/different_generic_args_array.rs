@@ -9,3 +9,6 @@ fn main() {
     x = Const::<{ [4] }> {};
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -23,3 +23,9 @@ fn main() {
     assert_eq!(Boo::X as isize, 18);
     assert_eq!(Boo::Y as isize, 9);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

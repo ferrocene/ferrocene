@@ -49,3 +49,9 @@ fn main() {
     //~| expected struct `Foo`
     //~| found unit type `()`
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

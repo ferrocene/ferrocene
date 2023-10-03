@@ -12,3 +12,6 @@ fn main() {
     let f = Foo { a: 2, ..b };        //~ ERROR mismatched types
     let f__isize = Foo { a: 2, ..4 }; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

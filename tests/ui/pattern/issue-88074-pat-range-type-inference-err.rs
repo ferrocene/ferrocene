@@ -26,3 +26,9 @@ fn main() {
     foo();
     bar();
 }
+
+// ferrocene-annotations: fls_fyskeih6twyb
+// Range Pattern Matching
+//
+// ferrocene-annotations: fls_6tl1fx99yn6c
+// Range Patterns

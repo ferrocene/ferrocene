@@ -1,0 +1,8 @@
+error: extern location for some_crate does not exist: invalid
+  --> $DIR/extern_path-and-no-path.rs:7:7
+   |
+LL |     ::some_crate::hello();
+   |       ^^^^^^^^^^
+
+error: aborting due to previous error
+

@@ -16,3 +16,5 @@ pub fn cmp_bool(a: bool, b: bool) -> Ordering {
 // CHECK: {{sub|add}} nsw
     a.cmp(&b)
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

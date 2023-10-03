@@ -58,3 +58,6 @@ fn main() {
         first_iter = false;
     }
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

@@ -18,6 +18,8 @@ mod read2;
 pub mod runtest;
 pub mod util;
 
+pub mod ferrocene_annotations;
+
 use crate::common::{expected_output_path, output_base_dir, output_relative_path, UI_EXTENSIONS};
 use crate::common::{Config, Debugger, Mode, PassMode, TestPaths};
 use crate::util::logv;
@@ -638,6 +640,37 @@ fn collect_tests_from_dir(
     modified_tests: &Vec<PathBuf>,
     poisoned: &mut bool,
 ) -> io::Result<()> {
+    find_tests_in_dir(
+        config.clone(),
+        dir,
+        relative_dir_path,
+        found_paths,
+        modified_tests,
+        &mut |paths| {
+            // If we find a test foo/bar.rs, we have to build the
+            // output directory `$build/foo` so we can write
+            // `$build/foo/bar` into it. We do this *now* in this
+            // sequential loop because otherwise, if we do it in the
+            // tests themselves, they race for the privilege of
+            // creating the directories and sometimes fail randomly.
+            let build_dir = output_relative_path(&config, &paths.relative_dir);
+            if !build_dir.exists() {
+                fs::create_dir_all(&build_dir).unwrap();
+            }
+
+            tests.extend(make_test(config.clone(), cache, paths, inputs, poisoned))
+        },
+    )
+}
+
+fn find_tests_in_dir(
+    config: Arc<Config>,
+    dir: &Path,
+    relative_dir_path: &Path,
+    found_paths: &mut BTreeSet<PathBuf>,
+    modified_tests: &Vec<PathBuf>,
+    on_test_found: &mut dyn FnMut(&TestPaths),
+) -> io::Result<()> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
         return Ok(());
@@ -648,18 +681,9 @@ fn collect_tests_from_dir(
             file: dir.to_path_buf(),
             relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
         };
-        tests.extend(make_test(config, cache, &paths, inputs, poisoned));
+        on_test_found(&paths);
         return Ok(());
     }
-
-    // If we find a test foo/bar.rs, we have to build the
-    // output directory `$build/foo` so we can write
-    // `$build/foo/bar` into it. We do this *now* in this
-    // sequential loop because otherwise, if we do it in the
-    // tests themselves, they race for the privilege of
-    // creating the directories and sometimes fail randomly.
-    let build_dir = output_relative_path(&config, relative_dir_path);
-    fs::create_dir_all(&build_dir).unwrap();
 
     // Add each `.rs` file as a test, and recurse further on any
     // subdirectories we find, except for `aux` directories.
@@ -674,21 +698,18 @@ fn collect_tests_from_dir(
             let paths =
                 TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
 
-            tests.extend(make_test(config.clone(), cache, &paths, inputs, poisoned))
+            on_test_found(&paths);
         } else if file_path.is_dir() {
             let relative_file_path = relative_dir_path.join(file.file_name());
             if &file_name != "auxiliary" {
                 debug!("found directory: {:?}", file_path.display());
-                collect_tests_from_dir(
+                find_tests_in_dir(
                     config.clone(),
-                    cache,
                     &file_path,
                     &relative_file_path,
-                    inputs,
-                    tests,
                     found_paths,
                     modified_tests,
-                    poisoned,
+                    on_test_found,
                 )?;
             }
         } else {

@@ -1,0 +1,11 @@
+error: literal out of range for `u8`
+  --> $DIR/upper-a_upper-d.rs:8:17
+   |
+LL |     let x: u8 = 1000;
+   |                 ^^^^
+   |
+   = note: the literal `1000` does not fit into the type `u8` whose range is `0..=255`
+   = note: requested on the command line with `-D overflowing-literals`
+
+error: aborting due to previous error
+

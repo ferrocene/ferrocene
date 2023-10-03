@@ -19,3 +19,9 @@ pub fn main() {
     let y = repeater(Box::new(x));
     assert_eq!(x, y.get());
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

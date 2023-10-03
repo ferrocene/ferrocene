@@ -53,3 +53,18 @@ fn main() {}
 
 trait Fake { fn use_mut(&mut self) { } fn use_ref(&self) { }  }
 impl<T> Fake for T { }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

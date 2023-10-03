@@ -19,3 +19,9 @@ fn main() {
     needs_fn(1);
     //~^ ERROR expected a `Fn<(isize,)>` closure, found `{integer}`
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

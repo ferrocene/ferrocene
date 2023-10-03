@@ -11,3 +11,6 @@ fn main() {
         C => {}
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

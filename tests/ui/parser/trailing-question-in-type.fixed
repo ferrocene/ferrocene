@@ -8,3 +8,9 @@ fn foo() -> Option<i32> { //~ ERROR invalid `?` in type
 fn main() {
     let _: Option<i32> = foo();
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

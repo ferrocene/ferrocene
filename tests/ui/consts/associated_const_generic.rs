@@ -23,3 +23,15 @@ fn main() {
     let _ = [0; A::VALUE];
     let _ = [0; B::VALUE]; // Indirectly refers to `A::VALUE`
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation conformance
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

@@ -9,3 +9,6 @@ fn main() {
     let _: Vec<isize, Heap, bool>;
     //~^ ERROR struct takes at most 2 generic arguments but 3 generic arguments
 }
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

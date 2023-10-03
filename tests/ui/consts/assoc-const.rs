@@ -19,3 +19,6 @@ impl<N: Nat> Nat for Succ<N> {
 fn main() {
     let x: [i32; <Succ<Succ<Succ<Succ<Zero>>>>>::VALUE] = [1, 2, 3, 4];
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items

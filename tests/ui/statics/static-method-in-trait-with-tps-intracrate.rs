@@ -26,3 +26,9 @@ pub fn main() {
     let i: isize = Deserializable::deserialize(&d);
     assert_eq!(i, 22);
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

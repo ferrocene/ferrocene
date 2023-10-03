@@ -12,3 +12,15 @@ pub fn main() {
     };
     assert_eq!(arg, 42);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

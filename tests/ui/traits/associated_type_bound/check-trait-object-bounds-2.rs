@@ -13,3 +13,6 @@ fn main() {
     f::<dyn for<'x> X<'x, F = i32>>();
     //~^ expected a `FnOnce<(&i32,)>` closure, found `i32`
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

@@ -8,3 +8,8 @@ fn main() {
     f.v.push("hello".to_string());
     let e = f.v[0]; //~ ERROR cannot move out of index
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Indexing Expressions

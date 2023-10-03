@@ -12,3 +12,6 @@ fn main() {
     // check that `None` is zero
     assert_eq!(0, unsafe { std::mem::transmute::<Option<Size>, u8>(None) });
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

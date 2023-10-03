@@ -27,3 +27,6 @@ const Z: () = { let mut x = None; x = Some(FakeNeedsDrop); };
 // error
 const Z2: () = { let mut x; x = None; x = Some(FakeNeedsDrop); };
 //~^ ERROR destructor of
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

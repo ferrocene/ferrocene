@@ -22,3 +22,6 @@ fn main() {
        println!("{:p}", &dep1::collision);
     }
 }
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

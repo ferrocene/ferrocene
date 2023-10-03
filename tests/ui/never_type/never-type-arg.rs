@@ -15,3 +15,6 @@ impl PartialEq<!> for Wub {
 fn main() {
     let _ = Wub == panic!("oh no!");
 }
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

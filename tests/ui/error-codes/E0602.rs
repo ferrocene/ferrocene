@@ -6,3 +6,5 @@
 // error-pattern:`#[warn(unknown_lints)]` on by default
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_D

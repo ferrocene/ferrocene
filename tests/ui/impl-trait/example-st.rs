@@ -28,3 +28,18 @@ fn atom<T>(x: T) -> impl FnMut(&mut State) -> Result<T, Error> {
 fn main() {
     assert_eq!(bind(atom(5), |x| atom(x > 4))(&mut State), Ok(true));
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

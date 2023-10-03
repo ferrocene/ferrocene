@@ -34,3 +34,6 @@ pub struct Key {
     inner: BB,
     dtor_running: bool,
 }
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main

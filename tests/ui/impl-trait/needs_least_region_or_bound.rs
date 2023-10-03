@@ -19,3 +19,9 @@ fn no_least_region<'a, 'b>(x: &'a u32, y: &'b u32) -> impl MultiRegionTrait<'a, 
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type

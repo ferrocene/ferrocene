@@ -18,3 +18,5 @@ pub enum Foo<T> {
 pub fn foo() -> usize {
     std::mem::size_of::<Foo<u8>>()
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

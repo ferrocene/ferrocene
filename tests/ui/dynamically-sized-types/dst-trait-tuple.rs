@@ -100,3 +100,8 @@ pub fn main() {
     let f5: &Fat<Fat<dyn ToBar>> = &(5, "some str", (8, "deep str", Bar1 {f :42}));
     baz(f5);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

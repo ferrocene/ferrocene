@@ -14,3 +14,9 @@ pub fn main() {
     assert!(cmp(Some(3), Some(3)));
     assert!(cmp(None, None));
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

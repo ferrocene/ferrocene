@@ -34,3 +34,8 @@ fn with_dyn_debug_not_static<'a>(x: Box<dyn Debug + 'a>) {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type
+// ferrocene-annotations: fls_xtbohk2yk4la
+// Trait Object Lifetime Elision

@@ -5,3 +5,9 @@ trait A {
     }
 }
 fn main() {}
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

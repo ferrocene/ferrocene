@@ -99,3 +99,6 @@ fn main() {
     test_alignment_affected();
     test_alignment_not_affected();
 }
+
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

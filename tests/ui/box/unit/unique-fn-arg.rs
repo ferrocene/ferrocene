@@ -9,3 +9,9 @@ pub fn main() {
     let i = Box::new(100);
     f(i);
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

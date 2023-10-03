@@ -71,3 +71,36 @@ fn rest_patterns() {
     }
     //~| WARN unstable syntax
 }
+
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference Pattern Matching
+//
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

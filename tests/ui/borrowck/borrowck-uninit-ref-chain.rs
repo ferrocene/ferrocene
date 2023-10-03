@@ -31,3 +31,10 @@ fn main() {
     a.x = &&0; //~ ERROR [E0381]
     let _b = &**a.y;
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

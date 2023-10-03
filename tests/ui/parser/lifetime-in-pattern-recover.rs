@@ -4,3 +4,9 @@ fn main() {
 
     let _recovery_witness: () = 0; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

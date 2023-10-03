@@ -5,3 +5,5 @@ pub fn main() {
     let x = 42;
     x = 43;
 }
+
+// ferrocene-annotations: um_rustc_error_format

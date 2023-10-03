@@ -16,3 +16,6 @@ fn foo() {
 fn bar() {
     1, 2, 3 //~ ERROR expected one of
 }
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions

@@ -15,3 +15,15 @@ fn main() {
         _ => { }
     }
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

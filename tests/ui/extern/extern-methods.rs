@@ -27,3 +27,10 @@ fn main() {
     <S as A>::test2(2);
     S::test3(3);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

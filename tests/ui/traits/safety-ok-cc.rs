@@ -22,3 +22,9 @@ fn main() {
     let x: Bar = Bar { x: 23 };
     assert_eq!(23, take_foo(&x));
 }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates

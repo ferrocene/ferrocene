@@ -31,3 +31,5 @@ fn main() {
     let s = Command::new(env::args_os().next().unwrap()).arg("foo").status();
     assert!(s.unwrap().code() != Some(0));
 }
+
+// ferrocene-annotations: um_rustc_C_panic

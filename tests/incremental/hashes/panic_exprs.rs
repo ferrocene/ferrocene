@@ -149,3 +149,5 @@ pub fn shift_right(val: i32, shift: usize) -> i32 {
         val >> shift
     }
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

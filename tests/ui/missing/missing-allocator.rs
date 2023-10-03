@@ -16,3 +16,5 @@ fn oom(_: core::alloc::Layout) -> ! {
 }
 
 extern crate alloc;
+
+// ferrocene-annotations: um_rustc_C_panic

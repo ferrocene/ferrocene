@@ -15,3 +15,6 @@ mod inner2 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_e0a96eb6ux3y
+// Attribute macro_export

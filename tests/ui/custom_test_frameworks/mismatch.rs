@@ -8,3 +8,5 @@ extern crate example_runner;
 #[test]
 fn wrong_kind(){}
 //~^ ERROR trait bound `TestDescAndFn: Testable` is not satisfied
+
+// ferrocene-annotations: um_rustc_test

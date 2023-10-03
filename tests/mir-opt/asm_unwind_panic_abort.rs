@@ -13,3 +13,5 @@ fn main() {
         std::arch::asm!("", options(may_unwind));
     }
 }
+
+// ferrocene-annotations: um_rustc_C_panic

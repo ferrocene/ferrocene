@@ -30,3 +30,15 @@ fn main() {
     };
     accept_fn(&c3);
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

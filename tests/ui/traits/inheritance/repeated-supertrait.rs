@@ -46,3 +46,16 @@ fn main() {
     assert_eq!(with_ufcs1(&22), true);
     assert_eq!(with_ufcs2(&22), true);
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

@@ -14,3 +14,9 @@ fn main() {
     let _map = BTreeMap::from_iter([((), PrintOnDrop(&s))]);
     drop(s); //~ ERROR cannot move out of `s` because it is borrowed
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

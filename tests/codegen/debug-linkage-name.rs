@@ -40,3 +40,8 @@ pub mod xyz {
     #[export_name = "g"]
     pub extern "C" fn g() {}
 }
+
+// ferrocene-annotations: fls_olzilmy8n0nl
+// Attribute export_name
+//
+// ferrocene-annotations: um_rustc_C_debuginfo

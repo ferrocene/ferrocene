@@ -10,3 +10,5 @@ pub fn main() {
         println!("{}", x);
     }).join();
 }
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

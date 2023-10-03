@@ -15,3 +15,6 @@ fn main() {
     println!("$1 $0 $$ $NAME", 1, 2, NAME=3);
     //~^ ERROR multiple unused formatting arguments
 }
+
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals

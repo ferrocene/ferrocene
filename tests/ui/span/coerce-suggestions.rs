@@ -21,3 +21,6 @@ fn main() {
     s = format!("foo");
     //~^ ERROR E0308
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

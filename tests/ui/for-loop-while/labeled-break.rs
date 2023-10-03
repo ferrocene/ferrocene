@@ -20,3 +20,15 @@ pub fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

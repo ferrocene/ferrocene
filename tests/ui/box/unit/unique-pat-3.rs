@@ -14,3 +14,15 @@ pub fn main() {
     };
     assert_eq!(v, 10);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+//
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

@@ -11,3 +11,6 @@ pub fn main() {
     fn f() {}
     let _i: r<fn()> = r {field: f as fn()};
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

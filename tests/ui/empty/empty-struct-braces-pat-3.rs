@@ -30,3 +30,8 @@ fn main() {
         //~^ ERROR expected tuple struct or tuple variant, found struct variant `XE::XEmpty3
     }
 }
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching

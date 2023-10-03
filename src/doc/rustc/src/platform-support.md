@@ -263,6 +263,7 @@ target | std | host | notes
 `csky-unknown-linux-gnuabiv2` | ✓ |  | C-SKY abiv2 Linux(little endian)
 `hexagon-unknown-linux-musl` | ? |  |
 `i386-apple-ios` | ✓ |  | 32-bit x86 iOS
+[`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit LynxOS-178 (2022.07)
 [`i586-pc-nto-qnx700`](platform-support/nto-qnx.md) | * |  | 32-bit x86 QNX Neutrino 7.0 RTOS |
 `i686-apple-darwin` | ✓ | ✓ | 32-bit macOS (10.12+, Sierra+)
 `i686-pc-windows-msvc` | * |  | 32-bit Windows XP support
@@ -344,5 +345,6 @@ target | std | host | notes
 `x86_64-uwp-windows-msvc` | ✓ |  |
 `x86_64-wrs-vxworks` | ? |  |
 [`x86_64h-apple-darwin`](platform-support/x86_64h-apple-darwin.md) | ✓ | ✓ | macOS with late-gen Intel (at least Haswell)
+`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets

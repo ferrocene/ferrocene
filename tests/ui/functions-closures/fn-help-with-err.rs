@@ -22,3 +22,9 @@ fn main() {
     //~| HELP items from traits can only be used if the trait is implemented and in scope
     //~| HELP use parentheses to call this closure
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

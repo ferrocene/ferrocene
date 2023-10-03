@@ -52,3 +52,6 @@ fn main() {
     mut_ref_2();
     mut_mut_ref();
 }
+
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

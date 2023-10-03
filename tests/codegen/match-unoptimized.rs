@@ -21,3 +21,5 @@ pub fn exhaustive_match_2(e: E2) -> u8 {
         E2::B => 1,
     }
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

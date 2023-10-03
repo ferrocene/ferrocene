@@ -1,0 +1,11 @@
+error[E0433]: failed to resolve: maybe a missing crate `some_crate`?
+  --> $DIR/edition_2015-without-extern-crate.rs:6:7
+   |
+LL |     ::some_crate::hello();
+   |       ^^^^^^^^^^ maybe a missing crate `some_crate`?
+   |
+   = help: consider adding `extern crate some_crate` to use the `some_crate` crate
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0433`.

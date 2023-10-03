@@ -10,3 +10,6 @@ fn main() {
     //~| NOTE creating a `*const [u8]` requires both an address and a length
     //~| NOTE consider casting this expression to `*const ()`, then using `core::ptr::from_raw_parts`
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type

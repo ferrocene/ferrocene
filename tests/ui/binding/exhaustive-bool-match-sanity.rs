@@ -20,3 +20,9 @@ fn main() {
     assert_eq!(foo(true, false), 1);
     assert_eq!(foo(true, true), 2);
 }
+
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple pattern matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple patterns

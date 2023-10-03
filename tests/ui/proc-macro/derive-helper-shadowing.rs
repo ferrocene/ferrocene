@@ -54,3 +54,6 @@ struct Z;
 fn main() {
     let s = S { field: [] };
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

@@ -19,3 +19,6 @@ fn main() {
     MustUseDeprecated::new(); //~ warning: use of deprecated
     //~| warning: unused `MustUseDeprecated` that must be used
 }
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr

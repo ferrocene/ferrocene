@@ -35,3 +35,21 @@ literal";
     let source = include_str!("lexer-crlf-line-endings-string-literal-doc-comment.rs");
     assert!(source.contains("string\r\nliteral"));
 }
+
+// ferrocene-annotations: fls_fqaffyrjob7v
+// Byte String Literals
+//
+// ferrocene-annotations: fls_jps9102q0qfi
+// Raw Byte String Literals
+//
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions

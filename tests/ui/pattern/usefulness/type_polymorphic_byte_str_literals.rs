@@ -34,3 +34,30 @@ fn parse_data5(data: &[u8; 3]) -> u8 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_fqaffyrjob7v
+// Byte String Literals
+//
+// ferrocene-annotations: fls_msbaxfc09vkk
+// Simple Byte String Literals
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Underscore Pattern Matching

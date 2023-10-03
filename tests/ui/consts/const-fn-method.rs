@@ -14,3 +14,6 @@ pub fn main() {
     assert_eq!(FOO.value, 22);
     let _: [&'static str; Foo::new().value as usize] = ["hey"; 22];
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

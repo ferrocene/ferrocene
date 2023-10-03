@@ -8,3 +8,8 @@ impl dyn AutoTrait {} //~ERROR E0785
 impl dyn Unpin {} //~ERROR E0785
 
 fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

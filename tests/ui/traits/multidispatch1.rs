@@ -31,3 +31,6 @@ pub fn main() {
     test_eq::<usize, _>(value, value.dummy);
     test_eq::<u8, _>(value, value.dummy as u8);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

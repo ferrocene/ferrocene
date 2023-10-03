@@ -26,3 +26,12 @@ fn main() {
     let r = RefCell::new(format!("data"));
     assert_eq!(foo2(r), "data");
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order

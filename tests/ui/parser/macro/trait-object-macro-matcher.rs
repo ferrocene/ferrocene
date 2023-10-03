@@ -12,3 +12,6 @@ fn main() {
     //~^ ERROR lifetime in trait object type must be followed by `+`
     //~| ERROR at least one trait is required for an object type
 }
+
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables

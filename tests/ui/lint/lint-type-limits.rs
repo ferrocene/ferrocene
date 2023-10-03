@@ -25,3 +25,5 @@ fn bleh() {
     let _ = u >= 0; //~ ERROR comparison is useless due to type limits
     let _ = 0 <= u; //~ ERROR comparison is useless due to type limits
 }
+
+// ferrocene-annotations: um_rustc_D

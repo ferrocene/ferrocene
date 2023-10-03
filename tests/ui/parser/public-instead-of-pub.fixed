@@ -6,3 +6,6 @@ pub struct X;
 //~^^ HELP write `pub` instead of `public` to make the item public
 
 fn main() {}
+
+// ferrocene-annotations: fls_wb86edg02t6a
+// Items

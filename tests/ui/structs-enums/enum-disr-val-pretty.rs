@@ -15,3 +15,12 @@ pub fn main() {
 fn test_color(color: color, val: isize, _name: String) {
     assert_eq!(color as isize , val);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

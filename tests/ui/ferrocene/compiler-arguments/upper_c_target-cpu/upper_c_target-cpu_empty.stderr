@@ -1,0 +1,2 @@
+error: codegen option `target-cpu` requires a string (C target-cpu=<value>)
+

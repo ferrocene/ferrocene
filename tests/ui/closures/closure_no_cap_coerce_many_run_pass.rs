@@ -57,3 +57,9 @@ fn main() {
     let funcs = [add, |a, b| (a - b) as i32];
     assert_eq!([funcs[0](5, 5), funcs[1](5, 5)], [10, 0]);
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

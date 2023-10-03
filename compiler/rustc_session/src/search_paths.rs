@@ -1,5 +1,6 @@
 use crate::filesearch::make_target_lib_path;
 use crate::EarlyErrorHandler;
+use rustc_target::spec::TargetTriple;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -46,7 +47,12 @@ impl PathKind {
 }
 
 impl SearchPath {
-    pub fn from_cli_opt(handler: &EarlyErrorHandler, path: &str) -> Self {
+    pub fn from_cli_opt(
+        sysroot: Option<&Path>,
+        triple: &TargetTriple,
+        handler: &EarlyErrorHandler,
+        path: &str,
+    ) -> Self {
         let (kind, path) = if let Some(stripped) = path.strip_prefix("native=") {
             (PathKind::Native, stripped)
         } else if let Some(stripped) = path.strip_prefix("crate=") {
@@ -64,7 +70,38 @@ impl SearchPath {
             handler.early_error("empty search path given via `-L`");
         }
 
-        let dir = PathBuf::from(path);
+        // Temporary implementation until https://github.com/rust-lang/compiler-team/issues/659 is
+        // accepted and implemented upstream.
+        let dir = if let Some(stripped) = path.strip_prefix("ferrocene-temp-builtin:") {
+            let Some(sysroot) = sysroot else {
+                handler.early_error("`-L ferrocene-temp-builtin:` is not supported");
+            };
+            let triple = match triple {
+                TargetTriple::TargetTriple(triple) => triple,
+                TargetTriple::TargetJson { .. } => {
+                    handler.early_error(
+                        "`-L ferrocene-temp-builtin:` is not supported with custom targets",
+                    );
+                }
+            };
+
+            if stripped == ".." || stripped.contains('/') {
+                handler.early_error(
+                    "`-L ferrocene-temp-builtin:` does not accept \
+                     subdirectories or parent directories",
+                );
+            }
+
+            let path = make_target_lib_path(sysroot, triple).join("builtin").join(stripped);
+            if !path.is_dir() {
+                handler.early_error(format!("ferrocene-temp-builtin:{stripped} does not exist"));
+            }
+
+            path
+        } else {
+            PathBuf::from(path)
+        };
+
         Self::new(kind, dir)
     }
 

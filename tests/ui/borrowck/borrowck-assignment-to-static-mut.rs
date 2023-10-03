@@ -9,3 +9,7 @@ unsafe fn should_ok() {
 }
 
 fn main() {}
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

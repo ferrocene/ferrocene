@@ -13,3 +13,9 @@ pub fn main() {
     assert_eq!(altlit(10), 20);
     assert_eq!(altlit(11), 22);
 }
+
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal pattern matching
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal patterns

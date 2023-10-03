@@ -1,8 +1,6 @@
 # WARNING: this metadata is currently incomplete, do not rely on it yet.
 
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Files-Excluded:
- src/llvm-project
 
 # Note that we're explicitly listing the individual files at the root of the
 # repository rather than just having `Files: *`. This is explicitly done to
@@ -92,3 +90,7 @@ License: MIT OR Apache-2.0
 Files: src/doc/rustc-dev-guide/mermaid.min.js
 Copyright: Knut Sveidqvist
 License: MIT
+
+Files: ferrocene/library/libc/*
+Copyright: The Rust libc developers
+License: MIT OR Apache-2.0

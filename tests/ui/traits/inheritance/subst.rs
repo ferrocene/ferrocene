@@ -25,3 +25,6 @@ pub fn main() {
     let z = f(x, y);
     assert_eq!(z.val, 8)
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

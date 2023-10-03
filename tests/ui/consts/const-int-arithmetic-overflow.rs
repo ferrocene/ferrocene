@@ -23,3 +23,15 @@ fn main() {
     const NEG_OFLOW: i8 = neg(-128);
     assert_eq!(NEG_OFLOW, -128);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic expressions
+//
+// ferrocene-annotations: fls_wrecura8u5ar
+// Negation expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

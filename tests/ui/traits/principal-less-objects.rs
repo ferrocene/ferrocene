@@ -40,3 +40,6 @@ fn main() {
     }
     assert_eq!(c.load(Ordering::Relaxed), 1);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

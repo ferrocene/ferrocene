@@ -15,3 +15,6 @@ pub struct S;
 pub unsafe fn foo() {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_ahmnqhm8anlb
+// Built-in Attributes

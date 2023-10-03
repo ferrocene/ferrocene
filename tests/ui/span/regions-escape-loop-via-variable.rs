@@ -12,3 +12,15 @@ fn main() {
     }
     //~^^ ERROR `x` does not live long enough
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership

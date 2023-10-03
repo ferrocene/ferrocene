@@ -113,7 +113,7 @@ mod os_impl {
     pub fn check(path: &Path, bad: &mut bool) {
         use std::ffi::OsStr;
 
-        const ALLOWED: &[&str] = &["configure", "x"];
+        const ALLOWED: &[&str] = &["configure", "x", "ferrocene/library/libc/ci/test-runner-linux"];
 
         for p in RI_EXCLUSION_LIST {
             if !path.join(Path::new(p)).exists() {

@@ -16,3 +16,13 @@ fn main() {
         let ua = u.a;
     }
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization
+//
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Type
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

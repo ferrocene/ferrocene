@@ -13,3 +13,5 @@ all:
 	[ "$$(cat "$(TMPDIR)"/foo.*.ll | grep -c define\ internal\ i32\ .*inlined)" -eq "2" ]
 	[ "$$(cat "$(TMPDIR)"/foo.*.ll | grep -c define\ hidden\ i32\ .*normal)" -eq "1" ]
 	[ "$$(cat "$(TMPDIR)"/foo.*.ll | grep -c declare\ hidden\ i32\ .*normal)" -eq "2" ]
+
+# ferrocene-annotations: um_rustc_C_codegen_units

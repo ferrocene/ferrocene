@@ -24,3 +24,9 @@ pub fn main() {
     assert!((j > k));
     assert!((k < a));
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals

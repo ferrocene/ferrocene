@@ -21,3 +21,6 @@ fn foo<R: Bar>(_: impl Fn() -> R) {}
 fn main() {
     foo(|| panic!());
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

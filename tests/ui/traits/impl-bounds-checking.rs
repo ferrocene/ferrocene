@@ -12,3 +12,6 @@ impl Getter<isize> for isize { //~ ERROR `isize: Clone2` is not satisfied
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

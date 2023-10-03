@@ -13,8 +13,10 @@ const LICENSES: &[&str] = &[
     "0BSD OR MIT OR Apache-2.0",                           // adler license
     "0BSD",
     "Apache-2.0 / MIT",
+    "Apache-2.0 OR ISC OR MIT",                            // rustls
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
+    "Apache-2.0/ISC/MIT",
     "Apache-2.0/MIT",
     "ISC",
     "MIT / Apache-2.0",
@@ -39,18 +41,40 @@ const LICENSES: &[&str] = &[
 const EXCEPTIONS: &[(&str, &str)] = &[
     // tidy-alphabetical-start
     ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
+    ("aws-config", "Apache-2.0"),                            // generate-tarball, through criticaltrust
+    ("aws-credential-types", "Apache-2.0"),                  // generate-tarball, through criticaltrust
+    ("aws-http", "Apache-2.0"),                              // generate-tarball, through criticaltrust
+    ("aws-runtime", "Apache-2.0"),                           // generate-tarball, through criticaltrust
+    ("aws-sdk-kms", "Apache-2.0"),                           // generate-tarball, through criticaltrust
+    ("aws-sdk-sso", "Apache-2.0"),                           // generate-tarball, through criticaltrust
+    ("aws-sdk-sts", "Apache-2.0"),                           // generate-tarball, through criticaltrust
+    ("aws-sigv4", "Apache-2.0"),                             // generate-tarball, through criticaltrust
+    ("aws-smithy-async", "Apache-2.0"),                      // generate-tarball, through criticaltrust
+    ("aws-smithy-client", "Apache-2.0"),                     // generate-tarball, through criticaltrust
+    ("aws-smithy-http", "Apache-2.0"),                       // generate-tarball, through criticaltrust
+    ("aws-smithy-http-tower", "Apache-2.0"),                 // generate-tarball, through criticaltrust
+    ("aws-smithy-json", "Apache-2.0"),                       // generate-tarball, through criticaltrust
+    ("aws-smithy-query", "Apache-2.0"),                      // generate-tarball, through criticaltrust
+    ("aws-smithy-runtime", "Apache-2.0"),                    // generate-tarball, through criticaltrust
+    ("aws-smithy-runtime-api", "Apache-2.0"),                // generate-tarball, through criticaltrust
+    ("aws-smithy-types", "Apache-2.0"),                      // generate-tarball, through criticaltrust
+    ("aws-smithy-xml", "Apache-2.0"),                        // generate-tarball, through criticaltrust
+    ("aws-types", "Apache-2.0"),                             // generate-tarball, through criticaltrust
     ("colored", "MPL-2.0"),                                  // rustfmt
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("encoding_rs", "(Apache-2.0 OR MIT) AND BSD-3-Clause"), // opt-dist
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("fortanix-sgx-abi", "MPL-2.0"),                         // libstd but only for `sgx` target. FIXME: this dependency violates the documentation comment above.
+    ("insta", "Apache-2.0"),                                 // generate-tarball
     ("instant", "BSD-3-Clause"),                             // rustc_driver/tracing-subscriber/parking_lot
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("openssl", "Apache-2.0"),                               // opt-dist
     ("rustc_apfloat", "Apache-2.0 WITH LLVM-exception"),     // rustc (license is the same as LLVM uses)
     ("ryu", "Apache-2.0 OR BSL-1.0"),                        // cargo/... (because of serde)
     ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
+    ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
+    ("subtle", "BSD-3-Clause"),                              // generate-tarball
     // tidy-alphabetical-end
 ];
 
@@ -128,6 +152,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "compiler_builtins",
+    "const-oid",    // this is a false positive: it's only used by generate-tarball
     "convert_case", // dependency of derive_more
     "cpufeatures",
     "crc32fast",
@@ -253,6 +278,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "stacker",
     "static_assertions",
     "strsim",
+    "subtle", // this is a false positive: it's only used by generate-tarball
     "syn",
     "synstructure",
     "tempfile",
@@ -315,6 +341,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "yoke-derive",
     "zerofrom",
     "zerofrom-derive",
+    "zeroize", // this is a false positive: it's only used by generate-tarball
     "zerovec",
     "zerovec-derive",
     // tidy-alphabetical-end
@@ -488,6 +515,10 @@ fn check_license_exceptions(
         let license = match &pkg.license {
             Some(license) => license,
             None => {
+                if pkg.name == "ring" {
+                    // *ring* does not define proper licensing metadata.
+                    continue;
+                }
                 tidy_error!(bad, "dependency `{}` does not define a license expression", pkg.id);
                 continue;
             }

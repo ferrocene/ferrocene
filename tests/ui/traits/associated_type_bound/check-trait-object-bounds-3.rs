@@ -18,3 +18,6 @@ pub fn main() {
 
     println!("{}", z)
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

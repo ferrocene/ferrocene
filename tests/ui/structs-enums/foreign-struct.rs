@@ -17,3 +17,9 @@ mod bindgen {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
+//
+// ferrocene-annotations: fls_osd6c4utyjb3
+// FFI

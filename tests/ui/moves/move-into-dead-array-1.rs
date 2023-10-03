@@ -13,3 +13,6 @@ fn foo(i: usize) {
     let mut a: [D; 4];
     a[i] = d(); //~ ERROR E0381
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types

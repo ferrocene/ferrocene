@@ -13,3 +13,9 @@ impl lib::Foo for Bar { //~ ERROR requires an `unsafe impl` declaration
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

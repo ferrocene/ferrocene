@@ -11,3 +11,6 @@ fn main() {
     let b = hello;
     let c = hello; //~ ERROR use of moved value: `hello` [E0382]
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

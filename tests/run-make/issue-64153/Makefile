@@ -24,3 +24,5 @@ all:
 	# 0000000000000000 g     F .text.issue64153_test_function	00000023 issue64153_test_function
 	grep -c -e "[[:space:]]g[[:space:]]*F[[:space:]].*issue64153_test_function" $(TMPDIR)/syms > $(TMPDIR)/count
 	[ "$$(cat $(TMPDIR)/count)" -eq "1" ]
+
+# ferrocene-annotations: um_rustc_C_codegen_units

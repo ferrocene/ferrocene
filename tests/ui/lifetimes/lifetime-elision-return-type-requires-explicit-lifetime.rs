@@ -49,3 +49,12 @@ fn l<'a>(_: &'a str, _: &'a str) -> &str { "" }
 fn m<'a>(_: &'a Foo<'a>) -> &str { "" }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

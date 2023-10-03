@@ -13,3 +13,6 @@ extern crate panic_runtime_unwind2;
 extern crate panic_runtime_lang_items;
 
 fn main() {}
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main

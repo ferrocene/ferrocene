@@ -25,3 +25,12 @@ fn main() {
     test1();
     test2();
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Wildcard Pattern Matching

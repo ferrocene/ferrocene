@@ -15,3 +15,9 @@ fn main() {
     f::<dyn X<Y = str>>();
     //~^ ERROR the trait bound `str: Clone` is not satisfied
 }
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

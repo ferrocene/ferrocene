@@ -11,3 +11,9 @@ pub fn main() {
     }
     assert_eq!(y, 90);
 }
+
+// ferrocene-annotations: fls_sjwrlwvpulp
+// Continue Expressions
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

@@ -14,3 +14,6 @@ struct C<const C: u8, const N: u8>;
 impl<const N: u8> Foo for C<N, T> {}
 //~^ ERROR cannot find type
 //~| unresolved item provided when a constant
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

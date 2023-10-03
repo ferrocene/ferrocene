@@ -17,3 +17,9 @@ fn main() {
     enum std {}
     use std as foo; // OK
 }
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

@@ -8,3 +8,6 @@ struct Bug {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

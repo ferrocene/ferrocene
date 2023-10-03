@@ -14,3 +14,9 @@ fn g() -> Result<Vec<i32>, ()> {
 fn main() {
     g();
 }
+
+// ferrocene-annotations: fls_pocsh1neugpc
+// Error Propagation Expression
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

@@ -34,3 +34,12 @@ fn bar2() -> impl FnOnce(&'static str) -> usize {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Type
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliasing

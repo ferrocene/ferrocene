@@ -9,3 +9,5 @@
 // error-pattern:did you mean: `dead_code`
 
 fn main() { }
+
+// ferrocene-annotations: um_rustc_D

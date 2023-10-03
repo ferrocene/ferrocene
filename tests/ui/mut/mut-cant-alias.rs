@@ -12,3 +12,9 @@ fn main() {
 
 trait Fake { fn use_mut(&mut self) { } fn use_ref(&self) { }  }
 impl<T> Fake for T { }
+
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

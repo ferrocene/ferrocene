@@ -20,3 +20,6 @@ impl<const F: fn() -> u32> Wrapper<F> {
 fn main() {
     assert_eq!(Wrapper::<function>::call(), 17);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

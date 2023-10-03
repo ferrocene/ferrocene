@@ -18,3 +18,6 @@ struct Bar<const N: u8>([u8; (N + 2) as usize]) where [(); (N + 1) as usize]:;
 //~| help: try adding a `where` bound using this expression: `where [(); (N + 2) as usize]:`
 
 fn main() {}
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

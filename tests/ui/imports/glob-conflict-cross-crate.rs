@@ -6,3 +6,6 @@ fn main() {
     glob_conflict::f(); //~ ERROR cannot find function `f` in crate `glob_conflict`
     glob_conflict::glob::f(); //~ ERROR cannot find function `f` in module `glob_conflict::glob`
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

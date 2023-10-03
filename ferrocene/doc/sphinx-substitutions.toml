@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# This file defines all the substitutions available in the Sphinx documentation
+# sites using the `ferrocene_qualification` extension.
+
+# look at substitutions.py for the rest of the substitutions
+
+ferrocene_ASIL = "ASIL D"
+ferrocene_TCL = "TCL 3"
+ferrocene_TQL = "TQL T3"
+channel_name= "stable-23.06"
+
+iso_ref = "ISO-26262:2018"
+iso_doc = "Road Vehicles - Functional Safety"
+iec_ref = "IEC-61508:2010"
+iec_doc = "Functional safety of electrical/electronic/programmable electronic safety-related systems"
+9001_ref = "ISO-9001:2015"
+9001_doc = "Quality management systems — Requirements"
+
+certification_engineer = "Tshepang Mbambo"
+verification_engineer = "Sebastian Ziebell"
+safety_manager = "Felix Gilcher"
+product_manager = "Florian Gilcher"
+project_manager = "Leslie Glass"
+engineering_lead = "Pietro Albini"
+release_lead = "Pietro Albini"
+technical_lead = "Pietro Albini"
+qa_support_lead = "Pietro Albini"
+iso_9001_quality_manager = "Sina Krause"

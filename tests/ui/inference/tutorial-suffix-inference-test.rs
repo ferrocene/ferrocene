@@ -22,3 +22,18 @@ fn main() {
     //~^ ERROR mismatched types
     //~| expected `u16`, found `isize`
 }
+
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_hv9jtycp0o1y
+// Numeric Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

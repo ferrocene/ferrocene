@@ -44,3 +44,8 @@ fn main() {
     //~^ ERROR expected one of
     //~| HELP you might have meant to end the type parameters here
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

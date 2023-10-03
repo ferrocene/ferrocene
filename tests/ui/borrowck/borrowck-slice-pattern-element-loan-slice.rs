@@ -77,3 +77,7 @@ fn main() {
     const_index_and_subslice_from_end_err(&mut v);
     subslices(&mut v);
 }
+
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

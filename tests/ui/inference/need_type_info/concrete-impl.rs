@@ -17,3 +17,9 @@ fn main() {
     //~| ERROR type annotations needed
     //~| NOTE infer type of the type parameter `A`
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

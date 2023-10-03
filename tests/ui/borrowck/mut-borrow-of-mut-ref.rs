@@ -34,3 +34,7 @@ pub fn baz(f: &mut String) { //~ HELP consider making the binding mutable
     f.bar(); //~ ERROR cannot borrow `f` as mutable, as it is not declared as mutable
     //~^ NOTE cannot borrow as mutable
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

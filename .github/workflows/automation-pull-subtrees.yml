@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+
+name: Automatic subtrees pull
+on:
+  # Run from Monday to Friday at 5:00 UTC
+  schedule:
+    - cron: '0 5 * * 1-5'
+  # Allow to run this manually from the GitHub UI
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    name: ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - main
+          - release/1.68
+
+    environment: automation-pull-subtrees
+    steps:
+      - name: Checkout the Ferrocene repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all the history
+          ref: ${{ matrix.branch }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            python3-requests \
+            python3-yaml \
+            python3-jwt
+
+      - name: Configure git authorship information
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      # The pull-subtrees automation needs to fetch from the repositories the
+      # subtrees are based on, but since those repositories are private we need to
+      # authenticate on GitHub Actions with some kind of credentials.
+      #
+      # Unfortunately deploy keys are not feasible, as a single deploy key can only
+      # clone one repository, and git doesn't make it easy to use multiple keys for
+      # different repositories. Personal access tokens are also not adequate as
+      # there's no way to scope the repositories a token has access to.
+      #
+      # To limit the permissions as much as possible, we then decided to create a
+      # GitHub App that has only read access to those repos, and we use that app to
+      # generate a temporary token.
+      - name: Authenticate with GitHub to fetch from repositories
+        run: ferrocene/ci/github-app-auth.py
+        env:
+          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-pull-subtrees
+          APP_ID: 200501
+          APP_PRIVATE_KEY: "${{ secrets.PULL_SUBTREES_APP_PRIVATE_KEY }}"
+        id: github_app_auth
+
+      # Some subtrees require updating the Cargo.lock once they're updated, and
+      # updating the Cargo.lock requires subtrees to be present.
+      - name: Fetch submodules
+        run: git submodule update --init --depth=1 --jobs=$(nproc)
+
+      - name: Run the manage-subtrees automation
+        run: python3 ferrocene/tools/pull-subtrees/pull.py --automation --target ${{ matrix.branch }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          HTTP_CLONE_TOKEN: "${{ steps.github_app_auth.outputs.token }}"

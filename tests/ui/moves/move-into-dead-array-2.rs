@@ -13,3 +13,6 @@ fn foo(mut a: [D; 4], i: usize) {
     drop(a);
     a[i] = d(); //~ ERROR use of moved value: `a`
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types

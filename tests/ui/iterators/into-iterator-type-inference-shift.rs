@@ -34,3 +34,6 @@ fn desugared_for_loop_bad(byte: u8) -> u8 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

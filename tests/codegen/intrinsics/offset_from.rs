@@ -34,3 +34,5 @@ pub unsafe fn offset_from_unsigned_odd_size(a: *const RGB, b: *const RGB) -> usi
     // CHECK-NEXT: ret i64
     ptr_offset_from_unsigned(a, b)
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

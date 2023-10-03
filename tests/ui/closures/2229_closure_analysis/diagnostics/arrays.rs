@@ -83,3 +83,6 @@ fn main() {
     arrays_4();
     arrays_5();
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

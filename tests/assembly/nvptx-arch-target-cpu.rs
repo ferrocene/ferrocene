@@ -11,3 +11,5 @@ extern crate breakpoint_panic_handler;
 // Verify target arch override via `target-cpu`.
 // CHECK: .target sm_50
 // CHECK: .address_size 64
+
+// ferrocene-annotations: um_rustc_C_target_cpu

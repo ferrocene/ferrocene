@@ -13,3 +13,5 @@ fn not_a_num() -> Result<(), ParseIntError> {
     let _: u32 = "abc".parse()?;
     Ok(())
 }
+
+// ferrocene-annotations: um_rustc_test

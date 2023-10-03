@@ -13,3 +13,6 @@ type Bar<T> = Foo<T>;
 fn takebar<T>(_b: Bar<T>) { }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_xjcxbajhzp3d
+// Type Parameters

@@ -38,3 +38,6 @@ fn main() {
     _ => panic!("didn't match")
   };
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

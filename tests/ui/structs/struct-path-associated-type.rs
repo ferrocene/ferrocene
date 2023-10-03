@@ -35,3 +35,6 @@ fn main() {
         S::A {} => {} //~ ERROR ambiguous associated type
     }
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

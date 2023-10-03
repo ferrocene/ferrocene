@@ -14,3 +14,9 @@ pub fn main() {
     let x = Some(5);
     foo(&&x);
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

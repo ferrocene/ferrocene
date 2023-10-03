@@ -15,3 +15,9 @@ pub fn main() {
         _ => panic!("should match range with inferred end type")
     }
 }
+
+// ferrocene-annotations: fls_fyskeih6twyb
+// Range pattern matching
+//
+// ferrocene-annotations: fls_6tl1fx99yn6c
+// Range patterns

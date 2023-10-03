@@ -15,3 +15,9 @@ struct S {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

@@ -40,3 +40,6 @@ fn main() {
     // lifetimes, to allow &'tmp (Display+'static).
     e(&0 as &dyn Display);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

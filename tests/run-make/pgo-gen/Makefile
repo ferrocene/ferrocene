@@ -7,7 +7,7 @@
 
 include ../tools.mk
 
-COMPILE_FLAGS=-g -Cprofile-generate="$(TMPDIR)"
+COMPILE_FLAGS=-g -Cprofile-generate="$(TMPDIR)" --target $(TARGET)
 
 all:
 	$(RUSTC) $(COMPILE_FLAGS) test.rs

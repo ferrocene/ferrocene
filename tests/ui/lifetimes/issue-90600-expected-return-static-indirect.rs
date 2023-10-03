@@ -13,3 +13,6 @@ fn inner(mut foo: &[u8]) {
 }
 
 fn read_thing(refcell: &RefCell<dyn Read>) {}
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

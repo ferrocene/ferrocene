@@ -9,3 +9,6 @@ pub fn main() {
     let _x = 8;
     assert_eq!(bad_macro!(_x),8)
 }
+
+// ferrocene-annotations: fls_xlfo7di0gsqz
+// Hygiene

@@ -77,3 +77,5 @@ fn main() {
     a(1, 2);
     b(1, 2);
 }
+
+// ferrocene-annotations: um_rustc_cfg

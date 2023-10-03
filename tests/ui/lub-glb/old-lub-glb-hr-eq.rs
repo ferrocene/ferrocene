@@ -25,3 +25,12 @@ fn foo_cast(x: fn(&u8, &u8), y: for<'a> fn(&'a u8, &'a u8)) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

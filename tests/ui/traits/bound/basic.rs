@@ -23,3 +23,15 @@ fn e(x: Box<dyn Foo>) {
 }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

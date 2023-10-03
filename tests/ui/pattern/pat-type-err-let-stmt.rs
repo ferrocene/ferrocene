@@ -14,3 +14,9 @@ fn main() {
     // We want to point at the scrutinee.
     let Ok(0) = 42u8; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

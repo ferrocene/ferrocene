@@ -21,3 +21,6 @@ fn main() {
     //~| NOTE required by a bound in `collect`
     process_slice(some_generated_vec);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

@@ -11,3 +11,12 @@ enum Bar {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

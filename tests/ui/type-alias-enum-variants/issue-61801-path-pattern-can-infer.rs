@@ -26,3 +26,8 @@ fn f1(x: OptAlias<u8>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

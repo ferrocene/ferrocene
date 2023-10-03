@@ -8,3 +8,6 @@ pub fn main() {
     x = y;
     assert_eq!(x, 42);
 }
+
+// ferrocene-annotations: fls_qwljwqr07slp
+// Numeric Types

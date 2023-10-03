@@ -21,3 +21,12 @@ static MY_TOO_BIG_ARRAY_2: [u8; HUGE_SIZE] = [0x00; HUGE_SIZE];
 //~| too big
 
 fn main() { }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

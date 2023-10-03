@@ -34,3 +34,12 @@ fn main() {
         *MUH.x.get() = 99;
     }
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

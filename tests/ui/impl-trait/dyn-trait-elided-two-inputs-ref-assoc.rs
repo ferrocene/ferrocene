@@ -25,3 +25,6 @@ fn main() {
     let r = bar(&s);
     is_static(r.item());
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

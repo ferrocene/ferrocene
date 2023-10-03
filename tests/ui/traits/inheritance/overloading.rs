@@ -45,3 +45,9 @@ pub fn main() {
     assert_eq!(b, mi(-2));
     assert_eq!(c, mi(15));
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

@@ -16,3 +16,6 @@ fn main() {
     let x: isize = 22;
     assert_eq!(22, take_foo(&x));
 }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

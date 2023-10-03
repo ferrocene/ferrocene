@@ -10,6 +10,7 @@ use std::io::{BufRead, BufReader};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic;
 use std::time::{Duration, Instant};
 
 use crate::cache::{Cache, Interned, INTERNER};
@@ -43,6 +44,7 @@ pub struct Builder<'a> {
     cache: Cache,
     stack: RefCell<Vec<Box<dyn Any>>>,
     time_spent_on_dependencies: Cell<Duration>,
+    should_serve_called: atomic::AtomicBool,
     pub paths: Vec<PathBuf>,
 }
 
@@ -605,6 +607,7 @@ pub enum Kind {
     Run,
     Setup,
     Suggest,
+    Sign,
 }
 
 impl Kind {
@@ -625,6 +628,7 @@ impl Kind {
             "run" | "r" => Kind::Run,
             "setup" => Kind::Setup,
             "suggest" => Kind::Suggest,
+            "sign" => Kind::Sign,
             _ => return None,
         })
     }
@@ -645,6 +649,7 @@ impl Kind {
             Kind::Run => "run",
             Kind::Setup => "setup",
             Kind::Suggest => "suggest",
+            Kind::Sign => "sign",
         }
     }
 
@@ -704,6 +709,8 @@ impl<'a> Builder<'a> {
                 tool::CargoMiri,
                 llvm::Lld,
                 llvm::CrtBeginEnd,
+                crate::ferrocene::tool::SelfTest,
+                tool::FerroceneGenerateTarball,
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,
@@ -723,6 +730,10 @@ impl<'a> Builder<'a> {
                 check::Bootstrap
             ),
             Kind::Test => describe!(
+                crate::ferrocene::test::TraceabilityMatrixTool,
+                crate::ferrocene::test::SelfTest,
+                crate::ferrocene::test::CheckDocumentSignatures,
+                crate::ferrocene::test::GenerateTarball,
                 crate::toolstate::ToolStateCheck,
                 test::ExpandYamlAnchors,
                 test::Tidy,
@@ -808,6 +819,20 @@ impl<'a> Builder<'a> {
                 doc::EditionGuide,
                 doc::StyleGuide,
                 doc::Tidy,
+                // Basic Documents
+                crate::ferrocene::doc::Index,
+                crate::ferrocene::doc::Specification,
+                crate::ferrocene::doc::UserManual,
+                // Qualification Documents
+                crate::ferrocene::doc::DocumentList,
+                crate::ferrocene::doc::EvaluationPlan,
+                crate::ferrocene::doc::EvaluationReport,
+                crate::ferrocene::doc::QualificationPlan,
+                crate::ferrocene::doc::QualificationReport,
+                crate::ferrocene::doc::SafetyManual,
+                crate::ferrocene::doc::TraceabilityMatrix,
+                // QMS Documents
+                crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,
             ),
             Kind::Dist => describe!(
@@ -838,6 +863,11 @@ impl<'a> Builder<'a> {
                 dist::PlainSourceTarball,
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
+                crate::ferrocene::dist::Docs,
+                crate::ferrocene::dist::SourceTarball,
+                crate::ferrocene::dist::SelfTest,
+                crate::ferrocene::dist::TestOutcomes,
+                crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
                 install::Docs,
@@ -853,6 +883,7 @@ impl<'a> Builder<'a> {
                 install::Rustc
             ),
             Kind::Run => describe!(
+                crate::ferrocene::run::TraceabilityMatrix,
                 run::ExpandYamlAnchors,
                 run::BuildManifest,
                 run::BumpStage0,
@@ -862,6 +893,17 @@ impl<'a> Builder<'a> {
                 run::GenerateCopyright,
                 run::GenerateWindowsSys,
                 run::GenerateCompletions,
+            ),
+            Kind::Sign => describe!(
+                // Qualification Documents
+                crate::ferrocene::sign::DocumentList,
+                crate::ferrocene::sign::EvaluationPlan,
+                crate::ferrocene::sign::EvaluationReport,
+                crate::ferrocene::sign::QualificationPlan,
+                crate::ferrocene::sign::QualificationReport,
+                crate::ferrocene::sign::SafetyManual,
+                // QMS Documents
+                crate::ferrocene::sign::InternalProcedures,
             ),
             Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
@@ -912,6 +954,7 @@ impl<'a> Builder<'a> {
             cache: Cache::new(),
             stack: RefCell::new(Vec::new()),
             time_spent_on_dependencies: Cell::new(Duration::new(0, 0)),
+            should_serve_called: atomic::AtomicBool::new(false),
             paths,
         }
     }
@@ -936,6 +979,7 @@ impl<'a> Builder<'a> {
                 Kind::Setup,
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
+            Subcommand::Sign => (Kind::Sign, &paths[..]),
         };
 
         Self::new_internal(build, kind, paths.to_owned())
@@ -1455,7 +1499,7 @@ impl<'a> Builder<'a> {
         }
 
         match mode {
-            Mode::Std | Mode::ToolBootstrap | Mode::ToolStd => {}
+            Mode::Std | Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolCustom { .. } => {}
             Mode::Rustc | Mode::Codegen | Mode::ToolRustc => {
                 // Build proc macros both for the host and the target
                 if target != compiler.host && cmd != "check" {
@@ -1498,7 +1542,9 @@ impl<'a> Builder<'a> {
                 "binary-dep-depinfo,proc_macro_span,proc_macro_span_shrink,proc_macro_diagnostic"
                     .to_string()
             }
-            Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustc => String::new(),
+            Mode::Std | Mode::Rustc | Mode::Codegen | Mode::ToolRustc | Mode::ToolCustom { .. } => {
+                String::new()
+            }
         };
 
         cargo.arg("-j").arg(self.jobs().to_string());
@@ -1680,7 +1726,7 @@ impl<'a> Builder<'a> {
         let debuginfo_level = match mode {
             Mode::Rustc | Mode::Codegen => self.config.rust_debuginfo_level_rustc,
             Mode::Std => self.config.rust_debuginfo_level_std,
-            Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolRustc => {
+            Mode::ToolBootstrap | Mode::ToolStd | Mode::ToolRustc | Mode::ToolCustom { .. } => {
                 self.config.rust_debuginfo_level_tools
             }
         };
@@ -2055,6 +2101,10 @@ impl<'a> Builder<'a> {
             cargo.env("RUSTFLAGS", &rustc_args.join(" "));
         }
 
+        if target.contains("ferrocenecoretest") {
+            rustflags.arg("-Zpanic-abort-tests");
+        }
+
         Cargo { command: cargo, rustflags, rustdocflags, allow_features }
     }
 
@@ -2181,6 +2231,18 @@ impl<'a> Builder<'a> {
         if let Err(err) = opener::open(path) {
             self.info(&format!("{err}\n"));
         }
+    }
+
+    pub(crate) fn should_serve<S: Step>(&self) -> bool {
+        // We record whether this method was called to see if it was invoked during the dry run. If
+        // it wasn't and the --serve flag was passed we error out saying this is unsupported.
+        self.should_serve_called.store(true, atomic::Ordering::Relaxed);
+
+        self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
+    }
+
+    pub(crate) fn is_serve_flag_unsupported(&self) -> bool {
+        self.config.cmd.serve() && !self.should_serve_called.load(atomic::Ordering::Relaxed)
     }
 }
 

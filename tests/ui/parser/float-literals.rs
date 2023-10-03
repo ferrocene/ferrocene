@@ -7,3 +7,6 @@ pub fn main() {
 
     let _: f64 = 1234567890123456789012345678901234567890e-340;
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals

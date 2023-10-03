@@ -34,3 +34,9 @@ fn main() {
     let ck = d1 == d1;
     assert!(ck);
 }
+
+// ferrocene-annotations: fls_ohhsmifo0urd
+// Type Representation
+//
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

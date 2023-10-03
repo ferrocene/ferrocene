@@ -9,3 +9,12 @@ fn foo(a: Option<usize>, b: Option<usize>) {
 fn main() {
     foo(None, None);
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching

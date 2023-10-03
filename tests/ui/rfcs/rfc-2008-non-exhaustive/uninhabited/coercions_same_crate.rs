@@ -43,3 +43,8 @@ fn cannot_coerce_enum_with_empty_variants_to_anything(x: UninhabitedVariants) ->
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

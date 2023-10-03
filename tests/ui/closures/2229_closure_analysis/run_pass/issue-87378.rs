@@ -14,3 +14,9 @@ fn main() {
 
     c();
 }
+
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Type
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

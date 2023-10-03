@@ -352,3 +352,14 @@ test_with_formatter! {
         let _ = writeln!(f, "hello {}", "world",);
     }
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: um_rustc_test

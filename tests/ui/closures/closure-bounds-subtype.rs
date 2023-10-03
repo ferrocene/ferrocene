@@ -14,3 +14,6 @@ fn give_owned<F>(f: F) where F: FnOnce() + Send {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

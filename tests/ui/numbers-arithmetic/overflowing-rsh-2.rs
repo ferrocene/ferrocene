@@ -7,3 +7,5 @@ fn main() {
     let _x = -1_i32 >> -1;
     //~^ ERROR: this arithmetic operation will overflow
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

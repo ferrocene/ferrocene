@@ -15,3 +15,9 @@ pub fn main() {
         color::blue => { 3 }
     });
 }
+
+// ferrocene-annotations: fls_d44aflefat88
+// Path pattern matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path patterns

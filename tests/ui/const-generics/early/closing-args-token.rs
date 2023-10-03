@@ -24,3 +24,6 @@ fn bad_args_4() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

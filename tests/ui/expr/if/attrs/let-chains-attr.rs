@@ -11,3 +11,12 @@ fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+// ferrocene-annotations: fls_u1afezy1ye99
+// Conditional Compilation
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions

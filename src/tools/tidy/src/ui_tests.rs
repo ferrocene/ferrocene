@@ -8,6 +8,10 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+// When you add Ferrocene tests change this number rather than the ROOT_ENTRY_LIMIT variable below,
+// to avoid merge conflicts whenever upstream moves tests around and lowers the limit.
+const FERROCENE_EXTRA_ROOT_ENTRY_LIMIT: usize = 1;
+
 const ENTRY_LIMIT: usize = 900;
 // FIXME: The following limits should be reduced eventually.
 const ISSUES_ENTRY_LIMIT: usize = 1854;
@@ -54,7 +58,7 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
         let is_root = tests_path.join("ui") == dir_path;
         let is_issues_dir = tests_path.join("ui/issues") == dir_path;
         let (limit, maxcnt) = if is_root {
-            (ROOT_ENTRY_LIMIT, &mut max_root)
+            (ROOT_ENTRY_LIMIT + FERROCENE_EXTRA_ROOT_ENTRY_LIMIT, &mut max_root)
         } else if is_issues_dir {
             (ISSUES_ENTRY_LIMIT, &mut max_issues)
         } else {
@@ -70,6 +74,14 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
                 count,
                 dir_path.display()
             );
+        }
+        if count == 1 && dir_path.join("ferrocene-annotations").exists() {
+            tidy_error!(
+                bad,
+                "following path contains a dangling `ferrocene-annotations` file, which may be \
+                     a remnant from an upstream directory move: {}",
+                dir_path.display()
+            )
         }
     }
     if ROOT_ENTRY_LIMIT > max_root {

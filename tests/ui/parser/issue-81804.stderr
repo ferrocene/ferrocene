@@ -7,13 +7,15 @@ LL | fn p([=(}
    |        unclosed delimiter
 
 error: this file contains an unclosed delimiter
-  --> $DIR/issue-81804.rs:6:11
+  --> $DIR/issue-81804.rs:9:14
    |
 LL | fn p([=(}
-   |     --    ^
-   |     ||
-   |     |unclosed delimiter
+   |     -- unclosed delimiter
+   |     |
    |     unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: aborting due to 2 previous errors
 

@@ -25,3 +25,8 @@ fn test_no_run() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_x849a4u7h82j
+// Attribute ignore
+//
+// ferrocene-annotations: um_rustc_test

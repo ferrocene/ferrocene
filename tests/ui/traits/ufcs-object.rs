@@ -15,3 +15,9 @@ fn main() {
     let a: &dyn Foo = &22;
     assert_eq!(Foo::test(a), 22);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

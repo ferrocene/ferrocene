@@ -35,3 +35,12 @@ pub fn main() {
     sink(option::some(close_res(c)));
     assert!(!c.get());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

@@ -15,3 +15,6 @@ fn main() {
   b + 3 //~ ERROR E0277
   //~^ ERROR: mismatched types
 }
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions

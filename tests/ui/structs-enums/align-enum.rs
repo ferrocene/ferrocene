@@ -52,3 +52,12 @@ fn main() {
     assert_eq!(mem::align_of::<AnotherAlign16>(), 16);
     assert_eq!(mem::size_of::<AnotherAlign16>(), 32);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_7pby13muw48o
+// Representation
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

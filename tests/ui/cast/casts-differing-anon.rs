@@ -20,3 +20,6 @@ fn main() {
     // ... and they should not be mixable
     b_raw = f_raw as *mut _; //~ ERROR is invalid
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type

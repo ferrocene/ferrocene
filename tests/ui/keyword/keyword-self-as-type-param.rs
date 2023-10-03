@@ -8,3 +8,6 @@ trait Bar<Self> {}
 //~^ ERROR unexpected keyword `Self` in generic parameters
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

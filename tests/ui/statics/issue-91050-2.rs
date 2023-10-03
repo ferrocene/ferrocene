@@ -22,3 +22,18 @@ pub mod inner {
         GLOBAL1 + 42
     }
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+//
+// ferrocene-annotations: fls_s4yt19sptl7d
+// External Statics
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

@@ -41,3 +41,5 @@ fn main() {
     let s = cmd.status();
     assert!(s.unwrap().code() != Some(0));
 }
+
+// ferrocene-annotations: um_rustc_C_panic

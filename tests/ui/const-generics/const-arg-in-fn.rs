@@ -7,3 +7,6 @@ fn const_u32_identity<const X: u32>() -> u32 {
     let val = const_u32_identity::<18>();
     assert_eq!(val, 18);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

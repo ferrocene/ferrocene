@@ -117,3 +117,7 @@ pub fn main() {
         Box::<Fat<[_; 3]>>::new((5, "some str", [1, 2, 3]));
     foo(&*f3);
 }
+
+
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

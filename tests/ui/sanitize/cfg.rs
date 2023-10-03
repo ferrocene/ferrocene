@@ -48,3 +48,5 @@ fn main() {}
 pub fn check() {
     main();
 }
+
+// ferrocene-annotations: um_rustc_cfg

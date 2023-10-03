@@ -24,3 +24,8 @@ fn main() {
         println!("{:p}", &dep1::collision);
     }
 }
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle
+//
+// ferrocene-annotations: um_rustc_C_codegen_units

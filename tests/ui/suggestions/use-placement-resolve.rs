@@ -9,3 +9,5 @@
 fn main() {}
 
 fn foobar<T: Debug>(x: T) {} //~ ERROR expected trait, found derive macro
+
+// ferrocene-annotations: um_rustc_test

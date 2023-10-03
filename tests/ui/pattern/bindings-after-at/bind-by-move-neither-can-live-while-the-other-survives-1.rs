@@ -35,3 +35,12 @@ fn main() {
         None => panic!(),
     }
 }
+
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns

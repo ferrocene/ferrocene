@@ -8,3 +8,12 @@ trait A {
 fn main() {
     let _x: &dyn A; //~ ERROR E0038
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object Safety

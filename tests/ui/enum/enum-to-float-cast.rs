@@ -19,3 +19,9 @@ pub fn main() {
     assert_eq!(b, -1.0f32);
     assert_eq!(d, -1.0f32);
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

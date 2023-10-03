@@ -15,3 +15,5 @@ extern "C-unwind" {
 pub unsafe extern "C" fn foo() {
     bar();
 }
+
+// ferrocene-annotations: um_rustc_C_panic

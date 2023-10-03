@@ -28,3 +28,6 @@ fn main() {
               .filter(|&&x| x == 1)
               .filter_map; //~ ERROR attempted to take value of method `filter_map` on type
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

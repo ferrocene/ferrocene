@@ -15,3 +15,9 @@ pub fn main() {
   assert!(!(a1 != a1));
   assert!(!(a2 != a1));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

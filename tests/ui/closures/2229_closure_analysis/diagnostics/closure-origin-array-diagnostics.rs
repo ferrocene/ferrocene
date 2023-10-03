@@ -11,3 +11,6 @@ fn main() {
     };
     expect_fn(c);
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

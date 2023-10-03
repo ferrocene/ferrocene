@@ -18,3 +18,6 @@ fn wow<'a>() -> &'a () {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

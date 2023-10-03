@@ -32,3 +32,7 @@ pub fn main() {
     let x: isize;
     x >>= 1; //~ ERROR E0381
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

@@ -24,3 +24,9 @@ fn only_generic_n<const N: usize>() -> [u8; N + 13] {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

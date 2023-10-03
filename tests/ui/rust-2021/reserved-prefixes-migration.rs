@@ -36,3 +36,24 @@ quote! {
     //~^ WARNING prefix `kind` is unknown [rust_2021_prefixes_incompatible_syntax]
     //~| WARNING hard error in Rust 2021
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_4apk1exafxii
+// Macro Matching
+//
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule Matching
+//
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token Matching

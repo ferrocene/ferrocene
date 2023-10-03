@@ -18,3 +18,8 @@ impl Bar for Foo {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_21vnag69kbwe
+// Identifiers
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

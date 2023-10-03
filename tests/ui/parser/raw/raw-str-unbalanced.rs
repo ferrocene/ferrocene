@@ -20,3 +20,6 @@ const B: &'static str = r""## //~ ERROR too many `#` when terminating raw string
 fn test2() {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals

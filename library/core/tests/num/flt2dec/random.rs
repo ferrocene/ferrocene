@@ -145,7 +145,7 @@ fn shortest_random_equivalence_test() {
 }
 
 #[test]
-#[ignore] // it is too expensive
+#[ignore = "high resource cost of running test"]
 fn shortest_f32_exhaustive_equivalence_test() {
     // it is hard to directly test the optimality of the output, but we can at least test if
     // two different algorithms agree to each other.
@@ -159,7 +159,7 @@ fn shortest_f32_exhaustive_equivalence_test() {
 }
 
 #[test]
-#[ignore] // it is too expensive
+#[ignore = "high resource cost of running test"]
 fn shortest_f64_hard_random_equivalence_test() {
     // this again probably has to use appropriate rustc flags.
 

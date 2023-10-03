@@ -5,3 +5,5 @@
 #![allow(random_lint_name)]
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_D

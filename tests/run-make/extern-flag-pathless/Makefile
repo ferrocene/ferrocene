@@ -32,3 +32,5 @@ all:
 	mv $(call DYLIB,bar) $(TMPDIR)/bar.tmp
 	$(call FAIL,foo)
 	mv $(TMPDIR)/bar.tmp $(call DYLIB,bar)
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

@@ -11,3 +11,6 @@ pub unsafe extern "C" fn foo(a: i32, b: u32) -> u32 {
     //~^ ERROR: derive proc macro has incorrect signature
     loop {}
 }
+
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive

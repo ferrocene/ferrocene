@@ -12,3 +12,5 @@ fn main() {
 fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop{}
 }
+
+// ferrocene-annotations: um_rustc_C_panic

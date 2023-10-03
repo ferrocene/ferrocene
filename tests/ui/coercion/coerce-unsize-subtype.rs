@@ -38,3 +38,6 @@ fn long_and_short_lub2<'a, 'b, T>(xs: &'b [&'static T], ys: &'b [&'a T; 1]) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions

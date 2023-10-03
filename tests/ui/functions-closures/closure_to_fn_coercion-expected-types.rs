@@ -7,3 +7,6 @@ fn foo(f: fn(Vec<u32>) -> usize) { }
 fn main() {
     foo(|x| x.len())
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

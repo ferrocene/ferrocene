@@ -26,7 +26,6 @@ jobs:
       matrix:
         branch:
           - main
-          - release/1.68
 
     environment: automation-pull-subtrees
     steps:

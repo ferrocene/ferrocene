@@ -128,7 +128,10 @@ def find_previous_commit(subtree):
         ]
         if before is not None:
             cmd.append(f"{before}^")
-        hash, message = run_capture(cmd).split("|", 1)
+        output = run_capture(cmd)
+        if not output:
+            return
+        hash, message = output.split("|", 1)
 
         # git log's --grep flag also searches in the commit message, not just the
         # commit summary (the first line of the message). To work around the
@@ -190,13 +193,16 @@ def update_subtree(repo_root, subtree):
     diff = "* *Initial pull of the repository.*\n"
     if (repo_root / subtree.path).is_dir():
         previous_commit = find_previous_commit(subtree)
-        if previous_commit == latest_commit:
+        if previous_commit is None:
+            print("warning: could not find any commit previously bumping this subtree")
+        elif previous_commit == latest_commit:
             print(f"subtree {subtree.path} is already up to date")
             return
+        else:
+            diff = generate_merged_pull_requests_list(
+                subtree, previous_commit, latest_commit
+            )
 
-        diff = generate_merged_pull_requests_list(
-            subtree, previous_commit, latest_commit
-        )
         print(f"updating subtree {subtree.path}")
         run(
             [

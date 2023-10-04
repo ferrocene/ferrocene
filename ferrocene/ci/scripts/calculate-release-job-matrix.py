@@ -200,7 +200,10 @@ def run():
         commits = commits_in_release_branches(ctx)
         releases = filter_automated_channels(commits_to_releases(ctx, commits))
     elif ctx.event_name == "workflow_dispatch":
-        commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
+        if ctx.event_data["inputs"]["verbatim-ref"] == "true":
+            commit = ctx.event_data["inputs"]["ref"]
+        else:
+            commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
         releases = commits_to_releases(ctx, [commit])
     else:
         raise RuntimeError(f"unsupported event name: {event_name}")

@@ -13,3 +13,6 @@ pub fn main() {
     println!("{}", z);
     assert_eq!(z, 5);
 }
+
+// ferrocene-annotations: fls_telbknkodx3d
+// Call Resolution

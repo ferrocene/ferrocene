@@ -109,7 +109,10 @@ def filter_automated_channels(releases):
             )
 
     rolling_releases.sort(key=lambda vr: vr[0])
-    yield rolling_releases.pop()[1]
+    # When starting from a squashed repo with no release branches yielding the
+    # latest rolling release would crash the script.
+    if rolling_releases:
+        yield rolling_releases.pop()[1]
     for discarded in rolling_releases:
         print(
             f"note: version {discarded[1].metadata.rust_version} is not the latest "

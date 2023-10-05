@@ -1,7 +1,7 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Tests Tesults
+Tests Results
 =============
 
 Ferrocene for ARMv8-A bare metal and x86-64 Linux

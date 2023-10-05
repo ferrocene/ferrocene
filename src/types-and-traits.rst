@@ -890,7 +890,7 @@ A :t:`closure type` implicitly implements the :std:`core::marker::Send`
 
 :dp:`fls_5jh07heok8sy`
 A :t:`closure type` implicitly implements the :std:`core::marker::Sync`
-:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capture
+:t:`trait` if all the :t:`[type]s` of the :t:`[value]s` of the :t:`capturing
 environment` implement the :std:`core::marker::Send` :t:`trait`.
 
 .. _fls_airvr79xkcag:

@@ -204,6 +204,7 @@ def update_subtree(repo_root, subtree):
             )
 
         print(f"updating subtree {subtree.path}")
+        commit_before = resolve_commit("HEAD")
         run(
             [
                 "git",
@@ -217,6 +218,13 @@ def update_subtree(repo_root, subtree):
             ],
             cwd=repo_root,
         )
+
+        # Mark the update as not being executed (returning None) when no commit
+        # was created by the subtree pull. Otherwise the PR automation will try
+        # creating a PR without diff, which will be rejected by GitHub.
+        if resolve_commit("HEAD") == commit_before:
+            print("warning: tried to update subtree, but no change was committed")
+            return
     else:
         print(f"creating subtree {subtree.path}")
         (repo_root / subtree.path.parent).mkdir(parents=True, exist_ok=True)

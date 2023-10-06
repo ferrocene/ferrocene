@@ -60,7 +60,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
         }
 
         // The rest jumps to `ret` immediately.
-        this.emulate_intrinsic_by_name(intrinsic_name, args, dest)?;
+        this.emulate_intrinsic_by_name(intrinsic_name, instance.args, args, dest)?;
 
         trace!("{:?}", this.dump_place(dest));
         this.go_to_block(ret);
@@ -71,6 +71,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
     fn emulate_intrinsic_by_name(
         &mut self,
         intrinsic_name: &str,
+        generic_args: ty::GenericArgsRef<'tcx>,
         args: &[OpTy<'tcx, Provenance>],
         dest: &PlaceTy<'tcx, Provenance>,
     ) -> InterpResult<'tcx> {
@@ -80,7 +81,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             return this.emulate_atomic_intrinsic(name, args, dest);
         }
         if let Some(name) = intrinsic_name.strip_prefix("simd_") {
-            return this.emulate_simd_intrinsic(name, args, dest);
+            return this.emulate_simd_intrinsic(name, generic_args, args, dest);
         }
 
         match intrinsic_name {
@@ -324,7 +325,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
 
             "fmaf32" => {
                 let [a, b, c] = check_arg_count(args)?;
-                // FIXME: Using host floats, to work around https://github.com/rust-lang/miri/issues/2468.
+                // FIXME: Using host floats, to work around https://github.com/rust-lang/rustc_apfloat/issues/11
                 let a = f32::from_bits(this.read_scalar(a)?.to_u32()?);
                 let b = f32::from_bits(this.read_scalar(b)?.to_u32()?);
                 let c = f32::from_bits(this.read_scalar(c)?.to_u32()?);
@@ -334,7 +335,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
 
             "fmaf64" => {
                 let [a, b, c] = check_arg_count(args)?;
-                // FIXME: Using host floats, to work around https://github.com/rust-lang/miri/issues/2468.
+                // FIXME: Using host floats, to work around https://github.com/rust-lang/rustc_apfloat/issues/11
                 let a = f64::from_bits(this.read_scalar(a)?.to_u64()?);
                 let b = f64::from_bits(this.read_scalar(b)?.to_u64()?);
                 let c = f64::from_bits(this.read_scalar(c)?.to_u64()?);

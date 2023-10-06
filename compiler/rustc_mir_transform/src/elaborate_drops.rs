@@ -170,6 +170,7 @@ impl<'a, 'tcx> DropElaborator<'a, 'tcx> for Elaborator<'a, '_, 'tcx> {
         self.ctxt.param_env()
     }
 
+    #[instrument(level = "debug", skip(self), ret)]
     fn drop_style(&self, path: Self::Path, mode: DropFlagMode) -> DropStyle {
         let ((maybe_live, maybe_dead), multipart) = match mode {
             DropFlagMode::Shallow => (self.ctxt.init_data.maybe_live_dead(path), false),
@@ -270,7 +271,7 @@ impl<'b, 'tcx> ElaborateDropsCtxt<'b, 'tcx> {
         let tcx = self.tcx;
         let patch = &mut self.patch;
         debug!("create_drop_flag({:?})", self.body.span);
-        self.drop_flags[index].get_or_insert_with(|| patch.new_internal(tcx.types.bool, span));
+        self.drop_flags[index].get_or_insert_with(|| patch.new_temp(tcx.types.bool, span));
     }
 
     fn drop_flag(&mut self, index: MovePathIndex) -> Option<Place<'tcx>> {

@@ -1289,7 +1289,7 @@ impl Lifetime {
 pub(crate) enum WherePredicate {
     BoundPredicate { ty: Type, bounds: Vec<GenericBound>, bound_params: Vec<GenericParamDef> },
     RegionPredicate { lifetime: Lifetime, bounds: Vec<GenericBound> },
-    EqPredicate { lhs: Box<Type>, rhs: Box<Term>, bound_params: Vec<GenericParamDef> },
+    EqPredicate { lhs: Type, rhs: Term },
 }
 
 impl WherePredicate {
@@ -1297,15 +1297,6 @@ impl WherePredicate {
         match *self {
             WherePredicate::BoundPredicate { ref bounds, .. } => Some(bounds),
             WherePredicate::RegionPredicate { ref bounds, .. } => Some(bounds),
-            _ => None,
-        }
-    }
-
-    pub(crate) fn get_bound_params(&self) -> Option<&[GenericParamDef]> {
-        match self {
-            Self::BoundPredicate { bound_params, .. } | Self::EqPredicate { bound_params, .. } => {
-                Some(bound_params)
-            }
             _ => None,
         }
     }
@@ -1604,14 +1595,16 @@ impl Type {
     ///
     /// This function will panic if the return type does not match the expected sugaring for async
     /// functions.
-    pub(crate) fn sugared_async_return_type(&self) -> Type {
-        if let Type::ImplTrait(v) = self &&
-            let [GenericBound::TraitBound(PolyTrait { trait_, .. }, _ )] = &v[..]
+    pub(crate) fn sugared_async_return_type(self) -> Type {
+        if let Type::ImplTrait(mut v) = self
+            && let Some(GenericBound::TraitBound(PolyTrait { mut trait_, .. }, _ )) = v.pop()
+            && let Some(segment) = trait_.segments.pop()
+            && let GenericArgs::AngleBracketed { mut bindings, .. } = segment.args
+            && let Some(binding) = bindings.pop()
+            && let TypeBindingKind::Equality { term } = binding.kind
+            && let Term::Type(ty) = term
         {
-            let bindings = trait_.bindings().unwrap();
-            let ret_ty = bindings[0].term();
-            let ty = ret_ty.ty().expect("unexpected constant in async fn return term");
-            ty.clone()
+            ty
         } else {
             panic!("unexpected async fn return type")
         }
@@ -2189,16 +2182,6 @@ impl Path {
             }
         })
     }
-
-    pub(crate) fn bindings(&self) -> Option<&[TypeBinding]> {
-        self.segments.last().and_then(|seg| {
-            if let GenericArgs::AngleBracketed { ref bindings, .. } = seg.args {
-                Some(&**bindings)
-            } else {
-                None
-            }
-        })
-    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
@@ -2476,15 +2459,6 @@ pub(crate) struct TypeBinding {
 pub(crate) enum TypeBindingKind {
     Equality { term: Term },
     Constraint { bounds: Vec<GenericBound> },
-}
-
-impl TypeBinding {
-    pub(crate) fn term(&self) -> &Term {
-        match self.kind {
-            TypeBindingKind::Equality { ref term } => term,
-            _ => panic!("expected equality type binding for parenthesized generic args"),
-        }
-    }
 }
 
 /// The type, lifetime, or constant that a private type alias's parameter should be

@@ -38,7 +38,7 @@ fn sgx_image_base_no_std() {
     }
 
     let image_base = guess_image_base();
-    backtrace::set_image_base(image_base);
+    backtrace::set_image_base(image_base as _);
 
     let mut frame_ips = Vec::new();
     unsafe {

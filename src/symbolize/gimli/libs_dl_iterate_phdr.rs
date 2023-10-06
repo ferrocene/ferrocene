@@ -18,14 +18,18 @@ pub(super) fn native_libraries() -> Vec<Library> {
 }
 
 fn infer_current_exe(base_addr: usize) -> OsString {
-    if let Ok(entries) = super::parse_running_mmaps::parse_maps() {
-        let opt_path = entries
-            .iter()
-            .find(|e| e.ip_matches(base_addr) && e.pathname().len() > 0)
-            .map(|e| e.pathname())
-            .cloned();
-        if let Some(path) = opt_path {
-            return path;
+    cfg_if::cfg_if! {
+        if #[cfg(not(target_os = "hurd"))] {
+                if let Ok(entries) = super::parse_running_mmaps::parse_maps() {
+                let opt_path = entries
+                    .iter()
+                    .find(|e| e.ip_matches(base_addr) && e.pathname().len() > 0)
+                    .map(|e| e.pathname())
+                    .cloned();
+                if let Some(path) = opt_path {
+                    return path;
+                }
+            }
         }
     }
     env::current_exe().map(|e| e.into()).unwrap_or_default()

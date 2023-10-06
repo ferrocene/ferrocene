@@ -308,7 +308,7 @@ const DEBUG_PATH: &[u8] = b"/usr/lib/debug";
 
 fn debug_path_exists() -> bool {
     cfg_if::cfg_if! {
-        if #[cfg(any(target_os = "freebsd", target_os = "linux"))] {
+        if #[cfg(any(target_os = "freebsd", target_os = "hurd", target_os = "linux"))] {
             use core::sync::atomic::{AtomicU8, Ordering};
             static DEBUG_PATH_EXISTS: AtomicU8 = AtomicU8::new(0);
 

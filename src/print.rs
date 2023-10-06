@@ -219,7 +219,7 @@ impl BacktraceFrameFmt<'_, '_, '_> {
     #[allow(unused_mut)]
     fn print_raw_generic(
         &mut self,
-        mut frame_ip: *mut c_void,
+        frame_ip: *mut c_void,
         symbol_name: Option<SymbolName<'_>>,
         filename: Option<BytesOrWideString<'_>>,
         lineno: Option<u32>,
@@ -231,15 +231,6 @@ impl BacktraceFrameFmt<'_, '_, '_> {
             if frame_ip.is_null() {
                 return Ok(());
             }
-        }
-
-        // To reduce TCB size in Sgx enclave, we do not want to implement symbol
-        // resolution functionality.  Rather, we can print the offset of the
-        // address here, which could be later mapped to correct function.
-        #[cfg(all(feature = "std", target_env = "sgx", target_vendor = "fortanix"))]
-        {
-            let image_base = std::os::fortanix_sgx::mem::image_base();
-            frame_ip = usize::wrapping_sub(frame_ip as usize, image_base as _) as _;
         }
 
         // Print the index of the frame as well as the optional instruction

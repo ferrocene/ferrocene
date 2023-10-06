@@ -134,6 +134,12 @@ cfg_if::cfg_if! {
     }
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))] {
+        pub use self::backtrace::set_image_base;
+    }
+}
+
 #[allow(dead_code)]
 struct Bomb {
     enabled: bool,

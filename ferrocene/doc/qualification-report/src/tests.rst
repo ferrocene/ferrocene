@@ -28,7 +28,7 @@ For this qualification, testing is restricted to the following environment:
 .. note::
 
    Only the Rust language,
-   as described in the Ferrocene :doc:`Language Specification document <specification:index>`,
+   as described in the :doc:`specification:index`,
    is verified.
 
 Bare metal testing

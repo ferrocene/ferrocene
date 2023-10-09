@@ -30,7 +30,7 @@ their code.
 .. note::
 
    Only the Rust language,
-   as described in the Ferrocene :doc:`Language Specification document <specification:index>`,
+   as described in the :doc:`specification:index`,
    is verified.
 
 The qualification scope is limited to the set of supported compilation options

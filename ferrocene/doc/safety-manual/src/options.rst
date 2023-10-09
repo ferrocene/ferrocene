@@ -6,17 +6,17 @@ Tool Options
 
 Ferrocene is qualified exclusively for the following command line options:
 
-- users shall pass command line option ``--edition 2021`` to each invocation of
+- Users shall pass command line option ``--edition 2021`` to each invocation of
   the Ferrocene compiler.
 
-- users shall pass command line option ``-C opt-level=2`` to each invocation of
+- Users shall pass command line option ``-C opt-level=2`` to each invocation of
   the Ferrocene compiler.
 
 - Users shall pass command line option
   ``-C llvm-args=-protect-from-escaped-allocas=true`` to each invocation of the
   Ferrocene compiler.
 
-- users shall pass all target-specific command line options, as listed in the
+- Users shall pass all target-specific command line options, as listed in the
   page of the target in the :doc:`Compilation Targets
   <user-manual:targets/index>` section of the User Manual.
 

@@ -6,10 +6,12 @@ warning[E0602]: unknown lint: `invalid_lint_code`
 warning[E0602]: unknown lint: `invalid_lint_code`
    |
    = note: requested on the command line with `-F invalid_lint_code`
+   = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
 warning[E0602]: unknown lint: `invalid_lint_code`
    |
    = note: requested on the command line with `-F invalid_lint_code`
+   = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
 
 warning: 3 warnings emitted
 

@@ -2643,9 +2643,9 @@ checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 
 [[package]]
 name = "jemalloc-sys"
-version = "0.5.3+5.3.0-patched"
+version = "0.5.4+5.3.0-patched"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9bd5d616ea7ed58b571b2e209a65759664d7fb021a0819d7a790afc67e47ca1"
+checksum = "ac6c1946e1cea1788cbfde01c993b52a10e2da07f4bac608228d1bed20bfebf2"
 dependencies = [
  "cc",
  "libc",
@@ -2734,7 +2734,7 @@ checksum = "db13adb97ab515a3691f56e4dbab09283d0b86cb45abd991d8634a9d6f501760"
 
 [[package]]
 name = "libc"
-version = "0.2.148"
+version = "0.2.149"
 dependencies = [
  "rustc-std-workspace-core",
 ]
@@ -2766,6 +2766,16 @@ checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
 dependencies = [
  "cfg-if",
  "winapi",
+]
+
+[[package]]
+name = "libloading"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c571b676ddfc9a8c12f1f3d3085a7b163966a8fd8098a90640953ce5f6170161"
+dependencies = [
+ "cfg-if",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -3043,7 +3053,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "libffi",
- "libloading",
+ "libloading 0.8.1",
  "log",
  "measureme",
  "rand",
@@ -3051,7 +3061,7 @@ dependencies = [
  "rustc_version",
  "serde",
  "smallvec",
- "ui_test 0.11.7",
+ "ui_test 0.21.2",
 ]
 
 [[package]]
@@ -4667,7 +4677,7 @@ dependencies = [
 name = "rustc_interface"
 version = "0.0.0"
 dependencies = [
- "libloading",
+ "libloading 0.7.4",
  "rustc-rayon",
  "rustc-rayon-core",
  "rustc_ast",
@@ -4798,7 +4808,7 @@ name = "rustc_metadata"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.3.2",
- "libloading",
+ "libloading 0.7.4",
  "odht",
  "rustc_ast",
  "rustc_attr",
@@ -5013,7 +5023,7 @@ dependencies = [
 name = "rustc_plugin_impl"
 version = "0.0.0"
 dependencies = [
- "libloading",
+ "libloading 0.7.4",
  "rustc_ast",
  "rustc_errors",
  "rustc_fluent_macro",
@@ -5216,6 +5226,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_feature",
  "rustc_fs_util",
+ "rustc_index",
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
@@ -6543,18 +6554,23 @@ checksum = "9e79c4d996edb816c91e4308506774452e55e95c3c9de07b6729e17e15a5ef81"
 
 [[package]]
 name = "ui_test"
-version = "0.11.7"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c21899b59f53717dfad29e4f46e5b21a200a1b6888ab86532a07cfc8b48dd78c"
+checksum = "bfd8fb9b15c8332cf51bfc2dc4830063b2446a9c9d732421b56f2478024a3971"
 dependencies = [
+ "annotate-snippets",
+ "anyhow",
  "bstr",
  "cargo-platform",
  "cargo_metadata",
  "color-eyre",
  "colored",
+ "comma",
  "crossbeam-channel",
- "diff",
+ "indicatif",
  "lazy_static",
+ "levenshtein",
+ "prettydiff",
  "regex",
  "rustc_version",
  "rustfix",
@@ -6565,9 +6581,9 @@ dependencies = [
 
 [[package]]
 name = "ui_test"
-version = "0.20.0"
+version = "0.21.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfd8fb9b15c8332cf51bfc2dc4830063b2446a9c9d732421b56f2478024a3971"
+checksum = "aaf4bf7c184b8dfc7a4d3b90df789b1eb992ee42811cd115f32a7a1eb781058d"
 dependencies = [
  "annotate-snippets",
  "anyhow",

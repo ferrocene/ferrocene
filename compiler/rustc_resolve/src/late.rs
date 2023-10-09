@@ -41,9 +41,6 @@ type Res = def::Res<NodeId>;
 
 type IdentMap<T> = FxHashMap<Ident, T>;
 
-/// Map from the name in a pattern to its binding mode.
-type BindingMap = IdentMap<BindingInfo>;
-
 use diagnostics::{
     ElisionFnParameter, LifetimeElisionCandidate, MissingLifetime, MissingLifetimeKind,
 };
@@ -3164,8 +3161,8 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
     /// this is done hygienically. This could arise for a macro
     /// that expands into an or-pattern where one 'x' was from the
     /// user and one 'x' came from the macro.
-    fn binding_mode_map(&mut self, pat: &Pat) -> BindingMap {
-        let mut binding_map = FxHashMap::default();
+    fn binding_mode_map(&mut self, pat: &Pat) -> FxIndexMap<Ident, BindingInfo> {
+        let mut binding_map = FxIndexMap::default();
 
         pat.walk(&mut |pat| {
             match pat.kind {
@@ -3200,22 +3197,28 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
 
     /// Checks that all of the arms in an or-pattern have exactly the
     /// same set of bindings, with the same binding modes for each.
-    fn check_consistent_bindings(&mut self, pats: &[P<Pat>]) -> Vec<BindingMap> {
-        let mut missing_vars = FxHashMap::default();
-        let mut inconsistent_vars = FxHashMap::default();
+    fn check_consistent_bindings(
+        &mut self,
+        pats: &[P<Pat>],
+    ) -> Vec<FxIndexMap<Ident, BindingInfo>> {
+        // pats is consistent.
+        let mut missing_vars = FxIndexMap::default();
+        let mut inconsistent_vars = FxIndexMap::default();
 
         // 1) Compute the binding maps of all arms.
         let maps = pats.iter().map(|pat| self.binding_mode_map(pat)).collect::<Vec<_>>();
 
         // 2) Record any missing bindings or binding mode inconsistencies.
-        for (map_outer, pat_outer) in pats.iter().enumerate().map(|(idx, pat)| (&maps[idx], pat)) {
+        for (map_outer, pat_outer) in maps.iter().zip(pats.iter()) {
             // Check against all arms except for the same pattern which is always self-consistent.
-            let inners = pats
+            let inners = maps
                 .iter()
-                .enumerate()
+                .zip(pats.iter())
                 .filter(|(_, pat)| pat.id != pat_outer.id)
-                .flat_map(|(idx, _)| maps[idx].iter())
-                .map(|(key, binding)| (key.name, map_outer.get(&key), binding));
+                .flat_map(|(map, _)| map)
+                .map(|(key, binding)| (key.name, map_outer.get(key), binding));
+
+            let inners = inners.collect::<Vec<_>>();
 
             for (name, info, &binding_inner) in inners {
                 match info {
@@ -3244,10 +3247,7 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
         }
 
         // 3) Report all missing variables we found.
-        let mut missing_vars = missing_vars.into_iter().collect::<Vec<_>>();
-        missing_vars.sort_by_key(|&(sym, ref _err)| sym);
-
-        for (name, mut v) in missing_vars.into_iter() {
+        for (name, mut v) in missing_vars {
             if inconsistent_vars.contains_key(&name) {
                 v.could_be_path = false;
             }
@@ -3258,10 +3258,8 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
         }
 
         // 4) Report all inconsistencies in binding modes we found.
-        let mut inconsistent_vars = inconsistent_vars.iter().collect::<Vec<_>>();
-        inconsistent_vars.sort();
         for (name, v) in inconsistent_vars {
-            self.report_error(v.0, ResolutionError::VariableBoundWithDifferentMode(*name, v.1));
+            self.report_error(v.0, ResolutionError::VariableBoundWithDifferentMode(name, v.1));
         }
 
         // 5) Finally bubble up all the binding maps.
@@ -4140,6 +4138,12 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
         });
     }
 
+    fn resolve_expr_field(&mut self, f: &'ast ExprField, e: &'ast Expr) {
+        self.resolve_expr(&f.expr, Some(e));
+        self.visit_ident(f.ident);
+        walk_list!(self, visit_attribute, f.attrs.iter());
+    }
+
     fn resolve_expr(&mut self, expr: &'ast Expr, parent: Option<&'ast Expr>) {
         // First, record candidate traits for this expression if it could
         // result in the invocation of a method call.
@@ -4155,7 +4159,19 @@ impl<'a: 'ast, 'b, 'ast, 'tcx> LateResolutionVisitor<'a, 'b, 'ast, 'tcx> {
 
             ExprKind::Struct(ref se) => {
                 self.smart_resolve_path(expr.id, &se.qself, &se.path, PathSource::Struct);
-                visit::walk_expr(self, expr);
+                // This is the same as `visit::walk_expr(self, expr);`, but we want to pass the
+                // parent in for accurate suggestions when encountering `Foo { bar }` that should
+                // have been `Foo { bar: self.bar }`.
+                if let Some(qself) = &se.qself {
+                    self.visit_ty(&qself.ty);
+                }
+                self.visit_path(&se.path, expr.id);
+                walk_list!(self, resolve_expr_field, &se.fields, expr);
+                match &se.rest {
+                    StructRest::Base(expr) => self.visit_expr(expr),
+                    StructRest::Rest(_span) => {}
+                    StructRest::None => {}
+                }
             }
 
             ExprKind::Break(Some(label), _) | ExprKind::Continue(Some(label)) => {

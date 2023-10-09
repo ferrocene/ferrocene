@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+sphinx
+sphinx-autobuild
+tomli
+myst_parser
+pyyaml
+
+# For compatibility with Python < 3.10, as Sphinx has a conditional dependency
+# on importlib-metadata on older Python versions.
+importlib-metadata

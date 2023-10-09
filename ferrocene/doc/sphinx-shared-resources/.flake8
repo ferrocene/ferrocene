@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Configuration recommended by Black
+# https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
+
+[flake8]
+max-line-length = 88
+extend-ignore = E203

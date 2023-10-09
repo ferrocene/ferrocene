@@ -1,0 +1,61 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+
+{% extends "layout.html" %}
+{% set title = "Digital signatures" %}
+
+{% block body %}
+<section>
+    <h1>Digital signatures</h1>
+
+    {% if state == "unsigned" %}
+        <div class="admonition caution">
+            <p class="admonition-title">Caution</p>
+            <p>
+                This document is not digitally signed.
+            </p>
+        </div>
+    {% elif state == "inconsistent" %}
+        <div class="admonition error">
+            <p class="admonition-title">Error</p>
+            <p>
+                Some signature files are missing, but the build system marked this
+                document as being signed. This is an intermediate step of the
+                signature process that should never end up in released documents.
+            </p>
+        </div>
+    {% else %}
+        <p>This document has been digitally signed by the following people:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th>Signature time</th>
+                    <th>Signed file</th>
+                    <th>Signature bundle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role_name, role in signature["config"]["roles"].items() %}
+                    <tr>
+                        <td>{{ role["name"] }}</td>
+                        <td>{{ role["role-name"] }}</td>
+                        <td><a href="mailto:{{ role[" email"] }}">{{ role["email"] }}</a></td>
+                        <td>{{ signature["signatures"][role_name]["time"] }}</td>
+                        {% if signature["signatures"][role_name]["present"] %}
+                            <td><a href="pinned.toml">pinned.toml</a></td>
+                            <td><a href="{{ role_name }}.cosign-bundle">{{ role_name }}.cosign-bundle</a></td>
+                        {% else %}
+                            <td>-</td>
+                            <td>-</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,13 +1,13 @@
 - // MIR for `bar` before InstrumentCoverage
 + // MIR for `bar` after InstrumentCoverage
-
+  
   fn bar() -> bool {
       let mut _0: bool;
-
+  
       bb0: {
-+         Coverage::Counter(0) for [/the/src/instrument_coverage.rs:20:1 - 22:2];
++         Coverage::Counter(0) for [/the/src/instrument_coverage.rs:21:1 - 23:2];
           _0 = const true;
           return;
       }
   }
-
+  

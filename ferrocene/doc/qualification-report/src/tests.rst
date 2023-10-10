@@ -10,7 +10,7 @@ Ferrocene for ARMv8-A bare metal and x86-64 Linux
 Test Environment
 ^^^^^^^^^^^^^^^^
 
-For this qualification, testing is restricted to the following environment:
+For this qualification, testing is restricted to the following environments:
 
 .. list-table:: 
    :align: left
@@ -18,9 +18,12 @@ For this qualification, testing is restricted to the following environment:
 
    * - Host
      - x86_64 Linux
+     - x86_64 Linux
    * - Target
      - ARMv8-A bare metal (aarch64)
+     - x86_64 Linux
    * - Supported languages
+     - Rust
      - Rust
 
 .. end of table

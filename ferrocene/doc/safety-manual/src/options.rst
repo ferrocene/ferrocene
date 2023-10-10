@@ -39,6 +39,6 @@ defined and tested by the Ferrocene testsuite.
 
 If the end user requires CLI options other than those identified in this
 chapter, they must verify that the feature exists and is compatible with their
-target, that their safety context is compatible with the use of CLI option or
+target, that their safety context is compatible with the use of the CLI option or
 feature, and develop appropriate verification activities and tests to ensure
 the correct functionality of the generated code.

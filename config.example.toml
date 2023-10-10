@@ -882,3 +882,9 @@ change-id = 115898
 
 # Name of the AWS S3 bucket containing the document signatures file.
 #document-signatures-s3-bucket = "ferrocene-document-signatures"
+
+# The following serves two purposes when set to true:
+# - Avoids "Unsigned draft" warning in Qualification docs, when they are not signed
+# - Avoids an error that occurs if signatures are present,
+#   but you don't have access to the private signature files
+#ignore-document-signatures = false

@@ -27,9 +27,11 @@ end-use code is outside the scope of the current Ferrocene qualification. It
 is the end-user responsibility to qualify these libraries if they are used in
 their code.
 
-.. Note::
-   For the Rust language, only the Rust standard as described in the
-   Ferrocene :doc:`Language Specification document <specification:index>`.
+.. note::
+
+   Only the Rust language,
+   as described in the :doc:`specification:index`,
+   is verified.
 
 The qualification scope is limited to the set of supported compilation options
 described in the :doc:`Tool Options <safety-manual:options>`.

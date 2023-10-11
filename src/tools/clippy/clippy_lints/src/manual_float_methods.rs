@@ -26,7 +26,7 @@ declare_clippy_lint! {
     /// # let x = 1.0f32;
     /// if x.is_infinite() {}
     /// ```
-    #[clippy::version = "1.72.0"]
+    #[clippy::version = "1.73.0"]
     pub MANUAL_IS_INFINITE,
     style,
     "use dedicated method to check if a float is infinite"
@@ -51,7 +51,7 @@ declare_clippy_lint! {
     /// if x.is_finite() {}
     /// if x.is_finite() {}
     /// ```
-    #[clippy::version = "1.72.0"]
+    #[clippy::version = "1.73.0"]
     pub MANUAL_IS_FINITE,
     style,
     "use dedicated method to check if a float is finite"
@@ -85,7 +85,7 @@ impl<'tcx> LateLintPass<'tcx> for ManualFloatMethods {
         if !in_external_macro(cx.sess(), expr.span)
             && (
                 matches!(cx.tcx.constness(cx.tcx.hir().enclosing_body_owner(expr.hir_id)), Constness::NotConst)
-                    || cx.tcx.features().active(sym!(const_float_classify))
+                    || cx.tcx.features().declared(sym!(const_float_classify))
             ) && let ExprKind::Binary(kind, lhs, rhs) = expr.kind
             && let ExprKind::Binary(lhs_kind, lhs_lhs, lhs_rhs) = lhs.kind
             && let ExprKind::Binary(rhs_kind, rhs_lhs, rhs_rhs) = rhs.kind

@@ -185,8 +185,6 @@ pub enum LinkerFlavorCli {
     Ld,
     Lld(LldFlavor),
     Em,
-    BpfLinker,
-    PtxLinker,
 }
 
 impl LinkerFlavorCli {
@@ -200,9 +198,7 @@ impl LinkerFlavorCli {
             | LinkerFlavorCli::Msvc(Lld::Yes)
             | LinkerFlavorCli::EmCc
             | LinkerFlavorCli::Bpf
-            | LinkerFlavorCli::Ptx
-            | LinkerFlavorCli::BpfLinker
-            | LinkerFlavorCli::PtxLinker => true,
+            | LinkerFlavorCli::Ptx => true,
             LinkerFlavorCli::Gcc
             | LinkerFlavorCli::Ld
             | LinkerFlavorCli::Lld(..)
@@ -280,8 +276,6 @@ impl LinkerFlavor {
             LinkerFlavorCli::Lld(LldFlavor::Wasm) => LinkerFlavor::WasmLld(Cc::No),
             LinkerFlavorCli::Lld(LldFlavor::Link) => LinkerFlavor::Msvc(Lld::Yes),
             LinkerFlavorCli::Em => LinkerFlavor::EmCc,
-            LinkerFlavorCli::BpfLinker => LinkerFlavor::Bpf,
-            LinkerFlavorCli::PtxLinker => LinkerFlavor::Ptx,
         }
     }
 
@@ -300,8 +294,8 @@ impl LinkerFlavor {
             LinkerFlavor::Msvc(Lld::Yes) => LinkerFlavorCli::Lld(LldFlavor::Link),
             LinkerFlavor::Msvc(..) => LinkerFlavorCli::Msvc(Lld::No),
             LinkerFlavor::EmCc => LinkerFlavorCli::Em,
-            LinkerFlavor::Bpf => LinkerFlavorCli::BpfLinker,
-            LinkerFlavor::Ptx => LinkerFlavorCli::PtxLinker,
+            LinkerFlavor::Bpf => LinkerFlavorCli::Bpf,
+            LinkerFlavor::Ptx => LinkerFlavorCli::Ptx,
         }
     }
 
@@ -321,7 +315,6 @@ impl LinkerFlavor {
             LinkerFlavorCli::Ld => (Some(Cc::No), Some(Lld::No)),
             LinkerFlavorCli::Lld(_) => (Some(Cc::No), Some(Lld::Yes)),
             LinkerFlavorCli::Em => (Some(Cc::Yes), Some(Lld::Yes)),
-            LinkerFlavorCli::BpfLinker | LinkerFlavorCli::PtxLinker => (None, None),
         }
     }
 
@@ -520,8 +513,6 @@ linker_flavor_cli_impls! {
     (LinkerFlavorCli::Lld(LldFlavor::Link)) "lld-link"
     (LinkerFlavorCli::Lld(LldFlavor::Wasm)) "wasm-ld"
     (LinkerFlavorCli::Em) "em"
-    (LinkerFlavorCli::BpfLinker) "bpf-linker"
-    (LinkerFlavorCli::PtxLinker) "ptx-linker"
 }
 
 impl ToJson for LinkerFlavorCli {

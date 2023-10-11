@@ -133,7 +133,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     }
 }
 
-#[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+#[cfg(any(target_arch = "x86", target_arch = "arm"))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::mem;
@@ -156,6 +156,11 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 
     let process_handle = GetCurrentProcess();
 
+    #[cfg(target_arch = "x86")]
+    let image = IMAGE_FILE_MACHINE_I386;
+    #[cfg(target_arch = "arm")]
+    let image = IMAGE_FILE_MACHINE_ARMNT;
+
     // Attempt to use `StackWalkEx` if we can, but fall back to `StackWalk64`
     // since it's in theory supported on more systems.
     match (*dbghelp.dbghelp()).StackWalkEx() {
@@ -170,7 +175,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             stack_frame_ex.AddrFrame.Mode = AddrModeFlat;
 
             while StackWalkEx(
-                IMAGE_FILE_MACHINE_I386 as DWORD,
+                image as DWORD,
                 process,
                 thread,
                 &mut stack_frame_ex,
@@ -208,7 +213,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             stack_frame64.AddrFrame.Mode = AddrModeFlat;
 
             while dbghelp.StackWalk64()(
-                IMAGE_FILE_MACHINE_I386 as DWORD,
+                image as DWORD,
                 process,
                 thread,
                 &mut stack_frame64,

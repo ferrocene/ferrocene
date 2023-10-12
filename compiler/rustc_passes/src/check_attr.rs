@@ -1108,6 +1108,7 @@ impl CheckAttrVisitor<'_> {
                         | sym::html_root_url
                         | sym::html_no_source
                         | sym::test
+                        | sym::rust_logo
                             if !self.check_attr_crate_level(attr, meta, hir_id) =>
                         {
                             is_valid = false;
@@ -1165,6 +1166,18 @@ impl CheckAttrVisitor<'_> {
                         | sym::passes
                         | sym::plugins
                         | sym::fake_variadic => {}
+
+                        sym::rust_logo => {
+                            if !self.tcx.features().rustdoc_internals {
+                                feature_err(
+                                    &self.tcx.sess.parse_sess,
+                                    sym::rustdoc_internals,
+                                    meta.span(),
+                                    "the `#[doc(rust_logo)]` attribute is used for Rust branding",
+                                )
+                                .emit();
+                            }
+                        }
 
                         sym::test => {
                             if !self.check_test_attr(meta, hir_id) {
@@ -2373,7 +2386,7 @@ impl CheckAttrVisitor<'_> {
 
         let errors = ocx.select_all_or_error();
         if !errors.is_empty() {
-            infcx.err_ctxt().report_fulfillment_errors(&errors);
+            infcx.err_ctxt().report_fulfillment_errors(errors);
             self.abort.set(true);
         }
     }

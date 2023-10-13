@@ -67,7 +67,7 @@ pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern "C" fn(*mut u8)) {
 // workaround below is to register, via _tlv_atexit, a custom DTOR list once per
 // thread. thread_local dtors are pushed to the DTOR list without calling
 // _tlv_atexit.
-#[cfg(any(target_os = "macos", target_os = "ios", target_os = "watchos"))]
+#[cfg(any(target_os = "macos", target_os = "ios", target_os = "watchos", target_os = "tvos"))]
 pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern "C" fn(*mut u8)) {
     use crate::cell::Cell;
     use crate::mem;
@@ -102,7 +102,12 @@ pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern "C" fn(*mut u8)) {
     }
 }
 
-#[cfg(any(target_os = "vxworks", target_os = "horizon", target_os = "emscripten"))]
+#[cfg(any(
+    target_os = "vxworks",
+    target_os = "horizon",
+    target_os = "emscripten",
+    target_os = "aix"
+))]
 #[cfg_attr(target_family = "wasm", allow(unused))] // might remain unused depending on target details (e.g. wasm32-unknown-emscripten)
 pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern "C" fn(*mut u8)) {
     use crate::sys_common::thread_local_dtor::register_dtor_fallback;

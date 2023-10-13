@@ -14,9 +14,7 @@ impl<X> Method<u32> for Thing<X> {
 
 fn main() {
     let thing = Thing(true);
-    thing.method(42);
-    //~^ ERROR type annotations needed
-    //~| ERROR type annotations needed
+    thing.method(42); //~ ERROR type annotations needed
 }
 
 // ferrocene-annotations: fls_exe4zodlwfez

@@ -10,8 +10,8 @@ pub(crate) mod test;
 pub(crate) mod tool;
 
 use crate::builder::Builder;
-use crate::config::{Config, TargetSelection};
-use crate::util::t;
+use crate::core::config::{Config, TargetSelection};
+use crate::t;
 use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;

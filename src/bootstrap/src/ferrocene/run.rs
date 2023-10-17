@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
+use crate::core::build_steps::tool::Tool;
+use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, UserManual};
-use crate::tool::Tool;
 use std::path::PathBuf;
 use std::process::Command;
 

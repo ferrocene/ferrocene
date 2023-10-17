@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::TargetSelection;
-use crate::tarball::{GeneratedTarball, Tarball};
+use crate::core::config::TargetSelection;
+use crate::utils::tarball::{GeneratedTarball, Tarball};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -102,7 +102,7 @@ impl Step for SourceTarball {
         // Ferrocene from the tarball, so that the final build will include the right git commit
         // even though it didn't come from the repository.
         if let Some(info) = builder.rust_info().info() {
-            crate::channel::write_commit_info_file(&dest_dir, info);
+            crate::utils::channel::write_commit_info_file(&dest_dir, info);
         }
 
         // Vendor Rust dependencies
@@ -113,7 +113,7 @@ impl Step for SourceTarball {
             vendor.arg("--sync").arg(&builder.src.join(extra));
         }
         if !builder.config.dry_run() {
-            let config = crate::util::output(&mut vendor);
+            let config = crate::output(&mut vendor);
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
         }

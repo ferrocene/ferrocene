@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::TargetSelection;
+use crate::core::build_steps::tool::{self, SourceType};
+use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::{document_signatures_cmd, error_when_signatures_are_ignored};
-use crate::tool::SourceType;
-use crate::{tool, Mode};
+use crate::Mode;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct TraceabilityMatrixTool {
@@ -142,7 +142,7 @@ impl Step for GenerateTarball {
             SourceType::InTree,
             &[],
         );
-        crate::test::run_cargo_test(
+        crate::core::build_steps::test::run_cargo_test(
             cargo,
             &[],
             &[],

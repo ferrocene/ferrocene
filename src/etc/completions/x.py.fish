@@ -520,10 +520,10 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -l keep-stage -d 'stage(s
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l keep-stage-std -d 'stage(s) of the standard library to keep without recompiling (pass multiple times to keep e.g., both stages 0 and 1)' -r -f
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l src -d 'path to the root of the rust checkout' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_seen_subcommand_from sign" -s j -l jobs -d 'number of jobs to run in parallel' -r -f
-complete -c x.py -n "__fish_seen_subcommand_from sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny	,warn	,default	}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny	'',warn	'',default	''}"
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l error-format -d 'rustc error format' -r -f
-complete -c x.py -n "__fish_seen_subcommand_from sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always	,never	,auto	}"
-complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-skip-rebuild -d 'whether rebuilding llvm should be skipped, overriding `skip-rebuld` in config.toml' -r -f -a "{true	,false	}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always	'',never	'',auto	''}"
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-skip-rebuild -d 'whether rebuilding llvm should be skipped, overriding `skip-rebuld` in config.toml' -r -f -a "{true	'',false	''}"
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
@@ -535,4 +535,5 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -l include-default-paths 
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l json-output -d 'use message-format=json'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -s h -l help -d 'Print help (see more with \'--help\')'

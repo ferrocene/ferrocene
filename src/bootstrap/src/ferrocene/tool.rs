@@ -1,8 +1,7 @@
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::TargetSelection;
-use crate::tool::{prepare_tool_cargo, SourceType};
-use crate::util::exe;
-use crate::Mode;
+use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
+use crate::core::config::TargetSelection;
+use crate::{exe, Mode};
 use std::path::PathBuf;
 use std::process::Command;
 

@@ -666,6 +666,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--dry-run', 'dry-run', [CompletionResultType]::ParameterName, 'dry run; don''t build anything')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'use message-format=json')
             [CompletionResult]::new('--llvm-profile-generate', 'llvm-profile-generate', [CompletionResultType]::ParameterName, 'generate PGO profile with llvm built for rustc')
+            [CompletionResult]::new('--enable-bolt-settings', 'enable-bolt-settings', [CompletionResultType]::ParameterName, 'Enable BOLT link flags')
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break

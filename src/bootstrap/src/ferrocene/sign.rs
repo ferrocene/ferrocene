@@ -6,10 +6,10 @@
 // signature of the documentation.
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::TargetSelection;
+use crate::core::build_steps::tool::Tool;
+use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::WithSource;
 use crate::t;
-use crate::tool::Tool;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;

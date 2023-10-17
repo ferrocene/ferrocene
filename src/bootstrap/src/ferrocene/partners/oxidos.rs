@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
-use crate::compile::run_cargo;
-use crate::config::TargetSelection;
-use crate::tarball::Tarball;
-use crate::tool::SourceType;
+use crate::core::build_steps::compile::run_cargo;
+use crate::core::build_steps::tool::SourceType;
+use crate::core::config::TargetSelection;
+use crate::utils::tarball::Tarball;
 use crate::{t, Compiler, Mode};
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -117,9 +117,9 @@ impl Step for BuildOxidOS {
         let target = self.target;
         let source = builder.ensure(SourceCode);
 
-        builder.ensure(crate::compile::Std::new(compiler, target));
+        builder.ensure(crate::core::build_steps::compile::Std::new(compiler, target));
         if target != compiler.host {
-            builder.ensure(crate::compile::Std::new(compiler, compiler.host));
+            builder.ensure(crate::core::build_steps::compile::Std::new(compiler, compiler.host));
         }
 
         let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);

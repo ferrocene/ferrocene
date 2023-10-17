@@ -341,7 +341,8 @@ impl<'a> Tarball<'a> {
             self.builder.install(&self.builder.src.join(file), &self.overlay_dir, 0o644);
         }
 
-        let mut cmd = self.builder.tool_cmd(crate::tool::Tool::FerroceneGenerateTarball);
+        let mut cmd =
+            self.builder.tool_cmd(crate::core::build_steps::tool::Tool::FerroceneGenerateTarball);
 
         let package_name = self.package_name();
         self.builder.info(&format!("Dist {package_name}"));

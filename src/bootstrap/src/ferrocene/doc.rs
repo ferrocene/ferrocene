@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::config::TargetSelection;
+use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::CacheSignatureFiles;
 use std::collections::HashMap;
 use std::ffi::OsString;

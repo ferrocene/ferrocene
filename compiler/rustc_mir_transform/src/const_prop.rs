@@ -2,8 +2,6 @@
 //! assertion failures
 
 use either::Right;
-
-use rustc_const_eval::const_eval::CheckAlignment;
 use rustc_const_eval::ReportErrorExt;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_hir::def::DefKind;
@@ -16,7 +14,7 @@ use rustc_middle::mir::*;
 use rustc_middle::ty::layout::{LayoutError, LayoutOf, LayoutOfHelpers, TyAndLayout};
 use rustc_middle::ty::{self, GenericArgs, Instance, ParamEnv, Ty, TyCtxt, TypeVisitableExt};
 use rustc_span::{def_id::DefId, Span};
-use rustc_target::abi::{self, Align, HasDataLayout, Size, TargetDataLayout};
+use rustc_target::abi::{self, HasDataLayout, Size, TargetDataLayout};
 use rustc_target::spec::abi::Abi as CallAbi;
 
 use crate::dataflow_const_prop::Patch;
@@ -141,26 +139,13 @@ impl<'mir, 'tcx> interpret::Machine<'mir, 'tcx> for ConstPropMachine<'mir, 'tcx>
     type MemoryKind = !;
 
     #[inline(always)]
-    fn enforce_alignment(_ecx: &InterpCx<'mir, 'tcx, Self>) -> CheckAlignment {
-        // We do not check for alignment to avoid having to carry an `Align`
-        // in `ConstValue::Indirect`.
-        CheckAlignment::No
+    fn enforce_alignment(_ecx: &InterpCx<'mir, 'tcx, Self>) -> bool {
+        false // no reason to enforce alignment
     }
 
     #[inline(always)]
     fn enforce_validity(_ecx: &InterpCx<'mir, 'tcx, Self>, _layout: TyAndLayout<'tcx>) -> bool {
         false // for now, we don't enforce validity
-    }
-    fn alignment_check_failed(
-        ecx: &InterpCx<'mir, 'tcx, Self>,
-        _has: Align,
-        _required: Align,
-        _check: CheckAlignment,
-    ) -> InterpResult<'tcx, ()> {
-        span_bug!(
-            ecx.cur_span(),
-            "`alignment_check_failed` called when no alignment check requested"
-        )
     }
 
     fn load_mir(
@@ -699,7 +684,9 @@ impl<'tcx> Visitor<'tcx> for CanConstProp {
 impl<'tcx> Visitor<'tcx> for ConstPropagator<'_, 'tcx> {
     fn visit_operand(&mut self, operand: &Operand<'tcx>, location: Location) {
         self.super_operand(operand, location);
-        if let Some(place) = operand.place() && let Some(value) = self.replace_with_const(place) {
+        if let Some(place) = operand.place()
+            && let Some(value) = self.replace_with_const(place)
+        {
             self.patch.before_effect.insert((location, place), value);
         }
     }
@@ -733,7 +720,10 @@ impl<'tcx> Visitor<'tcx> for ConstPropagator<'_, 'tcx> {
                     if let Rvalue::Use(Operand::Constant(c)) = rvalue
                         && let Const::Val(..) = c.const_
                     {
-                        trace!("skipping replace of Rvalue::Use({:?} because it is already a const", c);
+                        trace!(
+                            "skipping replace of Rvalue::Use({:?} because it is already a const",
+                            c
+                        );
                     } else if let Some(operand) = self.replace_with_const(*place) {
                         self.patch.assignments.insert(location, operand);
                     }

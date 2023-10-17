@@ -405,7 +405,9 @@ fn parse_stability(sess: &Session, attr: &Attribute) -> Option<(Symbol, Stabilit
         }
     }
 
-    if let Some(s) = since && s.as_str() == VERSION_PLACEHOLDER {
+    if let Some(s) = since
+        && s.as_str() == VERSION_PLACEHOLDER
+    {
         since = Some(rust_version_symbol());
     }
 
@@ -548,7 +550,11 @@ pub fn cfg_matches(
                     UNEXPECTED_CFGS,
                     cfg.span,
                     lint_node_id,
-                    "unexpected `cfg` condition value",
+                    if let Some(value) = cfg.value {
+                        format!("unexpected `cfg` condition value: `{value}`")
+                    } else {
+                        format!("unexpected `cfg` condition value: (none)")
+                    },
                     BuiltinLintDiagnostics::UnexpectedCfgValue(
                         (cfg.name, cfg.name_span),
                         cfg.value.map(|v| (v, cfg.value_span.unwrap())),
@@ -560,7 +566,7 @@ pub fn cfg_matches(
                     UNEXPECTED_CFGS,
                     cfg.span,
                     lint_node_id,
-                    "unexpected `cfg` condition name",
+                    format!("unexpected `cfg` condition name: `{}`", cfg.name),
                     BuiltinLintDiagnostics::UnexpectedCfgName(
                         (cfg.name, cfg.name_span),
                         cfg.value.map(|v| (v, cfg.value_span.unwrap())),
@@ -690,13 +696,16 @@ pub fn eval_condition(
                     !eval_condition(mis[0].meta_item().unwrap(), sess, features, eval)
                 }
                 sym::target => {
-                    if let Some(features) = features && !features.cfg_target_compact {
+                    if let Some(features) = features
+                        && !features.cfg_target_compact
+                    {
                         feature_err(
                             sess,
                             sym::cfg_target_compact,
                             cfg.span,
-                            "compact `cfg(target(..))` is experimental and subject to change"
-                        ).emit();
+                            "compact `cfg(target(..))` is experimental and subject to change",
+                        )
+                        .emit();
                     }
 
                     mis.iter().fold(true, |res, mi| {

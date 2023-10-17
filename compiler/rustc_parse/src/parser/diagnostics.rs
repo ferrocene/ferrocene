@@ -314,11 +314,10 @@ impl<'a> Parser<'a> {
             // which uses `Symbol::to_ident_string()` and "helpfully" adds an implicit `r#`
             let ident_name = ident.name.to_string();
 
-            Some(SuggEscapeIdentifier {
-                span: ident.span.shrink_to_lo(),
-                ident_name
-            })
-        } else { None };
+            Some(SuggEscapeIdentifier { span: ident.span.shrink_to_lo(), ident_name })
+        } else {
+            None
+        };
 
         let suggest_remove_comma =
             if self.token == token::Comma && self.look_ahead(1, |t| t.is_ident()) {
@@ -375,9 +374,11 @@ impl<'a> Parser<'a> {
                             // and current token should be Ident with the item name (i.e. the function name)
                             // if there is a `<` after the fn name, then don't show a suggestion, show help
 
-                            if !self.look_ahead(1, |t| *t == token::Lt) &&
-                                let Ok(snippet) = self.sess.source_map().span_to_snippet(generic.span) {
-                                    err.multipart_suggestion_verbose(
+                            if !self.look_ahead(1, |t| *t == token::Lt)
+                                && let Ok(snippet) =
+                                    self.sess.source_map().span_to_snippet(generic.span)
+                            {
+                                err.multipart_suggestion_verbose(
                                         format!("place the generic parameter name after the {ident_name} name"),
                                         vec![
                                             (self.token.span.shrink_to_hi(), snippet),
@@ -385,11 +386,11 @@ impl<'a> Parser<'a> {
                                         ],
                                         Applicability::MaybeIncorrect,
                                     );
-                                } else {
-                                    err.help(format!(
-                                        "place the generic parameter name after the {ident_name} name"
-                                    ));
-                                }
+                            } else {
+                                err.help(format!(
+                                    "place the generic parameter name after the {ident_name} name"
+                                ));
+                            }
                         }
                     }
                     Err(err) => {
@@ -402,7 +403,9 @@ impl<'a> Parser<'a> {
             }
         }
 
-        if let Some(recovered_ident) = recovered_ident && recover {
+        if let Some(recovered_ident) = recovered_ident
+            && recover
+        {
             err.emit();
             Ok(recovered_ident)
         } else {
@@ -617,19 +620,19 @@ impl<'a> Parser<'a> {
         }
 
         if let TokenKind::Ident(prev, _) = &self.prev_token.kind
-          && let TokenKind::Ident(cur, _) = &self.token.kind
+            && let TokenKind::Ident(cur, _) = &self.token.kind
         {
-                let concat = Symbol::intern(&format!("{prev}{cur}"));
-                let ident = Ident::new(concat, DUMMY_SP);
-                if ident.is_used_keyword() || ident.is_reserved() || ident.is_raw_guess() {
-                    let span = self.prev_token.span.to(self.token.span);
-                    err.span_suggestion_verbose(
-                        span,
-                        format!("consider removing the space to spell keyword `{concat}`"),
-                        concat,
-                        Applicability::MachineApplicable,
-                    );
-                }
+            let concat = Symbol::intern(&format!("{prev}{cur}"));
+            let ident = Ident::new(concat, DUMMY_SP);
+            if ident.is_used_keyword() || ident.is_reserved() || ident.is_raw_guess() {
+                let span = self.prev_token.span.to(self.token.span);
+                err.span_suggestion_verbose(
+                    span,
+                    format!("consider removing the space to spell keyword `{concat}`"),
+                    concat,
+                    Applicability::MachineApplicable,
+                );
+            }
         }
 
         // `pub` may be used for an item or `pub(crate)`
@@ -825,6 +828,65 @@ impl<'a> Parser<'a> {
             });
         }
         None
+    }
+
+    pub(super) fn recover_closure_body(
+        &mut self,
+        mut err: DiagnosticBuilder<'a, ErrorGuaranteed>,
+        before: token::Token,
+        prev: token::Token,
+        token: token::Token,
+        lo: Span,
+        decl_hi: Span,
+    ) -> PResult<'a, P<Expr>> {
+        err.span_label(lo.to(decl_hi), "while parsing the body of this closure");
+        match before.kind {
+            token::OpenDelim(Delimiter::Brace)
+                if !matches!(token.kind, token::OpenDelim(Delimiter::Brace)) =>
+            {
+                // `{ || () }` should have been `|| { () }`
+                err.multipart_suggestion(
+                    "you might have meant to open the body of the closure, instead of enclosing \
+                     the closure in a block",
+                    vec![
+                        (before.span, String::new()),
+                        (prev.span.shrink_to_hi(), " {".to_string()),
+                    ],
+                    Applicability::MaybeIncorrect,
+                );
+                err.emit();
+                self.eat_to_tokens(&[&token::CloseDelim(Delimiter::Brace)]);
+            }
+            token::OpenDelim(Delimiter::Parenthesis)
+                if !matches!(token.kind, token::OpenDelim(Delimiter::Brace)) =>
+            {
+                // We are within a function call or tuple, we can emit the error
+                // and recover.
+                self.eat_to_tokens(&[&token::CloseDelim(Delimiter::Parenthesis), &token::Comma]);
+
+                err.multipart_suggestion_verbose(
+                    "you might have meant to open the body of the closure",
+                    vec![
+                        (prev.span.shrink_to_hi(), " {".to_string()),
+                        (self.token.span.shrink_to_lo(), "}".to_string()),
+                    ],
+                    Applicability::MaybeIncorrect,
+                );
+                err.emit();
+            }
+            _ if !matches!(token.kind, token::OpenDelim(Delimiter::Brace)) => {
+                // We don't have a heuristic to correctly identify where the block
+                // should be closed.
+                err.multipart_suggestion_verbose(
+                    "you might have meant to open the body of the closure",
+                    vec![(prev.span.shrink_to_hi(), " {".to_string())],
+                    Applicability::HasPlaceholders,
+                );
+                return Err(err);
+            }
+            _ => return Err(err),
+        }
+        Ok(self.mk_expr_err(lo.to(self.token.span)))
     }
 
     /// Eats and discards tokens until one of `kets` is encountered. Respects token trees,
@@ -1025,8 +1087,7 @@ impl<'a> Parser<'a> {
                         .emit();
                         match self.parse_expr() {
                             Ok(_) => {
-                                *expr =
-                                    self.mk_expr_err(expr.span.to(self.prev_token.span));
+                                *expr = self.mk_expr_err(expr.span.to(self.prev_token.span));
                                 return Ok(());
                             }
                             Err(err) => {
@@ -1218,7 +1279,9 @@ impl<'a> Parser<'a> {
                     return if token::ModSep == self.token.kind {
                         // We have some certainty that this was a bad turbofish at this point.
                         // `foo< bar >::`
-                        if let ExprKind::Binary(o, ..) = inner_op.kind && o.node == BinOpKind::Lt {
+                        if let ExprKind::Binary(o, ..) = inner_op.kind
+                            && o.node == BinOpKind::Lt
+                        {
                             err.suggest_turbofish = Some(op.span.shrink_to_lo());
                         } else {
                             err.help_turbofish = Some(());
@@ -1248,7 +1311,9 @@ impl<'a> Parser<'a> {
                     } else if token::OpenDelim(Delimiter::Parenthesis) == self.token.kind {
                         // We have high certainty that this was a bad turbofish at this point.
                         // `foo< bar >(`
-                        if let ExprKind::Binary(o, ..) = inner_op.kind && o.node == BinOpKind::Lt {
+                        if let ExprKind::Binary(o, ..) = inner_op.kind
+                            && o.node == BinOpKind::Lt
+                        {
                             err.suggest_turbofish = Some(op.span.shrink_to_lo());
                         } else {
                             err.help_turbofish = Some(());
@@ -1826,19 +1891,21 @@ impl<'a> Parser<'a> {
                 let sm = self.sess.source_map();
                 let left = begin_par_sp;
                 let right = self.prev_token.span;
-                let left_snippet = if let Ok(snip) = sm.span_to_prev_source(left) &&
-                        !snip.ends_with(' ') {
-                                " ".to_string()
-                            } else {
-                                "".to_string()
-                            };
+                let left_snippet = if let Ok(snip) = sm.span_to_prev_source(left)
+                    && !snip.ends_with(' ')
+                {
+                    " ".to_string()
+                } else {
+                    "".to_string()
+                };
 
-                let right_snippet = if let Ok(snip) = sm.span_to_next_source(right) &&
-                        !snip.starts_with(' ') {
-                                " ".to_string()
-                            } else {
-                                "".to_string()
-                        };
+                let right_snippet = if let Ok(snip) = sm.span_to_next_source(right)
+                    && !snip.starts_with(' ')
+                {
+                    " ".to_string()
+                } else {
+                    "".to_string()
+                };
 
                 self.sess.emit_err(ParenthesesInForHead {
                     span: vec![left, right],

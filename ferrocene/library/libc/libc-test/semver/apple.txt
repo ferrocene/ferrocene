@@ -1883,6 +1883,7 @@ endpwent
 endservent
 endutxent
 exchangedata
+execvP
 faccessat
 fchdir
 fchflags
@@ -1957,6 +1958,7 @@ if_freenameindex
 if_msghdr
 if_nameindex
 ifaddrs
+ifconf
 ifkpi
 ifreq
 image_offset

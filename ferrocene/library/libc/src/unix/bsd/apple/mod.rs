@@ -1129,6 +1129,15 @@ s! {
         pub validattr: attribute_set_t,
         pub nativeattr: attribute_set_t,
     }
+
+    #[cfg_attr(libc_packedN, repr(packed(4)))]
+    pub struct ifconf {
+        pub ifc_len: ::c_int,
+        #[cfg(libc_union)]
+        pub ifc_ifcu: __c_anonymous_ifc_ifcu,
+        #[cfg(not(libc_union))]
+        pub ifc_ifcu: *mut ifreq,
+    }
 }
 
 s_no_extra_traits! {
@@ -1464,6 +1473,14 @@ s_no_extra_traits! {
         pub ifr_name: [::c_char; ::IFNAMSIZ],
         #[cfg(libc_union)]
         pub ifr_ifru: __c_anonymous_ifr_ifru,
+        #[cfg(not(libc_union))]
+        pub ifr_ifru: ::sockaddr,
+    }
+
+    #[cfg(libc_union)]
+    pub union __c_anonymous_ifc_ifcu {
+        pub ifcu_buf: *mut ::c_char,
+        pub ifcu_req: *mut ifreq,
     }
 }
 
@@ -2977,6 +2994,7 @@ cfg_if! {
         impl PartialEq for ifreq {
             fn eq(&self, other: &ifreq) -> bool {
                 self.ifr_name == other.ifr_name
+                    && self.ifr_ifru == other.ifr_ifru
             }
         }
 
@@ -2986,6 +3004,7 @@ cfg_if! {
             fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
                 f.debug_struct("ifreq")
                     .field("ifr_name", &self.ifr_name)
+                    .field("ifr_ifru", &self.ifr_ifru)
                     .finish()
             }
         }
@@ -2993,8 +3012,38 @@ cfg_if! {
         impl ::hash::Hash for ifreq {
             fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
                 self.ifr_name.hash(state);
-                #[cfg(libc_union)]
                 self.ifr_ifru.hash(state);
+            }
+        }
+
+        #[cfg(libc_union)]
+        impl Eq for __c_anonymous_ifc_ifcu {}
+
+        #[cfg(libc_union)]
+        impl PartialEq for __c_anonymous_ifc_ifcu {
+            fn eq(&self, other: &__c_anonymous_ifc_ifcu) -> bool {
+                unsafe {
+                    self.ifcu_buf == other.ifcu_buf &&
+                    self.ifcu_req == other.ifcu_req
+                }
+            }
+        }
+
+        #[cfg(libc_union)]
+        impl ::fmt::Debug for __c_anonymous_ifc_ifcu {
+            fn fmt(&self, f: &mut ::fmt::Formatter) -> ::fmt::Result {
+                f.debug_struct("ifc_ifcu")
+                    .field("ifcu_buf", unsafe { &self.ifcu_buf })
+                    .field("ifcu_req", unsafe { &self.ifcu_req })
+                    .finish()
+            }
+        }
+
+        #[cfg(libc_union)]
+        impl ::hash::Hash for __c_anonymous_ifc_ifcu {
+            fn hash<H: ::hash::Hasher>(&self, state: &mut H) {
+                unsafe { self.ifcu_buf.hash(state) };
+                unsafe { self.ifcu_req.hash(state) };
             }
         }
     }
@@ -6347,6 +6396,11 @@ extern "C" {
         dev: dev_t,
     ) -> ::c_int;
     pub fn freadlink(fd: ::c_int, buf: *mut ::c_char, size: ::size_t) -> ::c_int;
+    pub fn execvP(
+        file: *const ::c_char,
+        search_path: *const ::c_char,
+        argv: *const *mut ::c_char,
+    ) -> ::c_int;
 }
 
 pub unsafe fn mach_task_self() -> ::mach_port_t {

@@ -1,6 +1,6 @@
 // The option of -F starts immediately, without requiring any equal symbol
 //
-// check-pass
+// check-fail
 // compile-flags: -F=
 
 fn main() {}

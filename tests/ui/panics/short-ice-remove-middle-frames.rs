@@ -9,6 +9,7 @@
 // ignore-sgx Backtraces not symbolized
 // ignore-fuchsia Backtraces not symbolized
 // ignore-msvc the `__rust_{begin,end}_short_backtrace` symbols aren't reliable.
+// ignore-aarch64-unknown-ferrocenecoretest no backtrace support
 
 
 #[inline(never)]

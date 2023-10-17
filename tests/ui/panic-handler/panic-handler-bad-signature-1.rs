@@ -12,8 +12,6 @@ fn panic(
 {
 }
 
-//~^ `#[panic_handler]` function has wrong type [E0308]
-
 // ferrocene-annotations: fls_fh27ljezn3qz
 // Attribute no_main
 //

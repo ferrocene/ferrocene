@@ -67,25 +67,25 @@ should not be used in production.
 
    * - Target
      - Triple
-     - Host compiler
+     - Kind
      - Standard library
      - Notes
 
    * - ARMv7e-M (Thumb) bare metal
      - ``thumbv7em-none-eabi``
-     - \-
+     - Cross-compilation
      - Bare-metal
      - \-
 
    * - ARMv7e-M (Thumb, floats) bare metal
      - ``thumbv7em-none-eabihf``
-     - \-
+     - Cross-compilation
      - Bare-metal
      - \-
 
    * - WASM bare metal
      - ``wasm32-unknown-unknown``
-     - \-
+     - Cross-compilation
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 

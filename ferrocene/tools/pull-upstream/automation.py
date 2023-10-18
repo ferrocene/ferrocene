@@ -37,6 +37,7 @@ class PullUpstreamPR(AutomatedPR):
                 self._upstream_branch,
                 self._base_branch,
             ],
+            env={"COMMIT_WITH_MERGE_CONFLICTS": 1, **os.environ},
             check=False,
         )
         if res.returncode == 0:

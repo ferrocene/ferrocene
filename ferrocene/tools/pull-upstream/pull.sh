@@ -41,6 +41,9 @@ fi
 cd "$(git rev-parse --show-toplevel)"
 
 # Safety check to avoid messing with uncommitted changes.
+# Submodules are updated before that, as submodules needing an update should
+# not block merging chnages from upstream.
+git submodule update
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
     echo "pull-upstream: make sure all changes are committed before running this script."
@@ -139,6 +142,19 @@ if ! git merge "${merge_flags[@]}" "${TEMP_BRANCH}" --no-edit -m "pull new chang
     fi
 
     if git diff --diff-filter=U --quiet; then
+        # Setting the editor to `true` prevents the actual editor from being open,
+        # as in this case we don't want to change the default message.
+        GIT_EDITOR="$(which true)" git merge --continue
+    elif [[ -n "${COMMIT_WITH_MERGE_CONFLICTS+x}" ]]; then
+        echo "pull-upstream: there are unresolved merge conflicts"
+        echo "pull-upstream: committing with merge conflict markers in the source"
+
+        # We do a `git submodule update` ahead of time to ensure the wrong
+        # submodule commits are not accidentally added.
+        git submodule update
+
+        git add .
+
         # Setting the editor to `true` prevents the actual editor from being open,
         # as in this case we don't want to change the default message.
         GIT_EDITOR="$(which true)" git merge --continue

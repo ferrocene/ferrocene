@@ -45,9 +45,6 @@ class PullUpstreamPR(AutomatedPR):
         elif res.returncode == 42:
             return AutomationResult.NO_CHANGES
         else:
-            self.conflict_diff = self.cmd_capture(
-                ["git", "diff", "--diff-filter=U", "--no-color"],
-            )
             self.cmd(["git", "merge", "--abort"], check=False)
             return AutomationResult.FAILURE
 
@@ -71,48 +68,19 @@ This PR pulls the following changes from the upstream repository:
 """
 
     def error_issue_title(self):
-        return f"Repository diverged from upstream `{self._upstream_branch}`"
+        return f"Failed to pull from upstream `{self._upstream_branch}`"
 
     def error_issue_labels(self):
         return {"automation"}
 
     def error_issue_body(self):
         return """
-While trying to pull the latest changes from the upstream \
-`{{upstream_branch}}` branch, the automation failed due to the following \
-merge conflict:
+While trying to pull the latest changes from the upstream `{{upstream_branch}}` \
+branch, the automation failed. The automation will not open any more pull \
+requests pulling from upstream until the merge is fixed.
 
-```diff
-{{diff}}
-```
-
-The automation will not open any more pull requests pulling from upstream \
-until the merge conflict is fixed.
-
-<details>
-<summary><i>How to fix the merge conflict manually</i></summary><br>
-
-To fix the conflict, create a new branch and execute the following command:
-
-```
-ferrocene/tools/pull-upstream/pull.sh {{upstream_branch}}
-```
-
-The command will try pull the latest changes from upstream into the branch, \
-and exit when the merge conflict is detected. Fix the merge conflict and then \
-run:
-
-```
-git merge --continue
-```
-
-The command will finish the merge. You'll then be able to push the \
-local branch to GitHub and open a PR for it.
-
-</details>
+Check the log on GitHub Actions for more details on the cause of the failure.
 """.replace(
-            "{{diff}}", self.conflict_diff
-        ).replace(
             "{{upstream_branch}}", self._upstream_branch
         )
 
@@ -123,16 +91,7 @@ The automation successfully pulled the latest changes from upstream in \
 """
 
     def error_issue_repeated_comment(self):
-        return """
-The automation failed to pull the latest changes from upstream again\
-due to the following merge conflict:
-
-```diff
-{{diff}}
-```
-""".replace(
-            "{{diff}}", self.conflict_diff
-        )
+        return "The automation failed to pull the latest changes from upstream again."
 
     def base_branch(self):
         return self._base_branch

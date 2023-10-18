@@ -87,18 +87,7 @@ merge conflict:
 ```
 
 The automation will not open any more pull requests pulling from upstream \
-until the merge conflict is fixed. There are multiple ways to fix the merge \
-conflict:
-
-* If ***all*** the conflicts should be resolved by keeping the Ferrocene changes, \
-  [start the workflow][dispatch] with the "ours" merge strategy.
-* If ***all*** the conflicts should be resolved by using the new code introduced \
-  by Rust upstream, [start the workflow][dispatch] with the "theirs" merge \
-  strategy.
-* Otherwise, you'll have to fix the merge conflict locally (see below for \
-  instructions).
-
-[dispatch]: https://github.com/ferrocene/ferrocene/actions/workflows/automation-pull-upstream.yml
+until the merge conflict is fixed.
 
 <details>
 <summary><i>How to fix the merge conflict manually</i></summary><br>

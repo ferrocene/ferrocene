@@ -1908,6 +1908,8 @@ fn test_android(target: &str) {
 
             // Added in API level 28, but some tests use level 24.
             "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" => true,
+            // Added in API level 28, but some tests use level 24.
+            "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked" => true,
 
             _ => false,
         }
@@ -3841,6 +3843,7 @@ fn test_linux(target: &str) {
             | "MADV_POPULATE_READ"
             | "MADV_POPULATE_WRITE"
             if musl => true,
+            "CLONE_CLEAR_SIGHAND" | "CLONE_INTO_CGROUP" => true,
 
             // kernel 6.1 minimum
             "MADV_COLLAPSE" => true,

@@ -136,6 +136,23 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "pull new changes from upstream"; t
         # submodule commits are not accidentally added.
         git submodule update
 
+        # The person handling the conflict should decide what to do if a file
+        # has been deleted on either side of the merge, but doing a `git add .`
+        # would mask the conflict (it would simply revert the deletion).
+        #
+        # To avoid that, we prefix the file with a custom line noting the file
+        # had a delete conflict, and the detect-config-markers.py script will
+        # pick it up and block CI until it's resolved either way.
+        handle_deleted_files() {
+            marker="$1"
+            who="$2"
+            for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
+                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted by ${who}, fix the conflict and remove this line\\n/" "${changed_file}"
+            done
+        }
+        handle_deleted_files DU Ferrocene # DU means "deleted by us"
+        handle_deleted_files UD Rust      # UD means "deleted by them"
+
         git add .
 
         # Setting the editor to `true` prevents the actual editor from being open,

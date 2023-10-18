@@ -128,7 +128,7 @@ if ! git merge "${merge_flags[@]}" "${TEMP_BRANCH}" --no-edit -m "pull new chang
     # have our own crates with our own dependencies in the workspace.
     # Automatically resolve any conflict involving Cargo.lock to prefer our own
     # copy of the lockfile rather than upstream's.
-    if git status --porcelain=v1 | grep "^UU Cargo.lock$" --quiet; then
+    if git status --porcelain=v1 | grep "^UU Cargo.lock$" >/dev/null; then
         echo "pull-upstream: automatically resolving conflict for Cargo.lock..."
         git show "${current_branch}:Cargo.lock" > Cargo.lock
 

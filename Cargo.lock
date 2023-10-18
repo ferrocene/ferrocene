@@ -1119,6 +1119,7 @@ dependencies = [
  "glob",
  "hex",
  "home",
+ "indexmap 2.0.0",
  "lazycell",
  "libc",
  "miow",

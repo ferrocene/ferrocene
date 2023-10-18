@@ -9,10 +9,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "5:00"
+      time: "05:00"
     groups:
       monorepo-dependencies:
-        patterns: "*"
+        patterns:
+          - "*"
     labels:
       - "automation"
       - "backport:never"
@@ -23,10 +24,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "5:00"
+      time: "05:00"
     groups:
       bootstrap-dependencies:
-        patterns: "*"
+        patterns:
+          - "*"
     labels:
       - "automation"
       - "backport:never"

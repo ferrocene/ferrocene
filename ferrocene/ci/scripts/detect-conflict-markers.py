@@ -12,11 +12,18 @@
 # repository, and errors out if some are found.
 
 import subprocess
+from dataclasses import dataclass
 
 
 START = "<<<<<<< "
 MIDDLE = "======="
 END = ">>>>>>> "
+
+# git doesn't include any marker when a file is deleted by one side of the
+# merge while the other side made changes to it. To ensure those are still
+# marked as conflict, the pull-upstream tool adds custom markers to them. We
+# should detect those as well.
+CUSTOM_DELETE_MARKER = "<<<PULL-UPSTREAM>>> file deleted by "
 
 EXCEPTIONS = {
     # Used in multiple rustc tests as a test case for conflict detection.
@@ -27,7 +34,7 @@ EXCEPTIONS = {
 def files_with_possible_conflict_markers():
     # git grep automatically filters out submodules.
     lines = subprocess.run(
-        ["git", "grep", "-l", "^<<<<<<<"],
+        ["git", "grep", "-l", "^<<<"],
         check=True,
         stdout=subprocess.PIPE,
         text=True,
@@ -55,20 +62,41 @@ def conflict_markers_in_file(file):
             elif expect == MIDDLE:
                 expect = END
             elif expect == END:
-                yield (start_line, num)
+                yield ConflictMarker(file=file, start_line=start_line, end_line=num)
                 start_line = None
                 expect = START
+        elif line.startswith(CUSTOM_DELETE_MARKER):
+            yield CustomDeleteMarker(file=file)
 
 
 def main():
     found_conflicts = False
     for file in files_with_possible_conflict_markers():
-        for start_line, end_line in conflict_markers_in_file(file):
-            print(f"{file}: conflict between lines {start_line} and {end_line}")
+        for conflict in conflict_markers_in_file(file):
+            print(conflict.repr())
             found_conflicts = True
 
     if found_conflicts:
         exit(1)
+
+
+@dataclass
+class ConflictMarker:
+    file: str
+    start_line: int
+    end_line: int
+
+    def repr(self):
+        return f"{self.file}: conflict between lines {self.start_line} " \
+               f"and {self.end_line}"
+
+
+@dataclass
+class CustomDeleteMarker:
+    file: str
+
+    def repr(self):
+        return f"{self.file}: file deleted by one side of the merge"
 
 
 if __name__ == "__main__":

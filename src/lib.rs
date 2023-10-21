@@ -192,7 +192,7 @@ mod lock {
     }
 }
 
-#[cfg(all(windows, not(target_vendor = "uwp")))]
+#[cfg(all(windows, target_env = "msvc", not(target_vendor = "uwp")))]
 mod dbghelp;
 #[cfg(windows)]
 mod windows;

@@ -17,7 +17,7 @@
 
 #![allow(bad_style)]
 
-use super::super::{backtrace::StackFrame, dbghelp, windows::*};
+use super::super::{dbghelp, windows::*};
 use super::{BytesOrWideString, ResolveWhat, SymbolName};
 use core::char;
 use core::ffi::c_void;
@@ -79,53 +79,71 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
     };
 
     match what {
-        ResolveWhat::Address(_) => resolve_without_inline(&dbghelp, what.address_or_ip(), cb),
-        ResolveWhat::Frame(frame) => match &frame.inner.stack_frame {
-            StackFrame::New(frame) => resolve_with_inline(&dbghelp, frame, cb),
-            StackFrame::Old(_) => resolve_without_inline(&dbghelp, frame.ip(), cb),
-        },
+        ResolveWhat::Address(_) => resolve_with_inline(&dbghelp, what.address_or_ip(), None, cb),
+        ResolveWhat::Frame(frame) => {
+            resolve_with_inline(&dbghelp, frame.ip(), frame.inner.inline_context(), cb)
+        }
     }
 }
 
 unsafe fn resolve_with_inline(
     dbghelp: &dbghelp::Init,
-    frame: &STACKFRAME_EX,
-    cb: &mut dyn FnMut(&super::Symbol),
-) {
-    do_resolve(
-        |info| {
-            dbghelp.SymFromInlineContextW()(
-                GetCurrentProcess(),
-                super::adjust_ip(frame.AddrPC.Offset as *mut _) as u64,
-                frame.InlineFrameContext,
-                &mut 0,
-                info,
-            )
-        },
-        |line| {
-            dbghelp.SymGetLineFromInlineContextW()(
-                GetCurrentProcess(),
-                super::adjust_ip(frame.AddrPC.Offset as *mut _) as u64,
-                frame.InlineFrameContext,
-                0,
-                &mut 0,
-                line,
-            )
-        },
-        cb,
-    )
-}
-
-unsafe fn resolve_without_inline(
-    dbghelp: &dbghelp::Init,
     addr: *mut c_void,
+    inline_context: Option<DWORD>,
     cb: &mut dyn FnMut(&super::Symbol),
 ) {
-    do_resolve(
-        |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr as DWORD64, &mut 0, info),
-        |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr as DWORD64, &mut 0, line),
-        cb,
-    )
+    let current_process = GetCurrentProcess();
+
+    let addr = super::adjust_ip(addr) as DWORD64;
+
+    let (inlined_frame_count, inline_context) = if let Some(ic) = inline_context {
+        (0, ic)
+    } else {
+        let mut inlined_frame_count = dbghelp.SymAddrIncludeInlineTrace()(current_process, addr);
+
+        let mut inline_context = 0;
+
+        // If there is are inlined frames but we can't load them for some reason OR if there are no
+        // inlined frames, then we disregard inlined_frame_count and inline_context.
+        if (inlined_frame_count > 0
+            && dbghelp.SymQueryInlineTrace()(
+                current_process,
+                addr,
+                0,
+                addr,
+                addr,
+                &mut inline_context,
+                &mut 0,
+            ) != TRUE)
+            || inlined_frame_count == 0
+        {
+            inlined_frame_count = 0;
+            inline_context = 0;
+        }
+
+        (inlined_frame_count, inline_context)
+    };
+
+    let last_inline_context = inline_context + 1 + inlined_frame_count;
+
+    for inline_context in inline_context..last_inline_context {
+        do_resolve(
+            |info| {
+                dbghelp.SymFromInlineContextW()(current_process, addr, inline_context, &mut 0, info)
+            },
+            |line| {
+                dbghelp.SymGetLineFromInlineContextW()(
+                    current_process,
+                    addr,
+                    inline_context,
+                    0,
+                    &mut 0,
+                    line,
+                )
+            },
+            cb,
+        );
+    }
 }
 
 unsafe fn do_resolve(

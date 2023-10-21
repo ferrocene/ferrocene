@@ -34,8 +34,8 @@ use core::ptr;
 mod dbghelp {
     use crate::windows::*;
     pub use winapi::um::dbghelp::{
-        StackWalk64, StackWalkEx, SymCleanup, SymFromAddrW, SymFunctionTableAccess64,
-        SymGetLineFromAddrW64, SymGetModuleBase64, SymGetOptions, SymInitializeW, SymSetOptions,
+        StackWalk64, StackWalkEx, SymFunctionTableAccess64, SymGetModuleBase64, SymGetOptions,
+        SymInitializeW, SymSetOptions,
     };
 
     extern "system" {
@@ -54,6 +54,16 @@ mod dbghelp {
             qwModuleBaseAddress: DWORD64,
             pdwDisplacement: PDWORD,
             Line: PIMAGEHLP_LINEW64,
+        ) -> BOOL;
+        pub fn SymAddrIncludeInlineTrace(hProcess: HANDLE, Address: DWORD64) -> DWORD;
+        pub fn SymQueryInlineTrace(
+            hProcess: HANDLE,
+            StartAddress: DWORD64,
+            StartContext: DWORD,
+            StartRetAddress: DWORD64,
+            CurAddress: DWORD64,
+            CurContext: LPDWORD,
+            CurFrameIndex: LPDWORD,
         ) -> BOOL;
     }
 
@@ -164,7 +174,6 @@ dbghelp! {
             path: PCWSTR,
             invade: BOOL
         ) -> BOOL;
-        fn SymCleanup(handle: HANDLE) -> BOOL;
         fn StackWalk64(
             MachineType: DWORD,
             hProcess: HANDLE,
@@ -184,18 +193,6 @@ dbghelp! {
             hProcess: HANDLE,
             AddrBase: DWORD64
         ) -> DWORD64;
-        fn SymFromAddrW(
-            hProcess: HANDLE,
-            Address: DWORD64,
-            Displacement: PDWORD64,
-            Symbol: PSYMBOL_INFOW
-        ) -> BOOL;
-        fn SymGetLineFromAddrW64(
-            hProcess: HANDLE,
-            dwAddr: DWORD64,
-            pdwDisplacement: PDWORD,
-            Line: PIMAGEHLP_LINEW64
-        ) -> BOOL;
         fn StackWalkEx(
             MachineType: DWORD,
             hProcess: HANDLE,
@@ -222,6 +219,19 @@ dbghelp! {
             qwModuleBaseAddress: DWORD64,
             pdwDisplacement: PDWORD,
             Line: PIMAGEHLP_LINEW64
+        ) -> BOOL;
+        fn SymAddrIncludeInlineTrace(
+            hProcess: HANDLE,
+            Address: DWORD64
+        ) -> DWORD;
+        fn SymQueryInlineTrace(
+            hProcess: HANDLE,
+            StartAddress: DWORD64,
+            StartContext: DWORD,
+            StartRetAddress: DWORD64,
+            CurAddress: DWORD64,
+            CurContext: LPDWORD,
+            CurFrameIndex: LPDWORD
         ) -> BOOL;
     }
 }

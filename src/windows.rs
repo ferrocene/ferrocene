@@ -19,6 +19,9 @@ cfg_if::cfg_if! {
         pub use self::winapi::PUNWIND_HISTORY_TABLE;
         #[cfg(target_pointer_width = "64")]
         pub use self::winapi::PRUNTIME_FUNCTION;
+        pub use self::winapi::PEXCEPTION_ROUTINE;
+        #[cfg(target_pointer_width = "64")]
+        pub use self::winapi::PKNONVOLATILE_CONTEXT_POINTERS;
 
         mod winapi {
             pub use winapi::ctypes::*;
@@ -35,6 +38,22 @@ cfg_if::cfg_if! {
             pub use winapi::um::tlhelp32::*;
             pub use winapi::um::winbase::*;
             pub use winapi::um::winnt::*;
+
+            // Work around winapi not having this function on aarch64.
+            #[cfg(target_arch = "aarch64")]
+            #[link(name = "kernel32")]
+            extern "system" {
+                pub fn RtlVirtualUnwind(
+                    HandlerType: ULONG,
+                    ImageBase: ULONG64,
+                    ControlPc: ULONG64,
+                    FunctionEntry: PRUNTIME_FUNCTION,
+                    ContextRecord: PCONTEXT,
+                    HandlerData: *mut PVOID,
+                    EstablisherFrame: PULONG64,
+                    ContextPointers: PKNONVOLATILE_CONTEXT_POINTERS
+                ) -> PEXCEPTION_ROUTINE;
+            }
         }
     } else {
         pub use core::ffi::c_void;
@@ -45,6 +64,9 @@ cfg_if::cfg_if! {
         pub type PRUNTIME_FUNCTION = *mut c_void;
         #[cfg(target_pointer_width = "64")]
         pub type PUNWIND_HISTORY_TABLE = *mut c_void;
+        pub type PEXCEPTION_ROUTINE = *mut c_void;
+        #[cfg(target_pointer_width = "64")]
+        pub type PKNONVOLATILE_CONTEXT_POINTERS = *mut c_void;
     }
 }
 
@@ -359,6 +381,7 @@ ffi! {
     pub type LPCSTR = *const i8;
     pub type PWSTR = *mut u16;
     pub type WORD = u16;
+    pub type USHORT = u16;
     pub type ULONG = u32;
     pub type ULONG64 = u64;
     pub type WCHAR = u16;
@@ -370,6 +393,8 @@ ffi! {
     pub type LPVOID = *mut c_void;
     pub type LPCVOID = *const c_void;
     pub type LPMODULEENTRY32W = *mut MODULEENTRY32W;
+    pub type PULONG = *mut ULONG;
+    pub type PULONG64 = *mut ULONG64;
 
     #[link(name = "kernel32")]
     extern "system" {
@@ -434,6 +459,33 @@ ffi! {
             hSnapshot: HANDLE,
             lpme: LPMODULEENTRY32W,
         ) -> BOOL;
+    }
+
+    #[link(name = "ntdll")]
+    extern "system" {
+        pub fn RtlCaptureStackBackTrace(
+            FramesToSkip: ULONG,
+            FramesToCapture: ULONG,
+            BackTrace: *mut PVOID,
+            BackTraceHash: PULONG,
+        ) -> USHORT;
+    }
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+ffi! {
+    #[link(name = "kernel32")]
+    extern "system" {
+        pub fn RtlVirtualUnwind(
+            HandlerType: ULONG,
+            ImageBase: ULONG64,
+            ControlPc: ULONG64,
+            FunctionEntry: PRUNTIME_FUNCTION,
+            ContextRecord: PCONTEXT,
+            HandlerData: *mut PVOID,
+            EstablisherFrame: PULONG64,
+            ContextPointers: PKNONVOLATILE_CONTEXT_POINTERS
+        ) -> PEXCEPTION_ROUTINE;
     }
 }
 

@@ -40,11 +40,7 @@ class RubricCollector(EnvironmentCollector):
     def clear_doc(self, app, env, docname):
         storage = get_storage(env)
         for rubric, items in storage.items():
-            # This makes a copy of the list (with `list(items)`) to be able to
-            # remove items from it without affecting the iteration.
-            for i, item in enumerate(list(items)):
-                if item.document == docname:
-                    items.pop(i)
+            items[:] = (item for item in items if item.document != docname)
 
     def merge_other(self, app, env, docnames, other):
         current = get_storage(env)

@@ -128,9 +128,16 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "pull new changes from upstream"; t
         # Setting the editor to `true` prevents the actual editor from being open,
         # as in this case we don't want to change the default message.
         GIT_EDITOR="$(which true)" git merge --continue
-    elif [[ -n "${COMMIT_WITH_MERGE_CONFLICTS+x}" ]]; then
+    elif [[ -n "${EXIT_ON_MERGE_CONFLICT+x}" ]]; then
+        echo
+        echo "pull-upstream: there are unresolved merge conflicts"
+        echo "pull-upstream: resolve the conflicts manually and then run \`git merge --continue\`."
+        exit 1
+    else
+        echo
         echo "pull-upstream: there are unresolved merge conflicts"
         echo "pull-upstream: committing with merge conflict markers in the source"
+        echo
 
         # We do a `git submodule update` ahead of time to ensure the wrong
         # submodule commits are not accidentally added.
@@ -158,11 +165,6 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "pull new changes from upstream"; t
         # Setting the editor to `true` prevents the actual editor from being open,
         # as in this case we don't want to change the default message.
         GIT_EDITOR="$(which true)" git merge --continue
-    else
-        echo
-        echo "pull-upstream: there are unresolved merge conflicts"
-        echo "pull-upstream: resolve the conflicts manually and then run \`git merge --continue\`."
-        exit 1
     fi
 fi
 

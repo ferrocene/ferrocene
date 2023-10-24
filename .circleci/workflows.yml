@@ -63,6 +63,9 @@ jobs:
       - ferrocene-checkout:
           llvm-subset: true
       - run:
+          name: Check whether git conflict markers are present
+          command: ferrocene/ci/scripts/detect-conflict-markers.py
+      - run:
           name: Perform licensing checks
           command: reuse lint
       - ferrocene-ci

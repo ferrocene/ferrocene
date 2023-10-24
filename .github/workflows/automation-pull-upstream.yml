@@ -9,16 +9,7 @@ on:
   schedule:
     - cron: '0 5 * * 1-5'
   # Allow to run this manually from the GitHub UI
-  workflow_dispatch:
-    inputs:
-      merge:
-        description: Merge strategy
-        type: choice
-        required: true
-        options:
-          - "default: Standard three-way merge"
-          - "ours: Prefer Ferrocene changes"
-          - "theirs: Prefer Rust upstream changes"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -56,13 +47,6 @@ jobs:
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
-      - name: Configure the merge strategy
-        run: |
-          strategy="$(echo "${{ github.event.inputs.merge }}" | sed 's/:.*//')"
-          echo "chosen strategy: ${strategy}"
-          echo "MERGE_STRATEGY=${strategy}" >> "${GITHUB_ENV}"
-        if: github.event_name == 'workflow_dispatch'
 
       # The builtin GitHub token doesn't have the "workflows" permissions, and
       # so it can't create new branches with the .github/workflows directory in

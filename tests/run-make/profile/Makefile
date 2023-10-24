@@ -1,4 +1,5 @@
 # needs-profiler-support
+# ignore-aarch64-unknown-ferrocenecoretest pgo not supported
 
 include ../tools.mk
 

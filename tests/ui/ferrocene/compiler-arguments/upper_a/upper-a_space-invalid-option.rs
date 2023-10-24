@@ -1,6 +1,6 @@
 // -A must be followed by a valid lint option
 //
-// check-pass
+// check-fail
 // compile-flags: -A invalid_lint_code
 
 fn main() {}

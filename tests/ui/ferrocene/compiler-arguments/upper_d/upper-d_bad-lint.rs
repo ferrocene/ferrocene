@@ -1,4 +1,4 @@
-// check-pass
+// check-fail
 // compile-flags: -D junk
 
 fn main() {}

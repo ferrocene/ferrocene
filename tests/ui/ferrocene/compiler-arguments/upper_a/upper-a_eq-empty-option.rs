@@ -1,6 +1,6 @@
 // The option of -A starts immediately, without requiring any equal symbol
 //
-// check-pass
+// check-fail
 // compile-flags: -A=
 
 fn main() {}

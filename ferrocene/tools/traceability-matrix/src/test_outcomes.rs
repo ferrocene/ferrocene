@@ -5,8 +5,6 @@ use anyhow::{Context, Error};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::path::Path;
 
-const COMPILETEST_TYPE: &str = "bootstrap::test::Compiletest";
-
 const EXPECTED_FORMAT_VERSION: usize = 1;
 
 #[derive(Debug, PartialEq, Eq, Default, Clone)]
@@ -40,23 +38,19 @@ impl TestOutcomes {
 
             let mut search_queue = VecDeque::new();
             for invocation in &metrics.invocations {
-                search_queue.extend(invocation.children.iter().map(|c| (c, false)));
+                search_queue.extend(invocation.children.iter());
             }
-            while let Some((node, mut inside_compiletest)) = search_queue.pop_front() {
+            while let Some(node) = search_queue.pop_front() {
                 match node {
-                    MetricsNode::RustbuildStep { type_, children } => {
-                        if type_ == COMPILETEST_TYPE {
-                            inside_compiletest = true;
-                        }
+                    MetricsNode::RustbuildStep { children } => {
                         for child in children {
-                            search_queue.push_back((child, inside_compiletest));
+                            search_queue.push_back(child);
                         }
                     }
-                    MetricsNode::TestSuite(TestSuite { tests, metadata }) => {
-                        if !inside_compiletest {
-                            continue;
-                        }
-
+                    MetricsNode::TestSuite {
+                        tests,
+                        metadata: TestSuiteMetadata::Compiletest { target },
+                    } => {
                         for Test { name, outcome } in tests {
                             // Compiletest test names are in the "[suite] path/to/test.rs#revision"
                             // format, with the revision being optional.
@@ -64,9 +58,6 @@ impl TestOutcomes {
                                 continue;
                             };
                             let name = name.rsplit_once('#').map(|(n, _)| n).unwrap_or(name).into();
-
-                            let (TestSuiteMetadata::CargoPackage { target }
-                            | TestSuiteMetadata::Compiletest { target }) = metadata;
 
                             if let MetricsTestOutcome::Ignored = outcome {
                                 test_outcomes
@@ -83,6 +74,11 @@ impl TestOutcomes {
                             }
                         }
                     }
+                    // Ignore test results from Cargo packages, as we don't consider those in the
+                    // traceability matrix (yet?).
+                    MetricsNode::TestSuite {
+                        metadata: TestSuiteMetadata::CargoPackage, ..
+                    } => {}
                 }
             }
         }
@@ -106,24 +102,14 @@ struct MetricsInvocation {
 #[derive(serde::Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 enum MetricsNode {
-    RustbuildStep {
-        #[serde(rename = "type")]
-        type_: String,
-        children: Vec<MetricsNode>,
-    },
-    TestSuite(TestSuite),
-}
-
-#[derive(serde::Deserialize)]
-struct TestSuite {
-    metadata: TestSuiteMetadata,
-    tests: Vec<Test>,
+    RustbuildStep { children: Vec<MetricsNode> },
+    TestSuite { metadata: TestSuiteMetadata, tests: Vec<Test> },
 }
 
 #[derive(serde::Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 enum TestSuiteMetadata {
-    CargoPackage { target: String },
+    CargoPackage,
     Compiletest { target: String },
 }
 

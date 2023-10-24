@@ -160,7 +160,7 @@ mod tests {
                                             "kind": "test_suite",
                                             "metadata": {
                                                 "target": "aarch64-unknown-linux-gnu",
-                                                "kind": "cargo_package",
+                                                "kind": "compiletest",
                                             },
                                             "tests": [
                                                 {

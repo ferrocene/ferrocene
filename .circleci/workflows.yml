@@ -297,6 +297,9 @@ jobs:
       # due to the OOM killer killing the build, decrease this number.
       LLVM_BUILD_PARALLELISM: 18
     steps:
+      - run:
+          name: TODO
+          command: which python
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
           steps:

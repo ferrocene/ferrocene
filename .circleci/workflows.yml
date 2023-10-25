@@ -306,8 +306,10 @@ jobs:
             - run:
                 name: Install Windows dependencies
                 command: |
-                  choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-                  choco install -y ninja
+                  choco install -y cmake ninja
+                  # By default CMake is not in the bash PATH, so we need to add
+                  # it manually to it.
+                  echo 'export PATH="/c/Program Files/CMake/bin:${PATH}"' >> "${BASH_ENV}"
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

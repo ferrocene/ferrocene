@@ -305,7 +305,7 @@ jobs:
             - ferrocene-setup-windows
             - run:
                 name: Install Windows dependencies
-                command: choco install cmake ninja
+                command: choco install -y cmake ninja
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

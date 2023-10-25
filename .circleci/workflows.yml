@@ -303,6 +303,9 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
+            - run:
+                name: Install Windows dependencies
+                command: choco install cmake ninja
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

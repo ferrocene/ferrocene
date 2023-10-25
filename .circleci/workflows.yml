@@ -297,14 +297,12 @@ jobs:
       # due to the OOM killer killing the build, decrease this number.
       LLVM_BUILD_PARALLELISM: 18
     steps:
-      - run:
-          name: TODO
-          command: which python
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
           steps:
             - aws-oidc-auth
             - ferrocene-checkout
+            - ferrocene-setup-windows
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -742,6 +740,13 @@ commands:
       - run:
           name: Show the current environment
           command: ferrocene/ci/scripts/show-environment.sh
+
+  ferrocene-setup-windows:
+    description: Prepare the Windows environment
+    steps:
+      - run:
+          name: Setup Windows environment
+          command: ferrocene/ci/scripts/setup-windows.sh
 
   ferrocene-ci:
     description: Common CI steps for Ferrocene

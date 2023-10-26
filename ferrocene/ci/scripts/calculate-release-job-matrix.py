@@ -8,6 +8,7 @@
 from dataclasses import dataclass
 import base64
 import boto3
+import collections
 import json
 import os
 import re
@@ -30,7 +31,9 @@ def commits_in_release_branches(ctx):
     # being picked up.
     print("note: only protected branches are considered here", file=sys.stderr)
 
-    url = f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
+    url = (
+        f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
+    )
     while url is not None:
         response = ctx.http.get(url)
         response.raise_for_status()
@@ -121,6 +124,43 @@ def filter_automated_channels(releases):
         )
 
 
+# In some cases, it's possible that multiple pending releases target the same
+# channel. This could happen for example if a new `release/1.NN` branch is
+# created by an automation, and the PR bumping the channel away from nightly
+# hasn't been merged yet. In that case, two releases with the same (nightly)
+# channel will be attempted.
+#
+# Multiple pending releases with the same channel results in unpredictable
+# behavior though. The release process would be instructed to release both of
+# them, but the startup check preventing duplicate releases with the same ID
+# would prevent ONE of them from being releases.
+#
+# This leads to unpredictability, since which commit ends up being released is
+# not deterministic and only depends on which GitHub Actions job ran first.
+# This could lead for example to a release channel going back in time.
+#
+# To prevent this from happening, the function discards all releases that have
+# a duplicate channel. In the case above, no nightly release would be returned
+# by the function, as two of them were pending.
+def discard_duplicate_channels(releases):
+    # Buffer the iterator as we need to iterate through it multiple times.
+    releases = list(releases)
+
+    channels_count = collections.defaultdict(lambda: 0)
+    for release in releases:
+        channels_count[release.channel] += 1
+
+    for release in releases:
+        if channels_count[release.channel] > 1:
+            print(
+                f"note: discarding {release.commit} on channel {release.channel} "
+                "as multiple releases with that channel exist",
+                file=sys.stderr,
+            )
+        else:
+            yield release
+
+
 def prepare_github_actions_output(ctx, pending_releases):
     if ctx.event_name == "schedule":
         environment = "release-prod-automated"
@@ -141,7 +181,7 @@ def prepare_github_actions_output(ctx, pending_releases):
             name_suffix += ", allow duplicates"
 
     jobs = []
-    for release in pending_releases:
+    for release in discard_duplicate_channels(pending_releases):
         jobs.append(
             {
                 "name": f"{release.channel} ({name_suffix})",
@@ -210,7 +250,6 @@ def run():
         releases = commits_to_releases(ctx, [commit])
     else:
         raise RuntimeError(f"unsupported event name: {event_name}")
-
 
     output = prepare_github_actions_output(ctx, releases)
     print(f"jobs={json.dumps(output)}")

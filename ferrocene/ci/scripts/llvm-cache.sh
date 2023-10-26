@@ -123,7 +123,10 @@ build_llvm_tarball() {
     # Call `zstd` separately to be able to use all cores available (`-T0`) and
     # the lowest compression level possible, to speed the compression as much
     # as possible.
-    tar cv "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
+    #
+    # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+    # rather than stdout by default.
+    tar -cvf- "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
 }
 
 usage() {

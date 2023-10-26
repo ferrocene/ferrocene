@@ -30,7 +30,9 @@ def commits_in_release_branches(ctx):
     # being picked up.
     print("note: only protected branches are considered here", file=sys.stderr)
 
-    url = f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
+    url = (
+        f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
+    )
     while url is not None:
         response = ctx.http.get(url)
         response.raise_for_status()
@@ -210,7 +212,6 @@ def run():
         releases = commits_to_releases(ctx, [commit])
     else:
         raise RuntimeError(f"unsupported event name: {event_name}")
-
 
     output = prepare_github_actions_output(ctx, releases)
     print(f"jobs={json.dumps(output)}")

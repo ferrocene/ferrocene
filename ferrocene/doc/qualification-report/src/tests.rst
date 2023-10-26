@@ -99,7 +99,7 @@ The ``Rustdoc``, ``RustdocJson``, and ``RustdocUi`` test suites are not
 verified on ``aarch64`` because the ``rustdoc`` tool does not run on
 ``aarch64`` hosts.
 
-.. suite-summary:: bootstrap::test::Compiletest
+.. suite-summary:: bootstrap::core::build_steps::test::Compiletest
 
 Library Test Suite
 ******************
@@ -115,7 +115,7 @@ for that target.
    root node, otherwise we'd also match other tests invoking Crate down their
    dependency chain.
 
-.. suite-summary:: bootstrap::test::Crate
+.. suite-summary:: bootstrap::core::build_steps::test::Crate
    :only_match_root_node:
 
 Crates Test Suite
@@ -124,7 +124,7 @@ Crates Test Suite
 The crates test suite is not tested on ``aarch64`` because the Ferrocene
 toolset does not provide a **host** ``aarch64`` compiler.
 
-.. suite-summary:: bootstrap::test::CrateLibrustc
+.. suite-summary:: bootstrap::core::build_steps::test::CrateLibrustc
 
 Linkchecker Test Suite
 **********************
@@ -149,7 +149,7 @@ and the library test suite.
 Build System Test Suite
 ***********************
 
-.. suite-summary:: bootstrap::test::Bootstrap
+.. suite-summary:: bootstrap::core::build_steps::test::Bootstrap
 
 Tidy Test Suite
 ***************

@@ -43,7 +43,7 @@ cd "$(git rev-parse --show-toplevel)"
 # Safety check to avoid messing with uncommitted changes.
 # Submodules are updated before that, as submodules needing an update should
 # not block merging chnages from upstream.
-git submodule update
+git submodule update --init
 if ! git diff-index --quiet HEAD; then
     echo "pull-upstream: the current branch contains uncommitted changes!"
     echo "pull-upstream: make sure all changes are committed before running this script."
@@ -141,7 +141,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "pull new changes from upstream"; t
 
         # We do a `git submodule update` ahead of time to ensure the wrong
         # submodule commits are not accidentally added.
-        git submodule update
+        git submodule update --init
 
         # The person handling the conflict should decide what to do if a file
         # has been deleted on either side of the merge, but doing a `git add .`

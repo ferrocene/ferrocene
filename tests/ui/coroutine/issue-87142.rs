@@ -30,3 +30,5 @@ impl CoroutineProviderAlt for () {
         }
     }
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

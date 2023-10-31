@@ -25,3 +25,6 @@ fn main() {
     let y = x.max(1) // !foo //~ ERROR found doc comment
         .min(2);
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

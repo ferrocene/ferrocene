@@ -12,7 +12,7 @@ use thin_vec::ThinVec;
 
 use rustc_ast as ast;
 use rustc_ast_pretty::pprust;
-use rustc_attr::{ConstStability, Deprecation, Stability, StabilityLevel};
+use rustc_attr::{ConstStability, Deprecation, Since, Stability, StabilityLevel};
 use rustc_const_eval::const_eval::is_unstable_const_fn;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_hir as hir;
@@ -585,14 +585,14 @@ impl Item {
         })
     }
 
-    pub(crate) fn stable_since(&self, tcx: TyCtxt<'_>) -> Option<Symbol> {
+    pub(crate) fn stable_since(&self, tcx: TyCtxt<'_>) -> Option<Since> {
         match self.stability(tcx)?.level {
             StabilityLevel::Stable { since, .. } => Some(since),
             StabilityLevel::Unstable { .. } => None,
         }
     }
 
-    pub(crate) fn const_stable_since(&self, tcx: TyCtxt<'_>) -> Option<Symbol> {
+    pub(crate) fn const_stable_since(&self, tcx: TyCtxt<'_>) -> Option<Since> {
         match self.const_stability(tcx)?.level {
             StabilityLevel::Stable { since, .. } => Some(since),
             StabilityLevel::Unstable { .. } => None,
@@ -852,9 +852,9 @@ pub(crate) enum ItemKind {
     ProcMacroItem(ProcMacro),
     PrimitiveItem(PrimitiveType),
     /// A required associated constant in a trait declaration.
-    TyAssocConstItem(Box<Generics>, Type),
+    TyAssocConstItem(Generics, Box<Type>),
     /// An associated constant in a trait impl or a provided one in a trait declaration.
-    AssocConstItem(Box<Generics>, Type, ConstantKind),
+    AssocConstItem(Generics, Box<Type>, ConstantKind),
     /// A required associated type in a trait declaration.
     ///
     /// The bounds may be non-empty if there is a `where` clause.
@@ -1325,8 +1325,8 @@ impl WherePredicate {
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub(crate) enum GenericParamDefKind {
-    Lifetime { outlives: Vec<Lifetime> },
-    Type { did: DefId, bounds: Vec<GenericBound>, default: Option<Box<Type>>, synthetic: bool },
+    Lifetime { outlives: ThinVec<Lifetime> },
+    Type { did: DefId, bounds: ThinVec<GenericBound>, default: Option<Box<Type>>, synthetic: bool },
     Const { ty: Box<Type>, default: Option<Box<String>>, is_host_effect: bool },
 }
 
@@ -1344,7 +1344,7 @@ pub(crate) struct GenericParamDef {
 
 impl GenericParamDef {
     pub(crate) fn lifetime(name: Symbol) -> Self {
-        Self { name, kind: GenericParamDefKind::Lifetime { outlives: Vec::new() } }
+        Self { name, kind: GenericParamDefKind::Lifetime { outlives: ThinVec::new() } }
     }
 
     pub(crate) fn is_synthetic_param(&self) -> bool {
@@ -2282,8 +2282,8 @@ pub(crate) struct Static {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub(crate) struct Constant {
-    pub(crate) type_: Type,
-    pub(crate) generics: Box<Generics>,
+    pub(crate) type_: Box<Type>,
+    pub(crate) generics: Generics,
     pub(crate) kind: ConstantKind,
 }
 
@@ -2521,11 +2521,10 @@ mod size_asserts {
     static_assert_size!(DocFragment, 32);
     static_assert_size!(GenericArg, 32);
     static_assert_size!(GenericArgs, 32);
-    static_assert_size!(GenericParamDef, 56);
+    static_assert_size!(GenericParamDef, 40);
     static_assert_size!(Generics, 16);
     static_assert_size!(Item, 56);
-    // FIXME(generic_const_items): Further reduce the size.
-    static_assert_size!(ItemKind, 72);
+    static_assert_size!(ItemKind, 56);
     static_assert_size!(PathSegment, 40);
     static_assert_size!(Type, 32);
     // tidy-alphabetical-end

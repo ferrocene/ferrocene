@@ -114,7 +114,7 @@
 //! approach that only works for some classes of CFGs:
 //! - rustc now has a powerful dataflow analysis framework that can handle forwards and backwards
 //!   analyses efficiently.
-//! - Layout optimizations for generators have been added to improve code generation for
+//! - Layout optimizations for coroutines have been added to improve code generation for
 //!   async/await, which are very similar in spirit to what this optimization does.
 //!
 //! Also, rustc now has a simple NRVO pass (see `nrvo.rs`), which handles a subset of the cases that
@@ -244,7 +244,7 @@ impl<'tcx> MirPass<'tcx> for DestinationPropagation {
         if round_count != 0 {
             // Merging can introduce overlap between moved arguments and/or call destination in an
             // unreachable code, which validator considers to be ill-formed.
-            remove_dead_blocks(tcx, body);
+            remove_dead_blocks(body);
         }
 
         trace!(round_count);
@@ -655,7 +655,7 @@ impl WriteInfo {
                 // `Drop`s create a `&mut` and so are not considered
             }
             TerminatorKind::Yield { .. }
-            | TerminatorKind::GeneratorDrop
+            | TerminatorKind::CoroutineDrop
             | TerminatorKind::FalseEdge { .. }
             | TerminatorKind::FalseUnwind { .. } => {
                 bug!("{:?} not found in this MIR phase", terminator)

@@ -241,8 +241,10 @@ impl<'tcx> Ty<'tcx> {
             }
             ty::Dynamic(..) => "trait object".into(),
             ty::Closure(..) => "closure".into(),
-            ty::Generator(def_id, ..) => tcx.generator_kind(def_id).unwrap().descr().into(),
-            ty::GeneratorWitness(..) => "generator witness".into(),
+            ty::Coroutine(def_id, ..) => {
+                format!("{:#}", tcx.coroutine_kind(def_id).unwrap()).into()
+            }
+            ty::CoroutineWitness(..) => "coroutine witness".into(),
             ty::Infer(ty::TyVar(_)) => "inferred type".into(),
             ty::Infer(ty::IntVar(_)) => "integer".into(),
             ty::Infer(ty::FloatVar(_)) => "floating-point number".into(),
@@ -299,8 +301,10 @@ impl<'tcx> Ty<'tcx> {
             ty::FnPtr(_) => "fn pointer".into(),
             ty::Dynamic(..) => "trait object".into(),
             ty::Closure(..) => "closure".into(),
-            ty::Generator(def_id, ..) => tcx.generator_kind(def_id).unwrap().descr().into(),
-            ty::GeneratorWitness(..) => "generator witness".into(),
+            ty::Coroutine(def_id, ..) => {
+                format!("{:#}", tcx.coroutine_kind(def_id).unwrap()).into()
+            }
+            ty::CoroutineWitness(..) => "coroutine witness".into(),
             ty::Tuple(..) => "tuple".into(),
             ty::Placeholder(..) => "higher-ranked type".into(),
             ty::Bound(..) => "bound type variable".into(),
@@ -315,26 +319,25 @@ impl<'tcx> Ty<'tcx> {
 impl<'tcx> TyCtxt<'tcx> {
     pub fn ty_string_with_limit(self, ty: Ty<'tcx>, length_limit: usize) -> String {
         let mut type_limit = 50;
-        let regular = FmtPrinter::new(self, hir::def::Namespace::TypeNS)
-            .pretty_print_type(ty)
-            .expect("could not write to `String`")
-            .into_buffer();
+        let regular = FmtPrinter::print_string(self, hir::def::Namespace::TypeNS, |cx| {
+            cx.pretty_print_type(ty)
+        })
+        .expect("could not write to `String`");
         if regular.len() <= length_limit {
             return regular;
         }
         let mut short;
         loop {
             // Look for the longest properly trimmed path that still fits in length_limit.
-            short = with_forced_trimmed_paths!(
-                FmtPrinter::new_with_limit(
+            short = with_forced_trimmed_paths!({
+                let mut cx = FmtPrinter::new_with_limit(
                     self,
                     hir::def::Namespace::TypeNS,
                     rustc_session::Limit(type_limit),
-                )
-                .pretty_print_type(ty)
-                .expect("could not write to `String`")
-                .into_buffer()
-            );
+                );
+                cx.pretty_print_type(ty).expect("could not write to `String`");
+                cx.into_buffer()
+            });
             if short.len() <= length_limit || type_limit == 0 {
                 break;
             }
@@ -344,10 +347,10 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn short_ty_string(self, ty: Ty<'tcx>) -> (String, Option<PathBuf>) {
-        let regular = FmtPrinter::new(self, hir::def::Namespace::TypeNS)
-            .pretty_print_type(ty)
-            .expect("could not write to `String`")
-            .into_buffer();
+        let regular = FmtPrinter::print_string(self, hir::def::Namespace::TypeNS, |cx| {
+            cx.pretty_print_type(ty)
+        })
+        .expect("could not write to `String`");
 
         if !self.sess.opts.unstable_opts.write_long_types_to_disk {
             return (regular, None);

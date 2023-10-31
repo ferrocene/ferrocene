@@ -492,7 +492,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                     // `Variants::Multiple`.
                     match v.layout.variants {
                         Variants::Multiple { .. } => {
-                            // A multi-variant enum, or generator, or so.
+                            // A multi-variant enum, or coroutine, or so.
                             // Treat this like a union: without reading from memory,
                             // we cannot determine the variant we are in. Reading from
                             // memory would be subject to Stacked Borrows rules, leading
@@ -868,9 +868,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
         let size2 = Size::from_bytes(2);
         let this = self.eval_context_mut();
         this.check_ptr_align(ptr, Align::from_bytes(2).unwrap())?;
-        let mut alloc = this
-            .get_ptr_alloc_mut(ptr, size2 * string_length)?
-            .unwrap(); // not a ZST, so we will get a result
+        let mut alloc = this.get_ptr_alloc_mut(ptr, size2 * string_length)?.unwrap(); // not a ZST, so we will get a result
         for (offset, wchar) in wide_str.iter().copied().chain(iter::once(0x0000)).enumerate() {
             let offset = u64::try_from(offset).unwrap();
             alloc.write_scalar(alloc_range(size2 * offset, size2), Scalar::from_u16(wchar))?;

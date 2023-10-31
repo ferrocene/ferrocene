@@ -2,7 +2,7 @@
 
 use crate::ty::codec::{TyDecoder, TyEncoder};
 use crate::ty::fold::{FallibleTypeFolder, TypeFoldable, TypeFolder, TypeSuperFoldable};
-use crate::ty::sty::{ClosureArgs, GeneratorArgs, InlineConstArgs};
+use crate::ty::sty::{ClosureArgs, CoroutineArgs, InlineConstArgs};
 use crate::ty::visit::{TypeVisitable, TypeVisitableExt, TypeVisitor};
 use crate::ty::{self, Lift, List, ParamConst, Ty, TyCtxt};
 
@@ -11,7 +11,6 @@ use rustc_errors::{DiagnosticArgValue, IntoDiagnosticArg};
 use rustc_hir::def_id::DefId;
 use rustc_macros::HashStable;
 use rustc_serialize::{self, Decodable, Encodable};
-use rustc_span::sym;
 use rustc_type_ir::WithCachedTypeInfo;
 use smallvec::SmallVec;
 
@@ -267,12 +266,12 @@ impl<'tcx> GenericArgs<'tcx> {
         ClosureArgs { args: self }
     }
 
-    /// Interpret these generic args as the args of a generator type.
-    /// Generator args have a particular structure controlled by the
-    /// compiler that encodes information like the signature and generator kind;
-    /// see `ty::GeneratorArgs` struct for more comments.
-    pub fn as_generator(&'tcx self) -> GeneratorArgs<'tcx> {
-        GeneratorArgs { args: self }
+    /// Interpret these generic args as the args of a coroutine type.
+    /// Coroutine args have a particular structure controlled by the
+    /// compiler that encodes information like the signature and coroutine kind;
+    /// see `ty::CoroutineArgs` struct for more comments.
+    pub fn as_coroutine(&'tcx self) -> CoroutineArgs<'tcx> {
+        CoroutineArgs { args: self }
     }
 
     /// Interpret these generic args as the args of an inline const.
@@ -450,10 +449,6 @@ impl<'tcx> GenericArgs<'tcx> {
 
     pub fn truncate_to(&self, tcx: TyCtxt<'tcx>, generics: &ty::Generics) -> GenericArgsRef<'tcx> {
         tcx.mk_args_from_iter(self.iter().take(generics.count()))
-    }
-
-    pub fn host_effect_param(&'tcx self) -> Option<ty::Const<'tcx>> {
-        self.consts().rfind(|x| matches!(x.kind(), ty::ConstKind::Param(p) if p.name == sym::host))
     }
 
     pub fn print_as_list(&self) -> String {

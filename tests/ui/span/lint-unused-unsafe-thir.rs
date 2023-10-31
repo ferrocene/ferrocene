@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // FIXME: This file is tracking old lint behavior that's still unchanged in the
 // unstable -Zthir-unsafeck implementation. See lint-unused-unsafe.rs for more details.
 //

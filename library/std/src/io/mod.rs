@@ -317,6 +317,7 @@ pub use self::stdio::set_output_capture;
 #[stable(feature = "is_terminal", since = "1.70.0")]
 pub use self::stdio::IsTerminal;
 #[unstable(feature = "print_internals", issue = "none")]
+#[doc(hidden)]
 pub use self::stdio::{_eprint, _print};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::{
@@ -1140,10 +1141,10 @@ pub fn read_to_string<R: Read>(mut reader: R) -> Result<String> {
 #[repr(transparent)]
 pub struct IoSliceMut<'a>(sys::io::IoSliceMut<'a>);
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
+#[stable(feature = "iovec_send_sync", since = "1.44.0")]
 unsafe impl<'a> Send for IoSliceMut<'a> {}
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
+#[stable(feature = "iovec_send_sync", since = "1.44.0")]
 unsafe impl<'a> Sync for IoSliceMut<'a> {}
 
 #[stable(feature = "iovec", since = "1.36.0")]
@@ -1283,10 +1284,10 @@ impl<'a> DerefMut for IoSliceMut<'a> {
 #[repr(transparent)]
 pub struct IoSlice<'a>(sys::io::IoSlice<'a>);
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
+#[stable(feature = "iovec_send_sync", since = "1.44.0")]
 unsafe impl<'a> Send for IoSlice<'a> {}
 
-#[stable(feature = "iovec-send-sync", since = "1.44.0")]
+#[stable(feature = "iovec_send_sync", since = "1.44.0")]
 unsafe impl<'a> Sync for IoSlice<'a> {}
 
 #[stable(feature = "iovec", since = "1.36.0")]
@@ -2777,23 +2778,53 @@ pub struct Bytes<R> {
 impl<R: Read> Iterator for Bytes<R> {
     type Item = Result<u8>;
 
-    #[inline]
+    // Not `#[inline]`. This function gets inlined even without it, but having
+    // the inline annotation can result in worse code generation. See #116785.
     fn next(&mut self) -> Option<Result<u8>> {
-        let mut byte = 0;
-        loop {
-            return match self.inner.read(slice::from_mut(&mut byte)) {
-                Ok(0) => None,
-                Ok(..) => Some(Ok(byte)),
-                Err(ref e) if e.is_interrupted() => continue,
-                Err(e) => Some(Err(e)),
-            };
-        }
+        SpecReadByte::spec_read_byte(&mut self.inner)
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         SizeHint::size_hint(&self.inner)
     }
+}
+
+/// For the specialization of `Bytes::next`.
+trait SpecReadByte {
+    fn spec_read_byte(&mut self) -> Option<Result<u8>>;
+}
+
+impl<R> SpecReadByte for R
+where
+    Self: Read,
+{
+    #[inline]
+    default fn spec_read_byte(&mut self) -> Option<Result<u8>> {
+        inlined_slow_read_byte(self)
+    }
+}
+
+/// Read a single byte in a slow, generic way. This is used by the default
+/// `spec_read_byte`.
+#[inline]
+fn inlined_slow_read_byte<R: Read>(reader: &mut R) -> Option<Result<u8>> {
+    let mut byte = 0;
+    loop {
+        return match reader.read(slice::from_mut(&mut byte)) {
+            Ok(0) => None,
+            Ok(..) => Some(Ok(byte)),
+            Err(ref e) if e.is_interrupted() => continue,
+            Err(e) => Some(Err(e)),
+        };
+    }
+}
+
+// Used by `BufReader::spec_read_byte`, for which the `inline(ever)` is
+// important.
+#[inline(never)]
+fn uninlined_slow_read_byte<R: Read>(reader: &mut R) -> Option<Result<u8>> {
+    inlined_slow_read_byte(reader)
 }
 
 trait SizeHint {

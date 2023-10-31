@@ -1,294 +1,270 @@
 use crate::coverageinfo::ffi::{Counter, CounterExpression, ExprKind};
 
+use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::FxIndexSet;
-use rustc_index::IndexVec;
-use rustc_middle::mir::coverage::{CodeRegion, CounterId, ExpressionId, Op, Operand};
+use rustc_index::bit_set::BitSet;
+use rustc_middle::mir::coverage::{
+    CodeRegion, CounterId, CovTerm, Expression, ExpressionId, FunctionCoverageInfo, Mapping, Op,
+};
 use rustc_middle::ty::Instance;
-use rustc_middle::ty::TyCtxt;
+use rustc_span::Symbol;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Expression {
-    lhs: Operand,
-    op: Op,
-    rhs: Operand,
-    code_regions: Vec<CodeRegion>,
-}
-
-/// Collects all of the coverage regions associated with (a) injected counters, (b) counter
-/// expressions (additions or subtraction), and (c) unreachable regions (always counted as zero),
-/// for a given Function. This struct also stores the `function_source_hash`,
-/// computed during instrumentation, and forwarded with counters.
-///
-/// Note, it may be important to understand LLVM's definitions of `unreachable` regions versus "gap
-/// regions" (or "gap areas"). A gap region is a code region within a counted region (either counter
-/// or expression), but the line or lines in the gap region are not executable (such as lines with
-/// only whitespace or comments). According to LLVM Code Coverage Mapping documentation, "A count
-/// for a gap area is only used as the line execution count if there are no other regions on a
-/// line."
+/// Holds all of the coverage mapping data associated with a function instance,
+/// collected during traversal of `Coverage` statements in the function's MIR.
 #[derive(Debug)]
-pub struct FunctionCoverage<'tcx> {
-    instance: Instance<'tcx>,
-    source_hash: u64,
+pub struct FunctionCoverageCollector<'tcx> {
+    /// Coverage info that was attached to this function by the instrumentor.
+    function_coverage_info: &'tcx FunctionCoverageInfo,
     is_used: bool,
-    counters: IndexVec<CounterId, Option<Vec<CodeRegion>>>,
-    expressions: IndexVec<ExpressionId, Option<Expression>>,
-    unreachable_regions: Vec<CodeRegion>,
+
+    /// Tracks which counters have been seen, so that we can identify mappings
+    /// to counters that were optimized out, and set them to zero.
+    counters_seen: BitSet<CounterId>,
+    /// Contains all expression IDs that have been seen in an `ExpressionUsed`
+    /// coverage statement, plus all expression IDs that aren't directly used
+    /// by any mappings (and therefore do not have expression-used statements).
+    /// After MIR traversal is finished, we can conclude that any IDs missing
+    /// from this set must have had their statements deleted by MIR opts.
+    expressions_seen: BitSet<ExpressionId>,
 }
 
-impl<'tcx> FunctionCoverage<'tcx> {
+impl<'tcx> FunctionCoverageCollector<'tcx> {
     /// Creates a new set of coverage data for a used (called) function.
-    pub fn new(tcx: TyCtxt<'tcx>, instance: Instance<'tcx>) -> Self {
-        Self::create(tcx, instance, true)
+    pub fn new(
+        instance: Instance<'tcx>,
+        function_coverage_info: &'tcx FunctionCoverageInfo,
+    ) -> Self {
+        Self::create(instance, function_coverage_info, true)
     }
 
     /// Creates a new set of coverage data for an unused (never called) function.
-    pub fn unused(tcx: TyCtxt<'tcx>, instance: Instance<'tcx>) -> Self {
-        Self::create(tcx, instance, false)
+    pub fn unused(
+        instance: Instance<'tcx>,
+        function_coverage_info: &'tcx FunctionCoverageInfo,
+    ) -> Self {
+        Self::create(instance, function_coverage_info, false)
     }
 
-    fn create(tcx: TyCtxt<'tcx>, instance: Instance<'tcx>, is_used: bool) -> Self {
-        let coverageinfo = tcx.coverageinfo(instance.def);
+    fn create(
+        instance: Instance<'tcx>,
+        function_coverage_info: &'tcx FunctionCoverageInfo,
+        is_used: bool,
+    ) -> Self {
+        let num_counters = function_coverage_info.num_counters;
+        let num_expressions = function_coverage_info.expressions.len();
         debug!(
-            "FunctionCoverage::create(instance={:?}) has coverageinfo={:?}. is_used={}",
-            instance, coverageinfo, is_used
+            "FunctionCoverage::create(instance={instance:?}) has \
+            num_counters={num_counters}, num_expressions={num_expressions}, is_used={is_used}"
         );
+
+        // Create a filled set of expression IDs, so that expressions not
+        // directly used by mappings will be treated as "seen".
+        // (If they end up being unused, LLVM will delete them for us.)
+        let mut expressions_seen = BitSet::new_filled(num_expressions);
+        // For each expression ID that is directly used by one or more mappings,
+        // mark it as not-yet-seen. This indicates that we expect to see a
+        // corresponding `ExpressionUsed` statement during MIR traversal.
+        for Mapping { term, .. } in &function_coverage_info.mappings {
+            if let &CovTerm::Expression(id) = term {
+                expressions_seen.remove(id);
+            }
+        }
+
         Self {
-            instance,
-            source_hash: 0, // will be set with the first `add_counter()`
+            function_coverage_info,
             is_used,
-            counters: IndexVec::from_elem_n(None, coverageinfo.num_counters as usize),
-            expressions: IndexVec::from_elem_n(None, coverageinfo.num_expressions as usize),
-            unreachable_regions: Vec::new(),
+            counters_seen: BitSet::new_empty(num_counters),
+            expressions_seen,
         }
     }
 
-    /// Returns true for a used (called) function, and false for an unused function.
-    pub fn is_used(&self) -> bool {
-        self.is_used
-    }
-
-    /// Sets the function source hash value. If called multiple times for the same function, all
-    /// calls should have the same hash value.
-    pub fn set_function_source_hash(&mut self, source_hash: u64) {
-        if self.source_hash == 0 {
-            self.source_hash = source_hash;
-        } else {
-            debug_assert_eq!(source_hash, self.source_hash);
-        }
-    }
-
-    /// Adds code regions to be counted by an injected counter intrinsic.
+    /// Marks a counter ID as having been seen in a counter-increment statement.
     #[instrument(level = "debug", skip(self))]
-    pub(crate) fn add_counter(&mut self, id: CounterId, code_regions: &[CodeRegion]) {
-        if code_regions.is_empty() {
-            return;
-        }
-
-        let slot = &mut self.counters[id];
-        match slot {
-            None => *slot = Some(code_regions.to_owned()),
-            // If this counter ID slot has already been filled, it should
-            // contain identical information.
-            Some(ref previous_regions) => assert_eq!(
-                previous_regions, code_regions,
-                "add_counter: code regions for id changed"
-            ),
-        }
+    pub(crate) fn mark_counter_id_seen(&mut self, id: CounterId) {
+        self.counters_seen.insert(id);
     }
 
-    /// Adds information about a coverage expression, along with zero or more
-    /// code regions mapped to that expression.
-    ///
-    /// Both counters and "counter expressions" (or simply, "expressions") can be operands in other
-    /// expressions. These are tracked as separate variants of `Operand`, so there is no ambiguity
-    /// between operands that are counter IDs and operands that are expression IDs.
+    /// Marks an expression ID as having been seen in an expression-used statement.
     #[instrument(level = "debug", skip(self))]
-    pub(crate) fn add_counter_expression(
-        &mut self,
-        expression_id: ExpressionId,
-        lhs: Operand,
-        op: Op,
-        rhs: Operand,
-        code_regions: &[CodeRegion],
-    ) {
-        debug_assert!(
-            expression_id.as_usize() < self.expressions.len(),
-            "expression_id {} is out of range for expressions.len() = {}
-            for {:?}",
-            expression_id.as_usize(),
-            self.expressions.len(),
-            self,
-        );
-
-        let expression = Expression { lhs, op, rhs, code_regions: code_regions.to_owned() };
-        let slot = &mut self.expressions[expression_id];
-        match slot {
-            None => *slot = Some(expression),
-            // If this expression ID slot has already been filled, it should
-            // contain identical information.
-            Some(ref previous_expression) => assert_eq!(
-                previous_expression, &expression,
-                "add_counter_expression: expression for id changed"
-            ),
-        }
+    pub(crate) fn mark_expression_id_seen(&mut self, id: ExpressionId) {
+        self.expressions_seen.insert(id);
     }
 
-    /// Adds regions that will be marked as "unreachable", with a constant "zero counter".
-    #[instrument(level = "debug", skip(self))]
-    pub(crate) fn add_unreachable_regions(&mut self, code_regions: &[CodeRegion]) {
-        assert!(!code_regions.is_empty(), "unreachable regions always have code regions");
-        self.unreachable_regions.extend_from_slice(code_regions);
-    }
-
-    /// Perform some simplifications to make the final coverage mappings
-    /// slightly smaller.
+    /// Identify expressions that will always have a value of zero, and note
+    /// their IDs in [`ZeroExpressions`]. Mappings that refer to a zero expression
+    /// can instead become mappings to a constant zero value.
     ///
     /// This method mainly exists to preserve the simplifications that were
     /// already being performed by the Rust-side expression renumbering, so that
     /// the resulting coverage mappings don't get worse.
-    pub(crate) fn simplify_expressions(&mut self) {
+    fn identify_zero_expressions(&self) -> ZeroExpressions {
         // The set of expressions that either were optimized out entirely, or
         // have zero as both of their operands, and will therefore always have
         // a value of zero. Other expressions that refer to these as operands
-        // can have those operands replaced with `Operand::Zero`.
-        let mut zero_expressions = FxIndexSet::default();
+        // can have those operands replaced with `CovTerm::Zero`.
+        let mut zero_expressions = ZeroExpressions::default();
 
-        // For each expression, perform simplifications based on lower-numbered
-        // expressions, and then update the set of always-zero expressions if
-        // necessary.
+        // Simplify a copy of each expression based on lower-numbered expressions,
+        // and then update the set of always-zero expressions if necessary.
         // (By construction, expressions can only refer to other expressions
-        // that have lower IDs, so one simplification pass is sufficient.)
-        for (id, maybe_expression) in self.expressions.iter_enumerated_mut() {
-            let Some(expression) = maybe_expression else {
-                // If an expression is missing, it must have been optimized away,
+        // that have lower IDs, so one pass is sufficient.)
+        for (id, expression) in self.function_coverage_info.expressions.iter_enumerated() {
+            if !self.expressions_seen.contains(id) {
+                // If an expression was not seen, it must have been optimized away,
                 // so any operand that refers to it can be replaced with zero.
                 zero_expressions.insert(id);
                 continue;
+            }
+
+            // We don't need to simplify the actual expression data in the
+            // expressions list; we can just simplify a temporary copy and then
+            // use that to update the set of always-zero expressions.
+            let Expression { mut lhs, op, mut rhs } = *expression;
+
+            // If an expression has an operand that is also an expression, the
+            // operand's ID must be strictly lower. This is what lets us find
+            // all zero expressions in one pass.
+            let assert_operand_expression_is_lower = |operand_id: ExpressionId| {
+                assert!(
+                    operand_id < id,
+                    "Operand {operand_id:?} should be less than {id:?} in {expression:?}",
+                )
             };
 
-            // If an operand refers to an expression that is always zero, then
-            // that operand can be replaced with `Operand::Zero`.
-            let maybe_set_operand_to_zero = |operand: &mut Operand| match &*operand {
-                Operand::Expression(id) if zero_expressions.contains(id) => {
-                    *operand = Operand::Zero;
+            // If an operand refers to a counter or expression that is always
+            // zero, then that operand can be replaced with `CovTerm::Zero`.
+            let maybe_set_operand_to_zero = |operand: &mut CovTerm| {
+                if let CovTerm::Expression(id) = *operand {
+                    assert_operand_expression_is_lower(id);
                 }
-                _ => (),
+
+                if is_zero_term(&self.counters_seen, &zero_expressions, *operand) {
+                    *operand = CovTerm::Zero;
+                }
             };
-            maybe_set_operand_to_zero(&mut expression.lhs);
-            maybe_set_operand_to_zero(&mut expression.rhs);
+            maybe_set_operand_to_zero(&mut lhs);
+            maybe_set_operand_to_zero(&mut rhs);
 
             // Coverage counter values cannot be negative, so if an expression
             // involves subtraction from zero, assume that its RHS must also be zero.
             // (Do this after simplifications that could set the LHS to zero.)
-            if let Expression { lhs: Operand::Zero, op: Op::Subtract, .. } = expression {
-                expression.rhs = Operand::Zero;
+            if lhs == CovTerm::Zero && op == Op::Subtract {
+                rhs = CovTerm::Zero;
             }
 
             // After the above simplifications, if both operands are zero, then
             // we know that this expression is always zero too.
-            if let Expression { lhs: Operand::Zero, rhs: Operand::Zero, .. } = expression {
+            if lhs == CovTerm::Zero && rhs == CovTerm::Zero {
                 zero_expressions.insert(id);
             }
         }
+
+        zero_expressions
+    }
+
+    pub(crate) fn into_finished(self) -> FunctionCoverage<'tcx> {
+        let zero_expressions = self.identify_zero_expressions();
+        let FunctionCoverageCollector { function_coverage_info, is_used, counters_seen, .. } = self;
+
+        FunctionCoverage { function_coverage_info, is_used, counters_seen, zero_expressions }
+    }
+}
+
+pub(crate) struct FunctionCoverage<'tcx> {
+    function_coverage_info: &'tcx FunctionCoverageInfo,
+    is_used: bool,
+
+    counters_seen: BitSet<CounterId>,
+    zero_expressions: ZeroExpressions,
+}
+
+impl<'tcx> FunctionCoverage<'tcx> {
+    /// Returns true for a used (called) function, and false for an unused function.
+    pub(crate) fn is_used(&self) -> bool {
+        self.is_used
     }
 
     /// Return the source hash, generated from the HIR node structure, and used to indicate whether
     /// or not the source code structure changed between different compilations.
     pub fn source_hash(&self) -> u64 {
-        self.source_hash
+        if self.is_used { self.function_coverage_info.function_source_hash } else { 0 }
     }
 
-    /// Generate an array of CounterExpressions, and an iterator over all `Counter`s and their
-    /// associated `Regions` (from which the LLVM-specific `CoverageMapGenerator` will create
-    /// `CounterMappingRegion`s.
-    pub fn get_expressions_and_counter_regions(
-        &self,
-    ) -> (Vec<CounterExpression>, impl Iterator<Item = (Counter, &CodeRegion)>) {
-        assert!(
-            self.source_hash != 0 || !self.is_used,
-            "No counters provided the source_hash for used function: {:?}",
-            self.instance
-        );
-
-        let counter_expressions = self.counter_expressions();
-        // Expression IDs are indices into `self.expressions`, and on the LLVM
-        // side they will be treated as indices into `counter_expressions`, so
-        // the two vectors should correspond 1:1.
-        assert_eq!(self.expressions.len(), counter_expressions.len());
-
-        let counter_regions = self.counter_regions();
-        let expression_regions = self.expression_regions();
-        let unreachable_regions = self.unreachable_regions();
-
-        let counter_regions =
-            counter_regions.chain(expression_regions.into_iter().chain(unreachable_regions));
-        (counter_expressions, counter_regions)
-    }
-
-    fn counter_regions(&self) -> impl Iterator<Item = (Counter, &CodeRegion)> {
-        self.counters
-            .iter_enumerated()
-            // Filter out counter IDs that we never saw during MIR traversal.
-            // This can happen if a counter was optimized out by MIR transforms
-            // (and replaced with `CoverageKind::Unreachable` instead).
-            .filter_map(|(id, maybe_code_regions)| Some((id, maybe_code_regions.as_ref()?)))
-            .flat_map(|(id, code_regions)| {
-                let counter = Counter::counter_value_reference(id);
-                code_regions.iter().map(move |region| (counter, region))
-            })
+    /// Returns an iterator over all filenames used by this function's mappings.
+    pub(crate) fn all_file_names(&self) -> impl Iterator<Item = Symbol> + Captures<'_> {
+        self.function_coverage_info.mappings.iter().map(|mapping| mapping.code_region.file_name)
     }
 
     /// Convert this function's coverage expression data into a form that can be
     /// passed through FFI to LLVM.
-    fn counter_expressions(&self) -> Vec<CounterExpression> {
+    pub(crate) fn counter_expressions(
+        &self,
+    ) -> impl Iterator<Item = CounterExpression> + ExactSizeIterator + Captures<'_> {
         // We know that LLVM will optimize out any unused expressions before
         // producing the final coverage map, so there's no need to do the same
         // thing on the Rust side unless we're confident we can do much better.
         // (See `CounterExpressionsMinimizer` in `CoverageMappingWriter.cpp`.)
 
-        self.expressions
-            .iter()
-            .map(|expression| match expression {
-                None => {
-                    // This expression ID was allocated, but we never saw the
-                    // actual expression, so it must have been optimized out.
-                    // Replace it with a dummy expression, and let LLVM take
-                    // care of omitting it from the expression list.
-                    CounterExpression::DUMMY
-                }
-                &Some(Expression { lhs, op, rhs, .. }) => {
-                    // Convert the operands and operator as normal.
-                    CounterExpression::new(
-                        Counter::from_operand(lhs),
-                        match op {
-                            Op::Add => ExprKind::Add,
-                            Op::Subtract => ExprKind::Subtract,
-                        },
-                        Counter::from_operand(rhs),
-                    )
-                }
-            })
-            .collect::<Vec<_>>()
+        self.function_coverage_info.expressions.iter().map(move |&Expression { lhs, op, rhs }| {
+            CounterExpression {
+                lhs: self.counter_for_term(lhs),
+                kind: match op {
+                    Op::Add => ExprKind::Add,
+                    Op::Subtract => ExprKind::Subtract,
+                },
+                rhs: self.counter_for_term(rhs),
+            }
+        })
     }
 
-    fn expression_regions(&self) -> Vec<(Counter, &CodeRegion)> {
-        // Find all of the expression IDs that weren't optimized out AND have
-        // one or more attached code regions, and return the corresponding
-        // mappings as counter/region pairs.
-        self.expressions
-            .iter_enumerated()
-            .filter_map(|(id, maybe_expression)| {
-                let code_regions = &maybe_expression.as_ref()?.code_regions;
-                Some((id, code_regions))
-            })
-            .flat_map(|(id, code_regions)| {
-                let counter = Counter::expression(id);
-                code_regions.iter().map(move |code_region| (counter, code_region))
-            })
-            .collect::<Vec<_>>()
+    /// Converts this function's coverage mappings into an intermediate form
+    /// that will be used by `mapgen` when preparing for FFI.
+    pub(crate) fn counter_regions(
+        &self,
+    ) -> impl Iterator<Item = (Counter, &CodeRegion)> + ExactSizeIterator {
+        self.function_coverage_info.mappings.iter().map(move |mapping| {
+            let &Mapping { term, ref code_region } = mapping;
+            let counter = self.counter_for_term(term);
+            (counter, code_region)
+        })
     }
 
-    fn unreachable_regions(&self) -> impl Iterator<Item = (Counter, &CodeRegion)> {
-        self.unreachable_regions.iter().map(|region| (Counter::ZERO, region))
+    fn counter_for_term(&self, term: CovTerm) -> Counter {
+        if is_zero_term(&self.counters_seen, &self.zero_expressions, term) {
+            Counter::ZERO
+        } else {
+            Counter::from_term(term)
+        }
+    }
+}
+
+/// Set of expression IDs that are known to always evaluate to zero.
+/// Any mapping or expression operand that refers to these expressions can have
+/// that reference replaced with a constant zero value.
+#[derive(Default)]
+struct ZeroExpressions(FxIndexSet<ExpressionId>);
+
+impl ZeroExpressions {
+    fn insert(&mut self, id: ExpressionId) {
+        self.0.insert(id);
+    }
+
+    fn contains(&self, id: ExpressionId) -> bool {
+        self.0.contains(&id)
+    }
+}
+
+/// Returns `true` if the given term is known to have a value of zero, taking
+/// into account knowledge of which counters are unused and which expressions
+/// are always zero.
+fn is_zero_term(
+    counters_seen: &BitSet<CounterId>,
+    zero_expressions: &ZeroExpressions,
+    term: CovTerm,
+) -> bool {
+    match term {
+        CovTerm::Zero => true,
+        CovTerm::Counter(id) => !counters_seen.contains(id),
+        CovTerm::Expression(id) => zero_expressions.contains(id),
     }
 }

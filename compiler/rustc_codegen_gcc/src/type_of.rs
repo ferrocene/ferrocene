@@ -9,7 +9,7 @@ use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_target::abi::{self, Abi, Align, F32, F64, FieldsShape, Int, Integer, Pointer, PointeeInfo, Size, TyAbiInterface, Variants};
 use rustc_target::abi::call::{CastTarget, FnAbi, Reg};
 
-use crate::abi::{FnAbiGccExt, GccType};
+use crate::abi::{FnAbiGcc, FnAbiGccExt, GccType};
 use crate::context::CodegenCx;
 use crate::type_::struct_fields;
 
@@ -87,7 +87,7 @@ fn uncached_gcc_type<'gcc, 'tcx>(cx: &CodegenCx<'gcc, 'tcx>, layout: TyAndLayout
         // FIXME(eddyb) producing readable type names for trait objects can result
         // in problematically distinct types due to HRTB and subtyping (see #47638).
         // ty::Dynamic(..) |
-        ty::Adt(..) | ty::Closure(..) | ty::Foreign(..) | ty::Generator(..) | ty::Str
+        ty::Adt(..) | ty::Closure(..) | ty::Foreign(..) | ty::Coroutine(..) | ty::Str
             if !cx.sess().fewer_names() =>
         {
             let mut name = with_no_trimmed_paths!(layout.ty.to_string());
@@ -98,10 +98,10 @@ fn uncached_gcc_type<'gcc, 'tcx>(cx: &CodegenCx<'gcc, 'tcx>, layout: TyAndLayout
                     write!(&mut name, "::{}", def.variant(index).name).unwrap();
                 }
             }
-            if let (&ty::Generator(_, _, _), &Variants::Single { index }) =
+            if let (&ty::Coroutine(_, _, _), &Variants::Single { index }) =
                 (layout.ty.kind(), &layout.variants)
             {
-                write!(&mut name, "::{}", ty::GeneratorArgs::variant_name(index)).unwrap();
+                write!(&mut name, "::{}", ty::CoroutineArgs::variant_name(index)).unwrap();
             }
             Some(name)
         }
@@ -372,7 +372,13 @@ impl<'gcc, 'tcx> LayoutTypeMethods<'tcx> for CodegenCx<'gcc, 'tcx> {
     }
 
     fn fn_decl_backend_type(&self, fn_abi: &FnAbi<'tcx, Ty<'tcx>>) -> Type<'gcc> {
-        let (return_type, param_types, variadic, _) = fn_abi.gcc_type(self);
-        self.context.new_function_pointer_type(None, return_type, &param_types, variadic)
+        // FIXME(antoyo): Should we do something with `FnAbiGcc::fn_attributes`?
+        let FnAbiGcc {
+            return_type,
+            arguments_type,
+            is_c_variadic,
+            ..
+        } = fn_abi.gcc_type(self);
+        self.context.new_function_pointer_type(None, return_type, &arguments_type, is_c_variadic)
     }
 }

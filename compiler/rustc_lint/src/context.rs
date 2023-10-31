@@ -31,7 +31,7 @@ use rustc_hir::definitions::{DefPathData, DisambiguatedDefPathData};
 use rustc_middle::middle::privacy::EffectiveVisibilities;
 use rustc_middle::middle::stability;
 use rustc_middle::ty::layout::{LayoutError, LayoutOfHelpers, TyAndLayout};
-use rustc_middle::ty::print::with_no_trimmed_paths;
+use rustc_middle::ty::print::{with_no_trimmed_paths, PrintError};
 use rustc_middle::ty::{self, print::Printer, GenericArg, RegisteredTools, Ty, TyCtxt};
 use rustc_session::config::ExpectedValues;
 use rustc_session::lint::{BuiltinLintDiagnostics, LintExpectationId};
@@ -1200,51 +1200,45 @@ impl<'tcx> LateContext<'tcx> {
     /// }
     /// ```
     pub fn get_def_path(&self, def_id: DefId) -> Vec<Symbol> {
-        pub struct AbsolutePathPrinter<'tcx> {
-            pub tcx: TyCtxt<'tcx>,
+        struct AbsolutePathPrinter<'tcx> {
+            tcx: TyCtxt<'tcx>,
+            path: Vec<Symbol>,
         }
 
         impl<'tcx> Printer<'tcx> for AbsolutePathPrinter<'tcx> {
-            type Error = !;
-
-            type Path = Vec<Symbol>;
-            type Region = ();
-            type Type = ();
-            type DynExistential = ();
-            type Const = ();
-
             fn tcx(&self) -> TyCtxt<'tcx> {
                 self.tcx
             }
 
-            fn print_region(self, _region: ty::Region<'_>) -> Result<Self::Region, Self::Error> {
+            fn print_region(&mut self, _region: ty::Region<'_>) -> Result<(), PrintError> {
                 Ok(())
             }
 
-            fn print_type(self, _ty: Ty<'tcx>) -> Result<Self::Type, Self::Error> {
+            fn print_type(&mut self, _ty: Ty<'tcx>) -> Result<(), PrintError> {
                 Ok(())
             }
 
             fn print_dyn_existential(
-                self,
+                &mut self,
                 _predicates: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
-            ) -> Result<Self::DynExistential, Self::Error> {
+            ) -> Result<(), PrintError> {
                 Ok(())
             }
 
-            fn print_const(self, _ct: ty::Const<'tcx>) -> Result<Self::Const, Self::Error> {
+            fn print_const(&mut self, _ct: ty::Const<'tcx>) -> Result<(), PrintError> {
                 Ok(())
             }
 
-            fn path_crate(self, cnum: CrateNum) -> Result<Self::Path, Self::Error> {
-                Ok(vec![self.tcx.crate_name(cnum)])
+            fn path_crate(&mut self, cnum: CrateNum) -> Result<(), PrintError> {
+                self.path = vec![self.tcx.crate_name(cnum)];
+                Ok(())
             }
 
             fn path_qualified(
-                self,
+                &mut self,
                 self_ty: Ty<'tcx>,
                 trait_ref: Option<ty::TraitRef<'tcx>>,
-            ) -> Result<Self::Path, Self::Error> {
+            ) -> Result<(), PrintError> {
                 if trait_ref.is_none() {
                     if let ty::Adt(def, args) = self_ty.kind() {
                         return self.print_def_path(def.did(), args);
@@ -1253,24 +1247,25 @@ impl<'tcx> LateContext<'tcx> {
 
                 // This shouldn't ever be needed, but just in case:
                 with_no_trimmed_paths!({
-                    Ok(vec![match trait_ref {
+                    self.path = vec![match trait_ref {
                         Some(trait_ref) => Symbol::intern(&format!("{trait_ref:?}")),
                         None => Symbol::intern(&format!("<{self_ty}>")),
-                    }])
+                    }];
+                    Ok(())
                 })
             }
 
             fn path_append_impl(
-                self,
-                print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 _disambiguated_data: &DisambiguatedDefPathData,
                 self_ty: Ty<'tcx>,
                 trait_ref: Option<ty::TraitRef<'tcx>>,
-            ) -> Result<Self::Path, Self::Error> {
-                let mut path = print_prefix(self)?;
+            ) -> Result<(), PrintError> {
+                print_prefix(self)?;
 
                 // This shouldn't ever be needed, but just in case:
-                path.push(match trait_ref {
+                self.path.push(match trait_ref {
                     Some(trait_ref) => {
                         with_no_trimmed_paths!(Symbol::intern(&format!(
                             "<impl {} for {}>",
@@ -1283,35 +1278,37 @@ impl<'tcx> LateContext<'tcx> {
                     }
                 });
 
-                Ok(path)
+                Ok(())
             }
 
             fn path_append(
-                self,
-                print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 disambiguated_data: &DisambiguatedDefPathData,
-            ) -> Result<Self::Path, Self::Error> {
-                let mut path = print_prefix(self)?;
+            ) -> Result<(), PrintError> {
+                print_prefix(self)?;
 
                 // Skip `::{{extern}}` blocks and `::{{constructor}}` on tuple/unit structs.
                 if let DefPathData::ForeignMod | DefPathData::Ctor = disambiguated_data.data {
-                    return Ok(path);
+                    return Ok(());
                 }
 
-                path.push(Symbol::intern(&disambiguated_data.data.to_string()));
-                Ok(path)
+                self.path.push(Symbol::intern(&disambiguated_data.data.to_string()));
+                Ok(())
             }
 
             fn path_generic_args(
-                self,
-                print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 _args: &[GenericArg<'tcx>],
-            ) -> Result<Self::Path, Self::Error> {
+            ) -> Result<(), PrintError> {
                 print_prefix(self)
             }
         }
 
-        AbsolutePathPrinter { tcx: self.tcx }.print_def_path(def_id, &[]).unwrap()
+        let mut printer = AbsolutePathPrinter { tcx: self.tcx, path: vec![] };
+        printer.print_def_path(def_id, &[]).unwrap();
+        printer.path
     }
 
     /// Returns the associated type `name` for `self_ty` as an implementation of `trait_id`.

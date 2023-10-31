@@ -15,6 +15,7 @@ use crate::json;
 use crate::read2::{read2_abbreviated, Truncated};
 use crate::util::{add_dylib_path, dylib_env_var, logv, PathBufExt};
 use crate::ColorConfig;
+use miropt_test_tools::{files_for_miropt_test, MiroptTest, MiroptTestFile};
 use regex::{Captures, Regex};
 use rustfix::{apply_suggestions, get_suggestions_from_json, Filter};
 
@@ -229,6 +230,7 @@ enum Emit {
     None,
     Metadata,
     LlvmIr,
+    Mir,
     Asm,
     LinkArgsAsm,
 }
@@ -2468,7 +2470,7 @@ impl<'test> TestCx<'test> {
             }
             CoverageMap => {
                 rustc.arg("-Cinstrument-coverage");
-                // These tests only compile to MIR, so they don't need the
+                // These tests only compile to LLVM IR, so they don't need the
                 // profiler runtime to be present.
                 rustc.arg("-Zno-profiler-runtime");
                 // Coverage mappings are sensitive to MIR optimizations, and
@@ -2505,6 +2507,9 @@ impl<'test> TestCx<'test> {
             }
             Emit::LlvmIr => {
                 rustc.args(&["--emit", "llvm-ir"]);
+            }
+            Emit::Mir => {
+                rustc.args(&["--emit", "mir"]);
             }
             Emit::Asm => {
                 rustc.args(&["--emit", "asm"]);
@@ -3541,10 +3546,6 @@ impl<'test> TestCx<'test> {
             cmd.env("RUSTDOC", cwd.join(rustdoc));
         }
 
-        if let Some(ref rust_demangler) = self.config.rust_demangler_path {
-            cmd.env("RUST_DEMANGLER", cwd.join(rust_demangler));
-        }
-
         if let Some(ref node) = self.config.nodejs {
             cmd.env("NODE", node);
         }
@@ -3984,14 +3985,20 @@ impl<'test> TestCx<'test> {
     fn run_mir_opt_test(&self) {
         let pm = self.pass_mode();
         let should_run = self.should_run(pm);
-        let emit_metadata = self.should_emit_metadata(pm);
-        let passes = self.get_passes();
 
-        let proc_res = self.compile_test_with_passes(should_run, emit_metadata, passes);
-        self.check_mir_dump();
+        let mut test_info = files_for_miropt_test(
+            &self.testpaths.file,
+            self.config.get_pointer_width(),
+            self.config.target_cfg().panic.for_miropt_test_tools(),
+        );
+
+        let passes = std::mem::take(&mut test_info.passes);
+
+        let proc_res = self.compile_test_with_passes(should_run, Emit::Mir, passes);
         if !proc_res.status.success() {
             self.fatal_proc_rec("compilation failed!", &proc_res);
         }
+        self.check_mir_dump(test_info);
 
         if let WillExecute::Yes = should_run {
             let proc_res = self.exec_compiled_test();
@@ -4002,37 +4009,12 @@ impl<'test> TestCx<'test> {
         }
     }
 
-    fn get_passes(&self) -> Vec<String> {
-        let files = miropt_test_tools::files_for_miropt_test(
-            &self.testpaths.file,
-            self.config.get_pointer_width(),
-            self.config.target_cfg().panic.for_miropt_test_tools(),
-        );
-
-        let mut out = Vec::new();
-
-        for miropt_test_tools::MiroptTestFiles {
-            from_file: _,
-            to_file: _,
-            expected_file: _,
-            passes,
-        } in files
-        {
-            out.extend(passes);
-        }
-        out
-    }
-
-    fn check_mir_dump(&self) {
+    fn check_mir_dump(&self, test_info: MiroptTest) {
         let test_dir = self.testpaths.file.parent().unwrap();
         let test_crate =
             self.testpaths.file.file_stem().unwrap().to_str().unwrap().replace("-", "_");
 
-        let suffix = miropt_test_tools::output_file_suffix(
-            &self.testpaths.file,
-            self.config.get_pointer_width(),
-            self.config.target_cfg().panic.for_miropt_test_tools(),
-        );
+        let MiroptTest { run_filecheck, suffix, files, passes: _ } = test_info;
 
         if self.config.bless {
             for e in
@@ -4047,14 +4029,7 @@ impl<'test> TestCx<'test> {
             }
         }
 
-        let files = miropt_test_tools::files_for_miropt_test(
-            &self.testpaths.file,
-            self.config.get_pointer_width(),
-            self.config.target_cfg().panic.for_miropt_test_tools(),
-        );
-        for miropt_test_tools::MiroptTestFiles { from_file, to_file, expected_file, passes: _ } in
-            files
-        {
+        for MiroptTestFile { from_file, to_file, expected_file } in files {
             let dumped_string = if let Some(after) = to_file {
                 self.diff_mir_files(from_file.into(), after.into())
             } else {
@@ -4093,6 +4068,14 @@ impl<'test> TestCx<'test> {
                         expected_file.display()
                     );
                 }
+            }
+        }
+
+        if run_filecheck {
+            let output_path = self.output_base_name().with_extension("mir");
+            let proc_res = self.verify_with_filecheck(&output_path);
+            if !proc_res.status.success() {
+                self.fatal_proc_rec("verification with 'FileCheck' failed", &proc_res);
             }
         }
     }

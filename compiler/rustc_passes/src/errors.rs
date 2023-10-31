@@ -558,9 +558,16 @@ pub struct ReprIdent {
     pub span: Span,
 }
 
+#[derive(Diagnostic)]
+#[diag(passes_repr_conflicting, code = "E0566")]
+pub struct ReprConflicting {
+    #[primary_span]
+    pub hint_spans: Vec<Span>,
+}
+
 #[derive(LintDiagnostic)]
 #[diag(passes_repr_conflicting, code = "E0566")]
-pub struct ReprConflicting;
+pub struct ReprConflictingLint;
 
 #[derive(Diagnostic)]
 #[diag(passes_used_static)]
@@ -849,8 +856,15 @@ pub struct UnknownLangItem {
 
 pub struct InvalidAttrAtCrateLevel {
     pub span: Span,
-    pub snippet: Option<String>,
+    pub sugg_span: Option<Span>,
     pub name: Symbol,
+    pub item: Option<ItemFollowingInnerAttr>,
+}
+
+#[derive(Clone, Copy)]
+pub struct ItemFollowingInnerAttr {
+    pub span: Span,
+    pub kind: &'static str,
 }
 
 impl IntoDiagnostic<'_> for InvalidAttrAtCrateLevel {
@@ -864,14 +878,17 @@ impl IntoDiagnostic<'_> for InvalidAttrAtCrateLevel {
         diag.set_arg("name", self.name);
         // Only emit an error with a suggestion if we can create a string out
         // of the attribute span
-        if let Some(src) = self.snippet {
-            let replacement = src.replace("#!", "#");
+        if let Some(span) = self.sugg_span {
             diag.span_suggestion_verbose(
-                self.span,
+                span,
                 fluent::passes_suggestion,
-                replacement,
+                String::new(),
                 rustc_errors::Applicability::MachineApplicable,
             );
+        }
+        if let Some(item) = self.item {
+            diag.set_arg("kind", item.kind);
+            diag.span_label(item.span, fluent::passes_invalid_attr_at_crate_level_item);
         }
         diag
     }
@@ -1498,16 +1515,6 @@ pub struct UselessStability {
 }
 
 #[derive(Diagnostic)]
-#[diag(passes_invalid_stability)]
-pub struct InvalidStability {
-    #[primary_span]
-    #[label]
-    pub span: Span,
-    #[label(passes_item)]
-    pub item_sp: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag(passes_cannot_stabilize_deprecated)]
 pub struct CannotStabilizeDeprecated {
     #[primary_span]
@@ -1761,15 +1768,24 @@ pub struct UnusedVariableTryPrefix {
     #[subdiagnostic]
     pub string_interp: Vec<UnusedVariableStringInterp>,
     #[subdiagnostic]
-    pub sugg: UnusedVariableTryPrefixSugg,
+    pub sugg: UnusedVariableSugg,
+    pub name: String,
 }
 
 #[derive(Subdiagnostic)]
-#[multipart_suggestion(passes_suggestion, applicability = "machine-applicable")]
-pub struct UnusedVariableTryPrefixSugg {
-    #[suggestion_part(code = "_{name}")]
-    pub spans: Vec<Span>,
-    pub name: String,
+pub enum UnusedVariableSugg {
+    #[multipart_suggestion(passes_suggestion, applicability = "machine-applicable")]
+    TryPrefixSugg {
+        #[suggestion_part(code = "_{name}")]
+        spans: Vec<Span>,
+        name: String,
+    },
+    #[help(passes_unused_variable_args_in_macro)]
+    NoSugg {
+        #[primary_span]
+        span: Span,
+        name: String,
+    },
 }
 
 pub struct UnusedVariableStringInterp {

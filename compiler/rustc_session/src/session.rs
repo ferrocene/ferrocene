@@ -1,7 +1,8 @@
 use crate::code_stats::CodeStats;
 pub use crate::code_stats::{DataTypeKind, FieldInfo, FieldKind, SizeKind, VariantInfo};
 use crate::config::{
-    self, CrateType, InstrumentCoverage, OptLevel, OutFileName, OutputType, SwitchWithOptPath,
+    self, CrateType, InstrumentCoverage, OptLevel, OutFileName, OutputType,
+    RemapPathScopeComponents, SwitchWithOptPath,
 };
 use crate::config::{ErrorOutputType, Input};
 use crate::errors;
@@ -44,7 +45,7 @@ use std::fmt;
 use std::ops::{Div, Mul};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::sync::Arc;
+use std::sync::{atomic::AtomicBool, Arc};
 use std::time::Duration;
 
 pub struct OptimizationFuel {
@@ -201,6 +202,12 @@ pub struct Session {
     /// The version of the rustc process, possibly including a commit hash and description.
     pub cfg_version: &'static str,
 
+    /// The inner atomic value is set to true when a feature marked as `internal` is
+    /// enabled. Makes it so that "please report a bug" is hidden, as ICEs with
+    /// internal features are wontfix, and they are usually the cause of the ICEs.
+    /// None signifies that this is not tracked.
+    pub using_internal_features: Arc<AtomicBool>,
+
     /// All commandline args used to invoke the compiler, with @file args fully expanded.
     /// This will only be used within debug info, e.g. in the pdb file on windows
     /// This is mainly useful for other tools that reads that debuginfo to figure out
@@ -254,7 +261,11 @@ impl Session {
 
     pub fn local_crate_source_file(&self) -> Option<PathBuf> {
         let path = self.io.input.opt_path()?;
-        Some(self.opts.file_path_mapping().map_prefix(path).0.into_owned())
+        if self.should_prefer_remapped_for_codegen() {
+            Some(self.opts.file_path_mapping().map_prefix(path).0.into_owned())
+        } else {
+            Some(path.to_path_buf())
+        }
     }
 
     fn check_miri_unleashed_features(&self) {
@@ -695,6 +706,10 @@ impl Session {
 
     pub fn instrument_coverage(&self) -> bool {
         self.opts.cg.instrument_coverage() != InstrumentCoverage::Off
+    }
+
+    pub fn instrument_coverage_branch(&self) -> bool {
+        self.opts.cg.instrument_coverage() == InstrumentCoverage::Branch
     }
 
     pub fn instrument_coverage_except_unused_generics(&self) -> bool {
@@ -1243,6 +1258,53 @@ impl Session {
     pub fn link_dead_code(&self) -> bool {
         self.opts.cg.link_dead_code.unwrap_or(false)
     }
+
+    pub fn should_prefer_remapped_for_codegen(&self) -> bool {
+        // bail out, if any of the requested crate types aren't:
+        // "compiled executables or libraries"
+        for crate_type in &self.opts.crate_types {
+            match crate_type {
+                CrateType::Executable
+                | CrateType::Dylib
+                | CrateType::Rlib
+                | CrateType::Staticlib
+                | CrateType::Cdylib => continue,
+                CrateType::ProcMacro => return false,
+            }
+        }
+
+        let has_split_debuginfo = match self.split_debuginfo() {
+            SplitDebuginfo::Off => false,
+            SplitDebuginfo::Packed => true,
+            SplitDebuginfo::Unpacked => true,
+        };
+
+        let remap_path_scopes = &self.opts.unstable_opts.remap_path_scope;
+        let mut prefer_remapped = false;
+
+        if remap_path_scopes.contains(RemapPathScopeComponents::UNSPLIT_DEBUGINFO) {
+            prefer_remapped |= !has_split_debuginfo;
+        }
+
+        if remap_path_scopes.contains(RemapPathScopeComponents::SPLIT_DEBUGINFO) {
+            prefer_remapped |= has_split_debuginfo;
+        }
+
+        prefer_remapped
+    }
+
+    pub fn should_prefer_remapped_for_split_debuginfo_paths(&self) -> bool {
+        let has_split_debuginfo = match self.split_debuginfo() {
+            SplitDebuginfo::Off => false,
+            SplitDebuginfo::Packed | SplitDebuginfo::Unpacked => true,
+        };
+
+        self.opts
+            .unstable_opts
+            .remap_path_scope
+            .contains(RemapPathScopeComponents::SPLIT_DEBUGINFO_PATH)
+            && has_split_debuginfo
+    }
 }
 
 // JUSTIFICATION: part of session construction
@@ -1333,6 +1395,7 @@ pub fn build_session(
     target_override: Option<Target>,
     cfg_version: &'static str,
     ice_file: Option<PathBuf>,
+    using_internal_features: Arc<AtomicBool>,
     expanded_args: Vec<String>,
 ) -> Session {
     // FIXME: This is not general enough to make the warning lint completely override
@@ -1469,6 +1532,7 @@ pub fn build_session(
         target_features: Default::default(),
         unstable_target_features: Default::default(),
         cfg_version,
+        using_internal_features,
         expanded_args,
     };
 
@@ -1751,4 +1815,54 @@ fn mk_emitter(output: ErrorOutputType) -> Box<DynEmitter> {
         )),
     };
     emitter
+}
+
+pub trait RemapFileNameExt {
+    type Output<'a>
+    where
+        Self: 'a;
+
+    fn for_scope(&self, sess: &Session, scopes: RemapPathScopeComponents) -> Self::Output<'_>;
+
+    fn for_codegen(&self, sess: &Session) -> Self::Output<'_>;
+}
+
+impl RemapFileNameExt for rustc_span::FileName {
+    type Output<'a> = rustc_span::FileNameDisplay<'a>;
+
+    fn for_scope(&self, sess: &Session, scopes: RemapPathScopeComponents) -> Self::Output<'_> {
+        if sess.opts.unstable_opts.remap_path_scope.contains(scopes) {
+            self.prefer_remapped_unconditionaly()
+        } else {
+            self.prefer_local()
+        }
+    }
+
+    fn for_codegen(&self, sess: &Session) -> Self::Output<'_> {
+        if sess.should_prefer_remapped_for_codegen() {
+            self.prefer_remapped_unconditionaly()
+        } else {
+            self.prefer_local()
+        }
+    }
+}
+
+impl RemapFileNameExt for rustc_span::RealFileName {
+    type Output<'a> = &'a Path;
+
+    fn for_scope(&self, sess: &Session, scopes: RemapPathScopeComponents) -> Self::Output<'_> {
+        if sess.opts.unstable_opts.remap_path_scope.contains(scopes) {
+            self.remapped_path_if_available()
+        } else {
+            self.local_path_if_available()
+        }
+    }
+
+    fn for_codegen(&self, sess: &Session) -> Self::Output<'_> {
+        if sess.should_prefer_remapped_for_codegen() {
+            self.remapped_path_if_available()
+        } else {
+            self.local_path_if_available()
+        }
+    }
 }

@@ -37,7 +37,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
         let this = self.eval_context_mut();
         let tcx = this.tcx;
 
-        let flags = if let Some(flags_op) = args.get(0) {
+        let flags = if let Some(flags_op) = args.first() {
             this.read_scalar(flags_op)?.to_u64()?
         } else {
             throw_ub_format!("expected at least 1 argument")
@@ -135,7 +135,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             this.tcx.sess.source_map().lookup_char_pos(BytePos(offset.bytes().try_into().unwrap()));
 
         let name = fn_instance.to_string();
-        let filename = lo.file.name.prefer_remapped().to_string();
+        let filename = lo.file.name.prefer_remapped_unconditionaly().to_string();
 
         Ok((fn_instance, lo, name, filename))
     }

@@ -898,7 +898,10 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for BoundVarReplacer<'_, 'tcx> {
                 if debruijn.as_usize() + 1
                     > self.current_index.as_usize() + self.universe_indices.len() =>
             {
-                bug!("Bound vars outside of `self.universe_indices`");
+                bug!(
+                    "Bound vars {r:#?} outside of `self.universe_indices`: {:#?}",
+                    self.universe_indices
+                );
             }
             ty::ReLateBound(debruijn, br) if debruijn >= self.current_index => {
                 let universe = self.universe_for(debruijn);
@@ -916,7 +919,10 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for BoundVarReplacer<'_, 'tcx> {
                 if debruijn.as_usize() + 1
                     > self.current_index.as_usize() + self.universe_indices.len() =>
             {
-                bug!("Bound vars outside of `self.universe_indices`");
+                bug!(
+                    "Bound vars {t:#?} outside of `self.universe_indices`: {:#?}",
+                    self.universe_indices
+                );
             }
             ty::Bound(debruijn, bound_ty) if debruijn >= self.current_index => {
                 let universe = self.universe_for(debruijn);
@@ -935,7 +941,10 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for BoundVarReplacer<'_, 'tcx> {
                 if debruijn.as_usize() + 1
                     > self.current_index.as_usize() + self.universe_indices.len() =>
             {
-                bug!("Bound vars outside of `self.universe_indices`");
+                bug!(
+                    "Bound vars {ct:#?} outside of `self.universe_indices`: {:#?}",
+                    self.universe_indices
+                );
             }
             ty::ConstKind::Bound(debruijn, bound_const) if debruijn >= self.current_index => {
                 let universe = self.universe_for(debruijn);
@@ -1789,7 +1798,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                 let self_ty = selcx.infcx.shallow_resolve(obligation.predicate.self_ty());
 
                 let lang_items = selcx.tcx().lang_items();
-                if [lang_items.gen_trait(), lang_items.future_trait()].contains(&Some(trait_ref.def_id))
+                if [lang_items.gen_trait(), lang_items.future_trait(), lang_items.iterator_trait()].contains(&Some(trait_ref.def_id))
                     || selcx.tcx().fn_trait_kind_from_def_id(trait_ref.def_id).is_some()
                 {
                     true
@@ -1811,8 +1820,8 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::FnPtr(..)
                         | ty::Dynamic(..)
                         | ty::Closure(..)
-                        | ty::Generator(..)
-                        | ty::GeneratorWitness(..)
+                        | ty::Coroutine(..)
+                        | ty::CoroutineWitness(..)
                         | ty::Never
                         | ty::Tuple(..)
                         // Integers and floats always have `u8` as their discriminant.
@@ -1860,8 +1869,8 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::FnPtr(..)
                         | ty::Dynamic(..)
                         | ty::Closure(..)
-                        | ty::Generator(..)
-                        | ty::GeneratorWitness(..)
+                        | ty::Coroutine(..)
+                        | ty::CoroutineWitness(..)
                         | ty::Never
                         // Extern types have unit metadata, according to RFC 2850
                         | ty::Foreign(_)
@@ -2003,9 +2012,11 @@ fn confirm_select_candidate<'cx, 'tcx>(
             let trait_def_id = obligation.predicate.trait_def_id(selcx.tcx());
             let lang_items = selcx.tcx().lang_items();
             if lang_items.gen_trait() == Some(trait_def_id) {
-                confirm_generator_candidate(selcx, obligation, data)
+                confirm_coroutine_candidate(selcx, obligation, data)
             } else if lang_items.future_trait() == Some(trait_def_id) {
                 confirm_future_candidate(selcx, obligation, data)
+            } else if lang_items.iterator_trait() == Some(trait_def_id) {
+                confirm_iterator_candidate(selcx, obligation, data)
             } else if selcx.tcx().fn_trait_kind_from_def_id(trait_def_id).is_some() {
                 if obligation.predicate.self_ty().is_closure() {
                     confirm_closure_candidate(selcx, obligation, data)
@@ -2030,17 +2041,17 @@ fn confirm_select_candidate<'cx, 'tcx>(
     }
 }
 
-fn confirm_generator_candidate<'cx, 'tcx>(
+fn confirm_coroutine_candidate<'cx, 'tcx>(
     selcx: &mut SelectionContext<'cx, 'tcx>,
     obligation: &ProjectionTyObligation<'tcx>,
     nested: Vec<PredicateObligation<'tcx>>,
 ) -> Progress<'tcx> {
-    let ty::Generator(_, args, _) =
+    let ty::Coroutine(_, args, _) =
         selcx.infcx.shallow_resolve(obligation.predicate.self_ty()).kind()
     else {
         unreachable!()
     };
-    let gen_sig = args.as_generator().poly_sig();
+    let gen_sig = args.as_coroutine().poly_sig();
     let Normalized { value: gen_sig, obligations } = normalize_with_depth(
         selcx,
         obligation.param_env,
@@ -2049,13 +2060,13 @@ fn confirm_generator_candidate<'cx, 'tcx>(
         gen_sig,
     );
 
-    debug!(?obligation, ?gen_sig, ?obligations, "confirm_generator_candidate");
+    debug!(?obligation, ?gen_sig, ?obligations, "confirm_coroutine_candidate");
 
     let tcx = selcx.tcx();
 
-    let gen_def_id = tcx.require_lang_item(LangItem::Generator, None);
+    let gen_def_id = tcx.require_lang_item(LangItem::Coroutine, None);
 
-    let predicate = super::util::generator_trait_ref_and_outputs(
+    let predicate = super::util::coroutine_trait_ref_and_outputs(
         tcx,
         gen_def_id,
         obligation.predicate.self_ty(),
@@ -2072,7 +2083,7 @@ fn confirm_generator_candidate<'cx, 'tcx>(
         };
 
         ty::ProjectionPredicate {
-            projection_ty: tcx.mk_alias_ty(obligation.predicate.def_id, trait_ref.args),
+            projection_ty: ty::AliasTy::new(tcx, obligation.predicate.def_id, trait_ref.args),
             term: ty.into(),
         }
     });
@@ -2087,12 +2098,12 @@ fn confirm_future_candidate<'cx, 'tcx>(
     obligation: &ProjectionTyObligation<'tcx>,
     nested: Vec<PredicateObligation<'tcx>>,
 ) -> Progress<'tcx> {
-    let ty::Generator(_, args, _) =
+    let ty::Coroutine(_, args, _) =
         selcx.infcx.shallow_resolve(obligation.predicate.self_ty()).kind()
     else {
         unreachable!()
     };
-    let gen_sig = args.as_generator().poly_sig();
+    let gen_sig = args.as_coroutine().poly_sig();
     let Normalized { value: gen_sig, obligations } = normalize_with_depth(
         selcx,
         obligation.param_env,
@@ -2116,8 +2127,52 @@ fn confirm_future_candidate<'cx, 'tcx>(
         debug_assert_eq!(tcx.associated_item(obligation.predicate.def_id).name, sym::Output);
 
         ty::ProjectionPredicate {
-            projection_ty: tcx.mk_alias_ty(obligation.predicate.def_id, trait_ref.args),
+            projection_ty: ty::AliasTy::new(tcx, obligation.predicate.def_id, trait_ref.args),
             term: return_ty.into(),
+        }
+    });
+
+    confirm_param_env_candidate(selcx, obligation, predicate, false)
+        .with_addl_obligations(nested)
+        .with_addl_obligations(obligations)
+}
+
+fn confirm_iterator_candidate<'cx, 'tcx>(
+    selcx: &mut SelectionContext<'cx, 'tcx>,
+    obligation: &ProjectionTyObligation<'tcx>,
+    nested: Vec<PredicateObligation<'tcx>>,
+) -> Progress<'tcx> {
+    let ty::Coroutine(_, args, _) =
+        selcx.infcx.shallow_resolve(obligation.predicate.self_ty()).kind()
+    else {
+        unreachable!()
+    };
+    let gen_sig = args.as_coroutine().poly_sig();
+    let Normalized { value: gen_sig, obligations } = normalize_with_depth(
+        selcx,
+        obligation.param_env,
+        obligation.cause.clone(),
+        obligation.recursion_depth + 1,
+        gen_sig,
+    );
+
+    debug!(?obligation, ?gen_sig, ?obligations, "confirm_future_candidate");
+
+    let tcx = selcx.tcx();
+    let iter_def_id = tcx.require_lang_item(LangItem::Iterator, None);
+
+    let predicate = super::util::iterator_trait_ref_and_outputs(
+        tcx,
+        iter_def_id,
+        obligation.predicate.self_ty(),
+        gen_sig,
+    )
+    .map_bound(|(trait_ref, yield_ty)| {
+        debug_assert_eq!(tcx.associated_item(obligation.predicate.def_id).name, sym::Item);
+
+        ty::ProjectionPredicate {
+            projection_ty: ty::AliasTy::new(tcx, obligation.predicate.def_id, trait_ref.args),
+            term: yield_ty.into(),
         }
     });
 
@@ -2172,7 +2227,7 @@ fn confirm_builtin_candidate<'cx, 'tcx>(
     };
 
     let predicate =
-        ty::ProjectionPredicate { projection_ty: tcx.mk_alias_ty(item_def_id, args), term };
+        ty::ProjectionPredicate { projection_ty: ty::AliasTy::new(tcx, item_def_id, args), term };
 
     confirm_param_env_candidate(selcx, obligation, ty::Binder::dummy(predicate), false)
         .with_addl_obligations(obligations)
@@ -2245,7 +2300,7 @@ fn confirm_callable_candidate<'cx, 'tcx>(
         flag,
     )
     .map_bound(|(trait_ref, ret_type)| ty::ProjectionPredicate {
-        projection_ty: tcx.mk_alias_ty(fn_once_output_def_id, trait_ref.args),
+        projection_ty: ty::AliasTy::new(tcx, fn_once_output_def_id, trait_ref.args),
         term: ret_type.into(),
     });
 

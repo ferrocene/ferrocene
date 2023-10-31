@@ -14,14 +14,11 @@
 //! At present, however, we do run collection across all items in the
 //! crate as a kind of pass. This should eventually be factored away.
 
-use crate::astconv::AstConv;
-use crate::check::intrinsic::intrinsic_operation_unsafety;
-use crate::errors;
-use hir::def::DefKind;
 use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_errors::{Applicability, DiagnosticBuilder, ErrorGuaranteed, StashKey};
 use rustc_hir as hir;
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{GenericParamKind, Node};
@@ -39,6 +36,11 @@ use rustc_trait_selection::traits::error_reporting::suggestions::NextTypeParamNa
 use rustc_trait_selection::traits::ObligationCtxt;
 use std::iter;
 use std::ops::Bound;
+
+use crate::astconv::AstConv;
+use crate::check::intrinsic::intrinsic_operation_unsafety;
+use crate::errors;
+pub use type_of::test_opaque_hidden_types;
 
 mod generics_of;
 mod item_bounds;
@@ -76,7 +78,7 @@ pub fn provide(providers: &mut Providers) {
         fn_sig,
         impl_trait_ref,
         impl_polarity,
-        generator_kind,
+        coroutine_kind,
         collect_mod_item_types,
         is_type_alias_impl_trait,
         ..*providers
@@ -1548,12 +1550,12 @@ fn compute_sig_of_foreign_fn_decl<'tcx>(
     fty
 }
 
-fn generator_kind(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<hir::GeneratorKind> {
+fn coroutine_kind(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<hir::CoroutineKind> {
     match tcx.hir().get_by_def_id(def_id) {
         Node::Expr(&rustc_hir::Expr {
             kind: rustc_hir::ExprKind::Closure(&rustc_hir::Closure { body, .. }),
             ..
-        }) => tcx.hir().body(body).generator_kind(),
+        }) => tcx.hir().body(body).coroutine_kind(),
         _ => None,
     }
 }

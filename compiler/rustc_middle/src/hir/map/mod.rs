@@ -6,7 +6,7 @@ use rustc_ast as ast;
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::svh::Svh;
-use rustc_data_structures::sync::{par_for_each_in, DynSend, DynSync};
+use rustc_data_structures::sync::{par_for_each_in, try_par_for_each_in, DynSend, DynSync};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId, LOCAL_CRATE};
 use rustc_hir::definitions::{DefKey, DefPath, DefPathData, DefPathHash};
@@ -16,7 +16,7 @@ use rustc_index::Idx;
 use rustc_middle::hir::nested_filter;
 use rustc_span::def_id::StableCrateId;
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::Span;
+use rustc_span::{ErrorGuaranteed, Span};
 use rustc_target::spec::abi::Abi;
 
 #[inline]
@@ -240,7 +240,7 @@ impl<'hir> Map<'hir> {
             Node::Field(_) => DefKind::Field,
             Node::Expr(expr) => match expr.kind {
                 ExprKind::Closure(Closure { movability: None, .. }) => DefKind::Closure,
-                ExprKind::Closure(Closure { movability: Some(_), .. }) => DefKind::Generator,
+                ExprKind::Closure(Closure { movability: Some(_), .. }) => DefKind::Coroutine,
                 _ => bug!("def_kind: unsupported node: {}", self.node_to_string(hir_id)),
             },
             Node::GenericParam(param) => match param.kind {
@@ -445,7 +445,7 @@ impl<'hir> Map<'hir> {
             }
             DefKind::InlineConst => BodyOwnerKind::Const { inline: true },
             DefKind::Ctor(..) | DefKind::Fn | DefKind::AssocFn => BodyOwnerKind::Fn,
-            DefKind::Closure | DefKind::Generator => BodyOwnerKind::Closure,
+            DefKind::Closure | DefKind::Coroutine => BodyOwnerKind::Closure,
             DefKind::Static(mt) => BodyOwnerKind::Static(mt),
             dk => bug!("{:?} is not a body node: {:?}", def_id, dk),
         }
@@ -628,6 +628,17 @@ impl<'hir> Map<'hir> {
     pub fn par_for_each_module(self, f: impl Fn(LocalModDefId) + DynSend + DynSync) {
         let crate_items = self.tcx.hir_crate_items(());
         par_for_each_in(&crate_items.submodules[..], |module| {
+            f(LocalModDefId::new_unchecked(module.def_id))
+        })
+    }
+
+    #[inline]
+    pub fn try_par_for_each_module(
+        self,
+        f: impl Fn(LocalModDefId) -> Result<(), ErrorGuaranteed> + DynSend + DynSync,
+    ) -> Result<(), ErrorGuaranteed> {
+        let crate_items = self.tcx.hir_crate_items(());
+        try_par_for_each_in(&crate_items.submodules[..], |module| {
             f(LocalModDefId::new_unchecked(module.def_id))
         })
     }

@@ -301,8 +301,8 @@ pub enum ObligationCauseCode<'tcx> {
     InlineAsmSized,
     /// Captured closure type must be `Sized`.
     SizedClosureCapture(LocalDefId),
-    /// Types live across generator yields must be `Sized`.
-    SizedGeneratorInterior(LocalDefId),
+    /// Types live across coroutine yields must be `Sized`.
+    SizedCoroutineInterior(LocalDefId),
     /// `[expr; N]` requires `type_of(expr): Copy`.
     RepeatElementCopy {
         /// If element is a `const fn` we display a help message suggesting to move the
@@ -541,6 +541,7 @@ pub struct MatchExpressionArmCause<'tcx> {
     pub prior_arm_ty: Ty<'tcx>,
     pub prior_arm_span: Span,
     pub scrut_span: Span,
+    pub scrut_hir_id: hir::HirId,
     pub source: hir::MatchSource,
     pub prior_arms: Vec<Span>,
     pub opt_suggest_box_span: Option<Span>,

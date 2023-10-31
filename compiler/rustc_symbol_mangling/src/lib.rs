@@ -103,8 +103,6 @@ extern crate rustc_middle;
 #[macro_use]
 extern crate tracing;
 
-use rustc_errors::{DiagnosticMessage, SubdiagnosticMessage};
-use rustc_fluent_macro::fluent_messages;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, LOCAL_CRATE};
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
@@ -120,8 +118,6 @@ mod v0;
 pub mod errors;
 pub mod test;
 pub mod typeid;
-
-fluent_messages! { "../messages.ftl" }
 
 /// This function computes the symbol name for the given `instance` and the
 /// given instantiating crate. That is, if you know that instance X is
@@ -238,7 +234,7 @@ fn compute_symbol_name<'tcx>(
     // and we want to be sure to avoid any symbol conflicts here.
     let is_globally_shared_function = matches!(
         tcx.def_kind(instance.def_id()),
-        DefKind::Fn | DefKind::AssocFn | DefKind::Closure | DefKind::Generator | DefKind::Ctor(..)
+        DefKind::Fn | DefKind::AssocFn | DefKind::Closure | DefKind::Coroutine | DefKind::Ctor(..)
     ) && matches!(
         MonoItem::Fn(instance).instantiation_mode(tcx),
         InstantiationMode::GloballyShared { may_conflict: true }

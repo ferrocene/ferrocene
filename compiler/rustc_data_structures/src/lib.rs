@@ -6,46 +6,43 @@
 //!
 //! This API is completely unstable and subject to change.
 
+// tidy-alphabetical-start
+#![allow(internal_features)]
+#![allow(rustc::default_hash_types)]
+#![allow(rustc::potential_query_instability)]
 #![cfg_attr(not(bootstrap), doc(rust_logo))]
 #![cfg_attr(not(bootstrap), feature(rustdoc_internals))]
+#![deny(rustc::diagnostic_outside_of_impl)]
+#![deny(rustc::untranslatable_diagnostic)]
+#![deny(unsafe_op_in_unsafe_fn)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
+#![feature(allocator_api)]
 #![feature(array_windows)]
-#![feature(associated_type_bounds)]
 #![feature(auto_traits)]
 #![feature(cell_leak)]
+#![feature(cfg_match)]
 #![feature(core_intrinsics)]
 #![feature(extend_one)]
 #![feature(hash_raw_entry)]
 #![feature(hasher_prefixfree_extras)]
+#![feature(lazy_cell)]
+#![feature(lint_reasons)]
+#![feature(macro_metavar_expr)]
 #![feature(maybe_uninit_uninit_array)]
 #![feature(min_specialization)]
-#![feature(never_type)]
-#![feature(type_alias_impl_trait)]
-#![feature(new_uninit)]
-#![feature(lazy_cell)]
-#![feature(rustc_attrs)]
 #![feature(negative_impls)]
+#![feature(never_type)]
+#![feature(ptr_alignment_type)]
+#![feature(rustc_attrs)]
+#![feature(strict_provenance)]
 #![feature(test)]
 #![feature(thread_id_value)]
-#![feature(vec_into_raw_parts)]
-#![feature(allocator_api)]
-#![feature(get_mut_unchecked)]
-#![feature(lint_reasons)]
+#![feature(type_alias_impl_trait)]
 #![feature(unwrap_infallible)]
-#![feature(strict_provenance)]
-#![feature(ptr_alignment_type)]
-#![feature(macro_metavar_expr)]
-#![allow(rustc::default_hash_types)]
-#![allow(rustc::potential_query_instability)]
-#![deny(rustc::untranslatable_diagnostic)]
-#![deny(rustc::diagnostic_outside_of_impl)]
-#![allow(internal_features)]
-#![deny(unsafe_op_in_unsafe_fn)]
+// tidy-alphabetical-end
 
 #[macro_use]
 extern crate tracing;
-#[macro_use]
-extern crate cfg_if;
 #[macro_use]
 extern crate rustc_macros;
 
@@ -65,7 +62,6 @@ pub mod binary_search_util;
 pub mod captures;
 pub mod flat_map_in_place;
 pub mod flock;
-pub mod functor;
 pub mod fx;
 pub mod graph;
 pub mod intern;

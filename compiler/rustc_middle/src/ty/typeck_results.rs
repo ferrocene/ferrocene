@@ -189,9 +189,9 @@ pub struct TypeckResults<'tcx> {
     /// Details may be find in `rustc_hir_analysis::check::rvalue_scopes`.
     pub rvalue_scopes: RvalueScopes,
 
-    /// Stores the predicates that apply on generator witness types.
-    /// formatting modified file tests/ui/generator/retain-resume-ref.rs
-    pub generator_interior_predicates:
+    /// Stores the predicates that apply on coroutine witness types.
+    /// formatting modified file tests/ui/coroutine/retain-resume-ref.rs
+    pub coroutine_interior_predicates:
         LocalDefIdMap<Vec<(ty::Predicate<'tcx>, ObligationCause<'tcx>)>>,
 
     /// We sometimes treat byte string literals (which are of type `&[u8; N]`)
@@ -231,7 +231,7 @@ impl<'tcx> TypeckResults<'tcx> {
             closure_min_captures: Default::default(),
             closure_fake_reads: Default::default(),
             rvalue_scopes: Default::default(),
-            generator_interior_predicates: Default::default(),
+            coroutine_interior_predicates: Default::default(),
             treat_byte_string_as_slice: Default::default(),
             closure_size_eval: Default::default(),
             offset_of_data: Default::default(),
@@ -594,10 +594,27 @@ pub struct CanonicalUserTypeAnnotation<'tcx> {
 /// Canonical user type annotation.
 pub type CanonicalUserType<'tcx> = Canonical<'tcx, UserType<'tcx>>;
 
-impl<'tcx> CanonicalUserType<'tcx> {
+/// A user-given type annotation attached to a constant. These arise
+/// from constants that are named via paths, like `Foo::<A>::new` and
+/// so forth.
+#[derive(Copy, Clone, Debug, PartialEq, TyEncodable, TyDecodable)]
+#[derive(Eq, Hash, HashStable, TypeFoldable, TypeVisitable)]
+pub enum UserType<'tcx> {
+    Ty(Ty<'tcx>),
+
+    /// The canonical type is the result of `type_of(def_id)` with the
+    /// given substitutions applied.
+    TypeOf(DefId, UserArgs<'tcx>),
+}
+
+pub trait IsIdentity {
+    fn is_identity(&self) -> bool;
+}
+
+impl<'tcx> IsIdentity for CanonicalUserType<'tcx> {
     /// Returns `true` if this represents a substitution of the form `[?0, ?1, ?2]`,
     /// i.e., each thing is mapped to a canonical variable with the same index.
-    pub fn is_identity(&self) -> bool {
+    fn is_identity(&self) -> bool {
         match self.value {
             UserType::Ty(_) => false,
             UserType::TypeOf(_, user_args) => {
@@ -638,19 +655,6 @@ impl<'tcx> CanonicalUserType<'tcx> {
             }
         }
     }
-}
-
-/// A user-given type annotation attached to a constant. These arise
-/// from constants that are named via paths, like `Foo::<A>::new` and
-/// so forth.
-#[derive(Copy, Clone, Debug, PartialEq, TyEncodable, TyDecodable)]
-#[derive(Eq, Hash, HashStable, TypeFoldable, TypeVisitable)]
-pub enum UserType<'tcx> {
-    Ty(Ty<'tcx>),
-
-    /// The canonical type is the result of `type_of(def_id)` with the
-    /// given substitutions applied.
-    TypeOf(DefId, UserArgs<'tcx>),
 }
 
 impl<'tcx> std::fmt::Display for UserType<'tcx> {

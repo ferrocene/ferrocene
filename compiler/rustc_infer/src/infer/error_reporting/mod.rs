@@ -67,7 +67,7 @@ use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_middle::dep_graph::DepContext;
-use rustc_middle::ty::print::with_forced_trimmed_paths;
+use rustc_middle::ty::print::{with_forced_trimmed_paths, PrintError};
 use rustc_middle::ty::relate::{self, RelateResult, TypeRelation};
 use rustc_middle::ty::{
     self, error::TypeError, IsSuggestable, List, Region, Ty, TyCtxt, TypeFoldable,
@@ -580,76 +580,68 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
 
         struct AbsolutePathPrinter<'tcx> {
             tcx: TyCtxt<'tcx>,
+            segments: Vec<String>,
         }
 
-        struct NonTrivialPath;
-
         impl<'tcx> Printer<'tcx> for AbsolutePathPrinter<'tcx> {
-            type Error = NonTrivialPath;
-
-            type Path = Vec<String>;
-            type Region = !;
-            type Type = !;
-            type DynExistential = !;
-            type Const = !;
-
             fn tcx<'a>(&'a self) -> TyCtxt<'tcx> {
                 self.tcx
             }
 
-            fn print_region(self, _region: ty::Region<'_>) -> Result<Self::Region, Self::Error> {
-                Err(NonTrivialPath)
+            fn print_region(&mut self, _region: ty::Region<'_>) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
 
-            fn print_type(self, _ty: Ty<'tcx>) -> Result<Self::Type, Self::Error> {
-                Err(NonTrivialPath)
+            fn print_type(&mut self, _ty: Ty<'tcx>) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
 
             fn print_dyn_existential(
-                self,
+                &mut self,
                 _predicates: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
-            ) -> Result<Self::DynExistential, Self::Error> {
-                Err(NonTrivialPath)
+            ) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
 
-            fn print_const(self, _ct: ty::Const<'tcx>) -> Result<Self::Const, Self::Error> {
-                Err(NonTrivialPath)
+            fn print_const(&mut self, _ct: ty::Const<'tcx>) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
 
-            fn path_crate(self, cnum: CrateNum) -> Result<Self::Path, Self::Error> {
-                Ok(vec![self.tcx.crate_name(cnum).to_string()])
+            fn path_crate(&mut self, cnum: CrateNum) -> Result<(), PrintError> {
+                self.segments = vec![self.tcx.crate_name(cnum).to_string()];
+                Ok(())
             }
             fn path_qualified(
-                self,
+                &mut self,
                 _self_ty: Ty<'tcx>,
                 _trait_ref: Option<ty::TraitRef<'tcx>>,
-            ) -> Result<Self::Path, Self::Error> {
-                Err(NonTrivialPath)
+            ) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
 
             fn path_append_impl(
-                self,
-                _print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                _print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 _disambiguated_data: &DisambiguatedDefPathData,
                 _self_ty: Ty<'tcx>,
                 _trait_ref: Option<ty::TraitRef<'tcx>>,
-            ) -> Result<Self::Path, Self::Error> {
-                Err(NonTrivialPath)
+            ) -> Result<(), PrintError> {
+                Err(fmt::Error)
             }
             fn path_append(
-                self,
-                print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 disambiguated_data: &DisambiguatedDefPathData,
-            ) -> Result<Self::Path, Self::Error> {
-                let mut path = print_prefix(self)?;
-                path.push(disambiguated_data.to_string());
-                Ok(path)
+            ) -> Result<(), PrintError> {
+                print_prefix(self)?;
+                self.segments.push(disambiguated_data.to_string());
+                Ok(())
             }
             fn path_generic_args(
-                self,
-                print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+                &mut self,
+                print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
                 _args: &[GenericArg<'tcx>],
-            ) -> Result<Self::Path, Self::Error> {
+            ) -> Result<(), PrintError> {
                 print_prefix(self)
             }
         }
@@ -659,12 +651,14 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             // are from a local module we could have false positives, e.g.
             // let _ = [{struct Foo; Foo}, {struct Foo; Foo}];
             if did1.krate != did2.krate {
-                let abs_path =
-                    |def_id| AbsolutePathPrinter { tcx: self.tcx }.print_def_path(def_id, &[]);
+                let abs_path = |def_id| {
+                    let mut printer = AbsolutePathPrinter { tcx: self.tcx, segments: vec![] };
+                    printer.print_def_path(def_id, &[]).map(|_| printer.segments)
+                };
 
                 // We compare strings because DefPath can be different
                 // for imported and non-imported crates
-                let same_path = || -> Result<_, NonTrivialPath> {
+                let same_path = || -> Result<_, PrintError> {
                     Ok(self.tcx.def_path_str(did1) == self.tcx.def_path_str(did2)
                         || abs_path(did1)? == abs_path(did2)?)
                 };
@@ -781,6 +775,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 ref prior_arms,
                 opt_suggest_box_span,
                 scrut_span,
+                scrut_hir_id,
                 ..
             }) => match source {
                 hir::MatchSource::TryDesugar(scrut_hir_id) => {
@@ -847,6 +842,18 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         arm_span,
                     ) {
                         err.subdiagnostic(subdiag);
+                    }
+                    if let Some(hir::Node::Expr(m)) = self.tcx.hir().find_parent(scrut_hir_id)
+                        && let Some(hir::Node::Stmt(stmt)) = self.tcx.hir().find_parent(m.hir_id)
+                        && let hir::StmtKind::Expr(_) = stmt.kind
+                    {
+                        err.span_suggestion_verbose(
+                            stmt.span.shrink_to_hi(),
+                            "consider using a semicolon here, but this will discard any values \
+                             in the match arms",
+                            ";",
+                            Applicability::MaybeIncorrect,
+                        );
                     }
                     if let Some(ret_sp) = opt_suggest_box_span {
                         // Get return type span and point to it.
@@ -1063,7 +1070,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
 
         let get_lifetimes = |sig| {
             use rustc_hir::def::Namespace;
-            let (_, sig, reg) = ty::print::FmtPrinter::new(self.tcx, Namespace::TypeNS)
+            let (sig, reg) = ty::print::FmtPrinter::new(self.tcx, Namespace::TypeNS)
                 .name_all_regions(sig)
                 .unwrap();
             let lts: Vec<String> = reg.into_values().map(|kind| kind.to_string()).collect();
@@ -1577,14 +1584,13 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 target: &str,
                 types: &FxIndexMap<TyCategory, FxIndexSet<Span>>,
             ) {
-                for (key, values) in types.iter() {
+                for (kind, values) in types.iter() {
                     let count = values.len();
-                    let kind = key.descr();
                     for &sp in values {
                         err.span_label(
                             sp,
                             format!(
-                                "{}{} {}{}",
+                                "{}{} {:#}{}",
                                 if count == 1 { "the " } else { "one of the " },
                                 target,
                                 kind,
@@ -2826,7 +2832,7 @@ impl<'tcx> ObligationCauseExt<'tcx> for ObligationCause<'tcx> {
             // say, also take a look at the error code, maybe we can
             // tailor to that.
             _ => match terr {
-                TypeError::CyclicTy(ty) if ty.is_closure() || ty.is_generator() => Error0644,
+                TypeError::CyclicTy(ty) if ty.is_closure() || ty.is_coroutine() => Error0644,
                 TypeError::IntrinsicCast => Error0308,
                 _ => Error0308,
             },
@@ -2873,7 +2879,7 @@ impl<'tcx> ObligationCauseExt<'tcx> for ObligationCause<'tcx> {
             // say, also take a look at the error code, maybe we can
             // tailor to that.
             _ => match terr {
-                TypeError::CyclicTy(ty) if ty.is_closure() || ty.is_generator() => {
+                TypeError::CyclicTy(ty) if ty.is_closure() || ty.is_coroutine() => {
                     ObligationCauseFailureCode::ClosureSelfref { span }
                 }
                 TypeError::IntrinsicCast => {
@@ -2941,21 +2947,23 @@ pub enum TyCategory {
     Closure,
     Opaque,
     OpaqueFuture,
-    Generator(hir::GeneratorKind),
+    Coroutine(hir::CoroutineKind),
     Foreign,
 }
 
-impl TyCategory {
-    fn descr(&self) -> &'static str {
+impl fmt::Display for TyCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Closure => "closure",
-            Self::Opaque => "opaque type",
-            Self::OpaqueFuture => "future",
-            Self::Generator(gk) => gk.descr(),
-            Self::Foreign => "foreign type",
+            Self::Closure => "closure".fmt(f),
+            Self::Opaque => "opaque type".fmt(f),
+            Self::OpaqueFuture => "future".fmt(f),
+            Self::Coroutine(gk) => gk.fmt(f),
+            Self::Foreign => "foreign type".fmt(f),
         }
     }
+}
 
+impl TyCategory {
     pub fn from_ty(tcx: TyCtxt<'_>, ty: Ty<'_>) -> Option<(Self, DefId)> {
         match *ty.kind() {
             ty::Closure(def_id, _) => Some((Self::Closure, def_id)),
@@ -2964,8 +2972,8 @@ impl TyCategory {
                     if tcx.ty_is_opaque_future(ty) { Self::OpaqueFuture } else { Self::Opaque };
                 Some((kind, def_id))
             }
-            ty::Generator(def_id, ..) => {
-                Some((Self::Generator(tcx.generator_kind(def_id).unwrap()), def_id))
+            ty::Coroutine(def_id, ..) => {
+                Some((Self::Coroutine(tcx.coroutine_kind(def_id).unwrap()), def_id))
             }
             ty::Foreign(def_id) => Some((Self::Foreign, def_id)),
             _ => None,

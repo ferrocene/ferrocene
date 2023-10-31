@@ -17,3 +17,5 @@ bar: baz
 
 baz:
 	$(RUSTC) baz.rs
+
+# ferrocene-annotations: um_rustc_C_linker

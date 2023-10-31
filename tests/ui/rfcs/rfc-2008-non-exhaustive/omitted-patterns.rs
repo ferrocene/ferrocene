@@ -252,7 +252,13 @@ pub fn takes_non_exhaustive(_: NonExhaustiveEnum) {
     let _closure = |_: NonExhaustiveEnum| {};
 }
 
-<<<<<<< HEAD
+// ICE #117033
+enum Void {}
+#[deny(non_exhaustive_omitted_patterns)]
+pub fn void(v: Void) -> ! {
+    match v {}
+}
+
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions
 // ferrocene-annotations: fls_jm6l7b90h6wa
@@ -263,11 +269,3 @@ pub fn takes_non_exhaustive(_: NonExhaustiveEnum) {
 // If Let Expressions
 // ferrocene-annotations: fls_yivm43r5wnp1
 // Let Statements
-=======
-// ICE #117033
-enum Void {}
-#[deny(non_exhaustive_omitted_patterns)]
-pub fn void(v: Void) -> ! {
-    match v {}
-}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

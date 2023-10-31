@@ -1863,7 +1863,8 @@ fn test_android(target: &str) {
             | "NDA_NDM_FLAGS_MASK"
             | "NDTPA_INTERVAL_PROBE_TIME_MS"
             | "NFQA_UNSPEC"
-            | "NTF_EXT_LOCKED" => true,
+            | "NTF_EXT_LOCKED"
+            | "ALG_SET_DRBG_ENTROPY" => true,
 
             _ => false,
         }
@@ -3872,6 +3873,11 @@ fn test_linux(target: &str) {
 
             // FIXME: Requires more recent kernel headers
             "HWTSTAMP_TX_ONESTEP_P2P" if musl => true, // linux v5.6+
+
+            // kernel 6.5 minimum
+            "MOVE_MOUNT_BENEATH" => true,
+            // FIXME: Requires linux 6.1
+            "ALG_SET_KEY_BY_KEY_SERIAL" | "ALG_SET_DRBG_ENTROPY" => true,
 
             _ => false,
         }

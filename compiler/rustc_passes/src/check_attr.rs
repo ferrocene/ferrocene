@@ -1776,6 +1776,7 @@ impl CheckAttrVisitor<'_> {
             .collect();
 
         let mut int_reprs = 0;
+        let mut is_explicit_rust = false;
         let mut is_c = false;
         let mut is_simd = false;
         let mut is_transparent = false;
@@ -1787,7 +1788,9 @@ impl CheckAttrVisitor<'_> {
             }
 
             match hint.name_or_empty() {
-                sym::Rust => {}
+                sym::Rust => {
+                    is_explicit_rust = true;
+                }
                 sym::C => {
                     is_c = true;
                     match target {
@@ -1897,11 +1900,15 @@ impl CheckAttrVisitor<'_> {
 
         // Error on repr(transparent, <anything else>).
         if is_transparent && hints.len() > 1 {
-            let hint_spans: Vec<_> = hint_spans.clone().collect();
+            let hint_spans = hint_spans.clone().collect();
             self.tcx.sess.emit_err(errors::TransparentIncompatible {
                 hint_spans,
                 target: target.to_string(),
             });
+        }
+        if is_explicit_rust && (int_reprs > 0 || is_c || is_simd) {
+            let hint_spans = hint_spans.clone().collect();
+            self.tcx.sess.emit_err(errors::ReprConflicting { hint_spans });
         }
         // Warn on repr(u8, u16), repr(C, simd), and c-like-enum-repr(C, u8)
         if (int_reprs > 1)
@@ -1919,7 +1926,7 @@ impl CheckAttrVisitor<'_> {
                 CONFLICTING_REPR_HINTS,
                 hir_id,
                 hint_spans.collect::<Vec<Span>>(),
-                errors::ReprConflicting,
+                errors::ReprConflictingLint,
             );
         }
     }
@@ -2527,10 +2534,30 @@ fn check_invalid_crate_level_attr(tcx: TyCtxt<'_>, attrs: &[Attribute]) {
         if attr.style == AttrStyle::Inner {
             for attr_to_check in ATTRS_TO_CHECK {
                 if attr.has_name(*attr_to_check) {
+                    let item = tcx
+                        .hir()
+                        .items()
+                        .map(|id| tcx.hir().item(id))
+                        .find(|item| !item.span.is_dummy()) // Skip prelude `use`s
+                        .map(|item| errors::ItemFollowingInnerAttr {
+                            span: item.ident.span,
+                            kind: item.kind.descr(),
+                        });
                     tcx.sess.emit_err(errors::InvalidAttrAtCrateLevel {
                         span: attr.span,
-                        snippet: tcx.sess.source_map().span_to_snippet(attr.span).ok(),
+                        sugg_span: tcx
+                            .sess
+                            .source_map()
+                            .span_to_snippet(attr.span)
+                            .ok()
+                            .filter(|src| src.starts_with("#!["))
+                            .map(|_| {
+                                attr.span
+                                    .with_lo(attr.span.lo() + BytePos(1))
+                                    .with_hi(attr.span.lo() + BytePos(2))
+                            }),
                         name: *attr_to_check,
+                        item,
                     });
                 }
             }

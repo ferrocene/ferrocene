@@ -1,12 +1,64 @@
-use crate::ty::{AdtDef, ClosureDef, Const, GeneratorDef, GenericArgs, Movability, Region};
+use crate::ty::{AdtDef, ClosureDef, Const, CoroutineDef, GenericArgs, Movability, Region};
 use crate::Opaque;
 use crate::{ty::Ty, Span};
 
+/// The SMIR representation of a single function.
 #[derive(Clone, Debug)]
 pub struct Body {
     pub blocks: Vec<BasicBlock>,
-    pub locals: Vec<LocalDecl>,
+
+    // Declarations of locals within the function.
+    //
+    // The first local is the return value pointer, followed by `arg_count`
+    // locals for the function arguments, followed by any user-declared
+    // variables and temporaries.
+    locals: LocalDecls,
+
+    // The number of arguments this function takes.
+    arg_count: usize,
 }
+
+impl Body {
+    /// Constructs a `Body`.
+    ///
+    /// A constructor is required to build a `Body` from outside the crate
+    /// because the `arg_count` and `locals` fields are private.
+    pub fn new(blocks: Vec<BasicBlock>, locals: LocalDecls, arg_count: usize) -> Self {
+        // If locals doesn't contain enough entries, it can lead to panics in
+        // `ret_local`, `arg_locals`, and `inner_locals`.
+        assert!(
+            locals.len() > arg_count,
+            "A Body must contain at least a local for the return value and each of the function's arguments"
+        );
+        Self { blocks, locals, arg_count }
+    }
+
+    /// Return local that holds this function's return value.
+    pub fn ret_local(&self) -> &LocalDecl {
+        &self.locals[0]
+    }
+
+    /// Locals in `self` that correspond to this function's arguments.
+    pub fn arg_locals(&self) -> &[LocalDecl] {
+        &self.locals[1..][..self.arg_count]
+    }
+
+    /// Inner locals for this function. These are the locals that are
+    /// neither the return local nor the argument locals.
+    pub fn inner_locals(&self) -> &[LocalDecl] {
+        &self.locals[self.arg_count + 1..]
+    }
+
+    /// Convenience function to get all the locals in this function.
+    ///
+    /// Locals are typically accessed via the more specific methods `ret_local`,
+    /// `arg_locals`, and `inner_locals`.
+    pub fn locals(&self) -> &[LocalDecl] {
+        &self.locals
+    }
+}
+
+type LocalDecls = Vec<LocalDecl>;
 
 #[derive(Clone, Debug)]
 pub struct LocalDecl {
@@ -59,7 +111,7 @@ pub enum TerminatorKind {
         target: usize,
         unwind: UnwindAction,
     },
-    GeneratorDrop,
+    CoroutineDrop,
     InlineAsm {
         template: String,
         operands: Vec<InlineAsmOperand>,
@@ -94,8 +146,8 @@ pub enum AssertMessage {
     OverflowNeg(Operand),
     DivisionByZero(Operand),
     RemainderByZero(Operand),
-    ResumedAfterReturn(GeneratorKind),
-    ResumedAfterPanic(GeneratorKind),
+    ResumedAfterReturn(CoroutineKind),
+    ResumedAfterPanic(CoroutineKind),
     MisalignedPointerDereference { required: Operand, found: Operand },
 }
 
@@ -132,13 +184,14 @@ pub enum UnOp {
 }
 
 #[derive(Clone, Debug)]
-pub enum GeneratorKind {
-    Async(AsyncGeneratorKind),
-    Gen,
+pub enum CoroutineKind {
+    Async(CoroutineSource),
+    Coroutine,
+    Gen(CoroutineSource),
 }
 
 #[derive(Clone, Debug)]
-pub enum AsyncGeneratorKind {
+pub enum CoroutineSource {
     Block,
     Closure,
     Fn,
@@ -227,8 +280,8 @@ pub enum Rvalue {
     /// `dest = Foo { x: ..., y: ... }` from `dest.x = ...; dest.y = ...;` in the case that `Foo`
     /// has a destructor.
     ///
-    /// Disallowed after deaggregation for all aggregate kinds except `Array` and `Generator`. After
-    /// generator lowering, `Generator` aggregate kinds are disallowed too.
+    /// Disallowed after deaggregation for all aggregate kinds except `Array` and `Coroutine`. After
+    /// coroutine lowering, `Coroutine` aggregate kinds are disallowed too.
     Aggregate(AggregateKind, Vec<Operand>),
 
     /// * `Offset` has the same semantics as `<*const T>::offset`, except that the second
@@ -331,7 +384,7 @@ pub enum AggregateKind {
     Tuple,
     Adt(AdtDef, VariantIdx, GenericArgs, Option<UserTypeAnnotationIndex>, Option<FieldIdx>),
     Closure(ClosureDef, GenericArgs),
-    Generator(GeneratorDef, GenericArgs, Movability),
+    Coroutine(CoroutineDef, GenericArgs, Movability),
 }
 
 #[derive(Clone, Debug)]
@@ -344,6 +397,7 @@ pub enum Operand {
 #[derive(Clone, Debug)]
 pub struct Place {
     pub local: Local,
+    /// projection out of a place (access a field, deref a pointer, etc)
     pub projection: String,
 }
 
@@ -461,4 +515,26 @@ pub enum NullOp {
     AlignOf,
     /// Returns the offset of a field.
     OffsetOf(Vec<FieldIdx>),
+}
+
+impl Operand {
+    pub fn ty(&self, locals: &[LocalDecl]) -> Ty {
+        match self {
+            Operand::Copy(place) | Operand::Move(place) => place.ty(locals),
+            Operand::Constant(c) => c.ty(),
+        }
+    }
+}
+
+impl Constant {
+    pub fn ty(&self) -> Ty {
+        self.literal.ty()
+    }
+}
+
+impl Place {
+    pub fn ty(&self, locals: &[LocalDecl]) -> Ty {
+        let _start_ty = locals[self.local].ty;
+        todo!("Implement projection")
+    }
 }

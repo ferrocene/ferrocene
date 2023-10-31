@@ -111,10 +111,10 @@ struct LoweringContext<'a, 'hir> {
     /// Collect items that were created by lowering the current owner.
     children: Vec<(LocalDefId, hir::MaybeOwner<&'hir hir::OwnerInfo<'hir>>)>,
 
-    generator_kind: Option<hir::GeneratorKind>,
+    coroutine_kind: Option<hir::CoroutineKind>,
 
     /// When inside an `async` context, this is the `HirId` of the
-    /// `task_context` local bound to the resume argument of the generator.
+    /// `task_context` local bound to the resume argument of the coroutine.
     task_context: Option<hir::HirId>,
 
     /// Used to get the current `fn`'s def span to point to when using `await`
@@ -1217,7 +1217,11 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                                     hir_id: this.lower_node_id(node_id),
                                     body: this.lower_const_body(path_expr.span, Some(&path_expr)),
                                 });
-                                return GenericArg::Const(ConstArg { value: ct, span });
+                                return GenericArg::Const(ConstArg {
+                                    value: ct,
+                                    span,
+                                    is_desugared_from_effects: false,
+                                });
                             }
                         }
                     }
@@ -1228,6 +1232,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             ast::GenericArg::Const(ct) => GenericArg::Const(ConstArg {
                 value: self.lower_anon_const(&ct),
                 span: self.lower_span(ct.value.span),
+                is_desugared_from_effects: false,
             }),
         }
     }
@@ -1737,14 +1742,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     }
 
     fn lower_fn_params_to_names(&mut self, decl: &FnDecl) -> &'hir [Ident] {
-        // Skip the `...` (`CVarArgs`) trailing arguments from the AST,
-        // as they are not explicit in HIR/Ty function signatures.
-        // (instead, the `c_variadic` flag is set to `true`)
-        let mut inputs = &decl.inputs[..];
-        if decl.c_variadic() {
-            inputs = &inputs[..inputs.len() - 1];
-        }
-        self.arena.alloc_from_iter(inputs.iter().map(|param| match param.pat.kind {
+        self.arena.alloc_from_iter(decl.inputs.iter().map(|param| match param.pat.kind {
             PatKind::Ident(_, ident, _) => self.lower_ident(ident),
             _ => Ident::new(kw::Empty, self.lower_span(param.pat.span)),
         }))
@@ -2525,6 +2523,7 @@ impl<'hir> GenericArgsCtor<'hir> {
         self.args.push(hir::GenericArg::Const(hir::ConstArg {
             value: hir::AnonConst { def_id, hir_id, body },
             span,
+            is_desugared_from_effects: true,
         }))
     }
 

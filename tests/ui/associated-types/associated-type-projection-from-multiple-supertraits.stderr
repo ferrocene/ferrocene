@@ -18,11 +18,11 @@ LL |     type Color;
 LL | fn dent<C:BoxCar>(c: C, color: C::Color) {
    |                                ^^^^^^^^ ambiguous associated type `Color`
    |
-help: use fully qualified syntax to disambiguate
+help: use fully-qualified syntax to disambiguate
    |
 LL | fn dent<C:BoxCar>(c: C, color: <C as Vehicle>::Color) {
    |                                ~~~~~~~~~~~~~~~~
-help: use fully qualified syntax to disambiguate
+help: use fully-qualified syntax to disambiguate
    |
 LL | fn dent<C:BoxCar>(c: C, color: <C as Box>::Color) {
    |                                ~~~~~~~~~~~~
@@ -45,7 +45,7 @@ LL | fn dent_object<COLOR>(c: dyn BoxCar<Color=COLOR>) {
                    T: Vehicle::Color = COLOR,
                    T: Box::Color = COLOR
 
-error[E0191]: the value of the associated types `Color` (from trait `Box`), `Color` (from trait `Vehicle`) must be specified
+error[E0191]: the value of the associated types `Color` in `Box`, `Color` in `Vehicle` must be specified
   --> $DIR/associated-type-projection-from-multiple-supertraits.rs:23:30
    |
 LL |     type Color;
@@ -71,16 +71,16 @@ LL |     type Color;
 LL | fn paint<C:BoxCar>(c: C, d: C::Color) {
    |                             ^^^^^^^^ ambiguous associated type `Color`
    |
-help: use fully qualified syntax to disambiguate
+help: use fully-qualified syntax to disambiguate
    |
 LL | fn paint<C:BoxCar>(c: C, d: <C as Vehicle>::Color) {
    |                             ~~~~~~~~~~~~~~~~
-help: use fully qualified syntax to disambiguate
+help: use fully-qualified syntax to disambiguate
    |
 LL | fn paint<C:BoxCar>(c: C, d: <C as Box>::Color) {
    |                             ~~~~~~~~~~~~
 
-error[E0191]: the value of the associated types `Color` (from trait `Box`), `Color` (from trait `Vehicle`) must be specified
+error[E0191]: the value of the associated types `Color` in `Box`, `Color` in `Vehicle` must be specified
   --> $DIR/associated-type-projection-from-multiple-supertraits.rs:32:32
    |
 LL |     type Color;

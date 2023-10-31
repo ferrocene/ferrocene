@@ -17,7 +17,7 @@ use rustc_data_structures::captures::Captures;
 use rustc_errors::{DiagnosticArgValue, DiagnosticMessage, ErrorGuaranteed, IntoDiagnosticArg};
 use rustc_hir::def::{CtorKind, Namespace};
 use rustc_hir::def_id::{DefId, CRATE_DEF_ID};
-use rustc_hir::{self, GeneratorKind, ImplicitSelfKind};
+use rustc_hir::{self, CoroutineKind, ImplicitSelfKind};
 use rustc_hir::{self as hir, HirId};
 use rustc_session::Session;
 use rustc_target::abi::{FieldIdx, VariantIdx};
@@ -246,19 +246,19 @@ impl<'tcx> MirSource<'tcx> {
 }
 
 #[derive(Clone, TyEncodable, TyDecodable, Debug, HashStable, TypeFoldable, TypeVisitable)]
-pub struct GeneratorInfo<'tcx> {
-    /// The yield type of the function, if it is a generator.
+pub struct CoroutineInfo<'tcx> {
+    /// The yield type of the function, if it is a coroutine.
     pub yield_ty: Option<Ty<'tcx>>,
 
-    /// Generator drop glue.
-    pub generator_drop: Option<Body<'tcx>>,
+    /// Coroutine drop glue.
+    pub coroutine_drop: Option<Body<'tcx>>,
 
-    /// The layout of a generator. Produced by the state transformation.
-    pub generator_layout: Option<GeneratorLayout<'tcx>>,
+    /// The layout of a coroutine. Produced by the state transformation.
+    pub coroutine_layout: Option<CoroutineLayout<'tcx>>,
 
-    /// If this is a generator then record the type of source expression that caused this generator
+    /// If this is a coroutine then record the type of source expression that caused this coroutine
     /// to be created.
-    pub generator_kind: GeneratorKind,
+    pub coroutine_kind: CoroutineKind,
 }
 
 /// The lowered representation of a single function.
@@ -284,7 +284,7 @@ pub struct Body<'tcx> {
     /// and used for debuginfo. Indexed by a `SourceScope`.
     pub source_scopes: IndexVec<SourceScope, SourceScopeData<'tcx>>,
 
-    pub generator: Option<Box<GeneratorInfo<'tcx>>>,
+    pub coroutine: Option<Box<CoroutineInfo<'tcx>>>,
 
     /// Declarations of locals.
     ///
@@ -345,6 +345,14 @@ pub struct Body<'tcx> {
     pub injection_phase: Option<MirPhase>,
 
     pub tainted_by_errors: Option<ErrorGuaranteed>,
+
+    /// Per-function coverage information added by the `InstrumentCoverage`
+    /// pass, to be used in conjunction with the coverage statements injected
+    /// into this body's blocks.
+    ///
+    /// If `-Cinstrument-coverage` is not active, or if an individual function
+    /// is not eligible for coverage, then this should always be `None`.
+    pub function_coverage_info: Option<Box<coverage::FunctionCoverageInfo>>,
 }
 
 impl<'tcx> Body<'tcx> {
@@ -357,7 +365,7 @@ impl<'tcx> Body<'tcx> {
         arg_count: usize,
         var_debug_info: Vec<VarDebugInfo<'tcx>>,
         span: Span,
-        generator_kind: Option<GeneratorKind>,
+        coroutine_kind: Option<CoroutineKind>,
         tainted_by_errors: Option<ErrorGuaranteed>,
     ) -> Self {
         // We need `arg_count` locals, and one for the return place.
@@ -374,12 +382,12 @@ impl<'tcx> Body<'tcx> {
             source,
             basic_blocks: BasicBlocks::new(basic_blocks),
             source_scopes,
-            generator: generator_kind.map(|generator_kind| {
-                Box::new(GeneratorInfo {
+            coroutine: coroutine_kind.map(|coroutine_kind| {
+                Box::new(CoroutineInfo {
                     yield_ty: None,
-                    generator_drop: None,
-                    generator_layout: None,
-                    generator_kind,
+                    coroutine_drop: None,
+                    coroutine_layout: None,
+                    coroutine_kind,
                 })
             }),
             local_decls,
@@ -392,6 +400,7 @@ impl<'tcx> Body<'tcx> {
             is_polymorphic: false,
             injection_phase: None,
             tainted_by_errors,
+            function_coverage_info: None,
         };
         body.is_polymorphic = body.has_non_region_param();
         body
@@ -409,7 +418,7 @@ impl<'tcx> Body<'tcx> {
             source: MirSource::item(CRATE_DEF_ID.to_def_id()),
             basic_blocks: BasicBlocks::new(basic_blocks),
             source_scopes: IndexVec::new(),
-            generator: None,
+            coroutine: None,
             local_decls: IndexVec::new(),
             user_type_annotations: IndexVec::new(),
             arg_count: 0,
@@ -420,6 +429,7 @@ impl<'tcx> Body<'tcx> {
             is_polymorphic: false,
             injection_phase: None,
             tainted_by_errors: None,
+            function_coverage_info: None,
         };
         body.is_polymorphic = body.has_non_region_param();
         body
@@ -538,22 +548,22 @@ impl<'tcx> Body<'tcx> {
 
     #[inline]
     pub fn yield_ty(&self) -> Option<Ty<'tcx>> {
-        self.generator.as_ref().and_then(|generator| generator.yield_ty)
+        self.coroutine.as_ref().and_then(|coroutine| coroutine.yield_ty)
     }
 
     #[inline]
-    pub fn generator_layout(&self) -> Option<&GeneratorLayout<'tcx>> {
-        self.generator.as_ref().and_then(|generator| generator.generator_layout.as_ref())
+    pub fn coroutine_layout(&self) -> Option<&CoroutineLayout<'tcx>> {
+        self.coroutine.as_ref().and_then(|coroutine| coroutine.coroutine_layout.as_ref())
     }
 
     #[inline]
-    pub fn generator_drop(&self) -> Option<&Body<'tcx>> {
-        self.generator.as_ref().and_then(|generator| generator.generator_drop.as_ref())
+    pub fn coroutine_drop(&self) -> Option<&Body<'tcx>> {
+        self.coroutine.as_ref().and_then(|coroutine| coroutine.coroutine_drop.as_ref())
     }
 
     #[inline]
-    pub fn generator_kind(&self) -> Option<GeneratorKind> {
-        self.generator.as_ref().map(|generator| generator.generator_kind)
+    pub fn coroutine_kind(&self) -> Option<CoroutineKind> {
+        self.coroutine.as_ref().map(|coroutine| coroutine.coroutine_kind)
     }
 
     #[inline]
@@ -567,6 +577,40 @@ impl<'tcx> Body<'tcx> {
     #[inline]
     pub fn is_custom_mir(&self) -> bool {
         self.injection_phase.is_some()
+    }
+
+    /// For a `Location` in this scope, determine what the "caller location" at that point is. This
+    /// is interesting because of inlining: the `#[track_caller]` attribute of inlined functions
+    /// must be honored. Falls back to the `tracked_caller` value for `#[track_caller]` functions,
+    /// or the function's scope.
+    pub fn caller_location_span<T>(
+        &self,
+        mut source_info: SourceInfo,
+        caller_location: Option<T>,
+        tcx: TyCtxt<'tcx>,
+        from_span: impl FnOnce(Span) -> T,
+    ) -> T {
+        loop {
+            let scope_data = &self.source_scopes[source_info.scope];
+
+            if let Some((callee, callsite_span)) = scope_data.inlined {
+                // Stop inside the most nested non-`#[track_caller]` function,
+                // before ever reaching its caller (which is irrelevant).
+                if !callee.def.requires_caller_location(tcx) {
+                    return from_span(source_info.span);
+                }
+                source_info.span = callsite_span;
+            }
+
+            // Skip past all of the parents with `inlined: None`.
+            match scope_data.inlined_parent_scope {
+                Some(parent) => source_info.scope = parent,
+                None => break,
+            }
+        }
+
+        // No inlined `SourceScope`s, or all of them were `#[track_caller]`.
+        caller_location.unwrap_or_else(|| from_span(source_info.span))
     }
 }
 

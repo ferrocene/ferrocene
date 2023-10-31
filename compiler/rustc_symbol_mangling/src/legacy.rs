@@ -1,7 +1,7 @@
 use rustc_data_structures::stable_hasher::{Hash64, HashStable, StableHasher};
 use rustc_hir::def_id::CrateNum;
 use rustc_hir::definitions::{DefPathData, DisambiguatedDefPathData};
-use rustc_middle::ty::print::{PrettyPrinter, Print, Printer};
+use rustc_middle::ty::print::{PrettyPrinter, Print, PrintError, Printer};
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::ty::{GenericArg, GenericArgKind};
 use rustc_middle::util::common::record_time;
@@ -199,46 +199,38 @@ struct SymbolPrinter<'tcx> {
 // `PrettyPrinter` aka pretty printing of e.g. types in paths,
 // symbol names should have their own printing machinery.
 
-impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
-    type Error = fmt::Error;
-
-    type Path = Self;
-    type Region = Self;
-    type Type = Self;
-    type DynExistential = Self;
-    type Const = Self;
-
+impl<'tcx> Printer<'tcx> for SymbolPrinter<'tcx> {
     fn tcx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
 
-    fn print_region(self, _region: ty::Region<'_>) -> Result<Self::Region, Self::Error> {
-        Ok(self)
+    fn print_region(&mut self, _region: ty::Region<'_>) -> Result<(), PrintError> {
+        Ok(())
     }
 
-    fn print_type(mut self, ty: Ty<'tcx>) -> Result<Self::Type, Self::Error> {
+    fn print_type(&mut self, ty: Ty<'tcx>) -> Result<(), PrintError> {
         match *ty.kind() {
             // Print all nominal types as paths (unlike `pretty_print_type`).
             ty::FnDef(def_id, args)
             | ty::Alias(ty::Projection | ty::Opaque, ty::AliasTy { def_id, args, .. })
             | ty::Closure(def_id, args)
-            | ty::Generator(def_id, args, _) => self.print_def_path(def_id, args),
+            | ty::Coroutine(def_id, args, _) => self.print_def_path(def_id, args),
 
             // The `pretty_print_type` formatting of array size depends on
             // -Zverbose flag, so we cannot reuse it here.
             ty::Array(ty, size) => {
                 self.write_str("[")?;
-                self = self.print_type(ty)?;
+                self.print_type(ty)?;
                 self.write_str("; ")?;
                 if let Some(size) = size.try_to_target_usize(self.tcx()) {
                     write!(self, "{size}")?
                 } else if let ty::ConstKind::Param(param) = size.kind() {
-                    self = param.print(self)?
+                    param.print(self)?
                 } else {
                     self.write_str("_")?
                 }
                 self.write_str("]")?;
-                Ok(self)
+                Ok(())
             }
 
             ty::Alias(ty::Inherent, _) => panic!("unexpected inherent projection"),
@@ -248,21 +240,21 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
     }
 
     fn print_dyn_existential(
-        mut self,
+        &mut self,
         predicates: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
-    ) -> Result<Self::DynExistential, Self::Error> {
+    ) -> Result<(), PrintError> {
         let mut first = true;
         for p in predicates {
             if !first {
                 write!(self, "+")?;
             }
             first = false;
-            self = p.print(self)?;
+            p.print(self)?;
         }
-        Ok(self)
+        Ok(())
     }
 
-    fn print_const(self, ct: ty::Const<'tcx>) -> Result<Self::Const, Self::Error> {
+    fn print_const(&mut self, ct: ty::Const<'tcx>) -> Result<(), PrintError> {
         // only print integers
         match (ct.kind(), ct.ty().kind()) {
             (ty::ConstKind::Value(ty::ValTree::Leaf(scalar)), ty::Int(_) | ty::Uint(_)) => {
@@ -277,22 +269,22 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
             }
             _ => self.write_str("_")?,
         }
-        Ok(self)
+        Ok(())
     }
 
-    fn path_crate(self, cnum: CrateNum) -> Result<Self::Path, Self::Error> {
+    fn path_crate(&mut self, cnum: CrateNum) -> Result<(), PrintError> {
         self.write_str(self.tcx.crate_name(cnum).as_str())?;
-        Ok(self)
+        Ok(())
     }
     fn path_qualified(
-        self,
+        &mut self,
         self_ty: Ty<'tcx>,
         trait_ref: Option<ty::TraitRef<'tcx>>,
-    ) -> Result<Self::Path, Self::Error> {
+    ) -> Result<(), PrintError> {
         // Similar to `pretty_path_qualified`, but for the other
         // types that are printed as paths (see `print_type` above).
         match self_ty.kind() {
-            ty::FnDef(..) | ty::Alias(..) | ty::Closure(..) | ty::Generator(..)
+            ty::FnDef(..) | ty::Alias(..) | ty::Closure(..) | ty::Coroutine(..)
                 if trait_ref.is_none() =>
             {
                 self.print_type(self_ty)
@@ -303,15 +295,15 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
     }
 
     fn path_append_impl(
-        self,
-        print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+        &mut self,
+        print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
         _disambiguated_data: &DisambiguatedDefPathData,
         self_ty: Ty<'tcx>,
         trait_ref: Option<ty::TraitRef<'tcx>>,
-    ) -> Result<Self::Path, Self::Error> {
+    ) -> Result<(), PrintError> {
         self.pretty_path_append_impl(
-            |mut cx| {
-                cx = print_prefix(cx)?;
+            |cx| {
+                print_prefix(cx)?;
 
                 if cx.keep_within_component {
                     // HACK(eddyb) print the path similarly to how `FmtPrinter` prints it.
@@ -320,22 +312,22 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
                     cx.path.finalize_pending_component();
                 }
 
-                Ok(cx)
+                Ok(())
             },
             self_ty,
             trait_ref,
         )
     }
     fn path_append(
-        mut self,
-        print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+        &mut self,
+        print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
         disambiguated_data: &DisambiguatedDefPathData,
-    ) -> Result<Self::Path, Self::Error> {
-        self = print_prefix(self)?;
+    ) -> Result<(), PrintError> {
+        print_prefix(self)?;
 
         // Skip `::{{extern}}` blocks and `::{{constructor}}` on tuple/unit structs.
         if let DefPathData::ForeignMod | DefPathData::Ctor = disambiguated_data.data {
-            return Ok(self);
+            return Ok(());
         }
 
         if self.keep_within_component {
@@ -347,14 +339,14 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
 
         write!(self, "{}", disambiguated_data.data)?;
 
-        Ok(self)
+        Ok(())
     }
     fn path_generic_args(
-        mut self,
-        print_prefix: impl FnOnce(Self) -> Result<Self::Path, Self::Error>,
+        &mut self,
+        print_prefix: impl FnOnce(&mut Self) -> Result<(), PrintError>,
         args: &[GenericArg<'tcx>],
-    ) -> Result<Self::Path, Self::Error> {
-        self = print_prefix(self)?;
+    ) -> Result<(), PrintError> {
+        print_prefix(self)?;
 
         let args =
             args.iter().cloned().filter(|arg| !matches!(arg.unpack(), GenericArgKind::Lifetime(_)));
@@ -362,42 +354,42 @@ impl<'tcx> Printer<'tcx> for &mut SymbolPrinter<'tcx> {
         if args.clone().next().is_some() {
             self.generic_delimiters(|cx| cx.comma_sep(args))
         } else {
-            Ok(self)
+            Ok(())
         }
     }
 }
 
-impl<'tcx> PrettyPrinter<'tcx> for &mut SymbolPrinter<'tcx> {
+impl<'tcx> PrettyPrinter<'tcx> for SymbolPrinter<'tcx> {
     fn should_print_region(&self, _region: ty::Region<'_>) -> bool {
         false
     }
-    fn comma_sep<T>(mut self, mut elems: impl Iterator<Item = T>) -> Result<Self, Self::Error>
+    fn comma_sep<T>(&mut self, mut elems: impl Iterator<Item = T>) -> Result<(), PrintError>
     where
-        T: Print<'tcx, Self, Output = Self, Error = Self::Error>,
+        T: Print<'tcx, Self>,
     {
         if let Some(first) = elems.next() {
-            self = first.print(self)?;
+            first.print(self)?;
             for elem in elems {
                 self.write_str(",")?;
-                self = elem.print(self)?;
+                elem.print(self)?;
             }
         }
-        Ok(self)
+        Ok(())
     }
 
     fn generic_delimiters(
-        mut self,
-        f: impl FnOnce(Self) -> Result<Self, Self::Error>,
-    ) -> Result<Self, Self::Error> {
+        &mut self,
+        f: impl FnOnce(&mut Self) -> Result<(), PrintError>,
+    ) -> Result<(), PrintError> {
         write!(self, "<")?;
 
         let kept_within_component = mem::replace(&mut self.keep_within_component, true);
-        self = f(self)?;
+        f(self)?;
         self.keep_within_component = kept_within_component;
 
         write!(self, ">")?;
 
-        Ok(self)
+        Ok(())
     }
 }
 

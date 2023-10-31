@@ -141,7 +141,7 @@ impl From<DefKind> for ItemType {
             | DefKind::GlobalAsm
             | DefKind::Impl { .. }
             | DefKind::Closure
-            | DefKind::Generator => Self::ForeignType,
+            | DefKind::Coroutine => Self::ForeignType,
         }
     }
 }
@@ -179,6 +179,9 @@ impl ItemType {
     }
     pub(crate) fn is_method(&self) -> bool {
         matches!(*self, ItemType::Method | ItemType::TyMethod)
+    }
+    pub(crate) fn is_adt(&self) -> bool {
+        matches!(*self, ItemType::Struct | ItemType::Union | ItemType::Enum)
     }
 }
 

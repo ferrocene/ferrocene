@@ -29,17 +29,18 @@ use std::assert_matches::debug_assert_matches;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt;
-use std::marker::PhantomData;
 use std::ops::{ControlFlow, Deref, Range};
 use ty::util::IntTypeExt;
 
-use rustc_type_ir::sty::TyKind::*;
+use rustc_type_ir::ClauseKind as IrClauseKind;
 use rustc_type_ir::CollectAndApply;
 use rustc_type_ir::ConstKind as IrConstKind;
 use rustc_type_ir::DebugWithInfcx;
 use rustc_type_ir::DynKind;
+use rustc_type_ir::PredicateKind as IrPredicateKind;
 use rustc_type_ir::RegionKind as IrRegionKind;
 use rustc_type_ir::TyKind as IrTyKind;
+use rustc_type_ir::TyKind::*;
 
 use super::GenericParamDefKind;
 
@@ -48,6 +49,8 @@ use super::GenericParamDefKind;
 pub type TyKind<'tcx> = IrTyKind<TyCtxt<'tcx>>;
 pub type RegionKind<'tcx> = IrRegionKind<TyCtxt<'tcx>>;
 pub type ConstKind<'tcx> = IrConstKind<TyCtxt<'tcx>>;
+pub type PredicateKind<'tcx> = IrPredicateKind<TyCtxt<'tcx>>;
+pub type ClauseKind<'tcx> = IrClauseKind<TyCtxt<'tcx>>;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, TyEncodable, TyDecodable)]
 #[derive(HashStable, TypeFoldable, TypeVisitable, Lift)]
@@ -215,20 +218,20 @@ impl<'tcx> Article for TyKind<'tcx> {
 /// closure C (which would then require fixed point iteration to
 /// handle). Plus it fixes an ICE. :P
 ///
-/// ## Generators
+/// ## Coroutines
 ///
-/// Generators are handled similarly in `GeneratorArgs`. The set of
+/// Coroutines are handled similarly in `CoroutineArgs`. The set of
 /// type parameters is similar, but `CK` and `CS` are replaced by the
 /// following type parameters:
 ///
-/// * `GS`: The generator's "resume type", which is the type of the
+/// * `GS`: The coroutine's "resume type", which is the type of the
 ///   argument passed to `resume`, and the type of `yield` expressions
-///   inside the generator.
+///   inside the coroutine.
 /// * `GY`: The "yield type", which is the type of values passed to
-///   `yield` inside the generator.
+///   `yield` inside the coroutine.
 /// * `GR`: The "return type", which is the type of value returned upon
-///   completion of the generator.
-/// * `GW`: The "generator witness".
+///   completion of the coroutine.
+/// * `GW`: The "coroutine witness".
 #[derive(Copy, Clone, PartialEq, Eq, Debug, TypeFoldable, TypeVisitable, Lift)]
 pub struct ClosureArgs<'tcx> {
     /// Lifetime and type parameters from the enclosing function,
@@ -352,11 +355,11 @@ impl<'tcx> ClosureArgs<'tcx> {
 
 /// Similar to `ClosureArgs`; see the above documentation for more.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, TypeFoldable, TypeVisitable)]
-pub struct GeneratorArgs<'tcx> {
+pub struct CoroutineArgs<'tcx> {
     pub args: GenericArgsRef<'tcx>,
 }
 
-pub struct GeneratorArgsParts<'tcx, T> {
+pub struct CoroutineArgsParts<'tcx, T> {
     pub parent_args: &'tcx [GenericArg<'tcx>],
     pub resume_ty: T,
     pub yield_ty: T,
@@ -365,14 +368,14 @@ pub struct GeneratorArgsParts<'tcx, T> {
     pub tupled_upvars_ty: T,
 }
 
-impl<'tcx> GeneratorArgs<'tcx> {
-    /// Construct `GeneratorArgs` from `GeneratorArgsParts`, containing `Args`
-    /// for the generator parent, alongside additional generator-specific components.
+impl<'tcx> CoroutineArgs<'tcx> {
+    /// Construct `CoroutineArgs` from `CoroutineArgsParts`, containing `Args`
+    /// for the coroutine parent, alongside additional coroutine-specific components.
     pub fn new(
         tcx: TyCtxt<'tcx>,
-        parts: GeneratorArgsParts<'tcx, Ty<'tcx>>,
-    ) -> GeneratorArgs<'tcx> {
-        GeneratorArgs {
+        parts: CoroutineArgsParts<'tcx, Ty<'tcx>>,
+    ) -> CoroutineArgs<'tcx> {
+        CoroutineArgs {
             args: tcx.mk_args_from_iter(
                 parts.parent_args.iter().copied().chain(
                     [
@@ -389,12 +392,12 @@ impl<'tcx> GeneratorArgs<'tcx> {
         }
     }
 
-    /// Divides the generator args into their respective components.
-    /// The ordering assumed here must match that used by `GeneratorArgs::new` above.
-    fn split(self) -> GeneratorArgsParts<'tcx, GenericArg<'tcx>> {
+    /// Divides the coroutine args into their respective components.
+    /// The ordering assumed here must match that used by `CoroutineArgs::new` above.
+    fn split(self) -> CoroutineArgsParts<'tcx, GenericArg<'tcx>> {
         match self.args[..] {
             [ref parent_args @ .., resume_ty, yield_ty, return_ty, witness, tupled_upvars_ty] => {
-                GeneratorArgsParts {
+                CoroutineArgsParts {
                     parent_args,
                     resume_ty,
                     yield_ty,
@@ -403,34 +406,34 @@ impl<'tcx> GeneratorArgs<'tcx> {
                     tupled_upvars_ty,
                 }
             }
-            _ => bug!("generator args missing synthetics"),
+            _ => bug!("coroutine args missing synthetics"),
         }
     }
 
     /// Returns `true` only if enough of the synthetic types are known to
-    /// allow using all of the methods on `GeneratorArgs` without panicking.
+    /// allow using all of the methods on `CoroutineArgs` without panicking.
     ///
-    /// Used primarily by `ty::print::pretty` to be able to handle generator
+    /// Used primarily by `ty::print::pretty` to be able to handle coroutine
     /// types that haven't had their synthetic types substituted in.
     pub fn is_valid(self) -> bool {
         self.args.len() >= 5 && matches!(self.split().tupled_upvars_ty.expect_ty().kind(), Tuple(_))
     }
 
-    /// Returns the substitutions of the generator's parent.
+    /// Returns the substitutions of the coroutine's parent.
     pub fn parent_args(self) -> &'tcx [GenericArg<'tcx>] {
         self.split().parent_args
     }
 
-    /// This describes the types that can be contained in a generator.
+    /// This describes the types that can be contained in a coroutine.
     /// It will be a type variable initially and unified in the last stages of typeck of a body.
-    /// It contains a tuple of all the types that could end up on a generator frame.
+    /// It contains a tuple of all the types that could end up on a coroutine frame.
     /// The state transformation MIR pass may only produce layouts which mention types
     /// in this tuple. Upvars are not counted here.
     pub fn witness(self) -> Ty<'tcx> {
         self.split().witness.expect_ty()
     }
 
-    /// Returns an iterator over the list of types of captured paths by the generator.
+    /// Returns an iterator over the list of types of captured paths by the coroutine.
     /// In case there was a type error in figuring out the types of the captured path, an
     /// empty iterator is returned.
     #[inline]
@@ -443,28 +446,28 @@ impl<'tcx> GeneratorArgs<'tcx> {
         }
     }
 
-    /// Returns the tuple type representing the upvars for this generator.
+    /// Returns the tuple type representing the upvars for this coroutine.
     #[inline]
     pub fn tupled_upvars_ty(self) -> Ty<'tcx> {
         self.split().tupled_upvars_ty.expect_ty()
     }
 
-    /// Returns the type representing the resume type of the generator.
+    /// Returns the type representing the resume type of the coroutine.
     pub fn resume_ty(self) -> Ty<'tcx> {
         self.split().resume_ty.expect_ty()
     }
 
-    /// Returns the type representing the yield type of the generator.
+    /// Returns the type representing the yield type of the coroutine.
     pub fn yield_ty(self) -> Ty<'tcx> {
         self.split().yield_ty.expect_ty()
     }
 
-    /// Returns the type representing the return type of the generator.
+    /// Returns the type representing the return type of the coroutine.
     pub fn return_ty(self) -> Ty<'tcx> {
         self.split().return_ty.expect_ty()
     }
 
-    /// Returns the "generator signature", which consists of its yield
+    /// Returns the "coroutine signature", which consists of its yield
     /// and return types.
     ///
     /// N.B., some bits of the code prefers to see this wrapped in a
@@ -474,7 +477,7 @@ impl<'tcx> GeneratorArgs<'tcx> {
         ty::Binder::dummy(self.sig())
     }
 
-    /// Returns the "generator signature", which consists of its resume, yield
+    /// Returns the "coroutine signature", which consists of its resume, yield
     /// and return types.
     pub fn sig(self) -> GenSig<'tcx> {
         ty::GenSig {
@@ -485,23 +488,23 @@ impl<'tcx> GeneratorArgs<'tcx> {
     }
 }
 
-impl<'tcx> GeneratorArgs<'tcx> {
-    /// Generator has not been resumed yet.
+impl<'tcx> CoroutineArgs<'tcx> {
+    /// Coroutine has not been resumed yet.
     pub const UNRESUMED: usize = 0;
-    /// Generator has returned or is completed.
+    /// Coroutine has returned or is completed.
     pub const RETURNED: usize = 1;
-    /// Generator has been poisoned.
+    /// Coroutine has been poisoned.
     pub const POISONED: usize = 2;
 
     const UNRESUMED_NAME: &'static str = "Unresumed";
     const RETURNED_NAME: &'static str = "Returned";
     const POISONED_NAME: &'static str = "Panicked";
 
-    /// The valid variant indices of this generator.
+    /// The valid variant indices of this coroutine.
     #[inline]
     pub fn variant_range(&self, def_id: DefId, tcx: TyCtxt<'tcx>) -> Range<VariantIdx> {
         // FIXME requires optimized MIR
-        FIRST_VARIANT..tcx.generator_layout(def_id).unwrap().variant_fields.next_index()
+        FIRST_VARIANT..tcx.coroutine_layout(def_id).unwrap().variant_fields.next_index()
     }
 
     /// The discriminant for the given variant. Panics if the `variant_index` is
@@ -513,13 +516,13 @@ impl<'tcx> GeneratorArgs<'tcx> {
         tcx: TyCtxt<'tcx>,
         variant_index: VariantIdx,
     ) -> Discr<'tcx> {
-        // Generators don't support explicit discriminant values, so they are
+        // Coroutines don't support explicit discriminant values, so they are
         // the same as the variant index.
         assert!(self.variant_range(def_id, tcx).contains(&variant_index));
         Discr { val: variant_index.as_usize() as u128, ty: self.discr_ty(tcx) }
     }
 
-    /// The set of all discriminants for the generator, enumerated with their
+    /// The set of all discriminants for the coroutine, enumerated with their
     /// variant indices.
     #[inline]
     pub fn discriminants(
@@ -543,15 +546,15 @@ impl<'tcx> GeneratorArgs<'tcx> {
         }
     }
 
-    /// The type of the state discriminant used in the generator type.
+    /// The type of the state discriminant used in the coroutine type.
     #[inline]
     pub fn discr_ty(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         tcx.types.u32
     }
 
     /// This returns the types of the MIR locals which had to be stored across suspension points.
-    /// It is calculated in rustc_mir_transform::generator::StateTransform.
-    /// All the types here must be in the tuple in GeneratorInterior.
+    /// It is calculated in rustc_mir_transform::coroutine::StateTransform.
+    /// All the types here must be in the tuple in CoroutineInterior.
     ///
     /// The locals are grouped by their variant number. Note that some locals may
     /// be repeated in multiple variants.
@@ -561,7 +564,7 @@ impl<'tcx> GeneratorArgs<'tcx> {
         def_id: DefId,
         tcx: TyCtxt<'tcx>,
     ) -> impl Iterator<Item: Iterator<Item = Ty<'tcx>> + Captures<'tcx>> {
-        let layout = tcx.generator_layout(def_id).unwrap();
+        let layout = tcx.coroutine_layout(def_id).unwrap();
         layout.variant_fields.iter().map(move |variant| {
             variant.iter().map(move |field| {
                 ty::EarlyBinder::bind(layout.field_tys[*field].ty).instantiate(tcx, self.args)
@@ -569,7 +572,7 @@ impl<'tcx> GeneratorArgs<'tcx> {
         })
     }
 
-    /// This is the types of the fields of a generator which are not stored in a
+    /// This is the types of the fields of a coroutine which are not stored in a
     /// variant.
     #[inline]
     pub fn prefix_tys(self) -> &'tcx List<Ty<'tcx>> {
@@ -580,18 +583,18 @@ impl<'tcx> GeneratorArgs<'tcx> {
 #[derive(Debug, Copy, Clone, HashStable)]
 pub enum UpvarArgs<'tcx> {
     Closure(GenericArgsRef<'tcx>),
-    Generator(GenericArgsRef<'tcx>),
+    Coroutine(GenericArgsRef<'tcx>),
 }
 
 impl<'tcx> UpvarArgs<'tcx> {
-    /// Returns an iterator over the list of types of captured paths by the closure/generator.
+    /// Returns an iterator over the list of types of captured paths by the closure/coroutine.
     /// In case there was a type error in figuring out the types of the captured path, an
     /// empty iterator is returned.
     #[inline]
     pub fn upvar_tys(self) -> &'tcx List<Ty<'tcx>> {
         let tupled_tys = match self {
             UpvarArgs::Closure(args) => args.as_closure().tupled_upvars_ty(),
-            UpvarArgs::Generator(args) => args.as_generator().tupled_upvars_ty(),
+            UpvarArgs::Coroutine(args) => args.as_coroutine().tupled_upvars_ty(),
         };
 
         match tupled_tys.kind() {
@@ -606,7 +609,7 @@ impl<'tcx> UpvarArgs<'tcx> {
     pub fn tupled_upvars_ty(self) -> Ty<'tcx> {
         match self {
             UpvarArgs::Closure(args) => args.as_closure().tupled_upvars_ty(),
-            UpvarArgs::Generator(args) => args.as_generator().tupled_upvars_ty(),
+            UpvarArgs::Coroutine(args) => args.as_coroutine().tupled_upvars_ty(),
         }
     }
 }
@@ -683,8 +686,8 @@ pub enum ExistentialPredicate<'tcx> {
 }
 
 impl<'tcx> DebugWithInfcx<TyCtxt<'tcx>> for ExistentialPredicate<'tcx> {
-    fn fmt<InfCtx: rustc_type_ir::InferCtxtLike<TyCtxt<'tcx>>>(
-        this: rustc_type_ir::OptWithInfcx<'_, TyCtxt<'tcx>, InfCtx, &Self>,
+    fn fmt<Infcx: rustc_type_ir::InferCtxtLike<Interner = TyCtxt<'tcx>>>(
+        this: rustc_type_ir::WithInfcx<'_, Infcx, &Self>,
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result {
         fmt::Debug::fmt(&this.data, f)
@@ -1213,11 +1216,20 @@ pub struct AliasTy<'tcx> {
     pub def_id: DefId,
 
     /// This field exists to prevent the creation of `AliasTy` without using
-    /// [TyCtxt::mk_alias_ty].
-    pub(super) _use_mk_alias_ty_instead: (),
+    /// [AliasTy::new].
+    _use_alias_ty_new_instead: (),
 }
 
 impl<'tcx> AliasTy<'tcx> {
+    pub fn new(
+        tcx: TyCtxt<'tcx>,
+        def_id: DefId,
+        args: impl IntoIterator<Item: Into<GenericArg<'tcx>>>,
+    ) -> ty::AliasTy<'tcx> {
+        let args = tcx.check_and_mk_args(def_id, args);
+        ty::AliasTy { def_id, args, _use_alias_ty_new_instead: () }
+    }
+
     pub fn kind(self, tcx: TyCtxt<'tcx>) -> ty::AliasKind {
         match tcx.def_kind(self.def_id) {
             DefKind::AssocTy
@@ -1245,7 +1257,7 @@ impl<'tcx> AliasTy<'tcx> {
     }
 
     pub fn with_self_ty(self, tcx: TyCtxt<'tcx>, self_ty: Ty<'tcx>) -> Self {
-        tcx.mk_alias_ty(self.def_id, [self_ty.into()].into_iter().chain(self.args.iter().skip(1)))
+        AliasTy::new(tcx, self.def_id, [self_ty.into()].into_iter().chain(self.args.iter().skip(1)))
     }
 }
 
@@ -1574,26 +1586,22 @@ impl fmt::Debug for EarlyBoundRegion {
     }
 }
 
-/// A **`const`** **v**ariable **ID**.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[derive(HashStable, TyEncodable, TyDecodable)]
-pub struct ConstVid<'tcx> {
-    pub index: u32,
-    pub phantom: PhantomData<&'tcx ()>,
+rustc_index::newtype_index! {
+    /// A **`const`** **v**ariable **ID**.
+    #[debug_format = "?{}c"]
+    pub struct ConstVid {}
 }
 
-/// An **effect** **v**ariable **ID**.
-///
-/// Handling effect infer variables happens separately from const infer variables
-/// because we do not want to reuse any of the const infer machinery. If we try to
-/// relate an effect variable with a normal one, we would ICE, which can catch bugs
-/// where we are not correctly using the effect var for an effect param. Fallback
-/// is also implemented on top of having separate effect and normal const variables.
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[derive(TyEncodable, TyDecodable)]
-pub struct EffectVid<'tcx> {
-    pub index: u32,
-    pub phantom: PhantomData<&'tcx ()>,
+rustc_index::newtype_index! {
+    /// An **effect** **v**ariable **ID**.
+    ///
+    /// Handling effect infer variables happens separately from const infer variables
+    /// because we do not want to reuse any of the const infer machinery. If we try to
+    /// relate an effect variable with a normal one, we would ICE, which can catch bugs
+    /// where we are not correctly using the effect var for an effect param. Fallback
+    /// is also implemented on top of having separate effect and normal const variables.
+    #[debug_format = "?{}e"]
+    pub struct EffectVid {}
 }
 
 rustc_index::newtype_index! {
@@ -1667,8 +1675,11 @@ impl<'tcx> ExistentialProjection<'tcx> {
         debug_assert!(!self_ty.has_escaping_bound_vars());
 
         ty::ProjectionPredicate {
-            projection_ty: tcx
-                .mk_alias_ty(self.def_id, [self_ty.into()].into_iter().chain(self.args)),
+            projection_ty: AliasTy::new(
+                tcx,
+                self.def_id,
+                [self_ty.into()].into_iter().chain(self.args),
+            ),
             term: self.term,
         }
     }
@@ -1971,7 +1982,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn new_opaque(tcx: TyCtxt<'tcx>, def_id: DefId, args: GenericArgsRef<'tcx>) -> Ty<'tcx> {
-        Ty::new_alias(tcx, ty::Opaque, tcx.mk_alias_ty(def_id, args))
+        Ty::new_alias(tcx, ty::Opaque, AliasTy::new(tcx, def_id, args))
     }
 
     /// Constructs a `TyKind::Error` type with current `ErrorGuaranteed`
@@ -2135,7 +2146,7 @@ impl<'tcx> Ty<'tcx> {
         item_def_id: DefId,
         args: impl IntoIterator<Item: Into<GenericArg<'tcx>>>,
     ) -> Ty<'tcx> {
-        Ty::new_alias(tcx, ty::Projection, tcx.mk_alias_ty(item_def_id, args))
+        Ty::new_alias(tcx, ty::Projection, AliasTy::new(tcx, item_def_id, args))
     }
 
     #[inline]
@@ -2153,27 +2164,27 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
-    pub fn new_generator(
+    pub fn new_coroutine(
         tcx: TyCtxt<'tcx>,
         def_id: DefId,
-        generator_args: GenericArgsRef<'tcx>,
+        coroutine_args: GenericArgsRef<'tcx>,
         movability: hir::Movability,
     ) -> Ty<'tcx> {
         debug_assert_eq!(
-            generator_args.len(),
+            coroutine_args.len(),
             tcx.generics_of(tcx.typeck_root_def_id(def_id)).count() + 5,
-            "generator constructed with incorrect number of substitutions"
+            "coroutine constructed with incorrect number of substitutions"
         );
-        Ty::new(tcx, Generator(def_id, generator_args, movability))
+        Ty::new(tcx, Coroutine(def_id, coroutine_args, movability))
     }
 
     #[inline]
-    pub fn new_generator_witness(
+    pub fn new_coroutine_witness(
         tcx: TyCtxt<'tcx>,
         id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> Ty<'tcx> {
-        Ty::new(tcx, GeneratorWitness(id, args))
+        Ty::new(tcx, CoroutineWitness(id, args))
     }
 
     // misc
@@ -2483,8 +2494,8 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
-    pub fn is_generator(self) -> bool {
-        matches!(self.kind(), Generator(..))
+    pub fn is_coroutine(self) -> bool {
+        matches!(self.kind(), Coroutine(..))
     }
 
     #[inline]
@@ -2640,13 +2651,13 @@ impl<'tcx> Ty<'tcx> {
 
     /// If the type contains variants, returns the valid range of variant indices.
     //
-    // FIXME: This requires the optimized MIR in the case of generators.
+    // FIXME: This requires the optimized MIR in the case of coroutines.
     #[inline]
     pub fn variant_range(self, tcx: TyCtxt<'tcx>) -> Option<Range<VariantIdx>> {
         match self.kind() {
             TyKind::Adt(adt, _) => Some(adt.variant_range()),
-            TyKind::Generator(def_id, args, _) => {
-                Some(args.as_generator().variant_range(*def_id, tcx))
+            TyKind::Coroutine(def_id, args, _) => {
+                Some(args.as_coroutine().variant_range(*def_id, tcx))
             }
             _ => None,
         }
@@ -2655,7 +2666,7 @@ impl<'tcx> Ty<'tcx> {
     /// If the type contains variants, returns the variant for `variant_index`.
     /// Panics if `variant_index` is out of range.
     //
-    // FIXME: This requires the optimized MIR in the case of generators.
+    // FIXME: This requires the optimized MIR in the case of coroutines.
     #[inline]
     pub fn discriminant_for_variant(
         self,
@@ -2666,8 +2677,8 @@ impl<'tcx> Ty<'tcx> {
             TyKind::Adt(adt, _) if adt.is_enum() => {
                 Some(adt.discriminant_for_variant(tcx, variant_index))
             }
-            TyKind::Generator(def_id, args, _) => {
-                Some(args.as_generator().discriminant_for_variant(*def_id, tcx, variant_index))
+            TyKind::Coroutine(def_id, args, _) => {
+                Some(args.as_coroutine().discriminant_for_variant(*def_id, tcx, variant_index))
             }
             _ => None,
         }
@@ -2677,7 +2688,7 @@ impl<'tcx> Ty<'tcx> {
     pub fn discriminant_ty(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         match self.kind() {
             ty::Adt(adt, _) if adt.is_enum() => adt.repr().discr_type().to_ty(tcx),
-            ty::Generator(_, args, _) => args.as_generator().discr_ty(tcx),
+            ty::Coroutine(_, args, _) => args.as_coroutine().discr_ty(tcx),
 
             ty::Param(_) | ty::Alias(..) | ty::Infer(ty::TyVar(_)) => {
                 let assoc_items = tcx.associated_item_def_ids(
@@ -2702,7 +2713,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::FnPtr(..)
             | ty::Dynamic(..)
             | ty::Closure(..)
-            | ty::GeneratorWitness(..)
+            | ty::CoroutineWitness(..)
             | ty::Never
             | ty::Tuple(_)
             | ty::Error(_)
@@ -2736,8 +2747,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::RawPtr(..)
             | ty::Char
             | ty::Ref(..)
-            | ty::Generator(..)
-            | ty::GeneratorWitness(..)
+            | ty::Coroutine(..)
+            | ty::CoroutineWitness(..)
             | ty::Array(..)
             | ty::Closure(..)
             | ty::Never
@@ -2824,8 +2835,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::RawPtr(..)
             | ty::Char
             | ty::Ref(..)
-            | ty::Generator(..)
-            | ty::GeneratorWitness(..)
+            | ty::Coroutine(..)
+            | ty::CoroutineWitness(..)
             | ty::Array(..)
             | ty::Closure(..)
             | ty::Never
@@ -2888,7 +2899,7 @@ impl<'tcx> Ty<'tcx> {
             // anything with custom metadata it might be more complicated.
             ty::Ref(_, _, hir::Mutability::Not) | ty::RawPtr(..) => false,
 
-            ty::Generator(..) | ty::GeneratorWitness(..) => false,
+            ty::Coroutine(..) | ty::CoroutineWitness(..) => false,
 
             // Might be, but not "trivial" so just giving the safe answer.
             ty::Adt(..) | ty::Closure(..) => false,
@@ -2963,8 +2974,8 @@ impl<'tcx> Ty<'tcx> {
             | FnPtr(_)
             | Dynamic(_, _, _)
             | Closure(_, _)
-            | Generator(_, _, _)
-            | GeneratorWitness(..)
+            | Coroutine(_, _, _)
+            | CoroutineWitness(..)
             | Never
             | Tuple(_) => true,
             Error(_) | Infer(_) | Alias(_, _) | Param(_) | Bound(_, _) | Placeholder(_) => false,

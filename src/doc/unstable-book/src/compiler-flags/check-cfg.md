@@ -123,7 +123,7 @@ rustc --check-cfg 'cfg(is_embedded, has_feathers, values(any()))' \
 fn do_embedded() {}         // and because names exhaustiveness was not disabled
 
 #[cfg(has_feathers)]        // This is expected as "has_feathers" was provided in cfg()
-fn do_features() {}         // and because names exhaustiveness was not disbaled
+fn do_features() {}         // and because names exhaustiveness was not disabled
 
 #[cfg(has_feathers = "zapping")] // This is expected as "has_feathers" was provided in cfg()
                                  // and because no value checking was enable for "has_feathers"
@@ -139,7 +139,7 @@ fn do_mumble_frotz() {}
 
 ```bash
 # This turns on checking for feature values, but not for condition names.
-rustc --check-cfg 'configure(feature, values("zapping", "lasers"))' \
+rustc --check-cfg 'cfg(feature, values("zapping", "lasers"))' \
       --check-cfg 'cfg(any())' \
       --cfg 'feature="zapping"' -Z unstable-options
 ```

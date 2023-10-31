@@ -1,4 +1,5 @@
 #![feature(rustc_private)]
+#![feature(cell_update)]
 #![feature(float_gamma)]
 #![feature(map_try_insert)]
 #![feature(never_type)]
@@ -117,7 +118,7 @@ pub use crate::eval::{
     create_ecx, eval_entry, AlignmentCheck, BacktraceStyle, IsolatedOp, MiriConfig, RejectOpWith,
 };
 pub use crate::helpers::EvalContextExt as _;
-pub use crate::intptrcast::ProvenanceMode;
+pub use crate::intptrcast::{EvalContextExt as _, ProvenanceMode};
 pub use crate::machine::{
     AllocExtra, FrameExtra, MiriInterpCx, MiriInterpCxExt, MiriMachine, MiriMemoryKind,
     PrimitiveLayouts, Provenance, ProvenanceExtra,

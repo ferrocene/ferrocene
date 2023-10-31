@@ -197,6 +197,9 @@ macro_rules! handle_cycle_error {
     ([(fatal_cycle) $($rest:tt)*]) => {{
         rustc_query_system::HandleCycleError::Fatal
     }};
+    ([(cycle_stash) $($rest:tt)*]) => {{
+        rustc_query_system::HandleCycleError::Stash
+    }};
     ([(cycle_delay_bug) $($rest:tt)*]) => {{
         rustc_query_system::HandleCycleError::DelayBug
     }};
@@ -437,8 +440,6 @@ where
     );
 
     if let Some(key) = Q::Key::recover(tcx, &dep_node) {
-        #[cfg(debug_assertions)]
-        let _guard = tracing::span!(tracing::Level::TRACE, stringify!($name), ?key).entered();
         force_query(query, QueryCtxt::new(tcx), key, dep_node);
         true
     } else {

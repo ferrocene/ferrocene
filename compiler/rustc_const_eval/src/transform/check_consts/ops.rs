@@ -357,10 +357,10 @@ impl<'tcx> NonConstOp<'tcx> for FnCallUnstable {
 }
 
 #[derive(Debug)]
-pub struct Generator(pub hir::GeneratorKind);
-impl<'tcx> NonConstOp<'tcx> for Generator {
+pub struct Coroutine(pub hir::CoroutineKind);
+impl<'tcx> NonConstOp<'tcx> for Coroutine {
     fn status_in_item(&self, _: &ConstCx<'_, 'tcx>) -> Status {
-        if let hir::GeneratorKind::Async(hir::AsyncGeneratorKind::Block) = self.0 {
+        if let hir::CoroutineKind::Async(hir::CoroutineSource::Block) = self.0 {
             Status::Unstable(sym::const_async_blocks)
         } else {
             Status::Forbidden
@@ -372,8 +372,8 @@ impl<'tcx> NonConstOp<'tcx> for Generator {
         ccx: &ConstCx<'_, 'tcx>,
         span: Span,
     ) -> DiagnosticBuilder<'tcx, ErrorGuaranteed> {
-        let msg = format!("{}s are not allowed in {}s", self.0.descr(), ccx.const_kind());
-        if let hir::GeneratorKind::Async(hir::AsyncGeneratorKind::Block) = self.0 {
+        let msg = format!("{:#}s are not allowed in {}s", self.0, ccx.const_kind());
+        if let hir::CoroutineKind::Async(hir::CoroutineSource::Block) = self.0 {
             ccx.tcx.sess.create_feature_err(
                 errors::UnallowedOpInConstContext { span, msg },
                 sym::const_async_blocks,

@@ -3,18 +3,17 @@ use info;
 use libloading::Library;
 use rustc_ast as ast;
 use rustc_codegen_ssa::traits::CodegenBackend;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::FxHashMap;
 #[cfg(parallel_compiler)]
 use rustc_data_structures::sync;
 use rustc_errors::registry::Registry;
 use rustc_parse::validate_attr;
 use rustc_session as session;
-use rustc_session::config::CheckCfg;
-use rustc_session::config::{self, CrateType};
-use rustc_session::config::{OutFileName, OutputFilenames, OutputTypes};
+use rustc_session::config::{
+    self, Cfg, CheckCfg, CrateType, OutFileName, OutputFilenames, OutputTypes,
+};
 use rustc_session::filesearch::sysroot_candidates;
 use rustc_session::lint::{self, BuiltinLintDiagnostics, LintBuffer};
-use rustc_session::parse::CrateConfig;
 use rustc_session::{filesearch, output, Session};
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
@@ -26,7 +25,7 @@ use std::env::consts::{DLL_PREFIX, DLL_SUFFIX};
 use std::mem;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::thread;
 
 /// Function pointer type that constructs a new CodegenBackend.
@@ -37,11 +36,7 @@ pub type MakeBackendFn = fn() -> Box<dyn CodegenBackend>;
 ///
 /// This is performed by checking whether a set of permitted features
 /// is available on the target machine, by querying the codegen backend.
-pub fn add_configuration(
-    cfg: &mut CrateConfig,
-    sess: &mut Session,
-    codegen_backend: &dyn CodegenBackend,
-) {
+pub fn add_configuration(cfg: &mut Cfg, sess: &mut Session, codegen_backend: &dyn CodegenBackend) {
     let tf = sym::target_feature;
 
     let unstable_target_features = codegen_backend.target_features(sess, true);
@@ -60,8 +55,8 @@ pub fn add_configuration(
 pub fn create_session(
     handler: &EarlyErrorHandler,
     sopts: config::Options,
-    cfg: FxHashSet<(String, Option<String>)>,
-    check_cfg: CheckCfg,
+    cfg: Cfg,
+    mut check_cfg: CheckCfg,
     locale_resources: &'static [&'static str],
     file_loader: Option<Box<dyn FileLoader + Send + Sync + 'static>>,
     io: CompilerIO,
@@ -71,6 +66,7 @@ pub fn create_session(
     >,
     descriptions: Registry,
     ice_file: Option<PathBuf>,
+    using_internal_features: Arc<AtomicBool>,
     expanded_args: Vec<String>,
 ) -> (Session, Box<dyn CodegenBackend>) {
     let codegen_backend = if let Some(make_codegen_backend) = make_codegen_backend {
@@ -114,17 +110,18 @@ pub fn create_session(
         target_override,
         rustc_version_str().unwrap_or("unknown"),
         ice_file,
+        using_internal_features,
         expanded_args,
     );
 
     codegen_backend.init(&sess);
 
-    let mut cfg = config::build_configuration(&sess, config::to_crate_config(cfg));
+    let mut cfg = config::build_configuration(&sess, cfg);
     add_configuration(&mut cfg, &mut sess, &*codegen_backend);
 
-    let mut check_cfg = config::to_crate_check_config(check_cfg);
     check_cfg.fill_well_known(&sess.target);
 
+    // These configs use symbols, rather than strings.
     sess.parse_sess.config = cfg;
     sess.parse_sess.check_config = check_cfg;
 
@@ -485,21 +482,6 @@ fn categorize_crate_type(s: Symbol) -> Option<CrateType> {
 }
 
 pub fn collect_crate_types(session: &Session, attrs: &[ast::Attribute]) -> Vec<CrateType> {
-    // Unconditionally collect crate types from attributes to make them used
-    let attr_types: Vec<CrateType> = attrs
-        .iter()
-        .filter_map(|a| {
-            if a.has_name(sym::crate_type) {
-                match a.value_str() {
-                    Some(s) => categorize_crate_type(s),
-                    _ => None,
-                }
-            } else {
-                None
-            }
-        })
-        .collect();
-
     // If we're generating a test executable, then ignore all other output
     // styles at all other locations
     if session.opts.test {
@@ -513,6 +495,13 @@ pub fn collect_crate_types(session: &Session, attrs: &[ast::Attribute]) -> Vec<C
     #[allow(rustc::bad_opt_access)]
     let mut base = session.opts.crate_types.clone();
     if base.is_empty() {
+        let attr_types = attrs.iter().filter_map(|a| {
+            if a.has_name(sym::crate_type) && let Some(s) = a.value_str() {
+                categorize_crate_type(s)
+            } else {
+                None
+            }
+        });
         base.extend(attr_types);
         if base.is_empty() {
             base.push(output::default_output_for_target(session));

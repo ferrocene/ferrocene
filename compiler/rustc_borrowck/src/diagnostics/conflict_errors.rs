@@ -8,7 +8,7 @@ use rustc_errors::{
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::intravisit::{walk_block, walk_expr, Visitor};
-use rustc_hir::{AsyncGeneratorKind, GeneratorKind, LangItem};
+use rustc_hir::{CoroutineKind, CoroutineSource, LangItem};
 use rustc_infer::traits::ObligationCause;
 use rustc_middle::hir::nested_filter::OnlyBodies;
 use rustc_middle::mir::tcx::PlaceTy;
@@ -848,7 +848,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         move_spans.var_subdiag(None, &mut err, None, |kind, var_span| {
             use crate::session_diagnostics::CaptureVarCause::*;
             match kind {
-                Some(_) => MoveUseInGenerator { var_span },
+                Some(_) => MoveUseInCoroutine { var_span },
                 None => MoveUseInClosure { var_span },
             }
         });
@@ -894,7 +894,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             let desc_place = self.describe_any_place(place.as_ref());
             match kind {
                 Some(_) => {
-                    BorrowUsePlaceGenerator { place: desc_place, var_span, is_single_var: true }
+                    BorrowUsePlaceCoroutine { place: desc_place, var_span, is_single_var: true }
                 }
                 None => BorrowUsePlaceClosure { place: desc_place, var_span, is_single_var: true },
             }
@@ -926,8 +926,8 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         let borrow_spans = self.borrow_spans(span, location);
         let span = borrow_spans.args_or_use();
 
-        let container_name = if issued_spans.for_generator() || borrow_spans.for_generator() {
-            "generator"
+        let container_name = if issued_spans.for_coroutine() || borrow_spans.for_coroutine() {
+            "coroutine"
         } else {
             "closure"
         };
@@ -1040,7 +1040,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         |kind, var_span| {
                             use crate::session_diagnostics::CaptureVarCause::*;
                             match kind {
-                                Some(_) => BorrowUsePlaceGenerator {
+                                Some(_) => BorrowUsePlaceCoroutine {
                                     place: desc_place,
                                     var_span,
                                     is_single_var: true,
@@ -1125,7 +1125,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             borrow_spans.var_subdiag(None, &mut err, Some(gen_borrow_kind), |kind, var_span| {
                 use crate::session_diagnostics::CaptureVarCause::*;
                 match kind {
-                    Some(_) => BorrowUsePlaceGenerator {
+                    Some(_) => BorrowUsePlaceCoroutine {
                         place: desc_place,
                         var_span,
                         is_single_var: false,
@@ -1146,7 +1146,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     let borrow_place_desc = self.describe_any_place(borrow_place.as_ref());
                     match kind {
                         Some(_) => {
-                            FirstBorrowUsePlaceGenerator { place: borrow_place_desc, var_span }
+                            FirstBorrowUsePlaceCoroutine { place: borrow_place_desc, var_span }
                         }
                         None => FirstBorrowUsePlaceClosure { place: borrow_place_desc, var_span },
                     }
@@ -1160,7 +1160,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 |kind, var_span| {
                     use crate::session_diagnostics::CaptureVarCause::*;
                     match kind {
-                        Some(_) => SecondBorrowUsePlaceGenerator { place: desc_place, var_span },
+                        Some(_) => SecondBorrowUsePlaceCoroutine { place: desc_place, var_span },
                         None => SecondBorrowUsePlaceClosure { place: desc_place, var_span },
                     }
                 },
@@ -1575,7 +1575,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         // Get closure's arguments
         let ty::Closure(_, args) = typeck_results.expr_ty(closure_expr).kind() else {
-            /* hir::Closure can be a generator too */
+            /* hir::Closure can be a coroutine too */
             return;
         };
         let sig = args.as_closure().sig();
@@ -1949,7 +1949,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             (
                 Some(name),
                 BorrowExplanation::UsedLater(LaterUseKind::ClosureCapture, var_or_use_span, _),
-            ) if borrow_spans.for_generator() || borrow_spans.for_closure() => self
+            ) if borrow_spans.for_coroutine() || borrow_spans.for_closure() => self
                 .report_escaping_closure_capture(
                     borrow_spans,
                     borrow_span,
@@ -1974,7 +1974,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     span,
                     ..
                 },
-            ) if borrow_spans.for_generator() || borrow_spans.for_closure() => self
+            ) if borrow_spans.for_coroutine() || borrow_spans.for_closure() => self
                 .report_escaping_closure_capture(
                     borrow_spans,
                     borrow_span,
@@ -2077,8 +2077,8 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         .unwrap_or_else(|| {
                             match &self.infcx.tcx.def_kind(self.mir_def_id()) {
                                 DefKind::Closure => "enclosing closure",
-                                DefKind::Generator => "enclosing generator",
-                                kind => bug!("expected closure or generator, found {:?}", kind),
+                                DefKind::Coroutine => "enclosing coroutine",
+                                kind => bug!("expected closure or coroutine, found {:?}", kind),
                             }
                             .to_string()
                         })
@@ -2112,7 +2112,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
             borrow_spans.args_subdiag(&mut err, |args_span| {
                 crate::session_diagnostics::CaptureArgLabel::Capture {
-                    is_within: borrow_spans.for_generator(),
+                    is_within: borrow_spans.for_coroutine(),
                     args_span,
                 }
             });
@@ -2263,6 +2263,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     current: usize,
                     found: usize,
                     prop_expr: Option<&'tcx hir::Expr<'tcx>>,
+                    call: Option<&'tcx hir::Expr<'tcx>>,
                 }
 
                 impl<'tcx> Visitor<'tcx> for NestedStatementVisitor<'tcx> {
@@ -2272,6 +2273,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         self.current -= 1;
                     }
                     fn visit_expr(&mut self, expr: &'tcx hir::Expr<'tcx>) {
+                        if let hir::ExprKind::MethodCall(_, rcvr, _, _) = expr.kind {
+                            if self.span == rcvr.span.source_callsite() {
+                                self.call = Some(expr);
+                            }
+                        }
                         if self.span == expr.span.source_callsite() {
                             self.found = self.current;
                             if self.prop_expr.is_none() {
@@ -2295,6 +2301,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             current: 0,
                             found: 0,
                             prop_expr: None,
+                            call: None,
                         };
                         visitor.visit_stmt(stmt);
 
@@ -2316,6 +2323,21 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             && let Some(p) = sm.span_to_margin(stmt.span)
                             && let Ok(s) = sm.span_to_snippet(proper_span)
                         {
+                            if let Some(call) = visitor.call
+                                && let hir::ExprKind::MethodCall(path, _, [], _) = call.kind
+                                && path.ident.name == sym::iter
+                                && let Some(ty) = expr_ty
+                            {
+                                err.span_suggestion_verbose(
+                                    path.ident.span,
+                                    format!(
+                                        "consider consuming the `{ty}` when turning it into an \
+                                         `Iterator`",
+                                    ),
+                                    "into_iter".to_string(),
+                                    Applicability::MaybeIncorrect,
+                                );
+                            }
                             if !is_format_arguments_item {
                                 let addition = format!("let binding = {};\n{}", s, " ".repeat(p));
                                 err.multipart_suggestion_verbose(
@@ -2353,7 +2375,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         borrow_spans.args_subdiag(&mut err, |args_span| {
             crate::session_diagnostics::CaptureArgLabel::Capture {
-                is_within: borrow_spans.for_generator(),
+                is_within: borrow_spans.for_coroutine(),
                 args_span,
             }
         });
@@ -2469,11 +2491,17 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         let (sugg_span, suggestion) = match tcx.sess.source_map().span_to_snippet(args_span) {
             Ok(string) => {
-                if string.starts_with("async ") {
-                    let pos = args_span.lo() + BytePos(6);
-                    (args_span.with_lo(pos).with_hi(pos), "move ")
-                } else if string.starts_with("async|") {
-                    let pos = args_span.lo() + BytePos(5);
+                let coro_prefix = if string.starts_with("async") {
+                    // `async` is 5 chars long. Not using `.len()` to avoid the cast from `usize` to `u32`
+                    Some(5)
+                } else if string.starts_with("gen") {
+                    // `gen` is 3 chars long
+                    Some(3)
+                } else {
+                    None
+                };
+                if let Some(n) = coro_prefix {
+                    let pos = args_span.lo() + BytePos(n);
                     (args_span.with_lo(pos).with_hi(pos), " move")
                 } else {
                     (args_span.shrink_to_lo(), "move ")
@@ -2481,14 +2509,19 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             }
             Err(_) => (args_span, "move |<args>| <body>"),
         };
-        let kind = match use_span.generator_kind() {
-            Some(generator_kind) => match generator_kind {
-                GeneratorKind::Async(async_kind) => match async_kind {
-                    AsyncGeneratorKind::Block => "async block",
-                    AsyncGeneratorKind::Closure => "async closure",
+        let kind = match use_span.coroutine_kind() {
+            Some(coroutine_kind) => match coroutine_kind {
+                CoroutineKind::Gen(kind) => match kind {
+                    CoroutineSource::Block => "gen block",
+                    CoroutineSource::Closure => "gen closure",
+                    _ => bug!("gen block/closure expected, but gen function found."),
+                },
+                CoroutineKind::Async(async_kind) => match async_kind {
+                    CoroutineSource::Block => "async block",
+                    CoroutineSource::Closure => "async closure",
                     _ => bug!("async block/closure expected, but async function found."),
                 },
-                GeneratorKind::Gen => "generator",
+                CoroutineKind::Coroutine => "coroutine",
             },
             None => "closure",
         };
@@ -2517,7 +2550,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             }
             ConstraintCategory::CallArgument(_) => {
                 fr_name.highlight_region_name(&mut err);
-                if matches!(use_span.generator_kind(), Some(GeneratorKind::Async(_))) {
+                if matches!(use_span.coroutine_kind(), Some(CoroutineKind::Async(_))) {
                     err.note(
                         "async blocks are not executed immediately and must either take a \
                          reference or ownership of outside variables they use",
@@ -2611,9 +2644,10 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         /* Check if the mpi is initialized as an argument */
         let mut is_argument = false;
         for arg in self.body.args_iter() {
-            let path = self.move_data.rev_lookup.find_local(arg);
-            if mpis.contains(&path) {
-                is_argument = true;
+            if let Some(path) = self.move_data.rev_lookup.find_local(arg) {
+                if mpis.contains(&path) {
+                    is_argument = true;
+                }
             }
         }
 
@@ -2785,7 +2819,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 loan_spans.var_subdiag(None, &mut err, Some(loan.kind), |kind, var_span| {
                     use crate::session_diagnostics::CaptureVarCause::*;
                     match kind {
-                        Some(_) => BorrowUseInGenerator { var_span },
+                        Some(_) => BorrowUseInCoroutine { var_span },
                         None => BorrowUseInClosure { var_span },
                     }
                 });
@@ -2801,7 +2835,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         loan_spans.var_subdiag(None, &mut err, Some(loan.kind), |kind, var_span| {
             use crate::session_diagnostics::CaptureVarCause::*;
             match kind {
-                Some(_) => BorrowUseInGenerator { var_span },
+                Some(_) => BorrowUseInCoroutine { var_span },
                 None => BorrowUseInClosure { var_span },
             }
         });

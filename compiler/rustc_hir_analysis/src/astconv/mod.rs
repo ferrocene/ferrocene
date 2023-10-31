@@ -916,7 +916,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
             // Type aliases defined in crates that have the
             // feature `lazy_type_alias` enabled get encoded as a type alias that normalization will
             // then actually instantiate the where bounds of.
-            let alias_ty = tcx.mk_alias_ty(did, args);
+            let alias_ty = ty::AliasTy::new(tcx, did, args);
             Ty::new_alias(tcx, ty::Weak, alias_ty)
         } else {
             tcx.at(span).type_of(did).instantiate(tcx, args)
@@ -1018,7 +1018,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                     }
                     err.span_suggestions(
                         span,
-                        "use the fully-qualified path",
+                        "use fully-qualified syntax",
                         suggestions,
                         Applicability::MachineApplicable,
                     );
@@ -1190,7 +1190,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                     } else {
                         err.span_suggestion_verbose(
                             span.with_hi(assoc_name.span.lo()),
-                            "use fully qualified syntax to disambiguate",
+                            "use fully-qualified syntax to disambiguate",
                             format!("<{ty_param_name} as {}>::", bound.print_only_trait_path()),
                             Applicability::MaybeIncorrect,
                         );
@@ -1718,7 +1718,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                     .chain(args.into_iter().skip(parent_args.len())),
             );
 
-            let ty = Ty::new_alias(tcx, ty::Inherent, tcx.mk_alias_ty(assoc_item, args));
+            let ty = Ty::new_alias(tcx, ty::Inherent, ty::AliasTy::new(tcx, assoc_item, args));
 
             return Ok(Some((ty, assoc_item)));
         }

@@ -22,6 +22,10 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
         self.trait_ref
     }
 
+    fn polarity(self) -> ty::ImplPolarity {
+        self.polarity
+    }
+
     fn with_self_ty(self, tcx: TyCtxt<'tcx>, self_ty: Ty<'tcx>) -> Self {
         self.with_self_ty(tcx, self_ty)
     }
@@ -238,14 +242,25 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
         ecx: &mut EvalCtxt<'_, 'tcx>,
         goal: Goal<'tcx, Self>,
     ) -> QueryResult<'tcx> {
-        if goal.predicate.polarity != ty::ImplPolarity::Positive {
-            return Err(NoSolution);
-        }
-
-        if let ty::FnPtr(..) = goal.predicate.self_ty().kind() {
-            ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
-        } else {
-            Err(NoSolution)
+        let self_ty = goal.predicate.self_ty();
+        match goal.predicate.polarity {
+            ty::ImplPolarity::Positive => {
+                if self_ty.is_fn_ptr() {
+                    ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+                } else {
+                    Err(NoSolution)
+                }
+            }
+            ty::ImplPolarity::Negative => {
+                // If a type is rigid and not a fn ptr, then we know for certain
+                // that it does *not* implement `FnPtr`.
+                if !self_ty.is_fn_ptr() && self_ty.is_known_rigid() {
+                    ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+                } else {
+                    Err(NoSolution)
+                }
+            }
+            ty::ImplPolarity::Reservation => bug!(),
         }
     }
 
@@ -319,23 +334,47 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
             return Err(NoSolution);
         }
 
-        let ty::Generator(def_id, _, _) = *goal.predicate.self_ty().kind() else {
+        let ty::Coroutine(def_id, _, _) = *goal.predicate.self_ty().kind() else {
             return Err(NoSolution);
         };
 
-        // Generators are not futures unless they come from `async` desugaring
+        // Coroutines are not futures unless they come from `async` desugaring
         let tcx = ecx.tcx();
-        if !tcx.generator_is_async(def_id) {
+        if !tcx.coroutine_is_async(def_id) {
             return Err(NoSolution);
         }
 
-        // Async generator unconditionally implement `Future`
+        // Async coroutine unconditionally implement `Future`
         // Technically, we need to check that the future output type is Sized,
-        // but that's already proven by the generator being WF.
+        // but that's already proven by the coroutine being WF.
         ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
     }
 
-    fn consider_builtin_generator_candidate(
+    fn consider_builtin_iterator_candidate(
+        ecx: &mut EvalCtxt<'_, 'tcx>,
+        goal: Goal<'tcx, Self>,
+    ) -> QueryResult<'tcx> {
+        if goal.predicate.polarity != ty::ImplPolarity::Positive {
+            return Err(NoSolution);
+        }
+
+        let ty::Coroutine(def_id, _, _) = *goal.predicate.self_ty().kind() else {
+            return Err(NoSolution);
+        };
+
+        // Coroutines are not iterators unless they come from `gen` desugaring
+        let tcx = ecx.tcx();
+        if !tcx.coroutine_is_gen(def_id) {
+            return Err(NoSolution);
+        }
+
+        // Gen coroutines unconditionally implement `Iterator`
+        // Technically, we need to check that the iterator output type is Sized,
+        // but that's already proven by the coroutines being WF.
+        ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
+    }
+
+    fn consider_builtin_coroutine_candidate(
         ecx: &mut EvalCtxt<'_, 'tcx>,
         goal: Goal<'tcx, Self>,
     ) -> QueryResult<'tcx> {
@@ -344,24 +383,24 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
         }
 
         let self_ty = goal.predicate.self_ty();
-        let ty::Generator(def_id, args, _) = *self_ty.kind() else {
+        let ty::Coroutine(def_id, args, _) = *self_ty.kind() else {
             return Err(NoSolution);
         };
 
-        // `async`-desugared generators do not implement the generator trait
+        // `async`-desugared coroutines do not implement the coroutine trait
         let tcx = ecx.tcx();
-        if tcx.generator_is_async(def_id) {
+        if !tcx.is_general_coroutine(def_id) {
             return Err(NoSolution);
         }
 
-        let generator = args.as_generator();
+        let coroutine = args.as_coroutine();
         Self::consider_implied_clause(
             ecx,
             goal,
-            ty::TraitRef::new(tcx, goal.predicate.def_id(), [self_ty, generator.resume_ty()])
+            ty::TraitRef::new(tcx, goal.predicate.def_id(), [self_ty, coroutine.resume_ty()])
                 .to_predicate(tcx),
-            // Technically, we need to check that the generator types are Sized,
-            // but that's already proven by the generator being WF.
+            // Technically, we need to check that the coroutine types are Sized,
+            // but that's already proven by the coroutine being WF.
             [],
         )
     }
@@ -844,10 +883,10 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
 
             ty::Infer(_) | ty::Bound(_, _) => bug!("unexpected type `{self_ty}`"),
 
-            // Generators have one special built-in candidate, `Unpin`, which
+            // Coroutines have one special built-in candidate, `Unpin`, which
             // takes precedence over the structural auto trait candidate being
             // assembled.
-            ty::Generator(_, _, movability)
+            ty::Coroutine(_, _, movability)
                 if Some(goal.predicate.def_id()) == self.tcx().lang_items().unpin_trait() =>
             {
                 match movability {
@@ -879,8 +918,8 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             | ty::FnDef(_, _)
             | ty::FnPtr(_)
             | ty::Closure(_, _)
-            | ty::Generator(_, _, _)
-            | ty::GeneratorWitness(..)
+            | ty::Coroutine(_, _, _)
+            | ty::CoroutineWitness(..)
             | ty::Never
             | ty::Tuple(_)
             | ty::Adt(_, _)

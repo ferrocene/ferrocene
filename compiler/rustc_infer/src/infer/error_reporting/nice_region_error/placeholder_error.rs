@@ -28,7 +28,7 @@ pub struct Highlighted<'tcx, T> {
 
 impl<'tcx, T> IntoDiagnosticArg for Highlighted<'tcx, T>
 where
-    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>, Error = fmt::Error, Output = FmtPrinter<'a, 'tcx>>,
+    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>>,
 {
     fn into_diagnostic_arg(self) -> rustc_errors::DiagnosticArgValue<'static> {
         rustc_errors::DiagnosticArgValue::Str(self.to_string().into())
@@ -43,14 +43,14 @@ impl<'tcx, T> Highlighted<'tcx, T> {
 
 impl<'tcx, T> fmt::Display for Highlighted<'tcx, T>
 where
-    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>, Error = fmt::Error, Output = FmtPrinter<'a, 'tcx>>,
+    T: for<'a> Print<'tcx, FmtPrinter<'a, 'tcx>>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut printer = ty::print::FmtPrinter::new(self.tcx, Namespace::TypeNS);
         printer.region_highlight_mode = self.highlight;
 
-        let s = self.value.print(printer)?.into_buffer();
-        f.write_str(&s)
+        self.value.print(&mut printer)?;
+        f.write_str(&printer.into_buffer())
     }
 }
 

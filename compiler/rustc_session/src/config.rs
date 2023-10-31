@@ -9,20 +9,19 @@ use crate::utils::{CanonicalizedPath, NativeLib, NativeLibKind};
 use crate::{lint, HashStableContext};
 use crate::{EarlyErrorHandler, Session};
 
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_data_structures::stable_hasher::{StableOrd, ToStableHashKey};
 use rustc_target::abi::Align;
 use rustc_target::spec::LinkSelfContainedComponents;
 use rustc_target::spec::{PanicStrategy, RelocModel, SanitizerSet, SplitDebuginfo};
 use rustc_target::spec::{Target, TargetTriple, TargetWarnings, TARGETS};
 
-use crate::parse::{CrateCheckConfig, CrateConfig};
 use rustc_feature::UnstableFeatures;
 use rustc_span::edition::{Edition, DEFAULT_EDITION, EDITION_NAME_LIST, LATEST_STABLE_EDITION};
 use rustc_span::source_map::{FileName, FilePathMapping};
 use rustc_span::symbol::{sym, Symbol};
-use rustc_span::RealFileName;
 use rustc_span::SourceFileHashAlgorithm;
+use rustc_span::{FileNameDisplayPreference, RealFileName};
 
 use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_errors::{ColorConfig, DiagnosticArgValue, HandlerFlags, IntoDiagnosticArg};
@@ -169,6 +168,9 @@ pub enum MirSpanview {
 pub enum InstrumentCoverage {
     /// Default `-C instrument-coverage` or `-C instrument-coverage=statement`
     All,
+    /// Additionally, instrument branches and output branch coverage.
+    /// `-Zunstable-options -C instrument-coverage=branch`
+    Branch,
     /// `-Zunstable-options -C instrument-coverage=except-unused-generics`
     ExceptUnusedGenerics,
     /// `-Zunstable-options -C instrument-coverage=except-unused-functions`
@@ -1018,6 +1020,32 @@ impl OutputFilenames {
     }
 }
 
+bitflags::bitflags! {
+    /// Scopes used to determined if it need to apply to --remap-path-prefix
+    pub struct RemapPathScopeComponents: u8 {
+        /// Apply remappings to the expansion of std::file!() macro
+        const MACRO = 1 << 0;
+        /// Apply remappings to printed compiler diagnostics
+        const DIAGNOSTICS = 1 << 1;
+        /// Apply remappings to debug information only when they are written to
+        /// compiled executables or libraries, but not when they are in split
+        /// debuginfo files
+        const UNSPLIT_DEBUGINFO = 1 << 2;
+        /// Apply remappings to debug information only when they are written to
+        /// split debug information files, but not in compiled executables or
+        /// libraries
+        const SPLIT_DEBUGINFO = 1 << 3;
+        /// Apply remappings to the paths pointing to split debug information
+        /// files. Does nothing when these files are not generated.
+        const SPLIT_DEBUGINFO_PATH = 1 << 4;
+
+        /// An alias for macro,unsplit-debuginfo,split-debuginfo-path. This
+        /// ensures all paths in compiled executables or libraries are remapped
+        /// but not elsewhere.
+        const OBJECT = Self::MACRO.bits | Self::UNSPLIT_DEBUGINFO.bits | Self::SPLIT_DEBUGINFO_PATH.bits;
+    }
+}
+
 pub fn host_triple() -> &'static str {
     // Get the host triple out of the build environment. This ensures that our
     // idea of the host triple is the same as for the set of libraries we've
@@ -1028,6 +1056,22 @@ pub fn host_triple() -> &'static str {
     // compile time) the target triple that this rustc is built with and
     // calling that (at runtime) the host triple.
     (option_env!("CFG_COMPILER_HOST_TRIPLE")).expect("CFG_COMPILER_HOST_TRIPLE")
+}
+
+fn file_path_mapping(
+    remap_path_prefix: Vec<(PathBuf, PathBuf)>,
+    unstable_opts: &UnstableOptions,
+) -> FilePathMapping {
+    FilePathMapping::new(
+        remap_path_prefix.clone(),
+        if unstable_opts.remap_path_scope.contains(RemapPathScopeComponents::DIAGNOSTICS)
+            && !remap_path_prefix.is_empty()
+        {
+            FileNameDisplayPreference::Remapped
+        } else {
+            FileNameDisplayPreference::Local
+        },
+    )
 }
 
 impl Default for Options {
@@ -1085,7 +1129,7 @@ impl Options {
     }
 
     pub fn file_path_mapping(&self) -> FilePathMapping {
-        FilePathMapping::new(self.remap_path_prefix.clone())
+        file_path_mapping(self.remap_path_prefix.clone(), &self.unstable_opts)
     }
 
     /// Returns `true` if there will be an output file generated.
@@ -1203,8 +1247,8 @@ pub const fn default_lib_output() -> CrateType {
     CrateType::Rlib
 }
 
-fn default_configuration(sess: &Session) -> CrateConfig {
-    // NOTE: This should be kept in sync with `CrateCheckConfig::fill_well_known` below.
+fn default_configuration(sess: &Session) -> Cfg {
+    // NOTE: This should be kept in sync with `CheckCfg::fill_well_known` below.
     let end = &sess.target.endian;
     let arch = &sess.target.arch;
     let wordsz = sess.target.pointer_width.to_string();
@@ -1220,7 +1264,7 @@ fn default_configuration(sess: &Session) -> CrateConfig {
         sess.emit_fatal(err);
     });
 
-    let mut ret = CrateConfig::default();
+    let mut ret = Cfg::default();
     ret.reserve(7); // the minimum number of insertions
     // Target bindings.
     ret.insert((sym::target_os, Some(Symbol::intern(os))));
@@ -1313,55 +1357,22 @@ fn default_configuration(sess: &Session) -> CrateConfig {
     ret
 }
 
-/// Converts the crate `cfg!` configuration from `String` to `Symbol`.
-/// `rustc_interface::interface::Config` accepts this in the compiler configuration,
-/// but the symbol interner is not yet set up then, so we must convert it later.
-pub fn to_crate_config(cfg: FxHashSet<(String, Option<String>)>) -> CrateConfig {
-    cfg.into_iter().map(|(a, b)| (Symbol::intern(&a), b.map(|b| Symbol::intern(&b)))).collect()
-}
+/// The parsed `--cfg` options that define the compilation environment of the
+/// crate, used to drive conditional compilation.
+///
+/// An `FxIndexSet` is used to ensure deterministic ordering of error messages
+/// relating to `--cfg`.
+pub type Cfg = FxIndexSet<(Symbol, Option<Symbol>)>;
 
-/// The parsed `--check-cfg` options
-pub struct CheckCfg<T = String> {
+/// The parsed `--check-cfg` options.
+#[derive(Default)]
+pub struct CheckCfg {
     /// Is well known names activated
     pub exhaustive_names: bool,
     /// Is well known values activated
     pub exhaustive_values: bool,
     /// All the expected values for a config name
-    pub expecteds: FxHashMap<T, ExpectedValues<T>>,
-}
-
-impl<T> Default for CheckCfg<T> {
-    fn default() -> Self {
-        CheckCfg {
-            exhaustive_names: false,
-            exhaustive_values: false,
-            expecteds: FxHashMap::default(),
-        }
-    }
-}
-
-impl<T> CheckCfg<T> {
-    fn map_data<O: Eq + Hash>(self, f: impl Fn(T) -> O) -> CheckCfg<O> {
-        CheckCfg {
-            exhaustive_names: self.exhaustive_names,
-            exhaustive_values: self.exhaustive_values,
-            expecteds: self
-                .expecteds
-                .into_iter()
-                .map(|(name, values)| {
-                    (
-                        f(name),
-                        match values {
-                            ExpectedValues::Some(values) => ExpectedValues::Some(
-                                values.into_iter().map(|b| b.map(|b| f(b))).collect(),
-                            ),
-                            ExpectedValues::Any => ExpectedValues::Any,
-                        },
-                    )
-                })
-                .collect(),
-        }
-    }
+    pub expecteds: FxHashMap<Symbol, ExpectedValues<Symbol>>,
 }
 
 pub enum ExpectedValues<T> {
@@ -1396,14 +1407,7 @@ impl<'a, T: Eq + Hash + Copy + 'a> Extend<&'a T> for ExpectedValues<T> {
     }
 }
 
-/// Converts the crate `--check-cfg` options from `String` to `Symbol`.
-/// `rustc_interface::interface::Config` accepts this in the compiler configuration,
-/// but the symbol interner is not yet set up then, so we must convert it later.
-pub fn to_crate_check_config(cfg: CheckCfg) -> CrateCheckConfig {
-    cfg.map_data(|s| Symbol::intern(&s))
-}
-
-impl CrateCheckConfig {
+impl CheckCfg {
     pub fn fill_well_known(&mut self, current_target: &Target) {
         if !self.exhaustive_values && !self.exhaustive_names {
             return;
@@ -1543,7 +1547,7 @@ impl CrateCheckConfig {
     }
 }
 
-pub fn build_configuration(sess: &Session, mut user_cfg: CrateConfig) -> CrateConfig {
+pub fn build_configuration(sess: &Session, mut user_cfg: Cfg) -> Cfg {
     // Combine the configuration requested by the session (command line) with
     // some default and generated configuration items.
     let default_cfg = default_configuration(sess);
@@ -2694,29 +2698,25 @@ pub fn build_session_options(
         _ => {}
     }
 
-    // Handle both `-Z instrument-coverage` and `-C instrument-coverage`; the latter takes
-    // precedence.
-    match (cg.instrument_coverage, unstable_opts.instrument_coverage) {
-        (Some(ic_c), Some(ic_z)) if ic_c != ic_z => {
-            handler.early_error(
-                "incompatible values passed for `-C instrument-coverage` \
-                and `-Z instrument-coverage`",
-            );
+    // Check for unstable values of `-C instrument-coverage`.
+    // This is what prevents them from being used on stable compilers.
+    match cg.instrument_coverage {
+        // Stable values:
+        InstrumentCoverage::All | InstrumentCoverage::Off => {}
+        // Unstable values:
+        InstrumentCoverage::Branch
+        | InstrumentCoverage::ExceptUnusedFunctions
+        | InstrumentCoverage::ExceptUnusedGenerics => {
+            if !unstable_opts.unstable_options {
+                handler.early_error(
+                    "`-C instrument-coverage=branch` and `-C instrument-coverage=except-*` \
+                    require `-Z unstable-options`",
+                );
+            }
         }
-        (Some(InstrumentCoverage::Off | InstrumentCoverage::All), _) => {}
-        (Some(_), _) if !unstable_opts.unstable_options => {
-            handler.early_error("`-C instrument-coverage=except-*` requires `-Z unstable-options`");
-        }
-        (None, None) => {}
-        (None, ic) => {
-            handler
-                .early_warn("`-Z instrument-coverage` is deprecated; use `-C instrument-coverage`");
-            cg.instrument_coverage = ic;
-        }
-        _ => {}
     }
 
-    if cg.instrument_coverage.is_some() && cg.instrument_coverage != Some(InstrumentCoverage::Off) {
+    if cg.instrument_coverage != InstrumentCoverage::Off {
         if cg.profile_generate.enabled() || cg.profile_use.is_some() {
             handler.early_error(
                 "option `-C instrument-coverage` is not compatible with either `-C profile-use` \
@@ -2867,7 +2867,7 @@ pub fn build_session_options(
         handler.early_error(format!("Current directory is invalid: {e}"));
     });
 
-    let remap = FilePathMapping::new(remap_path_prefix.clone());
+    let remap = file_path_mapping(remap_path_prefix.clone(), &unstable_opts);
     let (path, remapped) = remap.map_prefix(&working_dir);
     let working_dir = if remapped {
         RealFileName::Remapped { virtual_name: path.into_owned(), local_path: Some(working_dir) }
@@ -3173,8 +3173,8 @@ pub(crate) mod dep_tracking {
         BranchProtection, CFGuard, CFProtection, CrateType, DebugInfo, DebugInfoCompression,
         ErrorOutputType, InstrumentCoverage, InstrumentXRay, LinkerPluginLto, LocationDetail,
         LtoCli, OomStrategy, OptLevel, OutFileName, OutputType, OutputTypes, Polonius,
-        ResolveDocLinks, SourceFileHashAlgorithm, SplitDwarfKind, SwitchWithOptPath,
-        SymbolManglingVersion, TraitSolver, TrimmedDefPaths,
+        RemapPathScopeComponents, ResolveDocLinks, SourceFileHashAlgorithm, SplitDwarfKind,
+        SwitchWithOptPath, SymbolManglingVersion, TraitSolver, TrimmedDefPaths,
     };
     use crate::lint;
     use crate::options::WasiExecModel;
@@ -3268,6 +3268,7 @@ pub(crate) mod dep_tracking {
         StackProtector,
         SwitchWithOptPath,
         SymbolManglingVersion,
+        RemapPathScopeComponents,
         SourceFileHashAlgorithm,
         TrimmedDefPaths,
         OutFileName,
@@ -3420,9 +3421,10 @@ impl DumpMonoStatsFormat {
 
 /// `-Zpolonius` values, enabling the borrow checker polonius analysis, and which version: legacy,
 /// or future prototype.
-#[derive(Clone, Copy, PartialEq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Hash, Debug, Default)]
 pub enum Polonius {
     /// The default value: disabled.
+    #[default]
     Off,
 
     /// Legacy version, using datalog and the `polonius-engine` crate. Historical value for `-Zpolonius`.
@@ -3430,12 +3432,6 @@ pub enum Polonius {
 
     /// In-tree prototype, extending the NLL infrastructure.
     Next,
-}
-
-impl Default for Polonius {
-    fn default() -> Self {
-        Polonius::Off
-    }
 }
 
 impl Polonius {

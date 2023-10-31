@@ -13,21 +13,24 @@
 //!
 //! This API is completely unstable and subject to change.
 
-#![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
+// tidy-alphabetical-start
+#![allow(internal_features)]
 #![cfg_attr(not(bootstrap), doc(rust_logo))]
 #![cfg_attr(not(bootstrap), feature(rustdoc_internals))]
-#![feature(array_windows)]
-#![feature(if_let_guard)]
-#![feature(negative_impls)]
-#![feature(min_specialization)]
-#![feature(rustc_attrs)]
-#![feature(let_chains)]
-#![feature(round_char_boundary)]
-#![feature(read_buf)]
-#![feature(new_uninit)]
-#![deny(rustc::untranslatable_diagnostic)]
 #![deny(rustc::diagnostic_outside_of_impl)]
-#![allow(internal_features)]
+#![deny(rustc::untranslatable_diagnostic)]
+#![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
+#![feature(array_windows)]
+#![feature(cfg_match)]
+#![feature(if_let_guard)]
+#![feature(let_chains)]
+#![feature(min_specialization)]
+#![feature(negative_impls)]
+#![feature(new_uninit)]
+#![feature(read_buf)]
+#![feature(round_char_boundary)]
+#![feature(rustc_attrs)]
+// tidy-alphabetical-end
 
 #[macro_use]
 extern crate rustc_macros;
@@ -370,7 +373,7 @@ impl FileName {
         }
     }
 
-    pub fn prefer_remapped(&self) -> FileNameDisplay<'_> {
+    pub fn prefer_remapped_unconditionaly(&self) -> FileNameDisplay<'_> {
         FileNameDisplay { inner: self, display_pref: FileNameDisplayPreference::Remapped }
     }
 
@@ -2244,7 +2247,7 @@ where
 
 /// Useful type to use with `Result<>` indicate that an error has already
 /// been reported to the user, so no need to continue checking.
-#[derive(Clone, Copy, Debug, Encodable, Decodable, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[derive(HashStable_Generic)]
 pub struct ErrorGuaranteed(());
 
@@ -2254,5 +2257,22 @@ impl ErrorGuaranteed {
     #[deprecated = "`Session::delay_span_bug` should be preferred over this function"]
     pub fn unchecked_claim_error_was_emitted() -> Self {
         ErrorGuaranteed(())
+    }
+}
+
+impl<E: rustc_serialize::Encoder> Encodable<E> for ErrorGuaranteed {
+    #[inline]
+    fn encode(&self, _e: &mut E) {
+        panic!(
+            "should never serialize an `ErrorGuaranteed`, as we do not write metadata or incremental caches in case errors occurred"
+        )
+    }
+}
+impl<D: rustc_serialize::Decoder> Decodable<D> for ErrorGuaranteed {
+    #[inline]
+    fn decode(_d: &mut D) -> ErrorGuaranteed {
+        panic!(
+            "`ErrorGuaranteed` should never have been serialized to metadata or incremental caches"
+        )
     }
 }

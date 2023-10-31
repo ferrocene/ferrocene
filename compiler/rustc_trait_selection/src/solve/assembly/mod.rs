@@ -37,6 +37,8 @@ pub(super) trait GoalKind<'tcx>:
 
     fn trait_ref(self, tcx: TyCtxt<'tcx>) -> ty::TraitRef<'tcx>;
 
+    fn polarity(self) -> ty::ImplPolarity;
+
     fn with_self_ty(self, tcx: TyCtxt<'tcx>, self_ty: Ty<'tcx>) -> Self;
 
     fn trait_def_id(self, tcx: TyCtxt<'tcx>) -> DefId;
@@ -191,18 +193,26 @@ pub(super) trait GoalKind<'tcx>:
         goal: Goal<'tcx, Self>,
     ) -> QueryResult<'tcx>;
 
-    /// A generator (that comes from an `async` desugaring) is known to implement
-    /// `Future<Output = O>`, where `O` is given by the generator's return type
+    /// A coroutine (that comes from an `async` desugaring) is known to implement
+    /// `Future<Output = O>`, where `O` is given by the coroutine's return type
     /// that was computed during type-checking.
     fn consider_builtin_future_candidate(
         ecx: &mut EvalCtxt<'_, 'tcx>,
         goal: Goal<'tcx, Self>,
     ) -> QueryResult<'tcx>;
 
-    /// A generator (that doesn't come from an `async` desugaring) is known to
-    /// implement `Generator<R, Yield = Y, Return = O>`, given the resume, yield,
-    /// and return types of the generator computed during type-checking.
-    fn consider_builtin_generator_candidate(
+    /// A coroutine (that comes from a `gen` desugaring) is known to implement
+    /// `Iterator<Item = O>`, where `O` is given by the generator's yield type
+    /// that was computed during type-checking.
+    fn consider_builtin_iterator_candidate(
+        ecx: &mut EvalCtxt<'_, 'tcx>,
+        goal: Goal<'tcx, Self>,
+    ) -> QueryResult<'tcx>;
+
+    /// A coroutine (that doesn't come from an `async` or `gen` desugaring) is known to
+    /// implement `Coroutine<R, Yield = Y, Return = O>`, given the resume, yield,
+    /// and return types of the coroutine computed during type-checking.
+    fn consider_builtin_coroutine_candidate(
         ecx: &mut EvalCtxt<'_, 'tcx>,
         goal: Goal<'tcx, Self>,
     ) -> QueryResult<'tcx>;
@@ -410,7 +420,7 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             | ty::FnPtr(_)
             | ty::Dynamic(_, _, _)
             | ty::Closure(_, _)
-            | ty::Generator(_, _, _)
+            | ty::Coroutine(_, _, _)
             | ty::Never
             | ty::Tuple(_) => {
                 let simp =
@@ -467,9 +477,9 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             ty::Alias(_, _) | ty::Placeholder(..) | ty::Error(_) => (),
 
             // FIXME: These should ideally not exist as a self type. It would be nice for
-            // the builtin auto trait impls of generators to instead directly recurse
+            // the builtin auto trait impls of coroutines to instead directly recurse
             // into the witness.
-            ty::GeneratorWitness(..) => (),
+            ty::CoroutineWitness(..) => (),
 
             // These variants should not exist as a self type.
             ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
@@ -552,8 +562,10 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             G::consider_builtin_pointee_candidate(self, goal)
         } else if lang_items.future_trait() == Some(trait_def_id) {
             G::consider_builtin_future_candidate(self, goal)
+        } else if lang_items.iterator_trait() == Some(trait_def_id) {
+            G::consider_builtin_iterator_candidate(self, goal)
         } else if lang_items.gen_trait() == Some(trait_def_id) {
-            G::consider_builtin_generator_candidate(self, goal)
+            G::consider_builtin_coroutine_candidate(self, goal)
         } else if lang_items.discriminant_kind_trait() == Some(trait_def_id) {
             G::consider_builtin_discriminant_kind_candidate(self, goal)
         } else if lang_items.destruct_trait() == Some(trait_def_id) {
@@ -620,8 +632,8 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             | ty::FnPtr(_)
             | ty::Dynamic(..)
             | ty::Closure(..)
-            | ty::Generator(..)
-            | ty::GeneratorWitness(..)
+            | ty::Coroutine(..)
+            | ty::CoroutineWitness(..)
             | ty::Never
             | ty::Tuple(_)
             | ty::Param(_)
@@ -776,8 +788,8 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
             | ty::FnPtr(_)
             | ty::Alias(..)
             | ty::Closure(..)
-            | ty::Generator(..)
-            | ty::GeneratorWitness(..)
+            | ty::Coroutine(..)
+            | ty::CoroutineWitness(..)
             | ty::Never
             | ty::Tuple(_)
             | ty::Param(_)

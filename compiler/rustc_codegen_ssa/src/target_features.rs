@@ -244,38 +244,38 @@ const MIPS_ALLOWED_FEATURES: &[(&str, Option<Symbol>)] = &[
 
 const RISCV_ALLOWED_FEATURES: &[(&str, Option<Symbol>)] = &[
     // tidy-alphabetical-start
-    ("a", Some(sym::riscv_target_feature)),
-    ("c", Some(sym::riscv_target_feature)),
+    ("a", None),
+    ("c", None),
     ("d", Some(sym::riscv_target_feature)),
     ("e", Some(sym::riscv_target_feature)),
     ("f", Some(sym::riscv_target_feature)),
-    ("m", Some(sym::riscv_target_feature)),
+    ("m", None),
     ("relax", Some(sym::riscv_target_feature)),
     ("unaligned-scalar-mem", Some(sym::riscv_target_feature)),
     ("v", Some(sym::riscv_target_feature)),
-    ("zba", Some(sym::riscv_target_feature)),
-    ("zbb", Some(sym::riscv_target_feature)),
-    ("zbc", Some(sym::riscv_target_feature)),
-    ("zbkb", Some(sym::riscv_target_feature)),
-    ("zbkc", Some(sym::riscv_target_feature)),
-    ("zbkx", Some(sym::riscv_target_feature)),
-    ("zbs", Some(sym::riscv_target_feature)),
+    ("zba", None),
+    ("zbb", None),
+    ("zbc", None),
+    ("zbkb", None),
+    ("zbkc", None),
+    ("zbkx", None),
+    ("zbs", None),
     ("zdinx", Some(sym::riscv_target_feature)),
     ("zfh", Some(sym::riscv_target_feature)),
     ("zfhmin", Some(sym::riscv_target_feature)),
     ("zfinx", Some(sym::riscv_target_feature)),
     ("zhinx", Some(sym::riscv_target_feature)),
     ("zhinxmin", Some(sym::riscv_target_feature)),
-    ("zk", Some(sym::riscv_target_feature)),
-    ("zkn", Some(sym::riscv_target_feature)),
-    ("zknd", Some(sym::riscv_target_feature)),
-    ("zkne", Some(sym::riscv_target_feature)),
-    ("zknh", Some(sym::riscv_target_feature)),
-    ("zkr", Some(sym::riscv_target_feature)),
-    ("zks", Some(sym::riscv_target_feature)),
-    ("zksed", Some(sym::riscv_target_feature)),
-    ("zksh", Some(sym::riscv_target_feature)),
-    ("zkt", Some(sym::riscv_target_feature)),
+    ("zk", None),
+    ("zkn", None),
+    ("zknd", None),
+    ("zkne", None),
+    ("zknh", None),
+    ("zkr", None),
+    ("zks", None),
+    ("zksed", None),
+    ("zksh", None),
+    ("zkt", None),
     // tidy-alphabetical-end
 ];
 
@@ -342,6 +342,19 @@ const CSKY_ALLOWED_FEATURES: &[(&str, Option<Symbol>)] = &[
     ("hard-float-abi", Some(sym::csky_target_feature)),
     // tidy-alphabetical-end
 ];
+
+const LOONGARCH_ALLOWED_FEATURES: &[(&str, Option<Symbol>)] = &[
+    // tidy-alphabetical-start
+    ("d", Some(sym::loongarch_target_feature)),
+    ("f", Some(sym::loongarch_target_feature)),
+    ("lasx", Some(sym::loongarch_target_feature)),
+    ("lbt", Some(sym::loongarch_target_feature)),
+    ("lsx", Some(sym::loongarch_target_feature)),
+    ("lvz", Some(sym::loongarch_target_feature)),
+    ("ual", Some(sym::loongarch_target_feature)),
+    // tidy-alphabetical-end
+];
+
 /// When rustdoc is running, provide a list of all known features so that all their respective
 /// primitives may be documented.
 ///
@@ -358,6 +371,7 @@ pub fn all_known_features() -> impl Iterator<Item = (&'static str, Option<Symbol
         .chain(WASM_ALLOWED_FEATURES.iter())
         .chain(BPF_ALLOWED_FEATURES.iter())
         .chain(CSKY_ALLOWED_FEATURES)
+        .chain(LOONGARCH_ALLOWED_FEATURES)
         .cloned()
 }
 
@@ -373,6 +387,7 @@ pub fn supported_target_features(sess: &Session) -> &'static [(&'static str, Opt
         "wasm32" | "wasm64" => WASM_ALLOWED_FEATURES,
         "bpf" => BPF_ALLOWED_FEATURES,
         "csky" => CSKY_ALLOWED_FEATURES,
+        "loongarch64" => LOONGARCH_ALLOWED_FEATURES,
         _ => &[],
     }
 }
@@ -445,6 +460,7 @@ pub fn from_target_feature(
                 Some(sym::bpf_target_feature) => rust_features.bpf_target_feature,
                 Some(sym::aarch64_ver_target_feature) => rust_features.aarch64_ver_target_feature,
                 Some(sym::csky_target_feature) => rust_features.csky_target_feature,
+                Some(sym::loongarch_target_feature) => rust_features.loongarch_target_feature,
                 Some(name) => bug!("unknown target feature gate {}", name),
                 None => true,
             };

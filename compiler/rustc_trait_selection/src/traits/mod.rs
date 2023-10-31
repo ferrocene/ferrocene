@@ -41,18 +41,13 @@ use std::ops::ControlFlow;
 
 pub(crate) use self::project::{needs_normalization, BoundVarReplacer, PlaceholderReplacer};
 
-pub use self::FulfillmentErrorCode::*;
-pub use self::ImplSource::*;
-pub use self::ObligationCauseCode::*;
-pub use self::SelectionError::*;
-
 pub use self::coherence::{add_placeholder_note, orphan_check, overlapping_impls};
 pub use self::coherence::{OrphanCheckErr, OverlapResult};
 pub use self::engine::{ObligationCtxt, TraitEngineExt};
 pub use self::fulfill::{FulfillmentContext, PendingPredicateObligation};
 pub use self::object_safety::astconv_object_safety_violations;
 pub use self::object_safety::is_vtable_safe_method;
-pub use self::object_safety::MethodViolationCode;
+pub use self::object_safety::object_safety_violations_for_assoc_item;
 pub use self::object_safety::ObjectSafetyViolation;
 pub use self::project::NormalizeExt;
 pub use self::project::{normalize_inherent_projection, normalize_projection_type};

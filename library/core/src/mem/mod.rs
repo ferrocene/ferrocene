@@ -909,6 +909,10 @@ pub fn take<T: Default>(dest: &mut T) -> T {
 #[rustc_const_unstable(feature = "const_replace", issue = "83164")]
 #[cfg_attr(not(test), rustc_diagnostic_item = "mem_replace")]
 pub const fn replace<T>(dest: &mut T, src: T) -> T {
+    // It may be tempting to use `swap` to avoid `unsafe` here. Don't!
+    // The compiler optimizes the implementation below to two `memcpy`s
+    // while `swap` would require at least three. See PR#83022 for details.
+
     // SAFETY: We read from `dest` but directly write `src` into it afterwards,
     // such that the old value is not duplicated. Nothing is dropped and
     // nothing here can panic.
@@ -1202,7 +1206,7 @@ impl<T> fmt::Debug for Discriminant<T> {
 /// // assert_eq!(0, unsafe { std::mem::transmute::<_, u8>(std::mem::discriminant(&unit_like)) });
 /// ```
 #[stable(feature = "discriminant_value", since = "1.21.0")]
-#[rustc_const_unstable(feature = "const_discriminant", issue = "69821")]
+#[rustc_const_stable(feature = "const_discriminant", since = "CURRENT_RUSTC_VERSION")]
 #[cfg_attr(not(test), rustc_diagnostic_item = "mem_discriminant")]
 #[cfg_attr(miri, track_caller)] // even without panics, this helps for Miri backtraces
 pub const fn discriminant<T>(v: &T) -> Discriminant<T> {

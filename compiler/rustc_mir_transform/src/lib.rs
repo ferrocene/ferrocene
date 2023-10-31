@@ -2,6 +2,7 @@
 #![deny(rustc::untranslatable_diagnostic)]
 #![deny(rustc::diagnostic_outside_of_impl)]
 #![feature(box_patterns)]
+#![feature(cow_is_borrowed)]
 #![feature(decl_macro)]
 #![feature(is_sorted)]
 #![feature(let_chains)]
@@ -20,6 +21,7 @@ extern crate tracing;
 #[macro_use]
 extern crate rustc_middle;
 
+use hir::ConstContext;
 use required_consts::RequiredConstsVisitor;
 use rustc_const_eval::util;
 use rustc_data_structures::fx::FxIndexSet;
@@ -61,6 +63,8 @@ mod const_goto;
 mod const_prop;
 mod const_prop_lint;
 mod copy_prop;
+mod coroutine;
+mod cost_checker;
 mod coverage;
 mod cross_crate_inline;
 mod ctfe_limit;
@@ -77,10 +81,10 @@ mod elaborate_drops;
 mod errors;
 mod ffi_unwind_calls;
 mod function_item_references;
-mod generator;
 mod gvn;
 pub mod inline;
 mod instsimplify;
+mod jump_threading;
 mod large_enums;
 mod lower_intrinsics;
 mod lower_slice_len;
@@ -132,7 +136,7 @@ pub fn provide(providers: &mut Providers) {
         mir_promoted,
         mir_drops_elaborated_and_const_checked,
         mir_for_ctfe,
-        mir_generator_witnesses: generator::mir_generator_witnesses,
+        mir_coroutine_witnesses: coroutine::mir_coroutine_witnesses,
         optimized_mir,
         is_mir_available,
         is_ctfe_mir_available: |tcx, did| is_mir_available(tcx, did),
@@ -249,8 +253,13 @@ fn mir_const_qualif(tcx: TyCtxt<'_>, def: LocalDefId) -> ConstQualifs {
     let const_kind = tcx.hir().body_const_context(def);
 
     // No need to const-check a non-const `fn`.
-    if const_kind.is_none() {
-        return Default::default();
+    match const_kind {
+        Some(ConstContext::Const { .. } | ConstContext::Static(_))
+        | Some(ConstContext::ConstFn) => {}
+        None => span_bug!(
+            tcx.def_span(def),
+            "`mir_const_qualif` should only be called on const fns and const items"
+        ),
     }
 
     // N.B., this `borrow()` is guaranteed to be valid (i.e., the value
@@ -315,7 +324,21 @@ fn mir_promoted(
     // Ensure that we compute the `mir_const_qualif` for constants at
     // this point, before we steal the mir-const result.
     // Also this means promotion can rely on all const checks having been done.
-    let const_qualifs = tcx.mir_const_qualif(def);
+
+    let const_qualifs = match tcx.def_kind(def) {
+        DefKind::Fn | DefKind::AssocFn | DefKind::Closure
+            if tcx.constness(def) == hir::Constness::Const
+                || tcx.is_const_default_method(def.to_def_id()) =>
+        {
+            tcx.mir_const_qualif(def)
+        }
+        DefKind::AssocConst
+        | DefKind::Const
+        | DefKind::Static(_)
+        | DefKind::InlineConst
+        | DefKind::AnonConst => tcx.mir_const_qualif(def),
+        _ => ConstQualifs::default(),
+    };
     let mut body = tcx.mir_const(def).steal();
     if let Some(error_reported) = const_qualifs.tainted_by_errors {
         body.tainted_by_errors = Some(error_reported);
@@ -375,15 +398,15 @@ fn inner_mir_for_ctfe(tcx: TyCtxt<'_>, def: LocalDefId) -> Body<'_> {
 /// mir borrowck *before* doing so in order to ensure that borrowck can be run and doesn't
 /// end up missing the source MIR due to stealing happening.
 fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &Steal<Body<'_>> {
-    if let DefKind::Generator = tcx.def_kind(def) {
-        tcx.ensure_with_value().mir_generator_witnesses(def);
+    if let DefKind::Coroutine = tcx.def_kind(def) {
+        tcx.ensure_with_value().mir_coroutine_witnesses(def);
     }
     let mir_borrowck = tcx.mir_borrowck(def);
 
     let is_fn_like = tcx.def_kind(def).is_fn_like();
     if is_fn_like {
         // Do not compute the mir call graph without said call graph actually being used.
-        if inline::Inline.is_enabled(&tcx.sess) {
+        if pm::should_run_pass(tcx, &inline::Inline) {
             tcx.ensure_with_value().mir_inliner_callees(ty::InstanceDef::Item(def.to_def_id()));
         }
     }
@@ -509,7 +532,7 @@ fn run_runtime_lowering_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
         // `AddRetag` needs to run after `ElaborateDrops`. Otherwise it should run fairly late,
         // but before optimizations begin.
         &elaborate_box_derefs::ElaborateBoxDerefs,
-        &generator::StateTransform,
+        &coroutine::StateTransform,
         &add_retag::AddRetag,
         &Lint(const_prop_lint::ConstPropLint),
     ];
@@ -568,9 +591,11 @@ fn run_optimization_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
             &separate_const_switch::SeparateConstSwitch,
             &const_prop::ConstProp,
             &gvn::GVN,
+            &simplify::SimplifyLocals::AfterGVN,
             &dataflow_const_prop::DataflowConstProp,
             &const_debuginfo::ConstDebugInfo,
             &o1(simplify_branches::SimplifyConstCondition::AfterConstProp),
+            &jump_threading::JumpThreading,
             &early_otherwise_branch::EarlyOtherwiseBranch,
             &simplify_comparison_integral::SimplifyComparisonIntegral,
             &dead_store_elimination::DeadStoreElimination,

@@ -1,10 +1,9 @@
 use crate::llvm;
 
-use crate::abi::Abi;
 use crate::builder::Builder;
 use crate::common::CodegenCx;
 use crate::coverageinfo::ffi::{CounterExpression, CounterMappingRegion};
-use crate::coverageinfo::map_data::FunctionCoverage;
+use crate::coverageinfo::map_data::FunctionCoverageCollector;
 
 use libc::c_uint;
 use rustc_codegen_ssa::traits::{
@@ -12,17 +11,12 @@ use rustc_codegen_ssa::traits::{
     StaticMethods,
 };
 use rustc_data_structures::fx::FxHashMap;
-use rustc_hir as hir;
-use rustc_hir::def_id::DefId;
 use rustc_llvm::RustString;
 use rustc_middle::bug;
-use rustc_middle::mir::coverage::{CounterId, CoverageKind};
+use rustc_middle::mir::coverage::CoverageKind;
 use rustc_middle::mir::Coverage;
-use rustc_middle::ty;
-use rustc_middle::ty::layout::{FnAbiOf, HasTyCtxt};
-use rustc_middle::ty::GenericArgs;
+use rustc_middle::ty::layout::HasTyCtxt;
 use rustc_middle::ty::Instance;
-use rustc_middle::ty::Ty;
 
 use std::cell::RefCell;
 
@@ -30,14 +24,13 @@ pub(crate) mod ffi;
 pub(crate) mod map_data;
 pub mod mapgen;
 
-const UNUSED_FUNCTION_COUNTER_ID: CounterId = CounterId::START;
-
 const VAR_ALIGN_BYTES: usize = 8;
 
 /// A context object for maintaining all state needed by the coverageinfo module.
 pub struct CrateCoverageContext<'ll, 'tcx> {
     /// Coverage data for each instrumented function identified by DefId.
-    pub(crate) function_coverage_map: RefCell<FxHashMap<Instance<'tcx>, FunctionCoverage<'tcx>>>,
+    pub(crate) function_coverage_map:
+        RefCell<FxHashMap<Instance<'tcx>, FunctionCoverageCollector<'tcx>>>,
     pub(crate) pgo_func_name_var_map: RefCell<FxHashMap<Instance<'tcx>, &'ll llvm::Value>>,
 }
 
@@ -49,7 +42,9 @@ impl<'ll, 'tcx> CrateCoverageContext<'ll, 'tcx> {
         }
     }
 
-    pub fn take_function_coverage_map(&self) -> FxHashMap<Instance<'tcx>, FunctionCoverage<'tcx>> {
+    pub fn take_function_coverage_map(
+        &self,
+    ) -> FxHashMap<Instance<'tcx>, FunctionCoverageCollector<'tcx>> {
         self.function_coverage_map.replace(FxHashMap::default())
     }
 }
@@ -76,56 +71,56 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
             bug!("Could not get the `coverage_context`");
         }
     }
-
-    /// Functions with MIR-based coverage are normally codegenned _only_ if
-    /// called. LLVM coverage tools typically expect every function to be
-    /// defined (even if unused), with at least one call to LLVM intrinsic
-    /// `instrprof.increment`.
-    ///
-    /// Codegen a small function that will never be called, with one counter
-    /// that will never be incremented.
-    ///
-    /// For used/called functions, the coverageinfo was already added to the
-    /// `function_coverage_map` (keyed by function `Instance`) during codegen.
-    /// But in this case, since the unused function was _not_ previously
-    /// codegenned, collect the coverage `CodeRegion`s from the MIR and add
-    /// them. Since the function is never called, all of its `CodeRegion`s can be
-    /// added as `unreachable_region`s.
-    fn define_unused_fn(&self, def_id: DefId) {
-        let instance = declare_unused_fn(self, def_id);
-        codegen_unused_fn_and_counter(self, instance);
-        add_unused_function_coverage(self, instance, def_id);
-    }
 }
 
 impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
+    #[instrument(level = "debug", skip(self))]
     fn add_coverage(&mut self, instance: Instance<'tcx>, coverage: &Coverage) {
+        // Our caller should have already taken care of inlining subtleties,
+        // so we can assume that counter/expression IDs in this coverage
+        // statement are meaningful for the given instance.
+        //
+        // (Either the statement was not inlined and directly belongs to this
+        // instance, or it was inlined *from* this instance.)
+
         let bx = self;
+
+        let Some(function_coverage_info) =
+            bx.tcx.instance_mir(instance.def).function_coverage_info.as_deref()
+        else {
+            debug!("function has a coverage statement but no coverage info");
+            return;
+        };
 
         let Some(coverage_context) = bx.coverage_context() else { return };
         let mut coverage_map = coverage_context.function_coverage_map.borrow_mut();
         let func_coverage = coverage_map
             .entry(instance)
-            .or_insert_with(|| FunctionCoverage::new(bx.tcx(), instance));
+            .or_insert_with(|| FunctionCoverageCollector::new(instance, function_coverage_info));
 
-        let Coverage { kind, code_regions } = coverage;
+        let Coverage { kind } = coverage;
         match *kind {
-            CoverageKind::Counter { function_source_hash, id } => {
-                debug!(
-                    "ensuring function source hash is set for instance={:?}; function_source_hash={}",
-                    instance, function_source_hash,
-                );
-                func_coverage.set_function_source_hash(function_source_hash);
-                func_coverage.add_counter(id, code_regions);
+            CoverageKind::CounterIncrement { id } => {
+                func_coverage.mark_counter_id_seen(id);
                 // We need to explicitly drop the `RefMut` before calling into `instrprof_increment`,
                 // as that needs an exclusive borrow.
                 drop(coverage_map);
 
-                let coverageinfo = bx.tcx().coverageinfo(instance.def);
+                // The number of counters passed to `llvm.instrprof.increment` might
+                // be smaller than the number originally inserted by the instrumentor,
+                // if some high-numbered counters were removed by MIR optimizations.
+                // If so, LLVM's profiler runtime will use fewer physical counters.
+                let num_counters =
+                    bx.tcx().coverage_ids_info(instance.def).max_counter_id.as_u32() + 1;
+                assert!(
+                    num_counters as usize <= function_coverage_info.num_counters,
+                    "num_counters disagreement: query says {num_counters} but function info only has {}",
+                    function_coverage_info.num_counters
+                );
 
                 let fn_name = bx.get_pgo_func_name_var(instance);
-                let hash = bx.const_u64(function_source_hash);
-                let num_counters = bx.const_u32(coverageinfo.num_counters);
+                let hash = bx.const_u64(function_coverage_info.function_source_hash);
+                let num_counters = bx.const_u32(num_counters);
                 let index = bx.const_u32(id.as_u32());
                 debug!(
                     "codegen intrinsic instrprof.increment(fn_name={:?}, hash={:?}, num_counters={:?}, index={:?})",
@@ -133,87 +128,10 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
                 );
                 bx.instrprof_increment(fn_name, hash, num_counters, index);
             }
-            CoverageKind::Expression { id, lhs, op, rhs } => {
-                func_coverage.add_counter_expression(id, lhs, op, rhs, code_regions);
-            }
-            CoverageKind::Unreachable => {
-                func_coverage.add_unreachable_regions(code_regions);
+            CoverageKind::ExpressionUsed { id } => {
+                func_coverage.mark_expression_id_seen(id);
             }
         }
-    }
-}
-
-fn declare_unused_fn<'tcx>(cx: &CodegenCx<'_, 'tcx>, def_id: DefId) -> Instance<'tcx> {
-    let tcx = cx.tcx;
-
-    let instance = Instance::new(
-        def_id,
-        GenericArgs::for_item(tcx, def_id, |param, _| {
-            if let ty::GenericParamDefKind::Lifetime = param.kind {
-                tcx.lifetimes.re_erased.into()
-            } else {
-                tcx.mk_param_from_def(param)
-            }
-        }),
-    );
-
-    let llfn = cx.declare_fn(
-        tcx.symbol_name(instance).name,
-        cx.fn_abi_of_fn_ptr(
-            ty::Binder::dummy(tcx.mk_fn_sig(
-                [Ty::new_unit(tcx)],
-                Ty::new_unit(tcx),
-                false,
-                hir::Unsafety::Unsafe,
-                Abi::Rust,
-            )),
-            ty::List::empty(),
-        ),
-        None,
-    );
-
-    llvm::set_linkage(llfn, llvm::Linkage::PrivateLinkage);
-    llvm::set_visibility(llfn, llvm::Visibility::Default);
-
-    assert!(cx.instances.borrow_mut().insert(instance, llfn).is_none());
-
-    instance
-}
-
-fn codegen_unused_fn_and_counter<'tcx>(cx: &CodegenCx<'_, 'tcx>, instance: Instance<'tcx>) {
-    let llfn = cx.get_fn(instance);
-    let llbb = Builder::append_block(cx, llfn, "unused_function");
-    let mut bx = Builder::build(cx, llbb);
-    let fn_name = bx.get_pgo_func_name_var(instance);
-    let hash = bx.const_u64(0);
-    let num_counters = bx.const_u32(1);
-    let index = bx.const_u32(u32::from(UNUSED_FUNCTION_COUNTER_ID));
-    debug!(
-        "codegen intrinsic instrprof.increment(fn_name={:?}, hash={:?}, num_counters={:?},
-            index={:?}) for unused function: {:?}",
-        fn_name, hash, num_counters, index, instance
-    );
-    bx.instrprof_increment(fn_name, hash, num_counters, index);
-    bx.ret_void();
-}
-
-fn add_unused_function_coverage<'tcx>(
-    cx: &CodegenCx<'_, 'tcx>,
-    instance: Instance<'tcx>,
-    def_id: DefId,
-) {
-    let tcx = cx.tcx;
-
-    let mut function_coverage = FunctionCoverage::unused(tcx, instance);
-    for &code_region in tcx.covered_code_regions(def_id) {
-        let code_region = std::slice::from_ref(code_region);
-        function_coverage.add_unreachable_regions(code_region);
-    }
-
-    if let Some(coverage_context) = cx.coverage_context() {
-        coverage_context.function_coverage_map.borrow_mut().insert(instance, function_coverage);
-    } else {
-        bug!("Could not get the `coverage_context`");
     }
 }
 

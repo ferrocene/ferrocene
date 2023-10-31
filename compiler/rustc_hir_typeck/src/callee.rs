@@ -304,8 +304,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             hir::ExprKind::Block(..),
         ) = (parent_node, callee_node)
         {
-            let fn_decl_span = if hir.body(body).generator_kind
-                == Some(hir::GeneratorKind::Async(hir::AsyncGeneratorKind::Closure))
+            let fn_decl_span = if hir.body(body).coroutine_kind
+                == Some(hir::CoroutineKind::Async(hir::CoroutineSource::Closure))
             {
                 // Actually need to unwrap one more layer of HIR to get to
                 // the _real_ closure...
@@ -786,8 +786,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 tcx.consts.false_
             }
             Some(hir::ConstContext::ConstFn) => {
-                let args = ty::GenericArgs::identity_for_item(tcx, context);
-                args.host_effect_param().expect("ConstContext::Maybe must have host effect param")
+                let host_idx = tcx
+                    .generics_of(context)
+                    .host_effect_index
+                    .expect("ConstContext::Maybe must have host effect param");
+                ty::GenericArgs::identity_for_item(tcx, context).const_at(host_idx)
             }
             None => tcx.consts.true_,
         };

@@ -460,7 +460,7 @@ pub fn type_di_node<'ll, 'tcx>(cx: &CodegenCx<'ll, 'tcx>, t: Ty<'tcx>) -> &'ll D
         }
         ty::FnDef(..) | ty::FnPtr(_) => build_subroutine_type_di_node(cx, unique_type_id),
         ty::Closure(..) => build_closure_env_di_node(cx, unique_type_id),
-        ty::Generator(..) => enums::build_generator_di_node(cx, unique_type_id),
+        ty::Coroutine(..) => enums::build_coroutine_di_node(cx, unique_type_id),
         ty::Adt(def, ..) => match def.adt_kind() {
             AdtKind::Struct => build_struct_type_di_node(cx, unique_type_id),
             AdtKind::Union => build_union_type_di_node(cx, unique_type_id),
@@ -547,48 +547,77 @@ pub fn file_metadata<'ll>(cx: &CodegenCx<'ll, '_>, source_file: &SourceFile) -> 
     ) -> &'ll DIFile {
         debug!(?source_file.name);
 
+        use rustc_session::RemapFileNameExt;
         let (directory, file_name) = match &source_file.name {
             FileName::Real(filename) => {
                 let working_directory = &cx.sess().opts.working_dir;
                 debug!(?working_directory);
 
-                let filename = cx
-                    .sess()
-                    .source_map()
-                    .path_mapping()
-                    .to_embeddable_absolute_path(filename.clone(), working_directory);
+                if cx.sess().should_prefer_remapped_for_codegen() {
+                    let filename = cx
+                        .sess()
+                        .source_map()
+                        .path_mapping()
+                        .to_embeddable_absolute_path(filename.clone(), working_directory);
 
-                // Construct the absolute path of the file
-                let abs_path = filename.remapped_path_if_available();
-                debug!(?abs_path);
+                    // Construct the absolute path of the file
+                    let abs_path = filename.remapped_path_if_available();
+                    debug!(?abs_path);
 
-                if let Ok(rel_path) =
-                    abs_path.strip_prefix(working_directory.remapped_path_if_available())
-                {
-                    // If the compiler's working directory (which also is the DW_AT_comp_dir of
-                    // the compilation unit) is a prefix of the path we are about to emit, then
-                    // only emit the part relative to the working directory.
-                    // Because of path remapping we sometimes see strange things here: `abs_path`
-                    // might actually look like a relative path
-                    // (e.g. `<crate-name-and-version>/src/lib.rs`), so if we emit it without
-                    // taking the working directory into account, downstream tooling will
-                    // interpret it as `<working-directory>/<crate-name-and-version>/src/lib.rs`,
-                    // which makes no sense. Usually in such cases the working directory will also
-                    // be remapped to `<crate-name-and-version>` or some other prefix of the path
-                    // we are remapping, so we end up with
-                    // `<crate-name-and-version>/<crate-name-and-version>/src/lib.rs`.
-                    // By moving the working directory portion into the `directory` part of the
-                    // DIFile, we allow LLVM to emit just the relative path for DWARF, while
-                    // still emitting the correct absolute path for CodeView.
-                    (
-                        working_directory.to_string_lossy(FileNameDisplayPreference::Remapped),
-                        rel_path.to_string_lossy().into_owned(),
-                    )
+                    if let Ok(rel_path) =
+                        abs_path.strip_prefix(working_directory.remapped_path_if_available())
+                    {
+                        // If the compiler's working directory (which also is the DW_AT_comp_dir of
+                        // the compilation unit) is a prefix of the path we are about to emit, then
+                        // only emit the part relative to the working directory.
+                        // Because of path remapping we sometimes see strange things here: `abs_path`
+                        // might actually look like a relative path
+                        // (e.g. `<crate-name-and-version>/src/lib.rs`), so if we emit it without
+                        // taking the working directory into account, downstream tooling will
+                        // interpret it as `<working-directory>/<crate-name-and-version>/src/lib.rs`,
+                        // which makes no sense. Usually in such cases the working directory will also
+                        // be remapped to `<crate-name-and-version>` or some other prefix of the path
+                        // we are remapping, so we end up with
+                        // `<crate-name-and-version>/<crate-name-and-version>/src/lib.rs`.
+                        // By moving the working directory portion into the `directory` part of the
+                        // DIFile, we allow LLVM to emit just the relative path for DWARF, while
+                        // still emitting the correct absolute path for CodeView.
+                        (
+                            working_directory.to_string_lossy(FileNameDisplayPreference::Remapped),
+                            rel_path.to_string_lossy().into_owned(),
+                        )
+                    } else {
+                        ("".into(), abs_path.to_string_lossy().into_owned())
+                    }
                 } else {
-                    ("".into(), abs_path.to_string_lossy().into_owned())
+                    let working_directory = working_directory.local_path_if_available();
+                    let filename = filename.local_path_if_available();
+
+                    debug!(?working_directory, ?filename);
+
+                    let abs_path: Cow<'_, Path> = if filename.is_absolute() {
+                        filename.into()
+                    } else {
+                        let mut p = PathBuf::new();
+                        p.push(working_directory);
+                        p.push(filename);
+                        p.into()
+                    };
+
+                    if let Ok(rel_path) = abs_path.strip_prefix(working_directory) {
+                        (
+                            working_directory.to_string_lossy().into(),
+                            rel_path.to_string_lossy().into_owned(),
+                        )
+                    } else {
+                        ("".into(), abs_path.to_string_lossy().into_owned())
+                    }
                 }
             }
-            other => ("".into(), other.prefer_remapped().to_string_lossy().into_owned()),
+            other => {
+                debug!(?other);
+                ("".into(), other.for_codegen(cx.sess()).to_string_lossy().into_owned())
+            }
         };
 
         let hash_kind = match source_file.src_hash.kind {
@@ -822,8 +851,9 @@ pub fn build_compile_unit_di_node<'ll, 'tcx>(
     // FIXME(#41252) Remove "clang LLVM" if we can get GDB and LLVM to play nice.
     let producer = format!("clang LLVM ({rustc_producer})");
 
+    use rustc_session::RemapFileNameExt;
     let name_in_debuginfo = name_in_debuginfo.to_string_lossy();
-    let work_dir = tcx.sess.opts.working_dir.to_string_lossy(FileNameDisplayPreference::Remapped);
+    let work_dir = tcx.sess.opts.working_dir.for_codegen(&tcx.sess).to_string_lossy();
     let flags = "\0";
     let output_filenames = tcx.output_filenames(());
     let split_name = if tcx.sess.target_can_use_split_dwarf() {
@@ -834,7 +864,13 @@ pub fn build_compile_unit_di_node<'ll, 'tcx>(
                 Some(codegen_unit_name),
             )
             // We get a path relative to the working directory from split_dwarf_path
-            .map(|f| tcx.sess.source_map().path_mapping().map_prefix(f).0)
+            .map(|f| {
+                if tcx.sess.should_prefer_remapped_for_split_debuginfo_paths() {
+                    tcx.sess.source_map().path_mapping().map_prefix(f).0
+                } else {
+                    f.into()
+                }
+            })
     } else {
         None
     }
@@ -990,20 +1026,20 @@ fn build_struct_type_di_node<'ll, 'tcx>(
 // Tuples
 //=-----------------------------------------------------------------------------
 
-/// Builds the DW_TAG_member debuginfo nodes for the upvars of a closure or generator.
-/// For a generator, this will handle upvars shared by all states.
+/// Builds the DW_TAG_member debuginfo nodes for the upvars of a closure or coroutine.
+/// For a coroutine, this will handle upvars shared by all states.
 fn build_upvar_field_di_nodes<'ll, 'tcx>(
     cx: &CodegenCx<'ll, 'tcx>,
-    closure_or_generator_ty: Ty<'tcx>,
-    closure_or_generator_di_node: &'ll DIType,
+    closure_or_coroutine_ty: Ty<'tcx>,
+    closure_or_coroutine_di_node: &'ll DIType,
 ) -> SmallVec<&'ll DIType> {
-    let (&def_id, up_var_tys) = match closure_or_generator_ty.kind() {
-        ty::Generator(def_id, args, _) => (def_id, args.as_generator().prefix_tys()),
+    let (&def_id, up_var_tys) = match closure_or_coroutine_ty.kind() {
+        ty::Coroutine(def_id, args, _) => (def_id, args.as_coroutine().prefix_tys()),
         ty::Closure(def_id, args) => (def_id, args.as_closure().upvar_tys()),
         _ => {
             bug!(
-                "build_upvar_field_di_nodes() called with non-closure-or-generator-type: {:?}",
-                closure_or_generator_ty
+                "build_upvar_field_di_nodes() called with non-closure-or-coroutine-type: {:?}",
+                closure_or_coroutine_ty
             )
         }
     };
@@ -1013,7 +1049,7 @@ fn build_upvar_field_di_nodes<'ll, 'tcx>(
     );
 
     let capture_names = cx.tcx.closure_saved_names_of_captured_variables(def_id);
-    let layout = cx.layout_of(closure_or_generator_ty);
+    let layout = cx.layout_of(closure_or_coroutine_ty);
 
     up_var_tys
         .into_iter()
@@ -1022,7 +1058,7 @@ fn build_upvar_field_di_nodes<'ll, 'tcx>(
         .map(|(index, (up_var_ty, capture_name))| {
             build_field_di_node(
                 cx,
-                closure_or_generator_di_node,
+                closure_or_coroutine_di_node,
                 capture_name.as_str(),
                 cx.size_and_align_of(up_var_ty),
                 layout.fields.offset(index),

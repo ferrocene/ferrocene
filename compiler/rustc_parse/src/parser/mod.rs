@@ -11,6 +11,7 @@ mod stmt;
 mod ty;
 
 use crate::lexer::UnmatchedDelim;
+use ast::Gen;
 pub use attr_wrapper::AttrWrapper;
 pub use diagnostics::AttemptLocalParseRecovery;
 pub(crate) use expr::ForbiddenLetReason;
@@ -159,8 +160,9 @@ pub struct Parser<'a> {
     /// appropriately.
     ///
     /// See the comments in the `parse_path_segment` function for more details.
-    unmatched_angle_bracket_count: u32,
-    max_angle_bracket_count: u32,
+    unmatched_angle_bracket_count: u16,
+    max_angle_bracket_count: u16,
+    angle_bracket_nesting: u16,
 
     last_unexpected_token_span: Option<Span>,
     /// If present, this `Parser` is not parsing Rust code but rather a macro call.
@@ -394,6 +396,7 @@ impl<'a> Parser<'a> {
             break_last_token: false,
             unmatched_angle_bracket_count: 0,
             max_angle_bracket_count: 0,
+            angle_bracket_nesting: 0,
             last_unexpected_token_span: None,
             subparser_name,
             capture_state: CaptureState {
@@ -1123,6 +1126,16 @@ impl<'a> Parser<'a> {
             Async::Yes { span, closure_id: DUMMY_NODE_ID, return_impl_trait_id: DUMMY_NODE_ID }
         } else {
             Async::No
+        }
+    }
+
+    /// Parses genness: `gen` or nothing.
+    fn parse_genness(&mut self, case: Case) -> Gen {
+        if self.token.span.at_least_rust_2024() && self.eat_keyword_case(kw::Gen, case) {
+            let span = self.prev_token.uninterpolated_span();
+            Gen::Yes { span, closure_id: DUMMY_NODE_ID, return_impl_trait_id: DUMMY_NODE_ID }
+        } else {
+            Gen::No
         }
     }
 

@@ -551,4 +551,5 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -l dry-run -d 'dry run; d
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l json-output -d 'use message-format=json'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -s h -l help -d 'Print help (see more with \'--help\')'

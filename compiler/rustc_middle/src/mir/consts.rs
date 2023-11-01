@@ -520,11 +520,13 @@ impl<'tcx> Const<'tcx> {
                 // types are fine though.
                 ty::ConstKind::Value(_) => c.ty().is_primitive(),
                 ty::ConstKind::Unevaluated(..) | ty::ConstKind::Expr(..) => false,
+                // This can happen if evaluation of a constant failed. The result does not matter
+                // much since compilation is doomed.
+                ty::ConstKind::Error(..) => false,
                 // Should not appear in runtime MIR.
                 ty::ConstKind::Infer(..)
                 | ty::ConstKind::Bound(..)
-                | ty::ConstKind::Placeholder(..)
-                | ty::ConstKind::Error(..) => bug!(),
+                | ty::ConstKind::Placeholder(..) => bug!(),
             },
             Const::Unevaluated(..) => false,
             // If the same slice appears twice in the MIR, we cannot guarantee that we will
@@ -588,12 +590,12 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn span_as_caller_location(self, span: Span) -> ConstValue<'tcx> {
         let topmost = span.ctxt().outer_expn().expansion_cause().unwrap_or(span);
         let caller = self.sess.source_map().lookup_char_pos(topmost.lo());
-        self.const_caller_location((
+        self.const_caller_location(
             rustc_span::symbol::Symbol::intern(
                 &caller.file.name.for_codegen(&self.sess).to_string_lossy(),
             ),
             caller.line as u32,
             caller.col_display as u32 + 1,
-        ))
+        )
     }
 }

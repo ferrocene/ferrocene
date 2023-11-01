@@ -28,6 +28,8 @@ CUSTOM_DELETE_MARKER = "<<<PULL-UPSTREAM>>> file deleted by "
 EXCEPTIONS = {
     # Used in multiple rustc tests as a test case for conflict detection.
     "<<<<<<< HEAD //~ ERROR encountered diff marker",
+    # Introduced in https://github.com/rust-lang/rust/pull/116712.
+    ">>>>>>> 7a4f13c blah blah blah",
 }
 
 

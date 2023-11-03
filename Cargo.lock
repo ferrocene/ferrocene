@@ -4265,7 +4265,6 @@ dependencies = [
  "rustc_span",
  "rustc_target",
  "thin-vec",
- "tracing",
 ]
 
 [[package]]

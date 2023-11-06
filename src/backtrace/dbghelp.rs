@@ -86,6 +86,42 @@ impl MyContext {
     }
 }
 
+#[cfg(target_arch = "x86")]
+impl MyContext {
+    #[inline(always)]
+    fn ip(&self) -> DWORD {
+        self.0.Eip
+    }
+
+    #[inline(always)]
+    fn sp(&self) -> DWORD {
+        self.0.Esp
+    }
+
+    #[inline(always)]
+    fn fp(&self) -> DWORD {
+        self.0.Ebp
+    }
+}
+
+#[cfg(target_arch = "arm")]
+impl MyContext {
+    #[inline(always)]
+    fn ip(&self) -> DWORD {
+        self.0.Pc
+    }
+
+    #[inline(always)]
+    fn sp(&self) -> DWORD {
+        self.0.Sp
+    }
+
+    #[inline(always)]
+    fn fp(&self) -> DWORD {
+        self.0.R11
+    }
+}
+
 #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
@@ -167,11 +203,11 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         Some(StackWalkEx) => {
             let mut stack_frame_ex: STACKFRAME_EX = mem::zeroed();
             stack_frame_ex.StackFrameSize = mem::size_of::<STACKFRAME_EX>() as DWORD;
-            stack_frame_ex.AddrPC.Offset = context.0.Eip as u64;
+            stack_frame_ex.AddrPC.Offset = context.ip() as u64;
             stack_frame_ex.AddrPC.Mode = AddrModeFlat;
-            stack_frame_ex.AddrStack.Offset = context.0.Esp as u64;
+            stack_frame_ex.AddrStack.Offset = context.sp() as u64;
             stack_frame_ex.AddrStack.Mode = AddrModeFlat;
-            stack_frame_ex.AddrFrame.Offset = context.0.Ebp as u64;
+            stack_frame_ex.AddrFrame.Offset = context.fp() as u64;
             stack_frame_ex.AddrFrame.Mode = AddrModeFlat;
 
             while StackWalkEx(
@@ -205,11 +241,11 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
         }
         None => {
             let mut stack_frame64: STACKFRAME64 = mem::zeroed();
-            stack_frame64.AddrPC.Offset = context.0.Eip as u64;
+            stack_frame64.AddrPC.Offset = context.ip() as u64;
             stack_frame64.AddrPC.Mode = AddrModeFlat;
-            stack_frame64.AddrStack.Offset = context.0.Esp as u64;
+            stack_frame64.AddrStack.Offset = context.sp() as u64;
             stack_frame64.AddrStack.Mode = AddrModeFlat;
-            stack_frame64.AddrFrame.Offset = context.0.Ebp as u64;
+            stack_frame64.AddrFrame.Offset = context.fp() as u64;
             stack_frame64.AddrFrame.Mode = AddrModeFlat;
 
             while dbghelp.StackWalk64()(

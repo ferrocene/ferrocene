@@ -977,6 +977,7 @@ name = "clippy"
 version = "0.1.75"
 dependencies = [
  "anstream",
+ "clippy_config",
  "clippy_lints",
  "clippy_utils",
  "color-print",
@@ -1000,6 +1001,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "clippy_config"
+version = "0.1.75"
+dependencies = [
+ "rustc-semver",
+ "serde",
+ "toml 0.7.5",
+ "walkdir",
+]
+
+[[package]]
 name = "clippy_dev"
 version = "0.0.1"
 dependencies = [
@@ -1018,6 +1029,7 @@ version = "0.1.75"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.15.4",
+ "clippy_config",
  "clippy_utils",
  "declare_clippy_lint",
  "if_chain",
@@ -1042,10 +1054,10 @@ name = "clippy_utils"
 version = "0.1.75"
 dependencies = [
  "arrayvec",
+ "clippy_config",
  "if_chain",
  "itertools",
  "rustc-semver",
- "serde",
 ]
 
 [[package]]
@@ -1131,9 +1143,9 @@ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.101"
+version = "0.1.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01a6d58e9c3408138099a396a98fd0d0e6cfb25d723594d2ae48b5004513fd5b"
+checksum = "a3b73c3443a5fd2438d7ba4853c64e4c8efc2404a9e28a9234cc2d5eebc6c242"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",
@@ -4537,7 +4549,6 @@ dependencies = [
  "rustc_monomorphize",
  "rustc_parse",
  "rustc_passes",
- "rustc_plugin_impl",
  "rustc_privacy",
  "rustc_query_system",
  "rustc_resolve",
@@ -4826,7 +4837,6 @@ dependencies = [
  "rustc_monomorphize",
  "rustc_parse",
  "rustc_passes",
- "rustc_plugin_impl",
  "rustc_privacy",
  "rustc_query_impl",
  "rustc_query_system",
@@ -5134,21 +5144,6 @@ dependencies = [
  "rustc_target",
  "rustc_trait_selection",
  "tracing",
-]
-
-[[package]]
-name = "rustc_plugin_impl"
-version = "0.0.0"
-dependencies = [
- "libloading 0.7.4",
- "rustc_ast",
- "rustc_errors",
- "rustc_fluent_macro",
- "rustc_lint",
- "rustc_macros",
- "rustc_metadata",
- "rustc_session",
- "rustc_span",
 ]
 
 [[package]]
@@ -6856,7 +6851,6 @@ checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 name = "unwind"
 version = "0.0.0"
 dependencies = [
- "cc",
  "cfg-if",
  "compiler_builtins",
  "core",

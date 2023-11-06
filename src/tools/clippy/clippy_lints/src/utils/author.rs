@@ -7,15 +7,15 @@ use rustc_ast::LitIntType;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_hir as hir;
 use rustc_hir::{
-    ArrayLen, BindingAnnotation, Closure, ExprKind, FnRetTy, HirId, Lit, PatKind, QPath, StmtKind, TyKind,
+    ArrayLen, BindingAnnotation, Closure, ExprKind, FnRetTy, HirId, Lit, PatKind, QPath, StmtKind, TyKind, CaptureBy
 };
 use rustc_lint::{LateContext, LateLintPass, LintContext};
-use rustc_session::{declare_lint_pass, declare_tool_lint};
+use rustc_session::declare_lint_pass;
 use rustc_span::symbol::{Ident, Symbol};
 use std::cell::Cell;
 use std::fmt::{Display, Formatter, Write as _};
 
-declare_clippy_lint! {
+declare_lint_pass!(
     /// ### What it does
     /// Generates clippy code that detects the offending pattern
     ///
@@ -47,12 +47,8 @@ declare_clippy_lint! {
     ///     // report your lint here
     /// }
     /// ```
-    pub LINT_AUTHOR,
-    internal_warn,
-    "helper for writing lints"
-}
-
-declare_lint_pass!(Author => [LINT_AUTHOR]);
+    Author => []
+);
 
 /// Writes a line of output with indentation added
 macro_rules! out {
@@ -483,6 +479,11 @@ impl<'a, 'tcx> PrintVisitor<'a, 'tcx> {
                 movability,
                 ..
             }) => {
+                let capture_clause = match capture_clause {
+                    CaptureBy::Value { .. } => "Value { .. }",
+                    CaptureBy::Ref => "Ref",
+                };
+
                 let movability = OptionPat::new(movability.map(|m| format!("Movability::{m:?}")));
 
                 let ret_ty = match fn_decl.output {
@@ -491,7 +492,7 @@ impl<'a, 'tcx> PrintVisitor<'a, 'tcx> {
                 };
 
                 bind!(self, fn_decl, body_id);
-                kind!("Closure(CaptureBy::{capture_clause:?}, {fn_decl}, {body_id}, _, {movability})");
+                kind!("Closure(CaptureBy::{capture_clause}, {fn_decl}, {body_id}, _, {movability})");
                 chain!(self, "let {ret_ty} = {fn_decl}.output");
                 self.body(body_id);
             },

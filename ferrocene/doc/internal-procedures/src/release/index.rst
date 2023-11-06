@@ -90,8 +90,8 @@ We calculate the release channel using the two files rather than just defining
 our own release channel to reduce the maintenance efforts. This way, we can
 keep the Ferrocene channel as ``rolling`` in the ``main`` branch, and upstream
 takes care of bumping its channel to ``beta`` and ``stable`` as part of its own
-release process. Only when we want to prepare a stable release of Ferrocene we
-need to change anything.
+release process. It is only when we want to prepare a stable release of Ferrocene
+do we need to change anything.
 
 .. _publish-release: https://github.com/ferrocene/publish-release
 .. _calculate-release-job-matrix.py: https://github.com/ferrocene/ferrocene/blob/main/ferrocene/ci/scripts/calculate-release-job-matrix.py

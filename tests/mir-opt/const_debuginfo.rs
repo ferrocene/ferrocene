@@ -32,10 +32,5 @@ fn main() {
     let p = Point { x: 32, y: 32 };
     let a = p.x + p.y;
 }
-<<<<<<< HEAD
-
-// EMIT_MIR const_debuginfo.main.ConstDebugInfo.diff
 
 // ferrocene-annotations: um_rustc_C_overflow_checks
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

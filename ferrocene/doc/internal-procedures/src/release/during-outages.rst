@@ -6,8 +6,8 @@ Releasing during outages
 
 Our release process relies on third-party infrastructure services, and their
 outages might prevent releases from being published. In most cases, delaying
-the release until the service in question is back available is the best
-approach. These services include GitHub, Github Actions, AWS.
+the release until the service in question is back up is the best
+approach. These services include GitHub, Github Actions, and AWS.
 
 There are certain situations when a release must not wait. If you believe
 something requires an emergency release, communicate this to the team and wait
@@ -27,10 +27,10 @@ release process, and their outage will prevent a release from being published
 even when this guide is followed:
 
 * AWS IAM and STS in the ``us-east-1`` and ``eu-central-1`` regions, to
-  authenticate. `(AWS Status)`_
-* AWS S3 in the ``us-east-1`` region, to download artifacts. `(AWS Status)`_
-* AWS S3 in the ``eu-central-1`` region, to store release files. `(AWS
-  Status)`_
+  authenticate. (`AWS Status`_)
+* AWS S3 in the ``us-east-1`` region, to download artifacts. (`AWS Status`_)
+* AWS S3 in the ``eu-central-1`` region, to store release files. (`AWS
+  Status`_)
 
 Step by step instructions
 -------------------------

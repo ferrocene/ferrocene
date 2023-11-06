@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // aux-build:lint-plugin-test.rs
 // ignore-stage1
 // compile-flags: -D test-lint

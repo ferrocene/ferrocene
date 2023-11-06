@@ -526,10 +526,10 @@ declare_features! (
     /// In that case, `dyn Trait: Trait` does not hold. Moreover, coercions and
     /// casts in safe Rust to `dyn Trait` for such a `Trait` is also forbidden.
     (unstable, object_safe_for_dispatch, "1.40.0", Some(43561), None),
+    /// Allows using enums in offset_of!
+    (unstable, offset_of_enum, "CURRENT_RUSTC_VERSION", Some(106655), None),
     /// Allows using `#[optimize(X)]`.
     (unstable, optimize_attribute, "1.34.0", Some(54882), None),
-    /// Allows using `#![plugin(myplugin)]`.
-    (unstable, plugin, "1.0.0", Some(29597), None),
     /// Allows exhaustive integer pattern matching on `usize` and `isize`.
     (unstable, precise_pointer_size_matching, "1.32.0", Some(56354), None),
     /// Allows macro attributes on expressions, statements and non-inline modules.

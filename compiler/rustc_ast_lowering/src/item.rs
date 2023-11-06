@@ -16,9 +16,8 @@ use rustc_hir::PredicateOrigin;
 use rustc_index::{Idx, IndexSlice, IndexVec};
 use rustc_middle::ty::{ResolverAstLowering, TyCtxt};
 use rustc_span::edit_distance::find_best_match_for_name;
-use rustc_span::source_map::DesugaringKind;
 use rustc_span::symbol::{kw, sym, Ident};
-use rustc_span::{Span, Symbol};
+use rustc_span::{DesugaringKind, Span, Symbol};
 use rustc_target::spec::abi;
 use smallvec::{smallvec, SmallVec};
 use thin_vec::ThinVec;
@@ -1202,7 +1201,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             }
 
             let async_expr = this.make_async_expr(
-                CaptureBy::Value,
+                CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
                 closure_id,
                 None,
                 body.span,

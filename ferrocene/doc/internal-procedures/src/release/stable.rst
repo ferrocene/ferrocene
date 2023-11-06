@@ -15,7 +15,7 @@ one available at the point the release was branched off the rolling branches.
 Once the baseline is chosen, it will be possible to upgrade to newer patch
 releases of Rust, but not to new minor or major Rust versions.
 
-The decision of the baseline Rust version is for a new Ferrocene major version
+The decision of the baseline Rust version for a new Ferrocene major version
 is made within the team. Once chosen, all development work will be done in the
 ``release/1.NN`` branch, where ``NN`` is the minor Rust version number.
 

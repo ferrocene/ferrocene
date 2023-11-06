@@ -23,6 +23,9 @@ The following channels are available to customers:
   warranty, and no qualification. Customers are expected to use nightly only if
   they need to explicitly check a change we just committed.
 
+* **pre-rolling**: This channel tracks the latest beta release *made by
+  upstream* and is used to prepare the next rolling release.
+
 * **rolling**: This channel tracks the latest release *made by upstream*, with
   a new release roughly every six weeks. There are no stability guarantees,
   no long term support, no warranty, and no qualification. In practice, this
@@ -31,27 +34,21 @@ The following channels are available to customers:
   trying out new features that will be later included in a stable release, or
   when prototyping.
 
+* **beta-${year}.${month}**: This channel is used to prepare the next stable
+  release before it is published.
+
 * **stable-${version}:** Each major release of Ferrocene has its own stable
   channel, where both the initial release and all subsequent patch releases are
   published. Releases in this channel will be qualified, and Ferrocene provides
   support and warranty. These releases will also be supported in the long term
   (however long customers are willing to pay for long term support).
 
-All customers have access to the nightly and rolling channels as well as access
-to the stable channels for the versions they subscribe to. Depending on their
-plan, they may also have access to just a subset of releases from the stable
-channel (for example, only the releases published in the first five years if
-that's the duration of their support contract).
-
-There are also internal release channels, only available to Ferrocene
-developers:
-
-* **pre-rolling**: This channel tracks the latest beta release *made by
-  upstream* and is used to prepare the next rolling release.
-
-* **beta-${year}.${month}**: This channel is used to prepare the next stable release
-  before it is published.
-
+All customers have access to the nightly, pre-rolling and rolling channels as
+well as access to the stable and beta channels for the versions they subscribe
+to. Depending on their plan, they may also have access to just a subset of
+releases from the stable and beta channels (for example, only the releases
+published in the first five years if that's the duration of their support
+contract).
 
 Release Trains
 --------------
@@ -112,6 +109,12 @@ environment:
 
 * Everyday at 00:00 UTC, the tip of the ``main`` branch is released on the
   nightly channel.
+* Everyday at 00:00 UTC, the tip of the branch with the Rust channel of
+  ``beta`` is released on the pre-rolling channel.
+* Everyday at 00:00 UTC, the tip of the most recent branch with the Rust
+  channel of ``stable`` is released on the pre-rolling channel.
+* Everyday at 00:00 UTC, the tip of every branch with the Ferrocene channel of
+  ``beta`` is released on the beta-${version} channel.
 
 
 Manually-started Releases

@@ -523,15 +523,6 @@ fn test_openbsd(target: &str) {
         "sys/param.h",
     }
 
-    cfg.skip_type(move |ty| {
-        if ty.starts_with("__c_anonymous_") {
-            return true;
-        }
-        match ty {
-            _ => false,
-        }
-    });
-
     cfg.skip_struct(move |ty| {
         if ty.starts_with("__c_anonymous_") {
             return true;
@@ -1569,6 +1560,7 @@ fn test_android(target: &str) {
                "libgen.h",
                "limits.h",
                "link.h",
+               "linux/sysctl.h",
                "locale.h",
                "malloc.h",
                "net/ethernet.h",
@@ -3264,6 +3256,7 @@ fn test_linux(target: &str) {
                "libgen.h",
                "limits.h",
                "link.h",
+               "linux/sysctl.h",
                "locale.h",
                "malloc.h",
                "mntent.h",

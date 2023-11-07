@@ -28,6 +28,7 @@ import yaml
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
 
 from automated_prs import AutomatedPR, AutomationResult
+from pr_links import PRLinker
 
 
 @dataclass
@@ -164,6 +165,8 @@ def generate_merged_pull_requests_list(subtree, previous_commit, latest_commit):
         ]
     )
 
+    linker = PRLinker()
+
     result = ""
     for line in messages.split("\0"):
         if not line:
@@ -176,12 +179,12 @@ def generate_merged_pull_requests_list(subtree, previous_commit, latest_commit):
                     continue
                 if not number.isdigit():
                     continue
-                result += f"* {subtree.repo}#{number}\n"
+                result += f"* {linker.link(subtree.repo, number)}\n"
         elif (pr := remove_prefix(line, "Auto merge of #")) != line:
             number, _ = pr.split(" - ", 1)
             if not number.isdigit():
                 continue
-            result += f"* {subtree.repo}#{number}\n"
+            result += f"* {linker.link(subtree.repo, number)}\n"
 
     return result
 

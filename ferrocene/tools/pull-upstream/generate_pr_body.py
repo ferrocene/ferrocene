@@ -6,11 +6,15 @@
 # changes from upstream. It's automatically invoked by automation.py, and can
 # be invoked manually if the pull is performed manually (on merge conflicts).
 
-import subprocess
 from dataclasses import dataclass
 from typing import Optional
+import os
+import subprocess
 import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "common"))
+
+from pr_links import PRLinker
 
 UPSTREAM_REPO = "rust-lang/rust"
 
@@ -37,6 +41,7 @@ def render_changes(origin, base_branch, new_branch):
     automatic pull as a bullet list of merged pull requests. This also renders
     pull requests merged as part of a rollup.
     """
+    linker = PRLinker()
 
     # Ensure we have all the commits we need, otherwise the log command
     # below could fail.
@@ -89,7 +94,7 @@ def render_changes(origin, base_branch, new_branch):
         pr = extract_pr_from_message("Auto", commit.message)
         if pr is None:
             continue
-        changes += f"* {pr}\n"
+        changes += f"* {linker.link(UPSTREAM_REPO, pr)}\n"
 
         if commit.merge in commits:
             rollup_cursor = commit.merge
@@ -100,7 +105,7 @@ def render_changes(origin, base_branch, new_branch):
                 rollup_pr = extract_pr_from_message("Rollup", rollup_commit.message)
                 if rollup_pr is None:
                     break
-                changes += f"  * {rollup_pr}\n"
+                changes += f"  * {linker.link(UPSTREAM_REPO, rollup_pr)}\n"
 
     return changes
 

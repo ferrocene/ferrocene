@@ -76,5 +76,5 @@ Step by step instructions
 
       cargo run --release -- $sha
 
-.. _(AWS Status): https://health.aws.amazon.com/health/status
+.. _AWS Status: https://health.aws.amazon.com/health/status
 .. _AWS CLI v2: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html

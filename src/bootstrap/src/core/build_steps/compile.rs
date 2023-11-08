@@ -1722,6 +1722,12 @@ impl Step for Assemble {
                     &self_contained_lld_dir.join(exe(name, target_compiler.host)),
                 );
             }
+            let ferrocene_cc_exe = builder.ensure(crate::core::build_steps::tool::FerroceneCc {
+                compiler: build_compiler,
+                target: target_compiler.host,
+            });
+            let dst_exe = exe("ferrocene-cc", target_compiler.host);
+            builder.copy(&ferrocene_cc_exe, &libdir_bin.join(&dst_exe));
         }
 
         if builder.config.rust_codegen_backends.contains(&INTERNER.intern_str("llvm")) {

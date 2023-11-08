@@ -602,6 +602,38 @@ impl Step for LldWrapper {
 }
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub struct FerroceneCc {
+    pub compiler: Compiler,
+    pub target: TargetSelection,
+}
+
+impl Step for FerroceneCc {
+    type Output = PathBuf;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.never()
+    }
+
+    fn run(self, builder: &Builder<'_>) -> PathBuf {
+        let src_exe = builder
+            .ensure(ToolBuild {
+                compiler: self.compiler,
+                target: self.target,
+                tool: "ferrocene-cc",
+                mode: Mode::ToolStd,
+                path: "src/tools/ferrocene-cc",
+                is_optional_tool: false,
+                source_type: SourceType::InTree,
+                extra_features: Vec::new(),
+                allow_features: "",
+            })
+            .expect("expected to build -- essential tool");
+
+        src_exe
+    }
+}
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct RustAnalyzer {
     pub compiler: Compiler,
     pub target: TargetSelection,

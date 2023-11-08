@@ -68,7 +68,7 @@ const LLVM_TOOLS: &[&str] = &[
 ];
 
 /// LLD file names for all flavors.
-const LLD_FILE_NAMES: &[&str] = &["ld.lld", "ld64.lld", "lld-link", "wasm-ld"];
+const LLD_FILE_NAMES: &[&str] = &["ld.lld", "ld64.lld", "lld-link", "wasm-ld", "ld"];
 
 /// Keeps track of major changes made to the bootstrap configuration.
 ///

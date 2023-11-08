@@ -21,8 +21,9 @@ if [[ -z "${CI+x}" ]]; then
     echo
     echo "The purpose of this script is to configure the build system for CI"
     echo "use, and it's not recommended for local development. If you are"
-    echo "developing Ferrocene, please check the the Internal Procedures"
-    echo "documentation on how to set up a local environment."
+    echo "developing Ferrocene, please check the the Internal Procedures:"
+    echo
+    echo "    https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html"
     echo
     echo "If you're trying to simulate CI to debug an issue locally, set the"
     echo '$CI' "environment variable when invoking this script to suppress"

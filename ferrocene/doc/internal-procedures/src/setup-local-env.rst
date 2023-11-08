@@ -103,7 +103,7 @@ content in it:
 .. code-block:: text
 
    profile = "compiler"
-   changelog-seen = 2
+   change-id = 115898
 
    [ferrocene]
    aws-profile = "ferrocene-ci"

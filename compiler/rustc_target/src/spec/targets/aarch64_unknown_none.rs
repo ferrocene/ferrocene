@@ -6,13 +6,7 @@
 //
 // For example, `-C target-cpu=cortex-a53`.
 
-<<<<<<< HEAD:compiler/rustc_target/src/spec/aarch64_unknown_none.rs
-use super::{PanicStrategy, RelocModel, SanitizerSet, Target, TargetOptions};
-=======
-use crate::spec::{
-    Cc, LinkerFlavor, Lld, PanicStrategy, RelocModel, SanitizerSet, Target, TargetOptions,
-};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code:compiler/rustc_target/src/spec/targets/aarch64_unknown_none.rs
+use crate::spec::{PanicStrategy, RelocModel, SanitizerSet, Target, TargetOptions};
 
 pub fn target() -> Target {
     let opts = TargetOptions {

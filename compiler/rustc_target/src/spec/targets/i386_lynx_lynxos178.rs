@@ -1,7 +1,7 @@
-use crate::spec::{Cc, LinkerFlavor, Lld, StackProbeType, Target};
+use crate::spec::{base, Cc, LinkerFlavor, Lld, StackProbeType, Target};
 
 pub fn target() -> Target {
-    let mut base = super::lynxos178_base::opts();
+    let mut base = base::lynxos178::opts();
     base.cpu = "i386".into();
     base.max_atomic_width = Some(32);
     base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32"]);

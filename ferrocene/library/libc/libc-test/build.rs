@@ -518,6 +518,7 @@ fn test_openbsd(target: &str) {
         "util.h",
         "ufs/ufs/quota.h",
         "pthread_np.h",
+        "sys/reboot.h",
         "sys/syscall.h",
         "sys/shm.h",
         "sys/param.h",
@@ -1110,6 +1111,7 @@ fn test_netbsd(target: &str) {
         "netinet/dccp.h",
         "sys/event.h",
         "sys/quota.h",
+        "sys/reboot.h",
         "sys/shm.h",
         "iconv.h",
     }
@@ -1821,6 +1823,9 @@ fn test_android(target: &str) {
 
             // kernel 5.6 minimum required
             "IPPROTO_MPTCP" | "IPPROTO_ETHERNET" => true,
+
+            // kernel 6.2 minimum
+            "TUN_F_USO4" | "TUN_F_USO6" | "IFF_NO_CARRIER" => true,
 
             // FIXME: NDK r22 minimum required
             | "FDB_NOTIFY_BIT"
@@ -3854,6 +3859,9 @@ fn test_linux(target: &str) {
 
             // kernel 6.1 minimum
             "MADV_COLLAPSE" => true,
+
+            // kernel 6.2 minimum
+            "TUN_F_USO4" | "TUN_F_USO6" | "IFF_NO_CARRIER" => true,
 
             // FIXME: Requires more recent kernel headers
             | "IFLA_PARENT_DEV_NAME"     // linux v5.13+

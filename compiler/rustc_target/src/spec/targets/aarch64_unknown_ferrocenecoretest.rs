@@ -7,12 +7,26 @@
 //! THIS IS TEMPORARY. We implemented this solution as we needed to run bare-metal tests for
 //! qualification, but we're planning a cleaner implementation to upstream.
 
-use crate::spec::{cvs, Target};
+use crate::spec::{cvs, Cc, LinkerFlavor, Lld, Target};
 
 pub fn target() -> Target {
     let mut target = super::aarch64_unknown_none::target();
     target.os = "linux".into();
     target.env = "gnu".into();
     target.families = cvs!["unix"];
+    // aarch64-unknown-none uses Cc:No, LLd::Yes. Here we want to use
+    // the same underlying linker, but we want to use GCC/clang as the linker
+    // driver so it can add system-specific paths to the linker command line for
+    // us.
+    //
+    // Setting Lld::Yes causes `-fuse-ld=lld` to be added to the linker args
+    // (and by linker I mean `cc` as the linker as we use Cc::Yes)
+    target.linker_flavor = LinkerFlavor::Gnu(Cc::Yes, Lld::Yes);
+    // This setting causes `-B path/to/gcc-ld` to be added to the linker args.
+    // This means that that the `ld.lld` wrapper for `rust-lld` appears in the
+    // path that `cc` uses to find `ld.lld` (also the path used for `cpp` and
+    // `cc1`, but we don't supply those so it goes back to the defaults for
+    // those tools).
+    target.link_self_contained = crate::spec::LinkSelfContainedDefault::with_linker();
     target
 }

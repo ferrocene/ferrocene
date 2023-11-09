@@ -57,6 +57,7 @@ use rustc_macros::HashStable_Generic;
 pub mod abi;
 pub mod crt_objects;
 
+<<<<<<< HEAD
 mod aix_base;
 mod android_base;
 mod apple_base;
@@ -99,6 +100,13 @@ mod windows_gnullvm_base;
 mod windows_msvc_base;
 mod windows_uwp_gnu_base;
 mod windows_uwp_msvc_base;
+=======
+mod base;
+pub use base::apple::deployment_target as current_apple_deployment_target;
+pub use base::apple::platform as current_apple_platform;
+pub use base::apple::sdk_version as current_apple_sdk_version;
+pub use base::avr_gnu::ef_avr_arch;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 /// Linker is called through a C/C++ compiler.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -1445,14 +1453,16 @@ impl fmt::Display for StackProtector {
 
 macro_rules! supported_targets {
     ( $(($triple:literal, $module:ident),)+ ) => {
-        $(mod $module;)+
+        mod targets {
+            $(pub(crate) mod $module;)+
+        }
 
         /// List of supported targets
         pub const TARGETS: &[&str] = &[$($triple),+];
 
         fn load_builtin(target: &str) -> Option<Target> {
             let mut t = match target {
-                $( $triple => $module::target(), )+
+                $( $triple => targets::$module::target(), )+
                 _ => return None,
             };
             t.is_builtin = true;
@@ -1468,7 +1478,7 @@ macro_rules! supported_targets {
             $(
                 #[test] // `#[test]`
                 fn $module() {
-                    tests_impl::test_target(super::$module::target());
+                    tests_impl::test_target(crate::spec::targets::$module::target());
                 }
             )+
         }

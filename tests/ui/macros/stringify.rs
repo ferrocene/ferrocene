@@ -115,6 +115,7 @@ fn test_expr() {
         "a + b * c - d + -1 * -2 - -3",
         "a + b * c - d + - 1 * - 2 - - 3"
     );
+    c2!(expr, [ x = !y ], "x = !y", "x =! y"); // FIXME
 
     // ExprKind::Unary
     c2!(expr, [ *expr ], "*expr", "* expr");
@@ -137,6 +138,7 @@ fn test_expr() {
 
     // ExprKind::If
     c1!(expr, [ if true {} ], "if true {}");
+    c2!(expr, [ if !true {} ], "if !true {}", "if! true {}"); // FIXME
     c2!(expr,
         [ if ::std::blah() { } else { } ],
         "if ::std::blah() {} else {}",
@@ -800,6 +802,7 @@ fn test_vis() {
     assert_eq!(stringify!(), "");
 }
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_xa7lp0zg1ol2
 // Declarative Macros
 //
@@ -825,3 +828,33 @@ fn test_vis() {
 // Token Matching
 //
 // ferrocene-annotations: um_rustc_test
+=======
+macro_rules! p {
+    ([$($tt:tt)*], $s:literal) => {
+        assert_eq!(stringify!($($tt)*), $s);
+    };
+}
+
+#[test]
+fn test_punct() {
+    // For all these cases, we must preserve spaces between the tokens.
+    // Otherwise, any old proc macro that parses pretty-printed code might glue
+    // together tokens that shouldn't be glued.
+    p!([ = = < < <= <= == == != != >= >= > > ], "= = < < <= <= == == != != >= >= > >");
+    p!([ && && & & || || | | ! ! ], "&& && & & || || | |!!"); // FIXME
+    p!([ ~ ~ @ @ # # ], "~ ~ @ @ # #");
+    p!([ . . .. .. ... ... ..= ..=], ".... .. ... ... ..= ..="); // FIXME
+    p!([ , , ; ; : : :: :: ], ",, ; ; : : :: ::"); // FIXME
+    p!([ -> -> <- <- => =>], "-> -> <- <- => =>");
+    p!([ $ $ ? ? ' ' ], "$$? ? ' '"); // FIXME
+    p!([ + + += += - - -= -= * * *= *= / / /= /= ], "+ + += += - - -= -= * * *= *= / / /= /=");
+    p!([ % % %= %= ^ ^ ^= ^= << << <<= <<= >> >> >>= >>= ],
+        "% % %= %= ^ ^ ^= ^= << << <<= <<= >> >> >>= >>=");
+
+    // For these one we must insert spaces between adjacent tokens, again due
+    // to proc macros.
+    p!([ +! ?= |> >>@ --> <-- $$ =====> ], "+! ? = | > >> @ - -> <- - $$== == =>"); // FIXME
+    p!([ ,; ;, ** @@ $+$ >< <> ?? +== ], ", ; ;, * * @ @ $+ $> < < > ? ? += ="); // FIXME
+    p!([ :#!@|$=&*,+;*~? ], ": #! @ | $= & *, + ; * ~ ?"); // FIXME
+}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -886,3 +886,7 @@ change-id = 117435
 # - Avoids an error that occurs if signatures are present,
 #   but you don't have access to the private signature files
 #ignore-document-signatures = false
+
+# Download URL for the qualification technical report. If omitted, the
+# technical report will not be included in the documentation.
+#technical-report-url = <none> (url)

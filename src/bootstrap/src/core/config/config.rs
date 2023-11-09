@@ -306,6 +306,7 @@ pub struct Config {
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures_s3_bucket: String,
     pub ferrocene_ignore_document_signatures: bool,
+    pub ferrocene_technical_report_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1088,6 +1089,7 @@ define_config! {
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
         ignore_document_signatures: Option<bool> = "ignore-document-signatures",
+        technical_report_url: Option<String> = "technical-report-url",
     }
 }
 
@@ -1681,6 +1683,7 @@ impl Config {
                 .unwrap_or_else(|| "ferrocene-document-signatures".into());
             config.ferrocene_ignore_document_signatures =
                 f.ignore_document_signatures.unwrap_or(false);
+            config.ferrocene_technical_report_url = f.technical_report_url;
         }
 
         if config.llvm_from_ci {

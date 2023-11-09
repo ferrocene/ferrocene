@@ -831,6 +831,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::QualificationReport,
                 crate::ferrocene::doc::SafetyManual,
                 crate::ferrocene::doc::TraceabilityMatrix,
+                crate::ferrocene::doc::TechnicalReport,
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,

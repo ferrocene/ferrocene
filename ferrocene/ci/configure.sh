@@ -269,6 +269,12 @@ add --set ferrocene.tarball-signing-kms-key-arn="arn:aws:kms:us-east-1:886866542
 # This will not work for non-employees of Ferrous Systems
 add --set ferrocene.oxidos-src="s3://ferrocene-ci-mirrors/manual/oxidos/oxidos-source-2023-09-21.tar.xz"
 
+# Include the technical report from the assessor in the documentation.
+#
+# If this is not provided, the report will not be included in the generated
+# documentation. This should only be set in stable, qualified releases.
+#add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-technical-report.pdf"
+
 ###############################################
 #                                             #
 #  Write the configuration to `config.toml`   #

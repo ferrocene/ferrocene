@@ -135,7 +135,7 @@ struct Subsetter<'a> {
     output_prefix: PathBuf,
 
     tarballs: BTreeMap<Option<String>, Rc<Tarball<'a>>>,
-    current_subset: Option<String>,
+    directory_subset: Option<String>,
 }
 
 impl<'a> Subsetter<'a> {
@@ -145,63 +145,64 @@ impl<'a> Subsetter<'a> {
             name_prefix: name_prefix.into(),
             output_prefix: output_prefix.into(),
             tarballs: BTreeMap::new(),
-            current_subset: None,
+            directory_subset: None,
         }
     }
 
     fn add_directory(&mut self, root: &Path, path: &Path) {
-        self.with_tarball(path, |this, tarball| {
-            for entry in std::fs::read_dir(path).unwrap() {
-                let path = entry.as_ref().unwrap().path();
-
-                if path.is_file() {
-                    let relative = path.strip_prefix(root).unwrap();
-                    let mode = if this.is_executable(&path) { 0o755 } else { 0o644 };
-                    tarball.add_file(
-                        &path,
-                        this.output_prefix.join(relative).parent().unwrap(),
-                        mode,
-                    );
-                } else if path.is_dir() {
-                    this.add_directory(root, &path);
-                }
-            }
-        })
-    }
-
-    fn add_file(&mut self, root: &Path, path: &Path) {
-        self.with_tarball(path.parent().unwrap(), |this, tarball| {
-            let relative = path.strip_prefix(root).unwrap();
-            let mode = if this.is_executable(&path) { 0o755 } else { 0o644 };
-            tarball.add_file(&path, this.output_prefix.join(relative).parent().unwrap(), mode);
-        });
-    }
-
-    fn with_tarball<F: FnOnce(&mut Self, &Tarball<'a>)>(&mut self, path: &Path, f: F) {
-        let old_subset = self.current_subset.clone();
+        let old_subset = self.directory_subset.clone();
 
         let subset_file = path.join("ferrocene-subset");
         match std::fs::read_to_string(&subset_file) {
-            Ok(data) => self.current_subset = Some(self.parse_subset_file(&subset_file, &data)),
+            Ok(data) => self.directory_subset = Some(self.parse_subset_file(&subset_file, &data)),
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
             Err(err) => panic!("failed to read ferrocene-subset in {}: {err}", path.display()),
         }
-        let tarball = match self.tarballs.get(&self.current_subset) {
+
+        for entry in std::fs::read_dir(path).unwrap() {
+            let path = entry.as_ref().unwrap().path();
+            if path.is_file() {
+                self.add_file(root, &path);
+            } else if path.is_dir() {
+                self.add_directory(root, &path);
+            }
+        }
+
+        self.directory_subset = old_subset;
+    }
+
+    fn add_file(&mut self, root: &Path, path: &Path) {
+        let mut subset = self.directory_subset.clone();
+
+        // Allow overriding the directory subset with per-file subsets.
+        let mut subset_file = path.to_path_buf();
+        if subset_file.to_str().map(|p| !p.ends_with(".ferrocene-subset")).unwrap_or(true) {
+            // If the file itself is the $name.ferrocene-subset file, include it in the same subset
+            // it references.
+            subset_file.as_mut_os_string().push(".ferrocene-subset");
+        }
+        match std::fs::read_to_string(&subset_file) {
+            Ok(data) => subset = Some(self.parse_subset_file(&subset_file, &data)),
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+            Err(err) => panic!("failed to read {}: {err}", subset_file.display()),
+        }
+
+        let tarball = match self.tarballs.get(&subset) {
             Some(tarball) => tarball.clone(),
             None => {
-                let name = match &self.current_subset {
+                let name = match &subset {
                     Some(name) => format!("{}-{name}", self.name_prefix),
                     None => self.name_prefix.clone(),
                 };
                 let tarball = Rc::new(Tarball::new_targetless(self.builder, &name));
-                self.tarballs.insert(self.current_subset.clone(), tarball.clone());
+                self.tarballs.insert(subset, tarball.clone());
                 tarball
             }
         };
 
-        f(self, &tarball);
-
-        self.current_subset = old_subset;
+        let relative = path.strip_prefix(root).unwrap();
+        let mode = if self.is_executable(&path) { 0o755 } else { 0o644 };
+        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), mode);
     }
 
     #[cfg(unix)]

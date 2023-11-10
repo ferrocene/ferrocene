@@ -89,6 +89,12 @@ div.docs a {
     color: var(--text-fg);
 }
 
+/* By default hide items with a subset. They will be shown thanks to
+ * subset-spcific CSS files */
+div.docs a[data-subset] {
+    display: none;
+}
+
 div.docs a h3 {
     margin: 0;
     font-size: 1.1em;

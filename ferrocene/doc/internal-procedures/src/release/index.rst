@@ -38,14 +38,14 @@ To manually start a release, go to the `release workflow page`_ and click the
 "Run workflow" button. You need to input the git reference you want to release
 (it can be a branch name, a short commit hash, or a full commit hash), and the
 environment to release in. Note that anyone can publish a release in the
-``dev`` environment, while approval from a release manager is required for the
+``dev`` environment, while approval from a :ref:`release manager
+<qualification-plan:organization:Release Managers>` is required for the
 ``prod`` environment.
 
 It's also possible to override some of the startup checks the release process
 performs, and to treat the git reference as verbatim instead of trying to
 resolve it. The latter option is useful if you need to release a commit which
 is not present in the ``ferrocene/ferrocene`` repository.
-
 
 Once you click the green "Run workflow" button a new job will be queued.
 

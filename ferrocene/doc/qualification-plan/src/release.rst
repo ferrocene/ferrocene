@@ -127,9 +127,9 @@ scheduled, to restart a scheduled release that failed, or for testing (only for
 this case; all the other steps are fully automated.
 
 If the release targets the **prod** environment, an approval from a Release
-Manager is required. The Ferrocene release manager needs to approve the release
-in the GitHub UI before the release can proceed. Once approved, the release
-process will start automatically.
+Manager is required. A :ref:`release manager <organization:Release Managers>`
+needs to approve the release in the GitHub UI before the release can proceed.
+Once approved, the release process will start automatically.
 
 
 Backporting Changes

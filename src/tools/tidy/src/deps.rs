@@ -641,13 +641,12 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         let license = match &pkg.license {
             Some(license) => license,
             None => {
-<<<<<<< HEAD
                 if pkg.name == "ring" {
                     // *ring* does not define proper licensing metadata.
-=======
+                    continue;
+                }
                 if ICU4X_UNICODE_LICENSE_DEPENDENCIES.contains(&pkg.name.as_str()) {
                     // See the comment on ICU4X_UNICODE_LICENSE_DEPENDENCIES.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
                     continue;
                 }
                 tidy_error!(bad, "dependency `{}` does not define a license expression", pkg.id);

@@ -4,6 +4,7 @@
     "artifacts_server": "s3://ferrocene-ci-artifacts/ferrocene/dist",
     "artifacts_with_llvm_assertions_server": "s3://ferrocene-ci-artifacts/ferrocene/dist",
     "git_merge_commit_email": "87868125+bors-ferrocene\\[bot\\]@users.noreply.github.com",
+    "git_repository": "ferrocene/ferrocene",
     "nightly_branch": "main"
   },
   "__comments": [

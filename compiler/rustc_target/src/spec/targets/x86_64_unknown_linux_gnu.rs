@@ -12,7 +12,7 @@ pub fn target() -> Target {
     // (and by linker I mean `cc` as the linker as we use Cc::Yes)
     base.linker_flavor = LinkerFlavor::Gnu(Cc::Yes, Lld::Yes);
     // This setting causes `-B path/to/gcc-ld` to be added to the linker args.
-    // This means that that the `ld.lld` wrapper for `rust-lld` appears in the
+    // This means that the `ld.lld` wrapper for `rust-lld` appears in the
     // path that `cc` uses to find `ld.lld` (also the path used for `cpp` and
     // `cc1`, but we don't supply those so it goes back to the defaults for
     // those tools).

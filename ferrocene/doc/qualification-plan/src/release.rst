@@ -34,7 +34,7 @@ The following channels are available to customers:
   trying out new features that will be later included in a stable release, or
   when prototyping.
 
-* **beta-${year}.${month}**: This channel is used to prepare the next stable
+* **beta-${version}**: This channel is used to prepare the next stable
   release before it is published.
 
 * **stable-${version}:** Each major release of Ferrocene has its own stable

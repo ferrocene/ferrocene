@@ -139,7 +139,6 @@ fn clean_specific_stage(build: &Build, stage: u32) {
 fn clean_default(build: &Build) {
     rm_rf(&build.out.join("tmp"));
     rm_rf(&build.out.join("dist"));
-    rm_rf(&build.out.join("bootstrap"));
     rm_rf(&build.out.join("rustfmt.stamp"));
 
     for host in &build.hosts {
@@ -178,7 +177,7 @@ fn rm_rf(path: &Path) {
                             && p.file_name().and_then(std::ffi::OsStr::to_str)
                                 == Some("bootstrap.exe")
                         {
-                            eprintln!("warning: failed to delete '{}'.", p.display());
+                            eprintln!("WARNING: failed to delete '{}'.", p.display());
                             return Ok(());
                         }
                         Err(e)

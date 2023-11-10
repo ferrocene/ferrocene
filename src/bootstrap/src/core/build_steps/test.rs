@@ -1127,10 +1127,10 @@ impl Step for Tidy {
                 let inferred_rustfmt_dir = builder.initial_rustc.parent().unwrap();
                 eprintln!(
                     "\
-error: no `rustfmt` binary found in {PATH}
-info: `rust.channel` is currently set to \"{CHAN}\"
-help: if you are testing a beta branch, set `rust.channel` to \"beta\" in the `config.toml` file
-help: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to `x.py test`",
+ERROR: no `rustfmt` binary found in {PATH}
+INFO: `rust.channel` is currently set to \"{CHAN}\"
+HELP: if you are testing a beta branch, set `rust.channel` to \"beta\" in the `config.toml` file
+HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to `x.py test`",
                     PATH = inferred_rustfmt_dir.display(),
                     CHAN = builder.config.channel,
                 );
@@ -1184,7 +1184,7 @@ impl Step for ExpandYamlAnchors {
     /// appropriate configuration for all our CI providers. This step ensures the tool was called
     /// by the user before committing CI changes.
     fn run(self, builder: &Builder<'_>) {
-        // Note: `.github/` is not included in dist-src tarballs
+        // NOTE: `.github/` is not included in dist-src tarballs
         if !builder.src.join(".github/workflows/ci.yml").exists() {
             builder.info("Skipping YAML anchors check: GitHub Actions config not found");
             return;
@@ -1567,10 +1567,10 @@ impl Step for Compiletest {
     fn run(self, builder: &Builder<'_>) {
         if builder.top_stage == 0 && env::var("COMPILETEST_FORCE_STAGE0").is_err() {
             eprintln!("\
-error: `--stage 0` runs compiletest on the beta compiler, not your local changes, and will almost always cause tests to fail
-help: to test the compiler, use `--stage 1` instead
-help: to test the standard library, use `--stage 0 library/std` instead
-note: if you're sure you want to do this, please open an issue as to why. In the meantime, you can override this with `COMPILETEST_FORCE_STAGE0=1`."
+ERROR: `--stage 0` runs compiletest on the beta compiler, not your local changes, and will almost always cause tests to fail
+HELP: to test the compiler, use `--stage 1` instead
+HELP: to test the standard library, use `--stage 0 library/std` instead
+NOTE: if you're sure you want to do this, please open an issue as to why. In the meantime, you can override this with `COMPILETEST_FORCE_STAGE0=1`."
             );
             crate::exit!(1);
         }
@@ -1976,6 +1976,10 @@ note: if you're sure you want to do this, please open an issue as to why. In the
         if !builder.config.omit_git_hash {
             cmd.arg("--git-hash");
         }
+
+        let git_config = builder.config.git_config();
+        cmd.arg("--git-repository").arg(git_config.git_repository);
+        cmd.arg("--nightly-branch").arg(git_config.nightly_branch);
 
         builder.ci_env.force_coloring_in_ci(&mut cmd);
 

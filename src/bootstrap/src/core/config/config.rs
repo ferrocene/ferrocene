@@ -31,6 +31,7 @@ use serde::{Deserialize, Deserializer};
 use serde_derive::Deserialize;
 
 pub use crate::core::config::flags::Subcommand;
+use build_helper::git::GitConfig;
 
 macro_rules! check_ci_llvm {
     ($name:expr) => {
@@ -340,6 +341,7 @@ pub struct Stage0Config {
     pub artifacts_server: String,
     pub artifacts_with_llvm_assertions_server: String,
     pub git_merge_commit_email: String,
+    pub git_repository: String,
     pub nightly_branch: String,
 }
 #[derive(Default, Deserialize, Clone)]
@@ -1502,7 +1504,7 @@ impl Config {
                         if available_backends.contains(&backend) {
                             panic!("Invalid value '{s}' for 'rust.codegen-backends'. Instead, please use '{backend}'.");
                         } else {
-                            println!("help: '{s}' for 'rust.codegen-backends' might fail. \
+                            println!("HELP: '{s}' for 'rust.codegen-backends' might fail. \
                                 Codegen backends are mostly defined without the '{CODEGEN_BACKEND_PREFIX}' prefix. \
                                 In this case, it would be referred to as '{backend}'.");
                         }
@@ -1866,9 +1868,9 @@ impl Config {
                 }
                 (channel, version) => {
                     let src = self.src.display();
-                    eprintln!("error: failed to determine artifact channel and/or version");
+                    eprintln!("ERROR: failed to determine artifact channel and/or version");
                     eprintln!(
-                        "help: consider using a git checkout or ensure these files are readable"
+                        "HELP: consider using a git checkout or ensure these files are readable"
                     );
                     if let Err(channel) = channel {
                         eprintln!("reading {src}/src/ci/channel failed: {channel:?}");
@@ -2060,6 +2062,13 @@ impl Config {
         self.rust_codegen_backends.get(0).cloned()
     }
 
+    pub fn git_config(&self) -> GitConfig<'_> {
+        GitConfig {
+            git_repository: &self.stage0_metadata.config.git_repository,
+            nightly_branch: &self.stage0_metadata.config.nightly_branch,
+        }
+    }
+
     pub fn check_build_rustc_version(&self, rustc_path: &str) {
         if self.dry_run() {
             return;
@@ -2124,10 +2133,10 @@ impl Config {
         );
         let commit = merge_base.trim_end();
         if commit.is_empty() {
-            println!("error: could not find commit hash for downloading rustc");
-            println!("help: maybe your repository history is too shallow?");
-            println!("help: consider disabling `download-rustc`");
-            println!("help: or fetch enough history to include one upstream commit");
+            println!("ERROR: could not find commit hash for downloading rustc");
+            println!("HELP: maybe your repository history is too shallow?");
+            println!("HELP: consider disabling `download-rustc`");
+            println!("HELP: or fetch enough history to include one upstream commit");
             crate::exit!(1);
         }
 
@@ -2141,14 +2150,14 @@ impl Config {
             if if_unchanged {
                 if self.verbose > 0 {
                     println!(
-                        "warning: saw changes to compiler/ or library/ since {commit}; \
+                        "WARNING: saw changes to compiler/ or library/ since {commit}; \
                             ignoring `download-rustc`"
                     );
                 }
                 return None;
             }
             println!(
-                "warning: `download-rustc` is enabled, but there are changes to \
+                "WARNING: `download-rustc` is enabled, but there are changes to \
                     compiler/ or library/"
             );
         }

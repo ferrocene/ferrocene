@@ -57,12 +57,12 @@ will start automatically.
 If there is a service outage preventing you from manually starting a release
 follow the instructions in :doc:`internal-procedures:release/during-outages`.
 
-Channels
---------
+Channel names
+-------------
 
 The release channel is determined automatically by the tooling, based on both
-the Rust channel (in the ``src/ci/channel`` file) and the Ferrocene channel (in
-the ``ferrocene/ci/channel`` file):
+the ``src/ci/channel`` file (managed by upstream) and the
+``ferrocene/ci/channel`` file (managed by Ferrocene):
 
 .. list-table::
    :header-rows: 1
@@ -86,12 +86,14 @@ the ``ferrocene/ci/channel`` file):
      - stable
      - stable
 
-We calculate the release channel using the two files rather than just defining
-our own release channel to reduce the maintenance efforts. This way, we can
-keep the Ferrocene channel as ``rolling`` in the ``main`` branch, and upstream
-takes care of bumping its channel to ``beta`` and ``stable`` as part of its own
-release process. It is only when we want to prepare a stable release of Ferrocene
-do we need to change anything.
+We rely on this approach of combining the two files to determine the channel
+(rather than storing the actual channel in ``ferrocene/ci/channel``) to reduce
+the maintenance efforts.
+
+This way, as long as we set ``ferrocene/ci/channel`` to "rolling" on the main
+branch, we don't need make any change ourselves to promote a branch from
+"nightly" to "pre-rolling" to "rolling", as upstream does that for us when they
+change ``src/ci/channel``.
 
 .. _publish-release: https://github.com/ferrocene/publish-release
 .. _calculate-release-job-matrix.py: https://github.com/ferrocene/ferrocene/blob/main/ferrocene/ci/scripts/calculate-release-job-matrix.py

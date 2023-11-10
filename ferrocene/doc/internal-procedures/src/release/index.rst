@@ -68,8 +68,8 @@ the ``ferrocene/ci/channel`` file):
    :header-rows: 1
 
    * - Release channel
-     - Rust channel
-     - Ferrocene channel
+     - ``src/ci/channel``
+     - ``ferrocene/ci/channel``
    * - **nightly**
      - nightly
      - rolling

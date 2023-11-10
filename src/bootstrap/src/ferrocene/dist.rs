@@ -219,7 +219,6 @@ impl<'a> Subsetter<'a> {
             .lines()
             .map(|line| line.trim())
             .filter(|line| !line.starts_with('#'))
-            .map(|line| line.trim())
             .filter(|line| !line.is_empty());
 
         let Some(subset) = lines.next() else {

@@ -84,6 +84,18 @@ def render_changes(origin, base_branch, new_branch):
     if last is None:
         return "**Nothing**"
 
+    # When merge conflicts are fixes with separate commits, the latest commit
+    # on the branch will not be the merge commit from upstream. In those cases
+    # we need to walk back through the commit graph until we find it.
+    while commits[last].merge is None:
+        print(f"skipping commit {last} as it's not a merge commit", file=sys.stderr)
+        last = commits[last].parent
+        # When there are no merge commits in the branch, we will reach a point
+        # where the parent commit is not in the subset of commits retrieved
+        # from the git invocation above. Gracefully handle that.
+        if last not in commits:
+            return "**Nothing**"
+
     # Parse the commit graph and generate the list of changes
     changes = ""
     cursor = commits[last].merge

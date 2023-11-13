@@ -28,6 +28,7 @@ pub(crate) enum Error {
     MissingCompilationArtifact { name: String, after_compiling: String },
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
     SuitableCCompilerNotFound { target: String },
+    LinkerArgsError { target: String },
 }
 
 impl Error {
@@ -53,6 +54,7 @@ impl Error {
             Error::MissingCompilationArtifact { .. } => 21,
             Error::UnexpectedCompilationArtifact { .. } => 22,
             Error::SuitableCCompilerNotFound { .. } => 23,
+            Error::LinkerArgsError { .. } => 24,
         }
     }
 }
@@ -80,6 +82,7 @@ impl std::error::Error for Error {
             Error::MissingCompilationArtifact { .. } => None,
             Error::UnexpectedCompilationArtifact { .. } => None,
             Error::SuitableCCompilerNotFound { .. } => None,
+            Error::LinkerArgsError { .. } => None,
         }
     }
 }
@@ -162,6 +165,9 @@ impl Display for Error {
             }
             Error::SuitableCCompilerNotFound { target } => {
                 write!(f, "unable to find LLD-compatible C compiler for `{target}`")
+            }
+            Error::LinkerArgsError { target } => {
+                write!(f, "Unable to analyse linker arguments for `{target}`")
             }
         }
     }

@@ -37,18 +37,17 @@ pub(crate) fn check_and_add_rustflags(
     let lld_bin = find_bundled_lld_wrapper(reporter, sysroot)?;
     let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
 
+    // Step 2. Check the C compiler works on each target that needs one
     'target_loop: for target in targets {
         let prefix_list: &[&str] = match target.linker {
             Linker::BundledLld => {
+                reporter
+                    .skipped(&format!("Target `{}` does not require a C compiler", target.triple));
                 continue 'target_loop;
             }
             Linker::HostCC => &[""],
             Linker::CrossCC(list) => list,
         };
-        reporter.note(&format!(
-            "Target {:?} requires a C compiler. Searching for one...",
-            target.triple
-        ));
         for cc_prefix in prefix_list {
             for compiler_kind in ["cc", "gcc", "clang"] {
                 let temp_dir = tempfile::tempdir().expect("making temp dir");
@@ -56,6 +55,7 @@ pub(crate) fn check_and_add_rustflags(
                 let cc_result = check_system_compiler(
                     reporter,
                     environment,
+                    target.triple,
                     &compiler_name,
                     lld_dir,
                     temp_dir.path(),
@@ -63,10 +63,16 @@ pub(crate) fn check_and_add_rustflags(
                 temp_dir.close().expect("clean up temp");
                 match cc_result {
                     Ok((_path, args)) => {
-                        reporter.info(&format!("Found C compiler: {:?}", compiler_name));
+                        reporter.success(&format!(
+                            "Found C compiler `{}` for target `{}`",
+                            compiler_name, target.triple
+                        ));
                         let mut need_no_lto = false;
                         for arg in args {
-                            reporter.note(&format!("{compiler_name} provides argument {arg:?}"));
+                            if std::env::var("FST_PRINT_LINKER_ARGS").is_ok() {
+                                reporter
+                                    .note(&format!("`{compiler_name}` provides argument {arg:?}"));
+                            }
                             if arg.contains("liblto_plugin") {
                                 need_no_lto = true;
                             }
@@ -77,8 +83,11 @@ pub(crate) fn check_and_add_rustflags(
                         }
                         continue 'target_loop;
                     }
-                    Err(_e) => {
-                        reporter.note(&format!("Couldn't find C compiler: {:?}", compiler_name));
+                    Err(e) => {
+                        // Try again until we run out of compilers
+                        if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                            reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                        }
                     }
                 }
             }
@@ -102,6 +111,7 @@ pub(crate) fn check_and_add_rustflags(
 fn check_system_compiler(
     reporter: &dyn Reporter,
     environment: &Environment,
+    target: &str,
     compiler_name: &str,
     lld_dir: &Path,
     temp_dir: &Path,
@@ -109,7 +119,7 @@ fn check_system_compiler(
     let cc_path = find_binary_in_path(environment, &compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
 
-    reporter.success(&format!("C compiler {compiler_name} detected, testing supported arguments",));
+    reporter.info(&format!("C compiler {compiler_name} detected, testing supported arguments",));
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
@@ -120,7 +130,7 @@ fn check_system_compiler(
 
     let _ld_lld_path = make_fake_linker(temp_dir)?;
 
-    let linker_args = check_compiler_linker_args(&cc_path, temp_dir)?;
+    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir)?;
 
     Ok((cc_path, linker_args))
 }
@@ -204,15 +214,19 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 /// Use a fake linker to check the C compiler arguments to the linker
 ///
 /// We assume the fake linker is in `temp_dir`
-fn check_compiler_linker_args(cc_path: &Path, temp_dir: &Path) -> Result<Vec<String>, Error> {
+fn check_compiler_linker_args(
+    target: &str,
+    cc_path: &Path,
+    temp_dir: &Path,
+) -> Result<Vec<String>, Error> {
     // compile a sample C program, but using our fake linker
     compile_c_program(cc_path, temp_dir, temp_dir)?;
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read("args.txt") else {
-        panic!("Args file was missing?!");
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
     };
     let Ok(args_str) = std::str::from_utf8(&args_file) else {
-        panic!("Args file was not valid UTF-8?")
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
     };
 
     Ok(args_str.lines().map(|s| s.to_owned()).collect())

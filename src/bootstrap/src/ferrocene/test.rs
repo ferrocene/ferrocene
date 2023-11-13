@@ -159,6 +159,6 @@ impl Step for GenerateTarball {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(CheckDocumentSignatures { target: run.target });
+        run.builder.ensure(Self { target: run.target });
     }
 }

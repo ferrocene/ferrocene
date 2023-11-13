@@ -190,7 +190,7 @@ fi
 for prefix in "" "src/bootstrap/"; do
     lock="${prefix}Cargo.lock"
     echo "pull-upstream: checking whether ${lock} needs to be updated..."
-    RUSTC_BOOTSTRAP=1 cargo -Z unstable-options -C "${prefix}." metadata --format-version=1 >/dev/null
+    RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null
     if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
         git add "${lock}"
         git commit -m "update ${lock}"

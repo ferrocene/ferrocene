@@ -91,7 +91,7 @@ We rely on this approach of combining the two files to determine the channel
 the maintenance efforts.
 
 This way, as long as we set ``ferrocene/ci/channel`` to "rolling" on the main
-branch, we don't need make any change ourselves to promote a branch from
+branch, we don't need to make any change ourselves to promote a branch from
 "nightly" to "pre-rolling" to "rolling", as upstream does that for us when they
 change ``src/ci/channel``.
 

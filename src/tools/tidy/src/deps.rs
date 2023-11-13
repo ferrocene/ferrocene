@@ -145,6 +145,7 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
     ("similar", "Apache-2.0"),
     ("sized-chunks", "MPL-2.0+"),
     ("subtle", "BSD-3-Clause"),
+    ("supports-hyperlinks", "Apache-2.0"),
     ("unicode-bom", "Apache-2.0"),
     // tidy-alphabetical-end
 ];
@@ -445,7 +446,11 @@ const ICU4X_UNICODE_LICENSE_DEPENDENCIES: &[&str] = &[
     "tinystr",
     "writeable",
     "yoke",
+    "yoke-derive",
+    "zerofrom",
+    "zerofrom-derive",
     "zerovec",
+    "zerovec-derive",
     // tidy-alphabetical-end
 ];
 

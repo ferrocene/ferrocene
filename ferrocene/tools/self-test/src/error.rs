@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::utils::DisplayList;
 use std::ffi::OsString;
 use std::fmt::Display;
 use std::path::PathBuf;
@@ -19,11 +18,8 @@ pub(crate) enum Error {
     TargetLibraryMissing { target: String, library: String },
     DuplicateTargetLibrary { target: String, library: String },
     TargetLibraryDiscoveryFailed { path: PathBuf, error: std::io::Error },
-    LinkerNotFound { targets: Vec<String>, name: String, error: FindBinaryInPathError },
-    LinkerVersionFetchFailed { targets: Vec<String>, name: String, error: CommandError },
-    LinkerVersionParseFailed { targets: Vec<String>, name: String },
-    UnsupportedLinkerVersion { targets: Vec<String>, name: String, expected: String, found: String },
-    BundledLinkerMissing { targets: Vec<String> },
+    CCompilerNotFound { name: String, error: FindBinaryInPathError },
+    BundledLinkerMissing,
     NonUtf8Path { path: PathBuf },
     TemporaryCompilationDirectoryCreationFailed { error: std::io::Error },
     WritingSampleProgramFailed { name: String, dest: PathBuf, error: std::io::Error },
@@ -31,6 +27,7 @@ pub(crate) enum Error {
     CompilationArtifactsListingFailed { path: PathBuf, error: std::io::Error },
     MissingCompilationArtifact { name: String, after_compiling: String },
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
+    SuitableCCompilerNotFound { target: String },
 }
 
 impl Error {
@@ -46,11 +43,8 @@ impl Error {
             Error::TargetLibraryMissing { .. } => 8,
             Error::DuplicateTargetLibrary { .. } => 9,
             Error::TargetLibraryDiscoveryFailed { .. } => 10,
-            Error::LinkerNotFound { .. } => 11,
-            Error::LinkerVersionFetchFailed { .. } => 12,
-            Error::LinkerVersionParseFailed { .. } => 13,
-            Error::UnsupportedLinkerVersion { .. } => 14,
-            Error::BundledLinkerMissing { .. } => 15,
+            Error::CCompilerNotFound { .. } => 11,
+            Error::BundledLinkerMissing => 15,
             Error::NonUtf8Path { .. } => 16,
             Error::TemporaryCompilationDirectoryCreationFailed { .. } => 17,
             Error::WritingSampleProgramFailed { .. } => 18,
@@ -58,6 +52,7 @@ impl Error {
             Error::CompilationArtifactsListingFailed { .. } => 20,
             Error::MissingCompilationArtifact { .. } => 21,
             Error::UnexpectedCompilationArtifact { .. } => 22,
+            Error::SuitableCCompilerNotFound { .. } => 23,
         }
     }
 }
@@ -75,11 +70,8 @@ impl std::error::Error for Error {
             Error::TargetLibraryMissing { .. } => None,
             Error::DuplicateTargetLibrary { .. } => None,
             Error::TargetLibraryDiscoveryFailed { error, .. } => Some(error),
-            Error::LinkerNotFound { error, .. } => Some(error),
-            Error::LinkerVersionFetchFailed { error, .. } => Some(error),
-            Error::LinkerVersionParseFailed { .. } => None,
-            Error::UnsupportedLinkerVersion { .. } => None,
-            Error::BundledLinkerMissing { .. } => None,
+            Error::CCompilerNotFound { error, .. } => Some(error),
+            Error::BundledLinkerMissing => None,
             Error::NonUtf8Path { .. } => None,
             Error::TemporaryCompilationDirectoryCreationFailed { error } => Some(error),
             Error::WritingSampleProgramFailed { error, .. } => Some(error),
@@ -87,6 +79,7 @@ impl std::error::Error for Error {
             Error::CompilationArtifactsListingFailed { error, .. } => Some(error),
             Error::MissingCompilationArtifact { .. } => None,
             Error::UnexpectedCompilationArtifact { .. } => None,
+            Error::SuitableCCompilerNotFound { .. } => None,
         }
     }
 }
@@ -124,37 +117,11 @@ impl Display for Error {
             Error::TargetLibraryDiscoveryFailed { path, .. } => {
                 write!(f, "failed to access {} while discovering target libraries", path.display())
             }
-            Error::LinkerNotFound { targets, name, .. } => {
-                write!(
-                    f,
-                    "linker {name} for target {} not found on the system",
-                    DisplayList(targets)
-                )
+            Error::CCompilerNotFound { name, .. } => {
+                write!(f, "C compiler {name} not found on the system",)
             }
-            Error::LinkerVersionFetchFailed { targets, name, .. } => {
-                write!(
-                    f,
-                    "failed to invoke linker {name} to retrieve its version (for target {})",
-                    DisplayList(targets)
-                )
-            }
-            Error::LinkerVersionParseFailed { targets, name } => {
-                write!(
-                    f,
-                    "failed to parse the version of linker {name} (for target {})",
-                    DisplayList(targets)
-                )
-            }
-            Error::UnsupportedLinkerVersion { targets, name, expected, found } => {
-                write!(
-                    f,
-                    "version {found} of linker {name} is unsupported, only {expected} \
-                     is supported (for target {})",
-                    DisplayList(targets)
-                )
-            }
-            Error::BundledLinkerMissing { targets } => {
-                write!(f, "the bundled linker is missing (for target {})", DisplayList(targets))
+            Error::BundledLinkerMissing => {
+                write!(f, "the bundled linker is missing")
             }
             Error::NonUtf8Path { path } => {
                 write!(
@@ -192,6 +159,9 @@ impl Display for Error {
                     "unexpected compilation artifact '{name}' \
                      after compiling sample program `{after_compiling}`"
                 )
+            }
+            Error::SuitableCCompilerNotFound { target } => {
+                write!(f, "unable to find LLD-compatible C compiler for `{target}`")
             }
         }
     }

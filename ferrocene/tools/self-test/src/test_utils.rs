@@ -14,27 +14,18 @@ use tempfile::TempDir;
 pub(crate) struct TestUtils {
     environment: Environment,
     sysroot: TempDir,
-    external_binaries_dir: TempDir,
     reports: ReportsCollector,
 }
 
 impl TestUtils {
     pub(crate) fn new() -> Self {
         let sysroot = TempDir::new().unwrap();
-        let external_binaries_dir = TempDir::new().unwrap();
 
         Self {
             environment: Environment {
-                path: Some(
-                    std::env::join_paths([
-                        &sysroot.path().join("bin"),
-                        external_binaries_dir.path(),
-                    ])
-                    .unwrap(),
-                ),
+                path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()),
             },
             sysroot,
-            external_binaries_dir,
             reports: ReportsCollector { reports: RefCell::new(Vec::new()) },
         }
     }
@@ -143,16 +134,6 @@ impl<'a> BinBuilder<'a> {
     }
 
     #[must_use]
-    pub(crate) fn external(mut self) -> Self {
-        if let BinaryDestinaton::Sysroot = self.dest {
-            self.dest = BinaryDestinaton::External;
-            self
-        } else {
-            panic!("called external() when another destination was already set");
-        }
-    }
-
-    #[must_use]
     pub(crate) fn for_target(mut self, target: &str) -> Self {
         if let BinaryDestinaton::Sysroot = self.dest {
             self.dest = BinaryDestinaton::Target(target.into());
@@ -175,14 +156,16 @@ impl<'a> BinBuilder<'a> {
     }
 
     pub(crate) fn create(self) -> PathBuf {
-        let bin_dir = match self.dest {
+        let bin_root = match self.dest {
             BinaryDestinaton::Sysroot => self.utils.sysroot.path().join("bin"),
-            BinaryDestinaton::External => self.utils.external_binaries_dir.path().into(),
             BinaryDestinaton::Target(target) => {
                 self.utils.sysroot.path().join("lib").join("rustlib").join(target).join("bin")
             }
         };
-        let bin = bin_dir.join(self.name);
+        let bin = bin_root.join(self.name);
+        // self.name might have included a sub-directory, so re-fetch the
+        // containing directory's path
+        let bin_dir = bin.parent().expect("path should have a parent");
 
         std::fs::create_dir_all(&bin_dir).unwrap();
         if bin.exists() {
@@ -228,7 +211,6 @@ impl<'a> BinBuilder<'a> {
 
 enum BinaryDestinaton {
     Sysroot,
-    External,
     Target(String),
 }
 

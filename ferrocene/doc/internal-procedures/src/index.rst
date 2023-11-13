@@ -22,6 +22,14 @@ Ferrocene Internal Procedures
 
 .. toctree::
    :maxdepth: 4
+   :caption: Release process
+
+   release/index
+   release/stable
+   release/during-outages
+
+.. toctree::
+   :maxdepth: 4
    :caption: Partnerships
 
    partners/oxidos

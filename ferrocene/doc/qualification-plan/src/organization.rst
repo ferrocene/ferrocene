@@ -31,6 +31,16 @@ Product Engineering
 * Engineering Lead - |engineering_lead|
 * Release Lead - |release_lead|
 
+Release Managers
+~~~~~~~~~~~~~~~~
+
+Release managers are allowed to :ref:`approve manually published releases
+<release:Manually-started Releases>`. This role does not have the
+responsibilities of the Release Lead. The current release managers are:
+
+* |release_manager_1|
+* |release_manager_2|
+
 Qualification and Certification Team
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

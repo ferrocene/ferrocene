@@ -84,7 +84,7 @@ def render_changes(origin, base_branch, new_branch):
     if last is None:
         return "**Nothing**"
 
-    # When merge conflicts are fixes with separate commits, the latest commit
+    # When merge conflicts are fixed with separate commits, the latest commit
     # on the branch will not be the merge commit from upstream. In those cases
     # we need to walk back through the commit graph until we find it.
     while commits[last].merge is None:

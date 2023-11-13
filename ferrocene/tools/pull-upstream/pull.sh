@@ -177,6 +177,26 @@ if git diff --quiet HEAD^..HEAD; then
     exit 42
 fi
 
+# Occasionally, changes made upstream require the lockfile to be regenerated,
+# otherwise CI with its --locked flag will fail. This is **not** updating the
+# versions of the packages we use, but ensuring the lockfile stays consistent.
+#
+# Whenever the lockfile needs an update (we check that by invoking a Cargo
+# command that regerates the lockfile if needed but doesn't have any side
+# effects) we include that in a separate commit.
+#
+# Note that this is not related to merge conflicts: lockfile merge conflicts
+# are automatically fixed by another part of this script.
+for prefix in "" "src/bootstrap/"; do
+    lock="${prefix}Cargo.lock"
+    echo "pull-upstream: checking whether ${lock} needs to be updated..."
+    RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null
+    if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
+        git add "${lock}"
+        git commit -m "update ${lock}"
+    fi
+done
+
 git branch -D "${TEMP_BRANCH}"
 
 echo

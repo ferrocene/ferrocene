@@ -67,6 +67,9 @@ jobs:
         if: matrix.branch != 'master'
         id: create_branch
 
+      - name: Clone a subset of the LLVM submodule rather than the whole thing
+        run: ferrocene/ci/scripts/clone-llvm-subset.sh
+
       - name: Run the pull-upstream automation
         run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
         env:

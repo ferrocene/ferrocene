@@ -53,7 +53,6 @@ pub(crate) fn check_and_add_rustflags(
                 let temp_dir = tempfile::tempdir().expect("making temp dir");
                 let compiler_name = format!("{cc_prefix}{compiler_kind}");
                 let cc_result = check_system_compiler(
-                    reporter,
                     environment,
                     target.triple,
                     &compiler_name,
@@ -109,7 +108,6 @@ pub(crate) fn check_and_add_rustflags(
 /// Returns the path to the C compiler, and a list of arguments that the C
 /// compiler gives to the linker.
 fn check_system_compiler(
-    reporter: &dyn Reporter,
     environment: &Environment,
     target: &str,
     compiler_name: &str,
@@ -119,8 +117,6 @@ fn check_system_compiler(
     let cc_path = find_binary_in_path(environment, &compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
 
-    reporter.info(&format!("C compiler {compiler_name} detected, testing supported arguments",));
-
     // Part 1. Check with the real ld.lld - can we make a binary?
 
     compile_c_program(&cc_path, lld_dir, temp_dir)?;
@@ -128,9 +124,9 @@ fn check_system_compiler(
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
 
-    let _ld_lld_path = make_fake_linker(temp_dir)?;
+    let args_file = make_fake_linker(temp_dir)?;
 
-    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir)?;
+    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir, &args_file)?;
 
     Ok((cc_path, linker_args))
 }
@@ -174,11 +170,13 @@ fn compile_c_program(cc_path: &Path, lld_dir: &Path, temp_dir: &Path) -> Result<
 
 /// Compile a fake linker using the system C compiler
 fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
-    const C_SOURCE: &str = r#"
+    const C_SOURCE: &[u8] = br#"
     #include <stdio.h>
 
     int main(int argc, char** argv) {
-        FILE* f = fopen("args.txt", "w");
+        FILE* f = fopen(""#;
+
+    const C_SOURCE2: &[u8] = br#"", "w");
         if (!f) {
             return 1;
         }
@@ -194,9 +192,16 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     }
     "#;
 
+    let args_file = temp_dir.join("_fst_args_capture");
+
+    // Concatentation, using byte strings
+    let mut c_source = C_SOURCE.to_owned();
+    c_source.extend(args_file.as_os_str().as_encoded_bytes());
+    c_source.extend(C_SOURCE2);
+
     let source_file = temp_dir.join("ldlld.c");
     let object_file = temp_dir.join("ld.lld");
-    std::fs::write(&source_file, C_SOURCE.as_bytes()).expect("saving source code to temp file");
+    std::fs::write(&source_file, &c_source).expect("saving source code to temp file");
 
     // Compile our sample program
     let args: Vec<OsString> =
@@ -208,7 +213,7 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let _output = run_command(&mut cc_child)
         .map_err(|error| Error::SampleProgramCompilationFailed { name: "cc".to_string(), error })?;
 
-    Ok(object_file)
+    Ok(args_file)
 }
 
 /// Use a fake linker to check the C compiler arguments to the linker
@@ -218,18 +223,31 @@ fn check_compiler_linker_args(
     target: &str,
     cc_path: &Path,
     temp_dir: &Path,
+    args_file_path: &Path,
 ) -> Result<Vec<String>, Error> {
+    // Ensure this file doesn't already exist
+    let _ = std::fs::remove_file(args_file_path);
+
     // compile a sample C program, but using our fake linker
     compile_c_program(cc_path, temp_dir, temp_dir)?;
+
     // see what the fake linker wrote
-    let Ok(args_file) = std::fs::read("args.txt") else {
+    let Ok(args_file) = std::fs::read(args_file_path) else {
         return Err(Error::LinkerArgsError { target: target.to_owned() });
     };
     let Ok(args_str) = std::str::from_utf8(&args_file) else {
         return Err(Error::LinkerArgsError { target: target.to_owned() });
     };
 
-    Ok(args_str.lines().map(|s| s.to_owned()).collect())
+    // parse the file
+    let args: Vec<String> = args_str.lines().map(|s| s.to_owned()).collect();
+
+    // an empty file would be bad
+    if args.is_empty() {
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
+    };
+
+    Ok(args)
 }
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
@@ -345,7 +363,6 @@ mod tests {
 
         // Having constructed a fake C compiler, we should be able to call it
         let result = check_system_compiler(
-            utils.reporter(),
             utils.env(),
             "missing-cc",
             Path::new("/some/fake/lld/path"),

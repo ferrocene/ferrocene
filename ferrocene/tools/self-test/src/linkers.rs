@@ -22,6 +22,64 @@ pub enum Linker {
     CrossCC(&'static [&'static str]),
 }
 
+/// Linker options we know about
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum LinkerArg<'a> {
+    // Unqualified option
+    /// An input file (an argument with no option before it)
+    Input(&'a str),
+
+    // Single character options
+    /// The `-ofoo.elf` option
+    Output(&'a str),
+    /// The `-Lpath/foo` library path option
+    LibraryPath(&'a str),
+    /// The `-X` / `--discard-all` option
+    DiscardAll,
+    /// The `-Zfoo` option
+    Keyword(&'a str),
+    /// The `-lfoo` option
+    Link(&'a str),
+    /// The `-mfoo` option
+    Emulation(&'a str),
+
+    // Long options
+    /// The `-plugin` option
+    Plugin(&'a str),
+    /// The `-plugin-opt=` option
+    PluginOpt(&'a str),
+    /// The `-EL` option
+    LittleEndian,
+    /// The `-pie` option
+    PicExecutable,
+    /// The `-no-pie` option
+    NonPicExecutable,
+    /// The `-dynamic-linker foo/bar` option
+    DynamicLinker(&'a str),
+    /// The `--sysroot=` option
+    Sysroot(&'a str),
+    /// The `--build-id`` option
+    BuildId,
+    /// The `--eh-frame-hdr`` option
+    EhFrameHeader,
+    /// The `--hash-style=` option
+    HashStyle(&'a str),
+    /// The `--as-needed` option
+    AsNeeded,
+    /// The `--no-as-needed` option
+    NoAsNeeded,
+    /// The `--push-state` option
+    PushState,
+    /// The `--pop-state` option
+    PopState,
+    /// The `--fix-cortex-a53-843419` option
+    FixCortexA53_843419,
+
+    // Anything else goes here
+    /// We didn't recognise this option
+    Unknown(&'a str),
+}
+
 /// Finds a system C compiler for each target and determines what flags should
 /// be added when calling `rustc`.
 ///
@@ -39,6 +97,7 @@ pub(crate) fn check_and_add_rustflags(
     let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
 
     // Step 2. Check the C compiler works on each target that needs one
+    // 2a. We loop through the targets
     'target_loop: for target in targets {
         let prefix_list: &[&str] = match target.linker {
             Linker::BundledLld => {
@@ -49,45 +108,74 @@ pub(crate) fn check_and_add_rustflags(
             Linker::HostCC => &[""],
             Linker::CrossCC(list) => list,
         };
+        // 2b. We loop through the prefixes used on this target (e.g. "arm-unknown-none-")
         for cc_prefix in prefix_list {
-            for compiler_kind in ["cc", "gcc", "clang"] {
-                let temp_dir = tempfile::tempdir().map_err(|error| {
-                    Error::TemporaryCompilationDirectoryCreationFailed { error }
-                })?;
-                let compiler_name = format!("{cc_prefix}{compiler_kind}");
-                let cc_result = check_system_compiler(
-                    environment,
-                    target.triple,
-                    &compiler_name,
-                    lld_dir,
-                    temp_dir.path(),
-                );
-                match cc_result {
-                    Ok((_path, args)) => {
-                        reporter.success(&format!(
-                            "Found C compiler `{}` for target `{}`",
-                            compiler_name, target.triple
-                        ));
-                        let mut need_no_lto = false;
-                        for arg in args {
-                            if std::env::var("FST_PRINT_LINKER_ARGS").is_ok() {
-                                reporter
-                                    .note(&format!("`{compiler_name}` provides argument {arg:?}"));
+            // 2c. We loop through the things we know C compilers can be called
+            'cc_loop: for compiler_kind in ["cc", "gcc", "clang"] {
+                let mut cc_args = Vec::new();
+                // 2d. We keep trying until we get a set of linker arguments are are happy with
+                //     or we run out of flags to give the C compiler
+                'arg_loop: loop {
+                    let temp_dir = tempfile::tempdir().map_err(|error| {
+                        Error::TemporaryCompilationDirectoryCreationFailed { error }
+                    })?;
+                    let compiler_name = format!("{cc_prefix}{compiler_kind}");
+                    let cc_result = check_system_compiler(
+                        environment,
+                        target.triple,
+                        &compiler_name,
+                        lld_dir,
+                        temp_dir.path(),
+                        &cc_args,
+                    );
+                    match cc_result {
+                        Ok((_path, linker_args)) => {
+                            if std::env::var("FST_PRINT_DETAILED_ARGS").is_ok() {
+                                reporter.note(&format!(
+                                    "Target `{}`, detected args `{:?}`",
+                                    target.triple, &linker_args
+                                ));
                             }
-                            if arg.contains("liblto_plugin") {
-                                need_no_lto = true;
+
+                            match linker_args_ok(
+                                target.triple,
+                                linker_args.iter().map(|s| s.as_str()),
+                                &mut cc_args,
+                            ) {
+                                Ok(true) => {
+                                    // Looks good to go
+                                }
+                                Ok(false) => {
+                                    // Give it another go with some new arguments
+                                    continue 'arg_loop;
+                                }
+                                Err(e) => {
+                                    // Try another compiler
+                                    if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                        reporter
+                                            .note(&format!("`{compiler_name}` failed with {e}"));
+                                    }
+                                    continue 'cc_loop;
+                                }
                             }
+                            reporter.success(&format!(
+                                "Found C compiler `{}` for target `{}`",
+                                compiler_name, target.triple
+                            ));
+                            target.rustflags.push(format!("-Clinker={compiler_name}"));
+                            for cc_arg in cc_args {
+                                target.rustflags.push(format!("-Clink-arg={cc_arg}"));
+                            }
+                            // All done with this target
+                            continue 'target_loop;
                         }
-                        target.rustflags.push(format!("-Clinker={compiler_name}"));
-                        if need_no_lto {
-                            target.rustflags.push(format!("-Clink-arg=-fno-lto"));
-                        }
-                        continue 'target_loop;
-                    }
-                    Err(e) => {
-                        // Try again until we run out of compilers
-                        if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
-                            reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                        Err(e) => {
+                            // Try again until we run out of compilers
+                            if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                            }
+                            // Try another compiler
+                            continue 'cc_loop;
                         }
                     }
                 }
@@ -97,6 +185,249 @@ pub(crate) fn check_and_add_rustflags(
     }
 
     Ok(())
+}
+
+/// Look at the arguments given to the linker.
+///
+/// * Returns `Ok(true)` if these linker arguments look OK
+/// * Returns `Ok(false)` if the linker arguments were not OK, but an extra
+///   argument was added to `compiler_args` and so the caller should try again
+/// * Returns `Err(...)` if the linker arguments were not OK, and there's no
+///   proposed remedy
+fn linker_args_ok<'a, I>(
+    target: &str,
+    linker_args: I,
+    compiler_args: &mut Vec<String>,
+) -> Result<bool, Error>
+where
+    I: Iterator<Item = &'a str>,
+{
+    let linker_args = rationalise_linker_args(linker_args);
+    for arg in linker_args {
+        match arg {
+            LinkerArg::Input(_) => {}
+            LinkerArg::Output(_) => {}
+            LinkerArg::LibraryPath(_) => {}
+            LinkerArg::DiscardAll => {}
+            LinkerArg::Keyword(_) => {}
+            LinkerArg::Link(_) => {}
+            LinkerArg::Emulation(_) => {}
+            LinkerArg::PluginOpt(_) => {}
+            LinkerArg::LittleEndian => {}
+            LinkerArg::PicExecutable => {}
+            LinkerArg::NonPicExecutable => {}
+            LinkerArg::DynamicLinker(_) => {}
+            LinkerArg::Sysroot(_) => {}
+            LinkerArg::BuildId => {}
+            LinkerArg::EhFrameHeader => {}
+            LinkerArg::HashStyle(_) => {}
+            LinkerArg::AsNeeded => {}
+            LinkerArg::NoAsNeeded => {}
+            LinkerArg::PushState => {}
+            LinkerArg::PopState => {}
+            LinkerArg::FixCortexA53_843419 => {}
+            LinkerArg::Unknown(_) => {
+                // Hmm, we don't want unknown arguments
+                return Err(Error::LinkerArgsError { target: target.to_owned() });
+            }
+            LinkerArg::Plugin(_plugin) => {
+                // Hmm, we don't want plugins.
+                if compiler_args.iter().find(|s| "-fno-lto" == *s).is_some() {
+                    // We already turned LTO off, and we still got a plugin, so bail out
+                    return Err(Error::LinkerArgsError { target: target.to_owned() });
+                }
+                // Try again with LTO disabled.
+                compiler_args.push("-fno-lto".to_owned());
+                return Ok(false);
+            }
+        }
+    }
+    Ok(true)
+}
+
+/// Parse single letter linker arguments.
+///
+/// This might be "-ofoo" or "-o foo".
+fn parse_linker_short_arg<'a, F, I>(
+    option: char,
+    arg: &'a str,
+    args_iter: &mut I,
+    f: F,
+) -> Option<LinkerArg<'a>>
+where
+    I: Iterator<Item = &'a str>,
+    F: FnOnce(&'a str) -> LinkerArg<'a>,
+{
+    let option = format!("-{option}");
+    if arg == option {
+        if let Some(next) = args_iter.next() {
+            Some(f(next))
+        } else {
+            Some(LinkerArg::Unknown(arg))
+        }
+    } else if let Some(tail) = arg.strip_prefix(&option) {
+        Some(f(tail))
+    } else {
+        None
+    }
+}
+
+/// Parse single letter linker options.
+///
+/// This might be "-X".
+fn parse_linker_short_opt<'a, F>(option: char, arg: &'a str, f: F) -> Option<LinkerArg<'a>>
+where
+    F: FnOnce() -> LinkerArg<'a>,
+{
+    let option = format!("-{option}");
+    if arg == option { Some(f()) } else { None }
+}
+
+/// Parse multi-letter linker arguments.
+///
+/// This might be "--foo=bar" or "--foo bar" or "-foo bar" or "-foo=bar"
+fn parse_linker_long_arg<'a, F, I>(
+    option: &str,
+    arg: &'a str,
+    args_iter: &mut I,
+    f: F,
+) -> Option<LinkerArg<'a>>
+where
+    I: Iterator<Item = &'a str>,
+    F: FnOnce(&'a str) -> LinkerArg<'a>,
+{
+    let onedash = format!("-{option}");
+    let twodash = format!("--{option}");
+    if arg == onedash || arg == twodash {
+        if let Some(next) = args_iter.next() {
+            Some(f(next))
+        } else {
+            Some(LinkerArg::Unknown(arg))
+        }
+    } else if let Some(tail) = arg.strip_prefix(&format!("{onedash}=")) {
+        Some(f(tail))
+    } else if let Some(tail) = arg.strip_prefix(&format!("{twodash}=")) {
+        Some(f(tail))
+    } else {
+        None
+    }
+}
+
+/// Parse multi-letter linker options.
+///
+/// This might be "--eh-frame-hdr" or "-eh-frame-hdr"
+fn parse_linker_long_opt<'a, F>(option: &str, arg: &'a str, f: F) -> Option<LinkerArg<'a>>
+where
+    F: FnOnce() -> LinkerArg<'a>,
+{
+    let onedash = format!("-{option}");
+    let twodash = format!("--{option}");
+    if arg == onedash || arg == twodash { Some(f()) } else { None }
+}
+
+/// Clean up split linker arguments so they can be more easily processed
+fn rationalise_linker_args<'a, I>(mut args_iter: I) -> Vec<LinkerArg<'a>>
+where
+    I: Iterator<Item = &'a str>,
+{
+    let mut output = Vec::new();
+    while let Some(arg) = args_iter.next() {
+        if let Some(result) = parse_linker_short_arg('o', arg, &mut args_iter, LinkerArg::Output) {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_short_arg('L', arg, &mut args_iter, LinkerArg::LibraryPath)
+        {
+            output.push(result);
+        } else if let Some(result) = parse_linker_short_opt('X', arg, || LinkerArg::DiscardAll) {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("discard-all", arg, || LinkerArg::DiscardAll)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_short_arg('z', arg, &mut args_iter, LinkerArg::Keyword)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_short_arg('l', arg, &mut args_iter, LinkerArg::Link)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("library-path", arg, &mut args_iter, LinkerArg::Link)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_short_arg('m', arg, &mut args_iter, LinkerArg::Emulation)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("plugin", arg, &mut args_iter, LinkerArg::Plugin)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("plugin-opt", arg, &mut args_iter, LinkerArg::PluginOpt)
+        {
+            output.push(result);
+        } else if let Some(result) = parse_linker_long_opt("EL", arg, || LinkerArg::LittleEndian) {
+            output.push(result);
+        } else if let Some(result) = parse_linker_long_opt("pie", arg, || LinkerArg::PicExecutable)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("pic-executable", arg, || LinkerArg::PicExecutable)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("no-pie", arg, || LinkerArg::NonPicExecutable)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_short_arg('I', arg, &mut args_iter, LinkerArg::DynamicLinker)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("dynamic-linker", arg, &mut args_iter, LinkerArg::DynamicLinker)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("sysroot", arg, &mut args_iter, LinkerArg::Sysroot)
+        {
+            output.push(result);
+        } else if let Some(result) = parse_linker_long_opt("build-id", arg, || LinkerArg::BuildId) {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("eh-frame-hdr", arg, || LinkerArg::EhFrameHeader)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_arg("hash-style", arg, &mut args_iter, LinkerArg::HashStyle)
+        {
+            output.push(result);
+        } else if let Some(result) = parse_linker_long_opt("as-needed", arg, || LinkerArg::AsNeeded)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("no-as-needed", arg, || LinkerArg::NoAsNeeded)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("push-state", arg, || LinkerArg::PushState)
+        {
+            output.push(result);
+        } else if let Some(result) = parse_linker_long_opt("pop-state", arg, || LinkerArg::PopState)
+        {
+            output.push(result);
+        } else if let Some(result) =
+            parse_linker_long_opt("fix-cortex-a53-843419", arg, || LinkerArg::FixCortexA53_843419)
+        {
+            output.push(result);
+        } else if arg.starts_with("-") {
+            output.push(LinkerArg::Unknown(arg));
+        } else {
+            output.push(LinkerArg::Input(arg));
+        }
+    }
+    output
 }
 
 /// Check if the given system C compiler works.
@@ -115,20 +446,22 @@ fn check_system_compiler(
     compiler_name: &str,
     lld_dir: &Path,
     temp_dir: &Path,
+    extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
     let cc_path = find_binary_in_path(environment, &compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
-    cross_compile_test_program(&cc_path, lld_dir, temp_dir)?;
+    cross_compile_test_program(&cc_path, lld_dir, temp_dir, extra_args)?;
 
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
 
     let args_file = make_fake_linker(temp_dir)?;
 
-    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir, &args_file)?;
+    let linker_args =
+        check_compiler_linker_args(target, &cc_path, temp_dir, &args_file, extra_args)?;
 
     Ok((cc_path, linker_args))
 }
@@ -144,6 +477,7 @@ fn cross_compile_test_program(
     cc_path: &Path,
     lld_dir: &Path,
     temp_dir: &Path,
+    extra_args: &[String],
 ) -> Result<(), Error> {
     // We need some C source code,
     let c_source = r#"int main(void) { return 0; }"#;
@@ -160,7 +494,7 @@ fn cross_compile_test_program(
     })?;
 
     // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
-    let args: Vec<OsString> = vec![
+    let mut args: Vec<OsString> = vec![
         "-fuse-ld=lld".into(),
         "-B".into(),
         lld_dir.as_os_str().to_owned(),
@@ -168,6 +502,9 @@ fn cross_compile_test_program(
         "-o".into(),
         object_file.as_os_str().to_owned(),
     ];
+    for arg in extra_args {
+        args.push(OsString::try_from(arg).unwrap());
+    }
     let mut cc_child = Command::new(cc_path);
     cc_child.args(&args);
 
@@ -247,12 +584,13 @@ fn check_compiler_linker_args(
     cc_path: &Path,
     temp_dir: &Path,
     args_file_path: &Path,
+    extra_args: &[String],
 ) -> Result<Vec<String>, Error> {
     // Ensure this file doesn't already exist
     let _ = std::fs::remove_file(args_file_path);
 
     // compile a sample C program, but using our fake linker
-    cross_compile_test_program(cc_path, temp_dir, temp_dir)?;
+    cross_compile_test_program(cc_path, temp_dir, temp_dir, extra_args)?;
 
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
@@ -375,8 +713,13 @@ mod tests {
             .create();
 
         // Having constructed a fake C compiler, we should be able to call it
-        cross_compile_test_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path())
-            .expect("Working C compiler");
+        cross_compile_test_program(
+            &test_cc,
+            Path::new("/some/fake/lld/path"),
+            temp_dir.path(),
+            &[],
+        )
+        .expect("Working C compiler");
     }
 
     #[test]
@@ -391,6 +734,7 @@ mod tests {
             "missing-cc",
             Path::new("/some/fake/lld/path"),
             temp_dir.path(),
+            &[],
         );
         match result {
             Ok(_) => {
@@ -429,5 +773,236 @@ mod tests {
             assert_eq!(lines.next(), Some(arg.to_str().unwrap()));
         }
         assert!(lines.next().is_none());
+    }
+
+    #[test]
+    fn test_linker_args_ok() {
+        let linker_args = ["-o", "output.elf", "-L", "/some/library/path", "-L/some/library/path"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(true) => {
+                // OK!
+            }
+            Ok(false) => {
+                panic!("Unexpected rejection processing {:?}", linker_args);
+            }
+            Err(e) => {
+                panic!("Unexpected error {:?} processing {:?}", e, linker_args);
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_bad() {
+        let linker_args = ["-o", "output.elf", "--plugin", "/some/lto/binary.so"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(true) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Ok(false) => {
+                // Correct
+                assert_eq!(&compiler_args, &["-fno-lto".to_owned()]);
+            }
+            Err(e) => {
+                panic!("Unexpected error {:?} processing {:?}", e, linker_args);
+            }
+        }
+        // Second try, with -fno-lto
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Err(Error::LinkerArgsError { target }) if target == "x86_64-unknown-linux-gnu" => {
+                // Correct
+            }
+            _ => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown() {
+        let linker_args = ["-o", "output.elf", "-foobarbaz"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown_missing_short_arg() {
+        let linker_args = ["-o"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown_missing_long_arg() {
+        let linker_args = ["--plugin"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_rationalise_linker_args() {
+        let args = [
+            "-plugin",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/liblto_plugin.so",
+            "-plugin-opt=/usr/lib/gcc-cross/aarch64-linux-gnu/12/lto-wrapper",
+            "-plugin-opt=-fresolution=/tmp/cc9GsGIt.res",
+            "-plugin-opt=-pass-through=-lgcc",
+            "-plugin-opt=-pass-through=-lgcc_s",
+            "-plugin-opt=-pass-through=-lc",
+            "-plugin-opt=-pass-through=-lgcc",
+            "-plugin-opt=-pass-through=-lgcc_s",
+            "--sysroot=/",
+            "--build-id",
+            "--eh-frame-hdr",
+            "--hash-style=gnu",
+            "--as-needed",
+            "-dynamic-linker",
+            "/lib/ld-linux-aarch64.so.1",
+            "-X",
+            "-EL",
+            "-maarch64linux",
+            "--fix-cortex-a53-843419",
+            "-pie",
+            "-z",
+            "now",
+            "-z",
+            "relro",
+            "-o",
+            "/tmp/.tmpoNgAJE/output.bin",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/Scrt1.o",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crti.o",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtbeginS.o",
+            "-L/tmp/.tmpoNgAJE",
+            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12",
+            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib",
+            "-L/lib/aarch64-linux-gnu",
+            "-L/lib/../lib",
+            "-L/usr/lib/aarch64-linux-gnu",
+            "-L/usr/lib/../lib",
+            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib",
+            "/tmp/cc81JpAZ.o",
+            "-lgcc",
+            "--push-state",
+            "--as-needed",
+            "-lgcc_s",
+            "--pop-state",
+            "-lc",
+            "-lgcc",
+            "--as-needed",
+            "-lgcc_s",
+            "--no-as-needed",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtendS.o",
+            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crtn.o",
+        ];
+        let expected = vec![
+            LinkerArg::Plugin("/usr/lib/gcc-cross/aarch64-linux-gnu/12/liblto_plugin.so"),
+            LinkerArg::PluginOpt("/usr/lib/gcc-cross/aarch64-linux-gnu/12/lto-wrapper"),
+            LinkerArg::PluginOpt("-fresolution=/tmp/cc9GsGIt.res"),
+            LinkerArg::PluginOpt("-pass-through=-lgcc"),
+            LinkerArg::PluginOpt("-pass-through=-lgcc_s"),
+            LinkerArg::PluginOpt("-pass-through=-lc"),
+            LinkerArg::PluginOpt("-pass-through=-lgcc"),
+            LinkerArg::PluginOpt("-pass-through=-lgcc_s"),
+            LinkerArg::Sysroot("/"),
+            LinkerArg::BuildId,
+            LinkerArg::EhFrameHeader,
+            LinkerArg::HashStyle("gnu"),
+            LinkerArg::AsNeeded,
+            LinkerArg::DynamicLinker("/lib/ld-linux-aarch64.so.1"),
+            LinkerArg::DiscardAll,
+            LinkerArg::LittleEndian,
+            LinkerArg::Emulation("aarch64linux"),
+            LinkerArg::FixCortexA53_843419,
+            LinkerArg::PicExecutable,
+            LinkerArg::Keyword("now"),
+            LinkerArg::Keyword("relro"),
+            LinkerArg::Output("/tmp/.tmpoNgAJE/output.bin"),
+            LinkerArg::Input(
+                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/Scrt1.o",
+            ),
+            LinkerArg::Input(
+                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crti.o",
+            ),
+            LinkerArg::Input("/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtbeginS.o"),
+            LinkerArg::LibraryPath("/tmp/.tmpoNgAJE"),
+            LinkerArg::LibraryPath("/usr/lib/gcc-cross/aarch64-linux-gnu/12"),
+            LinkerArg::LibraryPath(
+                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib",
+            ),
+            LinkerArg::LibraryPath("/lib/aarch64-linux-gnu"),
+            LinkerArg::LibraryPath("/lib/../lib"),
+            LinkerArg::LibraryPath("/usr/lib/aarch64-linux-gnu"),
+            LinkerArg::LibraryPath("/usr/lib/../lib"),
+            LinkerArg::LibraryPath(
+                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib",
+            ),
+            LinkerArg::Input("/tmp/cc81JpAZ.o"),
+            LinkerArg::Link("gcc"),
+            LinkerArg::PushState,
+            LinkerArg::AsNeeded,
+            LinkerArg::Link("gcc_s"),
+            LinkerArg::PopState,
+            LinkerArg::Link("c"),
+            LinkerArg::Link("gcc"),
+            LinkerArg::AsNeeded,
+            LinkerArg::Link("gcc_s"),
+            LinkerArg::NoAsNeeded,
+            LinkerArg::Input("/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtendS.o"),
+            LinkerArg::Input(
+                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crtn.o",
+            ),
+        ];
+        let output = rationalise_linker_args(args.iter().cloned());
+
+        assert_eq!(output, expected, "{:#?}\n!=\n{:#?}", output, expected);
     }
 }

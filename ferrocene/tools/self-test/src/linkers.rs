@@ -22,10 +22,11 @@ pub enum Linker {
     CrossCC(&'static [&'static str]),
 }
 
-/// We need to find a system C compiler and determine what flags should be
-/// added when calling `rustc`.
+/// Finds a system C compiler for each target and determines what flags should
+/// be added when calling `rustc`.
 ///
-/// These flags will include `-Clinker=/path/to/cc`.
+/// These flags will include `-Clinker=/path/to/cc` and they will be added to
+/// each target's rustflags field.
 pub(crate) fn check_and_add_rustflags(
     reporter: &dyn Reporter,
     environment: &Environment,
@@ -50,7 +51,9 @@ pub(crate) fn check_and_add_rustflags(
         };
         for cc_prefix in prefix_list {
             for compiler_kind in ["cc", "gcc", "clang"] {
-                let temp_dir = tempfile::tempdir().expect("making temp dir");
+                let temp_dir = tempfile::tempdir().map_err(|error| {
+                    Error::TemporaryCompilationDirectoryCreationFailed { error }
+                })?;
                 let compiler_name = format!("{cc_prefix}{compiler_kind}");
                 let cc_result = check_system_compiler(
                     environment,
@@ -59,7 +62,6 @@ pub(crate) fn check_and_add_rustflags(
                     lld_dir,
                     temp_dir.path(),
                 );
-                temp_dir.close().expect("clean up temp");
                 match cc_result {
                     Ok((_path, args)) => {
                         reporter.success(&format!(
@@ -119,7 +121,7 @@ fn check_system_compiler(
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
-    compile_c_program(&cc_path, lld_dir, temp_dir)?;
+    cross_compile_test_program(&cc_path, lld_dir, temp_dir)?;
 
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
@@ -136,17 +138,26 @@ fn check_system_compiler(
 /// We are given a path to the real `ld.lld`.
 ///
 /// We are also given a path to a fresh temporary directory we can put source
-/// code in.
-///
-/// Returns the path to the C compiler.
-fn compile_c_program(cc_path: &Path, lld_dir: &Path, temp_dir: &Path) -> Result<(), Error> {
+/// code in. We don't execute the program that we build as this might be a
+/// cross-compiled target.
+fn cross_compile_test_program(
+    cc_path: &Path,
+    lld_dir: &Path,
+    temp_dir: &Path,
+) -> Result<(), Error> {
     // We need some C source code,
     let c_source = r#"int main(void) { return 0; }"#;
 
     // We need a temp directory we can save the output file to
     let source_file = temp_dir.join("input.c");
     let object_file = temp_dir.join("output.bin");
-    std::fs::write(&source_file, c_source.as_bytes()).expect("saving source code to temp file");
+    std::fs::write(&source_file, c_source.as_bytes()).map_err(|error| {
+        Error::WritingSampleProgramFailed {
+            name: "input.c".to_owned(),
+            dest: source_file.clone(),
+            error,
+        }
+    })?;
 
     // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
     let args: Vec<OsString> = vec![
@@ -161,14 +172,19 @@ fn compile_c_program(cc_path: &Path, lld_dir: &Path, temp_dir: &Path) -> Result<
     cc_child.args(&args);
 
     let _output = run_command(&mut cc_child).map_err(|error| {
-        let cc_name = cc_path.file_name().unwrap().to_str().unwrap();
+        let cc_name: &str =
+            cc_path.file_name().and_then(|p| p.to_str()).unwrap_or("<non UTF-8 compiler name>");
         Error::SampleProgramCompilationFailed { name: cc_name.to_string(), error }
     })?;
 
     Ok(())
 }
 
-/// Compile a fake linker using the system C compiler
+/// Compile a fake linker using the host's C compiler
+///
+/// Returns the file that the fake linker will write its args to.
+///
+/// The linker itself is called `<temp_dir>/ld.lld`.
 fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     const C_SOURCE: &[u8] = br#"
     #include <stdio.h>
@@ -201,7 +217,11 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 
     let source_file = temp_dir.join("ldlld.c");
     let object_file = temp_dir.join("ld.lld");
-    std::fs::write(&source_file, &c_source).expect("saving source code to temp file");
+    std::fs::write(&source_file, &c_source).map_err(|error| Error::WritingSampleProgramFailed {
+        name: "ldlld.c".to_owned(),
+        dest: source_file.clone(),
+        error,
+    })?;
 
     // Compile our sample program
     let args: Vec<OsString> =
@@ -218,7 +238,10 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 
 /// Use a fake linker to check the C compiler arguments to the linker
 ///
-/// We assume the fake linker is in `temp_dir`
+/// The fake linker should be at `<temp_dir>/ld.lld` and it should write its
+/// arguments to the path given by `args_file_path`.
+///
+/// Returns a list of arguments given to the fake linker.
 fn check_compiler_linker_args(
     target: &str,
     cc_path: &Path,
@@ -229,7 +252,7 @@ fn check_compiler_linker_args(
     let _ = std::fs::remove_file(args_file_path);
 
     // compile a sample C program, but using our fake linker
-    compile_c_program(cc_path, temp_dir, temp_dir)?;
+    cross_compile_test_program(cc_path, temp_dir, temp_dir)?;
 
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
@@ -335,7 +358,7 @@ mod tests {
     #[test]
     fn test_c_compiler() {
         let utils = TestUtils::new();
-        let temp_dir = tempfile::tempdir().expect("making temp dir");
+        let temp_dir = tempfile::tempdir().unwrap();
         let expected_input = temp_dir.path().join("input.c");
         let expected_output = temp_dir.path().join("output.bin");
 
@@ -352,7 +375,7 @@ mod tests {
             .create();
 
         // Having constructed a fake C compiler, we should be able to call it
-        compile_c_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path())
+        cross_compile_test_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path())
             .expect("Working C compiler");
     }
 
@@ -364,6 +387,7 @@ mod tests {
         // Having constructed a fake C compiler, we should be able to call it
         let result = check_system_compiler(
             utils.env(),
+            "some-test-target",
             "missing-cc",
             Path::new("/some/fake/lld/path"),
             temp_dir.path(),
@@ -382,5 +406,28 @@ mod tests {
                 panic!("Unexpected error");
             }
         }
+    }
+
+    #[test]
+    fn test_make_fake_linker() {
+        let temp_dir = tempfile::tempdir().expect("making temp dir");
+        // make a fake linker
+        let args_path = make_fake_linker(temp_dir.path()).unwrap();
+        let args: &[OsString] = &["-arg1".into(), "-arg2".into(), "-arg3".into()];
+        let lld_path = temp_dir.path().join("ld.lld");
+
+        // Run the fake linker
+        let mut lld_child = Command::new(&lld_path);
+        lld_child.args(args);
+        let _output = run_command(&mut lld_child).unwrap();
+
+        // Did the fake linker write all the command-line args to the file (including its own name)
+        let read_args = std::fs::read_to_string(args_path).unwrap();
+        let mut lines = read_args.lines();
+        assert_eq!(lines.next(), Some(lld_path.to_str().unwrap()));
+        for arg in args {
+            assert_eq!(lines.next(), Some(arg.to_str().unwrap()));
+        }
+        assert!(lines.next().is_none());
     }
 }

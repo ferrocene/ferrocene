@@ -43,6 +43,17 @@ fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
     linkers::check_and_add_rustflags(reporter, &environment, &sysroot, &mut targets)?;
     compile::check(reporter, &sysroot, &targets)?;
 
+    for target in targets {
+        if target.rustflags.is_empty() {
+            reporter.info(&format!("Target '{}' requires no special linker flags", target.triple));
+        } else {
+            reporter.info(&format!("Target '{}' requires special linker flags:", target.triple));
+            for flag in target.rustflags {
+                reporter.info(&format!("\t{}", flag));
+            }
+        }
+    }
+
     reporter.success("Ferrocene self-check completed!");
     Ok(())
 }

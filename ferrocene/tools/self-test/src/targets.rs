@@ -2,30 +2,31 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::error::Error;
-use crate::linkers::{GccMode, Linker};
+use crate::linkers::Linker;
 use crate::report::Reporter;
 use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::path::Path;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
-    TargetSpec {
-        triple: "x86_64-unknown-linux-gnu",
-        std: true,
-        linker: Linker::GccUbuntu18 { target: "x86_64-linux-gnu", mode: GccMode::Normal },
-    },
+    TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCC },
     TargetSpec {
         triple: "aarch64-unknown-linux-gnu",
         std: true,
-        linker: Linker::GccUbuntu18 { target: "aarch64-linux-gnu", mode: GccMode::Normal },
+        linker: Linker::CrossCC(&["aarch64-linux-gnu-"]),
     },
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]
 pub(crate) struct TargetSpec {
+    /// The rustc triple for the target
     pub(crate) triple: &'static str,
+    /// Indicates if the target provides libstd.
     pub(crate) std: bool,
+    /// Indicates if the target requires a system C compiler as a linker driver
+    /// to ensure system libs are on the library path, and if so, what possible
+    /// filename prefixes should be checked to find a suitable compiler.
     pub(crate) linker: Linker,
 }
 
@@ -141,13 +142,12 @@ fn extract_library_name(file_path: &Path) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::linkers::Linker::BundledLld;
     use crate::test_utils::TestUtils;
 
     #[test]
     fn test_check_target_std() {
         let target =
-            TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: BundledLld };
+            TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCC };
 
         let utils = TestUtils::new();
         utils
@@ -169,7 +169,8 @@ mod tests {
 
     #[test]
     fn test_check_target_no_std() {
-        let target = TargetSpec { triple: "x86_64-unknown-none", std: false, linker: BundledLld };
+        let target =
+            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
@@ -188,7 +189,8 @@ mod tests {
 
     #[test]
     fn test_check_target_missing_library() {
-        let target = TargetSpec { triple: "x86_64-unknown-none", std: false, linker: BundledLld };
+        let target =
+            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils.target("x86_64-unknown-none").lib("core", "0123456789abcdef").create();
@@ -205,7 +207,8 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_required_library() {
-        let target = TargetSpec { triple: "x86_64-unknown-none", std: false, linker: BundledLld };
+        let target =
+            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
@@ -227,7 +230,8 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_other_library() {
-        let target = TargetSpec { triple: "x86_64-unknown-none", std: false, linker: BundledLld };
+        let target =
+            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils

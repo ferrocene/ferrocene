@@ -1,71 +1,280 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::targets::Target;
-use crate::utils::{find_binary_in_path, run_command, DisplayList};
-use crate::Environment;
-use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum Linker {
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::targets::Target;
+use crate::utils::{find_binary_in_path, run_command};
+use crate::Environment;
+
+/// What kind of C compiler does a target require
+#[derive(Debug)]
+pub enum Linker {
+    /// No C compiler required
     BundledLld,
-    GccUbuntu18 { target: &'static str, mode: GccMode },
+    /// The system's native C compiler is required
+    HostCC,
+    /// Some kind of cross compiler, with one of the given target prefixes
+    CrossCC(&'static [&'static str]),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum GccMode {
-    Normal,
-    #[cfg_attr(not(test), allow(unused))]
-    BareMetal,
-}
-
+/// Finds a system C compiler for each target and determines what flags should
+/// be added when calling `rustc`.
+///
+/// These flags will include `-Clinker=/path/to/cc` and they will be added to
+/// each target's rustflags field.
 pub(crate) fn check_and_add_rustflags(
     reporter: &dyn Reporter,
     environment: &Environment,
     sysroot: &Path,
     targets: &mut [Target],
 ) -> Result<(), Error> {
-    // Multiple installed targets might use the same linker, deduplicate them.
-    let mut linkers = BTreeMap::new();
-    for target in targets {
-        linkers.entry(target.linker).or_insert_with(Vec::new).push(target);
-    }
+    // Step 1. Check we have ld.lld available
+    let _rust_lld_path = find_bundled_lld(reporter, sysroot)?;
+    let lld_bin = find_bundled_lld_wrapper(reporter, sysroot)?;
+    let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
 
-    for (linker, targets) in linkers {
-        let triples = targets.iter().map(|t| t.triple.to_string()).collect::<Vec<_>>();
-        let (bin, flavor, extra_flags): (_, _, &[&str]) = match linker {
-            Linker::BundledLld => (check_bundled_lld(reporter, sysroot, &triples)?, "ld.lld", &[]),
-            Linker::GccUbuntu18 { target: gcc_target, mode } => (
-                check_gcc(reporter, environment, &triples, gcc_target, mode, [7, 5])?,
-                "gcc",
-                match mode {
-                    GccMode::Normal => &[],
-                    GccMode::BareMetal => &["-ffreestanding", "-nostdlib"],
-                },
-            ),
+    // Step 2. Check the C compiler works on each target that needs one
+    'target_loop: for target in targets {
+        let prefix_list: &[&str] = match target.linker {
+            Linker::BundledLld => {
+                reporter
+                    .skipped(&format!("Target `{}` does not require a C compiler", target.triple));
+                continue 'target_loop;
+            }
+            Linker::HostCC => &[""],
+            Linker::CrossCC(list) => list,
         };
-        let bin = bin.to_str().ok_or_else(|| Error::NonUtf8Path { path: bin.clone() })?;
-        for target in targets {
-            target.rustflags.push(format!("-Clinker={bin}"));
-            target.rustflags.push(format!("-Clinker-flavor={flavor}"));
-            for flag in extra_flags {
-                target.rustflags.push(format!("-Clink-arg={flag}"));
+        for cc_prefix in prefix_list {
+            for compiler_kind in ["cc", "gcc", "clang"] {
+                let temp_dir = tempfile::tempdir().map_err(|error| {
+                    Error::TemporaryCompilationDirectoryCreationFailed { error }
+                })?;
+                let compiler_name = format!("{cc_prefix}{compiler_kind}");
+                let cc_result = check_system_compiler(
+                    environment,
+                    target.triple,
+                    &compiler_name,
+                    lld_dir,
+                    temp_dir.path(),
+                );
+                match cc_result {
+                    Ok((_path, args)) => {
+                        reporter.success(&format!(
+                            "Found C compiler `{}` for target `{}`",
+                            compiler_name, target.triple
+                        ));
+                        let mut need_no_lto = false;
+                        for arg in args {
+                            if std::env::var("FST_PRINT_LINKER_ARGS").is_ok() {
+                                reporter
+                                    .note(&format!("`{compiler_name}` provides argument {arg:?}"));
+                            }
+                            if arg.contains("liblto_plugin") {
+                                need_no_lto = true;
+                            }
+                        }
+                        target.rustflags.push(format!("-Clinker={compiler_name}"));
+                        if need_no_lto {
+                            target.rustflags.push(format!("-Clink-arg=-fno-lto"));
+                        }
+                        continue 'target_loop;
+                    }
+                    Err(e) => {
+                        // Try again until we run out of compilers
+                        if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                            reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                        }
+                    }
+                }
             }
         }
+        return Err(Error::SuitableCCompilerNotFound { target: target.triple.to_owned() });
     }
 
     Ok(())
 }
 
-fn check_bundled_lld(
-    reporter: &dyn Reporter,
-    sysroot: &Path,
-    targets: &[String],
-) -> Result<PathBuf, Error> {
+/// Check if the given system C compiler works.
+///
+/// We are given a path to the real `ld.lld`, but we also test it with a fake
+/// `ld.lld` as well.
+///
+/// We are also given a path to a fresh temporary directory we can put source
+/// code in.
+///
+/// Returns the path to the C compiler, and a list of arguments that the C
+/// compiler gives to the linker.
+fn check_system_compiler(
+    environment: &Environment,
+    target: &str,
+    compiler_name: &str,
+    lld_dir: &Path,
+    temp_dir: &Path,
+) -> Result<(PathBuf, Vec<String>), Error> {
+    let cc_path = find_binary_in_path(environment, &compiler_name)
+        .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
+
+    // Part 1. Check with the real ld.lld - can we make a binary?
+
+    cross_compile_test_program(&cc_path, lld_dir, temp_dir)?;
+
+    // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
+    // does it give our fake linker?
+
+    let args_file = make_fake_linker(temp_dir)?;
+
+    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir, &args_file)?;
+
+    Ok((cc_path, linker_args))
+}
+
+/// Check if the given system C compiler works.
+///
+/// We are given a path to the real `ld.lld`.
+///
+/// We are also given a path to a fresh temporary directory we can put source
+/// code in. We don't execute the program that we build as this might be a
+/// cross-compiled target.
+fn cross_compile_test_program(
+    cc_path: &Path,
+    lld_dir: &Path,
+    temp_dir: &Path,
+) -> Result<(), Error> {
+    // We need some C source code,
+    let c_source = r#"int main(void) { return 0; }"#;
+
+    // We need a temp directory we can save the output file to
+    let source_file = temp_dir.join("input.c");
+    let object_file = temp_dir.join("output.bin");
+    std::fs::write(&source_file, c_source.as_bytes()).map_err(|error| {
+        Error::WritingSampleProgramFailed {
+            name: "input.c".to_owned(),
+            dest: source_file.clone(),
+            error,
+        }
+    })?;
+
+    // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
+    let args: Vec<OsString> = vec![
+        "-fuse-ld=lld".into(),
+        "-B".into(),
+        lld_dir.as_os_str().to_owned(),
+        source_file.as_os_str().to_owned(),
+        "-o".into(),
+        object_file.as_os_str().to_owned(),
+    ];
+    let mut cc_child = Command::new(cc_path);
+    cc_child.args(&args);
+
+    let _output = run_command(&mut cc_child).map_err(|error| {
+        let cc_name: &str =
+            cc_path.file_name().and_then(|p| p.to_str()).unwrap_or("<non UTF-8 compiler name>");
+        Error::SampleProgramCompilationFailed { name: cc_name.to_string(), error }
+    })?;
+
+    Ok(())
+}
+
+/// Compile a fake linker using the host's C compiler
+///
+/// Returns the file that the fake linker will write its args to.
+///
+/// The linker itself is called `<temp_dir>/ld.lld`.
+fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
+    const C_SOURCE: &[u8] = br#"
+    #include <stdio.h>
+
+    int main(int argc, char** argv) {
+        FILE* f = fopen(""#;
+
+    const C_SOURCE2: &[u8] = br#"", "w");
+        if (!f) {
+            return 1;
+        }
+
+        for (int arg = 0; arg < argc; arg++) {
+            fprintf(f, "%s", argv[arg]);
+            fprintf(f, "\r\n");
+        }
+
+        fclose(f);
+
+        return 0;
+    }
+    "#;
+
+    let args_file = temp_dir.join("_fst_args_capture");
+
+    // Concatentation, using byte strings
+    let mut c_source = C_SOURCE.to_owned();
+    c_source.extend(args_file.as_os_str().as_encoded_bytes());
+    c_source.extend(C_SOURCE2);
+
+    let source_file = temp_dir.join("ldlld.c");
+    let object_file = temp_dir.join("ld.lld");
+    std::fs::write(&source_file, &c_source).map_err(|error| Error::WritingSampleProgramFailed {
+        name: "ldlld.c".to_owned(),
+        dest: source_file.clone(),
+        error,
+    })?;
+
+    // Compile our sample program
+    let args: Vec<OsString> =
+        vec![source_file.as_os_str().to_owned(), "-o".into(), object_file.as_os_str().to_owned()];
+    // Always use the host compiler for this build
+    let mut cc_child = Command::new("cc");
+    cc_child.args(&args);
+
+    let _output = run_command(&mut cc_child)
+        .map_err(|error| Error::SampleProgramCompilationFailed { name: "cc".to_string(), error })?;
+
+    Ok(args_file)
+}
+
+/// Use a fake linker to check the C compiler arguments to the linker
+///
+/// The fake linker should be at `<temp_dir>/ld.lld` and it should write its
+/// arguments to the path given by `args_file_path`.
+///
+/// Returns a list of arguments given to the fake linker.
+fn check_compiler_linker_args(
+    target: &str,
+    cc_path: &Path,
+    temp_dir: &Path,
+    args_file_path: &Path,
+) -> Result<Vec<String>, Error> {
+    // Ensure this file doesn't already exist
+    let _ = std::fs::remove_file(args_file_path);
+
+    // compile a sample C program, but using our fake linker
+    cross_compile_test_program(cc_path, temp_dir, temp_dir)?;
+
+    // see what the fake linker wrote
+    let Ok(args_file) = std::fs::read(args_file_path) else {
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
+    };
+    let Ok(args_str) = std::str::from_utf8(&args_file) else {
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
+    };
+
+    // parse the file
+    let args: Vec<String> = args_str.lines().map(|s| s.to_owned()).collect();
+
+    // an empty file would be bad
+    if args.is_empty() {
+        return Err(Error::LinkerArgsError { target: target.to_owned() });
+    };
+
+    Ok(args)
+}
+
+/// Look for the bundled `rust-lld` program in the given sysroot.
+fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
     let path = sysroot
         .join("lib")
         .join("rustlib")
@@ -74,418 +283,151 @@ fn check_bundled_lld(
         .join("rust-lld");
 
     if path.is_file() {
-        reporter.success(&format!("bundled linker detected, for target {}", DisplayList(targets)));
+        reporter.success(&format!("bundled linker detected"));
         Ok(path)
     } else {
-        Err(Error::BundledLinkerMissing { targets: targets.into() })
+        Err(Error::BundledLinkerMissing)
     }
 }
 
-fn check_gcc(
-    reporter: &dyn Reporter,
-    environment: &Environment,
-    targets: &[String],
-    gcc_target: &str,
-    gcc_mode: GccMode,
-    expected_version: [u8; 2],
-) -> Result<PathBuf, Error> {
-    let name = format!("{gcc_target}-gcc");
-    let bin = find_binary_in_path(environment, &name).map_err(|error| Error::LinkerNotFound {
-        targets: targets.into(),
-        name: name.clone(),
-        error,
-    })?;
+/// Look for the bundled `ld.lld` linker wrapper program in the given sysroot.
+fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
+    let path = sysroot
+        .join("lib")
+        .join("rustlib")
+        .join(env!("SELFTEST_TARGET"))
+        .join("bin")
+        .join("gcc-ld")
+        .join("ld.lld");
 
-    let version_output = run_command(Command::new(&bin).arg("--version")).map_err(|error| {
-        Error::LinkerVersionFetchFailed { targets: targets.into(), name: name.clone(), error }
-    })?;
-
-    let parsed_version = extract_gcc_version(&name, &version_output.stdout).ok_or_else(|| {
-        Error::LinkerVersionParseFailed { targets: targets.into(), name: name.clone() }
-    })?;
-
-    if &parsed_version.parsed[..2] == &expected_version {
-        let suffix = match gcc_mode {
-            GccMode::Normal => "",
-            GccMode::BareMetal => " (bare metal)",
-        };
-        reporter.success(&format!(
-            "linker {name} {}{suffix} detected, for target {}",
-            parsed_version.raw,
-            DisplayList(targets)
-        ));
-        Ok(bin)
+    if path.is_file() {
+        reporter.success(&format!("bundled linker-wrapper detected"));
+        Ok(path)
     } else {
-        Err(Error::UnsupportedLinkerVersion {
-            targets: targets.into(),
-            name: name.into(),
-            expected: format!(
-                "{}.x",
-                expected_version.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(".")
-            ),
-            found: parsed_version.raw,
-        })
+        Err(Error::BundledLinkerMissing)
     }
-}
-
-fn extract_gcc_version(binary_name: &str, output: &str) -> Option<GccVersion> {
-    let first_line = output.lines().next()?;
-    let mut segments = first_line.split(' ');
-
-    // Ensure what we called actually looks like GCC.
-    // GCC outputs the name of the binary you called as the first word in the version output. If
-    // you renamed a GCC binary to "foo", the first word would be "foo" rather than "gcc".
-    let found_binary_name = segments.next()?;
-    if found_binary_name != binary_name {
-        return None;
-    }
-
-    // Parse the version number at the end of the first line
-    let raw = segments.next_back()?;
-    Some(GccVersion {
-        parsed: raw.split('.').map(|n| n.parse().ok()).collect::<Option<_>>()?,
-        raw: raw.into(),
-    })
-}
-
-struct GccVersion {
-    raw: String,
-    parsed: Vec<u8>,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
-    use crate::targets::TargetSpec;
-    use crate::test_utils::TestUtils;
-    use std::ffi::OsString;
+    use crate::{error::FindBinaryInPathError, test_utils::TestUtils};
 
     #[test]
-    fn test_check() {
-        // Tests both the deduplication of checks, and the specific gcc version we look for.
-
-        let utils = TestUtils::new();
-        let lld = utils
-            .bin("rust-lld")
-            .for_target(env!("SELFTEST_TARGET"))
-            .create()
-            .to_str()
-            .unwrap()
-            .to_string();
-        let gcc_x86_64 = utils
-            .bin("x86_64-linux-gnu-gcc")
-            .stdout("x86_64-linux-gnu-gcc 7.5.3")
-            .expected_args(&["--version"])
-            .external()
-            .create()
-            .to_str()
-            .unwrap()
-            .to_string();
-        let gcc_aarch64 = utils
-            .bin("aarch64-linux-gnu-gcc")
-            .stdout("aarch64-linux-gnu-gcc 7.5.8.9")
-            .expected_args(&["--version"])
-            .external()
-            .create()
-            .to_str()
-            .unwrap()
-            .to_string();
-
-        let mut targets = [
-            Target {
-                spec: &TargetSpec {
-                    triple: "x86_64-unknown-linux-gnu",
-                    std: true,
-                    linker: Linker::GccUbuntu18 {
-                        target: "x86_64-linux-gnu",
-                        mode: GccMode::Normal,
-                    },
-                },
-                rustflags: Vec::new(),
-            },
-            Target {
-                spec: &TargetSpec {
-                    triple: "x86_64-unknown-linux-gnu2",
-                    std: true,
-                    linker: Linker::GccUbuntu18 {
-                        target: "x86_64-linux-gnu",
-                        mode: GccMode::Normal,
-                    },
-                },
-                rustflags: Vec::new(),
-            },
-            Target {
-                spec: &TargetSpec {
-                    triple: "aarch64-unknown-linux-gnu",
-                    std: true,
-                    linker: Linker::GccUbuntu18 {
-                        target: "aarch64-linux-gnu",
-                        mode: GccMode::Normal,
-                    },
-                },
-                rustflags: Vec::new(),
-            },
-            Target {
-                spec: &TargetSpec {
-                    triple: "aarch64-unknown-none",
-                    std: false,
-                    linker: Linker::BundledLld,
-                },
-                rustflags: Vec::new(),
-            },
-            Target {
-                spec: &TargetSpec {
-                    triple: "thumbv7m-none-eabi",
-                    std: false,
-                    linker: Linker::BundledLld,
-                },
-                rustflags: Vec::new(),
-            },
-            Target {
-                spec: &TargetSpec {
-                    triple: "x86_64-unknown-none",
-                    std: false,
-                    linker: Linker::GccUbuntu18 {
-                        target: "x86_64-linux-gnu",
-                        mode: GccMode::BareMetal,
-                    },
-                },
-                rustflags: Vec::new(),
-            },
-        ];
-
-        check_and_add_rustflags(utils.reporter(), utils.env(), utils.sysroot(), &mut targets)
-            .unwrap();
-
-        assert_eq!(
-            &[format!("-Clinker={gcc_x86_64}"), format!("-Clinker-flavor=gcc")],
-            &targets[0].rustflags[..]
-        );
-        assert_eq!(
-            &[format!("-Clinker={gcc_x86_64}"), format!("-Clinker-flavor=gcc")],
-            &targets[1].rustflags[..]
-        );
-        assert_eq!(
-            &[format!("-Clinker={gcc_aarch64}"), format!("-Clinker-flavor=gcc")],
-            &targets[2].rustflags[..]
-        );
-        assert_eq!(
-            &[format!("-Clinker={lld}"), format!("-Clinker-flavor=ld.lld")],
-            &targets[3].rustflags[..]
-        );
-        assert_eq!(
-            &[format!("-Clinker={lld}"), format!("-Clinker-flavor=ld.lld")],
-            &targets[4].rustflags[..]
-        );
-        assert_eq!(
-            &[
-                format!("-Clinker={gcc_x86_64}"),
-                "-Clinker-flavor=gcc".into(),
-                "-Clink-arg=-ffreestanding".into(),
-                "-Clink-arg=-nostdlib".into()
-            ],
-            &targets[5].rustflags[..]
-        );
-
-        utils.assert_report_success(
-            "linker x86_64-linux-gnu-gcc 7.5.3 (bare metal) detected, for target x86_64-unknown-none",
-        );
-        utils.assert_report_success(
-            "linker x86_64-linux-gnu-gcc 7.5.3 detected, \
-             for target x86_64-unknown-linux-gnu and x86_64-unknown-linux-gnu2",
-        );
-        utils.assert_report_success(
-            "linker aarch64-linux-gnu-gcc 7.5.8.9 detected, for target aarch64-unknown-linux-gnu",
-        );
-        utils.assert_report_success(
-            "bundled linker detected, for target aarch64-unknown-none and thumbv7m-none-eabi",
-        );
-        utils.assert_no_reports();
-    }
-
-    #[test]
-    fn test_check_bundled_lld() {
+    fn test_find_bundled_lld() {
         let utils = TestUtils::new();
         utils.bin("rust-lld").for_target(env!("SELFTEST_TARGET")).create();
 
-        check_bundled_lld(
-            utils.reporter(),
-            utils.sysroot(),
-            &["aarch64-unknown-none".into(), "thumbv7m-none-eabi".into()],
-        )
-        .unwrap();
-        utils.assert_report_success(
-            "bundled linker detected, for target aarch64-unknown-none and thumbv7m-none-eabi",
+        find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();
+        utils.assert_report_success("bundled linker detected");
+    }
+
+    #[test]
+    fn test_find_bundled_lld_missing() {
+        let utils = TestUtils::new();
+
+        match find_bundled_lld(utils.reporter(), utils.sysroot()) {
+            Err(Error::BundledLinkerMissing) => {
+                // Ok
+            }
+            other => panic!("unexpected result: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_find_bundled_lld_wrapper() {
+        let utils = TestUtils::new();
+        utils.bin("gcc-ld/ld.lld").for_target(env!("SELFTEST_TARGET")).create();
+
+        find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
+        utils.assert_report_success("bundled linker-wrapper detected");
+    }
+
+    #[test]
+    fn test_find_bundled_lld_wrapper_missing() {
+        let utils = TestUtils::new();
+
+        match find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()) {
+            Err(Error::BundledLinkerMissing) => {
+                // Ok
+            }
+            other => panic!("unexpected result: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_c_compiler() {
+        let utils = TestUtils::new();
+        let temp_dir = tempfile::tempdir().unwrap();
+        let expected_input = temp_dir.path().join("input.c");
+        let expected_output = temp_dir.path().join("output.bin");
+
+        let test_cc = utils
+            .bin("custom-cc")
+            .expected_args(&[
+                "-fuse-ld=lld",
+                "-B",
+                "/some/fake/lld/path",
+                expected_input.to_str().unwrap(),
+                "-o",
+                expected_output.to_str().unwrap(),
+            ])
+            .create();
+
+        // Having constructed a fake C compiler, we should be able to call it
+        cross_compile_test_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path())
+            .expect("Working C compiler");
+    }
+
+    #[test]
+    fn test_c_compiler_missing() {
+        let utils = TestUtils::new();
+        let temp_dir = tempfile::tempdir().expect("making temp dir");
+
+        // Having constructed a fake C compiler, we should be able to call it
+        let result = check_system_compiler(
+            utils.env(),
+            "some-test-target",
+            "missing-cc",
+            Path::new("/some/fake/lld/path"),
+            temp_dir.path(),
         );
-    }
-
-    #[test]
-    fn test_check_bundled_lld_missing() {
-        let utils = TestUtils::new();
-
-        match check_bundled_lld(utils.reporter(), utils.sysroot(), &["thumbv7-none-eabi".into()]) {
-            Err(Error::BundledLinkerMissing { targets }) => {
-                assert_eq!(&["thumbv7-none-eabi".to_string()], &targets[..]);
+        match result {
+            Ok(_) => {
+                panic!("Should not have found a C compiler");
             }
-            other => panic!("unexpected result: {other:?}"),
-        }
-    }
-
-    #[test]
-    fn test_check_gcc() {
-        let utils = TestUtils::new();
-        utils
-            .bin("x86_64-linux-gnu-gcc")
-            .stdout("x86_64-linux-gnu-gcc (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0")
-            .expected_args(&["--version"])
-            .external()
-            .create();
-
-        check_gcc(
-            utils.reporter(),
-            utils.env(),
-            &["x86_64-unknown-linux-gnu".into(), "other-target".into()],
-            "x86_64-linux-gnu",
-            GccMode::Normal,
-            [11, 3],
-        )
-        .unwrap();
-        utils.assert_report_success(
-            "linker x86_64-linux-gnu-gcc 11.3.0 detected, \
-             for target x86_64-unknown-linux-gnu and other-target",
-        );
-    }
-
-    #[test]
-    fn test_check_gcc_missing_linker_binary() {
-        let utils = TestUtils::new();
-
-        match check_gcc(
-            utils.reporter(),
-            utils.env(),
-            &["x86_64-unknown-linux-gnu".into()],
-            "x86_64-linux-gnu",
-            GccMode::Normal,
-            [11, 3],
-        ) {
-            Err(Error::LinkerNotFound {
-                targets,
+            Err(Error::CCompilerNotFound {
                 name,
-                error: FindBinaryInPathError::MissingBinary { name: binary_name },
+                error: FindBinaryInPathError::MissingBinary { .. },
             }) => {
-                assert_eq!(&["x86_64-unknown-linux-gnu".to_string()], &targets[..]);
-                assert_eq!("x86_64-linux-gnu-gcc", name);
-                assert_eq!("x86_64-linux-gnu-gcc", binary_name);
+                assert_eq!(&name, "missing-cc");
             }
-            other => panic!("unexpected result: {other:?}"),
+            _ => {
+                panic!("Unexpected error");
+            }
         }
-        utils.assert_no_reports();
     }
 
     #[test]
-    fn test_check_gcc_invocation_failure() {
-        let utils = TestUtils::new();
-        let bin = utils.bin("x86_64-linux-gnu-gcc").external().exit(1).create();
+    fn test_make_fake_linker() {
+        let temp_dir = tempfile::tempdir().expect("making temp dir");
+        // make a fake linker
+        let args_path = make_fake_linker(temp_dir.path()).unwrap();
+        let args: &[OsString] = &["-arg1".into(), "-arg2".into(), "-arg3".into()];
+        let lld_path = temp_dir.path().join("ld.lld");
 
-        match check_gcc(
-            utils.reporter(),
-            utils.env(),
-            &["x86_64-unknown-linux-gnu".into()],
-            "x86_64-linux-gnu",
-            GccMode::Normal,
-            [11, 3],
-        ) {
-            Err(Error::LinkerVersionFetchFailed {
-                targets,
-                name,
-                error: CommandError { path, args, kind: CommandErrorKind::Failure { output } },
-            }) => {
-                assert_eq!(&["x86_64-unknown-linux-gnu".to_string()], &targets[..]);
-                assert_eq!("x86_64-linux-gnu-gcc", name);
-                assert_eq!(Some(1), output.status.code());
-                assert_eq!(bin, path);
-                assert_eq!(vec![OsString::from("--version")], args);
-            }
-            other => panic!("unexpected result: {other:?}"),
+        // Run the fake linker
+        let mut lld_child = Command::new(&lld_path);
+        lld_child.args(args);
+        let _output = run_command(&mut lld_child).unwrap();
+
+        // Did the fake linker write all the command-line args to the file (including its own name)
+        let read_args = std::fs::read_to_string(args_path).unwrap();
+        let mut lines = read_args.lines();
+        assert_eq!(lines.next(), Some(lld_path.to_str().unwrap()));
+        for arg in args {
+            assert_eq!(lines.next(), Some(arg.to_str().unwrap()));
         }
-        utils.assert_no_reports();
-    }
-
-    #[test]
-    fn test_check_gcc_invalid_output() {
-        let utils = TestUtils::new();
-        utils
-            .bin("x86_64-linux-gnu-gcc")
-            .external()
-            .expected_args(&["--version"])
-            .stdout("I'm not a version")
-            .create();
-
-        match check_gcc(
-            utils.reporter(),
-            utils.env(),
-            &["x86_64-unknown-linux-gnu".into()],
-            "x86_64-linux-gnu",
-            GccMode::Normal,
-            [11, 3],
-        ) {
-            Err(Error::LinkerVersionParseFailed { targets, name }) => {
-                assert_eq!(&["x86_64-unknown-linux-gnu".to_string()], &targets[..]);
-                assert_eq!("x86_64-linux-gnu-gcc", name);
-            }
-            other => panic!("unexpected result: {other:?}"),
-        }
-        utils.assert_no_reports();
-    }
-
-    #[test]
-    fn test_check_gcc_unsupported_version() {
-        let utils = TestUtils::new();
-        utils
-            .bin("x86_64-linux-gnu-gcc")
-            .external()
-            .expected_args(&["--version"])
-            .stdout("x86_64-linux-gnu-gcc 1.2.3")
-            .create();
-
-        match check_gcc(
-            utils.reporter(),
-            utils.env(),
-            &["x86_64-unknown-linux-gnu".into()],
-            "x86_64-linux-gnu",
-            GccMode::Normal,
-            [11, 3],
-        ) {
-            Err(Error::UnsupportedLinkerVersion { targets, name, expected, found }) => {
-                assert_eq!(&["x86_64-unknown-linux-gnu".to_string()], &targets[..]);
-                assert_eq!("x86_64-linux-gnu-gcc", name);
-                assert_eq!("11.3.x", expected);
-                assert_eq!("1.2.3", found);
-            }
-            other => panic!("unexpected result: {other:?}"),
-        }
-        utils.assert_no_reports();
-    }
-
-    #[test]
-    fn test_extract_gcc_version() {
-        let valid_outputs = [
-            "gcc 11.3.0",
-            "gcc (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0",
-            "gcc (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0\n\
-             This is free software; see the source for copying conditions.  There is NO\n\
-             warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
-        ];
-        for output in valid_outputs {
-            let result = extract_gcc_version("gcc", output).unwrap();
-            assert_eq!("11.3.0", result.raw);
-            assert_eq!([11, 3, 0], result.parsed[..]);
-        }
-
-        // Invalid outputs
-        assert!(extract_gcc_version("gcc", "").is_none());
-        assert!(extract_gcc_version("gcc", "x86_64-linux-gnu-gcc 1.0.0").is_none());
-        assert!(extract_gcc_version("gcc", "gcc 1.foo.0").is_none());
+        assert!(lines.next().is_none());
     }
 }

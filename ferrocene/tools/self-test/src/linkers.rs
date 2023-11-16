@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::ffi::OsString;
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -10,6 +11,10 @@ use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::{find_binary_in_path, run_command};
 use crate::Environment;
+
+mod argparse;
+
+use argparse::LinkerArg;
 
 /// What kind of C compiler does a target require
 #[derive(Debug)]
@@ -20,64 +25,6 @@ pub enum Linker {
     HostCC,
     /// Some kind of cross compiler, with one of the given target prefixes
     CrossCC(&'static [&'static str]),
-}
-
-/// Linker options we know about
-#[derive(Debug, Clone, Eq, PartialEq)]
-enum LinkerArg<'a> {
-    // Unqualified option
-    /// An input file (an argument with no option before it)
-    Input(&'a str),
-
-    // Single character options
-    /// The `-ofoo.elf` option
-    Output(&'a str),
-    /// The `-Lpath/foo` library path option
-    LibraryPath(&'a str),
-    /// The `-X` / `--discard-all` option
-    DiscardAll,
-    /// The `-Zfoo` option
-    Keyword(&'a str),
-    /// The `-lfoo` option
-    Link(&'a str),
-    /// The `-mfoo` option
-    Emulation(&'a str),
-
-    // Long options
-    /// The `-plugin` option
-    Plugin(&'a str),
-    /// The `-plugin-opt=` option
-    PluginOpt(&'a str),
-    /// The `-EL` option
-    LittleEndian,
-    /// The `-pie` option
-    PicExecutable,
-    /// The `-no-pie` option
-    NonPicExecutable,
-    /// The `-dynamic-linker foo/bar` option
-    DynamicLinker(&'a str),
-    /// The `--sysroot=` option
-    Sysroot(&'a str),
-    /// The `--build-id`` option
-    BuildId,
-    /// The `--eh-frame-hdr`` option
-    EhFrameHeader,
-    /// The `--hash-style=` option
-    HashStyle(&'a str),
-    /// The `--as-needed` option
-    AsNeeded,
-    /// The `--no-as-needed` option
-    NoAsNeeded,
-    /// The `--push-state` option
-    PushState,
-    /// The `--pop-state` option
-    PopState,
-    /// The `--fix-cortex-a53-843419` option
-    FixCortexA53_843419,
-
-    // Anything else goes here
-    /// We didn't recognise this option
-    Unknown(&'a str),
 }
 
 /// Finds a system C compiler for each target and determines what flags should
@@ -202,7 +149,7 @@ fn linker_args_ok<'a, I>(
 where
     I: Iterator<Item = &'a str>,
 {
-    let linker_args = rationalise_linker_args(linker_args);
+    let linker_args = argparse::rationalise_linker_args(linker_args);
     for arg in linker_args {
         match arg {
             LinkerArg::Input(_) => {}
@@ -243,191 +190,6 @@ where
         }
     }
     Ok(true)
-}
-
-/// Parse single letter linker arguments.
-///
-/// This might be "-ofoo" or "-o foo".
-fn parse_linker_short_arg<'a, F, I>(
-    option: char,
-    arg: &'a str,
-    args_iter: &mut I,
-    f: F,
-) -> Option<LinkerArg<'a>>
-where
-    I: Iterator<Item = &'a str>,
-    F: FnOnce(&'a str) -> LinkerArg<'a>,
-{
-    let option = format!("-{option}");
-    if arg == option {
-        if let Some(next) = args_iter.next() {
-            Some(f(next))
-        } else {
-            Some(LinkerArg::Unknown(arg))
-        }
-    } else if let Some(tail) = arg.strip_prefix(&option) {
-        Some(f(tail))
-    } else {
-        None
-    }
-}
-
-/// Parse single letter linker options.
-///
-/// This might be "-X".
-fn parse_linker_short_opt<'a, F>(option: char, arg: &'a str, f: F) -> Option<LinkerArg<'a>>
-where
-    F: FnOnce() -> LinkerArg<'a>,
-{
-    let option = format!("-{option}");
-    if arg == option { Some(f()) } else { None }
-}
-
-/// Parse multi-letter linker arguments.
-///
-/// This might be "--foo=bar" or "--foo bar" or "-foo bar" or "-foo=bar"
-fn parse_linker_long_arg<'a, F, I>(
-    option: &str,
-    arg: &'a str,
-    args_iter: &mut I,
-    f: F,
-) -> Option<LinkerArg<'a>>
-where
-    I: Iterator<Item = &'a str>,
-    F: FnOnce(&'a str) -> LinkerArg<'a>,
-{
-    let onedash = format!("-{option}");
-    let twodash = format!("--{option}");
-    if arg == onedash || arg == twodash {
-        if let Some(next) = args_iter.next() {
-            Some(f(next))
-        } else {
-            Some(LinkerArg::Unknown(arg))
-        }
-    } else if let Some(tail) = arg.strip_prefix(&format!("{onedash}=")) {
-        Some(f(tail))
-    } else if let Some(tail) = arg.strip_prefix(&format!("{twodash}=")) {
-        Some(f(tail))
-    } else {
-        None
-    }
-}
-
-/// Parse multi-letter linker options.
-///
-/// This might be "--eh-frame-hdr" or "-eh-frame-hdr"
-fn parse_linker_long_opt<'a, F>(option: &str, arg: &'a str, f: F) -> Option<LinkerArg<'a>>
-where
-    F: FnOnce() -> LinkerArg<'a>,
-{
-    let onedash = format!("-{option}");
-    let twodash = format!("--{option}");
-    if arg == onedash || arg == twodash { Some(f()) } else { None }
-}
-
-/// Clean up split linker arguments so they can be more easily processed
-fn rationalise_linker_args<'a, I>(mut args_iter: I) -> Vec<LinkerArg<'a>>
-where
-    I: Iterator<Item = &'a str>,
-{
-    let mut output = Vec::new();
-    while let Some(arg) = args_iter.next() {
-        if let Some(result) = parse_linker_short_arg('o', arg, &mut args_iter, LinkerArg::Output) {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_short_arg('L', arg, &mut args_iter, LinkerArg::LibraryPath)
-        {
-            output.push(result);
-        } else if let Some(result) = parse_linker_short_opt('X', arg, || LinkerArg::DiscardAll) {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("discard-all", arg, || LinkerArg::DiscardAll)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_short_arg('z', arg, &mut args_iter, LinkerArg::Keyword)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_short_arg('l', arg, &mut args_iter, LinkerArg::Link)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("library-path", arg, &mut args_iter, LinkerArg::Link)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_short_arg('m', arg, &mut args_iter, LinkerArg::Emulation)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("plugin", arg, &mut args_iter, LinkerArg::Plugin)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("plugin-opt", arg, &mut args_iter, LinkerArg::PluginOpt)
-        {
-            output.push(result);
-        } else if let Some(result) = parse_linker_long_opt("EL", arg, || LinkerArg::LittleEndian) {
-            output.push(result);
-        } else if let Some(result) = parse_linker_long_opt("pie", arg, || LinkerArg::PicExecutable)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("pic-executable", arg, || LinkerArg::PicExecutable)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("no-pie", arg, || LinkerArg::NonPicExecutable)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_short_arg('I', arg, &mut args_iter, LinkerArg::DynamicLinker)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("dynamic-linker", arg, &mut args_iter, LinkerArg::DynamicLinker)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("sysroot", arg, &mut args_iter, LinkerArg::Sysroot)
-        {
-            output.push(result);
-        } else if let Some(result) = parse_linker_long_opt("build-id", arg, || LinkerArg::BuildId) {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("eh-frame-hdr", arg, || LinkerArg::EhFrameHeader)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_arg("hash-style", arg, &mut args_iter, LinkerArg::HashStyle)
-        {
-            output.push(result);
-        } else if let Some(result) = parse_linker_long_opt("as-needed", arg, || LinkerArg::AsNeeded)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("no-as-needed", arg, || LinkerArg::NoAsNeeded)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("push-state", arg, || LinkerArg::PushState)
-        {
-            output.push(result);
-        } else if let Some(result) = parse_linker_long_opt("pop-state", arg, || LinkerArg::PopState)
-        {
-            output.push(result);
-        } else if let Some(result) =
-            parse_linker_long_opt("fix-cortex-a53-843419", arg, || LinkerArg::FixCortexA53_843419)
-        {
-            output.push(result);
-        } else if arg.starts_with("-") {
-            output.push(LinkerArg::Unknown(arg));
-        } else {
-            output.push(LinkerArg::Input(arg));
-        }
-    }
-    output
 }
 
 /// Check if the given system C compiler works.
@@ -549,7 +311,7 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 
     // Concatentation, using byte strings
     let mut c_source = C_SOURCE.to_owned();
-    c_source.extend(args_file.as_os_str().as_encoded_bytes());
+    c_source.extend(args_file.as_os_str().as_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");
@@ -843,7 +605,7 @@ mod tests {
             Ok(_) => {
                 panic!("Unexpected acceptance processing {:?}", linker_args);
             }
-            Err(e) => {
+            Err(_e) => {
                 // Correct
                 assert!(compiler_args.is_empty());
             }
@@ -862,7 +624,7 @@ mod tests {
             Ok(_) => {
                 panic!("Unexpected acceptance processing {:?}", linker_args);
             }
-            Err(e) => {
+            Err(_e) => {
                 // Correct
                 assert!(compiler_args.is_empty());
             }
@@ -881,128 +643,10 @@ mod tests {
             Ok(_) => {
                 panic!("Unexpected acceptance processing {:?}", linker_args);
             }
-            Err(e) => {
+            Err(_e) => {
                 // Correct
                 assert!(compiler_args.is_empty());
             }
         }
-    }
-
-    #[test]
-    fn test_rationalise_linker_args() {
-        let args = [
-            "-plugin",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/liblto_plugin.so",
-            "-plugin-opt=/usr/lib/gcc-cross/aarch64-linux-gnu/12/lto-wrapper",
-            "-plugin-opt=-fresolution=/tmp/cc9GsGIt.res",
-            "-plugin-opt=-pass-through=-lgcc",
-            "-plugin-opt=-pass-through=-lgcc_s",
-            "-plugin-opt=-pass-through=-lc",
-            "-plugin-opt=-pass-through=-lgcc",
-            "-plugin-opt=-pass-through=-lgcc_s",
-            "--sysroot=/",
-            "--build-id",
-            "--eh-frame-hdr",
-            "--hash-style=gnu",
-            "--as-needed",
-            "-dynamic-linker",
-            "/lib/ld-linux-aarch64.so.1",
-            "-X",
-            "-EL",
-            "-maarch64linux",
-            "--fix-cortex-a53-843419",
-            "-pie",
-            "-z",
-            "now",
-            "-z",
-            "relro",
-            "-o",
-            "/tmp/.tmpoNgAJE/output.bin",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/Scrt1.o",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crti.o",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtbeginS.o",
-            "-L/tmp/.tmpoNgAJE",
-            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12",
-            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib",
-            "-L/lib/aarch64-linux-gnu",
-            "-L/lib/../lib",
-            "-L/usr/lib/aarch64-linux-gnu",
-            "-L/usr/lib/../lib",
-            "-L/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib",
-            "/tmp/cc81JpAZ.o",
-            "-lgcc",
-            "--push-state",
-            "--as-needed",
-            "-lgcc_s",
-            "--pop-state",
-            "-lc",
-            "-lgcc",
-            "--as-needed",
-            "-lgcc_s",
-            "--no-as-needed",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtendS.o",
-            "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crtn.o",
-        ];
-        let expected = vec![
-            LinkerArg::Plugin("/usr/lib/gcc-cross/aarch64-linux-gnu/12/liblto_plugin.so"),
-            LinkerArg::PluginOpt("/usr/lib/gcc-cross/aarch64-linux-gnu/12/lto-wrapper"),
-            LinkerArg::PluginOpt("-fresolution=/tmp/cc9GsGIt.res"),
-            LinkerArg::PluginOpt("-pass-through=-lgcc"),
-            LinkerArg::PluginOpt("-pass-through=-lgcc_s"),
-            LinkerArg::PluginOpt("-pass-through=-lc"),
-            LinkerArg::PluginOpt("-pass-through=-lgcc"),
-            LinkerArg::PluginOpt("-pass-through=-lgcc_s"),
-            LinkerArg::Sysroot("/"),
-            LinkerArg::BuildId,
-            LinkerArg::EhFrameHeader,
-            LinkerArg::HashStyle("gnu"),
-            LinkerArg::AsNeeded,
-            LinkerArg::DynamicLinker("/lib/ld-linux-aarch64.so.1"),
-            LinkerArg::DiscardAll,
-            LinkerArg::LittleEndian,
-            LinkerArg::Emulation("aarch64linux"),
-            LinkerArg::FixCortexA53_843419,
-            LinkerArg::PicExecutable,
-            LinkerArg::Keyword("now"),
-            LinkerArg::Keyword("relro"),
-            LinkerArg::Output("/tmp/.tmpoNgAJE/output.bin"),
-            LinkerArg::Input(
-                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/Scrt1.o",
-            ),
-            LinkerArg::Input(
-                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crti.o",
-            ),
-            LinkerArg::Input("/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtbeginS.o"),
-            LinkerArg::LibraryPath("/tmp/.tmpoNgAJE"),
-            LinkerArg::LibraryPath("/usr/lib/gcc-cross/aarch64-linux-gnu/12"),
-            LinkerArg::LibraryPath(
-                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib",
-            ),
-            LinkerArg::LibraryPath("/lib/aarch64-linux-gnu"),
-            LinkerArg::LibraryPath("/lib/../lib"),
-            LinkerArg::LibraryPath("/usr/lib/aarch64-linux-gnu"),
-            LinkerArg::LibraryPath("/usr/lib/../lib"),
-            LinkerArg::LibraryPath(
-                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib",
-            ),
-            LinkerArg::Input("/tmp/cc81JpAZ.o"),
-            LinkerArg::Link("gcc"),
-            LinkerArg::PushState,
-            LinkerArg::AsNeeded,
-            LinkerArg::Link("gcc_s"),
-            LinkerArg::PopState,
-            LinkerArg::Link("c"),
-            LinkerArg::Link("gcc"),
-            LinkerArg::AsNeeded,
-            LinkerArg::Link("gcc_s"),
-            LinkerArg::NoAsNeeded,
-            LinkerArg::Input("/usr/lib/gcc-cross/aarch64-linux-gnu/12/crtendS.o"),
-            LinkerArg::Input(
-                "/usr/lib/gcc-cross/aarch64-linux-gnu/12/../../../../aarch64-linux-gnu/lib/../lib/crtn.o",
-            ),
-        ];
-        let output = rationalise_linker_args(args.iter().cloned());
-
-        assert_eq!(output, expected, "{:#?}\n!=\n{:#?}", output, expected);
     }
 }

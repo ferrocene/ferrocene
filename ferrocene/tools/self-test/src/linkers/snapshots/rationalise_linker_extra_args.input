@@ -1,0 +1,5 @@
+--discard-all
+--library-path=/path/to/library
+-I/path/to/dynamic/linker
+-pic-executable
+--no-pie

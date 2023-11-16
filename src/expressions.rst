@@ -3596,6 +3596,15 @@ Closure Expressions
 A :t:`closure expression` is an :t:`expression` that defines a
 :t:`closure type` and constructs a value of that :t:`type`.
 
+:dp:`fls_UgJgur0z6d4a`
+The :t:`return type` of a :t:`closure type` is determined as follows:
+
+* :dp:`fls_af1WL2mBKMfW`
+  If the :t:`closure expression` specifies a :s:`ClosureBodyWithReturnType`, then the :t:`return type` is the specified :s:`ReturnTypeWithoutBounds`.
+
+* :dp:`fls_wLVeE6cNG8oa`
+  Otherwise the :t:`return type` is the :t:`type` of the :t:`closure body`.
+
 :dp:`fls_srbl7ptknjyk`
 A :t:`closure body` is a :t:`construct` that represents the executable portion
 of a :t:`closure expression`.

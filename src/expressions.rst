@@ -3624,9 +3624,24 @@ A :t:`closure parameter` is a :t:`construct` that yields a set of
 :t:`[binding]s` that bind matched input :t:`[value]s` to :t:`[name]s` at the
 site of a :t:`call expression` or a :t:`method call expression`.
 
+:dp:`fls_81KOEXwps2HS`
+The :t:`type` of a :t:`closure parameter` is determined as follows:
+
+* :dp:`fls_XWJ9SFggdVeH`
+  If the :t:`closure parameter` lacks a :s:`TypeSpecification`, the :t:`type` is inferred form the usage of the :t:`closure parameter`.
+
+* :dp:`fls_mPWkIxTJErqx`
+  Otherwise the :t:`type` is the specified :t:`type`.
+
+:dp:`fls_MeLJqy28J4jr`
+The :t:`type` of a :t:`closure parameter` is the :t:`type` of the :t:`closure parameter`.
+
 :dp:`fls_r6gWLoNR7JMR`
 The :t:`pattern` of a :t:`closure parameter` shall be an
 :t:`irrefutable pattern`.
+
+:dp:`fls_zsaTK9snhXs0`
+The :t:`expected type` of the :t:`pattern` of a :t:`closure parameter` is the :t:`type` of the :t:`closure parameter`.
 
 :dp:`fls_qPeOL6ZhXsgH`
 The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[closure parameter]s` of a :t:`closure expression` shall not shadow another.
@@ -3730,6 +3745,9 @@ its :t:`loop body` as long as its :t:`subject expression` yields a :t:`value`.
 :dp:`fls_fkgbin6ydkm4`
 The :t:`type` of a :t:`subject expression` shall implement the
 :std:`core::iter::IntoIterator` :t:`trait`.
+
+:dp:`fls_fo6Aa6Td6rMA`
+The :t:`expected type` of the :t:`pattern` is the :t:`associated type` :std:`core::iter::IntoIterator::Item` of the :t:`subject expression`'s :std:`core::iter::IntoIterator` implementation.
 
 :dp:`fls_bmTjhKdpfgCB`
 The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
@@ -3923,6 +3941,9 @@ While Let Loops
 A :t:`while let loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`loop body` as long as its :t:`subject let expression` yields
 a :t:`value` that can be matched against its :t:`pattern`.
+
+:dp:`fls_bC60ZSC9yUOI`
+The :t:`expected type` of the :t:`pattern` is the :t:`type` of the :t:`subject let expression`.
 
 :dp:`fls_gTfSLePwHTES`
 The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
@@ -4409,6 +4430,9 @@ An :t:`if let expression` is an :t:`expression` that evaluates either a
 :t:`block expression` or an :t:`else expression` depending on whether its
 :t:`pattern` can be matched against its :t:`subject let expression`.
 
+:dp:`fls_okVOYzTT6fBK`
+The :t:`expected type` of the :t:`pattern` is the :t:`type` of the :t:`subject let expression`.
+
 :dp:`fls_4vyrufo4qdeg`
 The :t:`type` of an :t:`if let expression` is the :t:`type` of its
 :t:`block expression`.
@@ -4526,6 +4550,9 @@ A :t:`final match arm` is the last :t:`match arm` of a :t:`match expression`.
 A :t:`match arm matcher` is a :t:`construct` that consists of a :t:`pattern` and
 a :t:`match arm guard`.
 
+:dp:`fls_zJQ4LecT1HYd`
+The :t:`expected type` of the :t:`pattern` of the :t:`match arm matcher` is the :t:`type` of the :t:`subject expression`.
+
 :dp:`fls_8wjdichfxp0y`
 A :t:`match arm body` is the :t:`operand` of a :t:`match arm`.
 
@@ -4555,7 +4582,7 @@ The :t:`type` of a :t:`match expression` is the :t:`unified type` of the
 
 :dp:`fls_g6xyz0beps3o`
 A :t:`match arm` is selected when its :t:`pattern` matches the
-:t:`subject expression` and its :t:`match arm guard` (if any) evaluates to
+:t:`value` of the :t:`subject expression` and its :t:`match arm guard` (if any) evaluates to
 ``true``.
 
 :dp:`fls_8dba4o5qg8js`

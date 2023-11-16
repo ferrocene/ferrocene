@@ -25,6 +25,7 @@ Expressions
          | LoopExpression
          | MatchExpression
          | UnsafeBlockExpression
+         | NamedBlockExpression
        )
 
    ExpressionWithoutBlock ::=
@@ -652,7 +653,7 @@ Block Expressions
 .. syntax::
 
    BlockExpression ::=
-       Label? $${$$
+       $${$$
          InnerAttributeOrDoc*
          StatementList
        $$}$$
@@ -665,13 +666,6 @@ Block Expressions
 :dp:`fls_nf65p0l0v0gr`
 A :t:`block expression` is an :t:`expression` that sequences :t:`[expression]s`
 and :t:`[statement]s`.
-
-:dp:`fls_gOxD5xdYLaQG`
-A :t:`named block expression` is a :t:`block expression` with a :t:`label`.
-
-:dp:`fls_osLgtbU8OfbD`
-An :t:`anonymous block expression` is a :t:`block expression` without a
-:t:`label`.
 
 :dp:`fls_tn3hj7k2lliu`
 A :t:`tail expression` is the last :t:`expression` within a :t:`block
@@ -784,6 +778,40 @@ the :t:`[capture target]s` of the :t:`async block expression`.
 
    async {
        42
+   }
+
+.. _fls_0ybsR1hEo7wV:
+
+Named Blocks
+~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   NamedBlockExpression ::=
+       Label BlockExpression
+
+.. rubric:: Legality Rules
+
+:dp:`fls_J8wJNfcSAYrS`
+A :t:`named block expression` is a :t:`block expression` with a :t:`label`.
+
+:dp:`fls_B4NBv2jfZLuy`
+The :t:`type` of the :t:`named block expression` is the :t:`type` of its
+:t:`block expression`.
+
+:dp:`fls_YxvAUUYAPkaq`
+The :t:`value` of the :t:`named block expression` is the :t:`value` of its
+:t:`block expression`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   'block: {
+       break 'block 1;
+       3
    }
 
 .. _fls_8wnyln2nmg4y:

@@ -3624,6 +3624,9 @@ site of a :t:`call expression` or a :t:`method call expression`.
 The :t:`pattern` of a :t:`closure parameter` shall be an
 :t:`irrefutable pattern`.
 
+:dp:`fls_qPeOL6ZhXsgH`
+The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[closure parameter]s` of a :t:`closure expression` shall not shadow another.
+
 :dp:`fls_yn30xuejcfxo`
 The :t:`type` of a :t:`closure expression` is the unique anonymous
 :t:`closure type` defined by it.

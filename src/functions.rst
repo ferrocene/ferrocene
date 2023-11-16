@@ -83,6 +83,9 @@ it is an :t:`external function`.
 The :t:`pattern` of a :t:`function parameter` shall be an :t:`irrefutable
 pattern`.
 
+:dp:`fls_PGDKWK7nPvgw`
+The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[function parameter]s` of a :t:`function` shall not shadow another.
+
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function`, :t:`closure type` or :t:`function pointer type` returns.
 

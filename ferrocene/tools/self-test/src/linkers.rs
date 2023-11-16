@@ -159,7 +159,12 @@ where
             LinkerArg::Keyword(_) => {}
             LinkerArg::Link(_) => {}
             LinkerArg::Emulation(_) => {}
-            LinkerArg::PluginOpt(_) => {}
+            LinkerArg::PluginOpt(_) => {
+                // If we see one of these, and we haven't previously seen a
+                // -plugin (which causes this loop to exit), then that's bad and
+                // we should report the error
+                return Err(Error::LinkerArgsError { target: target.to_owned() });
+            }
             LinkerArg::LittleEndian => {}
             LinkerArg::PicExecutable => {}
             LinkerArg::NonPicExecutable => {}
@@ -634,6 +639,26 @@ mod tests {
     #[test]
     fn test_linker_args_unknown_missing_long_arg() {
         let linker_args = ["--plugin"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(_e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_bare_plugin_opt_is_fatal() {
+        // Check that a bare --plugin-opt, with no --plugin before it, is rejected
+        let linker_args = ["--plugin-opt=-foo=bar"];
         let mut compiler_args = Vec::new();
         match linker_args_ok(
             "x86_64-unknown-linux-gnu",

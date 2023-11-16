@@ -7289,6 +7289,14 @@ unnamed lifetime
 An :dt:`unnamed lifetime` is a :t:`lifetime` declared with character 0x5F (low
 line).
 
+.. _fls_cDVmvrVhUBmr:
+
+unqualified path expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_9xKgP8uVsOaR`
+An :dt:`unqualified path expression` is a :t:`path expression`  without a :t:`qualified type`.
+
 .. _fls_6349nvapfj9d:
 
 unsafe block
@@ -7652,4 +7660,3 @@ zero-variant enum type
 :dp:`fls_84gqz3vwi5mj`
 A :dt:`zero-variant enum type` is an :t:`enum type` without any
 :t:`[enum variant]s`.
-

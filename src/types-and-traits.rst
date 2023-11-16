@@ -1968,12 +1968,12 @@ occur when:
   using :t:`unsized coercion`.
 
 * :dp:`fls_ulcdetwp6x96`
-  The source :t:`type` is a :t:`function item type` and the target :t:`type` is
-  a :t:`function pointer type`.
+  The source :t:`type` is a :t:`function item type`, the target :t:`type` is
+  a :t:`function pointer type` and the source's :t:`function signature` is a :t:`subtype` of the target's :t:`function signature`.
 
 * :dp:`fls_2uv1r0gni1fk`
-  The source :t:`type` is a non-capturing :t:`closure type` and the target
-  :t:`type` is a :t:`function pointer type`.
+  The source :t:`type` is a non-capturing :t:`closure type`, the target
+  :t:`type` is a :t:`function pointer type` and the source's :t:`function signature` is a :t:`subtype` of the target's :t:`function signature`.
 
 * :dp:`fls_sf0c3fbx8z57`
   The source :t:`type` is the :t:`never type` and the target :t:`type` is any

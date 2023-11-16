@@ -611,7 +611,7 @@ Path Expressions
 .. syntax::
 
    PathExpression ::=
-       PathExpression
+       UnqualifiedPathExpression
      | QualifiedPathExpression
 
 .. rubric:: Legality Rules

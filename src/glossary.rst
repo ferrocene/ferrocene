@@ -7280,6 +7280,14 @@ unnamed lifetime
 An :dt:`unnamed lifetime` is a :t:`lifetime` declared with character 0x5F (low
 line).
 
+.. _fls_cDVmvrVhUBmr:
+
+unqualified path expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_9xKgP8uVsOaR`
+An :dt:`unqualified path expression` is a :t:`path expression`  without a :t:`qualified type`.
+
 .. _fls_6349nvapfj9d:
 
 unsafe block

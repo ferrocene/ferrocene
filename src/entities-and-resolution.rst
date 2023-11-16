@@ -257,7 +257,7 @@ Paths
    QualifyingTrait ::=
        $$as$$ TypePath
 
-   PathExpression ::=
+   UnqualifiedPathExpression ::=
        $$::$$? PathExpressionSegment ($$::$$ PathExpressionSegment)*
 
    PathExpressionSegment ::=
@@ -346,8 +346,8 @@ A :t:`single segment path` is a :t:`path` consisting of exactly one
 A :t:`multi segment path` is a :t:`path` consisting of more than one
 :t:`path segment`.
 
-:dp:`fls_1hi5xjym7152`
-A :t:`path expression` is a :t:`path` that acts as an :t:`expression`.
+:dp:`fls_nRgjCLYZL3iX`
+An :t:`unqualified path expression` is a :t:`path expression`  without a :t:`qualified type`.
 
 :dp:`fls_tvvycup09b51`
 A :t:`path expression` is subject to :t:`path expression resolution`.
@@ -410,7 +410,7 @@ declaration of ``crate_visible_function``.
    crate::outer_module::inner_module::crate_visible_function();
 
 :dp:`fls_no853u27p4f3`
-The following is a path expression with a generic argument.
+The following is an :t:`unqualified path expression`` with a generic argument.
 
 .. code-block:: rust
 
@@ -1676,14 +1676,14 @@ Path Expression Resolution
 
 :dp:`fls_akjlqm3a2lb1`
 :t:`Path expression resolution` is a form of :t:`path resolution` that applies
-to a :t:`path expression`.
+to a :t:`unqualified path expression`.
 
 :dp:`fls_xyzdajtf4u2t`
 The :t:`namespace context` of :t:`path expression resolution` is the
 :t:`value namespace`.
 
 :dp:`fls_d45vu3iazi3`
-The leftmost :t:`path segment` of a :t:`path expression` is resolved using
+The leftmost :t:`path segment` of a :t:`unqualified path expression` is resolved using
 general :t:`path resolution`. The remaining :t:`[path segment]s` are resolved
 in left-to-right order, as follows:
 

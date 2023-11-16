@@ -725,8 +725,19 @@ A :t:`struct pattern` is interpreted based on the :t:`deconstructee`. It is a
 static error if a :t:`struct pattern` cannot be interpreted.
 
 :dp:`fls_r8rat3qmc4hy`
-A :t:`struct pattern` is an :t:`irrefutable pattern` when all of its
-:t:`[subpattern]s` are :t:`[irrefutable pattern]s`.
+A :t:`struct pattern` is an :t:`irrefutable pattern` if
+
+* :dp:`fls_hUX723DmLg2a`
+  All of its :t:`[subpattern]s` are :t:`[irrefutable pattern]s`, and
+
+* :dp:`fls_p4OplpUvS04l`
+  The :t:`deconstructree` is either:
+
+  * :dp:`fls_pre3YwAv01FE`
+    A :t:`struct type` or a :t:`union type`, or
+
+  * :dp:`fls_MK83WE0iDqNf`
+    An :t:`enum variant` of an :t:`enum` with a single :t:`enum variant`.
 
 .. _fls_nruvg0es3kx7:
 

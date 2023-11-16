@@ -971,6 +971,15 @@ parameters.
 A :t:`variadic part` shall be specified only when the :t:`ABI` of the
 :t:`function pointer type` is either ``extern "C"`` or ``extern "cdecl"``.
 
+:dp:`fls_g1iYVw7upBnH`
+The :t:`return type` of a :t:`function pointer type` is determined as follows:
+
+* :dp:`fls_8gpvNJfVlyaD`
+  If the :t:`function pointer type` specifies a :s:`ReturnTypeWithoutBounds`, then the :t:`return type` is the specified :s:`ReturnTypeWithoutBounds`.
+
+* :dp:`fls_KcI6yK0P8Onn`
+  Otherwise the :t:`return type` is the :t:`unit type`.
+
 .. rubric:: Undefined Behavior
 
 :dp:`fls_52thmi9hnoks`

@@ -1,0 +1,16 @@
+---
+source: src/linkers/argparse.rs
+assertion_line: 224
+expression: output
+---
+[
+    DiscardAll,
+    Link(
+        "/path/to/library",
+    ),
+    DynamicLinker(
+        "/path/to/dynamic/linker",
+    ),
+    PicExecutable,
+    NonPicExecutable,
+]

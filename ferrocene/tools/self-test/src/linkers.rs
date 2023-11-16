@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::ffi::OsString;
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -10,6 +11,10 @@ use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::{find_binary_in_path, run_command};
 use crate::Environment;
+
+mod argparse;
+
+use argparse::LinkerArg;
 
 /// What kind of C compiler does a target require
 #[derive(Debug)]
@@ -39,6 +44,7 @@ pub(crate) fn check_and_add_rustflags(
     let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
 
     // Step 2. Check the C compiler works on each target that needs one
+    // 2a. We loop through the targets
     'target_loop: for target in targets {
         let prefix_list: &[&str] = match target.linker {
             Linker::BundledLld => {
@@ -49,45 +55,74 @@ pub(crate) fn check_and_add_rustflags(
             Linker::HostCC => &[""],
             Linker::CrossCC(list) => list,
         };
+        // 2b. We loop through the prefixes used on this target (e.g. "arm-unknown-none-")
         for cc_prefix in prefix_list {
-            for compiler_kind in ["cc", "gcc", "clang"] {
-                let temp_dir = tempfile::tempdir().map_err(|error| {
-                    Error::TemporaryCompilationDirectoryCreationFailed { error }
-                })?;
-                let compiler_name = format!("{cc_prefix}{compiler_kind}");
-                let cc_result = check_system_compiler(
-                    environment,
-                    target.triple,
-                    &compiler_name,
-                    lld_dir,
-                    temp_dir.path(),
-                );
-                match cc_result {
-                    Ok((_path, args)) => {
-                        reporter.success(&format!(
-                            "Found C compiler `{}` for target `{}`",
-                            compiler_name, target.triple
-                        ));
-                        let mut need_no_lto = false;
-                        for arg in args {
-                            if std::env::var("FST_PRINT_LINKER_ARGS").is_ok() {
-                                reporter
-                                    .note(&format!("`{compiler_name}` provides argument {arg:?}"));
+            // 2c. We loop through the things we know C compilers can be called
+            'cc_loop: for compiler_kind in ["cc", "gcc", "clang"] {
+                let mut cc_args = Vec::new();
+                // 2d. We keep trying until we get a set of linker arguments are are happy with
+                //     or we run out of flags to give the C compiler
+                'arg_loop: loop {
+                    let temp_dir = tempfile::tempdir().map_err(|error| {
+                        Error::TemporaryCompilationDirectoryCreationFailed { error }
+                    })?;
+                    let compiler_name = format!("{cc_prefix}{compiler_kind}");
+                    let cc_result = check_system_compiler(
+                        environment,
+                        target.triple,
+                        &compiler_name,
+                        lld_dir,
+                        temp_dir.path(),
+                        &cc_args,
+                    );
+                    match cc_result {
+                        Ok((_path, linker_args)) => {
+                            if std::env::var("FST_PRINT_DETAILED_ARGS").is_ok() {
+                                reporter.note(&format!(
+                                    "Target `{}`, detected args `{:?}`",
+                                    target.triple, &linker_args
+                                ));
                             }
-                            if arg.contains("liblto_plugin") {
-                                need_no_lto = true;
+
+                            match linker_args_ok(
+                                target.triple,
+                                linker_args.iter().map(|s| s.as_str()),
+                                &mut cc_args,
+                            ) {
+                                Ok(true) => {
+                                    // Looks good to go
+                                }
+                                Ok(false) => {
+                                    // Give it another go with some new arguments
+                                    continue 'arg_loop;
+                                }
+                                Err(e) => {
+                                    // Try another compiler
+                                    if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                        reporter
+                                            .note(&format!("`{compiler_name}` failed with {e}"));
+                                    }
+                                    continue 'cc_loop;
+                                }
                             }
+                            reporter.success(&format!(
+                                "Found C compiler `{}` for target `{}`",
+                                compiler_name, target.triple
+                            ));
+                            target.rustflags.push(format!("-Clinker={compiler_name}"));
+                            for cc_arg in cc_args {
+                                target.rustflags.push(format!("-Clink-arg={cc_arg}"));
+                            }
+                            // All done with this target
+                            continue 'target_loop;
                         }
-                        target.rustflags.push(format!("-Clinker={compiler_name}"));
-                        if need_no_lto {
-                            target.rustflags.push(format!("-Clink-arg=-fno-lto"));
-                        }
-                        continue 'target_loop;
-                    }
-                    Err(e) => {
-                        // Try again until we run out of compilers
-                        if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
-                            reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                        Err(e) => {
+                            // Try again until we run out of compilers
+                            if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                reporter.note(&format!("`{compiler_name}` failed with {e}"));
+                            }
+                            // Try another compiler
+                            continue 'cc_loop;
                         }
                     }
                 }
@@ -97,6 +132,69 @@ pub(crate) fn check_and_add_rustflags(
     }
 
     Ok(())
+}
+
+/// Look at the arguments given to the linker.
+///
+/// * Returns `Ok(true)` if these linker arguments look OK
+/// * Returns `Ok(false)` if the linker arguments were not OK, but an extra
+///   argument was added to `compiler_args` and so the caller should try again
+/// * Returns `Err(...)` if the linker arguments were not OK, and there's no
+///   proposed remedy
+fn linker_args_ok<'a, I>(
+    target: &str,
+    linker_args: I,
+    compiler_args: &mut Vec<String>,
+) -> Result<bool, Error>
+where
+    I: Iterator<Item = &'a str>,
+{
+    let linker_args = argparse::rationalise_linker_args(linker_args);
+    for arg in linker_args {
+        match arg {
+            LinkerArg::Input(_) => {}
+            LinkerArg::Output(_) => {}
+            LinkerArg::LibraryPath(_) => {}
+            LinkerArg::DiscardAll => {}
+            LinkerArg::Keyword(_) => {}
+            LinkerArg::Link(_) => {}
+            LinkerArg::Emulation(_) => {}
+            LinkerArg::PluginOpt(_) => {
+                // If we see one of these, and we haven't previously seen a
+                // -plugin (which causes this loop to exit), then that's bad and
+                // we should report the error
+                return Err(Error::LinkerArgsError { target: target.to_owned() });
+            }
+            LinkerArg::LittleEndian => {}
+            LinkerArg::PicExecutable => {}
+            LinkerArg::NonPicExecutable => {}
+            LinkerArg::DynamicLinker(_) => {}
+            LinkerArg::Sysroot(_) => {}
+            LinkerArg::BuildId => {}
+            LinkerArg::EhFrameHeader => {}
+            LinkerArg::HashStyle(_) => {}
+            LinkerArg::AsNeeded => {}
+            LinkerArg::NoAsNeeded => {}
+            LinkerArg::PushState => {}
+            LinkerArg::PopState => {}
+            LinkerArg::FixCortexA53_843419 => {}
+            LinkerArg::Unknown(_) => {
+                // Hmm, we don't want unknown arguments
+                return Err(Error::LinkerArgsError { target: target.to_owned() });
+            }
+            LinkerArg::Plugin(_plugin) => {
+                // Hmm, we don't want plugins.
+                if compiler_args.iter().find(|s| "-fno-lto" == *s).is_some() {
+                    // We already turned LTO off, and we still got a plugin, so bail out
+                    return Err(Error::LinkerArgsError { target: target.to_owned() });
+                }
+                // Try again with LTO disabled.
+                compiler_args.push("-fno-lto".to_owned());
+                return Ok(false);
+            }
+        }
+    }
+    Ok(true)
 }
 
 /// Check if the given system C compiler works.
@@ -115,20 +213,22 @@ fn check_system_compiler(
     compiler_name: &str,
     lld_dir: &Path,
     temp_dir: &Path,
+    extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
     let cc_path = find_binary_in_path(environment, &compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
-    cross_compile_test_program(&cc_path, lld_dir, temp_dir)?;
+    cross_compile_test_program(&cc_path, lld_dir, temp_dir, extra_args)?;
 
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
 
     let args_file = make_fake_linker(temp_dir)?;
 
-    let linker_args = check_compiler_linker_args(target, &cc_path, temp_dir, &args_file)?;
+    let linker_args =
+        check_compiler_linker_args(target, &cc_path, temp_dir, &args_file, extra_args)?;
 
     Ok((cc_path, linker_args))
 }
@@ -144,6 +244,7 @@ fn cross_compile_test_program(
     cc_path: &Path,
     lld_dir: &Path,
     temp_dir: &Path,
+    extra_args: &[String],
 ) -> Result<(), Error> {
     // We need some C source code,
     let c_source = r#"int main(void) { return 0; }"#;
@@ -160,7 +261,7 @@ fn cross_compile_test_program(
     })?;
 
     // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
-    let args: Vec<OsString> = vec![
+    let mut args: Vec<OsString> = vec![
         "-fuse-ld=lld".into(),
         "-B".into(),
         lld_dir.as_os_str().to_owned(),
@@ -168,6 +269,9 @@ fn cross_compile_test_program(
         "-o".into(),
         object_file.as_os_str().to_owned(),
     ];
+    for arg in extra_args {
+        args.push(OsString::try_from(arg).unwrap());
+    }
     let mut cc_child = Command::new(cc_path);
     cc_child.args(&args);
 
@@ -212,7 +316,7 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 
     // Concatentation, using byte strings
     let mut c_source = C_SOURCE.to_owned();
-    c_source.extend(args_file.as_os_str().as_encoded_bytes());
+    c_source.extend(args_file.as_os_str().as_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");
@@ -247,12 +351,13 @@ fn check_compiler_linker_args(
     cc_path: &Path,
     temp_dir: &Path,
     args_file_path: &Path,
+    extra_args: &[String],
 ) -> Result<Vec<String>, Error> {
     // Ensure this file doesn't already exist
     let _ = std::fs::remove_file(args_file_path);
 
     // compile a sample C program, but using our fake linker
-    cross_compile_test_program(cc_path, temp_dir, temp_dir)?;
+    cross_compile_test_program(cc_path, temp_dir, temp_dir, extra_args)?;
 
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
@@ -375,8 +480,13 @@ mod tests {
             .create();
 
         // Having constructed a fake C compiler, we should be able to call it
-        cross_compile_test_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path())
-            .expect("Working C compiler");
+        cross_compile_test_program(
+            &test_cc,
+            Path::new("/some/fake/lld/path"),
+            temp_dir.path(),
+            &[],
+        )
+        .expect("Working C compiler");
     }
 
     #[test]
@@ -391,6 +501,7 @@ mod tests {
             "missing-cc",
             Path::new("/some/fake/lld/path"),
             temp_dir.path(),
+            &[],
         );
         match result {
             Ok(_) => {
@@ -429,5 +540,138 @@ mod tests {
             assert_eq!(lines.next(), Some(arg.to_str().unwrap()));
         }
         assert!(lines.next().is_none());
+    }
+
+    #[test]
+    fn test_linker_args_ok() {
+        let linker_args = ["-o", "output.elf", "-L", "/some/library/path", "-L/some/library/path"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(true) => {
+                // OK!
+            }
+            Ok(false) => {
+                panic!("Unexpected rejection processing {:?}", linker_args);
+            }
+            Err(e) => {
+                panic!("Unexpected error {:?} processing {:?}", e, linker_args);
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_bad() {
+        let linker_args = ["-o", "output.elf", "--plugin", "/some/lto/binary.so"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(true) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Ok(false) => {
+                // Correct
+                assert_eq!(&compiler_args, &["-fno-lto".to_owned()]);
+            }
+            Err(e) => {
+                panic!("Unexpected error {:?} processing {:?}", e, linker_args);
+            }
+        }
+        // Second try, with -fno-lto
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Err(Error::LinkerArgsError { target }) if target == "x86_64-unknown-linux-gnu" => {
+                // Correct
+            }
+            _ => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown() {
+        let linker_args = ["-o", "output.elf", "-foobarbaz"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(_e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown_missing_short_arg() {
+        let linker_args = ["-o"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(_e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_linker_args_unknown_missing_long_arg() {
+        let linker_args = ["--plugin"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(_e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_bare_plugin_opt_is_fatal() {
+        // Check that a bare --plugin-opt, with no --plugin before it, is rejected
+        let linker_args = ["--plugin-opt=-foo=bar"];
+        let mut compiler_args = Vec::new();
+        match linker_args_ok(
+            "x86_64-unknown-linux-gnu",
+            linker_args.iter().cloned(),
+            &mut compiler_args,
+        ) {
+            Ok(_) => {
+                panic!("Unexpected acceptance processing {:?}", linker_args);
+            }
+            Err(_e) => {
+                // Correct
+                assert!(compiler_args.is_empty());
+            }
+        }
     }
 }

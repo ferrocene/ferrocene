@@ -129,15 +129,6 @@ models existential quantifier ALL.
 :dp:`fls_0fEw9Bx8xX8q`
 See :s:`ConfigurationPredicateAll`.
 
-.. _fls_eg1wsZzoiTzK:
-
-anonymous block expression
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:dp:`fls_ZU8eI3kyzw3z`
-An :dt:`anonymous block expression` is a :t:`block expression` without a
-:t:`label`.
-
 .. _fls_du8uevac5q7j:
 
 anonymous loop expression
@@ -7289,6 +7280,14 @@ unnamed lifetime
 An :dt:`unnamed lifetime` is a :t:`lifetime` declared with character 0x5F (low
 line).
 
+.. _fls_cDVmvrVhUBmr:
+
+unqualified path expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_9xKgP8uVsOaR`
+An :dt:`unqualified path expression` is a :t:`path expression`  without a :t:`qualified type`.
+
 .. _fls_6349nvapfj9d:
 
 unsafe block
@@ -7652,4 +7651,3 @@ zero-variant enum type
 :dp:`fls_84gqz3vwi5mj`
 A :dt:`zero-variant enum type` is an :t:`enum type` without any
 :t:`[enum variant]s`.
-

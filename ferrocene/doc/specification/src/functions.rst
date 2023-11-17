@@ -83,8 +83,20 @@ it is an :t:`external function`.
 The :t:`pattern` of a :t:`function parameter` shall be an :t:`irrefutable
 pattern`.
 
+:dp:`fls_PGDKWK7nPvgw`
+The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[function parameter]s` of a :t:`function` shall not shadow another.
+
 :dp:`fls_vljy4mm0zca2`
-A :t:`return type` is the :t:`type` of the result a :t:`function` returns.
+A :t:`return type` is the :t:`type` of the result a :t:`function`, :t:`closure type` or :t:`function pointer type` returns.
+
+:dp:`fls_EqJb3Jl3vK8K`
+The :t:`return type` of a :t:`function` is determined as follows:
+
+* :dp:`fls_C7dvzcXcpQCy`
+  If the :s:`FunctionDeclaration` specifies a :s:`ReturnType`, then the :t:`return type` is the specified :s:`ReturnType`.
+
+* :dp:`fls_J8X8ahnJLrMo`
+  Otherwise the :t:`return type` is the :t:`unit type`.
 
 :dp:`fls_927nfm5mkbsp`
 A :t:`function body` is the :t:`block expression` of a :t:`function`.
@@ -183,4 +195,3 @@ program. A :t:`main function` is subject to the following restrictions:
    }
 
    fn main() {}
-

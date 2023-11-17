@@ -592,7 +592,9 @@ impl Step for StdLink {
                 .join("stage0/lib/rustlib")
                 .join(&host)
                 .join("codegen-backends");
-            builder.cp_r(&stage0_codegen_backends, &sysroot_codegen_backends);
+            if stage0_codegen_backends.exists() {
+                builder.cp_r(&stage0_codegen_backends, &sysroot_codegen_backends);
+            }
         }
     }
 }
@@ -885,7 +887,9 @@ impl Step for Rustc {
         } else if let Some(path) = &builder.config.rust_profile_use {
             if compiler.stage == 1 {
                 cargo.rustflag(&format!("-Cprofile-use={path}"));
-                cargo.rustflag("-Cllvm-args=-pgo-warn-missing-function");
+                if builder.is_verbose() {
+                    cargo.rustflag("-Cllvm-args=-pgo-warn-missing-function");
+                }
                 true
             } else {
                 false

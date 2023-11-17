@@ -138,7 +138,7 @@ External Blocks
 .. syntax::
 
    ExternalBlock ::=
-       $$unsafe$$? $$extern$$ AbiSpecification? $${$$
+       $$unsafe$$? $$extern$$ AbiKind? $${$$
          InnerAttributeOrDoc*
          ExternItem*
        $$}$$
@@ -157,6 +157,15 @@ External Blocks
 :dp:`fls_4dje9t5y2dia`
 An :t:`external block` is a :t:`construct` that provides the declarations of
 foreign :t:`[function]s` as unchecked imports.
+
+:dp:`fls_Nz0l16hMxqTd`
+The :t:`ABI` of a :t:`extern block` is determined as follows:
+
+* :dp:`fls_4XOoiFloXM7t`
+  If the :t:`extern block` specifies an :s:`AbiKind`, then the :t:`ABI` is the specified :s:`AbiKind`.
+
+* :dp:`fls_PBsepNHImJKH`
+  Otherwise the :t:`ABI` is the :t:`extern C ABI`.
 
 :dp:`fls_iaimuqcclstl`
 The ``unsafe`` :t:`keyword` of an :t:`external block` is rejected, but may
@@ -237,4 +246,3 @@ An :t:`external static` shall not specify a :t:`static initializer`.
 :dp:`fls_en2h09ehj0j3`
 An :t:`immutable` :t:`external static` shall be initialized before Rust code
 is executed.
-

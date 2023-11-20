@@ -12,7 +12,7 @@ or higher on x86_64 using glibc 2.17 or higher.
 Prerequisites
 -------------
 
-This target uses the LLVM ``ld.lld`` linker and is qualfied for use with the
+This target uses the LLVM ``ld.lld`` linker and is qualified for use with the
 version of ``ld.lld`` bundled with Ferrocene. To locate the system C libraries
 required to link a functional Linux binary, this target drives the ``ld.lld``
 linker using your system's C compiler as a linker-driver.

@@ -12,7 +12,7 @@ bare-metal ARMv8-A processors operating in Aarch64 mode.
 Prerequisites
 -------------
 
-This target uses the LLVM ``rust-lld`` linker and is qualfied for use with the
+This target uses the LLVM ``rust-lld`` linker and is qualified for use with the
 version of ``rust-lld`` bundled with Ferrocene.
 
 Required compiler flags

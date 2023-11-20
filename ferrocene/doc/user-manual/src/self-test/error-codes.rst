@@ -111,44 +111,6 @@ This error occurs when a Ferrocene toolset library is not accessible.
 
 Ensure that file ownership and system permissions are correctly set.
 
-FST_011: Linker not found
--------------------------
-
-This error occurs when a linker has not been installed.
-
-**Suggested fixes**
-
-Ensure that a linker is installed.
-
-FST_012: Linker version fetch failed
-------------------------------------
-
-This error occurs when the invocation of the linker failed.
-
-**Suggested fixes**
-
-Ensure that a linker is installed.
-
-FST_013: Linker version parse failed
-------------------------------------
-
-This error occurs when the linker is not a valid binary.
-
-**Suggested fixes**
-
-Ensure that another binary with the same name has not been installed in the
-linker installation directory.
-
-FST_014: Unsupported linker version
------------------------------------
-
-This error occurs when the version of the linker is not supported by the
-qualified Ferrocene toolset.
-
-**Suggested fixes**
-
-Use a linker that is supported by the qualified Ferrocene toolset.
-
 FST_015: Bundled linker missing
 -------------------------------
 
@@ -240,3 +202,23 @@ Ensure that the Ferrocene sysroot is not tampered with while the self-test
 tool is running.
 
 Ensure that the Ferrocene toolset has been properly installed.
+
+FLS_023: Suitable C Compiler not found
+--------------------------------------
+
+This error occurs when the Ferrocene self-test tool is unable to find a C
+compiler which meets the requirements for a specific target.
+
+**Suggested fixes**
+
+Install a suitable C compiler for that target, such as GCC or clang.
+
+FLS_024: Linker Arguments error
+-------------------------------
+
+This error occurs when the Ferrocene self-test tool is unable to find a C
+compiler which emits only valid linker arguments to the linker.
+
+**Suggested fixes**
+
+Install a suitable C compiler for that target, such as GCC or clang.

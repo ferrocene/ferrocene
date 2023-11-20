@@ -1036,7 +1036,7 @@ impl<'tcx, T> Binder<'tcx, T> {
     /// risky thing to do because it's easy to get confused about
     /// De Bruijn indices and the like. It is usually better to
     /// discharge the binder using `no_bound_vars` or
-    /// `replace_late_bound_regions` or something like
+    /// `instantiate_bound_regions` or something like
     /// that. `skip_binder` is only valid when you are either
     /// extracting data that has nothing to do with bound vars, you
     /// are doing some sort of test that does not involve bound
@@ -1242,6 +1242,28 @@ impl<'tcx> AliasTy<'tcx> {
             DefKind::OpaqueTy => ty::Opaque,
             DefKind::TyAlias => ty::Weak,
             kind => bug!("unexpected DefKind in AliasTy: {kind:?}"),
+        }
+    }
+
+    /// Whether this alias type is an opaque.
+    pub fn is_opaque(self, tcx: TyCtxt<'tcx>) -> bool {
+        matches!(self.opt_kind(tcx), Some(ty::AliasKind::Opaque))
+    }
+
+    /// FIXME: rename `AliasTy` to `AliasTerm` and always handle
+    /// constants. This function can then be removed.
+    pub fn opt_kind(self, tcx: TyCtxt<'tcx>) -> Option<ty::AliasKind> {
+        match tcx.def_kind(self.def_id) {
+            DefKind::AssocTy
+                if let DefKind::Impl { of_trait: false } =
+                    tcx.def_kind(tcx.parent(self.def_id)) =>
+            {
+                Some(ty::Inherent)
+            }
+            DefKind::AssocTy => Some(ty::Projection),
+            DefKind::OpaqueTy => Some(ty::Opaque),
+            DefKind::TyAlias => Some(ty::Weak),
+            _ => None,
         }
     }
 

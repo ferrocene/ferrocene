@@ -42,6 +42,7 @@ fn use_bang_macro_as_attr() {}
 #[derive(Debug)] //~ ERROR `derive` may only be applied to `struct`s
 fn use_derive_macro_as_attr() {}
 
+<<<<<<< HEAD
 // ferrocene-annotations: fls_xa7lp0zg1ol2
 // Declarative Macros
 //
@@ -65,3 +66,15 @@ fn use_derive_macro_as_attr() {}
 //
 // ferrocene-annotations: fls_qpx6lgapce57
 // Token Matching
+=======
+macro_rules! test {
+    (let $p:pat = $e:expr) => {test!(($p,$e))};
+    // this should be expr
+    //           vvv
+    (($p:pat, $e:pat)) => {let $p = $e;}; //~ ERROR expected expression, found pattern `1 + 1`
+}
+
+fn foo() {
+    test!(let x = 1+1);
+}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

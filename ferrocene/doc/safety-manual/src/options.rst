@@ -4,6 +4,9 @@
 Tool Options
 ============
 
+Ferrocene Options
+-----------------
+
 Ferrocene is qualified exclusively for the following command line options:
 
 - Users shall pass command line option ``--edition 2021`` to each invocation of
@@ -42,3 +45,67 @@ chapter, they must verify that the feature exists and is compatible with their
 target, that their safety context is compatible with the use of the CLI option or
 feature, and develop appropriate verification activities and tests to ensure
 the correct functionality of the generated code.
+
+Linker Options
+--------------
+
+Ferrocene is qualified using the ``rust-lld`` linker supplied with
+Ferrocene. The linker can either be driven directly by Ferrocene, or via a
+system C compiler acting as a *linker driver*, depending on whether the target
+requires access to system-specific C libraries to correctly link an executable
+or shared library.
+
+The :doc:`Compilation Targets <user-manual:targets/index>` section of the User
+Manual specifies for each target whether the linker is used directly, or via a
+system C compiler as a *linker-driver*.
+
+Where a C compiler is acting as a *linker driver*, the C compiler is given a
+path to a binary called ``ld.lld`` to use as its linker. The ``ld.lld`` binary
+is a small wrapper around ``rust-lld`` which puts ``rust-lld`` into a *GNU ld
+compatible mode* and otherwise passes on any arguments given straight through to
+``rust-lld``.
+
+Regardless of whether a C compiler is used as a *linker-driver* or not, only the
+following arguments may be presented to the ``rust-lld`` linker for the linking
+of Ferrocene executables and shared libraries:
+
+- Input objects for linking
+
+- The *Output object name* option, ``-o <path>``
+
+- The *Library Path* option, ``-L <path>``
+
+- The *Discard All* option ``-X`` or ``--discard-all``
+
+- The *Keyword* option, ``-z <keyword>``
+
+- The *Link* option, ``-l <somelibrary>`` or ``--library-path <somelibrary>``
+
+- The *Emulation* option, ``-m <mode>``
+
+- The *Little Endian* option, ``-EL``
+
+- The *PIC Executable* option, ``--pie`` or ``--pic-executable``
+
+- The *Non-PIC Executable* option, ``--no-pie``
+
+- The *Dynamic Linker* option, ``-I <path>`` or ``--dynamic-linker <path>``
+
+- The *SysRoot* option, ``--sysroot``
+
+- The *Build ID* option, ``--build-id``
+
+- The *Exception Frame Header* option, ``--eh-frame-header``
+
+- The *Hash Style* option, ``--hash-style <style>``
+
+- The *As Needed* options, ``--as-needed`` and ``--no-as-needed``
+
+- The *Push and Pop* options, ``--push-state`` and ``--pop-state``
+
+- The *Arm Cortex-A53 Errata fix* option, ``--fix-cortex-a53-843419``
+
+Where alternative forms of the above options, for example using a single dash
+(``-``) instead of two dashes (``--``), or using the ``--option=value`` form
+instead of ``--option value`` form, are treated as equivalent by the linker they
+are also acceptable.

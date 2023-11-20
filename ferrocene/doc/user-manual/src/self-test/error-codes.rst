@@ -123,7 +123,7 @@ Ensure that the Ferrocene toolset has been properly installed.
 FLS_016: Path not in UTF-8
 --------------------------
 
-This error occurs when the Ferrocene self-test tool attemts to access a
+This error occurs when the Ferrocene self-test tool attempts to access a
 path that is not in UTF-8.
 
 **Suggested fixes**

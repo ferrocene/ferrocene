@@ -24,7 +24,7 @@ The Ferrocene provides a checker called ``ferrocene-self-test`` (see
 for verifying the installation of the toolchain in a non-certification context.
 
 This tool is not qualified. Consequently, in certification context, the
-following manual checks must be perfomred as per the :doc:`User Exported
+following manual checks must be performed as per the :doc:`User Exported
 Constraints <safety-manual:constraints>`:
 
 - the tarballs were extracted correctly, and permissions were preserved

@@ -194,12 +194,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "array_tool"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f8cb5d814eb646a863c4f24978cff2880c4be96ad8cde2c0f0678732902e271"
-
-[[package]]
 name = "arrayvec"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1793,24 +1787,11 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44533bbbb3bb3c1fa17d9f2e4e38bbbaf8396ba82193c4cb1b6445d711445d36"
-dependencies = [
- "atty",
- "humantime 1.3.0",
- "log",
- "regex",
- "termcolor",
-]
-
-[[package]]
-name = "env_logger"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
 dependencies = [
- "humantime 2.1.0",
+ "humantime",
  "is-terminal",
  "log",
  "regex",
@@ -2408,15 +2389,6 @@ dependencies = [
 
 [[package]]
 name = "humantime"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
-dependencies = [
- "quick-error",
-]
-
-[[package]]
-name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
@@ -2828,12 +2800,10 @@ dependencies = [
 
 [[package]]
 name = "jsonpath_lib"
-version = "0.2.6"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61352ec23883402b7d30b3313c16cbabefb8907361c4eb669d990cbb87ceee5a"
+checksum = "eaa63191d68230cccb81c5aa23abd53ed64d83337cacbb25a7b8c7979523774f"
 dependencies = [
- "array_tool",
- "env_logger 0.7.1",
  "log",
  "serde",
  "serde_json",
@@ -3049,7 +3019,7 @@ dependencies = [
  "clap",
  "clap_complete",
  "elasticlunr-rs",
- "env_logger 0.10.0",
+ "env_logger",
  "handlebars",
  "log",
  "memchr",
@@ -3174,7 +3144,7 @@ dependencies = [
  "aes",
  "colored",
  "ctrlc",
- "env_logger 0.10.0",
+ "env_logger",
  "getrandom",
  "lazy_static",
  "libc",
@@ -3413,11 +3383,11 @@ dependencies = [
  "camino",
  "clap",
  "derive_builder",
- "env_logger 0.10.0",
+ "env_logger",
  "fs_extra",
  "glob",
  "humansize",
- "humantime 2.1.0",
+ "humantime",
  "log",
  "reqwest",
  "serde",
@@ -3834,12 +3804,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9e1dcb320d6839f6edb64f7a4a59d39b30480d4d1765b56873f7c858538a5fe"
 
 [[package]]
-name = "quick-error"
-version = "1.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
-
-[[package]]
 name = "quine-mc_cluskey"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4111,7 +4075,7 @@ name = "rustbook"
 version = "0.1.0"
 dependencies = [
  "clap",
- "env_logger 0.10.0",
+ "env_logger",
  "mdbook",
 ]
 
@@ -4569,6 +4533,7 @@ dependencies = [
  "rustc_query_system",
  "rustc_resolve",
  "rustc_session",
+ "rustc_smir",
  "rustc_span",
  "rustc_symbol_mangling",
  "rustc_target",
@@ -4795,9 +4760,20 @@ name = "rustc_index"
 version = "0.0.0"
 dependencies = [
  "arrayvec",
+ "rustc_index_macros",
  "rustc_macros",
  "rustc_serialize",
  "smallvec",
+]
+
+[[package]]
+name = "rustc_index_macros"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.29",
+ "synstructure 0.13.0",
 ]
 
 [[package]]

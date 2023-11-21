@@ -836,6 +836,7 @@ impl<'a> Builder<'a> {
                 // QMS Documents
                 crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,
+                doc::Releases,
             ),
             Kind::Dist => describe!(
                 dist::Docs,

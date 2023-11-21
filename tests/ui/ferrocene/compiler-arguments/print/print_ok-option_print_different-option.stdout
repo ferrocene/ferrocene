@@ -68,7 +68,6 @@ armv7k-apple-watchos
 armv7r-none-eabi
 armv7r-none-eabihf
 armv7s-apple-ios
-asmjs-unknown-emscripten
 avr-unknown-gnu-atmega328
 bpfeb-unknown-none
 bpfel-unknown-none

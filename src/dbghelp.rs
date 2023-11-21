@@ -34,8 +34,8 @@ use core::ptr;
 mod dbghelp {
     use crate::windows::*;
     pub use winapi::um::dbghelp::{
-        StackWalk64, StackWalkEx, SymFunctionTableAccess64, SymGetModuleBase64, SymGetOptions,
-        SymInitializeW, SymSetOptions,
+        StackWalk64, StackWalkEx, SymFromAddrW, SymFunctionTableAccess64, SymGetLineFromAddrW64,
+        SymGetModuleBase64, SymGetOptions, SymInitializeW, SymSetOptions,
     };
 
     extern "system" {
@@ -232,6 +232,18 @@ dbghelp! {
             CurAddress: DWORD64,
             CurContext: LPDWORD,
             CurFrameIndex: LPDWORD
+        ) -> BOOL;
+        fn SymFromAddrW(
+            hProcess: HANDLE,
+            Address: DWORD64,
+            Displacement: PDWORD64,
+            Symbol: PSYMBOL_INFOW
+        ) -> BOOL;
+        fn SymGetLineFromAddrW64(
+            hProcess: HANDLE,
+            dwAddr: DWORD64,
+            pdwDisplacement: PDWORD,
+            Line: PIMAGEHLP_LINEW64
         ) -> BOOL;
     }
 }

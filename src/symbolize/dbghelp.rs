@@ -78,14 +78,45 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
         Err(()) => return, // oh well...
     };
 
+    let resolve_inner = if (*dbghelp.dbghelp()).SymAddrIncludeInlineTrace().is_some() {
+        // We are on a version of dbghelp 6.2+, which contains the more modern
+        // Inline APIs.
+        resolve_with_inline
+    } else {
+        // We are on an older version of dbghelp which doesn't contain the Inline
+        // APIs.
+        resolve_legacy
+    };
     match what {
-        ResolveWhat::Address(_) => resolve_with_inline(&dbghelp, what.address_or_ip(), None, cb),
+        ResolveWhat::Address(_) => resolve_inner(&dbghelp, what.address_or_ip(), None, cb),
         ResolveWhat::Frame(frame) => {
-            resolve_with_inline(&dbghelp, frame.ip(), frame.inner.inline_context(), cb)
+            resolve_inner(&dbghelp, frame.ip(), frame.inner.inline_context(), cb)
         }
     }
 }
 
+/// Resolve the address using the legacy dbghelp API.
+///
+/// This should work all the way down to Windows XP. The inline context is
+/// ignored, since this concept was only introduced in dbghelp 6.2+.
+unsafe fn resolve_legacy(
+    dbghelp: &dbghelp::Init,
+    addr: *mut c_void,
+    _inline_context: Option<DWORD>,
+    cb: &mut dyn FnMut(&super::Symbol),
+) {
+    let addr = super::adjust_ip(addr) as DWORD64;
+    do_resolve(
+        |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr, &mut 0, info),
+        |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr, &mut 0, line),
+        cb,
+    )
+}
+
+/// Resolve the address using the modern dbghelp APIs.
+///
+/// Note that calling this function requires having dbghelp 6.2+ loaded - and
+/// will panic otherwise.
 unsafe fn resolve_with_inline(
     dbghelp: &dbghelp::Init,
     addr: *mut c_void,

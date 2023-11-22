@@ -250,7 +250,7 @@ impl<'a> DecorateLint<'a, ()> for BuiltinUngatedAsyncFnTrackCaller<'_> {
         diag.span_label(self.label, fluent::lint_label);
         rustc_session::parse::add_feature_diagnostics(
             diag,
-            &self.parse_sess,
+            self.parse_sess,
             sym::async_fn_track_caller,
         );
         diag
@@ -551,21 +551,6 @@ pub enum BuiltinSpecialModuleNameUsed {
     #[diag(lint_builtin_special_module_name_used_main)]
     #[note]
     Main,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(lint_builtin_unexpected_cli_config_name)]
-#[help]
-pub struct BuiltinUnexpectedCliConfigName {
-    pub name: Symbol,
-}
-
-#[derive(LintDiagnostic)]
-#[diag(lint_builtin_unexpected_cli_config_value)]
-#[help]
-pub struct BuiltinUnexpectedCliConfigValue {
-    pub name: Symbol,
-    pub value: Symbol,
 }
 
 // deref_into_dyn_supertrait.rs

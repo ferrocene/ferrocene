@@ -1,4 +1,4 @@
-{"message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
+{"$message_type":"diagnostic","message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
 
 Erroneous code examples:
 
@@ -65,8 +65,8 @@ LL |     let x = x;
    |             ^ not found in this scope
 
 "}
-{"message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to previous error
+{"$message_type":"diagnostic","message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to previous error
 
 "}
-{"message":"For more information about this error, try `rustc --explain E0425`.","code":null,"level":"failure-note","spans":[],"children":[],"rendered":"For more information about this error, try `rustc --explain E0425`.
+{"$message_type":"diagnostic","message":"For more information about this error, try `rustc --explain E0425`.","code":null,"level":"failure-note","spans":[],"children":[],"rendered":"For more information about this error, try `rustc --explain E0425`.
 "}

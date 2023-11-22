@@ -1,1 +1,1 @@
-{"artifact":"$TEST_BUILD_DIR/ferrocene/compiler-arguments/json/json_artifacts/libjson_artifacts.rlib","emit":"link"}
+{"$message_type":"artifact","artifact":"$TEST_BUILD_DIR/ferrocene/compiler-arguments/json/json_artifacts/libjson_artifacts.rlib","emit":"link"}

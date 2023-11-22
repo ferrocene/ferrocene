@@ -105,8 +105,7 @@ of Ferrocene executables and shared libraries:
 
 - The *Arm Cortex-A53 Errata fix* option, ``--fix-cortex-a53-843419``
 
-Alternative forms of the above options are acceptable,
-if treated as equivalent by the linker:
+Alternative forms of the above options are acceptable:
 
 - Using a single dash (``-``) instead of two dashes (``--``),
 - Using the ``--option=value`` form instead of ``--option value`` form

@@ -125,15 +125,12 @@ jobs:
       max-parallel: 12
       matrix:
         target: [
-          # FIXME: Mysterious failures in CI, see
-          # https://github.com/rust-lang/libc/issues/2081
-          # aarch64-linux-android,
+          aarch64-linux-android,
           aarch64-unknown-linux-gnu,
           aarch64-unknown-linux-musl,
           arm-linux-androideabi,
           arm-unknown-linux-gnueabihf,
           arm-unknown-linux-musleabihf,
-          asmjs-unknown-emscripten,
           i686-linux-android,
           i686-unknown-linux-musl,
           powerpc-unknown-linux-gnu,

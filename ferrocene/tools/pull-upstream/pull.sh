@@ -7,6 +7,7 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
+MAX_MERGES_PER_PR=30
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
@@ -56,6 +57,23 @@ if git rev-parse --quiet --verify "${TEMP_BRANCH}" > /dev/null; then
 fi
 
 git fetch "${UPSTREAM_REPO}" "${upstream_branch}"
+
+# Avoid creating extra-large PRs by limiting the amount of merge commits
+# included in automated pulls to ${MAX_MERGES_PER_DAY}.
+if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
+    fetch_head="$(git rev-parse FETCH_HEAD)"
+    upstream_commit="$(git log HEAD..FETCH_HEAD --first-parent --format="%H" | tail -n "${MAX_MERGES_PER_PR}" | head -n 1)"
+    if [[ "${upstream_commit}" = "" ]]; then
+        # When the branch is up to date, the `git log` above rightfully doesn't
+        # return any difference between the two refs, resulting in an empty
+        # ${upstream_commit}. To avoid the rest of the script from misbehaving,
+        # in this case we revert the commit back to FETCH_HEAD.
+        upstream_commit="FETCH_HEAD"
+    elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
+        echo "pull-upstream: pulling at most ${MAX_MERGES_PER_PR}, even though more commits are available"
+    fi
+fi
+
 git checkout -b "${TEMP_BRANCH}" "${upstream_commit}"
 
 # Delete all the files excluded from the pull. Those files are marked with the

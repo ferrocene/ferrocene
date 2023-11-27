@@ -100,12 +100,18 @@ RUN mkdir /tmp/git \
     && rm -rf /tmp/git
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 18.04 is too
-# old to run the rustdoc-js test suite.
+# old to run the rustdoc-js test suite. Note that we cannot install the most
+# recent NodeJS LTS release, as it's built with a more recent glibc version
+# than the one shipped with Ubuntu 18.04.
+#
+# If you are reading this comment because you need to upgrade past NodeJS 16,
+# you will unfortunately need to change this to build NodeJS from source.
 RUN mkdir /opt/nodejs \
-    && curl -Lo /tmp/nodejs.tar.xz https://nodejs.org/dist/v20.10.0/node-v20.10.0-linux-x64.tar.xz \
-    && echo "3fe4ec5d70c8b4ffc1461dec83ab23fc70124e137c4cbbe1ccc9d6ae6ec04a7d /tmp/nodejs.tar.xz" | sha256sum -c \
+    && curl -Lo /tmp/nodejs.tar.xz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.xz \
+    && echo "874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87 /tmp/nodejs.tar.xz" | sha256sum -c \
     && tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1 \
-    && rm /tmp/nodejs.tar.xz
+    && rm /tmp/nodejs.tar.xz \
+    && /opt/nodejs/bin/node --version
 ENV PATH "/opt/nodejs/bin:$PATH"
 
 # Install AWS CLI from the published binaries, as no source tarball is provided

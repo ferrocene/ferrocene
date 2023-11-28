@@ -108,13 +108,18 @@ pub(super) struct NestedGoals<'tcx> {
     pub(super) goals: Vec<Goal<'tcx, ty::Predicate<'tcx>>>,
 }
 
-impl NestedGoals<'_> {
+impl<'tcx> NestedGoals<'tcx> {
     pub(super) fn new() -> Self {
         Self { normalizes_to_hack_goal: None, goals: Vec::new() }
     }
 
     pub(super) fn is_empty(&self) -> bool {
         self.normalizes_to_hack_goal.is_none() && self.goals.is_empty()
+    }
+
+    pub(super) fn extend(&mut self, other: NestedGoals<'tcx>) {
+        assert_eq!(other.normalizes_to_hack_goal, None);
+        self.goals.extend(other.goals)
     }
 }
 
@@ -406,8 +411,6 @@ impl<'a, 'tcx> EvalCtxt<'a, 'tcx> {
                 ty::PredicateKind::Coerce(predicate) => {
                     self.compute_coerce_goal(Goal { param_env, predicate })
                 }
-                ty::PredicateKind::ClosureKind(def_id, args, kind) => self
-                    .compute_closure_kind_goal(Goal { param_env, predicate: (def_id, args, kind) }),
                 ty::PredicateKind::ObjectSafe(trait_def_id) => {
                     self.compute_object_safe_goal(trait_def_id)
                 }

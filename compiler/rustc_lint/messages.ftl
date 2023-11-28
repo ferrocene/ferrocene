@@ -490,8 +490,10 @@ lint_requested_level = requested on the command line with `{$level} {$lint_name}
 
 lint_span_use_eq_ctxt = use `.eq_ctxt()` instead of `.ctxt() == .ctxt()`
 
-lint_supertrait_as_deref_target = `{$t}` implements `Deref` with supertrait `{$target_principal}` as target
-    .label = target type is set here
+lint_supertrait_as_deref_target = this `Deref` implementation is covered by an implicit supertrait coercion
+    .label = `{$self_ty}` implements `Deref<Target = dyn {$target_principal}>` which conflicts with supertrait `{$supertrait_principal}`
+    .label2 = target type is a supertrait of `{$self_ty}`
+    .help = consider removing this implementation or replacing it with a method instead
 
 lint_suspicious_double_ref_clone =
     using `.clone()` on a double reference, which returns `{$ty}` instead of cloning the inner type
@@ -516,6 +518,9 @@ lint_undropped_manually_drops = calls to `std::mem::drop` with `std::mem::Manual
 
 lint_ungated_async_fn_track_caller = `#[track_caller]` on async functions is a no-op
      .label = this function will not propagate the caller location
+
+lint_unit_bindings = binding has unit type `()`
+    .label = this pattern is inferred to be the unit type `()`
 
 lint_unknown_gated_lint =
     unknown lint: `{$name}`

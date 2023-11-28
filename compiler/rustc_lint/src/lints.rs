@@ -556,15 +556,19 @@ pub enum BuiltinSpecialModuleNameUsed {
 // deref_into_dyn_supertrait.rs
 #[derive(LintDiagnostic)]
 #[diag(lint_supertrait_as_deref_target)]
+#[help]
 pub struct SupertraitAsDerefTarget<'a> {
-    pub t: Ty<'a>,
+    pub self_ty: Ty<'a>,
+    pub supertrait_principal: PolyExistentialTraitRef<'a>,
     pub target_principal: PolyExistentialTraitRef<'a>,
+    #[label]
+    pub label: Span,
     #[subdiagnostic]
-    pub label: Option<SupertraitAsDerefTargetLabel>,
+    pub label2: Option<SupertraitAsDerefTargetLabel>,
 }
 
 #[derive(Subdiagnostic)]
-#[label(lint_label)]
+#[label(lint_label2)]
 pub struct SupertraitAsDerefTargetLabel {
     #[primary_span]
     pub label: Span,
@@ -1829,4 +1833,11 @@ impl<'a> DecorateLint<'a, ()> for AsyncFnInTraitDiag {
     fn msg(&self) -> rustc_errors::DiagnosticMessage {
         fluent::lint_async_fn_in_trait
     }
+}
+
+#[derive(LintDiagnostic)]
+#[diag(lint_unit_bindings)]
+pub struct UnitBindingsDiag {
+    #[label]
+    pub label: Span,
 }

@@ -39,11 +39,7 @@ ignore = [
     # these are ignored by a standard cargo fmt run
     "compiler/rustc_codegen_cranelift/y.rs", # running rustfmt breaks this file
     "compiler/rustc_codegen_cranelift/scripts",
-<<<<<<< HEAD
-
+    "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs", # uses edition 2024
     "ferrocene/library/libc",
     "ferrocene/library/getrandom-0.1",
-=======
-    "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs", # uses edition 2024
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 ]

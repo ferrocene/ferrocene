@@ -1590,7 +1590,7 @@ impl<'tcx> Deref for Region<'tcx> {
 
     #[inline]
     fn deref(&self) -> &RegionKind<'tcx> {
-        &self.0.0
+        self.0.0
     }
 }
 
@@ -1606,24 +1606,6 @@ impl fmt::Debug for EarlyParamRegion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}, {}, {}", self.def_id, self.index, self.name)
     }
-}
-
-rustc_index::newtype_index! {
-    /// A **`const`** **v**ariable **ID**.
-    #[debug_format = "?{}c"]
-    pub struct ConstVid {}
-}
-
-rustc_index::newtype_index! {
-    /// An **effect** **v**ariable **ID**.
-    ///
-    /// Handling effect infer variables happens separately from const infer variables
-    /// because we do not want to reuse any of the const infer machinery. If we try to
-    /// relate an effect variable with a normal one, we would ICE, which can catch bugs
-    /// where we are not correctly using the effect var for an effect param. Fallback
-    /// is also implemented on top of having separate effect and normal const variables.
-    #[debug_format = "?{}e"]
-    pub struct EffectVid {}
 }
 
 rustc_index::newtype_index! {
@@ -2132,7 +2114,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn new_tup(tcx: TyCtxt<'tcx>, ts: &[Ty<'tcx>]) -> Ty<'tcx> {
-        if ts.is_empty() { tcx.types.unit } else { Ty::new(tcx, Tuple(tcx.mk_type_list(&ts))) }
+        if ts.is_empty() { tcx.types.unit } else { Ty::new(tcx, Tuple(tcx.mk_type_list(ts))) }
     }
 
     pub fn new_tup_from_iter<I, T>(tcx: TyCtxt<'tcx>, iter: I) -> T::Output
@@ -2288,7 +2270,7 @@ impl<'tcx> Ty<'tcx> {
 impl<'tcx> Ty<'tcx> {
     #[inline(always)]
     pub fn kind(self) -> &'tcx TyKind<'tcx> {
-        &self.0.0
+        self.0.0
     }
 
     #[inline(always)]
@@ -2299,7 +2281,7 @@ impl<'tcx> Ty<'tcx> {
     #[inline]
     pub fn is_unit(self) -> bool {
         match self.kind() {
-            Tuple(ref tys) => tys.is_empty(),
+            Tuple(tys) => tys.is_empty(),
             _ => false,
         }
     }

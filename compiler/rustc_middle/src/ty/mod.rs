@@ -84,9 +84,7 @@ pub use self::closure::{
     CapturedPlace, ClosureKind, ClosureTypeInfo, MinCaptureInformationMap, MinCaptureList,
     RootVariableMinCaptureList, UpvarCapture, UpvarId, UpvarPath, CAPTURE_STRUCT_LOCAL,
 };
-pub use self::consts::{
-    Const, ConstData, ConstInt, Expr, InferConst, ScalarInt, UnevaluatedConst, ValTree,
-};
+pub use self::consts::{Const, ConstData, ConstInt, Expr, ScalarInt, UnevaluatedConst, ValTree};
 pub use self::context::{
     tls, CtxtInterners, DeducedParamAttrs, FreeRegionInfo, GlobalCtxt, Lift, TyCtxt, TyCtxtFeed,
 };
@@ -98,7 +96,7 @@ pub use self::sty::BoundRegionKind::*;
 pub use self::sty::{
     AliasTy, Article, Binder, BoundRegion, BoundRegionKind, BoundTy, BoundTyKind, BoundVar,
     BoundVariableKind, CanonicalPolyFnSig, ClauseKind, ClosureArgs, ClosureArgsParts, ConstKind,
-    ConstVid, CoroutineArgs, CoroutineArgsParts, EarlyParamRegion, EffectVid, ExistentialPredicate,
+    CoroutineArgs, CoroutineArgsParts, EarlyParamRegion, ExistentialPredicate,
     ExistentialProjection, ExistentialTraitRef, FnSig, GenSig, InlineConstArgs,
     InlineConstArgsParts, LateParamRegion, ParamConst, ParamTy, PolyExistentialPredicate,
     PolyExistentialProjection, PolyExistentialTraitRef, PolyFnSig, PolyGenSig, PolyTraitRef,
@@ -1378,7 +1376,7 @@ impl<'tcx> InstantiatedPredicates<'tcx> {
     }
 
     pub fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
-        (&self).into_iter()
+        self.into_iter()
     }
 }
 
@@ -2022,7 +2020,7 @@ impl<'tcx> TyCtxt<'tcx> {
         }
 
         for attr in self.get_attrs(did, sym::repr) {
-            for r in attr::parse_repr_attr(&self.sess, attr) {
+            for r in attr::parse_repr_attr(self.sess, attr) {
                 flags.insert(match r {
                     attr::ReprRust => ReprFlags::empty(),
                     attr::ReprC => ReprFlags::IS_C,
@@ -2288,7 +2286,7 @@ impl<'tcx> TyCtxt<'tcx> {
     where
         'tcx: 'attr,
     {
-        let filter_fn = move |a: &&ast::Attribute| a.path_matches(&attr);
+        let filter_fn = move |a: &&ast::Attribute| a.path_matches(attr);
         if let Some(did) = did.as_local() {
             self.hir().attrs(self.hir().local_def_id_to_hir_id(did)).iter().filter(filter_fn)
         } else {
@@ -2500,7 +2498,7 @@ impl<'tcx> TyCtxt<'tcx> {
 pub fn is_impl_trait_defn(tcx: TyCtxt<'_>, def_id: DefId) -> Option<LocalDefId> {
     let def_id = def_id.as_local()?;
     if let Node::Item(item) = tcx.hir().get_by_def_id(def_id) {
-        if let hir::ItemKind::OpaqueTy(ref opaque_ty) = item.kind {
+        if let hir::ItemKind::OpaqueTy(opaque_ty) = item.kind {
             return match opaque_ty.origin {
                 hir::OpaqueTyOrigin::FnReturn(parent) | hir::OpaqueTyOrigin::AsyncFn(parent) => {
                     Some(parent)

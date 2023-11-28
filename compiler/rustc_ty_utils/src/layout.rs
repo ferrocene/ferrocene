@@ -24,7 +24,7 @@ use crate::errors::{
 };
 use crate::layout_sanity_check::sanity_check_layout;
 
-pub fn provide(providers: &mut Providers) {
+pub(crate) fn provide(providers: &mut Providers) {
     *providers = Providers { layout_of, ..*providers };
 }
 
@@ -65,7 +65,11 @@ fn layout_of<'tcx>(
     let layout = layout_of_uncached(&cx, ty)?;
     let layout = TyAndLayout { ty, layout };
 
-    record_layout_for_printing(&cx, layout);
+    // If we are running with `-Zprint-type-sizes`, maybe record layouts
+    // for dumping later.
+    if cx.tcx.sess.opts.unstable_opts.print_type_sizes {
+        record_layout_for_printing(&cx, layout);
+    }
 
     sanity_check_layout(&cx, &layout);
 
@@ -316,7 +320,7 @@ fn layout_of_uncached<'tcx>(
 
         ty::Coroutine(def_id, args, _) => coroutine_layout(cx, ty, def_id, args)?,
 
-        ty::Closure(_, ref args) => {
+        ty::Closure(_, args) => {
             let tys = args.as_closure().upvar_tys();
             univariant(
                 &tys.iter()
@@ -724,7 +728,7 @@ fn coroutine_layout<'tcx>(
     let Some(info) = tcx.coroutine_layout(def_id) else {
         return Err(error(cx, LayoutError::Unknown(ty)));
     };
-    let (ineligible_locals, assignments) = coroutine_saved_local_eligibility(&info);
+    let (ineligible_locals, assignments) = coroutine_saved_local_eligibility(info);
 
     // Build a prefix layout, including "promoting" all ineligible
     // locals as part of the prefix. We compute the layout of all of
@@ -911,21 +915,7 @@ fn coroutine_layout<'tcx>(
     Ok(layout)
 }
 
-/// This is invoked by the `layout_of` query to record the final
-/// layout of each type.
-#[inline(always)]
 fn record_layout_for_printing<'tcx>(cx: &LayoutCx<'tcx, TyCtxt<'tcx>>, layout: TyAndLayout<'tcx>) {
-    // If we are running with `-Zprint-type-sizes`, maybe record layouts
-    // for dumping later.
-    if cx.tcx.sess.opts.unstable_opts.print_type_sizes {
-        record_layout_for_printing_outlined(cx, layout)
-    }
-}
-
-fn record_layout_for_printing_outlined<'tcx>(
-    cx: &LayoutCx<'tcx, TyCtxt<'tcx>>,
-    layout: TyAndLayout<'tcx>,
-) {
     // Ignore layouts that are done with non-empty environments or
     // non-monomorphic layouts, as the user only wants to see the stuff
     // resulting from the final codegen session.

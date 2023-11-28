@@ -35,7 +35,7 @@ use crate::session_diagnostics::{
     LifetimeReturnCategoryErr, RequireStaticErr, VarHereDenote,
 };
 
-use super::{OutlivesSuggestionBuilder, RegionName};
+use super::{OutlivesSuggestionBuilder, RegionName, RegionNameSource};
 use crate::region_infer::{BlameConstraint, ExtraConstraintInfo};
 use crate::{
     nll::ConstraintDescription,
@@ -53,7 +53,7 @@ impl<'tcx> ConstraintDescription for ConstraintCategory<'tcx> {
             ConstraintCategory::Yield => "yielding this value ",
             ConstraintCategory::UseAsConst => "using this value as a constant ",
             ConstraintCategory::UseAsStatic => "using this value as a static ",
-            ConstraintCategory::Cast => "cast ",
+            ConstraintCategory::Cast { .. } => "cast ",
             ConstraintCategory::CallArgument(_) => "argument ",
             ConstraintCategory::TypeAnnotation => "type annotation ",
             ConstraintCategory::ClosureBounds => "closure body ",
@@ -650,14 +650,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
         let fr_name_and_span = self.regioncx.get_var_name_and_span_for_region(
             self.infcx.tcx,
-            &self.body,
+            self.body,
             &self.local_names,
             &self.upvars,
             errci.fr,
         );
         let outlived_fr_name_and_span = self.regioncx.get_var_name_and_span_for_region(
             self.infcx.tcx,
-            &self.body,
+            self.body,
             &self.local_names,
             &self.upvars,
             errci.outlived_fr,
@@ -763,7 +763,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
         let err = LifetimeOutliveErr { span: *span };
         let mut diag = self.infcx.tcx.sess.create_err(err);
 
-        let fr_name = self.give_region_a_name(*fr).unwrap();
+        // In certain scenarios, such as the one described in issue #118021,
+        // we might encounter a lifetime that cannot be named.
+        // These situations are bound to result in errors.
+        // To prevent an immediate ICE, we opt to create a dummy name instead.
+        let fr_name = self.give_region_a_name(*fr).unwrap_or(RegionName {
+            name: kw::UnderscoreLifetime,
+            source: RegionNameSource::Static,
+        });
         fr_name.highlight_region_name(&mut diag);
         let outlived_fr_name = self.give_region_a_name(*outlived_fr).unwrap();
         outlived_fr_name.highlight_region_name(&mut diag);
@@ -964,7 +971,7 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
         for found_did in found_dids {
             let mut traits = vec![];
             let mut hir_v = HirTraitObjectVisitor(&mut traits, *found_did);
-            hir_v.visit_ty(&self_ty);
+            hir_v.visit_ty(self_ty);
             debug!("trait spans found: {:?}", traits);
             for span in &traits {
                 let mut multi_span: MultiSpan = vec![*span].into();

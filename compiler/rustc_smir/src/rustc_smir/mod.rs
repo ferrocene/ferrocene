@@ -14,17 +14,20 @@ use rustc_hir::def::DefKind;
 use rustc_middle::mir;
 use rustc_middle::mir::interpret::{alloc_range, AllocId};
 use rustc_middle::mir::mono::MonoItem;
-use rustc_middle::ty::{self, Instance, ParamEnv, Ty, TyCtxt, Variance};
+use rustc_middle::ty::{self, Instance, ParamEnv, ScalarInt, Ty, TyCtxt, Variance};
 use rustc_span::def_id::{CrateNum, DefId, LOCAL_CRATE};
 use rustc_target::abi::FieldIdx;
 use stable_mir::mir::mono::InstanceDef;
-use stable_mir::mir::{Body, CopyNonOverlapping, Statement, UserTypeProjection, VariantIdx};
+use stable_mir::mir::{
+    Body, ConstOperand, CopyNonOverlapping, Statement, UserTypeProjection, VarDebugInfoFragment,
+    VariantIdx,
+};
 use stable_mir::ty::{
     AdtDef, AdtKind, ClosureDef, ClosureKind, Const, ConstId, ConstantKind, EarlyParamRegion,
     FloatTy, FnDef, GenericArgs, GenericParamDef, IntTy, LineInfo, Movability, RigidTy, Span,
     TyKind, UintTy,
 };
-use stable_mir::{self, opaque, Context, CrateItem, Filename, ItemKind};
+use stable_mir::{self, opaque, Context, CrateItem, Error, Filename, ItemKind};
 use std::cell::RefCell;
 use tracing::debug;
 
@@ -69,15 +72,13 @@ impl<'tcx> Context for TablesWrapper<'tcx> {
 
     fn get_filename(&self, span: &Span) -> Filename {
         let tables = self.0.borrow();
-        opaque(
-            &tables
-                .tcx
-                .sess
-                .source_map()
-                .span_to_filename(tables[*span])
-                .display(rustc_span::FileNameDisplayPreference::Local)
-                .to_string(),
-        )
+        tables
+            .tcx
+            .sess
+            .source_map()
+            .span_to_filename(tables[*span])
+            .display(rustc_span::FileNameDisplayPreference::Local)
+            .to_string()
     }
 
     fn get_lines(&self, span: &Span) -> LineInfo {
@@ -91,13 +92,14 @@ impl<'tcx> Context for TablesWrapper<'tcx> {
         new_item_kind(tables.tcx.def_kind(tables[item.0]))
     }
 
+    fn is_foreign_item(&self, item: CrateItem) -> bool {
+        let tables = self.0.borrow();
+        tables.tcx.is_foreign_item(tables[item.0])
+    }
+
     fn adt_kind(&self, def: AdtDef) -> AdtKind {
         let mut tables = self.0.borrow_mut();
-        let ty = tables.tcx.type_of(def.0.internal(&mut *tables)).instantiate_identity().kind();
-        let ty::TyKind::Adt(def, _) = ty else {
-            panic!("Expected an ADT definition, but found: {ty:?}")
-        };
-        def.adt_kind().stable(&mut *tables)
+        def.internal(&mut *tables).adt_kind().stable(&mut *tables)
     }
 
     fn def_ty(&self, item: stable_mir::DefId) -> stable_mir::ty::Ty {
@@ -302,6 +304,37 @@ impl<'tcx> Context for TablesWrapper<'tcx> {
         let closure_kind = kind.internal(&mut *tables);
         Instance::resolve_closure(tables.tcx, def_id, args_ref, closure_kind).stable(&mut *tables)
     }
+
+    fn adt_is_box(&self, def: AdtDef) -> bool {
+        let mut tables = self.0.borrow_mut();
+        def.internal(&mut *tables).is_box()
+    }
+
+    fn eval_target_usize(&self, cnst: &Const) -> Result<u64, Error> {
+        let mut tables = self.0.borrow_mut();
+        let mir_const = cnst.internal(&mut *tables);
+        mir_const
+            .try_eval_target_usize(tables.tcx, ParamEnv::empty())
+            .ok_or_else(|| Error::new(format!("Const `{cnst:?}` cannot be encoded as u64")))
+    }
+
+    fn usize_to_const(&self, val: u64) -> Result<Const, Error> {
+        let mut tables = self.0.borrow_mut();
+        let ty = tables.tcx.types.usize;
+        let size = tables.tcx.layout_of(ParamEnv::empty().and(ty)).unwrap().size;
+
+        let scalar = ScalarInt::try_from_uint(val, size).ok_or_else(|| {
+            Error::new(format!("Value overflow: cannot convert `{val}` to usize."))
+        })?;
+        Ok(ty::Const::new_value(tables.tcx, ty::ValTree::from_scalar_int(scalar), ty)
+            .stable(&mut *tables))
+    }
+
+    fn new_rigid_ty(&self, kind: RigidTy) -> stable_mir::ty::Ty {
+        let mut tables = self.0.borrow_mut();
+        let internal_kind = kind.internal(&mut *tables);
+        tables.tcx.mk_ty_from_kind(internal_kind).stable(&mut *tables)
+    }
 }
 
 pub(crate) struct TablesWrapper<'tcx>(pub(crate) RefCell<Tables<'tcx>>);
@@ -412,7 +445,21 @@ impl<'tcx> Stable<'tcx> for mir::Body<'tcx> {
                 })
                 .collect(),
             self.arg_count,
+            self.var_debug_info.iter().map(|info| info.stable(tables)).collect(),
         )
+    }
+}
+
+impl<'tcx> Stable<'tcx> for mir::VarDebugInfo<'tcx> {
+    type T = stable_mir::mir::VarDebugInfo;
+    fn stable(&self, tables: &mut Tables<'tcx>) -> Self::T {
+        stable_mir::mir::VarDebugInfo {
+            name: self.name.to_string(),
+            source_info: self.source_info.stable(tables),
+            composite: self.composite.as_ref().map(|composite| composite.stable(tables)),
+            value: self.value.stable(tables),
+            argument_index: self.argument_index,
+        }
     }
 }
 
@@ -420,6 +467,42 @@ impl<'tcx> Stable<'tcx> for mir::Statement<'tcx> {
     type T = stable_mir::mir::Statement;
     fn stable(&self, tables: &mut Tables<'tcx>) -> Self::T {
         Statement { kind: self.kind.stable(tables), span: self.source_info.span.stable(tables) }
+    }
+}
+
+impl<'tcx> Stable<'tcx> for mir::SourceInfo {
+    type T = stable_mir::mir::SourceInfo;
+    fn stable(&self, tables: &mut Tables<'tcx>) -> Self::T {
+        stable_mir::mir::SourceInfo { span: self.span.stable(tables), scope: self.scope.into() }
+    }
+}
+
+impl<'tcx> Stable<'tcx> for mir::VarDebugInfoFragment<'tcx> {
+    type T = stable_mir::mir::VarDebugInfoFragment;
+    fn stable(&self, tables: &mut Tables<'tcx>) -> Self::T {
+        VarDebugInfoFragment {
+            ty: self.ty.stable(tables),
+            projection: self.projection.iter().map(|e| e.stable(tables)).collect(),
+        }
+    }
+}
+
+impl<'tcx> Stable<'tcx> for mir::VarDebugInfoContents<'tcx> {
+    type T = stable_mir::mir::VarDebugInfoContents;
+    fn stable(&self, tables: &mut Tables<'tcx>) -> Self::T {
+        match self {
+            mir::VarDebugInfoContents::Place(place) => {
+                stable_mir::mir::VarDebugInfoContents::Place(place.stable(tables))
+            }
+            mir::VarDebugInfoContents::Const(const_operand) => {
+                let op = ConstOperand {
+                    span: const_operand.span.stable(tables),
+                    user_ty: const_operand.user_ty.map(|index| index.as_usize()),
+                    const_: const_operand.const_.stable(tables),
+                };
+                stable_mir::mir::VarDebugInfoContents::Const(op)
+            }
+        }
     }
 }
 

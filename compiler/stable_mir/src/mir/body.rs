@@ -1,8 +1,10 @@
 use crate::mir::pretty::{function_body, pretty_statement};
-use crate::ty::{AdtDef, ClosureDef, Const, CoroutineDef, GenericArgs, Movability, Region, Ty};
-use crate::Opaque;
-use crate::Span;
+use crate::ty::{
+    AdtDef, ClosureDef, Const, CoroutineDef, GenericArgs, Movability, Region, RigidTy, Ty, TyKind,
+};
+use crate::{Error, Opaque, Span, Symbol};
 use std::io;
+
 /// The SMIR representation of a single function.
 #[derive(Clone, Debug)]
 pub struct Body {
@@ -17,6 +19,9 @@ pub struct Body {
 
     // The number of arguments this function takes.
     pub(super) arg_count: usize,
+
+    // Debug information pertaining to user variables, including captures.
+    pub(super) var_debug_info: Vec<VarDebugInfo>,
 }
 
 impl Body {
@@ -24,14 +29,19 @@ impl Body {
     ///
     /// A constructor is required to build a `Body` from outside the crate
     /// because the `arg_count` and `locals` fields are private.
-    pub fn new(blocks: Vec<BasicBlock>, locals: LocalDecls, arg_count: usize) -> Self {
+    pub fn new(
+        blocks: Vec<BasicBlock>,
+        locals: LocalDecls,
+        arg_count: usize,
+        var_debug_info: Vec<VarDebugInfo>,
+    ) -> Self {
         // If locals doesn't contain enough entries, it can lead to panics in
         // `ret_local`, `arg_locals`, and `inner_locals`.
         assert!(
             locals.len() > arg_count,
             "A Body must contain at least a local for the return value and each of the function's arguments"
         );
-        Self { blocks, locals, arg_count }
+        Self { blocks, locals, arg_count, var_debug_info }
     }
 
     /// Return local that holds this function's return value.
@@ -425,6 +435,42 @@ pub struct Place {
     pub projection: Vec<ProjectionElem>,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct VarDebugInfo {
+    pub name: Symbol,
+    pub source_info: SourceInfo,
+    pub composite: Option<VarDebugInfoFragment>,
+    pub value: VarDebugInfoContents,
+    pub argument_index: Option<u16>,
+}
+
+pub type SourceScope = u32;
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SourceInfo {
+    pub span: Span,
+    pub scope: SourceScope,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct VarDebugInfoFragment {
+    pub ty: Ty,
+    pub projection: Vec<ProjectionElem>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum VarDebugInfoContents {
+    Place(Place),
+    Const(ConstOperand),
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ConstOperand {
+    pub span: Span,
+    pub user_ty: Option<UserTypeAnnotationIndex>,
+    pub const_: Const,
+}
+
 // In MIR ProjectionElem is parameterized on the second Field argument and the Index argument. This
 // is so it can be used for both Places (for which the projection elements are of type
 // ProjectionElem<Local, Ty>) and user-provided type annotations (for which the projection elements
@@ -561,7 +607,7 @@ pub struct SwitchTarget {
     pub target: usize,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum BorrowKind {
     /// Data must be immutable and is aliasable.
     Shared,
@@ -579,14 +625,14 @@ pub enum BorrowKind {
     },
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum MutBorrowKind {
     Default,
     TwoPhaseBorrow,
     ClosureCapture,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Mutability {
     Not,
     Mut,
@@ -651,10 +697,16 @@ pub enum NullOp {
 }
 
 impl Operand {
-    pub fn ty(&self, locals: &[LocalDecl]) -> Ty {
+    /// Get the type of an operand relative to the local declaration.
+    ///
+    /// In order to retrieve the correct type, the `locals` argument must match the list of all
+    /// locals from the function body where this operand originates from.
+    ///
+    /// Errors indicate a malformed operand or incompatible locals list.
+    pub fn ty(&self, locals: &[LocalDecl]) -> Result<Ty, Error> {
         match self {
             Operand::Copy(place) | Operand::Move(place) => place.ty(locals),
-            Operand::Constant(c) => c.ty(),
+            Operand::Constant(c) => Ok(c.ty()),
         }
     }
 }
@@ -666,12 +718,57 @@ impl Constant {
 }
 
 impl Place {
-    // FIXME(klinvill): This function is expected to resolve down the chain of projections to get
-    // the type referenced at the end of it. E.g. calling `ty()` on `*(_1.f)` should end up
-    // returning the type referenced by `f`. The information needed to do this may not currently be
-    // present in Stable MIR since at least an implementation for AdtDef is probably needed.
-    pub fn ty(&self, locals: &[LocalDecl]) -> Ty {
-        let _start_ty = locals[self.local].ty;
-        todo!("Implement projection")
+    /// Resolve down the chain of projections to get the type referenced at the end of it.
+    /// E.g.:
+    /// Calling `ty()` on `var.field` should return the type of `field`.
+    ///
+    /// In order to retrieve the correct type, the `locals` argument must match the list of all
+    /// locals from the function body where this place originates from.
+    pub fn ty(&self, locals: &[LocalDecl]) -> Result<Ty, Error> {
+        let start_ty = locals[self.local].ty;
+        self.projection.iter().fold(Ok(start_ty), |place_ty, elem| {
+            let ty = place_ty?;
+            match elem {
+                ProjectionElem::Deref => Self::deref_ty(ty),
+                ProjectionElem::Field(_idx, fty) => Ok(*fty),
+                ProjectionElem::Index(_) | ProjectionElem::ConstantIndex { .. } => {
+                    Self::index_ty(ty)
+                }
+                ProjectionElem::Subslice { from, to, from_end } => {
+                    Self::subslice_ty(ty, from, to, from_end)
+                }
+                ProjectionElem::Downcast(_) => Ok(ty),
+                ProjectionElem::OpaqueCast(ty) | ProjectionElem::Subtype(ty) => Ok(*ty),
+            }
+        })
+    }
+
+    fn index_ty(ty: Ty) -> Result<Ty, Error> {
+        ty.kind().builtin_index().ok_or_else(|| error!("Cannot index non-array type: {ty:?}"))
+    }
+
+    fn subslice_ty(ty: Ty, from: &u64, to: &u64, from_end: &bool) -> Result<Ty, Error> {
+        let ty_kind = ty.kind();
+        match ty_kind {
+            TyKind::RigidTy(RigidTy::Slice(..)) => Ok(ty),
+            TyKind::RigidTy(RigidTy::Array(inner, _)) if !from_end => Ty::try_new_array(
+                inner,
+                to.checked_sub(*from).ok_or_else(|| error!("Subslice overflow: {from}..{to}"))?,
+            ),
+            TyKind::RigidTy(RigidTy::Array(inner, size)) => {
+                let size = size.eval_target_usize()?;
+                let len = size - from - to;
+                Ty::try_new_array(inner, len)
+            }
+            _ => Err(Error(format!("Cannot subslice non-array type: `{ty_kind:?}`"))),
+        }
+    }
+
+    fn deref_ty(ty: Ty) -> Result<Ty, Error> {
+        let deref_ty = ty
+            .kind()
+            .builtin_deref(true)
+            .ok_or_else(|| error!("Cannot dereference type: {ty:?}"))?;
+        Ok(deref_ty.ty)
     }
 }

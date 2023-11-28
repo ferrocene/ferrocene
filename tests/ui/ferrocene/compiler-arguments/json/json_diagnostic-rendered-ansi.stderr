@@ -1,4 +1,4 @@
-{"message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
+{"$message_type":"diagnostic","message":"cannot find value `x` in this scope","code":{"code":"E0425","explanation":"An unresolved name was used.
 
 Erroneous code examples:
 
@@ -65,8 +65,8 @@ current module, then it must also be declared as public (e.g., `pub fn`).
 \u001b[0m   \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m| \u001b[0m\u001b[0m            \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;9m^\u001b[0m\u001b[0m \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;9mnot found in this scope\u001b[0m
 
 "}
-{"message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1m\u001b[38;5;9merror\u001b[0m\u001b[0m\u001b[1m: aborting due to previous error\u001b[0m
+{"$message_type":"diagnostic","message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1m\u001b[38;5;9merror\u001b[0m\u001b[0m\u001b[1m: aborting due to previous error\u001b[0m
 
 "}
-{"message":"For more information about this error, try `rustc --explain E0425`.","code":null,"level":"failure-note","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1mFor more information about this error, try `rustc --explain E0425`.\u001b[0m
+{"$message_type":"diagnostic","message":"For more information about this error, try `rustc --explain E0425`.","code":null,"level":"failure-note","spans":[],"children":[],"rendered":"\u001b[0m\u001b[1mFor more information about this error, try `rustc --explain E0425`.\u001b[0m
 "}

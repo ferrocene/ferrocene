@@ -108,6 +108,14 @@ impl<K: Hash + Eq, V> interpret::AllocMap<K, V> for FxIndexMap<K, V> {
     }
 
     #[inline(always)]
+    fn contains_key_ref<Q: ?Sized + Hash + Eq>(&self, k: &Q) -> bool
+    where
+        K: Borrow<Q>,
+    {
+        FxIndexMap::contains_key(self, k)
+    }
+
+    #[inline(always)]
     fn insert(&mut self, k: K, v: V) -> Option<V> {
         FxIndexMap::insert(self, k, v)
     }
@@ -192,7 +200,7 @@ impl<'mir, 'tcx: 'mir> CompileTimeEvalContext<'mir, 'tcx> {
                 &caller
                     .file
                     .name
-                    .for_scope(&self.tcx.sess, RemapPathScopeComponents::DIAGNOSTICS)
+                    .for_scope(self.tcx.sess, RemapPathScopeComponents::DIAGNOSTICS)
                     .to_string_lossy(),
             ),
             u32::try_from(caller.line).unwrap(),

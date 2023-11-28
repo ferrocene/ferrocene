@@ -183,7 +183,6 @@ x86_64-pc-solaris
 x86_64-pc-windows-gnu
 x86_64-pc-windows-gnullvm
 x86_64-pc-windows-msvc
-x86_64-sun-solaris
 x86_64-unknown-dragonfly
 x86_64-unknown-freebsd
 x86_64-unknown-fuchsia

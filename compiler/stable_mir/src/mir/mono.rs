@@ -1,6 +1,7 @@
+use crate::crate_def::CrateDef;
 use crate::mir::Body;
-use crate::ty::{ClosureDef, ClosureKind, FnDef, GenericArgs, IndexedVal, Ty};
-use crate::{with, CrateItem, DefId, Error, ItemKind, Opaque};
+use crate::ty::{Allocation, ClosureDef, ClosureKind, FnDef, GenericArgs, IndexedVal, Ty};
+use crate::{with, CrateItem, DefId, Error, ItemKind, Opaque, Symbol};
 use std::fmt::{Debug, Formatter};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -37,13 +38,37 @@ impl Instance {
         with(|context| context.instance_body(self.def))
     }
 
+    pub fn is_foreign_item(&self) -> bool {
+        let item = CrateItem::try_from(*self);
+        item.as_ref().map_or(false, CrateItem::is_foreign_item)
+    }
+
     /// Get the instance type with generic substitutions applied and lifetimes erased.
     pub fn ty(&self) -> Ty {
         with(|context| context.instance_ty(self.def))
     }
 
-    pub fn mangled_name(&self) -> String {
+    /// Retrieve the instance's mangled name used for calling the given instance.
+    ///
+    /// This will also look up the correct name of instances from upstream crates.
+    pub fn mangled_name(&self) -> Symbol {
         with(|context| context.instance_mangled_name(self.def))
+    }
+
+    /// Retrieve the instance name for diagnostic messages.
+    ///
+    /// This will return the specialized name, e.g., `std::vec::Vec<u8>::new`.
+    pub fn name(&self) -> Symbol {
+        with(|context| context.instance_name(self.def, false))
+    }
+
+    /// Return a trimmed name of the given instance including its args.
+    ///
+    /// If a symbol name can only be imported from one place for a type, and as
+    /// long as it was not glob-imported anywhere in the current crate, we trim its
+    /// path and print only the name.
+    pub fn trimmed_name(&self) -> Symbol {
+        with(|context| context.instance_name(self.def, true))
     }
 
     /// Resolve an instance starting from a function definition and generic arguments.
@@ -99,6 +124,8 @@ impl TryFrom<CrateItem> for Instance {
 
     fn try_from(item: CrateItem) -> Result<Self, Self::Error> {
         with(|context| {
+            // FIXME(celinval):
+            // - Return `Err` if instance does not have a body.
             if !context.requires_monomorphization(item.0) {
                 Ok(context.mono_instance(item))
             } else {
@@ -128,11 +155,25 @@ impl From<Instance> for MonoItem {
     }
 }
 
+impl From<StaticDef> for MonoItem {
+    fn from(value: StaticDef) -> Self {
+        MonoItem::Static(value)
+    }
+}
+
+impl From<StaticDef> for CrateItem {
+    fn from(value: StaticDef) -> Self {
+        CrateItem(value.0)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct InstanceDef(usize);
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
-pub struct StaticDef(pub DefId);
+crate_def! {
+    /// Holds information about a static variable definition.
+    pub StaticDef;
+}
 
 impl TryFrom<CrateItem> for StaticDef {
     type Error = crate::Error;
@@ -147,8 +188,14 @@ impl TryFrom<CrateItem> for StaticDef {
 }
 
 impl StaticDef {
+    /// Return the type of this static definition.
     pub fn ty(&self) -> Ty {
         with(|cx| cx.def_ty(self.0))
+    }
+
+    /// Evaluate a static's initializer, returning the allocation of the initializer's memory.
+    pub fn eval_initializer(&self) -> Result<Allocation, Error> {
+        with(|cx| cx.eval_static_initializer(*self))
     }
 }
 

@@ -17,7 +17,7 @@
 //! The goal is to eventually be published on
 //! [crates.io](https://crates.io).
 
-use crate::mir::mono::InstanceDef;
+use crate::mir::mono::{InstanceDef, StaticDef};
 use crate::mir::Body;
 use std::fmt;
 use std::fmt::Debug;
@@ -32,14 +32,19 @@ use self::ty::{
 extern crate scoped_tls;
 
 #[macro_use]
+pub mod crate_def;
+#[macro_use]
 pub mod error;
 pub mod mir;
 pub mod ty;
 pub mod visitor;
 
+pub use crate::crate_def::CrateDef;
+pub use crate::crate_def::DefId;
+use crate::mir::alloc::{AllocId, GlobalAlloc};
 use crate::mir::pretty::function_name;
 use crate::mir::Mutability;
-use crate::ty::{AdtDef, AdtKind, ClosureDef, ClosureKind, Const, RigidTy};
+use crate::ty::{AdtDef, AdtKind, Allocation, ClosureDef, ClosureKind, Const, RigidTy};
 pub use error::*;
 use mir::mono::Instance;
 use ty::{FnDef, GenericArgs};
@@ -50,15 +55,11 @@ pub type Symbol = String;
 /// The number that identifies a crate.
 pub type CrateNum = usize;
 
-/// A unique identification number for each item accessible for the current compilation unit.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct DefId(usize);
-
 impl Debug for DefId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DefId")
             .field("id", &self.0)
-            .field("name", &with(|cx| cx.name_of_def_id(*self)))
+            .field("name", &with(|cx| cx.def_name(*self, false)))
             .finish()
     }
 }
@@ -68,19 +69,6 @@ impl IndexedVal for DefId {
         DefId(index)
     }
 
-    fn to_index(&self) -> usize {
-        self.0
-    }
-}
-
-/// A unique identification number for each provenance
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct AllocId(usize);
-
-impl IndexedVal for AllocId {
-    fn to_val(index: usize) -> Self {
-        AllocId(index)
-    }
     fn to_index(&self) -> usize {
         self.0
     }
@@ -112,9 +100,10 @@ pub enum ItemKind {
 
 pub type Filename = String;
 
-/// Holds information about an item in the crate.
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub struct CrateItem(pub DefId);
+crate_def! {
+    /// Holds information about an item in a crate.
+    pub CrateItem;
+}
 
 impl CrateItem {
     pub fn body(&self) -> mir::Body {
@@ -123,10 +112,6 @@ impl CrateItem {
 
     pub fn span(&self) -> Span {
         with(|cx| cx.span_of_an_item(self.0))
-    }
-
-    pub fn name(&self) -> String {
-        with(|cx| cx.name_of_def_id(self.0))
     }
 
     pub fn kind(&self) -> ItemKind {
@@ -139,6 +124,10 @@ impl CrateItem {
 
     pub fn ty(&self) -> Ty {
         with(|cx| cx.def_ty(self.0))
+    }
+
+    pub fn is_foreign_item(&self) -> bool {
+        with(|cx| cx.is_foreign_item(*self))
     }
 
     pub fn dump<W: io::Write>(&self, w: &mut W) -> io::Result<()> {
@@ -190,6 +179,8 @@ pub fn trait_impl(trait_impl: &ImplDef) -> ImplTrait {
     with(|cx| cx.trait_impl(trait_impl))
 }
 
+/// This trait defines the interface between stable_mir and the Rust compiler.
+/// Do not use this directly.
 pub trait Context {
     fn entry_fn(&self) -> Option<CrateItem>;
     /// Retrieve all items of the local crate that have a MIR associated with them.
@@ -211,7 +202,7 @@ pub trait Context {
     fn find_crates(&self, name: &str) -> Vec<Crate>;
 
     /// Returns the name of given `DefId`
-    fn name_of_def_id(&self, def_id: DefId) -> String;
+    fn def_name(&self, def_id: DefId, trimmed: bool) -> Symbol;
 
     /// Returns printable, human readable form of `Span`
     fn span_to_string(&self, span: Span) -> String;
@@ -266,7 +257,7 @@ pub trait Context {
     fn instance_def_id(&self, instance: InstanceDef) -> DefId;
 
     /// Get the instance mangled name.
-    fn instance_mangled_name(&self, instance: InstanceDef) -> String;
+    fn instance_mangled_name(&self, instance: InstanceDef) -> Symbol;
 
     /// Convert a non-generic crate item into an instance.
     /// This function will panic if the item is generic.
@@ -291,6 +282,17 @@ pub trait Context {
         args: &GenericArgs,
         kind: ClosureKind,
     ) -> Option<Instance>;
+
+    /// Evaluate a static's initializer.
+    fn eval_static_initializer(&self, def: StaticDef) -> Result<Allocation, Error>;
+
+    /// Retrieve global allocation for the given allocation ID.
+    fn global_alloc(&self, id: AllocId) -> GlobalAlloc;
+
+    /// Retrieve the id for the virtual table.
+    fn vtable_allocation(&self, global_alloc: &GlobalAlloc) -> Option<AllocId>;
+    fn krate(&self, def_id: DefId) -> Crate;
+    fn instance_name(&self, def: InstanceDef, trimmed: bool) -> Symbol;
 }
 
 // A thread local variable that stores a pointer to the tables mapping between TyCtxt

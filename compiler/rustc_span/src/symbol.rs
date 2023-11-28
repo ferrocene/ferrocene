@@ -787,6 +787,7 @@ symbols! {
         fmt,
         fmul_fast,
         fn_align,
+        fn_delegation,
         fn_must_use,
         fn_mut,
         fn_once,
@@ -2018,6 +2019,7 @@ impl fmt::Display for MacroRulesNormalizedIdent {
 pub struct Symbol(SymbolIndex);
 
 rustc_index::newtype_index! {
+    #[orderable]
     struct SymbolIndex {}
 }
 

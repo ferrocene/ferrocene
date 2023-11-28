@@ -41,5 +41,4 @@ ignore = [
     "compiler/rustc_codegen_cranelift/scripts",
     "compiler/rustc_codegen_cranelift/example/gen_block_iterate.rs", # uses edition 2024
     "ferrocene/library/libc",
-    "ferrocene/library/getrandom-0.1",
 ]

@@ -153,7 +153,6 @@ const EXCEPTIONS_CARGO: ExceptionList = &[
 const EXCEPTIONS_RUST_ANALYZER: ExceptionList = &[
     // tidy-alphabetical-start
     ("dissimilar", "Apache-2.0"),
-    ("instant", "BSD-3-Clause"),
     ("notify", "CC0-1.0"),
     ("pulldown-cmark-to-cmark", "Apache-2.0"),
     ("ryu", "Apache-2.0 OR BSL-1.0"), // BSL is not acceptble, but we use it under Apache-2.0
@@ -515,7 +514,6 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
 /// to the cargo executable.
 pub fn check(root: &Path, cargo: &Path, bad: &mut bool) {
     let mut checked_runtime_licenses = false;
-    let mut rust_metadata = None;
 
     for &(workspace, exceptions, permitted_deps) in WORKSPACES {
         if !root.join(workspace).join("Cargo.lock").exists() {
@@ -539,15 +537,6 @@ pub fn check(root: &Path, cargo: &Path, bad: &mut bool) {
             let runtime_ids = compute_runtime_crates(&metadata);
             check_runtime_license_exceptions(&metadata, runtime_ids, bad);
             checked_runtime_licenses = true;
-            rust_metadata = Some(metadata);
-        } else if workspace == "src/tools/cargo" {
-            check_rustfix(
-                rust_metadata
-                    .as_ref()
-                    .expect("The root workspace should be the first to be checked"),
-                &metadata,
-                bad,
-            );
         }
     }
 
@@ -778,35 +767,5 @@ fn deps_of_filtered<'a>(
             continue;
         }
         deps_of_filtered(metadata, &dep.pkg, result, filter);
-    }
-}
-
-fn direct_deps_of<'a>(
-    metadata: &'a Metadata,
-    pkg_id: &'a PackageId,
-) -> impl Iterator<Item = &'a Package> {
-    let resolve = metadata.resolve.as_ref().unwrap();
-    let node = resolve.nodes.iter().find(|n| &n.id == pkg_id).unwrap();
-    node.deps.iter().map(|dep| pkg_from_id(metadata, &dep.pkg))
-}
-
-fn check_rustfix(rust_metadata: &Metadata, cargo_metadata: &Metadata, bad: &mut bool) {
-    let cargo = pkg_from_name(cargo_metadata, "cargo");
-    let cargo_rustfix =
-        direct_deps_of(cargo_metadata, &cargo.id).find(|p| p.name == "rustfix").unwrap();
-
-    let compiletest = pkg_from_name(rust_metadata, "compiletest");
-    let compiletest_rustfix =
-        direct_deps_of(rust_metadata, &compiletest.id).find(|p| p.name == "rustfix").unwrap();
-
-    if cargo_rustfix.version != compiletest_rustfix.version {
-        tidy_error!(
-            bad,
-            "cargo's rustfix version {} does not match compiletest's rustfix version {}\n\
-             rustfix should be kept in sync, update the cargo side first, and then update \
-             compiletest along with cargo.",
-            cargo_rustfix.version,
-            compiletest_rustfix.version
-        );
     }
 }

@@ -61,7 +61,6 @@ use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::svh::Svh;
 use rustc_data_structures::sync::Lrc;
-use rustc_data_structures::sync::WorkerLocal;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::ErrorGuaranteed;
 use rustc_hir as hir;
@@ -1152,7 +1151,7 @@ rustc_queries! {
         cache_on_disk_if { true }
     }
 
-    query opt_def_kind(def_id: DefId) -> Option<DefKind> {
+    query def_kind(def_id: DefId) -> DefKind {
         desc { |tcx| "looking up definition kind of `{}`", tcx.def_path_str(def_id) }
         cache_on_disk_if { def_id.is_local() }
         separate_provide_extern

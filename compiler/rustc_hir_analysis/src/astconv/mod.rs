@@ -239,7 +239,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
         def: Option<&ty::GenericParamDef>,
     ) -> ty::Region<'tcx> {
         let tcx = self.tcx();
-        let lifetime_name = |def_id| tcx.hir().name(tcx.hir().local_def_id_to_hir_id(def_id));
+        let lifetime_name = |def_id| tcx.hir().name(tcx.local_def_id_to_hir_id(def_id));
 
         match tcx.named_bound_var(lifetime.hir_id) {
             Some(rbv::ResolvedArg::StaticLifetime) => tcx.lifetimes.re_static,
@@ -1674,10 +1674,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                         let impl_ty = ocx.normalize(&cause, param_env, impl_ty);
 
                         // Check that the self types can be related.
-                        // FIXME(inherent_associated_types): Should we use `eq` here? Method probing uses
-                        // `sup` for this situtation, too. What for? To constrain inference variables?
-                        if ocx.sup(&ObligationCause::dummy(), param_env, impl_ty, self_ty).is_err()
-                        {
+                        if ocx.eq(&ObligationCause::dummy(), param_env, impl_ty, self_ty).is_err() {
                             return false;
                         }
 
@@ -1875,7 +1872,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
 
             let parent_def_id = def_id
                 .as_local()
-                .map(|def_id| tcx.hir().local_def_id_to_hir_id(def_id))
+                .map(|def_id| tcx.local_def_id_to_hir_id(def_id))
                 .map(|hir_id| tcx.hir().get_parent_item(hir_id).to_def_id());
 
             debug!("qpath_to_ty: parent_def_id={:?}", parent_def_id);
@@ -2549,7 +2546,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                     .map(|(ty, _, _)| ty)
                     .unwrap_or_else(|guar| Ty::new_error(tcx, guar))
             }
-            &hir::TyKind::Path(hir::QPath::LangItem(lang_item, span, _)) => {
+            &hir::TyKind::Path(hir::QPath::LangItem(lang_item, span)) => {
                 let def_id = tcx.require_lang_item(lang_item, Some(span));
                 let (args, _) = self.create_args_for_ast_path(
                     span,

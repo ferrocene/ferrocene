@@ -60,5 +60,5 @@ If the item you are importing is not defined in some super-module of the
 current module, then it must also be declared as public (e.g., `pub fn`).
 "},"level":"error","spans":[{"file_name":"$DIR/json_diagnostic-short.rs","byte_start":101,"byte_end":102,"line_start":5,"line_end":5,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;
 "}
-{"$message_type":"diagnostic","message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to previous error
+{"$message_type":"diagnostic","message":"aborting due to 1 previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to 1 previous error
 "}

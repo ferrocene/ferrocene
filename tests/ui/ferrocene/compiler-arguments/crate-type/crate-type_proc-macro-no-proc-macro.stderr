@@ -4,5 +4,5 @@ error: `proc-macro` crate types currently cannot export any items other than fun
 LL | pub fn foo(input: TokenStream) -> TokenStream {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: aborting due to previous error
+error: aborting due to 1 previous error
 

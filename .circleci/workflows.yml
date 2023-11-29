@@ -52,7 +52,7 @@ jobs:
     executor: docker-ubuntu-22
     resource_class: large # 4-core
     environment:
-      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-15
+      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py test tidy

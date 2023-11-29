@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-FROM ubuntu:22.04
+FROM ubuntu:23.10
 
 RUN apt-get update \
     # Update all the dependencies
@@ -27,8 +27,8 @@ RUN apt-get update \
         python-is-python3 \
         reuse \
         # Needed by the `commit-checks` CI job:
-        llvm-15-tools \
-        llvm-15-dev \
+        llvm-17-tools \
+        llvm-17-dev \
         # Needed to install AWS CLI during the build:
         unzip \
     # Remove files that are not useful in the final image, and can be
@@ -38,6 +38,10 @@ RUN apt-get update \
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 22.04 archive is too old and doesn't support
 # `aws ecr get-login-password`.
+# TODO / FIXME: awscli version 2.12.0 is availabole as a deb package for 
+# Ubuntu 23.10 which means we can remove this download and just install via
+# run apt-get.
+# https://ubuntu.pkgs.org/23.10/ubuntu-universe-amd64/awscli_2.12.0-1_all.deb.html
 RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.12.4.zip \
     && echo "0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08  /tmp/awscli.zip" | sha256sum -c \
     && unzip -q -d /tmp/awscli /tmp/awscli.zip \

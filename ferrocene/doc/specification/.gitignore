@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+
+# Sphinx ignored files
+/build
+/.venv
+
+# Python ignored files
+__pycache__
+*.py[co]
+
+# Linkchecker ignored files
+/.linkchecker

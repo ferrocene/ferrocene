@@ -1,0 +1,270 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+
+.. default-domain:: spec
+
+.. _fls_fk2m2irwpeof:
+
+Implementations
+===============
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   Implementation ::=
+       InherentImplementation
+     | TraitImplementation
+
+   InherentImplementation ::=
+       $$impl$$ GenericParameterList? ImplementingType WhereClause? ImplementationBody
+
+   TraitImplementation ::=
+       $$unsafe$$? $$impl$$ GenericParameterList? $$!$$? ImplementedTrait $$for$$ ImplementingType WhereClause? ImplementationBody
+
+   ImplementingType ::=
+       TypeSpecification
+
+   ImplementedTrait ::=
+       TypePath
+
+   ImplementationBody ::=
+       $${$$
+         InnerAttributeOrDoc*
+         AssociatedItem*
+       $$}$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_ivxpoxggy7s6`
+An :t:`implementation` is an :t:`item` that supplements an :t:`implementing
+type` by extending its functionality.
+
+:dp:`fls_yopmjbnw8tbl`
+An :t:`implementing type` is the :t:`type` that the :t:`[associated item]s` of
+an :t:`implementation` are associated with.
+
+:dp:`fls_eIHc8Y9fBtr0`
+Within an :t:`implementation`, the :t:`type` :c:`Self` acts as a :t:`type alias`
+for the :t:`implementing type`.
+
+:dp:`fls_Mcpdzzcw43M7`
+An :t:`implementation body` is a :t:`construct` that encapsulates the
+:t:`[associated item]s`, :t:`[inner attribute]s`, and
+:t:`[inner doc comment]s` of an :t:`implementation`.
+
+:dp:`fls_v0n0bna40dqr`
+An :t:`inherent implementation` is an :t:`implementation` that adds direct
+functionality.
+
+:dp:`fls_797etpdk5dyb`
+:t:`[Inherent implementation]s` of the same :t:`implementing type` shall be
+defined within the same :t:`crate`.
+
+:dp:`fls_ry3an0mwb63g`
+A :t:`trait implementation` is an :t:`implementation` that adds functionality
+specified by a :t:`trait`.
+
+:dp:`fls_8pwr7ibvhmhu`
+An :t:`unsafe trait implementation` is a :t:`trait implementation` subject to
+:t:`keyword` ``unsafe``.
+
+:dp:`fls_47x0ep8of8wr`
+An :t:`implemented trait` is a :t:`trait` whose functionality has been
+implemented by an :t:`implementing type`.
+
+:dp:`fls_agitlryvyc16`
+The :t:`type path` of a :t:`trait implementation` shall resolve to a :t:`trait`.
+
+:dp:`fls_mx5xjcejwa6u`
+A :t:`trait implementation` shall be an :t:`unsafe trait implementation` if and
+only if it implements an :t:`unsafe trait`.
+
+:dp:`fls_z78dg261oob6`
+:t:`[Trait implementation]s` are subject to :t:`implementation coherence` and
+:t:`implementation conformance`.
+
+:dp:`fls_89yNjGNB7KI3`
+:t:`[Inherent implementation]s` of the same :t:`implementing type` shall not
+define more than one :t:`associated item` with the same :t:`name` in the same
+:t:`namespace`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   trait Shape {
+       fn area(self) -> f64;
+   }
+
+:dp:`fls_yuyesijndu9n`
+``Circle`` is an implementing type.
+
+.. code-block:: rust
+
+   struct Circle {
+       radius: f64
+   }
+
+:dp:`fls_o62i75sjzp9y`
+The following is an inherent implementation:
+
+.. code-block:: rust
+
+   impl Circle {
+       fn set_radius(mut self, new_radius: f64) {
+           self.radius = new_radius;
+       }
+   }
+
+:dp:`fls_a2utf0tmuhy4`
+The following is a trait implementation:
+
+.. code-block:: rust
+
+   impl Shape for Circle {
+       fn area(self) -> f64 {
+           self.radius.powi(2) * std::f64::consts::PI
+       }
+   }
+
+.. _fls_46ork6fz5o2e:
+
+Implementation Coherence
+------------------------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_fv1l4yjuut7p`
+A :t:`trait implementation` exhibits :t:`implementation coherence` when it is
+valid and does not overlap with another :t:`trait implementation`.
+
+:dp:`fls_swdusjwzgksx`
+Two :t:`[trait implementation]s` of the same :t:`implemented trait` overlap when
+the intersection of the :t:`[implementing type]s` is non-empty.
+
+:dp:`fls_ir7hp941ky8t`
+Given :t:`trait implementation`
+``impl<P1, P2, .., PN> Trait<T1, T2, .., TN> for T0``, the
+:t:`trait implementation` is considered valid when
+
+* :dp:`fls_3tbm20k2ixol`
+  ``Trait`` is :t:`fundamental` or a :t:`local trait`, or
+
+* :dp:`fls_lscc9ileg3gm`
+  All of
+
+  * :dp:`fls_9klwbsh3vlxu`
+    At least one of :t:`[type]s` ``T0, T1, .., TN`` is :T:`fundamental` or a
+    :t:`local type`, and
+
+  * :dp:`fls_9gmc1tcscq9v`
+    No :t:`type parameter` of ``P1, P2, .., PN`` that is not used in another
+    :t:`type` may appear in the :t:`non-[local type]s` and
+    :t:`non-[fundamental]` :t:`[type]s` of ``T0, T1, .., TN``.
+
+:dp:`fls_UkQhjEWSJpDq`
+A :t:`trait` or :t:`type` is :t:`fundamental` when its
+:t:`implementation coherence` rules are relaxed and the :t:`trait` or :t:`type`
+is always treated as if it was a :t:`local trait` or a :t:`local type`.
+
+:dp:`fls_fSybUG40hA5r`
+The following :t:`[type]s` are :t:`fundamental`:
+
+* :dp:`fls_z8APl0CEF7a0`
+  :t:`[reference type]s`
+
+* :dp:`fls_RJJafhpVsi6M`
+  :std:`core::pin::Pin`
+
+..
+  also `alloc::boxed::Box`
+
+:dp:`fls_dtUJxhNkl8Ty`
+The following :t:`[trait]s` are :t:`fundamental`:
+
+* :dp:`fls_zJKovQrXQWdU`
+  :std:`core::ops::Fn`
+
+* :dp:`fls_V6R8yQtsqNyv`
+  :std:`core::ops::FnMut`
+
+* :dp:`fls_CpC6XQN1iWqU`
+  :std:`core::ops::FnOnce`
+
+* :dp:`fls_dj7YGw4e4i4H`
+  :std:`core::marker::Sized`
+
+:dp:`fls_koy70k770ayu`
+A :t:`trait implementation` shall be coherent.
+
+.. _fls_e1pgdlv81vul:
+
+Implementation Conformance
+--------------------------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_YyUSuAYG4lX6`
+A :t:`trait implementation` exhibits :t:`implementation conformance` when it
+satisfies the constraints of its :t:`implemented trait`.
+
+:dp:`fls_v31idwjau90d`
+An :t:`associated trait constant` is conformant with an :t:`associated constant`
+of an :t:`implemented trait` when
+
+* :dp:`fls_k3wfh5japmyw`
+  The :t:`[name]s` of both :t:`[associated constant]s` are the same, and
+
+* :dp:`fls_11qrqfuc3rmh`
+  The :t:`type` of the :t:`associated constant` in the :t:`implementation` is a
+  :t:`subtype` of the :t:`type` of the :t:`associated trait constant`.
+
+:dp:`fls_qmhduwunxww0`
+An :t:`associated trait function` is conformant with an :t:`associated function`
+of an :t:`implemented trait` when
+
+* :dp:`fls_2500ivh0cc3y`
+  The :t:`function signature` of the :t:`associated function` of the
+  :t:`implemented trait` is a :t:`subtype` of the :t:`function signature` of
+  the :t:`associated trait function`, and
+
+* :dp:`fls_18gimgfy0kw9`
+  The :t:`[bound]s` of the :t:`associated function` of the
+  :t:`implemented trait` are more general that the :t:`[bound]s` of the
+  :t:`associated trait function`.
+
+:dp:`fls_fi4qmauirlsm`
+An :t:`associated type` of a :t:`trait implementation` is conformant with an
+:t:`associated type` of an :t:`implemented trait` when
+
+* :dp:`fls_2s8lh3k4rw6u`
+  The :t:`[name]s` of both :t:`[type]s` are the same, and
+
+* :dp:`fls_bb874uu2alt3`
+  The :t:`type specification` of the :t:`associated type` of the
+  :t:`implemented trait` conforms to the :t:`[bound]s` of the
+  :t:`associated type` of the :t:`trait implementation`.
+
+:dp:`fls_so8em6rphkhv`
+A :t:`trait implementation` is conformant with an :t:`implemented trait` when:
+
+* :dp:`fls_ldu9bmb9cy10`
+  The :t:`trait implementation` has a conformant :t:`associated constant`
+  for each :t:`associated constant` of the :t:`implemented trait`, unless the
+  :t:`associated constant` of the :t:`implemented trait` has a default value,
+  and
+
+* :dp:`fls_5cr6un2gzdft`
+  The :t:`trait implementation` has a conformant :t:`associated function`
+  for each :t:`associated function` of the :t:`implemented trait`, unless
+  the :t:`associated function` of the :t:`implemented trait` has a default
+  implementation in the :t:`implemented trait`, and
+
+* :dp:`fls_pshfe3ioh0mg`
+  The :t:`trait implementation` has a conformant :t:`associated type` for each
+  :t:`associated type` of the :t:`implemented trait`.
+
+:dp:`fls_8yq1g7nzv9px`
+A :t:`trait implementation` shall be conformant.
+

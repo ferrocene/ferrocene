@@ -1,0 +1,93 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+
+.. default-domain:: spec
+
+.. _fls_dzq9cdz4ibsz:
+
+Exceptions and Errors
+=====================
+
+.. rubric:: Legality Rules
+
+:dp:`fls_vsk4vhnuiyyz`
+The Rust programming language lacks exceptions and exception handlers. Instead,
+the language uses the following tiered error handling scheme:
+
+* :dp:`fls_ebangxc36t74`
+  A possibly absent :t:`value` is usually represented using :t:`enum`
+  :std:`core::option::Option`.
+
+* :dp:`fls_ckeitwiv326r`
+  The result of a possibly erroneous computation is usually represented using
+  :t:`enum` :std:`core::result::Result`.
+
+* :dp:`fls_eg0orgibg98m`
+  Erroneous behavior is signaled using :t:`macro` :std:`core::panic`.
+
+:dp:`fls_ko1x0gp9e7y3`
+:t:`Enum` :std:`core::option::Option` indicates whether a :t:`value` is
+either present using :std:`core::option::Option::Some` or absent using
+:std:`core::option::Option::None`.
+
+:dp:`fls_gwu4cn4ziabe`
+:t:`Enum` :std:`core::result::Result` indicates whether a computation completed
+successfully and produced a :t:`value` using :std:`core::result::Result::Ok` or
+the computation failed with an error using :std:`core::result::Result::Err`.
+
+.. _fls_k02nt1m5fq1z:
+
+Panic
+-----
+
+.. rubric:: Legality Rules
+
+:dp:`fls_a554v4n0khye`
+A :t:`panic` is an abnormal program state caused by invoking :t:`macro`
+:std:`core::panic`.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_i9njhpte5l0t`
+Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
+
+#. :dp:`fls_n6q7bksyn1m`
+   Control flow halts the execution of the current thread.
+
+#. :dp:`fls_xmtt04lw517w`
+   Control flow of the current thread resumes execution by invoking the
+   :t:`function` subject to :t:`attribute` :c:`panic_handler`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_krhb07mvojph`
+It is undefined behavior when a :t:`panic` crosses a
+:t:`foreign function interface` boundary.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   panic!("This was a terrible mistake!");
+
+.. _fls_hi1iz0gbnksi:
+
+Abort
+-----
+
+.. rubric:: Legality Rules
+
+:dp:`fls_9a1izu3omkbn`
+:t:`Abort` is the immediate termination of a program.
+
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_iq6olct3rw4u`
+:t:`Abort` has the following runtime effects:
+
+#. :dp:`fls_wd2q6ft9yzrg`
+   Control flow halts the execution of all threads.
+
+#. :dp:`fls_7bnrbjb0pq5n`
+   The program terminates.
+

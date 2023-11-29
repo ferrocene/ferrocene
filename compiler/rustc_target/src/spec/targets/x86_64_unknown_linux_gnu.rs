@@ -18,7 +18,7 @@ pub fn target() -> Target {
     // those tools).
     base.link_self_contained = crate::spec::LinkSelfContainedDefault::with_linker();
     base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
-    base.stack_probes = StackProbeType::X86;
+    base.stack_probes = StackProbeType::Inline;
     base.static_position_independent_executables = true;
     base.supported_sanitizers = SanitizerSet::ADDRESS
         | SanitizerSet::CFI

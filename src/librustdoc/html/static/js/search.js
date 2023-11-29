@@ -1755,17 +1755,26 @@ function initSearch(rawSearchIndex) {
                 if (mgens && mgens.has(fnType.id) && mgens.get(fnType.id) !== 0) {
                     return false;
                 }
+                // Where clauses can represent cyclical data.
+                // `null` prevents it from trying to unbox in an infinite loop
+                const mgensTmp = new Map(mgens);
+                mgensTmp.set(fnType.id, null);
                 // This is only a potential unbox if the search query appears in the where clause
                 // for example, searching `Read -> usize` should find
                 // `fn read_all<R: Read>(R) -> Result<usize>`
                 // generic `R` is considered "unboxed"
-                return checkIfInList(whereClause[(-fnType.id) - 1], queryElem, whereClause);
+                return checkIfInList(
+                    whereClause[(-fnType.id) - 1],
+                    queryElem,
+                    whereClause,
+                    mgensTmp
+                );
             } else if (fnType.generics.length > 0 || fnType.bindings.size > 0) {
                 const simplifiedGenerics = [
                     ...fnType.generics,
                     ...Array.from(fnType.bindings.values()).flat(),
                 ];
-                return checkIfInList(simplifiedGenerics, queryElem, whereClause);
+                return checkIfInList(simplifiedGenerics, queryElem, whereClause, mgens);
             }
             return false;
         }
@@ -1777,12 +1786,13 @@ function initSearch(rawSearchIndex) {
           * @param {Array<FunctionType>} list
           * @param {QueryElement} elem          - The element from the parsed query.
           * @param {[FunctionType]} whereClause - Trait bounds for generic items.
+         * @param {Map<number,number>|null} mgens - Map functions generics to query generics.
           *
           * @return {boolean} - Returns true if found, false otherwise.
           */
-        function checkIfInList(list, elem, whereClause) {
+        function checkIfInList(list, elem, whereClause, mgens) {
             for (const entry of list) {
-                if (checkType(entry, elem, whereClause)) {
+                if (checkType(entry, elem, whereClause, mgens)) {
                     return true;
                 }
             }
@@ -1796,23 +1806,29 @@ function initSearch(rawSearchIndex) {
           * @param {Row} row
           * @param {QueryElement} elem          - The element from the parsed query.
           * @param {[FunctionType]} whereClause - Trait bounds for generic items.
+         * @param {Map<number,number>|null} mgens - Map functions generics to query generics.
           *
           * @return {boolean} - Returns true if the type matches, false otherwise.
           */
-        function checkType(row, elem, whereClause) {
+        function checkType(row, elem, whereClause, mgens) {
             if (row.bindings.size === 0 && elem.bindings.size === 0) {
                 if (elem.id < 0) {
-                    return row.id < 0 || checkIfInList(row.generics, elem, whereClause);
+                    return row.id < 0 || checkIfInList(row.generics, elem, whereClause, mgens);
                 }
                 if (row.id > 0 && elem.id > 0 && elem.pathWithoutLast.length === 0 &&
                     typePassesFilter(elem.typeFilter, row.ty) && elem.generics.length === 0 &&
                     // special case
                     elem.id !== typeNameIdOfArrayOrSlice
                 ) {
-                    return row.id === elem.id || checkIfInList(row.generics, elem, whereClause);
+                    return row.id === elem.id || checkIfInList(
+                        row.generics,
+                        elem,
+                        whereClause,
+                        mgens
+                    );
                 }
             }
-            return unifyFunctionTypes([row], [elem], whereClause);
+            return unifyFunctionTypes([row], [elem], whereClause, mgens);
         }
 
         function checkPath(contains, ty, maxEditDistance) {
@@ -2408,10 +2424,7 @@ function initSearch(rawSearchIndex) {
      * @param {boolean}     display - True if this is the active tab
      */
     function addTab(array, query, display) {
-        let extraClass = "";
-        if (display === true) {
-            extraClass = " active";
-        }
+        const extraClass = display ? " active" : "";
 
         const output = document.createElement("div");
         let length = 0;
@@ -2653,13 +2666,9 @@ ${item.displayPath}<span class="${type}">${name}</span>\
     /**
      * Perform a search based on the current state of the search input element
      * and display the results.
-     * @param {Event}   [e]       - The event that triggered this search, if any
      * @param {boolean} [forced]
      */
-    function search(e, forced) {
-        if (e) {
-            e.preventDefault();
-        }
+    function search(forced) {
         const query = parseQuery(searchState.input.value.trim());
         let filterCrates = getFilterCrates();
 
@@ -3196,7 +3205,8 @@ ${item.displayPath}<span class="${type}">${name}</span>\
                     // popping a state (Firefox), which is why search() is
                     // called both here and at the end of the startSearch()
                     // function.
-                    search(e);
+                    e.preventDefault();
+                    search();
                 } else {
                     searchState.input.value = "";
                     // When browsing back from search results the main page
@@ -3231,7 +3241,7 @@ ${item.displayPath}<span class="${type}">${name}</span>\
         // before paste back the previous search, you get the old search results without
         // the filter. To prevent this, we need to remove the previous results.
         currentResults = null;
-        search(undefined, true);
+        search(true);
     }
 
     /**

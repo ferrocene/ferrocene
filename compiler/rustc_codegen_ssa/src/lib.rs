@@ -27,8 +27,6 @@ extern crate rustc_middle;
 use rustc_ast as ast;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::sync::Lrc;
-use rustc_errors::{DiagnosticMessage, SubdiagnosticMessage};
-use rustc_fluent_macro::fluent_messages;
 use rustc_hir::def_id::CrateNum;
 use rustc_middle::dep_graph::WorkProduct;
 use rustc_middle::middle::debugger_visualizer::DebuggerVisualizerFile;
@@ -60,7 +58,7 @@ pub mod mono_item;
 pub mod target_features;
 pub mod traits;
 
-fluent_messages! { "../messages.ftl" }
+rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub struct ModuleCodegen<M> {
     /// The name of the module. When the crate may be saved between
@@ -218,6 +216,7 @@ impl CodegenResults {
         sess: &Session,
         rlink_file: &Path,
         codegen_results: &CodegenResults,
+        outputs: &OutputFilenames,
     ) -> Result<usize, io::Error> {
         let mut encoder = FileEncoder::new(rlink_file)?;
         encoder.emit_raw_bytes(RLINK_MAGIC);
@@ -226,10 +225,14 @@ impl CodegenResults {
         encoder.emit_raw_bytes(&RLINK_VERSION.to_be_bytes());
         encoder.emit_str(sess.cfg_version);
         Encodable::encode(codegen_results, &mut encoder);
-        encoder.finish()
+        Encodable::encode(outputs, &mut encoder);
+        encoder.finish().map_err(|(_path, err)| err)
     }
 
-    pub fn deserialize_rlink(sess: &Session, data: Vec<u8>) -> Result<Self, CodegenErrors> {
+    pub fn deserialize_rlink(
+        sess: &Session,
+        data: Vec<u8>,
+    ) -> Result<(Self, OutputFilenames), CodegenErrors> {
         // The Decodable machinery is not used here because it panics if the input data is invalid
         // and because its internal representation may change.
         if !data.starts_with(RLINK_MAGIC) {
@@ -258,6 +261,7 @@ impl CodegenResults {
         }
 
         let codegen_results = CodegenResults::decode(&mut decoder);
-        Ok(codegen_results)
+        let outputs = OutputFilenames::decode(&mut decoder);
+        Ok((codegen_results, outputs))
     }
 }

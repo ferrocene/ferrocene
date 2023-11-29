@@ -28,9 +28,8 @@ use rustc_data_structures::profiling::{
 use rustc_data_structures::sync::SeqCst;
 use rustc_errors::registry::{InvalidErrorCode, Registry};
 use rustc_errors::{markdown, ColorConfig};
-use rustc_errors::{DiagnosticMessage, ErrorGuaranteed, Handler, PResult, SubdiagnosticMessage};
+use rustc_errors::{ErrorGuaranteed, Handler, PResult};
 use rustc_feature::find_gated_cfg;
-use rustc_fluent_macro::fluent_messages;
 use rustc_interface::util::{self, collect_crate_types, get_codegen_backend};
 use rustc_interface::{interface, Queries};
 use rustc_lint::unerased_lint_store;
@@ -102,7 +101,7 @@ use crate::session_diagnostics::{
     RLinkWrongFileType, RlinkNotAFile, RlinkUnableToRead,
 };
 
-fluent_messages! { "../messages.ftl" }
+rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 pub static DEFAULT_LOCALE_RESOURCES: &[&str] = &[
     // tidy-alphabetical-start
@@ -114,7 +113,6 @@ pub static DEFAULT_LOCALE_RESOURCES: &[&str] = &[
     rustc_builtin_macros::DEFAULT_LOCALE_RESOURCE,
     rustc_codegen_ssa::DEFAULT_LOCALE_RESOURCE,
     rustc_const_eval::DEFAULT_LOCALE_RESOURCE,
-    rustc_error_messages::DEFAULT_LOCALE_RESOURCE,
     rustc_errors::DEFAULT_LOCALE_RESOURCE,
     rustc_expand::DEFAULT_LOCALE_RESOURCE,
     rustc_hir_analysis::DEFAULT_LOCALE_RESOURCE,
@@ -403,9 +401,7 @@ fn run_compiler(
                         Ok(())
                     })?;
 
-                    // Make sure the `output_filenames` query is run for its side
-                    // effects of writing the dep-info and reporting errors.
-                    queries.global_ctxt()?.enter(|tcx| tcx.output_filenames(()));
+                    queries.write_dep_info()?;
                 } else {
                     let krate = queries.parse()?;
                     pretty::print(
@@ -433,9 +429,7 @@ fn run_compiler(
                 return early_exit();
             }
 
-            // Make sure the `output_filenames` query is run for its side
-            // effects of writing the dep-info and reporting errors.
-            queries.global_ctxt()?.enter(|tcx| tcx.output_filenames(()));
+            queries.write_dep_info()?;
 
             if sess.opts.output_types.contains_key(&OutputType::DepInfo)
                 && sess.opts.output_types.len() == 1
@@ -650,12 +644,11 @@ fn show_md_content_with_pager(content: &str, color: ColorConfig) {
 fn process_rlink(sess: &Session, compiler: &interface::Compiler) {
     assert!(sess.opts.unstable_opts.link_only);
     if let Input::File(file) = &sess.io.input {
-        let outputs = compiler.build_output_filenames(sess, &[]);
         let rlink_data = fs::read(file).unwrap_or_else(|err| {
             sess.emit_fatal(RlinkUnableToRead { err });
         });
-        let codegen_results = match CodegenResults::deserialize_rlink(sess, rlink_data) {
-            Ok(codegen) => codegen,
+        let (codegen_results, outputs) = match CodegenResults::deserialize_rlink(sess, rlink_data) {
+            Ok((codegen, outputs)) => (codegen, outputs),
             Err(err) => {
                 match err {
                     CodegenErrors::WrongFileType => sess.emit_fatal(RLinkWrongFileType),

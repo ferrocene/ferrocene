@@ -20,13 +20,13 @@ parameters:
   docker-image-tag--ubuntu-18:
     type: string
     default: ""
-  docker-image-tag--ubuntu-23:
+  docker-image-tag--debian-12:
     type: string
     default: ""
   docker-image-rebuild--ci-docker-images--ubuntu-18:
     type: boolean
     default: false
-  docker-image-rebuild--ci-docker-images--ubuntu-23:
+  docker-image-rebuild--ci-docker-images--debian-12:
     type: boolean
     default: false
   docker-repository-url--ci-docker-images:
@@ -49,10 +49,10 @@ jobs:
   # test suite for all the supported targets will be run when bors-rs tries to
   # merge the PR anyway.
   commit-checks:
-    executor: docker-ubuntu-23
+    executor: docker-debian-12
     resource_class: large # 4-core
     environment:
-      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
+      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-16
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py test tidy
@@ -388,14 +388,14 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
       - build-docker:
-          name: build-docker--ubuntu-23
-          image: ubuntu-23
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
+          name: build-docker--debian-12
+          image: debian-12
+          tag: << pipeline.parameters.docker-image-tag--debian-12 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--debian-12 >>
 
       - commit-checks:
           requires:
-            - build-docker--ubuntu-23
+            - build-docker--debian-12
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -780,9 +780,9 @@ executors:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-18 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
-  docker-ubuntu-23:
+  docker-debian-12:
     docker:
-      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-23 >>
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--debian-12 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:

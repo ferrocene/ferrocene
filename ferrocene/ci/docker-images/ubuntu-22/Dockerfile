@@ -52,7 +52,8 @@ RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_6
 ENV LANG=C.UTF-8
 
 RUN mkdir /home/ci \
-    && deluser --remove-home --group ubuntu \
+    && deluser --remove-home ubuntu \
+    && delgroup ubuntu \
     && addgroup --gid 1000 ci \
     && addgroup --gid 1001 ci-usergroup \
     && adduser --home /home/ci --uid 1000 --gid 1000 --gecos "" --disabled-password ci \

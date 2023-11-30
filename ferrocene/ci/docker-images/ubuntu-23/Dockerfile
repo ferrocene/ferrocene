@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# TODO move to 24.04, when available... 23.10 support window is just 9 months
 FROM ubuntu:23.10
 
 RUN apt-get update \

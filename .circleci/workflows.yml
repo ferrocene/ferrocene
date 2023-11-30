@@ -670,7 +670,7 @@ commands:
         default: false
     steps:
       - ferrocene-git-shallow-clone:
-          depth: 2
+          depth: 20
       - when:
           condition: << parameters.llvm-subset >>
           steps:

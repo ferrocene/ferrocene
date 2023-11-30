@@ -26,3 +26,6 @@ fn make_bad_impl<'b>(x: &'b ()) -> impl for<'a> Hrtb<'a, Assoc = impl Send + 'a>
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

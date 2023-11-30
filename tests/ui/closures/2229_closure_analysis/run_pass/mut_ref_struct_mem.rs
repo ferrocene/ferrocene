@@ -41,3 +41,9 @@ fn main() {
     mut_tuple();
     mut_tuple_nested();
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

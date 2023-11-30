@@ -10,3 +10,5 @@ all:
 	$(call REMOVE_DYLIBS,m2)
 	$(call REMOVE_DYLIBS,m3)
 	$(call FAIL,m4)
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

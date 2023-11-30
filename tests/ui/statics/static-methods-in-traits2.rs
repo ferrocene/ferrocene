@@ -20,3 +20,12 @@ impl NumConv for f64 {
 pub fn main() {
     let _: f64 = Number::from(0.0f64);
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

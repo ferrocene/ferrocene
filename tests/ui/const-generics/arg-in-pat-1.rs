@@ -21,3 +21,8 @@ fn main() {
         ConstGenericEnum::<3>::Bar => (),
     }
 }
+
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

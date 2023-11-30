@@ -28,3 +28,6 @@ fn main() {
     let mut s = S { x: 1, y: 2 };
     drop(s(3))
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

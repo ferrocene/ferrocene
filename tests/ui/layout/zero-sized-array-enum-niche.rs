@@ -43,3 +43,6 @@ enum U16IsZero { _Zero = 0 }
 #[rustc_layout(debug)]
 type NicheWinsOverTagged = Result<[u32; 0], Packed<U16IsZero>>; //~ ERROR: layout_of
 // Should get tag_encoding: Niche, size == align == 4.
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

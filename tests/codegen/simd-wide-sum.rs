@@ -53,3 +53,5 @@ pub fn wider_reduce_into_iter(x: Simd<u8, N>) -> u16 {
     // WOULD-CHECK: call i16 @llvm.vector.reduce.add.v8i16(<8 x i16>
     x.to_array().into_iter().map(u16::from).sum()
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

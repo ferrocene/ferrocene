@@ -23,3 +23,6 @@ impl<T> marker::Copy for *mut T {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

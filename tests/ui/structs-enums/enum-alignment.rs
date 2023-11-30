@@ -22,3 +22,9 @@ pub fn main() {
         Some(ref y) => assert!(is_aligned(y))
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

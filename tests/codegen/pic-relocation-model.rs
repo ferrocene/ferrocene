@@ -17,3 +17,5 @@ pub fn call_foreign_fn() -> u8 {
 extern "C" {fn foreign_fn() -> u8;}
 
 // CHECK: !{i32 {{[78]}}, !"PIC Level", i32 2}
+
+// ferrocene-annotations: um_rustc_C_relocation_model

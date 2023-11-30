@@ -48,3 +48,9 @@ fn main() {
     assert!(mem::size_of::<i32>() < mem::size_of::<EnumNewtypeU8<i32>>());
     assert!(mem::size_of::<i32>() < mem::size_of::<EnumNewtypeC<i32>>());
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

@@ -13,6 +13,7 @@
 // ignore-emscripten no panic or subprocess support
 // ignore-sgx no subprocess support
 // ignore-fuchsia Backtrace not symbolized
+// ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 
 // NOTE(eddyb) output differs between symbol mangling schemes
 // revisions: legacy v0

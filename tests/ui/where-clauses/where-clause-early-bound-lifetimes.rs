@@ -16,3 +16,21 @@ fn main() {
     foo(&x);
     bar(&x);
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

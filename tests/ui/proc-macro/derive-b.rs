@@ -17,3 +17,6 @@ fn main() {
     let _d = b;
     let _e = b;
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

@@ -17,3 +17,6 @@ impl Foo for i32 {
 fn main() {
     3i32.foo();
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

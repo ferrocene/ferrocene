@@ -14,3 +14,15 @@ mod mod1 {
 fn main() {
     mod1::f(5i32);
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Type
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

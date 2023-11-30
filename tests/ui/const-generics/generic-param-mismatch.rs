@@ -3,3 +3,6 @@ fn test<const N: usize, const M: usize>() -> [u8; M] {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -106,3 +106,9 @@ fn check_pedigree(arc: Arc<Vec<Box<dyn Pet+Sync+Send>>>) {
         assert!(pet.of_good_pedigree());
     }
 }
+
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

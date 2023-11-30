@@ -24,3 +24,15 @@ fn main() {
                       //~^ ERROR `..` cannot be used in union patterns
     let U { a, .. } = u; //~ ERROR `..` cannot be used in union patterns
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns

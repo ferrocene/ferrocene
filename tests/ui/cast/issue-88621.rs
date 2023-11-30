@@ -9,3 +9,6 @@ fn main() {
     let _ = Kind2::Foo() as u8;
     //~^ ERROR non-primitive cast
 }
+
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

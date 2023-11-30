@@ -30,3 +30,6 @@ pub mod bar {
 //~^^ ERROR conflicting doc inlining attributes
 //~|  HELP remove one of the conflicting attributes
 pub use bar::baz;
+
+// ferrocene-annotations: fls_63v1fqedzwfd
+// Attribute doc

@@ -15,3 +15,5 @@ pub fn func1(c: char) -> bool {
 pub fn func2(c: char) -> bool {
     matches!(c, 's' | 'm' | 'h' | 'd' | 'w')
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

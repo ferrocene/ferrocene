@@ -15,3 +15,9 @@ fn foo5(_: &(dyn Drop + dyn AsRef<str>)) {} //~ ERROR invalid `dyn` keyword
 //~^ ERROR only auto traits can be used as additional traits in a trait object
 
 fn main() {}
+
+// ferrocene-annotations: fls_olbj67eyxz2k
+// Parenthesized Types
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

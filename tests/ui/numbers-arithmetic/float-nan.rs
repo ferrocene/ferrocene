@@ -80,3 +80,15 @@ pub fn main() {
   assert!(!(-inf).is_nan());
   assert!(!(1./-inf).is_nan());
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

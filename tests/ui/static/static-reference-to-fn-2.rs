@@ -52,3 +52,39 @@ fn main() {
     println!("{:?}",it.next());
     println!("{:?}",it.next());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_g0uyl7qw4c7w
+// Parenthesized Expressions
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

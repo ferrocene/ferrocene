@@ -28,3 +28,30 @@ fn main() -> std::io::Result<()> {
     let other: Other = downcast()?;//~ERROR 28:24: 28:35: `?` operator has incompatible types
     Ok(())
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

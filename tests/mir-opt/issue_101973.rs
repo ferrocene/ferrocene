@@ -18,3 +18,5 @@ fn main() {
     let val = inner(0xe32cf20f);
     assert_eq!(val as u64, 0xfffffffff0000000);
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

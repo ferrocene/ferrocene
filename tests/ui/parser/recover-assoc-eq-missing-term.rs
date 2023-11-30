@@ -4,3 +4,9 @@ fn syntax() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_9i5msiuuyihf
+// Paths

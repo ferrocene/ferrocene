@@ -21,3 +21,6 @@ fn main() {
     let x = 3;
     assert_eq!(call_it(x), 22);
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

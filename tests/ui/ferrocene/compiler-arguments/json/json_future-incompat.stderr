@@ -1,0 +1,29 @@
+{"message":"reference to packed field is unaligned","code":{"code":"unaligned_references","explanation":null},"level":"error","spans":[{"file_name":"$DIR/json_future-incompat.rs","byte_start":147,"byte_end":151,"line_start":11,"line_end":11,"column_start":5,"column_end":9,"is_primary":true,"text":[{"text":"    &s.b;","highlight_start":5,"highlight_end":9}],"label":null,"suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[{"message":"this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!","code":null,"level":"warning","spans":[],"children":[],"rendered":null},{"message":"for more information, see issue #82523 <https://github.com/rust-lang/rust/issues/82523>","code":null,"level":"note","spans":[],"children":[],"rendered":null},{"message":"fields of packed structs are not properly aligned, and creating a misaligned reference is undefined behavior (even if that reference is never dereferenced)","code":null,"level":"note","spans":[],"children":[],"rendered":null},{"message":"copy the field contents to a local variable, or replace the reference with a raw pointer and use `read_unaligned`/`write_unaligned` (loads and stores via `*p` must be properly aligned even when using raw pointers)","code":null,"level":"help","spans":[],"children":[],"rendered":null},{"message":"`#[deny(unaligned_references)]` on by default","code":null,"level":"note","spans":[],"children":[],"rendered":null}],"rendered":"error: reference to packed field is unaligned
+  --> $DIR/json_future-incompat.rs:11:5
+   |
+LL |     &s.b;
+   |     ^^^^
+   |
+   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+   = note: for more information, see issue #82523 <https://github.com/rust-lang/rust/issues/82523>
+   = note: fields of packed structs are not properly aligned, and creating a misaligned reference is undefined behavior (even if that reference is never dereferenced)
+   = help: copy the field contents to a local variable, or replace the reference with a raw pointer and use `read_unaligned`/`write_unaligned` (loads and stores via `*p` must be properly aligned even when using raw pointers)
+   = note: `#[deny(unaligned_references)]` on by default
+
+"}
+{"message":"aborting due to previous error","code":null,"level":"error","spans":[],"children":[],"rendered":"error: aborting due to previous error
+
+"}
+{"future_incompat_report":[{"diagnostic":{"message":"reference to packed field is unaligned","code":{"code":"unaligned_references","explanation":null},"level":"error","spans":[{"file_name":"$DIR/json_future-incompat.rs","byte_start":147,"byte_end":151,"line_start":11,"line_end":11,"column_start":5,"column_end":9,"is_primary":true,"text":[{"text":"    &s.b;","highlight_start":5,"highlight_end":9}],"label":null,"suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[{"message":"this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!","code":null,"level":"warning","spans":[],"children":[],"rendered":null},{"message":"for more information, see issue #82523 <https://github.com/rust-lang/rust/issues/82523>","code":null,"level":"note","spans":[],"children":[],"rendered":null},{"message":"fields of packed structs are not properly aligned, and creating a misaligned reference is undefined behavior (even if that reference is never dereferenced)","code":null,"level":"note","spans":[],"children":[],"rendered":null},{"message":"copy the field contents to a local variable, or replace the reference with a raw pointer and use `read_unaligned`/`write_unaligned` (loads and stores via `*p` must be properly aligned even when using raw pointers)","code":null,"level":"help","spans":[],"children":[],"rendered":null},{"message":"`#[deny(unaligned_references)]` on by default","code":null,"level":"note","spans":[],"children":[],"rendered":null}],"rendered":"error: reference to packed field is unaligned
+  --> $DIR/json_future-incompat.rs:11:5
+   |
+LL |     &s.b;
+   |     ^^^^
+   |
+   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+   = note: for more information, see issue #82523 <https://github.com/rust-lang/rust/issues/82523>
+   = note: fields of packed structs are not properly aligned, and creating a misaligned reference is undefined behavior (even if that reference is never dereferenced)
+   = help: copy the field contents to a local variable, or replace the reference with a raw pointer and use `read_unaligned`/`write_unaligned` (loads and stores via `*p` must be properly aligned even when using raw pointers)
+   = note: `#[deny(unaligned_references)]` on by default
+
+"}}]}

@@ -25,3 +25,9 @@ pub fn main() {
     assert_eq!(CLs as i8, Es::Ls as i8);
     assert_eq!(CHs as i8, Es::Hs as i8);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

@@ -61,3 +61,9 @@ pub fn main() {
   let nyan: Box<dyn ToString> = Box::new(cat(0, 2, "nyan".to_string())) as Box<dyn ToString>;
   print_out(nyan, "nyan".to_string());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

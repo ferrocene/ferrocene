@@ -13,3 +13,8 @@ fn main() {
     let _: AlsoBad<7, 'static, u32, 'static, 17, u16>;
     //~^ ERROR lifetime provided when a type was expected
  }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

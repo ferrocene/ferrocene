@@ -35,3 +35,9 @@ fn load2<'a>(ss: &MyBox<dyn SomeTrait + 'a>) -> MyBox<dyn SomeTrait + 'a> {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

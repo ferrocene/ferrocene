@@ -1,0 +1,2 @@
+// "unsized_locals" is an unstable feature.
+// All tests in this directory are ignored.

@@ -26,3 +26,5 @@ fn test_a_neg_bench(_: &mut Bencher) -> Result<(), ParseIntError> {
     let _: u32 = "abc".parse()?;
     Ok(())
 }
+
+// ferrocene-annotations: um_rustc_test

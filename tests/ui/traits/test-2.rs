@@ -15,3 +15,6 @@ fn main() {
     //~| ERROR E0038
     //~| ERROR E0038
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

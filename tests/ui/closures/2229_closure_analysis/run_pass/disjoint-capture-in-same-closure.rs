@@ -21,3 +21,6 @@ fn main() {
         s.s = String::from("new");
     };
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

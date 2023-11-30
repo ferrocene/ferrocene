@@ -12,3 +12,6 @@ fn main() {
     let _ = ArrayStruct { data: [0u32; 8] };
     let _ = ArrayTuple([0u32; 8]);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

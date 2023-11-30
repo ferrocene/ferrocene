@@ -143,3 +143,27 @@ fn main() {
         WhoKnows::Nope => {}
     }
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

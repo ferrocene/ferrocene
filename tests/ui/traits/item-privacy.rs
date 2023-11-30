@@ -132,3 +132,9 @@ fn check_assoc_ty<T: assoc_ty::C>() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

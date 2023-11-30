@@ -20,3 +20,8 @@ fn main() {
     //~^ ERROR expected type, found
     //~| ERROR type provided when a constant was expected
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

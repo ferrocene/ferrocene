@@ -30,6 +30,7 @@ use std::iter;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Output, Stdio};
 use std::str;
+use std::sync::Arc;
 
 use glob::glob;
 use lazy_static::lazy_static;
@@ -94,7 +95,7 @@ pub fn get_lib_name(lib: &str, dylib: bool) -> String {
     }
 }
 
-pub fn run(config: Config, testpaths: &TestPaths, revision: Option<&str>) {
+pub fn run(config: Arc<Config>, testpaths: &TestPaths, revision: Option<&str>) {
     match &*config.target {
         "arm-linux-androideabi"
         | "armv7-linux-androideabi"
@@ -1742,8 +1743,8 @@ impl<'test> TestCx<'test> {
             || self.config.target.contains("wasm32")
             || self.config.target.contains("nvptx")
             || self.is_vxworks_pure_static()
-            || self.config.target.contains("sgx")
             || self.config.target.contains("bpf")
+            || !self.config.target_cfg().dynamic_linking
         {
             // We primarily compile all auxiliary libraries as dynamic libraries
             // to avoid code size bloat and large binaries as much as possible
@@ -3194,17 +3195,35 @@ impl<'test> TestCx<'test> {
         match output_kind {
             TestOutput::Compile => {
                 if !self.props.dont_check_compiler_stdout {
-                    errors +=
-                        self.compare_output(stdout_kind, &normalized_stdout, &expected_stdout);
+                    errors += self.compare_output(
+                        stdout_kind,
+                        &normalized_stdout,
+                        &expected_stdout,
+                        self.props.compare_output_lines_by_subset,
+                    );
                 }
                 if !self.props.dont_check_compiler_stderr {
-                    errors +=
-                        self.compare_output(stderr_kind, &normalized_stderr, &expected_stderr);
+                    errors += self.compare_output(
+                        stderr_kind,
+                        &normalized_stderr,
+                        &expected_stderr,
+                        self.props.compare_output_lines_by_subset,
+                    );
                 }
             }
             TestOutput::Run => {
-                errors += self.compare_output(stdout_kind, &normalized_stdout, &expected_stdout);
-                errors += self.compare_output(stderr_kind, &normalized_stderr, &expected_stderr);
+                errors += self.compare_output(
+                    stdout_kind,
+                    &normalized_stdout,
+                    &expected_stdout,
+                    self.props.compare_output_lines_by_subset,
+                );
+                errors += self.compare_output(
+                    stderr_kind,
+                    &normalized_stderr,
+                    &expected_stderr,
+                    self.props.compare_output_lines_by_subset,
+                );
             }
         }
         errors
@@ -3288,7 +3307,12 @@ impl<'test> TestCx<'test> {
                 )
             });
 
-            errors += self.compare_output("fixed", &fixed_code, &expected_fixed);
+            errors += self.compare_output(
+                "fixed",
+                &fixed_code,
+                &expected_fixed,
+                self.props.compare_output_lines_by_subset,
+            );
         } else if !expected_fixed.is_empty() {
             panic!(
                 "the `// run-rustfix` directive wasn't found but a `*.fixed` \
@@ -3414,25 +3438,24 @@ impl<'test> TestCx<'test> {
     }
 
     fn check_mir_dump(&self) {
-        let test_file_contents = fs::read_to_string(&self.testpaths.file).unwrap();
-
         let test_dir = self.testpaths.file.parent().unwrap();
         let test_crate =
             self.testpaths.file.file_stem().unwrap().to_str().unwrap().replace("-", "_");
 
-        let mut bit_width = String::new();
-        if test_file_contents.lines().any(|l| l == "// EMIT_MIR_FOR_EACH_BIT_WIDTH") {
-            bit_width = format!(".{}bit", self.config.get_pointer_width());
-        }
+        let suffix = miropt_test_tools::output_file_suffix(
+            &self.testpaths.file,
+            self.config.get_pointer_width(),
+            self.config.target_cfg().panic.for_miropt_test_tools(),
+        );
 
         if self.config.bless {
             for e in
-                glob(&format!("{}/{}.*{}.mir", test_dir.display(), test_crate, bit_width)).unwrap()
+                glob(&format!("{}/{}.*{}.mir", test_dir.display(), test_crate, suffix)).unwrap()
             {
                 std::fs::remove_file(e.unwrap()).unwrap();
             }
             for e in
-                glob(&format!("{}/{}.*{}.diff", test_dir.display(), test_crate, bit_width)).unwrap()
+                glob(&format!("{}/{}.*{}.diff", test_dir.display(), test_crate, suffix)).unwrap()
             {
                 std::fs::remove_file(e.unwrap()).unwrap();
             }
@@ -3441,6 +3464,7 @@ impl<'test> TestCx<'test> {
         let files = miropt_test_tools::files_for_miropt_test(
             &self.testpaths.file,
             self.config.get_pointer_width(),
+            self.config.target_cfg().panic.for_miropt_test_tools(),
         );
 
         for miropt_test_tools::MiroptTestFiles { from_file, to_file, expected_file } in files {
@@ -3749,10 +3773,37 @@ impl<'test> TestCx<'test> {
         }
     }
 
-    fn compare_output(&self, kind: &str, actual: &str, expected: &str) -> usize {
+    fn compare_output(
+        &self,
+        kind: &str,
+        actual: &str,
+        expected: &str,
+        compare_output_by_lines: bool,
+    ) -> usize {
         if actual == expected {
             return 0;
         }
+
+        let tmp;
+        let (expected, actual): (&str, &str) = if compare_output_by_lines {
+            let actual_lines: HashSet<_> = actual.lines().collect();
+            let expected_lines: Vec<_> = expected.lines().collect();
+            let mut used = expected_lines.clone();
+            used.retain(|line| actual_lines.contains(line));
+            // check if `expected` contains a subset of the lines of `actual`
+            if used.len() == expected_lines.len() && (expected.is_empty() == actual.is_empty()) {
+                return 0;
+            }
+            if expected_lines.is_empty() {
+                // if we have no lines to check, force a full overwite
+                ("", actual)
+            } else {
+                tmp = (expected_lines.join("\n"), used.join("\n"));
+                (&tmp.0, &tmp.1)
+            }
+        } else {
+            (expected, actual)
+        };
 
         if !self.config.bless {
             if expected.is_empty() {

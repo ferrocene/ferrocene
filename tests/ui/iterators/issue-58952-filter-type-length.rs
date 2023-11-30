@@ -30,3 +30,6 @@ fn main() {
         .filter(|a| b.clone().any(|b| *b == *a))
         .collect::<VecDeque<_>>();
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

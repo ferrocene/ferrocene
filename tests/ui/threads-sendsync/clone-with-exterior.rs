@@ -18,3 +18,6 @@ pub fn main() {
         assert_eq!(z.b, 12);
     }).join();
 }
+
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Types

@@ -83,3 +83,9 @@ fn main() {
     let _ = ARRR4;
     let _ = ARRR5;
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison expressions
+
+// ferrocene-annotations: fls_lstusiu2c8lu
+// Lazy boolean expressions

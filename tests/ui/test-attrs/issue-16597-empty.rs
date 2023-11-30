@@ -3,3 +3,5 @@
 
 // This verifies that the test generation doesn't crash when we have
 // no tests - for more information, see PR #16892.
+
+// ferrocene-annotations: um_rustc_test

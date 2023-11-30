@@ -6,3 +6,5 @@
 fn main() {
     let _x = 2i32.pow(1024);
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

@@ -34,3 +34,12 @@ fn main() {
     }
     *OH_YES = 99; //~ ERROR cannot assign to `*OH_YES`, as `OH_YES` is an immutable static item
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

@@ -9,3 +9,6 @@ fn main() {
              ";
     //~^^^ WARNING non-ASCII whitespace symbol '\u{a0}' is not skipped
 }
+
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals

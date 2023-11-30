@@ -61,3 +61,5 @@ pub fn enum_call(x: Option<u8>, f: fn(Option<u8>) -> Option<u8>) -> Option<u8> {
   // CHECK: call { i8, i8 } %f(i1 zeroext %x.0, i8 %x.1)
   f(x)
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

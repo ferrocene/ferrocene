@@ -109,6 +109,7 @@ pub enum Subcommand {
     Doc {
         paths: Vec<PathBuf>,
         open: bool,
+        serve: bool,
         json: bool,
     },
     Test {
@@ -142,9 +143,13 @@ pub enum Subcommand {
     Run {
         paths: Vec<PathBuf>,
         args: Vec<String>,
+        bless: bool,
     },
     Setup {
         profile: Option<PathBuf>,
+    },
+    Sign {
+        paths: Vec<PathBuf>,
     },
 }
 
@@ -332,6 +337,7 @@ To learn more about a subcommand, run `./x.py <subcommand> -h`",
             }
             Kind::Doc => {
                 opts.optflag("", "open", "open the docs in a browser");
+                opts.optflag("", "serve", "start a live-reloading web server");
                 opts.optflag(
                     "",
                     "json",
@@ -346,6 +352,7 @@ To learn more about a subcommand, run `./x.py <subcommand> -h`",
             }
             Kind::Run => {
                 opts.optmulti("", "args", "arguments for the tool", "ARGS");
+                opts.optflag("", "bless", "update all files of failing tests");
             }
             _ => {}
         };
@@ -520,6 +527,7 @@ Arguments:
         ./x.py doc src/doc/book library/std
         ./x.py doc library/std --json
         ./x.py doc library/std --open
+        ./x.py doc src/doc/book --serve
 
     If no arguments are passed then everything is documented:
 
@@ -535,6 +543,7 @@ Arguments:
     example:
 
         ./x.py run src/tools/expand-yaml-anchors
+        ./x.py run ferrocene/tools/traceability-matrix --bless
 
     At least a tool needs to be called.",
                 );
@@ -556,7 +565,7 @@ Arguments:
                     Profile::all_for_help("        ").trim_end()
                 ));
             }
-            Kind::Bench | Kind::Clean | Kind::Dist | Kind::Install => {}
+            Kind::Bench | Kind::Clean | Kind::Dist | Kind::Install | Kind::Sign => {}
         };
         // Get any optional paths which occur after the subcommand
         let mut paths = matches.free[1..].iter().map(|p| p.into()).collect::<Vec<PathBuf>>();
@@ -607,11 +616,18 @@ Arguments:
                 },
             },
             Kind::Bench => Subcommand::Bench { paths, test_args: matches.opt_strs("test-args") },
-            Kind::Doc => Subcommand::Doc {
-                paths,
-                open: matches.opt_present("open"),
-                json: matches.opt_present("json"),
-            },
+            Kind::Doc => {
+                if matches.opt_present("serve") && paths.len() != 1 {
+                    eprintln!("error: --serve requires exactly one path");
+                    crate::detail_exit(1);
+                }
+                Subcommand::Doc {
+                    paths,
+                    open: matches.opt_present("open"),
+                    serve: matches.opt_present("serve"),
+                    json: matches.opt_present("json"),
+                }
+            }
             Kind::Clean => Subcommand::Clean { all: matches.opt_present("all"), paths },
             Kind::Format => Subcommand::Format { check: matches.opt_present("check"), paths },
             Kind::Dist => Subcommand::Dist { paths },
@@ -621,7 +637,11 @@ Arguments:
                     println!("\nrun requires at least a path!\n");
                     usage(1, &opts, verbose, &subcommand_help);
                 }
-                Subcommand::Run { paths, args: matches.opt_strs("args") }
+                Subcommand::Run {
+                    paths,
+                    args: matches.opt_strs("args"),
+                    bless: matches.opt_present("bless"),
+                }
             }
             Kind::Setup => {
                 let profile = if paths.len() > 1 {
@@ -643,6 +663,13 @@ Arguments:
                     None
                 };
                 Subcommand::Setup { profile }
+            }
+            Kind::Sign => {
+                if paths.is_empty() {
+                    println!("\nsign requires at least a path!\n");
+                    usage(1, &opts, verbose, &subcommand_help);
+                }
+                Subcommand::Sign { paths }
             }
         };
 
@@ -726,6 +753,7 @@ impl Subcommand {
             Subcommand::Install { .. } => Kind::Install,
             Subcommand::Run { .. } => Kind::Run,
             Subcommand::Setup { .. } => Kind::Setup,
+            Subcommand::Sign { .. } => Kind::Sign,
         }
     }
 
@@ -773,6 +801,7 @@ impl Subcommand {
     pub fn bless(&self) -> bool {
         match *self {
             Subcommand::Test { bless, .. } => bless,
+            Subcommand::Run { bless, .. } => bless,
             _ => false,
         }
     }
@@ -815,6 +844,13 @@ impl Subcommand {
     pub fn open(&self) -> bool {
         match *self {
             Subcommand::Doc { open, .. } => open,
+            _ => false,
+        }
+    }
+
+    pub fn serve(&self) -> bool {
+        match *self {
+            Subcommand::Doc { serve, .. } => serve,
             _ => false,
         }
     }

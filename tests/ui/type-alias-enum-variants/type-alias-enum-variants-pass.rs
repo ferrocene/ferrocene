@@ -67,3 +67,63 @@ fn main() {
     assert_eq!(some, OptionAlias::Some(4));
     check_pat!(some, OptionAlias::Some(4));
 }
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions
+// ferrocene-annotations: fls_6l60b5hwnjbm
+// Path Expressions
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+// ferrocene-annotations: fls_9i5msiuuyihf
+// Paths
+//
+// ferrocene-annotations: fls_151r19d7xbgz
+// Entities
+//
+// ferrocene-annotations: fls_izl8iuhoz9e0
+// Scopes
+//
+// ferrocene-annotations: fls_6ozthochxz1i
+// Binding Scopes
+//
+// ferrocene-annotations: fls_ftphlagzd2te
+// Generic Parameter Scope
+//
+// ferrocene-annotations: fls_m0z7omni9hp0
+// Item Scope
+//
+// ferrocene-annotations: fls_769b4p8v3cwu
+// Label Scope
+//
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope
+//
+// ferrocene-annotations: fls_octf6sf7yso
+// Textual Macro Scope
+//
+// ferrocene-annotations: fls_lnpyb285qdiy
+// Scope Hierarchy
+//
+// ferrocene-annotations: fls_dq403wq5yrs
+// Namespaces
+//
+// ferrocene-annotations: fls_ld0ize96cm6m
+// Preludes
+//
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing
+//
+// ferrocene-annotations: fls_40xoego2thsp
+// Resolution
+//
+// ferrocene-annotations: fls_i6qzga6dyaee
+// Path Resolution
+//
+// ferrocene-annotations: fls_o9u2h5m17kpz
+// Path Expression Resolution

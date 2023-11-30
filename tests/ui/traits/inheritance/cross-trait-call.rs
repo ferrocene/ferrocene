@@ -17,3 +17,9 @@ pub fn main() {
     let a = &A { x: 3 };
     assert_eq!(a.g(), 10);
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

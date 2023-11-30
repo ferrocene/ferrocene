@@ -12,3 +12,12 @@ fn main() {
         break 22 //~ ERROR `break` with value from a `for` loop
     }
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

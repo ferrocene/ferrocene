@@ -9,3 +9,6 @@ trait Me2 {
 }
 impl Me2 for usize { fn me(&self) -> usize { *self } }
 fn main() { 1_usize.me(); } //~ ERROR E0034
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

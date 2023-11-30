@@ -36,3 +36,12 @@ fn g() -> Traitor + 'static { //~ ERROR expected trait, found struct `Traitor`
     A
 }
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -30,3 +30,6 @@ fn main() {
     foo::<0>();
     foo2::<0>();
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

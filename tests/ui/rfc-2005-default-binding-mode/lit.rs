@@ -22,3 +22,8 @@ pub fn main() {
     with_str();
     with_bytes();
 }
+
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal Pattern Matching
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

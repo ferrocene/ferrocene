@@ -20,3 +20,5 @@ extern crate msvc_imp_present as bar;
 fn main() {
     println!("{}", bar::A);
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

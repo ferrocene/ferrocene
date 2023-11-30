@@ -16,3 +16,5 @@ fn main() {
 
     use_u8((Temp { x: 40 }).x + 2);
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

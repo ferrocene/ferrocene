@@ -39,3 +39,12 @@ fn c(s: Result<S, S>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jm6l7b90h6wa
+// Pattern Matching
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

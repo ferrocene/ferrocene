@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+
+name: CI
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lints
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      # Some Ferrocene builders require the use of Python 3.6. Use that on CI
+      # to make sure there are no surprises when we import into Ferrocene.
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.6.x"
+
+      - name: Check that the requirements are installable
+        run: python3 -m pip install -r requirements.txt
+
+      - name: Install linting dependencies
+        run: python3 -m pip install reuse black flake8
+
+      - name: Verify licensing metadata
+        run: reuse lint
+
+      - name: Verify Python code formatting
+        run: black . --check --diff --color
+
+      - name: Lint Python code with flake8
+        run: flake8 .

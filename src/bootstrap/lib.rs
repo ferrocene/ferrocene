@@ -137,14 +137,17 @@ mod config;
 mod dist;
 mod doc;
 mod download;
+mod ferrocene;
 mod flags;
 mod format;
 mod install;
 mod metadata;
 mod native;
+mod render_tests;
 mod run;
 mod sanity;
 mod setup;
+mod synthetic_targets;
 mod tarball;
 mod test;
 mod tool;
@@ -175,6 +178,7 @@ pub use crate::builder::PathSet;
 use crate::cache::{Interned, INTERNER};
 pub use crate::config::Config;
 pub use crate::flags::Subcommand;
+use termcolor::{ColorChoice, StandardStream, WriteColor};
 
 const LLVM_TOOLS: &[&str] = &[
     "llvm-cov",      // used to generate coverage report
@@ -309,10 +313,10 @@ pub struct Build {
 
     // Runtime state filled in later on
     // C/C++ compilers and archiver for all targets
-    cc: HashMap<TargetSelection, cc::Tool>,
-    cxx: HashMap<TargetSelection, cc::Tool>,
-    ar: HashMap<TargetSelection, PathBuf>,
-    ranlib: HashMap<TargetSelection, PathBuf>,
+    cc: RefCell<HashMap<TargetSelection, cc::Tool>>,
+    cxx: RefCell<HashMap<TargetSelection, cc::Tool>>,
+    ar: RefCell<HashMap<TargetSelection, PathBuf>>,
+    ranlib: RefCell<HashMap<TargetSelection, PathBuf>>,
     // Miscellaneous
     // allow bidirectional lookups: both name -> path and path -> name
     crates: HashMap<Interned<String>, Crate>,
@@ -531,10 +535,10 @@ impl Build {
             miri_info,
             rustfmt_info,
             in_tree_llvm_info,
-            cc: HashMap::new(),
-            cxx: HashMap::new(),
-            ar: HashMap::new(),
-            ranlib: HashMap::new(),
+            cc: RefCell::new(HashMap::new()),
+            cxx: RefCell::new(HashMap::new()),
+            ar: RefCell::new(HashMap::new()),
+            ranlib: RefCell::new(HashMap::new()),
             crates: HashMap::new(),
             crate_paths: HashMap::new(),
             is_sudo,
@@ -563,7 +567,7 @@ impl Build {
         }
 
         build.verbose("finding compilers");
-        cc_detect::find(&mut build);
+        cc_detect::find(&build);
         // When running `setup`, the profile is about to change, so any requirements we have now may
         // be different on the next invocation. Don't check for them until the next time x.py is
         // run. This is ok because `setup` never runs any build commands, so it won't fail if commands are missing.
@@ -746,7 +750,13 @@ impl Build {
                 self.config.dry_run = DryRun::SelfCheck;
                 let builder = builder::Builder::new(&self);
                 builder.execute_cli();
+
+                if builder.is_serve_flag_unsupported() {
+                    eprintln!("error: --serve flag is not supported for the requested path");
+                    detail_exit(1);
+                }
             }
+
             self.config.dry_run = DryRun::Disabled;
             let builder = builder::Builder::new(&self);
             builder.execute_cli();
@@ -1073,16 +1083,22 @@ impl Build {
     }
 
     /// Returns the path to the C compiler for the target specified.
-    fn cc(&self, target: TargetSelection) -> &Path {
-        self.cc[&target].path()
+    fn cc(&self, target: TargetSelection) -> PathBuf {
+        if self.config.dry_run() {
+            return PathBuf::new();
+        }
+        self.cc.borrow()[&target].path().into()
     }
 
     /// Returns a list of flags to pass to the C compiler for the target
     /// specified.
     fn cflags(&self, target: TargetSelection, which: GitRepo, c: CLang) -> Vec<String> {
+        if self.config.dry_run() {
+            return Vec::new();
+        }
         let base = match c {
-            CLang::C => &self.cc[&target],
-            CLang::Cxx => &self.cxx[&target],
+            CLang::C => self.cc.borrow()[&target].clone(),
+            CLang::Cxx => self.cxx.borrow()[&target].clone(),
         };
 
         // Filter out -O and /O (the optimization flags) that we picked up from
@@ -1123,19 +1139,28 @@ impl Build {
     }
 
     /// Returns the path to the `ar` archive utility for the target specified.
-    fn ar(&self, target: TargetSelection) -> Option<&Path> {
-        self.ar.get(&target).map(|p| &**p)
+    fn ar(&self, target: TargetSelection) -> Option<PathBuf> {
+        if self.config.dry_run() {
+            return None;
+        }
+        self.ar.borrow().get(&target).cloned()
     }
 
     /// Returns the path to the `ranlib` utility for the target specified.
-    fn ranlib(&self, target: TargetSelection) -> Option<&Path> {
-        self.ranlib.get(&target).map(|p| &**p)
+    fn ranlib(&self, target: TargetSelection) -> Option<PathBuf> {
+        if self.config.dry_run() {
+            return None;
+        }
+        self.ranlib.borrow().get(&target).cloned()
     }
 
     /// Returns the path to the C++ compiler for the target specified.
-    fn cxx(&self, target: TargetSelection) -> Result<&Path, String> {
-        match self.cxx.get(&target) {
-            Some(p) => Ok(p.path()),
+    fn cxx(&self, target: TargetSelection) -> Result<PathBuf, String> {
+        if self.config.dry_run() {
+            return Ok(PathBuf::new());
+        }
+        match self.cxx.borrow().get(&target) {
+            Some(p) => Ok(p.path().into()),
             None => {
                 Err(format!("target `{}` is not configured as a host, only as a target", target))
             }
@@ -1143,21 +1168,24 @@ impl Build {
     }
 
     /// Returns the path to the linker for the given target if it needs to be overridden.
-    fn linker(&self, target: TargetSelection) -> Option<&Path> {
-        if let Some(linker) = self.config.target_config.get(&target).and_then(|c| c.linker.as_ref())
+    fn linker(&self, target: TargetSelection) -> Option<PathBuf> {
+        if self.config.dry_run() {
+            return Some(PathBuf::new());
+        }
+        if let Some(linker) = self.config.target_config.get(&target).and_then(|c| c.linker.clone())
         {
             Some(linker)
         } else if target.contains("vxworks") {
             // need to use CXX compiler as linker to resolve the exception functions
             // that are only existed in CXX libraries
-            Some(self.cxx[&target].path())
+            Some(self.cxx.borrow()[&target].path().into())
         } else if target != self.config.build
             && util::use_host_linker(target)
             && !target.contains("msvc")
         {
             Some(self.cc(target))
         } else if self.config.use_lld && !self.is_fuse_ld_lld(target) && self.build == target {
-            Some(&self.initial_lld)
+            Some(self.initial_lld.clone())
         } else {
             None
         }
@@ -1639,6 +1667,31 @@ to download LLVM rather than building it.
         }
 
         self.config.ninja_in_file
+    }
+
+    pub fn colored_stdout<R, F: FnOnce(&mut dyn WriteColor) -> R>(&self, f: F) -> R {
+        self.colored_stream_inner(StandardStream::stdout, self.config.stdout_is_tty, f)
+    }
+
+    pub fn colored_stderr<R, F: FnOnce(&mut dyn WriteColor) -> R>(&self, f: F) -> R {
+        self.colored_stream_inner(StandardStream::stderr, self.config.stderr_is_tty, f)
+    }
+
+    fn colored_stream_inner<R, F, C>(&self, constructor: C, is_tty: bool, f: F) -> R
+    where
+        C: Fn(ColorChoice) -> StandardStream,
+        F: FnOnce(&mut dyn WriteColor) -> R,
+    {
+        let choice = match self.config.color {
+            flags::Color::Always => ColorChoice::Always,
+            flags::Color::Never => ColorChoice::Never,
+            flags::Color::Auto if !is_tty => ColorChoice::Never,
+            flags::Color::Auto => ColorChoice::Auto,
+        };
+        let mut stream = constructor(choice);
+        let result = f(&mut stream);
+        stream.reset().unwrap();
+        result
     }
 }
 

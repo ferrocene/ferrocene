@@ -9,3 +9,9 @@ impl Drop for A {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

@@ -34,3 +34,6 @@ impl<T> Bar for Foo2<{ Protocol::Variant1 }, T> {}
 impl<T> Bar for Foo2<{ Protocol::Variant2 }, T> {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

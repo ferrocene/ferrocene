@@ -20,3 +20,15 @@ fn main() {
     foo(&"a".to_string());
     A::foo(&"a".to_string());
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

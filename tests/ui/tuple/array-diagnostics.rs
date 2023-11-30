@@ -5,3 +5,6 @@ fn main() {
         ("C200B40A8537", 5),
     ];
 }
+
+// ferrocene-annotations: fls_k64tfywtn0g8
+// Tuple Expressions

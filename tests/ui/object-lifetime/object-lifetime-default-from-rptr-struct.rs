@@ -35,3 +35,6 @@ fn d<'a>(t: &'a MyBox<dyn Test+'a>, mut ss: SomeStruct<'a>) {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

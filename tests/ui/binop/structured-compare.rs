@@ -28,3 +28,9 @@ pub fn main() {
     assert_eq!(x, foo::large);
     assert!((x != foo::small));
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

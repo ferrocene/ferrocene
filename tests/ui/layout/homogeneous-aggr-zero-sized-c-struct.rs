@@ -34,3 +34,6 @@ pub type TestFinal = Final;
 //~^ ERROR homogeneous_aggregate: Ok(Homogeneous
 
 fn main() { }
+
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation

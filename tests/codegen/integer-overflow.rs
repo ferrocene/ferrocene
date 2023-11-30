@@ -24,3 +24,5 @@ pub fn test_check<'a>(s: &'a mut S1, x: usize, y: usize) -> &'a [u8] {
     // CHECK: slice_index_order_fail
     &s.data[x..y]
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

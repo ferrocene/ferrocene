@@ -6,3 +6,9 @@ trait T {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants

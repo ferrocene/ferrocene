@@ -62,3 +62,9 @@ type X7 = fn(self: u8);
 type X8 = fn(mut self: u8);
 //~^ ERROR `self` parameter is only allowed in associated functions
 //~| ERROR patterns aren't allowed in
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

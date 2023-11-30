@@ -11,3 +11,5 @@
 fn main() {
     let x: Iter;
 }
+
+// ferrocene-annotations: um_rustc_json

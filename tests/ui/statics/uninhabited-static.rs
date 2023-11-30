@@ -19,3 +19,6 @@ static NEVER2: Void = unsafe { std::mem::transmute(()) }; //~ ERROR static of un
 //~| WARN: type `Void` does not permit zero-initialization
 
 fn main() {}
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks

@@ -7,3 +7,5 @@ fn main() {
     debug_assert!(); //~ ERROR requires a boolean expression
     debug_assert!(struct); //~ ERROR expected expression
 }
+
+// ferrocene-annotations: um_rustc_cfg

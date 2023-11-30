@@ -61,3 +61,9 @@ fn main() {
     assert_eq!(search_old_style((true, true, false)), 7);
     assert_eq!(search_old_style((true, true, true)), 8);
 }
+
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Wildcard Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

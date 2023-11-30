@@ -63,3 +63,15 @@ fn shr<A: Shr<B, Output=()>, B>(lhs: A, rhs: B) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_svkx6szhr472
+// Ownership
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

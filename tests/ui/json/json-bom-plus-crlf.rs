@@ -24,3 +24,6 @@ fn main() {
     let s : String = (
     );  // Error spanning the newline.
 }
+
+// ferrocene-annotations: um_rustc_json
+// ferrocene-annotations: um_rustc_error_format

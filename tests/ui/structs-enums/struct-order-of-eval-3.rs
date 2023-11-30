@@ -35,3 +35,9 @@ fn event(tag: u8) {
     let new_log = (old_log << 8) + tag as usize;
     LOG.store(new_log, Ordering::SeqCst);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

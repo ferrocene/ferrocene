@@ -12,3 +12,6 @@ fn bar() {
 fn main() {
     bar()
 }
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions

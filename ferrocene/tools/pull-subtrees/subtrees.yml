@@ -1,0 +1,33 @@
+---
+
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Syntax and format of the file
+# =============================
+#
+# Each list item represents a subtree managed by this tool. Each subtree
+# requires the path in this repository, the name of the repository to pull, and
+# the name of the branch to pull from.
+#
+# Once you add the subtree definition here, merge the change in the main
+# repository and run the automation to perform the initial subtree pull.
+#
+# It's possible to optionally specify actions that should be run after each
+# subtree pull. Supported actions right now are:
+#
+# - "update-cargo-lock": regenerate the Cargo.lock after the pull.
+
+- path: ferrocene/doc/specification
+  repo: ferrocene/specification
+  ref: main
+
+- path: ferrocene/doc/sphinx-shared-resources
+  repo: ferrocene/sphinx-shared-resources
+  ref: main
+
+- path: ferrocene/library/libc
+  repo: rust-lang/libc
+  ref: master
+  after:
+    - update-cargo-lock

@@ -31,3 +31,9 @@ pub fn main() {
     let y = Foo::Baz { x: 1.0, y: 2.0 };
     f(&y);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

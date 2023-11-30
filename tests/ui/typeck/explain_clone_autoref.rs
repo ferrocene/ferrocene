@@ -11,3 +11,9 @@ fn clone_thing(nc: &NotClone) -> NotClone {
     //~| NOTE `NotClone` does not implement `Clone`, so `&NotClone` was cloned instead
     //~| NOTE expected struct `NotClone`, found `&NotClone`
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

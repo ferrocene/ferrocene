@@ -1,5 +1,6 @@
 // compile-flags: -O
 // ignore-debug: the debug assertions get in the way
+// needs-unwind
 #![crate_type = "lib"]
 #![feature(shrink_to)]
 

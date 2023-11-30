@@ -58,3 +58,12 @@ pub fn main() {
     let mut nyan: &mut dyn noisy = &mut nyan;
     nyan.speak();
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

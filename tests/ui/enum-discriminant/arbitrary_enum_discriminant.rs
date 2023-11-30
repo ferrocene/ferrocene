@@ -41,3 +41,6 @@ fn main() {
     assert_eq!(2, TUPLE_TAG);
     assert_eq!(1, STRUCT_TAG);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

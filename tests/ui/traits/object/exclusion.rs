@@ -17,3 +17,8 @@ impl Future for Promise {}
 fn main() {
     Promise.forget();
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

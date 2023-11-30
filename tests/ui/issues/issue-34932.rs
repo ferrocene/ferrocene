@@ -9,3 +9,5 @@
 fn dummy() {
     let () = "this should not reach type-checking";
 }
+
+// ferrocene-annotations: um_rustc_test

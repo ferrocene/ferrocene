@@ -13,3 +13,9 @@ fn main() {
   [c, ..] = [5, 6, 6];
   assert_eq!(c, 5);
 }
+
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

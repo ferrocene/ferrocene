@@ -64,3 +64,6 @@ fn main() {
     X!();
     //~^ ERROR cannot find macro `X`
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

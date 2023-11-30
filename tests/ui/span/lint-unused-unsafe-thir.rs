@@ -59,3 +59,12 @@ fn good4() { unsafe { foo::bar() } }
 #[allow(unused_unsafe)] fn allowed() { unsafe {} }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

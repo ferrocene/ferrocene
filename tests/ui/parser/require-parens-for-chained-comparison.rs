@@ -36,3 +36,6 @@ fn main() {
     //~| HELP use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
     //~| HELP or use `(...)` if you meant to specify fn arguments
 }
+
+// ferrocene-annotations: fls_g0uyl7qw4c7w
+// Parenthesized Expressions

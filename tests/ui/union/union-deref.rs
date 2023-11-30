@@ -27,3 +27,33 @@ fn main() {
     unsafe { (*u.f.0).0.push(0) }; // explicit deref, this compiles
     unsafe { u.f.0.0.push(0) }; //~ERROR not automatically applying `DerefMut` on `ManuallyDrop` union field
 }
+
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_g0uyl7qw4c7w
+// Parenthesized Expressions
+//
+// ferrocene-annotations: fls_6ydylimiv553
+// Place Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

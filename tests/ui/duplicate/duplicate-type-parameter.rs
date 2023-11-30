@@ -27,3 +27,6 @@ impl<T,T> Qux<T,T> for Option<T> {}
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

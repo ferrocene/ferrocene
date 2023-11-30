@@ -9,3 +9,6 @@ fn main() {
     //~^ ERROR mismatched types [E0308]
     //~| HELP consider using a semicolon here
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

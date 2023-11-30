@@ -5,3 +5,6 @@ fn main() { let a: bool = 1; let b: i32 = true; }
 //~| expected `bool`, found integer
 //~| ERROR mismatched types
 //~| expected `i32`, found `bool`
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

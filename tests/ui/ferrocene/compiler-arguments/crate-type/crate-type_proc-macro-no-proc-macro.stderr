@@ -1,0 +1,8 @@
+error: `proc-macro` crate types currently cannot export any items other than functions tagged with `#[proc_macro]`, `#[proc_macro_derive]`, or `#[proc_macro_attribute]`
+  --> $DIR/crate-type_proc-macro-no-proc-macro.rs:9:1
+   |
+LL | pub fn foo(input: TokenStream) -> TokenStream {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to previous error
+

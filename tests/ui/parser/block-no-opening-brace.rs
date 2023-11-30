@@ -29,3 +29,15 @@ fn f5() {
     async
         let x = 0; //~ ERROR expected one of `move`, `|`, or `||`, found keyword `let`
     }
+
+// ferrocene-annotations: fls_aadan19t5006
+// async Blocks
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

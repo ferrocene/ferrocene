@@ -18,3 +18,8 @@ fn not_main() {
     Bench;
     NonExistent; //~ ERROR cannot find value `NonExistent` in this scope
 }
+
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: um_rustc_test

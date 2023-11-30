@@ -19,3 +19,6 @@ pub fn main() {
     let mut y = x as *const _;
     y = core::ptr::null_mut();
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

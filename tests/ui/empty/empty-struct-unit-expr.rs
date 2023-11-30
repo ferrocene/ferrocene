@@ -19,3 +19,6 @@ fn main() {
     let xe4 = XE::XEmpty4();
     //~^ ERROR expected function, found enum variant `XE::XEmpty4` [E0618]
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

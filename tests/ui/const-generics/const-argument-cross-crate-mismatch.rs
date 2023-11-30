@@ -8,3 +8,6 @@ fn main() {
     let _: const_generic_lib::Alias = const_generic_lib::Struct([0u8, 1u8, 2u8]);
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

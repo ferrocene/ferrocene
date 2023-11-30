@@ -41,3 +41,12 @@ mod exported {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

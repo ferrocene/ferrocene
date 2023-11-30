@@ -8,3 +8,6 @@ struct Foo {}
 impl<'a> Foo {} //~ ERROR `'a` never used
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

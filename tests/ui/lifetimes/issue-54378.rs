@@ -24,3 +24,6 @@ impl<'a, 'mir, 'tcx: 'a + 'mir> Machine<'a, 'mir, 'tcx>
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

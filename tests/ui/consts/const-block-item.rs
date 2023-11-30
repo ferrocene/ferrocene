@@ -39,3 +39,6 @@ pub fn main() {
     assert_eq!(BLOCK_FN_DEF(390), 400);
     assert_eq!(BLOCK_MACRO_RULES, 412);
 }
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

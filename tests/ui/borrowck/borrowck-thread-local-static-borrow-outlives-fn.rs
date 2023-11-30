@@ -7,3 +7,7 @@ fn assert_static(_t: &'static u8) {}
 fn main() {
      assert_static(&FOO); //~ ERROR [E0712]
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

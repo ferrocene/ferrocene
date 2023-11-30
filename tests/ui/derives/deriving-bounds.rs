@@ -9,3 +9,6 @@ struct Test;
 struct Test1;
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

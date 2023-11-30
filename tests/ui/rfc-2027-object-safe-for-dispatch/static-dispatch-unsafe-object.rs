@@ -35,3 +35,10 @@ fn main() {
     <dyn Trait>::plain();
     <dyn Trait>::generic::<usize>()
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

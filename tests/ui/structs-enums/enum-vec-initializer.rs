@@ -15,3 +15,9 @@ pub fn main() {
     const BAR3:usize = BAR2;
     let _v = [0;  BAR3];
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions

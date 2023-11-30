@@ -16,3 +16,5 @@ all:
 	# prefer-dynamic does what it says
 	$(RUSTC) foo.rs --extern bar -C prefer-dynamic
 	$(call RUN,foo) | $(CGREP) 'dynamic'
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

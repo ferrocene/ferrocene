@@ -12,3 +12,9 @@ extern crate macro_use_warned_against2;
 fn main() {
     foo!();
 }
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use
+//
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

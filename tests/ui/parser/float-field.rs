@@ -60,3 +60,9 @@ fn main() {
     { s.1.1e-1f32; } //~ ERROR unexpected token: `1.1e-1f32`
                     //~| ERROR expected one of `.`, `;`, `?`, `}`, or an operator, found `1.1e-1f32`
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

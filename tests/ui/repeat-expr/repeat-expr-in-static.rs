@@ -6,3 +6,6 @@ static BAR: [isize; 4] = [32, 32, 32, 32];
 pub fn main() {
     assert_eq!(FOO, BAR);
 }
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

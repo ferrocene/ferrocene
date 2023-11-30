@@ -17,3 +17,15 @@ fn test00_start(ch: Chan<Box<isize>>, message: Box<isize>, _count: Box<isize>) {
 }
 
 fn main() { panic!(); }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

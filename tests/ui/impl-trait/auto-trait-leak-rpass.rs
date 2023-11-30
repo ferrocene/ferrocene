@@ -19,3 +19,9 @@ fn after() -> impl FnMut(i32) {
     let mut p = Box::new(0);
     move |x| *p = x
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

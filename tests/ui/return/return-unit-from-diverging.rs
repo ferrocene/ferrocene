@@ -7,3 +7,6 @@ fn fail() -> ! {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type

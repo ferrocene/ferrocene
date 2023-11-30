@@ -18,3 +18,9 @@ fn kitten(cat: Option<cat>) -> kitten {
 type cat = Box<kitten>;
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

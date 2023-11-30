@@ -21,3 +21,9 @@ mod test {
 fn main() {
     test::foo();
 }
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

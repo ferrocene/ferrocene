@@ -3,3 +3,6 @@ fn main() {
     a += { "b" };
     //~^ ERROR: binary assignment operation `+=` cannot be applied
 }
+
+// ferrocene-annotations: fls_290jmzfh7x4e
+// Compound Assignment Expressions

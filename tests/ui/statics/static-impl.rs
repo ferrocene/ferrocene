@@ -64,3 +64,18 @@ pub fn main() {
     10_usize.multi(|_n| x += 2_usize );
     assert_eq!(x, 20_usize);
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

@@ -44,3 +44,8 @@ fn main() {
     };
     //~^^^ ERROR `if` and `else` have incompatible types
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

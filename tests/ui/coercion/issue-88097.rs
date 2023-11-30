@@ -29,3 +29,6 @@ fn peculiar5() -> impl Fn(u8) -> u8 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

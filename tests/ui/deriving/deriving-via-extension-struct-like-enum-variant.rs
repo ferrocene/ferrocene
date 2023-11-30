@@ -11,3 +11,6 @@ pub fn main() {
     assert_eq!(x, x);
     assert!(!(x != x));
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

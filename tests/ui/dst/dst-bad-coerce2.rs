@@ -29,3 +29,9 @@ pub fn main() {
     let f2: &(Foo,) = &f1;
     let f3: &mut (dyn Bar,) = f2; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

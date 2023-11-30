@@ -16,3 +16,6 @@ fn make_impl() -> impl for<'a> Hrtb<'a, Assoc = impl Send + 'a> {}
 //~^ ERROR higher kinded lifetime bounds on nested opaque types are not supported yet
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

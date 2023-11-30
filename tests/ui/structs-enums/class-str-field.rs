@@ -19,3 +19,9 @@ fn cat(in_name: String) -> cat {
 pub fn main() {
   let _nyan = cat("nyan".to_string());
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

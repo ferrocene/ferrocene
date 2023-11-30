@@ -34,3 +34,6 @@ fn main() {
     // T = u32, U = i16
     test(22_u32, Default::default(), 4, 2);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

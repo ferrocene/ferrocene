@@ -28,3 +28,6 @@ struct T7 { //~ ERROR E0072
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout

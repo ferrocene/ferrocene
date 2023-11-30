@@ -18,3 +18,9 @@ fn semantics() {
     //~^ ERROR bounds on `type`s in this context have no effect
     //~| ERROR type parameter `_T` is unused
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

@@ -13,3 +13,5 @@
 //~| WARN this was previously accepted
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_cfg

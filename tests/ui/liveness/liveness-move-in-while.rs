@@ -11,3 +11,9 @@ fn main() {
         //~| WARN denote infinite loops with
     }
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

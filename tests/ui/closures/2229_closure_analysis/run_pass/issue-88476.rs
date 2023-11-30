@@ -45,3 +45,6 @@ pub fn test2() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

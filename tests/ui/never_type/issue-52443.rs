@@ -12,3 +12,10 @@ fn main() {
     //~| ERROR mutable references
     //~| ERROR cannot call
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

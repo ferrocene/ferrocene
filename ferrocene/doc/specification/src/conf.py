@@ -1,20 +1,20 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # -- Path setup --------------------------------------------------------------
 
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../exts"))
-sys.path.insert(1, os.path.abspath("../shared/exts"))
+sys.path.append(os.path.abspath("../exts"))
+sys.path.append(os.path.abspath("../shared/exts"))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "Ferrocene Language Specification"
-copyright = "Ferrous Systems and AdaCore"
-author = "Ferrous Systems and AdaCore"
+copyright = "The Ferrocene Developers"
+author = "The Ferrocene Developers"
 
 
 # -- General configuration ---------------------------------------------------
@@ -23,9 +23,12 @@ author = "Ferrous Systems and AdaCore"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "ferrocene_intersphinx_support",
+    "ferrocene_qualification",
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
+    "sphinx.ext.intersphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -36,13 +39,7 @@ templates_path = []
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-rst_prolog = """
-.. caution::
-
-   You're reading a draft of the Ferrocene Language Specification. Some parts
-   of this document might be missing, incomplete or incorrect. Our aim is to
-   have the specification ready by the end of 2022.
-"""
+ferrocene_id = "FLS"
 
 
 # -- Options for HTML output -------------------------------------------------

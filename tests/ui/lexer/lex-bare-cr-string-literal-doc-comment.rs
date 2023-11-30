@@ -24,3 +24,21 @@ fn main() {
     // the following string literal has a bare CR in it
     let _s = "foo\bar"; //~ ERROR: unknown character escape: `\r`
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments
+//
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values

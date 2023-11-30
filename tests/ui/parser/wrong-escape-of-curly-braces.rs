@@ -6,3 +6,6 @@ fn main() {
     //~| ERROR unknown character escape: `}`
     //~| HELP if used in a formatting string, curly braces are escaped with `{{` and `}}`
 }
+
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals

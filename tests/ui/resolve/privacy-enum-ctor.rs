@@ -69,3 +69,6 @@ fn main() {
     //~^ ERROR cannot find type `Z` in this scope
     //~| ERROR enum `Z` is private
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

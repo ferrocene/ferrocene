@@ -119,3 +119,6 @@ pub fn main() {
         Box::<Fat<[_; 3]>>::new(Fat { f1: 5, f2: "some str", ptr: [1, 2, 3] });
     foo(&*f3);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

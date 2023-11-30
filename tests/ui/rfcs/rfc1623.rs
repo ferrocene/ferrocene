@@ -73,3 +73,9 @@ fn main() {
         CONST_MULTI_FN(a, b, c);
     }
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

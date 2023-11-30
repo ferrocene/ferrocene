@@ -6,3 +6,5 @@ include ../../run-make-fulldeps/tools.mk
 all:
 	RUSTC_LOG=rustc_codegen_ssa::back::link=info $(RUSTC) -Z gcc-ld=lld -C link-args=-Wl,-v main.rs 2> $(TMPDIR)/output.txt
 	$(CGREP) -e "^LLD [0-9]+\.[0-9]+\.[0-9]+" < $(TMPDIR)/output.txt
+
+# ferrocene-annotations: um_rustc_C_link_args

@@ -19,3 +19,9 @@ fn main() {
     //~| NOTE: this `A` is followed by the combining mark `\u{30a}`
     //~| HELP: consider using the normalized form `\u{c5}` of this character
 }
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals
+//
+// ferrocene-annotations: fls_2i089jvv8j5g
+// Character Set

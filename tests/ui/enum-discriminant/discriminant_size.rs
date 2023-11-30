@@ -52,3 +52,6 @@ fn main() {
     target[1] = discriminant_value(&E4::B);
     assert_eq!(target, [0, -0x1223_3445_5667_7889, 0]);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

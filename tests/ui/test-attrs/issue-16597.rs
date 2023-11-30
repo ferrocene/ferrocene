@@ -8,3 +8,5 @@ mod tests {
     #[test]
     pub fn test(){}
 }
+
+// ferrocene-annotations: um_rustc_test

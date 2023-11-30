@@ -3,3 +3,6 @@ fn main() {
     //~^ ERROR the placeholder `_` is not allowed within types on item signatures for functions [E0121]
     //~| ERROR the placeholder `_` is not allowed within types on item signatures for static items
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

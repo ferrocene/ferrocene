@@ -13,3 +13,6 @@ pub struct Foo {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive

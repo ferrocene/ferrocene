@@ -27,3 +27,6 @@ fn main() {
     let b = B::<C> { arr: [1, 2, 3, 4, 5] };
     assert_eq!(b.arr.len(), 5);
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array expressions

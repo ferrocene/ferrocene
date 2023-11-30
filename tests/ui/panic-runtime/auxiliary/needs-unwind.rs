@@ -11,3 +11,5 @@ fn bar() {
     let ptr: extern "C-unwind" fn() = foo;
     ptr();
 }
+
+// ferrocene-annotations: um_rustc_C_panic

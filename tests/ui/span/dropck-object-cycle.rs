@@ -45,3 +45,18 @@ pub fn main() {
     // the type of `m` *strictly outlives* `'m`. Hence we get an
     // error.
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

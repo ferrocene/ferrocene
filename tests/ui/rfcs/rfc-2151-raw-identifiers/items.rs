@@ -30,3 +30,18 @@ pub fn main() {
     assert_eq!(4, Generic(4).0);
     assert_eq!(5, Generic(5).r#trait());
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

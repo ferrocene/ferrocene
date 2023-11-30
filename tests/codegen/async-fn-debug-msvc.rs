@@ -52,3 +52,5 @@ async fn async_fn_test() {
 fn main() {
     let _dummy = async_fn_test();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

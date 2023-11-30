@@ -11,3 +11,6 @@ fn main() {
 
 // This and the -32 version of this test need to have different literals, as we can't rely on
 // conditional compilation for them while retaining the same spans/lines.
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

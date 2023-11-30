@@ -12,3 +12,9 @@ pub fn main() {
     println!("{}", x.foo.clone());
     println!("{}", x.bar.clone());
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

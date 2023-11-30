@@ -11,3 +11,6 @@ fn foo() -> usize {
     //~| ERROR expected `;`
     return 3;
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

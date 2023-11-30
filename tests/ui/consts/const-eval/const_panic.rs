@@ -38,3 +38,9 @@ const W_CORE: () = core::panic!(MSG);
 
 const W2_CORE: () = core::panic!("{}", MSG);
 //~^ ERROR evaluation of constant value failed
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

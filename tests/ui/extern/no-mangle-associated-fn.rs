@@ -35,3 +35,12 @@ fn main() {
     assert_eq!(unsafe { baz() }, 3);
     assert_eq!(unsafe { qux() }, 4);
 }
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

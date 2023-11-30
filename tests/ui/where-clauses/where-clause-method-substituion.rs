@@ -20,3 +20,12 @@ fn main() {
     1.method::<X>();
     //~^ ERROR the trait bound `X: Foo<X>` is not satisfied
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

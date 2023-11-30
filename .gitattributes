@@ -16,3 +16,18 @@ config.toml.example linguist-language=TOML
 *.ico binary
 *.woff binary
 *.woff2 binary
+
+#####################################
+#                                   #
+#   Ferrocene-specific attributes   #
+#                                   #
+#####################################
+
+# Files marked with `ferrocene-avoid-pulling-from-upstream` will not be
+# imported from upstream. See `ferrocene/tools/pull-upstream/README.md`.
+
+**/.github/** ferrocene-avoid-pulling-from-upstream
+/triagebot.toml ferrocene-avoid-pulling-from-upstream
+/README.md ferrocene-avoid-pulling-from-upstream
+/CODE_OF_CONDUCT.md ferrocene-avoid-pulling-from-upstream
+/CONTRIBUTING.md ferrocene-avoid-pulling-from-upstream

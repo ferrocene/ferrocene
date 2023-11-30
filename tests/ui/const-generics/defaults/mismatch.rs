@@ -20,3 +20,6 @@ fn main() {
     //~^ Error: mismatched types
     //~| expected struct `Example4<7>`
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

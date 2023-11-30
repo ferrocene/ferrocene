@@ -12,3 +12,12 @@ const MUTATE: fn(&Vec<String>) = {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

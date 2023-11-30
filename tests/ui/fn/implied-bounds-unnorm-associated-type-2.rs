@@ -21,3 +21,6 @@ fn g<'a, 'b>() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

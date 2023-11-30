@@ -20,3 +20,6 @@ macro_rules! define_std_as_non_existent {
 define_std_as_non_existent!();
 
 fn main() {}
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

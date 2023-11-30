@@ -19,3 +19,6 @@ impl TheTrait for fn(&u8) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

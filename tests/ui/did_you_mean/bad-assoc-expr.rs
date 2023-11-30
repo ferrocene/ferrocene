@@ -34,3 +34,6 @@ fn check_macros() {
     ty!()::clone(&0);
     //~^ ERROR missing angle brackets in associated item path
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

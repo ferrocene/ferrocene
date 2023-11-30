@@ -1,5 +1,4 @@
 // run-pass
-// ignore-pretty issue #37195
 
 // Testing that a plain .rs file can load modules from other source files
 
@@ -9,3 +8,6 @@ mod m;
 pub fn main() {
     assert_eq!(m::foo(), 10);
 }
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

@@ -8,3 +8,6 @@ fn main() {
     let x: ! = panic!();
     let y: u32 = x as u32;
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

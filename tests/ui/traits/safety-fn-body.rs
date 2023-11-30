@@ -17,3 +17,6 @@ unsafe impl UnsafeTrait for *mut isize {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

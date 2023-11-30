@@ -9,3 +9,7 @@ fn main() {
     println!("t[0]: {}", t[0]);
     t[0];
 }
+
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

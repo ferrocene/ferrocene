@@ -58,3 +58,10 @@ fn main() {
         baz();
     }
 }
+
+// ferrocene-annotations: fls_hbbek3z4wtcs
+// Function Types
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

@@ -16,3 +16,6 @@ impl UnsafeTrait for u16 { } //~ ERROR requires an `unsafe impl` declaration
 unsafe impl SafeTrait for u32 { } //~ ERROR the trait `SafeTrait` is not unsafe
 
 fn main() { }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

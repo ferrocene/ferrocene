@@ -18,3 +18,9 @@ fn c<'a, T>(items: &'a [T]) -> Box<dyn Iterator<Item=&'a T> + 'a> {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

@@ -9,3 +9,12 @@ type A where T, = u8;
 //~^ ERROR expected one of `!`, `(`, `+`, `::`, `:`, `<`, `==`, or `=`, found `,`
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

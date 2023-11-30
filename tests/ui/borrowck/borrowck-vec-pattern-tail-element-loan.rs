@@ -12,3 +12,7 @@ fn main() {
     let fifth = a();
     println!("{}", *fifth);
 }
+
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

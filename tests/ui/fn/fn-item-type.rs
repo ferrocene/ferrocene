@@ -51,3 +51,6 @@ fn main() {
 
     eq(foo::<u8> as fn(isize) -> isize, bar::<u8>); // ok!
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

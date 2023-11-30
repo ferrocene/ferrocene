@@ -13,3 +13,6 @@ fn main() {
     };
     c_f(4);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Type

@@ -15,3 +15,12 @@ fn main() {
 
     eq::<IntMap>(foo, bar);
 }
+
+// ferrocene-annotations: fls_airvr79xkcag
+// Function Item Type
+//
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Type
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

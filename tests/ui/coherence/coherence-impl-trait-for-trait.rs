@@ -18,3 +18,6 @@ trait Other { }
 impl Other for dyn Baz { } // OK, Other not a supertrait of Baz
 
 fn main() { }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

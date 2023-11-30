@@ -7,3 +7,9 @@ pub fn main() {
     x.push(foo);
     assert_eq!((x[0])(), 22);
 }
+
+// ferrocene-annotations: fls_hbbek3z4wtcs
+// Function Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

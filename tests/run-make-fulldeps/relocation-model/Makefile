@@ -17,3 +17,5 @@ others:
 	$(RUSTC) -C relocation-model=static foo.rs
 	$(call RUN,foo)
 endif
+
+// ferrocene-annotations: um_rustc_C_relocation_model

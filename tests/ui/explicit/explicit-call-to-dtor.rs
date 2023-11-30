@@ -14,3 +14,6 @@ fn main() {
     println!("{}", x.x);
     x.drop();   //~ ERROR explicit use of destructor method
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

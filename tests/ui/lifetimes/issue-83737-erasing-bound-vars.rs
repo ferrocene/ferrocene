@@ -12,3 +12,9 @@ where
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_hyrbmfmf6r8g
+// Await Expressions
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

@@ -11,3 +11,6 @@ pub fn main() {
     let f = Foo { foo: 10 };
     format!("{:?}", f);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

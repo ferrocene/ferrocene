@@ -29,3 +29,14 @@ pub fn main() {
     f(r, 10, 20, 11, 22);
     f(r2, 10, 20, 11, 22);
 }
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_k64tfywtn0g8
+// Tuple Expressions
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

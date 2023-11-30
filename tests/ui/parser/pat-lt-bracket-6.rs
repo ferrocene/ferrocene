@@ -7,3 +7,6 @@ fn main() {
 }
 
 const RECOVERY_WITNESS: () = 0; //~ ERROR mismatched types
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

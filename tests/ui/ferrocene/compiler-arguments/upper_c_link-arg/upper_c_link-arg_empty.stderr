@@ -1,0 +1,2 @@
+error: codegen option `link-arg` requires a string (C link-arg=<value>)
+

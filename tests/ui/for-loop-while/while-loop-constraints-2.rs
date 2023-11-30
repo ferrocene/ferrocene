@@ -13,3 +13,6 @@ pub fn main() {
     }
     assert!((y == 42 && z == 50));
 }
+
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops

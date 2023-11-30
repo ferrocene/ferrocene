@@ -9,3 +9,6 @@ extern "C" {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

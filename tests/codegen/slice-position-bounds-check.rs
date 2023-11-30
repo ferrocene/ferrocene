@@ -30,3 +30,5 @@ pub fn test_check(y: &[i32]) -> i32 {
     // CHECK: panic_bounds_check
     y[12]
 }
+
+// ferrocene-annotations: um_rustc_C_panic

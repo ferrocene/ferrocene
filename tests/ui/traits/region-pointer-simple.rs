@@ -19,3 +19,6 @@ pub fn main() {
     let b = (&a) as &dyn Foo;
     assert_eq!(b.f(), 3);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

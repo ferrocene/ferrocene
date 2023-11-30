@@ -23,3 +23,6 @@ type FT6 = for<'a> const async unsafe extern "C" fn();
 fn main() {
     let _recovery_witness: () = 0; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

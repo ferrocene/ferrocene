@@ -28,3 +28,5 @@ pub fn test(n: &mut u32) {
 pub fn random_inline(n: &mut u32) {
     *n = 42;
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

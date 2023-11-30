@@ -9,10 +9,10 @@
 // compile-flags:-g -Copt-level=0 -Cllvm-args=-enable-tail-merge=0
 // compile-flags:-Cforce-frame-pointers=yes
 // compile-flags:-Cstrip=none
-// ignore-pretty issue #37195
 // ignore-emscripten spawning processes is not supported
 // ignore-sgx no processes
 // ignore-fuchsia Backtrace not symbolized, trace different line alignment
+// ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 
 use std::env;
 
@@ -188,3 +188,42 @@ fn main() {
         run_test(&args[0]);
     }
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_k01lsksqtq1r
+// Repetition
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_4apk1exafxii
+// Macro Matching
+//
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule Matching
+//
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token Matching
+//
+// ferrocene-annotations: fls_ym00b6ewf4n3
+// Macro Transcription
+//
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: fls_ypio6boj3pwf
+// Attribute inline

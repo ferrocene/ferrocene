@@ -41,3 +41,15 @@ fn main() {
 
     println!("{:?}", points.test1());
 }
+
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

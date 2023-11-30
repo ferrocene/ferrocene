@@ -37,3 +37,18 @@ fn main() {
     let u = U5 { a: ManuallyDrop::new(CloneNoCopy) };
     let w = u.clone(); //~ ERROR the method
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

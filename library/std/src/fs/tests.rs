@@ -639,7 +639,7 @@ fn recursive_rmdir_of_file_symlink() {
 }
 
 #[test]
-#[ignore] // takes too much time
+#[ignore = "high time cost of running test"]
 fn recursive_rmdir_toctou() {
     // Test for time-of-check to time-of-use issues.
     //

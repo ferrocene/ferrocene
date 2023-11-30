@@ -59,3 +59,6 @@ fn test_while_or() {
         println!("both");
     }
 }
+
+// ferrocene-annotations: fls_lstusiu2c8lu
+// Lazy Boolean Expressions

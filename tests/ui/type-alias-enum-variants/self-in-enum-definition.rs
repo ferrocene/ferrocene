@@ -6,3 +6,10 @@ enum Alpha {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_6l60b5hwnjbm
+// Path Expressions
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

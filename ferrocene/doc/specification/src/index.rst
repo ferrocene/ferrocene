@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 Ferrocene Language Specification
 ================================
@@ -39,6 +39,7 @@ Ferrocene Language Specification
 
    licenses
    glossary
+   undefined-behavior
 
 Indices and tables
 ------------------

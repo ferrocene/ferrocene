@@ -19,3 +19,12 @@ fn main() {
         //~| variable `y` is bound inconsistently across alternatives separated by `|`
     }
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_jm6l7b90h6wa
+// Pattern Matching
+//
+// ferrocene-annotations: fls_xgqh0ju6bmbn
+// Patterns

@@ -14,3 +14,7 @@ fn x2(cb: &mut Option<&mut dyn FnMut()>) {
 }
 
 fn main() {}
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

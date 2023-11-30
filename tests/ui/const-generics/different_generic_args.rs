@@ -11,3 +11,6 @@ fn main() {
     u = ConstUsize::<4> {};
     //~^ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

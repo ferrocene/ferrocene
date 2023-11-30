@@ -47,3 +47,18 @@ impl<'a, T> Master<'a, fn() -> T> for () {
 fn main() {
     println!("Hello, world!");
 }
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

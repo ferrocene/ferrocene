@@ -29,3 +29,8 @@ produce_it!(#[cfg_attr(not(FALSE), rustc_dummy(second))] {
 });
 
 fn main() {}
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: um_rustc_error_format

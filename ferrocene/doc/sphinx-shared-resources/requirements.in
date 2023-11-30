@@ -1,16 +1,12 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 sphinx
 sphinx-autobuild
+tomli
+myst_parser
+pyyaml
 
-# Sphinx dependencies used for compatibility with Python 3.6. They're not
-# installed by default when running pip-tools on newer systems because they're
-# only pulled in by pip when an older Python version is used.
-importlib-metadata < 4.9
-zipp < 3.7
-typing-extensions < 4.2
-jinja2 < 3.1
-markupsafe < 2.1
-requests < 2.28
-tornado < 6.2
+# For compatibility with Python < 3.10, as Sphinx has a conditional dependency
+# on importlib-metadata on older Python versions.
+importlib-metadata

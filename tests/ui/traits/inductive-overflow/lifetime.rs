@@ -31,3 +31,8 @@ fn main() {
     //~| 3 redundant requirements hidden
     //~| required for
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+// ferrocene-annotations: fls_u2hzlzpzh7yy
+// Attribute recursion_limit

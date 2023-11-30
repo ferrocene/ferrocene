@@ -13,3 +13,10 @@ pub fn main() {
     let (y,) = x;
     assert_eq!(y, 'd');
 }
+
+// ferrocene-annotations: fls_k64tfywtn0g8
+// Tuple Expressions
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types

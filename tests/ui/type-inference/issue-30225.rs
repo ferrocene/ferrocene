@@ -36,3 +36,8 @@ fn bomb() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

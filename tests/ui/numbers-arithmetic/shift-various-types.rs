@@ -46,3 +46,12 @@ fn main() {
     };
     foo(&p)
 }
+
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types

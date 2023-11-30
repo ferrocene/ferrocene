@@ -15,3 +15,6 @@ struct S(Option<<S as Mirror>::It>);
 fn main() {
     let _s = S(None);
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

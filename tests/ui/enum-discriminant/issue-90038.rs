@@ -19,3 +19,6 @@ fn main() {
         _ => unreachable!(),
     }
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

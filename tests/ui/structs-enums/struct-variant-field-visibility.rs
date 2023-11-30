@@ -15,3 +15,9 @@ fn f(f: foo::Foo) {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

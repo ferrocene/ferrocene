@@ -34,3 +34,9 @@ fn main() {
 
     c1();
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

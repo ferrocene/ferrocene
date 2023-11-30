@@ -17,3 +17,6 @@ fn main() {
 
     open_parent(&old_path);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

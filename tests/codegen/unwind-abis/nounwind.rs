@@ -15,3 +15,6 @@ pub extern "C" fn foo() {}
 // CHECK-NEXT: @bar
 #[no_mangle]
 pub fn bar() {}
+
+// ferrocene-annotations: um_rustc_C_panic
+// ferrocene-annotations: um_rustc_C_opt_level

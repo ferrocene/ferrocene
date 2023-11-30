@@ -57,3 +57,21 @@ fn main() {
     assert!(thread::spawn(move|| { 1i128 % 0; }).join().is_err());
     //~^ ERROR operation will panic
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

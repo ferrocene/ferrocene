@@ -54,3 +54,9 @@ fn main() {
     }
     collection = WrapSome(T);
 }
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

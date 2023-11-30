@@ -53,3 +53,27 @@ fn main() {
 
   from_marker(make_marker());
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative macros
+
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro expansion
+
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro invocation
+
+// ferrocene-annotations: fls_4apk1exafxii
+// Macro matching
+
+// ferrocene-annotations: fls_ym00b6ewf4n3
+// Macro transcription
+
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule matching
+
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token matching
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

@@ -21,3 +21,9 @@ pub fn main() {
     assert_eq!(pet as usize, 3);
     assert_eq!(hero as isize, -2);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

@@ -12,3 +12,5 @@ all:
 	$(AR) rcs $(TMPDIR)/libbad.a $(TMPDIR)/bad.o
 	$(RUSTC) param_passing.rs -L$(TMPDIR) -lbad -C opt-level=3
 	$(call RUN,param_passing)
+
+# ferrocene-annotations: um_rustc_C_opt_level

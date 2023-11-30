@@ -127,3 +127,57 @@ fn main() {
         [false] => {}
     }
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Underscore Pattern Matching
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns
+//
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal Pattern Matching
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_nrkd5wpi64oo
+// Literals
+//
+// ferrocene-annotations: fls_jkab8eevzbte
+// Boolean Literals
+//
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference Patterns
+//
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference Pattern Matching

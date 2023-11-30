@@ -14,3 +14,6 @@ extern crate lib;
 fn main() {
     lib::bar(()); // Error won't happen if bar is called from same crate
 }
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

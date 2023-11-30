@@ -10,3 +10,5 @@ all:
 	$(RUSTC) foo.rs --emit=llvm-ir -C codegen-units=6 \
 		-Z inline-in-all-cgus
 	[ "$$(cat "$(TMPDIR)"/foo.*.ll | grep -c define\ .*cci_fn)" -eq "2" ]
+
+# ferrocene-annotations: um_rustc_C_codegen_units

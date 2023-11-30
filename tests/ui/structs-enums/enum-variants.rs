@@ -16,3 +16,6 @@ pub fn main() {
     // permuting the fields should work too
     let _c = Animal::Cat { weight: 3.1, name: "Spreckles".to_string() };
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

@@ -13,3 +13,6 @@ fn main() {
     //~^ ERROR cannot find function `check` in this scope [E0425]
     f(a, b);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

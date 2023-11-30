@@ -6,3 +6,6 @@ fn main() {
     myprintln!("{}");
     //~^ ERROR in format string
 }
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use

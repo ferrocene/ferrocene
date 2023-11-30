@@ -25,3 +25,21 @@ fn main() {
         }
     };
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

@@ -24,3 +24,18 @@ enum EFoo2<'a> {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

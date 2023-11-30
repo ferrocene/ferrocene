@@ -197,3 +197,9 @@ fn main() {
     };
     assert_eq!(e, e);
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_vgb6ev541b2r
+// Types and Traits

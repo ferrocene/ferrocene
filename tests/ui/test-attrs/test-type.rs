@@ -1,4 +1,4 @@
-// compile-flags: --test
+// compile-flags: --test -Zpanic-abort-tests
 // run-flags: --test-threads=1
 // check-run-results
 // normalize-stdout-test "finished in \d+\.\d+s" -> "finished in $$TIME"
@@ -25,3 +25,8 @@ fn test_no_run() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_x849a4u7h82j
+// Attribute ignore
+//
+// ferrocene-annotations: um_rustc_test

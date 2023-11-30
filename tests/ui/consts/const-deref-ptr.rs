@@ -5,3 +5,6 @@ fn main() {
     //~^ ERROR could not evaluate static initializer
     println!("{}", C);
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

@@ -5,3 +5,5 @@
 // error-pattern: the linking modifiers `+bundle` and `+whole-archive` are not compatible with each other when generating rlibs
 
 fn main() { }
+
+// ferrocene-annotations: um_rustc_l

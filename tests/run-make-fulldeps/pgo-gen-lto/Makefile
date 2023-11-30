@@ -12,3 +12,5 @@ all:
 	$(RUSTC) $(COMPILE_FLAGS) test.rs
 	$(call RUN,test) || exit 1
 	[ -e "$(TMPDIR)"/default_*.profraw ] || (echo "No .profraw file"; exit 1)
+
+# ferrocene-annotations: um_rustc_C_opt_level

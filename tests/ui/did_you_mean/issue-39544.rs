@@ -48,3 +48,12 @@ pub fn with_tuple() {
     *x.0 = 1;
     //~^ ERROR cannot assign to `*x.0`, which is behind a `&` reference
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

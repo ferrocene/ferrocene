@@ -4,3 +4,5 @@
 
 fn main() { //~ ERROR external crate `somedep` unused in `no_nounused`
 }
+
+// ferrocene-annotations: um_rustc_D

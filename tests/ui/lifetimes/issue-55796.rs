@@ -24,3 +24,12 @@ pub trait Graph<'a> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

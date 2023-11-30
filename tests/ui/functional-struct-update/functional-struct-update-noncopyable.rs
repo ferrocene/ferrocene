@@ -12,3 +12,6 @@ fn main() {
     let _b = A { y: Arc::new(3), ..a }; //~ ERROR cannot move out of type `A`
     let _c = a;
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

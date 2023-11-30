@@ -66,3 +66,12 @@ pub fn main() {
     // Make sure in-array coercion still works.
     let _ = [("a", Default::default()), (Default::default(), "b"), (&s, &s)];
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_nlzksiu8y3z9
+// If and If Let Expressions
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions

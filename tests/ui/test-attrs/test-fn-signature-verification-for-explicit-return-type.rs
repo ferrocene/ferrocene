@@ -11,3 +11,5 @@ pub fn bench_explicit_return_type(_: &mut ::test::Bencher) -> () {}
 
 #[test]
 pub fn test_explicit_return_type() -> () {}
+
+// ferrocene-annotations: um_rustc_test

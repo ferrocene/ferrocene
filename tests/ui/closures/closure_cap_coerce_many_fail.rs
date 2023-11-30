@@ -37,3 +37,12 @@ fn main() {
     };
     //~^^^ ERROR `match` arms have incompatible types
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

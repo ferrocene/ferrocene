@@ -10,3 +10,6 @@ struct Bar<T, const TYPE_SIZE: usize = { std::mem::size_of::<T>() }>(T);
 //[min]~^ ERROR generic parameters may not be used in const operations
 
 fn main() {}
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

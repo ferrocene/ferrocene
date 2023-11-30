@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 .. default-domain:: spec
 
@@ -57,12 +57,6 @@ Invoking :t:`macro` :std:`core::panic` has the following runtime effects:
 #. :dp:`fls_xmtt04lw517w`
    Control flow of the current thread resumes execution by invoking the
    :t:`function` subject to :t:`attribute` :c:`panic_handler`.
-
-.. rubric:: Undefined Behavior
-
-:dp:`fls_krhb07mvojph`
-It is undefined behavior when a :t:`panic` crosses a
-:t:`foreign function interface` boundary.
 
 .. rubric:: Examples
 

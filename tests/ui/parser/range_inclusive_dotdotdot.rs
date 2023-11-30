@@ -21,3 +21,6 @@ pub fn main() {
                      //~^HELP  use `..` for an exclusive range
                      //~^^HELP or `..=` for an inclusive range
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

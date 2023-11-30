@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# This file defines all the files and packages that are going to be part of a
+# release. If you need to add a new target supported by Ferrocene or a new
+# package being distributed this is the file to tweak!
+#
+# ## Groups
+#
+# Groups are a collection of packages produced for the same set of targets. The
+# name of the group is arbitrary and doesn't have any specific meaning. If the
+# target or package you're trying to add would fit in an existing group try to
+# avoid creating a new one, unless it semantically makes more sense.
+#
+# ## Packages
+#
+# Packages represent individual artifacts or tarballs that are going to be part
+# of the release. All these packages must be produced by CI in order for the
+# release to succeed. Packages have a name, which is the prefix in the tarball
+# name, and its subset, which will define the set of customers with access to
+# that package.
+#
+# Packages containing documentation should also define the `docs-in` key, which
+# contains the path inside of the tarball where documentation is present. The
+# release process will take care of publishing the contents of that directory.
+
+manifest-version = 2
+
+[groups.hosts]
+targets = ["x86_64-unknown-linux-gnu"]
+
+[[groups.hosts.packages]]
+name = "rustc"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "rust-std"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "cargo"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "llvm-tools"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "ferrocene-self-test"
+subset = "default"
+
+[groups.cross-compilation]
+targets = ["aarch64-unknown-none"]
+
+[[groups.cross-compilation.packages]]
+name = "rust-std"
+subset = "default"
+
+[groups.any-platform]
+targets = ["*"]
+
+[[groups.any-platform.packages]]
+name = "rust-src"
+subset = "default"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-src"
+subset = "source"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-test-outcomes"
+subset = "source"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-docs"
+subset = "default"
+docs-in = "share/doc/ferrocene/html"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-docs-signatures"
+subset = "signatures"
+docs-in = "share/doc/ferrocene/html"

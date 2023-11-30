@@ -100,6 +100,9 @@ pub(crate) struct Tarball<'a> {
     include_target_in_component_name: bool,
     is_preview: bool,
     permit_symlinks: bool,
+
+    proxied_binaries: Vec<String>,
+    managed_prefixes: Vec<String>,
 }
 
 impl<'a> Tarball<'a> {
@@ -140,7 +143,21 @@ impl<'a> Tarball<'a> {
             include_target_in_component_name: false,
             is_preview: false,
             permit_symlinks: false,
+
+            proxied_binaries: Vec::new(),
+            managed_prefixes: Vec::new(),
         }
+    }
+
+    /// Register a binary that should have a proxy created by criticalup.
+    pub(crate) fn ferrocene_proxied_binary(&mut self, path: &str) {
+        self.proxied_binaries.push(path.into());
+    }
+
+    /// Register a path prefix that criticalup should prevent non-Ferrocene files from existing
+    /// into it.
+    pub(crate) fn ferrocene_managed_prefix(&mut self, path: &str) {
+        self.managed_prefixes.push(path.into());
     }
 
     pub(crate) fn set_overlay(&mut self, overlay: OverlayKind) {
@@ -293,6 +310,23 @@ impl<'a> Tarball<'a> {
             .arg(&self.overlay_dir)
             .arg("--output-dir")
             .arg(crate::dist::distdir(self.builder));
+
+        cmd.arg("--ferrocene-component").arg(match &self.target {
+            Some(target) => format!("{}-{target}", self.component),
+            None => self.component.clone(),
+        });
+        if let Some(sha) = self.builder.rust_sha() {
+            cmd.arg("--ferrocene-commit-sha").arg(sha);
+        }
+        if let Some(kms_key_arn) = &self.builder.config.ferrocene_tarball_signing_kms_key_arn {
+            cmd.arg("--ferrocene-signing-kms-key-arn").arg(kms_key_arn);
+        }
+        for proxied_binary in &self.proxied_binaries {
+            cmd.arg("--ferrocene-proxied-binary").arg(proxied_binary);
+        }
+        for managed_prefix in &self.managed_prefixes {
+            cmd.arg("--ferrocene-managed-prefix").arg(managed_prefix);
+        }
     }
 
     fn run(self, build_cli: impl FnOnce(&Tarball<'a>, &mut Command)) -> GeneratedTarball {
@@ -306,7 +340,7 @@ impl<'a> Tarball<'a> {
             self.builder.install(&self.builder.src.join(file), &self.overlay_dir, 0o644);
         }
 
-        let mut cmd = self.builder.tool_cmd(crate::tool::Tool::RustInstaller);
+        let mut cmd = self.builder.tool_cmd(crate::tool::Tool::FerroceneGenerateTarball);
 
         let package_name = self.package_name();
         self.builder.info(&format!("Dist {}", package_name));

@@ -11,3 +11,9 @@ fn parse_type_3() -> &str { unimplemented!() }
 //~^ ERROR missing lifetime specifier [E0106]
 
 fn main() {}
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

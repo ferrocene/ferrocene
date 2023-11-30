@@ -9,3 +9,5 @@ pub fn foo(bar: usize) -> usize {
 fn main() {
     foo(0);
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

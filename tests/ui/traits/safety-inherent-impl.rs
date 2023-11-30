@@ -7,3 +7,6 @@ unsafe impl SomeStruct { //~ ERROR inherent impls cannot be unsafe
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

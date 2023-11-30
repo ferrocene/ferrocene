@@ -7,3 +7,6 @@ impl Cmp, ToString for S {
   fn eq(&&other: S) { false }
   fn to_string(&self) -> String { "hi".to_string() }
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

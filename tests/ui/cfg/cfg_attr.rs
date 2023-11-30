@@ -48,3 +48,5 @@ fn main() {
     is_show::<Complex>();
     is_show::<KeyValue>();
 }
+
+// ferrocene-annotations: um_rustc_cfg

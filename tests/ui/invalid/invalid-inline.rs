@@ -12,3 +12,6 @@ fn main() {
     a();
     b();
 }
+
+// ferrocene-annotations: fls_ypio6boj3pwf
+// Attribute inline

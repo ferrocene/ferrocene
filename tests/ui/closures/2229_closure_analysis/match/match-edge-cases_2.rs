@@ -35,3 +35,9 @@ fn edge_case_if() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching

@@ -39,3 +39,6 @@ fn main() {
     t3(&());
     t4(&());
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

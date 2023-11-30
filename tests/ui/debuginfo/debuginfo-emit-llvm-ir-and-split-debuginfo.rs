@@ -1,5 +1,6 @@
 // build-pass
 // only-linux
+// ignore-aarch64-unknown-ferrocenecoretest - the actual tested target does not support this
 //
 // compile-flags: -g --emit=llvm-ir -Csplit-debuginfo=unpacked
 //

@@ -17,3 +17,6 @@ pub enum Aligned2 { //~ ERROR: layout_of
     Zero = 0,
     One = 1,
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

@@ -247,3 +247,12 @@ pub fn main() {
 
     no_autoderef();
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

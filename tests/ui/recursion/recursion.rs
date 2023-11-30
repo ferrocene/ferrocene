@@ -23,3 +23,12 @@ pub fn main() {
   let n = test(1, 0, Nil::NilValue, Nil::NilValue);
   println!("{}", n);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

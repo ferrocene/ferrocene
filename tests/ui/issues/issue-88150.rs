@@ -19,3 +19,5 @@ impl<T: ?Sized> Foo<T, Never> {
 fn main() {
     let _ = Foo::<[()], Never>::new_foo();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

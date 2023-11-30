@@ -6,3 +6,6 @@ fn main() {}
 
 #[cfg(FALSE)]
 static X: u8;
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

@@ -24,3 +24,6 @@ pub fn main() {
     let foo = Foo { ..foo };
     assert_eq!(foo, foo_);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

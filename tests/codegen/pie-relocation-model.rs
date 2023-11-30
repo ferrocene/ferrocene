@@ -20,3 +20,5 @@ extern "C" {fn foreign_fn() -> u8;}
 
 // CHECK: !{i32 {{[78]}}, !"PIC Level", i32 2}
 // CHECK: !{i32 7, !"PIE Level", i32 2}
+
+// ferrocene-annotations: um_rustc_C_relocation_model

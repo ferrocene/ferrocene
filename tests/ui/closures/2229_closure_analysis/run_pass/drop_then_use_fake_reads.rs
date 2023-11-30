@@ -9,3 +9,6 @@ fn main() {
         match x { _ => () }
     };
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

@@ -30,3 +30,14 @@ fn main() {
 
     let UnitStruct { } = us;
 }
+
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching

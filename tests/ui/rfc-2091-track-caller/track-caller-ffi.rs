@@ -46,3 +46,8 @@ fn main() {
     assert_eq!(contained.line(), 12);
     assert_eq!(contained.column(), 14);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

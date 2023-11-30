@@ -94,3 +94,36 @@ unsafe fn deref_sibling_move() {
 
 
 fn main() {}
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_g0uyl7qw4c7w
+// Parenthesized Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

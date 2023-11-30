@@ -1,0 +1,2 @@
+error: incorrect value `invalid` for codegen option `prefer-dynamic` - one of: `y`, `yes`, `on`, `n`, `no`, or `off` was expected
+

@@ -42,3 +42,21 @@ fn main() {
     //~^ ERROR mismatched types
     //~| expected `i32`, found `u32`
 }
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

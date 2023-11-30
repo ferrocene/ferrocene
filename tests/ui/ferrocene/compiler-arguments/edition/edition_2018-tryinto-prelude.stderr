@@ -1,0 +1,18 @@
+error[E0405]: cannot find trait `TryInto` in this scope
+  --> $DIR/edition_2018-tryinto-prelude.rs:6:6
+   |
+LL | impl TryInto<String> for Foo {
+   |      ^^^^^^^ not found in this scope
+   |
+   = note: 'std::convert::TryInto' is included in the prelude starting in Edition 2021
+   = note: 'core::convert::TryInto' is included in the prelude starting in Edition 2021
+help: consider importing one of these items
+   |
+LL | use core::convert::TryInto;
+   |
+LL | use std::convert::TryInto;
+   |
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0405`.

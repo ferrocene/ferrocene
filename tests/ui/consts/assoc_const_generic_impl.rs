@@ -17,3 +17,15 @@ fn main() {
     ().requires_zero_size();
     42_u32.requires_zero_size();
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation conformance
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

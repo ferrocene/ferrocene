@@ -28,3 +28,8 @@ fn main() {
     bar(&true);
     //~^ error: the trait bound `bool: Traitor<_>` is not satisfied
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

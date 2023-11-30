@@ -24,3 +24,9 @@ fn call<A>(p: Type<A>) {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

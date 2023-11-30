@@ -10,3 +10,9 @@ pub fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

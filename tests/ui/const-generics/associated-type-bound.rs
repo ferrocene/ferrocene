@@ -17,3 +17,6 @@ impl Foo<3> for i16 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

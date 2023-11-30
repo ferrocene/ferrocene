@@ -2,3 +2,9 @@ Change this file to make users of the `download-ci-llvm` configuration download
 a new version of LLVM from CI, even if the LLVM submodule hasn’t changed.
 
 Last change is for: https://github.com/rust-lang/rust/pull/104748
+
+
+
+(white space intentional to avoid merge conflicts)
+
+Last Ferrocene change is for: https://github.com/ferrocene/ferrocene/pull/1014

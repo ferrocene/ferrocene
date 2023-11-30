@@ -9,3 +9,9 @@ fn foo(cond: bool) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

@@ -12,3 +12,9 @@ impl Test for MyStruct {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+//
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants

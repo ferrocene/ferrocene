@@ -16,3 +16,6 @@ fn test(_cond: bool) {
 pub fn main() {
     // note: don't call test()... :)
 }
+
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops

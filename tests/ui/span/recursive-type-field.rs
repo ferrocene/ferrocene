@@ -16,3 +16,6 @@ struct Bar<'a> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

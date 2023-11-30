@@ -157,3 +157,6 @@ impl Trait5<i32> for Bar<i32> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_mvd7nz8k3wcy
+// Attribute no_mangle

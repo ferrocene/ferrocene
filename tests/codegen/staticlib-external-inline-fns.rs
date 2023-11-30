@@ -41,3 +41,6 @@ extern "C" fn g() {}
 #[export_name = "h"]
 #[inline(always)]
 extern "C" fn h() {}
+
+// ferrocene-annotations: fls_olzilmy8n0nl
+// Attribute export_name

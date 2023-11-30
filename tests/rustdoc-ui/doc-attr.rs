@@ -23,3 +23,6 @@ pub fn foo() {}
 //~| ERROR unknown `doc` attribute
 //~| WARN
 fn bar() {}
+
+// ferrocene-annotations: fls_63v1fqedzwfd
+// Attribute doc

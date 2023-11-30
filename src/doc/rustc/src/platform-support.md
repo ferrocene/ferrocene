@@ -253,6 +253,7 @@ target | std | host | notes
 `bpfel-unknown-none` | * |  | BPF (little endian)
 `hexagon-unknown-linux-musl` | ? |  |
 `i386-apple-ios` | ✓ |  | 32-bit x86 iOS
+[`i386-lynx-lynxos178`](platform-support/i386-lynx-lynxos178.md) | * |  | 32-bit LynxOS-178 (2022.07)
 `i686-apple-darwin` | ✓ | ✓ | 32-bit macOS (10.7+, Lion+)
 `i686-pc-windows-msvc` | * |  | 32-bit Windows XP support
 `i686-unknown-haiku` | ✓ | ✓ | 32-bit Haiku
@@ -320,5 +321,6 @@ target | std | host | notes
 `x86_64-uwp-windows-gnu` | ✓ |  |
 `x86_64-uwp-windows-msvc` | ✓ |  |
 `x86_64-wrs-vxworks` | ? |  |
+`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets

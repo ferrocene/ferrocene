@@ -25,3 +25,5 @@ mod mod1 {
         let _ = 1;
     }
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

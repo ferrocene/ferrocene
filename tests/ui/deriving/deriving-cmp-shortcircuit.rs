@@ -35,3 +35,6 @@ pub fn main() {
     assert!(a < b);
     assert_eq!(a.cmp(&b), ::std::cmp::Ordering::Less);
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

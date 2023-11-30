@@ -10,3 +10,12 @@ pub fn main() {
         (None, (), (), ..) => panic!(),
     }
 }
+
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching

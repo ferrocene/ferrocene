@@ -9,3 +9,6 @@ fn main() {
     foo::<0, 0, 0>();
     //~^ ERROR function takes 2
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

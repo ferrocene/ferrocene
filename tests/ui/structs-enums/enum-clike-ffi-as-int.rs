@@ -31,3 +31,12 @@ pub fn main() {
         assert_eq!(f(0xDEADBEEF), Foo::B as u32);
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation
+//
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

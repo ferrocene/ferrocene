@@ -39,3 +39,9 @@ fn pass<T: C>(a: &T) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

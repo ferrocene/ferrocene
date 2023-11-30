@@ -75,3 +75,6 @@ fn main() {
     //~| HELP try making the prefix lowercase
     //~| SUGGESTION 0b10101010u8
 }
+
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals

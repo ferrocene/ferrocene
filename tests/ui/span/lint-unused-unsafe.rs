@@ -1098,3 +1098,18 @@ mod additional_tests_extra {
 
     const unsafe fn size() -> usize { 0 }
 }
+
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_aadan19t5006
+// Async Blocks

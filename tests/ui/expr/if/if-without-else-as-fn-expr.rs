@@ -47,3 +47,6 @@ fn foo3_let(bar: usize) -> usize {
 fn main() {
     let _ = foo(1);
 }
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

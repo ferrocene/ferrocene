@@ -5,3 +5,6 @@ extern "C" {
     //~^ the `main` function cannot be declared in an `extern` block
     fn missing2();
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

@@ -17,3 +17,24 @@ fn main() {
 
     assert_eq!(&[1,2,3], Box::new(Rc::new(v)).trait_method());
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

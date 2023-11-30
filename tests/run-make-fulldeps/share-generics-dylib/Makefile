@@ -20,3 +20,5 @@ all:
 	$(RUSTC) instance_user_a_rlib.rs $(COMMON_ARGS) --crate-type=rlib
 	$(RUSTC) instance_user_b_rlib.rs $(COMMON_ARGS) --crate-type=rlib
 	$(RUSTC) linked_leaf.rs $(COMMON_ARGS) --crate-type=bin
+
+# ferrocene-annotations: um_rustc_C_codegen_units

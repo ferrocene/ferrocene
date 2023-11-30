@@ -13,3 +13,9 @@ fn main() {
     let x: [u8; 1518599999] = [0; 1518599999];
     generic::<[u8; 1518599999]>(x);
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

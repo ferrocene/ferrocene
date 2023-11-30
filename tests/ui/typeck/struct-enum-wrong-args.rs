@@ -12,3 +12,9 @@ fn main() {
     let _ = DoubleWrapper(5); //~ ERROR this struct takes
     let _ = DoubleWrapper(5, 2, 7); //~ ERROR this struct takes
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

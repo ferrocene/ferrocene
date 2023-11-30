@@ -35,3 +35,15 @@ impl fmt::Display for Foo<'_> {
 }
 
 impl Error for Foo<'_> {}
+
+// ferrocene-annotations: fls_ohhsmifo0urd
+// Type Representation
+//
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

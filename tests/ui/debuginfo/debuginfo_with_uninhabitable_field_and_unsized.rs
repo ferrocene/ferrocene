@@ -27,3 +27,5 @@ pub struct FooBase {
 
 // Bar *must* be a fieldless enum
 pub enum Bar {}
+
+// ferrocene-annotations: um_rustc_C_debuginfo

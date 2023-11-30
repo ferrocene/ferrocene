@@ -2,6 +2,7 @@
 // rendering of the `BasicCoverageBlock` coverage control flow graph, with counters and
 // expressions.
 
+// ignore-aarch64-unknown-ferrocenecoretest - instrument-coverage is not supported
 // needs-profiler-support
 // compile-flags: -C instrument-coverage -Z dump-mir-graphviz
 // EMIT_MIR coverage_graphviz.main.InstrumentCoverage.0.dot

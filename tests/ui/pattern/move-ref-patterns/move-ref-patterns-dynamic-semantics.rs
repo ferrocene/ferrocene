@@ -77,3 +77,33 @@ fn main() {
     let expected = [2, 3, 6, 5, 7, 8, 12, 11, 9, 10, 18, 13, 14, 15, 16, 17, 21, 19, 20, 22, 4, 1];
     assert_eq!(&*d.borrow(), &expected);
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

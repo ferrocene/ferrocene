@@ -19,3 +19,5 @@ all:
 	$(call RUN,test-26235) || exit 1
 	$(RUSTC) -Copt-level=z --emit=llvm-bc,llvm-ir,asm,obj,link test-26235.rs
 	$(call RUN,test-26235) || exit 1
+
+# ferrocene-annotations: um_rustc_C_opt_level

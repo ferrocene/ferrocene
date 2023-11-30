@@ -26,3 +26,6 @@ fn main() {
     ClientMap.call(S(Box::new(|_msgid| ())));
     ClientMap2.call((Box::new(|_msgid| ()),));
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

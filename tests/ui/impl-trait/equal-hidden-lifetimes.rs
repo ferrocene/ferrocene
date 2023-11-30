@@ -47,3 +47,9 @@ fn contravariant_lub<'a, 'b: 'a, 'c: 'a, 'd: 'b + 'c>(
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

@@ -9,3 +9,5 @@ fn _unused() {
     // creates.
     test_main();
 }
+
+// ferrocene-annotations: um_rustc_test

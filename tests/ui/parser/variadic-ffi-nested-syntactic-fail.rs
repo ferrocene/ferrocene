@@ -7,3 +7,6 @@ fn f2<'a>(x: u8, y: Vec<&'a ...>) {}
 fn main() {
     let _recovery_witness: () = 0; //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

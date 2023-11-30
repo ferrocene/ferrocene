@@ -55,3 +55,33 @@ fn main() {
     f_mwsa();
     f_t();
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order

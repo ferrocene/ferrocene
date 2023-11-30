@@ -21,3 +21,12 @@ fn f(p: *const Rec) -> isize {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

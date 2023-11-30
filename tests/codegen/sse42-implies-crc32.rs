@@ -14,3 +14,5 @@ pub unsafe fn crc32sse(v: u8) -> u32 {
 }
 
 // CHECK: attributes #0 {{.*"target-features"="\+sse4.2,\+crc32"}}
+
+// ferrocene-annotations: um_rustc_C_opt_level

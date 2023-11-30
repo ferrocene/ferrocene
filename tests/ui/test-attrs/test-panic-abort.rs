@@ -11,9 +11,13 @@
 // ignore-sgx no subprocess support
 
 #![cfg(test)]
+#![feature(test)]
+
+extern crate test;
 
 use std::io::Write;
 use std::env;
+use test::Bencher;
 
 #[test]
 fn it_works() {
@@ -48,3 +52,21 @@ fn no_residual_environment() {
         }
     }
 }
+
+#[bench]
+fn benchmark(b: &mut Bencher) {
+    b.iter(|| assert_eq!(1 + 1, 2));
+}
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_aes2d94g12b9
+// Attribute should_panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions
+//
+// ferrocene-annotations: um_rustc_test
+//
+// ferrocene-annotations: um_rustc_C_panic

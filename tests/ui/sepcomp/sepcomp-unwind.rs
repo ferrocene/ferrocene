@@ -33,3 +33,5 @@ mod b {
 fn main() {
     thread::spawn(move|| { ::b::g() }).join().unwrap_err();
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

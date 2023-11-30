@@ -1,0 +1,129 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: The Ferrocene Developers */
+
+/*************
+ *   Fonts   *
+ *************/
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 400;
+    font-style: normal;
+    src: url('raleway-400.ttf') format('truetype'), url('raleway-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-weight: 700;
+    font-style: normal;
+    src: url('raleway-700.ttf') format('truetype'), url('raleway-700.woff2') format('woff2');
+}
+
+/*********************
+ *   Basic styling   *
+ *********************/
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --text-fg: #1b1b1b;
+    --link-fg: #3168b0;
+    --body-bg: #f7f7f7;
+    --note-fg: #5f5f5f;
+    --header-fg: #194e80;
+    --header-offset: 0;
+    --section-title-border: #bcbcbc;
+}
+
+body {
+    font-family: 'Raleway', sans-serif;
+    margin: var(--header-offset) 0 0 0;
+
+    background: var(--body-bg);
+    color: var(--text-fg);
+    line-height: 1.5em;
+}
+
+header {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+header img {
+    display: block;
+    height: 2.5rem;
+    margin: auto;
+}
+
+div.wrapper {
+    max-width: 47rem;
+    padding: 1rem;
+    margin: auto;
+}
+
+section {
+    margin-bottom: 3em;
+}
+
+section:last-child {
+    margin-bottom: 1em;
+}
+
+section h2 {
+    margin: 0 0 1.5rem 0;
+    padding: 0 0 0.5rem 0;
+    border-bottom: 1px solid var(--section-title-border);
+}
+
+div.docs {
+    margin: -0.75em -0.5em;
+    padding: 0;
+}
+
+div.docs a {
+    display: block;
+    padding: 0.75em 0.5em;
+    text-decoration: none;
+    color: var(--text-fg);
+}
+
+/* By default hide items with a subset. They will be shown thanks to
+ * subset-spcific CSS files */
+div.docs a[data-subset] {
+    display: none;
+}
+
+div.docs a h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--link-fg);
+}
+
+div.docs a:hover h3 {
+    text-decoration: underline;
+}
+
+div.docs a p {
+    margin: 0.5em 0 0 0;
+}
+
+p.note {
+    margin: 1.5em auto;
+    width: 80%;
+    color: var(--note-fg);
+    text-align: center;
+}
+
+@media all and (min-width: 42rem) {
+    div.docs {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    div.docs a {
+        width: 22.5em;
+    }
+}

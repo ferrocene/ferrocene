@@ -13,3 +13,12 @@ fn test(val: u8) {
 fn main() {
   test(1);
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns
+//
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal Pattern Matching

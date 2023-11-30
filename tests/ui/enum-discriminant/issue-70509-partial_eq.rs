@@ -16,3 +16,8 @@ fn main() {
     // See https://github.com/rust-lang/rust/issues/70509#issuecomment-620654186
     // for a detailed explanation.
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

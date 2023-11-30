@@ -23,3 +23,5 @@ async fn async_fn_test() {
 fn main() {
     let _fn = async_fn_test();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

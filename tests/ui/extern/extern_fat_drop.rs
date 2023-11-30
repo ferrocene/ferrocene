@@ -11,3 +11,8 @@ fn main() {
         assert!(fat_drop::DROPPED);
     }
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

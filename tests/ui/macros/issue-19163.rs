@@ -9,3 +9,6 @@ fn main() {
     mywrite!(&v, "Hello world");
     //~^ ERROR cannot borrow data in a `&` reference as mutable
 }
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use

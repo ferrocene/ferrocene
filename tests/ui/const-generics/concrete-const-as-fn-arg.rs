@@ -9,3 +9,6 @@ fn main() {
     let val: A<2> = A;
     assert_eq!(with_concrete_const_arg(val), 17);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

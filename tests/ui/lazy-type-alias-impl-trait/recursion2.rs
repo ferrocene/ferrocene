@@ -21,3 +21,9 @@ fn bar(b: bool) -> impl std::fmt::Debug {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Type
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliasing

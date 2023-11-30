@@ -52,3 +52,8 @@ fn main() {
         _ => {},
     }
 }
+
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

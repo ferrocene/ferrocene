@@ -14,3 +14,7 @@ fn main() {
     let x = Foo { x: 3 };
     x.printme();    //~ ERROR cannot borrow
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

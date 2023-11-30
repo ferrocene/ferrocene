@@ -37,3 +37,21 @@ fn main() {
     let value = tick1(c);
     assert_eq!(value, 2);
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

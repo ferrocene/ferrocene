@@ -19,3 +19,6 @@ fn main() {
         _ => {},
     };
 }
+
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types

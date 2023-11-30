@@ -21,3 +21,6 @@ fn cycle2() -> impl Clone {
 
     Rc::new(String::from("foo"))
 }
+
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

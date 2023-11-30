@@ -14,3 +14,9 @@ impl A for isize {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

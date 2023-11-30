@@ -29,3 +29,5 @@ ifdef RUSTC_BLESS_TEST
 else
 	$(DIFF) output.txt "$(TMPDIR)"/output.txt
 endif
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

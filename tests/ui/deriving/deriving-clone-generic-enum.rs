@@ -12,3 +12,9 @@ enum E<T,U> {
 pub fn main() {
     let _ = E::A::<isize, isize>(1).clone();
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

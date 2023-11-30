@@ -26,3 +26,6 @@ struct Local2;
 impl<const N: usize> Trait<N, Local2> for i32 {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

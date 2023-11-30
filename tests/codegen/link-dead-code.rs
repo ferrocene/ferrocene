@@ -20,3 +20,5 @@ fn inline_fn() -> i32 { 2 }
 // CHECK-NEXT: ; Function Attrs:
 // CHECK-NEXT: define hidden
 fn private_fn() -> i32 { 3 }
+
+// ferrocene-annotations: um_rustc_C_link_dead_code

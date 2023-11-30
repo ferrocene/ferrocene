@@ -22,3 +22,5 @@ fn main() {
     });
     assert!(result.is_err());
 }
+
+// ferrocene-annotations: um_rustc_test

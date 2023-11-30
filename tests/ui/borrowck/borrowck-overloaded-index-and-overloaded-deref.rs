@@ -34,3 +34,13 @@ fn main() {
 }
 
 fn read(_: usize) { }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Array and Slice Indexing Expressions
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression/ References

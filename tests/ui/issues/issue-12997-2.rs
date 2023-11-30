@@ -7,3 +7,5 @@
 #[bench]
 fn bar(x: isize) { }
 //~^ ERROR mismatched types
+
+// ferrocene-annotations: um_rustc_test

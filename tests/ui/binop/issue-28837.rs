@@ -33,3 +33,18 @@ fn main() {
 
     a >= a; //~ ERROR binary operation `>=` cannot be applied to type `A`
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

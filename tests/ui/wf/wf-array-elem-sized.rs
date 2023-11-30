@@ -9,3 +9,9 @@ struct Foo {
 
 
 fn main() { }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types

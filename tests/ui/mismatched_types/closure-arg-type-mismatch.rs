@@ -9,3 +9,9 @@ fn baz<F: Fn(*mut &u32)>(_: F) {}
 fn _test<'a>(f: fn(*mut &'a u32)) {
     baz(f);
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

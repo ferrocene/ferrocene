@@ -72,6 +72,7 @@ mod linux_base;
 mod linux_gnu_base;
 mod linux_musl_base;
 mod linux_uclibc_base;
+mod lynxos178_base;
 mod msvc_base;
 mod netbsd_base;
 mod nto_qnx_base;
@@ -1256,6 +1257,9 @@ supported_targets! {
 
     ("aarch64-unknown-nto-qnx710", aarch64_unknown_nto_qnx_710),
     ("x86_64-pc-nto-qnx710", x86_64_pc_nto_qnx710),
+
+    ("i386-lynx-lynxos178", i386_lynx_lynxos178),
+    ("aarch64-unknown-ferrocenecoretest", aarch64_unknown_ferrocenecoretest),
 }
 
 /// Cow-Vec-Str: Cow<'static, [Cow<'static, str>]>

@@ -1,0 +1,88 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+
+name: Release
+on:
+  # Run nightly releases every day at midnight UTC.
+  schedule:
+    - cron: "0 0 * * *"
+
+  # Allow team members to manually trigger new releases through the GitHub UI.
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to release
+        required: true
+      env:
+        description: Environment to perform the release in
+        type: choice
+        required: true
+        options:
+          - dev
+          - prod
+      override-existing:
+        description: Allow overriding existing releases
+        type: boolean
+      allow-duplicate:
+        description: Allow duplicate releases
+        type: boolean
+
+
+permissions:
+  # Allow read access to the source code
+  contents: read
+  # Allow obtaining the OIDC token required for AWS authentication.
+  id-token: write
+
+jobs:
+  manual:
+    name: Manual ${{ toJSON(github.event.inputs) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: release-${{ github.event.inputs.env }}-manual
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+        with:
+          # All commits could potentially be released, so avoid shallow clones.
+          fetch-depth: 0
+
+      - name: Load AWS credentials into the environment
+        run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+
+      - name: Run the release process
+        run: ferrocene/ci/scripts/publish-release.sh $(git rev-parse ${{ github.event.inputs.ref }}) $( [[ "${{ github.event.inputs.override-existing }}" = 'true' ]] && echo '--allow-overriding-existing-releases' ) $( [[ "${{ github.event.inputs.allow-duplicate }}" = 'true' ]] && echo '--allow-duplicate-releases' )
+        env:
+          PUBLISHRELEASE_ARTIFACTS_ROLE: ${{ vars.PUBLISHRELEASE_ARTIFACTS_ROLE }}
+          PUBLISHRELEASE_ARTIFACTS_BUCKET: ${{ vars.PUBLISHRELEASE_ARTIFACTS_BUCKET }}
+          PUBLISHRELEASE_DOCS_BUCKET: ${{ vars.PUBLISHRELEASE_DOCS_BUCKET }}
+          PUBLISHRELEASE_RELEASES_BUCKET: ${{ vars.PUBLISHRELEASE_RELEASES_BUCKET }}
+
+  nightly:
+    name: Nightly
+    runs-on: ubuntu-latest
+    environment: release-prod-automated
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v3
+
+      - name: Load AWS credentials into the environment
+        run: ferrocene/ci/scripts/assume-aws-oidc-role.sh
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+
+      - name: Run the release process
+        run: ferrocene/ci/scripts/publish-release.sh $(git rev-parse main)
+        env:
+          PUBLISHRELEASE_ARTIFACTS_ROLE: ${{ vars.PUBLISHRELEASE_ARTIFACTS_ROLE }}
+          PUBLISHRELEASE_ARTIFACTS_BUCKET: ${{ vars.PUBLISHRELEASE_ARTIFACTS_BUCKET }}
+          PUBLISHRELEASE_DOCS_BUCKET: ${{ vars.PUBLISHRELEASE_DOCS_BUCKET }}
+          PUBLISHRELEASE_RELEASES_BUCKET: ${{ vars.PUBLISHRELEASE_RELEASES_BUCKET }}

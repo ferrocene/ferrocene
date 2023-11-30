@@ -15,3 +15,6 @@ fn main() {
                       //~| expected reference `&Foo`
                       //~| found reference `&{integer}`
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

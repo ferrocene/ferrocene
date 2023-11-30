@@ -7,3 +7,6 @@ fn main() {
     //~| HELP: place `mut` before `dyn`
     //~| ERROR: cannot find trait `Trait` in this scope [E0405]
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

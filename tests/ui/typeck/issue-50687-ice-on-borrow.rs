@@ -39,3 +39,6 @@ impl Borrow<Borrowed> for Owned {
 fn func(owned: Owned) {
     let _: () = Borrow::borrow(&owned); //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main

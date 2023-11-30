@@ -19,3 +19,9 @@ pub fn main() {
     println!("y = {:?}", y);
     assert_eq!(y, "t_rec { c8: 22, t: a_tag_var(44) }".to_string());
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

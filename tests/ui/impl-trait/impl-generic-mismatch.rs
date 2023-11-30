@@ -39,3 +39,6 @@ impl Hash for X {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

@@ -6,3 +6,5 @@ use std::num::ParseFloatError;
 fn can_parse_zero_as_f32() -> Result<f32, ParseFloatError> { //~ ERROR
     "0".parse()
 }
+
+// ferrocene-annotations: um_rustc_test

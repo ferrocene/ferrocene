@@ -17,3 +17,6 @@ fn main() {
 fn foo(a: [C; 4], i: usize) -> C {
     a[i]
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing conventions

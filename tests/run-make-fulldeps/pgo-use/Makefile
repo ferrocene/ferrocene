@@ -44,3 +44,6 @@ all:
 	# FileCheck only supports checking that something matches on the next line,
 	# but not if something matches on the previous line.
 	$(TAC) "$(TMPDIR)"/main.ll | "$(LLVM_FILECHECK)" filecheck-patterns.txt
+
+# ferrocene-annotations: um_rustc_C_opt_level
+# ferrocene-annotations: um_rustc_C_codegen_units

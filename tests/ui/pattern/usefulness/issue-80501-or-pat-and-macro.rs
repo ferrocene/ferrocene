@@ -25,3 +25,21 @@ fn _foo(ty: ApplicationTy) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+//
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

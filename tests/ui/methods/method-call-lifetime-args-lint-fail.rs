@@ -85,3 +85,6 @@ fn lint_not_inference_error() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

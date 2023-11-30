@@ -41,3 +41,6 @@ pub fn main() {
     v.borrow_mut()[1] += 3;
     assert_eq!((v.borrow()[0], v.borrow()[1], v.borrow()[2]), (3, 5, 3));
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression

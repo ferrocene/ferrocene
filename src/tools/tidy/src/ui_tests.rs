@@ -7,6 +7,10 @@ use ignore::WalkBuilder;
 use std::fs;
 use std::path::Path;
 
+// When you add Ferrocene tests change this number rather than the ROOT_ENTRY_LIMIT variable below,
+// to avoid merge conflicts whenever upstream moves tests around and lowers the limit.
+const FERROCENE_EXTRA_ROOT_ENTRY_LIMIT: usize = 1;
+
 const ENTRY_LIMIT: usize = 1000;
 // FIXME: The following limits should be reduced eventually.
 const ROOT_ENTRY_LIMIT: usize = 939;
@@ -21,7 +25,7 @@ fn check_entries(path: &Path, bad: &mut bool) {
                 let is_root = path.join("ui") == dir_path;
                 let is_issues_dir = path.join("ui/issues") == dir_path;
                 let limit = if is_root {
-                    ROOT_ENTRY_LIMIT
+                    ROOT_ENTRY_LIMIT + FERROCENE_EXTRA_ROOT_ENTRY_LIMIT
                 } else if is_issues_dir {
                     ISSUES_ENTRY_LIMIT
                 } else {

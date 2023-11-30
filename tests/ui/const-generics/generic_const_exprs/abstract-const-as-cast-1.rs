@@ -16,3 +16,6 @@ fn foo<const N: u8>() where Evaluatable<{N as usize as u16 }>: {
 
 
 fn main() {}
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

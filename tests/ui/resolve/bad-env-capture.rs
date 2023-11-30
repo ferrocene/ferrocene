@@ -4,3 +4,6 @@ fn foo() {
     fn bar() { log(debug, x); }
 }
 fn main() { foo(); }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

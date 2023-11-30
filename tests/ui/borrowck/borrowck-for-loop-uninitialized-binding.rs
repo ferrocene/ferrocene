@@ -5,3 +5,10 @@ fn f() -> isize {
 }
 
 fn main() { f(); }
+
+//
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

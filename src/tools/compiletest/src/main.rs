@@ -6,10 +6,10 @@
 extern crate test;
 
 use crate::common::{expected_output_path, output_base_dir, output_relative_path, UI_EXTENSIONS};
-use crate::common::{CompareMode, Config, Debugger, Mode, PassMode, TestPaths};
+use crate::common::{Config, Debugger, Mode, PassMode, TestPaths};
 use crate::util::logv;
 use getopts::Options;
-use lazycell::LazyCell;
+use lazycell::AtomicLazyCell;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
@@ -22,6 +22,8 @@ use tracing::*;
 use walkdir::WalkDir;
 
 use self::header::{make_test_description, EarlyProps};
+use crate::header::HeadersCache;
+use std::sync::Arc;
 
 #[cfg(test)]
 mod tests;
@@ -36,10 +38,14 @@ mod read2;
 pub mod runtest;
 pub mod util;
 
+mod ferrocene_annotations;
+
 fn main() {
     tracing_subscriber::fmt::init();
 
-    let config = parse_config(env::args().collect());
+    ferrocene_annotations::maybe_collect_and_exit();
+
+    let config = Arc::new(parse_config(env::args().collect()));
 
     if config.valgrind_path.is_none() && config.force_valgrind {
         panic!("Can't find Valgrind to run Valgrind tests");
@@ -112,6 +118,7 @@ pub fn parse_config(args: Vec<String>) -> Config {
         )
         .optflag("", "quiet", "print one character per test instead of one line")
         .optopt("", "color", "coloring: auto, always, never", "WHEN")
+        .optflag("", "json", "emit json output instead of plaintext output")
         .optopt("", "logfile", "file to log test execution to", "FILE")
         .optopt("", "target", "the target to build for", "TARGET")
         .optopt("", "host", "the host to build for", "HOST")
@@ -278,10 +285,17 @@ pub fn parse_config(args: Vec<String>) -> Config {
             && !opt_str2(matches.opt_str("adb-test-dir")).is_empty(),
         lldb_python_dir: matches.opt_str("lldb-python-dir"),
         verbose: matches.opt_present("verbose"),
-        quiet: matches.opt_present("quiet"),
+        format: match (matches.opt_present("quiet"), matches.opt_present("json")) {
+            (true, true) => panic!("--quiet and --json are incompatible"),
+            (true, false) => test::OutputFormat::Terse,
+            (false, true) => test::OutputFormat::Json,
+            (false, false) => test::OutputFormat::Pretty,
+        },
         color,
         remote_test_client: matches.opt_str("remote-test-client").map(PathBuf::from),
-        compare_mode: matches.opt_str("compare-mode").map(CompareMode::parse),
+        compare_mode: matches
+            .opt_str("compare-mode")
+            .map(|s| s.parse().expect("invalid --compare-mode provided")),
         rustfix_coverage: matches.opt_present("rustfix-coverage"),
         has_tidy,
         channel: matches.opt_str("channel").unwrap(),
@@ -299,7 +313,7 @@ pub fn parse_config(args: Vec<String>) -> Config {
 
         force_rerun: matches.opt_present("force-rerun"),
 
-        target_cfg: LazyCell::new(),
+        target_cfgs: AtomicLazyCell::new(),
     }
 }
 
@@ -335,7 +349,7 @@ pub fn log_config(config: &Config) {
     logv(c, format!("ar: {}", config.ar));
     logv(c, format!("linker: {:?}", config.linker));
     logv(c, format!("verbose: {}", config.verbose));
-    logv(c, format!("quiet: {}", config.quiet));
+    logv(c, format!("format: {:?}", config.format));
     logv(c, "\n".to_string());
 }
 
@@ -353,7 +367,7 @@ pub fn opt_str2(maybestr: Option<String>) -> String {
     }
 }
 
-pub fn run_tests(config: Config) {
+pub fn run_tests(config: Arc<Config>) {
     // If we want to collect rustfix coverage information,
     // we first make sure that the coverage file does not exist.
     // It will be created later on.
@@ -396,7 +410,7 @@ pub fn run_tests(config: Config) {
 
     let mut tests = Vec::new();
     for c in &configs {
-        make_tests(c, &mut tests);
+        make_tests(c.clone(), &mut tests);
     }
 
     tests.sort_by(|a, b| a.desc.name.as_slice().cmp(&b.desc.name.as_slice()));
@@ -412,10 +426,14 @@ pub fn run_tests(config: Config) {
             // easy to miss which tests failed, and as such fail to reproduce
             // the failure locally.
 
-            eprintln!(
+            println!(
                 "Some tests failed in compiletest suite={}{} mode={} host={} target={}",
                 config.suite,
-                config.compare_mode.map(|c| format!(" compare_mode={:?}", c)).unwrap_or_default(),
+                config
+                    .compare_mode
+                    .as_ref()
+                    .map(|c| format!(" compare_mode={:?}", c))
+                    .unwrap_or_default(),
                 config.mode,
                 config.host,
                 config.target
@@ -435,13 +453,13 @@ pub fn run_tests(config: Config) {
     }
 }
 
-fn configure_cdb(config: &Config) -> Option<Config> {
+fn configure_cdb(config: &Config) -> Option<Arc<Config>> {
     config.cdb.as_ref()?;
 
-    Some(Config { debugger: Some(Debugger::Cdb), ..config.clone() })
+    Some(Arc::new(Config { debugger: Some(Debugger::Cdb), ..config.clone() }))
 }
 
-fn configure_gdb(config: &Config) -> Option<Config> {
+fn configure_gdb(config: &Config) -> Option<Arc<Config>> {
     config.gdb_version?;
 
     if config.matches_env("msvc") {
@@ -472,10 +490,10 @@ fn configure_gdb(config: &Config) -> Option<Config> {
         env::set_var("RUST_TEST_THREADS", "1");
     }
 
-    Some(Config { debugger: Some(Debugger::Gdb), ..config.clone() })
+    Some(Arc::new(Config { debugger: Some(Debugger::Gdb), ..config.clone() }))
 }
 
-fn configure_lldb(config: &Config) -> Option<Config> {
+fn configure_lldb(config: &Config) -> Option<Arc<Config>> {
     config.lldb_python_dir.as_ref()?;
 
     if let Some(350) = config.lldb_version {
@@ -488,7 +506,7 @@ fn configure_lldb(config: &Config) -> Option<Config> {
         return None;
     }
 
-    Some(Config { debugger: Some(Debugger::Lldb), ..config.clone() })
+    Some(Arc::new(Config { debugger: Some(Debugger::Lldb), ..config.clone() }))
 }
 
 pub fn test_opts(config: &Config) -> test::TestOpts {
@@ -497,7 +515,7 @@ pub fn test_opts(config: &Config) -> test::TestOpts {
         filters: config.filters.clone(),
         filter_exact: config.filter_exact,
         run_ignored: if config.run_ignored { test::RunIgnored::Yes } else { test::RunIgnored::No },
-        format: if config.quiet { test::OutputFormat::Terse } else { test::OutputFormat::Pretty },
+        format: config.format,
         logfile: config.logfile.clone(),
         run_tests: true,
         bench_benchmarks: true,
@@ -518,11 +536,19 @@ pub fn test_opts(config: &Config) -> test::TestOpts {
     }
 }
 
-pub fn make_tests(config: &Config, tests: &mut Vec<test::TestDescAndFn>) {
+pub fn make_tests(config: Arc<Config>, tests: &mut Vec<test::TestDescAndFn>) {
     debug!("making tests from {:?}", config.src_base.display());
-    let inputs = common_inputs_stamp(config);
-    collect_tests_from_dir(config, &config.src_base, &PathBuf::new(), &inputs, tests)
+    let inputs = common_inputs_stamp(&config);
+
+    let cache = HeadersCache::load(&config);
+    let mut poisoned = false;
+    collect_tests_from_dir(config.clone(), &cache, &config.src_base, &inputs, tests, &mut poisoned)
         .unwrap_or_else(|_| panic!("Could not read tests from {}", config.src_base.display()));
+
+    if poisoned {
+        eprintln!();
+        panic!("there are errors in tests");
+    }
 }
 
 /// Returns a stamp constructed from input files common to all test cases.
@@ -562,34 +588,48 @@ fn common_inputs_stamp(config: &Config) -> Stamp {
 }
 
 fn collect_tests_from_dir(
-    config: &Config,
+    config: Arc<Config>,
+    cache: &HeadersCache,
     dir: &Path,
-    relative_dir_path: &Path,
     inputs: &Stamp,
     tests: &mut Vec<test::TestDescAndFn>,
+    poisoned: &mut bool,
+) -> io::Result<()> {
+    find_tests_in_dir(config.mode, dir, &PathBuf::new(), &mut |paths| {
+        // If we find a test foo/bar.rs, we have to build the
+        // output directory `$build/foo` so we can write
+        // `$build/foo/bar` into it. We do this *now* in this
+        // sequential loop because otherwise, if we do it in the
+        // tests themselves, they race for the privilege of
+        // creating the directories and sometimes fail randomly.
+        let build_dir = output_relative_path(&config, &paths.relative_dir);
+        if !build_dir.exists() {
+            fs::create_dir_all(&build_dir).unwrap();
+        }
+
+        tests.extend(make_test(config.clone(), cache, paths, inputs, poisoned))
+    })
+}
+
+fn find_tests_in_dir(
+    mode: Mode,
+    dir: &Path,
+    relative_dir_path: &Path,
+    on_test_found: &mut dyn FnMut(&TestPaths),
 ) -> io::Result<()> {
     // Ignore directories that contain a file named `compiletest-ignore-dir`.
     if dir.join("compiletest-ignore-dir").exists() {
         return Ok(());
     }
 
-    if config.mode == Mode::RunMake && dir.join("Makefile").exists() {
+    if mode == Mode::RunMake && dir.join("Makefile").exists() {
         let paths = TestPaths {
             file: dir.to_path_buf(),
             relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
         };
-        tests.extend(make_test(config, &paths, inputs));
+        on_test_found(&paths);
         return Ok(());
     }
-
-    // If we find a test foo/bar.rs, we have to build the
-    // output directory `$build/foo` so we can write
-    // `$build/foo/bar` into it. We do this *now* in this
-    // sequential loop because otherwise, if we do it in the
-    // tests themselves, they race for the privilege of
-    // creating the directories and sometimes fail randomly.
-    let build_dir = output_relative_path(config, relative_dir_path);
-    fs::create_dir_all(&build_dir).unwrap();
 
     // Add each `.rs` file as a test, and recurse further on any
     // subdirectories we find, except for `aux` directories.
@@ -602,12 +642,12 @@ fn collect_tests_from_dir(
             let paths =
                 TestPaths { file: file_path, relative_dir: relative_dir_path.to_path_buf() };
 
-            tests.extend(make_test(config, &paths, inputs))
+            on_test_found(&paths);
         } else if file_path.is_dir() {
             let relative_file_path = relative_dir_path.join(file.file_name());
             if &file_name != "auxiliary" {
                 debug!("found directory: {:?}", file_path.display());
-                collect_tests_from_dir(config, &file_path, &relative_file_path, inputs, tests)?;
+                find_tests_in_dir(mode, &file_path, &relative_file_path, on_test_found)?;
             }
         } else {
             debug!("found other file/directory: {:?}", file_path.display());
@@ -629,14 +669,20 @@ pub fn is_test(file_name: &OsString) -> bool {
     !invalid_prefixes.iter().any(|p| file_name.starts_with(p))
 }
 
-fn make_test(config: &Config, testpaths: &TestPaths, inputs: &Stamp) -> Vec<test::TestDescAndFn> {
+fn make_test(
+    config: Arc<Config>,
+    cache: &HeadersCache,
+    testpaths: &TestPaths,
+    inputs: &Stamp,
+    poisoned: &mut bool,
+) -> Vec<test::TestDescAndFn> {
     let test_path = if config.mode == Mode::RunMake {
         // Parse directives in the Makefile
         testpaths.file.join("Makefile")
     } else {
         PathBuf::from(&testpaths.file)
     };
-    let early_props = EarlyProps::from_file(config, &test_path);
+    let early_props = EarlyProps::from_file(&config, &test_path);
 
     // Incremental tests are special, they inherently cannot be run in parallel.
     // `runtest::run` will be responsible for iterating over revisions.
@@ -645,25 +691,31 @@ fn make_test(config: &Config, testpaths: &TestPaths, inputs: &Stamp) -> Vec<test
     } else {
         early_props.revisions.iter().map(Some).collect()
     };
+
     revisions
         .into_iter()
         .map(|revision| {
             let src_file =
                 std::fs::File::open(&test_path).expect("open test file to parse ignores");
             let cfg = revision.map(|v| &**v);
-            let test_name = crate::make_test_name(config, testpaths, revision);
-            let mut desc = make_test_description(config, test_name, &test_path, src_file, cfg);
+            let test_name = crate::make_test_name(&config, testpaths, revision);
+            let mut desc = make_test_description(
+                &config, cache, test_name, &test_path, src_file, cfg, poisoned,
+            );
             // Ignore tests that already run and are up to date with respect to inputs.
             if !config.force_rerun {
                 desc.ignore |= is_up_to_date(
-                    config,
+                    &config,
                     testpaths,
                     &early_props,
                     revision.map(|s| s.as_str()),
                     inputs,
                 );
             }
-            test::TestDescAndFn { desc, testfn: make_test_closure(config, testpaths, revision) }
+            test::TestDescAndFn {
+                desc,
+                testfn: make_test_closure(config.clone(), testpaths, revision),
+            }
         })
         .collect()
 }
@@ -797,7 +849,7 @@ fn make_test_name(
 }
 
 fn make_test_closure(
-    config: &Config,
+    config: Arc<Config>,
     testpaths: &TestPaths,
     revision: Option<&String>,
 ) -> test::TestFn {

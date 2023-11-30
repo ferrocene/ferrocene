@@ -7,3 +7,6 @@ pub fn main() {
         assert_eq!(elt.x + elt.y, 30);
     }
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

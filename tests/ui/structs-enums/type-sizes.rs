@@ -271,3 +271,15 @@ pub fn main() {
     assert_eq!(size_of::<Reorder2>(), 10);
     assert!((&v.ary).as_ptr().is_aligned_to(2), "[u8; 6] should group with align-2 fields");
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation

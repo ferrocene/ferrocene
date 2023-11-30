@@ -26,3 +26,5 @@ extern "C-unwind" {
 //
 // Now, check that foreign item is correctly marked without the `nounwind` attribute.
 // CHECK-NOT: attributes [[ATTR1]] = { {{.*}}nounwind{{.*}} }
+
+// ferrocene-annotations: um_rustc_C_panic

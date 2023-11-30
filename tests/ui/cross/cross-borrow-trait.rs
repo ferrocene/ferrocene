@@ -11,3 +11,9 @@ pub fn main() {
                             //~| expected reference `&dyn Trait`
                             //~| found struct `Box<dyn Trait>`
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

@@ -7,3 +7,5 @@
 fn test_foo() {
     panic!()
 }
+
+// ferrocene-annotations: um_rustc_test

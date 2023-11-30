@@ -18,3 +18,6 @@ impl TheTrait for for<'a> fn(&'a u8, &'a u8) -> &'a u8 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

@@ -40,3 +40,27 @@ fn foo() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_lstusiu2c8lu
+// Lazy Boolean Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

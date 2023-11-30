@@ -25,3 +25,11 @@ fn main() {
     let x = (10, &slice);
     let (_, &_slice) = x;
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

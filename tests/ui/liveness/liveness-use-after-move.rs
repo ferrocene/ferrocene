@@ -6,3 +6,9 @@ fn main() {
     println!("{}", *x); //~ ERROR borrow of moved value: `x`
     y.clone();
 }
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

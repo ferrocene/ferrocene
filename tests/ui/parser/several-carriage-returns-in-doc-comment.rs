@@ -8,3 +8,6 @@
 //~| ERROR bare CR not allowed in doc-comment
 //~| ERROR bare CR not allowed in doc-comment
 fn main() {}
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

@@ -43,3 +43,9 @@ fn repro2<M, F: Foo<M>>(msg: M, foo: F) {
 
 pub fn main() {
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

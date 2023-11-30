@@ -78,3 +78,8 @@ fn main() {
     assert!(d(&bok) == 5);
     assert!(c(BokType::<3> {}) == 5);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

@@ -61,3 +61,15 @@ fn main() {
     f32();
     f64();
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

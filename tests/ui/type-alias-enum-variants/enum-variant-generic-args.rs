@@ -103,3 +103,8 @@ fn main() {
     //~^ ERROR type arguments are not allowed on this type [E0109]
     //~| ERROR this type alias takes 0 generic arguments but 1 generic argument was supplied [E0107]
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

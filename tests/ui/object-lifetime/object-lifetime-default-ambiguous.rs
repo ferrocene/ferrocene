@@ -46,3 +46,18 @@ fn f(t: &Ref2<dyn Test>) {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

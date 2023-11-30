@@ -5,3 +5,6 @@ pub fn main() {
     for _ in 1.. {} //~ERROR inclusive range with no end
                      //~^HELP use `..` instead
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

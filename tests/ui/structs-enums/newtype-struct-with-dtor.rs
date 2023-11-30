@@ -18,3 +18,9 @@ impl Drop for Fd {
 
 pub fn main() {
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

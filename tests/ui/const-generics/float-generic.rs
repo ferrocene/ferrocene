@@ -10,3 +10,6 @@ const C: f32 = 1.0;
 fn main() {
     foo::<C>();
 }
+
+// ferrocene-annotations: fls_qwljwqr07slp
+// Numeric Types

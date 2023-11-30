@@ -24,3 +24,6 @@ fn main() {
     let x = Foo { x: 3 };
     println!("{}", x.x);
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

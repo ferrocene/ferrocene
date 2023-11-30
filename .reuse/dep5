@@ -1,8 +1,33 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Files-Excluded:
- src/llvm-project
 
-Files: *
+# Ferrocene change: listed all file names explicitly to avoid REUSE considering
+# the ferrocene/ directory as MIT OR Apache-2.0.
+Files: .editorconfig
+       .git-blame-ignore-revs
+       .gitattributes
+       .gitignore
+       .gitmodules
+       .mailmap
+       CODE_OF_CONDUCT.md
+       CONTRIBUTING.md
+       COPYRIGHT
+       Cargo.lock
+       Cargo.toml
+       LICENSE-APACHE
+       LICENSE-MIT
+       README.md
+       RELEASES.md
+       bors.toml
+       compiler/*
+       config.toml.example
+       configure
+       library/*
+       tests/*
+       rustfmt.toml
+       src/*
+       x
+       x.ps1
+       x.py
 Copyright: The Rust Project Developers (see https://thanks.rust-lang.org)
 License: MIT or Apache-2.0
 
@@ -21,3 +46,15 @@ License: OFL-1.1
 Files: src/librustdoc/html/static/fonts/SourceSerif4*
 Copyright: 2014-2021 Adobe Systems Incorporated
 License: OFL-1.1
+
+Files: ferrocene/library/libc/*
+Copyright: The Rust libc developers
+License: MIT OR Apache-2.0
+
+Files: ferrocene/library/getrandom-0.1/*
+Copyright: Developers of the Rand project.
+License: MIT OR Apache-2.0
+
+Files: ferrocene/vendored-deps/criticaltrust/*
+Copyright: The Ferrocene Developers
+License: MIT OR Apache-2.0

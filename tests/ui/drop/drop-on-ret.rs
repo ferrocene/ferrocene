@@ -13,3 +13,9 @@ fn f() -> isize {
 }
 
 pub fn main() { f(); }
+
+// ferrocene-annotations: fls_8l74abhlxzdl
+// Return Expressions
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

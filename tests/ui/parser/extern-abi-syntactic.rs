@@ -15,3 +15,6 @@ extern "some_abi_that_we_are_sure_does_not_exist_semantically" {
 
 #[cfg(FALSE)]
 type T = extern "some_abi_that_we_are_sure_does_not_exist_semantically" fn();
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

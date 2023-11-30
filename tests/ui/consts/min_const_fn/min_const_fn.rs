@@ -132,3 +132,6 @@ const fn traits_are_ok_i_mean_it() { (&() as &dyn std::fmt::Debug, ()).1 }
 
 const fn fn_ptrs(_x: fn()) {}
 const fn fn_ptrs2() -> fn() { fn foo() {} foo }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

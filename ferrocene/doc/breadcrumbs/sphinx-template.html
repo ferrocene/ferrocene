@@ -1,0 +1,42 @@
+{# SPDX-License-Identifier: (MIT OR Apache-2.0) AND CC-BY-4.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+{# SPDX-FileCopyrightText: Fonticons, Inc #}
+
+{% set root_index = pathto(root_doc) %}
+{% if root_index == "#" %}
+    {% set root_index = "index.html" %}
+{% endif %}
+
+<div class="breadcrumbs">
+    <a href="{{ root_index }}/../{{ ferrocene_breadcrumbs_index }}">
+        {# Ferrocene Logo #}
+        <svg width="179" height="204" viewBox="0 0 179 204" xmlns="http://www.w3.org/2000/svg" alt="Ferrocene logo">
+            <path d="M136.357 63.1915C135.15 63.6359 133.797 63.2713 132.939 62.3206C122.27 50.5064 106.762 43.0707 89.5001 43.0707C72.2385 43.0707 56.7301 50.5064 46.0616 62.3206C45.2031 63.2713 43.85 63.636 42.643 63.1916L2.41765 48.3794C0.0936887 47.5236 -0.74422 44.6935 0.745069 42.73L31.6894 1.93327C32.3899 1.00981 33.4881 0.466492 34.6542 0.466492L144.346 0.4665C145.512 0.4665 146.61 1.00982 147.311 1.93328L178.255 42.73C179.744 44.6935 178.906 47.5237 176.582 48.3794L136.357 63.1915Z"/>
+            <path d="M34.6542 123.733C35.4878 123.733 36.239 124.225 36.5888 124.975C45.8259 144.763 66.0443 158.493 89.5001 158.493C112.956 158.493 133.174 144.763 142.412 124.974C142.761 124.225 143.512 123.733 144.346 123.733C145.512 123.733 146.61 124.276 147.311 125.2L178.255 165.996C179.744 167.96 178.906 170.79 176.582 171.646L90.7921 203.236C89.9586 203.543 89.0414 203.543 88.2079 203.236L2.41765 171.646C0.0936887 170.79 -0.74422 167.96 0.745069 165.996L31.6894 125.2C32.3899 124.276 33.4881 123.733 34.6542 123.733Z"/>
+            <path d="M124.586 100.782C124.586 119.976 108.877 135.536 89.5001 135.536C70.1229 135.536 54.4145 119.976 54.4145 100.782C54.4145 81.5878 70.1229 66.028 89.5001 66.028C108.877 66.028 124.586 81.5878 124.586 100.782Z"/>
+        </svg>
+        Ferrocene Documentation
+    </a>
+    &rsaquo;
+    <a href="{{ root_index }}">
+        {{ shorttitle }}
+    </a>
+    <span class="spacer"></span>
+    {% if ferrocene_signature != None %}
+        <a href="{{ pathto("signature/index") }}" class="hidden" id="breadcrumbs-valid-signature">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) -->
+                <path d="M136.6 138.79a64.003 64.003 0 0 0-43.31 41.35L0 460l14.69 14.69L164.8 324.58c-2.99-6.26-4.8-13.18-4.8-20.58 0-26.51 21.49-48 48-48s48 21.49 48 48-21.49 48-48 48c-7.4 0-14.32-1.81-20.58-4.8L37.31 497.31 52 512l279.86-93.29a64.003 64.003 0 0 0 41.35-43.31L416 224 288 96l-151.4 42.79zm361.34-64.62l-60.11-60.11c-18.75-18.75-49.16-18.75-67.91 0l-56.55 56.55 128.02 128.02 56.55-56.55c18.75-18.75 18.75-49.15 0-67.91z"/>
+            </svg>
+            Digitally signed
+        </a>
+        <span class="text invalid-signature hidden" id="breadcrumbs-invalid-signature">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                <!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) -->
+                <path d="M569.517 440.013C587.975 472.007 564.806 512 527.94 512H48.054c-36.937 0-59.999-40.055-41.577-71.987L246.423 23.985c18.467-32.009 64.72-31.951 83.154 0l239.94 416.028zM288 354c-25.405 0-46 20.595-46 46s20.595 46 46 46 46-20.595 46-46-20.595-46-46-46zm-43.673-165.346l7.418 136c.347 6.364 5.609 11.346 11.982 11.346h48.546c6.373 0 11.635-4.982 11.982-11.346l7.418-136c.375-6.874-5.098-12.654-11.982-12.654h-63.383c-6.884 0-12.356 5.78-11.981 12.654z"/>
+            </svg>
+            Unsigned draft
+        </span>
+    {% endif %}
+    <script src="{{ root_index }}/../signature/breadcrumbs.js" defer></script>
+</div>

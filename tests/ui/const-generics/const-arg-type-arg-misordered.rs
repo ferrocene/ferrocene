@@ -6,3 +6,6 @@ fn foo<const N: usize>() -> Array<N, ()> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

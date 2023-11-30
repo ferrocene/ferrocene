@@ -1,5 +1,5 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/missing-close-brace-in-trait.rs:12:65
+  --> $DIR/missing-close-brace-in-trait.rs:15:65
    |
 LL | trait T {
    |         - unclosed delimiter

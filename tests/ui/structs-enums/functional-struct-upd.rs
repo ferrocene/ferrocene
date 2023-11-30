@@ -13,3 +13,6 @@ pub fn main() {
     let c = Foo { x: 4, .. a};
     println!("{:?}", c);
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

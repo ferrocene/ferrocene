@@ -14,3 +14,5 @@ all:
 	$(RUSTC) bar.rs
 	$(RUSTC) foo.rs $(FLAGS)
 	$(RUSTC) foo.rs $(FLAGS) -C panic=abort
+
+# ferrocene-annotations: um_rustc_C_link_args

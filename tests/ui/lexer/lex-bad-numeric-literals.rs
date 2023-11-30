@@ -33,3 +33,18 @@ fn main() {
     0b101f64; //~ ERROR: binary float literal is not supported
     0b111.101; //~ ERROR: binary float literal is not supported
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

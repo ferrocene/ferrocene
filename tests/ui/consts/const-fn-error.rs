@@ -16,3 +16,6 @@ const fn f(x: usize) -> usize {
 fn main() {
     let a : [i32; f(X)];
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

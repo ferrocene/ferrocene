@@ -30,3 +30,9 @@ pub fn main() {
     assert_eq!(3.do_get2(), (3, 3));
     assert_eq!(Some("hi".to_string()).do_get2(), ("hi".to_string(), "hi".to_string()));
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 # Convenience script to build the Ferrocene Language Specification, including
 # setting up a Python virtual environment to install Sphinx into (removing the

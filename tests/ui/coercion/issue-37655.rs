@@ -35,3 +35,6 @@ fn foo<'a, 'b>(split: &'b [&'a [u8]]) -> &'a [u8] {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

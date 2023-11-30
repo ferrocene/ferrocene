@@ -37,3 +37,9 @@ fn main() {
     drop(x);
     drop(x);
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

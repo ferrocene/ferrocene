@@ -10,3 +10,6 @@ pub fn main() {
         Box::new(list::cons::<isize>(Box::new(13),
         Box::new(list::nil::<isize>))))));
 }
+
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types

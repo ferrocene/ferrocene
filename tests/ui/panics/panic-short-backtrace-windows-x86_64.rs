@@ -51,3 +51,5 @@ fn c() {
 fn d() {
     panic!("d was called");
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

@@ -100,3 +100,6 @@ const BAD_UNINHABITED_WITH_DATA2: Result<(i32, !), (i32, Never)> = unsafe { mem:
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

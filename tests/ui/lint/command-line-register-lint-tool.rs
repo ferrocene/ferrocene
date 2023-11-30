@@ -5,3 +5,5 @@
 #![register_tool(known_tool)]
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_A

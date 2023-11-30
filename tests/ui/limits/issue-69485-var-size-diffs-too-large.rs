@@ -9,3 +9,9 @@ fn main() {
 enum Bug {
     V([u8; !0]),
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

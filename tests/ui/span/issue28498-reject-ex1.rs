@@ -35,3 +35,39 @@ fn main() {
     //~^ ERROR borrow may still be in use when destructor runs
     foo.data[1].1.set(Some(&foo.data[0]));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_3gapgqys3ceb
+// Recursive Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

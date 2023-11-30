@@ -11,3 +11,6 @@ fn main() {
     };
     expect_fn(c);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Type

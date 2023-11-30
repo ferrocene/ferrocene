@@ -10,3 +10,6 @@
 fn foo() -> impl Copy { || foo(); }
 fn bar() -> impl Copy { || bar(); }
 fn main() { }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

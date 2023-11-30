@@ -11,3 +11,5 @@ all:
 	# We do NOT expect the "__imp_" version of these symbols.
 	$(CGREP) -v "__imp___llvm_profile_" < $(TMPDIR)/test.ll # 64 bit
 	$(CGREP) -v "__imp____llvm_profile_" < $(TMPDIR)/test.ll # 32 bit
+
+# ferrocene-annotations: um_rustc_C_codegen_units

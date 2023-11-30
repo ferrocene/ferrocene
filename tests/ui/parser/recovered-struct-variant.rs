@@ -11,3 +11,12 @@ fn main() {
         Foo::A {a, b} => {}
     }
 }
+
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns

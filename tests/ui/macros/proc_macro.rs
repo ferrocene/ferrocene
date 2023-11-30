@@ -35,3 +35,18 @@ fn main() {
     assert!(identity!(5 == 5));
     assert!(f4(false));
 }
+
+// ferrocene-annotations: fls_4vjbkm4ceymk
+// Attribute Macros
+//
+// ferrocene-annotations: fls_qkmkev85o5jf
+// Attribute proc_macro
+//
+// ferrocene-annotations: fls_ejhlylrcajo
+// Attribute proc_macro_attribute
+//
+// ferrocene-annotations: fls_2d6bqnpy6tvs
+// Function-like Macros
+//
+// ferrocene-annotations: fls_wn1i6hzg2ff7
+// Procedural Macros

@@ -16,3 +16,9 @@ fn main() {
         Ok::<(), ()>(())
     })();
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_aadan19t5006
+// Async Blocks

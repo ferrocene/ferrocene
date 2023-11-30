@@ -16,3 +16,6 @@ impl Writer for Test {} //~ ERROR cannot find trait `Writer` in this scope
 fn main() {
     drop(2) //~ ERROR cannot find function `drop` in this scope
 }
+
+// ferrocene-annotations: fls_iikmhqsp1r5a
+// Attribute no_implicit_prelude

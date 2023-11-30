@@ -51,3 +51,12 @@ fn main() {
     let actual = LOG.load(Ordering::SeqCst);
     assert!(actual == expect, "expect: 0x{:x} actual: 0x{:x}", expect, actual);
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop order
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop scopes

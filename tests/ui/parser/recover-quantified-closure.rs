@@ -10,3 +10,6 @@ fn foo(x: impl Iterator<Item = Foo>) {
     //~^ ERROR expected one of `const`, `move`, `static`, `|`
     //~^^ ERROR `for<...>` binders for closures are experimental
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

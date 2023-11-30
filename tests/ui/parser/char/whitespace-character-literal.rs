@@ -8,3 +8,6 @@ fn main() {
     //~| HELP: consider removing the non-printing characters
     //~| SUGGESTION: x
 }
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals

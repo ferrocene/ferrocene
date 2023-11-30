@@ -9,3 +9,6 @@ fn main() {
 }
 
 fn foo(_: (usize, usize, usize)) {}
+
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

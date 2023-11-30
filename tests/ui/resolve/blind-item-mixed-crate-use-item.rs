@@ -24,3 +24,9 @@ fn main() {
     f(Data, BAR, foo::X);
     g(Data2, BAR2, foo2::Y);
 }
+
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

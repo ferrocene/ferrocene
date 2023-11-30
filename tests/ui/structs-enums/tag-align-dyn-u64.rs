@@ -27,3 +27,9 @@ pub fn main() {
     let x = mk_rec();
     assert!(is_u64_aligned(&x.t));
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

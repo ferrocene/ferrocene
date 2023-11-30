@@ -13,3 +13,12 @@ fn main() {
     take_param(&x);
     //~^ ERROR the trait bound `Box<{integer}>: Copy` is not satisfied
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

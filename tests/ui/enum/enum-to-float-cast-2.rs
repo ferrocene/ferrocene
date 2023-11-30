@@ -16,3 +16,6 @@ pub fn main() {
     assert_eq!(a, -1.0f32);
     assert_eq!(c, -1.0f32);
 }
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

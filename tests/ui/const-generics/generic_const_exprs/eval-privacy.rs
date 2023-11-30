@@ -24,3 +24,6 @@ const fn my_const_fn(val: u8) -> u8 {
     // body of this function doesn't matter
     val
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

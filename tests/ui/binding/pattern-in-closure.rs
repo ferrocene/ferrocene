@@ -12,3 +12,6 @@ pub fn main() {
     f((2, 3));
     g(Foo { x: 1, y: 2 });
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure expressions

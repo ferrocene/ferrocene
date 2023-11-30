@@ -21,3 +21,12 @@ impl Bar<X> for i32 {
 fn main() {
     1.method::<S>();
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

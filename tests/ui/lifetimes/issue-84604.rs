@@ -7,3 +7,6 @@ fn main() {
     f::<dyn Frob<str>>();
     f::<dyn for<'a> Frob<str>>();
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

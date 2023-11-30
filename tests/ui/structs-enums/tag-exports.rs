@@ -19,3 +19,9 @@ pub fn main() {
   let _raleigh: irving = irving::johnson;
   let _savier: marshall;
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

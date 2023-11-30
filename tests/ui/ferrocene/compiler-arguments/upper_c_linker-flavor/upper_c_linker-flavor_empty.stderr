@@ -1,0 +1,2 @@
+error: codegen option `linker-flavor` requires one of: gcc ld ld.lld ld64.lld lld-link wasm-ld msvc em bpf-linker ptx-linker  (C linker-flavor=<value>)
+

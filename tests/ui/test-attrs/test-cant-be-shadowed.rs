@@ -11,3 +11,11 @@ macro_rules! test { () => () }
 
 #[test]
 fn bar() {}
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: um_rustc_test

@@ -35,3 +35,5 @@ fn main() {
     assert!(!s.status.success());
     assert!(String::from_utf8_lossy(&s.stdout).contains("hurray you ran me"));
 }
+
+// ferrocene-annotations: um_rustc_C_panic

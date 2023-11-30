@@ -26,3 +26,5 @@ pub fn cmp_unsigned(a: u32, b: u32) -> Ordering {
 // CHECK: select i1
     a.cmp(&b)
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

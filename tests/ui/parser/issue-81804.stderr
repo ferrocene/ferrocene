@@ -1,20 +1,24 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/issue-81804.rs:9:11
+  --> $DIR/issue-81804.rs:12:14
    |
 LL | fn p([=(}
-   |     --    ^
-   |     ||
-   |     |unclosed delimiter
+   |     -- unclosed delimiter
+   |     |
    |     unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: this file contains an unclosed delimiter
-  --> $DIR/issue-81804.rs:9:11
+  --> $DIR/issue-81804.rs:12:14
    |
 LL | fn p([=(}
-   |     --    ^
-   |     ||
-   |     |unclosed delimiter
+   |     -- unclosed delimiter
+   |     |
    |     unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: expected pattern, found `=`
   --> $DIR/issue-81804.rs:9:7
@@ -26,16 +30,18 @@ error: expected one of `)`, `,`, `->`, `where`, or `{`, found `]`
   --> $DIR/issue-81804.rs:9:8
    |
 LL | fn p([=(}
-   |        ^ -^
-   |        | |
-   |        | help: `)` may belong here
+   |        ^ - help: `)` may belong here
+   |        |
    |        unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: expected item, found `]`
-  --> $DIR/issue-81804.rs:9:11
+  --> $DIR/issue-81804.rs:12:14
    |
-LL | fn p([=(}
-   |           ^ expected item
+LL | // Functions
+   |              ^ expected item
 
 error: aborting due to 5 previous errors
 

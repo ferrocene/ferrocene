@@ -62,3 +62,12 @@ pub fn main() {
         make_speak(nyan.clone());
     }
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

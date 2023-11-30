@@ -11,3 +11,5 @@ compile_error!("unbroken not set");
 
 fn main() {
 }
+
+// ferrocene-annotations: um_rustc_cfg

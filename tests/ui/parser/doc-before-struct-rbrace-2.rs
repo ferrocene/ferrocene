@@ -7,3 +7,6 @@ struct X {
 fn main() {
     let y = X {a: 1};
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

@@ -5,3 +5,5 @@
 fn main() {
     let x = 1;
 }
+
+// ferrocene-annotations: um_rustc_D

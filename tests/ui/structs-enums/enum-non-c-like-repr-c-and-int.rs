@@ -171,3 +171,12 @@ fn read_u8(buf: &mut &[u8]) -> Result<u8, ()> {
     *buf = &buf[1..];
     Ok(val)
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation
+//
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

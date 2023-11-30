@@ -33,3 +33,9 @@ fn main() {
         foo(1, 2, 1u16); //~ ERROR can't pass
     }
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

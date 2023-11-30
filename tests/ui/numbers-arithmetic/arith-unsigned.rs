@@ -24,3 +24,15 @@ pub fn main() {
     // 64-bit numbers have some flakiness yet. Not tested
 
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

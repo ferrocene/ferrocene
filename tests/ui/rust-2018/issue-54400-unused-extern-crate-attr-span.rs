@@ -13,3 +13,5 @@ extern crate edition_lint_paths;
 //~^ ERROR unused extern crate
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_cfg

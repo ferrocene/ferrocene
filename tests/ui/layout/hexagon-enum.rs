@@ -32,3 +32,6 @@ const TANGERINE: usize = 0x8100_0000; // hack to get negative numbers without ne
 #[rustc_layout(debug)]
 #[repr(C)]
 enum T { Tangerine = TANGERINE as isize } //~ ERROR: layout_of
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

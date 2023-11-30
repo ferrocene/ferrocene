@@ -72,3 +72,36 @@ fn main() {
     println!("container.v[30]: {:?}", container.v.v[30]);
     container.store(test);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order

@@ -25,3 +25,6 @@ fn main() {
         println!("{:?} {:?}", &oof.rab[..], oof.zab);
     }
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions

@@ -5,3 +5,5 @@
 extern crate a_def_obj;
 
 pub use a_def_obj::Object;
+
+// ferrocene-annotations: um_rustc_C_debuginfo

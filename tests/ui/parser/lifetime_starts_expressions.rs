@@ -37,3 +37,21 @@ pub fn main() {
         };
     };
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_8l74abhlxzdl
+// Return Expressions
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

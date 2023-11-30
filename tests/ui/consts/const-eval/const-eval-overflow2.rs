@@ -67,3 +67,6 @@ fn main() {
 
 fn foo<T>(_: T) {
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

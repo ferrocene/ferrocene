@@ -1,6 +1,5 @@
 // run-pass
 #![allow(unused_unsafe)]
-// ignore-pretty issue #37199
 #![allow(while_true)]
 
 fn main() {
@@ -38,3 +37,15 @@ fn main() {
         _ =>()
     }
 }
+
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal pattern matching
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal patterns
+//
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference pattern matching
+//
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference patterns

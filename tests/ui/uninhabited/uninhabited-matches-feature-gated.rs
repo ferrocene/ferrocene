@@ -37,3 +37,18 @@ fn main() {
     let Ok(x) = x;
     //~^ ERROR refutable
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types
+//
+// ferrocene-annotations: fls_vpbikb73dw4k
+// Slice Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

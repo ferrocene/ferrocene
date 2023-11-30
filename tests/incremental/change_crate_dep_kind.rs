@@ -4,6 +4,7 @@
 // ignore-wasm32-bare compiled with panic=abort by default
 // revisions:cfail1 cfail2
 // compile-flags: -Z query-dep-graph -Cpanic=unwind
+// needs-unwind
 // build-pass (FIXME(62277): could be check-pass?)
 
 #![feature(panic_unwind)]
@@ -13,3 +14,5 @@
 extern crate panic_unwind;
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_C_panic

@@ -19,3 +19,9 @@ const F : Foo = (Foo { a : 0 }, Foo { a : 1 }).1;
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

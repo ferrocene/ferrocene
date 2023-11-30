@@ -8,3 +8,6 @@ fn main() {
 
     let _ = tuple./*special cases*/0.0; // OK, comment
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions

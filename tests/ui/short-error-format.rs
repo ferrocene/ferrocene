@@ -7,3 +7,5 @@ fn main() {
     let x = 0u32;
     x.salut();
 }
+
+// ferrocene-annotations: um_rustc_error_format

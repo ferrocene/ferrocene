@@ -13,3 +13,6 @@ fn f() -> Au {
 pub fn main() {
     let _ = f();
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

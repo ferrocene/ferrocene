@@ -32,3 +32,12 @@ fn main() {
     println!("hello");
     println!("world");
 }
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI
+//
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks

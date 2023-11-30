@@ -51,3 +51,15 @@ fn main() {
     go_once(x, 10_000);
     assert_eq!(counter.get(), 11_110);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

@@ -77,3 +77,5 @@ fn main() {
     let _ = a(1, 2);
     let _ = b(1, 2);
 }
+
+// ferrocene-annotations: um_rustc_cfg

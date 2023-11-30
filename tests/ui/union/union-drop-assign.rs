@@ -35,3 +35,21 @@ fn main() {
         assert_eq!(CHECK, 11); // union field is assigned, field is dropped
     }
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety
+//
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order

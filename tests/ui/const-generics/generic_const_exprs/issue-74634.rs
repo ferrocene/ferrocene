@@ -26,3 +26,9 @@ impl<const N: u8> Foobar<N> for ()
 where (): IsZero<N, Answer = False> {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

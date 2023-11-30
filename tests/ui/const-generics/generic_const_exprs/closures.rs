@@ -4,3 +4,6 @@ fn test<const N: usize>() -> [u8; N + (|| 42)()] {}
 //~^ ERROR cycle detected when building an abstract representation
 
 fn main() {}
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure expressions

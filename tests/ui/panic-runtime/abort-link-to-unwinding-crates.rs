@@ -38,3 +38,5 @@ fn main() {
 fn do_panic() {
     panic!("try to catch me");
 }
+
+// ferrocene-annotations: um_rustc_C_panic

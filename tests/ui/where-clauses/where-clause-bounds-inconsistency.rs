@@ -21,3 +21,9 @@ impl Trait for bool {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

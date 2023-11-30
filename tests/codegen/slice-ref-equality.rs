@@ -36,3 +36,5 @@ pub fn is_zero_array(data: &[u8; 4]) -> bool {
     // CHECK-NEXT: ret i1 %[[EQ]]
     *data == [0; 4]
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

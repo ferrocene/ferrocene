@@ -5,3 +5,5 @@ include ../../run-make-fulldeps/tools.mk
 all:
 	$(RUSTC) panic-impl-provider.rs
 	$(RUSTC) panic-impl-consumer.rs -C panic=abort --emit=llvm-ir -L $(TMPDIR)
+
+# ferrocene-annotations: um_rustc_C_panic

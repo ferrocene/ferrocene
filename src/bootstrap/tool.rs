@@ -275,6 +275,12 @@ pub fn prepare_tool_cargo(
     cargo.env("CFG_VERSION", builder.rust_version());
     cargo.env("CFG_RELEASE_NUM", &builder.version);
     cargo.env("DOC_RUST_LANG_ORG_CHANNEL", builder.doc_rust_lang_org_channel());
+    if let Some(ref ver_date) = builder.rust_info().commit_date() {
+        cargo.env("CFG_VER_DATE", ver_date);
+    }
+    if let Some(ref ver_hash) = builder.rust_info().sha() {
+        cargo.env("CFG_VER_HASH", ver_hash);
+    }
 
     let info = GitInfo::new(builder.config.ignore_git, &dir);
     if let Some(sha) = info.sha() {
@@ -370,6 +376,11 @@ macro_rules! bootstrap_tool {
 }
 
 bootstrap_tool!(
+    // Ferrocene-specific
+    FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
+    FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
+    FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
+
     Rustbook, "src/tools/rustbook", "rustbook";
     UnstableBookGen, "src/tools/unstable-book-gen", "unstable-book-gen";
     Tidy, "src/tools/tidy", "tidy";
@@ -907,7 +918,7 @@ impl<'a> Builder<'a> {
         if compiler.host.contains("msvc") {
             let curpaths = env::var_os("PATH").unwrap_or_default();
             let curpaths = env::split_paths(&curpaths).collect::<Vec<_>>();
-            for &(ref k, ref v) in self.cc[&compiler.host].env() {
+            for &(ref k, ref v) in self.cc.borrow()[&compiler.host].env() {
                 if k != "PATH" {
                     continue;
                 }

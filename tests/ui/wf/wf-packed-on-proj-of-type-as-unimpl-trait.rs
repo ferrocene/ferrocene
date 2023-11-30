@@ -29,3 +29,12 @@ struct Foo(Matrix<<DefaultAllocator as Allocator>::Buffer>);
 //~^ ERROR the trait bound `DefaultAllocator: Allocator` is not satisfied
 
 fn main() { }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation
+//
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

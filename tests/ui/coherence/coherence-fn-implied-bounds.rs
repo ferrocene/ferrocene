@@ -24,3 +24,6 @@ impl Trait for for<'c> fn(&'c &'c u32, &'c &'c u32) -> &'c u32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

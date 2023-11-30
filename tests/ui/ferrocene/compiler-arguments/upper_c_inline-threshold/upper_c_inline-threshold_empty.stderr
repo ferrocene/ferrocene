@@ -1,0 +1,2 @@
+error: codegen option `inline-threshold` requires a number (C inline-threshold=<value>)
+

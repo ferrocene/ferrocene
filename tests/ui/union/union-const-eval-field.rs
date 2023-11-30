@@ -43,3 +43,12 @@ fn main() {
     let foo = unsafe { UNION.field3 };
     assert_eq!(read_field3(), foo);
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

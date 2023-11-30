@@ -16,3 +16,5 @@ pub fn index(x: &[u32; 3], ind: E) -> u32 {
     // CHECK: panic_bounds_check
     x[ind as usize]
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

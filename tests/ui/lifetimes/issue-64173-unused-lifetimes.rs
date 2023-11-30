@@ -17,3 +17,6 @@ struct Bar<'a> { //~ ERROR: parameter `'a` is never used
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type

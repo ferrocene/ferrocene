@@ -32,3 +32,12 @@ fn main() {
     assert_eq!(get_it(&Some(1_u16)), Some(1_u16));
     assert_eq!(get_it(&Box::new(1)), Box::new(1));
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

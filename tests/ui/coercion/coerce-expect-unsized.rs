@@ -41,3 +41,9 @@ pub fn main() {
         Box::new(|x| (x as i16 as u8)),
     ];
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

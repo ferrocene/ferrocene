@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 .. default-domain:: spec
 
@@ -780,8 +780,8 @@ The :t:`deconstructee` of a :t:`record struct pattern` shall resolve to an
 :t:`enum variant`, a :t:`struct type`, or a :t:`union type`.
 
 :dp:`fls_mnh35ehva8tx`
-An :t:`indexed deconstructor` is a :t:`construct` that matches the position of a
-:t:`field`.
+An :t:`indexed deconstructor` is a :t:`construct` that matches the position of
+a :t:`field`.
 
 :dp:`fls_p2rjnlbvifaa`
 An :t:`indexed deconstructor` matches a :t:`field` of the :t:`deconstructee`
@@ -875,7 +875,8 @@ If the :t:`deconstructee` of a :t:`record struct pattern` is a
   :t:`deconstructee` have been matched.
 
 :dp:`fls_jwz3arnfkxwn`
-If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`, then
+If the :t:`deconstructee` of a :t:`record struct pattern` is a :t:`union type`,
+then
 
 * :dp:`fls_pfz8xlwezbw1`
   The :s:`RecordStructPatternContent` of the :t:`record struct
@@ -1553,4 +1554,3 @@ Underscore Pattern Matching
 
 #. :dp:`fls_ljcq2vyo052q`
    Matching succeeds.
-

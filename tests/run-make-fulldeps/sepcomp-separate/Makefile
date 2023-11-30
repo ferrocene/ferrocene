@@ -7,3 +7,5 @@ include ../tools.mk
 all:
 	$(RUSTC) foo.rs --emit=llvm-ir -C codegen-units=3
 	[ "$$(cat "$(TMPDIR)"/foo.*.ll | grep -c define\ .*magic_fn)" -eq "3" ]
+
+# ferrocene-annotations: um_rustc_C_codegen_units

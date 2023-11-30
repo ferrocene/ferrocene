@@ -87,3 +87,54 @@ fn missing_nil() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns
+//
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal Pattern Matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+//
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Underscore Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching

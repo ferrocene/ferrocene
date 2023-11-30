@@ -33,3 +33,6 @@ fn cat() -> Box<dyn NotObjectSafe> { //~ ERROR the trait `NotObjectSafe` cannot 
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

@@ -22,3 +22,5 @@ fn main() {
     // report that the test did not produce the error expected above).
     assert_eq!(x, 2_i8);
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

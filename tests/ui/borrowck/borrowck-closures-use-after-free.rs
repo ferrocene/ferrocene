@@ -21,3 +21,7 @@ fn main() {
   };
   test(&*ptr); //~ ERROR cannot borrow `*ptr`
 }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

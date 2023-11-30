@@ -9,3 +9,6 @@ fn main() {
     0b8; //~ ERROR invalid digit for a base 2 literal
     0b9; //~ ERROR invalid digit for a base 2 literal
 }
+
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals

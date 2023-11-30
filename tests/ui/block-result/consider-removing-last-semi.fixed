@@ -18,3 +18,9 @@ pub fn macro_tests() -> u32 {  //~ ERROR mismatched types
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions
+//
+// ferrocene-annotations: fls_1pg5ig740tg1
+// Expression Statements

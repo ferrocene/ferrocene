@@ -7,3 +7,5 @@ extern crate c_another_vtable_for_obj;
 pub fn chain() {
     c_another_vtable_for_obj::another_dyn_debug();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

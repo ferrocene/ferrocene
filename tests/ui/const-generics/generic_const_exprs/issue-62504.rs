@@ -25,3 +25,12 @@ impl<const X: usize> ArrayHolder<X> {
 fn main() {
     let mut array = ArrayHolder::new();
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated items
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

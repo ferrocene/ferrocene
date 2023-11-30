@@ -109,3 +109,42 @@ fn f() {
 fn main() {
     f();
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_4jiw35pan7vn
+// Destruction
+//
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

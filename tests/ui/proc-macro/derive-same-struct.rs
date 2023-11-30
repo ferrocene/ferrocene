@@ -13,3 +13,6 @@ struct A;
 fn main() {
     C;
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

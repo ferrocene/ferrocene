@@ -13,3 +13,6 @@ impl<T> ::std::ops::Drop for S<T> {
 pub fn main() {
     let _x = S { x: 1 };
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

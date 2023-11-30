@@ -11,3 +11,9 @@ fn main() {
 
     let _ = x(x(Ok(())));
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_pocsh1neugpc
+// Error Propagation Expression

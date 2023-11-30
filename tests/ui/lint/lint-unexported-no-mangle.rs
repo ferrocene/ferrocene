@@ -27,3 +27,5 @@ fn main() {
     foo();
     bar();
 }
+
+// ferrocene-annotations: um_rustc_F

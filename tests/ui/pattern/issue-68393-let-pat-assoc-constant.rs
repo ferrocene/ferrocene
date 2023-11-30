@@ -24,3 +24,6 @@ pub fn test<A: Foo, B: Foo>(arg: EFoo, A::X: EFoo) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

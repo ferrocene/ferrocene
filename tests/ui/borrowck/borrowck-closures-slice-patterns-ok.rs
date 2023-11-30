@@ -115,3 +115,10 @@ fn main() {
     slice_by_ref(&<[_; 3]>::default());
     slice_by_mut(&mut <[_; 3]>::default());
 }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

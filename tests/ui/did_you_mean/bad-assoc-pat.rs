@@ -34,3 +34,6 @@ fn check_macros() {
         //~| ERROR no associated item named `AssocItem` found
     }
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

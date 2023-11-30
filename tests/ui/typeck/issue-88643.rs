@@ -17,3 +17,6 @@ static CALLBACKS3: Option<dyn Fn(& _)> = None;
 //~^ ERROR: the placeholder `_` is not allowed within types on item signatures for static items [E0121]
 
 fn main() {}
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

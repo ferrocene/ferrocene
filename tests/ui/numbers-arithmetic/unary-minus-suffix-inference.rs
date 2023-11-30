@@ -21,3 +21,12 @@ pub fn main() {
     let e_neg: isize = -e;
     println!("{}", e_neg);
 }
+
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_wrecura8u5ar
+// Negation Expression
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

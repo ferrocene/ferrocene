@@ -37,3 +37,9 @@ fn after() -> impl Fn(i32) {
     let p = Rc::new(Cell::new(0));
     move |x| p.set(x) //~ NOTE used within this closure
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

@@ -1,0 +1,89 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+
+name: Automatic upstream pull
+on:
+  # Run from Monday to Friday at 5:00 UTC
+  schedule:
+    - cron: '0 5 * * 1-5'
+  # Allow to run this manually from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      merge:
+        description: Merge strategy
+        type: choice
+        required: true
+        options:
+          - "default: Standard three-way merge"
+          - "ours: Prefer Ferrocene changes"
+          - "theirs: Prefer Rust upstream changes"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    name: ${{ matrix.branch }}
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - master
+          - beta
+          - stable
+
+    environment: automation-pull-upstream
+
+    steps:
+      - name: Checkout the Ferrocene repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all the history
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            python3-requests
+
+      - name: Configure git authorship information
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Configure the merge strategy
+        run: |
+          strategy="$(echo "${{ github.event.inputs.merge }}" | sed 's/:.*//')"
+          echo "chosen strategy: ${strategy}"
+          echo "MERGE_STRATEGY=${strategy}" >> "${GITHUB_ENV}"
+        if: github.event_name == 'workflow_dispatch'
+
+      # The builtin GitHub token doesn't have the "workflows" permissions, and
+      # so it can't create new branches with the .github/workflows directory in
+      # them. To work around that we're using a fresh token from an ad-hoc
+      # GitHub App with access to push new branches to this repo.
+      - name: Authenticate with GitHub to create branches
+        run: ferrocene/ci/github-app-auth.py
+        env:
+          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-pull-upstream
+          APP_ID: 211522
+          APP_PRIVATE_KEY: "${{ secrets.PULL_UPSTREAM_APP_PRIVATE_KEY }}"
+        id: github_app_auth
+
+      - name: Create the release branch if missing
+        run: ferrocene/tools/pull-upstream/create-release-branch.sh ${{ matrix.branch }}
+        env:
+          HTTP_PUSH_TOKEN: "${{ steps.github_app_auth.outputs.token }}"
+        if: matrix.branch != 'master'
+        id: create_branch
+
+      - name: Run the pull-upstream automation
+        run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

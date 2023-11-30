@@ -43,3 +43,6 @@ fn main() {
     discr(Unsigned::U64Limit, u64::MAX as u128 + 1);
     discr(Unsigned::Next, u64::MAX as u128 + 2);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

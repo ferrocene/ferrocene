@@ -14,3 +14,7 @@ fn test(f: Foo) {
 fn main() {
     test(BAR); //~ ERROR cannot move out of static item `BAR` [E0507]
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

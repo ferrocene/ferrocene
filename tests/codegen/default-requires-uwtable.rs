@@ -14,3 +14,5 @@ trait Sized {}
 
 // CHECK: attributes #{{.*}} uwtable
 pub fn foo() {}
+
+// ferrocene-annotations: um_rustc_C_panic

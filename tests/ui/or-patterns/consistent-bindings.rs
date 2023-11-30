@@ -37,3 +37,15 @@ fn main() {
         )),
     ): (_, Result<_, _>) = (1, Ok((Ok(V3((1, Ok::<_, (i32, i32)>((1, 1))))), 1)));
 }
+
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference Patterns
+//
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference Pattern Matching
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

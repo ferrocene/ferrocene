@@ -12,3 +12,6 @@ impl A for X {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

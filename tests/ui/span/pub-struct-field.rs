@@ -8,3 +8,9 @@ struct Foo {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

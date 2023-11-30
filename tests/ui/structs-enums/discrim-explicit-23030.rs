@@ -143,3 +143,9 @@ fn main() {
 
     f_isize(); f_usize();
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

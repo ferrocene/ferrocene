@@ -7,3 +7,5 @@ mod foo {}
 
 #[test] fn core() {}
 extern crate core;
+
+// ferrocene-annotations: um_rustc_test

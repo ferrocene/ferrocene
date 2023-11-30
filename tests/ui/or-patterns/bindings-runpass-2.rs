@@ -28,3 +28,21 @@ fn main() {
     assert_eq!(or_at(Err(20)), 220);
     assert_eq!(or_at(Err(50)), 500);
 }
+
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_fyskeih6twyb
+// Range Pattern Matching
+//
+// ferrocene-annotations: fls_6tl1fx99yn6c
+// Range Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

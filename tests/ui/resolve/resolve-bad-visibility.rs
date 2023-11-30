@@ -13,3 +13,6 @@ pub(in too_soon) struct H; //~ ERROR failed to resolve
 mod too_soon {}
 
 fn main () {}
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

@@ -24,3 +24,12 @@ impl fmt::Display for Foo {
 }
 
 impl Error for Foo {}
+
+// ferrocene-annotations: fls_ohhsmifo0urd
+// Type Representation
+//
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout
+//
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

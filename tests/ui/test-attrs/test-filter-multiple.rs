@@ -15,3 +15,5 @@ fn test2() {}
 fn test3() {
     panic!("this should not run");
 }
+
+// ferrocene-annotations: um_rustc_test

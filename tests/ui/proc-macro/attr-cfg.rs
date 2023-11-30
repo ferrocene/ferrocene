@@ -25,3 +25,6 @@ fn main() {
 fn main() {
     assert_eq!(outer(), 2);
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

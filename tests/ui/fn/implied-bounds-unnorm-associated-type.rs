@@ -21,3 +21,6 @@ fn main() {
     //~^ ERROR cannot move out of `x` because it is borrowed
     println!("{}", y);
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

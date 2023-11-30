@@ -35,3 +35,6 @@ struct _RangeToInclusive<const R: std::ops::RangeToInclusive<usize>>;
 const RANGE_TO_INCLUSIVE : _RangeToInclusive<{ ..= 999 }> = _RangeToInclusive;
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range expressions

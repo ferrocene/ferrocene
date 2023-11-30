@@ -12,3 +12,6 @@ fn main() {
     struct T;
     ().f() //~ ERROR no method
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

@@ -23,3 +23,6 @@ impl Trait for for<'c> fn(&'c u32, &'c u32) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

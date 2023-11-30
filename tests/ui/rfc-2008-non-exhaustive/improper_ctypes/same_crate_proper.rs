@@ -46,3 +46,10 @@ extern "C" {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

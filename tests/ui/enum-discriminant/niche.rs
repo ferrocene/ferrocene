@@ -107,3 +107,6 @@ fn main() {
     assert_eq!(OVERFLOW, 0);
     assert_eq!(MORE_OVERFLOW, 0);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

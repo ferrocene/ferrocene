@@ -17,3 +17,6 @@ pub fn main() {
 
 
 }
+
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals

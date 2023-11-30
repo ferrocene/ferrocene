@@ -10,3 +10,6 @@ pub fn main() {
         _ => panic!()
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum type

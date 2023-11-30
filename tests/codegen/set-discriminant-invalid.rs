@@ -41,3 +41,5 @@ pub trait IntoError<E>
     /// Combine the information to produce the error
     fn into_error(self, source: Self::Source) -> E;
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

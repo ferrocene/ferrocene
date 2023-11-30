@@ -22,3 +22,9 @@ pub fn main() {
     };
     assert_eq!(z_message, "not many".to_string());
 }
+
+// ferrocene-annotations: fls_fyskeih6twyb
+// Range pattern matching
+//
+// ferrocene-annotations: fls_6tl1fx99yn6c
+// Range patterns

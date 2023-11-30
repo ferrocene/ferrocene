@@ -9,3 +9,9 @@ impl Foo for u32 {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

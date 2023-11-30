@@ -1,5 +1,4 @@
 // run-pass
-// ignore-pretty `dyn ::foo` parses differently in the current edition
 
 use std::fmt::Display;
 
@@ -15,3 +14,6 @@ fn main() {
     assert_eq!(xstr, "33");
     assert_eq!(ystr, "33");
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

@@ -14,3 +14,6 @@ fn much_universe<T: S<impl Debug>, U: IntoIterator<Item = impl Iterator<Item = i
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

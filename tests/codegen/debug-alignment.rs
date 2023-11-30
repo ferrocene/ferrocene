@@ -6,3 +6,5 @@
 // CHECK: !DIGlobalVariable
 // CHECK: align: 32
 pub static A: u32 = 1;
+
+// ferrocene-annotations: um_rustc_C_debuginfo

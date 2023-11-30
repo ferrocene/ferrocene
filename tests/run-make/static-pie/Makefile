@@ -2,7 +2,7 @@ include ../../run-make-fulldeps/tools.mk
 
 # only-x86_64
 # only-linux
-# ignore-gnux32
+# ignore-32bit
 
 # How to manually run this
 # $ ./x.py test --target x86_64-unknown-linux-[musl,gnu] tests/run-make/static-pie
@@ -16,3 +16,6 @@ test-%:
 		readelf -l $(call RUN_BINFILE,test-aslr) | $(CGREP) DYNAMIC; \
 		$(call RUN,test-aslr) --test-aslr; \
 	fi
+
+# ferrocene-annotations: um_rustc_C_linker_flavor
+# ferrocene-annotations: um_rustc_C_linker

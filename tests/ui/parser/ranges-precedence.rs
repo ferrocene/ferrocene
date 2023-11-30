@@ -50,3 +50,6 @@ fn main() {
     let y = ..;
     assert_eq!(y, (..));
 }
+
+// ferrocene-annotations: fls_kw25194gpael
+// Expression Precedence

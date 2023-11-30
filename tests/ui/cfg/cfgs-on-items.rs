@@ -27,3 +27,5 @@ pub fn main() {
     assert_eq!(3, foo2());
     assert_eq!(3, foo3());
 }
+
+// ferrocene-annotations: um_rustc_cfg

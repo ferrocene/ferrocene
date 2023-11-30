@@ -23,3 +23,12 @@ fn main() {
     let x = &(&(&Foo));
     x.foo();
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

@@ -13,3 +13,5 @@ mod a {
         })();
     }
 }
+
+// ferrocene-annotations: um_rustc_test

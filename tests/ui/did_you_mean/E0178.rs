@@ -11,3 +11,6 @@ struct Bar<'a> {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_9i5msiuuyihf
+// Paths

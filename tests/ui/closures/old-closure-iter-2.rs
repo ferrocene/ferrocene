@@ -13,3 +13,6 @@ pub fn main() {
     println!("{}", sum);
     assert_eq!(sum, 225);
 }
+
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

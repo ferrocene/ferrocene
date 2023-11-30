@@ -9,3 +9,9 @@ fn bar(x: fn(i32)) -> unsafe fn(i32) {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

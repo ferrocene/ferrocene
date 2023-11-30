@@ -23,3 +23,6 @@ fn cat(done: extern "C" fn(usize)) -> cat {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

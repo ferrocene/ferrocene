@@ -48,3 +48,18 @@ fn test2(mut x: Own<Own<Own<Point>>>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

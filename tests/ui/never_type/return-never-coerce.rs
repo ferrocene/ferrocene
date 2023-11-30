@@ -16,3 +16,6 @@ fn main() {
     let x: i32 = call_another_fn(wub);
     let y: u32 = wub();
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

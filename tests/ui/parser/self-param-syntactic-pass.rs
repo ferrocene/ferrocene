@@ -64,3 +64,12 @@ impl X for Y {
     type X = fn(self: u8);
     type X = fn(mut self: u8);
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

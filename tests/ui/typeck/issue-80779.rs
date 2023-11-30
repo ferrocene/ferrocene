@@ -11,3 +11,6 @@ pub fn g(_: T<'static>) -> _ {}
 //~^ ERROR: the placeholder `_` is not allowed within types on item signatures for return types
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

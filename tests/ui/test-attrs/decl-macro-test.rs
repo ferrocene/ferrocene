@@ -20,3 +20,5 @@ macro create_module_test() {
 create_test!();
 create_test!();
 create_module_test!();
+
+// ferrocene-annotations: um_rustc_test

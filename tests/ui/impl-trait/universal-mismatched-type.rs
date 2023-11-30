@@ -5,3 +5,6 @@ fn foo(x: impl Debug) -> String {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

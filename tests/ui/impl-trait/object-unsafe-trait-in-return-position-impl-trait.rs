@@ -44,3 +44,12 @@ fn cat() -> impl ObjectSafe {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

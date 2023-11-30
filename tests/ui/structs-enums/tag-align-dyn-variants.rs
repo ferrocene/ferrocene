@@ -65,3 +65,9 @@ pub fn main() {
     assert!(is_aligned(u64_align, &x.tB));
     assert!(variant_data_is_aligned(u64_align, &x.tB));
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

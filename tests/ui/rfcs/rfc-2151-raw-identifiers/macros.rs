@@ -36,3 +36,12 @@ pub fn main() {
     assert_eq!(6, test_pat_match!(a));
     assert_eq!(7, test_pat_match!(r#a));
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

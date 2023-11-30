@@ -33,3 +33,6 @@ pub fn main() {
   let _: Example<Example::ASSOC_FLAG, _> = Example { x: 0 };
   //~^ ERROR: type provided when a constant was expected
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

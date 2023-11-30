@@ -32,3 +32,5 @@ fn main() {
     )).is_err());
     assert_eq!(count, 1);
 }
+
+// ferrocene-annotations: um_rustc_C_panic

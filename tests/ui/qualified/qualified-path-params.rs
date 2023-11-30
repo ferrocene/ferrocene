@@ -23,3 +23,6 @@ fn main() {
         //~^ ERROR only `char` and numeric types are allowed in range
     }
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

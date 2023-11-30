@@ -87,3 +87,18 @@ const _: i32 = {
     while let None = Some(x) { }
     x
 };
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_rr908hgunja7
+// Loop Expressions
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

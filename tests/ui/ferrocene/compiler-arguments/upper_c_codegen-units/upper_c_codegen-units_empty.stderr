@@ -1,0 +1,2 @@
+error: codegen option `codegen-units` requires a number (C codegen-units=<value>)
+

@@ -1,0 +1,13 @@
+error[E0602]: unknown lint: `=missing_docs`
+   |
+   = help: did you mean: `missing_docs`
+   = note: requested on the command line with `-F =missing_docs`
+
+error[E0602]: unknown lint: `=missing_docs`
+   |
+   = help: did you mean: `missing_docs`
+   = note: requested on the command line with `-F =missing_docs`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0602`.

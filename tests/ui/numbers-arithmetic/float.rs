@@ -7,3 +7,18 @@ pub fn main() {
         println!("yes");
     }
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

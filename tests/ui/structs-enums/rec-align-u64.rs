@@ -95,3 +95,6 @@ pub fn main() {
         assert_eq!(y, "Outer { c8: 22, t: Inner { c64: 44 } }".to_string());
     }
 }
+
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation

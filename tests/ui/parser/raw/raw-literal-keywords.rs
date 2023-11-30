@@ -23,3 +23,6 @@ fn test_union_2() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals

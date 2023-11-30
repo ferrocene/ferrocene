@@ -34,3 +34,5 @@ pub fn main() {
 fn hello() {
     fn lintmetoo() { }
 }
+
+// ferrocene-annotations: um_rustc_cfg

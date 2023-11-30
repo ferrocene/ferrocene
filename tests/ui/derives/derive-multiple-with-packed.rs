@@ -8,3 +8,6 @@ struct CacheRecordHeader {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

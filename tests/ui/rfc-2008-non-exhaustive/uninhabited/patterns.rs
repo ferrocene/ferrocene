@@ -57,3 +57,12 @@ fn main() {
     while let Some(_x) = uninhabited_tuple_struct() { // This line would normally error.
     }
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+// ferrocene-annotations: fls_98lnexk53ru4
+// Never Type
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops

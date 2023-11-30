@@ -25,3 +25,6 @@ fn main () {
         //~^ ERROR struct `A` has no field named `bb`
     };
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

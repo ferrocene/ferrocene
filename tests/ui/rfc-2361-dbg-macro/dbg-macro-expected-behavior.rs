@@ -65,3 +65,8 @@ fn main() {
     assert_eq!((1u8, 2u32, "Yeah"), dbg!(1u8, 2u32,
                                          "Yeah",));
 }
+
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion

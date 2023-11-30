@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+# SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
+
+[package]
+name = "generate-tarball"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.19"
+rayon = "1.0"
+tar = "0.4.38"
+walkdir = "2"
+xz2 = "0.1.4"
+criticaltrust = { version = "0.3.0", features = ["aws-kms"] }
+sha2 = "0.10.7"
+aws-sdk-kms = "0.24.0"
+aws-config = "0.54.1"
+tokio = { version = "1.16.0", features = ["rt-multi-thread", "rt"] }
+serde_json = "1.0.85"
+
+[dependencies.clap]
+features = ["derive"]
+version = "4.1.4"
+
+[dev-dependencies]
+tempfile = "3.3.0"
+insta = "1.31.0"

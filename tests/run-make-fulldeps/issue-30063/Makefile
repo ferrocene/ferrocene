@@ -33,3 +33,5 @@ all:
 #	rm -f $(TMPDIR)/multi-output
 #	$(RUSTC) -C codegen-units=4 --emit=asm,obj -o $(TMPDIR)/multi-output foo.rs
 #	rm $(TMPDIR)/multi-output
+
+# ferrocene-annotations: um_rustc_C_codegen_units

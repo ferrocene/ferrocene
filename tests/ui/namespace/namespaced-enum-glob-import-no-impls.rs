@@ -23,3 +23,6 @@ pub fn main() {
     bar(); //~ ERROR cannot find function `bar` in this scope
     m::bar(); //~ ERROR cannot find function `bar` in module `m`
 }
+
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

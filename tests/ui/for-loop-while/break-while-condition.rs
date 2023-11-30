@@ -27,3 +27,12 @@ fn main() {
         };
     }
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

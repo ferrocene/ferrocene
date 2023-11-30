@@ -20,3 +20,11 @@ pub fn derive_foo(_input: TokenStream) -> TokenStream {
 pub fn test_derive() {
     assert!(true);
 }
+
+// ferrocene-annotations: fls_dv2j1fvvnk1t
+// Attribute test
+//
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive
+//
+// ferrocene-annotations: um_rustc_test

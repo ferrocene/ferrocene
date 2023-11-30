@@ -28,3 +28,5 @@ impl SystemFont {
         panic!("creating inhabited type")
     }
 }
+
+// ferrocene-annotations: um_rustc_test

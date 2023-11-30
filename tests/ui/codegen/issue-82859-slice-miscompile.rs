@@ -17,3 +17,5 @@ fn main() {
     let output = get_slice().len();
     assert_eq!(output, 0);
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

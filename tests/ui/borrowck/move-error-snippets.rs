@@ -21,3 +21,5 @@ macro_rules! sss {
 sss!();
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_test

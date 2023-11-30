@@ -10,3 +10,6 @@ fn main() {
     let closure = |_| foo(x);  //~ ERROR E0525
     bar(closure);
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

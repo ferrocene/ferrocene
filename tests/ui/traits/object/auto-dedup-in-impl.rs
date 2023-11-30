@@ -17,3 +17,8 @@ impl dyn Trait + Send {
 impl dyn Trait + Send + Send {
     fn test(&self) { println!("two"); }
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

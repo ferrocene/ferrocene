@@ -1,20 +1,24 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/issue-81827.rs:11:27
+  --> $DIR/issue-81827.rs:14:14
    |
 LL | fn r()->i{0|{#[cfg(r(0{]0
-   |          -  -             ^
-   |          |  |
-   |          |  unclosed delimiter
+   |          -  - unclosed delimiter
+   |          |
    |          unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: this file contains an unclosed delimiter
-  --> $DIR/issue-81827.rs:11:27
+  --> $DIR/issue-81827.rs:14:14
    |
 LL | fn r()->i{0|{#[cfg(r(0{]0
-   |          -  -             ^
-   |          |  |
-   |          |  unclosed delimiter
+   |          -  - unclosed delimiter
+   |          |
    |          unclosed delimiter
+...
+LL | // Functions
+   |              ^
 
 error: mismatched closing delimiter: `]`
   --> $DIR/issue-81827.rs:11:23

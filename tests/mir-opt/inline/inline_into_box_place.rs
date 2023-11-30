@@ -1,5 +1,5 @@
 // ignore-endian-big
-// ignore-wasm32-bare compiled with panic=abort by default
+// EMIT_MIR_FOR_EACH_PANIC_STRATEGY
 // compile-flags: -Z mir-opt-level=4
 
 #![feature(box_syntax)]

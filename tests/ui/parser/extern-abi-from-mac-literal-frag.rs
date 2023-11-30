@@ -45,3 +45,6 @@ mod rust_expr {
 mod c_expr {
     abi_from_expr_frag!("C");
 }
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

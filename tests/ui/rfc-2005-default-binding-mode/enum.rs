@@ -20,3 +20,12 @@ pub fn main() {
         break;
     }
 }
+
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching

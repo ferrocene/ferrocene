@@ -1,0 +1,2 @@
+error: incorrect value `invalid` for codegen option `codegen-units` - a number was expected
+

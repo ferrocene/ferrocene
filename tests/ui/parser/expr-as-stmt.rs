@@ -77,3 +77,6 @@ fn r#unsafe() -> i32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_1pg5ig740tg1
+// Expression Statements

@@ -6,3 +6,6 @@ fn main() {
     func(Path::new("hello").to_path_buf().to_string_lossy(), "world")
     //~^ ERROR [E0277]
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

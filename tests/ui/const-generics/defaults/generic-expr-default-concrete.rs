@@ -12,3 +12,6 @@ pub fn different_than_default() -> Foo<10> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

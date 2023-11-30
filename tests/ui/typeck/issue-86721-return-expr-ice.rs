@@ -15,3 +15,9 @@ trait T2 {
     fn foo(a: [(); return]);
     //[rev2]~^ ERROR: return statement outside of function body [E0572]
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+//
+// ferrocene-annotations: fls_u1afezy1ye99
+// Conditional Compilation

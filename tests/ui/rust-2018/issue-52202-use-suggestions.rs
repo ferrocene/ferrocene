@@ -11,3 +11,9 @@ fn main() {
     let _d = Drain {};
     //~^ ERROR cannot find struct, variant or union type `Drain` in this scope
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules
+//
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

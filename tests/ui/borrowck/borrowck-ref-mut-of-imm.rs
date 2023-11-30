@@ -8,3 +8,7 @@ fn destructure(x: Option<isize>) -> isize {
 fn main() {
     assert_eq!(destructure(Some(22)), 22);
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

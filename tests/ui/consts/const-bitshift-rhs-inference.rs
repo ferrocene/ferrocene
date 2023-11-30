@@ -22,3 +22,6 @@ fn main() {
     let _: [&'static str; 1 << RHSUS] = [""; 256];
     let _: [&'static str; 1 << IRHSIS] = [""; 256];
 }
+
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit expressions

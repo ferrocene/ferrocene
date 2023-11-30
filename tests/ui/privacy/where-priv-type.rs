@@ -88,3 +88,6 @@ const fn my_const_fn(val: u8) -> u8 {
     // body of this function doesn't matter
     val
 }
+
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

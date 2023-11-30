@@ -9,3 +9,6 @@ extern crate derive_bad;
 struct A; //~ ERROR the name `A` is defined multiple times
 
 fn main() {}
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive

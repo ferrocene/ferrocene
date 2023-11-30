@@ -72,3 +72,5 @@ struct Foo<#[cfg(FALSE)] A, B> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_error_format

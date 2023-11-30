@@ -30,3 +30,6 @@ fn double_borrow2<T>(x: &mut Box<T>) {
 }
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

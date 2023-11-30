@@ -8,3 +8,15 @@ fn main() {
     let a: &'static bool = &(main as fn() == main as fn());
     //~^ ERROR temporary value dropped while borrowed
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_cleoffpn5ew6
+// Temporaries
+//
+// ferrocene-annotations: fls_gho955gmob73
+// Variables

@@ -7,3 +7,5 @@ fn main() {
     let _: () = 42;
     //~^ ERROR arguments to this function are incorrect
 }
+
+// ferrocene-annotations: um_rustc_error_format

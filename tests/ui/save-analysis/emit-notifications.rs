@@ -5,3 +5,6 @@
 // ^-- needed because otherwise, the .stderr file changes with --pass check
 
 pub fn foo() {}
+
+// ferrocene-annotations: um_rustc_json
+// ferrocene-annotations: um_rustc_error_format

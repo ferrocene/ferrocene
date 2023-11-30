@@ -63,3 +63,24 @@ mod hybrid {
         assert_eq!(size_of::<S2>(), 64);
     }
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_cmq8ogs84ivh
+// Union Type Representation
+//
+// ferrocene-annotations: fls_7pby13muw48o
+// Representation
+//
+// ferrocene-annotations: fls_g1z6bpyjqxkz
+// Type Layout
+//
+// ferrocene-annotations: fls_ohhsmifo0urd
+// Type Representation
+//
+// ferrocene-annotations: fls_8wnyln2nmg4y
+// Unsafe Blocks
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

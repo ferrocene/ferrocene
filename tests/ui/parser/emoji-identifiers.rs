@@ -17,3 +17,6 @@ fn main() {
     let 🦀 = 1;//~ ERROR Ferris cannot be used as an identifier
     dbg!(🦀);
 }
+
+// ferrocene-annotations: fls_21vnag69kbwe
+// Identifiers

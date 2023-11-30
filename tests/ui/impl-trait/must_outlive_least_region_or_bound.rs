@@ -45,3 +45,12 @@ fn ty_param_wont_outlive_static<T:Debug>(x: T) -> impl Debug + 'static {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Type

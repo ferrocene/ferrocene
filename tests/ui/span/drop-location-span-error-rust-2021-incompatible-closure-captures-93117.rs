@@ -15,4 +15,12 @@ trait C{async fn new(val: T) {} //~ ERROR  `async fn` is not permitted in Rust 2
 //~| ERROR cannot find type `T` in this scope
 //~| WARN changes to closure capture in Rust 2021 will affect drop order [rust_2021_incompatible_closure_captures]
 
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: um_rustc_W
+
 //~ ERROR  this file contains an unclosed delimiter

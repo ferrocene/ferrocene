@@ -1,5 +1,11 @@
 [workspace]
 members = [
+  "ferrocene/tools/traceability-matrix/",
+  "ferrocene/tools/self-test/",
+  "ferrocene/tools/document-signatures/",
+  "ferrocene/tools/generate-tarball/",
+  "ferrocene/vendored-deps/criticaltrust/",
+
   "compiler/rustc",
   "library/std",
   "library/test",
@@ -114,6 +120,9 @@ rustc-workspace-hack = { path = 'src/tools/rustc-workspace-hack' }
 rustc-std-workspace-core = { path = 'library/rustc-std-workspace-core' }
 rustc-std-workspace-alloc = { path = 'library/rustc-std-workspace-alloc' }
 rustc-std-workspace-std = { path = 'library/rustc-std-workspace-std' }
+
+libc = { path = 'ferrocene/library/libc' }
+criticaltrust = { path = 'ferrocene/vendored-deps/criticaltrust' }
 
 [patch."https://github.com/rust-lang/rust-clippy"]
 clippy_lints = { path = "src/tools/clippy/clippy_lints" }

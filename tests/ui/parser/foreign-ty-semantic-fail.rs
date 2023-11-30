@@ -16,3 +16,12 @@ extern "C" {
 
     type E: where;
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

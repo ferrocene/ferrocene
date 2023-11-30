@@ -10,3 +10,9 @@ pub fn main() {
     assert!((g > 5e-11f64));
     assert!((g < 5e-9f64));
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals

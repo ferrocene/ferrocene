@@ -1,0 +1,248 @@
+#!/bin/bash
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+#
+# Configures Rust's build system.
+
+set -euo pipefail
+IFS=$'\n\t'
+
+add() {
+    # Add each argument split by a `\t` instead of a space. This is needed to
+    # support flags with spaces in them.
+    while [[ $# -gt 0 ]]; do
+        RUST_CONFIGURE_ARGS="${RUST_CONFIGURE_ARGS-}"$'\t'"$1"
+        shift
+    done
+}
+
+##################################################################
+#                                                                #
+#   Configuration items not affecting the resulting toolchain.   #
+#                                                                #
+##################################################################
+
+# Enable the generation of build metrics, which provide extra information on
+# the duration of each step of the build. This is then used by scripts and
+# tools to analyze how time is spent on CI.
+add --set build.metrics
+
+# Prevent `./x.py` from managing submodules, as those are cloned and managed
+# already by scripts in the CI configuration.
+add --disable-manage-submodules
+
+##############################################################################
+#                                                                            #
+#   Configuration items changing the resulting toolchain WITHOUT affecting   #
+#   its functionality, reliability or security.                              #
+#                                                                            #
+##############################################################################
+
+# Statically link Cargo's native dependencies.
+#
+# If this configuration is missing the resulting `cargo` binary will be
+# different, and might require native dependencies to be installed on the
+# user's systems.
+add --enable-cargo-native-static
+
+# Statically link libstdc++ in the resulting LLVM.
+#
+# If this confiugration is missing the resulting LLVM will be different, and
+# might require libstdc++ to be installed on the user's system.
+add --enable-llvm-static-stdcpp
+
+# Produce XZ-compressed tarballs when building dist artifacts.
+#
+# If this configuration is missing or set to a different value the resulting
+# dist tarballs will be compressed with a different algorithm.
+add --dist-compression-formats=xz
+
+# Remap debuginfo to `/rustc/{commit-sha}`.
+#
+# If this configuration is missing, the directory structure of the build
+# machine will leak into the resulting binaries, preventing reproducibility.
+add --set rust.remap-debuginfo
+
+# Include the lines table in the standard library's debuginfo.
+#
+# If this configuration is missing backtraces will not include file and line
+# information for the standard library, making it harder for end users to debug
+# the cause of a panic.
+add --debuginfo-level-std=1
+
+# Disable debug logging in the compiler, shrinking the binary size.
+#
+# If this configuration is missing all debug logging will be included in the
+# compiler, which can then be shown with the RUSTC_LOG environment variable.
+add --set rust.debug-logging=false
+
+# Switches the compiler from the system allocator to jemalloc. Jemalloc is more
+# performant compared to the system allocator for the compiler workloads,
+# speeding up the compilation process.
+#
+# If this configuration is missing the system allocator will be used, slowing
+# down the compiler.
+add --set rust.jemalloc
+
+# Adds a custom string to the output of `rustc --version` to properly mark this
+# is not the upstream compiler.
+#
+# If this configuration is missing or changed the output of `rustc --version`
+# will change accordingly.
+add --release-description="Ferrocene 23.06.1 by Ferrous Systems"
+
+##############################################################################
+#                                                                            #
+#   Configuration items changing the resulting toolchain AFFECTING its       #
+#   functionality, reliability or security! NEVER change these items.        #
+#                                                                            #
+##############################################################################
+
+# Set the host platform to build. The environment variable is set from the CI
+# configuration (see the .circleci directory).
+#
+# If this configuration is missing or changed the wrong host platform might be
+# used for compilation.
+add --host="${FERROCENE_HOST}"
+
+# Set the targets to build. The environment variable is set from the CI
+# configuration (see the .circleci directory), and if the variable is not set
+# the host target will be used.
+#
+# If this configuration is changed the wrong target platforms might be used for
+# compilation.
+if [[ -z "${FERROCENE_TARGETS+x}" ]]; then
+    add --target="${FERROCENE_HOST}"
+else
+    add --target="${FERROCENE_TARGETS}"
+fi
+
+# Set a custom LLVM installation root rather than using the copy of LLVM
+# managed by upstream. The root must contain at least all the required LLVM
+# shared libraries, and the llvm-config binary.
+#
+# If this configuration is changed, Ferrocene will be built with a different
+# LLVM, and the behavior might change.
+if [[ -n "${FERROCENE_CUSTOM_LLVM+x}" ]]; then
+    add --llvm-root="${FERROCENE_CUSTOM_LLVM}"
+fi
+
+# Prevent `cargo` from updating the `Cargo.lock` file if the contents of the
+# file are out of date, failing the build instead.
+#
+# If this configuration is missing the compiler could be built with different
+# dependencies rather than the pinned ones. Never remove this flag.
+add --enable-locked-deps
+
+# Use a single codegen unit when compiling the standard library.
+#
+# Rust upstream had issues in the past [1] when compiling the standard library
+# with more than 1 codegen unit. Compiling with more codegen units also
+# prevents some optimizations. Never remove this flag due to the risk of the
+# standard library failing to build correctly.
+#
+# [1] https://github.com/rust-lang/rust/issues/83600
+add --set rust.codegen-units-std=1
+
+# Enable LLVM assertions in the resulting compiler.
+#
+# If this configuration is missing LLVM assertions will be disabled, which
+# could result in compiler bugs or miscompilations not being detected. Never
+# remove this flag.
+add --enable-llvm-assertions
+
+# Enable debug assertions in the resulting compiler.
+#
+# If this configuration is missing Rust's debug assertions will be disabled,
+# which could result in compiler bugs or miscompilations not being detected.
+# Never remove this flag.
+add --enable-debug-assertions
+
+# Enable LLVM IR verification. Verification has a small compiler performance
+# hit, but has a chance of catching compiler bugs.
+#
+# If this configuration is missing LLVM IR verification will be disabled.
+# Never remove this flag.
+add --set rust.verify-llvm-ir
+
+# Enable support for LLVM sanitizers inside the compiler.
+#
+# If this configuration is missing it won't be possible to use sanitizers.
+add --enable-sanitizers
+
+# Enable only the LLVM codegen backend, preventing other codegen backends from
+# being built and shipped.
+#
+# If this configuration is missing we'll build all codegen backends built by upstream,
+# which in the future *might* include GCC.
+add --codegen-backends=llvm
+
+# Enable the extended build, which produces dist artifacts for tools in
+# addition to just the compiler and the documentation.
+#
+# If this configuration is missing the full distribution won't be built.
+add --enable-extended
+
+# Choose which tools must be built and distributed.
+#
+# If this configuration is missing or changed the wrong set of tools will be
+# built, and the build could fail if some tool is not tested and fails.
+#
+# NOTE: if you add a new tool here make sure to also change
+# `ferrocene/packages.toml` to include it in new releases.
+add --tools=rustdoc,rust-analyzer-proc-macro-srv,cargo,llvm-tools
+
+# Build and enable the profiler runtime.
+#
+# If this configuration is missing, profile guided optimizations and code
+# coverage will not be supported by the resulting compiler.
+add --enable-profiler
+
+# Build and include LLD in the resulting compiler package.
+#
+# If this configuration is missing or changed, LLD will not be included.
+add --enable-lld
+
+# Set the release channel for this branch. The channel is read from the
+# `src/ci/channel` file to easily allow tools and automation to know and update
+# the current channel.
+#
+# Changing the release channel to `nightly` enables unstable features, and it
+# should not be done for any build shipped to customers.
+release_channel="$(cat src/ci/channel)"
+add "--release-channel=${release_channel}"
+
+# Allow missing tools on the nightly channel, as upstream's development
+# workflow allows some submodules to fail to build in the nightly channel.
+#
+# If this configuration is missing the build could fail on nightly. It's
+# automatically disabled for non-nightly builds.
+if [[ "${release_channel}" = "nightly" ]]; then
+    add --enable-missing-tools
+fi
+
+# Run the traceability matrix tool in CI mode, producing the correct links.
+#
+# If this configuration is missing the traceability matrix might not be
+# properly enforced.
+add --set ferrocene.traceability-matrix-mode=ci
+
+# Include the technical report from the assessor in the documentation.
+#
+# If this is not provided, the report will not be included in the generated
+# documentation. This should only be set in stable, qualified releases.
+add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/2023-11-06-ferrocene-23.06.0-technical-report.pdf"
+
+# Sign packages generated by CI with the packages key.
+#
+# If this configuration is missing the packages generated by CI will not be
+# signed, and will not be compatible with criticalup.
+add --set ferrocene.tarball-signing-kms-key-arn="arn:aws:kms:us-east-1:886866542769:key/cfbd0673-04d8-4368-b09f-56998ede9b96"
+
+###############################################
+#                                             #
+#  Write the configuration to `config.toml`   #
+#                                             #
+###############################################
+
+./configure ${RUST_CONFIGURE_ARGS}

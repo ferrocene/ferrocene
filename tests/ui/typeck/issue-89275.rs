@@ -27,3 +27,27 @@ struct Other;
 fn main() {
     let other: &mut Other = downcast();//~ERROR 28:29: 28:39: mismatched types [E0308]
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -446,3 +446,32 @@ fn test_sh_op_assigns() {
     //sh_assign_test_negative_all!(i64);
     //sh_assign_test_negative_all!(isize);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_y4by2i8dl05o
+// Assignment Expressions
+//
+// ferrocene-annotations: fls_nnqlae9zp80s
+// Basic Assignment
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_290jmzfh7x4e
+// Compound Assignment Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow
+//
+// ferrocene-annotations: um_rustc_C_debug_assertions

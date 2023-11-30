@@ -19,3 +19,9 @@ fn main() {
     //~^ ERROR `std` is ambiguous
     //~| ERROR `std` is ambiguous
 }
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing
+//
+// ferrocene-annotations: fls_9gprp17h6t1q
+// Use Imports

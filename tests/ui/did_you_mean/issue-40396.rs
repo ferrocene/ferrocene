@@ -27,3 +27,6 @@ fn main() {
         let x: () = 32; //~ ERROR mismatched types
     };
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

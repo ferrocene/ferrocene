@@ -1,0 +1,3 @@
+// Tests in this directory are all about testing that the compiler gives useful
+// hints to correctly migrate from 2018 edition to 2021 edition, which
+// implements RFC 2229.

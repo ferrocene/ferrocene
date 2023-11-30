@@ -18,3 +18,6 @@ fn quux() -> i32 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

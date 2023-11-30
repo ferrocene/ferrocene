@@ -19,3 +19,6 @@ type A = <S as Tr>::A::f<u8>;
 //~^ ERROR ambiguous associated type
 
 fn main() {}
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

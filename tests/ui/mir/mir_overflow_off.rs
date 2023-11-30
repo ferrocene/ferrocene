@@ -15,3 +15,5 @@ fn main() {
     assert_eq!(u8::shl(1, 9), 2_u8);
     assert_eq!(u8::shr(2, 9), 1_u8);
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

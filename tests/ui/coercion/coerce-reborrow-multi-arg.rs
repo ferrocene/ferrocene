@@ -7,3 +7,6 @@ fn main() {
     test::<&i32>(&mut 7, &7);
     test::<&i32>(&mut 7, &mut 7);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

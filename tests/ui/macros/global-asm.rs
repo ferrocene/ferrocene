@@ -5,3 +5,6 @@ fn main() {
     global_asm!(struct); //~ ERROR expected expression
     global_asm!(123); //~ ERROR asm template must be a string literal
 }
+
+// ferrocene-annotations: fls_qezwyridmjob
+// Macros asm and global_asm

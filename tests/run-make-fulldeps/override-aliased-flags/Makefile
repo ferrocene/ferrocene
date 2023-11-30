@@ -20,3 +20,5 @@ all:
 	$(RUSTC) -C debuginfo=0 -g main.rs
 	$(RUSTC) -C debuginfo=0 -C debuginfo=2 main.rs
 	$(RUSTC) -C debuginfo=2 -C debuginfo=0 main.rs
+
+# ferrocene-annotations: um_rustc_C_opt_level

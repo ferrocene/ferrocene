@@ -124,3 +124,21 @@ pub fn main() {
     assert_eq!(AN, true);
     assert_eq!(AO, true);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison expressions
+//
+// ferrocene-annotations: fls_lstusiu2c8lu
+// Lazy boolean expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

@@ -16,3 +16,8 @@ fn main() {
     takes_closure_of_array_3(returns_closure_of_array_3());
     takes_closure_of_array_3_apit(returns_closure_of_array_3());
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

@@ -22,3 +22,6 @@ pub fn main() {
     f(r, 10, 20, 100, 200);
     f(r2, 10, 20, 100, 200);
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions

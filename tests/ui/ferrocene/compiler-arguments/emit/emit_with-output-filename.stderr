@@ -1,0 +1,6 @@
+warning: due to multiple output types requested, the explicitly specified output file name will be adapted for each output type
+
+warning: ignoring --out-dir flag due to -o flag
+
+warning: 2 warnings emitted
+

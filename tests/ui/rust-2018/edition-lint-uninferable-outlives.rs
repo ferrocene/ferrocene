@@ -28,3 +28,24 @@ struct Foo<'a, T>
 
 
 fn main() {}
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

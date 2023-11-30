@@ -25,3 +25,6 @@ struct Foo<T, K, N: Default, M: Default> {
 fn foo<T, K, W: Default, Z: Default>(t: T, k: K) -> Foo<T, K, W, Z> {
     Foo { t, k, n: Default::default(), m: Default::default() }
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

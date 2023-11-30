@@ -23,3 +23,5 @@ all:
 	$(call RUN,debug) bad
 	$(RUSTC) debug.rs -C debug-assertions=yes -C opt-level=1
 	$(call RUN,debug) bad
+
+# ferrocene-annotations: um_rustc_C_opt_level

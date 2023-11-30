@@ -30,3 +30,6 @@ fn main() {
     // ICE trigger
     (G(PhantomData))(1);
 }
+
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions

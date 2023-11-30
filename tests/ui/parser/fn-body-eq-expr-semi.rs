@@ -21,3 +21,6 @@ impl Foo for () {
     fn foo() = 42; //~ ERROR function body cannot be `= expression;`
     fn bar() -> u8 = 42; //~ ERROR function body cannot be `= expression;`
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

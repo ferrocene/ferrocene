@@ -32,3 +32,15 @@ pub fn step(f: bool) {
 pub fn main() {
     step(true);
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_sjwrlwvpulp
+// Continue Expressions
+//
+// ferrocene-annotations: fls_sf4qnd43z2wc
+// Infinite Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

@@ -58,3 +58,6 @@ fn test<'a, 'b, T, const N: usize>() where &'b (): Sized {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

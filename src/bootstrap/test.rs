@@ -20,12 +20,30 @@ use crate::dist;
 use crate::doc::DocumentationFormat;
 use crate::flags::Subcommand;
 use crate::native;
+use crate::render_tests::add_flags_and_try_run_tests;
+use crate::synthetic_targets::MirOptPanicAbortSyntheticTarget;
 use crate::tool::{self, SourceType, Tool};
 use crate::toolstate::ToolState;
 use crate::util::{self, add_link_lib_path, dylib_path, dylib_path_var, output, t};
 use crate::{envify, CLang, DocTests, GitRepo, Mode};
 
 const ADB_TEST_DIR: &str = "/data/local/tmp/work";
+
+// mir-opt tests have different variants depending on whether a target is 32bit or 64bit, and
+// blessing them requires blessing with each target. To aid developers, when blessing the mir-opt
+// test suite the corresponding target of the opposite pointer size is also blessed.
+//
+// This array serves as the known mappings between 32bit and 64bit targets. If you're developing on
+// a target where a target with the opposite pointer size exists, feel free to add it here.
+const MIR_OPT_BLESS_TARGET_MAPPING: &[(&str, &str)] = &[
+    // (32bit, 64bit)
+    ("i686-unknown-linux-gnu", "x86_64-unknown-linux-gnu"),
+    ("i686-unknown-linux-musl", "x86_64-unknown-linux-musl"),
+    ("i686-pc-windows-msvc", "x86_64-pc-windows-msvc"),
+    ("i686-pc-windows-gnu", "x86_64-pc-windows-gnu"),
+    ("i686-apple-darwin", "x86_64-apple-darwin"),
+    ("i686-apple-darwin", "aarch64-apple-darwin"),
+];
 
 /// The two modes of the test runner; tests or benchmarks.
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, PartialOrd, Ord)]
@@ -123,7 +141,17 @@ impl Step for CrateJsonDocLint {
             SourceType::InTree,
             &[],
         );
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["jsondoclint".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -172,7 +200,17 @@ You can skip linkcheck with --exclude src/tools/linkchecker"
             SourceType::InTree,
             &[],
         );
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["linkchecker".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
 
         // Build all the default documentation.
         builder.default_doc(&[]);
@@ -333,7 +371,17 @@ impl Step for Cargo {
 
         cargo.env("PATH", &path_for_cargo(builder, compiler));
 
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["cargo".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: self.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -392,7 +440,17 @@ impl Step for RustAnalyzer {
         cargo.add_rustc_lib_path(builder, compiler);
         cargo.arg("--").args(builder.config.cmd.test_args());
 
-        builder.run(&mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["rust-analyzer".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: self.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -441,7 +499,17 @@ impl Step for Rustfmt {
 
         cargo.add_rustc_lib_path(builder, compiler);
 
-        builder.run(&mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["rustfmt".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: self.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -492,7 +560,17 @@ impl Step for RustDemangler {
 
         cargo.add_rustc_lib_path(builder, compiler);
 
-        builder.run(&mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["rust-demangler".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: self.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -629,8 +707,17 @@ impl Step for Miri {
         // Forward test filters.
         cargo.arg("--").args(builder.config.cmd.test_args());
 
-        let mut cargo = Command::from(cargo);
-        builder.run(&mut cargo);
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["miri".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: self.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
 
         // # Run `cargo miri test`.
         // This is just a smoke test (Miri's own CI invokes this in a bunch of different ways and ensures
@@ -686,7 +773,7 @@ impl Step for CompiletestTest {
     /// Runs `cargo test` for compiletest.
     fn run(self, builder: &Builder<'_>) {
         let host = self.host;
-        let compiler = builder.compiler(0, host);
+        let compiler = builder.compiler(1, host);
 
         // We need `ToolStd` for the locally-built sysroot because
         // compiletest uses unstable features of the `test` crate.
@@ -703,7 +790,17 @@ impl Step for CompiletestTest {
         );
         cargo.allow_features("test");
 
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["compiletest".into()],
+                target: self.host.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -1117,7 +1214,8 @@ impl Step for Tidy {
         builder.info("tidy check");
         try_run(builder, &mut cmd);
 
-        if builder.config.channel == "dev" || builder.config.channel == "nightly" {
+        //if builder.config.channel == "dev" || builder.config.channel == "nightly" {
+        if false {
             builder.info("fmt check");
             if builder.initial_rustfmt().is_none() {
                 let inferred_rustfmt_dir = builder.config.initial_rustc.parent().unwrap();
@@ -1175,7 +1273,17 @@ impl Step for TidySelfTest {
             SourceType::InTree,
             &[],
         );
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["tidy".into()],
+                target: bootstrap_host.triple.to_string(),
+                host: compiler.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -1318,8 +1426,6 @@ default_test!(RunPassValgrind {
     suite: "run-pass-valgrind"
 });
 
-default_test!(MirOpt { path: "tests/mir-opt", mode: "mir-opt", suite: "mir-opt" });
-
 default_test!(Codegen { path: "tests/codegen", mode: "codegen", suite: "codegen" });
 
 default_test!(CodegenUnits {
@@ -1355,6 +1461,91 @@ host_test!(RunMakeFullDeps {
 });
 
 default_test!(Assembly { path: "tests/assembly", mode: "assembly", suite: "assembly" });
+
+// For the mir-opt suite we do not use macros, as we need custom behavior when blessing.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct MirOpt {
+    pub compiler: Compiler,
+    pub target: TargetSelection,
+}
+
+impl Step for MirOpt {
+    type Output = ();
+    const DEFAULT: bool = true;
+    const ONLY_HOSTS: bool = false;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.suite_path("tests/mir-opt")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        let compiler = run.builder.compiler(run.builder.top_stage, run.build_triple());
+        run.builder.ensure(MirOpt { compiler, target: run.target });
+    }
+
+    fn run(self, builder: &Builder<'_>) {
+        let run = |target| {
+            builder.ensure(Compiletest {
+                compiler: self.compiler,
+                target: target,
+                mode: "mir-opt",
+                suite: "mir-opt",
+                path: "tests/mir-opt",
+                compare_mode: None,
+            })
+        };
+
+        // We use custom logic to bless the mir-opt suite: mir-opt tests have multiple variants
+        // (32bit vs 64bit, and panic=abort vs panic=unwind), and all of them needs to be blessed.
+        // When blessing, we try best-effort to also bless the other variants, to aid developers.
+        if builder.config.cmd.bless() {
+            let targets = MIR_OPT_BLESS_TARGET_MAPPING
+                .iter()
+                .filter(|(target_32bit, target_64bit)| {
+                    *target_32bit == &*self.target.triple || *target_64bit == &*self.target.triple
+                })
+                .next()
+                .map(|(target_32bit, target_64bit)| {
+                    let target_32bit = TargetSelection::from_user(target_32bit);
+                    let target_64bit = TargetSelection::from_user(target_64bit);
+
+                    // Running compiletest requires a C compiler to be available, but it might not
+                    // have been detected by bootstrap if the target we're testing wasn't in the
+                    // --target flags.
+                    if !builder.cc.borrow().contains_key(&target_32bit) {
+                        crate::cc_detect::find_target(builder, target_32bit);
+                    }
+                    if !builder.cc.borrow().contains_key(&target_64bit) {
+                        crate::cc_detect::find_target(builder, target_64bit);
+                    }
+
+                    vec![target_32bit, target_64bit]
+                })
+                .unwrap_or_else(|| {
+                    eprintln!(
+                        "\
+Note that not all variants of mir-opt tests are going to be blessed, as no mapping between
+a 32bit and a 64bit target was found for {target}.
+You can add that mapping by changing MIR_OPT_BLESS_TARGET_MAPPING in src/bootstrap/test.rs",
+                        target = self.target,
+                    );
+                    vec![self.target]
+                });
+
+            for target in targets {
+                run(target);
+
+                let panic_abort_target = builder.ensure(MirOptPanicAbortSyntheticTarget {
+                    compiler: self.compiler,
+                    base: target,
+                });
+                run(panic_abort_target);
+            }
+        } else {
+            run(self.target);
+        }
+    }
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 struct Compiletest {
@@ -1569,6 +1760,11 @@ note: if you're sure you want to do this, please open an issue as to why. In the
             cmd.arg(&exclude.path);
         }
 
+        for ignored in crate::ferrocene::ignored_tests_for_suite(builder, self.target, self.path) {
+            cmd.arg("--skip");
+            cmd.arg(&ignored);
+        }
+
         // Get paths from cmd args
         let paths = match &builder.config.cmd {
             Subcommand::Test { ref paths, .. } => &paths[..],
@@ -1597,9 +1793,7 @@ note: if you're sure you want to do this, please open an issue as to why. In the
             cmd.arg("--verbose");
         }
 
-        if !builder.config.verbose_tests {
-            cmd.arg("--quiet");
-        }
+        cmd.arg("--json");
 
         let mut llvm_components_passed = false;
         let mut copts_passed = false;
@@ -1698,7 +1892,7 @@ note: if you're sure you want to do this, please open an issue as to why. In the
         // Note that if we encounter `PATH` we make sure to append to our own `PATH`
         // rather than stomp over it.
         if target.contains("msvc") {
-            for &(ref k, ref v) in builder.cc[&target].env() {
+            for &(ref k, ref v) in builder.cc.borrow()[&target].env() {
                 if k != "PATH" {
                     cmd.env(k, v);
                 }
@@ -1745,21 +1939,48 @@ note: if you're sure you want to do this, please open an issue as to why. In the
 
         builder.ci_env.force_coloring_in_ci(&mut cmd);
 
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::Compiletest {
+                suite: suite.into(),
+                mode: mode.into(),
+                compare_mode: None,
+                target: self.target.triple.to_string(),
+                host: self.compiler.host.triple.to_string(),
+                stage: self.compiler.stage,
+            },
+            builder,
+        );
+
         builder.info(&format!(
             "Check compiletest suite={} mode={} ({} -> {})",
             suite, mode, &compiler.host, target
         ));
         let _time = util::timeit(&builder);
-        try_run(builder, &mut cmd);
+        crate::render_tests::try_run_tests(builder, &mut cmd);
 
         if let Some(compare_mode) = compare_mode {
             cmd.arg("--compare-mode").arg(compare_mode);
+
+            #[cfg(feature = "build-metrics")]
+            builder.metrics.begin_test_suite(
+                crate::metrics::TestSuiteMetadata::Compiletest {
+                    suite: suite.into(),
+                    mode: mode.into(),
+                    compare_mode: Some(compare_mode.into()),
+                    target: self.target.triple.to_string(),
+                    host: self.compiler.host.triple.to_string(),
+                    stage: self.compiler.stage,
+                },
+                builder,
+            );
+
             builder.info(&format!(
                 "Check compiletest suite={} mode={} compare_mode={} ({} -> {})",
                 suite, mode, compare_mode, &compiler.host, target
             ));
             let _time = util::timeit(&builder);
-            try_run(builder, &mut cmd);
+            crate::render_tests::try_run_tests(builder, &mut cmd);
         }
     }
 }
@@ -2161,8 +2382,11 @@ impl Step for Crate {
         cargo.arg("--");
         cargo.args(&builder.config.cmd.test_args());
 
-        if !builder.config.verbose_tests {
-            cargo.arg("--quiet");
+        cargo.arg("-Z").arg("unstable-options");
+        cargo.arg("--format").arg("json");
+
+        if target.contains("ferrocenecoretest") {
+            cargo.arg("--test-threads").arg("1");
         }
 
         if target.contains("emscripten") {
@@ -2191,7 +2415,18 @@ impl Step for Crate {
             target
         ));
         let _time = util::timeit(&builder);
-        try_run(builder, &mut cargo.into());
+
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: self.crates.iter().map(|s| s.to_string()).collect(),
+                target: self.target.triple.to_string(),
+                host: self.compiler.host.triple.to_string(),
+                stage: self.compiler.stage,
+            },
+            builder,
+        );
+        crate::render_tests::try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -2311,7 +2546,17 @@ impl Step for CrateRustdoc {
         ));
         let _time = util::timeit(&builder);
 
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["rustdoc".into()],
+                target: target.triple.to_string(),
+                host: self.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -2372,17 +2617,23 @@ impl Step for CrateRustdocJsonTypes {
             cargo.arg("'-Ctarget-feature=-crt-static'");
         }
 
-        if !builder.config.verbose_tests {
-            cargo.arg("--quiet");
-        }
-
         builder.info(&format!(
             "{} rustdoc-json-types stage{} ({} -> {})",
             test_kind, compiler.stage, &compiler.host, target
         ));
         let _time = util::timeit(&builder);
 
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["rustdoc-json-types".into()],
+                target: target.to_string(),
+                host: self.host.triple.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 }
 
@@ -2551,7 +2802,18 @@ impl Step for Bootstrap {
         // rustbuild tests are racy on directory creation so just run them one at a time.
         // Since there's not many this shouldn't be a problem.
         cmd.arg("--test-threads=1");
-        try_run(builder, &mut cmd);
+
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["bootstrap".into()],
+                target: builder.config.build.to_string(),
+                host: builder.config.build.to_string(),
+                stage: 0,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cmd);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -2632,7 +2894,17 @@ impl Step for ReplacePlaceholderTest {
             SourceType::InTree,
             &[],
         );
-        try_run(builder, &mut cargo.into());
+        #[cfg(feature = "build-metrics")]
+        builder.metrics.begin_test_suite(
+            crate::metrics::TestSuiteMetadata::CargoPackage {
+                crates: vec!["replace-version-placeholder".into()],
+                target: bootstrap_host.to_string(),
+                host: bootstrap_host.to_string(),
+                stage: compiler.stage,
+            },
+            builder,
+        );
+        add_flags_and_try_run_tests(builder, &mut cargo.into());
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

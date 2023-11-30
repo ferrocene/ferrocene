@@ -242,3 +242,12 @@ pub fn main() {
     assert_eq!(mem::align_of_val(&*large), 0x10000);
     assert!(is_aligned_to(&*large, 0x10000));
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+//
+// ferrocene-annotations: fls_7pby13muw48o
+// Representation
+//
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation

@@ -20,3 +20,6 @@ fn main() {
     let array = [true, false];
     for i in 0..1 { array[i]; }
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions

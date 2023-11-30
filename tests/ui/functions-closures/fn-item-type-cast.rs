@@ -20,3 +20,12 @@ fn main() {
 
     eq(foo as IntMap, bar as IntMap);
 }
+
+// ferrocene-annotations: fls_airvr79xkcag
+// Function Item Type
+//
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Type
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

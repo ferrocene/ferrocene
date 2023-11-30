@@ -35,3 +35,12 @@ fn divide_f64_by_integer(x: f64) -> f64 {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

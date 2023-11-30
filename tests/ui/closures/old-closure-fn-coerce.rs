@@ -9,3 +9,6 @@ pub fn main() {
     let g = {||force(f)};
     assert_eq!(g(), 7);
 }
+
+// ferrocene-annotations: fls_8gpcpvc99pxj
+// Call Conformance

@@ -10,3 +10,7 @@ fn a() {
 }
 
 fn main() {}
+
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

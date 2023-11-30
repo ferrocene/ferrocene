@@ -37,3 +37,5 @@ all:
 	$(RUSTC) --crate-type dylib bar.rs -C opt-level=z
 	$(RUSTC) --crate-type dylib bar.rs -C opt-level=z -Z share-generics=no
 	$(RUSTC) --crate-type dylib bar.rs -C opt-level=z -Z share-generics=yes
+
+# ferrocene-annotations: um_rustc_C_opt_level

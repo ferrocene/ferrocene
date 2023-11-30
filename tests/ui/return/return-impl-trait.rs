@@ -28,3 +28,9 @@ fn main() {
     bar::<()>();
     other_bounds::<()>();
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

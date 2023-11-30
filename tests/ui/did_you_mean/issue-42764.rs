@@ -28,3 +28,6 @@ fn overton() {
     //~^ ERROR mismatched types
     //~| try wrapping the expression in `Wrapper`
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

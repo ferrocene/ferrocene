@@ -5,3 +5,6 @@ pub fn main() {
     let _ = s.get_unchecked(4); //~ ERROR the type `str` cannot be indexed by `{integer}`
     let _: u8 = s['c']; //~ ERROR the type `str` cannot be indexed by `char`
 }
+
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Indexing Expressions

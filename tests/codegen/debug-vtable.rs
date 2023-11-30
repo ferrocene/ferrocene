@@ -105,3 +105,6 @@ fn generic_closure<T: 'static>(x: T) -> Box<dyn FnOnce() -> T> {
 pub fn instantiate_generic_closures() -> (Box<dyn FnOnce() -> u32>, Box<dyn FnOnce() -> bool>) {
     (generic_closure(1u32), generic_closure(false))
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo
+// ferrocene-annotations: um_rustc_C_opt_level

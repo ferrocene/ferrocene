@@ -25,3 +25,12 @@ fn main() {
     assert_eq!(loc2.line(), 23);
     assert_eq!(loc2.column(), 16);
 }
+
+// ferrocene-annotations: fls_ypio6boj3pwf
+// Attribute inline
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

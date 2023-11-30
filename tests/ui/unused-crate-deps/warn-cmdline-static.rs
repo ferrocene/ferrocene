@@ -8,3 +8,5 @@
 
 fn main() {}
 //~^ WARNING external crate `bar` unused in
+
+// ferrocene-annotations: um_rustc_W

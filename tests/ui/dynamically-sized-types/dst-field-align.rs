@@ -65,3 +65,21 @@ fn main() {
     let d : &HasDrop<Baz<[i32]>> = &d;
     assert_eq!(&[1,2,3,4], &d.data.a);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

@@ -19,3 +19,6 @@ fn die() {
 fn main() {
     die();
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

@@ -35,3 +35,21 @@ fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_7bxv8lybxm18
+// Identifier Patterns
+//
+// ferrocene-annotations: fls_d2sc9hl3v0mk
+// Reference Patterns
+//
+// ferrocene-annotations: fls_org6hqv397fp
+// Reference Pattern Matching
+//
+// ferrocene-annotations: fls_vnai6ag4qrdb
+// Identifier Pattern Matching
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

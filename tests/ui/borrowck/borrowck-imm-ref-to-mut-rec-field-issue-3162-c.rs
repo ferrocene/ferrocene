@@ -8,3 +8,6 @@ fn main() {
     }
     drop(b);
 }
+
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

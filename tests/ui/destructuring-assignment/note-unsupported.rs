@@ -20,3 +20,9 @@ fn main() {
     S { x: a, ..s } = S { x: 3, y: 4 };
     //~^ ERROR functional record updates are not allowed in destructuring assignments
 }
+
+// ferrocene-annotations: fls_290jmzfh7x4e
+// Compound Assignment Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

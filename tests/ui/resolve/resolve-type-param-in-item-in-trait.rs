@@ -33,3 +33,6 @@ trait TraitD<A> {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_ftphlagzd2te
+// Generic Parameter Scope

@@ -25,3 +25,8 @@ pub fn main() {
     assert!(uintuintuintuintret as uintuintuintuintret ==
             uintuintuintuintret as uintuintuintuintret);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

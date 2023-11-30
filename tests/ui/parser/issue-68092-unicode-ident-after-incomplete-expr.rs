@@ -7,3 +7,9 @@ macro_rules! x {
 fn main() {
     x!(!);
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

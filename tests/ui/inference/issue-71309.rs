@@ -5,3 +5,6 @@ fn foo(x: Result<i32, ()>) -> Result<(), ()> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_pocsh1neugpc
+// Error Propagation Expression

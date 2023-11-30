@@ -34,3 +34,6 @@ pub fn main() {
     }
     assert_eq!(indirect2(vec![1]), "[1]!".to_string());
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

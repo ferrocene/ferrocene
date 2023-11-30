@@ -17,3 +17,6 @@ struct Map2<Segment2> {
 impl<F> FilterBase2 for F {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

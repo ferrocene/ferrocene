@@ -26,3 +26,15 @@ pub fn main() {
     assert_eq!(two, (Partial { x: S::new(8), y: S::new(3) },
                      Partial { x: S::new(5), y: S::new(2) }));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns

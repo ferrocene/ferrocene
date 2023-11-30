@@ -45,6 +45,7 @@ use rustc_target::json::ToJson;
 
 use std::borrow::Cow;
 use std::cmp::max;
+use std::collections::BTreeMap;
 use std::env;
 use std::ffi::OsString;
 use std::fs;
@@ -64,6 +65,7 @@ use crate::session_diagnostics::{
     RLinkEmptyVersionNumber, RLinkEncodingVersionMismatch, RLinkRustcVersionMismatch,
     RLinkWrongFileType, RlinkNotAFile, RlinkUnableToRead,
 };
+use rustc_target::spec::{TargetTriple, Target};
 
 /// Exit status code used for successful compilation and help output.
 pub const EXIT_SUCCESS: i32 = 0;
@@ -622,6 +624,15 @@ fn print_crate_info(
             TargetLibdir => println!("{}", sess.target_tlib_path.dir.display()),
             TargetSpec => {
                 println!("{}", serde_json::to_string_pretty(&sess.target.to_json()).unwrap());
+            }
+            AllTargetSpecs => {
+                let mut targets = BTreeMap::new();
+                for name in rustc_target::spec::TARGETS {
+                    let triple = TargetTriple::from_triple(name);
+                    let target = Target::expect_builtin(&triple);
+                    targets.insert(name, target.to_json());
+                }
+                println!("{}", serde_json::to_string_pretty(&targets).unwrap());
             }
             FileNames | CrateName => {
                 let attrs = attrs.as_ref().unwrap();

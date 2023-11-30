@@ -75,3 +75,10 @@ fn main() {
     0u8.default_tracked();
     0u8.blanket_tracked();
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

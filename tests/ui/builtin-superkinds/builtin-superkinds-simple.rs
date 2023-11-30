@@ -7,3 +7,9 @@ impl Foo for std::rc::Rc<i8> { }
 //~^ ERROR `Rc<i8>` cannot be sent between threads safely
 
 fn main() { }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

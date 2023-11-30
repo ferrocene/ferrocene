@@ -5,3 +5,5 @@
 
 // Tests that we don't ICE when the set of imported crates changes
 #[cfg(rpass2)] use issue_79890::MyTrait;
+
+// ferrocene-annotations: um_rustc_test

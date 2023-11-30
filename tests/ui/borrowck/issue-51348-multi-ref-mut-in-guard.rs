@@ -19,3 +19,7 @@ fn main() {
     assert_eq!(foo(&mut Ok((3, 4))), 3);
     assert_eq!(foo(&mut Err((3, 4))), 4);
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

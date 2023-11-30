@@ -1,5 +1,6 @@
 // compile-flags: -C opt-level=0
 // ignore-wasm32-bare compiled with panic=abort by default
+// needs-unwind
 
 #![crate_type = "lib"]
 
@@ -15,3 +16,5 @@ pub unsafe extern "C" fn foo() {
 }
 
 // Note that this test will get removed when `C-unwind` is fully stabilized
+
+// ferrocene-annotations: um_rustc_C_opt_level

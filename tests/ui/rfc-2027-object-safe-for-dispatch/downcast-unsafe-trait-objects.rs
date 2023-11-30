@@ -21,3 +21,8 @@ where
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

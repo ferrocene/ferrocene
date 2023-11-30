@@ -10,3 +10,15 @@ pub fn main() {
     assert_eq!(a, 1);
     assert_eq!(b, 2);
 }
+
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching

@@ -11,3 +11,6 @@ fn main() {
     let foo = Foo::foo();
     //~^ error: type annotations needed for `Foo<N>`
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

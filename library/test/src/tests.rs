@@ -134,6 +134,7 @@ pub fn ignored_tests_result_in_ignored() {
 // FIXME: Re-enable emscripten once it can catch panics again (introduced by #65251)
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_should_panic() {
     fn f() -> Result<(), String> {
         panic!();
@@ -159,6 +160,7 @@ fn test_should_panic() {
 // FIXME: Re-enable emscripten once it can catch panics again (introduced by #65251)
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_should_panic_good_message() {
     fn f() -> Result<(), String> {
         panic!("an error message");
@@ -184,6 +186,7 @@ fn test_should_panic_good_message() {
 // FIXME: Re-enable emscripten once it can catch panics again (introduced by #65251)
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_should_panic_bad_message() {
     use crate::tests::TrFailedMsg;
     fn f() -> Result<(), String> {
@@ -214,6 +217,7 @@ fn test_should_panic_bad_message() {
 // FIXME: Re-enable emscripten once it can catch panics again (introduced by #65251)
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_should_panic_non_string_message_type() {
     use crate::tests::TrFailedMsg;
     use std::any::TypeId;
@@ -248,6 +252,7 @@ fn test_should_panic_non_string_message_type() {
 // FIXME: Re-enable emscripten once it can catch panics again (introduced by #65251)
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_should_panic_but_succeeds() {
     let should_panic_variants = [ShouldPanic::Yes, ShouldPanic::YesWithMessage("error message")];
 

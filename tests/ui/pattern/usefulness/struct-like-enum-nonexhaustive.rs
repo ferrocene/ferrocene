@@ -10,3 +10,15 @@ fn main() {
         A::B { x: None } => {}
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path Patterns
+//
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

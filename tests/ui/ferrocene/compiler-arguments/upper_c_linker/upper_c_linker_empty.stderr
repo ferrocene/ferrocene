@@ -1,0 +1,2 @@
+error: codegen option `linker` requires a path (C linker=<value>)
+

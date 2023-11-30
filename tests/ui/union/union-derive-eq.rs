@@ -19,3 +19,9 @@ union U2 {
 impl PartialEq for U2 { fn eq(&self, rhs: &Self) -> bool { true } }
 
 fn main() {}
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

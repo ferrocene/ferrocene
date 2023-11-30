@@ -33,3 +33,5 @@ pub fn other_fn() -> u8 {
 }
 
 extern "C" {fn foreign_fn() -> u8;}
+
+// ferrocene-annotations: um_rustc_C_relocation_model

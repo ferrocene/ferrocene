@@ -7,3 +7,6 @@ impl Trait1 for .. {}
 impl Trait2 for .. {} //~ ERROR `impl Trait for .. {}` is an obsolete syntax
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

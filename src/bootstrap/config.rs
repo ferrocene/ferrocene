@@ -85,6 +85,9 @@ pub struct Config {
     pub patch_binaries_for_nix: bool,
     pub stage0_metadata: Stage0Metadata,
 
+    pub stdout_is_tty: bool,
+    pub stderr_is_tty: bool,
+
     pub on_fail: Option<String>,
     pub stage: u32,
     pub keep_stage: Vec<u32>,
@@ -226,6 +229,27 @@ pub struct Config {
     pub initial_rustfmt: RefCell<RustfmtState>,
     pub out: PathBuf,
     pub rust_info: channel::GitInfo,
+
+    // Ferrocene-specific configuration
+    pub ferrocene_aws_profile: Option<String>,
+    pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
+    pub ferrocene_test_outcomes_dir: Option<PathBuf>,
+    pub ferrocene_technical_report_url: Option<String>,
+    pub ferrocene_document_signatures_s3_bucket: String,
+    pub ferrocene_ignore_document_signatures: bool,
+    pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum FerroceneTraceabilityMatrixMode {
+    Ci,
+    Local,
+}
+
+impl Default for FerroceneTraceabilityMatrixMode {
+    fn default() -> Self {
+        FerroceneTraceabilityMatrixMode::Local
+    }
 }
 
 #[derive(Default, Deserialize)]
@@ -357,6 +381,7 @@ impl std::str::FromStr for RustcLto {
 pub struct TargetSelection {
     pub triple: Interned<String>,
     file: Option<Interned<String>>,
+    synthetic: bool,
 }
 
 impl TargetSelection {
@@ -378,7 +403,15 @@ impl TargetSelection {
         let triple = INTERNER.intern_str(triple);
         let file = file.map(|f| INTERNER.intern_str(f));
 
-        Self { triple, file }
+        Self { triple, file, synthetic: false }
+    }
+
+    pub fn create_synthetic(triple: &str, file: &str) -> Self {
+        Self {
+            triple: INTERNER.intern_str(triple),
+            file: Some(INTERNER.intern_str(file)),
+            synthetic: true,
+        }
     }
 
     pub fn rustc_target_arg(&self) -> &str {
@@ -395,6 +428,11 @@ impl TargetSelection {
 
     pub fn ends_with(&self, needle: &str) -> bool {
         self.triple.ends_with(needle)
+    }
+
+    // See src/bootstrap/synthetic_targets.rs
+    pub fn is_synthetic(&self) -> bool {
+        self.synthetic
     }
 }
 
@@ -450,7 +488,8 @@ pub struct Target {
 impl Target {
     pub fn from_triple(triple: &str) -> Self {
         let mut target: Self = Default::default();
-        if triple.contains("-none")
+        if triple.contains("lynxos178")
+            || triple.contains("-none")
             || triple.contains("nvptx")
             || triple.contains("switch")
             || triple.contains("-uefi")
@@ -475,6 +514,7 @@ struct TomlConfig {
     rust: Option<Rust>,
     target: Option<HashMap<String, TomlTarget>>,
     dist: Option<Dist>,
+    ferrocene: Option<Ferrocene>,
     profile: Option<String>,
 }
 
@@ -485,7 +525,17 @@ trait Merge {
 impl Merge for TomlConfig {
     fn merge(
         &mut self,
-        TomlConfig { build, install, llvm, rust, dist, target, profile: _, changelog_seen: _ }: Self,
+        TomlConfig {
+            build,
+            install,
+            llvm,
+            rust,
+            dist,
+            target,
+            ferrocene,
+            profile: _,
+            changelog_seen: _,
+        }: Self,
     ) {
         fn do_merge<T: Merge>(x: &mut Option<T>, y: Option<T>) {
             if let Some(new) = y {
@@ -501,6 +551,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.llvm, llvm);
         do_merge(&mut self.rust, rust);
         do_merge(&mut self.dist, dist);
+        do_merge(&mut self.ferrocene, ferrocene);
         assert!(target.is_none(), "merging target-specific config is not currently supported");
     }
 }
@@ -790,6 +841,18 @@ define_config! {
     }
 }
 
+define_config! {
+    struct Ferrocene {
+        aws_profile: Option<String> = "aws-profile",
+        traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
+        test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
+        technical_report_url: Option<String> = "technical-report-url",
+        document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
+        ignore_document_signatures: Option<bool> = "ignore-document-signatures",
+        tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
+    }
+}
+
 impl Config {
     pub fn default_opts() -> Config {
         let mut config = Config::default();
@@ -810,6 +873,9 @@ impl Config {
         config.rust_codegen_backends = vec![INTERNER.intern_str("llvm")];
         config.deny_warnings = true;
         config.bindir = "bin".into();
+
+        config.stdout_is_tty = atty::is(atty::Stream::Stdout);
+        config.stderr_is_tty = atty::is(atty::Stream::Stderr);
 
         // set by build.rs
         config.build = TargetSelection::from_user(&env!("BUILD_TRIPLE"));
@@ -1274,6 +1340,24 @@ impl Config {
             }
         }
 
+        if let Some(f) = toml.ferrocene {
+            config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
+            {
+                Some("local") | None => FerroceneTraceabilityMatrixMode::Local,
+                Some("ci") => FerroceneTraceabilityMatrixMode::Ci,
+                Some(other) => panic!("unknown traceability matrix mode: {other}"),
+            };
+            config.ferrocene_aws_profile = f.aws_profile;
+            config.ferrocene_test_outcomes_dir = f.test_outcomes_dir;
+            config.ferrocene_technical_report_url = f.technical_report_url;
+            config.ferrocene_document_signatures_s3_bucket = f
+                .document_signatures_s3_bucket
+                .unwrap_or_else(|| "ferrocene-document-signatures".into());
+            config.ferrocene_ignore_document_signatures =
+                f.ignore_document_signatures.unwrap_or(false);
+            config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
+        }
+
         if config.llvm_from_ci {
             let triple = &config.build.triple;
             let ci_llvm_bin = config.ci_llvm_root().join("bin");
@@ -1372,6 +1456,7 @@ impl Config {
             | Subcommand::Fix { .. }
             | Subcommand::Run { .. }
             | Subcommand::Setup { .. }
+            | Subcommand::Sign { .. }
             | Subcommand::Format { .. } => flags.stage.unwrap_or(0),
         };
 
@@ -1397,6 +1482,7 @@ impl Config {
                 | Subcommand::Fix { .. }
                 | Subcommand::Run { .. }
                 | Subcommand::Setup { .. }
+                | Subcommand::Sign { .. }
                 | Subcommand::Format { .. } => {}
             }
         }

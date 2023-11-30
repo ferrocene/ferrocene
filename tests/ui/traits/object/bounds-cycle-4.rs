@@ -23,3 +23,10 @@ fn f<'a>(x: &dyn Obj<'a, U = i32, V = i32>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

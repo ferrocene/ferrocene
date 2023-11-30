@@ -14,3 +14,12 @@ fn main() {
     //~^ ERROR functional record updates are not allowed in destructuring assignments
     Struct { a, .. }; //~ ERROR base expression required after `..`
 }
+
+// ferrocene-annotations: fls_7dbd5t2750ce
+// Struct Patterns
+//
+// ferrocene-annotations: fls_7wpgnp4kjq82
+// Rest Patterns
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns

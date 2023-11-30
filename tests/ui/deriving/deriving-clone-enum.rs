@@ -12,3 +12,6 @@ enum E {
 pub fn main() {
     let _ = E::A.clone();
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

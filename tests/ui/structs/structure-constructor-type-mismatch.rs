@@ -71,3 +71,6 @@ fn main() {
         PairF::<u32> { .. } => {} // ok
     }
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

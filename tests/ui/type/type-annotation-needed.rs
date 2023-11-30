@@ -8,3 +8,10 @@ fn main() {
     //~| NOTE cannot infer type
     //~| NOTE cannot satisfy
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

@@ -17,3 +17,6 @@ fn test(f: Foo) {
 fn main() {
     test(BAR); //~ ERROR cannot move out of static item
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

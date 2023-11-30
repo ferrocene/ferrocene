@@ -8,3 +8,9 @@ fn main() {
     black_hole! { "this is surrogate: \u{DAAA}" }
     //~^ ERROR: invalid unicode character escape
 }
+
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_k01lsksqtq1r
+// Repetition

@@ -14,3 +14,6 @@ fn square_sum(v: &[i64]) -> i64 {
 fn main() {
     assert_eq!(36, square_sum(&[1,2,3]));
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

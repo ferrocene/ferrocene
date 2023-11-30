@@ -45,3 +45,12 @@ fn main() {
     assert_eq!(ABS_NEG, 10);
     assert_eq!(ABS_MIN, i32::MIN);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

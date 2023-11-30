@@ -13,3 +13,18 @@ fn main() {
     //~^ ERROR E0277
     let _ = bar;
 }
+
+// ferrocene-annotations: fls_maw4u1o8q37u
+// Crates
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

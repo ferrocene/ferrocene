@@ -74,3 +74,12 @@ fn load3<'a,'b>(ss: &'a dyn SomeTrait) -> &'b dyn SomeTrait {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

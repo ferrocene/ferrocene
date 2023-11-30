@@ -40,3 +40,10 @@ pub fn main() {
     fun1();
     fun2();
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression/ References

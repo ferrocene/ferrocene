@@ -57,3 +57,8 @@ fn main() {
 
     is_variant!(UVariant, AliasFixed::UVariant);
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

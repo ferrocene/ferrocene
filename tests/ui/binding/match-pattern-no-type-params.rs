@@ -12,3 +12,9 @@ fn foo(x: maybe<isize>) {
 }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_d44aflefat88
+// Path pattern matching
+//
+// ferrocene-annotations: fls_uloyjbaso8pz
+// Path patterns

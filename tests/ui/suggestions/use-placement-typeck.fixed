@@ -19,3 +19,5 @@ mod m {
     pub struct S;
     impl Foo for S{}
 }
+
+// ferrocene-annotations: um_rustc_test

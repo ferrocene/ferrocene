@@ -9,3 +9,6 @@ fn main() {
     let _: Const<{ 15 as *const _ }> = Const::<{ 10 as *const _ }>;
     let _: Const<{ 10 as *const _ }> = Const::<{ 10 as *const _ }>;
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

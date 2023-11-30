@@ -1,11 +1,11 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/use-unclosed-brace.rs:12:14
+  --> $DIR/use-unclosed-brace.rs:63:27
    |
 LL | use foo::{bar, baz;
    |          - unclosed delimiter
 ...
-LL | fn main() {}
-   |              ^
+LL | // Simple Path Resolution
+   |                           ^
 
 error: expected one of `,`, `::`, `as`, or `}`, found `;`
   --> $DIR/use-unclosed-brace.rs:4:10
@@ -18,10 +18,10 @@ LL | use foo::{bar, baz;
    |          unclosed delimiter
 
 error: expected item, found `}`
-  --> $DIR/use-unclosed-brace.rs:12:14
+  --> $DIR/use-unclosed-brace.rs:63:27
    |
-LL | fn main() {}
-   |              ^ expected item
+LL | // Simple Path Resolution
+   |                           ^ expected item
 
 error: aborting due to 3 previous errors
 

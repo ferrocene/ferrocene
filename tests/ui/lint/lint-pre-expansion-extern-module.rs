@@ -5,3 +5,5 @@
 fn main() {}
 
 mod lint_pre_expansion_extern_module_aux;
+
+// ferrocene-annotations: um_rustc_W

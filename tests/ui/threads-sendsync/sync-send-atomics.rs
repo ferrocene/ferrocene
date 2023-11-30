@@ -12,3 +12,6 @@ impl SendSync for AtomicUsize {}
 impl<T> SendSync for AtomicPtr<T> {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_vyc9vcuamlph
+// Atomics

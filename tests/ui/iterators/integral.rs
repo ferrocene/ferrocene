@@ -24,3 +24,6 @@ fn main() {
     for _ in 42.0 {}
     //~^ ERROR `{float}` is not an iterator
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

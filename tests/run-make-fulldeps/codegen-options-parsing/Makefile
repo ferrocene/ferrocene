@@ -29,3 +29,7 @@ all:
 	# ... unless you specifically ask to keep it
 	$(RUSTC) --print link-args -C link-dead-code dummy.rs 2>&1 | \
 		$(CGREP) -ve '--gc-sections|-z[^ ]* [^ ]*<ignore>|-dead_strip|/OPT:REF'
+
+# ferrocene-annotations: um_rustc_C_extra_filename
+# ferrocene-annotations: um_rustc_C_link_dead_code
+# ferrocene-annotations: um_rustc_C_codegen_units

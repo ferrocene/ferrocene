@@ -35,3 +35,9 @@ fn main() {
     let egregious_field_misaccess = demo.egregiously_nonexistent_field;
     //~^ ERROR no field
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

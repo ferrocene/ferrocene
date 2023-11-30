@@ -28,3 +28,5 @@ pub unsafe extern "C" fn c_variadic_clone(fmt: *const i8, mut ap: ...) -> i32 {
     res
     // CHECK: call void @llvm.va_end
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

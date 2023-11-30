@@ -37,3 +37,9 @@ pub fn main() {
     //~| found struct `Bar1`
     //~| ERROR the size for values of type
 }
+
+// ferrocene-annotations: fls_3ut3biyra4r9
+// Assignee Expressions
+//
+// ferrocene-annotations: fls_y4by2i8dl05o
+// Assignment Expressions

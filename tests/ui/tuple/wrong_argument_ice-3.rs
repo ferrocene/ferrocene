@@ -15,3 +15,15 @@ fn test(process: &Process, groups: Vec<Group>) -> Vec<Group> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases
+// ferrocene-annotations: fls_4ckl3n2ko3i4
+// Tuple Types
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

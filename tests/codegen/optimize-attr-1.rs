@@ -48,3 +48,6 @@ pub fn speed() -> i32 {
 // SIZE-OPT: attributes [[SPEED_ATTRS]]
 // SIZE-OPT-NOT: minsize
 // SIZE-OPT-NOT: optsize
+
+// ferrocene-annotations: um_rustc_C_opt_level
+// ferrocene-annotations: um_rustc_C_codegen_units

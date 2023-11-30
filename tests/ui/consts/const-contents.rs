@@ -17,3 +17,15 @@ pub fn main() {
     assert_eq!(notb, false);
     assert_eq!(neg, -1);
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit expressions
+//
+// ferrocene-annotations: fls_wrecura8u5ar
+// Negation expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

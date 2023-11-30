@@ -44,3 +44,5 @@ pub fn main() {
 
     let _f = Bar3::Bar3_1 { bar: 3 };
 }
+
+// ferrocene-annotations: um_rustc_cfg

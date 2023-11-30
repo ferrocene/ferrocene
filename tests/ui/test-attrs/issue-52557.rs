@@ -28,3 +28,5 @@ use b::*;
 pub fn conflict() {
     let _: bool = foo();
 }
+
+// ferrocene-annotations: um_rustc_test

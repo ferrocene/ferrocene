@@ -12,3 +12,9 @@ unsafe extern {
 unsafe extern "C++" {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_osd6c4utyjb3
+// FFI
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

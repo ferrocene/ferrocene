@@ -8,3 +8,6 @@ fn main() {
         Generic::<0usize>::Variant => todo!()
     }
 }
+
+// ferrocene-annotations: fls_d44aflefat88
+// Path Pattern Matching

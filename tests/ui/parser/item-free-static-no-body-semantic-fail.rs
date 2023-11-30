@@ -9,3 +9,6 @@ static B; //~ ERROR free static item without body
 static mut C: u8; //~ ERROR free static item without body
 static mut D; //~ ERROR free static item without body
 //~^ ERROR missing type for `static mut` item
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

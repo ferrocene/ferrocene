@@ -57,3 +57,9 @@ pub fn main() {
         _ => panic!(),
     };
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

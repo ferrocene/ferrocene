@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Critical Section GmbH
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 .. default-domain:: spec
 

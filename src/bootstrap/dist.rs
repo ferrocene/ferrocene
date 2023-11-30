@@ -362,7 +362,7 @@ impl Step for Rustc {
         let compiler = self.compiler;
         let host = self.compiler.host;
 
-        let tarball = Tarball::new(builder, "rustc", &host.triple);
+        let mut tarball = Tarball::new(builder, "rustc", &host.triple);
 
         // Prepare the rustc "image", what will actually end up getting installed
         prepare_image(builder, compiler, tarball.image_dir());
@@ -382,6 +382,8 @@ impl Step for Rustc {
             tarball.add_dir(builder.src.join("src/etc/third-party"), "share/doc");
         }
 
+        tarball.ferrocene_proxied_binary("bin/rustc");
+        tarball.ferrocene_proxied_binary("bin/rustdoc");
         return tarball.generate();
 
         fn prepare_image(builder: &Builder<'_>, compiler: Compiler, image: &Path) {
@@ -651,6 +653,7 @@ impl Step for Std {
         verify_uefi_rlib_format(builder, target, &stamp);
         copy_target_libs(builder, target, &tarball.image_dir(), &stamp);
 
+        tarball.ferrocene_managed_prefix(&format!("lib/rustlib/{target}/lib"));
         Some(tarball.generate())
     }
 }
@@ -1043,6 +1046,7 @@ impl Step for Cargo {
         tarball.add_renamed_file(etc.join("cargo.bashcomp.sh"), "etc/bash_completion.d", "cargo");
         tarball.add_dir(etc.join("man"), "share/man/man1");
         tarball.add_legal_and_readme_to("share/doc/cargo");
+        tarball.ferrocene_proxied_binary("bin/cargo");
 
         for dirent in fs::read_dir(cargo.parent().unwrap()).expect("read_dir") {
             let dirent = dirent.expect("read dir entry");
@@ -2004,7 +2008,8 @@ impl Step for LlvmTools {
 
         let mut tarball = Tarball::new(builder, "llvm-tools", &target.triple);
         tarball.set_overlay(OverlayKind::LLVM);
-        tarball.is_preview(true);
+        // Ferrocene: disable preview flag.
+        //tarball.is_preview(true);
 
         // Prepare the image directory
         let src_bindir = builder.llvm_out(target).join("bin");

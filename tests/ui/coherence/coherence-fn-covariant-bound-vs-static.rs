@@ -24,3 +24,6 @@ impl<'a> Trait for fn(fn(&'a ())) {}
 // [MCP 295]: https://github.com/rust-lang/compiler-team/issues/295
 
 fn main() {}
+
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

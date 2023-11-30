@@ -57,3 +57,15 @@ fn main() {
     });
     println!("{} {}", bar.foo(2), bar.bar(2));
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

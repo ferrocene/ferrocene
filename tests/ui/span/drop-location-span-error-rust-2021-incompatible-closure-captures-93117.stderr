@@ -1,5 +1,5 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/drop-location-span-error-rust-2021-incompatible-closure-captures-93117.rs:18:53
+  --> $DIR/drop-location-span-error-rust-2021-incompatible-closure-captures-93117.rs:26:53
    |
 LL | trait C{async fn new(val: T) {}
    |        - unclosed delimiter

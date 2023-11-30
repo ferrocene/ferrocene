@@ -15,3 +15,12 @@ fn main() {
     let xb = XB; //~ ERROR use of mutable static is unsafe
     let xrb = &XB; //~ ERROR use of mutable static is unsafe
 }
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks
+//
+// ferrocene-annotations: fls_s4yt19sptl7d
+// External Statics
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

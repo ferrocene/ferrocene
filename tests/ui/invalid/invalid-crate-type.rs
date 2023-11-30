@@ -46,3 +46,6 @@
 fn main() {
     return
 }
+
+// ferrocene-annotations: fls_ujig607lmwbm
+// Attribute crate_type

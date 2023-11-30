@@ -41,3 +41,18 @@ impl Leak for i32 {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

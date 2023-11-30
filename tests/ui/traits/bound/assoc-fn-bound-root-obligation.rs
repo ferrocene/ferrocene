@@ -9,3 +9,12 @@ fn strip_lf(s: &str) -> &str {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

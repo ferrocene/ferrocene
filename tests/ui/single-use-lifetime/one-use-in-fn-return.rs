@@ -21,3 +21,6 @@ impl Tfv<'_> for () {}
 pub fn i<'a>() -> impl Tfv<'a> {}
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

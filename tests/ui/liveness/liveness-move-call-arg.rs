@@ -9,3 +9,6 @@ fn main() {
         take(x); //~ ERROR use of moved value: `x`
     }
 }
+
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

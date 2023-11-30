@@ -99,7 +99,7 @@ mod os_impl {
     pub fn check(path: &Path, bad: &mut bool) {
         use std::ffi::OsStr;
 
-        const ALLOWED: &[&str] = &["configure", "x"];
+        const ALLOWED: &[&str] = &["configure", "x", "ferrocene/library/libc/ci/test-runner-linux"];
 
         walk_no_read(
             path,

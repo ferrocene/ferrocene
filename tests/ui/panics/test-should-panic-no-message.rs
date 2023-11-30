@@ -8,3 +8,5 @@
 pub fn test_explicit() {
     panic!()
 }
+
+// ferrocene-annotations: um_rustc_test

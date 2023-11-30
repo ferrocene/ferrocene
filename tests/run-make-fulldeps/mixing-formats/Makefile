@@ -72,3 +72,5 @@ all:
 	$(RUSTC) --crate-type=dylib bar2.rs -C prefer-dynamic
 	$(RUSTC) --crate-type=dylib,rlib baz2.rs
 	$(RUSTC) --crate-type=bin baz2.rs
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

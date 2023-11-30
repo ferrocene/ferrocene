@@ -16,3 +16,12 @@ pub fn main () {
     assert_eq!(f(0, 1, 2), (1, 2));
     assert_eq!(f(0, 1, 2), (1, 2));
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

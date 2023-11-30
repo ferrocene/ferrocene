@@ -21,3 +21,15 @@ macro_rules! errors_everywhere {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords

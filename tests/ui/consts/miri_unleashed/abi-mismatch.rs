@@ -16,3 +16,6 @@ static VAL: () = call_rust_fn(unsafe { std::mem::transmute(c_fn as extern "C" fn
 //~^ NOTE inside `VAL`
 
 fn main() {}
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

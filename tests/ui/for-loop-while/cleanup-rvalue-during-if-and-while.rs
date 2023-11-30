@@ -39,3 +39,24 @@ pub fn main() {
         unsafe { assert_eq!(DROPPED, i + 1) }
     }
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order
+//
+// ferrocene-annotations: fls_5eima0pd31c0
+// Drop Scope Extension
+//
+// ferrocene-annotations: fls_rm4ncoopcdvj
+// Drop Scopes
+//
+// ferrocene-annotations: fls_cleoffpn5ew6
+// Temporaries
+//
+// ferrocene-annotations: fls_5jjm1kt43axd
+// While Loops
+//
+// ferrocene-annotations: fls_gho955gmob73
+// Variables

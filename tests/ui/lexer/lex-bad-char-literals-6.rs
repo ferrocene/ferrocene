@@ -13,3 +13,9 @@ fn main() {
     let a: usize = "";
     //~^ ERROR: mismatched types
 }
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

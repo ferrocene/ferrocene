@@ -6,3 +6,5 @@
 
 struct S;
 fn main() {}
+
+// ferrocene-annotations: um_rustc_cap_lints

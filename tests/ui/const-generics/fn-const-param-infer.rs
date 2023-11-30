@@ -27,3 +27,8 @@ fn main() {
     let _: Checked<{generic::<u16>}> = Checked::<{generic::<u16>}>;
     let _: Checked<{generic::<u32>}> = Checked::<{generic::<u16>}>;
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

@@ -7,3 +7,6 @@ fn main() {
     if foo == y {}
     //~^ ERROR binary operation `==` cannot be applied to type
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions

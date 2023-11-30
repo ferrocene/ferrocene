@@ -35,3 +35,18 @@ fn main() {
     //~^ WARNING trait-associated function `from_iter` will become ambiguous in Rust 2021
     //~| this is accepted in the current edition (Rust 2018)
 }
+
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

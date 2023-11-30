@@ -20,3 +20,5 @@ fn some_function() {
 pub fn some_other_function() {
     some_function();
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

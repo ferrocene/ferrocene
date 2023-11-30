@@ -8,3 +8,6 @@ pub mod inline {
     #[path="somename.rs"]
     pub mod innie;
 }
+
+// ferrocene-annotations: fls_1zbaajz5prpn
+// Attribute path

@@ -35,3 +35,5 @@ all:
 	if diff $(TMPDIR)/symbolsbefore $(TMPDIR)/symbolsafter; then exit 1; fi
 	$(call FAIL,b)
 endif
+
+# ferrocene-annotations: um_rustc_C_rpath

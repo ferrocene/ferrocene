@@ -30,3 +30,6 @@ impl<T: ?Sized, A: Raw<T>> SafeImpl<T, A> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

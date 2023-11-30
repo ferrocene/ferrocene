@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+[["tests/run-make"]]
+tests = ["tests/run-make/coverage-reports"]
+targets = ["aarch64-unknown-linux-gnu"]
+reason = "The test generates profraw files to analyze, but remote-test is not capable of pushing those files back to the client yet"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/process/no-stdio.rs",
+    "tests/ui/process/nofile-limit.rs",
+    "tests/ui/process/process-spawn-nonexistent.rs",
+    "tests/ui/wait-forked-but-failed-child.rs",
+]
+targets = ["aarch64-unknown-ferrocenecoretest"]
+reason = "QEMU user space emulation behaves differently when spawning processes fails"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/hygiene/panic-location.rs",
+    "tests/ui/intrinsics/const-eval-select-backtrace-std.rs",
+    "tests/ui/intrinsics/const-eval-select-backtrace.rs",
+    "tests/ui/lto/issue-105637.rs",
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/assert-with-custom-errors-does-not-create-unnecessary-code.rs",
+    "tests/ui/panics/location-detail-panic-no-location-info.rs",
+    "tests/ui/panics/fmt-only-once.rs",
+    "tests/ui/panics/location-detail-panic-no-file.rs",
+    "tests/ui/panics/location-detail-unwrap-no-file.rs",
+    "tests/ui/panics/location-detail-panic-no-line.rs",
+    "tests/ui/panics/issue-47429-short-backtraces.rs",
+    "tests/ui/panics/location-detail-panic-no-column.rs",
+    "tests/ui/panics/issue-47429-short-backtraces.rs",
+    "tests/ui/macros/rfc-2011-nicer-assert-messages/feature-gate-generic_assert.rs",
+]
+targets = ["aarch64-unknown-ferrocenecoretest"]
+reason = "QEMU user space emulation outputs an extra message when an abort happens"
+
+[["tests/incremental"]]
+tests = ["tests/incremental/issue-80691-bad-eval-cache.rs"]
+targets = ["aarch64-unknown-ferrocenecoretest"]
+reason = "QEMU user space emulation uses a different exit code for aborting"

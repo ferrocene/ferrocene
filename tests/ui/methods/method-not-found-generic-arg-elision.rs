@@ -104,3 +104,9 @@ fn main() {
     s.method();
     //~^ ERROR the method `method` exists for struct `Struct<f64>`, but its trait bounds were not satisfied
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

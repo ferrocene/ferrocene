@@ -15,3 +15,6 @@ fn main() {
     //~| NOTE doesn't have a size known at compile-time
     process_slice(&some_generated_vec);
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

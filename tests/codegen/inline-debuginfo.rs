@@ -15,3 +15,5 @@ pub extern "C" fn callee(x: u32) -> u32 {
 pub extern "C" fn caller(y: u32) -> u32 {
     callee(y - 3)
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

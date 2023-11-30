@@ -1,0 +1,4 @@
+error: cannot mix `bin` crate type with others
+
+error: aborting due to previous error
+

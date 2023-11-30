@@ -15,3 +15,6 @@ fn main() {
     sink!("Foo"_);
     //~^ ERROR underscore literal suffix is not allowed
 }
+
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals

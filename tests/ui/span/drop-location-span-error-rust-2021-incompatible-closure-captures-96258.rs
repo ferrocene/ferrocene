@@ -13,3 +13,5 @@ impl Numberer {
         Numberer {}
     }
 }
+
+// ferrocene-annotations: um_rustc_W

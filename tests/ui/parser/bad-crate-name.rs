@@ -3,3 +3,9 @@ extern crate krate-name-here;
 //~| ERROR can't find crate for `krate_name_here`
 
 fn main() {}
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates
+//
+// ferrocene-annotations: fls_21vnag69kbwe
+// Identifiers

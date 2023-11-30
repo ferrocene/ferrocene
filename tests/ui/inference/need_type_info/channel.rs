@@ -17,3 +17,6 @@ fn main() {
     no_tuple();
     tuple();
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

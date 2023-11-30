@@ -6,3 +6,5 @@
 #![crate_name = "crate_name_attr_used"]
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_F

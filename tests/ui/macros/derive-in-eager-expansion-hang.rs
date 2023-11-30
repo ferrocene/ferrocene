@@ -12,3 +12,9 @@ macro_rules! hang { () => {
 fn main() {
     format_args!(hang!());
 }
+
+// ferrocene-annotations: fls_r6gj1p4gajnq
+// Attribute derive
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

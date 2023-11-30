@@ -11,3 +11,6 @@ fn main() {
     Foo({ a = 2 });
     assert_eq!(a, 2);
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

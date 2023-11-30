@@ -44,3 +44,18 @@ pub fn main() {
     }
     assert_eq!(sum, 6 + 12 + 18);
 }
+
+// ferrocene-annotations: fls_jr4tpuyksr75
+// Break Expressions
+//
+// ferrocene-annotations: fls_sjwrlwvpulp
+// Continue Expressions
+//
+// ferrocene-annotations: fls_uusi0zej55is
+// Loop Labels
+//
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions

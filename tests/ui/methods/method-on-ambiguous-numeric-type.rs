@@ -30,3 +30,21 @@ fn qux() {
     bar.pow(2);
     //~^ ERROR can't call method `pow` on ambiguous numeric type `{integer}`
 }
+
+// ferrocene-annotations: fls_hv9jtycp0o1y
+// Numeric Literals
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

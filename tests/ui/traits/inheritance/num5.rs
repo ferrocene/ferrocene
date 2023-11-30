@@ -24,3 +24,6 @@ fn num_eq_one<T:NumExt>() -> T {
 pub fn main() {
     num_eq_one::<isize>(); // you need to actually use the function to trigger the ICE
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

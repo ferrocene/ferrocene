@@ -5,3 +5,6 @@ use std as issue_45829_b;
 //~^ ERROR is defined multiple times
 
 fn main() {}
+
+// ferrocene-annotations: fls_gklst7joeo33
+// External Crates

@@ -6,3 +6,5 @@ all:
 	$(call RUN,foo)
 	rm $(TMPDIR)/*bar*
 	$(call FAIL,foo)
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

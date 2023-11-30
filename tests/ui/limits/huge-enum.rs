@@ -16,3 +16,9 @@ fn main() {
     let big: BIG = None;
     //~^ ERROR are too big for the current architecture
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

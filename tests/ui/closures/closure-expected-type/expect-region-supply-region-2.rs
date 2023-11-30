@@ -22,3 +22,27 @@ fn expect_bound_supply_named<'x>() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_airvr79xkcag
+// Function Item Type
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Type
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision
+//
+// ferrocene-annotations: fls_i7g2n7hfg3ch
+// Generic Conformance

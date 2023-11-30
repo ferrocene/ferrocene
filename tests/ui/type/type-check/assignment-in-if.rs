@@ -60,3 +60,8 @@ fn main() {
         println!("{}", x);
     }
 }
+
+// ferrocene-annotations: fls_y4by2i8dl05o
+// Assignment Expressions
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

@@ -11,3 +11,9 @@ fn syntax() {
     type E<_T>: Ord = u8;
     type F<_T>: Ord where 'static: 'static = u8;
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliases

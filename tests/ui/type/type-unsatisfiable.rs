@@ -57,3 +57,15 @@ fn main() {
     let bar = *hey - *word;
     //[usage]~^ ERROR cannot subtract
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

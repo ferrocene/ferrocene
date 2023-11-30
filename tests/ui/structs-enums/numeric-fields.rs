@@ -10,3 +10,12 @@ fn main() {
         }
     }
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

@@ -12,3 +12,9 @@ fn main() {
     //~| HELP this is an isolated carriage return
 
 }
+
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals

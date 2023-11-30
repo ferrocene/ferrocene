@@ -10,3 +10,6 @@ pub fn main() {
     assert!(n != 0xBAD);
     assert_eq!(n, 0x600D);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum type

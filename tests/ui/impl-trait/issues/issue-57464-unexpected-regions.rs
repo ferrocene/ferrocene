@@ -27,3 +27,9 @@ fn main() {
     let x: Box<dyn Send> = Box::new(wrapped_closure());
     let y: Box<dyn Send> = Box::new(wrapped_closure_with_bound());
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

@@ -23,3 +23,18 @@ fn main() {
     float_length = bar(&float_length);
     //~^ ERROR mismatched types [E0308]
 }
+
+// ferrocene-annotations: fls_qwljwqr07slp
+// Numeric Types
+//
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_nrkd5wpi64oo
+// Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions

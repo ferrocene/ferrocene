@@ -59,3 +59,6 @@ fn main() {
     let _ = fake_anon_field_expr!();
     let _ = real_method_expr!();
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

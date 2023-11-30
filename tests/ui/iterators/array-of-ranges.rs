@@ -14,3 +14,8 @@ fn main() {
     for _ in [0..1, 2..3] {}
     for _ in [0..=1] {}
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

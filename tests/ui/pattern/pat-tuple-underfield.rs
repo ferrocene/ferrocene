@@ -65,3 +65,21 @@ fn main() {
         //~| HELP use `..` to ignore the rest of the fields
     }
 }
+
+// ferrocene-annotations: fls_azzf1llv3wf
+// Literal Pattern Matching
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns
+//
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Underscore Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns

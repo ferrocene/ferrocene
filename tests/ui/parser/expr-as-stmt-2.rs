@@ -8,3 +8,6 @@ fn foo(a: Option<u32>, b: Option<u32>) -> bool {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_1pg5ig740tg1
+// Expression Statements

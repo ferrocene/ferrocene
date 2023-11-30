@@ -15,3 +15,9 @@ impl X {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

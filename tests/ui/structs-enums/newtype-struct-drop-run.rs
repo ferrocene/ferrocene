@@ -19,3 +19,9 @@ pub fn main() {
     }
     assert_eq!(y.get(), 23);
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

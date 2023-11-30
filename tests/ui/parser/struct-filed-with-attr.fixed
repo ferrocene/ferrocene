@@ -16,3 +16,9 @@ impl Feelings {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_gvwd0kf72jt
+// Attributes
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

@@ -501,3 +501,27 @@ pub fn run() {
         test!(SECOND_LARGEST_F32, f32 -> u128, 0xfffffe00000000000000000000000000);
     }
 }
+
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_b4xporvr64s
+// Floating Point Types
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_3qnpv2z7yjil
+// Integer Types
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

@@ -23,3 +23,6 @@ fn upper_bounds3<'b>(a: &u8) -> impl Trait<'_, 'b> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision

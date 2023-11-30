@@ -6,3 +6,9 @@ enum _En {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

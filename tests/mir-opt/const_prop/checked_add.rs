@@ -5,3 +5,5 @@
 fn main() {
     let x: u32 = 1 + 1;
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

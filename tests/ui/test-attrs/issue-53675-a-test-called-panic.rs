@@ -34,3 +34,14 @@ mod what_if_we_use_panic_directly_in_stmt {
         panic!("in stmt");
     }
 }
+
+// ferrocene-annotations: fls_k02nt1m5fq1z
+// Panic
+//
+// ferrocene-annotations: fls_aes2d94g12b9
+// Attribute should_panic
+//
+// ferrocene-annotations: fls_zjoamsr3dbqk
+// Diverging Expressions
+//
+// ferrocene-annotations: um_rustc_test

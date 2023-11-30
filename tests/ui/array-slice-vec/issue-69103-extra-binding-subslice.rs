@@ -16,3 +16,6 @@ fn main() {
     //~^ ERROR `..` patterns are not allowed here
     d;
 }
+
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice patterns

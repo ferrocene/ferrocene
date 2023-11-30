@@ -18,3 +18,5 @@
 trait Sized {}
 
 fn main() {}
+
+// ferrocene-annotations: um_rustc_C_target_feature

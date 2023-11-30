@@ -12,3 +12,7 @@ pub fn main() {
     a.foo();
     //~^ ERROR cannot borrow `*a` as mutable, as `a` is not declared as mutable [E0596]
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

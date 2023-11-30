@@ -30,3 +30,9 @@ fn main() {
     let foo = Foo(());
     assert_eq!("Foo(())", format!("{:?}", foo));
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

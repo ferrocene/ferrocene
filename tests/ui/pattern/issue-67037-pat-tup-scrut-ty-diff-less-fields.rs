@@ -19,3 +19,9 @@ fn main() {
     let P() = U {}; //~ ERROR mismatched types
     //~^ ERROR this pattern has 0 fields, but the corresponding tuple struct has 1 field
 }
+
+// ferrocene-annotations: fls_eexupzdsu7f
+// Tuple Struct Pattern Matching
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

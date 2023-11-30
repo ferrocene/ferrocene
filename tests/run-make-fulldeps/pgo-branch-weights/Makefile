@@ -32,3 +32,7 @@ all:
 		-Cprofile-use="$(TMPDIR)/prof_data_dir/merged.profdata" -O \
 		-Ccodegen-units=1 --emit=llvm-ir || exit 1
 	cat "$(TMPDIR)/interesting.ll" | "$(LLVM_FILECHECK)" filecheck-patterns.txt
+
+# ferrocene-annotations: um_rustc_C_link_args
+#
+# ferrocene-annotations: um_rustc_C_codegen_units

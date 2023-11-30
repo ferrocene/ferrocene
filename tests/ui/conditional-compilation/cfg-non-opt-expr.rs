@@ -9,3 +9,6 @@ fn main() {
     let _ = [1, 2, 3][#[cfg(unset)] 1];
     //~^ ERROR removing an expression is not supported in this position
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

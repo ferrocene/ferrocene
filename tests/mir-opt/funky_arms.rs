@@ -54,3 +54,5 @@ where
 {
     unimplemented!()
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

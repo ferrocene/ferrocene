@@ -15,3 +15,7 @@ fn c<F:FnOnce(isize, isize) -> isize>(f: F) {
 fn main() {}
 
 fn use_mut<T>(_: &mut T) { }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

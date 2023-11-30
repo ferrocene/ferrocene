@@ -9,3 +9,12 @@ static HELLO: u8 = 0;
 #[export_name="fail"]
 static HELLO_TWICE: u16 = 0;
 //~^ symbol `fail` is already defined
+
+// ferrocene-annotations: fls_osd6c4utyjb3
+// FFI
+//
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes
+//
+// ferrocene-annotations: fls_olzilmy8n0nl
+// Attribute export_name

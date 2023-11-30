@@ -32,3 +32,5 @@ async fn overlap_never() {
 #[allow(unused_must_use)]
 fn main() {
 }
+
+// ferrocene-annotations: um_rustc_A

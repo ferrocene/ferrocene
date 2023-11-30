@@ -9,3 +9,5 @@ fn foo() { } //~ ERROR functions used as benches
 
 #[bench]
 fn bar(x: isize, y: isize) { } //~ ERROR functions used as benches
+
+// ferrocene-annotations: um_rustc_test

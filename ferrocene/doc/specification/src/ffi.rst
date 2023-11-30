@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 .. default-domain:: spec
 
@@ -109,6 +109,12 @@ include, but may not be limited to, the following:
 
 * :dp:`fls_tyjs1x4j8ovp`
   ``extern "win64"`` - The x86_64 Windows :t:`ABI` of :t:`C` code.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_M4LqHf8hbPA8`
+It is undefined behavior when a foreign exception crosses a
+:t:`foreign function interface` boundary into Rust.
 
 .. rubric:: Examples
 

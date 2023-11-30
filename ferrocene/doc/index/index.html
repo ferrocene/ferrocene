@@ -1,0 +1,160 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-FileCopyrightText: The Ferrocene Developers -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Ferrocene Documentation Index</title>
+        <link rel="icon" href="index-assets/favicon.svg" sizes="any" type="image/svg+xml" />
+        <link rel="stylesheet" href="index-assets/index.css">
+        <link rel="stylesheet" href="ferrocene-breadcrumbs.css">
+    </head>
+    <body>
+        <div class="breadcrumbs">
+            <a href="#">
+                <svg width="179" height="204" viewBox="0 0 179 204" xmlns="http://www.w3.org/2000/svg" alt="Ferrocene logo">
+                    <path d="M136.357 63.1915C135.15 63.6359 133.797 63.2713 132.939 62.3206C122.27 50.5064 106.762 43.0707 89.5001 43.0707C72.2385 43.0707 56.7301 50.5064 46.0616 62.3206C45.2031 63.2713 43.85 63.636 42.643 63.1916L2.41765 48.3794C0.0936887 47.5236 -0.74422 44.6935 0.745069 42.73L31.6894 1.93327C32.3899 1.00981 33.4881 0.466492 34.6542 0.466492L144.346 0.4665C145.512 0.4665 146.61 1.00982 147.311 1.93328L178.255 42.73C179.744 44.6935 178.906 47.5237 176.582 48.3794L136.357 63.1915Z"/>
+                    <path d="M34.6542 123.733C35.4878 123.733 36.239 124.225 36.5888 124.975C45.8259 144.763 66.0443 158.493 89.5001 158.493C112.956 158.493 133.174 144.763 142.412 124.974C142.761 124.225 143.512 123.733 144.346 123.733C145.512 123.733 146.61 124.276 147.311 125.2L178.255 165.996C179.744 167.96 178.906 170.79 176.582 171.646L90.7921 203.236C89.9586 203.543 89.0414 203.543 88.2079 203.236L2.41765 171.646C0.0936887 170.79 -0.74422 167.96 0.745069 165.996L31.6894 125.2C32.3899 124.276 33.4881 123.733 34.6542 123.733Z"/>
+                    <path d="M124.586 100.782C124.586 119.976 108.877 135.536 89.5001 135.536C70.1229 135.536 54.4145 119.976 54.4145 100.782C54.4145 81.5878 70.1229 66.028 89.5001 66.028C108.877 66.028 124.586 81.5878 124.586 100.782Z"/>
+                </svg>
+                Ferrocene Documentation
+            </a>
+        </div>
+
+        <header>
+            <img src="index-assets/ferrocene.svg" alt="Ferrocene Logo">
+        </header>
+
+        <div class="wrapper" id="sections-container">
+            <section>
+                <h2>Ferrocene documentation</h2>
+                <div class="docs">
+                    <a href="user-manual/index.html">
+                        <h3>User Manual</h3>
+                        <p>An easy-to-read, how-to manual for operating Ferrocene in a qualified environment.</p>
+                    </a>
+                    <a href="specification/index.html">
+                        <h3>Language specification</h3>
+                        <p>The expected behavior of the Rust language as implemented by the Ferrocene compiler.</p>
+                    </a>
+                    <a href="safety-manual/index.html">
+                        <h3>Safety Manual</h3>
+                        <p>Usage and constraints information concerning the use of Ferrocene according to the functional safety standards.</p>
+                    </a>
+                </div>
+            </section>
+            <section>
+                <h2>Library APIs</h2>
+                <p class="note">
+                    Libraries distributed with Ferrocene are not pre-certified
+                    for safety-critical use. Certification of the parts used is
+                    currently the obligation of the user, for which Ferrous
+                    Systems provide support. This limitation is expected go
+                    away in future releases.
+                </p>
+                <div class="docs">
+                    <a href="core/index.html">
+                        <h3>core</h3>
+                        <p>Platform-agnostic and allocation-free APIs, plus basic Rust types.</p>
+                    </a>
+                    <a href="alloc/index.html">
+                        <h3>alloc</h3>
+                        <p>Data structures on the heap and memory allocation APIs.</p>
+                    </a>
+                    <a href="std/index.html">
+                        <h3>std</h3>
+                        <p>Operative system bindings, plus all APIs in core and alloc.</p>
+                    </a>
+                    <a href="proc_macro/index.html">
+                        <h3>proc_macro</h3>
+                        <p>APIs to implement procedural macros.</p>
+                    </a>
+                </div>
+            </section>
+            <section>
+                <h2>Qualification Material</h2>
+                <div class="docs">
+                    <a href="qualification/evaluation-plan/index.html">
+                        <h3>Evaluation Plan</h3>
+                        <p>Evaluation of applicable requirements to determine Ferrocene compiler qualification levels and activities to be performed.</p>
+                    </a>
+                    <a href="qualification/evaluation-report/index.html">
+                        <h3>Evaluation Report</h3>
+                        <p>Evaluation of all hazardous events that can happen on the compiler and setting counter-measures in order to mitigate these hazards.</p>
+                    </a>
+                    <a href="qualification/plan/index.html">
+                        <h3>Qualification Plan</h3>
+                        <p>Phases and activities that describe the qualification of the Ferrocene compiler with the TCL 3/ASIL D level in accordance with ISO-26262 standard and the T3 TQL level in accordance with the IEC-61508 standard.</p>
+                    </a>
+                    <a href="qualification/report/index.html">
+                        <h3>Qualification Report</h3>
+                        <p>How Ferrocene is qualified, including which tests can be used to prove functionality and validation goals.</p>
+                    </a>
+                    <a href="qualification/traceability-matrix.html">
+                        <h3>Traceability matrix</h3>
+                        <p>A matrix that ties the specifics of the Ferrocene Language Specification to the test suite. This was written to ensure that all documented requirements are covered.</p>
+                    </a>
+                    <a href="qualification/document-list/index.html">
+                        <h3>Document List</h3>
+                        <p>The reference list of documents used for the qualification dossier</p>
+                    </a>
+                    <a href="qualification/internal-procedures/index.html">
+                        <h3>Ferrocene Internal Procedures</h3>
+                        <p>Engineering level procedures for installing the develoment environment, using the existing infrastructure, and working with the Ferrocene toolchain.</p>
+                    </a>
+                    <a href="qualification/technical-report.pdf" data-subset="signatures">
+                        <h3>Technical Report</h3>
+                        <p>Technical report of the qualification, written by the assessors.</p>
+                    </a>
+                </div>
+            </section>
+            <section>
+                <h2>Rust Project's documentation</h2>
+                <p class="note">The following documentation is maintained by the Rust Project, and has not been validated by Ferrocene. It is provided here for convenience.</p>
+                <div class="docs">
+                    <a href="book/index.html">
+                        <h3>The Rust Programming Language</h3>
+                        <p>Free book to learn the Rust programming language from first principles.</p>
+                    </a>
+                    <a href="rust-by-example/index.html">
+                        <h3>Rust By Example</h3>
+                        <p>Learn Rust with practical code examples and exercises.</p>
+                    </a>
+                    <a href="edition-guide/index.html">
+                        <h3>Edition Guide</h3>
+                        <p>Documentation about all the editions of Rust, and the changes included in each edition.</p>
+                    </a>
+                    <a href="rustc/index.html">
+                        <h3>rustc documentation</h3>
+                        <p>Documentation about the Rust compiler itself, and the rustc binary.</p>
+                    </a>
+                    <a href="cargo/index.html">
+                        <h3>Cargo documentation</h3>
+                        <p>Documentation about the Cargo build system, and the cargo binary.</p>
+                    </a>
+                    <a href="rustdoc/index.html">
+                        <h3>rustdoc documentation</h3>
+                        <p>Documentation about Rust's documentation tooling, and the rustdoc binary.</p>
+                    </a>
+                    <a href="clippy/index.html">
+                        <h3>Clippy documentation</h3>
+                        <p>Documentation about the Clippy linter.</p>
+                    </a>
+                    <a href="nomicon/index.html">
+                        <h3>The Rustonomicon</h3>
+                        <p>Incomplete documentation on unsafe Rust.</p>
+                    </a>
+                    <a href="reference/index.html">
+                        <h3>The Reference</h3>
+                        <p>Incomplete description of the Rust language maintained by the Rust project.</p>
+                    </a>
+                    <a href="error_codes/index.html">
+                        <h3>Compiler error codes</h3>
+                        <p>List of error codes the compiler can emit, with additional details on how to fix them.</p>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </body>
+</body>

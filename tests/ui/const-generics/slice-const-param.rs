@@ -17,3 +17,6 @@ pub fn main() {
     assert_eq!(function_with_bytes::<b"AAAA">(), &[0x41, 0x41, 0x41, 0x41]);
     assert_eq!(function_with_bytes::<{&[0x41, 0x41, 0x41, 0x41]}>(), b"AAAA");
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

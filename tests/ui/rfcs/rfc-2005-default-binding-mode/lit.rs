@@ -32,3 +32,21 @@ fn with_bytes() {
 pub fn main() {
     with_str();
 }
+
+// ferrocene-annotations: fls_jkab8eevzbte
+// Boolean Literals
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

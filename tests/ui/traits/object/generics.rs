@@ -39,3 +39,8 @@ pub fn main() {
     let a = Box::new(()) as Box<dyn Trait<u8, u8>>;
     assert_eq!(a.method(Type::Constant((1, 2))), 0);
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

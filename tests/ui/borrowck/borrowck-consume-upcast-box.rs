@@ -12,3 +12,7 @@ fn foo(b: Box<dyn Foo + Send>) {
 
 fn main() {
 }
+
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance

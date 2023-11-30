@@ -5,6 +5,7 @@
 // ignore-wasm32
 // ignore-sgx no support for proc-macro crate type
 // build-pass
+// needs-dynamic-linking
 #![crate_type = "proc-macro"]
 
 // FIXME: This don't work when crate-type is specified by attribute

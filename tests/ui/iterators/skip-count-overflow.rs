@@ -6,3 +6,5 @@ fn main() {
     let i = (0..usize::MAX).chain(0..10).skip(usize::MAX);
     assert_eq!(i.count(), 10);
 }
+
+// ferrocene-annotations: um_rustc_C_overflow_checks

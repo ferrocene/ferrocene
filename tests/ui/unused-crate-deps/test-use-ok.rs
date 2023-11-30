@@ -13,3 +13,5 @@ fn main() {}
 fn test_bar() {
     assert_eq!(bar::BAR, "bar");
 }
+
+// ferrocene-annotations: um_rustc_test

@@ -45,3 +45,6 @@ fn main() {
     xcrate::m::n::Z;
     //~^ ERROR tuple struct constructor `Z` is private
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility

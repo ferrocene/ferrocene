@@ -74,3 +74,11 @@ fn main() {
     generic_compound::<i32>();
     custom_compound();
 }
+
+// ferrocene-annotations: fls_290jmzfh7x4e
+// Compound Assignment Expressions
+// ferrocene-annotations: fls_ckvjj4tt1hh2
+// Expressions
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

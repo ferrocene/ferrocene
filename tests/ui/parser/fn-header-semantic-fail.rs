@@ -56,3 +56,6 @@ fn main() {
         //~^ ERROR functions cannot be both `const` and `async`
     }
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

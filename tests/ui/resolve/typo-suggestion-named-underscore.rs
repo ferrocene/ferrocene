@@ -12,3 +12,6 @@ use Unknown as _;
 
 fn foo<T: A>(x: T) {} // Shouldn't suggest underscore
 //~^ ERROR: cannot find trait `A` in this scope
+
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns

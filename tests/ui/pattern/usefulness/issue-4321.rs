@@ -6,3 +6,12 @@ fn main() {
         (true, true) => "baz"
     });
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching

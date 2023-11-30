@@ -21,3 +21,15 @@ fn bar() -> impl Trait {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+//
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+//
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

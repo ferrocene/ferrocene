@@ -11,3 +11,6 @@ extern "\x43" {
 }
 
 type T = extern "\x43" fn();
+
+// ferrocene-annotations: fls_usgd0xlijoxv
+// ABI

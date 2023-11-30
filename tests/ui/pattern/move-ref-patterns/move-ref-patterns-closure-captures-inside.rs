@@ -118,3 +118,21 @@ fn main() {
     drop(&arr2); //~ ERROR borrow of moved value: `arr2`
     m!([_, mov1, mov2, mov3, _] = &arr3); //~ ERROR borrow of moved value: `arr3`
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple Patterns

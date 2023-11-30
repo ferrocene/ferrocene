@@ -28,3 +28,6 @@ pub fn main() {
         assert_eq!(i, foos[i].foo());
     }
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

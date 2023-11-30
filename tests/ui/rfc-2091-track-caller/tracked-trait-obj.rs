@@ -59,3 +59,10 @@ fn main() {
     let boxed: Box<dyn Tracked> = Box::new(());
     boxed.track_caller_through_self(line!(), 11);
 }
+
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

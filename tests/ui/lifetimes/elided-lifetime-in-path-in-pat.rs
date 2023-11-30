@@ -11,3 +11,6 @@ fn foo<'a>(Foo { x }: Foo<'a>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision

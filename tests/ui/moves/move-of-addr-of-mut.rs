@@ -10,3 +10,6 @@ fn main() {
     let y = x; // Should error here if `addr_of_mut` is ever allowed on uninitialized variables
     drop(y);
 }
+
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Types

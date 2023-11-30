@@ -134,6 +134,11 @@ impl Step for Std {
             cargo.arg("-p").arg(krate);
         }
 
+        // See src/bootstrap/synthetic_targets.rs
+        if target.is_synthetic() {
+            cargo.env("RUSTC_BOOTSTRAP_SYNTHETIC_TARGET", "1");
+        }
+
         builder.info(&format!(
             "Building{} stage{} library artifacts ({} -> {})",
             crate_description(&self.crates),
@@ -279,7 +284,7 @@ fn copy_self_contained_objects(
         }
     } else if target.ends_with("windows-gnu") {
         for obj in ["crt2.o", "dllcrt2.o"].iter() {
-            let src = compiler_file(builder, builder.cc(target), target, CLang::C, obj);
+            let src = compiler_file(builder, &builder.cc(target), target, CLang::C, obj);
             let target = libdir_self_contained.join(obj);
             builder.copy(&src, &target);
             target_deps.push((target, DependencyType::TargetSelfContained));
@@ -868,7 +873,7 @@ pub fn rustc_cargo_env(builder: &Builder<'_>, cargo: &mut Cargo, target: TargetS
         {
             let file = compiler_file(
                 builder,
-                builder.cxx(target).unwrap(),
+                &builder.cxx(target).unwrap(),
                 target,
                 CLang::Cxx,
                 "libstdc++.a",
@@ -1109,6 +1114,9 @@ pub fn compiler_file(
     c: CLang,
     file: &str,
 ) -> PathBuf {
+    if builder.config.dry_run() {
+        return PathBuf::new();
+    }
     let mut cmd = Command::new(compiler);
     cmd.args(builder.cflags(target, GitRepo::Rustc, c));
     cmd.arg(format!("-print-file-name={}", file));

@@ -15,3 +15,6 @@ fn main() {
     let x = unsafe { f(2) };
     assert_eq!(x, 44);
 }
+
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types

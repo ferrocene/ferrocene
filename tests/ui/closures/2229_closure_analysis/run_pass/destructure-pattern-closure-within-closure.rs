@@ -19,3 +19,6 @@ fn main() {
 
     a();
 }
+
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple Pattern Matching

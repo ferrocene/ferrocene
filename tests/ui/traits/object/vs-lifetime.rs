@@ -15,3 +15,6 @@ fn main() {
     //~^ ERROR type provided when a lifetime was expected
     //~| ERROR at least one trait is required for an object type
 }
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

@@ -23,3 +23,6 @@ fn main() {
     let virtual_remoteg : &dyn Fn(_) -> RemoteG<u32> = &RemoteG;
     assert_eq!(virtual_remoteg(1), RemoteG(1));
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

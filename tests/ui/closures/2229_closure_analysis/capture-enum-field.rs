@@ -25,3 +25,6 @@ fn main() {
     blue(3);
     assert_eq!(Color::RGB(1, 2, 3), color);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

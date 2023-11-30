@@ -52,3 +52,7 @@ fn f(x: &'static mut isize) {
 
 fn main() {
 }
+
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

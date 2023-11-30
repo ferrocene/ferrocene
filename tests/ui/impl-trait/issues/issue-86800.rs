@@ -53,3 +53,12 @@ impl Context {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_aadan19t5006
+// async Blocks
+//
+// ferrocene-annotations: fls_hyrbmfmf6r8g
+// Await Expressions
+//
+// ferrocene-annotations: fls_kgvleup5mdhq
+// Type Aliasing

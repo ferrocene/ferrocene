@@ -10,3 +10,6 @@ fn main() {
     let _: Bar<1, _> = Bar::<_, 300>;
     let _: Bar<_, 300> = Bar::<1, _>;
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic parameters

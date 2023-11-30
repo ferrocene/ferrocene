@@ -3,3 +3,9 @@ fn main() {
         x //~ ERROR mismatched types
     }
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops
+//
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions

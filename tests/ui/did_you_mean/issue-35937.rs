@@ -19,3 +19,9 @@ fn foo() {
 fn bar(s: S) {
     s.x += 1; //~ ERROR cannot assign
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

@@ -84,3 +84,5 @@ pub fn orange() -> &'static u8 {
 // ppc64le: .tc banana[TC],banana
 // ppc64le: .tc EXOCHORDA[TC],EXOCHORDA
 // ppc64le: .tc PIERIS[TC],PIERIS
+
+// ferrocene-annotations: um_rustc_C_relocation_model

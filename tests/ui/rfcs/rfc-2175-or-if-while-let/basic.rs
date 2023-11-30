@@ -31,3 +31,12 @@ fn main() {
         e = W;
     }
 }
+
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions
+//
+// ferrocene-annotations: fls_xgqh0ju6bmbn
+// Patterns
+//
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops

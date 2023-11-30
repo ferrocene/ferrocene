@@ -330,3 +330,9 @@ fn main() {
 
     run_test(context, |a| move_ref_pattern(a));
 }
+
+// ferrocene-annotations: fls_mtuwzinpfvkl
+// Asynchronous Computation
+//
+// ferrocene-annotations: fls_aadan19t5006
+// async Blocks

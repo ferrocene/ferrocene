@@ -29,3 +29,6 @@ fn main() {
     println!("x={}", x.get());
     let y = x.wrap();
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

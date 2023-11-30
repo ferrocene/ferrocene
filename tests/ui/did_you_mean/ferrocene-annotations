@@ -1,0 +1,3 @@
+// Tests here are about compiler hint messages. They test if the compiler is
+// able to give better informations when a compiler error is detected.
+// Some errors are already covered by other tests.

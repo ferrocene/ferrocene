@@ -32,3 +32,8 @@ fn main() {
     let _ = &T[0];
     // let x = &x as &Debug;
 }
+
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Indexing Expressions
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression

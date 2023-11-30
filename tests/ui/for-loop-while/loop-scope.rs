@@ -6,3 +6,6 @@ pub fn main() {
     for x in &x { sum += *x; }
     assert_eq!(sum, 60);
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

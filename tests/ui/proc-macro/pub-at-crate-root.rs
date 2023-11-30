@@ -20,3 +20,9 @@ fn bar(a: proc_macro::TokenStream) -> proc_macro::TokenStream {
 //~^ ERROR: functions tagged with `#[proc_macro_derive]` must be `pub`
     a
 }
+
+// ferrocene-annotations: fls_jdknpu3kf865
+// Visibility
+//
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive

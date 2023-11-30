@@ -105,3 +105,33 @@ fn main() {
     assert_eq!(10i128, [1i128, 2, 3, 4].iter().sum());
     assert_eq!(24i128, [1i128, 2, 3, 4].iter().product());
 }
+
+// ferrocene-annotations: fls_1k9mkv7rbezi
+// Arithmetic Expressions
+//
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_wrecura8u5ar
+// Negation Expression
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions
+//
+// ferrocene-annotations: fls_zfibijmf8qe1
+// Arithmetic Overflow

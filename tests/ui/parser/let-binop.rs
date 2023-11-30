@@ -8,3 +8,6 @@ fn main() {
     let c *= 1; //~ ERROR can't reassign to an uninitialized variable
     let _ = c;
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

@@ -25,3 +25,5 @@ endif
 $(call DYLIB,foo):
 	$(RUSTC) -C prefer-dynamic bar.rs
 	$(RUSTC) foo.rs
+
+# ferrocene-annotations: um_rustc_C_prefer_dynamic

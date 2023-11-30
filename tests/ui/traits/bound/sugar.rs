@@ -17,3 +17,12 @@ fn d(x: &'static (dyn Foo + Sync)) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

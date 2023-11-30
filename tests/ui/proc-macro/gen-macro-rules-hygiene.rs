@@ -21,3 +21,6 @@ fn main() {
         local_def; //~ ERROR cannot find value `local_def` in this scope
     }
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

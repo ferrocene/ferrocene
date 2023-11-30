@@ -80,3 +80,6 @@ pub fn main() {
     assert_eq!(discriminant_value(&Mixed::Tuple(5)), 2);
     assert_eq!(discriminant_value(&Mixed::Struct{a: 7, b: 11}), 1);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

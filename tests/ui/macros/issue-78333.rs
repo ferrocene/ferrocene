@@ -11,3 +11,6 @@ fn main() {
     ::std::dbg!(123);
     ::std::unreachable!();
 }
+
+// ferrocene-annotations: fls_iikmhqsp1r5a
+// Attribute no_implicit_prelude

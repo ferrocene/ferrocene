@@ -10,3 +10,4 @@ cdylib-thin:
 	$(RUSTC) lib.rs -C lto=thin -C opt-level=3 -C incremental=$(TMPDIR)/inc-thin
 	$(RUSTC) lib.rs -C lto=thin -C opt-level=3 -C incremental=$(TMPDIR)/inc-thin
 
+# ferrocene-annotations: um_rustc_C_opt_level

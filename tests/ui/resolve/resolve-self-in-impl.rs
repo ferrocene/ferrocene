@@ -19,3 +19,6 @@ impl (Self, Self) {} //~ ERROR `Self` is not valid in the self type of an impl b
 impl Tr<Self::A> for S {} //~ ERROR cycle detected
 
 fn main() {}
+
+// ferrocene-annotations: fls_kgbi26212eof
+// Self Scope

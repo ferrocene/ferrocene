@@ -57,3 +57,10 @@ fn main() {
     //~^ ERROR cannot assign to data in an index of `Bar`
     drop(rs);
 }
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References
+//
+// ferrocene-annotations: fls_sxcr4aa098i6
+// Array and Slice Indexing Expressions

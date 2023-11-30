@@ -42,3 +42,12 @@ fn make_bar() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object Safety
+//
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

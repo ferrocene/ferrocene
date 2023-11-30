@@ -8,3 +8,5 @@ all:
 
 	# Check sequence of linker args
 	$(RUSTC) main.rs --extern lib=$(TMPDIR)/librust_dep.rlib --crate-type=bin --print link-args | $(CGREP) -e 'native_dep_1.*some_flag.*native_dep_2'
+
+# ferrocene-annotations: um_rustc_C_link_arg

@@ -35,3 +35,6 @@ enum Ei64 {
 // This also applies to isize and usize on 64-bit targets.
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

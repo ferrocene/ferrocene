@@ -1,4 +1,5 @@
 // compile-flags: -C opt-level=0
+// needs-unwind
 
 // Test that `nounwind` attributes are correctly applied to exported `system` and `system-unwind`
 // extern functions. `system-unwind` functions MUST NOT have this attribute. We disable
@@ -27,3 +28,5 @@ pub extern "system-unwind" fn rust_item_that_can_unwind() {
 // CHECK: attributes #1 = {
 // CHECK-NOT: nounwind
 // CHECK: }
+
+// ferrocene-annotations: um_rustc_C_opt_level

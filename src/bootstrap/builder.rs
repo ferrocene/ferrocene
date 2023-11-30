@@ -9,6 +9,7 @@ use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic;
 use std::time::{Duration, Instant};
 
 use crate::cache::{Cache, Interned, INTERNER};
@@ -38,6 +39,7 @@ pub struct Builder<'a> {
     cache: Cache,
     stack: RefCell<Vec<Box<dyn Any>>>,
     time_spent_on_dependencies: Cell<Duration>,
+    should_serve_called: atomic::AtomicBool,
     pub paths: Vec<PathBuf>,
 }
 
@@ -561,6 +563,7 @@ pub enum Kind {
     Install,
     Run,
     Setup,
+    Sign,
 }
 
 impl Kind {
@@ -580,6 +583,7 @@ impl Kind {
             "install" => Kind::Install,
             "run" | "r" => Kind::Run,
             "setup" => Kind::Setup,
+            "sign" => Kind::Sign,
             _ => return None,
         })
     }
@@ -599,6 +603,7 @@ impl Kind {
             Kind::Install => "install",
             Kind::Run => "run",
             Kind::Setup => "setup",
+            Kind::Sign => "sign",
         }
     }
 }
@@ -642,7 +647,9 @@ impl<'a> Builder<'a> {
                 tool::Miri,
                 tool::CargoMiri,
                 native::Lld,
-                native::CrtBeginEnd
+                native::CrtBeginEnd,
+                crate::ferrocene::tool::SelfTest,
+                tool::FerroceneGenerateTarball,
             ),
             Kind::Check | Kind::Clippy | Kind::Fix => describe!(
                 check::Std,
@@ -659,6 +666,10 @@ impl<'a> Builder<'a> {
                 check::Bootstrap
             ),
             Kind::Test => describe!(
+                crate::ferrocene::test::TraceabilityMatrixTool,
+                crate::ferrocene::test::SelfTest,
+                crate::ferrocene::test::CheckDocumentSignatures,
+                crate::ferrocene::test::GenerateTarball,
                 crate::toolstate::ToolStateCheck,
                 test::ExpandYamlAnchors,
                 test::Tidy,
@@ -740,6 +751,21 @@ impl<'a> Builder<'a> {
                 doc::EmbeddedBook,
                 doc::EditionGuide,
                 doc::StyleGuide,
+                // Basic Documents
+                crate::ferrocene::doc::Index,
+                crate::ferrocene::doc::Specification,
+                crate::ferrocene::doc::UserManual,
+                // Qualification Documents
+                crate::ferrocene::doc::DocumentList,
+                crate::ferrocene::doc::EvaluationPlan,
+                crate::ferrocene::doc::EvaluationReport,
+                crate::ferrocene::doc::QualificationPlan,
+                crate::ferrocene::doc::QualificationReport,
+                crate::ferrocene::doc::SafetyManual,
+                crate::ferrocene::doc::TraceabilityMatrix,
+                crate::ferrocene::doc::TechnicalReport,
+                // QMS Documents
+                crate::ferrocene::doc::InternalProcedures,
             ),
             Kind::Dist => describe!(
                 dist::Docs,
@@ -769,6 +795,10 @@ impl<'a> Builder<'a> {
                 dist::PlainSourceTarball,
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
+                crate::ferrocene::dist::Docs,
+                crate::ferrocene::dist::SourceTarball,
+                crate::ferrocene::dist::SelfTest,
+                crate::ferrocene::dist::TestOutcomes,
             ),
             Kind::Install => describe!(
                 install::Docs,
@@ -785,6 +815,7 @@ impl<'a> Builder<'a> {
                 install::Rustc
             ),
             Kind::Run => describe!(
+                crate::ferrocene::run::TraceabilityMatrix,
                 run::ExpandYamlAnchors,
                 run::BuildManifest,
                 run::BumpStage0,
@@ -792,6 +823,17 @@ impl<'a> Builder<'a> {
                 run::Miri,
                 run::CollectLicenseMetadata,
                 run::GenerateCopyright,
+            ),
+            Kind::Sign => describe!(
+                // Qualification Documents
+                crate::ferrocene::sign::DocumentList,
+                crate::ferrocene::sign::EvaluationPlan,
+                crate::ferrocene::sign::EvaluationReport,
+                crate::ferrocene::sign::QualificationPlan,
+                crate::ferrocene::sign::QualificationReport,
+                crate::ferrocene::sign::SafetyManual,
+                // QMS Documents
+                crate::ferrocene::sign::InternalProcedures,
             ),
             Kind::Setup => describe!(setup::Profile),
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
@@ -842,6 +884,7 @@ impl<'a> Builder<'a> {
             cache: Cache::new(),
             stack: RefCell::new(Vec::new()),
             time_spent_on_dependencies: Cell::new(Duration::new(0, 0)),
+            should_serve_called: atomic::AtomicBool::new(false),
             paths,
         }
     }
@@ -864,6 +907,7 @@ impl<'a> Builder<'a> {
                 Kind::Setup,
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
+            Subcommand::Sign { ref paths } => (Kind::Sign, &paths[..]),
         };
 
         Self::new_internal(build, kind, paths.to_owned())
@@ -1585,6 +1629,10 @@ impl<'a> Builder<'a> {
             }
         };
         cargo.env(profile_var("DEBUG"), debuginfo_level.to_string());
+        if !self.config.dry_run() && self.cc.borrow()[&target].args().iter().any(|arg| arg == "-gz")
+        {
+            rustflags.arg("-Clink-arg=-gz");
+        }
         cargo.env(
             profile_var("DEBUG_ASSERTIONS"),
             if mode == Mode::Std {
@@ -1926,6 +1974,10 @@ impl<'a> Builder<'a> {
             }
         }
 
+        if target.contains("ferrocenecoretest") {
+            rustflags.arg("-Zpanic-abort-tests");
+        }
+
         Cargo { command: cargo, rustflags, rustdocflags, allow_features }
     }
 
@@ -1957,7 +2009,7 @@ impl<'a> Builder<'a> {
         }
 
         #[cfg(feature = "build-metrics")]
-        self.metrics.enter_step(&step);
+        self.metrics.enter_step(&step, self);
 
         let (out, dur) = {
             let start = Instant::now();
@@ -1983,7 +2035,7 @@ impl<'a> Builder<'a> {
         }
 
         #[cfg(feature = "build-metrics")]
-        self.metrics.exit_step();
+        self.metrics.exit_step(self);
 
         {
             let mut stack = self.stack.borrow_mut();
@@ -2052,6 +2104,18 @@ impl<'a> Builder<'a> {
         if let Err(err) = opener::open(path) {
             self.info(&format!("{}\n", err));
         }
+    }
+
+    pub(crate) fn should_serve<S: Step>(&self) -> bool {
+        // We record whether this method was called to see if it was invoked during the dry run. If
+        // it wasn't and the --serve flag was passed we error out saying this is unsupported.
+        self.should_serve_called.store(true, atomic::Ordering::Relaxed);
+
+        self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
+    }
+
+    pub(crate) fn is_serve_flag_unsupported(&self) -> bool {
+        self.config.cmd.serve() && !self.should_serve_called.load(atomic::Ordering::Relaxed)
     }
 }
 

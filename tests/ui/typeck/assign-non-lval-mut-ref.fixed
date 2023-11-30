@@ -13,3 +13,12 @@ fn main() {
     *y += 1;
     //~^ ERROR binary assignment operation `+=` cannot be applied to type `&mut usize`
 }
+
+// ferrocene-annotations: fls_3ut3biyra4r9
+// Assignee Expressions
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

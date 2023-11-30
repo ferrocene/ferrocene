@@ -15,3 +15,6 @@ fn main() {
     S.baz(); //~ ERROR this method takes
     S.generic::<()>(); //~ ERROR this method takes
 }
+
+// ferrocene-annotations: fls_xa4nbfas01cj
+// Call Expressions

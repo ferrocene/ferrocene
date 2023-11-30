@@ -52,3 +52,9 @@ fn main()
     println!("&p1 == &p2: {:?}", Point::equals_ref(&p1, &p2));
     println!("p1 == p2: {:?}", Point::equals_val(p1, p2));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

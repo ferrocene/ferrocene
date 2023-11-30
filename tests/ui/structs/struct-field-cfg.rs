@@ -16,3 +16,6 @@ fn main() {
     let Foo { present: (), #[cfg(all())] absent: () } = foo;
     //~^ ERROR struct `Foo` does not have a field named `absent`
 }
+
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

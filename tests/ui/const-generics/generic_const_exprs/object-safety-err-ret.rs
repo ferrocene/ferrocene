@@ -19,3 +19,6 @@ fn use_dyn(v: &dyn Foo) { //~ERROR the trait `Foo` cannot be made into an object
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object safety

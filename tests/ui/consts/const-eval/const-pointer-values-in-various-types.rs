@@ -112,3 +112,21 @@ fn main() {
     const STR_CHAR_UNION: char = unsafe { Nonsense { stringy: "3" }.character };
     //~^ ERROR evaluation of constant value failed
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_fmdn7n7s413d
+// Union Type
+//
+// ferrocene-annotations: fls_9kjpxri0axvg
+// Weak Keywords
+//
+// ferrocene-annotations: fls_6ydylimiv553
+// Place Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

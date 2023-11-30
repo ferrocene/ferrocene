@@ -62,3 +62,15 @@ fn main() {
     assert_eq!(f[1].get(), 5);
     assert_eq!(f[1].get_from_ref(), 5);
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

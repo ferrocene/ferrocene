@@ -20,3 +20,6 @@ fn a() -> Foo {
 fn b() -> Foo {
     42
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

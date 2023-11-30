@@ -30,3 +30,6 @@ fn main() {
     test(NoSync);
     //~^ ERROR `NoSync` cannot be shared between threads safely [E0277]
 }
+
+// ferrocene-annotations: fls_eiw4by8z75di
+// Send and Sync

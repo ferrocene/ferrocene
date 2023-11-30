@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 .. default-domain:: spec
 
@@ -133,6 +133,12 @@ The :t:`referent` of an :t:`immutable reference` shall be mutated only when the
 While a :t:`mutable reference` is :t:`active`, no other :t:`reference` shall
 refer to a :t:`value` that :t:`[overlap]s` with the :t:`referent` of the
 :t:`mutable reference`.
+
+.. rubric:: Undefined Behavior
+
+:dp:`fls_eT1hnLOx6vxk`
+It is undefined behavior to access a :t:`value` through aliasing
+:t:`[mutable reference]s` from :t:`unsafe context`.
 
 .. rubric:: Examples
 

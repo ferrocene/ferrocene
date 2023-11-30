@@ -21,3 +21,7 @@ unsafe fn raw_reborrow_of_raw() {
 }
 
 fn main() {}
+
+//
+// ferrocene-annotations: fls_v5x85lt5ulva
+// References

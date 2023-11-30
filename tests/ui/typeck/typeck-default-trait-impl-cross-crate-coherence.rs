@@ -23,3 +23,9 @@ impl DefaultedTrait for lib::Something<C> { } //~ ERROR E0117
 impl DefaultedTrait for D<C> { } // OK
 
 fn main() { }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance

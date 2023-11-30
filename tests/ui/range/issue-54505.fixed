@@ -41,3 +41,9 @@ fn main() {
     //~| HELP consider borrowing here
     //~| SUGGESTION &(..=42)
 }
+
+// ferrocene-annotations: fls_18swodqqzadj
+// Range Expressions
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: Ferrous Systems and AdaCore
+# SPDX-FileCopyrightText: The Ferrocene Developers
 
 from . import utils
 from collections import defaultdict
@@ -88,6 +88,14 @@ class RemoveInformationalMarkerNodesTransform(SphinxTransform):
     def apply(self):
         for node in self.document.findall(InformationalMarkerNode):
             node.parent.remove(node)
+
+
+def is_document_informational(env, docname):
+    return WHOLE_PAGE in get_storage(env)[docname]
+
+
+def is_section_informational(env, docname, anchor):
+    return anchor in get_storage(env)[docname]
 
 
 def get_storage(env):

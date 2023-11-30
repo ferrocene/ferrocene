@@ -24,3 +24,6 @@ fn main() {
         let _x = rust_dbg_static_mut;
     }
 }
+
+// ferrocene-annotations: fls_tmoh3y9oyqsy
+// External Blocks

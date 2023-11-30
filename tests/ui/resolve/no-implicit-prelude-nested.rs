@@ -52,3 +52,6 @@ fn main() {
     // these should work fine
     drop(2)
 }
+
+// ferrocene-annotations: fls_iikmhqsp1r5a
+// Attribute no_implicit_prelude

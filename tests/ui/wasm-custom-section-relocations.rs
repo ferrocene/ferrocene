@@ -13,3 +13,6 @@ pub static C: usize = 3;
 pub static D: &usize = &C; //~ ERROR: no extra levels of indirection
 
 fn main() {}
+
+// ferrocene-annotations: fls_hffpo88r61rh
+// Attribute link_section

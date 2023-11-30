@@ -7,3 +7,6 @@ fn bar<const N: u8>() -> [u8; N] {}
 //~| ERROR mismatched types
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

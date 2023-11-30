@@ -20,3 +20,9 @@ type T = impl std::fmt::Debug; //~ ERROR: layout_of
 fn f() -> T {
     0i32
 }
+
+// ferrocene-annotations: fls_rjxpof29a3nl
+// Struct Type Representation
+//
+// ferrocene-annotations: fls_cmq8ogs84ivh
+// Union Type Representation

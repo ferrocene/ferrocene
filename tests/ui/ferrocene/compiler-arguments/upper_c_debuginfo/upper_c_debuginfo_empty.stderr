@@ -1,0 +1,2 @@
+error: codegen option `debuginfo` requires a number (C debuginfo=<value>)
+

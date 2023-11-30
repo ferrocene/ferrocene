@@ -33,3 +33,6 @@ pub fn main() {
     let new_x = x.change_again();
     assert_eq!(new_x.a, 45);
 }
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types

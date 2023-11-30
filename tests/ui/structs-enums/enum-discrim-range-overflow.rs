@@ -24,3 +24,9 @@ pub fn f(e64: E64, e32: E32) -> (bool,bool) {
 }
 
 pub fn main() { }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_xc1hof4qbf6p
+// Enum Type Representation

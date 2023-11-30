@@ -3,3 +3,6 @@
 static c: char =
     '●  //~ ERROR: unterminated character literal
 ;
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals

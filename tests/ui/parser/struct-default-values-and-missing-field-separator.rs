@@ -33,3 +33,6 @@ const fn foo(_: i32) -> E {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

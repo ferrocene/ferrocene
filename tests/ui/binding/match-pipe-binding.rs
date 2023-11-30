@@ -58,3 +58,15 @@ pub fn main() {
     test4();
     test5();
 }
+
+// ferrocene-annotations: fls_5loglxds6zik
+// Parenthesized pattern matching
+//
+// ferrocene-annotations: fls_1xit18et4ohh
+// Parenthesized patterns
+//
+// ferrocene-annotations: fls_rce8bb7nz2jy
+// Tuple pattern matching
+//
+// ferrocene-annotations: fls_urbr5rg9206v
+// Tuple patterns

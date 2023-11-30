@@ -14,3 +14,5 @@ pub fn bad() -> i32 { }
 
 #[cfg(panic = "unwind")]
 pub fn main() { }
+
+// ferrocene-annotations: um_rustc_C_panic

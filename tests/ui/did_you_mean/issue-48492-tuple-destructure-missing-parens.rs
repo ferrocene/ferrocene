@@ -85,3 +85,6 @@ fn main() {
     //~^ ERROR unexpected `,` in pattern
         .partition(|g: &Genome| g.allosomes.0.is_x() && g.allosomes.1.is_x());
 }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

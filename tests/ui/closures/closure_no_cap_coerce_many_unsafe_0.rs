@@ -23,3 +23,9 @@ fn main() {
     };
     let result: i32 = foo(5, 5); //~ ERROR call to unsafe function
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

@@ -45,3 +45,6 @@ impl Drop for B {
 pub fn main() {
     let _c = C { a: A, b: B };
 }
+
+// ferrocene-annotations: fls_u2mzjgiwbkz0
+// Destructors

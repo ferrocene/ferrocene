@@ -39,3 +39,9 @@ pub fn main () {
 
     assert_eq!(X, 0);
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum type
+
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type cast expressions

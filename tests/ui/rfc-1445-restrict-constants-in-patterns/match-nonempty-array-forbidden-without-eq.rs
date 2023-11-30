@@ -17,3 +17,6 @@ fn main() {
         //~^ ERROR must be annotated with `#[derive(PartialEq, Eq)]`
     }
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types

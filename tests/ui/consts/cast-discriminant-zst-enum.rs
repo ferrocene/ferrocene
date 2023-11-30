@@ -43,3 +43,6 @@ fn main() {
     assert_eq!(-1i64, NEG_ONE_I64);
     assert_eq!(-1i128, NEG_ONE_I128);
 }
+
+// ferrocene annotations: fls_szibmtfv117b
+// Enum type

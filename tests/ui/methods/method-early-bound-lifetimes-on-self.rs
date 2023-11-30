@@ -29,3 +29,6 @@ fn main() {
     let n = SimpleNavigator;
     n.init_cursor(&mut c);
 }
+
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds

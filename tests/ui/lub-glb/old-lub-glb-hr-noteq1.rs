@@ -27,3 +27,18 @@ fn foo_cast(x: for<'a, 'b> fn(&'a u8, &'b u8) -> &'a u8, y: for<'a> fn(&'a u8, &
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions
+//
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

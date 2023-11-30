@@ -10,3 +10,6 @@ macro_rules! foo {
 foo!();
 
 fn main() {}
+
+// ferrocene-annotations: fls_k01lsksqtq1r
+// Repetition

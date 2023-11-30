@@ -309,6 +309,7 @@ fn test_drain_sorted() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_drain_sorted_leak() {
     let d0 = CrashTestDummy::new(0);
     let d1 = CrashTestDummy::new(1);
@@ -483,6 +484,7 @@ fn test_retain() {
 // FIXME: re-enable emscripten once it can unwind again
 #[test]
 #[cfg(not(target_os = "emscripten"))]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn panic_safe() {
     use rand::seq::SliceRandom;
     use std::cmp;

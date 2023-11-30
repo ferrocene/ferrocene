@@ -14,3 +14,6 @@ fn main() {
 
     make_bad_struct!(S); //~ ERROR expected one of
 }
+
+// ferrocene-annotations: fls_21vnag69kbwe
+// Identifiers

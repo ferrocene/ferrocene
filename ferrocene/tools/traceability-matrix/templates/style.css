@@ -1,0 +1,171 @@
+/* SPDX-License-Identifier: MIT OR Apache-2.0 */
+/* SPDX-FileCopyrightText: The Ferrocene Developers */
+
+body {
+    font-family: sans-serif;
+    margin: 1em;
+}
+
+a {
+    color: #194e80;
+}
+
+/* Header */
+
+header {
+    color: #fff;
+    background: #194e80;
+    margin: -1em;
+    margin-bottom: 0;
+    padding: 1em;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.25em;
+}
+
+/* Lists */
+
+ul {
+    padding: 0 0 0 1.5em;
+}
+
+ul li {
+    list-style: square;
+    margin: 0.5em 0;
+}
+
+/* Tables */
+
+table {
+    border-collapse: collapse;
+}
+
+table tr {
+    vertical-align: top;
+}
+
+table td, table th {
+    padding: 0.5em;
+}
+
+table td:first-child, table th:first-child {
+    padding-left: 0;
+}
+
+table td:last-child, table th:last-child {
+    padding-right: 0;
+}
+
+table th {
+    text-align: left;
+}
+
+table td {
+    border-top: 1px solid #ebebeb;
+}
+
+/* Lists inside tables (multiple tests) */
+
+table ul {
+    margin: 0;
+    padding: 0;
+}
+
+table ul li {
+    margin: 0 0 0.2em 0;
+    list-style: none;
+}
+
+table ul li:last-child {
+    margin-bottom: 0;
+}
+
+table details summary {
+    color: #194e80;
+    cursor: pointer;
+    user-select: none;
+}
+
+table details ul {
+    margin-top: 0.3em;
+}
+
+/* Circle "icon" */
+
+div.circle {
+    height: 0.8em;
+    width: 0.8em;
+    border-radius: 50%;
+    border: 1px solid transparent;
+}
+
+div.circle.red {
+    background: #ffebe9;
+    border-color: #f8c7c9;
+}
+
+div.circle.orange {
+    background: #fff8c5;
+    border-color: #eedcab;
+}
+
+div.circle.green {
+    background: #dafbe1;
+    border-color: #b0e1c0;
+}
+
+/* Errors */
+
+div.top-error {
+    padding: 1em;
+    margin: 0 -1em;
+
+    border-bottom: 1px solid #f00;
+    background: #fee;
+    color: #f00;
+}
+
+/* Annotation mode */
+
+label.top-note {
+    display: block;
+    cursor: pointer;
+
+    padding: 1em;
+    margin: 0 -1em 1em -1em;
+    border-bottom: 1px solid #ccc;
+}
+
+body.annotation-mode .copiable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
+body.annotation-mode .hide-in-annotation-mode {
+    display: none;
+}
+
+/* Popup messages */
+
+div.popup-message {
+    position: fixed;
+    bottom: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+
+    transition: bottom 0.1s;
+
+    background: #333;
+    color: #fff;
+    padding: 0.75em 1.26em;
+    border-radius: 0.3em;
+    box-shadow: 0 0.2em 0.4em rgba(0, 0, 0, 0.3);
+}
+
+div.popup-message.hidden {
+    bottom: -3em;
+    transition-duration: 0.5s;
+}

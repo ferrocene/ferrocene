@@ -19,3 +19,9 @@ impl Cat for isize {
 pub fn main() {
     assert!(5.meow());
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

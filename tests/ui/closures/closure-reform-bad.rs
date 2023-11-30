@@ -10,3 +10,6 @@ fn main() {
     let f = |s: &str| println!("{}{}", s, string);
     call_bare(f)    //~ ERROR mismatched types
 }
+
+// ferrocene-annotations: fls_jmjn8jkbzujm
+// Capturing

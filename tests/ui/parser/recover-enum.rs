@@ -9,3 +9,6 @@ fn main() {
         //~^ ERROR expected one of `,`, `=`, or `}`, found `Here`
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

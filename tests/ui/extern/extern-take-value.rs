@@ -11,3 +11,6 @@ pub fn main() {
     assert!(a == b);
     assert!(a != c);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

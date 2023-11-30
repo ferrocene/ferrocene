@@ -93,3 +93,15 @@ fn main() {
     let mut y = DerefMutOk((5, 4));
     let (ref mut z, ref mut a) = *y;
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types

@@ -18,3 +18,9 @@ mod nested {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

@@ -26,3 +26,6 @@ extern "C" {
 //~^^^ NOTE not a foreign function or static
 
 fn main() {}
+
+// ferrocene-annotations: fls_p44fky7fifc
+// Attribute link_name

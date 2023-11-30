@@ -31,6 +31,9 @@ fn main() {
         || target.contains("espidf")
         || target.contains("solid")
         || target.contains("nintendo-3ds")
+        || target.contains("ferrocenecoretest")
+        // See src/bootstrap/synthetic_targets.rs
+        || env::var("RUSTC_BOOTSTRAP_SYNTHETIC_TARGET").is_ok()
     {
         // These platforms don't have any special requirements.
     } else {

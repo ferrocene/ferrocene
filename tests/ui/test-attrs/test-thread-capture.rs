@@ -31,3 +31,5 @@ fn thready_fail() {
     println!("fum");
     panic!();
 }
+
+// ferrocene-annotations: um_rustc_test

@@ -26,3 +26,5 @@ fn main() {}
 
 #[cfg(all(sanitize = "thread", thread))]
 fn main() {}
+
+// ferrocene-annotations: um_rustc_cfg

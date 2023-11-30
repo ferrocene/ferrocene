@@ -22,3 +22,9 @@ fn main() {
     //~| NOTE unknown field
     //~| NOTE available fields are: `hello`, `bye`
 }
+
+// ferrocene-annotations: fls_18k3uajrgq5f
+// Field Access Expressions
+//
+// ferrocene-annotations: fls_xcwfotmq2e5d
+// Field Resolution

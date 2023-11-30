@@ -57,3 +57,12 @@ pub fn main() {
   for _ in 1_usize..10_usize { nyan.speak(); };
   assert!((nyan.eat()));
 }
+
+// ferrocene-annotations: fls_9ucqbbd0s2yo
+// Struct Types
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_85vx1qfa061i
+// Traits

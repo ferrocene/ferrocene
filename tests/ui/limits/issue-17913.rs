@@ -19,3 +19,12 @@ fn main() {
     let a: Box<_> = Box::new([&n; 0xFFFFFFFF_usize]);
     println!("{}", a[0xFFFFFF_usize]);
 }
+
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg

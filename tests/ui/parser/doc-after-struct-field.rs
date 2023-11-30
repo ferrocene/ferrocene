@@ -14,3 +14,6 @@ fn main() {
     let x = X { a: 1 };
     let y = Y { a: 1 };
 }
+
+// ferrocene-annotations: fls_q8l2jza7d9xa
+// Comments

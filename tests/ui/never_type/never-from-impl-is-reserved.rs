@@ -10,3 +10,6 @@ impl MyTrait for MyFoo {}
 impl<T> MyTrait for T where T: From<!> {} //~ ERROR conflicting implementation
 
 fn main() {}
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

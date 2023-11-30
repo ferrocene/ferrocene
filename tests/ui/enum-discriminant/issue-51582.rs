@@ -16,3 +16,6 @@ fn main() {
     assert_eq!(1, make_b() as u32);
     assert_eq!(1, std::intrinsics::discriminant_value(&make_b()));
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

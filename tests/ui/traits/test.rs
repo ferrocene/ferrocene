@@ -4,3 +4,6 @@ trait foo { fn foo(&self); }
 impl isize for usize { fn foo(&self) {} } //~ ERROR trait
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

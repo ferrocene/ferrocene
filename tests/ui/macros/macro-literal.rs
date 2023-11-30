@@ -132,3 +132,57 @@ pub fn main() {
     assert_eq!(pat_match!(3), "pat, single");
     assert_eq!(pat_match!(6), "pat, other");
 }
+
+// ferrocene-annotations: fls_jkab8eevzbte
+// Boolean Literals
+//
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals
+//
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros
+//
+// ferrocene-annotations: fls_29tlg1vyqay2
+// Float Literals
+//
+// ferrocene-annotations: fls_2ed4axpsy9u0
+// Integer Literals
+//
+// ferrocene-annotations: fls_wjldgtio5o75
+// Macro Expansion
+//
+// ferrocene-annotations: fls_vnvt40pa48n8
+// Macro Invocation
+//
+// ferrocene-annotations: fls_4apk1exafxii
+// Macro Matching
+//
+// ferrocene-annotations: fls_ym00b6ewf4n3
+// Macro Transcription
+//
+// ferrocene-annotations: fls_8nzypdu9j3ge
+// Metavariables
+//
+// ferrocene-annotations: fls_hv9jtycp0o1y
+// Numeric Literals
+//
+// ferrocene-annotations: fls_n3ktmjqf87qb
+// Rule Matching
+//
+// ferrocene-annotations: fls_hucd52suu6it
+// Simple String Literals
+//
+// ferrocene-annotations: fls_boyhlu5srp6u
+// String Literals
+//
+// ferrocene-annotations: fls_qpx6lgapce57
+// Token Matching
+//
+// ferrocene-annotations: fls_h0dvogc64tfh
+// Literal Expressions
+//
+// ferrocene-annotations: fls_94a8v54bufn8
+// Values
+//
+// ferrocene-annotations: fls_e7zgqroy2qxn
+// Value Expressions

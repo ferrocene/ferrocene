@@ -61,3 +61,9 @@ fn main() {
     println!("{:?}", dangle_ref());
     println!("{:?}", dangle_rc_refcell())
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime

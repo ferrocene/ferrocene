@@ -17,3 +17,5 @@ fn main() {
     let x = Foo::Bar(42);
     println!("{:?}", x);
 }
+
+// ferrocene-annotations: um_rustc_W

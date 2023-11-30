@@ -25,3 +25,6 @@ fn main() {
     let a = c;
     let b = c; //~ ERROR use of moved value: `c` [E0382]
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

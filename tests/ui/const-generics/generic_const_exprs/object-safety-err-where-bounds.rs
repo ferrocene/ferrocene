@@ -20,3 +20,6 @@ fn use_dyn(v: &dyn Foo) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_4ikc07mfrez5
+// Object safety

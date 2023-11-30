@@ -14,3 +14,9 @@ pub fn main() {
     assert!(a.eq(&b));
     assert!(!a.ne(&b));
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

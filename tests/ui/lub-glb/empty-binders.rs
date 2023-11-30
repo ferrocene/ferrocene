@@ -43,3 +43,15 @@ where
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetime
+//
+// ferrocene-annotations: fls_jeoas4n6su4
+// Trait and Lifetime Bounds
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_7nv8ualeaqe3
+// Where Clauses

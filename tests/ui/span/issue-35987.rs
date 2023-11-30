@@ -12,3 +12,6 @@ impl<T: Clone, Add> Add for Foo<T> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

@@ -19,3 +19,5 @@ fn it_works() {
 fn it_works_too() {
     assert_eq!(1 * 0, 0);
 }
+
+// ferrocene-annotations: um_rustc_test

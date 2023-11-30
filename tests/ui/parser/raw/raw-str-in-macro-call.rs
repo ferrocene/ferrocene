@@ -12,3 +12,6 @@ fn main() {
     m1!(r#"abc"##);
     m2!(r#"abc"#);
 }
+
+// ferrocene-annotations: fls_usr6iuwpwqqh
+// Raw String Literals

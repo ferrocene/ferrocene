@@ -41,3 +41,6 @@ fn main() {
     assert_eq!(bar(&true), 2);
     assert_eq!(bar(&1_u8), 1);
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

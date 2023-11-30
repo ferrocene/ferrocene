@@ -747,7 +747,7 @@ changelog-seen = 2
 #qemu-rootfs = <none> (path)
 
 # Skip building the `std` library for this target. Enabled by default for
-# target triples containing `-none`, `nvptx`, `switch`, or `-uefi`.
+# target triples containing `lynxos178`, `-none`, `nvptx`, `switch`, or `-uefi`.
 #no-std = <platform-specific> (bool)
 
 # =============================================================================
@@ -789,3 +789,30 @@ changelog-seen = 2
 #
 # This list must be non-empty.
 #compression-formats = ["gz", "xz"]
+
+# =============================================================================
+# Ferrocene options
+#
+# These options are added by Ferrocene, and are not present in the upstream
+# distribution. They configure our custom steps and tools.
+# =============================================================================
+[ferrocene]
+
+# Mode of operations for the traceability matrix tool. This changes the links
+# included in the report. Can be either "local" or "ci".
+#traceability-matrix-mode = "local"
+
+# Directory containing the build metrics files for the test executions, which
+# will be included in the qualification documents.
+#test-outcomes-dir = <none> (path)
+
+# Download URL for the qualification technical report. If omitted, the
+# technical report will not be included.
+#technical-report-url = <none> (url)
+
+# Name of the AWS S3 bucket containing the document signatures file.
+#document-signatures-s3-bucket = "ferrocene-document-signatures"
+
+# ARN of the AWS KMS key used to sign the criticalup manifests included in
+# tarballs. If this is not provided, tarballs will not be signed.
+#tarball-signing-kms-key-arn = <none> (AWS ARN)

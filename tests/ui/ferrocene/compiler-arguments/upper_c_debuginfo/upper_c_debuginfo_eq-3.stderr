@@ -1,0 +1,2 @@
+error: debug info level needs to be between 0-2 (instead was `3`)
+

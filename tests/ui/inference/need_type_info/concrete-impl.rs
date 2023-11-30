@@ -14,3 +14,9 @@ fn main() {
     //~^ ERROR type annotations needed
     //~| ERROR type annotations needed
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

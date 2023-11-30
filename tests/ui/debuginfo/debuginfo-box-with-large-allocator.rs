@@ -21,3 +21,5 @@ unsafe impl Allocator for &ZST {
 fn main() {
     let _ = Box::<i32, &ZST>::new_in(43, &ZST);
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

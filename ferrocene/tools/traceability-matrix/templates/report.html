@@ -1,0 +1,216 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Traceability matrix report</title>
+        <style>{% include "style.css" %}</style>
+    </head>
+    <body>
+        <header>
+            <h1>Traceability matrix report</h1>
+        </header>
+
+        {% if !considers_ignored_tests %}
+        <div class="top-error">
+            This traceability matrix does not take into account ignored tests.
+            Set <code>ferrocene.test-outcomes-dir</code> in
+            <code>config.toml</code> pointing to the directory containing the
+            test execution metrics to address this.
+        </div>
+        {% endif %}
+
+        <label class="top-note">
+            <input type="checkbox" id="toggle-annotation-mode">
+            Enable section linking mode. This hides informational sections,
+            empty sections and all paragraphs. This also allows clicking on an
+            ID to copy the annotation.
+        </label>
+
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2"></th>
+                    {% for kind in summary.get(0).unwrap().kinds %}
+                        <th colspan="3">{{ kind.kind.plural | capitalize }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>Page</th>
+                    {% for _ in summary.get(0).unwrap().kinds %}
+                        <th>Linked #</th>
+                        <th>Total #</th>
+                        <th>Completion</th>
+                    {% endfor %}
+                </tr>
+            </tbody>
+            <tbody>
+                {% for row in summary %}
+                    <tr>
+                        <td><div class="circle {{ row.color() }}"</div></td>
+                        <td>
+                            {% match row.page %}
+                                {% when Some with (page) %}
+                                    {% call page_link(page) %}
+                                {% when None %}
+                                    <b>Total:</b>
+                            {% endmatch %}
+                        </td>
+                        {% for kind in row.kinds %}
+                            {% if kind.total == 0 %}
+                                <td colspan="3"></td>
+                            {% else %}
+                                <td>{{ kind.linked }}</td>
+                                <td>{{ kind.total }}</td>
+                                <td>{{ kind.percentage | fmt("{:.2}") }}%</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if !matrix.unknown_annotations.is_empty() %}
+            <h2>Unknown annotations</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Annotation</th>
+                        <th>Test</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for annotation in matrix.unknown_annotations %}
+                        <tr id="{{ annotation.annotation }}">
+                            <td><div class="circle red"></div></td>
+                            <td><code>{{ annotation.annotation }}</code></td>
+                            <td>{% call file_link(annotation.file) %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% for analysis in matrix.analyses_by_kind() %}
+            {% if analysis.kind.hide_in_annotation_mode %}<div class="hide-in-annotation-mode">{% endif %}
+            <h2>All {{ analysis.kind.plural }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Page</th>
+                        <th>{{ analysis.kind.singular | capitalize }}</th>
+                        <th>ID</th>
+                        <th>Test</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in analysis.linked %}
+                        {% call row_with_tests("green", item) %}
+                    {% endfor %}
+                    {% for item in analysis.unlinked %}
+                        <tr id="{{ item.id }}">
+                            <td><div class="circle red"></div></td>
+                            <td>{% call page_link(item.page) %}</td>
+                            <td>{% call item_link(item) %}</td>
+                            <td>{% call item_id(item) %}</td>
+                            <td>-</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if analysis.kind.hide_in_annotation_mode %}</div>{% endif %}
+        {% endfor %}
+
+        {% if !ignored_tests.is_empty() %}
+            <h2>Ignored tests</h2>
+            <p>
+                These tests contain annotations linking them to one or more
+                items in this traceability matrix, but are never executed by
+                our CI. Because of that, they have not been considered while
+                building the matrix. The rationale for each test being ignored
+                is present in the Qualification Report.
+            </p>
+
+            <ul>
+            {% for file in ignored_tests %}
+                <li><a href="{{ urls.src }}/{{ file.display() }}">{{ file.display() }}</a></li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="popup-message hidden" id="annotation-copied-popup">
+            Annotation copied to the clipboard!
+        </div>
+
+        <script type="text/javascript">{% include "report.js" %}</script>
+    </body>
+</html>
+
+{%- macro row_with_tests(color, item) -%}
+    <tr id="{{ item.id }}" {% if item.hide_in_annotation_mode() %} class="hide-in-annotation-mode"{% endif %}>
+        <td><div class="circle {{ color }}"></div></td>
+        <td>{% call page_link(item.page) %}</td>
+        <td>{% call item_link(item) %}</td>
+        <td>{% call item_id(item) %}</td>
+        <td>
+            {% if item.tests.len() > 1 %}
+                <details><summary>show {{ item.tests.len() }} linked tests</summary>
+            {% endif %}
+            <ul>
+                {% for test in item.tests %}
+                    <li>
+                    {% match test %}
+                        {% when LinkTest::File with (file) %}
+                            {% call file_link(file) %}
+                        {% when LinkTest::InheritFromSection with { section_id, section_number} %}
+                            inherited from <a href="#{{ section_id }}">section {{ section_number }}</a>
+                        {% when LinkTest::Informational %}
+                            informational
+                        {% when LinkTest::NoParagraphsInSection %}
+                            no paragraphs within
+                    {% endmatch %}
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if item.tests.len() > 1 %}
+                </details>
+            {% endif %}
+        </td>
+    </tr>
+{%- endmacro -%}
+
+{%- macro page_link(page) -%}
+<a href="{{ page.link }}">{{ page.documentation }}: {{ page.name }}</a>
+{%- endmacro -%}
+
+{%- macro item_id(item) -%}
+<code {% match item.title -%}
+    {%- when Some with (title) -%}
+        {%- if item.kind.include_title_when_copying -%}
+        data-copy-title="{{ title }}"
+        {%- endif -%}
+    {%- when None -%}
+{%- endmatch %} class="copiable">{{ item.id }}</code>
+{%- endmacro -%}
+
+{%- macro item_link(item) -%}
+<a href="{{ item.link }}">
+    {{ item.name() }}
+</a>
+{%- endmacro -%}
+
+{%- macro file_link(file) -%}
+<a href="{{ urls.src }}/{{ file.test.display() }}">{{ file.test.display() }}</a>
+{% match file.source %}
+    {% when AnnotationSource::TestItself %}
+    {% when AnnotationSource::Makefile %}
+    (annotated in its <a href="{{ urls.src }}/{{ file.test.display() }}/Makefile">Makefile</a>)
+    {% when AnnotationSource::ParentDirectory with { bulk_file } %}
+    (annotated in its <a href="{{ urls.src }}/{{ bulk_file.display() }}">parent directory</a>)
+{% endmatch %}
+{%- endmacro -%}

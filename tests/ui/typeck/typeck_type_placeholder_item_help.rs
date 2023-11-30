@@ -31,3 +31,9 @@ pub fn main() {
     let _: f64 = test1();
     let _: Option<i32> = test1();
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items

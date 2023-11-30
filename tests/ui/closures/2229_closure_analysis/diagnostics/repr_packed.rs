@@ -30,3 +30,6 @@ fn test_missing_unsafe_warning_on_repr_packed() {
 fn main() {
     test_missing_unsafe_warning_on_repr_packed();
 }
+
+// ferrocene-annotations: fls_pgp7ezcc9lh8
+// Foreign Function Interface Attributes

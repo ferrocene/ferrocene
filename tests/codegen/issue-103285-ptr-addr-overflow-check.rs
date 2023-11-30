@@ -14,3 +14,5 @@ pub fn test(src: *const u8, dst: *const u8) -> usize {
     }
     return 0;
 }
+
+// ferrocene-annotations: um_rustc_C_debug_assertions

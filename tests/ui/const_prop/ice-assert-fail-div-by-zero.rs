@@ -12,3 +12,6 @@ pub struct Fixed64(i64);
 pub const fn div(f: Fixed64) {
     f.0 / 0; //~ WARN will panic at runtime
 }
+
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

@@ -49,3 +49,5 @@ fn some_function(a: isize, b: isize) {
 }
 
 fn some_other_function(a: isize, b: isize) -> bool { true }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

@@ -28,3 +28,6 @@ fn main() {
     f(Box::new(1234));
     g(Box::new(Struct) as Box<dyn Trait>);
 }
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

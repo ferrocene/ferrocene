@@ -218,3 +218,7 @@ fn bindings_after_at_slice_patterns_or_patterns_box_patterns_borrows_binding(
 }
 
 fn main() {}
+
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns

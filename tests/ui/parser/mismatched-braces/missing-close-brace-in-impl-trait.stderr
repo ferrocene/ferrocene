@@ -1,5 +1,5 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/missing-close-brace-in-impl-trait.rs:13:52
+  --> $DIR/missing-close-brace-in-impl-trait.rs:19:52
    |
 LL | impl T for () {
    |               - unclosed delimiter

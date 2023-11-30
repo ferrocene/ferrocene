@@ -18,3 +18,6 @@ fn main() {
     '	';
     //~^ ERROR: character constant must be escaped: `\t`
 }
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals

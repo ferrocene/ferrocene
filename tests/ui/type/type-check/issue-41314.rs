@@ -8,3 +8,6 @@ fn main() {
         //~^ ERROR tuple variant `X::Y` written as struct variant
     }
 }
+
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns

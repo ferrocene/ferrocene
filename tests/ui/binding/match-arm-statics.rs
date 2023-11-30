@@ -163,3 +163,6 @@ fn main() {
     issue_14576();
     issue_15393();
 }
+
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

@@ -9,3 +9,6 @@ fn main() {
         3 //~^ ERROR mismatched types
     })
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

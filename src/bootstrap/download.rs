@@ -179,8 +179,12 @@ impl Config {
         self.try_run(patchelf.arg(fname));
     }
 
-    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
+    pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
         self.verbose(&format!("download {url}"));
+        if self.dry_run() {
+            return;
+        }
+
         // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
         let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
         // While bootstrap itself only supports http and https downloads, downstream forks might
@@ -190,6 +194,7 @@ impl Config {
             Some("http") | Some("https") => {
                 self.download_http_with_retries(&tempfile, url, help_on_error)
             }
+            Some("s3") => crate::ferrocene::download_from_s3(self, url, &tempfile, help_on_error),
             Some(other) => panic!("unsupported protocol {other} in {url}"),
             None => panic!("no protocol in {url}"),
         }
@@ -211,6 +216,7 @@ impl Config {
             "--retry",
             "3",
             "-Sf",
+            "-L", // Follow redirects
             "-o",
         ]);
         curl.arg(tempfile);
@@ -284,18 +290,21 @@ impl Config {
     }
 
     /// Returns whether the SHA256 checksum of `path` matches `expected`.
-    fn verify(&self, path: &Path, expected: &str) -> bool {
+    pub fn verify(&self, path: &Path, expected: &str) -> bool {
         use sha2::Digest;
 
         self.verbose(&format!("verifying {}", path.display()));
+        if self.dry_run() {
+            return true;
+        }
         let mut hasher = sha2::Sha256::new();
         // FIXME: this is ok for rustfmt (4.1 MB large at time of writing), but it seems memory-intensive for rustc and larger components.
         // Consider using streaming IO instead?
-        let contents = if self.dry_run() { vec![] } else { t!(fs::read(path)) };
+        let contents = t!(fs::read(path));
         hasher.update(&contents);
         let found = hex::encode(hasher.finalize().as_slice());
         let verified = found == expected;
-        if !verified && !self.dry_run() {
+        if !verified {
             println!(
                 "invalid checksum: \n\
                 found:    {found}\n\

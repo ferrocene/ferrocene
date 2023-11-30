@@ -11,3 +11,6 @@ static TEST_BAD: () = {
     //~^ ERROR could not evaluate static initializer
     //~| NOTE inline assembly is not supported
 };
+
+// ferrocene-annotations: fls_qezwyridmjob
+// Macros asm and global_asm

@@ -6,3 +6,5 @@ all:
 		echo "found call instruction when one wasn't expected"; \
 		exit 1; \
 	fi
+
+# ferrocene-annotations: um_rustc_C_codegen_units

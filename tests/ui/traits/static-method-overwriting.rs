@@ -32,3 +32,6 @@ pub fn main() {
     let _f: base::Foo = base::HasNew::new();
     let _b: base::Bar = base::HasNew::new();
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

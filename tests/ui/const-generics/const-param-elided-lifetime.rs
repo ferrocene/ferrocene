@@ -28,3 +28,8 @@ fn bar<const N: &u8>() {}
 //[min]~^^ ERROR `&'static u8` is forbidden
 
 fn main() {}
+
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

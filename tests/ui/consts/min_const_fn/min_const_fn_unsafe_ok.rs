@@ -42,3 +42,9 @@ const unsafe fn call_unsafe_generic_cell_const_unsafe_fn_immediate()
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+//
+// ferrocene-annotations: fls_jep7p27kaqlp
+// Unsafety

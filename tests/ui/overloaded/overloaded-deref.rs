@@ -41,3 +41,6 @@ pub fn main() {
                 (*(*v).borrow())[1],
                 (*(*v).borrow())[2]), (3, 5, 3));
 }
+
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression

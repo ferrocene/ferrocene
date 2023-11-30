@@ -26,3 +26,5 @@ fn main() {
     };
     let _bla = fut; // Moving the future is required.
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

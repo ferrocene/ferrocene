@@ -57,3 +57,18 @@ fn main() {
 
 trait Fake { fn use_mut(&mut self) { } fn use_ref(&self) { }  }
 impl<T> Fake for T { }
+
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_hndm19t57wby
+// Block Expressions
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_qztk0bkju9u
+// Borrow Expression
+//
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing

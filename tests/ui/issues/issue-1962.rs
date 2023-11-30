@@ -8,3 +8,5 @@ fn main() {
         if i == 5 { break 'a; }
     }
 }
+
+// ferrocene-annotations: um_rustc_D

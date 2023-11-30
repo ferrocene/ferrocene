@@ -1,0 +1,9 @@
+error[E0433]: failed to resolve: could not find `some_crate` in the list of imported crates
+  --> $DIR/extern_missing.rs:7:7
+   |
+LL |     ::some_crate::hello();
+   |       ^^^^^^^^^^ could not find `some_crate` in the list of imported crates
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0433`.

@@ -26,3 +26,5 @@ pub fn f() {
 pub fn g() {
     f();
 }
+
+// ferrocene-annotations: um_rustc_C_debuginfo

@@ -27,3 +27,8 @@ fn main() {
     uwu::<{ u8::MAX }>();
     owo();
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

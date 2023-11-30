@@ -107,3 +107,6 @@ fn main() {}
 //~^ ERROR expected statement after outer attribute
 #[cfg(FALSE)] fn e() { { fn foo() { #[attr] } } }
 //~^ ERROR expected statement after outer attribute
+
+// ferrocene-annotations: fls_gvwd0kf72jt
+// Attributes

@@ -1,6 +1,7 @@
 // Test that `-C instrument-coverage` injects Coverage statements. The Coverage Counter statements
 // are later converted into LLVM instrprof.increment intrinsics, during codegen.
 
+// ignore-aarch64-unknown-ferrocenecoretest - instrument-coverage is not supported
 // unit-test: InstrumentCoverage
 // needs-profiler-support
 // ignore-windows

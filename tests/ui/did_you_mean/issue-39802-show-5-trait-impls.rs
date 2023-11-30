@@ -25,3 +25,6 @@ fn main() {
     Foo::<i32>::bar(&1u8); //~ ERROR is not satisfied
     Foo::<i32>::bar(&true); //~ ERROR is not satisfied
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

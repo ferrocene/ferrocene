@@ -16,3 +16,6 @@ pub fn foo(input: TokenStream) -> TokenStream {
 pub fn bar(input: TokenStream) -> TokenStream {
     input
 }
+
+// ferrocene-annotations: fls_q6qecp6e413
+// Attribute proc_macro_derive

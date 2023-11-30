@@ -38,3 +38,9 @@ fn main() {
     let bar = Bar { t: () };
     assert_eq!("Bar { t: () }", format!("{:?}", bar));
 }
+
+// ferrocene-annotations: fls_z7q8kbjwdc7g
+// Method Call Expressions
+//
+// ferrocene-annotations: fls_wqazkzle0ix9
+// Method Resolution

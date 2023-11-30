@@ -10,3 +10,6 @@ fn main() {
 
     println!("{}", foo)
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

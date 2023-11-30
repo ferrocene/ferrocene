@@ -1,6 +1,7 @@
 // compile-flags: -Cinstrument-coverage -Ccodegen-units=4 --crate-type dylib -Copt-level=0
 // build-pass
 // needs-profiler-support
+// needs-dynamic-linking
 
 // Regression test for #85461 where MSVC sometimes fails to link instrument-coverage binaries
 // with dead code and #[inline(always)].
@@ -25,3 +26,5 @@ pub mod baz {
         super::foo::called();
     }
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

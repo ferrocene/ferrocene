@@ -9,3 +9,18 @@ fn main() {
         [..] => {}
     }
 }
+
+// ferrocene-annotations: fls_ixjc5jaamx84
+// Constants
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_xinykul167l
+// Array Expressions
+//
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions

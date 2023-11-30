@@ -26,3 +26,6 @@ fn main() {
     let mut _q = Default::default();
     _q = foo::<_, 2>(_q);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

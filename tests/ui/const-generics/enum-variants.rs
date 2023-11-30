@@ -22,3 +22,6 @@ fn main() {
     let _ = Bar2::<1>();
     let _ = Bar3::<1>{};
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types

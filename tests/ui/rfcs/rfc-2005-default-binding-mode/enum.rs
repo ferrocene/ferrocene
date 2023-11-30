@@ -43,3 +43,18 @@ pub fn main() {
         break;
     }
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Types
+//
+// ferrocene-annotations: fls_nlzksiu8y3z9
+// If and If Let Expressions
+//
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions
+//
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_m6kd5i9dy8dx
+// While Let Loops

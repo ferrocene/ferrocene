@@ -14,3 +14,9 @@ impl B for AB {
 fn main() {
     AB::foo();  //~ ERROR E0034
 }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

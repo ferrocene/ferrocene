@@ -41,3 +41,15 @@ fn main() {
     }
     DROP_ORDER.with(|d| assert_eq!(&*d.borrow(), &expected_drop_order));
 }
+
+// ferrocene-annotations: fls_afafmafz4hf2
+// Drop Order
+//
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Wildcard Patterns
+//
+// ferrocene-annotations: fls_vlrto778v49m
+// Tuple Struct Patterns

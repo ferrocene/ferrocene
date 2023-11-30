@@ -7,3 +7,6 @@ fn main() {
     });
     println!("{}", x); //~ ERROR borrow of moved value
 }
+
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

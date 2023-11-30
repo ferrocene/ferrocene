@@ -27,3 +27,15 @@ fn tuple() {
     drop(tup.2);
     let (_x0, _, _, ..) = tup;
 }
+
+// ferrocene-annotations: fls_57ic33pwdvp3
+// Slice Pattern Matching
+//
+// ferrocene-annotations: fls_qte70mgzpras
+// Slice Patterns
+//
+// ferrocene-annotations: fls_yc4xm4hrfyw7
+// Underscore Pattern Matching
+//
+// ferrocene-annotations: fls_qfsfnql1t7m
+// Underscore Patterns

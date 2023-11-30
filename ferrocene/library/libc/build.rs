@@ -115,6 +115,36 @@ fn main() {
             println!("cargo:rustc-cfg=libc_const_extern_fn");
         }
     }
+
+    // Ferrocene: add support for building libc within the monorepo by setting the proper
+    // check-cfg values. We need to figure out how to upstream this.
+    const USED_CFGS: &[&str] = &[
+        "freebsd10",
+        "freebsd11",
+        "freebsd12",
+        "libc_align",
+        "libc_cfg_target_vendor",
+        "libc_const_extern_fn",
+        "libc_const_extern_fn_unstable",
+        "libc_const_size_of",
+        "libc_core_cvoid",
+        "libc_deny_warnings",
+        "libc_int128",
+        "libc_non_exhaustive",
+        "libc_packedN",
+        "libc_priv_mod_use",
+        "libc_ptr_addr_of",
+        "libc_thread_local",
+        "libc_underscore_const_names",
+        "libc_union",
+        "libc_long_array",
+    ];
+    for flag in USED_CFGS {
+        println!("cargo:rustc-check-cfg=values({})", flag);
+    }
+    println!("cargo:rustc-check-cfg=values(target_arch,\"loongarch64\")");
+    println!("cargo:rustc-check-cfg=values(target_env,\"illumos\",\"wasi\")");
+    println!("cargo:rustc-check-cfg=values(target_os,\"switch\")");
 }
 
 fn rustc_minor_nightly() -> (u32, bool) {

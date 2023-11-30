@@ -47,3 +47,10 @@ fn match_structs(ns: NormalStruct, ts: TupleStruct, us: UnitStruct) {
 
     let UnitStruct { .. } = us;
 }
+
+// ferrocene-annotations: fls_asj8rgccvkoe
+// Struct Pattern Matching
+// ferrocene-annotations: fls_nruvg0es3kx7
+// Record Struct Patterns
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

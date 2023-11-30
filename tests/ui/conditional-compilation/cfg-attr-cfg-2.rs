@@ -7,3 +7,8 @@
 
 #[cfg_attr(foo, cfg(bar))]
 fn main() { }
+
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: um_rustc_cfg

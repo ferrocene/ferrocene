@@ -8,3 +8,6 @@ impl NotObjectSafe for dyn NotObjectSafe { }
 //~^ ERROR E0038
 
 fn main() { }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Types

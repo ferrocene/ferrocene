@@ -14,3 +14,8 @@ fn main() {
     assert_eq!(discriminant_value(&MyWeirdOption::<u8>::None), 0);
     assert_eq!(discriminant_value(&MyWeirdOption::Some(0u8)), 1);
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr
+// ferrocene-annotations: fls_66m4rnbssgig
+// Constant Expressions

@@ -23,3 +23,6 @@ fn foo(x: usize) {
 fn main() {
     foo(3);
 }
+
+// ferrocene-annotations: fls_mkut7gut49gi
+// If Expressions

@@ -21,3 +21,9 @@ fn main() {
         //~^ ERROR type annotations needed
     };
 }
+
+// ferrocene-annotations: fls_pocsh1neugpc
+// Error Propagation Expression
+//
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions

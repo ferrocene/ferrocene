@@ -9,3 +9,6 @@
 macro_rules! foo {
     ($e:expr) => ($e)
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

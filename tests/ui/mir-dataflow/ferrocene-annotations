@@ -1,0 +1,2 @@
+// No ferrocene-annotations
+// All tests are using unstable features: core_intrinsics, rustc_attrs

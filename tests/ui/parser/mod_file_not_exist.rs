@@ -7,3 +7,6 @@ fn main() {
     assert_eq!(mod_file_aux::bar(), 10);
     //~^ ERROR failed to resolve: use of undeclared crate or module `mod_file_aux`
 }
+
+// ferrocene-annotations: fls_e9hwvqsib5d5
+// Modules

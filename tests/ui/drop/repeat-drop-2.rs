@@ -13,3 +13,9 @@ fn must_be_init() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_a14slch83hzn
+// Borrowing
+//
+// ferrocene-annotations: fls_77scxuomlbgs
+// Passing Conventions

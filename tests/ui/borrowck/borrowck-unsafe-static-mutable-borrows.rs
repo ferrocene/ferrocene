@@ -18,3 +18,7 @@ fn main() {
         *x += 1;
     }
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

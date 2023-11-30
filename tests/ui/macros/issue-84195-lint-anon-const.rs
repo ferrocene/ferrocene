@@ -12,3 +12,6 @@ macro_rules! len {
 fn main() {
     let val: [u8; len!()] = [];
 }
+
+// ferrocene-annotations: fls_xa7lp0zg1ol2
+// Declarative Macros

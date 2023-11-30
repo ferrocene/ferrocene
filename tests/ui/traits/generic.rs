@@ -43,3 +43,12 @@ pub fn main() {
                ["x".to_string(), "y".to_string()]);
     assert_eq!(bar::<(), Vec<()>>(vec![()]), ["()".to_string()]);
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_e1pgdlv81vul
+// Implementation Conformance
+//
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters

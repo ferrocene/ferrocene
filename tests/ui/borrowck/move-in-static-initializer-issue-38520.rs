@@ -14,3 +14,7 @@ const Z: usize = get(*&X); //~ ERROR [E0507]
 
 fn main() {
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

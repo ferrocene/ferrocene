@@ -6,3 +6,5 @@
 
 fn main() {}
 //~^ ERROR external crate `bar` unused in
+
+// ferrocene-annotations: um_rustc_D

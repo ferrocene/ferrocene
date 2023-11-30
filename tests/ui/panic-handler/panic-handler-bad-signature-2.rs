@@ -12,3 +12,8 @@ fn panic(
 {
     loop {}
 }
+
+// ferrocene-annotations: fls_fh27ljezn3qz
+// Attribute no_main
+//
+// ferrocene-annotations: um_rustc_C_panic

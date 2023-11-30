@@ -9,3 +9,6 @@ pub fn main() {
     macro_one!();
     macro_two!();
 }
+
+// ferrocene-annotations: fls_qxjy0f758x5s
+// Attribute macro_use

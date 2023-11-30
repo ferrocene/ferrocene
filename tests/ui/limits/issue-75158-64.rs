@@ -14,3 +14,9 @@ pub fn f() -> usize {
 fn main() {
     let x = f();
 }
+
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Type
+//
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

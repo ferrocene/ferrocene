@@ -29,3 +29,6 @@ pub fn other() {
     for _ in false {}
     //~^ ERROR `bool` is not an iterator
 }
+
+// ferrocene-annotations: fls_onfyolkcbeh3
+// For Loops

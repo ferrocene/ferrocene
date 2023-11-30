@@ -25,3 +25,6 @@ fn main() {
         fn f6() {} //~ ERROR incorrect function inside `extern` block
     }
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

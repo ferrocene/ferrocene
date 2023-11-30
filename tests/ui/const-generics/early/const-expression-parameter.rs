@@ -17,3 +17,6 @@ fn foo_c() {
 fn main() {
     i32_identity::<5>(); // ok
 }
+
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

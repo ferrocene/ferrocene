@@ -12,3 +12,8 @@ fn main() {
     let _ = Alias::<u8>::None; // OK
     let _ = Alias::None::<u8>; //~ ERROR type arguments are not allowed on this type
 }
+
+// ferrocene-annotations: fls_6l60b5hwnjbm
+// Path Expressions
+// ferrocene-annotations: fls_utuu8mdbuyxm
+// Generic Arguments

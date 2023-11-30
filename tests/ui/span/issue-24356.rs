@@ -25,3 +25,9 @@ fn main() {
         *thing
     };
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+//
+// ferrocene-annotations: fls_5cm4gkt55hjh
+// Dereference Expression

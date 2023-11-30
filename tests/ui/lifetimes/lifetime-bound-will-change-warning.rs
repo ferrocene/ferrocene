@@ -54,3 +54,6 @@ fn test3cc<'a>(x: &'a Box<dyn Fn() + 'static>) {
 
 fn main() {
 }
+
+// ferrocene-annotations: fls_qa98qdi42orq
+// Trait Object Type

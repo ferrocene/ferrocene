@@ -1,0 +1,770 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# NOTE: if you add new targets here make sure to also change
+# `ferrocene/packages.toml` to include it in new releases.
+
+---
+version: 2.1
+
+# Parameter values are determined by `calculate-parameters.py` dynamically
+# before the build starts. The script must be able to calculate the value of
+# ALL parameters, otherwise it will error out.
+#
+# Parameters with the following prefixes are supported:
+#
+# * `docker-image-tag--`: calculates the appropriate tag for the named image.
+# * `docker-repository-url--`: calculates the URL of an ECR repository
+#
+parameters:
+  docker-image-tag--ubuntu-18:
+    type: string
+    default: ""
+  docker-image-tag--ubuntu-22:
+    type: string
+    default: ""
+  docker-image-rebuild--ci-docker-images--ubuntu-18:
+    type: boolean
+    default: false
+  docker-image-rebuild--ci-docker-images--ubuntu-22:
+    type: boolean
+    default: false
+  docker-repository-url--ci-docker-images:
+    type: string
+    default: ""
+  llvm-rebuild--x86_64-unknown-linux-gnu:
+    type: boolean
+    default: false
+
+orbs:
+  aws-cli: circleci/aws-cli@4.0
+
+jobs:
+  # Container dedicated to running quick checks for each commit pushed in open
+  # PRs and personal branches. The job must balance providing quick feedback
+  # and providing useful feedback, focusing on catching the most common errors
+  # as soon as possible.
+  #
+  # It's fine if this job only runs a small subset of the test suite: the full
+  # test suite for all the supported targets will be run when bors-rs tries to
+  # merge the PR anyway.
+  commit-checks:
+    executor: docker-ubuntu-22
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-13
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        ./x.py test tidy
+        ./x.py check library compiler/rustc
+        ./x.py run ferrocene/tools/traceability-matrix
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Perform licensing checks
+          command: reuse lint
+      - ferrocene-ci
+
+  # Container dedicated to running ad-hoc tests that don't depend on an
+  # individual target. If you have a test you don't know where to run it, this
+  # is the place for it.
+  misc-checks:
+    executor: docker-ubuntu-18
+    resource_class: medium # 2-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Perform licensing checks
+          command: reuse lint
+      - run:
+          name: Run x.py's own tests
+          command: python3 src/bootstrap/bootstrap_test.py
+      - ferrocene-ci
+
+  # x86_64-unknown-linux-gnu jobs
+
+  x86_64-linux-build:
+    executor: docker-ubuntu-18
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps: [ferrocene-job-build]
+
+  x86_64-linux-docs:
+    executor: docker-ubuntu-18
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      RUST_CONFIGURE_ARGS: |
+        --set
+        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      SCRIPT: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        # Run dist before test to make sure the tarballs we test are uploaded
+        # to CI beforehand, for manual inspection in case of failures.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+
+  x86_64-linux-dist:
+    executor: docker-ubuntu-18
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+
+  x86_64-linux-dist-targets:
+    executor: docker-ubuntu-18
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf
+      SCRIPT: |
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+
+  x86_64-linux-dist-src:
+    executor: docker-ubuntu-18
+    resource_class: medium # 2-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+          # We need the whole LLVM clone to be able to include the full source
+          # code into the tarball we ship to customers.
+          llvm-subset: false
+
+  x86_64-linux-generic-test-container:
+    executor: docker-ubuntu-18
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>)
+    steps:
+      - ferrocene-job-test-container:
+          restore-from-job: x86_64-linux-build
+
+  aarch64-linux-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: ""
+      FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>)
+
+    steps:
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+
+  x86_64-linux-traceability-matrix:
+    executor: docker-ubuntu-18
+    resource_class: medium # 2-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      RUST_CONFIGURE_ARGS: |
+        --set
+        ferrocene.test-outcomes-dir=/tmp/test-outcomes
+      SCRIPT: |
+        ferrocene/ci/scripts/fetch-test-outcomes.sh
+        ./x.py run ferrocene/tools/traceability-matrix
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - ferrocene-ci
+      - store_artifacts:
+          path: build/x86_64-unknown-linux-gnu/ferrocene/traceability-matrix.html
+          destination: reports
+
+  x86_64-linux-test-library-std:
+    executor: linux-vm
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      # Standard library tests need IPv6, which is not available in container
+      # jobs. Because of that we need to run *just* standard library tests in a
+      # virtual machine.
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std)
+    steps:
+      - aws-oidc-auth
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
+          restore-from-job: x86_64-linux-build
+
+  x86_64-linux-llvm:
+    executor: docker-ubuntu-18
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--x86_64-unknown-linux-gnu >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  x86_64-linux-self-test:
+    executor: docker-ubuntu-18
+    resource_class: small # 1-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
+  finish-build:
+    executor: docker-ubuntu-18
+    resource_class: small # 1-core
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Generate build metadata
+          command: ferrocene/ci/scripts/generate-build-metadata.sh
+      - run:
+          name: Upload metadata files to S3
+          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+
+  # Simple job used to run "something" when no other jobs are supposed to be
+  # run. See the `skip` workflow for more information.
+  skip:
+    executor: docker-ubuntu-18
+    resource_class: small # 1-core
+    steps:
+      - run:
+          name: This is a workaround for CircleCI always wanting at least a job per commit.
+          command: "true"
+      - run:
+          name: This job does nothing!
+          command: "true"
+
+  # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
+  # If the image exists in the remote storage and is up to date, the job will
+  # early exit without doing any work.
+  build-docker:
+    description: Job that builds and uploads a Docker image, if needed.
+    docker:
+      - image: cimg/base:2022.09-22.04
+    resource_class: small # 1-core
+    parameters:
+      image:
+        description: The image that needs to be built
+        type: string
+      tag:
+        description: The tag of the image that needs to be build
+        type: string
+      rebuild:
+        description: Whether the image should be rebuilt or not
+        type: boolean
+    steps:
+      - when:
+          condition: << parameters.rebuild >>
+          steps:
+            - aws-cli/install
+            - aws-oidc-auth
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - setup_remote_docker:
+                version: 20.10.17
+            - run:
+                name: Build and upload the Docker image, if needed
+                command: ferrocene/ci/scripts/build-docker-image.sh
+                environment:
+                  IMAGE_NAME: << parameters.image >>
+                  IMAGE_TAG: << parameters.tag >>
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  # Job to record the head of the current branch in S3, so that other parts of
+  # the infrastructure can retrieve it without read access to the repo.
+  record-branch-commit:
+    description: Record the SHA1 of the head of the branch
+    docker:
+      - image: cimg/base:2022.09-22.04
+    resource_class: small # 1-core
+    steps:
+      - aws-cli/install
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Record the SHA1 of the head of the branch
+          command: ferrocene/ci/scripts/record-branch-commit.sh
+
+workflows:
+  version: 2
+
+  # Quick workflow used to check that PRs and personal branches are not
+  # completely broken. The full CI will be run by bors later anyway.
+  commit:
+    when:
+      not:
+        or:
+          # All commits landing on the `main` branch were checked by bors already:
+          - equal: [<< pipeline.git.branch >>, "main"]
+          - matches:
+              pattern: "^release\\/.*"
+              value: << pipeline.git.branch >>
+          # These branches run the `full` workflow already:
+          - equal: [<< pipeline.git.branch >>, "staging"]
+          - equal: [<< pipeline.git.branch >>, "trying"]
+          # These branches are a temporary scratchpad for bors to work on, and
+          # should not run any CI whatsoever:
+          - equal: [<< pipeline.git.branch >>, "staging.tmp"]
+          - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
+          - equal: [<< pipeline.git.branch >>, "trying.tmp"]
+    jobs:
+      - build-docker:
+          name: build-docker--ubuntu-22
+          image: ubuntu-22
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-22 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-22 >>
+
+      - commit-checks:
+          requires:
+            - build-docker--ubuntu-22
+
+  # Main workflow used by bors to ensure every PR is fully green.
+  full:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "staging"]
+        - equal: [<< pipeline.git.branch >>, "trying"]
+    jobs:
+      - build-docker:
+          name: build-docker--ubuntu-18
+          image: ubuntu-18
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-18 >>
+
+      - misc-checks:
+          requires:
+            - build-docker--ubuntu-18
+
+      - x86_64-linux-llvm:
+          requires:
+            - build-docker--ubuntu-18
+      - x86_64-linux-build:
+          requires:
+            - x86_64-linux-llvm
+      - x86_64-linux-docs:
+          requires: &test-outcomes-dependencies
+            # Need to depend on all of the test builders to include test
+            # outcomes in the qualification documents.
+            - misc-checks
+            - x86_64-linux-test
+            - x86_64-linux-test-library
+            - x86_64-linux-test-library-std
+            - x86_64-linux-compiletest
+            - aarch64-linux-test-library
+            - aarch64-linux-compiletest
+      - x86_64-linux-traceability-matrix:
+          requires: *test-outcomes-dependencies
+      - x86_64-linux-dist:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-dist-targets:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-dist-src:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-generic-test-container:
+          name: x86_64-linux-test
+          job: test
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-generic-test-container:
+          name: x86_64-linux-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-generic-test-container:
+          name: x86_64-linux-compiletest
+          job: test:compiletest
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-test-library-std:
+          requires:
+            - x86_64-linux-build
+
+      - aarch64-linux-generic-test-vm:
+          name: aarch64-linux-compiletest
+          job: test:compiletest
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - aarch64-linux-generic-test-vm:
+          name: aarch64-linux-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-linux-self-test:
+          requires:
+            - x86_64-linux-dist
+            - x86_64-linux-dist-targets
+
+      - finish-build:
+          requires:
+            - x86_64-linux-docs
+            - x86_64-linux-dist-src
+            - x86_64-linux-traceability-matrix
+            - x86_64-linux-self-test
+
+
+  # Record the branch commit for all the jobs bors merges commit into.
+  record-branch-commit:
+    when:
+      or:
+        - equal: [<< pipeline.git.branch >>, "main"]
+        - matches:
+            pattern: "^release\\/.*"
+            value: << pipeline.git.branch >>
+    jobs:
+      - record-branch-commit
+
+  # CircleCI doesn't like a build when no jobs are actually executed, treating
+  # it as a build failure. Due to how our workflows are setup this will happen
+  # for the branches bors lands code in, as those branches are not meant to run
+  # any test. To work around the issue this workflow starts a simple job doing
+  # nothing when a build for those branches is requested.
+  skip:
+    when:
+      or:
+        # These branches are excluded from all the other workflows:
+        - equal: [<< pipeline.git.branch >>, "staging.tmp"]
+        - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
+        - equal: [<< pipeline.git.branch >>, "trying.tmp"]
+    jobs:
+      - skip
+
+commands:
+  ferrocene-job-build:
+    description: Collection of steps for build jobs
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - ferrocene-ci
+      # Persist the build artifacts so following jobs don't have to start from
+      # scratch. The build directory is shrinked beforehand to avoid persisting
+      # too much data (slowing down uploads and downloads).
+      - run:
+          name: Shrink the build directory before persisting it
+          command: ferrocene/ci/scripts/shrink-build-directory.sh
+      - run:
+          name: Persist build output between jobs
+          command: ferrocene/ci/scripts/persist-between-jobs.sh upload build/
+
+  ferrocene-job-dist:
+    description: Collection of steps for dist jobs
+    parameters:
+      restore-from-job:
+        type: string
+      llvm-subset:
+        type: boolean
+        default: true
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: << parameters.llvm-subset >>
+      - run:
+          name: Restore files from the << parameters.restore-from-job >> job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+
+      - ferrocene-ci
+
+  ferrocene-job-test-container:
+    description: Collection of steps for test jobs in containers
+    parameters:
+      restore-from-job:
+        type: string
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the << parameters.restore-from-job >> job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - ferrocene-ci
+
+  ferrocene-job-test-vm:
+    description: Collection of steps for test jobs in VMs
+    parameters:
+      docker-image-tag:
+        type: string
+      restore-from-job:
+        type: string
+      emulator-script:
+        type: string
+        default: ""
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the << parameters.restore-from-job >> job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - run:
+          name: Enable IPv6 for Docker
+          command: |
+            sudo mkdir -p /etc/docker
+            cat \<<EOF | sudo tee /etc/docker/daemon.json
+            {
+              "ipv6": true,
+              "fixed-cidr-v6": "2001:db8:1::/64"
+            }
+            EOF
+            sudo service docker restart
+
+      - run:
+          name: Pull the Docker image used for CI
+          command: |
+            aws ecr get-login-password --region us-east-1 \
+              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
+
+      - when:
+          condition: << parameters.emulator-script >>
+          steps:
+            - run:
+                name: Create emulator directory
+                command: mkdir /tmp/emulator
+
+            - run:
+                name: Prepare emulator
+                command: |
+                  docker run \
+                    --rm \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    -e SCRIPT="<< parameters.emulator-script >> prepare" \
+                    -e REMOTE_TEST_SERVER_STAGE=2 \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
+                    --volume /tmp/emulator:/tmp/emulator \
+                    --user $(id -u):$(id -g) \
+                    --network host \
+                    --privileged \
+                    --interactive \
+                    --tty \
+                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+                    ferrocene/ci/run.sh
+                    # Actual command set in -e SCRIPT=... above!
+
+            - run:
+                name: Execute emulator in the background
+                background: true
+                command: |
+                  docker run \
+                    --rm \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    --workdir /home/ci/project \
+                    --volume $(pwd):/home/ci/project \
+                    --volume /tmp/emulator:/tmp/emulator \
+                    --network host \
+                    --privileged \
+                    --interactive \
+                    --tty \
+                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+                    << parameters.emulator-script >>
+
+      - ferrocene-ci:
+          wrapper: |
+            docker run \
+              --rm \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/emulator:/tmp/emulator \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+
+  ferrocene-git-shallow-clone:
+    description: Perform a shallow `git clone`
+    parameters:
+      depth:
+        type: integer
+    steps:
+      - run:
+          name: Clone the source code
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com &>> ~/.ssh/known_hosts
+
+            git init .
+            git remote add origin "${CIRCLE_REPOSITORY_URL}"
+            git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
+            git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
+
+  ferrocene-checkout:
+    description: Checkout the Ferrocene source code
+    parameters:
+      llvm-subset:
+        type: boolean
+        default: false
+    steps:
+      - ferrocene-git-shallow-clone:
+          depth: 2
+      - when:
+          condition: << parameters.llvm-subset >>
+          steps:
+            - run:
+                name: Clone a subset of the llvm-project monorepo
+                command: ferrocene/ci/scripts/clone-llvm-subset.sh
+      - run:
+          name: Checkout the submodules
+          command: ferrocene/ci/scripts/checkout-submodules.sh
+      - run:
+          name: Unshallow the clone on the beta channel
+          command: ferrocene/ci/scripts/unshallow-on-beta.sh
+      - run:
+          name: Change the files modification time to a consistent date
+          command: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
+      - run:
+          name: Show the current environment
+          command: ferrocene/ci/scripts/show-environment.sh
+
+  ferrocene-ci:
+    description: Common CI steps for Ferrocene
+    parameters:
+      wrapper:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: Execute the build
+          command: << parameters.wrapper >> ferrocene/ci/run.sh
+
+      - run:
+          name: Generate resource usage report
+          when: always
+          command: |
+            mkdir -p /tmp/metrics
+            ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
+            cp build/metrics.json /tmp/metrics/raw.json
+
+      - run:
+          name: Upload artifacts to S3
+          command: ferrocene/ci/scripts/upload-dist-artifacts.sh
+          # We want to upload artifacts even when the build is failing, to be
+          # able to retrieve and investigate them. They won't be making into a
+          # release anyway, sine the "finish-build" job will not be executed in
+          # case of a failure.
+          when: always
+
+      - store_artifacts:
+          path: /tmp/metrics
+          destination: metrics
+
+  aws-oidc-auth:
+    description: Authenticate with AWS using OIDC
+    steps:
+      - run:
+          name: Prepare environment for AWS authentication
+          command: |
+            # Load the JWT token into a file
+            touch /tmp/awsjwt
+            chmod 0600 /tmp/awsjwt
+            echo "${CIRCLE_OIDC_TOKEN_V2}" > /tmp/awsjwt
+
+            set_env() {
+              echo "export $1=\"$2\"" >> "${BASH_ENV}"
+            }
+
+            # Set environment variables to authenticate with OIDC
+            set_env AWS_WEB_IDENTITY_TOKEN_FILE /tmp/awsjwt
+            set_env AWS_ROLE_SESSION_NAME circleci
+            set_env AWS_DEFAULT_REGION us-east-1
+
+            # Avoid reaching out to the EC2 metadata server, which just
+            # timeouts outside of EC2.
+            set_env AWS_EC2_METADATA_DISABLED true
+
+            # Some versions of AWS CLI fail if `less` is not installed, so
+            # disable pager support to suppress the error.
+            set_env AWS_PAGER ""
+
+      - run:
+          name: Authenticate with AWS
+          command: aws sts get-caller-identity
+
+executors:
+  docker-ubuntu-18:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-18 >>
+        aws_auth:
+          oidc_role_arn: $AWS_ROLE_ARN
+  docker-ubuntu-22:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-22 >>
+        aws_auth:
+          oidc_role_arn: $AWS_ROLE_ARN
+  linux-vm:
+    machine:
+      image: ubuntu-2204:2022.07.1

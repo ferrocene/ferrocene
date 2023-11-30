@@ -724,6 +724,7 @@ fn test_drop_clear() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_drop_panic() {
     static mut DROPS: i32 = 0;
 
@@ -1578,6 +1579,7 @@ fn test_try_rfold_moves_iter() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn truncate_leak() {
     static mut DROPS: i32 = 0;
 
@@ -1611,6 +1613,7 @@ fn truncate_leak() {
 }
 
 #[test]
+#[cfg_attr(not(panic = "unwind"), ignore = "test requires unwinding support")]
 fn test_drain_leak() {
     static mut DROPS: i32 = 0;
 

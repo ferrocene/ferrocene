@@ -87,3 +87,15 @@ pub fn main() {
     test_ptr();
     test_class();
 }
+
+// ferrocene-annotations: fls_nsvzzbldhq53
+// Comparison Expressions
+//
+// ferrocene-annotations: fls_abp6tjbz8tpn
+// Bit Expressions
+//
+// ferrocene-annotations: fls_ppd1xwve3tr7
+// Raw Pointer Type
+//
+// ferrocene-annotations: fls_izdv9i4spokw
+// Operator Expressions

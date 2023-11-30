@@ -18,3 +18,12 @@ impl<'a,'b> Tr for Foo<'a,'b> {
 }
 
 fn main(){}
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification
+//
+// ferrocene-annotations: fls_ikfvbeewame7
+// Subtyping and Variance
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

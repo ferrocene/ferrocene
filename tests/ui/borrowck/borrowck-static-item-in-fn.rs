@@ -7,3 +7,7 @@
 pub fn main() {
     static A: &'static char = &'A';
 }
+
+//
+// ferrocene-annotations: fls_xdvdl2ssnhlo
+// Statics

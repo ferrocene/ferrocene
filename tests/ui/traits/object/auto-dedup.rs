@@ -44,3 +44,8 @@ fn main() {
     let dyn_trait_send = Box::new(Struct) as Box<dyn Trait + Send>;
     dyn_trait_send.do_nothing();
 }
+
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations
+// ferrocene-annotations: fls_1qhsun1vyarz
+// Type Cast Expressions

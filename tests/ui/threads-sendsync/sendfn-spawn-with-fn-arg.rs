@@ -19,3 +19,6 @@ fn test05() {
         test05_start(fn_to_send);
     }).join().ok().unwrap();
 }
+
+// ferrocene-annotations: fls_xd2oxlebhs14
+// Closure Types

@@ -119,3 +119,20 @@ fn main() {
     let _ = a(1);
     let _ = c(1, 2);
 }
+
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions
+// ferrocene-annotations: fls_l21tjqjkkaa0
+// Associated Items
+// ferrocene-annotations: fls_yztwtek0y34v
+// External Functions
+// ferrocene-annotations: fls_xztr1kebz8bo
+// Function Pointer Types
+// ferrocene-annotations: fls_tjyexqrx0fx5
+// Closure Expressions
+// ferrocene-annotations: fls_fymvsy6ig99a
+// Attribute cfg
+// ferrocene-annotations: fls_dd9xh3wdjudo
+// Attribute cfg_attr
+//
+// ferrocene-annotations: um_rustc_cfg

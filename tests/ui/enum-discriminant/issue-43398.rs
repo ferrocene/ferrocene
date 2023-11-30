@@ -12,3 +12,6 @@ fn main() {
         std::intrinsics::discriminant_value(&Big::A),
         std::mem::discriminant(&Big::B));
 }
+
+// ferrocene-annotations: fls_aibb2quva4mn
+// Attribute repr

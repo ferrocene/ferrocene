@@ -12,3 +12,6 @@ impl Alias {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes

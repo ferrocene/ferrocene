@@ -10,3 +10,9 @@ pub fn main() {
     assert_eq!(f(42), Foo(42));
     assert_eq!(g(4, 7), Bar(4, 7));
 }
+
+// ferrocene-annotations: fls_8tsynkj2cufj
+// Struct Expressions
+//
+// ferrocene-annotations: fls_qcb1n9c0e5hz
+// Functions

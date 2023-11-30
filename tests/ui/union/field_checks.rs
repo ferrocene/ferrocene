@@ -63,3 +63,12 @@ union U8<T> { // OK
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_142vncdktbin
+// Reference Types
+//
+// ferrocene-annotations: fls_yqcygq3y6m5j
+// Lifetimes
+//
+// ferrocene-annotations: fls_uj0kpjwyld60
+// Array Types

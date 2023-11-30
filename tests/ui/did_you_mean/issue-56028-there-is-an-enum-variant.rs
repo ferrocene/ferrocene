@@ -13,3 +13,6 @@ fn setup() -> Set { Set }
 fn main() {
     setup();
 }
+
+// ferrocene-annotations: fls_szibmtfv117b
+// Enum Type

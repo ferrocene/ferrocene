@@ -6,3 +6,6 @@ impl<'s> Foo<&'s u8> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_ydmnb7qnmzzq
+// Shadowing

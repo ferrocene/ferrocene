@@ -11,3 +11,12 @@ fn foo() -> impl Future<Item=(), Error=Box<dyn Error>> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Type
+//
+// ferrocene-annotations: fls_l9ebxrlxyawd
+// Lifetime Elision
+//
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

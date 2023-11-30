@@ -17,3 +17,6 @@ fn cache_server<K:Send+'static,V:Send+'static>(mut tx: Sender<Sender<Command<K, 
     tx.send(tx1);
 }
 pub fn main() { }
+
+// ferrocene-annotations: fls_lv7w7aalpwm5
+// Type Inference

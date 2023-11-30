@@ -39,3 +39,9 @@ fn main() {
     let mut m = MyType;
     (&mut m).foo()
 }
+
+// ferrocene-annotations: fls_vhpwge5123cm
+// Generic Parameters
+//
+// ferrocene-annotations: fls_fk2m2irwpeof
+// Implementations

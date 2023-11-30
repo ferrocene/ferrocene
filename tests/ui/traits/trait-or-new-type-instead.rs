@@ -4,3 +4,6 @@ impl<T> Option<T> {
 }
 
 fn main() { }
+
+// ferrocene-annotations: fls_46ork6fz5o2e
+// Implementation Coherence

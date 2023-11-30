@@ -8,3 +8,7 @@ RUSTC_FLAGS_PRE = -C linker-flavor=ld -Z pre-link-arg=a -Z pre-link-args="b c" -
 all:
 	$(RUSTC) $(RUSTC_FLAGS) empty.rs 2>&1 | $(CGREP) '"a" "b" "c" "d" "e" "f"'
 	$(RUSTC) $(RUSTC_FLAGS_PRE) empty.rs 2>&1 | $(CGREP) '"a" "b" "c" "d" "e" "f"'
+
+# ferrocene-annotations: um_rustc_C_link_args
+# ferrocene-annotations: um_rustc_C_link_arg
+# ferrocene-annotations: um_rustc_C_linker_flavor

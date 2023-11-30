@@ -30,3 +30,5 @@ pub fn auto_vectorize_loop(a: [f32; 4], b: [f32; 4]) -> [f32; 4] {
     }
     c
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

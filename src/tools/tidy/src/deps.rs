@@ -18,6 +18,8 @@ const LICENSES: &[&str] = &[
     "ISC",
     "Unlicense/MIT",
     "Unlicense OR MIT",
+    "Apache-2.0 OR ISC OR MIT",
+    "Apache-2.0/ISC/MIT",
     "0BSD OR MIT OR Apache-2.0",                // adler license
     "Zlib OR Apache-2.0 OR MIT",                // tinyvec
     "MIT OR Apache-2.0 OR Zlib",                // tinyvec_macros
@@ -31,6 +33,25 @@ const LICENSES: &[&str] = &[
 /// tooling. It is _crucial_ that no exception crates be dependencies
 /// of the Rust runtime (std/test).
 const EXCEPTIONS: &[(&str, &str)] = &[
+    ("aws-config", "Apache-2.0"),                            // criticaltrust
+    ("aws-credential-types", "Apache-2.0"),                  // criticaltrust
+    ("aws-endpoint", "Apache-2.0"),                          // criticaltrust
+    ("aws-http", "Apache-2.0"),                              // criticaltrust
+    ("aws-sdk-kms", "Apache-2.0"),                           // criticaltrust
+    ("aws-sdk-sso", "Apache-2.0"),                           // criticaltrust
+    ("aws-sdk-sts", "Apache-2.0"),                           // criticaltrust
+    ("aws-sig-auth", "Apache-2.0"),                          // criticaltrust
+    ("aws-sigv4", "Apache-2.0"),                             // criticaltrust
+    ("aws-smithy-async", "Apache-2.0"),                      // criticaltrust
+    ("aws-smithy-client", "Apache-2.0"),                     // criticaltrust
+    ("aws-smithy-http", "Apache-2.0"),                       // criticaltrust
+    ("aws-smithy-http-tower", "Apache-2.0"),                 // criticaltrust
+    ("aws-smithy-json", "Apache-2.0"),                       // criticaltrust
+    ("aws-smithy-query", "Apache-2.0"),                      // criticaltrust
+    ("aws-smithy-types", "Apache-2.0"),                      // criticaltrust
+    ("aws-smithy-xml", "Apache-2.0"),                        // criticaltrust
+    ("aws-types", "Apache-2.0"),                             // criticaltrust
+    ("insta", "Apache-2.0"),                                 // generate-tarball
     ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("openssl", "Apache-2.0"),                               // cargo, mdbook
@@ -106,6 +127,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "chalk-solve",
     "convert_case", // dependency of derive_more
     "compiler_builtins",
+    "const-oid",
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",
@@ -267,6 +289,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "yansi-term",
     "yoke",
     "yoke-derive",
+    "zeroize",
     "zerofrom",
     "zerofrom-derive",
     "zerovec",
@@ -439,6 +462,9 @@ fn check_license_exceptions(
         let license = match &pkg.license {
             Some(license) => license,
             None => {
+                if pkg.name == "ring" || pkg.name == "webpki" {
+                    continue;
+                }
                 tidy_error!(bad, "dependency `{}` does not define a license expression", pkg.id);
                 continue;
             }

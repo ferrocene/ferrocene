@@ -185,3 +185,14 @@ fn main() {
     #[warn(non_exhaustive_omitted_patterns)]
     let UnstableStruct { stable, stable2, unstable, .. } = UnstableStruct::default();
 }
+
+// ferrocene-annotations: fls_e5td0fa92fay
+// Match Expressions
+// ferrocene-annotations: fls_jm6l7b90h6wa
+// Pattern Matching
+// ferrocene-annotations: fls_xgqh0ju6bmbn
+// Patterns
+// ferrocene-annotations: fls_p0t1ch115tra
+// If Let Expressions
+// ferrocene-annotations: fls_yivm43r5wnp1
+// Let Statements

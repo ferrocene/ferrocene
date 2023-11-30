@@ -1,5 +1,5 @@
 {# SPDX-License-Identifier: MIT OR Apache-2.0 #}
-{# SPDX-FileCopyrightText: Ferrous Systems and AdaCore #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
 
 {% extends "basic/layout.html" %}
 {% from "fontawesome.html" import icon_search %}
@@ -10,6 +10,9 @@
 {% endblock %}
 
 {% block content %}
+{% if theme_include_in_header %}
+    {% include theme_include_in_header %}
+{% endif %}
 <div class="wrapper">
     <div class="sidebar">
         <header>
@@ -34,20 +37,23 @@
         <div class="page">
             {% block body %}{% endblock %}
         </div>
+        <footer>
+            <p>
+                Copyright &copy; {{ copyright }}.
+                {% if theme_license %}
+                    Contents released under the {{ theme_license }} license.
+                {% endif %}
+            </p>
+            {% if document_id %}
+                <p>Document ID: <code>{{ document_id }}</code></p>
+            {% endif %}
+            {% if theme_commit %}
+                <p>Built from commit: <code>{{ theme_commit }}</code></p>
+            {% endif %}
+            <p>Ferrocene is a registered trademark of Critical Section GmbH.</p>
+        </footer>
     </div>
 </div>
-<footer>
-    <p>
-        Copyright &copy; {{ copyright }}.
-        {% if theme_license %}
-            Contents released under the {{ theme_license }} license.
-        {% endif %}
-    </p>
-    {% if theme_commit %}
-        <p>Built from commit: <code>{{ theme_commit }}</code></p>
-    {% endif %}
-    <p>Ferrocene is a registered trademark of Critical Section GmbH.</p>
-</footer>
 {% endblock %}
 
 {# The blocks below, defined in the basic layout, are effectively removed from

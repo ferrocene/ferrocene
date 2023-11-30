@@ -4,3 +4,6 @@ static c: char =
 ;
 
 fn main() {}
+
+// ferrocene-annotations: fls_ypa86oqxhn9u
+// Character Literals

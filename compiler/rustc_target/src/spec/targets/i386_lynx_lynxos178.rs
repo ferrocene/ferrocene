@@ -5,7 +5,7 @@ pub fn target() -> Target {
     base.cpu = "i386".into();
     base.max_atomic_width = Some(32);
     base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32"]);
-    base.stack_probes = StackProbeType::X86;
+    base.stack_probes = StackProbeType::Inline;
 
     Target {
         llvm_target: "i686-unknown-linux-gnu".into(),

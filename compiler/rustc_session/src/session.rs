@@ -1,7 +1,7 @@
 use crate::code_stats::CodeStats;
 pub use crate::code_stats::{DataTypeKind, FieldInfo, FieldKind, SizeKind, VariantInfo};
 use crate::config::{
-    self, CrateType, InstrumentCoverage, OptLevel, OutFileName, OutputType,
+    self, CrateType, FunctionReturn, InstrumentCoverage, OptLevel, OutFileName, OutputType,
     RemapPathScopeComponents, SwitchWithOptPath,
 };
 use crate::config::{ErrorOutputType, Input};
@@ -10,8 +10,6 @@ use crate::parse::{add_feature_diagnostics, ParseSess};
 use crate::search_paths::{PathKind, SearchPath};
 use crate::{filesearch, lint};
 
-pub use rustc_ast::attr::MarkedAttrs;
-pub use rustc_ast::Attribute;
 use rustc_data_structures::flock;
 use rustc_data_structures::fx::{FxHashMap, FxIndexSet};
 use rustc_data_structures::jobserver::{self, Client};
@@ -48,7 +46,7 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::{atomic::AtomicBool, Arc};
 
-pub struct OptimizationFuel {
+struct OptimizationFuel {
     /// If `-zfuel=crate=n` is specified, initially set to `n`, otherwise `0`.
     remaining: u64,
     /// We're rejecting all further optimizations.
@@ -816,12 +814,7 @@ impl Session {
         if self_contained { vec![p.clone(), p.join("self-contained")] } else { vec![p] }
     }
 
-    pub fn init_incr_comp_session(
-        &self,
-        session_dir: PathBuf,
-        lock_file: flock::Lock,
-        load_dep_graph: bool,
-    ) {
+    pub fn init_incr_comp_session(&self, session_dir: PathBuf, lock_file: flock::Lock) {
         let mut incr_comp_session = self.incr_comp_session.borrow_mut();
 
         if let IncrCompSession::NotInitialized = *incr_comp_session {
@@ -830,7 +823,7 @@ impl Session {
         }
 
         *incr_comp_session =
-            IncrCompSession::Active { session_directory: session_dir, lock_file, load_dep_graph };
+            IncrCompSession::Active { session_directory: session_dir, _lock_file: lock_file };
     }
 
     pub fn finalize_incr_comp_session(&self, new_directory_path: PathBuf) {
@@ -1678,17 +1671,41 @@ fn validate_commandline_args_with_session_available(sess: &Session) {
             sess.emit_err(errors::IncompatibleLinkerFlavor { flavor, compatible_list });
         }
     }
+
+    if sess.opts.unstable_opts.function_return != FunctionReturn::default() {
+        if sess.target.arch != "x86" && sess.target.arch != "x86_64" {
+            sess.emit_err(errors::FunctionReturnRequiresX86OrX8664);
+        }
+    }
+
+    // The code model check applies to `thunk` and `thunk-extern`, but not `thunk-inline`, so it is
+    // kept as a `match` to force a change if new ones are added, even if we currently only support
+    // `thunk-extern` like Clang.
+    match sess.opts.unstable_opts.function_return {
+        FunctionReturn::Keep => (),
+        FunctionReturn::ThunkExtern => {
+            // FIXME: In principle, the inherited base LLVM target code model could be large,
+            // but this only checks whether we were passed one explicitly (like Clang does).
+            if let Some(code_model) = sess.code_model()
+                && code_model == CodeModel::Large
+            {
+                sess.emit_err(errors::FunctionReturnThunkExternRequiresNonLargeCodeModel);
+            }
+        }
+    }
 }
 
 /// Holds data on the current incremental compilation session, if there is one.
 #[derive(Debug)]
-pub enum IncrCompSession {
+enum IncrCompSession {
     /// This is the state the session will be in until the incr. comp. dir is
     /// needed.
     NotInitialized,
     /// This is the state during which the session directory is private and can
-    /// be modified.
-    Active { session_directory: PathBuf, lock_file: flock::Lock, load_dep_graph: bool },
+    /// be modified. `_lock_file` is never directly used, but its presence
+    /// alone has an effect, because the file will unlock when the session is
+    /// dropped.
+    Active { session_directory: PathBuf, _lock_file: flock::Lock },
     /// This is the state after the session directory has been finalized. In this
     /// state, the contents of the directory must not be modified any more.
     Finalized { session_directory: PathBuf },
@@ -1750,7 +1767,7 @@ impl EarlyErrorHandler {
 
     #[allow(rustc::untranslatable_diagnostic)]
     #[allow(rustc::diagnostic_outside_of_impl)]
-    pub(crate) fn early_struct_error(
+    pub fn early_struct_error(
         &self,
         msg: impl Into<DiagnosticMessage>,
     ) -> DiagnosticBuilder<'_, !> {

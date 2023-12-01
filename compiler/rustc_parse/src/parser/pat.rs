@@ -5,8 +5,8 @@ use crate::errors::{
     ExpectedCommaAfterPatternField, GenericArgsInPatRequireTurbofishSyntax,
     InclusiveRangeExtraEquals, InclusiveRangeMatchArrow, InclusiveRangeNoEnd, InvalidMutInPattern,
     PatternOnWrongSideOfAt, RefMutOrderIncorrect, RemoveLet, RepeatedMutInPattern,
-    TopLevelOrPatternNotAllowed, TopLevelOrPatternNotAllowedSugg, TrailingVertNotAllowed,
-    UnexpectedLifetimeInPattern, UnexpectedVertVertBeforeFunctionParam,
+    SwitchRefBoxOrder, TopLevelOrPatternNotAllowed, TopLevelOrPatternNotAllowedSugg,
+    TrailingVertNotAllowed, UnexpectedLifetimeInPattern, UnexpectedVertVertBeforeFunctionParam,
     UnexpectedVertVertInPattern,
 };
 use crate::{maybe_recover_from_interpolated_ty_qpath, maybe_whole};
@@ -368,12 +368,22 @@ impl<'a> Parser<'a> {
             self.recover_dotdotdot_rest_pat(lo)
         } else if let Some(form) = self.parse_range_end() {
             self.parse_pat_range_to(form)? // `..=X`, `...X`, or `..X`.
+        } else if self.eat(&token::Not) {
+            // Parse `!`
+            self.sess.gated_spans.gate(sym::never_patterns, self.prev_token.span);
+            PatKind::Never
         } else if self.eat_keyword(kw::Underscore) {
-            // Parse _
+            // Parse `_`
             PatKind::Wild
         } else if self.eat_keyword(kw::Mut) {
             self.parse_pat_ident_mut(syntax_loc)?
         } else if self.eat_keyword(kw::Ref) {
+            if self.check_keyword(kw::Box) {
+                // Suggest `box ref` and quit parsing pattern to prevent series of
+                // misguided diagnostics from later stages of the compiler.
+                let span = self.prev_token.span.to(self.token.span);
+                return Err(self.sess.create_err(SwitchRefBoxOrder { span }));
+            }
             // Parse ref ident @ pat / ref mut ident @ pat
             let mutbl = self.parse_mutability();
             self.parse_pat_ident(BindingAnnotation(ByRef::Yes, mutbl), syntax_loc)?

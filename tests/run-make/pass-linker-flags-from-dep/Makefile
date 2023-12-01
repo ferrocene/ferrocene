@@ -8,11 +8,7 @@ all:
 	$(RUSTC) rust_dep_attr.rs --crate-type=lib
 
 	# Check sequence of linker args
-<<<<<<< HEAD
-	$(RUSTC) main.rs --extern lib=$(TMPDIR)/librust_dep.rlib --crate-type=bin --print link-args | $(CGREP) -e 'native_dep_1.*some_flag.*native_dep_2'
-
-# ferrocene-annotations: um_rustc_C_link_arg
-=======
 	$(RUSTC) main.rs --extern lib=$(TMPDIR)/librust_dep_flag.rlib --crate-type=bin --print link-args | $(CGREP) -e 'native_dep_1.*some_flag.*native_dep_2'
 	$(RUSTC) main.rs --extern lib=$(TMPDIR)/librust_dep_attr.rlib --crate-type=bin --print link-args | $(CGREP) -e 'native_dep_1.*some_flag.*native_dep_2'
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+# ferrocene-annotations: um_rustc_C_link_arg

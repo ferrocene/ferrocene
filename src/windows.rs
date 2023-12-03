@@ -403,23 +403,8 @@ ffi! {
         pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
         pub fn LoadLibraryA(a: *const i8) -> HMODULE;
         pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
-        pub fn GetModuleHandleA(name: *const i8) -> HMODULE;
-        pub fn OpenProcess(
-            dwDesiredAccess: DWORD,
-            bInheitHandle: BOOL,
-            dwProcessId: DWORD,
-        ) -> HANDLE;
         pub fn GetCurrentProcessId() -> DWORD;
         pub fn CloseHandle(h: HANDLE) -> BOOL;
-        pub fn CreateFileA(
-            lpFileName: LPCSTR,
-            dwDesiredAccess: DWORD,
-            dwShareMode: DWORD,
-            lpSecurityAttributes: LPSECURITY_ATTRIBUTES,
-            dwCreationDisposition: DWORD,
-            dwFlagsAndAttributes: DWORD,
-            hTemplateFile: HANDLE,
-        ) -> HANDLE;
         pub fn CreateMutexA(
             attrs: LPSECURITY_ATTRIBUTES,
             initial: BOOL,
@@ -459,16 +444,6 @@ ffi! {
             hSnapshot: HANDLE,
             lpme: LPMODULEENTRY32W,
         ) -> BOOL;
-    }
-
-    #[link(name = "ntdll")]
-    extern "system" {
-        pub fn RtlCaptureStackBackTrace(
-            FramesToSkip: ULONG,
-            FramesToCapture: ULONG,
-            BackTrace: *mut PVOID,
-            BackTraceHash: PULONG,
-        ) -> USHORT;
     }
 }
 

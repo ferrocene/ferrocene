@@ -10,11 +10,7 @@ use std::io::{BufRead, BufReader};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-<<<<<<< HEAD
-use std::sync::atomic;
-=======
-use std::sync::OnceLock;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+use std::sync::{atomic, OnceLock};
 use std::time::{Duration, Instant};
 
 use crate::core::build_steps::llvm;

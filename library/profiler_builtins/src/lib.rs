@@ -1,4 +1,6 @@
-#![no_std]
+#![cfg_attr(feature = "core", no_std)]
+#![cfg_attr(not(feature = "core"), feature(no_core), no_core)]
+
 #![feature(profiler_runtime)]
 #![profiler_runtime]
 #![unstable(

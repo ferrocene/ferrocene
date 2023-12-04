@@ -89,6 +89,6 @@ elif [[ $# -eq 0 ]]; then
     cmd_run
 else
     echo "usage: $0"
-    echo"    or: $0 prepare"
+    echo "   or: $0 prepare"
     exit 1
 fi

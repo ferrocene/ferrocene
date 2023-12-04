@@ -18,7 +18,6 @@ use crate::errors::{
     UnexpectedConstParamDeclaration, UnexpectedConstParamDeclarationSugg, UnmatchedAngleBrackets,
     UseEqInstead, WrapType,
 };
-
 use crate::fluent_generated as fluent;
 use crate::parser;
 use crate::parser::attr::InnerAttrPolicy;
@@ -247,11 +246,11 @@ impl<'a> Parser<'a> {
         sp: S,
         m: impl Into<DiagnosticMessage>,
     ) -> DiagnosticBuilder<'a, ErrorGuaranteed> {
-        self.sess.span_diagnostic.struct_span_err(sp, m)
+        self.diagnostic().struct_span_err(sp, m)
     }
 
     pub fn span_bug<S: Into<MultiSpan>>(&self, sp: S, m: impl Into<String>) -> ! {
-        self.sess.span_diagnostic.span_bug(sp, m)
+        self.diagnostic().span_bug(sp, m)
     }
 
     pub(super) fn diagnostic(&self) -> &'a Handler {
@@ -285,7 +284,7 @@ impl<'a> Parser<'a> {
                 span: self.prev_token.span,
                 missing_comma: None,
             }
-            .into_diagnostic(&self.sess.span_diagnostic));
+            .into_diagnostic(self.diagnostic()));
         }
 
         let valid_follow = &[
@@ -348,7 +347,7 @@ impl<'a> Parser<'a> {
             suggest_remove_comma,
             help_cannot_start_number,
         };
-        let mut err = err.into_diagnostic(&self.sess.span_diagnostic);
+        let mut err = err.into_diagnostic(self.diagnostic());
 
         // if the token we have is a `<`
         // it *might* be a misplaced generic
@@ -772,8 +771,10 @@ impl<'a> Parser<'a> {
                 && let ast::AttrKind::Normal(attr_kind) = &attr.kind
                 && let [segment] = &attr_kind.item.path.segments[..]
                 && segment.ident.name == sym::cfg
+                && let Some(args_span) = attr_kind.item.args.span()
                 && let Ok(next_attr) = snapshot.parse_attribute(InnerAttrPolicy::Forbidden(None))
                 && let ast::AttrKind::Normal(next_attr_kind) = next_attr.kind
+                && let Some(next_attr_args_span) = next_attr_kind.item.args.span()
                 && let [next_segment] = &next_attr_kind.item.path.segments[..]
                 && segment.ident.name == sym::cfg
                 && let Ok(next_expr) = snapshot.parse_expr()
@@ -787,23 +788,14 @@ impl<'a> Parser<'a> {
                 let margin = self.sess.source_map().span_to_margin(next_expr.span).unwrap_or(0);
                 let sugg = vec![
                     (attr.span.with_hi(segment.span().hi()), "if cfg!".to_string()),
-                    (
-                        attr_kind.item.args.span().unwrap().shrink_to_hi().with_hi(attr.span.hi()),
-                        " {".to_string(),
-                    ),
+                    (args_span.shrink_to_hi().with_hi(attr.span.hi()), " {".to_string()),
                     (expr.span.shrink_to_lo(), "    ".to_string()),
                     (
                         next_attr.span.with_hi(next_segment.span().hi()),
                         "} else if cfg!".to_string(),
                     ),
                     (
-                        next_attr_kind
-                            .item
-                            .args
-                            .span()
-                            .unwrap()
-                            .shrink_to_hi()
-                            .with_hi(next_attr.span.hi()),
+                        next_attr_args_span.shrink_to_hi().with_hi(next_attr.span.hi()),
                         " {".to_string(),
                     ),
                     (next_expr.span.shrink_to_lo(), "    ".to_string()),
@@ -1426,7 +1418,7 @@ impl<'a> Parser<'a> {
                                 // Not entirely sure now, but we bubble the error up with the
                                 // suggestion.
                                 self.restore_snapshot(snapshot);
-                                Err(err.into_diagnostic(&self.sess.span_diagnostic))
+                                Err(err.into_diagnostic(self.diagnostic()))
                             }
                         }
                     } else if token::OpenDelim(Delimiter::Parenthesis) == self.token.kind {
@@ -1441,7 +1433,7 @@ impl<'a> Parser<'a> {
                         }
                         // Consume the fn call arguments.
                         match self.consume_fn_args() {
-                            Err(()) => Err(err.into_diagnostic(&self.sess.span_diagnostic)),
+                            Err(()) => Err(err.into_diagnostic(self.diagnostic())),
                             Ok(()) => {
                                 self.sess.emit_err(err);
                                 // FIXME: actually check that the two expressions in the binop are
@@ -1467,7 +1459,7 @@ impl<'a> Parser<'a> {
                             mk_err_expr(self, inner_op.span.to(self.prev_token.span))
                         } else {
                             // These cases cause too many knock-down errors, bail out (#61329).
-                            Err(err.into_diagnostic(&self.sess.span_diagnostic))
+                            Err(err.into_diagnostic(self.diagnostic()))
                         }
                     };
                 }
@@ -2522,8 +2514,7 @@ impl<'a> Parser<'a> {
             Ok(Some(GenericArg::Const(self.parse_const_arg()?)))
         } else {
             let after_kw_const = self.token.span;
-            self.recover_const_arg(after_kw_const, err.into_diagnostic(&self.sess.span_diagnostic))
-                .map(Some)
+            self.recover_const_arg(after_kw_const, err.into_diagnostic(self.diagnostic())).map(Some)
         }
     }
 
@@ -2886,7 +2877,7 @@ impl<'a> Parser<'a> {
                         span: path.span.shrink_to_hi(),
                         between: between_span,
                     }
-                    .into_diagnostic(&self.sess.span_diagnostic));
+                    .into_diagnostic(self.diagnostic()));
                 }
             }
         }

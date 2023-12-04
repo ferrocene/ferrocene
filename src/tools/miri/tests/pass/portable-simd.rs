@@ -1,7 +1,7 @@
 //@compile-flags: -Zmiri-strict-provenance
 #![feature(portable_simd, platform_intrinsics, adt_const_params, inline_const)]
-#![allow(incomplete_features)]
-use std::simd::*;
+#![allow(incomplete_features, internal_features)]
+use std::simd::{prelude::*, StdFloat};
 
 extern "platform-intrinsic" {
     pub(crate) fn simd_bitmask<T, U>(x: T) -> U;
@@ -197,6 +197,24 @@ fn simd_ops_i32() {
     assert_eq!(b.reduce_or(), -1);
     assert_eq!(a.reduce_xor(), 0);
     assert_eq!(b.reduce_xor(), -4);
+
+    assert_eq!(b.leading_zeros(), u32x4::from_array([31, 30, 30, 0]));
+    assert_eq!(b.trailing_zeros(), u32x4::from_array([0, 1, 0, 2]));
+    assert_eq!(b.leading_ones(), u32x4::from_array([0, 0, 0, 30]));
+    assert_eq!(b.trailing_ones(), u32x4::from_array([1, 0, 2, 0]));
+    assert_eq!(
+        b.swap_bytes(),
+        i32x4::from_array([0x01000000, 0x02000000, 0x03000000, 0xfcffffffu32 as i32])
+    );
+    assert_eq!(
+        b.reverse_bits(),
+        i32x4::from_array([
+            0x80000000u32 as i32,
+            0x40000000,
+            0xc0000000u32 as i32,
+            0x3fffffffu32 as i32
+        ])
+    );
 }
 
 fn simd_mask() {
@@ -247,6 +265,22 @@ fn simd_mask() {
             assert_eq!(bitmask2, [0b0001]);
         }
     }
+
+    // This used to cause an ICE.
+    let bitmask = u8x8::from_array([0b01000101, 0, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(
+        mask32x8::from_bitmask_vector(bitmask),
+        mask32x8::from_array([true, false, true, false, false, false, true, false]),
+    );
+    let bitmask =
+        u8x16::from_array([0b01000101, 0b11110000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    assert_eq!(
+        mask32x16::from_bitmask_vector(bitmask),
+        mask32x16::from_array([
+            true, false, true, false, false, false, true, false, false, false, false, false, true,
+            true, true, true,
+        ]),
+    );
 }
 
 fn simd_cast() {
@@ -328,14 +362,12 @@ fn simd_cast() {
 }
 
 fn simd_swizzle() {
-    use Which::*;
-
     let a = f32x4::splat(10.0);
     let b = f32x4::from_array([1.0, 2.0, 3.0, -4.0]);
 
     assert_eq!(simd_swizzle!(b, [3, 0, 0, 2]), f32x4::from_array([-4.0, 1.0, 1.0, 3.0]));
     assert_eq!(simd_swizzle!(b, [1, 2]), f32x2::from_array([2.0, 3.0]));
-    assert_eq!(simd_swizzle!(b, a, [First(3), Second(0)]), f32x2::from_array([-4.0, 10.0]));
+    assert_eq!(simd_swizzle!(b, a, [3, 4]), f32x2::from_array([-4.0, 10.0]));
 }
 
 fn simd_gather_scatter() {
@@ -417,13 +449,13 @@ fn simd_intrinsics() {
             i32x4::from_array([10, 2, 10, 10])
         );
         assert_eq!(simd_shuffle_generic::<_, i32x4, { &[3, 1, 0, 2] }>(a, b), a,);
-        assert_eq!(simd_shuffle::<_, _, i32x4>(a, b, const { [3, 1, 0, 2] }), a,);
+        assert_eq!(simd_shuffle::<_, _, i32x4>(a, b, const { [3u32, 1, 0, 2] }), a,);
         assert_eq!(
             simd_shuffle_generic::<_, i32x4, { &[7, 5, 4, 6] }>(a, b),
             i32x4::from_array([4, 2, 1, 10]),
         );
         assert_eq!(
-            simd_shuffle::<_, _, i32x4>(a, b, const { [7, 5, 4, 6] }),
+            simd_shuffle::<_, _, i32x4>(a, b, const { [7u32, 5, 4, 6] }),
             i32x4::from_array([4, 2, 1, 10]),
         );
     }

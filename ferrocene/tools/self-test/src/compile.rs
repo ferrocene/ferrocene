@@ -16,18 +16,21 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
         contents: include_bytes!("../sample-programs/addition.rs"),
         rustflags: &["--crate-type", "lib", "--edition", "2021"],
         expected_artifacts: &["libaddition.rlib"],
+        executable_output: None,
     },
     SampleProgram {
         name: "subtraction.rs",
         contents: include_bytes!("../sample-programs/subtraction.rs"),
         rustflags: &["--crate-type", "staticlib", "--edition", "2021"],
         expected_artifacts: &["libsubtraction.a"],
+        executable_output: None,
     },
     SampleProgram {
         name: "subtraction-sys.rs",
         contents: include_bytes!("../sample-programs/subtraction-sys.rs"),
         rustflags: &["--crate-type", "lib", "--edition", "2021", "-l", "subtraction"],
         expected_artifacts: &["libsubtraction_sys.rlib"],
+        executable_output: None,
     },
     SampleProgram {
         name: "assertion.rs",
@@ -43,6 +46,8 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
             "subtraction_sys",
         ],
         expected_artifacts: &["assertion"],
+        // See assertion.rs
+        executable_output: Some(b"123456789"),
     },
 ];
 
@@ -83,19 +88,30 @@ fn check_target(
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
+        let should_run = if ctx.target.triple == env!("SELFTEST_TARGET") {
+            program.executable_output
+        } else {
+            None
+        };
         expected_artifacts.add(program.expected_artifacts);
-        compile(&ctx, program)?;
+        compile(&ctx, program, should_run)?;
         expected_artifacts.check(program.name)?;
 
         reporter.success(&format!(
-            "compiled sample program `{}` for target {}",
-            program.name, target.triple
+            "compiled {}sample program `{}` for target {}",
+            if should_run.is_some() { "and ran " } else { "" },
+            program.name,
+            target.triple
         ));
     }
     Ok(())
 }
 
-fn compile(ctx: &Context<'_>, program: &SampleProgram) -> Result<(), Error> {
+fn compile(
+    ctx: &Context<'_>,
+    program: &SampleProgram,
+    expected_output: Option<&[u8]>,
+) -> Result<(), Error> {
     let program_path = ctx.source_dir.join(program.name);
     std::fs::write(&program_path, program.contents).map_err(|error| {
         Error::WritingSampleProgramFailed {
@@ -119,12 +135,32 @@ fn compile(ctx: &Context<'_>, program: &SampleProgram) -> Result<(), Error> {
     }
     cmd.args(program.rustflags);
     cmd.args(&ctx.target.rustflags);
-    cmd.arg(program_path);
+    cmd.arg(&program_path);
 
     run_command(&mut cmd).map_err(|error| Error::SampleProgramCompilationFailed {
         name: program.name.into(),
         error,
     })?;
+
+    if let Some(expected_output) = expected_output {
+        // where is it
+        let bin_name = program.name.replace(".rs", "");
+        let bin_path = ctx.output_dir.join(bin_name);
+        // now try and execute it
+        let mut cmd = Command::new(&bin_path);
+        let output = cmd.output().map_err(|error| Error::RunningSampleProgramFailed {
+            name: program.name.into(),
+            error,
+        })?;
+        if output.stdout != expected_output {
+            return Err(Error::SampleProgramOutputWrong {
+                name: program.name.into(),
+                expected: expected_output.to_vec(),
+                found: output.stdout,
+            });
+        };
+    }
+
     Ok(())
 }
 
@@ -188,6 +224,7 @@ struct SampleProgram {
     contents: &'static [u8],
     rustflags: &'static [&'static str],
     expected_artifacts: &'static [&'static str],
+    executable_output: Option<&'static [u8]>,
 }
 
 #[cfg(test)]
@@ -265,12 +302,14 @@ mod tests {
                 contents: b"pub fn foo() {}",
                 rustflags: &["--crate-type", "lib"],
                 expected_artifacts: &["libfoo.rlib"],
+                executable_output: None,
             },
             SampleProgram {
                 name: "bar.rs",
                 contents: b"fn main() {}",
                 rustflags: &["--crate-type", "bin"],
                 expected_artifacts: &["bar"],
+                executable_output: None,
             },
         ];
 
@@ -360,9 +399,10 @@ mod tests {
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &[],
             expected_artifacts: &[],
+            executable_output: None,
         };
 
-        match compile(&context, &program) {
+        match compile(&context, &program, None) {
             Err(Error::WritingSampleProgramFailed { name, dest, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(tempdir.path().join("missing").join("example.rs"), dest);
@@ -404,9 +444,10 @@ mod tests {
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &[],
             expected_artifacts: &[],
+            executable_output: None,
         };
 
-        match compile(&context, &program) {
+        match compile(&context, &program, None) {
             Err(Error::SampleProgramCompilationFailed { name, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(rustc, error.path);
@@ -482,8 +523,9 @@ mod tests {
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &["--extern", "foo"],
             expected_artifacts: &["example"],
+            executable_output: None,
         };
 
-        compile(&context, &program).unwrap();
+        compile(&context, &program, None).unwrap();
     }
 }

@@ -39,6 +39,8 @@ pub(crate) enum Error {
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
     SuitableCCompilerNotFound { target: String },
     LinkerArgsError { target: String, kind: LinkerArgsErrorKind },
+    RunningSampleProgramFailed { name: String, error: std::io::Error },
+    SampleProgramOutputWrong { name: String, expected: Vec<u8>, found: Vec<u8> },
 }
 
 impl Error {
@@ -65,6 +67,8 @@ impl Error {
             Error::UnexpectedCompilationArtifact { .. } => 22,
             Error::SuitableCCompilerNotFound { .. } => 23,
             Error::LinkerArgsError { .. } => 24,
+            Error::RunningSampleProgramFailed { .. } => 25,
+            Error::SampleProgramOutputWrong { .. } => 26,
         }
     }
 }
@@ -93,6 +97,8 @@ impl std::error::Error for Error {
             Error::UnexpectedCompilationArtifact { .. } => None,
             Error::SuitableCCompilerNotFound { .. } => None,
             Error::LinkerArgsError { .. } => None,
+            Error::RunningSampleProgramFailed { error, .. } => Some(error),
+            Error::SampleProgramOutputWrong { .. } => None,
         }
     }
 }
@@ -178,6 +184,15 @@ impl Display for Error {
             }
             Error::LinkerArgsError { target, kind } => {
                 write!(f, "Unable to analyse linker arguments for `{target}` (kind={kind:?})")
+            }
+            Error::RunningSampleProgramFailed { name, .. } => {
+                write!(f, "unable to execute sample program {name}")
+            }
+            Error::SampleProgramOutputWrong { name, expected, found } => {
+                write!(
+                    f,
+                    "sample program {name} should have produced {expected:?}, actually produced {found:?}"
+                )
             }
         }
     }

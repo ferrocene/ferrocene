@@ -6,7 +6,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::error::Error;
+use crate::error::{Error, LinkerArgsErrorKind};
 use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::{find_binary_in_path, run_command};
@@ -15,6 +15,10 @@ use crate::Environment;
 mod argparse;
 
 use argparse::LinkerArg;
+
+/// The linker arg we ask the C compiler to add, to check it can add arbitrary
+/// arguments.
+const RANDOM_LINKER_ARG: &str = "--rand456256146871864165842156=xyz";
 
 /// What kind of C compiler does a target require
 #[derive(Debug)]
@@ -163,7 +167,10 @@ where
                 // If we see one of these, and we haven't previously seen a
                 // -plugin (which causes this loop to exit), then that's bad and
                 // we should report the error
-                return Err(Error::LinkerArgsError { target: target.to_owned() });
+                return Err(Error::LinkerArgsError {
+                    target: target.to_owned(),
+                    kind: LinkerArgsErrorKind::DisallowedPlugin,
+                });
             }
             LinkerArg::LittleEndian => {}
             LinkerArg::PicExecutable => {}
@@ -178,15 +185,24 @@ where
             LinkerArg::PushState => {}
             LinkerArg::PopState => {}
             LinkerArg::FixCortexA53_843419 => {}
+            LinkerArg::Unknown(s) if s == RANDOM_LINKER_ARG => {
+                // This one is allowed, because we added it deliberately
+            }
             LinkerArg::Unknown(_) => {
                 // Hmm, we don't want unknown arguments
-                return Err(Error::LinkerArgsError { target: target.to_owned() });
+                return Err(Error::LinkerArgsError {
+                    target: target.to_owned(),
+                    kind: LinkerArgsErrorKind::UnknownArgument,
+                });
             }
             LinkerArg::Plugin(_plugin) => {
                 // Hmm, we don't want plugins.
                 if compiler_args.iter().find(|s| "-fno-lto" == *s).is_some() {
                     // We already turned LTO off, and we still got a plugin, so bail out
-                    return Err(Error::LinkerArgsError { target: target.to_owned() });
+                    return Err(Error::LinkerArgsError {
+                        target: target.to_owned(),
+                        kind: LinkerArgsErrorKind::DisallowedPlugin,
+                    });
                 }
                 // Try again with LTO disabled.
                 compiler_args.push("-fno-lto".to_owned());
@@ -356,15 +372,25 @@ fn check_compiler_linker_args(
     // Ensure this file doesn't already exist
     let _ = std::fs::remove_file(args_file_path);
 
+    // check the C compiler passes on any `-Wl,<foo>` type arguments
+    let mut extra_args: Vec<String> = extra_args.to_vec();
+    extra_args.push(format!("-Wl,{RANDOM_LINKER_ARG}"));
+
     // compile a sample C program, but using our fake linker
-    cross_compile_test_program(cc_path, temp_dir, temp_dir, extra_args)?;
+    cross_compile_test_program(cc_path, temp_dir, temp_dir, &extra_args)?;
 
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
-        return Err(Error::LinkerArgsError { target: target.to_owned() });
+        return Err(Error::LinkerArgsError {
+            target: target.to_owned(),
+            kind: LinkerArgsErrorKind::NoArgsFile,
+        });
     };
     let Ok(args_str) = std::str::from_utf8(&args_file) else {
-        return Err(Error::LinkerArgsError { target: target.to_owned() });
+        return Err(Error::LinkerArgsError {
+            target: target.to_owned(),
+            kind: LinkerArgsErrorKind::InvalidArgsFile,
+        });
     };
 
     // parse the file
@@ -372,8 +398,19 @@ fn check_compiler_linker_args(
 
     // an empty file would be bad
     if args.is_empty() {
-        return Err(Error::LinkerArgsError { target: target.to_owned() });
+        return Err(Error::LinkerArgsError {
+            target: target.to_owned(),
+            kind: LinkerArgsErrorKind::EmptyArgsFile,
+        });
     };
+
+    // Check the C compiler passed on our -Wl,<arg> argument exactly once.
+    if args.iter().filter(|s| s.as_str() == RANDOM_LINKER_ARG).count() != 1 {
+        return Err(Error::LinkerArgsError {
+            target: target.to_owned(),
+            kind: LinkerArgsErrorKind::MissingArg,
+        });
+    }
 
     Ok(args)
 }
@@ -589,7 +626,7 @@ mod tests {
             linker_args.iter().cloned(),
             &mut compiler_args,
         ) {
-            Err(Error::LinkerArgsError { target }) if target == "x86_64-unknown-linux-gnu" => {
+            Err(Error::LinkerArgsError { target, .. }) if target == "x86_64-unknown-linux-gnu" => {
                 // Correct
             }
             _ => {

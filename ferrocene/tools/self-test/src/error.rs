@@ -6,6 +6,16 @@ use std::fmt::Display;
 use std::path::PathBuf;
 use std::process::Output;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum LinkerArgsErrorKind {
+    UnknownArgument,
+    DisallowedPlugin,
+    NoArgsFile,
+    InvalidArgsFile,
+    EmptyArgsFile,
+    MissingArg,
+}
+
 #[derive(Debug)]
 pub(crate) enum Error {
     NoSysroot,
@@ -28,7 +38,7 @@ pub(crate) enum Error {
     MissingCompilationArtifact { name: String, after_compiling: String },
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
     SuitableCCompilerNotFound { target: String },
-    LinkerArgsError { target: String },
+    LinkerArgsError { target: String, kind: LinkerArgsErrorKind },
 }
 
 impl Error {
@@ -166,8 +176,8 @@ impl Display for Error {
             Error::SuitableCCompilerNotFound { target } => {
                 write!(f, "unable to find LLD-compatible C compiler for `{target}`")
             }
-            Error::LinkerArgsError { target } => {
-                write!(f, "Unable to analyse linker arguments for `{target}`")
+            Error::LinkerArgsError { target, kind } => {
+                write!(f, "Unable to analyse linker arguments for `{target}` (kind={kind:?})")
             }
         }
     }

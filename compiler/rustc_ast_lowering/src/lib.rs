@@ -58,7 +58,6 @@ use rustc_errors::{DiagnosticArgFromDisplay, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, LifetimeRes, Namespace, PartialRes, PerNS, Res};
 use rustc_hir::def_id::{LocalDefId, CRATE_DEF_ID, LOCAL_CRATE};
-use rustc_hir::definitions::DefPathData;
 use rustc_hir::{ConstArg, GenericArg, ItemLocalId, ParamName, TraitCandidate};
 use rustc_index::{Idx, IndexSlice, IndexVec};
 use rustc_middle::{
@@ -499,20 +498,20 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         &mut self,
         parent: LocalDefId,
         node_id: ast::NodeId,
-        data: DefPathData,
+        name: Symbol,
         def_kind: DefKind,
         span: Span,
     ) -> LocalDefId {
         debug_assert_ne!(node_id, ast::DUMMY_NODE_ID);
         assert!(
             self.opt_local_def_id(node_id).is_none(),
-            "adding a def'n for node-id {:?} and data {:?} but a previous def'n exists: {:?}",
+            "adding a def'n for node-id {:?} and def kind {:?} but a previous def'n exists: {:?}",
             node_id,
-            data,
+            def_kind,
             self.tcx.hir().def_key(self.local_def_id(node_id)),
         );
 
-        let def_id = self.tcx.at(span).create_def(parent, data, def_kind).def_id();
+        let def_id = self.tcx.at(span).create_def(parent, name, def_kind).def_id();
 
         debug!("create_def: def_id_to_node_id[{:?}] <-> {:?}", def_id, node_id);
         self.resolver.node_id_to_def_id.insert(node_id, def_id);
@@ -809,7 +808,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 let _def_id = self.create_def(
                     self.current_hir_id_owner.def_id,
                     param,
-                    DefPathData::LifetimeNs(kw::UnderscoreLifetime),
+                    kw::UnderscoreLifetime,
                     DefKind::LifetimeParam,
                     ident.span,
                 );
@@ -1227,7 +1226,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                                 let def_id = self.create_def(
                                     parent_def_id.def_id,
                                     node_id,
-                                    DefPathData::AnonConst,
+                                    kw::Empty,
                                     DefKind::AnonConst,
                                     span,
                                 );
@@ -1465,7 +1464,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                         self.create_def(
                             self.current_hir_id_owner.def_id,
                             *def_node_id,
-                            DefPathData::TypeNs(ident.name),
+                            ident.name,
                             DefKind::TyParam,
                             span,
                         );
@@ -1619,7 +1618,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         let opaque_ty_def_id = self.create_def(
             self.current_hir_id_owner.def_id,
             opaque_ty_node_id,
-            DefPathData::ImplTrait,
+            kw::Empty,
             DefKind::OpaqueTy,
             opaque_ty_span,
         );
@@ -1674,7 +1673,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 let duplicated_lifetime_def_id = self.create_def(
                     opaque_ty_def_id,
                     duplicated_lifetime_node_id,
-                    DefPathData::LifetimeNs(lifetime.ident.name),
+                    lifetime.ident.name,
                     DefKind::LifetimeParam,
                     lifetime.ident.span,
                 );
@@ -1779,13 +1778,15 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         }))
     }
 
-    // Lowers a function declaration.
-    //
-    // `decl`: the unlowered (AST) function declaration.
-    // `fn_node_id`: `impl Trait` arguments are lowered into generic parameters on the given `NodeId`.
-    // `make_ret_async`: if `Some`, converts `-> T` into `-> impl Future<Output = T>` in the
-    //      return type. This is used for `async fn` declarations. The `NodeId` is the ID of the
-    //      return type `impl Trait` item, and the `Span` points to the `async` keyword.
+    /// Lowers a function declaration.
+    ///
+    /// `decl`: the unlowered (AST) function declaration.
+    ///
+    /// `fn_node_id`: `impl Trait` arguments are lowered into generic parameters on the given
+    /// `NodeId`.
+    ///
+    /// `transform_return_type`: if `Some`, applies some conversion to the return type, such as is
+    /// needed for `async fn` and `gen fn`. See [`CoroutineKind`] for more details.
     #[instrument(level = "debug", skip(self))]
     fn lower_fn_decl(
         &mut self,
@@ -1793,7 +1794,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         fn_node_id: NodeId,
         fn_span: Span,
         kind: FnDeclKind,
-        make_ret_async: Option<(NodeId, Span)>,
+        coro: Option<CoroutineKind>,
     ) -> &'hir hir::FnDecl<'hir> {
         let c_variadic = decl.c_variadic();
 
@@ -1822,11 +1823,12 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             self.lower_ty_direct(&param.ty, &itctx)
         }));
 
-        let output = if let Some((ret_id, _span)) = make_ret_async {
-            let fn_def_id = self.local_def_id(fn_node_id);
-            self.lower_async_fn_ret_ty(&decl.output, fn_def_id, ret_id, kind, fn_span)
-        } else {
-            match &decl.output {
+        let output = match coro {
+            Some(coro) => {
+                let fn_def_id = self.local_def_id(fn_node_id);
+                self.lower_coroutine_fn_ret_ty(&decl.output, fn_def_id, coro, kind, fn_span)
+            }
+            None => match &decl.output {
                 FnRetTy::Ty(ty) => {
                     let context = if kind.return_impl_trait_allowed() {
                         let fn_def_id = self.local_def_id(fn_node_id);
@@ -1850,7 +1852,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                     hir::FnRetTy::Return(self.lower_ty(ty, &context))
                 }
                 FnRetTy::Default(span) => hir::FnRetTy::DefaultReturn(self.lower_span(*span)),
-            }
+            },
         };
 
         self.arena.alloc(hir::FnDecl {
@@ -1889,16 +1891,21 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     // `fn_node_id`: `NodeId` of the parent function (used to create child impl trait definition)
     // `opaque_ty_node_id`: `NodeId` of the opaque `impl Trait` type that should be created
     #[instrument(level = "debug", skip(self))]
-    fn lower_async_fn_ret_ty(
+    fn lower_coroutine_fn_ret_ty(
         &mut self,
         output: &FnRetTy,
         fn_def_id: LocalDefId,
-        opaque_ty_node_id: NodeId,
+        coro: CoroutineKind,
         fn_kind: FnDeclKind,
         fn_span: Span,
     ) -> hir::FnRetTy<'hir> {
         let span = self.lower_span(fn_span);
         let opaque_ty_span = self.mark_span_with_reason(DesugaringKind::Async, span, None);
+
+        let opaque_ty_node_id = match coro {
+            CoroutineKind::Async { return_impl_trait_id, .. }
+            | CoroutineKind::Gen { return_impl_trait_id, .. } => return_impl_trait_id,
+        };
 
         let captured_lifetimes: Vec<_> = self
             .resolver
@@ -1915,15 +1922,16 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             span,
             opaque_ty_span,
             |this| {
-                let future_bound = this.lower_async_fn_output_type_to_future_bound(
+                let bound = this.lower_coroutine_fn_output_type_to_bound(
                     output,
+                    coro,
                     span,
                     ImplTraitContext::ReturnPositionOpaqueTy {
                         origin: hir::OpaqueTyOrigin::FnReturn(fn_def_id),
                         fn_kind,
                     },
                 );
-                arena_vec![this; future_bound]
+                arena_vec![this; bound]
             },
         );
 
@@ -1932,9 +1940,10 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     }
 
     /// Transforms `-> T` into `Future<Output = T>`.
-    fn lower_async_fn_output_type_to_future_bound(
+    fn lower_coroutine_fn_output_type_to_bound(
         &mut self,
         output: &FnRetTy,
+        coro: CoroutineKind,
         span: Span,
         nested_impl_trait_context: ImplTraitContext,
     ) -> hir::GenericBound<'hir> {
@@ -1949,17 +1958,21 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             FnRetTy::Default(ret_ty_span) => self.arena.alloc(self.ty_tup(*ret_ty_span, &[])),
         };
 
-        // "<Output = T>"
+        // "<$assoc_ty_name = T>"
+        let (assoc_ty_name, trait_lang_item) = match coro {
+            CoroutineKind::Async { .. } => (hir::FN_OUTPUT_NAME, hir::LangItem::Future),
+            CoroutineKind::Gen { .. } => (hir::ITERATOR_ITEM_NAME, hir::LangItem::Iterator),
+        };
+
         let future_args = self.arena.alloc(hir::GenericArgs {
             args: &[],
-            bindings: arena_vec![self; self.output_ty_binding(span, output_ty)],
+            bindings: arena_vec![self; self.assoc_ty_binding(assoc_ty_name, span, output_ty)],
             parenthesized: hir::GenericArgsParentheses::No,
             span_ext: DUMMY_SP,
         });
 
         hir::GenericBound::LangItemTrait(
-            // ::std::future::Future<future_params>
-            hir::LangItem::Future,
+            trait_lang_item,
             self.lower_span(span),
             self.next_id(),
             future_args,
@@ -2549,7 +2562,7 @@ impl<'hir> GenericArgsCtor<'hir> {
         let def_id = lcx.create_def(
             lcx.current_hir_id_owner.def_id,
             id,
-            DefPathData::AnonConst,
+            kw::Empty,
             DefKind::AnonConst,
             span,
         );

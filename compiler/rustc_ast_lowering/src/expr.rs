@@ -13,10 +13,9 @@ use rustc_ast::*;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::definitions::DefPathData;
 use rustc_session::errors::report_lit_error;
 use rustc_span::source_map::{respan, Spanned};
-use rustc_span::symbol::{sym, Ident, Symbol};
+use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::DUMMY_SP;
 use rustc_span::{DesugaringKind, Span};
 use thin_vec::{thin_vec, ThinVec};
@@ -196,39 +195,39 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     binder,
                     capture_clause,
                     constness,
-                    asyncness,
+                    coro_kind,
                     movability,
                     fn_decl,
                     body,
                     fn_decl_span,
                     fn_arg_span,
-                }) => {
-                    if let Async::Yes { closure_id, .. } = asyncness {
-                        self.lower_expr_async_closure(
-                            binder,
-                            *capture_clause,
-                            e.id,
-                            hir_id,
-                            *closure_id,
-                            fn_decl,
-                            body,
-                            *fn_decl_span,
-                            *fn_arg_span,
-                        )
-                    } else {
-                        self.lower_expr_closure(
-                            binder,
-                            *capture_clause,
-                            e.id,
-                            *constness,
-                            *movability,
-                            fn_decl,
-                            body,
-                            *fn_decl_span,
-                            *fn_arg_span,
-                        )
-                    }
-                }
+                }) => match coro_kind {
+                    Some(
+                        CoroutineKind::Async { closure_id, .. }
+                        | CoroutineKind::Gen { closure_id, .. },
+                    ) => self.lower_expr_async_closure(
+                        binder,
+                        *capture_clause,
+                        e.id,
+                        hir_id,
+                        *closure_id,
+                        fn_decl,
+                        body,
+                        *fn_decl_span,
+                        *fn_arg_span,
+                    ),
+                    None => self.lower_expr_closure(
+                        binder,
+                        *capture_clause,
+                        e.id,
+                        *constness,
+                        *movability,
+                        fn_decl,
+                        body,
+                        *fn_decl_span,
+                        *fn_arg_span,
+                    ),
+                },
                 ExprKind::Block(blk, opt_label) => {
                     let opt_label = self.lower_label(*opt_label);
                     hir::ExprKind::Block(self.lower_block(blk, opt_label.is_some()), opt_label)
@@ -376,7 +375,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 self.create_def(
                     parent_def_id.def_id,
                     node_id,
-                    DefPathData::AnonConst,
+                    kw::Empty,
                     DefKind::AnonConst,
                     f.span,
                 );

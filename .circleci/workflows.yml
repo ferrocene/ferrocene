@@ -164,7 +164,6 @@ jobs:
           llvm-subset: false
 
   wasm-dist-oxidos:
-    continue-on-error: true
     executor: docker-ubuntu-18
     resource_class: large # 4-core
     environment:

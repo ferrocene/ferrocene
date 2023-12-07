@@ -492,8 +492,6 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
-            - wasm-dist-oxidos
-
 
   # Record the branch commit for all the jobs bors merges commit into.
   record-branch-commit:

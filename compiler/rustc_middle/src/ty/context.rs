@@ -121,6 +121,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type RegionOutlivesPredicate = ty::RegionOutlivesPredicate<'tcx>;
     type TypeOutlivesPredicate = ty::TypeOutlivesPredicate<'tcx>;
     type ProjectionPredicate = ty::ProjectionPredicate<'tcx>;
+    type NormalizesTo = ty::NormalizesTo<'tcx>;
     type SubtypePredicate = ty::SubtypePredicate<'tcx>;
     type CoercePredicate = ty::CoercePredicate<'tcx>;
     type ClosureKind = ty::ClosureKind;
@@ -2186,7 +2187,7 @@ impl<'tcx> TyCtxt<'tcx> {
             hir::Node::Item(hir::Item {
                 kind: hir::ItemKind::Impl(hir::Impl { generics, .. }),
                 ..
-            }) if generics.params.iter().any(|p| self.has_attr(p.def_id, sym::rustc_host))
+            }) if generics.params.iter().any(|p| matches!(p.kind, hir::GenericParamKind::Const { is_host_effect: true, .. }))
         )
     }
 

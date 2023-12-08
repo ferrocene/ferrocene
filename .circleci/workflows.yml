@@ -163,18 +163,6 @@ jobs:
           # code into the tarball we ship to customers.
           llvm-subset: false
 
-  wasm-dist-oxidos:
-    executor: docker-ubuntu-18
-    resource_class: large # 4-core
-    environment:
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: wasm32-unknown-unknown
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:oxidos)
-    steps:
-      - ferrocene-job-dist:
-          restore-from-job: x86_64-linux-build
-
   x86_64-linux-generic-test-container:
     executor: docker-ubuntu-18
     parameters:
@@ -477,10 +465,6 @@ workflows:
           requires:
             - x86_64-linux-build
 
-      - wasm-dist-oxidos:
-          requires:
-            - x86_64-linux-build
-
       - x86_64-linux-self-test:
           requires:
             - x86_64-linux-dist
@@ -492,8 +476,6 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
-            - wasm-dist-oxidos
-
 
   # Record the branch commit for all the jobs bors merges commit into.
   record-branch-commit:

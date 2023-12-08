@@ -222,8 +222,8 @@ pub enum TreatInductiveCycleAs {
 impl From<TreatInductiveCycleAs> for EvaluationResult {
     fn from(treat: TreatInductiveCycleAs) -> EvaluationResult {
         match treat {
-            TreatInductiveCycleAs::Ambig => EvaluatedToUnknown,
-            TreatInductiveCycleAs::Recur => EvaluatedToRecur,
+            TreatInductiveCycleAs::Ambig => EvaluatedToAmbigStackDependent,
+            TreatInductiveCycleAs::Recur => EvaluatedToErrStackDependent,
         }
     }
 }
@@ -990,8 +990,11 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         }
                     }
                 }
+                ty::PredicateKind::NormalizesTo(..) => {
+                    bug!("NormalizesTo is only used by the new solver")
+                }
                 ty::PredicateKind::AliasRelate(..) => {
-                    bug!("AliasRelate is only used for new solver")
+                    bug!("AliasRelate is only used by the new solver")
                 }
                 ty::PredicateKind::Ambiguous => Ok(EvaluatedToAmbig),
                 ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType(ct, ty)) => {
@@ -1231,7 +1234,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             })
         {
             debug!("evaluate_stack --> unbound argument, recursive --> giving up",);
-            return Ok(EvaluatedToUnknown);
+            return Ok(EvaluatedToAmbigStackDependent);
         }
 
         match self.candidate_from_obligation(stack) {

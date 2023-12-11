@@ -564,6 +564,7 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -s i -l incremental -d 'u
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l include-default-paths -d 'include default paths in addition to the provided ones'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l dry-run -d 'dry run; don\'t build anything'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l json-output -d 'use message-format=json'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'

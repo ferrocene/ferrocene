@@ -695,6 +695,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--include-default-paths', 'include-default-paths', [CompletionResultType]::ParameterName, 'include default paths in addition to the provided ones')
             [CompletionResult]::new('--dry-run', 'dry-run', [CompletionResultType]::ParameterName, 'dry run; don''t build anything')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'use message-format=json')
+            [CompletionResult]::new('--bypass-bootstrap-lock', 'bypass-bootstrap-lock', [CompletionResultType]::ParameterName, 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)')
             [CompletionResult]::new('--llvm-profile-generate', 'llvm-profile-generate', [CompletionResultType]::ParameterName, 'generate PGO profile with llvm built for rustc')
             [CompletionResult]::new('--enable-bolt-settings', 'enable-bolt-settings', [CompletionResultType]::ParameterName, 'Enable BOLT link flags')
             [CompletionResult]::new('--skip-stage0-validation', 'skip-stage0-validation', [CompletionResultType]::ParameterName, 'Skip stage0 compiler validation')

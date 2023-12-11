@@ -39,6 +39,10 @@ const OXIDOS_ALLOW_UNSTABLE_FEATURES: &[&str] = &[
     "core_intrinsics",
     "asm_experimental_arch",
 ];
+const OXIDOS_ALLOW_LINTS: &[&str] = &[
+    // Allow internal features to be used. This is needed due to the core_intrinsics feature.
+    "internal_features",
+];
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub(crate) struct DistOxidOs {
@@ -129,6 +133,10 @@ impl Step for BuildOxidOS {
 
         cargo.current_dir(&source);
         cargo.rustflag(&format!("-Zallow-features={}", OXIDOS_ALLOW_UNSTABLE_FEATURES.join(",")));
+
+        for lint in OXIDOS_ALLOW_LINTS {
+            cargo.rustflag(&format!("-A{lint}"));
+        }
 
         for krate in OXIDOS_CRATES {
             cargo.args(["-p", *krate]);

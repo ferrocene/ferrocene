@@ -30,7 +30,7 @@
 #
 # If `change-id` does not match the version that is currently running,
 # `x.py` will prompt you to update it and check the related PR for more details.
-change-id = 117813
+change-id = 118703
 
 # =============================================================================
 # Tweaking how LLVM is compiled
@@ -600,6 +600,16 @@ change-id = 117813
 # desired in distributions, for example.
 #rpath = true
 
+# Indicates whether symbols should be stripped using `-Cstrip=symbols`.
+#strip = false
+
+# Indicates whether stack protectors should be used
+# via the unstable option `-Zstack-protector`.
+#
+# Valid options are : `none`(default),`basic`,`strong`, or `all`.
+# `strong` and `basic` options may be buggy and are not recommended, see rust-lang/rust#114903.
+#stack-protector = "none"
+
 # Prints each test name as it is executed, to help debug issues in the test harness itself.
 #verbose-tests = false
 
@@ -638,10 +648,12 @@ change-id = 117813
 #lld = false
 
 # Indicates whether LLD will be used to link Rust crates during bootstrap on
-# supported platforms. The LLD from the bootstrap distribution will be used
-# and not the LLD compiled during the bootstrap.
+# supported platforms.
+# If set to `true` or `"external"`, a global `lld` binary that has to be in $PATH
+# will be used.
+# If set to `"self-contained"`, rust-lld from the snapshot compiler will be used.
 #
-# LLD will not be used if we're cross linking.
+# On MSVC, LLD will not be used if we're cross linking.
 #
 # Explicitly setting the linker for a target will override this option when targeting MSVC.
 #use-lld = false

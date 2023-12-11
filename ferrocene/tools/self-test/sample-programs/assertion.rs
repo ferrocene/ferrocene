@@ -9,6 +9,8 @@ use subtraction_sys::sub;
 
 pub fn main() {
     assert_eq!(2, add(sub(2, 1), 1));
+    #[cfg(not(selftest_no_std))]
+    print!("123456789");
 }
 
 #[cfg(selftest_no_std)]

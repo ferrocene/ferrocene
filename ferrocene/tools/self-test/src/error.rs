@@ -6,6 +6,16 @@ use std::fmt::Display;
 use std::path::PathBuf;
 use std::process::Output;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum LinkerArgsErrorKind {
+    UnknownArgument,
+    DisallowedPlugin,
+    NoArgsFile,
+    InvalidArgsFile,
+    EmptyArgsFile,
+    MissingArg,
+}
+
 #[derive(Debug)]
 pub(crate) enum Error {
     NoSysroot,
@@ -28,7 +38,9 @@ pub(crate) enum Error {
     MissingCompilationArtifact { name: String, after_compiling: String },
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
     SuitableCCompilerNotFound { target: String },
-    LinkerArgsError { target: String },
+    LinkerArgsError { target: String, kind: LinkerArgsErrorKind },
+    RunningSampleProgramFailed { name: String, error: std::io::Error },
+    SampleProgramOutputWrong { name: String, expected: Vec<u8>, found: Vec<u8> },
 }
 
 impl Error {
@@ -55,6 +67,8 @@ impl Error {
             Error::UnexpectedCompilationArtifact { .. } => 22,
             Error::SuitableCCompilerNotFound { .. } => 23,
             Error::LinkerArgsError { .. } => 24,
+            Error::RunningSampleProgramFailed { .. } => 25,
+            Error::SampleProgramOutputWrong { .. } => 26,
         }
     }
 }
@@ -83,6 +97,8 @@ impl std::error::Error for Error {
             Error::UnexpectedCompilationArtifact { .. } => None,
             Error::SuitableCCompilerNotFound { .. } => None,
             Error::LinkerArgsError { .. } => None,
+            Error::RunningSampleProgramFailed { error, .. } => Some(error),
+            Error::SampleProgramOutputWrong { .. } => None,
         }
     }
 }
@@ -166,8 +182,17 @@ impl Display for Error {
             Error::SuitableCCompilerNotFound { target } => {
                 write!(f, "unable to find LLD-compatible C compiler for `{target}`")
             }
-            Error::LinkerArgsError { target } => {
-                write!(f, "Unable to analyse linker arguments for `{target}`")
+            Error::LinkerArgsError { target, kind } => {
+                write!(f, "Unable to analyse linker arguments for `{target}` (kind={kind:?})")
+            }
+            Error::RunningSampleProgramFailed { name, .. } => {
+                write!(f, "unable to execute sample program {name}")
+            }
+            Error::SampleProgramOutputWrong { name, expected, found } => {
+                write!(
+                    f,
+                    "sample program {name} should have produced {expected:?}, actually produced {found:?}"
+                )
             }
         }
     }

@@ -65,6 +65,22 @@ is a small wrapper around ``rust-lld`` which puts ``rust-lld`` into a *GNU ld
 compatible mode* and otherwise passes on any arguments given straight through to
 ``rust-lld``.
 
+Any C compiler acting as a *linker driver*, must:
+
+- Pass to the underlying linker any arguments which do not start with a `-`
+  character and which end with a recognised file extension for Object Code
+  (typically ``.o``) or a Static Library containing Object Code (typically
+  ``.a``).
+
+- Accept arguments of the form ``-Wl,<linker-arg>``, passing ``<linker-arg>`` to
+  the underlying linker as an argument.
+
+- Accept the ``-fuse-ld=lld`` argument, which must cause the C compiler to use
+  ``lld`` as the linker instead of its default linker.
+
+- Accept the ``-B <path>`` argument, which must cause the C compiler search
+  the path ``<path>`` for the ``lld`` linker binary.
+
 Regardless of whether a C compiler is used as a *linker-driver* or not, only the
 following arguments may be presented to the ``rust-lld`` linker for the linking
 of Ferrocene executables and shared libraries:
@@ -107,5 +123,6 @@ of Ferrocene executables and shared libraries:
 
 Alternative forms of the above options are acceptable:
 
-- Using a single dash (``-``) instead of two dashes (``--``),
+- Using a single dash (``-``) instead of two dashes (``--``)
+
 - Using the ``--option=value`` form instead of ``--option value`` form

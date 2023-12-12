@@ -3,4 +3,5 @@ Available TLS models:
     local-dynamic
     initial-exec
     local-exec
+    emulated
 

@@ -8,9 +8,9 @@
 
 use itertools::{Either, Itertools};
 use rustc_ast::ptr::P;
-use rustc_ast::visit::{self, AssocCtxt, BoundKind, FnCtxt, FnKind, Visitor};
+use rustc_ast::visit::{AssocCtxt, BoundKind, FnCtxt, FnKind, Visitor};
+use rustc_ast::walk_list;
 use rustc_ast::*;
-use rustc_ast::{walk_list, StaticItem};
 use rustc_ast_pretty::pprust::{self, State};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_feature::Features;
@@ -1271,14 +1271,15 @@ impl<'a> Visitor<'a> for AstValidator<'a> {
         // Functions cannot both be `const async` or `const gen`
         if let Some(&FnHeader {
             constness: Const::Yes(cspan),
-            coro_kind:
-                Some(
-                    CoroutineKind::Async { span: aspan, .. }
-                    | CoroutineKind::Gen { span: aspan, .. },
-                ),
+            coroutine_kind: Some(coroutine_kind),
             ..
         }) = fk.header()
         {
+            let aspan = match coroutine_kind {
+                CoroutineKind::Async { span: aspan, .. }
+                | CoroutineKind::Gen { span: aspan, .. }
+                | CoroutineKind::AsyncGen { span: aspan, .. } => aspan,
+            };
             // FIXME(gen_blocks): Report a different error for `const gen`
             self.err_handler().emit_err(errors::ConstAndAsync {
                 spans: vec![cspan, aspan],

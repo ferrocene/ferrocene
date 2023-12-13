@@ -87,11 +87,10 @@ Files: src/doc/rustc-dev-guide/mermaid.min.js
 Copyright: 2014-2021 Knut Sveidqvist
 License: MIT
 
-<<<<<<< HEAD
 Files: ferrocene/library/libc/*
 Copyright: The Rust libc developers
 License: MIT OR Apache-2.0
-=======
+
 Files: library/backtrace/*
 Copyright: 2014 Alex Crichton
            The Rust Project Developers (see https://thanks.rust-lang.org)
@@ -124,4 +123,3 @@ Copyright: 2003-2019 by the contributors listed in [CREDITS.TXT](https://github.
            2010 Apple Inc
            2003-2019 University of Illinois at Urbana-Champaign.
 License: NCSA AND Apache-2.0 WITH LLVM-exception
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

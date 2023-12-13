@@ -67,7 +67,7 @@ jobs:
           command: ferrocene/ci/scripts/detect-conflict-markers.py
       - run:
           name: Perform licensing checks
-          command: reuse lint
+          command: reuse --include-submodules lint
       - ferrocene-ci
 
   # Container dedicated to running ad-hoc tests that don't depend on an
@@ -86,7 +86,7 @@ jobs:
           llvm-subset: true
       - run:
           name: Perform licensing checks
-          command: reuse lint
+          command: reuse --include-submodules lint
       - run:
           name: Run x.py's own tests
           command: python3 src/bootstrap/bootstrap_test.py

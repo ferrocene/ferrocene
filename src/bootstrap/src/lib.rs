@@ -78,6 +78,8 @@ const EXTRA_CHECK_CFGS: &[(Option<Mode>, &str, Option<&[&'static str]>)] = &[
     (None, "bootstrap", None),
     (Some(Mode::Rustc), "parallel_compiler", None),
     (Some(Mode::ToolRustc), "parallel_compiler", None),
+    (Some(Mode::ToolRustc), "rust_analyzer", None),
+    (Some(Mode::ToolStd), "rust_analyzer", None),
     (Some(Mode::Codegen), "parallel_compiler", None),
     (Some(Mode::Std), "stdarch_intel_sde", None),
     (Some(Mode::Std), "no_fp_fmt_parse", None),
@@ -1896,4 +1898,23 @@ pub fn generate_smart_stamp_hash(dir: &Path, additional_input: &str) -> String {
     hasher.update(additional_input);
 
     hex::encode(hasher.finalize().as_slice())
+}
+
+/// Ensures that the behavior dump directory is properly initialized.
+pub fn prepare_behaviour_dump_dir(build: &Build) {
+    static INITIALIZED: OnceLock<bool> = OnceLock::new();
+
+    let dump_path = build.out.join("bootstrap-shims-dump");
+
+    let initialized = INITIALIZED.get().unwrap_or_else(|| &false);
+    if !initialized {
+        // clear old dumps
+        if dump_path.exists() {
+            t!(fs::remove_dir_all(&dump_path));
+        }
+
+        t!(fs::create_dir_all(&dump_path));
+
+        t!(INITIALIZED.set(true));
+    }
 }

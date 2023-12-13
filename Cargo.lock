@@ -4524,6 +4524,7 @@ dependencies = [
  "rustc_monomorphize",
  "rustc_parse",
  "rustc_passes",
+ "rustc_pattern_analysis",
  "rustc_privacy",
  "rustc_query_system",
  "rustc_resolve",
@@ -4997,6 +4998,7 @@ dependencies = [
  "rustc_infer",
  "rustc_macros",
  "rustc_middle",
+ "rustc_pattern_analysis",
  "rustc_session",
  "rustc_span",
  "rustc_target",
@@ -5129,6 +5131,26 @@ dependencies = [
  "rustc_span",
  "rustc_target",
  "rustc_trait_selection",
+ "tracing",
+]
+
+[[package]]
+name = "rustc_pattern_analysis"
+version = "0.0.0"
+dependencies = [
+ "rustc_apfloat",
+ "rustc_arena",
+ "rustc_data_structures",
+ "rustc_errors",
+ "rustc_fluent_macro",
+ "rustc_hir",
+ "rustc_index",
+ "rustc_macros",
+ "rustc_middle",
+ "rustc_session",
+ "rustc_span",
+ "rustc_target",
+ "smallvec",
  "tracing",
 ]
 

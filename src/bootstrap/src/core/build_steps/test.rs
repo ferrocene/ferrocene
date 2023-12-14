@@ -2551,7 +2551,10 @@ impl Step for Crate {
             let profiler_builtins_no_core_path = profiler_builtins_no_core_path.unwrap();
             cargo.rustflag("-Cinstrument-coverage");
             cargo.rustflag("--extern");
-            cargo.rustflag(&format!("profiler_builtins={}", profiler_builtins_no_core_path.to_string_lossy()));
+            cargo.rustflag(&format!("profiler_builtins={}", profiler_builtins_no_core_path.to_str().unwrap()));
+            cargo.rustflag("-L");
+            cargo.rustflag(profiler_builtins_no_core_path.parent().unwrap().to_str().unwrap());
+
             // dbg!(&cargo);
         }
         

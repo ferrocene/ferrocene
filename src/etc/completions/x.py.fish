@@ -578,6 +578,7 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -s v -l verbose -d 'use v
 complete -c x.py -n "__fish_seen_subcommand_from sign" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l include-default-paths -d 'include default paths in addition to the provided ones'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l dry-run -d 'dry run; don\'t build anything'
+complete -c x.py -n "__fish_seen_subcommand_from sign" -l dump-bootstrap-shims -d 'Indicates whether to dump the work done from bootstrap shims'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l json-output -d 'use message-format=json'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l bypass-bootstrap-lock -d 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate -d 'generate PGO profile with llvm built for rustc'

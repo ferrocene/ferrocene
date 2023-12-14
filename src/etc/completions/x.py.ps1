@@ -709,6 +709,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--incremental', 'incremental', [CompletionResultType]::ParameterName, 'use incremental compilation')
             [CompletionResult]::new('--include-default-paths', 'include-default-paths', [CompletionResultType]::ParameterName, 'include default paths in addition to the provided ones')
             [CompletionResult]::new('--dry-run', 'dry-run', [CompletionResultType]::ParameterName, 'dry run; don''t build anything')
+            [CompletionResult]::new('--dump-bootstrap-shims', 'dump-bootstrap-shims', [CompletionResultType]::ParameterName, 'Indicates whether to dump the work done from bootstrap shims')
             [CompletionResult]::new('--json-output', 'json-output', [CompletionResultType]::ParameterName, 'use message-format=json')
             [CompletionResult]::new('--bypass-bootstrap-lock', 'bypass-bootstrap-lock', [CompletionResultType]::ParameterName, 'Bootstrap uses this value to decide whether it should bypass locking the build process. This is rarely needed (e.g., compiling the std library for different targets in parallel)')
             [CompletionResult]::new('--llvm-profile-generate', 'llvm-profile-generate', [CompletionResultType]::ParameterName, 'generate PGO profile with llvm built for rustc')

@@ -36,7 +36,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Python3 is installed by apt, and we use the same file than the container ubuntu-18
-COPY ../reuse-requirements.txt /tmp/reuse-requirements.txt
+COPY reuse-requirements.txt /tmp/reuse-requirements.txt
 RUN python3 -m pip install -r /tmp/reuse-requirements.txt && \
     rm -rf /tmp/reuse-requirements.txt
 

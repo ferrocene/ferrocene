@@ -82,7 +82,7 @@ RUN mkdir /tmp/python \
 
 # The REUSE tool is used to check the licensing status. It's not available in
 # the Ubuntu archives so we have to install it with pip.
-COPY ../reuse-requirements.txt /tmp/reuse-requirements.txt
+COPY reuse-requirements.txt /tmp/reuse-requirements.txt
 RUN python3 -m pip install -r /tmp/reuse-requirements.txt && \
     rm -rf /tmp/reuse-requirements.txt
 

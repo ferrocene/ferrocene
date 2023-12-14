@@ -29,6 +29,11 @@ CLONE_DIRECTORIES=(
     "lld"
     "llvm/LICENSE.txt"
     "llvm/cmake/modules"
+    # Some files in these directories have different licenses not used anywhere
+    # else in the Ferrocene monorepo. If we don't fetch them as part of the
+    # subset, invoking REUSE will complain about missing licenses in jobs that
+    # use the LLVM subset rather than the whole LLVM clone.
+    "llvm/include"
 )
 
 set -euo pipefail

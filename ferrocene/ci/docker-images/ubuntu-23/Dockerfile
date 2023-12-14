@@ -20,13 +20,13 @@ RUN apt-get update \
         ca-certificates \
         python3 \
         python3-venv \
+        python3-pip \
         libedit-dev \
         libssl-dev \
         zlib1g-dev \
         moreutils \
         cmake \
         python-is-python3 \
-        reuse \
         # Needed by the `commit-checks` CI job:
         llvm-17-tools \
         llvm-17-dev \
@@ -37,7 +37,7 @@ RUN apt-get update \
 
 # Python3 is installed by apt, and we use the same file than the container ubuntu-18
 COPY reuse-requirements.txt /tmp/reuse-requirements.txt
-RUN python3 -m pip3 install -r /tmp/reuse-requirements.txt && \
+RUN python3 -m pip install --break-system-packages -r /tmp/reuse-requirements.txt && \
     rm -rf /tmp/reuse-requirements.txt
 
 # Tell programs relying on the system language (like Python) to use UTF-8.

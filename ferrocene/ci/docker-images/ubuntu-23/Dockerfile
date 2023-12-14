@@ -26,7 +26,7 @@ RUN apt-get update \
         moreutils \
         cmake \
         python-is-python3 \
-        reuse \
+        reuse=2.10 \
         # Needed by the `commit-checks` CI job:
         llvm-17-tools \
         llvm-17-dev \

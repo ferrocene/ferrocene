@@ -420,8 +420,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "yansi-term", // this is a false-positive: it's only used by rustfmt, but because it's enabled through a feature, tidy thinks it's used by rustc as well.
     "yoke",
     "yoke-derive",
-    "zerocopy",
-    "zerocopy-derive",
     "zerofrom",
     "zerofrom-derive",
     "zeroize", // this is a false positive: it's only used by generate-tarball

@@ -572,7 +572,7 @@ fn construct_const<'a, 'tcx>(
     let hir_id = tcx.local_def_id_to_hir_id(def);
 
     // Figure out what primary body this item has.
-    let (span, const_ty_span) = match tcx.hir().get(hir_id) {
+    let (span, const_ty_span) = match tcx.hir_node(hir_id) {
         Node::Item(hir::Item {
             kind: hir::ItemKind::Static(ty, _, _) | hir::ItemKind::Const(ty, _, _),
             span,
@@ -640,7 +640,9 @@ fn construct_error(tcx: TyCtxt<'_>, def_id: LocalDefId, guar: ErrorGuaranteed) -
         }
         DefKind::Closure if coroutine_kind.is_some() => {
             let coroutine_ty = tcx.type_of(def_id).instantiate_identity();
-            let ty::Coroutine(_, args, _) = coroutine_ty.kind() else { bug!() };
+            let ty::Coroutine(_, args, _) = coroutine_ty.kind() else {
+                bug!("expected type of coroutine-like closure to be a coroutine")
+            };
             let args = args.as_coroutine();
             let yield_ty = args.yield_ty();
             let return_ty = args.return_ty();
@@ -648,7 +650,9 @@ fn construct_error(tcx: TyCtxt<'_>, def_id: LocalDefId, guar: ErrorGuaranteed) -
         }
         DefKind::Closure => {
             let closure_ty = tcx.type_of(def_id).instantiate_identity();
-            let ty::Closure(_, args) = closure_ty.kind() else { bug!() };
+            let ty::Closure(_, args) = closure_ty.kind() else {
+                bug!("expected type of closure to be a closure")
+            };
             let args = args.as_closure();
             let sig = tcx.liberate_late_bound_regions(def_id.to_def_id(), args.sig());
             let self_ty = match args.kind() {

@@ -15,7 +15,9 @@ use hir::def::DefKind;
 use polonius_engine::Atom;
 use rustc_data_structures::captures::Captures;
 use rustc_data_structures::intern::Interned;
-use rustc_errors::{DiagnosticArgValue, ErrorGuaranteed, IntoDiagnosticArg, MultiSpan};
+use rustc_errors::{
+    DiagnosticArgValue, DiagnosticMessage, ErrorGuaranteed, IntoDiagnosticArg, MultiSpan,
+};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_hir::LangItem;
@@ -42,23 +44,18 @@ use rustc_type_ir::PredicateKind as IrPredicateKind;
 use rustc_type_ir::RegionKind as IrRegionKind;
 use rustc_type_ir::TyKind as IrTyKind;
 use rustc_type_ir::TyKind::*;
+use rustc_type_ir::TypeAndMut as IrTypeAndMut;
 
 use super::GenericParamDefKind;
 
-// Re-export the `TyKind` from `rustc_type_ir` here for convenience
+// Re-export and re-parameterize some `I = TyCtxt<'tcx>` types here
 #[rustc_diagnostic_item = "TyKind"]
 pub type TyKind<'tcx> = IrTyKind<TyCtxt<'tcx>>;
 pub type RegionKind<'tcx> = IrRegionKind<TyCtxt<'tcx>>;
 pub type ConstKind<'tcx> = IrConstKind<TyCtxt<'tcx>>;
 pub type PredicateKind<'tcx> = IrPredicateKind<TyCtxt<'tcx>>;
 pub type ClauseKind<'tcx> = IrClauseKind<TyCtxt<'tcx>>;
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, TyEncodable, TyDecodable)]
-#[derive(HashStable, TypeFoldable, TypeVisitable, Lift)]
-pub struct TypeAndMut<'tcx> {
-    pub ty: Ty<'tcx>,
-    pub mutbl: hir::Mutability,
-}
+pub type TypeAndMut<'tcx> = IrTypeAndMut<TyCtxt<'tcx>>;
 
 #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, TyEncodable, TyDecodable, Copy)]
 #[derive(HashStable)]
@@ -2005,7 +2002,7 @@ impl<'tcx> Ty<'tcx> {
     pub fn new_error_with_message<S: Into<MultiSpan>>(
         tcx: TyCtxt<'tcx>,
         span: S,
-        msg: impl Into<String>,
+        msg: impl Into<DiagnosticMessage>,
     ) -> Ty<'tcx> {
         let reported = tcx.sess.span_delayed_bug(span, msg);
         Ty::new(tcx, Error(reported))
@@ -2813,6 +2810,15 @@ impl<'tcx> Ty<'tcx> {
             Error(_) => Some(ty::ClosureKind::Fn),
 
             _ => bug!("cannot convert type `{:?}` to a closure kind", self),
+        }
+    }
+
+    /// Inverse of [`Ty::to_opt_closure_kind`].
+    pub fn from_closure_kind(tcx: TyCtxt<'tcx>, kind: ty::ClosureKind) -> Ty<'tcx> {
+        match kind {
+            ty::ClosureKind::Fn => tcx.types.i8,
+            ty::ClosureKind::FnMut => tcx.types.i16,
+            ty::ClosureKind::FnOnce => tcx.types.i32,
         }
     }
 

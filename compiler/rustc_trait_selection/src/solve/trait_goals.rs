@@ -256,7 +256,10 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
                     Err(NoSolution)
                 }
             }
-            ty::ImplPolarity::Reservation => bug!(),
+            // FIXME: Goal polarity should be split from impl polarity
+            ty::ImplPolarity::Reservation => {
+                bug!("we never expect a `Reservation` polarity in a trait goal")
+            }
         }
     }
 
@@ -445,7 +448,7 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
             return Err(NoSolution);
         }
 
-        // FIXME(-Ztrait-solver=next): Implement this when we get const working in the new solver
+        // FIXME(-Znext-solver): Implement this when we get const working in the new solver
 
         // `Destruct` is automatically implemented for every type in
         // non-const environments.

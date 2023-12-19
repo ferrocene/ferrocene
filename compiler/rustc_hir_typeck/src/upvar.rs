@@ -261,7 +261,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // Unify the (as yet unbound) type variable in the closure
             // args with the kind we inferred.
             let closure_kind_ty = closure_args.as_closure().kind_ty();
-            self.demand_eqtype(span, closure_kind.to_ty(self.tcx), closure_kind_ty);
+            self.demand_eqtype(
+                span,
+                Ty::from_closure_kind(self.tcx, closure_kind),
+                closure_kind_ty,
+            );
 
             // If we have an origin, store it.
             if let Some(mut origin) = origin {
@@ -315,11 +319,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let final_tupled_upvars_type = Ty::new_tup(self.tcx, &final_upvar_tys);
         self.demand_suptype(span, args.tupled_upvars_ty(), final_tupled_upvars_type);
 
-        let fake_reads = delegate
-            .fake_reads
-            .into_iter()
-            .map(|(place, cause, hir_id)| (place, cause, hir_id))
-            .collect();
+        let fake_reads = delegate.fake_reads;
+
         self.typeck_results.borrow_mut().closure_fake_reads.insert(closure_def_id, fake_reads);
 
         if self.tcx.sess.opts.unstable_opts.profile_closures {
@@ -853,7 +854,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             // Looks like a macro fragment. Try to find the real block.
                             if let Some(hir::Node::Expr(&hir::Expr {
                                 kind: hir::ExprKind::Block(block, ..), ..
-                            })) = self.tcx.hir().find(body_id.hir_id) {
+                            })) = self.tcx.opt_hir_node(body_id.hir_id) {
                                 // If the body is a block (with `{..}`), we use the span of that block.
                                 // E.g. with a `|| $body` expanded from a `m!({ .. })`, we use `{ .. }`, and not `$body`.
                                 // Since we know it's a block, we know we can insert the `let _ = ..` without
@@ -911,8 +912,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             Applicability::HasPlaceholders
                         );
                     }
-
-                    lint
                 },
             );
         }
@@ -1673,7 +1672,7 @@ fn apply_capture_kind_on_capture_ty<'tcx>(
 fn drop_location_span(tcx: TyCtxt<'_>, hir_id: hir::HirId) -> Span {
     let owner_id = tcx.hir().get_enclosing_scope(hir_id).unwrap();
 
-    let owner_node = tcx.hir().get(owner_id);
+    let owner_node = tcx.hir_node(owner_id);
     let owner_span = match owner_node {
         hir::Node::Item(item) => match item.kind {
             hir::ItemKind::Fn(_, _, owner_id) => tcx.hir().span(owner_id.hir_id),

@@ -262,7 +262,10 @@ fn report_mismatched_rpitit_signature<'tcx>(
 
     if tcx.asyncness(impl_m_def_id).is_async() && tcx.asyncness(trait_m_def_id).is_async() {
         let ty::Alias(ty::Projection, future_ty) = return_ty.kind() else {
-            bug!();
+            span_bug!(
+                tcx.def_span(trait_m_def_id),
+                "expected return type of async fn in trait to be a AFIT projection"
+            );
         };
         let Some(future_output_ty) = tcx
             .explicit_item_bounds(future_ty.def_id)
@@ -272,13 +275,13 @@ fn report_mismatched_rpitit_signature<'tcx>(
                 _ => None,
             })
         else {
-            bug!()
+            span_bug!(tcx.def_span(trait_m_def_id), "expected `Future` projection bound in AFIT");
         };
         return_ty = future_output_ty;
     }
 
     let (span, impl_return_span, pre, post) =
-        match tcx.hir().get_by_def_id(impl_m_def_id.expect_local()).fn_decl().unwrap().output {
+        match tcx.hir_node_by_def_id(impl_m_def_id.expect_local()).fn_decl().unwrap().output {
             hir::FnRetTy::DefaultReturn(span) => (tcx.def_span(impl_m_def_id), span, "-> ", " "),
             hir::FnRetTy::Return(ty) => (ty.span, ty.span, "", ""),
         };

@@ -748,7 +748,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                     }
                     if let hir::Node::Item(hir::Item {
                         kind: hir::ItemKind::OpaqueTy { .. }, ..
-                    }) = self.tcx.hir().get(parent_id)
+                    }) = self.tcx.hir_node(parent_id)
                     {
                         let mut err = self.tcx.sess.struct_span_err(
                             lifetime.ident.span,
@@ -925,7 +925,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                                     "you can use the `'static` lifetime directly, in place of `{}`",
                                     lifetime.ident,
                                 );
-                                lint.help(help)
+                                lint.help(help);
                             },
                         );
                     }
@@ -935,32 +935,6 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 self.visit_ty(lhs_ty);
                 self.visit_ty(rhs_ty);
             }
-        }
-    }
-
-    fn visit_param_bound(&mut self, bound: &'tcx hir::GenericBound<'tcx>) {
-        match bound {
-            hir::GenericBound::LangItemTrait(_, _, hir_id, _) => {
-                // FIXME(jackh726): This is pretty weird. `LangItemTrait` doesn't go
-                // through the regular poly trait ref code, so we don't get another
-                // chance to introduce a binder. For now, I'm keeping the existing logic
-                // of "if there isn't a Binder scope above us, add one", but I
-                // imagine there's a better way to go about this.
-                let (binders, scope_type) = self.poly_trait_ref_binder_info();
-
-                self.record_late_bound_vars(*hir_id, binders);
-                let scope = Scope::Binder {
-                    hir_id: *hir_id,
-                    bound_vars: FxIndexMap::default(),
-                    s: self.scope,
-                    scope_type,
-                    where_bound_origin: None,
-                };
-                self.with(scope, |this| {
-                    intravisit::walk_param_bound(this, bound);
-                });
-            }
-            _ => intravisit::walk_param_bound(self, bound),
         }
     }
 
@@ -1004,7 +978,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
 
 fn object_lifetime_default(tcx: TyCtxt<'_>, param_def_id: LocalDefId) -> ObjectLifetimeDefault {
     debug_assert_eq!(tcx.def_kind(param_def_id), DefKind::TyParam);
-    let hir::Node::GenericParam(param) = tcx.hir().get_by_def_id(param_def_id) else {
+    let hir::Node::GenericParam(param) = tcx.hir_node_by_def_id(param_def_id) else {
         bug!("expected GenericParam for object_lifetime_default");
     };
     match param.source {
@@ -1300,12 +1274,16 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                             what,
                         })
                     }
-                    _ => unreachable!(),
+                    kind => span_bug!(
+                        use_span,
+                        "did not expect to resolve lifetime to {}",
+                        kind.descr(param_def_id)
+                    ),
                 };
                 def = ResolvedArg::Error(guar);
             } else if let Some(body_id) = outermost_body {
                 let fn_id = self.tcx.hir().body_owner(body_id);
-                match self.tcx.hir().get(fn_id) {
+                match self.tcx.hir_node(fn_id) {
                     Node::Item(hir::Item { owner_id, kind: hir::ItemKind::Fn(..), .. })
                     | Node::TraitItem(hir::TraitItem {
                         owner_id,
@@ -1441,7 +1419,11 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                             what,
                         })
                     }
-                    _ => unreachable!(),
+                    kind => span_bug!(
+                        use_span,
+                        "did not expect to resolve non-lifetime param to {}",
+                        kind.descr(param_def_id.to_def_id())
+                    ),
                 };
                 self.map.defs.insert(hir_id, ResolvedArg::Error(guar));
             } else {
@@ -2122,8 +2104,8 @@ pub fn deny_non_region_late_bound(
     let mut first = true;
 
     for (var, arg) in bound_vars {
-        let Node::GenericParam(param) = tcx.hir().get_by_def_id(*var) else {
-            bug!();
+        let Node::GenericParam(param) = tcx.hir_node_by_def_id(*var) else {
+            span_bug!(tcx.def_span(*var), "expected bound-var def-id to resolve to param");
         };
 
         let what = match param.kind {

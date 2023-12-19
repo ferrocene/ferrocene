@@ -520,9 +520,6 @@ pub trait LintContext {
     /// Emit a lint at the appropriate level, with an optional associated span and an existing
     /// diagnostic.
     ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed
-    /// explanation.
-    ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
     fn lookup_with_diagnostics(
@@ -530,9 +527,7 @@ pub trait LintContext {
         lint: &'static Lint,
         span: Option<impl Into<MultiSpan>>,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
         diagnostic: BuiltinLintDiagnostics,
     ) {
         // We first generate a blank diagnostic.
@@ -706,9 +701,13 @@ pub trait LintContext {
                 },
                 BuiltinLintDiagnostics::UnexpectedCfgName((name, name_span), value) => {
                     let possibilities: Vec<Symbol> = sess.parse_sess.check_config.expecteds.keys().copied().collect();
+                    let is_from_cargo = std::env::var_os("CARGO").is_some();
+                    let mut is_feature_cfg = name == sym::feature;
 
+                    if is_feature_cfg && is_from_cargo {
+                        db.help("consider defining some features in `Cargo.toml`");
                     // Suggest the most probable if we found one
-                    if let Some(best_match) = find_best_match_for_name(&possibilities, name, None) {
+                    } else if let Some(best_match) = find_best_match_for_name(&possibilities, name, None) {
                         if let Some(ExpectedValues::Some(best_match_values)) =
                             sess.parse_sess.check_config.expecteds.get(&best_match) {
                             let mut possibilities = best_match_values.iter()
@@ -741,8 +740,8 @@ pub trait LintContext {
                         } else {
                             db.span_suggestion(name_span, "there is a config with a similar name", best_match, Applicability::MaybeIncorrect);
                         }
-                    } else if name == sym::feature && std::env::var_os("CARGO").is_some() {
-                        db.help("consider defining some features in `Cargo.toml`");
+
+                        is_feature_cfg |= best_match == sym::feature;
                     } else if !possibilities.is_empty() {
                         let mut possibilities = possibilities.iter()
                             .map(Symbol::as_str)
@@ -756,6 +755,23 @@ pub trait LintContext {
                         // once.
                         db.help_once(format!("expected names are: `{possibilities}`"));
                     }
+
+                    let inst = if let Some((value, _value_span)) = value {
+                        let pre = if is_from_cargo { "\\" } else { "" };
+                        format!("cfg({name}, values({pre}\"{value}{pre}\"))")
+                    } else {
+                        format!("cfg({name})")
+                    };
+
+                    if is_from_cargo {
+                        if !is_feature_cfg {
+                            db.help(format!("consider using a Cargo feature instead or adding `println!(\"cargo:rustc-check-cfg={inst}\");` to the top of a `build.rs`"));
+                        }
+                        db.note("see <https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#check-cfg> for more information about checking conditional configuration");
+                    } else {
+                        db.help(format!("to expect this configuration use `--check-cfg={inst}`"));
+                        db.note("see <https://doc.rust-lang.org/nightly/unstable-book/compiler-flags/check-cfg.html> for more information about checking conditional configuration");
+                    }
                 },
                 BuiltinLintDiagnostics::UnexpectedCfgValue((name, name_span), value) => {
                     let Some(ExpectedValues::Some(values)) = &sess.parse_sess.check_config.expecteds.get(&name) else {
@@ -767,6 +783,7 @@ pub trait LintContext {
                         .copied()
                         .flatten()
                         .collect();
+                    let is_from_cargo = std::env::var_os("CARGO").is_some();
 
                     // Show the full list if all possible values for a given name, but don't do it
                     // for names as the possibilities could be very long
@@ -787,6 +804,8 @@ pub trait LintContext {
                                 db.span_suggestion(value_span, "there is a expected value with a similar name", format!("\"{best_match}\""), Applicability::MaybeIncorrect);
 
                             }
+                        } else if name == sym::feature && is_from_cargo {
+                            db.help(format!("consider defining `{name}` as feature in `Cargo.toml`"));
                         } else if let &[first_possibility] = &possibilities[..] {
                             db.span_suggestion(name_span.shrink_to_hi(), "specify a config value", format!(" = \"{first_possibility}\""), Applicability::MaybeIncorrect);
                         }
@@ -795,6 +814,27 @@ pub trait LintContext {
                         if let Some((_value, value_span)) = value {
                             db.span_suggestion(name_span.shrink_to_hi().to(value_span), "remove the value", "", Applicability::MaybeIncorrect);
                         }
+                    }
+
+                    let inst = if let Some((value, _value_span)) = value {
+                        let pre = if is_from_cargo { "\\" } else { "" };
+                        format!("cfg({name}, values({pre}\"{value}{pre}\"))")
+                    } else {
+                        format!("cfg({name})")
+                    };
+
+                    if is_from_cargo {
+                        if name == sym::feature {
+                            if let Some((value, _value_span)) = value {
+                                db.help(format!("consider adding `{value}` as a feature in `Cargo.toml`"));
+                            }
+                        } else {
+                            db.help(format!("consider using a Cargo feature instead or adding `println!(\"cargo:rustc-check-cfg={inst}\");` to the top of a `build.rs`"));
+                        }
+                        db.note("see <https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#check-cfg> for more information about checking conditional configuration");
+                    } else {
+                        db.help(format!("to expect this configuration use `--check-cfg={inst}`"));
+                        db.note("see <https://doc.rust-lang.org/nightly/unstable-book/compiler-flags/check-cfg.html> for more information about checking conditional configuration");
                     }
                 },
                 BuiltinLintDiagnostics::DeprecatedWhereclauseLocation(new_span, suggestion) => {
@@ -941,8 +981,6 @@ pub trait LintContext {
     // set the span in their `decorate` function (preferably using set_span).
     /// Emit a lint at the appropriate level, with an optional associated span.
     ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed explanation.
-    ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
     fn lookup<S: Into<MultiSpan>>(
@@ -950,9 +988,7 @@ pub trait LintContext {
         lint: &'static Lint,
         span: Option<S>,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     );
 
     /// Emit a lint at `span` from a lint struct (some type that implements `DecorateLint`,
@@ -963,12 +999,12 @@ pub trait LintContext {
         span: S,
         decorator: impl for<'a> DecorateLint<'a, ()>,
     ) {
-        self.lookup(lint, Some(span), decorator.msg(), |diag| decorator.decorate_lint(diag));
+        self.lookup(lint, Some(span), decorator.msg(), |diag| {
+            decorator.decorate_lint(diag);
+        });
     }
 
     /// Emit a lint at the appropriate level, with an associated span.
-    ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed explanation.
     ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
@@ -977,9 +1013,7 @@ pub trait LintContext {
         lint: &'static Lint,
         span: S,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         self.lookup(lint, Some(span), msg, decorate);
     }
@@ -988,13 +1022,11 @@ pub trait LintContext {
     /// generated by `#[derive(LintDiagnostic)]`).
     fn emit_lint(&self, lint: &'static Lint, decorator: impl for<'a> DecorateLint<'a, ()>) {
         self.lookup(lint, None as Option<Span>, decorator.msg(), |diag| {
-            decorator.decorate_lint(diag)
+            decorator.decorate_lint(diag);
         });
     }
 
     /// Emit a lint at the appropriate level, with no associated span.
-    ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed explanation.
     ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
@@ -1002,9 +1034,7 @@ pub trait LintContext {
         &self,
         lint: &'static Lint,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         self.lookup(lint, None as Option<Span>, msg, decorate);
     }
@@ -1068,9 +1098,7 @@ impl<'tcx> LintContext for LateContext<'tcx> {
         lint: &'static Lint,
         span: Option<S>,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         let hir_id = self.last_node_with_lint_attrs;
 
@@ -1097,9 +1125,7 @@ impl LintContext for EarlyContext<'_> {
         lint: &'static Lint,
         span: Option<S>,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         self.builder.struct_lint(lint, span.map(|s| s.into()), msg, decorate)
     }

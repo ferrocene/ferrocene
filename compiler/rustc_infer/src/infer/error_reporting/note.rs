@@ -22,7 +22,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             infer::Subtype(ref trace) => RegionOriginNote::WithRequirement {
                 span: trace.cause.span,
                 requirement: ObligationCauseAsDiagArg(trace.cause.clone()),
-                expected_found: self.values_str(trace.values).map(|(e, f, _, _)| (e, f)),
+                expected_found: self.values_str(trace.values).map(|(e, f, _)| (e, f)),
             }
             .add_to_diagnostic(err),
             infer::Reborrow(span) => {
@@ -375,7 +375,9 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     err.span_note(span, "the lifetime requirement is introduced here");
                     err
                 } else {
-                    unreachable!()
+                    unreachable!(
+                        "control flow ensures we have a `BindingObligation` or `ExprBindingObligation` here..."
+                    )
                 }
             }
             infer::Subtype(box trace) => {

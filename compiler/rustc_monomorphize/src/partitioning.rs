@@ -212,11 +212,17 @@ where
     let cgu_name_cache = &mut FxHashMap::default();
 
     for mono_item in mono_items {
-        // Handle only root items directly here. Inlined items are handled at
-        // the bottom of the loop based on reachability.
+        // Handle only root (GloballyShared) items directly here. Inlined (LocalCopy) items
+        // are handled at the bottom of the loop based on reachability, with one exception.
+        // The #[lang = "start"] item is the program entrypoint, so there are no calls to it in MIR.
+        // So even if its mode is LocalCopy, we need to treat it like a root.
         match mono_item.instantiation_mode(cx.tcx) {
             InstantiationMode::GloballyShared { .. } => {}
-            InstantiationMode::LocalCopy => continue,
+            InstantiationMode::LocalCopy => {
+                if Some(mono_item.def_id()) != cx.tcx.lang_items().start_fn() {
+                    continue;
+                }
+            }
         }
 
         let characteristic_def_id = characteristic_def_id_of_mono_item(cx.tcx, mono_item);
@@ -883,7 +889,7 @@ fn mono_item_visibility<'tcx>(
 }
 
 fn default_visibility(tcx: TyCtxt<'_>, id: DefId, is_generic: bool) -> Visibility {
-    if !tcx.sess.target.default_hidden_visibility {
+    if !tcx.sess.default_hidden_visibility() {
         return Visibility::Default;
     }
 

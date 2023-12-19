@@ -5,7 +5,6 @@
 //! parent directory, and otherwise documentation can be found throughout the `build`
 //! directory in each respective module.
 
-#[cfg(all(any(unix, windows), not(target_os = "solaris")))]
 use std::io::Write;
 #[cfg(all(any(unix, windows), not(target_os = "solaris")))]
 use std::process;
@@ -175,7 +174,7 @@ fn check_version(config: &Config) -> Option<String> {
                 "update `config.toml` to use `change-id = {latest_change_id}` instead"
             ));
 
-            if io::stdout().is_terminal() {
+            if io::stdout().is_terminal() && !config.dry_run() {
                 t!(fs::write(warned_id_path, latest_change_id.to_string()));
             }
         }

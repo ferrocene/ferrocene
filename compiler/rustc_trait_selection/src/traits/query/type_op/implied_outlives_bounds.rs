@@ -50,7 +50,7 @@ impl<'tcx> super::QueryTypeOp<'tcx> for ImpliedOutlivesBounds<'tcx> {
         tcx.implied_outlives_bounds(canonicalized)
     }
 
-    fn perform_locally_in_new_solver(
+    fn perform_locally_with_next_solver(
         ocx: &ObligationCtxt<'_, 'tcx>,
         key: ParamEnvAnd<'tcx, Self>,
     ) -> Result<Self::QueryResponse, NoSolution> {
@@ -184,7 +184,9 @@ pub fn compute_implied_outlives_bounds_inner<'tcx>(
                 push_outlives_components(tcx, ty_a, &mut components);
                 implied_bounds.extend(implied_bounds_from_components(r_b, components))
             }
-            ty::GenericArgKind::Const(_) => unreachable!(),
+            ty::GenericArgKind::Const(_) => {
+                unreachable!("consts do not participate in outlives bounds")
+            }
         }
     }
 

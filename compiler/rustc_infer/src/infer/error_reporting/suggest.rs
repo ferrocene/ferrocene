@@ -42,7 +42,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         ]
         .into_iter()
         .find_map(|(id, ty)| {
-            let hir::Node::Block(blk) = self.tcx.hir().get(id?) else { return None };
+            let hir::Node::Block(blk) = self.tcx.hir_node(id?) else { return None };
             self.could_remove_semicolon(blk, ty)
         });
         match remove_semicolon {
@@ -62,7 +62,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 let mut ret = None;
                 for (id, ty) in [(first_id, second_ty), (second_id, first_ty)] {
                     if let Some(id) = id
-                        && let hir::Node::Block(blk) = self.tcx.hir().get(id)
+                        && let hir::Node::Block(blk) = self.tcx.hir_node(id)
                         && let Some(diag) = self.consider_returning_binding_diag(blk, ty)
                     {
                         ret = Some(diag);
@@ -668,26 +668,16 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     (
                         hir::ItemKind::OpaqueTy(hir::OpaqueTy { bounds: last_bounds, .. }),
                         hir::ItemKind::OpaqueTy(hir::OpaqueTy { bounds: exp_bounds, .. }),
-                    ) if std::iter::zip(*last_bounds, *exp_bounds).all(|(left, right)| {
-                        match (left, right) {
-                            (
-                                hir::GenericBound::Trait(tl, ml),
-                                hir::GenericBound::Trait(tr, mr),
-                            ) if tl.trait_ref.trait_def_id() == tr.trait_ref.trait_def_id()
+                    ) if std::iter::zip(*last_bounds, *exp_bounds).all(|(left, right)| match (
+                        left, right,
+                    ) {
+                        (hir::GenericBound::Trait(tl, ml), hir::GenericBound::Trait(tr, mr))
+                            if tl.trait_ref.trait_def_id() == tr.trait_ref.trait_def_id()
                                 && ml == mr =>
-                            {
-                                true
-                            }
-                            (
-                                hir::GenericBound::LangItemTrait(langl, _, _, argsl),
-                                hir::GenericBound::LangItemTrait(langr, _, _, argsr),
-                            ) if langl == langr => {
-                                // FIXME: consider the bounds!
-                                debug!("{:?} {:?}", argsl, argsr);
-                                true
-                            }
-                            _ => false,
+                        {
+                            true
                         }
+                        _ => false,
                     }) =>
                     {
                         StatementAsExpression::NeedsBoxing

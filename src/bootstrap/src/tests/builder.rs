@@ -41,6 +41,9 @@ fn configure_with_args(cmd: &[String], host: &[&str], target: &[&str]) -> Config
 fn first<A, B>(v: Vec<(A, B)>) -> Vec<A> {
     v.into_iter().map(|(a, _)| a).collect::<Vec<_>>()
 }
+fn second<A, B>(v: Vec<(A, B)>) -> Vec<B> {
+    v.into_iter().map(|(_, b)| b).collect::<Vec<_>>()
+}
 
 fn run_build(paths: &[PathBuf], config: Config) -> Cache {
     let kind = config.cmd.kind();
@@ -268,8 +271,8 @@ mod defaults {
 }
 
 mod dist {
-    use super::{first, run_build, Config};
-    use crate::core::builder::*;
+    use super::{first, second, run_build, Config};
+    use crate::{core::builder::*, ferrocene::code_coverage::ProfilerBuiltinsNoCore};
     use pretty_assertions::assert_eq;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {
@@ -571,6 +574,7 @@ mod dist {
             only_modified: false,
             skip: vec![],
             extra_checks: None,
+            coverage: false,
         };
 
         let build = Build::new(config);
@@ -643,6 +647,7 @@ mod dist {
             run: None,
             only_modified: false,
             extra_checks: None,
+            coverage: false,
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();
@@ -681,5 +686,34 @@ mod dist {
                 tool::Rustdoc { compiler: Compiler { host: a, stage: 2 } },
             ]
         );
+    }
+    #[test]
+    fn test_std_coverage() {
+        // Behavior of `x.py test --coverage`
+        let mut config = configure(&["A"], &["A"]);
+        config.cmd = Subcommand::Test {
+            test_args: vec![],
+            rustc_args: vec![],
+            no_fail_fast: false,
+            doc: true,
+            no_doc: false,
+            skip: vec![],
+            bless: false,
+            force_rerun: false,
+            compare_mode: None,
+            rustfix_coverage: false,
+            pass: None,
+            run: None,
+            only_modified: false,
+            extra_checks: None,
+            coverage: true,
+        };
+
+        let build = Build::new(config);
+        let mut builder = Builder::new(&build);
+
+        builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Test), &[]);
+        // let a = TargetSelection::from_user("A");
+        assert_eq!(second(builder.cache.all::<ProfilerBuiltinsNoCore>()), &[()]);
     }
 }

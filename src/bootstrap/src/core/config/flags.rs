@@ -380,6 +380,9 @@ pub enum Subcommand {
         /// enable this to generate a Rustfix coverage file, which is saved in
         /// `/<build_base>/rustfix_missing_coverage.txt`
         rustfix_coverage: bool,
+        /// generate coverage for tests
+        #[arg(long)]
+        coverage: bool
     },
     /// Build and run some benchmarks
     Bench {

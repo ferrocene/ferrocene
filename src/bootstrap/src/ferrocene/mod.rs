@@ -8,6 +8,7 @@ pub(crate) mod run;
 pub(crate) mod sign;
 pub(crate) mod test;
 pub(crate) mod tool;
+pub(crate) mod code_coverage;
 
 use crate::builder::Builder;
 use crate::core::config::{Config, TargetSelection};

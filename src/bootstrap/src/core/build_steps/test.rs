@@ -25,6 +25,7 @@ use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
+use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils;
 use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::exec::BootstrapCommand;
@@ -2505,6 +2506,12 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
+        let profiler_builtins_no_core_path = if builder.config.ferrocene_code_coverage {
+            Some(builder.ensure(ProfilerBuiltinsNoCore))
+        } else {
+            None
+        };
+
         // See [field@compile::Std::force_recompile].
         builder.ensure(compile::Std::force_recompile(compiler, target));
         builder.ensure(RemoteCopyLibs { compiler, target });
@@ -2517,14 +2524,16 @@ impl Step for Crate {
 
         let mut cargo =
             builder.cargo(compiler, mode, SourceType::InTree, target, builder.kind.as_str());
-        match mode {
-            Mode::Std => {
-                compile::std_cargo(builder, target, compiler.stage, &mut cargo);
-                // `std_cargo` actually does the wrong thing: it passes `--sysroot build/host/stage2`,
-                // but we want to use the force-recompile std we just built in `build/host/stage2-test-sysroot`.
-                // Override it.
-                if builder.download_rustc() && compiler.stage > 0 {
-                    let sysroot = builder
+        
+            
+            match mode {
+                Mode::Std => {
+                    compile::std_cargo(builder, target, compiler.stage, &mut cargo);
+                    // `std_cargo` actually does the wrong thing: it passes `--sysroot build/host/stage2`,
+                    // but we want to use the force-recompile std we just built in `build/host/stage2-test-sysroot`.
+                    // Override it.
+                    if builder.download_rustc() && compiler.stage > 0 {
+                        let sysroot = builder
                         .out
                         .join(compiler.host.triple)
                         .join(format!("stage{}-test-sysroot", compiler.stage));
@@ -2537,6 +2546,15 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
+
+        if builder.config.ferrocene_code_coverage {
+            let profiler_builtins_no_core_path = profiler_builtins_no_core_path.unwrap();
+            cargo.rustflag("-Cinstrument-coverage");
+            cargo.rustflag("--extern");
+            cargo.rustflag(&format!("profiler_builtins={}", profiler_builtins_no_core_path.to_string_lossy()));
+            // dbg!(&cargo);
+        }
+        
         run_cargo_test(
             cargo,
             if target.contains("ferrocenecoretest") { &["--test-threads", "1"] } else { &[] },

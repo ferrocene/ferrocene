@@ -347,6 +347,7 @@ pub struct Config {
     pub ferrocene_document_signatures_s3_bucket: String,
     pub ferrocene_ignore_document_signatures: bool,
     pub ferrocene_technical_report_url: Option<String>,
+    pub ferrocene_code_coverage: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1266,6 +1267,9 @@ impl Config {
         config.llvm_profile_generate = flags.llvm_profile_generate;
         config.enable_bolt_settings = flags.enable_bolt_settings;
         config.bypass_bootstrap_lock = flags.bypass_bootstrap_lock;
+        if let Subcommand::Test { coverage, .. } = &config.cmd {
+            config.ferrocene_code_coverage = *coverage;
+        }
 
         // Infer the rest of the configuration.
 
@@ -1277,11 +1281,13 @@ impl Config {
         // We still support running outside the repository if we find we aren't in a git directory.
         cmd.arg("rev-parse").arg("--show-toplevel");
         // Discard stderr because we expect this to fail when building from a tarball.
-        let output = cmd
-            .stderr(std::process::Stdio::null())
-            .output()
-            .ok()
-            .and_then(|output| if output.status.success() { Some(output) } else { None });
+        let output = cmd.stderr(std::process::Stdio::null()).output().ok().and_then(|output| {
+            if output.status.success() {
+                Some(output)
+            } else {
+                None
+            }
+        });
         if let Some(output) = output {
             let git_root = String::from_utf8(output.stdout).unwrap();
             // We need to canonicalize this path to make sure it uses backslashes instead of forward slashes.

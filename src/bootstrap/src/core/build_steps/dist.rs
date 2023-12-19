@@ -1323,7 +1323,7 @@ impl Step for CodegenBackend {
                 return None;
             }
 
-            if self.compiler.host.contains("windows") {
+            if self.compiler.host.is_windows() {
                 builder.info(
                     "dist currently disabled for windows by rustc_codegen_cranelift. skipping",
                 );
@@ -1662,7 +1662,7 @@ impl Step for Extended {
             builder.run(&mut cmd);
         }
 
-        if target.contains("windows") {
+        if target.is_windows() {
             let exe = tmp.join("exe");
             let _ = fs::remove_dir_all(&exe);
 

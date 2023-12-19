@@ -1699,10 +1699,7 @@ impl<'a> Builder<'a> {
                 // flesh out rpath support more fully in the future.
                 rustflags.arg("-Zosx-rpath-install-name");
                 Some(format!("-Wl,-rpath,@loader_path/../{libdir}"))
-            } else if !target.contains("windows")
-                && !target.contains("aix")
-                && !target.contains("xous")
-            {
+            } else if !target.is_windows() && !target.contains("aix") && !target.contains("xous") {
                 rustflags.arg("-Clink-args=-Wl,-z,origin");
                 Some(format!("-Wl,-rpath,$ORIGIN/../{libdir}"))
             } else {
@@ -1775,8 +1772,7 @@ impl<'a> Builder<'a> {
         let split_debuginfo_is_stable = target.contains("linux")
             || target.contains("apple")
             || (target.is_msvc() && self.config.rust_split_debuginfo == SplitDebuginfo::Packed)
-            || (target.contains("windows")
-                && self.config.rust_split_debuginfo == SplitDebuginfo::Off);
+            || (target.is_windows() && self.config.rust_split_debuginfo == SplitDebuginfo::Off);
 
         if !split_debuginfo_is_stable {
             rustflags.arg("-Zunstable-options");

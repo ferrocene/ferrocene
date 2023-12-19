@@ -80,7 +80,7 @@ pub(crate) fn should_have_doc_example(cx: &DocContext<'_>, item: &clean::Item) -
 
     // check if parent is trait impl
     if let Some(parent_def_id) = cx.tcx.opt_local_parent(def_id)
-        && let Some(parent_node) = cx.tcx.hir().find_by_def_id(parent_def_id)
+        && let Some(parent_node) = cx.tcx.opt_hir_node_by_def_id(parent_def_id)
         && matches!(
             parent_node,
             hir::Node::Item(hir::Item {
@@ -131,7 +131,7 @@ pub(crate) fn look_for_tests<'tcx>(cx: &DocContext<'tcx>, dox: &str, item: &Item
                 hir_id,
                 sp,
                 "missing code example in this documentation",
-                |lint| lint,
+                |_| {},
             );
         }
     } else if tests.found_tests > 0
@@ -142,7 +142,7 @@ pub(crate) fn look_for_tests<'tcx>(cx: &DocContext<'tcx>, dox: &str, item: &Item
             hir_id,
             item.attr_span(cx.tcx),
             "documentation test in private item",
-            |lint| lint,
+            |_| {},
         );
     }
 }

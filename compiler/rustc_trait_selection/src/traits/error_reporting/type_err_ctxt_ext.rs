@@ -37,7 +37,7 @@ use rustc_middle::ty::{
     self, SubtypePredicate, ToPolyTraitRef, ToPredicate, TraitRef, Ty, TyCtxt, TypeFoldable,
     TypeVisitable, TypeVisitableExt,
 };
-use rustc_session::config::{DumpSolverProofTree, TraitSolver};
+use rustc_session::config::DumpSolverProofTree;
 use rustc_session::Limit;
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::symbol::sym;
@@ -250,7 +250,12 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
         err.emit();
 
         self.tcx.sess.abort_if_errors();
-        bug!();
+        // FIXME: this should be something like `build_overflow_error_fatal`, which returns
+        // `DiagnosticBuilder<', !>`. Then we don't even need anything after that `emit()`.
+        unreachable!(
+            "did not expect compilation to continue after `abort_if_errors`, \
+            since an error was definitely emitted!"
+        );
     }
 
     fn build_overflow_error<T>(
@@ -370,7 +375,9 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
     ) {
         let tcx = self.tcx;
 
-        if tcx.sess.opts.unstable_opts.dump_solver_proof_tree == DumpSolverProofTree::OnError {
+        if tcx.sess.opts.unstable_opts.next_solver.map(|c| c.dump_tree).unwrap_or_default()
+            == DumpSolverProofTree::OnError
+        {
             dump_proof_tree(root_obligation, self.infcx);
         }
 
@@ -444,21 +451,22 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                             // reported on the binding definition (#56607).
                             return;
                         }
-                        let (post_message, pre_message, type_def, file_note) = self
+                        let mut file = None;
+                        let (post_message, pre_message, type_def) = self
                             .get_parent_trait_ref(obligation.cause.code())
                             .map(|(t, s)| {
-                                let (t, file) = self.tcx.short_ty_string(t);
+                                let t = self.tcx.short_ty_string(t, &mut file);
                                 (
                                     format!(" in `{t}`"),
                                     format!("within `{t}`, "),
                                     s.map(|s| (format!("within this `{t}`"), s)),
-                                    file.map(|file| format!(
-                                        "the full trait has been written to '{}'",
-                                        file.display(),
-                                    ))
                                 )
                             })
                             .unwrap_or_default();
+                        let file_note = file.map(|file| format!(
+                            "the full trait has been written to '{}'",
+                            file.display(),
+                        ));
 
                         let OnUnimplementedNote {
                             message,
@@ -547,6 +555,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                         }
 
                         let explanation = get_explanation_based_on_obligation(
+                            self.tcx,
                             &obligation,
                             trait_ref,
                             &trait_predicate,
@@ -810,23 +819,20 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
 
                     ty::PredicateKind::Clause(ty::ClauseKind::WellFormed(ty)) => {
                         let ty = self.resolve_vars_if_possible(ty);
-                        match self.tcx.sess.opts.unstable_opts.trait_solver {
-                            TraitSolver::Classic => {
-                                // WF predicates cannot themselves make
-                                // errors. They can only block due to
-                                // ambiguity; otherwise, they always
-                                // degenerate into other obligations
-                                // (which may fail).
-                                span_bug!(span, "WF predicate not satisfied for {:?}", ty);
-                            }
-                            TraitSolver::Next | TraitSolver::NextCoherence => {
-                                // FIXME: we'll need a better message which takes into account
-                                // which bounds actually failed to hold.
-                                self.tcx.sess.struct_span_err(
-                                    span,
-                                    format!("the type `{ty}` is not well-formed"),
-                                )
-                            }
+                        if self.next_trait_solver() {
+                            // FIXME: we'll need a better message which takes into account
+                            // which bounds actually failed to hold.
+                            self.tcx.sess.struct_span_err(
+                                span,
+                                format!("the type `{ty}` is not well-formed"),
+                            )
+                        } else {
+                            // WF predicates cannot themselves make
+                            // errors. They can only block due to
+                            // ambiguity; otherwise, they always
+                            // degenerate into other obligations
+                            // (which may fail).
+                            span_bug!(span, "WF predicate not satisfied for {:?}", ty);
                         }
                     }
 
@@ -984,13 +990,13 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
     fn fn_arg_obligation(&self, obligation: &PredicateObligation<'tcx>) -> bool {
         if let ObligationCauseCode::FunctionArgumentObligation { arg_hir_id, .. } =
             obligation.cause.code()
-            && let Some(Node::Expr(arg)) = self.tcx.hir().find(*arg_hir_id)
+            && let Some(Node::Expr(arg)) = self.tcx.opt_hir_node(*arg_hir_id)
             && let arg = arg.peel_borrows()
             && let hir::ExprKind::Path(hir::QPath::Resolved(
                 None,
                 hir::Path { res: hir::def::Res::Local(hir_id), .. },
             )) = arg.kind
-            && let Some(Node::Pat(pat)) = self.tcx.hir().find(*hir_id)
+            && let Some(Node::Pat(pat)) = self.tcx.opt_hir_node(*hir_id)
             && let Some(preds) = self.reported_trait_errors.borrow().get(&pat.span)
             && preds.contains(&obligation.predicate)
         {
@@ -1028,7 +1034,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             }
         }
         let hir_id = self.tcx.local_def_id_to_hir_id(obligation.cause.body_id);
-        let body_id = match self.tcx.hir().find(hir_id) {
+        let body_id = match self.tcx.opt_hir_node(hir_id) {
             Some(hir::Node::Item(hir::Item { kind: hir::ItemKind::Fn(_, _, body_id), .. })) => {
                 body_id
             }
@@ -1069,7 +1075,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             if !self.tcx.is_diagnostic_item(sym::Result, def.did()) {
                 return None;
             }
-            Some(arg.as_type()?)
+            arg.as_type()
         };
 
         let mut suggested = false;
@@ -1154,7 +1160,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
 
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let hir::Path { res: hir::def::Res::Local(hir_id), .. } = path
-                && let Some(hir::Node::Pat(binding)) = self.tcx.hir().find(*hir_id)
+                && let Some(hir::Node::Pat(binding)) = self.tcx.opt_hir_node(*hir_id)
                 && let Some(parent) = self.tcx.hir().find_parent(binding.hir_id)
             {
                 // We've reached the root of the method call chain...
@@ -1560,7 +1566,9 @@ impl<'tcx> InferCtxtPrivExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
 
     #[instrument(skip(self), level = "debug")]
     fn report_fulfillment_error(&self, error: &FulfillmentError<'tcx>) {
-        if self.tcx.sess.opts.unstable_opts.dump_solver_proof_tree == DumpSolverProofTree::OnError {
+        if self.tcx.sess.opts.unstable_opts.next_solver.map(|c| c.dump_tree).unwrap_or_default()
+            == DumpSolverProofTree::OnError
+        {
             dump_proof_tree(&error.root_obligation, self.infcx);
         }
 
@@ -1666,7 +1674,7 @@ impl<'tcx> InferCtxtPrivExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                     )
                     .into(),
                 };
-                // FIXME(-Ztrait-solver=next): For diagnostic purposes, it would be nice
+                // FIXME(-Znext-solver): For diagnostic purposes, it would be nice
                 // to deeply normalize this type.
                 let normalized_term =
                     ocx.normalize(&obligation.cause, obligation.param_env, unnormalized_term);
@@ -2499,7 +2507,7 @@ impl<'tcx> InferCtxtPrivExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                                 ident: trait_name,
                                 kind: hir::ItemKind::Trait(_, _, _, _, trait_item_refs),
                                 ..
-                            })) = self.tcx.hir().find_by_def_id(local_def_id)
+                            })) = self.tcx.opt_hir_node_by_def_id(local_def_id)
                             && let Some(method_ref) = trait_item_refs
                                 .iter()
                                 .find(|item_ref| item_ref.ident == *assoc_item_name)

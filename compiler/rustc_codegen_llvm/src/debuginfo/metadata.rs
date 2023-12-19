@@ -21,7 +21,6 @@ use crate::llvm::debuginfo::{
 };
 use crate::value::Value;
 
-use cstr::cstr;
 use rustc_codegen_ssa::debuginfo::type_names::cpp_like_debuginfo;
 use rustc_codegen_ssa::debuginfo::type_names::VTableNameKind;
 use rustc_codegen_ssa::traits::*;
@@ -856,7 +855,6 @@ pub fn build_compile_unit_di_node<'ll, 'tcx>(
     use rustc_session::RemapFileNameExt;
     let name_in_debuginfo = name_in_debuginfo.to_string_lossy();
     let work_dir = tcx.sess.opts.working_dir.for_codegen(tcx.sess).to_string_lossy();
-    let flags = "\0";
     let output_filenames = tcx.output_filenames(());
     let split_name = if tcx.sess.target_can_use_split_dwarf() {
         output_filenames
@@ -910,7 +908,7 @@ pub fn build_compile_unit_di_node<'ll, 'tcx>(
             producer.as_ptr().cast(),
             producer.len(),
             tcx.sess.opts.optimize != config::OptLevel::No,
-            flags.as_ptr().cast(),
+            c"".as_ptr().cast(),
             0,
             // NB: this doesn't actually have any perceptible effect, it seems. LLVM will instead
             // put the path supplied to `MCSplitDwarfFile` into the debug info of the final
@@ -940,8 +938,7 @@ pub fn build_compile_unit_di_node<'ll, 'tcx>(
             );
             let val = llvm::LLVMMetadataAsValue(debug_context.llcontext, gcov_metadata);
 
-            let llvm_gcov_ident = cstr!("llvm.gcov");
-            llvm::LLVMAddNamedMetadataOperand(debug_context.llmod, llvm_gcov_ident.as_ptr(), val);
+            llvm::LLVMAddNamedMetadataOperand(debug_context.llmod, c"llvm.gcov".as_ptr(), val);
         }
 
         return unit_metadata;
@@ -980,6 +977,27 @@ fn build_field_di_node<'ll, 'tcx>(
     }
 }
 
+/// Returns the `DIFlags` corresponding to the visibility of the item identified by `did`.
+///
+/// `DIFlags::Flag{Public,Protected,Private}` correspond to `DW_AT_accessibility`
+/// (public/protected/private) aren't exactly right for Rust, but neither is `DW_AT_visibility`
+/// (local/exported/qualified), and there's no way to set `DW_AT_visibility` in LLVM's API.
+fn visibility_di_flags<'ll, 'tcx>(
+    cx: &CodegenCx<'ll, 'tcx>,
+    did: DefId,
+    type_did: DefId,
+) -> DIFlags {
+    let parent_did = cx.tcx.parent(type_did);
+    let visibility = cx.tcx.visibility(did);
+    match visibility {
+        Visibility::Public => DIFlags::FlagPublic,
+        // Private fields have a restricted visibility of the module containing the type.
+        Visibility::Restricted(did) if did == parent_did => DIFlags::FlagPrivate,
+        // `pub(crate)`/`pub(super)` visibilities are any other restricted visibility.
+        Visibility::Restricted(..) => DIFlags::FlagProtected,
+    }
+}
+
 /// Creates the debuginfo node for a Rust struct type. Maybe be a regular struct or a tuple-struct.
 fn build_struct_type_di_node<'ll, 'tcx>(
     cx: &CodegenCx<'ll, 'tcx>,
@@ -1003,7 +1021,7 @@ fn build_struct_type_di_node<'ll, 'tcx>(
             &compute_debuginfo_type_name(cx.tcx, struct_type, false),
             size_and_align_of(struct_type_and_layout),
             Some(containing_scope),
-            DIFlags::FlagZero,
+            visibility_di_flags(cx, adt_def.did(), adt_def.did()),
         ),
         // Fields:
         |cx, owner| {
@@ -1026,7 +1044,7 @@ fn build_struct_type_di_node<'ll, 'tcx>(
                         &field_name[..],
                         (field_layout.size, field_layout.align.abi),
                         struct_type_and_layout.fields.offset(i),
-                        DIFlags::FlagZero,
+                        visibility_di_flags(cx, f.did, adt_def.did()),
                         type_di_node(cx, field_layout.ty),
                     )
                 })

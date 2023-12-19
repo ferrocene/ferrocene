@@ -72,7 +72,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             orig_span,
                             custom_note
                                 .unwrap_or("any code following this expression is unreachable"),
-                        )
+                        );
                     },
                 )
             }
@@ -83,7 +83,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// version (resolve_vars_if_possible), this version will
     /// also select obligations if it seems useful, in an effort
     /// to get more type information.
-    // FIXME(-Ztrait-solver=next): A lot of the calls to this method should
+    // FIXME(-Znext-solver): A lot of the calls to this method should
     // probably be `try_structurally_resolve_type` or `structurally_resolve_type` instead.
     #[instrument(skip(self), level = "debug", ret)]
     pub(in super::super) fn resolve_vars_with_obligations(&self, mut ty: Ty<'tcx>) -> Ty<'tcx> {
@@ -994,7 +994,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // Get enclosing Fn, if it is a function or a trait method, unless there's a `loop` or
         // `while` before reaching it, as block tail returns are not available in them.
         self.tcx.hir().get_return_block(blk_id).and_then(|blk_id| {
-            let parent = self.tcx.hir().get(blk_id);
+            let parent = self.tcx.hir_node(blk_id);
             self.get_node_fn_decl(parent)
                 .map(|(fn_id, fn_decl, _, is_main)| (fn_id, fn_decl, is_main))
         })

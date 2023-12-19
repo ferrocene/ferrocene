@@ -36,6 +36,7 @@ impl<'tcx> Stable<'tcx> for mir::Body<'tcx> {
                 .collect(),
             self.arg_count,
             self.var_debug_info.iter().map(|info| info.stable(tables)).collect(),
+            self.spread_arg.stable(tables),
         )
     }
 }
@@ -707,7 +708,7 @@ impl<'tcx> Stable<'tcx> for rustc_middle::mir::Const<'tcx> {
                 let id = tables.intern_const(*self);
                 Const::new(kind, ty, id)
             }
-            mir::Const::Val(val, ty) if matches!(val, mir::ConstValue::ZeroSized) => {
+            mir::Const::Val(mir::ConstValue::ZeroSized, ty) => {
                 let ty = ty.stable(tables);
                 let id = tables.intern_const(*self);
                 Const::new(ConstantKind::ZeroSized, ty, id)

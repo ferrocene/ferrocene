@@ -6,7 +6,7 @@ pub mod tls;
 
 use crate::arena::Arena;
 use crate::dep_graph::{DepGraph, DepKindStruct};
-use crate::infer::canonical::{CanonicalVarInfo, CanonicalVarInfos};
+use crate::infer::canonical::{CanonicalParamEnvCache, CanonicalVarInfo, CanonicalVarInfos};
 use crate::lint::struct_lint_level;
 use crate::metadata::ModChild;
 use crate::middle::codegen_fn_attrs::CodegenFnAttrs;
@@ -28,7 +28,7 @@ use crate::ty::{
     self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Const, ConstData, GenericParamDefKind,
     ImplPolarity, List, ParamConst, ParamTy, PolyExistentialPredicate, PolyFnSig, Predicate,
     PredicateKind, Region, RegionKind, ReprOptions, TraitObjectVisitor, Ty, TyKind, TyVid,
-    TypeAndMut, Visibility,
+    Visibility,
 };
 use crate::ty::{GenericArg, GenericArgs, GenericArgsRef};
 use rustc_ast::{self as ast, attr};
@@ -88,7 +88,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type Term = ty::Term<'tcx>;
 
     type Binder<T> = Binder<'tcx, T>;
-    type TypeAndMut = TypeAndMut<'tcx>;
     type CanonicalVars = CanonicalVarInfos<'tcx>;
 
     type Ty = Ty<'tcx>;
@@ -127,12 +126,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type SubtypePredicate = ty::SubtypePredicate<'tcx>;
     type CoercePredicate = ty::CoercePredicate<'tcx>;
     type ClosureKind = ty::ClosureKind;
-
-    fn ty_and_mut_to_parts(
-        TypeAndMut { ty, mutbl }: TypeAndMut<'tcx>,
-    ) -> (Self::Ty, ty::Mutability) {
-        (ty, mutbl)
-    }
 
     fn mk_canonical_var_infos(self, infos: &[ty::CanonicalVarInfo<Self>]) -> Self::CanonicalVars {
         self.mk_canonical_var_infos(infos)
@@ -653,6 +646,8 @@ pub struct GlobalCtxt<'tcx> {
     pub new_solver_evaluation_cache: solve::EvaluationCache<'tcx>,
     pub new_solver_coherence_evaluation_cache: solve::EvaluationCache<'tcx>,
 
+    pub canonical_param_env_cache: CanonicalParamEnvCache<'tcx>,
+
     /// Data layout specification for the current target.
     pub data_layout: TargetDataLayout,
 
@@ -817,6 +812,7 @@ impl<'tcx> TyCtxt<'tcx> {
             evaluation_cache: Default::default(),
             new_solver_evaluation_cache: Default::default(),
             new_solver_coherence_evaluation_cache: Default::default(),
+            canonical_param_env_cache: Default::default(),
             data_layout,
             alloc_map: Lock::new(interpret::AllocMap::new()),
         }
@@ -1174,7 +1170,7 @@ impl<'tcx> TyCtxt<'tcx> {
             break (scope, ty::BrNamed(def_id.into(), self.item_name(def_id.into())));
         };
 
-        let is_impl_item = match self.hir().find_by_def_id(suitable_region_binding_scope) {
+        let is_impl_item = match self.opt_hir_node_by_def_id(suitable_region_binding_scope) {
             Some(Node::Item(..) | Node::TraitItem(..)) => false,
             Some(Node::ImplItem(..)) => {
                 self.is_bound_region_in_impl_item(suitable_region_binding_scope)
@@ -1217,8 +1213,8 @@ impl<'tcx> TyCtxt<'tcx> {
                 None,
                 hir::Path { res: hir::def::Res::Def(DefKind::TyAlias, def_id), .. }, )) = hir_output.kind
             && let Some(local_id) = def_id.as_local()
-            && let Some(alias_ty) = self.hir().get_by_def_id(local_id).alias_ty() // it is type alias
-            && let Some(alias_generics) = self.hir().get_by_def_id(local_id).generics()
+            && let Some(alias_ty) = self.hir_node_by_def_id(local_id).alias_ty() // it is type alias
+            && let Some(alias_generics) = self.hir_node_by_def_id(local_id).generics()
         {
             v.visit_ty(alias_ty);
             if !v.0.is_empty() {
@@ -2034,13 +2030,11 @@ impl<'tcx> TyCtxt<'tcx> {
         let msg = decorator.msg();
         let (level, src) = self.lint_level_at_node(lint, hir_id);
         struct_lint_level(self.sess, lint, level, src, Some(span.into()), msg, |diag| {
-            decorator.decorate_lint(diag)
+            decorator.decorate_lint(diag);
         })
     }
 
     /// Emit a lint at the appropriate level for a hir node, with an associated span.
-    ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed explanation.
     ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
@@ -2051,9 +2045,7 @@ impl<'tcx> TyCtxt<'tcx> {
         hir_id: HirId,
         span: impl Into<MultiSpan>,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         let (level, src) = self.lint_level_at_node(lint, hir_id);
         struct_lint_level(self.sess, lint, level, src, Some(span.into()), msg, decorate);
@@ -2068,12 +2060,12 @@ impl<'tcx> TyCtxt<'tcx> {
         id: HirId,
         decorator: impl for<'a> DecorateLint<'a, ()>,
     ) {
-        self.struct_lint_node(lint, id, decorator.msg(), |diag| decorator.decorate_lint(diag))
+        self.struct_lint_node(lint, id, decorator.msg(), |diag| {
+            decorator.decorate_lint(diag);
+        })
     }
 
     /// Emit a lint at the appropriate level for a hir node.
-    ///
-    /// Return value of the `decorate` closure is ignored, see [`struct_lint_level`] for a detailed explanation.
     ///
     /// [`struct_lint_level`]: rustc_middle::lint::struct_lint_level#decorate-signature
     #[rustc_lint_diagnostics]
@@ -2083,9 +2075,7 @@ impl<'tcx> TyCtxt<'tcx> {
         lint: &'static Lint,
         id: HirId,
         msg: impl Into<DiagnosticMessage>,
-        decorate: impl for<'a, 'b> FnOnce(
-            &'b mut DiagnosticBuilder<'a, ()>,
-        ) -> &'b mut DiagnosticBuilder<'a, ()>,
+        decorate: impl for<'a, 'b> FnOnce(&'b mut DiagnosticBuilder<'a, ()>),
     ) {
         let (level, src) = self.lint_level_at_node(lint, id);
         struct_lint_level(self.sess, lint, level, src, None, msg, decorate);
@@ -2137,7 +2127,7 @@ impl<'tcx> TyCtxt<'tcx> {
         loop {
             let parent = self.local_parent(rpit_lifetime_param_def_id);
             let hir::OpaqueTy { lifetime_mapping, .. } =
-                self.hir().get_by_def_id(parent).expect_item().expect_opaque_ty();
+                self.hir_node_by_def_id(parent).expect_item().expect_opaque_ty();
 
             let Some((lifetime, _)) = lifetime_mapping
                 .iter()
@@ -2221,8 +2211,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Whether the trait impl is marked const. This does not consider stability or feature gates.
     pub fn is_const_trait_impl_raw(self, def_id: DefId) -> bool {
         let Some(local_def_id) = def_id.as_local() else { return false };
-        let hir_id = self.local_def_id_to_hir_id(local_def_id);
-        let node = self.hir().get(hir_id);
+        let node = self.hir_node_by_def_id(local_def_id);
 
         matches!(
             node,
@@ -2238,15 +2227,11 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn next_trait_solver_globally(self) -> bool {
-        self.sess.opts.unstable_opts.trait_solver == rustc_session::config::TraitSolver::Next
+        self.sess.opts.unstable_opts.next_solver.map_or(false, |c| c.globally)
     }
 
     pub fn next_trait_solver_in_coherence(self) -> bool {
-        matches!(
-            self.sess.opts.unstable_opts.trait_solver,
-            rustc_session::config::TraitSolver::Next
-                | rustc_session::config::TraitSolver::NextCoherence
-        )
+        self.sess.opts.unstable_opts.next_solver.map_or(false, |c| c.coherence)
     }
 
     pub fn is_impl_trait_in_trait(self, def_id: DefId) -> bool {

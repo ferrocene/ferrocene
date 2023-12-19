@@ -58,18 +58,35 @@ pub fn pretty_statement(statement: &StatementKind) -> String {
             pretty.push_str(format!("        _{} = ", place.local).as_str());
             pretty.push_str(format!("{}", &pretty_rvalue(rval)).as_str());
         }
-        StatementKind::FakeRead(_, _) => todo!(),
-        StatementKind::SetDiscriminant { .. } => todo!(),
-        StatementKind::Deinit(_) => todo!(),
-        StatementKind::StorageLive(_) => todo!(),
-        StatementKind::StorageDead(_) => todo!(),
-        StatementKind::Retag(_, _) => todo!(),
-        StatementKind::PlaceMention(_) => todo!(),
-        StatementKind::AscribeUserType { .. } => todo!(),
-        StatementKind::Coverage(_) => todo!(),
-        StatementKind::Intrinsic(_) => todo!(),
-        StatementKind::ConstEvalCounter => (),
-        StatementKind::Nop => (),
+        // FIXME: Add rest of the statements
+        StatementKind::FakeRead(_, _) => {
+            return String::from("StatementKind::FakeRead:Unimplemented");
+        }
+        StatementKind::SetDiscriminant { .. } => {
+            return String::from("StatementKind::SetDiscriminant:Unimplemented");
+        }
+        StatementKind::Deinit(_) => return String::from("StatementKind::Deinit:Unimplemented"),
+        StatementKind::StorageLive(_) => {
+            return String::from("StatementKind::StorageLive:Unimplemented");
+        }
+        StatementKind::StorageDead(_) => {
+            return String::from("StatementKind::StorageDead:Unimplemented");
+        }
+        StatementKind::Retag(_, _) => return String::from("StatementKind::Retag:Unimplemented"),
+        StatementKind::PlaceMention(_) => {
+            return String::from("StatementKind::PlaceMention:Unimplemented");
+        }
+        StatementKind::AscribeUserType { .. } => {
+            return String::from("StatementKind::AscribeUserType:Unimplemented");
+        }
+        StatementKind::Coverage(_) => return String::from("StatementKind::Coverage:Unimplemented"),
+        StatementKind::Intrinsic(_) => {
+            return String::from("StatementKind::Intrinsic:Unimplemented");
+        }
+        StatementKind::ConstEvalCounter => {
+            return String::from("StatementKind::ConstEvalCounter:Unimplemented");
+        }
+        StatementKind::Nop => return String::from("StatementKind::Nop:Unimplemented"),
     }
     pretty
 }
@@ -243,6 +260,7 @@ pub fn pretty_assert_message(msg: &AssertMessage) -> String {
             );
             pretty
         }
+        AssertMessage::Overflow(op, _, _) => unreachable!("`{:?}` cannot overflow", op),
         AssertMessage::OverflowNeg(op) => {
             let pretty_op = pretty_operand(op);
             pretty.push_str(
@@ -262,17 +280,15 @@ pub fn pretty_assert_message(msg: &AssertMessage) -> String {
             );
             pretty
         }
-        AssertMessage::ResumedAfterReturn(_) => {
-            format!("attempt to resume a generator after completion")
-        }
-        AssertMessage::ResumedAfterPanic(_) => format!("attempt to resume a panicked generator"),
         AssertMessage::MisalignedPointerDereference { required, found } => {
             let pretty_required = pretty_operand(required);
             let pretty_found = pretty_operand(found);
             pretty.push_str(format!("\"misaligned pointer dereference: address must be a multiple of {{}} but is {{}}\",{pretty_required}, {pretty_found}").as_str());
             pretty
         }
-        _ => todo!(),
+        AssertMessage::ResumedAfterReturn(_) | AssertMessage::ResumedAfterPanic(_) => {
+            msg.description().unwrap().to_string()
+        }
     }
 }
 
@@ -355,7 +371,7 @@ pub fn pretty_rvalue(rval: &Rvalue) -> String {
             pretty.push_str(" ");
             pretty.push_str(&pretty_ty(cnst.ty().kind()));
         }
-        Rvalue::ShallowInitBox(_, _) => todo!(),
+        Rvalue::ShallowInitBox(_, _) => (),
         Rvalue::ThreadLocalRef(item) => {
             pretty.push_str("thread_local_ref");
             pretty.push_str(format!("{:#?}", item).as_str());

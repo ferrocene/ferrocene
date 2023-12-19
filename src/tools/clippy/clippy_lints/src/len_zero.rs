@@ -8,8 +8,8 @@ use rustc_hir::def::Res;
 use rustc_hir::def_id::{DefId, DefIdSet};
 use rustc_hir::{
     AssocItemKind, BinOpKind, Expr, ExprKind, FnRetTy, GenericArg, GenericBound, ImplItem, ImplItemKind,
-    ImplicitSelfKind, Item, ItemKind, LangItem, Mutability, Node, PatKind, PathSegment, PrimTy, QPath, TraitItemRef,
-    TyKind, TypeBindingKind,
+    ImplicitSelfKind, Item, ItemKind, Mutability, Node, PatKind, PathSegment, PrimTy, QPath, TraitItemRef,
+    TyKind, TypeBindingKind, OpaqueTyOrigin,
 };
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::ty::{self, AssocKind, FnSig, Ty};
@@ -147,7 +147,7 @@ impl<'tcx> LateLintPass<'tcx> for LenZero {
             && let Some(output) =
                 parse_len_output(cx, cx.tcx.fn_sig(item.owner_id).instantiate_identity().skip_binder())
         {
-            let (name, kind) = match cx.tcx.hir().find(ty_hir_id) {
+            let (name, kind) = match cx.tcx.opt_hir_node(ty_hir_id) {
                 Some(Node::ForeignItem(x)) => (x.ident.name, "extern type"),
                 Some(Node::Item(x)) => match x.kind {
                     ItemKind::Struct(..) => (x.ident.name, "struct"),
@@ -289,8 +289,10 @@ fn extract_future_output<'tcx>(cx: &LateContext<'tcx>, ty: Ty<'tcx>) -> Option<&
             kind: ItemKind::OpaqueTy(opaque),
             ..
         } = item
-        && opaque.bounds.len() == 1
-        && let GenericBound::LangItemTrait(LangItem::Future, _, _, generic_args) = &opaque.bounds[0]
+        && let OpaqueTyOrigin::AsyncFn(_) = opaque.origin
+        && let [GenericBound::Trait(trait_ref, _)] = &opaque.bounds
+        && let Some(segment) = trait_ref.trait_ref.path.segments.last()
+        && let Some(generic_args) = segment.args
         && generic_args.bindings.len() == 1
         && let TypeBindingKind::Equality {
             term:

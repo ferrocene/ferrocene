@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+pub(crate) mod code_coverage;
 pub(crate) mod dist;
 pub(crate) mod doc;
 pub(crate) mod partners;
@@ -8,7 +9,6 @@ pub(crate) mod run;
 pub(crate) mod sign;
 pub(crate) mod test;
 pub(crate) mod tool;
-pub(crate) mod code_coverage;
 
 use crate::builder::Builder;
 use crate::core::config::{Config, TargetSelection};

@@ -2843,16 +2843,7 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
     let debuginfo = select_debuginfo(matches, &cg);
     let debuginfo_compression = unstable_opts.debuginfo_compression;
 
-<<<<<<< HEAD
-    let libs = parse_libs(handler, matches);
-=======
-    let mut search_paths = vec![];
-    for s in &matches.opt_strs("L") {
-        search_paths.push(SearchPath::from_cli_opt(early_dcx, s));
-    }
-
     let libs = parse_libs(early_dcx, matches);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     let test = matches.opt_present("test");
 
@@ -2910,7 +2901,7 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
 
     let mut search_paths = vec![];
     for s in &matches.opt_strs("L") {
-        search_paths.push(SearchPath::from_cli_opt(Some(&sysroot), &target_triple, handler, s));
+        search_paths.push(SearchPath::from_cli_opt(Some(&sysroot), &target_triple, early_dcx, s));
     }
 
     let working_dir = std::env::current_dir().unwrap_or_else(|e| {

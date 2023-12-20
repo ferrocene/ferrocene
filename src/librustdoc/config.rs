@@ -461,13 +461,7 @@ impl Options {
             &matches.free[0]
         });
 
-<<<<<<< HEAD
-        let externs = parse_externs(handler, matches, &unstable_opts);
-=======
-        let libs =
-            matches.opt_strs("L").iter().map(|s| SearchPath::from_cli_opt(early_dcx, s)).collect();
         let externs = parse_externs(early_dcx, matches, &unstable_opts);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let extern_html_root_urls = match parse_extern_html_roots(matches) {
             Ok(ex) => ex,
             Err(err) => {
@@ -648,7 +642,7 @@ impl Options {
         let libs = matches
             .opt_strs("L")
             .iter()
-            .map(|s| SearchPath::from_cli_opt(None, &target, handler, s))
+            .map(|s| SearchPath::from_cli_opt(None, &target, early_dcx, s))
             .collect();
 
         let show_coverage = matches.opt_present("show-coverage");

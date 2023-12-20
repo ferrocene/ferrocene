@@ -311,13 +311,12 @@ fn test_search_paths_tracking_hash_different_order() {
         opts.search_paths.push(SearchPath::from_cli_opt(
             None,
             &opts.target_triple,
-            &handler,
+            &early_dcx,
             search_path,
         ));
     };
 
     // Reference
-<<<<<<< HEAD
     push(&mut v1, "native=abc");
     push(&mut v1, "crate=def");
     push(&mut v1, "dependency=ghi");
@@ -341,31 +340,6 @@ fn test_search_paths_tracking_hash_different_order() {
     push(&mut v4, "crate=def");
     push(&mut v4, "dependency=ghi");
     push(&mut v4, "framework=jkl");
-=======
-    v1.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "native=abc"));
-    v1.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "crate=def"));
-    v1.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "dependency=ghi"));
-    v1.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "framework=jkl"));
-    v1.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "all=mno"));
-
-    v2.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "native=abc"));
-    v2.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "dependency=ghi"));
-    v2.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "crate=def"));
-    v2.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "framework=jkl"));
-    v2.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "all=mno"));
-
-    v3.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "crate=def"));
-    v3.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "framework=jkl"));
-    v3.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "native=abc"));
-    v3.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "dependency=ghi"));
-    v3.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "all=mno"));
-
-    v4.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "all=mno"));
-    v4.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "native=abc"));
-    v4.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "crate=def"));
-    v4.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "dependency=ghi"));
-    v4.search_paths.push(SearchPath::from_cli_opt(&early_dcx, "framework=jkl"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     assert_same_hash(&v1, &v2);
     assert_same_hash(&v1, &v3);

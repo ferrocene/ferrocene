@@ -1,6 +1,10 @@
 use crate::filesearch::make_target_lib_path;
+<<<<<<< HEAD
 use crate::EarlyErrorHandler;
 use rustc_target::spec::TargetTriple;
+=======
+use crate::EarlyDiagCtxt;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug)]
@@ -47,12 +51,16 @@ impl PathKind {
 }
 
 impl SearchPath {
+<<<<<<< HEAD
     pub fn from_cli_opt(
         sysroot: Option<&Path>,
         triple: &TargetTriple,
         handler: &EarlyErrorHandler,
         path: &str,
     ) -> Self {
+=======
+    pub fn from_cli_opt(early_dcx: &EarlyDiagCtxt, path: &str) -> Self {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         let (kind, path) = if let Some(stripped) = path.strip_prefix("native=") {
             (PathKind::Native, stripped)
         } else if let Some(stripped) = path.strip_prefix("crate=") {
@@ -67,7 +75,7 @@ impl SearchPath {
             (PathKind::All, path)
         };
         if path.is_empty() {
-            handler.early_error("empty search path given via `-L`");
+            early_dcx.early_error("empty search path given via `-L`");
         }
 
         // Temporary implementation until https://github.com/rust-lang/compiler-team/issues/659 is

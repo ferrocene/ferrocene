@@ -26,6 +26,7 @@ use crate::core::builder::crate_description;
 use crate::core::builder::Cargo;
 use crate::core::builder::{Builder, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath};
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
+use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::helpers::{
     exe, get_clang_cl_resource_dir, is_debug_info, is_dylib, output, symlink_dir, t, up_to_date,
@@ -210,6 +211,13 @@ impl Step for Std {
         std_cargo(builder, target, compiler.stage, &mut cargo);
         for krate in &*self.crates {
             cargo.arg("-p").arg(krate);
+        }
+
+        if builder.config.ferrocene_code_coverage && compiler.stage == 1 {
+            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
+            for flag in instrument_coverage_flags.flags() {
+                cargo.rustflag(&flag);
+            }
         }
 
         // See src/bootstrap/synthetic_targets.rs

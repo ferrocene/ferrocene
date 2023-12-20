@@ -382,7 +382,7 @@ pub enum Subcommand {
         rustfix_coverage: bool,
         /// generate coverage for tests
         #[arg(long)]
-        coverage: bool
+        coverage: bool,
     },
     /// Build and run some benchmarks
     Bench {

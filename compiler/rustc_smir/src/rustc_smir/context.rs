@@ -158,7 +158,6 @@ impl<'tcx> Context for TablesWrapper<'tcx> {
                 let crate_name = tables.tcx.crate_name(*crate_num).to_string();
                 (name == crate_name).then(|| smir_crate(tables.tcx, *crate_num))
             })
-            .into_iter()
             .flatten()
             .collect();
         crates
@@ -218,6 +217,12 @@ impl<'tcx> Context for TablesWrapper<'tcx> {
     fn adt_is_simd(&self, def: AdtDef) -> bool {
         let mut tables = self.0.borrow_mut();
         def.internal(&mut *tables).repr().simd()
+    }
+
+    fn adt_is_cstr(&self, def: AdtDef) -> bool {
+        let mut tables = self.0.borrow_mut();
+        let def_id = def.0.internal(&mut *tables);
+        tables.tcx.lang_items().c_str() == Some(def_id)
     }
 
     fn fn_sig(&self, def: FnDef, args: &GenericArgs) -> PolyFnSig {

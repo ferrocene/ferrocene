@@ -13,7 +13,7 @@ use rustc_session::config::{
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
 use rustc_session::utils::{CanonicalizedPath, NativeLib, NativeLibKind};
-use rustc_session::{build_session, getopts, CompilerIO, EarlyErrorHandler, Session};
+use rustc_session::{build_session, getopts, CompilerIO, EarlyDiagCtxt, Session};
 use rustc_span::edition::{Edition, DEFAULT_EDITION};
 use rustc_span::symbol::sym;
 use rustc_span::{FileName, SourceFileHashAlgorithm};
@@ -25,11 +25,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 fn mk_session(matches: getopts::Matches) -> (Session, Cfg) {
-    let mut early_handler = EarlyErrorHandler::new(ErrorOutputType::default());
-    early_handler.initialize_checked_jobserver();
+    let mut early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
+    early_dcx.initialize_checked_jobserver();
 
     let registry = registry::Registry::new(&[]);
-    let sessopts = build_session_options(&mut early_handler, &matches);
+    let sessopts = build_session_options(&mut early_dcx, &matches);
     let temps_dir = sessopts.unstable_opts.temps_dir.as_deref().map(PathBuf::from);
     let io = CompilerIO {
         input: Input::Str { name: FileName::Custom(String::new()), input: String::new() },
@@ -38,7 +38,7 @@ fn mk_session(matches: getopts::Matches) -> (Session, Cfg) {
         temps_dir,
     };
     let sess = build_session(
-        early_handler,
+        early_dcx,
         sessopts,
         io,
         None,
@@ -52,7 +52,7 @@ fn mk_session(matches: getopts::Matches) -> (Session, Cfg) {
         Arc::default(),
         Default::default(),
     );
-    let cfg = parse_cfg(&sess.diagnostic(), matches.opt_strs("cfg"));
+    let cfg = parse_cfg(&sess.dcx(), matches.opt_strs("cfg"));
     (sess, cfg)
 }
 
@@ -143,20 +143,20 @@ fn test_can_print_warnings() {
     rustc_span::create_default_session_globals_then(|| {
         let matches = optgroups().parse(&["-Awarnings".to_string()]).unwrap();
         let (sess, _) = mk_session(matches);
-        assert!(!sess.diagnostic().can_emit_warnings());
+        assert!(!sess.dcx().can_emit_warnings());
     });
 
     rustc_span::create_default_session_globals_then(|| {
         let matches =
             optgroups().parse(&["-Awarnings".to_string(), "-Dwarnings".to_string()]).unwrap();
         let (sess, _) = mk_session(matches);
-        assert!(sess.diagnostic().can_emit_warnings());
+        assert!(sess.dcx().can_emit_warnings());
     });
 
     rustc_span::create_default_session_globals_then(|| {
         let matches = optgroups().parse(&["-Adead_code".to_string()]).unwrap();
         let (sess, _) = mk_session(matches);
-        assert!(sess.diagnostic().can_emit_warnings());
+        assert!(sess.dcx().can_emit_warnings());
     });
 }
 
@@ -301,7 +301,7 @@ fn test_search_paths_tracking_hash_different_order() {
     let mut v3 = Options::default();
     let mut v4 = Options::default();
 
-    let handler = EarlyErrorHandler::new(JSON);
+    let early_dcx = EarlyDiagCtxt::new(JSON);
     const JSON: ErrorOutputType = ErrorOutputType::Json {
         pretty: false,
         json_rendered: HumanReadableErrorType::Default(ColorConfig::Never),
@@ -311,7 +311,7 @@ fn test_search_paths_tracking_hash_different_order() {
         opts.search_paths.push(SearchPath::from_cli_opt(
             None,
             &opts.target_triple,
-            &handler,
+            &early_dcx,
             search_path,
         ));
     };
@@ -863,9 +863,9 @@ fn test_edition_parsing() {
     let options = Options::default();
     assert!(options.edition == DEFAULT_EDITION);
 
-    let mut handler = EarlyErrorHandler::new(ErrorOutputType::default());
+    let mut early_dcx = EarlyDiagCtxt::new(ErrorOutputType::default());
 
     let matches = optgroups().parse(&["--edition=2018".to_string()]).unwrap();
-    let sessopts = build_session_options(&mut handler, &matches);
+    let sessopts = build_session_options(&mut early_dcx, &matches);
     assert!(sessopts.edition == Edition::Edition2018)
 }

@@ -2506,6 +2506,9 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
+        if !builder.config.dry_run() {
+            dbg!(&self.crates);
+        }
         if builder.config.ferrocene_code_coverage && builder.doc_tests != DocTests::No {
             panic!("Cannot generate coverage for doc tests");
         }
@@ -2542,12 +2545,23 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
+        let mut collect_profraw = false;
         if builder.config.ferrocene_code_coverage {
             let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
+
             for flag in instrument_coverage_flags.flags() {
                 cargo.rustflag(&flag);
             }
+
+            let coverage_dir = builder.tempdir().join("coverage");
+            let coverage_file = coverage_dir.join("default_%m_%p.profraw");
+
+            if !std::env::var("LLVM_PROFILE_FILE").is_ok() {
+                cargo.env("LLVM_PROFILE_FILE", &coverage_file);
+                collect_profraw = true;
+            }
         }
+
         run_cargo_test(
             cargo,
             if target.contains("ferrocenecoretest") { &["--test-threads", "1"] } else { &[] },
@@ -2558,6 +2572,19 @@ impl Step for Crate {
             target,
             builder,
         );
+
+        if collect_profraw {
+            let temp_dir = builder.tempdir().join("coverage");
+            let coverage_dir = builder.out.join("coverage");
+
+            if !builder.config.dry_run() {
+                let _ = std::fs::remove_dir_all(&coverage_dir);
+                std::fs::create_dir_all(&coverage_dir)
+                    .expect("Failed to create coverage directory");
+
+                std::fs::rename(temp_dir, coverage_dir).expect("Failed to move coverage data");
+            }
+        }
     }
 }
 

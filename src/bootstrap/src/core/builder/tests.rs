@@ -271,7 +271,7 @@ mod defaults {
 }
 
 mod dist {
-    use super::{first, second, run_build, Config};
+    use super::{first, run_build, second, Config};
     use crate::{core::builder::*, ferrocene::code_coverage::ProfilerBuiltinsNoCore};
     use pretty_assertions::assert_eq;
 
@@ -708,13 +708,12 @@ mod dist {
             extra_checks: None,
             coverage: true,
         };
-        
         let build = Build::new(config);
         let mut builder = Builder::new(&build);
 
         builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Test), &[]);
-       let step_result = second(builder.cache.all::<ProfilerBuiltinsNoCore>());
+        let step_result = second(builder.cache.all::<ProfilerBuiltinsNoCore>());
 
-       assert_eq!(step_result.len(), 1);
+        assert_eq!(step_result.len(), 1);
     }
 }

@@ -708,7 +708,6 @@ mod dist {
             extra_checks: None,
             coverage: true,
         };
-        
         let build = Build::new(config);
         let mut builder = Builder::new(&build);
 

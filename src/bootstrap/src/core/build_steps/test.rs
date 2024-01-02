@@ -2506,9 +2506,6 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        if !builder.config.dry_run() {
-            dbg!(&self.crates);
-        }
         if builder.config.ferrocene_code_coverage && builder.doc_tests != DocTests::No {
             panic!("Cannot generate coverage for doc tests");
         }

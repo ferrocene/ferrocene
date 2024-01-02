@@ -791,9 +791,6 @@ impl<'a, 'tcx> CrateLoader<'a, 'tcx> {
         info!("loading profiler");
 
         let name = Symbol::intern(&self.sess.opts.unstable_opts.profiler_runtime);
-        // if name == sym::profiler_builtins && attr::contains_name(&krate.attrs, sym::no_core) {
-        //     self.sess.emit_err(errors::ProfilerBuiltinsNeedsCore);
-        // }
 
         let Some(cnum) = self.resolve_crate(name, DUMMY_SP, CrateDepKind::Implicit) else {
             return;

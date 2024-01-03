@@ -8,6 +8,7 @@ use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::path::PathBuf;
 use std::process::Command;
+use std::time::UNIX_EPOCH;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
@@ -99,4 +100,127 @@ impl Step for TraceabilityMatrix {
         builder.run(&mut cmd);
         html_output
     }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub(crate) struct GenerateCoverageReport;
+
+impl Step for GenerateCoverageReport {
+    type Output = ();
+    const ONLY_HOSTS: bool = true;
+    const DEFAULT: bool = true;
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        builder.info(&format!("Generating coverage report"));
+        let coverage_report_data_dir = builder.out.join("coverage");
+        let coverage_report_out_dir = builder.out.join("coverage_report");
+
+        let coverage_src_path = builder.out.join("../library/core").canonicalize().unwrap();
+        let _cargo_dir = builder.cargo_dir();
+
+        if builder.config.dry_run() {
+            return;
+        }
+
+        let core_tests_binary_path = get_test_binary_path(builder).unwrap();
+
+        if coverage_report_data_dir.exists() {
+            let mut files = coverage_report_data_dir.read_dir().expect("Failed to read dir");
+
+            let has_profraw_files = files.any(|file| {
+                if let Ok(file) = file {
+                    file.path().extension().map(|ext| ext.to_str().unwrap()) == Some("profraw")
+                } else {
+                    false
+                }
+            });
+
+            if !has_profraw_files {
+                panic!("No profraw files found in build/coverage directory");
+            }
+        }
+        
+        if coverage_report_out_dir.exists() {
+            builder.remove_dir(&coverage_report_out_dir);
+            builder.info(&format!("Removed previous report at {:?}", coverage_report_out_dir));
+        }
+        let rustc_path = builder.out.join(builder.config.build.triple).join("stage1/bin/rustc");
+
+        let grcov_installed = Command::new("grcov").arg("--version").output().is_ok();
+
+        if !grcov_installed {
+            panic!("grcov not installed, to install it run:\n cargo install grcov");
+        }
+
+        let mut cmd = builder.tool_cmd(Tool::FerroceneGenerateCoverageReport);
+        cmd.env("COVERAGE_REPORT_DATA_DIR", coverage_report_data_dir);
+        cmd.env("COVERAGE_REPORT_OUT_DIR", coverage_report_out_dir);
+        cmd.env("COVERAGE_REPORT_SRC_PATH", coverage_src_path);
+        cmd.env("COVERAGE_REPORT_BIN_PATH", core_tests_binary_path);
+        cmd.env("RUSTC", rustc_path);
+
+        builder.run(&mut cmd);
+    }
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("ferrocene/tools/generate-coverage-report")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(GenerateCoverageReport);
+    }
+}
+
+fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
+    let cargo_toml_str =
+        std::fs::read_to_string("library/core/Cargo.toml").expect("Failed to read Cargo.toml");
+    let cargo_toml_data: toml::Value =
+        toml::from_str(&cargo_toml_str).expect("Failed to parse Cargo.toml");
+
+    let tests = cargo_toml_data.get("test").expect("Failed to get tests");
+    let tests_array = tests.as_array();
+    let tests_array = tests_array.unwrap();
+    let test = &tests_array[0];
+    let test = test.as_table().unwrap();
+
+    let test_name = test.get("name").unwrap().as_str().unwrap();
+    let core_tests_binary_dir_path = builder
+        .out
+        .join(builder.config.build.triple)
+        .join("stage1-std")
+        .join(builder.config.build.triple)
+        .join("release")
+        .join("deps/");
+
+    let core_tests_binary_file_path = core_tests_binary_dir_path
+        .read_dir()
+        .expect("read_dir call failed")
+        .filter_map(|dir_entry| {
+            if let Ok(dir_entry) = dir_entry {
+                let file_path = dir_entry.path();
+                let file_name = dir_entry.file_name();
+                let file_name_str = file_name.to_str().expect("Failed to convert file name to str");
+                if !file_name_str.starts_with(test_name) {
+                    return None;
+                }
+                let extension = file_path.extension();
+                let is_executable =
+                    if let Some(extension) = extension { extension == "exe" } else { true };
+                if !is_executable {
+                    return None;
+                }
+                let metadata = file_path.metadata().expect("Failed to get metadata");
+                let modified_time = metadata.modified().expect("Failed to get modified time");
+                let duration = modified_time
+                    .duration_since(UNIX_EPOCH)
+                    .expect("Failed to get duration since epoch");
+                return Some((file_path.to_owned(), duration));
+            } else {
+                None
+            }
+        })
+        .max_by(|(_, duration_1), (_, duration_2)| duration_1.cmp(duration_2))
+        .map(|(path, _)| path);
+
+    core_tests_binary_file_path
 }

@@ -309,6 +309,9 @@ fn test_apple(target: &str) {
 
             // FIXME: The size is changed in recent macOSes.
             "malloc_zone_t" => true,
+            // it is a moving target, changing through versions
+            // also contains bitfields members
+            "tcp_connection_info" => true,
 
             _ => false,
         }
@@ -478,6 +481,7 @@ fn test_openbsd(target: &str) {
         "pthread.h",
         "dlfcn.h",
         "search.h",
+        "spawn.h",
         "signal.h",
         "string.h",
         "sys/file.h",
@@ -2422,7 +2426,11 @@ fn test_freebsd(target: &str) {
             "AT_USRSTACKBASE" | "AT_USRSTACKLIM" if Some(13) > freebsd_ver => true,
 
             // Added in FreeBSD 14
-            "TFD_CLOEXEC" | "TFD_NONBLOCK" if Some(14) > freebsd_ver => true,
+            "TFD_CLOEXEC" | "TFD_NONBLOCK" | "TFD_TIMER_ABSTIME" | "TFD_TIMER_CANCEL_ON_SET"
+                if Some(14) > freebsd_ver =>
+            {
+                true
+            }
 
             _ => false,
         }
@@ -4055,6 +4063,33 @@ fn test_linux(target: &str) {
             {
                 true
             }
+
+            // FIXME: seems to not be available all the time (from <include/linux/sched.h>:
+            "PF_VCPU"
+            | "PF_IDLE"
+            | "PF_EXITING"
+            | "PF_POSTCOREDUMP"
+            | "PF_IO_WORKER"
+            | "PF_WQ_WORKER"
+            | "PF_FORKNOEXEC"
+            | "PF_MCE_PROCESS"
+            | "PF_SUPERPRIV"
+            | "PF_DUMPCORE"
+            | "PF_SIGNALED"
+            | "PF_MEMALLOC"
+            | "PF_NPROC_EXCEEDED"
+            | "PF_USED_MATH"
+            | "PF_USER_WORKER"
+            | "PF_NOFREEZE"
+            | "PF_KSWAPD"
+            | "PF_MEMALLOC_NOFS"
+            | "PF_MEMALLOC_NOIO"
+            | "PF_LOCAL_THROTTLE"
+            | "PF_KTHREAD"
+            | "PF_RANDOMIZE"
+            | "PF_NO_SETAFFINITY"
+            | "PF_MCE_EARLY"
+            | "PF_MEMALLOC_PIN" => true,
 
             _ => false,
         }

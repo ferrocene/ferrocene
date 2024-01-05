@@ -2014,6 +2014,7 @@ fn test_freebsd(target: &str) {
         Some(12) => cfg.cfg("freebsd12", None),
         Some(13) => cfg.cfg("freebsd13", None),
         Some(14) => cfg.cfg("freebsd14", None),
+        Some(15) => cfg.cfg("freebsd15", None),
         _ => &mut cfg,
     };
 
@@ -2030,6 +2031,10 @@ fn test_freebsd(target: &str) {
     };
     let freebsd14 = match freebsd_ver {
         Some(n) if n >= 14 => true,
+        _ => false,
+    };
+    let freebsd15 = match freebsd_ver {
+        Some(n) if n >= 15 => true,
         _ => false,
     };
 
@@ -2119,7 +2124,7 @@ fn test_freebsd(target: &str) {
                 "sys/sysctl.h",
                 "sys/thr.h",
                 "sys/time.h",
-                [freebsd14]:"sys/timerfd.h",
+                [freebsd14 || freebsd15]:"sys/timerfd.h",
                 "sys/times.h",
                 "sys/timex.h",
                 "sys/types.h",
@@ -2402,6 +2407,9 @@ fn test_freebsd(target: &str) {
             {
                 true
             }
+
+            // Introduced in FreeBSD 14 then removed ?
+            "TCP_LRD" if freebsd_ver >= Some(15) => true,
 
             // Added in FreeBSD 14
             "LIO_READV" | "LIO_WRITEV" | "LIO_VECTORED" if Some(14) > freebsd_ver => true,
@@ -3574,6 +3582,19 @@ fn test_linux(target: &str) {
         if musl && ty.starts_with("uinput_") {
             return true;
         }
+        if musl && ty == "seccomp_notif" {
+            return true;
+        }
+        if musl && ty == "seccomp_notif_addfd" {
+            return true;
+        }
+        if musl && ty == "seccomp_notif_resp" {
+            return true;
+        }
+        if musl && ty == "seccomp_notif_sizes" {
+            return true;
+        }
+
         // LFS64 types have been removed in musl 1.2.4+
         if musl && (ty.ends_with("64") || ty.ends_with("64_t")) {
             return true;
@@ -3726,6 +3747,17 @@ fn test_linux(target: &str) {
             }
         }
         if musl {
+            // FIXME: Requires >= 5.0 kernel headers
+            if name == "SECCOMP_GET_NOTIF_SIZES"
+               || name == "SECCOMP_FILTER_FLAG_NEW_LISTENER"
+               || name == "SECCOMP_FILTER_FLAG_TSYNC_ESRCH"
+               || name == "SECCOMP_USER_NOTIF_FLAG_CONTINUE"  // requires >= 5.5
+               || name == "SECCOMP_ADDFD_FLAG_SETFD"  // requires >= 5.9
+               || name == "SECCOMP_ADDFD_FLAG_SEND"   // requires >= 5.9
+               || name == "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"  // requires >= 5.19
+            {
+                return true;
+            }
             // FIXME: Requires >= 5.4.1 kernel headers
             if name.starts_with("J1939")
                 || name.starts_with("RTEXT_FILTER_")
@@ -4488,6 +4520,7 @@ fn which_freebsd() -> Option<i32> {
         s if s.starts_with("12") => Some(12),
         s if s.starts_with("13") => Some(13),
         s if s.starts_with("14") => Some(14),
+        s if s.starts_with("15") => Some(15),
         _ => None,
     }
 }

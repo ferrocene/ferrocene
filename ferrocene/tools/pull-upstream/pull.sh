@@ -176,7 +176,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
         # would mask the conflict (it would simply revert the deletion).
         #
         # To avoid that, we prefix the file with a custom line noting the file
-        # had a delete conflict, and the detect-config-markers.py script will
+        # had a delete conflict, and the detect-conflict-markers.py script will
         # pick it up and block CI until it's resolved either way.
         handle_deleted_files() {
             marker="$1"

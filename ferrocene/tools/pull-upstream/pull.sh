@@ -8,6 +8,7 @@ IFS=$'\n\t'
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 MAX_MERGES_PER_PR=30
+DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
@@ -139,18 +140,21 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # have our own crates with our own dependencies in the workspace.
     # Automatically resolve any conflict involving Cargo.lock to prefer our own
     # copy of the lockfile rather than upstream's.
-    if git status --porcelain=v1 | grep "^UU Cargo.lock$" >/dev/null; then
-        echo "pull-upstream: automatically resolving conflict for Cargo.lock..."
-        git show "${current_branch}:Cargo.lock" > Cargo.lock
+    for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
+        lock="${prefix}Cargo.lock"
+        if git status --porcelain=v1 | grep "^UU ${lock}$" >/dev/null; then
+            echo "pull-upstream: automatically resolving conflict for ${lock}..."
+            git show "${current_branch}:${lock}" > "${lock}"
 
-        # Invoking any Cargo command touching the lockfile will cause the
-        # lockfile to be updated. "cargo metadata" is one of the fastest ones.
-        # The bootstrap flag is needed as the workspace uses unstable features.
-        RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 >/dev/null
+            # Invoking any Cargo command touching the lockfile will cause the
+            # lockfile to be updated. "cargo metadata" is one of the fastest ones.
+            # The bootstrap flag is needed as the workspace uses unstable features.
+            RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null
 
-        git add Cargo.lock
-        echo "pull-upstream: automatically resolved conflict for Cargo.lock"
-    fi
+            git add "${lock}"
+            echo "pull-upstream: automatically resolved conflict for ${lock}"
+        fi
+    done
 
     if git diff --diff-filter=U --quiet; then
         # Setting the editor to `true` prevents the actual editor from being open,
@@ -215,7 +219,7 @@ fi
 #
 # Note that this is not related to merge conflicts: lockfile merge conflicts
 # are automatically fixed by another part of this script.
-for prefix in "" "src/bootstrap/"; do
+for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     lock="${prefix}Cargo.lock"
     echo "pull-upstream: checking whether ${lock} needs to be updated..."
     RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null

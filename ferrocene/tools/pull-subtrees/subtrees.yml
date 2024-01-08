@@ -28,6 +28,6 @@
 
 - path: ferrocene/library/libc
   repo: rust-lang/libc
-  ref: main
+  ref: libc-0.2
   after:
     - update-cargo-lock

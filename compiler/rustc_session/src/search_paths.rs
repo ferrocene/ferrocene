@@ -67,7 +67,7 @@ impl SearchPath {
             (PathKind::All, path)
         };
         if path.is_empty() {
-            early_dcx.early_error("empty search path given via `-L`");
+            early_dcx.early_fatal("empty search path given via `-L`");
         }
 
         // Temporary implementation until https://github.com/rust-lang/compiler-team/issues/659 is

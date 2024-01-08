@@ -1951,9 +1951,6 @@ getxattr
 glob
 glob_t
 globfree
-iconv
-iconv_close
-iconv_open
 iconv_t
 id_t
 idtype_t
@@ -2216,6 +2213,7 @@ shmid_ds
 sigaltstack
 sigevent
 siginfo_t
+sigsuspend
 sigwait
 sockaddr_ctl
 sockaddr_dl

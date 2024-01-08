@@ -1,16 +1,17 @@
-name: CI (bors)
+name: full CI
 
 on:
-  push:
+  merge_group:
+  pull_request:
     branches:
-      - auto-libc
-      - try
+      - libc-0.2
+    types:
+      - labeled
 
-permissions: {}
 jobs:
   docker_linux_tier1:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Docker Linux Tier1
@@ -23,9 +24,6 @@ jobs:
           x86_64-unknown-linux-gnu,
         ]
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TARGET=${{ matrix.target }} sh ./ci/install-rust.sh
@@ -33,8 +31,8 @@ jobs:
         run: LIBC_CI=1 sh ./ci/run-docker.sh ${{ matrix.target }}
 
   macos:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: macOS
@@ -46,9 +44,6 @@ jobs:
           x86_64-apple-darwin,
         ]
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TARGET=${{ matrix.target }} sh ./ci/install-rust.sh
@@ -56,8 +51,8 @@ jobs:
         run: LIBC_CI=1 sh ./ci/run.sh ${{ matrix.target }}
 
   windows:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Windows
@@ -79,9 +74,6 @@ jobs:
               ARCH: i686
           - target: i686-pc-windows-msvc
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Self-update rustup
         run: rustup self update
@@ -94,16 +86,13 @@ jobs:
         shell: bash
 
   style_check:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Style check
     runs-on: ubuntu-22.04
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: sh ./ci/install-rust.sh
@@ -111,8 +100,8 @@ jobs:
         run: sh ci/style.sh
 
   docker_linux_tier2:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Docker Linux Tier2
@@ -152,9 +141,6 @@ jobs:
           # x86_64-unknown-redox,
         ]
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TARGET=${{ matrix.target }} sh ./ci/install-rust.sh
@@ -165,7 +151,6 @@ jobs:
   # Because of this, only the nightly compiler can be used on these targets.
   docker_linux_build_std:
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     if: ${{ false }} # This is currently broken
@@ -180,9 +165,6 @@ jobs:
           armv7-unknown-linux-uclibceabihf
         ]
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TOOLCHAIN=nightly INSTALL_RUST_SRC=1 sh ./ci/install-rust.sh
@@ -191,17 +173,14 @@ jobs:
 
   # devkitpro's pacman needs to be connected from Docker.
   docker_switch:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Docker Switch
     needs: [docker_linux_tier1, style_check]
     runs-on: ubuntu-22.04
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: sh ./ci/install-rust.sh
@@ -209,8 +188,8 @@ jobs:
         run: LIBC_CI=1 sh ./ci/run-docker.sh switch
 
   build_channels_linux:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: Build Channels Linux
@@ -229,9 +208,6 @@ jobs:
           1.71.0,
         ]
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TOOLCHAIN=${{ matrix.toolchain }} sh ./ci/install-rust.sh
@@ -239,6 +215,7 @@ jobs:
         run: LIBC_CI=1 TOOLCHAIN=${{ matrix.toolchain }} sh ./ci/build.sh
 
   build_channels_macos:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
       contents: read # to fetch code (actions/checkout)
 
@@ -257,9 +234,6 @@ jobs:
           - { toolchain: 1.71.0, os: macos-13 }
     runs-on: ${{ matrix.target.os }}
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TOOLCHAIN=${{ matrix.target.toolchain }} sh ./ci/install-rust.sh
@@ -267,6 +241,7 @@ jobs:
         run: LIBC_CI=1 TOOLCHAIN=${{ matrix.target.toolchain }} sh ./ci/build.sh
 
   build_channels_windows:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
       contents: read # to fetch code (actions/checkout)
 
@@ -291,31 +266,23 @@ jobs:
         shell: bash
 
   check_cfg:
+    if: github.event.label.name == 'libc-0.2-pre-merge-ci'
     permissions:
-      actions: write # to cancel workflows (rust-lang/simpleinfra/github-actions/cancel-outdated-builds)
       contents: read # to fetch code (actions/checkout)
 
     name: "Check #[cfg]s"
     runs-on: ubuntu-22.04
     steps:
-      - uses: rust-lang/simpleinfra/github-actions/cancel-outdated-builds@HEAD
-        with:
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
       - uses: actions/checkout@v4
       - name: Setup Rust toolchain
         run: TOOLCHAIN=nightly sh ./ci/install-rust.sh
       - name: Build with check-cfg
         run: LIBC_CI=1 LIBC_CHECK_CFG=1 cargo build -Z unstable-options -Z check-cfg
 
-  # These jobs doesn't actually test anything, but they're only used to tell
-  # bors the build completed, as there is no practical way to detect when a
-  # workflow is successful listening to webhooks only.
-  #
-  # ALL THE PREVIOUS JOBS NEED TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
-
-  end_success:
-    name: bors build finished
-    if: github.event.pusher.name == 'bors' && success()
+  # One job that "summarizes" the success state of this pipeline. This can then be added to branch
+  # protection, rather than having to add each job separately.
+  success:
+    name: Success
     runs-on: ubuntu-22.04
     needs: [
       docker_linux_tier1,
@@ -329,28 +296,11 @@ jobs:
       build_channels_macos,
       build_channels_windows,
     ]
-
+    # Github branch protection is exceedingly silly and treats "jobs skipped because a dependency
+    # failed" as success. So we have to do some contortions to ensure the job fails if any of its
+    # dependencies fails.
+    if: always() # make sure this is never "skipped"
     steps:
-      - name: Mark the job as successful
-        run: exit 0
-
-  end_failure:
-    name: bors build finished
-    if: github.event.pusher.name == 'bors' && (failure() || cancelled())
-    runs-on: ubuntu-22.04
-    needs: [
-      docker_linux_tier1,
-      docker_linux_tier2,
-      #docker_linux_build_std,
-      macos,
-      windows,
-      style_check,
-      docker_switch,
-      build_channels_linux,
-      build_channels_macos,
-      build_channels_windows,
-    ]
-
-    steps:
-      - name: Mark the job as a failure
-        run: exit 1
+      # Manually check the status of all dependencies. `if: failure()` does not work.
+      - name: check if any dependency failed
+        run: jq --exit-status 'all(.result == "success")' <<< '${{ toJson(needs) }}'

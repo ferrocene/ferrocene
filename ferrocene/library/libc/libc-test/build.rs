@@ -3705,6 +3705,12 @@ fn test_linux(target: &str) {
             // https://github.com/torvalds/linux/commit/c05cd3645814724bdeb32a2b4d953b12bdea5f8c
             "xdp_umem_reg_v1" => true,
 
+            // Is defined in `<linux/sched/types.h>` but if this file is included at the same time
+            // as `<sched.h>`, the `struct sched_param` is defined twice, causing the compilation to
+            // fail. The problem doesn't seem to be present in more recent versions of the linux
+            // kernel so we can drop this and test the type once this new version is used in CI.
+            "sched_attr" => true,
+
             _ => false,
         }
     });
@@ -4123,6 +4129,14 @@ fn test_linux(target: &str) {
             | "PF_MCE_EARLY"
             | "PF_MEMALLOC_PIN" => true,
 
+            "SCHED_FLAG_KEEP_POLICY"
+            | "SCHED_FLAG_KEEP_PARAMS"
+            | "SCHED_FLAG_UTIL_CLAMP_MIN"
+            | "SCHED_FLAG_UTIL_CLAMP_MAX"
+            | "SCHED_FLAG_KEEP_ALL"
+            | "SCHED_FLAG_UTIL_CLAMP"
+            | "SCHED_FLAG_ALL" if musl => true, // Needs more recent linux headers.
+
             _ => false,
         }
     });
@@ -4303,6 +4317,8 @@ fn test_linux(target: &str) {
         // Linux >= 5.11 tweaked the `svm_zero` field of the `sockaddr_vm` struct.
         // https://github.com/torvalds/linux/commit/dc8eeef73b63ed8988224ba6b5ed19a615163a7f
         (struct_ == "sockaddr_vm" && field == "svm_zero") ||
+        // Linux >= 5.11 had added the svm_flags field to the `sockaddr_vm` struct.
+        (struct_ == "sockaddr_vm" && field == "svm_flags") ||
         // the `ifr_ifru` field is an anonymous union
         (struct_ == "ifreq" && field == "ifr_ifru") ||
         // the `ifc_ifcu` field is an anonymous union

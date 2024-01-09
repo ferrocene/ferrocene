@@ -558,8 +558,8 @@ impl Subcommand {
 
     pub fn coverage(&self) -> bool {
         match *self {
-            Subcommand::Test { coverage, ..} => coverage,
-            _=> false
+            Subcommand::Test { coverage, .. } => coverage,
+            _ => false,
         }
     }
 

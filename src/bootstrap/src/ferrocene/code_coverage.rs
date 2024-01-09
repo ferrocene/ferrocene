@@ -2,12 +2,15 @@ use std::path::Path;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::SourceType;
+use crate::core::config::TargetSelection;
 use crate::BootstrapCommand;
 use crate::Command;
 use crate::Mode;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) struct ProfilerBuiltinsNoCore;
+pub(crate) struct ProfilerBuiltinsNoCore {
+    pub(crate) target: TargetSelection,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub(crate) struct InstrumentationCoverageFlags {
@@ -28,7 +31,7 @@ impl Step for ProfilerBuiltinsNoCore {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info("Building profiler_builtins with no_core");
 
-        let target = builder.config.build;
+        let target = self.target;
         let compiler = builder.compiler(1, target);
 
         // x.py test --coverage
@@ -76,6 +79,6 @@ impl Step for ProfilerBuiltinsNoCore {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(Self {});
+        run.builder.ensure(Self { target: run.target });
     }
 }

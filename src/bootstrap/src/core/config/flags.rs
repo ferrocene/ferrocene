@@ -552,6 +552,13 @@ impl Subcommand {
         }
     }
 
+    pub fn coverage(&self) -> bool {
+        match *self {
+            Subcommand::Test { coverage, ..} => coverage,
+            _=> false
+        }
+    }
+
     pub fn run(&self) -> Option<&str> {
         match *self {
             Subcommand::Test { ref run, .. } => run.as_ref().map(|s| &s[..]),

@@ -347,7 +347,6 @@ pub struct Config {
     pub ferrocene_document_signatures_s3_bucket: String,
     pub ferrocene_ignore_document_signatures: bool,
     pub ferrocene_technical_report_url: Option<String>,
-    pub ferrocene_code_coverage: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1267,9 +1266,6 @@ impl Config {
         config.llvm_profile_generate = flags.llvm_profile_generate;
         config.enable_bolt_settings = flags.enable_bolt_settings;
         config.bypass_bootstrap_lock = flags.bypass_bootstrap_lock;
-        if let Subcommand::Test { coverage, .. } = &config.cmd {
-            config.ferrocene_code_coverage = *coverage;
-        }
 
         // Infer the rest of the configuration.
 

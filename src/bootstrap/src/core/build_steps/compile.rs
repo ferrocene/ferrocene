@@ -213,7 +213,7 @@ impl Step for Std {
             cargo.arg("-p").arg(krate);
         }
 
-        if builder.config.ferrocene_code_coverage && compiler.stage == 1 {
+        if builder.config.cmd.coverage() && compiler.stage == 1 {
             let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
             for flag in instrument_coverage_flags.flags() {
                 cargo.rustflag(&flag);

@@ -1462,7 +1462,7 @@ impl<'a> Builder<'a> {
                 // showing up in user code yet (see https://github.com/rust-lang/rust/pull/90054).
                 // We only do so when we're not checking code coverage though, as code coverage
                 // requires the v0 symbol mangling.
-                if mode == Mode::Std && !self.config.ferrocene_code_coverage {
+                if mode == Mode::Std && !self.config.cmd.coverage() {
                     // The standard library defaults to the legacy scheme
                     false
                 } else {

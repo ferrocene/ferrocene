@@ -2506,7 +2506,7 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-        if builder.config.ferrocene_code_coverage && builder.doc_tests != DocTests::No {
+        if builder.config.cmd.coverage() && builder.doc_tests != DocTests::No {
             panic!("Cannot generate coverage for doc tests");
         }
         // See [field@compile::Std::force_recompile].
@@ -2543,7 +2543,7 @@ impl Step for Crate {
         };
 
         let mut collect_profraw = false;
-        if builder.config.ferrocene_code_coverage {
+        if builder.config.cmd.coverage() {
             let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
 
             for flag in instrument_coverage_flags.flags() {

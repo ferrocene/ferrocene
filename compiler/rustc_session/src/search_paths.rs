@@ -74,19 +74,19 @@ impl SearchPath {
         // accepted and implemented upstream.
         let dir = if let Some(stripped) = path.strip_prefix("ferrocene-temp-builtin:") {
             let Some(sysroot) = sysroot else {
-                early_dcx.early_error("`-L ferrocene-temp-builtin:` is not supported");
+                early_dcx.early_fatal("`-L ferrocene-temp-builtin:` is not supported");
             };
             let triple = match triple {
                 TargetTriple::TargetTriple(triple) => triple,
                 TargetTriple::TargetJson { .. } => {
-                    early_dcx.early_error(
+                    early_dcx.early_fatal(
                         "`-L ferrocene-temp-builtin:` is not supported with custom targets",
                     );
                 }
             };
 
             if stripped == ".." || stripped.contains('/') {
-                early_dcx.early_error(
+                early_dcx.early_fatal(
                     "`-L ferrocene-temp-builtin:` does not accept \
                      subdirectories or parent directories",
                 );
@@ -94,7 +94,7 @@ impl SearchPath {
 
             let path = make_target_lib_path(sysroot, triple).join("builtin").join(stripped);
             if !path.is_dir() {
-                early_dcx.early_error(format!("ferrocene-temp-builtin:{stripped} does not exist"));
+                early_dcx.early_fatal(format!("ferrocene-temp-builtin:{stripped} does not exist"));
             }
 
             path

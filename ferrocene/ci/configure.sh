@@ -239,15 +239,6 @@ add --enable-lld
 release_channel="$(cat src/ci/channel)"
 add "--release-channel=${release_channel}"
 
-# Allow missing tools on the nightly channel, as upstream's development
-# workflow allows some submodules to fail to build in the nightly channel.
-#
-# If this configuration is missing the build could fail on nightly. It's
-# automatically disabled for non-nightly builds.
-if [[ "${release_channel}" = "nightly" ]]; then
-    add --enable-missing-tools
-fi
-
 # Run the traceability matrix tool in CI mode, producing the correct links.
 #
 # If this configuration is missing the traceability matrix might not be

@@ -2544,7 +2544,7 @@ impl Step for Crate {
 
         let mut collect_profraw = false;
         if builder.config.cmd.coverage() {
-            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
+            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
 
             for flag in instrument_coverage_flags.flags() {
                 cargo.rustflag(&flag);

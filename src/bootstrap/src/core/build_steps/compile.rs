@@ -214,7 +214,7 @@ impl Step for Std {
         }
 
         if builder.config.cmd.coverage() && compiler.stage == 1 {
-            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore);
+            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
             for flag in instrument_coverage_flags.flags() {
                 cargo.rustflag(&flag);
             }

@@ -883,7 +883,7 @@ impl OutFileName {
             OutFileName::Stdout => print!("{content}"),
             OutFileName::Real(path) => {
                 if let Err(e) = fs::write(path, content) {
-                    sess.emit_fatal(FileWriteFail { path, err: e.to_string() });
+                    sess.dcx().emit_fatal(FileWriteFail { path, err: e.to_string() });
                 }
             }
         }
@@ -1116,6 +1116,7 @@ impl Default for Options {
             working_dir: RealFileName::LocalPath(std::env::current_dir().unwrap()),
             color: ColorConfig::Auto,
             logical_env: FxIndexMap::default(),
+            verbose: false,
         }
     }
 }
@@ -1325,7 +1326,7 @@ fn default_configuration(sess: &Session) -> Cfg {
 
     // `target_has_atomic*`
     let layout = sess.target.parse_data_layout().unwrap_or_else(|err| {
-        sess.emit_fatal(err);
+        sess.dcx().emit_fatal(err);
     });
     let mut has_atomic = false;
     for (i, align) in [
@@ -2916,6 +2917,8 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
         RealFileName::LocalPath(path.into_owned())
     };
 
+    let verbose = matches.opt_present("verbose") || unstable_opts.verbose_internals;
+
     Options {
         assert_incr_state,
         crate_types,
@@ -2957,6 +2960,7 @@ pub fn build_session_options(early_dcx: &mut EarlyDiagCtxt, matches: &getopts::M
         working_dir,
         color,
         logical_env,
+        verbose,
     }
 }
 

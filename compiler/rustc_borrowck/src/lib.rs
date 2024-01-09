@@ -274,11 +274,12 @@ fn do_mir_borrowck<'tcx>(
         // The first argument is the coroutine type passed by value
         if let Some(local) = body.local_decls.raw.get(1)
         // Get the interior types and args which typeck computed
-        && let ty::Coroutine(_, _, hir::Movability::Static) = local.ty.kind()
+        && let ty::Coroutine(def_id, _) = *local.ty.kind()
+        && tcx.coroutine_movability(def_id) == hir::Movability::Movable
     {
-        false
-    } else {
         true
+    } else {
+        false
     };
 
     for (idx, move_data) in promoted_move_data {
@@ -1306,7 +1307,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 // moved into the closure and subsequently used by the closure,
                 // in order to populate our used_mut set.
                 match **aggregate_kind {
-                    AggregateKind::Closure(def_id, _) | AggregateKind::Coroutine(def_id, _, _) => {
+                    AggregateKind::Closure(def_id, _) | AggregateKind::Coroutine(def_id, _) => {
                         let def_id = def_id.expect_local();
                         let BorrowCheckResult { used_mut_upvars, .. } =
                             self.infcx.tcx.mir_borrowck(def_id);
@@ -1612,7 +1613,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     | ty::FnPtr(_)
                     | ty::Dynamic(_, _, _)
                     | ty::Closure(_, _)
-                    | ty::Coroutine(_, _, _)
+                    | ty::Coroutine(_, _)
                     | ty::CoroutineWitness(..)
                     | ty::Never
                     | ty::Tuple(_)
@@ -1636,7 +1637,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             return;
                         }
                     }
-                    ty::Closure(_, _) | ty::Coroutine(_, _, _) | ty::Tuple(_) => (),
+                    ty::Closure(_, _) | ty::Coroutine(_, _) | ty::Tuple(_) => (),
                     ty::Bool
                     | ty::Char
                     | ty::Int(_)
@@ -2134,7 +2135,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     // dereferencing a non-Copy raw pointer *and* have `-Ztreat-err-as-bug`
                     // enabled. We don't want to ICE for that case, as other errors will have
                     // been emitted (#52262).
-                    self.infcx.tcx.sess.span_delayed_bug(
+                    self.dcx().span_delayed_bug(
                         span,
                         format!(
                             "Accessing `{place:?}` with the kind `{kind:?}` shouldn't be possible",
@@ -2428,7 +2429,7 @@ mod error {
 
         pub fn buffer_error(&mut self, t: DiagnosticBuilder<'_>) {
             if let None = self.tainted_by_errors {
-                self.tainted_by_errors = Some(self.tcx.sess.span_delayed_bug(
+                self.tainted_by_errors = Some(self.tcx.dcx().span_delayed_bug(
                     t.span.clone_ignoring_labels(),
                     "diagnostic buffered but not emitted",
                 ))
@@ -2497,8 +2498,9 @@ mod error {
             if !self.errors.buffered.is_empty() {
                 self.errors.buffered.sort_by_key(|diag| diag.sort_span);
 
+                let dcx = self.dcx();
                 for diag in self.errors.buffered.drain(..) {
-                    self.infcx.tcx.sess.dcx().emit_diagnostic(diag);
+                    dcx.emit_diagnostic(diag);
                 }
             }
 

@@ -265,7 +265,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     &ImplTraitContext::Disallowed(ImplTraitPosition::Generic),
                     |this| match ty {
                         None => {
-                            let guar = this.tcx.sess.span_delayed_bug(
+                            let guar = this.dcx().span_delayed_bug(
                                 span,
                                 "expected to lower type alias type, but it was missing",
                             );
@@ -339,9 +339,14 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let itctx = ImplTraitContext::Universal;
                 let (generics, (trait_ref, lowered_ty)) =
                     self.lower_generics(ast_generics, *constness, id, &itctx, |this| {
+                        let constness = match *constness {
+                            Const::Yes(span) => BoundConstness::Maybe(span),
+                            Const::No => BoundConstness::Never,
+                        };
+
                         let trait_ref = trait_ref.as_ref().map(|trait_ref| {
                             this.lower_trait_ref(
-                                *constness,
+                                constness,
                                 trait_ref,
                                 &ImplTraitContext::Disallowed(ImplTraitPosition::Trait),
                             )
@@ -879,7 +884,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     &ImplTraitContext::Disallowed(ImplTraitPosition::Generic),
                     |this| match ty {
                         None => {
-                            let guar = this.tcx.sess.span_delayed_bug(
+                            let guar = this.dcx().span_delayed_bug(
                                 i.span,
                                 "expected to lower associated type, but it was missing",
                             );
@@ -952,11 +957,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         params: &'hir [hir::Param<'hir>],
         value: hir::Expr<'hir>,
     ) -> hir::BodyId {
-        let body = hir::Body {
-            coroutine_kind: self.coroutine_kind,
-            params,
-            value: self.arena.alloc(value),
-        };
+        let body = hir::Body { params, value: self.arena.alloc(value) };
         let id = body.id();
         debug_assert_eq!(id.hir_id.owner, self.current_hir_id_owner);
         self.bodies.push((id.hir_id.local_id, self.arena.alloc(body)));
@@ -1012,7 +1013,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_block_expr_opt(&mut self, span: Span, block: Option<&Block>) -> hir::Expr<'hir> {
         match block {
             Some(block) => self.lower_block_expr(block),
-            None => self.expr_err(span, self.tcx.sess.span_delayed_bug(span, "no block")),
+            None => self.expr_err(span, self.dcx().span_delayed_bug(span, "no block")),
         }
     }
 
@@ -1022,7 +1023,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 &[],
                 match expr {
                     Some(expr) => this.lower_expr_mut(expr),
-                    None => this.expr_err(span, this.tcx.sess.span_delayed_bug(span, "no block")),
+                    None => this.expr_err(span, this.dcx().span_delayed_bug(span, "no block")),
                 },
             )
         })
@@ -1208,33 +1209,20 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
                 this.expr_block(body)
             };
-            // FIXME(gen_blocks): Consider unifying the `make_*_expr` functions.
-            let coroutine_expr = match coroutine_kind {
-                CoroutineKind::Async { .. } => this.make_async_expr(
-                    CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
-                    closure_id,
-                    None,
-                    body.span,
-                    hir::CoroutineSource::Fn,
-                    mkbody,
-                ),
-                CoroutineKind::Gen { .. } => this.make_gen_expr(
-                    CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
-                    closure_id,
-                    None,
-                    body.span,
-                    hir::CoroutineSource::Fn,
-                    mkbody,
-                ),
-                CoroutineKind::AsyncGen { .. } => this.make_async_gen_expr(
-                    CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
-                    closure_id,
-                    None,
-                    body.span,
-                    hir::CoroutineSource::Fn,
-                    mkbody,
-                ),
+            let desugaring_kind = match coroutine_kind {
+                CoroutineKind::Async { .. } => hir::CoroutineDesugaring::Async,
+                CoroutineKind::Gen { .. } => hir::CoroutineDesugaring::Gen,
+                CoroutineKind::AsyncGen { .. } => hir::CoroutineDesugaring::AsyncGen,
             };
+            let coroutine_expr = this.make_desugared_coroutine_expr(
+                CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
+                closure_id,
+                None,
+                body.span,
+                desugaring_kind,
+                hir::CoroutineSource::Fn,
+                mkbody,
+            );
 
             let hir_id = this.lower_node_id(closure_id);
             this.maybe_forward_track_caller(body.span, fn_id, hir_id);
@@ -1296,7 +1284,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             .map(|s| Symbol::intern(s))
             .collect::<Vec<_>>();
         let suggested_name = find_best_match_for_name(&abi_names, abi.symbol_unescaped, None);
-        self.tcx.sess.emit_err(InvalidAbi {
+        self.dcx().emit_err(InvalidAbi {
             abi: abi.symbol_unescaped,
             span: abi.span,
             explain: match err {
@@ -1383,7 +1371,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 }
                 let is_param = *is_param.get_or_insert_with(compute_is_param);
                 if !is_param {
-                    self.tcx.sess.emit_err(MisplacedRelaxTraitBound { span: bound.span() });
+                    self.dcx().emit_err(MisplacedRelaxTraitBound { span: bound.span() });
                 }
             }
         }

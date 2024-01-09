@@ -130,7 +130,7 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReverseMapper<'tcx> {
             None => {
                 let e = self
                     .tcx
-                    .sess
+                    .dcx()
                     .struct_span_err(self.span, "non-defining opaque type use in defining scope")
                     .span_label(
                         self.span,
@@ -153,9 +153,9 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReverseMapper<'tcx> {
                 Ty::new_closure(self.tcx, def_id, args)
             }
 
-            ty::Coroutine(def_id, args, movability) => {
+            ty::Coroutine(def_id, args) => {
                 let args = self.fold_closure_args(def_id, args);
-                Ty::new_coroutine(self.tcx, def_id, args, movability)
+                Ty::new_coroutine(self.tcx, def_id, args)
             }
 
             ty::CoroutineWitness(def_id, args) => {
@@ -174,7 +174,7 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReverseMapper<'tcx> {
                         debug!(?param, ?self.map);
                         if !self.ignore_errors {
                             self.tcx
-                                .sess
+                                .dcx()
                                 .struct_span_err(
                                     self.span,
                                     format!(
@@ -208,7 +208,7 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReverseMapper<'tcx> {
                     None => {
                         let guar = self
                             .tcx
-                            .sess
+                            .dcx()
                             .create_err(ConstNotUsedTraitAlias {
                                 ct: ct.to_string(),
                                 span: self.span,

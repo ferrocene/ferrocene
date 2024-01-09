@@ -44,7 +44,7 @@ use rustc_data_structures::sync::{self, FreezeReadGuard, Lock, WorkerLocal};
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::{
-    DecorateLint, DiagnosticBuilder, DiagnosticMessage, ErrorGuaranteed, MultiSpan,
+    DecorateLint, DiagCtxt, DiagnosticBuilder, DiagnosticMessage, ErrorGuaranteed, MultiSpan,
 };
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
@@ -747,7 +747,7 @@ impl<'tcx> TyCtxt<'tcx> {
             {
                 Bound::Included(a)
             } else {
-                self.sess.span_delayed_bug(
+                self.dcx().span_delayed_bug(
                     attr.span,
                     "invalid rustc_layout_scalar_valid_range attribute",
                 );
@@ -783,7 +783,7 @@ impl<'tcx> TyCtxt<'tcx> {
         hooks: crate::hooks::Providers,
     ) -> GlobalCtxt<'tcx> {
         let data_layout = s.target.parse_data_layout().unwrap_or_else(|err| {
-            s.emit_fatal(err);
+            s.dcx().emit_fatal(err);
         });
         let interners = CtxtInterners::new(arena);
         let common_types = CommonTypes::new(&interners, s, &untracked);
@@ -847,6 +847,12 @@ impl<'tcx> TyCtxt<'tcx> {
         self.coroutine_kind(def_id).is_some()
     }
 
+    /// Returns the movability of the coroutine of `def_id`, or panics
+    /// if given a `def_id` that is not a coroutine.
+    pub fn coroutine_movability(self, def_id: DefId) -> hir::Movability {
+        self.coroutine_kind(def_id).expect("expected a coroutine").movability()
+    }
+
     /// Returns `true` if the node pointed to by `def_id` is a coroutine for an async construct.
     pub fn coroutine_is_async(self, def_id: DefId) -> bool {
         matches!(
@@ -858,7 +864,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Returns `true` if the node pointed to by `def_id` is a general coroutine that implements `Coroutine`.
     /// This means it is neither an `async` or `gen` construct.
     pub fn is_general_coroutine(self, def_id: DefId) -> bool {
-        matches!(self.coroutine_kind(def_id), Some(hir::CoroutineKind::Coroutine))
+        matches!(self.coroutine_kind(def_id), Some(hir::CoroutineKind::Coroutine(_)))
     }
 
     /// Returns `true` if the node pointed to by `def_id` is a coroutine for a `gen` construct.
@@ -1017,6 +1023,10 @@ impl<'tcx> TyCtxt<'tcx> {
             stable_crate_id.as_u64() >> (8 * 6),
             self.def_path(def_id).to_string_no_crate_verbose()
         )
+    }
+
+    pub fn dcx(self) -> &'tcx DiagCtxt {
+        self.sess.dcx()
     }
 }
 

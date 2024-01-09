@@ -223,8 +223,9 @@ impl<'tcx> TyCtxt<'tcx> {
                     Limit(0) => Limit(2),
                     limit => limit * 2,
                 };
-                let reported =
-                    self.sess.emit_err(crate::error::RecursionLimitReached { ty, suggested_limit });
+                let reported = self
+                    .dcx()
+                    .emit_err(crate::error::RecursionLimitReached { ty, suggested_limit });
                 return Ty::new_error(self, reported);
             }
             match *ty.kind() {
@@ -360,13 +361,13 @@ impl<'tcx> TyCtxt<'tcx> {
             }
 
             let Some(item_id) = self.associated_item_def_ids(impl_did).first() else {
-                self.sess
+                self.dcx()
                     .span_delayed_bug(self.def_span(impl_did), "Drop impl without drop function");
                 return;
             };
 
             if let Some((old_item_id, _)) = dtor_candidate {
-                self.sess
+                self.dcx()
                     .struct_span_err(self.def_span(item_id), "multiple drop impls found")
                     .span_note(self.def_span(old_item_id), "other impl here")
                     .delay_as_bug();
@@ -734,7 +735,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::AsyncGen, _) => {
                         "async gen closure"
                     }
-                    hir::CoroutineKind::Coroutine => "coroutine",
+                    hir::CoroutineKind::Coroutine(_) => "coroutine",
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, _) => {
                         "gen closure"
                     }
@@ -758,7 +759,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Async, ..) => "an",
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::AsyncGen, ..) => "an",
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, ..) => "a",
-                    hir::CoroutineKind::Coroutine => "a",
+                    hir::CoroutineKind::Coroutine(_) => "a",
                 }
             }
             _ => def_kind.article(),

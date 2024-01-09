@@ -293,7 +293,7 @@ impl<'tcx> Cx<'tcx> {
                     let attrs = tcx.hir().attrs(expr.hir_id);
                     if attrs.iter().any(|a| a.name_or_empty() == sym::rustc_box) {
                         if attrs.len() != 1 {
-                            tcx.sess.emit_err(errors::RustcBoxAttributeError {
+                            tcx.dcx().emit_err(errors::RustcBoxAttributeError {
                                 span: attrs[0].span,
                                 reason: errors::RustcBoxAttrReason::Attributes,
                             });
@@ -312,13 +312,13 @@ impl<'tcx> Cx<'tcx> {
                                     kind: ExprKind::Box { value: self.mirror_expr(value) },
                                 };
                             } else {
-                                tcx.sess.emit_err(errors::RustcBoxAttributeError {
+                                tcx.dcx().emit_err(errors::RustcBoxAttributeError {
                                     span: expr.span,
                                     reason: errors::RustcBoxAttrReason::NotBoxNew,
                                 });
                             }
                         } else {
-                            tcx.sess.emit_err(errors::RustcBoxAttributeError {
+                            tcx.dcx().emit_err(errors::RustcBoxAttributeError {
                                 span: attrs[0].span,
                                 reason: errors::RustcBoxAttrReason::MissingBox,
                             });
@@ -552,8 +552,8 @@ impl<'tcx> Cx<'tcx> {
                 let closure_ty = self.typeck_results().expr_ty(expr);
                 let (def_id, args, movability) = match *closure_ty.kind() {
                     ty::Closure(def_id, args) => (def_id, UpvarArgs::Closure(args), None),
-                    ty::Coroutine(def_id, args, movability) => {
-                        (def_id, UpvarArgs::Coroutine(args), Some(movability))
+                    ty::Coroutine(def_id, args) => {
+                        (def_id, UpvarArgs::Coroutine(args), Some(tcx.coroutine_movability(def_id)))
                     }
                     _ => {
                         span_bug!(expr.span, "closure expr w/o closure type: {:?}", closure_ty);

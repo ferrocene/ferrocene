@@ -284,7 +284,7 @@ impl<'tcx> LayoutCalculator for LayoutCx<'tcx, TyCtxt<'tcx>> {
     type TargetDataLayoutRef = &'tcx TargetDataLayout;
 
     fn delayed_bug(&self, txt: String) {
-        self.tcx.sess.span_delayed_bug(DUMMY_SP, txt);
+        self.tcx.dcx().span_delayed_bug(DUMMY_SP, txt);
     }
 
     fn current_data_layout(&self) -> Self::TargetDataLayoutRef {
@@ -906,7 +906,7 @@ where
                     i,
                 ),
 
-                ty::Coroutine(def_id, args, _) => match this.variants {
+                ty::Coroutine(def_id, args) => match this.variants {
                     Variants::Single { index } => TyMaybeWithLayout::Ty(
                         args.as_coroutine()
                             .state_tys(def_id, tcx)

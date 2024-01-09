@@ -10,6 +10,8 @@ parse_ambiguous_range_pattern = the range pattern here has ambiguous interpretat
 parse_array_brackets_instead_of_braces = this is a block expression, not an array
     .suggestion = to make an array, use square brackets instead of curly braces
 
+parse_array_index_offset_of = array indexing not supported in offset_of
+
 parse_assignment_else_not_allowed = <assignment> ... else {"{"} ... {"}"} is not allowed
 
 parse_assoc_lifetime = associated lifetimes are not supported
@@ -405,6 +407,8 @@ parse_invalid_logical_operator = `{$incorrect}` is not a logical operator
 
 parse_invalid_meta_item = expected unsuffixed literal or identifier, found `{$token}`
 
+parse_invalid_offset_of = offset_of expects dot-separated field and variant names
+
 parse_invalid_unicode_escape = invalid unicode character escape
     .label = invalid escape
     .help = unicode escape must {$surrogate ->
@@ -766,6 +770,9 @@ parse_unexpected_if_with_if = unexpected `if` in the condition expression
 
 parse_unexpected_lifetime_in_pattern = unexpected lifetime `{$symbol}` in pattern
     .suggestion = remove the lifetime
+
+parse_unexpected_paren_in_range_pat = range pattern bounds cannot have parentheses
+parse_unexpected_paren_in_range_pat_sugg = remove these parentheses
 
 parse_unexpected_parentheses_in_for_head = unexpected parentheses surrounding `for` loop head
     .suggestion = remove parentheses in `for` loop

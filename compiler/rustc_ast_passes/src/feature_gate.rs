@@ -152,8 +152,8 @@ impl<'a> PostExpansionVisitor<'a> {
     }
 
     fn check_late_bound_lifetime_defs(&self, params: &[ast::GenericParam]) {
-        // Check only lifetime parameters are present and that the lifetime
-        // parameters that are present have no bounds.
+        // Check only lifetime parameters are present and that the
+        // generic parameters that are present have no bounds.
         let non_lt_param_spans = params.iter().filter_map(|param| match param.kind {
             ast::GenericParamKind::Lifetime { .. } => None,
             _ => Some(param.ident.span),
@@ -164,10 +164,11 @@ impl<'a> PostExpansionVisitor<'a> {
             non_lt_param_spans,
             crate::fluent_generated::ast_passes_forbidden_non_lifetime_param
         );
+
         for param in params {
             if !param.bounds.is_empty() {
                 let spans: Vec<_> = param.bounds.iter().map(|b| b.span()).collect();
-                self.sess.emit_err(errors::ForbiddenLifetimeBound { spans });
+                self.sess.emit_err(errors::ForbiddenBound { spans });
             }
         }
     }
@@ -526,6 +527,7 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
         "async closures are unstable",
         "to use an async block, remove the `||`: `async {`"
     );
+    gate_all!(async_for_loop, "`for await` loops are experimental");
     gate_all!(
         closure_lifetime_binder,
         "`for<...>` binders for closures are experimental",

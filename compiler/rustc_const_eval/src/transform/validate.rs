@@ -119,7 +119,7 @@ impl<'a, 'tcx> CfgChecker<'a, 'tcx> {
         let span = self.body.source_info(location).span;
         // We use `span_delayed_bug` as we might see broken MIR when other errors have already
         // occurred.
-        self.tcx.sess.dcx().span_delayed_bug(
+        self.tcx.dcx().span_delayed_bug(
             span,
             format!(
                 "broken MIR in {:?} ({}) at {:?}:\n{}",
@@ -527,7 +527,7 @@ impl<'a, 'tcx> Visitor<'tcx> for CfgChecker<'a, 'tcx> {
 
     fn visit_source_scope(&mut self, scope: SourceScope) {
         if self.body.source_scopes.get(scope).is_none() {
-            self.tcx.sess.dcx().span_delayed_bug(
+            self.tcx.dcx().span_delayed_bug(
                 self.body.span,
                 format!(
                     "broken MIR in {:?} ({}):\ninvalid source scope {:?}",
@@ -694,7 +694,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                         };
                         check_equal(self, location, f_ty);
                     }
-                    &ty::Coroutine(def_id, args, _) => {
+                    &ty::Coroutine(def_id, args) => {
                         let f_ty = if let Some(var) = parent_ty.variant_index {
                             let gen_body = if def_id == self.body.source.def_id() {
                                 self.body

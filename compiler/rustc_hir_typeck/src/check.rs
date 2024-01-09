@@ -31,7 +31,7 @@ pub(super) fn check_fn<'a, 'tcx>(
     decl: &'tcx hir::FnDecl<'tcx>,
     fn_def_id: LocalDefId,
     body: &'tcx hir::Body<'tcx>,
-    can_be_coroutine: Option<hir::Movability>,
+    closure_kind: Option<hir::ClosureKind>,
     params_can_be_unsized: bool,
 ) -> Option<CoroutineTypes<'tcx>> {
     let fn_id = fcx.tcx.local_def_id_to_hir_id(fn_def_id);
@@ -55,12 +55,10 @@ pub(super) fn check_fn<'a, 'tcx>(
 
     forbid_intrinsic_abi(tcx, span, fn_sig.abi);
 
-    if let Some(kind) = body.coroutine_kind
-        && can_be_coroutine.is_some()
-    {
+    if let Some(hir::ClosureKind::Coroutine(kind)) = closure_kind {
         let yield_ty = match kind {
             hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, _)
-            | hir::CoroutineKind::Coroutine => {
+            | hir::CoroutineKind::Coroutine(_) => {
                 let yield_ty = fcx.next_ty_var(TypeVariableOrigin {
                     kind: TypeVariableOriginKind::TypeInference,
                     span,
@@ -151,9 +149,7 @@ pub(super) fn check_fn<'a, 'tcx>(
     // We insert the deferred_coroutine_interiors entry after visiting the body.
     // This ensures that all nested coroutines appear before the entry of this coroutine.
     // resolve_coroutine_interiors relies on this property.
-    let coroutine_ty = if let (Some(_), Some(coroutine_kind)) =
-        (can_be_coroutine, body.coroutine_kind)
-    {
+    let coroutine_ty = if let Some(hir::ClosureKind::Coroutine(coroutine_kind)) = closure_kind {
         let interior = fcx
             .next_ty_var(TypeVariableOrigin { kind: TypeVariableOriginKind::MiscVariable, span });
         fcx.deferred_coroutine_interiors.borrow_mut().push((
@@ -164,12 +160,7 @@ pub(super) fn check_fn<'a, 'tcx>(
         ));
 
         let (resume_ty, yield_ty) = fcx.resume_yield_tys.unwrap();
-        Some(CoroutineTypes {
-            resume_ty,
-            yield_ty,
-            interior,
-            movability: can_be_coroutine.unwrap(),
-        })
+        Some(CoroutineTypes { resume_ty, yield_ty, interior })
     } else {
         None
     };
@@ -215,22 +206,22 @@ pub(super) fn check_fn<'a, 'tcx>(
 fn check_panic_info_fn(tcx: TyCtxt<'_>, fn_id: LocalDefId, fn_sig: ty::FnSig<'_>) {
     let DefKind::Fn = tcx.def_kind(fn_id) else {
         let span = tcx.def_span(fn_id);
-        tcx.sess.span_err(span, "should be a function");
+        tcx.dcx().span_err(span, "should be a function");
         return;
     };
 
     let generic_counts = tcx.generics_of(fn_id).own_counts();
     if generic_counts.types != 0 {
         let span = tcx.def_span(fn_id);
-        tcx.sess.span_err(span, "should have no type parameters");
+        tcx.dcx().span_err(span, "should have no type parameters");
     }
     if generic_counts.consts != 0 {
         let span = tcx.def_span(fn_id);
-        tcx.sess.span_err(span, "should have no const parameters");
+        tcx.dcx().span_err(span, "should have no const parameters");
     }
 
     let Some(panic_info_did) = tcx.lang_items().panic_info() else {
-        tcx.sess.err("language item required, but not found: `panic_info`");
+        tcx.dcx().err("language item required, but not found: `panic_info`");
         return;
     };
 

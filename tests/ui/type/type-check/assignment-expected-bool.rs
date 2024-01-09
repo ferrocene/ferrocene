@@ -31,6 +31,11 @@ fn main() {
     let _: usize = 0 = 0;
     //~^ ERROR mismatched types [E0308]
     //~| ERROR invalid left-hand side of assignment [E0070]
+
+    let foo = &String::new();
+    let bar = "";
+    if foo = bar {}
+    //~^ ERROR mismatched types [E0308]
 }
 
 // ferrocene-annotations: fls_y4by2i8dl05o

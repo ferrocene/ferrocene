@@ -25,7 +25,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         param_mode: ParamMode,
         itctx: &ImplTraitContext,
         // constness of the impl/bound if this is a trait path
-        constness: Option<ast::Const>,
+        constness: Option<ast::BoundConstness>,
     ) -> hir::QPath<'hir> {
         let qself_position = qself.as_ref().map(|q| q.position);
         let qself = qself.as_ref().map(|q| self.lower_ty(&q.ty, itctx));
@@ -140,7 +140,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
 
         // We should've returned in the for loop above.
 
-        self.tcx.sess.dcx().span_bug(
+        self.dcx().span_bug(
             p.span,
             format!(
                 "lower_qpath: no final extension segment in {}..{}",
@@ -179,7 +179,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         param_mode: ParamMode,
         parenthesized_generic_args: ParenthesizedGenericArgs,
         itctx: &ImplTraitContext,
-        constness: Option<ast::Const>,
+        constness: Option<ast::BoundConstness>,
     ) -> hir::PathSegment<'hir> {
         debug!("path_span: {:?}, lower_path_segment(segment: {:?})", path_span, segment);
         let (mut generic_args, infer_args) = if let Some(generic_args) = segment.args.as_deref() {
@@ -214,7 +214,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                         } else {
                             None
                         };
-                        self.tcx.sess.emit_err(GenericTypeWithParentheses { span: data.span, sub });
+                        self.dcx().emit_err(GenericTypeWithParentheses { span: data.span, sub });
                         (
                             self.lower_angle_bracketed_parameter_data(
                                 &data.as_angle_bracketed_args(),

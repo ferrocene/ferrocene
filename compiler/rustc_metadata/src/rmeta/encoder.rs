@@ -169,7 +169,19 @@ impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for ExpnId {
 impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for Span {
     fn encode(&self, s: &mut EncodeContext<'a, 'tcx>) {
         match s.span_shorthands.entry(*self) {
-            Entry::Occupied(o) => SpanEncodingMode::Shorthand(*o.get()).encode(s),
+            Entry::Occupied(o) => {
+                // If an offset is smaller than the absolute position, we encode with the offset.
+                // This saves space since smaller numbers encode in less bits.
+                let last_location = *o.get();
+                // This cannot underflow. Metadata is written with increasing position(), so any
+                // previously saved offset must be smaller than the current position.
+                let offset = s.opaque.position() - last_location;
+                if offset < last_location {
+                    SpanEncodingMode::RelativeOffset(offset).encode(s)
+                } else {
+                    SpanEncodingMode::AbsoluteOffset(last_location).encode(s)
+                }
+            }
             Entry::Vacant(v) => {
                 let position = s.opaque.position();
                 v.insert(position);
@@ -1432,7 +1444,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if def_kind == DefKind::Closure
                 && let Some(coroutine_kind) = self.tcx.coroutine_kind(def_id)
             {
-                self.tables.coroutine_kind.set(def_id.index, Some(coroutine_kind));
+                self.tables.coroutine_kind.set(def_id.index, Some(coroutine_kind))
             }
             if let DefKind::Enum | DefKind::Struct | DefKind::Union = def_kind {
                 self.encode_info_for_adt(local_id);
@@ -2188,7 +2200,7 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path) {
     }
 
     let mut encoder = opaque::FileEncoder::new(path)
-        .unwrap_or_else(|err| tcx.sess.emit_fatal(FailCreateFileEncoder { err }));
+        .unwrap_or_else(|err| tcx.dcx().emit_fatal(FailCreateFileEncoder { err }));
     encoder.emit_raw_bytes(METADATA_HEADER);
 
     // Will be filled with the root position after encoding everything.
@@ -2229,12 +2241,12 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path) {
     // If we forget this, compilation can succeed with an incomplete rmeta file,
     // causing an ICE when the rmeta file is read by another compilation.
     if let Err((path, err)) = ecx.opaque.finish() {
-        tcx.sess.emit_err(FailWriteFile { path: &path, err });
+        tcx.dcx().emit_err(FailWriteFile { path: &path, err });
     }
 
     let file = ecx.opaque.file();
     if let Err(err) = encode_root_position(file, root.position.get()) {
-        tcx.sess.emit_err(FailWriteFile { path: ecx.opaque.path(), err });
+        tcx.dcx().emit_err(FailWriteFile { path: ecx.opaque.path(), err });
     }
 
     // Record metadata size for self-profiling

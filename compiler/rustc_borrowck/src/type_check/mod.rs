@@ -224,7 +224,7 @@ pub(crate) fn type_check<'mir, 'tcx>(
             let mut hidden_type = infcx.resolve_vars_if_possible(decl.hidden_type);
             trace!("finalized opaque type {:?} to {:#?}", opaque_type_key, hidden_type.ty.kind());
             if hidden_type.has_non_region_infer() {
-                let reported = infcx.tcx.sess.span_delayed_bug(
+                let reported = infcx.dcx().span_delayed_bug(
                     decl.hidden_type.span,
                     format!("could not resolve {:#?}", hidden_type.ty.kind()),
                 );
@@ -268,7 +268,7 @@ fn mirbug(tcx: TyCtxt<'_>, span: Span, msg: String) {
     // We sometimes see MIR failures (notably predicate failures) due to
     // the fact that we check rvalue sized predicates here. So use `span_delayed_bug`
     // to avoid reporting bugs in those cases.
-    tcx.sess.dcx().span_delayed_bug(span, msg);
+    tcx.dcx().span_delayed_bug(span, msg);
 }
 
 enum FieldAccessError {
@@ -762,7 +762,7 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
         let (variant, args) = match base_ty {
             PlaceTy { ty, variant_index: Some(variant_index) } => match *ty.kind() {
                 ty::Adt(adt_def, args) => (adt_def.variant(variant_index), args),
-                ty::Coroutine(def_id, args, _) => {
+                ty::Coroutine(def_id, args) => {
                     let mut variants = args.as_coroutine().state_tys(def_id, tcx);
                     let Some(mut variant) = variants.nth(variant_index.into()) else {
                         bug!(
@@ -790,7 +790,7 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
                         }),
                     };
                 }
-                ty::Coroutine(_, args, _) => {
+                ty::Coroutine(_, args) => {
                     // Only prefix fields (upvars and current state) are
                     // accessible without a variant index.
                     return match args.as_coroutine().prefix_tys().get(field.index()) {
@@ -1067,7 +1067,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         );
 
         if result.is_err() {
-            self.infcx.tcx.sess.span_delayed_bug(
+            self.infcx.dcx().span_delayed_bug(
                 self.body.span,
                 "failed re-defining predefined opaques in mir typeck",
             );
@@ -1573,7 +1573,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     sym::simd_shuffle => {
                         if !matches!(args[2], Operand::Constant(_)) {
                             self.tcx()
-                                .sess
+                                .dcx()
                                 .emit_err(SimdShuffleLastConst { span: term.source_info.span });
                         }
                     }
@@ -1752,7 +1752,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                 // While this is located in `nll::typeck` this error is not
                 // an NLL error, it's a required check to prevent creation
                 // of unsized rvalues in a call expression.
-                self.tcx().sess.emit_err(MoveUnsized { ty, span });
+                self.tcx().dcx().emit_err(MoveUnsized { ty, span });
             }
         }
     }
@@ -1784,7 +1784,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     }),
                 }
             }
-            AggregateKind::Coroutine(_, args, _) => {
+            AggregateKind::Coroutine(_, args) => {
                 // It doesn't make sense to look at a field beyond the prefix;
                 // these require a variant index, and are not initialized in
                 // aggregate rvalues.
@@ -2392,7 +2392,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                 AggregateKind::Array(_) => None,
                 AggregateKind::Tuple => None,
                 AggregateKind::Closure(_, _) => None,
-                AggregateKind::Coroutine(_, _, _) => None,
+                AggregateKind::Coroutine(_, _) => None,
             },
         }
     }
@@ -2620,7 +2620,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             // desugaring. A closure gets desugared to a struct, and
             // these extra requirements are basically like where
             // clauses on the struct.
-            AggregateKind::Closure(def_id, args) | AggregateKind::Coroutine(def_id, args, _) => {
+            AggregateKind::Closure(def_id, args) | AggregateKind::Coroutine(def_id, args) => {
                 (def_id, self.prove_closure_bounds(tcx, def_id.expect_local(), args, location))
             }
 

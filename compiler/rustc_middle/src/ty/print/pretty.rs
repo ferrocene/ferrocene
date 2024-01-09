@@ -744,7 +744,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 // only affect certain debug messages (e.g. messages printed
                 // from `rustc_middle::ty` during the computation of `tcx.predicates_of`),
                 // and should have no effect on any compiler output.
-                // [Unless `-Zverbose` is used, e.g. in the output of
+                // [Unless `-Zverbose-internals` is used, e.g. in the output of
                 // `tests/ui/nll/ty-outlives/impl-trait-captures.rs`, for
                 // example.]
                 if self.should_print_verbose() {
@@ -783,14 +783,14 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 }
             }
             ty::Str => p!("str"),
-            ty::Coroutine(did, args, movability) => {
+            ty::Coroutine(did, args) => {
                 p!(write("{{"));
                 let coroutine_kind = self.tcx().coroutine_kind(did).unwrap();
-                let should_print_movability =
-                    self.should_print_verbose() || coroutine_kind == hir::CoroutineKind::Coroutine;
+                let should_print_movability = self.should_print_verbose()
+                    || matches!(coroutine_kind, hir::CoroutineKind::Coroutine(_));
 
                 if should_print_movability {
-                    match movability {
+                    match coroutine_kind.movability() {
                         hir::Movability::Movable => {}
                         hir::Movability::Static => p!("static "),
                     }
@@ -829,7 +829,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             }
             ty::CoroutineWitness(did, args) => {
                 p!(write("{{"));
-                if !self.tcx().sess.verbose() {
+                if !self.tcx().sess.verbose_internals() {
                     p!("coroutine witness");
                     // FIXME(eddyb) should use `def_span`.
                     if let Some(did) = did.as_local() {
@@ -1055,7 +1055,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                             && assoc.trait_container(tcx) == tcx.lang_items().coroutine_trait()
                             && assoc.name == rustc_span::sym::Return
                         {
-                            if let ty::Coroutine(_, args, _) = args.type_at(0).kind() {
+                            if let ty::Coroutine(_, args) = args.type_at(0).kind() {
                                 let return_ty = args.as_coroutine().return_ty();
                                 if !return_ty.is_ty_var() {
                                     return_ty.into()
@@ -1698,7 +1698,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
     }
 
     fn should_print_verbose(&self) -> bool {
-        self.tcx().sess.verbose()
+        self.tcx().sess.verbose_internals()
     }
 }
 

@@ -1135,9 +1135,9 @@ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.103"
+version = "0.1.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3b73c3443a5fd2438d7ba4853c64e4c8efc2404a9e28a9234cc2d5eebc6c242"
+checksum = "99c3f9035afc33f4358773239573f7d121099856753e1bbd2a6a5207098fc741"
 dependencies = [
  "cc",
  "rustc-std-workspace-core",
@@ -3132,6 +3132,7 @@ dependencies = [
  "ctrlc",
  "env_logger",
  "getrandom",
+ "jemalloc-sys",
  "lazy_static",
  "libc",
  "libffi",
@@ -3141,7 +3142,6 @@ dependencies = [
  "rand",
  "regex",
  "rustc_version",
- "serde",
  "smallvec",
  "ui_test",
 ]
@@ -4048,9 +4048,9 @@ dependencies = [
 
 [[package]]
 name = "rustc-build-sysroot"
-version = "0.4.2"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ed2a90dfa5232ed5ff21d53d4df655f315ab316ea06fc508f1c74bcedb1ce6c"
+checksum = "39dcf8d82b1f79a179bdb284dc44db440a9666eefa5a6df5ef282d6db930d544"
 dependencies = [
  "anyhow",
  "rustc_version",
@@ -4506,6 +4506,7 @@ dependencies = [
  "rustc_trait_selection",
  "rustc_ty_utils",
  "serde_json",
+ "shlex",
  "time",
  "tracing",
  "windows",
@@ -4565,7 +4566,6 @@ dependencies = [
 name = "rustc_expand"
 version = "0.0.0"
 dependencies = [
- "crossbeam-channel",
  "rustc_ast",
  "rustc_ast_passes",
  "rustc_ast_pretty",
@@ -4645,6 +4645,7 @@ dependencies = [
  "rustc_feature",
  "rustc_fluent_macro",
  "rustc_hir",
+ "rustc_hir_pretty",
  "rustc_index",
  "rustc_infer",
  "rustc_lint_defs",
@@ -5412,6 +5413,7 @@ dependencies = [
  "rustc_index",
  "rustc_macros",
  "rustc_serialize",
+ "rustc_span",
  "smallvec",
 ]
 

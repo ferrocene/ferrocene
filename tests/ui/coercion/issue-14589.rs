@@ -20,7 +20,7 @@ impl<T> Test<T> {
 }
 
 trait Foo { fn dummy(&self) { }}
-struct Output(#[allow(unused_tuple_struct_fields)] isize);
+struct Output(#[allow(dead_code)] isize);
 impl Foo for Output {}
 
 // ferrocene-annotations: fls_qa98qdi42orq

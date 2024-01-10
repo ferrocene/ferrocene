@@ -1,2 +1,2 @@
-$DIR/error-format_short.rs:5:13: error[E0425]: cannot find value `x` in this scope
+$DIR/error-format_short.rs:6:13: error[E0425]: cannot find value `x` in this scope
 error: aborting due to 1 previous error

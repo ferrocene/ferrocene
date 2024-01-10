@@ -57,17 +57,26 @@ impl Step for ProfilerBuiltinsNoCore {
 
         let lib_dir = target_dir.join(&*target.triple).join(cargo_dir);
         let lib_path = lib_dir.join("libprofiler_builtins.rlib");
+        let profiler_builtins_no_core_path = lib_dir.join("libprofiler_builtins_no_core.rlib");
 
         if !builder.config.dry_run() {
-            assert!(lib_path.exists() && lib_path.is_file());
+            std::fs::rename(&lib_path, &profiler_builtins_no_core_path)
+                .expect("Could not rename the profiler_builtins_no_core library");
+            assert!(
+                profiler_builtins_no_core_path.exists() && profiler_builtins_no_core_path.is_file()
+            );
         }
         let mut instrument_coverage_flags = InstrumentationCoverageFlags { rustflags: Vec::new() };
 
         instrument_coverage_flags.rustflags.push("-Cinstrument-coverage".into());
         instrument_coverage_flags.rustflags.push("--extern".into());
+        instrument_coverage_flags.rustflags.push(format!(
+            "profiler_builtins_no_core={}",
+            profiler_builtins_no_core_path.to_str().unwrap()
+        ));
         instrument_coverage_flags
             .rustflags
-            .push(format!("profiler_builtins={}", lib_path.to_str().unwrap()));
+            .push("-Zprofiler_runtime=profiler_builtins_no_core".into());
         instrument_coverage_flags.rustflags.push("-L".into());
         instrument_coverage_flags.rustflags.push(lib_dir.to_str().unwrap().to_string());
 

@@ -1818,7 +1818,6 @@ impl Config {
                 check_ci_llvm!(static_libstdcpp);
                 check_ci_llvm!(targets);
                 check_ci_llvm!(experimental_targets);
-                check_ci_llvm!(link_jobs);
                 check_ci_llvm!(clang_cl);
                 check_ci_llvm!(version_suffix);
                 check_ci_llvm!(cflags);

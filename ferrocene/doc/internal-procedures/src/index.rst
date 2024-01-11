@@ -14,11 +14,16 @@ Ferrocene Internal Procedures
    onboarding
    setup-local-env
    issues
-   manual-upstream-pulls
-   manual-subtree-pulls
    known-problems
    pe-procedures
    doc-procedures
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Periodic maintenance
+
+   maintenance/upstream-pulls
+   maintenance/subtree-pulls
 
 .. toctree::
    :maxdepth: 4

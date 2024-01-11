@@ -1,6 +1,6 @@
-#![allow(rustc::potential_query_instability)]
 #![deny(rustc::untranslatable_diagnostic)]
 #![deny(rustc::diagnostic_outside_of_impl)]
+#![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(cow_is_borrowed)]
 #![feature(decl_macro)]
@@ -10,6 +10,7 @@
 #![feature(min_specialization)]
 #![feature(never_type)]
 #![feature(option_get_or_insert_default)]
+#![feature(round_char_boundary)]
 #![feature(trusted_step)]
 #![feature(try_blocks)]
 #![feature(yeet_expr)]
@@ -94,6 +95,7 @@ mod multiple_return_terminators;
 mod normalize_array_len;
 mod nrvo;
 mod prettify;
+mod promote_consts;
 mod ref_prop;
 mod remove_noop_landing_pads;
 mod remove_storage_markers;
@@ -115,7 +117,6 @@ mod uninhabited_enum_branching;
 mod unreachable_prop;
 
 use rustc_const_eval::transform::check_consts::{self, ConstCx};
-use rustc_const_eval::transform::promote_consts;
 use rustc_const_eval::transform::validate;
 use rustc_mir_dataflow::rustc_peek;
 
@@ -285,9 +286,9 @@ fn mir_const_qualif(tcx: TyCtxt<'_>, def: LocalDefId) -> ConstQualifs {
 /// FIXME(oli-obk): it's unclear whether we still need this phase (and its corresponding query).
 /// We used to have this for pre-miri MIR based const eval.
 fn mir_const(tcx: TyCtxt<'_>, def: LocalDefId) -> &Steal<Body<'_>> {
-    // Unsafety check uses the raw mir, so make sure it is run.
+    // MIR unsafety check uses the raw mir, so make sure it is run.
     if !tcx.sess.opts.unstable_opts.thir_unsafeck {
-        tcx.ensure_with_value().unsafety_check_result(def);
+        tcx.ensure_with_value().mir_unsafety_check_result(def);
     }
 
     // has_ffi_unwind_calls query uses the raw mir, so make sure it is run.

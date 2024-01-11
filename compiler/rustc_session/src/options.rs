@@ -391,7 +391,6 @@ mod desc {
     pub const parse_strip: &str = "either `none`, `debuginfo`, or `symbols`";
     pub const parse_linker_flavor: &str = ::rustc_target::spec::LinkerFlavorCli::one_of();
     pub const parse_optimization_fuel: &str = "crate=integer";
-    pub const parse_mir_spanview: &str = "`statement` (default), `terminator`, or `block`";
     pub const parse_dump_mono_stats: &str = "`markdown` (default) or `json`";
     pub const parse_instrument_coverage: &str =
         "`all` (default), `branch`, `except-unused-generics`, `except-unused-functions`, or `off`";
@@ -864,29 +863,6 @@ mod parse {
             }
             _ => false,
         }
-    }
-
-    pub(crate) fn parse_mir_spanview(slot: &mut Option<MirSpanview>, v: Option<&str>) -> bool {
-        if v.is_some() {
-            let mut bool_arg = None;
-            if parse_opt_bool(&mut bool_arg, v) {
-                *slot = bool_arg.unwrap().then_some(MirSpanview::Statement);
-                return true;
-            }
-        }
-
-        let Some(v) = v else {
-            *slot = Some(MirSpanview::Statement);
-            return true;
-        };
-
-        *slot = Some(match v.trim_end_matches('s') {
-            "statement" | "stmt" => MirSpanview::Statement,
-            "terminator" | "term" => MirSpanview::Terminator,
-            "block" | "basicblock" => MirSpanview::Block,
-            _ => return false,
-        });
-        true
     }
 
     pub(crate) fn parse_time_passes_format(slot: &mut TimePassesFormat, v: Option<&str>) -> bool {
@@ -1577,9 +1553,6 @@ options! {
     dep_info_omit_d_target: bool = (false, parse_bool, [TRACKED],
         "in dep-info output, omit targets for tracking dependencies of the dep-info files \
         themselves (default: no)"),
-    dont_buffer_diagnostics: bool = (false, parse_bool, [UNTRACKED],
-        "emit diagnostics rather than buffering (breaks NLL error downgrading, sorting) \
-        (default: no)"),
     dual_proc_macros: bool = (false, parse_bool, [TRACKED],
         "load proc macros for both target and host, but only link to the target (default: no)"),
     dump_dep_graph: bool = (false, parse_bool, [UNTRACKED],
@@ -1601,11 +1574,6 @@ options! {
         "exclude the pass number when dumping MIR (used in tests) (default: no)"),
     dump_mir_graphviz: bool = (false, parse_bool, [UNTRACKED],
         "in addition to `.mir` files, create graphviz `.dot` files (default: no)"),
-    dump_mir_spanview: Option<MirSpanview> = (None, parse_mir_spanview, [UNTRACKED],
-        "in addition to `.mir` files, create `.html` files to view spans for \
-        all `statement`s (including terminators), only `terminator` spans, or \
-        computed `block` spans (one span encompassing a block's terminator and \
-        all statements)."),
     dump_mono_stats: SwitchWithOptPath = (SwitchWithOptPath::Disabled,
         parse_switch_with_opt_path, [UNTRACKED],
         "output statistics about monomorphization collection"),
@@ -1841,8 +1809,6 @@ options! {
     remark_dir: Option<PathBuf> = (None, parse_opt_pathbuf, [UNTRACKED],
         "directory into which to write optimization remarks (if not specified, they will be \
 written to standard error output)"),
-    report_delayed_bugs: bool = (false, parse_bool, [TRACKED],
-        "immediately print bugs registered with `span_delayed_bug` (default: no)"),
     sanitizer: SanitizerSet = (SanitizerSet::empty(), parse_sanitizers, [TRACKED],
         "use a sanitizer"),
     sanitizer_cfi_canonical_jump_tables: Option<bool> = (Some(true), parse_opt_bool, [TRACKED],
@@ -1875,6 +1841,8 @@ written to standard error output)"),
                      query-blocked, incr-cache-load, incr-result-hashing, query-keys, function-args, args, llvm, artifact-sizes"),
     share_generics: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "make the current crate share its generic instantiations"),
+    shell_argfiles: bool = (false, parse_bool, [UNTRACKED],
+        "allow argument files to be specified with POSIX \"shell-style\" argument quoting"),
     show_span: Option<String> = (None, parse_opt_string, [TRACKED],
         "show spans for compiler debugging (expr|pat|ty)"),
     simulate_remapped_rust_src_base: Option<PathBuf> = (None, parse_opt_pathbuf, [TRACKED],
@@ -1919,8 +1887,8 @@ written to standard error output)"),
     #[rustc_lint_opt_deny_field_access("use `Session::lto` instead of this field")]
     thinlto: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "enable ThinLTO when possible"),
-    thir_unsafeck: bool = (false, parse_bool, [TRACKED],
-        "use the THIR unsafety checker (default: no)"),
+    thir_unsafeck: bool = (true, parse_bool, [TRACKED],
+        "use the THIR unsafety checker (default: yes)"),
     /// We default to 1 here since we want to behave like
     /// a sequential compiler for now. This'll likely be adjusted
     /// in the future. Note that -Zthreads=0 is the way to get
@@ -1991,6 +1959,8 @@ written to standard error output)"),
         "adds unstable command line options to rustc interface (default: no)"),
     use_ctors_section: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "use legacy .ctors section for initializers rather than .init_array"),
+    use_sync_unwind: Option<bool> = (None, parse_opt_bool, [TRACKED],
+        "Generate sync unwind tables instead of async unwind tables (default: no)"),
     validate_mir: bool = (false, parse_bool, [UNTRACKED],
         "validate MIR after each transformation"),
     #[rustc_lint_opt_deny_field_access("use `Session::verbose_internals` instead of this field")]

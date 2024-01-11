@@ -429,8 +429,8 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
         let base_error = self.make_base_error(path, span, source, res);
 
         let code = source.error_code(res.is_some());
-        let mut err =
-            self.r.dcx().struct_span_err_with_code(base_error.span, base_error.msg.clone(), code);
+        let mut err = self.r.dcx().struct_span_err(base_error.span, base_error.msg.clone());
+        err.code(code);
 
         self.suggest_at_operator_in_slice_pat_with_range(&mut err, path);
         self.suggest_swapping_misplaced_self_ty_and_trait(&mut err, source, res, base_error.span);
@@ -1383,7 +1383,7 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                 | PathSource::TupleStruct(span, _) => {
                     // We want the main underline to cover the suggested code as well for
                     // cleaner output.
-                    err.set_span(*span);
+                    err.span(*span);
                     *span
                 }
                 _ => span,
@@ -1615,7 +1615,7 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                 let field_spans = match source {
                     // e.g. `if let Enum::TupleVariant(field1, field2) = _`
                     PathSource::TupleStruct(_, pattern_spans) => {
-                        err.set_primary_message(
+                        err.primary_message(
                             "cannot match against a tuple struct which contains private fields",
                         );
 
@@ -1628,7 +1628,7 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                         span: call_span,
                         ..
                     })) => {
-                        err.set_primary_message(
+                        err.primary_message(
                             "cannot initialize a tuple struct which contains private fields",
                         );
                         self.suggest_alternative_construction_methods(
@@ -1755,11 +1755,8 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
             .filter_map(|item| {
                 // Only assoc fns that return `Self`
                 let fn_sig = self.r.tcx.fn_sig(item.def_id).skip_binder();
-                let ret_ty = fn_sig.output();
-                let ret_ty = self
-                    .r
-                    .tcx
-                    .normalize_erasing_late_bound_regions(ty::ParamEnv::reveal_all(), ret_ty);
+                // Don't normalize the return type, because that can cause cycle errors.
+                let ret_ty = fn_sig.output().skip_binder();
                 let ty::Adt(def, _args) = ret_ty.kind() else {
                     return None;
                 };
@@ -2191,15 +2188,20 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
     fn find_module(&mut self, def_id: DefId) -> Option<(Module<'a>, ImportSuggestion)> {
         let mut result = None;
         let mut seen_modules = FxHashSet::default();
-        let mut worklist = vec![(self.r.graph_root, ThinVec::new())];
+        let root_did = self.r.graph_root.def_id();
+        let mut worklist = vec![(
+            self.r.graph_root,
+            ThinVec::new(),
+            root_did.is_local() || !self.r.tcx.is_doc_hidden(root_did),
+        )];
 
-        while let Some((in_module, path_segments)) = worklist.pop() {
+        while let Some((in_module, path_segments, doc_visible)) = worklist.pop() {
             // abort if the module is already found
             if result.is_some() {
                 break;
             }
 
-            in_module.for_each_child(self.r, |_, ident, _, name_binding| {
+            in_module.for_each_child(self.r, |r, ident, _, name_binding| {
                 // abort if the module is already found or if name_binding is private external
                 if result.is_some() || !name_binding.vis.is_visible_locally() {
                     return;
@@ -2209,6 +2211,8 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                     let mut path_segments = path_segments.clone();
                     path_segments.push(ast::PathSegment::from_ident(ident));
                     let module_def_id = module.def_id();
+                    let doc_visible = doc_visible
+                        && (module_def_id.is_local() || !r.tcx.is_doc_hidden(module_def_id));
                     if module_def_id == def_id {
                         let path =
                             Path { span: name_binding.span, segments: path_segments, tokens: None };
@@ -2219,6 +2223,7 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                                 descr: "module",
                                 path,
                                 accessible: true,
+                                doc_visible,
                                 note: None,
                                 via_import: false,
                             },
@@ -2226,7 +2231,7 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
                     } else {
                         // add the module to the lookup
                         if seen_modules.insert(module_def_id) {
-                            worklist.push((module, path_segments));
+                            worklist.push((module, path_segments, doc_visible));
                         }
                     }
                 }
@@ -2598,25 +2603,23 @@ impl<'a: 'ast, 'ast, 'tcx> LateResolutionVisitor<'a, '_, 'ast, 'tcx> {
     ) {
         debug_assert_ne!(lifetime_ref.ident.name, kw::UnderscoreLifetime);
         let mut err = if let Some(outer) = outer_lifetime_ref {
-            let mut err = struct_span_err!(
+            struct_span_err!(
                 self.r.dcx(),
                 lifetime_ref.ident.span,
                 E0401,
                 "can't use generic parameters from outer item",
-            );
-            err.span_label(lifetime_ref.ident.span, "use of generic parameter from outer item");
-            err.span_label(outer.span, "lifetime parameter from outer item");
-            err
+            )
+            .span_label_mv(lifetime_ref.ident.span, "use of generic parameter from outer item")
+            .span_label_mv(outer.span, "lifetime parameter from outer item")
         } else {
-            let mut err = struct_span_err!(
+            struct_span_err!(
                 self.r.dcx(),
                 lifetime_ref.ident.span,
                 E0261,
                 "use of undeclared lifetime name `{}`",
                 lifetime_ref.ident
-            );
-            err.span_label(lifetime_ref.ident.span, "undeclared lifetime");
-            err
+            )
+            .span_label_mv(lifetime_ref.ident.span, "undeclared lifetime")
         };
         self.suggest_introducing_lifetime(
             &mut err,
@@ -3279,16 +3282,16 @@ fn mk_where_bound_predicate(
 
 /// Report lifetime/lifetime shadowing as an error.
 pub(super) fn signal_lifetime_shadowing(sess: &Session, orig: Ident, shadower: Ident) {
-    let mut err = struct_span_err!(
+    struct_span_err!(
         sess.dcx(),
         shadower.span,
         E0496,
         "lifetime name `{}` shadows a lifetime name that is already in scope",
         orig.name,
-    );
-    err.span_label(orig.span, "first declared here");
-    err.span_label(shadower.span, format!("lifetime `{}` already in scope", orig.name));
-    err.emit();
+    )
+    .span_label_mv(orig.span, "first declared here")
+    .span_label_mv(shadower.span, format!("lifetime `{}` already in scope", orig.name))
+    .emit();
 }
 
 struct LifetimeFinder<'ast> {
@@ -3314,11 +3317,12 @@ impl<'ast> Visitor<'ast> for LifetimeFinder<'ast> {
 pub(super) fn signal_label_shadowing(sess: &Session, orig: Span, shadower: Ident) {
     let name = shadower.name;
     let shadower = shadower.span;
-    let mut err = sess.dcx().struct_span_warn(
-        shadower,
-        format!("label name `{name}` shadows a label name that is already in scope"),
-    );
-    err.span_label(orig, "first declared here");
-    err.span_label(shadower, format!("label `{name}` already in scope"));
-    err.emit();
+    sess.dcx()
+        .struct_span_warn(
+            shadower,
+            format!("label name `{name}` shadows a label name that is already in scope"),
+        )
+        .span_label_mv(orig, "first declared here")
+        .span_label_mv(shadower, format!("label `{name}` already in scope"))
+        .emit();
 }

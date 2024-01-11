@@ -140,6 +140,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                 let reported = report_object_safety_error(
                     tcx,
                     span,
+                    Some(hir_id),
                     item.trait_ref().def_id(),
                     &object_safety_violations,
                 )
@@ -289,19 +290,19 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
 
                 if references_self {
                     let def_id = i.bottom().0.def_id();
-                    let mut err = struct_span_err!(
+                    struct_span_err!(
                         tcx.dcx(),
                         i.bottom().1,
                         E0038,
                         "the {} `{}` cannot be made into an object",
                         tcx.def_descr(def_id),
                         tcx.item_name(def_id),
-                    );
-                    err.note(
+                    )
+                    .note_mv(
                         rustc_middle::traits::ObjectSafetyViolation::SupertraitSelf(smallvec![])
                             .error_msg(),
-                    );
-                    err.emit();
+                    )
+                    .emit();
                 }
 
                 ty::ExistentialTraitRef { def_id: trait_ref.def_id, args }
@@ -374,7 +375,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                     self.ast_region_to_region(lifetime, None)
                 } else {
                     self.re_infer(None, span).unwrap_or_else(|| {
-                        let mut err = struct_span_err!(
+                        let err = struct_span_err!(
                             tcx.dcx(),
                             span,
                             E0228,

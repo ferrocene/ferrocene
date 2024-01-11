@@ -42,6 +42,8 @@ const OXIDOS_ALLOW_UNSTABLE_FEATURES: &[&str] = &[
 const OXIDOS_ALLOW_LINTS: &[&str] = &[
     // Allow internal features to be used. This is needed due to the core_intrinsics feature.
     "internal_features",
+    // Allow a warning that will be an error in 2023 edition.
+    "static-mut-ref",
 ];
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]

@@ -7,9 +7,7 @@ use rustc_ast::ast::{self, AttrStyle};
 use rustc_ast::token::{self, CommentKind, Delimiter, Token, TokenKind};
 use rustc_ast::tokenstream::TokenStream;
 use rustc_ast::util::unicode::contains_text_flow_control_chars;
-use rustc_errors::{
-    error_code, Applicability, DiagCtxt, Diagnostic, DiagnosticBuilder, FatalAbort, StashKey,
-};
+use rustc_errors::{error_code, Applicability, DiagCtxt, Diagnostic, StashKey};
 use rustc_lexer::unescape::{self, EscapeError, Mode};
 use rustc_lexer::{Base, DocStyle, RawStrError};
 use rustc_lexer::{Cursor, LiteralKind};
@@ -69,7 +67,7 @@ pub(crate) fn parse_token_trees<'a>(
     let (stream, res, unmatched_delims) =
         tokentrees::TokenTreesReader::parse_all_token_trees(string_reader);
     match res {
-        Ok(_open_spacing) if unmatched_delims.is_empty() => Ok(stream),
+        Ok(()) if unmatched_delims.is_empty() => Ok(stream),
         _ => {
             // Return error if there are unmatched delimiters or unclosed delimiters.
             // We emit delimiter mismatch errors first, then emit the unclosing delimiter mismatch
@@ -251,9 +249,9 @@ impl<'a> StringReader<'a> {
                     let lifetime_name = self.str_from(start);
                     if starts_with_number {
                         let span = self.mk_sp(start, self.pos);
-                        let mut diag = self.dcx().struct_err("lifetimes cannot start with a number");
-                        diag.set_span(span);
-                        diag.stash(span, StashKey::LifetimeIsChar);
+                        self.dcx().struct_err("lifetimes cannot start with a number")
+                            .span_mv(span)
+                            .stash(span, StashKey::LifetimeIsChar);
                     }
                     let ident = Symbol::intern(lifetime_name);
                     token::Lifetime(ident)
@@ -344,18 +342,6 @@ impl<'a> StringReader<'a> {
         token::Ident(sym, false)
     }
 
-    fn struct_fatal_span_char(
-        &self,
-        from_pos: BytePos,
-        to_pos: BytePos,
-        m: &str,
-        c: char,
-    ) -> DiagnosticBuilder<'a, FatalAbort> {
-        self.sess
-            .dcx
-            .struct_span_fatal(self.mk_sp(from_pos, to_pos), format!("{}: {}", m, escaped_char(c)))
-    }
-
     /// Detect usages of Unicode codepoints changing the direction of the text on screen and loudly
     /// complain about it.
     fn lint_unicode_text_flow(&self, start: BytePos) {
@@ -409,51 +395,58 @@ impl<'a> StringReader<'a> {
         match kind {
             rustc_lexer::LiteralKind::Char { terminated } => {
                 if !terminated {
-                    self.dcx().span_fatal_with_code(
-                        self.mk_sp(start, end),
-                        "unterminated character literal",
-                        error_code!(E0762),
-                    )
+                    self.dcx()
+                        .struct_span_fatal(self.mk_sp(start, end), "unterminated character literal")
+                        .code_mv(error_code!(E0762))
+                        .emit()
                 }
                 self.cook_quoted(token::Char, Mode::Char, start, end, 1, 1) // ' '
             }
             rustc_lexer::LiteralKind::Byte { terminated } => {
                 if !terminated {
-                    self.dcx().span_fatal_with_code(
-                        self.mk_sp(start + BytePos(1), end),
-                        "unterminated byte constant",
-                        error_code!(E0763),
-                    )
+                    self.dcx()
+                        .struct_span_fatal(
+                            self.mk_sp(start + BytePos(1), end),
+                            "unterminated byte constant",
+                        )
+                        .code_mv(error_code!(E0763))
+                        .emit()
                 }
                 self.cook_quoted(token::Byte, Mode::Byte, start, end, 2, 1) // b' '
             }
             rustc_lexer::LiteralKind::Str { terminated } => {
                 if !terminated {
-                    self.dcx().span_fatal_with_code(
-                        self.mk_sp(start, end),
-                        "unterminated double quote string",
-                        error_code!(E0765),
-                    )
+                    self.dcx()
+                        .struct_span_fatal(
+                            self.mk_sp(start, end),
+                            "unterminated double quote string",
+                        )
+                        .code_mv(error_code!(E0765))
+                        .emit()
                 }
                 self.cook_quoted(token::Str, Mode::Str, start, end, 1, 1) // " "
             }
             rustc_lexer::LiteralKind::ByteStr { terminated } => {
                 if !terminated {
-                    self.dcx().span_fatal_with_code(
-                        self.mk_sp(start + BytePos(1), end),
-                        "unterminated double quote byte string",
-                        error_code!(E0766),
-                    )
+                    self.dcx()
+                        .struct_span_fatal(
+                            self.mk_sp(start + BytePos(1), end),
+                            "unterminated double quote byte string",
+                        )
+                        .code_mv(error_code!(E0766))
+                        .emit()
                 }
                 self.cook_quoted(token::ByteStr, Mode::ByteStr, start, end, 2, 1) // b" "
             }
             rustc_lexer::LiteralKind::CStr { terminated } => {
                 if !terminated {
-                    self.dcx().span_fatal_with_code(
-                        self.mk_sp(start + BytePos(1), end),
-                        "unterminated C string",
-                        error_code!(E0767),
-                    )
+                    self.dcx()
+                        .struct_span_fatal(
+                            self.mk_sp(start + BytePos(1), end),
+                            "unterminated C string",
+                        )
+                        .code_mv(error_code!(E0767))
+                        .emit()
                 }
                 self.cook_c_string(token::CStr, Mode::CStr, start, end, 2, 1) // c" "
             }
@@ -568,13 +561,16 @@ impl<'a> StringReader<'a> {
     }
 
     fn report_non_started_raw_string(&self, start: BytePos, bad_char: char) -> ! {
-        self.struct_fatal_span_char(
-            start,
-            self.pos,
-            "found invalid character; only `#` is allowed in raw string delimitation",
-            bad_char,
-        )
-        .emit()
+        self.sess
+            .dcx
+            .struct_span_fatal(
+                self.mk_sp(start, self.pos),
+                format!(
+                    "found invalid character; only `#` is allowed in raw string delimitation: {}",
+                    escaped_char(bad_char)
+                ),
+            )
+            .emit()
     }
 
     fn report_unterminated_raw_string(
@@ -584,12 +580,9 @@ impl<'a> StringReader<'a> {
         possible_offset: Option<u32>,
         found_terminators: u32,
     ) -> ! {
-        let mut err = self.dcx().struct_span_fatal_with_code(
-            self.mk_sp(start, start),
-            "unterminated raw string",
-            error_code!(E0748),
-        );
-
+        let mut err =
+            self.dcx().struct_span_fatal(self.mk_sp(start, start), "unterminated raw string");
+        err.code(error_code!(E0748));
         err.span_label(self.mk_sp(start, start), "unterminated raw string");
 
         if n_hashes > 0 {
@@ -620,11 +613,8 @@ impl<'a> StringReader<'a> {
             None => "unterminated block comment",
         };
         let last_bpos = self.pos;
-        let mut err = self.dcx().struct_span_fatal_with_code(
-            self.mk_sp(start, last_bpos),
-            msg,
-            error_code!(E0758),
-        );
+        let mut err = self.dcx().struct_span_fatal(self.mk_sp(start, last_bpos), msg);
+        err.code(error_code!(E0758));
         let mut nested_block_comment_open_idxs = vec![];
         let mut last_nested_block_comment_idxs = None;
         let mut content_chars = self.str_from(start).char_indices().peekable();

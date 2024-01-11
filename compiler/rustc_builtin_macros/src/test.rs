@@ -395,10 +395,10 @@ fn not_testable_error(cx: &ExtCtxt<'_>, attr_sp: Span, item: Option<&ast::Item>)
         // These were a warning before #92959 and need to continue being that to avoid breaking
         // stable user code (#94508).
         Some(ast::ItemKind::MacCall(_)) => Level::Warning(None),
-        _ => Level::Error { lint: false },
+        _ => Level::Error,
     };
     let mut err = DiagnosticBuilder::<()>::new(dcx, level, msg);
-    err.set_span(attr_sp);
+    err.span(attr_sp);
     if let Some(item) = item {
         err.span_label(
             item.span,
@@ -409,8 +409,8 @@ fn not_testable_error(cx: &ExtCtxt<'_>, attr_sp: Span, item: Option<&ast::Item>)
             ),
         );
     }
-    err.span_label(attr_sp, "the `#[test]` macro causes a function to be run as a test and has no effect on non-functions")
-        .span_suggestion(attr_sp,
+    err.span_label_mv(attr_sp, "the `#[test]` macro causes a function to be run as a test and has no effect on non-functions")
+        .span_suggestion_mv(attr_sp,
             "replace with conditional compilation to make the item only exist when tests are being run",
             "#[cfg(test)]",
             Applicability::MaybeIncorrect)
@@ -480,7 +480,7 @@ fn should_panic(cx: &ExtCtxt<'_>, i: &ast::Item) -> ShouldPanic {
                                 "argument must be of the form: \
                              `expected = \"error message\"`",
                             )
-                            .note(
+                            .note_mv(
                                 "errors in this attribute were erroneously \
                                 allowed and will become a hard error in a \
                                 future release",

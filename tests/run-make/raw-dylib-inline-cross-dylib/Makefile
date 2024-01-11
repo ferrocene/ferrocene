@@ -26,7 +26,7 @@ else
 	$(CC) "$(TMPDIR)"/extern_1.obj -shared -o "$(TMPDIR)"/extern_1.dll
 	$(CC) "$(TMPDIR)"/extern_2.obj -shared -o "$(TMPDIR)"/extern_2.dll
 endif
-	$(call RUN,driver) > "$(TMPDIR)"/output.txt
+	$(call RUN,driver) | tr -d '\r' > "$(TMPDIR)"/output.txt
 	$(RUSTC_TEST_OP) "$(TMPDIR)"/output.txt output.txt
 
 # ferrocene-annotations: um_rustc_C_prefer_dynamic

@@ -27,8 +27,8 @@ impl Test6 {
 }
 
 pub fn main() {
-    let _: Option<usize> = test1();
-    let _: f64 = test1();
+    let _: Option<usize> = test1(); //~ ERROR mismatched types
+    let _: f64 = test1(); //~ ERROR mismatched types
     let _: Option<i32> = test1();
 }
 

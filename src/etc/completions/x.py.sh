@@ -1874,8 +1874,4 @@ _x.py() {
     esac
 }
 
-if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
-    complete -F _x.py -o nosort -o bashdefault -o default x.py
-else
-    complete -F _x.py -o bashdefault -o default x.py
-fi
+complete -F _x.py -o nosort -o bashdefault -o default x.py

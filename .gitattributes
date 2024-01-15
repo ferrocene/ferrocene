@@ -28,5 +28,6 @@ Cargo.lock linguist-generated=false
 **/.github/** ferrocene-avoid-pulling-from-upstream
 /triagebot.toml ferrocene-avoid-pulling-from-upstream
 /README.md ferrocene-avoid-pulling-from-upstream
+/INSTALL.md ferrocene-avoid-pulling-from-upstream
 /CODE_OF_CONDUCT.md ferrocene-avoid-pulling-from-upstream
 /CONTRIBUTING.md ferrocene-avoid-pulling-from-upstream

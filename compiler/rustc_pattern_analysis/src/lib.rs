@@ -38,13 +38,6 @@ use crate::rustc::RustcMatchCheckCtxt;
 #[cfg(feature = "rustc")]
 use crate::usefulness::{compute_match_usefulness, ValidityConstraint};
 
-// It's not possible to only enable the `typed_arena` dependency when the `rustc` feature is off, so
-// we use another feature instead. The crate won't compile if one of these isn't enabled.
-#[cfg(feature = "rustc")]
-pub(crate) use rustc_arena::TypedArena;
-#[cfg(feature = "stable")]
-pub(crate) use typed_arena::Arena as TypedArena;
-
 pub trait Captures<'a> {}
 impl<'a, T: ?Sized> Captures<'a> for T {}
 
@@ -89,11 +82,9 @@ pub trait TypeCx: Sized + fmt::Debug {
 /// Context that provides information global to a match.
 #[derive(derivative::Derivative)]
 #[derivative(Clone(bound = ""), Copy(bound = ""))]
-pub struct MatchCtxt<'a, 'p, Cx: TypeCx> {
+pub struct MatchCtxt<'a, Cx: TypeCx> {
     /// The context for type information.
     pub tycx: &'a Cx,
-    /// An arena to store the wildcards we produce during analysis.
-    pub wildcard_arena: &'p TypedArena<DeconstructedPat<'p, Cx>>,
 }
 
 /// The arm of a match expression.
@@ -114,18 +105,18 @@ pub fn analyze_match<'p, 'tcx>(
     arms: &[rustc::MatchArm<'p, 'tcx>],
     scrut_ty: Ty<'tcx>,
 ) -> Result<rustc::UsefulnessReport<'p, 'tcx>, ErrorGuaranteed> {
-    // Arena to store the extra wildcards we construct during analysis.
-    let wildcard_arena = tycx.pattern_arena;
     let scrut_ty = tycx.reveal_opaque_ty(scrut_ty);
     let scrut_validity = ValidityConstraint::from_bool(tycx.known_valid_scrutinee);
-    let cx = MatchCtxt { tycx, wildcard_arena };
+    let cx = MatchCtxt { tycx };
 
     let report = compute_match_usefulness(cx, arms, scrut_ty, scrut_validity)?;
 
     let pat_column = PatternColumn::new(arms);
 
-    // Lint on ranges that overlap on their endpoints, which is likely a mistake.
-    lint_overlapping_range_endpoints(cx, &pat_column)?;
+    // Lint ranges that overlap on their endpoints, which is likely a mistake.
+    if !report.overlapping_range_endpoints.is_empty() {
+        lint_overlapping_range_endpoints(cx, &report.overlapping_range_endpoints);
+    }
 
     // Run the non_exhaustive_omitted_patterns lint. Only run on refutable patterns to avoid hitting
     // `if let`s. Only run if the match is exhaustive otherwise the error is redundant.

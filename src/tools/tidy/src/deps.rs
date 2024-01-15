@@ -385,7 +385,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "tracing-tree",
     "twox-hash",
     "type-map",
-    "typed-arena",
     "typenum",
     "unic-langid",
     "unic-langid-impl",

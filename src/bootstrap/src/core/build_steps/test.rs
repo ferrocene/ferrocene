@@ -2602,6 +2602,9 @@ impl Step for Crate {
             builder,
         );
 
+        // NOTE: The profraw files are first created in temp/coverage and then moved to build/coverage
+        // This is done so that the existing coverage data in build/coverage if any is not lost
+        // if the coverage command fails for some reason.
         if collect_profraw {
             let temp_dir = builder.tempdir().join("coverage");
             let coverage_dir = builder.out.join("coverage");

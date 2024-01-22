@@ -146,13 +146,18 @@ impl Step for BuildOxidOS {
 
         for (cfg_name, cfg_values) in OXIDOS_CHECK_CFG {
             let mut flag = format!("--check-cfg=cfg({cfg_name},values(");
-            for (i, cfg_value) in cfg_values.iter().enumerate() {
-                if i != 0 {
-                    flag.push(',');
+
+            if cfg_values.is_empty() {
+                flag.push_str("none()");
+            } else {
+                for (i, cfg_value) in cfg_values.iter().enumerate() {
+                    if i != 0 {
+                        flag.push(',');
+                    }
+                    flag.push('"');
+                    flag.push_str(cfg_value);
+                    flag.push('"');
                 }
-                flag.push('"');
-                flag.push_str(cfg_value);
-                flag.push('"');
             }
             flag.push_str("))");
             cargo.rustflag(&flag);

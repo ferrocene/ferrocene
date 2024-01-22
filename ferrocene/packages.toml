@@ -87,3 +87,10 @@ docs-in = "share/doc/ferrocene/html"
 name = "ferrocene-docs-signatures"
 subset = "signatures"
 docs-in = "share/doc/ferrocene/html"
+
+[[groups.any-platform.packages]]
+name = "ferrocene-docs-doctrees"
+# The contents of this package are not confidential, but it's something end
+# users should never need, and displaying it in the list of downloadable
+# packages would only cause confusion.
+subset = "internal"

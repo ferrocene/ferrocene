@@ -133,10 +133,20 @@ impl<P: Step> Step for SphinxBook<P> {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let src = builder.src.join(&self.src).join("src");
-        let out = builder.out.join(self.target.triple).join("doc").join(&self.dest);
+        let out = match self.mode {
+            SphinxMode::Html | SphinxMode::OnlyObjectsInv => {
+                builder.out.join(self.target.triple).join("doc").join(&self.dest)
+            }
+            SphinxMode::XmlDoctrees => builder
+                .out
+                .join(self.target.triple)
+                .join("ferrocene")
+                .join("doctrees-out")
+                .join(&self.dest),
+        };
         let doctrees =
             builder.out.join(self.target.triple).join("ferrocene").join(match self.mode {
-                SphinxMode::Html => {
+                SphinxMode::Html | SphinxMode::XmlDoctrees => {
                     format!("{}-doctrees", self.name)
                 }
                 SphinxMode::OnlyObjectsInv => {
@@ -232,6 +242,17 @@ impl<P: Step> Step for SphinxBook<P> {
                     cmd.args(&["-W", "--keep-going"]);
                 }
             }
+            SphinxMode::XmlDoctrees => {
+                for step in intersphinx_gather_steps(self.target) {
+                    builder.ensure(step);
+                }
+
+                builder.info(&format!("Building XML doctrees of {}", self.src));
+                cmd.args(&["-b", "xml"]);
+
+                // This is intentionally more lax than HTML builds, especially around warnings.
+                // This will never be executed by CI if the HTML build fails anyways.
+            }
             SphinxMode::OnlyObjectsInv => {
                 // We use InterSphinx to add links between books, which requires the inventory files
                 // (object.inv) of the other books to be available before building. Unfortunately, there
@@ -299,9 +320,10 @@ impl<P: Step> Step for SphinxBook<P> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub(crate) enum SphinxMode {
     Html,
+    XmlDoctrees,
     OnlyObjectsInv,
 }
 
@@ -340,7 +362,9 @@ fn add_intersphinx_arguments<P: Step>(
         // the mappings even during gathering. Since not all objects.inv will be available during
         // gathering, all of them are replaced with an empty objects.inv file during gathering.
         let inv = match book.mode {
-            SphinxMode::Html => builder.doc_out(book.target).join(&step.dest).join("objects.inv"),
+            SphinxMode::Html | SphinxMode::XmlDoctrees => {
+                builder.doc_out(book.target).join(&step.dest).join("objects.inv")
+            }
             SphinxMode::OnlyObjectsInv => empty_objects_inv.clone(),
         };
 
@@ -379,6 +403,7 @@ macro_rules! sphinx_books {
         $(
             #[derive(Debug, PartialEq, Eq, Hash, Clone)]
             pub(crate) struct $ty {
+                pub(crate) mode: SphinxMode,
                 pub(crate) target: TargetSelection,
                 pub(crate) fresh_build: bool,
             }
@@ -394,6 +419,7 @@ macro_rules! sphinx_books {
 
                 fn make_run(run: RunConfig<'_>) {
                     run.builder.ensure(Self {
+                        mode: SphinxMode::Html,
                         target: run.target,
                         fresh_build: false,
                     });
@@ -418,7 +444,7 @@ macro_rules! sphinx_books {
                     $(inject_all_other_document_ids = $inject_all_other_document_ids;)*
 
                     builder.ensure(SphinxBook {
-                        mode: SphinxMode::Html,
+                        mode: self.mode,
                         target: self.target,
                         name: $name.into(),
                         src: $src.into(),
@@ -467,6 +493,7 @@ macro_rules! sphinx_books {
                     document_ids.insert(
                         $name,
                         builder.ensure($ty {
+                            mode: SphinxMode::Html,
                             target,
                             fresh_build: false,
                         }).join("document-id.txt"),
@@ -475,6 +502,22 @@ macro_rules! sphinx_books {
             )*
 
             document_ids
+        }
+
+        pub(crate) fn ensure_all_xml_doctrees(
+            builder: &Builder<'_>,
+            target: TargetSelection,
+        ) -> HashMap<&'static str, PathBuf> {
+            let mut paths = HashMap::new();
+            $(paths.insert(
+                $name,
+                builder.ensure($ty {
+                    mode: SphinxMode::XmlDoctrees,
+                    target,
+                    fresh_build: false,
+                })
+            );)*
+            paths
         }
     };
 }

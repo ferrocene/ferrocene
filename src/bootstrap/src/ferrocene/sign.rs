@@ -8,7 +8,7 @@
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::TargetSelection;
-use crate::ferrocene::doc::WithSource;
+use crate::ferrocene::doc::{SphinxMode, WithSource};
 use crate::t;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -93,6 +93,7 @@ macro_rules! documents {
                     builder.ensure(SignDocument {
                         target: self.target,
                         document: crate::ferrocene::doc::$name {
+                            mode: SphinxMode::Html,
                             target: self.target,
                             // Ensure there are no leftover artifacts from a previous incremental
                             // build when generating the signature.
@@ -113,6 +114,7 @@ macro_rules! documents {
                 let source_dir = builder.src.join(crate::ferrocene::doc::$name::SOURCE);
                 if condition(&source_dir) {
                     let output_dir = builder.ensure(crate::ferrocene::doc::$name {
+                        mode: SphinxMode::Html,
                         target,
                         fresh_build: false,
                     });

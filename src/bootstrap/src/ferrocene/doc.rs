@@ -112,11 +112,11 @@ impl Step for SphinxVirtualEnv {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 struct SphinxBook<P: Step = EmptyStep> {
+    mode: SphinxMode,
     target: TargetSelection,
     name: String,
     src: String,
     dest: String,
-    only_gather_objects_inv: bool,
     fresh_build: bool,
     signature: SignatureStatus,
     inject_all_other_document_ids: bool,
@@ -134,13 +134,15 @@ impl<P: Step> Step for SphinxBook<P> {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let src = builder.src.join(&self.src).join("src");
         let out = builder.out.join(self.target.triple).join("doc").join(&self.dest);
-        let doctrees = builder.out.join(self.target.triple).join("ferrocene").join(
-            if self.only_gather_objects_inv {
-                format!("{}-doctrees-objectsinv", self.name)
-            } else {
-                format!("{}-doctrees", self.name)
-            },
-        );
+        let doctrees =
+            builder.out.join(self.target.triple).join("ferrocene").join(match self.mode {
+                SphinxMode::Html => {
+                    format!("{}-doctrees", self.name)
+                }
+                SphinxMode::OnlyObjectsInv => {
+                    format!("{}-doctrees-objectsinv", self.name)
+                }
+            });
         let shared_resources =
             builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
         let substitutions =
@@ -214,34 +216,37 @@ impl<P: Step> Step for SphinxBook<P> {
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
 
-        // We use InterSphinx to add links between books, which requires the inventory files
-        // (object.inv) of the other books to be available before building. Unfortunately, there
-        // are circular dependencies between books.
-        //
-        // To solve them, we first "gather" the object.inv files by building all the documentation
-        // with a special Sphinx builder that doesn't write any other output file, and then we
-        // do a full build of the documents we want.
-        if self.only_gather_objects_inv {
-            builder.info(&format!("Gathering references of {}", self.src));
+        match self.mode {
+            SphinxMode::Html => {
+                for step in intersphinx_gather_steps(self.target) {
+                    builder.ensure(step);
+                }
 
-            // When gathering the objects.inv files, we use a custom Sphinx builder that only
-            // outputs the objects.inv file.
-            cmd.args(&["-b", "ferrocene-intersphinx"]);
-        } else {
-            for step in intersphinx_gather_steps(self.target) {
-                builder.ensure(step);
+                builder.info(&format!("Building {}", self.src));
+
+                cmd.args(&["-b", "html"]);
+                // Warn about missing references:
+                cmd.arg("-n");
+                // Fail the build if there are warnings (but don't abort at the first warning):
+                if !should_serve {
+                    cmd.args(&["-W", "--keep-going"]);
+                }
             }
+            SphinxMode::OnlyObjectsInv => {
+                // We use InterSphinx to add links between books, which requires the inventory files
+                // (object.inv) of the other books to be available before building. Unfortunately, there
+                // are circular dependencies between books.
+                //
+                // To solve them, we first "gather" the object.inv files by building all the documentation
+                // with a special Sphinx builder that doesn't write any other output file, and then we
+                // do a full build of the documents we want.
+                builder.info(&format!("Gathering references of {}", self.src));
 
-            builder.info(&format!("Building {}", self.src));
-
-            cmd.args(&["-b", "html"]);
-            // Warn about missing references:
-            cmd.arg("-n");
-            // Fail the build if there are warnings (but don't abort at the first warning):
-            if !should_serve {
-                cmd.args(&["-W", "--keep-going"]);
+                // When gathering the objects.inv files, we use a custom Sphinx builder that only
+                // outputs the objects.inv file.
+                cmd.args(&["-b", "ferrocene-intersphinx"]);
             }
-        };
+        }
 
         add_intersphinx_arguments(&self, builder, &src, &mut cmd);
 
@@ -295,6 +300,12 @@ impl<P: Step> Step for SphinxBook<P> {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub(crate) enum SphinxMode {
+    Html,
+    OnlyObjectsInv,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 enum SignatureStatus {
     Present,
     Missing,
@@ -328,10 +339,9 @@ fn add_intersphinx_arguments<P: Step>(
         // To avoid warnings due to missing objects.inv files when gathering them, we provide all
         // the mappings even during gathering. Since not all objects.inv will be available during
         // gathering, all of them are replaced with an empty objects.inv file during gathering.
-        let inv = if book.only_gather_objects_inv {
-            empty_objects_inv.clone()
-        } else {
-            builder.doc_out(book.target).join(&step.dest).join("objects.inv")
+        let inv = match book.mode {
+            SphinxMode::Html => builder.doc_out(book.target).join(&step.dest).join("objects.inv"),
+            SphinxMode::OnlyObjectsInv => empty_objects_inv.clone(),
         };
 
         inventories.push(Inventory {
@@ -408,11 +418,11 @@ macro_rules! sphinx_books {
                     $(inject_all_other_document_ids = $inject_all_other_document_ids;)*
 
                     builder.ensure(SphinxBook {
+                        mode: SphinxMode::Html,
                         target: self.target,
                         name: $name.into(),
                         src: $src.into(),
                         dest: $dest.into(),
-                        only_gather_objects_inv: false,
                         fresh_build: self.fresh_build,
                         signature,
                         inject_all_other_document_ids,
@@ -430,11 +440,11 @@ macro_rules! sphinx_books {
             let mut steps = Vec::new();
             $(
                 steps.push(SphinxBook {
+                    mode: SphinxMode::OnlyObjectsInv,
                     target,
                     name: $name.into(),
                     src: $src.into(),
                     dest: $dest.into(),
-                    only_gather_objects_inv: true,
                     fresh_build: false,
                     signature: SignatureStatus::NotNeeded,
                     inject_all_other_document_ids: false,

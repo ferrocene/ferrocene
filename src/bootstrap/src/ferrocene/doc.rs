@@ -170,7 +170,10 @@ impl<P: Step> Step for SphinxBook<P> {
             }
         }
 
-        builder.ensure(BreadcrumbsAssets { target: self.target, dest: Some(out.join("_static")) });
+        if let SphinxMode::Html = self.mode {
+            builder
+                .ensure(BreadcrumbsAssets { target: self.target, dest: Some(out.join("_static")) });
+        }
         let venv = builder.ensure(SphinxVirtualEnv { target: self.target });
 
         let path_to_root = std::iter::repeat("..")

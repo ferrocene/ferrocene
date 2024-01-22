@@ -106,7 +106,8 @@ def write_document_id(app):
 def build_finished(app, exception):
     if exception is not None:
         return
-    write_document_id(app)
+    if app.builder.name == "html":
+        write_document_id(app)
 
 
 def setup(app):

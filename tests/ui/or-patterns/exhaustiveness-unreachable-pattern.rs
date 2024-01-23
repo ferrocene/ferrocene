@@ -161,6 +161,26 @@ fn main() {
     }
 }
 
+fn unreachable_in_param((_ | (_, _)): (bool, bool)) {}
+//~^ ERROR unreachable
+
+fn unreachable_in_binding() {
+    let bool_pair = (true, true);
+    let bool_option = Some(true);
+
+    let (_ | (_, _)) = bool_pair;
+    //~^ ERROR unreachable
+    for (_ | (_, _)) in [bool_pair] {}
+    //~^ ERROR unreachable
+
+    let (Some(_) | Some(true)) = bool_option else { return };
+    //~^ ERROR unreachable
+    if let Some(_) | Some(true) = bool_option {}
+    //~^ ERROR unreachable
+    while let Some(_) | Some(true) = bool_option {}
+    //~^ ERROR unreachable
+}
+
 // ferrocene-annotations: fls_5loglxds6zik
 // Parenthesized Pattern Matching
 //

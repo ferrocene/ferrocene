@@ -252,6 +252,7 @@ use core::cell::Cell;
 use core::cmp::Ordering;
 use core::fmt;
 use core::hash::{Hash, Hasher};
+use core::hint;
 use core::intrinsics::abort;
 #[cfg(not(no_global_oom_handling))]
 use core::iter;
@@ -1924,7 +1925,7 @@ impl<T: ?Sized, A: Allocator> Rc<T, A> {
 
             // Free the allocation without dropping its contents
             let (bptr, alloc) = Box::into_raw_with_allocator(src);
-            let src = Box::from_raw(bptr as *mut mem::ManuallyDrop<T>);
+            let src = Box::from_raw_in(bptr as *mut mem::ManuallyDrop<T>, alloc.by_ref());
             drop(src);
 
             Self::from_ptr_in(ptr, alloc)
@@ -3268,7 +3269,7 @@ trait RcInnerPtr {
         // SAFETY: The reference count will never be zero when this is
         // called.
         unsafe {
-            core::intrinsics::assume(strong != 0);
+            hint::assert_unchecked(strong != 0);
         }
 
         let strong = strong.wrapping_add(1);
@@ -3301,7 +3302,7 @@ trait RcInnerPtr {
         // SAFETY: The reference count will never be zero when this is
         // called.
         unsafe {
-            core::intrinsics::assume(weak != 0);
+            hint::assert_unchecked(weak != 0);
         }
 
         let weak = weak.wrapping_add(1);

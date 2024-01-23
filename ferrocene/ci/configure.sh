@@ -230,6 +230,11 @@ add --set target.wasm32-unknown-unknown.profiler=false
 # If this configuration is missing or changed, LLD will not be included.
 add --enable-lld
 
+# Use our own LLD to build and link rustc itself.
+#
+# If this configuration is missing or changed, other linkers will be used.
+add --set rust.use-lld=self-contained
+
 # Set the release channel for this branch. The channel is read from the
 # `src/ci/channel` file to easily allow tools and automation to know and update
 # the current channel.

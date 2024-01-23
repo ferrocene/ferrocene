@@ -1,11 +1,21 @@
-# only-aarch64-unknown-none
+# only-aarch64
 
 # regression test for rust-lang/rust#118095
 
-# run-make sets `cc` as the linker; override that default
-RUSTC_LINKER=rust-lld
+# run-make sets `cc` as the linker using this variable;
+# clear it to let the target use its default linker
+RUSTC_LINKER=
+
 include ../tools.mk
-RUSTC_FLAGS = --target aarch64-unknown-none -C link-arg="link.x" --print link-args
+RUSTC_FLAGS = --target $(TARGET) --print link-args -C panic=abort
+
+# this target directly uses LLD as the linker; the others use GCC
+# the GCC targets need -nostartfiles because our program is basically a startup object
+ifeq ($(TARGET),aarch64-unknown-none)
+  RUSTC_FLAGS += -C link-arg="link.x"
+else
+  RUSTC_FLAGS += -C link-arg="-Wl,link.x" -C link-arg="-nostartfiles"
+endif
 
 # 1. check that LLD is invoked with the errata workaround flag
 # 2. check that the first two required pre-condition instructions are there

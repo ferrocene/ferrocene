@@ -3,9 +3,11 @@
 
 use core::arch::asm;
 use core::panic::PanicInfo;
-use core::sync::atomic::AtomicU32;
+use core::sync::atomic::AtomicU64;
 
-static SOME_VALUE: AtomicU32 = AtomicU32::new(0);
+// this variable needs to be 8-byte aligned because of the LDR instruction used below
+// `AtomicU64` ensures the proper alignment
+static SOME_VALUE: AtomicU64 = AtomicU64::new(0);
 
 #[no_mangle]
 extern "C" fn _start() {

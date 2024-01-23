@@ -21,7 +21,45 @@ rustc_fluent_macro::fluent_messages! { "../messages.ftl" }
 
 use std::fmt;
 
-use rustc_index::Idx;
+#[cfg(feature = "rustc")]
+pub mod index {
+    // Faster version when the indices of variants are `0..variants.len()`.
+    pub use rustc_index::bit_set::BitSet as IdxSet;
+    pub use rustc_index::Idx;
+    pub use rustc_index::IndexVec as IdxContainer;
+}
+#[cfg(not(feature = "rustc"))]
+pub mod index {
+    // Slower version when the indices of variants are something else.
+    pub trait Idx: Copy + PartialEq + Eq + std::hash::Hash {}
+    impl<T: Copy + PartialEq + Eq + std::hash::Hash> Idx for T {}
+
+    #[derive(Debug)]
+    pub struct IdxContainer<K, V>(pub rustc_hash::FxHashMap<K, V>);
+    impl<K: Idx, V> IdxContainer<K, V> {
+        pub fn len(&self) -> usize {
+            self.0.len()
+        }
+        pub fn iter_enumerated(&self) -> impl Iterator<Item = (K, &V)> {
+            self.0.iter().map(|(k, v)| (*k, v))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct IdxSet<T>(pub rustc_hash::FxHashSet<T>);
+    impl<T: Idx> IdxSet<T> {
+        pub fn new_empty(_len: usize) -> Self {
+            Self(Default::default())
+        }
+        pub fn contains(&self, elem: T) -> bool {
+            self.0.contains(&elem)
+        }
+        pub fn insert(&mut self, elem: T) {
+            self.0.insert(elem);
+        }
+    }
+}
+
 #[cfg(feature = "rustc")]
 use rustc_middle::ty::Ty;
 #[cfg(feature = "rustc")]
@@ -44,11 +82,11 @@ impl<'a, T: ?Sized> Captures<'a> for T {}
 /// Most of the crate is parameterized on a type that implements this trait.
 pub trait TypeCx: Sized + fmt::Debug {
     /// The type of a pattern.
-    type Ty: Copy + Clone + fmt::Debug; // FIXME: remove Copy
+    type Ty: Clone + fmt::Debug;
     /// Errors that can abort analysis.
     type Error: fmt::Debug;
     /// The index of an enum variant.
-    type VariantIdx: Clone + Idx;
+    type VariantIdx: Clone + index::Idx + fmt::Debug;
     /// A string literal
     type StrLit: Clone + PartialEq + fmt::Debug;
     /// Extra data to store in a match arm.
@@ -59,16 +97,16 @@ pub trait TypeCx: Sized + fmt::Debug {
     fn is_exhaustive_patterns_feature_on(&self) -> bool;
 
     /// The number of fields for this constructor.
-    fn ctor_arity(&self, ctor: &Constructor<Self>, ty: Self::Ty) -> usize;
+    fn ctor_arity(&self, ctor: &Constructor<Self>, ty: &Self::Ty) -> usize;
 
     /// The types of the fields for this constructor. The result must have a length of
     /// `ctor_arity()`.
-    fn ctor_sub_tys(&self, ctor: &Constructor<Self>, ty: Self::Ty) -> &[Self::Ty];
+    fn ctor_sub_tys(&self, ctor: &Constructor<Self>, ty: &Self::Ty) -> &[Self::Ty];
 
     /// The set of all the constructors for `ty`.
     ///
     /// This must follow the invariants of `ConstructorSet`
-    fn ctors_for_ty(&self, ty: Self::Ty) -> Result<ConstructorSet<Self>, Self::Error>;
+    fn ctors_for_ty(&self, ty: &Self::Ty) -> Result<ConstructorSet<Self>, Self::Error>;
 
     /// Best-effort `Debug` implementation.
     fn debug_pat(f: &mut fmt::Formatter<'_>, pat: &DeconstructedPat<'_, Self>) -> fmt::Result;

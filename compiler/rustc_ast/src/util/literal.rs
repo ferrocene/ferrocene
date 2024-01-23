@@ -8,7 +8,6 @@ use rustc_lexer::unescape::{
 };
 use rustc_span::symbol::{kw, sym, Symbol};
 use rustc_span::Span;
-use std::ops::Range;
 use std::{ascii, fmt, str};
 
 // Escapes a string, represented as a symbol. Reuses the original symbol,
@@ -39,7 +38,6 @@ pub enum LitError {
     InvalidFloatSuffix,
     NonDecimalFloat(u32),
     IntTooLarge(u32),
-    NulInCStr(Range<usize>),
 }
 
 impl LitKind {
@@ -156,10 +154,7 @@ impl LitKind {
                 let s = symbol.as_str();
                 let mut buf = Vec::with_capacity(s.len());
                 let mut error = Ok(());
-                unescape_c_string(s, Mode::CStr, &mut |span, c| match c {
-                    Ok(CStrUnit::Byte(0) | CStrUnit::Char('\0')) => {
-                        error = Err(LitError::NulInCStr(span));
-                    }
+                unescape_c_string(s, Mode::CStr, &mut |_span, c| match c {
                     Ok(CStrUnit::Byte(b)) => buf.push(b),
                     Ok(CStrUnit::Char(c)) => {
                         buf.extend_from_slice(c.encode_utf8(&mut [0; 4]).as_bytes())
@@ -179,10 +174,7 @@ impl LitKind {
                 // can convert the symbol directly to a `Lrc<u8>` on success.
                 let s = symbol.as_str();
                 let mut error = Ok(());
-                unescape_c_string(s, Mode::RawCStr, &mut |span, c| match c {
-                    Ok(CStrUnit::Byte(0) | CStrUnit::Char('\0')) => {
-                        error = Err(LitError::NulInCStr(span));
-                    }
+                unescape_c_string(s, Mode::RawCStr, &mut |_, c| match c {
                     Ok(_) => {}
                     Err(err) => {
                         if err.is_fatal() {
@@ -374,7 +366,7 @@ fn integer_lit(symbol: Symbol, suffix: Option<Symbol>) -> Result<LitKind, LitErr
     };
 
     let s = &s[if base != 10 { 2 } else { 0 }..];
-    u128::from_str_radix(s, base).map(|i| LitKind::Int(i, ty)).map_err(|_| {
+    u128::from_str_radix(s, base).map(|i| LitKind::Int(i.into(), ty)).map_err(|_| {
         // Small bases are lexed as if they were base 10, e.g, the string
         // might be `0b10201`. This will cause the conversion above to fail,
         // but these kinds of errors are already reported by the lexer.

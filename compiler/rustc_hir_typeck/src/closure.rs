@@ -68,12 +68,58 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         debug!(?bound_sig, ?liberated_sig);
 
+        let parent_args =
+            GenericArgs::identity_for_item(tcx, tcx.typeck_root_def_id(expr_def_id.to_def_id()));
+
+        let tupled_upvars_ty = self.next_ty_var(TypeVariableOrigin {
+            kind: TypeVariableOriginKind::ClosureSynthetic,
+            span: expr_span,
+        });
+
         // FIXME: We could probably actually just unify this further --
         // instead of having a `FnSig` and a `Option<CoroutineTypes>`,
         // we can have a `ClosureSignature { Coroutine { .. }, Closure { .. } }`,
         // similar to how `ty::GenSig` is a distinct data structure.
-        let coroutine_types = match closure.kind {
-            hir::ClosureKind::Closure => None,
+        let (closure_ty, coroutine_types) = match closure.kind {
+            hir::ClosureKind::Closure => {
+                // Tuple up the arguments and insert the resulting function type into
+                // the `closures` table.
+                let sig = bound_sig.map_bound(|sig| {
+                    tcx.mk_fn_sig(
+                        [Ty::new_tup(tcx, sig.inputs())],
+                        sig.output(),
+                        sig.c_variadic,
+                        sig.unsafety,
+                        sig.abi,
+                    )
+                });
+
+                debug!(?sig, ?expected_kind);
+
+                let closure_kind_ty = match expected_kind {
+                    Some(kind) => Ty::from_closure_kind(tcx, kind),
+
+                    // Create a type variable (for now) to represent the closure kind.
+                    // It will be unified during the upvar inference phase (`upvar.rs`)
+                    None => self.next_ty_var(TypeVariableOrigin {
+                        // FIXME(eddyb) distinguish closure kind inference variables from the rest.
+                        kind: TypeVariableOriginKind::ClosureSynthetic,
+                        span: expr_span,
+                    }),
+                };
+
+                let closure_args = ty::ClosureArgs::new(
+                    tcx,
+                    ty::ClosureArgsParts {
+                        parent_args,
+                        closure_kind_ty,
+                        closure_sig_as_fn_ptr_ty: Ty::new_fn_ptr(tcx, sig),
+                        tupled_upvars_ty,
+                    },
+                );
+
+                (Ty::new_closure(tcx, expr_def_id.to_def_id(), closure_args.args), None)
+            }
             hir::ClosureKind::Coroutine(kind) => {
                 let yield_ty = match kind {
                     hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, _)
@@ -119,74 +165,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // Resume type defaults to `()` if the coroutine has no argument.
                 let resume_ty = liberated_sig.inputs().get(0).copied().unwrap_or(tcx.types.unit);
 
-                Some(CoroutineTypes { resume_ty, yield_ty })
-            }
-        };
-
-        check_fn(
-            &mut FnCtxt::new(self, self.param_env, closure.def_id),
-            liberated_sig,
-            coroutine_types,
-            closure.fn_decl,
-            expr_def_id,
-            body,
-            // Closure "rust-call" ABI doesn't support unsized params
-            false,
-        );
-
-        let parent_args =
-            GenericArgs::identity_for_item(tcx, tcx.typeck_root_def_id(expr_def_id.to_def_id()));
-
-        let tupled_upvars_ty = self.next_root_ty_var(TypeVariableOrigin {
-            kind: TypeVariableOriginKind::ClosureSynthetic,
-            span: expr_span,
-        });
-
-        match closure.kind {
-            hir::ClosureKind::Closure => {
-                assert_eq!(coroutine_types, None);
-                // Tuple up the arguments and insert the resulting function type into
-                // the `closures` table.
-                let sig = bound_sig.map_bound(|sig| {
-                    tcx.mk_fn_sig(
-                        [Ty::new_tup(tcx, sig.inputs())],
-                        sig.output(),
-                        sig.c_variadic,
-                        sig.unsafety,
-                        sig.abi,
-                    )
-                });
-
-                debug!(?sig, ?expected_kind);
-
-                let closure_kind_ty = match expected_kind {
-                    Some(kind) => Ty::from_closure_kind(tcx, kind),
-
-                    // Create a type variable (for now) to represent the closure kind.
-                    // It will be unified during the upvar inference phase (`upvar.rs`)
-                    None => self.next_root_ty_var(TypeVariableOrigin {
-                        // FIXME(eddyb) distinguish closure kind inference variables from the rest.
-                        kind: TypeVariableOriginKind::ClosureSynthetic,
-                        span: expr_span,
-                    }),
-                };
-
-                let closure_args = ty::ClosureArgs::new(
-                    tcx,
-                    ty::ClosureArgsParts {
-                        parent_args,
-                        closure_kind_ty,
-                        closure_sig_as_fn_ptr_ty: Ty::new_fn_ptr(tcx, sig),
-                        tupled_upvars_ty,
-                    },
-                );
-
-                Ty::new_closure(tcx, expr_def_id.to_def_id(), closure_args.args)
-            }
-            hir::ClosureKind::Coroutine(_) => {
-                let Some(CoroutineTypes { resume_ty, yield_ty }) = coroutine_types else {
-                    bug!("expected coroutine to have yield/resume types");
-                };
                 let interior = self.next_ty_var(TypeVariableOrigin {
                     kind: TypeVariableOriginKind::MiscVariable,
                     span: body.value.span,
@@ -209,9 +187,25 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     },
                 );
 
-                Ty::new_coroutine(tcx, expr_def_id.to_def_id(), coroutine_args.args)
+                (
+                    Ty::new_coroutine(tcx, expr_def_id.to_def_id(), coroutine_args.args),
+                    Some(CoroutineTypes { resume_ty, yield_ty }),
+                )
             }
-        }
+        };
+
+        check_fn(
+            &mut FnCtxt::new(self, self.param_env, closure.def_id),
+            liberated_sig,
+            coroutine_types,
+            closure.fn_decl,
+            expr_def_id,
+            body,
+            // Closure "rust-call" ABI doesn't support unsized params
+            false,
+        );
+
+        closure_ty
     }
 
     /// Given the expected type, figures out what it can about this closure we
@@ -379,7 +373,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn sig_of_closure(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         closure_kind: hir::ClosureKind,
         expected_sig: Option<ExpectedSig<'tcx>>,
     ) -> ClosureSignatures<'tcx> {
@@ -396,7 +390,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn sig_of_closure_no_expectation(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         closure_kind: hir::ClosureKind,
     ) -> ClosureSignatures<'tcx> {
         let bound_sig = self.supplied_sig_of_closure(expr_def_id, decl, closure_kind);
@@ -455,7 +449,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn sig_of_closure_with_expectation(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         closure_kind: hir::ClosureKind,
         expected_sig: ExpectedSig<'tcx>,
     ) -> ClosureSignatures<'tcx> {
@@ -512,7 +506,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn sig_of_closure_with_mismatched_number_of_arguments(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         expected_sig: ExpectedSig<'tcx>,
     ) -> ClosureSignatures<'tcx> {
         let expr_map_node = self.tcx.hir_node_by_def_id(expr_def_id);
@@ -553,7 +547,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn merge_supplied_sig_with_expectation(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         closure_kind: hir::ClosureKind,
         mut expected_sigs: ClosureSignatures<'tcx>,
     ) -> InferResult<'tcx, ClosureSignatures<'tcx>> {
@@ -647,7 +641,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn supplied_sig_of_closure(
         &self,
         expr_def_id: LocalDefId,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         closure_kind: hir::ClosureKind,
     ) -> ty::PolyFnSig<'tcx> {
         let astconv: &dyn AstConv<'_> = self;
@@ -683,10 +677,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     })
                 }
                 // All `gen {}` and `async gen {}` must return unit.
-                hir::ClosureKind::Coroutine(
-                    hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Gen, _)
-                    | hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::AsyncGen, _),
-                ) => self.tcx.types.unit,
+                hir::ClosureKind::Coroutine(hir::CoroutineKind::Desugared(
+                    hir::CoroutineDesugaring::Gen | hir::CoroutineDesugaring::AsyncGen,
+                    _,
+                )) => self.tcx.types.unit,
 
                 // For async blocks, we just fall back to `_` here.
                 // For closures/coroutines, we know nothing about the return
@@ -760,16 +754,22 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     get_future_output(obligation.predicate, obligation.cause.span)
                 })?
             }
+            ty::Alias(ty::Projection, _) => {
+                return Some(Ty::new_error_with_message(
+                    self.tcx,
+                    closure_span,
+                    "this projection should have been projected to an opaque type",
+                ));
+            }
             ty::Alias(ty::Opaque, ty::AliasTy { def_id, args, .. }) => self
                 .tcx
                 .explicit_item_bounds(def_id)
                 .iter_instantiated_copied(self.tcx, args)
                 .find_map(|(p, s)| get_future_output(p.as_predicate(), s))?,
             ty::Error(_) => return Some(ret_ty),
-            _ => span_bug!(
-                closure_span,
-                "async fn coroutine return type not an inference variable: {ret_ty}"
-            ),
+            _ => {
+                span_bug!(closure_span, "invalid async fn coroutine return type: {ret_ty:?}")
+            }
         };
 
         let output_ty = self.normalize(closure_span, output_ty);
@@ -843,7 +843,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// all parameters are of type `ty::Error`.
     fn error_sig_of_closure(
         &self,
-        decl: &hir::FnDecl<'_>,
+        decl: &hir::FnDecl<'tcx>,
         guar: ErrorGuaranteed,
     ) -> ty::PolyFnSig<'tcx> {
         let astconv: &dyn AstConv<'_> = self;

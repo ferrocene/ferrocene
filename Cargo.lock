@@ -2857,16 +2857,6 @@ dependencies = [
 
 [[package]]
 name = "libloading"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
-dependencies = [
- "cfg-if",
- "winapi",
-]
-
-[[package]]
-name = "libloading"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c571b676ddfc9a8c12f1f3d3085a7b163966a8fd8098a90640953ce5f6170161"
@@ -3146,7 +3136,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "libffi",
- "libloading 0.8.1",
+ "libloading",
  "log",
  "measureme",
  "rand",
@@ -4773,7 +4763,7 @@ dependencies = [
 name = "rustc_interface"
 version = "0.0.0"
 dependencies = [
- "libloading 0.7.4",
+ "libloading",
  "rustc-rayon",
  "rustc-rayon-core",
  "rustc_ast",
@@ -4903,7 +4893,7 @@ name = "rustc_metadata"
 version = "0.0.0"
 dependencies = [
  "bitflags 2.4.1",
- "libloading 0.7.4",
+ "libloading",
  "odht",
  "rustc_ast",
  "rustc_attr",
@@ -5123,6 +5113,7 @@ name = "rustc_pattern_analysis"
 version = "0.0.0"
 dependencies = [
  "derivative",
+ "rustc-hash",
  "rustc_apfloat",
  "rustc_arena",
  "rustc_data_structures",
@@ -6238,9 +6229,9 @@ dependencies = [
 
 [[package]]
 name = "thin-vec"
-version = "0.2.12"
+version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aac81b6fd6beb5884b0cf3321b8117e6e5d47ecb6fc89f414cfdcca8b2fe2dd8"
+checksum = "a38c90d48152c236a3ab59271da4f4ae63d678c5d7ad6b7714d7cb9760be5e4b"
 
 [[package]]
 name = "thiserror"

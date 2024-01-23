@@ -98,6 +98,7 @@ fn assert_same_hash(x: &Options, y: &Options) {
     assert_same_clone(y);
 }
 
+#[track_caller]
 fn assert_different_hash(x: &Options, y: &Options) {
     assert_ne!(x.dep_tracking_hash(true), y.dep_tracking_hash(true));
     assert_ne!(x.dep_tracking_hash(false), y.dep_tracking_hash(false));
@@ -722,7 +723,6 @@ fn test_unstable_options_tracking_hash() {
     untracked!(unpretty, Some("expanded".to_string()));
     untracked!(unstable_options, true);
     untracked!(validate_mir, true);
-    untracked!(verbose_internals, true);
     untracked!(write_long_types_to_disk, false);
     // tidy-alphabetical-end
 
@@ -854,6 +854,7 @@ fn test_unstable_options_tracking_hash() {
         };
     }
     tracked_no_crate_hash!(no_codegen, true);
+    tracked_no_crate_hash!(verbose_internals, true);
 }
 
 #[test]

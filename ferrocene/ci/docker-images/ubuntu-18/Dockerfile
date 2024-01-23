@@ -36,6 +36,7 @@ RUN apt-get update \
         moreutils \
         zstd \
         sudo \
+        lld \
         # Needed to support the QEMU copied over from Ubuntu 22.04 (see above).
         # Replace this with qemu-user-static once we're not on Ubuntu 18.04.
         binfmt-support \

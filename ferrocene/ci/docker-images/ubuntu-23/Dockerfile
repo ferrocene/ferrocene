@@ -27,6 +27,7 @@ RUN apt-get update \
         moreutils \
         cmake \
         python-is-python3 \
+        lld \
         # Needed by the `commit-checks` CI job:
         llvm-17-tools \
         llvm-17-dev \

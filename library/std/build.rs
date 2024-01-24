@@ -35,7 +35,11 @@ fn main() {
         || target.contains("hurd")
         || target.contains("uefi")
         || target.contains("teeos")
+<<<<<<< HEAD
         || target.contains("ferrocenecoretest")
+=======
+        || target.contains("zkvm")
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // See src/bootstrap/synthetic_targets.rs
         || env::var("RUSTC_BOOTSTRAP_SYNTHETIC_TARGET").is_ok()
     {

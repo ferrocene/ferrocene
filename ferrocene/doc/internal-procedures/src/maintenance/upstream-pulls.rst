@@ -1,18 +1,23 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Upstream Pulls
-==============
+Automated pulls from upstream
+=============================
 
-What is an Upstream Pull
-------------------------
+An "upstream pull" is a pull request that pulls in commits from the upstream
+Rust repository back into the Ferrocene repository to keep them in sync. This
+procedure is performed by a `periodic Github Action`_ that opens a pull request
+automatically, only requiring sign off of a reviewer to get merged.
 
-An "upstream pull" is a pull request that pulls in commits from the upstream Rust
-repository back into the Ferrocene repository to keep them in sync. This
-procedure is usually performed by a periodic Github Action that opens a pull
-request automatically, only requiring sign off of a reviewer to get merged.
-Sometimes merge conflicts may occur in which case automation opens an issue
-describing the conflict and requiring the upstream pull to be done manually.
+Sometimes a merge conflict happens, and in that case it's up to the reviewer to
+address them.
+
+.. _periodic GitHub Action: https://github.com/ferrocene/ferrocene/blob/main/.github/workflows/automation-pull-upstream.yml
+
+Automation overview
+-------------------
+
+The automation runs at the start of each business day, and attempts to open a:q
 
 Manual intervention when the automation fails
 ---------------------------------------------

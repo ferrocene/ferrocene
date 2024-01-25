@@ -82,6 +82,45 @@ class LinkToTermsTransform(SphinxTransform):
         return node
 
 
+class PruneGlossaryTransform(SphinxTransform):
+    default_priority = 500
+
+    def apply(self):
+        state = State.get(self.env)
+        glossaries = list(self.document.findall(addnodes.glossary))
+        if glossaries:
+            used_terms = self.discover_used_terms()
+            for glossary in glossaries:
+                self.prune(glossary, used_terms)
+
+    # We have to re-scan all the documents to see which terms are used,
+    # duplicating the scanning effort. Ideally we would first run the
+    # LinkToTermsTransform transform and collect from there the terms that were
+    # linked, and then pass that information to this transform.
+    #
+    # Unfortunately that's not possible, because each "post transform" is
+    # executed on the process handling that file, and there is no way for those
+    # processes to synchronize and communicate.
+    def discover_used_terms(self):
+        state = State.get(self.env)
+        used_terms = set()
+        for docname in self.env.all_docs.keys():
+            doctree = self.env.get_doctree(docname)
+            for node in find_lexable_nodes(doctree):
+                for part in lexer(node.astext(), state.terms):
+                    if type(part) == MatchedTerm:
+                        used_terms.add(part.term.name)
+        return used_terms
+
+    def prune(self, glossary, used_terms):
+        for item in list(glossary.findall(nodes.definition_list_item)):
+            for term in item.findall(nodes.term):
+                if term.astext() in used_terms:
+                    break
+            else:
+                item.parent.remove(item)
+
+
 @dataclass
 class Term:
     name: str
@@ -172,6 +211,7 @@ def normalize(name):
 def setup(app):
     app.add_env_collector(GlossaryCollector)
     app.add_post_transform(LinkToTermsTransform)
+    app.add_post_transform(PruneGlossaryTransform)
 
     return {
         "version": "0",

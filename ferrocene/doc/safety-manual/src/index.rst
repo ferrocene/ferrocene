@@ -11,7 +11,6 @@ Ferrocene Safety Manual
 
    purpose
    scope
-   terms
    references
    environment
    user-responsibility
@@ -24,3 +23,10 @@ Ferrocene Safety Manual
    known-problems
    degraded-environment
    constraints
+
+.. appendices::
+   :caption: Appendices:
+   :numbered:
+   :maxdepth: 2
+
+   terms

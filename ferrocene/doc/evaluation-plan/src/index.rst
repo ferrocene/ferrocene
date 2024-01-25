@@ -10,9 +10,15 @@ Ferrocene Evaluation Plan
 
    purpose
    scope
-   terms
    references
    qualification-scope
    link-with-iso-requirements
    link-with-iec-requirements
    method
+
+.. appendices::
+   :caption: Appendices:
+   :numbered:
+   :maxdepth: 2
+
+   terms

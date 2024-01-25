@@ -14,6 +14,7 @@ extensions = [
     "ferrocene_toctrees",
     "ferrocene_qualification",
     "ferrocene_test_outcomes",
+    "ferrocene_autoglossary",
 
     "sphinx.ext.intersphinx",
     "ferrocene_intersphinx_support",

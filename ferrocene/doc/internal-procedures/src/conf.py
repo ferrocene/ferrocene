@@ -8,6 +8,7 @@ author = "The Ferrocene Developers"
 extensions = [
     "ferrocene_toctrees",
     "ferrocene_qualification",
+    "ferrocene_autoglossary",
 
     "sphinx.ext.intersphinx",
     "ferrocene_intersphinx_support",

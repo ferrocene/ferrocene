@@ -180,6 +180,13 @@ def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None
         inside_glossary = True
     elif inside_glossary and type(node) == nodes.definition_list_item:
         inside_definition_of = {term.astext() for term in node.findall(nodes.term)}
+    elif type(node) in (
+        nodes.reference,
+        nodes.literal,
+        nodes.literal_block,
+        nodes.comment,
+    ):
+        return
 
     for child in node.children:
         if inside_glossary and type(child) == nodes.term:

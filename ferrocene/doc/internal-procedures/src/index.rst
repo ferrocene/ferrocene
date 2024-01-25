@@ -9,7 +9,6 @@ Ferrocene Internal Procedures
    :caption: Introduction
 
    purpose
-   terms
    references
    onboarding
    setup-local-env
@@ -33,3 +32,9 @@ Ferrocene Internal Procedures
    :caption: Partnerships
 
    partners/oxidos
+
+.. appendices::
+   :caption: Appendices
+   :maxdepth: 2
+
+   terms

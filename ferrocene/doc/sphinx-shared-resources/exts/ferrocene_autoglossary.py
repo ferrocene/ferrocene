@@ -13,6 +13,7 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.transforms import SphinxTransform
+from typing import Optional
 import sphinx
 import string
 
@@ -52,7 +53,7 @@ class LinkToTermsTransform(SphinxTransform):
     def apply(self):
         state = State.get(self.env)
         for node in find_lexable_nodes(self.document):
-            self.apply_to_node(state, node)
+            self.apply_to_node(state, node.node)
 
     def apply_to_node(self, state, node):
         lexed = list(lexer(node.astext(), state.terms))
@@ -102,15 +103,47 @@ class PruneGlossaryTransform(SphinxTransform):
     # executed on the process handling that file, and there is no way for those
     # processes to synchronize and communicate.
     def discover_used_terms(self):
+        # The key of this dict is the name of the term, while the value is the
+        # "dependencies" of the term. When the term is referred to by any page
+        # other than the glossary the dependencies will be None, while if it's
+        # only referenced by other glossary entries the value will be the names
+        # of those entries.
+        used_terms = dict()
+
         state = State.get(self.env)
-        used_terms = set()
         for docname in self.env.all_docs.keys():
             doctree = self.env.get_doctree(docname)
             for node in find_lexable_nodes(doctree):
-                for part in lexer(node.astext(), state.terms):
-                    if type(part) == MatchedTerm:
-                        used_terms.add(part.term.name)
-        return used_terms
+                for part in lexer(node.node.astext(), state.terms):
+                    if type(part) != MatchedTerm:
+                        continue
+                    name = part.term.name
+                    # Join the list of dependencies, setting None when either
+                    # side is None.
+                    if name not in used_terms:
+                        used_terms[name] = node.inside_definition_of
+                    elif used_terms[name] is not None:
+                        if node.inside_definition_of is None:
+                            used_terms[name] = None
+                        else:
+                            used_terms[name].update(node.inside_definition_of)
+
+        # Keep resolving dependencies until no change is made in the previous
+        # iteration. This makes sure that term "A" referred by term "B"
+        # referred by term "C" referred by the rest of the text is kept.
+        changed = True
+        while changed:
+            changed = False
+            for term, depends_on in dict(used_terms.items()).items():
+                if depends_on is None:
+                    continue
+                for dependency in depends_on:
+                    if dependency in used_terms and used_terms[dependency] is None:
+                        used_terms[term] = None
+                        changed = True
+                        break
+
+        return {term for term, deps in used_terms.items() if deps is None}
 
     def prune(self, glossary, used_terms):
         for item in list(glossary.findall(nodes.definition_list_item)):
@@ -140,17 +173,29 @@ class State:
         return getattr(env, key)
 
 
-def find_lexable_nodes(node, *, inside_glossary=False):
+def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None):
     if type(node) == nodes.Text:
-        yield node
+        yield LexableNode(node=node, inside_definition_of=inside_definition_of)
     elif type(node) == addnodes.glossary:
         inside_glossary = True
+    elif inside_glossary and type(node) == nodes.definition_list_item:
+        inside_definition_of = {term.astext() for term in node.findall(nodes.term)}
 
     for child in node.children:
         if inside_glossary and type(child) == nodes.term:
             continue
-        for result in find_lexable_nodes(child, inside_glossary=inside_glossary):
+        for result in find_lexable_nodes(
+            child,
+            inside_glossary=inside_glossary,
+            inside_definition_of=inside_definition_of,
+        ):
             yield result
+
+
+@dataclass
+class LexableNode:
+    node: object
+    inside_definition_of: Optional[set[str]]
 
 
 def lexer(text, terms):

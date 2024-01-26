@@ -11,9 +11,9 @@ This qualification is restricted to the following environment:
    :stub-columns: 1
 
    * - Host
-     - x86_64 Linux
+     - :target:`x86_64-unknown-linux-gnu`
    * - Target
-     - ARMv8-A bare metal (aarch64)
+     - :target:`aarch64-unknown-none`
    * - Target specific libraries
      - libcore and liballoc
    * - Supported languages

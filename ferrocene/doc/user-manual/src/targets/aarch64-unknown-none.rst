@@ -3,8 +3,8 @@
 
 .. _aarch64-unknown-none:
 
-ARMv8-A bare metal
-==================
+:target:`aarch64-unknown-none`
+==============================
 
 The ``aarch64-unknown-none`` Ferrocene target provides support for
 bare-metal ARMv8-A processors operating in Aarch64 mode.

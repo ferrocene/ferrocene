@@ -4422,10 +4422,10 @@ version = "0.0.0"
 dependencies = [
  "arrayvec",
  "bitflags 2.4.1",
+ "either",
  "elsa",
  "ena",
  "indexmap 2.0.0",
- "itertools",
  "jobserver",
  "libc",
  "measureme",

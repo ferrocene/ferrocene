@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // Issue 62307 pointed out a case where the structural-match checking
 // was too shallow.
 //

@@ -11,8 +11,15 @@ Ferrocene Qualification Report
    purpose
    scope
    references
-   tests
    statement
+
+.. toctree::
+   :caption: Test results:
+   :numbered:
+   :maxdepth: 2
+
+   tests/aarch64-unknown-none
+   tests/x86_64-unknown-linux-gnu
 
 .. appendices::
    :caption: Appendices:

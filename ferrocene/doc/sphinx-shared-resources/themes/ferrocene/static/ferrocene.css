@@ -140,8 +140,17 @@ a {
     text-decoration: none;
 }
 
+/* Used by the ferrocene-autoglossary for automatically inserted glossary links */
+a.ferrocene-autoglossary {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.25em;
+}
+
 a:hover {
     text-decoration: underline;
+    text-decoration-style: solid;
 }
 
 p {
@@ -614,6 +623,10 @@ div.page > div.admonition:first-child + section h1 {
 dl dt {
     margin-top: 1.5em;
     font-weight: 700;
+}
+
+dl dt + dt {
+    margin-top: 0.3em;
 }
 
 dl dt:first-child {

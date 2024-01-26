@@ -8,6 +8,7 @@ author = "The Ferrocene Developers"
 extensions = [
     "ferrocene_toctrees",
     "ferrocene_qualification",
+    "ferrocene_autoglossary",
 
     "sphinx.ext.intersphinx",
     "ferrocene_intersphinx_support",
@@ -18,3 +19,8 @@ html_title = "Ferrocene Evaluation Report"
 html_short_title = "Evaluation Report"
 
 ferrocene_id = "ER"
+
+# Do not generate the index pages. We don't need them, and they cause
+# linkchecker to fail due to them including *all* glossary entries, including
+# entries that were removed by autoglossary.
+html_use_index = False

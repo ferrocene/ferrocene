@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# This file defines the human-readable names for the targets supported by
+# Ferrocene, to provide consistency across documents on how we refer to them.
+#
+# In the documents, as long as the ferrocene_qualification extension is added,
+# you can refer to them with :target:`triple`.
+
+aarch64-unknown-none     = "ARMv8-A bare metal"
+thumbv7em-none-eabi      = "ARMv7e-M bare metal (thumb)"
+thumbv7em-none-eabihf    = "ARMv7e-M bare metal (thumb, floats)"
+wasm32-unknown-unknown   = "WASM bare metal"
+x86_64-unknown-linux-gnu = "x86_64 Linux (glibc)"

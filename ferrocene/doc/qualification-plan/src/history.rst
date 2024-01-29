@@ -40,7 +40,7 @@ maintainers governing and developing the project”. The Rust Foundation does no
 make technical, language or governance decisions: it has a support role for the
 project, providing crucial funding, employment of key roles, and legal support.
 
-"Ferrocene", started in 2021 after years of planning, is a qualified Rust compiler 
+"Ferrocene", started in 2021 after years of planning, is a qualified Rust compiler
 with a focus on the ISO 26262 standard for the automotive industry. 
 It is maintained by Ferrous Systems, which also qualifies new versions of 
 the Rust compiler, as required in safety and mission-critical settings. 
@@ -110,9 +110,9 @@ The following diagram shows how the Upstream release trains work:
 Contributing to Upstream
 ------------------------
 
-A developer may contribute to upstream by either requesting a feature be
-developed, reporting a bug, submitting Pull Requests for review and merging into
-the master branch, or by writing documentation.
+A developer may contribute to upstream by either requesting a feature to be
+developed, reporting a bug, submitting a Pull Request for review and merging into
+the master branch, or writing documentation.
 
 The procedures and guidelines for contributing to upstream are outside the scope
 of this document, and can be found at

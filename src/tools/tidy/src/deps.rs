@@ -366,6 +366,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "termize",
     "thin-vec",
     "thiserror",
+    "thiserror-core",
+    "thiserror-core-impl",
     "thiserror-impl",
     "thorin-dwp",
     "thread_local",

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-from .parse_debug_repr import DebugReprParser
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -75,15 +74,15 @@ class InvocationCollector:
             self._bootstrap_types.append(step["type"])
             pop_bootstrap_type = True
 
-        invocation = Invocation(
-            bootstrap_types=list(self._bootstrap_types),
-            debug_repr=self._suite_debug_repr,
-            parsed_debug_repr=DebugReprParser(self._suite_debug_repr).parse_item()
-        )
         for child in step["children"]:
             if child["kind"] == "rustbuild_step":
                 self.collect(child)
             elif child["kind"] == "test_suite":
+                invocation = Invocation(
+                    bootstrap_types=list(self._bootstrap_types),
+                    debug_repr=self._suite_debug_repr,
+                    metadata=child["metadata"],
+                )
                 for test in child["tests"]:
                     outcome = test["outcome"]
                     if outcome == "ignored":
@@ -101,9 +100,8 @@ class InvocationCollector:
                         self._suite.ignored_tests[test["name"]] = TEST_EXECUTED
                     else:
                         raise RuntimeError(f"unexpected outcome: {outcome}")
-
-        if invocation.total_tests() > 0:
-            self.invocations.append(invocation)
+                if invocation.total_tests() > 0:
+                    self.invocations.append(invocation)
 
         if pop_bootstrap_type:
             self._bootstrap_types.pop()
@@ -113,7 +111,7 @@ class InvocationCollector:
 class Invocation:
     bootstrap_types: List[str]
     debug_repr: str
-    parsed_debug_repr: object
+    metadata: dict
 
     passed_tests: int = 0
     failed_tests: int = 0

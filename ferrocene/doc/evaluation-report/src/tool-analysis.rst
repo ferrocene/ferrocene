@@ -137,7 +137,7 @@ the following qualification methods:
 * 1c. Validation of the software tool in accordance with 11.4.9
 
 According to the clause 11.4.2 in part 8 of the [|iso_ref|] this choice is
-depending on user's software development life-cycle and her validation strategy,
+depending on user's software development life-cycle and their validation strategy,
 the user has the responsibility to determine whether this level or better one is
 applicable.
 

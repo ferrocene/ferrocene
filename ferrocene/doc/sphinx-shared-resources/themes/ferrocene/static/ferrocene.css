@@ -537,6 +537,7 @@ div.toctree-wrapper p.caption {
  **************/
 
 table {
+    margin: 1em 0;
     border-collapse: collapse;
 
     /* Let the table overflow on the right */
@@ -565,11 +566,11 @@ table tr:last-child td {
 }
 
 td > :first-child, th > :first-child {
-    margin-top: 0;
+    margin-top: 0 !important;
 }
 
 td > :last-child, th > :last-child {
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
 }
 
 td span.spec-paragraph-id, th span.spec-paragraph-id {

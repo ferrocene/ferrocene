@@ -3633,9 +3633,6 @@ The :t:`type` of a :t:`closure parameter` is determined as follows:
 * :dp:`fls_mPWkIxTJErqx`
   Otherwise the :t:`type` is the specified :t:`type`.
 
-:dp:`fls_MeLJqy28J4jr`
-The :t:`type` of a :t:`closure parameter` is the :t:`type` of the :t:`closure parameter`.
-
 :dp:`fls_r6gWLoNR7JMR`
 The :t:`pattern` of a :t:`closure parameter` shall be an
 :t:`irrefutable pattern`.

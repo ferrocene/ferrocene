@@ -12,7 +12,7 @@ Test Environment
 
 For this qualification, testing is restricted to the following environments:
 
-.. list-table:: 
+.. list-table::
    :align: left
    :stub-columns: 1
 
@@ -133,7 +133,7 @@ The linkchecker test suite is a pass/fail test suite integrated into the
 Ferrocene CI infrastructure.
 
 The linkchecker test suite is verified as part of
-:ref:`testing:Test Phase 2: Full Testing and Merge`. As indicated in 
+:ref:`testing:Test Phase 2: Full Testing and Merge`. As indicated in
 :doc:`Qualification Plan : Development Process <qualification-plan:development>`
 , a PR is merged into the repository only when it passes full testing.
 
@@ -158,7 +158,7 @@ The tidy test suite is a pass/fail test suite integrated into the Ferrocene
 CI infrastructure.
 
 The tidy test suite is verified as part of
-:ref:`testing:Test Phase 2: Full Testing and Merge`. As indicated in 
+:ref:`testing:Test Phase 2: Full Testing and Merge`. As indicated in
 :doc:`Qualification Plan : Development Process <qualification-plan:development>`
 , a PR is merged into the repository only when it passes full testing.
 

@@ -4,7 +4,7 @@
 Purpose
 =======
 
-Ferrocene is a software development environment for Rust programming 
+Ferrocene is a software development environment for Rust programming
 language.
 
 .. figure:: figures/toolchain-workflow.svg

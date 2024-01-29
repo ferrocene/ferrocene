@@ -1,5 +1,5 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
-   SPDX-FileCopyrightText: The Ferrocene Developers 
+   SPDX-FileCopyrightText: The Ferrocene Developers
 
 Validation Process
 ==================

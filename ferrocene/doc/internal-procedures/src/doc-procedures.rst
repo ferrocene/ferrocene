@@ -109,7 +109,7 @@ dynamically:
 
 * ``doc_short_title``: the acronym of the document (e.g. SM)
 
-You can refer to substitutions across all of our documentation  by surrounding 
+You can refer to substitutions across all of our documentation  by surrounding
 the substitution name with ``|``:
 
 .. code-block:: text
@@ -122,7 +122,7 @@ Signing documents
 All the qualification documents we send to TUV have to be digitally signed by
 the responsible parties, to attest they were reviewed and to prevent accidental
 changes to the documents (which would require TUV to review the documents
-again). 
+again).
 
 The Ferrocene QMS documentation also needs to be digitally signed by
 responsible parties to attest that their contents are up to date and represent

@@ -9,6 +9,7 @@ UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
 MAX_MERGES_PER_PR=30
 DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
+GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
@@ -228,6 +229,16 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
         git commit -m "update ${lock}"
     fi
 done
+
+# We expose additional commands for `x.py` which affects the completions file generation,
+# so we just run the command to regenerate those in case they need updating as this usually
+# does not need manual intervention.
+echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
+./x.py run generate-completions >/dev/null
+if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}*" >/dev/null; then
+    git add "${GENERATED_COMPLETIONS_DIR}"
+    git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
+fi
 
 git branch -D "${TEMP_BRANCH}"
 

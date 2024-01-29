@@ -214,32 +214,32 @@ qualification method:
 
 * For **TCL2**:
 
-.. csv-table:: TCL2 Qualification methods according to ASIL level
-   :name: TCL2 Qualification methods according to ASIL level
-   :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-   :delim: !
+   .. csv-table:: TCL2 Qualification methods according to ASIL level
+      :name: TCL2 Qualification methods according to ASIL level
+      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
+      :delim: !
 
-   1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! ++ ! \+
-   1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! ++ ! \+
-   1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! \+ ! ++
-   1d. Development in accordance with a safety standard! \+ ! \+ ! \+ ! \+
+      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! ++ ! \+
+      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! ++ ! \+
+      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! \+ ! ++
+      1d. Development in accordance with a safety standard! \+ ! \+ ! \+ ! \+
 
-.. end of table
+   .. end of table
 
 
 * For **TCL3**:
 
-.. csv-table:: TCL3 Qualification methods according to ASIL level
-   :name: TCL3 Qualification methods according to ASIL level
-   :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-   :delim: !
+   .. csv-table:: TCL3 Qualification methods according to ASIL level
+      :name: TCL3 Qualification methods according to ASIL level
+      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
+      :delim: !
 
-   1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! \+ ! \+
-   1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! \+ ! \+
-   1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! ++ ! ++
-   1d. Development in accordance with a safety standard! \+ ! \+ ! ++ ! ++
+      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! \+ ! \+
+      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! \+ ! \+
+      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! ++ ! ++
+      1d. Development in accordance with a safety standard! \+ ! \+ ! ++ ! ++
 
-.. end of table
+   .. end of table
 
 |
 | ++: Highly recommended

@@ -17,7 +17,13 @@ address them.
 Automation overview
 -------------------
 
-The automation runs at the start of each business day, and attempts to open a:q
+The automation runs at the start of each business day, and attempts to open a pull request.
+A few important things to note that the automation will -
+
+* always open the pull request even if there are conflicts compared to the upstream.
+* open a GitHub issue if the periodic Github Action fails.
+* leave conflict markers in the files that have a conflict with the upstream and will leave it to the developer/author to push conflict-resolving commit(s).
+* try to fix some common failures automatically.
 
 Manual intervention when the automation fails
 ---------------------------------------------

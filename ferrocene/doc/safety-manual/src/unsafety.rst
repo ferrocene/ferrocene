@@ -97,7 +97,7 @@ When verifying unsafe code, the user at a minimum shall:
 
 * Perform code review of the entire module where the unsafe code resides.
 
-* Perform unit testing on the unsafe code and its clients,
+* Perform unit testing on the unsafe code and its clients.
 
 * Perform integration testing between the unsafe code and its clients.
 

@@ -7,16 +7,10 @@ Customer Interactions
 Interactions between Customers and the Ferrocene organization are done
 through the following tools: 
 
-.. list-table::
-   :align: left
-   :stub-columns: 1
-
-   * - email
-     - | - Get contract information;
-       | - Contact our teams for support, questions or enhancement requests;
-       | - Obtain release tarballs
-
-.. end of table
+* email
+    * Get contract information
+    * Contact our teams for support, questions or enhancement requests
+    * Obtain release tarballs
 
 In the following parts, the usage of the customer focused tools are described.
 

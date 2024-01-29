@@ -4,8 +4,8 @@
 Tests Results
 =============
 
-Ferrocene for ARMv8-A bare metal and x86-64 Linux
--------------------------------------------------
+Ferrocene for :target:`aarch64-unknown-none` and :target:`x86_64-unknown-linux-gnu`
+-----------------------------------------------------------------------------------
 
 Test Environment
 ^^^^^^^^^^^^^^^^
@@ -17,11 +17,11 @@ For this qualification, testing is restricted to the following environments:
    :stub-columns: 1
 
    * - Host
-     - x86_64 Linux
-     - x86_64 Linux
+     - :target:`x86_64-unknown-linux-gnu`
+     - :target:`x86_64-unknown-linux-gnu`
    * - Target
-     - ARMv8-A bare metal (aarch64)
-     - x86_64 Linux
+     - :target:`aarch64-unknown-none`
+     - :target:`x86_64-unknown-linux-gnu`
    * - Supported languages
      - Rust
      - Rust
@@ -37,9 +37,9 @@ For this qualification, testing is restricted to the following environments:
 Bare metal testing
 ******************
 
-The ARMv8-A bare metal Ferrocene target is meant to be used in an environment
-without any operating system. Consequently, it does not include APIs relying on
-one (as part of the ``std`` crate).
+The :target:`aarch64-unknown-none` Ferrocene target is meant to be used in an
+environment without any operating system. Consequently, it does not include
+APIs relying on one (as part of the ``std`` crate).
 
 Rust's test suites require those APIs to be available in order to invoke the
 tests themselves and to report the execution results. To solve the issue, a new
@@ -173,9 +173,10 @@ compiletest test suite.
 Known Problems
 ^^^^^^^^^^^^^^
 
-KPs identified through the lifecycle of Ferrocene for ARMv8-A bare metal and
-x86-64 Linux are tracked in the :doc:`safety-manual:known-problems`. This
-document is made available to customers for consulting.
+KPs identified through the lifecycle of Ferrocene for
+:target:`aarch64-unknown-none` and :target:`x86_64-unknown-linux-gnu` are
+tracked in the :doc:`safety-manual:known-problems`. This document is made
+available to customers for consulting.
 
 Ignored Tests
 ^^^^^^^^^^^^^

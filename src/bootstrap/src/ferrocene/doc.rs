@@ -157,6 +157,7 @@ impl<P: Step> Step for SphinxBook<P> {
             builder.src.join("ferrocene").join("doc").join("sphinx-shared-resources");
         let substitutions =
             builder.src.join("ferrocene").join("doc").join("sphinx-substitutions.toml");
+        let target_names = builder.src.join("ferrocene").join("doc").join("target-names.toml");
         let breadcrumbs = builder.src.join("ferrocene").join("doc").join("breadcrumbs");
 
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
@@ -215,6 +216,9 @@ impl<P: Step> Step for SphinxBook<P> {
             // Provide the correct substitutions:
             .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))
+            // Provide the correct target names:
+            .arg("-D")
+            .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
             // Toolchain versions
             .arg("-D")
             .arg(format!(

@@ -11,12 +11,12 @@ of each error will be determined. This is done by evaluating the use cases of
 the tool based on the usage in the activities of safety-critical product
 development that this tool replaces or simplifies.
 
-Through this analysis, the following potential error are identified:
+Through this analysis, the following potential error are identified. Potential errors ...
 
-* Potential errors with the possibility to detect and to mitigate them.
-* Potential errors without the possibility to detect or to mitigate them.
-* Potential errors that do not appear in use cases.
-* Potential errors without an impact for safety.
+* ... with the possibility to detect and to mitigate them.
+* ... without the possibility to detect or to mitigate them.
+* ... that do not appear in use cases.
+* ... without an impact for safety.
 
 Errors, with the possibility of detection and mitigation, are added in
 the :doc:`safety-manual:index` with the following form:

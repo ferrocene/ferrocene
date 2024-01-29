@@ -7,7 +7,7 @@ Customer Interactions
 Interactions between Customers and the Ferrocene organization are done
 through the following tools: 
 
-* email
+* **Email**
     * Get contract information
     * Contact our teams for support, questions or enhancement requests
     * Obtain release tarballs
@@ -62,14 +62,14 @@ documentation.
 
 The documentation contains the following information:
 
-* Ferrocene documentation: the necessary documentation to understand
+* **Ferrocene documentation:** the necessary documentation to understand
   Ferrocene, its scope, and safety-related material.
 
-* Dev Log: a list of every new feature implemented in our products.
+* **Dev Log:** a list of every new feature implemented in our products.
 
-* Library AP documentation: description of associated libraries.
+* **Library AP documentation:** description of associated libraries.
 
-* Rust Project's documentation: documentation from the upstream rust project
+* **Rust Project's documentation:** documentation from the upstream rust project
   which provides the basis for understanding and using the Rust language.
 
 Unless specified otherwise, customers have the freedom to copy any of the

@@ -1308,6 +1308,7 @@ Attribute ``repr``
    RepresentationKind ::=
        PrimitiveRepresentation
      | $$C$$
+     | $$Rust$$
      | $$transparent$$
 
    Alignment ::=

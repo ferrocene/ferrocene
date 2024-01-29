@@ -235,7 +235,7 @@ done
 # does not need manual intervention.
 echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
 ./x.py run generate-completions >/dev/null
-if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}*" >/dev/null; then
+if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
     git add "${GENERATED_COMPLETIONS_DIR}"
     git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
 fi

@@ -121,7 +121,7 @@ process by considering the following organization:
 #. Several other meetings allow us to discuss the analysis of each member.
 #. Report is directly updated by members.
 #. An expert reads, the second time, the sessions' report and adds remarks
-   based on his domain knowledge, e.g. "impossible deviation", or adding some
+   based on her domain knowledge, e.g. "impossible deviation", or adding some
    missing deviations.
 #. Finally, an analysis of these results is performed in order to merge similar
    potential errors in an hazard class. This class groups potential errors with

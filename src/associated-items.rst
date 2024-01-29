@@ -107,6 +107,14 @@ within a :t:`trait`.
 An :t:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+:dp:`fls_2TRwCz38kuRz`
+An :t:`associated trait function` shall not be subject to :t:`keyword` ``const``.
+
+:dp:`fls_WnsVATJvUdza`
+Every occurrence of an :t:`impl trait type` in the :t:`return type` of an
+:t:`associated trait function` is equivalent to referring to a new
+anonymous :t:`associated trait type` of the :t:`implemented trait`.
+
 :dp:`fls_yyhebj4qyk34`
 An :t:`associated trait type` is an :t:`associated type` that appears within
 a :t:`trait`.
@@ -135,6 +143,16 @@ is equivalent to a :t:`where clause` of the following form:
    	trait T where Self::X: Bound {
    	    type X;
    	}
+
+:dp:`fls_amWtS80fPtza`
+An :t:`associated trait implementation function` is an :t:`associated function`
+that appears within a :t:`trait implementation`.
+
+:dp:`fls_Cu8FWrisrqz1`
+Every occurrence of an :t:`impl trait type` in the :t:`return type` of an
+:t:`associated trait implementation function` is equivalent to referring to the
+corresponding :t:`associated trait type` of the corresponding :t:`associated
+trait function`.
 
 :dp:`fls_oy92gzxgc273`
 A :t:`method` is an :t:`associated function` with a :t:`self parameter`.

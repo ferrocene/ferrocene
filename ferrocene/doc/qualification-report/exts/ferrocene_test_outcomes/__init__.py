@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-from . import ignored_tests, suite_summary, outcomes, render_template
+from . import outcomes, render_template
 
 def setup(app):
-    ignored_tests.setup(app)
-    suite_summary.setup(app)
     outcomes.setup(app)
     render_template.setup(app)
 

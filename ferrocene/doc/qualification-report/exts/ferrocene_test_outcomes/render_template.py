@@ -32,6 +32,16 @@ class RenderOutcomesTemplate(SphinxDirective):
             target=self.options["target"],
             bare_metal_test_target=self.options.get("bare_metal_test_target"),
             remote_testing="remote_testing" in self.options,
+            # Can be None if test outcomes were not injected.
+            platform_outcomes=self.env.ferrocene_test_outcomes.platform(
+                self.options["host"],
+                # Grab the outcomes for the bare metal test target if specified:
+                self.options["bare_metal_test_target"]
+                if "bare_metal_test_target" in self.options
+                else self.options["target"],
+            )
+            if self.env.ferrocene_test_outcomes is not None
+            else None,
         )
         rendered = StringList(rendered.splitlines(), source="")
 

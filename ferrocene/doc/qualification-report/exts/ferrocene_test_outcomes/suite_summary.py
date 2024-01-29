@@ -2,7 +2,6 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 from .utils import RenderTable, paragraph, literal, error
-from .parse_debug_repr import Struct
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util.docutils import SphinxDirective
@@ -47,41 +46,26 @@ class SuiteSummaryDirective(SphinxDirective):
                     if matcher not in invocation.bootstrap_types:
                         continue
 
-                parsed = invocation.parsed_debug_repr
-                host = None
-                target = None
-                crates = None
-                if type(parsed) == Struct:
-                    suite_name = parsed.name
-                    host = maybe_struct_field(parsed, "compiler", "Compiler")
-                    target = maybe_field(parsed, "target", str)
-                    crates = maybe_field(parsed, "crates", list)
-                elif type(parsed) == str:
-                    suite_name = parsed
-                else:
-                    raise RuntimeError(
-                        f"unexpected parsed debug repr for {invocation.debug_repr}"
-                    )
-
+                metadata = invocation.metadata
                 table = RenderTable(2)
-                table.add_row(paragraph("Suite name:"), paragraph(suite_name))
-                if host is not None:
-                    table.add_row(
-                        paragraph("Host compiler:"),
-                        paragraph(
-                            literal(host.fields["host"]),
-                            f" (stage {host.fields['stage']})",
-                        ),
-                    )
-                if target is not None:
-                    table.add_row(paragraph("Target:"), paragraph(literal(target)))
-                if crates is not None:
+                if metadata["kind"] == "compiletest":
+                    table.add_row(paragraph("Suite:"), paragraph(metadata["suite"]))
+                elif metadata["kind"] == "cargo_package":
                     contents = []
-                    for crate in crates:
+                    for crate in metadata["crates"]:
                         if contents:
                             contents.append(", ")
                         contents.append(literal(crate))
                     table.add_row(paragraph("Tested crates:"), paragraph(*contents))
+                table.add_row(
+                    paragraph("Host compiler:"),
+                    paragraph(
+                        literal(metadata["host"]), f" (stage {metadata['stage']})"
+                    ),
+                )
+                table.add_row(
+                    paragraph("Target:"), paragraph(literal(metadata["target"]))
+                )
                 table.add_row(
                     paragraph("Total tests:"), paragraph(str(invocation.total_tests()))
                 )
@@ -109,24 +93,6 @@ class SuiteSummaryDirective(SphinxDirective):
                 "No tests matching ", literal(matcher), " were executed."
             )
             return [warning]
-
-
-def maybe_field(parsed, field, expected_type):
-    if field not in parsed.fields:
-        return None
-    if type(parsed.fields[field]) != expected_type:
-        return None
-    return parsed.fields[field]
-
-
-def maybe_struct_field(parsed, field, struct_name):
-    if field not in parsed.fields:
-        return None
-    if type(parsed.fields[field]) != Struct:
-        return None
-    if parsed.fields[field].name != struct_name:
-        return None
-    return parsed.fields[field]
 
 
 def setup(app):

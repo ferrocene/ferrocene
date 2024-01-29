@@ -38,7 +38,7 @@ a PR that prompted their creation.
 
 * Pass/Fail criteria
 
-Once the tests are developed, the process continues with the 
+Once the tests are developed, the process continues with the
 :ref:`development:Development Phases` to be merged in the test suite.
 
 Changes to upstream test suites are merged as part of the automated PRs pulling

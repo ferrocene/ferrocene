@@ -41,9 +41,9 @@ make technical, language or governance decisions: it has a support role for the
 project, providing crucial funding, employment of key roles, and legal support.
 
 "Ferrocene", started in 2021 after years of planning, is a qualified Rust compiler
-with a focus on the ISO 26262 standard for the automotive industry. 
-It is maintained by Ferrous Systems, which also qualifies new versions of 
-the Rust compiler, as required in safety and mission-critical settings. 
+with a focus on the ISO 26262 standard for the automotive industry.
+It is maintained by Ferrous Systems, which also qualifies new versions of
+the Rust compiler, as required in safety and mission-critical settings.
 
 The Rust Project
 ----------------

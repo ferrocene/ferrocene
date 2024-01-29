@@ -21,9 +21,9 @@ This equipment conforms with Ferrocene security requirements.
 Required software and tools
 ---------------------------
 
-The following accounts and tools are necessary to access the Ferrocene 
+The following accounts and tools are necessary to access the Ferrocene
 toolchain, associated management repositories, and other communications means.
-These are necessary to follow the Ferrocene workflow: 
+These are necessary to follow the Ferrocene workflow:
 
 * **Ferrocene Google Drive**
 
@@ -37,7 +37,7 @@ These are necessary to follow the Ferrocene workflow:
       requested
 
 * **Microsoft Teams**
-    * access to necessary sync meetings must be requested 
+    * access to necessary sync meetings must be requested
 
 * **Zulip**
     * access to the Ferrocene channel needs to be requested

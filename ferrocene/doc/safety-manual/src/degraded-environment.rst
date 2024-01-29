@@ -34,8 +34,8 @@ compiler.
 
 .. list-table:: Input Environment Variables
    :align: left
-   
-   * - ``HOST`` 
+
+   * - ``HOST``
    * - ``CARGO``
    * - ``CARGO_ENCODED_RUSTFLAGS``
 
@@ -55,4 +55,4 @@ compiler.
    * - ``CARGO_CFG_TARGET_POINTER_WIDTH``
    * - ``CARGO_CFG_TARGET_VENDOR``
    * - ``CARGO_CFG_UNIX``
-   * - ``CARGO_ENCODED_RUSTFLAGS`` 
+   * - ``CARGO_ENCODED_RUSTFLAGS``

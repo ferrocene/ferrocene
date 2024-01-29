@@ -5,7 +5,7 @@ Customer Interactions
 =====================
 
 Interactions between Customers and the Ferrocene organization are done
-through the following tools: 
+through the following tools:
 
 * **Email**
     * Get contract information
@@ -46,9 +46,9 @@ The following channels are available to customers:
 
 * |channel_name| : Major release of Ferrocene.
 
-.. note:: 
-   For this qualification, only the |channel_name| release has been qualified 
-   for the :doc:`specified environment <safety-manual:environment>`. 
+.. note::
+   For this qualification, only the |channel_name| release has been qualified
+   for the :doc:`specified environment <safety-manual:environment>`.
    Consequently, only |channel_name| should be used in qualified development
    context.
 

@@ -21,7 +21,7 @@ feature requests, task management, CI, and wikis.
 
 The sources of the Ferrocene toolchain, including but not limited to the
 compiler, libraries, test suites, documentation, qualification material, helper
-tools, configuration, all reside in a private repository referred to as the
+tools, configuration, all reside in a public repository referred to as the
 "Ferrocene GitHub repository", "``ferrocene/ferrocene``", or "the monorepo".
 
 Hosting the Ferrocene toolchain in a single repository allows the Ferrocene

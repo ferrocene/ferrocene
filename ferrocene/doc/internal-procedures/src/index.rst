@@ -23,8 +23,6 @@ Ferrocene Internal Procedures
 
    maintenance/upstream-pulls
    maintenance/subtree-pulls
-   maintenance/useful-commands-tools
-   maintenance/common-failures-and-fix-procedures
 
 .. toctree::
    :maxdepth: 4

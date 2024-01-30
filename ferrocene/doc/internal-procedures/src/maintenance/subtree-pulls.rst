@@ -35,15 +35,18 @@ request automatically, only requiring sign off of a reviewer to get merged.
 Sometimes merge conflicts may occur in which case automation opens an issue
 describing the conflict and requiring the upstream pull to be done manually.
 
+Common failures and their potential fixes
+-----------------------------------------
+
 Manual intervention when the automation fails
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Performing a manual pull works similar to doing a manual upstream pull.
 The following text will make use of the term `<NEW_PULL_BRANCH>` to refer
 to the new branch created by the pull initiator to perform the pull on.
 
 Initiating the pull
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 Run the following git commands to set up a new local `<NEW_PULL_BRANCH>`
 branch to do the pull on::
@@ -54,7 +57,7 @@ branch to do the pull on::
   git checkout -b <NEW_PULL_BRANCH> # checkout a new branch to do the pull with
 
 Performing the pull
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 Now run::
 

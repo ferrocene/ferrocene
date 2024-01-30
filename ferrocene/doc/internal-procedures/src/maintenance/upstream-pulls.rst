@@ -25,8 +25,11 @@ A few important things to note that the automation will -
 * leave conflict markers in the files that have a conflict with the upstream and will leave it to the developer/author to push conflict-resolving commit(s).
 * try to fix some common failures automatically.
 
+Common failures and their potential fixes
+-----------------------------------------
+
 Manual intervention when the automation fails
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Performing a manual pull differs slightly depending on whether the pull is done
 for the `master` or `beta` branch. The following text uses a few angle
@@ -42,7 +45,7 @@ bracketed terms that have to be substituted as follows:
   `pull-upstream-master-2023-05-22`
 
 Initiating the pull
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 Run the following git commands to set up a new local `<NEW_PULL_BRANCH>`
 branch to do the pull on::
@@ -53,7 +56,7 @@ branch to do the pull on::
   git checkout -b <NEW_PULL_BRANCH> # checkout a new branch to do the pull with
 
 Performing the pull
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 Now run::
 
@@ -115,3 +118,23 @@ from the upstream Rust repository. Paste that into the PR description of
 the pull request you create from your `<NEW_PULL_BRANCH>` branch.
 You may omit `<NEW_PULL_BRANCH>` in which case the script will use the currently checked
 out branch.
+
+Useful commands, tools, and information
+---------------------------------------
+
+This document contains information pertaining to periodic maintenance.
+
+Conflict markers
+^^^^^^^^^^^^^^^^
+
+In the daily automation pull, the periodic action will create a pull request and use markers to denote any conflicts that may arise when compared to the upstream. For example,
+
+.. figure:: ../figures/regular-automation-conflict-message.png
+    :target: https://github.com/ferrocene/ferrocene/pull/164/commits/eeb33a22135a543de10a49faea22c9c28acb7b4b
+
+You can use the script ``ferrocene/ci/scripts/detect-conflict-markers.py`` to list the markers. This is the same script that the CI runs.
+
+There are special non-standard conflict markers for the files that were deleted. An example of how it looks,
+
+.. figure:: ../figures/file-deletion-conflict-message.png
+    :target: https://github.com/ferrocene/ferrocene/pull/235/commits/7931a51fa6f75c3d4690edd9e1feb25163bc81e7

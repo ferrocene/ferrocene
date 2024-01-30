@@ -2742,7 +2742,11 @@ A :t:`trait` is :t:`object safe` when:
   It lacks :t:`[associated constant]s`, and
 
 * :dp:`fls_kwo4cknx0yat`
-  Its :t:`[associated function]s` are :t:`object safe`.
+  Its :t:`[associated function]s` are :t:`object safe`, and
+
+* :dp:`fls_vmLLL82EQasI`
+  Its :t:`[associated type alias]es` specify a :std:`core::marker::Sized`
+  :t:`[trait bound]` for :c:`Self` in a :t:`type bound predicate`.
 
 :dp:`fls_uixekv82g2e5`
 An :t:`associated function` is :t:`object safe` when it is either an

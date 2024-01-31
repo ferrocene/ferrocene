@@ -4,10 +4,14 @@
 Ferrocene Document List
 =======================
 
+.. include:: ../../scope.rst
+
+It list the documents composing the Ferrocene |ferrocene_version| qualification
+dossier and the qualification standards used.
+
 .. toctree::
    :numbered:
    :maxdepth: 2
 
-   scope
    project-documents
    reference-documents

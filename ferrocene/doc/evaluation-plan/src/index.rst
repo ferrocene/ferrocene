@@ -4,12 +4,16 @@
 Ferrocene Evaluation Plan
 =========================
 
+.. include:: ../../scope.rst
+
+It describes the phases and activities to perform the evaluation of Ferrocene
+in accordance with the standards above.
+
 .. toctree::
    :numbered:
    :maxdepth: 2
 
    purpose
-   scope
    references
    qualification-scope
    link-with-iso-requirements

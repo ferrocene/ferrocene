@@ -27,6 +27,7 @@ Ferrocene in accordance to the standards above.
    change-tracking
    kp-tracking
    validation
+   patching
 
 .. appendices::
    :caption: Appendices:

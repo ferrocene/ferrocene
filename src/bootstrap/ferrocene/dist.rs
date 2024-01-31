@@ -301,7 +301,7 @@ impl Step for TestOutcomes {
 pub(crate) struct GenerateBuildMetadata;
 
 impl Step for GenerateBuildMetadata {
-    type Output = PathBuf;
+    type Output = ();
     const DEFAULT: bool = false;
     const ONLY_HOSTS: bool = true;
 
@@ -317,9 +317,13 @@ impl Step for GenerateBuildMetadata {
         let dist_dir = "build/dist";
 
         let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));
+        let ferrocene_channel = ferrocene_channel.trim();
         let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
+        let ferrocene_version = ferrocene_version.trim();
         let src_channel = t!(fs::read_to_string("src/ci/channel"));
+        let src_channel = src_channel.trim();
         let src_version = t!(fs::read_to_string("src/version"));
+        let src_version = src_version.trim();
 
         // Perform validation on the contents of the version field, to avoid generating
         // artifacts that will break the release process.
@@ -328,6 +332,34 @@ impl Step for GenerateBuildMetadata {
                 "error: ferrocene/version must be 'rolling' when ferrocene/ci/channel is 'rolling' but it was '{ferrocene_version}'"
             );
         }
+
+        let release_channel = match (src_channel, ferrocene_channel) {
+            ("nightly", "rolling") => "rolling".to_owned(),
+            ("beta", "rolling") => "pre-rolling".to_owned(),
+            ("stable", "rolling") => "rolling".to_owned(),
+            ("stable", ferrocene_channel @ ("beta" | "stable")) => {
+                let major_ferrocene = (|| {
+                    let mut version_components = ferrocene_version.split('.');
+                    let year = version_components.next()?;
+                    let month = version_components.next()?;
+                    let _patch = version_components.next()?;
+                    if version_components.next().is_none() {
+                        Some(format!("{year}.{month}"))
+                    } else {
+                        None
+                    }
+                })();
+                match major_ferrocene {
+                    Some(major_ferrocene) => format!("{ferrocene_channel}-{major_ferrocene}"),
+                    None => panic!(
+                        "invalid ferrocene/version, expected 'year.month.patch', got: {ferrocene_version}"
+                    ),
+                }
+            }
+            (rust, ferrocene) => panic!(
+                "error: unsupported channel configuration: rust '{rust}' and ferrocene '{ferrocene}'"
+            ),
+        };
 
         let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
         let sha1_full = t!(String::from_utf8(sha1_full.stdout));
@@ -339,32 +371,32 @@ impl Step for GenerateBuildMetadata {
             .output());
         let sha1_short = t!(String::from_utf8(sha1_short.stdout));
 
+        // Whenever the contents of this JSON file change, even just adding new fields,
+        // make sure to increase the metadata version number and update publish-release
+        // accordingly. Note that new releases *won't* be made until publish-release and
+        // this use the same version number.
         let data = format!(
             r#"{{
-    "metadata_version": 2,
+    "metadata_version": 3,
     "rust_version": "{src_version}",
     "rust_channel": "{src_channel}",
     "ferrocene_version": "{ferrocene_version}",
     "ferrocene_channel": "{ferrocene_channel}",
+    "release_channel": "{release_channel}",
     "sha1_full": "{sha1_full}",
     "sha1_short": "{sha1_short}"
 }}
 "#,
-            src_version = src_version.trim(),
-            src_channel = src_channel.trim(),
-            ferrocene_version = ferrocene_version.trim(),
-            ferrocene_channel = ferrocene_channel.trim(),
             sha1_full = sha1_full.trim(),
             sha1_short = sha1_short.trim(),
         );
 
         builder.create_dir(dist_dir.as_ref());
 
-        let metadata_path = format!("{dist_dir}/ferrocene-ci-metadata.json");
-        builder.create(metadata_path.as_ref(), &data);
+        builder.create(format!("{dist_dir}/ferrocene-ci-metadata.json").as_ref(), &data);
 
+        // Add the list of packages to include in the release to the artifacts, so that
+        // publish-release knows what to expect for this commit.
         builder.copy_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
-
-        metadata_path.into()
     }
 }

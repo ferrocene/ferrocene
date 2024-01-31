@@ -288,7 +288,7 @@ jobs:
           command: ferrocene/ci/scripts/checkout-submodules.sh
       - run:
           name: Generate build metadata
-          command: ./x.py --stage 2 dist ferrocene-build-metadata
+          command: ./x.py dist ferrocene-build-metadata
       - run:
           name: Upload metadata files to S3
           command: ferrocene/ci/scripts/upload-dist-artifacts.sh

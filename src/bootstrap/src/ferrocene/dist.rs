@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use serde_json::json;
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
@@ -362,7 +364,7 @@ impl Step for GenerateBuildMetadata {
             );
         }
 
-        let release_channel = match (src_channel, ferrocene_channel) {
+        let channel = match (src_channel, ferrocene_channel) {
             ("nightly", "rolling") => "nightly".to_owned(),
             ("beta", "rolling") => "pre-rolling".to_owned(),
             ("stable", "rolling") => "rolling".to_owned(),
@@ -404,21 +406,17 @@ impl Step for GenerateBuildMetadata {
         // make sure to increase the metadata version number and update publish-release
         // accordingly. Note that new releases *won't* be made until publish-release and
         // this use the same version number.
-        let data = format!(
-            r#"{{
-    "metadata_version": 3,
-    "rust_version": "{src_version}",
-    "rust_channel": "{src_channel}",
-    "ferrocene_version": "{ferrocene_version}",
-    "ferrocene_channel": "{ferrocene_channel}",
-    "release_channel": "{release_channel}",
-    "sha1_full": "{sha1_full}",
-    "sha1_short": "{sha1_short}"
-}}
-"#,
-            sha1_full = sha1_full.trim(),
-            sha1_short = sha1_short.trim(),
-        );
+        let data = json!({
+            "metadata_version": 3,
+            "rust_version": src_version,
+            "rust_channel": src_channel,
+            "ferrocene_version": ferrocene_version,
+            "ferrocene_channel": ferrocene_channel,
+            "channel": channel,
+            "sha1_full": sha1_full.trim(),
+            "sha1_short": sha1_short.trim()
+        })
+        .to_string();
 
         builder.create_dir(dist_dir.as_ref());
 

@@ -49,3 +49,19 @@ For IT issues and accounts, please contact your company’s internal IT services
 
 For accessing Ferrocene repositories, please contact the Ferrocene
 Project Manager.
+
+CircleCI access
+---------------
+
+To authenticate with CircleCI, you need to go to the `CircleCI login page
+<https://app.circleci.com/settings/user>`_, click "Log in", select "Signed up
+for CircleCI with GitHub or Bitbucket before September 2023?", and then click
+"Log in with GitHub".
+
+Once you have done so, you can access the Ferrocene project on CircleCI `here
+<https://app.circleci.com/pipelines/github/ferrocene/ferrocene>`_.
+
+If you cannot access the page above, make sure you have **write** access to the
+Ferrocene repository, then go to the `CircleCI user settings
+<https://app.circleci.com/settings/user>`_ and click the "Refresh permissions"
+button.

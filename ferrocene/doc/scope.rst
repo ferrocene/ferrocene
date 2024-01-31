@@ -6,5 +6,5 @@
 
 This document is the |doc_title| (|doc_short_title|) of the qualification
 material developed for automotive [|iso_ref|]
-(|ferrocene_ASIL|/|ferrocene_TQL|) and industrial [|iec_ref|] (|ferrocene_TQL|)
+(|ferrocene_ASIL|/|ferrocene_TCL|) and industrial [|iec_ref|] (|ferrocene_TQL|)
 standards certification.

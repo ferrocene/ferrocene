@@ -4,13 +4,17 @@
 Ferrocene Safety Manual
 =======================
 
+.. include:: ../../scope.rst
+
+It provides the use constraints associated to the Ferrocene qualification
+scope, in accordance to the standards above.
+
 .. toctree::
    :maxdepth: 3
    :caption: Safety Manual
    :numbered:
 
    purpose
-   scope
    references
    environment
    user-responsibility

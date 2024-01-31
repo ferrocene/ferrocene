@@ -316,6 +316,10 @@ impl Step for GenerateBuildMetadata {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
+        if builder.config.dry_run() {
+            return;
+        }
+
         let dist_dir = "build/dist";
 
         let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));

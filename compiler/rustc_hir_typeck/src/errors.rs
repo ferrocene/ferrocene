@@ -43,7 +43,7 @@ pub enum ReturnLikeStatementKind {
 }
 
 impl IntoDiagnosticArg for ReturnLikeStatementKind {
-    fn into_diagnostic_arg(self) -> DiagnosticArgValue<'static> {
+    fn into_diagnostic_arg(self) -> DiagnosticArgValue {
         let kind = match self {
             Self::Return => "return",
             Self::Become => "become",
@@ -79,14 +79,6 @@ pub struct StructExprNonExhaustive {
 #[derive(Diagnostic)]
 #[diag(hir_typeck_method_call_on_unknown_raw_pointee, code = E0699)]
 pub struct MethodCallOnUnknownRawPointee {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(hir_typeck_missing_fn_lang_items)]
-#[help]
-pub struct MissingFnLangItems {
     #[primary_span]
     pub span: Span,
 }
@@ -191,14 +183,6 @@ pub struct AddMissingParenthesesInRange {
     pub left: Span,
     #[suggestion_part(code = ")")]
     pub right: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(hir_typeck_op_trait_generic_params)]
-pub struct OpMethodGenericParams {
-    #[primary_span]
-    pub span: Span,
-    pub method_name: String,
 }
 
 pub struct TypeMismatchFruTypo {

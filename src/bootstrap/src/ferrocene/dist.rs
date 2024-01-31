@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use serde_json::json;
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
+use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use std::collections::BTreeMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::rc::Rc;
@@ -321,5 +325,109 @@ impl Step for TestOutcomes {
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");
         Some(tarball.generate())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct GenerateBuildMetadata;
+
+impl Step for GenerateBuildMetadata {
+    type Output = ();
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("ferrocene-build-metadata")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(GenerateBuildMetadata);
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        if builder.config.dry_run() {
+            return;
+        }
+
+        let dist_dir = "build/dist";
+
+        let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));
+        let ferrocene_channel = ferrocene_channel.trim();
+        let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
+        let ferrocene_version = ferrocene_version.trim();
+        let src_channel = t!(fs::read_to_string("src/ci/channel"));
+        let src_channel = src_channel.trim();
+        let src_version = t!(fs::read_to_string("src/version"));
+        let src_version = src_version.trim();
+
+        // Perform validation on the contents of the version field, to avoid generating
+        // artifacts that will break the release process.
+        if ferrocene_channel == "rolling" && ferrocene_version != "rolling" {
+            panic!(
+                "error: ferrocene/version must be 'rolling' when ferrocene/ci/channel is 'rolling' but it was '{ferrocene_version}'"
+            );
+        }
+
+        let channel = match (src_channel, ferrocene_channel) {
+            ("nightly", "rolling") => "nightly".to_owned(),
+            ("beta", "rolling") => "pre-rolling".to_owned(),
+            ("stable", "rolling") => "rolling".to_owned(),
+            ("stable", ferrocene_channel @ ("beta" | "stable")) => {
+                let major_ferrocene = (|| {
+                    let mut version_components = ferrocene_version.split('.');
+                    let year = version_components.next()?;
+                    let month = version_components.next()?;
+                    let _patch = version_components.next()?;
+                    if version_components.next().is_none() {
+                        Some(format!("{year}.{month}"))
+                    } else {
+                        None
+                    }
+                })();
+                match major_ferrocene {
+                    Some(major_ferrocene) => format!("{ferrocene_channel}-{major_ferrocene}"),
+                    None => panic!(
+                        "invalid ferrocene/version, expected 'year.month.patch', got: {ferrocene_version}"
+                    ),
+                }
+            }
+            (rust, ferrocene) => panic!(
+                "error: unsupported channel configuration: rust '{rust}' and ferrocene '{ferrocene}'"
+            ),
+        };
+
+        let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
+        let sha1_full = t!(String::from_utf8(sha1_full.stdout));
+
+        let sha1_short = t!(std::process::Command::new("git")
+            .arg("rev-parse")
+            .arg("--short")
+            .arg("HEAD")
+            .output());
+        let sha1_short = t!(String::from_utf8(sha1_short.stdout));
+
+        // Whenever the contents of this JSON file change, even just adding new fields,
+        // make sure to increase the metadata version number and update publish-release
+        // accordingly. Note that new releases *won't* be made until publish-release and
+        // this use the same version number.
+        let data = json!({
+            "metadata_version": 3,
+            "rust_version": src_version,
+            "rust_channel": src_channel,
+            "ferrocene_version": ferrocene_version,
+            "ferrocene_channel": ferrocene_channel,
+            "channel": channel,
+            "sha1_full": sha1_full.trim(),
+            "sha1_short": sha1_short.trim()
+        })
+        .to_string();
+
+        builder.create_dir(dist_dir.as_ref());
+
+        builder.create(format!("{dist_dir}/ferrocene-ci-metadata.json").as_ref(), &data);
+
+        // Add the list of packages to include in the release to the artifacts, so that
+        // publish-release knows what to expect for this commit.
+        builder.copy_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
     }
 }

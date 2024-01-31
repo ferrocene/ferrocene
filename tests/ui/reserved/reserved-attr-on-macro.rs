@@ -7,7 +7,7 @@ macro_rules! foo {
 }
 
 fn main() {
-    foo!(); //~ ERROR cannot determine resolution for the macro `foo`
+    foo!();
 }
 
 // ferrocene-annotations: fls_gvwd0kf72jt

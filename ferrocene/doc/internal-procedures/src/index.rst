@@ -4,11 +4,15 @@
 Ferrocene Internal Procedures
 =============================
 
+.. include:: ../../scope.rst
+
+It describes the internal engineering procedures for the Ferrocene project,
+based on software engineering best practices.
+
 .. toctree::
    :maxdepth: 4
    :caption: Introduction
 
-   purpose
    references
    onboarding
    setup-local-env

@@ -23,6 +23,7 @@ Ferrocene Qualification Plan
    change-tracking
    kp-tracking
    validation
+   patching
 
 .. appendices::
    :caption: Appendices:

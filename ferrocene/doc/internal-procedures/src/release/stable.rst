@@ -59,6 +59,8 @@ the latest commit on that branch into the ``beta-${major_version}`` channel
 every night. You can then continue landing changes into the branch until you
 are ready to release it as a stable release.
 
+.. _release-technical-report:
+
 Uploading the qualification technical report
 --------------------------------------------
 

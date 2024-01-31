@@ -4,8 +4,10 @@
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
+use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use std::collections::BTreeMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::rc::Rc;
@@ -321,5 +323,77 @@ impl Step for TestOutcomes {
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");
         Some(tarball.generate())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct GenerateBuildMetadata;
+
+impl Step for GenerateBuildMetadata {
+    type Output = PathBuf;
+    const DEFAULT: bool = false;
+    const ONLY_HOSTS: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.alias("ferrocene-build-metadata")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(GenerateBuildMetadata);
+    }
+
+    fn run(self, builder: &Builder<'_>) -> Self::Output {
+        let dist_dir = "build/dist";
+
+        let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));
+        let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
+        let src_channel = t!(fs::read_to_string("src/ci/channel"));
+        let src_version = t!(fs::read_to_string("src/version"));
+
+        // Perform validation on the contents of the version field, to avoid generating
+        // artifacts that will break the release process.
+        if ferrocene_channel == "rolling" && ferrocene_version != "rolling" {
+            panic!(
+                "error: ferrocene/version must be 'rolling' when ferrocene/ci/channel is 'rolling' but it was '{ferrocene_version}'"
+            );
+        }
+
+        let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
+        let sha1_full = t!(String::from_utf8(sha1_full.stdout));
+
+        let sha1_short = t!(std::process::Command::new("git")
+            .arg("rev-parse")
+            .arg("--short")
+            .arg("HEAD")
+            .output());
+        let sha1_short = t!(String::from_utf8(sha1_short.stdout));
+
+        let data = format!(
+            r#"{{
+    "metadata_version": 2,
+    "rust_version": "{src_version}",
+    "rust_channel": "{src_channel}",
+    "ferrocene_version": "{ferrocene_version}",
+    "ferrocene_channel": "{ferrocene_channel}",
+    "sha1_full": "{sha1_full}",
+    "sha1_short": "{sha1_short}"
+}}
+"#,
+            src_version = src_version.trim(),
+            src_channel = src_channel.trim(),
+            ferrocene_version = ferrocene_version.trim(),
+            ferrocene_channel = ferrocene_channel.trim(),
+            sha1_full = sha1_full.trim(),
+            sha1_short = sha1_short.trim(),
+        );
+
+        builder.create_dir(dist_dir.as_ref());
+
+        let metadata_path = format!("{dist_dir}/ferrocene-ci-metadata.json");
+        builder.create(metadata_path.as_ref(), &data);
+
+        builder.copy_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
+
+        metadata_path.into()
     }
 }

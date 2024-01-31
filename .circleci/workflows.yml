@@ -292,7 +292,7 @@ jobs:
           depth: 1
       - run:
           name: Generate build metadata
-          command: ferrocene/ci/scripts/generate-build-metadata.sh
+          command: ./x.py --stage 2 dist ferrocene-build-metadata
       - run:
           name: Upload metadata files to S3
           command: ferrocene/ci/scripts/upload-dist-artifacts.sh

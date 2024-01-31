@@ -363,7 +363,7 @@ impl Step for GenerateBuildMetadata {
         }
 
         let release_channel = match (src_channel, ferrocene_channel) {
-            ("nightly", "rolling") => "rolling".to_owned(),
+            ("nightly", "rolling") => "nightly".to_owned(),
             ("beta", "rolling") => "pre-rolling".to_owned(),
             ("stable", "rolling") => "rolling".to_owned(),
             ("stable", ferrocene_channel @ ("beta" | "stable")) => {

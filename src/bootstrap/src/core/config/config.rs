@@ -363,6 +363,7 @@ impl Default for FerroceneTraceabilityMatrixMode {
 pub enum FerroceneTestOutcomes {
     #[default]
     Disabled,
+    DownloadCi,
     Custom(PathBuf),
 }
 
@@ -1915,6 +1916,7 @@ impl Config {
             config.ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir)
             {
                 (None | Some("disabled"), None) => FerroceneTestOutcomes::Disabled,
+                (Some("download-ci"), None) => FerroceneTestOutcomes::DownloadCi,
                 (Some("custom"), Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
                 // Legacy: allow setting test-outcomes-dir without test-outcomes to avoid breaking
                 // developers currently setting it, only if test-outcomes is not configured.

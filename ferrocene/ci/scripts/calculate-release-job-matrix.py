@@ -184,19 +184,7 @@ def build_metadata(ctx, commit):
         except:
             raise RuntimeError(f"unknown rust channel `{rust}`")
 
-    if metadata["metadata_version"] == 1:
-        channel = rustc_to_channel_rolling(metadata["channel"])
-        return BuildMetadata(
-            rust_channel=metadata["channel"],
-            rust_version=metadata["version"],
-            # Version 1 of the build metadata did not have the Ferrocene
-            # channel in it, but on the other hand all of its releases were for
-            # the "rolling" channel, so we hardcode it.
-            ferrocene_channel="rolling",
-            ferrocene_version="rolling",
-            channel=channel
-        )
-    elif metadata["metadata_version"] == 2:
+    if  metadata["metadata_version"] == 2:
         rust_channel=metadata["rust_channel"]
         ferrocene_channel=metadata["ferrocene_channel"]
         ferrocene_version=metadata["ferrocene_version"]

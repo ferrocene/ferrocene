@@ -25,6 +25,7 @@ use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
+use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils;
 use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::exec::BootstrapCommand;
@@ -2537,6 +2538,9 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
+        if builder.config.cmd.coverage() && builder.doc_tests != DocTests::No {
+            panic!("Cannot generate coverage for doc tests");
+        }
         // See [field@compile::Std::force_recompile].
         builder.ensure(compile::Std::force_recompile(compiler, target));
         builder.ensure(RemoteCopyLibs { compiler, target });
@@ -2549,6 +2553,7 @@ impl Step for Crate {
 
         let mut cargo =
             builder.cargo(compiler, mode, SourceType::InTree, target, builder.kind.as_str());
+
         match mode {
             Mode::Std => {
                 compile::std_cargo(builder, target, compiler.stage, &mut cargo);
@@ -2569,6 +2574,23 @@ impl Step for Crate {
             _ => panic!("can only test libraries"),
         };
 
+        let mut collect_profraw = false;
+        if builder.config.cmd.coverage() {
+            let instrument_coverage_flags = builder.ensure(ProfilerBuiltinsNoCore { target });
+
+            for flag in instrument_coverage_flags.flags() {
+                cargo.rustflag(&flag);
+            }
+
+            let coverage_dir = builder.tempdir().join("coverage");
+            let coverage_file = coverage_dir.join("default_%m_%p.profraw");
+
+            if !std::env::var("LLVM_PROFILE_FILE").is_ok() {
+                cargo.env("LLVM_PROFILE_FILE", &coverage_file);
+                collect_profraw = true;
+            }
+        }
+
         run_cargo_test(
             cargo,
             if target.contains("ferrocenecoretest") { &["--test-threads", "1"] } else { &[] },
@@ -2579,6 +2601,22 @@ impl Step for Crate {
             target,
             builder,
         );
+
+        // NOTE: The profraw files are first created in temp/coverage and then moved to build/coverage
+        // This is done so that the existing coverage data in build/coverage if any is not lost
+        // if the coverage command fails for some reason.
+        if collect_profraw {
+            let temp_dir = builder.tempdir().join("coverage");
+            let coverage_dir = builder.out.join("coverage");
+
+            if !builder.config.dry_run() {
+                let _ = std::fs::remove_dir_all(&coverage_dir);
+                std::fs::create_dir_all(&coverage_dir)
+                    .expect("Failed to create coverage directory");
+
+                std::fs::rename(temp_dir, coverage_dir).expect("Failed to move coverage data");
+            }
+        }
     }
 }
 

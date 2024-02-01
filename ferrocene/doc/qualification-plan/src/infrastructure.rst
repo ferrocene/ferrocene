@@ -21,7 +21,7 @@ feature requests, task management, CI, and wikis.
 
 The sources of the Ferrocene toolchain, including but not limited to the
 compiler, libraries, test suites, documentation, qualification material, helper
-tools, configuration, all reside in a private repository referred to as the
+tools, configuration, all reside in a public repository referred to as the
 "Ferrocene GitHub repository", "``ferrocene/ferrocene``", or "the monorepo".
 
 Hosting the Ferrocene toolchain in a single repository allows the Ferrocene
@@ -44,7 +44,7 @@ low-level to most general and high-level:
 
 * A *job* is a set of *steps* that are either expressed as shell scripts or as
   actions. Steps are executed based on their ordering and dependencies, where
-  data can be shared between steps. 
+  data can be shared between steps.
 
 * A *workflow* is a configurable automated process that runs one or more jobs.
   Workflows are triggered by events, and executed by runners.
@@ -101,7 +101,7 @@ such as the following complex scenario:
     ``drive()`` function - one branch adds a new module invoking the ``drive()``
     function, while the other branch removes the ``drive()`` function and all of
     its callees.
-    
+
     Both branches will pass the full test suite, as the first branch calls an
     existing function and the second branch makes sure all the other functions
     calling ``drive()`` are removed. If a developer were to merge both branches,

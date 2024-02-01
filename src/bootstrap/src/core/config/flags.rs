@@ -384,6 +384,9 @@ pub enum Subcommand {
         /// enable this to generate a Rustfix coverage file, which is saved in
         /// `/<build_base>/rustfix_missing_coverage.txt`
         rustfix_coverage: bool,
+        /// generate coverage for tests
+        #[arg(long)]
+        coverage: bool,
     },
     /// Build and run some benchmarks
     Bench {
@@ -550,6 +553,13 @@ impl Subcommand {
         match *self {
             Subcommand::Test { ref pass, .. } => pass.as_ref().map(|s| &s[..]),
             _ => None,
+        }
+    }
+
+    pub fn coverage(&self) -> bool {
+        match *self {
+            Subcommand::Test { coverage, .. } => coverage,
+            _ => false,
         }
     }
 

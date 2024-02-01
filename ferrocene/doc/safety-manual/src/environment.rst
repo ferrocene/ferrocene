@@ -6,7 +6,7 @@ Environment
 
 This qualification is restricted to the following environment:
 
-.. list-table:: 
+.. list-table::
    :align: left
    :stub-columns: 1
 

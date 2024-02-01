@@ -9,7 +9,6 @@
 ferrocene_ASIL = "ASIL D"
 ferrocene_TCL = "TCL 3"
 ferrocene_TQL = "TQL T3"
-channel_name= "stable-23.06"
 
 iso_ref = "ISO-26262:2018"
 iso_doc = "Road Vehicles - Functional Safety"

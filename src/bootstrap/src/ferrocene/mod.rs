@@ -7,6 +7,7 @@ pub(crate) mod partners;
 pub(crate) mod run;
 pub(crate) mod sign;
 pub(crate) mod test;
+pub(crate) mod test_outcomes;
 pub(crate) mod tool;
 
 use crate::builder::Builder;

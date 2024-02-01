@@ -892,6 +892,7 @@
 # traceability matrix. Can be one of the following values:
 #
 # - disabled (default): do not include test outcomes
+# - download-ci: download the outcomes of the git merge base from CI
 # - custom: provide a custom path to the test outcomes (see test-outcomes-dir)
 #test-outcomes = "disabled"
 

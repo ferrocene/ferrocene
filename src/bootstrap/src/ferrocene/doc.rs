@@ -5,6 +5,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
+use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
@@ -324,11 +325,8 @@ impl<P: Step> Step for SphinxBook<P> {
         }
 
         if self.require_test_outcomes {
-            if let Some(test_outcomes_dir) = &builder.config.ferrocene_test_outcomes_dir {
-                cmd.env(
-                    "FERROCENE_TEST_OUTCOMES_DIR",
-                    std::fs::canonicalize(test_outcomes_dir).unwrap(),
-                );
+            if let Some(path) = builder.ensure(TestOutcomesDir) {
+                cmd.env("FERROCENE_TEST_OUTCOMES_DIR", path);
             }
         }
 

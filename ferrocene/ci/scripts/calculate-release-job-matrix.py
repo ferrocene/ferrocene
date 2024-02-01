@@ -66,48 +66,24 @@ def resolve_ref(ctx, ref):
 def commits_to_releases(ctx, all_commits):
     for commit in all_commits:
         metadata = build_metadata(ctx, commit)
-        rust = metadata.rust_channel
-        ferrocene = metadata.ferrocene_channel
-
-        if metadata.ferrocene_version == "rolling":
-            ferrocene_major = metadata.ferrocene_version
-        else:
-            ferrocene_major = ".".join(metadata.ferrocene_version.split(".")[:2])
-
-        if ferrocene == "rolling":
-            if rust == "nightly":
-                yield PendingRelease(commit, metadata, "nightly")
-            elif rust == "beta":
-                yield PendingRelease(commit, metadata, "pre-rolling")
-            elif rust == "stable":
-                yield PendingRelease(commit, metadata, "rolling")
-            else:
-                raise RuntimeError(f"unknown rust channel `{rust}` (in `{branch}`)")
-        elif ferrocene == "beta":
-            yield PendingRelease(commit, metadata, f"beta-{ferrocene_major}")
-        elif ferrocene == "stable":
-            yield PendingRelease(commit, metadata, f"stable-{ferrocene_major}")
-        else:
-            raise RuntimeError(
-                f"unknown ferrocene channel `{ferrocene}` (in `{branch}`)"
-            )
+        yield PendingRelease(commit, metadata)
 
 
 def filter_automated_channels(releases):
     rolling_releases = []
     for release in releases:
-        if release.channel == "nightly":
+        if release.metadata.channel == "nightly":
             yield release
-        elif release.channel == "pre-rolling":
+        elif release.metadata.channel == "pre-rolling":
             yield release
-        elif release.channel.startswith("beta-"):
+        elif release.metadata.channel.startswith("beta-"):
             yield release
-        elif release.channel == "rolling":
+        elif release.metadata.channel == "rolling":
             version = [int(num) for num in release.metadata.rust_version.split(".")]
             rolling_releases.append((version, release))
         else:
             print(
-                "note: channel {release.channel} cannot be released automatically",
+                "note: channel {release.metadata.channel} cannot be released automatically",
                 file=sys.stderr,
             )
 
@@ -148,12 +124,12 @@ def discard_duplicate_channels(releases):
 
     channels_count = collections.defaultdict(lambda: 0)
     for release in releases:
-        channels_count[release.channel] += 1
+        channels_count[release.metadata.channel] += 1
 
     for release in releases:
-        if channels_count[release.channel] > 1:
+        if channels_count[release.metadata.channel] > 1:
             print(
-                f"note: discarding {release.commit} on channel {release.channel} "
+                f"note: discarding {release.commit} on channel {release.metadata.channel} "
                 "as multiple releases with that channel exist",
                 file=sys.stderr,
             )
@@ -184,7 +160,7 @@ def prepare_github_actions_output(ctx, pending_releases):
     for release in discard_duplicate_channels(pending_releases):
         jobs.append(
             {
-                "name": f"{release.channel} ({name_suffix})",
+                "name": f"{release.metadata.channel} ({name_suffix})",
                 "environment": environment,
                 "command": f"ferrocene/ci/scripts/publish-release.sh {release.commit}{command_suffix}",
             }
@@ -198,22 +174,50 @@ def build_metadata(ctx, commit):
     )
     metadata = json.loads(response["Body"].read())
 
-    if metadata["metadata_version"] == 1:
+    def rustc_to_channel_rolling(rust_channel):
+        try:
+            return {
+                "nightly": "nightly",
+                "beta": "pre-rolling",
+                "stable": "rolling",
+            }[rust_channel]
+        except:
+            raise RuntimeError(f"unknown rust channel `{rust}`")
+
+    if  metadata["metadata_version"] == 2:
+        rust_channel=metadata["rust_channel"]
+        ferrocene_channel=metadata["ferrocene_channel"]
+        ferrocene_version=metadata["ferrocene_version"]
+        rust_version=metadata["rust_version"]
+
+        if ferrocene_version == "rolling":
+            ferrocene_major = ferrocene_version
+        else:
+            ferrocene_major = ".".join(ferrocene_version.split(".")[:2])
+
+        if ferrocene_channel == "rolling":
+            channel = rustc_to_channel_rolling(metadata["rust_channel"])
+        elif ferrocene_channel == "beta":
+            channel =  f"beta-{ferrocene_major}"
+        elif ferrocene_channel == "stable":
+            channel = f"stable-{ferrocene_major}"
+        else:
+            raise RuntimeError(f"unknown ferrocene channel `{ferrocene_channel}`")
+
         return BuildMetadata(
-            rust_channel=metadata["channel"],
-            rust_version=metadata["version"],
-            # Version 1 of the build metadata did not have the Ferrocene
-            # channel in it, but on the other hand all of its releases were for
-            # the "rolling" channel, so we hardcode it.
-            ferrocene_channel="rolling",
-            ferrocene_version="rolling",
+            rust_version=rust_version,
+            rust_channel=rust_channel,
+            ferrocene_channel=ferrocene_channel,
+            ferrocene_version=ferrocene_version,
+            channel=channel
         )
-    elif metadata["metadata_version"] == 2:
+    elif metadata["metadata_version"] == 3:
         return BuildMetadata(
             rust_version=metadata["rust_version"],
             rust_channel=metadata["rust_channel"],
             ferrocene_channel=metadata["ferrocene_channel"],
             ferrocene_version=metadata["ferrocene_version"],
+            channel=metadata["channel"]
         )
     else:
         raise RuntimeError(
@@ -261,13 +265,13 @@ class BuildMetadata:
     rust_channel: str
     ferrocene_channel: str
     ferrocene_version: str
+    channel: str
 
 
 @dataclass
 class PendingRelease:
     commit: str
     metadata: BuildMetadata
-    channel: str
 
 
 @dataclass

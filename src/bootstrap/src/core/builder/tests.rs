@@ -689,14 +689,15 @@ mod dist {
     }
     #[test]
     fn test_std_coverage() {
-        // Behavior of `x.py test --coverage`
+        // Behavior of `x.py test --coverage --no-doc`
+        // Currently using --coverage with doc tests is not supported
         let mut config = configure(&["A"], &["A"]);
         config.cmd = Subcommand::Test {
             test_args: vec![],
             rustc_args: vec![],
             no_fail_fast: false,
-            doc: true,
-            no_doc: false,
+            doc: false,
+            no_doc: true,
             skip: vec![],
             bless: false,
             force_rerun: false,

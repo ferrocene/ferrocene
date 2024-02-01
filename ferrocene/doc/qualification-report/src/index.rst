@@ -22,6 +22,7 @@ qualification, in accordance to the standards above.
    :numbered:
    :maxdepth: 2
 
+   tests/index
    tests/aarch64-unknown-none
    tests/x86_64-unknown-linux-gnu
 

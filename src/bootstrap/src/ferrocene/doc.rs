@@ -3,6 +3,7 @@
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
+use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -184,6 +185,10 @@ impl<P: Step> Step for SphinxBook<P> {
 
         let should_serve = self.parent.is_some() && builder.should_serve::<P>();
 
+        let ferrocene_version =
+            std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
+        let ferrocene_version = ferrocene_version.trim();
+
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
         // Absolute paths break our reproducibility, and paths relative from other directories
         // don't really work with Sphinx, as it treats all paths as relative from the directory
@@ -221,14 +226,24 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
             // Toolchain versions
             .arg("-D")
-            .arg(format!(
-                "ferrocene_version={}",
-                std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap()
-            ))
+            .arg(format!("ferrocene_version={ferrocene_version}"))
             .arg("-D")
             .arg(format!(
                 "rust_version={}",
                 std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap(),
+            ))
+            .arg("-D")
+            .arg(format!(
+                "channel={}",
+                ferrocene_channel(
+                    builder,
+                    std::fs::read_to_string(
+                        &builder.src.join("ferrocene").join("ci").join("channel")
+                    )
+                    .unwrap()
+                    .trim(),
+                    &ferrocene_version
+                ),
             ))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));

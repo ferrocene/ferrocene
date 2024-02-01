@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::config::FerroceneTestOutcomes;
 use std::path::PathBuf;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -15,10 +16,9 @@ impl Step for TestOutcomesDir {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        if let Some(path) = &builder.config.ferrocene_test_outcomes_dir {
-            Some(std::fs::canonicalize(path).unwrap())
-        } else {
-            None
+        match &builder.config.ferrocene_test_outcomes {
+            FerroceneTestOutcomes::Disabled => None,
+            FerroceneTestOutcomes::Custom(path) => Some(std::fs::canonicalize(path).unwrap()),
         }
     }
 }

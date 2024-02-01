@@ -236,9 +236,7 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg(format!(
                 "channel={}",
                 ferrocene_channel(
-                    std::fs::read_to_string(&builder.src.join("src").join("ci").join("channel"))
-                        .unwrap()
-                        .trim(),
+                    builder,
                     std::fs::read_to_string(
                         &builder.src.join("ferrocene").join("ci").join("channel")
                     )

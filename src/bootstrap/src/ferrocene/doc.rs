@@ -3,7 +3,7 @@
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::dist::GenerateBuildMetadata;
+use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -235,7 +235,7 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg("-D")
             .arg(format!(
                 "channel={}",
-                GenerateBuildMetadata::channel(
+                ferrocene_channel(
                     std::fs::read_to_string(&builder.src.join("src").join("ci").join("channel"))
                         .unwrap()
                         .trim(),

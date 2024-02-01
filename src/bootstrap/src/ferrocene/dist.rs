@@ -368,7 +368,8 @@ impl Step for GenerateBuildMetadata {
             );
         }
 
-        let channel = Self::channel(src_channel, ferrocene_channel, ferrocene_version);
+        let channel =
+            crate::ferrocene::ferrocene_channel(src_channel, ferrocene_channel, ferrocene_version);
 
         let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
         let sha1_full = t!(String::from_utf8(sha1_full.stdout));
@@ -403,41 +404,5 @@ impl Step for GenerateBuildMetadata {
         // Add the list of packages to include in the release to the artifacts, so that
         // publish-release knows what to expect for this commit.
         builder.copy_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
-    }
-}
-
-impl GenerateBuildMetadata {
-    pub(super) fn channel(
-        rust_channel: &str,
-        ferrocene_channel: &str,
-        ferrocene_version: &str,
-    ) -> String {
-        match (rust_channel, ferrocene_channel) {
-            ("nightly", "rolling") => "nightly".to_owned(),
-            ("beta", "rolling") => "pre-rolling".to_owned(),
-            ("stable", "rolling") => "rolling".to_owned(),
-            ("stable", ferrocene_channel @ ("beta" | "stable")) => {
-                let major_ferrocene = (|| {
-                    let mut version_components = ferrocene_version.split('.');
-                    let year = version_components.next()?;
-                    let month = version_components.next()?;
-                    let _patch = version_components.next()?;
-                    if version_components.next().is_none() {
-                        Some(format!("{year}.{month}"))
-                    } else {
-                        None
-                    }
-                })();
-                match major_ferrocene {
-                    Some(major_ferrocene) => format!("{ferrocene_channel}-{major_ferrocene}"),
-                    None => panic!(
-                        "invalid ferrocene/version, expected 'year.month.patch', got: {ferrocene_version}"
-                    ),
-                }
-            }
-            (rust, ferrocene) => panic!(
-                "error: unsupported channel configuration: rust '{rust}' and ferrocene '{ferrocene}'"
-            ),
-        }
     }
 }

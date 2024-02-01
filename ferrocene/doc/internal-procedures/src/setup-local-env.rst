@@ -103,10 +103,11 @@ content in it:
 .. code-block:: text
 
    profile = "compiler"
-   change-id = 115898
+   change-id = 102579
 
    [ferrocene]
    aws-profile = "ferrocene-ci"
+   test-outcomes = "download-ci"
 
 There are a lot of other options available: you can look at the documentation
 for all of them in the ``config.toml.example`` file for further details.

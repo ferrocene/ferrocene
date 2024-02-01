@@ -16,9 +16,8 @@
         {% if !considers_ignored_tests %}
         <div class="top-error">
             This traceability matrix does not take into account ignored tests.
-            Set <code>ferrocene.test-outcomes-dir</code> in
-            <code>config.toml</code> pointing to the directory containing the
-            test execution metrics to address this.
+            Set <code>ferrocene.test-outcomes</code> in <code>config.toml</code>
+            to address this.
         </div>
         {% endif %}
 

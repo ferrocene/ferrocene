@@ -113,6 +113,8 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       RUST_CONFIGURE_ARGS: |
         --set
+        ferrocene.test-outcomes=custom
+        --set
         ferrocene.test-outcomes-dir=/tmp/test-outcomes
       SCRIPT: |
         ferrocene/ci/scripts/fetch-test-outcomes.sh
@@ -219,6 +221,8 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       RUST_CONFIGURE_ARGS: |
+        --set
+        ferrocene.test-outcomes=custom
         --set
         ferrocene.test-outcomes-dir=/tmp/test-outcomes
       SCRIPT: |

@@ -342,7 +342,7 @@ pub struct Config {
     pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
-    pub ferrocene_test_outcomes_dir: Option<PathBuf>,
+    pub ferrocene_test_outcomes: FerroceneTestOutcomes,
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
     pub ferrocene_document_signatures_s3_bucket: String,
@@ -360,6 +360,13 @@ impl Default for FerroceneTraceabilityMatrixMode {
     fn default() -> Self {
         FerroceneTraceabilityMatrixMode::Local
     }
+}
+
+#[derive(Debug, Clone, Default)]
+pub enum FerroceneTestOutcomes {
+    #[default]
+    Disabled,
+    Custom(PathBuf),
 }
 
 #[derive(Default, Deserialize, Clone)]
@@ -1174,6 +1181,7 @@ define_config! {
         channel: Option<String> = "channel",
         aws_profile: Option<String> = "aws-profile",
         traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
+        test_outcomes: Option<String> = "test-outcomes",
         test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
         oxidos_src: Option<String> = "oxidos-src",
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
@@ -1894,7 +1902,6 @@ impl Config {
                 Some(other) => panic!("unknown traceability matrix mode: {other}"),
             };
             config.ferrocene_aws_profile = f.aws_profile;
-            config.ferrocene_test_outcomes_dir = f.test_outcomes_dir;
             config.ferrocene_oxidos_src = f.oxidos_src;
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             config.ferrocene_document_signatures_s3_bucket = f
@@ -1903,6 +1910,20 @@ impl Config {
             config.ferrocene_ignore_document_signatures =
                 f.ignore_document_signatures.unwrap_or(false);
             config.ferrocene_technical_report_url = f.technical_report_url;
+
+            config.ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir)
+            {
+                (None | Some("disabled"), None) => FerroceneTestOutcomes::Disabled,
+                (Some("custom"), Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
+                // Legacy: allow setting test-outcomes-dir without test-outcomes to avoid breaking
+                // developers currently setting it, only if test-outcomes is not configured.
+                (None, Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
+                // Error messages:
+                (Some(value), Some(_)) => panic!(
+                    "ferrocene.test-outcomes=\"{value}\" is incompatible with ferrocene.test-outcomes-dir"
+                ),
+                (Some(value), None) => panic!("invalid value for ferrocene.test-outcomes: {value}"),
+            };
         }
 
         if config.llvm_from_ci {

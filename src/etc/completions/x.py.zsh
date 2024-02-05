@@ -316,6 +316,8 @@ _arguments "${_arguments_options[@]}" \
 '*--set=[override options in config.toml]:section.option=value:( )' \
 '--open[open the docs in a browser]' \
 '--serve[start a live-relodaing web server]' \
+'--fresh[ignore caches when building the documentation]' \
+'--debug-sphinx[allow easier debugging of Sphinx extensions]' \
 '--json[render the documentation in JSON format in addition to the usual HTML format]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \

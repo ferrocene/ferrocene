@@ -251,6 +251,8 @@ complete -c x.py -n "__fish_seen_subcommand_from doc" -l reproducible-artifact -
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l set -d 'override options in config.toml' -r -f
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l open -d 'open the docs in a browser'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l serve -d 'start a live-relodaing web server'
+complete -c x.py -n "__fish_seen_subcommand_from doc" -l fresh -d 'ignore caches when building the documentation'
+complete -c x.py -n "__fish_seen_subcommand_from doc" -l debug-sphinx -d 'allow easier debugging of Sphinx extensions'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_seen_subcommand_from doc" -s i -l incremental -d 'use incremental compilation'

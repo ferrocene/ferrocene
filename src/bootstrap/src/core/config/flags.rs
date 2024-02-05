@@ -316,6 +316,9 @@ pub enum Subcommand {
         /// start a live-relodaing web server
         serve: bool,
         #[arg(long)]
+        /// ignore caches when building the documentation
+        fresh: bool,
+        #[arg(long)]
         /// render the documentation in JSON format in addition to the usual HTML format
         json: bool,
     },
@@ -580,6 +583,13 @@ impl Subcommand {
     pub fn serve(&self) -> bool {
         match *self {
             Subcommand::Doc { serve, .. } => serve,
+            _ => false,
+        }
+    }
+
+    pub fn fresh(&self) -> bool {
+        match *self {
+            Subcommand::Doc { fresh, .. } => fresh,
             _ => false,
         }
     }

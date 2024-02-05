@@ -10,6 +10,8 @@ fn main() {
     let src_path = env_path("SRC_PATH");
     let binary_path = env_path("BIN_PATH");
 
+    const COVERAGE_EXCLUDE_LINE: &str = "COVR_EXCL_LINE";
+
     assert!(data_dir.exists());
     assert!(!out_dir.exists());
     assert!(src_path.exists());
@@ -29,6 +31,8 @@ fn main() {
         .arg("html")
         .arg("--branch")
         .arg("--ignore-not-existing")
+        .arg("--excl-line")
+        .arg(COVERAGE_EXCLUDE_LINE)
         .arg("-o")
         .arg(out_dir)
         .output()

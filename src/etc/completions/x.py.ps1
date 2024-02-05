@@ -315,6 +315,8 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--set', 'set', [CompletionResultType]::ParameterName, 'override options in config.toml')
             [CompletionResult]::new('--open', 'open', [CompletionResultType]::ParameterName, 'open the docs in a browser')
             [CompletionResult]::new('--serve', 'serve', [CompletionResultType]::ParameterName, 'start a live-relodaing web server')
+            [CompletionResult]::new('--fresh', 'fresh', [CompletionResultType]::ParameterName, 'ignore caches when building the documentation')
+            [CompletionResult]::new('--debug-sphinx', 'debug-sphinx', [CompletionResultType]::ParameterName, 'allow easier debugging of Sphinx extensions')
             [CompletionResult]::new('--json', 'json', [CompletionResultType]::ParameterName, 'render the documentation in JSON format in addition to the usual HTML format')
             [CompletionResult]::new('-v', 'v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', 'verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')

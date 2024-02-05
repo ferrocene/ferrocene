@@ -21,5 +21,3 @@ distributed for convenience only. This includes but is not limited to:
 * `cargo`
 * `rustdoc`
 * `rust-gdb`
-
-It is the end-user responsibility to review the output of these tools.

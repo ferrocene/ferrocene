@@ -164,7 +164,7 @@ impl<P: Step> Step for SphinxBook<P> {
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
         // example to generate signatures). We want to purge the old build artifacts only when
         // necessary, to avoid thrashing incremental builds.
-        if self.fresh_build {
+        if self.fresh_build || builder.config.cmd.fresh() {
             for path in [&out, &doctrees] {
                 if path.exists() {
                     builder.remove_dir(path);

@@ -6,7 +6,7 @@ use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::UNIX_EPOCH;
 
@@ -112,7 +112,10 @@ impl Step for GenerateCoverageReport {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info(&format!("Generating coverage report"));
-        let coverage_report_data_dir = builder.out.join("coverage");
+
+        let coverage_report_data_dir =
+            env_llvm_profile_data_dir().unwrap_or_else(|| builder.out.join("coverage"));
+
         let coverage_report_out_dir = builder.out.join("coverage_report");
 
         let coverage_src_path = builder.out.join("../library/core").canonicalize().unwrap();
@@ -139,7 +142,7 @@ impl Step for GenerateCoverageReport {
                 panic!("No profraw files found in build/coverage directory");
             }
         }
-        
+
         if coverage_report_out_dir.exists() {
             builder.remove_dir(&coverage_report_out_dir);
             builder.info(&format!("Removed previous report at {:?}", coverage_report_out_dir));
@@ -170,7 +173,17 @@ impl Step for GenerateCoverageReport {
         run.builder.ensure(GenerateCoverageReport);
     }
 }
-
+fn env_llvm_profile_data_dir() -> Option<PathBuf> {
+    // If the LLVM_PROFILE_FILE environment variable is set, get the directory
+    match std::env::var("LLVM_PROFILE_FILE") {
+        Ok(path) => {
+            let file_path = Path::new(&path);
+            let directory = file_path.parent().unwrap_or(Path::new("./"));
+            Some(directory.to_owned())
+        }
+        Err(_err) => None,
+    }
+}
 fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
     let cargo_toml_str =
         std::fs::read_to_string("library/core/Cargo.toml").expect("Failed to read Cargo.toml");

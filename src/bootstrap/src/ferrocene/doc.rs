@@ -197,8 +197,6 @@ impl<P: Step> Step for SphinxBook<P> {
         cmd.current_dir(&src)
             .arg(relative_path(&src, &src))
             .arg(relative_path(&src, &out))
-            // Build in parallel
-            .args(&["-j", "auto"])
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
@@ -247,6 +245,18 @@ impl<P: Step> Step for SphinxBook<P> {
             ))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
+
+        if builder.config.cmd.debug_sphinx() {
+            cmd
+                // Only run one parallel job, as Sphinx occasionally cannot show the error message
+                // with the parallel backend.
+                .args(["-j", "1"])
+                // Show full traceback on exceptions.
+                .arg("-T");
+        } else {
+            // Build in parallel
+            cmd.args(["-j", "auto"]);
+        }
 
         match self.mode {
             SphinxMode::Html => {

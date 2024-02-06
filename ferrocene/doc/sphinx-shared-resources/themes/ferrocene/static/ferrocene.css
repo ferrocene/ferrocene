@@ -169,6 +169,14 @@ a:hover {
     text-decoration: underline;
 }
 
+.align-center {
+    text-align: center;
+}
+
+.align-right {
+    text-align: right;
+}
+
 /****************
  *   Headings   *
  ****************/

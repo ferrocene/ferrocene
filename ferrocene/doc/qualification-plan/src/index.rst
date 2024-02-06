@@ -13,7 +13,6 @@ Ferrocene in accordance to the standards above.
    :numbered:
    :maxdepth: 2
 
-   references
    history
    organization
    details

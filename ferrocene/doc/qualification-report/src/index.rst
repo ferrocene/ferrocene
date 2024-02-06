@@ -13,7 +13,6 @@ qualification, in accordance to the standards above.
    :numbered:
    :maxdepth: 2
 
-   references
    statement
 
 .. toctree::

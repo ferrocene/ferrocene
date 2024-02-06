@@ -14,7 +14,6 @@ scope, in accordance to the standards above.
    :caption: Safety Manual
    :numbered:
 
-   references
    environment
    user-responsibility
    customer-interactions

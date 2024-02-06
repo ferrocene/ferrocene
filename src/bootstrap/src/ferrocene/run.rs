@@ -5,6 +5,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
+use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -91,7 +92,7 @@ impl Step for TraceabilityMatrix {
             .env("TRACEABILITY_MATRIX_SRC_BASE", &builder.src)
             .env("TRACEABILITY_MATRIX_SRC_URL", src_url);
 
-        if let Some(dir) = &builder.config.ferrocene_test_outcomes_dir {
+        if let Some(dir) = builder.ensure(TestOutcomesDir) {
             cmd.env("TRACEABILITY_MATRIX_TEST_OUTCOMES_DIR", dir);
         }
 

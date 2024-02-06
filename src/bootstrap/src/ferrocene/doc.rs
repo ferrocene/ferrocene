@@ -5,6 +5,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
+use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
@@ -121,6 +122,7 @@ struct SphinxBook<P: Step = EmptyStep> {
     fresh_build: bool,
     signature: SignatureStatus,
     inject_all_other_document_ids: bool,
+    require_test_outcomes: bool,
     parent: Option<P>,
 }
 
@@ -322,11 +324,10 @@ impl<P: Step> Step for SphinxBook<P> {
             }
         }
 
-        if let Some(test_outcomes_dir) = &builder.config.ferrocene_test_outcomes_dir {
-            cmd.env(
-                "FERROCENE_TEST_OUTCOMES_DIR",
-                std::fs::canonicalize(test_outcomes_dir).unwrap(),
-            );
+        if self.require_test_outcomes {
+            if let Some(path) = builder.ensure(TestOutcomesDir) {
+                cmd.env("FERROCENE_TEST_OUTCOMES_DIR", path);
+            }
         }
 
         if should_serve && builder.config.cmd.open() {
@@ -421,6 +422,7 @@ macro_rules! sphinx_books {
         src: $src:expr,
         dest: $dest:expr,
         $(inject_all_other_document_ids: $inject_all_other_document_ids:expr,)?
+        $(require_test_outcomes: $require_test_outcomes:expr,)?
     },)*) => {
         $(
             #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -465,6 +467,10 @@ macro_rules! sphinx_books {
                     let mut inject_all_other_document_ids = false;
                     $(inject_all_other_document_ids = $inject_all_other_document_ids;)*
 
+                    #[allow(unused_mut, unused_assignments)]
+                    let mut require_test_outcomes = false;
+                    $(require_test_outcomes = $require_test_outcomes;)*
+
                     builder.ensure(SphinxBook {
                         mode: self.mode,
                         target: self.target,
@@ -474,6 +480,7 @@ macro_rules! sphinx_books {
                         fresh_build: self.fresh_build,
                         signature,
                         inject_all_other_document_ids,
+                        require_test_outcomes,
                         parent: Some(self),
                     })
                 }
@@ -486,7 +493,11 @@ macro_rules! sphinx_books {
 
         fn intersphinx_gather_steps(target: TargetSelection) -> Vec<SphinxBook> {
             let mut steps = Vec::new();
-            $(
+            $({
+                #[allow(unused_mut, unused_assignments)]
+                let mut require_test_outcomes = false;
+                $(require_test_outcomes = $require_test_outcomes;)*
+
                 steps.push(SphinxBook {
                     mode: SphinxMode::OnlyObjectsInv,
                     target,
@@ -496,9 +507,10 @@ macro_rules! sphinx_books {
                     fresh_build: false,
                     signature: SignatureStatus::NotNeeded,
                     inject_all_other_document_ids: false,
+                    require_test_outcomes,
                     parent: None,
                 });
-            )*
+            })*
             steps
         }
 
@@ -589,6 +601,7 @@ sphinx_books! [
         name: "qualification-report",
         src: "ferrocene/doc/qualification-report",
         dest: "qualification/report",
+        require_test_outcomes: true,
     },
     {
         ty: SafetyManual,

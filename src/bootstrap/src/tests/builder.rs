@@ -246,7 +246,13 @@ mod defaults {
     fn doc_default() {
         let mut config = configure("doc", &["A"], &["A"]);
         config.compiler_docs = true;
-        config.cmd = Subcommand::Doc { open: false, json: false, serve: false };
+        config.cmd = Subcommand::Doc {
+            open: false,
+            json: false,
+            fresh: false,
+            debug_sphinx: false,
+            serve: false,
+        };
         let mut cache = run_build(&[], config);
         let a = TargetSelection::from_user("A");
 
@@ -600,7 +606,13 @@ mod dist {
     fn doc_ci() {
         let mut config = configure(&["A"], &["A"]);
         config.compiler_docs = true;
-        config.cmd = Subcommand::Doc { open: false, json: false, serve: false };
+        config.cmd = Subcommand::Doc {
+            open: false,
+            json: false,
+            fresh: false,
+            debug_sphinx: false,
+            serve: false,
+        };
         let build = Build::new(config);
         let mut builder = Builder::new(&build);
         builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Doc), &[]);

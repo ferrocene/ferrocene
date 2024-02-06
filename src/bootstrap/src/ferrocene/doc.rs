@@ -135,9 +135,13 @@ impl<P: Step> Step for SphinxBook<P> {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let src = builder.src.join(&self.src).join("src");
         let out = match self.mode {
-            SphinxMode::Html | SphinxMode::OnlyObjectsInv => {
-                builder.out.join(self.target.triple).join("doc").join(&self.dest)
-            }
+            SphinxMode::Html => builder.out.join(self.target.triple).join("doc").join(&self.dest),
+            SphinxMode::OnlyObjectsInv => builder
+                .out
+                .join(self.target.triple)
+                .join("ferrocene")
+                .join("objectsinv-out")
+                .join(&self.dest),
             SphinxMode::XmlDoctrees => builder
                 .out
                 .join(self.target.triple)
@@ -394,9 +398,13 @@ fn add_intersphinx_arguments<P: Step>(
         // the mappings even during gathering. Since not all objects.inv will be available during
         // gathering, all of them are replaced with an empty objects.inv file during gathering.
         let inv = match book.mode {
-            SphinxMode::Html | SphinxMode::XmlDoctrees => {
-                builder.doc_out(book.target).join(&step.dest).join("objects.inv")
-            }
+            SphinxMode::Html | SphinxMode::XmlDoctrees => builder
+                .out
+                .join(book.target.triple)
+                .join("ferrocene")
+                .join("objectsinv-out")
+                .join(&step.dest)
+                .join("objects.inv"),
             SphinxMode::OnlyObjectsInv => empty_objects_inv.clone(),
         };
 

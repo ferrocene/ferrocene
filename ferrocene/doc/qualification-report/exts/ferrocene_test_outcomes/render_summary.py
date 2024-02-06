@@ -53,7 +53,10 @@ class InjectSummaryTransform(SphinxTransform):
             )
 
             def render_sum(field):
-                return str(sum(getattr(invoc, field) for invoc in platform.invocations))
+                content = sum(getattr(invoc, field) for invoc in platform.invocations)
+                container = paragraph(str(content))
+                container["classes"].append("align-right")
+                return container
 
             table.add_row(
                 paragraph(self.render_target(node, page.host)),
@@ -67,9 +70,9 @@ class InjectSummaryTransform(SphinxTransform):
                         nodes.Text("Detailed test results"),
                     )
                 ),
-                paragraph(render_sum("passed_tests")),
-                paragraph(render_sum("failed_tests")),
-                paragraph(render_sum("ignored_tests")),
+                render_sum("passed_tests"),
+                render_sum("failed_tests"),
+                render_sum("ignored_tests"),
             )
 
         node.replace_self(table.finalize())

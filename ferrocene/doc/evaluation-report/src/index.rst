@@ -12,7 +12,6 @@ It describes the evaluation of Ferrocene in accordance to the standards above.
    :numbered:
    :maxdepth: 3
 
-   references
    hazop
    use-cases
    tool-analysis

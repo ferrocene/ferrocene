@@ -20,7 +20,7 @@ HazOp Selected Nodes
 --------------------
 
 Ferrocene is composed of the elements presented in the :doc:`Toolchain
-Workflow diagram <purpose>`.
+Workflow diagram <evaluation-plan:purpose>`.
 
 Based on these elements, we define the following nodes corresponding to each
 step of the toolchain:

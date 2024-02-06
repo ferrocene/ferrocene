@@ -5,6 +5,7 @@ from .render_template import OutcomesPageNode
 from .utils import RenderTable, paragraph
 from dataclasses import dataclass
 from docutils import nodes
+from ferrocene_qualification.target import render_target_name
 from sphinx.directives import SphinxDirective
 from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.transforms import SphinxTransform
@@ -55,8 +56,8 @@ class InjectSummaryTransform(SphinxTransform):
                 return str(sum(getattr(invoc, field) for invoc in platform.invocations))
 
             table.add_row(
-                paragraph(page.host),
-                paragraph(page.target),
+                paragraph(self.render_target(node, page.host)),
+                paragraph(self.render_target(node, page.target)),
                 paragraph(
                     make_refnode(
                         self.app.builder,
@@ -72,6 +73,14 @@ class InjectSummaryTransform(SphinxTransform):
             )
 
         node.replace_self(table.finalize())
+
+    def render_target(self, node, target):
+        return render_target_name(
+            self.env,
+            self.config,
+            target,
+            location=(node.source, node.line),
+        )
 
 
 class OutcomePagesCollector(EnvironmentCollector):

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // Matching against float literals should result in a linter error
 
 #![feature(exclusive_range_pattern)]

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // Matching against NaN should result in a warning
 
 #![allow(unused)]

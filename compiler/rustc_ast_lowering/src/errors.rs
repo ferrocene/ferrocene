@@ -326,13 +326,6 @@ pub struct MisplacedRelaxTraitBound {
     pub span: Span,
 }
 
-#[derive(Diagnostic, Clone, Copy)]
-#[diag(ast_lowering_not_supported_for_lifetime_binder_async_closure)]
-pub struct NotSupportedForLifetimeBinderAsyncClosure {
-    #[primary_span]
-    pub span: Span,
-}
-
 #[derive(Diagnostic)]
 #[diag(ast_lowering_match_arm_with_no_body)]
 pub struct MatchArmWithNoBody {
@@ -392,6 +385,21 @@ pub enum BadReturnTypeNotation {
 #[derive(Diagnostic)]
 #[diag(ast_lowering_generic_param_default_in_binder)]
 pub(crate) struct GenericParamDefaultInBinder {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(ast_lowering_async_bound_not_on_trait)]
+pub(crate) struct AsyncBoundNotOnTrait {
+    #[primary_span]
+    pub span: Span,
+    pub descr: &'static str,
+}
+
+#[derive(Diagnostic)]
+#[diag(ast_lowering_async_bound_only_for_fn_traits)]
+pub(crate) struct AsyncBoundOnlyForFnTraits {
     #[primary_span]
     pub span: Span,
 }

@@ -35,8 +35,7 @@ Start by checking out the PR. The name of the branch is
 In order to find the conflicts you can either look at the CI logs, or search for the
 git conflict markers (`<<<<<<<`, `=======` and `>>>>>>>`).
 
-There are two kinds of conflicts you will encounter in the output that the
-script produces:.
+There are multiple kinds of conflicts you will encounter:.
 
 * Submodule conflict
   To fix a submodule conflict run::
@@ -47,6 +46,16 @@ script produces:.
     git add src/tools/cargo
 
   <COMMIT_HASH> is ...
+
+* File deleted by one side of the merge
+  This happens when we made changes to a file and it gets deleted by upstream. To
+  resolve this, remove the file::
+
+    git rm <FILE_1> <FILE_2> # removes file(s) and stages that change
+
+  If this file was a test case used in the traceability matrix, we might need to
+  update the traceability matrix, if some section is missing a test case. But finding
+  a new testcase should be done in a separate PR.
 
 * General conflict
   These are more common conflicts and will require manual fixing depending on

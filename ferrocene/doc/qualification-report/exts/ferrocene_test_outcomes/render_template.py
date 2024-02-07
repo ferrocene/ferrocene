@@ -19,37 +19,43 @@ class RenderOutcomesTemplate(SphinxDirective):
     }
 
     def run(self):
-        path = f"{self.env.srcdir}/{self.arguments[0]}"
-        with open(path) as f:
-            content = f.read()
-        self.env.note_dependency(path)
-
-        env = jinja2.Environment(autoescape=False)  # Autoescape is for HTML, not rst
-        template = env.from_string(content)
-
-        rendered = template.render(
-            host=self.options["host"],
-            target=self.options["target"],
-            bare_metal_test_target=self.options.get("bare_metal_test_target"),
-            remote_testing="remote_testing" in self.options,
-            # Can be None if test outcomes were not injected.
-            platform_outcomes=self.env.ferrocene_test_outcomes.platform(
-                self.options["host"],
-                # Grab the outcomes for the bare metal test target if specified:
-                self.options["bare_metal_test_target"]
-                if "bare_metal_test_target" in self.options
-                else self.options["target"],
-            )
-            if self.env.ferrocene_test_outcomes is not None
-            else None,
+        return render_template(
+            self,
+            self.arguments[0],
+            {
+                "host": self.options["host"],
+                "target": self.options["target"],
+                "bare_metal_test_target": self.options.get("bare_metal_test_target"),
+                "remote_testing": "remote_testing" in self.options,
+                # Can be None if test outcomes were not injected.
+                "platform_outcomes": self.env.ferrocene_test_outcomes.platform(
+                    self.options["host"],
+                    # Grab the outcomes for the bare metal test target if specified:
+                    self.options.get("bare_metal_test_target", self.options["target"]),
+                )
+                if self.env.ferrocene_test_outcomes is not None
+                else None,
+            },
         )
-        rendered = StringList(rendered.splitlines(), source="")
 
-        node = nodes.Element()
-        node.document = self.state.document
-        sphinx.util.nested_parse_with_titles(self.state, rendered, node)
 
-        return node.children
+def render_template(directive, template, context):
+    path = f"{directive.env.srcdir}/{template}"
+    with open(path) as f:
+        content = f.read()
+    directive.env.note_dependency(path)
+
+    env = jinja2.Environment(autoescape=False)  # Autoescape is for HTML, not rst
+    template = env.from_string(content)
+
+    rendered = template.render(context)
+    lines = StringList(rendered.splitlines(), source="")
+
+    node = nodes.Element()
+    node.document = directive.state.document
+    sphinx.util.nested_parse_with_titles(directive.state, lines, node)
+
+    return node.children
 
 
 def setup(app):

@@ -4,7 +4,7 @@
 .. This shared snippet is included in the table of contents of all
    qualification documents.
 
-This document is the |doc_title| (|doc_short_title|) of the qualification
-material developed for automotive [|iso_ref|]
+This document is the |doc_title| (|doc_short_title|) of the :doc:`qualification
+material <document-list:index>` developed for automotive [|iso_ref|]
 (|ferrocene_ASIL|/|ferrocene_TCL|) and industrial [|iec_ref|] (|ferrocene_TQL|)
 standards certification.

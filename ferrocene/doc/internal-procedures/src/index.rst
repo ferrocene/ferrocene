@@ -13,7 +13,6 @@ based on software engineering best practices.
    :maxdepth: 4
    :caption: Introduction
 
-   references
    onboarding
    setup-local-env
    issues

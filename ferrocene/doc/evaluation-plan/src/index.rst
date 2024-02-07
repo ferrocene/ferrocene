@@ -14,7 +14,6 @@ in accordance with the standards above.
    :maxdepth: 2
 
    purpose
-   references
    qualification-scope
    link-with-iso-requirements
    link-with-iec-requirements

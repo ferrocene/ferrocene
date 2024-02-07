@@ -64,6 +64,34 @@ flag:
 
    ./x doc ferrocene/doc/$foo --open
 
+If you are making frequent changes to the contents of a document, the
+``--serve`` flag will continuously watch for changes in the file system and
+rebuild content as needed. It also starts a local web server with automatic
+reloading of the changes in the browser:
+
+.. code-block:: text
+
+   ./x doc ferrocene/doc/$foo --serve
+
+When you are working on Sphinx extensions, the ``--debug-sphinx`` flag will
+change the configuration to aid debugging, by running only one builder job at
+the time and showing exception tracebacks:
+
+.. code-block:: text
+
+   ./x doc ferrocene/doc/$foo --debug-sphinx
+
+.. note::
+
+   Sphinx features automatic dependency tracking and should rebuild only the
+   files you actually changed. Dependency tracking doesn't work when the
+   implementation of extensions is changed: in those cases you will want to
+   pass the ``--fresh`` flag, which does a fresh build ignoring caches:
+
+   .. code-block:: text
+
+      ./x doc ferrocene/doc/$foo --fresh
+
 Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

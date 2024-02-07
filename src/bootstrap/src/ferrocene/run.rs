@@ -111,14 +111,14 @@ impl Step for GenerateCoverageReport {
     const DEFAULT: bool = true;
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.info(&format!("Generating coverage report"));
+        builder.info(&"Generating coverage report");
 
         let coverage_report_data_dir =
             env_llvm_profile_data_dir().unwrap_or_else(|| builder.out.join("coverage"));
 
         let coverage_report_out_dir = builder.out.join("coverage_report");
 
-        let coverage_src_path = builder.out.join("../library/core").canonicalize().unwrap();
+        let coverage_src_path = builder.src.join("library/core").canonicalize().unwrap();
         let _cargo_dir = builder.cargo_dir();
 
         if builder.config.dry_run() {
@@ -160,6 +160,13 @@ impl Step for GenerateCoverageReport {
         cmd.env("COVERAGE_REPORT_OUT_DIR", coverage_report_out_dir);
         cmd.env("COVERAGE_REPORT_SRC_PATH", coverage_src_path);
         cmd.env("COVERAGE_REPORT_BIN_PATH", core_tests_binary_path);
+
+        // RUSTC environment variable is required by grcov to locate the right version of the llvm-cov.
+        // If the variable is not set grcov uses the the rustc in the host.
+        // This version mismatch of llvm-cov leads to empty report.
+        // So, we need the specific version of rustc that we used to create the profraw files.
+        // grcov uses cargo-binutils to invoke llvm-cov. cargo-binutils looks for RUSTC env variable to get the path for llvm-cov.
+        // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
         cmd.env("RUSTC", rustc_path);
 
         builder.run(&mut cmd);

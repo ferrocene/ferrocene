@@ -41,10 +41,10 @@ class InjectSummaryTransform(SphinxTransform):
         table.add_row(
             paragraph("Host"),
             paragraph("Target"),
-            paragraph("Results"),
             paragraph("Passed tests"),
             paragraph("Failed tests"),
             paragraph("Ignored tests"),
+            paragraph(""),
             head=True,
         )
         for page in pages:
@@ -68,18 +68,18 @@ class InjectSummaryTransform(SphinxTransform):
             table.add_row(
                 paragraph(self.render_target(node, page.host)),
                 paragraph(self.render_target(node, page.target)),
+                render_sum("passed_tests"),
+                render_sum("failed_tests"),
+                render_sum("ignored_tests"),
                 paragraph(
                     make_refnode(
                         self.app.builder,
                         self.env.docname,
                         page.document,
                         "",
-                        nodes.Text("Detailed test results"),
+                        nodes.Text("Detailed results »"),
                     )
                 ),
-                render_sum("passed_tests"),
-                render_sum("failed_tests"),
-                render_sum("ignored_tests"),
             )
 
         node.replace_self(table.finalize())

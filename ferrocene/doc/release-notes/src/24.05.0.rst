@@ -1,0 +1,57 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+Ferrocene 24.05.0
+=================
+
+Ferrocene 24.05.0 is the second major release of Ferrocene.
+
+The highlights of this release are the inclusion of Rust 1.76.0, the qualified
+:target:`x86_64-unknown-linux-gnu` target, new experimental targets, and the
+use of a bundled linker.
+
+New features
+------------
+
+* The Rust version has been updated to 1.76.0.
+
+* The :target:`x86_64-unknown-linux-gnu` target is now supported and qualified
+  for safety critical use, in addition to being used as a host platform like in
+  previous releases.
+
+* The ``-C llvm-args=protect-from-escaped-alloca`` flag is now qualified for
+  ``rustc``, and its use is now required by the safety manual. This mitigates
+  `KP-R112213 <https://problems.ferrocene.dev/KP-R112213.html>`_.
+
+New experimental features
+-------------------------
+
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview.
+
+* Experimental support has been added for multiple cross-compilation targets.
+  Note that experimental targets are not qualified for safety critical use. The
+  new targets are:
+
+  * :target:`thumbv7em-none-eabi`
+  * :target:`thumbv7em-none-eabihf`
+  * :target:`wasm32-unknown-unknown`
+
+* The self-testing tool now checks the correct behavior of *linker drivers*,
+  according to the new requirements for linkers. Note that the self-testing
+  tool is not qualified for safety critical use yet.
+
+Changes
+-------
+
+* Ferrocene now uses a bundled copy of LLD as the linker, and allows any
+  external linker or C compiler to be used as the *linker driver* as long as it
+  adheres to the :ref:`behavior specified in the Safety Manual
+  <safety-manual:linker-options>`. The purpose of the *linker driver* is to
+  locate the system libraries needed for the linkage, and instructing LLD on
+  where to find them.
+
+Bug fixes
+---------
+
+N/A

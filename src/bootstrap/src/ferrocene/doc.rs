@@ -577,6 +577,12 @@ sphinx_books! [
         src: "ferrocene/doc/user-manual",
         dest: "user-manual",
     },
+    {
+        ty: ReleaseNotes,
+        name: "release-notes",
+        src: "ferrocene/doc/release-notes",
+        dest: "release-notes",
+    },
     // Qualification Documents
     {
         ty: DocumentList,

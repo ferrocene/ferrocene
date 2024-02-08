@@ -46,6 +46,8 @@ target, that their safety context is compatible with the use of the CLI option o
 feature, and develop appropriate verification activities and tests to ensure
 the correct functionality of the generated code.
 
+.. _linker-options:
+
 Linker Options
 --------------
 

@@ -276,6 +276,9 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - run:
+          name: Configure
+          command: ferrocene/ci/configure.sh
+      - run:
           name: Generate build metadata
           command: ferrocene/ci/scripts/generate-build-metadata.sh
       - run:

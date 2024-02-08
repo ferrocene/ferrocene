@@ -291,6 +291,9 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - run:
+          name: Restore files from the x86_64-linux-build
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
           name: Configure
           command: ferrocene/ci/configure.sh
       - run:

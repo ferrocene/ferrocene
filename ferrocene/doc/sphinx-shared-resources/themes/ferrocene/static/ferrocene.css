@@ -104,6 +104,8 @@
 
     --content-width: 50rem;
 
+    --relnotes-badge-bg: #ffe033;
+
     --spec-error-fg: #f00;
     --spec-syntax-literal-bg: #dbdbdb;
 
@@ -131,6 +133,10 @@ body {
 
 :focus {
     outline: 2px solid var(--focus-border);
+}
+
+.hidden {
+    display: none;
 }
 
 /************
@@ -698,6 +704,24 @@ blockquote code {
 .problematic {
     color: var(--problematic-fg);
     background: var(--problematic-bg);
+}
+
+/****************************
+ *   Release notes badges   *
+ ****************************/
+
+span.relnotes-upcoming-badge {
+    display: inline-block;
+    background: var(--relnotes-badge-bg);
+    color: var(--text-fg);
+
+    text-transform: capitalize;
+    font-size: 0.75em;
+    font-weight: 700;
+
+    margin-left: 0.75em;
+    padding: 0.2em 0.5em;
+    border-radius: 0.3em;
 }
 
 /**************************************************

@@ -48,14 +48,21 @@ class InjectSummaryTransform(SphinxTransform):
             head=True,
         )
         for page in pages:
-            platform = self.env.ferrocene_test_outcomes.platform(
-                page.host, page.tested_target
+            platform = (
+                self.env.ferrocene_test_outcomes.platform(page.host, page.tested_target)
+                if self.env.ferrocene_test_outcomes is not None
+                else None
             )
 
             def render_sum(field):
-                content = sum(getattr(invoc, field) for invoc in platform.invocations)
+                if platform is not None:
+                    content = sum(getattr(inv, field) for inv in platform.invocations)
+                    css_class = "align-right"
+                else:
+                    content = "-"
+                    css_class = "align-center"
                 container = paragraph(str(content))
-                container["classes"].append("align-right")
+                container["classes"].append(css_class)
                 return container
 
             table.add_row(

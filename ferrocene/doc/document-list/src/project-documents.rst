@@ -18,3 +18,4 @@ Project Documents
    :doc:`qualification-report:index`!:document-id:`qualification-report`!|ferrocene_version|
    :doc:`safety-manual:index`!:document-id:`safety-manual`!|ferrocene_version|
    :doc:`user-manual:index`!:document-id:`user-manual`!|ferrocene_version|
+   :doc:`release-notes:index`!:document-id:`release-notes`!|ferrocene_version|

@@ -290,10 +290,21 @@ jobs:
   finish-build:
     executor: docker-ubuntu-18
     resource_class: small # 1-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - run:
+          name: Restore files from the x86_64-linux-build
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore x86_64-linux-build
+      - run:
+          name: Configure
+          command: ferrocene/ci/configure.sh
+      - run:
+          name: Checkout the submodules
+          command: ferrocene/ci/scripts/checkout-submodules.sh
       - run:
           name: Generate build metadata
           command: ./x.py dist ferrocene-build-metadata

@@ -299,6 +299,9 @@ jobs:
           name: Configure
           command: ferrocene/ci/configure.sh
       - run:
+          name: Checkout the submodules
+          command: ferrocene/ci/scripts/checkout-submodules.sh
+      - run:
           name: Generate build metadata
           command: ferrocene/ci/scripts/generate-build-metadata.sh
       - run:

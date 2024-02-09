@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-from . import upcoming_release
+from . import rust_changelog, upcoming_release
 
 def setup(app):
+    rust_changelog.setup(app)
     upcoming_release.setup(app)
 
     return {

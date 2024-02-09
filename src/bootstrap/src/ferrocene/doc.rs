@@ -123,6 +123,7 @@ struct SphinxBook<P: Step = EmptyStep> {
     signature: SignatureStatus,
     inject_all_other_document_ids: bool,
     require_test_outcomes: bool,
+    require_relnotes: bool,
     parent: Option<P>,
 }
 
@@ -240,6 +241,13 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg(format!("channel={}", ferrocene_channel(builder, &ferrocene_version)))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
+
+        if self.require_relnotes {
+            cmd.arg("-D").arg(path_define(
+                "rust_release_notes",
+                &relative_path(&src, &builder.src.join("RELEASES.md")),
+            ));
+        }
 
         if builder.config.cmd.debug_sphinx() {
             cmd
@@ -430,6 +438,7 @@ macro_rules! sphinx_books {
         dest: $dest:expr,
         $(inject_all_other_document_ids: $inject_all_other_document_ids:expr,)?
         $(require_test_outcomes: $require_test_outcomes:expr,)?
+        $(require_relnotes: $require_relnotes:expr,)?
     },)*) => {
         $(
             #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -478,6 +487,10 @@ macro_rules! sphinx_books {
                     let mut require_test_outcomes = false;
                     $(require_test_outcomes = $require_test_outcomes;)*
 
+                    #[allow(unused_mut, unused_assignments)]
+                    let mut require_relnotes = false;
+                    $(require_relnotes = $require_relnotes;)*
+
                     builder.ensure(SphinxBook {
                         mode: self.mode,
                         target: self.target,
@@ -488,6 +501,7 @@ macro_rules! sphinx_books {
                         signature,
                         inject_all_other_document_ids,
                         require_test_outcomes,
+                        require_relnotes,
                         parent: Some(self),
                     })
                 }
@@ -505,6 +519,10 @@ macro_rules! sphinx_books {
                 let mut require_test_outcomes = false;
                 $(require_test_outcomes = $require_test_outcomes;)*
 
+                #[allow(unused_mut, unused_assignments)]
+                let mut require_relnotes = false;
+                $(require_relnotes = $require_relnotes;)*
+
                 steps.push(SphinxBook {
                     mode: SphinxMode::OnlyObjectsInv,
                     target,
@@ -515,6 +533,7 @@ macro_rules! sphinx_books {
                     signature: SignatureStatus::NotNeeded,
                     inject_all_other_document_ids: false,
                     require_test_outcomes,
+                    require_relnotes,
                     parent: None,
                 });
             })*
@@ -582,6 +601,7 @@ sphinx_books! [
         name: "release-notes",
         src: "ferrocene/doc/release-notes",
         dest: "release-notes",
+        require_relnotes: true,
     },
     // Qualification Documents
     {

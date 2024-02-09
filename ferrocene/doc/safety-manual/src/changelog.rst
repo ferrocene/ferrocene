@@ -4,4 +4,4 @@
 New Features and Bug Fixes
 ==========================
 
-N/A for Ferrocene |ferrocene_version| as it is a baseline version.
+The release notes of Ferrocene are available in the :doc:`release-notes:index`.

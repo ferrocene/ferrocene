@@ -40,7 +40,7 @@ def load_release_notes(app):
     if app.builder.name == "ferrocene-intersphinx":
         app.env.rust_release_notes = {}
     else:
-        with sphinx.util.progress_message("loading Rust release notes"):
+        with sphinx.util.display.progress_message("loading Rust release notes"):
             app.env.rust_release_notes = split_release_notes(
                 read_release_notes(app.config.rust_release_notes)
             )

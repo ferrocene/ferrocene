@@ -420,6 +420,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "writeable",
     "yoke",
     "yoke-derive",
+    "zerocopy",
+    "zerocopy-derive",
     "zerofrom",
     "zerofrom-derive",
     "zeroize", // this is a false positive: it's only used by generate-tarball

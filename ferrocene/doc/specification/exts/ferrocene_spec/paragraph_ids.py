@@ -70,7 +70,7 @@ def build_finished(app, exception):
     if app.builder.name != "html":
         return
 
-    with sphinx.util.progress_message("dumping paragraph ids"):
+    with sphinx.util.display.progress_message("dumping paragraph ids"):
         write_paragraph_ids(app)
 
 

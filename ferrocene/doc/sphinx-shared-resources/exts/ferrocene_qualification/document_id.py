@@ -98,7 +98,7 @@ def html_page_context(app, pagename, templatename, context, doctree):
 
 
 def write_document_id(app):
-    with sphinx.util.progress_message("writing document id"):
+    with sphinx.util.display.progress_message("writing document id"):
         with open(os.path.join(app.outdir, "document-id.txt"), "w") as f:
             f.write(f"{app.env.ferrocene_document_id}\n")
 

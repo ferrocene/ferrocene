@@ -57,8 +57,7 @@ it is not the inner :t:`pattern` of a :t:`slice pattern` or the :t:`pattern` of
 a possibly nested :t:`identifier pattern` of a :t:`slice pattern`\ ``.``
 
 :dp:`fls_cma5t8waon0x`
-The :t:`expected type` of a :t:`pattern` is the :t:`type` of the :t:`value` the
-:t:`pattern` is being matched against.
+The :t:`expected type` of a :t:`pattern` is the :t:`type` the :t:`pattern` is being matched against.
 
 :dp:`fls_TUanRT7WU14E`
 It is a static error when :t:`[lexical element]s` match multiple alternations
@@ -1255,7 +1254,7 @@ follows:
 Pattern Matching
 ----------------
 
-.. rubric:: Dynamic Semantics
+.. rubric:: Legality Rules
 
 :dp:`fls_tlwr4u7bjhh5`
 :t:`Pattern matching` that involves a :t:`pattern` and a context :t:`value`

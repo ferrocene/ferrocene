@@ -4,54 +4,73 @@
 Onboarding process
 ==================
 
-Basic training
---------------
-
 Engineers joining the Ferrocene project must be fully aware of the technical
-environment and procedures. This is important because it ensures that the work
-done is fully usable by other people in the company and avoids errors and work
-disruption.
+environment and procedures, to be able to work effectively. This page assumes
+you are fully onboarded inside of Ferrous Systems, and the Ferrous Systems
+infrastructure team has provisioned you access.
 
-Individual equipment
---------------------
+Required reading
+----------------
 
-Equipment is provided by Ferrous Systems.
-This equipment conforms with Ferrocene security requirements.
+During your onboarding, you should read and understand the following documents:
+
+* :doc:`qualification-plan:index`
+* :doc:`internal-procedures:index`
+
+The documents describe the development workflow and engineering procedures of
+Ferrocene, and the requirements they outline must be followed by every team
+member.
 
 Required software and tools
 ---------------------------
 
-The following accounts and tools are necessary to access the Ferrocene
-toolchain, associated management repositories, and other communications means.
-These are necessary to follow the Ferrocene workflow:
+You will need access to the following tools to be able to work on Ferrocene:
 
-* **Ferrocene Google Drive**
+.. list-table::
+   :header-rows: 1
 
-* **Microsoft account**
-    * used to SSO into GitHub
-    * used to SSO with AWS to access environment tools
-    * used to SSO into Zulip
+   * - Tool
+     - Authentication
+     - Purpose
+   * - `GitHub <https://github.com/ferrocene>`_
+     - GitHub + SSO
+     - Source code tracking, issue tracking, code review, CI/CD
+   * - `AWS <https://ferrous-systems.awsapps.com/start>`_
+     - SSO
+     - Access to pre-built CI artifacts
+   * - `Zulip <https://ferrous.zulipchat.com>`_
+     - SSO
+     - Realtime chat
+   * - `ClickUp <https://ferroussystems.clickup.com/4637546/v/o/s/90040220935>`_
+     - SSO
+     - Project management and task tracking
+   * - `CircleCI <https://app.circleci.com/pipelines/github/ferrocene>`_
+     - GitHub
+     - CI/CD
+   * - `Customer portal <https://customers.ferrocene.dev>`_
+     - Individual account
+     - Access to `rendered documentation <https://docs.ferrocene.dev>`_ and `releases <https://releases.ferrocene.dev>`_
 
-* **GitHub**
-    * access to ``ferrocene/ferrocene`` repository on GitHub needs to be
-      requested
+Depending on your tasks, you might also need access to:
 
-* **Microsoft Teams**
-    * access to necessary sync meetings must be requested
+.. list-table::
+   :header-rows: 1
 
-* **Zulip**
-    * access to the Ferrocene channel needs to be requested
+   * - Tool
+     - Authentication
+     - Purpose
+   * - `HackMD <https://ferroussystems.hackmd.io/team/ferrocene>`_
+     - SSO
+     - Documents and notes storage
+   * - `Google Drive <https://drive.google.com/drive/folders/0ANsMR0hRKNhAUk9PVA>`_
+     - SSO
+     - Documents storage
 
-
-IT services
-------------
-For IT issues and accounts, please contact your company’s internal IT services.
-
-For accessing Ferrocene repositories, please contact the Ferrocene
-Project Manager.
+You should also ask the project manager to give you access to the relevant
+recurring meetings.
 
 CircleCI access
----------------
+^^^^^^^^^^^^^^^
 
 To authenticate with CircleCI, you need to go to the `CircleCI login page
 <https://app.circleci.com/settings/user>`_, click "Log in", select "Signed up

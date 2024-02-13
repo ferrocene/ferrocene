@@ -4,15 +4,10 @@
 Product engineering procedures
 ==============================
 
-Development procedures have been described in the
-:doc:`qualification-plan:index`. These procedures have been developed to ensure
-that the Ferrocene toolchain conforms to the appropriate level of quality.
-
-
-PE methodology
---------------
-
-See the following chapters for the detailed process:
+Development procedures are described in the :doc:`qualification-plan:index`.
+These procedures have been developed to ensure that the Ferrocene toolchain
+conforms to the appropriate level of quality. See the following chapters for
+the detailed process:
 
 * :doc:`qualification-plan:development`
 * :doc:`qualification-plan:testing`

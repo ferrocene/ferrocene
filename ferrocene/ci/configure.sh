@@ -64,7 +64,7 @@ add --enable-cargo-native-static
 #
 # If this confiugration is missing the resulting LLVM will be different, and
 # might require libstdc++ to be installed on the user's system.
-add --enable-llvm-static-stdcpp
+add --disable-llvm-static-stdcpp
 
 # Produce XZ-compressed tarballs when building dist artifacts.
 #

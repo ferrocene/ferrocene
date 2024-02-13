@@ -345,6 +345,10 @@ The :t:`evaluation` of a :t:`constant expression` that results in
 It is a static error if a :t:`constant expression` either :t:`[panic]s` or
 control reaches the invocation of :t:`macro` :std:`core::panic`.
 
+:dp:`fls_XopG4yS9Q4q1`
+It is a static error if the evaluation of a :t:`constant expression` results in
+a :t:`value` that is unaligned.
+
 .. rubric:: Dynamic Semantics
 
 :dp:`fls_tg0kya5125jt`

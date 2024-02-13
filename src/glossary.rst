@@ -4526,7 +4526,7 @@ null
 ^^^^
 
 :dp:`fls_8sh17t37b2ml`
-A :dc:`null` :t:`value` denotes a tool-defined address.
+A :dc:`null` :t:`value` denotes the address ``0``.
 
 .. _fls_a0qsojiymgjy:
 

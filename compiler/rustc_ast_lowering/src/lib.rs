@@ -33,6 +33,7 @@
 #![allow(internal_features)]
 #![feature(rustdoc_internals)]
 #![doc(rust_logo)]
+#![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(let_chains)]
 #![deny(rustc::untranslatable_diagnostic)]
@@ -63,7 +64,7 @@ use rustc_middle::ty::{ResolverAstLowering, TyCtxt};
 use rustc_session::parse::{add_feature_diagnostics, feature_err};
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::{DesugaringKind, Span, DUMMY_SP};
-use smallvec::SmallVec;
+use smallvec::{smallvec, SmallVec};
 use std::collections::hash_map::Entry;
 use thin_vec::ThinVec;
 
@@ -131,6 +132,7 @@ struct LoweringContext<'a, 'hir> {
     allow_gen_future: Lrc<[Symbol]>,
     allow_async_iterator: Lrc<[Symbol]>,
     allow_for_await: Lrc<[Symbol]>,
+    allow_async_fn_traits: Lrc<[Symbol]>,
 
     /// Mapping from generics `def_id`s to TAIT generics `def_id`s.
     /// For each captured lifetime (e.g., 'a), we create a new lifetime parameter that is a generic
@@ -176,6 +178,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                 [sym::gen_future].into()
             },
             allow_for_await: [sym::async_iterator].into(),
+            allow_async_fn_traits: [sym::async_fn_traits].into(),
             // FIXME(gen_blocks): how does `closure_track_caller`/`async_fn_track_caller`
             // interact with `gen`/`async gen` blocks
             allow_async_iterator: [sym::gen_future, sym::async_iterator].into(),
@@ -296,7 +299,6 @@ enum ImplTraitPosition {
     Path,
     Variable,
     Trait,
-    AsyncBlock,
     Bound,
     Generic,
     ExternFnParam,
@@ -323,7 +325,6 @@ impl std::fmt::Display for ImplTraitPosition {
             ImplTraitPosition::Path => "paths",
             ImplTraitPosition::Variable => "the type of variable bindings",
             ImplTraitPosition::Trait => "traits",
-            ImplTraitPosition::AsyncBlock => "async blocks",
             ImplTraitPosition::Bound => "bounds",
             ImplTraitPosition::Generic => "generics",
             ImplTraitPosition::ExternFnParam => "`extern fn` parameters",
@@ -749,8 +750,14 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         self.resolver.get_partial_res(id).map_or(Res::Err, |pr| pr.expect_full_res())
     }
 
-    fn expect_full_res_from_use(&mut self, id: NodeId) -> impl Iterator<Item = Res<NodeId>> {
-        self.resolver.get_import_res(id).present_items()
+    fn lower_import_res(&mut self, id: NodeId, span: Span) -> SmallVec<[Res; 3]> {
+        let res = self.resolver.get_import_res(id).present_items();
+        let res: SmallVec<_> = res.map(|res| self.lower_res(res)).collect();
+        if res.is_empty() {
+            self.dcx().span_delayed_bug(span, "no resolution for an import");
+            return smallvec![Res::Err];
+        }
+        res
     }
 
     fn make_lang_item_qpath(&mut self, lang_item: hir::LangItem, span: Span) -> hir::QPath<'hir> {
@@ -1311,7 +1318,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                         span: t.span,
                     },
                     itctx,
-                    ast::BoundConstness::Never,
+                    TraitBoundModifiers::NONE,
                 );
                 let bounds = this.arena.alloc_from_iter([bound]);
                 let lifetime_bound = this.elided_dyn_bound(t.span);
@@ -1426,7 +1433,10 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                                         itctx,
                                         // Still, don't pass along the constness here; we don't want to
                                         // synthesize any host effect args, it'd only cause problems.
-                                        ast::BoundConstness::Never,
+                                        TraitBoundModifiers {
+                                            constness: BoundConstness::Never,
+                                            ..*modifiers
+                                        },
                                     ))
                                 }
                                 BoundPolarity::Maybe(_) => None,
@@ -2019,7 +2029,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     ) -> hir::GenericBound<'hir> {
         match tpb {
             GenericBound::Trait(p, modifiers) => hir::GenericBound::Trait(
-                self.lower_poly_trait_ref(p, itctx, modifiers.constness.into()),
+                self.lower_poly_trait_ref(p, itctx, *modifiers),
                 self.lower_trait_bound_modifiers(*modifiers),
             ),
             GenericBound::Outlives(lifetime) => {
@@ -2192,7 +2202,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
 
     fn lower_trait_ref(
         &mut self,
-        constness: ast::BoundConstness,
+        modifiers: ast::TraitBoundModifiers,
         p: &TraitRef,
         itctx: &ImplTraitContext,
     ) -> hir::TraitRef<'hir> {
@@ -2202,7 +2212,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             &p.path,
             ParamMode::Explicit,
             itctx,
-            Some(constness),
+            Some(modifiers),
         ) {
             hir::QPath::Resolved(None, path) => path,
             qpath => panic!("lower_trait_ref: unexpected QPath `{qpath:?}`"),
@@ -2215,11 +2225,11 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         &mut self,
         p: &PolyTraitRef,
         itctx: &ImplTraitContext,
-        constness: ast::BoundConstness,
+        modifiers: ast::TraitBoundModifiers,
     ) -> hir::PolyTraitRef<'hir> {
         let bound_generic_params =
             self.lower_lifetime_binder(p.trait_ref.ref_id, &p.bound_generic_params);
-        let trait_ref = self.lower_trait_ref(constness, &p.trait_ref, itctx);
+        let trait_ref = self.lower_trait_ref(modifiers, &p.trait_ref, itctx);
         hir::PolyTraitRef { bound_generic_params, trait_ref, span: self.lower_span(p.span) }
     }
 

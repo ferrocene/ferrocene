@@ -848,7 +848,7 @@ impl<'p, Cx: TypeCx> Clone for PatStack<'p, Cx> {
 }
 
 impl<'p, Cx: TypeCx> PatStack<'p, Cx> {
-    fn from_pattern(pat: &'p DeconstructedPat<'p, Cx>) -> Self {
+    fn from_pattern(pat: &'p DeconstructedPat<Cx>) -> Self {
         PatStack { pats: smallvec![PatOrWild::Pat(pat)], relevant: true }
     }
 
@@ -1082,7 +1082,7 @@ impl<'p, Cx: TypeCx> Matrix<'p, Cx> {
         pcx: &PlaceCtxt<'_, Cx>,
         ctor: &Constructor<Cx>,
         ctor_is_relevant: bool,
-    ) -> Matrix<'p, Cx> {
+    ) -> Result<Matrix<'p, Cx>, Cx::Error> {
         let ctor_sub_tys = pcx.ctor_sub_tys(ctor);
         let arity = ctor_sub_tys.len();
         let specialized_place_ty = ctor_sub_tys.chain(self.place_ty[1..].iter().cloned()).collect();
@@ -1098,12 +1098,12 @@ impl<'p, Cx: TypeCx> Matrix<'p, Cx> {
             wildcard_row_is_relevant: self.wildcard_row_is_relevant && ctor_is_relevant,
         };
         for (i, row) in self.rows().enumerate() {
-            if ctor.is_covered_by(pcx.cx, row.head().ctor()) {
+            if ctor.is_covered_by(pcx.cx, row.head().ctor())? {
                 let new_row = row.pop_head_constructor(ctor, arity, ctor_is_relevant, i);
                 matrix.expand_and_push(new_row);
             }
         }
-        matrix
+        Ok(matrix)
     }
 }
 
@@ -1523,7 +1523,7 @@ fn compute_exhaustiveness_and_usefulness<'a, 'p, Cx: TypeCx>(
         // strictly fewer rows. In that case we can sometimes skip it. See the top of the file for
         // details.
         let ctor_is_relevant = matches!(ctor, Constructor::Missing) || missing_ctors.is_empty();
-        let mut spec_matrix = matrix.specialize_constructor(pcx, &ctor, ctor_is_relevant);
+        let mut spec_matrix = matrix.specialize_constructor(pcx, &ctor, ctor_is_relevant)?;
         let mut witnesses = ensure_sufficient_stack(|| {
             compute_exhaustiveness_and_usefulness(mcx, &mut spec_matrix, false)
         })?;
@@ -1575,7 +1575,7 @@ pub enum Usefulness<'p, Cx: TypeCx> {
     /// The arm is useful. This additionally carries a set of or-pattern branches that have been
     /// found to be redundant despite the overall arm being useful. Used only in the presence of
     /// or-patterns, otherwise it stays empty.
-    Useful(Vec<&'p DeconstructedPat<'p, Cx>>),
+    Useful(Vec<&'p DeconstructedPat<Cx>>),
     /// The arm is redundant and can be removed without changing the behavior of the match
     /// expression.
     Redundant,

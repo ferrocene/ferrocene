@@ -420,6 +420,8 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "writeable",
     "yoke",
     "yoke-derive",
+    "zerocopy",
+    "zerocopy-derive",
     "zerofrom",
     "zerofrom-derive",
     "zeroize", // this is a false positive: it's only used by generate-tarball
@@ -486,13 +488,17 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
     "mach",
     "memchr",
     "object",
+    "proc-macro2",
+    "quote",
     "regalloc2",
     "region",
     "rustc-hash",
     "slice-group-by",
     "smallvec",
     "stable_deref_trait",
+    "syn",
     "target-lexicon",
+    "unicode-ident",
     "version_check",
     "wasmtime-jit-icache-coherence",
     "winapi",
@@ -507,6 +513,8 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
     "windows_x86_64_gnu",
     "windows_x86_64_gnullvm",
     "windows_x86_64_msvc",
+    "zerocopy",
+    "zerocopy-derive",
     // tidy-alphabetical-end
 ];
 

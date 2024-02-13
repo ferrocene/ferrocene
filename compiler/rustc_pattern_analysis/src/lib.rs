@@ -119,20 +119,20 @@ pub trait TypeCx: Sized + fmt::Debug {
     /// `DeconstructedPat`. Only invoqued when `pat.ctor()` is `Struct | Variant(_) | UnionField`.
     fn write_variant_name(
         f: &mut fmt::Formatter<'_>,
-        pat: &crate::pat::DeconstructedPat<'_, Self>,
+        pat: &crate::pat::DeconstructedPat<Self>,
     ) -> fmt::Result;
 
     /// Raise a bug.
-    fn bug(&self, fmt: fmt::Arguments<'_>) -> !;
+    fn bug(&self, fmt: fmt::Arguments<'_>) -> Self::Error;
 
     /// Lint that the range `pat` overlapped with all the ranges in `overlaps_with`, where the range
     /// they overlapped over is `overlaps_on`. We only detect singleton overlaps.
     /// The default implementation does nothing.
     fn lint_overlapping_range_endpoints(
         &self,
-        _pat: &DeconstructedPat<'_, Self>,
+        _pat: &DeconstructedPat<Self>,
         _overlaps_on: IntRange,
-        _overlaps_with: &[&DeconstructedPat<'_, Self>],
+        _overlaps_with: &[&DeconstructedPat<Self>],
     ) {
     }
 }
@@ -140,7 +140,7 @@ pub trait TypeCx: Sized + fmt::Debug {
 /// The arm of a match expression.
 #[derive(Debug)]
 pub struct MatchArm<'p, Cx: TypeCx> {
-    pub pat: &'p DeconstructedPat<'p, Cx>,
+    pub pat: &'p DeconstructedPat<Cx>,
     pub has_guard: bool,
     pub arm_data: Cx::ArmData,
 }

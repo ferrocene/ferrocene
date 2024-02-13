@@ -340,14 +340,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let itctx = ImplTraitContext::Universal;
                 let (generics, (trait_ref, lowered_ty)) =
                     self.lower_generics(ast_generics, *constness, id, &itctx, |this| {
-                        let constness = match *constness {
-                            Const::Yes(span) => BoundConstness::Maybe(span),
-                            Const::No => BoundConstness::Never,
+                        let modifiers = TraitBoundModifiers {
+                            constness: match *constness {
+                                Const::Yes(span) => BoundConstness::Maybe(span),
+                                Const::No => BoundConstness::Never,
+                            },
+                            asyncness: BoundAsyncness::Normal,
+                            // we don't use this in bound lowering
+                            polarity: BoundPolarity::Positive,
                         };
 
                         let trait_ref = trait_ref.as_ref().map(|trait_ref| {
                             this.lower_trait_ref(
-                                constness,
+                                modifiers,
                                 trait_ref,
                                 &ImplTraitContext::Disallowed(ImplTraitPosition::Trait),
                             )
@@ -493,8 +498,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     }
                 }
 
-                let res =
-                    self.expect_full_res_from_use(id).map(|res| self.lower_res(res)).collect();
+                let res = self.lower_import_res(id, path.span);
                 let path = self.lower_use_path(res, &path, ParamMode::Explicit);
                 hir::ItemKind::Use(path, hir::UseKind::Single)
             }
@@ -530,7 +534,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 // for that we return the `{}` import (called the
                 // `ListStem`).
 
-                let prefix = Path { segments, span: prefix.span.to(path.span), tokens: None };
+                let span = prefix.span.to(path.span);
+                let prefix = Path { segments, span, tokens: None };
 
                 // Add all the nested `PathListItem`s to the HIR.
                 for &(ref use_tree, id) in trees {
@@ -564,9 +569,16 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     });
                 }
 
-                let res =
-                    self.expect_full_res_from_use(id).map(|res| self.lower_res(res)).collect();
-                let path = self.lower_use_path(res, &prefix, ParamMode::Explicit);
+                let path = if trees.is_empty() && !prefix.segments.is_empty() {
+                    // For empty lists we need to lower the prefix so it is checked for things
+                    // like stability later.
+                    let res = self.lower_import_res(id, span);
+                    self.lower_use_path(res, &prefix, ParamMode::Explicit)
+                } else {
+                    // For non-empty lists we can just drop all the data, the prefix is already
+                    // present in HIR as a part of nested imports.
+                    self.arena.alloc(hir::UsePath { res: smallvec![], segments: &[], span })
+                };
                 hir::ItemKind::Use(path, hir::UseKind::ListStem)
             }
         }
@@ -1086,7 +1098,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 body.span,
                 coroutine_kind,
                 hir::CoroutineSource::Fn,
-                None,
             );
 
             // FIXME(async_fn_track_caller): Can this be moved above?
@@ -1108,7 +1119,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         body_span: Span,
         coroutine_kind: CoroutineKind,
         coroutine_source: hir::CoroutineSource,
-        return_type_hint: Option<hir::FnRetTy<'hir>>,
     ) -> (&'hir [hir::Param<'hir>], hir::Expr<'hir>) {
         let mut parameters: Vec<hir::Param<'_>> = Vec::new();
         let mut statements: Vec<hir::Stmt<'_>> = Vec::new();
@@ -1278,12 +1288,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
         };
         let closure_id = coroutine_kind.closure_id();
         let coroutine_expr = self.make_desugared_coroutine_expr(
-            // FIXME(async_closures): This should only move locals,
-            // and not upvars. Capturing closure upvars by ref doesn't
-            // work right now anyways, so whatever.
-            CaptureBy::Value { move_kw: rustc_span::DUMMY_SP },
+            // The default capture mode here is by-ref. Later on during upvar analysis,
+            // we will force the captured arguments to by-move, but for async closures,
+            // we want to make sure that we avoid unnecessarily moving captures, or else
+            // all async closures would default to `FnOnce` as their calling mode.
+            CaptureBy::Ref,
             closure_id,
-            return_type_hint,
+            None,
             body_span,
             desugaring_kind,
             coroutine_source,

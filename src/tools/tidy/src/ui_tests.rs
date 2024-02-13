@@ -18,7 +18,7 @@ const FERROCENE_EXTRA_ROOT_ENTRY_LIMIT: usize = 1;
 // #73494.
 const ENTRY_LIMIT: usize = 900;
 const ISSUES_ENTRY_LIMIT: usize = 1807;
-const ROOT_ENTRY_LIMIT: usize = 870;
+const ROOT_ENTRY_LIMIT: usize = 868;
 
 const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
     "rs",     // test source files

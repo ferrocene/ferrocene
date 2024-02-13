@@ -870,6 +870,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::dist::SourceTarball,
                 crate::ferrocene::dist::SelfTest,
                 crate::ferrocene::dist::TestOutcomes,
+                crate::ferrocene::dist::GenerateBuildMetadata,
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(

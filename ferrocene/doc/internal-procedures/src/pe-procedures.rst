@@ -42,19 +42,6 @@ Create a new branch based off the ``main`` branch and immediately check it out.
 
    git checkout -b branch_name
 
-It is suggested that ``branch_name`` should employ the following format:
-::
-
-   <personal_prefix>-<description>
-
-where ``personal_prefix`` identifies the author of the eventual PR, and
-``description`` is a short description of the branch. For example:
-::
-
-   kirtchev-add-branch-guidelines
-   pa-self-test-linkers
-   tshepang-unused-config-option
-
 Update branch
 ~~~~~~~~~~~~~
 

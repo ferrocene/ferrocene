@@ -97,6 +97,10 @@ locally and in the Ferrocene GitHub repository. The branch can be called
 everything except for ``main``, ``release/*``, ``automation/*``, or other
 reserved branch names.
 
+To avoid conflicts, it is strongly recommended that the main developer for a
+branch adds a prefix to the branch name unique to them (like ``pa-`` or
+``skade-``).
+
 Each time a new commit is pushed to the Ferrocene GitHub repository, the
 Ferrocene CI infrastructure runs a subset of the test suite as part of the
 commit workflow. These checks are not meant to provide any assurance on the

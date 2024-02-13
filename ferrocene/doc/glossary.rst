@@ -10,12 +10,19 @@ Definition of Terms
        Uses the control flow graph to verify the ownership and borrowing system of
        the programming language.
 
+   CircleCI
+       CI platform used by the Ferrocene repository to run its tests and build
+       its releases.
+
    Exhaustiveness Analyzer
        Determines whether the alternatives of a match expression fully cover the
        range of a type.
 
    Git
        A version control system that tracks changes in a set of computer files.
+
+   GitHub
+       Code hosting and collaboration platform.
 
    HazOp
        Hazard and Operability study. It is a process for analyzing hazards in a

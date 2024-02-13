@@ -15,7 +15,6 @@ based on software engineering best practices.
 
    onboarding
    setup-local-env
-   issues
    manual-upstream-pulls
    manual-subtree-pulls
    known-problems

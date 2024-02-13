@@ -27,6 +27,7 @@ pub fn target() -> Target {
         | SanitizerSet::SAFESTACK
         | SanitizerSet::THREAD;
     base.supports_xray = true;
+    base.llvm_args = crate::spec::cvs!["--protect-from-escaped-allocas"];
 
     Target {
         llvm_target: "x86_64-unknown-linux-gnu".into(),

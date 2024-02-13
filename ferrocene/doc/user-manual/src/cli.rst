@@ -310,12 +310,6 @@ Command-Line Interface
       Multiple ``linker-flavor`` code generation options are allowed on the
       command line.
 
-   .. cli:option:: -C llvm-args=-protect-from-escaped-allocas=true
-
-      Code generation option ``llvm-args`` with
-      ``-protect-from-escaped-allocas=true`` disables the stack coloring
-      optimization pass when a reference to a function's stack is returned.
-
    .. cli:option:: -C metadata=<data>
 
       Code generation option ``metadata`` enhances symbol mangling by supplying

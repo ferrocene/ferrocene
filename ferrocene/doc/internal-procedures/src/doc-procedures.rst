@@ -144,6 +144,33 @@ the substitution name with ``|``:
 
    |doc_title|
 
+Mentioning targets
+~~~~~~~~~~~~~~~~~~
+
+When you need to refer to targets across the documentation, it's better to use
+a human-readable name (like ":target:`aarch64-unknown-none`") than the target
+triple, as the latter is often inconsistent between similar targets and could
+be confusing to customers.
+
+To keep the target names consistent, you can use the ``:target:`` role with the
+target triple as its content, which will be rendered as the human-readable
+name:
+
+.. code-block:: rst
+
+   :target:`x86_64-unknown-linux-gnu`
+
+The ``:target-with-triple:`` role will also add the triple following the
+human-readable name, which is best used when customers then need to copy/paste
+the triple:
+
+.. code-block:: rst
+
+   :target-with-triple:`aarch64-unknown-none`
+
+The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
+referring to a target not defined in that file will emit a warning.
+
 Signing documents
 -----------------
 

@@ -8,54 +8,207 @@ ISO 26262 requirements
    :header:  ISO 26262 clause, Clause Description, Document chapter(s)
    :delim: !
 
-   11.4.1! If the safety lifecycle incorporates the use of a software tool for the development of a system, or its hardware or software elements, such that activities or tasks required by ISO 26262 series of standards rely on the correct functioning of a software tool, and where the relevant outputs of that tool are not examined or verified for the applicable process step(s), such software tools shall comply with the requirements of this clause.! See the traceability below
-   11.4.2!If the confidence level evaluation or qualification of a software tool is performed independently from the development of a particular safety-related item or element, the validity of this predetermined Tool Confidence Level or qualification shall be verified prior to the software tool being used for the development of a particular safety-related item or element.! N/A
-   11.4.3!When using a software tool, it shall be ensured that its usage, its determined environmental and functional constraints and its general operating conditions comply with its evaluation criteria or its qualification.! :doc:`Safety Manual - Usage <safety-manual:usage>`
-   11.4.4.1!The usage of a software tool shall be planned, including the determination of:!See sub items below
-   11.4.4.1.a!the identification and version number of the software tool;! :doc:`Safety Manual - Environment <safety-manual:environment>`
-   11.4.4.1.b!the configuration of the software tool;! :doc:`Safety Manual - Tool options <safety-manual:options>`
-   11.4.4.1.c!the use cases of the software tool;! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
-   11.4.4.1.d!the environment in which the software tool is executed,! :doc:`Safety Manual - Environment <safety-manual:environment>`
-   11.4.4.1.e!the maximum ASIL of all the safety requirements, allocated to the item or the element that can directly be violated, if the software tool is malfunctioning and producing corresponding erroneous output; and! :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
-   11.4.4.1.f!the methods to qualify the software tool, if required, based on the determined level of confidence and ASIL.! :doc:`Evaluation Report - Qualification Method <evaluation-report:method>`
-   11.4.4.2!To ensure the proper evaluation or usage of the software tool, the following information shall be available:! See sub items below
-   11.4.4.2.a!a description of the features, functions and technical properties of the software tool;! :doc:`Qualification Plan - Ferrocene details <qualification-plan:details>`
-   11.4.4.2.b!the user manual or other usage guides, if applicable;! :doc:`User Manual <user-manual:index>`
-   11.4.4.2.c!a description of the environment required for its operation,! :doc:`Safety Manual - Environment <safety-manual:environment>`
-   11.4.4.2.d!a description of the expected behaviour of the software tool under anomalous operating conditions, if applicable;! :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
-   11.4.4.2.e!a description of known software tool malfunctions and the appropriate safeguards, avoidance or workaround measures, if applicable; and! :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
-   11.4.4.2.f!the measures for the prevention or detection of malfunctions and the corresponding erroneous output of the software tool identified during the determination of the required level of confidence for this software tool.! :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
-   11.4.5.1!The description of the usage of a software tool shall contain the following information:! See sub items below
-   11.4.5.1.a!the intended purpose;! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
-   11.4.5.1.b!the inputs and expected outputs; and! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
-   11.4.5.1.c!the usage procedure, environmental and functional constraints, if applicable.! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
-   11.4.5.2!The intended usage of the software tool shall be analysed and evaluated to determine:!See sub items below
-   11.4.5.2.a!the possibility that a malfunction of a particular software tool can introduce or fail to detect errors in a safety-related item or element being developed. This is expressed by the classes of Tool Impact (TI):! See sub items below
-   11.4.5.2.a.1!TI1 shall be selected when there is an argument that there is no such possibility;! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.2.a.2!TI2 shall be selected in all other cases;! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.2.b!the confidence in measures that prevent the software tool from malfunctioning and producing corresponding erroneous output, or in measures that detect that the software tool has malfunctioned and has produced corresponding erroneous output. This is expressed by the classes of Tool error Detection (TD):! See sub items below
-   11.4.5.2.b.1!TD1 shall be selected if there is a high degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.2.b.2!TD2 shall be selected if there is a medium degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected;! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.2.b.3!TD3 shall be selected in all other cases.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.3!If the correct selection of TI or TD is unclear or doubtful, TI and TD should be estimated conservatively.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.5.4!Based on the values determined for the classes of TI and TD (in accordance with 11.4.5.2 or 11.4.5.3), the required software Tool Confidence Level shall be determined according to Table 3.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   11.4.6.1!For the qualification of software tools classified at TCL3, the methods listed in Table 4 shall be applied. For the qualification of software tools classified at TCL2, the methods listed in Table 5 shall be applied. A software tool classified at TCL1 needs no qualification methods.! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-   11.4.6.2!The qualification of the software tool shall be documented including the following:! See sub items below
-   11.4.6.2.a!the unique identification and version number of the software tool;! :doc:`Safety Manual - Environment <safety-manual:environment>`
-   11.4.6.2.b!the maximum Tool Confidence Level for which the software tool is classified together with a reference to its evaluation analysis;! :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
-   11.4.6.2.c!for the considered use cases the pre-determined maximum ASIL, or specific ASIL, of any safety requirement which might directly be violated if the software tool is malfunctioning and produces corresponding erroneous output;! :doc:`Qualification Report - Acceptability Statement <qualification-report:statement>`
-   11.4.6.2.d!the configuration and environment for which the software tool is qualified;! :doc:`Safety Manual - Environment <safety-manual:environment>`
-   11.4.6.2.e!the person or organization who carried out the qualification;!  :doc:`Qualification Plan - Ferrocene organization <../organization>`
-   11.4.6.2.f!the methods applied for its qualification in accordance with 11.4.6.1;! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-   11.4.6.2.g!the results of the measures applied to qualify the software tool; and! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
-   11.4.6.2.h!the usage constraints and malfunctions identified during the qualification, if applicable.! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
-   11.4.7! Increased confidence from use! N/A
-   11.4.8.1!If the method "Evaluation of the tool development process" in accordance with Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with the requirements of this sub-clause.! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-   11.4.8.2!The development process applied for the development of the software tool shall comply with an appropriate standard.! :doc:`Qualification Plan - Development process <qualification-plan:development>`
-   11.4.8.3!The evaluation of the development process applied for the development of the software tool shall be based on an appropriate national or international standard and provide evidence that a suitable software development process has been applied.! :doc:`Qualification Plan - Development process <qualification-plan:development>`
-   11.4.9!Validation of the software tool! :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
-   11.4.9.1!If the method "Validation of the software tool" according to Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with requirements of this sub-clause.! See items 11.4.9.2 below
-   11.4.9.2!The validation of the software tool shall meet the following criteria:! See sub items below
-   11.4.9.2.a!the validation measures shall provide evidence that the software tool complies with specified requirements to its purpose as specified in the classification;! :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
-   11.4.9.2.b!the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
-   11.4.9.2.c!the reaction of the software tool to anomalous operating conditions shall be examined;! :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+   * - 11.4.1
+     - See the traceability below
+     - If the safety lifecycle incorporates the use of a software tool for the development of a system, or its hardware or software elements, such that activities or tasks required by ISO 26262 series of standards rely on the correct functioning of a software tool, and where the relevant outputs of that tool are not examined or verified for the applicable process step(s), such software tools shall comply with the requirements of this clause.
+
+   * - 11.4.2
+     - N/A
+     - If the confidence level evaluation or qualification of a software tool is performed independently from the development of a particular safety-related item or element, the validity of this predetermined Tool Confidence Level or qualification shall be verified prior to the software tool being used for the development of a particular safety-related item or element.
+
+   * - 11.4.3
+     - :doc:`Safety Manual - Usage <safety-manual:usage>`
+     - When using a software tool, it shall be ensured that its usage, its determined environmental and functional constraints and its general operating conditions comply with its evaluation criteria or its qualification.
+
+   * - 11.4.4.1
+     - See sub items below
+     - The usage of a software tool shall be planned, including the determination of:
+
+   * - 11.4.4.1.a
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - the identification and version number of the software tool;
+
+   * - 11.4.4.1.b
+     - :doc:`Safety Manual - Tool options <safety-manual:options>`
+     - the configuration of the software tool;
+
+   * - 11.4.4.1.c
+     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - the use cases of the software tool;
+
+   * - 11.4.4.1.d
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - the environment in which the software tool is executed,
+
+   * - 11.4.4.1.e
+     - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
+     - the maximum ASIL of all the safety requirements, allocated to the item or the element that can directly be violated, if the software tool is malfunctioning and producing corresponding erroneous output; and
+
+   * - 11.4.4.1.f
+     - :doc:`Evaluation Report - Qualification Method <evaluation-report:method>`
+     - the methods to qualify the software tool, if required, based on the determined level of confidence and ASIL.
+
+   * - 11.4.4.2
+     - See sub items below
+     - To ensure the proper evaluation or usage of the software tool, the following information shall be available:
+
+   * - 11.4.4.2.a
+     - :doc:`Qualification Plan - Ferrocene details <qualification-plan:details>`
+     - a description of the features, functions and technical properties of the software tool;
+
+   * - 11.4.4.2.b
+     - :doc:`User Manual <user-manual:index>`
+     - the user manual or other usage guides, if applicable;
+
+   * - 11.4.4.2.c
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - a description of the environment required for its operation,
+
+   * - 11.4.4.2.d
+     - :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+     - a description of the expected behaviour of the software tool under anomalous operating conditions, if applicable;
+
+   * - 11.4.4.2.e
+     - :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
+     - a description of known software tool malfunctions and the appropriate safeguards, avoidance or workaround measures, if applicable; and
+
+   * - 11.4.4.2.f
+     - :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
+     - the measures for the prevention or detection of malfunctions and the corresponding erroneous output of the software tool identified during the determination of the required level of confidence for this software tool.
+
+   * - 11.4.5.1
+     - See sub items below
+     - The description of the usage of a software tool shall contain the following information:
+
+   * - 11.4.5.1.a
+     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - the intended purpose;
+
+   * - 11.4.5.1.b
+     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - the inputs and expected outputs; and
+
+   * - 11.4.5.1.c
+     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - the usage procedure, environmental and functional constraints, if applicable.
+
+   * - 11.4.5.2
+     - See sub items below
+     - The intended usage of the software tool shall be analysed and evaluated to determine:
+
+   * - 11.4.5.2.a
+     - See sub items below
+     - the possibility that a malfunction of a particular software tool can introduce or fail to detect errors in a safety-related item or element being developed. This is expressed by the classes of Tool Impact (TI):
+
+   * - 11.4.5.2.a.1
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - TI1 shall be selected when there is an argument that there is no such possibility;
+
+   * - 11.4.5.2.a.2
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - TI2 shall be selected in all other cases;
+
+   * - 11.4.5.2.b
+     - See sub items below
+     - the confidence in measures that prevent the software tool from malfunctioning and producing corresponding erroneous output, or in measures that detect that the software tool has malfunctioned and has produced corresponding erroneous output. This is expressed by the classes of Tool error Detection (TD):
+
+   * - 11.4.5.2.b.1
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - TD1 shall be selected if there is a high degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected
+
+   * - 11.4.5.2.b.2
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - TD2 shall be selected if there is a medium degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected;
+
+   * - 11.4.5.2.b.3
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - TD3 shall be selected in all other cases.
+
+   * - 11.4.5.3
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - If the correct selection of TI or TD is unclear or doubtful, TI and TD should be estimated conservatively.
+
+   * - 11.4.5.4
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - Based on the values determined for the classes of TI and TD (in accordance with 11.4.5.2 or 11.4.5.3), the required software Tool Confidence Level shall be determined according to Table 3.
+
+   * - 11.4.6.1
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - For the qualification of software tools classified at TCL3, the methods listed in Table 4 shall be applied. For the qualification of software tools classified at TCL2, the methods listed in Table 5 shall be applied. A software tool classified at TCL1 needs no qualification methods.
+
+   * - 11.4.6.2
+     - See sub items below
+     - The qualification of the software tool shall be documented including the following:
+
+   * - 11.4.6.2.a
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - the unique identification and version number of the software tool;
+
+   * - 11.4.6.2.b
+     - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
+     - the maximum Tool Confidence Level for which the software tool is classified together with a reference to its evaluation analysis;
+
+   * - 11.4.6.2.c
+     - :doc:`Qualification Report - Acceptability Statement <qualification-report:statement>`
+     - for the considered use cases the pre-determined maximum ASIL, or specific ASIL, of any safety requirement which might directly be violated if the software tool is malfunctioning and produces corresponding erroneous output;
+
+   * - 11.4.6.2.d
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - the configuration and environment for which the software tool is qualified;
+
+   * - 11.4.6.2.e
+     - :doc:`Qualification Plan - Ferrocene organization <../organization>`
+     - the person or organization who carried out the qualification;
+
+   * - 11.4.6.2.f
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - the methods applied for its qualification in accordance with 11.4.6.1;
+
+   * - 11.4.6.2.g
+     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - the results of the measures applied to qualify the software tool; and
+
+   * - 11.4.6.2.h
+     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - the usage constraints and malfunctions identified during the qualification, if applicable.
+
+   * - 11.4.7
+     - N/A
+     - Increased confidence from use
+
+   * - 11.4.8.1
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - If the method "Evaluation of the tool development process" in accordance with Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with the requirements of this sub-clause.
+
+   * - 11.4.8.2
+     - :doc:`Qualification Plan - Development process <qualification-plan:development>`
+     - The development process applied for the development of the software tool shall comply with an appropriate standard.
+
+   * - 11.4.8.3
+     - :doc:`Qualification Plan - Development process <qualification-plan:development>`
+     - The evaluation of the development process applied for the development of the software tool shall be based on an appropriate national or international standard and provide evidence that a suitable software development process has been applied.
+
+   * - 11.4.9
+     - :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
+     - Validation of the software tool
+
+   * - 11.4.9.1
+     - See items 11.4.9.2 below
+     - If the method "Validation of the software tool" according to Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with requirements of this sub-clause.
+
+   * - 11.4.9.2
+     - See sub items below
+     - The validation of the software tool shall meet the following criteria:
+
+   * - 11.4.9.2.a
+     - :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
+     - the validation measures shall provide evidence that the software tool complies with specified requirements to its purpose as specified in the classification;
+
+   * - 11.4.9.2.b
+     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and
+
+   * - 11.4.9.2.c
+     - :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+     - the reaction of the software tool to anomalous operating conditions shall be examined;
+

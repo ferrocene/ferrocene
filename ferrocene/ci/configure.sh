@@ -66,6 +66,21 @@ add --enable-cargo-native-static
 # might require libstdc++ to be installed on the user's system.
 add --enable-llvm-static-stdcpp
 
+# Build LLVM as shared libraries
+#
+# `llvm.static-stdcpp` requires dynamic LLVM libraries to work properly. A
+# dynamic library (`.so`) can hold a copy of `libstdc++.a` whereas static
+# libraries (`.a`) will not include a copy of `libstdc++.a`.
+#
+# Building `rustc` against static LLVM libraries will use the local version
+# of `libstdc++.so` to satisfy the dependencies on `std::` symbols that the
+# LLVM libraries have. That can be problematic when `llvm.download-ci-llvm`
+# is enabled and the CI built LLVM as static libraries. CI's LLVM libraries
+# expect the CI's version of `libstdc++.a` but the local build will use the
+# local `libstdc++.so` and that can lead to a library version mismatch which
+# translates to `rustc` segfaulting at runtime.
+add --enable-llvm-link-shared
+
 # Produce XZ-compressed tarballs when building dist artifacts.
 #
 # If this configuration is missing or set to a different value the resulting

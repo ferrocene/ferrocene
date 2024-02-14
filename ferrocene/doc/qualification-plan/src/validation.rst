@@ -135,9 +135,3 @@ artifacts:
 If any of these artifacts is not satisfactory, the release is delayed until all
 problems are resolved. The traceability of this work is captured in a GitHub
 issue with the “Release” label.
-
-
-Traceability Matrix
--------------------
-
-.. include:: traceability-matrix.rst

@@ -1,0 +1,50 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+IEC 61508 requirements
+======================
+
+.. csv-table::
+   :header: IEC 61508 clause, Clause Description, Document chapter(s)
+   :delim: !
+
+   7.4.4.1!A software on-line support tool shall be considered to be a software element of the safety related system.! N/A
+   7.4.4.2!Software off-line support tools shall be selected as a coherent part of the software development activities.! N/A
+   7.4.4.3!The selection of the off-line support tools shall be justified! This qualification is the justification
+   7.4.4.4!All off-line support tools in classes T2 and T3 shall have a specification or product documentation which clearly defines the behaviour of the tool and any instructions or constraints on its use.! :doc:`Safety Manual - Usage <safety-manual:usage>`, :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`, and :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+   7.4.4.5!An assessment shall be carried out for offline support tools in classes T2 and T3 to determine the level of reliance placed on the tools, and the potential failure mechanisms of the tools that may affect the executable software. Where such failure mechanisms are identified, appropriate mitigation measures shall be taken.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+   7.4.4.6!For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`, and :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.7!The results of tool validation shall be documented covering the following results:! See items below
+   7.4.4.7.a! a chronological record of the validation activities;! :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
+   7.4.4.7.b! the version of the tool product manual being used;! :doc:`Document List <document-list:index>`
+   7.4.4.7.c! the tool functions being validated;! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+   7.4.4.7.d! tools and equipment used; ! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+   7.4.4.7.e! the results of the validation activity; the documented results of validation shall state either that the software has passed the validation or the reasons for its failure;! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.7.f! test cases and their results for subsequent analysis;! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.7.g! discrepancies between expected and actual results.! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.8! Where the conformance evidence of 7.4.4.6 is unavailable, there shall be effective measures to control failures of the executable safety related system that result from faults that are attributable to the tool.! N/A
+   7.4.4.9!The compatibility of the tools of an integrated toolset shall be verified.! N/A
+   7.4.4.10!To the extent required by the safety integrity level, the software or design representation (including a programming language) selected shall:! See items below
+   7.4.4.10.a! have a translator which has been assessed for fitness for purpose including, where appropriate, assessment against the international or national standards;! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+   7.4.4.10.b! use only defined language features;! :doc:`Safety Manual - Tool Options <safety-manual:options>`
+   7.4.4.10.c! match the characteristics of the application;! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+   7.4.4.10.d! contain features that facilitate the detection of design or programming mistakes;! :doc:`Safety Manual - Tool options <safety-manual:options>`
+   7.4.4.10.e! support features that match the design method.! :doc:`Safety Manual - Tool options <safety-manual:options>`
+   7.4.4.11!Where 7.4.4.10 cannot be fully satisfied, the fitness for purpose of the language, and any additional measures which address any identified shortcomings of the language shall be justified.! N/A
+   7.4.4.12!Programming languages for the development of all safety-related software shall be used according to a suitable programming language coding standard.! :doc:`Qualification Plan - Development process <qualification-plan:development>`
+   7.4.4.13!A programming language coding standard shall specify good programming practice, proscribe unsafe language features (for example, undefined language features, unstructured designs, etc.), promote code understandability, facilitate verification and testing, and specify procedures for source code documentation. Where practicable, the following information shall be contained in the source code:! See items below
+   7.4.4.13.a! legal entity (for example company, author(s), etc.);! N/A
+   7.4.4.13.b! description;! N/A
+   7.4.4.13.c! inputs and outputs;! N/A
+   7.4.4.13.d! configuration management history.! N/A
+   7.4.4.14!Where automatic code generation or similar automatic translation takes place, the suitability of the automatic translator for safety-related system development shall be assessed at the point in the development lifecycle where development support tools are selected.! This qualification
+   7.4.4.15!Where off-line support tools of classes T2 and T3 generate items in the configuration baseline, configuration management shall ensure that information on the tools is recorded in the configuration baseline. This includes in particular:! See items below
+   7.4.4.15.a! the identification of the tool and its version;! N/A
+   7.4.4.15.b! the identification of the configuration baseline items for which the tool version has been used;! N/A
+   7.4.4.15.c! the way the tool was used (including the tool parameters, options and scripts selected) for each configuration baseline item.! N/A
+   7.4.4.16!Configuration management shall ensure that for tools in classes T2 and T3, only qualified versions are used.! N/A
+   7.4.4.17!Configuration management shall ensure that only tools compatible with each other and with the safety-related system are used.! N/A
+   7.4.4.18!Each new version of off-line support tool shall be qualified. This qualification may rely on evidence provided for an earlier version if sufficient evidence is provided that:! See items below
+   7.4.4.18.a! the functional differences (if any) will not affect tool compatibility with the rest of the toolset; and! N/A
+   7.4.4.18.b! the new version is unlikely to contain significant new, unknown faults.! N/A
+   7.4.4.19!Depending on the nature of the software development, responsibility for conformance with 7.4.4 can rest with multiple parties. The division of responsibility shall be documented during safety planning (see Clause 6 of IEC 61508-1).! N/A

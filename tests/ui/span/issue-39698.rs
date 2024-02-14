@@ -12,6 +12,7 @@ fn main() {
         //~| ERROR is not bound in all patterns
         //~| ERROR is not bound in all patterns
         //~| ERROR is not bound in all patterns
+        //~| ERROR `a` is possibly-uninitialized
     }
 }
 

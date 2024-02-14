@@ -1,4 +1,6 @@
-use rustc_errors::{codes::*, DiagnosticArgFromDisplay};
+use rustc_errors::{
+    codes::*, AddToDiagnostic, Diagnostic, DiagnosticArgFromDisplay, SubdiagnosticMessageOp,
+};
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_span::{symbol::Ident, Span, Symbol};
 
@@ -38,14 +40,8 @@ pub struct InvalidAbi {
 
 pub struct InvalidAbiReason(pub &'static str);
 
-impl rustc_errors::AddToDiagnostic for InvalidAbiReason {
-    fn add_to_diagnostic_with<F>(self, diag: &mut rustc_errors::Diagnostic, _: F)
-    where
-        F: Fn(
-            &mut rustc_errors::Diagnostic,
-            rustc_errors::SubdiagnosticMessage,
-        ) -> rustc_errors::SubdiagnosticMessage,
-    {
+impl AddToDiagnostic for InvalidAbiReason {
+    fn add_to_diagnostic_with<F: SubdiagnosticMessageOp>(self, diag: &mut Diagnostic, _: F) {
         #[allow(rustc::untranslatable_diagnostic)]
         diag.note(self.0);
     }
@@ -98,11 +94,12 @@ pub struct MisplacedImplTrait<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag(ast_lowering_misplaced_assoc_ty_binding)]
-pub struct MisplacedAssocTyBinding<'a> {
+#[diag(ast_lowering_assoc_ty_binding_in_dyn)]
+pub struct MisplacedAssocTyBinding {
     #[primary_span]
     pub span: Span,
-    pub position: DiagnosticArgFromDisplay<'a>,
+    #[suggestion(code = " = impl", applicability = "maybe-incorrect", style = "verbose")]
+    pub suggestion: Option<Span>,
 }
 
 #[derive(Diagnostic, Clone, Copy)]

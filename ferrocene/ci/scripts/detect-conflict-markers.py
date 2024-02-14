@@ -38,7 +38,6 @@ def files_with_possible_conflict_markers(directory):
     # git grep automatically filters out submodules.
     lines = subprocess.run(
         ["git", "grep", "-l", "^<<<", "--", directory],
-        check=True,
         stdout=subprocess.PIPE,
         text=True,
     )

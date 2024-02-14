@@ -24,7 +24,9 @@ IEC 61508 requirements
      - The selection of the off-line support tools shall be justified
 
    * - 7.4.4.4
-     - :doc:`Safety Manual - Usage <safety-manual:usage>`, :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`, and :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - | :doc:`Safety Manual - Usage <safety-manual:usage>`
+       | :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+       | :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
      - All off-line support tools in classes T2 and T3 shall have a specification or product documentation which clearly defines the behaviour of the tool and any instructions or constraints on its use.
 
    * - 7.4.4.5
@@ -32,7 +34,8 @@ IEC 61508 requirements
      - An assessment shall be carried out for offline support tools in classes T2 and T3 to determine the level of reliance placed on the tools, and the potential failure mechanisms of the tools that may affect the executable software. Where such failure mechanisms are identified, appropriate mitigation measures shall be taken.
 
    * - 7.4.4.6
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`, and :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - | :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+       | :doc:`Qualification Report - Test results <qualification-report:tests/index>`
      - For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.
 
    * - 7.4.4.7
@@ -53,7 +56,7 @@ IEC 61508 requirements
 
    * - 7.4.4.7.d
      - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-     - tools and equipment used; 
+     - tools and equipment used;
 
    * - 7.4.4.7.e
      - :doc:`Qualification Report - Test results <qualification-report:tests/index>`

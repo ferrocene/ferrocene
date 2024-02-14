@@ -155,8 +155,11 @@ a:hover {
     text-decoration-style: solid;
 }
 
-p {
+p, div.line-block {
     margin: 1em 0;
+}
+
+p, div.line-block div.line {
     line-height: 1.5em;
 }
 
@@ -567,6 +570,7 @@ table td, table th {
     padding: 0.4em;
     border-bottom: 1px solid var(--table-border);
     text-align: left;
+    vertical-align: top;
 }
 
 table tr:last-child td {

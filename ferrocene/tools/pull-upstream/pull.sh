@@ -230,14 +230,20 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
 done
 
-# We expose additional commands for `x.py` which affects the completions file generation,
-# so we just run the command to regenerate those in case they need updating as this usually
-# does not need manual intervention.
-echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
-./x.py run generate-completions >/dev/null
-if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
-    git add "${GENERATED_COMPLETIONS_DIR}"
-    git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
+# Only run these steps when there are no conflicts in bootstrap, otherwise
+# trying to invoke x.py will fail to compile.
+if ferrocene/ci/scripts/detect-conflict-markers.py src/bootstrap >/dev/null; then
+    # We expose additional commands for `x.py` which affects the completions file generation,
+    # so we just run the command to regenerate those in case they need updating as this usually
+    # does not need manual intervention.
+    echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
+    ./x.py run generate-completions >/dev/null
+    if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
+        git add "${GENERATED_COMPLETIONS_DIR}"
+        git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
+    fi
+else
+    echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap conflicts"
 fi
 
 git branch -D "${TEMP_BRANCH}"

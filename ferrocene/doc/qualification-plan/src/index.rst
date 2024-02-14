@@ -27,6 +27,13 @@ Ferrocene in accordance to the standards above.
    validation
    patching
 
+.. toctree::
+   :caption: Traceability of standard requirements:
+   :numbered:
+
+   standards/iso-26262
+   standards/iec-61508
+
 .. appendices::
    :caption: Appendices:
    :numbered:

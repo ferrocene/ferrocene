@@ -11,8 +11,9 @@
 # whenever those are found, this script lists all the conflict markers in the
 # repository, and errors out if some are found.
 
-import subprocess
 from dataclasses import dataclass
+import subprocess
+import argparse
 
 
 START = "<<<<<<< "
@@ -33,10 +34,10 @@ EXCEPTIONS = {
 }
 
 
-def files_with_possible_conflict_markers():
+def files_with_possible_conflict_markers(directory):
     # git grep automatically filters out submodules.
     lines = subprocess.run(
-        ["git", "grep", "-l", "^<<<"],
+        ["git", "grep", "-l", "^<<<", "--", directory],
         check=True,
         stdout=subprocess.PIPE,
         text=True,
@@ -71,9 +72,9 @@ def conflict_markers_in_file(file):
             yield CustomDeleteMarker(file=file)
 
 
-def main():
+def main(directory):
     found_conflicts = False
-    for file in files_with_possible_conflict_markers():
+    for file in files_with_possible_conflict_markers(directory):
         for conflict in conflict_markers_in_file(file):
             print(conflict.repr())
             found_conflicts = True
@@ -102,4 +103,8 @@ class CustomDeleteMarker:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("directory", default=".", nargs="?")
+    args = parser.parse_args()
+
+    main(args.directory)

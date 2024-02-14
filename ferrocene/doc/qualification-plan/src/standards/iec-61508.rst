@@ -4,9 +4,12 @@
 IEC 61508 requirements
 ======================
 
-.. csv-table::
-   :header: IEC 61508 clause, Clause Description, Document chapter(s)
-   :delim: !
+.. list-table::
+   :header-rows: 1
+
+   * - Clause
+     - Document chapter(s)
+     - Clause description
 
    * - 7.4.4.1
      - N/A

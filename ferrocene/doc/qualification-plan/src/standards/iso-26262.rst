@@ -4,9 +4,12 @@
 ISO 26262 requirements
 ======================
 
-.. csv-table::
-   :header:  ISO 26262 clause, Clause Description, Document chapter(s)
-   :delim: !
+.. list-table::
+   :header-rows: 1
+
+   * - Clause
+     - Document chapter(s)
+     - Clause description
 
    * - 11.4.1
      - See the traceability below

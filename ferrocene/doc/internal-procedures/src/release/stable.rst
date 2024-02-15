@@ -78,6 +78,8 @@ changing ``ferrocene/ci/configure.sh``. In that file, find the line setting the
 ``technical-report-url`` option, if commented uncomment it, and replace the URL
 with the ``s3://`` URL you just uploaded.
 
+.. _publish-stable:
+
 Publishing a stable release
 ---------------------------
 
@@ -85,9 +87,13 @@ To publish a stable release, you need to first open a PR targeting the
 ``release/1.NN`` branch, changing the contents of ``ferrocene/ci/channel`` to
 ``stable``.
 
-Once the PR is merged, you need to grab the commit hash of the merge commit and
-:ref:`start a manual release <manual-release>` on the ``prod`` environment. The
-release will require approval from the release managers.
+Once the PR is merged, you need to grab the commit hash of the merge commit,
+:ref:`start a manual release <manual-release>` on the ``dev`` environment, and
+perform the :ref:`qualification-plan:release-validation`.
+
+Once the release validation succeeded, :ref:`start a manual release
+<manual-release>` on the ``prod`` environment. The release will require
+approval from the release managers.
 
 Finally, you need to send another PR targeting the ``release/1.NN`` branch,
 changing ``ferrocene/ci/channel`` back to ``beta`` and incrementing the point

@@ -25,11 +25,7 @@ use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
-<<<<<<< HEAD
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-use crate::utils;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::{

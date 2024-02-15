@@ -185,171 +185,10 @@ impl Checker {
             }
         };
 
-<<<<<<< HEAD
-        // Search for anything that's the regex 'href[ ]*=[ ]*".*?"'
-        with_attrs_in_source(&source, " href", |url, i, base| {
-            // Ignore external URLs
-            if url.starts_with("http:")
-                || url.starts_with("https:")
-                || url.starts_with("javascript:")
-                || url.starts_with("ftp:")
-                || url.starts_with("irc:")
-                || url.starts_with("data:")
-                || url.starts_with("mailto:")
-                || url.starts_with("file:")
-            {
-                report.links_ignored_external += 1;
-                return;
-            }
-            report.links_checked += 1;
-            let (url, fragment) = match url.split_once('#') {
-                None => (url, None),
-                Some((url, fragment)) => (url, Some(fragment)),
-            };
-            // NB: the `splitn` always succeeds, even if the delimiter is not present.
-            let url = url.splitn(2, '?').next().unwrap();
-
-            // Once we've plucked out the URL, parse it using our base url and
-            // then try to extract a file path.
-            let mut path = file.to_path_buf();
-            if !base.is_empty() || !url.is_empty() {
-                path.pop();
-                for part in Path::new(base).join(url).components() {
-                    match part {
-                        Component::Prefix(_) | Component::RootDir => {
-                            // Avoid absolute paths as they make the docs not
-                            // relocatable by making assumptions on where the docs
-                            // are hosted relative to the site root.
-                            report.errors += 1;
-                            println!(
-                                "{}:{}: absolute path - {}",
-                                pretty_path,
-                                i + 1,
-                                Path::new(base).join(url).display()
-                            );
-                            return;
-                        }
-                        Component::CurDir => {}
-                        Component::ParentDir => {
-                            path.pop();
-                        }
-                        Component::Normal(s) => {
-                            path.push(s);
-                        }
-                    }
-                }
-            }
-
-            let (target_pretty_path, target_entry) = self.load_file(&path, report);
-            let (target_source, target_ids) = match target_entry {
-                FileEntry::Missing => {
-                    if is_exception(file, &target_pretty_path) {
-                        report.links_ignored_exception += 1;
-                    } else {
-                        report.errors += 1;
-                        println!(
-                            "{}:{}: broken link - `{}`",
-                            pretty_path,
-                            i + 1,
-                            target_pretty_path
-                        );
-                    }
-                    return;
-                }
-                FileEntry::Dir => {
-                    // Links to directories show as directory listings when viewing
-                    // the docs offline so it's best to avoid them.
-                    report.errors += 1;
-                    println!(
-                        "{}:{}: directory link to `{}` \
-                         (directory links should use index.html instead)",
-                        pretty_path,
-                        i + 1,
-                        target_pretty_path
-                    );
-                    return;
-                }
-                FileEntry::OtherFile => return,
-                FileEntry::Redirect { target } => {
-                    let t = target.clone();
-                    let (target, redir_entry) = self.load_file(&t, report);
-                    match redir_entry {
-                        FileEntry::Missing => {
-                            report.errors += 1;
-                            println!(
-                                "{}:{}: broken redirect from `{}` to `{}`",
-                                pretty_path,
-                                i + 1,
-                                target_pretty_path,
-                                target
-                            );
-                            return;
-                        }
-                        FileEntry::Redirect { target } => {
-                            // Redirect to a redirect, this link checker
-                            // currently doesn't support this, since it would
-                            // require cycle checking, etc.
-                            report.errors += 1;
-                            println!(
-                                "{}:{}: redirect from `{}` to `{}` \
-                                 which is also a redirect (not supported)",
-                                pretty_path,
-                                i + 1,
-                                target_pretty_path,
-                                target.display()
-                            );
-                            return;
-                        }
-                        FileEntry::Dir => {
-                            report.errors += 1;
-                            println!(
-                                "{}:{}: redirect from `{}` to `{}` \
-                                 which is a directory \
-                                 (directory links should use index.html instead)",
-                                pretty_path,
-                                i + 1,
-                                target_pretty_path,
-                                target
-                            );
-                            return;
-                        }
-                        FileEntry::OtherFile => return,
-                        FileEntry::HtmlFile { source, ids } => (source, ids),
-                    }
-                }
-                FileEntry::HtmlFile { source, ids } => (source, ids),
-            };
-
-            // Alright, if we've found an HTML file for the target link. If
-            // this is a fragment link, also check that the `id` exists.
-            if let Some(ref fragment) = fragment {
-                // Fragments like `#1-6` are most likely line numbers to be
-                // interpreted by javascript, so we're ignoring these
-                if fragment.splitn(2, '-').all(|f| f.chars().all(|c| c.is_numeric())) {
-                    return;
-                }
-
-                parse_ids(&mut target_ids.borrow_mut(), &pretty_path, target_source, report);
-
-                if target_ids.borrow().contains(*fragment) {
-                    return;
-                }
-
-                if is_exception(file, &format!("#{}", fragment)) {
-                    report.links_ignored_exception += 1;
-                } else {
-                    report.errors += 1;
-                    print!("{}:{}: broken link fragment ", pretty_path, i + 1);
-                    println!("`#{}` pointing to `{}`", fragment, target_pretty_path);
-                };
-            }
-        });
-=======
         let (base, urls) = get_urls(&source);
         for (i, url) in urls {
             self.check_url(file, &pretty_path, report, &base, i, &url);
         }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         self.check_intra_doc_links(file, &pretty_path, &source, report);
 
@@ -378,6 +217,7 @@ impl Checker {
             || url.starts_with("irc:")
             || url.starts_with("data:")
             || url.starts_with("mailto:")
+            || url.starts_with("file:")
         {
             report.links_ignored_external += 1;
             return;

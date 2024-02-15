@@ -242,6 +242,16 @@ impl<P: Step> Step for SphinxBook<P> {
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
 
+        if builder.config.cmd.fresh() {
+            // The `-E` flag forces Sphinx to ignore any saved environment and build everything
+            // from scratch. This is not strictly required during normal builds or initial builds
+            // with --serve, as code above already clears the directory before invoking Sphinx.
+            //
+            // Without this code, followup builds of --serve would be incremental rather than
+            // fresh, as our code to delete directories only runs once. Passing `-E` fixes that.
+            cmd.arg("-E");
+        }
+
         if self.require_relnotes {
             cmd.arg("-D").arg(path_define(
                 "rust_release_notes",

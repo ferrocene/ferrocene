@@ -86,7 +86,7 @@ executed without warnings.
 Testing Validation
 ------------------
 
-The :doc:`testing` is performed as part of the of the development process in
+The :doc:`testing` is performed as part of the development process in
 the test step, so validating it implies validating the testing process.
 
 Packaging Validation

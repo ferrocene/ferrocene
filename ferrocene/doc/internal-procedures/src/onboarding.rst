@@ -6,7 +6,7 @@ Onboarding process
 
 Engineers joining the Ferrocene project must be fully aware of the technical
 environment and procedures, to be able to work effectively. This page assumes
-you are fully onboarded inside of Ferrous Systems, and the Ferrous Systems
+you are fully onboarded inside of Ferrous Systems, and that the Ferrous Systems
 infrastructure team has provisioned you access.
 
 Required reading

@@ -16,11 +16,11 @@ This qualification is restricted to the following environment:
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
-     - libcore and liballoc
+     - ``core``, ``alloc``
 
    * - :target:`x86_64-unknown-linux-gnu`
      - :target:`x86_64-unknown-linux-gnu`
-     - libcore and liballoc
+     - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
 
 .. end of table
 

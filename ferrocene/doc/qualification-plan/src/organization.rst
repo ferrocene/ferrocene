@@ -4,32 +4,34 @@
 Ferrocene Organization
 ======================
 
-Quality Management System
--------------------------
+Ferrous Systems is ISO 9001:2015 certified, and Ferrocene relies on its quality
+management system.
 
-Ferrous Systems is ISO 9001:2015 certified.
+Leadership roles
+----------------
 
-Roles
------
+.. list-table::
 
-Ferrocene Leads
-~~~~~~~~~~~~~~~
+   * - Safety Manager
+     - Florian Gilcher
 
-* Product Manager - |product_manager|
-* Project Manager - |project_manager|
-* Technical Lead - |technical_lead|
+   * - Product Manager
+     - Florian Gilcher and Pietro Albini
 
-Quality Assurance
-~~~~~~~~~~~~~~~~~
+   * - Project Manager
+     - Brigitte Markmann and Leslie Glass
 
-* ISO 9001 Quality Manager - |iso_9001_quality_manager|
-* QA Support Lead - |qa_support_lead|
+   * - Technical Lead
+     - Pietro Albini
 
-Product Engineering
-~~~~~~~~~~~~~~~~~~~
+   * - Infrastructure Lead
+     - Pietro Albini
 
-* Engineering Lead - |engineering_lead|
-* Release Lead - |release_lead|
+   * - Release Lead
+     - Pietro Albini
+
+   * - ISO 9001 Quality Manager
+     - Sina Krause
 
 Release Managers
 ~~~~~~~~~~~~~~~~
@@ -38,12 +40,5 @@ Release managers are allowed to :ref:`approve manually published releases
 <release:Manually-started Releases>`. This role does not have the
 responsibilities of the Release Lead. The current release managers are:
 
-* |release_manager_1|
-* |release_manager_2|
-
-Qualification and Certification Team
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* Certification Engineer - |certification_engineer|
-* Verification Engineer - |verification_engineer|
-* Safety Manager - |safety_manager|
+* Pietro Albini
+* Florian Gilcher

@@ -336,7 +336,7 @@ fn get_build_id<'a>(info: &'a dl_phdr_info) -> Option<&'a [u8]> {
 enum Error {
     /// NameError means that an error occurred while converting a C style string
     /// into a rust string.
-    NameError(core::str::Utf8Error),
+    NameError,
     /// BuildIDError means that we didn't find a build ID. This could either be
     /// because the DSO had no build ID or because the segment containing the
     /// build ID was malformed.
@@ -362,8 +362,8 @@ fn for_each_dso(mut visitor: &mut DsoPrinter<'_, '_>) {
             unsafe { core::slice::from_raw_parts(info.name as *const u8, name_len) };
         let name = match core::str::from_utf8(name_slice) {
             Ok(name) => name,
-            Err(err) => {
-                return visitor.error(Error::NameError(err)) as i32;
+            Err(_) => {
+                return visitor.error(Error::NameError) as i32;
             }
         };
         let build_id = match get_build_id(info) {

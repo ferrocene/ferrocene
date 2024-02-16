@@ -16,7 +16,7 @@ fn main() {
             Ok(()) => {
                 println!("test result: ok");
             }
-            Err(EarlyExit::IgnoreTest(_)) => {
+            Err(EarlyExit::IgnoreTest) => {
                 println!("test result: ignored");
             }
             Err(EarlyExit::IoError(e)) => {
@@ -34,7 +34,7 @@ const VAR: &str = "__THE_TEST_YOU_ARE_LUKE";
 
 #[derive(Debug)]
 enum EarlyExit {
-    IgnoreTest(String),
+    IgnoreTest,
     IoError(std::io::Error),
 }
 
@@ -47,7 +47,7 @@ impl From<std::io::Error> for EarlyExit {
 fn parent() -> Result<(), EarlyExit> {
     // If we cannot re-exec this test, there's no point in trying to do it.
     if common::cannot_reexec_the_test() {
-        return Err(EarlyExit::IgnoreTest("(cannot reexec)".into()));
+        return Err(EarlyExit::IgnoreTest);
     }
 
     let me = std::env::current_exe().unwrap();
@@ -111,7 +111,7 @@ fn find_interpreter(me: &Path) -> Result<PathBuf, EarlyExit> {
         .arg("-l")
         .arg(me)
         .output()
-        .map_err(|_err| EarlyExit::IgnoreTest("readelf invocation failed".into()))?;
+        .map_err(|_| EarlyExit::IgnoreTest)?;
     if result.status.success() {
         let r = BufReader::new(&result.stdout[..]);
         for line in r.lines() {
@@ -124,11 +124,6 @@ fn find_interpreter(me: &Path) -> Result<PathBuf, EarlyExit> {
                 }
             }
         }
-
-        Err(EarlyExit::IgnoreTest(
-            "could not find interpreter from readelf output".into(),
-        ))
-    } else {
-        Err(EarlyExit::IgnoreTest("readelf returned non-success".into()))
     }
+    Err(EarlyExit::IgnoreTest)
 }

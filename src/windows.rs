@@ -7,7 +7,7 @@
 //! This module largely exists to integrate into libstd itself where winapi is
 //! not currently available.
 
-#![allow(bad_style, dead_code)]
+#![allow(bad_style, dead_code, unused)]
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "verify-winapi")] {

@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# Note: check out debug.py within the extension for useful tools to check the
+# lexer behavior when making changes to this file.
+
 from dataclasses import dataclass
 from docutils import nodes
 from sphinx import addnodes

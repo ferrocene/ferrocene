@@ -41,7 +41,7 @@ pub struct Builder<'a> {
     cache: Cache,
     stack: RefCell<Vec<Box<dyn Any>>>,
     time_spent_on_dependencies: Cell<Duration>,
-    should_serve_called: atomic::AtomicBool,
+    should_serve_called: atomic::AtomicU64,
     pub paths: Vec<PathBuf>,
 }
 
@@ -833,6 +833,7 @@ impl<'a> Builder<'a> {
                 doc::EditionGuide,
                 doc::StyleGuide,
                 doc::Tidy,
+                crate::ferrocene::doc::AllSphinxDocuments,
                 // Basic Documents
                 crate::ferrocene::doc::Index,
                 crate::ferrocene::doc::Specification,
@@ -974,7 +975,7 @@ impl<'a> Builder<'a> {
             cache: Cache::new(),
             stack: RefCell::new(Vec::new()),
             time_spent_on_dependencies: Cell::new(Duration::new(0, 0)),
-            should_serve_called: atomic::AtomicBool::new(false),
+            should_serve_called: atomic::AtomicU64::new(0),
             paths,
         }
     }
@@ -2327,14 +2328,20 @@ impl<'a> Builder<'a> {
 
     pub(crate) fn should_serve<S: Step>(&self) -> bool {
         // We record whether this method was called to see if it was invoked during the dry run. If
-        // it wasn't and the --serve flag was passed we error out saying this is unsupported.
-        self.should_serve_called.store(true, atomic::Ordering::Relaxed);
+        // it wasn't and the --serve flag was passed we error out saying this is unsupported. If it
+        // was invoked multiple times we also error out since it's not supported to run it for
+        // multiple books at the same time.
+        self.should_serve_called.fetch_add(1, atomic::Ordering::Relaxed);
 
         self.was_invoked_explicitly::<S>(Kind::Doc) && self.config.cmd.serve()
     }
 
     pub(crate) fn is_serve_flag_unsupported(&self) -> bool {
-        self.config.cmd.serve() && !self.should_serve_called.load(atomic::Ordering::Relaxed)
+        self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) == 0
+    }
+
+    pub(crate) fn is_serve_flag_called_multiple_times(&self) -> bool {
+        self.config.cmd.serve() && self.should_serve_called.load(atomic::Ordering::Relaxed) > 1
     }
 }
 

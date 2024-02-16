@@ -50,7 +50,16 @@ paths:
 
    ./x doc ferrocene/doc/$foo ferrocene/doc/$bar ferrocene/doc/$baz
 
-If you want to build all of the available documentation, you can omit the path:
+If you want to build all the documentation generated with Sphinx (for example
+if you need to ensure cross-document links work, or you need to test an
+extension change across all documents) you can run:
+
+.. code-block:: text
+
+   ./x doc ferrocene/doc
+
+If you want to build all of the available documentation, including the standard
+library docs and documentation from upstream, you can omit the path:
 
 .. code-block:: text
 
@@ -72,6 +81,13 @@ reloading of the changes in the browser:
 .. code-block:: text
 
    ./x doc ferrocene/doc/$foo --serve
+
+.. caution::
+
+   The ``--serve`` flag is only available for documents built with Sphinx, and
+   it will not do anything for other kinds of documentation (like mdBook or
+   rustdoc). It also only supports serving a *single* Sphinx document: if you
+   attempt to serve more than one at the time it will error out.
 
 When you are working on Sphinx extensions, the ``--debug-sphinx`` flag will
 change the configuration to aid debugging, by running only one builder job at

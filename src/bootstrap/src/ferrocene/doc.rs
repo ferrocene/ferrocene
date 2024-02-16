@@ -533,6 +533,40 @@ macro_rules! sphinx_books {
             }
         )*
 
+        #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+        pub(crate) struct AllSphinxDocuments {
+            pub(crate) target: TargetSelection,
+        }
+
+        impl Step for AllSphinxDocuments {
+            type Output = ();
+            const DEFAULT: bool = false;
+
+            fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+                run.path("ferrocene/doc")
+            }
+
+            fn make_run(run: RunConfig<'_>) {
+                run.builder.ensure(AllSphinxDocuments {
+                    target: run.target,
+                });
+            }
+
+            fn run(self, builder: &Builder<'_>) {
+                $(
+                    builder.ensure($ty {
+                        mode: SphinxMode::Html,
+                        target: self.target,
+                        fresh_build: false,
+                    });
+                )*
+
+                // Also regenerate the index file, so that the "Ferrocene documentation" link in
+                // the breadcrumbs doesn't break.
+                builder.ensure(Index { target: self.target });
+            }
+        }
+
         fn intersphinx_gather_steps(target: TargetSelection) -> Vec<SphinxBook> {
             let mut steps = Vec::new();
             $({

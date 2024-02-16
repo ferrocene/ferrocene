@@ -56,7 +56,7 @@ extension change across all documents) you can run:
 
 .. code-block:: text
 
-   ./x doc ferrocene-all-sphinx
+   ./x doc ferrocene/doc
 
 If you want to build all of the available documentation, including the standard
 library docs and documentation from upstream, you can omit the path:

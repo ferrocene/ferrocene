@@ -59,7 +59,7 @@ def _filter_matches(matches):
         if type(token) == MatchedTerm and not previous_token_allows_match:
             token = token.text
 
-        # Only allow the next token to be a match if this is is a text token
+        # Only allow the next token to be a match if this is a text token
         # that doesn't end with forbidden chars.
         previous_token_allows_match = type(token) == str and (
             not token or token[-1] not in FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH

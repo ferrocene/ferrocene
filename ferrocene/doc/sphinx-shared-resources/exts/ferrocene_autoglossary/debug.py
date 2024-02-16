@@ -70,9 +70,5 @@ def node_location(node):
         return "<unknown>"
 
 
-def debug_file():
-    return os.environ.get("AUTOGLOSSARY_DEBUG_FILE")
-
-
 def setup(app):
     app.connect("env-check-consistency", write_lexer_outcome)

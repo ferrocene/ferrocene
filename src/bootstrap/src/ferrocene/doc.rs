@@ -560,6 +560,10 @@ macro_rules! sphinx_books {
                         fresh_build: false,
                     });
                 )*
+
+                // Also regenerate the index file, so that the "Ferrocene documentation" link in
+                // the breadcrumbs doesn't break.
+                builder.ensure(Index { target: self.target });
             }
         }
 

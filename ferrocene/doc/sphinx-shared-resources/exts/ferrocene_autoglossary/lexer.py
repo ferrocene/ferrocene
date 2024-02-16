@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from docutils import nodes
 from sphinx import addnodes
 from typing import Optional
+import string
+
+
+FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH = string.ascii_letters + string.digits
 
 
 def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None):
@@ -43,6 +47,28 @@ class LexableNode:
 
 
 def lexer(text, terms):
+    return _filter_matches(_split_into_matches(text, terms))
+
+
+def _filter_matches(matches):
+    previous_token_allows_match = True
+
+    for token in matches:
+        # Convert a match into a token if the previous token doesn't allow the
+        # following token to be a match.
+        if type(token) == MatchedTerm and not previous_token_allows_match:
+            token = token.text
+
+        # Only allow the next token to be a match if this is is a text token
+        # that doesn't end with forbidden chars.
+        previous_token_allows_match = type(token) == str and (
+            not token or token[-1] not in FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH
+        )
+
+        yield token
+
+
+def _split_into_matches(text, terms):
     normalized_text = normalize(text)
     while text:
         # We need to look for all possible matches of all possible terms,

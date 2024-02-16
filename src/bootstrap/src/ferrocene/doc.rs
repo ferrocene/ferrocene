@@ -532,7 +532,7 @@ macro_rules! sphinx_books {
             const DEFAULT: bool = false;
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-                run.alias("ferrocene-all-sphinx")
+                run.path("ferrocene/doc")
             }
 
             fn make_run(run: RunConfig<'_>) {

@@ -8,7 +8,7 @@
 # The extension requires no configuration, and just adding a glossary directive
 # is enough for the extension to work.
 
-from . import lexer
+from . import debug, lexer
 from .lexer import Term, MatchedTerm
 from dataclasses import dataclass
 from docutils import nodes
@@ -170,6 +170,8 @@ def setup(app):
     app.add_env_collector(GlossaryCollector)
     app.add_post_transform(LinkToTermsTransform)
     app.add_post_transform(PruneGlossaryTransform)
+
+    debug.setup(app)
 
     return {
         "version": "0",

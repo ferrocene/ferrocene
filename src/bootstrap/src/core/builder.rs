@@ -833,6 +833,7 @@ impl<'a> Builder<'a> {
                 doc::EditionGuide,
                 doc::StyleGuide,
                 doc::Tidy,
+                crate::ferrocene::doc::AllSphinxDocuments,
                 // Basic Documents
                 crate::ferrocene::doc::Index,
                 crate::ferrocene::doc::Specification,

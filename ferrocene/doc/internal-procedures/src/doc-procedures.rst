@@ -50,7 +50,16 @@ paths:
 
    ./x doc ferrocene/doc/$foo ferrocene/doc/$bar ferrocene/doc/$baz
 
-If you want to build all of the available documentation, you can omit the path:
+If you want to build all the documentation generated with Sphinx (for example
+if you need to ensure cross-document links work, or you need to test an
+extension change across all documents) you can run:
+
+.. code-block:: text
+
+   ./x doc ferrocene-all-sphinx
+
+If you want to build all of the available documentation, including the standard
+library docs and documentation from upstream, you can omit the path:
 
 .. code-block:: text
 

@@ -110,6 +110,16 @@ jobs:
     - run: ./ci/debuglink-docker.sh
       if: contains(matrix.os, 'ubuntu')
 
+    # Test that backtraces are still symbolicated if we don't embed an absolute
+    # path to the PDB file in the binary.
+    - run: |
+        cargo clean
+        cargo test
+      if: contains(matrix.rust, 'msvc')
+      name: "Test that backtraces are symbolicated without absolute PDB path"
+      env:
+        RUSTFLAGS: "-C link-arg=/PDBALTPATH:%_PDB%"
+
     # Test that including as a submodule will still work, both with and without
     # the `backtrace` feature enabled.
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml

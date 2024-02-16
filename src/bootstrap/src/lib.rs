@@ -673,6 +673,11 @@ impl Build {
                     eprintln!("error: --serve flag is not supported for the requested path");
                     exit!(1);
                 }
+
+                if builder.is_serve_flag_called_multiple_times() {
+                    eprintln!("error: --serve can only be used when building a single document");
+                    exit!(1);
+                }
             }
 
             self.config.dry_run = DryRun::Disabled;

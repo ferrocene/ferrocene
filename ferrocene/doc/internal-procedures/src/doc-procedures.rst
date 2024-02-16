@@ -82,6 +82,13 @@ reloading of the changes in the browser:
 
    ./x doc ferrocene/doc/$foo --serve
 
+.. caution::
+
+   The ``--serve`` flag is only available for documents built with Sphinx, and
+   it will not do anything for other kinds of documentation (like mdBook or
+   rustdoc). It also only supports serving a *single* Sphinx document: if you
+   attempt to serve more than one at the time it will error out.
+
 When you are working on Sphinx extensions, the ``--debug-sphinx`` flag will
 change the configuration to aid debugging, by running only one builder job at
 the time and showing exception tracebacks:

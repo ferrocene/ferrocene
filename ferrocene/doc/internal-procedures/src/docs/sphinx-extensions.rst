@@ -4,8 +4,15 @@
 Custom Sphinx extensions
 ========================
 
-Global extensions
------------------
+To ease the effort required to keep the documentation up to date, and improve
+the writing experience, we developed a few custom Sphinx extensions. This page
+documents the features of each extension.
+
+``ferrocene_qualification`` extension
+-------------------------------------
+
+This extension implements "global" features that are not tied to any specific
+document, and should be imported in each document.
 
 Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,6 +44,16 @@ material, without having to mention the document the ID was defined in. You can
 just reference an ID defined in a different document like you would link to an
 ID defined in the same document.
 
+.. note::
+
+   The ``id`` role and directive are both defined in the ``qualification``
+   domain. To use them, you must either prefix their name with
+   ``qualification:``, or put this at the top of the file:
+
+   .. code-block:: rst
+
+      .. default-domain:: qualification
+
 Using substitutions
 ~~~~~~~~~~~~~~~~~~~
 
@@ -52,8 +69,13 @@ dynamically:
 
 * ``doc_short_title``: the acronym of the document (e.g. SM)
 
-You can refer to substitutions across all of our documentation  by surrounding
-the substitution name with ``|``:
+* ``ferrocene_version``: the Ferrocene version number (e.g. 23.06.0)
+
+* ``rust_version``: the Rust version number (e.g. 1.68.2)
+
+* ``channel``: the Ferrocene channel of this release (e.g. stable-23.06)
+
+You can refer to substitutions by surrounding the substitution name with ``|``:
 
 .. code-block:: text
 
@@ -85,3 +107,19 @@ the triple:
 
 The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
 referring to a target not defined in that file will emit a warning.
+
+Document ID
+~~~~~~~~~~~
+
+The extension is responsible for generating the ID of the document, which is
+displayed at the bottom of every page. The ID contains the acronym of the
+document and a hash of the content, uniquely identifying the revision of the
+document. This is enabled by default and requires no maintainer action.
+
+Signature outcome page
+~~~~~~~~~~~~~~~~~~~~~~
+
+The extension is responsible for generating the dynamic page showing the
+signature status of the document (see :doc:`signatures` for more information
+about signatures). This is enabled by default and requires no maintainer
+action.

@@ -19,8 +19,13 @@ based on software engineering best practices.
    manual-subtree-pulls
    known-problems
    pe-procedures
-   doc-procedures
    release-notes
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Documentation
+
+   docs/index
 
 .. toctree::
    :maxdepth: 4

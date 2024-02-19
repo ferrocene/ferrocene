@@ -27,6 +27,7 @@ based on software engineering best practices.
 
    docs/index
    docs/sphinx-extensions
+   docs/signatures
 
 .. toctree::
    :maxdepth: 4

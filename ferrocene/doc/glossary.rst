@@ -78,8 +78,8 @@ Definition of Terms
        processes.
 
    SSO
-       An authentication scheme that allows a user to log into multiple independent
-       software using a single ID.
+       An authentication scheme that allows a user to login to multiple independent
+       services with a single ID.
 
    THIR Lowering
        Translates the HIR into THIR.

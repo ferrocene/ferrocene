@@ -26,10 +26,10 @@ does not need to undergo assessor review:
 * Fixing a rustc bug or security vulnerability, if the source code change is
   self-contained and does not require widespread changes in the rustc codebase.
 * Qualifying an existing compiler flag that we have confidence mitigates a
-  known problem, optionally updating the safety manual to mandate its use.
+  known problem, optionally updating the Safety Manual to mandate its use.
 * Fixing bugs or security vulnerabilities in other components shipped as part
   of the Ferrocene toolchain that are not qualified.
-* Updating the safety manual to clarify or restrict the use of certain
+* Updating the Safety Manual to clarify or restrict the use of certain
   facilities.
 
 .. _patching-review:

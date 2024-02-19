@@ -53,11 +53,12 @@ Compiler Test Suite
 
 .. id:: TS3_CRAT
 
-The **compiler test suite** covers the crates that comprise the compiler codebase.
-The tests are a mix of unit tests and integration tests. The compiler test suite
-does not have good coverage because the upstream Rust project prefers to use
-compiletest to check the compiler functionality, and in addition, unit tests are
-only used on a subset of the compiler codebase.
+The **compiler test suite** covers the crates that comprise the compiler
+codebase. The tests are a mix of unit tests, integration tests and
+documentation tests (code snippets within the documentation which are built and
+run). The compiler test suite does not have good coverage because the upstream
+Rust project prefers to use compiletest to check the compiler functionality, and
+in addition, unit tests are only used on a subset of the compiler codebase.
 
 Linkchecker Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -66,14 +67,6 @@ Linkchecker Test Suite
 
 The **linkchecker** test suite checks that none of the links in the generated
 documentation are broken.
-
-Documentation Test Suite
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. id:: TS5_DOCS
-
-The **documentation test suite** checks that any code snippet found in narrative
-and generated documentation properly compiles and executes.
 
 Build System Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^^

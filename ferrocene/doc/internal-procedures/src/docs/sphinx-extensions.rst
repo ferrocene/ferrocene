@@ -124,6 +124,30 @@ signature status of the document (see :doc:`signatures` for more information
 about signatures). This is enabled by default and requires no maintainer
 action.
 
+``ferrocene_toctrees`` extension
+--------------------------------
+
+This extension tweaks Sphinx's table of contents support to better suit our
+style of documents. It must be enabled in all of our documents.
+
+Continuous numbering of sections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default Sphinx numbers pages within a ``toctree`` directive without
+considering other directives. This means adding multiple ``toctree``\ s (for
+example to group some pages together) would reset the numbering, potentially
+having multiple pages numbered "1".
+
+The extension patches Sphinx to fix this, and ensure the page numbers
+constantly increase even when multiple ``toctree`` directives are present.
+
+Appendices support
+~~~~~~~~~~~~~~~~~~
+
+The extension adds a new ``appendices`` directive, with the same syntax and
+functionality as the ``toctree`` directive. The only difference is that page
+are numbered with letters rather than digits.
+
 ``ferrocene_autoglossary`` extension
 ------------------------------------
 

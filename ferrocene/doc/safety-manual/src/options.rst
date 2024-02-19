@@ -27,7 +27,7 @@ available to the end user.
 
 CLI options that impact code generation and can create unsafe conditions are
 tagged with a caution note. A CLI option or one of its arguments may be outside
-the scope of the Ferrocene |iso_ref| qualification, in which case the CLI
+the scope of the Ferrocene qualification, in which case the CLI
 option or argument must not be used in a safety critical context. For
 convenience to the end user, these limitations are provided directly in the CLI
 caution note when applicable.

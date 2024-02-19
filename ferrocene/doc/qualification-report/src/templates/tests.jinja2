@@ -1,6 +1,8 @@
 {# SPDX-License-Identifier: MIT OR Apache-2.0 #}
 {# SPDX-FileCopyrightText: The Ferrocene Developers #}
 
+.. default-domain:: qualification
+
 {% macro no_outcomes_error() %}
 .. error::
 
@@ -116,6 +118,8 @@ details of each test suite, refer to
 Compiletest Test Suite
 ----------------------
 
+**Test suite:** :id:`TS1_COMP`
+
 {{ invocations_summary("bootstrap::core::build_steps::test::Compiletest") }}
 
 {% if host != target %}
@@ -156,6 +160,8 @@ Compiletest Test Suite
 Library Test Suite
 ------------------
 
+**Test suite:** :id:`TS2_LIBR`
+
 .. FIXME: due to how the bootstrap code works, we're forced to match only the
    root node, otherwise we'd also match other tests invoking Crate down their
    dependency chain.
@@ -178,6 +184,8 @@ Library Test Suite
 Compiler Test Suite
 -------------------
 
+**Test suite:** :id:`TS3_CRAT`
+
 {{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
 
 {% if host != target %}
@@ -189,6 +197,8 @@ Compiler Test Suite
 
 Linkchecker Test Suite
 ----------------------
+
+**Test suite:** :id:`TS4_LINK`
 
 The linkchecker test suite is a pass/fail test suite integrated into the
 Ferrocene CI infrastructure.
@@ -204,10 +214,14 @@ qualification.
 Build System Test Suite
 -----------------------
 
+**Test suite:** :id:`TS6_BSYS`
+
 {{ invocations_summary("bootstrap::core::build_steps::test::Bootstrap") }}
 
 Tidy Test Suite
 ---------------
+
+**Test suite:** :id:`TS7_TIDY`
 
 The tidy test suite is a pass/fail test suite integrated into the Ferrocene
 CI infrastructure.

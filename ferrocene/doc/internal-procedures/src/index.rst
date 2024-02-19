@@ -26,6 +26,7 @@ based on software engineering best practices.
    :caption: Documentation
 
    docs/index
+   docs/sphinx-extensions
 
 .. toctree::
    :maxdepth: 4

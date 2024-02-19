@@ -51,7 +51,7 @@ ID defined in the same document.
 .. note::
 
    The ``id`` role and directive are both defined in the ``qualification``
-   domain. To use them, you must either prefix their name with
+   `Sphinx domain`_. To use them, you must either prefix their name with
    ``qualification:``, or put this at the top of the file:
 
    .. code-block:: rst
@@ -128,6 +128,54 @@ signature status of the document (see :doc:`signatures` for more information
 about signatures). This is enabled by default and requires no maintainer
 action.
 
+``ferrocene_domain_cli`` extension
+----------------------------------
+
+The extension adds a custoom ``cli`` `Sphinx domain`_ that can be used to
+document the CLI options of a program. Compared to Sphinx's builtin domain, our
+``cli`` domain supports options with spaces in their name (like ``-C option``),
+and emits metadata compatible with our traceability matrix tooling.
+
+The extension only needs to be added to documents either defining or linking to
+CLI options.
+
+Defining CLI options
+~~~~~~~~~~~~~~~~~~~~
+
+CLI options can be defined with the ``cli:program`` directive, whose argument
+is the name of the binary being documented.
+
+Within it, you need to define one or more ``cli:option`` directives. The
+argument of the directive is the name of the option, with the user-provided
+value wrapped between ``<>``. The body of the directive is the documentation of
+the CLI option:
+
+.. code-block:: rst
+
+   .. cli::program: rustc
+
+      .. cli::option: --target <name>
+
+         Used to specify the target triple.
+
+      .. cli::option: --help
+
+         Show the help message.
+
+Linking to CLI options
+~~~~~~~~~~~~~~~~~~~~~~
+
+It's possible to link to CLI options (even defined in other documents) with the
+``:cli:option:`` role. Options are identified with both the program name and
+the option name, separated by a space. It works like a normal link role, so you
+can either put the option name as the role value, or arbitrary text (with the
+option name between ``<>``).
+
+.. code-block:: rst
+
+   :cli:option:`rustc --help`
+   :cli:option:`the target flag <rustc --target <name>>`
+
 ``ferrocene_toctrees`` extension
 --------------------------------
 
@@ -165,3 +213,5 @@ each document containing a glossary. It serves two purposes:
 
 * Automatically adds links to terms defined in ``glossary`` directives across
   the document, without the need to manually use the builtin ``:term:`` role.
+
+.. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html

@@ -1,6 +1,8 @@
 {# SPDX-License-Identifier: MIT OR Apache-2.0 #}
 {# SPDX-FileCopyrightText: The Ferrocene Developers #}
 
+.. default-domain:: qualification
+
 {% macro no_outcomes_error() %}
 .. error::
 
@@ -116,6 +118,8 @@ details of each test suite, refer to
 Compiletest Test Suite
 ----------------------
 
+**Test suite:** :id:`TS1_COMP`
+
 {{ invocations_summary("bootstrap::core::build_steps::test::Compiletest") }}
 
 {% if host != target %}
@@ -156,6 +160,8 @@ Compiletest Test Suite
 Library Test Suite
 ------------------
 
+**Test suite:** :id:`TS2_LIBR`
+
 .. FIXME: due to how the bootstrap code works, we're forced to match only the
    root node, otherwise we'd also match other tests invoking Crate down their
    dependency chain.
@@ -175,20 +181,24 @@ Library Test Suite
    available on bare metal targets.
 {% endif %}
 
-Crates Test Suite
------------------
+Compiler Test Suite
+-------------------
+
+**Test suite:** :id:`TS3_CRAT`
 
 {{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
 
 {% if host != target %}
 .. note::
 
-   The crates test suite is not tested on :target:`{{ target }}`, as it is not
+   The compiler test suite is not tested on :target:`{{ target }}`, as it is not
    a host platform.
 {% endif %}
 
 Linkchecker Test Suite
 ----------------------
+
+**Test suite:** :id:`TS4_LINK`
 
 The linkchecker test suite is a pass/fail test suite integrated into the
 Ferrocene CI infrastructure.
@@ -201,19 +211,17 @@ only when it passes full testing.
 As a result, the linkchecker test suite reports a **pass** for this
 qualification.
 
-Documentation Test Suite
-------------------------
-
-The documentation test suite is integrated directly into the crates test suite
-and the library test suite.
-
 Build System Test Suite
 -----------------------
+
+**Test suite:** :id:`TS6_BSYS`
 
 {{ invocations_summary("bootstrap::core::build_steps::test::Bootstrap") }}
 
 Tidy Test Suite
 ---------------
+
+**Test suite:** :id:`TS7_TIDY`
 
 The tidy test suite is a pass/fail test suite integrated into the Ferrocene
 CI infrastructure.
@@ -224,12 +232,6 @@ Process <qualification-plan:development>`, a PR is merged into the repository
 only when it passes full testing.
 
 As a result, the tidy test suite reports a **pass** for this qualification.
-
-Ferrocene Compiletest Test Suite
---------------------------------
-
-The Ferrocene compiletest test suite is directly integrated into the
-compiletest test suite.
 
 Known Problems
 ==============

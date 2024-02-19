@@ -15,8 +15,8 @@ including a non-regression test suite, in a correctly configured environment to
 be sure of the tool conformance. In particular, the following test suites are run
 daily:
 
-Upstream Test Suites
---------------------
+Test Suites
+-----------
 
 The following test suites are developed and maintained by the upstream Rust
 project.
@@ -27,24 +27,25 @@ Compiletest Test Suite
 .. id:: TS1_COMP
 
 **Compiletest** is the main compiler test suite. It contains a set of Rust
-programs that verify the *robustness* and *behavior* of the compiler.
+programs that verify the *robustness* and *behavior* of the compiler and
+compiler arguments.
 
-Robustness is checked by compiling illegal Rust programs, where the error
-diagnostics emitted by the compiler are compared against expected results.
+Robustness is checked by invoking the compiler with illegal or malformed
+arguments and by compiling illegal Rust programs, where the error diagnostics
+emitted by the compiler are compared against expected results.
 
-Behavior is checked by compiling legal Rust programs, and comparing  all of the
-output artifacts against expected results. If the Rust program produces an
-executable, the behavior of the executable is compared against expected results.
-Behavior tests may employ various compiler arguments, and be exercised on all or
-selected targets.
+Behavior is checked by invoking the compiler with legal arguments and by
+compiling legal Rust programs, and comparing  all of the output artifacts
+against expected results. If the Rust program produces an executable, the
+behavior of the executable is compared against expected results. Behavior tests
+may employ various compiler arguments, and be exercised on all or selected
+targets.
 
-Compiletest has the following statistics:
-
-* 7,080 test cases
-
-* 28,589 files
-
-* 909,823 lines of code
+In addition, the majority of tests are annotated with unique "ferrocene
+annotation" tags that establish traceability between a test and a section from
+the Ferrocene Language Specification. The ferrocene annotations are applied at
+the directory level, where all tests in that directory inherit the annotation,
+and also applied at the level of an individual test.
 
 Library Test Suite
 ^^^^^^^^^^^^^^^^^^
@@ -56,36 +57,17 @@ supported platforms, libraries liballoc, libstd, and libtest. The tests are a
 mix of unit tests, integration tests, and documentation tests (code snippets
 within the documentation which are built and run).
 
-The library test suite has the following statistics:
-
-* 1,000 test cases
-
-* 100 files
-
-* 17,500 lines of code
-
-Crates Test Suite
-^^^^^^^^^^^^^^^^^
+Compiler Test Suite
+^^^^^^^^^^^^^^^^^^^
 
 .. id:: TS3_CRAT
 
-The **crates test suite** covers the crates that comprise the compiler codebase.
-The tests are a mix of unit tests and integration tests. The crates test suite
-does not have good coverage because the upstream Rust project prefers to use
-compiletest to check the compiler functionality, and in addition, unit tests are
-only used on a subset of the compiler codebase.
-
-The crates test suite has the following statistics:
-
-.. Approximation of the following command, as of 2023-02-24:
-   rg "^ *#\[test\]" compiler/ -c --no-filename | paste -sd+ | bc
-
-* 500 test cases for the compiler
-
-.. Approximatrion of the following command, as of 2023-02-24:
-   rg "^ *#\[test\]" library/ -c --no-filename | paste -sd+ | bc
-
-* 3,200 test cases for the standard library
+The **compiler test suite** covers the crates that comprise the compiler
+codebase. The tests are a mix of unit tests, integration tests and
+documentation tests (code snippets within the documentation which are built and
+run). The compiler test suite does not have good coverage because the upstream
+Rust project prefers to use compiletest to check the compiler functionality, and
+in addition, unit tests are only used on a subset of the compiler codebase.
 
 Linkchecker Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -94,27 +76,6 @@ Linkchecker Test Suite
 
 The **linkchecker** test suite checks that none of the links in the generated
 documentation are broken.
-
-The linkchecker test suite has the following statistics:
-
-.. Approximation of the number of links checked minus the number of links
-   ignored, as of 2023-02-24:
-
-* 3,000,000 links checked
-
-Documentation Test Suite
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. id:: TS5_DOCS
-
-The **documentation test suite** checks that any code snippet found in narrative
-and generated documentation properly compiles and executes.
-
-The documentation test suite has the following statistics:
-
-.. Approxiamtion of the Doc-tests executed in CI, as of 2023-02-24:
-
-* 6,000 test cases
 
 Build System Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -133,40 +94,3 @@ Tidy Test Suite
 
 The **tidy test suite** checks for consistency in the compiler codebase. It
 includes a variety of miscellaneous checks.
-
-Ferrocene Test Suites
----------------------
-
-The following test suites are developed and maintained by Ferrous Systems.
-
-Ferrocene Compiletest
-^^^^^^^^^^^^^^^^^^^^^
-
-.. id:: TS8_FCOMP
-
-**Ferrocene Compiletest** is the augmented version of the upstream
-*Compiletest* test suite. Ferrocene Compiletest contains additional tests that
-check the robustness and behavior of the compiler arguments that have been
-selected for qualification.
-
-Robustness is checked by invoking the compiler with illegal or malformed
-arguments, where the error diagnostics emitted by the compiler are compared
-against expected results.
-
-Behavior is checked by invoking the compiler with legal arguments, and if the
-compiler generates output artifacts, the artifacts are compared against expected
-results.
-
-In addition, the majority of tests are annotated with unique "ferrocene
-annotation" tags that establish traceability between a test and a section from
-the Ferrocene Language Specification. The ferrocene annotations are applied at
-the directory level, where all tests in that directory inherit the annotation,
-and also applied at the level of an individual test.
-
-Ferrocene Compiletest has the following statistics:
-
-* 7,507 test cases
-
-* 29,267 files
-
-* 915,125 lines of code

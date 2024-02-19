@@ -175,7 +175,7 @@ Library Test Suite
    available on bare metal targets.
 {% endif %}
 
-Crates Test Suite
+Compiler Test Suite
 -----------------
 
 {{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
@@ -183,7 +183,7 @@ Crates Test Suite
 {% if host != target %}
 .. note::
 
-   The crates test suite is not tested on :target:`{{ target }}`, as it is not
+   The compiler test suite is not tested on :target:`{{ target }}`, as it is not
    a host platform.
 {% endif %}
 
@@ -204,7 +204,7 @@ qualification.
 Documentation Test Suite
 ------------------------
 
-The documentation test suite is integrated directly into the crates test suite
+The documentation test suite is integrated directly into the compiler test suite
 and the library test suite.
 
 Build System Test Suite

@@ -8,6 +8,10 @@ To ease the effort required to keep the documentation up to date, and improve
 the writing experience, we developed a few custom Sphinx extensions. This page
 documents the features of each extension.
 
+.. contents:: Table of contents:
+   :local:
+   :backlinks: none
+
 ``ferrocene_qualification`` extension
 -------------------------------------
 

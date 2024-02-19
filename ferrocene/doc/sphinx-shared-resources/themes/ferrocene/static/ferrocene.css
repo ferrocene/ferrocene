@@ -308,6 +308,11 @@ li > p:last-child {
     margin-bottom: 0;
 }
 
+/* Don't add extra margin before a nested list */
+li > p:has(+ ul) {
+    margin-bottom: 0;
+}
+
 /**************
  *   Layout   *
  **************/
@@ -472,34 +477,34 @@ nav div.toctree {
     padding: 1.25rem 0 1rem 0;
 }
 
-nav p.caption {
+nav div.toctree p.caption {
     font-weight: 700;
     margin: 1.25rem 1rem 0.5rem 1rem;
 }
 
-nav p.caption:first-child {
+nav div.toctree p.caption:first-child {
     margin-top: 0;
 }
 
-nav ul {
+nav div.toctree ul {
     margin: 0;
     padding: 0;
 }
 
-nav li {
+nav div.toctree li {
     margin: 0;
     list-style: none;
 }
 
-nav a {
+nav div.toctree a {
     color: var(--sidebar-inactive-fg);
     text-decoration: none;
     padding: 0.35rem 1rem;
     display: block;
 }
 
-nav a:hover,
-nav a.current {
+nav div.toctree a:hover,
+nav div.toctree a.current {
     color: var(--sidebar-active-fg);
     text-decoration: none;
 }
@@ -706,6 +711,14 @@ blockquote code {
 .problematic {
     color: var(--problematic-fg);
     background: var(--problematic-bg);
+}
+
+/****************************
+ *   contents:: directive   *
+ ****************************/
+
+nav.contents > p.topic-title {
+    font-weight: bold;
 }
 
 /****************************

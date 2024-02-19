@@ -54,7 +54,7 @@ The release manager in charge of publishing the release must ensure that:
 * All the steps in the :doc:`validation` are followed.
 * The :ref:`patching-review` was followed for all changes included in the patch
   release.
-* The traceability matrixr's coverage is equal or better compared to the
+* The traceability matrix's coverage is equal or better compared to the
   previous release.
 
 Once those steps are followed, the Safety Manager must contact the assessor to

@@ -83,41 +83,66 @@ Regardless of whether a C compiler is used as a *linker-driver* or not, only the
 following arguments may be presented to the ``rust-lld`` linker for the linking
 of Ferrocene executables and shared libraries:
 
-- Input objects for linking
+.. list-table::
+   :align: left
+   :header-rows: 1
 
-- The *Output object name* option, ``-o <path>``
+   * - Flag
+     - Description
 
-- The *Library Path* option, ``-L <path>``
+   * - ``<path>``
+     - Input objects for linking
 
-- The *Discard All* option ``-X`` or ``--discard-all``
+   * - ``-o <path>``
+     - The *Output object name* option
 
-- The *Keyword* option, ``-z <keyword>``
+   * - ``-L <path>``
+     - The *Library Path* option
 
-- The *Link* option, ``-l <somelibrary>`` or ``--library-path <somelibrary>``
+   * - ``-X`` or ``--discard-all``
+     - The *Discard All* option
 
-- The *Emulation* option, ``-m <mode>``
+   * - ``-z <keyword>``
+     - The *Keyword* option
 
-- The *Little Endian* option, ``-EL``
+   * - ``-l <somelibrary>`` or ``--library-path <somelibrary>``
+     - The *Link* option
 
-- The *PIC Executable* option, ``--pie`` or ``--pic-executable``
+   * - ``-m <mode>``
+     - The *Emulation* option
 
-- The *Non-PIC Executable* option, ``--no-pie``
+   * - ``-EL``
+     - The *Little Endian* option
 
-- The *Dynamic Linker* option, ``-I <path>`` or ``--dynamic-linker <path>``
+   * - ``--pie`` or ``--pic-executable``
+     - The *PIC Executable* option
 
-- The *SysRoot* option, ``--sysroot``
+   * - ``--no-pie``
+     - The *Non-PIC Executable* option
 
-- The *Build ID* option, ``--build-id``
+   * - ``-I <path>`` or ``--dynamic-linker <path>``
+     - The *Dynamic Linker* option
 
-- The *Exception Frame Header* option, ``--eh-frame-header``
+   * - ``--sysroot``
+     - The *SysRoot* option
 
-- The *Hash Style* option, ``--hash-style <style>``
+   * - ``--build-id``
+     - The *Build ID* option
 
-- The *As Needed* options, ``--as-needed`` and ``--no-as-needed``
+   * - ``--eh-frame-header``
+     - The *Exception Frame Header* option
 
-- The *Push and Pop* options, ``--push-state`` and ``--pop-state``
+   * - ``--hash-style <style>``
+     - The *Hash Style* option
 
-- The *Arm Cortex-A53 Errata fix* option, ``--fix-cortex-a53-843419``
+   * - ``--as-needed`` and ``--no-as-needed``
+     - The *As Needed* options
+
+   * - ``--push-state`` and ``--pop-state``
+     - The *Push and Pop* options
+
+   * - ``--fix-cortex-a53-843419``
+     - The *Arm Cortex-A53 Errata fix* option
 
 Alternative forms of the above options are acceptable:
 

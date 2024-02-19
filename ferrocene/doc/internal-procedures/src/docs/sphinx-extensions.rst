@@ -214,4 +214,10 @@ each document containing a glossary. It serves two purposes:
 * Automatically adds links to terms defined in ``glossary`` directives across
   the document, without the need to manually use the builtin ``:term:`` role.
 
+``ferrocene_intersphinx_support`` extension
+-------------------------------------------
+
+This extension is required by the build system to enable interlinking between
+documents. It must be added to all documents and requires no maintainer action.
+
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html

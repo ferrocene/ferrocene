@@ -47,6 +47,12 @@ Constraints
      - The user shall not perform source modification when the build of the
        safety-related software is in progress.
      - :id:`AVD_PARALLEL_BUILD_006`
+   * - .. id:: CSTR_0070_TEST
+     - The integrated testing objectives of [ISO-26262] sections 11.4.9 must be
+       performed on the final application or libraries or on parts of them built
+       using build protocols as close as possible to those used for the final
+       build.
+     - :id:`AVD_TEST_007`
    * - .. id:: CSTR_0080_KP
      - The user shall implement mitigation strategies for known problems
        documented in the :ref:`known-problems:Known Problems` manual.

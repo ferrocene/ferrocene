@@ -64,18 +64,18 @@ The library test suite has the following statistics:
 
 * 17,500 lines of code
 
-Crates Test Suite
-^^^^^^^^^^^^^^^^^
+Compiler Test Suite
+^^^^^^^^^^^^^^^^^^^
 
 .. id:: TS3_CRAT
 
-The **crates test suite** covers the crates that comprise the compiler codebase.
-The tests are a mix of unit tests and integration tests. The crates test suite
+The **compiler test suite** covers the crates that comprise the compiler codebase.
+The tests are a mix of unit tests and integration tests. The compiler test suite
 does not have good coverage because the upstream Rust project prefers to use
 compiletest to check the compiler functionality, and in addition, unit tests are
 only used on a subset of the compiler codebase.
 
-The crates test suite has the following statistics:
+The compiler test suite has the following statistics:
 
 .. Approximation of the following command, as of 2023-02-24:
    rg "^ *#\[test\]" compiler/ -c --no-filename | paste -sd+ | bc

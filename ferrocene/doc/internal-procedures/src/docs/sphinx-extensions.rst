@@ -123,3 +123,17 @@ The extension is responsible for generating the dynamic page showing the
 signature status of the document (see :doc:`signatures` for more information
 about signatures). This is enabled by default and requires no maintainer
 action.
+
+``ferrocene_autoglossary`` extension
+------------------------------------
+
+This extension eases the maintenance of the glossary, and should be enabled for
+each document containing a glossary. It serves two purposes:
+
+* Prunes from ``glossary`` directives all items that are not mentioned anywhere
+  in the current document. This allows sharing the same glossary file across
+  documents without adding extra content to documents not referring to some
+  terms.
+
+* Automatically adds links to terms defined in ``glossary`` directives across
+  the document, without the need to manually use the builtin ``:term:`` role.

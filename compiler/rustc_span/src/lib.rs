@@ -17,8 +17,6 @@
 
 // tidy-alphabetical-start
 #![allow(internal_features)]
-#![deny(rustc::diagnostic_outside_of_impl)]
-#![deny(rustc::untranslatable_diagnostic)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(array_windows)]
@@ -625,6 +623,13 @@ impl Span {
         let span = self.data();
         let other = other.data();
         span.lo < other.hi && other.lo < span.hi
+    }
+
+    /// Returns `true` if `self` touches or adjoins `other`.
+    pub fn overlaps_or_adjacent(self, other: Span) -> bool {
+        let span = self.data();
+        let other = other.data();
+        span.lo <= other.hi && other.lo <= span.hi
     }
 
     /// Returns `true` if the spans are equal with regards to the source text.
@@ -2477,10 +2482,9 @@ where
 pub struct ErrorGuaranteed(());
 
 impl ErrorGuaranteed {
-    /// To be used only if you really know what you are doing... ideally, we would find a way to
-    /// eliminate all calls to this method.
-    #[deprecated = "`Session::span_delayed_bug` should be preferred over this function"]
-    pub fn unchecked_claim_error_was_emitted() -> Self {
+    /// Don't use this outside of `DiagCtxtInner::emit_diagnostic`!
+    #[deprecated = "should only be used in `DiagCtxtInner::emit_diagnostic`"]
+    pub fn unchecked_error_guaranteed() -> Self {
         ErrorGuaranteed(())
     }
 }

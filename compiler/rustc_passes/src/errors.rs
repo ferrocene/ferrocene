@@ -8,6 +8,7 @@ use rustc_ast::Label;
 use rustc_errors::{
     codes::*, AddToDiagnostic, Applicability, DiagCtxt, Diagnostic, DiagnosticBuilder,
     DiagnosticSymbolList, EmissionGuarantee, IntoDiagnostic, Level, MultiSpan,
+    SubdiagnosticMessageOp,
 };
 use rustc_hir::{self as hir, ExprKind, Target};
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
@@ -1732,7 +1733,7 @@ pub struct UnusedVariableTryPrefix {
 
 #[derive(Subdiagnostic)]
 pub enum UnusedVariableSugg {
-    #[multipart_suggestion(passes_suggestion, applicability = "machine-applicable")]
+    #[multipart_suggestion(passes_suggestion, applicability = "maybe-incorrect")]
     TryPrefixSugg {
         #[suggestion_part(code = "_{name}")]
         spans: Vec<Span>,
@@ -1753,7 +1754,7 @@ pub struct UnusedVariableStringInterp {
 }
 
 impl AddToDiagnostic for UnusedVariableStringInterp {
-    fn add_to_diagnostic_with<F>(self, diag: &mut Diagnostic, _: F) {
+    fn add_to_diagnostic_with<F: SubdiagnosticMessageOp>(self, diag: &mut Diagnostic, _: F) {
         diag.span_label(self.lit, crate::fluent_generated::passes_maybe_string_interpolation);
         diag.multipart_suggestion(
             crate::fluent_generated::passes_string_interpolation_only_works,
@@ -1771,7 +1772,7 @@ pub struct UnusedVarTryIgnore {
 }
 
 #[derive(Subdiagnostic)]
-#[multipart_suggestion(passes_suggestion, applicability = "machine-applicable")]
+#[multipart_suggestion(passes_suggestion, applicability = "maybe-incorrect")]
 pub struct UnusedVarTryIgnoreSugg {
     #[suggestion_part(code = "{name}: _")]
     pub shorthands: Vec<Span>,

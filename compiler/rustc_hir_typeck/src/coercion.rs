@@ -186,17 +186,6 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         let b = self.shallow_resolve(b);
         debug!("Coerce.tys({:?} => {:?})", a, b);
 
-        // Just ignore error types.
-        if let Err(guar) = (a, b).error_reported() {
-            // Best-effort try to unify these types -- we're already on the error path,
-            // so this will have the side-effect of making sure we have no ambiguities
-            // due to `[type error]` and `_` not coercing together.
-            let _ = self.commit_if_ok(|_| {
-                self.at(&self.cause, self.param_env).eq(DefineOpaqueTypes::Yes, a, b)
-            });
-            return success(vec![], Ty::new_error(self.fcx.tcx, guar), vec![]);
-        }
-
         // Coercing from `!` to any type is allowed:
         if a.is_never() {
             return success(simple(Adjust::NeverToAny)(b), b, vec![]);
@@ -1715,8 +1704,8 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
         let ret_msg = "return a value for the case when the loop has zero elements to iterate on";
         let ret_ty_msg =
             "otherwise consider changing the return type to account for that possibility";
-        if let Some(node) = tcx.opt_hir_node(item.into())
-            && let Some(body_id) = node.body_id()
+        let node = tcx.hir_node(item.into());
+        if let Some(body_id) = node.body_id()
             && let Some(sig) = node.fn_sig()
             && let hir::ExprKind::Block(block, _) = hir.body(body_id).value.kind
             && !ty.is_never()

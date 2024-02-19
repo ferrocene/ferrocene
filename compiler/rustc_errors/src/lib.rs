@@ -5,6 +5,9 @@
 // tidy-alphabetical-start
 #![allow(incomplete_features)]
 #![allow(internal_features)]
+#![allow(rustc::diagnostic_outside_of_impl)]
+#![allow(rustc::untranslatable_diagnostic)]
+#![cfg_attr(bootstrap, feature(min_specialization))]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(array_windows)]
@@ -14,11 +17,11 @@
 #![feature(error_reporter)]
 #![feature(extract_if)]
 #![feature(let_chains)]
-#![feature(min_specialization)]
 #![feature(negative_impls)]
 #![feature(never_type)]
 #![feature(rustc_attrs)]
 #![feature(rustdoc_internals)]
+#![feature(trait_alias)]
 #![feature(try_blocks)]
 #![feature(yeet_expr)]
 // tidy-alphabetical-end
@@ -35,6 +38,7 @@ pub use codes::*;
 pub use diagnostic::{
     AddToDiagnostic, DecorateLint, Diagnostic, DiagnosticArg, DiagnosticArgName,
     DiagnosticArgValue, DiagnosticStyledString, IntoDiagnosticArg, StringPart, SubDiagnostic,
+    SubdiagnosticMessageOp,
 };
 pub use diagnostic_builder::{
     BugAbort, DiagnosticBuilder, EmissionGuarantee, FatalAbort, IntoDiagnostic,
@@ -429,6 +433,10 @@ struct DiagCtxtInner {
     /// The number of non-lint errors that have been emitted, including duplicates.
     err_count: usize,
 
+    /// The number of stashed errors. Unlike the other counts, this can go up
+    /// and down, so it doesn't guarantee anything.
+    stashed_err_count: usize,
+
     /// The error count shown to the user at the end.
     deduplicated_err_count: usize,
     /// The warning count shown to the user at the end.
@@ -598,6 +606,7 @@ impl DiagCtxt {
                 flags: DiagCtxtFlags { can_emit_warnings: true, ..Default::default() },
                 lint_err_count: 0,
                 err_count: 0,
+                stashed_err_count: 0,
                 deduplicated_err_count: 0,
                 deduplicated_warn_count: 0,
                 has_printed: false,
@@ -654,6 +663,7 @@ impl DiagCtxt {
         let mut inner = self.inner.borrow_mut();
         inner.lint_err_count = 0;
         inner.err_count = 0;
+        inner.stashed_err_count = 0;
         inner.deduplicated_err_count = 0;
         inner.deduplicated_warn_count = 0;
         inner.has_printed = false;
@@ -675,10 +685,8 @@ impl DiagCtxt {
         let key = (span.with_parent(None), key);
 
         if diag.is_error() {
-            if diag.is_lint.is_some() {
-                inner.lint_err_count += 1;
-            } else {
-                inner.err_count += 1;
+            if diag.is_lint.is_none() {
+                inner.stashed_err_count += 1;
             }
         }
 
@@ -694,10 +702,8 @@ impl DiagCtxt {
         let key = (span.with_parent(None), key);
         let diag = inner.stashed_diagnostics.remove(&key)?;
         if diag.is_error() {
-            if diag.is_lint.is_some() {
-                inner.lint_err_count -= 1;
-            } else {
-                inner.err_count -= 1;
+            if diag.is_lint.is_none() {
+                inner.stashed_err_count -= 1;
             }
         }
         Some(DiagnosticBuilder::new_diagnostic(self, diag))
@@ -708,7 +714,7 @@ impl DiagCtxt {
     }
 
     /// Emit all stashed diagnostics.
-    pub fn emit_stashed_diagnostics(&self) -> Option<ErrorGuaranteed> {
+    pub fn emit_stashed_diagnostics(&self) {
         self.inner.borrow_mut().emit_stashed_diagnostics()
     }
 
@@ -845,6 +851,7 @@ impl DiagCtxt {
         self.struct_span_warn(span, msg).emit()
     }
 
+    #[track_caller]
     pub fn span_bug(&self, span: impl Into<MultiSpan>, msg: impl Into<DiagnosticMessage>) -> ! {
         self.struct_span_bug(span, msg).emit()
     }
@@ -922,40 +929,52 @@ impl DiagCtxt {
         self.struct_bug(msg).emit()
     }
 
-    /// This excludes lint errors and delayed bugs.
+    /// This excludes lint errors, delayed bugs, and stashed errors.
     #[inline]
     pub fn err_count(&self) -> usize {
         self.inner.borrow().err_count
     }
 
-    /// This excludes lint errors and delayed bugs.
+    /// This excludes normal errors, lint errors and delayed bugs. Unless
+    /// absolutely necessary, avoid using this. It's dubious because stashed
+    /// errors can later be cancelled, so the presence of a stashed error at
+    /// some point of time doesn't guarantee anything -- there are no
+    /// `ErrorGuaranteed`s here.
+    pub fn stashed_err_count(&self) -> usize {
+        self.inner.borrow().stashed_err_count
+    }
+
+    /// This excludes lint errors, delayed bugs, and stashed errors.
     pub fn has_errors(&self) -> Option<ErrorGuaranteed> {
         self.inner.borrow().has_errors().then(|| {
+            // FIXME(nnethercote) find a way to store an `ErrorGuaranteed`.
             #[allow(deprecated)]
-            ErrorGuaranteed::unchecked_claim_error_was_emitted()
+            ErrorGuaranteed::unchecked_error_guaranteed()
         })
     }
 
-    /// This excludes delayed bugs. Unless absolutely necessary, prefer
-    /// `has_errors` to this method.
+    /// This excludes delayed bugs and stashed errors. Unless absolutely
+    /// necessary, prefer `has_errors` to this method.
     pub fn has_errors_or_lint_errors(&self) -> Option<ErrorGuaranteed> {
         let inner = self.inner.borrow();
         let result = inner.has_errors() || inner.lint_err_count > 0;
         result.then(|| {
+            // FIXME(nnethercote) find a way to store an `ErrorGuaranteed`.
             #[allow(deprecated)]
-            ErrorGuaranteed::unchecked_claim_error_was_emitted()
+            ErrorGuaranteed::unchecked_error_guaranteed()
         })
     }
 
-    /// Unless absolutely necessary, prefer `has_errors` or
-    /// `has_errors_or_lint_errors` to this method.
+    /// This excludes stashed errors. Unless absolutely necessary, prefer
+    /// `has_errors` or `has_errors_or_lint_errors` to this method.
     pub fn has_errors_or_lint_errors_or_delayed_bugs(&self) -> Option<ErrorGuaranteed> {
         let inner = self.inner.borrow();
         let result =
             inner.has_errors() || inner.lint_err_count > 0 || !inner.delayed_bugs.is_empty();
         result.then(|| {
+            // FIXME(nnethercote) find a way to store an `ErrorGuaranteed`.
             #[allow(deprecated)]
-            ErrorGuaranteed::unchecked_claim_error_was_emitted()
+            ErrorGuaranteed::unchecked_error_guaranteed()
         })
     }
 
@@ -1216,16 +1235,13 @@ impl DiagCtxt {
 // `DiagCtxtInner::foo`.
 impl DiagCtxtInner {
     /// Emit all stashed diagnostics.
-    fn emit_stashed_diagnostics(&mut self) -> Option<ErrorGuaranteed> {
+    fn emit_stashed_diagnostics(&mut self) {
         let has_errors = self.has_errors();
-        let mut reported = None;
         for (_, diag) in std::mem::take(&mut self.stashed_diagnostics).into_iter() {
             // Decrement the count tracking the stash; emitting will increment it.
             if diag.is_error() {
-                if diag.is_lint.is_some() {
-                    self.lint_err_count -= 1;
-                } else {
-                    self.err_count -= 1;
+                if diag.is_lint.is_none() {
+                    self.stashed_err_count -= 1;
                 }
             } else {
                 // Unless they're forced, don't flush stashed warnings when
@@ -1235,12 +1251,11 @@ impl DiagCtxtInner {
                     continue;
                 }
             }
-            let reported_this = self.emit_diagnostic(diag);
-            reported = reported.or(reported_this);
+            self.emit_diagnostic(diag);
         }
-        reported
     }
 
+    // Return value is only `Some` if the level is `Error` or `DelayedBug`.
     fn emit_diagnostic(&mut self, mut diagnostic: Diagnostic) -> Option<ErrorGuaranteed> {
         assert!(diagnostic.level.can_be_top_or_sub().0);
 
@@ -1285,7 +1300,7 @@ impl DiagCtxtInner {
                 let backtrace = std::backtrace::Backtrace::capture();
                 self.delayed_bugs.push(DelayedDiagnostic::with_backtrace(diagnostic, backtrace));
                 #[allow(deprecated)]
-                return Some(ErrorGuaranteed::unchecked_claim_error_was_emitted());
+                return Some(ErrorGuaranteed::unchecked_error_guaranteed());
             }
             GoodPathDelayedBug => {
                 let backtrace = std::backtrace::Backtrace::capture();
@@ -1319,6 +1334,7 @@ impl DiagCtxtInner {
                 !self.emitted_diagnostics.insert(diagnostic_hash)
             };
 
+            let level = diagnostic.level;
             let is_error = diagnostic.is_error();
             let is_lint = diagnostic.is_lint.is_some();
 
@@ -1355,6 +1371,7 @@ impl DiagCtxtInner {
 
                 self.emitter.emit_diagnostic(diagnostic);
             }
+
             if is_error {
                 if is_lint {
                     self.lint_err_count += 1;
@@ -1362,11 +1379,11 @@ impl DiagCtxtInner {
                     self.err_count += 1;
                 }
                 self.panic_if_treat_err_as_bug();
+            }
 
-                #[allow(deprecated)]
-                {
-                    guaranteed = Some(ErrorGuaranteed::unchecked_claim_error_was_emitted());
-                }
+            #[allow(deprecated)]
+            if level == Level::Error {
+                guaranteed = Some(ErrorGuaranteed::unchecked_error_guaranteed());
             }
         });
 

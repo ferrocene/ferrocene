@@ -112,6 +112,8 @@ the triple:
 The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
 referring to a target not defined in that file will emit a warning.
 
+.. _document-id:
+
 Document ID
 ~~~~~~~~~~~
 
@@ -219,5 +221,16 @@ each document containing a glossary. It serves two purposes:
 
 This extension is required by the build system to enable interlinking between
 documents. It must be added to all documents and requires no maintainer action.
+
+``ferrocene_document_list`` extension
+-------------------------------------
+
+This extension is specific to the :doc:`document-list:index` document. It
+provides the ``document-id`` role, which injects the
+:ref:`document-id` of the requested document:
+
+.. code-block:: rst
+
+   The ID of the qualification plan is :document-id:`qualification-plan`.
 
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html

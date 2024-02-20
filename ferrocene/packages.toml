@@ -9,7 +9,7 @@
 #
 # Groups are a collection of packages produced for the same set of targets. The
 # name of the group is arbitrary and doesn't have any specific meaning. If the
-# target or package you're trying to add would fit in an existing group try to
+# target or package you're trying to add would fit in an existing group, try to
 # avoid creating a new one, unless it semantically makes more sense.
 #
 # ## Packages

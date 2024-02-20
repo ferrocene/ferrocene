@@ -15,7 +15,7 @@ with the standard Sphinx CLI) is not supported and will likely not work.
 
 This section of the Internal Procedures contains documentation on how to work
 on the documentation. Quality management procedures are available in the
-:doc:`qualification-plan:documentation`.
+:doc:`qualification-plan:development`.
 
 Building documents
 ------------------

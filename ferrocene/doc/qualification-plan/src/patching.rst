@@ -40,8 +40,7 @@ Review checklist
 The developer reviewing a change slated to be included in a patch release must
 ensure that:
 
-* All the requirements in the :doc:`development` and :doc:`documentation` are
-  followed.
+* All the requirements in the :doc:`development` are followed.
 * The change falls within one of the clauses in :ref:`patching-scope`.
 * The patch is the minimal set of changes needed to address and test the fix,
   and does not include any change used by unrelated features.

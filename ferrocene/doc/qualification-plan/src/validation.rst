@@ -21,7 +21,6 @@ they are not present in the final product, or means of mitigating their effects
 have been identified (see :doc:`evaluation-report:tool-analysis` for further
 details).
 
-
 Validation Strategy
 -------------------
 
@@ -38,7 +37,6 @@ process, and to examine any log at any point during the span of an activity.
 
 The following sections describe how the various Ferrocene processes are
 validated.
-
 
 Development Validation
 ----------------------
@@ -64,24 +62,19 @@ were checked by the reviewer), and run these steps before merging the change:
 Because of this, all merged changes have followed the development process, and
 there is no need for any additional manual verification.
 
-Documentation Validation
-------------------------
+.. _documentation-validation:
 
-Similar to the development validation, the :doc:`documentation` is assessed by
-the reviewer, who must ensure these steps were followed before marking the PR
-as approved:
-
-* :ref:`doc-phase-development`
-* :ref:`doc-phase-review`
-
-Once the PR is queued to be merged, the :doc:`development` will be followed,
-which will ensure that the documentation approval is present.
+Documentation validation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 In addition to this process, the safety manager (or a person delegated by the
-safety manager) performs a manual sanity check of the documentation before each
-release. This ensures that the documentation is coherent, there are no
-unexpected problems with the end product and that the automation successfully
-executed without warnings.
+safety manager) must review the documents before each release, checking that
+the documentation's contents are valid, up-to-date, and complete, that all
+applicable requirements have been successfully covered.
+
+They must also do a sanity check to ensure there are no unexpected problems
+with the end product and that the automation successfully executed without
+warnings.
 
 Testing Validation
 ------------------
@@ -115,6 +108,8 @@ manually verify that:
 * All the expected files are present in the release.
 
 * The release can be installed locally and can compile example programs.
+
+* The :ref:`documentation-validation` has been performed.
 
 If any of the checks are not satisfactory, the release must be delayed until
 resolved. Once all checks are passed, the release can be published in the

@@ -46,6 +46,22 @@ name = "llvm-tools"
 subset = "default"
 
 [[groups.hosts.packages]]
+name = "rustfmt"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "rust-analyzer"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "clippy"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "rust-demangler"
+subset = "default"
+
+[[groups.hosts.packages]]
 name = "ferrocene-self-test"
 subset = "default"
 

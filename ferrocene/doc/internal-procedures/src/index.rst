@@ -19,8 +19,15 @@ based on software engineering best practices.
    manual-subtree-pulls
    known-problems
    pe-procedures
-   doc-procedures
    release-notes
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Documentation
+
+   docs/index
+   docs/sphinx-extensions
+   docs/signatures
 
 .. toctree::
    :maxdepth: 4

@@ -10,11 +10,12 @@
 # starts with "-" (for example "--crate-name"), but for our use case we want to
 # consider "-C opt-level=<level>" as the "-C opt-level" argument.
 
-from . import domain
+from . import domain, traceability_ids
 
 
 def setup(app):
     domain.setup(app)
+    traceability_ids.setup(app)
 
     return {
         "version": "0",

@@ -4,8 +4,6 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath("../exts"))
-
 project = "Ferrocene User Manual"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
@@ -13,7 +11,6 @@ author = "The Ferrocene Developers"
 extensions = [
     "ferrocene_intersphinx_support",
     "ferrocene_qualification",
-    "ferrocene_user_manual",
     "ferrocene_toctrees",
     "ferrocene_domain_cli",
     "sphinx.ext.intersphinx",

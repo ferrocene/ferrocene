@@ -108,6 +108,8 @@ the time and showing exception tracebacks:
 
       ./x doc ferrocene/doc/$foo --fresh
 
+.. _test-outcomes:
+
 Test outcomes
 -------------
 

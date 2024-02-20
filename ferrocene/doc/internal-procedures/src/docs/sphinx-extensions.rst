@@ -233,4 +233,46 @@ provides the ``document-id`` role, which injects the
 
    The ID of the qualification plan is :document-id:`qualification-plan`.
 
+``ferrocene_test_outcomes`` extension
+-------------------------------------
+
+This extension is specific to the :doc:`qualification-report:index`.
+
+Rendering a template with the test outcomes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``render-outcomes-template`` directive allows rendering a `Jinja`_ template
+with the :ref:`test outcomes <test-outcomes>` of a tested target. The
+directive accepts a single argument, the path to the template to render. It
+also accepts multiple options:
+
+* ``host`` (required): the target triple of the host platform
+* ``target`` (required): the target triple of the compilation target
+* ``bare_metal_test_target`` (optional): the target triple of the special
+  target used for bare metal testing; it should be omitted if no special target
+  was used
+* ``remote_testing`` (optional): whether the tests were executed on CI or on a
+  remote machine/emulator; its presence without a value means ``true``, while
+  its absence means ``false``
+
+.. code-block:: rst
+
+   .. render-outcomes-template:: templates/tests.jinja2
+      :host: x86_64-unknown-linux-gnu
+      :target: x86_64-unknown-linux-gnu
+
+   .. render-outcomes-template:: templates/tests.jinja2
+      :host: x86_64-unknown-linux-gnu
+      :target: aarch64-unknown-none
+      :bare_metal_test_target: aarch64-unknown-ferrocenecoretest
+      :remote_testing:
+
+Rendering a summary of all test outcome pages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``render-summary`` directive renders a table with all
+``render-outcomes-template`` invocations present in the rest of the document.
+It accepts no arguments nor options.
+
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html
+.. _Jinja: https://palletsprojects.com/p/jinja/

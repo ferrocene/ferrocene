@@ -9,12 +9,12 @@ in the ``ferrocene/doc`` folder inside the Ferrocene repository. For example,
 the source of the Safety Manual is located in ``ferrocene/doc/safety-manual``.
 
 The Ferrocene build system takes care of building and cross-linking the
-qualification, including downloading all the required dependencies. Building
+documentation, including downloading all the required dependencies. Building
 the documents outside of the Ferrocene build system (including building them
 with the standard Sphinx CLI) is not supported and will likely not work.
 
-This section of the internal procedures contain documentation on how to work on
-the documentation. Quality management procedures are available in the
+This section of the Internal Procedures contains documentation on how to work
+on the documentation. Quality management procedures are available in the
 :doc:`qualification-plan:documentation`.
 
 Building documents

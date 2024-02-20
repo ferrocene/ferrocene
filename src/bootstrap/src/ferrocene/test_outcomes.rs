@@ -54,7 +54,9 @@ fn download_and_extract_outcomes(builder: &Builder<'_>, commit: &str) -> PathBuf
 
     if !commit_file.exists() || builder.read(&commit_file) != commit {
         builder.info(&format!("Extracting test outcomes for commit {commit}"));
-        builder.remove_dir(&extracted_dir);
+        if extracted_dir.exists() {
+            builder.remove_dir(&extracted_dir);
+        }
         builder.create_dir(&extracted_dir);
         builder.config.unpack(&tarball_file, &extracted_dir, "");
         std::fs::write(&commit_file, commit.as_bytes()).unwrap();

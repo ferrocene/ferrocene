@@ -276,7 +276,7 @@ option in ``config.toml``.
 
 The easiest way to inject test outcomes into the built documentation is to
 instruct the build system to automatically download the latest available copy
-of the test outcomes built by CI. Ferrocene staff with access to AWS can do so
+of the test outcomes built by CI. People with access to the Ferrocene AWS account can do so
 by adding this to their ``config.toml``:
 
 .. code-block:: toml

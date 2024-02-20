@@ -26,6 +26,19 @@ impl<'tcx> rustc_type_ir::IntoKind for Region<'tcx> {
     }
 }
 
+impl<'tcx> rustc_type_ir::visit::Flags for Region<'tcx> {
+    fn flags(&self) -> TypeFlags {
+        self.type_flags()
+    }
+
+    fn outer_exclusive_binder(&self) -> ty::DebruijnIndex {
+        match **self {
+            ty::ReBound(debruijn, _) => debruijn.shifted_in(1),
+            _ => ty::INNERMOST,
+        }
+    }
+}
+
 impl<'tcx> Region<'tcx> {
     #[inline]
     pub fn new_early_param(
@@ -82,8 +95,8 @@ impl<'tcx> Region<'tcx> {
         tcx.intern_region(ty::ReError(reported))
     }
 
-    /// Constructs a `RegionKind::ReError` region and registers a `span_delayed_bug` to ensure it
-    /// gets used.
+    /// Constructs a `RegionKind::ReError` region and registers a delayed bug to ensure it gets
+    /// used.
     #[track_caller]
     pub fn new_error_misc(tcx: TyCtxt<'tcx>) -> Region<'tcx> {
         Region::new_error_with_message(
@@ -93,8 +106,8 @@ impl<'tcx> Region<'tcx> {
         )
     }
 
-    /// Constructs a `RegionKind::ReError` region and registers a `span_delayed_bug` with the given
-    /// `msg` to ensure it gets used.
+    /// Constructs a `RegionKind::ReError` region and registers a delayed bug with the given `msg`
+    /// to ensure it gets used.
     #[track_caller]
     pub fn new_error_with_message<S: Into<MultiSpan>>(
         tcx: TyCtxt<'tcx>,

@@ -399,7 +399,7 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
                     };
                     for (field_index, op) in fields.into_iter().enumerate() {
                         let field_dest = self.ecx.project_field(&variant_dest, field_index).ok()?;
-                        self.ecx.copy_op(op, &field_dest, /*allow_transmute*/ false).ok()?;
+                        self.ecx.copy_op(op, &field_dest).ok()?;
                     }
                     self.ecx.write_discriminant(variant.unwrap_or(FIRST_VARIANT), &dest).ok()?;
                     self.ecx
@@ -561,9 +561,14 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
                         .ok()?;
                     dest.into()
                 }
-                CastKind::FnPtrToPtr
-                | CastKind::PtrToPtr
-                | CastKind::PointerCoercion(
+                CastKind::FnPtrToPtr | CastKind::PtrToPtr => {
+                    let src = self.evaluated[value].as_ref()?;
+                    let src = self.ecx.read_immediate(src).ok()?;
+                    let to = self.ecx.layout_of(to).ok()?;
+                    let ret = self.ecx.ptr_to_ptr(&src, to).ok()?;
+                    ret.into()
+                }
+                CastKind::PointerCoercion(
                     ty::adjustment::PointerCoercion::MutToConstPointer
                     | ty::adjustment::PointerCoercion::ArrayToPointer
                     | ty::adjustment::PointerCoercion::UnsafeFnPointer,
@@ -571,8 +576,7 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
                     let src = self.evaluated[value].as_ref()?;
                     let src = self.ecx.read_immediate(src).ok()?;
                     let to = self.ecx.layout_of(to).ok()?;
-                    let ret = self.ecx.ptr_to_ptr(&src, to).ok()?;
-                    ret.into()
+                    ImmTy::from_immediate(*src, to).into()
                 }
                 _ => return None,
             },
@@ -853,10 +857,10 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
 
     fn simplify_discriminant(&mut self, place: VnIndex) -> Option<VnIndex> {
         if let Value::Aggregate(enum_ty, variant, _) = *self.get(place)
-            && let AggregateTy::Def(enum_did, enum_substs) = enum_ty
+            && let AggregateTy::Def(enum_did, enum_args) = enum_ty
             && let DefKind::Enum = self.tcx.def_kind(enum_did)
         {
-            let enum_ty = self.tcx.type_of(enum_did).instantiate(self.tcx, enum_substs);
+            let enum_ty = self.tcx.type_of(enum_did).instantiate(self.tcx, enum_args);
             let discr = self.ecx.discriminant_for_variant(enum_ty, variant).ok()?;
             return Some(self.insert_scalar(discr.to_scalar(), discr.layout.ty));
         }
@@ -899,13 +903,11 @@ impl<'body, 'tcx> VnState<'body, 'tcx> {
                 assert!(!fields.is_empty());
                 (AggregateTy::Tuple, FIRST_VARIANT)
             }
-            AggregateKind::Closure(did, substs)
-            | AggregateKind::CoroutineClosure(did, substs)
-            | AggregateKind::Coroutine(did, substs) => {
-                (AggregateTy::Def(did, substs), FIRST_VARIANT)
-            }
-            AggregateKind::Adt(did, variant_index, substs, _, None) => {
-                (AggregateTy::Def(did, substs), variant_index)
+            AggregateKind::Closure(did, args)
+            | AggregateKind::CoroutineClosure(did, args)
+            | AggregateKind::Coroutine(did, args) => (AggregateTy::Def(did, args), FIRST_VARIANT),
+            AggregateKind::Adt(did, variant_index, args, _, None) => {
+                (AggregateTy::Def(did, args), variant_index)
             }
             // Do not track unions.
             AggregateKind::Adt(_, _, _, _, Some(_)) => return None,
@@ -1179,8 +1181,7 @@ fn op_to_prop_const<'tcx>(
     }
 
     // Everything failed: create a new allocation to hold the data.
-    let alloc_id =
-        ecx.intern_with_temp_alloc(op.layout, |ecx, dest| ecx.copy_op(op, dest, false)).ok()?;
+    let alloc_id = ecx.intern_with_temp_alloc(op.layout, |ecx, dest| ecx.copy_op(op, dest)).ok()?;
     let value = ConstValue::Indirect { alloc_id, offset: Size::ZERO };
 
     // Check that we do not leak a pointer.

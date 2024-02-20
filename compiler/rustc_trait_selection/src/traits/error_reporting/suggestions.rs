@@ -635,7 +635,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                 | hir::Node::ImplItem(hir::ImplItem { generics, .. })
                     if param_ty =>
                 {
-                    // We skip the 0'th subst (self) because we do not want
+                    // We skip the 0'th arg (self) because we do not want
                     // to consider the predicate as not suggestible if the
                     // self type is an arg position `impl Trait` -- instead,
                     // we handle that by adding ` + Bound` below.
@@ -1032,15 +1032,14 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             }
         };
 
-        let hir = self.tcx.hir();
         let hir_id = self.tcx.local_def_id_to_hir_id(def_id.as_local()?);
-        match hir.find_parent(hir_id) {
-            Some(hir::Node::Stmt(hir::Stmt { kind: hir::StmtKind::Local(local), .. })) => {
+        match self.tcx.parent_hir_node(hir_id) {
+            hir::Node::Stmt(hir::Stmt { kind: hir::StmtKind::Local(local), .. }) => {
                 get_name(err, &local.pat.kind)
             }
             // Different to previous arm because one is `&hir::Local` and the other
             // is `P<hir::Local>`.
-            Some(hir::Node::Local(local)) => get_name(err, &local.pat.kind),
+            hir::Node::Local(local) => get_name(err, &local.pat.kind),
             _ => None,
         }
     }
@@ -1202,8 +1201,8 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
         let hir::Node::Pat(pat) = self.tcx.hir_node(hir_id) else {
             return;
         };
-        let Some(hir::Node::Local(hir::Local { ty: None, init: Some(init), .. })) =
-            self.tcx.hir().find_parent(pat.hir_id)
+        let hir::Node::Local(hir::Local { ty: None, init: Some(init), .. }) =
+            self.tcx.parent_hir_node(pat.hir_id)
         else {
             return;
         };
@@ -1790,7 +1789,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let Res::Local(hir_id) = path.res
                 && let hir::Node::Pat(binding) = self.tcx.hir_node(hir_id)
-                && let Some(hir::Node::Local(local)) = self.tcx.hir().find_parent(binding.hir_id)
+                && let hir::Node::Local(local) = self.tcx.parent_hir_node(binding.hir_id)
                 && let None = local.ty
                 && let Some(binding_expr) = local.init
             {
@@ -2344,7 +2343,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
         err: &mut DiagnosticBuilder<'tcx>,
     ) {
         // First, look for an `ExprBindingObligation`, which means we can get
-        // the unsubstituted predicate list of the called function. And check
+        // the uninstantiated predicate list of the called function. And check
         // that the predicate that we failed to satisfy is a `Fn`-like trait.
         if let ObligationCauseCode::ExprBindingObligation(def_id, _, _, idx) = cause
             && let predicates = self.tcx.predicates_of(def_id).instantiate_identity(self.tcx)
@@ -3042,7 +3041,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                             this = "the implicit `Sized` requirement on this type parameter";
                         }
                         if let Some(hir::Node::TraitItem(hir::TraitItem {
-                            ident,
+                            generics,
                             kind: hir::TraitItemKind::Type(bounds, None),
                             ..
                         })) = tcx.hir().get_if_local(item_def_id)
@@ -3054,7 +3053,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                             let (span, separator) = if let [.., last] = bounds {
                                 (last.span().shrink_to_hi(), " +")
                             } else {
-                                (ident.span.shrink_to_hi(), ":")
+                                (generics.span.shrink_to_hi(), ":")
                             };
                             err.span_suggestion_verbose(
                                 span,
@@ -3188,8 +3187,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                 }
             }
             ObligationCauseCode::VariableType(hir_id) => {
-                let parent_node = tcx.hir().parent_id(hir_id);
-                match tcx.hir_node(parent_node) {
+                match tcx.parent_hir_node(hir_id) {
                     Node::Local(hir::Local { ty: Some(ty), .. }) => {
                         err.span_suggestion_verbose(
                             ty.span.shrink_to_lo(),
@@ -3237,8 +3235,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
                                     types always have a known size";
                 if let Some(hir_id) = hir_id
                     && let hir::Node::Param(param) = self.tcx.hir_node(hir_id)
-                    && let Some(item) = self.tcx.hir().find_parent(hir_id)
-                    && let Some(decl) = item.fn_decl()
+                    && let Some(decl) = self.tcx.parent_hir_node(hir_id).fn_decl()
                     && let Some(t) = decl.inputs.iter().find(|t| param.ty_span.contains(t.span))
                 {
                     // We use `contains` because the type might be surrounded by parentheses,
@@ -4079,8 +4076,7 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let hir::Path { res: Res::Local(hir_id), .. } = path
                 && let hir::Node::Pat(binding) = self.tcx.hir_node(*hir_id)
-                && let parent_hir_id = self.tcx.hir().parent_id(binding.hir_id)
-                && let hir::Node::Local(local) = self.tcx.hir_node(parent_hir_id)
+                && let hir::Node::Local(local) = self.tcx.parent_hir_node(binding.hir_id)
                 && let Some(binding_expr) = local.init
             {
                 // If the expression we're calling on is a binding, we want to point at the
@@ -4338,8 +4334,8 @@ impl<'tcx> TypeErrCtxtExt<'tcx> for TypeErrCtxt<'_, 'tcx> {
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let hir::Path { res: Res::Local(hir_id), .. } = path
                 && let hir::Node::Pat(binding) = self.tcx.hir_node(*hir_id)
-                && let Some(parent) = self.tcx.hir().find_parent(binding.hir_id)
             {
+                let parent = self.tcx.parent_hir_node(binding.hir_id);
                 // We've reached the root of the method call chain...
                 if let hir::Node::Local(local) = parent
                     && let Some(binding_expr) = local.init

@@ -132,20 +132,6 @@ pub struct TypeErrCtxt<'a, 'tcx> {
         Box<dyn Fn(Ty<'tcx>) -> Vec<(Ty<'tcx>, Vec<PredicateObligation<'tcx>>)> + 'a>,
 }
 
-impl Drop for TypeErrCtxt<'_, '_> {
-    fn drop(&mut self) {
-        if self.dcx().has_errors().is_some() {
-            // Ok, emitted an error.
-        } else {
-            // Didn't emit an error; maybe it was created but not yet emitted.
-            self.infcx
-                .tcx
-                .sess
-                .good_path_delayed_bug("used a `TypeErrCtxt` without raising an error or lint");
-        }
-    }
-}
-
 impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     pub fn dcx(&self) -> &'tcx DiagCtxt {
         self.infcx.tcx.dcx()
@@ -862,8 +848,8 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     ) {
                         err.subdiagnostic(subdiag);
                     }
-                    if let Some(hir::Node::Expr(m)) = self.tcx.hir().find_parent(scrut_hir_id)
-                        && let Some(hir::Node::Stmt(stmt)) = self.tcx.hir().find_parent(m.hir_id)
+                    if let hir::Node::Expr(m) = self.tcx.parent_hir_node(scrut_hir_id)
+                        && let hir::Node::Stmt(stmt) = self.tcx.parent_hir_node(m.hir_id)
                         && let hir::StmtKind::Expr(_) = stmt.kind
                     {
                         err.span_suggestion_verbose(

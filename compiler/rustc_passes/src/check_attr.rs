@@ -197,7 +197,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 | sym::unstable
                 | sym::stable
                 | sym::rustc_allowed_through_unstable_modules
-                | sym::rustc_promotable => self.check_stability_promotable(attr, span, target),
+                | sym::rustc_promotable => self.check_stability_promotable(attr, target),
                 sym::link_ordinal => self.check_link_ordinal(attr, span, target),
                 sym::rustc_confusables => self.check_confusables(attr, target),
                 sym::rustc_safe_intrinsic => {
@@ -2069,14 +2069,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         span: Span,
         target: Target,
     ) -> bool {
-        let hir = self.tcx.hir();
-
         if let Target::ForeignFn = target
-            && let Some(parent) = hir.opt_parent_id(hir_id)
             && let hir::Node::Item(Item {
                 kind: ItemKind::ForeignMod { abi: Abi::RustIntrinsic | Abi::PlatformIntrinsic, .. },
                 ..
-            }) = self.tcx.hir_node(parent)
+            }) = self.tcx.parent_hir_node(hir_id)
         {
             return true;
         }
@@ -2102,7 +2099,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
     }
 
-    fn check_stability_promotable(&self, attr: &Attribute, _span: Span, target: Target) -> bool {
+    fn check_stability_promotable(&self, attr: &Attribute, target: Target) -> bool {
         match target {
             Target::Expression => {
                 self.dcx().emit_err(errors::StabilityPromotable { attr_span: attr.span });

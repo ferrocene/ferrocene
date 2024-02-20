@@ -5340,6 +5340,7 @@ dependencies = [
  "rustc_data_structures",
  "rustc_hir",
  "rustc_middle",
+ "rustc_session",
  "rustc_span",
  "rustc_target",
  "scoped-tls",

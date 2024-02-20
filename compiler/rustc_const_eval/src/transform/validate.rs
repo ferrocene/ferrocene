@@ -98,6 +98,26 @@ impl<'tcx> MirPass<'tcx> for Validator {
                 }
             }
         }
+
+        // Enforce that coroutine-closure layouts are identical.
+        if let Some(layout) = body.coroutine_layout()
+            && let Some(by_move_body) = body.coroutine_by_move_body()
+            && let Some(by_move_layout) = by_move_body.coroutine_layout()
+        {
+            if layout != by_move_layout {
+                // If this turns out not to be true, please let compiler-errors know.
+                // It is possible to support, but requires some changes to the layout
+                // computation code.
+                cfg_checker.fail(
+                    Location::START,
+                    format!(
+                        "Coroutine layout differs from by-move coroutine layout:\n\
+                        layout: {layout:#?}\n\
+                        by_move_layout: {by_move_layout:#?}",
+                    ),
+                );
+            }
+        }
     }
 }
 
@@ -117,18 +137,14 @@ struct CfgChecker<'a, 'tcx> {
 impl<'a, 'tcx> CfgChecker<'a, 'tcx> {
     #[track_caller]
     fn fail(&self, location: Location, msg: impl AsRef<str>) {
-        let span = self.body.source_info(location).span;
-        // We use `span_delayed_bug` as we might see broken MIR when other errors have already
-        // occurred.
-        self.tcx.dcx().span_delayed_bug(
-            span,
-            format!(
-                "broken MIR in {:?} ({}) at {:?}:\n{}",
-                self.body.source.instance,
-                self.when,
-                location,
-                msg.as_ref()
-            ),
+        // We might see broken MIR when other errors have already occurred.
+        assert!(
+            self.tcx.dcx().has_errors().is_some(),
+            "broken MIR in {:?} ({}) at {:?}:\n{}",
+            self.body.source.instance,
+            self.when,
+            location,
+            msg.as_ref(),
         );
     }
 

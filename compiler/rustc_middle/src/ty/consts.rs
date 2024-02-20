@@ -35,6 +35,16 @@ impl<'tcx> IntoKind for Const<'tcx> {
     }
 }
 
+impl<'tcx> rustc_type_ir::visit::Flags for Const<'tcx> {
+    fn flags(&self) -> TypeFlags {
+        self.0.flags
+    }
+
+    fn outer_exclusive_binder(&self) -> rustc_type_ir::DebruijnIndex {
+        self.0.outer_exclusive_binder
+    }
+}
+
 impl<'tcx> ConstTy<TyCtxt<'tcx>> for Const<'tcx> {
     fn ty(self) -> Ty<'tcx> {
         self.ty()
@@ -63,11 +73,13 @@ impl<'tcx> Const<'tcx> {
         self.0.kind
     }
 
+    // FIXME(compiler-errors): Think about removing this.
     #[inline]
     pub fn flags(self) -> TypeFlags {
         self.0.flags
     }
 
+    // FIXME(compiler-errors): Think about removing this.
     #[inline]
     pub fn outer_exclusive_binder(self) -> ty::DebruijnIndex {
         self.0.outer_exclusive_binder
@@ -235,7 +247,7 @@ impl<'tcx> Const<'tcx> {
         // FIXME(const_generics): We currently have to special case parameters because `min_const_generics`
         // does not provide the parents generics to anonymous constants. We still allow generic const
         // parameters by themselves however, e.g. `N`. These constants would cause an ICE if we were to
-        // ever try to substitute the generic parameters in their bodies.
+        // ever try to instantiate the generic parameters in their bodies.
         match expr.kind {
             hir::ExprKind::Path(hir::QPath::Resolved(
                 _,

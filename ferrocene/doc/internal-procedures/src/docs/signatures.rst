@@ -4,10 +4,10 @@
 Digital signatures
 ==================
 
-All the qualification documents we send to TUV have to be digitally signed by
-the responsible parties, to attest they were reviewed and to prevent accidental
-changes to the documents (which would require TUV to review the documents
-again).
+All the qualification documents we send to the assessor have to be digitally
+signed by the responsible parties, to attest they were reviewed and to prevent
+accidental changes to the documents (which would require the assessor to review
+the documents again).
 
 Signing documents
 -----------------

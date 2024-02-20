@@ -192,14 +192,14 @@ considering other directives. This means adding multiple ``toctree``\ s (for
 example to group some pages together) would reset the numbering, potentially
 having multiple pages numbered "1".
 
-The extension patches Sphinx to fix this, and ensure the page numbers
+The extension patches Sphinx to fix this, and ensure that the page numbers
 constantly increase even when multiple ``toctree`` directives are present.
 
 Appendices support
 ~~~~~~~~~~~~~~~~~~
 
 The extension adds a new ``appendices`` directive, with the same syntax and
-functionality as the ``toctree`` directive. The only difference is that page
+functionality as the ``toctree`` directive. The only difference is that pages
 are numbered with letters rather than digits.
 
 ``ferrocene_autoglossary`` extension
@@ -283,7 +283,7 @@ Marking releases as upcoming
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The extension allows marking a page as upcoming by adding
-``:upcoming-release:`` *before* any content of the page (execept for comments).
+``:upcoming-release:`` *before* any content of the page (except for comments).
 This adds an "upcoming" badge next to the title, and a caution message just
 below the title.
 
@@ -291,8 +291,8 @@ Including Rust changelogs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is possible to inject the Rust changelog for a range of versions with the
-``rust-changelog``. The directive requires the ``:from:`` and ``:to:`` options
-to define the (inclusive) range of releases to include:
+``rust-changelog`` directive. The directive requires the ``:from:`` and
+``:to:`` options to define the (inclusive) range of releases to include:
 
 .. code-block:: rst
 

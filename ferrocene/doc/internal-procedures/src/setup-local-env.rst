@@ -14,9 +14,9 @@ installed:
 
 * ``Python 3``, needed for the entry point of Rust’s build system.
 
-* ``AWS CLI v2``, needed to interact with our AWS account. Note that most Linux
-  distributions only include version 1 of the AWS CLI, while we explicitly
-  require version 2.
+* ``AWS CLI v2``, version **2.9.0 or greater**, needed to interact with our AWS
+  account. Note that most Linux distributions only include version 1 of the AWS
+  CLI, while we explicitly require version 2.
 
 Configuring git
 ---------------
@@ -50,16 +50,23 @@ following snippet to the ``~/.aws/config`` file in your work device:
 .. code-block:: text
 
    [profile ferrocene-ci]
-   sso_start_url = https://ferrous-systems.awsapps.com/start
-   sso_region = eu-central-1
+   sso_session = ferrous-systems
    sso_account_id = 886866542769
    sso_role_name = FerroceneDeveloper
    region = us-east-1
+
+   [sso-session ferrous-systems]
+   sso_start_url = https://ferrous-systems.awsapps.com/start
+   sso_region = eu-central-1
 
 .. Note::
 
    If you do not already have the ``~/.aws/config`` file in your local system,
    create a blank one.
+
+   If you already have the ``[sso-session ferrous-systems]`` block in your
+   ``~/.aws/config`` you do not need to add it again, as only one copy of it is
+   required.
 
 Once that's done, you can log into the CLI with the following command:
 
@@ -77,9 +84,9 @@ by the command). Authenticate with SSO on that page (if prompted) and click
 
 .. Note::
 
-   You will need to authenticate with AWS SSO every day. The Ferrocene build
+   You will need to authenticate with AWS SSO every week. The Ferrocene build
    system will remind you to authenticate if you're trying to perform actions
-   that require AWS access but you didn't log in that day.
+   that require AWS access but you didn't log in that week.
 
 Cloning the Ferrocene repository
 --------------------------------

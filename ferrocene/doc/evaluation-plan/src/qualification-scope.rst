@@ -20,4 +20,8 @@ distributed for convenience only. This includes but is not limited to:
 
 * ``cargo``
 * ``rustdoc``
+* ``rust-analyzer``
+* ``cargo-clippy``
+* ``rust-demangler``
 * ``rust-gdb``
+* the various llvm tools (example being ``llvm-objcopy``)

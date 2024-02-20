@@ -274,5 +274,31 @@ The ``render-summary`` directive renders a table with all
 ``render-outcomes-template`` invocations present in the rest of the document.
 It accepts no arguments nor options.
 
+``ferrocene_relnotes`` extension
+--------------------------------
+
+This extension is specific to the :doc:`release-notes:index`.
+
+Marking releases as upcoming
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The extension allows marking a page as upcoming by adding
+``:upcoming-release:`` *before* any content of the page (execept for comments).
+This adds an "upcoming" badge next to the title, and a caution message just
+below the title.
+
+Including Rust changelogs
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to inject the Rust changelog for a range of versions with the
+``rust-changelog``. The directive requires the ``:from:`` and ``:to:`` options
+to define the (inclusive) range of releases to include:
+
+.. code-block:: rst
+
+   .. rust-changelog::
+      :from: 1.68.2
+      :to: 1.76.0
+
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html
 .. _Jinja: https://palletsprojects.com/p/jinja/

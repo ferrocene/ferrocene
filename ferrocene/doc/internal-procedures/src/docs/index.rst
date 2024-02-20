@@ -1,26 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Documentation procedures
-========================
-
-The following procedures describe the means of building, updating, validating,
-and signing documents as per the appropriate level of quality.
-
-Document process
-----------------
-
-The document process has been described in the :doc:`qualification-plan:index`.
-The procedures describe how documentation is imported to GitHub as well as the
-verification process used to verify the buildability and correctness of the
-content.
-
-See the following chapters for the detailed process:
-
-* :doc:`qualification-plan:documentation`
-
 Working on the documentation
-----------------------------
+============================
 
 Qualification documents are built with Sphinx, and their source code is located
 in the ``ferrocene/doc`` folder inside the Ferrocene repository. For example,
@@ -31,8 +13,12 @@ qualification, including downloading all the required dependencies. Building
 the documents outside of the Ferrocene build system (including building them
 with the standard Sphinx CLI) is not supported and will likely not work.
 
+This section of the internal procedures contain documentation on how to work on
+the documentation. Quality management procedures are available in the
+:doc:`qualification-plan:documentation`.
+
 Building documents
-~~~~~~~~~~~~~~~~~~
+------------------
 
 You can build a qualification document by passing its path to the Ferrocene
 build system:

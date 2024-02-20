@@ -9,10 +9,6 @@ the responsible parties, to attest they were reviewed and to prevent accidental
 changes to the documents (which would require TUV to review the documents
 again).
 
-The Ferrocene QMS documentation also needs to be digitally signed by
-responsible parties to attest that their contents are up to date and represent
-the latest applicable procedures to be applied throughout the organization.
-
 Signing documents
 -----------------
 

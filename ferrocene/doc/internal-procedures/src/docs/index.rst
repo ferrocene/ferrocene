@@ -22,16 +22,14 @@ See the following chapters for the detailed process:
 Working on the documentation
 ----------------------------
 
-Qualification and QMS documents are built with Sphinx, and their source code is
-located in the ``ferrocene/doc`` folder inside the Ferrocene repository. For
-example, the source of the Safety Manual is located in
-``ferrocene/doc/safety-manual``.
+Qualification documents are built with Sphinx, and their source code is located
+in the ``ferrocene/doc`` folder inside the Ferrocene repository. For example,
+the source of the Safety Manual is located in ``ferrocene/doc/safety-manual``.
 
 The Ferrocene build system takes care of building and cross-linking the
-qualification and QMS documents, including downloading all the required
-dependencies. Building the documents outside of the Ferrocene build system
-(including building them with the standard Sphinx CLI) is not supported and will
-likely not work.
+qualification, including downloading all the required dependencies. Building
+the documents outside of the Ferrocene build system (including building them
+with the standard Sphinx CLI) is not supported and will likely not work.
 
 Building documents
 ~~~~~~~~~~~~~~~~~~

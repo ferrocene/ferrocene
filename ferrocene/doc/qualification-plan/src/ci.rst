@@ -34,7 +34,7 @@ tests or updates of existing tests suites is required:
 * Updates for test suites maintained by Ferrocene are done as part of
   the :doc:`development`.
 
-.. _test-phase-spot:
+.. _ci-phase-spot:
 
 Build and Test Phase 1: Spot Testing
 ------------------------------------
@@ -68,7 +68,7 @@ in the comment section of the PR with a red X:
 
    Spot Testing Failure
 
-.. _test-phase-full:
+.. _ci-phase-full:
 
 Build and Test Phase 2: Full Build and Test
 -------------------------------------------

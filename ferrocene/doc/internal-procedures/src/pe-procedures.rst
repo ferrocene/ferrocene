@@ -26,20 +26,20 @@ PE workflow
 -----------
 
 The workflow outlined below describes the expected interactions between the
-engineer and the ``ferrocene/ferrocene`` GitHub repository. 
+engineer and the ``ferrocene/ferrocene`` GitHub repository.
 
 Create branch
 ~~~~~~~~~~~~~
 Create a personal branch of the ``ferrocene/ferrocene`` repository to work on.
 
-.. Note:: 
+.. Note::
    Once pushed to GitHub, this branch can be shared with other people. These
    branches however, will not be released.
 
 Ensure that you are branching off the ``main`` branch by checking it out before
 creating your own branch.
 ::
-    
+
     git checkout main
 
 Create a new branch based off the ``main`` branch and immediately check it out.
@@ -114,7 +114,7 @@ For initial commit:
    git commit
 
 ``git`` will open an editor where you will need to add the commit message. The
-message should contain the information on the scope and goal for the changes 
+message should contain the information on the scope and goal for the changes
 made.
 
 .. Note::

@@ -193,7 +193,7 @@ library.
 
 4. `rustc` parses the Rust compilation unit.
 
-5. `rustc` analyzes both the Rust compilation unit and the Rust library..
+5. `rustc` analyzes both the Rust compilation unit and the Rust library.
 
 6. `rustc` generates LLVM IR for the Rust compilation unit.
 

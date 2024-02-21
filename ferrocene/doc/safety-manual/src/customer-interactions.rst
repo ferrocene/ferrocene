@@ -5,18 +5,12 @@ Customer Interactions
 =====================
 
 Interactions between Customers and the Ferrocene organization are done
-through the following tools: 
+through the following tools:
 
-.. list-table::
-   :align: left
-   :stub-columns: 1
-
-   * - email
-     - | - Get contract information;
-       | - Contact our teams for support, questions or enhancement requests;
-       | - Obtain release tarballs
-
-.. end of table
+* **Email**
+    * Get contract information
+    * Contact our teams for support, questions or enhancement requests
+    * Obtain release tarballs
 
 In the following parts, the usage of the customer focused tools are described.
 
@@ -52,9 +46,9 @@ The following channels are available to customers:
 
 * |channel_name| : Major release of Ferrocene.
 
-.. note:: 
-   For this qualification, only the |channel_name| release has been qualified 
-   for the :doc:`specified environment <safety-manual:environment>`. 
+.. note::
+   For this qualification, only the |channel_name| release has been qualified
+   for the :doc:`specified environment <safety-manual:environment>`.
    Consequently, only |channel_name| should be used in qualified development
    context.
 
@@ -68,14 +62,14 @@ documentation.
 
 The documentation contains the following information:
 
-* Ferrocene documentation: the necessary documentation to understand
+* **Ferrocene documentation:** the necessary documentation to understand
   Ferrocene, its scope, and safety-related material.
 
-* Dev Log: a list of every new feature implemented in our products.
+* **Dev Log:** a list of every new feature implemented in our products.
 
-* Library AP documentation: description of associated libraries.
+* **Library AP documentation:** description of associated libraries.
 
-* Rust Project's documentation: documentation from the upstream rust project
+* **Rust Project's documentation:** documentation from the upstream rust project
   which provides the basis for understanding and using the Rust language.
 
 Unless specified otherwise, customers have the freedom to copy any of the

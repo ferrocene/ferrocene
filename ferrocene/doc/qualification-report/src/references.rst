@@ -19,7 +19,7 @@ Input Documents
 #. :doc:`evaluation-report:index`
 #. :doc:`qualification-plan:index`
 
-.. note:: 
-   The document identifiers and the applicable versions of documents can be 
+.. note::
+   The document identifiers and the applicable versions of documents can be
    found in the :doc:`document-list:index` document; the latest available
    version applies.

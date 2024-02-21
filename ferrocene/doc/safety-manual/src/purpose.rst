@@ -8,7 +8,7 @@ Ferrocene is a software development environment for Rust programming
 language.
 
 .. figure:: figures/toolchain-workflow.svg
-   
+
    Toolchain Workflow
 
 Ferrocene is composed of the following tools:

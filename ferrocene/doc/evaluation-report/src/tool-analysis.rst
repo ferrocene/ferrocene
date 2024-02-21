@@ -80,8 +80,8 @@ LLVM
    .. id:: ERR_LLVM_17!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!Input parameter has invalid value!Most likely LLVM will crash. Invalid code could also be generated! :id:`AVD_TEST_007`
    .. id:: ERR_LLVM_18!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!An object file is invalid!Invalid code generated! :id:`AVD_CHECK_BUILD_SCRIPT_003`
    .. id:: ERR_LLVM_19!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!An object file or static library is not correctly translated to machine code!Undefined behavior! :id:`AVD_TEST_007`
-   .. id:: ERR_LLVM_20!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!The behavior is incorrect because of concurrent modificaitons!Invalid code generated! :id:`AVD_PARALLEL_BUILD_006`
-   .. id:: ERR_LLVM_21!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!An object or static library exposes aditional symbols!Internal functionality might become callable from the outside! :id:`AVD_TEST_007`
+   .. id:: ERR_LLVM_20!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!The behavior is incorrect because of concurrent modifications!Invalid code generated! :id:`AVD_PARALLEL_BUILD_006`
+   .. id:: ERR_LLVM_21!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!An object or static library exposes additional symbols!Internal functionality might become callable from the outside! :id:`AVD_TEST_007`
    .. id:: ERR_LLVM_22!:id:`UC1_RLIB`, :id:`UC2_STATICLIB`, :id:`UC3_EXEC`, :id:`UC4_EXEC_RLIB`, :id:`UC5_EXEC_CLIB`!Output does not contain expected variables or functions!Invalid code generated! :id:`AVD_CHECK_CLEAN_ENV_002` AND :id:`AVD_CLEAN_004` AND :id:`AVD_TEST_007`
 
 .. end of table
@@ -150,7 +150,7 @@ the following qualification methods:
 * 1c. Validation of the software tool in accordance with 11.4.9
 
 According to the clause 11.4.2 in part 8 of the [|iso_ref|] this choice is
-depending on user's software development life-cycle and his validation strategy,
+depending on user's software development life-cycle and their validation strategy,
 the user has the responsibility to determine whether this level or better one is
 applicable.
 

@@ -7,7 +7,7 @@ Setting up a local development environment
 Required software
 -----------------
 
-To develop Ferrocene locally, you’ll need to have the following software 
+To develop Ferrocene locally, you’ll need to have the following software
 installed:
 
 * ``git``, as the version control system used by Ferrocene.
@@ -56,8 +56,8 @@ following snippet to the ``~/.aws/config`` file in your work device:
    sso_role_name = FerroceneDeveloper
    region = us-east-1
 
-.. Note:: 
-   
+.. Note::
+
    If you do not already have the ``~/.aws/config`` file in your local system,
    create a blank one.
 
@@ -76,8 +76,8 @@ by the command). Authenticate with SSO on that page (if prompted) and click
     AWS SSO log in prompt
 
 .. Note::
-   
-   You will need to authenticate with AWS SSO every day. The Ferrocene build 
+
+   You will need to authenticate with AWS SSO every day. The Ferrocene build
    system will remind you to authenticate if you're trying to perform actions
    that require AWS access but you didn't log in that day.
 

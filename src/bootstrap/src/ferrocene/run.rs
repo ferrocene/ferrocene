@@ -4,7 +4,7 @@
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
-use crate::ferrocene::doc::{Specification, UserManual};
+use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -30,9 +30,16 @@ impl Step for TraceabilityMatrix {
         let test_annotations_base =
             builder.out.join(self.target.triple).join("ferrocene").join("test-annotations");
 
-        let specification =
-            builder.ensure(Specification { target: self.target, fresh_build: false });
-        let user_manual = builder.ensure(UserManual { target: self.target, fresh_build: false });
+        let specification = builder.ensure(Specification {
+            mode: SphinxMode::Html,
+            target: self.target,
+            fresh_build: false,
+        });
+        let user_manual = builder.ensure(UserManual {
+            mode: SphinxMode::Html,
+            target: self.target,
+            fresh_build: false,
+        });
 
         let compiletest = builder.tool_exe(Tool::Compiletest);
         for (suite, mode) in &[("tests/ui", "ui"), ("tests/run-make", "run-make")] {

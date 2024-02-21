@@ -113,6 +113,9 @@ def build_finished(app, exception):
     if exception is not None:
         return
 
+    if app.builder.name != "html":
+        return
+
     with sphinx.util.progress_message("copying signature files"):
         os.makedirs(f"{app.outdir}/signature", exist_ok=True)
         signature = SignatureStatus(app)

@@ -6,7 +6,8 @@
 This repository contains the shared Sphinx resources we rely on for our
 Sphinx documentation websites, rather than duplicating them into each site.
 
-🚨 **The contents of this repository are strictly meant for Ferrocene use** 🚨  
+🚨 **The contents of this repository are strictly meant for Ferrocene use** 🚨
+
 While this repository is public and released under an open source license,
 breaking changes will regularly happen, we will provide no support and
 third-party pull requests likely won't be accepted.

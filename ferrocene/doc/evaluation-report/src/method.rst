@@ -54,7 +54,7 @@ Library Test Suite
 The **library test suite** contains tests that cover library libcore, and on
 supported platforms, libraries liballoc, libstd, and libtest. The tests are a
 mix of unit tests, integration tests, and documentation tests (code snippets
-within the documentation and built and run).
+within the documentation which are built and run).
 
 The library test suite has the following statistics:
 

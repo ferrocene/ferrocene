@@ -121,7 +121,7 @@ process by considering the following organization:
 #. Several other meetings allow us to discuss the analysis of each member.
 #. Report is directly updated by members.
 #. An expert reads, the second time, the sessions' report and adds remarks
-   based on his domain knowledge, e.g. "impossible deviation", or adding some
+   based on their domain knowledge, e.g. "impossible deviation", or adding some
    missing deviations.
 #. Finally, an analysis of these results is performed in order to merge similar
    potential errors in an hazard class. This class groups potential errors with
@@ -214,32 +214,32 @@ qualification method:
 
 * For **TCL2**:
 
-.. csv-table:: TCL2 Qualification methods according to ASIL level
-   :name: TCL2 Qualification methods according to ASIL level
-   :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-   :delim: !
+   .. csv-table:: TCL2 Qualification methods according to ASIL level
+      :name: TCL2 Qualification methods according to ASIL level
+      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
+      :delim: !
 
-   1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! ++ ! \+
-   1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! ++ ! \+
-   1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! \+ ! ++
-   1d. Development in accordance with a safety standard! \+ ! \+ ! \+ ! \+
+      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! ++ ! \+
+      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! ++ ! \+
+      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! \+ ! ++
+      1d. Development in accordance with a safety standard! \+ ! \+ ! \+ ! \+
 
-.. end of table
+   .. end of table
 
 
 * For **TCL3**:
 
-.. csv-table:: TCL3 Qualification methods according to ASIL level
-   :name: TCL3 Qualification methods according to ASIL level
-   :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-   :delim: !
+   .. csv-table:: TCL3 Qualification methods according to ASIL level
+      :name: TCL3 Qualification methods according to ASIL level
+      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
+      :delim: !
 
-   1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! \+ ! \+
-   1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! \+ ! \+
-   1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! ++ ! ++
-   1d. Development in accordance with a safety standard! \+ ! \+ ! ++ ! ++
+      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! \+ ! \+
+      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! \+ ! \+
+      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! ++ ! ++
+      1d. Development in accordance with a safety standard! \+ ! \+ ! ++ ! ++
 
-.. end of table
+   .. end of table
 
 |
 | ++: Highly recommended

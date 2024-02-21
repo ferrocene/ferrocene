@@ -867,6 +867,7 @@ impl<'a> Builder<'a> {
                 dist::BuildManifest,
                 dist::ReproducibleArtifacts,
                 crate::ferrocene::dist::Docs,
+                crate::ferrocene::dist::DocsDoctrees,
                 crate::ferrocene::dist::SourceTarball,
                 crate::ferrocene::dist::SelfTest,
                 crate::ferrocene::dist::TestOutcomes,

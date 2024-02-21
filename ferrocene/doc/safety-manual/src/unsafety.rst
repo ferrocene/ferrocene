@@ -46,7 +46,6 @@ documentation.
     /// even if the resulting reference is not used. The caller has to ensure that
     /// `0 <= mid <= self.len()`.
     ///
-    /// [`split_at_mut`]: slice::split_at_mut
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     . . .
     pub const unsafe fn split_at_mut_unchecked(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
@@ -69,7 +68,6 @@ documentation.
     /// even if the resulting reference is not used. The caller has to ensure that
     /// `0 <= mid <= self.len()`.
     ///
-    /// [`split_at`]: slice::split_at
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     . . .
     pub const fn split_at_mut(&mut self, mid: usize) -> (&mut [T], &mut [T]) {
@@ -99,7 +97,7 @@ When verifying unsafe code, the user at a minimum shall:
 
 * Perform code review of the entire module where the unsafe code resides.
 
-* Perform unit testing on the unsafe code and its clients,
+* Perform unit testing on the unsafe code and its clients.
 
 * Perform integration testing between the unsafe code and its clients.
 

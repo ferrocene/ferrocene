@@ -9,7 +9,7 @@
 #
 # Groups are a collection of packages produced for the same set of targets. The
 # name of the group is arbitrary and doesn't have any specific meaning. If the
-# target or package you're trying to add would fit in an existing group try to
+# target or package you're trying to add would fit in an existing group, try to
 # avoid creating a new one, unless it semantically makes more sense.
 #
 # ## Packages
@@ -46,11 +46,33 @@ name = "llvm-tools"
 subset = "default"
 
 [[groups.hosts.packages]]
+name = "rustfmt"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "rust-analyzer"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "clippy"
+subset = "default"
+
+[[groups.hosts.packages]]
+name = "rust-demangler"
+subset = "default"
+
+[[groups.hosts.packages]]
 name = "ferrocene-self-test"
 subset = "default"
 
 [groups.cross-compilation]
-targets = ["aarch64-unknown-none", "aarch64-unknown-linux-gnu", "thumbv7em-none-eabi", "thumbv7em-none-eabihf", "wasm32-unknown-unknown"]
+targets = [
+  "aarch64-unknown-none",
+  "aarch64-unknown-linux-gnu",
+  "thumbv7em-none-eabi",
+  "thumbv7em-none-eabihf",
+  "wasm32-unknown-unknown",
+]
 
 [[groups.cross-compilation.packages]]
 name = "rust-std"

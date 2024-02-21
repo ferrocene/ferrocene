@@ -36,21 +36,23 @@ tests or updates of existing tests suites is required:
 
 .. _test-phase-spot:
 
-Test Phase 1: Trial Merge and Spot Testing
-------------------------------------------
+Build and Test Phase 1: Spot Testing
+------------------------------------
 
 The goal of this phase is to quickly assess the health of a PR by detecting
-merge issues, and testing for common issues.
+merge issues, running linters, and testing for common issues. It is executed as
+a convenience for developers, and doesn't perform any check not performed in
+:ref:`test-phase-full`.
 
 This phase is triggered whenever a new PR is created, or a new commit is pushed
-under a PR. CircleCI starts the "commit" workflow. This workflow performs the
+under a PR. CircleCI starts the ``commit`` workflow. This workflow performs the
 following steps:
 
 * Prepare a Docker image of the build environment.
 * Perform licensing checks.
+* Run linters on the codebase.
 * Build the Ferrocene toolchain.
-* Run selected tests on a subset of supported targets to spot check the
-  toolchain.
+* Run the subset of tests most likely to fail due to a change.
 
 If this phase is successful, the Ferrocene CI infrastructure reports a pass in
 the comment section of the PR with a green check mark:

@@ -18,8 +18,8 @@ daily:
 Test Suites
 -----------
 
-The following test suites are developed and maintained by the upstream Rust
-project.
+The following test suites are developed and maintained by both the upstream
+Rust project and Ferrocene.
 
 Compiletest Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^

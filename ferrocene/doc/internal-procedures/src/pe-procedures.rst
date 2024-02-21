@@ -10,8 +10,7 @@ conforms to the appropriate level of quality. See the following chapters for
 the detailed process:
 
 * :doc:`qualification-plan:development`
-* :doc:`qualification-plan:testing`
-* :doc:`qualification-plan:packaging`
+* :doc:`qualification-plan:ci`
 * :doc:`qualification-plan:release`
 * :doc:`qualification-plan:change-tracking`
 * :doc:`qualification-plan:kp-tracking`

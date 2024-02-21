@@ -32,5 +32,4 @@ documented in the ``ferrocene/problems`` repository.
 
 Once a new stable release is produced, an announcement is published on the
 Ferrous Systems blog. In addition, customers will receive email communication
-whenever new know problems are discovered, or a release fixing know problems is
-publshed.
+whenever new KPs are discovered, or a release fixing KPs is publshed.

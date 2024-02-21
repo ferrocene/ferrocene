@@ -9,27 +9,28 @@ use std::path::Path;
 #[rustfmt::skip]
 const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
-    "(MIT OR Apache-2.0) AND Unicode-DFS-2016",               // unicode_ident
+    "(MIT OR Apache-2.0) AND Unicode-DFS-2016",            // unicode_ident
+    "0BSD OR MIT OR Apache-2.0",                           // adler license
     "0BSD",
-    "0BSD OR Apache-2.0 OR MIT",                              // adler license
-    "Apache-2.0",
-    "Apache-2.0/MIT",
-    "Apache-2.0 OR ISC OR MIT",                               // rustls
+    "Apache-2.0 / MIT",
+    "Apache-2.0 OR ISC OR MIT",                            // rustls
     "Apache-2.0 OR MIT",
-    "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",    // wasi license
+    "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
     "Apache-2.0/ISC/MIT",
     "Apache-2.0/MIT",
-    "BSD-2-Clause OR Apache-2.0 OR MIT",                      // zerocopy
+    "BSD-2-Clause OR Apache-2.0 OR MIT",                   // zerocopy
     "ISC",
+    "MIT / Apache-2.0",
+    "MIT OR Apache-2.0 OR LGPL-2.1-or-later",              // r-efi, r-efi-alloc
+    "MIT OR Apache-2.0 OR Zlib",                           // tinyvec_macros
+    "MIT OR Apache-2.0",
+    "MIT OR Zlib OR Apache-2.0",                           // miniz_oxide
     "MIT",
-    "MIT OR Apache-2.0 OR LGPL-2.1-or-later",                 // r-efi, r-efi-alloc
-    "Apache-2.0 OR MIT OR Zlib",                              // tinyvec_macros
-    "MIT OR Zlib OR Apache-2.0",                              // miniz_oxide
     "MIT/Apache-2.0",
-    "Unicode-DFS-2016",                                       // tinystr and icu4x
+    "Unicode-DFS-2016",                                    // tinystr and icu4x
     "Unlicense OR MIT",
     "Unlicense/MIT",
-    "Zlib OR Apache-2.0 OR MIT",                              // tinyvec
+    "Zlib OR Apache-2.0 OR MIT",                           // tinyvec
     // tidy-alphabetical-end
 ];
 

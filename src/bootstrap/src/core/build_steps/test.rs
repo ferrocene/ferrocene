@@ -2510,10 +2510,6 @@ impl Step for Crate {
         // we're working with automatically.
         let compiler = builder.compiler_for(compiler.stage, compiler.host, target);
 
-<<<<<<< HEAD
-        let mut cargo =
-            builder.cargo(compiler, mode, SourceType::InTree, target, builder.kind.as_str());
-=======
         let mut cargo = builder::Cargo::new(
             builder,
             compiler,
@@ -2522,7 +2518,6 @@ impl Step for Crate {
             target,
             builder.kind.as_str(),
         );
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         match mode {
             Mode::Std => {

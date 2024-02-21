@@ -76,19 +76,17 @@ They must also do a sanity check to ensure there are no unexpected problems
 with the end product and that the automation successfully executed without
 warnings.
 
-Testing Validation
-------------------
+Build and Testing Validation
+----------------------------
 
-The :doc:`testing` is performed as part of the development process in
-the test step, so validating it implies validating the testing process.
+The :doc:`ci` is performed as part of the development process in
+:ref:`dev-phase-test`, so validating it implies validating the testing process.
 
-Packaging Validation
---------------------
-
-The :doc:`packaging` is validated automatically by the release tooling as part
-of the Ferrocene infrastructure. The tooling expects the packages to be stored
-at the correct location with the right metadata attached, so failures in the
-packaging process will prevent releases from being published.
+Additionally, the produced packages are validated automatically by the release
+tooling as part of the Ferrocene infrastructure. The tooling expects the
+packages to be stored at the correct location with the right metadata attached,
+so failures in the packaging process will prevent releases from being
+published.
 
 .. _release-validation:
 

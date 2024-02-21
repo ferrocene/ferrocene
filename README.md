@@ -21,9 +21,9 @@ website][website] for details.
 
 ## Current status
 
-Ferrocene is currently in the final stages of qualification for ISO 26262
-ASIL-D and IEC 61508 SiL4. Qualification for other standards and areas, such as
-railway and aerospace, are planned.
+Ferrocene is qualified for ISO 26262 ASIL-D and IEC 61508 SiL4.
+Qualification for other standards and areas, such as railway and aerospace,
+are planned.
 
 ## Installation
 

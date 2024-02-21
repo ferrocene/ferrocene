@@ -10,7 +10,6 @@ Ferrocene Qualification Plan
 
    purpose
    scope
-   terms
    references
    history
    organization
@@ -24,3 +23,10 @@ Ferrocene Qualification Plan
    change-tracking
    kp-tracking
    validation
+
+.. appendices::
+   :caption: Appendices:
+   :numbered:
+   :maxdepth: 2
+
+   terms

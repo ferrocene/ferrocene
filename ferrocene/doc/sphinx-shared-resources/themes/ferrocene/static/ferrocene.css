@@ -73,6 +73,8 @@
     --code-block-bg: #f7f7f7;
     --focus-border: #68a4e8;
     --table-border: #dbdbdb;
+    --problematic-fg: #fff;
+    --problematic-bg: #f00;
 
     --body-bg: #fff;
     --header-fg: #194e80;
@@ -140,8 +142,17 @@ a {
     text-decoration: none;
 }
 
+/* Used by the ferrocene-autoglossary for automatically inserted glossary links */
+a.ferrocene-autoglossary {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 0.25em;
+}
+
 a:hover {
     text-decoration: underline;
+    text-decoration-style: solid;
 }
 
 p {
@@ -616,6 +627,10 @@ dl dt {
     font-weight: 700;
 }
 
+dl dt + dt {
+    margin-top: 0.3em;
+}
+
 dl dt:first-child {
     margin-top: 0;
 }
@@ -661,6 +676,15 @@ blockquote {
 
 blockquote code {
     font-style: normal;
+}
+
+/*********************
+ *   Inline errors   *
+ *********************/
+
+.problematic {
+    color: var(--problematic-fg);
+    background: var(--problematic-bg);
 }
 
 /**************************************************

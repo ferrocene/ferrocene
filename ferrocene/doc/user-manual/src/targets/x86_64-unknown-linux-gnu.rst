@@ -3,8 +3,8 @@
 
 .. _x86_64-unknown-linux-gnu:
 
-x86_64 Linux (glibc)
-====================
+:target:`x86_64-unknown-linux-gnu`
+==================================
 
 The ``x86_64-unknown-linux-gnu`` Ferrocene target provides support for Linux on
 x86_64 using glibc 2.27 or higher.

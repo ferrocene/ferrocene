@@ -10,7 +10,13 @@ Ferrocene Qualification Report
 
    purpose
    scope
-   terms
    references
    tests
    statement
+
+.. appendices::
+   :caption: Appendices:
+   :numbered:
+   :maxdepth: 2
+
+   terms

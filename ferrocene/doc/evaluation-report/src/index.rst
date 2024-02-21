@@ -10,10 +10,16 @@ Ferrocene Evaluation Report
 
    purpose
    scope
-   terms
    references
    hazop
    use-cases
    tool-analysis
    method
    potential-errors
+
+.. appendices::
+   :caption: Appendices:
+   :numbered:
+   :maxdepth: 2
+
+   terms

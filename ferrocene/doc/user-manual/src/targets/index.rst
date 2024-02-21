@@ -71,19 +71,19 @@ should not be used in production.
      - Standard library
      - Notes
 
-   * - ARMv7e-M (Thumb) bare metal
+   * - :target:`thumbv7em-none-eabi`
      - ``thumbv7em-none-eabi``
      - Cross-compilation
      - Bare-metal
      - \-
 
-   * - ARMv7e-M (Thumb, floats) bare metal
+   * - :target:`thumbv7em-none-eabihf`
      - ``thumbv7em-none-eabihf``
      - Cross-compilation
      - Bare-metal
      - \-
 
-   * - WASM bare metal
+   * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``
      - Cross-compilation
      - Full

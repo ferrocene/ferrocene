@@ -13,17 +13,11 @@ const LICENSES: &[&str] = &[
     "0BSD OR MIT OR Apache-2.0",                           // adler license
     "0BSD",
     "Apache-2.0 / MIT",
-<<<<<<< HEAD
     "Apache-2.0 OR ISC OR MIT",                            // rustls
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
     "Apache-2.0/ISC/MIT",
-=======
-    "Apache-2.0 OR ISC OR MIT",
-    "Apache-2.0 OR MIT",
-    "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
     "Apache-2.0",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "Apache-2.0/MIT",
     "BSD-2-Clause OR Apache-2.0 OR MIT",                   // zerocopy
     "ISC",

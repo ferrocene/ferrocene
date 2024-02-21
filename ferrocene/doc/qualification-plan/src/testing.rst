@@ -3,15 +3,23 @@
 
 .. default-domain:: qualification
 
-Testing Process
-===============
+Build and Testing Process
+=========================
 
-The Ferrocene CI infrastructure tests every PR, regardless of whether the PR
-modifies the tool chain, documentation, tests, configurations, or any other
-artifact within the Ferrocene GitHub repository. This ensures that regardless
-of what the change is, all verification activities are performed successfully,
-and the branch remains "green".
+The Ferrocene CI infrastructure serves two purposes: testing every PR to make
+sure it meets Ferrocene's quality standards, and building the release binaries
+with the changes of that PR.
 
+CI tests every PR, regardless of whether it modifies the toolchain,
+documentation, tests, configurations, or any other artifact within the
+Ferrocene repository. This ensures that regardless of what the change is, all
+verification activities are performed successfully, and the branch remains
+"green".
+
+Building and packaging release binaries is also done by CI for every PR, as
+part of the same workflow used for testing. Building and storing packages for
+every PR simplifies the release process (as it can reuse the binaries built by
+CI), and allows quick bisection to identify the change that introduced a bug.
 
 Updating Tests Suites
 ---------------------

@@ -1353,7 +1353,7 @@ impl<'a> Builder<'a> {
     /// rustc compiler, its output will be scoped by `mode`'s output directory,
     /// it will pass the `--target` flag for the specified `target`, and will be
     /// executing the Cargo command `cmd`.
-    fn cargo(
+    pub fn cargo(
         &self,
         compiler: Compiler,
         mode: Mode,

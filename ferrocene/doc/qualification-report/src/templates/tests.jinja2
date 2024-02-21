@@ -10,6 +10,13 @@
    The test outcomes won't be populated until you configure it.
 {% endmacro %}
 
+{% macro only_on_hosts(suite) %}
+.. note::
+
+   The {{ suite }} test suite is not tested on :target:`{{ target }}`, as it is
+   not a host platform.
+{% endmacro %}
+
 {% macro invocations_summary(bootstrap_type, only_match_root_node=False) %}
 {% if platform_outcomes is none %}
 {{ no_outcomes_error() }}
@@ -199,10 +206,7 @@ Compiler Test Suite
 {{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
 
 {% if host != target %}
-.. note::
-
-   The compiler test suite is not tested on :target:`{{ target }}`, as it is not
-   a host platform.
+{{ only_on_hosts("compiler") }}
 {% endif %}
 
 Linkchecker Test Suite
@@ -227,6 +231,10 @@ Build System Test Suite
 **Test suite:** :id:`TS6_BSYS`
 
 {{ invocations_summary("bootstrap::core::build_steps::test::Bootstrap") }}
+
+{% if host != target %}
+{{ only_on_hosts("build system") }}
+{% endif %}
 
 Tidy Test Suite
 ---------------
@@ -260,10 +268,7 @@ into the repository only when it passes full testing.
 As a result, the self-test test suite reports a **pass** for this
 qualification.
 {% else %}
-.. note::
-
-   The self-test test suite is not tested on :target:`{{ target }}`, as it is
-   not a host platform.
+{{ only_on_hosts("self-test") }}
 {% endif %}
 
 Known Problems

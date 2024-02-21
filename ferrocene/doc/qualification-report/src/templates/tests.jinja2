@@ -105,7 +105,32 @@ Compiletest Test Suite
 
 **Test suite:** :id:`TS1_COMP`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Compiletest") }}
+The following compiletest suites were executed as part of this test suite:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Compiletest suite
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in platform_outcomes.filter_invocations("bootstrap::core::build_steps::test::Compiletest") %}
+   * - ``{{ invocation.kind.suite }}`` {% if invocation.kind.mode is not none %} (mode: ``{{ invocation.kind.mode }}``){% endif %}
+
+       .. rst-class:: align-right
+     - {{ invocation.passed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.ignored_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
 
 {% if host != target %}
 .. note::

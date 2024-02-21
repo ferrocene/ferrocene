@@ -388,13 +388,6 @@ Backus-Naur form. In particular:
 
    ($$,$$ ConfigurationPredicate)
 
-:dp:`fls_u5ryccs9cpex`
-Whenever the run-time semantics define certain actions to happen in an arbitrary
-order, this means that a tool arranges for these actions to occur in a way that
-is equivalent to some sequential order, following the rules that result from
-that sequential order. This can happen, for example, if two parameters of a
-given call expression have side effects.
-
 .. _fls_9cd746qe40ag:
 
 Versioning
@@ -435,4 +428,3 @@ under Implementation Requirements heading.
 :dp:`fls_47svine904xk`
 A *fact* is a requirement imposed on a conforming tool, stated in informative
 language such as "is", "is not", "can", "cannot".
-

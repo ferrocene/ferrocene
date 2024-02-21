@@ -26,36 +26,13 @@ Updating Tests Suites
 
 As part of the testing process, it is essential to ensure that the test suites
 are adapted to the evolution of Ferrocene. Consequently, the creation of new
-tests or updates of existing tests suites is required.
+tests or updates of existing tests suites is required:
 
-When a new feature is developed, the author of the PR is also responsible for
-creating tests to ensure that the feature works as intended. These tests are
-required to ensure that future PRs do not negatively impact the functionality
-of the feature.
+* Updates for test suites maintained by upstream are merged whenever we pull
+  new changes in.
 
-New tests provide the following information, and are linked to a GitHub issue or
-a PR that prompted their creation.
-
-* Test name and test reference
-
-* Introduced commit
-
-* Scope of tests
-
-* (optional) Test Platform
-
-* Pass/Fail criteria
-
-Once the tests are developed, the process continues with the
-:ref:`development:Development Phases` to be merged in the test suite.
-
-Changes to upstream test suites are merged as part of the automated PRs pulling
-code from upstream.
-
-KPs can also result in additional tests to be developed or modified. For the
-details on handling KPs, refer to :ref:`kp-tracking:Known Problems Tracking`.
-The tests developed for KPs provide the same information mentioned above and
-follow :ref:`development:Development Process` to be merged into the test suite.
+* Updates for test suites maintained by Ferrocene are done as part of
+  the :doc:`development`.
 
 .. _test-phase-spot:
 

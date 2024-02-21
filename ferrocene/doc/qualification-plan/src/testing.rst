@@ -70,26 +70,18 @@ in the comment section of the PR with a red X:
 
 .. _test-phase-full:
 
-Test Phase 2: Full Testing and Merge
-------------------------------------
+Build and Test Phase 2: Full Build and Test
+-------------------------------------------
 
-The goal of this phase is to validate the PR, and merge it into the branch.
-
-Once a PR is approved by a human reviewer, the Ferrocene developer or the
-Reviewer can instruct the Ferrocene CI infrastructure to perform full testing
-and merge the PR into the branch by posting comment "bors merge" (or one of its
-equivalents) in the comment section of the PR.
-
-.. figure:: figures/bors-merge-request.png
-
-   Bors Merge Request
-
-When this happens, CircleCI runs the "full" workflow within a pipeline. This
-workflow performs the following steps:
+The goal of this phase is to validate the PR, build and package release
+artifacts, and merge it into the target branch. The phase starts when
+:ref:`dev-phase-test` is reached. CircleCI then runs the ``full`` workflow
+within a pipeline, performing the following steps:
 
 * Prepare a Docker image of the build environment.
 * Build the Ferrocene toolchain.
 * Run all test suites on all supported targets using the toolchain.
+* Render the documentation, including the outcomes of the tests.
 * Package the toolchain.
 * Upload the package to Amazon S3.
 * Prepare a Docker image of the installation environment.
@@ -98,10 +90,6 @@ workflow performs the following steps:
 * Install the toolchain.
 * Verify the versions and functionality of the toolchain binaries.
 * Generate a report.
-
-.. figure:: figures/full-workflow-pipeline.png
-
-   Full Workflow Pipeline
 
 If the "full" workflow executes successfully, then the merge commit is
 fast-forwarded to the ``main`` branch and a new PR is pulled out of the queue to

@@ -75,16 +75,37 @@ A :t:`self parameter` is a :t:`function parameter` expressed by :t:`keyword`
 A :t:`function` shall not specify a :t:`self parameter` unless it is an
 :t:`associated function`.
 
-:dp:`fls_icdzs1mjh0n4`
-A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless
-it is an :t:`external function`.
+:dp:`fls_AAYJDCNMJgTq`
+The :t:`type` of a :t:`parameter` is determined as follows:
+
+* :dp:`fls_PGtp39f6gJwU`
+  If the :t:`parameter` is a :t:`self parameter` without a :s:`TypeSpecification`:
+
+  * :dp:`fls_yZ2yIXxmy2ri`
+    And the :t:`self parameter` has token ``&`` and :t:`keyword` ``mut``, then the :t:`type` is ``&mut Self``.
+
+  * :dp:`fls_35aSvBxBnIzm`
+    And the :t:`self parameter` has token ``&`` and lacks :t:`keyword` ``mut``, then the :t:`type` is ``&Self``.
+
+  * :dp:`fls_Ogziu8S01qPQ`
+    And the :t:`self parameter` lacks token ``&`` and :t:`keyword` ``mut``, then the :t:`type` is ``Self``.
+
+* :dp:`fls_xCSsxYUZUFed`
+  Otherwise the :t:`type` is the specified :t:`type`.
 
 :dp:`fls_lxzinvqveuqh`
 The :t:`pattern` of a :t:`function parameter` shall be an :t:`irrefutable
 pattern`.
 
+:dp:`fls_kcAbTPZXQ5Y8`
+The :t:`expected type` of the :t:`pattern` of a :t:`function parameter` is the :t:`type` of the :t:`function parameter`.
+
 :dp:`fls_PGDKWK7nPvgw`
 The :t:`[binding]s` of all :t:`[pattern]s` of all :t:`[function parameter]s` of a :t:`function` shall not shadow another.
+
+:dp:`fls_icdzs1mjh0n4`
+A :t:`function` shall not specify a :s:`FunctionParameterVariadicPart` unless
+it is an :t:`external function`.
 
 :dp:`fls_vljy4mm0zca2`
 A :t:`return type` is the :t:`type` of the result a :t:`function`, :t:`closure type` or :t:`function pointer type` returns.

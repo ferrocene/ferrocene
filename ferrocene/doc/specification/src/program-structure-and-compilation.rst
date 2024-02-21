@@ -215,6 +215,11 @@ A :t:`construct` subject to :t:`attribute` :c:`cfg` where the related
 :t:`configuration predicate` evaluates to ``false`` is not considered part of a
 Rust program.
 
+:dp:`fls_y56RGw3cbFex`
+A :t:`crate root module` subject to :t:`attribute` :c:`cfg` where the related
+:t:`configuration predicate` evaluates to ``false`` is considered empty except
+for all :t:`[attribute]s` up to the invoked :t:`attribute` :c:`cfg`.
+
 :dp:`fls_h6b1fuw4nvi1`
 An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate`
 evaluates to ``false`` is not considered part of a Rust program.

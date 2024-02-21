@@ -51,14 +51,23 @@
 Testing scope
 =============
 
-For this qualification, testing is restricted to the following environments:
+This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
+|rust_version|) in the following environment:
 
 .. list-table::
+   :header-rows: 1
+
+   * -
+     - Target name
+     - Target triple
 
    * - Host platform:
-     - :target-with-triple:`{{ host }}`
+     - :target:`{{ host }}`
+     - ``{{ host }}``
+
    * - Compilation target:
-     - :target-with-triple:`{{ target }}`
+     - :target:`{{ target }}`
+     - ``{{ target }}``
 
 {% if bare_metal_test_target %}
 Bare metal testing
@@ -83,24 +92,6 @@ crate, which is not present in the ``{{ target }}`` target (and consequently
 not shipped to customers), we can conclude that the test results of
 ``{{ bare_metal_test_target }}`` are also valid for ``{{ target }}``.
 {% endif %}
-
-Release Notes
--------------
-
-The |ferrocene_version| version of the Ferrocene toolset contains the following
-tools:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Tool
-     - Version
-   * - Cargo
-     - |rust_version|
-   * - rustc
-     - |rust_version|
-   * - rustdoc
-     - |rust_version|
 
 Test results
 ============

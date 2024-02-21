@@ -126,9 +126,9 @@ and successful merge in the comment section of the PR.
    Full Workflow Success
 
 If the "full" workflow fails, the current PR is moved back to
-:ref:`dev-phase-review` or :ref:`doc-phase-review` respectively, and the
-Ferrocene CI infrastructure reports a failed full build in the comment section
-of the PR and prevents the merge until the failure is fixed.
+:ref:`dev-phase-review`, and the Ferrocene CI infrastructure reports a failed
+full build in the comment section of the PR and prevents the merge until the
+failure is fixed.
 
 .. figure:: figures/bors-failed-workflow.png
 

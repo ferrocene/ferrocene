@@ -9,10 +9,11 @@ Development Process
 The Ferrocene toolchain is a complex codebase that contains inputs from
 different teams and upstream sources. Ferrocene developers need to ensure that
 all changes made to it are properly reviewed, are of adequate quality, and can
-be properly assessed through automated testing. This section describes the
-process for merging any change into the Ferrocene codebase while accomplishing
-the aforementioned goals.
+be properly assessed through automated testing.
 
+This section describes the process for merging any change into the Ferrocene
+codebase while accomplishing the aforementioned goals. It applies to both code
+changes and documentation changes.
 
 Merge Requirements
 ------------------

@@ -11,9 +11,9 @@ const LICENSES: &[&str] = &[
     // tidy-alphabetical-start
     "(MIT OR Apache-2.0) AND Unicode-DFS-2016",               // unicode_ident
     "0BSD",
-    "0BSD OR MIT OR Apache-2.0",                              // adler license
+    "0BSD OR Apache-2.0 OR MIT",                              // adler license
     "Apache-2.0",
-    "Apache-2.0 / MIT",
+    "Apache-2.0/MIT",
     "Apache-2.0 OR ISC OR MIT",                               // rustls
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",    // wasi license
@@ -22,10 +22,8 @@ const LICENSES: &[&str] = &[
     "BSD-2-Clause OR Apache-2.0 OR MIT",                      // zerocopy
     "ISC",
     "MIT",
-    "MIT / Apache-2.0",
-    "MIT OR Apache-2.0",
     "MIT OR Apache-2.0 OR LGPL-2.1-or-later",                 // r-efi, r-efi-alloc
-    "MIT OR Apache-2.0 OR Zlib",                              // tinyvec_macros
+    "Apache-2.0 OR MIT OR Zlib",                              // tinyvec_macros
     "MIT OR Zlib OR Apache-2.0",                              // miniz_oxide
     "MIT/Apache-2.0",
     "Unicode-DFS-2016",                                       // tinystr and icu4x

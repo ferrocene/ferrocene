@@ -233,6 +233,29 @@ into the repository only when it passes full testing.
 
 As a result, the tidy test suite reports a **pass** for this qualification.
 
+Self-Test Test Suite
+--------------------
+
+**Test suite:** :id:`TS8_SELF`
+
+{% if host == target %}
+The self-test test suite is a pass/fail test suite integrated into the
+Ferrocene CI infrastructure.
+
+The self-test test suite is verified as part of
+:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
+Plan : Development Process <qualification-plan:development>`, a PR is merged
+into the repository only when it passes full testing.
+
+As a result, the self-test test suite reports a **pass** for this
+qualification.
+{% else %}
+.. note::
+
+   The self-test test suite is not tested on :target:`{{ target }}`, as it is
+   not a host platform.
+{% endif %}
+
 Known Problems
 ==============
 

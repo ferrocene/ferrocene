@@ -10,6 +10,12 @@
    The test outcomes won't be populated until you configure it.
 {% endmacro %}
 
+{% macro no_matching_outcomes_warning() %}
+.. warning::
+
+   No matching test outcomes were found for this suite.
+{% endmacro %}
+
 {% macro only_on_hosts(suite) %}
 .. note::
 
@@ -66,9 +72,7 @@ qualification.
      - {{ invocation.total_tests() }}
    {% endfor %}
 {% else %}
-.. warning::
-
-   No matching test outcomes were found for this suite.
+{{ no_matching_outcomes_warning() }}
 {% endif %}
 {% endif %}
 {% endmacro %}
@@ -115,6 +119,11 @@ Compiletest Test Suite
 
 The following compiletest suites were executed as part of this test suite:
 
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% else %}
+{% set invocations = platform_outcomes.filter_invocations("bootstrap::core::build_steps::test::Compiletest") | list %}
+{% if invocations %}
 .. list-table::
    :header-rows: 1
 
@@ -124,7 +133,7 @@ The following compiletest suites were executed as part of this test suite:
      - Failed tests
      - Total tests
 
-   {% for invocation in platform_outcomes.filter_invocations("bootstrap::core::build_steps::test::Compiletest") %}
+   {% for invocation in invocations %}
    * - ``{{ invocation.kind.suite }}`` {% if invocation.kind.mode is not none %} (mode: ``{{ invocation.kind.mode }}``){% endif %}
 
        .. rst-class:: align-right
@@ -139,6 +148,10 @@ The following compiletest suites were executed as part of this test suite:
        .. rst-class:: align-right
      - {{ invocation.total_tests() }}
    {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
+{% endif %}
 
 {% if host != target %}
 .. note::

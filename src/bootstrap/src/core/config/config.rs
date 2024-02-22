@@ -337,6 +337,7 @@ pub struct Config {
     pub paths: Vec<PathBuf>,
 
     // Ferrocene-specific configuration
+    pub ferrocene_raw_channel: String,
     pub ferrocene_aws_profile: Option<String>,
     pub ferrocene_traceability_matrix_mode: FerroceneTraceabilityMatrixMode,
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
@@ -1177,6 +1178,7 @@ define_config! {
 
 define_config! {
     struct Ferrocene {
+        channel: Option<String> = "channel",
         aws_profile: Option<String> = "aws-profile",
         traceability_matrix_mode: Option<String> = "traceability-matrix-mode",
         test_outcomes: Option<String> = "test-outcomes",
@@ -1216,6 +1218,8 @@ impl Config {
 
         config.stdout_is_tty = std::io::stdout().is_terminal();
         config.stderr_is_tty = std::io::stderr().is_terminal();
+
+        config.ferrocene_raw_channel = "rolling".into();
 
         // set by build.rs
         config.build = TargetSelection::from_user(&env!("BUILD_TRIPLE"));
@@ -1896,6 +1900,7 @@ impl Config {
         }
 
         if let Some(f) = toml.ferrocene {
+            set(&mut config.ferrocene_raw_channel, f.channel);
             config.ferrocene_traceability_matrix_mode = match f.traceability_matrix_mode.as_deref()
             {
                 Some("local") | None => FerroceneTraceabilityMatrixMode::Local,

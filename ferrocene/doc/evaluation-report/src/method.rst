@@ -18,8 +18,8 @@ daily:
 Test Suites
 -----------
 
-The following test suites are developed and maintained by the upstream Rust
-project.
+The following test suites are developed and maintained by both the upstream
+Rust project and Ferrocene.
 
 Compiletest Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -94,3 +94,14 @@ Tidy Test Suite
 
 The **tidy test suite** checks for consistency in the compiler codebase. It
 includes a variety of miscellaneous checks.
+
+Self-Test Test Suite
+~~~~~~~~~~~~~~~~~~~~
+
+.. id:: TS8_SELF
+
+The **self-test test suite** installs the packaged release in a temporary
+directory, and executes the ``ferrocene-self-test`` tool on it. The tool
+ensures that packages contain the correct files, that files are installed in
+the correct places, and that the installed toolchain can successfully compile a
+small number of example programs.

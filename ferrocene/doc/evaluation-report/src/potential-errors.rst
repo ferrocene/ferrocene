@@ -13,6 +13,7 @@ Potential Errors and Tests Traceability
    :widths: 35, 65
    :class: longtable
 
+   :id:`ERR_INSTALL_01`! :id:`TS8_SELF`
    :id:`ERR_DRIVER_04`! :id:`TS1_COMP`, :id:`TS2_LIBR`, :id:`TS3_CRAT`, :id:`TS4_LINK`, :id:`TS6_BSYS`, :id:`TS7_TIDY`
    :id:`ERR_DRIVER_05`! :id:`TS1_COMP`, :id:`TS2_LIBR`, :id:`TS3_CRAT`, :id:`TS6_BSYS`, :id:`TS7_TIDY`
    :id:`ERR_DRIVER_08`! :id:`TS1_COMP`, :id:`TS2_LIBR`, :id:`TS3_CRAT`, :id:`TS6_BSYS`

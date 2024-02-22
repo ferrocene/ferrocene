@@ -4,8 +4,8 @@
 Overview
 ========
 
-This Manual describes the use of Ferrocene |ferrocene_version|, the ISO 26262
-qualified version of the rustc toolchain. Ferrocene is based on rustc
+This Manual describes the use of Ferrocene |ferrocene_version|, the |iso_ref|
+and |iec_ref| qualified version of the rustc toolchain. Ferrocene is based on rustc
 version |rust_version|.
 
 This Manual assumes familiarity with rustc and the Rust language, and outlines

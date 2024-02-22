@@ -577,6 +577,7 @@ mod dist {
             only_modified: false,
             skip: vec![],
             extra_checks: None,
+            ferrocene_test_one_crate_per_cargo_call: false,
         };
 
         let build = Build::new(config);
@@ -655,6 +656,7 @@ mod dist {
             run: None,
             only_modified: false,
             extra_checks: None,
+            ferrocene_test_one_crate_per_cargo_call: false,
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();

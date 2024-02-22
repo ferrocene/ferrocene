@@ -166,8 +166,9 @@ Command-Line Interface
 
       .. caution::
 
-         Only the arguments listed in section Compilation targets are within
-         the scope of the Ferrocene |iso_ref| qualification.
+         This code generation option is outside the scope of the Ferrocene
+         |iso_ref| qualification, and must not be used in a safety critical
+         context. Its documentation is presented for your convenience.
 
       Code generation option ``link-arg`` appends a single extra argument to
       the invocation of the linker.
@@ -191,8 +192,9 @@ Command-Line Interface
 
       .. caution::
 
-         Only the arguments listed in section Compilation targets are within
-         the scope of the Ferrocene |iso_ref| qualification.
+         This code generation option is outside the scope of the Ferrocene
+         |iso_ref| qualification, and must not be used in a safety critical
+         context. Its documentation is presented for your convenience.
 
       Code generation option ``link-args`` appends multiple extra arguments to
       the invocation of the linker.
@@ -243,8 +245,9 @@ Command-Line Interface
 
       .. caution::
 
-         Only the paths listed in section Compilation targets are within the
-         scope of the Ferrocene |iso_ref| qualification.
+         This code generation option is outside the scope of the Ferrocene
+         |iso_ref| qualification, and must not be used in a safety critical
+         context. Its documentation is presented for your convenience.
 
       Code generation option ``linker`` indicates the path to the linker. If
       this compiler argument is not specified, then the linker is inferred
@@ -265,8 +268,9 @@ Command-Line Interface
 
       .. caution::
 
-         Only the flavors listed in section Compilation targets are within the
-         scope of the Ferrocene |iso_ref| qualification.
+         This code generation option is outside the scope of the Ferrocene
+         |iso_ref| qualification, and must not be used in a safety critical
+         context. Its documentation is presented for your convenience.
 
       Code generation option ``linker-flavor`` indicates the flavor of the
       linker.

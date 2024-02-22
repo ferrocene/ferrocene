@@ -133,7 +133,7 @@ Command-Line Interface
          context. Its documentation is presented for your convenience.
 
       Code generation option ``inline-threshold`` indicates the default
-      threshold for inlining a functions.
+      threshold for inlining a function.
 
       ``<threshold>`` must be an unsigned integer.
 

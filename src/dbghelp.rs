@@ -71,13 +71,13 @@ mod dbghelp {
         pub fn SymGetSearchPathW(
             hprocess: HANDLE,
             searchpatha: PWSTR,
-            searchpathlength: u32,
+            searchpathlength: DWORD,
         ) -> BOOL;
         pub fn SymSetSearchPathW(hprocess: HANDLE, searchpatha: PCWSTR) -> BOOL;
         pub fn EnumerateLoadedModulesW64(
             hprocess: HANDLE,
             enumloadedmodulescallback: PENUMLOADED_MODULES_CALLBACKW64,
-            usercontext: *const c_void,
+            usercontext: PVOID,
         ) -> BOOL;
     }
 
@@ -191,7 +191,7 @@ dbghelp! {
         fn SymGetSearchPathW(
             hprocess: HANDLE,
             searchpatha: PWSTR,
-            searchpathlength: u32
+            searchpathlength: DWORD
         ) -> BOOL;
         fn SymSetSearchPathW(
             hprocess: HANDLE,
@@ -200,7 +200,7 @@ dbghelp! {
         fn EnumerateLoadedModulesW64(
             hprocess: HANDLE,
             enumloadedmodulescallback: PENUMLOADED_MODULES_CALLBACKW64,
-            usercontext: *const c_void
+            usercontext: PVOID
         ) -> BOOL;
         fn StackWalk64(
             MachineType: DWORD,
@@ -436,7 +436,7 @@ pub fn init() -> Result<Init, ()> {
         DBGHELP.EnumerateLoadedModulesW64().unwrap()(
             GetCurrentProcess(),
             Some(enum_loaded_modules_callback),
-            &mut search_path as *mut _ as *mut _,
+            ((&mut search_path) as *mut SearchPath) as *mut c_void,
         );
 
         let new_search_path = search_path.finalize();
@@ -495,9 +495,9 @@ impl SearchPath {
 
 extern "system" fn enum_loaded_modules_callback(
     module_name: PCWSTR,
-    _: u64,
-    _: u32,
-    user_context: *const c_void,
+    _: DWORD64,
+    _: ULONG,
+    user_context: PVOID,
 ) -> BOOL {
     // `module_name` is an absolute path like `C:\path\to\module.dll`
     // or `C:\path\to\module.exe`

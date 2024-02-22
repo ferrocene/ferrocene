@@ -59,9 +59,9 @@ cfg_if::cfg_if! {
             pub type PENUMLOADED_MODULES_CALLBACKW64 = Option<
             unsafe extern "system" fn(
                 modulename: PCWSTR,
-                modulebase: u64,
-                modulesize: u32,
-                usercontext: *const c_void,
+                modulebase: DWORD64,
+                modulesize: ULONG,
+                usercontext: PVOID,
             ) -> BOOL,
         >;
         }
@@ -301,7 +301,7 @@ ffi! {
     pub type PTRANSLATE_ADDRESS_ROUTINE64 = Option<
         unsafe extern "system" fn(hProcess: HANDLE, hThread: HANDLE, lpaddr: LPADDRESS64) -> DWORD64,
     >;
-    pub type PENUMLOADED_MODULES_CALLBACKW64 = Option<unsafe extern "system" fn(modulename: PCWSTR, modulebase: u64, modulesize: u32, usercontext: *const c_void) -> BOOL>;
+    pub type PENUMLOADED_MODULES_CALLBACKW64 = Option<unsafe extern "system" fn(modulename: PCWSTR, modulebase: DWORD64, modulesize: ULONG, usercontext: PVOID) -> BOOL>;
     pub type PGET_MODULE_BASE_ROUTINE64 =
         Option<unsafe extern "system" fn(hProcess: HANDLE, Address: DWORD64) -> DWORD64>;
     pub type PFUNCTION_TABLE_ACCESS_ROUTINE64 =

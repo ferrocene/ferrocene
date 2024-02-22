@@ -17,6 +17,19 @@
    not a host platform.
 {% endmacro %}
 
+{% macro unconditional_pass(suite) %}
+The {{ suite }} suite is a pass/fail test suite integrated into the Ferrocene
+CI infrastructure.
+
+The {{ suite }} test suite is verified as part of
+:ref:`qualification-plan:ci-phase-full`. As indicated in
+:doc:`qualification-plan:development`, a PR is merged into the repository only
+when it passes full testing.
+
+As a result, the {{ suite }} test suite reports a **pass** for this
+qualification.
+{% endmacro %}
+
 {% macro invocations_summary(bootstrap_type, only_match_root_node=False) %}
 {% if platform_outcomes is none %}
 {{ no_outcomes_error() }}
@@ -215,16 +228,7 @@ Linkchecker Test Suite
 **Test suite:** :id:`TS4_LINK`
 
 {% if host == target %}
-The linkchecker test suite is a pass/fail test suite integrated into the
-Ferrocene CI infrastructure.
-
-The linkchecker test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the linkchecker test suite reports a **pass** for this
-qualification.
+{{ unconditional_pass("linkchecker") }}
 {% else %}
 {{ only_on_hosts("linkchecker") }}
 {% endif %}
@@ -246,15 +250,7 @@ Tidy Test Suite
 **Test suite:** :id:`TS7_TIDY`
 
 {% if host == target %}
-The tidy test suite is a pass/fail test suite integrated into the Ferrocene
-CI infrastructure.
-
-The tidy test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the tidy test suite reports a **pass** for this qualification.
+{{ unconditional_pass("tidy") }}
 {% else %}
 {{ only_on_hosts("tidy") }}
 {% endif %}
@@ -265,16 +261,7 @@ Self-Test Test Suite
 **Test suite:** :id:`TS8_SELF`
 
 {% if host == target %}
-The self-test test suite is a pass/fail test suite integrated into the
-Ferrocene CI infrastructure.
-
-The self-test test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the self-test test suite reports a **pass** for this
-qualification.
+{{ unconditional_pass("self-test") }}
 {% else %}
 {{ only_on_hosts("self-test") }}
 {% endif %}

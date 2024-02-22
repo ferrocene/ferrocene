@@ -15,7 +15,7 @@ FROM ubuntu:22.04 AS jammy
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt-get update \
     # Update all the dependencies
@@ -85,19 +85,6 @@ RUN mkdir /tmp/python \
 COPY reuse-requirements.txt /tmp/reuse-requirements.txt
 RUN python3 -m pip install -r /tmp/reuse-requirements.txt && \
     rm -rf /tmp/reuse-requirements.txt
-
-# Install git 2.25 from source. The version included in Ubuntu 18.04 is too old
-# to perform fast clones of the LLVM monorepo.
-RUN mkdir /tmp/git \
-    && cd /tmp/git \
-    && curl -OL https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.25.5.tar.xz \
-    && echo "164dec6d31843a436c0db2acb79ce49a56f703f587e7c127cf421604d5570bba git-2.25.5.tar.xz" | sha256sum -c \
-    && tar xf git-2.25.5.tar.xz --strip-components=1 \
-    && make configure \
-    && ./configure --prefix=/usr/local \
-    && make -j$(nproc) \
-    && make install \
-    && rm -rf /tmp/git
 
 # Install a recent NodeJS version, as the one shipped in Ubuntu 18.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most

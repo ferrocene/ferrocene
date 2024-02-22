@@ -30,37 +30,46 @@ As a result, the {{ suite }} test suite reports a **pass** for this
 qualification.
 {% endmacro %}
 
-{% macro invocations_summary(bootstrap_type, only_match_root_node=False) %}
+{% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}
 {% if platform_outcomes is none %}
 {{ no_outcomes_error() }}
 {% else %}
-{% for invocation in platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) %}
+{% set invocations = platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) | list %}
+{% if invocations %}
 .. list-table::
+   :header-rows: 1
 
-   {% if invocation.is_compiletest() %}
-   * - Compiletest suite:
-     - ``{{ invocation.kind.suite }}``
-   {% if invocation.kind.mode is not none %}
-   * - Compiletest mode:
-     - ``{{ invocation.kind.mode }}``
-   {% endif %}
-   {% elif invocation.is_cargo_package() %}
-   * - Tested crates:
-     - {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
-   {% endif %}
-   * - Host compiler:
-     - ``{{ invocation.host }}`` (stage {{ invocation.stage }})
-   * - Target:
-     - ``{{ invocation.target }}``
-   * - Total tests:
-     - {{ invocation.total_tests() }}
-   * - Passed tests:
+   * - Crate name
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+
+   * - {% if invocation.kind.crates -%}
+           {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
+       {%- else -%}
+           N/A
+       {%- endif %}
+
+       .. rst-class:: align-right
      - {{ invocation.passed_tests }}
-   * - Failed tests:
-     - {{ invocation.failed_tests }}
-   * - Ignored tests:
+
+       .. rst-class:: align-right
      - {{ invocation.ignored_tests }}
-{% endfor %}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+.. warning::
+
+   No matching test outcomes were found for this suite.
+{% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -196,7 +205,7 @@ Library Test Suite
    root node, otherwise we'd also match other tests invoking Crate down their
    dependency chain.
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
 
 .. note::
 
@@ -216,9 +225,9 @@ Compiler Test Suite
 
 **Test suite:** :id:`TS3_CRAT`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
-
-{% if host != target %}
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
+{% else %}
 {{ only_on_hosts("compiler") }}
 {% endif %}
 
@@ -238,9 +247,10 @@ Build System Test Suite
 
 **Test suite:** :id:`TS6_BSYS`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Bootstrap") }}
 
-{% if host != target %}
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Bootstrap") }}
+{% else %}
 {{ only_on_hosts("build system") }}
 {% endif %}
 

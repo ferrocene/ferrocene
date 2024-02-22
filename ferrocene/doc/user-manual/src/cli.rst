@@ -138,7 +138,7 @@ Command-Line Interface
       ``<threshold>`` must be an unsigned integer.
 
       Inlining is based on a cost model, where a higher threshold allows for
-      more inlining. The default thresholds depend on the optimization level,
+      more inlining. The default threshold depends on the optimization level,
       as specified by code generation option ``opt-level``, as follows:
 
       ============= ==========================================================

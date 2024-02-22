@@ -78,7 +78,7 @@ RUN mkdir /tmp/python \
     && ./configure \
     && make -j$(nproc) \
     && make install \
-    && rm -rf /tmp/git
+    && rm -rf /tmp/python
 
 # The REUSE tool is used to check the licensing status. It's not available in
 # the Ubuntu archives so we have to install it with pip.

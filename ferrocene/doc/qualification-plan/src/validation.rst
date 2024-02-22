@@ -72,7 +72,7 @@ safety manager) must review the documents before each release, checking that
 the documentation's contents are valid, up-to-date, and complete, that all
 applicable requirements have been successfully covered.
 
-They must also do a sanity check to ensure there are no unexpected problems
+They must also do a quick check to ensure there are no unexpected problems
 with the end product and that the automation successfully executed without
 warnings.
 

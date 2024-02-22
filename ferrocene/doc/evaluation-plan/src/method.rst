@@ -209,7 +209,7 @@ Confidence Level is TCL2 or TCL3.
 Remark: we do not need a qualification for tools with a Tool Confidence Level
 TCL1.
 
-The following tables from [|iso_ref|] standard indicate the appropriate
+The following tables from the [|iso_ref|] standard indicate the appropriate
 qualification method:
 
 * For **TCL2**:

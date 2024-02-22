@@ -26,15 +26,10 @@ to have parallel development on new targets or with specialized requirements.
 
 The Ferrocene toolchain maintains several artifacts that track the changes
 between **stable releases**. New features that have been introduced in a stable
-release are documented in features files. New KPs that have been identified and
-existing KPs that have been fixed in stable releases are documented in KP
-files. Once a new stable release is produced, the Ferrocene team sends a mass
-email to existing customers, notifying them of the release, its new features
-and KPs. In addition, customers and interested parties may view these artifacts
-online on the Ferrocene landing page.
+release are documented in the :doc:`release-notes:index`. New KPs that have
+been identified and existing KPs that have been fixed in stable releases are
+documented in the ``ferrocene/problems`` repository.
 
-As per the “Customer Centric Objectives” of the “Ferrocene Quality Objectives”
-document, the entire Ferrocene toolchain release process is designed to ensure
-that the delivered product is exactly what was validated internally. The
-Ferrocene toolchain is made available to customers as a tarball supplied by
-Ferrocene engineers.
+Once a new stable release is produced, an announcement is published on the
+Ferrous Systems blog. In addition, customers will receive email communication
+whenever new KPs are discovered, or a release fixing KPs is published.

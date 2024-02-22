@@ -186,12 +186,6 @@ Library Test Suite
 
 {{ cargo_tests_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
 
-.. note::
-
-   The library test suite uses the ``stage1`` library because a ``stage2``
-   library is never built, and the ``stage2`` Ferrocene compiler reuses the
-   ``stage1`` library.
-
 {% if bare_metal_test_target %}
 .. note::
 

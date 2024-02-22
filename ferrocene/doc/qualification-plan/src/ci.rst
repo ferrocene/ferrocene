@@ -116,3 +116,32 @@ All test results are compressed into a tarball which is included in the release
 artifacts and stored on AWS S3 alongside the binaries and documentation we ship
 to customers. For qualified releases, those are retained in the S3 bucket
 indefinitely.
+
+.. _bare-metal-testing:
+
+Bare metal testing
+------------------
+
+Some Ferrocene targets are meant to be used in an environment without any
+operating system. Consequently, they don't include APIs relying on one (as part
+of the ``std`` crate), and only include the ``core`` and ``alloc`` crates,
+which are OS-independent.
+
+Unfortunately, Rust's test suites require those APIs (and in general an
+operating system) to be available in order to invoke the tests themselves and
+to report the execution results.
+
+To solve the issue, our approach is to create a new target based on the Rust
+target we need to test: this new "bare metal testing target" has the same
+configuration as the real target, with the only exception being enabling the
+operating system bindings for Linux. This new target won't be shipped to
+customers.
+
+The bare metal testing target allows us to execute the test suite on Linux
+(running on the hardware needed by the real target), side-stepping the
+requiremento to have an operative system.
+
+Since the only difference between the two targets is the implementation of the
+APIs in the ``std`` crate. Since the ``std`` crate is not shipped to customers
+for bare metal targets, we can conclude that the test results of the two
+targets are equivalent.

@@ -598,6 +598,7 @@ mod dist {
             skip: vec![],
             extra_checks: None,
             coverage: false,
+            ferrocene_test_one_crate_per_cargo_call: false,
         };
 
         let build = Build::new(config);
@@ -677,6 +678,7 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             coverage: false,
+            ferrocene_test_one_crate_per_cargo_call: false,
         };
         // Make sure rustfmt binary not being found isn't an error.
         config.channel = "beta".to_string();
@@ -737,6 +739,7 @@ mod dist {
             only_modified: false,
             extra_checks: None,
             coverage: true,
+            ferrocene_test_one_crate_per_cargo_call: false,
         };
         let build = Build::new(config);
         let mut builder = Builder::new(&build);

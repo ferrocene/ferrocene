@@ -165,11 +165,11 @@ The type of a :t:`self parameter` shall be one of the following:
   related :t:`implementation`, or
 
 * :dp:`fls_Wd2FZRomB5yn`
-  ``&T`` where ``T`` is one of the the :t:`[type]s` listed in this enumeration,
+  ``&T`` where ``T`` is one of the :t:`[type]s` listed in this enumeration,
   or
 
 * :dp:`fls_lcEyToYIlcmf`
-  ``&mut T`` where ``T`` is one of the the :t:`[type]s` listed in this
+  ``&mut T`` where ``T`` is one of the :t:`[type]s` listed in this
   enumeration, or
 
 * :dp:`fls_IKSPR7ZQMErU`

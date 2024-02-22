@@ -235,18 +235,7 @@ impl<P: Step> Step for SphinxBook<P> {
                 std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap(),
             ))
             .arg("-D")
-            .arg(format!(
-                "channel={}",
-                ferrocene_channel(
-                    builder,
-                    std::fs::read_to_string(
-                        &builder.src.join("ferrocene").join("ci").join("channel")
-                    )
-                    .unwrap()
-                    .trim(),
-                    &ferrocene_version
-                ),
-            ))
+            .arg(format!("channel={}", ferrocene_channel(builder, &ferrocene_version)))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
 

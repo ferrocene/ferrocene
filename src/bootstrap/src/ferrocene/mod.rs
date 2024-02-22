@@ -97,12 +97,8 @@ pub(crate) fn ignored_tests_for_suite(
         .collect()
 }
 
-fn ferrocene_channel(
-    builder: &Builder<'_>,
-    ferrocene_channel: &str,
-    ferrocene_version: &str,
-) -> String {
-    match (&*builder.config.channel, ferrocene_channel) {
+fn ferrocene_channel(builder: &Builder<'_>, ferrocene_version: &str) -> String {
+    match (&*builder.config.channel, &*builder.config.ferrocene_raw_channel) {
         ("nightly" | "dev", "rolling") => "nightly".to_owned(),
         ("beta", "rolling") => "pre-rolling".to_owned(),
         ("stable", "rolling") => "rolling".to_owned(),

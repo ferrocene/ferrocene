@@ -351,10 +351,9 @@ impl Step for GenerateBuildMetadata {
 
         let dist_dir = "build/dist";
 
-        let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));
-        let ferrocene_channel = ferrocene_channel.trim();
         let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
         let ferrocene_version = ferrocene_version.trim();
+        let ferrocene_channel = &builder.config.ferrocene_raw_channel;
         let src_version = t!(fs::read_to_string("src/version"));
         let src_version = src_version.trim();
 
@@ -366,8 +365,7 @@ impl Step for GenerateBuildMetadata {
             );
         }
 
-        let channel =
-            crate::ferrocene::ferrocene_channel(builder, ferrocene_channel, ferrocene_version);
+        let channel = crate::ferrocene::ferrocene_channel(builder, ferrocene_version);
 
         let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
         let sha1_full = t!(String::from_utf8(sha1_full.stdout));

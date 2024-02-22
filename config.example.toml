@@ -878,6 +878,12 @@
 # =============================================================================
 [ferrocene]
 
+# The channel for the Ferrocene build to produce. This is merged with Rust's
+# channel to determine the full channel name.
+#
+# Can be "rolling", "beta" or "stable".
+#channel = "rolling"
+
 # Mode of operations for the traceability matrix tool. This changes the links
 # included in the report. Can be either "local" or "ci".
 #traceability-matrix-mode = "local"

@@ -23,6 +23,9 @@ This guide contains the following chapters: 
   toolchain. This includes an overview on how to build libraries, executables,
   as well as mixed language compilation and system calls. 
 
+* *Compilation targets* describes qualified (supported) and unqualified (experimental)
+  Ferrocene compilation targets.
+
 * *References* provides further support and information about other
   documentation.
 

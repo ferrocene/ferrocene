@@ -128,7 +128,7 @@ path that is not in UTF-8.
 
 **Suggested fixes**
 
-Ensure that sysroot of the the Ferrocene toolset is a valid UTF-8 path.
+Ensure that sysroot of the Ferrocene toolset is a valid UTF-8 path.
 
 FLS_017: Creation of temporary directory failed
 -----------------------------------------------

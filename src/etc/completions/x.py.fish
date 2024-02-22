@@ -299,6 +299,7 @@ complete -c x.py -n "__fish_seen_subcommand_from test" -l bless -d 'whether to a
 complete -c x.py -n "__fish_seen_subcommand_from test" -l force-rerun -d 'rerun tests even if the inputs are unchanged'
 complete -c x.py -n "__fish_seen_subcommand_from test" -l only-modified -d 'only run tests that result has been changed'
 complete -c x.py -n "__fish_seen_subcommand_from test" -l rustfix-coverage -d 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`'
+complete -c x.py -n "__fish_seen_subcommand_from test" -l ferrocene-test-one-crate-per-cargo-call -d 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report'
 complete -c x.py -n "__fish_seen_subcommand_from test" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_seen_subcommand_from test" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_seen_subcommand_from test" -l include-default-paths -d 'include default paths in addition to the provided ones'

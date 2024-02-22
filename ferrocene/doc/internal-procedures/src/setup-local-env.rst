@@ -116,5 +116,11 @@ content in it:
    aws-profile = "ferrocene-ci"
    test-outcomes = "download-ci"
 
+   [rust]
+   lld = true
+
+   [llvm]
+   download-ci-llvm = false
+
 There are a lot of other options available: you can look at the documentation
 for all of them in the ``config.toml.example`` file for further details.

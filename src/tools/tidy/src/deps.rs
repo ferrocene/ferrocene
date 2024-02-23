@@ -17,6 +17,7 @@ const LICENSES: &[&str] = &[
     "Apache-2.0 OR MIT",
     "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
     "Apache-2.0",
+    "Apache-2.0/ISC/MIT",
     "Apache-2.0/MIT",
     "BSD-2-Clause OR Apache-2.0 OR MIT",                   // zerocopy
     "ISC",
@@ -242,7 +243,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "darling_core",
     "darling_macro",
     "datafrog",
-    "deranged",
     "derivative",
     "derive_more",
     "derive_setters",
@@ -284,6 +284,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "indexmap",
     "intl-memoizer",
     "intl_pluralrules",
+    "is-terminal",
     "itertools",
     "itoa",
     "jemalloc-sys",
@@ -303,7 +304,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "memoffset",
     "miniz_oxide",
     "nu-ansi-term",
-    "num-conv",
     "num_cpus",
     "object",
     "odht",
@@ -316,7 +316,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pin-project-lite",
     "polonius-engine",
     "portable-atomic", // dependency for platforms doesn't support `AtomicU64` in std
-    "powerfmt",
     "ppv-lite86",
     "proc-macro-hack",
     "proc-macro2",

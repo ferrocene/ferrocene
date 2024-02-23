@@ -130,10 +130,6 @@ review (e.g. if they're out of office). Before dismissing the request, the
 Ferrocene developer is required to ensure that the concerns raised were
 adequately addressed.
 
-All Ferrocene developers are able to view the PR and leave review comments,
-however only approvals from the authorized Ferrocene developers count as code
-review approvals.
-
 During this phase, CI performs quick checks on the pushed code as part of the
 commit workflow and the PR author can opt to run the full test suite by sending
 a command to the merge bot before the approval. When the command is sent, CI

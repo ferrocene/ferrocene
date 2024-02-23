@@ -231,13 +231,18 @@ add --set target.wasm32-unknown-unknown.profiler=false
 add --enable-lld
 
 # Set the release channel for this branch. The channel is read from the
-# `src/ci/channel` file to easily allow tools and automation to know and update
-# the current channel.
+# `src/ci/channel` file to easily allow tools and automations to know and
+# update the current channel.
 #
 # Changing the release channel to `nightly` enables unstable features, and it
 # should not be done for any build shipped to customers.
 release_channel="$(cat src/ci/channel)"
 add "--release-channel=${release_channel}"
+
+# Set the Ferrocene channel for this branch. The channel is read from
+# `ferrocene/ci/channel` file to easily allow tools and automations to know and
+# update the current channel.
+add --set "ferrocene.channel=$(cat ferrocene/ci/channel)"
 
 # Run the traceability matrix tool in CI mode, producing the correct links.
 #

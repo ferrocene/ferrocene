@@ -139,9 +139,9 @@ customers.
 
 The bare metal testing target allows us to execute the test suite on Linux
 (running on the hardware needed by the real target), side-stepping the
-requiremento to have an operative system.
+requirement to have an operating system.
 
 Since the only difference between the two targets is the implementation of the
-APIs in the ``std`` crate. Since the ``std`` crate is not shipped to customers
-for bare metal targets, we can conclude that the test results of the two
-targets are equivalent.
+APIs in the ``std`` crate. and that crate is not shipped to customers for bare
+metal targets, we can conclude that the test results of the two targets are
+equivalent.

@@ -129,7 +129,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``inline-threshold`` indicates the default
@@ -192,7 +192,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``link-args`` appends multiple extra arguments to
@@ -245,7 +245,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``linker`` indicates the path to the linker. If
@@ -268,7 +268,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``linker-flavor`` indicates the flavor of the
@@ -335,7 +335,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``no-vectorize-loops`` disables loop
@@ -354,7 +354,7 @@ Command-Line Interface
 
       .. caution::
 
-         Only level ``2`` is within the scope of the Ferrocene |iso_ref|
+         Only level ``2`` is within the scope of the Ferrocene
          qualification.
 
       Code generation option ``opt-level`` indicates the optimization level in
@@ -465,7 +465,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``relocation-model`` enables the generation of
@@ -508,7 +508,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``target-cpu`` indicates the CPU of the target to
@@ -531,7 +531,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``target-feature`` enables (or disables) a
@@ -745,7 +745,7 @@ Command-Line Interface
       .. caution::
 
          Only edition ``2021`` is within the scope of the Ferrocene
-         |iso_ref| qualification.
+         qualification.
 
       Compiler argument ``--edition`` indicates the edition of the Rust
       programming language used during compilation.

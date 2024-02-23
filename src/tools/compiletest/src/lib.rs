@@ -679,7 +679,7 @@ fn find_tests_in_dir(
     config: Arc<Config>,
     dir: &Path,
     relative_dir_path: &Path,
-    found_paths: &mut BTreeSet<PathBuf>,
+    found_paths: &mut HashSet<PathBuf>,
     modified_tests: &Vec<PathBuf>,
     on_test_found: &mut dyn FnMut(&TestPaths),
 ) -> io::Result<()> {

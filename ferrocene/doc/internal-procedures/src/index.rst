@@ -19,6 +19,7 @@ based on software engineering best practices.
    manual-subtree-pulls
    known-problems
    pe-procedures
+   backports
    release-notes
 
 .. toctree::

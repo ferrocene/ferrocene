@@ -312,6 +312,12 @@ pub enum Subcommand {
         /// start a live-relodaing web server
         serve: bool,
         #[arg(long)]
+        /// ignore caches when building the documentation
+        fresh: bool,
+        #[arg(long)]
+        /// allow easier debugging of Sphinx extensions
+        debug_sphinx: bool,
+        #[arg(long)]
         /// render the documentation in JSON format in addition to the usual HTML format
         json: bool,
     },
@@ -566,6 +572,20 @@ impl Subcommand {
     pub fn serve(&self) -> bool {
         match *self {
             Subcommand::Doc { serve, .. } => serve,
+            _ => false,
+        }
+    }
+
+    pub fn fresh(&self) -> bool {
+        match *self {
+            Subcommand::Doc { fresh, .. } => fresh,
+            _ => false,
+        }
+    }
+
+    pub fn debug_sphinx(&self) -> bool {
+        match *self {
+            Subcommand::Doc { debug_sphinx, .. } => debug_sphinx,
             _ => false,
         }
     }

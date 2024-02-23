@@ -351,12 +351,9 @@ impl Step for GenerateBuildMetadata {
 
         let dist_dir = "build/dist";
 
-        let ferrocene_channel = t!(fs::read_to_string("ferrocene/ci/channel"));
-        let ferrocene_channel = ferrocene_channel.trim();
         let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
         let ferrocene_version = ferrocene_version.trim();
-        let src_channel = t!(fs::read_to_string("src/ci/channel"));
-        let src_channel = src_channel.trim();
+        let ferrocene_channel = &builder.config.ferrocene_raw_channel;
         let src_version = t!(fs::read_to_string("src/version"));
         let src_version = src_version.trim();
 
@@ -368,33 +365,7 @@ impl Step for GenerateBuildMetadata {
             );
         }
 
-        let channel = match (src_channel, ferrocene_channel) {
-            ("nightly", "rolling") => "nightly".to_owned(),
-            ("beta", "rolling") => "pre-rolling".to_owned(),
-            ("stable", "rolling") => "rolling".to_owned(),
-            ("stable", ferrocene_channel @ ("beta" | "stable")) => {
-                let major_ferrocene = (|| {
-                    let mut version_components = ferrocene_version.split('.');
-                    let year = version_components.next()?;
-                    let month = version_components.next()?;
-                    let _patch = version_components.next()?;
-                    if version_components.next().is_none() {
-                        Some(format!("{year}.{month}"))
-                    } else {
-                        None
-                    }
-                })();
-                match major_ferrocene {
-                    Some(major_ferrocene) => format!("{ferrocene_channel}-{major_ferrocene}"),
-                    None => panic!(
-                        "invalid ferrocene/version, expected 'year.month.patch', got: {ferrocene_version}"
-                    ),
-                }
-            }
-            (rust, ferrocene) => panic!(
-                "error: unsupported channel configuration: rust '{rust}' and ferrocene '{ferrocene}'"
-            ),
-        };
+        let channel = crate::ferrocene::ferrocene_channel(builder, ferrocene_version);
 
         let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
         let sha1_full = t!(String::from_utf8(sha1_full.stdout));
@@ -413,7 +384,7 @@ impl Step for GenerateBuildMetadata {
         let data = json!({
             "metadata_version": 3,
             "rust_version": src_version,
-            "rust_channel": src_channel,
+            "rust_channel": builder.config.channel,
             "ferrocene_version": ferrocene_version,
             "ferrocene_channel": ferrocene_channel,
             "channel": channel,

@@ -3,6 +3,7 @@
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
+use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
 use std::collections::HashMap;
 use std::ffi::OsString;
@@ -134,9 +135,13 @@ impl<P: Step> Step for SphinxBook<P> {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let src = builder.src.join(&self.src).join("src");
         let out = match self.mode {
-            SphinxMode::Html | SphinxMode::OnlyObjectsInv => {
-                builder.out.join(self.target.triple).join("doc").join(&self.dest)
-            }
+            SphinxMode::Html => builder.out.join(self.target.triple).join("doc").join(&self.dest),
+            SphinxMode::OnlyObjectsInv => builder
+                .out
+                .join(self.target.triple)
+                .join("ferrocene")
+                .join("objectsinv-out")
+                .join(&self.dest),
             SphinxMode::XmlDoctrees => builder
                 .out
                 .join(self.target.triple)
@@ -163,7 +168,7 @@ impl<P: Step> Step for SphinxBook<P> {
         // In some cases we have to perform a fresh build to guarantee deterministic output (for
         // example to generate signatures). We want to purge the old build artifacts only when
         // necessary, to avoid thrashing incremental builds.
-        if self.fresh_build {
+        if self.fresh_build || builder.config.cmd.fresh() {
             for path in [&out, &doctrees] {
                 if path.exists() {
                     builder.remove_dir(path);
@@ -184,6 +189,10 @@ impl<P: Step> Step for SphinxBook<P> {
 
         let should_serve = self.parent.is_some() && builder.should_serve::<P>();
 
+        let ferrocene_version =
+            std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
+        let ferrocene_version = ferrocene_version.trim();
+
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
         // Absolute paths break our reproducibility, and paths relative from other directories
         // don't really work with Sphinx, as it treats all paths as relative from the directory
@@ -192,8 +201,6 @@ impl<P: Step> Step for SphinxBook<P> {
         cmd.current_dir(&src)
             .arg(relative_path(&src, &src))
             .arg(relative_path(&src, &out))
-            // Build in parallel
-            .args(&["-j", "auto"])
             // Store doctrees outside the output directory:
             .arg("-d")
             .arg(relative_path(&src, &doctrees))
@@ -221,17 +228,28 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg(path_define("ferrocene_target_names_path", &relative_path(&src, &target_names)))
             // Toolchain versions
             .arg("-D")
-            .arg(format!(
-                "ferrocene_version={}",
-                std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap()
-            ))
+            .arg(format!("ferrocene_version={ferrocene_version}"))
             .arg("-D")
             .arg(format!(
                 "rust_version={}",
                 std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap(),
             ))
+            .arg("-D")
+            .arg(format!("channel={}", ferrocene_channel(builder, &ferrocene_version)))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
+
+        if builder.config.cmd.debug_sphinx() {
+            cmd
+                // Only run one parallel job, as Sphinx occasionally cannot show the error message
+                // with the parallel backend.
+                .args(["-j", "1"])
+                // Show full traceback on exceptions.
+                .arg("-T");
+        } else {
+            // Build in parallel
+            cmd.args(["-j", "auto"]);
+        }
 
         match self.mode {
             SphinxMode::Html => {
@@ -369,9 +387,13 @@ fn add_intersphinx_arguments<P: Step>(
         // the mappings even during gathering. Since not all objects.inv will be available during
         // gathering, all of them are replaced with an empty objects.inv file during gathering.
         let inv = match book.mode {
-            SphinxMode::Html | SphinxMode::XmlDoctrees => {
-                builder.doc_out(book.target).join(&step.dest).join("objects.inv")
-            }
+            SphinxMode::Html | SphinxMode::XmlDoctrees => builder
+                .out
+                .join(book.target.triple)
+                .join("ferrocene")
+                .join("objectsinv-out")
+                .join(&step.dest)
+                .join("objects.inv"),
             SphinxMode::OnlyObjectsInv => empty_objects_inv.clone(),
         };
 

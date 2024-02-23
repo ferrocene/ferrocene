@@ -4,13 +4,14 @@
 Ferrocene Evaluation Report
 ===========================
 
+.. include:: ../../scope.rst
+
+It describes the evaluation of Ferrocene in accordance to the standards above.
+
 .. toctree::
    :numbered:
    :maxdepth: 3
 
-   purpose
-   scope
-   references
    hazop
    use-cases
    tool-analysis

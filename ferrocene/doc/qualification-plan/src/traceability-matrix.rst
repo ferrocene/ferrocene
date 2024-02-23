@@ -21,7 +21,7 @@ Traceability with ISO 26262 Requirements
    11.4.4.1.f!the methods to qualify the software tool, if required, based on the determined level of confidence and ASIL.! :doc:`Evaluation Report - Qualification Method <evaluation-report:method>`
    11.4.4.2!To ensure the proper evaluation or usage of the software tool, the following information shall be available:! See sub items below
    11.4.4.2.a!a description of the features, functions and technical properties of the software tool;! :doc:`Qualification Plan - Ferrocene details <qualification-plan:details>`
-   11.4.4.2.b!the user manual or other usage guides, if applicable;! :doc:`Safety Manual - Associated documents <safety-manual:references>`
+   11.4.4.2.b!the user manual or other usage guides, if applicable;! :doc:`User Manual <user-manual:index>`
    11.4.4.2.c!a description of the environment required for its operation,! :doc:`Safety Manual - Environment <safety-manual:environment>`
    11.4.4.2.d!a description of the expected behaviour of the software tool under anomalous operating conditions, if applicable;! :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
    11.4.4.2.e!a description of known software tool malfunctions and the appropriate safeguards, avoidance or workaround measures, if applicable; and! :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
@@ -48,8 +48,8 @@ Traceability with ISO 26262 Requirements
    11.4.6.2.d!the configuration and environment for which the software tool is qualified;! :doc:`Safety Manual - Environment <safety-manual:environment>`
    11.4.6.2.e!the person or organization who carried out the qualification;! :doc:`Qualification Plan - Ferrocene organization <organization>`
    11.4.6.2.f!the methods applied for its qualification in accordance with 11.4.6.1;! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-   11.4.6.2.g!the results of the measures applied to qualify the software tool; and! :doc:`Qualification Report - Test results <qualification-report:tests>`
-   11.4.6.2.h!the usage constraints and malfunctions identified during the qualification, if applicable.! :doc:`Qualification Report - Test results <qualification-report:tests>`
+   11.4.6.2.g!the results of the measures applied to qualify the software tool; and! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   11.4.6.2.h!the usage constraints and malfunctions identified during the qualification, if applicable.! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
    11.4.7! Increased confidence from use! N/A
    11.4.8.1!If the method "Evaluation of the tool development process" in accordance with Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with the requirements of this sub-clause.! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
    11.4.8.2!The development process applied for the development of the software tool shall comply with an appropriate standard.! :doc:`Qualification Plan - Development process <qualification-plan:development>`
@@ -58,7 +58,7 @@ Traceability with ISO 26262 Requirements
    11.4.9.1!If the method "Validation of the software tool" according to Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with requirements of this sub-clause.! See items 11.4.9.2 below
    11.4.9.2!The validation of the software tool shall meet the following criteria:! See sub items below
    11.4.9.2.a!the validation measures shall provide evidence that the software tool complies with specified requirements to its purpose as specified in the classification;! :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
-   11.4.9.2.b!the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and! :doc:`Qualification Report - Test results <qualification-report:tests>`
+   11.4.9.2.b!the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
    11.4.9.2.c!the reaction of the software tool to anomalous operating conditions shall be examined;! :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
 
 .. end of table
@@ -75,15 +75,15 @@ Traceability with IEC 61508 Requirements
    7.4.4.3!The selection of the off-line support tools shall be justified! This qualification is the justification
    7.4.4.4!All off-line support tools in classes T2 and T3 shall have a specification or product documentation which clearly defines the behaviour of the tool and any instructions or constraints on its use.! :doc:`Safety Manual - Usage <safety-manual:usage>`, :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`, and :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
    7.4.4.5!An assessment shall be carried out for offline support tools in classes T2 and T3 to determine the level of reliance placed on the tools, and the potential failure mechanisms of the tools that may affect the executable software. Where such failure mechanisms are identified, appropriate mitigation measures shall be taken.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
-   7.4.4.6!For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`, and :doc:`Qualification Report - Test results <qualification-report:tests>`
+   7.4.4.6!For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.! :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`, and :doc:`Qualification Report - Test results <qualification-report:tests/index>`
    7.4.4.7!The results of tool validation shall be documented covering the following results:! See items below
    7.4.4.7.a! a chronological record of the validation activities;! :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
    7.4.4.7.b! the version of the tool product manual being used;! :doc:`Document List <document-list:index>`
    7.4.4.7.c! the tool functions being validated;! :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
    7.4.4.7.d! tools and equipment used; ! :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
-   7.4.4.7.e! the results of the validation activity; the documented results of validation shall state either that the software has passed the validation or the reasons for its failure;! :doc:`Qualification Report - Test results <qualification-report:tests>`
-   7.4.4.7.f! test cases and their results for subsequent analysis;! :doc:`Qualification Report - Test results <qualification-report:tests>`
-   7.4.4.7.g! discrepancies between expected and actual results.! :doc:`Qualification Report - Test results <qualification-report:tests>`
+   7.4.4.7.e! the results of the validation activity; the documented results of validation shall state either that the software has passed the validation or the reasons for its failure;! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.7.f! test cases and their results for subsequent analysis;! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+   7.4.4.7.g! discrepancies between expected and actual results.! :doc:`Qualification Report - Test results <qualification-report:tests/index>`
    7.4.4.8! Where the conformance evidence of 7.4.4.6 is unavailable, there shall be effective measures to control failures of the executable safety related system that result from faults that are attributable to the tool.! N/A
    7.4.4.9!The compatibility of the tools of an integrated toolset shall be verified.! N/A
    7.4.4.10!To the extent required by the safety integrity level, the software or design representation (including a programming language) selected shall:! See items below

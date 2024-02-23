@@ -4,15 +4,25 @@
 Ferrocene Qualification Report
 ==============================
 
+.. include:: ../../scope.rst
+
+It provides the results of the activities performed in the frame of Ferrocene
+qualification, in accordance to the standards above.
+
 .. toctree::
    :numbered:
    :maxdepth: 2
 
-   purpose
-   scope
-   references
-   tests
    statement
+
+.. toctree::
+   :caption: Test results:
+   :numbered:
+   :maxdepth: 2
+
+   tests/index
+   tests/aarch64-unknown-none
+   tests/x86_64-unknown-linux-gnu
 
 .. appendices::
    :caption: Appendices:

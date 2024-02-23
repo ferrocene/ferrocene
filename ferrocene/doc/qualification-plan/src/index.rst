@@ -4,13 +4,15 @@
 Ferrocene Qualification Plan
 ============================
 
+.. include:: ../../scope.rst
+
+It describes the phases and activities to perform the qualification of
+Ferrocene in accordance to the standards above.
+
 .. toctree::
    :numbered:
    :maxdepth: 2
 
-   purpose
-   scope
-   references
    history
    organization
    details
@@ -23,6 +25,7 @@ Ferrocene Qualification Plan
    change-tracking
    kp-tracking
    validation
+   patching
 
 .. appendices::
    :caption: Appendices:

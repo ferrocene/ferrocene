@@ -44,12 +44,12 @@ The following channels are available to customers:
   six weeks. There are no stability guarantees, no long term support, no
   warranty, and no qualification.
 
-* |channel_name| : Major release of Ferrocene.
+* |channel| : Major release of Ferrocene.
 
 .. note::
-   For this qualification, only the |channel_name| release has been qualified
+   For this qualification, only the |channel| release has been qualified
    for the :doc:`specified environment <safety-manual:environment>`.
-   Consequently, only |channel_name| should be used in qualified development
+   Consequently, only |channel| should be used in qualified development
    context.
 
 Obtaining Documentation

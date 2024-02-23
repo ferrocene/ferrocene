@@ -235,7 +235,7 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg("-D")
             .arg(format!(
                 "rust_version={}",
-                std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap(),
+                std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
             ))
             .arg("-D")
             .arg(format!("channel={}", ferrocene_channel(builder, &ferrocene_version)))

@@ -393,6 +393,10 @@ pub enum Subcommand {
         /// generate coverage for tests
         #[arg(long)]
         coverage: bool,
+        /// Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification
+        /// documents to ensure there is enough granularity for the test outcomes report.
+        #[arg(long)]
+        ferrocene_test_one_crate_per_cargo_call: bool,
     },
     /// Build and run some benchmarks
     Bench {
@@ -607,6 +611,15 @@ impl Subcommand {
     pub fn json(&self) -> bool {
         match *self {
             Subcommand::Doc { json, .. } => json,
+            _ => false,
+        }
+    }
+
+    pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
+        match *self {
+            Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
+                ferrocene_test_one_crate_per_cargo_call
+            }
             _ => false,
         }
     }

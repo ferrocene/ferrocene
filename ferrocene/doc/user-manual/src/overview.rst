@@ -4,11 +4,11 @@
 Overview
 ========
 
-This Manual describes the use of Ferrocene |ferrocene_version|, the ISO 26262
-qualified version of the rustc toolchain. Ferrocene is based on rustc
+This Manual describes the use of Ferrocene |ferrocene_version|, the |iso_ref|
+and |iec_ref| qualified version of the rustc toolchain. Ferrocene is based on rustc
 version |rust_version|.
 
-This Manual assumes familiarity with rustc and the Rust language and outlines
+This Manual assumes familiarity with rustc and the Rust language, and outlines
 usage instructions specific to Ferrocene.
 
 Structure
@@ -22,6 +22,9 @@ This guide contains the following chapters: 
 * *Using Ferrocene* describes how to build programs using the Ferrocene
   toolchain. This includes an overview on how to build libraries, executables,
   as well as mixed language compilation and system calls. 
+
+* *Compilation targets* describes qualified (supported) and unqualified (experimental)
+  Ferrocene compilation targets.
 
 * *References* provides further support and information about other
   documentation.

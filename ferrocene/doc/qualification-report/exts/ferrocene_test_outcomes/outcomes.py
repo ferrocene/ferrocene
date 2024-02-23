@@ -164,7 +164,8 @@ class FileLoader:
             else:
                 raise RuntimeError(f"unknown test outcome: {test['outcome']}")
 
-        platform.invocations.append(invocation)
+        if invocation.total_tests():
+            platform.invocations.append(invocation)
 
 
 def builder_inited(app):

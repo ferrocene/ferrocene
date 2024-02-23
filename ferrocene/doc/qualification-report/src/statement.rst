@@ -10,3 +10,7 @@ linking programs for the target architecture. As per the traceability in
 :doc:`tests/index`, Ferrocene |ferrocene_version| has been reviewed and is
 demonstrated compliant with automotive [|iso_ref|]
 |ferrocene_TCL|/|ferrocene_ASIL| and industrial [|iec_ref|] |ferrocene_TQL|.
+
+KPs identified through the lifecycle of Ferrocene |ferrocene_version| are
+tracked in the :doc:`safety-manual:known-problems`. This document is made
+available to customers for consulting.

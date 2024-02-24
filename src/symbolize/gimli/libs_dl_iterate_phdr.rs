@@ -12,7 +12,7 @@ use core::slice;
 pub(super) fn native_libraries() -> Vec<Library> {
     let mut ret = Vec::new();
     unsafe {
-        libc::dl_iterate_phdr(Some(callback), &mut ret as *mut Vec<_> as *mut _);
+        libc::dl_iterate_phdr(Some(callback), core::ptr::addr_of_mut!(ret) as *mut _);
     }
     return ret;
 }

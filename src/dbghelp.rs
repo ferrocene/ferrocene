@@ -155,7 +155,7 @@ macro_rules! dbghelp {
 
             pub fn dbghelp(&self) -> *mut Dbghelp {
                 unsafe {
-                    &mut DBGHELP
+                    ptr::addr_of_mut!(DBGHELP)
                 }
             }
         }

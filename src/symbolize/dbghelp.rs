@@ -222,7 +222,7 @@ unsafe fn do_resolve(
             }
         }
     }
-    let name = &name_buffer[..name_len] as *const [u8];
+    let name = core::ptr::addr_of!(name_buffer[..name_len]);
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
     line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;

@@ -17,6 +17,7 @@
 
 use super::super::Bomb;
 use core::ffi::c_void;
+use core::ptr::addr_of_mut;
 
 pub enum Frame {
     Raw(*mut uw::_Unwind_Context),
@@ -101,7 +102,7 @@ impl Clone for Frame {
 
 #[inline(always)]
 pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
-    uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
+    uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb) as *mut _);
 
     extern "C" fn trace_fn(
         ctx: *mut uw::_Unwind_Context,
@@ -198,6 +199,8 @@ mod uw {
                 _Unwind_GetGR(ctx, 15)
             }
         } else {
+            use core::ptr::addr_of_mut;
+
             // On android and arm, the function `_Unwind_GetIP` and a bunch of
             // others are macros, so we define functions containing the
             // expansion of the macros.
@@ -242,7 +245,7 @@ mod uw {
 
             pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
-                let ptr = &mut val as *mut _Unwind_Word;
+                let ptr = addr_of_mut!(val);
                 let _ = _Unwind_VRS_Get(
                     ctx,
                     _Unwind_VRS_RegClass::_UVRSC_CORE,
@@ -258,7 +261,7 @@ mod uw {
 
             pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
-                let ptr = &mut val as *mut _Unwind_Word;
+                let ptr = addr_of_mut!(val);
                 let _ = _Unwind_VRS_Get(
                     ctx,
                     _Unwind_VRS_RegClass::_UVRSC_CORE,

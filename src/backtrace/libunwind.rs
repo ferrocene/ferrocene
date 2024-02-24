@@ -102,13 +102,13 @@ impl Clone for Frame {
 
 #[inline(always)]
 pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
-    uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb) as *mut _);
+    uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb).cast());
 
     extern "C" fn trace_fn(
         ctx: *mut uw::_Unwind_Context,
         arg: *mut c_void,
     ) -> uw::_Unwind_Reason_Code {
-        let cb = unsafe { &mut *(arg as *mut &mut dyn FnMut(&super::Frame) -> bool) };
+        let cb = unsafe { &mut *arg.cast::<&mut dyn FnMut(&super::Frame) -> bool>() };
         let cx = super::Frame {
             inner: Frame::Raw(ctx),
         };
@@ -251,7 +251,7 @@ mod uw {
                     _Unwind_VRS_RegClass::_UVRSC_CORE,
                     15,
                     _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr as *mut c_void,
+                    ptr.cast::<c_void>(),
                 );
                 (val & !1) as libc::uintptr_t
             }
@@ -267,7 +267,7 @@ mod uw {
                     _Unwind_VRS_RegClass::_UVRSC_CORE,
                     SP,
                     _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr as *mut c_void,
+                    ptr.cast::<c_void>(),
                 );
                 val as libc::uintptr_t
             }

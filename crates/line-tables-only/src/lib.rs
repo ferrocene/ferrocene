@@ -13,7 +13,7 @@ mod tests {
 
     extern "C" fn store_backtrace(data: *mut c_void) {
         let bt = backtrace::Backtrace::new();
-        unsafe { *(data as *mut Option<Backtrace>) = Some(bt) };
+        unsafe { *data.cast::<Option<Backtrace>>() = Some(bt) };
     }
 
     fn assert_contains(
@@ -50,7 +50,7 @@ mod tests {
     #[cfg_attr(windows, ignore)]
     fn backtrace_works_with_line_tables_only() {
         let mut backtrace: Option<Backtrace> = None;
-        unsafe { foo(store_backtrace, addr_of_mut!(backtrace) as *mut c_void) };
+        unsafe { foo(store_backtrace, addr_of_mut!(backtrace).cast::<c_void>()) };
         let backtrace = backtrace.expect("backtrace");
         assert_contains(&backtrace, "foo", "src/callback.c", 13);
         assert_contains(&backtrace, "bar", "src/callback.c", 9);

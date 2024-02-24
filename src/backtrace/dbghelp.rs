@@ -141,7 +141,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 
         let frame = super::Frame {
             inner: Frame {
-                base_address: fn_entry as *mut c_void,
+                base_address: fn_entry.cast::<c_void>(),
                 ip: context.ip() as *mut c_void,
                 sp: context.sp() as *mut c_void,
                 #[cfg(not(target_env = "gnu"))]
@@ -162,7 +162,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             context.ip(),
             fn_entry,
             &mut context.0,
-            ptr::addr_of_mut!(handler_data) as *mut PVOID,
+            ptr::addr_of_mut!(handler_data).cast::<PVOID>(),
             &mut establisher_frame,
             ptr::null_mut(),
         );

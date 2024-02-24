@@ -359,7 +359,7 @@ fn for_each_dso(mut visitor: &mut DsoPrinter<'_, '_>) {
         // location.
         let name_len = unsafe { libc::strlen(info.name) };
         let name_slice: &[u8] =
-            unsafe { core::slice::from_raw_parts(info.name as *const u8, name_len) };
+            unsafe { core::slice::from_raw_parts(info.name.cast::<u8>(), name_len) };
         let name = match core::str::from_utf8(name_slice) {
             Ok(name) => name,
             Err(_) => {

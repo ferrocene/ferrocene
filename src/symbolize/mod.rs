@@ -210,7 +210,7 @@ impl Symbol {
 
     /// Returns the starting address of this function.
     pub fn addr(&self) -> Option<*mut c_void> {
-        self.inner.addr().map(|p| p as *mut _)
+        self.inner.addr()
     }
 
     /// Returns the raw filename as a slice. This is mainly useful for `no_std`

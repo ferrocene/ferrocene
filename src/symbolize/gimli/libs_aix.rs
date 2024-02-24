@@ -20,7 +20,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
         loop {
             if libc::loadquery(
                 libc::L_GETINFO,
-                buffer.as_mut_ptr() as *mut libc::c_char,
+                buffer.as_mut_ptr().cast::<libc::c_char>(),
                 (mem::size_of::<libc::ld_info>() * buffer.len()) as u32,
             ) != -1
             {
@@ -66,8 +66,10 @@ pub(super) fn native_libraries() -> Vec<Library> {
             if (*current).ldinfo_next == 0 {
                 break;
             }
-            current = (current as *mut libc::c_char).offset((*current).ldinfo_next as isize)
-                as *mut libc::ld_info;
+            current = current
+                .cast::<libc::c_char>()
+                .offset((*current).ldinfo_next as isize)
+                .cast::<libc::ld_info>();
         }
     }
     return ret;

@@ -430,7 +430,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
     };
 
     Cache::with_global(|cache| {
-        let (lib, addr) = match cache.avma_to_svma(addr as *const u8) {
+        let (lib, addr) = match cache.avma_to_svma(addr.cast_const().cast::<u8>()) {
             Some(pair) => pair,
             None => return,
         };

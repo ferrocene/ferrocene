@@ -241,12 +241,6 @@ Command-Line Interface
 
    .. cli:option:: -C linker=<path>
 
-      .. caution::
-
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
-
       Code generation option ``linker`` indicates the path to the linker. If
       this compiler argument is not specified, then the linker is inferred
       based on the target.

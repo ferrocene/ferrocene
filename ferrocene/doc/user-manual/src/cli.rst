@@ -241,6 +241,11 @@ Command-Line Interface
 
    .. cli:option:: -C linker=<path>
 
+      .. caution::
+
+         This can only be used for targets that require a linker driver,
+         in which case the linker driver must respect the option.
+
       Code generation option ``linker`` indicates the path to the linker. If
       this compiler argument is not specified, then the linker is inferred
       based on the target.

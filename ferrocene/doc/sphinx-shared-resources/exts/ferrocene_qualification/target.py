@@ -10,15 +10,21 @@ import tomli
 class TargetRole(SphinxRole):
     def run(self):
         target = self.text.strip()
-        if target in self.env.ferrocene_target_names:
-            return [nodes.Text(self.env.ferrocene_target_names[target])], []
-        else:
-            config = self.config["ferrocene_target_names_path"]
-            logger = sphinx.util.logging.getLogger(__name__)
-            logger.warning(
-                f"missing target {target} in {config}", location=self.get_location()
+        return [
+            render_target_name(
+                self.env, self.config, target, location=self.get_location()
             )
-            return [nodes.problematic("", self.text)], []
+        ], []
+
+
+def render_target_name(env, config, target, *, location=None):
+    if target in env.ferrocene_target_names:
+        return nodes.Text(env.ferrocene_target_names[target])
+    else:
+        config = config["ferrocene_target_names_path"]
+        logger = sphinx.util.logging.getLogger(__name__)
+        logger.warning(f"missing target {target} in {config}", location=location)
+        return nodes.problematic("", target)
 
 
 def load_target_names(app, env, _docnames):

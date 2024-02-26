@@ -21,6 +21,7 @@ based on software engineering best practices.
    known-problems
    pe-procedures
    doc-procedures
+   release-notes
 
 .. toctree::
    :maxdepth: 4

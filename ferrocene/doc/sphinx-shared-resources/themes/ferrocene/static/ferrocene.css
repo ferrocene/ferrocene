@@ -104,6 +104,8 @@
 
     --content-width: 50rem;
 
+    --relnotes-badge-bg: #ffe033;
+
     --spec-error-fg: #f00;
     --spec-syntax-literal-bg: #dbdbdb;
 
@@ -133,6 +135,10 @@ body {
     outline: 2px solid var(--focus-border);
 }
 
+.hidden {
+    display: none;
+}
+
 /************
  *   Text   *
  ************/
@@ -155,8 +161,11 @@ a:hover {
     text-decoration-style: solid;
 }
 
-p {
+p, div.line-block {
     margin: 1em 0;
+}
+
+p, div.line-block div.line {
     line-height: 1.5em;
 }
 
@@ -167,6 +176,14 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.align-right {
+    text-align: right;
 }
 
 /****************
@@ -559,6 +576,7 @@ table td, table th {
     padding: 0.4em;
     border-bottom: 1px solid var(--table-border);
     text-align: left;
+    vertical-align: top;
 }
 
 table tr:last-child td {
@@ -686,6 +704,24 @@ blockquote code {
 .problematic {
     color: var(--problematic-fg);
     background: var(--problematic-bg);
+}
+
+/****************************
+ *   Release notes badges   *
+ ****************************/
+
+span.relnotes-upcoming-badge {
+    display: inline-block;
+    background: var(--relnotes-badge-bg);
+    color: var(--text-fg);
+
+    text-transform: capitalize;
+    font-size: 0.75em;
+    font-weight: 700;
+
+    margin-left: 0.75em;
+    padding: 0.2em 0.5em;
+    border-radius: 0.3em;
 }
 
 /**************************************************

@@ -8,16 +8,19 @@ This qualification is restricted to the following environment:
 
 .. list-table::
    :align: left
-   :stub-columns: 1
+   :header-rows: 1
 
    * - Host
-     - :target:`x86_64-unknown-linux-gnu`
-   * - Target
+     - Target
+     - Uncertified Libraries
+
+   * - :target:`x86_64-unknown-linux-gnu`
      - :target:`aarch64-unknown-none`
-   * - Target specific libraries
-     - libcore and liballoc
-   * - Supported languages
-     - Rust
+     - ``core``, ``alloc``
+
+   * - :target:`x86_64-unknown-linux-gnu`
+     - :target:`x86_64-unknown-linux-gnu`
+     - ``core``, ``alloc``, ``std``, ``proc_macro``, ``test``
 
 .. end of table
 

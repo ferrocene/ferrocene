@@ -7,6 +7,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::t;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
+use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
 use std::collections::BTreeMap;
 use std::fs;
@@ -320,7 +321,7 @@ impl Step for TestOutcomes {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let Some(test_outcomes) = &builder.config.ferrocene_test_outcomes_dir else { return None };
+        let Some(test_outcomes) = builder.ensure(TestOutcomesDir) else { return None };
 
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");

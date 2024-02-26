@@ -1,0 +1,8 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+Ferrocene 23.06.0
+=================
+
+Ferrocene 23.06.0 is the initial release of Ferrocene, and includes Rust
+1.68.2. As it is the initial version, there are no release notes for it.

@@ -4,9 +4,18 @@
 from docutils import nodes
 from docutils.statemachine import StringList
 from sphinx.directives import SphinxDirective
+from sphinx.transforms import SphinxTransform
 import docutils
 import jinja2
 import sphinx
+
+
+class OutcomesPageNode(nodes.Element):
+    def __init__(self, host, target, tested_target):
+        super().__init__()
+        self["host"] = host
+        self["target"] = target
+        self["tested_target"] = tested_target
 
 
 class RenderOutcomesTemplate(SphinxDirective):
@@ -19,7 +28,18 @@ class RenderOutcomesTemplate(SphinxDirective):
     }
 
     def run(self):
-        return render_template(
+        # Grab the outcomes for the bare metal test target if specified:
+        tested_target = self.options.get(
+            "bare_metal_test_target",
+            self.options["target"],
+        )
+
+        page_node = OutcomesPageNode(
+            self.options["host"],
+            self.options["target"],
+            tested_target,
+        )
+        content_node = render_template(
             self,
             self.arguments[0],
             {
@@ -30,13 +50,13 @@ class RenderOutcomesTemplate(SphinxDirective):
                 # Can be None if test outcomes were not injected.
                 "platform_outcomes": self.env.ferrocene_test_outcomes.platform(
                     self.options["host"],
-                    # Grab the outcomes for the bare metal test target if specified:
-                    self.options.get("bare_metal_test_target", self.options["target"]),
+                    tested_target,
                 )
                 if self.env.ferrocene_test_outcomes is not None
                 else None,
             },
         )
+        return [page_node] + content_node
 
 
 def render_template(directive, template, context):
@@ -58,5 +78,10 @@ def render_template(directive, template, context):
     return node.children
 
 
+def null_fn(*args):
+    pass
+
+
 def setup(app):
     app.add_directive("render-outcomes-template", RenderOutcomesTemplate)
+    app.add_node(OutcomesPageNode, html=(null_fn, null_fn))

@@ -823,6 +823,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::Index,
                 crate::ferrocene::doc::Specification,
                 crate::ferrocene::doc::UserManual,
+                crate::ferrocene::doc::ReleaseNotes,
                 // Qualification Documents
                 crate::ferrocene::doc::DocumentList,
                 crate::ferrocene::doc::EvaluationPlan,

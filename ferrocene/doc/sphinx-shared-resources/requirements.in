@@ -6,6 +6,7 @@ sphinx-autobuild
 tomli
 myst_parser
 pyyaml
+semver
 
 # For compatibility with Python < 3.10, as Sphinx has a conditional dependency
 # on importlib-metadata on older Python versions.

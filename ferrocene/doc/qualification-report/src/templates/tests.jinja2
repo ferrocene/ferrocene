@@ -4,10 +4,8 @@
 {% macro no_outcomes_error() %}
 .. error::
 
-   The ``ferrocene.test_outcomes_dir`` setting in ``config.toml`` was not set.
-   The test outcomes won't be populated until you store the relevant build
-   metrics file in a directory, and change the setting to point to that
-   directory.
+   The ``ferrocene.test-outcomes`` setting in ``config.toml`` was not set.
+   The test outcomes won't be populated until you configure it.
 {% endmacro %}
 
 {% macro invocations_summary(bootstrap_type, only_match_root_node=False) %}

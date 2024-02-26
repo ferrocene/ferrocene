@@ -47,7 +47,7 @@ def build_finished(app, exception):
     if app.builder.name != "html":
         return
 
-    with sphinx.util.progress_message("dumping traceability ids"):
+    with sphinx.util.display.progress_message("dumping traceability ids"):
         write_traceability_ids(app)
 
 

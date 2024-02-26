@@ -888,8 +888,17 @@
 # included in the report. Can be either "local" or "ci".
 #traceability-matrix-mode = "local"
 
+# How to retrieve the test outcomes to include in the documentation and the
+# traceability matrix. Can be one of the following values:
+#
+# - disabled (default): do not include test outcomes
+# - download-ci: download the outcomes of the git merge base from CI
+# - custom: provide a custom path to the test outcomes (see test-outcomes-dir)
+#test-outcomes = "disabled"
+
 # Directory containing the build metrics files for the test executions, which
-# will be included in the qualification documents.
+# will be included in the qualification documents as the test outcomes. Must be
+# set when and only if test-outcomes is set to "custom".
 #test-outcomes-dir = <none> (path)
 
 # Path containing the OxidOS source code tarball. It can be a remote URL, and

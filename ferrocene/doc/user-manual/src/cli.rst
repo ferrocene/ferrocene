@@ -191,9 +191,8 @@ Command-Line Interface
 
       .. caution::
 
-         This code generation option is outside the scope of the Ferrocene
-         qualification, and must not be used in a safety critical
-         context. Its documentation is presented for your convenience.
+         Only the values listed in :doc:`Compilation targets <targets/index>`
+         section for each target can be used in a safety critical context.
 
       Code generation option ``link-args`` appends multiple extra arguments to
       the invocation of the linker.

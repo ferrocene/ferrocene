@@ -37,16 +37,6 @@ git conflict markers (`<<<<<<<`, `=======` and `>>>>>>>`).
 
 There are multiple kinds of conflicts you will encounter:.
 
-* Submodule conflict
-  To fix a submodule conflict run::
-
-    cd src/tools/cargo
-    git merge <COMMIT_HASH>
-    cd ../../..
-    git add src/tools/cargo
-
-  <COMMIT_HASH> is ...
-
 * File deleted by one side of the merge
   This happens when we made changes to a file and it gets deleted by upstream. To
   resolve this, remove the file::

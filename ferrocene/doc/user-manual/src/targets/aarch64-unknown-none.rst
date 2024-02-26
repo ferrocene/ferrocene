@@ -14,6 +14,14 @@ Prerequisites
 
 This target has no pre-requisites.
 
+Archives to install
+-------------------
+
+The following archives are needed when :doc:`installing <../install>` this
+target as a cross-compilation target:
+
+* ``rust-std-aarch64-unknown-none``
+
 Required compiler flags
 -----------------------
 

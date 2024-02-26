@@ -276,10 +276,12 @@ code {
     padding: 0 0.2em;
     border-radius: 0.2em;
     outline: 0.1em solid var(--inline-code-border);
+    margin: 0 0.1em;
 }
 
 pre code {
     background: transparent;
+    margin: 0;
     padding: 0;
     border-radius: 0;
     outline: none;

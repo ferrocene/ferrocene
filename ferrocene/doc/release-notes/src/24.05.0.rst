@@ -21,10 +21,6 @@ New features
   for safety critical use, in addition to being used as a host platform like in
   previous releases.
 
-* The ``-C llvm-args=protect-from-escaped-alloca`` flag is now qualified for
-  ``rustc``, and its use is now required by the safety manual. This mitigates
-  `KP-R112213 <https://problems.ferrocene.dev/KP-R112213.html>`_.
-
 New experimental features
 -------------------------
 
@@ -35,9 +31,9 @@ shipped as a preview.
   Note that experimental targets are not qualified for safety critical use. The
   new targets are:
 
-  * :target:`thumbv7em-none-eabi`
-  * :target:`thumbv7em-none-eabihf`
-  * :target:`wasm32-unknown-unknown`
+  * :target-with-triple:`thumbv7em-none-eabi`
+  * :target-with-triple:`thumbv7em-none-eabihf`
+  * :target-with-triple:`wasm32-unknown-unknown`
 
 * The self-testing tool now checks the correct behavior of *linker drivers*,
   according to the new requirements for linkers. Note that the self-testing
@@ -56,7 +52,8 @@ Changes
 Bug fixes
 ---------
 
-N/A
+* Disabled LLVM optimization that optimizes lifetime zones that are broken to mitigate
+  `KP-R112213 <https://problems.ferrocene.dev/KP-R112213.html>`_.
 
 Rust changes
 ------------

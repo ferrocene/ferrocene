@@ -9,25 +9,28 @@ Validation Process
    Validation Process
 
 As described in the picture above, the validation process starts with the
-results of the Evaluation Report. After the analysis of the software tool
-identified the use cases and the potential errors, we determined the Tool
-Confidence Level and then the validation method used for this qualification.
+results of the :doc:`evaluation-report:index`. After the analysis of the
+software tool identified the use cases and the potential errors, we determined
+the Tool Confidence Level and then the validation method used for this
+qualification.
 
-The validation process shall demonstrate that all the potential errors have been
-identified for the use case described in the Evaluation Report HazOp analysis.
-These errors will either be covered by a test which ensures that they are not
-present in the final product, or means of mitigating their effects have been
-identified (see Evaluation Report Tool Analysis for further details).
+The validation process shall demonstrate that all the potential errors have
+been identified for the use case described in the Evaluation Report HazOp
+analysis.  These errors will either be covered by a test which ensures that
+they are not present in the final product, or means of mitigating their effects
+have been identified (see :doc:`evaluation-report:tool-analysis` for further
+details).
 
 
 Validation Strategy
 -------------------
 
 The general validation strategy employed across the Ferrocene processes is to
-use a trusted CI infrastructure to thoroughly test a PR, to prevent the merge of
-a PR that would otherwise violate the "always green" invariant of the Ferrocene
-Git repository, and to maintain logs and artifacts for every single activity
-that was performed for some Ferrocene process.
+use a trusted CI infrastructure to thoroughly test a PR, to prevent the merge
+of a PR that would otherwise violate the :ref:`"always green" invariant
+<infrastructure:Bors>` of the Ferrocene Git repository, and to maintain logs
+and artifacts for every single activity that was performed for some Ferrocene
+process.
 
 The Ferrocene CI infrastructure implements the general validation strategy, and
 in addition allows a Ferrocene developer to stop any phase of any Ferrocene
@@ -40,98 +43,79 @@ validated.
 Development Validation
 ----------------------
 
-The validation of the development process is performed through the feedback and
-analysis of the Ferrocene test suites.
+The validation of the :doc:`development` is performed in part by the reviewer
+of each PR, and in part automatically by the Ferrocene infrastructure.
 
-If the Ferrocene CI infrastructure reports a “success” status for a PR, then the
-author of the PR can consider the PR as validated. The author is not required to
-review the logs, but may still choose to do so. The logs are kept as proof that
-the PR conforms to applicable requirements, and that its merge has been
-validated.
+Whenever a PR is ready for review, in addition to reviewing the code change,
+the reviewer must ensure these steps were followed before marking the PR as
+approved:
 
-However, if the Ferrocene CI infrastructure reports a “failed” status for a PR,
-the author must manually evaluate the logs. Once confidence is reestablished
-after the manual evaluation, the Ferrocene test suites are executed again. In
-this case, the PR is validated only when the author of the PR and the Reviewer
-have validated the fix, and the Ferrocene CI infrastructure has reported a
-“success” status. All logs are kept and stored with the associated analysis and
-justification.
+* :ref:`dev-phase-design`
+* :ref:`dev-phase-development`
+* :ref:`dev-phase-review`
 
+Once the PR is queued to be merged, the Ferrocene infrastructure will
+automatically verify that the reviewer approved the PR (meaning the steps above
+were checked by the reviewer), and run these steps before merging the change:
+
+* :ref:`dev-phase-queue`
+* :ref:`dev-phase-test`
+
+Because of this, all merged changes have followed the development process, and
+there is no need for any additional manual verification.
 
 Documentation Validation
 ------------------------
 
-Similar to the development validation, the documentation process is assessed
-through the Ferrocene CI infrastructure. The content of the document is
-validated in the review process described in :ref:`documentation:Documentation
-Process`.
+Similar to the development validation, the :doc:`documentation` is assessed by
+the reviewer, who must ensure these steps were followed before marking the PR
+as approved:
 
-In addition to the review process, a member of the certification team for
-certification or qualification documents, or a member of the development team
-for technical documents (see :doc:`qualification-plan:organization` for details)
-performs a manual sanity check on the document before each release. This
-validates that there are no unexpected visual problems with the end product
-and ensures that the automations have been successful.
+* :ref:`doc-phase-development`
+* :ref:`doc-phase-review`
 
+Once the PR is queued to be merged, the :doc:`development` will be followed,
+which will ensure that the documentation approval is present.
+
+In addition to this process, the safety manager (or a person delegated by the
+safety manager) performs a manual sanity check of the documentation before each
+release. This ensures that the documentation is coherent, there are no
+unexpected problems with the end product and that the automation successfully
+executed without warnings.
 
 Testing Validation
 ------------------
 
-The validation of the testing process is performed by analyzing the
-testing-related logs generated by the Ferrocene CI infrastructure.
-
-If the Ferrocene CI infrastructure reports a "success" status for a PR, the
-author of the PR is not required to review the testing-related logs. The
-testing-related logs are kept as proof that the PR passes all tests.
-
-However, if the Ferrocene CI infrastructure reports a "failed" status for a PR,
-the author of the PR must review the testing-related logs, identify the failed
-tests, and investigate the cause for the failure.
-
+The :doc:`testing` is performed as part of the development process in
+the test step, so validating it implies validating the testing process.
 
 Packaging Validation
 --------------------
 
-The validation of the packaging process is performed by examining the contents
-of the artifact storage location for a particular PR.
+The :doc:`packaging` is validated automatically by the release tooling as part
+of the Ferrocene infrastructure. The tooling expects the packages to be stored
+at the correct location with the right metadata attached, so failures in the
+packaging process will prevent releases from being published.
 
-To validate a package for PR ``abcdef``, a Ferrocene engineer checks that
-artifact storage location ``s3://ferrocene-ci-artifacts/ferrocene/dist``
-contains subdirectory ``abcdef``.
-
-Note that the contents of the tarballs are further validated as part of the
-:ref:`release:Release Process`.
-
-If any of these checks are not satisfied, a Ferrocene engineer investigates the
-causes for the packaging issue. The traceability of this work is captured in a
-GitHub issue with the "Packaging" label.
-
+.. _release-validation:
 
 Release Validation
 ------------------
 
 The validation of the release process is only applicable to the stable release
-channel. As indicated in :ref:`release:Release Process`, there are no stability or
+channel. As indicated in :doc:`release`, there are no stability or
 functionality guarantees in the other release channels as they are not
 production environments.
 
-To validate a release, the Release Manager examines the following release
-artifacts:
+To validate a release, the release manager must first publish the release on
+the ``dev`` environment (as described :ref:`in the internal procedures
+<internal-procedures:publish-stable>`), and once published there they must
+manually verify that:
 
-* The manifest of the release. The Release Manager validates the manifest only
-  if it is complete, consistent with the intent of the release, and does not
-  list unwanted items.
+* All the expected files are present in the release.
 
-* The contents of the release. The Release Manager validates the contents of the
-  release only when they correspond to the items listed in the manifest.
+* The release can be installed locally and can compile example programs.
 
-* The checksum of the release. The Release Manager validates the checksum only
-  when it corresponds to an expected checksum.
-
-* The KPs of the release. The Release Manager validates the KPs only when the
-  KPs are current and each one has a title, description, workaround, and
-  detection.
-
-If any of these artifacts is not satisfactory, the release is delayed until all
-problems are resolved. The traceability of this work is captured in a GitHub
-issue with the “Release” label.
+If any of the checks are not satisfactory, the release must be delayed until
+resolved. Once all checks are passed, the release can be published in the
+production environment.

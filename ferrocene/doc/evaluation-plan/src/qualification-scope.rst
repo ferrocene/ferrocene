@@ -15,9 +15,9 @@ by end-use code is outside the scope of the current Ferrocene
 qualification. It is the end-user responsibility to qualify these libraries if
 they are used in their code.
 
-The other development tools besides `rustc` are not qualified and are
+The other development tools besides ``rustc`` are not qualified and are
 distributed for convenience only. This includes but is not limited to:
 
-* `cargo`
-* `rustdoc`
-* `rust-gdb`
+* ``cargo``
+* ``rustdoc``
+* ``rust-gdb``

@@ -5,7 +5,8 @@ Acceptability Statement
 =======================
 
 Ferrocene provides a development environment capable of compiling, binding, and
-linking programs for the target architecture. As per the test results shown in
+linking programs for the target architecture. As per the traceability in
+:doc:`requirements-traceability` and the test results shown in
 :doc:`tests/index`, Ferrocene |ferrocene_version| has been reviewed and is
 demonstrated compliant with automotive [|iso_ref|]
 |ferrocene_TCL|/|ferrocene_ASIL| and industrial [|iec_ref|] |ferrocene_TQL|.

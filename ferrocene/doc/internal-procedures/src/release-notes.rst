@@ -47,7 +47,7 @@ of the document, *before* any non-comment content of the page:
 Including Rust's release notes
 ------------------------------
 
-Major releases of Ferrocene bump the bundled Rust version, and when that happen
+Major releases of Ferrocene bump the bundled Rust version, and when that happens,
 we should mention what changed since the last major release of Ferrocene. The
 ``rust-changelog`` directive takes care of that, automatically including the
 release notes of all Rust versions within a semver range.

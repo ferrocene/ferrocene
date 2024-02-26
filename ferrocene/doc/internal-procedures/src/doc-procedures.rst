@@ -50,7 +50,16 @@ paths:
 
    ./x doc ferrocene/doc/$foo ferrocene/doc/$bar ferrocene/doc/$baz
 
-If you want to build all of the available documentation, you can omit the path:
+If you want to build all the documentation generated with Sphinx (for example
+if you need to ensure cross-document links work, or you need to test an
+extension change across all documents) you can run:
+
+.. code-block:: text
+
+   ./x doc ferrocene/doc
+
+If you want to build all of the available documentation, including the standard
+library docs and documentation from upstream, you can omit the path:
 
 .. code-block:: text
 
@@ -72,6 +81,13 @@ reloading of the changes in the browser:
 .. code-block:: text
 
    ./x doc ferrocene/doc/$foo --serve
+
+.. caution::
+
+   The ``--serve`` flag is only available for documents built with Sphinx, and
+   it will not do anything for other kinds of documentation (like mdBook or
+   rustdoc). It also only supports serving a *single* Sphinx document: if you
+   attempt to serve more than one at the time it will error out.
 
 When you are working on Sphinx extensions, the ``--debug-sphinx`` flag will
 change the configuration to aid debugging, by running only one builder job at
@@ -143,6 +159,33 @@ the substitution name with ``|``:
 .. code-block:: text
 
    |doc_title|
+
+Mentioning targets
+~~~~~~~~~~~~~~~~~~
+
+When you need to refer to targets across the documentation, it's better to use
+a human-readable name (like ":target:`aarch64-unknown-none`") than the target
+triple, as the latter is often inconsistent between similar targets and could
+be confusing to customers.
+
+To keep the target names consistent, you can use the ``:target:`` role with the
+target triple as its content, which will be rendered as the human-readable
+name:
+
+.. code-block:: rst
+
+   :target:`x86_64-unknown-linux-gnu`
+
+The ``:target-with-triple:`` role will also add the triple following the
+human-readable name, which is best used when customers then need to copy/paste
+the triple:
+
+.. code-block:: rst
+
+   :target-with-triple:`aarch64-unknown-none`
+
+The human-readable names are stored in ``ferrocene/doc/target-names.toml``, and
+referring to a target not defined in that file will emit a warning.
 
 Signing documents
 -----------------
@@ -255,128 +298,3 @@ tarball in a directory on disk, and add this snippet to ``config.toml``:
    When configuring a custom path for the test outcomes, make sure you choose
    the path actually containing the JSON files. In downloaded tarballs, that is
    the ``share/ferrocene/test-outcomes`` directory inside the tarball.
-
-Signing workflow
-----------------
-
-The following workflow considers that two different people are signing the
-document. If the number of signees is greater than 2, then the steps of
-:ref:`doc-procedures:Signee 2` can be repeated.
-
-For qualification documents, :ref:`doc-procedures:Signee 1` is the
-Verification Engineer and
-:ref:`doc-procedures:Signee 2` is the
-Certification Engineer.
-
-Signee 1
-~~~~~~~~
-
-1. Perform Setting up a local development environment from this document.
-
-2. Go to your checkout of ``ferrocene/ferrocene``.
-
-3. Create a signing branch by executing
-
-.. code-block:: text
-
-   git fetch
-   git checkout -b <branch_name> origin/release/1.68
-
-where ``<branch_name>`` denotes the name of the signing branch, for example
-``sign-evaluation-plan``.
-
-4. Update tool submodules by executing
-
-.. code-block:: text
-
-   	git submodule update
-
-5. Perform Signing documents from this document.
-
-6. Check that files ``verifier.cosign-bundle`` and
-   ``verifier.cosign-bundle.license`` have been created by executing
-
-.. code-block:: text
-
-   git status
-
-7. Prepare a PR by executing
-
-.. code-block:: text
-
-   git add .
-   git commit
-
-8. Add title ``Sign <document>`` to the commit message, where ``<document>`` is
-   the document you just signed, for example ``Sign Evaluation Plan``.
-
-9. Save and exit your editor.
-
-10. Push the branch to GitHub:
-
-.. code-block:: text
-
-   git push -u origin <branch_name>
-
-11. Follow the URL to GitHub, and create the PR.
-
-12. Update the base branch to ``release/1.68`` in the GitHub UI by selecting it
-    from the dropbox, as shown below:
-
-.. figure:: figures/pr-chose-base-branch.png
-
-   pr-chose-base-branch
-
-13. Notify the Certification Engineer that the PR has been created, and give
-    the ``<branch_name>``.
-
-Signee 2
-~~~~~~~~
-
-1. Perform Setting up a local development environment from this document.
-
-2. Go to your checkout of ``ferrocene/ferrocene``.
-
-3. Check out the signing branch by executing
-
-.. code-block:: text
-
-   git checkout <branch_name>
-
-where ``<branch_name>`` denotes the name of the signing branch, for example
-``sign-evaluation-plan``.
-
-4. Update tool submodules by executing
-
-.. code-block:: text
-
-   	git submodule update
-
-5. Perform Signing documents from this document.
-
-6. Check that files ``engineer.cosign-bundle`` and
-   ``engineer.cosign-bundle.license`` have been created by executing
-
-.. code-block:: text
-
-   git status
-
-7. Prepare a commit by executing
-
-.. code-block:: text
-
-   git add .
-   git commit
-
-8. Add title ``Sign <document>`` to the commit message, where ``<document>`` is
-   the document you just signed, for example ``Sign Evaluation Plan``.
-
-9. Save and exit your editor.
-
-10. Push your commit by executing
-
-.. code-block:: text
-
-   git push
-
-11. Request a review of the PR on Ferrous Systems' ``highfive`` Zulip channel.

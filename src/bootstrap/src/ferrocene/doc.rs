@@ -242,6 +242,16 @@ impl<P: Step> Step for SphinxBook<P> {
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
 
+        if builder.config.cmd.fresh() {
+            // The `-E` flag forces Sphinx to ignore any saved environment and build everything
+            // from scratch. This is not strictly required during normal builds or initial builds
+            // with --serve, as code above already clears the directory before invoking Sphinx.
+            //
+            // Without this code, followup builds of --serve would be incremental rather than
+            // fresh, as our code to delete directories only runs once. Passing `-E` fixes that.
+            cmd.arg("-E");
+        }
+
         if self.require_relnotes {
             cmd.arg("-D").arg(path_define(
                 "rust_release_notes",
@@ -511,6 +521,40 @@ macro_rules! sphinx_books {
                 const SOURCE: &'static str = $src;
             }
         )*
+
+        #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+        pub(crate) struct AllSphinxDocuments {
+            pub(crate) target: TargetSelection,
+        }
+
+        impl Step for AllSphinxDocuments {
+            type Output = ();
+            const DEFAULT: bool = false;
+
+            fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+                run.path("ferrocene/doc")
+            }
+
+            fn make_run(run: RunConfig<'_>) {
+                run.builder.ensure(AllSphinxDocuments {
+                    target: run.target,
+                });
+            }
+
+            fn run(self, builder: &Builder<'_>) {
+                $(
+                    builder.ensure($ty {
+                        mode: SphinxMode::Html,
+                        target: self.target,
+                        fresh_build: false,
+                    });
+                )*
+
+                // Also regenerate the index file, so that the "Ferrocene documentation" link in
+                // the breadcrumbs doesn't break.
+                builder.ensure(Index { target: self.target });
+            }
+        }
 
         fn intersphinx_gather_steps(target: TargetSelection) -> Vec<SphinxBook> {
             let mut steps = Vec::new();

@@ -211,7 +211,9 @@ def build_metadata(ctx, commit):
             ferrocene_version=ferrocene_version,
             channel=channel
         )
-    elif metadata["metadata_version"] == 3:
+    elif metadata["metadata_version"] in (3, 4):
+        # For the purposes of this script, metadata versions 3 and 4 are
+        # equivalent (the only difference is the tarball naming scheme).
         return BuildMetadata(
             rust_version=metadata["rust_version"],
             rust_channel=metadata["rust_channel"],

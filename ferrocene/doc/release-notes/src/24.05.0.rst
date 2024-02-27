@@ -21,11 +21,6 @@ New features
   for safety critical use, in addition to being used as a host platform like in
   previous releases.
 
-* Host targets now distribute all the official Rust dev tools. Additionally to
-  ``rustc`` and ``cargo`` which were already included before, ``clippy``,
-  ``rustfmt``, ``rust-analyzer`` and ``rust-demangler`` are build and bundled
-  now as well.
-
 New experimental features
 -------------------------
 
@@ -43,6 +38,11 @@ shipped as a preview.
 * The self-testing tool now checks the correct behavior of *linker drivers*,
   according to the new requirements for linkers. Note that the self-testing
   tool is not qualified for safety critical use yet.
+
+* Host targets now distribute all the official Rust dev tools. Additionally to
+  ``rustc`` and ``cargo`` which were already included before, ``clippy``,
+  ``rustfmt``, ``rust-analyzer`` and ``rust-demangler`` are build and bundled
+  now as well.
 
 Changes
 -------

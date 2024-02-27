@@ -11,7 +11,7 @@
 # - Partial clones are used to do a file-less clone of the repository,
 #   deferring the fetch of the individual files only when they're needed.
 #
-# - Sparse checkouts are used to only checkouts a subset of directories instead
+# - Sparse checkouts are used to only checkout a subset of directories instead
 #   of the whole tree. Combined with partial clones this results in only the
 #   files from those directories being fetched.
 #

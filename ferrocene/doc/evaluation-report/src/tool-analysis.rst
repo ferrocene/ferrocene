@@ -142,22 +142,22 @@ Moreover, this analysis shows us that the likelihood of detecting these
 potential errors is very low. Therefore, the tool error detection class is
 **TD3**.
 
-Using the clause 11.4.5.4 in part 8 of the [|iso_ref|], we can conclude that in
+Using clause 11.4.5.4 in part 8 of the [|iso_ref|] standard, we can conclude that in
 the worst case the Tool Classification Level is **TCL3** and therefore we choose
 the following qualification methods:
 
 * 1b. Evaluation of the tool development process in accordance with 11.4.8
 * 1c. Validation of the software tool in accordance with 11.4.9
 
-According to the clause 11.4.2 in part 8 of the [|iso_ref|] this choice is
-depending on user's software development life-cycle and their validation strategy,
-the user has the responsibility to determine whether this level or better one is
+According to clause 11.4.2 in part 8 of the [|iso_ref|] standard, this choice
+depends on the user's software development life-cycle and their validation strategy.
+The user has the responsibility to determine whether this level, or a better one, is
 applicable.
 
 
 IEC 61508 Tool Classification
 -----------------------------
 
-Ferrocene provides a development environment capable of compiling, binding,
-and linking programs for the target architecture conform with automotive
+Ferrocene provides a development environment capable of compiling,
+and linking programs for the target architecture to conform with automotive
 [|iso_ref|] TCL 3/ASIL D level and industrial [|iec_ref|] T3 TQL level.

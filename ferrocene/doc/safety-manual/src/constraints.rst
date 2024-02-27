@@ -48,7 +48,7 @@ Constraints
        safety-related software is in progress.
      - :id:`AVD_PARALLEL_BUILD_006`
    * - .. id:: CSTR_0070_TEST
-     - The integrated testing objectives of [ISO-26262] sections 11.4.9 must be
+     - The integrated testing objectives of |iso_ref|, sections 11.4.9, must be
        performed on the final application or libraries or on parts of them built
        using build protocols as close as possible to those used for the final
        build.

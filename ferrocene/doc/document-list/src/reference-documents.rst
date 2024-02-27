@@ -4,12 +4,15 @@
 Reference Documents
 ===================
 
-.. csv-table::
+.. list-table::
    :align: left
-   :header: **Document**, **Version**
-   :delim: !
-   :class: longtable
-
-   |iec_doc|!|iec_ref|
-   |9001_doc|!|9001_ref|
-   |iso_doc|!|iso_ref|
+   :header-rows: 1
+   
+   * - Document
+     - Version
+   * - |iec_doc|
+     - |iec_ref|
+   * - |9001_doc|
+     - |9001_ref|
+   * - |iso_doc|
+     - |iso_ref|

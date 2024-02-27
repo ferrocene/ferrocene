@@ -4,18 +4,37 @@
 Project Documents
 =================
 
-.. csv-table::
+.. list-table::
    :align: left
-   :header: **Document**, **ID**, **Version**
-   :delim: !
-   :class: longtable
+   :header-rows: 1
 
-   :doc:`evaluation-plan:index`!:document-id:`evaluation-plan`!|ferrocene_version|
-   :doc:`evaluation-report:index`!:document-id:`evaluation-report`!|ferrocene_version|
-   :doc:`internal-procedures:index`!:document-id:`internal-procedures`!|ferrocene_version|
-   :doc:`specification:index`!:document-id:`specification`!|ferrocene_version|
-   :doc:`qualification-plan:index`!:document-id:`qualification-plan`!|ferrocene_version|
-   :doc:`qualification-report:index`!:document-id:`qualification-report`!|ferrocene_version|
-   :doc:`safety-manual:index`!:document-id:`safety-manual`!|ferrocene_version|
-   :doc:`user-manual:index`!:document-id:`user-manual`!|ferrocene_version|
-   :doc:`release-notes:index`!:document-id:`release-notes`!|ferrocene_version|
+   * - Document
+     - ID
+     - Version
+   * - :doc:`evaluation-plan:index`
+     - :document-id:`evaluation-plan`
+     - |ferrocene_version|
+   * - :doc:`evaluation-report:index`
+     - :document-id:`evaluation-report`
+     - |ferrocene_version|
+   * - :doc:`internal-procedures:index`
+     - :document-id:`internal-procedures`
+     - |ferrocene_version|
+   * - :doc:`specification:index`
+     - :document-id:`specification`
+     - |ferrocene_version|
+   * - :doc:`qualification-plan:index`
+     - :document-id:`qualification-plan`
+     - |ferrocene_version|
+   * - :doc:`qualification-report:index`
+     - :document-id:`qualification-report`
+     - |ferrocene_version|
+   * - :doc:`safety-manual:index`
+     - :document-id:`safety-manual`
+     - |ferrocene_version|
+   * - :doc:`user-manual:index`
+     - :document-id:`user-manual`
+     - |ferrocene_version|
+   * - :doc:`release-notes:index`
+     - :document-id:`release-notes`
+     - |ferrocene_version|

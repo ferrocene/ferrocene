@@ -24,6 +24,8 @@ delete any previous compilation artifacts, as follows:
 
 * `libname.rlib` - Rust static libraries, where `name` is the name of a library.
 
+* `libname.rmeta` - Rust metadata file, where `name` is the name of a library.
+
 * `libname.so` - Native dynamic libraries, where `name` is the name of a
   library.
 

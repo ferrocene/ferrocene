@@ -11,7 +11,7 @@ Installing Ferrocene
 
 .. id:: UC0_INST
 
-**Actor(s):** User, tar (compression utility), install.sh (script).
+**Actor(s):** User, tar (compression utility)
 
 **Input:** A Ferrocene release tarball.
 
@@ -21,26 +21,11 @@ Installing Ferrocene
 
 **Description:**
 
-1. The `user` unpacks the archive with the following command line::
+1. The `user` downloads all the archives needed to install Ferrocene.
 
-    tar -xvzf stable-${version}.tar.gz
-    # where stable-${version}.tar.gz is the Ferrocene release tarball.
+2. The `user` extracts each archive into the installation directory using `tar`::
 
-2. `tar` extracts Ferrocene in directory `stable-${version}`.
-
-3. The `user` changes to directory `stable-${version}` by running::
-
-    cd stable-${version}
-
-4. The `user` installs the Ferrocene toolchain with the following command line::
-
-    ./install.sh --prefix=<install_dir>
-    # where <install_dir> is the installation directory of the Ferrocene
-    # toolchain.
-
-5. `install.sh` creates the installation directory structure of Ferrocene at
-   `<install_dir>`, and copies relevant binaries and libraries to it.
-
+    tar -C path/to/installation -xf path/to/archive.tar.xz
 
 Building a Library
 ------------------

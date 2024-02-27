@@ -231,73 +231,93 @@ TCL1.
 The following tables from the [|iso_ref|] standard indicate the appropriate
 qualification method:
 
-* For **TCL2**:
+TCL2
+^^^^
 
-   .. list-table::
-      :header-rows: 1
+.. list-table::
+   :header-rows: 1
 
-      * - Method
-        - ASIL A
-        - ASIL B
-        - ASIL C
-        - ASIL D
-      * - 1a. Increased confidence from use in accordance with 11.4.7
-        - ++ 
-        - ++ 
-        - ++ 
-        - \+
-      * - 1b. Evaluation of the tool development process in accordance with 11.4.8
-        - ++ 
-        - ++ 
-        - ++ 
-        - \+
-      * - 1c. Validation of the software tool in accordance with 11.4.9
-        - \+ 
-        - \+ 
-        - \+ 
-        - ++
-      * - 1d. Development in accordance with a safety standard
-        - \+ 
-        - \+ 
-        - \+ 
-        - \+
+   * - 
+     - Method
+     - ASIL A
+     - ASIL B
+     - ASIL C
+     - ASIL D
+   * - 1a
+     - Increased confidence from use in accordance with 11.4.7
+     - ++ 
+     - ++ 
+     - ++ 
+     - \+
+   * - 1b
+     - Evaluation of the tool development process in accordance with 11.4.8
+     - ++ 
+     - ++ 
+     - ++ 
+     - \+
+   * - 1c
+     - Validation of the software tool in accordance with 11.4.9
+     - \+ 
+     - \+ 
+     - \+ 
+     - ++
+   * - 1d
+     - Development in accordance with a safety standard
+     - \+ 
+     - \+ 
+     - \+ 
+     - \+
 
-   .. end of table
+.. end of table
 
 
-* For **TCL3**:
+TCL3
+^^^^
 
-   .. list-table::
-      :header-rows: 1
+.. list-table::
+   :header-rows: 1
 
-      * - Method
-        - ASIL A
-        - ASIL B
-        - ASIL C
-        - ASIL D
-      * - 1a. Increased confidence from use in accordance with 11.4.7
-        - ++ 
-        - ++ 
-        - \+ 
-        - \+
-      * - 1b. Evaluation of the tool development process in accordance with 11.4.8
-        - ++ 
-        - ++ 
-        - \+ 
-        - \+
-      * - 1c. Validation of the software tool in accordance with 11.4.9
-        - \+ 
-        - \+ 
-        - ++ 
-        - ++
-      * - 1d. Development in accordance with a safety standard
-        - \+ 
-        - \+ 
-        - ++ 
-        - ++
+   * - 
+     - Method
+     - ASIL A
+     - ASIL B
+     - ASIL C
+     - ASIL D
+   * - 1a
+     - Increased confidence from use in accordance with 11.4.7
+     - ++ 
+     - ++ 
+     - \+ 
+     - \+
+   * - 1b
+     - Evaluation of the tool development process in accordance with 11.4.8
+     - ++ 
+     - ++ 
+     - \+ 
+     - \+
+   * - 1c
+     - Validation of the software tool in accordance with 11.4.9
+     - \+ 
+     - \+ 
+     - ++ 
+     - ++
+   * - 1d
+     - Development in accordance with a safety standard
+     - \+ 
+     - \+ 
+     - ++ 
+     - ++
 
-   .. end of table
+.. end of table
 
-|
-| ++: Highly recommended
-| +: Recommended
+Legend
+^^^^^^
+
+.. list-table::
+
+   * - ++
+     - Highly recommended
+   * - \+
+     - Recommended
+
+.. end of table

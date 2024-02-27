@@ -7,7 +7,7 @@
 ==================================
 
 The ``x86_64-unknown-linux-gnu`` Ferrocene target provides support for Linux on
-x86_64 using glibc 2.27 or higher.
+x86_64 using glibc 2.31 or higher.
 
 Prerequisites
 -------------
@@ -28,7 +28,7 @@ You must have a C compiler which:
 - Supplies to ``ld.lld`` only those linker arguments specified in the
   :doc:`Safety Manual <safety-manual:options>`
 
-On Ubuntu 18.04 LTS you can install a suitable C compiler with:
+On Ubuntu 20.04 LTS you can install a suitable C compiler with:
 
 .. code-block::
 

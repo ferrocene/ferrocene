@@ -6,7 +6,7 @@
 Potential Errors and Tests Traceability
 =======================================
 
-.. list-table:: Errors/Tests Traceability Matrix
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 35, 65

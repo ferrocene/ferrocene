@@ -12,7 +12,7 @@ Potential Errors
 Installation
 ^^^^^^^^^^^^
 
-.. list-table:: ERR_INSTALL
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 15, 15, 25, 20, 25
@@ -34,7 +34,7 @@ Installation
 Rust Driver
 ^^^^^^^^^^^
 
-.. list-table:: ERR_DRIVER
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 15, 15, 25, 20, 25
@@ -96,7 +96,7 @@ Rust Driver
 Rust Front-End
 ^^^^^^^^^^^^^^^^
 
-.. list-table:: ERR_COMPIL
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 15, 15, 25, 20, 25
@@ -143,7 +143,7 @@ Rust Front-End
 LLVM
 ^^^^
 
-.. list-table:: ERR_LLVM
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 15, 15, 25, 20, 25
@@ -190,7 +190,7 @@ LLVM
 Linking
 ^^^^^^^
 
-.. list-table:: ERR_LINK
+.. list-table::
    :align: left
    :header-rows: 1
    :widths: 15, 15, 25, 20, 25
@@ -237,7 +237,7 @@ Linking
 Detection Measures and Usage Restriction
 ----------------------------------------
 
-.. list-table:: Detection measures and usage restriction
+.. list-table::
    :align: left
    :header-rows: 1
 

@@ -21,8 +21,7 @@ Through this analysis, the following potential error are identified:
 Errors, with the possibility of detection and mitigation, are added in
 the :doc:`safety-manual:index` with the following form:
 
-.. list-table:: Safety Manual  potential error template
-   :name: Safety Manual potential error template
+.. list-table::
 
    * - Error identifier 
      - An identifier for the error with format ERR_NAME_XXX where NAME is a short name describing the faulty feature, and XXX is a number.
@@ -52,8 +51,7 @@ file, etc.), the output artifacts (object file, executable, etc.), and usage
 constraints must also be listed. The following table represents all the
 information that is required to describe a use case.
 
-.. list-table:: Use case description
-   :name: Use case description
+.. list-table::
 
    * - Use case identifier 
      - UC_XXXX where XXXX is an identifier for the use case.
@@ -93,8 +91,7 @@ should be linked with the associated detection measure and with the associated
 mitigation if any. The following table describes a potential error entry in the
 HazOp analysis:
 
-.. list-table:: HazOp error entry
-   :name: HazOp error entry
+.. list-table::
 
    * - Error identifier 
      - ERR_TOOLID_XXX where TOOLID is the name of the tool causing the error, and XXX a number.
@@ -115,8 +112,7 @@ The associated detection measure and/or mitigation should be identified with an
 unique name, and with a detailed description of the measure. The following
 table describes a countermeasure entry:
 
-.. list-table:: Measure to detect or avoid error
-   :name: Measure to detect or avoid error
+.. list-table::
 
    * - Measure identifier 
      - CHK_NAME_XXX | AVD_NAME_XXX where NAME is a short name describing the feature and XXX is a number.
@@ -189,8 +185,7 @@ Compute the Tool Confidence Level
 The [|iso_ref|] standard (Part 8 - Section 11.4.5.5) determines the TCL by
 applying the TI and TD values with the following table:
 
-.. list-table:: Tool Confidence Level table
-   :name: Tool Confidence Level table
+.. list-table::
    :header-rows: 1
    
    * - 
@@ -238,8 +233,7 @@ qualification method:
 
 * For **TCL2**:
 
-   .. list-table:: TCL2 Qualification methods according to ASIL level
-      :name: TCL2 Qualification methods according to ASIL level
+   .. list-table::
       :header-rows: 1
 
       * - Method
@@ -273,8 +267,7 @@ qualification method:
 
 * For **TCL3**:
 
-   .. list-table:: TCL3 Qualification methods according to ASIL level
-      :name: TCL3 Qualification methods according to ASIL level
+   .. list-table::
       :header-rows: 1
 
       * - Method

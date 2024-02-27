@@ -13,8 +13,8 @@ procedure is usually performed by a periodic Github Action that opens a pull
 request automatically. Sometimes merge conflicts may occur in which case the conflict
 needs to to be resolved manually.
 
-Upstram Pull without merge conflicts
----------------------
+Upstream Pull without merge conflicts
+-------------------------------------
 
 To sign off a automatic upstream pull without merge conflicts, the reviewer only
 needs to approve the PR and comment `bors merge`. This will trigger the "full" CI
@@ -78,13 +78,5 @@ These changes should happen in a separate PR though.
 Commit and push
 ^^^^^^^^^^^^^^^
 
-After having fixed the conflicts, add a new commit and push it to the PR::
-
-  git commit
-  git push
-
-Review
-^^^^^^
-
-Now another developer needs to review and sign off the PR (see "Upstram Pull without
-merge conflicts" section above).
+After having fixed the conflicts, commit your changes, push them to the branch
+and follow `Upstream Pull without merge conflicts`_.

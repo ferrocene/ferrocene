@@ -171,7 +171,7 @@ probability for the tool or the use case.
 Compute the Tool Confidence Level
 ---------------------------------
 
-The standard [|iso_ref|] (Part 8 - Section 11.4.5.5) determines the TCL by
+The [|iso_ref|] standard (Part 8 - Section 11.4.5.5) determines the TCL by
 applying the TI and TD values with the following table:
 
 .. csv-table:: Tool Confidence Level table
@@ -209,7 +209,7 @@ Confidence Level is TCL2 or TCL3.
 Remark: we do not need a qualification for tools with a Tool Confidence Level
 TCL1.
 
-The following tables from [|iso_ref|] standard indicate the appropriate
+The following tables from the [|iso_ref|] standard indicate the appropriate
 qualification method:
 
 * For **TCL2**:

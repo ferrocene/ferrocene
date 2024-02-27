@@ -129,16 +129,16 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``inline-threshold`` indicates the default
-      threshold for inlining a functions.
+      threshold for inlining a function.
 
       ``<threshold>`` must be an unsigned integer.
 
       Inlining is based on a cost model, where a higher threshold allows for
-      more inlining. The default thresholds depend on the optimization level,
+      more inlining. The default threshold depends on the optimization level,
       as specified by code generation option ``opt-level``, as follows:
 
       ============= ==========================================================
@@ -166,8 +166,8 @@ Command-Line Interface
 
       .. caution::
 
-         Only the arguments listed in section Compilation targets are within
-         the scope of the Ferrocene |iso_ref| qualification.
+         Only the values listed in :doc:`Compilation targets <targets/index>`
+         section for each target can be used in a safety critical context.
 
       Code generation option ``link-arg`` appends a single extra argument to
       the invocation of the linker.
@@ -191,8 +191,8 @@ Command-Line Interface
 
       .. caution::
 
-         Only the arguments listed in section Compilation targets are within
-         the scope of the Ferrocene |iso_ref| qualification.
+         Only the values listed in :doc:`Compilation targets <targets/index>`
+         section for each target can be used in a safety critical context.
 
       Code generation option ``link-args`` appends multiple extra arguments to
       the invocation of the linker.
@@ -243,8 +243,9 @@ Command-Line Interface
 
       .. caution::
 
-         Only the paths listed in section Compilation targets are within the
-         scope of the Ferrocene |iso_ref| qualification.
+         This can only be used for targets that require a linker driver,
+         in which case the linker driver must adhere to the
+         :ref:`linker options <linker-options>` restrictions.
 
       Code generation option ``linker`` indicates the path to the linker. If
       this compiler argument is not specified, then the linker is inferred
@@ -265,8 +266,8 @@ Command-Line Interface
 
       .. caution::
 
-         Only the flavors listed in section Compilation targets are within the
-         scope of the Ferrocene |iso_ref| qualification.
+         Only the flavors listed in :doc:`Compilation targets <targets/index>`
+         section for each target can be used in a safety critical context.
 
       Code generation option ``linker-flavor`` indicates the flavor of the
       linker.
@@ -332,7 +333,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``no-vectorize-loops`` disables loop
@@ -351,7 +352,7 @@ Command-Line Interface
 
       .. caution::
 
-         Only level ``2`` is within the scope of the Ferrocene |iso_ref|
+         Only level ``2`` is within the scope of the Ferrocene
          qualification.
 
       Code generation option ``opt-level`` indicates the optimization level in
@@ -462,7 +463,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``relocation-model`` enables the generation of
@@ -505,7 +506,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``target-cpu`` indicates the CPU of the target to
@@ -528,7 +529,7 @@ Command-Line Interface
       .. caution::
 
          This code generation option is outside the scope of the Ferrocene
-         |iso_ref| qualification, and must not be used in a safety critical
+         qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
       Code generation option ``target-feature`` enables (or disables) a
@@ -742,7 +743,7 @@ Command-Line Interface
       .. caution::
 
          Only edition ``2021`` is within the scope of the Ferrocene
-         |iso_ref| qualification.
+         qualification.
 
       Compiler argument ``--edition`` indicates the edition of the Rust
       programming language used during compilation.

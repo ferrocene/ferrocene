@@ -30,6 +30,5 @@ Constraints <safety-manual:constraints>`:
 - the tarballs were extracted correctly, and permissions were preserved
 - only one version of Ferrocene is installed in the same directory, no
   duplicate versions or in-place updates
-- the used linker is the one specified for that target in the
-  :doc:`Compilation Targets <user-manual:targets/index>` section of the User
-  Manual.
+- the used linker driver should be valid according to the description in the
+  :ref:`Tool Options - Linker Options <safety-manual:options:linker-options>`

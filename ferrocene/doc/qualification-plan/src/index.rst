@@ -18,9 +18,7 @@ Ferrocene in accordance to the standards above.
    details
    infrastructure
    development
-   documentation
-   testing
-   packaging
+   ci
    release
    change-tracking
    kp-tracking

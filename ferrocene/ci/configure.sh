@@ -21,7 +21,7 @@ if [[ -z "${CI+x}" ]]; then
     echo
     echo "The purpose of this script is to configure the build system for CI"
     echo "use, and it's not recommended for local development. If you are"
-    echo "developing Ferrocene, please check the the Internal Procedures:"
+    echo "developing Ferrocene, please check the Internal Procedures:"
     echo
     echo "    https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html"
     echo
@@ -201,17 +201,17 @@ add --codegen-backends=llvm
 # Enable the extended build, which produces dist artifacts for tools in
 # addition to just the compiler and the documentation.
 #
-# If this configuration is missing the full distribution won't be built.
+# If this configuration is missing, the full distribution won't be built.
 add --enable-extended
 
 # Choose which tools must be built and distributed.
 #
-# If this configuration is missing or changed the wrong set of tools will be
+# If this configuration is missing or changed, the wrong set of tools will be
 # built, and the build could fail if some tool is not tested and fails.
 #
-# NOTE: if you add a new tool here make sure to also change
+# NOTE: If you add a new tool here, make sure to also change
 # `ferrocene/packages.toml` to include it in new releases.
-add --tools=rustdoc,rust-analyzer-proc-macro-srv,cargo,llvm-tools
+add --tools=rustdoc,cargo,llvm-tools,rustfmt,rust-analyzer,clippy,rust-demangler
 
 # Build and enable the profiler runtime.
 #

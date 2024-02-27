@@ -21,6 +21,10 @@ def write_traceability_ids(app):
             }
         )
 
+    # Do not emit the traceability IDs if no option was defined.
+    if not options_by_document:
+        return
+
     documents = []
     for docname, title in env.titles.items():
         if docname not in options_by_document:

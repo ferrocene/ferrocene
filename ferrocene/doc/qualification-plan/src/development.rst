@@ -9,10 +9,11 @@ Development Process
 The Ferrocene toolchain is a complex codebase that contains inputs from
 different teams and upstream sources. Ferrocene developers need to ensure that
 all changes made to it are properly reviewed, are of adequate quality, and can
-be properly assessed through automated testing. This section describes the
-process for merging any change into the Ferrocene codebase while accomplishing
-the aforementioned goals.
+be properly assessed through automated testing.
 
+This section describes the process for merging any change into the Ferrocene
+codebase while accomplishing the aforementioned goals. It applies to both code
+changes and documentation changes.
 
 Merge Requirements
 ------------------
@@ -106,7 +107,7 @@ Ferrocene CI infrastructure runs a subset of the test suite as part of the
 commit workflow. These checks are not meant to provide any assurance on the
 commits being tested, rather they serve as an aid for the Ferrocene developer
 to catch the most common mistakes before and during code review. For further
-details, see :ref:`test-phase-spot`.
+details, see :ref:`ci-phase-spot`.
 
 Once active development is done, a PR is opened and this initiates
 :ref:`dev-phase-review`.
@@ -170,7 +171,7 @@ Once it is a PR's turn to be tested, the commits in the PR are merged with the
 latest commit from the ``main`` branch. That merged commit is then pushed to
 the staging branch. This triggers the full test workflow, which executes the
 full set of tests to ensure the merge commit does not have issues. For further
-details, see :ref:`test-phase-full`.
+details, see :ref:`ci-phase-full`.
 
 If the full test workflow executes successfully, the merge commit is
 fast-forwarded to the ``main`` branch and a new PR is pulled out of the queue to

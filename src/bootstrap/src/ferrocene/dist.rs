@@ -350,6 +350,11 @@ impl Step for GenerateBuildMetadata {
             return;
         }
 
+        let git_info = builder.rust_info();
+        let (Some(sha1_full), Some(sha1_short)) = (&git_info.sha(), &git_info.sha_short()) else {
+            panic!("generating the build metadata requires git information");
+        };
+
         let dist_dir = "build/dist";
 
         let ferrocene_version = t!(fs::read_to_string("ferrocene/version"));
@@ -368,16 +373,6 @@ impl Step for GenerateBuildMetadata {
 
         let channel = crate::ferrocene::ferrocene_channel(builder, ferrocene_version);
 
-        let sha1_full = t!(std::process::Command::new("git").arg("rev-parse").arg("HEAD").output());
-        let sha1_full = t!(String::from_utf8(sha1_full.stdout));
-
-        let sha1_short = t!(std::process::Command::new("git")
-            .arg("rev-parse")
-            .arg("--short")
-            .arg("HEAD")
-            .output());
-        let sha1_short = t!(String::from_utf8(sha1_short.stdout));
-
         // Whenever the contents of this JSON file change, even just adding new fields,
         // make sure to increase the metadata version number and update publish-release
         // accordingly. Note that new releases *won't* be made until publish-release and
@@ -389,8 +384,8 @@ impl Step for GenerateBuildMetadata {
             "ferrocene_version": ferrocene_version,
             "ferrocene_channel": ferrocene_channel,
             "channel": channel,
-            "sha1_full": sha1_full.trim(),
-            "sha1_short": sha1_short.trim()
+            "sha1_full": sha1_full,
+            "sha1_short": sha1_short,
         })
         .to_string();
 

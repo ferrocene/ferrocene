@@ -244,7 +244,8 @@ Command-Line Interface
       .. caution::
 
          This can only be used for targets that require a linker driver,
-         in which case the linker driver must respect the option.
+         in which case the linker driver must adhere to the
+         :ref:`linker options <linker-options>` restrictions.
 
       Code generation option ``linker`` indicates the path to the linker. If
       this compiler argument is not specified, then the linker is inferred

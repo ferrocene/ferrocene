@@ -32,18 +32,24 @@ Checkout PR
 Start by checking out the PR. The name of the branch is
 `automation/pull-upstream/<ID>`, e.g. `automation/pull-upstream/dfvjj2s4`::
 
+    git fetch
     git switch automation/pull-upstream/<ID>
 
 Fix conflict
 ^^^^^^^^^^^^
+
+To find the conflicting files run following command::
+
+  python ferrocene/ci/scripts/detect-conflict-markers.py
 
 There are multiple kinds of merge conflicts:
 
 General conflict
 """"""""""""""""
 
-In order to find general conflicts search for the git conflict markers (``<<<<<<<``,
-``=======`` or ``>>>>>>>``).
+For general conflicts the output will look similar to this::
+
+  compiler/rustc_abi/Cargo.toml: conflict between lines 18 and 20
 
 Fix the conflict manually and stage the changed files::
 
@@ -52,17 +58,22 @@ Fix the conflict manually and stage the changed files::
 Deletion conflict
 """""""""""""""""
 
-In order to find deletion conflicts search for ``<<<PULL-UPSTREAM>>>``. Automation
-inserts this marker into the first line of the conflicting file.
+For deletion conflicts the output will look similar to this::
 
-This conflict happens when we made changes to a file and it gets deleted by upstream.
-To resolve this, remove the file::
+  compiler/rustc_abi/src/layout.rs: file deleted by one side of the merge
+
+This conflict happens when we made changes to a file and it gets deleted by
+upstream.
+
+Usually this is solved by removing the file::
 
   git rm <FILE_1> <FILE_2> # removes file(s) and stages that change
 
-If this file was a test case used in the traceability matrix, we might need to
-update the traceability matrix, if some section is missing a test case. But finding
-a new testcase should be done in a separate PR.
+Nevertheless it is necessary to make sure that the purpose we changed the file
+for is preserved. For example if this file was a test case used in the
+traceability matrix, we might need to find a new testcase. Or if we made
+changes to a bootstrap file, we might need to port this change to another file.
+These changes should happen in a separate PR though.
 
 Commit and push
 ^^^^^^^^^^^^^^^

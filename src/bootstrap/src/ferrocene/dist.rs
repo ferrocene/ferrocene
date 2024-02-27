@@ -383,7 +383,7 @@ impl Step for GenerateBuildMetadata {
         // accordingly. Note that new releases *won't* be made until publish-release and
         // this use the same version number.
         let data = json!({
-            "metadata_version": 3,
+            "metadata_version": 4,
             "rust_version": src_version,
             "rust_channel": builder.config.channel,
             "ferrocene_version": ferrocene_version,

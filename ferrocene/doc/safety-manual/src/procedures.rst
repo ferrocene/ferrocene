@@ -31,4 +31,4 @@ Constraints <safety-manual:constraints>`:
 - only one version of Ferrocene is installed in the same directory, no
   duplicate versions or in-place updates
 - the used linker driver should be valid according to the description in the
-  :ref:`Tool Options - Linker Options <safety-manual:options:linker-options>`
+  :ref:`Linker Options <safety-manual:linker-options>`

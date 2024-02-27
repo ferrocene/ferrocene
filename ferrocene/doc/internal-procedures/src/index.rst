@@ -15,8 +15,8 @@ based on software engineering best practices.
 
    onboarding
    setup-local-env
-   manual-upstream-pulls
-   manual-subtree-pulls
+   upstream-pulls
+   subtree-pulls
    known-problems
    pe-procedures
    backports

@@ -16,5 +16,4 @@ shall ensure the usage, the environment and the functional constraints of this
 software tool comply with its evaluation criteria or its qualification.
 
 Ferrocene is accompanied by the appropriate documentation to support this
-process however it is under the user responsibility to ensure that the latest
-version of the applicable documentation is used.
+process.

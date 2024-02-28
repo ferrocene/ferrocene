@@ -27,7 +27,6 @@ jobs:
         branch:
           - main
 
-    environment: automation-update-lockfiles
     steps:
       - name: Checkout the Ferrocene repository
         uses: actions/checkout@v3
@@ -40,8 +39,7 @@ jobs:
           sudo apt-get update
           DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             python3-requests \
-            python3-yaml \
-            python3-jwt
+            python3-yaml
 
       - name: Configure git authorship information
         run: |
@@ -56,4 +54,3 @@ jobs:
         run: python3 ferrocene/tools/update-lockfiles/update.py --automation --target ${{ matrix.branch }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          HTTP_CLONE_TOKEN: "${{ steps.github_app_auth.outputs.token }}"

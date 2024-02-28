@@ -76,6 +76,8 @@ def get_docs_tarballs():
     with open("ferrocene/packages.toml", "rb") as f:
         packages = tomli.load(f)
 
+    commit_hash = cmd("git", "rev-parse", "--short=9", "HEAD", stdout=True)
+
     for group in packages["groups"].values():
         for package in group["packages"]:
             try:
@@ -87,7 +89,7 @@ def get_docs_tarballs():
 
             if "*" not in group["targets"]:
                 raise RuntimeError("target-specific docs not supported")
-            yield f"{package['name']}-nightly.tar.xz", docs_in
+            yield f"{package['name']}-{commit_hash}.tar.xz", docs_in
 
 
 def cmd(*args, stdout=False):

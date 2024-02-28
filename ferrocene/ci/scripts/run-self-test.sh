@@ -5,8 +5,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+COMMIT="$(git rev-parse HEAD)"
+
 BUCKET="ferrocene-ci-artifacts"
-PREFIX="ferrocene/dist/$(git rev-parse HEAD)"
+PREFIX="ferrocene/dist/${COMMIT}"
 
 root="$(mktemp -d)"
 cleanup() {
@@ -14,25 +16,22 @@ cleanup() {
 }
 trap cleanup EXIT
 
-case "$(cat src/ci/channel)" in
-    nightly)
-        version="nightly"
-        ;;
-    beta)
-        version="beta"
-        ;;
+case "$(cat ferrocene/ci/channel)" in
     stable)
-        version="$(cat src/version)"
+        version="$(cat ferrocene/version)"
+        ;;
+    beta|rolling)
+        version="${COMMIT:0:9}"  # First 9 chars of the commit hash
         ;;
     *)
-        echo "error: unexpected content of src/ci/channel"
+        echo "error: unexpected content of ferrocene/ci/channel"
         exit 1
 esac
 
 list_targets() {
     aws s3api list-objects-v2 --bucket "${BUCKET}" --prefix "${PREFIX}/" --delimiter / --query 'Contents[].Key' --output text \
         | xargs basename -a \
-        | sed -n "s/^rust-std-${version}-\(.*\)\.tar.xz$/\1/p"
+        | sed -n "s/^rust-std-\(.*\)-${version}\.tar.xz$/\1/p"
 }
 
 download() {
@@ -40,7 +39,7 @@ download() {
     target="$2"
 
     echo "===> downloading ${package} for ${target}"
-    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${version}-${target}.tar.xz" "${root}/archives/${package}-${target}.tar.xz"
+    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${root}/archives/${package}-${target}-${version}.tar.xz"
 }
 
 mkdir -p "${root}/archives"

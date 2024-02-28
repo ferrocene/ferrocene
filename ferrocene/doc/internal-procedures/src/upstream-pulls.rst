@@ -40,7 +40,7 @@ Fix conflict
 
 To find the conflicting files run following command::
 
-  python ferrocene/ci/scripts/detect-conflict-markers.py
+  ferrocene/ci/scripts/detect-conflict-markers.py
 
 There are multiple kinds of merge conflicts:
 
@@ -79,4 +79,4 @@ Commit and push
 ^^^^^^^^^^^^^^^
 
 After having fixed the conflicts, commit your changes, push them to the branch
-and follow `Upstream Pull without merge conflicts`_.
+and ask for a code review from another member of the team.

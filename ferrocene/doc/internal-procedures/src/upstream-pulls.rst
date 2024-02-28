@@ -69,11 +69,14 @@ Usually this is solved by removing the file::
 
   git rm <FILE_1> <FILE_2> # removes file(s) and stages that change
 
-Nevertheless it is necessary to make sure that the purpose we changed the file
-for is preserved. For example if this file was a test case used in the
-traceability matrix, we might need to find a new testcase. Or if we made
-changes to a bootstrap file, we might need to port this change to another file.
-These changes should happen in a separate PR though.
+Apart from deleting the file it is necessary to make sure that the purpose we
+changed the file for is preserved. For example if we changed a bootstrap file,
+we need to port this change to another file. Usually this change needs to
+happen in the same PR.
+
+Some changes might be deferred to a follow-up PR. For example if the deleted
+file was a test case used in the traceability matrix, the investigation if we
+need to find a new test case and finding it can be deferred.
 
 Commit and push
 ^^^^^^^^^^^^^^^

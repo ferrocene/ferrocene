@@ -76,6 +76,8 @@ def update_lockfile(repo_root, cargo_lockfile):
     status = run_capture(["git", "status", "--porcelain", cargo_lockfile.lockfile], cwd=repo_root)
     if status.strip():
         print(f"Lockfile `{cargo_lockfile.lockfile}` updated")
+        run(["git", "add", cargo_lockfile.lockfile], cwd=repo_root)
+        run(["git", "commit", "-m", f"Update {cargo_lockfile.lockfile}"], cwd=repo_root)
         return output
     else:
         print(f"Lockfile `{cargo_lockfile.lockfile}` is up to date")
@@ -129,6 +131,9 @@ automation failed.
     def error_issue_repeated_comment(self):
         return f"The automation failed to update the lockfile {self.cargo_lockfile.lockfile} again."
 
+def run(*args, **kwargs):
+    kwargs.setdefault("check", True)
+    return subprocess.run(*args, **kwargs)
 
 def run_capture(*args, **kwargs):
     kwargs.setdefault("check", True)

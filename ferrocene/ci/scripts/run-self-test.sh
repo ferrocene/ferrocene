@@ -5,8 +5,10 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+COMMIT="$(git rev-parse HEAD)"
+
 BUCKET="ferrocene-ci-artifacts"
-PREFIX="ferrocene/dist/$(git rev-parse HEAD)"
+PREFIX="ferrocene/dist/${COMMIT}"
 
 root="$(mktemp -d)"
 cleanup() {
@@ -18,9 +20,8 @@ case "$(cat ferrocene/ci/channel)" in
     stable)
         version="$(cat ferrocene/version)"
         ;;
-    beta)
-    rolling)
-        version="$(git rev-parse --short=9 HEAD)"
+    beta|rolling)
+        version="${COMMIT:0:9}"  # First 9 chars of the commit hash
         ;;
     *)
         echo "error: unexpected content of ferrocene/ci/channel"

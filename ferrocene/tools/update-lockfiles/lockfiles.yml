@@ -6,3 +6,5 @@
 - path: Cargo.toml
 
 - path: src/bootstrap/Cargo.toml
+  after:
+    - update-completions

@@ -31,7 +31,7 @@ jobs:
       - name: Checkout the Ferrocene repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch all the history
+          fetch-depth: 1
           ref: ${{ matrix.branch }}
 
       - name: Install dependencies

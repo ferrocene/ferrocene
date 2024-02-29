@@ -76,7 +76,7 @@ def get_docs_tarballs():
     with open("ferrocene/packages.toml", "rb") as f:
         packages = tomli.load(f)
 
-    commit_hash = cmd("git", "rev-parse", "--short=9", "HEAD", stdout=True)
+    commit_hash = cmd("git", "rev-parse", "--short=9", "HEAD", stdout=True).strip()
 
     for group in packages["groups"].values():
         for package in group["packages"]:

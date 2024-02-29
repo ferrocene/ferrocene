@@ -58,10 +58,10 @@ def parse_configuration(path):
 
 
 def retrieve_git_repo_root():
-    return Path(run_capture(["git", "rev-parse", "--show-toplevel"]))
+    return Path(run_capture_stdout(["git", "rev-parse", "--show-toplevel"]))
 
 def update_lockfile(repo_root, cargo_lockfile):
-    output = run_capture(
+    output = run_capture_stderr(
         [
             "cargo",
             "update",
@@ -72,8 +72,7 @@ def update_lockfile(repo_root, cargo_lockfile):
         cwd=repo_root,
     )
 
-
-    status = run_capture(["git", "status", "--porcelain", cargo_lockfile.lockfile], cwd=repo_root)
+    status = run_capture_stdout(["git", "status", "--porcelain", cargo_lockfile.lockfile], cwd=repo_root)
     if status.strip():
         print(f"Lockfile `{cargo_lockfile.lockfile}` updated")
         run(["git", "add", cargo_lockfile.lockfile], cwd=repo_root)
@@ -135,11 +134,17 @@ def run(*args, **kwargs):
     kwargs.setdefault("check", True)
     return subprocess.run(*args, **kwargs)
 
-def run_capture(*args, **kwargs):
+def run_capture_stdout(*args, **kwargs):
     kwargs.setdefault("check", True)
     kwargs.setdefault("stdout", subprocess.PIPE)
     kwargs.setdefault("text", True)
     return subprocess.run(*args, **kwargs).stdout.strip()
+
+def run_capture_stderr(*args, **kwargs):
+    kwargs.setdefault("check", True)
+    kwargs.setdefault("stderr", subprocess.PIPE)
+    kwargs.setdefault("text", True)
+    return subprocess.run(*args, **kwargs).stderr.strip()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

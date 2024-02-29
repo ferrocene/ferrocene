@@ -114,6 +114,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
+    ("sync_wrapper", "Apache-2.0"),                          // opt-dist, ferrocene lock file update
     // tidy-alphabetical-end
 ];
 
@@ -242,6 +243,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "darling_core",
     "darling_macro",
     "datafrog",
+    "deranged",
     "derivative",
     "derive_more",
     "derive_setters",
@@ -283,7 +285,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "indexmap",
     "intl-memoizer",
     "intl_pluralrules",
-    "is-terminal",
     "itertools",
     "itoa",
     "jemalloc-sys",
@@ -303,6 +304,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "memoffset",
     "miniz_oxide",
     "nu-ansi-term",
+    "num-conv",
     "num_cpus",
     "object",
     "odht",
@@ -315,6 +317,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "pin-project-lite",
     "polonius-engine",
     "portable-atomic", // dependency for platforms doesn't support `AtomicU64` in std
+    "powerfmt",
     "ppv-lite86",
     "proc-macro-hack",
     "proc-macro2",
@@ -367,8 +370,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "termize",
     "thin-vec",
     "thiserror",
-    "thiserror-core",
-    "thiserror-core-impl",
     "thiserror-impl",
     "thorin-dwp",
     "thread_local",

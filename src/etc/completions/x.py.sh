@@ -71,7 +71,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -186,21 +194,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -236,7 +268,15 @@ _x.py() {
                     return 0
                     ;;
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -351,21 +391,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -397,7 +461,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -512,21 +584,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -558,7 +654,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -673,21 +777,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -723,7 +851,15 @@ _x.py() {
                     return 0
                     ;;
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -831,21 +967,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -893,7 +1053,15 @@ _x.py() {
                     return 0
                     ;;
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1008,21 +1176,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1054,7 +1246,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1169,21 +1369,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1215,7 +1439,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1330,21 +1562,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1376,7 +1632,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1491,21 +1755,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1537,7 +1825,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1652,21 +1948,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1698,7 +2018,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1813,21 +2141,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1863,7 +2215,15 @@ _x.py() {
                     return 0
                     ;;
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -1978,21 +2338,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2024,7 +2408,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2139,21 +2531,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2185,7 +2601,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2300,21 +2724,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2346,7 +2794,15 @@ _x.py() {
             fi
             case "${prev}" in
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2461,21 +2917,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2535,7 +3015,15 @@ _x.py() {
                     return 0
                     ;;
                 --config)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
@@ -2646,21 +3134,45 @@ _x.py() {
                     return 0
                     ;;
                 --rust-profile-generate)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --rust-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi
                     return 0
                     ;;
                 --llvm-profile-use)
+                    local oldifs
+                    if [[ -v IFS ]]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
                     COMPREPLY=($(compgen -f "${cur}"))
+                    if [[ -v oldifs ]]; then
+                        IFS="$oldifs"
+                    fi
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o filenames
                     fi

@@ -18,6 +18,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 import argparse
 import os
 import subprocess
@@ -34,6 +35,7 @@ from pr_links import PRLinker
 class CargoLock:
     manifest_path: Path
     lockfile: Path
+    after: List[str]
 
 
 def parse_configuration(path):
@@ -49,8 +51,18 @@ def parse_configuration(path):
             print(f"error: missing required key in config item: {e}")
             poisoned = True
             continue
+
+        actions = []
+        if "after" in item:
+            for action in item["after"]:
+                if action not in AFTER_ACTIONS:
+                    print(f"error: unknown after action: {action}")
+                    poisoned = True
+                    continue
+                actions.append(action)
+
         manifest_path = Path(path)
-        found.append(CargoLock(manifest_path, manifest_path.with_suffix(".lock")))
+        found.append(CargoLock(manifest_path, manifest_path.with_suffix(".lock"), actions))
 
     if poisoned:
         exit(1)
@@ -77,6 +89,11 @@ def update_lockfile(repo_root, cargo_lockfile):
         print(f"Lockfile `{cargo_lockfile.lockfile}` updated")
         run(["git", "add", cargo_lockfile.lockfile], cwd=repo_root)
         run(["git", "commit", "-m", f"Update {cargo_lockfile.lockfile}"], cwd=repo_root)
+
+        for action in cargo_lockfile.after:
+            print(f"executing after action {action}")
+            AFTER_ACTIONS[action](cargo_lockfile, repo_root)
+
         return output
     else:
         print(f"Lockfile `{cargo_lockfile.lockfile}` is up to date")
@@ -145,6 +162,20 @@ def run_capture_stderr(*args, **kwargs):
     kwargs.setdefault("stderr", subprocess.PIPE)
     kwargs.setdefault("text", True)
     return subprocess.run(*args, **kwargs).stderr.strip()
+
+def action_update_completions(cargo_lockfile, repo_root):
+    completions_path = "src/etc/completions"
+    run(["./x.py" ,"run", "generate-completions"], cwd=repo_root)
+
+    status = run_capture_stdout(["git", "status", "--porcelain", completions_path], cwd=repo_root)
+    if status.strip():
+        print(f"`{completions_path}` updated")
+        run(["git", "add", completions_path], cwd=repo_root)
+        run(["git", "commit", "-m", f"Update {completions_path}"], cwd=repo_root)
+
+AFTER_ACTIONS = {
+    "update-completions": action_update_completions,
+}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

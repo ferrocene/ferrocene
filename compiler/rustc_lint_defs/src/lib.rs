@@ -708,6 +708,7 @@ impl LintBuffer {
     }
 
     pub fn take(&mut self, id: NodeId) -> Vec<BufferedEarlyLint> {
+        #[allow(deprecated)]
         self.map.remove(&id).unwrap_or_default()
     }
 

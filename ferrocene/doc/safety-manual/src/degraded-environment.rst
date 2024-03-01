@@ -43,7 +43,7 @@ errors as they may lead to incorrect behavior of the Ferrocene toolchain. Users
 must verify that the values of these variables have not been set prior to using
 the Ferrocene toolchain.
 
-The following environment variables may not be set prior to using the Ferrocene
+The following environment variables must not be set prior to using the Ferrocene
 toolchian.
 
 * ``RUST_TARGET_PATH``

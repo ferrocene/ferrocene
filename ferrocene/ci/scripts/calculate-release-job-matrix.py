@@ -38,7 +38,7 @@ def commits_in_release_branches(ctx):
     # This is an unconditional note that's always emitted. We do that to give
     # insights to someone looking at the logs to figure out why a branch isn't
     # being picked up.
-    print("note: only protected branches are considered here", file=sys.stderr)
+    note("only protected branches are considered here")
 
     url = (
         f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
@@ -56,10 +56,7 @@ def commits_in_release_branches(ctx):
         for branch in response.json():
             name = branch["name"]
             if RELEASE_BRANCHES_RE.search(name) is None:
-                print(
-                    f"note: branch `{name}` doesn't seem to be a release branch",
-                    file=sys.stderr,
-                )
+                note(f"branch `{name}` doesn't seem to be a release branch")
             else:
                 commits.append(branch["commit"]["sha"])
 
@@ -91,10 +88,7 @@ def filter_automated_channels(releases):
             version = [int(num) for num in release.metadata.rust_version.split(".")]
             rolling_releases.append((version, release))
         else:
-            print(
-                "note: channel {release.metadata.channel} cannot be released automatically",
-                file=sys.stderr,
-            )
+            note("channel {release.metadata.channel} cannot be released automatically")
 
     rolling_releases.sort(key=lambda vr: vr[0])
     # When starting from a squashed repo with no release branches yielding the
@@ -102,10 +96,9 @@ def filter_automated_channels(releases):
     if rolling_releases:
         yield rolling_releases.pop()[1]
     for discarded in rolling_releases:
-        print(
-            f"note: version {discarded[1].metadata.rust_version} is not the latest "
+        note(
+            f"version {discarded[1].metadata.rust_version} is not the latest "
             "in the rolling channel",
-            file=sys.stderr,
         )
 
 
@@ -137,10 +130,9 @@ def discard_duplicate_channels(releases):
 
     for release in releases:
         if channels_count[release.metadata.channel] > 1:
-            print(
-                f"note: discarding {release.commit} on channel {release.metadata.channel} "
+            note(
+                f"discarding {release.commit} on channel {release.metadata.channel} "
                 "as multiple releases with that channel exist",
-                file=sys.stderr,
             )
         else:
             yield release
@@ -287,6 +279,10 @@ def setup_http_client():
     http = requests.Session()
     http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
     return http
+
+
+def note(message):
+    print(f"note: {message}", file=sys.stderr)
 
 
 @dataclass

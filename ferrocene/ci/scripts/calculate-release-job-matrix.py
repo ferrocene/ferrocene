@@ -76,7 +76,7 @@ def commits_to_releases(ctx, all_commits):
         except UnsupportedMetadataVersion as e:
             note(f"skipping `{commit}` (unsupported metadata version {e.version})")
             if ctx.manual:
-                exit(1)
+                error("manual mode early exits on unsupported metadata versions")
             continue
         yield PendingRelease(commit, metadata)
 
@@ -220,8 +220,7 @@ def run():
             try:
                 key, value = argument.split("=")
             except ValueError:
-                print(f"error: input must be key=value: {argument}", file=sys.stderr)
-                exit(1)
+                error(f"input must be key=value: {argument}")
             event["inputs"][key] = value
         ctx = Context(
             repo=LOCAL_TEST_REPO,
@@ -229,8 +228,7 @@ def run():
             event_data=event,
         )
     else:
-        print("error: invalid arguments", file=sys.stderr)
-        exit(1)
+        error("invalid arguments")
 
     if ctx.manual:
         if ctx.event_data["inputs"].get("verbatim-ref") == "true":
@@ -254,6 +252,11 @@ def setup_http_client():
 
 def note(message):
     print(f"note: {message}", file=sys.stderr)
+
+
+def error(message):
+    print(f"error: {message}", file=sys.stderr)
+    exit(1)
 
 
 @dataclass

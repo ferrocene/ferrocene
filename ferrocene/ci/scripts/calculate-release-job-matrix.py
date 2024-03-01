@@ -5,7 +5,7 @@
 # This script is responsible for calculating the list of release jobs we should
 # start, as part of the .github/workflows/release.yml GitHub Actions workflow.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import base64
 import boto3
 import collections
@@ -21,6 +21,8 @@ RELEASE_BRANCHES_RE = re.compile(r"^(main|release\/1\.[0-9]+)$")
 
 S3_BUCKET = "ferrocene-ci-artifacts"
 S3_PREFIX = "ferrocene/dist"
+
+LOCAL_TEST_REPO = "ferrocene/ferrocene"
 
 
 def commits_in_release_branches(ctx):
@@ -229,21 +231,34 @@ def build_metadata(ctx, commit):
 
 
 def run():
-    s3 = boto3.client("s3")
-
-    http = requests.Session()
-    http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
-
-    repo = os.environ["GITHUB_REPOSITORY"]
-    event_name = os.environ["GITHUB_EVENT_NAME"]
-    event_path = os.environ["GITHUB_EVENT_PATH"]
-
-    with open(event_path) as f:
-        event_data = json.load(f)
-
-    ctx = Context(
-        s3=s3, http=http, repo=repo, event_name=event_name, event_data=event_data
-    )
+    args = sys.argv[1:]
+    if not args:  # CI mode
+        with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+            event_data = json.load(f)
+        ctx = Context(
+            repo=os.environ["GITHUB_REPOSITORY"],
+            event_name=os.environ["GITHUB_EVENT_NAME"],
+            event_data=event_data,
+        )
+    elif args == ["local-test", "schedule"]:
+        ctx = Context(repo=LOCAL_TEST_REPO, event_name="schedule", event_data={})
+    elif args[:2] == ["local-test", "dispatch"]:
+        event = {"inputs": {}}
+        for argument in args[2:]:
+            try:
+                key, value = argument.split("=")
+            except ValueError:
+                print(f"error: input must be key=value: {argument}", file=sys.stderr)
+                exit(1)
+            event["inputs"][key] = value
+        ctx = Context(
+            repo=LOCAL_TEST_REPO,
+            event_name="workflow_dispatch",
+            event_data=event,
+        )
+    else:
+        print("error: invalid arguments", file=sys.stderr)
+        exit(1)
 
     if ctx.event_name == "schedule":
         commits = commits_in_release_branches(ctx)
@@ -255,10 +270,16 @@ def run():
             commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
         releases = commits_to_releases(ctx, [commit])
     else:
-        raise RuntimeError(f"unsupported event name: {event_name}")
+        raise RuntimeError(f"unsupported event name: {ctx.event_name}")
 
     output = prepare_github_actions_output(ctx, releases)
     print(f"jobs={json.dumps(output)}")
+
+
+def setup_http_client():
+    http = requests.Session()
+    http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
+    return http
 
 
 @dataclass
@@ -278,11 +299,12 @@ class PendingRelease:
 
 @dataclass
 class Context:
-    s3: object
-    http: object
     repo: str
     event_name: str
     event_data: object
+
+    s3: object = field(default_factory=lambda: boto3.client("s3"))
+    http: object = field(default_factory=setup_http_client)
 
 
 if __name__ == "__main__":

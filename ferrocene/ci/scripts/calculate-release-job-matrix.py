@@ -71,7 +71,13 @@ def resolve_ref(ctx, ref):
 
 def commits_to_releases(ctx, all_commits):
     for commit in all_commits:
-        metadata = build_metadata(ctx, commit)
+        try:
+            metadata = build_metadata(ctx, commit)
+        except UnsupportedMetadataVersion as e:
+            note(f"skipping `{commit}` (unsupported metadata version {e.version})")
+            if ctx.manual:
+                exit(1)
+            continue
         yield PendingRelease(commit, metadata)
 
 
@@ -175,44 +181,7 @@ def build_metadata(ctx, commit):
     )
     metadata = json.loads(response["Body"].read())
 
-    def rustc_to_channel_rolling(rust_channel):
-        try:
-            return {
-                "nightly": "nightly",
-                "beta": "pre-rolling",
-                "stable": "rolling",
-            }[rust_channel]
-        except:
-            raise RuntimeError(f"unknown rust channel `{rust}`")
-
-    if metadata["metadata_version"] == 2:
-        rust_channel = metadata["rust_channel"]
-        ferrocene_channel = metadata["ferrocene_channel"]
-        ferrocene_version = metadata["ferrocene_version"]
-        rust_version = metadata["rust_version"]
-
-        if ferrocene_version == "rolling":
-            ferrocene_major = ferrocene_version
-        else:
-            ferrocene_major = ".".join(ferrocene_version.split(".")[:2])
-
-        if ferrocene_channel == "rolling":
-            channel = rustc_to_channel_rolling(metadata["rust_channel"])
-        elif ferrocene_channel == "beta":
-            channel = f"beta-{ferrocene_major}"
-        elif ferrocene_channel == "stable":
-            channel = f"stable-{ferrocene_major}"
-        else:
-            raise RuntimeError(f"unknown ferrocene channel `{ferrocene_channel}`")
-
-        return BuildMetadata(
-            rust_version=rust_version,
-            rust_channel=rust_channel,
-            ferrocene_channel=ferrocene_channel,
-            ferrocene_version=ferrocene_version,
-            channel=channel,
-        )
-    elif metadata["metadata_version"] in (3, 4):
+    if metadata["metadata_version"] in (3, 4):
         # For the purposes of this script, metadata versions 3 and 4 are
         # equivalent (the only difference is the tarball naming scheme).
         return BuildMetadata(
@@ -223,10 +192,7 @@ def build_metadata(ctx, commit):
             channel=metadata["channel"],
         )
     else:
-        raise RuntimeError(
-            "unexpected ferrocene-ci-metadata.json version "
-            f"`{metadata['metadata_version']}` (for commit `{commit}`)"
-        )
+        raise UnsupportedMetadataVersion(metadata["metadata_version"])
 
 
 def run():
@@ -313,6 +279,11 @@ class Context:
 
     s3: object = field(default_factory=lambda: boto3.client("s3"))
     http: object = field(default_factory=setup_http_client)
+
+
+class UnsupportedMetadataVersion(Exception):
+    def __init__(self, version):
+        self.version = version
 
 
 if __name__ == "__main__":

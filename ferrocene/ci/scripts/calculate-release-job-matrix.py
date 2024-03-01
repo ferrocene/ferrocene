@@ -4,6 +4,13 @@
 
 # This script is responsible for calculating the list of release jobs we should
 # start, as part of the .github/workflows/release.yml GitHub Actions workflow.
+#
+# The script is meant to be executed inside of GitHub Actions, and relies on
+# environment variables set by it. There are helpers to run it locally though:
+#
+#     calculate-release-job-matrix.py local-test schedule
+#     calculate-release-job-matrix.py local-test dispatch key1=value1 key2=value2
+#
 
 from dataclasses import dataclass, field
 import base64

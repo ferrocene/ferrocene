@@ -148,7 +148,7 @@ def prepare_github_actions_output(ctx, pending_releases):
     if ctx.manual:
         inputs = ctx.event_data["inputs"]
 
-        environment = f"release-{inputs['env']}-manual"
+        environment = f"release-{ctx.env()}-manual"
         name_suffix = "manual"
         command_suffix = ""
 
@@ -159,7 +159,7 @@ def prepare_github_actions_output(ctx, pending_releases):
             command_suffix += " --allow-duplicate-releases"
             name_suffix += ", allow duplicates"
     else:
-        environment = "release-prod-automated"
+        environment = f"release-{ctx.env()}-automated"
         name_suffix = "automated"
         command_suffix = ""
 
@@ -282,6 +282,12 @@ class Context:
 
     s3: object = field(default_factory=lambda: boto3.client("s3"))
     http: object = field(default_factory=setup_http_client)
+
+    def env(self):
+        if self.manual:
+            return self.envent_data["inputs"]["env"]
+        else:
+            return "prod"
 
 
 class UnsupportedMetadataVersion(Exception):

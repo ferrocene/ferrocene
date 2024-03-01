@@ -15,6 +15,7 @@
 from dataclasses import dataclass, field
 import base64
 import boto3
+import botocore
 import collections
 import json
 import os
@@ -30,6 +31,11 @@ S3_BUCKET = "ferrocene-ci-artifacts"
 S3_PREFIX = "ferrocene/dist"
 
 LOCAL_TEST_REPO = "ferrocene/ferrocene"
+
+RELEASES_ACCESS_ROLES = {
+    "dev": "arn:aws:iam::173318036596:role/release-scheduler",
+    "prod": "arn:aws:iam::397686924940:role/release-scheduler",
+}
 
 
 def commits_in_release_branches(ctx):
@@ -144,6 +150,56 @@ def discard_duplicate_channels(releases):
             yield release
 
 
+def discard_branches_with_no_changes(ctx, releases):
+    # Assume the role on the AWS account containing the published releases,
+    # otherwise we cannot determine which commit is already published.
+    try:
+        role = RELEASES_ACCESS_ROLES[ctx.env()]
+    except KeyError:
+        error(f"no AWS IAM Role configured to access environment {ctx.env()}")
+    sts = boto3.client("sts")
+    role = sts.assume_role(RoleArn=role, RoleSessionName="github-actions")
+    releases_s3 = boto3.client(
+        "s3",
+        aws_access_key_id=role["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=role["Credentials"]["SecretAccessKey"],
+        aws_session_token=role["Credentials"]["SessionToken"],
+    )
+
+    for release in releases:
+        try:
+            response = releases_s3.get_object(
+                Bucket=f"ferrocene-{ctx.env()}-releases",
+                Key=f"ferrocene/channels/{release.metadata.channel}.json",
+            )
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "AccessDenied":
+                # First release in the channel
+                yield release
+                continue
+            else:
+                raise e
+
+        channel_metadata = json.loads(response["Body"].read())
+        if channel_metadata["metadata_version"] == 2:
+            last_commit = channel_metadata["latest_release"]["sha1_full"]
+        else:
+            note(
+                "Channel API metadata version {channel_metadata['metadata_version']} "
+                "for channel {metadata.release.channel} is not supported. "
+                '"No changes" check will be skipped.'
+            )
+            last_commit = "Z"  # Will never match :)
+
+        if release.commit != last_commit:
+            yield release
+        else:
+            note(
+                f"skipping channel {release.metadata.channel} "
+                "as we would release the same commit"
+            )
+
+
 def prepare_github_actions_output(ctx, pending_releases):
     if ctx.manual:
         inputs = ctx.event_data["inputs"]
@@ -163,8 +219,12 @@ def prepare_github_actions_output(ctx, pending_releases):
         name_suffix = "automated"
         command_suffix = ""
 
+    iterator = discard_duplicate_channels(pending_releases)
+    if not ctx.manual:
+        iterator = discard_branches_with_no_changes(ctx, iterator)
+
     jobs = []
-    for release in discard_duplicate_channels(pending_releases):
+    for release in iterator:
         jobs.append(
             {
                 "name": f"{release.metadata.channel} ({name_suffix})",

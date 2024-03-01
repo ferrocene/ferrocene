@@ -139,11 +139,7 @@ def discard_duplicate_channels(releases):
 
 
 def prepare_github_actions_output(ctx, pending_releases):
-    if ctx.event_name == "schedule":
-        environment = "release-prod-automated"
-        name_suffix = "automated"
-        command_suffix = ""
-    elif ctx.event_name == "workflow_dispatch":
+    if ctx.manual:
         inputs = ctx.event_data["inputs"]
 
         environment = f"release-{inputs['env']}-manual"
@@ -156,6 +152,10 @@ def prepare_github_actions_output(ctx, pending_releases):
         if inputs.get("allow-duplicate") == "true":
             command_suffix += " --allow-duplicate-releases"
             name_suffix += ", allow duplicates"
+    else:
+        environment = "release-prod-automated"
+        name_suffix = "automated"
+        command_suffix = ""
 
     jobs = []
     for release in discard_duplicate_channels(pending_releases):
@@ -234,13 +234,20 @@ def run():
     if not args:  # CI mode
         with open(os.environ["GITHUB_EVENT_PATH"]) as f:
             event_data = json.load(f)
+        event_name = os.environ["GITHUB_EVENT_NAME"]
+        if event_name == "workflow_dispatch":
+            manual = True
+        elif event_name == "schedule":
+            manual = False
+        else:
+            raise RuntimeError(f"unsupported event name: {ctx.event_name}")
         ctx = Context(
             repo=os.environ["GITHUB_REPOSITORY"],
-            event_name=os.environ["GITHUB_EVENT_NAME"],
+            manual=manual,
             event_data=event_data,
         )
     elif args == ["local-test", "schedule"]:
-        ctx = Context(repo=LOCAL_TEST_REPO, event_name="schedule", event_data={})
+        ctx = Context(repo=LOCAL_TEST_REPO, manual=False, event_data={})
     elif args[:2] == ["local-test", "dispatch"]:
         event = {"inputs": {}}
         for argument in args[2:]:
@@ -252,24 +259,22 @@ def run():
             event["inputs"][key] = value
         ctx = Context(
             repo=LOCAL_TEST_REPO,
-            event_name="workflow_dispatch",
+            manual=True,
             event_data=event,
         )
     else:
         print("error: invalid arguments", file=sys.stderr)
         exit(1)
 
-    if ctx.event_name == "schedule":
-        commits = commits_in_release_branches(ctx)
-        releases = filter_automated_channels(commits_to_releases(ctx, commits))
-    elif ctx.event_name == "workflow_dispatch":
+    if ctx.manual:
         if ctx.event_data["inputs"].get("verbatim-ref") == "true":
             commit = ctx.event_data["inputs"]["ref"]
         else:
             commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
         releases = commits_to_releases(ctx, [commit])
     else:
-        raise RuntimeError(f"unsupported event name: {ctx.event_name}")
+        commits = commits_in_release_branches(ctx)
+        releases = filter_automated_channels(commits_to_releases(ctx, commits))
 
     output = prepare_github_actions_output(ctx, releases)
     print(f"jobs={json.dumps(output)}")
@@ -303,8 +308,8 @@ class PendingRelease:
 @dataclass
 class Context:
     repo: str
-    event_name: str
-    event_data: object
+    manual: bool
+    event_data: dict
 
     s3: object = field(default_factory=lambda: boto3.client("s3"))
     http: object = field(default_factory=setup_http_client)

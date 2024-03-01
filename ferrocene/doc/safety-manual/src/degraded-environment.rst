@@ -27,7 +27,7 @@ constrain :id:`CSTR_0010_INSTALL`.
 The following environment variables control or specify behavior of the
 compiler.
 
-.. list-table:: Configuration Environment Variables
+.. list-table::
    :align: left
    :header-rows: 1
 
@@ -35,7 +35,7 @@ compiler.
      - Description
 
    * - ``RUST_MIN_STACK``
-   * - Sets the default stack size for spawned threads of the compiler.
+     - Sets the default stack size for spawned threads of the compiler.
 
 
 The environment variables listed below were identified as potential sources of
@@ -46,8 +46,5 @@ the Ferrocene toolchain.
 The following environment variables may not be set prior to using the Ferrocene
 toolchian.
 
-.. list-table:: Forbidden Environment Variables
-   :align: left
-
-   * - ``RUST_TARGET_PATH``
-   * - ``RUSTC_BOOTSTRAP``
+* ``RUST_TARGET_PATH``
+* ``RUSTC_BOOTSTRAP``

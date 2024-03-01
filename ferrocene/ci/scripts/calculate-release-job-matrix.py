@@ -184,11 +184,11 @@ def build_metadata(ctx, commit):
         except:
             raise RuntimeError(f"unknown rust channel `{rust}`")
 
-    if  metadata["metadata_version"] == 2:
-        rust_channel=metadata["rust_channel"]
-        ferrocene_channel=metadata["ferrocene_channel"]
-        ferrocene_version=metadata["ferrocene_version"]
-        rust_version=metadata["rust_version"]
+    if metadata["metadata_version"] == 2:
+        rust_channel = metadata["rust_channel"]
+        ferrocene_channel = metadata["ferrocene_channel"]
+        ferrocene_version = metadata["ferrocene_version"]
+        rust_version = metadata["rust_version"]
 
         if ferrocene_version == "rolling":
             ferrocene_major = ferrocene_version
@@ -198,7 +198,7 @@ def build_metadata(ctx, commit):
         if ferrocene_channel == "rolling":
             channel = rustc_to_channel_rolling(metadata["rust_channel"])
         elif ferrocene_channel == "beta":
-            channel =  f"beta-{ferrocene_major}"
+            channel = f"beta-{ferrocene_major}"
         elif ferrocene_channel == "stable":
             channel = f"stable-{ferrocene_major}"
         else:
@@ -209,7 +209,7 @@ def build_metadata(ctx, commit):
             rust_channel=rust_channel,
             ferrocene_channel=ferrocene_channel,
             ferrocene_version=ferrocene_version,
-            channel=channel
+            channel=channel,
         )
     elif metadata["metadata_version"] in (3, 4):
         # For the purposes of this script, metadata versions 3 and 4 are
@@ -219,7 +219,7 @@ def build_metadata(ctx, commit):
             rust_channel=metadata["rust_channel"],
             ferrocene_channel=metadata["ferrocene_channel"],
             ferrocene_version=metadata["ferrocene_version"],
-            channel=metadata["channel"]
+            channel=metadata["channel"],
         )
     else:
         raise RuntimeError(

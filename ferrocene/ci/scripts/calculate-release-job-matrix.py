@@ -151,10 +151,10 @@ def prepare_github_actions_output(ctx, pending_releases):
         name_suffix = "manual"
         command_suffix = ""
 
-        if inputs["override-existing"] == "true":
+        if inputs.get("override-existing") == "true":
             command_suffix += " --allow-overriding-existing-releases"
             name_suffix += ", allow overriding"
-        if inputs["allow-duplicate"] == "true":
+        if inputs.get("allow-duplicate") == "true":
             command_suffix += " --allow-duplicate-releases"
             name_suffix += ", allow duplicates"
 
@@ -264,7 +264,7 @@ def run():
         commits = commits_in_release_branches(ctx)
         releases = filter_automated_channels(commits_to_releases(ctx, commits))
     elif ctx.event_name == "workflow_dispatch":
-        if ctx.event_data["inputs"]["verbatim-ref"] == "true":
+        if ctx.event_data["inputs"].get("verbatim-ref") == "true":
             commit = ctx.event_data["inputs"]["ref"]
         else:
             commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])

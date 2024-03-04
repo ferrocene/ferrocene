@@ -4,10 +4,18 @@
 
 # This script is responsible for calculating the list of release jobs we should
 # start, as part of the .github/workflows/release.yml GitHub Actions workflow.
+#
+# The script is meant to be executed inside of GitHub Actions, and relies on
+# environment variables set by it. There are helpers to run it locally though:
+#
+#     calculate-release-job-matrix.py local-test schedule
+#     calculate-release-job-matrix.py local-test dispatch key1=value1 key2=value2
+#
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import base64
 import boto3
+import botocore
 import collections
 import json
 import os
@@ -22,6 +30,13 @@ RELEASE_BRANCHES_RE = re.compile(r"^(main|release\/1\.[0-9]+)$")
 S3_BUCKET = "ferrocene-ci-artifacts"
 S3_PREFIX = "ferrocene/dist"
 
+LOCAL_TEST_REPO = "ferrocene/ferrocene"
+
+RELEASES_ACCESS_ROLES = {
+    "dev": "arn:aws:iam::173318036596:role/release-scheduler",
+    "prod": "arn:aws:iam::397686924940:role/release-scheduler",
+}
+
 
 def commits_in_release_branches(ctx):
     commits = []
@@ -29,7 +44,7 @@ def commits_in_release_branches(ctx):
     # This is an unconditional note that's always emitted. We do that to give
     # insights to someone looking at the logs to figure out why a branch isn't
     # being picked up.
-    print("note: only protected branches are considered here", file=sys.stderr)
+    note("only protected branches are considered here")
 
     url = (
         f"https://api.github.com/repos/{ctx.repo}/branches?protected=true&per_page=100"
@@ -47,10 +62,7 @@ def commits_in_release_branches(ctx):
         for branch in response.json():
             name = branch["name"]
             if RELEASE_BRANCHES_RE.search(name) is None:
-                print(
-                    f"note: branch `{name}` doesn't seem to be a release branch",
-                    file=sys.stderr,
-                )
+                note(f"branch `{name}` doesn't seem to be a release branch")
             else:
                 commits.append(branch["commit"]["sha"])
 
@@ -65,7 +77,13 @@ def resolve_ref(ctx, ref):
 
 def commits_to_releases(ctx, all_commits):
     for commit in all_commits:
-        metadata = build_metadata(ctx, commit)
+        try:
+            metadata = build_metadata(ctx, commit)
+        except UnsupportedMetadataVersion as e:
+            note(f"skipping `{commit}` (unsupported metadata version {e.version})")
+            if ctx.manual:
+                error("manual mode early exits on unsupported metadata versions")
+            continue
         yield PendingRelease(commit, metadata)
 
 
@@ -82,10 +100,7 @@ def filter_automated_channels(releases):
             version = [int(num) for num in release.metadata.rust_version.split(".")]
             rolling_releases.append((version, release))
         else:
-            print(
-                "note: channel {release.metadata.channel} cannot be released automatically",
-                file=sys.stderr,
-            )
+            note("channel {release.metadata.channel} cannot be released automatically")
 
     rolling_releases.sort(key=lambda vr: vr[0])
     # When starting from a squashed repo with no release branches yielding the
@@ -93,10 +108,9 @@ def filter_automated_channels(releases):
     if rolling_releases:
         yield rolling_releases.pop()[1]
     for discarded in rolling_releases:
-        print(
-            f"note: version {discarded[1].metadata.rust_version} is not the latest "
+        note(
+            f"version {discarded[1].metadata.rust_version} is not the latest "
             "in the rolling channel",
-            file=sys.stderr,
         )
 
 
@@ -128,36 +142,89 @@ def discard_duplicate_channels(releases):
 
     for release in releases:
         if channels_count[release.metadata.channel] > 1:
-            print(
-                f"note: discarding {release.commit} on channel {release.metadata.channel} "
+            note(
+                f"discarding {release.commit} on channel {release.metadata.channel} "
                 "as multiple releases with that channel exist",
-                file=sys.stderr,
             )
         else:
             yield release
 
 
+def discard_branches_with_no_changes(ctx, releases):
+    # Assume the role on the AWS account containing the published releases,
+    # otherwise we cannot determine which commit is already published.
+    try:
+        role = RELEASES_ACCESS_ROLES[ctx.env()]
+    except KeyError:
+        error(f"no AWS IAM Role configured to access environment {ctx.env()}")
+    sts = boto3.client("sts")
+    role = sts.assume_role(RoleArn=role, RoleSessionName="github-actions")
+    releases_s3 = boto3.client(
+        "s3",
+        aws_access_key_id=role["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=role["Credentials"]["SecretAccessKey"],
+        aws_session_token=role["Credentials"]["SessionToken"],
+    )
+
+    for release in releases:
+        try:
+            response = releases_s3.get_object(
+                Bucket=f"ferrocene-{ctx.env()}-releases",
+                Key=f"ferrocene/channels/{release.metadata.channel}.json",
+            )
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "AccessDenied":
+                # First release in the channel
+                yield release
+                continue
+            else:
+                raise e
+
+        channel_metadata = json.loads(response["Body"].read())
+        if channel_metadata["metadata_version"] == 2:
+            last_commit = channel_metadata["latest_release"]["sha1_full"]
+        else:
+            note(
+                "Channel API metadata version {channel_metadata['metadata_version']} "
+                "for channel {metadata.release.channel} is not supported. "
+                '"No changes" check will be skipped.'
+            )
+            last_commit = "Z"  # Will never match :)
+
+        if release.commit != last_commit:
+            yield release
+        else:
+            note(
+                f"skipping channel {release.metadata.channel} "
+                "as we would release the same commit"
+            )
+
+
 def prepare_github_actions_output(ctx, pending_releases):
-    if ctx.event_name == "schedule":
-        environment = "release-prod-automated"
-        name_suffix = "automated"
-        command_suffix = ""
-    elif ctx.event_name == "workflow_dispatch":
+    if ctx.manual:
         inputs = ctx.event_data["inputs"]
 
-        environment = f"release-{inputs['env']}-manual"
+        environment = f"release-{ctx.env()}-manual"
         name_suffix = "manual"
         command_suffix = ""
 
-        if inputs["override-existing"] == "true":
+        if inputs.get("override-existing") == "true":
             command_suffix += " --allow-overriding-existing-releases"
             name_suffix += ", allow overriding"
-        if inputs["allow-duplicate"] == "true":
+        if inputs.get("allow-duplicate") == "true":
             command_suffix += " --allow-duplicate-releases"
             name_suffix += ", allow duplicates"
+    else:
+        environment = f"release-{ctx.env()}-automated"
+        name_suffix = "automated"
+        command_suffix = ""
+
+    iterator = discard_duplicate_channels(pending_releases)
+    if not ctx.manual:
+        iterator = discard_branches_with_no_changes(ctx, iterator)
 
     jobs = []
-    for release in discard_duplicate_channels(pending_releases):
+    for release in iterator:
         jobs.append(
             {
                 "name": f"{release.metadata.channel} ({name_suffix})",
@@ -174,44 +241,7 @@ def build_metadata(ctx, commit):
     )
     metadata = json.loads(response["Body"].read())
 
-    def rustc_to_channel_rolling(rust_channel):
-        try:
-            return {
-                "nightly": "nightly",
-                "beta": "pre-rolling",
-                "stable": "rolling",
-            }[rust_channel]
-        except:
-            raise RuntimeError(f"unknown rust channel `{rust}`")
-
-    if  metadata["metadata_version"] == 2:
-        rust_channel=metadata["rust_channel"]
-        ferrocene_channel=metadata["ferrocene_channel"]
-        ferrocene_version=metadata["ferrocene_version"]
-        rust_version=metadata["rust_version"]
-
-        if ferrocene_version == "rolling":
-            ferrocene_major = ferrocene_version
-        else:
-            ferrocene_major = ".".join(ferrocene_version.split(".")[:2])
-
-        if ferrocene_channel == "rolling":
-            channel = rustc_to_channel_rolling(metadata["rust_channel"])
-        elif ferrocene_channel == "beta":
-            channel =  f"beta-{ferrocene_major}"
-        elif ferrocene_channel == "stable":
-            channel = f"stable-{ferrocene_major}"
-        else:
-            raise RuntimeError(f"unknown ferrocene channel `{ferrocene_channel}`")
-
-        return BuildMetadata(
-            rust_version=rust_version,
-            rust_channel=rust_channel,
-            ferrocene_channel=ferrocene_channel,
-            ferrocene_version=ferrocene_version,
-            channel=channel
-        )
-    elif metadata["metadata_version"] in (3, 4):
+    if metadata["metadata_version"] in (3, 4):
         # For the purposes of this script, metadata versions 3 and 4 are
         # equivalent (the only difference is the tarball naming scheme).
         return BuildMetadata(
@@ -219,46 +249,74 @@ def build_metadata(ctx, commit):
             rust_channel=metadata["rust_channel"],
             ferrocene_channel=metadata["ferrocene_channel"],
             ferrocene_version=metadata["ferrocene_version"],
-            channel=metadata["channel"]
+            channel=metadata["channel"],
         )
     else:
-        raise RuntimeError(
-            "unexpected ferrocene-ci-metadata.json version "
-            f"`{metadata['metadata_version']}` (for commit `{commit}`)"
-        )
+        raise UnsupportedMetadataVersion(metadata["metadata_version"])
 
 
 def run():
-    s3 = boto3.client("s3")
+    args = sys.argv[1:]
+    if not args:  # CI mode
+        with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+            event_data = json.load(f)
+        event_name = os.environ["GITHUB_EVENT_NAME"]
+        if event_name == "workflow_dispatch":
+            manual = True
+        elif event_name == "schedule":
+            manual = False
+        else:
+            raise RuntimeError(f"unsupported event name: {ctx.event_name}")
+        ctx = Context(
+            repo=os.environ["GITHUB_REPOSITORY"],
+            manual=manual,
+            event_data=event_data,
+        )
+    elif args == ["local-test", "schedule"]:
+        ctx = Context(repo=LOCAL_TEST_REPO, manual=False, event_data={})
+    elif args[:2] == ["local-test", "dispatch"]:
+        event = {"inputs": {}}
+        for argument in args[2:]:
+            try:
+                key, value = argument.split("=")
+            except ValueError:
+                error(f"input must be key=value: {argument}")
+            event["inputs"][key] = value
+        ctx = Context(
+            repo=LOCAL_TEST_REPO,
+            manual=True,
+            event_data=event,
+        )
+    else:
+        error("invalid arguments")
 
-    http = requests.Session()
-    http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
-
-    repo = os.environ["GITHUB_REPOSITORY"]
-    event_name = os.environ["GITHUB_EVENT_NAME"]
-    event_path = os.environ["GITHUB_EVENT_PATH"]
-
-    with open(event_path) as f:
-        event_data = json.load(f)
-
-    ctx = Context(
-        s3=s3, http=http, repo=repo, event_name=event_name, event_data=event_data
-    )
-
-    if ctx.event_name == "schedule":
-        commits = commits_in_release_branches(ctx)
-        releases = filter_automated_channels(commits_to_releases(ctx, commits))
-    elif ctx.event_name == "workflow_dispatch":
-        if ctx.event_data["inputs"]["verbatim-ref"] == "true":
+    if ctx.manual:
+        if ctx.event_data["inputs"].get("verbatim-ref") == "true":
             commit = ctx.event_data["inputs"]["ref"]
         else:
             commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
         releases = commits_to_releases(ctx, [commit])
     else:
-        raise RuntimeError(f"unsupported event name: {event_name}")
+        commits = commits_in_release_branches(ctx)
+        releases = filter_automated_channels(commits_to_releases(ctx, commits))
 
     output = prepare_github_actions_output(ctx, releases)
     print(f"jobs={json.dumps(output)}")
+
+
+def setup_http_client():
+    http = requests.Session()
+    http.headers["Authorization"] = f"token {os.environ['GITHUB_TOKEN']}"
+    return http
+
+
+def note(message):
+    print(f"note: {message}", file=sys.stderr)
+
+
+def error(message):
+    print(f"error: {message}", file=sys.stderr)
+    exit(1)
 
 
 @dataclass
@@ -278,11 +336,23 @@ class PendingRelease:
 
 @dataclass
 class Context:
-    s3: object
-    http: object
     repo: str
-    event_name: str
-    event_data: object
+    manual: bool
+    event_data: dict
+
+    s3: object = field(default_factory=lambda: boto3.client("s3"))
+    http: object = field(default_factory=setup_http_client)
+
+    def env(self):
+        if self.manual:
+            return self.event_data["inputs"]["env"]
+        else:
+            return "prod"
+
+
+class UnsupportedMetadataVersion(Exception):
+    def __init__(self, version):
+        self.version = version
 
 
 if __name__ == "__main__":

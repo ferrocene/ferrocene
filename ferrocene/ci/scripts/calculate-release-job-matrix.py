@@ -345,7 +345,7 @@ class Context:
 
     def env(self):
         if self.manual:
-            return self.envent_data["inputs"]["env"]
+            return self.event_data["inputs"]["env"]
         else:
             return "prod"
 

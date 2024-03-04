@@ -802,4 +802,4 @@ executors:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:
     machine:
-      image: current
+      image: default

@@ -17,13 +17,13 @@ version: 2.1
 # * `docker-repository-url--`: calculates the URL of an ECR repository
 #
 parameters:
-  docker-image-tag--ubuntu-18:
+  docker-image-tag--ubuntu-20:
     type: string
     default: ""
   docker-image-tag--ubuntu-23:
     type: string
     default: ""
-  docker-image-rebuild--ci-docker-images--ubuntu-18:
+  docker-image-rebuild--ci-docker-images--ubuntu-20:
     type: boolean
     default: false
   docker-image-rebuild--ci-docker-images--ubuntu-23:
@@ -74,7 +74,7 @@ jobs:
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
   misc-checks:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -95,7 +95,7 @@ jobs:
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -107,7 +107,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -128,7 +128,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -140,7 +140,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-tools:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -152,7 +152,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -164,7 +164,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -178,7 +178,7 @@ jobs:
           llvm-subset: false
 
   wasm-dist-oxidos:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -190,7 +190,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-generic-test-container:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     parameters:
       job:
         type: string
@@ -223,12 +223,12 @@ jobs:
 
     steps:
       - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
   x86_64-linux-traceability-matrix:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -262,11 +262,11 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-llvm:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -287,7 +287,7 @@ jobs:
           command: echo
 
   x86_64-linux-self-test:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -300,7 +300,7 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   finish-build:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -327,7 +327,7 @@ jobs:
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
-    executor: docker-ubuntu-18
+    executor: docker-ubuntu-20
     resource_class: small # 1-core
     steps:
       - run:
@@ -432,18 +432,18 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "trying"]
     jobs:
       - build-docker:
-          name: build-docker--ubuntu-18
-          image: ubuntu-18
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-18 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-18 >>
+          name: build-docker--ubuntu-20
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
 
       - misc-checks:
           requires:
-            - build-docker--ubuntu-18
+            - build-docker--ubuntu-20
 
       - x86_64-linux-llvm:
           requires:
-            - build-docker--ubuntu-18
+            - build-docker--ubuntu-20
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
@@ -805,9 +805,9 @@ commands:
           command: aws sts get-caller-identity
 
 executors:
-  docker-ubuntu-18:
+  docker-ubuntu-20:
     docker:
-      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-18 >>
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-20 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
   docker-ubuntu-23:

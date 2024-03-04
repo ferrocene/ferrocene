@@ -2506,6 +2506,22 @@ impl Step for Crate {
     /// Currently this runs all tests for a DAG by passing a bunch of `-p foo`
     /// arguments, and those arguments are discovered from `cargo metadata`.
     fn run(self, builder: &Builder<'_>) {
+        // The current way build metrics are gathered means there is a single test_suite node
+        // emitted for every execution of this step. As we want crate granularity in the metrics,
+        // when CI passes the --ferrocene-test-one-crate-per-cargo-call flag, we will split this
+        // step into one step per crate.
+        if builder.config.cmd.ferrocene_test_one_crate_per_cargo_call() && self.crates.len() > 1 {
+            for krate in &self.crates {
+                builder.ensure(Crate {
+                    compiler: self.compiler,
+                    target: self.target,
+                    mode: self.mode,
+                    crates: vec![*krate],
+                });
+            }
+            return;
+        }
+
         let compiler = self.compiler;
         let target = self.target;
         let mode = self.mode;

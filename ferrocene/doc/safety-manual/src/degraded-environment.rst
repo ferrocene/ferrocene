@@ -24,35 +24,27 @@ undefined code generation. Therefore, the correctness of the Ferrocene
 toolchain installation needs to be verified before use. This is covered by
 constrain :id:`CSTR_0010_INSTALL`.
 
+The following environment variables control or specify behavior of the
+compiler.
+
+.. list-table::
+   :align: left
+   :header-rows: 1
+
+   * - Environment Variable
+     - Description
+
+   * - ``RUST_MIN_STACK``
+     - Sets the default stack size for spawned threads of the compiler.
+
+
 The environment variables listed below were identified as potential sources of
 errors as they may lead to incorrect behavior of the Ferrocene toolchain. Users
 must verify that the values of these variables have not been set prior to using
 the Ferrocene toolchain.
 
-The following environment variables control or specify the inputs to the
-compiler.
+The following environment variables must not be set prior to using the Ferrocene
+toolchian.
 
-.. list-table:: Input Environment Variables
-   :align: left
-
-   * - ``HOST``
-   * - ``CARGO``
-   * - ``CARGO_ENCODED_RUSTFLAGS``
-
-The following environment variables control or specify the inputs to the
-compiler.
-
-.. list-table:: Output Environment Variables
-   :align: left
-
-   * - ``CARGO_CACHE_RUSTC_INFO``
-   * - ``CARGO_CFG_TARGET_ARCH``
-   * - ``CARGO_CFG_TARGET_ENDIAN``
-   * - ``CARGO_CFG_TARGET_ENV``
-   * - ``CARGO_CFG_TARGET_FAMILY``
-   * - ``CARGO_CFG_TARGET_FEATURE``
-   * - ``CARGO_CFG_TARGET_OS``
-   * - ``CARGO_CFG_TARGET_POINTER_WIDTH``
-   * - ``CARGO_CFG_TARGET_VENDOR``
-   * - ``CARGO_CFG_UNIX``
-   * - ``CARGO_ENCODED_RUSTFLAGS``
+* ``RUST_TARGET_PATH``
+* ``RUSTC_BOOTSTRAP``

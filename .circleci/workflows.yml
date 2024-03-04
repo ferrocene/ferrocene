@@ -189,7 +189,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>)
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - ferrocene-job-test-container:
           restore-from-job: x86_64-linux-build
@@ -207,7 +207,7 @@ jobs:
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
-        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>)
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
 
     steps:
       - ferrocene-job-test-vm:
@@ -246,7 +246,7 @@ jobs:
       # jobs. Because of that we need to run *just* standard library tests in a
       # virtual machine.
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std)
+      SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
@@ -331,7 +331,7 @@ jobs:
   build-docker:
     description: Job that builds and uploads a Docker image, if needed.
     docker:
-      - image: cimg/base:2022.09-22.04
+      - image: cimg/base:current-22.04
     resource_class: small # 1-core
     parameters:
       image:
@@ -368,7 +368,7 @@ jobs:
   record-branch-commit:
     description: Record the SHA1 of the head of the branch
     docker:
-      - image: cimg/base:2022.09-22.04
+      - image: cimg/base:current-22.04
     resource_class: small # 1-core
     steps:
       - aws-cli/install
@@ -802,4 +802,4 @@ executors:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:
     machine:
-      image: ubuntu-2204:2022.07.1
+      image: default

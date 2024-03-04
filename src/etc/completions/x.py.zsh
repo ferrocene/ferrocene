@@ -373,6 +373,7 @@ _arguments "${_arguments_options[@]}" \
 '--force-rerun[rerun tests even if the inputs are unchanged]' \
 '--only-modified[only run tests that result has been changed]' \
 '--rustfix-coverage[enable this to generate a Rustfix coverage file, which is saved in \`/<build_base>/rustfix_missing_coverage.txt\`]' \
+'--ferrocene-test-one-crate-per-cargo-call[Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report]' \
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \

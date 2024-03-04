@@ -94,7 +94,6 @@ impl OverlayKind {
 pub(crate) struct Tarball<'a> {
     builder: &'a Builder<'a>,
 
-    pkgname: String,
     component: String,
     target: Option<String>,
     product_name: String,
@@ -123,8 +122,6 @@ impl<'a> Tarball<'a> {
     }
 
     fn new_inner(builder: &'a Builder<'a>, component: &str, target: Option<String>) -> Self {
-        let pkgname = crate::core::build_steps::dist::pkgname(builder, component);
-
         let mut temp_dir = builder.out.join("tmp").join("tarball").join(component);
         if let Some(target) = &target {
             temp_dir = temp_dir.join(target);
@@ -137,7 +134,6 @@ impl<'a> Tarball<'a> {
         Self {
             builder,
 
-            pkgname,
             component: component.into(),
             target,
             product_name: "Rust".into(),
@@ -300,12 +296,31 @@ impl<'a> Tarball<'a> {
         })
     }
 
+    /// Ferrocene uses a custom package naming scheme, with the component name, the optional target
+    /// name, and the version. The version is:
+    ///
+    /// * For stable releases, the version number.
+    /// * For any other build where we have git information, the short commit hash.
+    /// * Otherwise, the string "custom".
+    ///
+    /// See https://designs.ferrocene.dev/tarball-names.html
     fn package_name(&self) -> String {
+        let mut name = self.component.clone();
         if let Some(target) = &self.target {
-            format!("{}-{}", self.pkgname, target)
-        } else {
-            self.pkgname.clone()
+            name.push('-');
+            name.push_str(&target);
         }
+        name.push('-');
+        if self.builder.config.ferrocene_raw_channel == "stable" {
+            name.push_str(
+                self.builder.read(&self.builder.src.join("ferrocene").join("version")).trim(),
+            );
+        } else if let Some(sha) = self.builder.rust_info().sha_short() {
+            name.push_str(sha);
+        } else {
+            name.push_str("custom");
+        }
+        name
     }
 
     fn non_bare_args(&self, cmd: &mut Command) {

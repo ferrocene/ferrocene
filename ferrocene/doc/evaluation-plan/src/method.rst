@@ -21,15 +21,18 @@ Through this analysis, the following potential error are identified:
 Errors, with the possibility of detection and mitigation, are added in
 the :doc:`safety-manual:index` with the following form:
 
-.. csv-table:: Safety Manual  potential error template
-   :name: Safety Manual potential error template
-   :delim: !
+.. list-table::
 
-   Error identifier ! An identifier for the error with format ERR_NAME_XXX where NAME is a short name describing the faulty feature, and XXX is a number.
-   Error description ! The description of the error.
-   Condition of appearance ! Condition to reproduce the error.
-   Effects ! The effects of the error for the safety-critical products.
-   Workaround/Mitigation ! The description of the mitigation and/or the workaround.
+   * - Error identifier 
+     - An identifier for the error with format ERR_NAME_XXX where NAME is a short name describing the faulty feature, and XXX is a number.
+   * - Error description 
+     - The description of the error.
+   * - Condition of appearance 
+     - Condition to reproduce the error.
+   * - Effects 
+     - The effects of the error for the safety-critical products.
+   * - Workaround/Mitigation 
+     - The description of the mitigation and/or the workaround.
 
 .. end of table
 
@@ -48,16 +51,20 @@ file, etc.), the output artifacts (object file, executable, etc.), and usage
 constraints must also be listed. The following table represents all the
 information that is required to describe a use case.
 
-.. csv-table:: Use case description
-   :name: Use case description
-   :delim: !
+.. list-table::
 
-   Use case identifier ! UC_XXXX where XXXX is an identifier for the use case.
-   Actor(s) ! The actor who controls this use case.
-   Input(s) ! List of the input artifacts.
-   Output(s) ! List of the output artifacts.
-   Constraint(s) ! List of the tool constraints for qualification (Environment, usage limitation, etc.), If applicable.
-   Description ! The description of the use cases.
+   * - Use case identifier 
+     - UC_XXXX where XXXX is an identifier for the use case.
+   * - Actor(s) 
+     - The actor who controls this use case.
+   * - Input(s) 
+     - List of the input artifacts.
+   * - Output(s) 
+     - List of the output artifacts.
+   * - Constraint(s) 
+     - List of the tool constraints for qualification (Environment, usage limitation, etc.), If applicable.
+   * - Description 
+     - The description of the use cases.
 
 .. end of table
 
@@ -84,16 +91,20 @@ should be linked with the associated detection measure and with the associated
 mitigation if any. The following table describes a potential error entry in the
 HazOp analysis:
 
-.. csv-table:: HazOp error entry
-   :name: HazOp error entry
-   :delim: !
+.. list-table::
 
-   Error identifier ! ERR_TOOLID_XXX where TOOLID is the name of the tool causing the error, and XXX a number.
-   Use case ! The use case where the error is determined.
-   Description ! The potential error descriptions.
-   Risk ! Possibles effects of the potential error.
-   Mitigation ! The detection or mitigation method identifier, if available.
-   Detectable! YES or NO, indicates if the error could be detected.
+   * - Error identifier 
+     - ERR_TOOLID_XXX where TOOLID is the name of the tool causing the error, and XXX a number.
+   * - Use case 
+     - The use case where the error is determined.
+   * - Description 
+     - The potential error descriptions.
+   * - Risk 
+     - Possibles effects of the potential error.
+   * - Mitigation 
+     - The detection or mitigation method identifier, if available.
+   * - Detectable
+     - YES or NO, indicates if the error could be detected.
 
 .. end of table
 
@@ -101,12 +112,12 @@ The associated detection measure and/or mitigation should be identified with an
 unique name, and with a detailed description of the measure. The following
 table describes a countermeasure entry:
 
-.. csv-table:: Measure to detect or avoid error
-   :name: Measure to detect or avoid error
-   :delim: !
+.. list-table::
 
-   Measure identifier ! CHK_NAME_XXX | AVD_NAME_XXX where NAME is a short name describing the feature and XXX is a number.
-   Description ! The description of the check or the avoidance mechanism.
+   * - Measure identifier 
+     - CHK_NAME_XXX | AVD_NAME_XXX where NAME is a short name describing the feature and XXX is a number.
+   * - Description 
+     - The description of the check or the avoidance mechanism.
 
 .. end of table
 
@@ -174,13 +185,21 @@ Compute the Tool Confidence Level
 The [|iso_ref|] standard (Part 8 - Section 11.4.5.5) determines the TCL by
 applying the TI and TD values with the following table:
 
-.. csv-table:: Tool Confidence Level table
-   :name: Tool Confidence Level table
-   :header: ,TD1, TD2, TD3
-   :delim: !
-
-   TI1 ! TCL1 ! TCL1 ! TCL1
-   TI2 ! TCL1 ! TCL2 ! TCL3
+.. list-table::
+   :header-rows: 1
+   
+   * - 
+     - TD1
+     - TD2
+     - TD3
+   * - TI1 
+     - TCL1 
+     - TCL1 
+     - TCL1
+   * - TI2 
+     - TCL1 
+     - TCL2 
+     - TCL3
 
 .. end of table
 
@@ -212,35 +231,93 @@ TCL1.
 The following tables from the [|iso_ref|] standard indicate the appropriate
 qualification method:
 
-* For **TCL2**:
+TCL2
+^^^^
 
-   .. csv-table:: TCL2 Qualification methods according to ASIL level
-      :name: TCL2 Qualification methods according to ASIL level
-      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-      :delim: !
+.. list-table::
+   :header-rows: 1
 
-      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! ++ ! \+
-      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! ++ ! \+
-      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! \+ ! ++
-      1d. Development in accordance with a safety standard! \+ ! \+ ! \+ ! \+
+   * - 
+     - Method
+     - ASIL A
+     - ASIL B
+     - ASIL C
+     - ASIL D
+   * - 1a
+     - Increased confidence from use in accordance with 11.4.7
+     - ++ 
+     - ++ 
+     - ++ 
+     - \+
+   * - 1b
+     - Evaluation of the tool development process in accordance with 11.4.8
+     - ++ 
+     - ++ 
+     - ++ 
+     - \+
+   * - 1c
+     - Validation of the software tool in accordance with 11.4.9
+     - \+ 
+     - \+ 
+     - \+ 
+     - ++
+   * - 1d
+     - Development in accordance with a safety standard
+     - \+ 
+     - \+ 
+     - \+ 
+     - \+
 
-   .. end of table
+.. end of table
 
 
-* For **TCL3**:
+TCL3
+^^^^
 
-   .. csv-table:: TCL3 Qualification methods according to ASIL level
-      :name: TCL3 Qualification methods according to ASIL level
-      :header: Method, ASIL A, ASIL B, ASIL C, ASIL D
-      :delim: !
+.. list-table::
+   :header-rows: 1
 
-      1a. Increased confidence from use in accordance with 11.4.7! ++ ! ++ ! \+ ! \+
-      1b. Evaluation of the tool development process in accordance with 11.4.8! ++ ! ++ ! \+ ! \+
-      1c. Validation of the software tool in accordance with 11.4.9! \+ ! \+ ! ++ ! ++
-      1d. Development in accordance with a safety standard! \+ ! \+ ! ++ ! ++
+   * - 
+     - Method
+     - ASIL A
+     - ASIL B
+     - ASIL C
+     - ASIL D
+   * - 1a
+     - Increased confidence from use in accordance with 11.4.7
+     - ++ 
+     - ++ 
+     - \+ 
+     - \+
+   * - 1b
+     - Evaluation of the tool development process in accordance with 11.4.8
+     - ++ 
+     - ++ 
+     - \+ 
+     - \+
+   * - 1c
+     - Validation of the software tool in accordance with 11.4.9
+     - \+ 
+     - \+ 
+     - ++ 
+     - ++
+   * - 1d
+     - Development in accordance with a safety standard
+     - \+ 
+     - \+ 
+     - ++ 
+     - ++
 
-   .. end of table
+.. end of table
 
-|
-| ++: Highly recommended
-| +: Recommended
+Legend
+^^^^^^
+
+.. list-table::
+
+   * - ++
+     - Highly recommended
+   * - \+
+     - Recommended
+
+.. end of table

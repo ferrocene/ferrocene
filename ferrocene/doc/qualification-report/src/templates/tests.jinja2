@@ -10,37 +10,70 @@
    The test outcomes won't be populated until you configure it.
 {% endmacro %}
 
-{% macro invocations_summary(bootstrap_type, only_match_root_node=False) %}
+{% macro no_matching_outcomes_warning() %}
+.. warning::
+
+   No matching test outcomes were found for this suite.
+{% endmacro %}
+
+{% macro only_on_hosts(suite) %}
+.. note::
+
+   The {{ suite }} test suite is not tested on :target:`{{ target }}`, as it is
+   not a host platform.
+{% endmacro %}
+
+{% macro unconditional_pass(suite) %}
+The {{ suite }} suite is a pass/fail test suite integrated into the Ferrocene
+CI infrastructure.
+
+The {{ suite }} test suite is verified as part of
+:ref:`qualification-plan:ci-phase-full`. As indicated in
+:doc:`qualification-plan:development`, a PR is merged into the repository only
+when it passes full testing.
+
+As a result, the {{ suite }} test suite reports a **pass** for this
+qualification.
+{% endmacro %}
+
+{% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}
 {% if platform_outcomes is none %}
 {{ no_outcomes_error() }}
 {% else %}
-{% for invocation in platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) %}
+{% set invocations = platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) | list %}
+{% if invocations %}
 .. list-table::
+   :header-rows: 1
 
-   {% if invocation.is_compiletest() %}
-   * - Compiletest suite:
-     - ``{{ invocation.kind.suite }}``
-   {% if invocation.kind.mode is not none %}
-   * - Compiletest mode:
-     - ``{{ invocation.kind.mode }}``
-   {% endif %}
-   {% elif invocation.is_cargo_package() %}
-   * - Tested crates:
-     - {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
-   {% endif %}
-   * - Host compiler:
-     - ``{{ invocation.host }}`` (stage {{ invocation.stage }})
-   * - Target:
-     - ``{{ invocation.target }}``
-   * - Total tests:
-     - {{ invocation.total_tests() }}
-   * - Passed tests:
+   * - Crate name
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+
+   * - {% if invocation.kind.crates -%}
+           {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
+       {%- else -%}
+           N/A
+       {%- endif %}
+
+       .. rst-class:: align-right
      - {{ invocation.passed_tests }}
-   * - Failed tests:
-     - {{ invocation.failed_tests }}
-   * - Ignored tests:
+
+       .. rst-class:: align-right
      - {{ invocation.ignored_tests }}
-{% endfor %}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -48,65 +81,29 @@
 :target:`{{ target }}`
 {{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
 
-Testing scope
-=============
-
-For this qualification, testing is restricted to the following environments:
-
-.. list-table::
-
-   * - Host platform:
-     - :target-with-triple:`{{ host }}`
-   * - Compilation target:
-     - :target-with-triple:`{{ target }}`
-   * - Supported languages:
-     - Rust
-
-.. note::
-
-   Only the Rust language, as described in the :doc:`specification:index`, is verified.
-
-{% if bare_metal_test_target %}
-Bare metal testing
-------------------
-
-The :target:`{{ target }}` Ferrocene target is meant to be used in an
-environment without any operating system. Consequently, it does not include
-APIs relying on one (as part of the ``std`` crate).
-
-Rust's test suites require those APIs to be available in order to invoke the
-tests themselves and to report the execution results. To solve the issue, a new
-target, based on the existing Rust ``{{ target }}`` target, was created called
-``{{ bare_metal_test_target }}``.
-
-This target is strictly internal, and will not be released to customers. It has
-the same configuration as the ``{{ target }}`` target, with the only exception
-being enabling the operating system bindings for Linux (the OS used to execute
-the test suite).
-
-Since the only difference between the two targets is the APIs in the ``std``
-crate, which is not present in the ``{{ target }}`` target (and consequently
-not shipped to customers), we can conclude that the test results of
-``{{ bare_metal_test_target }}`` are also valid for ``{{ target }}``.
-{% endif %}
-
-Release Notes
--------------
-
-The |ferrocene_version| version of the Ferrocene toolset contains the following
-tools:
+This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
+|rust_version|) in the following environment:
 
 .. list-table::
    :header-rows: 1
 
-   * - Tool
-     - Version
-   * - Cargo
-     - |rust_version|
-   * - rustc
-     - |rust_version|
-   * - rustdoc
-     - |rust_version|
+   * -
+     - Target name
+     - Target triple
+
+   * - Host platform:
+     - :target:`{{ host }}`
+     - ``{{ host }}``
+
+   * - Compilation target:
+     - :target:`{{ target }}`
+     - ``{{ target }}``
+
+   {% if bare_metal_test_target %}
+   * - :ref:`Bare metal testing <qualification-plan:bare-metal-testing>` target:
+     - :target:`{{ target }}`
+     - ``{{ bare_metal_test_target }}``
+   {% endif %}
 
 Test results
 ============
@@ -120,7 +117,41 @@ Compiletest Test Suite
 
 **Test suite:** :id:`TS1_COMP`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Compiletest") }}
+The following compiletest suites were executed as part of this test suite:
+
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% else %}
+{% set invocations = platform_outcomes.filter_invocations("bootstrap::core::build_steps::test::Compiletest") | list %}
+{% if invocations %}
+.. list-table::
+   :header-rows: 1
+
+   * - Compiletest suite
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+   * - ``{{ invocation.kind.suite }}`` {% if invocation.kind.mode is not none %} (mode: ``{{ invocation.kind.mode }}``){% endif %}
+
+       .. rst-class:: align-right
+     - {{ invocation.passed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.ignored_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
+{% endif %}
 
 {% if host != target %}
 .. note::
@@ -166,13 +197,7 @@ Library Test Suite
    root node, otherwise we'd also match other tests invoking Crate down their
    dependency chain.
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
-
-.. note::
-
-   The library test suite uses the ``stage1`` library because a ``stage2``
-   library is never built, and the ``stage2`` Ferrocene compiler reuses the
-   ``stage1`` library.
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Crate", only_match_root_node=True) }}
 
 {% if bare_metal_test_target %}
 .. note::
@@ -186,13 +211,10 @@ Compiler Test Suite
 
 **Test suite:** :id:`TS3_CRAT`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
-
-{% if host != target %}
-.. note::
-
-   The compiler test suite is not tested on :target:`{{ target }}`, as it is not
-   a host platform.
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
+{% else %}
+{{ only_on_hosts("compiler") }}
 {% endif %}
 
 Linkchecker Test Suite
@@ -200,38 +222,34 @@ Linkchecker Test Suite
 
 **Test suite:** :id:`TS4_LINK`
 
-The linkchecker test suite is a pass/fail test suite integrated into the
-Ferrocene CI infrastructure.
-
-The linkchecker test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the linkchecker test suite reports a **pass** for this
-qualification.
+{% if host == target %}
+{{ unconditional_pass("linkchecker") }}
+{% else %}
+{{ only_on_hosts("linkchecker") }}
+{% endif %}
 
 Build System Test Suite
 -----------------------
 
 **Test suite:** :id:`TS6_BSYS`
 
-{{ invocations_summary("bootstrap::core::build_steps::test::Bootstrap") }}
+
+{% if host == target %}
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Bootstrap") }}
+{% else %}
+{{ only_on_hosts("build system") }}
+{% endif %}
 
 Tidy Test Suite
 ---------------
 
 **Test suite:** :id:`TS7_TIDY`
 
-The tidy test suite is a pass/fail test suite integrated into the Ferrocene
-CI infrastructure.
-
-The tidy test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the tidy test suite reports a **pass** for this qualification.
+{% if host == target %}
+{{ unconditional_pass("tidy") }}
+{% else %}
+{{ only_on_hosts("tidy") }}
+{% endif %}
 
 Self-Test Test Suite
 --------------------
@@ -239,29 +257,10 @@ Self-Test Test Suite
 **Test suite:** :id:`TS8_SELF`
 
 {% if host == target %}
-The self-test test suite is a pass/fail test suite integrated into the
-Ferrocene CI infrastructure.
-
-The self-test test suite is verified as part of
-:ref:`qualification-plan:ci-phase-full`. As indicated in :doc:`Qualification
-Plan : Development Process <qualification-plan:development>`, a PR is merged
-into the repository only when it passes full testing.
-
-As a result, the self-test test suite reports a **pass** for this
-qualification.
+{{ unconditional_pass("self-test") }}
 {% else %}
-.. note::
-
-   The self-test test suite is not tested on :target:`{{ target }}`, as it is
-   not a host platform.
+{{ only_on_hosts("self-test") }}
 {% endif %}
-
-Known Problems
-==============
-
-KPs identified through the lifecycle of Ferrocene for :target:`{{ target }}`
-are tracked in the :doc:`safety-manual:known-problems`. This document is made
-available to customers for consulting.
 
 Ignored Tests
 =============

@@ -331,7 +331,7 @@ jobs:
   build-docker:
     description: Job that builds and uploads a Docker image, if needed.
     docker:
-      - image: cimg/base:2022.09-22.04
+      - image: cimg/base:current-22.04
     resource_class: small # 1-core
     parameters:
       image:
@@ -368,7 +368,7 @@ jobs:
   record-branch-commit:
     description: Record the SHA1 of the head of the branch
     docker:
-      - image: cimg/base:2022.09-22.04
+      - image: cimg/base:current-22.04
     resource_class: small # 1-core
     steps:
       - aws-cli/install
@@ -802,4 +802,4 @@ executors:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:
     machine:
-      image: ubuntu-2204:2022.07.1
+      image: default

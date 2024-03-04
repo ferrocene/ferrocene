@@ -25,7 +25,7 @@ Leadership roles
      - Pietro Albini
 
    * - Infrastructure Lead
-     - Pietro Albini
+     - Ana Hobden
 
    * - Release Lead
      - Pietro Albini

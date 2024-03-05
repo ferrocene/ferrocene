@@ -966,7 +966,6 @@ impl Step for PlainSourceTarball {
             "COPYRIGHT",
             "LICENSE-APACHE",
             "LICENSE-MIT",
-            "CONTRIBUTING.md",
             "README.md",
             "RELEASES.md",
             "configure",

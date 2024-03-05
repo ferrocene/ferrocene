@@ -55,7 +55,7 @@ or shared library.
 
 The :doc:`Compilation Targets <user-manual:targets/index>` section of the User
 Manual specifies for each target whether the linker is used directly, or via a
-system C compiler as a *linker-driver*.
+system C compiler as a linker driver.
 
 Where a C compiler is acting as a *linker driver*, the C compiler is given a
 path to a binary called ``ld.lld`` to use as its linker. The ``ld.lld`` binary
@@ -63,7 +63,7 @@ is a small wrapper around ``rust-lld`` which puts ``rust-lld`` into a *GNU ld
 compatible mode* and otherwise passes on any arguments given straight through to
 ``rust-lld``.
 
-Any C compiler acting as a *linker driver*, must:
+Any C compiler acting as a linker driver, must:
 
 - Pass to the underlying linker any arguments which do not start with a `-`
   character and which end with a recognised file extension for Object Code
@@ -79,7 +79,7 @@ Any C compiler acting as a *linker driver*, must:
 - Accept the ``-B <path>`` argument, which must cause the C compiler search
   the path ``<path>`` for the ``lld`` linker binary.
 
-Regardless of whether a C compiler is used as a *linker-driver* or not, only the
+Regardless of whether a C compiler is used as a *linker driver* or not, only the
 following arguments may be presented to the ``rust-lld`` linker for the linking
 of Ferrocene executables and shared libraries:
 

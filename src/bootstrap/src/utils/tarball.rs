@@ -303,7 +303,7 @@ impl<'a> Tarball<'a> {
     /// * For any other build where we have git information, the short commit hash.
     /// * Otherwise, the string "custom".
     ///
-    /// See https://designs.ferrocene.dev/tarball-names.html
+    /// See <https://designs.ferrocene.dev/tarball-names.html>
     fn package_name(&self) -> String {
         let mut name = self.component.clone();
         if let Some(target) = &self.target {

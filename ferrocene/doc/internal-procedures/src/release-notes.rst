@@ -35,7 +35,7 @@ maintaining a working draft of the release notes of the next release. Those
 working drafts should be marked as "upcoming", to alert users the release is
 not out yet and the contents are subject to change.
 
-You can mark a release as upcoming by adding this snipopet to the `file-wide
+You can mark a release as upcoming by adding this snippet to the `file-wide
 metadata
 <https://www.sphinx-doc.org/en/master/usage/restructuredtext/field-lists.html#file-wide-metadata>`_
 of the document, *before* any non-comment content of the page:

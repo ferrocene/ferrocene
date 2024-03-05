@@ -49,6 +49,12 @@ Definition of Terms
        A stream of characters that represent the text of a Rust program in order to
        produce lexical elements.
 
+   Linker driver
+
+       An external linker or system C compiler used to locate system-specific
+       C libraries needed to link executables and shared libraries, before
+       deferring control to the actual linker.
+
    LLVM IR Generation
        Translates the MIR into LLVM IR.
 

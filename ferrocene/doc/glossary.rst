@@ -52,7 +52,8 @@ Definition of Terms
    Linker driver
 
        An external linker or system C compiler used to locate system-specific
-       C libraries needed to link executables and shared libraries.
+       C libraries needed to link executables and shared libraries, before
+       deferring control to the actual linker.
 
    LLVM IR Generation
        Translates the MIR into LLVM IR.

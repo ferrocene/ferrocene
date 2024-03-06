@@ -55,7 +55,7 @@ JOBS_DEFINITION = {
         # Build the documentation on a different jobs, since building it takes
         # a while and with a separate job we can run dist inside the same job
         # as linkchecker (which also needs to generate docs).
-        "docs": ["ferrocene-docs", "ferrocene-test-outcomes"],
+        "docs": ["rustc-docs", "ferrocene-docs", "ferrocene-test-outcomes"],
 
         # Build the source code tarball on a different job, since that requires
         # a (slower) clone of the whole LLVM submodule, not just the subset,
@@ -63,6 +63,8 @@ JOBS_DEFINITION = {
         "src": ["rust-src", "ferrocene-src"],
 
         "oxidos": ["ferrocene-oxidos"],
+
+        "tools": ["rust-analyzer", "clippy", "rustfmt"],
 
         # The "None" job contains the tasks that should never be executed,
         # regardless of which job is requested.

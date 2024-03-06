@@ -139,6 +139,18 @@ jobs:
       - ferrocene-job-dist:
           restore-from-job: x86_64-linux-build
 
+  x86_64-linux-dist-tools:
+    executor: docker-ubuntu-18
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: x86_64-linux-build
+
   x86_64-linux-dist-targets:
     executor: docker-ubuntu-18
     resource_class: large # 4-core
@@ -449,6 +461,9 @@ workflows:
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-dist-tools:
           requires:
             - x86_64-linux-build
       - x86_64-linux-dist-targets:

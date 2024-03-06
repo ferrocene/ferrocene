@@ -50,7 +50,7 @@ case "$1" in
         # Call `zstd` separately to be able to use all cores available (`-T0`)
         # and the lowest compression level possible, to speed the compression
         # as much as possible.
-        tar c $@ --exclude build/metrics.json | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then

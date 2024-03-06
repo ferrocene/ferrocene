@@ -505,6 +505,10 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging.tmp"]
         - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
         - equal: [<< pipeline.git.branch >>, "trying.tmp"]
+        - equal: [<< pipeline.git.branch >>, "main"]
+        - matches:
+            pattern: "^release\\/.*"
+            value: << pipeline.git.branch >>
     jobs:
       - skip
 

@@ -55,7 +55,7 @@ JOBS_DEFINITION = {
         # Build the documentation on a different jobs, since building it takes
         # a while and with a separate job we can run dist inside the same job
         # as linkchecker (which also needs to generate docs).
-        "docs": ["rustc-docs", "ferrocene-docs", "ferrocene-test-outcomes"],
+        "docs": ["ferrocene-docs", "ferrocene-test-outcomes"],
 
         # Build the source code tarball on a different job, since that requires
         # a (slower) clone of the whole LLVM submodule, not just the subset,
@@ -79,6 +79,7 @@ JOBS_DEFINITION = {
             # Upstream's documentation tarball is replaced by the
             # "ferrocene-docs" step, so we avoid executing it.
             "rust-docs",
+            "rustc-docs",
         ],
     },
 

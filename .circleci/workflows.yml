@@ -514,6 +514,7 @@ workflows:
       - x86_64-linux-self-test:
           requires:
             - x86_64-linux-dist
+            - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
 
       - finish-build:

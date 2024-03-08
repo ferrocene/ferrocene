@@ -12,4 +12,5 @@ release.
 Changes
 -------
 
-* The ``x86_64-unknown-linux-gnu`` Ferrocene target now requires a glibc version of 2.31 or higher.
+* The :target-with-triple:`x86_64-unknown-linux-gnu` target now requires
+  glibc version of 2.31 or higher.

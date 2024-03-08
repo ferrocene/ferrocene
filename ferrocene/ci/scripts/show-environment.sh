@@ -5,14 +5,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-echo "CPU"
-echo "==="
-lscpu
+# The two commands are not supported on Windows
+if [[ "${OSTYPE}" != "msys" ]]; then
+    echo "CPU"
+    echo "==="
+    lscpu
 
-echo
-echo "System memory"
-echo "============="
-free -h
+    echo
+    echo "System memory"
+    echo "============="
+    free -h
+fi
 
 echo "Disk"
 echo "===="

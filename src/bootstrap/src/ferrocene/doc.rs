@@ -812,8 +812,14 @@ impl Step for EmptyStep {
 // Note: this function is correct for the use made in this module, but it will not work correctly
 // if paths don't exists or the paths do not have any segments in common.
 fn relative_path(base: &Path, path: &Path) -> PathBuf {
-    let base = std::fs::canonicalize(base).unwrap_or_else(|_| base.to_path_buf());
-    let path = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let base = std::fs::canonicalize(base).unwrap_or_else(|e| {
+        eprintln!("Unable to canonicalize {}: {e}", base.display());
+        base.to_path_buf()
+    });
+    let path = std::fs::canonicalize(path).unwrap_or_else(|e| {
+        eprintln!("Unable to canonicalize {}: {e}", path.display());
+        path.to_path_buf()
+    });
 
     let common = base
         .components()

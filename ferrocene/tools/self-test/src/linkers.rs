@@ -3,6 +3,8 @@
 
 mod argparse;
 
+use std::ffi::OsString;
+#[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -321,8 +323,8 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let args_file = temp_dir.join("_fst_args_capture");
 
     // Concatentation, using byte strings
-    let mut c_source = C_SOURCE.to_vec();
-    c_source.extend(args_file.as_os_str().as_bytes());
+    let mut c_source = C_SOURCE.to_owned();
+    c_source.extend(args_file.as_os_str().as_encoded_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");

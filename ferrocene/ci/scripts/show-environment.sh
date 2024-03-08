@@ -9,7 +9,7 @@ echo "CPU"
 echo "==="
 if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
     sysctl -n machdep.cpu.brand_string
-else
+else if [[ "${OSTYPE}" != "msys" ]]; then
     lscpu
 fi
 
@@ -18,7 +18,7 @@ echo "System memory"
 echo "============="
 if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
     vm_stat
-else
+else if [[ "${OSTYPE}" != "msys" ]]; then
     free -h
 fi
 

@@ -7,7 +7,7 @@ name: Automatic lockfile updates
 on:
   # Run from Monday to Friday at 5:00 UTC
   schedule:
-    - cron: '0 5 * * 1'
+    - cron: '0 5 * * 1-5'
   # Allow to run this manually from the GitHub UI
   workflow_dispatch: {}
 

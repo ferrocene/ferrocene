@@ -10,5 +10,6 @@
 aarch64-unknown-none     = "Armv8-A bare-metal"
 thumbv7em-none-eabi      = "Armv7E-M bare-metal (soft-float)"
 thumbv7em-none-eabihf    = "Armv7E-M bare-metal (hard-float)"
+armv8r-none-eabihf       = "Armv8-R bare-metal (hard-float)"
 wasm32-unknown-unknown   = "WASM bare-metal"
 x86_64-unknown-linux-gnu = "x86-64 Linux (glibc)"

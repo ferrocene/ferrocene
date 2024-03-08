@@ -4,6 +4,7 @@
 use crate::error::Error;
 use crate::report::Reporter;
 use crate::utils::run_command;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
@@ -64,7 +65,41 @@ fn check_binary(
     Ok(())
 }
 
-fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
+/// Check that `bin` is a file and has the correct permissions.
+fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
+    /// Minimum file permission the binary should have.
+    ///
+    /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    #[cfg(unix)] // Windows does permissions different.
+    const MODE: u32 = 0o555;
+
+    match std::fs::metadata(bin) {
+        Ok(metadata) => {
+            if !metadata.is_file() || bin.is_symlink() {
+                return Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
+            }
+            #[cfg(unix)] // Windows does permissions different.
+            if metadata.permissions().mode() & MODE != MODE {
+                return Err(Error::WrongBinaryPermissions { path: bin.into() })
+            }
+            Ok(())
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
+        }
+        Err(err) => Err(Error::MetadataFetchFailed { path: bin.into(), error: err }),
+    }
+}
+
+fn get_version(bin: &Path, name: &str) -> Result<VersionOutput, Error> {
+    let version_command_output = run_command(Command::new(bin).arg("-vV")).map_err(|error| {
+        Error::VersionFetchFailed { binary: name.into(), error: Box::new(error) }
+    })?;
+    parse_version_output(&version_command_output.stdout)
+        .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })
+}
+
+fn parse_version_output(output: &str) -> Option<VersionOutput> {
     let mut release = None;
     let mut commit_hash = None;
     let mut host = None;

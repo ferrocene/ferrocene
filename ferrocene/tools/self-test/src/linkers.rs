@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+mod argparse;
+
 use std::ffi::OsString;
+#[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -332,7 +335,7 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
 
     // Concatentation, using byte strings
     let mut c_source = C_SOURCE.to_owned();
-    c_source.extend(args_file.as_os_str().as_bytes());
+    c_source.extend(args_file.as_os_str().as_encoded_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");

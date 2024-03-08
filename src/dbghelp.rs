@@ -23,9 +23,12 @@
 
 #![allow(non_snake_case)]
 
+use alloc::vec::Vec;
+
 use super::windows::*;
 use core::mem;
 use core::ptr;
+use core::slice;
 
 // Work around `SymGetOptions` and `SymSetOptions` not being present in winapi
 // itself. Otherwise this is only used when we're double-checking types against
@@ -64,6 +67,17 @@ mod dbghelp {
             CurAddress: DWORD64,
             CurContext: LPDWORD,
             CurFrameIndex: LPDWORD,
+        ) -> BOOL;
+        pub fn SymGetSearchPathW(
+            hprocess: HANDLE,
+            searchpatha: PWSTR,
+            searchpathlength: DWORD,
+        ) -> BOOL;
+        pub fn SymSetSearchPathW(hprocess: HANDLE, searchpatha: PCWSTR) -> BOOL;
+        pub fn EnumerateLoadedModulesW64(
+            hprocess: HANDLE,
+            enumloadedmodulescallback: PENUMLOADED_MODULES_CALLBACKW64,
+            usercontext: PVOID,
         ) -> BOOL;
     }
 
@@ -173,6 +187,20 @@ dbghelp! {
             handle: HANDLE,
             path: PCWSTR,
             invade: BOOL
+        ) -> BOOL;
+        fn SymGetSearchPathW(
+            hprocess: HANDLE,
+            searchpatha: PWSTR,
+            searchpathlength: DWORD
+        ) -> BOOL;
+        fn SymSetSearchPathW(
+            hprocess: HANDLE,
+            searchpatha: PCWSTR
+        ) -> BOOL;
+        fn EnumerateLoadedModulesW64(
+            hprocess: HANDLE,
+            enumloadedmodulescallback: PENUMLOADED_MODULES_CALLBACKW64,
+            usercontext: PVOID
         ) -> BOOL;
         fn StackWalk64(
             MachineType: DWORD,
@@ -372,9 +400,131 @@ pub fn init() -> Result<Init, ()> {
         // get to initialization first and the other will pick up that
         // initialization.
         DBGHELP.SymInitializeW().unwrap()(GetCurrentProcess(), ptr::null_mut(), TRUE);
+
+        // The default search path for dbghelp will only look in the current working
+        // directory and (possibly) `_NT_SYMBOL_PATH` and `_NT_ALT_SYMBOL_PATH`.
+        // However, we also want to look in the directory of the executable
+        // and each DLL that is loaded. To do this, we need to update the search path
+        // to include these directories.
+        //
+        // See https://learn.microsoft.com/cpp/build/reference/pdbpath for an
+        // example of where symbols are usually searched for.
+        let mut search_path_buf = Vec::new();
+        search_path_buf.resize(1024, 0);
+
+        // Prefill the buffer with the current search path.
+        if DBGHELP.SymGetSearchPathW().unwrap()(
+            GetCurrentProcess(),
+            search_path_buf.as_mut_ptr(),
+            search_path_buf.len() as _,
+        ) == TRUE
+        {
+            // Trim the buffer to the actual length of the string.
+            let len = lstrlenW(search_path_buf.as_mut_ptr());
+            assert!(len >= 0);
+            search_path_buf.truncate(len as usize);
+        } else {
+            // If getting the search path fails, at least include the current directory.
+            search_path_buf.clear();
+            search_path_buf.push(utf16_char('.'));
+            search_path_buf.push(utf16_char(';'));
+        }
+
+        let mut search_path = SearchPath::new(search_path_buf);
+
+        // Update the search path to include the directory of the executable and each DLL.
+        DBGHELP.EnumerateLoadedModulesW64().unwrap()(
+            GetCurrentProcess(),
+            Some(enum_loaded_modules_callback),
+            ((&mut search_path) as *mut SearchPath) as *mut c_void,
+        );
+
+        let new_search_path = search_path.finalize();
+
+        // Set the new search path.
+        DBGHELP.SymSetSearchPathW().unwrap()(GetCurrentProcess(), new_search_path.as_ptr());
+
         INITIALIZED = true;
         Ok(ret)
     }
+}
+
+struct SearchPath {
+    search_path_utf16: Vec<u16>,
+}
+
+fn utf16_char(c: char) -> u16 {
+    let buf = &mut [0u16; 2];
+    let buf = c.encode_utf16(buf);
+    assert!(buf.len() == 1);
+    buf[0]
+}
+
+impl SearchPath {
+    fn new(initial_search_path: Vec<u16>) -> Self {
+        Self {
+            search_path_utf16: initial_search_path,
+        }
+    }
+
+    /// Add a path to the search path if it is not already present.
+    fn add(&mut self, path: &[u16]) {
+        let sep = utf16_char(';');
+
+        // We could deduplicate in a case-insensitive way, but case-sensitivity
+        // can be configured by directory on Windows, so let's not do that.
+        // https://learn.microsoft.com/windows/wsl/case-sensitivity
+        if !self
+            .search_path_utf16
+            .split(|&c| c == sep)
+            .any(|p| p == path)
+        {
+            if self.search_path_utf16.last() != Some(&sep) {
+                self.search_path_utf16.push(sep);
+            }
+            self.search_path_utf16.extend_from_slice(path);
+        }
+    }
+
+    fn finalize(mut self) -> Vec<u16> {
+        // Add a null terminator.
+        self.search_path_utf16.push(0);
+        self.search_path_utf16
+    }
+}
+
+extern "system" fn enum_loaded_modules_callback(
+    module_name: PCWSTR,
+    _: DWORD64,
+    _: ULONG,
+    user_context: PVOID,
+) -> BOOL {
+    // `module_name` is an absolute path like `C:\path\to\module.dll`
+    // or `C:\path\to\module.exe`
+    let len: usize = unsafe { lstrlenW(module_name).try_into().unwrap() };
+
+    if len == 0 {
+        // This should not happen, but if it does, we can just ignore it.
+        return TRUE;
+    }
+
+    let module_name = unsafe { slice::from_raw_parts(module_name, len) };
+    let path_sep = utf16_char('\\');
+    let alt_path_sep = utf16_char('/');
+
+    let Some(end_of_directory) = module_name
+        .iter()
+        .rposition(|&c| c == path_sep || c == alt_path_sep)
+    else {
+        // `module_name` being an absolute path, it should always contain at least one
+        // path separator. If not, there is nothing we can do.
+        return TRUE;
+    };
+
+    let search_path = unsafe { &mut *(user_context as *mut SearchPath) };
+    search_path.add(&module_name[..end_of_directory]);
+
+    TRUE
 }
 
 impl Drop for Init {

@@ -54,6 +54,16 @@ cfg_if::cfg_if! {
                     ContextPointers: PKNONVOLATILE_CONTEXT_POINTERS
                 ) -> PEXCEPTION_ROUTINE;
             }
+
+            // winapi doesn't have this type
+            pub type PENUMLOADED_MODULES_CALLBACKW64 = Option<
+            unsafe extern "system" fn(
+                modulename: PCWSTR,
+                modulebase: DWORD64,
+                modulesize: ULONG,
+                usercontext: PVOID,
+            ) -> BOOL,
+        >;
         }
     } else {
         pub use core::ffi::c_void;
@@ -291,6 +301,7 @@ ffi! {
     pub type PTRANSLATE_ADDRESS_ROUTINE64 = Option<
         unsafe extern "system" fn(hProcess: HANDLE, hThread: HANDLE, lpaddr: LPADDRESS64) -> DWORD64,
     >;
+    pub type PENUMLOADED_MODULES_CALLBACKW64 = Option<unsafe extern "system" fn(modulename: PCWSTR, modulebase: DWORD64, modulesize: ULONG, usercontext: PVOID) -> BOOL>;
     pub type PGET_MODULE_BASE_ROUTINE64 =
         Option<unsafe extern "system" fn(hProcess: HANDLE, Address: DWORD64) -> DWORD64>;
     pub type PFUNCTION_TABLE_ACCESS_ROUTINE64 =
@@ -444,6 +455,7 @@ ffi! {
             hSnapshot: HANDLE,
             lpme: LPMODULEENTRY32W,
         ) -> BOOL;
+        pub fn lstrlenW(lpstring: PCWSTR) -> i32;
     }
 }
 

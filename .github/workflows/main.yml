@@ -110,6 +110,17 @@ jobs:
     - run: ./ci/debuglink-docker.sh
       if: contains(matrix.os, 'ubuntu')
 
+    # Test that backtraces are still symbolicated if we don't embed an absolute
+    # path to the PDB file in the binary.
+    # Add -Cforce-frame-pointers for stability. The test otherwise fails
+    # non-deterministically on i686-pc-windows-msvc because the stack cannot be
+    # unwound reliably. This failure is not related to the feature being tested.
+    - run: cargo clean && cargo test
+      if: contains(matrix.rust, 'msvc')
+      name: "Test that backtraces are symbolicated without absolute PDB path"
+      env:
+        RUSTFLAGS: "-Clink-arg=/PDBALTPATH:%_PDB% -Cforce-frame-pointers"
+
     # Test that including as a submodule will still work, both with and without
     # the `backtrace` feature enabled.
     - run: cargo build --manifest-path crates/as-if-std/Cargo.toml

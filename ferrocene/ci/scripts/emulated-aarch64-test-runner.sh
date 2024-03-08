@@ -67,8 +67,12 @@ cmd_run() {
     # While on normal Ubuntu installations this command is executed at boot, on
     # Docker containers there is no systemd executing it. To make sure the
     # emulator starts up properly, run the enable command every time.
+    #
+    # Since Ubuntu 20.04, imported binfmts need to be manually enabled after
+    # the import if /proc/sys/fs/binfmt_misc is not mounted (like in CI).
     echo "===> loading binfmt configuration into the kernel"
     sudo update-binfmts --import
+    sudo update-binfmts --enable qemu-aarch64
 
     # We pass --sequential because we've seen deadlocks when running UI tests
     # without that flag. Test execution will be slower, but at least it won't

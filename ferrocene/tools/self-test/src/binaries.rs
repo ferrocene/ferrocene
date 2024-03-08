@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::utils::run_command;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
@@ -43,17 +47,19 @@ fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
     /// Minimum file permission the binary should have.
     ///
     /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    #[cfg(unix)] // Windows does permissions different.
     const MODE: u32 = 0o555;
 
     match std::fs::metadata(bin) {
         Ok(metadata) => {
             if !metadata.is_file() || bin.is_symlink() {
-                Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
-            } else if metadata.permissions().mode() & MODE != MODE {
-                Err(Error::WrongBinaryPermissions { path: bin.into() })
-            } else {
-                Ok(())
+                return Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
             }
+            #[cfg(unix)] // Windows does permissions different.
+            if metadata.permissions().mode() & MODE != MODE {
+                return Err(Error::WrongBinaryPermissions { path: bin.into() })
+            }
+            Ok(())
         }
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
             Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })

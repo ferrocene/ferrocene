@@ -38,6 +38,9 @@ parameters:
   llvm-rebuild--aarch64-apple-darwin:
     type: boolean
     default: false
+  llvm-rebuild--x86_64-pc-windows-msvc:
+    type: boolean
+    default: false
   targets--x86_64-unknown-linux-gnu--build:
     type: string
     default: ""
@@ -56,6 +59,7 @@ parameters:
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
+  win: circleci/windows@5.0
 
 jobs:
   # Container dedicated to running quick checks for each commit pushed in open
@@ -404,6 +408,37 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  x86_64-windows-llvm:
+    executor:
+      name: win/default
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-setup-windows
+            - run:
+                name: Install Windows dependencies
+                command: |
+                  winget install Ninja-build.Ninja Kitware.Cmake Meta.Zstandard
+                  # By default CMake is not in the bash PATH, so we need to add
+                  # it manually to it.
+                  echo 'export PATH="/c/Program Files/CMake/bin:${PATH}"' >> "${BASH_ENV}"
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
   finish-build:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
@@ -512,6 +547,8 @@ workflows:
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
+            # TODO: do not merge, testing on commit to save CI resources
+            - x86_64-windows-llvm
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -820,11 +857,14 @@ commands:
       - run:
           name: Clone the source code
           command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts 2>&1
+            # There is no need to use any deploy key or SSH for CI, as the
+            # Ferrocene repository is public anyway. Also, on Windows the
+            # deploy key doesn't seem to be injected into the VM, so using
+            # HTTPS fixes that problem too.
+            repo_url="$(echo "${CIRCLE_REPOSITORY_URL}" | sed 's#^git@github.com:#https://github.com/#')"
 
             git init .
-            git remote add origin "${CIRCLE_REPOSITORY_URL}"
+            git remote add origin "${repo_url}"
             git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
@@ -835,6 +875,14 @@ commands:
           name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
           
+
+  ferrocene-setup-windows:
+    description: Prepare the Windows environment
+    steps:
+      - run:
+          name: Setup Windows environment
+          command: ferrocene/ci/scripts/setup-windows.sh
+
   ferrocene-checkout:
     description: Checkout the Ferrocene source code
     parameters:

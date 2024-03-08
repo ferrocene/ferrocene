@@ -9,6 +9,7 @@ use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs::File;
+#[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
 use tokio::runtime::Runtime;
@@ -78,7 +79,10 @@ fn collect_files(
             package.files.push(PackageFile {
                 path: relative_path.into(),
                 sha256: hash_file(&entry)?,
+                #[cfg(not(windows))]
                 posix_mode: entry.metadata()?.mode(),
+                #[cfg(windows)]
+                posix_mode: 0, // TODO: Not used! Should we cfg it in criticaltrust?
                 needs_proxy: ctx.proxied_binaries.contains(&relative_path),
             });
         } else if entry.is_dir() {

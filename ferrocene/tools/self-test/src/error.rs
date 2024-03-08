@@ -14,6 +14,7 @@ pub(crate) enum Error {
     NoSysroot,
     #[error("binary {name} expected (inside {}), but is not there", directory.display())]
     MissingBinary { directory: PathBuf, name: String },
+    #[cfg(unix)] // Windows does permissions different.
     #[error("binary {} must be readable and executable by all users", path.display())]
     WrongBinaryPermissions { path: PathBuf },
     #[error("failed to fetch the metadata of {}", path.display())]
@@ -104,6 +105,7 @@ impl Error {
         match self {
             Error::NoSysroot => 1,
             Error::MissingBinary { .. } => 2,
+            #[cfg(unix)] // Windows does permissions different.
             Error::WrongBinaryPermissions { .. } => 3,
             Error::MetadataFetchFailed { .. } => 4,
             Error::VersionFetchFailed { .. } => 5,

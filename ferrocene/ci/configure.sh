@@ -138,6 +138,24 @@ add --release-description="Ferrocene by Ferrous Systems"
 #                                                                            #
 ##############################################################################
 
+# Set the target used for the build itself (build system, initial compiler
+# stages, etc). This depends on the OS used in CI.
+#
+# If this configuration is missing or changed, the wrong build platform will be
+# used by the build system.
+if [[ "${OSTYPE}" = "msys" ]]; then
+    # In theory, when run under MSYS the default ABI would be GNU, not MSVC.
+    # We're running under MSYS just for compatibility with our CI scripts, not
+    # because we target the GNU ABI, so switching the build platform to the
+    # MSVC one is correct.
+    add --build="x86_64-pc-windows-msvc"
+elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
+    add --build="x86_64-unknown-linux-gnu"
+else
+    echo "error: unknown os type: ${OSTYPE}" >&2
+    exit 1
+fi
+
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).
 #

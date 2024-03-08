@@ -2103,10 +2103,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "generate-coverage-report"
-version = "0.1.0"
-
-[[package]]
 name = "generate-tarball"
 version = "0.0.0"
 dependencies = [

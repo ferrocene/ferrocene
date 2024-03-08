@@ -291,7 +291,6 @@ bootstrap_tool!(
     FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
     FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
     FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
-    FerroceneGenerateCoverageReport, "ferrocene/tools/generate-coverage-report", "generate-coverage-report";
 
     Rustbook, "src/tools/rustbook", "rustbook";
     UnstableBookGen, "src/tools/unstable-book-gen", "unstable-book-gen";

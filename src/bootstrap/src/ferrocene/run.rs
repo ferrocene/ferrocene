@@ -6,6 +6,7 @@ use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::utils::exec::BootstrapCommand;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::UNIX_EPOCH;
@@ -119,13 +120,12 @@ impl Step for GenerateCoverageReport {
         let coverage_report_out_dir = builder.out.join("coverage_report");
 
         let coverage_src_path = builder.src.join("library/core").canonicalize().unwrap();
-        let _cargo_dir = builder.cargo_dir();
 
         if builder.config.dry_run() {
             return;
         }
 
-        let core_tests_binary_path = get_test_binary_path(builder).unwrap();
+        let core_tests_binary_path = get_test_binary_path(builder).expect("Could not find tests binary");
 
         if coverage_report_data_dir.exists() {
             let mut files = coverage_report_data_dir.read_dir().expect("Failed to read dir");
@@ -155,25 +155,47 @@ impl Step for GenerateCoverageReport {
             panic!("grcov not installed, to install it run:\n cargo install grcov");
         }
 
-        let mut cmd = builder.tool_cmd(Tool::FerroceneGenerateCoverageReport);
-        cmd.env("COVERAGE_REPORT_DATA_DIR", coverage_report_data_dir);
-        cmd.env("COVERAGE_REPORT_OUT_DIR", coverage_report_out_dir);
-        cmd.env("COVERAGE_REPORT_SRC_PATH", coverage_src_path);
-        cmd.env("COVERAGE_REPORT_BIN_PATH", core_tests_binary_path);
+        const COVERAGE_EXCLUDE_LINE: &str = "COVR_EXCL_LINE";
 
-        // RUSTC environment variable is required by grcov to locate the right version of the llvm-cov.
-        // If the variable is not set grcov uses the the rustc in the host.
-        // This version mismatch of llvm-cov leads to empty report.
-        // So, we need the specific version of rustc that we used to create the profraw files.
-        // grcov uses cargo-binutils to invoke llvm-cov. cargo-binutils looks for RUSTC env variable to get the path for llvm-cov.
-        // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
-        cmd.env("RUSTC", rustc_path);
+        assert!(coverage_report_data_dir.exists());
+        assert!(!coverage_report_out_dir.exists());
+        assert!(coverage_src_path.exists());
+        assert!(core_tests_binary_path.exists());
 
-        builder.run(&mut cmd);
+        let mut cmd = Command::new("grcov");
+        cmd
+            .arg(coverage_report_data_dir)
+            .arg("-s")
+            .arg(coverage_src_path)
+            .arg("--ignore")
+            .arg("tests/*")
+            .arg("--ignore")
+            .arg("benches/*")
+            .arg("--binary-path")
+            .arg(core_tests_binary_path)
+            .arg("-t")
+            .arg("html")
+            .arg("--branch")
+            .arg("--ignore-not-existing")
+            .arg("--excl-line")
+            .arg(COVERAGE_EXCLUDE_LINE)
+            .arg("-o")
+            .arg(coverage_report_out_dir)
+            // RUSTC environment variable is required by grcov to locate the right version of the llvm-cov.
+            // If the variable is not set grcov uses the the rustc in the host.
+            // This version mismatch of llvm-cov leads to empty report.
+            // So, we need the specific version of rustc that we used to create the profraw files.
+            // grcov uses cargo-binutils to invoke llvm-cov. cargo-binutils looks for RUSTC env variable to get the path for llvm-cov.
+            // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
+            .env("RUSTC", rustc_path);
+
+        let  bootstrap_cmd = BootstrapCommand::from(&mut cmd);
+
+        builder.run_cmd(bootstrap_cmd);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("ferrocene/tools/generate-coverage-report")
+        run.alias("generate-coverage-report")
     }
 
     fn make_run(run: RunConfig<'_>) {

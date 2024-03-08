@@ -5,7 +5,6 @@ members = [
   "ferrocene/tools/self-test/",
   "ferrocene/tools/document-signatures/",
   "ferrocene/tools/generate-tarball/",
-  "ferrocene/tools/generate-coverage-report",
 
   "compiler/rustc",
   "library/std",

@@ -49,7 +49,7 @@ impl Frame {
         // the address here, which could be later mapped to correct function.
         #[cfg(all(target_env = "sgx", target_vendor = "fortanix"))]
         {
-            let image_base = super::get_image_base();
+            let image_base = super::sgx_image_base::get_image_base();
             ip = usize::wrapping_sub(ip as usize, image_base as _) as _;
         }
         ip

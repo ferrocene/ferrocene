@@ -125,38 +125,48 @@ impl fmt::Debug for Frame {
     }
 }
 
-#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
-mod sgx_no_std_image_base {
-    use core::ffi::c_void;
-    use core::sync::atomic::{AtomicUsize, Ordering::SeqCst};
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(miri)))]
+mod sgx_image_base {
 
-    static IMAGE_BASE: AtomicUsize = AtomicUsize::new(0);
+    #[cfg(not(feature = "std"))]
+    pub(crate) mod imp {
+        use core::ffi::c_void;
+        use core::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 
-    /// Set the image base address. This is only available for Fortanix SGX
-    /// target when the `std` feature is not enabled. This can be used in the
-    /// standard library to set the correct base address.
-    #[doc(hidden)]
-    pub fn set_image_base(base_addr: *mut c_void) {
-        IMAGE_BASE.store(base_addr as _, SeqCst);
+        static IMAGE_BASE: AtomicUsize = AtomicUsize::new(0);
+
+        /// Set the image base address. This is only available for Fortanix SGX
+        /// target when the `std` feature is not enabled. This can be used in the
+        /// standard library to set the correct base address.
+        #[doc(hidden)]
+        pub fn set_image_base(base_addr: *mut c_void) {
+            IMAGE_BASE.store(base_addr as _, SeqCst);
+        }
+
+        pub(crate) fn get_image_base() -> *mut c_void {
+            IMAGE_BASE.load(SeqCst) as _
+        }
     }
 
-    pub(crate) fn get_image_base() -> *mut c_void {
-        IMAGE_BASE.load(SeqCst) as _
+    #[cfg(feature = "std")]
+    mod imp {
+        use core::ffi::c_void;
+
+        pub(crate) fn get_image_base() -> *mut c_void {
+            std::os::fortanix_sgx::mem::image_base() as _
+        }
     }
+
+    pub(crate) use imp::get_image_base;
 }
 
-#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
-pub use self::sgx_no_std_image_base::set_image_base;
-
-#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
-#[deny(unused)]
-pub(crate) use self::sgx_no_std_image_base::get_image_base;
-
-#[cfg(all(target_env = "sgx", target_vendor = "fortanix", feature = "std"))]
-#[deny(unused)]
-pub(crate) fn get_image_base() -> *mut c_void {
-    std::os::fortanix_sgx::mem::image_base() as _
-}
+#[cfg(all(
+    target_env = "sgx",
+    target_vendor = "fortanix",
+    not(feature = "std"),
+    not(miri)
+))]
+pub use sgx_image_base::imp::set_image_base;
 
 cfg_if::cfg_if! {
     // This needs to come first, to ensure that

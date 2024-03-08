@@ -64,6 +64,8 @@ JOBS_DEFINITION = {
 
         "oxidos": ["ferrocene-oxidos"],
 
+        "tools": ["rust-analyzer", "clippy", "rustfmt"],
+
         # The "None" job contains the tasks that should never be executed,
         # regardless of which job is requested.
         None: [
@@ -77,6 +79,7 @@ JOBS_DEFINITION = {
             # Upstream's documentation tarball is replaced by the
             # "ferrocene-docs" step, so we avoid executing it.
             "rust-docs",
+            "rustc-docs",
         ],
     },
 

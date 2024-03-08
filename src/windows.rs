@@ -459,7 +459,11 @@ ffi! {
     }
 }
 
-#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "arm64ec"
+))]
 ffi! {
     #[link(name = "kernel32")]
     extern "system" {
@@ -606,7 +610,7 @@ ffi! {
     }
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]
 ffi! {
     #[repr(C, align(8))]
     pub struct CONTEXT {
@@ -674,7 +678,7 @@ ffi! {
 }
 
 #[repr(C)]
-#[cfg(target_arch = "x86_64")]
+#[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]
 #[derive(Copy, Clone)]
 pub struct FLOATING_SAVE_AREA {
     _Dummy: [u8; 512],

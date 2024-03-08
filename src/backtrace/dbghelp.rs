@@ -60,7 +60,7 @@ impl Frame {
 #[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in winapi right now
 struct MyContext(CONTEXT);
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]
 impl MyContext {
     #[inline(always)]
     fn ip(&self) -> DWORD64 {
@@ -122,7 +122,11 @@ impl MyContext {
     }
 }
 
-#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "aarch64",
+    target_arch = "arm64ec"
+))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::ptr;

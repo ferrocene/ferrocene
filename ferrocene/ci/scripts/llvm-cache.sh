@@ -55,7 +55,10 @@ get_llvm_cache_hash() {
     sha256sum "$0" >> "${file}"
     sha256sum ferrocene/ci/configure.sh >> "${file}"
     sha256sum src/version >> "${file}"
-    git ls-files src/bootstrap ferrocene/ci/docker-images -z | sort -z | xargs -0 sha256sum >> "${file}"
+    # Apparently, git for windows doesn't understand when the `-z` flag of `git
+    # ls-files` is passed after the paths, so we provide it before the list of
+    # paths to list.
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 sha256sum >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
@@ -120,7 +123,10 @@ build_llvm_tarball() {
     # Call `zstd` separately to be able to use all cores available (`-T0`) and
     # the lowest compression level possible, to speed the compression as much
     # as possible.
-    tar cv "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
+    #
+    # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+    # rather than stdout by default.
+    tar -cvf- "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
 }
 
 usage() {

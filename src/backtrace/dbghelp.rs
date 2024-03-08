@@ -145,7 +145,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 
         let frame = super::Frame {
             inner: Frame {
-                base_address: fn_entry as *mut c_void,
+                base_address: fn_entry.cast::<c_void>(),
                 ip: context.ip() as *mut c_void,
                 sp: context.sp() as *mut c_void,
                 #[cfg(not(target_env = "gnu"))]
@@ -166,7 +166,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             context.ip(),
             fn_entry,
             &mut context.0,
-            &mut handler_data as *mut usize as *mut PVOID,
+            ptr::addr_of_mut!(handler_data).cast::<PVOID>(),
             &mut establisher_frame,
             ptr::null_mut(),
         );
@@ -176,7 +176,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 #[cfg(any(target_arch = "x86", target_arch = "arm"))]
 #[inline(always)]
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
-    use core::mem;
+    use core::{mem, ptr};
 
     // Allocate necessary structures for doing the stack walk
     let process = GetCurrentProcess();
@@ -219,7 +219,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 process,
                 thread,
                 &mut stack_frame_ex,
-                &mut context.0 as *mut CONTEXT as PVOID,
+                ptr::addr_of_mut!(context.0) as PVOID,
                 None,
                 Some(function_table_access),
                 Some(get_module_base),
@@ -257,7 +257,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 process,
                 thread,
                 &mut stack_frame64,
-                &mut context.0 as *mut CONTEXT as PVOID,
+                ptr::addr_of_mut!(context.0) as PVOID,
                 None,
                 Some(function_table_access),
                 Some(get_module_base),

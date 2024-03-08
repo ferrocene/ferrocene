@@ -12,7 +12,7 @@ use core::slice;
 pub(super) fn native_libraries() -> Vec<Library> {
     let mut ret = Vec::new();
     unsafe {
-        libc::dl_iterate_phdr(Some(callback), &mut ret as *mut Vec<_> as *mut _);
+        libc::dl_iterate_phdr(Some(callback), core::ptr::addr_of_mut!(ret).cast());
     }
     return ret;
 }
@@ -43,7 +43,7 @@ unsafe extern "C" fn callback(
     vec: *mut libc::c_void,
 ) -> libc::c_int {
     let info = &*info;
-    let libs = &mut *(vec as *mut Vec<Library>);
+    let libs = &mut *vec.cast::<Vec<Library>>();
     let is_main_prog = info.dlpi_name.is_null() || *info.dlpi_name == 0;
     let name = if is_main_prog {
         // The man page for dl_iterate_phdr says that the first object visited by

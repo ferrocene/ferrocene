@@ -41,7 +41,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
         if dlinfo(
             RTLD_SELF,
             RTLD_DI_LINKMAP,
-            (&mut map) as *mut *const LinkMap as *mut libc::c_void,
+            core::ptr::addr_of_mut!(map).cast::<libc::c_void>(),
         ) != 0
         {
             return libs;

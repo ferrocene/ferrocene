@@ -7,7 +7,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
         static __start__: u8;
     }
 
-    let bias = unsafe { &__start__ } as *const u8 as usize;
+    let bias = core::ptr::addr_of!(__start__) as usize;
 
     let mut ret = Vec::new();
     let mut segments = Vec::new();

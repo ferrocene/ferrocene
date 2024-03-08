@@ -159,11 +159,12 @@ impl Drop for Bomb {
 mod lock {
     use std::boxed::Box;
     use std::cell::Cell;
+    use std::ptr;
     use std::sync::{Mutex, MutexGuard, Once};
 
     pub struct LockGuard(Option<MutexGuard<'static, ()>>);
 
-    static mut LOCK: *mut Mutex<()> = 0 as *mut _;
+    static mut LOCK: *mut Mutex<()> = ptr::null_mut();
     static INIT: Once = Once::new();
     thread_local!(static LOCK_HELD: Cell<bool> = Cell::new(false));
 

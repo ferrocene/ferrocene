@@ -272,7 +272,7 @@ impl BacktraceFrame {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn ip(&self) -> *mut c_void {
-        self.frame.ip() as *mut c_void
+        self.frame.ip()
     }
 
     /// Same as `Frame::symbol_address`
@@ -282,7 +282,7 @@ impl BacktraceFrame {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn symbol_address(&self) -> *mut c_void {
-        self.frame.symbol_address() as *mut c_void
+        self.frame.symbol_address()
     }
 
     /// Same as `Frame::module_base_address`
@@ -292,9 +292,7 @@ impl BacktraceFrame {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn module_base_address(&self) -> Option<*mut c_void> {
-        self.frame
-            .module_base_address()
-            .map(|addr| addr as *mut c_void)
+        self.frame.module_base_address()
     }
 
     /// Returns the list of symbols that this frame corresponds to.

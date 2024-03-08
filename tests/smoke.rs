@@ -1,4 +1,5 @@
 use backtrace::Frame;
+use std::ptr;
 use std::thread;
 
 fn get_actual_fn_pointer(fp: usize) -> usize {
@@ -264,7 +265,7 @@ fn sp_smoke_test() {
         assert!(refs.len() < 5);
 
         let x = refs.len();
-        refs.push(&x as *const _ as usize);
+        refs.push(ptr::addr_of!(x) as usize);
 
         if refs.len() < 5 {
             recursive_stack_references(refs);

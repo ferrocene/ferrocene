@@ -17,7 +17,7 @@ impl Mmap {
     pub unsafe fn map(file: &File, len: usize) -> Option<Mmap> {
         let file = file.try_clone().ok()?;
         let mapping = CreateFileMappingA(
-            file.as_raw_handle() as *mut _,
+            file.as_raw_handle().cast(),
             ptr::null_mut(),
             PAGE_READONLY,
             0,
@@ -43,7 +43,7 @@ impl Deref for Mmap {
     type Target = [u8];
 
     fn deref(&self) -> &[u8] {
-        unsafe { slice::from_raw_parts(self.ptr as *const u8, self.len) }
+        unsafe { slice::from_raw_parts(self.ptr.cast_const().cast::<u8>(), self.len) }
     }
 }
 

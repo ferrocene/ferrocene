@@ -17,6 +17,7 @@
 
 use super::super::Bomb;
 use core::ffi::c_void;
+use core::ptr::addr_of_mut;
 
 pub enum Frame {
     Raw(*mut uw::_Unwind_Context),
@@ -101,13 +102,13 @@ impl Clone for Frame {
 
 #[inline(always)]
 pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
-    uw::_Unwind_Backtrace(trace_fn, &mut cb as *mut _ as *mut _);
+    uw::_Unwind_Backtrace(trace_fn, addr_of_mut!(cb).cast());
 
     extern "C" fn trace_fn(
         ctx: *mut uw::_Unwind_Context,
         arg: *mut c_void,
     ) -> uw::_Unwind_Reason_Code {
-        let cb = unsafe { &mut *(arg as *mut &mut dyn FnMut(&super::Frame) -> bool) };
+        let cb = unsafe { &mut *arg.cast::<&mut dyn FnMut(&super::Frame) -> bool>() };
         let cx = super::Frame {
             inner: Frame::Raw(ctx),
         };
@@ -198,6 +199,8 @@ mod uw {
                 _Unwind_GetGR(ctx, 15)
             }
         } else {
+            use core::ptr::addr_of_mut;
+
             // On android and arm, the function `_Unwind_GetIP` and a bunch of
             // others are macros, so we define functions containing the
             // expansion of the macros.
@@ -242,13 +245,13 @@ mod uw {
 
             pub unsafe fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
-                let ptr = &mut val as *mut _Unwind_Word;
+                let ptr = addr_of_mut!(val);
                 let _ = _Unwind_VRS_Get(
                     ctx,
                     _Unwind_VRS_RegClass::_UVRSC_CORE,
                     15,
                     _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr as *mut c_void,
+                    ptr.cast::<c_void>(),
                 );
                 (val & !1) as libc::uintptr_t
             }
@@ -258,13 +261,13 @@ mod uw {
 
             pub unsafe fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t {
                 let mut val: _Unwind_Word = 0;
-                let ptr = &mut val as *mut _Unwind_Word;
+                let ptr = addr_of_mut!(val);
                 let _ = _Unwind_VRS_Get(
                     ctx,
                     _Unwind_VRS_RegClass::_UVRSC_CORE,
                     SP,
                     _Unwind_VRS_DataRepresentation::_UVRSD_UINT32,
-                    ptr as *mut c_void,
+                    ptr.cast::<c_void>(),
                 );
                 val as libc::uintptr_t
             }

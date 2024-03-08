@@ -102,7 +102,7 @@ macro_rules! dbghelp {
 
         static mut DBGHELP: Dbghelp = Dbghelp {
             // Initially we haven't loaded the DLL
-            dll: 0 as *mut _,
+            dll: ptr::null_mut(),
             // Initially all functions are set to zero to say they need to be
             // dynamically loaded.
             $($name: 0,)*
@@ -122,7 +122,7 @@ macro_rules! dbghelp {
                 }
                 let lib = b"dbghelp.dll\0";
                 unsafe {
-                    self.dll = LoadLibraryA(lib.as_ptr() as *const i8);
+                    self.dll = LoadLibraryA(lib.as_ptr().cast::<i8>());
                     if self.dll.is_null() {
                         Err(())
                     }  else {
@@ -149,7 +149,7 @@ macro_rules! dbghelp {
 
             fn symbol(&self, symbol: &[u8]) -> Option<usize> {
                 unsafe {
-                    match GetProcAddress(self.dll, symbol.as_ptr() as *const _) as usize {
+                    match GetProcAddress(self.dll, symbol.as_ptr().cast()) as usize {
                         0 => None,
                         n => Some(n),
                     }
@@ -169,7 +169,7 @@ macro_rules! dbghelp {
 
             pub fn dbghelp(&self) -> *mut Dbghelp {
                 unsafe {
-                    &mut DBGHELP
+                    ptr::addr_of_mut!(DBGHELP)
                 }
             }
         }

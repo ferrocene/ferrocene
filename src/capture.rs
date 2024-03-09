@@ -26,9 +26,6 @@ use serde::{Deserialize, Serialize};
 pub struct Backtrace {
     // Frames here are listed from top-to-bottom of the stack
     frames: Vec<BacktraceFrame>,
-    // The index we believe is the actual start of the backtrace, omitting
-    // frames like `Backtrace::new` and `backtrace::trace`.
-    actual_start_index: usize,
 }
 
 fn _assert_send_sync() {
@@ -85,6 +82,27 @@ impl Frame {
                 ..
             } => module_base_address.map(|addr| addr as *mut c_void),
         }
+    }
+
+    /// Resolve all addresses in the frame to their symbolic names.
+    fn resolve_symbols(&self) -> Vec<BacktraceSymbol> {
+        let mut symbols = Vec::new();
+        let sym = |symbol: &Symbol| {
+            symbols.push(BacktraceSymbol {
+                name: symbol.name().map(|m| m.as_bytes().to_vec()),
+                addr: symbol.addr().map(|a| a as usize),
+                filename: symbol.filename().map(|m| m.to_owned()),
+                lineno: symbol.lineno(),
+                colno: symbol.colno(),
+            });
+        };
+        match *self {
+            Frame::Raw(ref f) => resolve_frame(f, sym),
+            Frame::Deserialized { ip, .. } => {
+                resolve(ip as *mut c_void, sym);
+            }
+        }
+        symbols
     }
 }
 
@@ -172,23 +190,22 @@ impl Backtrace {
 
     fn create(ip: usize) -> Backtrace {
         let mut frames = Vec::new();
-        let mut actual_start_index = None;
         trace(|frame| {
             frames.push(BacktraceFrame {
                 frame: Frame::Raw(frame.clone()),
                 symbols: None,
             });
 
-            if frame.symbol_address() as usize == ip && actual_start_index.is_none() {
-                actual_start_index = Some(frames.len());
+            // clear inner frames, and start with call site.
+            if frame.symbol_address() as usize == ip {
+                frames.clear();
             }
+
             true
         });
+        frames.shrink_to_fit();
 
-        Backtrace {
-            frames,
-            actual_start_index: actual_start_index.unwrap_or(0),
-        }
+        Backtrace { frames }
     }
 
     /// Returns the frames from when this backtrace was captured.
@@ -202,7 +219,7 @@ impl Backtrace {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn frames(&self) -> &[BacktraceFrame] {
-        &self.frames[self.actual_start_index..]
+        self.frames.as_slice()
     }
 
     /// If this backtrace was created from `new_unresolved` then this function
@@ -216,41 +233,18 @@ impl Backtrace {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn resolve(&mut self) {
-        for frame in self.frames.iter_mut().filter(|f| f.symbols.is_none()) {
-            let mut symbols = Vec::new();
-            {
-                let sym = |symbol: &Symbol| {
-                    symbols.push(BacktraceSymbol {
-                        name: symbol.name().map(|m| m.as_bytes().to_vec()),
-                        addr: symbol.addr().map(|a| a as usize),
-                        filename: symbol.filename().map(|m| m.to_owned()),
-                        lineno: symbol.lineno(),
-                        colno: symbol.colno(),
-                    });
-                };
-                match frame.frame {
-                    Frame::Raw(ref f) => resolve_frame(f, sym),
-                    Frame::Deserialized { ip, .. } => {
-                        resolve(ip as *mut c_void, sym);
-                    }
-                }
-            }
-            frame.symbols = Some(symbols);
-        }
+        self.frames.iter_mut().for_each(BacktraceFrame::resolve);
     }
 }
 
 impl From<Vec<BacktraceFrame>> for Backtrace {
     fn from(frames: Vec<BacktraceFrame>) -> Self {
-        Backtrace {
-            frames,
-            actual_start_index: 0,
-        }
+        Backtrace { frames }
     }
 }
 
 impl From<crate::Frame> for BacktraceFrame {
-    fn from(frame: crate::Frame) -> BacktraceFrame {
+    fn from(frame: crate::Frame) -> Self {
         BacktraceFrame {
             frame: Frame::Raw(frame),
             symbols: None,
@@ -258,6 +252,9 @@ impl From<crate::Frame> for BacktraceFrame {
     }
 }
 
+// we don't want implementing `impl From<Backtrace> for Vec<BacktraceFrame>` on purpose,
+// because "... additional directions for Vec<T> can weaken type inference ..."
+// more information on https://github.com/rust-lang/backtrace-rs/pull/526
 impl Into<Vec<BacktraceFrame>> for Backtrace {
     fn into(self) -> Vec<BacktraceFrame> {
         self.frames
@@ -311,6 +308,20 @@ impl BacktraceFrame {
     /// enabled, and the `std` feature is enabled by default.
     pub fn symbols(&self) -> &[BacktraceSymbol] {
         self.symbols.as_ref().map(|s| &s[..]).unwrap_or(&[])
+    }
+
+    /// Resolve all addresses in this frame to their symbolic names.
+    ///
+    /// If this frame has been previously resolved, this function does nothing.
+    ///
+    /// # Required features
+    ///
+    /// This function requires the `std` feature of the `backtrace` crate to be
+    /// enabled, and the `std` feature is enabled by default.
+    pub fn resolve(&mut self) {
+        if self.symbols.is_none() {
+            self.symbols = Some(self.frame.resolve_symbols());
+        }
     }
 }
 
@@ -368,11 +379,10 @@ impl BacktraceSymbol {
 
 impl fmt::Debug for Backtrace {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let full = fmt.alternate();
-        let (frames, style) = if full {
-            (&self.frames[..], PrintFmt::Full)
+        let style = if fmt.alternate() {
+            PrintFmt::Full
         } else {
-            (&self.frames[self.actual_start_index..], PrintFmt::Short)
+            PrintFmt::Short
         };
 
         // When printing paths we try to strip the cwd if it exists, otherwise
@@ -383,7 +393,7 @@ impl fmt::Debug for Backtrace {
         let mut print_path =
             move |fmt: &mut fmt::Formatter<'_>, path: crate::BytesOrWideString<'_>| {
                 let path = path.into_path_buf();
-                if !full {
+                if style == PrintFmt::Full {
                     if let Ok(cwd) = &cwd {
                         if let Ok(suffix) = path.strip_prefix(cwd) {
                             return fmt::Display::fmt(&suffix.display(), fmt);
@@ -395,7 +405,7 @@ impl fmt::Debug for Backtrace {
 
         let mut f = BacktraceFmt::new(fmt, style, &mut print_path);
         f.add_context()?;
-        for frame in frames {
+        for frame in &self.frames {
             f.frame().backtrace_frame(frame)?;
         }
         f.finish()?;

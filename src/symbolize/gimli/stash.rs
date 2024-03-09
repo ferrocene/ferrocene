@@ -1,3 +1,4 @@
+#![allow(clippy::all)]
 // only used on Linux right now, so allow dead code elsewhere
 #![cfg_attr(not(target_os = "linux"), allow(dead_code))]
 

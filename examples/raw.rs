@@ -33,7 +33,7 @@ fn print() {
             }
 
             if let Some(name) = symbol.name() {
-                print!(" - {}", name);
+                print!(" - {name}");
             } else {
                 print!(" - <unknown>");
             }

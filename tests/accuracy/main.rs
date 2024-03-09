@@ -96,9 +96,9 @@ fn verify(filelines: &[Pos]) {
     println!("-----------------------------------");
     println!("looking for:");
     for (file, line) in filelines.iter().rev() {
-        println!("\t{}:{}", file, line);
+        println!("\t{file}:{line}");
     }
-    println!("found:\n{:?}", trace);
+    println!("found:\n{trace:?}");
     let mut symbols = trace.frames().iter().flat_map(|frame| frame.symbols());
     let mut iter = filelines.iter().rev();
     while let Some((file, line)) = iter.next() {

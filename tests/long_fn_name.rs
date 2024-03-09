@@ -25,7 +25,7 @@ fn test_long_fn_name() {
     // It's actually longer since it also includes `::`, `<>` and the
     // name of the current module
     let bt = S::<S<S<S<S<S<S<S<S<S<i32>>>>>>>>>>::new();
-    println!("{:?}", bt);
+    println!("{bt:?}");
 
     let mut found_long_name_frame = false;
 

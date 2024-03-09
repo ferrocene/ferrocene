@@ -27,7 +27,7 @@ fn main() {
 
     // do_some_work();
 
-    println!("{:?}", bt);
+    println!("{bt:?}");
 }
 ```
 

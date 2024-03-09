@@ -9,7 +9,7 @@ fn main() {
     let expect = std::path::Path::new(&crate_dir).join("src/main.rs");
 
     let bt = backtrace::Backtrace::new();
-    println!("{:?}", bt);
+    println!("{bt:?}");
 
     let mut found_main = false;
 
@@ -20,7 +20,7 @@ fn main() {
         }
 
         if let Some(name) = symbols[0].name() {
-            let name = format!("{:#}", name);
+            let name = format!("{name:#}");
             if name == "debuglink::main" {
                 found_main = true;
                 let filename = symbols[0].filename().unwrap();

@@ -174,9 +174,9 @@ impl Backtrace {
     /// use backtrace::Backtrace;
     ///
     /// let mut current_backtrace = Backtrace::new_unresolved();
-    /// println!("{:?}", current_backtrace); // no symbol names
+    /// println!("{current_backtrace:?}"); // no symbol names
     /// current_backtrace.resolve();
-    /// println!("{:?}", current_backtrace); // symbol names now present
+    /// println!("{current_backtrace:?}"); // symbol names now present
     /// ```
     ///
     /// # Required features

@@ -15,8 +15,7 @@ fn backtrace_no_dsym() {
     let executable_name = dsym_path.file_name().unwrap().to_str().unwrap().to_string();
     assert!(dsym_path.pop()); // Pop executable
     dsym_path.push(format!(
-        "{}.dSYM/Contents/Resources/DWARF/{0}",
-        executable_name
+        "{executable_name}.dSYM/Contents/Resources/DWARF/{executable_name}"
     ));
     let _ = fs::OpenOptions::new()
         .read(false)

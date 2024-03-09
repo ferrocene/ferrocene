@@ -18,7 +18,7 @@ fn backtrace_new_unresolved_should_start_with_call_site_trace() {
     }
     let mut b = Backtrace::new_unresolved();
     b.resolve();
-    println!("{:?}", b);
+    println!("{b:?}");
 
     assert!(!b.frames().is_empty());
 
@@ -34,7 +34,7 @@ fn backtrace_new_should_start_with_call_site_trace() {
         return;
     }
     let b = Backtrace::new();
-    println!("{:?}", b);
+    println!("{b:?}");
 
     assert!(!b.frames().is_empty());
 

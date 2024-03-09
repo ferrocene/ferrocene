@@ -20,7 +20,7 @@ fn main() {
                 println!("test result: ignored");
             }
             Err(EarlyExit::IoError(e)) => {
-                println!("{} parent encoutered IoError: {:?}", file!(), e);
+                println!("{} parent encountered IoError: {:?}", file!(), e);
                 panic!();
             }
         }
@@ -74,7 +74,7 @@ fn parent() -> Result<(), EarlyExit> {
 
 fn child() -> Result<(), EarlyExit> {
     let bt = backtrace::Backtrace::new();
-    println!("{:?}", bt);
+    println!("{bt:?}");
 
     let mut found_my_name = false;
 

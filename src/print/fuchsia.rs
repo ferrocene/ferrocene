@@ -312,7 +312,7 @@ struct HexSlice<'a> {
 impl fmt::Display for HexSlice<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for byte in self.bytes {
-            write!(f, "{:02x}", byte)?;
+            write!(f, "{byte:02x}")?;
         }
         Ok(())
     }

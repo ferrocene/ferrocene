@@ -421,7 +421,7 @@ cfg_if::cfg_if! {
                 // it outwards.
                 if let Some(ref cpp) = self.cpp_demangled.0 {
                     let mut s = String::new();
-                    if write!(s, "{}", cpp).is_ok() {
+                    if write!(s, "{cpp}").is_ok() {
                         return s.fmt(f)
                     }
                 }

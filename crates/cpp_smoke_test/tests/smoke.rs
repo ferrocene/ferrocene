@@ -49,13 +49,13 @@ fn smoke_test_cpp() {
             .take(2)
             .collect();
 
-        println!("actual names = {:#?}", names);
+        println!("actual names = {names:#?}");
 
         let expected = [
             "void space::templated_trampoline<void (*)()>(void (*)())",
             "cpp_trampoline",
         ];
-        println!("expected names = {:#?}", expected);
+        println!("expected names = {expected:#?}");
 
         assert_eq!(names.len(), expected.len());
         for (actual, expected) in names.iter().zip(expected.iter()) {

@@ -49,6 +49,14 @@ impl Frame {
         Some(self.base_address)
     }
 
+    #[cfg(not(target_env = "gnu"))]
+    pub fn inline_context(&self) -> Option<DWORD> {
+        match self.stack_frame {
+            StackFrame::New(ref new) => Some(new.InlineFrameContext),
+            StackFrame::Old(_) => None,
+        }
+    }
+
     fn addr_pc(&self) -> &ADDRESS64 {
         match self.stack_frame {
             StackFrame::New(ref new) => &new.AddrPC,
@@ -111,25 +119,8 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     //
     // Note that `RtlLookupFunctionEntry` only works for in-process backtraces,
     // but that's all we support anyway, so it all lines up well.
-    cfg_if::cfg_if! {
-        if #[cfg(target_pointer_width = "64")] {
-            use core::ptr;
-
-            unsafe extern "system" fn function_table_access(_process: HANDLE, addr: DWORD64) -> PVOID {
-                let mut base = 0;
-                RtlLookupFunctionEntry(addr, &mut base, ptr::null_mut()).cast()
-            }
-
-            unsafe extern "system" fn get_module_base(_process: HANDLE, addr: DWORD64) -> DWORD64 {
-                let mut base = 0;
-                RtlLookupFunctionEntry(addr, &mut base, ptr::null_mut());
-                base
-            }
-        } else {
-            let function_table_access = dbghelp.SymFunctionTableAccess64();
-            let get_module_base = dbghelp.SymGetModuleBase64();
-        }
-    }
+    let function_table_access = dbghelp.SymFunctionTableAccess64();
+    let get_module_base = dbghelp.SymGetModuleBase64();
 
     let process_handle = GetCurrentProcess();
 
@@ -206,18 +197,6 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     }
 }
 
-#[cfg(target_arch = "x86_64")]
-fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
-    frame.addr_pc_mut().Offset = ctx.Rip as u64;
-    frame.addr_pc_mut().Mode = AddrModeFlat;
-    frame.addr_stack_mut().Offset = ctx.Rsp as u64;
-    frame.addr_stack_mut().Mode = AddrModeFlat;
-    frame.addr_frame_mut().Offset = ctx.Rbp as u64;
-    frame.addr_frame_mut().Mode = AddrModeFlat;
-
-    IMAGE_FILE_MACHINE_AMD64
-}
-
 #[cfg(target_arch = "x86")]
 fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
     frame.addr_pc_mut().Offset = ctx.Eip as u64;
@@ -228,19 +207,6 @@ fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
     frame.addr_frame_mut().Mode = AddrModeFlat;
 
     IMAGE_FILE_MACHINE_I386
-}
-
-#[cfg(target_arch = "aarch64")]
-fn init_frame(frame: &mut Frame, ctx: &CONTEXT) -> WORD {
-    frame.addr_pc_mut().Offset = ctx.Pc as u64;
-    frame.addr_pc_mut().Mode = AddrModeFlat;
-    frame.addr_stack_mut().Offset = ctx.Sp as u64;
-    frame.addr_stack_mut().Mode = AddrModeFlat;
-    unsafe {
-        frame.addr_frame_mut().Offset = ctx.u.s().Fp as u64;
-    }
-    frame.addr_frame_mut().Mode = AddrModeFlat;
-    IMAGE_FILE_MACHINE_ARM64
 }
 
 #[cfg(target_arch = "arm")]

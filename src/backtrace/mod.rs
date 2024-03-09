@@ -193,7 +193,15 @@ cfg_if::cfg_if! {
         use self::libunwind::trace as trace_imp;
         pub(crate) use self::libunwind::Frame as FrameImp;
     } else if #[cfg(all(windows, not(target_vendor = "uwp")))] {
-        mod dbghelp;
+        cfg_if::cfg_if! {
+            if #[cfg(any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "arm64ec"))] {
+                mod dbghelp64;
+                use dbghelp64 as dbghelp;
+            } else if #[cfg(any(target_arch = "x86", target_arch = "arm"))] {
+                mod dbghelp32;
+                use dbghelp32 as dbghelp;
+            }
+        }
         use self::dbghelp::trace as trace_imp;
         pub(crate) use self::dbghelp::Frame as FrameImp;
     } else {

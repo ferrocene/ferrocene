@@ -72,6 +72,22 @@ impl Symbol<'_> {
 #[repr(C, align(8))]
 struct Aligned8<T>(T);
 
+#[cfg(not(target_vendor = "win7"))]
+pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
+    // Ensure this process's symbols are initialized
+    let dbghelp = match dbghelp::init() {
+        Ok(dbghelp) => dbghelp,
+        Err(()) => return, // oh well...
+    };
+    match what {
+        ResolveWhat::Address(_) => resolve_with_inline(&dbghelp, what.address_or_ip(), None, cb),
+        ResolveWhat::Frame(frame) => {
+            resolve_with_inline(&dbghelp, frame.ip(), frame.inner.inline_context(), cb)
+        }
+    }
+}
+
+#[cfg(target_vendor = "win7")]
 pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol)) {
     // Ensure this process's symbols are initialized
     let dbghelp = match dbghelp::init() {
@@ -100,6 +116,7 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
 ///
 /// This should work all the way down to Windows XP. The inline context is
 /// ignored, since this concept was only introduced in dbghelp 6.2+.
+#[cfg(target_vendor = "win7")]
 unsafe fn resolve_legacy(
     dbghelp: &dbghelp::Init,
     addr: *mut c_void,

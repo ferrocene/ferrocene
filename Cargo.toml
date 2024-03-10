@@ -1,6 +1,6 @@
 [package]
 name = "backtrace"
-version = "0.3.69"
+version = "0.3.70"
 authors = ["The Rust Project Developers"]
 build = "build.rs"
 license = "MIT OR Apache-2.0"

@@ -125,7 +125,8 @@ impl Step for GenerateCoverageReport {
             return;
         }
 
-        let core_tests_binary_path = get_test_binary_path(builder).expect("Could not find tests binary");
+        let core_tests_binary_path =
+            get_test_binary_path(builder).expect("Could not find tests binary");
 
         if coverage_report_data_dir.exists() {
             let mut files = coverage_report_data_dir.read_dir().expect("Failed to read dir");
@@ -163,8 +164,7 @@ impl Step for GenerateCoverageReport {
         assert!(core_tests_binary_path.exists());
 
         let mut cmd = Command::new("grcov");
-        cmd
-            .arg(coverage_report_data_dir)
+        cmd.arg(coverage_report_data_dir)
             .arg("-s")
             .arg(coverage_src_path)
             .arg("--ignore")
@@ -189,7 +189,7 @@ impl Step for GenerateCoverageReport {
             // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
             .env("RUSTC", rustc_path);
 
-        let  bootstrap_cmd = BootstrapCommand::from(&mut cmd);
+        let bootstrap_cmd = BootstrapCommand::from(&mut cmd);
 
         builder.run_cmd(bootstrap_cmd);
     }
@@ -214,18 +214,8 @@ fn env_llvm_profile_data_dir() -> Option<PathBuf> {
     }
 }
 fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
-    let cargo_toml_str =
-        std::fs::read_to_string("library/core/Cargo.toml").expect("Failed to read Cargo.toml");
-    let cargo_toml_data: toml::Value =
-        toml::from_str(&cargo_toml_str).expect("Failed to parse Cargo.toml");
+    let test_name = "coretests";
 
-    let tests = cargo_toml_data.get("test").expect("Failed to get tests");
-    let tests_array = tests.as_array();
-    let tests_array = tests_array.unwrap();
-    let test = &tests_array[0];
-    let test = test.as_table().unwrap();
-
-    let test_name = test.get("name").unwrap().as_str().unwrap();
     let core_tests_binary_dir_path = builder
         .out
         .join(builder.config.build.triple)

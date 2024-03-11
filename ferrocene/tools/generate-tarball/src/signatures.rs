@@ -104,8 +104,10 @@ mod tests {
     use super::*;
     use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
     use criticaltrust::signatures::Keychain;
+    #[cfg(unix)] // Not used on Windows
     use std::fs::Permissions;
     use std::io::Write;
+    #[cfg(unix)]
     use std::os::unix::prelude::PermissionsExt;
     use tempfile::TempDir;
 
@@ -113,6 +115,7 @@ mod tests {
     fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
 
+        #[cfg_attr(windows, allow(unused_variables))] // Windows does not use `mode`
         let create_file = |path, contents, mode| {
             let path = package_dir.path().join(path);
             if let Some(parent) = path.parent() {
@@ -120,6 +123,7 @@ mod tests {
             }
             let mut file = File::create(path)?;
             file.write_all(contents)?;
+            #[cfg(unix)]
             file.set_permissions(Permissions::from_mode(mode))?;
             Ok::<_, Error>(())
         };

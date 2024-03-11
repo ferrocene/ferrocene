@@ -3,6 +3,7 @@
 
 use std::cell::RefCell;
 use std::io::Write;
+#[cfg(unix)]
 use std::os::unix::prelude::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -192,6 +193,7 @@ impl<'a> BinBuilder<'a> {
         stdin.write_all(self.program.as_bytes()).unwrap();
         assert!(rustc.wait().unwrap().success());
 
+        #[cfg(not(windows))]
         if let Some(mode) = self.mode {
             let mut perms = bin.metadata().unwrap().permissions();
             perms.set_mode(mode);

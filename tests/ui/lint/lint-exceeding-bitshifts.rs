@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 // revisions: noopt opt opt_with_overflow_checks
 //[noopt]compile-flags: -C opt-level=0
 //[opt]compile-flags: -O

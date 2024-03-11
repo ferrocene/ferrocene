@@ -1282,7 +1282,7 @@ impl Step for CodegenBackend {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        for &backend in &run.builder.config.rust_codegen_backends {
+        for &backend in run.builder.config.codegen_backends(run.target) {
             if backend == "llvm" {
                 continue; // Already built as part of rustc
             }
@@ -1306,7 +1306,7 @@ impl Step for CodegenBackend {
             return None;
         }
 
-        if !builder.config.rust_codegen_backends.contains(&self.backend) {
+        if !builder.config.codegen_backends(self.compiler.host).contains(&self.backend) {
             return None;
         }
 

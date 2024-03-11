@@ -33,8 +33,8 @@ use crate::errors::{AddedMacroUse, ChangeImportBinding, ChangeImportBindingSugge
 use crate::errors::{ConsiderAddingADerive, ExplicitUnsafeTraits, MaybeMissingMacroRulesName};
 use crate::imports::{Import, ImportKind};
 use crate::late::{PatternSource, Rib};
-use crate::path_names_to_string;
 use crate::{errors as errs, BindingKey};
+use crate::{path_names_to_string, Used};
 use crate::{AmbiguityError, AmbiguityErrorMisc, AmbiguityKind, BindingError, Finalize};
 use crate::{HasGenericParams, MacroRulesScope, Module, ModuleKind, ModuleOrUniformRoot};
 use crate::{LexicalScopeBinding, NameBinding, NameBindingKind, PrivacyError, VisResolutionError};
@@ -403,9 +403,12 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
         }
 
         if let Some(suggestion) = suggestion {
-            err.subdiagnostic(ChangeImportBindingSuggestion { span: binding_span, suggestion });
+            err.subdiagnostic(
+                self.dcx(),
+                ChangeImportBindingSuggestion { span: binding_span, suggestion },
+            );
         } else {
-            err.subdiagnostic(ChangeImportBinding { span: binding_span });
+            err.subdiagnostic(self.dcx(), ChangeImportBinding { span: binding_span });
         }
     }
 
@@ -1430,17 +1433,17 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
         );
 
         if macro_kind == MacroKind::Bang && ident.name == sym::macro_rules {
-            err.subdiagnostic(MaybeMissingMacroRulesName { span: ident.span });
+            err.subdiagnostic(self.dcx(), MaybeMissingMacroRulesName { span: ident.span });
             return;
         }
 
         if macro_kind == MacroKind::Derive && (ident.name == sym::Send || ident.name == sym::Sync) {
-            err.subdiagnostic(ExplicitUnsafeTraits { span: ident.span, ident });
+            err.subdiagnostic(self.dcx(), ExplicitUnsafeTraits { span: ident.span, ident });
             return;
         }
 
         if self.macro_names.contains(&ident.normalize_to_macros_2_0()) {
-            err.subdiagnostic(AddedMacroUse);
+            err.subdiagnostic(self.dcx(), AddedMacroUse);
             return;
         }
 
@@ -1450,10 +1453,13 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
             let span = self.def_span(def_id);
             let source_map = self.tcx.sess.source_map();
             let head_span = source_map.guess_head_span(span);
-            err.subdiagnostic(ConsiderAddingADerive {
-                span: head_span.shrink_to_lo(),
-                suggestion: "#[derive(Default)]\n".to_string(),
-            });
+            err.subdiagnostic(
+                self.dcx(),
+                ConsiderAddingADerive {
+                    span: head_span.shrink_to_lo(),
+                    suggestion: "#[derive(Default)]\n".to_string(),
+                },
+            );
         }
         for ns in [Namespace::MacroNS, Namespace::TypeNS, Namespace::ValueNS] {
             if let Ok(binding) = self.early_resolve_ident_in_lexical_scope(
@@ -1497,7 +1503,7 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
                         );
                         // Silence the 'unused import' warning we might get,
                         // since this diagnostic already covers that import.
-                        self.record_use(ident, binding, false);
+                        self.record_use(ident, binding, Used::Other);
                         return;
                     }
                 }

@@ -1,9 +1,7 @@
 use std::cmp;
 use std::iter;
-use std::num::NonZeroUsize;
+use std::num::NonZero;
 use std::time::Duration;
-
-use log::trace;
 
 use rustc_apfloat::ieee::{Double, Single};
 use rustc_apfloat::Float;
@@ -574,7 +572,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             fn visit_union(
                 &mut self,
                 _v: &MPlaceTy<'tcx, Provenance>,
-                _fields: NonZeroUsize,
+                _fields: NonZero<usize>,
             ) -> InterpResult<'tcx> {
                 bug!("we should have already handled unions in `visit_value`")
             }

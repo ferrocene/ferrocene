@@ -1,7 +1,5 @@
 use std::{collections::hash_map::Entry, io::Write, iter, path::Path};
 
-use log::trace;
-
 use rustc_apfloat::Float;
 use rustc_ast::expand::allocator::AllocatorKind;
 use rustc_hir::{
@@ -477,7 +475,7 @@ trait EvalContextExtPriv<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                 let [id, show_unnamed] = this.check_shim(abi, Abi::Rust, link_name, args)?;
                 let id = this.read_scalar(id)?.to_u64()?;
                 let show_unnamed = this.read_scalar(show_unnamed)?.to_bool()?;
-                if let Some(id) = std::num::NonZeroU64::new(id) {
+                if let Some(id) = std::num::NonZero::new(id) {
                     this.print_borrow_state(AllocId(id), show_unnamed)?;
                 }
             }

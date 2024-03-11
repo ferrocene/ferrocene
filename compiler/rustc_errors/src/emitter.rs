@@ -10,6 +10,7 @@
 use rustc_span::source_map::SourceMap;
 use rustc_span::{FileLines, FileName, SourceFile, Span};
 
+use crate::error::TranslateError;
 use crate::snippet::{
     Annotation, AnnotationColumn, AnnotationType, Line, MultilineAnnotation, Style, StyledString,
 };
@@ -559,6 +560,18 @@ pub struct SilentEmitter {
     pub fatal_note: String,
 }
 
+pub fn silent_translate<'a>(
+    message: &'a DiagnosticMessage,
+) -> Result<Cow<'_, str>, TranslateError<'_>> {
+    match message {
+        DiagnosticMessage::Str(msg) | DiagnosticMessage::Translated(msg) => Ok(Cow::Borrowed(msg)),
+        DiagnosticMessage::FluentIdentifier(identifier, _) => {
+            // Any value works here.
+            Ok(identifier.clone())
+        }
+    }
+}
+
 impl Translate for SilentEmitter {
     fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
         None
@@ -566,6 +579,16 @@ impl Translate for SilentEmitter {
 
     fn fallback_fluent_bundle(&self) -> &FluentBundle {
         panic!("silent emitter attempted to translate message")
+    }
+
+    // Override `translate_message` for the silent emitter because eager translation of
+    // subdiagnostics result in a call to this.
+    fn translate_message<'a>(
+        &'a self,
+        message: &'a DiagnosticMessage,
+        _: &'a FluentArgs<'_>,
+    ) -> Result<Cow<'_, str>, TranslateError<'_>> {
+        silent_translate(message)
     }
 }
 
@@ -1743,9 +1766,17 @@ impl HumanEmitter {
         buffer.append(0, level.to_str(), Style::Level(*level));
         buffer.append(0, ": ", Style::HeaderMsg);
 
+        let mut msg = vec![(suggestion.msg.to_owned(), Style::NoStyle)];
+        if suggestions
+            .iter()
+            .take(MAX_SUGGESTIONS)
+            .any(|(_, _, _, only_capitalization)| *only_capitalization)
+        {
+            msg.push((" (notice the capitalization difference)".into(), Style::NoStyle));
+        }
         self.msgs_to_buffer(
             &mut buffer,
-            &[(suggestion.msg.to_owned(), Style::NoStyle)],
+            &msg,
             args,
             max_line_num_len,
             "suggestion",
@@ -1754,12 +1785,8 @@ impl HumanEmitter {
 
         let mut row_num = 2;
         draw_col_separator_no_space(&mut buffer, 1, max_line_num_len + 1);
-        let mut notice_capitalization = false;
-        for (complete, parts, highlights, only_capitalization) in
-            suggestions.iter().take(MAX_SUGGESTIONS)
-        {
+        for (complete, parts, highlights, _) in suggestions.iter().take(MAX_SUGGESTIONS) {
             debug!(?complete, ?parts, ?highlights);
-            notice_capitalization |= only_capitalization;
 
             let has_deletion = parts.iter().any(|p| p.is_deletion(sm));
             let is_multiline = complete.lines().count() > 1;
@@ -2058,9 +2085,6 @@ impl HumanEmitter {
             let others = suggestions.len() - MAX_SUGGESTIONS;
             let msg = format!("and {} other candidate{}", others, pluralize!(others));
             buffer.puts(row_num, max_line_num_len + 3, &msg, Style::NoStyle);
-        } else if notice_capitalization {
-            let msg = "notice the capitalization difference";
-            buffer.puts(row_num, max_line_num_len + 3, msg, Style::NoStyle);
         }
         emit_to_destination(&buffer.render(), level, &mut self.dst, self.short_message)?;
         Ok(())

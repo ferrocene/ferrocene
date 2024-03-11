@@ -1433,7 +1433,7 @@ impl<'a> Parser<'a> {
                     // If the input is something like `if a { 1 } else { 2 } | if a { 3 } else { 4 }`
                     // then suggest parens around the lhs.
                     if let Some(sp) = this.sess.ambiguous_block_expr_parse.borrow().get(&lo) {
-                        err.subdiagnostic(ExprParenthesesNeeded::surrounding(*sp));
+                        err.subdiagnostic(this.dcx(), ExprParenthesesNeeded::surrounding(*sp));
                     }
                     err
                 })
@@ -2140,12 +2140,12 @@ impl<'a> Parser<'a> {
                     Err(err) => {
                         let span = token.uninterpolated_span();
                         self.bump();
-                        report_lit_error(self.sess, err, lit, span);
+                        let guar = report_lit_error(self.sess, err, lit, span);
                         // Pack possible quotes and prefixes from the original literal into
                         // the error literal's symbol so they can be pretty-printed faithfully.
                         let suffixless_lit = token::Lit::new(lit.kind, lit.symbol, None);
                         let symbol = Symbol::intern(&suffixless_lit.to_string());
-                        let lit = token::Lit::new(token::Err, symbol, lit.suffix);
+                        let lit = token::Lit::new(token::Err(guar), symbol, lit.suffix);
                         Some(
                             MetaItemLit::from_token_lit(lit, span)
                                 .unwrap_or_else(|_| unreachable!()),

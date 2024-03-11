@@ -1,4 +1,4 @@
-// error-pattern:expected
+//@ error-pattern:expected
 use foo::{bar}::baz
 
 // ferrocene-annotations: fls_9i5msiuuyihf

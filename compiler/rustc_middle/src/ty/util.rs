@@ -18,7 +18,7 @@ use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_index::bit_set::GrowableBitSet;
 use rustc_macros::HashStable;
 use rustc_session::Limit;
-use rustc_span::sym;
+use rustc_span::{sym, Symbol};
 use rustc_target::abi::{Integer, IntegerType, Primitive, Size};
 use rustc_target::spec::abi::Abi;
 use smallvec::SmallVec;
@@ -96,13 +96,8 @@ impl<'tcx> Discr<'tcx> {
     }
 }
 
-pub trait IntTypeExt {
-    fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx>;
-    fn disr_incr<'tcx>(&self, tcx: TyCtxt<'tcx>, val: Option<Discr<'tcx>>) -> Option<Discr<'tcx>>;
-    fn initial_discriminant<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Discr<'tcx>;
-}
-
-impl IntTypeExt for IntegerType {
+#[extension(pub trait IntTypeExt)]
+impl IntegerType {
     fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         match self {
             IntegerType::Pointer(true) => tcx.types.isize,
@@ -1552,9 +1547,15 @@ pub fn is_doc_notable_trait(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
         .any(|items| items.iter().any(|item| item.has_name(sym::notable_trait)))
 }
 
-/// Determines whether an item is an intrinsic by Abi.
-pub fn is_intrinsic(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
-    matches!(tcx.fn_sig(def_id).skip_binder().abi(), Abi::RustIntrinsic | Abi::PlatformIntrinsic)
+/// Determines whether an item is an intrinsic by Abi. or by whether it has a `rustc_intrinsic` attribute
+pub fn intrinsic(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Option<Symbol> {
+    if matches!(tcx.fn_sig(def_id).skip_binder().abi(), Abi::RustIntrinsic | Abi::PlatformIntrinsic)
+        || tcx.has_attr(def_id, sym::rustc_intrinsic)
+    {
+        Some(tcx.item_name(def_id.into()))
+    } else {
+        None
+    }
 }
 
 pub fn provide(providers: &mut Providers) {
@@ -1562,7 +1563,7 @@ pub fn provide(providers: &mut Providers) {
         reveal_opaque_types_in_bounds,
         is_doc_hidden,
         is_doc_notable_trait,
-        is_intrinsic,
+        intrinsic,
         ..*providers
     }
 }

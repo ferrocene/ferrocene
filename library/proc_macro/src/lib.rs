@@ -26,6 +26,7 @@
 #![feature(staged_api)]
 #![feature(allow_internal_unstable)]
 #![feature(decl_macro)]
+#![feature(generic_nonzero)]
 #![feature(maybe_uninit_write_slice)]
 #![feature(negative_impls)]
 #![feature(new_uninit)]
@@ -1451,7 +1452,7 @@ impl Literal {
                 f(&["cr", hashes, "\"", symbol, "\"", hashes, suffix])
             }
 
-            bridge::LitKind::Integer | bridge::LitKind::Float | bridge::LitKind::Err => {
+            bridge::LitKind::Integer | bridge::LitKind::Float | bridge::LitKind::ErrWithGuar => {
                 f(&[symbol, suffix])
             }
         })

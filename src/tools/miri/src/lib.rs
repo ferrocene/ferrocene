@@ -1,6 +1,7 @@
 #![feature(rustc_private)]
 #![feature(cell_update)]
 #![feature(float_gamma)]
+#![feature(generic_nonzero)]
 #![feature(map_try_insert)]
 #![feature(never_type)]
 #![feature(try_blocks)]
@@ -62,6 +63,8 @@ extern crate rustc_middle;
 extern crate rustc_session;
 extern crate rustc_span;
 extern crate rustc_target;
+#[macro_use]
+extern crate tracing;
 
 // Necessary to pull in object code as the rest of the rustc crates are shipped only as rmeta
 // files.

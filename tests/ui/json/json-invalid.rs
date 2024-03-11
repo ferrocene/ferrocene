@@ -1,4 +1,4 @@
-// compile-flags: --json=foo --error-format=json
+//@ compile-flags: --json=foo --error-format=json
 
 fn main() {}
 

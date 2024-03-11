@@ -543,6 +543,8 @@ workflows:
           image: ubuntu-23
           tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
+      
+      - x86_64-windows-llvm
 
       - commit-checks:
           requires:

@@ -126,6 +126,7 @@ parameterized_over_tcx! {
     crate::middle::exported_symbols::ExportedSymbol,
     crate::mir::Body,
     crate::mir::CoroutineLayout,
+    crate::mir::interpret::ConstAllocation,
     ty::Ty,
     ty::FnSig,
     ty::GenericPredicates,
@@ -134,4 +135,5 @@ parameterized_over_tcx! {
     ty::Predicate,
     ty::Clause,
     ty::ClauseKind,
+    ty::ImplTraitHeader
 }

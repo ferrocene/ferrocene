@@ -56,7 +56,7 @@ type variable is an instance of a type parameter. That is,
 given a generic function `fn foo<T>(t: T)`, while checking the
 function `foo`, the type `ty_param(0)` refers to the type `T`, which
 is treated in abstract. However, when `foo()` is called, `T` will be
-substituted for a fresh type variable `N`. This variable will
+instantiated with a fresh type variable `N`. This variable will
 eventually be resolved to some concrete type (which might itself be
 a type parameter).
 
@@ -76,7 +76,7 @@ pub use check::check_abi;
 
 use std::num::NonZeroU32;
 
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_errors::ErrorGuaranteed;
 use rustc_errors::{pluralize, struct_span_code_err, Diagnostic, DiagnosticBuilder};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -307,7 +307,7 @@ fn bounds_from_generic_predicates<'tcx>(
     tcx: TyCtxt<'tcx>,
     predicates: impl IntoIterator<Item = (ty::Clause<'tcx>, Span)>,
 ) -> (String, String) {
-    let mut types: FxHashMap<Ty<'tcx>, Vec<DefId>> = FxHashMap::default();
+    let mut types: FxIndexMap<Ty<'tcx>, Vec<DefId>> = FxIndexMap::default();
     let mut projections = vec![];
     for (predicate, _) in predicates {
         debug!("predicate {:?}", predicate);

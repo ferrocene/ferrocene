@@ -161,7 +161,7 @@ impl<'tcx> LateLintPass<'tcx> for NeedlessPassByRefMut<'tcx> {
         };
 
         // Exclude non-inherent impls
-        if let Some(Node::Item(item)) = cx.tcx.hir().find_parent(hir_id) {
+        if let Node::Item(item) = cx.tcx.parent_hir_node(hir_id) {
             if matches!(
                 item.kind,
                 ItemKind::Impl(Impl { of_trait: Some(_), .. }) | ItemKind::Trait(..)
@@ -382,7 +382,8 @@ impl<'tcx> euv::Delegate<'tcx> for MutablyUsedVariablesCtxt<'tcx> {
                 self.add_mutably_used_var(*vid);
             }
             self.prev_bind = None;
-            self.prev_move_to_closure.remove(vid);
+            // FIXME(rust/#120456) - is `swap_remove` correct?
+            self.prev_move_to_closure.swap_remove(vid);
         }
     }
 

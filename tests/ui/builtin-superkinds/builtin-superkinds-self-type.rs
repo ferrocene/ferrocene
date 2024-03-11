@@ -14,6 +14,7 @@ fn main() {
     let (tx, rx) = channel();
     1193182.foo(tx);
     assert_eq!(rx.recv(), 1193182);
+    //~^ ERROR: mismatched types
 }
 
 // ferrocene-annotations: fls_jeoas4n6su4

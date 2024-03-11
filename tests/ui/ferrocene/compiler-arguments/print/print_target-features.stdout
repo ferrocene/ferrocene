@@ -137,7 +137,6 @@ Code-generation features supported by LLVM for this target:
     retpoline-external-thunk        - When lowering an indirect call or branch using a `retpoline`, rely on the specified user provided thunk rather than emitting one ourselves. Only has effect when combined with some other retpoline feature.
     retpoline-indirect-branches     - Remove speculation of indirect branches from the generated code.
     retpoline-indirect-calls        - Remove speculation of indirect calls from the generated code.
-    sahf                            - Support LAHF and SAHF instructions in 64-bit mode.
     sbb-dep-breaking                - SBB with same register has no source dependency.
     serialize                       - Has serialize instruction.
     seses                           - Prevent speculative execution side channel timing attacks by inserting a speculation barrier before memory reads, memory writes, and conditional branches. Implies LVI Control Flow integrity..

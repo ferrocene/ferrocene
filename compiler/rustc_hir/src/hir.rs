@@ -2536,7 +2536,7 @@ pub struct OpaqueTy<'hir> {
     /// lifetimes that are captured from the function signature they originate from.
     ///
     /// This is done by generating a new early-bound lifetime parameter local to the
-    /// opaque which is substituted in the function signature with the late-bound
+    /// opaque which is instantiated in the function signature with the late-bound
     /// lifetime.
     ///
     /// This mapping associated a captured lifetime (first parameter) with the new
@@ -2587,6 +2587,8 @@ pub enum TyKind<'hir> {
     Never,
     /// A tuple (`(A, B, C, D, ...)`).
     Tup(&'hir [Ty<'hir>]),
+    /// An anonymous struct or union type i.e. `struct { foo: Type }` or `union { foo: Type }`
+    AnonAdt(ItemId),
     /// A path to a type definition (`module::module::...::Type`), or an
     /// associated type (e.g., `<Vec<T> as Trait>::Type` or `<T>::Target`).
     ///
@@ -3508,7 +3510,7 @@ impl<'hir> Node<'hir> {
     /// ```ignore (illustrative)
     /// ctor
     ///     .ctor_hir_id()
-    ///     .and_then(|ctor_id| tcx.hir().find_parent(ctor_id))
+    ///     .map(|ctor_id| tcx.parent_hir_node(ctor_id))
     ///     .and_then(|parent| parent.ident())
     /// ```
     pub fn ident(&self) -> Option<Ident> {

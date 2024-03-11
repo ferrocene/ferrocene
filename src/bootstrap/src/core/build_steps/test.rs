@@ -20,6 +20,7 @@ use crate::core::build_steps::llvm;
 use crate::core::build_steps::synthetic_targets::MirOptPanicAbortSyntheticTarget;
 use crate::core::build_steps::tool::{self, SourceType, Tool};
 use crate::core::build_steps::toolstate::ToolState;
+use crate::core::builder;
 use crate::core::builder::crate_description;
 use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
@@ -381,7 +382,7 @@ impl Step for RustAnalyzer {
         // work in Rust CI
         cargo.env("SKIP_SLOW_TESTS", "1");
 
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
         run_cargo_test(cargo, &[], &[], "rust-analyzer", "rust-analyzer", compiler, host, builder);
     }
 }
@@ -427,7 +428,7 @@ impl Step for Rustfmt {
         t!(fs::create_dir_all(&dir));
         cargo.env("RUSTFMT_TEST_DIR", dir);
 
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
 
         run_cargo_test(cargo, &[], &[], "rustfmt", "rustfmt", compiler, host, builder);
     }
@@ -477,7 +478,7 @@ impl Step for RustDemangler {
         t!(fs::create_dir_all(&dir));
 
         cargo.env("RUST_DEMANGLER_DRIVER_PATH", rust_demangler);
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
 
         run_cargo_test(
             cargo,
@@ -518,7 +519,7 @@ impl Miri {
             SourceType::InTree,
             &[],
         );
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
         cargo.arg("--").arg("miri").arg("setup");
         cargo.arg("--target").arg(target.rustc_target_arg());
 
@@ -619,7 +620,7 @@ impl Step for Miri {
         );
         let _guard = builder.msg_sysroot_tool(Kind::Test, compiler.stage, "miri", host, target);
 
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
 
         // miri tests need to know about the stage sysroot
         cargo.env("MIRI_SYSROOT", &miri_sysroot);
@@ -672,7 +673,7 @@ impl Step for Miri {
             SourceType::Submodule,
             &[],
         );
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
         cargo.arg("--").arg("miri").arg("test");
         if builder.config.locked_deps {
             cargo.arg("--locked");
@@ -789,7 +790,7 @@ impl Step for Clippy {
         let host_libs = builder.stage_out(compiler, Mode::ToolRustc).join(builder.cargo_dir());
         cargo.env("HOST_LIBS", host_libs);
 
-        cargo.add_rustc_lib_path(builder, compiler);
+        cargo.add_rustc_lib_path(builder);
         let mut cargo = prepare_cargo_test(cargo, &[], &[], "clippy", compiler, host, builder);
 
         let _guard = builder.msg_sysroot_tool(Kind::Test, compiler.stage, "clippy", host, host);
@@ -2525,8 +2526,14 @@ impl Step for Crate {
         // we're working with automatically.
         let compiler = builder.compiler_for(compiler.stage, compiler.host, target);
 
-        let mut cargo =
-            builder.cargo(compiler, mode, SourceType::InTree, target, builder.kind.as_str());
+        let mut cargo = builder::Cargo::new(
+            builder,
+            compiler,
+            mode,
+            SourceType::InTree,
+            target,
+            builder.kind.as_str(),
+        );
 
         match mode {
             Mode::Std => {
@@ -3194,13 +3201,15 @@ impl Step for CodegenCranelift {
         let compiler = builder.compiler_for(compiler.stage, compiler.host, target);
 
         let build_cargo = || {
-            let mut cargo = builder.cargo(
+            let mut cargo = builder::Cargo::new(
+                builder,
                 compiler,
                 Mode::Codegen, // Must be codegen to ensure dlopen on compiled dylibs works
                 SourceType::InTree,
                 target,
                 "run",
             );
+
             cargo.current_dir(&builder.src.join("compiler/rustc_codegen_cranelift"));
             cargo
                 .arg("--manifest-path")
@@ -3320,13 +3329,15 @@ impl Step for CodegenGCC {
         let compiler = builder.compiler_for(compiler.stage, compiler.host, target);
 
         let build_cargo = || {
-            let mut cargo = builder.cargo(
+            let mut cargo = builder::Cargo::new(
+                builder,
                 compiler,
                 Mode::Codegen, // Must be codegen to ensure dlopen on compiled dylibs works
                 SourceType::InTree,
                 target,
                 "run",
             );
+
             cargo.current_dir(&builder.src.join("compiler/rustc_codegen_gcc"));
             cargo
                 .arg("--manifest-path")

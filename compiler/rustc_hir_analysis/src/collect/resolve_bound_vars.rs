@@ -732,7 +732,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                     let Some(def_id) = def_id.as_local() else { continue };
                     let hir_id = self.tcx.local_def_id_to_hir_id(def_id);
                     // Ensure that the parent of the def is an item, not HRTB
-                    let parent_id = self.tcx.hir().parent_id(hir_id);
+                    let parent_id = self.tcx.parent_hir_id(hir_id);
                     if !parent_id.is_owner() {
                         struct_span_code_err!(
                             self.tcx.dcx(),
@@ -1786,7 +1786,8 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                 let bound_predicate = pred.kind();
                 match bound_predicate.skip_binder() {
                     ty::ClauseKind::Trait(data) => {
-                        // The order here needs to match what we would get from `subst_supertrait`
+                        // The order here needs to match what we would get from
+                        // `rustc_middle::ty::predicate::Clause::instantiate_supertrait`
                         let pred_bound_vars = bound_predicate.bound_vars();
                         let mut all_bound_vars = bound_vars.clone();
                         all_bound_vars.extend(pred_bound_vars.iter());
@@ -1872,7 +1873,8 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
         lifetime_ref: &'tcx hir::Lifetime,
         bad_def: ResolvedArg,
     ) {
-        let old_value = self.map.defs.remove(&lifetime_ref.hir_id);
+        // FIXME(#120456) - is `swap_remove` correct?
+        let old_value = self.map.defs.swap_remove(&lifetime_ref.hir_id);
         assert_eq!(old_value, Some(bad_def));
     }
 }

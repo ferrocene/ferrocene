@@ -24,6 +24,7 @@ use crate::{
 use rustc_ast as ast;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stack::ensure_sufficient_stack;
+use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{
     codes::*, pluralize, struct_span_code_err, AddToDiagnostic, Applicability, Diagnostic,
     DiagnosticBuilder, ErrCode, ErrorGuaranteed, StashKey,
@@ -346,7 +347,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
-            ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected, expr),
+            ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
             ExprKind::Repeat(element, ref count) => {
                 self.check_expr_repeat(element, count, expected, expr)
             }
@@ -1016,7 +1017,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         original_expr_id: HirId,
         then: impl FnOnce(&hir::Expr<'_>),
     ) {
-        let mut parent = self.tcx.hir().parent_id(original_expr_id);
+        let mut parent = self.tcx.parent_hir_id(original_expr_id);
         loop {
             let node = self.tcx.hir_node(parent);
             match node {
@@ -1038,15 +1039,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         ),
                     ..
                 }) => {
-                    // Check if our original expression is a child of the condition of a while loop
-                    let expr_is_ancestor = std::iter::successors(Some(original_expr_id), |id| {
-                        self.tcx.hir().opt_parent_id(*id)
-                    })
-                    .take_while(|id| *id != parent)
-                    .any(|id| id == expr.hir_id);
-                    // if it is, then we have a situation like `while Some(0) = value.get(0) {`,
+                    // Check if our original expression is a child of the condition of a while loop.
+                    // If it is, then we have a situation like `while Some(0) = value.get(0) {`,
                     // where `while let` was more likely intended.
-                    if expr_is_ancestor {
+                    if self.tcx.hir().parent_id_iter(original_expr_id).any(|id| id == expr.hir_id) {
                         then(expr);
                     }
                     break;
@@ -1056,7 +1052,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 | hir::Node::TraitItem(_)
                 | hir::Node::Crate(_) => break,
                 _ => {
-                    parent = self.tcx.hir().parent_id(parent);
+                    parent = self.tcx.parent_hir_id(parent);
                 }
             }
         }
@@ -1199,9 +1195,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 && !matches!(lhs.kind, hir::ExprKind::Lit(_))
             {
                 // Do not suggest `if let x = y` as `==` is way more likely to be the intention.
-                let hir = self.tcx.hir();
                 if let hir::Node::Expr(hir::Expr { kind: ExprKind::If { .. }, .. }) =
-                    hir.get_parent(hir.parent_id(expr.hir_id))
+                    self.tcx.parent_hir_node(expr.hir_id)
                 {
                     err.span_suggestion_verbose(
                         expr.span.shrink_to_lo(),
@@ -1493,7 +1488,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         block: &'tcx hir::ConstBlock,
         expected: Expectation<'tcx>,
-        _expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
         let body = self.tcx.hir().body(block.body);
 
@@ -1716,7 +1710,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             .fields
             .iter_enumerated()
             .map(|(i, field)| (field.ident(tcx).normalize_to_macros_2_0(), (i, field)))
-            .collect::<FxHashMap<_, _>>();
+            .collect::<UnordMap<_, _>>();
 
         let mut seen_fields = FxHashMap::default();
 
@@ -1727,7 +1721,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let ident = tcx.adjust_ident(field.ident, variant.def_id);
             let field_type = if let Some((i, v_field)) = remaining_fields.remove(&ident) {
                 seen_fields.insert(ident, field.span);
-                self.write_field_index(field.hir_id, i);
+                // FIXME: handle nested fields
+                self.write_field_index(field.hir_id, i, Vec::new());
 
                 // We don't look at stability attributes on
                 // struct-like enums (yet...), but it's definitely not
@@ -1807,7 +1802,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // consistency. But they should be merged as much as possible.
             let fru_tys = if self.tcx.features().type_changing_struct_update {
                 if adt.is_struct() {
-                    // Make some fresh substitutions for our ADT type.
+                    // Make some fresh generic parameters for our ADT type.
                     let fresh_args = self.fresh_args_for_item(base_expr.span, adt.did());
                     // We do subtyping on the FRU fields first, so we can
                     // learn exactly what types we expect the base expr
@@ -1960,18 +1955,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         adt_ty: Ty<'tcx>,
         span: Span,
-        remaining_fields: FxHashMap<Ident, (FieldIdx, &ty::FieldDef)>,
+        remaining_fields: UnordMap<Ident, (FieldIdx, &ty::FieldDef)>,
         variant: &'tcx ty::VariantDef,
         ast_fields: &'tcx [hir::ExprField<'tcx>],
         args: GenericArgsRef<'tcx>,
     ) {
         let len = remaining_fields.len();
 
-        #[allow(rustc::potential_query_instability)]
-        let mut displayable_field_names: Vec<&str> =
-            remaining_fields.keys().map(|ident| ident.as_str()).collect();
-        // sorting &str primitives here, sort_unstable is ok
-        displayable_field_names.sort_unstable();
+        let displayable_field_names: Vec<&str> =
+            remaining_fields.items().map(|(ident, _)| ident.as_str()).into_sorted_stable_ord();
 
         let mut truncated_fields_error = String::new();
         let remaining_fields_names = match &displayable_field_names[..] {
@@ -2373,24 +2365,39 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let body_hir_id = self.tcx.local_def_id_to_hir_id(self.body_id);
                     let (ident, def_scope) =
                         self.tcx.adjust_ident_and_get_scope(field, base_def.did(), body_hir_id);
-                    let fields = &base_def.non_enum_variant().fields;
-                    if let Some((index, field)) = fields
-                        .iter_enumerated()
-                        .find(|(_, f)| f.ident(self.tcx).normalize_to_macros_2_0() == ident)
-                    {
+                    let mut adt_def = *base_def;
+                    let mut last_ty = None;
+                    let mut nested_fields = Vec::new();
+                    let mut index = None;
+                    while let Some(idx) = self.tcx.find_field((adt_def.did(), ident)) {
+                        let &mut first_idx = index.get_or_insert(idx);
+                        let field = &adt_def.non_enum_variant().fields[idx];
                         let field_ty = self.field_ty(expr.span, field, args);
-                        // Save the index of all fields regardless of their visibility in case
-                        // of error recovery.
-                        self.write_field_index(expr.hir_id, index);
-                        let adjustments = self.adjust_steps(&autoderef);
-                        if field.vis.is_accessible_from(def_scope, self.tcx) {
-                            self.apply_adjustments(base, adjustments);
-                            self.register_predicates(autoderef.into_obligations());
-
-                            self.tcx.check_stability(field.did, Some(expr.hir_id), expr.span, None);
-                            return field_ty;
+                        if let Some(ty) = last_ty {
+                            nested_fields.push((ty, idx));
                         }
-                        private_candidate = Some((adjustments, base_def.did()));
+                        if field.ident(self.tcx).normalize_to_macros_2_0() == ident {
+                            // Save the index of all fields regardless of their visibility in case
+                            // of error recovery.
+                            self.write_field_index(expr.hir_id, first_idx, nested_fields);
+                            let adjustments = self.adjust_steps(&autoderef);
+                            if field.vis.is_accessible_from(def_scope, self.tcx) {
+                                self.apply_adjustments(base, adjustments);
+                                self.register_predicates(autoderef.into_obligations());
+
+                                self.tcx.check_stability(
+                                    field.did,
+                                    Some(expr.hir_id),
+                                    expr.span,
+                                    None,
+                                );
+                                return field_ty;
+                            }
+                            private_candidate = Some((adjustments, base_def.did()));
+                            break;
+                        }
+                        last_ty = Some(field_ty);
+                        adt_def = field_ty.ty_adt_def().expect("expect Adt for unnamed field");
                     }
                 }
                 ty::Tuple(tys) => {
@@ -2401,7 +2408,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 self.apply_adjustments(base, adjustments);
                                 self.register_predicates(autoderef.into_obligations());
 
-                                self.write_field_index(expr.hir_id, FieldIdx::from_usize(index));
+                                self.write_field_index(
+                                    expr.hir_id,
+                                    FieldIdx::from_usize(index),
+                                    Vec::new(),
+                                );
                                 return field_ty;
                             }
                         }
@@ -2645,7 +2656,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         err.span_label(field.span, "method, not a field");
         let expr_is_call =
             if let hir::Node::Expr(hir::Expr { kind: ExprKind::Call(callee, _args), .. }) =
-                self.tcx.hir().get_parent(expr.hir_id)
+                self.tcx.parent_hir_node(expr.hir_id)
             {
                 expr.hir_id == callee.hir_id
             } else {

@@ -192,13 +192,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             &mut obligations,
         );
 
-        obligations.extend(self.infcx.commit_if_ok(|_| {
+        obligations.extend(
             self.infcx
                 .at(&obligation.cause, obligation.param_env)
                 .sup(DefineOpaqueTypes::No, placeholder_trait_predicate, candidate)
                 .map(|InferOk { obligations, .. }| obligations)
-                .map_err(|_| Unimplemented)
-        })?);
+                .map_err(|_| Unimplemented)?,
+        );
 
         // FIXME(compiler-errors): I don't think this is needed.
         if let ty::Alias(ty::Projection, alias_ty) = placeholder_self_ty.kind() {
@@ -444,7 +444,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) -> ImplSourceUserDefinedData<'tcx, PredicateObligation<'tcx>> {
         debug!(?obligation, ?impl_def_id, "confirm_impl_candidate");
 
-        // First, create the substitutions by matching the impl again,
+        // First, create the generic parameters by matching the impl again,
         // this time not in a probe.
         let args = self.rematch_impl(impl_def_id, obligation);
         debug!(?args, "impl args");
@@ -532,13 +532,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             &mut nested,
         );
 
-        nested.extend(self.infcx.commit_if_ok(|_| {
+        nested.extend(
             self.infcx
                 .at(&obligation.cause, obligation.param_env)
                 .sup(DefineOpaqueTypes::No, obligation_trait_ref, upcast_trait_ref)
                 .map(|InferOk { obligations, .. }| obligations)
-                .map_err(|_| Unimplemented)
-        })?);
+                .map_err(|_| Unimplemented)?,
+        );
 
         // Check supertraits hold. This is so that their associated type bounds
         // will be checked in the code below.
@@ -585,7 +585,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // higher-ranked things.
             // Prevent, e.g., `dyn Iterator<Item = str>`.
             for bound in self.tcx().item_bounds(assoc_type).transpose_iter() {
-                let subst_bound = if defs.count() == 0 {
+                let arg_bound = if defs.count() == 0 {
                     bound.instantiate(tcx, trait_predicate.trait_ref.args)
                 } else {
                     let mut args = smallvec::SmallVec::with_capacity(defs.count());
@@ -649,7 +649,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     obligation.param_env,
                     obligation.cause.clone(),
                     obligation.recursion_depth + 1,
-                    subst_bound,
+                    arg_bound,
                     &mut nested,
                 );
                 nested.push(obligation.with(tcx, normalized_bound));

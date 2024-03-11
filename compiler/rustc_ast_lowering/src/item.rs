@@ -720,7 +720,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
         }
     }
 
-    fn lower_field_def(&mut self, (index, f): (usize, &FieldDef)) -> hir::FieldDef<'hir> {
+    pub(super) fn lower_field_def(
+        &mut self,
+        (index, f): (usize, &FieldDef),
+    ) -> hir::FieldDef<'hir> {
         let ty = if let TyKind::Path(qself, path) = &f.ty.kind {
             let t = self.lower_path_ty(
                 &f.ty,
@@ -1065,7 +1068,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_block_expr_opt(&mut self, span: Span, block: Option<&Block>) -> hir::Expr<'hir> {
         match block {
             Some(block) => self.lower_block_expr(block),
-            None => self.expr_err(span, self.dcx().span_delayed_bug(span, "no block")),
+            None => self.expr_err(span, self.dcx().has_errors().unwrap()),
         }
     }
 

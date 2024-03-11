@@ -1036,7 +1036,6 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             self,
             self.infcx.tcx,
             self.body,
-            location,
             (sd, place_span.0),
             &borrow_set,
             |borrow_index| borrows_in_scope.contains(borrow_index),
@@ -2174,7 +2173,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 // report the error as an illegal reassignment
                 let init = &self.move_data.inits[init_index];
                 let assigned_span = init.span(self.body);
-                self.report_illegal_reassignment(location, (place, span), assigned_span, place);
+                self.report_illegal_reassignment((place, span), assigned_span, place);
             } else {
                 self.report_mutability_error(place, span, the_place_err, error_access, location)
             }
@@ -2480,7 +2479,8 @@ mod diags {
             &mut self,
             span: Span,
         ) -> Option<(DiagnosticBuilder<'tcx>, usize)> {
-            self.diags.buffered_mut_errors.remove(&span)
+            // FIXME(#120456) - is `swap_remove` correct?
+            self.diags.buffered_mut_errors.swap_remove(&span)
         }
 
         pub fn buffer_mut_error(&mut self, span: Span, t: DiagnosticBuilder<'tcx>, count: usize) {

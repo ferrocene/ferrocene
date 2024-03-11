@@ -1045,11 +1045,9 @@ fn should_encode_mir(
             (true, mir_opt_base)
         }
         // Constants
-        DefKind::AnonConst
-        | DefKind::InlineConst
-        | DefKind::AssocConst
-        | DefKind::Static(..)
-        | DefKind::Const => (true, false),
+        DefKind::AnonConst | DefKind::InlineConst | DefKind::AssocConst | DefKind::Const => {
+            (true, false)
+        }
         // Coroutines require optimized MIR to compute layout.
         DefKind::Closure if tcx.is_coroutine(def_id.to_def_id()) => (false, true),
         // Full-fledged functions + closures
@@ -1446,6 +1444,19 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 && let Some(coroutine_kind) = self.tcx.coroutine_kind(def_id)
             {
                 self.tables.coroutine_kind.set(def_id.index, Some(coroutine_kind))
+            }
+            if def_kind == DefKind::Closure
+                && tcx.type_of(def_id).skip_binder().is_coroutine_closure()
+            {
+                self.tables
+                    .coroutine_for_closure
+                    .set_some(def_id.index, self.tcx.coroutine_for_closure(def_id).into());
+            }
+            if let DefKind::Static(_) = def_kind {
+                if !self.tcx.is_foreign_item(def_id) {
+                    let data = self.tcx.eval_static_initializer(def_id).unwrap();
+                    record!(self.tables.eval_static_initializer[def_id] <- data);
+                }
             }
             if let DefKind::Enum | DefKind::Struct | DefKind::Union = def_kind {
                 self.encode_info_for_adt(local_id);
@@ -1962,10 +1973,10 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             let def_id = id.owner_id.to_def_id();
 
             self.tables.defaultness.set_some(def_id.index, tcx.defaultness(def_id));
-            self.tables.impl_polarity.set_some(def_id.index, tcx.impl_polarity(def_id));
 
-            if of_trait && let Some(trait_ref) = tcx.impl_trait_ref(def_id) {
-                record!(self.tables.impl_trait_ref[def_id] <- trait_ref);
+            if of_trait && let Some(header) = tcx.impl_trait_header(def_id) {
+                record!(self.tables.impl_trait_header[def_id] <- header);
+                let trait_ref = header.map_bound(|h| h.trait_ref);
 
                 let trait_ref = trait_ref.instantiate_identity();
                 let simplified_self_ty = fast_reject::simplify_type(

@@ -447,16 +447,13 @@ fn build_thread_local_shim<'tcx>(tcx: TyCtxt<'tcx>, instance: ty::InstanceDef<'t
 fn build_clone_shim<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, self_ty: Ty<'tcx>) -> Body<'tcx> {
     debug!("build_clone_shim(def_id={:?})", def_id);
 
-    let param_env = tcx.param_env_reveal_all_normalized(def_id);
-
     let mut builder = CloneShimBuilder::new(tcx, def_id, self_ty);
-    let is_copy = self_ty.is_copy_modulo_regions(tcx, param_env);
 
     let dest = Place::return_place();
     let src = tcx.mk_place_deref(Place::from(Local::new(1 + 0)));
 
     match self_ty.kind() {
-        _ if is_copy => builder.copy_shim(),
+        ty::FnDef(..) | ty::FnPtr(_) => builder.copy_shim(),
         ty::Closure(_, args) => builder.tuple_like_shim(dest, src, args.as_closure().upvar_tys()),
         ty::Tuple(..) => builder.tuple_like_shim(dest, src, self_ty.tuple_fields()),
         ty::Coroutine(coroutine_def_id, args) => {
@@ -480,7 +477,7 @@ struct CloneShimBuilder<'tcx> {
 
 impl<'tcx> CloneShimBuilder<'tcx> {
     fn new(tcx: TyCtxt<'tcx>, def_id: DefId, self_ty: Ty<'tcx>) -> Self {
-        // we must subst the self_ty because it's
+        // we must instantiate the self_ty because it's
         // otherwise going to be TySelf and we can't index
         // or access fields of a Place of type TySelf.
         let sig = tcx.fn_sig(def_id).instantiate(tcx, &[self_ty.into()]);
@@ -719,8 +716,8 @@ fn build_call_shim<'tcx>(
     call_kind: CallKind<'tcx>,
 ) -> Body<'tcx> {
     // `FnPtrShim` contains the fn pointer type that a call shim is being built for - this is used
-    // to substitute into the signature of the shim. It is not necessary for users of this
-    // MIR body to perform further substitutions (see `InstanceDef::has_polymorphic_mir_body`).
+    // to instantiate into the signature of the shim. It is not necessary for users of this
+    // MIR body to perform further instantiations (see `InstanceDef::has_polymorphic_mir_body`).
     let (sig_args, untuple_args) = if let ty::InstanceDef::FnPtrShim(_, ty) = instance {
         let sig = tcx.instantiate_bound_regions_with_erased(ty.fn_sig(tcx));
 

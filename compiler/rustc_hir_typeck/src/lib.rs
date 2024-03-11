@@ -220,7 +220,7 @@ fn typeck_with_fallback<'tcx>(
                 span,
             }))
         } else if let Node::AnonConst(_) = node {
-            match tcx.hir_node(tcx.hir().parent_id(id)) {
+            match tcx.parent_hir_node(id) {
                 Node::Ty(&hir::Ty { kind: hir::TyKind::Typeof(ref anon_const), .. })
                     if anon_const.hir_id == id =>
                 {
@@ -303,6 +303,10 @@ fn typeck_with_fallback<'tcx>(
     fcx.check_asms();
 
     let typeck_results = fcx.resolve_type_vars_in_body(body);
+
+    // We clone the defined opaque types during writeback in the new solver
+    // because we have to use them during normalization.
+    let _ = fcx.infcx.take_opaque_types();
 
     // Consistency check our TypeckResults instance can hold all ItemLocalIds
     // it will need to hold.

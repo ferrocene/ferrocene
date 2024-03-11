@@ -22,6 +22,7 @@ use serde_derive::Deserialize;
 use crate::core::build_steps::dist;
 use crate::core::build_steps::llvm;
 use crate::core::build_steps::tool::SourceType;
+use crate::core::builder;
 use crate::core::builder::crate_description;
 use crate::core::builder::Cargo;
 use crate::core::builder::{Builder, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath};
@@ -240,12 +241,26 @@ impl Step for Std {
         // with -Zalways-encode-mir. This frees us from the need to have a target linker, and the
         // fact that this is a check build integrates nicely with run_cargo.
         let mut cargo = if self.is_for_mir_opt_tests {
-            let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, "check");
+            let mut cargo = builder::Cargo::new_for_mir_opt_tests(
+                builder,
+                compiler,
+                Mode::Std,
+                SourceType::InTree,
+                target,
+                "check",
+            );
             cargo.rustflag("-Zalways-encode-mir");
             cargo.arg("--manifest-path").arg(builder.src.join("library/sysroot/Cargo.toml"));
             cargo
         } else {
-            let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, "build");
+            let mut cargo = builder::Cargo::new(
+                builder,
+                compiler,
+                Mode::Std,
+                SourceType::InTree,
+                target,
+                "build",
+            );
             std_cargo(builder, target, compiler.stage, &mut cargo);
             for krate in &*self.crates {
                 cargo.arg("-p").arg(krate);
@@ -921,7 +936,15 @@ impl Step for Rustc {
             builder.config.build,
         ));
 
-        let mut cargo = builder.cargo(compiler, Mode::Rustc, SourceType::InTree, target, "build");
+        let mut cargo = builder::Cargo::new(
+            builder,
+            compiler,
+            Mode::Rustc,
+            SourceType::InTree,
+            target,
+            "build",
+        );
+
         rustc_cargo(builder, &mut cargo, target, compiler.stage);
 
         if builder.config.rust_profile_use.is_some()
@@ -1341,7 +1364,14 @@ impl Step for CodegenBackend {
 
         let out_dir = builder.cargo_out(compiler, Mode::Codegen, target);
 
-        let mut cargo = builder.cargo(compiler, Mode::Codegen, SourceType::InTree, target, "build");
+        let mut cargo = builder::Cargo::new(
+            builder,
+            compiler,
+            Mode::Codegen,
+            SourceType::InTree,
+            target,
+            "build",
+        );
         cargo
             .arg("--manifest-path")
             .arg(builder.src.join(format!("compiler/rustc_codegen_{backend}/Cargo.toml")));

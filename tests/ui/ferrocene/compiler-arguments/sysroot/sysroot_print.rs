@@ -1,4 +1,4 @@
-//@ Test that --print sysroot prints the correct sysroot
+// Test that --print sysroot prints the correct sysroot
 //
 //@ check-pass
 //@ compile-flags: --sysroot=foo --print sysroot

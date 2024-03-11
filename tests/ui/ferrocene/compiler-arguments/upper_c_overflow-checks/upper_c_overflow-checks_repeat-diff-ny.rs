@@ -1,7 +1,7 @@
 //@ run-pass
 //@ compile-flags: -Coverflow-checks=y -Coverflow-checks=n
 
-//@ Rightmost flag overrides any previous flags.
+// Rightmost flag overrides any previous flags.
 
 #[allow(arithmetic_overflow)]
 fn main() {

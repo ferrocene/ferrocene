@@ -1,4 +1,4 @@
-//@ -F must be followed by a valid option
+// -F must be followed by a valid option
 //
 //@ check-fail
 //@ compile-flags: -F

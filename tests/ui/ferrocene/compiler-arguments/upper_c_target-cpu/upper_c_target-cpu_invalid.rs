@@ -3,8 +3,8 @@
 //@ build-fail
 //@ ignore-cross-compile
 
-//@ Note: we have differente behaviors when cross compiling and when not cross
-//@ compiling. So this test is disabled when cross-compiling
+// Note: we have differente behaviors when cross compiling and when not cross
+// compiling. So this test is disabled when cross-compiling
 
 fn main() {}
 

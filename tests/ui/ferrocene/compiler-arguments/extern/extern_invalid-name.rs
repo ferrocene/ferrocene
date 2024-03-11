@@ -1,4 +1,4 @@
-//@ Test --extern with an invalid crate name. Surprisingly, it's accepted.
+// Test --extern with an invalid crate name. Surprisingly, it's accepted.
 //@ check-fail
 //@ aux-build:some_crate.rs
 //@ compile-flags:--extern -

@@ -1,7 +1,7 @@
 //@ check-pass
 //@ compile-flags: --error-format=json --json=future-incompat
 
-//@ From https://github.com/rust-lang/rust/issues/79813
+// From https://github.com/rust-lang/rust/issues/79813
 
 macro_rules! foo {
     () => {

@@ -1,5 +1,5 @@
-//@ Test when --sysroot set the path to a empty sysroot. sysroot should be the
-//@ current path.
+// Test when --sysroot set the path to a empty sysroot. sysroot should be the
+// current path.
 //
 //@ check-fail
 //@ ignore-cross-compile The error message is different when cross-compiling

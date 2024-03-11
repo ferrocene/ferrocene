@@ -1,4 +1,4 @@
-//@ -F can be specified multiple times, repeating the same option is not considered an error.
+// -F can be specified multiple times, repeating the same option is not considered an error.
 //
 //@ check-fail
 //@ compile-flags: -F missing_docs -F overflowing_literals

@@ -1,4 +1,4 @@
-//@ -A must be followed by a valid lint option
+// -A must be followed by a valid lint option
 //
 //@ check-pass
 //@ compile-flags: -A invalid_lint_code

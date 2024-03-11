@@ -1,9 +1,9 @@
 //@ run-pass
 //@ compile-flags: -Cdebug-assertions=y  -Coverflow-checks=n
 
-//@ If not specified, overflow checks are enabled if debug-assertions are
-//@ enabled, disabled otherwise.
-//@ With debug-assertions=y and overflow-checks=n, there should be no panic.
+// If not specified, overflow checks are enabled if debug-assertions are
+// enabled, disabled otherwise.
+// With debug-assertions=y and overflow-checks=n, there should be no panic.
 
 #[allow(arithmetic_overflow)]
 fn main() {

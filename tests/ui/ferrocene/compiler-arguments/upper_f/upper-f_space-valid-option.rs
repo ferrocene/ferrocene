@@ -1,4 +1,4 @@
-//@ When -F is followed by a valid option, the lint is denied
+// When -F is followed by a valid option, the lint is denied
 //
 //@ check-fail
 //@ compile-flags: -F missing_docs

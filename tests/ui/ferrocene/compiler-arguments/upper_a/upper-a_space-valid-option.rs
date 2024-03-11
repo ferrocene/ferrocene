@@ -1,4 +1,4 @@
-//@ When -A is followed by a valid option, the lint is allowed
+// When -A is followed by a valid option, the lint is allowed
 //
 //@ check-pass
 //@ compile-flags: -A overflowing_literals

@@ -1,4 +1,4 @@
-//@ The option of -F starts immediately, without requiring any equal symbol
+// The option of -F starts immediately, without requiring any equal symbol
 //
 //@ check-pass
 //@ compile-flags: -F=

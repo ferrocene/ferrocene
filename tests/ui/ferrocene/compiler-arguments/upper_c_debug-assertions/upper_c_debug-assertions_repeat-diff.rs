@@ -1,4 +1,4 @@
-//@ When repeated, the last one overrides the previous
+// When repeated, the last one overrides the previous
 //
 //@ run-pass
 //@ compile-flags: -Cdebug-assertions=y -Cdebug-assertions=n

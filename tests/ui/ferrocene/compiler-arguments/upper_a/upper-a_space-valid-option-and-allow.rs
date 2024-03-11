@@ -1,5 +1,5 @@
-//@ -A and --allow can be specified multiple times, repeating the same option is not considered an
-//@ error.
+// -A and --allow can be specified multiple times, repeating the same option is not considered an
+// error.
 //
 //@ check-pass
 //@ compile-flags: -A overflowing_literals --allow overflowing_literals

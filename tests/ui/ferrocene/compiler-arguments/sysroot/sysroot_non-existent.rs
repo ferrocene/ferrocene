@@ -1,4 +1,4 @@
-//@ Test when --sysroot set the path to a non-existent sysroot
+// Test when --sysroot set the path to a non-existent sysroot
 //
 //@ check-fail
 //@ compile-flags: --sysroot=/non/existent/sysroot

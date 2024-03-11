@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=llvm-bc
+//@ check-pass
+//@ compile-flags: --emit=llvm-bc
 
 fn main() {}
 

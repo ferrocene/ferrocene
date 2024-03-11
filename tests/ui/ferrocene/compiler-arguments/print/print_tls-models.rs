@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --print tls-models
+//@ check-pass
+//@ compile-flags: --print tls-models
 
 fn main() {}
 

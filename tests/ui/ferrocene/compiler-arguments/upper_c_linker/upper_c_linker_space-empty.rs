@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C linker
+//@ check-fail
+//@ compile-flags: -C linker
 
 fn main() {}
 

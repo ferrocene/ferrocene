@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --edition=foo
+//@ check-fail
+//@ compile-flags: --edition=foo
 
 fn main() {}
 

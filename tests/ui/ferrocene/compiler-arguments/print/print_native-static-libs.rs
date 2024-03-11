@@ -1,6 +1,6 @@
-// check-pass
-// compile-flags: --print native-static-libs
-// only-x86_64-unknown-linux-gnu
+//@ check-pass
+//@ compile-flags: --print native-static-libs
+//@ only-x86_64-unknown-linux-gnu
 
 fn main() {}
 

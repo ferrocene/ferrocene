@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C=lto
+//@ check-fail
+//@ compile-flags: -C=lto
 
 fn main() {}
 

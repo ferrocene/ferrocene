@@ -58,7 +58,7 @@ bar();
 
 If the item you are importing is not defined in some super-module of the
 current module, then it must also be declared as public (e.g., `pub fn`).
-"},"level":"error","spans":[{"file_name":"$DIR/error-format_json.rs","byte_start":131,"byte_end":132,"line_start":6,"line_end":6,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;","highlight_start":13,"highlight_end":14}],"label":"not found in this scope","suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[],"rendered":"error[E0425]: cannot find value `x` in this scope
+"},"level":"error","spans":[{"file_name":"$DIR/error-format_json.rs","byte_start":134,"byte_end":135,"line_start":6,"line_end":6,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;","highlight_start":13,"highlight_end":14}],"label":"not found in this scope","suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[],"rendered":"error[E0425]: cannot find value `x` in this scope
   --> $DIR/error-format_json.rs:6:13
    |
 LL |     let x = x;

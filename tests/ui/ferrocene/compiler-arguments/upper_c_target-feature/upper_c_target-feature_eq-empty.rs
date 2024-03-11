@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Ctarget-feature=
+//@ build-pass
+//@ compile-flags: -Ctarget-feature=
 
 fn main() {}
 

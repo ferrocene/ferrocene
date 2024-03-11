@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -L native=
+//@ check-fail
+//@ compile-flags: -L native=
 
 fn main() {}
 

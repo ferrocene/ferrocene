@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Ccodegen-units=-1
+//@ check-fail
+//@ compile-flags: -Ccodegen-units=-1
 
 fn main() {}
 

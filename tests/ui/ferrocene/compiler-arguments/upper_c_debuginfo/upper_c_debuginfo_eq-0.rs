@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Cdebuginfo=0
+//@ check-pass
+//@ compile-flags: -Cdebuginfo=0
 
 fn main() {}
 

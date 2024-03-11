@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -g=invalid
+//@ check-fail
+//@ compile-flags: -g=invalid
 
 fn main() {}
 

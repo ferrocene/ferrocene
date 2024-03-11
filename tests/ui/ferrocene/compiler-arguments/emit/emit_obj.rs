@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=obj
+//@ check-pass
+//@ compile-flags: --emit=obj
 
 fn main() {}
 

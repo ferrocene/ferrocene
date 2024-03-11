@@ -1,6 +1,6 @@
-// check-pass
-// compile-flags: --crate-type=cdylib
-// needs-dynamic-linking
+//@ check-pass
+//@ compile-flags: --crate-type=cdylib
+//@ needs-dynamic-linking
 
 pub fn foo() {}
 

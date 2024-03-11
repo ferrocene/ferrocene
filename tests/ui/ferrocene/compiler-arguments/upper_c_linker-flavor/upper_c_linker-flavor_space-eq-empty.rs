@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C linker-flavor=
+//@ check-fail
+//@ compile-flags: -C linker-flavor=
 
 fn main() {}
 

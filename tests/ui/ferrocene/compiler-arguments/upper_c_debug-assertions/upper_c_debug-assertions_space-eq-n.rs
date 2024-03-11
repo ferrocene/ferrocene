@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: -C debug-assertions=n
+//@ run-pass
+//@ compile-flags: -C debug-assertions=n
 
 fn main() {
     debug_assert!(false);

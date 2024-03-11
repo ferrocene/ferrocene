@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --error-format=json --json=badoption
+//@ check-fail
+//@ compile-flags: --error-format=json --json=badoption
 
 fn main() {}
 

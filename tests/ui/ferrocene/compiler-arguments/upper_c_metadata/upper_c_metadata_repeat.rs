@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Cmetadata=foo -Cmetadata=foo
+//@ build-pass
+//@ compile-flags: -Cmetadata=foo -Cmetadata=foo
 
 fn main() {}
 

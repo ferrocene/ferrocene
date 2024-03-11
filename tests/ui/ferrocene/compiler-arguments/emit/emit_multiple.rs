@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=asm --emit=dep-info --emit=link --emit=llvm-bc --emit=llvm-ir --emit=metadata --emit=mir --emit=obj
+//@ check-pass
+//@ compile-flags: --emit=asm --emit=dep-info --emit=link --emit=llvm-bc --emit=llvm-ir --emit=metadata --emit=mir --emit=obj
 
 fn main() {}
 

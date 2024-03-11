@@ -6,22 +6,13 @@
 // Unfortunately, LLVM has no "disable" option for this, so we have to set
 // "enable" to 0 instead.
 
-<<<<<<< HEAD
-// compile-flags:-g -Copt-level=0 -Cllvm-args=-enable-tail-merge=0
-// compile-flags:-Cforce-frame-pointers=yes
-// compile-flags:-Cstrip=none
-// ignore-emscripten spawning processes is not supported
-// ignore-sgx no processes
-// ignore-fuchsia Backtrace not symbolized, trace different line alignment
-// ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
-=======
 //@ compile-flags:-g -Copt-level=0 -Cllvm-args=-enable-tail-merge=0
 //@ compile-flags:-Cforce-frame-pointers=yes
 //@ compile-flags:-Cstrip=none
 //@ ignore-emscripten spawning processes is not supported
 //@ ignore-sgx no processes
 //@ ignore-fuchsia Backtrace not symbolized, trace different line alignment
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+//@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 
 use std::env;
 

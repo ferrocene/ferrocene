@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Clinker
+//@ check-fail
+//@ compile-flags: -Clinker
 
 fn main() {}
 

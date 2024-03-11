@@ -1,6 +1,6 @@
-// build-fail
-// compile-flags: -Cpanic=abort
-// needs-unwind
+//@ build-fail
+//@ compile-flags: -Cpanic=abort
+//@ needs-unwind
 
 fn main() {}
 

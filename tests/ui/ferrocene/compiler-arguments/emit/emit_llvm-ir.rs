@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=llvm-ir
+//@ check-pass
+//@ compile-flags: --emit=llvm-ir
 
 fn main() {}
 

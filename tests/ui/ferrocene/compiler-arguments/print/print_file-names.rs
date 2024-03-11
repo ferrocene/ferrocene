@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --print file-names
+//@ check-pass
+//@ compile-flags: --print file-names
 
 fn main() {}
 

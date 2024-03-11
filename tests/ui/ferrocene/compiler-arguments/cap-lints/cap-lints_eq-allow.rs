@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --cap-lints=allow
+//@ check-pass
+//@ compile-flags: --cap-lints=allow
 
 fn main() {}
 

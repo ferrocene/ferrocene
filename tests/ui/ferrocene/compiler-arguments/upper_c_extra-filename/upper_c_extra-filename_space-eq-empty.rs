@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C extra-filename=
+//@ check-pass
+//@ compile-flags: -C extra-filename=
 
 fn main() {}
 

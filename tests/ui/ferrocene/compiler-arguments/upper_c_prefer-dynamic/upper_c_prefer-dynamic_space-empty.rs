@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C prefer-dynamic
+//@ check-pass
+//@ compile-flags: -C prefer-dynamic
 
 fn main() {}
 

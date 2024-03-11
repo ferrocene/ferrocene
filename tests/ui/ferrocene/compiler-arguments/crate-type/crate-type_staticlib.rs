@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --crate-type=staticlib
+//@ check-pass
+//@ compile-flags: --crate-type=staticlib
 
 pub fn foo() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Clink-dead-code=n
+//@ check-pass
+//@ compile-flags: -Clink-dead-code=n
 
 fn main() {}
 

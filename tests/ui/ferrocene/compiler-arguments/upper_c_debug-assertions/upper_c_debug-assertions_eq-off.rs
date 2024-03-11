@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: -Cdebug-assertions=off
+//@ run-pass
+//@ compile-flags: -Cdebug-assertions=off
 
 fn main() {
     debug_assert!(false);

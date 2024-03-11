@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-// build-pass
-// only-linux
-// ignore-aarch64-unknown-ferrocenecoretest - the actual tested target does not support this
-=======
 //@ build-pass
 //@ only-linux
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+//@ ignore-aarch64-unknown-ferrocenecoretest - the actual tested target does not support this
 //
 //@ compile-flags: -g --emit=llvm-ir -Csplit-debuginfo=unpacked
 //

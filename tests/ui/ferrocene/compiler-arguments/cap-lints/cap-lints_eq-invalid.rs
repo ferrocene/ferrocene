@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --cap-lints=invalid
+//@ check-fail
+//@ compile-flags: --cap-lints=invalid
 
 fn main() {}
 

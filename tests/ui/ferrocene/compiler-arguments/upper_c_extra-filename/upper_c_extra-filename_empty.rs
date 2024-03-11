@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Cextra-filename
+//@ check-fail
+//@ compile-flags: -Cextra-filename
 
 fn main() {}
 

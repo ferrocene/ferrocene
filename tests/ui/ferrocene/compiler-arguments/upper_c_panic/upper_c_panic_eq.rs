@@ -1,6 +1,6 @@
-// build-pass
-// compile-flags: -Cpanic=unwind
-// needs-unwind
+//@ build-pass
+//@ compile-flags: -Cpanic=unwind
+//@ needs-unwind
 
 fn main() {}
 

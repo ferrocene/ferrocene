@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -C linker-flavor=gcc
+//@ build-pass
+//@ compile-flags: -C linker-flavor=gcc
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --edition=2015
+//@ check-pass
+//@ compile-flags: --edition=2015
 
 fn main() {}
 

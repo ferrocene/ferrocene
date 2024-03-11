@@ -1,6 +1,6 @@
-// run-pass
-// compile-flags: -C target-cpu=native
-// ignore-cross-compile
+//@ run-pass
+//@ compile-flags: -C target-cpu=native
+//@ ignore-cross-compile
 
 fn main() {}
 

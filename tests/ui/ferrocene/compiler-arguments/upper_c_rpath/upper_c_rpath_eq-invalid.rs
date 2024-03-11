@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Crpath=invalid
+//@ check-fail
+//@ compile-flags: -Crpath=invalid
 
 fn main() {}
 

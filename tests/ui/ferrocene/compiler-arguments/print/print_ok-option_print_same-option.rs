@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --print crate-name --print crate-name
+//@ check-pass
+//@ compile-flags: --print crate-name --print crate-name
 
 fn main() {}
 

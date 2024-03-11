@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Cprefer-dynamic=invalid
+//@ check-fail
+//@ compile-flags: -Cprefer-dynamic=invalid
 
 fn main() {}
 

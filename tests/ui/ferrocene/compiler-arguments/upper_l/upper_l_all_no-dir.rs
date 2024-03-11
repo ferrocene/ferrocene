@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -L all=
+//@ check-fail
+//@ compile-flags: -L all=
 
 fn main() {}
 

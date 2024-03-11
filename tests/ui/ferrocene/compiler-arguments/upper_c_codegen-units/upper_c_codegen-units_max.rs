@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Ccodegen-units=18446744073709551615
+//@ build-pass
+//@ compile-flags: -Ccodegen-units=18446744073709551615
 
 fn main() {}
 

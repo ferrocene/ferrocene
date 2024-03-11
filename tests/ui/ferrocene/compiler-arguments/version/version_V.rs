@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --version -V
+//@ check-fail
+//@ compile-flags: --version -V
 
 fn main() {}
 

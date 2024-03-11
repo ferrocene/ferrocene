@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C no-vectorize-loops=false
+//@ check-fail
+//@ compile-flags: -C no-vectorize-loops=false
 
 fn main() {}
 

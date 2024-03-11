@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-// run-pass
-// ignore-android FIXME #17520
-// ignore-emscripten spawning processes is not supported
-// ignore-openbsd no support for libbacktrace without filename
-// ignore-sgx no processes
-// ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
-// ignore-fuchsia Backtraces not symbolized
-// ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
-// compile-flags:-g
-// compile-flags:-Cstrip=none
-=======
 //@ run-pass
 //@ ignore-android FIXME #17520
 //@ ignore-emscripten spawning processes is not supported
@@ -17,9 +5,9 @@
 //@ ignore-sgx no processes
 //@ ignore-msvc see #62897 and `backtrace-debuginfo.rs` test
 //@ ignore-fuchsia Backtraces not symbolized
+//@ ignore-aarch64-unknown-ferrocenecoretest - backtraces not supported on the target
 //@ compile-flags:-g
 //@ compile-flags:-Cstrip=none
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 use std::env;
 use std::process::{Command, Stdio};

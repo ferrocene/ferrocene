@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --print relocation-models
+//@ check-pass
+//@ compile-flags: --print relocation-models
 
 fn main() {}
 

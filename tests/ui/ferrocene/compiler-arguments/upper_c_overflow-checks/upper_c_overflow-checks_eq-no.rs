@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: -Coverflow-checks=no
+//@ run-pass
+//@ compile-flags: -Coverflow-checks=no
 
 #[allow(arithmetic_overflow)]
 fn main() {

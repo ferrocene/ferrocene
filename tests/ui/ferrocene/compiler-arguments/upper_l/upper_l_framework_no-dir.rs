@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -L framework=
+//@ check-fail
+//@ compile-flags: -L framework=
 
 fn main() {}
 

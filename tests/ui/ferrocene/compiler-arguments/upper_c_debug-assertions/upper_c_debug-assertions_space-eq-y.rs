@@ -1,5 +1,5 @@
-// run-fail
-// compile-flags: -C debug-assertions=y
+//@ run-fail
+//@ compile-flags: -C debug-assertions=y
 
 fn main() {
     debug_assert!(false);

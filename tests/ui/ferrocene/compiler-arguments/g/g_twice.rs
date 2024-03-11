@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -g -g
+//@ check-pass
+//@ compile-flags: -g -g
 
 fn main() {}
 

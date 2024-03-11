@@ -1,5 +1,5 @@
 error: this file contains an unclosed delimiter
-  --> $DIR/mbe_missing_right_paren.rs:5:23
+  --> $DIR/mbe_missing_right_paren.rs:6:23
    |
 LL | macro_rules! abc(ؼ
    |                 - unclosed delimiter

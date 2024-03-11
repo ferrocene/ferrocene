@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -L dependency=
+//@ check-fail
+//@ compile-flags: -L dependency=
 
 fn main() {}
 

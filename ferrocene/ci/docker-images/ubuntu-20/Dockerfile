@@ -43,11 +43,8 @@ RUN apt-get update \
         g++-aarch64-linux-gnu \
         binutils-aarch64-linux-gnu \
         libc6-dev-arm64-cross \
-        # Needed for thumbv7em-none-eabihf cross-compilation
+        # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
-        # Needed for armv8r-none-eabihf
-        arm-none-eabi-gcc \
-        arm-none-eabi-g++ \
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:
@@ -137,6 +134,8 @@ ENV CC_aarch64_unknown_none=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_none=aarch64-linux-gnu-g++
 ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
+ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
+ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 
 RUN mkdir /home/ci \
     && addgroup --gid 1000 ci \

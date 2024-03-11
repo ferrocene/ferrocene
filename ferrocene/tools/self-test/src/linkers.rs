@@ -550,6 +550,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // For now, this test does not support windows.
     fn test_make_fake_linker() {
         let temp_dir = tempfile::tempdir().expect("making temp dir");
         // make a fake linker

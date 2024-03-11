@@ -269,6 +269,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // For now, this test does not support windows.
     fn test_check_target() {
         // To test the check_target function, we create a fake rustc binary that verifies the
         // correct flags were provided, and if so creates empty files in place of the artifacts.

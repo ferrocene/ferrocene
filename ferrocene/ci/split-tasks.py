@@ -35,7 +35,7 @@ def find_all_compiletests(*, exclude=None, deprioritize=None):
         if entry.name in deprioritize:
             weight = 1
 
-        found.append(Task(str(entry.relative_to(REPOSITORY_ROOT)), weight))
+        found.append(Task(entry.relative_to(REPOSITORY_ROOT).as_posix(), weight))
     return found
 
 

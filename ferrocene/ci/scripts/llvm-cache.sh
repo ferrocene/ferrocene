@@ -153,8 +153,10 @@ case "$1" in
         aws s3 cp /tmp/llvm-cache.tar.zst "${s3_url}"
         ;;
     download)
-        aws s3 cp "${s3_url}" - | unzstd --stdout | tar x
-        echo "restored LLVM cache with hash ${cache_hash}"
+        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+        # rather than stdout by default.
+        aws s3 cp "${s3_url}" - | zstd -d --stdout | tar -xf-
+        echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)
         echo "${s3_url}"

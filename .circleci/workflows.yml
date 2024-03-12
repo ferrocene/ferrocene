@@ -123,7 +123,9 @@ jobs:
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
-    steps: [ferrocene-job-build]
+    steps:
+      - ferrocene-setup-windows
+      - ferrocene-job-build
 
   x86_64-windows-dist:
     executor:
@@ -137,6 +139,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
+      - ferrocene-setup-windows
       - ferrocene-job-dist:
           restore-from-job: x86_64-windows-build
 
@@ -439,13 +442,6 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
-            - run:
-                name: Install Windows dependencies
-                command: |
-                  choco install -y cmake ninja zstandard
-                  # By default CMake is not in the bash PATH, so we need to add
-                  # it manually to it.
-                  echo 'export PATH="/c/Program Files/CMake/bin:${PATH}"' >> "${BASH_ENV}"
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

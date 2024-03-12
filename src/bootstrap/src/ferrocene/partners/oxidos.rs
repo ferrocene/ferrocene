@@ -44,6 +44,8 @@ const OXIDOS_ALLOW_LINTS: &[&str] = &[
     "internal_features",
     // Allow a warning that will be an error in 2023 edition.
     "static-mut-ref",
+    // The source contains redundant prelude imports which are now linted against
+    "unused-imports",
 ];
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]

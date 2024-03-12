@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+---
+name: Mirror sphinx-shared-resources
+
+# This workflow runs when a PR gets merged into the main branch and includes
+# changes to any files in ferrocene/doc/sphinx-shared-resources/.
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "ferrocene/doc/sphinx-shared-resources/**"
+
+jobs:
+  mirror:
+    name: Mirror
+    runs-on: ubuntu-latest
+
+    environment: mirror-sphinx-shared-resources
+
+    env:
+      ORIGIN_REPO_PATH: ferrocene
+      MIRROR_REPO_PATH: sphinx-shared-resources
+
+    steps:
+      - name: Checkout ferrocene/ferrocene
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # need two commits two create the diff
+          path: ${{ env.ORIGIN_REPO_PATH }}
+
+      - name: Authenticate with GitHub
+        run: ferrocene/ci/github-app-auth.py
+        env:
+          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-mirror-shared-resources
+          APP_ID: 852121
+          APP_PRIVATE_KEY: "${{ secrets.MIRROR_APP_PRIVATE_KEY }}"
+        id: github_app_auth
+        working-directory: ${{ env.ORIGIN_REPO_PATH }}
+
+      - name: Checkout ferrocene/sphinx-shared-resources
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.MIRROR_REPO_PATH }}
+          repository: ferrocene/sphinx-shared-resources
+          token: ${{ steps.github_app_auth.outputs.token }}
+
+      - name: Configure git authorship information
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Mirror changes
+        run: python ${{ env.ORIGIN_REPO_PATH }}/ferrocene/ci/scripts/mirror-sphinx-shared-resources.py
+
+      - name: Push changes to ferrocene/sphinx-shared-resources
+        run: git push
+        working-directory: ${{ env.MIRROR_REPO_PATH }}

@@ -15,11 +15,11 @@ FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH = string.ascii_letters + string.digits
 
 
 def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None):
-    if type(node) == nodes.Text:
+    if type(node) is nodes.Text:
         yield LexableNode(node=node, inside_definition_of=inside_definition_of)
-    elif type(node) == addnodes.glossary:
+    elif type(node) is addnodes.glossary:
         inside_glossary = True
-    elif inside_glossary and type(node) == nodes.definition_list_item:
+    elif inside_glossary and type(node) is nodes.definition_list_item:
         inside_definition_of = {term.astext() for term in node.findall(nodes.term)}
     elif type(node) in (
         nodes.reference,
@@ -30,7 +30,7 @@ def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None
         return
 
     for child in node.children:
-        if inside_glossary and type(child) == nodes.term:
+        if inside_glossary and type(child) is nodes.term:
             continue
         for result in find_lexable_nodes(
             child,
@@ -56,12 +56,12 @@ def _filter_matches(matches):
     for token in matches:
         # Convert a match into a token if the previous token doesn't allow the
         # following token to be a match.
-        if type(token) == MatchedTerm and not previous_token_allows_match:
+        if type(token) is MatchedTerm and not previous_token_allows_match:
             token = token.text
 
         # Only allow the next token to be a match if this is a text token
         # that doesn't end with forbidden chars.
-        previous_token_allows_match = type(token) == str and (
+        previous_token_allows_match = type(token) is str and (
             not token or token[-1] not in FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH
         )
 

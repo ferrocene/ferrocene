@@ -58,15 +58,15 @@ class LinkToTermsTransform(SphinxTransform):
 
     def apply_to_node(self, state, node):
         lexed = list(lexer.lexer(node.astext(), state.terms))
-        if len(lexed) == 1 and type(lexed[0]) == str:
+        if len(lexed) == 1 and type(lexed[0]) is str:
             # Do nothing if the lexed version returned the same string.
             pass
         else:
             container = nodes.inline()
             for part in lexed:
-                if type(part) == str:
+                if type(part) is str:
                     container.append(nodes.Text(part))
-                elif type(part) == MatchedTerm:
+                elif type(part) is MatchedTerm:
                     container.append(self.make_link(part))
                 else:
                     raise RuntimeError("unexpected result of lexer")
@@ -88,7 +88,6 @@ class PruneGlossaryTransform(SphinxTransform):
     default_priority = 500
 
     def apply(self):
-        state = State.get(self.env)
         glossaries = list(self.document.findall(addnodes.glossary))
         if glossaries:
             used_terms = self.discover_used_terms()
@@ -116,7 +115,7 @@ class PruneGlossaryTransform(SphinxTransform):
             doctree = self.env.get_doctree(docname)
             for node in lexer.find_lexable_nodes(doctree):
                 for part in lexer.lexer(node.node.astext(), state.terms):
-                    if type(part) != MatchedTerm:
+                    if type(part) is not MatchedTerm:
                         continue
                     name = part.term.name
                     # Join the list of dependencies, setting None when either

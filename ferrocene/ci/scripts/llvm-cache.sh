@@ -154,8 +154,9 @@ case "$1" in
         echo "cached LLVM cache at ${s3_url}"
         ;;
     download)
-        echo "restoring LLVM cache from ${s3_url}"
-        aws s3 cp "${s3_url}" - | unzstd --stdout | tar x
+        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+        # rather than stdout by default.
+        aws s3 cp "${s3_url}" - | zstd -d --stdout | tar -xf-
         echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)

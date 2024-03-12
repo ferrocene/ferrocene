@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C inline-threshold=1000
+//@ check-pass
+//@ compile-flags: -C inline-threshold=1000
 
 fn main() {}
 

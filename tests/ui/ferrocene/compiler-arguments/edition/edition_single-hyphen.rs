@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -edition 2021
+//@ check-fail
+//@ compile-flags: -edition 2021
 
 fn main() {}
 

@@ -13,7 +13,7 @@ use itertools::Itertools;
 use rustc_ast as ast;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::{
-    codes::*, pluralize, Applicability, Diagnostic, ErrCode, ErrorGuaranteed, MultiSpan, StashKey,
+    codes::*, pluralize, Applicability, Diagnostic, ErrorGuaranteed, MultiSpan, StashKey,
 };
 use rustc_hir as hir;
 use rustc_hir::def::{CtorOf, DefKind, Res};
@@ -1269,7 +1269,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         {
             // The user provided `ptr::null()`, but the function expects
             // `ptr::null_mut()`.
-            err.subdiagnostic(SuggestPtrNullMut { span: arg.span });
+            err.subdiagnostic(self.dcx(), SuggestPtrNullMut { span: arg.span });
         }
     }
 
@@ -1319,7 +1319,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 tcx.type_of(tcx.require_lang_item(hir::LangItem::CStr, Some(lit.span)))
                     .skip_binder(),
             ),
-            ast::LitKind::Err => Ty::new_misc_error(tcx),
+            ast::LitKind::Err(guar) => Ty::new_error(tcx, guar),
         }
     }
 

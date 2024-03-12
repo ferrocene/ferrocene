@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=link
+//@ check-pass
+//@ compile-flags: --emit=link
 
 fn main() {}
 

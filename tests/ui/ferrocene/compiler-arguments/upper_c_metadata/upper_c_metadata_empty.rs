@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Cmetadata
+//@ check-fail
+//@ compile-flags: -Cmetadata
 
 fn main() {}
 

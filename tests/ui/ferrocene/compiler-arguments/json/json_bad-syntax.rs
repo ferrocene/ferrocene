@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --error-format=json -json
+//@ check-fail
+//@ compile-flags: --error-format=json -json
 
 fn main() {}
 

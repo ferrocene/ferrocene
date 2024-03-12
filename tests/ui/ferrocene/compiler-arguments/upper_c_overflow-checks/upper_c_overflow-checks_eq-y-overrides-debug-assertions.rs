@@ -1,5 +1,5 @@
-// run-fail
-// compile-flags: -Cdebug-assertions=n  -Coverflow-checks=y
+//@ run-fail
+//@ compile-flags: -Cdebug-assertions=n  -Coverflow-checks=y
 
 // If not specified, overflow checks are enabled if debug-assertions are
 // enabled, disabled otherwise.

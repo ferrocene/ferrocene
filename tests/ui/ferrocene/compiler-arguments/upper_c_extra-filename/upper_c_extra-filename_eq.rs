@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Cextra-filename=suffix
+//@ check-pass
+//@ compile-flags: -Cextra-filename=suffix
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Cpanic
+//@ check-fail
+//@ compile-flags: -Cpanic
 
 fn main() {}
 

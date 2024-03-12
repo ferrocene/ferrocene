@@ -1,6 +1,6 @@
-// check-pass
-// compile-flags: --print target-list
-// compare-output-lines-by-subset
+//@ check-pass
+//@ compile-flags: --print target-list
+//@ compare-output-lines-by-subset
 
 fn main() {}
 

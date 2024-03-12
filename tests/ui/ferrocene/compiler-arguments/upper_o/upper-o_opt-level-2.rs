@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -O -C opt-level=2
+//@ check-pass
+//@ compile-flags: -O -C opt-level=2
 
 fn main() {}
 

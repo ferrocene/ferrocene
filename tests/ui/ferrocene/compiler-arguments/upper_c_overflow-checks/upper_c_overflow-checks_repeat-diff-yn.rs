@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: -Coverflow-checks=y -Coverflow-checks=n
+//@ run-pass
+//@ compile-flags: -Coverflow-checks=y -Coverflow-checks=n
 
 // Rightmost flag overrides any previous flags.
 

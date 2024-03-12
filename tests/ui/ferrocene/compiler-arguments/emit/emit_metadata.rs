@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=metadata
+//@ check-pass
+//@ compile-flags: --emit=metadata
 
 fn main() {}
 

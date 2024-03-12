@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: --crate-type=rlib --error-format=json --json=artifacts
+//@ build-pass
+//@ compile-flags: --crate-type=rlib --error-format=json --json=artifacts
 
 fn factorial(value: i32) -> i32 {
     match value {

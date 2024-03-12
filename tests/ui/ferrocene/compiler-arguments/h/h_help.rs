@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -h --help
+//@ check-fail
+//@ compile-flags: -h --help
 
 fn main() {}
 

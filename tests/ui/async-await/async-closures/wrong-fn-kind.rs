@@ -1,4 +1,4 @@
-// edition:2021
+//@ edition:2021
 
 // FIXME(async_closures): This needs a better error message!
 
@@ -9,8 +9,7 @@ fn main() {
 
     let mut x = 1;
     needs_async_fn(async || {
-        //~^ ERROR i16: ops::async_function::internal_implementation_detail::AsyncFnKindHelper<i8>
-        // FIXME: Should say "closure is `async FnMut` but it needs `async Fn`" or sth.
+        //~^ ERROR expected a closure that implements the `async Fn` trait, but this closure only implements `async FnMut`
         x += 1;
     });
 }

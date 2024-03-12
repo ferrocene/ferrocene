@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C overflow-checks=invalid
+//@ check-fail
+//@ compile-flags: -C overflow-checks=invalid
 
 fn main() {}
 

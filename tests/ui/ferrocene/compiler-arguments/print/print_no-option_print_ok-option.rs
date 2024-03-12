@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --print --print crate-name
+//@ check-fail
+//@ compile-flags: --print --print crate-name
 
 fn main() {}
 

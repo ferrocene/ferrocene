@@ -1,6 +1,6 @@
-// run-pass
-// compile-flags: -C target-cpu=generic
-// ignore-cross-compile
+//@ run-pass
+//@ compile-flags: -C target-cpu=generic
+//@ ignore-cross-compile
 
 fn main() {}
 

@@ -1,6 +1,6 @@
-// check-pass
-// compile-flags: --crate-type=proc-macro
-// needs-dynamic-linking - proc macros rely on dynamic linking
+//@ check-pass
+//@ compile-flags: --crate-type=proc-macro
+//@ needs-dynamic-linking - proc macros rely on dynamic linking
 
 extern crate proc_macro;
 

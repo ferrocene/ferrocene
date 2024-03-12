@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C link-arg=
+//@ check-pass
+//@ compile-flags: -C link-arg=
 
 fn main() {}
 

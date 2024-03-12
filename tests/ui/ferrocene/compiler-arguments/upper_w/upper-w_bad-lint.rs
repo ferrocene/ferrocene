@@ -1,4 +1,4 @@
-// check-pass
-// compile-flags: -W junk
+//@ check-pass
+//@ compile-flags: -W junk
 
 fn main() {}

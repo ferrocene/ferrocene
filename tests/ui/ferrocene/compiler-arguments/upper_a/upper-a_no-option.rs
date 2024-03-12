@@ -1,7 +1,7 @@
 // -A must be followed by a valid option
 //
-// check-fail
-// compile-flags: -A
+//@ check-fail
+//@ compile-flags: -A
 
 fn main() {}
 

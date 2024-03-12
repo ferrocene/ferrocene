@@ -1,4 +1,4 @@
-// check-fail
-// compile-flags: -W
+//@ check-fail
+//@ compile-flags: -W
 
 fn main() {}

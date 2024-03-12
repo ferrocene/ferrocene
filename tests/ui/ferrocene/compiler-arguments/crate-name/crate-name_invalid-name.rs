@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --crate-name=foo-bar
+//@ check-fail
+//@ compile-flags: --crate-name=foo-bar
 
 fn main() {}
 

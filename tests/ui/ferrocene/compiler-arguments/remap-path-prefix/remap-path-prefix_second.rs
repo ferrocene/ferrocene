@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --remap-path-prefix=foo=bar --remap-path-prefix={{src-base}}/ferrocene/compiler-arguments/remap-path-prefix=remapped
+//@ check-fail
+//@ compile-flags: --remap-path-prefix=foo=bar --remap-path-prefix={{src-base}}/ferrocene/compiler-arguments/remap-path-prefix=remapped
 
 fn main() {
     // We cannot actually put an ERROR marker here because

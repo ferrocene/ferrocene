@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Copt-level=z
+//@ build-pass
+//@ compile-flags: -Copt-level=z
 
 fn main() {}
 

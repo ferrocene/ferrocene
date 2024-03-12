@@ -1,4 +1,4 @@
-// check-fail
+//@ check-fail
 
 extern "C" {
     // N.B., mutability can be easily incorrect in FFI calls -- as
@@ -237,6 +237,11 @@ unsafe fn bigger_layout() {
         let num = foi::<i32>();
         let _num = &*(&num as *const i32 as *const i64);
         //~^ ERROR casting references to a bigger memory layout
+    }
+
+    {
+        let x: Box<dyn Send> = Box::new(0i32);
+        let _z = unsafe { &*(&*x as *const dyn Send as *const i32) };
     }
 
     unsafe fn from_ref(this: &i32) -> &i64 {

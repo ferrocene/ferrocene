@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C rpath
+//@ check-pass
+//@ compile-flags: -C rpath
 
 fn main() {}
 

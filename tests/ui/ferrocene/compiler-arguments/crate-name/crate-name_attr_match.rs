@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --crate-name=foo
+//@ check-pass
+//@ compile-flags: --crate-name=foo
 
 #![crate_name = "foo"]
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --print code-models
+//@ check-pass
+//@ compile-flags: --print code-models
 
 fn main() {}
 

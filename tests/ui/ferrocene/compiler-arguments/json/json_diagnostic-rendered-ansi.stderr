@@ -58,7 +58,7 @@ bar();
 
 If the item you are importing is not defined in some super-module of the
 current module, then it must also be declared as public (e.g., `pub fn`).
-"},"level":"error","spans":[{"file_name":"$DIR/json_diagnostic-rendered-ansi.rs","byte_start":163,"byte_end":164,"line_start":6,"line_end":6,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;","highlight_start":13,"highlight_end":14}],"label":"not found in this scope","suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[],"rendered":"\u001b[0m\u001b[1m\u001b[38;5;9merror[E0425]\u001b[0m\u001b[0m\u001b[1m: cannot find value `x` in this scope\u001b[0m
+"},"level":"error","spans":[{"file_name":"$DIR/json_diagnostic-rendered-ansi.rs","byte_start":166,"byte_end":167,"line_start":6,"line_end":6,"column_start":13,"column_end":14,"is_primary":true,"text":[{"text":"    let x = x;","highlight_start":13,"highlight_end":14}],"label":"not found in this scope","suggested_replacement":null,"suggestion_applicability":null,"expansion":null}],"children":[],"rendered":"\u001b[0m\u001b[1m\u001b[38;5;9merror[E0425]\u001b[0m\u001b[0m\u001b[1m: cannot find value `x` in this scope\u001b[0m
 \u001b[0m  \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m--> \u001b[0m\u001b[0m$DIR/json_diagnostic-rendered-ansi.rs:6:13\u001b[0m
 \u001b[0m   \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m|\u001b[0m
 \u001b[0m\u001b[1m\u001b[38;5;12mLL\u001b[0m\u001b[0m \u001b[0m\u001b[0m\u001b[1m\u001b[38;5;12m|\u001b[0m\u001b[0m \u001b[0m\u001b[0m    let x = x;\u001b[0m

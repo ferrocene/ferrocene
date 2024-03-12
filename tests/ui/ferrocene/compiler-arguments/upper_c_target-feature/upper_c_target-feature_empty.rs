@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Ctarget-feature
+//@ check-fail
+//@ compile-flags: -Ctarget-feature
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -D exceeding_bitshifts -D
+//@ check-fail
+//@ compile-flags: -D exceeding_bitshifts -D
 
 fn main() {}
 

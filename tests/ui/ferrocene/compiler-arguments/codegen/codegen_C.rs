@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --codegen -C
+//@ check-fail
+//@ compile-flags: --codegen -C
 
 fn main() {}
 

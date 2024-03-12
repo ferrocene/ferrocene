@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --out-dir
+//@ check-fail
+//@ compile-flags: --out-dir
 
 fn main() {}
 

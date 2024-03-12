@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C target-cpu
+//@ check-fail
+//@ compile-flags: -C target-cpu
 
 fn main() {}
 

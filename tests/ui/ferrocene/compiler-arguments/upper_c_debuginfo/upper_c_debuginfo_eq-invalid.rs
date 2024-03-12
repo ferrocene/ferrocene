@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Cdebuginfo=invalid
+//@ check-fail
+//@ compile-flags: -Cdebuginfo=invalid
 
 fn main() {}
 

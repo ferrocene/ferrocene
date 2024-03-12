@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Copt-level=
+//@ check-fail
+//@ compile-flags: -Copt-level=
 
 fn main() {}
 

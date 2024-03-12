@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: --remap-path-prefix={{src-base}}/ferrocene/compiler-arguments/remap-path-prefix=remapped
+//@ run-pass
+//@ compile-flags: --remap-path-prefix={{src-base}}/ferrocene/compiler-arguments/remap-path-prefix=remapped
 
 fn main() {
     let this_file = file!();

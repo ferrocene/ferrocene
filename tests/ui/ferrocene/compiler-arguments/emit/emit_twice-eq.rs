@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=asm --emit=asm
+//@ check-pass
+//@ compile-flags: --emit=asm --emit=asm
 
 fn main() {}
 

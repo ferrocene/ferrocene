@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C link-dead-code=invalid
+//@ check-fail
+//@ compile-flags: -C link-dead-code=invalid
 
 fn main() {}
 

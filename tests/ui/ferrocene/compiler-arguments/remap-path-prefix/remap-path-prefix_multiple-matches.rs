@@ -1,7 +1,7 @@
 // Test what happens when both the first and the second FROM match
 //
-// check-fail
-// compile-flags: --remap-path-prefix={{src-base}}=foo --remap-path-prefix={{src-base}}=bar
+//@ check-fail
+//@ compile-flags: --remap-path-prefix={{src-base}}=foo --remap-path-prefix={{src-base}}=bar
 
 fn main() {
     // We cannot actually put an ERROR marker here because

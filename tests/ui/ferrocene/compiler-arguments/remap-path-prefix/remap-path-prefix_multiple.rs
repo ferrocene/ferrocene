@@ -1,8 +1,8 @@
 // Test what happens when the second remap FROM match the result of the first
 // remap.
 //
-// check-fail
-// compile-flags: --remap-path-prefix={{src-base}}=foo --remap-path-prefix=foo/ferrocene/compiler-arguments/remap-path-prefix=bar
+//@ check-fail
+//@ compile-flags: --remap-path-prefix={{src-base}}=foo --remap-path-prefix=foo/ferrocene/compiler-arguments/remap-path-prefix=bar
 
 fn main() {
     // We cannot actually put an ERROR marker here because

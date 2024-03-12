@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C debuginfo
+//@ check-fail
+//@ compile-flags: -C debuginfo
 
 fn main() {}
 

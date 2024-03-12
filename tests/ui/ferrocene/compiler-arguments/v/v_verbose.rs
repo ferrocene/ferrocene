@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -v --verbose
+//@ check-fail
+//@ compile-flags: -v --verbose
 
 fn main() {}
 

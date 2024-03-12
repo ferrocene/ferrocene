@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -L crate=
+//@ check-fail
+//@ compile-flags: -L crate=
 
 fn main() {}
 

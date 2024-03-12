@@ -1,5 +1,5 @@
-// check-pass
-// compile-args: --print link-args
+//@ check-pass
+//@ compile-args: --print link-args
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Cprefer-dynamic=y -Cprefer-dynamic=n
+//@ check-pass
+//@ compile-flags: -Cprefer-dynamic=y -Cprefer-dynamic=n
 
 fn main() {}
 

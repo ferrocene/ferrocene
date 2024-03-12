@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --crate-type=bin
+//@ check-fail
+//@ compile-flags: --crate-type=bin
 
 fn foo() {} //~ ERROR `main` function not found in crate
 

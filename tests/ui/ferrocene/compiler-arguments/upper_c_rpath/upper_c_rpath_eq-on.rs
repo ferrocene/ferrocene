@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Crpath=on
+//@ check-pass
+//@ compile-flags: -Crpath=on
 
 fn main() {}
 

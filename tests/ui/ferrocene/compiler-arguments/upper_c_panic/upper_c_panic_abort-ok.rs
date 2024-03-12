@@ -1,6 +1,6 @@
-// run-pass
-// compile-flags: -Cpanic=abort
-// no-prefer-dynamic
+//@ run-pass
+//@ compile-flags: -Cpanic=abort
+//@ no-prefer-dynamic
 
 fn main() {}
 

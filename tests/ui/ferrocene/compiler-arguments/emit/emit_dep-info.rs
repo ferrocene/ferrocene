@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=dep-info
+//@ check-pass
+//@ compile-flags: --emit=dep-info
 
 fn main() {}
 

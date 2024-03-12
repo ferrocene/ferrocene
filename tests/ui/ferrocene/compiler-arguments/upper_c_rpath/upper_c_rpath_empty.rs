@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -Crpath
+//@ check-pass
+//@ compile-flags: -Crpath
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --crate-name=foo --crate-type=lib
+//@ check-pass
+//@ compile-flags: --crate-name=foo --crate-type=lib
 
 pub fn foo() {}
 

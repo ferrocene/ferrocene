@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --crate-type=bin
+//@ check-pass
+//@ compile-flags: --crate-type=bin
 
 fn main() {}
 

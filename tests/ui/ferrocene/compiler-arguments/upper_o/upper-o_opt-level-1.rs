@@ -1,8 +1,8 @@
 // -O equals to -C opt-level=2. Here we test what happens when they are both
 // set, but with a mismatching optimization level.
 //
-// check-pass
-// compile-flags: -O -C opt-level=1
+//@ check-pass
+//@ compile-flags: -O -C opt-level=1
 
 fn main() {}
 

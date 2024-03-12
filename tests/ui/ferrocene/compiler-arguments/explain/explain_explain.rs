@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --explain E0425 --explain
+//@ check-fail
+//@ compile-flags: --explain E0425 --explain
 
 fn main() {}
 

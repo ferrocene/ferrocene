@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --error-format=json --json=future-incompat
+//@ check-pass
+//@ compile-flags: --error-format=json --json=future-incompat
 
 // From https://github.com/rust-lang/rust/issues/79813
 

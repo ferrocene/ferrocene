@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -C inline-threshold=
+//@ check-fail
+//@ compile-flags: -C inline-threshold=
 
 fn main() {}
 

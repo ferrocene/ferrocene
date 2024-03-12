@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=asm -C extra_filename=suffix
+//@ check-pass
+//@ compile-flags: --emit=asm -C extra_filename=suffix
 
 fn main() {}
 

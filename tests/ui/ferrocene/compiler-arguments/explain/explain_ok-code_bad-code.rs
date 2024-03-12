@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --explain E0425 junk
+//@ check-pass
+//@ compile-flags: --explain E0425 junk
 
 fn main() {}
 

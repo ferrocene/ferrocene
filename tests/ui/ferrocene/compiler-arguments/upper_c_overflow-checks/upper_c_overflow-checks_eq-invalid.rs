@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -Coverflow-checks=invalid
+//@ check-fail
+//@ compile-flags: -Coverflow-checks=invalid
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -C link-dead-code=n
+//@ check-pass
+//@ compile-flags: -C link-dead-code=n
 
 fn main() {}
 

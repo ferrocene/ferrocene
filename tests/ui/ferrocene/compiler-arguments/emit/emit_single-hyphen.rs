@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: -emit=asm
+//@ check-fail
+//@ compile-flags: -emit=asm
 
 fn main() {}
 

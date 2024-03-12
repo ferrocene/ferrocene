@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Clinker-flavor=gcc -Clinker-flavor=gcc
+//@ build-pass
+//@ compile-flags: -Clinker-flavor=gcc -Clinker-flavor=gcc
 
 fn main() {}
 

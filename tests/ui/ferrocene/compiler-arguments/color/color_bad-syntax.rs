@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --error-format human -color always
+//@ check-fail
+//@ compile-flags: --error-format human -color always
 
 fn main() {}
 

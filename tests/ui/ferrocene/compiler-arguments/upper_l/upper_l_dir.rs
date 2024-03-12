@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: -L some_directory
+//@ check-pass
+//@ compile-flags: -L some_directory
 
 fn main() {}
 

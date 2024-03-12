@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=asm -o {{build-base}}//output_filename
+//@ check-pass
+//@ compile-flags: --emit=asm -o {{build-base}}//output_filename
 
 fn main() {}
 

@@ -1,5 +1,5 @@
-// check-pass
-// compile-flags: --emit=mir
+//@ check-pass
+//@ compile-flags: --emit=mir
 
 fn main() {}
 

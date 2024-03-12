@@ -1,5 +1,5 @@
-// run-pass
-// compile-flags: -Ctarget-cpu=
+//@ run-pass
+//@ compile-flags: -Ctarget-cpu=
 
 fn main() {}
 

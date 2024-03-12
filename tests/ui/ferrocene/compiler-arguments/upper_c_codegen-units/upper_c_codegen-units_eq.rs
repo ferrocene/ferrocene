@@ -1,5 +1,5 @@
-// build-pass
-// compile-flags: -Ccodegen-units=2
+//@ build-pass
+//@ compile-flags: -Ccodegen-units=2
 
 fn main() {}
 

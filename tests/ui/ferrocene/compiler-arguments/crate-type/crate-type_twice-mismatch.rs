@@ -1,5 +1,5 @@
-// check-fail
-// compile-flags: --crate-type=bin --crate-type=lib
+//@ check-fail
+//@ compile-flags: --crate-type=bin --crate-type=lib
 
 fn main() {}
 

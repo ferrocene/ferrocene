@@ -2141,15 +2141,15 @@ impl Config {
     pub(crate) fn artifact_version_part(&self, commit: &str) -> String {
         let (channel, version) = if self.rust_info.is_managed_git_subrepository() {
             let mut channel = self.git();
-            channel.arg("show").arg(format!("{commit}:src/ci/channel"));
+            channel.arg("show").arg(format!("{commit}:ferrocene/ci/channel"));
             let channel = output(&mut channel);
             let mut version = self.git();
-            version.arg("show").arg(format!("{commit}:src/version"));
+            version.arg("show").arg(format!("{commit}:ferrocene/version"));
             let version = output(&mut version);
             (channel.trim().to_owned(), version.trim().to_owned())
         } else {
-            let channel = fs::read_to_string(self.src.join("src/ci/channel"));
-            let version = fs::read_to_string(self.src.join("src/version"));
+            let channel = fs::read_to_string(self.src.join("ferrocene/ci/channel"));
+            let version = fs::read_to_string(self.src.join("ferrocene/version"));
             match (channel, version) {
                 (Ok(channel), Ok(version)) => {
                     (channel.trim().to_owned(), version.trim().to_owned())
@@ -2161,22 +2161,17 @@ impl Config {
                         "HELP: consider using a git checkout or ensure these files are readable"
                     );
                     if let Err(channel) = channel {
-                        eprintln!("reading {src}/src/ci/channel failed: {channel:?}");
+                        eprintln!("reading {src}/ferrocene/ci/channel failed: {channel:?}");
                     }
                     if let Err(version) = version {
-                        eprintln!("reading {src}/src/version failed: {version:?}");
+                        eprintln!("reading {src}/ferrocene/version failed: {version:?}");
                     }
                     panic!();
                 }
             }
         };
 
-        match channel.as_str() {
-            "stable" => version,
-            "beta" => channel,
-            "nightly" => channel,
-            other => unreachable!("{:?} is not recognized as a valid channel", other),
-        }
+        if channel == "stable" { version } else { commit[..9].to_string() }
     }
 
     /// Try to find the relative path of `bindir`, otherwise return it in full.

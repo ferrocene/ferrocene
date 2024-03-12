@@ -7,7 +7,6 @@ use build_helper::git::get_git_merge_base;
 use std::path::PathBuf;
 
 static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-artifacts/ferrocene/dist";
-static TARBALL_NAME: &str = "ferrocene-test-outcomes-nightly.tar.xz";
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(super) struct TestOutcomesDir;
@@ -47,7 +46,8 @@ fn download_and_extract_outcomes(builder: &Builder<'_>, commit: &str) -> PathBuf
 
     if !tarball_file.exists() {
         builder.info(&format!("Downloading test outcomes for commit {commit}"));
-        let url = format!("{DOWNLOAD_PREFIX}/{commit}/{TARBALL_NAME}");
+        let version = builder.config.artifact_version_part(commit);
+        let url = format!("{DOWNLOAD_PREFIX}/{commit}/ferrocene-test-outcomes-{version}.tar.xz");
         builder.create_dir(&tarballs_dir);
         builder.config.download_file(&url, &tarball_file, "Could not download the test outcomes.");
     }

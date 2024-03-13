@@ -294,7 +294,7 @@ fn cross_compile_test_program(
     let _output = run_command(&mut cc_child).map_err(|error| {
         let cc_name =
             cc_path.file_name().and_then(|p| p.to_str()).unwrap_or("<non UTF-8 compiler name>");
-        Error::SampleProgramCompilationFailed { name: cc_name.to_string(), error: Box::new(error) }
+        Error::sample_program_compilation_failed(cc_name, error)
     })?;
 
     Ok(())
@@ -350,9 +350,8 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let mut cc_child = Command::new("cc");
     cc_child.args(&args);
 
-    let _output = run_command(&mut cc_child).map_err(|error| {
-        Error::SampleProgramCompilationFailed { name: "cc".to_string(), error: Box::new(error) }
-    })?;
+    let _output = run_command(&mut cc_child)
+        .map_err(|error| Error::sample_program_compilation_failed("cc", error))?;
 
     Ok(args_file)
 }

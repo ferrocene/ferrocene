@@ -71,6 +71,10 @@ impl Error {
             Error::SampleProgramOutputWrong { .. } => 26,
         }
     }
+
+    pub(crate) fn sample_program_compilation_failed(name: &str, error: CommandError) -> Self {
+        Error::SampleProgramCompilationFailed { name: name.to_string(), error: Box::new(error) }
+    }
 }
 
 impl std::error::Error for Error {

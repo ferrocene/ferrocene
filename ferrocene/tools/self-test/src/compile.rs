@@ -140,10 +140,8 @@ fn compile(
     cmd.args(&ctx.target.rustflags);
     cmd.arg(&program_path);
 
-    run_command(&mut cmd).map_err(|error| Error::SampleProgramCompilationFailed {
-        name: program.name.into(),
-        error: Box::new(error),
-    })?;
+    run_command(&mut cmd)
+        .map_err(|error| Error::sample_program_compilation_failed(program.name, error))?;
 
     if let Some(expected_output) = expected_output {
         // where is it

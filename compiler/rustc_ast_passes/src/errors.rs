@@ -2,8 +2,7 @@
 
 use rustc_ast::ParamKindOrd;
 use rustc_errors::{
-    codes::*, AddToDiagnostic, Applicability, DiagnosticBuilder, EmissionGuarantee,
-    SubdiagnosticMessageOp,
+    codes::*, AddToDiagnostic, Applicability, Diag, EmissionGuarantee, SubdiagnosticMessageOp,
 };
 use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_span::{symbol::Ident, Span, Symbol};
@@ -377,7 +376,7 @@ pub struct EmptyLabelManySpans(pub Vec<Span>);
 impl AddToDiagnostic for EmptyLabelManySpans {
     fn add_to_diagnostic_with<G: EmissionGuarantee, F: SubdiagnosticMessageOp<G>>(
         self,
-        diag: &mut DiagnosticBuilder<'_, G>,
+        diag: &mut Diag<'_, G>,
         _: F,
     ) {
         diag.span_labels(self.0, "");
@@ -516,17 +515,25 @@ pub struct WhereClauseBeforeTypeAlias {
 }
 
 #[derive(Subdiagnostic)]
-#[multipart_suggestion(
-    ast_passes_suggestion,
-    applicability = "machine-applicable",
-    style = "verbose"
-)]
-pub struct WhereClauseBeforeTypeAliasSugg {
-    #[suggestion_part(code = "")]
-    pub left: Span,
-    pub snippet: String,
-    #[suggestion_part(code = "{snippet}")]
-    pub right: Span,
+
+pub enum WhereClauseBeforeTypeAliasSugg {
+    #[suggestion(ast_passes_remove_suggestion, applicability = "machine-applicable", code = "")]
+    Remove {
+        #[primary_span]
+        span: Span,
+    },
+    #[multipart_suggestion(
+        ast_passes_move_suggestion,
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    Move {
+        #[suggestion_part(code = "")]
+        left: Span,
+        snippet: String,
+        #[suggestion_part(code = "{snippet}")]
+        right: Span,
+    },
 }
 
 #[derive(Diagnostic)]
@@ -738,7 +745,7 @@ pub struct StableFeature {
 impl AddToDiagnostic for StableFeature {
     fn add_to_diagnostic_with<G: EmissionGuarantee, F: SubdiagnosticMessageOp<G>>(
         self,
-        diag: &mut DiagnosticBuilder<'_, G>,
+        diag: &mut Diag<'_, G>,
         _: F,
     ) {
         diag.arg("name", self.name);

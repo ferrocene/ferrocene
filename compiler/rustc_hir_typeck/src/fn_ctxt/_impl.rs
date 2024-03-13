@@ -5,7 +5,7 @@ use crate::rvalue_scopes;
 use crate::{BreakableCtxt, Diverges, Expectation, FnCtxt, LoweredTy};
 use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::FxHashSet;
-use rustc_errors::{Applicability, DiagnosticBuilder, ErrorGuaranteed, MultiSpan, StashKey};
+use rustc_errors::{Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::DefId;
@@ -848,11 +848,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             .resolve_fully_qualified_call(span, item_name, ty.normalized, qself.span, hir_id)
             .map(|r| {
                 // lint bare trait if the method is found in the trait
-                if span.edition().at_least_rust_2021()
-                    && let Some(diag) =
-                        self.dcx().steal_diagnostic(qself.span, StashKey::TraitMissingMethod)
-                {
-                    diag.emit();
+                if span.edition().at_least_rust_2021() {
+                    self.dcx().try_steal_modify_and_emit_err(
+                        qself.span,
+                        StashKey::TraitMissingMethod,
+                        |_err| {},
+                    );
                 }
                 r
             })
@@ -879,17 +880,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     );
                 }
 
-                // emit or cancel the diagnostic for bare traits
-                if span.edition().at_least_rust_2021()
-                    && let Some(diag) =
-                        self.dcx().steal_diagnostic(qself.span, StashKey::TraitMissingMethod)
-                {
-                    if trait_missing_method {
-                        // cancel the diag for bare traits when meeting `MyTrait::missing_method`
-                        diag.cancel();
-                    } else {
-                        diag.emit();
-                    }
+                // Emit the diagnostic for bare traits. (We used to cancel for slightly better
+                // error messages, but cancelling stashed diagnostics is no longer allowed because
+                // it causes problems when tracking whether errors have actually occurred.)
+                if span.edition().at_least_rust_2021() {
+                    self.dcx().try_steal_modify_and_emit_err(
+                        qself.span,
+                        StashKey::TraitMissingMethod,
+                        |_err| {},
+                    );
                 }
 
                 if item_name.name != kw::Empty {
@@ -1020,7 +1019,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     pub(in super::super) fn note_internal_mutation_in_method(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         expr: &hir::Expr<'_>,
         expected: Option<Ty<'tcx>>,
         found: Ty<'tcx>,
@@ -1516,6 +1515,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// In case there is still ambiguity, the returned type may be an inference
     /// variable. This is different from `structurally_resolve_type` which errors
     /// in this case.
+    #[instrument(level = "debug", skip(self, sp), ret)]
     pub fn try_structurally_resolve_type(&self, sp: Span, ty: Ty<'tcx>) -> Ty<'tcx> {
         let ty = self.resolve_vars_with_obligations(ty);
 

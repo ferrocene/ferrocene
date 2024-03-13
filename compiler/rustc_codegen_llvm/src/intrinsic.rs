@@ -17,7 +17,7 @@ use rustc_hir as hir;
 use rustc_middle::ty::layout::{FnAbiOf, HasTyCtxt, LayoutOf};
 use rustc_middle::ty::{self, GenericArgsRef, Ty};
 use rustc_middle::{bug, span_bug};
-use rustc_span::{sym, symbol::kw, Span, Symbol};
+use rustc_span::{sym, Span, Symbol};
 use rustc_target::abi::{self, Align, HasDataLayout, Primitive};
 use rustc_target::spec::{HasTargetSpec, PanicStrategy};
 
@@ -133,8 +133,8 @@ impl<'ll, 'tcx> IntrinsicCallMethods<'tcx> for Builder<'_, 'll, 'tcx> {
             }
             sym::unlikely => self
                 .call_intrinsic("llvm.expect.i1", &[args[0].immediate(), self.const_bool(false)]),
-            kw::Try => {
-                try_intrinsic(
+            sym::catch_unwind => {
+                catch_unwind_intrinsic(
                     self,
                     args[0].immediate(),
                     args[1].immediate(),
@@ -163,11 +163,15 @@ impl<'ll, 'tcx> IntrinsicCallMethods<'tcx> for Builder<'_, 'll, 'tcx> {
                                     emit_va_arg(self, args[0], ret_ty)
                                 }
                             }
+                            Primitive::F16 => bug!("the va_arg intrinsic does not work with `f16`"),
                             Primitive::F64 | Primitive::Pointer(_) => {
                                 emit_va_arg(self, args[0], ret_ty)
                             }
                             // `va_arg` should never be used with the return type f32.
                             Primitive::F32 => bug!("the va_arg intrinsic does not work with `f32`"),
+                            Primitive::F128 => {
+                                bug!("the va_arg intrinsic does not work with `f128`")
+                            }
                         }
                     }
                     _ => bug!("the va_arg intrinsic does not work with non-scalar types"),
@@ -457,7 +461,7 @@ impl<'ll, 'tcx> IntrinsicCallMethods<'tcx> for Builder<'_, 'll, 'tcx> {
     }
 }
 
-fn try_intrinsic<'ll>(
+fn catch_unwind_intrinsic<'ll>(
     bx: &mut Builder<'_, 'll, '_>,
     try_func: &'ll Value,
     data: &'ll Value,

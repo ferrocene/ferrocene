@@ -31,6 +31,7 @@
 #![feature(array_windows)]
 #![feature(box_patterns)]
 #![feature(control_flow_enum)]
+#![feature(extract_if)]
 #![feature(generic_nonzero)]
 #![feature(if_let_guard)]
 #![feature(iter_order_by)]
@@ -70,6 +71,7 @@ mod methods;
 mod multiple_supertrait_upcastable;
 mod non_ascii_idents;
 mod non_fmt_panic;
+mod non_local_def;
 mod nonstandard_style;
 mod noop_method_call;
 mod opaque_hidden_inferred_bound;
@@ -105,6 +107,7 @@ use methods::*;
 use multiple_supertrait_upcastable::*;
 use non_ascii_idents::*;
 use non_fmt_panic::NonPanicFmt;
+use non_local_def::*;
 use nonstandard_style::*;
 use noop_method_call::*;
 use opaque_hidden_inferred_bound::*;
@@ -229,6 +232,7 @@ late_lint_methods!(
             MissingDebugImplementations: MissingDebugImplementations,
             MissingDoc: MissingDoc,
             AsyncFnInTrait: AsyncFnInTrait,
+            NonLocalDefinitions: NonLocalDefinitions::default(),
         ]
     ]
 );
@@ -546,7 +550,6 @@ fn register_internals(store: &mut LintStore) {
     store.register_lints(&TyTyKind::get_lints());
     store.register_late_mod_pass(|_| Box::new(TyTyKind));
     store.register_lints(&Diagnostics::get_lints());
-    store.register_early_pass(|| Box::new(Diagnostics));
     store.register_late_mod_pass(|_| Box::new(Diagnostics));
     store.register_lints(&BadOptAccess::get_lints());
     store.register_late_mod_pass(|_| Box::new(BadOptAccess));

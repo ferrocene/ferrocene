@@ -244,9 +244,28 @@ lint_hidden_unicode_codepoints = unicode codepoint changing visible direction of
 lint_identifier_non_ascii_char = identifier contains non-ASCII characters
 
 lint_identifier_uncommon_codepoints = identifier contains {$codepoints_len ->
-    [one] an uncommon Unicode codepoint
-    *[other] uncommon Unicode codepoints
+    [one] { $identifier_type ->
+        [Exclusion] a character from an archaic script
+        [Technical] a character that is for non-linguistic, specialized usage
+        [Limited_Use] a character from a script in limited use
+        [Not_NFKC] a non normalized (NFKC) character
+        *[other] an uncommon character
+    }
+    *[other] { $identifier_type ->
+        [Exclusion] {$codepoints_len} characters from archaic scripts
+        [Technical] {$codepoints_len} characters that are for non-linguistic, specialized usage
+        [Limited_Use] {$codepoints_len} characters from scripts in limited use
+        [Not_NFKC] {$codepoints_len} non normalized (NFKC) characters
+        *[other] uncommon characters
+    }
 }: {$codepoints}
+    .note = {$codepoints_len ->
+        [one] this character is
+        *[other] these characters are
+    } included in the{$identifier_type ->
+        [Restricted] {""}
+        *[other] {" "}{$identifier_type}
+    } Unicode general security profile
 
 lint_ignored_unless_crate_specified = {$level}({$name}) is ignored unless specified at crate level
 
@@ -413,6 +432,29 @@ lint_non_fmt_panic_unused =
         *[other] arguments
     }
     .add_fmt_suggestion = or add a "{"{"}{"}"}" format string to use the message literally
+
+lint_non_local_definitions_cargo_update = the {$macro_kind} `{$macro_name}` may come from an old version of the `{$crate_name}` crate, try updating your dependency with `cargo update -p {$crate_name}`
+
+lint_non_local_definitions_deprecation = this lint may become deny-by-default in the edition 2024 and higher, see the tracking issue <https://github.com/rust-lang/rust/issues/120363>
+
+lint_non_local_definitions_impl = non-local `impl` definition, they should be avoided as they go against expectation
+    .help =
+        move this `impl` block outside the of the current {$body_kind_descr} {$depth ->
+            [one] `{$body_name}`
+           *[other] `{$body_name}` and up {$depth} bodies
+        }
+    .non_local = an `impl` definition is non-local if it is nested inside an item and neither the type nor the trait are at the same nesting level as the `impl` block
+    .exception = one exception to the rule are anon-const (`const _: () = {"{"} ... {"}"}`) at top-level module and anon-const at the same nesting as the trait or type
+    .const_anon = use a const-anon item to suppress this lint
+
+lint_non_local_definitions_macro_rules = non-local `macro_rules!` definition, they should be avoided as they go against expectation
+    .help =
+        remove the `#[macro_export]` or move this `macro_rules!` outside the of the current {$body_kind_descr} {$depth ->
+            [one] `{$body_name}`
+           *[other] `{$body_name}` and up {$depth} bodies
+        }
+    .non_local = a `macro_rules!` definition is non-local if it is nested inside an item and has a `#[macro_export]` attribute
+    .exception = one exception to the rule are anon-const (`const _: () = {"{"} ... {"}"}`) at top-level module
 
 lint_non_snake_case = {$sort} `{$name}` should have a snake case name
     .rename_or_convert_suggestion = rename the identifier or convert it to a snake case raw identifier

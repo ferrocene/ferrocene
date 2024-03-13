@@ -394,10 +394,12 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
 
             ty::Infer(ty::FloatVar(_)) => {
                 // This causes a compiler error if any new float kinds are added.
-                let (ty::FloatTy::F32 | ty::FloatTy::F64);
+                let (ty::FloatTy::F16 | ty::FloatTy::F32 | ty::FloatTy::F64 | ty::FloatTy::F128);
                 let possible_floats = [
+                    SimplifiedType::Float(ty::FloatTy::F16),
                     SimplifiedType::Float(ty::FloatTy::F32),
                     SimplifiedType::Float(ty::FloatTy::F64),
+                    SimplifiedType::Float(ty::FloatTy::F128),
                 ];
 
                 for simp in possible_floats {
@@ -777,6 +779,7 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
     // FIXME(@lcnr): The current structure here makes me unhappy and feels ugly. idk how
     // to improve this however. However, this should make it fairly straightforward to refine
     // the filtering going forward, so it seems alright-ish for now.
+    #[instrument(level = "debug", skip(self, goal))]
     fn discard_impls_shadowed_by_env<G: GoalKind<'tcx>>(
         &mut self,
         goal: Goal<'tcx, G>,
@@ -799,7 +802,10 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
                 // This feels dangerous.
                 Certainty::Yes => {
                     candidates.retain(|c| match c.source {
-                        CandidateSource::Impl(_) | CandidateSource::BuiltinImpl(_) => false,
+                        CandidateSource::Impl(_) | CandidateSource::BuiltinImpl(_) => {
+                            debug!(?c, "discard impl candidate");
+                            false
+                        }
                         CandidateSource::ParamEnv(_) | CandidateSource::AliasBound => true,
                     });
                 }
@@ -807,6 +813,7 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
                 // to be ambig and wait for inference constraints. See
                 // tests/ui/traits/next-solver/env-shadows-impls/ambig-env-no-shadow.rs
                 Certainty::Maybe(cause) => {
+                    debug!(?cause, "force ambiguity");
                     *candidates = self.forced_ambiguity(cause);
                 }
             }

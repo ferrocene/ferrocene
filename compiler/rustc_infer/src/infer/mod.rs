@@ -23,7 +23,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::sync::Lrc;
 use rustc_data_structures::undo_log::Rollback;
 use rustc_data_structures::unify as ut;
-use rustc_errors::{DiagCtxt, DiagnosticBuilder, ErrorGuaranteed};
+use rustc_errors::{Diag, DiagCtxt, ErrorGuaranteed};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_middle::infer::canonical::{Canonical, CanonicalVarValues};
 use rustc_middle::infer::unify_key::ConstVariableValue;
@@ -54,6 +54,7 @@ use self::region_constraints::{
     RegionConstraintCollector, RegionConstraintStorage, RegionSnapshot,
 };
 pub use self::relate::combine::CombineFields;
+pub use self::relate::StructurallyRelateAliases;
 use self::type_variable::{TypeVariableOrigin, TypeVariableOriginKind};
 
 pub mod at;
@@ -304,12 +305,6 @@ pub struct InferCtxt<'tcx> {
     /// `tainted_by_errors`) to avoid reporting certain kinds of errors.
     // FIXME(matthewjasper) Merge into `tainted_by_errors`
     err_count_on_creation: usize,
-
-    /// Track how many errors were stashed when this infcx is created.
-    /// Used for the same purpose as `err_count_on_creation`, even
-    /// though it's weaker because the count can go up and down.
-    // FIXME(matthewjasper) Merge into `tainted_by_errors`
-    stashed_err_count_on_creation: usize,
 
     /// What is the innermost universe we have created? Starts out as
     /// `UniverseIndex::root()` but grows from there as we enter
@@ -716,7 +711,6 @@ impl<'tcx> InferCtxtBuilder<'tcx> {
             reported_signature_mismatch: Default::default(),
             tainted_by_errors: Cell::new(None),
             err_count_on_creation: tcx.dcx().err_count_excluding_lint_errs(),
-            stashed_err_count_on_creation: tcx.dcx().stashed_err_count(),
             universe: Cell::new(ty::UniverseIndex::ROOT),
             intercrate,
             next_trait_solver,
@@ -1273,14 +1267,6 @@ impl<'tcx> InferCtxt<'tcx> {
             let guar = self.dcx().has_errors().unwrap();
             self.set_tainted_by_errors(guar);
             Some(guar)
-        } else if self.dcx().stashed_err_count() > self.stashed_err_count_on_creation {
-            // Errors stashed since this infcx was made. Not entirely reliable
-            // because the count of stashed errors can go down. But without
-            // this case we get a moderate number of uninteresting and
-            // extraneous "type annotations needed" errors.
-            let guar = self.dcx().delayed_bug("tainted_by_errors: stashed bug awaiting emission");
-            self.set_tainted_by_errors(guar);
-            Some(guar)
         } else {
             None
         }
@@ -1766,9 +1752,9 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         sp: Span,
         mk_diag: M,
         actual_ty: Ty<'tcx>,
-    ) -> DiagnosticBuilder<'tcx>
+    ) -> Diag<'tcx>
     where
-        M: FnOnce(String) -> DiagnosticBuilder<'tcx>,
+        M: FnOnce(String) -> Diag<'tcx>,
     {
         let actual_ty = self.resolve_vars_if_possible(actual_ty);
         debug!("type_error_struct_with_diag({:?}, {:?})", sp, actual_ty);
@@ -1789,7 +1775,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         expected: Ty<'tcx>,
         actual: Ty<'tcx>,
         err: TypeError<'tcx>,
-    ) -> DiagnosticBuilder<'tcx> {
+    ) -> Diag<'tcx> {
         self.report_and_explain_type_error(TypeTrace::types(cause, true, expected, actual), err)
     }
 
@@ -1799,7 +1785,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         expected: ty::Const<'tcx>,
         actual: ty::Const<'tcx>,
         err: TypeError<'tcx>,
-    ) -> DiagnosticBuilder<'tcx> {
+    ) -> Diag<'tcx> {
         self.report_and_explain_type_error(TypeTrace::consts(cause, true, expected, actual), err)
     }
 }

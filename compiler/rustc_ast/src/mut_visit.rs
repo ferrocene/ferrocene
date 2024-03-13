@@ -1079,8 +1079,8 @@ pub fn noop_visit_item_kind<T: MutVisitor>(kind: &mut ItemKind, vis: &mut T) {
         }) => {
             visit_defaultness(defaultness, vis);
             vis.visit_generics(generics);
-            vis.visit_span(&mut where_clauses.0.1);
-            vis.visit_span(&mut where_clauses.1.1);
+            vis.visit_span(&mut where_clauses.before.span);
+            vis.visit_span(&mut where_clauses.after.span);
             visit_bounds(bounds, vis);
             visit_opt(ty, |ty| vis.visit_ty(ty));
         }
@@ -1163,8 +1163,8 @@ pub fn noop_flat_map_assoc_item<T: MutVisitor>(
         }) => {
             visit_defaultness(defaultness, visitor);
             visitor.visit_generics(generics);
-            visitor.visit_span(&mut where_clauses.0.1);
-            visitor.visit_span(&mut where_clauses.1.1);
+            visitor.visit_span(&mut where_clauses.before.span);
+            visitor.visit_span(&mut where_clauses.after.span);
             visit_bounds(bounds, visitor);
             visit_opt(ty, |ty| visitor.visit_ty(ty));
         }
@@ -1257,8 +1257,8 @@ pub fn noop_flat_map_foreign_item<T: MutVisitor>(
         }) => {
             visit_defaultness(defaultness, visitor);
             visitor.visit_generics(generics);
-            visitor.visit_span(&mut where_clauses.0.1);
-            visitor.visit_span(&mut where_clauses.1.1);
+            visitor.visit_span(&mut where_clauses.before.span);
+            visitor.visit_span(&mut where_clauses.after.span);
             visit_bounds(bounds, visitor);
             visit_opt(ty, |ty| visitor.visit_ty(ty));
         }
@@ -1526,7 +1526,7 @@ pub fn noop_visit_expr<T: MutVisitor>(
         }
         ExprKind::Try(expr) => vis.visit_expr(expr),
         ExprKind::TryBlock(body) => vis.visit_block(body),
-        ExprKind::Lit(_) | ExprKind::IncludedBytes(..) | ExprKind::Err => {}
+        ExprKind::Lit(_) | ExprKind::IncludedBytes(..) | ExprKind::Err(_) | ExprKind::Dummy => {}
     }
     vis.visit_id(id);
     vis.visit_span(span);
@@ -1642,7 +1642,7 @@ impl DummyAstNode for Expr {
     fn dummy() -> Self {
         Expr {
             id: DUMMY_NODE_ID,
-            kind: ExprKind::Err,
+            kind: ExprKind::Dummy,
             span: Default::default(),
             attrs: Default::default(),
             tokens: Default::default(),

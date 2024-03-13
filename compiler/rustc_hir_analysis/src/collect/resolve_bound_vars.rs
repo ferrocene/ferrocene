@@ -1181,13 +1181,12 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
                         && !self.tcx.asyncness(lifetime_ref.hir_id.owner.def_id).is_async()
                         && !self.tcx.features().anonymous_lifetime_in_impl_trait
                     {
-                        let mut diag: rustc_errors::DiagnosticBuilder<'_> =
-                            rustc_session::parse::feature_err(
-                                &self.tcx.sess,
-                                sym::anonymous_lifetime_in_impl_trait,
-                                lifetime_ref.ident.span,
-                                "anonymous lifetimes in `impl Trait` are unstable",
-                            );
+                        let mut diag: rustc_errors::Diag<'_> = rustc_session::parse::feature_err(
+                            &self.tcx.sess,
+                            sym::anonymous_lifetime_in_impl_trait,
+                            lifetime_ref.ident.span,
+                            "anonymous lifetimes in `impl Trait` are unstable",
+                        );
 
                         if let Some(generics) =
                             self.tcx.hir().get_generics(lifetime_ref.hir_id.owner.def_id)
@@ -1331,7 +1330,7 @@ impl<'a, 'tcx> BoundVarContext<'a, 'tcx> {
             }
         }
 
-        self.tcx.dcx().span_bug(
+        self.tcx.dcx().span_delayed_bug(
             lifetime_ref.ident.span,
             format!("Could not resolve {:?} in scope {:#?}", lifetime_ref, self.scope,),
         );

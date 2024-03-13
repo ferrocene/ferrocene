@@ -3,11 +3,9 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use rustc_data_structures::sync::{IntoDynSyncSend, Lrc};
-use rustc_errors::emitter::{DynEmitter, Emitter, HumanEmitter};
+use rustc_errors::emitter::{stderr_destination, DynEmitter, Emitter, HumanEmitter};
 use rustc_errors::translation::Translate;
-use rustc_errors::{
-    ColorConfig, DiagCtxt, Diagnostic, DiagnosticBuilder, Level as DiagnosticLevel,
-};
+use rustc_errors::{ColorConfig, Diag, DiagCtxt, DiagInner, Level as DiagnosticLevel};
 use rustc_session::parse::ParseSess as RawParseSess;
 use rustc_span::{
     source_map::{FilePathMapping, SourceMap},
@@ -58,7 +56,7 @@ impl Emitter for SilentEmitter {
         None
     }
 
-    fn emit_diagnostic(&mut self, _db: Diagnostic) {}
+    fn emit_diagnostic(&mut self, _diag: DiagInner) {}
 }
 
 fn silent_emitter() -> Box<DynEmitter> {
@@ -75,10 +73,10 @@ struct SilentOnIgnoredFilesEmitter {
 }
 
 impl SilentOnIgnoredFilesEmitter {
-    fn handle_non_ignoreable_error(&mut self, db: Diagnostic) {
+    fn handle_non_ignoreable_error(&mut self, diag: DiagInner) {
         self.has_non_ignorable_parser_errors = true;
         self.can_reset.store(false, Ordering::Release);
-        self.emitter.emit_diagnostic(db);
+        self.emitter.emit_diagnostic(diag);
     }
 }
 
@@ -97,11 +95,11 @@ impl Emitter for SilentOnIgnoredFilesEmitter {
         None
     }
 
-    fn emit_diagnostic(&mut self, db: Diagnostic) {
-        if db.level() == DiagnosticLevel::Fatal {
-            return self.handle_non_ignoreable_error(db);
+    fn emit_diagnostic(&mut self, diag: DiagInner) {
+        if diag.level() == DiagnosticLevel::Fatal {
+            return self.handle_non_ignoreable_error(diag);
         }
-        if let Some(primary_span) = &db.span.primary_span() {
+        if let Some(primary_span) = &diag.span.primary_span() {
             let file_name = self.source_map.span_to_filename(*primary_span);
             if let rustc_span::FileName::Real(rustc_span::RealFileName::LocalPath(ref path)) =
                 file_name
@@ -117,7 +115,7 @@ impl Emitter for SilentOnIgnoredFilesEmitter {
                 }
             };
         }
-        self.handle_non_ignoreable_error(db);
+        self.handle_non_ignoreable_error(diag);
     }
 }
 
@@ -152,9 +150,12 @@ fn default_dcx(
             rustc_driver::DEFAULT_LOCALE_RESOURCES.to_vec(),
             false,
         );
-        Box::new(HumanEmitter::stderr(emit_color, fallback_bundle).sm(Some(source_map.clone())))
+        Box::new(
+            HumanEmitter::new(stderr_destination(emit_color), fallback_bundle)
+                .sm(Some(source_map.clone())),
+        )
     };
-    DiagCtxt::with_emitter(Box::new(SilentOnIgnoredFilesEmitter {
+    DiagCtxt::new(Box::new(SilentOnIgnoredFilesEmitter {
         has_non_ignorable_parser_errors: false,
         source_map,
         emitter,
@@ -231,7 +232,7 @@ impl ParseSess {
     }
 
     pub(crate) fn set_silent_emitter(&mut self) {
-        self.parse_sess.dcx = DiagCtxt::with_emitter(silent_emitter());
+        self.parse_sess.dcx = DiagCtxt::new(silent_emitter());
     }
 
     pub(crate) fn span_to_filename(&self, span: Span) -> FileName {
@@ -296,7 +297,7 @@ impl ParseSess {
 
 // Methods that should be restricted within the parse module.
 impl ParseSess {
-    pub(super) fn emit_diagnostics(&self, diagnostics: Vec<DiagnosticBuilder<'_>>) {
+    pub(super) fn emit_diagnostics(&self, diagnostics: Vec<Diag<'_>>) {
         for diagnostic in diagnostics {
             diagnostic.emit();
         }
@@ -376,13 +377,13 @@ mod tests {
                 None
             }
 
-            fn emit_diagnostic(&mut self, _db: Diagnostic) {
+            fn emit_diagnostic(&mut self, _diag: DiagInner) {
                 self.num_emitted_errors.fetch_add(1, Ordering::Release);
             }
         }
 
-        fn build_diagnostic(level: DiagnosticLevel, span: Option<MultiSpan>) -> Diagnostic {
-            let mut diag = Diagnostic::new(level, "");
+        fn build_diagnostic(level: DiagnosticLevel, span: Option<MultiSpan>) -> DiagInner {
+            let mut diag = DiagInner::new(level, "");
             diag.messages.clear();
             if let Some(span) = span {
                 diag.span = span;

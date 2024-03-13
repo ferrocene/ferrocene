@@ -17,7 +17,7 @@ use itertools::Itertools;
 use rustc_ast as ast;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::{
-    codes::*, pluralize, Applicability, DiagnosticBuilder, ErrorGuaranteed, MultiSpan, StashKey,
+    codes::*, pluralize, Applicability, Diag, ErrorGuaranteed, MultiSpan, StashKey,
 };
 use rustc_hir as hir;
 use rustc_hir::def::{CtorOf, DefKind, Res};
@@ -561,7 +561,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             None
         };
 
-        let suggest_confusable = |err: &mut DiagnosticBuilder<'_>| {
+        let suggest_confusable = |err: &mut Diag<'_>| {
             let Some(call_name) = call_ident else {
                 return;
             };
@@ -1369,7 +1369,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expected_ty: Ty<'tcx>,
         provided_ty: Ty<'tcx>,
         arg: &hir::Expr<'tcx>,
-        err: &mut rustc_errors::DiagnosticBuilder<'tcx>,
+        err: &mut Diag<'tcx>,
     ) {
         if let ty::RawPtr(ty::TypeAndMut { mutbl: hir::Mutability::Mut, .. }) = expected_ty.kind()
             && let ty::RawPtr(ty::TypeAndMut { mutbl: hir::Mutability::Not, .. }) =
@@ -1941,53 +1941,49 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         errors_causecode: Vec<(Span, ObligationCauseCode<'tcx>)>,
     ) {
         for (span, code) in errors_causecode {
-            let Some(mut diag) = self.dcx().steal_diagnostic(span, StashKey::MaybeForgetReturn)
-            else {
-                continue;
-            };
-
-            if let Some(fn_sig) = self.body_fn_sig()
-                && let ExprBindingObligation(_, _, hir_id, ..) = code
-                && !fn_sig.output().is_unit()
-            {
-                let mut block_num = 0;
-                let mut found_semi = false;
-                for (_, node) in self.tcx.hir().parent_iter(hir_id) {
-                    match node {
-                        hir::Node::Stmt(stmt) => {
-                            if let hir::StmtKind::Semi(expr) = stmt.kind {
-                                let expr_ty = self.typeck_results.borrow().expr_ty(expr);
-                                let return_ty = fn_sig.output();
-                                if !matches!(expr.kind, hir::ExprKind::Ret(..))
-                                    && self.can_coerce(expr_ty, return_ty)
-                                {
-                                    found_semi = true;
+            self.dcx().try_steal_modify_and_emit_err(span, StashKey::MaybeForgetReturn, |err| {
+                if let Some(fn_sig) = self.body_fn_sig()
+                    && let ExprBindingObligation(_, _, hir_id, ..) = code
+                    && !fn_sig.output().is_unit()
+                {
+                    let mut block_num = 0;
+                    let mut found_semi = false;
+                    for (_, node) in self.tcx.hir().parent_iter(hir_id) {
+                        match node {
+                            hir::Node::Stmt(stmt) => {
+                                if let hir::StmtKind::Semi(expr) = stmt.kind {
+                                    let expr_ty = self.typeck_results.borrow().expr_ty(expr);
+                                    let return_ty = fn_sig.output();
+                                    if !matches!(expr.kind, hir::ExprKind::Ret(..))
+                                        && self.can_coerce(expr_ty, return_ty)
+                                    {
+                                        found_semi = true;
+                                    }
                                 }
                             }
-                        }
-                        hir::Node::Block(_block) => {
-                            if found_semi {
-                                block_num += 1;
+                            hir::Node::Block(_block) => {
+                                if found_semi {
+                                    block_num += 1;
+                                }
                             }
-                        }
-                        hir::Node::Item(item) => {
-                            if let hir::ItemKind::Fn(..) = item.kind {
-                                break;
+                            hir::Node::Item(item) => {
+                                if let hir::ItemKind::Fn(..) = item.kind {
+                                    break;
+                                }
                             }
+                            _ => {}
                         }
-                        _ => {}
+                    }
+                    if block_num > 1 && found_semi {
+                        err.span_suggestion_verbose(
+                            span.shrink_to_lo(),
+                            "you might have meant to return this to infer its type parameters",
+                            "return ",
+                            Applicability::MaybeIncorrect,
+                        );
                     }
                 }
-                if block_num > 1 && found_semi {
-                    diag.span_suggestion_verbose(
-                        span.shrink_to_lo(),
-                        "you might have meant to return this to infer its type parameters",
-                        "return ",
-                        Applicability::MaybeIncorrect,
-                    );
-                }
-            }
-            diag.emit();
+            });
         }
     }
 
@@ -2047,7 +2043,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn label_fn_like(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         callable_def_id: Option<DefId>,
         callee_ty: Option<Ty<'tcx>>,
         call_expr: &'tcx hir::Expr<'tcx>,

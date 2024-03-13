@@ -80,7 +80,7 @@ pub(crate) enum ProcMacroKind {
 }
 
 impl IntoDiagnosticArg for ProcMacroKind {
-    fn into_diagnostic_arg(self) -> rustc_errors::DiagnosticArgValue {
+    fn into_diagnostic_arg(self) -> rustc_errors::DiagArgValue {
         match self {
             ProcMacroKind::Attribute => "attribute proc macro",
             ProcMacroKind::Derive => "derive proc macro",
@@ -1389,7 +1389,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         if target == Target::ForeignMod
             && let hir::Node::Item(item) = self.tcx.hir_node(hir_id)
             && let Item { kind: ItemKind::ForeignMod { abi, .. }, .. } = item
-            && !matches!(abi, Abi::Rust | Abi::RustIntrinsic | Abi::PlatformIntrinsic)
+            && !matches!(abi, Abi::Rust | Abi::RustIntrinsic)
         {
             return;
         }
@@ -2071,7 +2071,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
     ) -> bool {
         if let Target::ForeignFn = target
             && let hir::Node::Item(Item {
-                kind: ItemKind::ForeignMod { abi: Abi::RustIntrinsic | Abi::PlatformIntrinsic, .. },
+                kind: ItemKind::ForeignMod { abi: Abi::RustIntrinsic, .. },
                 ..
             }) = self.tcx.parent_hir_node(hir_id)
         {
@@ -2520,14 +2520,6 @@ fn check_invalid_crate_level_attr(tcx: TyCtxt<'_>, attrs: &[Attribute]) {
         if attr.style == AttrStyle::Inner {
             for attr_to_check in ATTRS_TO_CHECK {
                 if attr.has_name(*attr_to_check) {
-                    if let AttrKind::Normal(ref p) = attr.kind
-                        && let Some(diag) = tcx.dcx().steal_diagnostic(
-                            p.item.path.span,
-                            StashKey::UndeterminedMacroResolution,
-                        )
-                    {
-                        diag.cancel();
-                    }
                     let item = tcx
                         .hir()
                         .items()
@@ -2537,7 +2529,7 @@ fn check_invalid_crate_level_attr(tcx: TyCtxt<'_>, attrs: &[Attribute]) {
                             span: item.ident.span,
                             kind: item.kind.descr(),
                         });
-                    tcx.dcx().emit_err(errors::InvalidAttrAtCrateLevel {
+                    let err = tcx.dcx().create_err(errors::InvalidAttrAtCrateLevel {
                         span: attr.span,
                         sugg_span: tcx
                             .sess
@@ -2553,6 +2545,16 @@ fn check_invalid_crate_level_attr(tcx: TyCtxt<'_>, attrs: &[Attribute]) {
                         name: *attr_to_check,
                         item,
                     });
+
+                    if let AttrKind::Normal(ref p) = attr.kind {
+                        tcx.dcx().try_steal_replace_and_emit_err(
+                            p.item.path.span,
+                            StashKey::UndeterminedMacroResolution,
+                            err,
+                        );
+                    } else {
+                        err.emit();
+                    }
                 }
             }
         }

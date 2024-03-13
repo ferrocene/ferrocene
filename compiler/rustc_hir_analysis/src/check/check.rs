@@ -612,17 +612,6 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) {
                     }
                 }
 
-                Abi::PlatformIntrinsic => {
-                    for item in items {
-                        intrinsic::check_platform_intrinsic_type(
-                            tcx,
-                            item.id.owner_id.def_id,
-                            item.span,
-                            item.ident.name,
-                        );
-                    }
-                }
-
                 _ => {
                     for item in items {
                         let def_id = item.id.owner_id.def_id;
@@ -1247,7 +1236,7 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 fn detect_discriminant_duplicate<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) {
     // Helper closure to reduce duplicate code. This gets called everytime we detect a duplicate.
     // Here `idx` refers to the order of which the discriminant appears, and its index in `vs`
-    let report = |dis: Discr<'tcx>, idx, err: &mut DiagnosticBuilder<'_>| {
+    let report = |dis: Discr<'tcx>, idx, err: &mut Diag<'_>| {
         let var = adt.variant(idx); // HIR for the duplicate discriminant
         let (span, display_discr) = match var.discr {
             ty::VariantDiscr::Explicit(discr_def_id) => {
@@ -1307,7 +1296,7 @@ fn detect_discriminant_duplicate<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>)
     let mut i = 0;
     while i < discrs.len() {
         let var_i_idx = discrs[i].0;
-        let mut error: Option<DiagnosticBuilder<'_, _>> = None;
+        let mut error: Option<Diag<'_, _>> = None;
 
         let mut o = i + 1;
         while o < discrs.len() {
@@ -1361,8 +1350,7 @@ fn check_type_alias_type_params_are_used<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalD
     let ty = tcx.type_of(def_id).instantiate_identity();
     if ty.references_error() {
         // If there is already another error, do not emit an error for not using a type parameter.
-        // Without the `stashed_err_count` part this can fail (#120856).
-        assert!(tcx.dcx().has_errors().is_some() || tcx.dcx().stashed_err_count() > 0);
+        assert!(tcx.dcx().has_errors().is_some());
         return;
     }
 

@@ -1,5 +1,5 @@
 use rustc_ast::TraitObjectSyntax;
-use rustc_errors::{codes::*, DiagnosticBuilder, EmissionGuarantee, StashKey};
+use rustc_errors::{codes::*, Diag, EmissionGuarantee, Level, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
 use rustc_lint_defs::{builtin::BARE_TRAIT_OBJECTS, Applicability};
@@ -13,7 +13,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
     pub(super) fn maybe_lint_blanket_trait_impl<G: EmissionGuarantee>(
         &self,
         self_ty: &hir::Ty<'_>,
-        diag: &mut DiagnosticBuilder<'_, G>,
+        diag: &mut Diag<'_, G>,
     ) {
         let tcx = self.tcx();
         let parent_id = tcx.hir().get_parent_item(self_ty.hir_id).def_id;
@@ -75,11 +75,7 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
     }
 
     /// Make sure that we are in the condition to suggest `impl Trait`.
-    fn maybe_lint_impl_trait(
-        &self,
-        self_ty: &hir::Ty<'_>,
-        diag: &mut DiagnosticBuilder<'_>,
-    ) -> bool {
+    fn maybe_lint_impl_trait(&self, self_ty: &hir::Ty<'_>, diag: &mut Diag<'_>) -> bool {
         let tcx = self.tcx();
         let parent_id = tcx.hir().get_parent_item(self_ty.hir_id).def_id;
         let (sig, generics, owner) = match tcx.hir_node_by_def_id(parent_id) {
@@ -241,7 +237,15 @@ impl<'o, 'tcx> dyn AstConv<'tcx> + 'o {
                 }
                 // check if the impl trait that we are considering is a impl of a local trait
                 self.maybe_lint_blanket_trait_impl(self_ty, &mut diag);
-                diag.stash(self_ty.span, StashKey::TraitMissingMethod);
+                match diag.level() {
+                    Level::Error => {
+                        diag.stash(self_ty.span, StashKey::TraitMissingMethod);
+                    }
+                    Level::DelayedBug => {
+                        diag.emit();
+                    }
+                    _ => unreachable!(),
+                }
             } else {
                 let msg = "trait objects without an explicit `dyn` are deprecated";
                 tcx.node_span_lint(BARE_TRAIT_OBJECTS, self_ty.hir_id, self_ty.span, msg, |lint| {

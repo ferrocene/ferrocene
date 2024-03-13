@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use rustc_ast::token::TokenKind;
 use rustc_ast::{ast, attr, ptr};
-use rustc_errors::DiagnosticBuilder;
+use rustc_errors::Diag;
 use rustc_parse::{new_parser_from_file, parser::Parser as RawParser};
 use rustc_span::{sym, Span};
 use thin_vec::ThinVec;
@@ -65,7 +65,7 @@ impl<'a> ParserBuilder<'a> {
     fn parser(
         sess: &'a rustc_session::parse::ParseSess,
         input: Input,
-    ) -> Result<rustc_parse::parser::Parser<'a>, Option<Vec<DiagnosticBuilder<'a>>>> {
+    ) -> Result<rustc_parse::parser::Parser<'a>, Option<Vec<Diag<'a>>>> {
         match input {
             Input::File(ref file) => catch_unwind(AssertUnwindSafe(move || {
                 new_parser_from_file(sess, file, None)
@@ -162,22 +162,14 @@ impl<'a> Parser<'a> {
 
     fn parse_crate_mod(&mut self) -> Result<ast::Crate, ParserError> {
         let mut parser = AssertUnwindSafe(&mut self.parser);
-
-        // rustfmt doesn't use `run_compiler` like other tools, so it must emit
-        // any stashed diagnostics itself, otherwise the `DiagCtxt` will assert
-        // when dropped. The final result here combines the parsing result and
-        // the `emit_stashed_diagnostics` result.
-        let parse_res = catch_unwind(move || parser.parse_crate_mod());
-        let stashed_res = self.parser.dcx().emit_stashed_diagnostics();
         let err = Err(ParserError::ParsePanicError);
-        match (parse_res, stashed_res) {
-            (Ok(Ok(k)), None) => Ok(k),
-            (Ok(Ok(_)), Some(_guar)) => err,
-            (Ok(Err(db)), _) => {
+        match catch_unwind(move || parser.parse_crate_mod()) {
+            Ok(Ok(k)) => Ok(k),
+            Ok(Err(db)) => {
                 db.emit();
                 err
             }
-            (Err(_), _) => err,
+            Err(_) => err,
         }
     }
 }

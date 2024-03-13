@@ -27,6 +27,7 @@ pub use UnsafeSource::*;
 use crate::ptr::P;
 use crate::token::{self, CommentKind, Delimiter};
 use crate::tokenstream::{DelimSpan, LazyAttrTokenStream, TokenStream};
+pub use rustc_ast_ir::{Movability, Mutability};
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::stack::ensure_sufficient_stack;
@@ -35,7 +36,6 @@ use rustc_macros::HashStable_Generic;
 use rustc_span::source_map::{respan, Spanned};
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::{ErrorGuaranteed, Span, DUMMY_SP};
-pub use rustc_type_ir::{Movability, Mutability};
 use std::fmt;
 use std::mem;
 use thin_vec::{thin_vec, ThinVec};
@@ -403,9 +403,10 @@ impl Default for Generics {
 /// A where-clause in a definition.
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct WhereClause {
-    /// `true` if we ate a `where` token: this can happen
-    /// if we parsed no predicates (e.g. `struct Foo where {}`).
-    /// This allows us to pretty-print accurately.
+    /// `true` if we ate a `where` token.
+    ///
+    /// This can happen if we parsed no predicates, e.g., `struct Foo where {}`.
+    /// This allows us to pretty-print accurately and provide correct suggestion diagnostics.
     pub has_where_token: bool,
     pub predicates: ThinVec<WherePredicate>,
     pub span: Span,
@@ -1296,21 +1297,8 @@ impl Expr {
             ExprKind::Yeet(..) => ExprPrecedence::Yeet,
             ExprKind::FormatArgs(..) => ExprPrecedence::FormatArgs,
             ExprKind::Become(..) => ExprPrecedence::Become,
-            ExprKind::Err => ExprPrecedence::Err,
+            ExprKind::Err(_) | ExprKind::Dummy => ExprPrecedence::Err,
         }
-    }
-
-    pub fn take(&mut self) -> Self {
-        mem::replace(
-            self,
-            Expr {
-                id: DUMMY_NODE_ID,
-                kind: ExprKind::Err,
-                span: DUMMY_SP,
-                attrs: AttrVec::new(),
-                tokens: None,
-            },
-        )
     }
 
     /// To a first-order approximation, is this a pattern?
@@ -1531,7 +1519,10 @@ pub enum ExprKind {
     FormatArgs(P<FormatArgs>),
 
     /// Placeholder for an expression that wasn't syntactically well formed in some way.
-    Err,
+    Err(ErrorGuaranteed),
+
+    /// Acts as a null expression. Lowering it will always emit a bug.
+    Dummy,
 }
 
 /// Used to differentiate between `for` loops and `for await` loops.
@@ -3017,18 +3008,29 @@ pub struct Trait {
 ///
 /// If there is no where clause, then this is `false` with `DUMMY_SP`.
 #[derive(Copy, Clone, Encodable, Decodable, Debug, Default)]
-pub struct TyAliasWhereClause(pub bool, pub Span);
+pub struct TyAliasWhereClause {
+    pub has_where_token: bool,
+    pub span: Span,
+}
+
+/// The span information for the two where clauses on a `TyAlias`.
+#[derive(Copy, Clone, Encodable, Decodable, Debug, Default)]
+pub struct TyAliasWhereClauses {
+    /// Before the equals sign.
+    pub before: TyAliasWhereClause,
+    /// After the equals sign.
+    pub after: TyAliasWhereClause,
+    /// The index in `TyAlias.generics.where_clause.predicates` that would split
+    /// into predicates from the where clause before the equals sign and the ones
+    /// from the where clause after the equals sign.
+    pub split: usize,
+}
 
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct TyAlias {
     pub defaultness: Defaultness,
     pub generics: Generics,
-    /// The span information for the two where clauses (before equals, after equals)
-    pub where_clauses: (TyAliasWhereClause, TyAliasWhereClause),
-    /// The index in `generics.where_clause.predicates` that would split into
-    /// predicates from the where clause before the equals and the predicates
-    /// from the where clause after the equals
-    pub where_predicates_split: usize,
+    pub where_clauses: TyAliasWhereClauses,
     pub bounds: GenericBounds,
     pub ty: Option<P<Ty>>,
 }

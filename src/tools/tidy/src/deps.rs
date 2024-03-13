@@ -114,7 +114,11 @@ const EXCEPTIONS: ExceptionList = &[
     ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
+<<<<<<< HEAD
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
+=======
+    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),      // rustc
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc
     // tidy-alphabetical-end
 ];
@@ -291,6 +295,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "jemalloc-sys",
     "jobserver",
     "lazy_static",
+    "leb128",
     "libc",
     "libloading",
     "linux-raw-sys",
@@ -405,6 +410,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "valuable",
     "version_check",
     "wasi",
+    "wasm-encoder",
     "wasmparser",
     "winapi",
     "winapi-i686-pc-windows-gnu",

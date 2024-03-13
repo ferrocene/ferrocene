@@ -32,6 +32,7 @@ pub use generic_args::*;
 pub use generics::*;
 use rustc_ast as ast;
 use rustc_ast::node_id::NodeMap;
+pub use rustc_ast_ir::{Movability, Mutability};
 use rustc_attr as attr;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::intern::Interned;
@@ -39,7 +40,7 @@ use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::steal::Steal;
 use rustc_data_structures::tagged_ptr::CopyTaggedPtr;
 use rustc_data_structures::unord::UnordMap;
-use rustc_errors::{DiagnosticBuilder, ErrorGuaranteed, StashKey};
+use rustc_errors::{Diag, ErrorGuaranteed, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap, LocalDefIdSet};
@@ -845,14 +846,16 @@ impl<'tcx> OpaqueHiddenType<'tcx> {
         other: &Self,
         opaque_def_id: LocalDefId,
         tcx: TyCtxt<'tcx>,
-    ) -> Result<DiagnosticBuilder<'tcx>, ErrorGuaranteed> {
-        if let Some(diag) = tcx
-            .sess
-            .dcx()
-            .steal_diagnostic(tcx.def_span(opaque_def_id), StashKey::OpaqueHiddenTypeMismatch)
-        {
-            diag.cancel();
-        }
+    ) -> Result<Diag<'tcx>, ErrorGuaranteed> {
+        // We used to cancel here for slightly better error messages, but
+        // cancelling stashed diagnostics is no longer allowed because it
+        // causes problems when tracking whether errors have actually
+        // occurred.
+        tcx.sess.dcx().try_steal_modify_and_emit_err(
+            tcx.def_span(opaque_def_id),
+            StashKey::OpaqueHiddenTypeMismatch,
+            |_err| {},
+        );
         (self.ty, other.ty).error_reported()?;
         // Found different concrete types for the opaque type.
         let sub_diag = if self.span == other.span {

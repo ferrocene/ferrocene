@@ -561,8 +561,10 @@ fn lint_literal<'tcx>(
         ty::Float(t) => {
             let is_infinite = match lit.node {
                 ast::LitKind::Float(v, _) => match t {
+                    ty::FloatTy::F16 => unimplemented!("f16_f128"),
                     ty::FloatTy::F32 => v.as_str().parse().map(f32::is_infinite),
                     ty::FloatTy::F64 => v.as_str().parse().map(f64::is_infinite),
+                    ty::FloatTy::F128 => unimplemented!("f16_f128"),
                 },
                 _ => bug!(),
             };
@@ -1587,10 +1589,7 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
     }
 
     fn is_internal_abi(&self, abi: SpecAbi) -> bool {
-        matches!(
-            abi,
-            SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic | SpecAbi::PlatformIntrinsic
-        )
+        matches!(abi, SpecAbi::Rust | SpecAbi::RustCall | SpecAbi::RustIntrinsic)
     }
 
     /// Find any fn-ptr types with external ABIs in `ty`.

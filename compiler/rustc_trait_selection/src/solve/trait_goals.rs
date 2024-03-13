@@ -2,6 +2,7 @@
 
 use crate::traits::supertrait_def_ids;
 
+use super::assembly::structural_traits::AsyncCallableRelevantTypes;
 use super::assembly::{self, structural_traits, Candidate};
 use super::{EvalCtxt, GoalSource, SolverMode};
 use rustc_data_structures::fx::FxIndexSet;
@@ -327,14 +328,19 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
                 // This region doesn't matter because we're throwing away the coroutine type
                 tcx.lifetimes.re_static,
             )?;
-        let output_is_sized_pred =
-            tupled_inputs_and_output_and_coroutine.map_bound(|(_, output, _)| {
-                ty::TraitRef::from_lang_item(tcx, LangItem::Sized, DUMMY_SP, [output])
-            });
+        let output_is_sized_pred = tupled_inputs_and_output_and_coroutine.map_bound(
+            |AsyncCallableRelevantTypes { output_coroutine_ty, .. }| {
+                ty::TraitRef::from_lang_item(tcx, LangItem::Sized, DUMMY_SP, [output_coroutine_ty])
+            },
+        );
 
         let pred = tupled_inputs_and_output_and_coroutine
-            .map_bound(|(inputs, _, _)| {
-                ty::TraitRef::new(tcx, goal.predicate.def_id(), [goal.predicate.self_ty(), inputs])
+            .map_bound(|AsyncCallableRelevantTypes { tupled_inputs_ty, .. }| {
+                ty::TraitRef::new(
+                    tcx,
+                    goal.predicate.def_id(),
+                    [goal.predicate.self_ty(), tupled_inputs_ty],
+                )
             })
             .to_predicate(tcx);
         // A built-in `AsyncFn` impl only holds if the output is sized.
@@ -543,14 +549,13 @@ impl<'tcx> assembly::GoalKind<'tcx> for TraitPredicate<'tcx> {
         let args = ecx.tcx().erase_regions(goal.predicate.trait_ref.args);
 
         let Some(assume) =
-            rustc_transmute::Assume::from_const(ecx.tcx(), goal.param_env, args.const_at(3))
+            rustc_transmute::Assume::from_const(ecx.tcx(), goal.param_env, args.const_at(2))
         else {
             return Err(NoSolution);
         };
 
         let certainty = ecx.is_transmutable(
             rustc_transmute::Types { dst: args.type_at(0), src: args.type_at(1) },
-            args.type_at(2),
             assume,
         )?;
         ecx.evaluate_added_goals_and_make_canonical_response(certainty)

@@ -44,6 +44,15 @@
 //! * Sequentially consistent - sequentially consistent operations are
 //!   guaranteed to happen in order. This is the standard mode for working
 //!   with atomic types and is equivalent to Java's `volatile`.
+//!
+//! # Unwinding
+//!
+//! Rust intrinsics may, in general, unwind. If an intrinsic can never unwind, add the
+//! `#[rustc_nounwind]` attribute so that the compiler can make use of this fact.
+//!
+//! However, even for intrinsics that may unwind, rustc assumes that a Rust intrinsics will never
+//! initiate a foreign (non-Rust) unwind, and thus for panic=abort we can always assume that these
+//! intrinsics cannot unwind.
 
 #![unstable(
     feature = "core_intrinsics",
@@ -74,6 +83,9 @@ pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
     // SAFETY: see `ptr::drop_in_place`
     unsafe { crate::ptr::drop_in_place(to_drop) }
 }
+
+#[cfg(bootstrap)]
+pub use self::r#try as catch_unwind;
 
 extern "rust-intrinsic" {
     // N.B., these intrinsics take raw pointers because they mutate aliased
@@ -689,6 +701,7 @@ extern "rust-intrinsic" {
     /// The stabilized version of this intrinsic is available on the
     /// [`atomic`] signed integer types via the `fetch_min` method by passing
     /// [`Ordering::AcqRel`] as the `order`. For example, [`AtomicI32::fetch_min`].
+    #[rustc_nounwind]
     pub fn atomic_min_acqrel<T: Copy>(dst: *mut T, src: T) -> T;
     /// Minimum with the current value using a signed comparison.
     ///
@@ -2382,16 +2395,24 @@ extern "rust-intrinsic" {
     #[rustc_nounwind]
     pub fn variant_count<T>() -> usize;
 
-    /// Rust's "try catch" construct which invokes the function pointer `try_fn`
-    /// with the data pointer `data`.
-    ///
-    /// The third argument is a function called if a panic occurs. This function
-    /// takes the data pointer and a pointer to the target-specific exception
-    /// object that was caught. For more information see the compiler's
-    /// source as well as std's catch implementation.
+    /// Rust's "try catch" construct for unwinding. Invokes the function pointer `try_fn` with the
+    /// data pointer `data`, and calls `catch_fn` if unwinding occurs while `try_fn` runs.
     ///
     /// `catch_fn` must not unwind.
+    ///
+    /// The third argument is a function called if an unwind occurs (both Rust unwinds and foreign
+    /// unwinds). This function takes the data pointer and a pointer to the target-specific
+    /// exception object that was caught. For more information, see the compiler's source as well as
+    /// std's `catch_unwind` implementation.
+    ///
+    /// The stable version of this intrinsic is `std::panic::catch_unwind`.
     #[rustc_nounwind]
+    #[cfg(not(bootstrap))]
+    pub fn catch_unwind(try_fn: fn(*mut u8), data: *mut u8, catch_fn: fn(*mut u8, *mut u8)) -> i32;
+
+    /// For bootstrap only, see `catch_unwind`.
+    #[rustc_nounwind]
+    #[cfg(bootstrap)]
     pub fn r#try(try_fn: fn(*mut u8), data: *mut u8, catch_fn: fn(*mut u8, *mut u8)) -> i32;
 
     /// Emits a `!nontemporal` store according to LLVM (see their docs).

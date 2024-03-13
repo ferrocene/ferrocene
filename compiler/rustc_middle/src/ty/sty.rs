@@ -14,7 +14,7 @@ use crate::ty::{List, ParamEnv};
 use hir::def::DefKind;
 use rustc_data_structures::captures::Captures;
 use rustc_errors::{
-    DiagnosticArgValue, DiagnosticMessage, ErrorGuaranteed, IntoDiagnosticArg, MultiSpan,
+    DiagArgValue, DiagnosticMessage, ErrorGuaranteed, IntoDiagnosticArg, MultiSpan,
 };
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
@@ -1100,7 +1100,7 @@ impl<'tcx, T> IntoDiagnosticArg for Binder<'tcx, T>
 where
     T: IntoDiagnosticArg,
 {
-    fn into_diagnostic_arg(self) -> DiagnosticArgValue {
+    fn into_diagnostic_arg(self) -> DiagArgValue {
         self.value.into_diagnostic_arg()
     }
 }
@@ -1310,7 +1310,7 @@ impl<'tcx> FnSig<'tcx> {
 }
 
 impl<'tcx> IntoDiagnosticArg for FnSig<'tcx> {
-    fn into_diagnostic_arg(self) -> DiagnosticArgValue {
+    fn into_diagnostic_arg(self) -> DiagArgValue {
         self.to_string().into_diagnostic_arg()
     }
 }
@@ -1528,8 +1528,8 @@ impl<'tcx> Ty<'tcx> {
     }
 
     /// Constructs a `TyKind::Error` type with current `ErrorGuaranteed`
-    pub fn new_error(tcx: TyCtxt<'tcx>, reported: ErrorGuaranteed) -> Ty<'tcx> {
-        Ty::new(tcx, Error(reported))
+    pub fn new_error(tcx: TyCtxt<'tcx>, guar: ErrorGuaranteed) -> Ty<'tcx> {
+        Ty::new(tcx, Error(guar))
     }
 
     /// Constructs a `TyKind::Error` type and registers a `span_delayed_bug` to ensure it gets used.
@@ -1580,8 +1580,10 @@ impl<'tcx> Ty<'tcx> {
     pub fn new_float(tcx: TyCtxt<'tcx>, f: ty::FloatTy) -> Ty<'tcx> {
         use ty::FloatTy::*;
         match f {
+            F16 => tcx.types.f16,
             F32 => tcx.types.f32,
             F64 => tcx.types.f64,
+            F128 => tcx.types.f128,
         }
     }
 
@@ -2539,8 +2541,10 @@ impl<'tcx> Ty<'tcx> {
             ty::Bool => Some(sym::bool),
             ty::Char => Some(sym::char),
             ty::Float(f) => match f {
+                ty::FloatTy::F16 => Some(sym::f16),
                 ty::FloatTy::F32 => Some(sym::f32),
                 ty::FloatTy::F64 => Some(sym::f64),
+                ty::FloatTy::F128 => Some(sym::f128),
             },
             ty::Int(f) => match f {
                 ty::IntTy::Isize => Some(sym::isize),

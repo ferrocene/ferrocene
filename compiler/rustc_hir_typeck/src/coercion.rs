@@ -36,7 +36,7 @@
 //! ```
 
 use crate::FnCtxt;
-use rustc_errors::{codes::*, struct_span_code_err, Applicability, DiagnosticBuilder, MultiSpan};
+use rustc_errors::{codes::*, struct_span_code_err, Applicability, Diag, MultiSpan};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::{self, Visitor};
@@ -44,6 +44,8 @@ use rustc_hir::Expr;
 use rustc_hir_analysis::astconv::AstConv;
 use rustc_infer::infer::type_variable::{TypeVariableOrigin, TypeVariableOriginKind};
 use rustc_infer::infer::{Coercion, DefineOpaqueTypes, InferOk, InferResult};
+use rustc_infer::traits::TraitEngine;
+use rustc_infer::traits::TraitEngineExt as _;
 use rustc_infer::traits::{Obligation, PredicateObligation};
 use rustc_middle::lint::in_external_macro;
 use rustc_middle::traits::BuiltinImplSource;
@@ -61,6 +63,7 @@ use rustc_target::spec::abi::Abi;
 use rustc_trait_selection::infer::InferCtxtExt as _;
 use rustc_trait_selection::traits::error_reporting::TypeErrCtxtExt as _;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
+use rustc_trait_selection::traits::TraitEngineExt as _;
 use rustc_trait_selection::traits::{
     self, NormalizeExt, ObligationCause, ObligationCauseCode, ObligationCtxt,
 };
@@ -157,17 +160,19 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
             // In the new solver, lazy norm may allow us to shallowly equate
             // more types, but we emit possibly impossible-to-satisfy obligations.
             // Filter these cases out to make sure our coercion is more accurate.
-            if self.next_trait_solver() {
-                if let Ok(res) = &res {
-                    for obligation in &res.obligations {
-                        if !self.predicate_may_hold(obligation) {
-                            return Err(TypeError::Mismatch);
-                        }
+            match res {
+                Ok(InferOk { value, obligations }) if self.next_trait_solver() => {
+                    let mut fulfill_cx = <dyn TraitEngine<'tcx>>::new(self);
+                    fulfill_cx.register_predicate_obligations(self, obligations);
+                    let errs = fulfill_cx.select_where_possible(self);
+                    if errs.is_empty() {
+                        Ok(InferOk { value, obligations: fulfill_cx.pending_obligations() })
+                    } else {
+                        Err(TypeError::Mismatch)
                     }
                 }
+                res => res,
             }
-
-            res
         })
     }
 
@@ -625,19 +630,32 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         let traits = [coerce_unsized_did, unsize_did];
         while !queue.is_empty() {
             let obligation = queue.remove(0);
-            debug!("coerce_unsized resolve step: {:?}", obligation);
             let trait_pred = match obligation.predicate.kind().no_bound_vars() {
                 Some(ty::PredicateKind::Clause(ty::ClauseKind::Trait(trait_pred)))
                     if traits.contains(&trait_pred.def_id()) =>
                 {
-                    trait_pred
+                    self.resolve_vars_if_possible(trait_pred)
+                }
+                // Eagerly process alias-relate obligations in new trait solver,
+                // since these can be emitted in the process of solving trait goals,
+                // but we need to constrain vars before processing goals mentioning
+                // them.
+                Some(ty::PredicateKind::AliasRelate(..)) => {
+                    let mut fulfill_cx = <dyn TraitEngine<'tcx>>::new(self);
+                    fulfill_cx.register_predicate_obligation(self, obligation);
+                    let errs = fulfill_cx.select_where_possible(self);
+                    if !errs.is_empty() {
+                        return Err(TypeError::Mismatch);
+                    }
+                    coercion.obligations.extend(fulfill_cx.pending_obligations());
+                    continue;
                 }
                 _ => {
                     coercion.obligations.push(obligation);
                     continue;
                 }
             };
-            let trait_pred = self.resolve_vars_if_possible(trait_pred);
+            debug!("coerce_unsized resolve step: {:?}", trait_pred);
             match selcx.select(&obligation.with(selcx.tcx(), trait_pred)) {
                 // Uncertain or unimplemented.
                 Ok(None) => {
@@ -1173,11 +1191,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
         if let (Some(a_sig), Some(b_sig)) = (a_sig, b_sig) {
             // Intrinsics are not coercible to function pointers.
-            if a_sig.abi() == Abi::RustIntrinsic
-                || a_sig.abi() == Abi::PlatformIntrinsic
-                || b_sig.abi() == Abi::RustIntrinsic
-                || b_sig.abi() == Abi::PlatformIntrinsic
-            {
+            if a_sig.abi() == Abi::RustIntrinsic || b_sig.abi() == Abi::RustIntrinsic {
                 return Err(TypeError::IntrinsicCast);
             }
             // The signature must match.
@@ -1437,7 +1451,7 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
         &mut self,
         fcx: &FnCtxt<'a, 'tcx>,
         cause: &ObligationCause<'tcx>,
-        augment_error: impl FnOnce(&mut DiagnosticBuilder<'_>),
+        augment_error: impl FnOnce(&mut Diag<'_>),
         label_unit_as_expected: bool,
     ) {
         self.coerce_inner(
@@ -1460,7 +1474,7 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
         cause: &ObligationCause<'tcx>,
         expression: Option<&'tcx hir::Expr<'tcx>>,
         mut expression_ty: Ty<'tcx>,
-        augment_error: impl FnOnce(&mut DiagnosticBuilder<'_>),
+        augment_error: impl FnOnce(&mut Diag<'_>),
         label_expression_as_expected: bool,
     ) {
         // Incorporate whatever type inference information we have
@@ -1671,7 +1685,7 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
 
     fn note_unreachable_loop_return(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         tcx: TyCtxt<'tcx>,
         expr: &hir::Expr<'tcx>,
         ret_exprs: &Vec<&'tcx hir::Expr<'tcx>>,
@@ -1783,7 +1797,7 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
         id: hir::HirId,
         expression: Option<&'tcx hir::Expr<'tcx>>,
         blk_id: Option<hir::HirId>,
-    ) -> DiagnosticBuilder<'a> {
+    ) -> Diag<'a> {
         let mut err = fcx.err_ctxt().report_mismatched_types(cause, expected, found, ty_err);
 
         let parent_id = fcx.tcx.parent_hir_id(id);

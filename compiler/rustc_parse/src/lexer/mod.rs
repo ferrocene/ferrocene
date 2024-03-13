@@ -7,7 +7,7 @@ use rustc_ast::ast::{self, AttrStyle};
 use rustc_ast::token::{self, CommentKind, Delimiter, IdentIsRaw, Token, TokenKind};
 use rustc_ast::tokenstream::TokenStream;
 use rustc_ast::util::unicode::contains_text_flow_control_chars;
-use rustc_errors::{codes::*, Applicability, DiagCtxt, DiagnosticBuilder, StashKey};
+use rustc_errors::{codes::*, Applicability, Diag, DiagCtxt, StashKey};
 use rustc_lexer::unescape::{self, EscapeError, Mode};
 use rustc_lexer::{Base, DocStyle, RawStrError};
 use rustc_lexer::{Cursor, LiteralKind};
@@ -47,7 +47,7 @@ pub(crate) fn parse_token_trees<'sess, 'src>(
     mut src: &'src str,
     mut start_pos: BytePos,
     override_span: Option<Span>,
-) -> Result<TokenStream, Vec<DiagnosticBuilder<'sess>>> {
+) -> Result<TokenStream, Vec<Diag<'sess>>> {
     // Skip `#!`, if present.
     if let Some(shebang_len) = rustc_lexer::strip_shebang(src) {
         src = &src[shebang_len..];
@@ -501,9 +501,11 @@ impl<'sess, 'src> StringReader<'sess, 'src> {
                 (kind, self.symbol_from_to(start, end))
             }
             rustc_lexer::LiteralKind::Float { base, empty_exponent } => {
+                let mut kind = token::Float;
                 if empty_exponent {
                     let span = self.mk_sp(start, self.pos);
-                    self.dcx().emit_err(errors::EmptyExponentFloat { span });
+                    let guar = self.dcx().emit_err(errors::EmptyExponentFloat { span });
+                    kind = token::Err(guar);
                 }
                 let base = match base {
                     Base::Hexadecimal => Some("hexadecimal"),
@@ -513,9 +515,11 @@ impl<'sess, 'src> StringReader<'sess, 'src> {
                 };
                 if let Some(base) = base {
                     let span = self.mk_sp(start, end);
-                    self.dcx().emit_err(errors::FloatLiteralUnsupportedBase { span, base });
+                    let guar =
+                        self.dcx().emit_err(errors::FloatLiteralUnsupportedBase { span, base });
+                    kind = token::Err(guar)
                 }
-                (token::Float, self.symbol_from_to(start, end))
+                (kind, self.symbol_from_to(start, end))
             }
         }
     }

@@ -26,7 +26,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{
-    codes::*, pluralize, struct_span_code_err, AddToDiagnostic, Applicability, DiagnosticBuilder,
+    codes::*, pluralize, struct_span_code_err, AddToDiagnostic, Applicability, Diag,
     ErrorGuaranteed, StashKey,
 };
 use rustc_hir as hir;
@@ -69,7 +69,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         expr: &'tcx hir::Expr<'tcx>,
         expected_ty: Ty<'tcx>,
-        extend_err: impl FnOnce(&mut DiagnosticBuilder<'_>),
+        extend_err: impl FnOnce(&mut Diag<'_>),
     ) -> Ty<'tcx> {
         let mut ty = self.check_expr_with_expectation(expr, ExpectHasType(expected_ty));
 
@@ -954,7 +954,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         lhs: &'tcx hir::Expr<'tcx>,
         code: ErrCode,
         op_span: Span,
-        adjust_err: impl FnOnce(&mut DiagnosticBuilder<'_>),
+        adjust_err: impl FnOnce(&mut Diag<'_>),
     ) {
         if lhs.is_syntactic_place_expr() {
             return;
@@ -980,11 +980,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     /// Check if the expression that could not be assigned to was a typoed expression that
-    pub fn check_for_missing_semi(
-        &self,
-        expr: &'tcx hir::Expr<'tcx>,
-        err: &mut DiagnosticBuilder<'_>,
-    ) -> bool {
+    pub fn check_for_missing_semi(&self, expr: &'tcx hir::Expr<'tcx>, err: &mut Diag<'_>) -> bool {
         if let hir::ExprKind::Binary(binop, lhs, rhs) = expr.kind
             && let hir::BinOpKind::Mul = binop.node
             && self.tcx.sess.source_map().is_multiline(lhs.span.between(rhs.span))
@@ -1219,7 +1215,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let lhs_ty = self.check_expr_with_needs(lhs, Needs::MutPlace);
 
-        let suggest_deref_binop = |err: &mut DiagnosticBuilder<'_>, rhs_ty: Ty<'tcx>| {
+        let suggest_deref_binop = |err: &mut Diag<'_>, rhs_ty: Ty<'tcx>| {
             if let Some(lhs_deref_ty) = self.deref_once_mutably_for_diagnostic(lhs_ty) {
                 // Can only assign if the type is sized, so if `DerefMut` yields a type that is
                 // unsized, do not suggest dereferencing it.
@@ -1464,18 +1460,18 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             && let hir::ArrayLen::Body(hir::AnonConst { hir_id, .. }) = length
         {
             let span = self.tcx.hir().span(hir_id);
-            match self.dcx().steal_diagnostic(span, StashKey::UnderscoreForArrayLengths) {
-                Some(mut err) => {
+            self.dcx().try_steal_modify_and_emit_err(
+                span,
+                StashKey::UnderscoreForArrayLengths,
+                |err| {
                     err.span_suggestion(
                         span,
                         "consider specifying the array length",
                         array_len,
                         Applicability::MaybeIncorrect,
                     );
-                    err.emit();
-                }
-                None => (),
-            }
+                },
+            );
         }
     }
 
@@ -1755,11 +1751,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let (_, diag) =
                 self.demand_coerce_diag(field.expr, ty, field_type, None, AllowTwoPhase::No);
 
-            if let Some(mut diag) = diag {
+            if let Some(diag) = diag {
                 if idx == ast_fields.len() - 1 {
                     if remaining_fields.is_empty() {
-                        self.suggest_fru_from_range(field, variant, args, &mut diag);
-                        diag.emit();
+                        self.suggest_fru_from_range_and_emit(field, variant, args, diag);
                     } else {
                         diag.stash(field.span, StashKey::MaybeFruTypo);
                     }
@@ -1990,20 +1985,20 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         err.span_label(span, format!("missing {remaining_fields_names}{truncated_fields_error}"));
 
         if let Some(last) = ast_fields.last() {
-            self.suggest_fru_from_range(last, variant, args, &mut err);
+            self.suggest_fru_from_range_and_emit(last, variant, args, err);
+        } else {
+            err.emit();
         }
-
-        err.emit();
     }
 
     /// If the last field is a range literal, but it isn't supposed to be, then they probably
     /// meant to use functional update syntax.
-    fn suggest_fru_from_range(
+    fn suggest_fru_from_range_and_emit(
         &self,
         last_expr_field: &hir::ExprField<'tcx>,
         variant: &ty::VariantDef,
         args: GenericArgsRef<'tcx>,
-        err: &mut DiagnosticBuilder<'_>,
+        mut err: Diag<'_>,
     ) {
         // I don't use 'is_range_literal' because only double-sided, half-open ranges count.
         if let ExprKind::Struct(QPath::LangItem(LangItem::Range, ..), [range_start, range_end], _) =
@@ -2016,16 +2011,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 .map(|adt| adt.did())
                 != range_def_id
         {
-            // Suppress any range expr type mismatches
-            if let Some(diag) =
-                self.dcx().steal_diagnostic(last_expr_field.span, StashKey::MaybeFruTypo)
-            {
-                diag.delay_as_bug();
-            }
-
             // Use a (somewhat arbitrary) filtering heuristic to avoid printing
             // expressions that are either too long, or have control character
-            //such as newlines in them.
+            // such as newlines in them.
             let expr = self
                 .tcx
                 .sess
@@ -2047,6 +2035,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.dcx(),
                 TypeMismatchFruTypo { expr_span: range_start.span, fru_span, expr },
             );
+
+            // Suppress any range expr type mismatches
+            self.dcx().try_steal_replace_and_emit_err(
+                last_expr_field.span,
+                StashKey::MaybeFruTypo,
+                err,
+            );
+        } else {
+            err.emit();
         }
     }
 
@@ -2519,7 +2516,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn suggest_await_on_field_access(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         field_ident: Ident,
         base: &'tcx hir::Expr<'tcx>,
         ty: Ty<'tcx>,
@@ -2718,7 +2715,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         err.emit()
     }
 
-    fn point_at_param_definition(&self, err: &mut DiagnosticBuilder<'_>, param: ty::ParamTy) {
+    fn point_at_param_definition(&self, err: &mut Diag<'_>, param: ty::ParamTy) {
         let generics = self.tcx.generics_of(self.body_id);
         let generic_param = generics.type_param(&param, self.tcx);
         if let ty::GenericParamDefKind::Type { synthetic: true, .. } = generic_param.kind {
@@ -2737,7 +2734,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn maybe_suggest_array_indexing(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         expr: &hir::Expr<'_>,
         base: &hir::Expr<'_>,
         field: Ident,
@@ -2761,7 +2758,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn suggest_first_deref_field(
         &self,
-        err: &mut DiagnosticBuilder<'_>,
+        err: &mut Diag<'_>,
         expr: &hir::Expr<'_>,
         base: &hir::Expr<'_>,
         field: Ident,
@@ -2774,12 +2771,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
-    fn no_such_field_err(
-        &self,
-        field: Ident,
-        expr_t: Ty<'tcx>,
-        id: HirId,
-    ) -> DiagnosticBuilder<'_> {
+    fn no_such_field_err(&self, field: Ident, expr_t: Ty<'tcx>, id: HirId) -> Diag<'_> {
         let span = field.span;
         debug!("no_such_field_err(span: {:?}, field: {:?}, expr_t: {:?})", span, field, expr_t);
 
@@ -2862,7 +2854,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         err
     }
 
-    fn private_field_err(&self, field: Ident, base_did: DefId) -> DiagnosticBuilder<'_> {
+    fn private_field_err(&self, field: Ident, base_did: DefId) -> Diag<'_> {
         let struct_path = self.tcx().def_path_str(base_did);
         let kind_name = self.tcx().def_descr(base_did);
         struct_span_code_err!(

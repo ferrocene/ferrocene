@@ -69,7 +69,7 @@ pub enum Applicability {
 }
 
 /// Each lint expectation has a `LintExpectationId` assigned by the `LintLevelsBuilder`.
-/// Expected `Diagnostic`s get the lint level `Expect` which stores the `LintExpectationId`
+/// Expected diagnostics get the lint level `Expect` which stores the `LintExpectationId`
 /// to match it with the actual expectation later on.
 ///
 /// The `LintExpectationId` has to be stable between compilations, as diagnostic
@@ -597,7 +597,7 @@ pub enum BuiltinLintDiagnostics {
     UnicodeTextFlow(Span, String),
     UnexpectedCfgName((Symbol, Span), Option<(Symbol, Span)>),
     UnexpectedCfgValue((Symbol, Span), Option<(Symbol, Span)>),
-    DeprecatedWhereclauseLocation(Span, String),
+    DeprecatedWhereclauseLocation(Option<(Span, String)>),
     SingleUseLifetime {
         /// Span of the parameter which declares this lifetime.
         param_span: Span,
@@ -683,7 +683,7 @@ pub struct BufferedEarlyLint {
     /// `rustc_lint::early::EarlyContextAndPass::check_id`.
     pub lint_id: LintId,
 
-    /// Customization of the `DiagnosticBuilder<'_>` for the lint.
+    /// Customization of the `Diag<'_>` for the lint.
     pub diagnostic: BuiltinLintDiagnostics,
 }
 

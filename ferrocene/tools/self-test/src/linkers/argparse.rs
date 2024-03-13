@@ -89,7 +89,7 @@ where
     F: FnOnce() -> LinkerArg<'a>,
 {
     let option = format!("-{option}");
-    if arg == option { Some(f()) } else { None }
+    (arg == option).then(f)
 }
 
 /// Parse multi-letter linker arguments.
@@ -124,7 +124,7 @@ where
 {
     let onedash = format!("-{option}");
     let twodash = format!("--{option}");
-    if arg == onedash || arg == twodash { Some(f()) } else { None }
+    (arg == onedash || arg == twodash).then(f)
 }
 
 /// Clean up split linker arguments so they can be more easily processed

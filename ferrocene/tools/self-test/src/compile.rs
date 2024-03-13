@@ -142,7 +142,7 @@ fn compile(
 
     run_command(&mut cmd).map_err(|error| Error::SampleProgramCompilationFailed {
         name: program.name.into(),
-        error,
+        error: Box::new(error),
     })?;
 
     if let Some(expected_output) = expected_output {
@@ -181,6 +181,7 @@ impl ExpectedFiles {
         self.expected.extend(files.iter().copied());
     }
 
+    /// Check that all, and those only, compilation artifacts are present.
     fn check(&self, after_compiling: &str) -> Result<(), Error> {
         let mut currently_expected = self.expected.clone();
 
@@ -194,23 +195,25 @@ impl ExpectedFiles {
                 .ok_or_else(|| Error::NonUtf8Path { path: entry.path() })?
                 .to_string();
 
-            if !currently_expected.remove(&*file_name) {
+            if !currently_expected.remove(file_name.as_str()) {
                 return Err(Error::UnexpectedCompilationArtifact {
                     name: file_name,
                     after_compiling: after_compiling.into(),
                 });
             }
         }
+
         let mut currently_expected = currently_expected.into_iter().collect::<Vec<_>>();
         currently_expected.sort();
-        for missing_file in currently_expected {
-            return Err(Error::MissingCompilationArtifact {
-                name: missing_file.into(),
-                after_compiling: after_compiling.into(),
-            });
-        }
 
-        Ok(())
+        if let Some(missing_file) = currently_expected.first() {
+            Err(Error::MissingCompilationArtifact {
+                name: missing_file.to_string(),
+                after_compiling: after_compiling.into(),
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 

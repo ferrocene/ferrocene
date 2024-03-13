@@ -167,7 +167,7 @@ where
                 // If we see one of these, and we haven't previously seen a
                 // -plugin (which causes this loop to exit), then that's bad and
                 // we should report the error
-                return Err(Error::LinkerArgsError {
+                return Err(Error::WrongLinkerArgs {
                     target: target.to_owned(),
                     kind: LinkerArgsErrorKind::DisallowedPlugin,
                 });
@@ -190,7 +190,7 @@ where
             }
             LinkerArg::Unknown(_) => {
                 // Hmm, we don't want unknown arguments
-                return Err(Error::LinkerArgsError {
+                return Err(Error::WrongLinkerArgs {
                     target: target.to_owned(),
                     kind: LinkerArgsErrorKind::UnknownArgument,
                 });
@@ -199,7 +199,7 @@ where
                 // Hmm, we don't want plugins.
                 if compiler_args.iter().any(|s| "-fno-lto" == s) {
                     // We already turned LTO off, and we still got a plugin, so bail out
-                    return Err(Error::LinkerArgsError {
+                    return Err(Error::WrongLinkerArgs {
                         target: target.to_owned(),
                         kind: LinkerArgsErrorKind::DisallowedPlugin,
                     });
@@ -292,9 +292,9 @@ fn cross_compile_test_program(
     cc_child.args(&args);
 
     let _output = run_command(&mut cc_child).map_err(|error| {
-        let cc_name: &str =
+        let cc_name =
             cc_path.file_name().and_then(|p| p.to_str()).unwrap_or("<non UTF-8 compiler name>");
-        Error::SampleProgramCompilationFailed { name: cc_name.to_string(), error }
+        Error::SampleProgramCompilationFailed { name: cc_name.to_string(), error: Box::new(error) }
     })?;
 
     Ok(())
@@ -350,8 +350,9 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let mut cc_child = Command::new("cc");
     cc_child.args(&args);
 
-    let _output = run_command(&mut cc_child)
-        .map_err(|error| Error::SampleProgramCompilationFailed { name: "cc".to_string(), error })?;
+    let _output = run_command(&mut cc_child).map_err(|error| {
+        Error::SampleProgramCompilationFailed { name: "cc".to_string(), error: Box::new(error) }
+    })?;
 
     Ok(args_file)
 }
@@ -381,13 +382,13 @@ fn check_compiler_linker_args(
 
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
-        return Err(Error::LinkerArgsError {
+        return Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::NoArgsFile,
         });
     };
     let Ok(args_str) = std::str::from_utf8(&args_file) else {
-        return Err(Error::LinkerArgsError {
+        return Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::InvalidArgsFile,
         });
@@ -398,7 +399,7 @@ fn check_compiler_linker_args(
 
     // an empty file would be bad
     if args.is_empty() {
-        return Err(Error::LinkerArgsError {
+        return Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::EmptyArgsFile,
         });
@@ -406,7 +407,7 @@ fn check_compiler_linker_args(
 
     // Check the C compiler passed on our -Wl,<arg> argument exactly once.
     if args.iter().filter(|s| s.as_str() == RANDOM_LINKER_ARG).count() != 1 {
-        return Err(Error::LinkerArgsError {
+        return Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::MissingArg,
         });
@@ -639,7 +640,7 @@ mod tests {
             linker_args.iter().cloned(),
             &mut compiler_args,
         ) {
-            Err(Error::LinkerArgsError { target, .. }) if target == "x86_64-unknown-linux-gnu" => {
+            Err(Error::WrongLinkerArgs { target, .. }) if target == "x86_64-unknown-linux-gnu" => {
                 // Correct
             }
             _ => {

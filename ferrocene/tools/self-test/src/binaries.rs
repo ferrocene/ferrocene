@@ -43,8 +43,9 @@ fn check_binary(
         Err(err) => return Err(Error::MetadataFetchFailed { path: bin, error: err }),
     }
 
-    let version_command_output = run_command(Command::new(&bin).arg("-vV"))
-        .map_err(|error| Error::VersionFetchFailed { binary: name.into(), error })?;
+    let version_command_output = run_command(Command::new(&bin).arg("-vV")).map_err(|error| {
+        Error::VersionFetchFailed { binary: name.into(), error: Box::new(error) }
+    })?;
     let version = parse_version_output(&version_command_output.stdout)
         .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })?;
 
@@ -129,7 +130,7 @@ impl CommitHashOf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::{CommandError, CommandErrorKind};
+    use crate::error::CommandErrorKind;
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
 
@@ -192,12 +193,11 @@ mod tests {
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::StartupFailed { .. } },
-            }) => {
-                assert_eq!(bin, path);
-                assert_eq!(vec![OsString::from("-vV")], args);
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::StartupFailed { .. }) =>
+            {
+                assert_eq!(bin, error.path);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
                 assert_eq!("rustc", binary);
             }
             Err(err) => panic!("unexpected error: {err}"),
@@ -211,13 +211,16 @@ mod tests {
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::Failure { output } },
-            }) => {
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::Failure { .. }) =>
+            {
+                let output = match error.kind {
+                    CommandErrorKind::Failure { output } => output,
+                    _ => unreachable!(),
+                };
                 assert_eq!("rustc", binary);
-                assert_eq!(vec![OsString::from("-vV")], args);
-                assert_eq!(bin, path);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
+                assert_eq!(bin, error.path);
                 assert_eq!(Some(1), output.status.code());
             }
             Err(err) => panic!("unexpected error: {err}"),

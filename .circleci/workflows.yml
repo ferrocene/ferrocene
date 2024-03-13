@@ -124,8 +124,8 @@ jobs:
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
-      - ferrocene-setup-windows
-      - ferrocene-job-build
+      - ferrocene-job-build:
+          os: windows
 
   x86_64-windows-dist:
     executor:
@@ -139,7 +139,6 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
-      - ferrocene-setup-windows
       - ferrocene-job-dist:
           restore-from-job: x86_64-windows-build
 
@@ -718,6 +717,11 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
       - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -749,6 +753,11 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job

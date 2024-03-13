@@ -19,10 +19,10 @@ The other development tools besides ``rustc`` are not qualified and are
 distributed for convenience only. This includes but is not limited to:
 
 * ``cargo``
-* ``rustdoc``
-* ``rustfmt``
-* ``rust-analyzer``
 * ``cargo-clippy``
+* ``rust-analyzer``
 * ``rust-demangler``
 * ``rust-gdb``
+* ``rustdoc``
+* ``rustfmt``
 * the various llvm tools (example being ``llvm-objcopy``)

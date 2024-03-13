@@ -110,12 +110,11 @@ jobs:
 
   x86_64-windows-build:
     executor:
-      name: win/default
+      name: win/server-2022
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      FERROCENE_TARGETS: aarch64-windows-msvc
       SCRIPT: |
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
@@ -126,7 +125,7 @@ jobs:
 
   x86_64-windows-dist:
     executor:
-      name: win/default
+      name: win/server-2022
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
@@ -334,7 +333,7 @@ jobs:
 
   x86_64-windows-llvm:
     executor:
-      name: win/default
+      name: win/server-2022
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:

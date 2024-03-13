@@ -81,8 +81,7 @@ check_sizes!(UnsafeCell<&dyn Trait>: PTR_SIZE * 2 => PTR_SIZE * 3);
 #[repr(simd)]
 pub struct Vec4<T>([T; 4]);
 
-<<<<<<< HEAD
-check_sizes!(UnsafeCell<Vec4<N32>>: 16 => 32);
+check_sizes!(UnsafeCell<Vec4<NonZero<u32>>>: 16 => 32);
 
 // ferrocene-annotations: fls_xa7lp0zg1ol2
 // Declarative Macros
@@ -107,6 +106,3 @@ check_sizes!(UnsafeCell<Vec4<N32>>: 16 => 32);
 //
 // ferrocene-annotations: fls_qpx6lgapce57
 // Token Matching
-=======
-check_sizes!(UnsafeCell<Vec4<NonZero<u32>>>: 16 => 32);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

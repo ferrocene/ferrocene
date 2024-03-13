@@ -20,6 +20,7 @@ distributed for convenience only. This includes but is not limited to:
 
 * ``cargo``
 * ``rustdoc``
+* ``rustfmt``
 * ``rust-analyzer``
 * ``cargo-clippy``
 * ``rust-demangler``

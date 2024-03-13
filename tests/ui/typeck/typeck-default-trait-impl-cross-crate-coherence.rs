@@ -21,14 +21,10 @@ impl DefaultedTrait for Box<C> {} //~ ERROR E0321
 impl DefaultedTrait for lib::Something<C> {} //~ ERROR E0117
 impl DefaultedTrait for D<C> {} // OK
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations
 //
 // ferrocene-annotations: fls_e1pgdlv81vul
 // Implementation Conformance
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

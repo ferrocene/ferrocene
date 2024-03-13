@@ -517,16 +517,12 @@ impl Step for SharedAssets {
                 .replace("VERSION", &builder.rust_release())
                 .replace("SHORT_HASH", builder.rust_info().sha_short().unwrap_or(""))
                 .replace("STAMP", builder.rust_info().sha().unwrap_or(""));
-<<<<<<< HEAD
 
             if let Some(parent) = version_info.parent() {
                 t!(std::fs::create_dir_all(parent));
             }
 
-            t!(fs::write(&version_info, &info));
-=======
             t!(fs::write(&version_info, info));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
 
         builder.copy(&builder.src.join("src").join("doc").join("rust.css"), &out.join("rust.css"));

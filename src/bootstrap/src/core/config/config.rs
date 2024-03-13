@@ -1223,15 +1223,8 @@ impl Config {
             stdout_is_tty: std::io::stdout().is_terminal(),
             stderr_is_tty: std::io::stderr().is_terminal(),
 
-<<<<<<< HEAD
-        config.ferrocene_raw_channel = "rolling".into();
-
-        // set by build.rs
-        config.build = TargetSelection::from_user(&env!("BUILD_TRIPLE"));
-=======
             // set by build.rs
             build: TargetSelection::from_user(env!("BUILD_TRIPLE")),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
             src: {
                 let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
@@ -1239,6 +1232,7 @@ impl Config {
                 manifest_dir.parent().unwrap().parent().unwrap().to_owned()
             },
             out: PathBuf::from("build"),
+            ferrocene_raw_channel: "rolling".into(),
 
             ..Default::default()
         }

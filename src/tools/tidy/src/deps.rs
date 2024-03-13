@@ -114,11 +114,8 @@ const EXCEPTIONS: ExceptionList = &[
     ("self_cell", "Apache-2.0"),                             // rustc (fluent translations)
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
-<<<<<<< HEAD
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
-=======
     ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     // tidy-alphabetical-end
 ];
 

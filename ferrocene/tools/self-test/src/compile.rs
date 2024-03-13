@@ -150,7 +150,7 @@ fn compile(
         let bin_name = program.name.replace(".rs", "");
         let bin_path = ctx.output_dir.join(bin_name);
         // now try and execute it
-        let mut cmd = Command::new(&bin_path);
+        let mut cmd = Command::new(bin_path);
         let output = cmd.output().map_err(|error| Error::RunningSampleProgramFailed {
             name: program.name.into(),
             error,
@@ -196,7 +196,7 @@ impl ExpectedFiles {
 
             if !currently_expected.remove(&*file_name) {
                 return Err(Error::UnexpectedCompilationArtifact {
-                    name: file_name.into(),
+                    name: file_name,
                     after_compiling: after_compiling.into(),
                 });
             }

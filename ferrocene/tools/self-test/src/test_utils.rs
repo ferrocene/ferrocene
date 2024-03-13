@@ -128,7 +128,7 @@ impl<'a> BinBuilder<'a> {
         stdout.push_str(concat!("host: ", env!("SELFTEST_TARGET"), "\n"));
         stdout.push_str("commit-hash: ");
         stdout.push_str(option_env!("SELFTEST_RUST_HASH").unwrap_or("unknown"));
-        stdout.push_str("\n");
+        stdout.push('\n');
 
         self.stdout(&stdout).stderr("").exit(0).expected_args(&["-vV"])
     }
@@ -167,7 +167,7 @@ impl<'a> BinBuilder<'a> {
         // containing directory's path
         let bin_dir = bin.parent().expect("path should have a parent");
 
-        std::fs::create_dir_all(&bin_dir).unwrap();
+        std::fs::create_dir_all(bin_dir).unwrap();
         if bin.exists() {
             std::fs::remove_file(&bin).unwrap();
         }
@@ -239,7 +239,7 @@ impl CliVersionContent<'_> {
         buffer.push_str(self.host);
         buffer.push_str("\ncommit-hash: ");
         buffer.push_str(self.commit_hash);
-        buffer.push_str("\n");
+        buffer.push('\n');
         buffer
     }
 }

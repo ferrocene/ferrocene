@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_find_binary_in_path_empty_path() {
-        let env = path_env(&[&Path::new("")]);
+        let env = path_env(&[(Path::new(""))]);
 
         match find_binary_in_path(&env, "vim") {
             Err(FindBinaryInPathError::MissingBinary { name }) if name == "vim" => {}

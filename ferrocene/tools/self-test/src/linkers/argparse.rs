@@ -76,10 +76,8 @@ where
         } else {
             Some(LinkerArg::Unknown(arg))
         }
-    } else if let Some(tail) = arg.strip_prefix(&option) {
-        Some(f(tail))
     } else {
-        None
+        arg.strip_prefix(&option).map(f)
     }
 }
 
@@ -112,10 +110,8 @@ where
         }
     } else if let Some(tail) = arg.strip_prefix(&format!("{onedash}=")) {
         Some(f(tail))
-    } else if let Some(tail) = arg.strip_prefix(&format!("{twodash}=")) {
-        Some(f(tail))
     } else {
-        None
+        arg.strip_prefix(&format!("{twodash}=")).map(f)
     }
 }
 
@@ -189,7 +185,7 @@ where
             output.push(result);
         } else if let Some(result) = long_opt("fix-cortex-a53-843419", arg, || LinkerArg::FixCortexA53_843419) {
             output.push(result);
-        } else if arg.starts_with("-") {
+        } else if arg.starts_with('-') {
             output.push(LinkerArg::Unknown(arg));
         } else {
             output.push(LinkerArg::Input(arg));

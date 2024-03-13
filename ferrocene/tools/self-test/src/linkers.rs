@@ -197,7 +197,7 @@ where
             }
             LinkerArg::Plugin(_plugin) => {
                 // Hmm, we don't want plugins.
-                if compiler_args.iter().find(|s| "-fno-lto" == *s).is_some() {
+                if compiler_args.iter().any(|s| "-fno-lto" == s) {
                     // We already turned LTO off, and we still got a plugin, so bail out
                     return Err(Error::LinkerArgsError {
                         target: target.to_owned(),
@@ -231,7 +231,7 @@ fn check_system_compiler(
     temp_dir: &Path,
     extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
-    let cc_path = find_binary_in_path(environment, &compiler_name)
+    let cc_path = find_binary_in_path(environment, compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
@@ -286,7 +286,7 @@ fn cross_compile_test_program(
         object_file.as_os_str().to_owned(),
     ];
     for arg in extra_args {
-        args.push(OsString::try_from(arg).unwrap());
+        args.push(OsString::from(arg));
     }
     let mut cc_child = Command::new(cc_path);
     cc_child.args(&args);
@@ -425,7 +425,7 @@ fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, 
         .join("rust-lld");
 
     if path.is_file() {
-        reporter.success(&format!("bundled linker detected"));
+        reporter.success("bundled linker detected");
         Ok(path)
     } else {
         Err(Error::BundledLinkerMissing)
@@ -443,7 +443,7 @@ fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<P
         .join("ld.lld");
 
     if path.is_file() {
-        reporter.success(&format!("bundled linker-wrapper detected"));
+        reporter.success("bundled linker-wrapper detected");
         Ok(path)
     } else {
         Err(Error::BundledLinkerMissing)

@@ -112,7 +112,7 @@ impl Reporter for StderrReporter {
                 self.render_command_output("stderr", &output.stderr);
             }
             if !output.stdout.is_empty() || !output.stderr.is_empty() {
-                let footer = std::iter::repeat('=').take(TERMINAL_WIDTH).collect::<String>();
+                let footer = "=".repeat(TERMINAL_WIDTH);
                 eprintln!("{}{footer}{}", self.color_bold, self.color_reset);
             }
         }

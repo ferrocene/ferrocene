@@ -224,8 +224,8 @@ impl Display for CommandError {
             .map(|arg| {
                 // Quote args with space. This is extremely rudimentary shell quoting, but
                 // it should do the trick most of the times.
-                if arg.contains(" ") {
-                    let arg = arg.replace("\"", "\\\"");
+                if arg.contains(' ') {
+                    let arg = arg.replace('"', "\\\"");
                     format!("\"{arg}\"").into()
                 } else {
                     arg

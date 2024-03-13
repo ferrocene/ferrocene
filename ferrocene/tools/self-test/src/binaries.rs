@@ -188,7 +188,7 @@ mod tests {
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
         let bin = utils.bin("rustc").create();
-        std::fs::write(&bin, &[]).unwrap(); // Broken content
+        std::fs::write(&bin, []).unwrap(); // Broken content
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),

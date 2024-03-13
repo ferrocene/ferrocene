@@ -41,7 +41,7 @@ impl Deref for Target {
     type Target = TargetSpec;
 
     fn deref(&self) -> &Self::Target {
-        &self.spec
+        self.spec
     }
 }
 
@@ -61,7 +61,7 @@ fn check_target(
     sysroot: &Path,
     target: &TargetSpec,
 ) -> Result<CheckTargetOutcome, Error> {
-    let target_dir = sysroot.join("lib").join("rustlib").join(&target.triple);
+    let target_dir = sysroot.join("lib").join("rustlib").join(target.triple);
     if !target_dir.is_dir() {
         // Target not present, ignore it.
         return Ok(CheckTargetOutcome::Missing);
@@ -90,7 +90,7 @@ enum CheckTargetOutcome {
 fn check_libraries(target: &TargetSpec, target_dir: &Path, expected: &[&str]) -> Result<(), Error> {
     let lib_dir = target_dir.join("lib");
 
-    let mut expected_to_find = expected.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>();
+    let mut expected_to_find = expected.iter().map(|s| s.to_string()).collect::<HashSet<_>>();
     for (library, count) in find_libraries_in(&lib_dir)?.into_iter() {
         if count > 1 {
             return Err(Error::DuplicateTargetLibrary { target: target.triple.into(), library });
@@ -288,15 +288,15 @@ mod tests {
 
     #[test]
     fn test_extract_library_name() {
-        assert_eq!(Some("core"), extract_library_name(&Path::new("libcore-0123456789abcdef.rlib")));
+        assert_eq!(Some("core"), extract_library_name(Path::new("libcore-0123456789abcdef.rlib")));
         assert_eq!(
             Some("proc_macro"),
-            extract_library_name(&Path::new("libproc_macro-0123456789abcdef.rlib"))
+            extract_library_name(Path::new("libproc_macro-0123456789abcdef.rlib"))
         );
 
         let assert_fail = |name: &str| {
             assert!(
-                extract_library_name(&Path::new(name)).is_none(),
+                extract_library_name(Path::new(name)).is_none(),
                 "{name} is treated as valid but should be wrong"
             )
         };

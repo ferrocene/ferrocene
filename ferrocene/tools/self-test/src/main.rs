@@ -12,10 +12,11 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
-use crate::error::Error;
-use crate::report::{Reporter, StderrReporter};
 use std::ffi::OsString;
 use std::path::PathBuf;
+
+use crate::error::Error;
+use crate::report::{Reporter, StderrReporter};
 
 /// Environment variables set by the caller of the binary.
 struct Environment {
@@ -46,17 +47,7 @@ fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
     let mut targets = targets::check(reporter, &sysroot)?;
     linkers::check_and_add_rustflags(reporter, &environment, &sysroot, &mut targets)?;
     compile::check(reporter, &sysroot, &targets)?;
-
-    for target in targets {
-        if target.rustflags.is_empty() {
-            reporter.info(&format!("Target '{}' requires no special linker flags", target.triple));
-        } else {
-            reporter.info(&format!("Target '{}' requires special linker flags:", target.triple));
-            for flag in target.rustflags {
-                reporter.info(&format!("\t{}", flag));
-            }
-        }
-    }
+    linkers::report_linker_flags(reporter, &targets);
 
     reporter.success("Ferrocene self-check completed!");
     Ok(())

@@ -450,6 +450,19 @@ fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<P
     }
 }
 
+pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
+    for target in targets {
+        if target.rustflags.is_empty() {
+            reporter.info(&format!("Target '{}' requires no special linker flags", target.triple));
+        } else {
+            reporter.info(&format!("Target '{}' requires special linker flags:", target.triple));
+            for flag in &target.rustflags {
+                reporter.info(&format!("\t{}", flag));
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

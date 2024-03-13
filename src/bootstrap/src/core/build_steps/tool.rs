@@ -15,7 +15,7 @@ use crate::Compiler;
 use crate::Mode;
 use crate::{gha, Kind};
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum SourceType {
     InTree,
     Submodule,
@@ -220,7 +220,7 @@ macro_rules! bootstrap_tool {
         $(,allow_features = $allow_features:expr)?
         ;
     )+) => {
-        #[derive(Copy, PartialEq, Eq, Clone)]
+        #[derive(PartialEq, Eq, Clone)]
         pub enum Tool {
             $(
                 $name,
@@ -241,7 +241,7 @@ macro_rules! bootstrap_tool {
         }
 
         $(
-            #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+            #[derive(Debug, Clone, Hash, PartialEq, Eq)]
         pub struct $name {
             pub compiler: Compiler,
             pub target: TargetSelection,
@@ -320,7 +320,7 @@ bootstrap_tool!(
     CoverageDump, "src/tools/coverage-dump", "coverage-dump";
 );
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
 pub struct ErrorIndex {
     pub compiler: Compiler,
 }
@@ -374,7 +374,7 @@ impl Step for ErrorIndex {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RemoteTestServer {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -408,7 +408,7 @@ impl Step for RemoteTestServer {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Ord, PartialOrd)]
 pub struct Rustdoc {
     /// This should only ever be 0 or 2.
     /// We sometimes want to reference the "bootstrap" rustdoc, which is why this option is here.
@@ -520,7 +520,7 @@ impl Step for Rustdoc {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Cargo {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -565,7 +565,7 @@ impl Step for Cargo {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct LldWrapper {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -594,7 +594,7 @@ impl Step for LldWrapper {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustAnalyzer {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -642,7 +642,7 @@ impl Step for RustAnalyzer {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustAnalyzerProcMacroSrv {
     pub compiler: Compiler,
     pub target: TargetSelection,

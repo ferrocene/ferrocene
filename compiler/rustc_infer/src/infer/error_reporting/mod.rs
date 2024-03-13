@@ -1247,10 +1247,23 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             (&ty::Adt(def1, sub1), &ty::Adt(def2, sub2)) => {
                 let did1 = def1.did();
                 let did2 = def2.did();
-                let sub_no_defaults_1 =
-                    self.tcx.generics_of(did1).own_args_no_defaults(self.tcx, sub1);
-                let sub_no_defaults_2 =
-                    self.tcx.generics_of(did2).own_args_no_defaults(self.tcx, sub2);
+
+                let generics1 = self.tcx.generics_of(did1);
+                let generics2 = self.tcx.generics_of(did2);
+
+                let non_default_after_default = generics1
+                    .check_concrete_type_after_default(self.tcx, sub1)
+                    || generics2.check_concrete_type_after_default(self.tcx, sub2);
+                let sub_no_defaults_1 = if non_default_after_default {
+                    generics1.own_args(sub1)
+                } else {
+                    generics1.own_args_no_defaults(self.tcx, sub1)
+                };
+                let sub_no_defaults_2 = if non_default_after_default {
+                    generics2.own_args(sub2)
+                } else {
+                    generics2.own_args_no_defaults(self.tcx, sub2)
+                };
                 let mut values = (DiagStyledString::new(), DiagStyledString::new());
                 let path1 = self.tcx.def_path_str(did1);
                 let path2 = self.tcx.def_path_str(did2);
@@ -1976,6 +1989,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 self.suggest_accessing_field_where_appropriate(cause, &exp_found, diag);
                 self.suggest_await_on_expect_found(cause, span, &exp_found, diag);
                 self.suggest_function_pointers(cause, span, &exp_found, diag);
+                self.suggest_turning_stmt_into_expr(cause, &exp_found, diag);
             }
         }
 
@@ -2652,10 +2666,6 @@ impl<'tcx> TypeRelation<'tcx> for SameTypeModuloInfer<'_, 'tcx> {
 
     fn tag(&self) -> &'static str {
         "SameTypeModuloInfer"
-    }
-
-    fn a_is_expected(&self) -> bool {
-        true
     }
 
     fn relate_with_variance<T: relate::Relate<'tcx>>(

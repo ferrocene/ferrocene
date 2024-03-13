@@ -1,9 +1,13 @@
 Change this file to make users of the `download-ci-llvm` configuration download
 a new version of LLVM from CI, even if the LLVM submodule hasn’t changed.
 
+<<<<<<< HEAD
 Last change is for: https://github.com/rust-lang/rust/pull/116881
 
 
 (white space intentional to avoid merge conflicts)
 
 Last Ferrocene change is for: https://github.com/ferrocene/ferrocene/pull/98
+=======
+Last change is for: https://github.com/rust-lang/rust/pull/120761
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

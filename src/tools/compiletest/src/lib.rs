@@ -688,6 +688,7 @@ fn find_tests_in_dir(
         return Ok(());
     }
 
+<<<<<<< HEAD
     if config.mode == Mode::RunMake && dir.join("Makefile").exists() {
         let paths = TestPaths {
             file: dir.to_path_buf(),
@@ -695,6 +696,23 @@ fn find_tests_in_dir(
         };
         on_test_found(&paths);
         return Ok(());
+=======
+    if config.mode == Mode::RunMake {
+        if dir.join("Makefile").exists() && dir.join("rmake.rs").exists() {
+            return Err(io::Error::other(
+                "run-make tests cannot have both `Makefile` and `rmake.rs`",
+            ));
+        }
+
+        if dir.join("Makefile").exists() || dir.join("rmake.rs").exists() {
+            let paths = TestPaths {
+                file: dir.to_path_buf(),
+                relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
+            };
+            tests.extend(make_test(config, cache, &paths, inputs, poisoned));
+            return Ok(());
+        }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     // Add each `.rs` file as a test, and recurse further on any
@@ -754,8 +772,17 @@ fn make_test(
     poisoned: &mut bool,
 ) -> Vec<test::TestDescAndFn> {
     let test_path = if config.mode == Mode::RunMake {
-        // Parse directives in the Makefile
-        testpaths.file.join("Makefile")
+        if testpaths.file.join("rmake.rs").exists() && testpaths.file.join("Makefile").exists() {
+            panic!("run-make tests cannot have both `rmake.rs` and `Makefile`");
+        }
+
+        if testpaths.file.join("rmake.rs").exists() {
+            // Parse directives in rmake.rs.
+            testpaths.file.join("rmake.rs")
+        } else {
+            // Parse directives in the Makefile.
+            testpaths.file.join("Makefile")
+        }
     } else {
         PathBuf::from(&testpaths.file)
     };

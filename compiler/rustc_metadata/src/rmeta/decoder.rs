@@ -420,7 +420,7 @@ impl<'a, 'tcx> Decodable<DecodeContext<'a, 'tcx>> for ExpnIndex {
 impl<'a, 'tcx> SpanDecoder for DecodeContext<'a, 'tcx> {
     fn decode_attr_id(&mut self) -> rustc_span::AttrId {
         let sess = self.sess.expect("can't decode AttrId without Session");
-        sess.parse_sess.attr_id_generator.mk_attr_id()
+        sess.psess.attr_id_generator.mk_attr_id()
     }
 
     fn decode_crate_num(&mut self) -> CrateNum {
@@ -1749,7 +1749,7 @@ impl<'a, 'tcx> CrateMetadataRef<'a> {
         self.root.tables.attr_flags.get(self, index)
     }
 
-    fn get_intrinsic(self, index: DefIndex) -> Option<Symbol> {
+    fn get_intrinsic(self, index: DefIndex) -> Option<ty::IntrinsicDef> {
         self.root.tables.intrinsic.get(self, index).map(|d| d.decode(self))
     }
 

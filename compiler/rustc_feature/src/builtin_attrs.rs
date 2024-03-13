@@ -867,6 +867,10 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         rustc_no_mir_inline, Normal, template!(Word), WarnFollowing,
         "#[rustc_no_mir_inline] prevents the MIR inliner from inlining a function while not affecting codegen"
     ),
+    rustc_attr!(
+        rustc_intrinsic_must_be_overridden, Normal, template!(Word), ErrorFollowing,
+        "the `#[rustc_intrinsic_must_be_overridden]` attribute is used to declare intrinsics without real bodies",
+    ),
 
     // ==========================================================================
     // Internal attributes, Testing:
@@ -928,6 +932,10 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     gated!(
         omit_gdb_pretty_printer_section, Normal, template!(Word), WarnFollowing,
         "the `#[omit_gdb_pretty_printer_section]` attribute is just used for the Rust test suite",
+    ),
+    rustc_attr!(
+        TEST, pattern_complexity, CrateLevel, template!(NameValueStr: "N"),
+        ErrorFollowing, @only_local: true,
     ),
 ];
 

@@ -19,7 +19,7 @@ detailed installation procedure for Ferrocene.
 Installation Validation
 -----------------------
 
-The Ferrocene provides a checker called ``ferrocene-self-test`` (see
+Ferrocene provides a checker called ``ferrocene-self-test`` (see
 :ref:`Ferrocene - Validation <user-manual:install:Validation>` for details),
 for verifying the installation of the toolchain in a non-certification context.
 

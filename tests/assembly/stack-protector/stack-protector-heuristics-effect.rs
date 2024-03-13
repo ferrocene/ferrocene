@@ -1,31 +1,16 @@
-<<<<<<< HEAD
-// revisions: all strong basic none missing
-// assembly-output: emit-asm
-// ignore-macos slightly different policy on stack protection of arrays
-// ignore-msvc stack check code uses different function names
-// ignore-nvptx64 stack protector is not supported
-// ignore-wasm32-bare
-// ignore-aarch64-unknown-ferrocenecoretest
-// [all] compile-flags: -Z stack-protector=all
-// [strong] compile-flags: -Z stack-protector=strong
-// [basic] compile-flags: -Z stack-protector=basic
-// [none] compile-flags: -Z stack-protector=none
-// compile-flags: -C opt-level=2 -Z merge-functions=disabled
-// min-llvm-version: 17.0.2
-=======
 //@ revisions: all strong basic none missing
 //@ assembly-output: emit-asm
 //@ ignore-macos slightly different policy on stack protection of arrays
 //@ ignore-msvc stack check code uses different function names
 //@ ignore-nvptx64 stack protector is not supported
 //@ ignore-wasm32-bare
+//@ ignore-aarch64-unknown-ferrocenecoretest
 //@ [all] compile-flags: -Z stack-protector=all
 //@ [strong] compile-flags: -Z stack-protector=strong
 //@ [basic] compile-flags: -Z stack-protector=basic
 //@ [none] compile-flags: -Z stack-protector=none
 //@ compile-flags: -C opt-level=2 -Z merge-functions=disabled
 //@ min-llvm-version: 17.0.2
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 #![crate_type = "lib"]
 

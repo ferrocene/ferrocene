@@ -1,19 +1,10 @@
-<<<<<<< HEAD
-// assembly-output: emit-asm
-// compile-flags: -O
-// compile-flags: --target aarch64-unknown-linux-gnu
-// needs-llvm-components: aarch64
-// only-aarch64
-// only-linux
-// ignore-aarch64-unknown-ferrocenecoretest
-=======
 //@ assembly-output: emit-asm
 //@ compile-flags: -O
 //@ compile-flags: --target aarch64-unknown-linux-gnu
 //@ needs-llvm-components: aarch64
 //@ only-aarch64
 //@ only-linux
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+//@ ignore-aarch64-unknown-ferrocenecoretest
 
 #![crate_type = "rlib"]
 

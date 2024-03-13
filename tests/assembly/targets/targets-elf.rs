@@ -561,12 +561,12 @@
 
 // Ferrocene-specific targets
 
-// revisions: i386_lynx_lynxos178
-// [i386_lynx_lynxos178] compile-flags: --target i386-lynx-lynxos178
-// [i386_lynx_lynxos178] needs-llvm-components: x86
-// revisions: aarch64_unknown_ferrocenecoretest
-// [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
-// [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
+//@ revisions: i386_lynx_lynxos178
+//@ [i386_lynx_lynxos178] compile-flags: --target i386-lynx-lynxos178
+//@ [i386_lynx_lynxos178] needs-llvm-components: x86
+//@ revisions: aarch64_unknown_ferrocenecoretest
+//@ [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
+//@ [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
 
 // Sanity-check that each target can produce assembly code.
 

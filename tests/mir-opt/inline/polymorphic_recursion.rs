@@ -1,4 +1,4 @@
-// ignore-test The test is extremely slow due to debug assertions being enabled
+//@ ignore-test The test is extremely slow due to debug assertions being enabled
 // skip-filecheck
 // Make sure that the MIR inliner does not loop indefinitely on polymorphic recursion.
 //@ compile-flags: --crate-type lib

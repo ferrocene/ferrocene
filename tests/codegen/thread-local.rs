@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-// compile-flags: -O
-// aux-build:thread_local_aux.rs
-// ignore-windows FIXME(#84933)
-// ignore-wasm globals are used instead of thread locals
-// ignore-emscripten globals are used instead of thread locals
-// ignore-android does not use #[thread_local]
-// ignore-nto does not use #[thread_local]
-// ignore-aarch64-unknown-ferrocenecoretest no support for thread locals
-=======
 //@ compile-flags: -O
 //@ aux-build:thread_local_aux.rs
 //@ ignore-windows FIXME(#84933)
@@ -15,7 +5,7 @@
 //@ ignore-emscripten globals are used instead of thread locals
 //@ ignore-android does not use #[thread_local]
 //@ ignore-nto does not use #[thread_local]
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+//@ ignore-aarch64-unknown-ferrocenecoretest no support for thread locals
 
 #![crate_type = "lib"]
 

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 //@ run-fail
 //@ error-pattern:attempt to negate with overflow
 //@ ignore-emscripten no processes

@@ -32,7 +32,7 @@ macro_rules! submodule_helper {
 macro_rules! book {
     ($($name:ident, $path:expr, $book_name:expr $(, submodule $(= $submodule:literal)? )? ;)+) => {
         $(
-            #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+            #[derive(Debug, Clone, Hash, PartialEq, Eq)]
         pub struct $name {
             target: TargetSelection,
         }
@@ -86,7 +86,7 @@ book!(
     StyleGuide, "src/doc/style-guide", "style-guide";
 );
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct UnstableBook {
     target: TargetSelection,
 }
@@ -160,7 +160,7 @@ impl<P: Step> Step for RustbookSrc<P> {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct TheBook {
     compiler: Compiler,
     target: TargetSelection,
@@ -286,7 +286,7 @@ fn invoke_rustdoc(
     builder.run(&mut cmd);
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Standalone {
     compiler: Compiler,
     target: TargetSelection,
@@ -389,7 +389,7 @@ impl Step for Standalone {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Releases {
     compiler: Compiler,
     target: TargetSelection,
@@ -492,7 +492,7 @@ pub struct SharedAssetsPaths {
     pub version_info: PathBuf,
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct SharedAssets {
     target: TargetSelection,
 }
@@ -877,7 +877,7 @@ macro_rules! tool_doc {
         $(is_library = $is_library:expr,)?
         $(crates = $crates:expr)?
        ) => {
-        #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+        #[derive(Debug, Clone, Hash, PartialEq, Eq)]
         pub struct $tool {
             target: TargetSelection,
         }
@@ -1026,7 +1026,7 @@ tool_doc!(
     crates = ["bootstrap"]
 );
 
-#[derive(Ord, PartialOrd, Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ErrorIndex {
     pub target: TargetSelection,
 }
@@ -1061,7 +1061,7 @@ impl Step for ErrorIndex {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct UnstableBookGen {
     target: TargetSelection,
 }
@@ -1117,7 +1117,7 @@ fn symlink_dir_force(config: &Config, original: &Path, link: &Path) {
     );
 }
 
-#[derive(Ord, PartialOrd, Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustcBook {
     pub compiler: Compiler,
     pub target: TargetSelection,

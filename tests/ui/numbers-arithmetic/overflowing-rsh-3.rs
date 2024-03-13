@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 //@ build-fail
 //@ compile-flags: -C debug-assertions
 

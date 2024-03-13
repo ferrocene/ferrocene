@@ -2,11 +2,18 @@
 // Test that `-C instrument-coverage` injects Coverage statements. The Coverage Counter statements
 // are later converted into LLVM instrprof.increment intrinsics, during codegen.
 
+<<<<<<< HEAD
 // ignore-aarch64-unknown-ferrocenecoretest - instrument-coverage is not supported
 // unit-test: InstrumentCoverage
 // needs-profiler-support
 // ignore-windows
 // compile-flags: -C instrument-coverage --remap-path-prefix={{src-base}}=/the/src
+=======
+//@ unit-test: InstrumentCoverage
+//@ needs-profiler-support
+//@ ignore-windows
+//@ compile-flags: -C instrument-coverage --remap-path-prefix={{src-base}}=/the/src
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 // EMIT_MIR instrument_coverage.main.InstrumentCoverage.diff
 // EMIT_MIR instrument_coverage.bar.InstrumentCoverage.diff

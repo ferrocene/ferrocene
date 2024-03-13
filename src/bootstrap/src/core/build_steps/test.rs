@@ -87,7 +87,7 @@ impl Step for CrateBootstrap {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Linkcheck {
     host: TargetSelection,
 }
@@ -180,7 +180,7 @@ fn check_if_tidy_is_installed() -> bool {
         .map_or(false, |status| status.success())
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct HtmlCheck {
     target: TargetSelection,
 }
@@ -221,7 +221,7 @@ impl Step for HtmlCheck {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cargotest {
     stage: u32,
     host: TargetSelection,
@@ -267,7 +267,7 @@ impl Step for Cargotest {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cargo {
     stage: u32,
     host: TargetSelection,
@@ -328,7 +328,7 @@ impl Step for Cargo {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RustAnalyzer {
     stage: u32,
     host: TargetSelection,
@@ -387,7 +387,7 @@ impl Step for RustAnalyzer {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Rustfmt {
     stage: u32,
     host: TargetSelection,
@@ -434,7 +434,7 @@ impl Step for Rustfmt {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RustDemangler {
     stage: u32,
     host: TargetSelection,
@@ -493,7 +493,7 @@ impl Step for RustDemangler {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Miri {
     stage: u32,
     host: TargetSelection,
@@ -700,7 +700,7 @@ impl Step for Miri {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CompiletestTest {
     host: TargetSelection,
 }
@@ -748,7 +748,7 @@ impl Step for CompiletestTest {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Clippy {
     stage: u32,
     host: TargetSelection,
@@ -816,7 +816,7 @@ fn path_for_cargo(builder: &Builder<'_>, compiler: Compiler) -> OsString {
     env::join_paths(iter::once(path).chain(env::split_paths(&old_path))).expect("")
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustdocTheme {
     pub compiler: Compiler,
 }
@@ -853,7 +853,7 @@ impl Step for RustdocTheme {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustdocJSStd {
     pub target: TargetSelection,
 }
@@ -913,7 +913,7 @@ impl Step for RustdocJSStd {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustdocJSNotStd {
     pub target: TargetSelection,
     pub compiler: Compiler,
@@ -967,7 +967,7 @@ fn get_browser_ui_test_version(npm: &Path) -> Option<String> {
         .or_else(|| get_browser_ui_test_version_inner(npm, true))
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustdocGUI {
     pub target: TargetSelection,
     pub compiler: Compiler,
@@ -1061,7 +1061,7 @@ impl Step for RustdocGUI {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Tidy;
 
 impl Step for Tidy {
@@ -1153,7 +1153,7 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ExpandYamlAnchors;
 
 impl Step for ExpandYamlAnchors {
@@ -1253,7 +1253,7 @@ macro_rules! test_definitions {
         host: $host:expr,
         compare_mode: $compare_mode:expr
     }) => {
-        #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+        #[derive(Debug, Clone, PartialEq, Eq, Hash)]
         pub struct $name {
             pub compiler: Compiler,
             pub target: TargetSelection,
@@ -1296,7 +1296,7 @@ macro_rules! coverage_test_alias {
         default: $default:expr,
         only_hosts: $only_hosts:expr $(,)?
     }) => {
-        #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+        #[derive(Debug, Clone, PartialEq, Eq, Hash)]
         pub struct $name {
             pub compiler: Compiler,
             pub target: TargetSelection,
@@ -1378,7 +1378,7 @@ default_test!(Assembly { path: "tests/assembly", mode: "assembly", suite: "assem
 ///
 /// Each individual mode also has its own alias that will run the tests in
 /// just that mode.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Coverage {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -1440,7 +1440,7 @@ host_test!(CoverageRunRustdoc {
 });
 
 // For the mir-opt suite we do not use macros, as we need custom behavior when blessing.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MirOpt {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -1496,7 +1496,7 @@ impl Step for MirOpt {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Compiletest {
     compiler: Compiler,
     target: TargetSelection,
@@ -2149,7 +2149,7 @@ impl BookTest {
 macro_rules! test_book {
     ($($name:ident, $path:expr, $book_name:expr, default=$default:expr;)+) => {
         $(
-            #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+            #[derive(Debug, Clone, PartialEq, Eq, Hash)]
             pub struct $name {
                 compiler: Compiler,
             }
@@ -2194,7 +2194,7 @@ test_book!(
     EditionGuide, "src/doc/edition-guide", "edition-guide", default=false;
 );
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ErrorIndex {
     compiler: Compiler,
 }
@@ -2271,7 +2271,7 @@ fn markdown_test(builder: &Builder<'_>, compiler: Compiler, markdown: &Path) -> 
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RustcGuide;
 
 impl Step for RustcGuide {
@@ -2596,7 +2596,7 @@ impl Step for Crate {
 }
 
 /// Rustdoc is special in various ways, which is why this step is different from `Crate`.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CrateRustdoc {
     host: TargetSelection,
 }
@@ -2697,7 +2697,7 @@ impl Step for CrateRustdoc {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct CrateRustdocJsonTypes {
     host: TargetSelection,
 }
@@ -2767,7 +2767,7 @@ impl Step for CrateRustdocJsonTypes {
 /// QEMU we have to build our own tools so we've got conditional dependencies
 /// on those programs as well. Note that the remote test client is built for
 /// the build target (us) and the server is built for the target.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RemoteCopyLibs {
     compiler: Compiler,
     target: TargetSelection,
@@ -2813,7 +2813,7 @@ impl Step for RemoteCopyLibs {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Distcheck;
 
 impl Step for Distcheck {
@@ -2883,7 +2883,7 @@ impl Step for Distcheck {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Bootstrap;
 
 impl Step for Bootstrap {
@@ -2935,7 +2935,7 @@ impl Step for Bootstrap {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TierCheck {
     pub compiler: Compiler,
 }
@@ -2985,7 +2985,7 @@ impl Step for TierCheck {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LintDocs {
     pub compiler: Compiler,
     pub target: TargetSelection,
@@ -3018,7 +3018,7 @@ impl Step for LintDocs {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RustInstaller;
 
 impl Step for RustInstaller {
@@ -3079,7 +3079,7 @@ impl Step for RustInstaller {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TestHelpers {
     pub target: TargetSelection,
 }

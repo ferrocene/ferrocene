@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::targets::Target;
-use crate::utils::run_command;
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+
+use tempfile::TempDir;
+
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::targets::Target;
+use crate::utils::run_command;
 
 static SAMPLE_PROGRAMS: &[SampleProgram] = &[
     SampleProgram {
@@ -77,18 +80,9 @@ fn check_target(
         .tempdir()
         .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
 
-    let ctx = Context {
-        target,
-        rustc: sysroot.join("bin").join("rustc"),
-        temp_dir: temp.path().into(),
-        source_dir: temp.path().join("src"),
-        output_dir: temp.path().join("out"),
-    };
-
-    std::fs::create_dir_all(&ctx.source_dir)
-        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
-    std::fs::create_dir_all(&ctx.output_dir)
-        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
+    let ctx = Context::new(target, sysroot, &temp);
+    create_tmp_compilation_dir(&ctx.source_dir)?;
+    create_tmp_compilation_dir(&ctx.output_dir)?;
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
@@ -109,6 +103,11 @@ fn check_target(
         ));
     }
     Ok(())
+}
+
+fn create_tmp_compilation_dir(path: &Path) -> Result<(), Error> {
+    std::fs::create_dir_all(path)
+        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })
 }
 
 fn compile(
@@ -223,6 +222,18 @@ struct Context<'a> {
     output_dir: PathBuf,
 }
 
+impl<'a> Context<'a> {
+    fn new(target: &'a Target, sysroot: &Path, temp: &TempDir) -> Self {
+        Self {
+            target,
+            rustc: sysroot.join("bin").join("rustc"),
+            temp_dir: temp.path().into(),
+            source_dir: temp.path().join("src"),
+            output_dir: temp.path().join("out"),
+        }
+    }
+}
+
 struct SampleProgram {
     name: &'static str,
     contents: &'static [u8],
@@ -237,7 +248,6 @@ mod tests {
     use crate::linkers::Linker;
     use crate::targets::TargetSpec;
     use crate::test_utils::TestUtils;
-    use tempfile::TempDir;
 
     #[test]
     fn test_all_sample_program_source_files_are_registered() {

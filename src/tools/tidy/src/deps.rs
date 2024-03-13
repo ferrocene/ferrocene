@@ -115,6 +115,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
+    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc
     // tidy-alphabetical-end
 ];
 
@@ -404,6 +405,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "valuable",
     "version_check",
     "wasi",
+    "wasmparser",
     "winapi",
     "winapi-i686-pc-windows-gnu",
     "winapi-util",
@@ -590,6 +592,21 @@ fn check_runtime_license_exceptions(
             if pkg.name == "fortanix-sgx-abi" && pkg.license.as_deref() == Some("MPL-2.0") {
                 continue;
             }
+
+            // This exception is due to the fact that the feature set of the
+            // `object` crate is different between rustc and libstd. In the
+            // standard library only a conservative set of features are enabled
+            // which notably does not include the `wasm` feature which pulls in
+            // this dependency. In the compiler, however, the `wasm` feature is
+            // enabled. This exception is intended to be here so long as the
+            // `EXCEPTIONS` above contains `wasmparser`, but once that goes away
+            // this can be removed.
+            if pkg.name == "wasmparser"
+                && pkg.license.as_deref() == Some("Apache-2.0 WITH LLVM-exception")
+            {
+                continue;
+            }
+
             tidy_error!(bad, "invalid license `{}` in `{}`", license, pkg.id);
         }
     }

@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::linkers::Linker;
-use crate::report::Reporter;
 use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::path::Path;
+
+use crate::error::Error;
+use crate::linkers::Linker;
+use crate::report::Reporter;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCC },
@@ -46,14 +47,13 @@ impl Deref for Target {
 
 /// Check which of the supported targets are installed.
 pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<Vec<Target>, Error> {
-    let mut found = Vec::new();
-    for target in SUPPORTED_TARGETS {
+    SUPPORTED_TARGETS.iter().try_fold(Vec::new(), |mut found, target| {
         match check_target(reporter, sysroot, target)? {
             CheckTargetOutcome::Missing => {}
             CheckTargetOutcome::Found => found.push(Target { spec: target, rustflags: Vec::new() }),
         }
-    }
-    Ok(found)
+        Ok(found)
+    })
 }
 
 fn check_target(

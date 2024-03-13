@@ -17,6 +17,7 @@ use crate::report::{Reporter, StderrReporter};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
+/// Environment variables set by the caller of the binary.
 struct Environment {
     path: Option<OsString>,
 }
@@ -27,6 +28,9 @@ impl Environment {
     }
 }
 
+/// The user manual states to extract all archives to the same directory.
+/// Therefore the sysroot is the grandparent of `ferrocene-self-test`
+/// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
 fn get_sysroot() -> Option<PathBuf> {
     let current_exe = std::env::current_exe().ok()?;
     Some(current_exe.parent()?.parent()?.to_path_buf())

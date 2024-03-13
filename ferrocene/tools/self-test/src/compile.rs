@@ -51,6 +51,10 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
     },
 ];
 
+/// Compile the [`SAMPLE_PROGRAMS`] for all `targets`.
+///
+/// Also execute the sample programs for the platform specified by the
+/// `SELFTEST_TARGET` compile-time environment variable.
 pub(crate) fn check(
     reporter: &dyn Reporter,
     sysroot: &Path,

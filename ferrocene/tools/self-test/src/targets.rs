@@ -44,6 +44,7 @@ impl Deref for Target {
     }
 }
 
+/// Check which of the supported targets are installed.
 pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<Vec<Target>, Error> {
     let mut found = Vec::new();
     for target in SUPPORTED_TARGETS {

@@ -8,6 +8,9 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 
+/// Check that the executables exist in the expected path, and that they have the correct permissions.
+///
+/// Some binaries are optional and only warn when not present.
 pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<(), Error> {
     check_binary(reporter, sysroot, "rustc", CommitHashOf::Rust)?;
     check_binary(reporter, sysroot, "rustdoc", CommitHashOf::Rust)?;

@@ -125,6 +125,7 @@ fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {
     Ok(found)
 }
 
+/// Extract `name` from `libname-hash.rlib`.
 fn extract_library_name(file_path: &Path) -> Option<&str> {
     let (library, hash) = file_path
         .file_name()?

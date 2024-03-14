@@ -28,7 +28,7 @@ features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
 [build-dependencies]
 # Dependency of the `backtrace` crate
-cc = "1.0.67"
+cc = "1.0.90"
 
 [features]
 default = ['backtrace']

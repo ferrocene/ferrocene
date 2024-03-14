@@ -54,7 +54,7 @@ winapi = { version = "0.3.9", optional = true }
 [build-dependencies]
 # Only needed for Android, but cannot be target dependent
 # https://github.com/rust-lang/cargo/issues/4932
-cc = "1.0.67"
+cc = "1.0.90"
 
 [dev-dependencies]
 dylib-dep = { path = "crates/dylib-dep" }

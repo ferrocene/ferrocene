@@ -79,7 +79,8 @@ impl Collector {
 
     fn collect_test(&mut self, paths: &TestPaths) -> Option<TestFile> {
         let path = if self.config.mode == Mode::RunMake {
-            paths.file.join("Makefile")
+            let path = paths.file.join("Makefile");
+            if path.exists() { path } else { paths.file.join("rmake.rs") }
         } else {
             paths.file.clone()
         };
@@ -115,7 +116,9 @@ impl Collector {
     fn collect_annotations(&self, path: &Path, contents: &str) -> Vec<Annotation> {
         let mut found = Vec::new();
         for line in contents.lines() {
-            let prefix = if path.file_name() == Some(OsStr::new("Makefile")) {
+            let prefix = if path.file_name() == Some(OsStr::new("Makefile"))
+                || path.file_name() == Some(OsStr::new("rmake.rs"))
+            {
                 "# "
             } else if path.extension() == Some(OsStr::new("rs"))
                 || path.file_name() == Some(OsStr::new(BULK_ANNOTATIONS_FILE_NAME))

@@ -1227,6 +1227,7 @@ bitflags::bitflags! {
         const KCFI    = 1 << 8;
         const KERNELADDRESS = 1 << 9;
         const SAFESTACK = 1 << 10;
+        const DATAFLOW = 1 << 11;
     }
 }
 rustc_data_structures::external_bitflags_debug! { SanitizerSet }
@@ -1239,6 +1240,7 @@ impl SanitizerSet {
         Some(match self {
             SanitizerSet::ADDRESS => "address",
             SanitizerSet::CFI => "cfi",
+            SanitizerSet::DATAFLOW => "dataflow",
             SanitizerSet::KCFI => "kcfi",
             SanitizerSet::KERNELADDRESS => "kernel-address",
             SanitizerSet::LEAK => "leak",
@@ -1581,6 +1583,7 @@ supported_targets! {
     ("wasm32-unknown-emscripten", wasm32_unknown_emscripten),
     ("wasm32-unknown-unknown", wasm32_unknown_unknown),
     ("wasm32-wasi", wasm32_wasi),
+    ("wasm32-wasip1", wasm32_wasip1),
     ("wasm32-wasip2", wasm32_wasip2),
     ("wasm32-wasi-preview1-threads", wasm32_wasi_preview1_threads),
     ("wasm64-unknown-unknown", wasm64_unknown_unknown),
@@ -1680,7 +1683,7 @@ supported_targets! {
 
     ("mips64-openwrt-linux-musl", mips64_openwrt_linux_musl),
 
-    ("aarch64-unknown-nto-qnx710", aarch64_unknown_nto_qnx_710),
+    ("aarch64-unknown-nto-qnx710", aarch64_unknown_nto_qnx710),
     ("x86_64-pc-nto-qnx710", x86_64_pc_nto_qnx710),
     ("i586-pc-nto-qnx700", i586_pc_nto_qnx700),
 
@@ -2799,6 +2802,7 @@ impl Target {
                             base.$key_name |= match s.as_str() {
                                 Some("address") => SanitizerSet::ADDRESS,
                                 Some("cfi") => SanitizerSet::CFI,
+                                Some("dataflow") => SanitizerSet::DATAFLOW,
                                 Some("kcfi") => SanitizerSet::KCFI,
                                 Some("kernel-address") => SanitizerSet::KERNELADDRESS,
                                 Some("leak") => SanitizerSet::LEAK,

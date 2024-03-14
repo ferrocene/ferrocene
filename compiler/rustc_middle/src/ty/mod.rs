@@ -30,6 +30,7 @@ pub use adt::*;
 pub use assoc::*;
 pub use generic_args::*;
 pub use generics::*;
+pub use intrinsic::IntrinsicDef;
 use rustc_ast as ast;
 use rustc_ast::node_id::NodeMap;
 pub use rustc_ast_ir::{Movability, Mutability};
@@ -149,6 +150,7 @@ mod generic_args;
 mod generics;
 mod impls_ty;
 mod instance;
+mod intrinsic;
 mod list;
 mod opaque_types;
 mod parameterized;
@@ -1991,8 +1993,10 @@ pub fn uint_ty(uty: ast::UintTy) -> UintTy {
 
 pub fn float_ty(fty: ast::FloatTy) -> FloatTy {
     match fty {
+        ast::FloatTy::F16 => FloatTy::F16,
         ast::FloatTy::F32 => FloatTy::F32,
         ast::FloatTy::F64 => FloatTy::F64,
+        ast::FloatTy::F128 => FloatTy::F128,
     }
 }
 

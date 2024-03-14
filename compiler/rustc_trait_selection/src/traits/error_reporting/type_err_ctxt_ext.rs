@@ -20,10 +20,9 @@ use crate::traits::{
     SelectionError, SignatureMismatch, TraitNotObjectSafe,
 };
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
-use rustc_errors::{
-    codes::*, pluralize, struct_span_code_err, Applicability, Diag, ErrorGuaranteed, FatalError,
-    MultiSpan, StashKey, StringPart,
-};
+use rustc_errors::codes::*;
+use rustc_errors::{pluralize, struct_span_code_err, Applicability, MultiSpan, StringPart};
+use rustc_errors::{Diag, EmissionGuarantee, ErrorGuaranteed, FatalError, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Namespace, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -60,6 +59,22 @@ pub use rustc_infer::traits::error_reporting::*;
 pub enum OverflowCause<'tcx> {
     DeeplyNormalize(ty::AliasTy<'tcx>),
     TraitSolver(ty::Predicate<'tcx>),
+}
+
+pub fn suggest_new_overflow_limit<'tcx, G: EmissionGuarantee>(
+    tcx: TyCtxt<'tcx>,
+    err: &mut Diag<'_, G>,
+) {
+    let suggested_limit = match tcx.recursion_limit() {
+        Limit(0) => Limit(2),
+        limit => limit * 2,
+    };
+    err.help(format!(
+        "consider increasing the recursion limit by adding a \
+         `#![recursion_limit = \"{}\"]` attribute to your crate (`{}`)",
+        suggested_limit,
+        tcx.crate_name(LOCAL_CRATE),
+    ));
 }
 
 #[extension(pub trait TypeErrCtxtExt<'tcx>)]
@@ -263,7 +278,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         };
 
         if suggest_increasing_limit {
-            self.suggest_new_overflow_limit(&mut err);
+            suggest_new_overflow_limit(self.tcx, &mut err);
         }
 
         err
@@ -303,19 +318,6 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         );
     }
 
-    fn suggest_new_overflow_limit(&self, err: &mut Diag<'_>) {
-        let suggested_limit = match self.tcx.recursion_limit() {
-            Limit(0) => Limit(2),
-            limit => limit * 2,
-        };
-        err.help(format!(
-            "consider increasing the recursion limit by adding a \
-             `#![recursion_limit = \"{}\"]` attribute to your crate (`{}`)",
-            suggested_limit,
-            self.tcx.crate_name(LOCAL_CRATE),
-        ));
-    }
-
     /// Reports that a cycle was detected which led to overflow and halts
     /// compilation. This is equivalent to `report_overflow_obligation` except
     /// that we can give a more helpful error message (and, in particular,
@@ -335,12 +337,16 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         );
     }
 
-    fn report_overflow_no_abort(&self, obligation: PredicateObligation<'tcx>) -> ErrorGuaranteed {
+    fn report_overflow_no_abort(
+        &self,
+        obligation: PredicateObligation<'tcx>,
+        suggest_increasing_limit: bool,
+    ) -> ErrorGuaranteed {
         let obligation = self.resolve_vars_if_possible(obligation);
         let mut err = self.build_overflow_error(
             OverflowCause::TraitSolver(obligation.predicate),
             obligation.cause.span,
-            true,
+            suggest_increasing_limit,
         );
         self.note_obligation_cause(&mut err, &obligation);
         self.point_at_returns_when_relevant(&mut err, &obligation);
@@ -389,6 +395,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     kind: _,
                 } = *obligation.cause.code()
                 {
+                    debug!("ObligationCauseCode::CompareImplItemObligation");
                     return self.report_extra_impl_obligation(
                         span,
                         impl_item_def_id,
@@ -439,10 +446,12 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                                 )
                             })
                             .unwrap_or_default();
-                        let file_note = file.map(|file| format!(
+                        let file_note = file.as_ref().map(|file| format!(
                             "the full trait has been written to '{}'",
                             file.display(),
                         ));
+
+                        let mut long_ty_file = None;
 
                         let OnUnimplementedNote {
                             message,
@@ -450,7 +459,8 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                             notes,
                             parent_label,
                             append_const_msg,
-                        } = self.on_unimplemented_note(trait_ref, &obligation);
+                        } = self.on_unimplemented_note(trait_ref, &obligation, &mut long_ty_file);
+
                         let have_alt_message = message.is_some() || label.is_some();
                         let is_try_conversion = self.is_try_conversion(span, trait_ref.def_id());
                         let is_unsize =
@@ -505,6 +515,13 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
 
                         let mut err = struct_span_code_err!(self.dcx(), span, E0277, "{}", err_msg);
 
+                        if let Some(long_ty_file) = long_ty_file {
+                            err.note(format!(
+                                "the full name for the type has been written to '{}'",
+                                long_ty_file.display(),
+                            ));
+                            err.note("consider using `--verbose` to print the full type name to the console");
+                        }
                         let mut suggested = false;
                         if is_try_conversion {
                             suggested = self.try_conversion_context(&obligation, trait_ref.skip_binder(), &mut err);
@@ -751,6 +768,8 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         {
                             return err.emit();
                         }
+
+
 
                         err
                     }
@@ -1422,11 +1441,11 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             FulfillmentErrorCode::ProjectionError(ref e) => {
                 self.report_projection_error(&error.obligation, e)
             }
-            FulfillmentErrorCode::Ambiguity { overflow: false } => {
+            FulfillmentErrorCode::Ambiguity { overflow: None } => {
                 self.maybe_report_ambiguity(&error.obligation)
             }
-            FulfillmentErrorCode::Ambiguity { overflow: true } => {
-                self.report_overflow_no_abort(error.obligation.clone())
+            FulfillmentErrorCode::Ambiguity { overflow: Some(suggest_increasing_limit) } => {
+                self.report_overflow_no_abort(error.obligation.clone(), suggest_increasing_limit)
             }
             FulfillmentErrorCode::SubtypeError(ref expected_found, ref err) => self
                 .report_mismatched_types(
@@ -1528,6 +1547,12 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         | ObligationCauseCode::Coercion { .. }
                 );
 
+                let (expected, actual) = if is_normalized_term_expected {
+                    (normalized_term, data.term)
+                } else {
+                    (data.term, normalized_term)
+                };
+
                 // constrain inference variables a bit more to nested obligations from normalize so
                 // we can have more helpful errors.
                 //
@@ -1535,13 +1560,9 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 // since the normalization is just done to improve the error message.
                 let _ = ocx.select_where_possible();
 
-                if let Err(new_err) = ocx.eq_exp(
-                    &obligation.cause,
-                    obligation.param_env,
-                    is_normalized_term_expected,
-                    normalized_term,
-                    data.term,
-                ) {
+                if let Err(new_err) =
+                    ocx.eq(&obligation.cause, obligation.param_env, expected, actual)
+                {
                     (Some((data, is_normalized_term_expected, normalized_term, data.term)), new_err)
                 } else {
                     (None, error.err)
@@ -1908,6 +1929,9 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                             ct_op: |ct| ct.normalize(self.tcx, ty::ParamEnv::empty()),
                         },
                     );
+                    if cand.references_error() {
+                        return false;
+                    }
                     err.highlighted_help(vec![
                         StringPart::normal(format!("the trait `{}` ", cand.print_trait_sugared())),
                         StringPart::highlighted("is"),
@@ -1932,7 +1956,8 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         }
 
         let other = if other { "other " } else { "" };
-        let report = |candidates: Vec<TraitRef<'tcx>>, err: &mut Diag<'_>| {
+        let report = |mut candidates: Vec<TraitRef<'tcx>>, err: &mut Diag<'_>| {
+            candidates.retain(|tr| !tr.references_error());
             if candidates.is_empty() {
                 return false;
             }

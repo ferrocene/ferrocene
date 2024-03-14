@@ -21,12 +21,13 @@ const FERROCENE_EXTRA_ROOT_ENTRY_LIMIT: usize = 1;
 const ENTRY_LIMIT: usize = 900;
 // FIXME: The following limits should be reduced eventually.
 
-const ISSUES_ENTRY_LIMIT: usize = 1781;
+const ISSUES_ENTRY_LIMIT: usize = 1750;
 const ROOT_ENTRY_LIMIT: usize = 872;
 
 const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
     "rs",     // test source files
     "stderr", // expected stderr file, corresponds to a rs file
+    "svg",    // expected svg file, corresponds to a rs file, equivalent to stderr
     "stdout", // expected stdout file, corresponds to a rs file
     "fixed",  // expected source file after applying fixes
     "md",     // test directory descriptions
@@ -47,6 +48,7 @@ const EXTENSION_EXCEPTION_PATHS: &[&str] = &[
     "tests/ui/macros/syntax-extension-source-utils-files/includeme.fragment", // more include
     "tests/ui/proc-macro/auxiliary/included-file.txt", // more include
     "tests/ui/invalid/foo.natvis.xml", // sample debugger visualizer
+    "tests/ui/sanitizer/dataflow-abilist.txt", // dataflow sanitizer ABI list file
     "tests/ui/shell-argfiles/shell-argfiles.args", // passing args via a file
     "tests/ui/shell-argfiles/shell-argfiles-badquotes.args", // passing args via a file
     "tests/ui/shell-argfiles/shell-argfiles-via-argfile-shell.args", // passing args via a file

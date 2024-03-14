@@ -136,7 +136,9 @@ ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
-ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -C target-feature=+fp64,+d32,+neon"
+
+# Automatic CFLAGs do not work for some targets.
+ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"
 
 RUN mkdir /home/ci \
     && addgroup --gid 1000 ci \

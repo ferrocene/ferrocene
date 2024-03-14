@@ -86,14 +86,16 @@ fn check_target(
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
-        let should_run = if ctx.target.triple == env!("SELFTEST_TARGET") {
-            program.executable_output
-        } else {
-            None
-        };
         expected_artifacts.add(program.expected_artifacts);
-        compile(&ctx, program, should_run)?;
+        compile(&ctx, program)?;
         expected_artifacts.check(program.name)?;
+
+        let should_run = (ctx.target.triple == env!("SELFTEST_TARGET"))
+            .then_some(program.executable_output)
+            .flatten();
+        if let Some(expected_output) = should_run {
+            run(&ctx, program, expected_output)?
+        }
 
         reporter.success(&format!(
             "compiled {}sample program `{}` for target {}",
@@ -110,11 +112,7 @@ fn create_tmp_compilation_dir(path: &Path) -> Result<(), Error> {
         .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })
 }
 
-fn compile(
-    ctx: &Context<'_>,
-    program: &SampleProgram,
-    expected_output: Option<&[u8]>,
-) -> Result<(), Error> {
+fn compile(ctx: &Context<'_>, program: &SampleProgram) -> Result<(), Error> {
     let program_path = ctx.source_dir.join(program.name);
     std::fs::write(&program_path, program.contents).map_err(|error| {
         Error::WritingSampleProgramFailed {
@@ -143,26 +141,27 @@ fn compile(
     run_command(&mut cmd)
         .map_err(|error| Error::sample_program_compilation_failed(program.name, error))?;
 
-    if let Some(expected_output) = expected_output {
-        // where is it
-        let bin_name = program.name.replace(".rs", "");
-        let bin_path = ctx.output_dir.join(bin_name);
-        // now try and execute it
-        let mut cmd = Command::new(bin_path);
-        let output = cmd.output().map_err(|error| Error::RunningSampleProgramFailed {
-            name: program.name.into(),
-            error,
-        })?;
-        if output.stdout != expected_output {
-            return Err(Error::SampleProgramOutputWrong {
-                name: program.name.into(),
-                expected: expected_output.to_vec(),
-                found: output.stdout,
-            });
-        };
-    }
-
     Ok(())
+}
+
+fn run(ctx: &Context<'_>, program: &SampleProgram, expected_output: &[u8]) -> Result<(), Error> {
+    // where is it
+    let bin_name = program.name.replace(".rs", "");
+    let bin_path = ctx.output_dir.join(bin_name);
+    // now try and execute it
+    let mut cmd = Command::new(bin_path);
+    let output = cmd
+        .output()
+        .map_err(|error| Error::RunningSampleProgramFailed { name: program.name.into(), error })?;
+    if output.stdout != expected_output {
+        Err(Error::SampleProgramOutputWrong {
+            name: program.name.into(),
+            expected: expected_output.to_vec(),
+            found: output.stdout,
+        })
+    } else {
+        Ok(())
+    }
 }
 
 struct ExpectedFiles {
@@ -417,7 +416,7 @@ mod tests {
             executable_output: None,
         };
 
-        match compile(&context, &program, None) {
+        match compile(&context, &program) {
             Err(Error::WritingSampleProgramFailed { name, dest, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(tempdir.path().join("missing").join("example.rs"), dest);
@@ -462,7 +461,7 @@ mod tests {
             executable_output: None,
         };
 
-        match compile(&context, &program, None) {
+        match compile(&context, &program) {
             Err(Error::SampleProgramCompilationFailed { name, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(rustc, error.path);
@@ -541,6 +540,6 @@ mod tests {
             executable_output: None,
         };
 
-        compile(&context, &program, None).unwrap();
+        compile(&context, &program).unwrap();
     }
 }

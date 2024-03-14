@@ -28,47 +28,47 @@ fn check_binary(
     let bin_dir = sysroot.join("bin");
     let bin = bin_dir.join(name);
 
-    match std::fs::metadata(&bin) {
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                return Err(Error::MissingBinary { directory: bin_dir, name: name.into() });
-            }
-            if metadata.permissions().mode() & 0o555 != 0o555 {
-                return Err(Error::WrongBinaryPermissions { path: bin });
-            }
-        }
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            return Err(Error::MissingBinary { directory: bin_dir, name: name.into() });
-        }
-        Err(err) => return Err(Error::MetadataFetchFailed { path: bin, error: err }),
-    }
-
-    let version_command_output = run_command(Command::new(&bin).arg("-vV")).map_err(|error| {
-        Error::VersionFetchFailed { binary: name.into(), error: Box::new(error) }
-    })?;
-    let version = parse_version_output(&version_command_output.stdout)
-        .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })?;
-
-    for (field, expected, found) in [
-        ("host", env!("SELFTEST_TARGET"), version.host),
-        ("release", env!("CFG_RELEASE"), version.release),
-        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
-    ] {
-        if expected != found {
-            return Err(Error::BinaryVersionMismatch {
-                binary: name.into(),
-                field: field.into(),
-                expected: expected.into(),
-                found: found.into(),
-            });
-        }
-    }
+    check_file(&bin, &bin_dir, name)?;
+    let version = get_version(&bin, name)?;
+    check_version(version, hash, name)?;
 
     reporter.success(&format!("binary {name} is valid"));
     Ok(())
 }
 
-fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
+/// Check that `bin` is a file and has the correct permissions.
+fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
+    /// Minimum file permission the binary should have.
+    ///
+    /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    const MODE: u32 = 0o555;
+
+    match std::fs::metadata(bin) {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                Err(Error::MissingBinary { directory: bin_dir.to_owned(), name: name.to_owned() })
+            } else if metadata.permissions().mode() & MODE != MODE {
+                Err(Error::WrongBinaryPermissions { path: bin.to_owned() })
+            } else {
+                Ok(())
+            }
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            Err(Error::MissingBinary { directory: bin_dir.to_owned(), name: name.to_owned() })
+        }
+        Err(err) => Err(Error::MetadataFetchFailed { path: bin.to_owned(), error: err }),
+    }
+}
+
+fn get_version(bin: &Path, name: &str) -> Result<VersionOutput, Error> {
+    let version_command_output = run_command(Command::new(bin).arg("-vV")).map_err(|error| {
+        Error::VersionFetchFailed { binary: name.into(), error: Box::new(error) }
+    })?;
+    parse_version_output(&version_command_output.stdout)
+        .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })
+}
+
+fn parse_version_output(output: &str) -> Option<VersionOutput> {
     let mut release = None;
     let mut commit_hash = None;
     let mut host = None;
@@ -80,9 +80,9 @@ fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
 
         let Some((key, value)) = line.split_once(": ") else { continue };
         match key {
-            "host" => host = Some(value),
-            "commit-hash" => commit_hash = Some(value),
-            "release" => release = Some(value),
+            "host" => host = Some(value.to_string()),
+            "commit-hash" => commit_hash = Some(value.to_string()),
+            "release" => release = Some(value.to_string()),
             _ => {}
         }
     }
@@ -90,12 +90,29 @@ fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
     Some(VersionOutput { release: release?, commit_hash: commit_hash?, host: host? })
 }
 
+fn check_version(version: VersionOutput, hash: CommitHashOf, name: &str) -> Result<(), Error> {
+    for (field, expected, found) in [
+        ("host", env!("SELFTEST_TARGET"), version.host),
+        ("release", env!("CFG_RELEASE"), version.release),
+        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
+    ] {
+        if expected != found {
+            return Err(Error::BinaryVersionMismatch {
+                binary: name.into(),
+                field: field.into(),
+                expected: expected.into(),
+                found,
+            });
+        }
+    }
+    Ok(())
+}
+
 #[derive(Debug)]
-#[allow(dead_code)]
-struct VersionOutput<'a> {
-    release: &'a str,
-    commit_hash: &'a str,
-    host: &'a str,
+struct VersionOutput {
+    release: String,
+    commit_hash: String,
+    host: String,
 }
 
 fn check_optional_binary(

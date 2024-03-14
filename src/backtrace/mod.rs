@@ -125,7 +125,7 @@ impl fmt::Debug for Frame {
     }
 }
 
-#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(miri)))]
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix"))]
 mod sgx_image_base {
 
     #[cfg(not(feature = "std"))]
@@ -160,12 +160,7 @@ mod sgx_image_base {
     pub(crate) use imp::get_image_base;
 }
 
-#[cfg(all(
-    target_env = "sgx",
-    target_vendor = "fortanix",
-    not(feature = "std"),
-    not(miri)
-))]
+#[cfg(all(target_env = "sgx", target_vendor = "fortanix", not(feature = "std")))]
 pub use sgx_image_base::imp::set_image_base;
 
 cfg_if::cfg_if! {

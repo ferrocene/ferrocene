@@ -81,7 +81,12 @@ build_llvm_tarball() {
     # The llvm/build directory contains a *copy* of all the binaries, plus the
     # intermediate object files and other build artifacts we don't need. To
     # save space in the cached tarball remove it.
-    rm -rf "build/${FERROCENE_HOST}/llvm/build"
+    #
+    # On Windows, we skip this pruning since it *does* need some intermediate
+    # object files. (Notably, `llvm/Config/llvm-config.h`)
+    if [[ "${OSTYPE}" != "msys" ]]; then
+        rm -rf "build/${FERROCENE_HOST}/llvm/build"
+    fi
 
     # The LLVM distribution as of 2021-08-23 contains more than 1GB of
     # binaries, but we only need a small subset of them. This "deletes" the

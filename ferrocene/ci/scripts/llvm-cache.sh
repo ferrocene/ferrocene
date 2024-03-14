@@ -101,16 +101,25 @@ build_llvm_tarball() {
 
         name="$(basename "${file}")"
         keep="no"
+        
         for wanted in "${KEEP_LLVM_BINARIES[@]}"; do
-            if [[ "${name}" == "${wanted}" ]]; then
-                keep="yes"
-                break
+            # Windows will postfix binaries with `.exe`
+            if [[ "${OSTYPE}" = "msys" ]]; then
+                if [[ "${name}" == "${wanted}.exe" ]]; then
+                    keep="yes"
+                    break
+                fi
+            else
+                if [[ "${name}" == "${wanted}" ]]; then
+                    keep="yes"
+                    break
+                fi
             fi
         done
         if [[ "${keep}" == "no" ]]; then
             chmod -x "${file}"
-            echo "#!/bin/false" > "${file}"
-            echo "File soft-removed by ferrocene/ci/scripts/build-and-cache-llvm.sh" >> "${file}"
+            echo "#!/bin/sh" > "${file}"
+            echo "echo 'File soft-removed by ferrocene/ci/scripts/build-and-cache-llvm.sh'" >> "${file}"
         fi
     done
 

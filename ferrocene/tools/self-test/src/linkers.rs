@@ -396,23 +396,21 @@ fn check_compiler_linker_args(
     // parse the file
     let args: Vec<String> = args_str.lines().map(|s| s.to_owned()).collect();
 
-    // an empty file would be bad
     if args.is_empty() {
-        return Err(Error::WrongLinkerArgs {
+        // an empty file would be bad
+        Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::EmptyArgsFile,
-        });
-    };
-
-    // Check the C compiler passed on our -Wl,<arg> argument exactly once.
-    if args.iter().filter(|s| s.as_str() == RANDOM_LINKER_ARG).count() != 1 {
-        return Err(Error::WrongLinkerArgs {
+        })
+    } else if args.iter().filter(|s| s.as_str() == RANDOM_LINKER_ARG).count() != 1 {
+        // Check the C compiler passed on our -Wl,<arg> argument exactly once.
+        Err(Error::WrongLinkerArgs {
             target: target.to_owned(),
             kind: LinkerArgsErrorKind::MissingArg,
-        });
+        })
+    } else {
+        Ok(args)
     }
-
-    Ok(args)
 }
 
 /// Look for the bundled `rust-lld` program in the given sysroot.

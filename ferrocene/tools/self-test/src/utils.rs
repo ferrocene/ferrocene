@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
-use crate::Environment;
-use std::fmt::Display;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+
+use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
+use crate::Environment;
 
 pub(crate) fn run_command(command: &mut Command) -> Result<CommandOutput, CommandError> {
     command.stdout(Stdio::piped());
@@ -59,28 +59,6 @@ pub(crate) fn find_binary_in_path(
         }
     }
     Err(FindBinaryInPathError::MissingBinary { name: name.into() })
-}
-
-pub(crate) struct DisplayList<'a, T: Display>(pub(crate) &'a [T]);
-
-impl<T: Display> Display for DisplayList<'_, T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.0.is_empty() {
-            return write!(f, "<empty>");
-        }
-
-        for (idx, item) in self.0.iter().enumerate() {
-            Display::fmt(item, f)?;
-            if idx == self.0.len() - 1 {
-                // Nothing
-            } else if idx == self.0.len() - 2 {
-                f.write_str(" and ")?;
-            } else {
-                f.write_str(", ")?;
-            }
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
@@ -171,17 +149,5 @@ mod tests {
 
     fn path_env(paths: &[&Path]) -> Environment {
         Environment { path: Some(std::env::join_paths(paths).unwrap()) }
-    }
-
-    #[test]
-    fn test_display_list() {
-        assert_eq!("<empty>", DisplayList::<&str>(&[]).to_string());
-        assert_eq!("foo", DisplayList(&["foo"]).to_string());
-        assert_eq!("foo and bar", DisplayList(&["foo", "bar"]).to_string());
-        assert_eq!("foo, bar and baz", DisplayList(&["foo", "bar", "baz"]).to_string());
-        assert_eq!(
-            "foo, bar, baz and quux",
-            DisplayList(&["foo", "bar", "baz", "quux"]).to_string()
-        );
     }
 }

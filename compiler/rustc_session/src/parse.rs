@@ -168,6 +168,7 @@ pub fn add_feature_diagnostics<G: EmissionGuarantee>(
 /// This variant allows you to control whether it is a library or language feature.
 /// Almost always, you want to use this for a language feature. If so, prefer
 /// `add_feature_diagnostics`.
+#[allow(rustc::diagnostic_outside_of_impl)] // FIXME
 pub fn add_feature_diagnostics_for_issue<G: EmissionGuarantee>(
     err: &mut Diag<'_, G>,
     sess: &Session,
@@ -265,14 +266,20 @@ impl ParseSess {
         }
     }
 
-    pub fn with_silent_emitter(fatal_note: String) -> Self {
-        let fallback_bundle = fallback_fluent_bundle(Vec::new(), false);
+    pub fn with_silent_emitter(locale_resources: Vec<&'static str>, fatal_note: String) -> Self {
+        let fallback_bundle = fallback_fluent_bundle(locale_resources, false);
         let sm = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-        let emitter =
-            Box::new(HumanEmitter::new(stderr_destination(ColorConfig::Auto), fallback_bundle));
+        let emitter = Box::new(HumanEmitter::new(
+            stderr_destination(ColorConfig::Auto),
+            fallback_bundle.clone(),
+        ));
         let fatal_dcx = DiagCtxt::new(emitter);
-        let dcx =
-            DiagCtxt::new(Box::new(SilentEmitter { fatal_dcx, fatal_note })).disable_warnings();
+        let dcx = DiagCtxt::new(Box::new(SilentEmitter {
+            fallback_bundle,
+            fatal_dcx,
+            fatal_note: Some(fatal_note),
+        }))
+        .disable_warnings();
         ParseSess::with_dcx(dcx, sm)
     }
 

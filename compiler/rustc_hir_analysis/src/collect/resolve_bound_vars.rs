@@ -6,7 +6,8 @@
 //! the types in HIR to identify late-bound lifetimes and assign their Debruijn indices. This file
 //! is also responsible for assigning their semantics to implicit lifetimes in trait objects.
 
-use rustc_ast::walk_list;
+use core::ops::ControlFlow;
+use rustc_ast::visit::walk_list;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_errors::{codes::*, struct_span_code_err};
 use rustc_hir as hir;
@@ -417,23 +418,18 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
         {
             if let &hir::ClosureBinder::For { span: for_sp, .. } = binder {
                 fn span_of_infer(ty: &hir::Ty<'_>) -> Option<Span> {
-                    struct V(Option<Span>);
-
+                    struct V;
                     impl<'v> Visitor<'v> for V {
-                        fn visit_ty(&mut self, t: &'v hir::Ty<'v>) {
-                            match t.kind {
-                                _ if self.0.is_some() => (),
-                                hir::TyKind::Infer => {
-                                    self.0 = Some(t.span);
-                                }
-                                _ => intravisit::walk_ty(self, t),
+                        type Result = ControlFlow<Span>;
+                        fn visit_ty(&mut self, t: &'v hir::Ty<'v>) -> Self::Result {
+                            if matches!(t.kind, hir::TyKind::Infer) {
+                                ControlFlow::Break(t.span)
+                            } else {
+                                intravisit::walk_ty(self, t)
                             }
                         }
                     }
-
-                    let mut v = V(None);
-                    v.visit_ty(ty);
-                    v.0
+                    V.visit_ty(ty).break_value()
                 }
 
                 let infer_in_rt_sp = match fn_decl.output {
@@ -514,38 +510,11 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 // These sorts of items have no lifetime parameters at all.
                 intravisit::walk_item(self, item);
             }
-            hir::ItemKind::OpaqueTy(hir::OpaqueTy {
-                origin: hir::OpaqueTyOrigin::TyAlias { .. },
-                ..
-            }) => {
-                // Opaque types are visited when we visit the
-                // `TyKind::OpaqueDef`, so that they have the lifetimes from
-                // their parent opaque_ty in scope.
-                //
-                // The core idea here is that since OpaqueTys are generated with the impl Trait as
-                // their owner, we can keep going until we find the Item that owns that. We then
-                // conservatively add all resolved lifetimes. Otherwise we run into problems in
-                // cases like `type Foo<'a> = impl Bar<As = impl Baz + 'a>`.
-                let parent_item = self.tcx.hir().get_parent_item(item.hir_id());
-                let resolved_lifetimes: &ResolveBoundVars =
-                    self.tcx.resolve_bound_vars(parent_item);
-                // We need to add *all* deps, since opaque tys may want them from *us*
-                for (&owner, defs) in resolved_lifetimes.defs.iter() {
-                    defs.iter().for_each(|(&local_id, region)| {
-                        self.map.defs.insert(hir::HirId { owner, local_id }, *region);
-                    });
-                }
-                for (&owner, late_bound_vars) in resolved_lifetimes.late_bound_vars.iter() {
-                    late_bound_vars.iter().for_each(|(&local_id, late_bound_vars)| {
-                        self.record_late_bound_vars(
-                            hir::HirId { owner, local_id },
-                            late_bound_vars.clone(),
-                        );
-                    });
-                }
-            }
             hir::ItemKind::OpaqueTy(&hir::OpaqueTy {
-                origin: hir::OpaqueTyOrigin::FnReturn(parent) | hir::OpaqueTyOrigin::AsyncFn(parent),
+                origin:
+                    hir::OpaqueTyOrigin::FnReturn(parent)
+                    | hir::OpaqueTyOrigin::AsyncFn(parent)
+                    | hir::OpaqueTyOrigin::TyAlias { parent, .. },
                 generics,
                 ..
             }) => {
@@ -683,26 +652,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
                 //                                      the opaque_ty generics
                 let opaque_ty = self.tcx.hir().item(item_id);
                 match &opaque_ty.kind {
-                    hir::ItemKind::OpaqueTy(hir::OpaqueTy {
-                        origin: hir::OpaqueTyOrigin::TyAlias { .. },
-                        ..
-                    }) => {
-                        intravisit::walk_ty(self, ty);
-
-                        // Elided lifetimes and late-bound lifetimes (from the parent)
-                        // are not allowed in non-return position impl Trait
-                        let scope = Scope::LateBoundary {
-                            s: &Scope::TraitRefBoundary { s: self.scope },
-                            what: "type alias impl trait",
-                        };
-                        self.with(scope, |this| intravisit::walk_item(this, opaque_ty));
-
-                        return;
-                    }
-                    hir::ItemKind::OpaqueTy(hir::OpaqueTy {
-                        origin: hir::OpaqueTyOrigin::FnReturn(..) | hir::OpaqueTyOrigin::AsyncFn(..),
-                        ..
-                    }) => {}
+                    hir::ItemKind::OpaqueTy(hir::OpaqueTy { origin: _, .. }) => {}
                     i => bug!("`impl Trait` pointed to non-opaque type?? {:#?}", i),
                 };
 
@@ -1964,31 +1914,26 @@ fn is_late_bound_map(
         arg_is_constrained: Box<[bool]>,
     }
 
-    use std::ops::ControlFlow;
     use ty::Ty;
     impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for ConstrainedCollectorPostAstConv {
-        fn visit_ty(&mut self, t: Ty<'tcx>) -> ControlFlow<!> {
+        fn visit_ty(&mut self, t: Ty<'tcx>) {
             match t.kind() {
                 ty::Param(param_ty) => {
                     self.arg_is_constrained[param_ty.index as usize] = true;
                 }
-                ty::Alias(ty::Projection | ty::Inherent, _) => return ControlFlow::Continue(()),
+                ty::Alias(ty::Projection | ty::Inherent, _) => return,
                 _ => (),
             }
             t.super_visit_with(self)
         }
 
-        fn visit_const(&mut self, _: ty::Const<'tcx>) -> ControlFlow<!> {
-            ControlFlow::Continue(())
-        }
+        fn visit_const(&mut self, _: ty::Const<'tcx>) {}
 
-        fn visit_region(&mut self, r: ty::Region<'tcx>) -> ControlFlow<!> {
+        fn visit_region(&mut self, r: ty::Region<'tcx>) {
             debug!("r={:?}", r.kind());
             if let ty::RegionKind::ReEarlyParam(region) = r.kind() {
                 self.arg_is_constrained[region.index as usize] = true;
             }
-
-            ControlFlow::Continue(())
         }
     }
 

@@ -448,7 +448,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses a block. No inner attributes are allowed.
-    pub(super) fn parse_block(&mut self) -> PResult<'a, P<Block>> {
+    pub fn parse_block(&mut self) -> PResult<'a, P<Block>> {
         let (attrs, block) = self.parse_inner_attrs_and_block()?;
         if let [.., last] = &*attrs {
             self.error_on_forbidden_inner_attr(
@@ -787,13 +787,17 @@ impl<'a> Parser<'a> {
                             let suggest_eq = if self.token.kind == token::Dot
                                 && let _ = self.bump()
                                 && let mut snapshot = self.create_snapshot_for_diagnostic()
-                                && let Ok(_) = snapshot.parse_dot_suffix_expr(
-                                    colon_sp,
-                                    self.mk_expr_err(
+                                && let Ok(_) = snapshot
+                                    .parse_dot_suffix_expr(
                                         colon_sp,
-                                        self.dcx().delayed_bug("error during `:` -> `=` recovery"),
-                                    ),
-                                ) {
+                                        self.mk_expr_err(
+                                            colon_sp,
+                                            self.dcx()
+                                                .delayed_bug("error during `:` -> `=` recovery"),
+                                        ),
+                                    )
+                                    .map_err(Diag::cancel)
+                            {
                                 true
                             } else if let Some(op) = self.check_assoc_op()
                                 && op.node.can_continue_expr_unambiguously()

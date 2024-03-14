@@ -688,15 +688,6 @@ fn find_tests_in_dir(
         return Ok(());
     }
 
-<<<<<<< HEAD
-    if config.mode == Mode::RunMake && dir.join("Makefile").exists() {
-        let paths = TestPaths {
-            file: dir.to_path_buf(),
-            relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
-        };
-        on_test_found(&paths);
-        return Ok(());
-=======
     if config.mode == Mode::RunMake {
         if dir.join("Makefile").exists() && dir.join("rmake.rs").exists() {
             return Err(io::Error::other(
@@ -709,10 +700,9 @@ fn find_tests_in_dir(
                 file: dir.to_path_buf(),
                 relative_dir: relative_dir_path.parent().unwrap().to_path_buf(),
             };
-            tests.extend(make_test(config, cache, &paths, inputs, poisoned));
+            on_test_found(&paths);
             return Ok(());
         }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     // Add each `.rs` file as a test, and recurse further on any

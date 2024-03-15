@@ -3,7 +3,6 @@
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::ferrocene_channel;
 use crate::ferrocene::sign::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::collections::HashMap;
@@ -237,8 +236,6 @@ impl<P: Step> Step for SphinxBook<P> {
                 "rust_version={}",
                 std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
             ))
-            .arg("-D")
-            .arg(format!("channel={}", ferrocene_channel(builder, &ferrocene_version)))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
 

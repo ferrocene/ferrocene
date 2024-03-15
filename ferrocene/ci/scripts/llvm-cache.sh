@@ -131,7 +131,7 @@ build_llvm_tarball() {
     # Rustbuild is looking in `llvm/build/bin` instead of `bin` when checking
     # for an existing `llvm-config` binary. Create a symlink to make sure it
     # can still detect the existing build.
-    mkdir "build/${FERROCENE_HOST}/llvm/build"
+    mkdir -p "build/${FERROCENE_HOST}/llvm/build"
     ln -s ../bin "build/${FERROCENE_HOST}/llvm/build/bin"
 
     # Call `zstd` separately to be able to use all cores available (`-T0`) and

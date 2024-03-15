@@ -7,9 +7,14 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
-MAX_MERGES_PER_PR=30
 DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
+
+# Set a default max of merges per PR to 30, if it was not overridden in the
+# environment.
+if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
+    MAX_MERGES_PER_PR=30
+fi
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #

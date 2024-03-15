@@ -1237,6 +1237,16 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         }
     }
 
+    pub fn codegen_block_as_unreachable(&mut self, bb: mir::BasicBlock) {
+        let llbb = match self.try_llbb(bb) {
+            Some(llbb) => llbb,
+            None => return,
+        };
+        let bx = &mut Bx::build(self.cx, llbb);
+        debug!("codegen_block_as_unreachable({:?})", bb);
+        bx.unreachable();
+    }
+
     fn codegen_terminator(
         &mut self,
         bx: &mut Bx,
@@ -1597,7 +1607,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         let funclet;
         let llbb;
         let mut bx;
-        if base::wants_msvc_seh(self.cx.sess()) {
+        if base::wants_new_eh_instructions(self.cx.sess()) {
             // This is a basic block that we're aborting the program for,
             // notably in an `extern` function. These basic blocks are inserted
             // so that we assert that `extern` functions do indeed not panic,

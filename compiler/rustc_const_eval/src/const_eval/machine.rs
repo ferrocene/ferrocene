@@ -8,6 +8,7 @@ use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::fx::IndexEntry;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::LocalDefId;
 use rustc_hir::LangItem;
 use rustc_middle::mir;
 use rustc_middle::mir::AssertMessage;
@@ -59,8 +60,10 @@ pub struct CompileTimeInterpreter<'mir, 'tcx> {
     /// Whether to check alignment during evaluation.
     pub(super) check_alignment: CheckAlignment,
 
-    /// Used to prevent reads from a static's base allocation, as that may allow for self-initialization.
-    pub(crate) static_root_alloc_id: Option<AllocId>,
+    /// If `Some`, we are evaluating the initializer of the static with the given `LocalDefId`,
+    /// storing the result in the given `AllocId`.
+    /// Used to prevent reads from a static's base allocation, as that may allow for self-initialization loops.
+    pub(crate) static_root_ids: Option<(AllocId, LocalDefId)>,
 }
 
 #[derive(Copy, Clone)]
@@ -94,7 +97,7 @@ impl<'mir, 'tcx> CompileTimeInterpreter<'mir, 'tcx> {
             stack: Vec::new(),
             can_access_mut_global,
             check_alignment,
-            static_root_alloc_id: None,
+            static_root_ids: None,
         }
     }
 }
@@ -227,7 +230,7 @@ impl<'mir, 'tcx: 'mir> CompileTimeEvalContext<'mir, 'tcx> {
         if self.tcx.has_attr(def_id, sym::rustc_const_panic_str)
             || Some(def_id) == self.tcx.lang_items().begin_panic_fn()
         {
-            let args = self.copy_fn_args(args)?;
+            let args = self.copy_fn_args(args);
             // &str or &&str
             assert!(args.len() == 1);
 
@@ -243,18 +246,16 @@ impl<'mir, 'tcx: 'mir> CompileTimeEvalContext<'mir, 'tcx> {
         } else if Some(def_id) == self.tcx.lang_items().panic_fmt() {
             // For panic_fmt, call const_panic_fmt instead.
             let const_def_id = self.tcx.require_lang_item(LangItem::ConstPanicFmt, None);
-            let new_instance = ty::Instance::resolve(
+            let new_instance = ty::Instance::expect_resolve(
                 *self.tcx,
                 ty::ParamEnv::reveal_all(),
                 const_def_id,
                 instance.args,
-            )
-            .unwrap()
-            .unwrap();
+            );
 
             return Ok(Some(new_instance));
         } else if Some(def_id) == self.tcx.lang_items().align_offset_fn() {
-            let args = self.copy_fn_args(args)?;
+            let args = self.copy_fn_args(args);
             // For align_offset, we replace the function call if the pointer has no address.
             match self.align_offset(instance, &args, dest, ret)? {
                 ControlFlow::Continue(()) => return Ok(Some(instance)),
@@ -751,7 +752,7 @@ impl<'mir, 'tcx> interpret::Machine<'mir, 'tcx> for CompileTimeInterpreter<'mir,
         ecx: &InterpCx<'mir, 'tcx, Self>,
         alloc_id: AllocId,
     ) -> InterpResult<'tcx> {
-        if Some(alloc_id) == ecx.machine.static_root_alloc_id {
+        if Some(alloc_id) == ecx.machine.static_root_ids.map(|(id, _)| id) {
             Err(ConstEvalErrKind::RecursiveStatic.into())
         } else {
             Ok(())

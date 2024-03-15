@@ -41,7 +41,6 @@ use crate::core::builder::Kind;
 use crate::core::config::{flags, LldMode};
 use crate::core::config::{DryRun, Target};
 use crate::core::config::{LlvmLibunwind, TargetSelection};
-use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::exec::{BehaviorOnFailure, BootstrapCommand, OutputMode};
 use crate::utils::helpers::{self, dir_is_empty, exe, libdir, mtime, output, symlink_dir};
 
@@ -66,6 +65,7 @@ const LLVM_TOOLS: &[&str] = &[
     "llvm-ar",       // used for creating and modifying archive files
     "llvm-as",       // used to convert LLVM assembly to LLVM bitcode
     "llvm-dis",      // used to disassemble LLVM bitcode
+    "llvm-link",     // Used to link LLVM bitcode
     "llc",           // used to compile LLVM bytecode
     "opt",           // used to optimize LLVM bytecode
 ];
@@ -173,9 +173,11 @@ pub struct Build {
     doc_tests: DocTests,
     verbosity: usize,
 
-    // Targets for which to build
+    /// Build triple for the pre-compiled snapshot compiler.
     build: TargetSelection,
+    /// Which triples to produce a compiler toolchain for.
     hosts: Vec<TargetSelection>,
+    /// Which triples to build libraries (core/alloc/std/test/proc_macro) for.
     targets: Vec<TargetSelection>,
 
     initial_rustc: PathBuf,
@@ -192,8 +194,8 @@ pub struct Build {
     ranlib: RefCell<HashMap<TargetSelection, PathBuf>>,
     // Miscellaneous
     // allow bidirectional lookups: both name -> path and path -> name
-    crates: HashMap<Interned<String>, Crate>,
-    crate_paths: HashMap<PathBuf, Interned<String>>,
+    crates: HashMap<String, Crate>,
+    crate_paths: HashMap<PathBuf, String>,
     is_sudo: bool,
     ci_env: CiEnv,
     delayed_failures: RefCell<Vec<String>>,
@@ -205,8 +207,8 @@ pub struct Build {
 
 #[derive(Debug, Clone)]
 struct Crate {
-    name: Interned<String>,
-    deps: HashSet<Interned<String>>,
+    name: String,
+    deps: HashSet<String>,
     path: PathBuf,
     has_lib: bool,
 }
@@ -294,7 +296,7 @@ macro_rules! forward {
 }
 
 forward! {
-    verbose(msg: &str),
+    verbose(f: impl Fn()),
     is_verbose() -> bool,
     create(path: &Path, s: &str),
     remove(f: &Path),
@@ -446,11 +448,11 @@ impl Build {
             .unwrap()
             .trim();
         if local_release.split('.').take(2).eq(version.split('.').take(2)) {
-            build.verbose(&format!("auto-detected local-rebuild {local_release}"));
+            build.verbose(|| println!("auto-detected local-rebuild {local_release}"));
             build.local_rebuild = true;
         }
 
-        build.verbose("finding compilers");
+        build.verbose(|| println!("finding compilers"));
         utils::cc_detect::find(&build);
         // When running `setup`, the profile is about to change, so any requirements we have now may
         // be different on the next invocation. Don't check for them until the next time x.py is
@@ -458,7 +460,7 @@ impl Build {
         //
         // Similarly, for `setup` we don't actually need submodules or cargo metadata.
         if !matches!(build.config.cmd, Subcommand::Setup { .. }) {
-            build.verbose("running sanity check");
+            build.verbose(|| println!("running sanity check"));
             crate::core::sanity::check(&mut build);
 
             // Make sure we update these before gathering metadata so we don't get an error about missing
@@ -470,7 +472,7 @@ impl Build {
             // Now, update all existing submodules.
             build.update_existing_submodules();
 
-            build.verbose("learning about cargo");
+            build.verbose(|| println!("learning about cargo"));
             crate::core::metadata::build(&mut build);
         }
 
@@ -710,7 +712,7 @@ impl Build {
         let stamp = dir.join(".stamp");
         let mut cleared = false;
         if mtime(&stamp) < mtime(input) {
-            self.verbose(&format!("Dirty - {}", dir.display()));
+            self.verbose(|| println!("Dirty - {}", dir.display()));
             let _ = fs::remove_dir_all(dir);
             cleared = true;
         } else if stamp.exists() {
@@ -860,8 +862,8 @@ impl Build {
     }
 
     /// Output directory for some generated md crate documentation for a target (temporary)
-    fn md_doc_out(&self, target: TargetSelection) -> Interned<PathBuf> {
-        INTERNER.intern_path(self.out.join(&*target.triple).join("md-doc"))
+    fn md_doc_out(&self, target: TargetSelection) -> PathBuf {
+        self.out.join(&*target.triple).join("md-doc")
     }
 
     /// Returns `true` if this is an external version of LLVM not managed by bootstrap.
@@ -1015,7 +1017,7 @@ impl Build {
         }
 
         let command = cmd.into();
-        self.verbose(&format!("running: {command:?}"));
+        self.verbose(|| println!("running: {command:?}"));
 
         let (output, print_error) = match command.output_mode {
             mode @ (OutputMode::PrintAll | OutputMode::PrintOutput) => (
@@ -1073,14 +1075,15 @@ impl Build {
         }
     }
 
+    /// Check if verbosity is greater than the `level`
     pub fn is_verbose_than(&self, level: usize) -> bool {
         self.verbosity > level
     }
 
-    /// Prints a message if this build is configured in more verbose mode than `level`.
-    fn verbose_than(&self, level: usize, msg: &str) {
+    /// Runs a function if verbosity is greater than `level`.
+    fn verbose_than(&self, level: usize, f: impl Fn()) {
         if self.is_verbose_than(level) {
-            println!("{msg}");
+            f()
         }
     }
 
@@ -1384,6 +1387,44 @@ impl Build {
             || env::var_os("TEST_DEVICE_ADDR").is_some()
     }
 
+    /// Returns an optional "runner" to pass to `compiletest` when executing
+    /// test binaries.
+    ///
+    /// An example of this would be a WebAssembly runtime when testing the wasm
+    /// targets.
+    fn runner(&self, target: TargetSelection) -> Option<String> {
+        let configured_runner =
+            self.config.target_config.get(&target).and_then(|t| t.runner.as_ref()).map(|p| &**p);
+        if let Some(runner) = configured_runner {
+            return Some(runner.to_owned());
+        }
+
+        if target.starts_with("wasm") && target.contains("wasi") {
+            self.default_wasi_runner()
+        } else {
+            None
+        }
+    }
+
+    /// When a `runner` configuration is not provided and a WASI-looking target
+    /// is being tested this is consulted to prove the environment to see if
+    /// there's a runtime already lying around that seems reasonable to use.
+    fn default_wasi_runner(&self) -> Option<String> {
+        let mut finder = crate::core::sanity::Finder::new();
+
+        // Look for Wasmtime, and for its default options be sure to disable
+        // its caching system since we're executing quite a lot of tests and
+        // ideally shouldn't pollute the cache too much.
+        if let Some(path) = finder.maybe_have("wasmtime") {
+            if let Ok(mut path) = path.into_os_string().into_string() {
+                path.push_str(" run -C cache=n --dir .");
+                return Some(path);
+            }
+        }
+
+        None
+    }
+
     /// Returns the root of the "rootfs" image that this target will be using,
     /// if one was configured.
     ///
@@ -1569,7 +1610,7 @@ impl Build {
     /// "local" crates (those in the local source tree, not from a registry).
     fn in_tree_crates(&self, root: &str, target: Option<TargetSelection>) -> Vec<&Crate> {
         let mut ret = Vec::new();
-        let mut list = vec![INTERNER.intern_str(root)];
+        let mut list = vec![root.to_owned()];
         let mut visited = HashSet::new();
         while let Some(krate) = list.pop() {
             let krate = self
@@ -1595,11 +1636,11 @@ impl Build {
                     && (dep != "rustc_codegen_llvm"
                         || self.config.hosts.iter().any(|host| self.config.llvm_enabled(*host)))
                 {
-                    list.push(*dep);
+                    list.push(dep.clone());
                 }
             }
         }
-        ret.sort_unstable_by_key(|krate| krate.name); // reproducible order needed for tests
+        ret.sort_unstable_by_key(|krate| krate.name.clone()); // reproducible order needed for tests
         ret
     }
 
@@ -1645,7 +1686,7 @@ impl Build {
         if self.config.dry_run() {
             return;
         }
-        self.verbose_than(1, &format!("Copy {src:?} to {dst:?}"));
+        self.verbose_than(1, || println!("Copy {src:?} to {dst:?}"));
         if src == dst {
             return;
         }
@@ -1736,7 +1777,7 @@ impl Build {
             return;
         }
         let dst = dstdir.join(src.file_name().unwrap());
-        self.verbose_than(1, &format!("Install {src:?} to {dst:?}"));
+        self.verbose_than(1, || println!("Install {src:?} to {dst:?}"));
         t!(fs::create_dir_all(dstdir));
         if !src.exists() {
             panic!("ERROR: File \"{}\" not found!", src.display());

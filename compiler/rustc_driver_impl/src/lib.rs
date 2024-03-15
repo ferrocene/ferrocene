@@ -28,7 +28,7 @@ use rustc_errors::{
     markdown, ColorConfig, DiagCtxt, ErrCode, ErrorGuaranteed, FatalError, PResult,
 };
 use rustc_feature::find_gated_cfg;
-use rustc_interface::util::{self, collect_crate_types, get_codegen_backend};
+use rustc_interface::util::{self, get_codegen_backend};
 use rustc_interface::{interface, Queries};
 use rustc_lint::unerased_lint_store;
 use rustc_metadata::creader::MetadataLoader;
@@ -37,7 +37,8 @@ use rustc_session::config::{nightly_options, CG_OPTIONS, Z_OPTIONS};
 use rustc_session::config::{ErrorOutputType, Input, OutFileName, OutputType};
 use rustc_session::getopts::{self, Matches};
 use rustc_session::lint::{Lint, LintId};
-use rustc_session::{config, EarlyDiagCtxt, Session};
+use rustc_session::output::collect_crate_types;
+use rustc_session::{config, filesearch, EarlyDiagCtxt, Session};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::source_map::FileLoader;
 use rustc_span::symbol::sym;
@@ -676,6 +677,7 @@ fn list_metadata(early_dcx: &EarlyDiagCtxt, sess: &Session, metadata_loader: &dy
                 metadata_loader,
                 &mut v,
                 &sess.opts.unstable_opts.ls,
+                sess.cfg_version,
             )
             .unwrap();
             safe_println!("{}", String::from_utf8(v).unwrap());
@@ -886,7 +888,11 @@ pub fn version_at_macro_invocation(
 
         let debug_flags = matches.opt_strs("Z");
         let backend_name = debug_flags.iter().find_map(|x| x.strip_prefix("codegen-backend="));
-        get_codegen_backend(early_dcx, &None, backend_name).print_version();
+        let opts = config::Options::default();
+        let sysroot = filesearch::materialize_sysroot(opts.maybe_sysroot.clone());
+        let target = config::build_target_config(early_dcx, &opts, None, &sysroot);
+
+        get_codegen_backend(early_dcx, &sysroot, backend_name, &target).print_version();
     }
 }
 
@@ -1091,7 +1097,12 @@ pub fn describe_flag_categories(early_dcx: &EarlyDiagCtxt, matches: &Matches) ->
 
     if cg_flags.iter().any(|x| *x == "passes=list") {
         let backend_name = debug_flags.iter().find_map(|x| x.strip_prefix("codegen-backend="));
-        get_codegen_backend(early_dcx, &None, backend_name).print_passes();
+
+        let opts = config::Options::default();
+        let sysroot = filesearch::materialize_sysroot(opts.maybe_sysroot.clone());
+        let target = config::build_target_config(early_dcx, &opts, None, &sysroot);
+
+        get_codegen_backend(early_dcx, &sysroot, backend_name, &target).print_passes();
         return true;
     }
 
@@ -1317,6 +1328,9 @@ pub fn install_ice_hook(
     panic::update_hook(Box::new(
         move |default_hook: &(dyn Fn(&PanicInfo<'_>) + Send + Sync + 'static),
               info: &PanicInfo<'_>| {
+            // Lock stderr to prevent interleaving of concurrent panics.
+            let _guard = io::stderr().lock();
+
             // If the error was caused by a broken pipe then this is not a bug.
             // Write the error and return immediately. See #98700.
             #[cfg(windows)]

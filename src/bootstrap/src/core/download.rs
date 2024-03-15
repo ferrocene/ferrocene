@@ -61,7 +61,7 @@ impl Config {
         if self.dry_run() {
             return true;
         }
-        self.verbose(&format!("running: {cmd:?}"));
+        self.verbose(|| println!("running: {cmd:?}"));
         check_run(cmd, self.is_verbose())
     }
 
@@ -194,12 +194,17 @@ impl Config {
         let _ = try_run(self, patchelf.arg(fname));
     }
 
+<<<<<<< HEAD
     pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
         self.verbose(&format!("download {url}"));
         if self.dry_run() {
             return;
         }
 
+=======
+    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
+        self.verbose(|| println!("download {url}"));
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
         let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
         // While bootstrap itself only supports http and https downloads, downstream forks might
@@ -317,7 +322,9 @@ impl Config {
             };
 
             let dst_path = dst.join(short_path);
-            self.verbose(&format!("extracting {} to {}", original_path.display(), dst.display()));
+            self.verbose(|| {
+                println!("extracting {} to {}", original_path.display(), dst.display())
+            });
             if !t!(member.unpack_in(dst)) {
                 panic!("path traversal attack ??");
             }
@@ -340,7 +347,7 @@ impl Config {
     pub fn verify(&self, path: &Path, expected: &str) -> bool {
         use sha2::Digest;
 
-        self.verbose(&format!("verifying {}", path.display()));
+        self.verbose(|| println!("verifying {}", path.display()));
 
         if self.dry_run() {
             return true;
@@ -396,7 +403,7 @@ enum DownloadSource {
 /// Functions that are only ever called once, but named for clarify and to avoid thousand-line functions.
 impl Config {
     pub(crate) fn download_clippy(&self) -> PathBuf {
-        self.verbose("downloading stage0 clippy artifacts");
+        self.verbose(|| println!("downloading stage0 clippy artifacts"));
 
         let date = &self.stage0_metadata.compiler.date;
         let version = &self.stage0_metadata.compiler.version;
@@ -486,7 +493,7 @@ impl Config {
     }
 
     pub(crate) fn download_ci_rustc(&self, commit: &str) {
-        self.verbose(&format!("using downloaded stage2 artifacts from CI (commit {commit})"));
+        self.verbose(|| println!("using downloaded stage2 artifacts from CI (commit {commit})"));
 
         let version = self.artifact_version_part(commit);
         // download-rustc doesn't need its own cargo, it can just use beta's. But it does need the
@@ -503,7 +510,7 @@ impl Config {
     }
 
     pub(crate) fn download_beta_toolchain(&self) {
-        self.verbose("downloading stage0 beta artifacts");
+        self.verbose(|| println!("downloading stage0 beta artifacts"));
 
         let date = &self.stage0_metadata.compiler.date;
         let version = &self.stage0_metadata.compiler.version;
@@ -642,10 +649,12 @@ impl Config {
                     self.unpack(&tarball, &bin_root, prefix);
                     return;
                 } else {
-                    self.verbose(&format!(
-                        "ignoring cached file {} due to failed verification",
-                        tarball.display()
-                    ));
+                    self.verbose(|| {
+                        println!(
+                            "ignoring cached file {} due to failed verification",
+                            tarball.display()
+                        )
+                    });
                     self.remove(&tarball);
                 }
             }

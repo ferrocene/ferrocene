@@ -203,57 +203,63 @@ impl<'ll, 'tcx> ArgAbiExt<'ll, 'tcx> for ArgAbi<'tcx, Ty<'tcx>> {
         val: &'ll Value,
         dst: PlaceRef<'tcx, &'ll Value>,
     ) {
-        if self.is_ignore() {
-            return;
-        }
-        if self.is_sized_indirect() {
-            OperandValue::Ref(val, None, self.layout.align.abi).store(bx, dst)
-        } else if self.is_unsized_indirect() {
-            bug!("unsized `ArgAbi` must be handled through `store_fn_arg`");
-        } else if let PassMode::Cast { cast, pad_i32: _ } = &self.mode {
-            // FIXME(eddyb): Figure out when the simpler Store is safe, clang
-            // uses it for i16 -> {i8, i8}, but not for i24 -> {i8, i8, i8}.
-            let can_store_through_cast_ptr = false;
-            if can_store_through_cast_ptr {
-                bx.store(val, dst.llval, self.layout.align.abi);
-            } else {
-                // The actual return type is a struct, but the ABI
-                // adaptation code has cast it into some scalar type. The
-                // code that follows is the only reliable way I have
-                // found to do a transform like i64 -> {i32,i32}.
-                // Basically we dump the data onto the stack then memcpy it.
-                //
-                // Other approaches I tried:
-                // - Casting rust ret pointer to the foreign type and using Store
-                //   is (a) unsafe if size of foreign type > size of rust type and
-                //   (b) runs afoul of strict aliasing rules, yielding invalid
-                //   assembly under -O (specifically, the store gets removed).
-                // - Truncating foreign type to correct integral type and then
-                //   bitcasting to the struct type yields invalid cast errors.
-
-                // We instead thus allocate some scratch space...
-                let scratch_size = cast.size(bx);
-                let scratch_align = cast.align(bx);
-                let llscratch = bx.alloca(cast.llvm_type(bx), scratch_align);
-                bx.lifetime_start(llscratch, scratch_size);
-
-                // ... where we first store the value...
-                bx.store(val, llscratch, scratch_align);
-
-                // ... and then memcpy it to the intended destination.
-                bx.memcpy(
-                    dst.llval,
-                    self.layout.align.abi,
-                    llscratch,
-                    scratch_align,
-                    bx.const_usize(self.layout.size.bytes()),
-                    MemFlags::empty(),
-                );
-
-                bx.lifetime_end(llscratch, scratch_size);
+        match &self.mode {
+            PassMode::Ignore => {}
+            // Sized indirect arguments
+            PassMode::Indirect { attrs, meta_attrs: None, on_stack: _ } => {
+                let align = attrs.pointee_align.unwrap_or(self.layout.align.abi);
+                OperandValue::Ref(val, None, align).store(bx, dst);
             }
-        } else {
-            OperandRef::from_immediate_or_packed_pair(bx, val, self.layout).val.store(bx, dst);
+            // Unsized indirect qrguments
+            PassMode::Indirect { attrs: _, meta_attrs: Some(_), on_stack: _ } => {
+                bug!("unsized `ArgAbi` must be handled through `store_fn_arg`");
+            }
+            PassMode::Cast { cast, pad_i32: _ } => {
+                // FIXME(eddyb): Figure out when the simpler Store is safe, clang
+                // uses it for i16 -> {i8, i8}, but not for i24 -> {i8, i8, i8}.
+                let can_store_through_cast_ptr = false;
+                if can_store_through_cast_ptr {
+                    bx.store(val, dst.llval, self.layout.align.abi);
+                } else {
+                    // The actual return type is a struct, but the ABI
+                    // adaptation code has cast it into some scalar type. The
+                    // code that follows is the only reliable way I have
+                    // found to do a transform like i64 -> {i32,i32}.
+                    // Basically we dump the data onto the stack then memcpy it.
+                    //
+                    // Other approaches I tried:
+                    // - Casting rust ret pointer to the foreign type and using Store
+                    //   is (a) unsafe if size of foreign type > size of rust type and
+                    //   (b) runs afoul of strict aliasing rules, yielding invalid
+                    //   assembly under -O (specifically, the store gets removed).
+                    // - Truncating foreign type to correct integral type and then
+                    //   bitcasting to the struct type yields invalid cast errors.
+
+                    // We instead thus allocate some scratch space...
+                    let scratch_size = cast.size(bx);
+                    let scratch_align = cast.align(bx);
+                    let llscratch = bx.alloca(cast.llvm_type(bx), scratch_align);
+                    bx.lifetime_start(llscratch, scratch_size);
+
+                    // ... where we first store the value...
+                    bx.store(val, llscratch, scratch_align);
+
+                    // ... and then memcpy it to the intended destination.
+                    bx.memcpy(
+                        dst.llval,
+                        self.layout.align.abi,
+                        llscratch,
+                        scratch_align,
+                        bx.const_usize(self.layout.size.bytes()),
+                        MemFlags::empty(),
+                    );
+
+                    bx.lifetime_end(llscratch, scratch_size);
+                }
+            }
+            _ => {
+                OperandRef::from_immediate_or_packed_pair(bx, val, self.layout).val.store(bx, dst);
+            }
         }
     }
 
@@ -424,7 +430,10 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
             PassMode::Indirect { attrs, meta_attrs: _, on_stack } => {
                 assert!(!on_stack);
                 let i = apply(attrs);
-                let sret = llvm::CreateStructRetAttr(cx.llcx, self.ret.layout.llvm_type(cx));
+                let sret = llvm::CreateStructRetAttr(
+                    cx.llcx,
+                    cx.type_array(cx.type_i8(), self.ret.layout.size.bytes()),
+                );
                 attributes::apply_to_llfn(llfn, llvm::AttributePlace::Argument(i), &[sret]);
             }
             PassMode::Cast { cast, pad_i32: _ } => {
@@ -437,7 +446,10 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
                 PassMode::Ignore => {}
                 PassMode::Indirect { attrs, meta_attrs: None, on_stack: true } => {
                     let i = apply(attrs);
-                    let byval = llvm::CreateByValAttr(cx.llcx, arg.layout.llvm_type(cx));
+                    let byval = llvm::CreateByValAttr(
+                        cx.llcx,
+                        cx.type_array(cx.type_i8(), arg.layout.size.bytes()),
+                    );
                     attributes::apply_to_llfn(llfn, llvm::AttributePlace::Argument(i), &[byval]);
                 }
                 PassMode::Direct(attrs)
@@ -486,7 +498,10 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
             PassMode::Indirect { attrs, meta_attrs: _, on_stack } => {
                 assert!(!on_stack);
                 let i = apply(bx.cx, attrs);
-                let sret = llvm::CreateStructRetAttr(bx.cx.llcx, self.ret.layout.llvm_type(bx));
+                let sret = llvm::CreateStructRetAttr(
+                    bx.cx.llcx,
+                    bx.cx.type_array(bx.cx.type_i8(), self.ret.layout.size.bytes()),
+                );
                 attributes::apply_to_callsite(callsite, llvm::AttributePlace::Argument(i), &[sret]);
             }
             PassMode::Cast { cast, pad_i32: _ } => {
@@ -513,7 +528,10 @@ impl<'ll, 'tcx> FnAbiLlvmExt<'ll, 'tcx> for FnAbi<'tcx, Ty<'tcx>> {
                 PassMode::Ignore => {}
                 PassMode::Indirect { attrs, meta_attrs: None, on_stack: true } => {
                     let i = apply(bx.cx, attrs);
-                    let byval = llvm::CreateByValAttr(bx.cx.llcx, arg.layout.llvm_type(bx));
+                    let byval = llvm::CreateByValAttr(
+                        bx.cx.llcx,
+                        bx.cx.type_array(bx.cx.type_i8(), arg.layout.size.bytes()),
+                    );
                     attributes::apply_to_callsite(
                         callsite,
                         llvm::AttributePlace::Argument(i),

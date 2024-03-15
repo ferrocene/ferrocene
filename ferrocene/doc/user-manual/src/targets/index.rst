@@ -82,6 +82,12 @@ should not be used in production.
      - Cross-compilation
      - Bare-metal
      - \-
+  
+   * - :target:`armv8r-none-eabihf`
+     - ``armv8r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
 
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``

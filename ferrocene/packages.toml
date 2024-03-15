@@ -71,6 +71,7 @@ targets = [
   "aarch64-unknown-linux-gnu",
   "thumbv7em-none-eabi",
   "thumbv7em-none-eabihf",
+  "armv8r-none-eabihf",
   "wasm32-unknown-unknown",
 ]
 

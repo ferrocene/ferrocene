@@ -3,23 +3,23 @@ use std::num::NonZero;
 use rustc_ast::token;
 use rustc_ast::util::literal::LitError;
 use rustc_errors::{
-    codes::*, Diag, DiagCtxt, DiagMessage, EmissionGuarantee, ErrorGuaranteed, IntoDiagnostic,
-    Level, MultiSpan,
+    codes::*, Diag, DiagCtxt, DiagMessage, Diagnostic, EmissionGuarantee, ErrorGuaranteed, Level,
+    MultiSpan,
 };
 use rustc_macros::Diagnostic;
 use rustc_span::{Span, Symbol};
 use rustc_target::spec::{SplitDebuginfo, StackProtector, TargetTriple};
 
-use crate::parse::ParseSess;
+use crate::{config::CrateType, parse::ParseSess};
 
 pub struct FeatureGateError {
     pub span: MultiSpan,
     pub explain: DiagMessage,
 }
 
-impl<'a, G: EmissionGuarantee> IntoDiagnostic<'a, G> for FeatureGateError {
+impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for FeatureGateError {
     #[track_caller]
-    fn into_diagnostic(self, dcx: &'a DiagCtxt, level: Level) -> Diag<'a, G> {
+    fn into_diag(self, dcx: &'a DiagCtxt, level: Level) -> Diag<'a, G> {
         Diag::new(dcx, level, self.explain).with_span(self.span).with_code(E0658)
     }
 }
@@ -343,6 +343,13 @@ pub(crate) struct BinaryFloatLiteralNotSupported {
     #[primary_span]
     #[label(session_not_supported)]
     pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(session_unsupported_crate_type_for_target)]
+pub struct UnsupportedCrateTypeForTarget<'a> {
+    pub crate_type: CrateType,
+    pub target_triple: &'a TargetTriple,
 }
 
 pub fn report_lit_error(

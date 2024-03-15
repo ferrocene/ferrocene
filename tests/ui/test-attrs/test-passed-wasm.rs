@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 //@ no-prefer-dynamic
 //@ compile-flags: --test
 //@ run-flags: --test-threads=1

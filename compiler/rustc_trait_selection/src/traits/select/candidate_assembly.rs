@@ -165,7 +165,6 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             let poly_trait_predicate = self.infcx.resolve_vars_if_possible(obligation.predicate);
             let placeholder_trait_predicate =
                 self.infcx.enter_forall_and_leak_universe(poly_trait_predicate);
-            debug!(?placeholder_trait_predicate);
 
             // The bounds returned by `item_bounds` may contain duplicates after
             // normalization, so try to deduplicate when possible to avoid
@@ -184,8 +183,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     selcx.infcx.probe(|_| {
                         match selcx.match_normalize_trait_ref(
                             obligation,
-                            bound.to_poly_trait_ref(),
                             placeholder_trait_predicate.trait_ref,
+                            bound.to_poly_trait_ref(),
                         ) {
                             Ok(None) => {
                                 candidates.vec.push(ProjectionCandidate(idx));
@@ -218,6 +217,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         candidates: &mut SelectionCandidateSet<'tcx>,
     ) -> Result<(), SelectionError<'tcx>> {
         debug!(?stack.obligation);
+
+        // An error type will unify with anything. So, avoid
+        // matching an error type with `ParamCandidate`.
+        // This helps us avoid spurious errors like issue #121941.
+        if stack.obligation.predicate.references_error() {
+            return Ok(());
+        }
 
         let all_bounds = stack
             .obligation
@@ -874,8 +880,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                         self.infcx.probe(|_| {
                             self.match_normalize_trait_ref(
                                 obligation,
-                                upcast_trait_ref,
                                 placeholder_trait_predicate.trait_ref,
+                                upcast_trait_ref,
                             )
                             .is_ok()
                         })

@@ -232,8 +232,11 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "compiler_builtins",
+<<<<<<< HEAD
     "const-oid",    // this is a false positive: it's only used by generate-tarball
     "convert_case", // dependency of derive_more
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",

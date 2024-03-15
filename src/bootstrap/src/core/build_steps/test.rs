@@ -26,11 +26,7 @@ use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
-<<<<<<< HEAD
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-use crate::utils::cache::{Interned, INTERNER};
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::{
     self, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,
@@ -2582,7 +2578,7 @@ impl Step for Crate {
                     compiler: self.compiler,
                     target: self.target,
                     mode: self.mode,
-                    crates: vec![*krate],
+                    crates: vec![krate.clone()],
                 });
             }
             return;

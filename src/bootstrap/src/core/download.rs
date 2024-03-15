@@ -194,17 +194,12 @@ impl Config {
         let _ = try_run(self, patchelf.arg(fname));
     }
 
-<<<<<<< HEAD
     pub fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
-        self.verbose(&format!("download {url}"));
+        self.verbose(|| println!("download {url}"));
         if self.dry_run() {
             return;
         }
 
-=======
-    fn download_file(&self, url: &str, dest_path: &Path, help_on_error: &str) {
-        self.verbose(|| println!("download {url}"));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // Use a temporary file in case we crash while downloading, to avoid a corrupt download in cache/.
         let tempfile = self.tempdir().join(dest_path.file_name().unwrap());
         // While bootstrap itself only supports http and https downloads, downstream forks might

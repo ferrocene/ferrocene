@@ -172,11 +172,19 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
                 // previously saved offset must be smaller than the current position.
                 let offset = self.opaque.position() - last_location;
                 if offset < last_location {
-                    SpanTag::indirect(true).encode(self);
-                    offset.encode(self);
+                    let needed = bytes_needed(offset);
+                    SpanTag::indirect(true, needed as u8).encode(self);
+                    self.opaque.write_with(|dest| {
+                        *dest = offset.to_le_bytes();
+                        needed
+                    });
                 } else {
-                    SpanTag::indirect(false).encode(self);
-                    last_location.encode(self);
+                    let needed = bytes_needed(last_location);
+                    SpanTag::indirect(false, needed as u8).encode(self);
+                    self.opaque.write_with(|dest| {
+                        *dest = last_location.to_le_bytes();
+                        needed
+                    });
                 }
             }
             Entry::Vacant(v) => {
@@ -210,6 +218,10 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
             }
         }
     }
+}
+
+fn bytes_needed(n: usize) -> usize {
+    (usize::BITS - n.leading_zeros()).div_ceil(u8::BITS) as usize
 }
 
 impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for SpanData {
@@ -1981,9 +1993,8 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
             if of_trait && let Some(header) = tcx.impl_trait_header(def_id) {
                 record!(self.tables.impl_trait_header[def_id] <- header);
-                let trait_ref = header.map_bound(|h| h.trait_ref);
 
-                let trait_ref = trait_ref.instantiate_identity();
+                let trait_ref = header.trait_ref.instantiate_identity();
                 let simplified_self_ty = fast_reject::simplify_type(
                     self.tcx,
                     trait_ref.self_ty(),

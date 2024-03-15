@@ -10,4 +10,4 @@
 'invalid' is not a recognized processor for this target (ignoring processor)
 'invalid' is not a recognized processor for this target (ignoring processor)
 'invalid' is not a recognized processor for this target (ignoring processor)
-LLVM ERROR: 64-bit code requested on a subtarget that doesn't support it!
+rustc-LLVM ERROR: 64-bit code requested on a subtarget that doesn't support it!

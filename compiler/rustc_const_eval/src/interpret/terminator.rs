@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 
-use rustc_ast::ast::InlineAsmOptions;
 use rustc_middle::{
     mir,
     ty::{
@@ -153,7 +152,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
                     ),
                 };
 
-                let destination = self.eval_place(destination)?;
+                let destination = self.force_allocation(&self.eval_place(destination)?)?;
                 self.eval_fn_call(
                     fn_val,
                     (fn_sig.abi, fn_abi),
@@ -224,15 +223,8 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
                 terminator.kind
             ),
 
-            InlineAsm { template, ref operands, options, destination, .. } => {
-                M::eval_inline_asm(self, template, operands, options)?;
-                if options.contains(InlineAsmOptions::NORETURN) {
-                    throw_ub_custom!(fluent::const_eval_noreturn_asm_returned);
-                }
-                self.go_to_block(
-                    destination
-                        .expect("InlineAsm terminators without noreturn must have a destination"),
-                )
+            InlineAsm { template, ref operands, options, ref targets, .. } => {
+                M::eval_inline_asm(self, template, operands, options, targets)?;
             }
         }
 
@@ -359,14 +351,8 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
             Ok(Some(match ty.kind() {
                 ty::Ref(_, ty, _) => *ty,
                 ty::RawPtr(mt) => mt.ty,
-                // We should only accept `Box` with the default allocator.
-                // It's hard to test for that though so we accept every 1-ZST allocator.
-                ty::Adt(def, args)
-                    if def.is_box()
-                        && self.layout_of(args[1].expect_ty()).is_ok_and(|l| l.is_1zst()) =>
-                {
-                    args[0].expect_ty()
-                }
+                // We only accept `Box` with the default allocator.
+                _ if ty.is_box_global(*self.tcx) => ty.boxed_ty(),
                 _ => return Ok(None),
             }))
         };
@@ -503,7 +489,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
         (caller_abi, caller_fn_abi): (Abi, &FnAbi<'tcx, Ty<'tcx>>),
         args: &[FnArg<'tcx, M::Provenance>],
         with_caller_location: bool,
-        destination: &PlaceTy<'tcx, M::Provenance>,
+        destination: &MPlaceTy<'tcx, M::Provenance>,
         target: Option<mir::BasicBlock>,
         mut unwind: mir::UnwindAction,
     ) -> InterpResult<'tcx> {
@@ -732,7 +718,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
                         });
                     }
                     // Protect return place for in-place return value passing.
-                    M::protect_in_place_function_argument(self, destination)?;
+                    M::protect_in_place_function_argument(self, &destination.clone().into())?;
 
                     // Don't forget to mark "initially live" locals as live.
                     self.storage_live_for_always_live_locals()?;

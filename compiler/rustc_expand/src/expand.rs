@@ -14,8 +14,7 @@ use rustc_ast::mut_visit::*;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, Delimiter};
 use rustc_ast::tokenstream::TokenStream;
-use rustc_ast::visit::{self, AssocCtxt, Visitor, VisitorResult};
-use rustc_ast::{try_visit, walk_list};
+use rustc_ast::visit::{self, try_visit, walk_list, AssocCtxt, Visitor, VisitorResult};
 use rustc_ast::{AssocItemKind, AstNodeWrapper, AttrArgs, AttrStyle, AttrVec, ExprKind};
 use rustc_ast::{ForeignItemKind, HasAttrs, HasNodeId};
 use rustc_ast::{Inline, ItemKind, MacStmtStyle, MetaItemKind, ModKind};
@@ -784,6 +783,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         })
     }
 
+    #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
     fn gate_proc_macro_attr_item(&self, span: Span, item: &Annotatable) {
         let kind = match item {
             Annotatable::Item(_)
@@ -826,6 +826,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         }
 
         impl<'ast, 'a> Visitor<'ast> for GateProcMacroInput<'a> {
+            #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
             fn visit_item(&mut self, item: &'ast ast::Item) {
                 match &item.kind {
                     ItemKind::Mod(_, mod_kind)
@@ -1690,6 +1691,7 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
 
     // Detect use of feature-gated or invalid attributes on macro invocations
     // since they will not be detected after macro expansion.
+    #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
     fn check_attributes(&self, attrs: &[ast::Attribute], call: &ast::MacCall) {
         let features = self.cx.ecfg.features;
         let mut attrs = attrs.iter().peekable();

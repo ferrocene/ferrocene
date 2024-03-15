@@ -72,6 +72,15 @@ jobs:
       fail-fast: false
       max-parallel: 1
 
+    # GitHub Actions fails the workflow if an empty list of jobs is provided to
+    # the workflow, so we need to skip the release job as a whole when there
+    # are no releases to publish.
+    #
+    # Unfortunately checking whether a list is empty is not possible in a nice
+    # way due to GitHub Actions expressions limits. This hacky solution is from
+    # https://github.com/orgs/community/discussions/27085#discussioncomment-3533174
+    if: fromJSON(needs.scheduler.output.jobs)[0] != null
+
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     environment: ${{ matrix.environment }}

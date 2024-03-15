@@ -82,21 +82,18 @@ build_llvm_tarball() {
     # intermediate object files and other build artifacts we don't need. To
     # save space in the cached tarball remove it.
     #
-    # On Windows, we skip this pruning since it *does* need some intermediate
-    # object files. (Notably, `llvm/Config/llvm-config.h`)
-    if [[ "${OSTYPE}" = "msys" ]]; then
-        mv "build/${FERROCENE_HOST}/llvm/build/include" "build/${FERROCENE_HOST}/llvm/include"
+    # On Windows, we skip this pruning since it *does* need intermediate
+    # object files. (Notably, `llvm/Config/llvm-config.h` and many lib objects)
+    if [[ "${OSTYPE}" != "msys" ]]; then
+        rm -rf "build/${FERROCENE_HOST}/llvm/build"
+        
+        # Rustbuild is looking in `llvm/build/bin` instead of `bin` when checking
+        # for an existing `llvm-config` binary. Create a symlink to make sure it
+        # can still detect the existing build.
+        
+        mkdir -p "build/${FERROCENE_HOST}/llvm/build"
+        ln -s ../bin "build/${FERROCENE_HOST}/llvm/build/bin"
     fi
-    rm -rf "build/${FERROCENE_HOST}/llvm/build"
-    mkdir -p "build/${FERROCENE_HOST}/llvm/build"
-    if [[ "${OSTYPE}" = "msys" ]]; then
-        mv "build/${FERROCENE_HOST}/llvm/include" "build/${FERROCENE_HOST}/llvm/build/include"
-    fi
-
-    # Rustbuild is looking in `llvm/build/bin` instead of `bin` when checking
-    # for an existing `llvm-config` binary. Create a symlink to make sure it
-    # can still detect the existing build.
-    ln -s ../bin "build/${FERROCENE_HOST}/llvm/build/bin"
 
     # The LLVM distribution as of 2021-08-23 contains more than 1GB of
     # binaries, but we only need a small subset of them. This "deletes" the

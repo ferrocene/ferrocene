@@ -9,7 +9,13 @@ on:
   schedule:
     - cron: '0 5 * * 1-5'
   # Allow to run this manually from the GitHub UI
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      max_merges_per_pr:
+        description: Max number of PRs to be included
+        type: number
+        default: 30
+        required: true
 
 permissions:
   contents: write
@@ -74,3 +80,4 @@ jobs:
         run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MAX_MERGES_PER_PR: "${{ github.event_name == 'workflow_dispatch' && inputs.max_merges_per_pr || 30 }}"

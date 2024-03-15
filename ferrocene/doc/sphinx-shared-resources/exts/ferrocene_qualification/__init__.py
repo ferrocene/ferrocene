@@ -20,7 +20,6 @@ def setup(app):
     app.add_config_value("ferrocene_private_signature_files_dir", None, "env", [str])
     app.add_config_value("ferrocene_version", None, "env", [str])
     app.add_config_value("rust_version", None, "env", [str])
-    app.add_config_value("channel", None, "env", [str])
 
     return {
         "version": "0",

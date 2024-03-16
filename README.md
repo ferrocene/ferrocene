@@ -21,7 +21,7 @@ website][website] for details.
 
 ## Current status
 
-Ferrocene is qualified for ISO 26262 ASIL-D and IEC 61508 SiL4.
+Ferrocene is qualified for ISO 26262 (ASIL D) and IEC 61508 (SIL 4).
 Qualification for other standards and areas, such as railway and aerospace,
 are planned.
 

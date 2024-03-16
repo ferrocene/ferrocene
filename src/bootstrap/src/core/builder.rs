@@ -19,7 +19,7 @@ use crate::core::build_steps::{check, clean, compile, dist, doc, install, run, s
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
 use crate::prepare_behaviour_dump_dir;
-use crate::utils::cache::{Cache, Interned, INTERNER};
+use crate::utils::cache::Cache;
 use crate::utils::helpers::{self, add_dylib_path, add_link_lib_path, exe, linker_args};
 use crate::utils::helpers::{check_cfg_arg, libdir, linker_flags, output, t, LldThreads};
 use crate::EXTRA_CHECK_CFGS;
@@ -103,7 +103,7 @@ impl RunConfig<'_> {
 
     /// Return a list of crate names selected by `run.paths`.
     #[track_caller]
-    pub fn cargo_crates_in_set(&self) -> Interned<Vec<String>> {
+    pub fn cargo_crates_in_set(&self) -> Vec<String> {
         let mut crates = Vec::new();
         for krate in &self.paths {
             let path = krate.assert_single_path();
@@ -112,7 +112,7 @@ impl RunConfig<'_> {
             };
             crates.push(crate_name.to_string());
         }
-        INTERNER.intern_list(crates)
+        crates
     }
 
     /// Given an `alias` selected by the `Step` and the paths passed on the command line,
@@ -121,7 +121,7 @@ impl RunConfig<'_> {
     /// Normally, people will pass *just* `library` if they pass it.
     /// But it's possible (although strange) to pass something like `library std core`.
     /// Build all crates anyway, as if they hadn't passed the other args.
-    pub fn make_run_crates(&self, alias: Alias) -> Interned<Vec<String>> {
+    pub fn make_run_crates(&self, alias: Alias) -> Vec<String> {
         let has_alias =
             self.paths.iter().any(|set| set.assert_single_path().path.ends_with(alias.as_str()));
         if !has_alias {
@@ -134,7 +134,7 @@ impl RunConfig<'_> {
         };
 
         let crate_names = crates.into_iter().map(|krate| krate.name.to_string()).collect();
-        INTERNER.intern_list(crate_names)
+        crate_names
     }
 }
 
@@ -292,7 +292,7 @@ impl PathSet {
 const PATH_REMAP: &[(&str, &[&str])] = &[
     // config.toml uses `rust-analyzer-proc-macro-srv`, but the
     // actual path is `proc-macro-srv-cli`
-    ("rust-analyzer-proc-macro-srv", &["proc-macro-srv-cli"]),
+    ("rust-analyzer-proc-macro-srv", &["src/tools/rust-analyzer/crates/proc-macro-srv-cli"]),
     // Make `x test tests` function the same as `x t tests/*`
     (
         "tests",
@@ -383,10 +383,12 @@ impl StepDescription {
         }
 
         if !builder.config.skip.is_empty() && !matches!(builder.config.dry_run, DryRun::SelfCheck) {
-            builder.verbose(&format!(
-                "{:?} not skipped for {:?} -- not in {:?}",
-                pathset, self.name, builder.config.skip
-            ));
+            builder.verbose(|| {
+                println!(
+                    "{:?} not skipped for {:?} -- not in {:?}",
+                    pathset, self.name, builder.config.skip
+                )
+            });
         }
         false
     }
@@ -769,6 +771,7 @@ impl<'a> Builder<'a> {
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,
+                tool::LlvmBitcodeLinker
             ),
             Kind::Check | Kind::Clippy | Kind::Fix => describe!(
                 check::Std,
@@ -1111,26 +1114,26 @@ impl<'a> Builder<'a> {
         }
     }
 
-    pub fn sysroot(&self, compiler: Compiler) -> Interned<PathBuf> {
+    pub fn sysroot(&self, compiler: Compiler) -> PathBuf {
         self.ensure(compile::Sysroot::new(compiler))
     }
 
     /// Returns the libdir where the standard library and other artifacts are
     /// found for a compiler's sysroot.
-    pub fn sysroot_libdir(&self, compiler: Compiler, target: TargetSelection) -> Interned<PathBuf> {
+    pub fn sysroot_libdir(&self, compiler: Compiler, target: TargetSelection) -> PathBuf {
         #[derive(Debug, Clone, Hash, PartialEq, Eq)]
         struct Libdir {
             compiler: Compiler,
             target: TargetSelection,
         }
         impl Step for Libdir {
-            type Output = Interned<PathBuf>;
+            type Output = PathBuf;
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
                 run.never()
             }
 
-            fn run(self, builder: &Builder<'_>) -> Interned<PathBuf> {
+            fn run(self, builder: &Builder<'_>) -> PathBuf {
                 let lib = builder.sysroot_libdir_relative(self.compiler);
                 let sysroot = builder
                     .sysroot(self.compiler)
@@ -1141,10 +1144,9 @@ impl<'a> Builder<'a> {
                 // Avoid deleting the rustlib/ directory we just copied
                 // (in `impl Step for Sysroot`).
                 if !builder.download_rustc() {
-                    builder.verbose(&format!(
-                        "Removing sysroot {} to avoid caching bugs",
-                        sysroot.display()
-                    ));
+                    builder.verbose(|| {
+                        println!("Removing sysroot {} to avoid caching bugs", sysroot.display())
+                    });
                     let _ = fs::remove_dir_all(&sysroot);
                     t!(fs::create_dir_all(&sysroot));
                 }
@@ -1159,7 +1161,7 @@ impl<'a> Builder<'a> {
                     );
                 }
 
-                INTERNER.intern_path(sysroot)
+                sysroot
             }
         }
         self.ensure(Libdir { compiler, target })
@@ -1484,7 +1486,7 @@ impl<'a> Builder<'a> {
 
         let sysroot_str = sysroot.as_os_str().to_str().expect("sysroot should be UTF-8");
         if !matches!(self.config.dry_run, DryRun::SelfCheck) {
-            self.verbose_than(0, &format!("using sysroot {sysroot_str}"));
+            self.verbose_than(0, || println!("using sysroot {sysroot_str}"));
         }
 
         let mut rustflags = Rustflags::new(target);
@@ -1785,15 +1787,16 @@ impl<'a> Builder<'a> {
             },
         );
 
+        let split_debuginfo = self.config.split_debuginfo(target);
         let split_debuginfo_is_stable = target.contains("linux")
             || target.contains("apple")
-            || (target.is_msvc() && self.config.rust_split_debuginfo == SplitDebuginfo::Packed)
-            || (target.is_windows() && self.config.rust_split_debuginfo == SplitDebuginfo::Off);
+            || (target.is_msvc() && split_debuginfo == SplitDebuginfo::Packed)
+            || (target.is_windows() && split_debuginfo == SplitDebuginfo::Off);
 
         if !split_debuginfo_is_stable {
             rustflags.arg("-Zunstable-options");
         }
-        match self.config.rust_split_debuginfo {
+        match split_debuginfo {
             SplitDebuginfo::Packed => rustflags.arg("-Csplit-debuginfo=packed"),
             SplitDebuginfo::Unpacked => rustflags.arg("-Csplit-debuginfo=unpacked"),
             SplitDebuginfo::Off => rustflags.arg("-Csplit-debuginfo=off"),
@@ -2160,11 +2163,11 @@ impl<'a> Builder<'a> {
                 panic!("{}", out);
             }
             if let Some(out) = self.cache.get(&step) {
-                self.verbose_than(1, &format!("{}c {:?}", "  ".repeat(stack.len()), step));
+                self.verbose_than(1, || println!("{}c {:?}", "  ".repeat(stack.len()), step));
 
                 return out;
             }
-            self.verbose_than(1, &format!("{}> {:?}", "  ".repeat(stack.len()), step));
+            self.verbose_than(1, || println!("{}> {:?}", "  ".repeat(stack.len()), step));
             stack.push(Box::new(step.clone()));
         }
 
@@ -2202,7 +2205,7 @@ impl<'a> Builder<'a> {
             let cur_step = stack.pop().expect("step stack empty");
             assert_eq!(cur_step.downcast_ref(), Some(&step));
         }
-        self.verbose_than(1, &format!("{}< {:?}", "  ".repeat(self.stack.borrow().len()), step));
+        self.verbose_than(1, || println!("{}< {:?}", "  ".repeat(self.stack.borrow().len()), step));
         self.cache.put(step, out.clone());
         out
     }

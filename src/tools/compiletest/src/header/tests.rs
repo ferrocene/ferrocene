@@ -5,6 +5,8 @@ use std::str::FromStr;
 use crate::common::{Config, Debugger, Mode};
 use crate::header::{parse_normalization_string, EarlyProps, HeadersCache};
 
+use super::iter_header;
+
 fn make_test_description<R: Read>(
     config: &Config,
     name: test::TestName,
@@ -283,6 +285,7 @@ fn ignore_target() {
     assert!(check_ignore(&config, "//@ ignore-x86_64-unknown-linux-gnu"));
     assert!(check_ignore(&config, "//@ ignore-x86_64"));
     assert!(check_ignore(&config, "//@ ignore-linux"));
+    assert!(check_ignore(&config, "//@ ignore-unix"));
     assert!(check_ignore(&config, "//@ ignore-gnu"));
     assert!(check_ignore(&config, "//@ ignore-64bit"));
 
@@ -298,6 +301,7 @@ fn only_target() {
 
     assert!(check_ignore(&config, "//@ only-x86"));
     assert!(check_ignore(&config, "//@ only-linux"));
+    assert!(check_ignore(&config, "//@ only-unix"));
     assert!(check_ignore(&config, "//@ only-msvc"));
     assert!(check_ignore(&config, "//@ only-32bit"));
 
@@ -611,4 +615,64 @@ fn threads_support() {
         assert_eq!(config.has_threads(), has_threads);
         assert_eq!(check_ignore(&config, "//@ needs-threads"), !has_threads)
     }
+}
+
+fn run_path(poisoned: &mut bool, path: &Path, buf: &[u8]) {
+    let rdr = std::io::Cursor::new(&buf);
+    iter_header(Mode::Ui, "ui", poisoned, path, rdr, &mut |_| {});
+}
+
+#[test]
+fn test_unknown_directive_check() {
+    let mut poisoned = false;
+    run_path(
+        &mut poisoned,
+        Path::new("a.rs"),
+        include_bytes!("./test-auxillary/unknown_directive.rs"),
+    );
+    assert!(poisoned);
+}
+
+#[test]
+fn test_known_legacy_directive_check() {
+    let mut poisoned = false;
+    run_path(
+        &mut poisoned,
+        Path::new("a.rs"),
+        include_bytes!("./test-auxillary/known_legacy_directive.rs"),
+    );
+    assert!(poisoned);
+}
+
+#[test]
+fn test_known_directive_check_no_error() {
+    let mut poisoned = false;
+    run_path(
+        &mut poisoned,
+        Path::new("a.rs"),
+        include_bytes!("./test-auxillary/known_directive.rs"),
+    );
+    assert!(!poisoned);
+}
+
+#[test]
+fn test_error_annotation_no_error() {
+    let mut poisoned = false;
+    run_path(
+        &mut poisoned,
+        Path::new("a.rs"),
+        include_bytes!("./test-auxillary/error_annotation.rs"),
+    );
+    assert!(!poisoned);
+}
+
+#[test]
+fn test_non_rs_unknown_directive_not_checked() {
+    let mut poisoned = false;
+    run_path(
+        &mut poisoned,
+        Path::new("a.Makefile"),
+        include_bytes!("./test-auxillary/not_rs.Makefile"),
+    );
+    assert!(!poisoned);
 }

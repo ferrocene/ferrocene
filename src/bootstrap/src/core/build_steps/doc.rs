@@ -16,7 +16,6 @@ use crate::core::build_steps::tool::{self, prepare_tool_cargo, SourceType, Tool}
 use crate::core::builder::{self, crate_description};
 use crate::core::builder::{Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::{Config, TargetSelection};
-use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::helpers::{dir_is_empty, symlink_dir, t, up_to_date};
 use crate::Mode;
 
@@ -59,8 +58,8 @@ macro_rules! book {
                 )?
                 builder.ensure(RustbookSrc {
                     target: self.target,
-                    name: INTERNER.intern_str($book_name),
-                    src: INTERNER.intern_path(builder.src.join($path)),
+                    name: $book_name.to_owned(),
+                    src: builder.src.join($path),
                     parent: Some(self),
                 })
             }
@@ -108,18 +107,18 @@ impl Step for UnstableBook {
         builder.ensure(UnstableBookGen { target: self.target });
         builder.ensure(RustbookSrc {
             target: self.target,
-            name: INTERNER.intern_str("unstable-book"),
-            src: INTERNER.intern_path(builder.md_doc_out(self.target).join("unstable-book")),
+            name: "unstable-book".to_owned(),
+            src: builder.md_doc_out(self.target).join("unstable-book"),
             parent: Some(self),
         })
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 struct RustbookSrc<P: Step> {
     target: TargetSelection,
-    name: Interned<String>,
-    src: Interned<PathBuf>,
+    name: String,
+    src: PathBuf,
     parent: Option<P>,
 }
 
@@ -141,12 +140,13 @@ impl<P: Step> Step for RustbookSrc<P> {
         let out = builder.doc_out(target);
         t!(fs::create_dir_all(&out));
 
-        let out = out.join(name);
+        let out = out.join(&name);
         let index = out.join("index.html");
         let rustbook = builder.tool_exe(Tool::Rustbook);
         let mut rustbook_cmd = builder.tool_cmd(Tool::Rustbook);
 
-        if !builder.config.dry_run() && !(up_to_date(&src, &index) || up_to_date(&rustbook, &index))
+        if !builder.config.dry_run()
+            && (!up_to_date(&src, &index) || !up_to_date(&rustbook, &index))
         {
             builder.info(&format!("Rustbook ({target}) - {name}"));
             let _ = fs::remove_dir_all(&out);
@@ -211,8 +211,8 @@ impl Step for TheBook {
         // build book
         builder.ensure(RustbookSrc {
             target,
-            name: INTERNER.intern_str("book"),
-            src: INTERNER.intern_path(absolute_path.clone()),
+            name: "book".to_owned(),
+            src: absolute_path.clone(),
             parent: Some(self),
         });
 
@@ -220,8 +220,8 @@ impl Step for TheBook {
         for edition in &["first-edition", "second-edition", "2018-edition"] {
             builder.ensure(RustbookSrc {
                 target,
-                name: INTERNER.intern_string(format!("book/{edition}")),
-                src: INTERNER.intern_path(absolute_path.join(edition)),
+                name: format!("book/{edition}"),
+                src: absolute_path.join(edition),
                 // There should only be one book that is marked as the parent for each target, so
                 // treat the other editions as not having a parent.
                 parent: Option::<Self>::None,
@@ -531,12 +531,12 @@ impl Step for SharedAssets {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Std {
     pub stage: u32,
     pub target: TargetSelection,
     pub format: DocumentationFormat,
-    crates: Interned<Vec<String>>,
+    crates: Vec<String>,
 }
 
 impl Std {
@@ -551,7 +551,7 @@ impl Std {
             .into_iter()
             .map(|krate| krate.name.to_string())
             .collect();
-        Std { stage, target, format, crates: INTERNER.intern_list(crates) }
+        Std { stage, target, format, crates }
     }
 }
 
@@ -726,11 +726,11 @@ fn doc_std(
     builder.cp_r(&out_dir, out);
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Rustc {
     pub stage: u32,
     pub target: TargetSelection,
-    crates: Interned<Vec<String>>,
+    crates: Vec<String>,
 }
 
 impl Rustc {
@@ -740,7 +740,7 @@ impl Rustc {
             .into_iter()
             .map(|krate| krate.name.to_string())
             .collect();
-        Self { stage, target, crates: INTERNER.intern_list(crates) }
+        Self { stage, target, crates }
     }
 }
 
@@ -1199,8 +1199,8 @@ impl Step for RustcBook {
         // Run rustbook/mdbook to generate the HTML pages.
         builder.ensure(RustbookSrc {
             target: self.target,
-            name: INTERNER.intern_str("rustc"),
-            src: INTERNER.intern_path(out_base),
+            name: "rustc".to_owned(),
+            src: out_base,
             parent: Some(self),
         });
     }

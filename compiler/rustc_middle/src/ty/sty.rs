@@ -13,7 +13,7 @@ use crate::ty::{GenericArg, GenericArgs, GenericArgsRef};
 use crate::ty::{List, ParamEnv};
 use hir::def::DefKind;
 use rustc_data_structures::captures::Captures;
-use rustc_errors::{DiagArgValue, ErrorGuaranteed, IntoDiagnosticArg, MultiSpan};
+use rustc_errors::{DiagArgValue, ErrorGuaranteed, IntoDiagArg, MultiSpan};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_hir::LangItem;
@@ -1094,12 +1094,12 @@ impl<'tcx, T: IntoIterator> Binder<'tcx, T> {
     }
 }
 
-impl<'tcx, T> IntoDiagnosticArg for Binder<'tcx, T>
+impl<'tcx, T> IntoDiagArg for Binder<'tcx, T>
 where
-    T: IntoDiagnosticArg,
+    T: IntoDiagArg,
 {
-    fn into_diagnostic_arg(self) -> DiagArgValue {
-        self.value.into_diagnostic_arg()
+    fn into_diag_arg(self) -> DiagArgValue {
+        self.value.into_diag_arg()
     }
 }
 
@@ -1307,9 +1307,9 @@ impl<'tcx> FnSig<'tcx> {
     }
 }
 
-impl<'tcx> IntoDiagnosticArg for FnSig<'tcx> {
-    fn into_diagnostic_arg(self) -> DiagArgValue {
-        self.to_string().into_diagnostic_arg()
+impl<'tcx> IntoDiagArg for FnSig<'tcx> {
+    fn into_diag_arg(self) -> DiagArgValue {
+        self.to_string().into_diag_arg()
     }
 }
 
@@ -2008,13 +2008,10 @@ impl<'tcx> Ty<'tcx> {
                     // Single-argument Box is always global. (for "minicore" tests)
                     return true;
                 };
-                if let Some(alloc_adt) = alloc.expect_ty().ty_adt_def() {
+                alloc.expect_ty().ty_adt_def().is_some_and(|alloc_adt| {
                     let global_alloc = tcx.require_lang_item(LangItem::GlobalAlloc, None);
                     alloc_adt.did() == global_alloc
-                } else {
-                    // Allocator is not an ADT...
-                    false
-                }
+                })
             }
             _ => false,
         }
@@ -2439,8 +2436,9 @@ impl<'tcx> Ty<'tcx> {
             },
 
             // "Bound" types appear in canonical queries when the
-            // closure type is not yet known
-            Bound(..) | Param(_) | Infer(_) => None,
+            // closure type is not yet known, and `Placeholder` and `Param`
+            // may be encountered in generic `AsyncFnKindHelper` goals.
+            Bound(..) | Placeholder(_) | Param(_) | Infer(_) => None,
 
             Error(_) => Some(ty::ClosureKind::Fn),
 

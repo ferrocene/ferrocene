@@ -1,2 +1,2 @@
-error: codegen option `linker-flavor` requires one of: gnu gnu-lld gnu-cc gnu-lld-cc darwin darwin-lld darwin-cc darwin-lld-cc wasm-lld wasm-lld-cc unix unix-cc msvc-lld msvc em-cc bpf ptx gcc ld ld.lld ld64.lld lld-link wasm-ld em  (C linker-flavor=<value>)
+error: codegen option `linker-flavor` requires one of: gnu gnu-lld gnu-cc gnu-lld-cc darwin darwin-lld darwin-cc darwin-lld-cc wasm-lld wasm-lld-cc unix unix-cc msvc-lld msvc em-cc bpf llbc ptx gcc ld ld.lld ld64.lld lld-link wasm-ld em  (C linker-flavor=<value>)
 

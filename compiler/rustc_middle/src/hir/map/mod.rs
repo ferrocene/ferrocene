@@ -161,7 +161,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Retrieves the `hir::Node` corresponding to `id`, returning `None` if cannot be found.
     #[inline]
     pub fn opt_hir_node_by_def_id(self, id: LocalDefId) -> Option<Node<'tcx>> {
-        Some(self.hir_node(self.opt_local_def_id_to_hir_id(id)?))
+        Some(self.hir_node_by_def_id(id))
     }
 
     /// Retrieves the `hir::Node` corresponding to `id`.
@@ -169,12 +169,10 @@ impl<'tcx> TyCtxt<'tcx> {
         self.hir_owner_nodes(id.owner).nodes[id.local_id].node
     }
 
-    /// Retrieves the `hir::Node` corresponding to `id`, panicking if it cannot be found.
+    /// Retrieves the `hir::Node` corresponding to `id`.
     #[inline]
-    #[track_caller]
     pub fn hir_node_by_def_id(self, id: LocalDefId) -> Node<'tcx> {
-        self.opt_hir_node_by_def_id(id)
-            .unwrap_or_else(|| bug!("couldn't find HIR node for def id {id:?}"))
+        self.hir_node(self.local_def_id_to_hir_id(id))
     }
 
     /// Returns `HirId` of the parent HIR node of node with this `hir_id`.
@@ -343,7 +341,7 @@ impl<'hir> Map<'hir> {
             DefKind::InlineConst => BodyOwnerKind::Const { inline: true },
             DefKind::Ctor(..) | DefKind::Fn | DefKind::AssocFn => BodyOwnerKind::Fn,
             DefKind::Closure => BodyOwnerKind::Closure,
-            DefKind::Static(mt) => BodyOwnerKind::Static(mt),
+            DefKind::Static { mutability, nested: false } => BodyOwnerKind::Static(mutability),
             dk => bug!("{:?} is not a body node: {:?}", def_id, dk),
         }
     }
@@ -359,7 +357,7 @@ impl<'hir> Map<'hir> {
         let def_id = def_id.into();
         let ccx = match self.body_owner_kind(def_id) {
             BodyOwnerKind::Const { inline } => ConstContext::Const { inline },
-            BodyOwnerKind::Static(mt) => ConstContext::Static(mt),
+            BodyOwnerKind::Static(mutability) => ConstContext::Static(mutability),
 
             BodyOwnerKind::Fn if self.tcx.is_constructor(def_id) => return None,
             BodyOwnerKind::Fn | BodyOwnerKind::Closure if self.tcx.is_const_fn_raw(def_id) => {
@@ -655,7 +653,7 @@ impl<'hir> Map<'hir> {
                 | Node::ForeignItem(_)
                 | Node::TraitItem(_)
                 | Node::ImplItem(_)
-                | Node::Stmt(Stmt { kind: StmtKind::Local(_), .. }) => break,
+                | Node::Stmt(Stmt { kind: StmtKind::Let(_), .. }) => break,
                 Node::Expr(expr @ Expr { kind: ExprKind::If(..) | ExprKind::Match(..), .. }) => {
                     return Some(expr);
                 }
@@ -963,6 +961,7 @@ impl<'hir> Map<'hir> {
             Node::Crate(item) => item.spans.inner_span,
             Node::WhereBoundPredicate(pred) => pred.span,
             Node::ArrayLenInfer(inf) => inf.span,
+            Node::AssocOpaqueTy(..) => unreachable!(),
             Node::Err(span) => *span,
         }
     }
@@ -1227,6 +1226,7 @@ fn hir_id_to_string(map: Map<'_>, id: HirId) -> String {
         Node::Crate(..) => String::from("(root_crate)"),
         Node::WhereBoundPredicate(_) => node_str("where bound predicate"),
         Node::ArrayLenInfer(_) => node_str("array len infer"),
+        Node::AssocOpaqueTy(..) => unreachable!(),
         Node::Err(_) => node_str("error"),
     }
 }

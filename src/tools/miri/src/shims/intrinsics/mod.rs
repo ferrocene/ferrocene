@@ -129,6 +129,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                 this.write_bytes_ptr(ptr, iter::repeat(val_byte).take(byte_count.bytes_usize()))?;
             }
 
+            // Memory model / provenance manipulation
             "ptr_mask" => {
                 let [ptr, mask] = check_arg_count(args)?;
 
@@ -138,6 +139,18 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                 let masked_addr = Size::from_bytes(ptr.addr().bytes() & mask);
 
                 this.write_pointer(Pointer::new(ptr.provenance, masked_addr), dest)?;
+            }
+            "retag_box_to_raw" => {
+                let [ptr] = check_arg_count(args)?;
+                let alloc_ty = generic_args[1].expect_ty();
+
+                let val = this.read_immediate(ptr)?;
+                let new_val = if this.machine.borrow_tracker.is_some() {
+                    this.retag_box_to_raw(&val, alloc_ty)?
+                } else {
+                    val
+                };
+                this.write_immediate(*new_val, dest)?;
             }
 
             // We want to return either `true` or `false` at random, or else something like
@@ -274,13 +287,14 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                     _ => bug!(),
                 };
                 let float_finite = |x: &ImmTy<'tcx, _>| -> InterpResult<'tcx, bool> {
-                    Ok(match x.layout.ty.kind() {
-                        ty::Float(FloatTy::F32) => x.to_scalar().to_f32()?.is_finite(),
-                        ty::Float(FloatTy::F64) => x.to_scalar().to_f64()?.is_finite(),
-                        _ => bug!(
-                            "`{intrinsic_name}` called with non-float input type {ty:?}",
-                            ty = x.layout.ty,
-                        ),
+                    let ty::Float(fty) = x.layout.ty.kind() else {
+                        bug!("float_finite: non-float input type {}", x.layout.ty)
+                    };
+                    Ok(match fty {
+                        FloatTy::F16 => unimplemented!("f16_f128"),
+                        FloatTy::F32 => x.to_scalar().to_f32()?.is_finite(),
+                        FloatTy::F64 => x.to_scalar().to_f64()?.is_finite(),
+                        FloatTy::F128 => unimplemented!("f16_f128"),
                     })
                 };
                 match (float_finite(&a)?, float_finite(&b)?) {

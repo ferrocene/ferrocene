@@ -7,20 +7,22 @@ use rustc_data_structures::sync;
 use rustc_metadata::{load_symbol_from_dylib, DylibError};
 use rustc_parse::validate_attr;
 use rustc_session as session;
-use rustc_session::config::{self, Cfg, CrateType, OutFileName, OutputFilenames, OutputTypes};
+use rustc_session::config::{Cfg, OutFileName, OutputFilenames, OutputTypes};
 use rustc_session::filesearch::sysroot_candidates;
 use rustc_session::lint::{self, BuiltinLintDiag, LintBuffer};
-use rustc_session::{filesearch, output, Session};
+use rustc_session::{filesearch, Session};
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::edition::Edition;
-use rustc_span::symbol::{sym, Symbol};
+use rustc_span::symbol::sym;
+use rustc_target::spec::Target;
+use session::output::{categorize_crate_type, CRATE_TYPES};
 use session::EarlyDiagCtxt;
-use std::env;
 use std::env::consts::{DLL_PREFIX, DLL_SUFFIX};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::OnceLock;
 use std::thread;
+use std::{env, iter};
 
 /// Function pointer type that constructs a new CodegenBackend.
 pub type MakeBackendFn = fn() -> Box<dyn CodegenBackend>;
@@ -101,10 +103,11 @@ pub(crate) fn run_in_thread_pool_with_globals<F: FnOnce() -> R + Send, R: Send>(
     threads: usize,
     f: F,
 ) -> R {
-    use rustc_data_structures::{jobserver, sync::FromDyn};
+    use rustc_data_structures::{defer, jobserver, sync::FromDyn};
     use rustc_middle::ty::tls;
     use rustc_query_impl::QueryCtxt;
-    use rustc_query_system::query::{deadlock, QueryContext};
+    use rustc_query_system::query::{break_query_cycles, QueryContext};
+    use std::process;
 
     let registry = sync::Registry::new(std::num::NonZero::new(threads).unwrap());
 
@@ -128,7 +131,19 @@ pub(crate) fn run_in_thread_pool_with_globals<F: FnOnce() -> R + Send, R: Send>(
             let query_map =
                 FromDyn::from(tls::with(|tcx| QueryCtxt::new(tcx).collect_active_jobs()));
             let registry = rayon_core::Registry::current();
-            thread::spawn(move || deadlock(query_map.into_inner(), &registry));
+            thread::Builder::new()
+                .name("rustc query cycle handler".to_string())
+                .spawn(move || {
+                    let on_panic = defer(|| {
+                        eprintln!("query cycle handler thread panicked, aborting process");
+                        // We need to abort here as we failed to resolve the deadlock,
+                        // otherwise the compiler could just hang,
+                        process::abort();
+                    });
+                    break_query_cycles(query_map.into_inner(), &registry);
+                    on_panic.disable();
+                })
+                .unwrap();
         });
     if let Some(size) = get_stack_size() {
         builder = builder.stack_size(size);
@@ -182,21 +197,25 @@ fn load_backend_from_dylib(early_dcx: &EarlyDiagCtxt, path: &Path) -> MakeBacken
 /// A name of `None` indicates that the default backend should be used.
 pub fn get_codegen_backend(
     early_dcx: &EarlyDiagCtxt,
-    maybe_sysroot: &Option<PathBuf>,
+    sysroot: &Path,
     backend_name: Option<&str>,
+    target: &Target,
 ) -> Box<dyn CodegenBackend> {
     static LOAD: OnceLock<unsafe fn() -> Box<dyn CodegenBackend>> = OnceLock::new();
 
     let load = LOAD.get_or_init(|| {
-        let default_codegen_backend = option_env!("CFG_DEFAULT_CODEGEN_BACKEND").unwrap_or("llvm");
+        let backend = backend_name
+            .or(target.default_codegen_backend.as_deref())
+            .or(option_env!("CFG_DEFAULT_CODEGEN_BACKEND"))
+            .unwrap_or("llvm");
 
-        match backend_name.unwrap_or(default_codegen_backend) {
+        match backend {
             filename if filename.contains('.') => {
                 load_backend_from_dylib(early_dcx, filename.as_ref())
             }
             #[cfg(feature = "llvm")]
             "llvm" => rustc_codegen_llvm::LlvmCodegenBackend::new,
-            backend_name => get_codegen_sysroot(early_dcx, maybe_sysroot, backend_name),
+            backend_name => get_codegen_sysroot(early_dcx, sysroot, backend_name),
         }
     });
 
@@ -231,7 +250,7 @@ fn get_rustc_path_inner(bin_path: &str) -> Option<PathBuf> {
 #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
 fn get_codegen_sysroot(
     early_dcx: &EarlyDiagCtxt,
-    maybe_sysroot: &Option<PathBuf>,
+    sysroot: &Path,
     backend_name: &str,
 ) -> MakeBackendFn {
     // For now we only allow this function to be called once as it'll dlopen a
@@ -248,28 +267,28 @@ fn get_codegen_sysroot(
     let target = session::config::host_triple();
     let sysroot_candidates = sysroot_candidates();
 
-    let sysroot = maybe_sysroot
-        .iter()
-        .chain(sysroot_candidates.iter())
+    let sysroot = iter::once(sysroot)
+        .chain(sysroot_candidates.iter().map(<_>::as_ref))
         .map(|sysroot| {
             filesearch::make_target_lib_path(sysroot, target).with_file_name("codegen-backends")
         })
         .find(|f| {
             info!("codegen backend candidate: {}", f.display());
             f.exists()
-        });
-    let sysroot = sysroot.unwrap_or_else(|| {
-        let candidates = sysroot_candidates
-            .iter()
-            .map(|p| p.display().to_string())
-            .collect::<Vec<_>>()
-            .join("\n* ");
-        let err = format!(
-            "failed to find a `codegen-backends` folder \
+        })
+        .unwrap_or_else(|| {
+            let candidates = sysroot_candidates
+                .iter()
+                .map(|p| p.display().to_string())
+                .collect::<Vec<_>>()
+                .join("\n* ");
+            let err = format!(
+                "failed to find a `codegen-backends` folder \
                            in the sysroot candidates:\n* {candidates}"
-        );
-        early_dcx.early_fatal(err);
-    });
+            );
+            early_dcx.early_fatal(err);
+        });
+
     info!("probing {} for a codegen backend", sysroot.display());
 
     let d = sysroot.read_dir().unwrap_or_else(|e| {
@@ -379,67 +398,6 @@ pub(crate) fn check_attr_crate_type(
             }
         }
     }
-}
-
-const CRATE_TYPES: &[(Symbol, CrateType)] = &[
-    (sym::rlib, CrateType::Rlib),
-    (sym::dylib, CrateType::Dylib),
-    (sym::cdylib, CrateType::Cdylib),
-    (sym::lib, config::default_lib_output()),
-    (sym::staticlib, CrateType::Staticlib),
-    (sym::proc_dash_macro, CrateType::ProcMacro),
-    (sym::bin, CrateType::Executable),
-];
-
-fn categorize_crate_type(s: Symbol) -> Option<CrateType> {
-    Some(CRATE_TYPES.iter().find(|(key, _)| *key == s)?.1)
-}
-
-pub fn collect_crate_types(session: &Session, attrs: &[ast::Attribute]) -> Vec<CrateType> {
-    // If we're generating a test executable, then ignore all other output
-    // styles at all other locations
-    if session.opts.test {
-        return vec![CrateType::Executable];
-    }
-
-    // Only check command line flags if present. If no types are specified by
-    // command line, then reuse the empty `base` Vec to hold the types that
-    // will be found in crate attributes.
-    // JUSTIFICATION: before wrapper fn is available
-    #[allow(rustc::bad_opt_access)]
-    let mut base = session.opts.crate_types.clone();
-    if base.is_empty() {
-        let attr_types = attrs.iter().filter_map(|a| {
-            if a.has_name(sym::crate_type)
-                && let Some(s) = a.value_str()
-            {
-                categorize_crate_type(s)
-            } else {
-                None
-            }
-        });
-        base.extend(attr_types);
-        if base.is_empty() {
-            base.push(output::default_output_for_target(session));
-        } else {
-            base.sort();
-            base.dedup();
-        }
-    }
-
-    base.retain(|crate_type| {
-        if output::invalid_output_for_target(session, *crate_type) {
-            session.dcx().emit_warn(errors::UnsupportedCrateTypeForTarget {
-                crate_type: *crate_type,
-                target_triple: &session.opts.target_triple,
-            });
-            false
-        } else {
-            true
-        }
-    });
-
-    base
 }
 
 fn multiple_output_types_to_stdout(

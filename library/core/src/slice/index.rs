@@ -1,9 +1,9 @@
 //! Indexing implementations for `[T]`.
 
+use crate::intrinsics::assert_unsafe_precondition;
 use crate::intrinsics::const_eval_select;
 use crate::intrinsics::unchecked_sub;
 use crate::ops;
-use crate::panic::debug_assert_nounwind;
 use crate::ptr;
 
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -180,19 +180,19 @@ pub unsafe trait SliceIndex<T: ?Sized>: private_slice_index::Sealed {
     #[unstable(feature = "slice_index_methods", issue = "none")]
     fn get_mut(self, slice: &mut T) -> Option<&mut Self::Output>;
 
-    /// Returns a shared reference to the output at this location, without
+    /// Returns a pointer to the output at this location, without
     /// performing any bounds checking.
     /// Calling this method with an out-of-bounds index or a dangling `slice` pointer
-    /// is *[undefined behavior]* even if the resulting reference is not used.
+    /// is *[undefined behavior]* even if the resulting pointer is not used.
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[unstable(feature = "slice_index_methods", issue = "none")]
     unsafe fn get_unchecked(self, slice: *const T) -> *const Self::Output;
 
-    /// Returns a mutable reference to the output at this location, without
+    /// Returns a mutable pointer to the output at this location, without
     /// performing any bounds checking.
     /// Calling this method with an out-of-bounds index or a dangling `slice` pointer
-    /// is *[undefined behavior]* even if the resulting reference is not used.
+    /// is *[undefined behavior]* even if the resulting pointer is not used.
     ///
     /// [undefined behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
     #[unstable(feature = "slice_index_methods", issue = "none")]
@@ -230,9 +230,10 @@ unsafe impl<T> SliceIndex<[T]> for usize {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const T {
-        debug_assert_nounwind!(
-            self < slice.len(),
-            "slice::get_unchecked requires that the index is within the slice"
+        assert_unsafe_precondition!(
+            check_language_ub,
+            "slice::get_unchecked requires that the index is within the slice",
+            (this: usize = self, len: usize = slice.len()) => this < len
         );
         // SAFETY: the caller guarantees that `slice` is not dangling, so it
         // cannot be longer than `isize::MAX`. They also guarantee that
@@ -248,9 +249,10 @@ unsafe impl<T> SliceIndex<[T]> for usize {
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut T {
-        debug_assert_nounwind!(
-            self < slice.len(),
-            "slice::get_unchecked_mut requires that the index is within the slice"
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "slice::get_unchecked_mut requires that the index is within the slice",
+            (this: usize = self, len: usize = slice.len()) => this < len
         );
         // SAFETY: see comments for `get_unchecked` above.
         unsafe { slice.as_mut_ptr().add(self) }
@@ -297,9 +299,10 @@ unsafe impl<T> SliceIndex<[T]> for ops::IndexRange {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        debug_assert_nounwind!(
-            self.end() <= slice.len(),
-            "slice::get_unchecked requires that the index is within the slice"
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "slice::get_unchecked requires that the index is within the slice",
+            (end: usize = self.end(), len: usize = slice.len()) => end <= len
         );
         // SAFETY: the caller guarantees that `slice` is not dangling, so it
         // cannot be longer than `isize::MAX`. They also guarantee that
@@ -310,9 +313,10 @@ unsafe impl<T> SliceIndex<[T]> for ops::IndexRange {
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        debug_assert_nounwind!(
-            self.end() <= slice.len(),
-            "slice::get_unchecked_mut requires that the index is within the slice"
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "slice::get_unchecked_mut requires that the index is within the slice",
+            (end: usize = self.end(), len: usize = slice.len()) => end <= len
         );
 
         // SAFETY: see comments for `get_unchecked` above.
@@ -367,9 +371,14 @@ unsafe impl<T> SliceIndex<[T]> for ops::Range<usize> {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        debug_assert_nounwind!(
-            self.end >= self.start && self.end <= slice.len(),
-            "slice::get_unchecked requires that the range is within the slice"
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "slice::get_unchecked requires that the range is within the slice",
+            (
+                start: usize = self.start,
+                end: usize = self.end,
+                len: usize = slice.len()
+            ) => end >= start && end <= len
         );
 
         // SAFETY: the caller guarantees that `slice` is not dangling, so it
@@ -384,9 +393,14 @@ unsafe impl<T> SliceIndex<[T]> for ops::Range<usize> {
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        debug_assert_nounwind!(
-            self.end >= self.start && self.end <= slice.len(),
-            "slice::get_unchecked_mut requires that the range is within the slice"
+        assert_unsafe_precondition!(
+            check_library_ub,
+            "slice::get_unchecked_mut requires that the range is within the slice",
+            (
+                start: usize = self.start,
+                end: usize = self.end,
+                len: usize = slice.len()
+            ) => end >= start && end <= len
         );
         // SAFETY: see comments for `get_unchecked` above.
         unsafe {
@@ -690,8 +704,7 @@ where
 {
     let len = bounds.end;
 
-    let start: ops::Bound<&usize> = range.start_bound();
-    let start = match start {
+    let start = match range.start_bound() {
         ops::Bound::Included(&start) => start,
         ops::Bound::Excluded(start) => {
             start.checked_add(1).unwrap_or_else(|| slice_start_index_overflow_fail())
@@ -699,8 +712,7 @@ where
         ops::Bound::Unbounded => 0,
     };
 
-    let end: ops::Bound<&usize> = range.end_bound();
-    let end = match end {
+    let end = match range.end_bound() {
         ops::Bound::Included(end) => {
             end.checked_add(1).unwrap_or_else(|| slice_end_index_overflow_fail())
         }
@@ -716,6 +728,59 @@ where
     }
 
     ops::Range { start, end }
+}
+
+/// Performs bounds-checking of a range without panicking.
+///
+/// This is a version of [`range`] that returns [`None`] instead of panicking.
+///
+/// # Examples
+///
+/// ```
+/// #![feature(slice_range)]
+///
+/// use std::slice;
+///
+/// let v = [10, 40, 30];
+/// assert_eq!(Some(1..2), slice::try_range(1..2, ..v.len()));
+/// assert_eq!(Some(0..2), slice::try_range(..2, ..v.len()));
+/// assert_eq!(Some(1..3), slice::try_range(1.., ..v.len()));
+/// ```
+///
+/// Returns [`None`] when [`Index::index`] would panic:
+///
+/// ```
+/// #![feature(slice_range)]
+///
+/// use std::slice;
+///
+/// assert_eq!(None, slice::try_range(2..1, ..3));
+/// assert_eq!(None, slice::try_range(1..4, ..3));
+/// assert_eq!(None, slice::try_range(1..=usize::MAX, ..3));
+/// ```
+///
+/// [`Index::index`]: ops::Index::index
+#[unstable(feature = "slice_range", issue = "76393")]
+#[must_use]
+pub fn try_range<R>(range: R, bounds: ops::RangeTo<usize>) -> Option<ops::Range<usize>>
+where
+    R: ops::RangeBounds<usize>,
+{
+    let len = bounds.end;
+
+    let start = match range.start_bound() {
+        ops::Bound::Included(&start) => start,
+        ops::Bound::Excluded(start) => start.checked_add(1)?,
+        ops::Bound::Unbounded => 0,
+    };
+
+    let end = match range.end_bound() {
+        ops::Bound::Included(end) => end.checked_add(1)?,
+        ops::Bound::Excluded(&end) => end,
+        ops::Bound::Unbounded => len,
+    };
+
+    if start > end || end > len { None } else { Some(ops::Range { start, end }) }
 }
 
 /// Convert pair of `ops::Bound`s into `ops::Range` without performing any bounds checking and (in debug) overflow checking

@@ -236,6 +236,7 @@ pub struct Config {
     pub lld_mode: LldMode,
     pub lld_enabled: bool,
     pub llvm_tools_enabled: bool,
+    pub llvm_bitcode_linker_enabled: bool,
 
     pub llvm_cflags: Option<String>,
     pub llvm_cxxflags: Option<String>,
@@ -255,7 +256,7 @@ pub struct Config {
     pub rust_debuginfo_level_std: DebuginfoLevel,
     pub rust_debuginfo_level_tools: DebuginfoLevel,
     pub rust_debuginfo_level_tests: DebuginfoLevel,
-    pub rust_split_debuginfo: SplitDebuginfo,
+    pub rust_split_debuginfo_for_build_triple: Option<SplitDebuginfo>, // FIXME: Deprecated field. Remove in Q3'24.
     pub rust_rpath: bool,
     pub rust_strip: bool,
     pub rust_frame_pointers: bool,
@@ -264,7 +265,7 @@ pub struct Config {
     pub rustc_default_linker: Option<String>,
     pub rust_optimize_tests: bool,
     pub rust_dist_src: bool,
-    pub rust_codegen_backends: Vec<Interned<String>>,
+    pub rust_codegen_backends: Vec<String>,
     pub rust_verify_llvm_ir: bool,
     pub rust_thin_lto_import_instr_limit: Option<u32>,
     pub rust_remap_debuginfo: bool,
@@ -489,6 +490,8 @@ impl std::str::FromStr for RustcLto {
 }
 
 #[derive(Copy, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+// N.B.: This type is used everywhere, and the entire codebase relies on it being Copy.
+// Making !Copy is highly nontrivial!
 pub struct TargetSelection {
     pub triple: Interned<String>,
     file: Option<Interned<String>>,
@@ -602,6 +605,7 @@ pub struct Target {
     pub ranlib: Option<PathBuf>,
     pub default_linker: Option<PathBuf>,
     pub linker: Option<PathBuf>,
+    pub split_debuginfo: Option<SplitDebuginfo>,
     pub sanitizers: Option<bool>,
     pub profiler: Option<StringOrBool>,
     pub rpath: Option<bool>,
@@ -610,8 +614,9 @@ pub struct Target {
     pub musl_libdir: Option<PathBuf>,
     pub wasi_root: Option<PathBuf>,
     pub qemu_rootfs: Option<PathBuf>,
+    pub runner: Option<String>,
     pub no_std: bool,
-    pub codegen_backends: Option<Vec<Interned<String>>>,
+    pub codegen_backends: Option<Vec<String>>,
 }
 
 impl Target {
@@ -850,8 +855,8 @@ define_config! {
         host: Option<Vec<String>> = "host",
         target: Option<Vec<String>> = "target",
         build_dir: Option<String> = "build-dir",
-        cargo: Option<String> = "cargo",
-        rustc: Option<String> = "rustc",
+        cargo: Option<PathBuf> = "cargo",
+        rustc: Option<PathBuf> = "rustc",
         rustfmt: Option<PathBuf> = "rustfmt",
         docs: Option<bool> = "docs",
         compiler_docs: Option<bool> = "compiler-docs",
@@ -1134,6 +1139,7 @@ define_config! {
         dist_src: Option<bool> = "dist-src",
         save_toolstates: Option<String> = "save-toolstates",
         codegen_backends: Option<Vec<String>> = "codegen-backends",
+        llvm_bitcode_linker: Option<bool> = "llvm-bitcode-linker",
         lld: Option<bool> = "lld",
         lld_mode: Option<LldMode> = "use-lld",
         llvm_tools: Option<bool> = "llvm-tools",
@@ -1166,6 +1172,7 @@ define_config! {
         ranlib: Option<String> = "ranlib",
         default_linker: Option<PathBuf> = "default-linker",
         linker: Option<String> = "linker",
+        split_debuginfo: Option<String> = "split-debuginfo",
         llvm_config: Option<String> = "llvm-config",
         llvm_has_rust_patches: Option<bool> = "llvm-has-rust-patches",
         llvm_filecheck: Option<String> = "llvm-filecheck",
@@ -1180,6 +1187,7 @@ define_config! {
         qemu_rootfs: Option<String> = "qemu-rootfs",
         no_std: Option<bool> = "no-std",
         codegen_backends: Option<Vec<String>> = "codegen-backends",
+        runner: Option<String> = "runner",
     }
 }
 
@@ -1216,7 +1224,7 @@ impl Config {
             channel: "dev".to_string(),
             codegen_tests: true,
             rust_dist_src: true,
-            rust_codegen_backends: vec![INTERNER.intern_str("llvm")],
+            rust_codegen_backends: vec!["llvm".to_owned()],
             deny_warnings: true,
             bindir: "bin".into(),
             dist_include_mingw_linker: true,
@@ -1487,7 +1495,7 @@ impl Config {
             if !flags.skip_stage0_validation {
                 config.check_stage0_version(&rustc, "rustc");
             }
-            PathBuf::from(rustc)
+            rustc
         } else {
             config.download_beta_toolchain();
             config.out.join(config.build.triple).join("stage0/bin/rustc")
@@ -1497,7 +1505,7 @@ impl Config {
             if !flags.skip_stage0_validation {
                 config.check_stage0_version(&cargo, "cargo");
             }
-            PathBuf::from(cargo)
+            cargo
         } else {
             config.download_beta_toolchain();
             config.out.join(config.build.triple).join("stage0/bin/cargo")
@@ -1621,6 +1629,7 @@ impl Config {
                 codegen_backends,
                 lld,
                 llvm_tools,
+                llvm_bitcode_linker,
                 deny_warnings,
                 backtrace_on_ice,
                 verify_llvm_ir,
@@ -1674,11 +1683,18 @@ impl Config {
             debuginfo_level_tools = debuginfo_level_tools_toml;
             debuginfo_level_tests = debuginfo_level_tests_toml;
 
-            config.rust_split_debuginfo = split_debuginfo
+            config.rust_split_debuginfo_for_build_triple = split_debuginfo
                 .as_deref()
                 .map(SplitDebuginfo::from_str)
-                .map(|v| v.expect("invalid value for rust.split_debuginfo"))
-                .unwrap_or(SplitDebuginfo::default_for_platform(config.build));
+                .map(|v| v.expect("invalid value for rust.split-debuginfo"));
+
+            if config.rust_split_debuginfo_for_build_triple.is_some() {
+                println!(
+                    "WARNING: specifying `rust.split-debuginfo` is deprecated, use `target.{}.split-debuginfo` instead",
+                    config.build
+                );
+            }
+
             optimize = optimize_toml;
             omit_git_hash = omit_git_hash_toml;
             config.rust_new_symbol_mangling = new_symbol_mangling;
@@ -1700,6 +1716,7 @@ impl Config {
             }
             set(&mut config.lld_mode, lld_mode);
             set(&mut config.lld_enabled, lld);
+            set(&mut config.llvm_bitcode_linker_enabled, llvm_bitcode_linker);
 
             if matches!(config.lld_mode, LldMode::SelfContained)
                 && !config.lld_enabled
@@ -1747,7 +1764,7 @@ impl Config {
                         }
                     }
 
-                    INTERNER.intern_str(s)
+                    s.clone()
                 }).collect();
             }
 
@@ -1899,10 +1916,11 @@ impl Config {
                 if let Some(ref s) = cfg.llvm_filecheck {
                     target.llvm_filecheck = Some(config.src.join(s));
                 }
-                target.llvm_libunwind = cfg
-                    .llvm_libunwind
-                    .as_ref()
-                    .map(|v| v.parse().expect("failed to parse rust.llvm-libunwind"));
+                target.llvm_libunwind = cfg.llvm_libunwind.as_ref().map(|v| {
+                    v.parse().unwrap_or_else(|_| {
+                        panic!("failed to parse target.{triple}.llvm-libunwind")
+                    })
+                });
                 if let Some(s) = cfg.no_std {
                     target.no_std = s;
                 }
@@ -1916,6 +1934,7 @@ impl Config {
                 target.musl_libdir = cfg.musl_libdir.map(PathBuf::from);
                 target.wasi_root = cfg.wasi_root.map(PathBuf::from);
                 target.qemu_rootfs = cfg.qemu_rootfs.map(PathBuf::from);
+                target.runner = cfg.runner;
                 target.sanitizers = cfg.sanitizers;
                 target.profiler = cfg.profiler;
                 target.rpath = cfg.rpath;
@@ -1934,9 +1953,15 @@ impl Config {
                             }
                         }
 
-                        INTERNER.intern_str(s)
+                        s.clone()
                     }).collect());
                 }
+
+                target.split_debuginfo = cfg.split_debuginfo.as_ref().map(|v| {
+                    v.parse().unwrap_or_else(|_| {
+                        panic!("invalid value for target.{triple}.split-debuginfo")
+                    })
+                });
 
                 config.target_config.insert(TargetSelection::from_user(&triple), target);
             }
@@ -2124,7 +2149,7 @@ impl Config {
         if self.dry_run() {
             return Ok(());
         }
-        self.verbose(&format!("running: {cmd:?}"));
+        self.verbose(|| println!("running: {cmd:?}"));
         build_helper::util::try_run(cmd, self.is_verbose())
     }
 
@@ -2306,9 +2331,10 @@ impl Config {
         }
     }
 
-    pub fn verbose(&self, msg: &str) {
+    /// Runs a function if verbosity is greater than 0
+    pub fn verbose(&self, f: impl Fn()) {
         if self.verbose > 0 {
-            println!("{msg}");
+            f()
         }
     }
 
@@ -2352,7 +2378,7 @@ impl Config {
     }
 
     pub fn llvm_enabled(&self, target: TargetSelection) -> bool {
-        self.codegen_backends(target).contains(&INTERNER.intern_str("llvm"))
+        self.codegen_backends(target).contains(&"llvm".to_owned())
     }
 
     pub fn llvm_libunwind(&self, target: TargetSelection) -> LlvmLibunwind {
@@ -2367,18 +2393,28 @@ impl Config {
             })
     }
 
+    pub fn split_debuginfo(&self, target: TargetSelection) -> SplitDebuginfo {
+        self.target_config
+            .get(&target)
+            .and_then(|t| t.split_debuginfo)
+            .or_else(|| {
+                if self.build == target { self.rust_split_debuginfo_for_build_triple } else { None }
+            })
+            .unwrap_or_else(|| SplitDebuginfo::default_for_platform(target))
+    }
+
     pub fn submodules(&self, rust_info: &GitInfo) -> bool {
         self.submodules.unwrap_or(rust_info.is_managed_git_subrepository())
     }
 
-    pub fn codegen_backends(&self, target: TargetSelection) -> &[Interned<String>] {
+    pub fn codegen_backends(&self, target: TargetSelection) -> &[String] {
         self.target_config
             .get(&target)
             .and_then(|cfg| cfg.codegen_backends.as_deref())
             .unwrap_or(&self.rust_codegen_backends)
     }
 
-    pub fn default_codegen_backend(&self, target: TargetSelection) -> Option<Interned<String>> {
+    pub fn default_codegen_backend(&self, target: TargetSelection) -> Option<String> {
         self.codegen_backends(target).first().cloned()
     }
 
@@ -2390,7 +2426,7 @@ impl Config {
     }
 
     // check rustc/cargo version is same or lower with 1 apart from the building one
-    pub fn check_stage0_version(&self, program_path: &str, component_name: &'static str) {
+    pub fn check_stage0_version(&self, program_path: &Path, component_name: &'static str) {
         if self.dry_run() {
             return;
         }
@@ -2401,7 +2437,8 @@ impl Config {
         let stage0_name = stage0_output.next().unwrap();
         if stage0_name != component_name {
             fail(&format!(
-                "Expected to find {component_name} at {program_path} but it claims to be {stage0_name}"
+                "Expected to find {component_name} at {} but it claims to be {stage0_name}",
+                program_path.display()
             ));
         }
 

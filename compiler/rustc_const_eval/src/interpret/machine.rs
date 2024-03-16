@@ -260,24 +260,6 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
         F2::NAN
     }
 
-    /// Called before writing the specified `local` of the `frame`.
-    /// Since writing a ZST is not actually accessing memory or locals, this is never invoked
-    /// for ZST reads.
-    ///
-    /// Due to borrow checker trouble, we indicate the `frame` as an index rather than an `&mut
-    /// Frame`.
-    #[inline(always)]
-    fn before_access_local_mut<'a>(
-        _ecx: &'a mut InterpCx<'mir, 'tcx, Self>,
-        _frame: usize,
-        _local: mir::Local,
-    ) -> InterpResult<'tcx>
-    where
-        'tcx: 'mir,
-    {
-        Ok(())
-    }
-
     /// Called before a basic block terminator is executed.
     #[inline]
     fn before_terminator(_ecx: &mut InterpCx<'mir, 'tcx, Self>) -> InterpResult<'tcx> {
@@ -391,6 +373,8 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
 
     /// Hook for performing extra checks on a memory read access.
     ///
+    /// This will *not* be called during validation!
+    ///
     /// Takes read-only access to the allocation so we can keep all the memory read
     /// operations take `&self`. Use a `RefCell` in `AllocExtra` if you
     /// need to mutate.
@@ -409,6 +393,8 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
 
     /// Hook for performing extra checks on any memory read access,
     /// that involves an allocation, even ZST reads.
+    ///
+    /// This will *not* be called during validation!
     ///
     /// Used to prevent statics from self-initializing by reading from their own memory
     /// as it is being initialized.
@@ -439,7 +425,8 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
         _machine: &mut Self,
         _alloc_extra: &mut Self::AllocExtra,
         _prov: (AllocId, Self::ProvenanceExtra),
-        _range: AllocRange,
+        _size: Size,
+        _align: Align,
     ) -> InterpResult<'tcx> {
         Ok(())
     }
@@ -472,11 +459,11 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
     /// argument/return value was actually copied or passed in-place..
     fn protect_in_place_function_argument(
         ecx: &mut InterpCx<'mir, 'tcx, Self>,
-        place: &PlaceTy<'tcx, Self::Provenance>,
+        mplace: &MPlaceTy<'tcx, Self::Provenance>,
     ) -> InterpResult<'tcx> {
         // Without an aliasing model, all we can do is put `Uninit` into the place.
         // Conveniently this also ensures that the place actually points to suitable memory.
-        ecx.write_uninit(place)
+        ecx.write_uninit(mplace)
     }
 
     /// Called immediately before a new stack frame gets pushed.
@@ -526,7 +513,6 @@ pub trait Machine<'mir, 'tcx: 'mir>: Sized {
     #[inline(always)]
     fn after_local_allocated(
         _ecx: &mut InterpCx<'mir, 'tcx, Self>,
-        _frame: usize,
         _local: mir::Local,
         _mplace: &MPlaceTy<'tcx, Self::Provenance>,
     ) -> InterpResult<'tcx> {

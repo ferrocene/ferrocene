@@ -39,10 +39,6 @@ class AddCustomSubstitutions(SphinxTransform):
             "rust_version",
             self.app.config["rust_version"],
         )
-        self.add_substitution(
-            "channel",
-            self.app.config["channel"],
-        )
 
     def add_substitution(self, name, value):
         substitution = nodes.substitution_definition()

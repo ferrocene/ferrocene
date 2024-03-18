@@ -35,10 +35,10 @@ Ferrocene installation archives are available for manual download at
 requires authentication through the customer portal, and doesn't allow
 programmatic access.
 
-On the channel list, select the "|channel|" channel to view the latest release
-published in that channel and its files. For each of the targets you identified
-above, download all the archives listed in the "installation archives" section
-of the target documentation.
+On the channel list, select the channel you want to view the latest release
+published in it (and its files). For each of the targets you identified above,
+download all the archives listed in the "installation archives" section of the
+target documentation.
 
 You must extract all downloaded archives in the **same** directory to finish
 the Ferrocene installation. Ferrocene binaries will then be available in the

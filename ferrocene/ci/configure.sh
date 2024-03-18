@@ -122,7 +122,12 @@ add --set rust.debug-logging=false
 #
 # If this configuration is missing the system allocator will be used, slowing
 # down the compiler.
-add --set rust.jemalloc
+#
+# On Windows, Jemalloc is not tested, and manual testing suggests it is not
+# supported.
+if [[ "${OSTYPE}" != "msys" ]]; then
+    add --set rust.jemalloc
+fi
 
 # Adds a custom string to the output of `rustc --version` to properly mark this
 # is not the upstream compiler.

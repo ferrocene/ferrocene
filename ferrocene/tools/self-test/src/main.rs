@@ -18,7 +18,15 @@ use std::path::PathBuf;
 use crate::error::Error;
 use crate::report::{Reporter, StderrReporter};
 
-/// Environment variables set by the caller of the binary.
+// Compile-time environment variables
+/// The Rust release ferrocene-self-test is being compiled for
+const CFG_RELEASE: &str = env!("CFG_RELEASE");
+/// The target-triple ferroce-self-test is being compiled for
+const SELFTEST_TARGET: &str = env!("SELFTEST_TARGET");
+const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_HASH");
+const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
+
+/// Run-time environment variables set by the caller of the binary.
 struct Environment {
     path: Option<OsString>,
 }

@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::Environment;
 use std::cell::RefCell;
 use std::io::Write;
 use std::os::unix::prelude::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
 use tempfile::TempDir;
+
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::{Environment, CFG_RELEASE, SELFTEST_RUST_HASH, SELFTEST_TARGET};
 
 pub(crate) struct TestUtils {
     environment: Environment,
@@ -123,13 +125,12 @@ impl<'a> BinBuilder<'a> {
     #[allow(non_snake_case)]
     #[must_use]
     pub(crate) fn behaves_like_vV(self) -> Self {
-        let mut stdout = String::new();
-        stdout.push_str(concat!("release: ", env!("CFG_RELEASE"), "\n"));
-        stdout.push_str(concat!("host: ", env!("SELFTEST_TARGET"), "\n"));
-        stdout.push_str("commit-hash: ");
-        stdout.push_str(option_env!("SELFTEST_RUST_HASH").unwrap_or("unknown"));
-        stdout.push('\n');
-
+        let stdout = format!(
+            "release: {CFG_RELEASE}
+            host: {SELFTEST_TARGET}
+            commit-hash: {}\n",
+            SELFTEST_RUST_HASH.unwrap_or("unknown")
+        );
         self.stdout(&stdout).stderr("").exit(0).expected_args(&["-vV"])
     }
 
@@ -223,9 +224,9 @@ pub(crate) struct CliVersionContent<'a> {
 impl Default for CliVersionContent<'_> {
     fn default() -> Self {
         Self {
-            release: env!("CFG_RELEASE"),
-            host: env!("SELFTEST_TARGET"),
-            commit_hash: option_env!("SELFTEST_RUST_HASH").unwrap_or("unknown"),
+            release: CFG_RELEASE,
+            host: SELFTEST_TARGET,
+            commit_hash: SELFTEST_RUST_HASH.unwrap_or("unknown"),
         }
     }
 }

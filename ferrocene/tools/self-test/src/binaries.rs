@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::utils::run_command;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
+
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::utils::run_command;
+use crate::{CFG_RELEASE, SELFTEST_CARGO_HASH, SELFTEST_RUST_HASH, SELFTEST_TARGET};
 
 /// Check that the executables exist in the expected path, and that they have the correct permissions.
 ///
@@ -92,8 +94,8 @@ fn parse_version_output(output: &str) -> Option<VersionOutput> {
 
 fn check_version(version: VersionOutput, hash: CommitHashOf, name: &str) -> Result<(), Error> {
     for (field, expected, found) in [
-        ("host", env!("SELFTEST_TARGET"), version.host),
-        ("release", env!("CFG_RELEASE"), version.release),
+        ("host", SELFTEST_TARGET, version.host),
+        ("release", CFG_RELEASE, version.release),
         ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
     ] {
         if expected != found {
@@ -138,8 +140,8 @@ enum CommitHashOf {
 impl CommitHashOf {
     fn fetch(&self) -> Option<&'static str> {
         match self {
-            CommitHashOf::Rust => option_env!("SELFTEST_RUST_HASH"),
-            CommitHashOf::Cargo => option_env!("SELFTEST_CARGO_HASH"),
+            CommitHashOf::Rust => SELFTEST_RUST_HASH,
+            CommitHashOf::Cargo => SELFTEST_CARGO_HASH,
         }
     }
 }

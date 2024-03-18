@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+mod argparse;
+
 use std::ffi::OsString;
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use argparse::LinkerArg;
+
 use crate::error::{Error, LinkerArgsErrorKind};
 use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::{find_binary_in_path, run_command};
-use crate::Environment;
-
-mod argparse;
-
-use argparse::LinkerArg;
+use crate::{Environment, SELFTEST_TARGET};
 
 /// The linker arg we ask the C compiler to add, to check it can add arbitrary
 /// arguments.
@@ -412,12 +412,8 @@ fn check_compiler_linker_args(
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
-    let path = sysroot
-        .join("lib")
-        .join("rustlib")
-        .join(env!("SELFTEST_TARGET"))
-        .join("bin")
-        .join("rust-lld");
+    let path =
+        sysroot.join("lib").join("rustlib").join(SELFTEST_TARGET).join("bin").join("rust-lld");
 
     if path.is_file() {
         reporter.success("bundled linker detected");
@@ -432,7 +428,7 @@ fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<P
     let path = sysroot
         .join("lib")
         .join("rustlib")
-        .join(env!("SELFTEST_TARGET"))
+        .join(SELFTEST_TARGET)
         .join("bin")
         .join("gcc-ld")
         .join("ld.lld");
@@ -466,7 +462,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld() {
         let utils = TestUtils::new();
-        utils.bin("rust-lld").for_target(env!("SELFTEST_TARGET")).create();
+        utils.bin("rust-lld").for_target(SELFTEST_TARGET).create();
 
         find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker detected");
@@ -487,7 +483,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld_wrapper() {
         let utils = TestUtils::new();
-        utils.bin("gcc-ld/ld.lld").for_target(env!("SELFTEST_TARGET")).create();
+        utils.bin("gcc-ld/ld.lld").for_target(SELFTEST_TARGET).create();
 
         find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker-wrapper detected");

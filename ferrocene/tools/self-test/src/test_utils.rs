@@ -233,15 +233,12 @@ impl Default for CliVersionContent<'_> {
 
 impl CliVersionContent<'_> {
     pub(crate) fn serialize(&self) -> String {
-        let mut buffer = String::new();
-        buffer.push_str("release: ");
-        buffer.push_str(self.release);
-        buffer.push_str("\nhost: ");
-        buffer.push_str(self.host);
-        buffer.push_str("\ncommit-hash: ");
-        buffer.push_str(self.commit_hash);
-        buffer.push('\n');
-        buffer
+        format!(
+            "release: {}
+            host: {}
+            commit-hash: {}\n",
+            self.release, self.host, self.commit_hash
+        )
     }
 }
 

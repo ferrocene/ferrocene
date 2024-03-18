@@ -90,22 +90,22 @@ enum CheckTargetOutcome {
 fn check_libraries(target: &TargetSpec, target_dir: &Path, expected: &[&str]) -> Result<(), Error> {
     let lib_dir = target_dir.join("lib");
 
-    let mut expected_to_find = expected.iter().map(|s| s.to_string()).collect::<HashSet<_>>();
+    let mut expected_to_find = expected.iter().cloned().collect::<HashSet<_>>();
     for (library, count) in find_libraries_in(&lib_dir)?.into_iter() {
         if count > 1 {
             return Err(Error::DuplicateTargetLibrary { target: target.triple.into(), library });
         }
-        expected_to_find.remove(&library);
+        expected_to_find.remove(library.as_str());
     }
 
-    if let Some(library) = expected_to_find.drain().next() {
-        return Err(Error::TargetLibraryMissing {
+    if let Some(library) = expected_to_find.iter().next() {
+        Err(Error::TargetLibraryMissing {
             target: target.triple.into(),
-            library: (*library).into(),
-        });
+            library: library.to_string(),
+        })
+    } else {
+        Ok(())
     }
-
-    Ok(())
 }
 
 fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {

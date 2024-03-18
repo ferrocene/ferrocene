@@ -50,7 +50,10 @@ case "$1" in
         # Call `zstd` separately to be able to use all cores available (`-T0`)
         # and the lowest compression level possible, to speed the compression
         # as much as possible.
-        tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        #
+        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+        # rather than stdout by default.
+        tar -cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -59,7 +62,7 @@ case "$1" in
         fi
         job="$2"
 
-        aws s3 cp "$(s3_url "${job}")" - | unzstd --stdout | tar x
+        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | tar x
         ;;
     *)
         usage 1>&2

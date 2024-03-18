@@ -171,7 +171,7 @@ case "$1" in
     download)
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        aws s3 cp "${s3_url}" - | zstd -d --stdout | tar -xf-
+        aws s3 cp "${s3_url}" - | zstd --decompress --stdout | tar -xf-
         echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)

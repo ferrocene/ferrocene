@@ -132,7 +132,7 @@ pub(crate) fn check_and_add_rustflags(
                 }
             }
         }
-        return Err(Error::SuitableCCompilerNotFound { target: target.triple.to_owned() });
+        return Err(Error::SuitableCCompilerNotFound { target: target.triple.into() });
     }
 
     Ok(())
@@ -168,7 +168,7 @@ where
                 // -plugin (which causes this loop to exit), then that's bad and
                 // we should report the error
                 return Err(Error::WrongLinkerArgs {
-                    target: target.to_owned(),
+                    target: target.into(),
                     kind: LinkerArgsErrorKind::DisallowedPlugin,
                 });
             }
@@ -191,7 +191,7 @@ where
             LinkerArg::Unknown(_) => {
                 // Hmm, we don't want unknown arguments
                 return Err(Error::WrongLinkerArgs {
-                    target: target.to_owned(),
+                    target: target.into(),
                     kind: LinkerArgsErrorKind::UnknownArgument,
                 });
             }
@@ -200,12 +200,12 @@ where
                 if compiler_args.iter().any(|s| "-fno-lto" == s) {
                     // We already turned LTO off, and we still got a plugin, so bail out
                     return Err(Error::WrongLinkerArgs {
-                        target: target.to_owned(),
+                        target: target.into(),
                         kind: LinkerArgsErrorKind::DisallowedPlugin,
                     });
                 }
                 // Try again with LTO disabled.
-                compiler_args.push("-fno-lto".to_owned());
+                compiler_args.push("-fno-lto".into());
                 return Ok(false);
             }
         }
@@ -232,7 +232,7 @@ fn check_system_compiler(
     extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
     let cc_path = find_binary_in_path(environment, compiler_name)
-        .map_err(|error| Error::CCompilerNotFound { name: compiler_name.to_owned(), error })?;
+        .map_err(|error| Error::CCompilerNotFound { name: compiler_name.into(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
@@ -270,7 +270,7 @@ fn cross_compile_test_program(
     let object_file = temp_dir.join("output.bin");
     std::fs::write(&source_file, c_source.as_bytes()).map_err(|error| {
         Error::WritingSampleProgramFailed {
-            name: "input.c".to_owned(),
+            name: "input.c".into(),
             dest: source_file.clone(),
             error,
         }
@@ -280,10 +280,10 @@ fn cross_compile_test_program(
     let mut args: Vec<OsString> = vec![
         "-fuse-ld=lld".into(),
         "-B".into(),
-        lld_dir.as_os_str().to_owned(),
-        source_file.as_os_str().to_owned(),
+        lld_dir.as_os_str().into(),
+        source_file.as_os_str().into(),
         "-o".into(),
-        object_file.as_os_str().to_owned(),
+        object_file.as_os_str().into(),
     ];
     for arg in extra_args {
         args.push(OsString::from(arg));
@@ -331,21 +331,21 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let args_file = temp_dir.join("_fst_args_capture");
 
     // Concatentation, using byte strings
-    let mut c_source = C_SOURCE.to_owned();
+    let mut c_source = C_SOURCE.to_vec();
     c_source.extend(args_file.as_os_str().as_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");
     let object_file = temp_dir.join("ld.lld");
     std::fs::write(&source_file, &c_source).map_err(|error| Error::WritingSampleProgramFailed {
-        name: "ldlld.c".to_owned(),
+        name: "ldlld.c".into(),
         dest: source_file.clone(),
         error,
     })?;
 
     // Compile our sample program
     let args: Vec<OsString> =
-        vec![source_file.as_os_str().to_owned(), "-o".into(), object_file.as_os_str().to_owned()];
+        vec![source_file.as_os_str().into(), "-o".into(), object_file.as_os_str().into()];
     // Always use the host compiler for this build
     let mut cc_child = Command::new("cc");
     cc_child.args(&args);
@@ -382,32 +382,29 @@ fn check_compiler_linker_args(
     // see what the fake linker wrote
     let Ok(args_file) = std::fs::read(args_file_path) else {
         return Err(Error::WrongLinkerArgs {
-            target: target.to_owned(),
+            target: target.into(),
             kind: LinkerArgsErrorKind::NoArgsFile,
         });
     };
     let Ok(args_str) = std::str::from_utf8(&args_file) else {
         return Err(Error::WrongLinkerArgs {
-            target: target.to_owned(),
+            target: target.into(),
             kind: LinkerArgsErrorKind::InvalidArgsFile,
         });
     };
 
     // parse the file
-    let args: Vec<String> = args_str.lines().map(|s| s.to_owned()).collect();
+    let args: Vec<String> = args_str.lines().map(|s| s.into()).collect();
 
     if args.is_empty() {
         // an empty file would be bad
         Err(Error::WrongLinkerArgs {
-            target: target.to_owned(),
+            target: target.into(),
             kind: LinkerArgsErrorKind::EmptyArgsFile,
         })
     } else if args.iter().filter(|s| s.as_str() == RANDOM_LINKER_ARG).count() != 1 {
         // Check the C compiler passed on our -Wl,<arg> argument exactly once.
-        Err(Error::WrongLinkerArgs {
-            target: target.to_owned(),
-            kind: LinkerArgsErrorKind::MissingArg,
-        })
+        Err(Error::WrongLinkerArgs { target: target.into(), kind: LinkerArgsErrorKind::MissingArg })
     } else {
         Ok(args)
     }
@@ -620,16 +617,10 @@ mod tests {
             linker_args.iter().cloned(),
             &mut compiler_args,
         ) {
-            Ok(true) => {
-                panic!("Unexpected acceptance processing {:?}", linker_args);
-            }
-            Ok(false) => {
-                // Correct
-                assert_eq!(&compiler_args, &["-fno-lto".to_owned()]);
-            }
-            Err(e) => {
-                panic!("Unexpected error {:?} processing {:?}", e, linker_args);
-            }
+            Ok(true) => panic!("Unexpected acceptance processing {:?}", linker_args),
+            // Correct
+            Ok(false) => assert_eq!(&compiler_args, &["-fno-lto".to_string()]),
+            Err(e) => panic!("Unexpected error {:?} processing {:?}", e, linker_args),
         }
         // Second try, with -fno-lto
         match linker_args_ok(
@@ -637,12 +628,9 @@ mod tests {
             linker_args.iter().cloned(),
             &mut compiler_args,
         ) {
-            Err(Error::WrongLinkerArgs { target, .. }) if target == "x86_64-unknown-linux-gnu" => {
-                // Correct
-            }
-            _ => {
-                panic!("Unexpected acceptance processing {:?}", linker_args);
-            }
+            // Correct
+            Err(Error::WrongLinkerArgs { target, .. }) if target == "x86_64-unknown-linux-gnu" => {}
+            _ => panic!("Unexpected acceptance processing {:?}", linker_args),
         }
     }
 

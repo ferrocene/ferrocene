@@ -46,17 +46,17 @@ fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
     match std::fs::metadata(bin) {
         Ok(metadata) => {
             if !metadata.is_file() {
-                Err(Error::MissingBinary { directory: bin_dir.to_owned(), name: name.to_owned() })
+                Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
             } else if metadata.permissions().mode() & MODE != MODE {
-                Err(Error::WrongBinaryPermissions { path: bin.to_owned() })
+                Err(Error::WrongBinaryPermissions { path: bin.into() })
             } else {
                 Ok(())
             }
         }
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            Err(Error::MissingBinary { directory: bin_dir.to_owned(), name: name.to_owned() })
+            Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
         }
-        Err(err) => Err(Error::MetadataFetchFailed { path: bin.to_owned(), error: err }),
+        Err(err) => Err(Error::MetadataFetchFailed { path: bin.into(), error: err }),
     }
 }
 
@@ -80,9 +80,9 @@ fn parse_version_output(output: &str) -> Option<VersionOutput> {
 
         let Some((key, value)) = line.split_once(": ") else { continue };
         match key {
-            "host" => host = Some(value.to_string()),
-            "commit-hash" => commit_hash = Some(value.to_string()),
-            "release" => release = Some(value.to_string()),
+            "host" => host = Some(value.into()),
+            "commit-hash" => commit_hash = Some(value.into()),
+            "release" => release = Some(value.into()),
             _ => {}
         }
     }

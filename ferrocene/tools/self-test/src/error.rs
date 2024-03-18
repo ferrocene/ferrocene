@@ -73,7 +73,7 @@ impl Error {
     }
 
     pub(crate) fn sample_program_compilation_failed(name: &str, error: CommandError) -> Self {
-        Error::SampleProgramCompilationFailed { name: name.to_string(), error: Box::new(error) }
+        Error::SampleProgramCompilationFailed { name: name.into(), error: Box::new(error) }
     }
 }
 

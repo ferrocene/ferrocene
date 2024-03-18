@@ -119,7 +119,7 @@ fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {
         }
         let Some(library) = extract_library_name(&path) else { continue };
 
-        *found.entry(library.to_string()).or_insert(0) += 1;
+        *found.entry(library.into()).or_insert(0) += 1;
     }
 
     Ok(found)

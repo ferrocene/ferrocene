@@ -63,15 +63,19 @@ def get_commit_msg(origin_repo_path: str) -> str:
 
 def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]:
     print(f"🏃 {' '.join(args)}")
-    return subprocess.run(
-        args,
-        capture_output=True,
-        check=True,
-        cwd=cwd,
-        encoding="utf-8",
-        timeout=10,
-        **kwargs,
-    )
+    try:
+        return subprocess.run(
+            args,
+            capture_output=True,
+            check=True,
+            cwd=cwd,
+            encoding="utf-8",
+            timeout=10,
+            **kwargs,
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"{e.stderr=}")
+        raise e
 
 
 if __name__ == "__main__":

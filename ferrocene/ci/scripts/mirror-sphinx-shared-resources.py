@@ -7,7 +7,6 @@ import os
 import subprocess
 
 
-COMMIT_MSG = "Automatically push changes from ferrocene/ferrocene"
 MIRROR_DIR = ""  # the root, but "." does not work
 ORIGIN_DIR = "ferrocene/doc/sphinx-shared-resources/"
 
@@ -47,7 +46,19 @@ def main():
     # apply patch to the mirror repo and create a commit
     run(["git", "apply", "-"], mirror_repo_path, input=patch)
     run(["git", "add", "."], mirror_repo_path)
-    run(["git", "commit", "-m", COMMIT_MSG], mirror_repo_path)
+    commit_msg = get_commit_msg(origin_repo_path)
+    run(["git", "commit", "-m", commit_msg], mirror_repo_path)
+
+
+def get_commit_msg(origin_repo_path: str) -> str:
+    # get the hash of the commit which triggered the workflow ...
+    origin_commit_hash = run(["git", "rev-parse", "HEAD"], origin_repo_path).stdout
+    # ... and construct the commit message with it
+    return (
+        "Automatically push changes from ferrocene/ferrocene"
+        + "\n\nmirrored-commit: "
+        + origin_commit_hash
+    )
 
 
 def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]:

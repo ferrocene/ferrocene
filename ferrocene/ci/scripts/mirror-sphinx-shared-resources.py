@@ -39,8 +39,8 @@ def main():
     ).stdout
     if patch == "":
         raise Exception(
-            f"patch cannot be empty; make sure the last commit made changes to \
-            {ORIGIN_DIR} (the ORIGIN_DIR)"
+            "patch cannot be empty; make sure the last commit made changes to "
+            + ORIGIN_DIR
         )
     patch = patch.replace(ORIGIN_DIR, MIRROR_DIR)
 

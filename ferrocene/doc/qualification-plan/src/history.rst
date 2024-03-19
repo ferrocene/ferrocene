@@ -7,7 +7,7 @@ History
 The Rust programming language was initiated as a personal project by Mozilla
 researcher Graydon Hoare. After realizing its potential for efficient safety and
 performance, the software company started sponsoring its development and
-launched it in 2010. It was in that year that the Rust compiler rustc, in the
+launched it in 2010. It was in that year that the Rust compiler, rustc, in the
 form it is used today, was launched. From 2010 to 2015, Rust underwent many
 iterations and experimentation up until the release of Rust 1.0 (May 2015),
 which also established the first form of independent governance for the project.

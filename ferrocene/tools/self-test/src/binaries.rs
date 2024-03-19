@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::utils::run_command;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::utils::run_command;
+use crate::{CFG_RELEASE, SELFTEST_CARGO_HASH, SELFTEST_RUST_HASH, SELFTEST_TARGET};
+
+/// Check that the executables exist in the expected path, and that they have the correct permissions.
+///
+/// Some binaries are optional and only warn when not present.
 pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<(), Error> {
     check_binary(reporter, sysroot, "rustc", CommitHashOf::Rust)?;
     check_binary(reporter, sysroot, "rustdoc", CommitHashOf::Rust)?;
@@ -25,46 +30,47 @@ fn check_binary(
     let bin_dir = sysroot.join("bin");
     let bin = bin_dir.join(name);
 
-    match std::fs::metadata(&bin) {
-        Ok(metadata) => {
-            if !metadata.is_file() {
-                return Err(Error::MissingBinary { directory: bin_dir, name: name.into() });
-            }
-            if metadata.permissions().mode() & 0o555 != 0o555 {
-                return Err(Error::WrongBinaryPermissions { path: bin });
-            }
-        }
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            return Err(Error::MissingBinary { directory: bin_dir, name: name.into() });
-        }
-        Err(err) => return Err(Error::MetadataFetchFailed { path: bin, error: err }),
-    }
-
-    let version_command_output = run_command(Command::new(&bin).arg("-vV"))
-        .map_err(|error| Error::VersionFetchFailed { binary: name.into(), error })?;
-    let version = parse_version_output(&version_command_output.stdout)
-        .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })?;
-
-    for (field, expected, found) in [
-        ("host", env!("SELFTEST_TARGET"), version.host),
-        ("release", env!("CFG_RELEASE"), version.release),
-        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
-    ] {
-        if expected != found {
-            return Err(Error::BinaryVersionMismatch {
-                binary: name.into(),
-                field: field.into(),
-                expected: expected.into(),
-                found: found.into(),
-            });
-        }
-    }
+    check_file(&bin, &bin_dir, name)?;
+    let version = get_version(&bin, name)?;
+    check_version(version, hash, name)?;
 
     reporter.success(&format!("binary {name} is valid"));
     Ok(())
 }
 
-fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
+/// Check that `bin` is a file and has the correct permissions.
+fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
+    /// Minimum file permission the binary should have.
+    ///
+    /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    const MODE: u32 = 0o555;
+
+    match std::fs::metadata(bin) {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
+            } else if metadata.permissions().mode() & MODE != MODE {
+                Err(Error::WrongBinaryPermissions { path: bin.into() })
+            } else {
+                Ok(())
+            }
+        }
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
+        }
+        Err(err) => Err(Error::MetadataFetchFailed { path: bin.into(), error: err }),
+    }
+}
+
+fn get_version(bin: &Path, name: &str) -> Result<VersionOutput, Error> {
+    let version_command_output = run_command(Command::new(bin).arg("-vV")).map_err(|error| {
+        Error::VersionFetchFailed { binary: name.into(), error: Box::new(error) }
+    })?;
+    parse_version_output(&version_command_output.stdout)
+        .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })
+}
+
+fn parse_version_output(output: &str) -> Option<VersionOutput> {
     let mut release = None;
     let mut commit_hash = None;
     let mut host = None;
@@ -76,9 +82,9 @@ fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
 
         let Some((key, value)) = line.split_once(": ") else { continue };
         match key {
-            "host" => host = Some(value),
-            "commit-hash" => commit_hash = Some(value),
-            "release" => release = Some(value),
+            "host" => host = Some(value.into()),
+            "commit-hash" => commit_hash = Some(value.into()),
+            "release" => release = Some(value.into()),
             _ => {}
         }
     }
@@ -86,12 +92,29 @@ fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
     Some(VersionOutput { release: release?, commit_hash: commit_hash?, host: host? })
 }
 
+fn check_version(version: VersionOutput, hash: CommitHashOf, name: &str) -> Result<(), Error> {
+    for (field, expected, found) in [
+        ("host", SELFTEST_TARGET, version.host),
+        ("release", CFG_RELEASE, version.release),
+        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
+    ] {
+        if expected != found {
+            return Err(Error::BinaryVersionMismatch {
+                binary: name.into(),
+                field: field.into(),
+                expected: expected.into(),
+                found,
+            });
+        }
+    }
+    Ok(())
+}
+
 #[derive(Debug)]
-#[allow(dead_code)]
-struct VersionOutput<'a> {
-    release: &'a str,
-    commit_hash: &'a str,
-    host: &'a str,
+struct VersionOutput {
+    release: String,
+    commit_hash: String,
+    host: String,
 }
 
 fn check_optional_binary(
@@ -117,8 +140,8 @@ enum CommitHashOf {
 impl CommitHashOf {
     fn fetch(&self) -> Option<&'static str> {
         match self {
-            CommitHashOf::Rust => option_env!("SELFTEST_RUST_HASH"),
-            CommitHashOf::Cargo => option_env!("SELFTEST_CARGO_HASH"),
+            CommitHashOf::Rust => SELFTEST_RUST_HASH,
+            CommitHashOf::Cargo => SELFTEST_CARGO_HASH,
         }
     }
 }
@@ -126,7 +149,7 @@ impl CommitHashOf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::{CommandError, CommandErrorKind};
+    use crate::error::CommandErrorKind;
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
 
@@ -185,16 +208,15 @@ mod tests {
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
         let bin = utils.bin("rustc").create();
-        std::fs::write(&bin, &[]).unwrap(); // Broken content
+        std::fs::write(&bin, []).unwrap(); // Broken content
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::StartupFailed { .. } },
-            }) => {
-                assert_eq!(bin, path);
-                assert_eq!(vec![OsString::from("-vV")], args);
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::StartupFailed { .. }) =>
+            {
+                assert_eq!(bin, error.path);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
                 assert_eq!("rustc", binary);
             }
             Err(err) => panic!("unexpected error: {err}"),
@@ -208,13 +230,16 @@ mod tests {
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::Failure { output } },
-            }) => {
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::Failure { .. }) =>
+            {
+                let output = match error.kind {
+                    CommandErrorKind::Failure { output } => output,
+                    _ => unreachable!(),
+                };
                 assert_eq!("rustc", binary);
-                assert_eq!(vec![OsString::from("-vV")], args);
-                assert_eq!(bin, path);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
+                assert_eq!(bin, error.path);
                 assert_eq!(Some(1), output.status.code());
             }
             Err(err) => panic!("unexpected error: {err}"),

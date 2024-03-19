@@ -22,7 +22,7 @@ pub(crate) enum Error {
     MissingBinary { directory: PathBuf, name: String },
     WrongBinaryPermissions { path: PathBuf },
     MetadataFetchFailed { path: PathBuf, error: std::io::Error },
-    VersionFetchFailed { binary: String, error: CommandError },
+    VersionFetchFailed { binary: String, error: Box<CommandError> },
     VersionParseFailed { binary: String },
     BinaryVersionMismatch { binary: String, field: String, expected: String, found: String },
     TargetLibraryMissing { target: String, library: String },
@@ -33,12 +33,12 @@ pub(crate) enum Error {
     NonUtf8Path { path: PathBuf },
     TemporaryCompilationDirectoryCreationFailed { error: std::io::Error },
     WritingSampleProgramFailed { name: String, dest: PathBuf, error: std::io::Error },
-    SampleProgramCompilationFailed { name: String, error: CommandError },
+    SampleProgramCompilationFailed { name: String, error: Box<CommandError> },
     CompilationArtifactsListingFailed { path: PathBuf, error: std::io::Error },
     MissingCompilationArtifact { name: String, after_compiling: String },
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
     SuitableCCompilerNotFound { target: String },
-    LinkerArgsError { target: String, kind: LinkerArgsErrorKind },
+    WrongLinkerArgs { target: String, kind: LinkerArgsErrorKind },
     RunningSampleProgramFailed { name: String, error: std::io::Error },
     SampleProgramOutputWrong { name: String, expected: Vec<u8>, found: Vec<u8> },
 }
@@ -66,10 +66,14 @@ impl Error {
             Error::MissingCompilationArtifact { .. } => 21,
             Error::UnexpectedCompilationArtifact { .. } => 22,
             Error::SuitableCCompilerNotFound { .. } => 23,
-            Error::LinkerArgsError { .. } => 24,
+            Error::WrongLinkerArgs { .. } => 24,
             Error::RunningSampleProgramFailed { .. } => 25,
             Error::SampleProgramOutputWrong { .. } => 26,
         }
+    }
+
+    pub(crate) fn sample_program_compilation_failed(name: &str, error: CommandError) -> Self {
+        Error::SampleProgramCompilationFailed { name: name.into(), error: Box::new(error) }
     }
 }
 
@@ -96,7 +100,7 @@ impl std::error::Error for Error {
             Error::MissingCompilationArtifact { .. } => None,
             Error::UnexpectedCompilationArtifact { .. } => None,
             Error::SuitableCCompilerNotFound { .. } => None,
-            Error::LinkerArgsError { .. } => None,
+            Error::WrongLinkerArgs { .. } => None,
             Error::RunningSampleProgramFailed { error, .. } => Some(error),
             Error::SampleProgramOutputWrong { .. } => None,
         }
@@ -182,7 +186,7 @@ impl Display for Error {
             Error::SuitableCCompilerNotFound { target } => {
                 write!(f, "unable to find LLD-compatible C compiler for `{target}`")
             }
-            Error::LinkerArgsError { target, kind } => {
+            Error::WrongLinkerArgs { target, kind } => {
                 write!(f, "Unable to analyse linker arguments for `{target}` (kind={kind:?})")
             }
             Error::RunningSampleProgramFailed { name, .. } => {
@@ -224,8 +228,8 @@ impl Display for CommandError {
             .map(|arg| {
                 // Quote args with space. This is extremely rudimentary shell quoting, but
                 // it should do the trick most of the times.
-                if arg.contains(" ") {
-                    let arg = arg.replace("\"", "\\\"");
+                if arg.contains(' ') {
+                    let arg = arg.replace('"', "\\\"");
                     format!("\"{arg}\"").into()
                 } else {
                     arg

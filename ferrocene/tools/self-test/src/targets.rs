@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::linkers::Linker;
-use crate::report::Reporter;
 use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::path::Path;
+
+use crate::error::Error;
+use crate::linkers::Linker;
+use crate::report::Reporter;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCC },
@@ -40,19 +41,19 @@ impl Deref for Target {
     type Target = TargetSpec;
 
     fn deref(&self) -> &Self::Target {
-        &self.spec
+        self.spec
     }
 }
 
+/// Check which of the supported targets are installed.
 pub(crate) fn check(reporter: &dyn Reporter, sysroot: &Path) -> Result<Vec<Target>, Error> {
-    let mut found = Vec::new();
-    for target in SUPPORTED_TARGETS {
+    SUPPORTED_TARGETS.iter().try_fold(Vec::new(), |mut found, target| {
         match check_target(reporter, sysroot, target)? {
             CheckTargetOutcome::Missing => {}
             CheckTargetOutcome::Found => found.push(Target { spec: target, rustflags: Vec::new() }),
         }
-    }
-    Ok(found)
+        Ok(found)
+    })
 }
 
 fn check_target(
@@ -60,7 +61,7 @@ fn check_target(
     sysroot: &Path,
     target: &TargetSpec,
 ) -> Result<CheckTargetOutcome, Error> {
-    let target_dir = sysroot.join("lib").join("rustlib").join(&target.triple);
+    let target_dir = sysroot.join("lib").join("rustlib").join(target.triple);
     if !target_dir.is_dir() {
         // Target not present, ignore it.
         return Ok(CheckTargetOutcome::Missing);
@@ -89,22 +90,22 @@ enum CheckTargetOutcome {
 fn check_libraries(target: &TargetSpec, target_dir: &Path, expected: &[&str]) -> Result<(), Error> {
     let lib_dir = target_dir.join("lib");
 
-    let mut expected_to_find = expected.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>();
+    let mut expected_to_find = expected.iter().cloned().collect::<HashSet<_>>();
     for (library, count) in find_libraries_in(&lib_dir)?.into_iter() {
         if count > 1 {
             return Err(Error::DuplicateTargetLibrary { target: target.triple.into(), library });
         }
-        expected_to_find.remove(&library);
+        expected_to_find.remove(library.as_str());
     }
 
-    if let Some(library) = expected_to_find.drain().next() {
-        return Err(Error::TargetLibraryMissing {
+    if let Some(library) = expected_to_find.iter().next() {
+        Err(Error::TargetLibraryMissing {
             target: target.triple.into(),
-            library: (*library).into(),
-        });
+            library: library.to_string(),
+        })
+    } else {
+        Ok(())
     }
-
-    Ok(())
 }
 
 fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {
@@ -118,12 +119,13 @@ fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {
         }
         let Some(library) = extract_library_name(&path) else { continue };
 
-        *found.entry(library.to_string()).or_insert(0) += 1;
+        *found.entry(library.into()).or_insert(0) += 1;
     }
 
     Ok(found)
 }
 
+/// Extract `name` from `libname-hash.rlib`.
 fn extract_library_name(file_path: &Path) -> Option<&str> {
     let (library, hash) = file_path
         .file_name()?
@@ -287,15 +289,15 @@ mod tests {
 
     #[test]
     fn test_extract_library_name() {
-        assert_eq!(Some("core"), extract_library_name(&Path::new("libcore-0123456789abcdef.rlib")));
+        assert_eq!(Some("core"), extract_library_name(Path::new("libcore-0123456789abcdef.rlib")));
         assert_eq!(
             Some("proc_macro"),
-            extract_library_name(&Path::new("libproc_macro-0123456789abcdef.rlib"))
+            extract_library_name(Path::new("libproc_macro-0123456789abcdef.rlib"))
         );
 
         let assert_fail = |name: &str| {
             assert!(
-                extract_library_name(&Path::new(name)).is_none(),
+                extract_library_name(Path::new(name)).is_none(),
                 "{name} is treated as valid but should be wrong"
             )
         };

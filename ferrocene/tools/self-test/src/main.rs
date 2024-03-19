@@ -12,11 +12,21 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
-use crate::error::Error;
-use crate::report::{Reporter, StderrReporter};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
+use crate::error::Error;
+use crate::report::{Reporter, StderrReporter};
+
+// Compile-time environment variables
+/// The Rust release ferrocene-self-test is being compiled for
+const CFG_RELEASE: &str = env!("CFG_RELEASE");
+/// The target-triple ferroce-self-test is being compiled for
+const SELFTEST_TARGET: &str = env!("SELFTEST_TARGET");
+const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_HASH");
+const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
+
+/// Run-time environment variables set by the caller of the binary.
 struct Environment {
     path: Option<OsString>,
 }
@@ -27,6 +37,9 @@ impl Environment {
     }
 }
 
+/// The user manual states to extract all archives to the same directory.
+/// Therefore the sysroot is the grandparent of `ferrocene-self-test`
+/// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
 fn get_sysroot() -> Option<PathBuf> {
     let current_exe = std::env::current_exe().ok()?;
     Some(current_exe.parent()?.parent()?.to_path_buf())
@@ -42,17 +55,7 @@ fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
     let mut targets = targets::check(reporter, &sysroot)?;
     linkers::check_and_add_rustflags(reporter, &environment, &sysroot, &mut targets)?;
     compile::check(reporter, &sysroot, &targets)?;
-
-    for target in targets {
-        if target.rustflags.is_empty() {
-            reporter.info(&format!("Target '{}' requires no special linker flags", target.triple));
-        } else {
-            reporter.info(&format!("Target '{}' requires special linker flags:", target.triple));
-            for flag in target.rustflags {
-                reporter.info(&format!("\t{}", flag));
-            }
-        }
-    }
+    linkers::report_linker_flags(reporter, &targets);
 
     reporter.success("Ferrocene self-check completed!");
     Ok(())

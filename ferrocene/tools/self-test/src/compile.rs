@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::Error;
-use crate::report::Reporter;
-use crate::targets::Target;
-use crate::utils::run_command;
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+
+use tempfile::TempDir;
+
+use crate::error::Error;
+use crate::report::Reporter;
+use crate::targets::Target;
+use crate::utils::run_command;
+use crate::SELFTEST_TARGET;
 
 static SAMPLE_PROGRAMS: &[SampleProgram] = &[
     SampleProgram {
@@ -51,6 +55,10 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
     },
 ];
 
+/// Compile the [`SAMPLE_PROGRAMS`] for all `targets`.
+///
+/// Also execute the sample programs for the platform specified by the
+/// `SELFTEST_TARGET` compile-time environment variable.
 pub(crate) fn check(
     reporter: &dyn Reporter,
     sysroot: &Path,
@@ -73,29 +81,21 @@ fn check_target(
         .tempdir()
         .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
 
-    let ctx = Context {
-        target,
-        rustc: sysroot.join("bin").join("rustc"),
-        temp_dir: temp.path().into(),
-        source_dir: temp.path().join("src"),
-        output_dir: temp.path().join("out"),
-    };
-
-    std::fs::create_dir_all(&ctx.source_dir)
-        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
-    std::fs::create_dir_all(&ctx.output_dir)
-        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })?;
+    let ctx = Context::new(target, sysroot, &temp);
+    create_tmp_compilation_dir(&ctx.source_dir)?;
+    create_tmp_compilation_dir(&ctx.output_dir)?;
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
-        let should_run = if ctx.target.triple == env!("SELFTEST_TARGET") {
-            program.executable_output
-        } else {
-            None
-        };
         expected_artifacts.add(program.expected_artifacts);
-        compile(&ctx, program, should_run)?;
+        compile(&ctx, program)?;
         expected_artifacts.check(program.name)?;
+
+        let should_run =
+            (ctx.target.triple == SELFTEST_TARGET).then_some(program.executable_output).flatten();
+        if let Some(expected_output) = should_run {
+            run(&ctx, program, expected_output)?
+        }
 
         reporter.success(&format!(
             "compiled {}sample program `{}` for target {}",
@@ -107,11 +107,12 @@ fn check_target(
     Ok(())
 }
 
-fn compile(
-    ctx: &Context<'_>,
-    program: &SampleProgram,
-    expected_output: Option<&[u8]>,
-) -> Result<(), Error> {
+fn create_tmp_compilation_dir(path: &Path) -> Result<(), Error> {
+    std::fs::create_dir_all(path)
+        .map_err(|error| Error::TemporaryCompilationDirectoryCreationFailed { error })
+}
+
+fn compile(ctx: &Context<'_>, program: &SampleProgram) -> Result<(), Error> {
     let program_path = ctx.source_dir.join(program.name);
     std::fs::write(&program_path, program.contents).map_err(|error| {
         Error::WritingSampleProgramFailed {
@@ -137,31 +138,30 @@ fn compile(
     cmd.args(&ctx.target.rustflags);
     cmd.arg(&program_path);
 
-    run_command(&mut cmd).map_err(|error| Error::SampleProgramCompilationFailed {
-        name: program.name.into(),
-        error,
-    })?;
-
-    if let Some(expected_output) = expected_output {
-        // where is it
-        let bin_name = program.name.replace(".rs", "");
-        let bin_path = ctx.output_dir.join(bin_name);
-        // now try and execute it
-        let mut cmd = Command::new(&bin_path);
-        let output = cmd.output().map_err(|error| Error::RunningSampleProgramFailed {
-            name: program.name.into(),
-            error,
-        })?;
-        if output.stdout != expected_output {
-            return Err(Error::SampleProgramOutputWrong {
-                name: program.name.into(),
-                expected: expected_output.to_vec(),
-                found: output.stdout,
-            });
-        };
-    }
+    run_command(&mut cmd)
+        .map_err(|error| Error::sample_program_compilation_failed(program.name, error))?;
 
     Ok(())
+}
+
+fn run(ctx: &Context<'_>, program: &SampleProgram, expected_output: &[u8]) -> Result<(), Error> {
+    // where is it
+    let bin_name = program.name.replace(".rs", "");
+    let bin_path = ctx.output_dir.join(bin_name);
+    // now try and execute it
+    let mut cmd = Command::new(bin_path);
+    let output = cmd
+        .output()
+        .map_err(|error| Error::RunningSampleProgramFailed { name: program.name.into(), error })?;
+    if output.stdout != expected_output {
+        Err(Error::SampleProgramOutputWrong {
+            name: program.name.into(),
+            expected: expected_output.to_vec(),
+            found: output.stdout,
+        })
+    } else {
+        Ok(())
+    }
 }
 
 struct ExpectedFiles {
@@ -178,6 +178,7 @@ impl ExpectedFiles {
         self.expected.extend(files.iter().copied());
     }
 
+    /// Check that all, and those only, compilation artifacts are present.
     fn check(&self, after_compiling: &str) -> Result<(), Error> {
         let mut currently_expected = self.expected.clone();
 
@@ -191,23 +192,25 @@ impl ExpectedFiles {
                 .ok_or_else(|| Error::NonUtf8Path { path: entry.path() })?
                 .to_string();
 
-            if !currently_expected.remove(&*file_name) {
+            if !currently_expected.remove(file_name.as_str()) {
                 return Err(Error::UnexpectedCompilationArtifact {
-                    name: file_name.into(),
+                    name: file_name,
                     after_compiling: after_compiling.into(),
                 });
             }
         }
+
         let mut currently_expected = currently_expected.into_iter().collect::<Vec<_>>();
         currently_expected.sort();
-        for missing_file in currently_expected {
-            return Err(Error::MissingCompilationArtifact {
-                name: missing_file.into(),
-                after_compiling: after_compiling.into(),
-            });
-        }
 
-        Ok(())
+        if let Some(missing_file) = currently_expected.first() {
+            Err(Error::MissingCompilationArtifact {
+                name: missing_file.to_string(),
+                after_compiling: after_compiling.into(),
+            })
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -217,6 +220,18 @@ struct Context<'a> {
     temp_dir: PathBuf,
     source_dir: PathBuf,
     output_dir: PathBuf,
+}
+
+impl<'a> Context<'a> {
+    fn new(target: &'a Target, sysroot: &Path, temp: &TempDir) -> Self {
+        Self {
+            target,
+            rustc: sysroot.join("bin").join("rustc"),
+            temp_dir: temp.path().into(),
+            source_dir: temp.path().join("src"),
+            output_dir: temp.path().join("out"),
+        }
+    }
 }
 
 struct SampleProgram {
@@ -233,7 +248,6 @@ mod tests {
     use crate::linkers::Linker;
     use crate::targets::TargetSpec;
     use crate::test_utils::TestUtils;
-    use tempfile::TempDir;
 
     #[test]
     fn test_all_sample_program_source_files_are_registered() {
@@ -402,7 +416,7 @@ mod tests {
             executable_output: None,
         };
 
-        match compile(&context, &program, None) {
+        match compile(&context, &program) {
             Err(Error::WritingSampleProgramFailed { name, dest, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(tempdir.path().join("missing").join("example.rs"), dest);
@@ -447,7 +461,7 @@ mod tests {
             executable_output: None,
         };
 
-        match compile(&context, &program, None) {
+        match compile(&context, &program) {
             Err(Error::SampleProgramCompilationFailed { name, error }) => {
                 assert_eq!("example.rs", name);
                 assert_eq!(rustc, error.path);
@@ -526,6 +540,6 @@ mod tests {
             executable_output: None,
         };
 
-        compile(&context, &program, None).unwrap();
+        compile(&context, &program).unwrap();
     }
 }

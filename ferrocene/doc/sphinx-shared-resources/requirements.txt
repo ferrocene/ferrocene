@@ -299,9 +299,8 @@ snowballstemmer==2.2.0 \
     --hash=sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1 \
     --hash=sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a
     # via sphinx
-sphinx==7.2.6 \
-    --hash=sha256:1e09160a40b956dc623c910118fa636da93bd3ca0b9876a7b3df90f07d691560 \
-    --hash=sha256:9a5160e1ea90688d5963ba09a2dcd8bdd526620edbb65c328728f1b2228d5ab5
+sphinx @ https://github.com/sphinx-doc/sphinx/archive/b0f096f4405d40a2de566dd8c725837a51dedb52.zip \
+    --hash=sha256:fc981628ded874439d88eb8262d68453996505370151db05bc304887fcfc9dc6
     # via
     #   -r requirements.in
     #   myst-parser

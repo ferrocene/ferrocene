@@ -232,7 +232,7 @@ impl Step for Std {
                 let target_sysroot_bin =
                     builder.sysroot_libdir(compiler, target).parent().unwrap().join("bin");
                 t!(fs::create_dir_all(&target_sysroot_bin));
-                builder.cp_r(&src_sysroot_bin, &target_sysroot_bin);
+                builder.cp_link_r(&src_sysroot_bin, &target_sysroot_bin);
             }
         }
 
@@ -315,7 +315,7 @@ fn copy_and_stamp(
     dependency_type: DependencyType,
 ) {
     let target = libdir.join(name);
-    builder.copy(&sourcedir.join(name), &target);
+    builder.copy_link(&sourcedir.join(name), &target);
 
     target_deps.push((target, dependency_type));
 }
@@ -324,7 +324,7 @@ fn copy_llvm_libunwind(builder: &Builder<'_>, target: TargetSelection, libdir: &
     let libunwind_path = builder.ensure(llvm::Libunwind { target });
     let libunwind_source = libunwind_path.join("libunwind.a");
     let libunwind_target = libdir.join("libunwind.a");
-    builder.copy(&libunwind_source, &libunwind_target);
+    builder.copy_link(&libunwind_source, &libunwind_target);
     libunwind_target
 }
 
@@ -393,7 +393,7 @@ fn copy_self_contained_objects(
         for &obj in &["crtbegin.o", "crtbeginS.o", "crtend.o", "crtendS.o"] {
             let src = crt_path.join(obj);
             let target = libdir_self_contained.join(obj);
-            builder.copy(&src, &target);
+            builder.copy_link(&src, &target);
             target_deps.push((target, DependencyType::TargetSelfContained));
         }
 
@@ -426,7 +426,7 @@ fn copy_self_contained_objects(
         for obj in ["crt2.o", "dllcrt2.o"].iter() {
             let src = compiler_file(builder, &builder.cc(target), target, CLang::C, obj);
             let target = libdir_self_contained.join(obj);
-            builder.copy(&src, &target);
+            builder.copy_link(&src, &target);
             target_deps.push((target, DependencyType::TargetSelfContained));
         }
     }
@@ -558,6 +558,10 @@ pub fn std_cargo(builder: &Builder<'_>, target: TargetSelection, stage: u32, car
         cargo.rustflag("-Cforce-unwind-tables=yes");
     }
 
+    // Enable frame pointers by default for the library. Note that they are still controlled by a
+    // separate setting for the compiler.
+    cargo.rustflag("-Cforce-frame-pointers=yes");
+
     let html_root =
         format!("-Zcrate-attr=doc(html_root_url=\"{}/\")", builder.doc_rust_lang_org_channel(),);
     cargo.rustflag(&html_root);
@@ -645,7 +649,7 @@ impl Step for StdLink {
             let stage0_bin_dir = builder.out.join(host).join("stage0/bin");
             let sysroot_bin_dir = sysroot.join("bin");
             t!(fs::create_dir_all(&sysroot_bin_dir));
-            builder.cp_r(&stage0_bin_dir, &sysroot_bin_dir);
+            builder.cp_link_r(&stage0_bin_dir, &sysroot_bin_dir);
 
             // Copy all *.so files from stage0/lib to stage0-sysroot/lib
             let stage0_lib_dir = builder.out.join(host).join("stage0/lib");
@@ -654,7 +658,8 @@ impl Step for StdLink {
                     let file = t!(file);
                     let path = file.path();
                     if path.is_file() && is_dylib(&file.file_name().into_string().unwrap()) {
-                        builder.copy(&path, &sysroot.join("lib").join(path.file_name().unwrap()));
+                        builder
+                            .copy_link(&path, &sysroot.join("lib").join(path.file_name().unwrap()));
                     }
                 }
             }
@@ -669,7 +674,7 @@ impl Step for StdLink {
                 .join(host)
                 .join("codegen-backends");
             if stage0_codegen_backends.exists() {
-                builder.cp_r(&stage0_codegen_backends, &sysroot_codegen_backends);
+                builder.cp_link_r(&stage0_codegen_backends, &sysroot_codegen_backends);
             }
         }
     }
@@ -692,7 +697,7 @@ fn copy_sanitizers(
 
     for runtime in &runtimes {
         let dst = libdir.join(&runtime.name);
-        builder.copy(&runtime.path, &dst);
+        builder.copy_link(&runtime.path, &dst);
 
         // The `aarch64-apple-ios-macabi` and `x86_64-apple-ios-macabi` are also supported for
         // sanitizers, but they share a sanitizer runtime with `${arch}-apple-darwin`, so we do
@@ -798,7 +803,7 @@ impl Step for StartupObjects {
             }
 
             let target = sysroot_dir.join((*file).to_string() + ".o");
-            builder.copy(dst_file, &target);
+            builder.copy_link(dst_file, &target);
             target_deps.push((target, DependencyType::Target));
         }
 
@@ -820,7 +825,7 @@ fn cp_rustc_component_to_ci_sysroot(
         if src.is_dir() {
             t!(fs::create_dir_all(dst));
         } else {
-            builder.copy(&src, &dst);
+            builder.copy_link(&src, &dst);
         }
     }
 }
@@ -1451,7 +1456,7 @@ fn copy_codegen_backends_to_sysroot(
             let dot = filename.find('.').unwrap();
             format!("{}-{}{}", &filename[..dash], builder.rust_release(), &filename[dot..])
         };
-        builder.copy(file, &dst.join(target_filename));
+        builder.copy_link(file, &dst.join(target_filename));
     }
 }
 
@@ -1607,7 +1612,7 @@ impl Step for Sysroot {
                 OsStr::new(std::env::consts::DLL_EXTENSION),
             ];
             let ci_rustc_dir = builder.config.ci_rustc_dir();
-            builder.cp_filtered(&ci_rustc_dir, &sysroot, &|path| {
+            builder.cp_link_filtered(&ci_rustc_dir, &sysroot, &|path| {
                 if path.extension().map_or(true, |ext| !filtered_extensions.contains(&ext)) {
                     return true;
                 }
@@ -1799,7 +1804,7 @@ impl Step for Assemble {
             let filename = f.file_name().into_string().unwrap();
             if (is_dylib(&filename) || is_debug_info(&filename)) && !proc_macros.contains(&filename)
             {
-                builder.copy(&f.path(), &rustc_libdir.join(&filename));
+                builder.copy_link(&f.path(), &rustc_libdir.join(&filename));
             }
         }
 
@@ -1813,7 +1818,7 @@ impl Step for Assemble {
         if let Some(lld_install) = lld_install {
             let src_exe = exe("lld", target_compiler.host);
             let dst_exe = exe("rust-lld", target_compiler.host);
-            builder.copy(&lld_install.join("bin").join(src_exe), &libdir_bin.join(dst_exe));
+            builder.copy_link(&lld_install.join("bin").join(src_exe), &libdir_bin.join(dst_exe));
             let self_contained_lld_dir = libdir_bin.join("gcc-ld");
             t!(fs::create_dir_all(&self_contained_lld_dir));
             let lld_wrapper_exe = builder.ensure(crate::core::build_steps::tool::LldWrapper {
@@ -1821,7 +1826,7 @@ impl Step for Assemble {
                 target: target_compiler.host,
             });
             for name in crate::LLD_FILE_NAMES {
-                builder.copy(
+                builder.copy_link(
                     &lld_wrapper_exe,
                     &self_contained_lld_dir.join(exe(name, target_compiler.host)),
                 );
@@ -1846,7 +1851,7 @@ impl Step for Assemble {
                     // When using `download-ci-llvm`, some of the tools
                     // may not exist, so skip trying to copy them.
                     if src_path.exists() {
-                        builder.copy(&src_path, &libdir_bin.join(&tool_exe));
+                        builder.copy_link(&src_path, &libdir_bin.join(&tool_exe));
                     }
                 }
             }
@@ -1859,7 +1864,7 @@ impl Step for Assemble {
                 extra_features: vec![],
             });
             let tool_exe = exe("llvm-bitcode-linker", target_compiler.host);
-            builder.copy(&src_path, &libdir_bin.join(&tool_exe));
+            builder.copy_link(&src_path, &libdir_bin.join(&tool_exe));
         }
 
         // Ensure that `libLLVM.so` ends up in the newly build compiler directory,
@@ -1873,7 +1878,7 @@ impl Step for Assemble {
         let bindir = sysroot.join("bin");
         t!(fs::create_dir_all(bindir));
         let compiler = builder.rustc(target_compiler);
-        builder.copy(&rustc, &compiler);
+        builder.copy_link(&rustc, &compiler);
 
         target_compiler
     }
@@ -1899,7 +1904,7 @@ pub fn add_to_sysroot(
             DependencyType::Target => sysroot_dst,
             DependencyType::TargetSelfContained => self_contained_dst,
         };
-        builder.copy(&path, &dst.join(path.file_name().unwrap()));
+        builder.copy_link(&path, &dst.join(path.file_name().unwrap()));
     }
 }
 

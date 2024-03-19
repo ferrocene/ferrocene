@@ -1369,7 +1369,7 @@ impl Step for RunMakeSupport {
 
         let cargo_out =
             builder.cargo_out(self.compiler, Mode::ToolStd, self.target).join(&lib_name);
-        builder.copy(&cargo_out, &lib);
+        builder.copy_link(&cargo_out, &lib);
         lib
     }
 }
@@ -1550,6 +1550,10 @@ impl Step for MirOpt {
             })
         };
 
+        run(self.target);
+
+        // Run more targets with `--bless`. But we always run the host target first, since some
+        // tests use very specific `only` clauses that are not covered by the target set below.
         if builder.config.cmd.bless() {
             // All that we really need to do is cover all combinations of 32/64-bit and unwind/abort,
             // but while we're at it we might as well flex our cross-compilation support. This
@@ -1568,8 +1572,6 @@ impl Step for MirOpt {
                 });
                 run(panic_abort_target);
             }
-        } else {
-            run(self.target);
         }
     }
 }

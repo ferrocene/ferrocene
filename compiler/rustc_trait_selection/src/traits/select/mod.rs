@@ -949,7 +949,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                                 obligation.param_env,
                                 unevaluated,
                                 c.ty(),
-                                Some(obligation.cause.span),
+                                obligation.cause.span,
                             ) {
                                 Ok(val) => Ok(val),
                                 Err(e) => Err(e),
@@ -2123,13 +2123,14 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ),
 
             ty::Adt(def, args) => {
-                let sized_crit = def.sized_constraint(self.tcx());
-                // (*) binder moved here
-                Where(
-                    obligation
-                        .predicate
-                        .rebind(sized_crit.iter_instantiated(self.tcx(), args).collect()),
-                )
+                if let Some(sized_crit) = def.sized_constraint(self.tcx()) {
+                    // (*) binder moved here
+                    Where(
+                        obligation.predicate.rebind(vec![sized_crit.instantiate(self.tcx(), args)]),
+                    )
+                } else {
+                    Where(ty::Binder::dummy(Vec::new()))
+                }
             }
 
             ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) => None,

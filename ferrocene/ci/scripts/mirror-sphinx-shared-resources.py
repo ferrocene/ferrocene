@@ -27,9 +27,9 @@ def main():
 
     # As an input the script takes two environment variables. They specify the
     # (relative) path to the origin and mirror repository.
-    origin_repo_path = os.environ["ORIGIN_REPO_PATH"]
-    mirror_repo_path = os.environ["MIRROR_REPO_PATH"]
-    if origin_repo_path == "" or mirror_repo_path == "":
+    origin_repo_path = os.getenv("ORIGIN_REPO_PATH")
+    mirror_repo_path = os.getenv("MIRROR_REPO_PATH")
+    if origin_repo_path == None or mirror_repo_path == None:
         raise Exception("script needs env vars ORIGIN_REPO_PATH and MIRROR_REPO_PATH")
 
     # create patch from the origin repo and map the paths from `ORIGIN_DIR` to

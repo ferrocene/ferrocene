@@ -100,7 +100,7 @@ HazOp analysis:
    * - Description 
      - The potential error descriptions.
    * - Risk 
-     - Possibles effects of the potential error.
+     - Possible effects of the potential error.
    * - Mitigation 
      - The detection or mitigation method identifier, if available.
    * - Detectable

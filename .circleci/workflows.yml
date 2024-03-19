@@ -363,22 +363,6 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
-  # Job to record the head of the current branch in S3, so that other parts of
-  # the infrastructure can retrieve it without read access to the repo.
-  record-branch-commit:
-    description: Record the SHA1 of the head of the branch
-    docker:
-      - image: cimg/base:current-22.04
-    resource_class: small # 1-core
-    steps:
-      - aws-cli/install
-      - aws-oidc-auth
-      - ferrocene-git-shallow-clone:
-          depth: 1
-      - run:
-          name: Record the SHA1 of the head of the branch
-          command: ferrocene/ci/scripts/record-branch-commit.sh
-
 workflows:
   version: 2
 
@@ -509,18 +493,6 @@ workflows:
             - x86_64-linux-self-test
             - wasm-dist-oxidos
 
-
-  # Record the branch commit for all the jobs bors merges commit into.
-  record-branch-commit:
-    when:
-      or:
-        - equal: [<< pipeline.git.branch >>, "main"]
-        - matches:
-            pattern: "^release\\/.*"
-            value: << pipeline.git.branch >>
-    jobs:
-      - record-branch-commit
-
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
   # for the branches bors lands code in, as those branches are not meant to run
@@ -533,6 +505,10 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging.tmp"]
         - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
         - equal: [<< pipeline.git.branch >>, "trying.tmp"]
+        - equal: [<< pipeline.git.branch >>, "main"]
+        - matches:
+            pattern: "^release\\/.*"
+            value: << pipeline.git.branch >>
     jobs:
       - skip
 

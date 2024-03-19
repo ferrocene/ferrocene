@@ -23,3 +23,8 @@ in Ferrocene releases.
    :maxdepth: 1
 
    23.06.0
+
+.. appendices::
+   :caption: Appendices:
+
+   terms

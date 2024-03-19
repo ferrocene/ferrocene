@@ -395,6 +395,6 @@ impl Step for GenerateBuildMetadata {
 
         // Add the list of packages to include in the release to the artifacts, so that
         // publish-release knows what to expect for this commit.
-        builder.copy_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
+        builder.copy_link_to_folder("ferrocene/packages.toml".as_ref(), dist_dir.as_ref());
     }
 }

@@ -12,6 +12,7 @@ on:
       - "main"
     paths:
       - "ferrocene/doc/sphinx-shared-resources/**"
+  workflow_dispatch:
 
 jobs:
   mirror:

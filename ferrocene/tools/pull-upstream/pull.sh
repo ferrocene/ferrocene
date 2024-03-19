@@ -235,9 +235,16 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
 done
 
-# Only run these steps when there are no conflicts in bootstrap, otherwise
-# trying to invoke x.py will fail to compile.
-if ferrocene/ci/scripts/detect-conflict-markers.py src/bootstrap >/dev/null; then
+# Check whether we can compile bootstrap successfully, which will be used to
+# gate on the next few steps.
+echo "pull-upstream: checking whether bootstrap can be invoked safely..."
+if ./x.py --help; then
+    can_invoke_bootstrap=true
+else
+    can_invoke_bootstrap=false
+fi
+
+if [[ "${can_invoke_bootstrap}" = "true" ]]; then
     # We expose additional commands for `x.py` which affects the completions file generation,
     # so we just run the command to regenerate those in case they need updating as this usually
     # does not need manual intervention.
@@ -248,7 +255,7 @@ if ferrocene/ci/scripts/detect-conflict-markers.py src/bootstrap >/dev/null; the
         git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
     fi
 else
-    echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap conflicts"
+    echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap not compiling"
 fi
 
 git branch -D "${TEMP_BRANCH}"

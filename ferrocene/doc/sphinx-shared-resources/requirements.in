@@ -1,7 +1,12 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-sphinx
+# We need a copy of Sphinx fixing the search index nondeterminism, fixed in
+# https://github.com/sphinx-doc/sphinx/pull/11665. That will be included in
+# Sphinx 7.3, but as of 2024-03-19 no release has been made. We thus pin to the
+# latest git commit avaialable that date.
+sphinx @ https://github.com/sphinx-doc/sphinx/archive/b0f096f4405d40a2de566dd8c725837a51dedb52.zip
+
 sphinx-autobuild
 tomli
 myst_parser

@@ -19,8 +19,8 @@ def raise_error(message, *, location=None):
 def setup(app):
     app.connect("env-check-consistency", run_lints)
 
-    app.add_config_value("lint_alphabetical_section_titles", [], "", typing.List[str])
-    app.add_config_value("lint_no_paragraph_ids", [], "", typing.List[str])
+    app.add_config_value("lint_alphabetical_section_titles", [], "", [str])
+    app.add_config_value("lint_no_paragraph_ids", [], "", [str])
 
     return {
         "version": "0",

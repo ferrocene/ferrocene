@@ -29,7 +29,7 @@ jobs:
       - name: Checkout ferrocene/ferrocene
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # need two commits two create the diff
+          fetch-depth: 0 # need whole history, in case the merge-commit is not the mirrored-commit
           path: ${{ env.ORIGIN_REPO_PATH }}
 
       - name: Authenticate with GitHub

@@ -7,6 +7,9 @@ import os
 import subprocess
 
 
+COMMIT_MSG_START = (
+    "Automatically push changes from ferrocene/ferrocene\n\nmirrored-commit: "
+)
 MIRROR_DIR = ""  # the root, but "." does not work
 ORIGIN_DIR = "ferrocene/doc/sphinx-shared-resources/"
 
@@ -31,10 +34,13 @@ def main():
     if origin_repo_path == None or mirror_repo_path == None:
         raise Exception("script needs env vars ORIGIN_REPO_PATH and MIRROR_REPO_PATH")
 
+    last_mirrored_commit = get_last_mirrored_commit(mirror_repo_path)
+
     # create patch from the origin repo and map the paths from `ORIGIN_DIR` to
     # `MIRROR_DIR`. We need to map it in order to apply it in the other repo.
     patch = run(
-        ["git", "diff", "HEAD~1", "HEAD", "--", ORIGIN_DIR], origin_repo_path
+        ["git", "diff", last_mirrored_commit, "HEAD", "--", ORIGIN_DIR],
+        origin_repo_path,
     ).stdout
     if patch == "":
         raise Exception(
@@ -54,11 +60,15 @@ def get_commit_msg(origin_repo_path: str) -> str:
     # get the hash of the commit which triggered the workflow ...
     origin_commit_hash = run(["git", "rev-parse", "HEAD"], origin_repo_path).stdout
     # ... and construct the commit message with it
-    return (
-        "Automatically push changes from ferrocene/ferrocene"
-        + "\n\nmirrored-commit: "
-        + origin_commit_hash
-    )
+    return COMMIT_MSG_START + origin_commit_hash
+
+
+def get_last_mirrored_commit(mirror_repo_path: str) -> str:
+    commit_message = run(
+        ["git", "log", "--format=%B", "-n", "1", "HEAD"], mirror_repo_path
+    ).stdout
+    hash = commit_message.lstrip(COMMIT_MSG_START).strip()
+    return hash
 
 
 def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]:

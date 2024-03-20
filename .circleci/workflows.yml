@@ -747,7 +747,7 @@ commands:
           command: ferrocene/ci/scripts/shrink-build-directory.sh
       - run:
           name: Persist build output between jobs
-          command: ferrocene/ci/scripts/persist-between-jobs.sh upload build/
+          command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
 
   ferrocene-job-dist:
     description: Collection of steps for dist jobs

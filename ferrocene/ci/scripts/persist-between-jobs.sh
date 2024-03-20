@@ -7,10 +7,6 @@ IFS=$'\n\t'
 
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
-TAR="tar"
-if [[ "${OSTYPE}" = "msys" ]]; then
-    TAR="/c/WINDOWS/system32/tar.exe"
-fi
 
 usage() {
     echo "usage: $0 upload <path ...>"
@@ -57,7 +53,7 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        ${TAR} -cvf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        tar -cvf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -68,7 +64,7 @@ case "$1" in
 
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | ${TAR} -xvf-
+        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | tar -xvf-
         ;;
     *)
         usage 1>&2

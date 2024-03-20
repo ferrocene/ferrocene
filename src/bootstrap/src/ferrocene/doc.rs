@@ -40,7 +40,7 @@ impl Step for BreadcrumbsAssets {
                 builder.create_dir(parent);
             }
         }
-        builder.copy(&src, &dest);
+        builder.copy_link(&src, &dest);
     }
 }
 
@@ -105,7 +105,7 @@ impl Step for SphinxVirtualEnv {
         let venv = VirtualEnv { path: venv };
         builder
             .run(venv.cmd("pip").args(&["install", "--require-hashes", "-r"]).arg(&requirements));
-        builder.copy(&requirements, &installed_requirements);
+        builder.copy_link(&requirements, &installed_requirements);
 
         venv
     }
@@ -761,7 +761,7 @@ impl Step for TechnicalReport {
         let mut output_file = output_dir.join("technical-report.pdf");
 
         builder.create_dir(&output_dir);
-        builder.copy(&cache_path, &output_file);
+        builder.copy_link(&cache_path, &output_file);
 
         // Include the technical report file only in the signatures subset.
         output_file.as_mut_os_string().push(".ferrocene-subset");
@@ -789,7 +789,7 @@ impl Step for Index {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.ensure(BreadcrumbsAssets { target: self.target, dest: None });
-        builder.cp_r(
+        builder.cp_link_r(
             &builder.src.join("ferrocene").join("doc").join("index"),
             &builder.out.join(self.target.triple).join("doc"),
         );

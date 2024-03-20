@@ -7,6 +7,7 @@
 
 use std::io::Write;
 use std::process;
+use std::str::FromStr;
 use std::{
     env,
     fs::{self, OpenOptions},
@@ -14,7 +15,8 @@ use std::{
 };
 
 use bootstrap::{
-    find_recent_config_change_ids, t, Build, Config, Subcommand, CONFIG_CHANGE_HISTORY,
+    find_recent_config_change_ids, human_readable_changes, t, Build, Config, Subcommand,
+    CONFIG_CHANGE_HISTORY,
 };
 
 fn main() {
@@ -136,16 +138,25 @@ fn check_version(config: &Config) -> Option<String> {
     let latest_change_id = CONFIG_CHANGE_HISTORY.last().unwrap().change_id;
     let warned_id_path = config.out.join("bootstrap").join(".last-warned-change-id");
 
-    if let Some(id) = config.change_id {
+    if let Some(mut id) = config.change_id {
         if id == latest_change_id {
             return None;
         }
 
-        if let Ok(last_warned_id) = fs::read_to_string(&warned_id_path) {
-            if latest_change_id.to_string() == last_warned_id {
-                return None;
+        // Always try to use `change-id` from .last-warned-change-id first. If it doesn't exist,
+        // then use the one from the config.toml. This way we never show the same warnings
+        // more than once.
+        if let Ok(t) = fs::read_to_string(&warned_id_path) {
+            let last_warned_id =
+                usize::from_str(&t).expect(&format!("{} is corrupted.", warned_id_path.display()));
+
+            // We only use the last_warned_id if it exists in `CONFIG_CHANGE_HISTORY`.
+            // Otherwise, we may retrieve all the changes if it's not the highest value.
+            // For better understanding, refer to `change_tracker::find_recent_config_change_ids`.
+            if CONFIG_CHANGE_HISTORY.iter().any(|config| config.change_id == last_warned_id) {
+                id = last_warned_id;
             }
-        }
+        };
 
         let changes = find_recent_config_change_ids(id);
 
@@ -154,14 +165,7 @@ fn check_version(config: &Config) -> Option<String> {
         }
 
         msg.push_str("There have been changes to x.py since you last updated:\n");
-
-        for change in changes {
-            msg.push_str(&format!("  [{}] {}\n", change.severity, change.summary));
-            msg.push_str(&format!(
-                "    - PR Link https://github.com/rust-lang/rust/pull/{}\n",
-                change.change_id
-            ));
-        }
+        msg.push_str(&human_readable_changes(&changes));
 
         msg.push_str("NOTE: to silence this warning, ");
         msg.push_str(&format!(

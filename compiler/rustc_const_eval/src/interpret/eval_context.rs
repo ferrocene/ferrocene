@@ -826,7 +826,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
             for &const_ in &body.required_consts {
                 let c = self
                     .instantiate_from_current_frame_and_normalize_erasing_regions(const_.const_)?;
-                c.eval(*self.tcx, self.param_env, Some(const_.span)).map_err(|err| {
+                c.eval(*self.tcx, self.param_env, const_.span).map_err(|err| {
                     err.emit_note(*self.tcx);
                     err
                 })?;
@@ -1034,8 +1034,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
     ) -> InterpResult<'tcx> {
         trace!("{:?} is now live", local);
 
-        // We avoid `ty.is_trivially_sized` since that (a) cannot assume WF, so it recurses through
-        // all fields of a tuple, and (b) does something expensive for ADTs.
+        // We avoid `ty.is_trivially_sized` since that does something expensive for ADTs.
         fn is_very_trivially_sized(ty: Ty<'_>) -> bool {
             match ty.kind() {
                 ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
@@ -1054,9 +1053,10 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
                 | ty::Closure(..)
                 | ty::CoroutineClosure(..)
                 | ty::Never
-                | ty::Error(_) => true,
+                | ty::Error(_)
+                | ty::Dynamic(_, _, ty::DynStar) => true,
 
-                ty::Str | ty::Slice(_) | ty::Dynamic(..) | ty::Foreign(..) => false,
+                ty::Str | ty::Slice(_) | ty::Dynamic(_, _, ty::Dyn) | ty::Foreign(..) => false,
 
                 ty::Tuple(tys) => tys.last().iter().all(|ty| is_very_trivially_sized(**ty)),
 
@@ -1174,7 +1174,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
     pub fn eval_mir_constant(
         &self,
         val: &mir::Const<'tcx>,
-        span: Option<Span>,
+        span: Span,
         layout: Option<TyAndLayout<'tcx>>,
     ) -> InterpResult<'tcx, OpTy<'tcx, M::Provenance>> {
         M::eval_mir_constant(self, *val, span, layout, |ecx, val, span, layout| {

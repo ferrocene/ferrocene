@@ -1,5 +1,3 @@
-mod flip_link;
-
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -8,15 +6,13 @@ use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
 use crate::core::config::TargetSelection;
 use crate::{exe, Mode};
 
-pub(crate) use self::flip_link::FlipLink;
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) struct SelfTest {
+pub(crate) struct FlipLink {
     pub(crate) target: TargetSelection,
 }
 
-impl SelfTest {
-    pub(super) fn update_command(
+impl FlipLink {
+    pub(crate) fn update_command(
         cmd: &mut Command,
         builder: &Builder<'_>,
         target: TargetSelection,
@@ -31,7 +27,7 @@ impl SelfTest {
     }
 }
 
-impl Step for SelfTest {
+impl Step for FlipLink {
     type Output = PathBuf;
     const DEFAULT: bool = true;
     const ONLY_HOSTS: bool = true;
@@ -41,7 +37,7 @@ impl Step for SelfTest {
     }
 
     fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(SelfTest { target: run.target });
+        run.builder.ensure(FlipLink { target: run.target });
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {

@@ -767,6 +767,7 @@ impl<'a> Builder<'a> {
                 llvm::Lld,
                 llvm::CrtBeginEnd,
                 crate::ferrocene::tool::SelfTest,
+                crate::ferrocene::tool::FlipLink,
                 tool::FerroceneGenerateTarball,
                 tool::RustdocGUITest,
                 tool::OptimizedDist,

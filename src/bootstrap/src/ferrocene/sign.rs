@@ -15,27 +15,27 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 // Latest version and checksums available at: https://github.com/sigstore/cosign/releases
-const COSIGN_VERSION: &str = "2.0.0";
+const COSIGN_VERSION: &str = "2.2.3";
 const COSIGN_ARTIFACTS: &[CosignArtifact] = &[
     CosignArtifact {
         target: "x86_64-unknown-linux-gnu",
         name: "cosign-linux-amd64",
-        sha256: "169a53594c437d53ffc401b911b7e70d453f5a2c1f96eb2a736f34f6356c4f2b",
+        sha256: "f669f41176cb1d58bb6a3fdb06e24861540cfdb5a571b4ec5eb2218b0df5d304",
     },
     CosignArtifact {
         target: "x86_64-pc-windows-msvc",
         name: "cosign-windows-amd64.exe",
-        sha256: "5cc2e61d6d405438bd69b120f4cd5b12e81c91d03f301cc81d9468e6b9efeafa",
+        sha256: "f7f272d56c580b0ec96f59bfe9f88ec5f42b6e195df009ce3417428e0e0dead1",
     },
     CosignArtifact {
         target: "x86_64-apple-darwin",
         name: "cosign-darwin-amd64",
-        sha256: "d2c8fc0edb42a1e9745da1c43a2928cee044f3b8a1b8df64088a384c7e6f5b5d",
+        sha256: "2429f4b027fc311a6324e9db6fb3a937d559dc61de906a1c2d0d1e0671685e4c",
     },
     CosignArtifact {
         target: "aarch64-apple-darwin",
         name: "cosign-darwin-arm64",
-        sha256: "9d7821e1c05da4b07513729cb00d1070c9a95332c66d90fa593ed77d8c72ca2a",
+        sha256: "3d95ab46d4c4cc55e6465758c238dc03f830cc8a1fc38bc7a33bc203e0fb2c3b",
     },
 ];
 

@@ -57,13 +57,13 @@ def main():
 
 def get_commit_msg(origin_repo_path: str) -> str:
     # get the hash of the commit which triggered the workflow ...
-    origin_commit_hash = run(["git", "rev-parse", "HEAD"], origin_repo_path).stdout
+    origin_commit_hash = run(["git", "rev-parse", "HEAD"], origin_repo_path)
     # ... and construct the commit message with it
     return COMMIT_SUBJECT + "\n\n" + MIRRORED_MARKER + origin_commit_hash
 
 
 def get_last_mirrored_commit(mirror_repo_path: str) -> str:
-    commit_messages: str = run(["git", "log", "--format=%B"], mirror_repo_path).stdout
+    commit_messages = run(["git", "log", "--format=%B"], mirror_repo_path)
     for line in commit_messages.splitlines():
         if line.startswith(MIRRORED_MARKER):
             hash = line.lstrip(MIRRORED_MARKER)
@@ -71,7 +71,8 @@ def get_last_mirrored_commit(mirror_repo_path: str) -> str:
     raise Exception("could not find mirrored-commit")
 
 
-def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]:
+def run(args: list[str], cwd: str, input: str | None = None) -> str:
+    """Run the command and return stdout."""
     print(f"🏃 {' '.join(args)}")
     try:
         return subprocess.run(
@@ -80,9 +81,9 @@ def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]
             check=True,
             cwd=cwd,
             encoding="utf-8",
+            input=input,
             timeout=10,
-            **kwargs,
-        )
+        ).stdout
     except subprocess.CalledProcessError as e:
         print(f"{e.stderr=}")
         raise e

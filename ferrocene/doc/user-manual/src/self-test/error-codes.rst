@@ -8,7 +8,7 @@ FST_001: No sysroot
 -------------------
 
 This error occurs when the ``ferrocene-self-test`` binary has not been
-installed in the ``bin`` folder within the Ferrocene toolset installation
+installed in the ``bin`` folder within the Ferrocene toolchain installation
 directory, aka "the sysroot".
 
 **Suggested fixes**
@@ -16,33 +16,33 @@ directory, aka "the sysroot".
 If you have moved the ``ferrocene-self-test`` binary out of the sysroot, move
 it back into that directory.
 
-Alternatively, reinstall the Ferrocene toolset.
+Alternatively, reinstall the Ferrocene toolchain.
 
 FST_002: Missing binary
 -----------------------
 
-This error occurs when one of the Ferrocene toolset binaries has not been
+This error occurs when one of the Ferrocene toolchain binaries has not been
 installed.
 
 **Suggested fixes**
 
-Ensure that all packages of the Ferrocene toolset have been properly
+Ensure that all packages of the Ferrocene toolchain have been properly
 installed.
 
 FST_003: Wrong binary permissions
 ---------------------------------
 
-This error occurs when a Ferrocene toolset binary lacks execution
+This error occurs when a Ferrocene toolchain binary lacks execution
 permissions.
 
 **Suggested fixes**
 
-Grant execution permission to the indicated Ferrocene toolset binary.
+Grant execution permission to the indicated Ferrocene toolchain binary.
 
 FST_004: Metadata fetch failed
 ------------------------------
 
-This error occurs when a Ferrocene toolset binary is not accessible.
+This error occurs when a Ferrocene toolchain binary is not accessible.
 
 **Suggested fixes**
 
@@ -55,7 +55,7 @@ This error occurs when the invocation of the Ferrocene compiler failed.
 
 **Suggested fixes**
 
-Reinstall the Ferrocene toolset.
+Reinstall the Ferrocene toolchain.
 
 FST_006: Version parse failed
 -----------------------------
@@ -79,7 +79,7 @@ that of the Ferrocene compiler are not the same.
 Do not use the same ``ferrocene-self-test`` binary with different Ferrocene
 toolchains.
 
-Reinstall the Ferrocene toolset in order to obtain the expected
+Reinstall the Ferrocene toolchain in order to obtain the expected
 ``ferrocene-self-test`` binary or Ferrocene compiler.
 
 FST_008: Missing target library
@@ -90,7 +90,7 @@ particular target is malformed.
 
 **Suggested fixes**
 
-Reinstall the Ferrocene toolset.
+Reinstall the Ferrocene toolchain.
 
 FST_009: Duplicate target library
 ---------------------------------
@@ -105,7 +105,7 @@ Ensure that the sysroots of both installations are distinct.
 FST_010: Target library discovery failed
 ----------------------------------------
 
-This error occurs when a Ferrocene toolset library is not accessible.
+This error occurs when a Ferrocene toolchain library is not accessible.
 
 **Suggested fixes**
 
@@ -114,11 +114,11 @@ Ensure that file ownership and system permissions are correctly set.
 FST_015: Bundled linker missing
 -------------------------------
 
-This error occurs when the Ferrocene toolset linker is not available.
+This error occurs when the Ferrocene toolchain linker is not available.
 
 **Suggested fixes**
 
-Ensure that the Ferrocene toolset has been properly installed.
+Ensure that the Ferrocene toolchain has been properly installed.
 
 FLS_016: Path not in UTF-8
 --------------------------
@@ -128,7 +128,7 @@ path that is not in UTF-8.
 
 **Suggested fixes**
 
-Ensure that sysroot of the Ferrocene toolset is a valid UTF-8 path.
+Ensure that sysroot of the Ferrocene toolchain is a valid UTF-8 path.
 
 FLS_017: Creation of temporary directory failed
 -----------------------------------------------
@@ -160,12 +160,12 @@ program.
 
 **Suggested fixes**
 
-Ensure that the operating system is supported by the Ferrocene toolset.
+Ensure that the operating system is supported by the Ferrocene toolchain.
 
-Ensure that the prerequisites of the Ferrocene toolset has been properly
+Ensure that the prerequisites of the Ferrocene toolchain has been properly
 installed.
 
-Ensure that the Ferrocene toolset has been properly installed.
+Ensure that the Ferrocene toolchain has been properly installed.
 
 FLS_020: Compilation artifact cannot be read
 --------------------------------------------
@@ -188,7 +188,7 @@ artifact produced by compiling a test program.
 Ensure that the Ferrocene sysroot is not tampered with while the self-test
 tool is running.
 
-Ensure that the Ferrocene toolset has been properly installed.
+Ensure that the Ferrocene toolchain has been properly installed.
 
 FLS_022: Unexpected compilation artifact
 ----------------------------------------
@@ -201,7 +201,7 @@ unexpected artifact produced by compiling a test program.
 Ensure that the Ferrocene sysroot is not tampered with while the self-test
 tool is running.
 
-Ensure that the Ferrocene toolset has been properly installed.
+Ensure that the Ferrocene toolchain has been properly installed.
 
 FLS_023: Suitable C Compiler not found
 --------------------------------------

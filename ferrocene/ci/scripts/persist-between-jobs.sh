@@ -53,7 +53,7 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        tar -cvf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        tar -cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -64,7 +64,7 @@ case "$1" in
 
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | tar -xvf-
+        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | tar -xf-
         ;;
     *)
         usage 1>&2

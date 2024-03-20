@@ -44,6 +44,7 @@ jobs:
       - name: Checkout ferrocene/sphinx-shared-resources
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0 # need whole history, to search for mirrored-commit
           path: ${{ env.MIRROR_REPO_PATH }}
           repository: ferrocene/sphinx-shared-resources
           token: ${{ steps.github_app_auth.outputs.token }}

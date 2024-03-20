@@ -7,9 +7,8 @@ import os
 import subprocess
 
 
-COMMIT_MSG_START = (
-    "Automatically push changes from ferrocene/ferrocene\n\nmirrored-commit: "
-)
+COMMIT_SUBJECT = "Automatically push changes from ferrocene/ferrocene"
+MIRRORED_MARKER = "mirrored-commit: "
 MIRROR_DIR = ""  # the root, but "." does not work
 ORIGIN_DIR = "ferrocene/doc/sphinx-shared-resources/"
 
@@ -60,15 +59,16 @@ def get_commit_msg(origin_repo_path: str) -> str:
     # get the hash of the commit which triggered the workflow ...
     origin_commit_hash = run(["git", "rev-parse", "HEAD"], origin_repo_path).stdout
     # ... and construct the commit message with it
-    return COMMIT_MSG_START + origin_commit_hash
+    return COMMIT_SUBJECT + "\n\n" + MIRRORED_MARKER + origin_commit_hash
 
 
 def get_last_mirrored_commit(mirror_repo_path: str) -> str:
-    commit_message = run(
-        ["git", "log", "--format=%B", "-n", "1", "HEAD"], mirror_repo_path
-    ).stdout
-    hash = commit_message.lstrip(COMMIT_MSG_START).strip()
-    return hash
+    commit_messages: str = run(["git", "log", "--format=%B"], mirror_repo_path).stdout
+    for line in commit_messages.splitlines():
+        if line.startswith(MIRRORED_MARKER):
+            hash = line.lstrip(MIRRORED_MARKER)
+            return hash
+    raise Exception("could not find mirrored-commit")
 
 
 def run(args: list[str], cwd: str, **kwargs) -> subprocess.CompletedProcess[str]:

@@ -4,7 +4,7 @@
 System Requirements
 ===================
 
-Even though any machine can run the Ferrocene toolset, in order to get the
+Even though any machine can run the Ferrocene toolchain, in order to get the
 best experience, we recommend using a machine with many cores, since parts of
 the compilation process are internally parallelized. The benefit of more cores
 will vary depending on the structure of the project being compiled.

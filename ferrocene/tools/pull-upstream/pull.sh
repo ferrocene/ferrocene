@@ -7,9 +7,14 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
-MAX_MERGES_PER_PR=30
 DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
+
+# Set a default max of merges per PR to 30, if it was not overridden in the
+# environment.
+if [[ -z "${MAX_MERGES_PER_PR+x}" ]]; then
+    MAX_MERGES_PER_PR=30
+fi
 
 # Print all files with the `ferrocene-avoid-pulling-from-upstream` attribute.
 #
@@ -230,14 +235,27 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
 done
 
-# We expose additional commands for `x.py` which affects the completions file generation,
-# so we just run the command to regenerate those in case they need updating as this usually
-# does not need manual intervention.
-echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
-./x.py run generate-completions >/dev/null
-if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
-    git add "${GENERATED_COMPLETIONS_DIR}"
-    git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
+# Check whether we can compile bootstrap successfully, which will be used to
+# gate on the next few steps.
+echo "pull-upstream: checking whether bootstrap can be invoked safely..."
+if ./x.py --help; then
+    can_invoke_bootstrap=true
+else
+    can_invoke_bootstrap=false
+fi
+
+if [[ "${can_invoke_bootstrap}" = "true" ]]; then
+    # We expose additional commands for `x.py` which affects the completions file generation,
+    # so we just run the command to regenerate those in case they need updating as this usually
+    # does not need manual intervention.
+    echo "pull-upstream: checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated..."
+    ./x.py run generate-completions >/dev/null
+    if git status --porcelain=v1 | grep "^ M ${GENERATED_COMPLETIONS_DIR}" >/dev/null; then
+        git add "${GENERATED_COMPLETIONS_DIR}"
+        git commit -m "update ${GENERATED_COMPLETIONS_DIR}"
+    fi
+else
+    echo "pull-upstream: skipped checking whether ${GENERATED_COMPLETIONS_DIR} needs to be updated, due to bootstrap not compiling"
 fi
 
 git branch -D "${TEMP_BRANCH}"

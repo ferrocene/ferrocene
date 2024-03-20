@@ -46,10 +46,10 @@ def render_lexed_node(terms, node):
     has_matches = False
 
     for token in lexer.lexer(node.astext(), terms):
-        if type(token) == MatchedTerm:
+        if type(token) is MatchedTerm:
             result += f"[{token.text}]"
             has_matches = True
-        elif type(token) == str:
+        elif type(token) is str:
             result += token
         else:
             raise RuntimeError("invalid token type")

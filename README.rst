@@ -17,8 +17,8 @@ FLS is compiled of existing Rust documentation, but presented with a rigorous
 structure in order to meet the requirements of qualification.
 
 The FLS is not intended to be used as the normative specification of the Rust
-language nor is it's meant to replace the decision-making processes of the Rust
-project. Any difference between the FLS and the behavior of the rustc compiler
+language, nor is it meant to replace the decision-making processes of the Rust
+project. Any difference between the FLS and the behavior of the Rust compiler
 is considered an error on our part and the FLS will be updated accordingly.
 
 The Ferrocene Language Specification text is licensed under either the ``MIT``

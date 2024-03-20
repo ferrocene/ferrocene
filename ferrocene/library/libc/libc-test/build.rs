@@ -1613,6 +1613,7 @@ fn test_android(target: &str) {
                "sched.h",
                "semaphore.h",
                "signal.h",
+               "spawn.h",
                "stddef.h",
                "stdint.h",
                "stdio.h",
@@ -1979,14 +1980,30 @@ fn test_android(target: &str) {
 
             // Added in API level 28, but some tests use level 24.
             "getrandom" => true,
-
-            // Added in API level 28, but some tests use level 24.
             "syncfs" => true,
-
-            // Added in API level 28, but some tests use level 24.
             "pthread_attr_getinheritsched" | "pthread_attr_setinheritsched" => true,
-            // Added in API level 28, but some tests use level 24.
             "fread_unlocked" | "fwrite_unlocked" | "fgets_unlocked" | "fflush_unlocked" => true,
+            "posix_spawn"
+            | "posix_spawnp"
+            | "posix_spawnattr_init"
+            | "posix_spawnattr_destroy"
+            | "posix_spawnattr_getsigdefault"
+            | "posix_spawnattr_setsigdefault"
+            | "posix_spawnattr_getsigmask"
+            | "posix_spawnattr_setsigmask"
+            | "posix_spawnattr_getflags"
+            | "posix_spawnattr_setflags"
+            | "posix_spawnattr_getpgroup"
+            | "posix_spawnattr_setpgroup"
+            | "posix_spawnattr_getschedpolicy"
+            | "posix_spawnattr_setschedpolicy"
+            | "posix_spawnattr_getschedparam"
+            | "posix_spawnattr_setschedparam"
+            | "posix_spawn_file_actions_init"
+            | "posix_spawn_file_actions_destroy"
+            | "posix_spawn_file_actions_addopen"
+            | "posix_spawn_file_actions_addclose"
+            | "posix_spawn_file_actions_adddup2" => true,
 
             // FIXME: bad function pointers:
             "isalnum" | "isalpha" | "iscntrl" | "isdigit" | "isgraph" | "islower" | "isprint"
@@ -2706,6 +2723,7 @@ fn test_emscripten(target: &str) {
                "semaphore.h",
                "shadow.h",
                "signal.h",
+               "spawn.h",
                "stddef.h",
                "stdint.h",
                "stdio.h",
@@ -3296,6 +3314,7 @@ fn test_vxworks(target: &str) {
 
 fn test_linux(target: &str) {
     assert!(target.contains("linux"));
+    assert!(!target.contains("android"));
 
     // target_env
     let gnu = target.contains("gnu");

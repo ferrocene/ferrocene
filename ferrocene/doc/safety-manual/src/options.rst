@@ -19,8 +19,8 @@ Ferrocene is qualified exclusively for the following command line options:
   page of the target in the :doc:`Compilation Targets
   <user-manual:targets/index>` section of the User Manual.
 
-These CLI options must be utilized for each invocation of the Ferrocene
-toolset to remain within the qualified scope.
+These CLI options must be utilized for each invocation of rustc
+to remain within the qualified scope.
 
 For convenience, :doc:`user-manual:cli` provides further details on CLI options
 available to the end user.

@@ -205,23 +205,10 @@ pub(crate) enum CommandErrorKind {
     NonUtf8Output,
 }
 
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub(crate) enum FindBinaryInPathError {
+    #[error("the PATH environment variable is not set")]
     NoEnvironmentVariable,
+    #[error("binary {name} is not present in the system PATH")]
     MissingBinary { name: String },
-}
-
-impl std::error::Error for FindBinaryInPathError {}
-
-impl Display for FindBinaryInPathError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FindBinaryInPathError::NoEnvironmentVariable => {
-                write!(f, "the PATH environment variable is not set")
-            }
-            FindBinaryInPathError::MissingBinary { name } => {
-                write!(f, "binary {name} is not present in the system PATH")
-            }
-        }
-    }
 }

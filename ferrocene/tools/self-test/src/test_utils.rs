@@ -9,12 +9,12 @@ use std::process::{Command, Stdio};
 
 use tempfile::TempDir;
 
+use crate::env::{self, Env};
 use crate::error::Error;
 use crate::report::Reporter;
-use crate::{Environment, CFG_RELEASE, SELFTEST_RUST_HASH, SELFTEST_TARGET};
 
 pub(crate) struct TestUtils {
-    environment: Environment,
+    env: Env,
     sysroot: TempDir,
     reports: ReportsCollector,
 }
@@ -24,9 +24,7 @@ impl TestUtils {
         let sysroot = TempDir::new().unwrap();
 
         Self {
-            environment: Environment {
-                path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()),
-            },
+            env: Env { path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()) },
             sysroot,
             reports: ReportsCollector { reports: RefCell::new(Vec::new()) },
         }
@@ -58,8 +56,8 @@ impl TestUtils {
         &self.reports
     }
 
-    pub(crate) fn env(&self) -> &Environment {
-        &self.environment
+    pub(crate) fn env(&self) -> &Env {
+        &self.env
     }
 
     #[track_caller]
@@ -126,10 +124,12 @@ impl<'a> BinBuilder<'a> {
     #[must_use]
     pub(crate) fn behaves_like_vV(self) -> Self {
         let stdout = format!(
-            "release: {CFG_RELEASE}
-            host: {SELFTEST_TARGET}
+            "release: {}
+            host: {}
             commit-hash: {}\n",
-            SELFTEST_RUST_HASH.unwrap_or("unknown")
+            env::CFG_RELEASE,
+            env::SELFTEST_TARGET,
+            env::SELFTEST_RUST_HASH.unwrap_or("unknown")
         );
         self.stdout(&stdout).stderr("").exit(0).expected_args(&["-vV"])
     }
@@ -224,9 +224,9 @@ pub(crate) struct CliVersionContent<'a> {
 impl Default for CliVersionContent<'_> {
     fn default() -> Self {
         Self {
-            release: CFG_RELEASE,
-            host: SELFTEST_TARGET,
-            commit_hash: SELFTEST_RUST_HASH.unwrap_or("unknown"),
+            release: env::CFG_RELEASE,
+            host: env::SELFTEST_TARGET,
+            commit_hash: env::SELFTEST_RUST_HASH.unwrap_or("unknown"),
         }
     }
 }

@@ -8,16 +8,6 @@ use std::process::Output;
 
 use thiserror::Error as ThisError;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub(crate) enum LinkerArgsErrorKind {
-    UnknownArgument,
-    DisallowedPlugin,
-    NoArgsFile,
-    InvalidArgsFile,
-    EmptyArgsFile,
-    MissingArg,
-}
-
 #[derive(Debug, ThisError)]
 pub(crate) enum Error {
     #[error("could not detect the sysroot of the Ferrocene installation")]
@@ -211,4 +201,14 @@ pub(crate) enum FindBinaryInPathError {
     NoEnvironmentVariable,
     #[error("binary {name} is not present in the system PATH")]
     MissingBinary { name: String },
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum LinkerArgsErrorKind {
+    UnknownArgument,
+    DisallowedPlugin,
+    NoArgsFile,
+    InvalidArgsFile,
+    EmptyArgsFile,
+    MissingArg,
 }

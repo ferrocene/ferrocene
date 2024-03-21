@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_find_binary_in_path_missing_path() {
-        let env = Env { path: None, ..Env::gather() };
+        let env = Env { path: None };
 
         let err = find_binary_in_path(&env, "vim").unwrap_err();
         assert!(matches!(err, FindBinaryInPathError::NoEnvironmentVariable));

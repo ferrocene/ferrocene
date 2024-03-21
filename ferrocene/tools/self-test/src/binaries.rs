@@ -191,7 +191,7 @@ mod tests {
         std::fs::create_dir_all(&bin_dir).unwrap();
 
         let mut perms = bin_dir.metadata().unwrap().permissions();
-        perms.set_mode(0);
+        perms.set_mode(0o0);
         std::fs::set_permissions(&bin_dir, perms).unwrap();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {

@@ -11,7 +11,7 @@ CACHE_PREFIX="persist-between-jobs"
 TAR="tar"
 # Ensure we use GNU tar on Windows, bsdtar will not handle links well.
 if [[ "${OSTYPE}" != "msys" ]]; then
-    TAR="/usr/bin/tar"
+    TAR="/c/Program\ Files/Git/usr/bin/tar.exe"
 fi
 ${TAR} --version # This should always show GNU tar!
 

@@ -13,19 +13,10 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
-use std::path::PathBuf;
-
 use crate::env::Env;
 use crate::error::Error;
 use crate::report::{Reporter, StderrReporter};
-
-/// The user manual states to extract all archives to the same directory.
-/// Therefore the sysroot is the grandparent of `ferrocene-self-test`
-/// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
-fn get_sysroot() -> Option<PathBuf> {
-    let current_exe = std::env::current_exe().ok()?;
-    Some(current_exe.parent()?.parent()?.to_path_buf())
-}
+use crate::utils::get_sysroot;
 
 fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
     let env = Env::gather();

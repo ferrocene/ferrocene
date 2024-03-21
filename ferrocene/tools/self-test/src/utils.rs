@@ -58,6 +58,14 @@ pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, Find
     Err(FindBinaryInPathError::MissingBinary { name: name.into() })
 }
 
+/// The user manual states to extract all archives to the same directory.
+/// Therefore the sysroot is the grandparent of `ferrocene-self-test`
+/// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
+pub(crate) fn get_sysroot() -> Option<PathBuf> {
+    let current_exe = std::env::current_exe().ok()?;
+    Some(current_exe.parent()?.parent()?.to_path_buf())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

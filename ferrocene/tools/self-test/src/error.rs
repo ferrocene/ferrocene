@@ -6,6 +6,8 @@ use std::fmt::Display;
 use std::path::PathBuf;
 use std::process::Output;
 
+use thiserror::Error as ThisError;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub(crate) enum LinkerArgsErrorKind {
     UnknownArgument,
@@ -16,30 +18,95 @@ pub(crate) enum LinkerArgsErrorKind {
     MissingArg,
 }
 
-#[derive(Debug)]
+#[derive(Debug, ThisError)]
 pub(crate) enum Error {
+    #[error("could not detect the sysroot of the Ferrocene installation")]
     NoSysroot,
+    #[error("binary {name} not found (inside {})", directory.display())]
     MissingBinary { directory: PathBuf, name: String },
+    #[error("binary {} must be readable and executable by all users", path.display())]
     WrongBinaryPermissions { path: PathBuf },
-    MetadataFetchFailed { path: PathBuf, error: std::io::Error },
-    VersionFetchFailed { binary: String, error: Box<CommandError> },
+    #[error("failed to fetch the metadata of {}", path.display())]
+    MetadataFetchFailed {
+        path: PathBuf,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error("failed to invoke {binary} to fetch its version")]
+    VersionFetchFailed {
+        binary: String,
+        #[source]
+        error: Box<CommandError>,
+    },
+    #[error("failed to parse {binary}'s version output")]
     VersionParseFailed { binary: String },
+    #[error("expected {field} of {binary} to be {expected}, found {found}")]
     BinaryVersionMismatch { binary: String, field: String, expected: String, found: String },
+    #[error("library {library} is missing from target {target}")]
     TargetLibraryMissing { target: String, library: String },
+    #[error("there are conflicting copies of library {library} for target {target}")]
     DuplicateTargetLibrary { target: String, library: String },
-    TargetLibraryDiscoveryFailed { path: PathBuf, error: std::io::Error },
-    CCompilerNotFound { name: String, error: FindBinaryInPathError },
+    #[error("failed to access {} while discovering target libraries", path.display())]
+    TargetLibraryDiscoveryFailed {
+        path: PathBuf,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error("C compiler {name} not found on the system")]
+    CCompilerNotFound {
+        name: String,
+        #[source]
+        error: FindBinaryInPathError,
+    },
+    #[error("the bundled linker is missing")]
     BundledLinkerMissing,
+    #[error("the path {} contains bytes not representable as UTF-8", path.to_string_lossy())]
     NonUtf8Path { path: PathBuf },
-    TemporaryCompilationDirectoryCreationFailed { error: std::io::Error },
-    WritingSampleProgramFailed { name: String, dest: PathBuf, error: std::io::Error },
-    SampleProgramCompilationFailed { name: String, error: Box<CommandError> },
-    CompilationArtifactsListingFailed { path: PathBuf, error: std::io::Error },
+    #[error("failed to create the temporary directory to store compilation artifacts")]
+    TemporaryCompilationDirectoryCreationFailed {
+        #[source]
+        error: std::io::Error,
+    },
+    #[error("writing the source of sample program `{name}` to {} failed", dest.display())]
+    WritingSampleProgramFailed {
+        name: String,
+        dest: PathBuf,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error("compilation of sample program `{name}` failed")]
+    SampleProgramCompilationFailed {
+        name: String,
+        #[source]
+        error: Box<CommandError>,
+    },
+    #[error("failed to discover compilation artifacts in {}", path.display())]
+    CompilationArtifactsListingFailed {
+        path: PathBuf,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error(
+        "missing compilation artifact '{name}' after compiling sample program `{after_compiling}`"
+    )]
     MissingCompilationArtifact { name: String, after_compiling: String },
+    #[error(
+        "unexpected compilation artifact '{name}' after compiling sample program `{after_compiling}`"
+    )]
     UnexpectedCompilationArtifact { name: String, after_compiling: String },
+    #[error("unable to find LLD-compatible C compiler for `{target}`")]
     SuitableCCompilerNotFound { target: String },
+    #[error("Unable to analyse linker arguments for `{target}` (kind={kind:?})")]
     WrongLinkerArgs { target: String, kind: LinkerArgsErrorKind },
-    RunningSampleProgramFailed { name: String, error: std::io::Error },
+    #[error("unable to execute sample program {name}")]
+    RunningSampleProgramFailed {
+        name: String,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error(
+        "sample program {name} should have produced {expected:?}, actually produced {found:?}"
+    )]
     SampleProgramOutputWrong { name: String, expected: Vec<u8>, found: Vec<u8> },
 }
 
@@ -74,131 +141,6 @@ impl Error {
 
     pub(crate) fn sample_program_compilation_failed(name: &str, error: CommandError) -> Self {
         Error::SampleProgramCompilationFailed { name: name.into(), error: Box::new(error) }
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::NoSysroot => None,
-            Error::MissingBinary { .. } => None,
-            Error::WrongBinaryPermissions { .. } => None,
-            Error::MetadataFetchFailed { error, .. } => Some(error),
-            Error::VersionFetchFailed { error, .. } => Some(error),
-            Error::VersionParseFailed { .. } => None,
-            Error::BinaryVersionMismatch { .. } => None,
-            Error::TargetLibraryMissing { .. } => None,
-            Error::DuplicateTargetLibrary { .. } => None,
-            Error::TargetLibraryDiscoveryFailed { error, .. } => Some(error),
-            Error::CCompilerNotFound { error, .. } => Some(error),
-            Error::BundledLinkerMissing => None,
-            Error::NonUtf8Path { .. } => None,
-            Error::TemporaryCompilationDirectoryCreationFailed { error } => Some(error),
-            Error::WritingSampleProgramFailed { error, .. } => Some(error),
-            Error::SampleProgramCompilationFailed { error, .. } => Some(error),
-            Error::CompilationArtifactsListingFailed { error, .. } => Some(error),
-            Error::MissingCompilationArtifact { .. } => None,
-            Error::UnexpectedCompilationArtifact { .. } => None,
-            Error::SuitableCCompilerNotFound { .. } => None,
-            Error::WrongLinkerArgs { .. } => None,
-            Error::RunningSampleProgramFailed { error, .. } => Some(error),
-            Error::SampleProgramOutputWrong { .. } => None,
-        }
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::NoSysroot => {
-                write!(f, "could not detect the sysroot of the Ferrocene installation")
-            }
-            Error::MissingBinary { directory, name } => {
-                write!(f, "binary {name} not found (inside {})", directory.display())
-            }
-            Error::WrongBinaryPermissions { path } => {
-                write!(f, "binary {} must be readable and executable by all users", path.display())
-            }
-            Error::MetadataFetchFailed { path, .. } => {
-                write!(f, "failed to fetch the metadata of {}", path.display())
-            }
-            Error::VersionFetchFailed { binary, .. } => {
-                write!(f, "failed to invoke {binary} to fetch its version")
-            }
-            Error::VersionParseFailed { binary } => {
-                write!(f, "failed to parse {binary}'s version output")
-            }
-            Error::BinaryVersionMismatch { binary, field, expected, found } => {
-                write!(f, "expected {field} of {binary} to be {expected}, found {found}")
-            }
-            Error::TargetLibraryMissing { target, library } => {
-                write!(f, "library {library} is missing from target {target}")
-            }
-            Error::DuplicateTargetLibrary { target, library } => {
-                write!(f, "there are conflicting copies of library {library} for target {target}")
-            }
-            Error::TargetLibraryDiscoveryFailed { path, .. } => {
-                write!(f, "failed to access {} while discovering target libraries", path.display())
-            }
-            Error::CCompilerNotFound { name, .. } => {
-                write!(f, "C compiler {name} not found on the system",)
-            }
-            Error::BundledLinkerMissing => {
-                write!(f, "the bundled linker is missing")
-            }
-            Error::NonUtf8Path { path } => {
-                write!(
-                    f,
-                    "the path {} contains bytes not representable as UTF-8",
-                    path.to_string_lossy()
-                )
-            }
-            Error::TemporaryCompilationDirectoryCreationFailed { .. } => {
-                write!(f, "failed to create the temporary directory to store compilation artifacts")
-            }
-            Error::WritingSampleProgramFailed { name, dest, .. } => {
-                write!(
-                    f,
-                    "writing the source of sample program `{name}` to {} failed",
-                    dest.display()
-                )
-            }
-            Error::SampleProgramCompilationFailed { name, .. } => {
-                write!(f, "compilation of sample program `{name}` failed")
-            }
-            Error::CompilationArtifactsListingFailed { path, .. } => {
-                write!(f, "failed to discover compilation artifacts in {}", path.display())
-            }
-            Error::MissingCompilationArtifact { name, after_compiling } => {
-                write!(
-                    f,
-                    "missing compilation artifact '{name}' \
-                     after compiling sample program `{after_compiling}`"
-                )
-            }
-            Error::UnexpectedCompilationArtifact { name, after_compiling } => {
-                write!(
-                    f,
-                    "unexpected compilation artifact '{name}' \
-                     after compiling sample program `{after_compiling}`"
-                )
-            }
-            Error::SuitableCCompilerNotFound { target } => {
-                write!(f, "unable to find LLD-compatible C compiler for `{target}`")
-            }
-            Error::WrongLinkerArgs { target, kind } => {
-                write!(f, "Unable to analyse linker arguments for `{target}` (kind={kind:?})")
-            }
-            Error::RunningSampleProgramFailed { name, .. } => {
-                write!(f, "unable to execute sample program {name}")
-            }
-            Error::SampleProgramOutputWrong { name, expected, found } => {
-                write!(
-                    f,
-                    "sample program {name} should have produced {expected:?}, actually produced {found:?}"
-                )
-            }
-        }
     }
 }
 

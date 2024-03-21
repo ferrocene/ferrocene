@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 atty = "0.2.14"
 tempfile = "3.3.0"
+thiserror = "1"
 
 [dev-dependencies]
 insta = { version = "1.31.0" }

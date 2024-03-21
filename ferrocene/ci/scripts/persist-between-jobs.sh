@@ -8,6 +8,13 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
+TAR="tar"
+# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
+if [[ "${OSTYPE}" != "msys" ]]; then
+    TAR="/usr/bin/tar"
+fi
+${TAR} --version # This should always show GNU tar!
+
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
@@ -53,7 +60,7 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        tar -cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        ${TAR} -cvf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -64,7 +71,7 @@ case "$1" in
 
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | tar -xf-
+        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | ${TAR} -xvf-
         ;;
     *)
         usage 1>&2

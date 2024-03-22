@@ -741,6 +741,7 @@ commands:
         default: linux # Or `windows` or `darwin`
       restore-from-job:
         type: string
+        default: ""
       llvm-subset:
         type: boolean
         default: true
@@ -758,9 +759,12 @@ commands:
           steps:
             - ferrocene-setup-windows
       - aws-oidc-auth
-      - run:
-          name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - when:
+          condition: <<parameters.restore-from-job>>
+          steps:
+            - run:
+                name: Restore files from the << parameters.restore-from-job >> job
+                command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
 
       - ferrocene-ci
 

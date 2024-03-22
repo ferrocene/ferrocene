@@ -139,6 +139,7 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
       - ferrocene-job-dist:
+          os: windows
           restore-from-job: x86_64-windows-build
 
   x86_64-linux-docs:

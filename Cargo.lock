@@ -32,7 +32,7 @@ dependencies = [
 
 [[package]]
 name = "backtrace"
-version = "0.3.70"
+version = "0.3.71"
 dependencies = [
  "addr2line",
  "cc",

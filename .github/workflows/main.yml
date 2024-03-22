@@ -233,7 +233,13 @@ jobs:
 
   msrv:
     name: MSRV
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-20.04
+          - os: windows-latest
     steps:
     - uses: actions/checkout@v3
       with:

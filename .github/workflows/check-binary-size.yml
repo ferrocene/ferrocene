@@ -6,8 +6,9 @@ name: Check binary size
 
 on:
   pull_request_target:
-    branches:
-      - master
+    # HACK(jubilee): something broke the distributed LLVM libso and I don't know what.
+    branches: []
+#      - master
 
 # Both the "measure" and "report" jobs need to know this.
 env:

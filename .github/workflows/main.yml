@@ -48,7 +48,7 @@ jobs:
     - name: Force frame pointers
       run: echo RUSTFLAGS="-Cforce-frame-pointers $RUSTFLAGS" >> $GITHUB_ENV
       shell: bash
-      if: matrix.rust == 'stable-i686-msvc'
+      if: contains(matrix.rust, 'i686')
 
     - run: cargo build
     - run: cargo test

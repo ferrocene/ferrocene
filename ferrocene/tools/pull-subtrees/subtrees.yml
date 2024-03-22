@@ -22,10 +22,6 @@
   repo: ferrocene/specification
   ref: main
 
-- path: ferrocene/doc/sphinx-shared-resources
-  repo: ferrocene/sphinx-shared-resources
-  ref: main
-
 - path: ferrocene/library/libc
   repo: rust-lang/libc
   ref: libc-0.2

@@ -26,6 +26,13 @@ use core::mem;
 use core::ptr;
 use core::slice;
 
+// FIXME: replace with ptr::from_ref once MSRV is high enough
+#[inline(always)]
+#[must_use]
+const fn ptr_from_ref<T: ?Sized>(r: &T) -> *const T {
+    r
+}
+
 // Store an OsString on std so we can provide the symbol name and filename.
 pub struct Symbol<'a> {
     name: *const [u8],
@@ -257,7 +264,7 @@ unsafe fn do_resolve(
 
         let len = len as usize;
 
-        filename = Some(ptr::from_ref(slice::from_raw_parts(base, len)));
+        filename = Some(ptr_from_ref(slice::from_raw_parts(base, len)));
     }
 
     cb(&super::Symbol {

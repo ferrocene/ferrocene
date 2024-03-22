@@ -355,7 +355,7 @@ mod tests {
     use super::*;
     use crate::annotations::AnnotationSource;
     use crate::documentations::{CliOption, Document, Paragraph, Section, TraceabilityIds};
-    use std::collections::{BTreeMap, BTreeSet};
+    use std::collections::BTreeMap;
     use std::path::Path;
 
     #[test]

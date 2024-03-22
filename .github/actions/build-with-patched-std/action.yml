@@ -41,7 +41,7 @@ runs:
         python3 x.py build library --stage 0
 
         TEMP_BUILD_OUTPUT=$(mktemp test-binary-XXXXXXXX)
-        "$RUSTC_BUILD_DIR/stage0-sysroot/bin/rustc" $RUSTC_FLAGS "${{ inputs.main-rs }}" -o "$TEMP_BUILD_OUTPUT"
+        "$RUSTC_BUILD_DIR/stage0/bin/rustc" $RUSTC_FLAGS "${{ inputs.main-rs }}" -o "$TEMP_BUILD_OUTPUT"
         BINARY_SIZE=$(stat -c '%s' "$TEMP_BUILD_OUTPUT")
         rm "$TEMP_BUILD_OUTPUT"
 

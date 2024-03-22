@@ -1006,7 +1006,7 @@ checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
 
 [[package]]
 name = "clippy"
-version = "0.1.78"
+version = "0.1.79"
 dependencies = [
  "anstream",
  "clippy_config",
@@ -1034,7 +1034,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.78"
+version = "0.1.79"
 dependencies = [
  "rustc-semver",
  "serde",
@@ -1057,7 +1057,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.78"
+version = "0.1.79"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1082,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.78"
+version = "0.1.79"
 dependencies = [
  "arrayvec",
  "clippy_config",
@@ -1449,7 +1449,7 @@ checksum = "a0afaad2b26fa326569eb264b1363e8ae3357618c43982b3f285f0774ce76b69"
 
 [[package]]
 name = "declare_clippy_lint"
-version = "0.1.78"
+version = "0.1.79"
 dependencies = [
  "itertools 0.12.1",
  "quote",
@@ -2859,7 +2859,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c2a198fb6b0eada2a8df47933734e6d35d350665a33a3593d7164fa52c75c19"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.4",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -5229,6 +5229,8 @@ dependencies = [
  "rustc_target",
  "smallvec",
  "tracing",
+ "tracing-subscriber",
+ "tracing-tree",
 ]
 
 [[package]]

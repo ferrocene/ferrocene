@@ -126,7 +126,8 @@ jobs:
         ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
 
-  x86_64-windows-build:
+  # We opt against a build/dist split for Windows to save on CI time (setup is slow)
+  x86_64-windows-dist:
     executor:
       name: win/server-2022
       size: large # 8-core
@@ -137,25 +138,11 @@ jobs:
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
-    steps:
-      - ferrocene-job-build:
-          os: windows
-
-  x86_64-windows-dist:
-    executor:
-      name: win/server-2022
-      size: large # 8-core
-      shell: bash.exe -euo pipefail
-    environment:
-      FERROCENE_HOST: x86_64-pc-windows-msvc
-      SCRIPT: |
-        ferrocene/ci/scripts/llvm-cache.sh download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
       - ferrocene-job-dist:
           os: windows
-          restore-from-job: x86_64-windows-build
 
   x86_64-linux-docs:
     executor: docker-ubuntu-20
@@ -567,13 +554,9 @@ workflows:
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
       
       - x86_64-windows-llvm: {}
-      - x86_64-windows-build:
-          requires:
-            - x86_64-windows-llvm
       - x86_64-windows-dist:
           requires:
             - x86_64-windows-llvm
-            - x86_64-windows-build
 
       - commit-checks:
           requires:

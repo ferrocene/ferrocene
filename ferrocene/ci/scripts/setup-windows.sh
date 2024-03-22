@@ -32,3 +32,8 @@ choco install -y cmake ninja zstandard
 # By default CMake is not in the bash PATH, so we need to add
 # it manually to it.
 echo 'export PATH="/c/Program Files/CMake/bin:${PATH}"' >> "${BASH_ENV}"
+
+where git
+where tar
+ls /c/Program\ Files\
+exit 1

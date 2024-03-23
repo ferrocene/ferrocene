@@ -20,7 +20,7 @@ pub use pat::{CommaRecoveryMode, RecoverColon, RecoverComma};
 pub use path::PathStyle;
 
 use rustc_ast::ptr::P;
-use rustc_ast::token::{self, Delimiter, Nonterminal, Token, TokenKind};
+use rustc_ast::token::{self, Delimiter, Token, TokenKind};
 use rustc_ast::tokenstream::{AttributesData, DelimSpacing, DelimSpan, Spacing};
 use rustc_ast::tokenstream::{TokenStream, TokenTree, TokenTreeCursor};
 use rustc_ast::util::case::Case;
@@ -93,12 +93,13 @@ pub enum TrailingToken {
 #[macro_export]
 macro_rules! maybe_whole {
     ($p:expr, $constructor:ident, |$x:ident| $e:expr) => {
-        if let token::Interpolated(nt) = &$p.token.kind {
-            if let token::$constructor(x) = &nt.0 {
-                let $x = x.clone();
-                $p.bump();
-                return Ok($e);
-            }
+        if let token::Interpolated(nt) = &$p.token.kind
+            && let token::$constructor(x) = &nt.0
+        {
+            #[allow(unused_mut)]
+            let mut $x = x.clone();
+            $p.bump();
+            return Ok($e);
         }
     };
 }
@@ -449,6 +450,7 @@ impl<'a> Parser<'a> {
         parser
     }
 
+    #[inline]
     pub fn recovery(mut self, recovery: Recovery) -> Self {
         self.recovery = recovery;
         self
@@ -461,17 +463,24 @@ impl<'a> Parser<'a> {
     ///
     /// Technically, this only needs to restrict eager recovery by doing lookahead at more tokens.
     /// But making the distinction is very subtle, and simply forbidding all recovery is a lot simpler to uphold.
+    #[inline]
     fn may_recover(&self) -> bool {
         matches!(self.recovery, Recovery::Allowed)
     }
 
-    pub fn unexpected<T>(&mut self) -> PResult<'a, T> {
+    /// Version of [`unexpected`](Parser::unexpected) that "returns" any type in the `Ok`
+    /// (both those functions never return "Ok", and so can lie like that in the type).
+    pub fn unexpected_any<T>(&mut self) -> PResult<'a, T> {
         match self.expect_one_of(&[], &[]) {
             Err(e) => Err(e),
             // We can get `Ok(true)` from `recover_closing_delimiter`
             // which is called in `expected_one_of_not_found`.
             Ok(_) => FatalError.raise(),
         }
+    }
+
+    pub fn unexpected(&mut self) -> PResult<'a, ()> {
+        self.unexpected_any()
     }
 
     /// Expects and consumes the token `t`. Signals an error if the next token is not `t`.
@@ -542,6 +551,7 @@ impl<'a> Parser<'a> {
     ///
     /// This method will automatically add `tok` to `expected_tokens` if `tok` is not
     /// encountered.
+    #[inline]
     fn check(&mut self, tok: &TokenKind) -> bool {
         let is_present = self.token == *tok;
         if !is_present {
@@ -550,6 +560,7 @@ impl<'a> Parser<'a> {
         is_present
     }
 
+    #[inline]
     fn check_noexpect(&self, tok: &TokenKind) -> bool {
         self.token == *tok
     }
@@ -558,6 +569,7 @@ impl<'a> Parser<'a> {
     ///
     /// the main purpose of this function is to reduce the cluttering of the suggestions list
     /// which using the normal eat method could introduce in some cases.
+    #[inline]
     pub fn eat_noexpect(&mut self, tok: &TokenKind) -> bool {
         let is_present = self.check_noexpect(tok);
         if is_present {
@@ -567,6 +579,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Consumes a token 'tok' if it exists. Returns whether the given token was present.
+    #[inline]
     pub fn eat(&mut self, tok: &TokenKind) -> bool {
         let is_present = self.check(tok);
         if is_present {
@@ -577,11 +590,13 @@ impl<'a> Parser<'a> {
 
     /// If the next token is the given keyword, returns `true` without eating it.
     /// An expectation is also added for diagnostics purposes.
+    #[inline]
     fn check_keyword(&mut self, kw: Symbol) -> bool {
         self.expected_tokens.push(TokenType::Keyword(kw));
         self.token.is_keyword(kw)
     }
 
+    #[inline]
     fn check_keyword_case(&mut self, kw: Symbol, case: Case) -> bool {
         if self.check_keyword(kw) {
             return true;
@@ -600,6 +615,7 @@ impl<'a> Parser<'a> {
     /// If the next token is the given keyword, eats it and returns `true`.
     /// Otherwise, returns `false`. An expectation is also added for diagnostics purposes.
     // Public for rustfmt usage.
+    #[inline]
     pub fn eat_keyword(&mut self, kw: Symbol) -> bool {
         if self.check_keyword(kw) {
             self.bump();
@@ -612,6 +628,7 @@ impl<'a> Parser<'a> {
     /// Eats a keyword, optionally ignoring the case.
     /// If the case differs (and is ignored) an error is issued.
     /// This is useful for recovery.
+    #[inline]
     fn eat_keyword_case(&mut self, kw: Symbol, case: Case) -> bool {
         if self.eat_keyword(kw) {
             return true;
@@ -629,6 +646,7 @@ impl<'a> Parser<'a> {
         false
     }
 
+    #[inline]
     fn eat_keyword_noexpect(&mut self, kw: Symbol) -> bool {
         if self.token.is_keyword(kw) {
             self.bump();
@@ -650,6 +668,7 @@ impl<'a> Parser<'a> {
         self.token.is_keyword(kw) && self.look_ahead(1, |t| t.is_ident() && !t.is_reserved_ident())
     }
 
+    #[inline]
     fn check_or_expected(&mut self, ok: bool, typ: TokenType) -> bool {
         if ok {
             true
@@ -697,6 +716,7 @@ impl<'a> Parser<'a> {
 
     /// Checks to see if the next token is either `+` or `+=`.
     /// Otherwise returns `false`.
+    #[inline]
     fn check_plus(&mut self) -> bool {
         self.check_or_expected(
             self.token.is_like_plus(),
@@ -1278,7 +1298,11 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_delim_args(&mut self) -> PResult<'a, P<DelimArgs>> {
-        if let Some(args) = self.parse_delim_args_inner() { Ok(P(args)) } else { self.unexpected() }
+        if let Some(args) = self.parse_delim_args_inner() {
+            Ok(P(args))
+        } else {
+            self.unexpected_any()
+        }
     }
 
     fn parse_attr_args(&mut self) -> PResult<'a, AttrArgs> {
@@ -1384,7 +1408,7 @@ impl<'a> Parser<'a> {
     /// so emit a proper diagnostic.
     // Public for rustfmt usage.
     pub fn parse_visibility(&mut self, fbt: FollowedByType) -> PResult<'a, Visibility> {
-        maybe_whole!(self, NtVis, |x| x.into_inner());
+        maybe_whole!(self, NtVis, |vis| vis.into_inner());
 
         if !self.eat_keyword(kw::Pub) {
             // We need a span for our `Spanned<VisibilityKind>`, but there's inherently no
@@ -1561,8 +1585,21 @@ pub enum FlatToken {
     Empty,
 }
 
-#[derive(Debug)]
-pub enum ParseNtResult {
-    Nt(Nonterminal),
+// Metavar captures of various kinds.
+#[derive(Clone, Debug)]
+pub enum ParseNtResult<NtType> {
     Tt(TokenTree),
+    Nt(NtType),
+}
+
+impl<T> ParseNtResult<T> {
+    pub fn map_nt<F, U>(self, mut f: F) -> ParseNtResult<U>
+    where
+        F: FnMut(T) -> U,
+    {
+        match self {
+            ParseNtResult::Tt(tt) => ParseNtResult::Tt(tt),
+            ParseNtResult::Nt(nt) => ParseNtResult::Nt(f(nt)),
+        }
+    }
 }

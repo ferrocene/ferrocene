@@ -45,6 +45,29 @@ use rustc_trait_selection::traits::{self, ObligationCauseCode, SelectionContext}
 use std::iter;
 use std::mem;
 
+#[derive(Clone, Copy, Default)]
+pub enum DivergingBlockBehavior {
+    /// This is the current stable behavior:
+    ///
+    /// ```rust
+    /// {
+    ///     return;
+    /// } // block has type = !, even though we are supposedly dropping it with `;`
+    /// ```
+    #[default]
+    Never,
+
+    /// Alternative behavior:
+    ///
+    /// ```ignore (very-unstable-new-attribute)
+    /// #![rustc_never_type_options(diverging_block_default = "unit")]
+    /// {
+    ///     return;
+    /// } // block has type = (), since we are dropping `!` from `return` with `;`
+    /// ```
+    Unit,
+}
+
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(in super::super) fn check_casts(&mut self) {
         // don't hold the borrow to deferred_cast_checks while checking to avoid borrow checker errors
@@ -1710,7 +1733,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 //
                 // #41425 -- label the implicit `()` as being the
                 // "found type" here, rather than the "expected type".
-                if !self.diverges.get().is_always() {
+                if !self.diverges.get().is_always()
+                    || matches!(self.diverging_block_behavior, DivergingBlockBehavior::Unit)
+                {
                     // #50009 -- Do not point at the entire fn block span, point at the return type
                     // span, as it is the cause of the requirement, and
                     // `consider_hint_about_removing_semicolon` will point at the last expression
@@ -1892,11 +1917,35 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         pat: &'tcx hir::Pat<'tcx>,
         ty: Ty<'tcx>,
     ) {
+        struct V<'tcx> {
+            tcx: TyCtxt<'tcx>,
+            pat_hir_ids: Vec<hir::HirId>,
+        }
+
+        impl<'tcx> Visitor<'tcx> for V<'tcx> {
+            type NestedFilter = rustc_middle::hir::nested_filter::All;
+
+            fn nested_visit_map(&mut self) -> Self::Map {
+                self.tcx.hir()
+            }
+
+            fn visit_pat(&mut self, p: &'tcx hir::Pat<'tcx>) {
+                self.pat_hir_ids.push(p.hir_id);
+                hir::intravisit::walk_pat(self, p);
+            }
+        }
         if let Err(guar) = ty.error_reported() {
             // Override the types everywhere with `err()` to avoid knock on errors.
             let err = Ty::new_error(self.tcx, guar);
             self.write_ty(hir_id, err);
             self.write_ty(pat.hir_id, err);
+            let mut visitor = V { tcx: self.tcx, pat_hir_ids: vec![] };
+            hir::intravisit::walk_pat(&mut visitor, pat);
+            // Mark all the subpatterns as `{type error}` as well. This allows errors for specific
+            // subpatterns to be silenced.
+            for hir_id in visitor.pat_hir_ids {
+                self.write_ty(hir_id, err);
+            }
             self.locals.borrow_mut().insert(hir_id, err);
             self.locals.borrow_mut().insert(pat.hir_id, err);
         }

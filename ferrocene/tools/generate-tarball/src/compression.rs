@@ -4,7 +4,7 @@
 
 use anyhow::{Context, Error};
 use rayon::prelude::*;
-use std::{convert::TryFrom, fmt, io::Write, path::Path, str::FromStr};
+use std::{fmt, io::Write, path::Path, str::FromStr};
 use xz2::write::XzEncoder;
 
 #[derive(Default, Debug, Copy, Clone)]

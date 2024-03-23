@@ -10,7 +10,7 @@ mod generator;
 mod tarballer;
 
 use anyhow::Context;
-use clap::{self, Parser};
+use clap::Parser;
 
 #[derive(Parser)]
 pub struct CommandLine {

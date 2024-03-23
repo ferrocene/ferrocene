@@ -61,6 +61,9 @@ pub fn provide(providers: &mut Providers) {
         type_alias_is_lazy: type_of::type_alias_is_lazy,
         item_bounds: item_bounds::item_bounds,
         explicit_item_bounds: item_bounds::explicit_item_bounds,
+        item_super_predicates: item_bounds::item_super_predicates,
+        explicit_item_super_predicates: item_bounds::explicit_item_super_predicates,
+        item_non_self_assumptions: item_bounds::item_non_self_assumptions,
         generics_of: generics_of::generics_of,
         predicates_of: predicates_of::predicates_of,
         predicates_defined_on,
@@ -633,7 +636,9 @@ fn convert_item(tcx: TyCtxt<'_>, item_id: hir::ItemId) {
             tcx.ensure().generics_of(def_id);
             tcx.ensure().predicates_of(def_id);
             tcx.ensure().explicit_item_bounds(def_id);
+            tcx.ensure().explicit_item_super_predicates(def_id);
             tcx.ensure().item_bounds(def_id);
+            tcx.ensure().item_super_predicates(def_id);
         }
 
         hir::ItemKind::TyAlias(..) => {
@@ -689,6 +694,7 @@ fn convert_trait_item(tcx: TyCtxt<'_>, trait_item_id: hir::TraitItemId) {
 
         hir::TraitItemKind::Type(_, Some(_)) => {
             tcx.ensure().item_bounds(def_id);
+            tcx.ensure().item_super_predicates(def_id);
             tcx.ensure().type_of(def_id);
             // Account for `type T = _;`.
             let mut visitor = HirPlaceholderCollector::default();
@@ -698,6 +704,7 @@ fn convert_trait_item(tcx: TyCtxt<'_>, trait_item_id: hir::TraitItemId) {
 
         hir::TraitItemKind::Type(_, None) => {
             tcx.ensure().item_bounds(def_id);
+            tcx.ensure().item_super_predicates(def_id);
             // #74612: Visit and try to find bad placeholders
             // even if there is no concrete type.
             let mut visitor = HirPlaceholderCollector::default();
@@ -1364,7 +1371,7 @@ fn infer_return_ty_for_fn_sig<'tcx>(
             // recursive function definition to leak out into the fn sig.
             let mut should_recover = false;
 
-            if let Some(ret_ty) = ret_ty.make_suggestable(tcx, false) {
+            if let Some(ret_ty) = ret_ty.make_suggestable(tcx, false, None) {
                 diag.span_suggestion(
                     ty.span,
                     "replace with the correct return type",
@@ -1442,7 +1449,7 @@ fn suggest_impl_trait<'tcx>(
             let ty::Tuple(types) = *args_tuple.kind() else {
                 return None;
             };
-            let types = types.make_suggestable(tcx, false)?;
+            let types = types.make_suggestable(tcx, false, None)?;
             let maybe_ret =
                 if item_ty.is_unit() { String::new() } else { format!(" -> {item_ty}") };
             Some(format!(
@@ -1500,7 +1507,7 @@ fn suggest_impl_trait<'tcx>(
         // FIXME(compiler-errors): We may benefit from resolving regions here.
         if ocx.select_where_possible().is_empty()
             && let item_ty = infcx.resolve_vars_if_possible(item_ty)
-            && let Some(item_ty) = item_ty.make_suggestable(tcx, false)
+            && let Some(item_ty) = item_ty.make_suggestable(tcx, false, None)
             && let Some(sugg) = formatter(
                 tcx,
                 infcx.resolve_vars_if_possible(args),

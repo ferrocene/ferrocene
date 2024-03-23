@@ -26,13 +26,18 @@ jobs:
             rust: stable
           - os: macos-latest
             rust: nightly
-          # HACK(jubilee): 1.77 broke backtraces on Windows lol
           - os: windows-latest
-            rust: 1.76.0-x86_64-msvc
+            rust: stable-x86_64-msvc
           - os: windows-latest
-            rust: 1.76.0-i686-msvc
+            rust: stable-i686-msvc
           - os: windows-latest
-            rust: 1.76.0-x86_64-gnu
+            rust: stable-x86_64-gnu
+          - os: windows-latest
+            rust: nightly-x86_64-msvc
+          - os: windows-latest
+            rust: nightly-i686-msvc
+          - os: windows-latest
+            rust: nightly-x86_64-gnu
     steps:
     - uses: actions/checkout@v3
       with:

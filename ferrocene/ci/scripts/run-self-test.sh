@@ -54,7 +54,8 @@ mkdir -p "${root}/sysroot"
 for archive in ${root}/archives/*; do
     echo "===> installing $(basename ${archive})"
 
-    tar -C "${root}/sysroot" -xf "${archive}"
+    # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0 rather than stdout by default.
+    tar -C "${root}/sysroot" -xf- "${archive}"
 done
 
 echo "===> running the self-test tool"

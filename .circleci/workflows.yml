@@ -585,7 +585,7 @@ commands:
     parameters:
       os:
         type: string
-        default: unix # Or windows
+        default: linux # Or `windows` or `darwin`
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:

@@ -27,7 +27,7 @@ fi
 
 setup_python3
 
-choco install -y cmake ninja zstandard
+choco install -y cmake.portable ninja zstandard
 
 # By default CMake is not in the bash PATH, so we need to add
 # it manually to it.

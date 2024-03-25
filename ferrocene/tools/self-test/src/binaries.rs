@@ -21,7 +21,10 @@ fn check_binary(
     hash: CommitHashOf,
 ) -> Result<(), Error> {
     let bin_dir = sysroot.join("bin");
+    #[cfg(unix)]
     let bin = bin_dir.join(name);
+    #[cfg(windows)] // Windows needs `.exe` on the end
+    let bin = bin_dir.join(format!("{name}.exe"));
 
     match std::fs::metadata(&bin) {
         Ok(metadata) => {

@@ -27,8 +27,6 @@ fi
 
 setup_python3
 
+# Use `cmake.portable` to ensure it is added to path and because the virtual package
+# was previously broken intermittently.
 choco install -y cmake.portable ninja zstandard
-
-# By default CMake is not in the bash PATH, so we need to add
-# it manually to it.
-echo 'export PATH="/c/Program Files/CMake/bin:${PATH}"' >> "${BASH_ENV}"

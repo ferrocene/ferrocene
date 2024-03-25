@@ -111,24 +111,6 @@ jobs:
         ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
 
-  # We opt against a build/dist split for Windows to save on CI time (setup is slow)
-  x86_64-windows-dist:
-    executor:
-      name: win/server-2022
-      size: large # 8-core
-      shell: bash.exe -euo pipefail
-    environment:
-      FERROCENE_HOST: x86_64-pc-windows-msvc
-      SCRIPT: |
-        ferrocene/ci/scripts/llvm-cache.sh download
-        ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-    steps:
-      - ferrocene-job-dist:
-          os: windows
-
   x86_64-linux-docs:
     executor: docker-ubuntu-20
     resource_class: large # 4-core
@@ -433,6 +415,38 @@ jobs:
           name: Empty step to make sure the job always has steps
           command: echo
 
+  # We opt against a build/dist split for Windows to save on CI time (setup is slow)
+  x86_64-windows-dist:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          os: windows
+
+  x86_64-windows-self-test:
+    executor: docker-ubuntu-20
+    resource_class: small # 1-core
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
   finish-build:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
@@ -537,17 +551,20 @@ workflows:
           image: ubuntu-23
           tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
-      
+
       - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-self-test:
+          requires:
+            - x86_64-windows-dist
 
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
             # TODO: do not merge, testing on commit to save CI resources
-            - x86_64-windows-dist
+            - x86_64-windows-self-test
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:

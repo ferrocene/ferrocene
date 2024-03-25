@@ -29,7 +29,10 @@ fn check_binary(
     hash: CommitHashOf,
 ) -> Result<(), Error> {
     let bin_dir = sysroot.join("bin");
+    #[cfg(unix)]
     let bin = bin_dir.join(name);
+    #[cfg(windows)] // Windows needs `.exe` on the end
+    let bin = bin_dir.join(format!("{name}.exe"));
 
     check_file(&bin, &bin_dir, name)?;
     let version = get_version(&bin, name)?;

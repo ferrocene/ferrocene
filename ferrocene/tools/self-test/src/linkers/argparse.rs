@@ -5,7 +5,7 @@
 
 /// Linker options we know about
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum LinkerArg<'a> {
+pub(crate) enum LinkerArg<'a> {
     // Unqualified option
     /// An input file (an argument with no option before it)
     Input(&'a str),
@@ -129,7 +129,7 @@ where
 
 /// Clean up split linker arguments so they can be more easily processed
 #[rustfmt::skip]
-pub fn rationalise_linker_args<'a, I>(mut args_iter: I) -> Vec<LinkerArg<'a>>
+pub(crate) fn rationalise_linker_args<'a, I>(mut args_iter: I) -> Vec<LinkerArg<'a>>
 where
     I: Iterator<Item = &'a str>,
 {

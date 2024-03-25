@@ -5,10 +5,10 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 
+use crate::env;
 use crate::error::Error;
 use crate::report::Reporter;
 use crate::utils::run_command;
-use crate::{CFG_RELEASE, SELFTEST_CARGO_HASH, SELFTEST_RUST_HASH, SELFTEST_TARGET};
 
 /// Check that the executables exist in the expected path, and that they have the correct permissions.
 ///
@@ -94,8 +94,8 @@ fn parse_version_output(output: &str) -> Option<VersionOutput> {
 
 fn check_version(version: VersionOutput, hash: CommitHashOf, name: &str) -> Result<(), Error> {
     for (field, expected, found) in [
-        ("host", SELFTEST_TARGET, version.host),
-        ("release", CFG_RELEASE, version.release),
+        ("host", env::SELFTEST_TARGET, version.host),
+        ("release", env::CFG_RELEASE, version.release),
         ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
     ] {
         if expected != found {
@@ -140,8 +140,8 @@ enum CommitHashOf {
 impl CommitHashOf {
     fn fetch(&self) -> Option<&'static str> {
         match self {
-            CommitHashOf::Rust => SELFTEST_RUST_HASH,
-            CommitHashOf::Cargo => SELFTEST_CARGO_HASH,
+            CommitHashOf::Rust => env::SELFTEST_RUST_HASH,
+            CommitHashOf::Cargo => env::SELFTEST_CARGO_HASH,
         }
     }
 }
@@ -191,7 +191,7 @@ mod tests {
         std::fs::create_dir_all(&bin_dir).unwrap();
 
         let mut perms = bin_dir.metadata().unwrap().permissions();
-        perms.set_mode(0);
+        perms.set_mode(0o0);
         std::fs::set_permissions(&bin_dir, perms).unwrap();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {

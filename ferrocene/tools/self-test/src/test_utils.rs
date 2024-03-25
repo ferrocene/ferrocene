@@ -9,12 +9,12 @@ use std::process::{Command, Stdio};
 
 use tempfile::TempDir;
 
+use crate::env::{self, Env};
 use crate::error::Error;
 use crate::report::Reporter;
-use crate::{Environment, CFG_RELEASE, SELFTEST_RUST_HASH, SELFTEST_TARGET};
 
 pub(crate) struct TestUtils {
-    environment: Environment,
+    env: Env,
     sysroot: TempDir,
     reports: ReportsCollector,
 }
@@ -24,9 +24,7 @@ impl TestUtils {
         let sysroot = TempDir::new().unwrap();
 
         Self {
-            environment: Environment {
-                path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()),
-            },
+            env: Env { path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()) },
             sysroot,
             reports: ReportsCollector { reports: RefCell::new(Vec::new()) },
         }
@@ -58,8 +56,8 @@ impl TestUtils {
         &self.reports
     }
 
-    pub(crate) fn env(&self) -> &Environment {
-        &self.environment
+    pub(crate) fn env(&self) -> &Env {
+        &self.env
     }
 
     #[track_caller]
@@ -98,43 +96,39 @@ pub(crate) struct BinBuilder<'a> {
 }
 
 impl<'a> BinBuilder<'a> {
-    #[must_use]
     pub(crate) fn mode(mut self, mode: u32) -> Self {
         self.mode = Some(mode);
         self
     }
 
-    #[must_use]
     pub(crate) fn stdout(mut self, stdout: &str) -> Self {
         self.stdout = Some(stdout.into());
         self
     }
 
-    #[must_use]
     pub(crate) fn stderr(mut self, stderr: &str) -> Self {
         self.stderr = Some(stderr.into());
         self
     }
 
-    #[must_use]
     pub(crate) fn exit(mut self, exit: i32) -> Self {
         self.exit = Some(exit);
         self
     }
 
     #[allow(non_snake_case)]
-    #[must_use]
     pub(crate) fn behaves_like_vV(self) -> Self {
         let stdout = format!(
-            "release: {CFG_RELEASE}
-            host: {SELFTEST_TARGET}
+            "release: {}
+            host: {}
             commit-hash: {}\n",
-            SELFTEST_RUST_HASH.unwrap_or("unknown")
+            env::CFG_RELEASE,
+            env::SELFTEST_TARGET,
+            env::SELFTEST_RUST_HASH.unwrap_or("unknown")
         );
         self.stdout(&stdout).stderr("").exit(0).expected_args(&["-vV"])
     }
 
-    #[must_use]
     pub(crate) fn for_target(mut self, target: &str) -> Self {
         if let BinaryDestinaton::Sysroot = self.dest {
             self.dest = BinaryDestinaton::Target(target.into());
@@ -144,13 +138,11 @@ impl<'a> BinBuilder<'a> {
         }
     }
 
-    #[must_use]
     pub(crate) fn expected_args(mut self, args: &'a [&'a str]) -> Self {
         self.expected_args = Some(args);
         self
     }
 
-    #[must_use]
     pub(crate) fn program_source(mut self, source: &'static str) -> Self {
         self.program = source;
         self
@@ -224,9 +216,9 @@ pub(crate) struct CliVersionContent<'a> {
 impl Default for CliVersionContent<'_> {
     fn default() -> Self {
         Self {
-            release: CFG_RELEASE,
-            host: SELFTEST_TARGET,
-            commit_hash: SELFTEST_RUST_HASH.unwrap_or("unknown"),
+            release: env::CFG_RELEASE,
+            host: env::SELFTEST_TARGET,
+            commit_hash: env::SELFTEST_RUST_HASH.unwrap_or("unknown"),
         }
     }
 }
@@ -250,7 +242,6 @@ pub(crate) struct TargetBuilder<'a> {
 }
 
 impl<'a> TargetBuilder<'a> {
-    #[must_use]
     pub(crate) fn lib(mut self, name: &'a str, hash: &'a str) -> Self {
         self.libraries.push((name, hash));
         self

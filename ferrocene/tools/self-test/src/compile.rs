@@ -8,11 +8,11 @@ use std::process::Command;
 
 use tempfile::TempDir;
 
+use crate::env;
 use crate::error::Error;
 use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::run_command;
-use crate::SELFTEST_TARGET;
 
 static SAMPLE_PROGRAMS: &[SampleProgram] = &[
     SampleProgram {
@@ -91,8 +91,9 @@ fn check_target(
         compile(&ctx, program)?;
         expected_artifacts.check(program.name)?;
 
-        let should_run =
-            (ctx.target.triple == SELFTEST_TARGET).then_some(program.executable_output).flatten();
+        let should_run = (ctx.target.triple == env::SELFTEST_TARGET)
+            .then_some(program.executable_output)
+            .flatten();
         if let Some(expected_output) = should_run {
             run(&ctx, program, expected_output)?
         }

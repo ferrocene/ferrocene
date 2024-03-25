@@ -10,11 +10,11 @@ use std::process::Command;
 
 use argparse::LinkerArg;
 
+use crate::env::{self, Env};
 use crate::error::{Error, LinkerArgsErrorKind};
 use crate::report::Reporter;
 use crate::targets::Target;
 use crate::utils::{find_binary_in_path, run_command};
-use crate::{Environment, SELFTEST_TARGET};
 
 /// The linker arg we ask the C compiler to add, to check it can add arbitrary
 /// arguments.
@@ -22,7 +22,7 @@ const RANDOM_LINKER_ARG: &str = "--rand456256146871864165842156=xyz";
 
 /// What kind of C compiler does a target require
 #[derive(Debug)]
-pub enum Linker {
+pub(crate) enum Linker {
     /// No C compiler required
     BundledLld,
     /// The system's native C compiler is required
@@ -38,7 +38,7 @@ pub enum Linker {
 /// each target's rustflags field.
 pub(crate) fn check_and_add_rustflags(
     reporter: &dyn Reporter,
-    environment: &Environment,
+    env: &Env,
     sysroot: &Path,
     targets: &mut [Target],
 ) -> Result<(), Error> {
@@ -72,7 +72,7 @@ pub(crate) fn check_and_add_rustflags(
                     })?;
                     let compiler_name = format!("{cc_prefix}{compiler_kind}");
                     let cc_result = check_system_compiler(
-                        environment,
+                        env,
                         target.triple,
                         &compiler_name,
                         lld_dir,
@@ -224,14 +224,14 @@ where
 /// Returns the path to the C compiler, and a list of arguments that the C
 /// compiler gives to the linker.
 fn check_system_compiler(
-    environment: &Environment,
+    env: &Env,
     target: &str,
     compiler_name: &str,
     lld_dir: &Path,
     temp_dir: &Path,
     extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
-    let cc_path = find_binary_in_path(environment, compiler_name)
+    let cc_path = find_binary_in_path(env, compiler_name)
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.into(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
@@ -413,7 +413,7 @@ fn check_compiler_linker_args(
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
     let path =
-        sysroot.join("lib").join("rustlib").join(SELFTEST_TARGET).join("bin").join("rust-lld");
+        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join("rust-lld");
 
     if path.is_file() {
         reporter.success("bundled linker detected");
@@ -428,7 +428,7 @@ fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<P
     let path = sysroot
         .join("lib")
         .join("rustlib")
-        .join(SELFTEST_TARGET)
+        .join(env::SELFTEST_TARGET)
         .join("bin")
         .join("gcc-ld")
         .join("ld.lld");
@@ -462,7 +462,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld() {
         let utils = TestUtils::new();
-        utils.bin("rust-lld").for_target(SELFTEST_TARGET).create();
+        utils.bin("rust-lld").for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker detected");
@@ -483,7 +483,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld_wrapper() {
         let utils = TestUtils::new();
-        utils.bin("gcc-ld/ld.lld").for_target(SELFTEST_TARGET).create();
+        utils.bin("gcc-ld/ld.lld").for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker-wrapper detected");

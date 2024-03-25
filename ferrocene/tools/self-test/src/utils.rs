@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
-use crate::Environment;
+use crate::Env;
 
 pub(crate) fn run_command(command: &mut Command) -> Result<CommandOutput, CommandError> {
     command.stdout(Stdio::piped());
@@ -44,11 +44,8 @@ pub(crate) struct CommandOutput {
     pub(crate) stdout: String,
 }
 
-pub(crate) fn find_binary_in_path(
-    environment: &Environment,
-    name: &str,
-) -> Result<PathBuf, FindBinaryInPathError> {
-    let Some(path) = &environment.path else {
+pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, FindBinaryInPathError> {
+    let Some(path) = &env.path else {
         return Err(FindBinaryInPathError::NoEnvironmentVariable);
     };
 
@@ -61,6 +58,14 @@ pub(crate) fn find_binary_in_path(
     Err(FindBinaryInPathError::MissingBinary { name: name.into() })
 }
 
+/// The user manual states to extract all archives to the same directory.
+/// Therefore the sysroot is the grandparent of `ferrocene-self-test`
+/// (`PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test`).
+pub(crate) fn get_sysroot() -> Option<PathBuf> {
+    let current_exe = std::env::current_exe().ok()?;
+    Some(current_exe.parent()?.parent()?.to_path_buf())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -68,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_find_binary_in_path_missing_path() {
-        let env = Environment { path: None, ..Environment::gather() };
+        let env = Env { path: None };
 
         let err = find_binary_in_path(&env, "vim").unwrap_err();
         assert!(matches!(err, FindBinaryInPathError::NoEnvironmentVariable));
@@ -147,7 +152,7 @@ mod tests {
         assert_eq!(bin2, find_binary_in_path(&env, "vim").unwrap());
     }
 
-    fn path_env(paths: &[&Path]) -> Environment {
-        Environment { path: Some(std::env::join_paths(paths).unwrap()) }
+    fn path_env(paths: &[&Path]) -> Env {
+        Env { path: Some(std::env::join_paths(paths).unwrap()) }
     }
 }

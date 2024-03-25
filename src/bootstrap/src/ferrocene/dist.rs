@@ -254,9 +254,15 @@ impl<'a> Subsetter<'a> {
         use std::os::unix::prelude::PermissionsExt;
         std::fs::metadata(path).unwrap().permissions().mode() & 0o111 > 0
     }
-    #[cfg(not(unix))]
-    fn is_executable(&self, _: &Path) -> bool {
-        panic!("generating accurate tarballs on non-unix-like platforms is not yet supported");
+
+    // This is kind of a blunt instrument, but Windows lacks file modes to check otherwise.
+    #[cfg(windows)]
+    fn is_executable(&self, path: &Path) -> bool {
+        if let Some(extension) = path.extension() {
+            extension == "exe"
+        } else {
+            false
+        }
     }
 
     fn parse_subset_file(&self, path: &Path, contents: &str) -> String {

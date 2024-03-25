@@ -1264,7 +1264,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
 
                 // Extract `TailField<T>` and `TailField<U>` from `Struct<T>` and `Struct<U>`,
                 // normalizing in the process, since `type_of` returns something directly from
-                // astconv (which means it's un-normalized).
+                // HIR ty lowering (which means it's un-normalized).
                 let source_tail = normalize_with_depth_to(
                     self,
                     obligation.param_env,
@@ -1413,7 +1413,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Infer(ty::IntVar(_))
                 | ty::Infer(ty::FloatVar(_))
                 | ty::Str
-                | ty::RawPtr(_)
+                | ty::RawPtr(_, _)
                 | ty::Ref(..)
                 | ty::FnDef(..)
                 | ty::FnPtr(_)
@@ -1460,7 +1460,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                                 cause.span,
                                 [nested_ty.into(), host_effect_param],
                             ),
-                            polarity: ty::ImplPolarity::Positive,
+                            polarity: ty::PredicatePolarity::Positive,
                         }),
                         &mut nested,
                     );
@@ -1485,7 +1485,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                             cause.span,
                             [nested_ty.into(), host_effect_param],
                         ),
-                        polarity: ty::ImplPolarity::Positive,
+                        polarity: ty::PredicatePolarity::Positive,
                     });
 
                     nested.push(Obligation::with_depth(

@@ -7,7 +7,6 @@ use crate::hir::is_range_literal;
 use crate::method::probe;
 use crate::method::probe::{IsSuggestion, Mode, ProbeScope};
 use crate::rustc_middle::ty::Article;
-use crate::ty::TypeAndMut;
 use core::cmp::min;
 use core::iter;
 use rustc_ast::util::parser::{ExprPrecedence, PREC_POSTFIX};
@@ -21,7 +20,7 @@ use rustc_hir::{
     CoroutineDesugaring, CoroutineKind, CoroutineSource, Expr, ExprKind, GenericBound, HirId, Node,
     Path, QPath, Stmt, StmtKind, TyKind, WherePredicate,
 };
-use rustc_hir_analysis::astconv::AstConv;
+use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
 use rustc_infer::traits::{self};
 use rustc_middle::lint::in_external_macro;
 use rustc_middle::middle::stability::EvalResult;
@@ -318,7 +317,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             );
                             expr_id = parent_id;
                         }
-                        Node::Local(local) => {
+                        Node::LetStmt(local) => {
                             if let Some(mut ty) = local.ty {
                                 while let Some(index) = tuple_indexes.pop() {
                                     match ty.kind {
@@ -877,7 +876,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     // Only point to return type if the expected type is the return type, as if they
                     // are not, the expectation must have been caused by something else.
                     debug!("return type {:?}", hir_ty);
-                    let ty = self.astconv().ast_ty_to_ty(hir_ty);
+                    let ty = self.lowerer().lower_ty(hir_ty);
                     debug!("return type {:?}", ty);
                     debug!("expected type {:?}", expected);
                     let bound_vars = self.tcx.late_bound_vars(hir_ty.hir_id.owner.into());
@@ -889,7 +888,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             self.dcx(),
                             errors::ExpectedReturnTypeLabel::Other { span: hir_ty.span, expected },
                         );
-                        self.try_suggest_return_impl_trait(err, expected, ty, fn_id);
+                        self.try_suggest_return_impl_trait(err, expected, found, fn_id);
+                        self.note_caller_chooses_ty_for_ty_param(err, expected, found);
                         return true;
                     }
                 }
@@ -897,6 +897,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             _ => {}
         }
         false
+    }
+
+    fn note_caller_chooses_ty_for_ty_param(
+        &self,
+        diag: &mut Diag<'_>,
+        expected: Ty<'tcx>,
+        found: Ty<'tcx>,
+    ) {
+        if let ty::Param(expected_ty_as_param) = expected.kind() {
+            diag.subdiagnostic(
+                self.dcx(),
+                errors::NoteCallerChoosesTyForTyParam {
+                    ty_param_name: expected_ty_as_param.name,
+                    found_ty: found,
+                },
+            );
+        }
     }
 
     /// check whether the return type is a generic type with a trait bound
@@ -957,8 +974,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     bounded_ty,
                     ..
                 }) => {
-                    // FIXME: Maybe these calls to `ast_ty_to_ty` can be removed (and the ones below)
-                    let ty = self.astconv().ast_ty_to_ty(bounded_ty);
+                    // FIXME: Maybe these calls to `lower_ty` can be removed (and the ones below)
+                    let ty = self.lowerer().lower_ty(bounded_ty);
                     Some((ty, bounds))
                 }
                 _ => None,
@@ -996,7 +1013,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let all_bounds_str = all_matching_bounds_strs.join(" + ");
 
         let ty_param_used_in_fn_params = fn_parameters.iter().any(|param| {
-                let ty = self.astconv().ast_ty_to_ty( param);
+                let ty = self.lowerer().lower_ty( param);
                 matches!(ty.kind(), ty::Param(fn_param_ty_param) if expected_ty_as_param == fn_param_ty_param)
             });
 
@@ -1071,7 +1088,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let can_return = match fn_decl.output {
             hir::FnRetTy::Return(ty) => {
-                let ty = self.astconv().ast_ty_to_ty(ty);
+                let ty = self.lowerer().lower_ty(ty);
                 let bound_vars = self.tcx.late_bound_vars(fn_id);
                 let ty = self
                     .tcx
@@ -1331,7 +1348,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         //                     ++++++++++
         // since the user probably just misunderstood how `let else`
         // and `&&` work together.
-        if let Some((_, hir::Node::Local(local))) = cond_parent
+        if let Some((_, hir::Node::LetStmt(local))) = cond_parent
             && let hir::PatKind::Path(qpath) | hir::PatKind::TupleStruct(qpath, _, _) =
                 &local.pat.kind
             && let hir::QPath::Resolved(None, path) = qpath
@@ -1479,7 +1496,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expected_ty: Ty<'tcx>,
     ) -> bool {
         // Expected type needs to be a raw pointer.
-        let ty::RawPtr(ty::TypeAndMut { mutbl, .. }) = expected_ty.kind() else {
+        let ty::RawPtr(_, mutbl) = expected_ty.kind() else {
             return false;
         };
 
@@ -1731,7 +1748,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
                 match self.tcx.parent_hir_node(*hir_id) {
                     // foo.clone()
-                    hir::Node::Local(hir::Local { init: Some(init), .. }) => {
+                    hir::Node::LetStmt(hir::LetStmt { init: Some(init), .. }) => {
                         self.note_type_is_not_clone_inner_expr(init)
                     }
                     // When `expr` is more complex like a tuple
@@ -1740,7 +1757,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         kind: hir::PatKind::Tuple(pats, ..),
                         ..
                     }) => {
-                        let hir::Node::Local(hir::Local { init: Some(init), .. }) =
+                        let hir::Node::LetStmt(hir::LetStmt { init: Some(init), .. }) =
                             self.tcx.parent_hir_node(*pat_hir_id)
                         else {
                             return expr;
@@ -1774,7 +1791,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     && let hir::Path { segments: [_], res: crate::Res::Local(binding), .. } =
                         call_expr_path
                     && let hir::Node::Pat(hir::Pat { hir_id, .. }) = self.tcx.hir_node(*binding)
-                    && let hir::Node::Local(hir::Local { init: Some(init), .. }) =
+                    && let hir::Node::LetStmt(hir::LetStmt { init: Some(init), .. }) =
                         self.tcx.parent_hir_node(*hir_id)
                     && let Expr {
                         kind: hir::ExprKind::Closure(hir::Closure { body: body_id, .. }),
@@ -2509,11 +2526,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     return make_sugg(sp, expr.span.lo());
                 }
             }
-            (
-                _,
-                &ty::RawPtr(TypeAndMut { ty: ty_b, mutbl: mutbl_b }),
-                &ty::Ref(_, ty_a, mutbl_a),
-            ) => {
+            (_, &ty::RawPtr(ty_b, mutbl_b), &ty::Ref(_, ty_a, mutbl_a)) => {
                 if let Some(steps) = self.deref_steps(ty_a, ty_b)
                     // Only suggest valid if dereferencing needed.
                     && steps > 0
@@ -3134,7 +3147,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let hir::Node::Pat(pat) = self.tcx.hir_node(hir_id) else {
             return;
         };
-        let hir::Node::Local(hir::Local { ty: None, init: Some(init), .. }) =
+        let hir::Node::LetStmt(hir::LetStmt { ty: None, init: Some(init), .. }) =
             self.tcx.parent_hir_node(pat.hir_id)
         else {
             return;

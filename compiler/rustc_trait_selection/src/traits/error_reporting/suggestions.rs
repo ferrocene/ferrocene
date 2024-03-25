@@ -31,8 +31,8 @@ use rustc_middle::traits::IsConstable;
 use rustc_middle::ty::error::TypeError::{self, Sorts};
 use rustc_middle::ty::{
     self, suggest_arbitrary_trait_bound, suggest_constraining_type_param, AdtKind, GenericArgs,
-    InferTy, IsSuggestable, ToPredicate, Ty, TyCtxt, TypeAndMut, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeVisitableExt, TypeckResults,
+    InferTy, IsSuggestable, ToPredicate, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable,
+    TypeVisitableExt, TypeckResults,
 };
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
@@ -245,7 +245,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         associated_ty: Option<(&'static str, Ty<'tcx>)>,
         mut body_id: LocalDefId,
     ) {
-        if trait_pred.skip_binder().polarity == ty::ImplPolarity::Negative {
+        if trait_pred.skip_binder().polarity != ty::PredicatePolarity::Positive {
             return;
         }
 
@@ -482,7 +482,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     if let Some(steps) =
                         autoderef.into_iter().enumerate().find_map(|(steps, (ty, obligations))| {
                             // Re-add the `&`
-                            let ty = Ty::new_ref(self.tcx, region, TypeAndMut { ty, mutbl });
+                            let ty = Ty::new_ref(self.tcx, region, ty, mutbl);
 
                             // Remapping bound vars here
                             let real_trait_pred_and_ty = real_trait_pred
@@ -768,7 +768,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             }
             // Different to previous arm because one is `&hir::Local` and the other
             // is `P<hir::Local>`.
-            hir::Node::Local(local) => get_name(err, &local.pat.kind),
+            hir::Node::LetStmt(local) => get_name(err, &local.pat.kind),
             _ => None,
         }
     }
@@ -930,7 +930,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         let hir::Node::Pat(pat) = self.tcx.hir_node(hir_id) else {
             return;
         };
-        let hir::Node::Local(hir::Local { ty: None, init: Some(init), .. }) =
+        let hir::Node::LetStmt(hir::LetStmt { ty: None, init: Some(init), .. }) =
             self.tcx.parent_hir_node(pat.hir_id)
         else {
             return;
@@ -1562,7 +1562,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let Res::Local(hir_id) = path.res
                 && let hir::Node::Pat(binding) = self.tcx.hir_node(hir_id)
-                && let hir::Node::Local(local) = self.tcx.parent_hir_node(binding.hir_id)
+                && let hir::Node::LetStmt(local) = self.tcx.parent_hir_node(binding.hir_id)
                 && let None = local.ty
                 && let Some(binding_expr) = local.init
             {
@@ -2966,7 +2966,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     err.downgrade_to_delayed_bug();
                 }
                 match tcx.parent_hir_node(hir_id) {
-                    Node::Local(hir::Local { ty: Some(ty), .. }) => {
+                    Node::LetStmt(hir::LetStmt { ty: Some(ty), .. }) => {
                         err.span_suggestion_verbose(
                             ty.span.shrink_to_lo(),
                             "consider borrowing here",
@@ -2975,7 +2975,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         );
                         err.note("all local variables must have a statically known size");
                     }
-                    Node::Local(hir::Local {
+                    Node::LetStmt(hir::LetStmt {
                         init: Some(hir::Expr { kind: hir::ExprKind::Index(..), span, .. }),
                         ..
                     }) => {
@@ -3867,7 +3867,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             if let hir::ExprKind::Path(hir::QPath::Resolved(None, path)) = expr.kind
                 && let hir::Path { res: Res::Local(hir_id), .. } = path
                 && let hir::Node::Pat(binding) = self.tcx.hir_node(*hir_id)
-                && let hir::Node::Local(local) = self.tcx.parent_hir_node(binding.hir_id)
+                && let hir::Node::LetStmt(local) = self.tcx.parent_hir_node(binding.hir_id)
                 && let Some(binding_expr) = local.init
             {
                 // If the expression we're calling on is a binding, we want to point at the
@@ -4057,7 +4057,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                                 span,
                                 [*ty],
                             ),
-                            polarity: ty::ImplPolarity::Positive,
+                            polarity: ty::PredicatePolarity::Positive,
                         });
                         let Some(generics) = node.generics() else {
                             continue;
@@ -4128,7 +4128,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             {
                 let parent = self.tcx.parent_hir_node(binding.hir_id);
                 // We've reached the root of the method call chain...
-                if let hir::Node::Local(local) = parent
+                if let hir::Node::LetStmt(local) = parent
                     && let Some(binding_expr) = local.init
                 {
                     // ...and it is a binding. Get the binding creation and continue the chain.
@@ -4352,7 +4352,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         // Go through all the candidate impls to see if any of them is for
         // slices of `element_ty` with `mutability`.
         let mut is_slice = |candidate: Ty<'tcx>| match *candidate.kind() {
-            ty::RawPtr(ty::TypeAndMut { ty: t, mutbl: m }) | ty::Ref(_, t, m) => {
+            ty::RawPtr(t, m) | ty::Ref(_, t, m) => {
                 if matches!(*t.kind(), ty::Slice(e) if e == element_ty)
                     && m == mutability.unwrap_or(m)
                 {
@@ -4802,7 +4802,7 @@ pub(super) fn get_explanation_based_on_obligation<'tcx>(
             Some(desc) => format!(" {desc}"),
             None => String::new(),
         };
-        if let ty::ImplPolarity::Positive = trait_predicate.polarity() {
+        if let ty::PredicatePolarity::Positive = trait_predicate.polarity() {
             format!(
                 "{pre_message}the trait `{}` is not implemented for{desc} `{}`{post}",
                 trait_predicate.print_modifiers_and_trait_path(),

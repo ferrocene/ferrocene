@@ -9,8 +9,11 @@ use rustc_middle::{
 use rustc_span::def_id::DefId;
 use rustc_target::abi::{Abi, Size};
 
-use crate::borrow_tracker::{GlobalState, GlobalStateInner, ProtectorKind};
 use crate::*;
+use crate::{
+    borrow_tracker::{GlobalState, GlobalStateInner, ProtectorKind},
+    concurrency::data_race::NaReadType,
+};
 
 pub mod diagnostics;
 mod perms;
@@ -312,7 +315,13 @@ trait EvalContextPrivExt<'mir: 'ecx, 'tcx: 'mir, 'ecx>: crate::MiriInterpCxExt<'
         // Also inform the data race model (but only if any bytes are actually affected).
         if range.size.bytes() > 0 {
             if let Some(data_race) = alloc_extra.data_race.as_ref() {
-                data_race.read(alloc_id, range, &this.machine)?;
+                data_race.read(
+                    alloc_id,
+                    range,
+                    NaReadType::Retag,
+                    Some(place.layout.ty),
+                    &this.machine,
+                )?;
             }
         }
 
@@ -475,7 +484,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                             NewPermission::from_ref_ty(pointee, mutability, self.kind, self.ecx);
                         self.retag_ptr_inplace(place, new_perm)?;
                     }
-                    ty::RawPtr(_) => {
+                    ty::RawPtr(_, _) => {
                         // We definitely do *not* want to recurse into raw pointers -- wide raw
                         // pointers have fields, and for dyn Trait pointees those can have reference
                         // type!

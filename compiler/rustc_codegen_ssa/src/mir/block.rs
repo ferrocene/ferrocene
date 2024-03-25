@@ -5,6 +5,7 @@ use super::{CachedLlbb, FunctionCx, LocalRef};
 
 use crate::base;
 use crate::common::{self, IntPredicate};
+use crate::errors::CompilerBuiltinsCannotCall;
 use crate::meth;
 use crate::traits::*;
 use crate::MemFlags;
@@ -16,6 +17,7 @@ use rustc_middle::mir::{self, AssertKind, BasicBlock, SwitchTargets, UnwindTermi
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, ValidityRequirement};
 use rustc_middle::ty::print::{with_no_trimmed_paths, with_no_visible_paths};
 use rustc_middle::ty::{self, Instance, Ty};
+use rustc_monomorphize::is_call_from_compiler_builtins_to_upstream_monomorphization;
 use rustc_session::config::OptLevel;
 use rustc_span::{source_map::Spanned, sym, Span};
 use rustc_target::abi::call::{ArgAbi, FnAbi, PassMode, Reg};
@@ -157,8 +159,28 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
         destination: Option<(ReturnDest<'tcx, Bx::Value>, mir::BasicBlock)>,
         mut unwind: mir::UnwindAction,
         copied_constant_arguments: &[PlaceRef<'tcx, <Bx as BackendTypes>::Value>],
+        instance: Option<Instance<'tcx>>,
         mergeable_succ: bool,
     ) -> MergingSucc {
+        let tcx = bx.tcx();
+        if let Some(instance) = instance {
+            if is_call_from_compiler_builtins_to_upstream_monomorphization(tcx, instance) {
+                if destination.is_some() {
+                    let caller = with_no_trimmed_paths!(tcx.def_path_str(fx.instance.def_id()));
+                    let callee = with_no_trimmed_paths!(tcx.def_path_str(instance.def_id()));
+                    tcx.dcx().emit_err(CompilerBuiltinsCannotCall { caller, callee });
+                } else {
+                    info!(
+                        "compiler_builtins call to diverging function {:?} replaced with abort",
+                        instance.def_id()
+                    );
+                    bx.abort();
+                    bx.unreachable();
+                    return MergingSucc::False;
+                }
+            }
+        }
+
         // If there is a cleanup block and the function we're calling can unwind, then
         // do an invoke, otherwise do a call.
         let fn_ty = bx.fn_decl_backend_type(fn_abi);
@@ -210,6 +232,7 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
                 ret_llbb,
                 unwind_block,
                 self.funclet(fx),
+                instance,
             );
             if fx.mir[self.bb].is_cleanup {
                 bx.apply_attrs_to_cleanup_callsite(invokeret);
@@ -225,7 +248,8 @@ impl<'a, 'tcx> TerminatorCodegenHelper<'tcx> {
             }
             MergingSucc::False
         } else {
-            let llret = bx.call(fn_ty, fn_attrs, Some(fn_abi), fn_ptr, llargs, self.funclet(fx));
+            let llret =
+                bx.call(fn_ty, fn_attrs, Some(fn_abi), fn_ptr, llargs, self.funclet(fx), instance);
             if fx.mir[self.bb].is_cleanup {
                 bx.apply_attrs_to_cleanup_callsite(llret);
             }
@@ -495,7 +519,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             args1 = [place.llval];
             &args1[..]
         };
-        let (drop_fn, fn_abi) =
+        let (drop_fn, fn_abi, drop_instance) =
             match ty.kind() {
                 // FIXME(eddyb) perhaps move some of this logic into
                 // `Instance::resolve_drop_in_place`?
@@ -527,6 +551,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         meth::VirtualIndex::from_index(ty::COMMON_VTABLE_ENTRIES_DROPINPLACE)
                             .get_fn(bx, vtable, ty, fn_abi),
                         fn_abi,
+                        virtual_drop,
                     )
                 }
                 ty::Dynamic(_, _, ty::DynStar) => {
@@ -569,9 +594,14 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         meth::VirtualIndex::from_index(ty::COMMON_VTABLE_ENTRIES_DROPINPLACE)
                             .get_fn(bx, meta.immediate(), ty, fn_abi),
                         fn_abi,
+                        virtual_drop,
                     )
                 }
-                _ => (bx.get_fn_addr(drop_fn), bx.fn_abi_of_instance(drop_fn, ty::List::empty())),
+                _ => (
+                    bx.get_fn_addr(drop_fn),
+                    bx.fn_abi_of_instance(drop_fn, ty::List::empty()),
+                    drop_fn,
+                ),
             };
         helper.do_call(
             self,
@@ -582,6 +612,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             Some((ReturnDest::Nothing, target)),
             unwind,
             &[],
+            Some(drop_instance),
             mergeable_succ,
         )
     }
@@ -658,10 +689,11 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             }
         };
 
-        let (fn_abi, llfn) = common::build_langcall(bx, Some(span), lang_item);
+        let (fn_abi, llfn, instance) = common::build_langcall(bx, Some(span), lang_item);
 
         // Codegen the actual panic invoke/call.
-        let merging_succ = helper.do_call(self, bx, fn_abi, llfn, &args, None, unwind, &[], false);
+        let merging_succ =
+            helper.do_call(self, bx, fn_abi, llfn, &args, None, unwind, &[], Some(instance), false);
         assert_eq!(merging_succ, MergingSucc::False);
         MergingSucc::False
     }
@@ -677,7 +709,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         self.set_debug_loc(bx, terminator.source_info);
 
         // Obtain the panic entry point.
-        let (fn_abi, llfn) = common::build_langcall(bx, Some(span), reason.lang_item());
+        let (fn_abi, llfn, instance) = common::build_langcall(bx, Some(span), reason.lang_item());
 
         // Codegen the actual panic invoke/call.
         let merging_succ = helper.do_call(
@@ -689,6 +721,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             None,
             mir::UnwindAction::Unreachable,
             &[],
+            Some(instance),
             false,
         );
         assert_eq!(merging_succ, MergingSucc::False);
@@ -738,7 +771,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 let msg = bx.const_str(&msg_str);
 
                 // Obtain the panic entry point.
-                let (fn_abi, llfn) =
+                let (fn_abi, llfn, instance) =
                     common::build_langcall(bx, Some(source_info.span), LangItem::PanicNounwind);
 
                 // Codegen the actual panic invoke/call.
@@ -751,6 +784,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     target.as_ref().map(|bb| (ReturnDest::Nothing, *bb)),
                     unwind,
                     &[],
+                    Some(instance),
                     mergeable_succ,
                 )
             } else {
@@ -798,6 +832,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             ty::FnPtr(_) => (None, Some(callee.immediate())),
             _ => bug!("{} is not callable", callee.layout.ty),
         };
+
         let def = instance.map(|i| i.def);
 
         if let Some(ty::InstanceDef::DropGlue(_, None)) = def {
@@ -1106,6 +1141,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             destination,
             unwind,
             &copied_constant_arguments,
+            instance,
             mergeable_succ,
         )
     }
@@ -1664,11 +1700,15 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 
         self.set_debug_loc(&mut bx, mir::SourceInfo::outermost(self.mir.span));
 
-        let (fn_abi, fn_ptr) = common::build_langcall(&bx, None, reason.lang_item());
-        let fn_ty = bx.fn_decl_backend_type(fn_abi);
+        let (fn_abi, fn_ptr, instance) = common::build_langcall(&bx, None, reason.lang_item());
+        if is_call_from_compiler_builtins_to_upstream_monomorphization(bx.tcx(), instance) {
+            bx.abort();
+        } else {
+            let fn_ty = bx.fn_decl_backend_type(fn_abi);
 
-        let llret = bx.call(fn_ty, None, Some(fn_abi), fn_ptr, &[], funclet.as_ref());
-        bx.apply_attrs_to_cleanup_callsite(llret);
+            let llret = bx.call(fn_ty, None, Some(fn_abi), fn_ptr, &[], funclet.as_ref(), None);
+            bx.apply_attrs_to_cleanup_callsite(llret);
+        }
 
         bx.unreachable();
 

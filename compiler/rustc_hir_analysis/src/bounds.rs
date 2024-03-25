@@ -1,5 +1,5 @@
-//! Bounds are restrictions applied to some types after they've been converted into the
-//! `ty` form from the HIR.
+//! Bounds are restrictions applied to some types after they've been lowered from the HIR to the
+//! [`rustc_middle::ty`] form.
 
 use rustc_hir::LangItem;
 use rustc_middle::ty::{self, ToPredicate, Ty, TyCtxt};
@@ -42,7 +42,7 @@ impl<'tcx> Bounds<'tcx> {
         tcx: TyCtxt<'tcx>,
         trait_ref: ty::PolyTraitRef<'tcx>,
         span: Span,
-        polarity: ty::ImplPolarity,
+        polarity: ty::PredicatePolarity,
     ) {
         self.push_trait_bound_inner(tcx, trait_ref, span, polarity);
     }
@@ -52,7 +52,7 @@ impl<'tcx> Bounds<'tcx> {
         tcx: TyCtxt<'tcx>,
         trait_ref: ty::PolyTraitRef<'tcx>,
         span: Span,
-        polarity: ty::ImplPolarity,
+        polarity: ty::PredicatePolarity,
     ) {
         self.clauses.push((
             trait_ref

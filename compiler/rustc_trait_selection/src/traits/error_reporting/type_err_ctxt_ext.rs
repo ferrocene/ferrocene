@@ -1272,7 +1272,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             {
                 let parent = self.tcx.parent_hir_node(binding.hir_id);
                 // We've reached the root of the method call chain...
-                if let hir::Node::Local(local) = parent
+                if let hir::Node::LetStmt(local) = parent
                     && let Some(binding_expr) = local.init
                 {
                     // ...and it is a binding. Get the binding creation and continue the chain.
@@ -1357,7 +1357,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     "using function pointers as const generic parameters is forbidden",
                 )
             }
-            ty::RawPtr(_) => {
+            ty::RawPtr(_, _) => {
                 struct_span_code_err!(
                     self.dcx(),
                     span,
@@ -1809,9 +1809,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         let strip_references = |mut t: Ty<'tcx>| -> Ty<'tcx> {
             loop {
                 match t.kind() {
-                    ty::Ref(_, inner, _) | ty::RawPtr(ty::TypeAndMut { ty: inner, .. }) => {
-                        t = *inner
-                    }
+                    ty::Ref(_, inner, _) | ty::RawPtr(inner, _) => t = *inner,
                     _ => break t,
                 }
             }
@@ -1907,7 +1905,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             .all_impls(trait_pred.def_id())
             .filter_map(|def_id| {
                 let imp = self.tcx.impl_trait_header(def_id).unwrap();
-                if imp.polarity == ty::ImplPolarity::Negative
+                if imp.polarity != ty::ImplPolarity::Positive
                     || !self.tcx.is_user_visible_dep(def_id.krate)
                 {
                     return None;

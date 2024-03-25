@@ -304,11 +304,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 if let ty::Ref(region, t_type, mutability) = rcvr_ty.kind() {
                     if needs_mut {
-                        let trait_type = Ty::new_ref(
-                            self.tcx,
-                            *region,
-                            ty::TypeAndMut { ty: *t_type, mutbl: mutability.invert() },
-                        );
+                        let trait_type =
+                            Ty::new_ref(self.tcx, *region, *t_type, mutability.invert());
                         let msg = format!("you need `{trait_type}` instead of `{rcvr_ty}`");
                         let mut kind = &self_expr.kind;
                         while let hir::ExprKind::AddrOf(_, _, expr)
@@ -533,7 +530,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 Applicability::MachineApplicable,
             );
         }
-        if let ty::RawPtr(_) = &rcvr_ty.kind() {
+        if let ty::RawPtr(_, _) = &rcvr_ty.kind() {
             err.note(
                 "try using `<*const T>::as_ref()` to get a reference to the \
                  type behind the pointer: https://doc.rust-lang.org/std/\
@@ -875,7 +872,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 match pred.kind().skip_binder() {
                                     ty::PredicateKind::Clause(ty::ClauseKind::Trait(pred)) => {
                                         Some(pred.def_id()) == self.tcx.lang_items().sized_trait()
-                                            && pred.polarity == ty::ImplPolarity::Positive
+                                            && pred.polarity == ty::PredicatePolarity::Positive
                                     }
                                     _ => false,
                                 }
@@ -2166,7 +2163,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         match (filename, parent_node) {
                             (
                                 FileName::Real(_),
-                                Node::Local(hir::Local {
+                                Node::LetStmt(hir::LetStmt {
                                     source: hir::LocalSource::Normal,
                                     ty,
                                     ..
@@ -2221,7 +2218,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 impl<'v> Visitor<'v> for LetVisitor {
                     type Result = ControlFlow<Option<&'v hir::Expr<'v>>>;
                     fn visit_stmt(&mut self, ex: &'v hir::Stmt<'v>) -> Self::Result {
-                        if let hir::StmtKind::Let(&hir::Local { pat, init, .. }) = ex.kind
+                        if let hir::StmtKind::Let(&hir::LetStmt { pat, init, .. }) = ex.kind
                             && let Binding(_, _, ident, ..) = pat.kind
                             && ident.name == self.ident_name
                         {
@@ -3264,8 +3261,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 Colon,
                                 Nothing,
                             }
-                            let ast_generics = hir.get_generics(id.owner.def_id).unwrap();
-                            let trait_def_ids: DefIdSet = ast_generics
+                            let hir_generics = hir.get_generics(id.owner.def_id).unwrap();
+                            let trait_def_ids: DefIdSet = hir_generics
                                 .bounds_for_param(def_id)
                                 .flat_map(|bp| bp.bounds.iter())
                                 .filter_map(|bound| bound.trait_ref()?.trait_def_id())
@@ -3277,7 +3274,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 "restrict type parameter `{}` with",
                                 param.name.ident(),
                             ));
-                            let bounds_span = ast_generics.bounds_span_for_suggestions(def_id);
+                            let bounds_span = hir_generics.bounds_span_for_suggestions(def_id);
                             if rcvr_ty.is_ref() && param.is_impl_trait() && bounds_span.is_some() {
                                 err.multipart_suggestions(
                                     msg,
@@ -3367,7 +3364,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 "inherent impls can't be candidates, only trait impls can be",
                             )
                         })
-                        .filter(|header| header.polarity == ty::ImplPolarity::Negative)
+                        .filter(|header| header.polarity != ty::ImplPolarity::Positive)
                         .any(|header| {
                             let imp = header.trait_ref.instantiate_identity();
                             let imp_simp =

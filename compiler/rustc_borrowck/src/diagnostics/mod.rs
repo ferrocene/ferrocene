@@ -4,7 +4,6 @@ use crate::session_diagnostics::{
     CaptureArgLabel, CaptureReasonLabel, CaptureReasonNote, CaptureReasonSuggest, CaptureVarCause,
     CaptureVarKind, CaptureVarPathUseCause, OnClosureNote,
 };
-use itertools::Itertools;
 use rustc_errors::{Applicability, Diag};
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, Namespace};
@@ -226,16 +225,15 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         }
                     } else {
                         if autoderef_index.is_none() {
-                            autoderef_index =
-                                match place.projection.into_iter().rev().find_position(|elem| {
-                                    !matches!(
-                                        elem,
-                                        ProjectionElem::Deref | ProjectionElem::Downcast(..)
-                                    )
-                                }) {
-                                    Some((index, _)) => Some(place.projection.len() - index),
-                                    None => Some(0),
-                                };
+                            autoderef_index = match place.projection.iter().rposition(|elem| {
+                                !matches!(
+                                    elem,
+                                    ProjectionElem::Deref | ProjectionElem::Downcast(..)
+                                )
+                            }) {
+                                Some(index) => Some(index + 1),
+                                None => Some(0),
+                            };
                         }
                         if index >= autoderef_index.unwrap() {
                             buf.insert(0, '*');
@@ -366,7 +364,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     Some(variant.fields[field].name.to_string())
                 }
                 ty::Tuple(_) => Some(field.index().to_string()),
-                ty::Ref(_, ty, _) | ty::RawPtr(ty::TypeAndMut { ty, .. }) => {
+                ty::Ref(_, ty, _) | ty::RawPtr(ty, _) => {
                     self.describe_field_from_ty(ty, field, variant_index, including_tuple_field)
                 }
                 ty::Array(ty, _) | ty::Slice(ty) => {

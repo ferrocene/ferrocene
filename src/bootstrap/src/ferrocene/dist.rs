@@ -258,11 +258,7 @@ impl<'a> Subsetter<'a> {
     // This is kind of a blunt instrument, but Windows lacks file modes to check otherwise.
     #[cfg(windows)]
     fn is_executable(&self, path: &Path) -> bool {
-        if let Some(extension) = path.extension() {
-            extension == "exe"
-        } else {
-            false
-        }
+        if let Some(extension) = path.extension() { extension == "exe" } else { false }
     }
 
     fn parse_subset_file(&self, path: &Path, contents: &str) -> String {

@@ -11,11 +11,11 @@ use std::ffi::OsString;
 // Compile-time environment variables
 //
 /// The Rust release ferrocene-self-test is being compiled for
-pub const CFG_RELEASE: &str = env!("CFG_RELEASE");
+pub(crate) const CFG_RELEASE: &str = env!("CFG_RELEASE");
 /// The target-triple ferroce-self-test is being compiled for
-pub const SELFTEST_TARGET: &str = env!("SELFTEST_TARGET");
-pub const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_HASH");
-pub const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
+pub(crate) const SELFTEST_TARGET: &str = env!("SELFTEST_TARGET");
+pub(crate) const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_HASH");
+pub(crate) const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
 
 /// Run-time environment variables
 pub(crate) struct Env {
@@ -25,11 +25,11 @@ pub(crate) struct Env {
     ///
     /// Usually this variable is present in most operating systems and does not
     /// need to be set explicitly.
-    pub path: Option<OsString>,
+    pub(crate) path: Option<OsString>,
 }
 
 impl Env {
-    pub fn gather() -> Self {
+    pub(crate) fn gather() -> Self {
         Self { path: std::env::var_os("PATH") }
     }
 }

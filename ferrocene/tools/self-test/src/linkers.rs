@@ -22,7 +22,7 @@ const RANDOM_LINKER_ARG: &str = "--rand456256146871864165842156=xyz";
 
 /// What kind of C compiler does a target require
 #[derive(Debug)]
-pub enum Linker {
+pub(crate) enum Linker {
     /// No C compiler required
     BundledLld,
     /// The system's native C compiler is required

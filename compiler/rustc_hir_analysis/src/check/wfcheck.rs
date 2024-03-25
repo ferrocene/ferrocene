@@ -272,7 +272,7 @@ fn check_item<'tcx>(tcx: TyCtxt<'tcx>, item: &'tcx hir::Item<'tcx>) -> Result<()
                 }
                 Some(ty::ImplPolarity::Negative) => {
                     let ast::ImplPolarity::Negative(span) = impl_.polarity else {
-                        bug!("impl_polarity query disagrees with impl's polarity in AST");
+                        bug!("impl_polarity query disagrees with impl's polarity in HIR");
                     };
                     // FIXME(#27579): what amount of WF checking do we need for neg impls?
                     if let hir::Defaultness::Default { .. } = impl_.defaultness {
@@ -954,7 +954,7 @@ fn check_param_wf(tcx: TyCtxt<'_>, param: &hir::GenericParam<'_>) -> Result<(), 
                         hir_ty.span,
                         "using function pointers as const generic parameters is forbidden",
                     ),
-                    ty::RawPtr(_) => tcx.dcx().struct_span_err(
+                    ty::RawPtr(_, _) => tcx.dcx().struct_span_err(
                         hir_ty.span,
                         "using raw pointers as const generic parameters is forbidden",
                     ),
@@ -1322,7 +1322,7 @@ fn check_impl<'tcx>(
                     trait_ref,
                 );
                 let trait_pred =
-                    ty::TraitPredicate { trait_ref, polarity: ty::ImplPolarity::Positive };
+                    ty::TraitPredicate { trait_ref, polarity: ty::PredicatePolarity::Positive };
                 let mut obligations = traits::wf::trait_obligations(
                     wfcx.infcx,
                     wfcx.param_env,
@@ -1866,7 +1866,7 @@ fn check_variances_for_type_defn<'tcx>(
             .iter()
             .filter_map(|predicate| match predicate {
                 hir::WherePredicate::BoundPredicate(predicate) => {
-                    match icx.to_ty(predicate.bounded_ty).kind() {
+                    match icx.lower_ty(predicate.bounded_ty).kind() {
                         ty::Param(data) => Some(Parameter(data.index)),
                         _ => None,
                     }

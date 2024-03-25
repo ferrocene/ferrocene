@@ -303,10 +303,6 @@ impl TraitBoundModifiers {
     };
 }
 
-/// The AST represents all type param bounds as types.
-/// `typeck::collect::compute_bounds` matches these against
-/// the "special" built-in traits (see `middle::lang_items`) and
-/// detects `Copy`, `Send` and `Sync`.
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub enum GenericBound {
     Trait(PolyTraitRef, TraitBoundModifiers),
@@ -1441,7 +1437,7 @@ pub enum ExprKind {
     /// `'label: loop { block }`
     Loop(P<Block>, Option<Label>, Span),
     /// A `match` block.
-    Match(P<Expr>, ThinVec<Arm>),
+    Match(P<Expr>, ThinVec<Arm>, MatchKind),
     /// A closure (e.g., `move |a, b, c| a + b + c`).
     Closure(Box<Closure>),
     /// A block (`'label: { ... }`).
@@ -1764,6 +1760,15 @@ pub enum StrStyle {
     ///
     /// The value is the number of `#` symbols used.
     Raw(u8),
+}
+
+/// The kind of match expression
+#[derive(Clone, Copy, Encodable, Decodable, Debug, PartialEq)]
+pub enum MatchKind {
+    /// match expr { ... }
+    Prefix,
+    /// expr.match { ... }
+    Postfix,
 }
 
 /// A literal in a meta item.

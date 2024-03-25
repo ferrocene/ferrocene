@@ -2,7 +2,6 @@ use crate::cmp::Ordering;
 use crate::fmt;
 use crate::hash;
 use crate::intrinsics;
-use crate::intrinsics::assert_unsafe_precondition;
 use crate::marker::Unsize;
 use crate::mem::{MaybeUninit, SizedTypeProperties};
 use crate::num::NonZero;
@@ -10,6 +9,7 @@ use crate::ops::{CoerceUnsized, DispatchFromDyn};
 use crate::ptr;
 use crate::ptr::Unique;
 use crate::slice::{self, SliceIndex};
+use crate::ub_checks::assert_unsafe_precondition;
 
 /// `*mut T` but non-zero and [covariant].
 ///
@@ -1573,6 +1573,25 @@ impl<T> NonNull<[T]> {
     #[inline]
     pub const fn len(self) -> usize {
         self.as_ptr().len()
+    }
+
+    /// Returns `true` if the non-null raw slice has a length of 0.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// #![feature(slice_ptr_is_empty_nonnull)]
+    /// use std::ptr::NonNull;
+    ///
+    /// let slice: NonNull<[i8]> = NonNull::slice_from_raw_parts(NonNull::dangling(), 3);
+    /// assert!(!slice.is_empty());
+    /// ```
+    #[unstable(feature = "slice_ptr_is_empty_nonnull", issue = "71146")]
+    #[rustc_const_unstable(feature = "const_slice_ptr_is_empty_nonnull", issue = "71146")]
+    #[must_use]
+    #[inline]
+    pub const fn is_empty(self) -> bool {
+        self.len() == 0
     }
 
     /// Returns a non-null pointer to the slice's buffer.

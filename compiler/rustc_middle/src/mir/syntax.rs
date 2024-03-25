@@ -124,6 +124,7 @@ pub enum AnalysisPhase {
     /// * [`TerminatorKind::FalseEdge`]
     /// * [`StatementKind::FakeRead`]
     /// * [`StatementKind::AscribeUserType`]
+    /// * [`StatementKind::Coverage`] with [`CoverageKind::BlockMarker`] or [`CoverageKind::SpanMarker`]
     /// * [`Rvalue::Ref`] with `BorrowKind::Fake`
     ///
     /// Furthermore, `Deref` projections must be the first projection within any place (if they
@@ -372,7 +373,7 @@ pub enum StatementKind<'tcx> {
     ///
     /// Interpreters and codegen backends that don't support coverage instrumentation
     /// can usually treat this as a no-op.
-    Coverage(Box<Coverage>),
+    Coverage(CoverageKind),
 
     /// Denotes a call to an intrinsic that does not require an unwind path and always returns.
     /// This avoids adding a new block and a terminator for simple intrinsics.
@@ -514,12 +515,6 @@ pub enum FakeReadCause {
     /// index expression. Thus we create a fake borrow of `x` across the second
     /// indexer, which will cause a borrow check error.
     ForIndex,
-}
-
-#[derive(Clone, Debug, PartialEq, TyEncodable, TyDecodable, Hash, HashStable)]
-#[derive(TypeFoldable, TypeVisitable)]
-pub struct Coverage {
-    pub kind: CoverageKind,
 }
 
 #[derive(Clone, Debug, PartialEq, TyEncodable, TyDecodable, Hash, HashStable)]
@@ -1366,16 +1361,9 @@ pub enum NullOp<'tcx> {
     AlignOf,
     /// Returns the offset of a field
     OffsetOf(&'tcx List<(VariantIdx, FieldIdx)>),
-    /// Returns whether we want to check for library UB or language UB at monomorphization time.
-    /// Both kinds of UB evaluate to `true` in codegen, and only library UB evalutes to `true` in
-    /// const-eval/Miri, because the interpreter has its own better checks for language UB.
-    UbCheck(UbKind),
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, TyEncodable, TyDecodable, Hash, HashStable)]
-pub enum UbKind {
-    LanguageUb,
-    LibraryUb,
+    /// Returns whether we want to check for UB.
+    /// This returns the value of `cfg!(debug_assertions)` at monomorphization time.
+    UbChecks,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1464,5 +1452,6 @@ mod size_asserts {
     static_assert_size!(Place<'_>, 16);
     static_assert_size!(PlaceElem<'_>, 24);
     static_assert_size!(Rvalue<'_>, 40);
+    static_assert_size!(StatementKind<'_>, 16);
     // tidy-alphabetical-end
 }

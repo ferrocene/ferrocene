@@ -24,9 +24,9 @@ use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::{ExprKind, Node, QPath};
-use rustc_hir_analysis::astconv::AstConv;
 use rustc_hir_analysis::check::intrinsicck::InlineAsmCtxt;
 use rustc_hir_analysis::check::potentially_plural_count;
+use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
 use rustc_hir_analysis::structured_errors::StructuredDiag;
 use rustc_index::IndexVec;
 use rustc_infer::infer::error_reporting::{FailureCode, ObligationCauseExt};
@@ -1394,9 +1394,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         arg: &hir::Expr<'tcx>,
         err: &mut Diag<'tcx>,
     ) {
-        if let ty::RawPtr(ty::TypeAndMut { mutbl: hir::Mutability::Mut, .. }) = expected_ty.kind()
-            && let ty::RawPtr(ty::TypeAndMut { mutbl: hir::Mutability::Not, .. }) =
-                provided_ty.kind()
+        if let ty::RawPtr(_, hir::Mutability::Mut) = expected_ty.kind()
+            && let ty::RawPtr(_, hir::Mutability::Not) = provided_ty.kind()
             && let hir::ExprKind::Call(callee, _) = arg.kind
             && let hir::ExprKind::Path(hir::QPath::Resolved(_, path)) = callee.kind
             && let Res::Def(_, def_id) = path.res
@@ -1602,7 +1601,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     /// Type check a `let` statement.
-    pub fn check_decl_local(&self, local: &'tcx hir::Local<'tcx>) {
+    pub fn check_decl_local(&self, local: &'tcx hir::LetStmt<'tcx>) {
         self.check_decl(local.into());
         if local.pat.is_never_pattern() {
             self.diverges.set(Diverges::Always {
@@ -1790,7 +1789,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                             [
                                                 hir::Stmt {
                                                     kind:
-                                                        hir::StmtKind::Let(hir::Local {
+                                                        hir::StmtKind::Let(hir::LetStmt {
                                                             source:
                                                                 hir::LocalSource::AssignDesugar(_),
                                                             ..
@@ -1961,16 +1960,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> (Res, LoweredTy<'tcx>) {
         match *qpath {
             QPath::Resolved(ref maybe_qself, path) => {
-                let self_ty = maybe_qself.as_ref().map(|qself| self.to_ty(qself).raw);
-                let ty = self.astconv().res_to_ty(self_ty, path, hir_id, true);
+                let self_ty = maybe_qself.as_ref().map(|qself| self.lower_ty(qself).raw);
+                let ty = self.lowerer().lower_path(self_ty, path, hir_id, true);
                 (path.res, LoweredTy::from_raw(self, path_span, ty))
             }
             QPath::TypeRelative(qself, segment) => {
-                let ty = self.to_ty(qself);
+                let ty = self.lower_ty(qself);
 
                 let result = self
-                    .astconv()
-                    .associated_path_to_ty(hir_id, path_span, ty.raw, qself, segment, true);
+                    .lowerer()
+                    .lower_assoc_path(hir_id, path_span, ty.raw, qself, segment, true);
                 let ty = result
                     .map(|(ty, _, _)| ty)
                     .unwrap_or_else(|guar| Ty::new_error(self.tcx(), guar));

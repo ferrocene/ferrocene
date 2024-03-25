@@ -12,7 +12,6 @@ use rand::rngs::StdRng;
 use rand::Rng;
 use rand::SeedableRng;
 
-use rustc_ast::ast::Mutability;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 #[allow(unused)]
 use rustc_data_structures::static_assert_size;
@@ -22,7 +21,7 @@ use rustc_middle::{
     ty::{
         self,
         layout::{LayoutCx, LayoutError, LayoutOf, TyAndLayout},
-        Instance, Ty, TyCtxt, TypeAndMut,
+        Instance, Ty, TyCtxt,
     },
 };
 use rustc_span::def_id::{CrateNum, DefId};
@@ -35,6 +34,9 @@ use crate::{
     shims::unix::FileHandler,
     *,
 };
+
+use self::concurrency::data_race::NaReadType;
+use self::concurrency::data_race::NaWriteType;
 
 /// First real-time signal.
 /// `signal(7)` says this must be between 32 and 64 and specifies 34 or 35
@@ -373,10 +375,8 @@ pub struct PrimitiveLayouts<'tcx> {
 impl<'mir, 'tcx: 'mir> PrimitiveLayouts<'tcx> {
     fn new(layout_cx: LayoutCx<'tcx, TyCtxt<'tcx>>) -> Result<Self, &'tcx LayoutError<'tcx>> {
         let tcx = layout_cx.tcx;
-        let mut_raw_ptr =
-            Ty::new_ptr(tcx, TypeAndMut { ty: tcx.types.unit, mutbl: Mutability::Mut });
-        let const_raw_ptr =
-            Ty::new_ptr(tcx, TypeAndMut { ty: tcx.types.unit, mutbl: Mutability::Not });
+        let mut_raw_ptr = Ty::new_mut_ptr(tcx, tcx.types.unit);
+        let const_raw_ptr = Ty::new_imm_ptr(tcx, tcx.types.unit);
         Ok(Self {
             unit: layout_cx.layout_of(Ty::new_unit(tcx))?,
             i8: layout_cx.layout_of(tcx.types.i8)?,
@@ -1241,7 +1241,7 @@ impl<'mir, 'tcx> Machine<'mir, 'tcx> for MiriMachine<'mir, 'tcx> {
                 .emit_diagnostic(NonHaltingDiagnostic::AccessedAlloc(alloc_id, AccessKind::Read));
         }
         if let Some(data_race) = &alloc_extra.data_race {
-            data_race.read(alloc_id, range, machine)?;
+            data_race.read(alloc_id, range, NaReadType::Read, None, machine)?;
         }
         if let Some(borrow_tracker) = &alloc_extra.borrow_tracker {
             borrow_tracker.before_memory_read(alloc_id, prov_extra, range, machine)?;
@@ -1265,7 +1265,7 @@ impl<'mir, 'tcx> Machine<'mir, 'tcx> for MiriMachine<'mir, 'tcx> {
                 .emit_diagnostic(NonHaltingDiagnostic::AccessedAlloc(alloc_id, AccessKind::Write));
         }
         if let Some(data_race) = &mut alloc_extra.data_race {
-            data_race.write(alloc_id, range, machine)?;
+            data_race.write(alloc_id, range, NaWriteType::Write, None, machine)?;
         }
         if let Some(borrow_tracker) = &mut alloc_extra.borrow_tracker {
             borrow_tracker.before_memory_write(alloc_id, prov_extra, range, machine)?;
@@ -1289,7 +1289,13 @@ impl<'mir, 'tcx> Machine<'mir, 'tcx> for MiriMachine<'mir, 'tcx> {
             machine.emit_diagnostic(NonHaltingDiagnostic::FreedAlloc(alloc_id));
         }
         if let Some(data_race) = &mut alloc_extra.data_race {
-            data_race.deallocate(alloc_id, size, machine)?;
+            data_race.write(
+                alloc_id,
+                alloc_range(Size::ZERO, size),
+                NaWriteType::Deallocate,
+                None,
+                machine,
+            )?;
         }
         if let Some(borrow_tracker) = &mut alloc_extra.borrow_tracker {
             borrow_tracker.before_memory_deallocation(alloc_id, prove_extra, size, machine)?;

@@ -480,7 +480,7 @@ pub fn walk_use_tree<'a, V: Visitor<'a>>(
     try_visit!(visitor.visit_path(&use_tree.prefix, id));
     match use_tree.kind {
         UseTreeKind::Simple(rename) => {
-            // The extra IDs are handled during HIR lowering.
+            // The extra IDs are handled during AST lowering.
             visit_opt!(visitor, visit_ident, rename);
         }
         UseTreeKind::Glob => {}
@@ -923,7 +923,7 @@ pub fn walk_expr<'a, V: Visitor<'a>>(visitor: &mut V, expression: &'a Expr) -> V
             visit_opt!(visitor, visit_label, opt_label);
             try_visit!(visitor.visit_block(block));
         }
-        ExprKind::Match(subexpression, arms) => {
+        ExprKind::Match(subexpression, arms, _kind) => {
             try_visit!(visitor.visit_expr(subexpression));
             walk_list!(visitor, visit_arm, arms);
         }

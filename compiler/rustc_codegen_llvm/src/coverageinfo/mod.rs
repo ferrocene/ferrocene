@@ -14,7 +14,6 @@ use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_llvm::RustString;
 use rustc_middle::bug;
 use rustc_middle::mir::coverage::CoverageKind;
-use rustc_middle::mir::Coverage;
 use rustc_middle::ty::layout::HasTyCtxt;
 use rustc_middle::ty::Instance;
 
@@ -75,7 +74,7 @@ impl<'ll, 'tcx> CodegenCx<'ll, 'tcx> {
 
 impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
     #[instrument(level = "debug", skip(self))]
-    fn add_coverage(&mut self, instance: Instance<'tcx>, coverage: &Coverage) {
+    fn add_coverage(&mut self, instance: Instance<'tcx>, kind: &CoverageKind) {
         // Our caller should have already taken care of inlining subtleties,
         // so we can assume that counter/expression IDs in this coverage
         // statement are meaningful for the given instance.
@@ -84,14 +83,6 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
         // instance, or it was inlined *from* this instance.)
 
         let bx = self;
-
-        match coverage.kind {
-            // Marker statements have no effect during codegen,
-            // so return early and don't create `func_coverage`.
-            CoverageKind::SpanMarker | CoverageKind::BlockMarker { .. } => return,
-            // Match exhaustively to ensure that newly-added kinds are classified correctly.
-            CoverageKind::CounterIncrement { .. } | CoverageKind::ExpressionUsed { .. } => {}
-        }
 
         let Some(function_coverage_info) =
             bx.tcx.instance_mir(instance.def).function_coverage_info.as_deref()
@@ -106,10 +97,9 @@ impl<'tcx> CoverageInfoBuilderMethods<'tcx> for Builder<'_, '_, 'tcx> {
             .entry(instance)
             .or_insert_with(|| FunctionCoverageCollector::new(instance, function_coverage_info));
 
-        let Coverage { kind } = coverage;
         match *kind {
             CoverageKind::SpanMarker | CoverageKind::BlockMarker { .. } => unreachable!(
-                "unexpected marker statement {kind:?} should have caused an early return"
+                "marker statement {kind:?} should have been removed by CleanupPostBorrowck"
             ),
             CoverageKind::CounterIncrement { id } => {
                 func_coverage.mark_counter_id_seen(id);

@@ -2,8 +2,7 @@ use crate::deriving::generic::ty::*;
 use crate::deriving::generic::*;
 use crate::deriving::path_std;
 
-use ast::EnumDef;
-use rustc_ast::{self as ast, MetaItem};
+use rustc_ast::{self as ast, EnumDef, MetaItem};
 use rustc_expand::base::{Annotatable, ExtCtxt};
 use rustc_span::symbol::{sym, Ident, Symbol};
 use rustc_span::Span;
@@ -52,7 +51,7 @@ fn show_substructure(cx: &mut ExtCtxt<'_>, span: Span, substr: &Substructure<'_>
 
     let (ident, vdata, fields) = match substr.fields {
         Struct(vdata, fields) => (substr.type_ident, *vdata, fields),
-        EnumMatching(_, _, v, fields) => (v.ident, &v.data, fields),
+        EnumMatching(_, v, fields) => (v.ident, &v.data, fields),
         AllFieldlessEnum(enum_def) => return show_fieldless_enum(cx, span, enum_def, substr),
         EnumTag(..) | StaticStruct(..) | StaticEnum(..) => {
             cx.dcx().span_bug(span, "nonsensical .fields in `#[derive(Debug)]`")

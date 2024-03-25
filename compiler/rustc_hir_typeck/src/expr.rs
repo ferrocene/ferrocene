@@ -35,8 +35,8 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath};
-use rustc_hir_analysis::astconv::AstConv as _;
 use rustc_hir_analysis::check::ty_kind_suggestion;
+use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
 use rustc_infer::infer;
 use rustc_infer::infer::type_variable::{TypeVariableOrigin, TypeVariableOriginKind};
 use rustc_infer::infer::DefineOpaqueTypes;
@@ -333,7 +333,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ExprKind::Cast(e, t) => self.check_expr_cast(e, t, expr),
             ExprKind::Type(e, t) => {
-                let ascribed_ty = self.to_ty_saving_user_provided_ty(t);
+                let ascribed_ty = self.lower_ty_saving_user_provided_ty(t);
                 let ty = self.check_expr_with_hint(e, ascribed_ty);
                 self.demand_eqtype(e.span, ascribed_ty, ty);
                 ascribed_ty
@@ -426,7 +426,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Ty<'tcx> {
         let hint = expected.only_has_type(self).map_or(NoExpectation, |ty| {
             match ty.kind() {
-                ty::Ref(_, ty, _) | ty::RawPtr(ty::TypeAndMut { ty, .. }) => {
+                ty::Ref(_, ty, _) | ty::RawPtr(ty, _) => {
                     if oprnd.is_syntactic_place_expr() {
                         // Places may legitimately have unsized types.
                         // For example, dereferences of a fat pointer and
@@ -442,12 +442,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let ty =
             self.check_expr_with_expectation_and_needs(oprnd, hint, Needs::maybe_mut_place(mutbl));
 
-        let tm = ty::TypeAndMut { ty, mutbl };
         match kind {
-            _ if tm.ty.references_error() => Ty::new_misc_error(self.tcx),
+            _ if ty.references_error() => Ty::new_misc_error(self.tcx),
             hir::BorrowKind::Raw => {
                 self.check_named_place_expr(oprnd);
-                Ty::new_ptr(self.tcx, tm)
+                Ty::new_ptr(self.tcx, ty, mutbl)
             }
             hir::BorrowKind::Ref => {
                 // Note: at this point, we cannot say what the best lifetime
@@ -465,7 +464,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // whose address was taken can actually be made to live as long
                 // as it needs to live.
                 let region = self.next_region_var(infer::AddrOfRegion(expr.span));
-                Ty::new_ref(self.tcx, region, tm)
+                Ty::new_ref(self.tcx, region, ty, mutbl)
             }
         }
     }
@@ -1375,7 +1374,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Ty<'tcx> {
         // Find the type of `e`. Supply hints based on the type we are casting to,
         // if appropriate.
-        let t_cast = self.to_ty_saving_user_provided_ty(t);
+        let t_cast = self.lower_ty_saving_user_provided_ty(t);
         let t_cast = self.resolve_vars_if_possible(t_cast);
         let t_expr = self.check_expr_with_expectation(e, ExpectCastableToType(t_cast));
         let t_expr = self.resolve_vars_if_possible(t_expr);
@@ -1452,7 +1451,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         });
         let Some((
             _,
-            hir::Node::Local(hir::Local { ty: Some(ty), .. })
+            hir::Node::LetStmt(hir::LetStmt { ty: Some(ty), .. })
             | hir::Node::Item(hir::Item { kind: hir::ItemKind::Const(ty, _, _), .. }),
         )) = parent_node
         else {
@@ -1503,7 +1502,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
-        let count = self.array_length_to_const(count);
+        let count = self.lower_array_length(count);
         if let Some(count) = count.try_eval_target_usize(tcx, self.param_env) {
             self.suggest_array_len(expr, count);
         }
@@ -1679,7 +1678,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &hir::Expr<'_>,
         span: Span,
         variant: &'tcx ty::VariantDef,
-        ast_fields: &'tcx [hir::ExprField<'tcx>],
+        hir_fields: &'tcx [hir::ExprField<'tcx>],
         base_expr: &'tcx Option<&'tcx hir::Expr<'tcx>>,
     ) {
         let tcx = self.tcx;
@@ -1710,7 +1709,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let mut error_happened = false;
 
         // Type-check each field.
-        for (idx, field) in ast_fields.iter().enumerate() {
+        for (idx, field) in hir_fields.iter().enumerate() {
             let ident = tcx.adjust_ident(field.ident, variant.def_id);
             let field_type = if let Some((i, v_field)) = remaining_fields.remove(&ident) {
                 seen_fields.insert(ident, field.span);
@@ -1739,7 +1738,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         variant,
                         expr,
                         field,
-                        ast_fields,
+                        hir_fields,
                         adt.variant_descr(),
                     )
                 };
@@ -1754,7 +1753,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.demand_coerce_diag(field.expr, ty, field_type, None, AllowTwoPhase::No);
 
             if let Some(diag) = diag {
-                if idx == ast_fields.len() - 1 {
+                if idx == hir_fields.len() - 1 {
                     if remaining_fields.is_empty() {
                         self.suggest_fru_from_range_and_emit(field, variant, args, diag);
                     } else {
@@ -1768,7 +1767,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // Make sure the programmer specified correct number of fields.
         if adt_kind == AdtKind::Union {
-            if ast_fields.len() != 1 {
+            if hir_fields.len() != 1 {
                 struct_span_code_err!(
                     tcx.dcx(),
                     span,
@@ -1905,14 +1904,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 .collect();
 
             if !private_fields.is_empty() {
-                self.report_private_fields(adt_ty, span, expr.span, private_fields, ast_fields);
+                self.report_private_fields(adt_ty, span, expr.span, private_fields, hir_fields);
             } else {
                 self.report_missing_fields(
                     adt_ty,
                     span,
                     remaining_fields,
                     variant,
-                    ast_fields,
+                    hir_fields,
                     args,
                 );
             }
@@ -1949,7 +1948,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         span: Span,
         remaining_fields: UnordMap<Ident, (FieldIdx, &ty::FieldDef)>,
         variant: &'tcx ty::VariantDef,
-        ast_fields: &'tcx [hir::ExprField<'tcx>],
+        hir_fields: &'tcx [hir::ExprField<'tcx>],
         args: GenericArgsRef<'tcx>,
     ) {
         let len = remaining_fields.len();
@@ -1986,8 +1985,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         );
         err.span_label(span, format!("missing {remaining_fields_names}{truncated_fields_error}"));
 
-        if let Some(last) = ast_fields.last() {
-            self.suggest_fru_from_range_and_emit(last, variant, args, err);
+        if let Some(hir_field) = hir_fields.last() {
+            self.suggest_fru_from_range_and_emit(hir_field, variant, args, err);
         } else {
             err.emit();
         }
@@ -2686,8 +2685,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 expr,
                 Some(span),
             );
-        } else if let ty::RawPtr(ty_and_mut) = expr_t.kind()
-            && let ty::Adt(adt_def, _) = ty_and_mut.ty.kind()
+        } else if let ty::RawPtr(ptr_ty, _) = expr_t.kind()
+            && let ty::Adt(adt_def, _) = ptr_ty.kind()
             && let ExprKind::Field(base_expr, _) = expr.kind
             && adt_def.variants().len() == 1
             && adt_def
@@ -3100,7 +3099,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     cause.clone().derived_cause(
                         ty::Binder::dummy(ty::TraitPredicate {
                             trait_ref: impl_trait_ref,
-                            polarity: ty::ImplPolarity::Positive,
+                            polarity: ty::PredicatePolarity::Positive,
                         }),
                         |derived| {
                             traits::ImplDerivedObligation(Box::new(
@@ -3225,7 +3224,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     self.demand_coerce(expr, ty, fnptr_ty, None, AllowTwoPhase::No);
                 }
                 ty::Ref(_, base_ty, mutbl) => {
-                    let ptr_ty = Ty::new_ptr(self.tcx, ty::TypeAndMut { ty: base_ty, mutbl });
+                    let ptr_ty = Ty::new_ptr(self.tcx, base_ty, mutbl);
                     self.demand_coerce(expr, ty, ptr_ty, None, AllowTwoPhase::No);
                 }
                 _ => {}
@@ -3283,7 +3282,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         fields: &[Ident],
         expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
-        let container = self.to_ty(container).normalized;
+        let container = self.lower_ty(container).normalized;
 
         if let Some(ident_2) = fields.get(1)
             && !self.tcx.features().offset_of_nested

@@ -23,9 +23,10 @@ IFS=$'\n\t'
 TOUCH="touch"
 # Mac's touch does not enjoy parsing dates in any format git will output,
 # use a more consistent version of touch
-if [[ "${OSTYPE}" =~ ^#darwin/* ]]; then
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
     TOUCH="$HOMEBREW_PREFIX/opt/uutils-coreutils/libexec/uubin/touch"
 fi
+echo "Touch is ${TOUCH}"
 
 # `%ci` outputs the commit date formatted according to ISO8601.
 last_commit_date="$(git log -1 "--format=%ci" HEAD)"

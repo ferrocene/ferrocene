@@ -55,7 +55,7 @@ get_llvm_cache_hash() {
     sha256sum "$0" >> "${file}"
     sha256sum ferrocene/ci/configure.sh >> "${file}"
     sha256sum src/version >> "${file}"
-    # Apparently, git for windows doesn't understand when the `-z` flag of `git
+    # Git for windows doesn't understand when the `-z` flag of `git
     # ls-files` is passed after the paths, so we provide it before the list of
     # paths to list.
     git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 sha256sum >> "${file}"

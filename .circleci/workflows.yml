@@ -317,8 +317,9 @@ jobs:
       - when:
           condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
           steps:
-            - aws-oidc-auth
             - ferrocene-checkout
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - aws-oidc-auth
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -783,6 +784,13 @@ commands:
             git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
+  ferrocene-setup-darwin:
+    description: Prepare the Windows environment
+    steps:
+      - run:
+          name: Setup Windows environment
+          command: ferrocene/ci/scripts/setup-darwin.sh
+          
   ferrocene-checkout:
     description: Checkout the Ferrocene source code
     parameters:

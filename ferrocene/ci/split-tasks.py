@@ -19,24 +19,20 @@ import pathlib
 REPOSITORY_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 
 
-def find_all_compiletests(
-    *, exclude: list[str] | None = None, deprioritize: list[str] | None = None
-):
+def find_all_compiletests(exclude: list[str] | None, deprioritize: list[str] | None):
     if exclude is None:
         exclude = []
     if deprioritize is None:
-        prioritize = []
+        deprioritize = []
 
     found = []
     for entry in (REPOSITORY_ROOT / "tests").iterdir():
         if not entry.is_dir():
             continue
-        if entry.name in exclude:
+        elif entry.name in exclude:
             continue
 
-        weight = 0
-        if entry.name in deprioritize:
-            weight = 1
+        weight = 1 if entry.name in deprioritize else 0
 
         found.append(Task(str(entry.relative_to(REPOSITORY_ROOT)), weight))
     return found

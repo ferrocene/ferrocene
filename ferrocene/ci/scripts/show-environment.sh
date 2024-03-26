@@ -16,7 +16,11 @@ fi
 echo
 echo "System memory"
 echo "============="
-free -h
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    vm_stat
+else
+    free -h
+fi
 
 echo "Disk"
 echo "===="

@@ -35,6 +35,9 @@ parameters:
   llvm-rebuild--x86_64-unknown-linux-gnu:
     type: boolean
     default: false
+  llvm-rebuild--aarch64-apple-darwin:
+    type: boolean
+    default: false
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
@@ -299,6 +302,81 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  aarch64-darwin-llvm:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  aarch64-darwin-build:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps: [ferrocene-job-build]
+
+  aarch64-darwin-dist:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: aarch64-darwin-build
+
+  aarch64-darwin-dist-tools:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: aarch64-darwin-build
+
+  aarch64-darwin-self-test:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.medium.gen1 # 4 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
   finish-build:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
@@ -398,6 +476,21 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
+      - aarch64-darwin-llvm: {}
+      - aarch64-darwin-build:
+          requires:
+            - aarch64-darwin-llvm
+      - aarch64-darwin-dist:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-dist-tools:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-self-test:
+          requires:
+            - aarch64-darwin-dist
+            - aarch64-darwin-dist-tools
+
       - build-docker:
           name: build-docker--ubuntu-23
           image: ubuntu-23
@@ -407,6 +500,7 @@ workflows:
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
+            - aarch64-darwin-self-test
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:

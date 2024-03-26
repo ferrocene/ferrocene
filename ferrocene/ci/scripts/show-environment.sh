@@ -7,7 +7,11 @@ IFS=$'\n\t'
 
 echo "CPU"
 echo "==="
-lscpu
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    sysctl -n machdep.cpu.brand_string
+else
+    lscpu
+fi
 
 echo
 echo "System memory"

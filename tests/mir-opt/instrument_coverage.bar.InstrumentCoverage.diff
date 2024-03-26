@@ -4,7 +4,11 @@
   fn bar() -> bool {
       let mut _0: bool;
   
+<<<<<<< HEAD
 +     coverage Code(Counter(0)) => /the/src/instrument_coverage.rs:22:1 - 24:2;
+=======
++     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:19:1 - 21:2;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 + 
       bb0: {
 +         Coverage::CounterIncrement(0);

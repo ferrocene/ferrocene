@@ -20,16 +20,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-TOUCH="touch"
-# Mac's touch does not enjoy parsing dates in any format git will output,
-# use a more consistent version of touch
-if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
-    TOUCH="$HOMEBREW_PREFIX/opt/uutils-coreutils/libexec/uubin/touch"
-fi
-echo "Touch is ${TOUCH}"
-
 # `%ci` outputs the commit date formatted according to ISO8601.
-last_commit_date="$(git log -1 "--format=%ci" HEAD)"
+last_commit_date="$(git log -1 "--format=%ct" HEAD)"
 
 project_root="$(pwd)"
 for repo in . $(git config --file .gitmodules --get-regexp path | awk '{ print $2 }'); do
@@ -46,7 +38,7 @@ for repo in . $(git config --file .gitmodules --get-regexp path | awk '{ print $
     #
     # `--` instructs touch to treat all following arguments as files, even if
     # their names start with `-` (and would thus be interpreted as an option).
-    git ls-tree HEAD -rz --name-only | xargs -0 ${TOUCH} -c -d "${last_commit_date}" --
+    git ls-tree HEAD -rz --name-only | xargs -0 touch -c -t "${last_commit_date}" --
 done
 
 echo "finished resetting the mtime of all tracked files to ${last_commit_date}"

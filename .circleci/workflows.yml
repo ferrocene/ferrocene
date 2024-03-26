@@ -785,10 +785,10 @@ commands:
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
   ferrocene-setup-darwin:
-    description: Prepare the Windows environment
+    description: Prepare the Darwin environment
     steps:
       - run:
-          name: Setup Windows environment
+          name: Setup Darwin environment
           command: ferrocene/ci/scripts/setup-darwin.sh
           
   ferrocene-checkout:

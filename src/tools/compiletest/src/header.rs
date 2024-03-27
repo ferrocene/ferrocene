@@ -709,7 +709,10 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "check-stdout",
     "check-test-line-numbers-match",
     "compare-output-lines-by-subset",
+<<<<<<< HEAD
     "compile-args",
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "compile-flags",
     "dont-check-compiler-stderr",
     "dont-check-compiler-stdout",

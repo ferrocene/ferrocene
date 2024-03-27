@@ -48,8 +48,8 @@ pub(crate) enum Error {
         #[source]
         error: FindBinaryInPathError,
     },
-    #[error("the bundled linker is missing")]
-    BundledLinkerMissing,
+    #[error("the bundled linker is missing from {}", .0.display())]
+    BundledLinkerMissing(PathBuf),
     #[error("the path {} contains bytes not representable as UTF-8", path.to_string_lossy())]
     NonUtf8Path { path: PathBuf },
     #[error("failed to create the temporary directory to store compilation artifacts")]
@@ -115,7 +115,7 @@ impl Error {
             Error::DuplicateTargetLibrary { .. } => 9,
             Error::TargetLibraryDiscoveryFailed { .. } => 10,
             Error::CCompilerNotFound { .. } => 11,
-            Error::BundledLinkerMissing => 15,
+            Error::BundledLinkerMissing(_) => 15,
             Error::NonUtf8Path { .. } => 16,
             Error::TemporaryCompilationDirectoryCreationFailed { .. } => 17,
             Error::WritingSampleProgramFailed { .. } => 18,

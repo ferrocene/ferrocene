@@ -10,11 +10,14 @@ COMMIT="$(git rev-parse HEAD)"
 BUCKET="ferrocene-ci-artifacts"
 PREFIX="ferrocene/dist/${COMMIT}"
 
-root="$(mktemp -d)"
-cleanup() {
-    rm -rf "${root}"
-}
-trap cleanup EXIT
+root="$(mktemp -d -p .)"
+
+if [[ -z "$SKIP_CLEANUP" ]]; then
+    cleanup() {
+        rm -rf "${root}"
+    }
+    trap cleanup EXIT
+fi
 
 case "$(cat ferrocene/ci/channel)" in
     stable)
@@ -33,10 +36,10 @@ download() {
     target="$2"
 
     echo "===> downloading ${package} for ${target}"
-    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${root}/archives/${package}-${target}-${version}.tar.xz"
+    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
 }
 
-mkdir -p "${root}/archives"
+mkdir -p "${TEMPDIR}/archives"
 download ferrocene-self-test "${FERROCENE_HOST}"
 download rustc "${FERROCENE_HOST}"
 download cargo "${FERROCENE_HOST}"
@@ -47,12 +50,12 @@ for target in ${targets[@]:-}; do
     download rust-std "${target}"
 done
 
-mkdir -p "${root}/sysroot"
-for archive in ${root}/archives/*; do
+mkdir -p "${TEMPDIR}/sysroot"
+for archive in ${TEMPDIR}/archives/*; do
     echo "===> installing $(basename ${archive})"
 
-    tar -C "${root}/sysroot" -xf "${archive}"
+    tar -C "${TEMPDIR}/sysroot" -xf "${archive}"
 done
 
 echo "===> running the self-test tool"
-"${root}/sysroot/bin/ferrocene-self-test"
+"${TEMPDIR}/sysroot/bin/ferrocene-self-test"

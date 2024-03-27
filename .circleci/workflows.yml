@@ -626,10 +626,19 @@ workflows:
 commands:
   ferrocene-job-build:
     description: Collection of steps for build jobs
+    parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
     steps:
-      - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin
+      - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -644,15 +653,23 @@ commands:
   ferrocene-job-dist:
     description: Collection of steps for dist jobs
     parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
       restore-from-job:
         type: string
       llvm-subset:
         type: boolean
         default: true
     steps:
-      - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin
+      - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>

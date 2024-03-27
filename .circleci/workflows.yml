@@ -35,9 +35,13 @@ parameters:
   llvm-rebuild--x86_64-unknown-linux-gnu:
     type: boolean
     default: false
+  llvm-rebuild--x86_64-pc-windows-msvc:
+    type: boolean
+    default: false
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
+  win: circleci/windows@5.0
 
 jobs:
   # Container dedicated to running quick checks for each commit pushed in open
@@ -91,8 +95,6 @@ jobs:
           name: Run x.py's own tests
           command: python3 src/bootstrap/bootstrap_test.py
       - ferrocene-ci
-
-  # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
     executor: docker-ubuntu-20
@@ -299,6 +301,76 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  x86_64-windows-llvm:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-setup-windows
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  # We opt against a build/dist split for Windows to save on CI time (setup is slow)
+  x86_64-windows-dist:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          os: windows
+
+  x86_64-windows-dist-tools:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          os: windows
+
+  x86_64-windows-self-test:
+    executor: docker-ubuntu-20
+    resource_class: small # 1-core
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
   finish-build:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
@@ -404,9 +476,23 @@ workflows:
           tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
 
+      - x86_64-windows-llvm: {}
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-llvm
+      - x86_64-windows-dist-tools:
+          requires:
+            - x86_64-windows-llvm
+      - x86_64-windows-self-test:
+          requires:
+            - x86_64-windows-dist
+            - x86_64-windows-dist-tools
+
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
+            # TODO: do not merge, testing on commit to save CI resources
+            - x86_64-windows-self-test
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -531,10 +617,19 @@ workflows:
 commands:
   ferrocene-job-build:
     description: Collection of steps for build jobs
+    parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
     steps:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -544,13 +639,17 @@ commands:
           command: ferrocene/ci/scripts/shrink-build-directory.sh
       - run:
           name: Persist build output between jobs
-          command: ferrocene/ci/scripts/persist-between-jobs.sh upload build/
+          command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
 
   ferrocene-job-dist:
     description: Collection of steps for dist jobs
     parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
       restore-from-job:
         type: string
+        default: ""
       llvm-subset:
         type: boolean
         default: true
@@ -558,9 +657,17 @@ commands:
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
-      - run:
-          name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "windows"]
+          steps:
+            - ferrocene-setup-windows
+      - when:
+          condition: <<parameters.restore-from-job>>
+          steps:
+            - run:
+                name: Restore files from the << parameters.restore-from-job >> job
+                command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
 
       - ferrocene-ci
 
@@ -681,13 +788,24 @@ commands:
       - run:
           name: Clone the source code
           command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com &>> ~/.ssh/known_hosts
+            # There is no need to use any deploy key or SSH for CI, as the
+            # Ferrocene repository is public anyway. Also, on Windows the
+            # deploy key doesn't seem to be injected into the VM, so using
+            # HTTPS fixes that problem too.
+            repo_url="$(echo "${CIRCLE_REPOSITORY_URL}" | sed 's#^git@github.com:#https://github.com/#')"
 
             git init .
-            git remote add origin "${CIRCLE_REPOSITORY_URL}"
+            git remote add origin "${repo_url}"
             git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
+
+
+  ferrocene-setup-windows:
+    description: Prepare the Windows environment
+    steps:
+      - run:
+          name: Setup Windows environment
+          command: ferrocene/ci/scripts/setup-windows.sh
 
   ferrocene-checkout:
     description: Checkout the Ferrocene source code

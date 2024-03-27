@@ -9,6 +9,7 @@ use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs::File;
+#[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
 use tokio::runtime::Runtime;
@@ -78,7 +79,10 @@ fn collect_files(
             package.files.push(PackageFile {
                 path: relative_path.into(),
                 sha256: hash_file(&entry)?,
+                #[cfg(not(windows))]
                 posix_mode: entry.metadata()?.mode(),
+                #[cfg(windows)]
+                posix_mode: 0, // TODO: Not used! Should we cfg it in criticaltrust?
                 needs_proxy: ctx.proxied_binaries.contains(&relative_path),
             });
         } else if entry.is_dir() {
@@ -100,8 +104,10 @@ mod tests {
     use super::*;
     use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
     use criticaltrust::signatures::Keychain;
+    #[cfg(unix)] // Not used on Windows
     use std::fs::Permissions;
     use std::io::Write;
+    #[cfg(unix)]
     use std::os::unix::prelude::PermissionsExt;
     use tempfile::TempDir;
 
@@ -109,6 +115,7 @@ mod tests {
     fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
 
+        #[cfg_attr(windows, allow(unused_variables))] // Windows does not use `mode`
         let create_file = |path, contents, mode| {
             let path = package_dir.path().join(path);
             if let Some(parent) = path.parent() {
@@ -116,6 +123,7 @@ mod tests {
             }
             let mut file = File::create(path)?;
             file.write_all(contents)?;
+            #[cfg(unix)]
             file.set_permissions(Permissions::from_mode(mode))?;
             Ok::<_, Error>(())
         };

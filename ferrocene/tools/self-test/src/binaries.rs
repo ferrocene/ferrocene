@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
@@ -28,7 +29,10 @@ fn check_binary(
     hash: CommitHashOf,
 ) -> Result<(), Error> {
     let bin_dir = sysroot.join("bin");
+    #[cfg(unix)]
     let bin = bin_dir.join(name);
+    #[cfg(windows)] // Windows needs `.exe` on the end
+    let bin = bin_dir.join(format!("{name}.exe"));
 
     check_file(&bin, &bin_dir, name)?;
     let version = get_version(&bin, name)?;
@@ -43,17 +47,19 @@ fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
     /// Minimum file permission the binary should have.
     ///
     /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    #[cfg(unix)] // Windows does permissions different.
     const MODE: u32 = 0o555;
 
     match std::fs::metadata(bin) {
         Ok(metadata) => {
             if !metadata.is_file() {
-                Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
-            } else if metadata.permissions().mode() & MODE != MODE {
-                Err(Error::WrongBinaryPermissions { path: bin.into() })
-            } else {
-                Ok(())
+                return Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() });
             }
+            #[cfg(unix)] // Windows does permissions different.
+            if metadata.permissions().mode() & MODE != MODE {
+                return Err(Error::WrongBinaryPermissions { path: bin.into() });
+            }
+            Ok(())
         }
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
             Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
@@ -184,15 +190,19 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // For now, this test does not support windows.
     fn test_check_binary_no_access_to_parent_directory() {
         let utils = TestUtils::new();
 
         let bin_dir = utils.sysroot().join("bin");
         std::fs::create_dir_all(&bin_dir).unwrap();
 
-        let mut perms = bin_dir.metadata().unwrap().permissions();
-        perms.set_mode(0o0);
-        std::fs::set_permissions(&bin_dir, perms).unwrap();
+        #[cfg(not(windows))]
+        {
+            let mut perms = bin_dir.metadata().unwrap().permissions();
+            perms.set_mode(0o0);
+            std::fs::set_permissions(&bin_dir, perms).unwrap();
+        }
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
@@ -312,6 +322,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn test_check_binary_wrong_permissions() {
         const PERMISSIONS: &[&[u32]] = &[
             // No permissions whatsoever

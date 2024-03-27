@@ -4,6 +4,7 @@
 mod argparse;
 
 use std::ffi::OsString;
+#[cfg(unix)]
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -331,8 +332,8 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
     let args_file = temp_dir.join("_fst_args_capture");
 
     // Concatentation, using byte strings
-    let mut c_source = C_SOURCE.to_vec();
-    c_source.extend(args_file.as_os_str().as_bytes());
+    let mut c_source = C_SOURCE.to_owned();
+    c_source.extend(args_file.as_os_str().as_encoded_bytes());
     c_source.extend(C_SOURCE2);
 
     let source_file = temp_dir.join("ldlld.c");
@@ -412,32 +413,41 @@ fn check_compiler_linker_args(
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
+    #[cfg(unix)]
+    let bin_name = "rust-lld";
+    #[cfg(windows)]
+    let bin_name = "rust-lld.exe";
     let path =
-        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join("rust-lld");
+        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(bin_name);
 
     if path.is_file() {
         reporter.success("bundled linker detected");
         Ok(path)
     } else {
-        Err(Error::BundledLinkerMissing)
+        Err(Error::BundledLinkerMissing(path.to_path_buf()))
     }
 }
 
 /// Look for the bundled `ld.lld` linker wrapper program in the given sysroot.
 fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
+    #[cfg(unix)]
+    let bin_name = "ld.lld";
+    #[cfg(windows)]
+    let bin_name = "llvm-link.exe";
+
     let path = sysroot
         .join("lib")
         .join("rustlib")
         .join(env::SELFTEST_TARGET)
         .join("bin")
         .join("gcc-ld")
-        .join("ld.lld");
+        .join(bin_name);
 
     if path.is_file() {
         reporter.success("bundled linker-wrapper detected");
         Ok(path)
     } else {
-        Err(Error::BundledLinkerMissing)
+        Err(Error::BundledLinkerMissing(path.to_path_buf()))
     }
 }
 
@@ -561,6 +571,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // For now, this test does not support windows.
     fn test_make_fake_linker() {
         let temp_dir = tempfile::tempdir().expect("making temp dir");
         // make a fake linker

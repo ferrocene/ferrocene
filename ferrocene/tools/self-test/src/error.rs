@@ -29,9 +29,20 @@ pub(crate) enum Error {
     BinaryVersionMismatch { binary: String, field: String, expected: String, found: String },
     TargetLibraryMissing { target: String, library: String },
     DuplicateTargetLibrary { target: String, library: String },
-    TargetLibraryDiscoveryFailed { path: PathBuf, error: std::io::Error },
-    CCompilerNotFound { name: String, error: FindBinaryInPathError },
-    BundledLinkerMissing,
+    #[error("failed to access {} while discovering target libraries", path.display())]
+    TargetLibraryDiscoveryFailed {
+        path: PathBuf,
+        #[source]
+        error: std::io::Error,
+    },
+    #[error("C compiler not found on the system")]
+    CCompilerNotFound {
+        #[source]
+        error: FindBinaryInPathError,
+    },
+    #[error("the bundled linker is missing from {}", .0.display())]
+    BundledLinkerMissing(PathBuf),
+    #[error("the path {} contains bytes not representable as UTF-8", path.to_string_lossy())]
     NonUtf8Path { path: PathBuf },
     TemporaryCompilationDirectoryCreationFailed { error: std::io::Error },
     WritingSampleProgramFailed { name: String, dest: PathBuf, error: std::io::Error },
@@ -60,7 +71,7 @@ impl Error {
             Error::DuplicateTargetLibrary { .. } => 9,
             Error::TargetLibraryDiscoveryFailed { .. } => 10,
             Error::CCompilerNotFound { .. } => 11,
-            Error::BundledLinkerMissing => 15,
+            Error::BundledLinkerMissing(_) => 15,
             Error::NonUtf8Path { .. } => 16,
             Error::TemporaryCompilationDirectoryCreationFailed { .. } => 17,
             Error::WritingSampleProgramFailed { .. } => 18,

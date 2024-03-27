@@ -971,3 +971,8 @@
 # Download URL for the qualification technical report. If omitted, the
 # technical report will not be included in the documentation.
 #technical-report-url = <none> (url)
+
+# Amazon Web Services profile that you may have to set to work with AWS resources
+# while working locally.
+# https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html#configuring-aws-cli
+#aws-profile = "ferrocene-ci"

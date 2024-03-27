@@ -401,32 +401,41 @@ fn check_compiler_linker_args(
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
+    #[cfg(unix)]
+    let bin_name = "rust-lld";
+    #[cfg(windows)]
+    let bin_name = "rust-lld.exe";
     let path =
-        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join("rust-lld");
+        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(bin_name);
 
     if path.is_file() {
         reporter.success("bundled linker detected");
         Ok(path)
     } else {
-        Err(Error::BundledLinkerMissing)
+        Err(Error::BundledLinkerMissing(path.to_path_buf()))
     }
 }
 
 /// Look for the bundled `ld.lld` linker wrapper program in the given sysroot.
 fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
+    #[cfg(unix)]
+    let bin_name = "ld.lld";
+    #[cfg(windows)]
+    let bin_name = "llvm-link.exe";
+
     let path = sysroot
         .join("lib")
         .join("rustlib")
         .join(env::SELFTEST_TARGET)
         .join("bin")
         .join("gcc-ld")
-        .join("ld.lld");
+        .join(bin_name);
 
     if path.is_file() {
         reporter.success("bundled linker-wrapper detected");
         Ok(path)
     } else {
-        Err(Error::BundledLinkerMissing)
+        Err(Error::BundledLinkerMissing(path.to_path_buf()))
     }
 }
 

@@ -394,6 +394,9 @@ impl Step for Rustc {
 
         tarball.ferrocene_proxied_binary("bin/rustc");
         tarball.ferrocene_proxied_binary("bin/rustdoc");
+        tarball.ferrocene_proxied_binary("bin/rust-gdb");
+        tarball.ferrocene_proxied_binary("bin/rust-gdbgui");
+        tarball.ferrocene_proxied_binary("bin/rust-lldb");
         return tarball.generate();
 
         fn prepare_image(builder: &Builder<'_>, compiler: Compiler, image: &Path) {

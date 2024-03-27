@@ -7,12 +7,20 @@ IFS=$'\n\t'
 
 echo "CPU"
 echo "==="
-lscpu
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    sysctl -n machdep.cpu.brand_string
+else
+    lscpu
+fi
 
 echo
 echo "System memory"
 echo "============="
-free -h
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    vm_stat
+else
+    free -h
+fi
 
 echo "Disk"
 echo "===="

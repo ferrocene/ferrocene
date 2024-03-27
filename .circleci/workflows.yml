@@ -646,7 +646,7 @@ commands:
     parameters:
       os:
         type: string
-        default: unix # Or windows
+        default: linux # Or `windows` or `darwin`
       restore-from-job:
         type: string
         default: ""

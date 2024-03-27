@@ -336,7 +336,9 @@ jobs:
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
-    steps: [ferrocene-job-build]
+    steps:
+      - ferrocene-job-build:
+          os: darwin
 
   aarch64-darwin-dist:
     macos:
@@ -349,6 +351,7 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
       - ferrocene-job-dist:
+          os: darwin
           restore-from-job: aarch64-darwin-build
 
   aarch64-darwin-dist-tools:
@@ -362,6 +365,7 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - ferrocene-job-dist:
+          os: darwin
           restore-from-job: aarch64-darwin-build
 
   aarch64-darwin-self-test:
@@ -371,9 +375,10 @@ jobs:
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
     steps:
-      - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh

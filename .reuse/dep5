@@ -107,6 +107,10 @@ Copyright: 2014 Jorge Aparicio
            The Rust Project Developers (see https://thanks.rust-lang.org)
 License: MIT OR Apache-2.0
 
+Files: ferrocene/tools/flip-link/*
+Copyright: The Knurling-rs developers
+License: MIT OR Apache-2.0
+
 # Reuse cannot process the LLVM source tree, and so the copyrights for the LLVM
 # submodule are written out here manually. The collect-licence-metadata tool
 # has a specific exception coded within it to ignore ./src/llvm-project so

@@ -64,7 +64,7 @@ JOBS_DEFINITION = {
 
         "oxidos": ["ferrocene-oxidos"],
 
-        "tools": ["rust-analyzer", "clippy", "rustfmt"],
+        "tools": ["rust-analyzer", "clippy", "rustfmt", "flip-link"],
 
         # The "None" job contains the tasks that should never be executed,
         # regardless of which job is requested.

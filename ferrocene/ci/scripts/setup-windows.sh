@@ -27,6 +27,14 @@ fi
 
 setup_python3
 
+REALTIME_MONITORING_ENABLED=$(powershell -Command "(Get-MpPreference).DisableRealtimeMonitoring")
+if [[ "${REALTIME_MONITORING_ENABLED}" == "False" ]]; then
+    echo "Disabling Windows Defender Realtime Protection for performance reasons"
+    powershell -Command "Set-MpPreference -DisableRealtimeMonitoring 1"
+else
+    echo "Windows Defender Realtime Protection already disabled"
+fi
+
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
 choco install -y cmake.portable ninja zstandard

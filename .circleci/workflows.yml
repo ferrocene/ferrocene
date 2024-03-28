@@ -482,21 +482,6 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
-      - aarch64-darwin-llvm: {}
-      - aarch64-darwin-build:
-          requires:
-            - aarch64-darwin-llvm
-      - aarch64-darwin-dist:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-dist-tools:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-self-test:
-          requires:
-            - aarch64-darwin-dist
-            - aarch64-darwin-dist-tools
-
       - build-docker:
           name: build-docker--ubuntu-23
           image: ubuntu-23
@@ -506,7 +491,6 @@ workflows:
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
-            - aarch64-darwin-self-test
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -601,6 +585,21 @@ workflows:
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
 
+      - aarch64-darwin-llvm: {}
+      - aarch64-darwin-build:
+          requires:
+            - aarch64-darwin-llvm
+      - aarch64-darwin-dist:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-dist-tools:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-self-test:
+          requires:
+            - aarch64-darwin-dist
+            - aarch64-darwin-dist-tools
+
       - finish-build:
           requires:
             - x86_64-linux-docs
@@ -608,6 +607,7 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - wasm-dist-oxidos
+            - aarch64-darwin-self-test
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen

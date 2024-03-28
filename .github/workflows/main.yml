@@ -57,7 +57,6 @@ jobs:
 
     - run: cargo build
     - run: cargo test
-    - run: cargo test --features "serialize-rustc"
     - run: cargo test --features "serialize-serde"
     - run: cargo test --features "verify-winapi"
     - run: cargo test --features "cpp_demangle"

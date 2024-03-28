@@ -44,7 +44,6 @@ dependencies = [
  "miniz_oxide",
  "object",
  "rustc-demangle",
- "rustc-serialize",
  "serde",
  "winapi",
 ]
@@ -151,12 +150,6 @@ name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d626bb9dae77e28219937af045c257c28bfd3f69333c512553507f5f9798cb76"
-
-[[package]]
-name = "rustc-serialize"
-version = "0.3.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe834bc780604f4674073badbad26d7219cadfb4a2275802db12cbae17498401"
 
 [[package]]
 name = "serde"

@@ -21,7 +21,6 @@ use serde::{Deserialize, Serialize};
 /// This function requires the `std` feature of the `backtrace` crate to be
 /// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
-#[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Backtrace {
     // Frames here are listed from top-to-bottom of the stack
@@ -116,7 +115,6 @@ impl Frame {
 /// This function requires the `std` feature of the `backtrace` crate to be
 /// enabled, and the `std` feature is enabled by default.
 #[derive(Clone)]
-#[cfg_attr(feature = "serialize-rustc", derive(RustcDecodable, RustcEncodable))]
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct BacktraceSymbol {
     name: Option<Vec<u8>>,
@@ -437,53 +435,6 @@ impl fmt::Debug for BacktraceSymbol {
             .field("lineno", &self.lineno())
             .field("colno", &self.colno())
             .finish()
-    }
-}
-
-#[cfg(feature = "serialize-rustc")]
-mod rustc_serialize_impls {
-    use super::*;
-    use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
-
-    #[derive(RustcEncodable, RustcDecodable)]
-    struct SerializedFrame {
-        ip: usize,
-        symbol_address: usize,
-        module_base_address: Option<usize>,
-        symbols: Option<Vec<BacktraceSymbol>>,
-    }
-
-    impl Decodable for BacktraceFrame {
-        fn decode<D>(d: &mut D) -> Result<Self, D::Error>
-        where
-            D: Decoder,
-        {
-            let frame: SerializedFrame = SerializedFrame::decode(d)?;
-            Ok(BacktraceFrame {
-                frame: Frame::Deserialized {
-                    ip: frame.ip,
-                    symbol_address: frame.symbol_address,
-                    module_base_address: frame.module_base_address,
-                },
-                symbols: frame.symbols,
-            })
-        }
-    }
-
-    impl Encodable for BacktraceFrame {
-        fn encode<E>(&self, e: &mut E) -> Result<(), E::Error>
-        where
-            E: Encoder,
-        {
-            let BacktraceFrame { frame, symbols } = self;
-            SerializedFrame {
-                ip: frame.ip() as usize,
-                symbol_address: frame.symbol_address() as usize,
-                module_base_address: frame.module_base_address().map(|addr| addr as usize),
-                symbols: symbols.clone(),
-            }
-            .encode(e)
-        }
     }
 }
 

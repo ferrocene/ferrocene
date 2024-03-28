@@ -97,8 +97,6 @@
 // irrelevant as this crate is developed out-of-tree.
 #![cfg_attr(backtrace_in_libstd, allow(warnings))]
 #![cfg_attr(not(feature = "std"), allow(dead_code))]
-// We know this is deprecated, it's only here for back-compat reasons.
-#![cfg_attr(feature = "rustc-serialize", allow(deprecated))]
 
 #[cfg(feature = "std")]
 #[macro_use]

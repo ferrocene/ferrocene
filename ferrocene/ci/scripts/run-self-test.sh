@@ -51,7 +51,8 @@ mkdir -p "${TEMPDIR}/sysroot"
 for archive in ${TEMPDIR}/archives/*; do
     echo "===> installing $(basename ${archive})"
 
-    tar -C "${TEMPDIR}/sysroot" -xf "${archive}"
+    # TODO: Remove the v, it's debugging
+    tar -C "${TEMPDIR}/sysroot" -xvf "${archive}"
 done
 
 echo "===> running the self-test tool"

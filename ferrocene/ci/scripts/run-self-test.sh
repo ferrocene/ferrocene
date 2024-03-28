@@ -10,6 +10,16 @@ COMMIT="$(git rev-parse HEAD)"
 BUCKET="ferrocene-ci-artifacts"
 PREFIX="ferrocene/dist/${COMMIT}"
 
+TAR="tar"
+FERROCENE_SELF_TEST="ferrocene-self-test"
+# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
+if [[ "${OSTYPE}" = "msys" ]]; then
+    TAR="/c/Program Files/Git/usr/bin/tar.exe"
+    FERROCENE_SELF_TEST="ferrocene-self-test.exe"
+fi
+echo "${TAR}"
+${TAR} --version # This should always show GNU tar!
+
 TEMPDIR="$(mktemp -d -p .)"
 cleanup() {
     rm -rf "${TEMPDIR}"
@@ -52,8 +62,8 @@ for archive in ${TEMPDIR}/archives/*; do
     echo "===> installing $(basename ${archive})"
 
     # TODO: Remove the v, it's debugging
-    tar -C "${TEMPDIR}/sysroot" -xvf "${archive}"
+    ${TAR} -C "${TEMPDIR}/sysroot" -xf "${archive}"
 done
 
 echo "===> running the self-test tool"
-"${TEMPDIR}/sysroot/bin/ferrocene-self-test"
+"${TEMPDIR}/sysroot/bin/${FERROCENE_SELF_TEST}"

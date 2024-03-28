@@ -1,19 +1,10 @@
-//! Backtrace strategy for MSVC platforms.
+//! Backtrace strategy for MSVC `x86_64` and `aarch64` platforms.
 //!
-//! This module contains the ability to capture a backtrace on MSVC using one
-//! of three possible methods. For `x86_64` and `aarch64`, we use `RtlVirtualUnwind`
-//! to walk the stack one frame at a time. This function is much faster than using
+//! This module contains the ability to capture a backtrace on MSVC using
+//!  `RtlVirtualUnwind` to walk the stack one frame at a time. This function is much faster than using
 //! `dbghelp!StackWalk*` because it does not load debug info to report inlined frames.
 //! We still report inlined frames during symbolization by consulting the appropriate
 //! `dbghelp` functions.
-//!
-//! For all other platforms, primarily `i686`, the `StackWalkEx` function is used if
-//! possible, but not all systems have that. Failing that the `StackWalk64` function
-//! is used instead. Note that `StackWalkEx` is favored because it handles debuginfo
-//! internally and returns inline frame information.
-//!
-//! Note that all dbghelp support is loaded dynamically, see `src/dbghelp.rs`
-//! for more information about that.
 
 #![allow(bad_style)]
 
@@ -100,6 +91,8 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 
     // Call `RtlVirtualUnwind` to find the previous stack frame, walking until we hit ip = 0.
     while context.ip() != 0 {
+        // The base address of the module containing the function will be stored here
+        // when RtlLookupFunctionEntry returns successfully.
         let mut base = 0;
 
         let fn_entry = RtlLookupFunctionEntry(context.ip(), &mut base, ptr::null_mut());
@@ -109,7 +102,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
 
         let frame = super::Frame {
             inner: Frame {
-                base_address: fn_entry.cast::<c_void>(),
+                base_address: base as *mut c_void,
                 ip: context.ip() as *mut c_void,
                 sp: context.sp() as *mut c_void,
                 #[cfg(not(target_env = "gnu"))]

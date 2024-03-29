@@ -9,7 +9,7 @@
 # an --exclude without actually executing the test in another job.
 
 
-from typing import Iterable
+from typing import Iterable, TypeAlias
 import itertools
 import shlex
 import sys
@@ -49,9 +49,11 @@ class Task:
         return self.weight < other.weight
 
 
-type JobsDefinition = dict[str, Kind]
-type Kind = dict[str, Job]
-type Job = list[str]
+# TODO: this should be `type Job = list[str]` etc., but this requires CI to update
+# to python 9.12 or above
+Job: TypeAlias = list[str]
+Kind: TypeAlias = dict[str, Job]
+JobsDefinition: TypeAlias = dict[str, Kind]
 
 # fmt: off
 JOBS_DEFINITION: JobsDefinition = {

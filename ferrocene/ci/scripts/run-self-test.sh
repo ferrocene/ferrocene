@@ -41,7 +41,8 @@ download ferrocene-self-test "${FERROCENE_HOST}"
 download rustc "${FERROCENE_HOST}"
 download cargo "${FERROCENE_HOST}"
 
-IFS=',' read -ra targets <<< "${FERROCENE_TARGETS}"
+download rust-std "${FERROCENE_HOST}"
+IFS=',' read -ra targets <<< "${FERROCENE_TARGETS:-}"
 for target in ${targets[@]}; do
     download rust-std "${target}"
 done

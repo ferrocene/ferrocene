@@ -43,7 +43,7 @@ download cargo "${FERROCENE_HOST}"
 
 download rust-std "${FERROCENE_HOST}"
 IFS=',' read -ra targets <<< "${FERROCENE_TARGETS:-}"
-for target in ${targets[@]}; do
+for target in ${targets[@]:-}; do
     download rust-std "${target}"
 done
 

@@ -17,6 +17,9 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
         linker: Linker::CrossCC(&["aarch64-linux-gnu-"]),
     },
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
+    TargetSpec { triple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]

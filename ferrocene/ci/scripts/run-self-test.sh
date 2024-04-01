@@ -28,12 +28,6 @@ case "$(cat ferrocene/ci/channel)" in
         exit 1
 esac
 
-list_targets() {
-    aws s3api list-objects-v2 --bucket "${BUCKET}" --prefix "${PREFIX}/" --delimiter / --query 'Contents[].Key' --output text \
-        | xargs basename -a \
-        | sed -n "s/^rust-std-\(.*\)-${version}\.tar.xz$/\1/p"
-}
-
 download() {
     package="$1"
     target="$2"
@@ -46,7 +40,9 @@ mkdir -p "${root}/archives"
 download ferrocene-self-test "${FERROCENE_HOST}"
 download rustc "${FERROCENE_HOST}"
 download cargo "${FERROCENE_HOST}"
-for target in $(list_targets); do
+
+IFS=',' read -ra targets <<< "${FERROCENE_TARGETS}"
+for target in ${targets[@]}; do
     download rust-std "${target}"
 done
 

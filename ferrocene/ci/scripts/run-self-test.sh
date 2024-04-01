@@ -66,11 +66,5 @@ for archive in ${TEMPDIR}/archives/*; do
     ${TAR} -C "${TEMPDIR}/sysroot" -xf "${archive}"
 done
 
-echo "${TEMPDIR}"
-echo "Inside ${TEMPDIR}/sysroot"
-ls -lah "${TEMPDIR}/sysroot/"
-echo "Inside ${TEMPDIR}/sysroot/bin"
-ls -lah "${TEMPDIR}/sysroot/bin/"
-
 echo "===> running the self-test tool"
 "${TEMPDIR}/sysroot/bin/${FERROCENE_SELF_TEST}"

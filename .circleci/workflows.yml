@@ -332,7 +332,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
       SCRIPT: |
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
@@ -347,7 +347,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -363,7 +363,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
@@ -378,7 +378,7 @@ jobs:
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1

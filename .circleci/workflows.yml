@@ -349,6 +349,7 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: x86_64-apple-darwin
       SCRIPT: |
+        ./x.py --stage 2 dist rust-std
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:

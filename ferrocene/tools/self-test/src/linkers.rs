@@ -431,15 +431,16 @@ fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, 
 /// Look for the bundled `ld.lld` linker wrapper program in the given sysroot.
 fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
     #[cfg(unix)]
-    let bin_name = PathBuf::from("gcc-ld").join("ld.lld");
+    let bin_name = PathBuf::from("ld.lld");
     #[cfg(windows)]
-    let bin_name = PathBuf::from("llvm-link.exe");
+    let bin_name = PathBuf::from("lld-link.exe");
 
     let path = sysroot
         .join("lib")
         .join("rustlib")
         .join(env::SELFTEST_TARGET)
         .join("bin")
+        .join("gcc-ld")
         .join(bin_name);
 
     if path.is_file() {

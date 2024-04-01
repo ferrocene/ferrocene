@@ -464,8 +464,10 @@ jobs:
           os: windows
 
   x86_64-windows-self-test:
-    executor: docker-ubuntu-20
-    resource_class: small # 1-core
+    executor:
+      name: win/server-2022
+      size: medium # 4-core
+      shell: bash.exe -euo pipefail
     environment:
       FERROCENE_HOST: x86_64-pc-windows-msvc
     steps:

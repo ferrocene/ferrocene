@@ -21,10 +21,10 @@ echo "${TAR}"
 ${TAR} --version # This should always show GNU tar!
 
 TEMPDIR="$(mktemp -d -p .)"
-# cleanup() {
-#     rm -rf "${TEMPDIR}"
-# }
-# trap cleanup EXIT
+cleanup() {
+    rm -rf "${TEMPDIR}"
+}
+trap cleanup EXIT
 
 case "$(cat ferrocene/ci/channel)" in
     stable)

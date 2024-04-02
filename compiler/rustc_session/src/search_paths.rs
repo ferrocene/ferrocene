@@ -48,7 +48,11 @@ impl PathKind {
 
 impl SearchPath {
     pub fn from_cli_opt(
+<<<<<<< HEAD
         sysroot: Option<&Path>,
+=======
+        sysroot: &Path,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         triple: &TargetTriple,
         early_dcx: &EarlyDiagCtxt,
         path: &str,
@@ -66,11 +70,18 @@ impl SearchPath {
         } else {
             (PathKind::All, path)
         };
-        if path.is_empty() {
+        let dir = match path.strip_prefix("@RUSTC_BUILTIN") {
+            Some(stripped) => {
+                make_target_lib_path(sysroot, triple.triple()).join("builtin").join(stripped)
+            }
+            None => PathBuf::from(path),
+        };
+        if dir.as_os_str().is_empty() {
             #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
             early_dcx.early_fatal("empty search path given via `-L`");
         }
 
+<<<<<<< HEAD
         // Temporary implementation until https://github.com/rust-lang/compiler-team/issues/659 is
         // accepted and implemented upstream.
         let dir = if let Some(stripped) = path.strip_prefix("ferrocene-temp-builtin:") {
@@ -111,6 +122,8 @@ impl SearchPath {
             PathBuf::from(path)
         };
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Self::new(kind, dir)
     }
 

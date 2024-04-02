@@ -229,6 +229,22 @@ pub(crate) fn type_check<'mir, 'tcx>(
                 );
             }
 
+            // Convert all regions to nll vars.
+            let (opaque_type_key, hidden_type) =
+                infcx.tcx.fold_regions((opaque_type_key, hidden_type), |region, _| {
+                    match region.kind() {
+                        ty::ReVar(_) => region,
+                        ty::RePlaceholder(placeholder) => checker
+                            .borrowck_context
+                            .constraints
+                            .placeholder_region(infcx, placeholder),
+                        _ => ty::Region::new_var(
+                            infcx.tcx,
+                            checker.borrowck_context.universal_regions.to_region_vid(region),
+                        ),
+                    }
+                });
+
             (opaque_type_key, hidden_type)
         })
         .collect();
@@ -592,7 +608,7 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
             }
             self.cx.borrowck_context.constraints.outlives_constraints.push(constraint)
         }
-        // If the region is live at at least one location in the promoted MIR,
+        // If the region is live at least one location in the promoted MIR,
         // then add a liveness constraint to the main MIR for this region
         // at the location provided as an argument to this method
         //

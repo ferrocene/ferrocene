@@ -271,6 +271,18 @@ impl RealFileName {
         }
     }
 
+    /// Return the path remmapped or not depending on the [`FileNameDisplayPreference`].
+    ///
+    /// For the purpose of this function, local and short preference are equal.
+    pub fn to_path(&self, display_pref: FileNameDisplayPreference) -> &Path {
+        match display_pref {
+            FileNameDisplayPreference::Local | FileNameDisplayPreference::Short => {
+                self.local_path_if_available()
+            }
+            FileNameDisplayPreference::Remapped => self.remapped_path_if_available(),
+        }
+    }
+
     pub fn to_string_lossy(&self, display_pref: FileNameDisplayPreference) -> Cow<'_, str> {
         match display_pref {
             FileNameDisplayPreference::Local => self.local_path_if_available().to_string_lossy(),
@@ -426,6 +438,17 @@ impl FileName {
         let mut hasher = StableHasher::new();
         src.hash(&mut hasher);
         FileName::InlineAsm(hasher.finish())
+    }
+
+    /// Returns the path suitable for reading from the file system on the local host,
+    /// if this information exists.
+    /// Avoid embedding this in build artifacts; see `remapped_path_if_available()` for that.
+    pub fn into_local_path(self) -> Option<PathBuf> {
+        match self {
+            FileName::Real(path) => path.into_local_path(),
+            FileName::DocTest(path, _) => Some(path),
+            _ => None,
+        }
     }
 }
 

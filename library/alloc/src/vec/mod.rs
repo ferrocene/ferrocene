@@ -1547,7 +1547,7 @@ impl<T, A: Allocator> Vec<T, A> {
 
         // space for the new element
         if len == self.buf.capacity() {
-            self.reserve(1);
+            self.buf.grow_one();
         }
 
         unsafe {
@@ -1967,7 +1967,7 @@ impl<T, A: Allocator> Vec<T, A> {
         // This will panic or abort if we would allocate > isize::MAX bytes
         // or if the length increment would overflow for zero-sized types.
         if self.len == self.buf.capacity() {
-            self.buf.reserve_for_push(self.len);
+            self.buf.grow_one();
         }
         unsafe {
             let end = self.as_mut_ptr().add(self.len);
@@ -2056,6 +2056,31 @@ impl<T, A: Allocator> Vec<T, A> {
                 Some(ptr::read(self.as_ptr().add(self.len())))
             }
         }
+    }
+
+    /// Removes and returns the last element in a vector if the predicate
+    /// returns `true`, or [`None`] if the predicate returns false or the vector
+    /// is empty.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// #![feature(vec_pop_if)]
+    ///
+    /// let mut vec = vec![1, 2, 3, 4];
+    /// let pred = |x: &mut i32| *x % 2 == 0;
+    ///
+    /// assert_eq!(vec.pop_if(pred), Some(4));
+    /// assert_eq!(vec, [1, 2, 3]);
+    /// assert_eq!(vec.pop_if(pred), None);
+    /// ```
+    #[unstable(feature = "vec_pop_if", issue = "122741")]
+    pub fn pop_if<F>(&mut self, f: F) -> Option<T>
+    where
+        F: FnOnce(&mut T) -> bool,
+    {
+        let last = self.last_mut()?;
+        if f(last) { self.pop() } else { None }
     }
 
     /// Moves all the elements of `other` into `self`, leaving `other` empty.

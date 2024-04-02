@@ -60,6 +60,7 @@ pub use rustc_target::abi::{ReprFlags, ReprOptions};
 pub use rustc_type_ir::{DebugWithInfcx, InferCtxtLike, WithInfcx};
 pub use vtable::*;
 
+use std::assert_matches::assert_matches;
 use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -75,8 +76,6 @@ pub use rustc_type_ir::ConstKind::{
 };
 pub use rustc_type_ir::*;
 
-pub use self::binding::BindingMode;
-pub use self::binding::BindingMode::*;
 pub use self::closure::{
     is_ancestor_or_same_capture, place_to_string_for_capture, BorrowKind, CaptureInfo,
     CapturedPlace, ClosureTypeInfo, MinCaptureInformationMap, MinCaptureList,
@@ -86,8 +85,8 @@ pub use self::consts::{
     Const, ConstData, ConstInt, ConstKind, Expr, ScalarInt, UnevaluatedConst, ValTree,
 };
 pub use self::context::{
-    tls, CtxtInterners, DeducedParamAttrs, Feed, FreeRegionInfo, GlobalCtxt, Lift, TyCtxt,
-    TyCtxtFeed,
+    tls, CtxtInterners, CurrentGcx, DeducedParamAttrs, Feed, FreeRegionInfo, GlobalCtxt, Lift,
+    TyCtxt, TyCtxtFeed,
 };
 pub use self::instance::{Instance, InstanceDef, ShortInstance, UnusedGenericParams};
 pub use self::list::List;
@@ -122,7 +121,6 @@ pub use self::typeck_results::{
 pub mod _match;
 pub mod abstract_const;
 pub mod adjustment;
-pub mod binding;
 pub mod cast;
 pub mod codec;
 pub mod error;
@@ -214,7 +212,6 @@ pub struct ResolverAstLowering {
     pub next_node_id: ast::NodeId,
 
     pub node_id_to_def_id: NodeMap<LocalDefId>,
-    pub def_id_to_node_id: IndexVec<LocalDefId, ast::NodeId>,
 
     pub trait_map: NodeMap<Vec<hir::TraitCandidate>>,
     /// List functions and methods for which lifetime elision was successful.
@@ -516,7 +513,7 @@ pub struct CReaderCacheKey {
 }
 
 /// Use this rather than `TyKind`, whenever possible.
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, HashStable)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, HashStable)]
 #[rustc_diagnostic_item = "Ty"]
 #[rustc_pass_by_value]
 pub struct Ty<'tcx>(Interned<'tcx, WithCachedTypeInfo<TyKind<'tcx>>>);
@@ -701,7 +698,7 @@ const TAG_MASK: usize = 0b11;
 const TYPE_TAG: usize = 0b00;
 const CONST_TAG: usize = 0b01;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, TyEncodable, TyDecodable)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, TyEncodable, TyDecodable)]
 #[derive(HashStable, TypeFoldable, TypeVisitable)]
 pub enum TermKind<'tcx> {
     Ty(Ty<'tcx>),
@@ -830,6 +827,38 @@ impl<'a, 'tcx> IntoIterator for &'a InstantiatedPredicates<'tcx> {
 pub struct OpaqueTypeKey<'tcx> {
     pub def_id: LocalDefId,
     pub args: GenericArgsRef<'tcx>,
+}
+
+impl<'tcx> OpaqueTypeKey<'tcx> {
+    pub fn iter_captured_args(
+        self,
+        tcx: TyCtxt<'tcx>,
+    ) -> impl Iterator<Item = (usize, GenericArg<'tcx>)> {
+        std::iter::zip(self.args, tcx.variances_of(self.def_id)).enumerate().filter_map(
+            |(i, (arg, v))| match (arg.unpack(), v) {
+                (_, ty::Invariant) => Some((i, arg)),
+                (ty::GenericArgKind::Lifetime(_), ty::Bivariant) => None,
+                _ => bug!("unexpected opaque type arg variance"),
+            },
+        )
+    }
+
+    pub fn fold_captured_lifetime_args(
+        self,
+        tcx: TyCtxt<'tcx>,
+        mut f: impl FnMut(Region<'tcx>) -> Region<'tcx>,
+    ) -> Self {
+        let Self { def_id, args } = self;
+        let args = std::iter::zip(args, tcx.variances_of(def_id)).map(|(arg, v)| {
+            match (arg.unpack(), v) {
+                (ty::GenericArgKind::Lifetime(_), ty::Bivariant) => arg,
+                (ty::GenericArgKind::Lifetime(lt), _) => f(lt).into(),
+                _ => arg,
+            }
+        });
+        let args = tcx.mk_args_from_iter(args);
+        Self { def_id, args }
+    }
 }
 
 #[derive(Copy, Clone, Debug, TypeFoldable, TypeVisitable, HashStable, TyEncodable, TyDecodable)]
@@ -979,7 +1008,7 @@ impl PlaceholderLike for PlaceholderType {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, HashStable)]
-#[derive(TyEncodable, TyDecodable, PartialOrd, Ord)]
+#[derive(TyEncodable, TyDecodable)]
 pub struct BoundConst<'tcx> {
     pub var: BoundVar,
     pub ty: Ty<'tcx>,
@@ -1826,8 +1855,40 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Returns layout of a coroutine. Layout might be unavailable if the
     /// coroutine is tainted by errors.
-    pub fn coroutine_layout(self, def_id: DefId) -> Option<&'tcx CoroutineLayout<'tcx>> {
-        self.optimized_mir(def_id).coroutine_layout()
+    ///
+    /// Takes `coroutine_kind` which can be acquired from the `CoroutineArgs::kind_ty`,
+    /// e.g. `args.as_coroutine().kind_ty()`.
+    pub fn coroutine_layout(
+        self,
+        def_id: DefId,
+        coroutine_kind_ty: Ty<'tcx>,
+    ) -> Option<&'tcx CoroutineLayout<'tcx>> {
+        let mir = self.optimized_mir(def_id);
+        // Regular coroutine
+        if coroutine_kind_ty.is_unit() {
+            mir.coroutine_layout_raw()
+        } else {
+            // If we have a `Coroutine` that comes from an coroutine-closure,
+            // then it may be a by-move or by-ref body.
+            let ty::Coroutine(_, identity_args) =
+                *self.type_of(def_id).instantiate_identity().kind()
+            else {
+                unreachable!();
+            };
+            let identity_kind_ty = identity_args.as_coroutine().kind_ty();
+            // If the types differ, then we must be getting the by-move body of
+            // a by-ref coroutine.
+            if identity_kind_ty == coroutine_kind_ty {
+                mir.coroutine_layout_raw()
+            } else {
+                assert_matches!(coroutine_kind_ty.to_opt_closure_kind(), Some(ClosureKind::FnOnce));
+                assert_matches!(
+                    identity_kind_ty.to_opt_closure_kind(),
+                    Some(ClosureKind::Fn | ClosureKind::FnMut)
+                );
+                mir.coroutine_by_move_body().unwrap().coroutine_layout_raw()
+            }
+        }
     }
 
     /// Given the `DefId` of an impl, returns the `DefId` of the trait it implements.

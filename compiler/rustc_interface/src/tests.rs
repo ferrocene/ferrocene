@@ -317,7 +317,11 @@ fn test_search_paths_tracking_hash_different_order() {
 
     let push = |opts: &mut Options, search_path| {
         opts.search_paths.push(SearchPath::from_cli_opt(
+<<<<<<< HEAD
             None,
+=======
+            "not-a-sysroot".as_ref(),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             &opts.target_triple,
             &early_dcx,
             search_path,

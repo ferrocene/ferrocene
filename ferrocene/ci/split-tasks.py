@@ -9,6 +9,7 @@
 # an --exclude without actually executing the test in another job.
 
 
+from typing import Iterable, TypeAlias
 import itertools
 import shlex
 import sys
@@ -18,29 +19,27 @@ import pathlib
 REPOSITORY_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 
 
-def find_all_compiletests(*, exclude=None, deprioritize=None):
+def find_all_compiletests(exclude: list[str] | None, deprioritize: list[str] | None):
     if exclude is None:
         exclude = []
     if deprioritize is None:
-        prioritize = []
+        deprioritize = []
 
     found = []
     for entry in (REPOSITORY_ROOT / "tests").iterdir():
         if not entry.is_dir():
             continue
-        if entry.name in exclude:
+        elif entry.name in exclude:
             continue
 
-        weight = 0
-        if entry.name in deprioritize:
-            weight = 1
+        weight = 1 if entry.name in deprioritize else 0
 
         found.append(Task(str(entry.relative_to(REPOSITORY_ROOT)), weight))
     return found
 
 
 class Task:
-    def __init__(self, path, weight=0):
+    def __init__(self, path: str, weight=0):
         self.path = path
         self.weight = weight
 
@@ -50,7 +49,14 @@ class Task:
         return self.weight < other.weight
 
 
-JOBS_DEFINITION = {
+# TODO: this should be `type Job = list[str]` etc., but this requires CI to update
+# to python 9.12 or above
+Job: TypeAlias = list[str]
+Kind: TypeAlias = dict[str, Job]
+JobsDefinition: TypeAlias = dict[str, Kind]
+
+# fmt: off
+JOBS_DEFINITION: JobsDefinition = {
     "dist": {
         # Build the documentation on a different jobs, since building it takes
         # a while and with a separate job we can run dist inside the same job
@@ -117,7 +123,7 @@ JOBS_DEFINITION = {
                 #
                 # See https://github.com/rust-lang/rust/issues/92644
                 "run-make-fulldeps",
-            ]
+            ],
         ),
 
         # Library tests are the second slowest part of a test run, so we run
@@ -131,6 +137,7 @@ JOBS_DEFINITION = {
         "library-std": ["library/std"],
     },
 }
+# fmt: on
 
 GLOBAL_EXCLUDE = [
     # The "standalone" documentation includes upstream's index page, which
@@ -140,7 +147,7 @@ GLOBAL_EXCLUDE = [
 ]
 
 
-def sorted_tasks(tasks):
+def sorted_tasks(tasks: Iterable[str | Task]) -> list[Task]:
     tasks = list(tasks)
 
     # Convert everything to Task first
@@ -151,7 +158,7 @@ def sorted_tasks(tasks):
     return sorted(tasks)
 
 
-def get_flags_for_job(config, kind, job):
+def get_flags_for_job(config: JobsDefinition, kind: str, job: str):
     try:
         tasks = config[kind][job]
     except KeyError:
@@ -160,7 +167,7 @@ def get_flags_for_job(config, kind, job):
     return [shlex.quote(task.path) for task in sorted_tasks(tasks)]
 
 
-def get_flags_for_default_job(config, kind):
+def get_flags_for_default_job(config: JobsDefinition, kind: str):
     try:
         jobs = config[kind].values()
     except KeyError:

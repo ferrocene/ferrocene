@@ -22,6 +22,8 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::HostCC },
     TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::HostCC },
+    TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
+    TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]

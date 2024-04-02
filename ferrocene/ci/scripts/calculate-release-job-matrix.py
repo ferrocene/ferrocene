@@ -32,6 +32,8 @@ S3_PREFIX = "ferrocene/dist"
 
 LOCAL_TEST_REPO = "ferrocene/ferrocene"
 
+BORS_EMAIL = "87868125+bors-ferrocene[bot]@users.noreply.github.com"
+
 RELEASES_ACCESS_ROLES = {
     "dev": "arn:aws:iam::173318036596:role/release-scheduler",
     "prod": "arn:aws:iam::397686924940:role/release-scheduler",
@@ -255,6 +257,20 @@ def build_metadata(ctx, commit):
         raise UnsupportedMetadataVersion(metadata["metadata_version"])
 
 
+def reject_if_not_a_bors_commit(ctx, commit):
+    resp = ctx.http.get(f"https://api.github.com/repos/{ctx.repo}/commits/{commit}")
+    resp.raise_for_status()
+    resp = resp.json()
+
+    if resp["commit"]["author"]["email"] != BORS_EMAIL:
+        error("only merge commits from bors can be released", exit=False)
+        note(
+            "if you want to release your development branch, run a try build "
+            "and release the try build's commit hash"
+        )
+        exit(1)
+
+
 def run():
     args = sys.argv[1:]
     if not args:  # CI mode
@@ -295,6 +311,7 @@ def run():
             commit = ctx.event_data["inputs"]["ref"]
         else:
             commit = resolve_ref(ctx, ctx.event_data["inputs"]["ref"])
+        reject_if_not_a_bors_commit(ctx, commit)
         releases = commits_to_releases(ctx, [commit])
     else:
         commits = commits_in_release_branches(ctx)
@@ -314,9 +331,10 @@ def note(message):
     print(f"note: {message}", file=sys.stderr)
 
 
-def error(message):
+def error(message, exit=True):
     print(f"error: {message}", file=sys.stderr)
-    exit(1)
+    if exit:
+        exit(1)
 
 
 @dataclass

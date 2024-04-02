@@ -298,7 +298,7 @@ impl Step for SelfTest {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         let self_test = builder.ensure(crate::ferrocene::tool::SelfTest { target: self.target });
 
-        let tarball = Tarball::new(builder, "ferrocene-self-test", &self.target.triple);
+        let mut tarball = Tarball::new(builder, "ferrocene-self-test", &self.target.triple);
         tarball.add_file(self_test, "bin", 0o755);
 
         tarball.ferrocene_proxied_binary("bin/ferrocene-self-test");

@@ -300,6 +300,8 @@ impl Step for SelfTest {
 
         let tarball = Tarball::new(builder, "ferrocene-self-test", &self.target.triple);
         tarball.add_file(self_test, "bin", 0o755);
+
+        tarball.ferrocene_proxied_binary("bin/ferrocene-self-test");
         tarball.generate()
     }
 }

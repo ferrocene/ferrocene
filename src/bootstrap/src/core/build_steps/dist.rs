@@ -1081,8 +1081,8 @@ impl Step for Cargo {
         tarball.add_renamed_file(etc.join("cargo.bashcomp.sh"), "etc/bash_completion.d", "cargo");
         tarball.add_dir(etc.join("man"), "share/man/man1");
         tarball.add_legal_and_readme_to("share/doc/cargo");
-        tarball.ferrocene_proxied_binary("bin/cargo");
 
+        tarball.ferrocene_proxied_binary("bin/cargo");
         Some(tarball.generate())
     }
 }
@@ -1215,6 +1215,9 @@ impl Step for Clippy {
         tarball.add_file(clippy, "bin", 0o755);
         tarball.add_file(cargoclippy, "bin", 0o755);
         tarball.add_legal_and_readme_to("share/doc/clippy");
+
+        tarball.ferrocene_proxied_binary("bin/clippy");
+        tarball.ferrocene_proxied_binary("bin/cargo-clippy");
         Some(tarball.generate())
     }
 }
@@ -1408,6 +1411,9 @@ impl Step for Rustfmt {
         tarball.add_file(rustfmt, "bin", 0o755);
         tarball.add_file(cargofmt, "bin", 0o755);
         tarball.add_legal_and_readme_to("share/doc/rustfmt");
+
+        tarball.ferrocene_proxied_binary("bin/rustfmt");
+        tarball.ferrocene_proxied_binary("bin/cargofmt");
         Some(tarball.generate())
     }
 }

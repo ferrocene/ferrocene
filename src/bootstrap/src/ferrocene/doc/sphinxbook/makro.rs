@@ -1,3 +1,7 @@
+/// Generate a [Step](crate::builder::Step) and [WithSource](super::WithSource)
+/// implementation for every document and a struct
+/// [AllSphinxDocuments](super::AllSphinxDocuments) which builds all documents
+/// for the path `ferrocene/doc/`.
 macro_rules! sphinx_books {
     ($({
         ty: $ty:ident,

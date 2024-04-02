@@ -2,14 +2,14 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 # This Ubuntu 22.04 container is only used to grab a more recent QEMU, the real
-# container is below (FROM ubuntu:18.04). This is needed because the version of
-# QEMU in the Ubuntu 18.04 archives is too old, so we install QEMU on Ubuntu
-# 22.04 and copy the binary over to 18.04.
+# container is below (FROM ubuntu:20.04). This is needed because the version of
+# QEMU in the Ubuntu 20.04 archives is too old, so we install QEMU on Ubuntu
+# 22.04 and copy the binary over to 20.04.
 #
 # This actually works because the qemu-user-static package contains statically
 # linked versions of QEMU, with no dynamically linked libraries. This means we
 # can just copy it to a different system and it won't have any problems. Do NOT
-# use the same approach for other dependencies missing in Ubuntu 18.04 unless
+# use the same approach for other dependencies missing in Ubuntu 20.04 unless
 # you know what you're doing.
 FROM ubuntu:22.04 AS jammy
 RUN apt-get update \
@@ -37,7 +37,7 @@ RUN apt-get update \
         zstd \
         sudo \
         # Needed to support the QEMU copied over from Ubuntu 22.04 (see above).
-        # Replace this with qemu-user-static once we're not on Ubuntu 18.04.
+        # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
         binfmt-support \
         # Needed for aarch64-unknown-linux-gnu cross-compilation
         g++-aarch64-linux-gnu \
@@ -67,7 +67,7 @@ COPY --from=jammy /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=jammy /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
 COPY --from=jammy /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
 
-# We need a newer Python than what's included in Ubuntu 18.04, so we have to
+# We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.10.x has been chosen as it's the same minor
 # release shipped with Ubuntu 22.04 LTS.
 RUN mkdir /tmp/python \
@@ -86,10 +86,10 @@ COPY reuse-requirements.txt /tmp/reuse-requirements.txt
 RUN python3 -m pip install -r /tmp/reuse-requirements.txt && \
     rm -rf /tmp/reuse-requirements.txt
 
-# Install a recent NodeJS version, as the one shipped in Ubuntu 18.04 is too
+# Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
 # recent NodeJS LTS release, as it's built with a more recent glibc version
-# than the one shipped with Ubuntu 18.04.
+# than the one shipped with Ubuntu 20.04.
 #
 # If you are reading this comment because you need to upgrade past NodeJS 16,
 # you will unfortunately need to change this to build NodeJS from source.
@@ -102,7 +102,7 @@ RUN mkdir /opt/nodejs \
 ENV PATH "/opt/nodejs/bin:$PATH"
 
 # Install AWS CLI from the published binaries, as no source tarball is provided
-# and the version in the Ubuntu 18.04 archive is too old and doesn't support
+# and the version in the Ubuntu 20.04 archive is too old and doesn't support
 # `aws ecr get-login-password`.
 RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.12.4.zip \
     && echo "0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08  /tmp/awscli.zip" | sha256sum -c \
@@ -110,7 +110,7 @@ RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_6
     && /tmp/awscli/aws/install \
     && rm -rf /tmp/awscli /tmp/awscli.zip
 
-# Install cmake from source code, as the version in the Ubuntu 18.04 archives
+# Install cmake from source code, as the version in the Ubuntu 20.04 archives
 # is too old to build the latest LLVM.
 RUN curl -Lo /tmp/cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1.tar.gz \
     && echo "fac3915171d4dff25913975d712f76e69aef44bf738ba7b976793a458b4cfed4  /tmp/cmake.tar.gz" | sha256sum -c \

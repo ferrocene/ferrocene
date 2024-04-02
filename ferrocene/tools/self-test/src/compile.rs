@@ -26,7 +26,10 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
         name: "subtraction.rs",
         contents: include_bytes!("../sample-programs/subtraction.rs"),
         rustflags: &["--crate-type", "staticlib", "--edition", "2021"],
+        #[cfg(not(windows))]
         expected_artifacts: &["libsubtraction.a"],
+        #[cfg(windows)]
+        expected_artifacts: &["subtraction.lib"],
         executable_output: None,
     },
     SampleProgram {
@@ -49,7 +52,10 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
             "--extern",
             "subtraction_sys",
         ],
+        #[cfg(not(windows))]
         expected_artifacts: &["assertion"],
+        #[cfg(windows)]
+        expected_artifacts: &["assertion.exe", "assertion.pdb"],
         // See assertion.rs
         executable_output: Some(b"123456789"),
     },

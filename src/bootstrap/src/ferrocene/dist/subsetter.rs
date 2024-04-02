@@ -80,8 +80,8 @@ impl<'a> Subsetter<'a> {
         };
 
         let relative = path.strip_prefix(root).unwrap();
-        let mode = if self.is_executable(&path) { 0o755 } else { 0o644 };
-        tarball.add_file(&path, self.output_prefix.join(relative).parent().unwrap(), mode);
+        let mode = if self.is_executable(path) { 0o755 } else { 0o644 };
+        tarball.add_file(path, self.output_prefix.join(relative).parent().unwrap(), mode);
     }
 
     #[cfg(unix)]

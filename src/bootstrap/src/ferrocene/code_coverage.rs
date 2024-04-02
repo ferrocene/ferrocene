@@ -60,7 +60,7 @@ impl Step for ProfilerBuiltinsNoCore {
         let profiler_builtins_no_core_path = lib_dir.join("libprofiler_builtins_no_core.rlib");
 
         if !builder.config.dry_run() {
-            std::fs::rename(&lib_path, &profiler_builtins_no_core_path)
+            std::fs::rename(lib_path, &profiler_builtins_no_core_path)
                 .expect("Could not rename the profiler_builtins_no_core library");
             assert!(
                 profiler_builtins_no_core_path.exists() && profiler_builtins_no_core_path.is_file()

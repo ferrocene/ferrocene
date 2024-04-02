@@ -47,7 +47,7 @@ impl Step for CacheSignatureFiles {
             }
             builder.config.download_file(
                 &format!("s3://{}/{uuid}", builder.config.ferrocene_document_signatures_s3_bucket),
-                &cached_file,
+                cached_file,
                 // \u{20} is a space.
                 &format!(
                     "Failed to download signature file {uuid}, corresponding to {name}.\n\

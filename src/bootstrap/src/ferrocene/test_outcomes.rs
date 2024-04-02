@@ -42,7 +42,7 @@ fn download_and_extract_outcomes(builder: &Builder<'_>, commit: &str) -> PathBuf
     let tarballs_dir = base.join("tarballs");
 
     let commit_file = extracted_dir.join(".ferrocene-commit");
-    let tarball_file = tarballs_dir.join(&format!("{commit}.tar.xz"));
+    let tarball_file = tarballs_dir.join(format!("{commit}.tar.xz"));
 
     if !tarball_file.exists() {
         builder.info(&format!("Downloading test outcomes for commit {commit}"));

@@ -41,7 +41,7 @@ pub(super) fn document_signatures_cmd(builder: &Builder<'_>, source_dir: &Path) 
     let cache_dir = builder.ensure(CacheSignatureFiles { source_dir: source_dir.into() });
     let tool = builder.tool_exe(Tool::FerroceneDocumentSignatures);
 
-    let mut cmd = Command::new(&tool);
+    let mut cmd = Command::new(tool);
     cmd.env("DOCUMENT_SIGNATURES_COSIGN_BINARY", &cosign);
     cmd.env("DOCUMENT_SIGNATURES_S3_BUCKET", "ferrocene-document-signatures");
     cmd.env("DOCUMENT_SIGNATURES_S3_CACHE_DIR", &cache_dir);

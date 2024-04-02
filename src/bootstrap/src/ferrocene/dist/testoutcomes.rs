@@ -22,7 +22,7 @@ impl Step for TestOutcomes {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let Some(test_outcomes) = builder.ensure(TestOutcomesDir) else { return None };
+        let test_outcomes = builder.ensure(TestOutcomesDir)?;
 
         let tarball = Tarball::new_targetless(builder, "ferrocene-test-outcomes");
         tarball.add_dir(test_outcomes, "share/ferrocene/test-outcomes");

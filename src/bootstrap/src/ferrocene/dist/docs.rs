@@ -29,7 +29,7 @@ impl Step for Docs {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         // Build all of the documentation.
         builder.default_doc(&[]);
-        let doc_out = builder.out.join(&self.target.triple).join("doc");
+        let doc_out = builder.out.join(self.target.triple).join("doc");
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-docs", "share/doc/ferrocene/html");
         subsetter.add_directory(&doc_out, &doc_out);

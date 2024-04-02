@@ -172,7 +172,7 @@ impl<P: Step> Step for SphinxBook<P> {
         let should_serve = self.parent.is_some() && builder.should_serve::<P>();
 
         let ferrocene_version =
-            std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
+            std::fs::read_to_string(builder.src.join("ferrocene").join("version")).unwrap();
         let ferrocene_version = ferrocene_version.trim();
 
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
@@ -199,7 +199,7 @@ impl<P: Step> Step for SphinxBook<P> {
                 &relative_path(&src, &breadcrumbs.join("sphinx-template.html")),
             ))
             .arg("-D")
-            .arg(format!("html_css_files=ferrocene-breadcrumbs.css"))
+            .arg("html_css_files=ferrocene-breadcrumbs.css")
             .arg("-A")
             .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
             // Provide the correct substitutions:
@@ -214,7 +214,7 @@ impl<P: Step> Step for SphinxBook<P> {
             .arg("-D")
             .arg(format!(
                 "rust_version={}",
-                std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
+                std::fs::read_to_string(builder.src.join("src").join("version")).unwrap().trim(),
             ))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
@@ -256,12 +256,12 @@ impl<P: Step> Step for SphinxBook<P> {
 
                 builder.info(&format!("Building {}", self.src));
 
-                cmd.args(&["-b", "html"]);
+                cmd.args(["-b", "html"]);
                 // Warn about missing references:
                 cmd.arg("-n");
                 // Fail the build if there are warnings (but don't abort at the first warning):
                 if !should_serve {
-                    cmd.args(&["-W", "--keep-going"]);
+                    cmd.args(["-W", "--keep-going"]);
                 }
             }
             SphinxMode::XmlDoctrees => {
@@ -270,7 +270,7 @@ impl<P: Step> Step for SphinxBook<P> {
                 }
 
                 builder.info(&format!("Building XML doctrees of {}", self.src));
-                cmd.args(&["-b", "xml"]);
+                cmd.args(["-b", "xml"]);
 
                 // This is intentionally more lax than HTML builds, especially around warnings.
                 // This will never be executed by CI if the HTML build fails anyways.
@@ -287,7 +287,7 @@ impl<P: Step> Step for SphinxBook<P> {
 
                 // When gathering the objects.inv files, we use a custom Sphinx builder that only
                 // outputs the objects.inv file.
-                cmd.args(&["-b", "ferrocene-intersphinx"]);
+                cmd.args(["-b", "ferrocene-intersphinx"]);
             }
         }
 

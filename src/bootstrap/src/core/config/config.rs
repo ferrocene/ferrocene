@@ -352,19 +352,14 @@ pub struct Config {
     pub ferrocene_technical_report_url: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum FerroceneTraceabilityMatrixMode {
     Ci,
+    #[default]
     Local,
 }
 
-impl Default for FerroceneTraceabilityMatrixMode {
-    fn default() -> Self {
-        FerroceneTraceabilityMatrixMode::Local
-    }
-}
-
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum FerroceneTestOutcomes {
     #[default]
     Disabled,
@@ -2014,10 +2009,10 @@ impl Config {
             {
                 (None | Some("disabled"), None) => FerroceneTestOutcomes::Disabled,
                 (Some("download-ci"), None) => FerroceneTestOutcomes::DownloadCi,
-                (Some("custom"), Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
+                (Some("custom"), Some(path)) => FerroceneTestOutcomes::Custom(path),
                 // Legacy: allow setting test-outcomes-dir without test-outcomes to avoid breaking
                 // developers currently setting it, only if test-outcomes is not configured.
-                (None, Some(path)) => FerroceneTestOutcomes::Custom(path.into()),
+                (None, Some(path)) => FerroceneTestOutcomes::Custom(path),
                 // Error messages:
                 (Some(value), Some(_)) => panic!(
                     "ferrocene.test-outcomes=\"{value}\" is incompatible with ferrocene.test-outcomes-dir"

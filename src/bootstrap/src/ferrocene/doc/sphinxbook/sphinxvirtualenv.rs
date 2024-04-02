@@ -28,10 +28,10 @@ impl Step for SphinxVirtualEnv {
         let installed_requirements = venv.join("installed-requirements.txt");
 
         // Avoid rebuilding the venv if it's up to date.
-        if installed_requirements.is_file() {
-            if builder.read(&requirements) == builder.read(&installed_requirements) {
-                return VirtualEnv { path: venv };
-            }
+        if installed_requirements.is_file()
+            && builder.read(&requirements) == builder.read(&installed_requirements)
+        {
+            return VirtualEnv { path: venv };
         }
 
         if venv.is_dir() {
@@ -46,12 +46,11 @@ impl Step for SphinxVirtualEnv {
                     .as_ref()
                     .expect("Python is required to build Sphinx documentation"),
             )
-            .args(&["-m", "venv"])
+            .args(["-m", "venv"])
             .arg(&venv),
         );
         let venv = VirtualEnv { path: venv };
-        builder
-            .run(venv.cmd("pip").args(&["install", "--require-hashes", "-r"]).arg(&requirements));
+        builder.run(venv.cmd("pip").args(["install", "--require-hashes", "-r"]).arg(&requirements));
         builder.copy_link(&requirements, &installed_requirements);
 
         venv

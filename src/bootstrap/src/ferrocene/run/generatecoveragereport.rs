@@ -17,7 +17,7 @@ impl Step for GenerateCoverageReport {
     const DEFAULT: bool = true;
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        builder.info(&"Generating coverage report");
+        builder.info("Generating coverage report");
 
         let coverage_report_data_dir =
             env_llvm_profile_data_dir().unwrap_or_else(|| builder.out.join("coverage"));
@@ -135,7 +135,7 @@ fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
         .read_dir()
         .expect("read_dir call failed")
         .filter_map(|dir_entry| {
-            if let Ok(dir_entry) = dir_entry {
+            dir_entry.ok().and_then(|dir_entry| {
                 let file_path = dir_entry.path();
                 let file_name = dir_entry.file_name();
                 let file_name_str = file_name.to_str().expect("Failed to convert file name to str");
@@ -153,10 +153,8 @@ fn get_test_binary_path(builder: &Builder<'_>) -> Option<PathBuf> {
                 let duration = modified_time
                     .duration_since(UNIX_EPOCH)
                     .expect("Failed to get duration since epoch");
-                return Some((file_path.to_owned(), duration));
-            } else {
-                None
-            }
+                Some((file_path.to_owned(), duration))
+            })
         })
         .max_by(|(_, duration_1), (_, duration_2)| duration_1.cmp(duration_2))
         .map(|(path, _)| path);

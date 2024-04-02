@@ -95,7 +95,7 @@ pub(crate) fn ignored_tests_for_suite(
         .iter()
         .filter(|item| item.targets.contains(&triple))
         .flat_map(|item| item.tests.iter())
-        .map(|i| i.clone())
+        .cloned()
         .collect()
 }
 

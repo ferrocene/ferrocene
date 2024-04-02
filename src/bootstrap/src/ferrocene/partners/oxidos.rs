@@ -208,7 +208,7 @@ impl Step for SourceCode {
                 t!(std::fs::create_dir_all(parent));
             }
             builder.config.download_file(
-                &tarball,
+                tarball,
                 &cache,
                 "Could not download the OxidOS tarball. Ensure that the URL or local path in \
                  ferrocene.oxidos-src is valid.",

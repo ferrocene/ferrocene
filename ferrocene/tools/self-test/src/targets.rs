@@ -24,6 +24,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "armebv7r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
+    TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]

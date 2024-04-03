@@ -402,7 +402,7 @@ fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, 
     #[cfg(unix)]
     let bin_name = "rust-lld";
     #[cfg(windows)]
-    let bin_name = "rust-lld.exe";
+    let bin_name = "rust-link.exe";
     let path =
         sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(bin_name);
 
@@ -459,7 +459,11 @@ mod tests {
     #[test]
     fn test_find_bundled_lld() {
         let utils = TestUtils::new();
-        utils.bin("rust-lld").for_target(env::SELFTEST_TARGET).create();
+        #[cfg(not(windows))]
+        let linker = "rust-lld";
+        #[cfg(windows)]
+        let linker = "rust-link.exe";
+        utils.bin(linker).for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker detected");
@@ -480,7 +484,11 @@ mod tests {
     #[test]
     fn test_find_bundled_lld_wrapper() {
         let utils = TestUtils::new();
-        utils.bin("gcc-ld/ld.lld").for_target(env::SELFTEST_TARGET).create();
+        #[cfg(not(windows))]
+        let linker = "ld.lld";
+        #[cfg(windows)]
+        let linker = "lld-link.exe";
+        utils.bin(&format!("gcc-ld/{linker}")).for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker-wrapper detected");

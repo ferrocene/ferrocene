@@ -101,21 +101,29 @@ fn hash_file(path: &Path) -> Result<Vec<u8>, Error> {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(not(windows))]
     use super::*;
+    #[cfg(not(windows))]
     use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
+    #[cfg(not(windows))]
     use criticaltrust::signatures::Keychain;
-    #[cfg(unix)] // Not used on Windows
+    #[cfg(not(windows))]
     use std::fs::Permissions;
+    #[cfg(not(windows))]
     use std::io::Write;
-    #[cfg(unix)]
+    #[cfg(not(windows))]
     use std::os::unix::prelude::PermissionsExt;
+    #[cfg(not(windows))]
     use tempfile::TempDir;
 
+    // This insta snapshot is complex and brittle to maintain on Windows
+    // Windows does not have file modes, and filters don't provide a reliable way to
+    // remap Windows paths to Linux and back.
+    #[cfg(not(windows))]
     #[test]
     fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
 
-        #[cfg_attr(windows, allow(unused_variables))] // Windows does not use `mode`
         let create_file = |path, contents, mode| {
             let path = package_dir.path().join(path);
             if let Some(parent) = path.parent() {
@@ -160,6 +168,7 @@ mod tests {
         Ok(())
     }
 
+    #[cfg(not(windows))]
     fn generate_key_and_keychain(role: KeyRole) -> Result<(EphemeralKeyPair, Keychain), Error> {
         const ALGORITHM: KeyAlgorithm = KeyAlgorithm::EcdsaP256Sha256Asn1SpkiDer;
 

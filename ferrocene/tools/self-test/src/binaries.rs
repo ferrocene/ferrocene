@@ -21,10 +21,7 @@ fn check_binary(
     hash: CommitHashOf,
 ) -> Result<(), Error> {
     let bin_dir = sysroot.join("bin");
-    #[cfg(unix)]
     let bin = bin_dir.join(name);
-    #[cfg(windows)] // Windows needs `.exe` on the end
-    let bin = bin_dir.join(format!("{name}.exe"));
 
     match std::fs::metadata(&bin) {
         Ok(metadata) => {
@@ -61,7 +58,7 @@ fn check_binary(
         }
     }
 
-    reporter.success(&format!("binary {name} is valid"));
+    reporter.success(&format!("binary {} is valid", bin.display()));
     Ok(())
 }
 
@@ -165,6 +162,11 @@ mod tests {
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
 
+    #[cfg(windows)]
+    const RUSTC_BINARY_NAME: &str = "rustc.exe";
+    #[cfg(not(windows))]
+    const RUSTC_BINARY_NAME: &str = "rustc";
+
     #[test]
     fn test_check_binary_missing_file() {
         let utils = TestUtils::new();
@@ -177,9 +179,14 @@ mod tests {
         let utils = TestUtils::new();
         std::fs::create_dir_all(utils.sysroot().join("bin")).unwrap();
 
-        check_optional_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust)
-            .unwrap();
-        utils.assert_report_skipped("optional binary rustc (not present)");
+        check_optional_binary(
+            utils.reporter(),
+            utils.sysroot(),
+            RUSTC_BINARY_NAME,
+            CommitHashOf::Rust,
+        )
+        .unwrap();
+        utils.assert_report_skipped(&format!("optional binary {RUSTC_BINARY_NAME} (not present)"));
     }
 
     #[test]
@@ -191,7 +198,7 @@ mod tests {
     #[test]
     fn test_check_binary_file_is_a_directory() {
         let utils = TestUtils::new();
-        std::fs::create_dir_all(utils.sysroot().join("bin").join("rustc")).unwrap();
+        std::fs::create_dir_all(utils.sysroot().join("bin").join(RUSTC_BINARY_NAME)).unwrap();
         assert_not_found(utils);
     }
 
@@ -210,10 +217,11 @@ mod tests {
             std::fs::set_permissions(&bin_dir, perms).unwrap();
         }
 
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
             Err(Error::MetadataFetchFailed { path, error }) => {
-                assert_eq!(utils.sysroot().join("bin").join("rustc"), path);
+                assert_eq!(utils.sysroot().join("bin").join(RUSTC_BINARY_NAME), path);
                 assert_eq!(std::io::ErrorKind::PermissionDenied, error.kind());
             }
             Err(err) => panic!("unexpected error: {err}"),
@@ -223,7 +231,7 @@ mod tests {
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
-        let bin = utils.bin("rustc").create();
+        let bin = utils.bin(RUSTC_BINARY_NAME).create();
 
         #[cfg(not(target_os = "macos"))]
         const BROKEN_BINARY: &[u8] = &[];
@@ -233,15 +241,15 @@ mod tests {
 
         std::fs::write(&bin, BROKEN_BINARY).unwrap();
 
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::StartupFailed { .. } },
-            }) => {
-                assert_eq!(bin, path);
-                assert_eq!(vec![OsString::from("-vV")], args);
-                assert_eq!("rustc", binary);
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::StartupFailed { .. }) =>
+            {
+                assert_eq!(bin, error.path);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
+                assert_eq!(RUSTC_BINARY_NAME, binary);
             }
             Err(err) => panic!("unexpected error: {err}"),
         }
@@ -250,17 +258,21 @@ mod tests {
     #[test]
     fn test_check_failing_binary() {
         let utils = TestUtils::new();
-        let bin = utils.bin("rustc").exit(1).create();
+        let bin = utils.bin(RUSTC_BINARY_NAME).exit(1).create();
 
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
-            Err(Error::VersionFetchFailed {
-                binary,
-                error: CommandError { path, args, kind: CommandErrorKind::Failure { output } },
-            }) => {
-                assert_eq!("rustc", binary);
-                assert_eq!(vec![OsString::from("-vV")], args);
-                assert_eq!(bin, path);
+            Err(Error::VersionFetchFailed { binary, error })
+                if matches!(error.kind, CommandErrorKind::Failure { .. }) =>
+            {
+                let output = match error.kind {
+                    CommandErrorKind::Failure { output } => output,
+                    _ => unreachable!(),
+                };
+                assert_eq!(RUSTC_BINARY_NAME, binary);
+                assert_eq!(vec![OsString::from("-vV")], error.args);
+                assert_eq!(bin, error.path);
                 assert_eq!(Some(1), output.status.code());
             }
             Err(err) => panic!("unexpected error: {err}"),
@@ -270,12 +282,17 @@ mod tests {
     #[test]
     fn test_check_binary_with_invalid_output() {
         let utils = TestUtils::new();
-        utils.bin("rustc").expected_args(&["-vV"]).stdout("this is not the output of -vV").create();
+        utils
+            .bin(RUSTC_BINARY_NAME)
+            .expected_args(&["-vV"])
+            .stdout("this is not the output of -vV")
+            .create();
 
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
             Err(Error::VersionParseFailed { binary }) => {
-                assert_eq!("rustc", binary);
+                assert_eq!(RUSTC_BINARY_NAME, binary);
             }
             Err(err) => panic!("unexpected error: {err}"),
         }
@@ -318,12 +335,13 @@ mod tests {
         expected_found: &str,
     ) {
         let utils = TestUtils::new();
-        utils.bin("rustc").expected_args(&["-vV"]).stdout(&content.serialize()).create();
+        utils.bin(RUSTC_BINARY_NAME).expected_args(&["-vV"]).stdout(&content.serialize()).create();
 
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
             Err(Error::BinaryVersionMismatch { binary, field, expected, found }) => {
-                assert_eq!("rustc", binary);
+                assert_eq!(RUSTC_BINARY_NAME, binary);
                 assert_eq!(expected_field, field);
                 assert_eq!(expected_expected, expected);
                 assert_eq!(expected_found, found);
@@ -355,7 +373,7 @@ mod tests {
         ];
 
         let utils = TestUtils::new();
-        let bin = utils.bin("rustc").create();
+        let bin = utils.bin(RUSTC_BINARY_NAME).create();
 
         for mode in PERMISSIONS.iter().copied().flatten() {
             eprintln!("checking {mode:o}");
@@ -364,34 +382,42 @@ mod tests {
             perms.set_mode(*mode);
             std::fs::set_permissions(&bin, perms).unwrap();
 
-            match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+            match check_binary(
+                utils.reporter(),
+                utils.sysroot(),
+                RUSTC_BINARY_NAME,
+                CommitHashOf::Rust,
+            ) {
                 Ok(()) => panic!("should've failed"),
                 Err(Error::WrongBinaryPermissions { path }) => {
-                    assert_eq!(utils.sysroot().join("bin").join("rustc"), path);
+                    assert_eq!(utils.sysroot().join("bin").join(RUSTC_BINARY_NAME), path);
                 }
                 Err(err) => panic!("unexpected error: {err}"),
             }
         }
     }
 
+    #[cfg(not(windows))] // Windows does permissions differently
     #[test]
     fn test_check_binary_good_permissions() {
         let utils = TestUtils::new();
         for mode in [0o777, 0o775, 0o755, 0o555] {
             eprintln!("checking {mode:o}");
-            utils.bin("rustc").mode(mode).behaves_like_vV().create();
-            check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust).unwrap();
+            utils.bin(RUSTC_BINARY_NAME).mode(mode).behaves_like_vV().create();
+            check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+                .unwrap();
             utils.assert_report_success("binary rustc is valid");
         }
     }
 
     #[track_caller]
     fn assert_not_found(utils: TestUtils) {
-        match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
+        match check_binary(utils.reporter(), utils.sysroot(), RUSTC_BINARY_NAME, CommitHashOf::Rust)
+        {
             Ok(()) => panic!("should've failed"),
             Err(Error::MissingBinary { directory, name }) => {
                 assert_eq!(utils.sysroot().join("bin"), directory);
-                assert_eq!("rustc", name);
+                assert_eq!(RUSTC_BINARY_NAME, name);
             }
             Err(err) => panic!("unexpected error: {err}"),
         }

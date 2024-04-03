@@ -1413,7 +1413,7 @@ impl Step for Rustfmt {
         tarball.add_legal_and_readme_to("share/doc/rustfmt");
 
         tarball.ferrocene_proxied_binary("bin/rustfmt");
-        tarball.ferrocene_proxied_binary("bin/cargofmt");
+        tarball.ferrocene_proxied_binary("bin/cargo-fmt");
         Some(tarball.generate())
     }
 }

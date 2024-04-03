@@ -42,6 +42,13 @@ environment to release in. Note that anyone can publish a release in the
 <qualification-plan:organization:Release Managers>` is required for the
 ``prod`` environment.
 
+.. note::
+
+   The git reference needs to be a merge commit authored by bors.
+
+   This is because the Release workflow does not actually build anything, but
+   just copies the release artifacts to the appropriate storage location.
+
 It's also possible to override some of the startup checks the release process
 performs, and to treat the git reference as verbatim instead of trying to
 resolve it. The latter option is useful if you need to release a commit which

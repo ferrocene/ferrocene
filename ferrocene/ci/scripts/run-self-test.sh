@@ -13,6 +13,9 @@ PREFIX="ferrocene/dist/${COMMIT}"
 TAR="tar"
 FERROCENE_SELF_TEST="ferrocene-self-test"
 # Ensure we use GNU tar on Windows, bsdtar will not handle links well.
+# bsdtar (the default tar.exe) does not handle symlinks properly,
+# and will get 'stuck' in a cycle while unpacking and packing.
+# GNU Tar does not have this issue.
 if [[ "${OSTYPE}" = "msys" ]]; then
     TAR="/c/Program Files/Git/usr/bin/tar.exe"
     FERROCENE_SELF_TEST="ferrocene-self-test.exe"

@@ -88,7 +88,7 @@ fn parse_version_output(output: &str) -> Option<VersionOutput> {
             _ => {}
         }
     }
-
+    eprintln!("output: {output:?}\nparsed: {release:?} {commit_hash:?} {host:?}");
     Some(VersionOutput { release: release?, commit_hash: commit_hash?, host: host? })
 }
 
@@ -204,6 +204,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_os = "macos"))] // On Darwin, empty executables exit with code 0.
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();

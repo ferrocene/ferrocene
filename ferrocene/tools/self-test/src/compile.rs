@@ -55,7 +55,7 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
         #[cfg(not(windows))]
         expected_artifacts: &["assertion"],
         #[cfg(windows)]
-        expected_artifacts: &["assertion.exe", "assertion.pdb"],
+        expected_artifacts: &["assertion.exe", "assertion.pdb"], // `.pdb` is a debugging file
         // See assertion.rs
         executable_output: Some(b"123456789"),
     },

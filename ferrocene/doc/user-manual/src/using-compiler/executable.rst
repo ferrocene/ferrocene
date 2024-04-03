@@ -4,8 +4,7 @@
 Building an executable
 ======================
 
-This chapter describes how to build an executable using Ferrocene's rustc
-compiler.
+This chapter describes how to build an executable using rustc.
 
 The examples in this chapter assume the following directory structure:
 

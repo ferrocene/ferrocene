@@ -46,7 +46,7 @@ jobs:
   # as soon as possible.
   #
   # It's fine if this job only runs a small subset of the test suite: the full
-  # test suite for all the supported targets will be run when bors-rs tries to
+  # test suite for all the supported targets will be run when bors tries to
   # merge the PR anyway.
   commit-checks:
     executor: docker-ubuntu-23

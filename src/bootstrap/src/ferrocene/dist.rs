@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-mod flip_link;
+pub(crate) mod flip_link;
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -17,8 +17,6 @@ use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
-
-pub(crate) use self::flip_link::FlipLink;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {

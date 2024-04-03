@@ -7,6 +7,7 @@
 // If this test fails on a new platform, add a new normalization annotation:
 //@ normalize-stdout-test: "x86_64-unknown-linux-gnu" -> "$$TARGET"
 //@ normalize-stdout-test: "aarch64-unknown-linux-gnu" -> "$$TARGET"
+//@ normalize-stdout-test: "aarch64-apple-darwin" -> "$$TARGET"
 
 fn main() {}
 

@@ -105,7 +105,7 @@ impl Error {
         match self {
             Error::NoSysroot => 1,
             Error::MissingBinary { .. } => 2,
-            #[cfg(not(windows))] // WIndows does not do file modes
+            #[cfg(not(windows))] // Windows does not do file modes
             Error::WrongBinaryPermissions { .. } => 3,
             Error::MetadataFetchFailed { .. } => 4,
             Error::VersionFetchFailed { .. } => 5,

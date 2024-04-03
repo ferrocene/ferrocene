@@ -48,7 +48,7 @@ impl PathKind {
 
 impl SearchPath {
     pub fn from_cli_opt(
-        sysroot: Option<&Path>,
+        sysroot: &Path,
         triple: &TargetTriple,
         early_dcx: &EarlyDiagCtxt,
         path: &str,
@@ -66,50 +66,16 @@ impl SearchPath {
         } else {
             (PathKind::All, path)
         };
-        if path.is_empty() {
+        let dir = match path.strip_prefix("@RUSTC_BUILTIN") {
+            Some(stripped) => {
+                make_target_lib_path(sysroot, triple.triple()).join("builtin").join(stripped)
+            }
+            None => PathBuf::from(path),
+        };
+        if dir.as_os_str().is_empty() {
             #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
             early_dcx.early_fatal("empty search path given via `-L`");
         }
-
-        // Temporary implementation until https://github.com/rust-lang/compiler-team/issues/659 is
-        // accepted and implemented upstream.
-        let dir = if let Some(stripped) = path.strip_prefix("ferrocene-temp-builtin:") {
-            let Some(sysroot) = sysroot else {
-                #[allow(rustc::untranslatable_diagnostic)]
-                // FIXME: Will be gone once we switch to upstreams $builtin:path
-                early_dcx.early_fatal("`-L ferrocene-temp-builtin:` is not supported");
-            };
-            let triple = match triple {
-                TargetTriple::TargetTriple(triple) => triple,
-                TargetTriple::TargetJson { .. } => {
-                    #[allow(rustc::untranslatable_diagnostic)]
-                    // FIXME: Will be gone once we switch to upstreams $builtin:path
-                    early_dcx.early_fatal(
-                        "`-L ferrocene-temp-builtin:` is not supported with custom targets",
-                    );
-                }
-            };
-
-            if stripped == ".." || stripped.contains('/') {
-                #[allow(rustc::untranslatable_diagnostic)]
-                // FIXME: Will be gone once we switch to upstreams $builtin:path
-                early_dcx.early_fatal(
-                    "`-L ferrocene-temp-builtin:` does not accept \
-                     subdirectories or parent directories",
-                );
-            }
-
-            let path = make_target_lib_path(sysroot, triple).join("builtin").join(stripped);
-            if !path.is_dir() {
-                #[allow(rustc::untranslatable_diagnostic)]
-                // FIXME: Will be gone once we switch to upstreams $builtin:path
-                early_dcx.early_fatal(format!("ferrocene-temp-builtin:{stripped} does not exist"));
-            }
-
-            path
-        } else {
-            PathBuf::from(path)
-        };
 
         Self::new(kind, dir)
     }

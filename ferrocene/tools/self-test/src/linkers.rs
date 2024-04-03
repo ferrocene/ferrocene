@@ -4,8 +4,6 @@
 mod argparse;
 
 use std::ffi::OsString;
-#[cfg(unix)]
-use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -472,7 +470,7 @@ mod tests {
         let utils = TestUtils::new();
 
         match find_bundled_lld(utils.reporter(), utils.sysroot()) {
-            Err(Error::BundledLinkerMissing) => {
+            Err(Error::BundledLinkerMissing(_)) => {
                 // Ok
             }
             other => panic!("unexpected result: {other:?}"),
@@ -493,7 +491,7 @@ mod tests {
         let utils = TestUtils::new();
 
         match find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()) {
-            Err(Error::BundledLinkerMissing) => {
+            Err(Error::BundledLinkerMissing(_)) => {
                 // Ok
             }
             other => panic!("unexpected result: {other:?}"),

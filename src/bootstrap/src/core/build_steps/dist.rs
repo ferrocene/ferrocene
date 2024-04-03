@@ -1216,7 +1216,8 @@ impl Step for Clippy {
         tarball.add_file(cargoclippy, "bin", 0o755);
         tarball.add_legal_and_readme_to("share/doc/clippy");
 
-        tarball.ferrocene_proxied_binary("bin/clippy");
+        // the name of the binary is set in the tools.rs and not here
+        tarball.ferrocene_proxied_binary("bin/clippy-driver");
         tarball.ferrocene_proxied_binary("bin/cargo-clippy");
         Some(tarball.generate())
     }

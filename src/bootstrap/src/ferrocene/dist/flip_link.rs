@@ -24,8 +24,9 @@ impl Step for FlipLink {
         let flip_link =
             builder.ensure(crate::ferrocene::tool::flip_link::FlipLink { target: self.target });
 
-        let tarball = Tarball::new(builder, "flip-link", &self.target.triple);
+        let mut tarball = Tarball::new(builder, "flip-link", &self.target.triple);
         tarball.add_file(flip_link, "bin", 0o755);
+        tarball.ferrocene_proxied_binary("bin/flip-link");
         tarball.generate()
     }
 }

@@ -638,12 +638,6 @@ impl Options {
             .map(|s| SearchPath::from_cli_opt(&sysroot, &target, early_dcx, s))
             .collect();
 
-        let libs = matches
-            .opt_strs("L")
-            .iter()
-            .map(|s| SearchPath::from_cli_opt(None, &target, early_dcx, s))
-            .collect();
-
         let show_coverage = matches.opt_present("show-coverage");
 
         let crate_types = match parse_crate_types_from_list(matches.opt_strs("crate-type")) {

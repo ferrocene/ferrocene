@@ -38,6 +38,7 @@ impl<'a> BinBuilder<'a> {
         }
     }
 
+    #[cfg(not(windows))]
     pub(crate) fn mode(mut self, mode: u32) -> Self {
         self.mode = Some(mode);
         self
@@ -58,6 +59,7 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    #[cfg(not(windows))] // Tests which use this are excluded on Windows.
     #[allow(non_snake_case)]
     pub(crate) fn behaves_like_vV(self) -> Self {
         let stdout = format!(
@@ -85,6 +87,7 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    #[cfg(not(windows))] // Tests which use this are excluded on Windows.
     pub(crate) fn program_source(mut self, source: &'static str) -> Self {
         self.program = source;
         self

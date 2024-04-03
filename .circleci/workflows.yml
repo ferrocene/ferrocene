@@ -572,19 +572,9 @@ workflows:
           tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
 
-      - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
-          requires:
-            - x86_64-windows-llvm
-      - x86_64-windows-self-test:
-          requires:
-            - x86_64-windows-dist
-
       - commit-checks:
           requires:
             - build-docker--ubuntu-23
-            # TODO: do not merge, testing on commit to save CI resources
-            - x86_64-windows-self-test
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -695,12 +685,21 @@ workflows:
             - aarch64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
+      - x86_64-windows-llvm: {}
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-llvm
+      - x86_64-windows-self-test:
+          requires:
+            - x86_64-windows-dist
+
       - finish-build:
           requires:
             - x86_64-linux-docs
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
+            - x86_64-windows-self-test
             - wasm-dist-oxidos
             - aarch64-darwin-self-test
 

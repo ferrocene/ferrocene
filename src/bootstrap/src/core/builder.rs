@@ -1418,14 +1418,8 @@ impl<'a> Builder<'a> {
     /// Cargo. This cargo will be configured to use `compiler` as the actual
     /// rustc compiler, its output will be scoped by `mode`'s output directory,
     /// it will pass the `--target` flag for the specified `target`, and will be
-<<<<<<< HEAD
     /// executing the Cargo command `cmd`.
     pub fn cargo(
-=======
-    /// executing the Cargo command `cmd`. `cmd` can be `miri-cmd` for commands
-    /// to be run with Miri.
-    fn cargo(
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         &self,
         compiler: Compiler,
         mode: Mode,

@@ -55,6 +55,7 @@ mkdir -p "${TEMPDIR}/archives"
 download ferrocene-self-test "${FERROCENE_HOST}"
 download rustc "${FERROCENE_HOST}"
 download cargo "${FERROCENE_HOST}"
+download llvm-tools "${FERROCENE_HOST}" # This appears to be only required for Windows
 
 IFS=',' read -ra targets <<< "${FERROCENE_TARGETS:-}"
 targets+=("${FERROCENE_HOST}")

@@ -402,7 +402,7 @@ fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, 
     #[cfg(unix)]
     let bin_name = "rust-lld";
     #[cfg(windows)]
-    let bin_name = "rust-link.exe";
+    let bin_name = "llvm-link.exe";
     let path =
         sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(bin_name);
 
@@ -462,7 +462,7 @@ mod tests {
         #[cfg(not(windows))]
         let linker = "rust-lld";
         #[cfg(windows)]
-        let linker = "rust-link.exe";
+        let linker = "llvm-link.exe";
         utils.bin(linker).for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();

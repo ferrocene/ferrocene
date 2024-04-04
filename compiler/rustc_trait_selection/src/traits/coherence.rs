@@ -210,7 +210,7 @@ fn overlap<'tcx>(
         .intercrate(true)
         .with_next_trait_solver(tcx.next_trait_solver_in_coherence())
         .build();
-    let selcx = &mut SelectionContext::with_treat_inductive_cycle_as_ambig(&infcx);
+    let selcx = &mut SelectionContext::new(&infcx);
     if track_ambiguity_causes.is_yes() {
         selcx.enable_tracking_intercrate_ambiguity_causes();
     }
@@ -554,11 +554,7 @@ fn plug_infer_with_placeholders<'tcx>(
         }
     }
 
-    value.visit_with(&mut PlugInferWithPlaceholder {
-        infcx,
-        universe,
-        var: ty::BoundVar::from_u32(0),
-    });
+    value.visit_with(&mut PlugInferWithPlaceholder { infcx, universe, var: ty::BoundVar::ZERO });
 }
 
 fn try_prove_negated_where_clause<'tcx>(

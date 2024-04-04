@@ -88,7 +88,7 @@ fn parse_version_output(output: &str) -> Option<VersionOutput> {
             _ => {}
         }
     }
-    eprintln!("output: {output:?}\nparsed: {release:?} {commit_hash:?} {host:?}");
+    
     Some(VersionOutput { release: release?, commit_hash: commit_hash?, host: host? })
 }
 

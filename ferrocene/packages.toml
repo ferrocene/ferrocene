@@ -65,6 +65,10 @@ subset = "default"
 name = "ferrocene-self-test"
 subset = "default"
 
+[[groups.hosts.packages]]
+name = "flip-link"
+subset = "default"
+
 [groups.cross-compilation]
 targets = [
   "aarch64-unknown-none",

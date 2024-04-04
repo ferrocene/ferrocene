@@ -394,6 +394,9 @@ impl Step for Rustc {
 
         tarball.ferrocene_proxied_binary("bin/rustc");
         tarball.ferrocene_proxied_binary("bin/rustdoc");
+        tarball.ferrocene_proxied_binary("bin/rust-gdb");
+        tarball.ferrocene_proxied_binary("bin/rust-gdbgui");
+        tarball.ferrocene_proxied_binary("bin/rust-lldb");
         return tarball.generate();
 
         fn prepare_image(builder: &Builder<'_>, compiler: Compiler, image: &Path) {
@@ -1079,8 +1082,8 @@ impl Step for Cargo {
         tarball.add_renamed_file(etc.join("cargo.bashcomp.sh"), "etc/bash_completion.d", "cargo");
         tarball.add_dir(etc.join("man"), "share/man/man1");
         tarball.add_legal_and_readme_to("share/doc/cargo");
-        tarball.ferrocene_proxied_binary("bin/cargo");
 
+        tarball.ferrocene_proxied_binary("bin/cargo");
         Some(tarball.generate())
     }
 }
@@ -1213,6 +1216,10 @@ impl Step for Clippy {
         tarball.add_file(clippy, "bin", 0o755);
         tarball.add_file(cargoclippy, "bin", 0o755);
         tarball.add_legal_and_readme_to("share/doc/clippy");
+
+        // the name of the binary is set in the tools.rs and not here
+        tarball.ferrocene_proxied_binary("bin/clippy-driver");
+        tarball.ferrocene_proxied_binary("bin/cargo-clippy");
         Some(tarball.generate())
     }
 }
@@ -1406,6 +1413,9 @@ impl Step for Rustfmt {
         tarball.add_file(rustfmt, "bin", 0o755);
         tarball.add_file(cargofmt, "bin", 0o755);
         tarball.add_legal_and_readme_to("share/doc/rustfmt");
+
+        tarball.ferrocene_proxied_binary("bin/rustfmt");
+        tarball.ferrocene_proxied_binary("bin/cargo-fmt");
         Some(tarball.generate())
     }
 }

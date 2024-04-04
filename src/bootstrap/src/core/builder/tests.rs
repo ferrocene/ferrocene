@@ -740,7 +740,6 @@ mod dist {
             no_fail_fast: false,
             doc: false,
             no_doc: true,
-            skip: vec![],
             bless: false,
             force_rerun: false,
             compare_mode: None,

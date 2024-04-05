@@ -38,7 +38,7 @@ fn check_binary(
     let version = get_version(&bin, name)?;
     check_version(version, hash, name)?;
 
-    reporter.success(&format!("binary {} is valid", bin.display()));
+    reporter.success(&format!("binary {name} is valid"));
     Ok(())
 }
 

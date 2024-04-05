@@ -66,7 +66,7 @@ def get_last_mirrored_commit(mirror_repo_path: str) -> str:
     commit_messages = run(["git", "log", "--format=%B"], mirror_repo_path)
     for line in commit_messages.splitlines():
         if line.startswith(MIRRORED_MARKER):
-            hash = line.lstrip(MIRRORED_MARKER)
+            hash = line.removeprefix(MIRRORED_MARKER)
             return hash
     raise Exception("could not find mirrored-commit")
 

@@ -61,7 +61,7 @@ fn check_binary(
         }
     }
 
-    reporter.success(&format!("binary {} is valid", bin.display()));
+    reporter.success(&format!("binary {name} is valid"));
     Ok(())
 }
 

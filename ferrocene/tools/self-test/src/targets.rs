@@ -148,12 +148,12 @@ mod tests {
 
     #[test]
     fn test_check_target_std() {
-        let target =
-            TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCC };
+        let triple = "x86_64-unknown-linux-gnu";
+        let target = TargetSpec { triple, std: true, linker: Linker::HostCC };
 
         let utils = TestUtils::new();
         utils
-            .target("x86_64-unknown-linux-gnu")
+            .target(triple)
             .lib("core", "0123456789abcdef")
             .lib("alloc", "0123456789abcdef")
             .lib("std", "0123456789abcdef")
@@ -171,12 +171,12 @@ mod tests {
 
     #[test]
     fn test_check_target_no_std() {
-        let target =
-            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
+        let triple = "x86_64-unknown-none";
+        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target("x86_64-unknown-none")
+            .target(triple)
             .lib("core", "0123456789abcdef")
             .lib("alloc", "0123456789abcdef")
             .lib("other", "0123456789abcdef") // Unknown libraries are ignored
@@ -186,20 +186,20 @@ mod tests {
             CheckTargetOutcome::Found,
             check_target(utils.reporter(), utils.sysroot(), &target).unwrap()
         );
-        utils.assert_report_success("target installed correctly: x86_64-unknown-none");
+        utils.assert_report_success(format!("target installed correctly: {triple}").as_str());
     }
 
     #[test]
     fn test_check_target_missing_library() {
-        let target =
-            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
+        let triple = "x86_64-unknown-none";
+        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
-        utils.target("x86_64-unknown-none").lib("core", "0123456789abcdef").create();
+        utils.target(triple).lib("core", "0123456789abcdef").create();
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::TargetLibraryMissing { target, library }) => {
-                assert_eq!(target, "x86_64-unknown-none");
+                assert_eq!(target, triple);
                 assert_eq!(library, "alloc");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -209,12 +209,12 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_required_library() {
-        let target =
-            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
+        let triple = "x86_64-unknown-none";
+        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target("x86_64-unknown-none")
+            .target(triple)
             .lib("core", "0123456789abcdef")
             .lib("core", "abcdef0123456789")
             .lib("alloc", "0123456789abcdef")
@@ -222,7 +222,7 @@ mod tests {
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::DuplicateTargetLibrary { target, library }) => {
-                assert_eq!(target, "x86_64-unknown-none");
+                assert_eq!(target, triple);
                 assert_eq!(library, "core");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -232,12 +232,12 @@ mod tests {
 
     #[test]
     fn test_check_target_duplicate_other_library() {
-        let target =
-            TargetSpec { triple: "x86_64-unknown-none", std: false, linker: Linker::BundledLld };
+        let triple = "x86_64-unknown-none";
+        let target = TargetSpec { triple, std: false, linker: Linker::BundledLld };
 
         let utils = TestUtils::new();
         utils
-            .target("x86_64-unknown-none")
+            .target(triple)
             .lib("core", "0123456789abcdef")
             .lib("other", "0123456789abcdef")
             .lib("other", "abcdef0123456789")
@@ -246,7 +246,7 @@ mod tests {
 
         match check_target(utils.reporter(), utils.sysroot(), &target) {
             Err(Error::DuplicateTargetLibrary { target, library }) => {
-                assert_eq!(target, "x86_64-unknown-none");
+                assert_eq!(target, triple);
                 assert_eq!(library, "other");
             }
             other => panic!("unexpected result: {other:?}"),
@@ -267,10 +267,11 @@ mod tests {
         create_lib("foo-0123456789abcdef.so"); // Invalid files are not counted.
 
         let output = find_libraries_in(dir).unwrap();
-        assert_eq!(3, output.len());
-        assert_eq!(2, output["core"]);
-        assert_eq!(1, output["alloc"]);
-        assert_eq!(1, output["proc_macro"]);
+        assert_eq!(output.len(), 3);
+        assert_eq!(output.get("core"), Some(&2));
+        assert_eq!(output.get("alloc"), Some(&1));
+        assert_eq!(output.get("proc_macro"), Some(&1));
+        assert_eq!(output.get("foo"), None)
     }
 
     #[test]

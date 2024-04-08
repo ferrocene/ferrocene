@@ -4,7 +4,7 @@
 mod bin_builder;
 
 use std::cell::RefCell;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use tempfile::TempDir;
 
@@ -32,6 +32,10 @@ impl TestUtils {
 
     pub(crate) fn sysroot(&self) -> &Path {
         self.sysroot.path()
+    }
+
+    pub(crate) fn target_dir(&self, target: &str) -> PathBuf {
+        self.sysroot().join("lib").join("rustlib").join(target)
     }
 
     pub(crate) fn bin<'a>(&'a self, name: &'a str) -> BinBuilder<'a> {
@@ -113,7 +117,7 @@ impl<'a> TargetBuilder<'a> {
     }
 
     pub(crate) fn create(self) {
-        let target_dir = self.utils.sysroot().join("lib").join("rustlib").join(self.name);
+        let target_dir = self.utils.target_dir(self.name);
         std::fs::create_dir_all(&target_dir).unwrap();
 
         let lib_dir = target_dir.join("lib");

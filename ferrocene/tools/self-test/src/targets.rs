@@ -256,17 +256,21 @@ mod tests {
 
     #[test]
     fn test_find_libraries_in() {
-        let dir = tempfile::tempdir().unwrap();
-        let dir = dir.path();
+        let triple = "x86_64-unknown-linux-gnu";
 
-        let create_lib = |name| std::fs::write(dir.join(name), b"").unwrap();
-        create_lib("libcore-0123456789abcdef.rlib");
-        create_lib("libcore-abcdef0123456789.rlib");
-        create_lib("liballoc-0123456789abcdef.rlib");
-        create_lib("libproc_macro-0123456789abcdef.rlib");
-        create_lib("foo-0123456789abcdef.so"); // Invalid files are not counted.
+        let utils = TestUtils::new();
+        utils
+            .target(triple)
+            .lib("core", "0123456789abcdef")
+            .lib("core", "abcdef0123456789")
+            .lib("alloc", "0123456789abcdef")
+            .lib("proc_macro", "0123456789abcdef")
+            .create();
 
-        let output = find_libraries_in(dir).unwrap();
+        let lib_dir = utils.target_dir(triple).join("lib");
+        std::fs::write(lib_dir.join("foo-0123456789abcdef.so"), b"").unwrap(); // Invalid files are not counted.
+
+        let output = find_libraries_in(&lib_dir).unwrap();
         assert_eq!(output.len(), 3);
         assert_eq!(output.get("core"), Some(&2));
         assert_eq!(output.get("alloc"), Some(&1));

@@ -130,18 +130,15 @@ fn find_libraries_in(path: &Path) -> Result<HashMap<String, usize>, Error> {
 
 /// Extract `name` from `libname-hash.rlib`.
 fn extract_library_name(file_path: &Path) -> Option<&str> {
-    let (library, hash) = file_path
+    let (library_name, hash) = file_path
         .file_name()?
         .to_str()?
         .strip_prefix("lib")?
         .strip_suffix(".rlib")?
         .rsplit_once('-')?;
 
-    if hash.len() != 16 || hash.chars().any(|c| !c.is_ascii_hexdigit()) || library.is_empty() {
-        None
-    } else {
-        Some(library)
-    }
+    (hash.len() == 16 && hash.chars().all(|c| c.is_ascii_hexdigit()) && !library_name.is_empty())
+        .then_some(library_name)
 }
 
 #[cfg(test)]

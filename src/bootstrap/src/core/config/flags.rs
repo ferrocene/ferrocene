@@ -395,6 +395,25 @@ pub enum Subcommand {
         #[arg(long)]
         ferrocene_test_one_crate_per_cargo_call: bool,
     },
+    /// Build and run some test suites *in Miri*
+    Miri {
+        #[arg(long)]
+        /// run all tests regardless of failure
+        no_fail_fast: bool,
+        #[arg(long, value_name = "ARGS", allow_hyphen_values(true))]
+        /// extra arguments to be passed for the test tool being used
+        /// (e.g. libtest, compiletest or rustdoc)
+        test_args: Vec<String>,
+        /// extra options to pass the compiler when running tests
+        #[arg(long, value_name = "ARGS", allow_hyphen_values(true))]
+        rustc_args: Vec<String>,
+        #[arg(long)]
+        /// do not run doc tests
+        no_doc: bool,
+        #[arg(long)]
+        /// only run doc tests
+        doc: bool,
+    },
     /// Build and run some benchmarks
     Bench {
         #[arg(long, allow_hyphen_values(true))]
@@ -472,6 +491,7 @@ impl Subcommand {
             Subcommand::Fix { .. } => Kind::Fix,
             Subcommand::Format { .. } => Kind::Format,
             Subcommand::Test { .. } => Kind::Test,
+            Subcommand::Miri { .. } => Kind::Miri,
             Subcommand::Clean { .. } => Kind::Clean,
             Subcommand::Dist { .. } => Kind::Dist,
             Subcommand::Install { .. } => Kind::Install,
@@ -484,7 +504,7 @@ impl Subcommand {
 
     pub fn rustc_args(&self) -> Vec<&str> {
         match *self {
-            Subcommand::Test { ref rustc_args, .. } => {
+            Subcommand::Test { ref rustc_args, .. } | Subcommand::Miri { ref rustc_args, .. } => {
                 rustc_args.iter().flat_map(|s| s.split_whitespace()).collect()
             }
             _ => vec![],
@@ -493,14 +513,16 @@ impl Subcommand {
 
     pub fn fail_fast(&self) -> bool {
         match *self {
-            Subcommand::Test { no_fail_fast, .. } => !no_fail_fast,
+            Subcommand::Test { no_fail_fast, .. } | Subcommand::Miri { no_fail_fast, .. } => {
+                !no_fail_fast
+            }
             _ => false,
         }
     }
 
     pub fn doc_tests(&self) -> DocTests {
         match *self {
-            Subcommand::Test { doc, no_doc, .. } => {
+            Subcommand::Test { doc, no_doc, .. } | Subcommand::Miri { no_doc, doc, .. } => {
                 if doc {
                     DocTests::Only
                 } else if no_doc {

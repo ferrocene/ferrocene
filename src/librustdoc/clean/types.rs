@@ -23,6 +23,7 @@ use rustc_hir::{BodyId, Mutability};
 use rustc_hir_analysis::check::intrinsic::intrinsic_operation_unsafety;
 use rustc_index::IndexVec;
 use rustc_metadata::rendered_const;
+use rustc_middle::span_bug;
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, TyCtxt, Visibility};
 use rustc_resolve::rustdoc::{
@@ -266,8 +267,15 @@ impl ExternalCrate {
         let as_primitive = |res: Res<!>| {
             let Res::Def(DefKind::Mod, def_id) = res else { return None };
             tcx.get_attrs(def_id, sym::rustc_doc_primitive).find_map(|attr| {
-                // FIXME: should warn on unknown primitives?
-                Some((def_id, PrimitiveType::from_symbol(attr.value_str()?)?))
+                let attr_value = attr.value_str().expect("syntax should already be validated");
+                let Some(prim) = PrimitiveType::from_symbol(attr_value) else {
+                    span_bug!(
+                        attr.span,
+                        "primitive `{attr_value}` is not a member of `PrimitiveType`"
+                    );
+                };
+
+                Some((def_id, prim))
             })
         };
 
@@ -1797,8 +1805,10 @@ impl PrimitiveType {
             sym::bool => Some(PrimitiveType::Bool),
             sym::char => Some(PrimitiveType::Char),
             sym::str => Some(PrimitiveType::Str),
+            sym::f16 => Some(PrimitiveType::F16),
             sym::f32 => Some(PrimitiveType::F32),
             sym::f64 => Some(PrimitiveType::F64),
+            sym::f128 => Some(PrimitiveType::F128),
             sym::array => Some(PrimitiveType::Array),
             sym::slice => Some(PrimitiveType::Slice),
             sym::tuple => Some(PrimitiveType::Tuple),
@@ -1831,8 +1841,10 @@ impl PrimitiveType {
                 U32 => single(SimplifiedType::Uint(UintTy::U32)),
                 U64 => single(SimplifiedType::Uint(UintTy::U64)),
                 U128 => single(SimplifiedType::Uint(UintTy::U128)),
+                F16 => single(SimplifiedType::Float(FloatTy::F16)),
                 F32 => single(SimplifiedType::Float(FloatTy::F32)),
                 F64 => single(SimplifiedType::Float(FloatTy::F64)),
+                F128 => single(SimplifiedType::Float(FloatTy::F128)),
                 Str => single(SimplifiedType::Str),
                 Bool => single(SimplifiedType::Bool),
                 Char => single(SimplifiedType::Char),

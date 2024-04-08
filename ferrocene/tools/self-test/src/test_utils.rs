@@ -26,7 +26,7 @@ impl TestUtils {
         Self {
             env: Env { path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()) },
             sysroot,
-            reports: ReportsCollector { reports: RefCell::new(Vec::new()) },
+            reports: ReportsCollector::new(),
         }
     }
 
@@ -262,6 +262,12 @@ impl<'a> TargetBuilder<'a> {
 
 struct ReportsCollector {
     reports: RefCell<Vec<Report>>,
+}
+
+impl ReportsCollector {
+    fn new() -> Self {
+        Self { reports: RefCell::new(Vec::new()) }
+    }
 }
 
 impl Reporter for ReportsCollector {

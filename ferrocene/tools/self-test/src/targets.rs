@@ -70,15 +70,11 @@ fn check_target(
         return Ok(CheckTargetOutcome::Missing);
     }
 
-    check_libraries(
-        target,
-        &target_dir,
-        if target.std {
-            &["core", "alloc", "std", "test", "proc_macro"]
-        } else {
-            &["core", "alloc"]
-        },
-    )?;
+    let expected_libs = match target.std {
+        true => ["core", "alloc", "std", "test", "proc_macro"].as_slice(),
+        false => ["core", "alloc"].as_slice(),
+    };
+    check_libraries(target, &target_dir, expected_libs)?;
 
     reporter.success(&format!("target installed correctly: {}", target.triple));
     Ok(CheckTargetOutcome::Found)

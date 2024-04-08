@@ -4,8 +4,7 @@
 File formats
 ============
 
-This chapter describes the file formats recognized by Ferrocene's rustc
-compiler.
+This chapter describes the file formats recognized by rustc.
 
 A `source file <../../specification/glossary.html#source-file>`_ that contains
 Rust code must have file extension ``rs``, for example:
@@ -20,7 +19,7 @@ Libraries
 A library is a reusable collection of non-volatile resources, such as
 functionality and data, used by another library or executable.
 
-Compiling a source file with name ``name`` using Ferrocene's rustc compiler
+Compiling a source file with name ``name`` using rustc
 produces a library with name ``libname``, where the file extension is either
 ``rlib`` for a Rust static library or ``so`` for a native dynamic library.
 
@@ -41,7 +40,7 @@ Executables
 An executable (or a binary) causes a computer to perform indicated tasks
 according to encoded instructions.
 
-Compiling a source file with name ``name`` using Ferrocene's rustc compiler
+Compiling a source file with name ``name`` using rustc
 produces an executable with name ``name``, without a file extension.
 
 The file format of an executable is target-dependent. Consult the documentation

@@ -4,8 +4,7 @@
 Building a library
 ==================
 
-This chapter describes how to build a library using Ferrocene's rustc
-compiler.
+This chapter describes how to build a library using rustc.
 
 The examples in this chapter assume the following directory structure:
 

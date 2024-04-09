@@ -64,10 +64,7 @@ pub(crate) fn check(
     sysroot: &Path,
     targets: &[Target],
 ) -> Result<(), Error> {
-    for target in targets {
-        check_target(reporter, sysroot, target, SAMPLE_PROGRAMS)?;
-    }
-    Ok(())
+    targets.iter().try_for_each(|target| check_target(reporter, sysroot, target, SAMPLE_PROGRAMS))
 }
 
 fn check_target(

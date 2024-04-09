@@ -40,7 +40,7 @@ def main():
     patch = run(
         ["git", "diff", last_mirrored_commit, "HEAD", "--", ORIGIN_DIR],
         origin_repo_path,
-    ).stdout
+    )
     if patch == "":
         raise Exception(
             "patch cannot be empty; make sure the last commit made changes to "

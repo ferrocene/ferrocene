@@ -309,6 +309,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
       SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
@@ -349,7 +350,6 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
       SCRIPT: |
-        ./x.py --stage 2 dist rust-std
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     steps:
@@ -372,13 +372,27 @@ jobs:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
+  aarch64-darwin-dist-targets:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      SCRIPT: |
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: aarch64-darwin-build
+
   aarch64-darwin-self-test:
     macos:
       xcode: "15.3.0"
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1
@@ -600,10 +614,14 @@ workflows:
       - aarch64-darwin-dist-tools:
           requires:
             - aarch64-darwin-build
+      - aarch64-darwin-dist-targets:
+          requires:
+            - aarch64-darwin-build
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
             - aarch64-darwin-dist-tools
+            - aarch64-darwin-dist-targets
 
       - finish-build:
           requires:

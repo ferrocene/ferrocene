@@ -8,10 +8,10 @@ This directory contains all the tooling needed to update the dependencies tracke
 
 ## Running the automation
 
-The automation is configured to run every monday at 5:00 UTC. You can also
+The automation is configured to run every day at 5:00 UTC. You can also
 start it manually by going to the [GitHub Actions workflow page][dispatch] and
 clicking "Run workflow".
 
 You can also run it locally by running the `update.py` script (no arguments are required).
 
-[dispatch]: https://github.com/ferrocene/ferrocene/actions/workflows/automation-pull-subtrees.yml
+[dispatch]: https://github.com/ferrocene/ferrocene/actions/workflows/automation-update-lockfiles.yml

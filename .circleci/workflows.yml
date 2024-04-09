@@ -418,7 +418,7 @@ jobs:
   # We opt against a build/dist split for Windows to save on CI time (setup is slow)
   # Furthermore, this job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
-  x86_64-windows-dist:
+  x86_64-windows-build:
     executor:
       name: win/server-2022
       size: large # 8-core
@@ -429,13 +429,58 @@ jobs:
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
-        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-build:
+          os: windows
+
+  # We opt against a build/dist split for Windows to save on CI time (setup is slow)
+  # Furthermore, this job caused us to extend our CircleCI TTL via
+  # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
+  x86_64-windows-dist:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-dist-tools:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - ferrocene-job-dist:
           os: windows
+          restore-from-job: x86_64-windows-build
+
+
+  x86_64-windows-dist-targets:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.cene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          os: windows
+          restore-from-job: x86_64-windows-build
 
   x86_64-windows-self-test:
     executor:
@@ -670,12 +715,23 @@ workflows:
             - aarch64-darwin-dist-tools
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
+      - x86_64-windows-build:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-dist-tools:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-dist-targets:
+          requires:
+            - x86_64-windows-build
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
+            - x86_64-windows-dist-tools
+            - x86_64-windows-dist-targets
 
       - finish-build:
           requires:

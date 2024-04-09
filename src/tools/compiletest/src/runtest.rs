@@ -3926,11 +3926,17 @@ impl<'test> TestCx<'test> {
             cmd.env("IS_MSVC", "1")
                 .env("IS_WINDOWS", "1")
                 .env("MSVC_LIB", format!("'{}' -nologo", lib.display()))
-                .env("CC", format!("'{}' {}", self.config.cc, cflags))
-                .env("CXX", format!("'{}' {}", &self.config.cxx, cxxflags));
+                // Note: we diverge from legacy run_make and don't lump `CC` the compiler and
+                // default flags together.
+                .env("CC_DEFAULT_FLAGS", &cflags)
+                .env("CC", &self.config.cc)
+                .env("CXX_DEFAULT_FLAGS", &cxxflags)
+                .env("CXX", &self.config.cxx);
         } else {
-            cmd.env("CC", format!("{} {}", self.config.cc, self.config.cflags))
-                .env("CXX", format!("{} {}", self.config.cxx, self.config.cxxflags))
+            cmd.env("CC_DEFAULT_FLAGS", &self.config.cflags)
+                .env("CC", &self.config.cc)
+                .env("CXX_DEFAULT_FLAGS", &self.config.cxxflags)
+                .env("CXX", &self.config.cxx)
                 .env("AR", &self.config.ar);
 
             if self.config.target.contains("windows") {
@@ -4246,7 +4252,7 @@ impl<'test> TestCx<'test> {
         if self.props.run_rustfix && self.config.compare_mode.is_none() {
             // And finally, compile the fixed code and make sure it both
             // succeeds and has no diagnostics.
-            let rustc = self.make_compile_args(
+            let mut rustc = self.make_compile_args(
                 &self.expected_output_path(UI_FIXED),
                 TargetLocation::ThisFile(self.make_exe_name()),
                 emit_metadata,
@@ -4254,6 +4260,26 @@ impl<'test> TestCx<'test> {
                 LinkToAux::Yes,
                 Vec::new(),
             );
+
+            // If a test is revisioned, it's fixed source file can be named "a.foo.fixed", which,
+            // well, "a.foo" isn't a valid crate name. So we explicitly mangle the test name
+            // (including the revision) here to avoid the test writer having to manually specify a
+            // `#![crate_name = "..."]` as a workaround. This is okay since we're only checking if
+            // the fixed code is compilable.
+            if self.revision.is_some() {
+                let crate_name =
+                    self.testpaths.file.file_stem().expect("test must have a file stem");
+                // crate name must be alphanumeric or `_`.
+                let crate_name =
+                    crate_name.to_str().expect("crate name implies file name must be valid UTF-8");
+                // replace `a.foo` -> `a__foo` for crate name purposes.
+                // replace `revision-name-with-dashes` -> `revision_name_with_underscore`
+                let crate_name = crate_name.replace(".", "__");
+                let crate_name = crate_name.replace("-", "_");
+                rustc.arg("--crate-name");
+                rustc.arg(crate_name);
+            }
+
             let res = self.compose_and_run_compiler(rustc, None);
             if !res.status.success() {
                 self.fatal_proc_rec("failed to compile fixed code", &res);

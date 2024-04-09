@@ -57,10 +57,7 @@
 //
 // This cfg won't affect doc tests.
 #![cfg(not(test))]
-// To run core tests without x.py without ending up with two copies of core, Miri needs to be
-// able to "empty" this crate. See <https://github.com/rust-lang/miri-test-libstd/issues/4>.
-// rustc itself never sets the feature, so this line has no effect there.
-#![cfg(any(not(feature = "miri-test-libstd"), test, doctest))]
+//
 #![stable(feature = "core", since = "1.6.0")]
 #![doc(
     html_playground_url = "https://play.rust-lang.org/",
@@ -71,7 +68,6 @@
 #![doc(rust_logo)]
 #![doc(cfg_hide(
     not(test),
-    any(not(feature = "miri-test-libstd"), test, doctest),
     no_fp_fmt_parse,
     target_pointer_width = "16",
     target_pointer_width = "32",
@@ -125,7 +121,6 @@
 #![feature(const_array_into_iter_constructors)]
 #![feature(const_bigint_helper_methods)]
 #![feature(const_black_box)]
-#![feature(const_caller_location)]
 #![feature(const_cell_into_inner)]
 #![feature(const_char_from_u32_unchecked)]
 #![feature(const_eval_select)]

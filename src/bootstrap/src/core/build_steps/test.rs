@@ -2653,13 +2653,10 @@ impl Step for Crate {
         let target = self.target;
         let mode = self.mode;
 
-<<<<<<< HEAD
         if builder.config.cmd.coverage() && builder.doc_tests != DocTests::No {
             panic!("Cannot generate coverage for doc tests");
         }
-=======
         // Prepare sysroot
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         // See [field@compile::Std::force_recompile].
         builder.ensure(compile::Std::force_recompile(compiler, compiler.host));
 

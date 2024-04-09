@@ -3,13 +3,11 @@
 
 mod argparse;
 
-use std::ffi::OsString;
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use argparse::LinkerArg;
-
+use self::argparse::LinkerArg;
 use crate::env::{self, Env};
 use crate::error::{Error, LinkerArgsErrorKind};
 use crate::report::Reporter;
@@ -263,33 +261,27 @@ fn cross_compile_test_program(
     extra_args: &[String],
 ) -> Result<(), Error> {
     // We need some C source code,
-    let c_source = r#"int main(void) { return 0; }"#;
+    let c_source = "int main(void) { return 0; }";
 
-    // We need a temp directory we can save the output file to
+    // We need files to save the source and output
     let source_file = temp_dir.join("input.c");
     let object_file = temp_dir.join("output.bin");
-    std::fs::write(&source_file, c_source.as_bytes()).map_err(|error| {
-        Error::WritingSampleProgramFailed {
-            name: "input.c".into(),
-            dest: source_file.clone(),
-            error,
-        }
+    std::fs::write(&source_file, c_source).map_err(|error| Error::WritingSampleProgramFailed {
+        name: "input.c".into(),
+        dest: source_file.clone(),
+        error,
     })?;
 
     // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
-    let mut args: Vec<OsString> = vec![
-        "-fuse-ld=lld".into(),
-        "-B".into(),
-        lld_dir.as_os_str().into(),
-        source_file.as_os_str().into(),
-        "-o".into(),
-        object_file.as_os_str().into(),
-    ];
-    for arg in extra_args {
-        args.push(OsString::from(arg));
-    }
     let mut cc_child = Command::new(cc_path);
-    cc_child.args(&args);
+    cc_child
+        .arg("-fuse-ld=lld")
+        .arg("-B")
+        .arg(lld_dir)
+        .arg(source_file)
+        .arg("-o")
+        .arg(object_file)
+        .args(extra_args);
 
     let _output = run_command(&mut cc_child).map_err(|error| {
         let cc_name =
@@ -343,12 +335,9 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
         error,
     })?;
 
-    // Compile our sample program
-    let args: Vec<OsString> =
-        vec![source_file.as_os_str().into(), "-o".into(), object_file.as_os_str().into()];
-    // Always use the host compiler for this build
+    // Compile our sample program; Always use the host compiler for this build
     let mut cc_child = Command::new("cc");
-    cc_child.args(&args);
+    cc_child.arg(source_file).arg("-o").arg(object_file);
 
     let _output = run_command(&mut cc_child)
         .map_err(|error| Error::sample_program_compilation_failed("cc", error))?;
@@ -458,6 +447,7 @@ pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
 mod tests {
     use super::*;
     use crate::{error::FindBinaryInPathError, test_utils::TestUtils};
+    use std::ffi::OsString;
 
     #[test]
     fn test_find_bundled_lld() {

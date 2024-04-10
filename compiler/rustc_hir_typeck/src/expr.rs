@@ -1390,15 +1390,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         } else {
             // Defer other checks until we're done type checking.
             let mut deferred_cast_checks = self.deferred_cast_checks.borrow_mut();
-            match cast::CastCheck::new(
-                self,
-                e,
-                t_expr,
-                t_cast,
-                t.span,
-                expr.span,
-                hir::Constness::NotConst,
-            ) {
+            match cast::CastCheck::new(self, e, t_expr, t_cast, t.span, expr.span) {
                 Ok(cast_check) => {
                     debug!(
                         "check_expr_cast: deferring cast from {:?} to {:?}: {:?}",
@@ -2031,8 +2023,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 .tcx
                 .sess
                 .source_map()
-                .span_extend_while(range_start.span, |c| c.is_whitespace())
-                .unwrap_or(range_start.span)
+                .span_extend_while_whitespace(range_start.span)
                 .shrink_to_hi()
                 .to(range_end.span);
 

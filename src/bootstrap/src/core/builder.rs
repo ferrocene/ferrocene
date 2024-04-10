@@ -647,6 +647,7 @@ pub enum Kind {
 }
 
 impl Kind {
+<<<<<<< HEAD
     pub fn parse(string: &str) -> Option<Kind> {
         // these strings, including the one-letter aliases, must match the x.py help text
         Some(match string {
@@ -669,6 +670,8 @@ impl Kind {
         })
     }
 
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn as_str(&self) -> &'static str {
         match self {
             Kind::Build => "build",

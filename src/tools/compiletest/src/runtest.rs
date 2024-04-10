@@ -752,6 +752,19 @@ impl<'test> TestCx<'test> {
             Lazy::new(|| Regex::new(r"(?m:^)(?<prefix>(?:  \|)+  Branch \()[0-9]+:").unwrap());
         let coverage = BRANCH_LINE_NUMBER_RE.replace_all(&coverage, "${prefix}LL:");
 
+        // `  |---> MC/DC Decision Region (1:30) to (2:`     => `  |---> MC/DC Decision Region (LL:30) to (LL:`
+        static MCDC_DECISION_LINE_NUMBER_RE: Lazy<Regex> = Lazy::new(|| {
+            Regex::new(r"(?m:^)(?<prefix>(?:  \|)+---> MC/DC Decision Region \()[0-9]+:(?<middle>[0-9]+\) to \()[0-9]+:").unwrap()
+        });
+        let coverage =
+            MCDC_DECISION_LINE_NUMBER_RE.replace_all(&coverage, "${prefix}LL:${middle}LL:");
+
+        // `  |     Condition C1 --> (1:`     => `  |     Condition C1 --> (LL:`
+        static MCDC_CONDITION_LINE_NUMBER_RE: Lazy<Regex> = Lazy::new(|| {
+            Regex::new(r"(?m:^)(?<prefix>(?:  \|)+     Condition C[0-9]+ --> \()[0-9]+:").unwrap()
+        });
+        let coverage = MCDC_CONDITION_LINE_NUMBER_RE.replace_all(&coverage, "${prefix}LL:");
+
         coverage.into_owned()
     }
 
@@ -2353,6 +2366,11 @@ impl<'test> TestCx<'test> {
         rustc.arg("-Z").arg(format!(
             "ignore-directory-in-diagnostics-source-blocks={}",
             home::cargo_home().expect("failed to find cargo home").to_str().unwrap()
+        ));
+        // Similarly, vendored sources shouldn't be shown when running from a dist tarball.
+        rustc.arg("-Z").arg(format!(
+            "ignore-directory-in-diagnostics-source-blocks={}",
+            self.config.find_rust_src_root().unwrap().join("vendor").display(),
         ));
 
         // Optionally prevent default --sysroot if specified in test compile-flags.

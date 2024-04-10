@@ -18,7 +18,7 @@ pub(crate) struct BinBuilder<'a> {
     stderr: Option<String>,
     exit: Option<i32>,
     expected_args: Option<&'a [&'a str]>,
-    dest: BinaryDestinaton,
+    dest: BinaryDestination,
     program: &'static str,
 }
 
@@ -32,7 +32,7 @@ impl<'a> BinBuilder<'a> {
             stderr: None,
             exit: None,
             expected_args: None,
-            dest: BinaryDestinaton::Sysroot,
+            dest: BinaryDestination::Sysroot,
             program: BIN_PROGRAM,
         }
     }
@@ -71,8 +71,8 @@ impl<'a> BinBuilder<'a> {
     }
 
     pub(crate) fn for_target(mut self, target: &str) -> Self {
-        if let BinaryDestinaton::Sysroot = self.dest {
-            self.dest = BinaryDestinaton::Target(target.into());
+        if let BinaryDestination::Sysroot = self.dest {
+            self.dest = BinaryDestination::Target(target.into());
             self
         } else {
             panic!("called for_target() when another destination was already set");
@@ -91,8 +91,8 @@ impl<'a> BinBuilder<'a> {
 
     pub(crate) fn create(self) -> PathBuf {
         let bin_root = match self.dest {
-            BinaryDestinaton::Sysroot => self.utils.sysroot.path().join("bin"),
-            BinaryDestinaton::Target(target) => {
+            BinaryDestination::Sysroot => self.utils.sysroot.path().join("bin"),
+            BinaryDestination::Target(target) => {
                 self.utils.sysroot.path().join("lib").join("rustlib").join(target).join("bin")
             }
         };
@@ -143,7 +143,7 @@ impl<'a> BinBuilder<'a> {
     }
 }
 
-enum BinaryDestinaton {
+enum BinaryDestination {
     Sysroot,
     Target(String),
 }

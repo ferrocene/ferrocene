@@ -727,6 +727,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::tool::SelfTest,
                 crate::ferrocene::tool::flip_link::FlipLink,
                 tool::FerroceneGenerateTarball,
+                tool::FerroceneTraceabilityMatrix,
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,

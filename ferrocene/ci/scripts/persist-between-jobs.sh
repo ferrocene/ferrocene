@@ -75,13 +75,13 @@ case "$1" in
         echo "$(s3_url "${job}")"
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        # On Windows we pass `-h` to make sure we don't get link too long.
-        MAYBE_DEREF=""
+        # On Windows we pass `--exclude` and avoid some symlinks known to be broken
+        MAYBE_EXTRA_ARGS=""
         if [[ "${OSTYPE}" = "msys" ]]; then
-            MAYBE_DEREF="-h"
+            MAYBE_EXTRA_ARGS=" --exclude=build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude=build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude=build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude=build/host"
         fi
         aws s3 cp "$(s3_url "${job}")" - \
-            | ${TAR} -xf- --use-compress-program "zstd --decompress" ${MAYBE_DEREF} --preserve-permissions --format=posix
+            | ${TAR} -xf- --use-compress-program "zstd --decompress" ${MAYBE_EXTRA_ARGS} --preserve-permissions --format=posix
         ;;
     *)
         usage 1>&2

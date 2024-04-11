@@ -9,7 +9,7 @@ impl<const N: u32> Foo<N> {
 fn main() {
     let foo = Foo::<1>::foo();
     let foo = Foo::foo();
-    //~^ error: type annotations needed for `Foo<N>`
+    //~^ ERROR type annotations needed for `Foo<_>`
 }
 
 // ferrocene-annotations: fls_lv7w7aalpwm5

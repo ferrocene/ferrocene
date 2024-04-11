@@ -61,7 +61,7 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        ${TAR} -cf- --exclude build/metrics.json --use-compress-program "zstd -1 -T0" --preserve-order --preserve-permissions --format=posix $@ \
+        ${TAR} -cf- --exclude build/metrics.json --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
             | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         echo "Stored $(s3_url "${CIRCLE_JOB}")"
         ;;
@@ -81,7 +81,7 @@ case "$1" in
             MAYBE_DEREF="-h"
         fi
         aws s3 cp "$(s3_url "${job}")" - \
-            | ${TAR} -xf- --use-compress-program "zstd --decompress" ${MAYBE_DEREF} --preserve-order --preserve-permissions --format=posix
+            | ${TAR} -xf- --use-compress-program "zstd --decompress" ${MAYBE_DEREF} --preserve-permissions --format=posix
         ;;
     *)
         usage 1>&2

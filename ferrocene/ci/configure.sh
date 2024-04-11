@@ -1,8 +1,17 @@
 #!/bin/bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Configures Rust's build system with the Ferrocene-specific configuration.
 #
-# Configures Rust's build system.
+# In order to run the script, you might need to set some environment variables
+# to provide the values of some keys. We recommend to read through the script
+# for the list of variables you need to set and the explaination of them.
+#
+# Note that some of the configuration created by this file interacts with the
+# Ferrous Systems production infrastructure, and will not work outside of it.
+# If you don't have access to that infrastructure, you can invoke the script
+# with the OUTSIDE_FERROUS=1 environment variable.
 
 set -euo pipefail
 IFS=$'\n\t'

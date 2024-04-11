@@ -5,6 +5,7 @@ use anyhow::Error;
 use serde::Deserialize;
 use std::path::Path;
 
+#[derive(Debug)]
 pub(crate) struct Documentation {
     pub(crate) name: String,
     pub(crate) url: String,
@@ -52,6 +53,7 @@ pub(crate) struct CliOption {
     pub(crate) link: String,
 }
 
+/// Read `path` and parse it as [`TraceabilityIds`] (`ids` field of [`Documentation`]).
 pub(crate) fn load(name: &str, path: &Path, url: &str) -> Result<Documentation, Error> {
     Ok(Documentation {
         name: name.into(),

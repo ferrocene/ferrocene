@@ -44,9 +44,10 @@ fi
 # Systems has access to in the configuration.
 is_internal() {
     if [[ -z "${OUTSIDE_FERROUS+x}" ]]; then
+        return 0
+    else
         return 1
     fi
-    return 0
 }
 
 ##################################################################

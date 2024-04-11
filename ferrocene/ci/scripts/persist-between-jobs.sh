@@ -61,7 +61,9 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        ${TAR} -cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        ${TAR} -cf- --exclude build/metrics.json --use-compress-program "zstd -1 -T0" --preserve-order --preserve-permissions --format=posix $@ \
+            | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        echo "Stored $(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -70,9 +72,16 @@ case "$1" in
         fi
         job="$2"
 
+        echo "$(s3_url "${job}")"
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        aws s3 cp "$(s3_url "${job}")" - | zstd --decompress --stdout | ${TAR} -xf-
+        # On Windows we pass `-h` to make sure we don't get link too long.
+        MAYBE_DEREF=""
+        if [[ "${OSTYPE}" = "msys" ]]; then
+            MAYBE_DEREF="-h"
+        fi
+        aws s3 cp "$(s3_url "${job}")" - \
+            | ${TAR} -xf- --use-compress-program "zstd --decompress" ${MAYBE_DEREF} --preserve-order --preserve-permissions --format=posix
         ;;
     *)
         usage 1>&2

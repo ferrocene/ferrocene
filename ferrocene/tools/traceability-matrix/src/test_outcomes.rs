@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use anyhow::{Context, Error};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::path::Path;
+
+use anyhow::Context;
 
 const EXPECTED_FORMAT_VERSION: usize = 1;
 
@@ -18,7 +19,7 @@ pub(crate) struct TestOutcomes {
 }
 
 impl TestOutcomes {
-    pub(crate) fn load(directory: &Path) -> Result<Self, Error> {
+    pub(crate) fn load(directory: &Path) -> anyhow::Result<Self> {
         let mut test_outcomes = TestOutcomes::default();
 
         for entry in std::fs::read_dir(directory)? {

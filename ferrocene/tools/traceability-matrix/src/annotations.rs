@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::test_outcomes::TestOutcomes;
-use anyhow::Error;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
+
+use crate::test_outcomes::TestOutcomes;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct AnnotatedFile {
@@ -70,7 +70,7 @@ impl Annotations {
         dir: &Path,
         src_base: &Path,
         test_outcomes: Option<&TestOutcomes>,
-    ) -> Result<(), Error> {
+    ) -> anyhow::Result<()> {
         for entry in std::fs::read_dir(dir)? {
             let path = entry?.path();
             if !path.is_file() {
@@ -89,7 +89,7 @@ impl Annotations {
         file: &Path,
         src_base: &Path,
         test_outcomes: Option<&TestOutcomes>,
-    ) -> Result<(), Error> {
+    ) -> anyhow::Result<()> {
         #[derive(serde::Deserialize)]
         struct JsonOutput {
             bulk_annotations_file_name: String,
@@ -205,7 +205,7 @@ mod tests {
     use tempfile::{NamedTempFile, TempDir};
 
     #[test]
-    fn test_load_file() -> Result<(), Error> {
+    fn test_load_file() -> anyhow::Result<()> {
         let file = NamedTempFile::new()?;
         std::fs::write(file.path(), annotations_file_1()?)?;
 
@@ -251,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_load_directory() -> Result<(), Error> {
+    fn test_load_directory() -> anyhow::Result<()> {
         let dir = TempDir::new()?;
         std::fs::write(dir.path().join("foo.json"), annotations_file_1()?)?;
         std::fs::write(dir.path().join("bar.json"), annotations_file_2()?)?;
@@ -317,7 +317,7 @@ mod tests {
         }
     }
 
-    fn annotations_file_1() -> Result<Vec<u8>, Error> {
+    fn annotations_file_1() -> anyhow::Result<Vec<u8>> {
         Ok(serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
@@ -365,7 +365,7 @@ mod tests {
         }))?)
     }
 
-    fn annotations_file_2() -> Result<Vec<u8>, Error> {
+    fn annotations_file_2() -> anyhow::Result<Vec<u8>> {
         Ok(serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
@@ -386,7 +386,7 @@ mod tests {
         }))?)
     }
 
-    fn annotations_file_3() -> Result<Vec<u8>, Error> {
+    fn annotations_file_3() -> anyhow::Result<Vec<u8>> {
         Ok(serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {

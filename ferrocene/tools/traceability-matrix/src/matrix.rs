@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::annotations::{AnnotatedFile, Annotations};
-use crate::documentations::Documentation;
-use anyhow::Error;
 use std::collections::{BTreeSet, HashSet};
 use std::fmt::Debug;
 use std::ops::Deref;
+
+use crate::annotations::{AnnotatedFile, Annotations};
+use crate::documentations::Documentation;
 
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
     singular: "section",
@@ -32,7 +32,7 @@ pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
 pub(crate) fn prepare(
     documentations: &[Documentation],
     annotations: &Annotations,
-) -> Result<TraceabilityMatrix, Error> {
+) -> anyhow::Result<TraceabilityMatrix> {
     let mut matrix = TraceabilityMatrix {
         paragraphs: MatrixAnalysis::new(&ELEMENT_KIND_PARAGRAPH),
         sections: MatrixAnalysis::new(&ELEMENT_KIND_SECTION),
@@ -359,7 +359,7 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn test_prepare() -> Result<(), Error> {
+    fn test_prepare() -> anyhow::Result<()> {
         let documentations = [Documentation {
             name: "FLS".into(),
             url: "../fls".into(),

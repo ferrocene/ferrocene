@@ -55,9 +55,9 @@ low-level to most general and high-level:
 * A *runner* is a server that executes triggered workflows.
 
 While Ferrocene does not use GitHub Actions to perform CI builds as of today,
-GitHub Actions are used to automate various Ferrocene processes that would
+GitHub Actions is used to automate various Ferrocene processes that would
 otherwise require manual intervention, such as opening daily PRs or performing
-releases.The following screenshot shows the GitHub Actions of the Ferrocene
+releases. The following screenshot shows the GitHub Actions of the Ferrocene
 GitHub repository.
 
 .. figure:: figures/ferrocene-github-actions.png

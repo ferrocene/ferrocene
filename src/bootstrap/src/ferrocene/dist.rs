@@ -114,6 +114,7 @@ impl Step for SourceTarball {
             "x",
             "x.py",
             "x.ps1",
+            ".gitmodules",
         ];
         const EXTRA_CARGO_TOMLS: &[&str] = &[
             "compiler/rustc_codegen_cranelift/Cargo.toml",

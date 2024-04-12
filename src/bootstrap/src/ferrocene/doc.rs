@@ -3,7 +3,7 @@
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::sign::CacheSignatureFiles;
+use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::collections::HashMap;
 use std::ffi::OsString;

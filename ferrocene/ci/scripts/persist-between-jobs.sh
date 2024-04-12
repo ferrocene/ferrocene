@@ -61,12 +61,16 @@ case "$1" in
         #
         # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
         # rather than stdout by default.
-        MAYBE_EXTRA_ARGS=""
         if [[ "${OSTYPE}" = "msys" ]]; then
-            MAYBE_EXTRA_ARGS=" --exclude=build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude=build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude=build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude=build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude=build/host"
+            "${TAR}" -cf- --exclude build/metrics.json \
+                --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude build/host \
+                --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
+                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        else
+            "${TAR}" -cf- --exclude build/metrics.json \
+                --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
+                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         fi
-        ${TAR} -cf- --exclude build/metrics.json ${MAYBE_EXTRA_ARGS} --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
-            | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         echo "Stored $(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
@@ -81,7 +85,7 @@ case "$1" in
         # rather than stdout by default.
         # On Windows we pass `--exclude` and avoid some symlinks known to be broken
         aws s3 cp "$(s3_url "${job}")" - \
-            | ${TAR} -xf- --use-compress-program "zstd --decompress" --preserve-permissions --format=posix
+            | "${TAR}" -xf- --use-compress-program "zstd --decompress" --preserve-permissions --format=posix
         ;;
     *)
         usage 1>&2

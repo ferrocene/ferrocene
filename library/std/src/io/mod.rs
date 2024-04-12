@@ -311,14 +311,14 @@ pub use self::buffered::WriterPanicked;
 #[unstable(feature = "raw_os_error_ty", issue = "107792")]
 pub use self::error::RawOsError;
 pub(crate) use self::stdio::attempt_print_to_stderr;
-#[unstable(feature = "internal_output_capture", issue = "none")]
-#[doc(no_inline, hidden)]
-pub use self::stdio::set_output_capture;
 #[stable(feature = "is_terminal", since = "1.70.0")]
 pub use self::stdio::IsTerminal;
 #[unstable(feature = "print_internals", issue = "none")]
 #[doc(hidden)]
 pub use self::stdio::{_eprint, _print};
+#[unstable(feature = "internal_output_capture", issue = "none")]
+#[doc(no_inline, hidden)]
+pub use self::stdio::{set_output_capture, try_set_output_capture};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::{
     buffered::{BufReader, BufWriter, IntoInnerError, LineWriter},
@@ -385,12 +385,7 @@ where
     let mut g = Guard { len: buf.len(), buf: buf.as_mut_vec() };
     let ret = f(g.buf);
     if str::from_utf8(&g.buf[g.len..]).is_err() {
-        ret.and_then(|_| {
-            Err(error::const_io_error!(
-                ErrorKind::InvalidData,
-                "stream did not contain valid UTF-8"
-            ))
-        })
+        ret.and_then(|_| Err(Error::INVALID_UTF8))
     } else {
         g.len = g.buf.len();
         ret
@@ -566,11 +561,7 @@ pub(crate) fn default_read_exact<R: Read + ?Sized>(this: &mut R, mut buf: &mut [
             Err(e) => return Err(e),
         }
     }
-    if !buf.is_empty() {
-        Err(error::const_io_error!(ErrorKind::UnexpectedEof, "failed to fill whole buffer"))
-    } else {
-        Ok(())
-    }
+    if !buf.is_empty() { Err(Error::READ_EXACT_EOF) } else { Ok(()) }
 }
 
 pub(crate) fn default_read_buf<F>(read: F, mut cursor: BorrowedCursor<'_>) -> Result<()>
@@ -595,10 +586,7 @@ pub(crate) fn default_read_buf_exact<R: Read + ?Sized>(
         }
 
         if cursor.written() == prev_written {
-            return Err(error::const_io_error!(
-                ErrorKind::UnexpectedEof,
-                "failed to fill whole buffer"
-            ));
+            return Err(Error::READ_EXACT_EOF);
         }
     }
 
@@ -1709,10 +1697,7 @@ pub trait Write {
         while !buf.is_empty() {
             match self.write(buf) {
                 Ok(0) => {
-                    return Err(error::const_io_error!(
-                        ErrorKind::WriteZero,
-                        "failed to write whole buffer",
-                    ));
+                    return Err(Error::WRITE_ALL_EOF);
                 }
                 Ok(n) => buf = &buf[n..],
                 Err(ref e) if e.is_interrupted() => {}
@@ -1777,10 +1762,7 @@ pub trait Write {
         while !bufs.is_empty() {
             match self.write_vectored(bufs) {
                 Ok(0) => {
-                    return Err(error::const_io_error!(
-                        ErrorKind::WriteZero,
-                        "failed to write whole buffer",
-                    ));
+                    return Err(Error::WRITE_ALL_EOF);
                 }
                 Ok(n) => IoSlice::advance_slices(&mut bufs, n),
                 Err(ref e) if e.is_interrupted() => {}

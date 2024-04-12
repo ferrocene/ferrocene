@@ -5,6 +5,9 @@
 # Unlike Windows/Mac executors, Macs do not come with awscli by default
 brew install awscli cmake ninja zstd
 
+# Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
+brew install --cask gcc-arm-embedded
+
 # There are a number of reports of very slow uploads in Mac VMs due to TSO, disable it.
 # https://github.com/aws/aws-sdk/issues/469
 # https://github.com/cypress-io/cypress/issues/28033#issuecomment-1879102700

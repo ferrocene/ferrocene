@@ -159,7 +159,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
+      FERROCENE_TARGETS: x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -294,7 +294,7 @@ jobs:
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
+      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
     steps:
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
@@ -368,7 +368,7 @@ jobs:
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
-      - ferrocene-job-dist:
+    - ferrocene-job-dist:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
@@ -378,7 +378,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -392,7 +392,7 @@ jobs:
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1

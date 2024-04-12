@@ -86,46 +86,66 @@ impl MyContext {
 pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
     use core::ptr;
 
+    // Capture the initial context to start walking from.
     let mut context = core::mem::zeroed::<MyContext>();
     RtlCaptureContext(&mut context.0);
 
-    // Call `RtlVirtualUnwind` to find the previous stack frame, walking until we hit ip = 0.
-    while context.ip() != 0 {
+    loop {
+        let ip = context.ip();
+
         // The base address of the module containing the function will be stored here
         // when RtlLookupFunctionEntry returns successfully.
         let mut base = 0;
-
-        let fn_entry = RtlLookupFunctionEntry(context.ip(), &mut base, ptr::null_mut());
+        let fn_entry = RtlLookupFunctionEntry(ip, &mut base, ptr::null_mut());
         if fn_entry.is_null() {
+            // No function entry could be found - this may indicate a corrupt
+            // stack or that a binary was unloaded (amongst other issues). Stop
+            // walking and don't call the callback as we can't be confident in
+            // this frame or the rest of the stack.
             break;
         }
 
         let frame = super::Frame {
             inner: Frame {
                 base_address: base as *mut c_void,
-                ip: context.ip() as *mut c_void,
+                ip: ip as *mut c_void,
                 sp: context.sp() as *mut c_void,
                 #[cfg(not(target_env = "gnu"))]
                 inline_context: None,
             },
         };
 
+        // We've loaded all the info about the current frame, so now call the
+        // callback.
         if !cb(&frame) {
+            // Callback told us to stop, so we're done.
             break;
         }
 
+        // Unwind to the next frame.
+        let previous_ip = ip;
+        let previous_sp = context.sp();
         let mut handler_data = 0usize;
         let mut establisher_frame = 0;
-
         RtlVirtualUnwind(
             0,
             base,
-            context.ip(),
+            ip,
             fn_entry,
             &mut context.0,
             ptr::addr_of_mut!(handler_data).cast::<PVOID>(),
             &mut establisher_frame,
             ptr::null_mut(),
         );
+
+        // RtlVirtualUnwind indicates the end of the stack in two different ways:
+        // * On x64, it sets the instruction pointer to 0.
+        // * On ARM64, it leaves the context unchanged (easiest way to check is
+        //   to see if the instruction and stack pointers are the same).
+        // If we detect either of these, then unwinding is completed.
+        let ip = context.ip();
+        if ip == 0 || (ip == previous_ip && context.sp() == previous_sp) {
+            break;
+        }
     }
 }

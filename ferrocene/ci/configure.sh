@@ -6,7 +6,7 @@
 #
 # In order to run the script, you might need to set some environment variables
 # to provide the values of some keys. We recommend to read through the script
-# for the list of variables you need to set and the explaination of them.
+# for the list of variables you need to set and the explanation of them.
 #
 # Note that some of the configuration created by this file interacts with the
 # Ferrous Systems production infrastructure, and will not work outside of it.

@@ -8,3 +8,7 @@ fn main() {
     let x: &i32 = &42;
     let y = x as *const i32; //~ ERROR [E0381]
 }
+
+//
+// ferrocene-annotations: fls_3xvm61x0t251
+// Initialization

@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# Unlike Windows/Mac executors, Macs do not come with awscli by default
-brew install awscli cmake ninja zstd
+# Unlike Windows/Linux executors, Macs do not come with awscli by default
+# On Mac, XCode's LLVM cannot build for WASM.
+brew install awscli cmake ninja zstd llvm
 
 # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
 brew install --cask gcc-arm-embedded

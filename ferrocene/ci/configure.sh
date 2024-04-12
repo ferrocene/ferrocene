@@ -119,6 +119,13 @@ add --release-description="Ferrocene by Ferrous Systems"
 #                                                                            #
 ##############################################################################
 
+if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    # On Mac, the bundled XCode cannot produce WASM binaries. Use the `brew` provided LLVM
+    add --set target.wasm32-unknown-unknown.cc=/opt/homebrew/opt/llvm/bin/clang
+    add --set target.wasm32-unknown-unknown.cxx=/opt/homebrew/opt/llvm/bin/clang
+    add --set target.wasm32-unknown-unknown.ar=/opt/homebrew/opt/llvm/bin/llvm-ar
+fi
+
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).
 #

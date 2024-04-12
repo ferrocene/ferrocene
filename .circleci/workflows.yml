@@ -489,6 +489,7 @@ jobs:
       shell: bash.exe -euo pipefail
     environment:
       FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: x86_64-pc-windows-msvc,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.cene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std

@@ -154,6 +154,18 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     # because we target the GNU ABI, so switching the build platform to the
     # MSVC one is correct.
     add --build="x86_64-pc-windows-msvc"
+    add --set target.aarch64-unknown-none.cc=clang
+    add --set target.aarch64-unknown-none.cxx=clang
+    add --set target.aarch64-unknown-none.ar=arm-none-eabi-ar
+    add --set target.thumbv7em-none-eabi.cc=clang
+    add --set target.thumbv7em-none-eabi.cxx=clang
+    add --set target.thumbv7em-none-eabi.ar=arm-none-eabi-ar
+    add --set target.thumbv7em-none-eabihf.cc=clang
+    add --set target.thumbv7em-none-eabihf.cxx=clang
+    add --set target.thumbv7em-none-eabihf.ar=arm-none-eabi-ar
+    add --set target.wasm32-unknown-unknown.cc=clang
+    add --set target.wasm32-unknown-unknown.cxx=clang
+    add --set target.wasm32-unknown-unknown.ar=lld-link
 elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
     add --build="x86_64-unknown-linux-gnu"
 else

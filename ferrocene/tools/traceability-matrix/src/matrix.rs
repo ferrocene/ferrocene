@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::ops::Deref;
 
 use crate::annotations::{AnnotatedFile, Annotations};
-use crate::documentations::Documentation;
+use crate::documentations::{CliOption, Documentation, Paragraph, Section};
 
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
     singular: "section",
@@ -103,14 +103,7 @@ impl TraceabilityMatrix {
                 let has_annotations = self.sections.add(
                     annotations,
                     &extra_section_tests,
-                    Element {
-                        kind: &ELEMENT_KIND_SECTION,
-                        number: Some(ElementNumber(section.number.clone())),
-                        title: Some(section.title.clone()),
-                        id: section.id.clone(),
-                        link: to_url(&section.link),
-                        page: matrix_page.clone(),
-                    },
+                    Element::section(&matrix_page, section, to_url(&section.link)),
                 );
 
                 let extra_paragraph_tests = has_annotations
@@ -125,14 +118,7 @@ impl TraceabilityMatrix {
                     self.paragraphs.add(
                         annotations,
                         &extra_paragraph_tests,
-                        Element {
-                            kind: &ELEMENT_KIND_PARAGRAPH,
-                            id: paragraph.id.clone(),
-                            number: Some(ElementNumber(paragraph.number.clone())),
-                            title: None,
-                            link: to_url(&paragraph.link),
-                            page: matrix_page.clone(),
-                        },
+                        Element::paragraph(&matrix_page, paragraph, to_url(&paragraph.link)),
                     );
                 }
             }
@@ -142,14 +128,7 @@ impl TraceabilityMatrix {
                 self.cli_options.add(
                     annotations,
                     &[],
-                    Element {
-                        kind: &ELEMENT_KIND_CLI_OPTION,
-                        id: option.id.clone(),
-                        number: None,
-                        title: Some(format!("{} {}", option.program, option.option)),
-                        link: to_url(&option.link),
-                        page: matrix_page.clone(),
-                    },
+                    Element::cli_option(&matrix_page, option, to_url(&option.link)),
                 );
             }
         }
@@ -284,6 +263,39 @@ impl Element {
             (Some(number), None) => number.0.clone(),
             (None, Some(title)) => title.clone(),
             (None, None) => "no name".into(),
+        }
+    }
+
+    fn cli_option(matrix_page: &Page, option: &CliOption, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_CLI_OPTION,
+            id: option.id.clone(),
+            number: None,
+            title: Some(format!("{} {}", option.program, option.option)),
+            link,
+            page: matrix_page.clone(),
+        }
+    }
+
+    fn paragraph(matrix_page: &Page, paragraph: &Paragraph, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_PARAGRAPH,
+            id: paragraph.id.clone(),
+            number: Some(ElementNumber(paragraph.number.clone())),
+            title: None,
+            link,
+            page: matrix_page.clone(),
+        }
+    }
+
+    fn section(matrix_page: &Page, section: &Section, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_SECTION,
+            number: Some(ElementNumber(section.number.clone())),
+            title: Some(section.title.clone()),
+            id: section.id.clone(),
+            link,
+            page: matrix_page.clone(),
         }
     }
 }

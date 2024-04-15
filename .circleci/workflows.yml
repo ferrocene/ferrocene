@@ -686,12 +686,7 @@ workflows:
             - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-build:
-          requires:
-            - x86_64-windows-llvm
-      - x86_64-windows-dist:
-          requires:
-            - x86_64-windows-build
+      - x86_64-windows-dist: {}
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist

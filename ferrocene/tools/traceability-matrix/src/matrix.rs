@@ -40,82 +40,10 @@ pub(crate) fn prepare(
         unknown_annotations: Vec::new(),
     };
 
-    let mut seen_ids = HashSet::new();
-    for documentation in documentations {
-        let to_url = |url: &str| format!("{}/{url}", documentation.url);
-
-        for page in &documentation.ids.documents {
-            let matrix_page = Page {
-                documentation: documentation.name.clone(),
-                name: page.title.clone(),
-                link: to_url(&page.link),
-            };
-
-            for section in &page.sections {
-                seen_ids.insert(&section.id);
-
-                let mut extra_section_tests = Vec::new();
-                if section.paragraphs.is_empty() {
-                    extra_section_tests.push(LinkTest::NoParagraphsInSection);
-                }
-                if page.informational || section.informational {
-                    extra_section_tests.push(LinkTest::Informational);
-                }
-                let has_annotations = matrix.sections.add(
-                    annotations,
-                    &extra_section_tests,
-                    Element {
-                        kind: &ELEMENT_KIND_SECTION,
-                        number: Some(ElementNumber(section.number.clone())),
-                        title: Some(section.title.clone()),
-                        id: section.id.clone(),
-                        link: to_url(&section.link),
-                        page: matrix_page.clone(),
-                    },
-                );
-
-                let mut extra_paragraph_tests = Vec::new();
-                if has_annotations {
-                    extra_paragraph_tests.push(LinkTest::InheritFromSection {
-                        section_id: section.id.clone(),
-                        section_number: ElementNumber(section.number.clone()),
-                    });
-                }
-
-                for paragraph in &section.paragraphs {
-                    seen_ids.insert(&paragraph.id);
-                    matrix.paragraphs.add(
-                        annotations,
-                        &extra_paragraph_tests,
-                        Element {
-                            kind: &ELEMENT_KIND_PARAGRAPH,
-                            id: paragraph.id.clone(),
-                            number: Some(ElementNumber(paragraph.number.clone())),
-                            title: None,
-                            link: to_url(&paragraph.link),
-                            page: matrix_page.clone(),
-                        },
-                    );
-                }
-            }
-
-            for option in &page.options {
-                seen_ids.insert(&option.id);
-                matrix.cli_options.add(
-                    annotations,
-                    &[],
-                    Element {
-                        kind: &ELEMENT_KIND_CLI_OPTION,
-                        id: option.id.clone(),
-                        number: None,
-                        title: Some(format!("{} {}", option.program, option.option)),
-                        link: to_url(&option.link),
-                        page: matrix_page.clone(),
-                    },
-                );
-            }
-        }
-    }
+    let seen_ids = documentations
+        .iter()
+        .flat_map(|documentation| matrix.analyze_document(annotations, documentation))
+        .collect::<HashSet<_>>();
 
     // Detect which tests link to unknown paragraphs.
     for (annotation, files) in &annotations.ids {
@@ -145,6 +73,87 @@ pub(crate) struct TraceabilityMatrix {
 impl TraceabilityMatrix {
     pub(crate) fn analyses_by_kind(&self) -> impl Iterator<Item = &MatrixAnalysis> {
         [&self.sections, &self.paragraphs, &self.cli_options].into_iter()
+    }
+
+    fn analyze_document<'a>(
+        &mut self,
+        annotations: &Annotations,
+        documentation: &'a Documentation,
+    ) -> HashSet<&'a String> {
+        let to_url = |url: &str| format!("{}/{url}", documentation.url);
+
+        let mut seen_ids = HashSet::new();
+        for page in &documentation.ids.documents {
+            let matrix_page = Page {
+                documentation: documentation.name.clone(),
+                name: page.title.clone(),
+                link: to_url(&page.link),
+            };
+
+            for section in &page.sections {
+                seen_ids.insert(&section.id);
+
+                let mut extra_section_tests = Vec::new();
+                if section.paragraphs.is_empty() {
+                    extra_section_tests.push(LinkTest::NoParagraphsInSection);
+                }
+                if page.informational || section.informational {
+                    extra_section_tests.push(LinkTest::Informational);
+                }
+                let has_annotations = self.sections.add(
+                    annotations,
+                    &extra_section_tests,
+                    Element {
+                        kind: &ELEMENT_KIND_SECTION,
+                        number: Some(ElementNumber(section.number.clone())),
+                        title: Some(section.title.clone()),
+                        id: section.id.clone(),
+                        link: to_url(&section.link),
+                        page: matrix_page.clone(),
+                    },
+                );
+
+                let extra_paragraph_tests = has_annotations
+                    .then(|| LinkTest::InheritFromSection {
+                        section_id: section.id.clone(),
+                        section_number: ElementNumber(section.number.clone()),
+                    })
+                    .map_or_else(Vec::new, |lt| vec![lt]);
+
+                for paragraph in &section.paragraphs {
+                    seen_ids.insert(&paragraph.id);
+                    self.paragraphs.add(
+                        annotations,
+                        &extra_paragraph_tests,
+                        Element {
+                            kind: &ELEMENT_KIND_PARAGRAPH,
+                            id: paragraph.id.clone(),
+                            number: Some(ElementNumber(paragraph.number.clone())),
+                            title: None,
+                            link: to_url(&paragraph.link),
+                            page: matrix_page.clone(),
+                        },
+                    );
+                }
+            }
+
+            for option in &page.options {
+                seen_ids.insert(&option.id);
+                self.cli_options.add(
+                    annotations,
+                    &[],
+                    Element {
+                        kind: &ELEMENT_KIND_CLI_OPTION,
+                        id: option.id.clone(),
+                        number: None,
+                        title: Some(format!("{} {}", option.program, option.option)),
+                        link: to_url(&option.link),
+                        page: matrix_page.clone(),
+                    },
+                );
+            }
+        }
+        seen_ids
     }
 }
 
@@ -353,10 +362,12 @@ impl<T: Into<String>> From<T> for ElementNumber {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::annotations::AnnotationSource;
-    use crate::documentations::{CliOption, Document, Paragraph, Section, TraceabilityIds};
+
     use std::collections::BTreeMap;
     use std::path::Path;
+
+    use crate::annotations::AnnotationSource;
+    use crate::documentations::{Document, TraceabilityIds};
 
     #[test]
     fn test_prepare() -> anyhow::Result<()> {

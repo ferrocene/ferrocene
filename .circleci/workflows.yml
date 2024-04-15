@@ -352,6 +352,7 @@ jobs:
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
           os: darwin
@@ -369,20 +370,6 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
     - ferrocene-job-dist:
-          os: darwin
-          restore-from-job: aarch64-darwin-build
-
-  aarch64-darwin-dist-targets:
-    macos:
-      xcode: "15.3.0"
-    resource_class: macos.m1.large.gen1 # 8 cores
-    environment:
-      FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
-      SCRIPT: |
-        ./x.py --stage 2 dist rust-std
-    steps:
-      - ferrocene-job-dist:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
@@ -614,14 +601,10 @@ workflows:
       - aarch64-darwin-dist-tools:
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-dist-targets:
-          requires:
-            - aarch64-darwin-build
       - aarch64-darwin-self-test:
           requires:
             - aarch64-darwin-dist
             - aarch64-darwin-dist-tools
-            - aarch64-darwin-dist-targets
 
       - finish-build:
           requires:

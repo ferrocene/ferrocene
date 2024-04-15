@@ -1199,7 +1199,7 @@ dependencies = [
  "miropt-test-tools",
  "once_cell",
  "regex",
- "rustfix",
+ "rustfix 0.8.1",
  "serde",
  "serde_json",
  "tracing",
@@ -5052,7 +5052,6 @@ dependencies = [
  "either",
  "field-offset",
  "gsgdt",
- "measureme",
  "polonius-engine",
  "rustc-rayon",
  "rustc-rayon-core",
@@ -5643,6 +5642,18 @@ dependencies = [
  "log",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "rustfix"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81864b097046da5df3758fdc6e4822bbb70afa06317e8ca45ea1b51cb8c5e5a4"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]
@@ -6492,7 +6503,6 @@ dependencies = [
 name = "tidy"
 version = "0.1.0"
 dependencies = [
- "cargo-platform",
  "cargo_metadata 0.15.4",
  "ignore",
  "lazy_static",
@@ -6866,7 +6876,7 @@ dependencies = [
  "prettydiff",
  "regex",
  "rustc_version",
- "rustfix",
+ "rustfix 0.6.1",
  "serde",
  "serde_json",
  "tempfile",
@@ -6893,7 +6903,7 @@ dependencies = [
  "prettydiff",
  "regex",
  "rustc_version",
- "rustfix",
+ "rustfix 0.6.1",
  "serde",
  "serde_json",
  "spanned",

@@ -1,8 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
+  - package-ecosystem: gitsubmodule
+    directory: /
     allow:
-      - dependency-name: "ferrocene/tools/flip-link"
+      - dependency-name: ferrocene/tools/flip-link
     schedule:
-      interval: "daily"
+      interval: daily
+      time: "05:00"
+    labels:
+      - automation
+      - backport:never
+  - package-ecosystem: pip
+    versioning-strategy: lockfile-only
+    directory: /ferrocene/doc/sphinx-shared-resources
+    schedule:
+      interval: daily
+      time: "05:00"
+    labels:
+      - automation
+      - backport:never

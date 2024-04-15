@@ -111,6 +111,7 @@
 // tidy-alphabetical-start
 #![cfg_attr(bootstrap, feature(associated_type_bounds))]
 #![feature(array_ptr_get)]
+#![feature(asm_experimental_arch)]
 #![feature(char_indices_offset)]
 #![feature(const_align_of_val)]
 #![feature(const_align_of_val_raw)]
@@ -158,7 +159,6 @@
 #![feature(const_slice_from_raw_parts_mut)]
 #![feature(const_slice_from_ref)]
 #![feature(const_slice_index)]
-#![feature(const_slice_ptr_len)]
 #![feature(const_slice_split_at_mut)]
 #![feature(const_str_from_utf8_unchecked_mut)]
 #![feature(const_strict_overflow_ops)]
@@ -178,6 +178,7 @@
 #![feature(ip_bits)]
 #![feature(is_ascii_octdigit)]
 #![feature(isqrt)]
+#![feature(link_cfg)]
 #![feature(maybe_uninit_uninit_array)]
 #![feature(non_null_convenience)]
 #![feature(offset_of_enum)]

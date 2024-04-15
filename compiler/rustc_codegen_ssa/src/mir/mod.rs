@@ -2,6 +2,7 @@ use crate::base;
 use crate::traits::*;
 use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
+use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::mir;
 use rustc_middle::mir::traversal;
 use rustc_middle::mir::UnwindTerminateReason;
@@ -289,6 +290,12 @@ fn arg_local_refs<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 
     let mut num_untupled = None;
 
+    let codegen_fn_attrs = bx.tcx().codegen_fn_attrs(fx.instance.def_id());
+    let naked = codegen_fn_attrs.flags.contains(CodegenFnAttrFlags::NAKED);
+    if naked {
+        return vec![];
+    }
+
     let args = mir
         .args_iter()
         .enumerate()
@@ -336,7 +343,7 @@ fn arg_local_refs<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 
             if fx.fn_abi.c_variadic && arg_index == fx.fn_abi.args.len() {
                 let va_list = PlaceRef::alloca(bx, bx.layout_of(arg_ty));
-                bx.va_start(va_list.llval);
+                bx.va_start(va_list.val.llval);
 
                 return LocalRef::Place(va_list);
             }

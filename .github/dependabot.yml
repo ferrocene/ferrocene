@@ -6,3 +6,8 @@ updates:
       - dependency-name: "ferrocene/tools/flip-link"
     schedule:
       interval: "daily"
+  - package-ecosystem: pip
+    versioning-strategy: lockfile-only
+    directory: /ferrocene/doc/sphinx-shared-resources
+    schedule:
+      interval: weekly

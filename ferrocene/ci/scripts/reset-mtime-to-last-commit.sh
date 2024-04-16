@@ -20,15 +20,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-LAST_COMMIT_DATE=""
 if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
     # Darwin's bash does not support RFC2822 on `touch`
     # `%ct` outputs the commit date formatted according UNIX timestamp
-    LAST_COMMIT_DATE="$(git log -1 "--format=%ct" HEAD)"
+    git_log_format="%ct"
+    touch_flag="-t"
 else
     # `%cD` outputs the commit date formatted according to RFC2822.
-    LAST_COMMIT_DATE="$(git log -1 "--format=%cD" HEAD)"
+    git_log_format="%cD"
+    touch_flag="-d"
 fi
+last_commit_date="$(git log -1 "--format=${git_log_format}" HEAD)"
 
 
 project_root="$(pwd)"
@@ -46,12 +48,7 @@ for repo in . $(git config --file .gitmodules --get-regexp path | awk '{ print $
     #
     # `--` instructs touch to treat all following arguments as files, even if
     # their names start with `-` (and would thus be interpreted as an option).
-    if [[ "${OSTYPE}" =~ ^darwin.* ]]; then
-        # Darwin's bash does not support RFC2822 on `touch`, use a UNIX timestamp
-        git ls-tree HEAD -rz --name-only | xargs -0 touch -c -t "${LAST_COMMIT_DATE}" --
-    else
-        git ls-tree HEAD -rz --name-only | xargs -0 touch -c -d "${LAST_COMMIT_DATE}" --
-    fi
+    git ls-tree HEAD -rz --name-only | xargs -0 touch -c ${touch_flag} "${last_commit_date}" --
 done
 
-echo "finished resetting the mtime of all tracked files to ${LAST_COMMIT_DATE}"
+echo "finished resetting the mtime of all tracked files to ${last_commit_date}"

@@ -670,7 +670,9 @@ workflows:
             - aarch64-darwin-dist-tools
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist: {}
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-llvm
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist

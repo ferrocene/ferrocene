@@ -49,7 +49,7 @@ pub(crate) enum AnnotationSource {
     Makefile,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(crate) struct Annotations {
     pub(crate) ids: BTreeMap<String, BTreeSet<AnnotatedFile>>,
     pub(crate) ignored_tests: BTreeMap<String, BTreeSet<String>>,
@@ -58,11 +58,7 @@ pub(crate) struct Annotations {
 
 impl Annotations {
     pub(crate) fn new() -> Self {
-        Annotations {
-            ids: BTreeMap::new(),
-            ignored_tests: BTreeMap::new(),
-            considers_ignored_tests: true,
-        }
+        Annotations { considers_ignored_tests: true, ..Default::default() }
     }
 
     pub(crate) fn load_directory(
@@ -71,6 +67,12 @@ impl Annotations {
         src_base: &Path,
         test_outcomes: Option<&TestOutcomes>,
     ) -> anyhow::Result<()> {
+        // Mark the annotations as not considering ignored tests as soon as test
+        // outcomes are not provided once, even if they were provided before.
+        if test_outcomes.is_none() {
+            self.considers_ignored_tests = false;
+        }
+
         for entry in std::fs::read_dir(dir)? {
             let path = entry?.path();
             if !path.is_file() {
@@ -84,7 +86,7 @@ impl Annotations {
         Ok(())
     }
 
-    pub(crate) fn load_file(
+    fn load_file(
         &mut self,
         file: &Path,
         src_base: &Path,
@@ -106,12 +108,6 @@ impl Annotations {
         struct JsonAnnotation {
             id: String,
             file: PathBuf,
-        }
-
-        // Mark the annotations as not considering ignored tests as soon as test outcomes are not
-        // provided once, even if they were provided before.
-        if test_outcomes.is_none() {
-            self.considers_ignored_tests = false;
         }
 
         let output: JsonOutput = serde_json::from_slice(&std::fs::read(file)?)?;
@@ -304,7 +300,7 @@ mod tests {
             annotations.ids,
         );
         let expected = BTreeMap::from([("example/ignored.rs".into(), BTreeSet::default())]);
-        assert_eq!(expected, annotations.ignored_tests,);
+        assert_eq!(expected, annotations.ignored_tests);
 
         Ok(())
     }
@@ -317,8 +313,8 @@ mod tests {
         }
     }
 
-    fn annotations_file_1() -> anyhow::Result<Vec<u8>> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_1() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/foo.rs",
@@ -362,11 +358,11 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 
-    fn annotations_file_2() -> anyhow::Result<Vec<u8>> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_2() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/baz.rs",
@@ -383,11 +379,11 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 
-    fn annotations_file_3() -> anyhow::Result<Vec<u8>> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_3() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/quux.rs",
@@ -400,6 +396,6 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 }

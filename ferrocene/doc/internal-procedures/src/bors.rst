@@ -56,8 +56,8 @@ used:
    command re-executes the previous command, it doesn't attempt to merge the PR
    again.
 
-   In practice, if you first type ``bors merge`` and then ``bors retry`` bors
-   will attempt to merge the PR again, but just because it ends up executing
+   In practice, if you first type ``bors merge`` and then ``bors retry``, bors
+   will attempt to merge the PR again, and this is because it ends up executing
    ``bors merge`` twice. If instead you run ``bors merge``, ``bors p=10``
    and then ``bors retry``, the priority would be set twice.
 

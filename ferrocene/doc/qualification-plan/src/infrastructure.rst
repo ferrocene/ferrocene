@@ -83,6 +83,8 @@ repository.
    CircleCI UI
 
 
+.. _bors:
+
 Bors
 ----
 

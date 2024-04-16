@@ -21,6 +21,7 @@ based on software engineering best practices.
    pe-procedures
    backports
    release-notes
+   bors
 
 .. toctree::
    :maxdepth: 4

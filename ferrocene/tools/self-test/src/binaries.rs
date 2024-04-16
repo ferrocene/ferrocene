@@ -47,7 +47,7 @@ fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
 
     match std::fs::metadata(bin) {
         Ok(metadata) => {
-            if !metadata.is_file() {
+            if !metadata.is_file() || bin.is_symlink() {
                 Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
             } else if metadata.permissions().mode() & MODE != MODE {
                 Err(Error::WrongBinaryPermissions { path: bin.into() })

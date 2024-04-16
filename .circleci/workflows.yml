@@ -441,6 +441,7 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       SCRIPT: |
+              ferrocene/ci/scripts/llvm-cache.sh download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.\
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc

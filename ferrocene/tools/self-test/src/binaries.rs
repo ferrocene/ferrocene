@@ -204,12 +204,18 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_os = "macos"))] // On Darwin, empty executables exit with code 0.
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
         let bin = utils.bin("rustc").create();
-        std::fs::write(&bin, []).unwrap(); // Broken content
+        
+        #[cfg(not(target_os = "macos"))]
+        const BROKEN_BINARY: &[u8] = &[];
+        #[cfg(target_os = "macos")]
+        // The Mach-0 64 bit magic number from https://en.wikipedia.org/wiki/Mach-O#Mach-O_header
+        const BROKEN_BINARY: &[u8] = &[0xfe, 0xed, 0xfa, 0xcf];
+
+        std::fs::write(&bin, BROKEN_BINARY).unwrap();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),

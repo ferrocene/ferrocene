@@ -35,6 +35,9 @@ parameters:
   llvm-rebuild--x86_64-unknown-linux-gnu:
     type: boolean
     default: false
+  llvm-rebuild--aarch64-apple-darwin:
+    type: boolean
+    default: false
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
@@ -156,7 +159,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-none,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
+      FERROCENE_TARGETS: aarch64-unknown-linux-gnu,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -291,10 +294,97 @@ jobs:
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
     steps:
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
+  aarch64-darwin-llvm:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--aarch64-apple-darwin >>
+          steps:
+            - ferrocene-checkout
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - aws-oidc-auth
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  aarch64-darwin-build:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - ferrocene-job-build:
+          os: darwin
+
+  aarch64-darwin-dist:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: aarch64-darwin-build
+
+  aarch64-darwin-dist-tools:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+    - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: aarch64-darwin-build
+
+  aarch64-darwin-self-test:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.medium.gen1 # 4 cores
+    environment:
+      FERROCENE_HOST: aarch64-apple-darwin
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown
+    steps:
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - aws-oidc-auth
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -501,6 +591,21 @@ workflows:
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
 
+      - aarch64-darwin-llvm: {}
+      - aarch64-darwin-build:
+          requires:
+            - aarch64-darwin-llvm
+      - aarch64-darwin-dist:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-dist-tools:
+          requires:
+            - aarch64-darwin-build
+      - aarch64-darwin-self-test:
+          requires:
+            - aarch64-darwin-dist
+            - aarch64-darwin-dist-tools
+
       - finish-build:
           requires:
             - x86_64-linux-docs
@@ -508,6 +613,7 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - wasm-dist-oxidos
+            - aarch64-darwin-self-test
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
@@ -531,10 +637,19 @@ workflows:
 commands:
   ferrocene-job-build:
     description: Collection of steps for build jobs
+    parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
     steps:
-      - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin
+      - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
@@ -549,15 +664,23 @@ commands:
   ferrocene-job-dist:
     description: Collection of steps for dist jobs
     parameters:
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
       restore-from-job:
         type: string
       llvm-subset:
         type: boolean
         default: true
     steps:
-      - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin
+      - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -682,13 +805,20 @@ commands:
           name: Clone the source code
           command: |
             mkdir -p ~/.ssh
-            ssh-keyscan github.com &>> ~/.ssh/known_hosts
+            ssh-keyscan github.com >> ~/.ssh/known_hosts 2>&1
 
             git init .
             git remote add origin "${CIRCLE_REPOSITORY_URL}"
             git fetch --depth=<< parameters.depth >> origin "${CIRCLE_SHA1}"
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
+  ferrocene-setup-darwin:
+    description: Prepare the Darwin environment
+    steps:
+      - run:
+          name: Setup Darwin environment
+          command: ferrocene/ci/scripts/setup-darwin.sh
+          
   ferrocene-checkout:
     description: Checkout the Ferrocene source code
     parameters:

@@ -96,13 +96,13 @@ should not be used in production.
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
 
-   * - :ref:`x86_64-apple-darwin`
+   * - :target:`x86_64-apple-darwin`
      - ``x86_64-apple-darwin``
      - Host platform
      - Full
      - Also available as a cross-compile target for :target:`aarch64-apple-darwin`.
 
-   * - :ref:`aarch64-apple-darwin`
+   * - :target:`aarch64-apple-darwin`
      - ``aarch64-apple-darwin``
      - Host platform
      - Full

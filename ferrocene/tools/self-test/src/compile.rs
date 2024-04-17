@@ -268,7 +268,7 @@ struct SampleProgram {
     name: &'static str,
     contents: &'static [u8],
     rustflags: &'static [&'static str],
-    /// Executable names on Linux/Mac are `{name}``, on Windows they are `{name}.exe`
+    /// Executable names on Linux/Mac are `{name}`, on Windows they are `{name}.exe`
     expected_executables: &'static [&'static str],
     /// rlibs are always `{name}.rlib`
     expected_rlibs: &'static [&'static str],

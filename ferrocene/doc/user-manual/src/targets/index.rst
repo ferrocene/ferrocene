@@ -120,6 +120,12 @@ should not be used in production.
      - Full
      - \-
 
+   * - :target:`x86_64-pc-windows-msvc`
+     - ``x86_64-pc-windows-msvc``
+     - Host platform
+     - Full
+     - \-
+
 
 If your project needs support for one of these targets, please reach out to the
 Ferrocene support team.

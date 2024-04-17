@@ -190,19 +190,16 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(windows))] // For now, this test does not support windows.
+    #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_no_access_to_parent_directory() {
         let utils = TestUtils::new();
 
         let bin_dir = utils.sysroot().join("bin");
         std::fs::create_dir_all(&bin_dir).unwrap();
 
-        #[cfg(not(windows))]
-        {
             let mut perms = bin_dir.metadata().unwrap().permissions();
             perms.set_mode(0o0);
             std::fs::set_permissions(&bin_dir, perms).unwrap();
-        }
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),

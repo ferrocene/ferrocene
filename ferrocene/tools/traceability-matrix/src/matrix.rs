@@ -151,7 +151,7 @@ pub(crate) struct MatrixAnalysis {
 }
 
 impl MatrixAnalysis {
-    pub(crate) fn new(kind: &'static ElementKind) -> Self {
+    fn new(kind: &'static ElementKind) -> Self {
         MatrixAnalysis {
             kind,
             linked: BTreeSet::new(),
@@ -160,6 +160,7 @@ impl MatrixAnalysis {
         }
     }
 
+    /// Returns `true` if tests were linked (or partially linked).
     fn add(
         &mut self,
         annotations: &Annotations,
@@ -167,8 +168,8 @@ impl MatrixAnalysis {
         element: Element,
     ) -> bool {
         let mut tests = extra_tests.to_vec();
-        if let Some(files) = annotations.ids.get(&element.id) {
-            tests.extend(files.iter().map(|file| LinkTest::File(file.clone())));
+        if let Some(files) = annotations.ids.get(&element.id).cloned() {
+            tests.extend(files.into_iter().map(LinkTest::File));
         }
 
         if tests.is_empty() {
@@ -176,34 +177,25 @@ impl MatrixAnalysis {
             false
         } else {
             tests.sort();
-            let mut untested_targets = BTreeSet::new();
-            for link_test in &tests {
-                if let LinkTest::File(annotated) = link_test {
-                    for target in &annotated.targets.ignored.0 {
-                        untested_targets.insert(target.to_owned());
-                    }
-                }
-            }
-            // another loop, to capture targets that are not tested at all
-            for link_test in &tests {
-                if let LinkTest::File(annotated) = link_test {
-                    for target in &annotated.targets.executed.0 {
-                        untested_targets.remove(target);
-                    }
-                }
-            }
-            if untested_targets.is_empty() {
-                self.linked.insert(Link { element, tests: tests.clone(), untested_targets });
-            } else {
-                self.partially_linked.insert(Link {
-                    element,
-                    tests: tests.clone(),
-                    untested_targets,
-                });
-            }
+
+            let ignored = filter_targets_from_tests(&tests, |t| &t.targets.ignored.0);
+            let executed = filter_targets_from_tests(&tests, |t| &t.targets.executed.0);
+            let untested_targets =
+                ignored.difference(&executed).map(ToString::to_string).collect::<BTreeSet<_>>();
+
+            if untested_targets.is_empty() { &mut self.linked } else { &mut self.partially_linked }
+                .insert(Link { element, tests, untested_targets });
+
             true
         }
     }
+}
+
+fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&String>
+where
+    F: Fn(&AnnotatedFile) -> &BTreeSet<String>,
+{
+    tests.iter().filter_map(LinkTest::unwrap_file).flat_map(getter).collect()
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -242,6 +234,13 @@ impl LinkTest {
             LinkTest::NoParagraphsInSection => true,
             LinkTest::Informational => true,
             LinkTest::InheritFromSection { .. } => false,
+        }
+    }
+
+    fn unwrap_file(&self) -> Option<&AnnotatedFile> {
+        match self {
+            LinkTest::File(annotated) => Some(annotated),
+            _ => None,
         }
     }
 }

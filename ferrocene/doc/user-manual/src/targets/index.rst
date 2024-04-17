@@ -14,10 +14,11 @@ There are two kinds of targets available:
 
 * **Host platform**: can be used by developers and build systems to compile
   Rust code from that platform, either targeting the same platform or
-  cross-compiling to a different one.
+  cross-compiling to a different one. Host platforms cannot neccessarily
+  target other host platforms.
 
 * **Cross-compilation**: can only be used to cross-compile to the platform from
-  another host platform.
+  any host platform.
 
 There are also two variants of the standard library available:
 
@@ -94,6 +95,19 @@ should not be used in production.
      - Cross-compilation
      - Full
      - The full standard library is available, but unsupported functions in ``std`` will panic.
+
+   * - :ref:`x86_64-apple-darwin`
+     - ``x86_64-apple-darwin``
+     - Host platform
+     - Full
+     - Also available as a cross-compile target for :target:`aarch64-apple-darwin`.
+
+   * - :ref:`aarch64-apple-darwin`
+     - ``aarch64-apple-darwin``
+     - Host platform
+     - Full
+     - Also available as a cross-compile target for :target:`x86_64-apple-darwin`.
+
 
 If your project needs support for one of these targets, please reach out to the
 Ferrocene support team.

@@ -8,12 +8,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Windows seems to quite dislike running this
-# TODO: Re-enable it
-if [[ "${OSTYPE}" != "msys" ]]; then
-    echo "build directory size:"
-    du -sh build/*/* | sort -hr
-fi
+echo "build directory size:"
+du -sh build/*/* | sort -hr
 
 # Temporary files. *Should* be empty at the end of the build but let's delete
 # it to be extra sure it's not persisted.

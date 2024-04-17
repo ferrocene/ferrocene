@@ -130,7 +130,7 @@ build_llvm_tarball() {
         done
         if [[ "${keep}" == "no" ]]; then
             chmod -x "${file}"
-            echo "#!/bin/sh" > "${file}"
+            echo "#!/usr/bin/env sh" > "${file}"
             echo "echo 'File soft-removed by ferrocene/ci/scripts/build-and-cache-llvm.sh'" >> "${file}"
         fi
     done

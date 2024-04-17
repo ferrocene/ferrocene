@@ -18,6 +18,15 @@ use crate::utils::{find_binary_in_path, run_command};
 /// arguments.
 const RANDOM_LINKER_ARG: &str = "--rand456256146871864165842156=xyz";
 
+#[cfg(unix)]
+const LINKER_NAME: &str = "rust-lld";
+#[cfg(windows)]
+const LINKER_NAME: &str = "llvm-link.exe";
+#[cfg(unix)]
+const LINKER_WRAPPER_NAME: &str = "ld.lld";
+#[cfg(windows)]
+const LINKER_WRAPPER_NAME: &str = "lld-link.exe";
+
 /// What kind of C compiler does a target require
 #[derive(Debug)]
 pub(crate) enum Linker {
@@ -399,12 +408,8 @@ fn check_compiler_linker_args(
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
-    #[cfg(unix)]
-    let bin_name = "rust-lld";
-    #[cfg(windows)]
-    let bin_name = "llvm-link.exe";
     let path =
-        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(bin_name);
+        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(LINKER_NAME);
 
     if path.is_file() {
         reporter.success("bundled linker detected");
@@ -416,18 +421,13 @@ fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, 
 
 /// Look for the bundled `ld.lld` linker wrapper program in the given sysroot.
 fn find_bundled_lld_wrapper(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
-    #[cfg(unix)]
-    let bin_name = PathBuf::from("ld.lld");
-    #[cfg(windows)]
-    let bin_name = PathBuf::from("lld-link.exe");
-
     let path = sysroot
         .join("lib")
         .join("rustlib")
         .join(env::SELFTEST_TARGET)
         .join("bin")
         .join("gcc-ld")
-        .join(bin_name);
+        .join(LINKER_WRAPPER_NAME);
 
     if path.is_file() {
         reporter.success("bundled linker-wrapper detected");
@@ -459,11 +459,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld() {
         let utils = TestUtils::new();
-        #[cfg(not(windows))]
-        let linker = "rust-lld";
-        #[cfg(windows)]
-        let linker = "llvm-link.exe";
-        utils.bin(linker).for_target(env::SELFTEST_TARGET).create();
+        utils.bin(LINKER_NAME).for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker detected");
@@ -484,11 +480,7 @@ mod tests {
     #[test]
     fn test_find_bundled_lld_wrapper() {
         let utils = TestUtils::new();
-        #[cfg(not(windows))]
-        let linker = "ld.lld";
-        #[cfg(windows)]
-        let linker = "lld-link.exe";
-        utils.bin(&format!("gcc-ld/{linker}")).for_target(env::SELFTEST_TARGET).create();
+        utils.bin(&format!("gcc-ld/{LINKER_WRAPPER_NAME}")).for_target(env::SELFTEST_TARGET).create();
 
         find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker-wrapper detected");

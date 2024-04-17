@@ -208,7 +208,7 @@ mod tests {
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
         let bin = utils.bin("rustc").create();
-        
+
         #[cfg(not(target_os = "macos"))]
         const BROKEN_BINARY: &[u8] = &[];
         #[cfg(target_os = "macos")]

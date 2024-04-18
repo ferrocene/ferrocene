@@ -164,7 +164,7 @@ mod tests {
     use crate::error::{CommandError, CommandErrorKind};
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
-    
+
     #[cfg(unix)]
     const RUSTC_EXECUTABLE: &str = "rustc";
     #[cfg(windows)]

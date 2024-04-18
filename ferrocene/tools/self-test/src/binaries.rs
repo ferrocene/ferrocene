@@ -164,6 +164,11 @@ mod tests {
     use crate::error::{CommandError, CommandErrorKind};
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
+    
+    #[cfg(unix)]
+    const RUSTC_EXECUTABLE: &str = "rustc";
+    #[cfg(windows)]
+    const RUSTC_EXECUTABLE: &str = "rustc.exe";
 
     #[test]
     fn test_check_binary_missing_file() {
@@ -220,11 +225,7 @@ mod tests {
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
-        #[cfg(unix)]
-        let bin_name = "rustc";
-        #[cfg(windows)]
-        let bin_name = "rustc.exe";
-        let bin = utils.bin(bin_name).create();
+        let bin = utils.bin(RUSTC_EXECUTABLE).create();
 
         #[cfg(not(target_os = "macos"))]
         const BROKEN_BINARY: &[u8] = &[];
@@ -250,11 +251,7 @@ mod tests {
     #[test]
     fn test_check_failing_binary() {
         let utils = TestUtils::new();
-        #[cfg(unix)]
-        let bin_name = "rustc";
-        #[cfg(windows)]
-        let bin_name = "rustc.exe";
-        let bin = utils.bin(bin_name).exit(1).create();
+        let bin = utils.bin(RUSTC_EXECUTABLE).exit(1).create();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
@@ -277,12 +274,8 @@ mod tests {
     #[test]
     fn test_check_binary_with_invalid_output() {
         let utils = TestUtils::new();
-        #[cfg(unix)]
-        let bin_name = "rustc";
-        #[cfg(windows)]
-        let bin_name = "rustc.exe";
         utils
-            .bin(bin_name)
+            .bin(RUSTC_EXECUTABLE)
             .expected_args(&["-vV"])
             .stdout("this is not the output of -vV")
             .create();
@@ -333,11 +326,7 @@ mod tests {
         expected_found: &str,
     ) {
         let utils = TestUtils::new();
-        #[cfg(unix)]
-        let bin_name = "rustc";
-        #[cfg(windows)]
-        let bin_name = "rustc.exe";
-        utils.bin(bin_name).expected_args(&["-vV"]).stdout(&content.serialize()).create();
+        utils.bin(RUSTC_EXECUTABLE).expected_args(&["-vV"]).stdout(&content.serialize()).create();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),

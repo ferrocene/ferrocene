@@ -157,7 +157,7 @@ if [[ "${OSTYPE}" = "msys" ]]; then
 elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
     add --build="x86_64-unknown-linux-gnu"
 elif [[ "${OSTYPE}" =~ ^darwin.* ]]; then
-    add --build="aarch64-apple-darwin"
+    add --build="aarch64-apple-darwin" # We only build on ARM Macs right now!
 else
     echo "error: unknown os type: ${OSTYPE}" >&2
     exit 1

@@ -90,6 +90,18 @@ should not be used in production.
      - Bare-metal
      - \-
 
+   * - :target:`armv7r-none-eabihf`
+     - ``armv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
+   * - :target:`armebv7r-none-eabihf`
+     - ``armebv7r-none-eabihf``
+     - Cross-compilation
+     - Bare-metal
+     - \-
+
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``
      - Cross-compilation

@@ -408,8 +408,12 @@ fn check_compiler_linker_args(
 
 /// Look for the bundled `rust-lld` program in the given sysroot.
 fn find_bundled_lld(reporter: &dyn Reporter, sysroot: &Path) -> Result<PathBuf, Error> {
-    let path =
-        sysroot.join("lib").join("rustlib").join(env::SELFTEST_TARGET).join("bin").join(LINKER_NAME);
+    let path = sysroot
+        .join("lib")
+        .join("rustlib")
+        .join(env::SELFTEST_TARGET)
+        .join("bin")
+        .join(LINKER_NAME);
 
     if path.is_file() {
         reporter.success("bundled linker detected");
@@ -480,7 +484,10 @@ mod tests {
     #[test]
     fn test_find_bundled_lld_wrapper() {
         let utils = TestUtils::new();
-        utils.bin(&format!("gcc-ld/{LINKER_WRAPPER_NAME}")).for_target(env::SELFTEST_TARGET).create();
+        utils
+            .bin(&format!("gcc-ld/{LINKER_WRAPPER_NAME}"))
+            .for_target(env::SELFTEST_TARGET)
+            .create();
 
         find_bundled_lld_wrapper(utils.reporter(), utils.sysroot()).unwrap();
         utils.assert_report_success("bundled linker-wrapper detected");

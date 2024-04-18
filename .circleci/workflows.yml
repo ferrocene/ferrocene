@@ -379,7 +379,7 @@ jobs:
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,,armv7r-none-eabihf,armebv7r-none-eabihf
+      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1

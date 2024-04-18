@@ -154,6 +154,17 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     # because we target the GNU ABI, so switching the build platform to the
     # MSVC one is correct.
     add --build="x86_64-pc-windows-msvc"
+elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
+    add --build="x86_64-unknown-linux-gnu"
+elif [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+    add --build="aarch64-apple-darwin"
+else
+    echo "error: unknown os type: ${OSTYPE}" >&2
+    exit 1
+fi
+
+# The Rust build system defaults to calling `cc` on Windows, which does not exist
+if [[ "${OSTYPE}" = "msys" ]]; then
     add --set target.aarch64-unknown-none.cc=clang
     add --set target.aarch64-unknown-none.cxx=clang
     add --set target.aarch64-unknown-none.ar=llvm-ar
@@ -166,11 +177,6 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     add --set target.wasm32-unknown-unknown.cc=clang
     add --set target.wasm32-unknown-unknown.cxx=clang
     add --set target.wasm32-unknown-unknown.ar=lld-ar
-elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
-    add --build="x86_64-unknown-linux-gnu"
-else
-    echo "error: unknown os type: ${OSTYPE}" >&2
-    exit 1
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

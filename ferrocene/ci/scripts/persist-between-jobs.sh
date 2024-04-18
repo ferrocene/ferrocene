@@ -85,7 +85,7 @@ case "$1" in
         # rather than stdout by default.
         # On Windows we pass `--exclude` and avoid some symlinks known to be broken
         aws s3 cp "$(s3_url "${job}")" - \
-            | "${TAR}" -xf- --use-compress-program "zstd --decompress" --preserve-permissions --format=posix
+            | "${TAR}" -xf- --use-compress-program "zstd --decompress" --preserve-permissions
         ;;
     *)
         usage 1>&2

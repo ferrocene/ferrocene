@@ -96,26 +96,30 @@ fn check_target(
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
-        let expected_binary_paths = program.expected_executables
+        let expected_binary_paths = program
+            .expected_executables
             .into_iter()
             .flat_map(|expected| match target.spec.triple {
-                windows if windows.ends_with("-pc-windows") => vec![
-                    format!("{expected}.exe"),
-                    format!("{expected}.pdb")
-                ],
+                windows if windows.ends_with("-pc-windows") => {
+                    vec![format!("{expected}.exe"), format!("{expected}.pdb")]
+                }
                 _ => vec![expected.to_string()],
-            }).collect::<Vec<_>>();
+            })
+            .collect::<Vec<_>>();
         expected_artifacts.add(expected_binary_paths);
 
-        let expected_library_paths = program.expected_libraries
+        let expected_library_paths = program
+            .expected_libraries
             .into_iter()
             .map(|expected| match target.spec.triple {
                 windows if windows.ends_with("-pc-windows") => format!("{expected}.lib"),
                 _ => format!("lib{expected}.a"),
-            }).collect::<Vec<_>>();
+            })
+            .collect::<Vec<_>>();
         expected_artifacts.add(expected_library_paths);
 
-        let expected_rlib_paths = program.expected_rlibs
+        let expected_rlib_paths = program
+            .expected_rlibs
             .into_iter()
             .map(|expected| format!("lib{expected}.rlib"))
             .collect::<Vec<_>>();
@@ -201,7 +205,7 @@ impl ExpectedFiles {
         Self { path: path.into(), expected: HashSet::new() }
     }
 
-    fn add(&mut self, files: impl IntoIterator<Item=String>) {
+    fn add(&mut self, files: impl IntoIterator<Item = String>) {
         self.expected.extend(files);
     }
 
@@ -333,7 +337,7 @@ mod tests {
                 name: "foo.rs",
                 contents: b"pub fn foo() {}",
                 rustflags: &["--crate-type", "lib"],
-                expected_rlibs: &["foo"],                
+                expected_rlibs: &["foo"],
                 expected_executables: &[],
                 expected_libraries: &[],
                 executable_output: None,
@@ -342,7 +346,7 @@ mod tests {
                 name: "bar.rs",
                 contents: b"fn main() {}",
                 rustflags: &["--crate-type", "bin"],
-                expected_rlibs: &[],                
+                expected_rlibs: &[],
                 expected_executables: &["bar"],
                 expected_libraries: &[],
                 executable_output: None,
@@ -480,7 +484,7 @@ mod tests {
         let program = SampleProgram {
             name: "example.rs",
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
-            rustflags: &[],            
+            rustflags: &[],
             expected_executables: &[],
             expected_rlibs: &[],
             expected_libraries: &[],

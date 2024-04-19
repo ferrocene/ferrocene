@@ -26,10 +26,6 @@ fn main() {
     println!("hello");
     println!("world");
 }
-<<<<<<< HEAD
-
-#[cfg(not(windows))]
-fn main() {}
 
 // ferrocene-annotations: fls_usgd0xlijoxv
 // ABI
@@ -39,5 +35,3 @@ fn main() {}
 //
 // ferrocene-annotations: fls_tmoh3y9oyqsy
 // External Blocks
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

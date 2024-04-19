@@ -8,14 +8,6 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
-TAR="tar"
-# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
-if [[ "${OSTYPE}" = "msys" ]]; then
-    TAR="/c/Program Files/Git/usr/bin/tar.exe"
-fi
-echo "${TAR}"
-${TAR} --version # This should always show GNU tar!
-
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
@@ -58,20 +50,7 @@ case "$1" in
         # Call `zstd` separately to be able to use all cores available (`-T0`)
         # and the lowest compression level possible, to speed the compression
         # as much as possible.
-        #
-        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
-        # rather than stdout by default.
-        if [[ "${OSTYPE}" = "msys" ]]; then
-            "${TAR}" -cf- --exclude build/metrics.json \
-                --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude build/host \
-                --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
-                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
-        else
-            "${TAR}" -cf- --exclude build/metrics.json \
-                --use-compress-program "zstd -1 -T0" --preserve-permissions --format=posix $@ \
-                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
-        fi
-        echo "Stored $(s3_url "${CIRCLE_JOB}")"
+        tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -80,12 +59,7 @@ case "$1" in
         fi
         job="$2"
 
-        echo "$(s3_url "${job}")"
-        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
-        # rather than stdout by default.
-        # On Windows we pass `--exclude` and avoid some symlinks known to be broken
-        aws s3 cp "$(s3_url "${job}")" - \
-            | "${TAR}" -xf- --use-compress-program "zstd --decompress" --preserve-permissions
+        aws s3 cp "$(s3_url "${job}")" - | unzstd --stdout | tar x
         ;;
     *)
         usage 1>&2

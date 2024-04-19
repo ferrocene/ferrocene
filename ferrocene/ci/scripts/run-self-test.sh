@@ -22,11 +22,11 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     FERROCENE_SELF_TEST="ferrocene-self-test.exe"
 fi
 
-root="$(mktemp -d -p .)"
+TEMPDIR="$(mktemp -d -p .)"
 
 if [[ -z "$SKIP_CLEANUP" ]]; then
     cleanup() {
-        rm -rf "${root}"
+        rm -rf "${TEMPDIR}"
     }
     trap cleanup EXIT
 fi

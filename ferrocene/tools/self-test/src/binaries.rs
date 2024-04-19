@@ -335,7 +335,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(windows))]
+    #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_wrong_permissions() {
         const PERMISSIONS: &[&[u32]] = &[
             // No permissions whatsoever

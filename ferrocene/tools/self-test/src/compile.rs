@@ -96,7 +96,7 @@ fn check_target(
             .expected_executables
             .into_iter()
             .flat_map(|expected| match target.spec.triple {
-                windows if windows.ends_with("-pc-windows") => {
+                windows if windows.ends_with("-pc-windows-msvc") => {
                     vec![format!("{expected}.exe"), format!("{expected}.pdb")]
                 }
                 _ => vec![expected.to_string()],
@@ -108,7 +108,7 @@ fn check_target(
             .expected_libraries
             .into_iter()
             .map(|expected| match target.spec.triple {
-                windows if windows.ends_with("-pc-windows") => format!("{expected}.lib"),
+                windows if windows.ends_with("-pc-windows-msvc") => format!("{expected}.lib"),
                 _ => format!("lib{expected}.a"),
             })
             .collect::<Vec<_>>();
@@ -119,6 +119,7 @@ fn check_target(
             .into_iter()
             .map(|expected| format!("lib{expected}.rlib"))
             .collect::<Vec<_>>();
+        eprintln!("expected_rlib_paths: {expected_rlib_paths:?}");
         expected_artifacts.add(expected_rlib_paths);
 
         compile(&ctx, program)?;

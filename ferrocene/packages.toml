@@ -27,7 +27,7 @@
 manifest-version = 2
 
 [groups.hosts]
-targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin"]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin"]
 
 [[groups.hosts.packages]]
 name = "rustc"

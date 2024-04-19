@@ -21,12 +21,11 @@ shipped as a preview.
 
   * :target-with-triple:`armv8r-none-eabihf`
 
-* Experimental support has been added for two new host platforms.
+* Experimental support has been added for a new host platform.
   Note that experimental targets are not qualified for safety critical use. The
-  new targets are:
+  new target is:
 
   * :target-with-triple:`aarch64-apple-darwin`
-  * :target-with-triple:`x86_64-apple-darwin`
 
 Changes
 -------

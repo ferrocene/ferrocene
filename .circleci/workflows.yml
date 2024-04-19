@@ -751,9 +751,16 @@ commands:
       - run:
           name: Shrink the build directory before persisting it
           command: ferrocene/ci/scripts/shrink-build-directory.sh
-      - run:
-          name: Persist build output between jobs
-          command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
+      - when:
+          condition:
+            # Taring on the Windows CI machine takes around 7 minutes
+            # We don't split up the Windows jobs, so this doesn't need to get called.
+            not:
+              equal: [<<parameters.os>>, "windows"]
+          steps:
+            - run:
+                name: Persist build output between jobs
+                command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
 
   ferrocene-job-dist:
     description: Collection of steps for dist jobs
@@ -782,7 +789,7 @@ commands:
             - ferrocene-setup-windows
       - aws-oidc-auth
       - when:
-          condition: <<parameters.restore-from-job>>
+          condition:  <<parameters.restore-from-job>>
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job

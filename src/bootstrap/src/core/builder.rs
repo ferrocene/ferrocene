@@ -13,9 +13,9 @@ use std::process::Command;
 use std::sync::{atomic, OnceLock};
 use std::time::{Duration, Instant};
 
-use crate::core::build_steps::llvm;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::build_steps::{check, clean, compile, dist, doc, install, run, setup, test};
+use crate::core::build_steps::{clippy, llvm};
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
 use crate::prepare_behaviour_dump_dir;
@@ -675,6 +675,7 @@ impl Kind {
             Kind::Doc => "Documenting",
             Kind::Run => "Running",
             Kind::Suggest => "Suggesting",
+            Kind::Clippy => "Linting",
             _ => {
                 let title_letter = self.as_str()[0..1].to_ascii_uppercase();
                 return format!("{title_letter}{}ing", &self.as_str()[1..]);
@@ -732,7 +733,35 @@ impl<'a> Builder<'a> {
                 tool::CoverageDump,
                 tool::LlvmBitcodeLinker
             ),
-            Kind::Check | Kind::Clippy | Kind::Fix => describe!(
+            Kind::Clippy => describe!(
+                clippy::Std,
+                clippy::Rustc,
+                clippy::Bootstrap,
+                clippy::BuildHelper,
+                clippy::BuildManifest,
+                clippy::CargoMiri,
+                clippy::Clippy,
+                clippy::CollectLicenseMetadata,
+                clippy::Compiletest,
+                clippy::CoverageDump,
+                clippy::Jsondocck,
+                clippy::Jsondoclint,
+                clippy::LintDocs,
+                clippy::LlvmBitcodeLinker,
+                clippy::Miri,
+                clippy::MiroptTestTools,
+                clippy::OptDist,
+                clippy::RemoteTestClient,
+                clippy::RemoteTestServer,
+                clippy::Rls,
+                clippy::RustAnalyzer,
+                clippy::RustDemangler,
+                clippy::Rustdoc,
+                clippy::Rustfmt,
+                clippy::RustInstaller,
+                clippy::Tidy,
+            ),
+            Kind::Check | Kind::Fix => describe!(
                 check::Std,
                 check::Rustc,
                 check::Rustdoc,
@@ -2129,6 +2158,14 @@ impl<'a> Builder<'a> {
             // break when incremental compilation is enabled. So this overrides the "no inlining
             // during incremental builds" heuristic for the standard library.
             rustflags.arg("-Zinline-mir");
+
+            // FIXME: always pass this after the next `#[cfg(bootstrap)]` update.
+            if compiler.stage != 0 {
+                // Similarly, we need to keep debug info for functions inlined into other std functions,
+                // even if we're not going to output debuginfo for the crate we're currently building,
+                // so that it'll be available when downstream consumers of std try to use it.
+                rustflags.arg("-Zinline-mir-preserve-debug");
+            }
         }
 
         if self.config.rustc_parallel

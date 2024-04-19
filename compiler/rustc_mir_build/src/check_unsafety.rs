@@ -1,10 +1,8 @@
-use std::borrow::Cow;
-
 use crate::build::ExprCategory;
 use crate::errors::*;
 
 use rustc_errors::DiagArgValue;
-use rustc_hir::{self as hir, BindingAnnotation, ByRef, Mutability};
+use rustc_hir::{self as hir, BindingMode, ByRef, HirId, Mutability};
 use rustc_middle::mir::BorrowKind;
 use rustc_middle::thir::visit::Visitor;
 use rustc_middle::thir::*;
@@ -16,6 +14,7 @@ use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::symbol::Symbol;
 use rustc_span::{sym, Span};
 
+use std::borrow::Cow;
 use std::mem;
 use std::ops::Bound;
 
@@ -24,7 +23,7 @@ struct UnsafetyVisitor<'a, 'tcx> {
     thir: &'a Thir<'tcx>,
     /// The `HirId` of the current scope, which would be the `HirId`
     /// of the current HIR node, modulo adjustments. Used for lint levels.
-    hir_context: hir::HirId,
+    hir_context: HirId,
     /// The current "safety context". This notably tracks whether we are in an
     /// `unsafe` block, and whether it has been used.
     safety_context: SafetyContext,
@@ -123,7 +122,7 @@ impl<'tcx> UnsafetyVisitor<'_, 'tcx> {
 
     fn warn_unused_unsafe(
         &mut self,
-        hir_id: hir::HirId,
+        hir_id: HirId,
         block_span: Span,
         enclosing_unsafe: Option<UnusedUnsafeEnclosing>,
     ) {
@@ -289,7 +288,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                     visit::walk_pat(self, pat);
                 }
             }
-            PatKind::Binding { mode: BindingAnnotation(ByRef::Yes(rm), _), ty, .. } => {
+            PatKind::Binding { mode: BindingMode(ByRef::Yes(rm), _), ty, .. } => {
                 if self.inside_adt {
                     let ty::Ref(_, ty, _) = ty.kind() else {
                         span_bug!(
@@ -537,22 +536,17 @@ enum SafetyContext {
     Safe,
     BuiltinUnsafeBlock,
     UnsafeFn,
-    UnsafeBlock {
-        span: Span,
-        hir_id: hir::HirId,
-        used: bool,
-        nested_used_blocks: Vec<NestedUsedBlock>,
-    },
+    UnsafeBlock { span: Span, hir_id: HirId, used: bool, nested_used_blocks: Vec<NestedUsedBlock> },
 }
 
 #[derive(Clone, Copy)]
 struct NestedUsedBlock {
-    hir_id: hir::HirId,
+    hir_id: HirId,
     span: Span,
 }
 
 struct UnusedUnsafeWarning {
-    hir_id: hir::HirId,
+    hir_id: HirId,
     block_span: Span,
     enclosing_unsafe: Option<UnusedUnsafeEnclosing>,
 }
@@ -585,7 +579,7 @@ impl UnsafeOpKind {
     pub fn emit_unsafe_op_in_unsafe_fn_lint(
         &self,
         tcx: TyCtxt<'_>,
-        hir_id: hir::HirId,
+        hir_id: HirId,
         span: Span,
         suggest_unsafe_block: bool,
     ) {
@@ -726,7 +720,7 @@ impl UnsafeOpKind {
         &self,
         tcx: TyCtxt<'_>,
         span: Span,
-        hir_context: hir::HirId,
+        hir_context: HirId,
         unsafe_op_in_unsafe_fn_allowed: bool,
     ) {
         let note_non_inherited = tcx.hir().parent_iter(hir_context).find(|(id, node)| {

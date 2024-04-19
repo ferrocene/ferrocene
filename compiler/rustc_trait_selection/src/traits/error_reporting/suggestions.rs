@@ -751,9 +751,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             // Get the local name of this closure. This can be inaccurate because
             // of the possibility of reassignment, but this should be good enough.
             match &kind {
-                hir::PatKind::Binding(hir::BindingAnnotation::NONE, _, ident, None) => {
-                    Some(ident.name)
-                }
+                hir::PatKind::Binding(hir::BindingMode::NONE, _, ident, None) => Some(ident.name),
                 _ => {
                     err.note(msg);
                     None
@@ -4251,7 +4249,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         type_diffs: &[TypeError<'tcx>],
         span: Span,
         prev_ty: Ty<'tcx>,
-        body_id: hir::HirId,
+        body_id: HirId,
         param_env: ty::ParamEnv<'tcx>,
     ) -> Vec<Option<(Span, (DefId, Ty<'tcx>))>> {
         let ocx = ObligationCtxt::new(self.infcx);
@@ -4764,7 +4762,7 @@ impl<'v> Visitor<'v> for ReturnsVisitor<'v> {
 /// Collect all the awaited expressions within the input expression.
 #[derive(Default)]
 struct AwaitsVisitor {
-    awaits: Vec<hir::HirId>,
+    awaits: Vec<HirId>,
 }
 
 impl<'v> Visitor<'v> for AwaitsVisitor {

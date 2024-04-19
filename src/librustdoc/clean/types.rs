@@ -408,7 +408,7 @@ impl Item {
 
     pub(crate) fn attr_span(&self, tcx: TyCtxt<'_>) -> rustc_span::Span {
         span_of_fragments(&self.attrs.doc_strings)
-            .unwrap_or_else(|| self.span(tcx).map_or(rustc_span::DUMMY_SP, |span| span.inner()))
+            .unwrap_or_else(|| self.span(tcx).map_or(DUMMY_SP, |span| span.inner()))
     }
 
     /// Combine all doc strings into a single value handling indentation and newlines as needed.
@@ -2567,7 +2567,7 @@ pub(crate) enum TypeBindingKind {
 }
 
 // Some nodes are used a lot. Make sure they don't unintentionally get bigger.
-#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+#[cfg(target_pointer_width = "64")]
 mod size_asserts {
     use super::*;
     use rustc_data_structures::static_assert_size;

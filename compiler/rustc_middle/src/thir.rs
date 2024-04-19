@@ -12,7 +12,7 @@ use rustc_ast::{InlineAsmOptions, InlineAsmTemplatePiece};
 use rustc_errors::{DiagArgValue, IntoDiagArg};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
-use rustc_hir::{BindingAnnotation, ByRef, MatchSource, RangeEnd};
+use rustc_hir::{BindingMode, ByRef, HirId, MatchSource, RangeEnd};
 use rustc_index::newtype_index;
 use rustc_index::IndexVec;
 use rustc_middle::middle::region;
@@ -115,13 +115,13 @@ pub struct Param<'tcx> {
     /// Whether this param is `self`, and how it is bound.
     pub self_kind: Option<hir::ImplicitSelfKind>,
     /// HirId for lints.
-    pub hir_id: Option<hir::HirId>,
+    pub hir_id: Option<HirId>,
 }
 
 #[derive(Copy, Clone, Debug, HashStable)]
 pub enum LintLevel {
     Inherited,
-    Explicit(hir::HirId),
+    Explicit(HirId),
 }
 
 #[derive(Clone, Debug, HashStable)]
@@ -167,7 +167,7 @@ pub struct ClosureExpr<'tcx> {
     pub args: UpvarArgs<'tcx>,
     pub upvars: Box<[ExprId]>,
     pub movability: Option<hir::Movability>,
-    pub fake_reads: Vec<(ExprId, FakeReadCause, hir::HirId)>,
+    pub fake_reads: Vec<(ExprId, FakeReadCause, HirId)>,
 }
 
 #[derive(Clone, Debug, HashStable)]
@@ -184,7 +184,7 @@ pub enum BlockSafety {
     /// A compiler-generated unsafe block
     BuiltinUnsafe,
     /// An `unsafe` block. The `HirId` is the ID of the block.
-    ExplicitUnsafe(hir::HirId),
+    ExplicitUnsafe(HirId),
 }
 
 #[derive(Clone, Debug, HashStable)]
@@ -233,7 +233,7 @@ pub enum StmtKind<'tcx> {
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq, Hash, HashStable, TyEncodable, TyDecodable)]
-pub struct LocalVarId(pub hir::HirId);
+pub struct LocalVarId(pub HirId);
 
 /// A THIR expression.
 #[derive(Clone, Debug, HashStable)]
@@ -356,7 +356,7 @@ pub enum ExprKind<'tcx> {
     /// A `match` expression.
     Match {
         scrutinee: ExprId,
-        scrutinee_hir_id: hir::HirId,
+        scrutinee_hir_id: HirId,
         arms: Box<[ArmId]>,
         match_source: MatchSource,
     },
@@ -603,10 +603,7 @@ impl<'tcx> Pat<'tcx> {
     pub fn simple_ident(&self) -> Option<Symbol> {
         match self.kind {
             PatKind::Binding {
-                name,
-                mode: BindingAnnotation(ByRef::No, _),
-                subpattern: None,
-                ..
+                name, mode: BindingMode(ByRef::No, _), subpattern: None, ..
             } => Some(name),
             _ => None,
         }
@@ -730,7 +727,7 @@ pub enum PatKind<'tcx> {
     Binding {
         name: Symbol,
         #[type_visitable(ignore)]
-        mode: BindingAnnotation,
+        mode: BindingMode,
         #[type_visitable(ignore)]
         var: LocalVarId,
         ty: Ty<'tcx>,
@@ -1206,7 +1203,7 @@ impl<'tcx> fmt::Display for Pat<'tcx> {
 }
 
 // Some nodes are used a lot. Make sure they don't unintentionally get bigger.
-#[cfg(all(any(target_arch = "x86_64", target_arch = "aarch64"), target_pointer_width = "64"))]
+#[cfg(target_pointer_width = "64")]
 mod size_asserts {
     use super::*;
     // tidy-alphabetical-start

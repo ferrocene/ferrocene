@@ -14,6 +14,7 @@ use rustc_ast::*;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
+use rustc_hir::HirId;
 use rustc_middle::span_bug;
 use rustc_session::errors::report_lit_error;
 use rustc_span::source_map::{respan, Spanned};
@@ -642,7 +643,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let (pat, task_context_hid) = self.pat_ident_binding_mode(
                     span,
                     Ident::with_dummy_span(sym::_task_context),
-                    hir::BindingAnnotation::MUT,
+                    hir::BindingMode::MUT,
                 );
                 let param = hir::Param {
                     hir_id: self.next_id(),
@@ -701,8 +702,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
     pub(super) fn maybe_forward_track_caller(
         &mut self,
         span: Span,
-        outer_hir_id: hir::HirId,
-        inner_hir_id: hir::HirId,
+        outer_hir_id: HirId,
+        inner_hir_id: HirId,
     ) {
         if self.tcx.features().async_fn_track_caller
             && let Some(attrs) = self.attrs.get(&outer_hir_id.local_id)
@@ -804,11 +805,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
         // debuggers and debugger extensions expect it to be called `__awaitee`. They use
         // this name to identify what is being awaited by a suspended async functions.
         let awaitee_ident = Ident::with_dummy_span(sym::__awaitee);
-        let (awaitee_pat, awaitee_pat_hid) = self.pat_ident_binding_mode(
-            gen_future_span,
-            awaitee_ident,
-            hir::BindingAnnotation::MUT,
-        );
+        let (awaitee_pat, awaitee_pat_hid) =
+            self.pat_ident_binding_mode(gen_future_span, awaitee_ident, hir::BindingMode::MUT);
 
         let task_context_ident = Ident::with_dummy_span(sym::_task_context);
 
@@ -1048,7 +1046,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         binder: &ClosureBinder,
         capture_clause: CaptureBy,
         closure_id: NodeId,
-        closure_hir_id: hir::HirId,
+        closure_hir_id: HirId,
         coroutine_kind: CoroutineKind,
         decl: &FnDecl,
         body: &Expr,
@@ -1647,7 +1645,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         // `mut iter`
         let iter = Ident::with_dummy_span(sym::iter);
         let (iter_pat, iter_pat_nid) =
-            self.pat_ident_binding_mode(head_span, iter, hir::BindingAnnotation::MUT);
+            self.pat_ident_binding_mode(head_span, iter, hir::BindingMode::MUT);
 
         let match_expr = {
             let iter = self.expr_ident(head_span, iter, iter_pat_nid);
@@ -2036,7 +2034,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         &mut self,
         sp: Span,
         ident: Ident,
-        binding: hir::HirId,
+        binding: HirId,
     ) -> &'hir hir::Expr<'hir> {
         self.arena.alloc(self.expr_ident_mut(sp, ident, binding))
     }
@@ -2045,7 +2043,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         &mut self,
         span: Span,
         ident: Ident,
-        binding: hir::HirId,
+        binding: HirId,
     ) -> hir::Expr<'hir> {
         let hir_id = self.next_id();
         let res = Res::Local(binding);

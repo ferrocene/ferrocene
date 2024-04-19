@@ -20,10 +20,8 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     TAR="/c/Program Files/Git/usr/bin/tar.exe"
     FERROCENE_SELF_TEST="ferrocene-self-test.exe"
 fi
-echo "${TAR}"
-${TAR} --version # This should always show GNU tar!
 
-TEMPDIR="$(mktemp -d -p .)"
+TEMPDIR="$(mktemp -d)"
 if [[ "${CLEANUP:-1}" != "0" ]]; then
     cleanup() {
         rm -rf "${TEMPDIR}"

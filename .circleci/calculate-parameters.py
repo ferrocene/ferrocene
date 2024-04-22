@@ -44,6 +44,8 @@ LINUX_BUILT_CROSS_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+    "aarch64-unknown-nto-qnx710",
+    "x86_64-pc-nto-qnx710",
 ]
 LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 

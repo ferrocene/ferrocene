@@ -98,15 +98,15 @@ should not be used in production.
 
    * - :target:`x86_64-apple-darwin`
      - ``x86_64-apple-darwin``
-     - Host platform
+     - Cross-compilation
      - Full
-     - Also available as a cross-compile target for :target:`aarch64-apple-darwin`.
+     - Available as a cross-compile target on :target:`aarch64-apple-darwin`.
 
    * - :target:`aarch64-apple-darwin`
      - ``aarch64-apple-darwin``
      - Host platform
      - Full
-     - Also available as a cross-compile target for :target:`x86_64-apple-darwin`.
+     - \-
 
 
 If your project needs support for one of these targets, please reach out to the

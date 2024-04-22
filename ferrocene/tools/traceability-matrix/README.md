@@ -13,9 +13,9 @@ While it says "written" it is (fortunately) generated semi-automatically.
 
 How does it work?
 
-On the one hand we have the Ferrocene language specification (FLS). Simply speaking the FLS is a list of statements, which are grouped in sections and subsections. Each section, subsection and statement has a unique id, which look something like `fls_wt81sbsecmu0` or `fls_3xvm61x0t251`.
+On the one hand, we have the Ferrocene Language Specification (FLS). Simply speaking, the FLS is a list of statements, which are grouped in sections and subsections. Each section, subsection and statement has a randombly-generated unique id, examples being `fls_wt81sbsecmu0` and `fls_3xvm61x0t251`.
 
-On the other hand we have tests. We need to find at least one test for each statement from the FLS. This test is then annotated with the id of the statement. This annotating is happening through a comment which is getting added to the end of the file. It is possible to annotate one test with multiple ids.
+On the other hand we have tests. We need to find at least one test for each section from the FLS. This test is then annotated with the id of the statement. This annotating is happening through a comment which is getting added to the end of the file. It is possible to annotate one test with multiple ids.
 
 For example `tests/ui/borrowck/borrowck-break-uninit-2.rs` got annotated with `fls_3xvm61x0t251` ([file at c80de1f](https://github.com/ferrocene/ferrocene/blob/c80de1fa7eecdfbe4579b13e2aaa93fb0586f9c6/tests/ui/borrowck/borrowck-break-uninit-2.rs)):
 

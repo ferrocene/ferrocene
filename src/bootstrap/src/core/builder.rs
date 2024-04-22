@@ -1870,7 +1870,7 @@ impl<'a> Builder<'a> {
         if self.config.rust_remap_debuginfo {
             let mut env_var = OsString::new();
             if self.config.vendor {
-                let vendor = self.build.src.join("vendor");
+                let vendor = self.build.src.join("vendor").join("rust");
                 env_var.push(vendor);
                 env_var.push("=/rust/deps");
             } else {

@@ -3,7 +3,7 @@
 // instrprof.increment intrinsics, during codegen.
 
 //@ ignore-aarch64-unknown-ferrocenecoretest - instrument-coverage is not supported
-//@ unit-test: InstrumentCoverage
+//@ test-mir-pass: InstrumentCoverage
 //@ compile-flags: -Cinstrument-coverage -Zno-profiler-runtime
 
 // EMIT_MIR instrument_coverage.main.InstrumentCoverage.diff

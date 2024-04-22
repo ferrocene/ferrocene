@@ -6496,6 +6496,7 @@ dependencies = [
  "lazy_static",
  "miropt-test-tools",
  "regex",
+ "rustc-hash",
  "semver",
  "termcolor",
  "walkdir",

@@ -49,7 +49,7 @@ pub(crate) enum AnnotationSource {
     Makefile,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct Annotations {
     pub(crate) ids: BTreeMap<String, BTreeSet<AnnotatedFile>>,
     pub(crate) ignored_tests: BTreeMap<String, BTreeSet<String>>,
@@ -58,7 +58,11 @@ pub(crate) struct Annotations {
 
 impl Annotations {
     pub(crate) fn new() -> Self {
-        Annotations { considers_ignored_tests: true, ..Default::default() }
+        Annotations {
+            ids: BTreeMap::new(),
+            ignored_tests: BTreeMap::new(),
+            considers_ignored_tests: true,
+        }
     }
 
     pub(crate) fn load_directory(

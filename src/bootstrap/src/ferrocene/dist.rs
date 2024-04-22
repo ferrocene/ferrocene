@@ -115,7 +115,9 @@ impl Step for SourceTarball {
         ];
         const EXTRA_CARGO_TOMLS: &[&str] = &[
             "compiler/rustc_codegen_cranelift/Cargo.toml",
+            "compiler/rustc_codegen_gcc/Cargo.toml",
             "src/bootstrap/Cargo.toml",
+            "src/tools/cargo/Cargo.toml",
             "src/tools/rust-analyzer/Cargo.toml",
         ];
 

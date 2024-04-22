@@ -38,8 +38,9 @@ impl TestOutcomes {
                 );
             }
 
-            let mut search_queue =
-                VecDeque::from_iter(metrics.invocations.into_iter().flat_map(|i| i.children));
+            let mut search_queue = VecDeque::from_iter(
+                metrics.invocations.into_iter().flat_map(|invocation| invocation.children),
+            );
             while let Some(node) = search_queue.pop_front() {
                 match node {
                     MetricsNode::RustbuildStep { children } => search_queue.extend(children),

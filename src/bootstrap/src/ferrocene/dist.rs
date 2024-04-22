@@ -152,6 +152,7 @@ impl Step for SourceTarball {
         for extra in EXTRA_CARGO_TOMLS {
             vendor.arg("--sync").arg(&builder.src.join(extra));
         }
+        vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
         if !builder.config.dry_run() {
             let config = crate::output(&mut vendor);
             builder.create_dir(&dest_dir.join(".cargo"));

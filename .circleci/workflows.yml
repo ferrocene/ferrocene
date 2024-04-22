@@ -189,6 +189,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
+          qnx: true
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
@@ -783,6 +784,9 @@ commands:
       llvm-subset:
         type: boolean
         default: true
+      qnx:
+        type: boolean
+        default: false
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
@@ -803,7 +807,20 @@ commands:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
                 command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
-
+      - when:
+          condition:
+            equal: [<<parameters.qnx>>, true]
+          steps:
+            - run:
+                name: Fetch QNX710 toolchain
+                command: aws s3 cp s3://ferrocene-ci-artifacts/qnx/qnx710.tar.zst - | zstd -d | tar x
+            - run:
+                name: Set PATH to include QNX710 tools
+                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+            - run:
+                name: Start QNX License Server port forwarding
+                command: aws ssm start-session --target i-0accef99ca2244097 --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
+                background: true
       - ferrocene-ci
 
   ferrocene-job-test-container:

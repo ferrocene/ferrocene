@@ -23,6 +23,8 @@ shipped as a preview.
   * :target-with-triple:`armv7r-none-eabihf`
   * :target-with-triple:`armebv7r-none-eabihf`
   * :target-with-triple:`x86_64-apple-darwin`
+  * :target-with-triple:`aarch64-unknown-nto-qnx710`
+  * :target-with-triple:`x86_64-pc-nto-qnx710`
 
 * Experimental support has been added for a new host platform.
   Note that experimental targets are not qualified for safety critical use. The

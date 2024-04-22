@@ -135,8 +135,8 @@ mod tests {
     fn test_load_outcomes() {
         let dir = TempDir::new().unwrap();
 
-        write_to_dir(content_1(), &dir, "runner1");
-        write_to_dir(content_2(), &dir, "runner2");
+        write_to_dir(content_1(), &dir, "runner1.json");
+        write_to_dir(content_2(), &dir, "runner2.json");
 
         let outcomes = TestOutcomes::load(dir.path()).unwrap();
 
@@ -172,7 +172,7 @@ mod tests {
     fn write_to_dir(json: serde_json::Value, dir: &TempDir, file_name: &str) {
         // format for ease of debugging
         let content = serde_json::to_string_pretty(&json).unwrap();
-        std::fs::write(dir.path().join(format!("{file_name}.json")), content).unwrap();
+        std::fs::write(dir.path().join(file_name), content).unwrap();
     }
 
     fn content_1() -> serde_json::Value {

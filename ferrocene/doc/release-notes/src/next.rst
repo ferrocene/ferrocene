@@ -21,6 +21,7 @@ shipped as a preview.
 
   * :target-with-triple:`armv8r-none-eabihf`
   * :target-with-triple:`armv7r-none-eabihf`
+  * :target-with-triple:`armebv7r-none-eabihf`
   * :target-with-triple:`x86_64-apple-darwin`
 
 * Experimental support has been added for a new host platform.

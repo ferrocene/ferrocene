@@ -428,7 +428,7 @@ jobs:
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
       - ferrocene-job-build:
-          os: darwin
+          os: windows
 
   # This job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
@@ -445,7 +445,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
-          os: darwin
+          os: windows
           restore-from-job: x86_64-windows-build
 
   x86_64-windows-dist-tools:
@@ -460,7 +460,7 @@ jobs:
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
     - ferrocene-job-dist:
-          os: darwin
+          os: windows
           restore-from-job: x86_64-windows-build
 
   x86_64-windows-self-test:

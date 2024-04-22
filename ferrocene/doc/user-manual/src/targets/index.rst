@@ -102,7 +102,7 @@ should not be used in production.
      - Bare-metal
      - \-
 
-  * - :target:`aarch64-unknown-nto-qnx710`
+   * - :target:`aarch64-unknown-nto-qnx710`
      - ``aarch64-unknown-nto-qnx710``
      - Cross-compilation
      - Full

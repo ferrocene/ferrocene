@@ -2216,14 +2216,9 @@ impl Step for LlvmTools {
         builder.ensure(crate::core::build_steps::llvm::Llvm { target });
 
         let mut tarball = Tarball::new(builder, "llvm-tools", &target.triple);
-<<<<<<< HEAD
-        tarball.set_overlay(OverlayKind::LLVM);
+        tarball.set_overlay(OverlayKind::Llvm);
         // Ferrocene: disable preview flag.
         //tarball.is_preview(true);
-=======
-        tarball.set_overlay(OverlayKind::Llvm);
-        tarball.is_preview(true);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
         if builder.config.llvm_tools_enabled {
             // Prepare the image directory

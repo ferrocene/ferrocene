@@ -924,7 +924,7 @@ impl Step for RustdocJSStd {
             builder.top_stage,
             self.target,
             builder,
-            DocumentationFormat::HTML,
+            DocumentationFormat::Html,
         ));
         let _guard = builder.msg(
             Kind::Test,
@@ -1391,10 +1391,9 @@ impl Step for RunMakeSupport {
         builder.run(&mut cargo);
 
         let lib_name = "librun_make_support.rlib";
-        let lib = builder.tools_dir(self.compiler).join(&lib_name);
+        let lib = builder.tools_dir(self.compiler).join(lib_name);
 
-        let cargo_out =
-            builder.cargo_out(self.compiler, Mode::ToolStd, self.target).join(&lib_name);
+        let cargo_out = builder.cargo_out(self.compiler, Mode::ToolStd, self.target).join(lib_name);
         builder.copy_link(&cargo_out, &lib);
         lib
     }
@@ -2490,7 +2489,12 @@ impl Step for CrateLibrustc {
 /// Given a `cargo test` subcommand, add the appropriate flags and run it.
 ///
 /// Returns whether the test succeeded.
+<<<<<<< HEAD
 pub(crate) fn run_cargo_test<'a>(
+=======
+#[allow(clippy::too_many_arguments)] // FIXME: reduce the number of args and remove this.
+fn run_cargo_test<'a>(
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     cargo: impl Into<Command>,
     libtest_args: &[&str],
     crates: &[String],

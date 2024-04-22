@@ -8,7 +8,9 @@ use rustc_data_structures::profiling::TimePassesFormat;
 use rustc_data_structures::stable_hasher::Hash64;
 use rustc_errors::ColorConfig;
 use rustc_errors::{LanguageIdentifier, TerminalUrl};
-use rustc_target::spec::{CodeModel, LinkerFlavorCli, MergeFunctions, PanicStrategy, SanitizerSet};
+use rustc_target::spec::{
+    CodeModel, LinkerFlavorCli, MergeFunctions, PanicStrategy, SanitizerSet, WasmCAbi,
+};
 use rustc_target::spec::{
     RelocModel, RelroLevel, SplitDebuginfo, StackProtector, TargetTriple, TlsModel,
 };
@@ -396,7 +398,7 @@ mod desc {
     pub const parse_optimization_fuel: &str = "crate=integer";
     pub const parse_dump_mono_stats: &str = "`markdown` (default) or `json`";
     pub const parse_instrument_coverage: &str = parse_bool;
-    pub const parse_coverage_options: &str = "`branch` or `no-branch`";
+    pub const parse_coverage_options: &str = "either  `no-branch`, `branch` or `mcdc`";
     pub const parse_instrument_xray: &str = "either a boolean (`yes`, `no`, `on`, `off`, etc), or a comma separated list of settings: `always` or `never` (mutually exclusive), `ignore-loops`, `instruction-threshold=N`, `skip-entry`, `skip-exit`";
     pub const parse_unpretty: &str = "`string` or `string=string`";
     pub const parse_treat_err_as_bug: &str = "either no value or a non-negative number";
@@ -441,6 +443,7 @@ mod desc {
         "either a boolean (`yes`, `no`, `on`, `off`, etc), or a non-negative number";
     pub const parse_llvm_module_flag: &str = "<key>:<type>:<value>:<behavior>. Type must currently be `u32`. Behavior should be one of (`error`, `warning`, `require`, `override`, `append`, `appendunique`, `max`, `min`)";
     pub const parse_function_return: &str = "`keep` or `thunk-extern`";
+    pub const parse_wasm_c_abi: &str = "`legacy` or `spec`";
 }
 
 mod parse {
@@ -946,17 +949,19 @@ mod parse {
         let Some(v) = v else { return true };
 
         for option in v.split(',') {
-            let (option, enabled) = match option.strip_prefix("no-") {
-                Some(without_no) => (without_no, false),
-                None => (option, true),
-            };
-            let slot = match option {
-                "branch" => &mut slot.branch,
+            match option {
+                "no-branch" => {
+                    slot.branch = false;
+                    slot.mcdc = false;
+                }
+                "branch" => slot.branch = true,
+                "mcdc" => {
+                    slot.branch = true;
+                    slot.mcdc = true;
+                }
                 _ => return false,
-            };
-            *slot = enabled;
+            }
         }
-
         true
     }
 
@@ -1429,6 +1434,15 @@ mod parse {
         match v {
             Some("keep") => *slot = FunctionReturn::Keep,
             Some("thunk-extern") => *slot = FunctionReturn::ThunkExtern,
+            _ => return false,
+        }
+        true
+    }
+
+    pub(crate) fn parse_wasm_c_abi(slot: &mut WasmCAbi, v: Option<&str>) -> bool {
+        match v {
+            Some("spec") => *slot = WasmCAbi::Spec,
+            Some("legacy") => *slot = WasmCAbi::Legacy,
             _ => return false,
         }
         true
@@ -2061,6 +2075,8 @@ written to standard error output)"),
         Requires `-Clto[=[fat,yes]]`"),
     wasi_exec_model: Option<WasiExecModel> = (None, parse_wasi_exec_model, [TRACKED],
         "whether to build a wasi command or reactor"),
+    wasm_c_abi: WasmCAbi = (WasmCAbi::Legacy, parse_wasm_c_abi, [TRACKED],
+        "use spec-compliant C ABI for `wasm32-unknown-unknown` (default: legacy)"),
     write_long_types_to_disk: bool = (true, parse_bool, [UNTRACKED],
         "whether long type names should be written to files instead of being printed in errors"),
     // tidy-alphabetical-end

@@ -2,8 +2,12 @@
 // The Coverage::CounterIncrement statements are later converted into LLVM
 // instrprof.increment intrinsics, during codegen.
 
+<<<<<<< HEAD
 //@ ignore-aarch64-unknown-ferrocenecoretest - instrument-coverage is not supported
 //@ unit-test: InstrumentCoverage
+=======
+//@ test-mir-pass: InstrumentCoverage
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 //@ compile-flags: -Cinstrument-coverage -Zno-profiler-runtime
 
 // EMIT_MIR instrument_coverage.main.InstrumentCoverage.diff

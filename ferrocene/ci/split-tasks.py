@@ -50,7 +50,7 @@ class Task:
 
 
 # TODO: this should be `type Job = list[str]` etc., but this requires CI to update
-# to python 9.12 or above
+# to python 3.12 or above
 Job: TypeAlias = list[str]
 Kind: TypeAlias = dict[str, Job]
 JobsDefinition: TypeAlias = dict[str, Kind]

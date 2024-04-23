@@ -294,11 +294,11 @@ pub struct Standalone {
 
 impl Step for Standalone {
     type Output = ();
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("src/doc").alias("standalone").default_condition(builder.config.docs)
+        // Ferrocene has its own documentation index.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

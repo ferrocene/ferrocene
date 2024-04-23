@@ -56,11 +56,11 @@ pub struct Docs {
 
 impl Step for Docs {
     type Output = Option<GeneratedTarball>;
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default = run.builder.config.docs;
-        run.alias("rust-docs").default_condition(default)
+        // Disabled by Ferrocene, as we have our own documentation tarball.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -127,12 +127,12 @@ pub struct RustcDocs {
 
 impl Step for RustcDocs {
     type Output = Option<GeneratedTarball>;
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("rustc-docs").default_condition(builder.config.compiler_docs)
+        // Disabled by Ferrocene, as we don't ship the compiler documentation.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -943,12 +943,12 @@ pub struct PlainSourceTarball;
 impl Step for PlainSourceTarball {
     /// Produces the location of the tarball generated
     type Output = GeneratedTarball;
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("rustc-src").default_condition(builder.config.rust_dist_src)
+        // Disabled by Ferrocene, as we have our own alternative for it.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -1501,12 +1501,12 @@ pub struct Extended {
 
 impl Step for Extended {
     type Output = ();
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.alias("extended").default_condition(builder.config.extended)
+        // Disabled by Ferrocene, as we don't support the extended tarball.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

@@ -313,7 +313,7 @@ jobs:
       SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
-      # due to the OOM killer killing the build, decrease this number.
+      # due to using too much memory, decrease this number.
       LLVM_BUILD_PARALLELISM: 18
     steps:
       - when:

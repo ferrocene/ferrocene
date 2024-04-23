@@ -1664,7 +1664,7 @@ dependencies = [
 
 [[package]]
 name = "document-signatures"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "asn1-rs",
@@ -1853,7 +1853,7 @@ checksum = "658bd65b1cf4c852a3cc96f18a8ce7b5640f6b703f905c7d74532294c2a63984"
 
 [[package]]
 name = "ferrocene-self-test"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "atty",
  "insta",
@@ -6702,7 +6702,7 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "traceability-matrix"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "askama",

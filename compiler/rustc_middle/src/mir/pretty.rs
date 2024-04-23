@@ -187,6 +187,17 @@ fn dump_path<'tcx>(
             }));
             s
         }
+        ty::InstanceDef::AsyncDropGlueCtorShim(_, Some(ty)) => {
+            // Unfortunately, pretty-printed typed are not very filename-friendly.
+            // We dome some filtering.
+            let mut s = ".".to_owned();
+            s.extend(ty.to_string().chars().filter_map(|c| match c {
+                ' ' => None,
+                ':' | '<' | '>' => Some('_'),
+                c => Some(c),
+            }));
+            s
+        }
         _ => String::new(),
     };
 
@@ -491,7 +502,7 @@ fn write_coverage_branch_info(
         writeln!(
             w,
             "{INDENT}coverage mcdc branch {{ condition_id: {:?}, true: {true_marker:?}, false: {false_marker:?} }} => {span:?}",
-            condition_info.condition_id
+            condition_info.map(|info| info.condition_id)
         )?;
     }
 

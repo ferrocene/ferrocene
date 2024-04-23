@@ -107,7 +107,9 @@ Front-End, we identify the following distinct "processors":
                 types, and stops a malformed Rust program from advancing further
                 into the Ferrocene compilation pipeline.
 
-:THIR Lowering: The process of THIR Lowering translates the HIR into THIR.
+:THIR Lowering: The process of THIR Lowering incorporates the results of the Type
+                Analyzer into the HIR with a simple structural transformation to
+                produce THIR. Unlike HIR, THIR is discarded after MIR lowering.
 
 :Exhaustiveness Analyzer: The Exhaustiveness Analyzer uses type information to
                           determine whether the alternatives of a match
@@ -124,7 +126,9 @@ Front-End, we identify the following distinct "processors":
                    stops a malformed Rust program from advancing further into
                    the Ferrocene compilation pipeline.
 
-:MIR Lowering: The process of MIR Lowering translates the THIR into MIR.
+:MIR Lowering: The process of MIR Lowering translates the THIR into MIR. This
+               system transforms high level control flow, such loops, into a
+               series of basic blocks and jumps between them.
 
 :Borrow Checker: The Borrow Checker uses the control flow graph to verify the
                  ownership and borrowing system of the Rust programming

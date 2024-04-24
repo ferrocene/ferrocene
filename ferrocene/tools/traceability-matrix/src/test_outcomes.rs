@@ -143,33 +143,23 @@ mod tests {
         // Assert
         assert_eq!(
             TestOutcomes {
-                executed_tests: BTreeMap::from([
-                    (
-                        "tests/ui/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/ui/bar.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/run-make/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/codegen/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
+                executed_tests: arrange_tests([
+                    "tests/ui/foo.rs",
+                    "tests/ui/bar.rs",
+                    "tests/run-make/foo.rs",
+                    "tests/codegen/foo.rs",
                 ]),
-                ignored_tests: BTreeMap::from([(
-                    "tests/ui/baz.rs".into(),
-                    BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                )]),
+                ignored_tests: arrange_tests(["tests/ui/baz.rs"])
             },
             outcomes,
         );
 
         Ok(())
+    }
+
+    fn arrange_tests<const N: usize>(tests: [&str; N]) -> BTreeMap<String, BTreeSet<String>> {
+        let targets = BTreeSet::from(["aarch64-unknown-linux-gnu".into()]);
+        tests.into_iter().map(Into::into).map(|test| (test, targets.clone())).collect()
     }
 
     fn content_1() -> serde_json::Result<Vec<u8>> {

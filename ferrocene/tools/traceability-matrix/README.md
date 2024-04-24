@@ -17,6 +17,8 @@ On the one hand, we have the Ferrocene Language Specification (FLS). Simply spea
 
 On the other hand we have tests. We need to find at least one test for each section from the FLS. This test is then annotated with the id of the statement. This annotating is happening through a comment which is getting added to the end of the file. It is possible to annotate one test with multiple ids.
 
+Currently we annotate tests in `tests/ui` (for the FLS) and `tests/run-make` (for the command-line interface).
+
 For example `tests/ui/borrowck/borrowck-break-uninit-2.rs` got annotated with `fls_3xvm61x0t251` ([file at c80de1f](https://github.com/ferrocene/ferrocene/blob/c80de1fa7eecdfbe4579b13e2aaa93fb0586f9c6/tests/ui/borrowck/borrowck-break-uninit-2.rs)):
 
 ```rust

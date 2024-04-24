@@ -12,7 +12,7 @@ use thiserror::Error as ThisError;
 pub(crate) enum Error {
     #[error("could not detect the sysroot of the Ferrocene installation")]
     NoSysroot,
-    #[error("binary {name} not found (inside {})", directory.display())]
+    #[error("binary {name} expected (inside {}), but is not there", directory.display())]
     MissingBinary { directory: PathBuf, name: String },
     #[error("binary {} must be readable and executable by all users", path.display())]
     WrongBinaryPermissions { path: PathBuf },

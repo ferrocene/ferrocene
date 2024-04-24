@@ -128,18 +128,19 @@ enum MetricsTestOutcome {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
     use tempfile::TempDir;
 
     #[test]
-    fn test_load_outcomes() {
-        let dir = TempDir::new().unwrap();
+    fn test_load_outcomes() -> anyhow::Result<()> {
+        // Arrange
+        let dir = TempDir::new()?;
+        std::fs::write(dir.path().join("runner1.json"), content_1()?)?;
+        std::fs::write(dir.path().join("runner2.json"), content_2()?)?;
 
-        write_to_dir(content_1(), &dir, "runner1.json");
-        write_to_dir(content_2(), &dir, "runner2.json");
-
+        // Act
         let outcomes = TestOutcomes::load(dir.path()).unwrap();
 
+        // Assert
         assert_eq!(
             TestOutcomes {
                 executed_tests: BTreeMap::from([
@@ -166,17 +167,13 @@ mod tests {
                 )]),
             },
             outcomes,
-        )
+        );
+
+        Ok(())
     }
 
-    fn write_to_dir(json: serde_json::Value, dir: &TempDir, file_name: &str) {
-        // format for ease of debugging
-        let content = serde_json::to_string_pretty(&json).unwrap();
-        std::fs::write(dir.path().join(file_name), content).unwrap();
-    }
-
-    fn content_1() -> serde_json::Value {
-        json!({
+    fn content_1() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "format_version": 1,
             "invocations": [
                 {
@@ -266,11 +263,11 @@ mod tests {
                     ],
                 },
             ],
-        })
+        }))
     }
 
-    fn content_2() -> serde_json::Value {
-        json!({
+    fn content_2() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
                 "format_version": 1,
                 "invocations": [
                     {
@@ -332,6 +329,6 @@ mod tests {
                         ],
                     },
                 ],
-        })
+        }))
     }
 }

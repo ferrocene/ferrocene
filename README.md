@@ -53,14 +53,14 @@ your support plan, and how to send support requests.
 ## Contribution policy
 
 As a downstream of the Rust project, Ferrocene prefers to keep the compiler
-unmodified. This means that general, contributions to the compiler or its tools
-and discussions should be kept to [`rust-lang/rust`]. However, Ferrocene does
+unmodified. This means that general contributions to the compiler or its tools
+(and discussions) should happen upstream ([`rust-lang/rust`]). However, Ferrocene does
 serve as a community of peers to propose and produce changes useful in
 safety-critical changes towards the project.
 
 Contributions to qualification activities and manuals are welcome, but
 generally gated. Contribution is open to industry and academic partners,
-customers and project employees.
+customers, and project employees.
 
 You can use the [Ferrocene issue tracker][issues] to file an issue for the
 materials provided by the Ferrocene developers. Please note that the issue

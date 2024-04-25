@@ -77,7 +77,7 @@ case "$1" in
 
         aws s3 cp "$(s3_url "${job}")" - \
             | zstd --decompress --stdout \
-            | "${TAR}" -xf- --preserve-permissions --format=posix
+            | "${TAR}" -xf-
         ;;
     *)
         usage 1>&2

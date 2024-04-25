@@ -8,10 +8,17 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
+TAR="tar"
+# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
+if [[ "${OSTYPE}" = "msys" ]]; then
+    TAR="/c/Program Files/Git/usr/bin/tar.exe"
+fi
+
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
 }
+
 
 s3_url() {
     # CircleCI provides two IDs in each job's environment:
@@ -28,11 +35,7 @@ s3_url() {
     #
     # We're reimplementing CirlceCI workspaces in this script, so we're using
     # the Workspace ID as the cache key.
-    EXTENSION="tar.zst"
-    if [[ "${OSTYPE}" = "msys" ]]; then
-        EXTENSION="7z"
-    fi
-    echo "s3://${CACHE_BUCKET}/${CACHE_PREFIX}/${CIRCLE_WORKFLOW_WORKSPACE_ID}/$1.${EXTENSION}"
+    echo "s3://${CACHE_BUCKET}/${CACHE_PREFIX}/${CIRCLE_WORKFLOW_WORKSPACE_ID}/$1.tar.zst"
 }
 
 if [[ "$#" -lt 1 ]]; then
@@ -52,14 +55,17 @@ case "$1" in
         fi
 
         if [[ "${OSTYPE}" = "msys" ]]; then
-            # Both bsdtar and gnutar are dreadfully slow on Windows (~6.5 minutes)
-            # `tar` archives
-            7z a -y -t7z -snh -snl -x!build/metrics.json build -so | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+            # CircleCI's folder path structure is too long to support these links on unpack, so we ignore them.
+            "${TAR}" -cf- --exclude build/metrics.json \
+                --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude build/host \
+                --preserve-permissions --format=posix $@ \
+                | zstd -1 -T0 \
+                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         else
             # Call `zstd` separately to be able to use all cores available (`-T0`)
             # and the lowest compression level possible, to speed the compression
             # as much as possible.
-            tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+            "${TAR}" c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         fi
         ;;
     restore)
@@ -69,13 +75,9 @@ case "$1" in
         fi
         job="$2"
 
-        if [[ "${OSTYPE}" = "msys" ]]; then
-            # Both bsdtar and gnutar are dreadfully slow on Windows (~6.5 minutes)
-            # `tar` archives
-            aws s3 cp "$(s3_url "${job}")" - | 7z x -y -si -t7z
-        else
-            aws s3 cp "$(s3_url "${job}")" - | unzstd --stdout | tar x
-        fi
+        aws s3 cp "$(s3_url "${job}")" - \
+            | zstd --decompress --stdout \
+            | "${TAR}" -xf- --preserve-permissions --format=posix
         ;;
     *)
         usage 1>&2

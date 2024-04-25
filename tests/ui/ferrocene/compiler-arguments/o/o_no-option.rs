@@ -1,4 +1,4 @@
-// This test should check what happen when no option is provided to -o
+// This test should check what happens when no option is provided to -o.
 // Unfortunately, the test frameworking is adding other options after it,
 // causing an unexpected failure.
 //

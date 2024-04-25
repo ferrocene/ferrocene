@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use anyhow::{Context, Error};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::path::Path;
 
+use anyhow::Context;
+
 const EXPECTED_FORMAT_VERSION: usize = 1;
 
+/// Answers which tests were executed and which were ignored
 #[derive(Debug, PartialEq, Eq, Default, Clone)]
 pub(crate) struct TestOutcomes {
     // key is name of test, represented by a path
@@ -18,7 +20,7 @@ pub(crate) struct TestOutcomes {
 }
 
 impl TestOutcomes {
-    pub(crate) fn load(directory: &Path) -> Result<Self, Error> {
+    pub(crate) fn load(directory: &Path) -> anyhow::Result<Self> {
         let mut test_outcomes = TestOutcomes::default();
 
         for entry in std::fs::read_dir(directory)? {
@@ -36,42 +38,19 @@ impl TestOutcomes {
                 );
             }
 
-            let mut search_queue = VecDeque::new();
-            for invocation in &metrics.invocations {
-                search_queue.extend(invocation.children.iter());
-            }
+            let mut search_queue = VecDeque::from_iter(
+                metrics.invocations.into_iter().flat_map(|invocation| invocation.children),
+            );
             while let Some(node) = search_queue.pop_front() {
                 match node {
-                    MetricsNode::RustbuildStep { children } => {
-                        for child in children {
-                            search_queue.push_back(child);
-                        }
-                    }
+                    MetricsNode::RustbuildStep { children } => search_queue.extend(children),
                     MetricsNode::TestSuite {
                         tests,
                         metadata: TestSuiteMetadata::Compiletest { target },
                     } => {
                         for Test { name, outcome } in tests {
-                            // Compiletest test names are in the "[suite] path/to/test.rs#revision"
-                            // format, with the revision being optional.
-                            let Some(name) = name.split_once("] ").map(|(_, n)| n) else {
-                                continue;
-                            };
-                            let name = name.rsplit_once('#').map(|(n, _)| n).unwrap_or(name).into();
-
-                            if let MetricsTestOutcome::Ignored = outcome {
-                                test_outcomes
-                                    .ignored_tests
-                                    .entry(name)
-                                    .or_insert_with(BTreeSet::new)
-                                    .insert(target.to_owned());
-                            } else {
-                                test_outcomes
-                                    .executed_tests
-                                    .entry(name)
-                                    .or_insert_with(BTreeSet::new)
-                                    .insert(target.to_owned());
-                            }
+                            let Some(name) = parse_name(name) else { continue };
+                            test_outcomes.insert(outcome, name, &target);
                         }
                     }
                     // Ignore test results from Cargo packages, as we don't consider those in the
@@ -85,6 +64,24 @@ impl TestOutcomes {
 
         Ok(test_outcomes)
     }
+
+    fn insert(&mut self, outcome: MetricsTestOutcome, name: String, target: &str) {
+        let tests = match outcome {
+            MetricsTestOutcome::Ignored => &mut self.ignored_tests,
+            MetricsTestOutcome::Passed => &mut self.executed_tests,
+        };
+        tests.entry(name).or_default().insert(target.into());
+    }
+}
+
+/// Compiletest test names are in the `[suite] path/to/test.rs#revision`
+/// format, with the revision being optional.
+fn parse_name(name: String) -> Option<String> {
+    let (_, mut name) = name.split_once("] ")?;
+    if let Some((name2, _)) = name.rsplit_once('#') {
+        name = name2;
+    }
+    Some(name.into())
 }
 
 #[derive(serde::Deserialize)]
@@ -131,14 +128,42 @@ enum MetricsTestOutcome {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
     use tempfile::TempDir;
 
     #[test]
-    fn test_load_outcomes() {
-        let dir = TempDir::new().unwrap();
+    fn test_load_outcomes() -> anyhow::Result<()> {
+        // Arrange
+        let dir = TempDir::new()?;
+        std::fs::write(dir.path().join("runner1.json"), content_1()?)?;
+        std::fs::write(dir.path().join("runner2.json"), content_2()?)?;
 
-        let content = json!({
+        // Act
+        let outcomes = TestOutcomes::load(dir.path()).unwrap();
+
+        // Assert
+        assert_eq!(
+            TestOutcomes {
+                executed_tests: arrange_tests([
+                    "tests/ui/foo.rs",
+                    "tests/ui/bar.rs",
+                    "tests/run-make/foo.rs",
+                    "tests/codegen/foo.rs",
+                ]),
+                ignored_tests: arrange_tests(["tests/ui/baz.rs"])
+            },
+            outcomes,
+        );
+
+        Ok(())
+    }
+
+    fn arrange_tests<const N: usize>(tests: [&str; N]) -> BTreeMap<String, BTreeSet<String>> {
+        let targets = BTreeSet::from(["aarch64-unknown-linux-gnu".into()]);
+        tests.into_iter().map(|test| (test.into(), targets.clone())).collect()
+    }
+
+    fn content_1() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "format_version": 1,
             "invocations": [
                 {
@@ -228,110 +253,72 @@ mod tests {
                     ],
                 },
             ],
-        })
-        .to_string();
-        let content: serde_json::Value = serde_json::from_str(&content).unwrap();
-        // for ease of debugging
-        let content = serde_json::to_string_pretty(&content).unwrap();
-        std::fs::write(dir.path().join("runner1.json"), content).unwrap();
+        }))
+    }
 
-        let content = json!({
-            "format_version": 1,
-            "invocations": [
-                {
-                    "children": [
-                        {
-                            "kind": "rustbuild_step",
-                            "type": "bootstrap::test::Codegen",
-                            "children": [
-                                {
-                                    "kind": "rustbuild_step",
-                                    "type": "bootstrap::test::Compiletest",
-                                    "children": [
-                                        {
-                                            "kind": "test_suite",
-                                            "metadata": {
-                                                "target": "aarch64-unknown-linux-gnu",
-                                                "kind": "compiletest",
-                                            },
-                                            "tests": [
-                                                {
-                                                    "name": "[codegen] tests/codegen/foo.rs",
-                                                    "outcome": "passed",
+    fn content_2() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
+                "format_version": 1,
+                "invocations": [
+                    {
+                        "children": [
+                            {
+                                "kind": "rustbuild_step",
+                                "type": "bootstrap::test::Codegen",
+                                "children": [
+                                    {
+                                        "kind": "rustbuild_step",
+                                        "type": "bootstrap::test::Compiletest",
+                                        "children": [
+                                            {
+                                                "kind": "test_suite",
+                                                "metadata": {
+                                                    "target": "aarch64-unknown-linux-gnu",
+                                                    "kind": "compiletest",
                                                 },
-                                            ],
-                                        },
-                                    ],
-                                }
-                            ],
-                        },
-                    ],
-                },
-                {
-                    "children": [
-                        {
-                            "kind": "rustbuild_step",
-                            "type": "bootstrap::test::Codegen",
-                            "children": [
-                                {
-                                    "kind": "rustbuild_step",
-                                    "type": "bootstrap::test::Compiletest",
-                                    "children": [
-                                        {
-                                            "kind": "test_suite",
-                                            "metadata": {
-                                                "target": "aarch64-unknown-linux-gnu",
-                                                "kind": "compiletest",
+                                                "tests": [
+                                                    {
+                                                        "name": "[codegen] tests/codegen/foo.rs",
+                                                        "outcome": "passed",
+                                                    },
+                                                ],
                                             },
-                                            "tests": [
-                                                {
-                                                    "name": "[codegen] tests/codegen/foo.rs",
-                                                    "outcome": "passed",
+                                        ],
+                                    }
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        "children": [
+                            {
+                                "kind": "rustbuild_step",
+                                "type": "bootstrap::test::Codegen",
+                                "children": [
+                                    {
+                                        "kind": "rustbuild_step",
+                                        "type": "bootstrap::test::Compiletest",
+                                        "children": [
+                                            {
+                                                "kind": "test_suite",
+                                                "metadata": {
+                                                    "target": "aarch64-unknown-linux-gnu",
+                                                    "kind": "compiletest",
                                                 },
-                                            ],
-                                        },
-                                    ],
-                                }
-                            ],
-                        },
-                    ],
-                },
-            ],
-        })
-        .to_string();
-        let content: serde_json::Value = serde_json::from_str(&content).unwrap();
-        // for ease of debugging
-        let content = serde_json::to_string_pretty(&content).unwrap();
-        std::fs::write(dir.path().join("runner2.json"), content).unwrap();
-
-        let outcomes = TestOutcomes::load(dir.path()).unwrap();
-
-        assert_eq!(
-            TestOutcomes {
-                executed_tests: BTreeMap::from([
-                    (
-                        "tests/ui/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/ui/bar.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/run-make/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                    (
-                        "tests/codegen/foo.rs".into(),
-                        BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                    ),
-                ]),
-                ignored_tests: BTreeMap::from([(
-                    "tests/ui/baz.rs".into(),
-                    BTreeSet::from(["aarch64-unknown-linux-gnu".into()])
-                )]),
-            },
-            outcomes,
-        )
+                                                "tests": [
+                                                    {
+                                                        "name": "[codegen] tests/codegen/foo.rs",
+                                                        "outcome": "passed",
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    }
+                                ],
+                            },
+                        ],
+                    },
+                ],
+        }))
     }
 }

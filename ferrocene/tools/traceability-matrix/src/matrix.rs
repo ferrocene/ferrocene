@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::annotations::{AnnotatedFile, Annotations};
-use crate::documentations::Documentation;
-use anyhow::Error;
 use std::collections::{BTreeSet, HashSet};
 use std::fmt::Debug;
 use std::ops::Deref;
+
+use crate::annotations::{AnnotatedFile, Annotations};
+use crate::documentations::{CliOption, Documentation, Paragraph, Section};
 
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
     singular: "section",
@@ -32,7 +32,7 @@ pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
 pub(crate) fn prepare(
     documentations: &[Documentation],
     annotations: &Annotations,
-) -> Result<TraceabilityMatrix, Error> {
+) -> anyhow::Result<TraceabilityMatrix> {
     let mut matrix = TraceabilityMatrix {
         paragraphs: MatrixAnalysis::new(&ELEMENT_KIND_PARAGRAPH),
         sections: MatrixAnalysis::new(&ELEMENT_KIND_SECTION),
@@ -40,82 +40,10 @@ pub(crate) fn prepare(
         unknown_annotations: Vec::new(),
     };
 
-    let mut seen_ids = HashSet::new();
-    for documentation in documentations {
-        let to_url = |url: &str| format!("{}/{url}", documentation.url);
-
-        for page in &documentation.ids.documents {
-            let matrix_page = Page {
-                documentation: documentation.name.clone(),
-                name: page.title.clone(),
-                link: to_url(&page.link),
-            };
-
-            for section in &page.sections {
-                seen_ids.insert(&section.id);
-
-                let mut extra_section_tests = Vec::new();
-                if section.paragraphs.is_empty() {
-                    extra_section_tests.push(LinkTest::NoParagraphsInSection);
-                }
-                if page.informational || section.informational {
-                    extra_section_tests.push(LinkTest::Informational);
-                }
-                let has_annotations = matrix.sections.add(
-                    annotations,
-                    &extra_section_tests,
-                    Element {
-                        kind: &ELEMENT_KIND_SECTION,
-                        number: Some(ElementNumber(section.number.clone())),
-                        title: Some(section.title.clone()),
-                        id: section.id.clone(),
-                        link: to_url(&section.link),
-                        page: matrix_page.clone(),
-                    },
-                );
-
-                let mut extra_paragraph_tests = Vec::new();
-                if has_annotations {
-                    extra_paragraph_tests.push(LinkTest::InheritFromSection {
-                        section_id: section.id.clone(),
-                        section_number: ElementNumber(section.number.clone()),
-                    });
-                }
-
-                for paragraph in &section.paragraphs {
-                    seen_ids.insert(&paragraph.id);
-                    matrix.paragraphs.add(
-                        annotations,
-                        &extra_paragraph_tests,
-                        Element {
-                            kind: &ELEMENT_KIND_PARAGRAPH,
-                            id: paragraph.id.clone(),
-                            number: Some(ElementNumber(paragraph.number.clone())),
-                            title: None,
-                            link: to_url(&paragraph.link),
-                            page: matrix_page.clone(),
-                        },
-                    );
-                }
-            }
-
-            for option in &page.options {
-                seen_ids.insert(&option.id);
-                matrix.cli_options.add(
-                    annotations,
-                    &[],
-                    Element {
-                        kind: &ELEMENT_KIND_CLI_OPTION,
-                        id: option.id.clone(),
-                        number: None,
-                        title: Some(format!("{} {}", option.program, option.option)),
-                        link: to_url(&option.link),
-                        page: matrix_page.clone(),
-                    },
-                );
-            }
-        }
-    }
+    let seen_ids = documentations
+        .iter()
+        .flat_map(|documentation| matrix.analyze_document(annotations, documentation))
+        .collect::<HashSet<_>>();
 
     // Detect which tests link to unknown paragraphs.
     for (annotation, files) in &annotations.ids {
@@ -146,6 +74,66 @@ impl TraceabilityMatrix {
     pub(crate) fn analyses_by_kind(&self) -> impl Iterator<Item = &MatrixAnalysis> {
         [&self.sections, &self.paragraphs, &self.cli_options].into_iter()
     }
+
+    fn analyze_document<'a>(
+        &mut self,
+        annotations: &Annotations,
+        documentation: &'a Documentation,
+    ) -> HashSet<&'a String> {
+        let to_url = |url: &str| format!("{}/{url}", documentation.url);
+
+        let mut seen_ids = HashSet::new();
+        for page in &documentation.ids.documents {
+            let matrix_page = Page {
+                documentation: documentation.name.clone(),
+                name: page.title.clone(),
+                link: to_url(&page.link),
+            };
+
+            for section in &page.sections {
+                seen_ids.insert(&section.id);
+
+                let mut extra_section_tests = Vec::new();
+                if section.paragraphs.is_empty() {
+                    extra_section_tests.push(LinkTest::NoParagraphsInSection);
+                }
+                if page.informational || section.informational {
+                    extra_section_tests.push(LinkTest::Informational);
+                }
+                let has_annotations = self.sections.add(
+                    annotations,
+                    &extra_section_tests,
+                    Element::section(&matrix_page, section, to_url(&section.link)),
+                );
+
+                let extra_paragraph_tests = has_annotations
+                    .then(|| LinkTest::InheritFromSection {
+                        section_id: section.id.clone(),
+                        section_number: ElementNumber(section.number.clone()),
+                    })
+                    .map_or_else(Vec::new, |lt| vec![lt]);
+
+                for paragraph in &section.paragraphs {
+                    seen_ids.insert(&paragraph.id);
+                    self.paragraphs.add(
+                        annotations,
+                        &extra_paragraph_tests,
+                        Element::paragraph(&matrix_page, paragraph, to_url(&paragraph.link)),
+                    );
+                }
+            }
+
+            for option in &page.options {
+                seen_ids.insert(&option.id);
+                self.cli_options.add(
+                    annotations,
+                    &[],
+                    Element::cli_option(&matrix_page, option, to_url(&option.link)),
+                );
+            }
+        }
+        seen_ids
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -163,7 +151,7 @@ pub(crate) struct MatrixAnalysis {
 }
 
 impl MatrixAnalysis {
-    pub(crate) fn new(kind: &'static ElementKind) -> Self {
+    fn new(kind: &'static ElementKind) -> Self {
         MatrixAnalysis {
             kind,
             linked: BTreeSet::new(),
@@ -172,6 +160,7 @@ impl MatrixAnalysis {
         }
     }
 
+    /// Returns `true` if tests were linked (or partially linked).
     fn add(
         &mut self,
         annotations: &Annotations,
@@ -179,8 +168,8 @@ impl MatrixAnalysis {
         element: Element,
     ) -> bool {
         let mut tests = extra_tests.to_vec();
-        if let Some(files) = annotations.ids.get(&element.id) {
-            tests.extend(files.iter().map(|file| LinkTest::File(file.clone())));
+        if let Some(files) = annotations.ids.get(&element.id).cloned() {
+            tests.extend(files.into_iter().map(LinkTest::File));
         }
 
         if tests.is_empty() {
@@ -188,34 +177,25 @@ impl MatrixAnalysis {
             false
         } else {
             tests.sort();
-            let mut untested_targets = BTreeSet::new();
-            for link_test in &tests {
-                if let LinkTest::File(annotated) = link_test {
-                    for target in &annotated.targets.ignored.0 {
-                        untested_targets.insert(target.to_owned());
-                    }
-                }
-            }
-            // another loop, to capture targets that are not tested at all
-            for link_test in &tests {
-                if let LinkTest::File(annotated) = link_test {
-                    for target in &annotated.targets.executed.0 {
-                        untested_targets.remove(target);
-                    }
-                }
-            }
-            if untested_targets.is_empty() {
-                self.linked.insert(Link { element, tests: tests.clone(), untested_targets });
-            } else {
-                self.partially_linked.insert(Link {
-                    element,
-                    tests: tests.clone(),
-                    untested_targets,
-                });
-            }
+
+            let ignored = filter_targets_from_tests(&tests, |t| &t.targets.ignored.0);
+            let executed = filter_targets_from_tests(&tests, |t| &t.targets.executed.0);
+            let untested_targets =
+                ignored.difference(&executed).map(ToString::to_string).collect::<BTreeSet<_>>();
+
+            if untested_targets.is_empty() { &mut self.linked } else { &mut self.partially_linked }
+                .insert(Link { element, tests, untested_targets });
+
             true
         }
     }
+}
+
+fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&String>
+where
+    F: Fn(&AnnotatedFile) -> &BTreeSet<String>,
+{
+    tests.iter().filter_map(LinkTest::unwrap_file).flat_map(getter).collect()
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -256,6 +236,13 @@ impl LinkTest {
             LinkTest::InheritFromSection { .. } => false,
         }
     }
+
+    fn unwrap_file(&self) -> Option<&AnnotatedFile> {
+        match self {
+            LinkTest::File(annotated) => Some(annotated),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
@@ -275,6 +262,39 @@ impl Element {
             (Some(number), None) => number.0.clone(),
             (None, Some(title)) => title.clone(),
             (None, None) => "no name".into(),
+        }
+    }
+
+    fn cli_option(matrix_page: &Page, option: &CliOption, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_CLI_OPTION,
+            id: option.id.clone(),
+            number: None,
+            title: Some(format!("{} {}", option.program, option.option)),
+            link,
+            page: matrix_page.clone(),
+        }
+    }
+
+    fn paragraph(matrix_page: &Page, paragraph: &Paragraph, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_PARAGRAPH,
+            id: paragraph.id.clone(),
+            number: Some(ElementNumber(paragraph.number.clone())),
+            title: None,
+            link,
+            page: matrix_page.clone(),
+        }
+    }
+
+    fn section(matrix_page: &Page, section: &Section, link: String) -> Self {
+        Self {
+            kind: &ELEMENT_KIND_SECTION,
+            number: Some(ElementNumber(section.number.clone())),
+            title: Some(section.title.clone()),
+            id: section.id.clone(),
+            link,
+            page: matrix_page.clone(),
         }
     }
 }
@@ -353,13 +373,15 @@ impl<T: Into<String>> From<T> for ElementNumber {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::annotations::AnnotationSource;
-    use crate::documentations::{CliOption, Document, Paragraph, Section, TraceabilityIds};
+
     use std::collections::BTreeMap;
     use std::path::Path;
 
+    use crate::annotations::AnnotationSource;
+    use crate::documentations::{Document, TraceabilityIds};
+
     #[test]
-    fn test_prepare() -> Result<(), Error> {
+    fn test_prepare() -> anyhow::Result<()> {
         let documentations = [Documentation {
             name: "FLS".into(),
             url: "../fls".into(),

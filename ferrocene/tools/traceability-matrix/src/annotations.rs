@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::test_outcomes::TestOutcomes;
-use anyhow::Error;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
+
+use crate::test_outcomes::TestOutcomes;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct AnnotatedFile {
@@ -70,7 +70,13 @@ impl Annotations {
         dir: &Path,
         src_base: &Path,
         test_outcomes: Option<&TestOutcomes>,
-    ) -> Result<(), Error> {
+    ) -> anyhow::Result<()> {
+        // Mark the annotations as not considering ignored tests as soon as test
+        // outcomes are not provided once, even if they were provided before.
+        if test_outcomes.is_none() {
+            self.considers_ignored_tests = false;
+        }
+
         for entry in std::fs::read_dir(dir)? {
             let path = entry?.path();
             if !path.is_file() {
@@ -84,12 +90,12 @@ impl Annotations {
         Ok(())
     }
 
-    pub(crate) fn load_file(
+    fn load_file(
         &mut self,
         file: &Path,
         src_base: &Path,
         test_outcomes: Option<&TestOutcomes>,
-    ) -> Result<(), Error> {
+    ) -> anyhow::Result<()> {
         #[derive(serde::Deserialize)]
         struct JsonOutput {
             bulk_annotations_file_name: String,
@@ -106,12 +112,6 @@ impl Annotations {
         struct JsonAnnotation {
             id: String,
             file: PathBuf,
-        }
-
-        // Mark the annotations as not considering ignored tests as soon as test outcomes are not
-        // provided once, even if they were provided before.
-        if test_outcomes.is_none() {
-            self.considers_ignored_tests = false;
         }
 
         let output: JsonOutput = serde_json::from_slice(&std::fs::read(file)?)?;
@@ -205,7 +205,7 @@ mod tests {
     use tempfile::{NamedTempFile, TempDir};
 
     #[test]
-    fn test_load_file() -> Result<(), Error> {
+    fn test_load_file() -> anyhow::Result<()> {
         let file = NamedTempFile::new()?;
         std::fs::write(file.path(), annotations_file_1()?)?;
 
@@ -251,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_load_directory() -> Result<(), Error> {
+    fn test_load_directory() -> anyhow::Result<()> {
         let dir = TempDir::new()?;
         std::fs::write(dir.path().join("foo.json"), annotations_file_1()?)?;
         std::fs::write(dir.path().join("bar.json"), annotations_file_2()?)?;
@@ -304,7 +304,7 @@ mod tests {
             annotations.ids,
         );
         let expected = BTreeMap::from([("example/ignored.rs".into(), BTreeSet::default())]);
-        assert_eq!(expected, annotations.ignored_tests,);
+        assert_eq!(expected, annotations.ignored_tests);
 
         Ok(())
     }
@@ -317,8 +317,8 @@ mod tests {
         }
     }
 
-    fn annotations_file_1() -> Result<Vec<u8>, Error> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_1() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/foo.rs",
@@ -362,11 +362,11 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 
-    fn annotations_file_2() -> Result<Vec<u8>, Error> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_2() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/baz.rs",
@@ -383,11 +383,11 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 
-    fn annotations_file_3() -> Result<Vec<u8>, Error> {
-        Ok(serde_json::to_vec(&serde_json::json!({
+    fn annotations_file_3() -> serde_json::Result<Vec<u8>> {
+        serde_json::to_vec(&serde_json::json!({
             "tests": [
                 {
                     "file": "/base/example/quux.rs",
@@ -400,6 +400,6 @@ mod tests {
                 },
             ],
             "bulk_annotations_file_name": "ferrocene-annotations",
-        }))?)
+        }))
     }
 }

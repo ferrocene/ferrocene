@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+
+use askama::Template;
+
 use crate::annotations::{AnnotationSource, Annotations};
 use crate::matrix::{ElementKind, LinkTest, Page, TraceabilityMatrix};
-use anyhow::Error;
-use askama::Template;
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 #[derive(Template)]
 #[template(path = "report.html")]
@@ -53,7 +54,7 @@ pub(crate) fn generate(
     annotations: &Annotations,
     matrix: &TraceabilityMatrix,
     urls: Urls,
-) -> Result<String, Error> {
+) -> anyhow::Result<String> {
     Ok(Report {
         matrix,
         summary: build_summary(matrix),

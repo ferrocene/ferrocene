@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use anyhow::Error;
-use serde::Deserialize;
 use std::path::Path;
 
+use serde::Deserialize;
+
+#[derive(Debug)]
 pub(crate) struct Documentation {
     pub(crate) name: String,
     pub(crate) url: String,
@@ -52,7 +53,8 @@ pub(crate) struct CliOption {
     pub(crate) link: String,
 }
 
-pub(crate) fn load(name: &str, path: &Path, url: &str) -> Result<Documentation, Error> {
+/// Read `path` and parse it as [`TraceabilityIds`] (`ids` field of [`Documentation`]).
+pub(crate) fn load(name: &str, path: &Path, url: &str) -> anyhow::Result<Documentation> {
     Ok(Documentation {
         name: name.into(),
         url: url.into(),

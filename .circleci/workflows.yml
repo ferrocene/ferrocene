@@ -323,6 +323,7 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
     steps:
       - aws-oidc-auth
+      - setup-qnx-toolchain: {}
       - ferrocene-git-shallow-clone:
           depth: 1
       - run:
@@ -811,18 +812,7 @@ commands:
           condition:
             equal: [<<parameters.qnx>>, true]
           steps:
-            - run:
-                name: Fetch QNX710 toolchain
-                command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710.tar.zst - | zstd -d | tar x
-            - run:
-                name: Set PATH to include QNX710 tools
-                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
-            - run:
-                name: Start QNX License Server port forwarding
-                command: |
-                  INSTANCE=$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=qnx-license-server' --output "text" --query 'Reservations[*].Instances[*].InstanceId')
-                  aws ssm start-session --target ${INSTANCE} --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
-                background: true
+            - setup-qnx-toolchain: {}
       - ferrocene-ci
 
   ferrocene-job-test-container:
@@ -1027,6 +1017,22 @@ commands:
       - store_artifacts:
           path: /tmp/metrics
           destination: metrics
+
+  setup-qnx-toolchain:
+    description: Setup QNX Toolchain
+    steps:
+      - run:
+          name: Fetch QNX710 toolchain
+          command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710.tar.zst - | zstd -d | tar x
+      - run:
+          name: Set PATH to include QNX710 tools
+          command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+      - run:
+          name: Start QNX License Server port forwarding
+          command: |
+            INSTANCE=$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=qnx-license-server' --output "text" --query 'Reservations[*].Instances[*].InstanceId')
+            aws ssm start-session --target ${INSTANCE} --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
+          background: true
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

@@ -7,7 +7,7 @@ import os
 import subprocess
 
 
-COMMIT_SUBJECT = "Automatically push changes from ferrocene/ferrocene"
+COMMIT_SUBJECT = "Automated update from ferrocene/ferrocene"
 MIRRORED_MARKER = "mirrored-commit: "
 MIRROR_DIR = ""  # the root, but "." does not work
 ORIGIN_DIR = "ferrocene/doc/sphinx-shared-resources/"

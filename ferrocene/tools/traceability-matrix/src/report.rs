@@ -2,11 +2,12 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::ops::Deref;
 
 use askama::Template;
 
 use crate::annotations::{AnnotationSource, Annotations};
-use crate::matrix::{ElementKind, LinkTest, Page, TraceabilityMatrix};
+use crate::matrix::{Element, ElementKind, LinkTest, Page, TraceabilityMatrix};
 
 #[derive(Template)]
 #[template(path = "report.html")]
@@ -30,10 +31,10 @@ impl SummaryRow<'_> {
 
         if linked == total {
             "green"
-        } else if linked > 0 {
-            "orange"
-        } else {
+        } else if linked == 0 {
             "red"
+        } else {
+            "orange"
         }
     }
 }
@@ -74,8 +75,8 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     // The table is created in an earlier step because we want to make sure all kinds are present,
     // even if a page doesn't contain that kind of data.
     let mut rows = crate::utils::chain(
-        matrix.analyses_by_kind().flat_map(|a| a.linked.iter()).map(|l| &l.page),
-        matrix.analyses_by_kind().flat_map(|a| a.unlinked.iter()).map(|u| &u.page),
+        matrix.analyses_by_kind().flat_map(|a| &a.linked).map(|l| &l.page),
+        matrix.analyses_by_kind().flat_map(|a| &a.unlinked).map(|u| &u.page),
     )
     .collect::<HashSet<_>>()
     .into_iter()
@@ -87,23 +88,19 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     for analysis in matrix.analyses_by_kind() {
         let kind_all = all.get_mut(&analysis.kind).unwrap();
 
-        for item in &analysis.linked {
-            let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
+        for_each_page(&analysis.linked, &mut rows, |page| {
             page.linked += 1;
             kind_all.linked += 1;
             page.total += 1;
             kind_all.total += 1;
-        }
-        for item in &analysis.partially_linked {
-            let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
+        });
+
+        let mut f = |page: &mut SummaryItem| {
             page.total += 1;
             kind_all.total += 1;
-        }
-
-        for item in &analysis.unlinked {
-            rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap().total += 1;
-            kind_all.total += 1;
-        }
+        };
+        for_each_page(&analysis.partially_linked, &mut rows, &mut f);
+        for_each_page(&analysis.unlinked.iter().collect(), &mut rows, &mut f);
     }
 
     let mut summary = rows
@@ -133,4 +130,19 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     }
 
     summary
+}
+
+fn for_each_page<T, U>(
+    items: &BTreeSet<T>,
+    rows: &mut HashMap<&Page, HashMap<&ElementKind, SummaryItem>>,
+    mut f: U,
+) where
+    T: Deref<Target = Element>,
+    U: FnMut(&mut SummaryItem),
+{
+    for item in items {
+        let item = item.deref();
+        let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
+        f(page);
+    }
 }

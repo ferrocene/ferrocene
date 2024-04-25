@@ -814,13 +814,15 @@ commands:
           steps:
             - run:
                 name: Fetch QNX710 toolchain
-                command: aws s3 cp s3://ferrocene-ci-artifacts/qnx/qnx710.tar.zst - | zstd -d | tar x
+                command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710.tar.zst - | zstd -d | tar x
             - run:
                 name: Set PATH to include QNX710 tools
                 command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
             - run:
                 name: Start QNX License Server port forwarding
-                command: aws ssm start-session --target i-0accef99ca2244097 --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
+                command: |
+                  INSTANCE=$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=qnx-license-server' --output "text" --query 'Reservations[*].Instances[*].InstanceId')
+                  aws ssm start-session --target ${INSTANCE} --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
                 background: true
       - ferrocene-ci
 

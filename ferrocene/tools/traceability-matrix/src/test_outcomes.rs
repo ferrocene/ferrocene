@@ -159,7 +159,7 @@ mod tests {
 
     fn arrange_tests<const N: usize>(tests: [&str; N]) -> BTreeMap<String, BTreeSet<String>> {
         let targets = BTreeSet::from(["aarch64-unknown-linux-gnu".into()]);
-        tests.into_iter().map(Into::into).map(|test| (test, targets.clone())).collect()
+        tests.into_iter().map(|test| (test.into(), targets.clone())).collect()
     }
 
     fn content_1() -> serde_json::Result<Vec<u8>> {

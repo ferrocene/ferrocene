@@ -20,6 +20,7 @@ pub(crate) const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_H
 pub(crate) const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
 
 /// Run-time environment variables
+#[derive(Debug, Default)]
 pub(crate) struct Env {
     /// `PATH` environment variable.
     ///
@@ -28,14 +29,46 @@ pub(crate) struct Env {
     /// Usually this variable is present in most operating systems and does not
     /// need to be set explicitly.
     pub(crate) path: OsString,
+    pub(crate) print_detailed_args: bool,
+    pub(crate) print_detailed_errors: bool,
 }
 
 impl Env {
     pub(crate) fn gather() -> Result<Self, Error> {
+        Self::new(
+            std::env::var_os("PATH"),
+            std::env::var("FST_PRINT_DETAILED_ARGS").is_ok(),
+            std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok(),
+        )
+    }
+
+    fn new(
+        path: Option<OsString>,
+        print_detailed_args: bool,
+        print_detailed_errors: bool,
+    ) -> Result<Self, Error> {
         Ok(Self {
-            path: std::env::var_os("PATH").ok_or_else(|| Error::CCompilerNotFound {
+            path: path.ok_or_else(|| Error::CCompilerNotFound {
                 error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
             })?,
+            print_detailed_args,
+            print_detailed_errors,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_missing_path() {
+        let err = Env::new(None, false, false).unwrap_err();
+        assert!(matches!(
+            err,
+            Error::CCompilerNotFound {
+                error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
+            }
+        ));
     }
 }

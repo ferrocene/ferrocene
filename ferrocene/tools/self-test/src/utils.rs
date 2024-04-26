@@ -68,14 +68,6 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn test_find_binary_in_path_missing_path() {
-        let env = Env { path: None };
-
-        let err = find_binary_in_path(&env, "vim").unwrap_err();
-        assert!(matches!(err, FindBinaryInPathError::NoEnvironmentVariable));
-    }
-
-    #[test]
     fn test_find_binary_in_path_empty_path() {
         let env = path_env(&[(Path::new(""))]);
 
@@ -149,6 +141,6 @@ mod tests {
     }
 
     fn path_env(paths: &[&Path]) -> Env {
-        Env { path: Some(std::env::join_paths(paths).unwrap()) }
+        Env { path: std::env::join_paths(paths).unwrap(), ..Default::default() }
     }
 }

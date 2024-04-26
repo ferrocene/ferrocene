@@ -79,7 +79,7 @@ pub(crate) fn check_and_add_rustflags(
                     );
                     match cc_result {
                         Ok((_path, linker_args)) => {
-                            if std::env::var("FST_PRINT_DETAILED_ARGS").is_ok() {
+                            if env.print_detailed_args {
                                 reporter.note(&format!(
                                     "Target `{}`, detected args `{:?}`",
                                     target.triple, &linker_args
@@ -100,7 +100,7 @@ pub(crate) fn check_and_add_rustflags(
                                 }
                                 Err(e) => {
                                     // Try another compiler
-                                    if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                    if env.print_detailed_errors {
                                         reporter
                                             .note(&format!("`{compiler_name}` failed with {e}"));
                                     }
@@ -120,7 +120,7 @@ pub(crate) fn check_and_add_rustflags(
                         }
                         Err(e) => {
                             // Try again until we run out of compilers
-                            if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                            if env.print_detailed_errors {
                                 reporter.note(&format!("`{compiler_name}` failed with {e}"));
                             }
                             // Try another compiler

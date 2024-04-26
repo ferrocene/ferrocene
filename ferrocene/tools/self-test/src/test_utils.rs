@@ -24,7 +24,10 @@ impl TestUtils {
         let sysroot = TempDir::new().unwrap();
 
         Self {
-            env: Env { path: Some(std::env::join_paths([&sysroot.path().join("bin")]).unwrap()) },
+            env: Env {
+                path: std::env::join_paths([&sysroot.path().join("bin")]).unwrap(),
+                ..Default::default()
+            },
             sysroot,
             reports: ReportsCollector::new(),
         }

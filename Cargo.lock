@@ -3144,8 +3144,10 @@ name = "miri"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "chrono",
  "colored",
  "ctrlc",
+ "directories",
  "getrandom",
  "jemalloc-sys",
  "lazy_static",
@@ -4118,6 +4120,7 @@ version = "0.0.0"
 dependencies = [
  "object 0.34.0",
  "regex",
+ "similar",
  "wasmparser",
 ]
 

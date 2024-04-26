@@ -64,7 +64,7 @@ pub(crate) fn check_and_add_rustflags(
             // 2c. We loop through the things we know C compilers can be called
             'cc_loop: for compiler_kind in ["cc", "gcc", "clang"] {
                 let mut cc_args = Vec::new();
-                // 2d. We keep trying until we get a set of linker arguments are are happy with
+                // 2d. We keep trying until we get a set of linker arguments we are happy with,
                 //     or we run out of flags to give the C compiler
                 'arg_loop: loop {
                     let temp_dir = tempfile::tempdir().map_err(|error| {

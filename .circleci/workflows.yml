@@ -40,7 +40,7 @@ parameters:
     default: false
   cross-compile-targets:
     type: string
-    default: aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+    default: ""
 
 orbs:
   aws-cli: circleci/aws-cli@4.0

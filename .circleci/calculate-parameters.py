@@ -109,6 +109,21 @@ def calculate_llvm_rebuild(target):
     except s3.exceptions.ClientError:
         return True
 
+def calculate_cross_compile_targets():
+    """
+    Calculates the list of targets to pass to `cross-compile-targets` parameter
+    """
+    return ",".join([
+        "aarch64-unknown-none",
+        "thumbv7em-none-eabi",
+        "thumbv7em-none-eabihf",
+        "armv8r-none-eabihf",
+        "wasm32-unknown-unknown",
+        "armv7r-none-eabihf",
+        "armebv7r-none-eabihf",
+    ])
+
+
 
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
@@ -119,12 +134,16 @@ def prepare_parameters():
         "docker-image-rebuild--": calculate_docker_image_rebuild,
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
+        "cross-compile-targets": calculate_cross_compile_targets,
     }
 
     parameters = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
-            if parameter.startswith(prefix):
+            if parameter == prefix: # No parameter
+                parameters[parameter] = func()
+                break
+            elif parameter.startswith(prefix): # Anything after the prefix gets passed as a parameter
                 parameters[parameter] = func(parameter[len(prefix):])
                 break
         # In Python, the `else` is executed when the for loop finished

@@ -235,12 +235,10 @@ fn check_system_compiler(
         .map_err(|error| Error::CCompilerNotFound { name: compiler_name.into(), error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
-
     cross_compile_test_program(&cc_path, lld_dir, temp_dir, extra_args)?;
 
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
-
     let args_file = make_fake_linker(temp_dir)?;
 
     let linker_args =

@@ -32,6 +32,26 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
+# Targets only built (and self-tested!) on Linux.
+LINUX_ONLY_TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+# x86_64-unknown-linux-gnu builds a number of cross compilation targets
+# for us and is special cased somewhat.
+LINUX_BUILT_CROSS_TARGETS = [
+    "aarch64-unknown-none",
+    "thumbv7em-none-eabi",
+    "thumbv7em-none-eabihf",
+    "armv8r-none-eabihf",
+    "wasm32-unknown-unknown",
+    "armv7r-none-eabihf",
+    "armebv7r-none-eabihf",
+]
+# Targets self-tested on Linux
+LINUX_SELF_TEST_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+
+# Targets only built (and tested!) on Mac
+MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
+# Targets self-tested on Mac
+MAC_SELF_TEST_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -109,20 +129,49 @@ def calculate_llvm_rebuild(target):
     except s3.exceptions.ClientError:
         return True
 
-def calculate_cross_compile_targets():
+def calculate_targets(host_plus_stage):
     """
-    Calculates the list of targets to pass to `cross-compile-targets` parameter
-    """
-    return ",".join([
-        "aarch64-unknown-none",
-        "thumbv7em-none-eabi",
-        "thumbv7em-none-eabihf",
-        "armv8r-none-eabihf",
-        "wasm32-unknown-unknown",
-        "armv7r-none-eabihf",
-        "armebv7r-none-eabihf",
-    ])
+    Calculates the list of targets to pass.
 
+    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test` 
+    """
+    host, stage = host_plus_stage.split("--", 1)
+    targets = []
+    match stage:
+        # The `build` stage should cover any toolchains the host is expected to build.
+        #
+        # Note `x86_64-unknown-linux-gnu` has an expanded list in a different step.
+        case "build":
+            match host:
+                case "x86_64-unknown-linux-gnu":
+                    targets += LINUX_ONLY_TARGETS
+                case "aarch64-apple-darwin":
+                    targets += MAC_ONLY_TARGETS
+                case _:
+                    raise Exception(f"Host {host} not supported at this time, please add support")
+        # The `std-only` stage should cover any cross compilation targets which the host
+        # is expected to build only `rust-std` for.
+        #
+        # When possible, prefer building targets on `x86_64-unknown-linux-gnu`.
+        case "std-only":
+            match host:
+                case "x86_64-unknown-linux-gnu":
+                    targets += LINUX_BUILT_CROSS_TARGETS
+                case _:
+                    raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
+        # The `self-test` stage should cover all targets the host can possibly build.
+        case "self-test":
+            match host:
+                case "x86_64-unknown-linux-gnu":
+                    targets += LINUX_SELF_TEST_TARGETS
+                case "aarch64-apple-darwin":
+                    targets += MAC_SELF_TEST_TARGETS
+                case _:
+                    raise Exception(f"Host {host} not supported at this time, please add support")
+        case _:
+            raise Exception("Stage not known, please add support")
+
+    return ",".join(targets)
 
 
 def prepare_parameters():
@@ -134,16 +183,14 @@ def prepare_parameters():
         "docker-image-rebuild--": calculate_docker_image_rebuild,
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
-        "cross-compile-targets": calculate_cross_compile_targets,
+        "targets--": calculate_targets,
     }
 
     parameters = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
-            if parameter == prefix: # No parameter
-                parameters[parameter] = func()
-                break
-            elif parameter.startswith(prefix): # Anything after the prefix gets passed as a parameter
+            if parameter.startswith(prefix):
+                # Anything after the prefix gets passed as a parameter
                 parameters[parameter] = func(parameter[len(prefix):])
                 break
         # In Python, the `else` is executed when the for loop finished

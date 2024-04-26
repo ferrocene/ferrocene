@@ -45,7 +45,7 @@ pub(crate) fn check_and_add_rustflags(
     // Step 1. Check we have ld.lld available
     let _rust_lld_path = find_bundled_lld(reporter, sysroot)?;
     let lld_bin = find_bundled_lld_wrapper(reporter, sysroot)?;
-    let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
+    let lld_dir = lld_bin.parent().expect("ld.lld should have a parent directory");
 
     // Step 2. Check the C compiler works on each target that needs one
     // 2a. We loop through the targets

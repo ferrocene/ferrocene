@@ -137,39 +137,30 @@ def calculate_targets(host_plus_stage):
     """
     host, stage = host_plus_stage.split("--", 1)
     targets = []
-    match stage:
-        # The `build` stage should cover any toolchains the host is expected to build.
-        #
-        # Note `x86_64-unknown-linux-gnu` has an expanded list in a different step.
-        case "build":
-            match host:
-                case "x86_64-unknown-linux-gnu":
-                    targets += LINUX_ONLY_TARGETS
-                case "aarch64-apple-darwin":
-                    targets += MAC_ONLY_TARGETS
-                case _:
-                    raise Exception(f"Host {host} not supported at this time, please add support")
-        # The `std-only` stage should cover any cross compilation targets which the host
-        # is expected to build only `rust-std` for.
-        #
-        # When possible, prefer building targets on `x86_64-unknown-linux-gnu`.
-        case "std-only":
-            match host:
-                case "x86_64-unknown-linux-gnu":
-                    targets += LINUX_BUILT_CROSS_TARGETS
-                case _:
-                    raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
-        # The `self-test` stage should cover all targets the host can possibly build.
-        case "self-test":
-            match host:
-                case "x86_64-unknown-linux-gnu":
-                    targets += LINUX_SELF_TEST_TARGETS
-                case "aarch64-apple-darwin":
-                    targets += MAC_SELF_TEST_TARGETS
-                case _:
-                    raise Exception(f"Host {host} not supported at this time, please add support")
-        case _:
-            raise Exception("Stage not known, please add support")
+
+    # The CI does not run Python 3.10 and thus `match` statements don't exist yet
+    # in this universe.
+    if stage == "build":
+        if host == "x86_64-unknown-linux-gnu":
+            targets += LINUX_ONLY_TARGETS
+        elif host == "aarch64-apple-darwin":
+            targets += MAC_ONLY_TARGETS
+        else:
+            raise Exception(f"Host {host} not supported at this time, please add support")
+    elif stage == "std-only":
+        if host== "x86_64-unknown-linux-gnu":
+            targets += LINUX_BUILT_CROSS_TARGETS
+        else:
+            raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
+    elif stage == "self-test":
+        if host == "x86_64-unknown-linux-gnu":
+            targets += LINUX_SELF_TEST_TARGETS
+        elif host == "aarch64-apple-darwin":
+            targets += MAC_SELF_TEST_TARGETS
+        else:
+            raise Exception(f"Host {host} not supported at this time, please add support")
+    else:
+        raise Exception("Stage not known, please add support")
 
     return ",".join(targets)
 

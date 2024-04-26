@@ -26,9 +26,9 @@ pub(crate) enum Linker {
     /// No C compiler required
     BundledLld,
     /// The system's native C compiler is required
-    HostCC,
+    HostCc,
     /// Some kind of cross compiler, with one of the given target prefixes
-    CrossCC(&'static [&'static str]),
+    CrossCc(&'static [&'static str]),
 }
 
 /// Finds a system C compiler for each target and determines what flags should
@@ -56,8 +56,8 @@ pub(crate) fn check_and_add_rustflags(
                     .skipped(&format!("Target `{}` does not require a C compiler", target.triple));
                 continue 'target_loop;
             }
-            Linker::HostCC => &[""],
-            Linker::CrossCC(list) => list,
+            Linker::HostCc => &[""],
+            Linker::CrossCc(list) => list,
         };
         // 2b. We loop through the prefixes used on this target (e.g. "arm-unknown-none-")
         for cc_prefix in prefix_list {

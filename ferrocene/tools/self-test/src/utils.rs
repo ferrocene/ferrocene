@@ -45,11 +45,7 @@ pub(crate) struct CommandOutput {
 }
 
 pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, FindBinaryInPathError> {
-    let Some(path) = &env.path else {
-        return Err(FindBinaryInPathError::NoEnvironmentVariable);
-    };
-
-    for directory in std::env::split_paths(&path) {
+    for directory in std::env::split_paths(&env.path) {
         let binary = directory.join(name);
         if binary.is_file() {
             return Ok(binary);

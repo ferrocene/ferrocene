@@ -230,7 +230,7 @@ fn check_system_compiler(
     extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
     let cc_path = find_binary_in_path(env, compiler_name)
-        .map_err(|error| Error::CCompilerNotFound { name: compiler_name.into(), error })?;
+        .map_err(|error| Error::CCompilerNotFound { error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
 
@@ -539,8 +539,7 @@ mod tests {
                 panic!("Should not have found a C compiler");
             }
             Err(Error::CCompilerNotFound {
-                name,
-                error: FindBinaryInPathError::MissingBinary { .. },
+                error: FindBinaryInPathError::MissingBinary { name },
             }) => {
                 assert_eq!(&name, "missing-cc");
             }

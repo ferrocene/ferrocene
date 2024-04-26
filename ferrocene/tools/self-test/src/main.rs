@@ -19,7 +19,7 @@ use crate::report::{Reporter, StderrReporter};
 use crate::utils::get_sysroot;
 
 fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
-    let env = Env::gather();
+    let env = Env::gather()?;
 
     let sysroot = get_sysroot().ok_or(Error::NoSysroot)?;
     reporter.info(&format!("using sysroot {}", sysroot.display()));

@@ -8,6 +8,8 @@
 
 use std::ffi::OsString;
 
+use crate::error::Error;
+
 // Compile-time environment variables
 //
 /// The Rust release ferrocene-self-test is being compiled for
@@ -25,11 +27,15 @@ pub(crate) struct Env {
     ///
     /// Usually this variable is present in most operating systems and does not
     /// need to be set explicitly.
-    pub(crate) path: Option<OsString>,
+    pub(crate) path: OsString,
 }
 
 impl Env {
-    pub(crate) fn gather() -> Self {
-        Self { path: std::env::var_os("PATH") }
+    pub(crate) fn gather() -> Result<Self, Error> {
+        Ok(Self {
+            path: std::env::var_os("PATH").ok_or_else(|| Error::CCompilerNotFound {
+                error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
+            })?,
+        })
     }
 }

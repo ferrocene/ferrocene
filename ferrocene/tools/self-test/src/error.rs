@@ -42,9 +42,8 @@ pub(crate) enum Error {
         #[source]
         error: std::io::Error,
     },
-    #[error("C compiler {name} not found on the system")]
+    #[error("C compiler not found on the system")]
     CCompilerNotFound {
-        name: String,
         #[source]
         error: FindBinaryInPathError,
     },

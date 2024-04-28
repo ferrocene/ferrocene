@@ -52,15 +52,15 @@ KEEP_LLVM_BINARIES=(
 get_llvm_cache_hash() {
     file="$(mktemp)"
 
-    sha256sum "$0" >> "${file}"
-    sha256sum ferrocene/ci/configure.sh >> "${file}"
-    sha256sum src/version >> "${file}"
-    git ls-files src/bootstrap ferrocene/ci/docker-images -z | sort -z | xargs -0 sha256sum >> "${file}"
+    shasum -a 256 "$0" >> "${file}"
+    shasum -a 256 ferrocene/ci/configure.sh >> "${file}"
+    shasum -a 256 src/version >> "${file}"
+    git ls-files src/bootstrap ferrocene/ci/docker-images -z | sort -z | xargs -0 shasum -a 256 >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
 
-    sha256sum "${file}" | awk '{print($1)}'
+    shasum -a 256 "${file}" | awk '{print($1)}'
     rm -f "${file}"
 }
 

@@ -27,7 +27,7 @@ page][workflow] and clicking "Run workflow".
 To run the tool, switch to a new branch and run the script:
 
 ```
-ferrocene/tools/pull-upstream/pull.sh
+ferrocene/tools/pull-upstream/pull.sh master
 ```
 
 The script will fetch the latest changes from `rust-lang/rust`'s `master`

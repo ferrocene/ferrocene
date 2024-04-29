@@ -51,8 +51,8 @@ of the categories of files we don't want to pull are:
   directory or `triagebot.toml`. We don't need those configuration files and
   they might actually interfere with Ferrocene's tooling.
 
-* Upstream-specific files that don't apply to Ferrocene. There are no files in
-  this category as of July 2021.
+* Upstream-specific files that don't apply to Ferrocene, like `README.md`
+  or `CONTRIBUTING.md`.
 
 * Files we can't ship due to licensing reasons. There are no files in this
   category as of July 2021.

@@ -228,7 +228,10 @@ fi
 for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     lock="${prefix}Cargo.lock"
     echo "pull-upstream: checking whether ${lock} needs to be updated..."
-    RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null
+    if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
+        echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
+        continue
+    fi
     if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
         git add "${lock}"
         git commit -m "update ${lock}"

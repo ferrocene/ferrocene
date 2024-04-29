@@ -673,6 +673,11 @@ Command-Line Interface
 
    .. cli:option:: --crate-type <types>
 
+      .. caution::
+
+         Only the ``bin``, ``lib``, ``rlib`` and ``staticlib`` crate types can
+         be used in a safety critical context.
+
       Compiler argument ``--crate-type`` specifies the type of crate to build.
 
       ``<types>`` must be a comma-separated list of crate types. The list must

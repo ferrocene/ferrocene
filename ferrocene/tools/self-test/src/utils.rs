@@ -45,13 +45,12 @@ pub(crate) struct CommandOutput {
 }
 
 pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, FindBinaryInPathError> {
-    for directory in std::env::split_paths(&env.path) {
-        let binary = directory.join(name);
-        if binary.is_file() {
-            return Ok(binary);
-        }
-    }
-    Err(FindBinaryInPathError::MissingBinary { name: name.into() })
+    std::env::split_paths(&env.path)
+        .find_map(|directory| {
+            let binary = directory.join(name);
+            binary.is_file().then_some(binary)
+        })
+        .ok_or(FindBinaryInPathError::MissingBinary { name: name.into() })
 }
 
 /// The user manual states to extract all archives to the same directory.

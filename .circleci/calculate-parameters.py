@@ -45,13 +45,11 @@ LINUX_BUILT_CROSS_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-# Targets self-tested on Linux
-LINUX_SELF_TEST_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 
 # Targets only built (and tested!) on Mac
 MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-# Targets self-tested on Mac
-MAC_SELF_TEST_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+MAC_ALL_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -149,14 +147,14 @@ def calculate_targets(host_plus_stage):
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std-only":
         if host== "x86_64-unknown-linux-gnu":
-            targets += LINUX_BUILT_CROSS_TARGETS
+            targets += LINUX_ALL_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_SELF_TEST_TARGETS
+            targets += LINUX_ALL_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_SELF_TEST_TARGETS
+            targets += MAC_ALL_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

@@ -345,6 +345,8 @@ pub struct Config {
     #[cfg(test)]
     pub initial_rustfmt: RefCell<RustfmtState>,
 
+    /// The paths to work with. For example: with `./x check foo bar` we get
+    /// `paths=["foo", "bar"]`.
     pub paths: Vec<PathBuf>,
 
     // Ferrocene-specific configuration
@@ -2125,7 +2127,8 @@ impl Config {
             | Subcommand::Setup { .. }
             | Subcommand::Sign { .. }
             | Subcommand::Format { .. }
-            | Subcommand::Suggest { .. } => flags.stage.unwrap_or(0),
+            | Subcommand::Suggest { .. }
+            | Subcommand::Vendor { .. } => flags.stage.unwrap_or(0),
         };
 
         // CI should always run stage 2 builds, unless it specifically states otherwise
@@ -2153,7 +2156,8 @@ impl Config {
                 | Subcommand::Setup { .. }
                 | Subcommand::Sign { .. }
                 | Subcommand::Format { .. }
-                | Subcommand::Suggest { .. } => {}
+                | Subcommand::Suggest { .. }
+                | Subcommand::Vendor { .. } => {}
             }
         }
 
@@ -2581,11 +2585,6 @@ impl Config {
                 }
 
                 b
-            }
-            // FIXME: "if-available" is deprecated. Remove this block later (around mid 2024)
-            // to not break builds between the recent-to-old checkouts.
-            Some(StringOrBool::String(s)) if s == "if-available" => {
-                llvm::is_ci_llvm_available(self, asserts)
             }
             Some(StringOrBool::String(s)) if s == "if-unchanged" => if_unchanged(),
             Some(StringOrBool::String(other)) => {

@@ -46,6 +46,12 @@ KEEP_LLVM_BINARIES=(
     "llvm-tblgen"
 )
 
+EXE_SUFFIX=""
+if [[ "${OSTYPE}" = "msys" ]]; then
+    # Windows will postfix binaries with `.exe`
+    EXE_SUFFIX=".exe"
+fi
+
 # Calculate a hash of the LLVM source code and all the files that could impact
 # the LLVM build. This will be used as the cache key to avoid rebuilding LLVM
 # from scratch every time.
@@ -115,18 +121,12 @@ build_llvm_tarball() {
         keep="no"
         
         for wanted in "${KEEP_LLVM_BINARIES[@]}"; do
-            # Windows will postfix binaries with `.exe`
-            if [[ "${OSTYPE}" = "msys" ]]; then
-                if [[ "${name}" == "${wanted}.exe" ]]; then
+            for wanted in "${KEEP_LLVM_BINARIES[@]}"; do
+                if [[ "${name}" == "${wanted}${EXE_SUFFIX}" ]]; then
                     keep="yes"
                     break
                 fi
-            else
-                if [[ "${name}" == "${wanted}" ]]; then
-                    keep="yes"
-                    break
-                fi
-            fi
+            done
         done
         if [[ "${keep}" == "no" ]]; then
             chmod -x "${file}"

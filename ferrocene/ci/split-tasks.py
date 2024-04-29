@@ -50,10 +50,22 @@ class Task:
 
 
 # TODO: this should be `type Job = list[str]` etc., but this requires CI to update
-# to python 9.12 or above
+# to python 3.12 or above
 Job: TypeAlias = list[str]
 Kind: TypeAlias = dict[str, Job]
 JobsDefinition: TypeAlias = dict[str, Kind]
+
+# If you are trying to exclude a step from being executed at all in our CI,
+# avoid changing the script to pass --exclude for it. Rather, change the
+# bootstrap source code to prevent the step from being invoked at all.
+#
+# This way, customers building from source will also avoid executing the step,
+# even if they don't rely on this script.
+#
+# See this commit for an example of how to do it:
+#
+#    https://github.com/ferrocene/ferrocene/commit/feb061293a968b0cd7122cb9e00a2409be3e3a39
+#
 
 # fmt: off
 JOBS_DEFINITION: JobsDefinition = {
@@ -71,22 +83,6 @@ JOBS_DEFINITION: JobsDefinition = {
         "oxidos": ["ferrocene-oxidos"],
 
         "tools": ["rust-analyzer", "clippy", "rustfmt", "flip-link"],
-
-        # The "None" job contains the tasks that should never be executed,
-        # regardless of which job is requested.
-        None: [
-            # Combined tarballs: we can't produce those, since different
-            # customers will only be allowed to access a subset of Ferrocene
-            # components (for example due to proprietary targets).
-            "extended",
-            # Upstream's plain source tarball is replaced by the "ferrocene-src"
-            # step, so we avoid executing it.
-            "rustc-src",
-            # Upstream's documentation tarball is replaced by the
-            # "ferrocene-docs" step, so we avoid executing it.
-            "rust-docs",
-            "rustc-docs",
-        ],
     },
 
     "test": {
@@ -139,14 +135,6 @@ JOBS_DEFINITION: JobsDefinition = {
 }
 # fmt: on
 
-GLOBAL_EXCLUDE = [
-    # The "standalone" documentation includes upstream's index page, which
-    # often overrides our own custom index page. It also includes all the
-    # redirects used by upstream that we don't need. Avoid building it.
-    "doc::standalone",
-]
-
-
 def sorted_tasks(tasks: Iterable[str | Task]) -> list[Task]:
     tasks = list(tasks)
 
@@ -188,8 +176,6 @@ def cli():
         flags += get_flags_for_job(JOBS_DEFINITION, split[0], split[1])
     else:
         flags += get_flags_for_default_job(JOBS_DEFINITION, split[0])
-
-    flags += [shlex.quote(f"--exclude={path}") for path in GLOBAL_EXCLUDE]
 
     print(" ".join(flags))
 

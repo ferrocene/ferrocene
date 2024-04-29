@@ -304,7 +304,6 @@ mod dist {
 
         let a = TargetSelection::from_user("A");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a },]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: a },]);
         assert_eq!(
             first(cache.all::<dist::Rustc>()),
@@ -330,10 +329,6 @@ mod dist {
         let b = TargetSelection::from_user("B");
 
         assert_eq!(
-            first(cache.all::<dist::Docs>()),
-            &[dist::Docs { host: a }, dist::Docs { host: b },]
-        );
-        assert_eq!(
             first(cache.all::<dist::Mingw>()),
             &[dist::Mingw { host: a }, dist::Mingw { host: b },]
         );
@@ -358,10 +353,6 @@ mod dist {
         let a = TargetSelection::from_user("A");
         let b = TargetSelection::from_user("B");
 
-        assert_eq!(
-            first(cache.all::<dist::Docs>()),
-            &[dist::Docs { host: a }, dist::Docs { host: b },]
-        );
         assert_eq!(
             first(cache.all::<dist::Mingw>()),
             &[dist::Mingw { host: a }, dist::Mingw { host: b },]
@@ -421,10 +412,6 @@ mod dist {
         let c = TargetSelection::from_user("C");
 
         assert_eq!(
-            first(cache.all::<dist::Docs>()),
-            &[dist::Docs { host: a }, dist::Docs { host: b }, dist::Docs { host: c },]
-        );
-        assert_eq!(
             first(cache.all::<dist::Mingw>()),
             &[dist::Mingw { host: a }, dist::Mingw { host: b }, dist::Mingw { host: c },]
         );
@@ -454,7 +441,6 @@ mod dist {
         let a = TargetSelection::from_user("A");
         let c = TargetSelection::from_user("C");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: c },]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: c },]);
         assert_eq!(
             first(cache.all::<dist::Std>()),
@@ -469,10 +455,6 @@ mod dist {
         let a = TargetSelection::from_user("A");
         let b = TargetSelection::from_user("B");
 
-        assert_eq!(
-            first(cache.all::<dist::Docs>()),
-            &[dist::Docs { host: a }, dist::Docs { host: b },]
-        );
         assert_eq!(
             first(cache.all::<dist::Mingw>()),
             &[dist::Mingw { host: a }, dist::Mingw { host: b },]

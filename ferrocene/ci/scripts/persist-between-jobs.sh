@@ -54,19 +54,7 @@ case "$1" in
             exit 1
         fi
 
-        if [[ "${OSTYPE}" = "msys" ]]; then
-            # CircleCI's folder path structure is too long to support these links on unpack, so we ignore them.
-            "${TAR}" -cf- --exclude build/metrics.json \
-                --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage0-sysroot/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage1/lib/rustlib/src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/rustc-src/rust --exclude build/x86_64-pc-windows-msvc/stage2/lib/rustlib/src/rust --exclude build/host \
-                --preserve-permissions --format=posix $@ \
-                | zstd -1 -T0 \
-                | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
-        else
-            # Call `zstd` separately to be able to use all cores available (`-T0`)
-            # and the lowest compression level possible, to speed the compression
-            # as much as possible.
-            "${TAR}" c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
-        fi
+        tar cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then
@@ -75,9 +63,7 @@ case "$1" in
         fi
         job="$2"
 
-        aws s3 cp "$(s3_url "${job}")" - \
-            | zstd --decompress --stdout \
-            | "${TAR}" -xf-
+        aws s3 cp "$(s3_url "${job}")" - | unzstd --stdout | tar x
         ;;
     *)
         usage 1>&2

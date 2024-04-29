@@ -168,6 +168,3 @@ Abbreviated Terms
 
    TI
        Tool Impact
-
-   TQL
-       Tool Qualification Level

@@ -45,23 +45,40 @@ fn check_binary(
     let version = parse_version_output(&version_command_output.stdout)
         .ok_or_else(|| Error::VersionParseFailed { binary: name.into() })?;
 
-    for (field, expected, found) in [
-        ("host", env!("SELFTEST_TARGET"), version.host),
-        ("release", env!("CFG_RELEASE"), version.release),
-        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
-    ] {
-        if expected != found {
-            return Err(Error::BinaryVersionMismatch {
-                binary: name.into(),
-                field: field.into(),
-                expected: expected.into(),
-                found: found.into(),
-            });
-        }
+    check_field(name, "host", env!("SELFTEST_TARGET"), version.host)?;
+    check_field(name, "release", env!("CFG_RELEASE"), version.release)?;
+
+    if let Some(commit_hash) = version.commit_hash {
+        check_field(name, "commit hash", hash.fetch().unwrap_or("unknown"), commit_hash)?;
+    } else if name == "cargo" {
+        // In Ferrocene 24.05, when building Cargo from source the commit hash is not properly
+        // captured. Skip the check in that case. This should not be present in future versions of
+        // the self-testing tool.
+        reporter.skipped("checking the cargo commit hash (commit hash is not available)");
+    } else {
+        return Err(Error::VersionParseFailed { binary: name.into() });
     }
 
     reporter.success(&format!("binary {name} is valid"));
     Ok(())
+}
+
+fn check_field(
+    binary_name: &str,
+    field_name: &str,
+    expected: &str,
+    found: &str,
+) -> Result<(), Error> {
+    if expected == found {
+        Ok(())
+    } else {
+        Err(Error::BinaryVersionMismatch {
+            binary: binary_name.into(),
+            field: field_name.into(),
+            expected: expected.into(),
+            found: found.into(),
+        })
+    }
 }
 
 fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
@@ -83,14 +100,14 @@ fn parse_version_output(output: &str) -> Option<VersionOutput<'_>> {
         }
     }
 
-    Some(VersionOutput { release: release?, commit_hash: commit_hash?, host: host? })
+    Some(VersionOutput { release: release?, commit_hash: commit_hash, host: host? })
 }
 
 #[derive(Debug)]
 #[allow(dead_code)]
 struct VersionOutput<'a> {
     release: &'a str,
-    commit_hash: &'a str,
+    commit_hash: Option<&'a str>,
     host: &'a str,
 }
 
@@ -233,6 +250,28 @@ mod tests {
             }
             Err(err) => panic!("unexpected error: {err}"),
         }
+    }
+
+    #[test]
+    fn test_temporary_cargo_binary_fix() {
+        let utils = TestUtils::new();
+        utils
+            .bin("cargo")
+            .expected_args(&["-vV"])
+            .stdout(concat!(
+                "cargo ",
+                env!("CFG_RELEASE"),
+                "\nrelease: ",
+                env!("CFG_RELEASE"),
+                "\nhost: ",
+                env!("SELFTEST_TARGET")
+            ))
+            .create();
+
+        check_binary(utils.reporter(), utils.sysroot(), "cargo", CommitHashOf::Cargo).unwrap();
+        utils.assert_report_success("binary cargo is valid");
+        utils.assert_report_skipped("checking the cargo commit hash (commit hash is not available)");
+        utils.assert_no_reports();
     }
 
     #[test]

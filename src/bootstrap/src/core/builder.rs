@@ -59,14 +59,13 @@ pub struct Builder<'a> {
 
     /// The total amount of time we spent running [`Step`]s in [`Self::stack`].
     time_spent_on_dependencies: Cell<Duration>,
-<<<<<<< HEAD
+
+    /// This is a Ferrocene flag, to support the --serve CLI option.
     should_serve_called: atomic::AtomicU64,
-=======
 
     /// The paths passed on the command line. Used by steps to figure out what
     /// to do. For example: with `./x check foo bar` we get `paths=["foo",
     /// "bar"]`.
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub paths: Vec<PathBuf>,
 }
 
@@ -664,11 +663,8 @@ pub enum Kind {
     Run,
     Setup,
     Suggest,
-<<<<<<< HEAD
-    Sign,
-=======
     Vendor,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    Sign,
 }
 
 impl Kind {
@@ -689,11 +685,8 @@ impl Kind {
             Kind::Run => "run",
             Kind::Setup => "setup",
             Kind::Suggest => "suggest",
-<<<<<<< HEAD
-            Kind::Sign => "sign",
-=======
             Kind::Vendor => "vendor",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            Kind::Sign => "sign",
         }
     }
 
@@ -1078,11 +1071,8 @@ impl<'a> Builder<'a> {
                 Kind::Setup,
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
-<<<<<<< HEAD
-            Subcommand::Sign => (Kind::Sign, &paths[..]),
-=======
             Subcommand::Vendor { .. } => (Kind::Vendor, &paths[..]),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            Subcommand::Sign => (Kind::Sign, &paths[..]),
         };
 
         Self::new_internal(build, kind, paths.to_owned())

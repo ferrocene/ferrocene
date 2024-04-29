@@ -173,12 +173,14 @@ if [[ is_internal ]]; then
     #
     # Assumes `qnxsdp-env.sh` has been sourced or the binaries are otherwise
     # already on path
-    add --set target.aarch64-unknown-nto-qnx710.cc=aarch64-unknown-nto-qnx7.1.0-gcc
-    add --set target.aarch64-unknown-nto-qnx710.cxx=aarch64-unknown-nto-qnx7.1.0-g++
-    add --set target.aarch64-unknown-nto-qnx710.ar=aarch64-unknown-nto-qnx7.1.0-ar
-    add --set target.x86_64-pc-nto-qnx710.cc=x86_64-pc-nto-qnx7.1.0-gcc
-    add --set target.x86_64-pc-nto-qnx710.cxx=x86_64-pc-nto-qnx7.1.0-g++
-    add --set target.x86_64-pc-nto-qnx710.ar=x86_64-pc-nto-qnx7.1.0-ar
+    add --set target.aarch64-unknown-nto-qnx710.cc=qcc
+    add --set target.aarch64-unknown-nto-qnx710.cxx=q++
+    # `qar` is searched for, but doesn't exist, so override it.
+    add --set target.aarch64-unknown-nto-qnx710.ar=ar
+    add --set target.x86_64-pc-nto-qnx710.cc=qcc
+    add --set target.x86_64-pc-nto-qnx710.cxx=q++
+    # `qar` is searched for, but doesn't exist, so override it.
+    add --set target.x86_64-pc-nto-qnx710.ar=ar
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

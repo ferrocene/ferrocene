@@ -54,6 +54,13 @@ Changes
   locate the system libraries needed for the linkage, and instructing LLD on
   where to find them.
 
+Breaking changes
+----------------
+
+* The ``--crate-type dylib``, ``--crate-type cdylib`` and ``--crate-type
+  proc-macro`` CLI flags are not qualified for safety critical use anymore.
+  Safety critical support for them will be added back in a future release.
+
 Bug fixes
 ---------
 

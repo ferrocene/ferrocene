@@ -32,11 +32,11 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
-# Targets only built (and self-tested!) on Linux.
-LINUX_ONLY_TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+AARCH64_LINUX_BUILD_HOST = "aarch64-unknown-linux-gnu"
+X86_64_LINUX_BUILD_HOST = "x86_64-unknown-linux-gnu"
 # x86_64-unknown-linux-gnu builds a number of cross compilation targets
 # for us and is special cased somewhat.
-LINUX_BUILT_CROSS_TARGETS = [
+X86_64_LINUX_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
@@ -45,11 +45,12 @@ LINUX_BUILT_CROSS_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+LINUX_SELF_TEST_TARGETS = [X86_64_LINUX_BUILD_HOST] + [AARCH64_LINUX_BUILD_HOST] + X86_64_LINUX_BUILD_STD_TARGETS
 
-# Targets only built (and tested!) on Mac
-MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-MAC_ALL_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+AARCH64_MAC_BUILD_HOST = "aarch64-apple-darwin"
+# We don't currently produce x86_64 Apple host tools, but we will one day
+AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
+MAC_SELF_TEST_TARGETS = [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -116,7 +117,7 @@ def calculate_llvm_rebuild(target):
     """
     url = urllib.parse.urlparse(subprocess.run(
         ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
-        env={"FERROCENE_HOST": target},
+        env={"FERROCENE_HOST": target, "PATH": os.environ.get("PATH")},
         stdout=subprocess.PIPE,
     ).stdout.strip()).decode("utf-8")
     assert url.scheme == "s3"
@@ -140,21 +141,25 @@ def calculate_targets(host_plus_stage):
     # in this universe.
     if stage == "build":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ONLY_TARGETS
+            targets += [X86_64_LINUX_BUILD_HOST]
+        elif host == "aarch64-unknown-linux-gnu":
+            targets += [AARCH64_LINUX_BUILD_HOST]
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ONLY_TARGETS
+            targets += [AARCH64_MAC_BUILD_HOST]
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
-    elif stage == "std-only":
+    elif stage == "std":
         if host== "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+            targets += X86_64_LINUX_BUILD_STD_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+            targets += LINUX_SELF_TEST_TARGETS
+        elif host == "aarch64-unknown-linux-gnu":
+            targets += LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ALL_TARGETS
+            targets += MAC_SELF_TEST_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

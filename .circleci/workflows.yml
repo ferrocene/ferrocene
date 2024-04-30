@@ -44,7 +44,13 @@ parameters:
   targets--x86_64-unknown-linux-gnu--self-test:
     type: string
     default: ""
-  targets--x86_64-unknown-linux-gnu--std-only:
+  targets--x86_64-unknown-linux-gnu--std:
+    type: string
+    default: ""
+  targets--aarch64-unknown-linux-gnu--build:
+    type: string
+    default: ""
+  targets--aarch64-unknown-linux-gnu--self-test:
     type: string
     default: ""
   targets--aarch64-apple-darwin--build:
@@ -117,7 +123,7 @@ jobs:
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
@@ -174,7 +180,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std-only >>
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -317,6 +323,11 @@ jobs:
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
+
+  # aarch64-linux jobs
+
+
+  # aarch64-darwin jobs
 
   aarch64-darwin-llvm:
     macos:

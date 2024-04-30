@@ -53,6 +53,7 @@ Ferrocene User Manual
    :caption: Reference:
 
    rustc/cli
+   rustfmt/cli
    self-test/error-codes
 
 Indices and tables

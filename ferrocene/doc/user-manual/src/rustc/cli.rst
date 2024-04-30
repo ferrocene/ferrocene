@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Command-Line Interface
-======================
+``rustc`` Command-Line Interface
+================================
 
 .. cli:program:: rustc
 

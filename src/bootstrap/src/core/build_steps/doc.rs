@@ -397,11 +397,11 @@ pub struct Releases {
 
 impl Step for Releases {
     type Output = ();
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("RELEASES.md").alias("releases").default_condition(builder.config.docs)
+        // Ferrocene has its own release notes.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

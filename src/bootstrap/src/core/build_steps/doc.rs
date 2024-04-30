@@ -316,7 +316,10 @@ impl Step for Standalone {
     /// `STAMP` along with providing the various header/footer HTML we've customized.
     ///
     /// In the end, this is just a glorified wrapper around rustdoc!
+    #[allow(unused)]
     fn run(self, builder: &Builder<'_>) {
+        panic!("this step should not be invoked in Ferrocene");
+
         let target = self.target;
         let compiler = self.compiler;
         let _guard = builder.msg_doc(compiler, "standalone", target);

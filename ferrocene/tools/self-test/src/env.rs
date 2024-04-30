@@ -20,7 +20,7 @@ pub(crate) const SELFTEST_RUST_HASH: Option<&str> = option_env!("SELFTEST_RUST_H
 pub(crate) const SELFTEST_CARGO_HASH: Option<&str> = option_env!("SELFTEST_CARGO_HASH");
 
 /// Run-time environment variables
-#[derive(Debug, Default)]
+#[derive(Debug, Default, PartialEq)]
 pub(crate) struct Env {
     /// `PATH` environment variable.
     ///
@@ -63,12 +63,28 @@ mod tests {
 
     #[test]
     fn test_missing_path() {
+        // Arrange
+        // Act
         let err = Env::new(None, false, false).unwrap_err();
+
+        // Assert
         assert!(matches!(
             err,
             Error::CCompilerNotFound {
                 error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
             }
         ));
+    }
+
+    #[test]
+    fn test_present_path() {
+        // Arrange
+        let path = OsString::from("0123456789abcdef");
+
+        // Act
+        let env = Env::new(Some(path.clone()), false, false).unwrap();
+
+        // Assert
+        assert_eq!(env, Env { path, print_detailed_args: false, print_detailed_errors: false });
     }
 }

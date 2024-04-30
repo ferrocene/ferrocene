@@ -8,17 +8,10 @@ IFS=$'\n\t'
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="persist-between-jobs"
 
-TAR="tar"
-# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
-if [[ "${OSTYPE}" = "msys" ]]; then
-    TAR="/c/Program Files/Git/usr/bin/tar.exe"
-fi
-
 usage() {
     echo "usage: $0 upload <path ...>"
     echo "usage: $0 restore <job-name>"
 }
-
 
 s3_url() {
     # CircleCI provides two IDs in each job's environment:
@@ -54,7 +47,10 @@ case "$1" in
             exit 1
         fi
 
-        tar cf- --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
+        # Call `zstd` separately to be able to use all cores available (`-T0`)
+        # and the lowest compression level possible, to speed the compression
+        # as much as possible.
+        tar c --exclude build/metrics.json $@ | zstd -1 -T0 | aws s3 cp - "$(s3_url "${CIRCLE_JOB}")"
         ;;
     restore)
         if [[ "$#" -ne 2 ]]; then

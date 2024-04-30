@@ -88,7 +88,7 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     for analysis in matrix.analyses_by_kind() {
         let kind_all = all.get_mut(&analysis.kind).unwrap();
 
-        for_each_page(&analysis.linked, &mut rows, |page| {
+        for_each_page(analysis.linked.iter().map(|a| a.deref()), &mut rows, |page| {
             page.linked += 1;
             kind_all.linked += 1;
             page.total += 1;
@@ -99,8 +99,8 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
             page.total += 1;
             kind_all.total += 1;
         };
-        for_each_page(&analysis.partially_linked, &mut rows, &mut f);
-        for_each_page(&analysis.unlinked.iter().collect(), &mut rows, &mut f);
+        for_each_page(analysis.partially_linked.iter().map(|a| a.deref()), &mut rows, &mut f);
+        for_each_page(analysis.unlinked.iter(), &mut rows, &mut f);
     }
 
     let mut summary = rows
@@ -132,16 +132,15 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     summary
 }
 
-fn for_each_page<T, U>(
-    items: &BTreeSet<T>,
+fn for_each_page<'a, F, I>(
+    items: I,
     rows: &mut HashMap<&Page, HashMap<&ElementKind, SummaryItem>>,
-    mut f: U,
+    mut f: F,
 ) where
-    T: Deref<Target = Element>,
-    U: FnMut(&mut SummaryItem),
+    F: FnMut(&mut SummaryItem),
+    I: Iterator<Item = &'a Element>,
 {
     for item in items {
-        let item = item.deref();
         let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
         f(page);
     }

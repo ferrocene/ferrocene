@@ -298,7 +298,7 @@ fn cross_compile_test_program(
     Ok(())
 }
 
-/// Compile a fake linker using the host's C compiler
+/// Compile a fake linker using the host's C compiler.
 ///
 /// Returns the file that the fake linker will write its args to.
 ///

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "signatures": [
+    {
+      "key_sha256": "bku5PxjKdq19DreWbPnBMMQtWJpGMMZN4HmD1R9eG08=",
+      "signature": "MEUCIF+V11XITjq3Rm+Kc8pdudkX9RCvuHadXXvQX/7RNY/MAiEApFna0XZCOY/TrAXuTsVoQZNmUtBkFOVE9rYgH8u7jCw="
+    }
+  ],
+  "signed": "{\"product\":\"ferrocene\",\"package\":\"ferrocene-test-outcomes\",\"commit\":\"7971d89733a118bca8e0216d634fdc7eb740ea0c\",\"files\":[{\"path\":\"share/ferrocene/test-outcomes/aarch64-linux-compiletest.json\",\"posix-mode\":33188,\"sha256\":\"QYKVS5d1ZvtVObWTEwc5cSZRU4OMA6pHxpi5sqJpByk=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/aarch64-linux-test-library.json\",\"posix-mode\":33188,\"sha256\":\"IxIvOQMYiGj12B36Isgtu0nUu7v/wKEkEK7c2ht60i8=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/misc-checks.json\",\"posix-mode\":33188,\"sha256\":\"PBVyjw6qPBlnCeJFq8Pvl53gWK79XBpSf860ZsFmwwk=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/x86_64-linux-compiletest.json\",\"posix-mode\":33188,\"sha256\":\"Y0qO5rvMm8sSSvgXpPlURBXHwqB6tulqZml+Zmo6qqo=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/x86_64-linux-test-library-std.json\",\"posix-mode\":33188,\"sha256\":\"9q5bu2bd3qQUIMfT1FoWtFRdtfiUjmZp4185zcnJoUo=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/x86_64-linux-test-library.json\",\"posix-mode\":33188,\"sha256\":\"+VGw/BrqyEVc5yvz1luFW05jb29X1JWyvNlv+rTdsnw=\",\"needs-proxy\":false},{\"path\":\"share/ferrocene/test-outcomes/x86_64-linux-test.json\",\"posix-mode\":33188,\"sha256\":\"5msRb8FcN0/UotQjNlGsWQ4MxhwiozwYIqHrbc88wt0=\",\"needs-proxy\":false}],\"managed-prefixes\":[]}"
+}

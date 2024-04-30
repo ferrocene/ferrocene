@@ -125,7 +125,7 @@ add --set rust.debug-logging=false
 #
 # On Windows, Jemalloc is not tested, and manual testing suggests it is not
 # supported.
-if [[ "${OSTYPE}" != "msys" ]]; then
+if [[ "${FERROCENE_HOST}" != "x86_64-pc-windows-msvc" ]]; then
     add --set rust.jemalloc
 fi
 
@@ -148,23 +148,23 @@ add --release-description="Ferrocene by Ferrous Systems"
 #
 # If this configuration is missing or changed, the wrong build platform will be
 # used by the build system.
-if [[ "${OSTYPE}" = "msys" ]]; then
+if [[ "${FERROCENE_HOST}" = "x86_64-pc-windows-msvc" ]]; then
     # In theory, when run under MSYS the default ABI would be GNU, not MSVC.
     # We're running under MSYS just for compatibility with our CI scripts, not
     # because we target the GNU ABI, so switching the build platform to the
     # MSVC one is correct.
     add --build="x86_64-pc-windows-msvc"
-elif [[ "${OSTYPE}" = "linux-gnu" ]]; then
+elif [[ "${FERROCENE_HOST}" = "x86_64-unknown-linux-gnu" ]]; then
     add --build="x86_64-unknown-linux-gnu"
-elif [[ "${OSTYPE}" =~ ^darwin.* ]]; then
+elif [[ "${FERROCENE_HOST}" = "aarch64-apple-darwin" ]]; then
     add --build="aarch64-apple-darwin" # We only build on ARM Macs right now!
 else
-    echo "error: unknown os type: ${OSTYPE}" >&2
+    echo "error: unknown Ferrocene host: ${FERROCENE_HOST}" >&2
     exit 1
 fi
 
 # The Rust build system defaults to calling `cc` on Windows, which does not exist
-if [[ "${OSTYPE}" = "msys" ]]; then
+if [[ "${FERROCENE_HOST}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.aarch64-unknown-none.cc=clang
     add --set target.aarch64-unknown-none.cxx=clang
     add --set target.aarch64-unknown-none.ar=llvm-ar

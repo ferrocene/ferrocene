@@ -51,6 +51,10 @@ LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
 MAC_ALL_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 
+# Tagets only built (and tested!) on Windows
+WINDOWS_ONLY_TARGETS = ["x86_64-pc-windows-msvc"]
+WINDOWS_ALL_TARGETS = WINDOWS_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
@@ -143,6 +147,8 @@ def calculate_targets(host_plus_stage):
             targets += LINUX_ONLY_TARGETS
         elif host == "aarch64-apple-darwin":
             targets += MAC_ONLY_TARGETS
+        elif host == "x86_64-pc-windows-msvc":
+            targets += WINDOWS_ONLY_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std-only":
@@ -155,6 +161,8 @@ def calculate_targets(host_plus_stage):
             targets += LINUX_ALL_TARGETS
         elif host == "aarch64-apple-darwin":
             targets += MAC_ALL_TARGETS
+        elif host == "x86_64-pc-windows-msvc":
+            targets += WINDOWS_ALL_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

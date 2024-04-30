@@ -164,7 +164,7 @@ else
 fi
 
 # The Rust build system defaults to calling `cc` on Windows, which does not exist
-if [[ "${FERROCENE_HOST}" = "x86_64-pc-windows-msvc" ]]; then
+if [[ "${FERROCENE_BUILD_HOST}" = "x86_64-pc-windows-msvc" ]]; then
     add --set target.aarch64-unknown-none.cc=clang
     add --set target.aarch64-unknown-none.cxx=clang
     add --set target.aarch64-unknown-none.ar=llvm-ar

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# Allow *all* users inside the container to run all commands. In a normal
+# scenario a rule like this would be horrifying, but this container is only
+# meant to be used inside CI.
+ALL ALL=(ALL:ALL) NOPASSWD: ALL

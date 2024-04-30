@@ -38,6 +38,21 @@ parameters:
   llvm-rebuild--aarch64-apple-darwin:
     type: boolean
     default: false
+  targets--x86_64-unknown-linux-gnu--build:
+    type: string
+    default: ""
+  targets--x86_64-unknown-linux-gnu--self-test:
+    type: string
+    default: ""
+  targets--x86_64-unknown-linux-gnu--std-only:
+    type: string
+    default: ""
+  targets--aarch64-apple-darwin--build:
+    type: string
+    default: ""
+  targets--aarch64-apple-darwin--self-test:
+    type: string
+    default: ""
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
@@ -159,7 +174,7 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std-only >>
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -294,7 +309,7 @@ jobs:
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-none,x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
     steps:
       - aws-oidc-auth
       - ferrocene-git-shallow-clone:
@@ -333,7 +348,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
@@ -348,7 +363,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
@@ -364,7 +379,7 @@ jobs:
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: x86_64-apple-darwin,aarch64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
@@ -379,7 +394,7 @@ jobs:
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
-      FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin,aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
       - ferrocene-git-shallow-clone:
           depth: 1

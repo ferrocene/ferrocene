@@ -32,6 +32,24 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
+# Targets only built (and self-tested!) on Linux.
+LINUX_ONLY_TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+# x86_64-unknown-linux-gnu builds a number of cross compilation targets
+# for us and is special cased somewhat.
+LINUX_BUILT_CROSS_TARGETS = [
+    "aarch64-unknown-none",
+    "thumbv7em-none-eabi",
+    "thumbv7em-none-eabihf",
+    "armv8r-none-eabihf",
+    "wasm32-unknown-unknown",
+    "armv7r-none-eabihf",
+    "armebv7r-none-eabihf",
+]
+LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+
+# Targets only built (and tested!) on Mac
+MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
+MAC_ALL_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -109,6 +127,41 @@ def calculate_llvm_rebuild(target):
     except s3.exceptions.ClientError:
         return True
 
+def calculate_targets(host_plus_stage):
+    """
+    Calculates the list of targets to pass.
+
+    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test` 
+    """
+    host, stage = host_plus_stage.split("--", 1)
+    targets = []
+
+    # The CI does not run Python 3.10 and thus `match` statements don't exist yet
+    # in this universe.
+    if stage == "build":
+        if host == "x86_64-unknown-linux-gnu":
+            targets += LINUX_ONLY_TARGETS
+        elif host == "aarch64-apple-darwin":
+            targets += MAC_ONLY_TARGETS
+        else:
+            raise Exception(f"Host {host} not supported at this time, please add support")
+    elif stage == "std-only":
+        if host== "x86_64-unknown-linux-gnu":
+            targets += LINUX_ALL_TARGETS
+        else:
+            raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
+    elif stage == "self-test":
+        if host == "x86_64-unknown-linux-gnu":
+            targets += LINUX_ALL_TARGETS
+        elif host == "aarch64-apple-darwin":
+            targets += MAC_ALL_TARGETS
+        else:
+            raise Exception(f"Host {host} not supported at this time, please add support")
+    else:
+        raise Exception("Stage not known, please add support")
+
+    return ",".join(targets)
+
 
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
@@ -119,12 +172,14 @@ def prepare_parameters():
         "docker-image-rebuild--": calculate_docker_image_rebuild,
         "docker-repository-url--": calculate_docker_repository_url,
         "llvm-rebuild--": calculate_llvm_rebuild,
+        "targets--": calculate_targets,
     }
 
     parameters = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
             if parameter.startswith(prefix):
+                # Anything after the prefix gets passed as a parameter
                 parameters[parameter] = func(parameter[len(prefix):])
                 break
         # In Python, the `else` is executed when the for loop finished

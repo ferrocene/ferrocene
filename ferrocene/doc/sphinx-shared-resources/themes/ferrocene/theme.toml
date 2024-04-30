@@ -2,10 +2,10 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 [theme]
-inherit = basic
-stylesheet = ferrocene.css
+inherit = "basic"
+stylesheets = ["ferrocene.css"]
 
 [options]
-license =
-commit =
-include_in_header =
+license = ""
+commit = ""
+include_in_header = ""

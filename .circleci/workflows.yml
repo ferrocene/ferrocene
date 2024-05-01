@@ -573,7 +573,7 @@ jobs:
   build-docker-aarch64:
     description: Job that builds and uploads a Docker image, if needed.
     docker:
-      - image: cimg/base:current-22.04
+      - image: cimg/base:2023.06 # Only specific images are supported by ARM https://discuss.circleci.com/t/product-launch-arm-docker-generally-available/48601
     resource_class: arm.medium # 2-core
     parameters:
       image:
@@ -594,7 +594,7 @@ jobs:
             - ferrocene-git-shallow-clone:
                 depth: 1
             - setup_remote_docker:
-                version: 20.10.17
+                version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
             - run:
                 name: Build and upload the Docker image, if needed
                 command: ferrocene/ci/scripts/build-docker-image.sh

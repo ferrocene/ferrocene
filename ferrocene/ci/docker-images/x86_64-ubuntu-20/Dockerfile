@@ -45,8 +45,6 @@ RUN apt-get update \
         libc6-dev-arm64-cross \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
-        # Needed for riscv64gc-unknown-linux-gnu cross-compilation
-        gcc-riscv64-linux-gnu
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:

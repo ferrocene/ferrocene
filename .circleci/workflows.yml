@@ -739,7 +739,9 @@ workflows:
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
 
-      - aarch64-linux-llvm: {}
+      - aarch64-linux-llvm:
+          requires:
+            - build-docker--aarch64-ubuntu-20
       - aarch64-linux-build:
           requires:
             - aarch64-linux-llvm

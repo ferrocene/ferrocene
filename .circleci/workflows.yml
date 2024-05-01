@@ -251,6 +251,7 @@ jobs:
         type: string
     resource_class: << parameters.resource-class >>
     environment:
+      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.

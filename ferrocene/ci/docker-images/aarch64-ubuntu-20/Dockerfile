@@ -79,7 +79,7 @@ ENV PATH "/opt/nodejs/bin:$PATH"
 # Install AWS CLI from the published binaries, as no source tarball is provided
 # and the version in the Ubuntu 20.04 archive is too old and doesn't support
 # `aws ecr get-login-password`.
-RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.12.4.zip \
+RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.12.4.zip \
     && echo "0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08  /tmp/awscli.zip" | sha256sum -c \
     && unzip -q -d /tmp/awscli /tmp/awscli.zip \
     && /tmp/awscli/aws/install \

@@ -647,13 +647,13 @@ workflows:
     jobs:
       - build-docker-x86_64:
           name: build-docker--x86_64-ubuntu-20
-          image: ubuntu-20
+          image: x86_64-ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--x86_64-ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64-ubuntu-20 >>
 
       - build-docker-aarch64:
           name: build-docker--aarch64-ubuntu-20
-          image: ubuntu-20
+          image: aarch64-ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--aarch64-ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64-ubuntu-20 >>
 

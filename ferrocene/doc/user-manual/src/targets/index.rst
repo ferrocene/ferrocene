@@ -120,7 +120,7 @@ should not be used in production.
      - Full
      - \-
 
-   * - :ref:`aarch64-unknown-linux-gnu`
+   * - :target:`aarch64-unknown-linux-gnu`
      - ``aarch64-unknown-linux-gnu``
      - Host platform
      - Full

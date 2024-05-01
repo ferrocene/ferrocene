@@ -628,7 +628,7 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
-      - build-docker:
+      - build-docker-x86_64:
           name: build-docker--x86_64-ubuntu-23
           image: x86_64-ubuntu-23
           tag: << pipeline.parameters.docker-image-tag--x86_64-ubuntu-23 >>
@@ -645,13 +645,13 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
     jobs:
-      - build-docker:
+      - build-docker-x86_64:
           name: build-docker--x86_64-ubuntu-20
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--x86_64-ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64-ubuntu-20 >>
 
-      - build-docker:
+      - build-docker-aarch64:
           name: build-docker--aarch64-ubuntu-20
           image: ubuntu-20
           tag: << pipeline.parameters.docker-image-tag--aarch64-ubuntu-20 >>
@@ -720,12 +720,14 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - aarch64-linux-build
       - aarch64-linux-generic-test-vm:
           name: aarch64-linux-test-library
           job: test:library
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - aarch64-linux-build
 
       - wasm-dist-oxidos:
           requires:
@@ -736,6 +738,21 @@ workflows:
             - x86_64-linux-dist
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
+
+      - aarch64-linux-llvm: {}
+      - aarch64-linux-build:
+          requires:
+            - aarch64-linux-llvm
+      - aarch64-linux-dist:
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-dist-tools:
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-self-test:
+          requires:
+            - aarch64-linux-dist
+            - aarch64-linux-dist-tools
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
@@ -760,6 +777,7 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - wasm-dist-oxidos
+            - aarch64-linux-self-test
             - aarch64-darwin-self-test
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating

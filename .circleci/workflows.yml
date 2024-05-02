@@ -728,7 +728,7 @@ workflows:
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
-
+            - x86_64-linux-dist-targets
 
       - finish-build:
           requires:

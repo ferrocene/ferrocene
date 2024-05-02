@@ -316,7 +316,10 @@ impl Step for Standalone {
     /// `STAMP` along with providing the various header/footer HTML we've customized.
     ///
     /// In the end, this is just a glorified wrapper around rustdoc!
+    #[allow(unused)]
     fn run(self, builder: &Builder<'_>) {
+        panic!("this step should not be invoked in Ferrocene");
+
         let target = self.target;
         let compiler = self.compiler;
         let _guard = builder.msg_doc(compiler, "standalone", target);
@@ -397,11 +400,11 @@ pub struct Releases {
 
 impl Step for Releases {
     type Output = ();
-    const DEFAULT: bool = true;
+    const DEFAULT: bool = false;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let builder = run.builder;
-        run.path("RELEASES.md").alias("releases").default_condition(builder.config.docs)
+        // Ferrocene has its own release notes.
+        run.never()
     }
 
     fn make_run(run: RunConfig<'_>) {

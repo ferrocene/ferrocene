@@ -54,6 +54,12 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     ("core/primitive.slice.html", &["#method.to_ascii_uppercase", "#method.to_ascii_lowercase",
                                     "core/slice::sort_by_key", "core\\slice::sort_by_key",
                                     "#method.sort_by_cached_key"]),
+    // Ferrocene-specific:
+    //
+    // The technical report is missing most of the time, as it's only included in stable releases.
+    // This is fine though, because that section is hidden by the build system with `display: none`
+    // when the link is missing. We thus ignore it to avoid linkchecker complain.
+    ("index.html", &["qualification/technical-report.pdf"]),
 ];
 
 #[rustfmt::skip]

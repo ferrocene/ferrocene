@@ -620,6 +620,7 @@ workflows:
           requires:
             - aarch64-darwin-dist
             - aarch64-darwin-dist-tools
+            - x86_64-linux-dist-targets
 
       - finish-build:
           requires:

@@ -720,6 +720,25 @@ workflows:
           requires:
             - build-docker--x86_64-ubuntu-23
 
+      # Temporary for testing! Please remove me!!!
+      - riscv64gc-linux-llvm: {}
+      - riscv64gc-linux-build:
+          requires:
+            - riscv64gc-linux-llvm
+      - riscv64gc-linux-dist:
+          requires:
+            - riscv64gc-linux-build
+      - riscv64gc-linux-dist-tools:
+          requires:
+            - riscv64gc-linux-build
+      - riscv64gc-linux-self-test:
+          requires:
+            - riscv64gc-linux-dist-tools
+            # - x86_64-linux-dist
+            # - aarch64-linux-dist
+            - riscv64gc-linux-dist
+            # - x86_64-linux-dist-targets
+
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:

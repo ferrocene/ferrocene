@@ -728,7 +728,7 @@ workflows:
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64-ubuntu-20 >>
       - riscv64gc-linux-llvm: 
           requires:
-            - build-docker-x86_64
+            - build-docker--x86_64-ubuntu-20
       - riscv64gc-linux-build:
           requires:
             - riscv64gc-linux-llvm

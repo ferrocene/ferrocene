@@ -34,6 +34,7 @@ REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
 AARCH64_LINUX_BUILD_HOST = "aarch64-unknown-linux-gnu"
 X86_64_LINUX_BUILD_HOST = "x86_64-unknown-linux-gnu"
+RISCV64GC_LINUX_BUILD_HOST = "riscv64gc-unknown-linux-gnu"
 # x86_64-unknown-linux-gnu builds a number of cross compilation targets
 # for us and is special cased somewhat.
 X86_64_LINUX_BUILD_STD_TARGETS = [
@@ -45,7 +46,7 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-LINUX_SELF_TEST_TARGETS = [X86_64_LINUX_BUILD_HOST] + [AARCH64_LINUX_BUILD_HOST] + X86_64_LINUX_BUILD_STD_TARGETS
+LINUX_SELF_TEST_TARGETS = [X86_64_LINUX_BUILD_HOST] + [AARCH64_LINUX_BUILD_HOST] + [RISCV64GC_LINUX_BUILD_HOST] + X86_64_LINUX_BUILD_STD_TARGETS
 
 AARCH64_MAC_BUILD_HOST = "aarch64-apple-darwin"
 # We don't currently produce x86_64 Apple host tools, but we will one day
@@ -144,6 +145,8 @@ def calculate_targets(host_plus_stage):
             targets += [X86_64_LINUX_BUILD_HOST]
         elif host == "aarch64-unknown-linux-gnu":
             targets += [AARCH64_LINUX_BUILD_HOST]
+        elif host == "riscv64gc-unknown-linux-gnu":
+            targets += [RISCV64GC_LINUX_BUILD_HOST]
         elif host == "aarch64-apple-darwin":
             targets += [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
         else:
@@ -157,6 +160,8 @@ def calculate_targets(host_plus_stage):
         if host == "x86_64-unknown-linux-gnu":
             targets += LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-unknown-linux-gnu":
+            targets += LINUX_SELF_TEST_TARGETS
+        elif host == "riscv64gc-unknown-linux-gnu":
             targets += LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":
             targets += MAC_SELF_TEST_TARGETS

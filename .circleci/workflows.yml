@@ -44,6 +44,9 @@ parameters:
   llvm-rebuild--aarch64-unknown-linux-gnu:
     type: boolean
     default: false
+  llvm-rebuild--riscv64gc-unknown-linux-gnu:
+    type: boolean
+    default: false
   llvm-rebuild--aarch64-apple-darwin:
     type: boolean
     default: false
@@ -60,6 +63,12 @@ parameters:
     type: string
     default: ""
   targets--aarch64-unknown-linux-gnu--self-test:
+    type: string
+    default: ""
+  targets--riscv64gc-unknown-linux-gnu--build:
+    type: string
+    default: ""
+  targets--riscv64gc-unknown-linux-gnu--self-test:
     type: string
     default: ""
   targets--aarch64-apple-darwin--build:
@@ -494,6 +503,79 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  # riscv64-linux jobs
+
+  riscv64gc-linux-llvm:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: riscv64gc-unknown-linux-gnu
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--riscv64gc-unknown-linux-gnu >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  riscv64gc-linux-build:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: riscv64gc-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--riscv64gc-unknown-linux-gnu--build >>
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.sh download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps: [ferrocene-job-build]
+
+  riscv64gc-linux-dist:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: riscv64gc-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: riscv64gc-linux-build
+
+  riscv64gc-linux-dist-tools:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: xlarge # 8-core
+    environment:
+      FERROCENE_HOST: riscv64gc-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: riscv64gc-linux-build
+
+  riscv64gc-linux-self-test:
+    executor: docker-x86_64-ubuntu-20
+    resource_class: medium # 2-core
+    environment:
+      FERROCENE_HOST: riscv64gc-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--riscv64gc-unknown-linux-gnu--self-test >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
   finish-build:
     executor: docker-x86_64-ubuntu-20
     resource_class: small # 1-core
@@ -735,10 +817,11 @@ workflows:
 
       - x86_64-linux-self-test:
           requires:
-            - x86_64-linux-dist
             - x86_64-linux-dist-tools
-            - x86_64-linux-dist-targets
+            - x86_64-linux-dist
             - aarch64-linux-dist
+            - riscv64gc-linux-dist
+            - x86_64-linux-dist-targets
 
       - aarch64-linux-llvm:
           requires:
@@ -754,10 +837,29 @@ workflows:
             - aarch64-linux-build
       - aarch64-linux-self-test:
           requires:
-            - aarch64-linux-dist
             - aarch64-linux-dist-tools
-            - x86_64-linux-dist-targets
+            - aarch64-linux-dist
             - x86_64-linux-dist
+            - riscv64gc-linux-dist
+            - x86_64-linux-dist-targets
+
+      - riscv64gc-linux-llvm: {}
+      - riscv64gc-linux-build:
+          requires:
+            - riscv64gc-linux-llvm
+      - riscv64gc-linux-dist:
+          requires:
+            - riscv64gc-linux-build
+      - riscv64gc-linux-dist-tools:
+          requires:
+            - riscv64gc-linux-build
+      - riscv64gc-linux-self-test:
+          requires:
+            - riscv64gc-linux-dist-tools
+            - x86_64-linux-dist
+            - aarch64-linux-dist
+            - riscv64gc-linux-dist
+            - x86_64-linux-dist-targets
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
@@ -781,9 +883,10 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
-            - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
+            - riscv64gc-linux-self-test
+            - wasm-dist-oxidos
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen

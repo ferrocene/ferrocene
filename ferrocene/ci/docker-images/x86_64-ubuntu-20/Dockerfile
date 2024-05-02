@@ -46,6 +46,9 @@ RUN apt-get update \
         binutils-aarch64-linux-gnu \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
+        # Needed for riscv64gc-unknown-linux-gnu cross compilation
+        gcc-riscv64-linux-gnu \
+        g++-riscv64-linux-gnu \
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:
@@ -67,6 +70,9 @@ RUN apt-get update \
 COPY --from=jammy /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=jammy /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
 COPY --from=jammy /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY --from=jammy /usr/bin/qemu-riscv-static /usr/bin/qemu-riscv-static
+COPY --from=jammy /usr/libexec/qemu-binfmt/riscv-binfmt-P /usr/libexec/qemu-binfmt/riscv-binfmt-P
+COPY --from=jammy /usr/share/binfmts/qemu-riscv /usr/share/binfmts/qemu-riscv
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.10.x has been chosen as it's the same minor

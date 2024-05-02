@@ -721,7 +721,14 @@ workflows:
             - build-docker--x86_64-ubuntu-23
 
       # Temporary for testing! Please remove me!!!
-      - riscv64gc-linux-llvm: {}
+      - build-docker-x86_64:
+          name: build-docker--x86_64-ubuntu-20
+          image: x86_64-ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--x86_64-ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64-ubuntu-20 >>
+      - riscv64gc-linux-llvm: 
+          requires:
+            - build-docker-x86_64
       - riscv64gc-linux-build:
           requires:
             - riscv64gc-linux-llvm
@@ -862,7 +869,9 @@ workflows:
             - riscv64gc-linux-dist
             - x86_64-linux-dist-targets
 
-      - riscv64gc-linux-llvm: {}
+      - riscv64gc-linux-llvm:
+          requires:
+            - build-docker-x86_64
       - riscv64gc-linux-build:
           requires:
             - riscv64gc-linux-llvm

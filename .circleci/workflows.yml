@@ -757,6 +757,7 @@ workflows:
             - aarch64-linux-dist
             - aarch64-linux-dist-tools
             - x86_64-linux-dist-targets
+            - x86_64-linux-dist
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:

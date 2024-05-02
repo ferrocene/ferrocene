@@ -67,7 +67,7 @@ def build_finished(app, exception):
     if exception is not None:
         return
 
-    with sphinx.util.progress_message("dumping paragraph ids"):
+    with sphinx.util.display.progress_message("dumping paragraph ids"):
         write_paragraph_ids(app)
 
 

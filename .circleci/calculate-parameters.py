@@ -145,7 +145,7 @@ def calculate_targets(host_plus_stage):
         elif host == "aarch64-unknown-linux-gnu":
             targets += [AARCH64_LINUX_BUILD_HOST]
         elif host == "aarch64-apple-darwin":
-            targets += [AARCH64_MAC_BUILD_HOST]
+            targets += [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":

@@ -638,29 +638,6 @@ workflows:
           requires:
             - build-docker--x86_64-ubuntu-23
 
-      # HERE FOR TESTING -- REMOVE ME!!!
-      - build-docker-aarch64:
-          name: build-docker--aarch64-ubuntu-20
-          image: aarch64-ubuntu-20
-          tag: << pipeline.parameters.docker-image-tag--aarch64-ubuntu-20 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64-ubuntu-20 >>
-      - aarch64-linux-llvm:
-          requires:
-            - build-docker--aarch64-ubuntu-20
-      - aarch64-linux-build:
-          requires:
-            - aarch64-linux-llvm
-      - aarch64-linux-dist:
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-dist-tools:
-          requires:
-            - aarch64-linux-build
-      - aarch64-linux-self-test:
-          requires:
-            - aarch64-linux-dist
-            - aarch64-linux-dist-tools
-
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -778,6 +755,7 @@ workflows:
           requires:
             - aarch64-linux-dist
             - aarch64-linux-dist-tools
+            - x86_64-linux-dist-targets
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:

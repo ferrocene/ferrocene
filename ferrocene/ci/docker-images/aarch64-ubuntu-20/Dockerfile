@@ -80,7 +80,7 @@ ENV PATH "/opt/nodejs/bin:$PATH"
 # and the version in the Ubuntu 20.04 archive is too old and doesn't support
 # `aws ecr get-login-password`.
 RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-aarch64-2.12.4.zip \
-    && echo "0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08  /tmp/awscli.zip" | sha256sum -c \
+    && echo "33b1c2a9daab91ae458516e934b1532e2174643aea2ccfa81ab8c5e9d4ed381b  /tmp/awscli.zip" | sha256sum -c \
     && unzip -q -d /tmp/awscli /tmp/awscli.zip \
     && /tmp/awscli/aws/install \
     && rm -rf /tmp/awscli /tmp/awscli.zip

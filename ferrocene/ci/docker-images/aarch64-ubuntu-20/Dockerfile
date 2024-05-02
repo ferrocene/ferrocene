@@ -27,6 +27,11 @@ RUN apt-get update \
         binfmt-support \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
+        # Needed for x86_64-unknown-linux-gnu cross compilation
+        libc6-dev-amd64-cross \
+        gcc-x86-64-linux-gnu \
+        g++-x86-64-linux-gnu \
+        binutils-x86-64-linux-gnu \
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:

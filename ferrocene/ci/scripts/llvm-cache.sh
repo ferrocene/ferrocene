@@ -148,7 +148,7 @@ case "$1" in
         ;;
     download)
         aws s3 cp "${s3_url}" - | unzstd --stdout | tar x
-        echo "restored LLVM cache with hash ${cache_hash}"
+        echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)
         echo "${s3_url}"

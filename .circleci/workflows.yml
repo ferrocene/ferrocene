@@ -534,6 +534,7 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--riscv64gc-unknown-linux-gnu--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm-cache.sh download
+        FERROCENE_HOST=x86_64-unknown-linux-gnu ferrocene/ci/scripts/llvm-cache.sh download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
@@ -875,6 +876,7 @@ workflows:
       - riscv64gc-linux-build:
           requires:
             - riscv64gc-linux-llvm
+            - x86_64-linux-llvm
       - riscv64gc-linux-dist:
           requires:
             - riscv64gc-linux-build

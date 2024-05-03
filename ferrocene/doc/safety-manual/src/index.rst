@@ -38,6 +38,7 @@ scope, in accordance to the standards above.
    :numbered:
 
    rustfmt/usage
+   rustfmt/constraints
 
 .. appendices::
    :maxdepth: 2

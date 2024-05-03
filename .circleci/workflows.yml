@@ -730,9 +730,13 @@ workflows:
       - riscv64gc-linux-llvm: 
           requires:
             - build-docker--x86_64-ubuntu-20
+      - x86_64-linux-llvm:
+          requires:
+            - build-docker--x86_64-ubuntu-20
       - riscv64gc-linux-build:
           requires:
             - riscv64gc-linux-llvm
+            - x86_64-linux-llvm
       - riscv64gc-linux-dist:
           requires:
             - riscv64gc-linux-build

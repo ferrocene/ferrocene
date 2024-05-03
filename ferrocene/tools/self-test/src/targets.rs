@@ -10,12 +10,22 @@ use crate::linkers::Linker;
 use crate::report::Reporter;
 
 static SUPPORTED_TARGETS: &[TargetSpec] = &[
+    #[cfg(target_arch = "x86_64")]
     TargetSpec { triple: "x86_64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
-    TargetSpec {
+    #[cfg(target_arch = "x86_64")]TargetSpec {
         triple: "aarch64-unknown-linux-gnu",
         std: true,
         linker: Linker::CrossCc(&["aarch64-linux-gnu-"]),
     },
+
+    #[cfg(target_arch = "aarch64")]
+    TargetSpec { triple: "aarch64-unknown-linux-gnu", std: true, linker: Linker::HostCc },
+    #[cfg(target_arch = "aarch64")]TargetSpec {
+        triple: "x86_64-unknown-linux-gnu",
+        std: true,
+        linker: Linker::CrossCC(&["x86_64-linux-gnu-"]),
+    },
+    
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },

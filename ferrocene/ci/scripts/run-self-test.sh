@@ -5,16 +5,20 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-COMMIT="$(git rev-parse HEAD)"
+COMMIT="${COMMIT:-$(git rev-parse HEAD)}"
+SKIP_CLEANUP="${SKIP_CLEANUP:-}"
 
 BUCKET="ferrocene-ci-artifacts"
 PREFIX="ferrocene/dist/${COMMIT}"
 
 root="$(mktemp -d)"
-cleanup() {
-    rm -rf "${root}"
-}
-trap cleanup EXIT
+
+if [[ -z "$SKIP_CLEANUP" ]]; then
+    cleanup() {
+        rm -rf "${root}"
+    }
+    trap cleanup EXIT
+fi
 
 case "$(cat ferrocene/ci/channel)" in
     stable)

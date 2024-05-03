@@ -178,7 +178,12 @@ impl Display for CommandError {
                 write!(f, "failed to wait for `{cli}` to finish")
             }
             CommandErrorKind::Failure { output } => {
-                write!(f, "invoking `{cli}` failed with {}", output.status)
+                write!(
+                    f,
+                    "invoking `{cli}` failed with {}, stderr:\n{}",
+                    output.status,
+                    String::from_utf8_lossy(&output.stderr)
+                )
             }
             CommandErrorKind::NonUtf8Output => {
                 write!(f, "invoking `{cli}` returned non-UTF-8 data in its standard output")

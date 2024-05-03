@@ -32,6 +32,13 @@ scope, in accordance to the standards above.
    rustc/degraded-environment
    rustc/constraints
 
+.. toctree::
+   :maxdepth: 2
+   :caption: rustfmt
+   :numbered:
+
+   rustfmt/usage
+
 .. appendices::
    :maxdepth: 2
    :caption: Appendices:

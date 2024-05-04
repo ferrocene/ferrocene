@@ -138,7 +138,6 @@ cfg_if::cfg_if! {
     }
 }
 
-#[allow(dead_code)]
 #[cfg(feature = "std")]
 mod lock {
     use std::boxed::Box;

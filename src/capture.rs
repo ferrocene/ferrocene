@@ -1,5 +1,7 @@
+#[cfg(feature = "serde")]
+use crate::resolve;
 use crate::PrintFmt;
-use crate::{resolve, resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
+use crate::{resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
 use std::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};
@@ -50,7 +52,7 @@ pub struct BacktraceFrame {
 #[derive(Clone)]
 enum Frame {
     Raw(crate::Frame),
-    #[allow(dead_code)]
+    #[cfg(feature = "serde")]
     Deserialized {
         ip: usize,
         symbol_address: usize,
@@ -62,6 +64,7 @@ impl Frame {
     fn ip(&self) -> *mut c_void {
         match *self {
             Frame::Raw(ref f) => f.ip(),
+            #[cfg(feature = "serde")]
             Frame::Deserialized { ip, .. } => ip as *mut c_void,
         }
     }
@@ -69,6 +72,7 @@ impl Frame {
     fn symbol_address(&self) -> *mut c_void {
         match *self {
             Frame::Raw(ref f) => f.symbol_address(),
+            #[cfg(feature = "serde")]
             Frame::Deserialized { symbol_address, .. } => symbol_address as *mut c_void,
         }
     }
@@ -76,6 +80,7 @@ impl Frame {
     fn module_base_address(&self) -> Option<*mut c_void> {
         match *self {
             Frame::Raw(ref f) => f.module_base_address(),
+            #[cfg(feature = "serde")]
             Frame::Deserialized {
                 module_base_address,
                 ..
@@ -97,6 +102,7 @@ impl Frame {
         };
         match *self {
             Frame::Raw(ref f) => resolve_frame(f, sym),
+            #[cfg(feature = "serde")]
             Frame::Deserialized { ip, .. } => {
                 resolve(ip as *mut c_void, sym);
             }

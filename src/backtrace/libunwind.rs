@@ -15,7 +15,6 @@
 //!
 //! This is the default unwinding API for all non-Windows platforms currently.
 
-use super::super::Bomb;
 use core::ffi::c_void;
 use core::ptr::addr_of_mut;
 
@@ -96,6 +95,18 @@ impl Clone for Frame {
             ip: self.ip(),
             sp: self.sp(),
             symbol_address: self.symbol_address(),
+        }
+    }
+}
+
+struct Bomb {
+    enabled: bool,
+}
+
+impl Drop for Bomb {
+    fn drop(&mut self) {
+        if self.enabled {
+            panic!("cannot panic during the backtrace function");
         }
     }
 }

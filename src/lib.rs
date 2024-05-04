@@ -139,20 +139,6 @@ cfg_if::cfg_if! {
 }
 
 #[allow(dead_code)]
-struct Bomb {
-    enabled: bool,
-}
-
-#[allow(dead_code)]
-impl Drop for Bomb {
-    fn drop(&mut self) {
-        if self.enabled {
-            panic!("cannot panic during the backtrace function");
-        }
-    }
-}
-
-#[allow(dead_code)]
 #[cfg(feature = "std")]
 mod lock {
     use std::boxed::Box;

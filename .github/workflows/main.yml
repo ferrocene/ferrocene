@@ -199,7 +199,7 @@ jobs:
       with:
         submodules: true
     - name: Install Rust
-      run: rustup update stable && rustup default stable
+      run: rustup update stable --no-self-update && rustup default stable
     - run: rustup target add ${{ matrix.target }}
     - run: cargo generate-lockfile
     - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
@@ -214,7 +214,7 @@ jobs:
       with:
         submodules: true
     - name: Install Rust
-      run: rustup update stable && rustup default stable && rustup component add rustfmt
+      run: rustup update stable --no-self-update && rustup default stable && rustup component add rustfmt
     - run: cargo fmt --all -- --check
 
   build:
@@ -233,7 +233,7 @@ jobs:
       with:
         submodules: true
     - name: Install Rust
-      run: rustup update nightly && rustup default nightly
+      run: rustup update nightly --no-self-update && rustup default nightly
     - run: rustup target add ${{ matrix.target }}
     - run: echo RUSTFLAGS=-Dwarnings >> $GITHUB_ENV
       shell: bash
@@ -254,7 +254,7 @@ jobs:
       with:
         submodules: true
     - name: Install Rust
-      run: rustup update 1.65.0 && rustup default 1.65.0
+      run: rustup update 1.65.0 --no-self-update && rustup default 1.65.0
     - run: cargo build
 
   miri:

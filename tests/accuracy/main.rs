@@ -1,3 +1,4 @@
+#![cfg(dbginfo = "collapsible")]
 mod auxiliary;
 
 macro_rules! pos {
@@ -6,6 +7,7 @@ macro_rules! pos {
     };
 }
 
+#[collapse_debuginfo(yes)]
 macro_rules! check {
     ($($pos:expr),*) => ({
         verify(&[$($pos,)* pos!()]);

@@ -33,3 +33,7 @@ cc = "1.0.90"
 [features]
 default = ['backtrace']
 backtrace = ['addr2line', 'miniz_oxide', 'object']
+std = []
+
+[lints.rust]
+unexpected_cfgs = "allow"

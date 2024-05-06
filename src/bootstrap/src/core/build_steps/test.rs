@@ -1147,12 +1147,6 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
         builder.info("tidy check");
         builder.run_delaying_failure(&mut cmd);
 
-<<<<<<< HEAD
-        // Ferrocene: disable this step as we don't use upstream's GitHub Actions configuration.
-        //builder.ensure(ExpandYamlAnchors {});
-
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         builder.info("x.py completions check");
         let [bash, zsh, fish, powershell] = ["x.py.sh", "x.py.zsh", "x.py.fish", "x.py.ps1"]
             .map(|filename| builder.src.join("src/etc/completions").join(filename));

@@ -10,11 +10,6 @@ compile_error!("cmdline_set not set");
 #[cfg(not(unbroken))]
 compile_error!("unbroken not set");
 
-<<<<<<< HEAD
-fn main() {
-}
+fn main() {}
 
 // ferrocene-annotations: um_rustc_cfg
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

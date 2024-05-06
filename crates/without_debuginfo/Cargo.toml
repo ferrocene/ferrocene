@@ -14,7 +14,3 @@ debug = false
 
 [profile.test]
 debug = false
-
-[features]
-libbacktrace = ['backtrace/libbacktrace']
-gimli-symbolize = ['backtrace/gimli-symbolize']

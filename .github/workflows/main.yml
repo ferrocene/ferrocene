@@ -73,8 +73,8 @@ jobs:
       env:
         CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: packed
         CARGO_PROFILE_TEST_SPLIT_DEBUGINFO: packed
-    - run: cargo test --features gimli-symbolize --manifest-path crates/without_debuginfo/Cargo.toml
-    - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml --features gimli-symbolize
+    - run: cargo test --manifest-path crates/without_debuginfo/Cargo.toml
+    - run: cargo test --manifest-path crates/line-tables-only/Cargo.toml
 
     # Test debuginfo compression still works
     - run: cargo test

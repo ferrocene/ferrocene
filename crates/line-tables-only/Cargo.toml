@@ -15,7 +15,3 @@ features = [
   'libunwind',
   'std',
 ]
-
-[features]
-libbacktrace = ['backtrace/libbacktrace']
-gimli-symbolize = ['backtrace/gimli-symbolize']

@@ -453,7 +453,7 @@ cfg_if::cfg_if! {
 /// While this function is always available it doesn't actually do anything on
 /// most implementations. Libraries like dbghelp or libbacktrace do not provide
 /// facilities to deallocate state and manage the allocated memory. For now the
-/// `gimli-symbolize` feature of this crate is the only feature where this
+/// `std` feature of this crate is the only feature where this
 /// function has any effect.
 #[cfg(feature = "std")]
 pub fn clear_symbol_cache() {

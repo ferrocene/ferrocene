@@ -33,7 +33,7 @@ Consulting Known Problems
 -------------------------
 
 Whenever a noticeable defect is discovered in Ferrocene, a new known problem is
-recorded in the :doc:`known-problems`. Customers are alerted of new known
+recorded in the :doc:`/ferrocene/known-problems`. Customers are alerted of new known
 problems via email.
 
 .. _customer portal: https://customers.ferrocene.dev

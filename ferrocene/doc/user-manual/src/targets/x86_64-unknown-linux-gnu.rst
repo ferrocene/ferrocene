@@ -26,7 +26,7 @@ You must have a C compiler which:
 - Does not load plugins into the linker (e.g. the GCC LTO plugin)
 
 - Supplies to ``ld.lld`` only those linker arguments specified in the
-  :doc:`Safety Manual <safety-manual:options>`
+  :doc:`Safety Manual <safety-manual:ferrocene/options>`
 
 On Ubuntu 20.04 LTS you can install a suitable C compiler with:
 

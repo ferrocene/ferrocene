@@ -20,7 +20,7 @@ ISO 26262 requirements
      - If the confidence level evaluation or qualification of a software tool is performed independently from the development of a particular safety-related item or element, the validity of this predetermined Tool Confidence Level or qualification shall be verified prior to the software tool being used for the development of a particular safety-related item or element.
 
    * - 11.4.3
-     - :doc:`Safety Manual - Usage <safety-manual:usage>`
+     - :doc:`Safety Manual - Usage <safety-manual:ferrocene/usage>`
      - When using a software tool, it shall be ensured that its usage, its determined environmental and functional constraints and its general operating conditions comply with its evaluation criteria or its qualification.
 
    * - 11.4.4.1
@@ -28,11 +28,11 @@ ISO 26262 requirements
      - The usage of a software tool shall be planned, including the determination of:
 
    * - 11.4.4.1.a
-     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:ferrocene/environment>`
      - the identification and version number of the software tool;
 
    * - 11.4.4.1.b
-     - :doc:`Safety Manual - Tool options <safety-manual:options>`
+     - :doc:`Safety Manual - Tool options <safety-manual:ferrocene/options>`
      - the configuration of the software tool;
 
    * - 11.4.4.1.c
@@ -40,7 +40,7 @@ ISO 26262 requirements
      - the use cases of the software tool;
 
    * - 11.4.4.1.d
-     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:ferrocene/environment>`
      - the environment in which the software tool is executed,
 
    * - 11.4.4.1.e
@@ -64,19 +64,19 @@ ISO 26262 requirements
      - the user manual or other usage guides, if applicable;
 
    * - 11.4.4.2.c
-     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:ferrocene/environment>`
      - a description of the environment required for its operation,
 
    * - 11.4.4.2.d
-     - :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+     - :doc:`Safety Manual - Degraded environment <safety-manual:ferrocene/degraded-environment>`
      - a description of the expected behaviour of the software tool under anomalous operating conditions, if applicable;
 
    * - 11.4.4.2.e
-     - :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
+     - :doc:`Safety Manual - Known problems <safety-manual:ferrocene/known-problems>`
      - a description of known software tool malfunctions and the appropriate safeguards, avoidance or workaround measures, if applicable; and
 
    * - 11.4.4.2.f
-     - :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
+     - :doc:`Safety Manual - Known Problems <safety-manual:ferrocene/known-problems>`
      - the measures for the prevention or detection of malfunctions and the corresponding erroneous output of the software tool identified during the determination of the required level of confidence for this software tool.
 
    * - 11.4.5.1
@@ -144,7 +144,7 @@ ISO 26262 requirements
      - The qualification of the software tool shall be documented including the following:
 
    * - 11.4.6.2.a
-     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:ferrocene/environment>`
      - the unique identification and version number of the software tool;
 
    * - 11.4.6.2.b
@@ -156,7 +156,7 @@ ISO 26262 requirements
      - for the considered use cases the pre-determined maximum ASIL, or specific ASIL, of any safety requirement which might directly be violated if the software tool is malfunctioning and produces corresponding erroneous output;
 
    * - 11.4.6.2.d
-     - :doc:`Safety Manual - Environment <safety-manual:environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:ferrocene/environment>`
      - the configuration and environment for which the software tool is qualified;
 
    * - 11.4.6.2.e
@@ -212,6 +212,6 @@ ISO 26262 requirements
      - the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and
 
    * - 11.4.9.2.c
-     - :doc:`Safety Manual - Degraded environment <safety-manual:degraded-environment>`
+     - :doc:`Safety Manual - Degraded environment <safety-manual:ferrocene/degraded-environment>`
      - the reaction of the software tool to anomalous operating conditions shall be examined;
 

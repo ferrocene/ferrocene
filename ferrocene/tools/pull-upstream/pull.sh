@@ -155,7 +155,10 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
             # Invoking any Cargo command touching the lockfile will cause the
             # lockfile to be updated. "cargo metadata" is one of the fastest ones.
             # The bootstrap flag is needed as the workspace uses unstable features.
-            RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null
+            if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
+                echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
+                continue
+            fi
 
             git add "${lock}"
             echo "pull-upstream: automatically resolved conflict for ${lock}"

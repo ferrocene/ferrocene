@@ -132,3 +132,7 @@ harness = false
 name = "current-exe-mismatch"
 required-features = ["std"]
 harness = false
+
+[lints.rust]
+# This crate uses them pervasively
+unexpected_cfgs = "allow"

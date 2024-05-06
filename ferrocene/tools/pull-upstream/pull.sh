@@ -114,7 +114,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
 
     # Files excluded by the pull that are also present in Ferrocene (for example
     # a different README) will cause merge conflicts. In those cases we always
-    # want to preserve Ferrocene's version, so we can solve ht e conflict
+    # want to preserve Ferrocene's version, so we can resolve the conflict
     # automatically.
     for file in $(excluded_files); do
         echo "pull-upstream: automatically resolving conflict for ${file}..."
@@ -220,7 +220,7 @@ fi
 # versions of the packages we use, but ensuring the lockfile stays consistent.
 #
 # Whenever the lockfile needs an update (we check that by invoking a Cargo
-# command that regerates the lockfile if needed but doesn't have any side
+# command that regenerates the lockfile if needed but doesn't have any side
 # effects) we include that in a separate commit.
 #
 # Note that this is not related to merge conflicts: lockfile merge conflicts

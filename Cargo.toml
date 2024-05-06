@@ -77,6 +77,7 @@ serialize-serde = ["serde"]
 # purposes. New code should use none of these features.
 coresymbolication = []
 dbghelp = []
+dl_iterate_phdr = []
 dladdr = []
 gimli-symbolize = []
 kernel32 = []

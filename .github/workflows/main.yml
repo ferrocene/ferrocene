@@ -55,6 +55,11 @@ jobs:
       shell: bash
       if: contains(matrix.rust, 'i686')
 
+    - name: Enable collapse_debuginfo based on version
+      run: echo RUSTFLAGS="--cfg dbginfo=\"collapsible\" $RUSTFLAGS" >> $GITHUB_ENV
+      shell: bash
+      if: contains(matrix.rust, 'nightly') || contains(matrix.rust, 'beta')
+
     - run: cargo build
     - run: cargo test
     - run: cargo test --features "serialize-serde"

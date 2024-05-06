@@ -110,7 +110,7 @@ git checkout "${current_branch}"
 if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
-    # If not all conflicts were resolved control is given back to the user.
+    # If not all conflicts were resolved, control is given back to the user.
 
     # Files excluded by the pull that are also present in Ferrocene (for example
     # a different README) will cause merge conflicts. In those cases we always
@@ -207,7 +207,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
 fi
 
 # If there were no changes made since the last pull (aka when the diff from the
-# previous commit and the pull is empty) remove the empty merge commit and
+# previous commit and the pull is empty), remove the empty merge commit and
 # exit with a special code to let the automation know it shouldn't open PRs.
 if git diff --quiet HEAD^..HEAD; then
     echo "pull-upstream: no changes to pull"

@@ -9,15 +9,9 @@ We released the Ferrocene Language Specification (FLS) publicly under an open
 source license. That's always been our goal, and since we announced our effort,
 a lot of people and organizations expressed their interest in it!
 
-The specification is still a work in progress and while we're open to
+The specification is still a work in progress, and while we're open to
 contributions, we want to manage your expectations on how much we'll be able to
 interact with the community in this repository:
-
-* We're a small team working on Ferrocene, with the ambitious goal of achieving
-  ISO 26262 qualification of the Rust compiler by the end of the year.
-
-* We need the specification to achieve qualification, and that’s where we have
-  to focus all our efforts so that we can deliver on schedule.
 
 * Any change made to the specification text causes extra work for us behind the
   scenes, as we have other tooling required for qualification that consumes the

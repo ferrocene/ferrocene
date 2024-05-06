@@ -206,7 +206,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     fi
 fi
 
-# If there were no changes made since the last pull (aka when the diff from the
+# If there were no changes made since the last pull (i.e. when the diff from the
 # previous commit and the pull is empty), remove the empty merge commit and
 # exit with a special code to let the automation know it shouldn't open PRs.
 if git diff --quiet HEAD^..HEAD; then

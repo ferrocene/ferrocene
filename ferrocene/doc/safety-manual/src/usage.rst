@@ -6,7 +6,7 @@ Usage
 
 Build tools listed below can be used individually or through a Ferrocene
 project. File formats are documented in :doc:`User Manual - File Formats
-<user-manual:using-compiler/file-formats>`.
+<user-manual:ferrocene/file-formats>`.
 
 Cleaning the Build Space
 ------------------------
@@ -43,20 +43,20 @@ severity of errors.
 Building a Library
 ------------------
 
-Refer to the User Manual - :doc:`user-manual:using-compiler/library`.
+Refer to the User Manual - :doc:`user-manual:ferrocene/library`.
 
 Building an Executable
 ----------------------
 
-Refer to the User Manual - :doc:`user-manual:using-compiler/executable`.
+Refer to the User Manual - :doc:`user-manual:ferrocene/executable`.
 
 Building Mixed-language Programs
 --------------------------------
 
-Refer to the User Manual - :doc:`user-manual:using-compiler/mixed-language`.
+Refer to the User Manual - :doc:`user-manual:ferrocene/mixed-language`.
 
 Performing System Calls
 -----------------------
 
-Refer to the User Manual - :doc:`user-manual:using-compiler/system-calls`.
+Refer to the User Manual - :doc:`user-manual:ferrocene/system-calls`.
 

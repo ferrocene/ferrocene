@@ -6,7 +6,7 @@ Installing Ferrocene
 
 This chapter describes how to install and validate the Ferrocene toolchain.
 
-Before proceeding, you should identify the :doc:`targets <targets/index>` you
+Before proceeding, you should identify the :doc:`targets </targets/index>` you
 want to install. You must pick the target of the host platform you're going to
 install Ferrocene on, and optionally one or more cross-compilation targets
 (depending on the hardware you'll deploy the executable or library on).
@@ -94,5 +94,5 @@ the tool, run:
 
 All the performed checks will be displayed. If any check fails, an error will
 be emitted along with an ID. You can look up the identifier in :doc:`the error
-codes list <self-test/error-codes>` to learn more about the failure and ways to
+codes list </self-test/error-codes>` to learn more about the failure and ways to
 fix it.

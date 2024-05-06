@@ -37,14 +37,14 @@ On Ubuntu 20.04 LTS you can install a suitable C compiler with:
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing <../install>` this
+The following archives are needed when :doc:`installing </ferrocene/install>` this
 target as a host platform:
 
 * ``rustc-x86_64-unknown-linux-gnu``
 * ``rust-std-x86_64-unknown-linux-gnu``
 * ``ferrocene-self-test-x86_64-unknown-linux-gnu``
 
-The following archives are needed when :doc:`installing <../install>` this
+The following archives are needed when :doc:`installing </ferrocene/install>` this
 target as a cross-compilation target:
 
 * ``rust-std-x86_64-unknown-linux-gnu``

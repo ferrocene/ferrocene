@@ -19,7 +19,7 @@ Obtaining Ferrocene
 -------------------
 
 Detailed instructions on how to download Ferrocene are available in the
-:doc:`User Manual <user-manual:install>`.
+:doc:`User Manual <user-manual:ferrocene/install>`.
 
 Obtaining Documentation
 -----------------------

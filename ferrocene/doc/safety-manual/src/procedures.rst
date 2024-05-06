@@ -7,20 +7,20 @@ Installation Procedures
 Installing Prerequisites
 ------------------------
 
-See :doc:`User Manual - System requirements <user-manual:system-requirements>`
+See :doc:`User Manual - System requirements <user-manual:ferrocene/system-requirements>`
 for the detailed installation prerequisites for Ferrocene.
 
 Installing Ferrocene
 --------------------
 
-See :doc:`User Manual - Installation <user-manual:install>` for the
+See :doc:`User Manual - Installation <user-manual:ferrocene/install>` for the
 detailed installation procedure for Ferrocene.
 
 Installation Validation
 -----------------------
 
 Ferrocene provides a checker called ``ferrocene-self-test`` (see
-:ref:`Ferrocene - Validation <user-manual:install:Validation>` for details),
+:ref:`Ferrocene - Validation <user-manual:ferrocene/install:Validation>` for details),
 for verifying the installation of the toolchain in a non-certification context.
 
 This tool is not qualified. Consequently, in certification context, the

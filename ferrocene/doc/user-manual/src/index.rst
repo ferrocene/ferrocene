@@ -16,19 +16,19 @@ Ferrocene User Manual
    :maxdepth: 2
    :caption: About Ferrocene:
 
-   system-requirements
-   install
+   ferrocene/system-requirements
+   ferrocene/install
 
 .. toctree::
    :numbered:
    :maxdepth: 2
    :caption: Using Ferrocene:
 
-   using-compiler/file-formats
-   using-compiler/library
-   using-compiler/executable
-   using-compiler/mixed-language
-   using-compiler/system-calls
+   ferrocene/file-formats
+   ferrocene/library
+   ferrocene/executable
+   ferrocene/mixed-language
+   ferrocene/system-calls
 
 .. toctree::
    :numbered:
@@ -39,12 +39,12 @@ Ferrocene User Manual
    targets/aarch64-unknown-none
    targets/x86_64-unknown-linux-gnu
 
-.. toctree::
+.. appendices::
    :numbered:
    :maxdepth: 2
    :caption: Reference:
 
-   cli
+   ferrocene/cli
    self-test/error-codes
 
 Indices and tables

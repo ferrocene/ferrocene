@@ -31,7 +31,7 @@ cfg-if = "1.0"
 rustc-demangle = "0.1.4"
 
 # Optionally enable the ability to serialize a `Backtrace`, controlled through
-# the `serialize-*` features below.
+# the `serialize-serde` feature below.
 serde = { version = "1.0", optional = true, features = ['derive'] }
 
 # Optionally demangle C++ frames' symbols in backtraces.
@@ -68,10 +68,6 @@ default = ["std"]
 # Include std support. This enables types like `Backtrace`.
 std = []
 
-#=======================================
-# Methods of serialization
-#
-# Various features used for enabling rustc-serialize or syntex codegen.
 serialize-serde = ["serde"]
 
 #=======================================

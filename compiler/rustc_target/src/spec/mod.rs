@@ -40,6 +40,7 @@ use crate::json::{Json, ToJson};
 use crate::spec::abi::Abi;
 use crate::spec::crt_objects::CrtObjects;
 use rustc_fs_util::try_canonicalize;
+use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use rustc_span::symbol::{kw, sym, Symbol};
 use serde_json::Value;
@@ -50,8 +51,7 @@ use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{fmt, io};
-
-use rustc_macros::HashStable_Generic;
+use tracing::debug;
 
 pub mod abi;
 pub mod crt_objects;
@@ -782,6 +782,14 @@ impl LinkerFeatures {
 pub enum PanicStrategy {
     Unwind,
     Abort,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Hash, Encodable, Decodable, HashStable_Generic)]
+pub enum OnBrokenPipe {
+    Default,
+    Kill,
+    Error,
+    Inherit,
 }
 
 impl PanicStrategy {

@@ -1,7 +1,7 @@
 use rustc_ast as ast;
 use rustc_ast::visit::{self, AssocCtxt, FnCtxt, FnKind, Visitor};
 use rustc_ast::{attr, AssocConstraint, AssocConstraintKind, NodeId};
-use rustc_ast::{token, PatKind, RangeEnd};
+use rustc_ast::{token, PatKind};
 use rustc_feature::{AttributeGate, BuiltinAttribute, Features, GateIssue, BUILTIN_ATTRIBUTE_MAP};
 use rustc_session::parse::{feature_err, feature_err_issue, feature_warn};
 use rustc_session::Session;
@@ -319,7 +319,7 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
             ast::ForeignItemKind::MacCall(..) => {}
         }
 
-        visit::walk_foreign_item(self, i)
+        visit::walk_item(self, i)
     }
 
     fn visit_ty(&mut self, ty: &'a ast::Ty) {
@@ -417,15 +417,6 @@ impl<'a> Visitor<'a> for PostExpansionVisitor<'a> {
             }
             PatKind::Box(..) => {
                 gate!(&self, box_patterns, pattern.span, "box pattern syntax is experimental");
-            }
-            PatKind::Range(_, Some(_), Spanned { node: RangeEnd::Excluded, .. }) => {
-                gate!(
-                    &self,
-                    exclusive_range_pattern,
-                    pattern.span,
-                    "exclusive range pattern syntax is experimental",
-                    "use an inclusive range pattern, like N..=M"
-                );
             }
             _ => {}
         }
@@ -619,10 +610,6 @@ pub fn check_crate(krate: &ast::Crate, sess: &Session, features: &Features) {
     // be too.
     gate_all_legacy_dont_use!(return_type_notation, "return type notation is experimental");
     gate_all_legacy_dont_use!(decl_macro, "`macro` is experimental");
-    gate_all_legacy_dont_use!(
-        exclusive_range_pattern,
-        "exclusive range pattern syntax is experimental"
-    );
     gate_all_legacy_dont_use!(try_blocks, "`try` blocks are unstable");
     gate_all_legacy_dont_use!(auto_traits, "`auto` traits are unstable");
 

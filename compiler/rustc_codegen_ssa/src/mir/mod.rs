@@ -8,6 +8,7 @@ use rustc_middle::mir::traversal;
 use rustc_middle::mir::UnwindTerminateReason;
 use rustc_middle::ty::layout::{FnAbiOf, HasTyCtxt, TyAndLayout};
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt, TypeFoldable, TypeVisitableExt};
+use rustc_middle::{bug, span_bug};
 use rustc_target::abi::call::{FnAbi, PassMode};
 
 use std::iter;
@@ -257,6 +258,10 @@ pub fn codegen_mir<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 
     // Apply debuginfo to the newly allocated locals.
     fx.debug_introduce_locals(&mut start_bx);
+
+    // If the backend supports coverage, and coverage is enabled for this function,
+    // do any necessary start-of-function codegen (e.g. locals for MC/DC bitmaps).
+    start_bx.init_coverage(instance);
 
     // The builders will be created separately for each basic block at `codegen_block`.
     // So drop the builder of `start_llbb` to avoid having two at the same time.

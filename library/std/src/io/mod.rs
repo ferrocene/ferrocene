@@ -266,7 +266,7 @@
 //! its file descriptors with no operations being performed by any other part of the program.
 //!
 //! Note that exclusive ownership of a file descriptor does *not* imply exclusive ownership of the
-//! underlying kernel object that the file descriptor references (also called "file description" on
+//! underlying kernel object that the file descriptor references (also called "open file description" on
 //! some operating systems). File descriptors basically work like [`Arc`]: when you receive an owned
 //! file descriptor, you cannot know whether there are any other file descriptors that reference the
 //! same kernel object. However, when you create a new kernel object, you know that you are holding
@@ -384,7 +384,10 @@ where
 {
     let mut g = Guard { len: buf.len(), buf: buf.as_mut_vec() };
     let ret = f(g.buf);
-    if str::from_utf8(&g.buf[g.len..]).is_err() {
+
+    // SAFETY: the caller promises to only append data to `buf`
+    let appended = g.buf.get_unchecked(g.len..);
+    if str::from_utf8(appended).is_err() {
         ret.and_then(|_| Err(Error::INVALID_UTF8))
     } else {
         g.len = g.buf.len();

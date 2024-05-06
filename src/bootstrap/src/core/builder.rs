@@ -14,8 +14,9 @@ use std::sync::{atomic, OnceLock};
 use std::time::{Duration, Instant};
 
 use crate::core::build_steps::tool::{self, SourceType};
-use crate::core::build_steps::{check, clean, compile, dist, doc, install, run, setup, test};
-use crate::core::build_steps::{clippy, llvm};
+use crate::core::build_steps::{
+    check, clean, clippy, compile, dist, doc, install, llvm, run, setup, test, vendor,
+};
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
 use crate::prepare_behaviour_dump_dir;
@@ -34,14 +35,38 @@ use once_cell::sync::Lazy;
 #[cfg(test)]
 mod tests;
 
+/// Builds and performs different [`Self::kind`]s of stuff and actions, taking
+/// into account build configuration from e.g. config.toml.
 pub struct Builder<'a> {
+    /// Build configuration from e.g. config.toml.
     pub build: &'a Build,
+
+    /// The stage to use. Either implicitly determined based on subcommand, or
+    /// explicitly specified with `--stage N`. Normally this is the stage we
+    /// use, but sometimes we want to run steps with a lower stage than this.
     pub top_stage: u32,
+
+    /// What to build or what action to perform.
     pub kind: Kind,
+
+    /// A cache of outputs of [`Step`]s so we can avoid running steps we already
+    /// ran.
     cache: Cache,
+
+    /// A stack of [`Step`]s to run before we can run this builder. The output
+    /// of steps is cached in [`Self::cache`].
     stack: RefCell<Vec<Box<dyn Any>>>,
+
+    /// The total amount of time we spent running [`Step`]s in [`Self::stack`].
     time_spent_on_dependencies: Cell<Duration>,
+<<<<<<< HEAD
     should_serve_called: atomic::AtomicU64,
+=======
+
+    /// The paths passed on the command line. Used by steps to figure out what
+    /// to do. For example: with `./x check foo bar` we get `paths=["foo",
+    /// "bar"]`.
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub paths: Vec<PathBuf>,
 }
 
@@ -639,7 +664,11 @@ pub enum Kind {
     Run,
     Setup,
     Suggest,
+<<<<<<< HEAD
     Sign,
+=======
+    Vendor,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl Kind {
@@ -660,7 +689,11 @@ impl Kind {
             Kind::Run => "run",
             Kind::Setup => "setup",
             Kind::Suggest => "suggest",
+<<<<<<< HEAD
             Kind::Sign => "sign",
+=======
+            Kind::Vendor => "vendor",
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         }
     }
 
@@ -779,7 +812,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::test::GenerateTarball,
                 crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore,
                 crate::core::build_steps::toolstate::ToolStateCheck,
-                test::ExpandYamlAnchors,
                 test::Tidy,
                 test::Ui,
                 test::Crashes,
@@ -829,6 +861,7 @@ impl<'a> Builder<'a> {
                 test::Clippy,
                 test::RustDemangler,
                 test::CompiletestTest,
+                test::CrateRunMakeSupport,
                 test::RustdocJSStd,
                 test::RustdocJSNotStd,
                 test::RustdocGUI,
@@ -945,9 +978,12 @@ impl<'a> Builder<'a> {
                 install::Src,
             ),
             Kind::Run => describe!(
+<<<<<<< HEAD
                 crate::ferrocene::run::TraceabilityMatrix,
                 crate::ferrocene::run::GenerateCoverageReport,
                 run::ExpandYamlAnchors,
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                 run::BuildManifest,
                 run::BumpStage0,
                 run::ReplaceVersionPlaceholder,
@@ -970,6 +1006,7 @@ impl<'a> Builder<'a> {
             ),
             Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
+            Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()
             Kind::Format | Kind::Suggest => vec![],
         }
@@ -1043,7 +1080,11 @@ impl<'a> Builder<'a> {
                 Kind::Setup,
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
+<<<<<<< HEAD
             Subcommand::Sign => (Kind::Sign, &paths[..]),
+=======
+            Subcommand::Vendor { .. } => (Kind::Vendor, &paths[..]),
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
         };
 
         Self::new_internal(build, kind, paths.to_owned())
@@ -2156,13 +2197,10 @@ impl<'a> Builder<'a> {
             // during incremental builds" heuristic for the standard library.
             rustflags.arg("-Zinline-mir");
 
-            // FIXME: always pass this after the next `#[cfg(bootstrap)]` update.
-            if compiler.stage != 0 {
-                // Similarly, we need to keep debug info for functions inlined into other std functions,
-                // even if we're not going to output debuginfo for the crate we're currently building,
-                // so that it'll be available when downstream consumers of std try to use it.
-                rustflags.arg("-Zinline-mir-preserve-debug");
-            }
+            // Similarly, we need to keep debug info for functions inlined into other std functions,
+            // even if we're not going to output debuginfo for the crate we're currently building,
+            // so that it'll be available when downstream consumers of std try to use it.
+            rustflags.arg("-Zinline-mir-preserve-debug");
         }
 
         if self.config.rustc_parallel
@@ -2260,13 +2298,8 @@ impl<'a> Builder<'a> {
         out
     }
 
-    /// Return paths of all submodules managed by git.
-    /// If the current checkout is not managed by git, returns an empty slice.
+    /// Return paths of all submodules.
     pub fn get_all_submodules(&self) -> &[String] {
-        if !self.rust_info().is_managed_git_subrepository() {
-            return &[];
-        }
-
         static SUBMODULES_PATHS: OnceLock<Vec<String>> = OnceLock::new();
 
         let init_submodules_paths = |src: &PathBuf| {

@@ -5,8 +5,8 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::OnceLock;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::*;
 
@@ -208,6 +208,8 @@ pub struct TestProps {
     pub llvm_cov_flags: Vec<String>,
     /// Extra flags to pass to LLVM's `filecheck` tool, in tests that use it.
     pub filecheck_flags: Vec<String>,
+    /// Don't automatically insert any `--check-cfg` args
+    pub no_auto_check_cfg: bool,
 }
 
 mod directives {
@@ -249,6 +251,7 @@ mod directives {
     pub const COMPARE_OUTPUT_LINES_BY_SUBSET: &'static str = "compare-output-lines-by-subset";
     pub const LLVM_COV_FLAGS: &'static str = "llvm-cov-flags";
     pub const FILECHECK_FLAGS: &'static str = "filecheck-flags";
+    pub const NO_AUTO_CHECK_CFG: &'static str = "no-auto-check-cfg";
     // This isn't a real directive, just one that is probably mistyped often
     pub const INCORRECT_COMPILER_FLAGS: &'static str = "compiler-flags";
 }
@@ -304,6 +307,7 @@ impl TestProps {
             remap_src_base: false,
             llvm_cov_flags: vec![],
             filecheck_flags: vec![],
+            no_auto_check_cfg: false,
         }
     }
 
@@ -567,6 +571,8 @@ impl TestProps {
                     if let Some(flags) = config.parse_name_value_directive(ln, FILECHECK_FLAGS) {
                         self.filecheck_flags.extend(split_flags(&flags));
                     }
+
+                    config.set_name_directive(ln, NO_AUTO_CHECK_CFG, &mut self.no_auto_check_cfg);
                 },
             );
 
@@ -862,6 +868,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "needs-unwind",
     "needs-wasmtime",
     "needs-xray",
+    "no-auto-check-cfg",
     "no-prefer-dynamic",
     "normalize-stderr-32bit",
     "normalize-stderr-64bit",
@@ -1023,8 +1030,9 @@ fn iter_header(
     let mut line_number = 0;
 
     // Match on error annotations like `//~ERROR`.
-    static REVISION_MAGIC_COMMENT_RE: Lazy<Regex> =
-        Lazy::new(|| Regex::new("//(\\[.*\\])?~.*").unwrap());
+    static REVISION_MAGIC_COMMENT_RE: OnceLock<Regex> = OnceLock::new();
+    let revision_magic_comment_re =
+        REVISION_MAGIC_COMMENT_RE.get_or_init(|| Regex::new("//(\\[.*\\])?~.*").unwrap());
 
     loop {
         line_number += 1;
@@ -1089,7 +1097,7 @@ fn iter_header(
             });
         // Then we try to check for legacy-style candidates, which are not the magic ~ERROR family
         // error annotations.
-        } else if !REVISION_MAGIC_COMMENT_RE.is_match(ln) {
+        } else if !revision_magic_comment_re.is_match(ln) {
             let Some((_, rest)) = line_directive("//", ln) else {
                 continue;
             };

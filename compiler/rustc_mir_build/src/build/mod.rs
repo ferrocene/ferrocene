@@ -566,7 +566,8 @@ fn construct_const<'a, 'tcx>(
             span,
             ..
         }) => (*span, ty.span),
-        Node::AnonConst(_) | Node::ConstBlock(_) => {
+        Node::AnonConst(ct) => (ct.span, ct.span),
+        Node::ConstBlock(_) => {
             let span = tcx.def_span(def);
             (span, span)
         }
@@ -997,7 +998,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         match self.unit_temp {
             Some(tmp) => tmp,
             None => {
-                let ty = Ty::new_unit(self.tcx);
+                let ty = self.tcx.types.unit;
                 let fn_span = self.fn_span;
                 let tmp = self.temp(ty, fn_span);
                 self.unit_temp = Some(tmp);

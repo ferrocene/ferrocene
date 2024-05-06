@@ -74,7 +74,11 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('run', 'run', [CompletionResultType]::ParameterValue, 'Run tools contained in this repository')
             [CompletionResult]::new('setup', 'setup', [CompletionResultType]::ParameterValue, 'Set up the environment for development')
             [CompletionResult]::new('suggest', 'suggest', [CompletionResultType]::ParameterValue, 'Suggest a subset of tests to run, based on modified files')
+<<<<<<< HEAD
             [CompletionResult]::new('sign', 'sign', [CompletionResultType]::ParameterValue, 'Sign Ferrocene qualification documents')
+=======
+            [CompletionResult]::new('vendor', 'vendor', [CompletionResultType]::ParameterValue, 'Vendor dependencies')
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             break
         }
         'x.py;build' {
@@ -731,7 +735,12 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
+<<<<<<< HEAD
         'x.py;sign' {
+=======
+        'x.py;vendor' {
+            [CompletionResult]::new('--sync', 'sync', [CompletionResultType]::ParameterName, 'Additional `Cargo.toml` to sync and vendor')
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('--config', 'config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', 'build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `config.toml`')
             [CompletionResult]::new('--build', 'build', [CompletionResultType]::ParameterName, 'build target of the stage0 compiler')
@@ -756,6 +765,10 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--llvm-profile-use', 'llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')
             [CompletionResult]::new('--reproducible-artifact', 'reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
             [CompletionResult]::new('--set', 'set', [CompletionResultType]::ParameterName, 'override options in config.toml')
+<<<<<<< HEAD
+=======
+            [CompletionResult]::new('--versioned-dirs', 'versioned-dirs', [CompletionResultType]::ParameterName, 'Always include version in subdir name')
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('-v', 'v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', 'verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'use incremental compilation')

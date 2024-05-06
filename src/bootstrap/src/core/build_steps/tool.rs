@@ -307,7 +307,6 @@ bootstrap_tool!(
     RemoteTestClient, "src/tools/remote-test-client", "remote-test-client";
     RustInstaller, "src/tools/rust-installer", "rust-installer";
     RustdocTheme, "src/tools/rustdoc-themes", "rustdoc-themes";
-    ExpandYamlAnchors, "src/tools/expand-yaml-anchors", "expand-yaml-anchors";
     LintDocs, "src/tools/lint-docs", "lint-docs";
     JsonDocCk, "src/tools/jsondocck", "jsondocck";
     JsonDocLint, "src/tools/jsondoclint", "jsondoclint";
@@ -477,7 +476,7 @@ impl Step for Rustdoc {
             features.push("jemalloc".to_string());
         }
 
-        let cargo = prepare_tool_cargo(
+        let mut cargo = prepare_tool_cargo(
             builder,
             build_compiler,
             Mode::ToolRustc,
@@ -487,6 +486,14 @@ impl Step for Rustdoc {
             SourceType::InTree,
             features.as_slice(),
         );
+
+        // If the rustdoc output is piped to e.g. `head -n1` we want the process
+        // to be killed, rather than having an error bubble up and cause a
+        // panic.
+        // FIXME: Synthetic #[cfg(bootstrap)]. Remove when the bootstrap compiler supports it.
+        if build_compiler.stage > 0 {
+            cargo.rustflag("-Zon-broken-pipe=kill");
+        }
 
         let _guard = builder.msg_tool(
             Kind::Build,

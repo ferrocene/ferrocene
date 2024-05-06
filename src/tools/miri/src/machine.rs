@@ -31,7 +31,7 @@ use rustc_target::spec::abi::Abi;
 
 use crate::{
     concurrency::{data_race, weak_memory},
-    shims::unix::FdTable,
+    shims::unix,
     *,
 };
 
@@ -380,7 +380,7 @@ impl<'mir, 'tcx: 'mir> PrimitiveLayouts<'tcx> {
         let mut_raw_ptr = Ty::new_mut_ptr(tcx, tcx.types.unit);
         let const_raw_ptr = Ty::new_imm_ptr(tcx, tcx.types.unit);
         Ok(Self {
-            unit: layout_cx.layout_of(Ty::new_unit(tcx))?,
+            unit: layout_cx.layout_of(tcx.types.unit)?,
             i8: layout_cx.layout_of(tcx.types.i8)?,
             i16: layout_cx.layout_of(tcx.types.i16)?,
             i32: layout_cx.layout_of(tcx.types.i32)?,
@@ -439,8 +439,7 @@ pub struct MiriMachine<'mir, 'tcx> {
     /// Ptr-int-cast module global data.
     pub alloc_addresses: alloc_addresses::GlobalState,
 
-    /// Environment variables set by `setenv`.
-    /// Miri does not expose env vars from the host to the emulated program.
+    /// Environment variables.
     pub(crate) env_vars: EnvVars<'tcx>,
 
     /// Return place of the main function.
@@ -465,9 +464,9 @@ pub struct MiriMachine<'mir, 'tcx> {
     pub(crate) validate: bool,
 
     /// The table of file descriptors.
-    pub(crate) fds: shims::unix::FdTable,
+    pub(crate) fds: unix::FdTable,
     /// The table of directory descriptors.
-    pub(crate) dirs: shims::unix::DirTable,
+    pub(crate) dirs: unix::DirTable,
 
     /// This machine's monotone clock.
     pub(crate) clock: Clock,
@@ -642,7 +641,7 @@ impl<'mir, 'tcx> MiriMachine<'mir, 'tcx> {
             tls: TlsData::default(),
             isolated_op: config.isolated_op,
             validate: config.validate,
-            fds: FdTable::new(config.mute_stdout_stderr),
+            fds: unix::FdTable::new(config.mute_stdout_stderr),
             dirs: Default::default(),
             layouts,
             threads: ThreadManager::default(),
@@ -987,7 +986,7 @@ impl<'mir, 'tcx> Machine<'mir, 'tcx> for MiriMachine<'mir, 'tcx> {
         dest: &MPlaceTy<'tcx, Provenance>,
         ret: Option<mir::BasicBlock>,
         unwind: mir::UnwindAction,
-    ) -> InterpResult<'tcx> {
+    ) -> InterpResult<'tcx, Option<ty::Instance<'tcx>>> {
         ecx.call_intrinsic(instance, args, dest, ret, unwind)
     }
 

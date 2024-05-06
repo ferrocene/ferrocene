@@ -37,11 +37,7 @@
 #![feature(box_patterns)]
 #![feature(let_chains)]
 
-#[macro_use]
-extern crate tracing;
-
 use crate::errors::{AssocTyParentheses, AssocTyParenthesesSub, MisplacedImplTrait};
-
 use rustc_ast::node_id::NodeMap;
 use rustc_ast::ptr::P;
 use rustc_ast::{self as ast, *};
@@ -69,6 +65,7 @@ use rustc_span::{DesugaringKind, Span, DUMMY_SP};
 use smallvec::{smallvec, SmallVec};
 use std::collections::hash_map::Entry;
 use thin_vec::ThinVec;
+use tracing::{debug, instrument, trace};
 
 macro_rules! arena_vec {
     ($this:expr; $($x:expr),*) => (
@@ -394,7 +391,7 @@ fn index_crate<'a>(
             let def_id = self.node_id_to_def_id[&item.id];
             *self.index.ensure_contains_elem(def_id, || AstOwner::NonOwner) =
                 AstOwner::ForeignItem(item);
-            visit::walk_foreign_item(self, item);
+            visit::walk_item(self, item);
         }
     }
 }
@@ -1181,14 +1178,17 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
                                     tokens: None,
                                 };
 
-                                let ct = self.with_new_scopes(span, |this| hir::AnonConst {
-                                    def_id,
-                                    hir_id: this.lower_node_id(node_id),
-                                    body: this.lower_const_body(path_expr.span, Some(&path_expr)),
+                                let ct = self.with_new_scopes(span, |this| {
+                                    self.arena.alloc(hir::AnonConst {
+                                        def_id,
+                                        hir_id: this.lower_node_id(node_id),
+                                        body: this
+                                            .lower_const_body(path_expr.span, Some(&path_expr)),
+                                        span,
+                                    })
                                 });
                                 return GenericArg::Const(ConstArg {
                                     value: ct,
-                                    span,
                                     is_desugared_from_effects: false,
                                 });
                             }
@@ -1200,7 +1200,6 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             }
             ast::GenericArg::Const(ct) => GenericArg::Const(ConstArg {
                 value: self.lower_anon_const(ct),
-                span: self.lower_span(ct.value.span),
                 is_desugared_from_effects: false,
             }),
         }
@@ -2318,7 +2317,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
     }
 
     #[allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
-    fn lower_array_length(&mut self, c: &AnonConst) -> hir::ArrayLen {
+    fn lower_array_length(&mut self, c: &AnonConst) -> hir::ArrayLen<'hir> {
         match c.value.kind {
             ExprKind::Underscore => {
                 if self.tcx.features().generic_arg_infer {
@@ -2341,12 +2340,13 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         }
     }
 
-    fn lower_anon_const(&mut self, c: &AnonConst) -> hir::AnonConst {
-        self.with_new_scopes(c.value.span, |this| hir::AnonConst {
+    fn lower_anon_const(&mut self, c: &AnonConst) -> &'hir hir::AnonConst {
+        self.arena.alloc(self.with_new_scopes(c.value.span, |this| hir::AnonConst {
             def_id: this.local_def_id(c.id),
             hir_id: this.lower_node_id(c.id),
             body: this.lower_const_body(c.value.span, Some(&c.value)),
-        })
+            span: this.lower_span(c.value.span),
+        }))
     }
 
     fn lower_unsafe_source(&mut self, u: UnsafeSource) -> hir::UnsafeSource {
@@ -2653,8 +2653,7 @@ impl<'hir> GenericArgsCtor<'hir> {
 
         lcx.children.push((def_id, hir::MaybeOwner::NonOwner(hir_id)));
         self.args.push(hir::GenericArg::Const(hir::ConstArg {
-            value: hir::AnonConst { def_id, hir_id, body },
-            span,
+            value: lcx.arena.alloc(hir::AnonConst { def_id, hir_id, body, span }),
             is_desugared_from_effects: true,
         }))
     }

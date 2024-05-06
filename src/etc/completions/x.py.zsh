@@ -749,8 +749,14 @@ _arguments "${_arguments_options[@]}" \
 '*::paths -- paths for the subcommand:_files' \
 && ret=0
 ;;
+<<<<<<< HEAD
 (sign)
 _arguments "${_arguments_options[@]}" \
+=======
+(vendor)
+_arguments "${_arguments_options[@]}" \
+'*--sync=[Additional \`Cargo.toml\` to sync and vendor]:SYNC:_files' \
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:( )' \
@@ -775,6 +781,10 @@ _arguments "${_arguments_options[@]}" \
 '--llvm-profile-use=[use PGO profile for LLVM build]:PROFILE:_files' \
 '*--reproducible-artifact=[Additional reproducible artifacts that should be added to the reproducible artifacts archive]:REPRODUCIBLE_ARTIFACT: ' \
 '*--set=[override options in config.toml]:section.option=value:( )' \
+<<<<<<< HEAD
+=======
+'--versioned-dirs[Always include version in subdir name]' \
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '*-v[use verbose output (-vv for very verbose)]' \
 '*--verbose[use verbose output (-vv for very verbose)]' \
 '-i[use incremental compilation]' \
@@ -815,7 +825,11 @@ _x.py_commands() {
 'run:Run tools contained in this repository' \
 'setup:Set up the environment for development' \
 'suggest:Suggest a subset of tests to run, based on modified files' \
+<<<<<<< HEAD
 'sign:Sign Ferrocene qualification documents' \
+=======
+'vendor:Vendor dependencies' \
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     )
     _describe -t commands 'x.py commands' commands "$@"
 }
@@ -898,6 +912,11 @@ _x.py__suggest_commands() {
 _x.py__test_commands() {
     local commands; commands=()
     _describe -t commands 'x.py test commands' commands "$@"
+}
+(( $+functions[_x.py__vendor_commands] )) ||
+_x.py__vendor_commands() {
+    local commands; commands=()
+    _describe -t commands 'x.py vendor commands' commands "$@"
 }
 
 if [ "$funcstack[1]" = "_x.py" ]; then

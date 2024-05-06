@@ -44,7 +44,6 @@ run-make/dep-graph/Makefile
 run-make/dep-info-doesnt-run-much/Makefile
 run-make/dep-info-spaces/Makefile
 run-make/dep-info/Makefile
-run-make/doctests-keep-binaries/Makefile
 run-make/doctests-runtool/Makefile
 run-make/dump-ice-to-disk/Makefile
 run-make/dump-mono-stats/Makefile
@@ -247,8 +246,6 @@ run-make/prefer-rlib/Makefile
 run-make/pretty-print-to-file/Makefile
 run-make/pretty-print-with-dep-file/Makefile
 run-make/print-calling-conventions/Makefile
-run-make/print-cfg/Makefile
-run-make/print-native-static-libs/Makefile
 run-make/print-target-list/Makefile
 run-make/profile/Makefile
 run-make/prune-link-args/Makefile
@@ -265,7 +262,6 @@ run-make/relocation-model/Makefile
 run-make/relro-levels/Makefile
 run-make/remap-path-prefix-dwarf/Makefile
 run-make/remap-path-prefix/Makefile
-run-make/repr128-dwarf/Makefile
 run-make/reproducible-build-2/Makefile
 run-make/reproducible-build/Makefile
 run-make/resolve-rename/Makefile
@@ -277,7 +273,6 @@ run-make/rlib-format-packed-bundled-libs-3/Makefile
 run-make/rlib-format-packed-bundled-libs/Makefile
 run-make/rmeta-preferred/Makefile
 run-make/rustc-macro-dep-files/Makefile
-run-make/rustdoc-determinism/Makefile
 run-make/rustdoc-error-lines/Makefile
 run-make/rustdoc-io-error/Makefile
 run-make/rustdoc-map-file/Makefile
@@ -319,7 +314,6 @@ run-make/static-unwinding/Makefile
 run-make/staticlib-blank-lib/Makefile
 run-make/staticlib-dylib-linkage/Makefile
 run-make/std-core-cycle/Makefile
-run-make/stdin-non-utf8/Makefile
 run-make/suspicious-library/Makefile
 run-make/symbol-mangling-hashed/Makefile
 run-make/symbol-visibility/Makefile

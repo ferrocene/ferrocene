@@ -216,7 +216,7 @@ declare_features! (
     /// Set the maximum pattern complexity allowed (not limited by default).
     (internal, pattern_complexity, "1.78.0", None),
     /// Allows using pattern types.
-    (internal, pattern_types, "CURRENT_RUSTC_VERSION", Some(123646)),
+    (internal, pattern_types, "1.79.0", Some(123646)),
     /// Allows using `#[prelude_import]` on glob `use` items.
     (internal, prelude_import, "1.2.0", None),
     /// Used to identify crates that contain the profiler runtime.
@@ -384,7 +384,7 @@ declare_features! (
     /// Allows `cfg(target_thread_local)`.
     (unstable, cfg_target_thread_local, "1.7.0", Some(29594)),
     /// Allows the use of `#[cfg(ub_checks)` to check if UB checks are enabled.
-    (unstable, cfg_ub_checks, "CURRENT_RUSTC_VERSION", Some(123499)),
+    (unstable, cfg_ub_checks, "1.79.0", Some(123499)),
     /// Allow conditional compilation depending on rust version
     (unstable, cfg_version, "1.45.0", Some(64796)),
     /// Allows to use the `#[cfi_encoding = ""]` attribute.
@@ -439,7 +439,7 @@ declare_features! (
     /// Allows having using `suggestion` in the `#[deprecated]` attribute.
     (unstable, deprecated_suggestion, "1.61.0", Some(94785)),
     /// Allows deref patterns.
-    (incomplete, deref_patterns, "CURRENT_RUSTC_VERSION", Some(87121)),
+    (incomplete, deref_patterns, "1.79.0", Some(87121)),
     /// Controls errors in trait implementations.
     (unstable, do_not_recommend, "1.67.0", Some(51992)),
     /// Tells rustdoc to automatically generate `#[doc(cfg(...))]`.
@@ -454,8 +454,6 @@ declare_features! (
     (incomplete, dyn_star, "1.65.0", Some(102425)),
     /// Uses generic effect parameters for ~const bounds
     (unstable, effects, "1.72.0", Some(102090)),
-    /// Allows `X..Y` patterns.
-    (unstable, exclusive_range_pattern, "1.11.0", Some(37854)),
     /// Allows exhaustive pattern matching on types that contain uninhabited types.
     (unstable, exhaustive_patterns, "1.13.0", Some(51085)),
     /// Allows explicit tail calls via `become` expression.
@@ -530,9 +528,9 @@ declare_features! (
     /// Allows the `#[must_not_suspend]` attribute.
     (unstable, must_not_suspend, "1.57.0", Some(83310)),
     /// Make `mut` not reset the binding mode on edition >= 2024.
-    (incomplete, mut_preserve_binding_mode_2024, "CURRENT_RUSTC_VERSION", Some(123076)),
+    (incomplete, mut_preserve_binding_mode_2024, "1.79.0", Some(123076)),
     /// Allows `mut ref` and `mut ref mut` identifier patterns.
-    (incomplete, mut_ref, "CURRENT_RUSTC_VERSION", Some(123076)),
+    (incomplete, mut_ref, "1.79.0", Some(123076)),
     /// Allows using `#[naked]` on functions.
     (unstable, naked_functions, "1.9.0", Some(90957)),
     /// Allows specifying the as-needed link modifier
@@ -564,23 +562,26 @@ declare_features! (
     /// Allows using `#[optimize(X)]`.
     (unstable, optimize_attribute, "1.34.0", Some(54882)),
     /// Allows postfix match `expr.match { ... }`
-    (unstable, postfix_match, "CURRENT_RUSTC_VERSION", Some(121618)),
+    (unstable, postfix_match, "1.79.0", Some(121618)),
     /// Allows `use<'a, 'b, A, B>` in `impl use<...> Trait` for precise capture of generic args.
-    (incomplete, precise_capturing, "CURRENT_RUSTC_VERSION", Some(123432)),
+    (incomplete, precise_capturing, "1.79.0", Some(123432)),
     /// Allows macro attributes on expressions, statements and non-inline modules.
     (unstable, proc_macro_hygiene, "1.30.0", Some(54727)),
     /// Allows `&raw const $place_expr` and `&raw mut $place_expr` expressions.
     (unstable, raw_ref_op, "1.41.0", Some(64490)),
     /// Makes `&` and `&mut` patterns eat only one layer of references in Rust 2024.
-    (incomplete, ref_pat_eat_one_layer_2024, "CURRENT_RUSTC_VERSION", Some(123076)),
+    (incomplete, ref_pat_eat_one_layer_2024, "1.79.0", Some(123076)),
     /// Allows `&` and `&mut` patterns to consume match-ergonomics-inserted references.
-    (incomplete, ref_pat_everywhere, "CURRENT_RUSTC_VERSION", Some(123076)),
+    (incomplete, ref_pat_everywhere, "1.79.0", Some(123076)),
     /// Allows using the `#[register_tool]` attribute.
     (unstable, register_tool, "1.41.0", Some(66079)),
     /// Allows the `#[repr(i128)]` attribute for enums.
     (incomplete, repr128, "1.16.0", Some(56071)),
     /// Allows `repr(simd)` and importing the various simd intrinsics.
     (unstable, repr_simd, "1.4.0", Some(27731)),
+    /// Allows enums like Result<T, E> to be used across FFI, if T's niche value can
+    /// be used to describe E or vise-versa.
+    (unstable, result_ffi_guarantees, "CURRENT_RUSTC_VERSION", Some(110503)),
     /// Allows bounding the return type of AFIT/RPITIT.
     (incomplete, return_type_notation, "1.70.0", Some(109417)),
     /// Allows `extern "rust-cold"`.
@@ -619,8 +620,6 @@ declare_features! (
     /// Allows creation of instances of a struct by moving fields that have
     /// not changed from prior instances of the same struct (RFC #2528)
     (unstable, type_changing_struct_update, "1.58.0", Some(86555)),
-    /// Enables rustc to generate code that instructs libstd to NOT ignore SIGPIPE.
-    (unstable, unix_sigpipe, "1.65.0", Some(97889)),
     /// Allows unnamed fields of struct and union type
     (incomplete, unnamed_fields, "1.74.0", Some(49804)),
     /// Allows unsized fn parameters.

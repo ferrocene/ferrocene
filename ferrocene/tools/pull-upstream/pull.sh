@@ -74,8 +74,8 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
     if [[ "${upstream_commit}" = "" ]]; then
         # When the branch is up to date, the `git log` above rightfully doesn't
         # return any difference between the two refs, resulting in an empty
-        # ${upstream_commit}. To avoid the rest of the script from misbehaving,
-        # in this case we revert the commit back to FETCH_HEAD.
+        # ${upstream_commit}. To prevent the rest of the script from misbehaving,
+        # we revert the commit back to FETCH_HEAD.
         upstream_commit="FETCH_HEAD"
     elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
         echo "pull-upstream: pulling at most ${MAX_MERGES_PER_PR}, even though more commits are available"

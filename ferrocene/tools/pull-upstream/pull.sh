@@ -230,14 +230,21 @@ fi
 # are automatically fixed by another part of this script.
 for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     lock="${prefix}Cargo.lock"
+    manifest="${prefix}Cargo.toml"
     echo "pull-upstream: checking whether ${lock} needs to be updated..."
-    if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${prefix}Cargo.toml" >/dev/null; then
+    if ! RUSTC_BOOTSTRAP=1 cargo metadata --format-version=1 "--manifest-path=${manifest}" >/dev/null; then
         echo "pull-upstream: failed to invoke cargo to update ${lock}, skipping it"
         continue
     fi
     if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
         git add "${lock}"
-        git commit -m "update ${lock}"
+        git commit -m "update ${lock} to match ${manifest}"
+    fi
+    echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
+    cargo update --manifest-path "${manifest}"
+    if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
+        git add "${lock}"
+        git commit -m "update ${lock} to latest semver-compatible crates"
     fi
 done
 

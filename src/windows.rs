@@ -38,6 +38,8 @@ cfg_if::cfg_if! {
             pub use winapi::um::tlhelp32::*;
             pub use winapi::um::winbase::*;
             pub use winapi::um::winnt::*;
+            pub use winapi::um::winnls::*;
+            pub use winapi::um::stringapiset::*;
 
             // Work around winapi not having this function on aarch64.
             #[cfg(target_arch = "aarch64")]
@@ -379,6 +381,7 @@ ffi! {
     pub const INVALID_HANDLE_VALUE: HANDLE = -1isize as HANDLE;
     pub const MAX_MODULE_NAME32: usize = 255;
     pub const MAX_PATH: usize = 260;
+    pub const CP_UTF8: u32 = 65001;
 
     pub type DWORD = u32;
     pub type PDWORD = *mut u32;
@@ -456,6 +459,16 @@ ffi! {
             lpme: LPMODULEENTRY32W,
         ) -> BOOL;
         pub fn lstrlenW(lpstring: PCWSTR) -> i32;
+        pub fn WideCharToMultiByte(
+            codepage: u32,
+            dwflags: u32,
+            lpwidecharstr: PCWSTR,
+            cchwidechar: i32,
+            lpmultibytestr: *mut i8,
+            cbmultibyte: i32,
+            lpdefaultchar: *const i8,
+            lpuseddefaultchar: *mut BOOL
+        ) -> i32;
     }
 }
 

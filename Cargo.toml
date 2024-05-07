@@ -93,6 +93,8 @@ verify-winapi = [
   'winapi/tlhelp32',
   'winapi/winbase',
   'winapi/winnt',
+  'winapi/winnls',
+  'winapi/stringapiset',
 ]
 
 [[example]]

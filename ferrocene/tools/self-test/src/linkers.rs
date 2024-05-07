@@ -3,13 +3,11 @@
 
 mod argparse;
 
-use std::ffi::OsString;
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use argparse::LinkerArg;
-
+use self::argparse::LinkerArg;
 use crate::env::{self, Env};
 use crate::error::{Error, LinkerArgsErrorKind};
 use crate::report::Reporter;
@@ -26,9 +24,9 @@ pub(crate) enum Linker {
     /// No C compiler required
     BundledLld,
     /// The system's native C compiler is required
-    HostCC,
+    HostCc,
     /// Some kind of cross compiler, with one of the given target prefixes
-    CrossCC(&'static [&'static str]),
+    CrossCc(&'static [&'static str]),
 }
 
 /// Finds a system C compiler for each target and determines what flags should
@@ -45,7 +43,7 @@ pub(crate) fn check_and_add_rustflags(
     // Step 1. Check we have ld.lld available
     let _rust_lld_path = find_bundled_lld(reporter, sysroot)?;
     let lld_bin = find_bundled_lld_wrapper(reporter, sysroot)?;
-    let lld_dir = lld_bin.parent().expect("ld.lld should be a in a directory");
+    let lld_dir = lld_bin.parent().expect("ld.lld should have a parent directory");
 
     // Step 2. Check the C compiler works on each target that needs one
     // 2a. We loop through the targets
@@ -56,15 +54,15 @@ pub(crate) fn check_and_add_rustflags(
                     .skipped(&format!("Target `{}` does not require a C compiler", target.triple));
                 continue 'target_loop;
             }
-            Linker::HostCC => &[""],
-            Linker::CrossCC(list) => list,
+            Linker::HostCc => &[""],
+            Linker::CrossCc(list) => list,
         };
         // 2b. We loop through the prefixes used on this target (e.g. "arm-unknown-none-")
         for cc_prefix in prefix_list {
             // 2c. We loop through the things we know C compilers can be called
             'cc_loop: for compiler_kind in ["cc", "gcc", "clang"] {
                 let mut cc_args = Vec::new();
-                // 2d. We keep trying until we get a set of linker arguments are are happy with
+                // 2d. We keep trying until we get a set of linker arguments we are happy with,
                 //     or we run out of flags to give the C compiler
                 'arg_loop: loop {
                     let temp_dir = tempfile::tempdir().map_err(|error| {
@@ -81,7 +79,7 @@ pub(crate) fn check_and_add_rustflags(
                     );
                     match cc_result {
                         Ok((_path, linker_args)) => {
-                            if std::env::var("FST_PRINT_DETAILED_ARGS").is_ok() {
+                            if env.print_detailed_args {
                                 reporter.note(&format!(
                                     "Target `{}`, detected args `{:?}`",
                                     target.triple, &linker_args
@@ -102,7 +100,7 @@ pub(crate) fn check_and_add_rustflags(
                                 }
                                 Err(e) => {
                                     // Try another compiler
-                                    if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                                    if env.print_detailed_errors {
                                         reporter
                                             .note(&format!("`{compiler_name}` failed with {e}"));
                                     }
@@ -122,7 +120,7 @@ pub(crate) fn check_and_add_rustflags(
                         }
                         Err(e) => {
                             // Try again until we run out of compilers
-                            if std::env::var("FST_PRINT_DETAILED_ERRORS").is_ok() {
+                            if env.print_detailed_errors {
                                 reporter.note(&format!("`{compiler_name}` failed with {e}"));
                             }
                             // Try another compiler
@@ -232,15 +230,13 @@ fn check_system_compiler(
     extra_args: &[String],
 ) -> Result<(PathBuf, Vec<String>), Error> {
     let cc_path = find_binary_in_path(env, compiler_name)
-        .map_err(|error| Error::CCompilerNotFound { name: compiler_name.into(), error })?;
+        .map_err(|error| Error::CCompilerNotFound { error })?;
 
     // Part 1. Check with the real ld.lld - can we make a binary?
-
     cross_compile_test_program(&cc_path, lld_dir, temp_dir, extra_args)?;
 
     // Part 2. Make a fake linker, and get GCC to try and use it. What arguments
     // does it give our fake linker?
-
     let args_file = make_fake_linker(temp_dir)?;
 
     let linker_args =
@@ -263,33 +259,27 @@ fn cross_compile_test_program(
     extra_args: &[String],
 ) -> Result<(), Error> {
     // We need some C source code,
-    let c_source = r#"int main(void) { return 0; }"#;
+    let c_source = "int main(void) { return 0; }";
 
-    // We need a temp directory we can save the output file to
+    // We need files to save the source and output
     let source_file = temp_dir.join("input.c");
     let object_file = temp_dir.join("output.bin");
-    std::fs::write(&source_file, c_source.as_bytes()).map_err(|error| {
-        Error::WritingSampleProgramFailed {
-            name: "input.c".into(),
-            dest: source_file.clone(),
-            error,
-        }
+    std::fs::write(&source_file, c_source).map_err(|error| Error::WritingSampleProgramFailed {
+        name: "input.c".into(),
+        dest: source_file.clone(),
+        error,
     })?;
 
     // We need to call the C compiler, telling it to use ld.lld and telling it where to find ld.lld
-    let mut args: Vec<OsString> = vec![
-        "-fuse-ld=lld".into(),
-        "-B".into(),
-        lld_dir.as_os_str().into(),
-        source_file.as_os_str().into(),
-        "-o".into(),
-        object_file.as_os_str().into(),
-    ];
-    for arg in extra_args {
-        args.push(OsString::from(arg));
-    }
     let mut cc_child = Command::new(cc_path);
-    cc_child.args(&args);
+    cc_child
+        .arg("-fuse-ld=lld")
+        .arg("-B")
+        .arg(lld_dir)
+        .arg(source_file)
+        .arg("-o")
+        .arg(object_file)
+        .args(extra_args);
 
     let _output = run_command(&mut cc_child).map_err(|error| {
         let cc_name =
@@ -300,7 +290,7 @@ fn cross_compile_test_program(
     Ok(())
 }
 
-/// Compile a fake linker using the host's C compiler
+/// Compile a fake linker using the host's C compiler.
 ///
 /// Returns the file that the fake linker will write its args to.
 ///
@@ -343,12 +333,9 @@ fn make_fake_linker(temp_dir: &Path) -> Result<PathBuf, Error> {
         error,
     })?;
 
-    // Compile our sample program
-    let args: Vec<OsString> =
-        vec![source_file.as_os_str().into(), "-o".into(), object_file.as_os_str().into()];
-    // Always use the host compiler for this build
+    // Compile our sample program; Always use the host compiler for this build
     let mut cc_child = Command::new("cc");
-    cc_child.args(&args);
+    cc_child.arg(source_file).arg("-o").arg(object_file);
 
     let _output = run_command(&mut cc_child)
         .map_err(|error| Error::sample_program_compilation_failed("cc", error))?;
@@ -458,6 +445,7 @@ pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
 mod tests {
     use super::*;
     use crate::{error::FindBinaryInPathError, test_utils::TestUtils};
+    use std::ffi::OsString;
 
     #[test]
     fn test_find_bundled_lld() {
@@ -549,8 +537,7 @@ mod tests {
                 panic!("Should not have found a C compiler");
             }
             Err(Error::CCompilerNotFound {
-                name,
-                error: FindBinaryInPathError::MissingBinary { .. },
+                error: FindBinaryInPathError::MissingBinary { name },
             }) => {
                 assert_eq!(&name, "missing-cc");
             }

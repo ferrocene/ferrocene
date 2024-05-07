@@ -45,17 +45,12 @@ pub(crate) struct CommandOutput {
 }
 
 pub(crate) fn find_binary_in_path(env: &Env, name: &str) -> Result<PathBuf, FindBinaryInPathError> {
-    let Some(path) = &env.path else {
-        return Err(FindBinaryInPathError::NoEnvironmentVariable);
-    };
-
-    for directory in std::env::split_paths(&path) {
-        let binary = directory.join(name);
-        if binary.is_file() {
-            return Ok(binary);
-        }
-    }
-    Err(FindBinaryInPathError::MissingBinary { name: name.into() })
+    std::env::split_paths(&env.path)
+        .find_map(|directory| {
+            let binary = directory.join(name);
+            binary.is_file().then_some(binary)
+        })
+        .ok_or(FindBinaryInPathError::MissingBinary { name: name.into() })
 }
 
 /// The user manual states to extract all archives to the same directory.
@@ -70,14 +65,6 @@ pub(crate) fn get_sysroot() -> Option<PathBuf> {
 mod tests {
     use super::*;
     use std::path::Path;
-
-    #[test]
-    fn test_find_binary_in_path_missing_path() {
-        let env = Env { path: None };
-
-        let err = find_binary_in_path(&env, "vim").unwrap_err();
-        assert!(matches!(err, FindBinaryInPathError::NoEnvironmentVariable));
-    }
 
     #[test]
     fn test_find_binary_in_path_empty_path() {
@@ -153,6 +140,6 @@ mod tests {
     }
 
     fn path_env(paths: &[&Path]) -> Env {
-        Env { path: Some(std::env::join_paths(paths).unwrap()) }
+        Env { path: std::env::join_paths(paths).unwrap(), ..Default::default() }
     }
 }

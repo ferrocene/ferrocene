@@ -96,7 +96,7 @@ fn check_version(version: VersionOutput, hash: CommitHashOf, name: &str) -> Resu
     for (field, expected, found) in [
         ("host", env::SELFTEST_TARGET, version.host),
         ("release", env::CFG_RELEASE, version.release),
-        ("commit hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
+        ("commit-hash", hash.fetch().unwrap_or("unknown"), version.commit_hash),
     ] {
         if expected != found {
             return Err(Error::BinaryVersionMismatch {
@@ -291,7 +291,7 @@ mod tests {
     fn test_check_binary_wrong_commit_hash() {
         test_wrong_version_data(
             CliVersionContent { commit_hash: "0000000", ..CliVersionContent::default() },
-            "commit hash",
+            "commit-hash",
             CliVersionContent::default().commit_hash,
             "0000000",
         );

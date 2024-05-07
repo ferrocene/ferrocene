@@ -5,15 +5,16 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-UBUNTU_RELEASE="22.04.1"
-UBUNTU_ARCH="arm64"
-UBUNTU_SHA256="b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45"
+UBUNTU_RELEASE="${UBUNTU_RELEASE:-22.04.1}"
+UBUNTU_ARCH="${UBUNTU_ARCH:-arm64}"
+QEMU_ARCH="${QEMU_ARCH:-aarch64}"
+UBUNTU_SHA256="${UBUNTU_SHA256:-b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45}"
 
 rootfs="/tmp/emulator/rootfs"
 
 cmd_prepare() {
-    if ! command -v qemu-aarch64-static >/dev/null 2>&1; then
-        echo "error: missing qemu-aarch64-static binary"
+    if ! command -v qemu-${QEMU_ARCH}-static >/dev/null 2>&1; then
+        echo "error: missing qemu-${QEMU_ARCH}-static binary"
         echo "help: on Ubuntu, install the qemu-user-static package"
         exit 1
     fi
@@ -27,20 +28,20 @@ cmd_prepare() {
     mkdir -p "${rootfs}"
 
     echo "===> downloading and extracting Ubuntu ${UBUNTU_RELEASE} base image"
-    curl -L https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-arm64.tar.gz -o /tmp/emulator-ubuntu-base.tar.gz
+    curl -L https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-${UBUNTU_ARCH}.tar.gz -o /tmp/emulator-ubuntu-base.tar.gz
     echo "${UBUNTU_SHA256}  /tmp/emulator-ubuntu-base.tar.gz" | sha256sum -c
     tar xzf /tmp/emulator-ubuntu-base.tar.gz -C "${rootfs}"
 
     echo "===> configuring networking in the rootfs"
     echo "127.0.0.1 localhost" > "${rootfs}/etc/hosts"
 
-    echo "===> copying qemu-aarch64-static in the rootfs"
-    cp "$(command -v qemu-aarch64-static)" "${rootfs}/usr/bin"
+    echo "===> copying qemu-${QEMU_ARCH}-static in the rootfs"
+    cp "$(command -v qemu-${QEMU_ARCH}-static)" "${rootfs}/usr/bin"
 
     echo "===> building and copying remote-test-server into the rootfs"
     stage="${REMOTE_TEST_SERVER_STAGE-0}"
-    ./x build src/tools/remote-test-server --target aarch64-unknown-linux-gnu --stage "${stage}"
-    cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/aarch64-unknown-linux-gnu/release/remote-test-server" "${rootfs}/usr/bin"
+    ./x build src/tools/remote-test-server --target ${QEMU_ARCH}-unknown-linux-gnu --stage "${stage}"
+    cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/${QEMU_ARCH}-unknown-linux-gnu/release/remote-test-server" "${rootfs}/usr/bin"
 }
 
 cmd_run() {
@@ -72,13 +73,13 @@ cmd_run() {
     # the import if /proc/sys/fs/binfmt_misc is not mounted (like in CI).
     echo "===> loading binfmt configuration into the kernel"
     sudo update-binfmts --import
-    sudo update-binfmts --enable qemu-aarch64
+    sudo update-binfmts --enable qemu-${QEMU_ARCH}
 
     # We pass --sequential because we've seen deadlocks when running UI tests
     # without that flag. Test execution will be slower, but at least it won't
     # lock CI up.
     echo "===> starting remote-test-server"
-    sudo chroot "${rootfs}" /usr/bin/qemu-aarch64-static /usr/bin/remote-test-server -v --bind 127.0.0.1:12345 --sequential
+    sudo chroot "${rootfs}" /usr/bin/qemu-${QEMU_ARCH}-static /usr/bin/remote-test-server -v --bind 127.0.0.1:12345 --sequential
 }
 
 cleanup_mount() {

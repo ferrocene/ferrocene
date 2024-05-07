@@ -274,6 +274,31 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
+  riscv64gc-linux-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: ""
+      FERROCENE_TARGETS: risvc64gc-unknown-linux-gnu
+      UBUNTU_RELEASE: 22.04.1
+      UBUNTU_ARCH: riscv64
+      QEMU_ARCH: riscv64
+      UBUNTU_SHA256: ee214aab6aba4146b655fa5801abcbc9f3d3c967d7982ca8de710f6487b142f5
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+
+    steps:
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: ferrocene/ci/scripts/emulated-risvc64gc-test-runner.sh
+
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
@@ -726,6 +751,25 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
+
+      - build-docker:
+          name: build-docker--ubuntu-20
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
+      - x86_64-linux-llvm:
+          requires:
+            - build-docker--ubuntu-20
+      - x86_64-linux-build:
+          requires:
+            - x86_64-linux-llvm
+      - riscv64gc-linux-generic-test-vm:
+          name: riscv64-linux-test
+          job: test
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -811,6 +855,13 @@ workflows:
       - aarch64-linux-generic-test-vm:
           name: aarch64-linux-test-library
           job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - riscv64gc-linux-generic-test-vm:
+          name: riscv64-linux-test
+          job: test
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

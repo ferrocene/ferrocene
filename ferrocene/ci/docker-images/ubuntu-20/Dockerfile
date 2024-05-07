@@ -75,6 +75,12 @@ RUN <<-EOF
             libc6-dev-amd64-cross
     fi
     
+    # Needed for riscv64gc-unknown-linux-gnu cross compilation
+    apt-install \
+        gcc-riscv64-linux-gnu \
+        g++-riscv64-linux-gnu \
+        binutils-riscv64-linux-gnu \
+    
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     apt-install gcc-arm-none-eabi
 

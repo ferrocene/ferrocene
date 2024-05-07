@@ -142,13 +142,15 @@ if [[ "$#" -ne 1 ]]; then
 fi
 case "$1" in
     prepare)
-        echo "building and caching LLVM with hash ${cache_hash}"
+        echo "building and caching LLVM to ${s3_url}"
         build_llvm_tarball
         aws s3 cp /tmp/llvm-cache.tar.zst "${s3_url}"
+        echo "cached LLVM cache at ${s3_url}"
         ;;
     download)
+        echo "restoring LLVM cache from ${s3_url}"
         aws s3 cp "${s3_url}" - | unzstd --stdout | tar x
-        echo "restored LLVM cache with hash ${cache_hash}"
+        echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)
         echo "${s3_url}"

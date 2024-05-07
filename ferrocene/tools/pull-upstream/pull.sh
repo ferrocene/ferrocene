@@ -240,11 +240,13 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
         git add "${lock}"
         git commit -m "update ${lock} to match ${manifest}"
     fi
-    echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
-    cargo update --manifest-path "${manifest}"
-    if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
-        git add "${lock}"
-        git commit -m "update ${lock} to latest semver-compatible crates"
+    if [ "${upstream_branch}" == "master" ]; then
+        echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
+        cargo update --manifest-path "${manifest}"
+        if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
+            git add "${lock}"
+            git commit -m "update ${lock} to latest semver-compatible crates"
+        fi
     fi
 done
 

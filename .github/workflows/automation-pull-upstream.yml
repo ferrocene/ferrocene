@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         branch:
-          - master
+          - master # be sure to change the name in ferrocene/tools/pull-upstream/pull.sh if this changes
           - beta
           - stable
 

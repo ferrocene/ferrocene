@@ -292,6 +292,6 @@ applicable.
 IEC 61508 Tool Classification
 -----------------------------
 
-Ferrocene provides a development environment capable of compiling,
+Ferrocene provides a development environment capable of compiling
 and linking programs for the target architecture to conform with automotive
 [|iso_ref|] TCL 3/ASIL D level and industrial [|iec_ref|] class T3.

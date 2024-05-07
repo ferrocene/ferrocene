@@ -74,8 +74,8 @@ if [[ "${upstream_commit}" = "FETCH_HEAD" ]]; then
     if [[ "${upstream_commit}" = "" ]]; then
         # When the branch is up to date, the `git log` above rightfully doesn't
         # return any difference between the two refs, resulting in an empty
-        # ${upstream_commit}. To avoid the rest of the script from misbehaving,
-        # in this case we revert the commit back to FETCH_HEAD.
+        # ${upstream_commit}. To prevent the rest of the script from misbehaving,
+        # we revert the commit back to FETCH_HEAD.
         upstream_commit="FETCH_HEAD"
     elif [[ "${upstream_commit}" != "${fetch_head}" ]]; then
         echo "pull-upstream: pulling at most ${MAX_MERGES_PER_PR}, even though more commits are available"
@@ -110,11 +110,11 @@ git checkout "${current_branch}"
 if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     # Merging failed, but the script might be able to resolve all the conflicts
     # on its own. This tries to resolve known conflicts and finish the merge.
-    # If not all conflicts were resolved control is given back to the user.
+    # If not all conflicts were resolved, control is given back to the user.
 
     # Files excluded by the pull that are also present in Ferrocene (for example
     # a different README) will cause merge conflicts. In those cases we always
-    # want to preserve Ferrocene's version, so we can solve ht e conflict
+    # want to preserve Ferrocene's version, so we can resolve the conflict
     # automatically.
     for file in $(excluded_files); do
         echo "pull-upstream: automatically resolving conflict for ${file}..."
@@ -209,8 +209,8 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
     fi
 fi
 
-# If there were no changes made since the last pull (aka when the diff from the
-# previous commit and the pull is empty) remove the empty merge commit and
+# If there were no changes made since the last pull (i.e. when the diff from the
+# previous commit and the pull is empty), remove the empty merge commit and
 # exit with a special code to let the automation know it shouldn't open PRs.
 if git diff --quiet HEAD^..HEAD; then
     echo "pull-upstream: no changes to pull"
@@ -223,7 +223,7 @@ fi
 # versions of the packages we use, but ensuring the lockfile stays consistent.
 #
 # Whenever the lockfile needs an update (we check that by invoking a Cargo
-# command that regerates the lockfile if needed but doesn't have any side
+# command that regenerates the lockfile if needed but doesn't have any side
 # effects) we include that in a separate commit.
 #
 # Note that this is not related to merge conflicts: lockfile merge conflicts

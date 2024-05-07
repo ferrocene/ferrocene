@@ -4,7 +4,7 @@
 Acceptability Statement
 =======================
 
-Ferrocene provides a development environment capable of compiling, and
+Ferrocene provides a development environment capable of compiling and
 linking programs for the target architecture. As per the traceability in
 :doc:`requirements-traceability` and the test results shown in
 :doc:`tests/index`, Ferrocene |ferrocene_version| has been reviewed and is

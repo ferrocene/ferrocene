@@ -1,10 +1,11 @@
-use rustc_data_structures::base_n;
+use rustc_data_structures::base_n::ToBaseN;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::intern::Interned;
 use rustc_hir as hir;
 use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::definitions::{DefPathData, DisambiguatedDefPathData};
+use rustc_middle::bug;
 use rustc_middle::ty::layout::IntegerExt;
 use rustc_middle::ty::print::{Print, PrintError, Printer};
 use rustc_middle::ty::{
@@ -831,7 +832,7 @@ impl<'tcx> Printer<'tcx> for SymbolMangler<'tcx> {
 ///   e.g. `1` becomes `"0_"`, `62` becomes `"Z_"`, etc.
 pub(crate) fn push_integer_62(x: u64, output: &mut String) {
     if let Some(x) = x.checked_sub(1) {
-        base_n::push_str(x as u128, base_n::ALPHANUMERIC_ONLY, output);
+        output.push_str(&x.to_base(62));
     }
     output.push('_');
 }

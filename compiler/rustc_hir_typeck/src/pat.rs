@@ -10,7 +10,6 @@ use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, BindingMode, ByRef, HirId, Mutability, Pat, PatKind};
 use rustc_infer::infer;
 use rustc_infer::infer::type_variable::TypeVariableOrigin;
-use rustc_lint as lint;
 use rustc_middle::mir::interpret::ErrorHandled;
 use rustc_middle::ty::{self, Ty, TypeVisitableExt};
 use rustc_session::lint::builtin::NON_EXHAUSTIVE_OMITTED_PATTERNS;
@@ -684,7 +683,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             {
                 // `mut x` resets the binding mode in edition <= 2021.
                 self.tcx.emit_node_span_lint(
-                    lint::builtin::DEREFERENCING_MUT_BINDING,
+                    rustc_lint::builtin::DEREFERENCING_MUT_BINDING,
                     pat.hir_id,
                     pat.span,
                     errors::DereferencingMutBinding { span: pat.span },
@@ -1228,16 +1227,22 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 );
             }
         } else {
-            // Pattern has wrong number of fields.
-            let e =
-                self.e0023(pat.span, res, qpath, subpats, &variant.fields.raw, expected, had_err);
+            let e = self.emit_err_pat_wrong_number_of_fields(
+                pat.span,
+                res,
+                qpath,
+                subpats,
+                &variant.fields.raw,
+                expected,
+                had_err,
+            );
             on_error(e);
             return Ty::new_error(tcx, e);
         }
         pat_ty
     }
 
-    fn e0023(
+    fn emit_err_pat_wrong_number_of_fields(
         &self,
         pat_span: Span,
         res: Res,

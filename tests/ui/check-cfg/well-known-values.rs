@@ -5,6 +5,7 @@
 // values since the suggestion shows them.
 //
 //@ check-pass
+//@ no-auto-check-cfg
 //@ compile-flags: --check-cfg=cfg()
 //@ compile-flags: -Zcheck-cfg-all-expected
 
@@ -41,6 +42,8 @@
     proc_macro = "_UNEXPECTED_VALUE",
     //~^ WARN unexpected `cfg` condition value
     relocation_model = "_UNEXPECTED_VALUE",
+    //~^ WARN unexpected `cfg` condition value
+    rustfmt = "_UNEXPECTED_VALUE",
     //~^ WARN unexpected `cfg` condition value
     sanitize = "_UNEXPECTED_VALUE",
     //~^ WARN unexpected `cfg` condition value
@@ -113,5 +116,8 @@ fn doc() {}
 
 #[cfg(clippy)]
 fn clippy() {}
+
+#[cfg_attr(rustfmt, rustfmt::skip)]
+fn rustfmt() {}
 
 fn main() {}

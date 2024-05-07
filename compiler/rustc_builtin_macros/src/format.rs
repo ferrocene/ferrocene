@@ -1,3 +1,5 @@
+use crate::errors;
+use crate::util::expr_to_spanned_string;
 use parse::Position::ArgumentNamed;
 use rustc_ast::ptr::P;
 use rustc_ast::tokenstream::TokenStream;
@@ -10,13 +12,12 @@ use rustc_ast::{
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::{Applicability, Diag, MultiSpan, PResult, SingleLabelManySpans};
 use rustc_expand::base::*;
+use rustc_lint_defs::builtin::NAMED_ARGUMENTS_USED_POSITIONALLY;
+use rustc_lint_defs::{BufferedEarlyLint, BuiltinLintDiag, LintId};
 use rustc_parse::parser::Recovered;
 use rustc_parse_format as parse;
 use rustc_span::symbol::{Ident, Symbol};
 use rustc_span::{BytePos, ErrorGuaranteed, InnerSpan, Span};
-
-use rustc_lint_defs::builtin::NAMED_ARGUMENTS_USED_POSITIONALLY;
-use rustc_lint_defs::{BufferedEarlyLint, BuiltinLintDiag, LintId};
 
 // The format_args!() macro is expanded in three steps:
 //  1. First, `parse_args` will parse the `(literal, arg, arg, name=arg, name=arg)` syntax,
@@ -37,8 +38,6 @@ enum PositionUsedAs {
     Width,
 }
 use PositionUsedAs::*;
-
-use crate::errors;
 
 #[derive(Debug)]
 struct MacroInput {
@@ -308,7 +307,7 @@ fn make_format_args(
         return ExpandResult::Ready(Err(guar));
     }
 
-    let to_span = |inner_span: rustc_parse_format::InnerSpan| {
+    let to_span = |inner_span: parse::InnerSpan| {
         is_source_literal.then(|| {
             fmt_span.from_inner(InnerSpan { start: inner_span.start, end: inner_span.end })
         })
@@ -578,7 +577,7 @@ fn make_format_args(
 fn invalid_placeholder_type_error(
     ecx: &ExtCtxt<'_>,
     ty: &str,
-    ty_span: Option<rustc_parse_format::InnerSpan>,
+    ty_span: Option<parse::InnerSpan>,
     fmt_span: Span,
 ) {
     let sp = ty_span.map(|sp| fmt_span.from_inner(InnerSpan::new(sp.start, sp.end)));
@@ -1001,7 +1000,7 @@ fn expand_format_args_impl<'cx>(
     })
 }
 
-pub fn expand_format_args<'cx>(
+pub(crate) fn expand_format_args<'cx>(
     ecx: &'cx mut ExtCtxt<'_>,
     sp: Span,
     tts: TokenStream,
@@ -1009,7 +1008,7 @@ pub fn expand_format_args<'cx>(
     expand_format_args_impl(ecx, sp, tts, false)
 }
 
-pub fn expand_format_args_nl<'cx>(
+pub(crate) fn expand_format_args_nl<'cx>(
     ecx: &'cx mut ExtCtxt<'_>,
     sp: Span,
     tts: TokenStream,

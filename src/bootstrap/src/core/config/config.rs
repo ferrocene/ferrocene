@@ -329,6 +329,7 @@ pub struct Config {
     pub nodejs: Option<PathBuf>,
     pub npm: Option<PathBuf>,
     pub gdb: Option<PathBuf>,
+    pub lldb: Option<PathBuf>,
     pub python: Option<PathBuf>,
     pub reuse: Option<PathBuf>,
     pub cargo_native_static: bool,
@@ -345,6 +346,8 @@ pub struct Config {
     #[cfg(test)]
     pub initial_rustfmt: RefCell<RustfmtState>,
 
+    /// The paths to work with. For example: with `./x check foo bar` we get
+    /// `paths=["foo", "bar"]`.
     pub paths: Vec<PathBuf>,
 
     // Ferrocene-specific configuration
@@ -879,6 +882,7 @@ define_config! {
         docs_minification: Option<bool> = "docs-minification",
         submodules: Option<bool> = "submodules",
         gdb: Option<String> = "gdb",
+        lldb: Option<String> = "lldb",
         nodejs: Option<String> = "nodejs",
         npm: Option<String> = "npm",
         python: Option<String> = "python",
@@ -1471,6 +1475,7 @@ impl Config {
             docs_minification,
             submodules,
             gdb,
+            lldb,
             nodejs,
             npm,
             python,
@@ -1563,6 +1568,7 @@ impl Config {
         config.nodejs = nodejs.map(PathBuf::from);
         config.npm = npm.map(PathBuf::from);
         config.gdb = gdb.map(PathBuf::from);
+        config.lldb = lldb.map(PathBuf::from);
         config.python = python.map(PathBuf::from);
         config.reuse = reuse.map(PathBuf::from);
         config.submodules = submodules;
@@ -2125,7 +2131,8 @@ impl Config {
             | Subcommand::Setup { .. }
             | Subcommand::Sign { .. }
             | Subcommand::Format { .. }
-            | Subcommand::Suggest { .. } => flags.stage.unwrap_or(0),
+            | Subcommand::Suggest { .. }
+            | Subcommand::Vendor { .. } => flags.stage.unwrap_or(0),
         };
 
         // CI should always run stage 2 builds, unless it specifically states otherwise
@@ -2153,7 +2160,8 @@ impl Config {
                 | Subcommand::Setup { .. }
                 | Subcommand::Sign { .. }
                 | Subcommand::Format { .. }
-                | Subcommand::Suggest { .. } => {}
+                | Subcommand::Suggest { .. }
+                | Subcommand::Vendor { .. } => {}
             }
         }
 
@@ -2581,11 +2589,6 @@ impl Config {
                 }
 
                 b
-            }
-            // FIXME: "if-available" is deprecated. Remove this block later (around mid 2024)
-            // to not break builds between the recent-to-old checkouts.
-            Some(StringOrBool::String(s)) if s == "if-available" => {
-                llvm::is_ci_llvm_available(self, asserts)
             }
             Some(StringOrBool::String(s)) if s == "if-unchanged" => if_unchanged(),
             Some(StringOrBool::String(other)) => {

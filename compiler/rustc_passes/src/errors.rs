@@ -1207,22 +1207,6 @@ pub struct NakedFunctionsMustUseNoreturn {
 }
 
 #[derive(Diagnostic)]
-#[diag(passes_attr_only_on_main)]
-pub struct AttrOnlyOnMain {
-    #[primary_span]
-    pub span: Span,
-    pub attr: Symbol,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_attr_only_on_root_main)]
-pub struct AttrOnlyOnRootMain {
-    #[primary_span]
-    pub span: Span,
-    pub attr: Symbol,
-}
-
-#[derive(Diagnostic)]
 #[diag(passes_attr_only_in_functions)]
 pub struct AttrOnlyInFunctions {
     #[primary_span]
@@ -1255,13 +1239,6 @@ pub struct MultipleStartFunctions {
 #[derive(Diagnostic)]
 #[diag(passes_extern_main)]
 pub struct ExternMain {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_unix_sigpipe_values)]
-pub struct UnixSigpipeValues {
     #[primary_span]
     pub span: Span,
 }

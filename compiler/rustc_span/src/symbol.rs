@@ -8,7 +8,7 @@ use rustc_data_structures::stable_hasher::{
     HashStable, StableCompare, StableHasher, ToStableHashKey,
 };
 use rustc_data_structures::sync::Lock;
-use rustc_macros::HashStable_Generic;
+use rustc_macros::{symbols, Decodable, Encodable, HashStable_Generic};
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -754,6 +754,7 @@ symbols! {
         enable,
         encode,
         end,
+        enumerate_method,
         env,
         env_CFG_RELEASE: env!("CFG_RELEASE"),
         eprint_macro,
@@ -1510,6 +1511,7 @@ symbols! {
         require,
         residual,
         result,
+        result_ffi_guarantees,
         resume,
         return_position_impl_trait_in_trait,
         return_type_notation,
@@ -1935,7 +1937,6 @@ symbols! {
         unit,
         universal_impl_trait,
         unix,
-        unix_sigpipe,
         unlikely,
         unmarked_api,
         unnamed_fields,

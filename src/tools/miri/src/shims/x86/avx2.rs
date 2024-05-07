@@ -9,7 +9,6 @@ use super::{
     packuswb, pmulhrsw, psign, shift_simd_by_scalar, shift_simd_by_simd, ShiftOp,
 };
 use crate::*;
-use shims::foreign_items::EmulateForeignItemResult;
 
 impl<'mir, 'tcx: 'mir> EvalContextExt<'mir, 'tcx> for crate::MiriInterpCx<'mir, 'tcx> {}
 pub(super) trait EvalContextExt<'mir, 'tcx: 'mir>:
@@ -21,7 +20,7 @@ pub(super) trait EvalContextExt<'mir, 'tcx: 'mir>:
         abi: Abi,
         args: &[OpTy<'tcx, Provenance>],
         dest: &MPlaceTy<'tcx, Provenance>,
-    ) -> InterpResult<'tcx, EmulateForeignItemResult> {
+    ) -> InterpResult<'tcx, EmulateItemResult> {
         let this = self.eval_context_mut();
         this.expect_target_feature_for_intrinsic(link_name, "avx2")?;
         // Prefix should have already been checked.
@@ -71,6 +70,8 @@ pub(super) trait EvalContextExt<'mir, 'tcx: 'mir>:
                 let (dest, dest_len) = this.mplace_to_simd(dest)?;
 
                 // There are cases like dest: i32x4, offsets: i64x2
+                // If dest has more elements than offset, extra dest elements are filled with zero.
+                // If offsets has more elements than dest, extra offsets are ignored.
                 let actual_len = dest_len.min(offsets_len);
 
                 assert_eq!(dest_len, mask_len);
@@ -437,8 +438,8 @@ pub(super) trait EvalContextExt<'mir, 'tcx: 'mir>:
 
                 shift_simd_by_simd(this, left, right, which, dest)?;
             }
-            _ => return Ok(EmulateForeignItemResult::NotSupported),
+            _ => return Ok(EmulateItemResult::NotSupported),
         }
-        Ok(EmulateForeignItemResult::NeedsJumping)
+        Ok(EmulateItemResult::NeedsJumping)
     }
 }

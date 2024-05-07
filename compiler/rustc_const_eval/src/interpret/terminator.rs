@@ -169,10 +169,8 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
             }
 
             Drop { place, target, unwind, replace: _ } => {
-                let frame = self.frame();
-                let ty = place.ty(&frame.body.local_decls, *self.tcx).ty;
-                let ty = self.instantiate_from_frame_and_normalize_erasing_regions(frame, ty)?;
-                let instance = Instance::resolve_drop_in_place(*self.tcx, ty);
+                let place = self.eval_place(place)?;
+                let instance = Instance::resolve_drop_in_place(*self.tcx, place.layout.ty);
                 if let ty::InstanceDef::DropGlue(_, None) = instance.def {
                     // This is the branch we enter if and only if the dropped type has no drop glue
                     // whatsoever. This can happen as a result of monomorphizing a drop of a
@@ -181,8 +179,7 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
                     self.go_to_block(target);
                     return Ok(());
                 }
-                let place = self.eval_place(place)?;
-                trace!("TerminatorKind::drop: {:?}, type {}", place, ty);
+                trace!("TerminatorKind::drop: {:?}, type {}", place, place.layout.ty);
                 self.drop_in_place(&place, instance, target, unwind)?;
             }
 
@@ -539,14 +536,28 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
             ty::InstanceDef::Intrinsic(def_id) => {
                 assert!(self.tcx.intrinsic(def_id).is_some());
                 // FIXME: Should `InPlace` arguments be reset to uninit?
-                M::call_intrinsic(
+                if let Some(fallback) = M::call_intrinsic(
                     self,
                     instance,
                     &self.copy_fn_args(args),
                     destination,
                     target,
                     unwind,
-                )
+                )? {
+                    assert!(!self.tcx.intrinsic(fallback.def_id()).unwrap().must_be_overridden);
+                    assert!(matches!(fallback.def, ty::InstanceDef::Item(_)));
+                    return self.eval_fn_call(
+                        FnVal::Instance(fallback),
+                        (caller_abi, caller_fn_abi),
+                        args,
+                        with_caller_location,
+                        destination,
+                        target,
+                        unwind,
+                    );
+                } else {
+                    Ok(())
+                }
             }
             ty::InstanceDef::VTableShim(..)
             | ty::InstanceDef::ReifyShim(..)
@@ -938,6 +949,12 @@ impl<'mir, 'tcx: 'mir, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
         // implementation fail -- a problem shared by rustc.
         let place = self.force_allocation(place)?;
 
+        // We behave a bit different from codegen here.
+        // Codegen creates an `InstanceDef::Virtual` with index 0 (the slot of the drop method) and
+        // then dispatches that to the normal call machinery. However, our call machinery currently
+        // only supports calling `VtblEntry::Method`; it would choke on a `MetadataDropInPlace`. So
+        // instead we do the virtual call stuff ourselves. It's easier here than in `eval_fn_call`
+        // since we can just get a place of the underlying type and use `mplace_to_ref`.
         let place = match place.layout.ty.kind() {
             ty::Dynamic(data, _, ty::Dyn) => {
                 // Dropping a trait object. Need to find actual drop fn.

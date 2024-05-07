@@ -17,6 +17,7 @@ use rustc_middle::mir::{self, AssertKind, BasicBlock, SwitchTargets, UnwindTermi
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, ValidityRequirement};
 use rustc_middle::ty::print::{with_no_trimmed_paths, with_no_visible_paths};
 use rustc_middle::ty::{self, Instance, Ty};
+use rustc_middle::{bug, span_bug};
 use rustc_monomorphize::is_call_from_compiler_builtins_to_upstream_monomorphization;
 use rustc_session::config::OptLevel;
 use rustc_span::{source_map::Spanned, sym, Span};
@@ -539,7 +540,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     //                \-------/
                     //
                     let virtual_drop = Instance {
-                        def: ty::InstanceDef::Virtual(drop_fn.def_id(), 0),
+                        def: ty::InstanceDef::Virtual(drop_fn.def_id(), 0), // idx 0: the drop function
                         args: drop_fn.args,
                     };
                     debug!("ty = {:?}", ty);
@@ -580,7 +581,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     //
                     // SO THEN WE CAN USE THE ABOVE CODE.
                     let virtual_drop = Instance {
-                        def: ty::InstanceDef::Virtual(drop_fn.def_id(), 0),
+                        def: ty::InstanceDef::Virtual(drop_fn.def_id(), 0), // idx 0: the drop function
                         args: drop_fn.args,
                     };
                     debug!("ty = {:?}", ty);
@@ -648,8 +649,8 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             return helper.funclet_br(self, bx, target, mergeable_succ);
         }
 
-        // Pass the condition through llvm.expect for branch hinting.
-        let cond = bx.expect(cond, expected);
+        // Because we're branching to a panic block (either a `#[cold]` one
+        // or an inlined abort), there's no need to `expect` it.
 
         // Create the failure block and the conditional branch to it.
         let lltarget = helper.llbb_with_cleanup(self, target);

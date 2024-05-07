@@ -9,7 +9,7 @@ use crate::util::case::Case;
 
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::sync::Lrc;
-use rustc_macros::HashStable_Generic;
+use rustc_macros::{Decodable, Encodable, HashStable_Generic};
 use rustc_span::symbol::{kw, sym};
 #[allow(clippy::useless_attribute)] // FIXME: following use of `hidden_glob_reexports` incorrectly triggers `useless_attribute` lint.
 #[allow(hidden_glob_reexports)]
@@ -167,7 +167,7 @@ impl LitKind {
 
     pub fn descr(self) -> &'static str {
         match self {
-            Bool => panic!("literal token contains `Lit::Bool`"),
+            Bool => "boolean",
             Byte => "byte",
             Char => "char",
             Integer => "integer",

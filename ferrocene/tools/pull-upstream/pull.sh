@@ -242,7 +242,7 @@ for prefix in "${DIRECTORIES_CONTAINING_LOCKFILES[@]}"; do
     fi
     if [ "${upstream_branch}" == "master" ]; then
         echo "pull-upstream: ensure ${lock} has latest semver-compatible crates"
-        cargo update --manifest-path "${manifest}"
+        RUSTC_BOOTSTRAP=1 cargo update --manifest-path "${manifest}"
         if git status --porcelain=v1 | grep "^ M ${lock}$" >/dev/null; then
             git add "${lock}"
             git commit -m "update ${lock} to latest semver-compatible crates"

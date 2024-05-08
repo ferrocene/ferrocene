@@ -37,4 +37,4 @@ their code.
    is verified.
 
 The qualification scope is limited to the set of supported compilation options
-described in the :doc:`Tool Options <safety-manual:options>`.
+described in the :doc:`Tool Options </ferrocene/options>`.

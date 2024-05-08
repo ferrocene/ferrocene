@@ -22,7 +22,7 @@ Ferrocene is qualified exclusively for the following command line options:
 These CLI options must be utilized for each invocation of rustc
 to remain within the qualified scope.
 
-For convenience, :doc:`user-manual:cli` provides further details on CLI options
+For convenience, :doc:`user-manual:ferrocene/cli` provides further details on CLI options
 available to the end user.
 
 CLI options that impact code generation and can create unsafe conditions are

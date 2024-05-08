@@ -166,7 +166,7 @@ Command-Line Interface
 
       .. caution::
 
-         Only the values listed in :doc:`Compilation targets <targets/index>`
+         Only the values listed in :doc:`Compilation targets </targets/index>`
          section for each target can be used in a safety critical context.
 
       Code generation option ``link-arg`` appends a single extra argument to
@@ -191,7 +191,7 @@ Command-Line Interface
 
       .. caution::
 
-         Only the values listed in :doc:`Compilation targets <targets/index>`
+         Only the values listed in :doc:`Compilation targets </targets/index>`
          section for each target can be used in a safety critical context.
 
       Code generation option ``link-args`` appends multiple extra arguments to
@@ -266,7 +266,7 @@ Command-Line Interface
 
       .. caution::
 
-         Only the flavors listed in :doc:`Compilation targets <targets/index>`
+         Only the flavors listed in :doc:`Compilation targets </targets/index>`
          section for each target can be used in a safety critical context.
 
       Code generation option ``linker-flavor`` indicates the flavor of the

@@ -16,7 +16,7 @@ Associated requirement ID: :id:`AVD_CHECK_INSTALL_001`
 Before using the Ferrocene toolchain, the user shall ensure that the
 appropriate tool package has been installed, and installation verified
 according to the verification procedure described in
-:doc:`Installation Procedures <safety-manual:procedures>`.
+:doc:`Installation Procedures </ferrocene/procedures>`.
 
 Cleaning environment variables
 ------------------------------
@@ -28,7 +28,7 @@ Associated requirement ID: :id:`AVD_CHECK_CLEAN_ENV_002`
 Before using the Ferrocene toolchain, the user shall ensure that the
 toolchain is available on the user ``PATH`` variable, and that none of
 the disallowed environment variables described in
-:ref:`Degraded Environment <degraded-environment:Degraded environment>`
+:ref:`Degraded Environment <ferrocene/degraded-environment:Degraded environment>`
 are set.
 
 Build monitoring
@@ -53,7 +53,7 @@ Associated requirement ID: :id:`AVD_CLEAN_004`
 Before building the final version of the safety-related software, the
 user shall ensure that the build environment is clean of former
 compilation artifacts, as described in
-:ref:`Cleaning the build space <usage:Cleaning the build space>`.
+:ref:`Cleaning the build space <ferrocene/usage:Cleaning the build space>`.
 
 Treating warnings as errors
 ---------------------------
@@ -64,7 +64,7 @@ Associated requirement ID: :id:`AVD_WARNING_AS_ERROR_005`
 
 The user shall ensure that, for the final build, the option to treat all
 warnings as errors is activated as described in
-:ref:`usage:Warnings and errors`.
+:ref:`ferrocene/usage:Warnings and errors`.
 
 Source modification while building
 ----------------------------------
@@ -94,7 +94,7 @@ Problem mitigation
 .. id:: CSTR_0080_KP
 
 The user shall implement mitigation strategies for known problems
-documented in the :ref:`known-problems:Known Problems` manual.
+documented in the :ref:`ferrocene/known-problems:Known Problems` manual.
 
 Tracking new problems
 ---------------------
@@ -103,7 +103,7 @@ Tracking new problems
 
 The user shall regularly inspect the new known problems reported via the
 mechanism documented in
-:ref:`Change Tracking <change-tracking:Change Tracking>`. In case of
+:ref:`Change Tracking <qualification-plan:change-tracking:Change Tracking>`. In case of
 a new safety impact, the user shall ensure the appropriate mitigation
 strategies are put in place.
 
@@ -115,7 +115,7 @@ Ensuring memory safety
 The user shall identify and evaluate the risks related to all instances
 of unsafe code as defined in :doc:`specification:unsafety`, and follow
 the guidelines outlined in
-:ref:`Handling Unsafety <unsafety:Handling Unsafety>`.
+:ref:`Handling Unsafety <ferrocene/unsafety:Handling Unsafety>`.
 
 Avoiding data races due to hardware interrupts
 ----------------------------------------------

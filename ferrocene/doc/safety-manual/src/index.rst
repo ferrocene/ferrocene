@@ -10,25 +10,31 @@ It provides the use constraints associated to the Ferrocene qualification
 scope, in accordance to the standards above.
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Safety Manual
+   :maxdepth: 2
+   :caption: General
    :numbered:
 
-   environment
-   user-responsibility
-   customer-interactions
-   procedures
-   usage
-   unsafety
-   options
-   changelog
-   known-problems
-   degraded-environment
-   constraints
+   general/user-responsibility
+   general/customer-interactions
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Ferrocene
+   :numbered:
+
+   ferrocene/environment
+   ferrocene/procedures
+   ferrocene/usage
+   ferrocene/unsafety
+   ferrocene/options
+   ferrocene/changelog
+   ferrocene/known-problems
+   ferrocene/degraded-environment
+   ferrocene/constraints
 
 .. appendices::
+   :maxdepth: 2
    :caption: Appendices:
    :numbered:
-   :maxdepth: 2
 
    terms

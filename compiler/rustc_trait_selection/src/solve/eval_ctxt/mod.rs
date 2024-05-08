@@ -248,8 +248,8 @@ impl<'a, 'tcx> EvalCtxt<'a, 'tcx> {
         };
 
         for &(key, ty) in &input.predefined_opaques_in_body.opaque_types {
-            ecx.insert_hidden_type(key, input.goal.param_env, ty)
-                .expect("failed to prepopulate opaque types");
+            let hidden_ty = ty::OpaqueHiddenType { ty, span: DUMMY_SP };
+            ecx.infcx.inject_new_hidden_type_unchecked(key, hidden_ty);
         }
 
         if !ecx.nested_goals.is_empty() {
@@ -586,6 +586,11 @@ impl<'a, 'tcx> EvalCtxt<'a, 'tcx> {
         }
 
         Ok(unchanged_certainty)
+    }
+
+    /// Record impl args in the proof tree for later access by `InspectCandidate`.
+    pub(crate) fn record_impl_args(&mut self, impl_args: ty::GenericArgsRef<'tcx>) {
+        self.inspect.record_impl_args(self.infcx, self.max_input_universe, impl_args)
     }
 }
 
@@ -1047,12 +1052,12 @@ impl<'tcx> EvalCtxt<'_, 'tcx> {
         ty: Ty<'tcx>,
     ) -> Option<ty::Const<'tcx>> {
         use rustc_middle::mir::interpret::ErrorHandled;
-        match self.infcx.try_const_eval_resolve(param_env, unevaluated, ty, DUMMY_SP) {
-            Ok(ct) => Some(ct),
+        match self.infcx.const_eval_resolve(param_env, unevaluated, DUMMY_SP) {
+            Ok(Some(val)) => Some(ty::Const::new_value(self.tcx(), val, ty)),
+            Ok(None) | Err(ErrorHandled::TooGeneric(_)) => None,
             Err(ErrorHandled::Reported(e, _)) => {
                 Some(ty::Const::new_error(self.tcx(), e.into(), ty))
             }
-            Err(ErrorHandled::TooGeneric(_)) => None,
         }
     }
 

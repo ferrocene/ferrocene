@@ -297,7 +297,8 @@ jobs:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: ferrocene/ci/scripts/emulated-risvc64gc-test-runner.sh
+          # Update this!!! It needs a rename!
+          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
@@ -763,12 +764,20 @@ workflows:
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
+      - x86_64-linux-dist:
+          requires:
+            - x86_64-linux-build
+      - x86_64-linux-dist-targets:
+          requires:
+            - x86_64-linux-build
       - riscv64gc-linux-generic-test-vm:
           name: riscv64-linux-test
           job: test
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - x86_64-linux-dist
+            - x86_64-linux-dist-targets
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:

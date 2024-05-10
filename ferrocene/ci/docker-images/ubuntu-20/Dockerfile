@@ -45,10 +45,6 @@ RUN apt-get update \
         libc6-dev-arm64-cross \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
-        # Needed for riscv64gc-unknown-linux-gnu cross compilation
-        gcc-riscv64-linux-gnu \
-        g++-riscv64-linux-gnu \
-        binutils-riscv64-linux-gnu \
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:
@@ -125,6 +121,17 @@ RUN curl -Lo /tmp/cmake.tar.gz https://github.com/Kitware/CMake/releases/downloa
     && make -j$(nproc) \
     && make install \
     && rm -rf /tmp/cmake /tmp/cmake.tar.gz
+
+# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
+# are too old to be useful.
+RUN mkdir /opt/riscv-toolchain \
+    && curl -Lo /tmp/riscv-toolchain.tar.gz https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz \
+    && echo "ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7 /tmp/riscv-toolchain.tar.gz" | sha256sum -c \
+    && tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1 \
+    && rm /tmp/riscv-toolchain.tar.gz \
+    && /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+ENV PATH "/opt/riscv-toolchain/bin:$PATH"
+
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.

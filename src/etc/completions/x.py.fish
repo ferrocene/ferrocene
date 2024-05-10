@@ -47,11 +47,8 @@ complete -c x.py -n "__fish_use_subcommand" -f -a "install" -d 'Install distribu
 complete -c x.py -n "__fish_use_subcommand" -f -a "run" -d 'Run tools contained in this repository'
 complete -c x.py -n "__fish_use_subcommand" -f -a "setup" -d 'Set up the environment for development'
 complete -c x.py -n "__fish_use_subcommand" -f -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_use_subcommand" -f -a "sign" -d 'Sign Ferrocene qualification documents'
-=======
 complete -c x.py -n "__fish_use_subcommand" -f -a "vendor" -d 'Vendor dependencies'
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x.py -n "__fish_seen_subcommand_from build" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_seen_subcommand_from build" -l build -d 'build target of the stage0 compiler' -r -f
@@ -601,7 +598,6 @@ complete -c x.py -n "__fish_seen_subcommand_from suggest" -l llvm-profile-genera
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_seen_subcommand_from suggest" -s h -l help -d 'Print help (see more with \'--help\')'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l build -d 'build target of the stage0 compiler' -r -f
@@ -636,7 +632,6 @@ complete -c x.py -n "__fish_seen_subcommand_from sign" -l llvm-profile-generate 
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_seen_subcommand_from sign" -s h -l help -d 'Print help (see more with \'--help\')'
-=======
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -l sync -d 'Additional `Cargo.toml` to sync and vendor' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
@@ -673,4 +668,3 @@ complete -c x.py -n "__fish_seen_subcommand_from vendor" -l llvm-profile-generat
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_seen_subcommand_from vendor" -s h -l help -d 'Print help (see more with \'--help\')'
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

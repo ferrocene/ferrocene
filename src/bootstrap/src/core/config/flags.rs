@@ -475,11 +475,9 @@ Arguments:
         #[arg(long)]
         run: bool,
     },
-<<<<<<< HEAD
     /// Sign Ferrocene qualification documents
     #[clap(long_about = "\n")]
     Sign,
-=======
     /// Vendor dependencies
     Vendor {
         /// Additional `Cargo.toml` to sync and vendor
@@ -489,7 +487,6 @@ Arguments:
         #[arg(long)]
         versioned_dirs: bool,
     },
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl Subcommand {
@@ -647,7 +644,6 @@ impl Subcommand {
         }
     }
 
-<<<<<<< HEAD
     pub fn ferrocene_test_one_crate_per_cargo_call(&self) -> bool {
         match *self {
             Subcommand::Test { ferrocene_test_one_crate_per_cargo_call, .. } => {
@@ -656,7 +652,7 @@ impl Subcommand {
             _ => false,
         }
     }
-=======
+
     pub fn vendor_versioned_dirs(&self) -> bool {
         match *self {
             Subcommand::Vendor { versioned_dirs, .. } => versioned_dirs,
@@ -670,7 +666,6 @@ impl Subcommand {
             _ => vec![],
         }
     }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 /// Returns the shell completion for a given shell, if the result differs from the current

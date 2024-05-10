@@ -42,6 +42,10 @@ pub struct Tarballer {
 impl Tarballer {
     /// Generates the actual tarballs
     pub fn run(self) -> Result<()> {
+        if let CompressionProfile::NoOp = self.compression_profile {
+            return Ok(());
+        }
+
         let Self { input, output, work_dir, compression_profile, compression_formats } = self;
         let tarball_name = output + ".tar";
         let encoder = CombinedEncoder::new(

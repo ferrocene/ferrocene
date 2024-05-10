@@ -13,6 +13,7 @@ pub enum CompressionProfile {
     #[default]
     Balanced,
     Best,
+    NoOp,
 }
 
 impl FromStr for CompressionProfile {
@@ -23,6 +24,7 @@ impl FromStr for CompressionProfile {
             "fast" => Self::Fast,
             "balanced" => Self::Balanced,
             "best" => Self::Best,
+            "no-op" => Self::NoOp,
             other => anyhow::bail!("invalid compression profile: {other}"),
         })
     }
@@ -34,6 +36,7 @@ impl fmt::Display for CompressionProfile {
             CompressionProfile::Fast => f.write_str("fast"),
             CompressionProfile::Balanced => f.write_str("balanced"),
             CompressionProfile::Best => f.write_str("best"),
+            CompressionProfile::NoOp => f.write_str("no-op"),
         }
     }
 }
@@ -79,7 +82,10 @@ impl CompressionFormat {
                         // produced by rust-lang/promote-release which hosts recompression logic
                         // and is tuned for optimal compression.
                         xz2::stream::MtStreamBuilder::new().threads(6).preset(9).encoder().unwrap()
-                    }
+                    },
+                    CompressionProfile::NoOp => panic!(
+                        "compression profile 'no-op' should not call `CompressionFormat::encode`."
+                    ),
                 };
 
                 let compressor = XzEncoder::new_stream(std::io::BufWriter::new(file), encoder);

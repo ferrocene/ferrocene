@@ -16,7 +16,6 @@ use rustc_index::{IndexSlice, IndexVec};
 use rustc_infer::infer::canonical::QueryRegionConstraints;
 use rustc_infer::infer::outlives::env::RegionBoundPairs;
 use rustc_infer::infer::region_constraints::RegionConstraintData;
-use rustc_infer::infer::type_variable::TypeVariableOrigin;
 use rustc_infer::infer::{
     BoundRegion, BoundRegionConversionTime, InferCtxt, NllRegionVariableOrigin,
 };
@@ -401,7 +400,7 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
             } else if let Some(static_def_id) = constant.check_static_ptr(tcx) {
                 let unnormalized_ty = tcx.type_of(static_def_id).instantiate_identity();
                 let normalized_ty = self.cx.normalize(unnormalized_ty, locations);
-                let literal_ty = constant.const_.ty().builtin_deref(true).unwrap().ty;
+                let literal_ty = constant.const_.ty().builtin_deref(true).unwrap();
 
                 if let Err(terr) = self.cx.eq_types(
                     literal_ty,
@@ -533,8 +532,11 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
 
         if let PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy) = context {
             let tcx = self.tcx();
-            let trait_ref =
-                ty::TraitRef::from_lang_item(tcx, LangItem::Copy, self.last_span, [place_ty.ty]);
+            let trait_ref = ty::TraitRef::new(
+                tcx,
+                tcx.require_lang_item(LangItem::Copy, Some(self.last_span)),
+                [place_ty.ty],
+            );
 
             // To have a `Copy` operand, the type `T` of the
             // value must be `Copy`. Note that we prove that `T: Copy`,
@@ -638,7 +640,7 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
         match pi {
             ProjectionElem::Deref => {
                 let deref_ty = base_ty.builtin_deref(true);
-                PlaceTy::from_ty(deref_ty.map(|t| t.ty).unwrap_or_else(|| {
+                PlaceTy::from_ty(deref_ty.unwrap_or_else(|| {
                     span_mirbug_and_err!(self, place, "deref of non-pointer {:?}", base_ty)
                 }))
             }
@@ -1274,10 +1276,9 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
 
                 self.check_rvalue(body, rv, location);
                 if !self.unsized_feature_enabled() {
-                    let trait_ref = ty::TraitRef::from_lang_item(
+                    let trait_ref = ty::TraitRef::new(
                         tcx,
-                        LangItem::Sized,
-                        self.last_span,
+                        tcx.require_lang_item(LangItem::Sized, Some(self.last_span)),
                         [place_ty],
                     );
                     self.prove_trait_ref(
@@ -1926,8 +1927,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                         Operand::Move(place) => {
                             // Make sure that repeated elements implement `Copy`.
                             let ty = place.ty(body, tcx).ty;
-                            let trait_ref =
-                                ty::TraitRef::from_lang_item(tcx, LangItem::Copy, span, [ty]);
+                            let trait_ref = ty::TraitRef::new(
+                                tcx,
+                                tcx.require_lang_item(LangItem::Copy, Some(span)),
+                                [ty],
+                            );
 
                             self.prove_trait_ref(
                                 trait_ref,
@@ -1940,7 +1944,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             }
 
             &Rvalue::NullaryOp(NullOp::SizeOf | NullOp::AlignOf, ty) => {
-                let trait_ref = ty::TraitRef::from_lang_item(tcx, LangItem::Sized, span, [ty]);
+                let trait_ref = ty::TraitRef::new(
+                    tcx,
+                    tcx.require_lang_item(LangItem::Sized, Some(span)),
+                    [ty],
+                );
 
                 self.prove_trait_ref(
                     trait_ref,
@@ -1953,7 +1961,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
             Rvalue::ShallowInitBox(operand, ty) => {
                 self.check_operand(operand, location);
 
-                let trait_ref = ty::TraitRef::from_lang_item(tcx, LangItem::Sized, span, [*ty]);
+                let trait_ref = ty::TraitRef::new(
+                    tcx,
+                    tcx.require_lang_item(LangItem::Sized, Some(span)),
+                    [*ty],
+                );
 
                 self.prove_trait_ref(
                     trait_ref,
@@ -2051,10 +2063,9 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
 
                     CastKind::PointerCoercion(PointerCoercion::Unsize) => {
                         let &ty = ty;
-                        let trait_ref = ty::TraitRef::from_lang_item(
+                        let trait_ref = ty::TraitRef::new(
                             tcx,
-                            LangItem::CoerceUnsized,
-                            span,
+                            tcx.require_lang_item(LangItem::CoerceUnsized, Some(span)),
                             [op.ty(body, tcx), ty],
                         );
 
@@ -2356,10 +2367,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     // Types with regions are comparable if they have a common super-type.
                     ty::RawPtr(_, _) | ty::FnPtr(_) => {
                         let ty_right = right.ty(body, tcx);
-                        let common_ty = self.infcx.next_ty_var(TypeVariableOrigin {
-                            param_def_id: None,
-                            span: body.source_info(location).span,
-                        });
+                        let common_ty = self.infcx.next_ty_var(body.source_info(location).span);
                         self.sub_types(
                             ty_left,
                             common_ty,

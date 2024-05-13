@@ -273,8 +273,6 @@ run-make/rlib-format-packed-bundled-libs/Makefile
 run-make/rmeta-preferred/Makefile
 run-make/rustc-macro-dep-files/Makefile
 run-make/rustdoc-io-error/Makefile
-run-make/rustdoc-map-file/Makefile
-run-make/rustdoc-output-path/Makefile
 run-make/rustdoc-scrape-examples-invalid-expr/Makefile
 run-make/rustdoc-scrape-examples-macros/Makefile
 run-make/rustdoc-scrape-examples-multiple/Makefile
@@ -282,7 +280,6 @@ run-make/rustdoc-scrape-examples-ordering/Makefile
 run-make/rustdoc-scrape-examples-remap/Makefile
 run-make/rustdoc-scrape-examples-test/Makefile
 run-make/rustdoc-scrape-examples-whitespace/Makefile
-run-make/rustdoc-shared-flags/Makefile
 run-make/rustdoc-target-spec-json-path/Makefile
 run-make/rustdoc-themes/Makefile
 run-make/rustdoc-verify-output-files/Makefile

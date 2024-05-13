@@ -7,7 +7,7 @@ use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_lint_defs::builtin::UNUSED_ASSOCIATED_TYPE_BOUNDS;
 use rustc_middle::ty::fold::BottomUpFolder;
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeFoldable};
+use rustc_middle::ty::{self, ExistentialPredicateStableCmpExt as _, Ty, TyCtxt, TypeFoldable};
 use rustc_middle::ty::{DynKind, ToPredicate};
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_trait_selection::traits::error_reporting::report_object_safety_error;
@@ -227,7 +227,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     .skip(1) // Remove `Self` for `ExistentialPredicate`.
                     .map(|(index, arg)| {
                         if arg == dummy_self.into() {
-                            let param = &generics.params[index];
+                            let param = &generics.own_params[index];
                             missing_type_params.push(param.name);
                             Ty::new_misc_error(tcx).into()
                         } else if arg.walk().any(|arg| arg == dummy_self.into()) {

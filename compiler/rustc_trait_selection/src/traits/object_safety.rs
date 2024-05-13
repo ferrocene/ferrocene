@@ -18,7 +18,8 @@ use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{
-    self, EarlyBinder, Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitor,
+    self, EarlyBinder, ExistentialPredicateStableCmpExt as _, Ty, TyCtxt, TypeSuperVisitable,
+    TypeVisitable, TypeVisitor,
 };
 use rustc_middle::ty::{GenericArg, GenericArgs};
 use rustc_middle::ty::{ToPredicate, TypeVisitableExt};
@@ -397,7 +398,7 @@ pub fn object_safety_violations_for_assoc_item(
         // Associated types can only be object safe if they have `Self: Sized` bounds.
         ty::AssocKind::Type => {
             if !tcx.features().generic_associated_types_extended
-                && !tcx.generics_of(item.def_id).params.is_empty()
+                && !tcx.generics_of(item.def_id).own_params.is_empty()
                 && !item.is_impl_trait_in_trait()
             {
                 vec![ObjectSafetyViolation::GAT(item.name, item.ident(tcx).span)]

@@ -4,6 +4,8 @@
 
 pub mod tls;
 
+pub use rustc_type_ir::lift::Lift;
+
 use crate::arena::Arena;
 use crate::dep_graph::{DepGraph, DepKindStruct};
 use crate::infer::canonical::{CanonicalParamEnvCache, CanonicalVarInfo, CanonicalVarInfos};
@@ -24,6 +26,7 @@ use crate::traits::solve;
 use crate::traits::solve::{
     ExternalConstraints, ExternalConstraintsData, PredefinedOpaques, PredefinedOpaquesData,
 };
+use crate::ty::predicate::ExistentialPredicateStableCmpExt as _;
 use crate::ty::{
     self, AdtDef, AdtDefData, AdtKind, Binder, Clause, Clauses, Const, ConstData,
     GenericParamDefKind, ImplPolarity, List, ListWithCachedTypeInfo, ParamConst, ParamTy, Pattern,
@@ -97,17 +100,17 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type CanonicalVars = CanonicalVarInfos<'tcx>;
 
     type Ty = Ty<'tcx>;
-    type Pat = Pattern<'tcx>;
     type Tys = &'tcx List<Ty<'tcx>>;
     type AliasTy = ty::AliasTy<'tcx>;
     type ParamTy = ParamTy;
     type BoundTy = ty::BoundTy;
     type PlaceholderTy = ty::PlaceholderType;
-
     type ErrorGuaranteed = ErrorGuaranteed;
+
     type BoundExistentialPredicates = &'tcx List<PolyExistentialPredicate<'tcx>>;
     type PolyFnSig = PolyFnSig<'tcx>;
     type AllocId = crate::mir::interpret::AllocId;
+    type Pat = Pattern<'tcx>;
 
     type Const = ty::Const<'tcx>;
     type AliasConst = ty::UnevaluatedConst<'tcx>;
@@ -119,8 +122,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
 
     type Region = Region<'tcx>;
     type EarlyParamRegion = ty::EarlyParamRegion;
-    type BoundRegion = ty::BoundRegion;
     type LateParamRegion = ty::LateParamRegion;
+    type BoundRegion = ty::BoundRegion;
     type InferRegion = ty::RegionVid;
     type PlaceholderRegion = ty::PlaceholderRegion;
 
@@ -137,6 +140,27 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
 
     fn mk_canonical_var_infos(self, infos: &[ty::CanonicalVarInfo<Self>]) -> Self::CanonicalVars {
         self.mk_canonical_var_infos(infos)
+    }
+
+    type GenericsOf = &'tcx ty::Generics;
+    fn generics_of(self, def_id: DefId) -> &'tcx ty::Generics {
+        self.generics_of(def_id)
+    }
+
+    fn mk_args(self, args: &[Self::GenericArg]) -> Self::GenericArgs {
+        self.mk_args(args)
+    }
+
+    fn check_and_mk_args(
+        self,
+        def_id: DefId,
+        args: impl IntoIterator<Item: Into<ty::GenericArg<'tcx>>>,
+    ) -> ty::GenericArgsRef<'tcx> {
+        self.check_and_mk_args(def_id, args)
+    }
+
+    fn parent(self, def_id: Self::DefId) -> Self::DefId {
+        self.parent(def_id)
     }
 }
 
@@ -917,7 +941,7 @@ impl<'tcx> TyCtxt<'tcx> {
         )
     }
 
-    pub fn lift<T: Lift<'tcx>>(self, value: T) -> Option<T::Lifted> {
+    pub fn lift<T: Lift<TyCtxt<'tcx>>>(self, value: T) -> Option<T::Lifted> {
         value.lift_to_tcx(self)
     }
 
@@ -1524,31 +1548,9 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 }
 
-/// A trait implemented for all `X<'a>` types that can be safely and
-/// efficiently converted to `X<'tcx>` as long as they are part of the
-/// provided `TyCtxt<'tcx>`.
-/// This can be done, for example, for `Ty<'tcx>` or `GenericArgsRef<'tcx>`
-/// by looking them up in their respective interners.
-///
-/// However, this is still not the best implementation as it does
-/// need to compare the components, even for interned values.
-/// It would be more efficient if `TypedArena` provided a way to
-/// determine whether the address is in the allocated range.
-///
-/// `None` is returned if the value or one of the components is not part
-/// of the provided context.
-/// For `Ty`, `None` can be returned if either the type interner doesn't
-/// contain the `TyKind` key or if the address of the interned
-/// pointer differs. The latter case is possible if a primitive type,
-/// e.g., `()` or `u8`, was interned in a different context.
-pub trait Lift<'tcx>: fmt::Debug {
-    type Lifted: fmt::Debug + 'tcx;
-    fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted>;
-}
-
 macro_rules! nop_lift {
     ($set:ident; $ty:ty => $lifted:ty) => {
-        impl<'a, 'tcx> Lift<'tcx> for $ty {
+        impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for $ty {
             type Lifted = $lifted;
             fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
                 // Assert that the set has the right type.
@@ -1583,7 +1585,7 @@ macro_rules! nop_lift {
 
 macro_rules! nop_list_lift {
     ($set:ident; $ty:ty => $lifted:ty) => {
-        impl<'a, 'tcx> Lift<'tcx> for &'a List<$ty> {
+        impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for &'a List<$ty> {
             type Lifted = &'tcx List<$lifted>;
             fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
                 // Assert that the set has the right type.
@@ -1621,7 +1623,7 @@ nop_list_lift! {args; GenericArg<'a> => GenericArg<'tcx>}
 
 macro_rules! nop_slice_lift {
     ($ty:ty => $lifted:ty) => {
-        impl<'a, 'tcx> Lift<'tcx> for &'a [$ty] {
+        impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for &'a [$ty] {
             type Lifted = &'tcx [$lifted];
             fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
                 if self.is_empty() {
@@ -2060,7 +2062,7 @@ impl<'tcx> TyCtxt<'tcx> {
             && let DefKind::AssocTy = self.def_kind(def_id)
             && let DefKind::Impl { of_trait: false } = self.def_kind(self.parent(def_id))
         {
-            if generics.params.len() + 1 != args.len() {
+            if generics.own_params.len() + 1 != args.len() {
                 return false;
             }
 
@@ -2085,7 +2087,7 @@ impl<'tcx> TyCtxt<'tcx> {
             own_args
         };
 
-        for (param, arg) in std::iter::zip(&generics.params, own_args) {
+        for (param, arg) in std::iter::zip(&generics.own_params, own_args) {
             match (&param.kind, arg.unpack()) {
                 (ty::GenericParamDefKind::Type { .. }, ty::GenericArgKind::Type(_))
                 | (ty::GenericParamDefKind::Lifetime, ty::GenericArgKind::Lifetime(_))
@@ -2331,7 +2333,7 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn mk_args_from_iter<I, T>(self, iter: I) -> T::Output
     where
         I: Iterator<Item = T>,
-        T: CollectAndApply<GenericArg<'tcx>, &'tcx List<GenericArg<'tcx>>>,
+        T: CollectAndApply<GenericArg<'tcx>, ty::GenericArgsRef<'tcx>>,
     {
         T::collect_and_apply(iter, |xs| self.mk_args(xs))
     }
@@ -2449,7 +2451,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     span,
                     msg,
                     format!("#![feature({feature})]\n"),
-                    Applicability::MachineApplicable,
+                    Applicability::MaybeIncorrect,
                 );
             } else {
                 diag.help(msg);

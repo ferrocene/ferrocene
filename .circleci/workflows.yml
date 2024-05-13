@@ -288,7 +288,7 @@ jobs:
       UBUNTU_RELEASE: 22.04.1
       UBUNTU_ARCH: riscv64
       QEMU_ARCH: riscv64
-      UBUNTU_SHA256: ee214aab6aba4146b655fa5801abcbc9f3d3c967d7982ca8de710f6487b142f5
+      UBUNTU_SHA256: 88a60f4685fcd33ae41fb27a1f0e1ca6c1fca10a9c5eb4b4e645342adc1a0c52
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
         TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call

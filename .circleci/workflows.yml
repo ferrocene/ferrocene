@@ -272,7 +272,7 @@ jobs:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+          emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
 
   riscv64gc-linux-generic-test-vm:
     executor: linux-vm
@@ -288,6 +288,7 @@ jobs:
       UBUNTU_RELEASE: 22.04.1
       UBUNTU_ARCH: riscv64
       QEMU_ARCH: riscv64
+      REMOTE_TEST_SERVER_TARGET: risvc64gc-unknown-linux-gnu
       UBUNTU_SHA256: 88a60f4685fcd33ae41fb27a1f0e1ca6c1fca10a9c5eb4b4e645342adc1a0c52
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
@@ -298,7 +299,7 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           # Update this!!! It needs a rename!
-          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+          emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20

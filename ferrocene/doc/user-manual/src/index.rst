@@ -14,21 +14,21 @@ Ferrocene User Manual
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: About Ferrocene:
+   :caption: About rustc:
 
-   ferrocene/system-requirements
-   ferrocene/install
+   rustc/system-requirements
+   rustc/install
 
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: Using Ferrocene:
+   :caption: Using rustc:
 
-   ferrocene/file-formats
-   ferrocene/library
-   ferrocene/executable
-   ferrocene/mixed-language
-   ferrocene/system-calls
+   rustc/file-formats
+   rustc/library
+   rustc/executable
+   rustc/mixed-language
+   rustc/system-calls
 
 .. toctree::
    :numbered:
@@ -44,7 +44,7 @@ Ferrocene User Manual
    :maxdepth: 2
    :caption: Reference:
 
-   ferrocene/cli
+   rustc/cli
    self-test/error-codes
 
 Indices and tables

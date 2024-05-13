@@ -27,8 +27,10 @@ cmd_prepare() {
     rm -rf "${rootfs}"
     mkdir -p "${rootfs}"
 
-    echo "===> downloading and extracting Ubuntu ${UBUNTU_RELEASE} base image"
-    curl -L https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-${UBUNTU_ARCH}.tar.gz -o /tmp/emulator-ubuntu-base.tar.gz
+    UBUNTU_IMAGE_URL="https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-${UBUNTU_ARCH}.tar.gz"
+    echo "===> downloading and extracting Ubuntu ${UBUNTU_RELEASE} base image from ${UBUNTU_IMAGE_URL}"
+    curl -L ${UBUNTU_IMAGE_URL} -o /tmp/emulator-ubuntu-base.tar.gz
+    echo "===> checking shasum is ${UBUNTU_SHA256}"
     echo "${UBUNTU_SHA256}  /tmp/emulator-ubuntu-base.tar.gz" | sha256sum -c
     tar xzf /tmp/emulator-ubuntu-base.tar.gz -C "${rootfs}"
 

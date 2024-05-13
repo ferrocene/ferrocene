@@ -7,25 +7,25 @@ Installation Procedures
 Installing Prerequisites
 ------------------------
 
-See :doc:`User Manual - System requirements <user-manual:ferrocene/system-requirements>`
+See :doc:`User Manual - System requirements <user-manual:rustc/system-requirements>`
 for the detailed installation prerequisites for Ferrocene.
 
 Installing Ferrocene
 --------------------
 
-See :doc:`User Manual - Installation <user-manual:ferrocene/install>` for the
+See :doc:`User Manual - Installation <user-manual:rustc/install>` for the
 detailed installation procedure for Ferrocene.
 
 Installation Validation
 -----------------------
 
 Ferrocene provides a checker called ``ferrocene-self-test`` (see
-:ref:`Ferrocene - Validation <user-manual:ferrocene/install:Validation>` for details),
+:ref:`Ferrocene - Validation <user-manual:rustc/install:Validation>` for details),
 for verifying the installation of the toolchain in a non-certification context.
 
 This tool is not qualified. Consequently, in certification context, the
 following manual checks must be performed as per the :doc:`User Exported
-Constraints </ferrocene/constraints>`:
+Constraints </rustc/constraints>`:
 
 - the tarballs were extracted correctly, and permissions were preserved
 - only one version of Ferrocene is installed in the same directory, no

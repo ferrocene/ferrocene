@@ -26,7 +26,7 @@ You must have a C compiler which:
 - Does not load plugins into the linker (e.g. the GCC LTO plugin)
 
 - Supplies to ``ld.lld`` only those linker arguments specified in the
-  :doc:`Safety Manual <safety-manual:ferrocene/options>`
+  :doc:`Safety Manual <safety-manual:rustc/options>`
 
 On Ubuntu 20.04 LTS you can install a suitable C compiler with:
 
@@ -37,14 +37,14 @@ On Ubuntu 20.04 LTS you can install a suitable C compiler with:
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing </ferrocene/install>` this
+The following archives are needed when :doc:`installing </rustc/install>` this
 target as a host platform:
 
 * ``rustc-x86_64-unknown-linux-gnu``
 * ``rust-std-x86_64-unknown-linux-gnu``
 * ``ferrocene-self-test-x86_64-unknown-linux-gnu``
 
-The following archives are needed when :doc:`installing </ferrocene/install>` this
+The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
 * ``rust-std-x86_64-unknown-linux-gnu``

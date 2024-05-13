@@ -12,5 +12,5 @@ demonstrated compliant with automotive [|iso_ref|]
 |ferrocene_TCL|/|ferrocene_ASIL| and industrial [|iec_ref|] |ferrocene_TQL|.
 
 KPs identified through the lifecycle of Ferrocene |ferrocene_version| are
-tracked in the :doc:`safety-manual:ferrocene/known-problems`. This document is made
+tracked in the :doc:`safety-manual:rustc/known-problems`. This document is made
 available to customers for consulting.

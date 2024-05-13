@@ -19,7 +19,7 @@ Obtaining Ferrocene
 -------------------
 
 Detailed instructions on how to download Ferrocene are available in the
-:doc:`User Manual <user-manual:ferrocene/install>`.
+:doc:`User Manual <user-manual:rustc/install>`.
 
 Obtaining Documentation
 -----------------------
@@ -33,7 +33,7 @@ Consulting Known Problems
 -------------------------
 
 Whenever a noticeable defect is discovered in Ferrocene, a new known problem is
-recorded in the :doc:`/ferrocene/known-problems`. Customers are alerted of new known
+recorded in the :doc:`/rustc/known-problems`. Customers are alerted of new known
 problems via email.
 
 .. _customer portal: https://customers.ferrocene.dev

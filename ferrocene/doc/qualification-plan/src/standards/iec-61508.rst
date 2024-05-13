@@ -24,8 +24,8 @@ IEC 61508 requirements
      - The selection of the off-line support tools shall be justified
 
    * - 7.4.4.4
-     - | :doc:`Safety Manual - Usage <safety-manual:ferrocene/usage>`
-       | :doc:`Safety Manual - Degraded environment <safety-manual:ferrocene/degraded-environment>`
+     - | :doc:`Safety Manual - Usage <safety-manual:rustc/usage>`
+       | :doc:`Safety Manual - Degraded environment <safety-manual:rustc/degraded-environment>`
        | :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
      - All off-line support tools in classes T2 and T3 shall have a specification or product documentation which clearly defines the behaviour of the tool and any instructions or constraints on its use.
 
@@ -87,7 +87,7 @@ IEC 61508 requirements
      - have a translator which has been assessed for fitness for purpose including, where appropriate, assessment against the international or national standards;
 
    * - 7.4.4.10.b
-     - :doc:`Safety Manual - Tool Options <safety-manual:ferrocene/options>`
+     - :doc:`Safety Manual - Tool Options <safety-manual:rustc/options>`
      - use only defined language features;
 
    * - 7.4.4.10.c
@@ -95,11 +95,11 @@ IEC 61508 requirements
      - match the characteristics of the application;
 
    * - 7.4.4.10.d
-     - :doc:`Safety Manual - Tool options <safety-manual:ferrocene/options>`
+     - :doc:`Safety Manual - Tool options <safety-manual:rustc/options>`
      - contain features that facilitate the detection of design or programming mistakes;
 
    * - 7.4.4.10.e
-     - :doc:`Safety Manual - Tool options <safety-manual:ferrocene/options>`
+     - :doc:`Safety Manual - Tool options <safety-manual:rustc/options>`
      - support features that match the design method.
 
    * - 7.4.4.11

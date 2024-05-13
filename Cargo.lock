@@ -3451,7 +3451,7 @@ dependencies = [
  "tabled",
  "tar",
  "tempfile",
- "xz",
+ "xz2",
  "zip",
 ]
 
@@ -4542,8 +4542,10 @@ name = "rustc_codegen_ssa"
 version = "0.0.0"
 dependencies = [
  "ar_archive_writer",
+ "arrayvec",
  "bitflags 2.5.0",
  "cc",
+ "either",
  "itertools 0.12.1",
  "jobserver",
  "libc",
@@ -5629,7 +5631,18 @@ dependencies = [
  "rustc_macros",
  "rustc_serialize",
  "rustc_span",
+ "rustc_type_ir_macros",
  "smallvec",
+]
+
+[[package]]
+name = "rustc_type_ir_macros"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.61",
+ "synstructure 0.13.1",
 ]
 
 [[package]]
@@ -7609,15 +7622,6 @@ name = "xmlparser"
 version = "0.13.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "66fee0b777b0f5ac1c69bb06d361268faafa61cd4682ae064a171c16c433e9e4"
-
-[[package]]
-name = "xz"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c887690ff2a2e233e8e49633461521f98ec57fbff9d59a884c9a4f04ec1da34"
-dependencies = [
- "xz2",
-]
 
 [[package]]
 name = "xz2"

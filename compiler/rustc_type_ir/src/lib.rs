@@ -23,23 +23,24 @@ pub mod visit;
 #[cfg(feature = "nightly")]
 pub mod codec;
 pub mod fold;
-pub mod new;
+pub mod inherent;
+pub mod ir_print;
+pub mod lift;
 pub mod ty_info;
 pub mod ty_kind;
 
 #[macro_use]
 mod macros;
-mod binder;
 mod canonical;
 mod const_kind;
 mod debug;
 mod flags;
 mod infcx;
 mod interner;
+mod predicate;
 mod predicate_kind;
 mod region_kind;
 
-pub use binder::*;
 pub use canonical::*;
 #[cfg(feature = "nightly")]
 pub use codec::*;
@@ -48,6 +49,7 @@ pub use debug::{DebugWithInfcx, WithInfcx};
 pub use flags::*;
 pub use infcx::InferCtxtLike;
 pub use interner::*;
+pub use predicate::*;
 pub use predicate_kind::*;
 pub use region_kind::*;
 pub use ty_info::*;

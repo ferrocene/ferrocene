@@ -8,14 +8,16 @@ use crate::traits::*;
 use crate::MemFlags;
 
 use rustc_hir as hir;
-use rustc_middle::mir::{self, AggregateKind, Operand};
+use rustc_middle::mir;
 use rustc_middle::ty::cast::{CastTy, IntTy};
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, adjustment::PointerCoercion, Instance, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_session::config::OptLevel;
 use rustc_span::{Span, DUMMY_SP};
-use rustc_target::abi::{self, FIRST_VARIANT};
+use rustc_target::abi::{self, FieldIdx, FIRST_VARIANT};
+
+use arrayvec::ArrayVec;
 
 impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
     #[instrument(level = "trace", skip(self, bx))]
@@ -72,8 +74,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         if val.llextra.is_some() {
                             bug!("unsized coercion on an unsized rvalue");
                         }
-                        let source = PlaceRef { val, layout: operand.layout };
-                        base::coerce_unsized_into(bx, source, dest);
+                        base::coerce_unsized_into(bx, val.with_type(operand.layout), dest);
                     }
                     OperandValue::ZeroSized => {
                         bug!("unsized coercion on a ZST rvalue");
@@ -182,10 +183,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             OperandValue::Immediate(..) | OperandValue::Pair(..) => {
                 // When we have immediate(s), the alignment of the source is irrelevant,
                 // so we can store them using the destination's alignment.
-                src.val.store(
-                    bx,
-                    PlaceRef::new_sized_aligned(dst.val.llval, src.layout, dst.val.align),
-                );
+                src.val.store(bx, dst.val.with_type(src.layout));
             }
         }
     }
@@ -223,8 +221,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             OperandValue::Ref(source_place_val) => {
                 debug_assert_eq!(source_place_val.llextra, None);
                 debug_assert!(matches!(operand_kind, OperandValueKind::Ref));
-                let fake_place = PlaceRef { val: source_place_val, layout: cast };
-                Some(bx.load_operand(fake_place).val)
+                Some(bx.load_operand(source_place_val.with_type(cast)).val)
             }
             OperandValue::ZeroSized => {
                 let OperandValueKind::ZeroSized = operand_kind else {
@@ -306,17 +303,15 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         self.assume_scalar_range(bx, imm, from_scalar, from_backend_ty);
 
         imm = match (from_scalar.primitive(), to_scalar.primitive()) {
-            (Int(..) | F16 | F32 | F64 | F128, Int(..) | F16 | F32 | F64 | F128) => {
-                bx.bitcast(imm, to_backend_ty)
-            }
+            (Int(..) | Float(_), Int(..) | Float(_)) => bx.bitcast(imm, to_backend_ty),
             (Pointer(..), Pointer(..)) => bx.pointercast(imm, to_backend_ty),
             (Int(..), Pointer(..)) => bx.ptradd(bx.const_null(bx.type_ptr()), imm),
             (Pointer(..), Int(..)) => bx.ptrtoint(imm, to_backend_ty),
-            (F16 | F32 | F64 | F128, Pointer(..)) => {
+            (Float(_), Pointer(..)) => {
                 let int_imm = bx.bitcast(imm, bx.cx().type_isize());
                 bx.ptradd(bx.const_null(bx.type_ptr()), int_imm)
             }
-            (Pointer(..), F16 | F32 | F64 | F128) => {
+            (Pointer(..), Float(_)) => {
                 let int_imm = bx.ptrtoint(imm, bx.cx().type_isize());
                 bx.bitcast(int_imm, to_backend_ty)
             }
@@ -452,23 +447,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     }
                     mir::CastKind::PointerCoercion(PointerCoercion::Unsize) => {
                         assert!(bx.cx().is_backend_scalar_pair(cast));
-                        let (lldata, llextra) = match operand.val {
-                            OperandValue::Pair(lldata, llextra) => {
-                                // unsize from a fat pointer -- this is a
-                                // "trait-object-to-supertrait" coercion.
-                                (lldata, Some(llextra))
-                            }
-                            OperandValue::Immediate(lldata) => {
-                                // "standard" unsize
-                                (lldata, None)
-                            }
-                            OperandValue::Ref(..) => {
-                                bug!("by-ref operand {:?} in `codegen_rvalue_operand`", operand);
-                            }
-                            OperandValue::ZeroSized => {
-                                bug!("zero-sized operand {:?} in `codegen_rvalue_operand`", operand);
-                            }
-                        };
+                        let (lldata, llextra) = operand.val.pointer_parts();
                         let (lldata, llextra) =
                             base::unsize_ptr(bx, lldata, operand.layout.ty, cast.ty, llextra);
                         OperandValue::Pair(lldata, llextra)
@@ -489,12 +468,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         }
                     }
                     mir::CastKind::DynStar => {
-                        let (lldata, llextra) = match operand.val {
-                            OperandValue::Ref(..) => todo!(),
-                            OperandValue::Immediate(v) => (v, None),
-                            OperandValue::Pair(v, l) => (v, Some(l)),
-                            OperandValue::ZeroSized => bug!("ZST -- which is not PointerLike -- in DynStar"),
-                        };
+                        let (lldata, llextra) = operand.val.pointer_parts();
                         let (lldata, llextra) =
                             base::cast_to_dyn_star(bx, lldata, operand.layout, cast.ty, llextra);
                         OperandValue::Pair(lldata, llextra)
@@ -581,7 +555,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 self.codegen_place_to_pointer(bx, place, mk_ref)
             }
 
-            mir::Rvalue::CopyForDeref(place) => self.codegen_operand(bx, &Operand::Copy(place)),
+            mir::Rvalue::CopyForDeref(place) => {
+                self.codegen_operand(bx, &mir::Operand::Copy(place))
+            }
             mir::Rvalue::AddressOf(mutability, place) => {
                 let mk_ptr =
                     move |tcx: TyCtxt<'tcx>, ty: Ty<'tcx>| Ty::new_ptr(tcx, ty, mutability);
@@ -738,11 +714,41 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                     _ => bug!("RawPtr operands {data:?} {meta:?}"),
                 }
             }
-            mir::Rvalue::Repeat(..) | mir::Rvalue::Aggregate(..) => {
-                // According to `rvalue_creates_operand`, only ZST
-                // aggregate rvalues are allowed to be operands.
+            mir::Rvalue::Repeat(..) => bug!("{rvalue:?} in codegen_rvalue_operand"),
+            mir::Rvalue::Aggregate(_, ref fields) => {
                 let ty = rvalue.ty(self.mir, self.cx.tcx());
-                OperandRef::zero_sized(self.cx.layout_of(self.monomorphize(ty)))
+                let ty = self.monomorphize(ty);
+                let layout = self.cx.layout_of(ty);
+
+                // `rvalue_creates_operand` has arranged that we only get here if
+                // we can build the aggregate immediate from the field immediates.
+                let mut inputs = ArrayVec::<Bx::Value, 2>::new();
+                let mut input_scalars = ArrayVec::<abi::Scalar, 2>::new();
+                for field_idx in layout.fields.index_by_increasing_offset() {
+                    let field_idx = FieldIdx::from_usize(field_idx);
+                    let op = self.codegen_operand(bx, &fields[field_idx]);
+                    let values = op.val.immediates_or_place().left_or_else(|p| {
+                        bug!("Field {field_idx:?} is {p:?} making {layout:?}");
+                    });
+                    inputs.extend(values);
+                    let scalars = self.value_kind(op.layout).scalars().unwrap();
+                    input_scalars.extend(scalars);
+                }
+
+                let output_scalars = self.value_kind(layout).scalars().unwrap();
+                itertools::izip!(&mut inputs, input_scalars, output_scalars).for_each(
+                    |(v, in_s, out_s)| {
+                        if in_s != out_s {
+                            // We have to be really careful about bool here, because
+                            // `(bool,)` stays i1 but `Cell<bool>` becomes i8.
+                            *v = bx.from_immediate(*v);
+                            *v = bx.to_immediate_scalar(*v, out_s);
+                        }
+                    },
+                );
+
+                let val = OperandValue::from_immediates(inputs);
+                OperandRef { val, layout }
             }
             mir::Rvalue::ShallowInitBox(ref operand, content_ty) => {
                 let operand = self.codegen_operand(bx, operand);
@@ -780,16 +786,18 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         mk_ptr_ty: impl FnOnce(TyCtxt<'tcx>, Ty<'tcx>) -> Ty<'tcx>,
     ) -> OperandRef<'tcx, Bx::Value> {
         let cg_place = self.codegen_place(bx, place.as_ref());
+        let val = cg_place.val.address();
 
         let ty = cg_place.layout.ty;
-
-        // Note: places are indirect, so storing the `llval` into the
-        // destination effectively creates a reference.
-        let val = if !bx.cx().type_has_metadata(ty) {
-            OperandValue::Immediate(cg_place.val.llval)
+        debug_assert!(
+            if bx.cx().type_has_metadata(ty) {
+                matches!(val, OperandValue::Pair(..))
         } else {
-            OperandValue::Pair(cg_place.val.llval, cg_place.val.llextra.unwrap())
-        };
+                matches!(val, OperandValue::Immediate(..))
+            },
+            "Address of place was unexpectedly {val:?} for pointee type {ty:?}",
+        );
+
         OperandRef { val, layout: self.cx.layout_of(mk_ptr_ty(self.cx.tcx(), ty)) }
     }
 
@@ -870,8 +878,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             mir::BinOp::Offset => {
                 let pointee_type = input_ty
                     .builtin_deref(true)
-                    .unwrap_or_else(|| bug!("deref of non-pointer {:?}", input_ty))
-                    .ty;
+                    .unwrap_or_else(|| bug!("deref of non-pointer {:?}", input_ty));
                 let pointee_layout = bx.cx().layout_of(pointee_type);
                 if pointee_layout.is_zst() {
                     // `Offset` works in terms of the size of pointee,
@@ -1050,14 +1057,29 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
             mir::Rvalue::ThreadLocalRef(_) |
             mir::Rvalue::Use(..) => // (*)
                 true,
-            // This always produces a `ty::RawPtr`, so will be Immediate or Pair
-            mir::Rvalue::Aggregate(box AggregateKind::RawPtr(..), ..) => true,
-            mir::Rvalue::Repeat(..) |
-            mir::Rvalue::Aggregate(..) => {
+            // Arrays are always aggregates, so it's not worth checking anything here.
+            // (If it's really `[(); N]` or `[T; 0]` and we use the place path, fine.)
+            mir::Rvalue::Repeat(..) => false,
+            mir::Rvalue::Aggregate(ref kind, _) => {
+                let allowed_kind = match **kind {
+                    // This always produces a `ty::RawPtr`, so will be Immediate or Pair
+                    mir::AggregateKind::RawPtr(..) => true,
+                    mir::AggregateKind::Array(..) => false,
+                    mir::AggregateKind::Tuple => true,
+                    mir::AggregateKind::Adt(def_id, ..) => {
+                        let adt_def = self.cx.tcx().adt_def(def_id);
+                        adt_def.is_struct() && !adt_def.repr().simd()
+                    }
+                    mir::AggregateKind::Closure(..) => true,
+                    // FIXME: Can we do this for simple coroutines too?
+                    mir::AggregateKind::Coroutine(..) | mir::AggregateKind::CoroutineClosure(..) => false,
+                };
+                allowed_kind && {
                 let ty = rvalue.ty(self.mir, self.cx.tcx());
                 let ty = self.monomorphize(ty);
-                // For ZST this can be `OperandValueKind::ZeroSized`.
-                self.cx.spanned_layout_of(ty, span).is_zst()
+                    let layout = self.cx.spanned_layout_of(ty, span);
+                    !self.cx.is_backend_ref(layout)
+                }
             }
         }
 
@@ -1098,4 +1120,15 @@ enum OperandValueKind {
     Immediate(abi::Scalar),
     Pair(abi::Scalar, abi::Scalar),
     ZeroSized,
+}
+
+impl OperandValueKind {
+    fn scalars(self) -> Option<ArrayVec<abi::Scalar, 2>> {
+        Some(match self {
+            OperandValueKind::ZeroSized => ArrayVec::new(),
+            OperandValueKind::Immediate(a) => ArrayVec::from_iter([a]),
+            OperandValueKind::Pair(a, b) => [a, b].into(),
+            OperandValueKind::Ref => return None,
+        })
+    }
 }

@@ -55,12 +55,6 @@ impl fmt::Debug for ty::UpvarId {
     }
 }
 
-impl<'tcx> fmt::Debug for ty::ExistentialTraitRef<'tcx> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        with_no_trimmed_paths!(fmt::Display::fmt(self, f))
-    }
-}
-
 impl<'tcx> fmt::Debug for ty::adjustment::Adjustment<'tcx> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?} -> {}", self.kind, self.target)
@@ -132,12 +126,6 @@ impl<'tcx> DebugWithInfcx<TyCtxt<'tcx>> for ty::FnSig<'tcx> {
     }
 }
 
-impl<'tcx> fmt::Debug for ty::TraitRef<'tcx> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        with_no_trimmed_paths!(fmt::Display::fmt(self, f))
-    }
-}
-
 impl<'tcx> ty::DebugWithInfcx<TyCtxt<'tcx>> for Ty<'tcx> {
     fn fmt<Infcx: InferCtxtLike<Interner = TyCtxt<'tcx>>>(
         this: WithInfcx<'_, Infcx, &Self>,
@@ -161,25 +149,6 @@ impl fmt::Debug for ty::ParamTy {
 impl fmt::Debug for ty::ParamConst {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}/#{}", self.name, self.index)
-    }
-}
-
-impl<'tcx> fmt::Debug for ty::TraitPredicate<'tcx> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // FIXME(effects) printing?
-        write!(f, "TraitPredicate({:?}, polarity:{:?})", self.trait_ref, self.polarity)
-    }
-}
-
-impl<'tcx> fmt::Debug for ty::ProjectionPredicate<'tcx> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "ProjectionPredicate({:?}, {:?})", self.projection_ty, self.term)
-    }
-}
-
-impl<'tcx> fmt::Debug for ty::NormalizesTo<'tcx> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "NormalizesTo({:?}, {:?})", self.alias, self.term)
     }
 }
 
@@ -478,7 +447,7 @@ TrivialTypeTraversalAndLiftImpls! {
 ///////////////////////////////////////////////////////////////////////////
 // Lift implementations
 
-impl<'tcx, T: Lift<'tcx>> Lift<'tcx> for Option<T> {
+impl<'tcx, T: Lift<TyCtxt<'tcx>>> Lift<TyCtxt<'tcx>> for Option<T> {
     type Lifted = Option<T::Lifted>;
     fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
         Some(match self {
@@ -488,7 +457,7 @@ impl<'tcx, T: Lift<'tcx>> Lift<'tcx> for Option<T> {
     }
 }
 
-impl<'a, 'tcx> Lift<'tcx> for Term<'a> {
+impl<'a, 'tcx> Lift<TyCtxt<'tcx>> for Term<'a> {
     type Lifted = ty::Term<'tcx>;
     fn lift_to_tcx(self, tcx: TyCtxt<'tcx>) -> Option<Self::Lifted> {
         Some(

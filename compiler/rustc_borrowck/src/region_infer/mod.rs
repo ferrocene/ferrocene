@@ -1326,14 +1326,20 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         })
     }
 
-    // Evaluate whether `sup_region == sub_region`.
-    fn eval_equal(&self, r1: RegionVid, r2: RegionVid) -> bool {
+    /// Evaluate whether `sup_region == sub_region`.
+    ///
+    /// Panics if called before `solve()` executes,
+    // This is `pub` because it's used by unstable external borrowck data users, see `consumers.rs`.
+    pub fn eval_equal(&self, r1: RegionVid, r2: RegionVid) -> bool {
         self.eval_outlives(r1, r2) && self.eval_outlives(r2, r1)
     }
 
-    // Evaluate whether `sup_region: sub_region`.
+    /// Evaluate whether `sup_region: sub_region`.
+    ///
+    /// Panics if called before `solve()` executes,
+    // This is `pub` because it's used by unstable external borrowck data users, see `consumers.rs`.
     #[instrument(skip(self), level = "debug", ret)]
-    fn eval_outlives(&self, sup_region: RegionVid, sub_region: RegionVid) -> bool {
+    pub fn eval_outlives(&self, sup_region: RegionVid, sub_region: RegionVid) -> bool {
         debug!(
             "sup_region's value = {:?} universal={:?}",
             self.region_value_str(sup_region),
@@ -2053,15 +2059,12 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                     // We currently do not store the `DefId` in the `ConstraintCategory`
                     // for performances reasons. The error reporting code used by NLL only
                     // uses the span, so this doesn't cause any problems at the moment.
-                    Some(ObligationCauseCode::BindingObligation(
-                        CRATE_DEF_ID.to_def_id(),
-                        predicate_span,
-                    ))
+                    Some(ObligationCauseCode::WhereClause(CRATE_DEF_ID.to_def_id(), predicate_span))
                 } else {
                     None
                 }
             })
-            .unwrap_or_else(|| ObligationCauseCode::MiscObligation);
+            .unwrap_or_else(|| ObligationCauseCode::Misc);
 
         // Classify each of the constraints along the path.
         let mut categorized_path: Vec<BlameConstraint<'tcx>> = path
@@ -2246,7 +2249,10 @@ impl<'tcx> RegionInferenceContext<'tcx> {
     }
 
     /// Access to the SCC constraint graph.
-    pub(crate) fn constraint_sccs(&self) -> &Sccs<RegionVid, ConstraintSccIndex> {
+    /// This can be used to quickly under-approximate the regions which are equal to each other
+    /// and their relative orderings.
+    // This is `pub` because it's used by unstable external borrowck data users, see `consumers.rs`.
+    pub fn constraint_sccs(&self) -> &Sccs<RegionVid, ConstraintSccIndex> {
         self.constraint_sccs.as_ref()
     }
 

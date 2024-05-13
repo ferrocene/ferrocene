@@ -108,9 +108,12 @@ EOF
 # This requires the binfmt-support package, which is normally a dependency of
 # qemu-user-static.
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY --from=noble /usr/bin/qemu-riscv64-static /usr/bin/qemu-riscv64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-# This was removed in 24.04 and is a copy of the 23.04 file.
+COPY --from=noble /usr/libexec/qemu-binfmt/riscv64-binfmt-P /usr/libexec/qemu-binfmt/riscv64-binfmt-P
+# This was removed in 24.04 and is a copy of the 23.04 file contained in `qemu-user-binfmt`.
 COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-riscv64 /usr/share/binfmts/qemu-riscv64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.12.x has been chosen as it's the same minor

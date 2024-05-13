@@ -9,6 +9,7 @@ UBUNTU_RELEASE="${UBUNTU_RELEASE:-22.04.1}"
 UBUNTU_ARCH="${UBUNTU_ARCH:-arm64}"
 QEMU_ARCH="${QEMU_ARCH:-aarch64}"
 UBUNTU_SHA256="${UBUNTU_SHA256:-b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45}"
+REMOTE_TEST_SERVER_TARGET="${REMOTE_TEST_SERVER_TARGET:-aarch64-unknown-linux-gnu}"
 
 rootfs="/tmp/emulator/rootfs"
 
@@ -30,6 +31,7 @@ cmd_prepare() {
     UBUNTU_IMAGE_URL="https://cdimage.ubuntu.com/ubuntu-base/releases/${UBUNTU_RELEASE}/release/ubuntu-base-${UBUNTU_RELEASE}-base-${UBUNTU_ARCH}.tar.gz"
     echo "===> downloading and extracting Ubuntu ${UBUNTU_RELEASE} base image from ${UBUNTU_IMAGE_URL}"
     curl -L ${UBUNTU_IMAGE_URL} -o /tmp/emulator-ubuntu-base.tar.gz
+    
     echo "===> checking shasum is ${UBUNTU_SHA256}"
     echo "${UBUNTU_SHA256}  /tmp/emulator-ubuntu-base.tar.gz" | sha256sum -c
     tar xzf /tmp/emulator-ubuntu-base.tar.gz -C "${rootfs}"
@@ -42,8 +44,8 @@ cmd_prepare() {
 
     echo "===> building and copying remote-test-server into the rootfs"
     stage="${REMOTE_TEST_SERVER_STAGE-0}"
-    ./x build src/tools/remote-test-server --target ${QEMU_ARCH}-unknown-linux-gnu --stage "${stage}"
-    cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/${QEMU_ARCH}-unknown-linux-gnu/release/remote-test-server" "${rootfs}/usr/bin"
+    ./x build src/tools/remote-test-server --target ${REMOTE_TEST_SERVER_TARGET} --stage "${stage}"
+    cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/${REMOTE_TEST_SERVER_TARGET}/release/remote-test-server" "${rootfs}/usr/bin"
 }
 
 cmd_run() {

@@ -132,7 +132,6 @@ RUN mkdir /opt/riscv-toolchain \
     && /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
 ENV PATH "/opt/riscv-toolchain/bin:$PATH"
 
-
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY sudoers /etc/sudoers
@@ -147,6 +146,8 @@ ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
+ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
+ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

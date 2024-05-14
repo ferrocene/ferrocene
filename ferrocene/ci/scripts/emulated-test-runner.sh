@@ -42,7 +42,7 @@ cmd_prepare() {
     echo "===> copying qemu-${QEMU_ARCH}-static in the rootfs"
     cp "$(command -v qemu-${QEMU_ARCH}-static)" "${rootfs}/usr/bin"
 
-    echo "===> building and copying remote-test-server into the rootfs"
+    echo "===> building and copying remote-test-server (${REMOTE_TEST_SERVER_TARGET}) into the rootfs"
     stage="${REMOTE_TEST_SERVER_STAGE-0}"
     ./x build src/tools/remote-test-server --target ${REMOTE_TEST_SERVER_TARGET} --stage "${stage}"
     cp "build/x86_64-unknown-linux-gnu/stage${stage}-tools/${REMOTE_TEST_SERVER_TARGET}/release/remote-test-server" "${rootfs}/usr/bin"

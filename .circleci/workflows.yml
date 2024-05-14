@@ -288,7 +288,7 @@ jobs:
       UBUNTU_RELEASE: 22.04.1
       UBUNTU_ARCH: riscv64
       QEMU_ARCH: riscv64
-      REMOTE_TEST_SERVER_TARGET: risvc64gc-unknown-linux-gnu
+      REMOTE_TEST_SERVER_TARGET: riscv64gc-unknown-linux-gnu
       UBUNTU_SHA256: 88a60f4685fcd33ae41fb27a1f0e1ca6c1fca10a9c5eb4b4e645342adc1a0c52
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |

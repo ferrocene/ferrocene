@@ -19,6 +19,7 @@ use rustc_middle::ty::{
     self, GenericArgs, Ty, TypeFoldable, TypeFolder, TypeSuperFoldable, TypeVisitableExt,
 };
 use rustc_middle::ty::{GenericParamDefKind, TyCtxt};
+use rustc_middle::{bug, span_bug};
 use rustc_span::Span;
 use rustc_trait_selection::regions::InferCtxtRegionExt;
 use rustc_trait_selection::traits::error_reporting::TypeErrCtxtExt;
@@ -2205,7 +2206,7 @@ fn param_env_with_gat_bounds<'tcx>(
             _ => predicates.push(
                 ty::Binder::bind_with_vars(
                     ty::ProjectionPredicate {
-                        projection_ty: ty::AliasTy::new(tcx, trait_ty.def_id, rebased_args),
+                        projection_term: ty::AliasTerm::new(tcx, trait_ty.def_id, rebased_args),
                         term: normalize_impl_ty.into(),
                     },
                     bound_vars,

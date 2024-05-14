@@ -26,15 +26,15 @@ IEC 61508 requirements
    * - 7.4.4.4
      - | :doc:`Safety Manual - Usage <safety-manual:rustc/usage>`
        | :doc:`Safety Manual - Degraded environment <safety-manual:rustc/degraded-environment>`
-       | :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+       | :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - All off-line support tools in classes T2 and T3 shall have a specification or product documentation which clearly defines the behaviour of the tool and any instructions or constraints on its use.
 
    * - 7.4.4.5
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - An assessment shall be carried out for offline support tools in classes T2 and T3 to determine the level of reliance placed on the tools, and the potential failure mechanisms of the tools that may affect the executable software. Where such failure mechanisms are identified, appropriate mitigation measures shall be taken.
 
    * - 7.4.4.6
-     - | :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - | :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
        | :doc:`Qualification Report - Test results <qualification-report:tests/index>`
      - For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.
 
@@ -51,11 +51,11 @@ IEC 61508 requirements
      - the version of the tool product manual being used;
 
    * - 7.4.4.7.c
-     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - the tool functions being validated;
 
    * - 7.4.4.7.d
-     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:rustc/method>`
      - tools and equipment used;
 
    * - 7.4.4.7.e
@@ -83,7 +83,7 @@ IEC 61508 requirements
      - To the extent required by the safety integrity level, the software or design representation (including a programming language) selected shall:
 
    * - 7.4.4.10.a
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - have a translator which has been assessed for fitness for purpose including, where appropriate, assessment against the international or national standards;
 
    * - 7.4.4.10.b
@@ -91,7 +91,7 @@ IEC 61508 requirements
      - use only defined language features;
 
    * - 7.4.4.10.c
-     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:rustc/method>`
      - match the characteristics of the application;
 
    * - 7.4.4.10.d

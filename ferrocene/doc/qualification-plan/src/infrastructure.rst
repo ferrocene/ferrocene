@@ -126,7 +126,7 @@ Test Suites
 
 The Ferrocene CI infrastructure relies on the test suites outlined in
 :external+evaluation-report:doc:`Qualification Method of the Evaluation Report
-<method>` to validate a PR. These test suites verify that the Ferrocene
+<rustc/method>` to validate a PR. These test suites verify that the Ferrocene
 toolchain behaves as intended, and that documentation is properly built and
 updated.
 

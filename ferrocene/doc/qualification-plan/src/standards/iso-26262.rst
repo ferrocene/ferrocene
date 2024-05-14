@@ -36,7 +36,7 @@ ISO 26262 requirements
      - the configuration of the software tool;
 
    * - 11.4.4.1.c
-     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - the use cases of the software tool;
 
    * - 11.4.4.1.d
@@ -48,7 +48,7 @@ ISO 26262 requirements
      - the maximum ASIL of all the safety requirements, allocated to the item or the element that can directly be violated, if the software tool is malfunctioning and producing corresponding erroneous output; and
 
    * - 11.4.4.1.f
-     - :doc:`Evaluation Report - Qualification Method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification Method <evaluation-report:rustc/method>`
      - the methods to qualify the software tool, if required, based on the determined level of confidence and ASIL.
 
    * - 11.4.4.2
@@ -84,15 +84,15 @@ ISO 26262 requirements
      - The description of the usage of a software tool shall contain the following information:
 
    * - 11.4.5.1.a
-     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - the intended purpose;
 
    * - 11.4.5.1.b
-     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - the inputs and expected outputs; and
 
    * - 11.4.5.1.c
-     - :doc:`Evaluation Report - Use cases <evaluation-report:use-cases>`
+     - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
      - the usage procedure, environmental and functional constraints, if applicable.
 
    * - 11.4.5.2
@@ -104,11 +104,11 @@ ISO 26262 requirements
      - the possibility that a malfunction of a particular software tool can introduce or fail to detect errors in a safety-related item or element being developed. This is expressed by the classes of Tool Impact (TI):
 
    * - 11.4.5.2.a.1
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - TI1 shall be selected when there is an argument that there is no such possibility;
 
    * - 11.4.5.2.a.2
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - TI2 shall be selected in all other cases;
 
    * - 11.4.5.2.b
@@ -116,27 +116,27 @@ ISO 26262 requirements
      - the confidence in measures that prevent the software tool from malfunctioning and producing corresponding erroneous output, or in measures that detect that the software tool has malfunctioned and has produced corresponding erroneous output. This is expressed by the classes of Tool error Detection (TD):
 
    * - 11.4.5.2.b.1
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - TD1 shall be selected if there is a high degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected
 
    * - 11.4.5.2.b.2
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - TD2 shall be selected if there is a medium degree of confidence that a malfunction and its corresponding erroneous output will be prevented or detected;
 
    * - 11.4.5.2.b.3
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - TD3 shall be selected in all other cases.
 
    * - 11.4.5.3
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - If the correct selection of TI or TD is unclear or doubtful, TI and TD should be estimated conservatively.
 
    * - 11.4.5.4
-     - :doc:`Evaluation Report - Tool analysis <evaluation-report:tool-analysis>`
+     - :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
      - Based on the values determined for the classes of TI and TD (in accordance with 11.4.5.2 or 11.4.5.3), the required software Tool Confidence Level shall be determined according to Table 3.
 
    * - 11.4.6.1
-     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:rustc/method>`
      - For the qualification of software tools classified at TCL3, the methods listed in Table 4 shall be applied. For the qualification of software tools classified at TCL2, the methods listed in Table 5 shall be applied. A software tool classified at TCL1 needs no qualification methods.
 
    * - 11.4.6.2
@@ -164,7 +164,7 @@ ISO 26262 requirements
      - the person or organization who carried out the qualification;
 
    * - 11.4.6.2.f
-     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:rustc/method>`
      - the methods applied for its qualification in accordance with 11.4.6.1;
 
    * - 11.4.6.2.g
@@ -180,7 +180,7 @@ ISO 26262 requirements
      - Increased confidence from use
 
    * - 11.4.8.1
-     - :doc:`Evaluation Report - Qualification method <evaluation-report:method>`
+     - :doc:`Evaluation Report - Qualification method <evaluation-report:rustc/method>`
      - If the method "Evaluation of the tool development process" in accordance with Table 4 or Table 5 is applied for the qualification of a software tool, the qualification shall comply with the requirements of this sub-clause.
 
    * - 11.4.8.2

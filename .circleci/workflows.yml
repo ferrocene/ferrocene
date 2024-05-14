@@ -297,7 +297,7 @@ jobs:
     steps:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
-          restore-from-job: x86_64-linux-dist-targets
+          restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
 
   x86_64-linux-traceability-matrix:

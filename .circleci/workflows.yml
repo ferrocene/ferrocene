@@ -297,8 +297,7 @@ jobs:
     steps:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
-          restore-from-job: x86_64-linux-build
-          # Update this!!! It needs a rename!
+          restore-from-job: x86_64-linux-dist-targets
           emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
 
   x86_64-linux-traceability-matrix:
@@ -1101,7 +1100,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['PATH', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \

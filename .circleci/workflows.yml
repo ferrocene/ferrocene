@@ -284,7 +284,7 @@ jobs:
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: ""
-      FERROCENE_TARGETS: risvc64gc-unknown-linux-gnu
+      FERROCENE_TARGETS: riscv64gc-unknown-linux-gnu
       UBUNTU_RELEASE: 22.04.1
       UBUNTU_ARCH: riscv64
       QEMU_ARCH: riscv64

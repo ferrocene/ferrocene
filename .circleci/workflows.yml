@@ -797,6 +797,8 @@ workflows:
             - x86_64-linux-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
+            - riscv64-linux-test-library
+            - riscv64-linux-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -847,14 +849,14 @@ workflows:
             - x86_64-linux-build
 
       - riscv64gc-linux-generic-test-vm:
-          name: riscv64-linux-test-library
-          job: test:library
+          name: riscv64-linux-compiletest
+          job: test:compiletest
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
       - riscv64gc-linux-generic-test-vm:
-          name: riscv64-linux-test-compiletest
-          job: test:compiletest
+          name: riscv64-linux-test-library
+          job: test:library
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

@@ -264,6 +264,11 @@ jobs:
     environment:
       FERROCENE_HOST: ""
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      UBUNTU_RELEASE: 22.04.1
+      UBUNTU_ARCH: arm64
+      QEMU_ARCH: aarch64
+      REMOTE_TEST_SERVER_TARGET: aarch64-unknown-linux-gnu
+      UBUNTU_SHA256: b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
         TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
@@ -752,33 +757,6 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
-
-      - build-docker:
-          name: build-docker--ubuntu-20
-          image: ubuntu-20
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
-      - x86_64-linux-llvm:
-          requires:
-            - build-docker--ubuntu-20
-      - x86_64-linux-build:
-          requires:
-            - x86_64-linux-llvm
-      - x86_64-linux-dist:
-          requires:
-            - x86_64-linux-build
-      - x86_64-linux-dist-targets:
-          requires:
-            - x86_64-linux-build
-      - riscv64gc-linux-generic-test-vm:
-          name: riscv64-linux-test
-          job: test
-          resource-class: large # 4-core
-          requires:
-            - x86_64-linux-build
-            - x86_64-linux-dist
-            - x86_64-linux-dist-targets
-
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -869,8 +847,14 @@ workflows:
             - x86_64-linux-build
 
       - riscv64gc-linux-generic-test-vm:
-          name: riscv64-linux-test
-          job: test
+          name: riscv64-linux-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - riscv64gc-linux-generic-test-vm:
+          name: riscv64-linux-test-compiletest
+          job: test:compiletest
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build

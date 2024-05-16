@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 include ../tools.mk
 
 # NOTE we use --emit=llvm-ir to avoid running the linker (linking will fail because there's no main

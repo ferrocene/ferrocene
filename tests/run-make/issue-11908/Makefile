@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted by Rust, fix the conflict and remove this line
 # ignore-cross-compile
 # This test ensures that if you have the same rlib or dylib at two locations
 # in the same path that you don't hit an assertion in the compiler.

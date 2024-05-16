@@ -17,3 +17,5 @@ fn main() {
         .library_search_path(tmp_dir())
         .run();
 }
+
+// ferrocene-annotations: um_rustc_C_panic

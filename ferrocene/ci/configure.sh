@@ -301,7 +301,7 @@ fi
 #
 # If this is not provided, the report will not be included in the generated
 # documentation. This should only be set in stable, qualified releases.
-#add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-technical-report.pdf"
+add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/2024-05-16-ferrocene-24.05.0-technical-report.pdf"
 
 ###############################################
 #                                             #

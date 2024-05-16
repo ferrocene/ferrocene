@@ -81,7 +81,6 @@ jobs:
     resource_class: large # 4-core
     environment:
       FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py test tidy
@@ -106,7 +105,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py test $(ferrocene/ci/split-tasks.py test:misc-checks)
@@ -128,7 +126,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
       SCRIPT: |
@@ -141,7 +138,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       RUST_CONFIGURE_ARGS: |
         --set
@@ -163,7 +159,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -176,7 +171,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -189,7 +183,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std-only >>
       SCRIPT: |
@@ -202,7 +195,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)
@@ -217,7 +209,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: large # 4-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: wasm32-unknown-unknown
       SCRIPT: |
@@ -235,7 +226,6 @@ jobs:
         type: string
     resource_class: << parameters.resource-class >>
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
@@ -269,7 +259,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: medium # 2-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       RUST_CONFIGURE_ARGS: |
         --set
@@ -292,7 +281,6 @@ jobs:
     executor: linux-vm
     resource_class: large # 4-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       # Standard library tests need IPv6, which is not available in container
       # jobs. Because of that we need to run *just* standard library tests in a
@@ -309,7 +297,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
       # This tries to strike a balance between the highest concurrency possible
@@ -331,7 +318,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
     steps:
@@ -349,7 +335,6 @@ jobs:
       xcode: "15.3.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
-      FERROCENE_BUILD_HOST: aarch64-apple-darwin
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
       SCRIPT: ferrocene/ci/scripts/llvm-cache.sh prepare
@@ -374,7 +359,6 @@ jobs:
       xcode: "15.3.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
-      FERROCENE_BUILD_HOST: aarch64-apple-darwin
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
@@ -390,7 +374,6 @@ jobs:
       xcode: "15.3.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
-      FERROCENE_BUILD_HOST: aarch64-apple-darwin
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
@@ -407,7 +390,6 @@ jobs:
       xcode: "15.3.0"
     resource_class: macos.m1.large.gen1 # 8 cores
     environment:
-      FERROCENE_BUILD_HOST: aarch64-apple-darwin
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
@@ -423,7 +405,6 @@ jobs:
       xcode: "15.3.0"
     resource_class: macos.m1.medium.gen1 # 4 cores
     environment:
-      FERROCENE_BUILD_HOST: aarch64-apple-darwin
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--self-test >>
     steps:
@@ -504,7 +485,6 @@ jobs:
     executor: docker-ubuntu-20
     resource_class: small # 1-core
     environment:
-      FERROCENE_BUILD_HOST: x86_64-unknown-linux-gnu
       FERROCENE_HOST: x86_64-unknown-linux-gnu
     steps:
       - aws-oidc-auth

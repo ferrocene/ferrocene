@@ -6,7 +6,7 @@ Usage
 
 Build tools listed below can be used individually or through a Ferrocene
 project. File formats are documented in :doc:`User Manual - File Formats
-<user-manual:ferrocene/file-formats>`.
+<user-manual:rustc/file-formats>`.
 
 Cleaning the Build Space
 ------------------------
@@ -43,20 +43,20 @@ severity of errors.
 Building a Library
 ------------------
 
-Refer to the User Manual - :doc:`user-manual:ferrocene/library`.
+Refer to the User Manual - :doc:`user-manual:rustc/library`.
 
 Building an Executable
 ----------------------
 
-Refer to the User Manual - :doc:`user-manual:ferrocene/executable`.
+Refer to the User Manual - :doc:`user-manual:rustc/executable`.
 
 Building Mixed-language Programs
 --------------------------------
 
-Refer to the User Manual - :doc:`user-manual:ferrocene/mixed-language`.
+Refer to the User Manual - :doc:`user-manual:rustc/mixed-language`.
 
 Performing System Calls
 -----------------------
 
-Refer to the User Manual - :doc:`user-manual:ferrocene/system-calls`.
+Refer to the User Manual - :doc:`user-manual:rustc/system-calls`.
 

@@ -14,23 +14,23 @@ scope, in accordance to the standards above.
    :caption: General
    :numbered:
 
-   general/user-responsibility
-   general/customer-interactions
+   user-responsibility
+   customer-interactions
 
 .. toctree::
    :maxdepth: 2
-   :caption: Ferrocene
+   :caption: rustc
    :numbered:
 
-   ferrocene/environment
-   ferrocene/procedures
-   ferrocene/usage
-   ferrocene/unsafety
-   ferrocene/options
-   ferrocene/changelog
-   ferrocene/known-problems
-   ferrocene/degraded-environment
-   ferrocene/constraints
+   rustc/environment
+   rustc/procedures
+   rustc/usage
+   rustc/unsafety
+   rustc/options
+   rustc/changelog
+   rustc/known-problems
+   rustc/degraded-environment
+   rustc/constraints
 
 .. appendices::
    :maxdepth: 2

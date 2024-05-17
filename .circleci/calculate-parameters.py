@@ -61,7 +61,7 @@ s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
 
-def calculate_docker_image_tag(image):
+def calculate_docker_image_tag(image: str):
     """
     Calculates the value of parameters starting with `docker-image-tag--`.
     """
@@ -69,7 +69,7 @@ def calculate_docker_image_tag(image):
     if not os.path.exists(os.path.join(path, "Dockerfile")):
         raise ScriptError(f"unknown Docker image: {image}")
 
-    all_files = []
+    all_files: list[str] = []
     for root, _, files in os.walk(path):
         for file in files:
             all_files.append(os.path.join(root, file))
@@ -86,7 +86,7 @@ def calculate_docker_image_tag(image):
     return f"{image}-{hash.hexdigest()}"
 
 
-def calculate_docker_image_rebuild(repo_plus_image):
+def calculate_docker_image_rebuild(repo_plus_image: str) -> bool:
     """
     Calculate the value of parameters starting with `docker-image-rebuild--`
     """
@@ -102,11 +102,11 @@ def calculate_docker_image_rebuild(repo_plus_image):
 
     # FIXME: .utcnow should be .now(datetime.UTC), but CI is on python 3.9
     now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
-    delta = now - image["imagePushedAt"]
+    delta: datetime.timedelta = now - image["imagePushedAt"]
     return delta.days >= REBUILD_IMAGES_OLDER_THAN_DAYS
 
 
-def calculate_docker_repository_url(repo):
+def calculate_docker_repository_url(repo: str) -> str:
     """
     Calculates the value of parameters starting with `docker-repository-url--`
     """
@@ -117,15 +117,17 @@ def calculate_docker_repository_url(repo):
     return repos["repositories"][0]["repositoryUri"]
 
 
-def calculate_llvm_rebuild(target):
+def calculate_llvm_rebuild(target: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url = urllib.parse.urlparse(subprocess.run(
-        ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
-        env={"FERROCENE_HOST": target},
-        stdout=subprocess.PIPE,
-    ).stdout.strip()).decode("utf-8")
+    url: urllib.parse.ParseResult = urllib.parse.urlparse(
+        subprocess.run(
+            ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
+            env={"FERROCENE_HOST": target},
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+    ).decode("utf-8")
     assert url.scheme == "s3"
 
     try:
@@ -135,7 +137,7 @@ def calculate_llvm_rebuild(target):
         return True
 
 
-def calculate_targets(host_plus_stage):
+def calculate_targets(host_plus_stage: str):
     """
     Calculates the list of targets to pass.
 

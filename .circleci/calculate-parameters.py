@@ -131,42 +131,42 @@ def calculate_llvm_rebuild(target):
     except s3.exceptions.ClientError:
         return True
 
+
 def calculate_targets(host_plus_stage):
     """
     Calculates the list of targets to pass.
 
-    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test` 
+    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test`
     """
     host, stage = host_plus_stage.split("--", 1)
-    targets = []
 
     # The CI does not run Python 3.10 and thus `match` statements don't exist yet
     # in this universe.
     if stage == "build":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ONLY_TARGETS
+            targets = LINUX_ONLY_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ONLY_TARGETS
+            targets = MAC_ONLY_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets += WINDOWS_ONLY_TARGETS
+            targets = WINDOWS_ONLY_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std-only":
-        if host== "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+        if host == "x86_64-unknown-linux-gnu":
+            targets = LINUX_ALL_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+            targets = LINUX_ALL_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ALL_TARGETS
+            targets = MAC_ALL_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets += WINDOWS_ALL_TARGETS
+            targets = WINDOWS_ALL_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:
-        raise Exception("Stage not known, please add support")
+        raise Exception(f"Stage {stage} not known, please add support")
 
     return ",".join(targets)
 
@@ -188,7 +188,7 @@ def prepare_parameters():
         for prefix, func in replacements.items():
             if parameter.startswith(prefix):
                 # Anything after the prefix gets passed as a parameter
-                parameters[parameter] = func(parameter[len(prefix):])
+                parameters[parameter] = func(parameter[len(prefix) :])
                 break
         # In Python, the `else` is executed when the for loop finished
         # normally, without any `break` being executed. In this case, it's

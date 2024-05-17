@@ -46,6 +46,12 @@ KEEP_LLVM_BINARIES=(
     "llvm-tblgen"
 )
 
+EXE_SUFFIX=""
+if [[ "${OSTYPE}" = "msys" ]]; then
+    # Windows will postfix binaries with `.exe`
+    EXE_SUFFIX=".exe"
+fi
+
 # Calculate a hash of the LLVM source code and all the files that could impact
 # the LLVM build. This will be used as the cache key to avoid rebuilding LLVM
 # from scratch every time.
@@ -55,7 +61,10 @@ get_llvm_cache_hash() {
     shasum -a 256 "$0" >> "${file}"
     shasum -a 256 ferrocene/ci/configure.sh >> "${file}"
     shasum -a 256 src/version >> "${file}"
-    git ls-files src/bootstrap ferrocene/ci/docker-images -z | sort -z | xargs -0 shasum -a 256 >> "${file}"
+    # Apparently, git for windows doesn't understand when the `-z` flag of `git
+    # ls-files` is passed after the paths, so we provide it before the list of
+    # paths to list.
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 shasum -a 256 >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
@@ -78,7 +87,19 @@ build_llvm_tarball() {
     # The llvm/build directory contains a *copy* of all the binaries, plus the
     # intermediate object files and other build artifacts we don't need. To
     # save space in the cached tarball remove it.
-    rm -rf "build/${FERROCENE_HOST}/llvm/build"
+    #
+    # On Windows, we skip this pruning since it *does* need intermediate
+    # object files. (Notably, `llvm/Config/llvm-config.h` and many lib objects)
+    if [[ "${OSTYPE}" != "msys" ]]; then
+        rm -rf "build/${FERROCENE_HOST}/llvm/build"
+        
+        # Rustbuild is looking in `llvm/build/bin` instead of `bin` when checking
+        # for an existing `llvm-config` binary. Create a symlink to make sure it
+        # can still detect the existing build.
+        
+        mkdir -p "build/${FERROCENE_HOST}/llvm/build"
+        ln -s ../bin "build/${FERROCENE_HOST}/llvm/build/bin"
+    fi
 
     # The LLVM distribution as of 2021-08-23 contains more than 1GB of
     # binaries, but we only need a small subset of them. This "deletes" the
@@ -98,29 +119,30 @@ build_llvm_tarball() {
 
         name="$(basename "${file}")"
         keep="no"
+        
         for wanted in "${KEEP_LLVM_BINARIES[@]}"; do
-            if [[ "${name}" == "${wanted}" ]]; then
-                keep="yes"
-                break
-            fi
+            for wanted in "${KEEP_LLVM_BINARIES[@]}"; do
+                if [[ "${name}" == "${wanted}${EXE_SUFFIX}" ]]; then
+                    keep="yes"
+                    break
+                fi
+            done
         done
         if [[ "${keep}" == "no" ]]; then
             chmod -x "${file}"
-            echo "#!/bin/false" > "${file}"
-            echo "File soft-removed by ferrocene/ci/scripts/build-and-cache-llvm.sh" >> "${file}"
+            echo "#!/usr/bin/env sh" > "${file}"
+            echo "echo 'File soft-removed by ferrocene/ci/scripts/build-and-cache-llvm.sh'" >> "${file}"
+            echo "exit 1" >> "${file}"
         fi
     done
-
-    # Rustbuild is looking in `llvm/build/bin` instead of `bin` when checking
-    # for an existing `llvm-config` binary. Create a symlink to make sure it
-    # can still detect the existing build.
-    mkdir "build/${FERROCENE_HOST}/llvm/build"
-    ln -s ../bin "build/${FERROCENE_HOST}/llvm/build/bin"
 
     # Call `zstd` separately to be able to use all cores available (`-T0`) and
     # the lowest compression level possible, to speed the compression as much
     # as possible.
-    tar cv "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
+    #
+    # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+    # rather than stdout by default.
+    tar -cvf- "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
 }
 
 usage() {
@@ -148,8 +170,9 @@ case "$1" in
         echo "cached LLVM cache at ${s3_url}"
         ;;
     download)
-        echo "restoring LLVM cache from ${s3_url}"
-        aws s3 cp "${s3_url}" - | unzstd --stdout | tar x
+        # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
+        # rather than stdout by default.
+        aws s3 cp "${s3_url}" - | zstd --decompress --stdout | tar -xf-
         echo "restored LLVM cache from ${s3_url}"
         ;;
     s3-url)

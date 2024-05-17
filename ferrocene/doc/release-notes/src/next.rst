@@ -29,6 +29,7 @@ shipped as a preview.
   new target is:
 
   * :target-with-triple:`aarch64-apple-darwin`
+  * :target-with-triple:`x86_64-pc-windows-msvc`
 
 Changes
 -------

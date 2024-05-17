@@ -9,6 +9,7 @@ use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs::File;
+#[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
 use tokio::runtime::Runtime;
@@ -78,7 +79,10 @@ fn collect_files(
             package.files.push(PackageFile {
                 path: relative_path.into(),
                 sha256: hash_file(&entry)?,
+                #[cfg(not(windows))]
                 posix_mode: entry.metadata()?.mode(),
+                #[cfg(windows)]
+                posix_mode: 0,
                 needs_proxy: ctx.proxied_binaries.contains(&relative_path),
             });
         } else if entry.is_dir() {
@@ -95,6 +99,7 @@ fn hash_file(path: &Path) -> Result<Vec<u8>, Error> {
     Ok(sha256.finalize().to_vec())
 }
 
+#[cfg(not(windows))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,6 +110,9 @@ mod tests {
     use std::os::unix::prelude::PermissionsExt;
     use tempfile::TempDir;
 
+    // This insta snapshot is complex and brittle to maintain on Windows
+    // Windows does not have file modes, and filters don't provide a reliable way to
+    // remap Windows paths to Linux and back.
     #[test]
     fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
@@ -116,6 +124,7 @@ mod tests {
             }
             let mut file = File::create(path)?;
             file.write_all(contents)?;
+            #[cfg(unix)]
             file.set_permissions(Permissions::from_mode(mode))?;
             Ok::<_, Error>(())
         };

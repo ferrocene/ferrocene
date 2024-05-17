@@ -14,6 +14,7 @@ pub(crate) enum Error {
     NoSysroot,
     #[error("binary {name} expected (inside {}), but is not there", directory.display())]
     MissingBinary { directory: PathBuf, name: String },
+    #[cfg(unix)] // Windows does permissions different.
     #[error("binary {} must be readable and executable by all users", path.display())]
     WrongBinaryPermissions { path: PathBuf },
     #[error("failed to fetch the metadata of {}", path.display())]
@@ -47,8 +48,8 @@ pub(crate) enum Error {
         #[source]
         error: FindBinaryInPathError,
     },
-    #[error("the bundled linker is missing")]
-    BundledLinkerMissing,
+    #[error("the bundled linker is missing from {}", .0.display())]
+    BundledLinkerMissing(PathBuf),
     #[error("the path {} contains bytes not representable as UTF-8", path.to_string_lossy())]
     NonUtf8Path { path: PathBuf },
     #[error("failed to create the temporary directory to store compilation artifacts")]
@@ -104,6 +105,7 @@ impl Error {
         match self {
             Error::NoSysroot => 1,
             Error::MissingBinary { .. } => 2,
+            #[cfg(not(windows))] // Windows does not do file modes
             Error::WrongBinaryPermissions { .. } => 3,
             Error::MetadataFetchFailed { .. } => 4,
             Error::VersionFetchFailed { .. } => 5,
@@ -113,7 +115,7 @@ impl Error {
             Error::DuplicateTargetLibrary { .. } => 9,
             Error::TargetLibraryDiscoveryFailed { .. } => 10,
             Error::CCompilerNotFound { .. } => 11,
-            Error::BundledLinkerMissing => 15,
+            Error::BundledLinkerMissing(_) => 15,
             Error::NonUtf8Path { .. } => 16,
             Error::TemporaryCompilationDirectoryCreationFailed { .. } => 17,
             Error::WritingSampleProgramFailed { .. } => 18,

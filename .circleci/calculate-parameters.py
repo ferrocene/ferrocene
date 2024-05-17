@@ -16,6 +16,7 @@ import sys
 import datetime
 import urllib.parse
 import subprocess
+from typing import Callable
 
 
 # Path of the YAML file to extract the needed parameters from.
@@ -173,9 +174,9 @@ def calculate_targets(host_plus_stage):
 
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
-        config = yaml.safe_load(f)
+        config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
-    replacements = {
+    replacements: dict[str, Callable[[str], str]] = {
         "docker-image-tag--": calculate_docker_image_tag,
         "docker-image-rebuild--": calculate_docker_image_rebuild,
         "docker-repository-url--": calculate_docker_repository_url,
@@ -183,7 +184,7 @@ def prepare_parameters():
         "targets--": calculate_targets,
     }
 
-    parameters = {}
+    parameters: dict[str, str] = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
             if parameter.startswith(prefix):

@@ -7,15 +7,16 @@
 # tries to find a value for all the defined parameters automatically, and exits
 # with an error if it can't calculate the value of one parameter.
 
+
+import boto3
+import datetime
 import hashlib
 import json
 import os
-import yaml
-import boto3
-import sys
-import datetime
-import urllib.parse
 import subprocess
+import sys
+import urllib.parse
+import yaml
 from typing import Callable
 
 

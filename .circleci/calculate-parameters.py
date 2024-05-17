@@ -100,6 +100,7 @@ def calculate_docker_image_rebuild(repo_plus_image):
         # Image doesn't exist, build it.
         return True
 
+    # FIXME: .utcnow should be .now(datetime.UTC), but CI is on python 3.9
     now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
     delta = now - image["imagePushedAt"]
     return delta.days >= REBUILD_IMAGES_OLDER_THAN_DAYS

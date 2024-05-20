@@ -169,6 +169,7 @@ AT_GID
 AT_HWCAP
 AT_HWCAP2
 AT_IGNORE
+AT_MINSIGSTKSZ
 AT_NOTELF
 AT_NO_AUTOMOUNT
 AT_NULL
@@ -2876,7 +2877,6 @@ SYS_flistxattr
 SYS_flock
 SYS_fremovexattr
 SYS_fsetxattr
-SYS_fstat
 SYS_fstatfs
 SYS_fsync
 SYS_ftruncate
@@ -3031,7 +3031,6 @@ SYS_setregid
 SYS_setresgid
 SYS_setresuid
 SYS_setreuid
-SYS_setrlimit
 SYS_setsid
 SYS_setsockopt
 SYS_settimeofday
@@ -3834,8 +3833,11 @@ statvfs64
 strcasecmp
 strcasestr
 strchrnul
+strftime
+strftime_l
 strncasecmp
 strndup
+strptime
 strsignal
 swapoff
 swapon

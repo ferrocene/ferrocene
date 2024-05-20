@@ -613,13 +613,8 @@ impl LinkSelfContainedDefault {
         }
     }
 
-<<<<<<< HEAD
-    /// Creates a `LinkSelfContained` enabling the self-contained linker for target specs (the
-    /// equivalent of `-Clink-self-contained=+linker` on the CLI).
-=======
     /// Creates a `LinkSelfContainedDefault` enabling the self-contained linker for target specs
     /// (the equivalent of `-Clink-self-contained=+linker` on the CLI).
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     pub fn with_linker() -> LinkSelfContainedDefault {
         LinkSelfContainedDefault::WithComponents(LinkSelfContainedComponents::LINKER)
     }

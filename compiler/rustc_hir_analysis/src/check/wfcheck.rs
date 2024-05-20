@@ -432,7 +432,7 @@ fn check_gat_where_clauses(tcx: TyCtxt<'_>, trait_def_id: LocalDefId) {
             }
             let gat_generics = tcx.generics_of(gat_def_id);
             // FIXME(jackh726): we can also warn in the more general case
-            if gat_generics.own_params.is_empty() {
+            if gat_generics.is_own_empty() {
                 continue;
             }
 
@@ -1350,12 +1350,12 @@ fn check_impl<'tcx>(
                         // We already have a better span.
                         continue;
                     }
-                    if let Some(pred) = obligation.predicate.to_opt_poly_trait_pred()
+                    if let Some(pred) = obligation.predicate.as_trait_clause()
                         && pred.skip_binder().self_ty() == trait_ref.self_ty()
                     {
                         obligation.cause.span = hir_self_ty.span;
                     }
-                    if let Some(pred) = obligation.predicate.to_opt_poly_projection_pred()
+                    if let Some(pred) = obligation.predicate.as_projection_clause()
                         && pred.skip_binder().self_ty() == trait_ref.self_ty()
                     {
                         obligation.cause.span = hir_self_ty.span;

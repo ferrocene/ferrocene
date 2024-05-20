@@ -1613,6 +1613,7 @@ fn test_android(target: &str) {
                "sched.h",
                "semaphore.h",
                "signal.h",
+               "spawn.h",
                "stddef.h",
                "stdint.h",
                "stdio.h",
@@ -1767,6 +1768,9 @@ fn test_android(target: &str) {
 
             // These are tested in the `linux_elf.rs` file.
             "Elf64_Phdr" | "Elf32_Phdr" => true,
+            // These are intended to be opaque
+            "posix_spawn_file_actions_t" => true,
+            "posix_spawnattr_t" => true,
             _ => false,
         }
     });
@@ -2520,6 +2524,9 @@ fn test_freebsd(target: &str) {
             | "sctp_assoc_change"
             | "sctp_send_failed_event"
             | "sctp_stream_reset_event" => true,
+
+            // FIXME: Changed in FreeBSD 15
+            "tcp_info" | "sockstat" if Some(15) >= freebsd_ver => true,
 
             _ => false,
         }
@@ -3326,6 +3333,7 @@ fn test_linux(target: &str) {
     let gnueabihf = target.contains("gnueabihf");
     let x86_64_gnux32 = target.contains("gnux32") && x86_64;
     let riscv64 = target.contains("riscv64");
+    let loongarch64 = target.contains("loongarch64");
     let uclibc = target.contains("uclibc");
 
     let mut cfg = ctest_cfg();
@@ -3448,6 +3456,7 @@ fn test_linux(target: &str) {
     // Include linux headers at the end:
     headers! {
         cfg:
+        [loongarch64]: "asm/hwcap.h",
         [riscv64]: "asm/hwcap.h",
         "asm/mman.h",
         [gnu]: "linux/aio_abi.h",
@@ -3903,6 +3912,12 @@ fn test_linux(target: &str) {
             | "SW_MAX"
             | "SW_CNT"
                 if ppc64 || riscv64 => true,
+
+            // FIXME: requires more recent kernel headers on CI
+            | "MFD_EXEC"
+            | "MFD_NOEXEC_SEAL"
+            | "SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV"
+                if sparc64 => true,
 
             // FIXME: Not currently available in headers on ARM and musl.
             "NETLINK_GET_STRICT_CHK" if arm || musl => true,

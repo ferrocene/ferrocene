@@ -1,6 +1,9 @@
 [submodule "ferrocene/doc/specification/shared"]
     path = ferrocene/doc/specification/shared
     url = https://github.com/ferrocene/sphinx-shared-resources.git
+[submodule "ferrocene/tools/flip-link"]
+	path = ferrocene/tools/flip-link
+	url = https://github.com/knurling-rs/flip-link
 [submodule "src/doc/nomicon"]
 	path = src/doc/nomicon
 	url = https://github.com/rust-lang/nomicon.git
@@ -46,6 +49,3 @@
 	path = library/backtrace
 	url = https://github.com/rust-lang/backtrace-rs.git
 	shallow = true
-[submodule "ferrocene/tools/flip-link"]
-	path = ferrocene/tools/flip-link
-	url = https://github.com/knurling-rs/flip-link

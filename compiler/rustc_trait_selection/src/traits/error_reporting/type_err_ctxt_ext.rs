@@ -422,6 +422,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     ty::PredicateKind::Clause(ty::ClauseKind::Trait(trait_predicate)) => {
                         let trait_predicate = bound_predicate.rebind(trait_predicate);
                         let trait_predicate = self.resolve_vars_if_possible(trait_predicate);
+                        let trait_predicate = self.apply_do_not_recommend(trait_predicate, &mut obligation);
 
                         // Let's use the root obligation as the main message, when we care about the
                         // most general case ("X doesn't implement Pattern<'_>") over the case that
@@ -1003,6 +1004,31 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         err.emit()
     }
 
+    fn apply_do_not_recommend(
+        &self,
+        mut trait_predicate: ty::Binder<'tcx, ty::TraitPredicate<'tcx>>,
+        obligation: &'_ mut PredicateObligation<'tcx>,
+    ) -> ty::Binder<'tcx, ty::TraitPredicate<'tcx>> {
+        let mut base_cause = obligation.cause.code().clone();
+        loop {
+            if let ObligationCauseCode::ImplDerived(ref c) = base_cause {
+                if self.tcx.has_attr(c.impl_or_alias_def_id, sym::do_not_recommend) {
+                    let code = (*c.derived.parent_code).clone();
+                    obligation.cause.map_code(|_| code);
+                    obligation.predicate = c.derived.parent_trait_pred.upcast(self.tcx);
+                    trait_predicate = c.derived.parent_trait_pred.clone();
+                }
+            }
+            if let Some((parent_cause, _parent_pred)) = base_cause.parent() {
+                base_cause = parent_cause.clone();
+            } else {
+                break;
+            }
+        }
+
+        trait_predicate
+    }
+
     fn emit_specialized_closure_kind_error(
         &self,
         obligation: &PredicateObligation<'tcx>,
@@ -1417,7 +1443,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         };
 
         let mut code = obligation.cause.code();
-        let mut pred = obligation.predicate.to_opt_poly_trait_pred();
+        let mut pred = obligation.predicate.as_trait_clause();
         while let Some((next_code, next_pred)) = code.parent() {
             if let Some(pred) = pred {
                 self.enter_forall(pred, |pred| {
@@ -1481,16 +1507,16 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             return true;
         }
 
-        if let Some(error) = error.to_opt_poly_trait_pred() {
+        if let Some(error) = error.as_trait_clause() {
             self.enter_forall(error, |error| {
                 elaborate(self.tcx, std::iter::once(cond))
-                    .filter_map(|implied| implied.to_opt_poly_trait_pred())
+                    .filter_map(|implied| implied.as_trait_clause())
                     .any(|implied| self.can_match_trait(error, implied))
             })
-        } else if let Some(error) = error.to_opt_poly_projection_pred() {
+        } else if let Some(error) = error.as_projection_clause() {
             self.enter_forall(error, |error| {
                 elaborate(self.tcx, std::iter::once(cond))
-                    .filter_map(|implied| implied.to_opt_poly_projection_pred())
+                    .filter_map(|implied| implied.as_projection_clause())
                     .any(|implied| self.can_match_projection(error, implied))
             })
         } else {
@@ -2415,8 +2441,8 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         return e;
                     }
                     err.note(format!("cannot satisfy `{predicate}`"));
-                    let impl_candidates = self
-                        .find_similar_impl_candidates(predicate.to_opt_poly_trait_pred().unwrap());
+                    let impl_candidates =
+                        self.find_similar_impl_candidates(predicate.as_trait_clause().unwrap());
                     if impl_candidates.len() < 40 {
                         self.report_similar_impl_candidates(
                             impl_candidates.as_slice(),

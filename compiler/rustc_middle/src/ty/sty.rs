@@ -388,7 +388,7 @@ impl<'tcx> CoroutineClosureArgs<'tcx> {
                 yield_ty,
                 return_ty,
                 c_variadic: sig.c_variadic,
-                unsafety: sig.unsafety,
+                safety: sig.safety,
                 abi: sig.abi,
             }
         })
@@ -416,8 +416,8 @@ pub struct CoroutineClosureSignature<'tcx> {
     // from scratch just for good measure.
     /// Always false
     pub c_variadic: bool,
-    /// Always [`hir::Unsafety::Normal`]
-    pub unsafety: hir::Unsafety,
+    /// Always [`hir::Safety::Safe`]
+    pub safety: hir::Safety,
     /// Always [`abi::Abi::RustCall`]
     pub abi: abi::Abi,
 }
@@ -1129,8 +1129,8 @@ impl<'tcx> PolyFnSig<'tcx> {
         self.skip_binder().c_variadic
     }
 
-    pub fn unsafety(&self) -> hir::Unsafety {
-        self.skip_binder().unsafety
+    pub fn safety(&self) -> hir::Safety {
+        self.skip_binder().safety
     }
 
     pub fn abi(&self) -> abi::Abi {
@@ -1140,12 +1140,7 @@ impl<'tcx> PolyFnSig<'tcx> {
     pub fn is_fn_trait_compatible(&self) -> bool {
         matches!(
             self.skip_binder(),
-            ty::FnSig {
-                unsafety: rustc_hir::Unsafety::Normal,
-                abi: Abi::Rust,
-                c_variadic: false,
-                ..
-            }
+            ty::FnSig { safety: rustc_hir::Safety::Safe, abi: Abi::Rust, c_variadic: false, .. }
         )
     }
 }
@@ -1202,6 +1197,12 @@ impl ParamConst {
 pub struct BoundTy {
     pub var: BoundVar,
     pub kind: BoundTyKind,
+}
+
+impl<'tcx> rustc_type_ir::inherent::BoundVarLike<TyCtxt<'tcx>> for BoundTy {
+    fn var(self) -> BoundVar {
+        self.var
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, TyEncodable, TyDecodable)]
@@ -1606,6 +1607,10 @@ impl<'tcx> Ty<'tcx> {
 }
 
 impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
+    fn new_bool(tcx: TyCtxt<'tcx>) -> Self {
+        tcx.types.bool
+    }
+
     fn new_anon_bound(tcx: TyCtxt<'tcx>, debruijn: ty::DebruijnIndex, var: ty::BoundVar) -> Self {
         Ty::new_bound(tcx, debruijn, ty::BoundTy { var, kind: ty::BoundTyKind::Anon })
     }
@@ -1991,7 +1996,7 @@ impl<'tcx> Ty<'tcx> {
                 ty::Binder::dummy(ty::FnSig {
                     inputs_and_output: ty::List::empty(),
                     c_variadic: false,
-                    unsafety: hir::Unsafety::Normal,
+                    safety: hir::Safety::Safe,
                     abi: abi::Abi::Rust,
                 })
             }

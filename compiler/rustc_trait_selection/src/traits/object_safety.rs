@@ -398,7 +398,7 @@ pub fn object_safety_violations_for_assoc_item(
         // Associated types can only be object safe if they have `Self: Sized` bounds.
         ty::AssocKind::Type => {
             if !tcx.features().generic_associated_types_extended
-                && !tcx.generics_of(item.def_id).own_params.is_empty()
+                && !tcx.generics_of(item.def_id).is_own_empty()
                 && !item.is_impl_trait_in_trait()
             {
                 vec![ObjectSafetyViolation::GAT(item.name, item.ident(tcx).span)]
@@ -653,7 +653,7 @@ fn object_ty_for_trait<'tcx>(
     let mut elaborated_predicates: Vec<_> = elaborate(tcx, [pred])
         .filter_map(|pred| {
             debug!(?pred);
-            let pred = pred.to_opt_poly_projection_pred()?;
+            let pred = pred.as_projection_clause()?;
             Some(pred.map_bound(|p| {
                 ty::ExistentialPredicate::Projection(ty::ExistentialProjection::erase_self_ty(
                     tcx, p,

@@ -28,7 +28,7 @@ use crate::ty::fast_reject::SimplifiedType;
 use crate::ty::util::Discr;
 pub use adt::*;
 pub use assoc::*;
-pub use generic_args::*;
+pub use generic_args::{GenericArgKind, *};
 pub use generics::*;
 pub use intrinsic::IntrinsicDef;
 use rustc_ast as ast;
@@ -97,13 +97,12 @@ pub use self::parameterized::ParameterizedOverTcx;
 pub use self::pattern::{Pattern, PatternKind};
 pub use self::predicate::{
     AliasTerm, Clause, ClauseKind, CoercePredicate, ExistentialPredicate,
-    ExistentialPredicateStableCmpExt, ExistentialProjection, ExistentialTraitRef, Goal,
-    NormalizesTo, OutlivesPredicate, PolyCoercePredicate, PolyExistentialPredicate,
-    PolyExistentialProjection, PolyExistentialTraitRef, PolyProjectionPredicate,
-    PolyRegionOutlivesPredicate, PolySubtypePredicate, PolyTraitPredicate, PolyTraitRef,
-    PolyTypeOutlivesPredicate, Predicate, PredicateKind, ProjectionPredicate,
-    RegionOutlivesPredicate, SubtypePredicate, ToPolyTraitRef, TraitPredicate, TraitRef,
-    TypeOutlivesPredicate,
+    ExistentialPredicateStableCmpExt, ExistentialProjection, ExistentialTraitRef, NormalizesTo,
+    OutlivesPredicate, PolyCoercePredicate, PolyExistentialPredicate, PolyExistentialProjection,
+    PolyExistentialTraitRef, PolyProjectionPredicate, PolyRegionOutlivesPredicate,
+    PolySubtypePredicate, PolyTraitPredicate, PolyTraitRef, PolyTypeOutlivesPredicate, Predicate,
+    PredicateKind, ProjectionPredicate, RegionOutlivesPredicate, SubtypePredicate, ToPolyTraitRef,
+    TraitPredicate, TraitRef, TypeOutlivesPredicate,
 };
 pub use self::region::{
     BoundRegion, BoundRegionKind, BoundRegionKind::*, EarlyParamRegion, LateParamRegion, Region,
@@ -267,7 +266,7 @@ pub struct ImplHeader<'tcx> {
 pub struct ImplTraitHeader<'tcx> {
     pub trait_ref: ty::EarlyBinder<ty::TraitRef<'tcx>>,
     pub polarity: ImplPolarity,
-    pub unsafety: hir::Unsafety,
+    pub safety: hir::Safety,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, TypeFoldable, TypeVisitable)]
@@ -537,14 +536,10 @@ unsafe impl<'tcx> Sync for Term<'tcx> where &'tcx (Ty<'tcx>, Const<'tcx>): Sync 
 
 impl Debug for Term<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let data = if let Some(ty) = self.ty() {
-            format!("Term::Ty({ty:?})")
-        } else if let Some(ct) = self.ct() {
-            format!("Term::Ct({ct:?})")
-        } else {
-            unreachable!()
-        };
-        f.write_str(&data)
+        match self.unpack() {
+            TermKind::Ty(ty) => write!(f, "Term::Ty({ty:?})"),
+            TermKind::Const(ct) => write!(f, "Term::Const({ct:?})"),
+        }
     }
 }
 

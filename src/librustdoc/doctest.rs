@@ -93,8 +93,6 @@ pub(crate) fn run(
     dcx: &rustc_errors::DiagCtxt,
     options: RustdocOptions,
 ) -> Result<(), ErrorGuaranteed> {
-    let input = config::Input::File(options.input.clone());
-
     let invalid_codeblock_attributes_name = crate::lint::INVALID_CODEBLOCK_ATTRIBUTES.name;
 
     // See core::create_config for what's going on here.
@@ -140,7 +138,7 @@ pub(crate) fn run(
         opts: sessopts,
         crate_cfg: cfgs,
         crate_check_cfg: options.check_cfgs.clone(),
-        input,
+        input: options.input.clone(),
         output_file: None,
         output_dir: None,
         file_loader: None,
@@ -686,9 +684,9 @@ pub(crate) fn make_test(
                     }
                 }
 
-                // The supplied slice is only used for diagnostics,
+                // The supplied item is only used for diagnostics,
                 // which are swallowed here anyway.
-                parser.maybe_consume_incorrect_semicolon(&[]);
+                parser.maybe_consume_incorrect_semicolon(None);
             }
 
             // Reset errors so that they won't be reported as compiler bugs when dropping the

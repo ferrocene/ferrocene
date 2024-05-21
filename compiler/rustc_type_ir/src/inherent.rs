@@ -1,3 +1,8 @@
+//! Set of traits which are used to emulate the inherent impls that are present in `rustc_middle`.
+//! It is customary to glob-import `rustc_type_ir::inherent::*` to bring all of these traits into
+//! scope when programming in interner-agnostic settings, and to avoid importing any of these
+//! directly elsewhere (i.e. specify the full path for an implementation downstream).
+
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::Deref;
@@ -21,6 +26,8 @@ pub trait Ty<I: Interner<Ty = Self>>:
     + TypeSuperFoldable<I>
     + Flags
 {
+    fn new_bool(interner: I) -> Self;
+
     fn new_anon_bound(interner: I, debruijn: DebruijnIndex, var: BoundVar) -> Self;
 
     fn new_alias(interner: I, kind: AliasTyKind, alias_ty: AliasTy<I>) -> Self;
@@ -37,7 +44,7 @@ pub trait Abi<I: Interner<Abi = Self>>: Copy + Debug + Hash + Eq {
     fn is_rust(self) -> bool;
 }
 
-pub trait Unsafety<I: Interner<Unsafety = Self>>: Copy + Debug + Hash + Eq {
+pub trait Safety<I: Interner<Safety = Self>>: Copy + Debug + Hash + Eq {
     fn prefix_str(self) -> &'static str;
 }
 
@@ -79,6 +86,7 @@ pub trait GenericArgs<I: Interner<GenericArgs = Self>>:
     + Eq
     + IntoIterator<Item = I::GenericArg>
     + Deref<Target: Deref<Target = [I::GenericArg]>>
+    + Default
 {
     fn type_at(self, i: usize) -> I::Ty;
 
@@ -110,4 +118,8 @@ pub trait BoundVars<I: Interner> {
     fn bound_vars(&self) -> I::BoundVars;
 
     fn has_no_bound_vars(&self) -> bool;
+}
+
+pub trait BoundVarLike<I: Interner> {
+    fn var(self) -> BoundVar;
 }

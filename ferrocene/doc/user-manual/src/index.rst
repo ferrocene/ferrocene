@@ -39,12 +39,21 @@ Ferrocene User Manual
    targets/aarch64-unknown-none
    targets/x86_64-unknown-linux-gnu
 
+.. toctree::
+   :numbered:
+   :maxdepth: 2
+   :caption: rustfmt
+
+   rustfmt/install
+   rustfmt/usage
+
 .. appendices::
    :numbered:
    :maxdepth: 2
    :caption: Reference:
 
    rustc/cli
+   rustfmt/cli
    self-test/error-codes
 
 Indices and tables

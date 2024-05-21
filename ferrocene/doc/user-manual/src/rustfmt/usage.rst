@@ -9,7 +9,7 @@ Using ``rustfmt``
 ``rustfmt <file>...``
 ---------------------
 
-To format one or more files, just pass the paths to ``rusfmt``. This will format the passed files and all of their child modules.
+To format one or more files, just pass the paths to ``rusfmt``. This will format the files and all of their child modules.
 
 Assuming following project structure, ``rustfmt main.rs`` will format the whole project, while ``rustfmt mod1.rs`` will format ``mod1.rs``, ``mod1/mod10.rs`` and ``mod1/mod11.rs``, but neither ``mod2.rs`` nor ``mod2/mod20.rs``.
 
@@ -30,7 +30,7 @@ Assuming following project structure, ``rustfmt main.rs`` will format the whole 
 ``rustfmt --check <file>...``
 -----------------------------
 
-If the ``--check`` option is passed ``rusfmt`` checks if the files are well formatted. It reports what it would format, but will not modify any files. For example:
+If the ``--check`` option is used, ``rusfmt`` checks if the files are well formatted. It reports what it would format, but will not modify any files. For example:
 
 .. code-block::
 

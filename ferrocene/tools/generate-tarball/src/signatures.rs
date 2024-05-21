@@ -71,10 +71,15 @@ fn collect_files(
         let entry = entry?.path();
         let relative_path = entry
             .strip_prefix(ctx.package_dir)
-            .unwrap()
-            .to_str()
+            .unwrap();
+
+        #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
+        let relative_path = relative_path.with_extension("");
+
+        let relative_path = relative_path.to_str()
             .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
 
+            
         if entry.is_file() {
             package.files.push(PackageFile {
                 path: relative_path.into(),

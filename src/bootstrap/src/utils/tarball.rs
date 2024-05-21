@@ -108,7 +108,7 @@ pub(crate) struct Tarball<'a> {
     is_preview: bool,
     permit_symlinks: bool,
 
-    proxied_binaries: Vec<String>,
+    proxied_binaries: Vec<PathBuf>,
     managed_prefixes: Vec<String>,
 }
 
@@ -154,8 +154,8 @@ impl<'a> Tarball<'a> {
     }
 
     /// Register a binary that should have a proxy created by criticalup.
-    pub(crate) fn ferrocene_proxied_binary(&mut self, path: &str) {
-        self.proxied_binaries.push(path.into());
+    pub(crate) fn ferrocene_proxied_binary(&mut self, path: impl AsRef<Path>) {
+        self.proxied_binaries.push(path.as_ref().to_path_buf());
     }
 
     /// Register a path prefix that criticalup should prevent non-Ferrocene files from existing

@@ -73,9 +73,11 @@ fn collect_files(
             .strip_prefix(ctx.package_dir)
             .unwrap();
 
+        #[cfg(not(windows))]
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path);
         #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
-        let relative_path = relative_path.with_extension("");
-
+        let needs_proxy = ctx.proxied_binaries.contains(relative_path.with_extension(""));
+        
         let relative_path = relative_path.to_str()
             .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
 
@@ -88,7 +90,7 @@ fn collect_files(
                 posix_mode: entry.metadata()?.mode(),
                 #[cfg(windows)]
                 posix_mode: 0,
-                needs_proxy: ctx.proxied_binaries.contains(&relative_path),
+                needs_proxy,
             });
         } else if entry.is_dir() {
             collect_files(package, ctx, &entry)?;

@@ -1,8 +1,9 @@
-#![allow(non_snake_case)]
+//@ run-rustfix
+#![allow(non_snake_case, dead_code)]
 
 use std::pin::Pin;
 
-struct Struct { }
+struct Struct {}
 
 impl Struct {
     // Test using `&mut self` sugar:
@@ -40,6 +41,7 @@ impl Struct {
     }
 }
 
+<<<<<<< HEAD
 fn main() { }
 
 // ferrocene-annotations: fls_fk2m2irwpeof
@@ -98,3 +100,6 @@ fn main() { }
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

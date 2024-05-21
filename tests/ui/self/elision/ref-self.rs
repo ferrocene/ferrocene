@@ -1,17 +1,20 @@
+//@ run-rustfix
 #![feature(arbitrary_self_types)]
-#![allow(non_snake_case)]
+#![allow(non_snake_case, dead_code)]
 
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::pin::Pin;
 
-struct Struct { }
+struct Struct {}
 
 struct Wrap<T, P>(T, PhantomData<P>);
 
 impl<T, P> Deref for Wrap<T, P> {
     type Target = T;
-    fn deref(&self) -> &T { &self.0 }
+    fn deref(&self) -> &T {
+        &self.0
+    }
 }
 
 impl Struct {
@@ -55,6 +58,7 @@ impl Struct {
     }
 }
 
+<<<<<<< HEAD
 fn main() { }
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
@@ -122,3 +126,6 @@ fn main() { }
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

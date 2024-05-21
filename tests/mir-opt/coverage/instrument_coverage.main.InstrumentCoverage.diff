@@ -8,12 +8,20 @@
       let mut _3: !;
   
 +     coverage ExpressionId(0) => Expression { lhs: Counter(0), op: Add, rhs: Counter(1) };
+<<<<<<< HEAD
 +     coverage ExpressionId(1) => Expression { lhs: Expression(0), op: Subtract, rhs: Counter(1) };
 +     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:11:1 - 11:11;
 +     coverage Code(Expression(0)) => $DIR/instrument_coverage.rs:12:5 - 13:17;
 +     coverage Code(Expression(1)) => $DIR/instrument_coverage.rs:14:13 - 14:18;
 +     coverage Code(Counter(1)) => $DIR/instrument_coverage.rs:15:10 - 15:11;
 +     coverage Code(Expression(1)) => $DIR/instrument_coverage.rs:17:1 - 17:2;
+=======
++     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:10:1 - 10:11;
++     coverage Code(Expression(0)) => $DIR/instrument_coverage.rs:11:5 - 12:17;
++     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:13:13 - 13:18;
++     coverage Code(Counter(1)) => $DIR/instrument_coverage.rs:14:10 - 14:11;
++     coverage Code(Counter(0)) => $DIR/instrument_coverage.rs:16:1 - 16:2;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 + 
       bb0: {
 +         Coverage::CounterIncrement(0);
@@ -35,7 +43,6 @@
       }
   
       bb4: {
-+         Coverage::ExpressionUsed(1);
           _0 = const ();
           StorageDead(_2);
           return;

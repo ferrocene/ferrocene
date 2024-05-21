@@ -1,10 +1,12 @@
 //@ edition:2018
-
-#![allow(non_snake_case)]
+//@ run-rustfix
+#![allow(non_snake_case, dead_code)]
 
 use std::pin::Pin;
 
-struct Struct<'a> { data: &'a u32 }
+struct Struct<'a> {
+    data: &'a u32,
+}
 
 impl<'a> Struct<'a> {
     // Test using `&self` sugar:
@@ -42,6 +44,7 @@ impl<'a> Struct<'a> {
     }
 }
 
+<<<<<<< HEAD
 fn main() { }
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
@@ -103,3 +106,6 @@ fn main() { }
 //
 // ferrocene-annotations: fls_bbso3c45kr9z
 // Simple Path Resolution
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -74,7 +74,7 @@ pub struct Generator {
     ferrocene_managed_prefix: Vec<String>,
     /// Path of a binary that should be proxied by criticalup.
     #[clap(long, value_name = "PATH")]
-    ferrocene_proxied_binary: Vec<String>,
+    ferrocene_proxied_binary: Vec<PathBuf>,
     /// Name of the Ferrocene component.
     #[clap(long, value_name = "NAME")]
     ferrocene_component: String,

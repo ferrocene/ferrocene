@@ -954,7 +954,17 @@
 
 # ARN of the AWS KMS key used to sign the criticalup manifests included in
 # tarballs. If this is not provided, tarballs will not be signed.
+#
+# This flag is incompatible with tarball-signing-ephemeral.
 #tarball-signing-kms-key-arn = <none> (AWS ARN)
+
+# Sign criticalup manifests in tarballs with a different ephemeral key for each
+# tarball. This should never be used in production (as it results in manifests
+# that cannot be installed by CriticalUp), but is useful when testing the
+# generation of the manifests locally.
+#
+# This flag is incompatible with tarball-signing-kms-key-arn.
+#tarball-signing-ephemeral = false
 
 # Name of the AWS S3 bucket containing the document signatures file.
 #document-signatures-s3-bucket = "ferrocene-document-signatures"

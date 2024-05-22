@@ -358,6 +358,9 @@ impl<'a> Tarball<'a> {
         if let Some(kms_key_arn) = &self.builder.config.ferrocene_tarball_signing_kms_key_arn {
             cmd.arg("--ferrocene-signing-kms-key-arn").arg(kms_key_arn);
         }
+        if self.builder.config.ferrocene_tarball_signing_ephemeral {
+            cmd.arg("--ferrocene-signing-ephemeral");
+        }
         for proxied_binary in &self.proxied_binaries {
             cmd.arg("--ferrocene-proxied-binary").arg(proxied_binary);
         }

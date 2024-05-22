@@ -3,7 +3,9 @@
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
 use crate::compression::{CompressionFormats, CompressionProfile};
-use crate::signatures::{sign_manifest_with_aws_kms, SignatureContext};
+use crate::signatures::{
+    sign_manifest_with_aws_kms, sign_manifest_with_ephemeral_key, SignatureContext,
+};
 use crate::tarballer::Tarballer;
 use crate::util::{copy_recursive, create_dir_all, path_to_str, remove_dir_all};
 use anyhow::Result;
@@ -69,6 +71,9 @@ pub struct Generator {
     /// The ARN of the AWS KMS key used to sign the criticalup manifest
     #[clap(long, value_name = "ARN")]
     ferrocene_signing_kms_key_arn: Option<String>,
+    /// Whether to sign criticalup manifests with an ephemeral key
+    #[clap(long)]
+    ferrocene_signing_ephemeral: bool,
     /// Path prefix that should only contain Ferrocene files.
     #[clap(long, value_name = "PATH")]
     ferrocene_managed_prefix: Vec<String>,
@@ -103,6 +108,7 @@ impl Generator {
             compression_formats,
             ferrocene_commit_sha,
             ferrocene_signing_kms_key_arn,
+            ferrocene_signing_ephemeral,
             ferrocene_managed_prefix,
             ferrocene_proxied_binary,
             ferrocene_component,
@@ -118,20 +124,39 @@ impl Generator {
         // copy over the image to the working directory
         copy_recursive(image_dir.as_ref(), &package_dir)?;
 
-        if let Some(key_arn) = ferrocene_signing_kms_key_arn {
-            let Some(commit_sha) = ferrocene_commit_sha else {
-                anyhow::bail!("commit sha not provided, but signing was requested");
-            };
-            sign_manifest_with_aws_kms(
-                &SignatureContext {
+        match (ferrocene_signing_ephemeral, ferrocene_signing_kms_key_arn) {
+            (false, Some(key_arn)) => {
+                let Some(commit_sha) = ferrocene_commit_sha else {
+                    anyhow::bail!("commit sha not provided, but signing was requested");
+                };
+                sign_manifest_with_aws_kms(
+                    &SignatureContext {
+                        component: &ferrocene_component,
+                        commit_sha: &commit_sha,
+                        package_dir: &package_dir,
+                        proxied_binaries: ferrocene_proxied_binary
+                            .iter()
+                            .map(String::as_str)
+                            .collect(),
+                        managed_prefixes: &ferrocene_managed_prefix,
+                    },
+                    &key_arn,
+                )?;
+            }
+            (true, None) => {
+                let Some(commit_sha) = ferrocene_commit_sha else {
+                    anyhow::bail!("commit sha not provided, but signing was requested");
+                };
+                sign_manifest_with_ephemeral_key(&SignatureContext {
                     component: &ferrocene_component,
                     commit_sha: &commit_sha,
                     package_dir: &package_dir,
                     proxied_binaries: ferrocene_proxied_binary.iter().map(String::as_str).collect(),
                     managed_prefixes: &ferrocene_managed_prefix,
-                },
-                &key_arn,
-            )?;
+                })?;
+            }
+            (true, Some(_)) => anyhow::bail!("requested both signing with AWS KMS and ephemeral keys"),
+            (false, None) => {}
         }
 
         // Make the tarballs

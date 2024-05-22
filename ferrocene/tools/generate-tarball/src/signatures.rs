@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
 use anyhow::{anyhow, Error};
-use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
+use criticaltrust::keys::{AwsKmsKeyPair, EphemeralKeyPair, KeyAlgorithm, KeyPair, KeyRole};
 use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
 use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
@@ -19,6 +19,15 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) package_dir: &'a Path,
     pub(crate) proxied_binaries: HashSet<&'a str>,
     pub(crate) managed_prefixes: &'a [String],
+}
+
+pub(crate) fn sign_manifest_with_ephemeral_key(ctx: &SignatureContext<'_>) -> Result<(), Error> {
+    let key = EphemeralKeyPair::generate(
+        KeyAlgorithm::EcdsaP256Sha256Asn1SpkiDer,
+        KeyRole::Packages,
+        None,
+    )?;
+    sign_manifest(ctx, &key)
 }
 
 pub(crate) fn sign_manifest_with_aws_kms(
@@ -98,7 +107,6 @@ fn hash_file(path: &Path) -> Result<Vec<u8>, Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
     use criticaltrust::signatures::Keychain;
     use std::fs::Permissions;
     use std::io::Write;

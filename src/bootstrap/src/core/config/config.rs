@@ -354,6 +354,7 @@ pub struct Config {
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
+    pub ferrocene_tarball_signing_ephemeral: bool,
     pub ferrocene_document_signatures_s3_bucket: String,
     pub ferrocene_ignore_document_signatures: bool,
     pub ferrocene_technical_report_url: Option<String>,
@@ -1215,6 +1216,7 @@ define_config! {
         test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
         oxidos_src: Option<String> = "oxidos-src",
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
+        tarball_signing_ephemeral: Option<bool> = "tarball-signing-ephemeral",
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
         ignore_document_signatures: Option<bool> = "ignore-document-signatures",
         technical_report_url: Option<String> = "technical-report-url",
@@ -2003,6 +2005,7 @@ impl Config {
             config.ferrocene_aws_profile = f.aws_profile;
             config.ferrocene_oxidos_src = f.oxidos_src;
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
+            set(&mut config.ferrocene_tarball_signing_ephemeral, f.tarball_signing_ephemeral);
             config.ferrocene_document_signatures_s3_bucket = f
                 .document_signatures_s3_bucket
                 .unwrap_or_else(|| "ferrocene-document-signatures".into());

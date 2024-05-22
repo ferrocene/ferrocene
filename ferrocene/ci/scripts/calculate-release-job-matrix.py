@@ -102,7 +102,7 @@ def filter_automated_channels(releases):
             version = [int(num) for num in release.metadata.rust_version.split(".")]
             rolling_releases.append((version, release))
         else:
-            note("channel {release.metadata.channel} cannot be released automatically")
+            note(f"channel {release.metadata.channel} cannot be released automatically")
 
     rolling_releases.sort(key=lambda vr: vr[0])
     # When starting from a squashed repo with no release branches yielding the
@@ -185,10 +185,12 @@ def discard_branches_with_no_changes(ctx, releases):
         channel_metadata = json.loads(response["Body"].read())
         if channel_metadata["metadata_version"] == 2:
             last_commit = channel_metadata["latest_release"]["sha1_full"]
+        elif channel_metadata["metadata_version"] == 3:
+            last_commit = channel_metadata["releases"][-1]["sha1_full"]
         else:
             note(
-                "Channel API metadata version {channel_metadata['metadata_version']} "
-                "for channel {metadata.release.channel} is not supported. "
+                f"Channel API metadata version {channel_metadata['metadata_version']} "
+                f"for channel {release.metadata.channel} is not supported. "
                 '"No changes" check will be skipped.'
             )
             last_commit = "Z"  # Will never match :)

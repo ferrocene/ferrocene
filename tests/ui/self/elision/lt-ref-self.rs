@@ -43,8 +43,7 @@ impl<'a> Struct<'a> {
     }
 }
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
 // Struct Types
@@ -108,6 +107,3 @@ fn main() { }
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

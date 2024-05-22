@@ -41,8 +41,7 @@ impl Struct {
     }
 }
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_fk2m2irwpeof
 // Implementations
@@ -100,6 +99,3 @@ fn main() { }
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

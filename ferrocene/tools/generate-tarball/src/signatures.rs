@@ -18,7 +18,7 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) component: &'a str,
     pub(crate) commit_sha: &'a str,
     pub(crate) package_dir: &'a Path,
-    pub(crate) proxied_binaries: HashSet<&'a str>,
+    pub(crate) proxied_binaries: HashSet<&'a Path>,
     pub(crate) managed_prefixes: &'a [String],
 }
 
@@ -71,10 +71,17 @@ fn collect_files(
         let entry = entry?.path();
         let relative_path = entry
             .strip_prefix(ctx.package_dir)
-            .unwrap()
-            .to_str()
+            .unwrap();
+
+        #[cfg(not(windows))]
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path);
+        #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path.with_extension("").as_path());
+        
+        let relative_path = relative_path.to_str()
             .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
 
+            
         if entry.is_file() {
             package.files.push(PackageFile {
                 path: relative_path.into(),
@@ -83,7 +90,7 @@ fn collect_files(
                 posix_mode: entry.metadata()?.mode(),
                 #[cfg(windows)]
                 posix_mode: 0,
-                needs_proxy: ctx.proxied_binaries.contains(&relative_path),
+                needs_proxy,
             });
         } else if entry.is_dir() {
             collect_files(package, ctx, &entry)?;
@@ -144,7 +151,7 @@ mod tests {
                 component: "demo-package",
                 commit_sha: "000000",
                 package_dir: package_dir.path(),
-                proxied_binaries: ["bin/rustc"].into_iter().collect(),
+                proxied_binaries: [Path::new("bin/rustc")].into_iter().collect(),
                 managed_prefixes: &["lib/rustlib/x86_64-unknown-linux-gnu/lib/".into()],
             },
             &key,

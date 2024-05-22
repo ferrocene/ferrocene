@@ -151,7 +151,7 @@ mod tests {
                 component: "demo-package",
                 commit_sha: "000000",
                 package_dir: package_dir.path(),
-                proxied_binaries: ["bin/rustc"].into_iter().collect(),
+                proxied_binaries: [Path::new("bin/rustc")].into_iter().collect(),
                 managed_prefixes: &["lib/rustlib/x86_64-unknown-linux-gnu/lib/".into()],
             },
             &key,

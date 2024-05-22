@@ -6,7 +6,6 @@ name = "ferrocene-self-test"
 edition = "2021"
 
 [dependencies]
-atty = "0.2"
 tempfile = "3.3"
 thiserror = "1"
 

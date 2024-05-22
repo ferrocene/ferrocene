@@ -76,7 +76,7 @@ fn collect_files(
         #[cfg(not(windows))]
         let needs_proxy = ctx.proxied_binaries.contains(&relative_path);
         #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
-        let needs_proxy = ctx.proxied_binaries.contains(relative_path.with_extension(""));
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path.with_extension("").as_path());
         
         let relative_path = relative_path.to_str()
             .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;

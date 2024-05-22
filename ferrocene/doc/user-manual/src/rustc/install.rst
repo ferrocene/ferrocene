@@ -80,7 +80,7 @@ Validation
 
    The procedure described below relies on a tool that is not qualified, and
    thus can't be used in a safety critical environment: in that case, you must
-   follow the instructions in :qualification:id:`CSTR_0010_INSTALL`.
+   follow the instructions in :qualification:id:`RUSTC_CSTR_0010_INSTALL`.
 
 The Ferrocene toolchain contains a validation binary called
 ``ferrocene-self-test``, useful to verify the installation of the Ferrocene

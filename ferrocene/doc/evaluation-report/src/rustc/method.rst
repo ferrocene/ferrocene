@@ -24,7 +24,7 @@ Rust project and Ferrocene.
 Compiletest Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. id:: TS1_COMP
+.. id:: RUSTC_TS1_COMP
 
 **Compiletest** is the main compiler test suite. It contains a set of Rust
 programs that verify the *robustness* and *behavior* of the compiler and
@@ -50,7 +50,7 @@ and also applied at the level of an individual test.
 Library Test Suite
 ^^^^^^^^^^^^^^^^^^
 
-.. id:: TS2_LIBR
+.. id:: RUSTC_TS2_LIBR
 
 The **library test suite** contains tests that cover library libcore, and on
 supported platforms, libraries liballoc, libstd, and libtest. The tests are a
@@ -60,7 +60,7 @@ within the documentation which are built and run).
 Compiler Test Suite
 ^^^^^^^^^^^^^^^^^^^
 
-.. id:: TS3_CRAT
+.. id:: RUSTC_TS3_CRAT
 
 The **compiler test suite** covers the crates that comprise the compiler
 codebase. The tests are a mix of unit tests, integration tests and
@@ -72,7 +72,7 @@ in addition, unit tests are only used on a subset of the compiler codebase.
 Linkchecker Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. id:: TS4_LINK
+.. id:: RUSTC_TS4_LINK
 
 The **linkchecker** test suite checks that none of the links in the generated
 documentation are broken.
@@ -80,7 +80,7 @@ documentation are broken.
 Build System Test Suite
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. id:: TS6_BSYS
+.. id:: RUSTC_TS6_BSYS
 
 The **build system test** suite checks that major components such as x.py and
 bootstrapping operate as expected. According to our analysis, the test suite is
@@ -90,7 +90,7 @@ implementation.
 Tidy Test Suite
 ^^^^^^^^^^^^^^^
 
-.. id:: TS7_TIDY
+.. id:: RUSTC_TS7_TIDY
 
 The **tidy test suite** checks for consistency in the compiler codebase. It
 includes a variety of miscellaneous checks.
@@ -98,7 +98,7 @@ includes a variety of miscellaneous checks.
 Self-Test Test Suite
 ~~~~~~~~~~~~~~~~~~~~
 
-.. id:: TS8_SELF
+.. id:: RUSTC_TS8_SELF
 
 The **self-test test suite** installs the packaged release in a temporary
 directory, and executes the ``ferrocene-self-test`` tool on it. The tool

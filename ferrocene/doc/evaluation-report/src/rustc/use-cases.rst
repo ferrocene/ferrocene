@@ -9,7 +9,7 @@ Use Cases
 Installing Ferrocene
 --------------------
 
-.. id:: UC0_INST
+.. id:: RUSTC_UC0_INST
 
 **Actor(s):** User, tar (compression utility)
 
@@ -30,7 +30,7 @@ Installing Ferrocene
 Building a Library
 ------------------
 
-.. id:: UC1_RLIB
+.. id:: RUSTC_UC1_RLIB
 
 **Actor(s):** User, rustc.
 
@@ -65,7 +65,7 @@ environment is correctly set.
 7. `LLVM` generates a static Rust library.
 
 
-.. id:: UC2_STATICLIB
+.. id:: RUSTC_UC2_STATICLIB
 
 **Actor:** User, rustc.
 
@@ -103,7 +103,7 @@ environment is correctly set.
 Building an Executable
 ----------------------
 
-.. id:: UC3_EXEC
+.. id:: RUSTC_UC3_EXEC
 
 **Actor:** User, rustc.
 
@@ -144,7 +144,7 @@ set.
 9. The linker generates a Rust executable.
 
 
-.. id:: UC4_EXEC_RLIB
+.. id:: RUSTC_UC4_EXEC_RLIB
 
 **Actor:** User, rustc.
 
@@ -160,7 +160,7 @@ directories included by compiler argument `-L`.
 
 **Description:**
 
-1. (Optional): The `user` performs use case :id:`UC1_RLIB` to generate a static Rust
+1. (Optional): The `user` performs use case :id:`RUSTC_UC1_RLIB` to generate a static Rust
 library.
 
 2. The `user` calls `rustc` with the following command line arguments::
@@ -196,7 +196,7 @@ library.
 Building Mixed-Language Programs
 --------------------------------
 
-.. id:: UC5_EXEC_CLIB
+.. id:: RUSTC_UC5_EXEC_CLIB
 
 **Actor:** User, rustc, a C toolchain.
 

@@ -115,7 +115,7 @@ details of each test suite, refer to
 Compiletest Test Suite
 ----------------------
 
-**Test suite:** :id:`TS1_COMP`
+**Test suite:** :id:`RUSTC_TS1_COMP`
 
 The following compiletest suites were executed as part of this test suite:
 
@@ -191,7 +191,7 @@ The following compiletest suites were executed as part of this test suite:
 Library Test Suite
 ------------------
 
-**Test suite:** :id:`TS2_LIBR`
+**Test suite:** :id:`RUSTC_TS2_LIBR`
 
 .. FIXME: due to how the bootstrap code works, we're forced to match only the
    root node, otherwise we'd also match other tests invoking Crate down their
@@ -209,7 +209,7 @@ Library Test Suite
 Compiler Test Suite
 -------------------
 
-**Test suite:** :id:`TS3_CRAT`
+**Test suite:** :id:`RUSTC_TS3_CRAT`
 
 {% if host == target %}
 {{ cargo_tests_summary("bootstrap::core::build_steps::test::CrateLibrustc") }}
@@ -220,7 +220,7 @@ Compiler Test Suite
 Linkchecker Test Suite
 ----------------------
 
-**Test suite:** :id:`TS4_LINK`
+**Test suite:** :id:`RUSTC_TS4_LINK`
 
 {% if host == target %}
 {{ unconditional_pass("linkchecker") }}
@@ -231,7 +231,7 @@ Linkchecker Test Suite
 Build System Test Suite
 -----------------------
 
-**Test suite:** :id:`TS6_BSYS`
+**Test suite:** :id:`RUSTC_TS6_BSYS`
 
 
 {% if host == target %}
@@ -243,7 +243,7 @@ Build System Test Suite
 Tidy Test Suite
 ---------------
 
-**Test suite:** :id:`TS7_TIDY`
+**Test suite:** :id:`RUSTC_TS7_TIDY`
 
 {% if host == target %}
 {{ unconditional_pass("tidy") }}
@@ -254,7 +254,7 @@ Tidy Test Suite
 Self-Test Test Suite
 --------------------
 
-**Test suite:** :id:`TS8_SELF`
+**Test suite:** :id:`RUSTC_TS8_SELF`
 
 {% if host == target %}
 {{ unconditional_pass("self-test") }}

@@ -52,24 +52,29 @@ if [[ "${OSTYPE}" = "msys" ]]; then
     EXE_SUFFIX=".exe"
 fi
 
+SHA_CMD=("sha256sum")
+if ! [ -x "$(command -v ${SHA_CMD})" ]; then
+    SHA_CMD=("shasum" "-a" "256")
+fi
+
 # Calculate a hash of the LLVM source code and all the files that could impact
 # the LLVM build. This will be used as the cache key to avoid rebuilding LLVM
 # from scratch every time.
 get_llvm_cache_hash() {
     file="$(mktemp)"
 
-    shasum -a 256 "$0" >> "${file}"
-    shasum -a 256 ferrocene/ci/configure.sh >> "${file}"
-    shasum -a 256 src/version >> "${file}"
+    ${SHA_CMD[@]} "$0" >> "${file}"
+    ${SHA_CMD[@]} ferrocene/ci/configure.sh >> "${file}"
+    ${SHA_CMD[@]} src/version >> "${file}"
     # Apparently, git for windows doesn't understand when the `-z` flag of `git
     # ls-files` is passed after the paths, so we provide it before the list of
     # paths to list.
-    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 shasum -a 256 >> "${file}"
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 ${SHA_CMD[@]} >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
 
-    shasum -a 256 "${file}" | awk '{print($1)}'
+    ${SHA_CMD[@]} "${file}" | awk '{print($1)}'
     rm -f "${file}"
 }
 
@@ -142,7 +147,7 @@ build_llvm_tarball() {
     #
     # On Windows we have to pass `-f -`, otherwise tar will write to \\.\tape0
     # rather than stdout by default.
-    tar -cvf- "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
+    tar -cf- "build/${FERROCENE_HOST}/llvm" | zstd -1 -T0 > /tmp/llvm-cache.tar.zst
 }
 
 usage() {

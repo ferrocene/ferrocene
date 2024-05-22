@@ -97,7 +97,7 @@ the time and showing exception tracebacks:
 Test outcomes
 -------------
 
-Some of our documents, like the :doc:`qualification-report:tests/index` page,
+Some of our documents, like the :doc:`qualification-report:rustc/index` page,
 need to know which tests were executed and ignored to generate parts of the
 content. We call this information "test outcomes". While not strictly required
 to build the docs, not providing them will result in some information being

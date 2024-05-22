@@ -35,7 +35,7 @@ IEC 61508 requirements
 
    * - 7.4.4.6
      - | :doc:`Evaluation Report - Tool analysis <evaluation-report:rustc/tool-analysis>`
-       | :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+       | :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - For each tool in class T3, evidence shall be available that the tool conforms to its specification or documentation. Evidence may be based on a suitable combination of history of successful use in similar environments and for similar applications (within the organization or other organizations), and of tool validation as specified in 7.4.4.7.
 
    * - 7.4.4.7
@@ -59,15 +59,15 @@ IEC 61508 requirements
      - tools and equipment used;
 
    * - 7.4.4.7.e
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - the results of the validation activity; the documented results of validation shall state either that the software has passed the validation or the reasons for its failure;
 
    * - 7.4.4.7.f
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - test cases and their results for subsequent analysis;
 
    * - 7.4.4.7.g
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - discrepancies between expected and actual results.
 
    * - 7.4.4.8

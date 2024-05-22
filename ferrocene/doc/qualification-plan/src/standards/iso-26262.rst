@@ -168,11 +168,11 @@ ISO 26262 requirements
      - the methods applied for its qualification in accordance with 11.4.6.1;
 
    * - 11.4.6.2.g
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - the results of the measures applied to qualify the software tool; and
 
    * - 11.4.6.2.h
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - the usage constraints and malfunctions identified during the qualification, if applicable.
 
    * - 11.4.7
@@ -208,7 +208,7 @@ ISO 26262 requirements
      - the validation measures shall provide evidence that the software tool complies with specified requirements to its purpose as specified in the classification;
 
    * - 11.4.9.2.b
-     - :doc:`Qualification Report - Test results <qualification-report:tests/index>`
+     - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - the malfunctions and their corresponding erroneous outputs of the software tool occurring during validation shall be analysed together with information on their possible consequences and with measures to avoid or detect them; and
 
    * - 11.4.9.2.c

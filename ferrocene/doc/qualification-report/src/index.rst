@@ -17,13 +17,13 @@ qualification, in accordance to the standards above.
    statement
 
 .. toctree::
-   :caption: Test results:
+   :caption: ``rustc`` test results:
    :numbered:
    :maxdepth: 2
 
-   tests/index
-   tests/aarch64-unknown-none
-   tests/x86_64-unknown-linux-gnu
+   rustc/index
+   rustc/aarch64-unknown-none
+   rustc/x86_64-unknown-linux-gnu
 
 .. appendices::
    :caption: Appendices:

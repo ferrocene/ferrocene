@@ -18,7 +18,7 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) component: &'a str,
     pub(crate) commit_sha: &'a str,
     pub(crate) package_dir: &'a Path,
-    pub(crate) proxied_binaries: HashSet<&'a str>,
+    pub(crate) proxied_binaries: HashSet<&'a Path>,
     pub(crate) managed_prefixes: &'a [String],
 }
 

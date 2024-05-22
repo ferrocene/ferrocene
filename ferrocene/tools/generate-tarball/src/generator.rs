@@ -127,7 +127,7 @@ impl Generator {
                     component: &ferrocene_component,
                     commit_sha: &commit_sha,
                     package_dir: &package_dir,
-                    proxied_binaries: ferrocene_proxied_binary.iter().map(String::as_str).collect(),
+                    proxied_binaries: ferrocene_proxied_binary.iter().map(PathBuf::as_path).collect(),
                     managed_prefixes: &ferrocene_managed_prefix,
                 },
                 &key_arn,

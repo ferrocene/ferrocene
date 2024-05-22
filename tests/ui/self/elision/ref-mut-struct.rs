@@ -1,8 +1,9 @@
-#![allow(non_snake_case)]
+//@ run-rustfix
+#![allow(non_snake_case, dead_code)]
 
 use std::pin::Pin;
 
-struct Struct { }
+struct Struct {}
 
 impl Struct {
     // Test using `&mut Struct` explicitly:
@@ -33,7 +34,7 @@ impl Struct {
     }
 }
 
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
 // Struct Types

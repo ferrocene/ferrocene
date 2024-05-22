@@ -1,8 +1,11 @@
-#![allow(non_snake_case)]
+//@ run-rustfix
+#![allow(non_snake_case, dead_code)]
 
 use std::pin::Pin;
 
-struct Struct<'a> { data: &'a u32 }
+struct Struct<'a> {
+    data: &'a u32,
+}
 
 impl<'a> Struct<'a> {
     // Test using `&self` sugar:
@@ -40,7 +43,7 @@ impl<'a> Struct<'a> {
     }
 }
 
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_9ucqbbd0s2yo
 // Struct Types

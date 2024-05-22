@@ -13,6 +13,8 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
+use std::io::{self, IsTerminal};
+
 use crate::env::Env;
 use crate::error::Error;
 use crate::report::{Reporter, StderrReporter};
@@ -35,11 +37,8 @@ fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
 }
 
 fn main() {
-    let reporter = if atty::is(atty::Stream::Stderr) {
-        StderrReporter::color()
-    } else {
-        StderrReporter::plain()
-    };
+    let reporter =
+        if io::stderr().is_terminal() { StderrReporter::color() } else { StderrReporter::plain() };
 
     match main_inner(&reporter) {
         Ok(()) => {}

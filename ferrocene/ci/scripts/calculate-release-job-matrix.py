@@ -188,7 +188,7 @@ def discard_branches_with_no_changes(ctx, releases):
         else:
             note(
                 f"Channel API metadata version {channel_metadata['metadata_version']} "
-                f"for channel {metadata.release.channel} is not supported. "
+                f"for channel {release.metadata.channel} is not supported. "
                 '"No changes" check will be skipped.'
             )
             last_commit = "Z"  # Will never match :)

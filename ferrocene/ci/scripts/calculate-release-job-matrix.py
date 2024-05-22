@@ -185,6 +185,8 @@ def discard_branches_with_no_changes(ctx, releases):
         channel_metadata = json.loads(response["Body"].read())
         if channel_metadata["metadata_version"] == 2:
             last_commit = channel_metadata["latest_release"]["sha1_full"]
+        elif channel_metadata["metadata_version"] == 3:
+            last_commit = channel_metadata["releases"][-1]["sha1_full"]
         else:
             note(
                 f"Channel API metadata version {channel_metadata['metadata_version']} "

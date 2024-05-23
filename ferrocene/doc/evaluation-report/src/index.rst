@@ -9,17 +9,25 @@ Ferrocene Evaluation Report
 It describes the evaluation of Ferrocene in accordance to the standards above.
 
 .. toctree::
+   :caption: General
    :numbered:
    :maxdepth: 3
 
-   hazop
-   use-cases
-   tool-analysis
-   method
-   potential-errors
+   hazop-words
+   
+.. toctree::
+   :caption: rustc
+   :numbered:
+   :maxdepth: 3
+
+   rustc/hazop-nodes
+   rustc/use-cases
+   rustc/tool-analysis
+   rustc/method
+   rustc/potential-errors
 
 .. appendices::
-   :caption: Appendices:
+   :caption: Appendices
    :numbered:
    :maxdepth: 2
 

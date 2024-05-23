@@ -11,7 +11,7 @@ not possible to test a requirement on a target, an exception will be listed on
 this page.
 
 Note that the reporting tool only considers tests that were actually executed
-as part of the :doc:`test results <tests/index>`. Ignored tests are not
+as part of the :doc:`test results <rustc/index>`. Ignored tests are not
 considered when determining the traceability.
 
 Exceptions

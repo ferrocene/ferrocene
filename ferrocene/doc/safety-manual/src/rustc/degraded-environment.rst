@@ -22,7 +22,7 @@ In case of invalid Ferrocene installation or configuration, the behavior of
 the tool is unpredictable. The behavior can vary from a compilation error to an
 undefined code generation. Therefore, the correctness of the Ferrocene
 toolchain installation needs to be verified before use. This is covered by
-constrain :id:`CSTR_0010_INSTALL`.
+constrain :id:`RUSTC_CSTR_0010_INSTALL`.
 
 The following environment variables control or specify behavior of the
 compiler.

@@ -18,7 +18,7 @@ The validation process shall demonstrate that all the potential errors have
 been identified for the use case described in the Evaluation Report HazOp
 analysis.  These errors will either be covered by a test which ensures that
 they are not present in the final product, or means of mitigating their effects
-have been identified (see :doc:`evaluation-report:tool-analysis` for further
+have been identified (see :doc:`evaluation-report:rustc/tool-analysis` for further
 details).
 
 Validation Strategy

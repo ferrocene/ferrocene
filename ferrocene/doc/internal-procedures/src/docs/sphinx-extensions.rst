@@ -22,7 +22,7 @@ Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Our qualification documents contain IDs defining every concept and item
-referenced across our qualification material for example - ``ERR_DRIVER_04``.
+referenced across our qualification material for example - ``RUSTC_ERR_DRIVER_04``.
 The ``ferrocene_qualification`` Sphinx extension provides a directive and a role
 to respectively declare and link to an ID.
 

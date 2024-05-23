@@ -7,15 +7,17 @@
 # tries to find a value for all the defined parameters automatically, and exits
 # with an error if it can't calculate the value of one parameter.
 
+
+import boto3
+import datetime
 import hashlib
 import json
 import os
-import yaml
-import boto3
-import sys
-import datetime
-import urllib.parse
 import subprocess
+import sys
+import urllib.parse
+import yaml
+from typing import Callable
 
 
 # Path of the YAML file to extract the needed parameters from.
@@ -59,7 +61,7 @@ s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
 
-def calculate_docker_image_tag(image):
+def calculate_docker_image_tag(image: str):
     """
     Calculates the value of parameters starting with `docker-image-tag--`.
     """
@@ -67,7 +69,7 @@ def calculate_docker_image_tag(image):
     if not os.path.exists(os.path.join(path, "Dockerfile")):
         raise ScriptError(f"unknown Docker image: {image}")
 
-    all_files = []
+    all_files: list[str] = []
     for root, _, files in os.walk(path):
         for file in files:
             all_files.append(os.path.join(root, file))
@@ -84,7 +86,7 @@ def calculate_docker_image_tag(image):
     return f"{image}-{hash.hexdigest()}"
 
 
-def calculate_docker_image_rebuild(repo_plus_image):
+def calculate_docker_image_rebuild(repo_plus_image: str) -> bool:
     """
     Calculate the value of parameters starting with `docker-image-rebuild--`
     """
@@ -98,12 +100,13 @@ def calculate_docker_image_rebuild(repo_plus_image):
         # Image doesn't exist, build it.
         return True
 
+    # FIXME: .utcnow should be .now(datetime.UTC), but CI is on python 3.9
     now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
-    delta = now - image["imagePushedAt"]
+    delta: datetime.timedelta = now - image["imagePushedAt"]
     return delta.days >= REBUILD_IMAGES_OLDER_THAN_DAYS
 
 
-def calculate_docker_repository_url(repo):
+def calculate_docker_repository_url(repo: str) -> str:
     """
     Calculates the value of parameters starting with `docker-repository-url--`
     """
@@ -114,15 +117,17 @@ def calculate_docker_repository_url(repo):
     return repos["repositories"][0]["repositoryUri"]
 
 
-def calculate_llvm_rebuild(target):
+def calculate_llvm_rebuild(target: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url = urllib.parse.urlparse(subprocess.run(
-        ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
-        env={"FERROCENE_HOST": target},
-        stdout=subprocess.PIPE,
-    ).stdout.strip()).decode("utf-8")
+    url: urllib.parse.ParseResult = urllib.parse.urlparse(
+        subprocess.run(
+            ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
+            env={"FERROCENE_HOST": target},
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+    ).decode("utf-8")
     assert url.scheme == "s3"
 
     try:
@@ -131,51 +136,51 @@ def calculate_llvm_rebuild(target):
     except s3.exceptions.ClientError:
         return True
 
-def calculate_targets(host_plus_stage):
+
+def calculate_targets(host_plus_stage: str):
     """
     Calculates the list of targets to pass.
 
-    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test` 
+    :param str host_plus_stage: The Rust target hosting this job, then "--", then one of `build`, `std-only`, or `self-test`
     """
     host, stage = host_plus_stage.split("--", 1)
-    targets = []
 
     # The CI does not run Python 3.10 and thus `match` statements don't exist yet
     # in this universe.
     if stage == "build":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ONLY_TARGETS
+            targets = LINUX_ONLY_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ONLY_TARGETS
+            targets = MAC_ONLY_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets += WINDOWS_ONLY_TARGETS
+            targets = WINDOWS_ONLY_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std-only":
-        if host== "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+        if host == "x86_64-unknown-linux-gnu":
+            targets = LINUX_ALL_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_ALL_TARGETS
+            targets = LINUX_ALL_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_ALL_TARGETS
+            targets = MAC_ALL_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets += WINDOWS_ALL_TARGETS
+            targets = WINDOWS_ALL_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:
-        raise Exception("Stage not known, please add support")
+        raise Exception(f"Stage {stage} not known, please add support")
 
     return ",".join(targets)
 
 
 def prepare_parameters():
     with open(CIRCLECI_CONFIGURATION) as f:
-        config = yaml.safe_load(f)
+        config: dict[str, dict[str, str]] = yaml.safe_load(f)
 
-    replacements = {
+    replacements: dict[str, Callable[[str], str]] = {
         "docker-image-tag--": calculate_docker_image_tag,
         "docker-image-rebuild--": calculate_docker_image_rebuild,
         "docker-repository-url--": calculate_docker_repository_url,
@@ -183,12 +188,12 @@ def prepare_parameters():
         "targets--": calculate_targets,
     }
 
-    parameters = {}
+    parameters: dict[str, str] = {}
     for parameter in config["parameters"].keys():
         for prefix, func in replacements.items():
             if parameter.startswith(prefix):
                 # Anything after the prefix gets passed as a parameter
-                parameters[parameter] = func(parameter[len(prefix):])
+                parameters[parameter] = func(parameter[len(prefix) :])
                 break
         # In Python, the `else` is executed when the for loop finished
         # normally, without any `break` being executed. In this case, it's

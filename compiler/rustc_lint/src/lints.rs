@@ -620,6 +620,7 @@ pub enum PtrNullChecksDiag<'a> {
 #[diag(lint_for_loops_over_fallibles)]
 pub struct ForLoopsOverFalliblesDiag<'a> {
     pub article: &'static str,
+    pub ref_prefix: &'static str,
     pub ty: &'static str,
     #[subdiagnostic]
     pub sub: ForLoopsOverFalliblesLoopSub<'a>,
@@ -2227,7 +2228,7 @@ pub struct MacroUseDeprecated;
 pub struct UnusedMacroUse;
 
 #[derive(LintDiagnostic)]
-#[diag(lint_private_extern_crate_reexport)]
+#[diag(lint_private_extern_crate_reexport, code = E0365)]
 pub struct PrivateExternCrateReexport {
     pub ident: Ident,
 }

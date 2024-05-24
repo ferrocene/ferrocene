@@ -24,7 +24,7 @@ END = ">>>>>>> "
 # merge while the other side made changes to it. To ensure those are still
 # marked as conflict, the pull-upstream tool adds custom markers to them. We
 # should detect those as well.
-CUSTOM_DELETE_MARKER = "<<<PULL-UPSTREAM>>> file deleted by "
+CUSTOM_DELETE_MARKER = "<<<PULL-UPSTREAM>>> file deleted "
 
 EXCEPTIONS = {
     # Used in multiple rustc tests as a test case for conflict detection.

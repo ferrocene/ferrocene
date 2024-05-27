@@ -80,11 +80,7 @@ jobs:
     - run: cargo test
       if: contains(matrix.os, 'ubuntu')
       env:
-        RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib-gabi"
-    - run: cargo test
-      if: contains(matrix.os, 'ubuntu')
-      env:
-        RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib-gnu"
+        RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib"
 
     # Test that, on macOS, packed/unpacked debuginfo both work
     - run: cargo clean && cargo test

@@ -292,32 +292,15 @@ cfg_if::cfg_if! {
                 OptionCppSymbol(None)
             }
         }
-    } else {
-        use core::marker::PhantomData;
-
-        // Make sure to keep this zero-sized, so that the `cpp_demangle` feature
-        // has no cost when disabled.
-        struct OptionCppSymbol<'a>(PhantomData<&'a ()>);
-
-        impl<'a> OptionCppSymbol<'a> {
-            fn parse(_: &'a [u8]) -> OptionCppSymbol<'a> {
-                OptionCppSymbol(PhantomData)
-            }
-
-            fn none() -> OptionCppSymbol<'a> {
-                OptionCppSymbol(PhantomData)
-            }
-        }
     }
 }
 
 /// A wrapper around a symbol name to provide ergonomic accessors to the
 /// demangled name, the raw bytes, the raw string, etc.
-// Allow dead code for when the `cpp_demangle` feature is not enabled.
-#[allow(dead_code)]
 pub struct SymbolName<'a> {
     bytes: &'a [u8],
     demangled: Option<Demangle<'a>>,
+    #[cfg(feature = "cpp_demangle")]
     cpp_demangled: OptionCppSymbol<'a>,
 }
 
@@ -327,6 +310,7 @@ impl<'a> SymbolName<'a> {
         let str_bytes = str::from_utf8(bytes).ok();
         let demangled = str_bytes.and_then(|s| try_demangle(s).ok());
 
+        #[cfg(feature = "cpp_demangle")]
         let cpp = if demangled.is_none() {
             OptionCppSymbol::parse(bytes)
         } else {
@@ -336,6 +320,7 @@ impl<'a> SymbolName<'a> {
         SymbolName {
             bytes: bytes,
             demangled: demangled,
+            #[cfg(feature = "cpp_demangle")]
             cpp_demangled: cpp,
         }
     }
@@ -380,65 +365,45 @@ fn format_symbol_name(
     Ok(())
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "cpp_demangle")] {
-        impl<'a> fmt::Display for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if let Some(ref s) = self.demangled {
-                    s.fmt(f)
-                } else if let Some(ref cpp) = self.cpp_demangled.0 {
-                    cpp.fmt(f)
-                } else {
-                    format_symbol_name(fmt::Display::fmt, self.bytes, f)
-                }
+impl<'a> fmt::Display for SymbolName<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(ref s) = self.demangled {
+            return s.fmt(f);
+        }
+
+        #[cfg(feature = "cpp_demangle")]
+        {
+            if let Some(ref cpp) = self.cpp_demangled.0 {
+                return cpp.fmt(f);
             }
         }
-    } else {
-        impl<'a> fmt::Display for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if let Some(ref s) = self.demangled {
-                    s.fmt(f)
-                } else {
-                    format_symbol_name(fmt::Display::fmt, self.bytes, f)
-                }
-            }
-        }
+
+        format_symbol_name(fmt::Display::fmt, self.bytes, f)
     }
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(all(feature = "std", feature = "cpp_demangle"))] {
-        impl<'a> fmt::Debug for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                use std::fmt::Write;
-
-                if let Some(ref s) = self.demangled {
-                    return s.fmt(f)
-                }
-
-                // This may to print if the demangled symbol isn't actually
-                // valid, so handle the error here gracefully by not propagating
-                // it outwards.
-                if let Some(ref cpp) = self.cpp_demangled.0 {
-                    let mut s = String::new();
-                    if write!(s, "{cpp}").is_ok() {
-                        return s.fmt(f)
-                    }
-                }
-
-                format_symbol_name(fmt::Debug::fmt, self.bytes, f)
-            }
+impl<'a> fmt::Debug for SymbolName<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(ref s) = self.demangled {
+            return s.fmt(f);
         }
-    } else {
-        impl<'a> fmt::Debug for SymbolName<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if let Some(ref s) = self.demangled {
-                    s.fmt(f)
-                } else {
-                    format_symbol_name(fmt::Debug::fmt, self.bytes, f)
+
+        #[cfg(all(feature = "std", feature = "cpp_demangle"))]
+        {
+            use std::fmt::Write;
+
+            // This may to print if the demangled symbol isn't actually
+            // valid, so handle the error here gracefully by not propagating
+            // it outwards.
+            if let Some(ref cpp) = self.cpp_demangled.0 {
+                let mut s = String::new();
+                if write!(s, "{cpp}").is_ok() {
+                    return s.fmt(f);
                 }
             }
         }
+
+        format_symbol_name(fmt::Debug::fmt, self.bytes, f)
     }
 }
 

@@ -6,7 +6,7 @@
 // so that it gets its own 'target' directory. We manually invoke this test
 // in .github/workflows/main.yml by passing `--manifest-path` to Cargo
 #[test]
-#[cfg(target_os = "macos")]
+#[cfg(target_vendor = "apple")]
 fn backtrace_no_dsym() {
     use std::{env, fs};
 

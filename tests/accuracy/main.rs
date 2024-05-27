@@ -31,7 +31,7 @@ fn doit() {
         dir.pop();
         if cfg!(windows) {
             dir.push("dylib_dep.dll");
-        } else if cfg!(target_os = "macos") {
+        } else if cfg!(target_vendor = "apple") {
             dir.push("libdylib_dep.dylib");
         } else if cfg!(target_os = "aix") {
             dir.push("libdylib_dep.a");

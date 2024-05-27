@@ -30,15 +30,16 @@ cfg_if::cfg_if! {
     if #[cfg(windows)] {
         #[path = "gimli/mmap_windows.rs"]
         mod mmap;
+    } else if #[cfg(target_vendor = "apple")] {
+        #[path = "gimli/mmap_unix.rs"]
+        mod mmap;
     } else if #[cfg(any(
         target_os = "android",
         target_os = "freebsd",
         target_os = "fuchsia",
         target_os = "haiku",
         target_os = "hurd",
-        target_os = "ios",
         target_os = "linux",
-        target_os = "macos",
         target_os = "openbsd",
         target_os = "solaris",
         target_os = "illumos",
@@ -195,12 +196,7 @@ cfg_if::cfg_if! {
     if #[cfg(windows)] {
         mod coff;
         use self::coff::{handle_split_dwarf, Object};
-    } else if #[cfg(any(
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "tvos",
-        target_os = "watchos",
-    ))] {
+    } else if #[cfg(any(target_vendor = "apple"))] {
         mod macho;
         use self::macho::{handle_split_dwarf, Object};
     } else if #[cfg(target_os = "aix")] {
@@ -216,12 +212,7 @@ cfg_if::cfg_if! {
     if #[cfg(windows)] {
         mod libs_windows;
         use libs_windows::native_libraries;
-    } else if #[cfg(any(
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "tvos",
-        target_os = "watchos",
-    ))] {
+    } else if #[cfg(target_vendor = "apple")] {
         mod libs_macos;
         use libs_macos::native_libraries;
     } else if #[cfg(target_os = "illumos")] {

@@ -213,9 +213,9 @@
 //! [array]: prim@array
 //! [slice]: prim@slice
 
-#![cfg_attr(not(feature = "restricted-std"), stable(feature = "rust1", since = "1.0.0"))]
+#![cfg_attr(not(restricted_std), stable(feature = "rust1", since = "1.0.0"))]
 #![cfg_attr(
-    feature = "restricted-std",
+    restricted_std,
     unstable(
         feature = "restricted_std",
         issue = "none",
@@ -395,7 +395,6 @@
 #![feature(edition_panic)]
 #![feature(format_args_nl)]
 #![feature(get_many_mut)]
-#![feature(lazy_cell)]
 #![feature(log_syntax)]
 #![feature(test)]
 #![feature(trace_macros)]

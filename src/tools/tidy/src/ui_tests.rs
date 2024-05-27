@@ -20,7 +20,6 @@ const ENTRY_LIMIT: usize = 900;
 // FIXME: The following limits should be reduced eventually.
 
 const ISSUES_ENTRY_LIMIT: usize = 1676;
-const ROOT_ENTRY_LIMIT: usize = 757;
 
 const EXPECTED_TEST_FILE_EXTENSIONS: &[&str] = &[
     "rs",     // test source files
@@ -67,14 +66,16 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
         }
     }
 
-    let (mut max, mut max_root, mut max_issues) = (0usize, 0usize, 0usize);
+    let (mut max, mut max_issues) = (0usize, 0usize);
     for (dir_path, count) in directories {
-        // Use special values for these dirs.
-        let is_root = tests_path.join("ui") == dir_path;
         let is_issues_dir = tests_path.join("ui/issues") == dir_path;
+<<<<<<< HEAD
         let (limit, maxcnt) = if is_root {
             (ROOT_ENTRY_LIMIT + FERROCENE_EXTRA_ROOT_ENTRY_LIMIT, &mut max_root)
         } else if is_issues_dir {
+=======
+        let (limit, maxcnt) = if is_issues_dir {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             (ISSUES_ENTRY_LIMIT, &mut max_issues)
         } else {
             (ENTRY_LIMIT, &mut max)
@@ -98,12 +99,6 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
                 dir_path.display()
             )
         }
-    }
-    if ROOT_ENTRY_LIMIT > max_root {
-        tidy_error!(
-            bad,
-            "`ROOT_ENTRY_LIMIT` is too high (is {ROOT_ENTRY_LIMIT}, should be {max_root})"
-        );
     }
     if ISSUES_ENTRY_LIMIT > max_issues {
         tidy_error!(

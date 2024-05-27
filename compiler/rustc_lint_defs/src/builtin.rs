@@ -49,7 +49,6 @@ declare_lint_pass! {
         HIDDEN_GLOB_REEXPORTS,
         ILL_FORMED_ATTRIBUTE_INPUT,
         INCOMPLETE_INCLUDE,
-        INDIRECT_STRUCTURAL_MATCH,
         INEFFECTIVE_UNSTABLE_TRAIT_IMPL,
         INLINE_NO_SANITIZE,
         INVALID_DOC_ATTRIBUTES,
@@ -74,7 +73,6 @@ declare_lint_pass! {
         ORDER_DEPENDENT_TRAIT_OBJECTS,
         OVERLAPPING_RANGE_ENDPOINTS,
         PATTERNS_IN_FNS_WITHOUT_BODY,
-        POINTER_STRUCTURAL_MATCH,
         PRIVATE_BOUNDS,
         PRIVATE_INTERFACES,
         PROC_MACRO_BACK_COMPAT,
@@ -90,6 +88,7 @@ declare_lint_pass! {
         RUST_2021_PREFIXES_INCOMPATIBLE_SYNTAX,
         RUST_2021_PRELUDE_COLLISIONS,
         RUST_2024_INCOMPATIBLE_PAT,
+        SELF_CONSTRUCTOR_FROM_OUTER_ITEM,
         SEMICOLON_IN_EXPRESSIONS_FROM_MACROS,
         SINGLE_USE_LIFETIMES,
         SOFT_UNSTABLE,
@@ -1315,10 +1314,8 @@ declare_lint! {
     /// * If you are trying to perform a one-time initialization of a global:
     ///     * If the value can be computed at compile-time, consider using
     ///       const-compatible values (see [Constant Evaluation]).
-    ///     * For more complex single-initialization cases, consider using a
-    ///       third-party crate, such as [`lazy_static`] or [`once_cell`].
-    ///     * If you are using the [nightly channel], consider the new
-    ///       [`lazy`] module in the standard library.
+    ///     * For more complex single-initialization cases, consider using
+    ///       [`std::sync::LazyLock`].
     /// * If you truly need a mutable global, consider using a [`static`],
     ///   which has a variety of options:
     ///   * Simple data types can be directly defined and mutated with an
@@ -1333,9 +1330,7 @@ declare_lint! {
     /// [Constant Evaluation]: https://doc.rust-lang.org/reference/const_eval.html
     /// [`static`]: https://doc.rust-lang.org/reference/items/static-items.html
     /// [mutable `static`]: https://doc.rust-lang.org/reference/items/static-items.html#mutable-statics
-    /// [`lazy`]: https://doc.rust-lang.org/nightly/std/lazy/index.html
-    /// [`lazy_static`]: https://crates.io/crates/lazy_static
-    /// [`once_cell`]: https://crates.io/crates/once_cell
+    /// [`std::sync::LazyLock`]: https://doc.rust-lang.org/stable/std/sync/struct.LazyLock.html
     /// [`atomic`]: https://doc.rust-lang.org/std/sync/atomic/index.html
     /// [`Mutex`]: https://doc.rust-lang.org/std/sync/struct.Mutex.html
     pub CONST_ITEM_MUTATION,
@@ -2355,52 +2350,6 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `indirect_structural_match` lint detects a `const` in a pattern
-    /// that manually implements [`PartialEq`] and [`Eq`].
-    ///
-    /// [`PartialEq`]: https://doc.rust-lang.org/std/cmp/trait.PartialEq.html
-    /// [`Eq`]: https://doc.rust-lang.org/std/cmp/trait.Eq.html
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail
-    /// #![deny(indirect_structural_match)]
-    ///
-    /// struct NoDerive(i32);
-    /// impl PartialEq for NoDerive { fn eq(&self, _: &Self) -> bool { false } }
-    /// impl Eq for NoDerive { }
-    /// #[derive(PartialEq, Eq)]
-    /// struct WrapParam<T>(T);
-    /// const WRAP_INDIRECT_PARAM: & &WrapParam<NoDerive> = & &WrapParam(NoDerive(0));
-    /// fn main() {
-    ///     match WRAP_INDIRECT_PARAM {
-    ///         WRAP_INDIRECT_PARAM => { }
-    ///         _ => { }
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// The compiler unintentionally accepted this form in the past. This is a
-    /// [future-incompatible] lint to transition this to a hard error in the
-    /// future. See [issue #62411] for a complete description of the problem,
-    /// and some possible solutions.
-    ///
-    /// [issue #62411]: https://github.com/rust-lang/rust/issues/62411
-    /// [future-incompatible]: ../index.md#future-incompatible-lints
-    pub INDIRECT_STRUCTURAL_MATCH,
-    Warn,
-    "constant used in pattern contains value of non-structural-match type in a field or a variant",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::FutureReleaseErrorReportInDeps,
-        reference: "issue #120362 <https://github.com/rust-lang/rust/issues/120362>",
-    };
-}
-
-declare_lint! {
     /// The `deprecated_in_future` lint is internal to rustc and should not be
     /// used by user code.
     ///
@@ -2415,45 +2364,6 @@ declare_lint! {
     Allow,
     "detects use of items that will be deprecated in a future version",
     report_in_external_macro
-}
-
-declare_lint! {
-    /// The `pointer_structural_match` lint detects pointers used in patterns whose behaviour
-    /// cannot be relied upon across compiler versions and optimization levels.
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail
-    /// #![deny(pointer_structural_match)]
-    /// fn foo(a: usize, b: usize) -> usize { a + b }
-    /// const FOO: fn(usize, usize) -> usize = foo;
-    /// fn main() {
-    ///     match FOO {
-    ///         FOO => {},
-    ///         _ => {},
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// Previous versions of Rust allowed function pointers and all raw pointers in patterns.
-    /// While these work in many cases as expected by users, it is possible that due to
-    /// optimizations pointers are "not equal to themselves" or pointers to different functions
-    /// compare as equal during runtime. This is because LLVM optimizations can deduplicate
-    /// functions if their bodies are the same, thus also making pointers to these functions point
-    /// to the same location. Additionally functions may get duplicated if they are instantiated
-    /// in different crates and not deduplicated again via LTO. Pointer identity for memory
-    /// created by `const` is similarly unreliable.
-    pub POINTER_STRUCTURAL_MATCH,
-    Warn,
-    "pointers are not structural-match",
-    @future_incompatible = FutureIncompatibleInfo {
-        reason: FutureIncompatibilityReason::FutureReleaseErrorReportInDeps,
-        reference: "issue #120362 <https://github.com/rust-lang/rust/issues/120362>",
-    };
 }
 
 declare_lint! {
@@ -3147,6 +3057,47 @@ declare_lint! {
     pub INEFFECTIVE_UNSTABLE_TRAIT_IMPL,
     Deny,
     "detects `#[unstable]` on stable trait implementations for stable types"
+}
+
+declare_lint! {
+    /// The `self_constructor_from_outer_item` lint detects cases where the `Self` constructor
+    /// was silently allowed due to a bug in the resolver, and which may produce surprising
+    /// and unintended behavior.
+    ///
+    /// Using a `Self` type alias from an outer item was never intended, but was silently allowed.
+    /// This is deprecated -- and is a hard error when the `Self` type alias references generics
+    /// that are not in scope.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,compile_fail
+    /// #![deny(self_constructor_from_outer_item)]
+    ///
+    /// struct S0(usize);
+    ///
+    /// impl S0 {
+    ///     fn foo() {
+    ///         const C: S0 = Self(0);
+    ///         fn bar() -> S0 {
+    ///             Self(0)
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// The `Self` type alias should not be reachable because nested items are not associated with
+    /// the scope of the parameters from the parent item.
+    pub SELF_CONSTRUCTOR_FROM_OUTER_ITEM,
+    Warn,
+    "detect unsupported use of `Self` from outer item",
+    @future_incompatible = FutureIncompatibleInfo {
+        reason: FutureIncompatibilityReason::FutureReleaseErrorDontReportInDeps,
+        reference: "issue #124186 <https://github.com/rust-lang/rust/issues/124186>",
+    };
 }
 
 declare_lint! {

@@ -5123,6 +5123,7 @@ dependencies = [
  "rustc_fluent_macro",
  "rustc_hir",
  "rustc_index",
+ "rustc_infer",
  "rustc_macros",
  "rustc_middle",
  "rustc_mir_build",

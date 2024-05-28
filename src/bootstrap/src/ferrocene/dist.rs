@@ -20,7 +20,7 @@ use crate::utils::tarball::{GeneratedTarball, Tarball};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {
-    target: TargetSelection,
+    pub(crate) target: TargetSelection,
 }
 
 impl Step for Docs {

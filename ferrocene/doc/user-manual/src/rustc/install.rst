@@ -21,11 +21,11 @@ section of the target documentation.
 Installation
 ------------
 
-.. note::
+Preferred way of installing and managing Ferrocene toolchain(s) is via our
+``rustup`` like tool called ``criticalup``.
 
-   We are developing a tool similar to ``rustup``, able to manage your
-   Ferrocene installations and install Ferrocene without relying on a web
-   browser. It will be available soon.
+Find more details about using ``criticalup`` in the
+`CriticalUp User Documentation <https://criticalup.ferrocene.dev/index.html>`_.
 
 Manual installation
 ~~~~~~~~~~~~~~~~~~~

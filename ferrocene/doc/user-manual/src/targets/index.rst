@@ -120,7 +120,7 @@ should not be used in production.
      - Full
      - \-
 
-   * - :target:`x86_64-pc-windows-msvc`
+   * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``
      - Host platform
      - Full

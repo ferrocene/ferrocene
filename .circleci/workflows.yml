@@ -526,7 +526,7 @@ jobs:
     description: Job that builds and uploads a Docker image, if needed.
     docker:
       - image: cimg/base:current-22.04
-    resource_class: small # 1-core
+    resource_class: large # 4-core
     parameters:
       image:
         description: The image that needs to be built
@@ -545,8 +545,7 @@ jobs:
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
-            - setup_remote_docker:
-                version: 20.10.17
+            - setup_remote_docker
             - run:
                 name: Build and upload the Docker image, if needed
                 command: ferrocene/ci/scripts/build-docker-image.sh

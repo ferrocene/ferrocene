@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::build_steps::{
-    check, clean, clippy, compile, dist, doc, install, llvm, run, setup, test, vendor,
+    check, clean, clippy, compile, dist, doc, llvm, run, setup, test, vendor,
 };
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
@@ -960,21 +960,32 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
-                install::Docs,
-                install::Std,
-                // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
-                // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
-                // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
-                // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
-                install::Rustc,
-                install::Cargo,
-                install::RustAnalyzer,
-                install::Rustfmt,
-                install::RustDemangler,
-                install::Clippy,
-                install::Miri,
-                install::LlvmTools,
-                install::Src,
+                // install::Docs,
+                // install::Std,
+                // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
+                // // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
+                // // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
+                // // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
+                // install::Rustc,
+                // install::Cargo,
+                // install::RustAnalyzer,
+                // install::Rustfmt,
+                // install::RustDemangler,
+                // install::Clippy,
+                // install::Miri,
+                // install::LlvmTools,
+                // install::Src,
+                // install::Rustc,
+                crate::ferrocene::install::Docs,
+                crate::ferrocene::install::Std,
+                crate::ferrocene::install::Cargo,
+                crate::ferrocene::install::RustAnalyzer,
+                crate::ferrocene::install::Rustfmt,
+                crate::ferrocene::install::RustDemangler,
+                crate::ferrocene::install::Clippy,
+                crate::ferrocene::install::Miri,
+                crate::ferrocene::install::LlvmTools,
+                crate::ferrocene::install::Src,
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,

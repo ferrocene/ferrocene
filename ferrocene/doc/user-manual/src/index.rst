@@ -38,6 +38,7 @@ Ferrocene User Manual
    targets/index
    targets/aarch64-unknown-none
    targets/x86_64-unknown-linux-gnu
+   targets/x86_64-pc-windows-msvc
 
 .. toctree::
    :numbered:

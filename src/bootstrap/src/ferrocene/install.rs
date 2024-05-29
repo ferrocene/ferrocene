@@ -15,56 +15,10 @@ use walkdir::WalkDir;
 use crate::core::build_steps::dist;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::{Config, TargetSelection};
-use crate::utils::helpers::t;
 use crate::utils::tarball::GeneratedTarball;
 use crate::{Compiler, Kind};
 
-// #[cfg(target_os = "illumos")]
-// const SHELL: &str = "bash";
-// #[cfg(not(target_os = "illumos"))]
-// const SHELL: &str = "sh";
-
-// /// We have to run a few shell scripts, which choke quite a bit on both `\`
-// /// characters and on `C:\` paths, so normalize both of them away.
-// fn sanitize_sh(path: &Path) -> String {
-//     let path = path.to_str().unwrap().replace('\\', "/");
-//     return change_drive(unc_to_lfs(&path)).unwrap_or(path);
-
-//     fn unc_to_lfs(s: &str) -> &str {
-//         s.strip_prefix("//?/").unwrap_or(s)
-//     }
-
-//     fn change_drive(s: &str) -> Option<String> {
-//         let mut ch = s.chars();
-//         let drive = ch.next().unwrap_or('C');
-//         if ch.next() != Some(':') {
-//             return None;
-//         }
-//         if ch.next() != Some('/') {
-//             return None;
-//         }
-//         Some(format!("/{}/{}", drive, &s[drive.len_utf8() + 2..]))
-//     }
-// }
-
-// fn is_dir_writable_for_user(dir: &Path) -> bool {
-//     let tmp = dir.join(".tmp");
-//     match fs::create_dir_all(&tmp) {
-//         Ok(_) => {
-//             fs::remove_dir_all(tmp).unwrap();
-//             true
-//         }
-//         Err(e) => {
-//             if e.kind() == std::io::ErrorKind::PermissionDenied {
-//                 false
-//             } else {
-//                 panic!("Failed the write access check for the current user. {}", e);
-//             }
-//         }
-//     }
-// }
-
-fn install_sh(
+fn install(
     builder: &Builder<'_>,
     package: &str,
     stage: u32,
@@ -73,25 +27,9 @@ fn install_sh(
 ) {
     let _guard = builder.msg(Kind::Install, stage, package, host, host);
 
-    // Create a temporary root
-    let empty_dir = builder.out.join("tmp/empty_dir");
-    t!(fs::create_dir_all(&empty_dir));
-
-    // Unpack into temporary root
     let tarball_output = tarball.work_dir();
     let image_dir = tarball_output.join("image");
-    // for maybe_entry in WalkDir::new(&image_dir) {
-    //     let entry = maybe_entry.unwrap();
-    //     let entry_relative = entry.path().strip_prefix(&image_dir).unwrap();
-    //     let ty = entry.file_type();
-    //     if ty.is_dir() {
-    //         fs::create_dir_all(empty_dir.join(entry_relative)).unwrap();
-    //     } else if ty.is_file() {
-    //         fs::copy(entry.path(), empty_dir.join(entry_relative)).unwrap();
-    //     }
-    // }
 
-    // Remap temporary root onto filesystem based on config
     let prefix = {
         let mut prefix = default_path(&builder.config.prefix, "/usr/local");
         let destdir_env = std::env::var_os("DESTDIR").map(PathBuf::from);
@@ -114,7 +52,7 @@ fn install_sh(
         prefix
     };
     
-    let install = |from: &Path, to: &Path| -> std::io::Result<()> {
+    let remap = |from: &Path, to: &Path| -> std::io::Result<()> {
         if !from.exists() {
             return Ok(())
         }
@@ -133,56 +71,27 @@ fn install_sh(
     };
 
     let sysconfdir = prefix.join(default_path(&builder.config.sysconfdir, "etc"));
-    install(&image_dir.join("etc"), &sysconfdir).unwrap();
+    remap(&image_dir.join("etc"), &sysconfdir).unwrap();
 
     let datadir = prefix.join(default_path(&builder.config.datadir, "share"));
-    install(&image_dir.join("share"), &datadir).unwrap();
+    remap(&image_dir.join("share"), &datadir).unwrap();
 
     let docdir = prefix.join(default_path(&builder.config.docdir, &format!("share/doc/{package}")));
-    install(&image_dir.join("share/doc"), &docdir).unwrap();
+    remap(&image_dir.join("share/doc"), &docdir).unwrap();
 
     let mandir = prefix.join(default_path(&builder.config.mandir, "share/man"));
-    install(&image_dir.join("share/man"), &mandir).unwrap();
+    remap(&image_dir.join("share/man"), &mandir).unwrap();
 
     let libdir = prefix.join(default_path(&builder.config.libdir, "lib"));
-    install(&image_dir.join("lib"), &libdir).unwrap();
+    remap(&image_dir.join("lib"), &libdir).unwrap();
 
     let bindir = prefix.join(&builder.config.bindir); // Default in config.rs
-    install(&image_dir.join("bin"), &bindir).unwrap();
+    remap(&image_dir.join("bin"), &bindir).unwrap();
 }
 
 fn default_path(config: &Option<PathBuf>, default: &str) -> PathBuf {
     config.as_ref().cloned().unwrap_or_else(|| PathBuf::from(default))
 }
-
-// fn prepare_dir(destdir_env: &Option<PathBuf>, mut path: PathBuf) -> String {
-//     // The DESTDIR environment variable is a standard way to install software in a subdirectory
-//     // while keeping the original directory structure, even if the prefix or other directories
-//     // contain absolute paths.
-//     //
-//     // More information on the environment variable is available here:
-//     // https://www.gnu.org/prep/standards/html_node/DESTDIR.html
-//     if let Some(destdir) = destdir_env {
-//         let without_destdir = path.clone();
-//         path.clone_from(destdir);
-//         // Custom .join() which ignores disk roots.
-//         for part in without_destdir.components() {
-//             if let Component::Normal(s) = part {
-//                 path.push(s)
-//             }
-//         }
-//     }
-
-//     // The installation command is not executed from the current directory, but from a temporary
-//     // directory. To prevent relative paths from breaking this converts relative paths to absolute
-//     // paths. std::fs::canonicalize is not used as that requires the path to actually be present.
-//     if path.is_relative() {
-//         path = std::env::current_dir().expect("failed to get the current directory").join(path);
-//         assert!(path.is_absolute(), "could not make the path relative");
-//     }
-
-//     sanitize_sh(&path)
-// }
 
 macro_rules! install {
     (($sel:ident, $builder:ident, $_config:ident),
@@ -234,7 +143,7 @@ macro_rules! install {
 install!((self, builder, _config),
     Docs, path = "src/doc", _config.docs, only_hosts: false, {
         let tarball = builder.ensure(dist::Docs { host: self.target }).expect("missing docs");
-        install_sh(builder, "docs", self.compiler.stage, Some(self.target), &tarball);
+        install(builder, "docs", self.compiler.stage, Some(self.target), &tarball);
     };
     Std, path = "library/std", true, only_hosts: false, {
         // `expect` should be safe, only None when host != build, but this
@@ -243,19 +152,19 @@ install!((self, builder, _config),
             compiler: self.compiler,
             target: self.target
         }).expect("missing std");
-        install_sh(builder, "std", self.compiler.stage, Some(self.target), &tarball);
+        install(builder, "std", self.compiler.stage, Some(self.target), &tarball);
     };
     Cargo, alias = "cargo", Self::should_build(_config), only_hosts: true, {
         let tarball = builder
             .ensure(dist::Cargo { compiler: self.compiler, target: self.target })
             .expect("missing cargo");
-        install_sh(builder, "cargo", self.compiler.stage, Some(self.target), &tarball);
+        install(builder, "cargo", self.compiler.stage, Some(self.target), &tarball);
     };
     RustAnalyzer, alias = "rust-analyzer", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) =
             builder.ensure(dist::RustAnalyzer { compiler: self.compiler, target: self.target })
         {
-            install_sh(builder, "rust-analyzer", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "rust-analyzer", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping Install rust-analyzer stage{} ({})", self.compiler.stage, self.target),
@@ -266,11 +175,11 @@ install!((self, builder, _config),
         let tarball = builder
             .ensure(dist::Clippy { compiler: self.compiler, target: self.target })
             .expect("missing clippy");
-        install_sh(builder, "clippy", self.compiler.stage, Some(self.target), &tarball);
+        install(builder, "clippy", self.compiler.stage, Some(self.target), &tarball);
     };
     Miri, alias = "miri", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::Miri { compiler: self.compiler, target: self.target }) {
-            install_sh(builder, "miri", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "miri", self.compiler.stage, Some(self.target), &tarball);
         } else {
             // Miri is only available on nightly
             builder.info(
@@ -280,7 +189,7 @@ install!((self, builder, _config),
     };
     LlvmTools, alias = "llvm-tools", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::LlvmTools { target: self.target }) {
-            install_sh(builder, "llvm-tools", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "llvm-tools", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping llvm-tools stage{} ({}): external LLVM", self.compiler.stage, self.target),
@@ -292,7 +201,7 @@ install!((self, builder, _config),
             compiler: self.compiler,
             target: self.target
         }) {
-            install_sh(builder, "rustfmt", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "rustfmt", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping Install Rustfmt stage{} ({})", self.compiler.stage, self.target),
@@ -307,7 +216,7 @@ install!((self, builder, _config),
             compiler: self.compiler,
             target: self.target
         }) {
-            install_sh(builder, "rust-demangler", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "rust-demangler", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping Install RustDemangler stage{} ({})",
@@ -319,14 +228,14 @@ install!((self, builder, _config),
         let tarball = builder.ensure(dist::Rustc {
             compiler: builder.compiler(builder.top_stage, self.target),
         });
-        install_sh(builder, "rustc", self.compiler.stage, Some(self.target), &tarball);
+        install(builder, "rustc", self.compiler.stage, Some(self.target), &tarball);
     };
     RustcCodegenCranelift, alias = "rustc-codegen-cranelift", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::CodegenBackend {
             compiler: self.compiler,
             backend: "cranelift".to_string(),
         }) {
-            install_sh(builder, "rustc-codegen-cranelift", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "rustc-codegen-cranelift", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping Install CodegenBackend(\"cranelift\") stage{} ({})",
@@ -336,7 +245,7 @@ install!((self, builder, _config),
     };
     LlvmBitcodeLinker, alias = "llvm-bitcode-linker", Self::should_build(_config), only_hosts: true, {
         if let Some(tarball) = builder.ensure(dist::LlvmBitcodeLinker { compiler: self.compiler, target: self.target }) {
-            install_sh(builder, "llvm-bitcode-linker", self.compiler.stage, Some(self.target), &tarball);
+            install(builder, "llvm-bitcode-linker", self.compiler.stage, Some(self.target), &tarball);
         } else {
             builder.info(
                 &format!("skipping llvm-bitcode-linker stage{} ({})", self.compiler.stage, self.target),
@@ -367,6 +276,6 @@ impl Step for Src {
 
     fn run(self, builder: &Builder<'_>) {
         let tarball = builder.ensure(dist::Src);
-        install_sh(builder, "src", self.stage, None, &tarball);
+        install(builder, "src", self.stage, None, &tarball);
     }
 }

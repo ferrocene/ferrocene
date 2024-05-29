@@ -971,6 +971,7 @@ impl<'a> Builder<'a> {
                 // install::Rustc,
                 crate::ferrocene::install::Docs,
                 crate::ferrocene::install::Std,
+                crate::ferrocene::install::Rustc,
                 crate::ferrocene::install::Cargo,
                 crate::ferrocene::install::RustAnalyzer,
                 crate::ferrocene::install::Rustfmt,

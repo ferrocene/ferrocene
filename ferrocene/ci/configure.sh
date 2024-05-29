@@ -322,7 +322,16 @@ fi
 #
 # If this is not provided, the report will not be included in the generated
 # documentation. This should only be set in stable, qualified releases.
-#add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-technical-report.pdf"
+#if is_internal; then
+#    add --set ferrocene.technical-report-url="s3://ferrocene-ci-mirrors/manual/tuv-technical-reports/YYYY-MM-DD-ferrocene-YY.MM.N-technical-report.pdf"
+#fi
+
+# When building Ferrocene outside of Ferrous Systems, folks will not have
+# access to the document signature files stored in AWS. In that case, configure
+# the build system to ignore document signatures.
+if ! is_internal; then
+    add --set ferrocene.ignore-document-signatures=true
+fi
 
 ###############################################
 #                                             #

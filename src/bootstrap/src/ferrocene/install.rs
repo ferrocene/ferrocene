@@ -7,7 +7,7 @@
 
 // use std::env;
 use std::fs;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 // use std::process::Command;
 
 use walkdir::WalkDir;
@@ -51,10 +51,10 @@ fn install(
         }
         prefix
     };
-    
+
     let remap = |from: &Path, to: &Path| -> std::io::Result<()> {
         if !from.exists() {
-            return Ok(())
+            return Ok(());
         }
         for maybe_entry in WalkDir::new(&from) {
             let entry = maybe_entry.unwrap();

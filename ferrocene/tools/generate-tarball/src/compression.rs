@@ -82,7 +82,7 @@ impl CompressionFormat {
                         // produced by rust-lang/promote-release which hosts recompression logic
                         // and is tuned for optimal compression.
                         xz2::stream::MtStreamBuilder::new().threads(6).preset(9).encoder().unwrap()
-                    },
+                    }
                     CompressionProfile::NoOp => panic!(
                         "compression profile 'no-op' should not call `CompressionFormat::encode`."
                     ),

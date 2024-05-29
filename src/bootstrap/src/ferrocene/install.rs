@@ -5,10 +5,12 @@
 //! This module is responsible for installing the standard library,
 //! compiler, and documentation.
 
-use std::env;
+// use std::env;
 use std::fs;
 use std::path::{PathBuf, Path};
 // use std::process::Command;
+
+use walkdir::WalkDir;
 
 use crate::core::build_steps::dist;
 use crate::core::builder::{Builder, RunConfig, ShouldRun, Step};
@@ -71,44 +73,82 @@ fn install_sh(
 ) {
     let _guard = builder.msg(Kind::Install, stage, package, host, host);
 
-    let prefix = default_path(&builder.config.prefix, "/usr/local");
-    let sysconfdir = prefix.join(default_path(&builder.config.sysconfdir, "/etc"));
-    let destdir_env = env::var_os("DESTDIR").map(PathBuf::from);
-
-    // let datadir = prefix.join(default_path(&builder.config.datadir, "share"));
-    // let docdir = prefix.join(default_path(&builder.config.docdir, &format!("share/doc/{package}")));
-    // let mandir = prefix.join(default_path(&builder.config.mandir, "share/man"));
-    // let libdir = prefix.join(default_path(&builder.config.libdir, "lib"));
-    // let bindir = prefix.join(&builder.config.bindir); // Default in config.rs
-
+    // Create a temporary root
     let empty_dir = builder.out.join("tmp/empty_dir");
     t!(fs::create_dir_all(&empty_dir));
 
-   
-    
+    // Unpack into temporary root
     let tarball_output = tarball.work_dir();
     let image_dir = tarball_output.join("image");
+    // for maybe_entry in WalkDir::new(&image_dir) {
+    //     let entry = maybe_entry.unwrap();
+    //     let entry_relative = entry.path().strip_prefix(&image_dir).unwrap();
+    //     let ty = entry.file_type();
+    //     if ty.is_dir() {
+    //         fs::create_dir_all(empty_dir.join(entry_relative)).unwrap();
+    //     } else if ty.is_file() {
+    //         fs::copy(entry.path(), empty_dir.join(entry_relative)).unwrap();
+    //     }
+    // }
 
-    
-    println!("Invoked\npackage: {package:#?}\nstage: {stage:#?}\ntarball: {tarball:#?}\nprefix: {prefix:#?}\nsysconfdir: {sysconfdir:#?}\ndestdir_env: {destdir_env:#?}\n");
-    sync_dir(image_dir, empty_dir).unwrap();
-}
-
-fn sync_dir(from: impl AsRef<Path>, to: impl AsRef<Path>) -> std::io::Result<()> {
-    // println!("\tfrom {:#?}\n\tto {:#?}", from.as_ref(), to.as_ref());
-    fs::create_dir_all(&to)?;
-    // println!("\tcreated {:#?}", to.as_ref());
-    for maybe_entry in fs::read_dir(from)? {
-        let entry = maybe_entry?;
-        // println!("\tEntry {:#?}", entry);
-        let ty = entry.file_type()?;
-        if ty.is_dir() {
-            sync_dir(entry.path(), to.as_ref().join(entry.file_name()))?;
-        } else {
-            fs::copy(entry.path(), to.as_ref().join(entry.file_name()))?;
+    // Remap temporary root onto filesystem based on config
+    let prefix = {
+        let mut prefix = default_path(&builder.config.prefix, "/usr/local");
+        let destdir_env = std::env::var_os("DESTDIR").map(PathBuf::from);
+        // The DESTDIR environment variable is a standard way to install software in a subdirectory
+        // while keeping the original directory structure, even if the prefix or other directories
+        // contain absolute paths.
+        //
+        // More information on the environment variable is available here:
+        // https://www.gnu.org/prep/standards/html_node/DESTDIR.html
+        if let Some(destdir) = destdir_env {
+            let without_destdir = prefix.clone();
+            prefix.clone_from(&destdir);
+            // Custom .join() which ignores disk roots.
+            for part in without_destdir.components() {
+                if let std::path::Component::Normal(s) = part {
+                    prefix.push(s)
+                }
+            }
         }
-    }
-    Ok(())
+        prefix
+    };
+    
+    let install = |from: &Path, to: &Path| -> std::io::Result<()> {
+        if !from.exists() {
+            return Ok(())
+        }
+        for maybe_entry in WalkDir::new(&from) {
+            let entry = maybe_entry.unwrap();
+            let entry_relative = entry.path().strip_prefix(&from).unwrap();
+            let destination = to.join(entry_relative);
+            let ty = entry.file_type();
+            if ty.is_dir() && !destination.exists() {
+                fs::create_dir_all(&destination)?;
+            } else if ty.is_file() {
+                fs::rename(entry.path(), destination).unwrap();
+            }
+        }
+        Ok(())
+    };
+
+    let sysconfdir = prefix.join(default_path(&builder.config.sysconfdir, "etc"));
+    install(&image_dir.join("etc"), &sysconfdir).unwrap();
+
+    let datadir = prefix.join(default_path(&builder.config.datadir, "share"));
+    install(&image_dir.join("share"), &datadir).unwrap();
+
+    let docdir = prefix.join(default_path(&builder.config.docdir, &format!("share/doc/{package}")));
+    install(&image_dir.join("share/doc"), &docdir).unwrap();
+
+    let mandir = prefix.join(default_path(&builder.config.mandir, "share/man"));
+    install(&image_dir.join("share/man"), &mandir).unwrap();
+
+    let libdir = prefix.join(default_path(&builder.config.libdir, "lib"));
+    install(&image_dir.join("lib"), &libdir).unwrap();
+
+    let bindir = prefix.join(&builder.config.bindir); // Default in config.rs
+    install(&image_dir.join("bin"), &bindir).unwrap();
 }
 
 fn default_path(config: &Option<PathBuf>, default: &str) -> PathBuf {

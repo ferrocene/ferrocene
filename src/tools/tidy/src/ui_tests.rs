@@ -8,10 +8,6 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-// When you add Ferrocene tests change this number rather than the ROOT_ENTRY_LIMIT variable below,
-// to avoid merge conflicts whenever upstream moves tests around and lowers the limit.
-const FERROCENE_EXTRA_ROOT_ENTRY_LIMIT: usize = 1;
-
 // FIXME: GitHub's UI truncates file lists that exceed 1000 entries, so these
 // should all be 1000 or lower. Limits significantly smaller than 1000 are also
 // desirable, because large numbers of files are unwieldy in general. See issue
@@ -69,13 +65,7 @@ fn check_entries(tests_path: &Path, bad: &mut bool) {
     let (mut max, mut max_issues) = (0usize, 0usize);
     for (dir_path, count) in directories {
         let is_issues_dir = tests_path.join("ui/issues") == dir_path;
-<<<<<<< HEAD
-        let (limit, maxcnt) = if is_root {
-            (ROOT_ENTRY_LIMIT + FERROCENE_EXTRA_ROOT_ENTRY_LIMIT, &mut max_root)
-        } else if is_issues_dir {
-=======
         let (limit, maxcnt) = if is_issues_dir {
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             (ISSUES_ENTRY_LIMIT, &mut max_issues)
         } else {
             (ENTRY_LIMIT, &mut max)

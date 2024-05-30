@@ -690,11 +690,7 @@ impl Merge for TomlConfig {
         do_merge(&mut self.llvm, llvm, replace);
         do_merge(&mut self.rust, rust, replace);
         do_merge(&mut self.dist, dist, replace);
-<<<<<<< HEAD
         do_merge(&mut self.ferrocene, ferrocene, replace);
-        assert!(target.is_none(), "merging target-specific config is not currently supported");
-=======
-
         match (self.target.as_mut(), target) {
             (_, None) => {}
             (None, Some(target)) => self.target = Some(target),
@@ -708,7 +704,6 @@ impl Merge for TomlConfig {
                 }
             }
         }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 }
 

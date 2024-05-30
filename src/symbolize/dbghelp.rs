@@ -128,13 +128,14 @@ unsafe fn resolve_legacy(
     addr: *mut c_void,
     _inline_context: Option<DWORD>,
     cb: &mut dyn FnMut(&super::Symbol),
-) {
+) -> Option<()> {
     let addr = super::adjust_ip(addr) as DWORD64;
     do_resolve(
         |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr, &mut 0, info),
         |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr, &mut 0, line),
         cb,
-    )
+    );
+    Some(())
 }
 
 /// Resolve the address using the modern dbghelp APIs.

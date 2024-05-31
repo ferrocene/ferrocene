@@ -59,7 +59,7 @@ To install the optional ``rustfmt`` tool, the following archive is needed:
 * ``rustfmt-aarch64-apple-darwin``
 
 Required compiler flags
-----------------------
+-----------------------
 
 To use the target, the following additional flags must be provided to
 ``rustc``:

@@ -13,9 +13,7 @@
    target. They are provided as a preview, with limited support available. They
    should not be used in production.
 
-The ``x86_64-pc-windows-msvc`` Ferrocene target provides support for Host as
-well as Cross-compilation for Microsoft Windows on x86_64 using the native
-ABI (MSVC).
+The ``x86_64-pc-windows-msvc`` Ferrocene target provides support Microsoft Windows on x86_64 using MSVC.
 
 Prerequisites
 -------------

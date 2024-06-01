@@ -34,8 +34,6 @@ It describes the evaluation of Ferrocene in accordance to the standards above.
    rustfmt/hazop-nodes
    rustfmt/use-cases
    rustfmt/tool-analysis
-   rustfmt/method
-   rustfmt/potential-errors
 
 .. appendices::
    :caption: Appendices

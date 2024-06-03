@@ -980,6 +980,9 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::Miri,
                 crate::ferrocene::install::LlvmTools,
                 crate::ferrocene::install::Src,
+                crate::ferrocene::install::FlipLink,
+                crate::ferrocene::install::SelfTest,
+                crate::ferrocene::install::FerroceneDocs,
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,

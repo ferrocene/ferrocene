@@ -250,6 +250,20 @@ install!((self, builder, _config),
             );
         }
     };
+    FlipLink, alias = "flip-link", Self::should_build(_config), only_hosts: true, {
+        let tarball = builder.ensure(crate::ferrocene::dist::flip_link::FlipLink { target: self.target });
+        install(builder, "flip-link", self.compiler.stage, Some(self.target), &tarball);
+    };
+    SelfTest, alias = "self-test", Self::should_build(_config), only_hosts: true, {
+        let tarball = builder.ensure(crate::ferrocene::dist::SelfTest { target: self.target });
+        install(builder, "self-test", self.compiler.stage, Some(self.target), &tarball);
+    };
+    FerroceneDocs, alias = "ferrocene-docs", Self::should_build(_config), only_hosts: true, {
+        let tarballs = builder.ensure(crate::ferrocene::dist::Docs { target: self.target });
+        for tarball in tarballs {
+            install(builder, "ferrocene-docs", self.compiler.stage, Some(self.target), &tarball);
+        }
+    };
 );
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]

@@ -14,7 +14,7 @@
    should not be used in production.
 
 The ``aarch64-apple-darwin`` Ferrocene target provides support for macOS (Darwin) on
-aarch64.
+Apple Silicon.
 
 Prerequisites
 -------------

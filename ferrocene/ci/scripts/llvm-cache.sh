@@ -74,8 +74,20 @@ get_llvm_cache_hash() {
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
 
+    if [[ "${OSTYPE}" = "msys" ]]; then
+        # For some reason, Windows has different shasum output than Linux.
+        # Lines are, inexplicably:
+        # $CHECKSUM *$PATH
+        # Instead of:
+        # $CHECKSUM  $PATH
+        # So, remove that. Also fix the line endings (\015)
+        new_file="$(mktemp)"
+        cat "${file}" | tr '*' ' ' | tr -d '\r' > "${new_file}"
+        mv "${new_file}" "${file}"
+    fi
+
     ${SHA_CMD[@]} "${file}" | awk '{print($1)}'
-    rm -f "${file}"
+    # rm -f "${file}"
 }
 
 # Build LLVM and generate a tarball we can cache with all the build artifacts.

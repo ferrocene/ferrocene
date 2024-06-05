@@ -17,3 +17,5 @@ fn main() {
         run("test-26235");
     }
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

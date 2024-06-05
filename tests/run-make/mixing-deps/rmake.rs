@@ -11,3 +11,5 @@ fn main() {
     rustc().input("prog.rs").run();
     run("prog");
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

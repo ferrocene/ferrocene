@@ -5,9 +5,6 @@ use compiletest::{common::Mode, ferrocene_annotations, log_config, parse_config,
 fn main() {
     tracing_subscriber::fmt::init();
 
-<<<<<<< HEAD
-    ferrocene_annotations::maybe_collect_and_exit();
-=======
     // colored checks stdout by default, but for some reason only stderr is a terminal.
     // compiletest *does* print many things to stdout, but it doesn't really matter.
     if std::io::stderr().is_terminal()
@@ -15,7 +12,8 @@ fn main() {
     {
         colored::control::set_override(true);
     }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+    ferrocene_annotations::maybe_collect_and_exit();
 
     let config = Arc::new(parse_config(env::args().collect()));
 

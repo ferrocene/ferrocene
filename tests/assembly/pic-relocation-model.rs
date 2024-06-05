@@ -27,12 +27,8 @@ pub fn other_fn() -> u8 {
     unsafe { foreign_fn() }
 }
 
-<<<<<<< HEAD
-extern "C" {fn foreign_fn() -> u8;}
-
-// ferrocene-annotations: um_rustc_C_relocation_model
-=======
 extern "C" {
     fn foreign_fn() -> u8;
 }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// ferrocene-annotations: um_rustc_C_relocation_model

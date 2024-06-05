@@ -13,3 +13,5 @@ fn main() {
     rustc().input("baz.rs").run();
     rustc().input("bar.rs").linker("rust-lld").link_arg("/WHOLEARCHIVE:libbaz.rlib").run();
 }
+
+// ferrocene-annotations: um_rustc_C_linker

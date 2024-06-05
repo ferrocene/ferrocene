@@ -13,11 +13,6 @@ pub fn normal_uwtable() {}
 // CHECK: Function Attrs: nounwind uwtable
 // CHECK-NEXT: define void @extern_uwtable()
 #[no_mangle]
-<<<<<<< HEAD
-pub extern fn extern_uwtable() {
-}
+pub extern "C" fn extern_uwtable() {}
 
 // ferrocene-annotations: um_rustc_C_panic
-=======
-pub extern "C" fn extern_uwtable() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

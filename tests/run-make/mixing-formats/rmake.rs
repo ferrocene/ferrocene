@@ -92,3 +92,5 @@ fn main() {
     rustc().crate_type("dylib,rlib").input("baz2.rs").run();
     rustc().crate_type("bin").input("baz2.rs").run();
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

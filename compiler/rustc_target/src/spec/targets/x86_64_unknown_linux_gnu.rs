@@ -5,18 +5,6 @@ pub fn target() -> Target {
     base.cpu = "x86-64".into();
     base.plt_by_default = false;
     base.max_atomic_width = Some(64);
-    // Ferrocene elects to use lld as the linker on this target.
-    // Upstream still uses ld.
-    //
-    // Setting Lld::Yes causes `-fuse-ld=lld` to be added to the linker args
-    // (and by linker I mean `cc` as the linker as we use Cc::Yes)
-    base.linker_flavor = LinkerFlavor::Gnu(Cc::Yes, Lld::Yes);
-    // This setting causes `-B path/to/gcc-ld` to be added to the linker args.
-    // This means that the `ld.lld` wrapper for `rust-lld` appears in the
-    // path that `cc` uses to find `ld.lld` (also the path used for `cpp` and
-    // `cc1`, but we don't supply those so it goes back to the defaults for
-    // those tools).
-    base.link_self_contained = crate::spec::LinkSelfContainedDefault::with_linker();
     base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
     base.stack_probes = StackProbeType::Inline;
     base.static_position_independent_executables = true;

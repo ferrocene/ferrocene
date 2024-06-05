@@ -594,6 +594,21 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
+      - build-docker:
+          name: build-docker--ubuntu-20
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
+      - x86_64-linux-llvm:
+          requires:
+            - build-docker--ubuntu-20
+      - x86_64-linux-build:
+          requires:
+            - x86_64-linux-llvm
+      - x86_64-linux-dist-targets:
+          requires:
+            - x86_64-linux-build
+
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -1023,7 +1038,7 @@ commands:
     steps:
       - run:
           name: Fetch QNX710 toolchain
-          command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710.tar.zst - | zstd -d | tar x
+          command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar xv
       - run:
           name: Set PATH to include QNX710 tools
           command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"

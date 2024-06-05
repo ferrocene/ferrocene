@@ -7,10 +7,10 @@ Qualification Method
 ====================
 
 According to the Tool Confidence Level determined previously and the
-recommendation of the Table 4 of [|iso_ref|] part 8, the chosen
+recommendation of Table 4 of [|iso_ref|] part 8, the chosen
 qualification method is "Validation of the software tool in accordance with
 11.4.9". To ensure the absence of potential issues in Ferrocene, automated
-jobs are carried out for all targets. These jobs launch several tests suites,
+jobs are carried out for all targets. These jobs launch several test suites,
 including a non-regression test suite, in a correctly configured environment to
 be sure of the tool conformance. In particular, the following test suites are
 executed for every code change that is merged.

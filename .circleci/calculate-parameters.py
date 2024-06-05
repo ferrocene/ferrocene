@@ -150,29 +150,29 @@ def calculate_targets(host_plus_stage: str):
     # in this universe.
     if stage == "build":
         if host == "x86_64-unknown-linux-gnu":
-            targets += [X86_64_LINUX_BUILD_HOST]
+            targets = [X86_64_LINUX_BUILD_HOST]
         elif host == "aarch64-unknown-linux-gnu":
-            targets += [AARCH64_LINUX_BUILD_HOST]
+            targets = [AARCH64_LINUX_BUILD_HOST]
         elif host == "aarch64-apple-darwin":
-            targets += [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
+            targets = [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
         elif host == "x86_64-pc-windows-msvc":
-            targets += [X86_64_WINDOWS_BUILD_HOST]
+            targets = [X86_64_WINDOWS_BUILD_HOST]
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":
         if host== "x86_64-unknown-linux-gnu":
-            targets += X86_64_LINUX_BUILD_STD_TARGETS
+            targets = X86_64_LINUX_BUILD_STD_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets += LINUX_SELF_TEST_TARGETS
+            targets = LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-unknown-linux-gnu":
-            targets += LINUX_SELF_TEST_TARGETS
+            targets = LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets += MAC_SELF_TEST_TARGETS
+            targets = MAC_SELF_TEST_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets += WINDOWS_SELF_TEST_TARGETS
+            targets = WINDOWS_SELF_TEST_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

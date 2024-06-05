@@ -969,7 +969,6 @@ impl<'a> Builder<'a> {
                 // install::LlvmTools,
                 // install::Src,
                 // install::Rustc,
-                crate::ferrocene::install::Docs,
                 crate::ferrocene::install::Std,
                 crate::ferrocene::install::Rustc,
                 crate::ferrocene::install::Cargo,

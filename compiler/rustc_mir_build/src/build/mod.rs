@@ -452,7 +452,7 @@ fn construct_fn<'tcx>(
     assert_eq!(expr.as_usize(), thir.exprs.len() - 1);
 
     // Figure out what primary body this item has.
-    let body_id = tcx.hir().body_owned_by(fn_def);
+    let body = tcx.hir().body_owned_by(fn_def);
     let span_with_body = tcx.hir().span_with_body(fn_id);
     let return_ty_span = tcx
         .hir()
@@ -512,9 +512,9 @@ fn construct_fn<'tcx>(
     );
 
     let call_site_scope =
-        region::Scope { id: body_id.hir_id.local_id, data: region::ScopeData::CallSite };
+        region::Scope { id: body.id().hir_id.local_id, data: region::ScopeData::CallSite };
     let arg_scope =
-        region::Scope { id: body_id.hir_id.local_id, data: region::ScopeData::Arguments };
+        region::Scope { id: body.id().hir_id.local_id, data: region::ScopeData::Arguments };
     let source_info = builder.source_info(span);
     let call_site_s = (call_site_scope, source_info);
     unpack!(builder.in_scope(call_site_s, LintLevel::Inherited, |builder| {
@@ -568,11 +568,8 @@ fn construct_const<'a, 'tcx>(
             ..
         }) => (*span, ty.span),
         Node::AnonConst(ct) => (ct.span, ct.span),
-        Node::ConstBlock(_) => {
-            let span = tcx.def_span(def);
-            (span, span)
-        }
-        _ => span_bug!(tcx.def_span(def), "can't build MIR for {:?}", def),
+        Node::Expr(&hir::Expr { span, kind: hir::ExprKind::ConstBlock(_), .. }) => (span, span),
+        node => span_bug!(tcx.def_span(def), "can't build MIR for {def:?}: {node:#?}"),
     };
 
     let infcx = tcx.infer_ctxt().build();

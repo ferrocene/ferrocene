@@ -1,5 +1,8 @@
 //! Term search assist
-use hir::term_search::{TermSearchConfig, TermSearchCtx};
+use hir::{
+    term_search::{TermSearchConfig, TermSearchCtx},
+    ImportPathConfig,
+};
 use ide_db::{
     assists::{AssistId, AssistKind, GroupLabel},
     famous_defs::FamousDefs,
@@ -50,8 +53,10 @@ pub(crate) fn term_search(acc: &mut Assists, ctx: &AssistContext<'_>) -> Option<
             path.gen_source_code(
                 &scope,
                 &mut formatter,
-                ctx.config.prefer_no_std,
-                ctx.config.prefer_prelude,
+                ImportPathConfig {
+                    prefer_no_std: ctx.config.prefer_no_std,
+                    prefer_prelude: ctx.config.prefer_prelude,
+                },
             )
             .ok()
         })
@@ -271,6 +276,18 @@ fn f() { let a = 1; let b = 0.0; let c: (i32, f64) = todo$0!(); }"#,
             r#"//- minicore: todo, unimplemented
 fn f() { let a = 1; let b = 0.0; let c: (i32, (i32, f64)) = todo$0!(); }"#,
             r#"fn f() { let a = 1; let b = 0.0; let c: (i32, (i32, f64)) = (a, (a, b)); }"#,
+        )
+    }
+
+    #[test]
+    fn test_tuple_struct_with_generics() {
+        check_assist(
+            term_search,
+            r#"//- minicore: todo, unimplemented
+struct Foo<T>(T);
+fn f() { let a = 1; let b: Foo<i32> = todo$0!(); }"#,
+            r#"struct Foo<T>(T);
+fn f() { let a = 1; let b: Foo<i32> = Foo(a); }"#,
         )
     }
 }

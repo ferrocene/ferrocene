@@ -8,17 +8,27 @@
 // CHECK-LABEL: ; link_dead_code::const_fn
 // CHECK-NEXT: ; Function Attrs:
 // CHECK-NEXT: define hidden
-const fn const_fn() -> i32 { 1 }
+const fn const_fn() -> i32 {
+    1
+}
 
 // CHECK-LABEL: ; link_dead_code::inline_fn
 // CHECK-NEXT: ; Function Attrs:
 // CHECK-NEXT: define hidden
 #[inline]
-fn inline_fn() -> i32 { 2 }
+fn inline_fn() -> i32 {
+    2
+}
 
 // CHECK-LABEL: ; link_dead_code::private_fn
 // CHECK-NEXT: ; Function Attrs:
 // CHECK-NEXT: define hidden
+<<<<<<< HEAD
 fn private_fn() -> i32 { 3 }
 
 // ferrocene-annotations: um_rustc_C_link_dead_code
+=======
+fn private_fn() -> i32 {
+    3
+}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

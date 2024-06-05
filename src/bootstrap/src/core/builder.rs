@@ -919,6 +919,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::doc::InternalProcedures,
                 doc::Bootstrap,
                 doc::Releases,
+                doc::RunMakeSupport,
             ),
             Kind::Dist => describe!(
                 dist::Docs,

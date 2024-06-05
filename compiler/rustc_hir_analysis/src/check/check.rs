@@ -46,13 +46,9 @@ pub fn check_abi(tcx: TyCtxt<'_>, hir_id: hir::HirId, span: Span, abi: Abi) {
             .emit();
         }
         None => {
-            tcx.node_span_lint(
-                UNSUPPORTED_CALLING_CONVENTIONS,
-                hir_id,
-                span,
-                "use of calling convention not supported on this target",
-                |_| {},
-            );
+            tcx.node_span_lint(UNSUPPORTED_CALLING_CONVENTIONS, hir_id, span, |lint| {
+                lint.primary_message("use of calling convention not supported on this target");
+            });
         }
     }
 
@@ -243,8 +239,8 @@ fn check_static_inhabited(tcx: TyCtxt<'_>, def_id: LocalDefId) {
             UNINHABITED_STATIC,
             tcx.local_def_id_to_hir_id(def_id),
             span,
-            "static of uninhabited type",
             |lint| {
+                lint.primary_message("static of uninhabited type");
                 lint
                 .note("uninhabited statics cannot be initialized, and any access would be an immediate error");
             },
@@ -346,7 +342,7 @@ fn check_opaque_meets_bounds<'tcx>(
     let param_env = tcx.param_env(defining_use_anchor);
 
     let infcx = tcx.infer_ctxt().with_opaque_type_inference(defining_use_anchor).build();
-    let ocx = ObligationCtxt::new(&infcx);
+    let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
     let args = match *origin {
         hir::OpaqueTyOrigin::FnReturn(parent)
@@ -538,11 +534,9 @@ fn check_opaque_precise_captures<'tcx>(tcx: TyCtxt<'tcx>, opaque_def_id: LocalDe
                 // the cases that were stabilized with the `impl_trait_projection`
                 // feature -- see <https://github.com/rust-lang/rust/pull/115659>.
                 if let DefKind::LifetimeParam = tcx.def_kind(def_id)
-                    && let ty::ReEarlyParam(ty::EarlyParamRegion { def_id, .. })
-                    | ty::ReLateParam(ty::LateParamRegion {
-                        bound_region: ty::BoundRegionKind::BrNamed(def_id, _),
-                        ..
-                    }) = *tcx.map_opaque_lifetime_to_parent_lifetime(def_id.expect_local())
+                    && let Some(def_id) = tcx
+                        .map_opaque_lifetime_to_parent_lifetime(def_id.expect_local())
+                        .opt_param_def_id(tcx, tcx.parent(opaque_def_id.to_def_id()))
                 {
                     shadowed_captures.insert(def_id);
                 }
@@ -585,12 +579,9 @@ fn check_opaque_precise_captures<'tcx>(tcx: TyCtxt<'tcx>, opaque_def_id: LocalDe
                     // Check if the lifetime param was captured but isn't named in the precise captures list.
                     if variances[param.index as usize] == ty::Invariant {
                         if let DefKind::OpaqueTy = tcx.def_kind(tcx.parent(param.def_id))
-                            && let ty::ReEarlyParam(ty::EarlyParamRegion { def_id, .. })
-                            | ty::ReLateParam(ty::LateParamRegion {
-                                bound_region: ty::BoundRegionKind::BrNamed(def_id, _),
-                                ..
-                            }) = *tcx
+                            && let Some(def_id) = tcx
                                 .map_opaque_lifetime_to_parent_lifetime(param.def_id.expect_local())
+                                .opt_param_def_id(tcx, tcx.parent(opaque_def_id.to_def_id()))
                         {
                             tcx.dcx().emit_err(errors::LifetimeNotCaptured {
                                 opaque_span,
@@ -1315,9 +1306,11 @@ pub(super) fn check_transparent<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) 
                     REPR_TRANSPARENT_EXTERNAL_PRIVATE_FIELDS,
                     tcx.local_def_id_to_hir_id(adt.did().expect_local()),
                     span,
-                    "zero-sized fields in `repr(transparent)` cannot \
-                    contain external non-exhaustive types",
                     |lint| {
+                        lint.primary_message(
+                            "zero-sized fields in `repr(transparent)` cannot \
+                             contain external non-exhaustive types",
+                        );
                         let note = if non_exhaustive {
                             "is marked with `#[non_exhaustive]`"
                         } else {
@@ -1734,7 +1727,7 @@ pub(super) fn check_coroutine_obligations(
         .with_opaque_type_inference(def_id)
         .build();
 
-    let ocx = ObligationCtxt::new(&infcx);
+    let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
     for (predicate, cause) in &typeck_results.coroutine_stalled_predicates {
         ocx.register_obligation(Obligation::new(tcx, cause.clone(), param_env, *predicate));
     }

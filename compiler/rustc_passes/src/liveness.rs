@@ -147,15 +147,19 @@ fn check_liveness(tcx: TyCtxt<'_>, def_id: LocalDefId) {
         return;
     }
 
+    // Don't run for inline consts, they are collected together with their parent
+    if let DefKind::InlineConst = tcx.def_kind(def_id) {
+        return;
+    }
+
     // Don't run unused pass for #[naked]
     if tcx.has_attr(def_id.to_def_id(), sym::naked) {
         return;
     }
 
     let mut maps = IrMaps::new(tcx);
-    let body_id = tcx.hir().body_owned_by(def_id);
-    let hir_id = tcx.hir().body_owner(body_id);
-    let body = tcx.hir().body(body_id);
+    let body = tcx.hir().body_owned_by(def_id);
+    let hir_id = tcx.hir().body_owner(body.id());
 
     if let Some(upvars) = tcx.upvars_mentioned(def_id) {
         for &var_hir_id in upvars.keys() {
@@ -166,17 +170,17 @@ fn check_liveness(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 
     // gather up the various local variables, significant expressions,
     // and so forth:
-    maps.visit_body(body);
+    maps.visit_body(&body);
 
     // compute liveness
     let mut lsets = Liveness::new(&mut maps, def_id);
-    let entry_ln = lsets.compute(body, hir_id);
-    lsets.log_liveness(entry_ln, body_id.hir_id);
+    let entry_ln = lsets.compute(&body, hir_id);
+    lsets.log_liveness(entry_ln, body.id().hir_id);
 
     // check for various error conditions
-    lsets.visit_body(body);
+    lsets.visit_body(&body);
     lsets.warn_about_unused_upvars(entry_ln);
-    lsets.warn_about_unused_args(body, entry_ln);
+    lsets.warn_about_unused_args(&body, entry_ln);
 }
 
 pub fn provide(providers: &mut Providers) {
@@ -1144,11 +1148,12 @@ impl<'a, 'tcx> Liveness<'a, 'tcx> {
             }
 
             hir::ExprKind::Lit(..)
-            | hir::ExprKind::ConstBlock(..)
             | hir::ExprKind::Err(_)
             | hir::ExprKind::Path(hir::QPath::TypeRelative(..))
             | hir::ExprKind::Path(hir::QPath::LangItem(..))
             | hir::ExprKind::OffsetOf(..) => succ,
+
+            hir::ExprKind::ConstBlock(expr) => self.propagate_through_expr(expr, succ),
 
             // Note that labels have been resolved, so we don't need to look
             // at the label ident

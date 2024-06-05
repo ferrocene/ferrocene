@@ -68,7 +68,6 @@ This API is completely unstable and subject to change.
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
 #![feature(never_type)]
-#![feature(lazy_cell)]
 #![feature(slice_partition_dedup)]
 #![feature(try_blocks)]
 
@@ -191,10 +190,6 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
         }
     });
 
-    // Freeze definitions as we don't add new ones at this point. This improves performance by
-    // allowing lock-free access to them.
-    tcx.untracked().definitions.freeze();
-
     // FIXME: Remove this when we implement creating `DefId`s
     // for anon constants during their parents' typeck.
     // Typeck all body owners in parallel will produce queries
@@ -205,6 +200,10 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
             tcx.ensure().typeck(item_def_id);
         }
     });
+
+    // Freeze definitions as we don't add new ones at this point. This improves performance by
+    // allowing lock-free access to them.
+    tcx.untracked().definitions.freeze();
 
     tcx.ensure().check_unused_traits(());
 }

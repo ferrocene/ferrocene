@@ -1141,7 +1141,13 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
                 );
                 crate::exit!(1);
             }
-            crate::core::build_steps::format::format(builder, !builder.config.cmd.bless(), &[]);
+            let all = false;
+            crate::core::build_steps::format::format(
+                builder,
+                !builder.config.cmd.bless(),
+                all,
+                &[],
+            );
         }
 
         builder.info("tidy check");
@@ -1776,23 +1782,9 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 .arg(builder.ensure(tool::JsonDocLint { compiler: json_compiler, target }));
         }
 
-        if mode == "coverage-map" {
-            let coverage_dump = builder.ensure(tool::CoverageDump {
-                compiler: compiler.with_stage(0),
-                target: compiler.host,
-            });
+        if matches!(mode, "coverage-map" | "coverage-run") {
+            let coverage_dump = builder.tool_exe(Tool::CoverageDump);
             cmd.arg("--coverage-dump-path").arg(coverage_dump);
-        }
-
-        if mode == "coverage-run" {
-            // The demangler doesn't need the current compiler, so we can avoid
-            // unnecessary rebuilds by using the bootstrap compiler instead.
-            let rust_demangler = builder.ensure(tool::RustDemangler {
-                compiler: compiler.with_stage(0),
-                target: compiler.host,
-                extra_features: Vec::new(),
-            });
-            cmd.arg("--rust-demangler-path").arg(rust_demangler);
         }
 
         cmd.arg("--src-base").arg(builder.src.join("tests").join(suite));

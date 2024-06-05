@@ -37,8 +37,8 @@ pub fn is_dyn_sym(name: &str, target_os: &str) -> bool {
     }
 }
 
-impl<'mir, 'tcx: 'mir> EvalContextExt<'mir, 'tcx> for crate::MiriInterpCx<'mir, 'tcx> {}
-pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
+impl<'tcx> EvalContextExt<'tcx> for crate::MiriInterpCx<'tcx> {}
+pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     fn emulate_foreign_item_inner(
         &mut self,
         link_name: Symbol,
@@ -326,7 +326,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                 let name = this.read_scalar(name)?.to_i32()?;
                 // FIXME: Which of these are POSIX, and which are GNU/Linux?
                 // At least the names seem to all also exist on macOS.
-                let sysconfs: &[(&str, fn(&MiriInterpCx<'_, '_>) -> Scalar<Provenance>)] = &[
+                let sysconfs: &[(&str, fn(&MiriInterpCx<'_>) -> Scalar<Provenance>)] = &[
                     ("_SC_PAGESIZE", |this| Scalar::from_int(this.machine.page_size, this.pointer_size())),
                     ("_SC_NPROCESSORS_CONF", |this| Scalar::from_int(this.machine.num_cpus, this.pointer_size())),
                     ("_SC_NPROCESSORS_ONLN", |this| Scalar::from_int(this.machine.num_cpus, this.pointer_size())),
@@ -388,14 +388,14 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             "pthread_getspecific" => {
                 let [key] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
                 let key = this.read_scalar(key)?.to_bits(key.layout.size)?;
-                let active_thread = this.get_active_thread();
+                let active_thread = this.active_thread();
                 let ptr = this.machine.tls.load_tls(key, active_thread, this)?;
                 this.write_scalar(ptr, dest)?;
             }
             "pthread_setspecific" => {
                 let [key, new_ptr] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
                 let key = this.read_scalar(key)?.to_bits(key.layout.size)?;
-                let active_thread = this.get_active_thread();
+                let active_thread = this.active_thread();
                 let new_data = this.read_scalar(new_ptr)?;
                 this.machine.tls.store_tls(key, active_thread, new_data, &*this.tcx)?;
 
@@ -426,8 +426,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             }
             "pthread_mutex_lock" => {
                 let [mutex] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
-                let result = this.pthread_mutex_lock(mutex)?;
-                this.write_scalar(Scalar::from_i32(result), dest)?;
+                this.pthread_mutex_lock(mutex, dest)?;
             }
             "pthread_mutex_trylock" => {
                 let [mutex] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
@@ -446,8 +445,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             }
             "pthread_rwlock_rdlock" => {
                 let [rwlock] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
-                let result = this.pthread_rwlock_rdlock(rwlock)?;
-                this.write_scalar(Scalar::from_i32(result), dest)?;
+                this.pthread_rwlock_rdlock(rwlock, dest)?;
             }
             "pthread_rwlock_tryrdlock" => {
                 let [rwlock] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
@@ -456,8 +454,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             }
             "pthread_rwlock_wrlock" => {
                 let [rwlock] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
-                let result = this.pthread_rwlock_wrlock(rwlock)?;
-                this.write_scalar(Scalar::from_i32(result), dest)?;
+                this.pthread_rwlock_wrlock(rwlock, dest)?;
             }
             "pthread_rwlock_trywrlock" => {
                 let [rwlock] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
@@ -513,8 +510,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
             }
             "pthread_cond_wait" => {
                 let [cond, mutex] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;
-                let result = this.pthread_cond_wait(cond, mutex)?;
-                this.write_scalar(Scalar::from_i32(result), dest)?;
+                this.pthread_cond_wait(cond, mutex, dest)?;
             }
             "pthread_cond_timedwait" => {
                 let [cond, mutex, abstime] = this.check_shim(abi, Abi::C { unwind: false }, link_name, args)?;

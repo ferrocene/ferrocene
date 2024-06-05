@@ -30,7 +30,7 @@ use std::assert_matches::assert_matches;
 use std::cell::Cell;
 use std::{cmp, iter, mem};
 
-use rustc_const_eval::transform::check_consts::{qualifs, ConstCx};
+use rustc_const_eval::check_consts::{qualifs, ConstCx};
 
 /// A `MirPass` for promotion.
 ///
@@ -464,7 +464,7 @@ impl<'tcx> Validator<'_, 'tcx> {
             Rvalue::UnaryOp(op, operand) => {
                 match op {
                     // These operations can never fail.
-                    UnOp::Neg | UnOp::Not => {}
+                    UnOp::Neg | UnOp::Not | UnOp::PtrMetadata => {}
                 }
 
                 self.validate_operand(operand)?;

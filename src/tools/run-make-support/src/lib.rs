@@ -12,6 +12,9 @@ pub mod rustc;
 pub mod rustdoc;
 
 use std::env;
+use std::ffi::OsString;
+use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
@@ -28,14 +31,28 @@ pub use run::{run, run_fail};
 pub use rustc::{aux_build, rustc, Rustc};
 pub use rustdoc::{bare_rustdoc, rustdoc, Rustdoc};
 
+pub fn env_var(name: &str) -> String {
+    match env::var(name) {
+        Ok(v) => v,
+        Err(err) => panic!("failed to retrieve environment variable {name:?}: {err:?}"),
+    }
+}
+
+pub fn env_var_os(name: &str) -> OsString {
+    match env::var_os(name) {
+        Some(v) => v,
+        None => panic!("failed to retrieve environment variable {name:?}"),
+    }
+}
+
 /// Path of `TMPDIR` (a temporary build directory, not under `/tmp`).
 pub fn tmp_dir() -> PathBuf {
-    env::var_os("TMPDIR").unwrap().into()
+    env_var_os("TMPDIR").into()
 }
 
 /// `TARGET`
 pub fn target() -> String {
-    env::var("TARGET").unwrap()
+    env_var("TARGET")
 }
 
 /// Check if target is windows-like.
@@ -60,7 +77,7 @@ pub fn static_lib(name: &str) -> PathBuf {
 }
 
 pub fn python_command() -> Command {
-    let python_path = std::env::var("PYTHON").expect("PYTHON environment variable does not exist");
+    let python_path = env_var("PYTHON");
     Command::new(python_path)
 }
 
@@ -71,7 +88,7 @@ pub fn htmldocck() -> Command {
 }
 
 pub fn source_path() -> PathBuf {
-    std::env::var("S").expect("S variable does not exist").into()
+    env_var("S").into()
 }
 
 /// Construct the static library name based on the platform.
@@ -121,19 +138,36 @@ pub fn dynamic_lib_name(name: &str) -> String {
     // ```
     assert!(!name.contains(char::is_whitespace), "dynamic library name cannot contain whitespace");
 
+    let extension = dynamic_lib_extension();
     if is_darwin() {
-        format!("lib{name}.dylib")
+        format!("lib{name}.{extension}")
     } else if is_windows() {
-        format!("{name}.dll")
+        format!("{name}.{extension}")
     } else {
-        format!("lib{name}.so")
+        format!("lib{name}.{extension}")
+    }
+}
+
+pub fn dynamic_lib_extension() -> &'static str {
+    if is_darwin() {
+        "dylib"
+    } else if is_windows() {
+        "dll"
+    } else {
+        "so"
     }
 }
 
 /// Construct a path to a rust library (rlib) under `$TMPDIR` given the library name. This will return a
 /// path with `$TMPDIR` joined with the library name.
 pub fn rust_lib(name: &str) -> PathBuf {
-    tmp_dir().join(format!("lib{name}.rlib"))
+    tmp_dir().join(rust_lib_name(name))
+}
+
+/// Generate the name a rust library (rlib) would have. If you want the complete path, use
+/// [`rust_lib`] instead.
+pub fn rust_lib_name(name: &str) -> String {
+    format!("lib{name}.rlib")
 }
 
 /// Construct the binary name based on platform.
@@ -189,16 +223,95 @@ fn handle_failed_output(cmd: &Command, output: Output, caller_line_number: u32) 
 
 /// Set the runtime library path as needed for running the host rustc/rustdoc/etc.
 pub fn set_host_rpath(cmd: &mut Command) {
-    let ld_lib_path_envvar = env::var("LD_LIB_PATH_ENVVAR").unwrap();
+    let ld_lib_path_envvar = env_var("LD_LIB_PATH_ENVVAR");
     cmd.env(&ld_lib_path_envvar, {
         let mut paths = vec![];
-        paths.push(PathBuf::from(env::var("TMPDIR").unwrap()));
-        paths.push(PathBuf::from(env::var("HOST_RPATH_DIR").unwrap()));
-        for p in env::split_paths(&env::var(&ld_lib_path_envvar).unwrap()) {
+        paths.push(PathBuf::from(env_var("TMPDIR")));
+        paths.push(PathBuf::from(env_var("HOST_RPATH_DIR")));
+        for p in env::split_paths(&env_var(&ld_lib_path_envvar)) {
             paths.push(p.to_path_buf());
         }
         env::join_paths(paths.iter()).unwrap()
     });
+}
+
+/// Copy a directory into another.
+pub fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) {
+    fn copy_dir_all_inner(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
+        let dst = dst.as_ref();
+        if !dst.is_dir() {
+            fs::create_dir_all(&dst)?;
+        }
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            let ty = entry.file_type()?;
+            if ty.is_dir() {
+                copy_dir_all_inner(entry.path(), dst.join(entry.file_name()))?;
+            } else {
+                fs::copy(entry.path(), dst.join(entry.file_name()))?;
+            }
+        }
+        Ok(())
+    }
+
+    if let Err(e) = copy_dir_all_inner(&src, &dst) {
+        // Trying to give more context about what exactly caused the failure
+        panic!(
+            "failed to copy `{}` to `{}`: {:?}",
+            src.as_ref().display(),
+            dst.as_ref().display(),
+            e
+        );
+    }
+}
+
+/// Check that all files in `dir1` exist and have the same content in `dir2`. Panic otherwise.
+pub fn recursive_diff(dir1: impl AsRef<Path>, dir2: impl AsRef<Path>) {
+    fn read_file(path: &Path) -> Vec<u8> {
+        match fs::read(path) {
+            Ok(c) => c,
+            Err(e) => panic!("Failed to read `{}`: {:?}", path.display(), e),
+        }
+    }
+
+    let dir2 = dir2.as_ref();
+    read_dir(dir1, |entry_path| {
+        let entry_name = entry_path.file_name().unwrap();
+        if entry_path.is_dir() {
+            recursive_diff(&entry_path, &dir2.join(entry_name));
+        } else {
+            let path2 = dir2.join(entry_name);
+            let file1 = read_file(&entry_path);
+            let file2 = read_file(&path2);
+
+            // We don't use `assert_eq!` because they are `Vec<u8>`, so not great for display.
+            // Why not using String? Because there might be minified files or even potentially
+            // binary ones, so that would display useless output.
+            assert!(
+                file1 == file2,
+                "`{}` and `{}` have different content",
+                entry_path.display(),
+                path2.display(),
+            );
+        }
+    });
+}
+
+pub fn read_dir<F: Fn(&Path)>(dir: impl AsRef<Path>, callback: F) {
+    for entry in fs::read_dir(dir).unwrap() {
+        callback(&entry.unwrap().path());
+    }
+}
+
+/// Check that `haystack` does not contain `needle`. Panic otherwise.
+pub fn assert_not_contains(haystack: &str, needle: &str) {
+    if haystack.contains(needle) {
+        eprintln!("=== HAYSTACK ===");
+        eprintln!("{}", haystack);
+        eprintln!("=== NEEDLE ===");
+        eprintln!("{}", needle);
+        panic!("needle was unexpectedly found in haystack");
+    }
 }
 
 /// Implement common helpers for command wrappers. This assumes that the command wrapper is a struct
@@ -284,7 +397,7 @@ macro_rules! impl_common_helpers {
                 self
             }
 
-            /// Inspect what the underlying [`Command`][::std::process::Command] is up to the
+            /// Inspect what the underlying [`Command`] is up to the
             /// current construction.
             pub fn inspect<I>(&mut self, inspector: I) -> &mut Self
             where

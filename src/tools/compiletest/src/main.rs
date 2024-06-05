@@ -1,11 +1,21 @@
-use std::{env, sync::Arc};
+use std::{env, io::IsTerminal, sync::Arc};
 
 use compiletest::{common::Mode, ferrocene_annotations, log_config, parse_config, run_tests};
 
 fn main() {
     tracing_subscriber::fmt::init();
 
+<<<<<<< HEAD
     ferrocene_annotations::maybe_collect_and_exit();
+=======
+    // colored checks stdout by default, but for some reason only stderr is a terminal.
+    // compiletest *does* print many things to stdout, but it doesn't really matter.
+    if std::io::stderr().is_terminal()
+        && matches!(std::env::var("NO_COLOR").as_deref(), Err(_) | Ok("0"))
+    {
+        colored::control::set_override(true);
+    }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
     let config = Arc::new(parse_config(env::args().collect()));
 

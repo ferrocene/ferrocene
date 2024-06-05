@@ -8,7 +8,6 @@
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(iter_intersperse)]
-#![feature(lazy_cell)]
 #![feature(let_chains)]
 #![feature(never_type)]
 #![feature(round_char_boundary)]
@@ -201,7 +200,6 @@ fn init_logging(early_dcx: &EarlyDiagCtxt) {
     let filter = tracing_subscriber::EnvFilter::from_env("RUSTDOC_LOG");
     let layer = tracing_tree::HierarchicalLayer::default()
         .with_writer(io::stderr)
-        .with_indent_lines(true)
         .with_ansi(color_logs)
         .with_targets(true)
         .with_wraparound(10)

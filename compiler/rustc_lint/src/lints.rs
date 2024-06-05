@@ -6,7 +6,7 @@ use crate::errors::RequestedLevel;
 use crate::fluent_generated as fluent;
 use rustc_errors::{
     codes::*, Applicability, Diag, DiagArgValue, DiagMessage, DiagStyledString,
-    ElidedLifetimeInPathSubdiag, EmissionGuarantee, LintDiagnostic, SubdiagMessageOp,
+    ElidedLifetimeInPathSubdiag, EmissionGuarantee, LintDiagnostic, MultiSpan, SubdiagMessageOp,
     Subdiagnostic, SuggestionStyle,
 };
 use rustc_hir::{def::Namespace, def_id::DefId};
@@ -145,11 +145,8 @@ pub struct BuiltinMissingDebugImpl<'a> {
 // Needed for def_path_str
 impl<'a> LintDiagnostic<'a, ()> for BuiltinMissingDebugImpl<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut rustc_errors::Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_builtin_missing_debug_impl);
         diag.arg("debug", self.tcx.def_path_str(self.def_id));
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_builtin_missing_debug_impl
     }
 }
 
@@ -250,16 +247,13 @@ pub struct BuiltinUngatedAsyncFnTrackCaller<'a> {
 
 impl<'a> LintDiagnostic<'a, ()> for BuiltinUngatedAsyncFnTrackCaller<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_ungated_async_fn_track_caller);
         diag.span_label(self.label, fluent::lint_label);
         rustc_session::parse::add_feature_diagnostics(
             diag,
             self.session,
             sym::async_fn_track_caller,
         );
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_ungated_async_fn_track_caller
     }
 }
 
@@ -432,6 +426,7 @@ pub struct BuiltinUnpermittedTypeInit<'a> {
 
 impl<'a> LintDiagnostic<'a, ()> for BuiltinUnpermittedTypeInit<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(self.msg);
         diag.arg("ty", self.ty);
         diag.span_label(self.label, fluent::lint_builtin_unpermitted_type_init_label);
         if let InhabitedPredicate::True = self.ty.inhabited_predicate(self.tcx) {
@@ -442,10 +437,6 @@ impl<'a> LintDiagnostic<'a, ()> for BuiltinUnpermittedTypeInit<'_> {
             );
         }
         self.sub.add_to_diag(diag);
-    }
-
-    fn msg(&self) -> DiagMessage {
-        self.msg.clone()
     }
 }
 
@@ -665,41 +656,62 @@ pub struct ForLoopsOverFalliblesSuggestion<'a> {
     pub end_span: Span,
 }
 
+#[derive(Subdiagnostic)]
+pub enum UseLetUnderscoreIgnoreSuggestion {
+    #[note(lint_use_let_underscore_ignore_suggestion)]
+    Note,
+    #[multipart_suggestion(
+        lint_use_let_underscore_ignore_suggestion,
+        style = "verbose",
+        applicability = "maybe-incorrect"
+    )]
+    Suggestion {
+        #[suggestion_part(code = "let _ = ")]
+        start_span: Span,
+        #[suggestion_part(code = "")]
+        end_span: Span,
+    },
+}
+
 // drop_forget_useless.rs
 #[derive(LintDiagnostic)]
 #[diag(lint_dropping_references)]
-#[note]
 pub struct DropRefDiag<'a> {
     pub arg_ty: Ty<'a>,
     #[label]
     pub label: Span,
+    #[subdiagnostic]
+    pub sugg: UseLetUnderscoreIgnoreSuggestion,
 }
 
 #[derive(LintDiagnostic)]
 #[diag(lint_dropping_copy_types)]
-#[note]
 pub struct DropCopyDiag<'a> {
     pub arg_ty: Ty<'a>,
     #[label]
     pub label: Span,
+    #[subdiagnostic]
+    pub sugg: UseLetUnderscoreIgnoreSuggestion,
 }
 
 #[derive(LintDiagnostic)]
 #[diag(lint_forgetting_references)]
-#[note]
 pub struct ForgetRefDiag<'a> {
     pub arg_ty: Ty<'a>,
     #[label]
     pub label: Span,
+    #[subdiagnostic]
+    pub sugg: UseLetUnderscoreIgnoreSuggestion,
 }
 
 #[derive(LintDiagnostic)]
 #[diag(lint_forgetting_copy_types)]
-#[note]
 pub struct ForgetCopyDiag<'a> {
     pub arg_ty: Ty<'a>,
     #[label]
     pub label: Span,
+    #[subdiagnostic]
+    pub sugg: UseLetUnderscoreIgnoreSuggestion,
 }
 
 #[derive(LintDiagnostic)]
@@ -1169,6 +1181,7 @@ pub struct NonFmtPanicUnused {
 // Used because of two suggestions based on one Option<Span>
 impl<'a> LintDiagnostic<'a, ()> for NonFmtPanicUnused {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_non_fmt_panic_unused);
         diag.arg("count", self.count);
         diag.note(fluent::lint_note);
         if let Some(span) = self.suggestion {
@@ -1185,10 +1198,6 @@ impl<'a> LintDiagnostic<'a, ()> for NonFmtPanicUnused {
                 Applicability::MachineApplicable,
             );
         }
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_non_fmt_panic_unused
     }
 }
 
@@ -1341,38 +1350,124 @@ pub struct SuspiciousDoubleRefCloneDiag<'a> {
 }
 
 // non_local_defs.rs
-#[derive(LintDiagnostic)]
 pub enum NonLocalDefinitionsDiag {
-    #[diag(lint_non_local_definitions_impl)]
-    #[help]
-    #[note(lint_non_local)]
-    #[note(lint_exception)]
-    #[note(lint_non_local_definitions_deprecation)]
     Impl {
         depth: u32,
         body_kind_descr: &'static str,
         body_name: String,
-        #[subdiagnostic]
         cargo_update: Option<NonLocalDefinitionsCargoUpdateNote>,
-        #[suggestion(lint_const_anon, code = "_", applicability = "machine-applicable")]
-        const_anon: Option<Span>,
+        const_anon: Option<Option<Span>>,
+        move_to: Option<(Span, Vec<Span>)>,
+        may_remove: Option<(Span, String)>,
+        has_trait: bool,
+        self_ty_str: String,
+        of_trait_str: Option<String>,
     },
-    #[diag(lint_non_local_definitions_macro_rules)]
     MacroRules {
         depth: u32,
         body_kind_descr: &'static str,
         body_name: String,
-        #[help]
         help: Option<()>,
-        #[help(lint_help_doctest)]
         doctest_help: Option<()>,
-        #[note(lint_non_local)]
-        #[note(lint_exception)]
-        #[note(lint_non_local_definitions_deprecation)]
-        notes: (),
-        #[subdiagnostic]
         cargo_update: Option<NonLocalDefinitionsCargoUpdateNote>,
     },
+}
+
+impl<'a> LintDiagnostic<'a, ()> for NonLocalDefinitionsDiag {
+    fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        match self {
+            NonLocalDefinitionsDiag::Impl {
+                depth,
+                body_kind_descr,
+                body_name,
+                cargo_update,
+                const_anon,
+                move_to,
+                may_remove,
+                has_trait,
+                self_ty_str,
+                of_trait_str,
+            } => {
+                diag.primary_message(fluent::lint_non_local_definitions_impl);
+                diag.arg("depth", depth);
+                diag.arg("body_kind_descr", body_kind_descr);
+                diag.arg("body_name", body_name);
+                diag.arg("self_ty_str", self_ty_str);
+                if let Some(of_trait_str) = of_trait_str {
+                    diag.arg("of_trait_str", of_trait_str);
+                }
+
+                if has_trait {
+                    diag.note(fluent::lint_bounds);
+                    diag.note(fluent::lint_with_trait);
+                } else {
+                    diag.note(fluent::lint_without_trait);
+                }
+
+                if let Some((move_help, may_move)) = move_to {
+                    let mut ms = MultiSpan::from_span(move_help);
+                    for sp in may_move {
+                        ms.push_span_label(sp, fluent::lint_non_local_definitions_may_move);
+                    }
+                    diag.span_help(ms, fluent::lint_non_local_definitions_impl_move_help);
+                }
+
+                if let Some((span, part)) = may_remove {
+                    diag.arg("may_remove_part", part);
+                    diag.span_suggestion(
+                        span,
+                        fluent::lint_remove_help,
+                        "",
+                        Applicability::MaybeIncorrect,
+                    );
+                }
+
+                if let Some(cargo_update) = cargo_update {
+                    diag.subdiagnostic(&diag.dcx, cargo_update);
+                }
+                if let Some(const_anon) = const_anon {
+                    diag.note(fluent::lint_exception);
+                    if let Some(const_anon) = const_anon {
+                        diag.span_suggestion(
+                            const_anon,
+                            fluent::lint_const_anon,
+                            "_",
+                            Applicability::MachineApplicable,
+                        );
+                    }
+                }
+
+                diag.note(fluent::lint_non_local_definitions_deprecation);
+            }
+            NonLocalDefinitionsDiag::MacroRules {
+                depth,
+                body_kind_descr,
+                body_name,
+                help,
+                doctest_help,
+                cargo_update,
+            } => {
+                diag.primary_message(fluent::lint_non_local_definitions_macro_rules);
+                diag.arg("depth", depth);
+                diag.arg("body_kind_descr", body_kind_descr);
+                diag.arg("body_name", body_name);
+
+                if let Some(()) = help {
+                    diag.help(fluent::lint_help);
+                }
+                if let Some(()) = doctest_help {
+                    diag.help(fluent::lint_help_doctest);
+                }
+
+                diag.note(fluent::lint_non_local);
+                diag.note(fluent::lint_non_local_definitions_deprecation);
+
+                if let Some(cargo_update) = cargo_update {
+                    diag.subdiagnostic(&diag.dcx, cargo_update);
+                }
+            }
+        }
+    }
 }
 
 #[derive(Subdiagnostic)]
@@ -1411,12 +1506,9 @@ pub struct DropTraitConstraintsDiag<'a> {
 // Needed for def_path_str
 impl<'a> LintDiagnostic<'a, ()> for DropTraitConstraintsDiag<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_drop_trait_constraints);
         diag.arg("predicate", self.predicate);
         diag.arg("needs_drop", self.tcx.def_path_str(self.def_id));
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_drop_trait_constraints
     }
 }
 
@@ -1428,11 +1520,8 @@ pub struct DropGlue<'a> {
 // Needed for def_path_str
 impl<'a> LintDiagnostic<'a, ()> for DropGlue<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_drop_glue);
         diag.arg("needs_drop", self.tcx.def_path_str(self.def_id));
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_drop_glue
     }
 }
 
@@ -1711,6 +1800,7 @@ pub struct ImproperCTypes<'a> {
 // Used because of the complexity of Option<DiagMessage>, DiagMessage, and Option<Span>
 impl<'a> LintDiagnostic<'a, ()> for ImproperCTypes<'_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_improper_ctypes);
         diag.arg("ty", self.ty);
         diag.arg("desc", self.desc);
         diag.span_label(self.label, fluent::lint_label);
@@ -1721,10 +1811,6 @@ impl<'a> LintDiagnostic<'a, ()> for ImproperCTypes<'_> {
         if let Some(note) = self.span_note {
             diag.span_note(note, fluent::lint_note);
         }
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_improper_ctypes
     }
 }
 
@@ -1854,6 +1940,7 @@ pub enum UnusedDefSuggestion {
 // Needed because of def_path_str
 impl<'a> LintDiagnostic<'a, ()> for UnusedDef<'_, '_> {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_unused_def);
         diag.arg("pre", self.pre);
         diag.arg("post", self.post);
         diag.arg("def", self.cx.tcx.def_path_str(self.def_id));
@@ -1864,10 +1951,6 @@ impl<'a> LintDiagnostic<'a, ()> for UnusedDef<'_, '_> {
         if let Some(sugg) = self.suggestion {
             diag.subdiagnostic(diag.dcx, sugg);
         }
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_unused_def
     }
 }
 
@@ -1937,14 +2020,11 @@ pub struct AsyncFnInTraitDiag {
 
 impl<'a> LintDiagnostic<'a, ()> for AsyncFnInTraitDiag {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(fluent::lint_async_fn_in_trait);
         diag.note(fluent::lint_note);
         if let Some(sugg) = self.sugg {
             diag.multipart_suggestion(fluent::lint_suggestion, sugg, Applicability::MaybeIncorrect);
         }
-    }
-
-    fn msg(&self) -> DiagMessage {
-        fluent::lint_async_fn_in_trait
     }
 }
 
@@ -1962,21 +2042,33 @@ pub struct UnitBindingsDiag {
 pub struct BuiltinNamedAsmLabel;
 
 #[derive(Subdiagnostic)]
-#[help(lint_unexpected_cfg_add_cargo_feature)]
-#[help(lint_unexpected_cfg_add_cargo_toml_lint_cfg)]
-#[help(lint_unexpected_cfg_add_build_rs_println)]
-pub struct UnexpectedCfgCargoHelp {
-    pub build_rs_println: String,
-    pub cargo_toml_lint_cfg: String,
+pub enum UnexpectedCfgCargoHelp {
+    #[help(lint_unexpected_cfg_add_cargo_feature)]
+    #[help(lint_unexpected_cfg_add_cargo_toml_lint_cfg)]
+    LintCfg { cargo_toml_lint_cfg: String },
+    #[help(lint_unexpected_cfg_add_cargo_feature)]
+    #[help(lint_unexpected_cfg_add_cargo_toml_lint_cfg)]
+    #[help(lint_unexpected_cfg_add_build_rs_println)]
+    LintCfgAndBuildRs { cargo_toml_lint_cfg: String, build_rs_println: String },
 }
 
 impl UnexpectedCfgCargoHelp {
-    pub fn new(unescaped: &str, escaped: &str) -> Self {
-        Self {
-            cargo_toml_lint_cfg: format!(
-                "\n [lints.rust]\n unexpected_cfgs = {{ level = \"warn\", check-cfg = ['{unescaped}'] }}",
-            ),
-            build_rs_println: format!("println!(\"cargo::rustc-check-cfg={escaped}\");",),
+    fn cargo_toml_lint_cfg(unescaped: &str) -> String {
+        format!(
+            "\n [lints.rust]\n unexpected_cfgs = {{ level = \"warn\", check-cfg = ['{unescaped}'] }}"
+        )
+    }
+
+    pub fn lint_cfg(unescaped: &str) -> Self {
+        UnexpectedCfgCargoHelp::LintCfg {
+            cargo_toml_lint_cfg: Self::cargo_toml_lint_cfg(unescaped),
+        }
+    }
+
+    pub fn lint_cfg_and_build_rs(unescaped: &str, escaped: &str) -> Self {
+        UnexpectedCfgCargoHelp::LintCfgAndBuildRs {
+            cargo_toml_lint_cfg: Self::cargo_toml_lint_cfg(unescaped),
+            build_rs_println: format!("println!(\"cargo::rustc-check-cfg={escaped}\");"),
         }
     }
 }
@@ -2261,10 +2353,8 @@ pub struct UnstableFeature {
 }
 
 impl<'a> LintDiagnostic<'a, ()> for UnstableFeature {
-    fn decorate_lint<'b>(self, _diag: &'b mut Diag<'a, ()>) {}
-
-    fn msg(&self) -> DiagMessage {
-        self.msg.clone()
+    fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, ()>) {
+        diag.primary_message(self.msg);
     }
 }
 
@@ -2560,14 +2650,6 @@ pub struct LegacyDeriveHelpers {
 }
 
 #[derive(LintDiagnostic)]
-#[diag(lint_proc_macro_back_compat)]
-#[note]
-pub struct ProcMacroBackCompat {
-    pub crate_name: String,
-    pub fixed_version: String,
-}
-
-#[derive(LintDiagnostic)]
 #[diag(lint_or_patterns_back_compat)]
 pub struct OrPatternsBackCompat {
     #[suggestion(code = "{suggestion}", applicability = "machine-applicable")]
@@ -2726,11 +2808,8 @@ pub struct AmbiguousGlobImports {
 
 impl<'a, G: EmissionGuarantee> LintDiagnostic<'a, G> for AmbiguousGlobImports {
     fn decorate_lint<'b>(self, diag: &'b mut Diag<'a, G>) {
+        diag.primary_message(self.ambiguity.msg.clone());
         rustc_errors::report_ambiguity_error(diag, self.ambiguity);
-    }
-
-    fn msg(&self) -> DiagMessage {
-        DiagMessage::Str(self.ambiguity.msg.clone().into())
     }
 }
 

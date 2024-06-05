@@ -1036,6 +1036,14 @@ tool_doc!(
     is_library = true,
     crates = ["bootstrap"]
 );
+tool_doc!(
+    RunMakeSupport,
+    "run_make_support",
+    "src/tools/run-make-support",
+    rustc_tool = false,
+    is_library = true,
+    crates = ["run_make_support"]
+);
 
 #[derive(Ord, PartialOrd, Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ErrorIndex {

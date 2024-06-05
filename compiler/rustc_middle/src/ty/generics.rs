@@ -66,7 +66,7 @@ pub struct GenericParamDef {
 impl GenericParamDef {
     pub fn to_early_bound_region_data(&self) -> ty::EarlyParamRegion {
         if let GenericParamDefKind::Lifetime = self.kind {
-            ty::EarlyParamRegion { def_id: self.def_id, index: self.index, name: self.name }
+            ty::EarlyParamRegion { index: self.index, name: self.name }
         } else {
             bug!("cannot convert a non-lifetime parameter def to an early bound region")
         }
@@ -88,7 +88,7 @@ impl GenericParamDef {
     pub fn default_value<'tcx>(
         &self,
         tcx: TyCtxt<'tcx>,
-    ) -> Option<EarlyBinder<ty::GenericArg<'tcx>>> {
+    ) -> Option<EarlyBinder<'tcx, ty::GenericArg<'tcx>>> {
         match self.kind {
             GenericParamDefKind::Type { has_default, .. } if has_default => {
                 Some(tcx.type_of(self.def_id).map_bound(|t| t.into()))
@@ -245,20 +245,6 @@ impl<'tcx> Generics {
         }
     }
 
-    /// Returns the `GenericParamDef` with the given index if available.
-    pub fn opt_param_at(
-        &'tcx self,
-        param_index: usize,
-        tcx: TyCtxt<'tcx>,
-    ) -> Option<&'tcx GenericParamDef> {
-        if let Some(index) = param_index.checked_sub(self.parent_count) {
-            self.own_params.get(index)
-        } else {
-            tcx.generics_of(self.parent.expect("parent_count > 0 but no parent?"))
-                .opt_param_at(param_index, tcx)
-        }
-    }
-
     pub fn params_to(&'tcx self, param_index: usize, tcx: TyCtxt<'tcx>) -> &'tcx [GenericParamDef] {
         if let Some(index) = param_index.checked_sub(self.parent_count) {
             &self.own_params[..index]
@@ -287,20 +273,6 @@ impl<'tcx> Generics {
         match param.kind {
             GenericParamDefKind::Type { .. } => param,
             _ => bug!("expected type parameter, but found another generic parameter"),
-        }
-    }
-
-    /// Returns the `GenericParamDef` associated with this `ParamTy` if it belongs to this
-    /// `Generics`.
-    pub fn opt_type_param(
-        &'tcx self,
-        param: ParamTy,
-        tcx: TyCtxt<'tcx>,
-    ) -> Option<&'tcx GenericParamDef> {
-        let param = self.opt_param_at(param.index as usize, tcx)?;
-        match param.kind {
-            GenericParamDefKind::Type { .. } => Some(param),
-            _ => None,
         }
     }
 

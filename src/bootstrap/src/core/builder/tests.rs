@@ -63,7 +63,14 @@ fn check_cli<const N: usize>(paths: [&str; N]) {
 macro_rules! std {
     ($host:ident => $target:ident, stage = $stage:literal) => {
         compile::Std::new(
-            Compiler { host: TargetSelection::from_user(concat!(stringify!($host), "-", stringify!($host))), stage: $stage },
+            Compiler {
+                host: TargetSelection::from_user(concat!(
+                    stringify!($host),
+                    "-",
+                    stringify!($host)
+                )),
+                stage: $stage,
+            },
             TargetSelection::from_user(concat!(stringify!($target), "-", stringify!($target))),
         )
     };
@@ -86,7 +93,14 @@ macro_rules! doc_std {
 macro_rules! rustc {
     ($host:ident => $target:ident, stage = $stage:literal) => {
         compile::Rustc::new(
-            Compiler { host: TargetSelection::from_user(concat!(stringify!($host), "-", stringify!($host))), stage: $stage },
+            Compiler {
+                host: TargetSelection::from_user(concat!(
+                    stringify!($host),
+                    "-",
+                    stringify!($host)
+                )),
+                stage: $stage,
+            },
             TargetSelection::from_user(concat!(stringify!($target), "-", stringify!($target))),
         )
     };
@@ -144,10 +158,14 @@ fn check_missing_paths_for_x_test_tests() {
 
         // Skip if not a test directory.
         if path.ends_with("tests/auxiliary") || !path.is_dir() {
-            continue
+            continue;
         }
 
-        assert!(tests_remap_paths.iter().any(|item| path.ends_with(*item)), "{} is missing in PATH_REMAP tests list.", path.display());
+        assert!(
+            tests_remap_paths.iter().any(|item| path.ends_with(*item)),
+            "{} is missing in PATH_REMAP tests list.",
+            path.display()
+        );
     }
 }
 
@@ -188,7 +206,8 @@ fn alias_and_path_for_library() {
         &[std!(A => A, stage = 0), std!(A => A, stage = 1)]
     );
 
-    let mut cache = run_build(&["library".into(), "core".into()], configure("doc", &["A-A"], &["A-A"]));
+    let mut cache =
+        run_build(&["library".into(), "core".into()], configure("doc", &["A-A"], &["A-A"]));
     assert_eq!(first(cache.all::<doc::Std>()), &[doc_std!(A => A, stage = 0)]);
 }
 

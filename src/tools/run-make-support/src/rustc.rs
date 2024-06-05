@@ -1,10 +1,9 @@
-use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Output, Stdio};
 
-use crate::{handle_failed_output, set_host_rpath, tmp_dir};
+use crate::{env_var, handle_failed_output, set_host_rpath, tmp_dir};
 
 /// Construct a new `rustc` invocation.
 pub fn rustc() -> Rustc {
@@ -26,7 +25,7 @@ pub struct Rustc {
 crate::impl_common_helpers!(Rustc);
 
 fn setup_common() -> Command {
-    let rustc = env::var("RUSTC").unwrap();
+    let rustc = env_var("RUSTC");
     let mut cmd = Command::new(rustc);
     set_host_rpath(&mut cmd);
     cmd.arg("--out-dir").arg(tmp_dir()).arg("-L").arg(tmp_dir());
@@ -203,9 +202,15 @@ impl Rustc {
         self
     }
 
-    /// Get the [`Output`][::std::process::Output] of the finished process.
+    /// Specify the linker
+    pub fn linker(&mut self, linker: &str) -> &mut Self {
+        self.cmd.arg(format!("-Clinker={linker}"));
+        self
+    }
+
+    /// Get the [`Output`] of the finished process.
     #[track_caller]
-    pub fn command_output(&mut self) -> ::std::process::Output {
+    pub fn command_output(&mut self) -> Output {
         // let's make sure we piped all the input and outputs
         self.cmd.stdin(Stdio::piped());
         self.cmd.stdout(Stdio::piped());

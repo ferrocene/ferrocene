@@ -24,7 +24,7 @@ pub type ConstKind<'tcx> = ir::ConstKind<TyCtxt<'tcx>>;
 pub type UnevaluatedConst<'tcx> = ir::UnevaluatedConst<TyCtxt<'tcx>>;
 
 #[cfg(target_pointer_width = "64")]
-rustc_data_structures::static_assert_size!(ConstKind<'_>, 32);
+rustc_data_structures::static_assert_size!(ConstKind<'_>, 24);
 
 /// Use this rather than `ConstData`, whenever possible.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, HashStable)]
@@ -58,7 +58,7 @@ pub struct ConstData<'tcx> {
 }
 
 #[cfg(target_pointer_width = "64")]
-rustc_data_structures::static_assert_size!(ConstData<'_>, 40);
+rustc_data_structures::static_assert_size!(ConstData<'_>, 32);
 
 impl<'tcx> Const<'tcx> {
     #[inline]
@@ -182,6 +182,15 @@ impl<'tcx> rustc_type_ir::inherent::Const<TyCtxt<'tcx>> for Const<'tcx> {
 
     fn new_var(tcx: TyCtxt<'tcx>, vid: ty::ConstVid, ty: Ty<'tcx>) -> Self {
         Const::new_var(tcx, vid, ty)
+    }
+
+    fn new_bound(
+        interner: TyCtxt<'tcx>,
+        debruijn: ty::DebruijnIndex,
+        var: ty::BoundVar,
+        ty: Ty<'tcx>,
+    ) -> Self {
+        Const::new_bound(interner, debruijn, var, ty)
     }
 
     fn new_anon_bound(
@@ -486,7 +495,10 @@ impl<'tcx> Const<'tcx> {
     }
 }
 
-pub fn const_param_default(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<Const<'_>> {
+pub fn const_param_default<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: LocalDefId,
+) -> ty::EarlyBinder<'tcx, Const<'tcx>> {
     let default_def_id = match tcx.hir_node_by_def_id(def_id) {
         hir::Node::GenericParam(hir::GenericParam {
             kind: hir::GenericParamKind::Const { default: Some(ac), .. },

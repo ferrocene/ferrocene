@@ -159,7 +159,23 @@ pub enum CoverageLevel {
     Block,
     /// Also instrument branch points (includes block coverage).
     Branch,
-    /// Instrument for MC/DC. Mostly a superset of branch coverage, but might
+    /// Same as branch coverage, but also adds branch instrumentation for
+    /// certain boolean expressions that are not directly used for branching.
+    ///
+    /// For example, in the following code, `b` does not directly participate
+    /// in a branch, but condition coverage will instrument it as its own
+    /// artificial branch:
+    /// ```
+    /// # let (a, b) = (false, true);
+    /// let x = a && b;
+    /// //           ^ last operand
+    /// ```
+    ///
+    /// This level is mainly intended to be a stepping-stone towards full MC/DC
+    /// instrumentation, so it might be removed in the future when MC/DC is
+    /// sufficiently complete, or if it is making MC/DC changes difficult.
+    Condition,
+    /// Instrument for MC/DC. Mostly a superset of condition coverage, but might
     /// differ in some corner cases.
     Mcdc,
 }
@@ -465,6 +481,7 @@ impl FromStr for SplitDwarfKind {
 #[derive(Encodable, Decodable)]
 pub enum OutputType {
     Bitcode,
+    ThinLinkBitcode,
     Assembly,
     LlvmAssembly,
     Mir,
@@ -492,6 +509,7 @@ impl OutputType {
         match *self {
             OutputType::Exe | OutputType::DepInfo | OutputType::Metadata => true,
             OutputType::Bitcode
+            | OutputType::ThinLinkBitcode
             | OutputType::Assembly
             | OutputType::LlvmAssembly
             | OutputType::Mir
@@ -502,6 +520,7 @@ impl OutputType {
     pub fn shorthand(&self) -> &'static str {
         match *self {
             OutputType::Bitcode => "llvm-bc",
+            OutputType::ThinLinkBitcode => "thin-link-bitcode",
             OutputType::Assembly => "asm",
             OutputType::LlvmAssembly => "llvm-ir",
             OutputType::Mir => "mir",
@@ -518,6 +537,7 @@ impl OutputType {
             "llvm-ir" => OutputType::LlvmAssembly,
             "mir" => OutputType::Mir,
             "llvm-bc" => OutputType::Bitcode,
+            "thin-link-bitcode" => OutputType::ThinLinkBitcode,
             "obj" => OutputType::Object,
             "metadata" => OutputType::Metadata,
             "link" => OutputType::Exe,
@@ -528,8 +548,9 @@ impl OutputType {
 
     fn shorthands_display() -> String {
         format!(
-            "`{}`, `{}`, `{}`, `{}`, `{}`, `{}`, `{}`, `{}`",
+            "`{}`, `{}`, `{}`, `{}`, `{}`, `{}`, `{}`, `{}`, `{}`",
             OutputType::Bitcode.shorthand(),
+            OutputType::ThinLinkBitcode.shorthand(),
             OutputType::Assembly.shorthand(),
             OutputType::LlvmAssembly.shorthand(),
             OutputType::Mir.shorthand(),
@@ -543,6 +564,7 @@ impl OutputType {
     pub fn extension(&self) -> &'static str {
         match *self {
             OutputType::Bitcode => "bc",
+            OutputType::ThinLinkBitcode => "indexing.o",
             OutputType::Assembly => "s",
             OutputType::LlvmAssembly => "ll",
             OutputType::Mir => "mir",
@@ -559,9 +581,11 @@ impl OutputType {
             | OutputType::LlvmAssembly
             | OutputType::Mir
             | OutputType::DepInfo => true,
-            OutputType::Bitcode | OutputType::Object | OutputType::Metadata | OutputType::Exe => {
-                false
-            }
+            OutputType::Bitcode
+            | OutputType::ThinLinkBitcode
+            | OutputType::Object
+            | OutputType::Metadata
+            | OutputType::Exe => false,
         }
     }
 }
@@ -644,6 +668,7 @@ impl OutputTypes {
     pub fn should_codegen(&self) -> bool {
         self.0.keys().any(|k| match *k {
             OutputType::Bitcode
+            | OutputType::ThinLinkBitcode
             | OutputType::Assembly
             | OutputType::LlvmAssembly
             | OutputType::Mir
@@ -657,6 +682,7 @@ impl OutputTypes {
     pub fn should_link(&self) -> bool {
         self.0.keys().any(|k| match *k {
             OutputType::Bitcode
+            | OutputType::ThinLinkBitcode
             | OutputType::Assembly
             | OutputType::LlvmAssembly
             | OutputType::Mir
@@ -763,6 +789,7 @@ pub enum PrintKind {
     TargetLibdir,
     CrateName,
     Cfg,
+    CheckCfg,
     CallingConventions,
     TargetList,
     TargetCPUs,
@@ -786,16 +813,6 @@ pub struct NextSolverConfig {
     /// Whether the new trait solver should be enabled everywhere.
     /// This is only `true` if `coherence` is also enabled.
     pub globally: bool,
-    /// Whether to dump proof trees after computing a proof tree.
-    pub dump_tree: DumpSolverProofTree,
-}
-
-#[derive(Default, Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum DumpSolverProofTree {
-    Always,
-    OnError,
-    #[default]
-    Never,
 }
 
 #[derive(Clone)]
@@ -1443,7 +1460,7 @@ pub fn rustc_short_optgroups() -> Vec<RustcOptGroup> {
             "",
             "print",
             "Compiler information to print on stdout",
-            "[crate-name|file-names|sysroot|target-libdir|cfg|calling-conventions|\
+            "[crate-name|file-names|sysroot|target-libdir|cfg|check-cfg|calling-conventions|\
              target-list|target-cpus|target-features|relocation-models|code-models|\
              tls-models|target-spec-json|all-target-specs-json|native-static-libs|\
              stack-protector-strategies|link-args|deployment-target]",
@@ -1769,6 +1786,12 @@ fn parse_output_types(
                         display = OutputType::shorthands_display(),
                     ))
                 });
+                if output_type == OutputType::ThinLinkBitcode && !unstable_opts.unstable_options {
+                    early_dcx.early_fatal(format!(
+                        "{} requested but -Zunstable-options not specified",
+                        OutputType::ThinLinkBitcode.shorthand()
+                    ));
+                }
                 output_types.insert(output_type, path);
             }
         }
@@ -1853,6 +1876,7 @@ fn collect_print_requests(
         ("all-target-specs-json", PrintKind::AllTargetSpecs),
         ("calling-conventions", PrintKind::CallingConventions),
         ("cfg", PrintKind::Cfg),
+        ("check-cfg", PrintKind::CheckCfg),
         ("code-models", PrintKind::CodeModels),
         ("crate-name", PrintKind::CrateName),
         ("deployment-target", PrintKind::DeploymentTarget),
@@ -1899,6 +1923,16 @@ fn collect_print_requests(
                     early_dcx.early_fatal(
                         "the `-Z unstable-options` flag must also be passed to \
                          enable the all-target-specs-json print option",
+                    );
+                }
+            }
+            Some((_, PrintKind::CheckCfg)) => {
+                if unstable_opts.unstable_options {
+                    PrintKind::CheckCfg
+                } else {
+                    early_dcx.early_fatal(
+                        "the `-Z unstable-options` flag must also be passed to \
+                         enable the check-cfg print option",
                     );
                 }
             }

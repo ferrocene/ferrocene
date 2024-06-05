@@ -47,9 +47,7 @@ use rustc_data_structures::sync::{self, FreezeReadGuard, Lock, Lrc, RwLock, Work
 #[cfg(parallel_compiler)]
 use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_data_structures::unord::UnordSet;
-use rustc_errors::{
-    Applicability, Diag, DiagCtxt, DiagMessage, ErrorGuaranteed, LintDiagnostic, MultiSpan,
-};
+use rustc_errors::{Applicability, Diag, DiagCtxt, ErrorGuaranteed, LintDiagnostic, MultiSpan};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, LocalDefId, LOCAL_CRATE};
@@ -92,7 +90,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type AdtDef = ty::AdtDef<'tcx>;
 
     type GenericArgs = ty::GenericArgsRef<'tcx>;
-    type OwnItemArgs = &'tcx [ty::GenericArg<'tcx>];
+    type GenericArgsSlice = &'tcx [ty::GenericArg<'tcx>];
     type GenericArg = ty::GenericArg<'tcx>;
     type Term = ty::Term<'tcx>;
 
@@ -103,7 +101,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
     type PredefinedOpaques = solve::PredefinedOpaques<'tcx>;
     type DefiningOpaqueTypes = &'tcx ty::List<LocalDefId>;
     type ExternalConstraints = ExternalConstraints<'tcx>;
-    type GoalEvaluationSteps = &'tcx [solve::inspect::GoalEvaluationStep<TyCtxt<'tcx>>];
+    type CanonicalGoalEvaluationStepRef =
+        &'tcx solve::inspect::CanonicalGoalEvaluationStep<TyCtxt<'tcx>>;
 
     type Ty = Ty<'tcx>;
     type Tys = &'tcx List<Ty<'tcx>>;
@@ -114,7 +113,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
 
     type ErrorGuaranteed = ErrorGuaranteed;
     type BoundExistentialPredicates = &'tcx List<PolyExistentialPredicate<'tcx>>;
-    type PolyFnSig = PolyFnSig<'tcx>;
     type AllocId = crate::mir::interpret::AllocId;
 
     type Pat = Pattern<'tcx>;
@@ -150,8 +148,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.generics_of(def_id)
     }
 
-    fn type_of_instantiated(self, def_id: DefId, args: ty::GenericArgsRef<'tcx>) -> Ty<'tcx> {
-        self.type_of(def_id).instantiate(self, args)
+    fn type_of(self, def_id: DefId) -> ty::EarlyBinder<'tcx, Ty<'tcx>> {
+        self.type_of(def_id)
     }
 
     fn alias_ty_kind(self, alias: ty::AliasTy<'tcx>) -> ty::AliasTyKind {
@@ -192,7 +190,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self,
         def_id: Self::DefId,
         args: Self::GenericArgs,
-    ) -> (rustc_type_ir::TraitRef<Self>, Self::OwnItemArgs) {
+    ) -> (rustc_type_ir::TraitRef<Self>, Self::GenericArgsSlice) {
         assert_matches!(self.def_kind(def_id), DefKind::AssocTy | DefKind::AssocConst);
         let trait_def_id = self.parent(def_id);
         assert_matches!(self.def_kind(trait_def_id), DefKind::Trait);
@@ -217,6 +215,13 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         args: impl IntoIterator<Item: Into<ty::GenericArg<'tcx>>>,
     ) -> ty::GenericArgsRef<'tcx> {
         self.check_and_mk_args(def_id, args)
+    }
+
+    fn intern_canonical_goal_evaluation_step(
+        self,
+        step: solve::inspect::CanonicalGoalEvaluationStep<TyCtxt<'tcx>>,
+    ) -> &'tcx solve::inspect::CanonicalGoalEvaluationStep<TyCtxt<'tcx>> {
+        self.arena.alloc(step)
     }
 
     fn parent(self, def_id: Self::DefId) -> Self::DefId {
@@ -680,7 +685,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// In order to break cycles involving `AnonConst`, we need to set the expected type by side
     /// effect. However, we do not want this as a general capability, so this interface restricts
     /// to the only allowed case.
-    pub fn feed_anon_const_type(self, key: LocalDefId, value: ty::EarlyBinder<Ty<'tcx>>) {
+    pub fn feed_anon_const_type(self, key: LocalDefId, value: ty::EarlyBinder<'tcx, Ty<'tcx>>) {
         debug_assert_eq!(self.def_kind(key), DefKind::AnonConst);
         TyCtxtFeed { tcx: self, key }.type_of(value)
     }
@@ -738,6 +743,7 @@ impl<'tcx> TyCtxtFeed<'tcx, LocalDefId> {
                 1,
             ),
             bodies,
+            has_inline_consts: false,
         })));
         self.feed_owner_id().hir_attrs(attrs);
     }
@@ -1488,13 +1494,14 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Returns the `DefId` and the `BoundRegionKind` corresponding to the given region.
-    pub fn is_suitable_region(self, mut region: Region<'tcx>) -> Option<FreeRegionInfo> {
+    pub fn is_suitable_region(
+        self,
+        generic_param_scope: LocalDefId,
+        mut region: Region<'tcx>,
+    ) -> Option<FreeRegionInfo> {
         let (suitable_region_binding_scope, bound_region) = loop {
-            let def_id = match region.kind() {
-                ty::ReLateParam(fr) => fr.bound_region.get_id()?.as_local()?,
-                ty::ReEarlyParam(ebr) => ebr.def_id.as_local()?,
-                _ => return None, // not a free region
-            };
+            let def_id =
+                region.opt_param_def_id(self, generic_param_scope.to_def_id())?.as_local()?;
             let scope = self.local_parent(def_id);
             if self.def_kind(scope) == DefKind::OpaqueTy {
                 // Lifetime params of opaque types are synthetic and thus irrelevant to
@@ -2469,10 +2476,9 @@ impl<'tcx> TyCtxt<'tcx> {
         span: impl Into<MultiSpan>,
         decorator: impl for<'a> LintDiagnostic<'a, ()>,
     ) {
-        let msg = decorator.msg();
         let (level, src) = self.lint_level_at_node(lint, hir_id);
-        lint_level(self.sess, lint, level, src, Some(span.into()), msg, |diag| {
-            decorator.decorate_lint(diag);
+        lint_level(self.sess, lint, level, src, Some(span.into()), |lint| {
+            decorator.decorate_lint(lint);
         })
     }
 
@@ -2486,11 +2492,10 @@ impl<'tcx> TyCtxt<'tcx> {
         lint: &'static Lint,
         hir_id: HirId,
         span: impl Into<MultiSpan>,
-        msg: impl Into<DiagMessage>,
         decorate: impl for<'a, 'b> FnOnce(&'b mut Diag<'a, ()>),
     ) {
         let (level, src) = self.lint_level_at_node(lint, hir_id);
-        lint_level(self.sess, lint, level, src, Some(span.into()), msg, decorate);
+        lint_level(self.sess, lint, level, src, Some(span.into()), decorate);
     }
 
     /// Find the crate root and the appropriate span where `use` and outer attributes can be
@@ -2541,8 +2546,8 @@ impl<'tcx> TyCtxt<'tcx> {
         id: HirId,
         decorator: impl for<'a> LintDiagnostic<'a, ()>,
     ) {
-        self.node_lint(lint, id, decorator.msg(), |diag| {
-            decorator.decorate_lint(diag);
+        self.node_lint(lint, id, |lint| {
+            decorator.decorate_lint(lint);
         })
     }
 
@@ -2555,11 +2560,10 @@ impl<'tcx> TyCtxt<'tcx> {
         self,
         lint: &'static Lint,
         id: HirId,
-        msg: impl Into<DiagMessage>,
         decorate: impl for<'a, 'b> FnOnce(&'b mut Diag<'a, ()>),
     ) {
         let (level, src) = self.lint_level_at_node(lint, id);
-        lint_level(self.sess, lint, level, src, None, msg, decorate);
+        lint_level(self.sess, lint, level, src, None, decorate);
     }
 
     pub fn in_scope_traits(self, id: HirId) -> Option<&'tcx [TraitCandidate]> {
@@ -2633,7 +2637,6 @@ impl<'tcx> TyCtxt<'tcx> {
                     return ty::Region::new_early_param(
                         self,
                         ty::EarlyParamRegion {
-                            def_id: ebv,
                             index: generics
                                 .param_def_id_to_index(self, ebv)
                                 .expect("early-bound var should be present in fn generics"),
@@ -2745,7 +2748,7 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn impl_trait_ref(
         self,
         def_id: impl IntoQueryParam<DefId>,
-    ) -> Option<ty::EarlyBinder<ty::TraitRef<'tcx>>> {
+    ) -> Option<ty::EarlyBinder<'tcx, ty::TraitRef<'tcx>>> {
         Some(self.impl_trait_header(def_id)?.trait_ref)
     }
 

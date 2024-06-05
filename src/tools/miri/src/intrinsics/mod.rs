@@ -18,8 +18,8 @@ use atomic::EvalContextExt as _;
 use helpers::{check_arg_count, ToHost, ToSoft};
 use simd::EvalContextExt as _;
 
-impl<'mir, 'tcx: 'mir> EvalContextExt<'mir, 'tcx> for crate::MiriInterpCx<'mir, 'tcx> {}
-pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
+impl<'tcx> EvalContextExt<'tcx> for crate::MiriInterpCx<'tcx> {}
+pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     fn call_intrinsic(
         &mut self,
         instance: ty::Instance<'tcx>,
@@ -46,10 +46,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriInterpCxExt<'mir, 'tcx> {
                 let intrinsic_fallback_is_spec = Symbol::intern("intrinsic_fallback_is_spec");
                 if this
                     .tcx
-                    .get_attrs_by_path(
-                        instance.def_id(),
-                        &[sym::miri, intrinsic_fallback_is_spec],
-                    )
+                    .get_attrs_by_path(instance.def_id(), &[sym::miri, intrinsic_fallback_is_spec])
                     .next()
                     .is_none()
                 {

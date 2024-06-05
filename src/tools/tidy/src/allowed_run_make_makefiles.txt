@@ -1,13 +1,10 @@
 run-make/allocator-shim-circular-deps/Makefile
 run-make/allow-non-lint-warnings-cmdline/Makefile
-run-make/allow-warnings-cmdline-stability/Makefile
 run-make/archive-duplicate-names/Makefile
 run-make/atomic-lock-free/Makefile
-run-make/bare-outfile/Makefile
 run-make/branch-protection-check-IBT/Makefile
 run-make/c-dynamic-dylib/Makefile
 run-make/c-dynamic-rlib/Makefile
-run-make/c-link-to-rust-dylib/Makefile
 run-make/c-static-dylib/Makefile
 run-make/c-static-rlib/Makefile
 run-make/c-unwind-abi-catch-lib-panic/Makefile
@@ -15,17 +12,13 @@ run-make/c-unwind-abi-catch-panic/Makefile
 run-make/cat-and-grep-sanity-check/Makefile
 run-make/cdylib-dylib-linkage/Makefile
 run-make/cdylib-fewer-symbols/Makefile
-run-make/cdylib/Makefile
 run-make/codegen-options-parsing/Makefile
 run-make/comment-section/Makefile
-run-make/compile-stdin/Makefile
 run-make/compiler-lookup-paths-2/Makefile
 run-make/compiler-lookup-paths/Makefile
 run-make/compiler-rt-works-on-mingw/Makefile
 run-make/compressed-debuginfo/Makefile
-run-make/const-prop-lint/Makefile
 run-make/const_fn_mir/Makefile
-run-make/crate-data-smoke/Makefile
 run-make/crate-hash-rustc-version/Makefile
 run-make/crate-name-priority/Makefile
 run-make/cross-lang-lto-clang/Makefile
@@ -42,12 +35,10 @@ run-make/dump-ice-to-disk/Makefile
 run-make/dump-mono-stats/Makefile
 run-make/duplicate-output-flavors/Makefile
 run-make/dylib-chain/Makefile
-run-make/emit-named-files/Makefile
 run-make/emit-path-unhashed/Makefile
 run-make/emit-shared-files/Makefile
 run-make/emit-stack-sizes/Makefile
 run-make/emit-to-stdout/Makefile
-run-make/emit/Makefile
 run-make/env-dep-info/Makefile
 run-make/error-found-staticlib-instead-crate/Makefile
 run-make/error-writing-dependencies/Makefile
@@ -102,7 +93,6 @@ run-make/forced-unwind-terminate-pof/Makefile
 run-make/foreign-double-unwind/Makefile
 run-make/foreign-exceptions/Makefile
 run-make/foreign-rust-exceptions/Makefile
-run-make/fpic/Makefile
 run-make/glibc-staticlib-args/Makefile
 run-make/inaccessible-temp-dir/Makefile
 run-make/include_bytes_deps/Makefile
@@ -133,7 +123,6 @@ run-make/issue-33329/Makefile
 run-make/issue-35164/Makefile
 run-make/issue-36710/Makefile
 run-make/issue-37839/Makefile
-run-make/issue-37893/Makefile
 run-make/issue-40535/Makefile
 run-make/issue-47384/Makefile
 run-make/issue-47551/Makefile
@@ -146,7 +135,6 @@ run-make/issue-83112-incr-test-moved-file/Makefile
 run-make/issue-84395-lto-embed-bitcode/Makefile
 run-make/issue-85019-moved-src-dir/Makefile
 run-make/issue-85401-static-mir/Makefile
-run-make/issue-85441/Makefile
 run-make/issue-88756-default-output/Makefile
 run-make/issue-97463-abi-param-passing/Makefile
 run-make/jobserver-error/Makefile
@@ -174,7 +162,6 @@ run-make/lto-linkage-used-attr/Makefile
 run-make/lto-no-link-whole-rlib/Makefile
 run-make/lto-readonly-lib/Makefile
 run-make/lto-smoke-c/Makefile
-run-make/lto-smoke/Makefile
 run-make/macos-deployment-target/Makefile
 run-make/macos-fat-archive/Makefile
 run-make/manual-crate-name/Makefile
@@ -186,8 +173,6 @@ run-make/min-global-align/Makefile
 run-make/mingw-export-call-convention/Makefile
 run-make/mismatching-target-triples/Makefile
 run-make/missing-crate-dependency/Makefile
-run-make/mixing-deps/Makefile
-run-make/mixing-formats/Makefile
 run-make/mixing-libs/Makefile
 run-make/msvc-opt-minsize/Makefile
 run-make/multiple-emits/Makefile
@@ -255,9 +240,6 @@ run-make/rlib-format-packed-bundled-libs/Makefile
 run-make/rmeta-preferred/Makefile
 run-make/rustc-macro-dep-files/Makefile
 run-make/rustdoc-io-error/Makefile
-run-make/rustdoc-verify-output-files/Makefile
-run-make/rustdoc-with-output-option/Makefile
-run-make/rustdoc-with-short-out-dir-option/Makefile
 run-make/sanitizer-cdylib-link/Makefile
 run-make/sanitizer-dylib-link/Makefile
 run-make/sanitizer-staticlib-link/Makefile
@@ -270,8 +252,6 @@ run-make/share-generics-dylib/Makefile
 run-make/short-ice/Makefile
 run-make/silly-file-names/Makefile
 run-make/simd-ffi/Makefile
-run-make/simple-dylib/Makefile
-run-make/simple-rlib/Makefile
 run-make/split-debuginfo/Makefile
 run-make/stable-symbol-names/Makefile
 run-make/static-dylib-by-default/Makefile
@@ -308,8 +288,4 @@ run-make/volatile-intrinsics/Makefile
 run-make/wasm-exceptions-nostd/Makefile
 run-make/wasm-override-linker/Makefile
 run-make/weird-output-filenames/Makefile
-run-make/windows-binary-no-external-deps/Makefile
-run-make/windows-safeseh/Makefile
-run-make/windows-spawn/Makefile
-run-make/windows-subsystem/Makefile
 run-make/x86_64-fortanix-unknown-sgx-lvi/Makefile

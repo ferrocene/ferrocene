@@ -32,7 +32,6 @@ use rustc_errors::{
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
-use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath};
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
@@ -336,7 +335,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
-            ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
+            ExprKind::ConstBlock(ref block) => self.check_expr_with_expectation(block, expected),
             ExprKind::Repeat(element, ref count) => {
                 self.check_expr_repeat(element, count, expected, expr)
             }
@@ -910,8 +909,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // the first place.
             assert_ne!(encl_item_id.def_id, encl_body_owner_id);
 
-            let encl_body_id = self.tcx.hir().body_owned_by(encl_body_owner_id);
-            let encl_body = self.tcx.hir().body(encl_body_id);
+            let encl_body = self.tcx.hir().body_owned_by(encl_body_owner_id);
 
             err.encl_body_span = Some(encl_body.value.span);
             err.encl_fn_span = Some(*encl_fn_span);
@@ -1349,6 +1347,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         Some(rcvr),
                         rcvr_t,
                         segment.ident,
+                        expr.hir_id,
                         SelfSource::MethodCall(rcvr),
                         error,
                         Some(args),
@@ -1458,24 +1457,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 },
             );
         }
-    }
-
-    fn check_expr_const_block(
-        &self,
-        block: &'tcx hir::ConstBlock,
-        expected: Expectation<'tcx>,
-    ) -> Ty<'tcx> {
-        let body = self.tcx.hir().body(block.body);
-
-        // Create a new function context.
-        let def_id = block.def_id;
-        let fcx = FnCtxt::new(self, self.param_env, def_id);
-        crate::GatherLocalsVisitor::new(&fcx).visit_body(body);
-
-        let ty = fcx.check_expr_with_expectation(body.value, expected);
-        fcx.require_type_is_sized(ty, body.value.span, ObligationCauseCode::ConstSized);
-        fcx.write_ty(block.hir_id, ty);
-        ty
     }
 
     fn check_expr_repeat(
@@ -3068,7 +3049,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         self.commit_if_ok(|snapshot| {
             let outer_universe = self.universe();
 
-            let ocx = ObligationCtxt::new(self);
+            let ocx = ObligationCtxt::new_with_diagnostics(self);
             let impl_args = self.fresh_args_for_item(base_expr.span, impl_def_id);
             let impl_trait_ref =
                 self.tcx.impl_trait_ref(impl_def_id).unwrap().instantiate(self.tcx, impl_args);

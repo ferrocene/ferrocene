@@ -57,7 +57,7 @@ use std::process::{self, Command, Stdio};
 use std::str;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, OnceLock};
-use std::time::{Instant, SystemTime};
+use std::time::{Duration, Instant, SystemTime};
 use time::OffsetDateTime;
 use tracing::trace;
 
@@ -804,6 +804,43 @@ fn print_crate_info(
                     println_info!("{cfg}");
                 }
             }
+            CheckCfg => {
+                let mut check_cfgs: Vec<String> = Vec::with_capacity(410);
+
+                // INSTABILITY: We are sorting the output below.
+                #[allow(rustc::potential_query_instability)]
+                for (name, expected_values) in &sess.psess.check_config.expecteds {
+                    use crate::config::ExpectedValues;
+                    match expected_values {
+                        ExpectedValues::Any => check_cfgs.push(format!("{name}=any()")),
+                        ExpectedValues::Some(values) => {
+                            if !values.is_empty() {
+                                check_cfgs.extend(values.iter().map(|value| {
+                                    if let Some(value) = value {
+                                        format!("{name}=\"{value}\"")
+                                    } else {
+                                        name.to_string()
+                                    }
+                                }))
+                            } else {
+                                check_cfgs.push(format!("{name}="))
+                            }
+                        }
+                    }
+                }
+
+                check_cfgs.sort_unstable();
+                if !sess.psess.check_config.exhaustive_names {
+                    if !sess.psess.check_config.exhaustive_values {
+                        println_info!("any()=any()");
+                    } else {
+                        println_info!("any()");
+                    }
+                }
+                for check_cfg in check_cfgs {
+                    println_info!("{check_cfg}");
+                }
+            }
             CallingConventions => {
                 let mut calling_conventions = rustc_target::spec::abi::all_names();
                 calling_conventions.sort_unstable();
@@ -1502,14 +1539,13 @@ pub fn init_logger(early_dcx: &EarlyDiagCtxt, cfg: rustc_log::LoggerConfig) {
 pub fn install_ctrlc_handler() {
     #[cfg(not(target_family = "wasm"))]
     ctrlc::set_handler(move || {
-        // Indicate that we have been signaled to stop. If we were already signaled, exit
-        // immediately. In our interpreter loop we try to consult this value often, but if for
-        // whatever reason we don't get to that check or the cleanup we do upon finding that
-        // this bool has become true takes a long time, the exit here will promptly exit the
-        // process on the second Ctrl-C.
-        if CTRL_C_RECEIVED.swap(true, Ordering::Relaxed) {
-            std::process::exit(1);
-        }
+        // Indicate that we have been signaled to stop, then give the rest of the compiler a bit of
+        // time to check CTRL_C_RECEIVED and run its own shutdown logic, but after a short amount
+        // of time exit the process. This sleep+exit ensures that even if nobody is checking
+        // CTRL_C_RECEIVED, the compiler exits reasonably promptly.
+        CTRL_C_RECEIVED.store(true, Ordering::Relaxed);
+        std::thread::sleep(Duration::from_millis(100));
+        std::process::exit(1);
     })
     .expect("Unable to install ctrlc handler");
 }

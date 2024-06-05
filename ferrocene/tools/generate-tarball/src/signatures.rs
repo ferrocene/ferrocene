@@ -69,19 +69,17 @@ fn collect_files(
 ) -> Result<(), Error> {
     for entry in std::fs::read_dir(dir)? {
         let entry = entry?.path();
-        let relative_path = entry
-            .strip_prefix(ctx.package_dir)
-            .unwrap();
+        let relative_path = entry.strip_prefix(ctx.package_dir).unwrap();
 
         #[cfg(not(windows))]
         let needs_proxy = ctx.proxied_binaries.contains(&relative_path);
         #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
-        let needs_proxy = ctx.proxied_binaries.contains(&relative_path.with_extension("").as_path());
-        
-        let relative_path = relative_path.to_str()
-            .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
+        let needs_proxy =
+            ctx.proxied_binaries.contains(&relative_path.with_extension("").as_path());
 
-            
+        let relative_path =
+            relative_path.to_str().ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
+
         if entry.is_file() {
             package.files.push(PackageFile {
                 path: relative_path.into(),

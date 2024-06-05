@@ -15,7 +15,7 @@ struct Point {
 fn main() {
     let x = 2 + 2;
     let y = [0, 1, 2, 3, 4, 5][3];
-    let z = (Point { x: 12, y: 42}).y;
+    let z = (Point { x: 12, y: 42 }).y;
 }
 
 // ferrocene-annotations: um_rustc_C_overflow_checks

@@ -9,7 +9,6 @@ use rustc_middle::ty::layout::ValidityRequirement;
 use rustc_middle::ty::{self, GenericArgsRef, ParamEnv, Ty, TyCtxt};
 use rustc_span::sym;
 use rustc_span::symbol::Symbol;
-use rustc_target::abi::FieldIdx;
 use rustc_target::spec::abi::Abi;
 
 pub struct InstSimplify;
@@ -124,7 +123,7 @@ impl<'tcx> InstSimplifyContext<'tcx, '_> {
 
     /// Transform `&(*a)` ==> `a`.
     fn simplify_ref_deref(&self, source_info: &SourceInfo, rvalue: &mut Rvalue<'tcx>) {
-        if let Rvalue::Ref(_, _, place) = rvalue {
+        if let Rvalue::Ref(_, _, place) | Rvalue::AddressOf(_, place) = rvalue {
             if let Some((base, ProjectionElem::Deref)) = place.as_ref().last_projection() {
                 if rvalue.ty(self.local_decls, self.tcx) != base.ty(self.local_decls, self.tcx).ty {
                     return;
@@ -217,13 +216,11 @@ impl<'tcx> InstSimplifyContext<'tcx, '_> {
                     && let Some(place) = operand.place()
                 {
                     let variant = adt_def.non_enum_variant();
-                    for (i, field) in variant.fields.iter().enumerate() {
+                    for (i, field) in variant.fields.iter_enumerated() {
                         let field_ty = field.ty(self.tcx, args);
                         if field_ty == *cast_ty {
-                            let place = place.project_deeper(
-                                &[ProjectionElem::Field(FieldIdx::from_usize(i), *cast_ty)],
-                                self.tcx,
-                            );
+                            let place = place
+                                .project_deeper(&[ProjectionElem::Field(i, *cast_ty)], self.tcx);
                             let operand = if operand.is_move() {
                                 Operand::Move(place)
                             } else {

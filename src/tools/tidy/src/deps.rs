@@ -28,6 +28,7 @@ const LICENSES: &[&str] = &[
     "MIT OR Zlib OR Apache-2.0",                           // miniz_oxide
     "MIT",
     "MIT/Apache-2.0",
+    "Unicode-3.0",                                         // ICU4X_UNICODE
     "Unicode-DFS-2016",                                    // tinystr and icu4x
     "Unlicense OR MIT",
     "Unlicense/MIT",

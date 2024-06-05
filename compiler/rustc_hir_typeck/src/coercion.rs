@@ -1158,7 +1158,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let (a_sig, b_sig) = self.normalize(new.span, (a_sig, b_sig));
             let sig = self
                 .at(cause, self.param_env)
-                .trace(prev_ty, new_ty)
                 .lub(DefineOpaqueTypes::Yes, a_sig, b_sig)
                 .map(|ok| self.register_infer_ok_obligations(ok))?;
 
@@ -1871,11 +1870,8 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
         // If this is due to a block, then maybe we forgot a `return`/`break`.
         if due_to_block
             && let Some(expr) = expression
-            && let Some((parent_fn_decl, parent_id)) = fcx
-                .tcx
-                .hir()
-                .parent_iter(block_or_return_id)
-                .find_map(|(_, node)| Some((node.fn_decl()?, node.associated_body()?.0)))
+            && let Some(parent_fn_decl) =
+                fcx.tcx.hir().fn_decl_by_hir_id(fcx.tcx.local_def_id_to_hir_id(fcx.body_id))
         {
             fcx.suggest_missing_break_or_return_expr(
                 &mut err,
@@ -1884,7 +1880,7 @@ impl<'tcx, 'exprs, E: AsCoercionSite> CoerceMany<'tcx, 'exprs, E> {
                 expected,
                 found,
                 block_or_return_id,
-                parent_id,
+                fcx.body_id,
             );
         }
 

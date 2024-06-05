@@ -798,7 +798,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 }
 
                 ty::PredicateKind::ObjectSafe(trait_def_id) => {
-                    if self.tcx().check_is_object_safe(trait_def_id) {
+                    if self.tcx().is_object_safe(trait_def_id) {
                         Ok(EvaluatedToOk)
                     } else {
                         Ok(EvaluatedToErr)
@@ -910,10 +910,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                                 if let Ok(InferOk { obligations, value: () }) = self
                                     .infcx
                                     .at(&obligation.cause, obligation.param_env)
-                                    .trace(c1, c2)
                                     // Can define opaque types as this is only reachable with
                                     // `generic_const_exprs`
-                                    .eq(DefineOpaqueTypes::Yes, a.args, b.args)
+                                    .eq(
+                                        DefineOpaqueTypes::Yes,
+                                        ty::AliasTerm::from(a),
+                                        ty::AliasTerm::from(b),
+                                    )
                                 {
                                     return self.evaluate_predicates_recursively(
                                         previous_stack,
@@ -992,10 +995,27 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 }
                 ty::PredicateKind::Ambiguous => Ok(EvaluatedToAmbig),
                 ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType(ct, ty)) => {
+                    // FIXME(BoxyUwU): Really we should not be calling `ct.ty()` for any variant
+                    // other than `ConstKind::Value`. Unfortunately this would require looking in the
+                    // env for any `ConstArgHasType` assumptions for parameters and placeholders. I
+                    // don't really want to implement this in the old solver so I haven't.
+                    //
+                    // We do still stall on infer vars though as otherwise a goal like:
+                    // `ConstArgHasType(?x: usize, usize)` can succeed even though it might later
+                    // get unified with some const that is not of type `usize`.
+                    let ct = self.infcx.shallow_resolve_const(ct);
+                    let ct_ty = match ct.kind() {
+                        ty::ConstKind::Infer(ty::InferConst::Var(_)) => {
+                            return Ok(EvaluatedToAmbig);
+                        }
+                        ty::ConstKind::Error(_) => return Ok(EvaluatedToOk),
+                        _ => ct.ty(),
+                    };
+
                     match self.infcx.at(&obligation.cause, obligation.param_env).eq(
                         // Only really excercised by generic_const_exprs
                         DefineOpaqueTypes::Yes,
-                        ct.ty(),
+                        ct_ty,
                         ty,
                     ) {
                         Ok(inf_ok) => self.evaluate_predicates_recursively(
@@ -2539,7 +2559,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         let InferOk { obligations, .. } = self
             .infcx
             .at(&cause, obligation.param_env)
-            .eq(DefineOpaqueTypes::No, placeholder_obligation_trait_ref, impl_trait_ref)
+            .eq(DefineOpaqueTypes::Yes, placeholder_obligation_trait_ref, impl_trait_ref)
             .map_err(|e| {
                 debug!("match_impl: failed eq_trait_refs due to `{}`", e.to_string(self.tcx()))
             })?;
@@ -2571,8 +2591,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         let a_auto_traits: FxIndexSet<DefId> = a_data
             .auto_traits()
             .chain(a_data.principal_def_id().into_iter().flat_map(|principal_def_id| {
-                util::supertrait_def_ids(tcx, principal_def_id)
-                    .filter(|def_id| tcx.trait_is_auto(*def_id))
+                tcx.supertrait_def_ids(principal_def_id).filter(|def_id| tcx.trait_is_auto(*def_id))
             }))
             .collect();
 
@@ -2594,7 +2613,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                         self.infcx
                             .at(&obligation.cause, obligation.param_env)
                             .eq(
-                                DefineOpaqueTypes::No,
+                                DefineOpaqueTypes::Yes,
                                 upcast_principal.map_bound(|trait_ref| {
                                     ty::ExistentialTraitRef::erase_self_ty(tcx, trait_ref)
                                 }),
@@ -2631,7 +2650,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                     nested.extend(
                         self.infcx
                             .at(&obligation.cause, obligation.param_env)
-                            .eq(DefineOpaqueTypes::No, source_projection, target_projection)
+                            .eq(DefineOpaqueTypes::Yes, source_projection, target_projection)
                             .map_err(|_| SelectionError::Unimplemented)?
                             .into_obligations(),
                     );

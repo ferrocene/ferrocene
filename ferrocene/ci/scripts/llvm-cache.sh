@@ -80,9 +80,9 @@ get_llvm_cache_hash() {
         # $CHECKSUM *$PATH
         # Instead of:
         # $CHECKSUM  $PATH
-        # So, remove that. Also fix the line endings (\015)
+        # So, remove that. Also fix the line endings (\r)
         new_file="$(mktemp)"
-        cat "${file}" | tr '*' ' ' | tr -d '\r' > "${new_file}"
+        cat "${file}" | tr '*' ' ' | sed 's.\r$..' > "${new_file}"
         mv "${new_file}" "${file}"
     fi
 

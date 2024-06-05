@@ -87,7 +87,7 @@ get_llvm_cache_hash() {
     fi
 
     ${SHA_CMD[@]} "${file}" | awk '{print($1)}'
-    # rm -f "${file}"
+    rm -f "${file}"
 }
 
 # Build LLVM and generate a tarball we can cache with all the build artifacts.

@@ -47,9 +47,11 @@ KEEP_LLVM_BINARIES=(
 )
 
 EXE_SUFFIX=""
+NEWLINE="\n"
 if [[ "${OSTYPE}" = "msys" ]]; then
     # Windows will postfix binaries with `.exe`
     EXE_SUFFIX=".exe"
+    NEWLINE="\r\n"
 fi
 
 SHA_CMD=("sha256sum")
@@ -68,10 +70,9 @@ get_llvm_cache_hash() {
     ${SHA_CMD[@]} ferrocene/ci/configure.sh >> "${file}"
     ${SHA_CMD[@]} src/version >> "${file}"
 
-    # Apparently, git for windows doesn't understand when the `-z` flag of `git
-    # ls-files` is passed after the paths, so we provide it before the list of
-    # paths to list.
-    git ls-files src/bootstrap ferrocene/ci/docker-images | sort | xargs -d '\n' ${SHA_CMD[@]} >> "${file}"
+    # We cannot use `-z` or `-0` flags here because `sort -z` does not work on
+    # the CircleCI Windows Runners
+    git ls-files src/bootstrap ferrocene/ci/docker-images | sort | xargs -d "${NEWLINE}" ${SHA_CMD[@]} >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"

@@ -1048,7 +1048,7 @@ commands:
           command: echo 'export QNXLM_LICENSE_FILE="56859@localhost"' >> "$BASH_ENV"
       - run:
           name: Start QNX License Server port forwarding
-          command: aws ssm start-session --target i-0accef99ca2244097 --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
+          command: aws ssm start-session --target i-02dc912eda2fb675a --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
           background: true
 
   aws-oidc-auth:

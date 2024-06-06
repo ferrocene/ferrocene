@@ -17,7 +17,7 @@ Installing Ferrocene
 
 **Output:** The directory structure and contents of Ferrocene.
 
-**Environment constraints:** Tar is correctly installed.
+**Environment constraints:** tar is correctly installed.
 
 **Description:**
 

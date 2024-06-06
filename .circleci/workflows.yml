@@ -528,6 +528,7 @@ jobs:
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - ferrocene-job-test-container:
+          os: darwin
           restore-from-job: aarch64-darwin-build
 
   # x86_64-pc-windows-msvc jobs
@@ -1028,7 +1029,15 @@ commands:
     parameters:
       restore-from-job:
         type: string
+      os:
+        type: string
+        default: linux # Or `windows` or `darwin`
     steps:
+      - when:
+          condition:
+            equal: [<<parameters.os>>, "darwin"]
+          steps:
+            - ferrocene-setup-darwin
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true

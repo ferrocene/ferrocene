@@ -800,8 +800,10 @@ Union Types
 .. syntax::
 
    UnionDeclaration ::=
-       $$union$$ Name GenericParameterList? WhereClause? RecordStructFieldList
+       $$union$$ Name GenericParameterList? WhereClause? UnionFieldList
 
+   UnionFieldList ::=
+       $${$$ RecordStructField ($$,$$ RecordStructField)* $$,$$? $$}$$
 .. rubric:: Legality Rules
 
 :dp:`fls_nskmnzq95yqm`

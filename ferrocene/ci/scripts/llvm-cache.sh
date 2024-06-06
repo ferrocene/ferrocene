@@ -61,6 +61,7 @@ fi
 # the LLVM build. This will be used as the cache key to avoid rebuilding LLVM
 # from scratch every time.
 get_llvm_cache_hash() {
+    echo "For ${FERROCENE_HOST}" 1>&2
     file="$(mktemp)"
 
     ${SHA_CMD[@]} "$0" >> "${file}"
@@ -196,6 +197,7 @@ case "$1" in
         echo "restored LLVM cache with hash ${cache_hash}"
         ;;
     s3-url)
+        echo "${FERROCENE_HOST} s3 url is ${s3_url}" 1>&2
         echo "${s3_url}"
         ;;
     *)

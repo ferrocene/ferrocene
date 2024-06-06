@@ -65,7 +65,3 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 - ``--target=x86_64-unknown-linux-gnu``
-
-- ``-C linker=<your-c-compiler>``
-
-  - e.g. ``-C linker=/usr/bin/clang``

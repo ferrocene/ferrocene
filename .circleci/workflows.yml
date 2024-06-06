@@ -432,6 +432,9 @@ jobs:
       # due to the OOM killer killing the build, decrease this number.
       LLVM_BUILD_PARALLELISM: 18
     steps:
+      - run:
+          name: Make sure git autocrlf is false
+          command: git config --global core.autocrlf false
       - when:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-pc-windows-msvc >>
           steps:

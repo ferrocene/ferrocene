@@ -4,6 +4,7 @@
 pub(crate) mod code_coverage;
 pub(crate) mod dist;
 pub(crate) mod doc;
+pub(crate) mod install;
 pub(crate) mod partners;
 pub(crate) mod run;
 pub(crate) mod sign;

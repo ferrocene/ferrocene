@@ -70,9 +70,12 @@ get_llvm_cache_hash() {
     ${SHA_CMD[@]} ferrocene/ci/configure.sh >> "${file}"
     ${SHA_CMD[@]} src/version >> "${file}"
 
-    # We cannot use `-z` or `-0` flags here because `sort -z` does not work on
-    # the CircleCI Windows Runners
-    git ls-files src/bootstrap ferrocene/ci/docker-images | sort | xargs -d "${NEWLINE}" ${SHA_CMD[@]} >> "${file}"
+    # `sort -z` does not work on the CircleCI Windows Runners, use a very basic loop here
+    checksum_files=$(git ls-files src/bootstrap ferrocene/ci/docker-images | sort)
+    for checksum_file in ${checksum_files}; do
+        ${SHA_CMD[@]} ${checksum_file} >> "${file}"
+    done
+    # git ls-files src/bootstrap ferrocene/ci/docker-images | sort | tr "${NEWLINE}" "\0" | xargs -0 ${SHA_CMD[@]} >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"

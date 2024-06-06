@@ -40,8 +40,8 @@ Install one of:
 If prompted for which components to enable, enable `Desktop
 development with C++`, or select all of the following individual components:
 
-* MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)
-* Windows 11 SDK (10.0.22621.0)
+* The most recent "C++ x64/x86 build tools"
+* The most recent "Windows 11 SDK"
 
 The specific versions of these components do not particularly matter to Ferrocene,
 you may use whatever version your dependencies require.
@@ -73,7 +73,3 @@ To use the target, the following additional flags must be provided to
 ``rustc``:
 
 - ``--target=x86_64-pc-windows-msvc``
-
-- ``-C linker=<your-c-compiler>``
-
-  - e.g. ``-C linker='C://Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.39.335.19\bin\HostX64\x64\link.exe'``

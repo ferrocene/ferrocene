@@ -74,11 +74,11 @@ get_llvm_cache_hash() {
     # ls-files` is passed after the paths, so we provide it before the list of
     # paths to list.
     echo "git ls-files | sort output" 1>&2
-    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z 1>&2
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort --zero-terminated 1>&2
     echo "git ls-files | sort | xargs output" 1>&2
-    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 ${SHA_CMD[@]}
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort --zero-terminated | xargs -0 ${SHA_CMD[@]}
 
-    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort -z | xargs -0 ${SHA_CMD[@]} >> "${file}"
+    git ls-files -z src/bootstrap ferrocene/ci/docker-images | sort --zero-terminated | xargs -0 ${SHA_CMD[@]} >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"

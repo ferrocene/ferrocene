@@ -442,6 +442,9 @@ jobs:
             - ferrocene-checkout
             - ferrocene-setup-windows
             - ferrocene-ci
+            - run:
+                name: Debug s3-url
+                command: ./ci/scripts/llvm-cache.sh s3-url
       - run:
           name: Empty step to make sure the job always has steps
           command: echo

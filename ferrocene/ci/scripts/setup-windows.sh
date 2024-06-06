@@ -38,3 +38,7 @@ fi
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
 choco install -y cmake.portable ninja zstandard gcc-arm-embedded llvm
+
+echo "git core.autocrlf is $(git config --global core.autocrlf)"
+git config --global core.autocrlf false
+echo "git core.autocrlf updated to $(git config --global core.autocrlf)"

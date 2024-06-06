@@ -73,7 +73,8 @@ get_llvm_cache_hash() {
     # `sort -z` does not work on the CircleCI Windows Runners, use a very basic loop here
     checksum_files=$(git ls-files src/bootstrap ferrocene/ci/docker-images | sort)
     for checksum_file in ${checksum_files}; do
-        ${SHA_CMD[@]} ${checksum_file} >> "${file}"
+        checksum_file_without_cr=$(echo "${checksum_file}" | tr -d "\r")
+        ${SHA_CMD[@]} ${checksum_file_without_cr} >> "${file}"
     done
     # git ls-files src/bootstrap ferrocene/ci/docker-images | sort | tr "${NEWLINE}" "\0" | xargs -0 ${SHA_CMD[@]} >> "${file}"
     # Hashing all of the LLVM source code takes time. Instead we can simply get

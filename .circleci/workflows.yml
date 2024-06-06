@@ -1068,14 +1068,14 @@ commands:
         type: string
         default: linux # Or `windows` or `darwin`
     steps:
+      - ferrocene-checkout:
+          llvm-subset: true
       - when:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin
+            - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
       - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>

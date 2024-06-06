@@ -74,6 +74,7 @@ get_llvm_cache_hash() {
     # the hash of the tree from git, saving time and achieving the same effect.
     git ls-tree HEAD src/llvm-project >> "${file}"
 
+    cat "${file}" 1>&2
     if [[ "${OSTYPE}" = "msys" ]]; then
         # For some reason, Windows has different shasum output than Linux.
         # Lines are, inexplicably:
@@ -84,6 +85,9 @@ get_llvm_cache_hash() {
         new_file="$(mktemp)"
         cat "${file}" | tr '*' ' ' | sed 's.\r$..' > "${new_file}"
         mv "${new_file}" "${file}"
+
+        echo "After edits" 1>&2
+        cat "${file}" 1>&2
     fi
 
     ${SHA_CMD[@]} "${file}" | awk '{print($1)}'

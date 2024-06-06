@@ -1,7 +1,7 @@
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::t;
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CacheSignatureFiles {
@@ -36,17 +36,33 @@ impl Step for CacheSignatureFiles {
             Err(err) => panic!("failed to read {}: {err}", signature_toml_path.display()),
         };
 
+        let fetcher: Box<dyn SignatureFilesFetcher> = Box::new(S3FilesFetcher);
         for (name, uuid) in signature_toml.files.into_iter() {
             let cached_file = &cache_dir.join(&uuid);
             if cached_file.exists() {
                 continue;
             }
-            builder.config.download_file(
-                &format!("s3://{}/{uuid}", builder.config.ferrocene_document_signatures_s3_bucket),
-                &cached_file,
-                // \u{20} is a space.
-                &format!(
-                    "Failed to download signature file {uuid}, corresponding to {name}.\n\
+            fetcher.fetch(builder, &uuid, &name, &cached_file);
+        }
+
+        cache_dir
+    }
+}
+
+trait SignatureFilesFetcher {
+    fn fetch(&self, builder: &Builder<'_>, uuid: &str, name: &str, dest: &Path);
+}
+
+struct S3FilesFetcher;
+
+impl SignatureFilesFetcher for S3FilesFetcher {
+    fn fetch(&self, builder: &Builder<'_>, uuid: &str, name: &str, dest: &Path) {
+        builder.config.download_file(
+            &format!("s3://{}/{uuid}", builder.config.ferrocene_document_signatures_s3_bucket),
+            dest,
+            // \u{20} is a space.
+            &format!(
+                "Failed to download signature file {uuid}, corresponding to {name}.\n\
                      \n\
                      If you don't have access to private signature files, you must disable \n\
                      digital signature support to continue executing this command. You can \n\
@@ -54,10 +70,7 @@ impl Step for CacheSignatureFiles {
                      \n\
                      \u{20}  [ferrocene]\n\
                      \u{20}  ignore-document-signatures = true"
-                ),
-            );
-        }
-
-        cache_dir
+            ),
+        );
     }
 }

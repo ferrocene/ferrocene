@@ -808,6 +808,10 @@ Union Types
 A :t:`union type` is an :t:`abstract data type` that is a sum of other
 :t:`types`.
 
+:dp:`fls_I5fN5Fmo5CyK`
+A :t:`union` without any :t:`[union field]s` is rejected, but may still be consumed by
+:t:`[macro]s`.
+
 :dp:`fls_1caus8ybmfli`
 The :t:`name` of a :t:`union field` shall be unique within the related
 :s:`RecordStructDeclaration`.

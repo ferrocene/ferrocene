@@ -14,3 +14,15 @@ mod traits {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_4vjbkm4ceymk
+// Attribute Macros
+//
+// ferrocene-annotations: fls_qkmkev85o5jf
+// Attribute proc_macro
+//
+// ferrocene-annotations: fls_ejhlylrcajo
+// Attribute proc_macro_attribute
+//
+// ferrocene-annotations: fls_wn1i6hzg2ff7
+// Procedural Macros

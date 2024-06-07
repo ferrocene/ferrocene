@@ -1,6 +1,7 @@
 //@ build-pass
 //@ only-linux
 //@ ignore-aarch64-unknown-ferrocenecoretest - the actual tested target does not support this
+//@ ignore-riscv64 On this platform `-Csplit-debuginfo=unpacked` is unstable, see #120518
 //
 //@ compile-flags: -g --emit=llvm-ir -Csplit-debuginfo=unpacked
 //

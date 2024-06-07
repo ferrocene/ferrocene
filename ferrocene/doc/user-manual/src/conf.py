@@ -1,9 +1,6 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-import os
-import sys
-
 project = "Ferrocene User Manual"
 copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"

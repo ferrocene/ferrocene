@@ -46,7 +46,7 @@ If the ``--check`` option is used, ``rusfmt`` checks if the files are well forma
 Exit codes
 ----------
 
-When running with ``--check``, ``rustfmt`` will exit with ``0`` if ``rustfmt`` would not make any formatting changes to the input, and ``1`` if ``rustfmt`` would make changes. In other modes, ``rustfmt`` will exit with ``1`` if there was some error during formatting (for example a parsing or internal error) and ``0`` if formatting completed without error (whether or not changes were made).
+When running with ``--check``, ``rustfmt`` will exit with status code ``0`` if ``rustfmt`` would not make any formatting changes to the input, and status code ``1`` if ``rustfmt`` would make changes. In other modes, ``rustfmt`` will exit with ``1`` if there was some error during formatting (for example a parsing or internal error) and ``0`` if formatting completed without error (whether or not changes were made).
 
 ``cargo fmt``
 -------------

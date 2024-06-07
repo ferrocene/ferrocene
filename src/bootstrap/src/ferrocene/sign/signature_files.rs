@@ -1,4 +1,5 @@
 use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::config::FerroceneDocumentSignatures;
 use crate::t;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -36,7 +37,13 @@ impl Step for CacheSignatureFiles {
             Err(err) => panic!("failed to read {}: {err}", signature_toml_path.display()),
         };
 
-        let fetcher: Box<dyn SignatureFilesFetcher> = Box::new(S3FilesFetcher);
+        let fetcher: Box<dyn SignatureFilesFetcher> =
+            match &builder.config.ferrocene_document_signatures {
+                FerroceneDocumentSignatures::Disabled => return cache_dir,
+                FerroceneDocumentSignatures::S3 { bucket } => {
+                    Box::new(S3FilesFetcher { bucket: bucket.clone() })
+                }
+            };
         for (name, uuid) in signature_toml.files.into_iter() {
             let cached_file = &cache_dir.join(&uuid);
             if cached_file.exists() {
@@ -53,12 +60,14 @@ trait SignatureFilesFetcher {
     fn fetch(&self, builder: &Builder<'_>, uuid: &str, name: &str, dest: &Path);
 }
 
-struct S3FilesFetcher;
+struct S3FilesFetcher {
+    bucket: String,
+}
 
 impl SignatureFilesFetcher for S3FilesFetcher {
     fn fetch(&self, builder: &Builder<'_>, uuid: &str, name: &str, dest: &Path) {
         builder.config.download_file(
-            &format!("s3://{}/{uuid}", builder.config.ferrocene_document_signatures_s3_bucket),
+            &format!("s3://{}/{uuid}", self.bucket),
             dest,
             // \u{20} is a space.
             &format!(

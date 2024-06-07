@@ -321,12 +321,13 @@ impl<P: Step> Step for SphinxBook<P> {
             }
         }
 
-        match self.signature {
+        match (&builder.config.ferrocene_document_signatures, self.signature) {
             // Always treat a document as not needing a signature if signatures are ignored.
-            _ if builder.config.ferrocene_ignore_document_signatures => {}
-            SignatureStatus::NotNeeded => {}
+            (crate::core::config::FerroceneDocumentSignatures::Disabled, _) => {}
 
-            SignatureStatus::Present => {
+            (_, SignatureStatus::NotNeeded) => {}
+
+            (_, SignatureStatus::Present) => {
                 let private_signature_files_dir =
                     builder.ensure(CacheSignatureFiles { source_dir: builder.src.join(&self.src) });
 
@@ -337,7 +338,7 @@ impl<P: Step> Step for SphinxBook<P> {
                     &relative_path(&src, &private_signature_files_dir),
                 ));
             }
-            SignatureStatus::Missing => {
+            (_, SignatureStatus::Missing) => {
                 cmd.args(["-D", "ferrocene_signature=missing"]);
             }
         }

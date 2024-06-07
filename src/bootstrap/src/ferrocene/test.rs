@@ -91,7 +91,10 @@ impl Step for CheckDocumentSignatures {
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        let default_condition = !run.builder.config.ferrocene_ignore_document_signatures;
+        let default_condition = !matches!(
+            run.builder.config.ferrocene_document_signatures,
+            crate::core::config::FerroceneDocumentSignatures::Disabled
+        );
         run.alias("ferrocene-check-document-signatures").default_condition(default_condition)
     }
 

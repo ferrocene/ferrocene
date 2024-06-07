@@ -1,6 +1,5 @@
 //@ check-pass
-//@ compile-flags: --target=x86_64-unknown-linux-gnu
-//@ only-x86_64-unknown-linux-gnu
+//@ compile-flags: --target={{target}}
 //@ needs-llvm-components:
 
 fn main() {}

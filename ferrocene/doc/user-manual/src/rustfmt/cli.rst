@@ -10,7 +10,7 @@
 
       Run in 'check' mode. Exits with 0 if input is formatted correctly. Exits with 1 and prints a diff if formatting is required.
 
-   .. cli:option:: --emit [files|stdout|coverage|checkstyle|json]
+   .. cli:option:: --emit [files|stdout]
 
       What data to emit and how
 
@@ -67,4 +67,3 @@
       Short option: ``-h``.
 
       Show this message or help about a specific topic: ``config`` or ``file-lines``
-   

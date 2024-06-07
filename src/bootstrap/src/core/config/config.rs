@@ -357,8 +357,7 @@ pub struct Config {
     pub ferrocene_test_outcomes: FerroceneTestOutcomes,
     pub ferrocene_oxidos_src: Option<String>,
     pub ferrocene_tarball_signing_kms_key_arn: Option<String>,
-    pub ferrocene_document_signatures_s3_bucket: String,
-    pub ferrocene_ignore_document_signatures: bool,
+    pub ferrocene_document_signatures: FerroceneDocumentSignatures,
     pub ferrocene_technical_report_url: Option<String>,
 }
 
@@ -380,6 +379,15 @@ pub enum FerroceneTestOutcomes {
     Disabled,
     DownloadCi,
     Custom(PathBuf),
+}
+
+#[derive(Debug, Clone, Default)]
+pub enum FerroceneDocumentSignatures {
+    #[default]
+    Disabled,
+    S3 {
+        bucket: String,
+    },
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1191,8 +1199,8 @@ define_config! {
         test_outcomes_dir: Option<PathBuf> = "test-outcomes-dir",
         oxidos_src: Option<String> = "oxidos-src",
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
+        document_signatures: Option<String> = "document-signatures",
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
-        ignore_document_signatures: Option<bool> = "ignore-document-signatures",
         technical_report_url: Option<String> = "technical-report-url",
     }
 }
@@ -1978,12 +1986,25 @@ impl Config {
             config.ferrocene_aws_profile = f.aws_profile;
             config.ferrocene_oxidos_src = f.oxidos_src;
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
-            config.ferrocene_document_signatures_s3_bucket = f
-                .document_signatures_s3_bucket
-                .unwrap_or_else(|| "ferrocene-document-signatures".into());
-            config.ferrocene_ignore_document_signatures =
-                f.ignore_document_signatures.unwrap_or(false);
             config.ferrocene_technical_report_url = f.technical_report_url;
+
+            config.ferrocene_document_signatures =
+                match (f.document_signatures.as_deref(), f.document_signatures_s3_bucket) {
+                    (None | Some("s3"), Some(bucket)) => FerroceneDocumentSignatures::S3 { bucket },
+                    (None | Some("s3"), None) => FerroceneDocumentSignatures::S3 {
+                        bucket: "ferrocene-document-signatures".into(),
+                    },
+
+                    (Some("disabled"), None) => FerroceneDocumentSignatures::Disabled,
+                    (Some("disabled"), _) => panic!(
+                        "ferrocene.document-signatures=\"disabled\" does not support \
+                         setting other settings related to document signatures"
+                    ),
+
+                    (Some(unknown), _) => {
+                        panic!("unsupported {unknown:?} value for ferrocene.document-signatures")
+                    }
+                };
 
             config.ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir)
             {

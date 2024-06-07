@@ -10,7 +10,7 @@ pub(crate) mod signature_files;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
-use crate::core::config::TargetSelection;
+use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{SphinxMode, WithSource};
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -116,13 +116,19 @@ documents![
 
 pub(super) fn document_signatures_cmd(builder: &Builder<'_>, source_dir: &Path) -> Command {
     let cosign = builder.ensure(cosign::CosignBinary);
-    let cache_dir = builder.ensure(signature_files::CacheSignatureFiles { source_dir: source_dir.into() });
+    let cache_dir =
+        builder.ensure(signature_files::CacheSignatureFiles { source_dir: source_dir.into() });
     let tool = builder.tool_exe(Tool::FerroceneDocumentSignatures);
 
     let mut cmd = Command::new(&tool);
     cmd.env("DOCUMENT_SIGNATURES_COSIGN_BINARY", &cosign);
-    cmd.env("DOCUMENT_SIGNATURES_S3_BUCKET", "ferrocene-document-signatures");
     cmd.env("DOCUMENT_SIGNATURES_S3_CACHE_DIR", &cache_dir);
+    match &builder.config.ferrocene_document_signatures {
+        config::FerroceneDocumentSignatures::Disabled => {}
+        config::FerroceneDocumentSignatures::S3 { bucket } => {
+            cmd.env("DOCUMENT_SIGNATURES_S3_BUCKET", bucket);
+        }
+    }
     if let Some(profile) = &builder.config.ferrocene_aws_profile {
         cmd.env("AWS_PROFILE", profile);
     }
@@ -130,7 +136,9 @@ pub(super) fn document_signatures_cmd(builder: &Builder<'_>, source_dir: &Path) 
 }
 
 pub(crate) fn error_when_signatures_are_ignored(builder: &Builder<'_>, action: &str) {
-    if builder.config.ferrocene_ignore_document_signatures {
+    if let config::FerroceneDocumentSignatures::Disabled =
+        &builder.config.ferrocene_document_signatures
+    {
         eprintln!("You're trying to {action} when document signatures are ignored.");
         eprintln!();
         eprintln!("If you are a Ferrous Systems employee or contractor with access to AWS");
@@ -138,7 +146,7 @@ pub(crate) fn error_when_signatures_are_ignored(builder: &Builder<'_>, action: &
         eprintln!("from your config.toml:");
         eprintln!();
         eprintln!("   [ferrocene]");
-        eprintln!("   ignore-document-signatures = true");
+        eprintln!("   document-signatures = \"disabled\"");
         eprintln!();
         panic!("document signatures are ignored");
     }

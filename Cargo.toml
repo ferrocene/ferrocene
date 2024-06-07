@@ -45,7 +45,7 @@ addr2line = { version = "0.22.0", default-features = false }
 libc = { version = "0.2.146", default-features = false }
 
 [target.'cfg(not(all(windows, target_env = "msvc", not(target_vendor = "uwp"))))'.dependencies.object]
-version = "0.35.0"
+version = "0.36.0"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 

@@ -2853,7 +2853,7 @@ Indexing Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_X9kdEAPTqsAe`
-A :t:`indexable type` is a :t:`type` that implements the
+An :t:`indexable type` is a :t:`type` that implements the
 :std:`core::ops::Index` :t:`trait`.
 
 :dp:`fls_42ijvuqqqlvh`
@@ -3815,7 +3815,7 @@ An :t:`infinite loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`loop body` indefinitely.
 
 :dp:`fls_b314wjbv0zwe`
-The :t:`type` of a :t:`infinite loop expression` is determined as follows:
+The :t:`type` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_rpedapxnv8w3`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,
@@ -3827,7 +3827,7 @@ The :t:`type` of a :t:`infinite loop expression` is determined as follows:
   :t:`[break type]s` of all :t:`[break expression]s`.
 
 :dp:`fls_q3qpcf2fz7h`
-The :t:`value` of a :t:`infinite loop expression` is determined as follows:
+The :t:`value` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_2ulbzmuuny3g`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,

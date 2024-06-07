@@ -3852,7 +3852,7 @@ version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9d34169e64b3c7a80c8621a48adaf44e0cf62c78a9b25dd9dd35f1881a17cf9"
 dependencies = [
- "base64",
+ "base64 0.21.7",
  "indexmap",
  "line-wrap",
  "quick-xml",

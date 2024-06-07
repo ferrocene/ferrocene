@@ -9,6 +9,7 @@ mod signature_files;
 mod verify;
 
 use anyhow::{Context, Error};
+use std::env::VarError;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
@@ -42,7 +43,7 @@ fn main() -> Result<(), Error> {
 
 struct CliOptions {
     cosign_binary: PathBuf,
-    s3_bucket: String,
+    s3_bucket: Option<String>,
     s3_cache_dir: PathBuf,
 }
 
@@ -50,9 +51,26 @@ impl CliOptions {
     fn load() -> Result<Self, Error> {
         Ok(Self {
             cosign_binary: env("COSIGN_BINARY")?,
-            s3_bucket: env("S3_BUCKET")?,
+            s3_bucket: maybe_env("S3_BUCKET")?,
             s3_cache_dir: env("S3_CACHE_DIR")?,
         })
+    }
+}
+
+fn maybe_env<T>(var: &str) -> Result<Option<T>, Error>
+where
+    T: FromStr,
+    T::Err: Send + Sync + std::error::Error + 'static,
+{
+    let var = format!("DOCUMENT_SIGNATURES_{var}");
+    match std::env::var(&var) {
+        Ok(v) => v
+            .parse()
+            .map(Some)
+            .map_err(Error::from)
+            .with_context(|| format!("failed to parse {var}")),
+        Err(VarError::NotPresent) => Ok(None),
+        Err(e) => Err(Error::from(e).context(format!("failed to read {var}"))),
     }
 }
 
@@ -61,9 +79,9 @@ where
     T: FromStr,
     T::Err: Send + Sync + std::error::Error + 'static,
 {
-    let var = format!("DOCUMENT_SIGNATURES_{var}");
-    match std::env::var(&var) {
-        Ok(v) => v.parse().map_err(Error::from).with_context(|| format!("failed to parse {var}")),
-        Err(e) => Err(Error::from(e).context(format!("failed to read {var}"))),
-    }
+    maybe_env(var)?.ok_or_else(|| anyhow::anyhow!("missing env var {}", env_name(var)))
+}
+
+fn env_name(var: &str) -> String {
+    format!("DOCUMENT_SIGNATURES_{var}")
 }

@@ -28,6 +28,20 @@ impl Step for TestOutcomesDir {
             }
             FerroceneTestOutcomes::Disabled => None,
             FerroceneTestOutcomes::Custom(path) => Some(std::fs::canonicalize(path).unwrap()),
+            FerroceneTestOutcomes::Local => {
+                let metrics = builder.out.join("metrics.json");
+                let local_path = builder.out.join("ferrocene").join("local-test-outcomes");
+                if !builder.config.dry_run() {
+                    if local_path.exists() {
+                        builder.remove_dir(&local_path);
+                    }
+                    builder.create_dir(&local_path);
+                    if metrics.exists() {
+                        std::fs::copy(metrics, local_path.join("local.json")).unwrap();
+                    }
+                }
+                Some(local_path)
+            }
         }
     }
 }

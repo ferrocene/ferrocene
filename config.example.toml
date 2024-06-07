@@ -946,6 +946,8 @@
 #
 # - disabled (default): do not include test outcomes
 # - download-ci: download the outcomes of the git merge base from CI
+# - local: use the test outcomes from the current build directory (see the
+#          internal procedures for instructions on how to use this).
 # - custom: provide a custom path to the test outcomes (see test-outcomes-dir)
 #test-outcomes = "disabled"
 

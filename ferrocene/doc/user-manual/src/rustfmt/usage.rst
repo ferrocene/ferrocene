@@ -11,22 +11,6 @@ Using ``rustfmt``
 
 To format one or more files, just pass the paths to ``rusfmt``. This will format the files and all of their child modules.
 
-Assuming following project structure, ``rustfmt main.rs`` will format the whole project, while ``rustfmt mod1.rs`` will format ``mod1.rs``, ``mod1/mod10.rs`` and ``mod1/mod11.rs``, but neither ``mod2.rs`` nor ``mod2/mod20.rs``.
-
-.. code-block::
-
-   $ tree src/
-   src/
-   ├── main.rs
-   ├── mod1
-   │   ├── mod10.rs
-   │   └── mod11.rs
-   ├── mod1.rs
-   ├── mod2
-   │   └── mod20.rs
-   └── mod2.rs
-
-
 ``rustfmt --check <file>...``
 -----------------------------
 

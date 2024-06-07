@@ -17,6 +17,11 @@ Definition of Terms
        Uses the control flow graph to verify the ownership and borrowing system of
        the programming language.
 
+   Child module
+       A module declared in another module.
+       An example declaration is ``mod child_module;``, which would be in a parent module.
+       Examples of parent modules are files named ``main.rs``, ``lib.rs``, and ``mod.rs``.
+
    CircleCI
        CI platform used by the Ferrocene repository to run its tests and build
        its releases.

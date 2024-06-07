@@ -3747,10 +3747,10 @@ The :t:`type` of a :t:`subject expression` shall implement the
 The :t:`expected type` of the :t:`pattern` is the :t:`associated type` :std:`core::iter::IntoIterator::Item` of the :t:`subject expression`'s :std:`core::iter::IntoIterator` implementation.
 
 :dp:`fls_bmTjhKdpfgCB`
-The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`for loop expression` is the :t:`unit type`.
 
 :dp:`fls_FkxLf91WKiIo`
-The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`for loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3887,10 +3887,10 @@ of a :t:`while loop expression`.
 The :t:`type` of an :t:`iteration expression` shall be :t:`type` :c:`bool`.
 
 :dp:`fls_P8iyTN6KZCVA`
-The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while loop expression` is the :t:`unit type`.
 
 :dp:`fls_s6hRa5spz64w`
-The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3943,10 +3943,10 @@ a :t:`value` that can be matched against its :t:`pattern`.
 The :t:`expected type` of the :t:`pattern` is the :t:`type` of the :t:`subject let expression`.
 
 :dp:`fls_gTfSLePwHTES`
-The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while let loop expression` is the :t:`unit type`.
 
 :dp:`fls_pTq4LIGIoAtN`
-The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while let loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 

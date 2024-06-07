@@ -1,6 +1,6 @@
-//! Backtrace strategy for MSVC platforms.
+//! Backtrace strategy for Windows platforms.
 //!
-//! This module contains the ability to generate a backtrace on MSVC using one
+//! This module contains the ability to generate a backtrace on Windows using one
 //! of two possible methods. The `StackWalkEx` function is primarily used if
 //! possible, but not all systems have that. Failing that the `StackWalk64`
 //! function is used instead. Note that `StackWalkEx` is favored because it

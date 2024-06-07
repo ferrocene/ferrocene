@@ -1,6 +1,6 @@
-//! Backtrace strategy for MSVC `x86_64` and `aarch64` platforms.
+//! Backtrace strategy for Windows `x86_64` and `aarch64` platforms.
 //!
-//! This module contains the ability to capture a backtrace on MSVC using
+//! This module contains the ability to capture a backtrace on Windows using
 //!  `RtlVirtualUnwind` to walk the stack one frame at a time. This function is much faster than using
 //! `dbghelp!StackWalk*` because it does not load debug info to report inlined frames.
 //! We still report inlined frames during symbolization by consulting the appropriate

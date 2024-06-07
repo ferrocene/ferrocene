@@ -800,15 +800,17 @@ Union Types
 .. syntax::
 
    UnionDeclaration ::=
-       $$union$$ Name GenericParameterList? WhereClause? UnionFieldList
+       $$union$$ Name GenericParameterList? WhereClause? RecordStructFieldList
 
-   UnionFieldList ::=
-       $${$$ RecordStructField ($$,$$ RecordStructField)* $$,$$? $$}$$
 .. rubric:: Legality Rules
 
 :dp:`fls_nskmnzq95yqm`
 A :t:`union type` is an :t:`abstract data type` that is a sum of other
 :t:`types`.
+
+:dp:`fls_nskmnzq95yqn`
+A :t:`union` without any :t:`[union field]s` is rejected, but may still be consumed by
+:t:`[macro]s`.
 
 :dp:`fls_1caus8ybmfli`
 The :t:`name` of a :t:`union field` shall be unique within the related

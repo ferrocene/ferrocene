@@ -8,7 +8,10 @@
 
    .. cli:option:: --check
 
-      Run in 'check' mode. Exits with 0 if input is formatted correctly. Exits with 1 and prints a diff if formatting is required.
+      Check if the input is formatted correctly.
+
+      Exits with status code 0 if input is formatted correctly.
+      Exits with status code 1 and prints a diff if formatting is not correct.
 
    .. cli:option:: --emit [files|stdout]
 

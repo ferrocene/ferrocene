@@ -12,11 +12,11 @@
 #![allow(bad_style)]
 
 use windows_sys::{
-    Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
-    Win32::System::SystemInformation::*, Win32::System::Threading::*,
+    Win32::System::Diagnostics::Debug::*, Win32::System::SystemInformation::*,
+    Win32::System::Threading::*,
 };
 
-use super::super::dbghelp;
+use super::super::{dbghelp, windows::*};
 use core::ffi::c_void;
 use core::mem;
 

@@ -1,3 +1,5 @@
+use windows_sys::{Win32::Foundation::*, Win32::System::Diagnostics::ToolHelp::*};
+
 use super::super::super::windows::*;
 use super::mystd::os::windows::prelude::*;
 use super::{coff, mmap, Library, LibrarySegment, OsString};

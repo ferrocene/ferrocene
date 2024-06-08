@@ -1,6 +1,8 @@
-use super::super::super::windows::*;
+use windows_sys::{Win32::Foundation::*, Win32::System::Memory::*};
+
 use super::mystd::fs::File;
 use super::mystd::os::windows::prelude::*;
+use core::ffi::c_void;
 use core::ops::Deref;
 use core::ptr;
 use core::slice;
@@ -17,14 +19,14 @@ impl Mmap {
     pub unsafe fn map(file: &File, len: usize) -> Option<Mmap> {
         let file = file.try_clone().ok()?;
         let mapping = CreateFileMappingA(
-            file.as_raw_handle().cast(),
+            file.as_raw_handle() as isize,
             ptr::null_mut(),
             PAGE_READONLY,
             0,
             0,
             ptr::null(),
         );
-        if mapping.is_null() {
+        if mapping == 0 {
             return None;
         }
         let ptr = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, len);

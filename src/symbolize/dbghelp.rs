@@ -22,7 +22,7 @@ use windows_sys::{
     Win32::Globalization::*,
 };
 
-use super::super::dbghelp;
+use super::super::{dbghelp, windows::*};
 use super::{BytesOrWideString, ResolveWhat, SymbolName};
 use core::ffi::c_void;
 use core::marker;
@@ -181,7 +181,7 @@ unsafe fn resolve_with_inline(
                 addr,
                 &mut inline_context,
                 &mut 0,
-            ) != 1)
+            ) != TRUE)
             || inlined_frame_count == 0
         {
             inlined_frame_count = 0;
@@ -219,7 +219,7 @@ unsafe fn do_resolve(
     // due to struct alignment.
     info.SizeOfStruct = 88;
 
-    if sym_from_addr(info) != 1 {
+    if sym_from_addr(info) != TRUE {
         return;
     }
 
@@ -257,7 +257,7 @@ unsafe fn do_resolve(
 
     let mut filename = None;
     let mut lineno = None;
-    if get_line_from_addr(&mut line) == 1 {
+    if get_line_from_addr(&mut line) == TRUE {
         lineno = Some(line.LineNumber);
 
         let base = line.FileName;

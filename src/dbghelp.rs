@@ -26,11 +26,13 @@
 use alloc::vec::Vec;
 
 use windows_sys::{
-    core::*, Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
+    core::*,
+    Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
     Win32::System::LibraryLoader::*, Win32::System::Threading::*,
     Win32::System::WindowsProgramming::*, Win32::Globalization::*,
 };
 
+use super::windows::*;
 use core::ffi::c_void;
 use core::mem;
 use core::ptr;
@@ -354,7 +356,7 @@ fn set_optional_options() -> Option<()> {
         // the time, but now that it's using this crate it means that someone will
         // get to initialization first and the other will pick up that
         // initialization.
-        DBGHELP.SymInitializeW()?(GetCurrentProcess(), ptr::null_mut(), 1);
+        DBGHELP.SymInitializeW()?(GetCurrentProcess(), ptr::null_mut(), TRUE);
 
         // The default search path for dbghelp will only look in the current working
         // directory and (possibly) `_NT_SYMBOL_PATH` and `_NT_ALT_SYMBOL_PATH`.
@@ -372,7 +374,7 @@ fn set_optional_options() -> Option<()> {
             GetCurrentProcess(),
             search_path_buf.as_mut_ptr(),
             search_path_buf.len() as _,
-        ) == 1
+        ) == TRUE
         {
             // Trim the buffer to the actual length of the string.
             let len =   lstrlenW(search_path_buf.as_mut_ptr());
@@ -458,7 +460,7 @@ extern "system" fn enum_loaded_modules_callback(
 
     if len == 0 {
         // This should not happen, but if it does, we can just ignore it.
-        return 1;
+        return TRUE;
     }
 
     let module_name = unsafe { slice::from_raw_parts(module_name, len) };
@@ -471,13 +473,13 @@ extern "system" fn enum_loaded_modules_callback(
     else {
         // `module_name` being an absolute path, it should always contain at least one
         // path separator. If not, there is nothing we can do.
-        return 1;
+        return TRUE;
     };
 
     let search_path = unsafe { &mut *(user_context as *mut SearchPath) };
     search_path.add(&module_name[..end_of_directory]);
 
-    1
+    TRUE
 }
 
 impl Drop for Init {

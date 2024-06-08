@@ -158,7 +158,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 Some(get_module_base),
                 None,
                 0,
-            ) == 1
+            ) == TRUE
             {
                 frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
 
@@ -190,7 +190,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
                 Some(function_table_access),
                 Some(get_module_base),
                 None,
-            ) == 1
+            ) == TRUE
             {
                 frame.inner.base_address = get_module_base(process_handle, frame.ip() as _) as _;
 

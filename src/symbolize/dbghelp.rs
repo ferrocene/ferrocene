@@ -19,6 +19,7 @@
 
 use windows_sys::{
     Win32::Foundation::*, Win32::System::Diagnostics::Debug::*, Win32::System::Threading::*,
+    Win32::Globalization::*,
 };
 
 use super::super::dbghelp;
@@ -180,7 +181,7 @@ unsafe fn resolve_with_inline(
                 addr,
                 &mut inline_context,
                 &mut 0,
-            ) != TRUE)
+            ) != 1)
             || inlined_frame_count == 0
         {
             inlined_frame_count = 0;
@@ -212,7 +213,7 @@ unsafe fn do_resolve(
     const SIZE: usize = 2 * MAX_SYM_NAME as usize + mem::size_of::<SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);
     let info = &mut *data.0.as_mut_ptr().cast::<SYMBOL_INFOW>();
-    info.MaxNameLen = MAX_SYM_NAME as ULONG;
+    info.MaxNameLen = MAX_SYM_NAME as u32;
     // the struct size in C.  the value is different to
     // `size_of::<SYMBOL_INFOW>() - MAX_SYM_NAME + 1` (== 81)
     // due to struct alignment.
@@ -236,7 +237,7 @@ unsafe fn do_resolve(
         0,
         name_ptr,
         name_len as i32,
-        name_buffer.as_mut_ptr().cast::<i8>(),
+        name_buffer.as_mut_ptr(),
         name_buffer.len() as i32,
         core::ptr::null_mut(),
         core::ptr::null_mut(),

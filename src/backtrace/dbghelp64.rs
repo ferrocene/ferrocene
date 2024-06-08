@@ -8,7 +8,7 @@
 
 #![allow(bad_style)]
 
-use super::super::windows::*;
+use windows_sys::Win32::System::Diagnostics::Debug::*;
 use core::ffi::c_void;
 
 #[derive(Clone, Copy)]
@@ -17,7 +17,7 @@ pub struct Frame {
     ip: *mut c_void,
     sp: *mut c_void,
     #[cfg(not(target_env = "gnu"))]
-    inline_context: Option<DWORD>,
+    inline_context: Option<u32>,
 }
 
 // we're just sending around raw pointers and reading them, never interpreting
@@ -43,7 +43,7 @@ impl Frame {
     }
 
     #[cfg(not(target_env = "gnu"))]
-    pub fn inline_context(&self) -> Option<DWORD> {
+    pub fn inline_context(&self) -> Option<u32> {
         self.inline_context
     }
 }
@@ -54,12 +54,12 @@ struct MyContext(CONTEXT);
 #[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]
 impl MyContext {
     #[inline(always)]
-    fn ip(&self) -> DWORD64 {
+    fn ip(&self) -> u64 {
         self.0.Rip
     }
 
     #[inline(always)]
-    fn sp(&self) -> DWORD64 {
+    fn sp(&self) -> u64 {
         self.0.Rsp
     }
 }
@@ -133,7 +133,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             ip,
             fn_entry,
             &mut context.0,
-            ptr::addr_of_mut!(handler_data).cast::<PVOID>(),
+            ptr::addr_of_mut!(handler_data).cast::<*mut c_void>(),
             &mut establisher_frame,
             ptr::null_mut(),
         );

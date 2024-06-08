@@ -28,7 +28,7 @@ use alloc::vec::Vec;
 use windows_sys::{
     core::*, Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
     Win32::System::LibraryLoader::*, Win32::System::Threading::*,
-    Win32::System::WindowsProgramming::*,
+    Win32::System::WindowsProgramming::*, Win32::Globalization::*,
 };
 
 use core::ffi::c_void;
@@ -151,7 +151,7 @@ dbghelp! {
         fn EnumerateLoadedModulesW64(
             hprocess: HANDLE,
             enumloadedmodulescallback: PENUMLOADED_MODULES_CALLBACKW64,
-            usercontext: PVOID
+            usercontext: *const c_void
         ) -> BOOL;
         fn StackWalk64(
             MachineType: u32,
@@ -223,18 +223,6 @@ dbghelp! {
             CurAddress: u64,
             CurContext: *mut u32,
             CurFrameIndex: *mut u32
-        ) -> BOOL;
-        fn SymFromAddrW(
-            hProcess: HANDLE,
-            Address: u64,
-            Displacement: *mut u64,
-            Symbol: PSYMBOL_INFOW
-        ) -> BOOL;
-        fn SymGetLineFromAddrW64(
-            hProcess: HANDLE,
-            dwAddr: u64,
-            pdwDisplacement: *mut u32,
-            Line: PIMAGEHLP_LINEW64
         ) -> BOOL;
     }
 }
@@ -308,7 +296,7 @@ pub fn init() -> Result<Init, ()> {
         let mut lock = LOCK.load(SeqCst);
         if lock.is_null() {
             let name = mutex_name();
-            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr().cast::<i8>());
+            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr());
             if lock.is_null() {
                 return Err(());
             }
@@ -387,7 +375,7 @@ fn set_optional_options() -> Option<()> {
         ) == 1
         {
             // Trim the buffer to the actual length of the string.
-            let len = lstrlenW(search_path_buf.as_mut_ptr());
+            let len =   lstrlenW(search_path_buf.as_mut_ptr());
             assert!(len >= 0);
             search_path_buf.truncate(len as usize);
         } else {
@@ -461,8 +449,8 @@ impl SearchPath {
 extern "system" fn enum_loaded_modules_callback(
     module_name: PCWSTR,
     _: u64,
-    _: ULONG,
-    user_context: PVOID,
+    _: u32,
+    user_context: *const c_void,
 ) -> BOOL {
     // `module_name` is an absolute path like `C:\path\to\module.dll`
     // or `C:\path\to\module.exe`
@@ -470,7 +458,7 @@ extern "system" fn enum_loaded_modules_callback(
 
     if len == 0 {
         // This should not happen, but if it does, we can just ignore it.
-        return TRUE;
+        return 1;
     }
 
     let module_name = unsafe { slice::from_raw_parts(module_name, len) };
@@ -483,13 +471,13 @@ extern "system" fn enum_loaded_modules_callback(
     else {
         // `module_name` being an absolute path, it should always contain at least one
         // path separator. If not, there is nothing we can do.
-        return TRUE;
+        return 1;
     };
 
     let search_path = unsafe { &mut *(user_context as *mut SearchPath) };
     search_path.add(&module_name[..end_of_directory]);
 
-    TRUE
+    1
 }
 
 impl Drop for Init {

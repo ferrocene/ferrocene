@@ -36,7 +36,10 @@
 
    .. cli:option:: --edition [2015|2018|2021]
 
-      Rust edition to use
+      Rust edition to use, which defaults to 2015 edition.
+
+      If using a different edition than the default, specify it here,
+      because the formatting may be different.
 
    .. cli:option:: --color [always|never|auto]
 

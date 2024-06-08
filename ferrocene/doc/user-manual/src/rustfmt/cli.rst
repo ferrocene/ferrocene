@@ -15,7 +15,10 @@
 
    .. cli:option:: --emit [files|stdout]
 
-      What data to emit and how
+      What kind of output to emit.
+
+      - ``files`` emits formatted output to files; this is the default
+      - ``stdout`` emits the formatted output to stdout
 
    .. cli:option:: --backup
 

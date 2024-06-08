@@ -18,8 +18,8 @@
 #![allow(bad_style)]
 
 use windows_sys::{
-    Win32::Foundation::*, Win32::System::Diagnostics::Debug::*, Win32::System::Threading::*,
-    Win32::Globalization::*,
+    Win32::Foundation::*, Win32::Globalization::*, Win32::System::Diagnostics::Debug::*,
+    Win32::System::Threading::*,
 };
 
 use super::super::{dbghelp, windows::*};

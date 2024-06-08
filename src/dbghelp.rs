@@ -26,10 +26,9 @@
 use alloc::vec::Vec;
 
 use windows_sys::{
-    core::*,
-    Win32::Foundation::*, Win32::System::Diagnostics::Debug::*,
+    core::*, Win32::Foundation::*, Win32::Globalization::*, Win32::System::Diagnostics::Debug::*,
     Win32::System::LibraryLoader::*, Win32::System::Threading::*,
-    Win32::System::WindowsProgramming::*, Win32::Globalization::*,
+    Win32::System::WindowsProgramming::*,
 };
 
 use super::windows::*;
@@ -377,7 +376,7 @@ fn set_optional_options() -> Option<()> {
         ) == TRUE
         {
             // Trim the buffer to the actual length of the string.
-            let len =   lstrlenW(search_path_buf.as_mut_ptr());
+            let len = lstrlenW(search_path_buf.as_mut_ptr());
             assert!(len >= 0);
             search_path_buf.truncate(len as usize);
         } else {

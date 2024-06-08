@@ -30,7 +30,9 @@
 
    .. cli:option:: --config-path
 
-      Recursively searches the given path for the rustfmt.toml config file. If not found reverts to the input file path
+      Recursively searches the given path for the ``rustfmt.toml`` or ``.rustfmt.toml`` config file.
+      If not found, it reverts to the default behavior of searching the parent directories of the
+      file to be formatted.
 
    .. cli:option:: --edition [2015|2018|2021]
 

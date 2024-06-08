@@ -24,6 +24,10 @@
 
       Backup any modified files.
 
+      Before a file is modified, rustfmt will create a copy of it in the same directory,
+      with the ``.bk`` extension.
+      Note that existing ``.bk`` files are over-written.
+
    .. cli:option:: --config-path
 
       Recursively searches the given path for the rustfmt.toml config file. If not found reverts to the input file path

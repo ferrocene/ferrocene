@@ -159,7 +159,7 @@ An :t:`external block` is a :t:`construct` that provides the declarations of
 foreign :t:`[function]s` as unchecked imports.
 
 :dp:`fls_Nz0l16hMxqTd`
-The :t:`ABI` of a :t:`extern block` is determined as follows:
+The :t:`ABI` of an :t:`extern block` is determined as follows:
 
 * :dp:`fls_4XOoiFloXM7t`
   If the :t:`extern block` specifies an :s:`AbiKind`, then the :t:`ABI` is the specified :s:`AbiKind`.

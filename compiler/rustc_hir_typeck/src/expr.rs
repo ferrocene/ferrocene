@@ -31,6 +31,7 @@ use rustc_errors::{
 use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
+use rustc_hir::intravisit::Visitor;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir::{ExprKind, HirId, QPath};
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
@@ -40,7 +41,7 @@ use rustc_infer::infer::InferOk;
 use rustc_infer::traits::query::NoSolution;
 use rustc_infer::traits::ObligationCause;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AllowTwoPhase};
-use rustc_middle::ty::error::{ExpectedFound, TypeError::Sorts};
+use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::GenericArgsRef;
 use rustc_middle::ty::{self, AdtKind, Ty, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
@@ -334,7 +335,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
-            ExprKind::ConstBlock(ref block) => self.check_expr_with_expectation(block, expected),
+            ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
             ExprKind::Repeat(element, ref count) => {
                 self.check_expr_repeat(element, count, expected, expr)
             }
@@ -682,7 +683,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             self.suggest_mismatched_types_on_tail(
                                 &mut err, expr, ty, e_ty, target_id,
                             );
-                            let error = Some(Sorts(ExpectedFound { expected: ty, found: e_ty }));
+                            let error =
+                                Some(TypeError::Sorts(ExpectedFound { expected: ty, found: e_ty }));
                             self.annotate_loop_expected_due_to_inference(err, expr, error);
                             if let Some(val) =
                                 self.err_ctxt().ty_kind_suggestion(self.param_env, ty)
@@ -1454,6 +1456,24 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 },
             );
         }
+    }
+
+    fn check_expr_const_block(
+        &self,
+        block: &'tcx hir::ConstBlock,
+        expected: Expectation<'tcx>,
+    ) -> Ty<'tcx> {
+        let body = self.tcx.hir().body(block.body);
+
+        // Create a new function context.
+        let def_id = block.def_id;
+        let fcx = FnCtxt::new(self, self.param_env, def_id);
+        crate::GatherLocalsVisitor::new(&fcx).visit_body(body);
+
+        let ty = fcx.check_expr_with_expectation(body.value, expected);
+        fcx.require_type_is_sized(ty, body.value.span, ObligationCauseCode::ConstSized);
+        fcx.write_ty(block.hir_id, ty);
+        ty
     }
 
     fn check_expr_repeat(
@@ -3343,7 +3363,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
                     let field_ty = self.field_ty(expr.span, field, args);
 
-                    // FIXME: DSTs with static alignment should be allowed
+                    // Enums are anyway always sized. But just to safeguard against future
+                    // language extensions, let's double-check.
                     self.require_type_is_sized(field_ty, expr.span, ObligationCauseCode::Misc);
 
                     if field.vis.is_accessible_from(sub_def_scope, self.tcx) {
@@ -3371,8 +3392,19 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     {
                         let field_ty = self.field_ty(expr.span, field, args);
 
-                        // FIXME: DSTs with static alignment should be allowed
-                        self.require_type_is_sized(field_ty, expr.span, ObligationCauseCode::Misc);
+                        if self.tcx.features().offset_of_slice {
+                            self.require_type_has_static_alignment(
+                                field_ty,
+                                expr.span,
+                                ObligationCauseCode::Misc,
+                            );
+                        } else {
+                            self.require_type_is_sized(
+                                field_ty,
+                                expr.span,
+                                ObligationCauseCode::Misc,
+                            );
+                        }
 
                         if field.vis.is_accessible_from(def_scope, self.tcx) {
                             self.tcx.check_stability(field.did, Some(expr.hir_id), expr.span, None);
@@ -3392,10 +3424,21 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     if let Ok(index) = field.as_str().parse::<usize>()
                         && field.name == sym::integer(index)
                     {
-                        for ty in tys.iter().take(index + 1) {
-                            self.require_type_is_sized(ty, expr.span, ObligationCauseCode::Misc);
-                        }
                         if let Some(&field_ty) = tys.get(index) {
+                            if self.tcx.features().offset_of_slice {
+                                self.require_type_has_static_alignment(
+                                    field_ty,
+                                    expr.span,
+                                    ObligationCauseCode::Misc,
+                                );
+                            } else {
+                                self.require_type_is_sized(
+                                    field_ty,
+                                    expr.span,
+                                    ObligationCauseCode::Misc,
+                                );
+                            }
+
                             field_indices.push((FIRST_VARIANT, index.into()));
                             current_container = field_ty;
 

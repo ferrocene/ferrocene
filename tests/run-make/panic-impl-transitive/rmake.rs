@@ -6,16 +6,11 @@
 // function in the crate.
 // See https://github.com/rust-lang/rust/pull/50338
 
-use run_make_support::{rustc, tmp_dir};
+use run_make_support::rustc;
 
 fn main() {
     rustc().input("panic-impl-provider.rs").run();
-    rustc()
-        .input("panic-impl-consumer.rs")
-        .panic("abort")
-        .emit("llvm-ir")
-        .library_search_path(tmp_dir())
-        .run();
+    rustc().input("panic-impl-consumer.rs").panic("abort").emit("llvm-ir").run();
 }
 
 // ferrocene-annotations: um_rustc_C_panic

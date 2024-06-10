@@ -559,6 +559,8 @@ declare_features! (
     (unstable, offset_of_enum, "1.75.0", Some(120141)),
     /// Allows using multiple nested field accesses in offset_of!
     (unstable, offset_of_nested, "1.77.0", Some(120140)),
+    /// Allows using fields with slice type in offset_of!
+    (unstable, offset_of_slice, "CURRENT_RUSTC_VERSION", Some(126151)),
     /// Allows using `#[optimize(X)]`.
     (unstable, optimize_attribute, "1.34.0", Some(54882)),
     /// Allows postfix match `expr.match { ... }`
@@ -620,6 +622,8 @@ declare_features! (
     (unstable, type_changing_struct_update, "1.58.0", Some(86555)),
     /// Allows unnamed fields of struct and union type
     (incomplete, unnamed_fields, "1.74.0", Some(49804)),
+    /// Allows unsafe attributes.
+    (unstable, unsafe_attributes, "CURRENT_RUSTC_VERSION", Some(123757)),
     /// Allows unsafe on extern declarations and safety qualifiers over internal items.
     (unstable, unsafe_extern_blocks, "CURRENT_RUSTC_VERSION", Some(123743)),
     /// Allows unsized fn parameters.

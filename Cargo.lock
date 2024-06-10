@@ -28,7 +28,7 @@ dependencies = [
  "miniz_oxide",
  "object",
  "rustc-demangle",
- "windows-bindgen 0.56.0",
+ "windows-bindgen",
 ]
 
 [[package]]
@@ -46,7 +46,6 @@ dependencies = [
  "object",
  "rustc-demangle",
  "serde",
- "windows-bindgen 0.57.0",
 ]
 
 [[package]]
@@ -296,21 +295,7 @@ dependencies = [
  "serde",
  "serde_json",
  "syn",
- "windows-metadata 0.56.0",
-]
-
-[[package]]
-name = "windows-bindgen"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ccb96113d6277ba543c0f77e1c5494af8094bf9daf9b85acdc3f1b620e7c7b4"
-dependencies = [
- "proc-macro2",
- "rayon",
- "serde",
- "serde_json",
- "syn",
- "windows-metadata 0.57.0",
+ "windows-metadata",
 ]
 
 [[package]]
@@ -318,9 +303,3 @@ name = "windows-metadata"
 version = "0.56.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3993f7827fff10c454e3a24847075598c7c08108304b8b07943c2c73d78f3b34"
-
-[[package]]
-name = "windows-metadata"
-version = "0.57.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8308d076825b9d9e5abc64f8113e96d02b2aeeba869b20fdd65c7e70cda13dfc"

@@ -48,7 +48,7 @@ impl Frame {
     }
 }
 
-#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in winapi right now
+#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in windows metadata right now
 struct MyContext(CONTEXT);
 
 #[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]

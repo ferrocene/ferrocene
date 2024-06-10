@@ -9,10 +9,10 @@
 //! said, `dbghelp.dll` almost always successfully loads on Windows.
 //!
 //! Note though that since we're loading all this support dynamically we can't
-//! actually use the raw definitions in `winapi`, but rather we need to define
+//! actually use the raw definitions in `windows_sys`, but rather we need to define
 //! the function pointer types ourselves and use that. We don't really want to
-//! be in the business of duplicating winapi, so we have a Cargo feature
-//! `verify-windows-sys` which asserts that all bindings match those in winapi and
+//! be in the business of duplicating auto-generated bindings, so we have a Cargo feature
+//! `verify-windows-sys` which asserts that all bindings match those in `windows_sys.rs` and
 //! this feature is enabled on CI.
 //!
 //! Finally, you'll note here that the dll for `dbghelp.dll` is never unloaded,

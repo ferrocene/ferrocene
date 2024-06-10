@@ -93,7 +93,7 @@ impl Frame {
     }
 }
 
-#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in winapi right now
+#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in windows metadata right now
 struct MyContext(CONTEXT);
 
 #[inline(always)]
@@ -176,7 +176,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             };
 
             while dbghelp.StackWalk64()(
-                image as _,
+                image as u32,
                 process,
                 thread,
                 frame_ptr,

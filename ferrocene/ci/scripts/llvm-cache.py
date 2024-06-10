@@ -101,7 +101,14 @@ def subcommand_download(ferrocene_host):
 
 def subcommand_prepare(ferrocene_host):
     tarball = build_llvm_tarball(ferrocene_host)
-    print(tarball)
+
+    s3_url = get_s3_url(ferrocene_host);
+    s3_cp_cmd = f"aws s3 cp {COMPRESSED_TARBALL_PATH} {s3_url}"
+    s3_cp = subprocess.run(s3_cp_cmd, shell=True, text=True, stdout=sys.stdout)
+    if s3_cp.returncode != 0:
+        print(f"`{s3_cp_cmd}` did not work")
+        exit(1)
+    os.remove(COMPRESSED_TARBALL_PATH)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
@@ -178,7 +185,7 @@ def build_llvm_tarball(ferrocene_host):
     tar.close()
 
     compress_cmd = f"zstd -1 -T0 {TARBALL_PATH} -o {COMPRESSED_TARBALL_PATH}"
-    compress = subprocess.run(compress_cmd, text=True, stdout=sys.stdout)
+    compress = subprocess.run(compress_cmd, shell=True, text=True, stdout=sys.stdout)
     if compress.returncode != 0:
         print(f"`{compress_cmd}` did not work")
         exit(1)

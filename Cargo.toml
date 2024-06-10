@@ -53,8 +53,6 @@ features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 # Only needed for Android, but cannot be target dependent
 # https://github.com/rust-lang/cargo/issues/4932
 cc = "1.0.97"
-# Same as above but for Windows
-windows-bindgen = "0.57"
 
 [dev-dependencies]
 dylib-dep = { path = "crates/dylib-dep" }

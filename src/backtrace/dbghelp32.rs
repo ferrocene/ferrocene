@@ -11,12 +11,7 @@
 
 #![allow(bad_style)]
 
-use windows_sys::{
-    Win32::System::Diagnostics::Debug::*, Win32::System::SystemInformation::*,
-    Win32::System::Threading::*,
-};
-
-use super::super::{dbghelp, windows::*};
+use super::super::{dbghelp, windows::*, windows_sys::*};
 use core::ffi::c_void;
 use core::mem;
 
@@ -55,7 +50,7 @@ impl Frame {
     }
 
     #[cfg(not(target_env = "gnu"))]
-    pub fn inline_context(&self) -> Option<DWORD> {
+    pub fn inline_context(&self) -> Option<u32> {
         match self.stack_frame {
             StackFrame::New(ref new) => Some(new.InlineFrameContext),
             StackFrame::Old(_) => None,

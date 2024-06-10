@@ -25,13 +25,7 @@
 
 use alloc::vec::Vec;
 
-use windows_sys::{
-    core::*, Win32::Foundation::*, Win32::Globalization::*, Win32::System::Diagnostics::Debug::*,
-    Win32::System::LibraryLoader::*, Win32::System::Threading::*,
-    Win32::System::WindowsProgramming::*,
-};
-
-use super::windows::*;
+use super::windows_sys::*;
 use core::ffi::c_void;
 use core::mem;
 use core::ptr;
@@ -59,7 +53,7 @@ macro_rules! dbghelp {
 
         static mut DBGHELP: Dbghelp = Dbghelp {
             // Initially we haven't loaded the DLL
-            dll: 0,
+            dll: ptr::null_mut(),
             // Initially all functions are set to zero to say they need to be
             // dynamically loaded.
             $($name: 0,)*
@@ -74,13 +68,13 @@ macro_rules! dbghelp {
             ///
             /// Panics if library is already loaded.
             fn ensure_open(&mut self) -> Result<(), ()> {
-                if self.dll != 0 {
+                if !self.dll.is_null() {
                     return Ok(())
                 }
                 let lib = b"dbghelp.dll\0";
                 unsafe {
                     self.dll = LoadLibraryA(lib.as_ptr());
-                    if self.dll == 0 {
+                    if self.dll.is_null() {
                         Err(())
                     }  else {
                         Ok(())

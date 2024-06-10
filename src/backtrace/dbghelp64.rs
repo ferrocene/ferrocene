@@ -8,7 +8,7 @@
 
 #![allow(bad_style)]
 
-use windows_sys::Win32::System::Diagnostics::Debug::*;
+use super::super::windows_sys::*;
 use core::ffi::c_void;
 
 #[derive(Clone, Copy)]

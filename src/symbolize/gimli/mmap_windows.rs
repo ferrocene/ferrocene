@@ -1,4 +1,4 @@
-use windows_sys::{Win32::Foundation::*, Win32::System::Memory::*};
+use super::super::super::windows_sys::*;
 
 use super::mystd::fs::File;
 use super::mystd::os::windows::prelude::*;
@@ -19,24 +19,24 @@ impl Mmap {
     pub unsafe fn map(file: &File, len: usize) -> Option<Mmap> {
         let file = file.try_clone().ok()?;
         let mapping = CreateFileMappingA(
-            file.as_raw_handle() as isize,
+            file.as_raw_handle(),
             ptr::null_mut(),
             PAGE_READONLY,
             0,
             0,
             ptr::null(),
         );
-        if mapping == 0 {
+        if mapping.is_null() {
             return None;
         }
         let ptr = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, len);
         CloseHandle(mapping);
-        if ptr.is_null() {
+        if ptr.Value.is_null() {
             return None;
         }
         Some(Mmap {
             _file: file,
-            ptr,
+            ptr: ptr.Value,
             len,
         })
     }
@@ -52,7 +52,7 @@ impl Deref for Mmap {
 impl Drop for Mmap {
     fn drop(&mut self) {
         unsafe {
-            let r = UnmapViewOfFile(self.ptr);
+            let r = UnmapViewOfFile(MEMORY_MAPPED_VIEW_ADDRESS { Value: self.ptr });
             debug_assert!(r != 0);
         }
     }

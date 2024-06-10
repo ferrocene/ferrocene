@@ -111,7 +111,7 @@ def build_llvm_tarball(ferrocene_host):
     """
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
-    build_cmd = f"./x.py build src/llvm-project"
+    build_cmd = f"{sys.executable} x.py build src/llvm-project"
     try: 
         parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
         if parallelism:

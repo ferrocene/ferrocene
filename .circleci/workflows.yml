@@ -441,10 +441,7 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
-            - run:
-                name: Debug s3-url
-                command: ./ferrocene/ci/scripts/llvm-cache.py s3-url
-            # - ferrocene-ci
+            - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
           command: echo
@@ -590,8 +587,6 @@ workflows:
           image: ubuntu-23
           tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
-
-      - x86_64-windows-llvm: {}
 
       - commit-checks:
           requires:

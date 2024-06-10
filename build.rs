@@ -7,7 +7,6 @@ use std::path::Path;
 pub fn main() {
     match env::var("CARGO_CFG_TARGET_OS").unwrap_or_default().as_str() {
         "android" => build_android(),
-        "windows" => build_windows(),
         _ => {}
     }
 }
@@ -53,9 +52,4 @@ fn build_android() {
     if version >= 21 {
         println!("cargo:rustc-cfg=feature=\"dl_iterate_phdr\"");
     }
-}
-
-fn build_windows() {
-    let args = ["--etc", "bindings.txt"];
-    windows_bindgen::bindgen(args).unwrap();
 }

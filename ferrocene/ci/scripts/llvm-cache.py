@@ -115,7 +115,7 @@ def build_llvm_tarball(ferrocene_host):
     try: 
         parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
         if parallelism:
-            build_cmd += "-j {parallelism}"
+            build_cmd += f"-j {parallelism}"
     except:
         True
     build = subprocess.run(build_cmd, shell=True, text=True, stdout=sys.stdout)
@@ -190,7 +190,6 @@ def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    # print(f"{ferrocene_host} url: {s3_url}", file=sys.stderr)
     return s3_url
 
 def get_llvm_cache_hash():

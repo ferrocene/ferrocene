@@ -82,3 +82,4 @@
       Short option: ``-h``.
 
       Show this message or help about a specific topic: ``config`` or ``file-lines``
+

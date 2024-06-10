@@ -207,7 +207,7 @@ def get_llvm_cache_hash():
     ];
     
     ls_files_cmd = "git ls-files src/bootstrap ferrocene/ci/docker-images"
-    ls_files = subprocess.run(ls_files_cmd, capture_output=True, text=True)
+    ls_files = subprocess.run(ls_files_cmd, shell=True, capture_output=True, text=True)
     if ls_files.returncode != 0:
         print(f"`{ls_files_cmd}` did not work")
         exit(1)
@@ -223,12 +223,13 @@ def get_llvm_cache_hash():
 
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
-    ls_tree_cmd = "git ls-tree HEAD src/llvm-project --object-only"
-    ls_tree = subprocess.run(ls_tree_cmd, capture_output=True, text=True)
+    ls_tree_cmd = "git ls-tree HEAD src/llvm-project"
+    ls_tree = subprocess.run(ls_tree_cmd, shell=True, capture_output=True, text=True)
     if ls_tree.returncode != 0:
         print(f"`{ls_tree_cmd}` did not work")
         exit(1)
-    m.update(str.encode(ls_tree.stdout))
+    ls_tree_shasum = ls_tree.stdout.split()[2];
+    m.update(str.encode(ls_tree_shasum))
 
     return m.hexdigest()
 

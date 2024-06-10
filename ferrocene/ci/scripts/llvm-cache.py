@@ -90,7 +90,7 @@ def subcommand_download(ferrocene_host):
     if s3_cp.returncode != 0:
         print(f"`{s3_cp_cmd}` did not work")
         exit(1)
-    os.remove(COMPRESSED_TARBALL_PATH)
+    # os.remove(COMPRESSED_TARBALL_PATH)
     
     # Use python tar to avoid Windows 'weirdness'
     tar = tarfile.open(TARBALL_PATH, "r")

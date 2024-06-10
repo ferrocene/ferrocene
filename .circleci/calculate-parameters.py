@@ -118,11 +118,13 @@ def calculate_llvm_rebuild(target):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url = urllib.parse.urlparse(subprocess.run(
-        ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
-        env={"FERROCENE_HOST": target},
-        stdout=subprocess.PIPE,
-    ).stdout.strip()).decode("utf-8")
+    url: urllib.parse.ParseResult = urllib.parse.urlparse(
+        subprocess.run(
+            ["ferrocene/ci/scripts/llvm-cache.py", "s3-url"],
+            env={"FERROCENE_HOST": target},
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+    ).decode("utf-8")
     assert url.scheme == "s3"
 
     try:

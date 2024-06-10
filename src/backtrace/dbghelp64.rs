@@ -67,13 +67,13 @@ impl MyContext {
 #[cfg(target_arch = "aarch64")]
 impl MyContext {
     #[inline(always)]
-    fn ip(&self) -> DWORD64 {
-        self.0.Pc
+    fn ip(&self) -> usize {
+        self.0.Pc as usize
     }
 
     #[inline(always)]
-    fn sp(&self) -> DWORD64 {
-        self.0.Sp
+    fn sp(&self) -> usize {
+        self.0.Sp as usize
     }
 }
 

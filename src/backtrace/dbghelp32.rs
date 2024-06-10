@@ -11,7 +11,7 @@
 
 #![allow(bad_style)]
 
-use super::super::{dbghelp, windows::*, windows_sys::*};
+use super::super::{dbghelp, windows_sys::*};
 use core::ffi::c_void;
 use core::mem;
 

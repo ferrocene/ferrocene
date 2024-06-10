@@ -1,4 +1,3 @@
-use super::super::super::windows::*;
 use super::super::super::windows_sys::*;
 use super::mystd::os::windows::prelude::*;
 use super::{coff, mmap, Library, LibrarySegment, OsString};

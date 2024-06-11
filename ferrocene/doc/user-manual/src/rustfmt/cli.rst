@@ -53,7 +53,9 @@
 
       Short option: ``-l``.
 
-      Prints the names of mismatched files that were formatted. Prints the names of files that would be formatted when used with ``--check``.
+      Prints the names of mismatched files that were formatted.
+      When used with --check,
+      this option instead prints the names of files that are not well-formatted.
 
    .. cli:option:: --config [key1=val1,key2=val2...]
 

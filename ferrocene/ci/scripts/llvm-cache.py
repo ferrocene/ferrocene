@@ -23,29 +23,29 @@ COMPRESSED_TARBALL_PATH = f"{TARBALL_PATH}.zst"
 # symlink please add to the list the binary the symlink points *to*.
 KEEP_LLVM_BINARIES=[
     # Needed for the `llvm-tools` component
-    "llvm-cov"
-    "llvm-nm"
-    "llvm-objcopy"
-    "llvm-objdump"
-    "llvm-profdata"
-    "llvm-readobj"
-    "llvm-size"
-    "llvm-strip"
-    "llvm-ar"
-    "llvm-as"
-    "llvm-dis"
-    "llc"
-    "opt"
+    "llvm-cov",
+    "llvm-nm",
+    "llvm-objcopy",
+    "llvm-objdump",
+    "llvm-profdata",
+    "llvm-readobj",
+    "llvm-size",
+    "llvm-strip",
+    "llvm-ar",
+    "llvm-as",
+    "llvm-dis",
+    "llc",
+    "opt",
     # Needed to link `rustc` with LLVM
-    "llvm-config"
+    "llvm-config",
     # Needed by the Rust test suite
-    "llvm-bcanalyzer"
-    "llvm-dwarfdump"
-    "FileCheck"
+    "llvm-bcanalyzer",
+    "llvm-dwarfdump",
+    "FileCheck",
     # Needed to resolve symbols
-    "llvm-dwp"
+    "llvm-dwp",
     # Needed to build LLD
-    "llvm-tblgen"
+    "llvm-tblgen",
 ]
 
 def arguments():

@@ -36,6 +36,10 @@ KEEP_LLVM_BINARIES=[
     "llvm-dis",
     "llc",
     "opt",
+    # Used by `llvm-ar`
+    "llvm-ranlib",
+    "llvm-dlltool",
+    "llvm-lib",
     # Needed to link `rustc` with LLVM
     "llvm-config",
     # Needed by the Rust test suite
@@ -170,14 +174,14 @@ def build_llvm_tarball(ferrocene_host):
             name = path.as_posix()
 
         if name in KEEP_LLVM_BINARIES:
-            print(f"Skipped {name}", file=sys.stderr)
+            print(f"Skipped {file}", file=sys.stderr)
             continue
         else:
-            print(f"Soft-removing {name}", file=sys.stderr)
+            print(f"Soft-removing {file}", file=sys.stderr)
             f = open(os.path.join(dirname, file), "wt")
-            f.write("""
+            f.write(f"""
                 #!/usr/bin/env sh
-                echo "File soft-removed by ferrocene/ci/scripts/llvm-cache.py"
+                echo "Binary {file} soft-removed by ferrocene/ci/scripts/llvm-cache.py"
                 exit 1
             """)
 

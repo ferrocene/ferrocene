@@ -12,6 +12,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{SphinxMode, WithSource};
+use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -34,11 +35,10 @@ impl<S: Step<Output = PathBuf> + WithSource> Step for SignDocument<S> {
         error_when_signatures_are_ignored(builder, "sign a document");
 
         let document = builder.ensure(self.document);
-        let source_dir = builder.src.join(S::SOURCE);
         builder.run(
-            document_signatures_cmd(builder, &source_dir)
+            document_signatures_cmd::<S>(builder)
                 .arg("sign")
-                .arg(&source_dir)
+                .arg(builder.src.join(S::SOURCE))
                 .arg(&document),
         );
     }
@@ -84,7 +84,7 @@ macro_rules! documents {
             builder: &Builder<'_>,
             target: TargetSelection,
             condition: impl Fn(&Path) -> bool,
-            f: impl Fn(&Path, &Path),
+            f: impl Fn(Command, &Path, &Path),
         ) {
             $({
                 let source_dir = builder.src.join(crate::ferrocene::doc::$name::SOURCE);
@@ -94,7 +94,8 @@ macro_rules! documents {
                         target,
                         fresh_build: false,
                     });
-                    f(&source_dir, &output_dir);
+                    let cmd = document_signatures_cmd::<crate::ferrocene::doc::$name>(builder);
+                    f(cmd, &source_dir, &output_dir);
                 }
             })*
         }
@@ -114,10 +115,9 @@ documents![
     InternalProcedures,
 ];
 
-pub(super) fn document_signatures_cmd(builder: &Builder<'_>, source_dir: &Path) -> Command {
+pub(super) fn document_signatures_cmd<B: Step + WithSource>(builder: &Builder<'_>) -> Command {
     let cosign = builder.ensure(cosign::CosignBinary);
-    let cache_dir =
-        builder.ensure(signature_files::CacheSignatureFiles { source_dir: source_dir.into() });
+    let cache_dir = builder.ensure(CacheSignatureFiles::<B>::new());
     let tool = builder.tool_exe(Tool::FerroceneDocumentSignatures);
 
     let mut cmd = Command::new(&tool);

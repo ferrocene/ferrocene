@@ -1,15 +1,23 @@
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneDocumentSignatures;
+use crate::ferrocene::doc::WithSource;
 use crate::t;
 use std::collections::HashMap;
+use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub(crate) struct CacheSignatureFiles {
-    pub(crate) source_dir: PathBuf,
+pub(crate) struct CacheSignatureFiles<B: Step + WithSource> {
+    marker: PhantomData<B>,
 }
 
-impl Step for CacheSignatureFiles {
+impl<B: Step + WithSource> CacheSignatureFiles<B> {
+    pub(crate) fn new() -> Self {
+        Self { marker: PhantomData }
+    }
+}
+
+impl<B: Step + WithSource> Step for CacheSignatureFiles<B> {
     type Output = PathBuf;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -30,7 +38,8 @@ impl Step for CacheSignatureFiles {
             builder.create_dir(&cache_dir);
         }
 
-        let signature_toml_path = self.source_dir.join("signature").join("signature.toml");
+        let signature_toml_path =
+            builder.src.join(B::SOURCE).join("signature").join("signature.toml");
         let signature_toml: SignatureToml = match std::fs::read(&signature_toml_path) {
             Ok(contents) => t!(toml::from_slice(&contents)),
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => return cache_dir,

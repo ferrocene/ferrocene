@@ -4,7 +4,7 @@
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
-use crate::ferrocene::sign::{document_signatures_cmd, error_when_signatures_are_ignored};
+use crate::ferrocene::sign::error_when_signatures_are_ignored;
 use crate::Mode;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -112,10 +112,8 @@ impl Step for CheckDocumentSignatures {
             // Condition
             |source| source.join("signature").join("signature.toml").exists(),
             // Function executed
-            |source, output| {
-                builder.run(
-                    document_signatures_cmd(builder, source).arg("verify").arg(source).arg(output),
-                );
+            |mut cmd, source, output| {
+                builder.run(cmd.arg("verify").arg(source).arg(output));
             },
         );
     }

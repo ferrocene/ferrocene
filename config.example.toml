@@ -958,8 +958,28 @@
 # tarballs. If this is not provided, tarballs will not be signed.
 #tarball-signing-kms-key-arn = <none> (AWS ARN)
 
-# Name of the AWS S3 bucket containing the document signatures file.
+# How document signatures should be handled. Possible values are:
+#
+# - disabled: avoid including document signatures in the generated
+#             documentation, or "Unsigned draft" warnings.
+#
+# - s3 (default): fetch document signatures from an S3 bucket. This is
+#                 meant to be used by Ferrous Systems employees and partners
+#                 only. You can change the bucket by setting the
+#                 ferrocene.document-signatures-s3-bucket option.
+#
+# - docs-tarball: extract the signatures from a documentation tarball with the
+#                 signature files embedded in it. This requires setting the
+#                 ferrocene.document-signatures-tarball option.
+#document-signatures = "s3"
+
+# Name of the AWS S3 bucket containing the document signatures file. Requires
+# ferrocene.document-signatures to be set to "s3".
 #document-signatures-s3-bucket = "ferrocene-document-signatures"
+
+# Path to the documentation tarball containing signatures. Requires
+# ferrocene.document-signatures to be set to "docs-tarball".
+#document-signatures-tarball = <path>
 
 # The following serves two purposes when set to true:
 # - Avoids "Unsigned draft" warning in Qualification docs, when they are not signed

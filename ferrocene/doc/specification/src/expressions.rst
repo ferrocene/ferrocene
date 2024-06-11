@@ -2853,7 +2853,7 @@ Indexing Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_X9kdEAPTqsAe`
-A :t:`indexable type` is a :t:`type` that implements the
+An :t:`indexable type` is a :t:`type` that implements the
 :std:`core::ops::Index` :t:`trait`.
 
 :dp:`fls_42ijvuqqqlvh`
@@ -3747,10 +3747,10 @@ The :t:`type` of a :t:`subject expression` shall implement the
 The :t:`expected type` of the :t:`pattern` is the :t:`associated type` :std:`core::iter::IntoIterator::Item` of the :t:`subject expression`'s :std:`core::iter::IntoIterator` implementation.
 
 :dp:`fls_bmTjhKdpfgCB`
-The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`for loop expression` is the :t:`unit type`.
 
 :dp:`fls_FkxLf91WKiIo`
-The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`for loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3815,7 +3815,7 @@ An :t:`infinite loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`loop body` indefinitely.
 
 :dp:`fls_b314wjbv0zwe`
-The :t:`type` of a :t:`infinite loop expression` is determined as follows:
+The :t:`type` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_rpedapxnv8w3`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,
@@ -3827,7 +3827,7 @@ The :t:`type` of a :t:`infinite loop expression` is determined as follows:
   :t:`[break type]s` of all :t:`[break expression]s`.
 
 :dp:`fls_q3qpcf2fz7h`
-The :t:`value` of a :t:`infinite loop expression` is determined as follows:
+The :t:`value` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_2ulbzmuuny3g`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,
@@ -3887,10 +3887,10 @@ of a :t:`while loop expression`.
 The :t:`type` of an :t:`iteration expression` shall be :t:`type` :c:`bool`.
 
 :dp:`fls_P8iyTN6KZCVA`
-The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while loop expression` is the :t:`unit type`.
 
 :dp:`fls_s6hRa5spz64w`
-The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3943,10 +3943,10 @@ a :t:`value` that can be matched against its :t:`pattern`.
 The :t:`expected type` of the :t:`pattern` is the :t:`type` of the :t:`subject let expression`.
 
 :dp:`fls_gTfSLePwHTES`
-The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while let loop expression` is the :t:`unit type`.
 
 :dp:`fls_pTq4LIGIoAtN`
-The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while let loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 

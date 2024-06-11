@@ -73,7 +73,7 @@ Modules
 A :t:`module` is a container for zero or more :t:`[item]s`.
 
 :dp:`fls_whgv72emrm47`
-The ``unsafe`` :t:`keyword` of an :t:`module` is rejected, but may still
+The ``unsafe`` :t:`keyword` of a :t:`module` is rejected, but may still
 be consumed by :t:`[macro]s`.
 
 :dp:`fls_qypjjpcf8uwq`

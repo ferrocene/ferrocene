@@ -23,7 +23,7 @@ ISO 26262 requirements
      - See sub items below
 
    * - 11.4.4.1.a
-     - :doc:`Safety Manual - Environment <safety-manual:rustc/environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
 
    * - 11.4.4.1.b
      - :doc:`Safety Manual - Tool options <safety-manual:rustc/options>`
@@ -32,7 +32,7 @@ ISO 26262 requirements
      - :doc:`Evaluation Report - Use cases <evaluation-report:rustc/use-cases>`
 
    * - 11.4.4.1.d
-     - :doc:`Safety Manual - Environment <safety-manual:rustc/environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
 
    * - 11.4.4.1.e
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
@@ -50,16 +50,16 @@ ISO 26262 requirements
      - :doc:`User Manual <user-manual:index>`
 
    * - 11.4.4.2.c
-     - :doc:`Safety Manual - Environment <safety-manual:rustc/environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
 
    * - 11.4.4.2.d
      - :doc:`Safety Manual - Degraded environment <safety-manual:rustc/degraded-environment>`
 
    * - 11.4.4.2.e
-     - :doc:`Safety Manual - Known problems <safety-manual:rustc/known-problems>`
+     - :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
 
    * - 11.4.4.2.f
-     - :doc:`Safety Manual - Known Problems <safety-manual:rustc/known-problems>`
+     - :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
 
    * - 11.4.5.1
      - See sub items below
@@ -110,7 +110,7 @@ ISO 26262 requirements
      - See sub items below
 
    * - 11.4.6.2.a
-     - :doc:`Safety Manual - Environment <safety-manual:rustc/environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
 
    * - 11.4.6.2.b
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
@@ -119,7 +119,7 @@ ISO 26262 requirements
      - :doc:`Qualification Report - Acceptability Statement <qualification-report:statement>`
 
    * - 11.4.6.2.d
-     - :doc:`Safety Manual - Environment <safety-manual:rustc/environment>`
+     - :doc:`Safety Manual - Environment <safety-manual:environment>`
 
    * - 11.4.6.2.e
      - :doc:`Qualification Plan - Ferrocene organization <../organization>`

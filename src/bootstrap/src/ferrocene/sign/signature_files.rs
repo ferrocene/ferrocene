@@ -3,8 +3,13 @@ use crate::core::config::FerroceneDocumentSignatures;
 use crate::ferrocene::doc::IsSphinxBook;
 use crate::t;
 use std::collections::HashMap;
+use std::error::Error;
+use std::fs::File;
+use std::io::BufReader;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
+use tar::Archive;
+use xz2::read::XzDecoder;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CacheSignatureFiles<B: Step + IsSphinxBook> {
@@ -52,6 +57,12 @@ impl<B: Step + IsSphinxBook> Step for CacheSignatureFiles<B> {
                 FerroceneDocumentSignatures::S3 { bucket } => {
                     Box::new(S3FilesFetcher { bucket: bucket.clone() })
                 }
+                FerroceneDocumentSignatures::DocsTarball { tarball } => {
+                    Box::new(DocsTarballFilesFetcher::<B> {
+                        path: tarball.clone(),
+                        phantom: PhantomData,
+                    })
+                }
             };
         for (name, uuid) in signature_toml.files.into_iter() {
             let cached_file = &cache_dir.join(&uuid);
@@ -90,5 +101,36 @@ impl SignatureFilesFetcher for S3FilesFetcher {
                      \u{20}  ignore-document-signatures = true"
             ),
         );
+    }
+}
+
+struct DocsTarballFilesFetcher<P: IsSphinxBook> {
+    path: PathBuf,
+    phantom: PhantomData<P>,
+}
+
+impl<P: IsSphinxBook> SignatureFilesFetcher for DocsTarballFilesFetcher<P> {
+    fn fetch(&self, _builder: &Builder<'_>, _uuid: &str, name: &str, dest: &Path) {
+        let expected_path = format!("share/doc/ferrocene/html/{}/signature/{name}", P::DEST);
+        match self.fetch_inner(&expected_path, dest) {
+            Ok(()) => {}
+            Err(err) => {
+                panic!("Failed to extract {expected_path} from {}: {err}", self.path.display())
+            }
+        }
+    }
+}
+
+impl<P: IsSphinxBook> DocsTarballFilesFetcher<P> {
+    fn fetch_inner(&self, path: &str, dest: &Path) -> Result<(), Box<dyn Error>> {
+        let mut tarball = Archive::new(XzDecoder::new(BufReader::new(File::open(&self.path)?)));
+        for entry in tarball.entries()? {
+            let mut entry = entry?;
+            if entry.path()?.to_str() == Some(path) {
+                entry.unpack(dest)?;
+                return Ok(());
+            }
+        }
+        Err(Box::<dyn Error>::from("file not present in the archive"))
     }
 }

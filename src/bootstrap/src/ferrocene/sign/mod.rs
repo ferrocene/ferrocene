@@ -11,7 +11,7 @@ pub(crate) mod signature_files;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
-use crate::ferrocene::doc::{SphinxMode, IsSphinxBook};
+use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -125,6 +125,7 @@ pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(builder: &Builder<
     cmd.env("DOCUMENT_SIGNATURES_S3_CACHE_DIR", &cache_dir);
     match &builder.config.ferrocene_document_signatures {
         config::FerroceneDocumentSignatures::Disabled => {}
+        config::FerroceneDocumentSignatures::DocsTarball { .. } => {}
         config::FerroceneDocumentSignatures::S3 { bucket } => {
             cmd.env("DOCUMENT_SIGNATURES_S3_BUCKET", bucket);
         }

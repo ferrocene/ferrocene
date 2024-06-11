@@ -416,6 +416,9 @@ pub enum FerroceneDocumentSignatures {
     S3 {
         bucket: String,
     },
+    DocsTarball {
+        tarball: PathBuf,
+    },
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1228,6 +1231,7 @@ define_config! {
         tarball_signing_kms_key_arn: Option<String> = "tarball-signing-kms-key-arn",
         document_signatures: Option<String> = "document-signatures",
         document_signatures_s3_bucket: Option<String> = "document-signatures-s3-bucket",
+        document_signatures_tarball: Option<PathBuf> = "document-signatures-tarball",
         technical_report_url: Option<String> = "technical-report-url",
     }
 }
@@ -2016,23 +2020,46 @@ impl Config {
             config.ferrocene_tarball_signing_kms_key_arn = f.tarball_signing_kms_key_arn;
             config.ferrocene_technical_report_url = f.technical_report_url;
 
-            config.ferrocene_document_signatures =
-                match (f.document_signatures.as_deref(), f.document_signatures_s3_bucket) {
-                    (None | Some("s3"), Some(bucket)) => FerroceneDocumentSignatures::S3 { bucket },
-                    (None | Some("s3"), None) => FerroceneDocumentSignatures::S3 {
-                        bucket: "ferrocene-document-signatures".into(),
-                    },
+            config.ferrocene_document_signatures = match (
+                f.document_signatures.as_deref(),
+                f.document_signatures_s3_bucket,
+                f.document_signatures_tarball,
+            ) {
+                (None | Some("s3"), Some(bucket), None) => {
+                    FerroceneDocumentSignatures::S3 { bucket }
+                }
+                (None | Some("s3"), None, None) => FerroceneDocumentSignatures::S3 {
+                    bucket: "ferrocene-document-signatures".into(),
+                },
+                (None | Some("s3"), _, _) => panic!(
+                    "ferrocene.document-signatures=\"s3\" only supports \
+                     ferrocene.document-signatures-s3-bucket as the additional \
+                     setting related to document signatures"
+                ),
 
-                    (Some("disabled"), None) => FerroceneDocumentSignatures::Disabled,
-                    (Some("disabled"), _) => panic!(
-                        "ferrocene.document-signatures=\"disabled\" does not support \
-                         setting other settings related to document signatures"
-                    ),
+                (Some("docs-tarball"), None, Some(tarball)) => {
+                    FerroceneDocumentSignatures::DocsTarball { tarball }
+                }
+                (Some("docs-tarball"), None, None) => panic!(
+                    "ferrocene.document-signatures=\"docs-tarball\" requires setting \
+                     ferrocene.document-signatures-tarball"
+                ),
+                (Some("docs-tarball"), _, _) => panic!(
+                    "ferrocene.document-signatures=\"docs-tarball\" only supports \
+                     ferrocene.document-signatures-tarball as the additional \
+                     setting related to document signatures"
+                ),
 
-                    (Some(unknown), _) => {
-                        panic!("unsupported {unknown:?} value for ferrocene.document-signatures")
-                    }
-                };
+                (Some("disabled"), None, None) => FerroceneDocumentSignatures::Disabled,
+                (Some("disabled"), _, _) => panic!(
+                    "ferrocene.document-signatures=\"disabled\" does not support \
+                     setting other settings related to document signatures"
+                ),
+
+                (Some(unknown), _, _) => {
+                    panic!("unsupported {unknown:?} value for ferrocene.document-signatures")
+                }
+            };
 
             config.ferrocene_test_outcomes = match (f.test_outcomes.as_deref(), f.test_outcomes_dir)
             {

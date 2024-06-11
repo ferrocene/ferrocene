@@ -94,7 +94,7 @@ def subcommand_download(ferrocene_host):
     
     # Use python tar to avoid Windows 'weirdness'
     tar = tarfile.open(TARBALL_PATH, "r")
-    tar.extractall(filter="fully_trusted")
+    tar.extractall()
     tar.close()
 
     os.remove(TARBALL_PATH)
@@ -170,14 +170,16 @@ def build_llvm_tarball(ferrocene_host):
             name = path
 
         if name in KEEP_LLVM_BINARIES:
+            print(f"Skipped {name}", file=sys.stderr)
             continue
-
-        f = open(os.path.join(dirname, file), "wt")
-        f.write("""
-            #!/usr/bin/env sh
-            echo "File soft-removed by ferrocene/ci/scripts/llvm-cache.py"
-            exit 1
-        """)
+        else:
+            print(f"Soft-removing {name}", file=sys.stderr)
+            f = open(os.path.join(dirname, file), "wt")
+            f.write("""
+                #!/usr/bin/env sh
+                echo "File soft-removed by ferrocene/ci/scripts/llvm-cache.py"
+                exit 1
+            """)
 
     # Use python tar to avoid Windows 'weirdness'
     tar = tarfile.open(TARBALL_PATH, "w")

@@ -167,9 +167,9 @@ def build_llvm_tarball(ferrocene_host):
         if is_windows:
             path = pathlib.Path(name)
             path = path.with_suffix('')
-            name = path
+            name = path.as_posix()
 
-        if name.as_posix() in KEEP_LLVM_BINARIES:
+        if name in KEEP_LLVM_BINARIES:
             print(f"Skipped {name}", file=sys.stderr)
             continue
         else:

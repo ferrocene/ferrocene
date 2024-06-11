@@ -12,6 +12,7 @@ use std::process::Command;
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
+    const DEST: &'static str;
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -112,18 +113,16 @@ impl Step for SphinxVirtualEnv {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct SphinxBook<P: Step + IsSphinxBook = EmptyStep> {
+struct SphinxBook<P: Step + IsSphinxBook> {
     mode: SphinxMode,
     target: TargetSelection,
     name: String,
-    src: String,
-    dest: String,
     fresh_build: bool,
     signature: SignatureStatus,
     inject_all_other_document_ids: bool,
     require_test_outcomes: bool,
     require_relnotes: bool,
-    parent: Option<P>,
+    parent: P,
 }
 
 impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
@@ -135,21 +134,21 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
     }
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
-        let src = builder.src.join(&self.src).join("src");
+        let src = builder.src.join(P::SOURCE).join("src");
         let out = match self.mode {
-            SphinxMode::Html => builder.out.join(self.target.triple).join("doc").join(&self.dest),
+            SphinxMode::Html => builder.out.join(self.target.triple).join("doc").join(P::DEST),
             SphinxMode::OnlyObjectsInv => builder
                 .out
                 .join(self.target.triple)
                 .join("ferrocene")
                 .join("objectsinv-out")
-                .join(&self.dest),
+                .join(P::DEST),
             SphinxMode::XmlDoctrees => builder
                 .out
                 .join(self.target.triple)
                 .join("ferrocene")
                 .join("doctrees-out")
-                .join(&self.dest),
+                .join(P::DEST),
         };
         let doctrees =
             builder.out.join(self.target.triple).join("ferrocene").join(match self.mode {
@@ -185,11 +184,11 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         let venv = builder.ensure(SphinxVirtualEnv { target: self.target });
 
         let path_to_root = std::iter::repeat("..")
-            .take(self.dest.chars().filter(|c| *c == '/').count() + 1)
+            .take(P::DEST.chars().filter(|c| *c == '/').count() + 1)
             .collect::<Vec<_>>()
             .join("/");
 
-        let should_serve = self.parent.is_some() && builder.should_serve::<P>();
+        let should_serve = builder.should_serve::<P>();
 
         let ferrocene_version =
             std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
@@ -268,13 +267,12 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             cmd.args(["-j", "auto"]);
         }
 
+        let mut allow_injecting_ids = false;
         match self.mode {
             SphinxMode::Html => {
-                for step in intersphinx_gather_steps(self.target) {
-                    builder.ensure(step);
-                }
+                intersphinx_ensure_steps(builder, self.target);
 
-                builder.info(&format!("Building {}", self.src));
+                builder.info(&format!("Building {}", P::SOURCE));
 
                 cmd.args(&["-b", "html"]);
                 // Warn about missing references:
@@ -285,11 +283,9 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 }
             }
             SphinxMode::XmlDoctrees => {
-                for step in intersphinx_gather_steps(self.target) {
-                    builder.ensure(step);
-                }
+                intersphinx_ensure_steps(builder, self.target);
 
-                builder.info(&format!("Building XML doctrees of {}", self.src));
+                builder.info(&format!("Building XML doctrees of {}", P::SOURCE));
                 cmd.args(&["-b", "xml"]);
 
                 // This is intentionally more lax than HTML builds, especially around warnings.
@@ -303,17 +299,20 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
                 // To solve them, we first "gather" the object.inv files by building all the documentation
                 // with a special Sphinx builder that doesn't write any other output file, and then we
                 // do a full build of the documents we want.
-                builder.info(&format!("Gathering references of {}", self.src));
+                builder.info(&format!("Gathering references of {}", P::SOURCE));
 
                 // When gathering the objects.inv files, we use a custom Sphinx builder that only
                 // outputs the objects.inv file.
                 cmd.args(&["-b", "ferrocene-intersphinx"]);
+
+                // Avoid circular dependencies.
+                allow_injecting_ids = false;
             }
         }
 
         add_intersphinx_arguments(&self, builder, &src, &mut cmd);
 
-        if self.inject_all_other_document_ids {
+        if self.inject_all_other_document_ids && allow_injecting_ids {
             for (document, file) in gather_other_document_ids(builder, self.target).into_iter() {
                 if file.exists() {
                     cmd.env(format!("FERROCENE_DOCUMENT_ID_{document}"), file);
@@ -389,15 +388,15 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     }
 
     let path_to_root = std::iter::repeat("..")
-        .take(book.dest.chars().filter(|c| *c == '/').count() + 1)
+        .take(P::DEST.chars().filter(|c| *c == '/').count() + 1)
         .collect::<Vec<_>>()
         .join("/");
 
     let empty_objects_inv = builder.src.join("ferrocene").join("etc").join("empty-objects.inv");
 
     let mut inventories = Vec::new();
-    for step in intersphinx_gather_steps(book.target) {
-        let html_root = format!("{path_to_root}/{}", step.dest);
+    for config in intersphinx_configs() {
+        let html_root = format!("{path_to_root}/{}", config.dest);
 
         // To avoid warnings due to missing objects.inv files when gathering them, we provide all
         // the mappings even during gathering. Since not all objects.inv will be available during
@@ -408,13 +407,13 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
                 .join(book.target.triple)
                 .join("ferrocene")
                 .join("objectsinv-out")
-                .join(&step.dest)
+                .join(config.dest)
                 .join("objects.inv"),
             SphinxMode::OnlyObjectsInv => empty_objects_inv.clone(),
         };
 
         inventories.push(Inventory {
-            name: step.name,
+            name: config.name.into(),
             html_root,
             inventory: relative_path(src, &inv),
         });
@@ -435,6 +434,11 @@ fn path_define(key: &str, value: &Path) -> OsString {
     string.push("=");
     string.push(value);
     string
+}
+
+struct InterSphinxConfig {
+    name: &'static str,
+    dest: &'static str,
 }
 
 macro_rules! sphinx_books {
@@ -502,20 +506,19 @@ macro_rules! sphinx_books {
                         mode: self.mode,
                         target: self.target,
                         name: $name.into(),
-                        src: $src.into(),
-                        dest: $dest.into(),
                         fresh_build: self.fresh_build,
                         signature,
                         inject_all_other_document_ids,
                         require_test_outcomes,
                         require_relnotes,
-                        parent: Some(self),
+                        parent: self,
                     })
                 }
             }
 
             impl IsSphinxBook for $ty {
                 const SOURCE: &'static str = $src;
+                const DEST: &'static str = $dest;
             }
         )*
 
@@ -553,32 +556,25 @@ macro_rules! sphinx_books {
             }
         }
 
-        fn intersphinx_gather_steps(target: TargetSelection) -> Vec<SphinxBook> {
-            let mut steps = Vec::new();
-            $({
-                #[allow(unused_mut, unused_assignments)]
-                let mut require_test_outcomes = false;
-                $(require_test_outcomes = $require_test_outcomes;)*
-
-                #[allow(unused_mut, unused_assignments)]
-                let mut require_relnotes = false;
-                $(require_relnotes = $require_relnotes;)*
-
-                steps.push(SphinxBook {
+        fn intersphinx_ensure_steps(builder: &Builder<'_>, target: TargetSelection) {
+            $(
+                builder.ensure($ty {
                     mode: SphinxMode::OnlyObjectsInv,
                     target,
-                    name: $name.into(),
-                    src: $src.into(),
-                    dest: $dest.into(),
                     fresh_build: false,
-                    signature: SignatureStatus::NotNeeded,
-                    inject_all_other_document_ids: false,
-                    require_test_outcomes,
-                    require_relnotes,
-                    parent: None,
                 });
-            })*
-            steps
+            )*
+        }
+
+        fn intersphinx_configs() -> Vec<InterSphinxConfig> {
+            let mut configs = Vec::new();
+            $(
+                configs.push(InterSphinxConfig {
+                    name: $name,
+                    dest: $ty::DEST,
+                });
+            )*
+            configs
         }
 
         fn gather_other_document_ids(builder: &Builder<'_>, target: TargetSelection) -> HashMap<&'static str, PathBuf> {
@@ -794,23 +790,6 @@ impl Step for Index {
             &builder.out.join(self.target.triple).join("doc"),
         );
     }
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct EmptyStep;
-
-impl Step for EmptyStep {
-    type Output = ();
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.never()
-    }
-
-    fn run(self, _: &Builder<'_>) -> Self::Output {}
-}
-
-impl IsSphinxBook for EmptyStep {
-    const SOURCE: &'static str = "";
 }
 
 // Note: this function is correct for the use made in this module, but it will not work correctly

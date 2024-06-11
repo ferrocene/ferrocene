@@ -186,6 +186,8 @@ ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
+ENV CFLAGS_aarch64-unknown-nto-qnx710=-Vgcc_ntoaarch64le_cxx
+ENV CFLAGS_x86_64-pc-nto-qnx710=-Vgcc_ntox86_64_cxx
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

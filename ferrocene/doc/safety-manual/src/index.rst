@@ -27,10 +27,10 @@ scope, in accordance to the standards above.
    :numbered:
 
    rustc/usage
-   rustc/unsafety
    rustc/options
-   rustc/degraded-environment
    rustc/constraints
+   rustc/unsafety
+   rustc/degraded-environment
 
 .. toctree::
    :maxdepth: 2
@@ -38,8 +38,8 @@ scope, in accordance to the standards above.
    :numbered:
 
    rustfmt/usage
-   rustfmt/constraints
    rustfmt/options
+   rustfmt/constraints
 
 .. appendices::
    :maxdepth: 2

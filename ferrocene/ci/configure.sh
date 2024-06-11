@@ -175,12 +175,10 @@ if [[ is_internal ]]; then
     # already on path
     add --set target.aarch64-unknown-nto-qnx710.cc=qcc
     add --set target.aarch64-unknown-nto-qnx710.cxx=q++
-    # `qar` is searched for, but doesn't exist, so override it.
-    add --set target.aarch64-unknown-nto-qnx710.ar=ar
+    add --set target.aarch64-unknown-nto-qnx710.ar=ntoaarch64-ar
     add --set target.x86_64-pc-nto-qnx710.cc=qcc
     add --set target.x86_64-pc-nto-qnx710.cxx=q++
-    # `qar` is searched for, but doesn't exist, so override it.
-    add --set target.x86_64-pc-nto-qnx710.ar=ar
+    add --set target.x86_64-pc-nto-qnx710.ar=ntox86_64-ar
 fi
 
 # Set the host platform to build. The environment variable is set from the CI

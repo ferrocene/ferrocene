@@ -1,23 +1,23 @@
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneDocumentSignatures;
-use crate::ferrocene::doc::WithSource;
+use crate::ferrocene::doc::IsSphinxBook;
 use crate::t;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub(crate) struct CacheSignatureFiles<B: Step + WithSource> {
+pub(crate) struct CacheSignatureFiles<B: Step + IsSphinxBook> {
     marker: PhantomData<B>,
 }
 
-impl<B: Step + WithSource> CacheSignatureFiles<B> {
+impl<B: Step + IsSphinxBook> CacheSignatureFiles<B> {
     pub(crate) fn new() -> Self {
         Self { marker: PhantomData }
     }
 }
 
-impl<B: Step + WithSource> Step for CacheSignatureFiles<B> {
+impl<B: Step + IsSphinxBook> Step for CacheSignatureFiles<B> {
     type Output = PathBuf;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

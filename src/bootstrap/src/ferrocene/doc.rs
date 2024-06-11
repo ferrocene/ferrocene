@@ -10,7 +10,7 @@ use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-pub(crate) trait WithSource {
+pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
 }
 
@@ -112,7 +112,7 @@ impl Step for SphinxVirtualEnv {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct SphinxBook<P: Step + WithSource = EmptyStep> {
+struct SphinxBook<P: Step + IsSphinxBook = EmptyStep> {
     mode: SphinxMode,
     target: TargetSelection,
     name: String,
@@ -126,7 +126,7 @@ struct SphinxBook<P: Step + WithSource = EmptyStep> {
     parent: Option<P>,
 }
 
-impl<P: Step + WithSource> Step for SphinxBook<P> {
+impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
     type Output = PathBuf;
     const DEFAULT: bool = true;
 
@@ -375,7 +375,7 @@ enum SignatureStatus {
     NotNeeded,
 }
 
-fn add_intersphinx_arguments<P: Step + WithSource>(
+fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     book: &SphinxBook<P>,
     builder: &Builder<'_>,
     src: &Path,
@@ -514,7 +514,7 @@ macro_rules! sphinx_books {
                 }
             }
 
-            impl WithSource for $ty {
+            impl IsSphinxBook for $ty {
                 const SOURCE: &'static str = $src;
             }
         )*
@@ -809,7 +809,7 @@ impl Step for EmptyStep {
     fn run(self, _: &Builder<'_>) -> Self::Output {}
 }
 
-impl WithSource for EmptyStep {
+impl IsSphinxBook for EmptyStep {
     const SOURCE: &'static str = "";
 }
 

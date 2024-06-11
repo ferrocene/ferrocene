@@ -1738,11 +1738,11 @@ proceeds as follows:
       Otherwise, :t:`type unification` fails.
 
 #. :dp:`fls_Hb95CPyUpCmc`
-   Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
+   Otherwise, if one :t:`type` ``T`` is a :t:`floating-point type variable`,
    behavior depends on the other :t:`type` ``U``:
 
    #. :dp:`fls_jEZVWlfVPevb`
-      If ``U`` is an :t:`floating-point type` or an
+      If ``U`` is a :t:`floating-point type` or an
       :t:`floating-point type variable`, the :t:`floating-point type variable`
       ``T`` is assigned :t:`type` ``U``.
 
@@ -3019,7 +3019,7 @@ A :t:`trait` is :t:`invariant` in all inputs, including the :c:`Self` parameter.
 
 :dp:`fls_abn5ycx11zpm`
 The :t:`variance` of a :t:`generic parameter` of an :t:`abstract data type` or
-an :t:`tuple type` is determined as follows:
+a :t:`tuple type` is determined as follows:
 
 #. :dp:`fls_hvfyog9ygn6q`
    For each :t:`generic parameter` ``G``:

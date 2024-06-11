@@ -98,7 +98,7 @@ impl SignatureFilesFetcher for S3FilesFetcher {
                      do so by adding this to your `config.toml`:\n\
                      \n\
                      \u{20}  [ferrocene]\n\
-                     \u{20}  ignore-document-signatures = true"
+                     \u{20}  document-signatures = \"disabled\""
             ),
         );
     }

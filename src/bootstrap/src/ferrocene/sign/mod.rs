@@ -11,18 +11,18 @@ pub(crate) mod signature_files;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
-use crate::ferrocene::doc::{SphinxMode, WithSource};
+use crate::ferrocene::doc::{SphinxMode, IsSphinxBook};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct SignDocument<S: Step<Output = PathBuf> + WithSource> {
+struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
     target: TargetSelection,
     document: S,
 }
 
-impl<S: Step<Output = PathBuf> + WithSource> Step for SignDocument<S> {
+impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
     type Output = ();
     const DEFAULT: bool = false;
     const ONLY_HOSTS: bool = true;
@@ -115,7 +115,7 @@ documents![
     InternalProcedures,
 ];
 
-pub(super) fn document_signatures_cmd<B: Step + WithSource>(builder: &Builder<'_>) -> Command {
+pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(builder: &Builder<'_>) -> Command {
     let cosign = builder.ensure(cosign::CosignBinary);
     let cache_dir = builder.ensure(CacheSignatureFiles::<B>::new());
     let tool = builder.tool_exe(Tool::FerroceneDocumentSignatures);

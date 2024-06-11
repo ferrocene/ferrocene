@@ -112,7 +112,7 @@ impl Step for SphinxVirtualEnv {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct SphinxBook<P: Step = EmptyStep> {
+struct SphinxBook<P: Step + WithSource = EmptyStep> {
     mode: SphinxMode,
     target: TargetSelection,
     name: String,
@@ -126,7 +126,7 @@ struct SphinxBook<P: Step = EmptyStep> {
     parent: Option<P>,
 }
 
-impl<P: Step> Step for SphinxBook<P> {
+impl<P: Step + WithSource> Step for SphinxBook<P> {
     type Output = PathBuf;
     const DEFAULT: bool = true;
 
@@ -328,8 +328,7 @@ impl<P: Step> Step for SphinxBook<P> {
             (_, SignatureStatus::NotNeeded) => {}
 
             (_, SignatureStatus::Present) => {
-                let private_signature_files_dir =
-                    builder.ensure(CacheSignatureFiles { source_dir: builder.src.join(&self.src) });
+                let private_signature_files_dir = builder.ensure(CacheSignatureFiles::<P>::new());
 
                 cmd.args(["-D", "ferrocene_signature=present"]);
                 // Provide the directory containing the cached private signature files:
@@ -376,7 +375,7 @@ enum SignatureStatus {
     NotNeeded,
 }
 
-fn add_intersphinx_arguments<P: Step>(
+fn add_intersphinx_arguments<P: Step + WithSource>(
     book: &SphinxBook<P>,
     builder: &Builder<'_>,
     src: &Path,
@@ -808,6 +807,10 @@ impl Step for EmptyStep {
     }
 
     fn run(self, _: &Builder<'_>) -> Self::Output {}
+}
+
+impl WithSource for EmptyStep {
+    const SOURCE: &'static str = "";
 }
 
 // Note: this function is correct for the use made in this module, but it will not work correctly

@@ -1049,6 +1049,9 @@ commands:
           name: Start QNX License Server port forwarding
           command: aws ssm start-session --target i-02dc912eda2fb675a --document-name AWS-StartPortForwardingSession --parameters '{"portNumber":["56859"], "localPortNumber":["56859"]}'
           background: true
+      - run:
+          name: Test qcc
+          command: qcc -v || true
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

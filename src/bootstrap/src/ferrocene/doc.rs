@@ -267,7 +267,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             cmd.args(["-j", "auto"]);
         }
 
-        let mut allow_injecting_ids = false;
+        let mut allow_injecting_ids = true;
         match self.mode {
             SphinxMode::Html => {
                 intersphinx_ensure_steps(builder, self.target);

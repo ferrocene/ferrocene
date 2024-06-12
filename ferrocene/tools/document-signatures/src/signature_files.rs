@@ -83,7 +83,7 @@ impl<'opts> SignatureFiles<'opts> {
         // First off, we upload the file to S3, named after the UUID.
         let mut command = Command::new("aws")
             .args(["s3", "cp", "-"])
-            .arg(format!("s3://{}/{uuid}", s3_bucket))
+            .arg(format!("s3://{s3_bucket}/{uuid}"))
             .stdin(Stdio::piped())
             .spawn()
             .with_context(|| format!("failed to invoke AWS CLI to upload {name}"))?;

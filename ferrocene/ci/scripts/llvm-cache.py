@@ -96,11 +96,7 @@ def subcommand_download(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
 
     s3_cp_cmd = f"aws s3 cp {s3_url} - | zstd --decompress - -o {TARBALL_PATH}"
-    s3_cp = subprocess.run(s3_cp_cmd, shell=True, text=True, stdout=sys.stdout)
-    if s3_cp.returncode != 0:
-        print(f"`{s3_cp_cmd}` did not work")
-        exit(1)
-    # os.remove(COMPRESSED_TARBALL_PATH)
+    s3_cp = subprocess.run(s3_cp_cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
     
     # Use python tar to avoid Windows 'weirdness'
     tar = tarfile.open(TARBALL_PATH, "r")
@@ -114,10 +110,7 @@ def subcommand_prepare(ferrocene_host):
 
     s3_url = get_s3_url(ferrocene_host);
     s3_cp_cmd = f"aws s3 cp {COMPRESSED_TARBALL_PATH} {s3_url}"
-    s3_cp = subprocess.run(s3_cp_cmd, shell=True, text=True, stdout=sys.stdout)
-    if s3_cp.returncode != 0:
-        print(f"`{s3_cp_cmd}` did not work")
-        exit(1)
+    s3_cp = subprocess.run(s3_cp_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     os.remove(COMPRESSED_TARBALL_PATH)
 
 def subcommand_s3_url(ferrocene_host):
@@ -134,8 +127,8 @@ def build_llvm_tarball(ferrocene_host):
         if parallelism:
             build_cmd += f" -j {parallelism}"
     except:
-        True
-    build = subprocess.run(build_cmd, shell=True, text=True, stdout=sys.stdout)
+        pass
+    build = subprocess.run(build_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     if build.returncode != 0:
         print(f"`{build_cmd}` did not work")
         exit(1)
@@ -197,7 +190,7 @@ def build_llvm_tarball(ferrocene_host):
     tar.close()
 
     compress_cmd = f"zstd -1 -T0 {TARBALL_PATH} -o {COMPRESSED_TARBALL_PATH}"
-    compress = subprocess.run(compress_cmd, shell=True, text=True, stdout=sys.stdout)
+    compress = subprocess.run(compress_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     if compress.returncode != 0:
         print(f"`{compress_cmd}` did not work")
         exit(1)
@@ -226,7 +219,7 @@ def get_llvm_cache_hash():
     ];
     
     ls_files_cmd = "git ls-files src/bootstrap ferrocene/ci/docker-images"
-    ls_files = subprocess.run(ls_files_cmd, shell=True, capture_output=True, text=True)
+    ls_files = subprocess.run(ls_files_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     if ls_files.returncode != 0:
         print(f"`{ls_files_cmd}` did not work")
         exit(1)
@@ -243,7 +236,7 @@ def get_llvm_cache_hash():
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
     ls_tree_cmd = "git ls-tree HEAD src/llvm-project"
-    ls_tree = subprocess.run(ls_tree_cmd, shell=True, capture_output=True, text=True)
+    ls_tree = subprocess.run(ls_tree_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     if ls_tree.returncode != 0:
         print(f"`{ls_tree_cmd}` did not work")
         exit(1)

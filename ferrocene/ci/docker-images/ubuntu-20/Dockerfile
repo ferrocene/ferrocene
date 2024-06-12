@@ -11,11 +11,11 @@
 # can just copy it to a different system and it won't have any problems. Do NOT
 # use the same approach for other dependencies missing in Ubuntu 20.04 unless
 # you know what you're doing.
-FROM ubuntu:22.04 AS jammy
+FROM --platform=linux/amd64 ubuntu:24.04 AS noble
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
 
-FROM ubuntu:20.04
+FROM --platform=linux/amd64 ubuntu:20.04
 
 RUN apt-get update \
     # Update all the dependencies
@@ -63,18 +63,18 @@ RUN apt-get update \
 # Grab the newer QEMU from Ubuntu 22.04
 # This requires the binfmt-support package, which is normally a dependency of
 # qemu-user-static.
-COPY --from=jammy /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
-COPY --from=jammy /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-COPY --from=jammy /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
+# COPY --from=noble /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
-# build it from source. Python 3.10.x has been chosen as it's the same minor
-# release shipped with Ubuntu 22.04 LTS.
+# build it from source. Python 3.12.x has been chosen as it's the same minor
+# release shipped with Ubuntu 24.04 LTS.
 RUN mkdir /tmp/python \
     && cd /tmp/python \
-    && curl -OL https://www.python.org/ftp/python/3.10.10/Python-3.10.10.tar.xz \
-    && echo "0419e9085bf51b7a672009b3f50dbf1859acdf18ba725d0ec19aa5c8503f0ea3 Python-3.10.10.tar.xz" | sha256sum -c \
-    && tar xf Python-3.10.10.tar.xz --strip-components=1 \
+    && curl -OL https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tar.xz \
+    && echo "56bfef1fdfc1221ce6720e43a661e3eb41785dd914ce99698d8c7896af4bdaa1 Python-3.12.3.tar.xz" | sha256sum -c \
+    && tar xf Python-3.12.3.tar.xz --strip-components=1 \
     && ./configure \
     && make -j$(nproc) \
     && make install \

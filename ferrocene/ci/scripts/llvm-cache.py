@@ -125,7 +125,7 @@ def build_llvm_tarball(ferrocene_host):
     try: 
         parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
         if parallelism:
-            build_cmd += f" -j {parallelism}"
+            build_cmd += ["-j", parallelism]
     except:
         pass
     build = subprocess.run(build_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)

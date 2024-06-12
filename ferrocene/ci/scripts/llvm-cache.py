@@ -109,7 +109,7 @@ def subcommand_prepare(ferrocene_host):
     tarball = build_llvm_tarball(ferrocene_host)
 
     s3_url = get_s3_url(ferrocene_host);
-    s3_cp_cmd = f"aws s3 cp {COMPRESSED_TARBALL_PATH} {s3_url}"
+    s3_cp_cmd = ["aws", "s3", "cp", COMPRESSED_TARBALL_PATH, s3_url]
     s3_cp = subprocess.run(s3_cp_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
     os.remove(COMPRESSED_TARBALL_PATH)
 
@@ -121,7 +121,7 @@ def build_llvm_tarball(ferrocene_host):
     """
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
-    build_cmd = f"{sys.executable} x.py build src/llvm-project"
+    build_cmd = [sys.executable, "x.py", "build", "src/llvm-project"]
     try: 
         parallelism = os.environ["LLVM_BUILD_PARALLELISM"];
         if parallelism:
@@ -129,9 +129,6 @@ def build_llvm_tarball(ferrocene_host):
     except:
         pass
     build = subprocess.run(build_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    if build.returncode != 0:
-        print(f"`{build_cmd}` did not work")
-        exit(1)
 
     # The llvm/build directory contains a *copy* of all the binaries, plus the
     # intermediate object files and other build artifacts we don't need. To
@@ -189,11 +186,8 @@ def build_llvm_tarball(ferrocene_host):
     tar.add(f"build/{ferrocene_host}/llvm")
     tar.close()
 
-    compress_cmd = f"zstd -1 -T0 {TARBALL_PATH} -o {COMPRESSED_TARBALL_PATH}"
+    compress_cmd = ["zstd", "-1", "-T0", TARBALL_PATH, "-o", COMPRESSED_TARBALL_PATH]
     compress = subprocess.run(compress_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    if compress.returncode != 0:
-        print(f"`{compress_cmd}` did not work")
-        exit(1)
 
     os.remove(TARBALL_PATH)
     return COMPRESSED_TARBALL_PATH
@@ -218,11 +212,8 @@ def get_llvm_cache_hash():
         "src/version",
     ];
     
-    ls_files_cmd = "git ls-files src/bootstrap ferrocene/ci/docker-images"
-    ls_files = subprocess.run(ls_files_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    if ls_files.returncode != 0:
-        print(f"`{ls_files_cmd}` did not work")
-        exit(1)
+    ls_files_cmd = ["git", "ls-files", "src/bootstrap", "ferrocene/ci/docker-images"]
+    ls_files = subprocess.run(ls_files_cmd, check=True, capture_output=True, text=True)
     files += ls_files.stdout.split()
 
     files.sort()
@@ -235,11 +226,8 @@ def get_llvm_cache_hash():
 
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.
-    ls_tree_cmd = "git ls-tree HEAD src/llvm-project"
-    ls_tree = subprocess.run(ls_tree_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    if ls_tree.returncode != 0:
-        print(f"`{ls_tree_cmd}` did not work")
-        exit(1)
+    ls_tree_cmd = ["git", "ls-tree", "HEAD", "src/llvm-project"]
+    ls_tree = subprocess.run(ls_tree_cmd, check=True, capture_output=True, text=True)
     ls_tree_shasum = ls_tree.stdout.split()[2];
     m.update(str.encode(ls_tree_shasum))
 

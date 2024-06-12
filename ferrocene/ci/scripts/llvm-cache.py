@@ -40,6 +40,12 @@ KEEP_LLVM_BINARIES=[
     "llvm-ranlib",
     "llvm-dlltool",
     "llvm-lib",
+    # Used by `llvm-objdump`
+    "llvm-otool",
+    # Used by `llvm-objcopy`, `llvm-strip`
+    "llvm-bitcode-strip",
+    # Used by `llvm-readobj`
+    "llvm-readelf",
     # Needed to link `rustc` with LLVM
     "llvm-config",
     # Needed by the Rust test suite

@@ -62,7 +62,7 @@ where
     T: FromStr,
     T::Err: Send + Sync + std::error::Error + 'static,
 {
-    let var = format!("DOCUMENT_SIGNATURES_{var}");
+    let var = env_name(var);
     match std::env::var(&var) {
         Ok(v) => v
             .parse()

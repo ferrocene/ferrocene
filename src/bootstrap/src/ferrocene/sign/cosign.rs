@@ -56,7 +56,7 @@ impl Step for CosignBinary {
         let Some(artifact) = artifact else {
             eprintln!();
             eprintln!("error: unsupported platform for cosign: {}", builder.config.build);
-            eprintln!("note:  add support for it in src/bootstrap/ferrocene/sign.rs");
+            eprintln!("note:  add support for it in src/bootstrap/ferrocene/sign/cosign.rs");
             eprintln!();
             panic!("could not download cosign");
         };

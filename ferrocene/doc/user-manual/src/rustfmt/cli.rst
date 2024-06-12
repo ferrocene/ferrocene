@@ -8,23 +8,38 @@
 
    .. cli:option:: --check
 
-      Run in 'check' mode. Exits with 0 if input is formatted correctly. Exits with 1 and prints a diff if formatting is required.
+      Check if the input is formatted correctly.
 
-   .. cli:option:: --emit [files|stdout|coverage|checkstyle|json]
+      Exits with status code 0 if input is formatted correctly.
+      Exits with status code 1 and prints a diff if formatting is not correct.
 
-      What data to emit and how
+   .. cli:option:: --emit [files|stdout]
+
+      What kind of output to emit.
+
+      - ``files`` emits formatted output to files; this is the default
+      - ``stdout`` emits the formatted output to stdout
 
    .. cli:option:: --backup
 
       Backup any modified files.
 
+      Before a file is modified, rustfmt will create a copy of it in the same directory,
+      with the ``.bk`` extension.
+      Note that existing ``.bk`` files are over-written.
+
    .. cli:option:: --config-path
 
-      Recursively searches the given path for the rustfmt.toml config file. If not found reverts to the input file path
+      Recursively searches the given path for the ``rustfmt.toml`` or ``.rustfmt.toml`` config file.
+      If not found, it reverts to the default behavior of searching the parent directories of the
+      file to be formatted.
 
    .. cli:option:: --edition [2015|2018|2021]
 
-      Rust edition to use
+      Rust edition to use, which defaults to 2015 edition.
+
+      If using a different edition than the default, specify it here,
+      because the formatting may be different.
 
    .. cli:option:: --color [always|never|auto]
 
@@ -38,7 +53,9 @@
 
       Short option: ``-l``.
 
-      Prints the names of mismatched files that were formatted. Prints the names of files that would be formatted when used with ``--check`` mode.
+      Prints the names of mismatched files that were formatted.
+      When used with --check,
+      this option instead prints the names of files that are not well-formatted.
 
    .. cli:option:: --config [key1=val1,key2=val2...]
 
@@ -67,4 +84,4 @@
       Short option: ``-h``.
 
       Show this message or help about a specific topic: ``config`` or ``file-lines``
-   
+

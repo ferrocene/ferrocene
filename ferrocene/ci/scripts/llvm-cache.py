@@ -11,6 +11,7 @@ import shutil
 import pathlib
 import tarfile
 import sys
+import shlex
 
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"

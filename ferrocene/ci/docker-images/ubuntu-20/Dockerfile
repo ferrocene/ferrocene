@@ -81,12 +81,6 @@ RUN mkdir /tmp/python \
     && make install \
     && rm -rf /tmp/python
 
-# The REUSE tool is used to check the licensing status. It's not available in
-# the Ubuntu archives so we have to install it with pip.
-COPY reuse-requirements.txt /tmp/reuse-requirements.txt
-RUN python3 -m pip install -r /tmp/reuse-requirements.txt && \
-    rm -rf /tmp/reuse-requirements.txt
-
 # Install a recent NodeJS version, as the one shipped in Ubuntu 20.04 is too
 # old to run the rustdoc-js test suite. Note that we cannot install the most
 # recent NodeJS LTS release, as it's built with a more recent glibc version
@@ -149,3 +143,12 @@ RUN mkdir /home/ci \
     && chown -R ci: /home/ci
 USER ci
 WORKDIR /home/ci
+
+# We prefer uv over other solutions, it's in Rust and fast
+ENV PATH="/home/ci/.local/bin:$PATH"
+RUN python3 -m pip install uv
+# Setup the venv
+COPY requirements.txt /tmp/requirements.txt
+RUN uv venv \
+    && uv pip sync /tmp/requirements.txt
+ENV PATH="/home/ci/.venv/bin:$PATH"

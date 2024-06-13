@@ -555,6 +555,14 @@ fn opts() -> Vec<RustcOptGroup> {
         unstable("no-run", |o| {
             o.optflagmulti("", "no-run", "Compile doctests without running them")
         }),
+        unstable("remap-path-prefix", |o| {
+            o.optmulti(
+                "",
+                "remap-path-prefix",
+                "Remap source names in compiler messages",
+                "FROM=TO",
+            )
+        }),
         unstable("show-type-layout", |o| {
             o.optflagmulti("", "show-type-layout", "Include the memory layout of types in the docs")
         }),
@@ -728,7 +736,7 @@ fn main_args(
         core::new_dcx(options.error_format, None, options.diagnostic_width, &options.unstable_opts);
 
     match (options.should_test, options.markdown_input()) {
-        (true, Some(_)) => return wrap_return(&diag, markdown::test(options)),
+        (true, Some(_)) => return wrap_return(&diag, doctest::test_markdown(options)),
         (true, None) => return doctest::run(&diag, options),
         (false, Some(input)) => {
             let input = input.to_owned();

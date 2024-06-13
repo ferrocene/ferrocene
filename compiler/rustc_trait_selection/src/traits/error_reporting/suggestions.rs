@@ -28,7 +28,7 @@ use rustc_infer::infer::{BoundRegionConversionTime, DefineOpaqueTypes, InferOk};
 use rustc_macros::extension;
 use rustc_middle::hir::map;
 use rustc_middle::traits::IsConstable;
-use rustc_middle::ty::error::TypeError::{self, Sorts};
+use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::print::PrintPolyTraitRefExt;
 use rustc_middle::ty::{
     self, suggest_arbitrary_trait_bound, suggest_constraining_type_param, AdtKind, GenericArgs,
@@ -3842,7 +3842,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     && let Some(failed_pred) = failed_pred.as_projection_clause()
                     && let Some(found) = failed_pred.skip_binder().term.as_type()
                 {
-                    type_diffs = vec![Sorts(ty::error::ExpectedFound {
+                    type_diffs = vec![TypeError::Sorts(ty::error::ExpectedFound {
                         expected: where_pred
                             .skip_binder()
                             .projection_term
@@ -3985,7 +3985,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 continue;
             };
             for diff in type_diffs {
-                let Sorts(expected_found) = diff else {
+                let TypeError::Sorts(expected_found) = diff else {
                     continue;
                 };
                 if tcx.is_diagnostic_item(sym::IteratorItem, *def_id)
@@ -4165,7 +4165,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     };
                     if primary_spans.is_empty()
                         || type_diffs.iter().any(|diff| {
-                            let Sorts(expected_found) = diff else {
+                            let TypeError::Sorts(expected_found) = diff else {
                                 return false;
                             };
                             self.can_eq(param_env, expected_found.found, ty)
@@ -4198,7 +4198,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         let assoc = with_forced_trimmed_paths!(self.tcx.def_path_str(assoc));
                         if !self.can_eq(param_env, ty, *prev_ty) {
                             if type_diffs.iter().any(|diff| {
-                                let Sorts(expected_found) = diff else {
+                                let TypeError::Sorts(expected_found) = diff else {
                                     return false;
                                 };
                                 self.can_eq(param_env, expected_found.found, ty)
@@ -4248,7 +4248,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         let ocx = ObligationCtxt::new(self.infcx);
         let mut assocs_in_this_method = Vec::with_capacity(type_diffs.len());
         for diff in type_diffs {
-            let Sorts(expected_found) = diff else {
+            let TypeError::Sorts(expected_found) = diff else {
                 continue;
             };
             let ty::Alias(ty::Projection, proj) = expected_found.expected.kind() else {
@@ -4586,6 +4586,47 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             ),
             _ => "/* value */".to_string(),
         })
+    }
+
+    fn suggest_add_result_as_return_type(
+        &self,
+        obligation: &PredicateObligation<'tcx>,
+        err: &mut Diag<'_>,
+        trait_ref: ty::PolyTraitRef<'tcx>,
+    ) {
+        if ObligationCauseCode::QuestionMark != *obligation.cause.code().peel_derives() {
+            return;
+        }
+
+        let node = self.tcx.hir_node_by_def_id(obligation.cause.body_id);
+        if let hir::Node::Item(item) = node
+            && let hir::ItemKind::Fn(sig, _, body_id) = item.kind
+            && let hir::FnRetTy::DefaultReturn(ret_span) = sig.decl.output
+            && self.tcx.is_diagnostic_item(sym::FromResidual, trait_ref.def_id())
+            && let ty::Tuple(l) = trait_ref.skip_binder().args.type_at(0).kind()
+            && l.len() == 0
+            && let ty::Adt(def, _) = trait_ref.skip_binder().args.type_at(1).kind()
+            && self.tcx.is_diagnostic_item(sym::Result, def.did())
+        {
+            let body = self.tcx.hir().body(body_id);
+            let mut sugg_spans =
+                vec![(ret_span, " -> Result<(), Box<dyn std::error::Error>>".to_string())];
+
+            if let hir::ExprKind::Block(b, _) = body.value.kind
+                && b.expr.is_none()
+            {
+                sugg_spans.push((
+                    // The span will point to the closing curly brace `}` of the block.
+                    b.span.shrink_to_hi().with_lo(b.span.hi() - BytePos(1)),
+                    "\n    Ok(())\n}".to_string(),
+                ));
+            }
+            err.multipart_suggestion_verbose(
+                format!("consider adding return type"),
+                sugg_spans,
+                Applicability::MaybeIncorrect,
+            );
+        }
     }
 }
 

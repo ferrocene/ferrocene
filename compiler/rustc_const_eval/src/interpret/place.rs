@@ -9,7 +9,6 @@ use tracing::{instrument, trace};
 
 use rustc_ast::Mutability;
 use rustc_middle::mir;
-use rustc_middle::ty;
 use rustc_middle::ty::layout::{LayoutOf, TyAndLayout};
 use rustc_middle::ty::Ty;
 use rustc_middle::{bug, span_bug};
@@ -499,13 +498,14 @@ where
         &self,
         mplace: &MPlaceTy<'tcx, M::Provenance>,
     ) -> InterpResult<'tcx, (MPlaceTy<'tcx, M::Provenance>, u64)> {
-        // Basically we just transmute this place into an array following simd_size_and_type.
-        // (Transmuting is okay since this is an in-memory place. We also double-check the size
-        // stays the same.)
+        // Basically we want to transmute this place into an array following simd_size_and_type.
         let (len, e_ty) = mplace.layout.ty.simd_size_and_type(*self.tcx);
-        let array = Ty::new_array(self.tcx.tcx, e_ty, len);
-        let layout = self.layout_of(array)?;
-        let mplace = mplace.transmute(layout, self)?;
+        // Some SIMD types have padding, so `len` many `e_ty` does not cover the entire place.
+        // Therefore we cannot transmute, and instead we project at offset 0, which side-steps
+        // the size check.
+        let array_layout = self.layout_of(Ty::new_array(self.tcx.tcx, e_ty, len))?;
+        assert!(array_layout.size <= mplace.layout.size);
+        let mplace = mplace.offset(Size::ZERO, array_layout, self)?;
         Ok((mplace, len))
     }
 
@@ -1016,54 +1016,6 @@ where
         let ptr = self.global_root_pointer(Pointer::from(raw.alloc_id))?;
         let layout = self.layout_of(raw.ty)?;
         Ok(self.ptr_to_mplace(ptr.into(), layout))
-    }
-
-    /// Turn a place with a `dyn Trait` type into a place with the actual dynamic type.
-    /// Aso returns the vtable.
-    pub(super) fn unpack_dyn_trait(
-        &self,
-        mplace: &MPlaceTy<'tcx, M::Provenance>,
-        expected_trait: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
-    ) -> InterpResult<'tcx, (MPlaceTy<'tcx, M::Provenance>, Pointer<Option<M::Provenance>>)> {
-        assert!(
-            matches!(mplace.layout.ty.kind(), ty::Dynamic(_, _, ty::Dyn)),
-            "`unpack_dyn_trait` only makes sense on `dyn*` types"
-        );
-        let vtable = mplace.meta().unwrap_meta().to_pointer(self)?;
-        let (ty, vtable_trait) = self.get_ptr_vtable(vtable)?;
-        if expected_trait.principal() != vtable_trait {
-            throw_ub!(InvalidVTableTrait { expected_trait, vtable_trait });
-        }
-        // This is a kind of transmute, from a place with unsized type and metadata to
-        // a place with sized type and no metadata.
-        let layout = self.layout_of(ty)?;
-        let mplace =
-            MPlaceTy { mplace: MemPlace { meta: MemPlaceMeta::None, ..mplace.mplace }, layout };
-        Ok((mplace, vtable))
-    }
-
-    /// Turn a `dyn* Trait` type into an value with the actual dynamic type.
-    /// Also returns the vtable.
-    pub(super) fn unpack_dyn_star<P: Projectable<'tcx, M::Provenance>>(
-        &self,
-        val: &P,
-        expected_trait: &'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>,
-    ) -> InterpResult<'tcx, (P, Pointer<Option<M::Provenance>>)> {
-        assert!(
-            matches!(val.layout().ty.kind(), ty::Dynamic(_, _, ty::DynStar)),
-            "`unpack_dyn_star` only makes sense on `dyn*` types"
-        );
-        let data = self.project_field(val, 0)?;
-        let vtable = self.project_field(val, 1)?;
-        let vtable = self.read_pointer(&vtable.to_op(self)?)?;
-        let (ty, vtable_trait) = self.get_ptr_vtable(vtable)?;
-        if expected_trait.principal() != vtable_trait {
-            throw_ub!(InvalidVTableTrait { expected_trait, vtable_trait });
-        }
-        // `data` is already the right thing but has the wrong type. So we transmute it.
-        let layout = self.layout_of(ty)?;
-        let data = data.transmute(layout, self)?;
-        Ok((data, vtable))
     }
 }
 

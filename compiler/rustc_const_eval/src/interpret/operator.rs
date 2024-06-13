@@ -95,10 +95,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         let l = left.to_scalar_int()?;
         let r = right.to_scalar_int()?;
         // Prepare to convert the values to signed or unsigned form.
-        let l_signed = || l.assert_int(left.layout.size);
-        let l_unsigned = || l.assert_uint(left.layout.size);
-        let r_signed = || r.assert_int(right.layout.size);
-        let r_unsigned = || r.assert_uint(right.layout.size);
+        let l_signed = || l.to_int(left.layout.size);
+        let l_unsigned = || l.to_uint(left.layout.size);
+        let r_signed = || r.to_int(right.layout.size);
+        let r_unsigned = || r.to_uint(right.layout.size);
 
         let throw_ub_on_overflow = match bin_op {
             AddUnchecked => Some(sym::unchecked_add),
@@ -437,23 +437,24 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 };
                 Ok(ImmTy::from_scalar(res, layout))
             }
-            _ if layout.ty.is_integral() => {
-                let val = val.to_scalar();
-                let val = val.to_bits(layout.size)?;
+            ty::Int(..) => {
+                let val = val.to_scalar().to_int(layout.size)?;
                 let res = match un_op {
-                    Not => self.truncate(!val, layout), // bitwise negation, then truncate
-                    Neg => {
-                        // arithmetic negation
-                        assert!(layout.abi.is_signed());
-                        let val = self.sign_extend(val, layout) as i128;
-                        let res = val.wrapping_neg();
-                        let res = res as u128;
-                        // Truncate to target type.
-                        self.truncate(res, layout)
-                    }
+                    Not => !val,
+                    Neg => val.wrapping_neg(),
                     _ => span_bug!(self.cur_span(), "Invalid integer op {:?}", un_op),
                 };
-                Ok(ImmTy::from_uint(res, layout))
+                let res = ScalarInt::truncate_from_int(res, layout.size).0;
+                Ok(ImmTy::from_scalar(res.into(), layout))
+            }
+            ty::Uint(..) => {
+                let val = val.to_scalar().to_uint(layout.size)?;
+                let res = match un_op {
+                    Not => !val,
+                    _ => span_bug!(self.cur_span(), "Invalid unsigned integer op {:?}", un_op),
+                };
+                let res = ScalarInt::truncate_from_uint(res, layout.size).0;
+                Ok(ImmTy::from_scalar(res.into(), layout))
             }
             ty::RawPtr(..) => {
                 assert_eq!(un_op, PtrMetadata);

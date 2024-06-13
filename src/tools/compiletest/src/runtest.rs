@@ -15,7 +15,7 @@ use crate::errors::{self, Error, ErrorKind};
 use crate::header::TestProps;
 use crate::json;
 use crate::read2::{read2_abbreviated, Truncated};
-use crate::util::{add_dylib_path, dylib_env_var, logv, PathBufExt};
+use crate::util::{add_dylib_path, copy_dir_all, dylib_env_var, logv, PathBufExt};
 use crate::ColorConfig;
 use colored::Colorize;
 use miropt_test_tools::{files_for_miropt_test, MiroptTest, MiroptTestFile};
@@ -1833,6 +1833,16 @@ impl<'test> TestCx<'test> {
                 ));
             }
         }
+
+        // Build any `//@ aux-codegen-backend`, and pass the resulting library
+        // to `-Zcodegen-backend` when compiling the test file.
+        if let Some(aux_file) = &self.props.aux_codegen_backend {
+            let aux_type = self.build_auxiliary(of, aux_file, aux_dir, false);
+            if let Some(lib_name) = get_lib_name(aux_file.trim_end_matches(".rs"), aux_type) {
+                let lib_path = aux_dir.join(&lib_name);
+                rustc.arg(format!("-Zcodegen-backend={}", lib_path.display()));
+            }
+        }
     }
 
     fn compose_and_run_compiler(&self, mut rustc: Command, input: Option<String>) -> ProcRes {
@@ -2254,6 +2264,9 @@ impl<'test> TestCx<'test> {
         }
 
         match output_file {
+            // If the test's compile flags specify an output path with `-o`,
+            // avoid a compiler warning about `--out-dir` being ignored.
+            _ if self.props.compile_flags.iter().any(|flag| flag == "-o") => {}
             TargetLocation::ThisFile(path) => {
                 rustc.arg("-o").arg(path);
             }
@@ -3458,6 +3471,21 @@ impl<'test> TestCx<'test> {
         let rmake_out_dir = base_dir.join("rmake_out");
         create_dir_all(&rmake_out_dir).unwrap();
 
+        // Copy all input files (apart from rmake.rs) to the temporary directory,
+        // so that the input directory structure from `tests/run-make/<test>` is mirrored
+        // to the `rmake_out` directory.
+        for path in walkdir::WalkDir::new(&self.testpaths.file).min_depth(1) {
+            let path = path.unwrap().path().to_path_buf();
+            if path.file_name().is_some_and(|s| s != "rmake.rs") {
+                let target = rmake_out_dir.join(path.strip_prefix(&self.testpaths.file).unwrap());
+                if path.is_dir() {
+                    copy_dir_all(&path, target).unwrap();
+                } else {
+                    fs::copy(&path, target).unwrap();
+                }
+            }
+        }
+
         // HACK: assume stageN-target, we only want stageN.
         let stage = self.config.stage_id.split('-').next().unwrap();
 
@@ -3515,21 +3543,13 @@ impl<'test> TestCx<'test> {
             .arg(&self.testpaths.file.join("rmake.rs"))
             .env("TARGET", &self.config.target)
             .env("PYTHON", &self.config.python)
-            .env("S", &src_root)
             .env("RUST_BUILD_STAGE", &self.config.stage_id)
             .env("RUSTC", cwd.join(&self.config.rustc_path))
-            .env("TMPDIR", &rmake_out_dir)
             .env("LD_LIB_PATH_ENVVAR", dylib_env_var())
             .env(dylib_env_var(), &host_dylib_env_paths)
             .env("HOST_RPATH_DIR", cwd.join(&self.config.compile_lib_path))
             .env("TARGET_RPATH_DIR", cwd.join(&self.config.run_lib_path))
-            .env("LLVM_COMPONENTS", &self.config.llvm_components)
-            // We for sure don't want these tests to run in parallel, so make
-            // sure they don't have access to these vars if we run via `make`
-            // at the top level
-            .env_remove("MAKEFLAGS")
-            .env_remove("MFLAGS")
-            .env_remove("CARGO_MAKEFLAGS");
+            .env("LLVM_COMPONENTS", &self.config.llvm_components);
 
         if std::env::var_os("COMPILETEST_FORCE_STAGE0").is_some() {
             let mut stage0_sysroot = build_root.clone();
@@ -3559,7 +3579,7 @@ impl<'test> TestCx<'test> {
         let target_rpath_env_path = env::join_paths(target_rpath_env_path).unwrap();
 
         let mut cmd = Command::new(&recipe_bin);
-        cmd.current_dir(&self.testpaths.file)
+        cmd.current_dir(&rmake_out_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .env("LD_LIB_PATH_ENVVAR", dylib_env_var())
@@ -3567,19 +3587,12 @@ impl<'test> TestCx<'test> {
             .env(dylib_env_var(), &dylib_env_paths)
             .env("TARGET", &self.config.target)
             .env("PYTHON", &self.config.python)
-            .env("S", &src_root)
+            .env("SOURCE_ROOT", &src_root)
             .env("RUST_BUILD_STAGE", &self.config.stage_id)
             .env("RUSTC", cwd.join(&self.config.rustc_path))
-            .env("TMPDIR", &rmake_out_dir)
             .env("HOST_RPATH_DIR", cwd.join(&self.config.compile_lib_path))
             .env("TARGET_RPATH_DIR", cwd.join(&self.config.run_lib_path))
-            .env("LLVM_COMPONENTS", &self.config.llvm_components)
-            // We for sure don't want these tests to run in parallel, so make
-            // sure they don't have access to these vars if we run via `make`
-            // at the top level
-            .env_remove("MAKEFLAGS")
-            .env_remove("MFLAGS")
-            .env_remove("CARGO_MAKEFLAGS");
+            .env("LLVM_COMPONENTS", &self.config.llvm_components);
 
         if let Some(ref rustdoc) = self.config.rustdoc_path {
             cmd.env("RUSTDOC", cwd.join(rustdoc));

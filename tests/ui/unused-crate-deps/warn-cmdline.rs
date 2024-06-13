@@ -6,6 +6,10 @@
 //@ aux-crate:bar=bar.rs
 
 fn main() {}
+<<<<<<< HEAD
 //~^ WARNING external crate `bar` unused in
 
 // ferrocene-annotations: um_rustc_W
+=======
+//~^ WARNING extern crate `bar` is unused in
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

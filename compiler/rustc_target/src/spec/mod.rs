@@ -1766,6 +1766,10 @@ supported_targets! {
 
     ("nvptx64-nvidia-cuda", nvptx64_nvidia_cuda),
 
+    ("xtensa-esp32-none-elf", xtensa_esp32_none_elf),
+    ("xtensa-esp32s2-none-elf", xtensa_esp32s2_none_elf),
+    ("xtensa-esp32s3-none-elf", xtensa_esp32s3_none_elf),
+
     ("i686-wrs-vxworks", i686_wrs_vxworks),
     ("x86_64-wrs-vxworks", x86_64_wrs_vxworks),
     ("armv7-wrs-vxworks-eabihf", armv7_wrs_vxworks_eabihf),
@@ -3370,7 +3374,7 @@ impl Target {
 
                 // Additionally look in the sysroot under `lib/rustlib/<triple>/target.json`
                 // as a fallback.
-                let rustlib_path = crate::target_rustlib_path(sysroot, target_triple);
+                let rustlib_path = crate::relative_target_rustlib_path(sysroot, target_triple);
                 let p = PathBuf::from_iter([
                     Path::new(sysroot),
                     Path::new(&rustlib_path),

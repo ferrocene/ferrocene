@@ -78,7 +78,7 @@ impl Step for Docs {
 
         let mut tarball = Tarball::new(builder, "rust-docs", &host.triple);
         tarball.set_product_name("Rust Documentation");
-        tarball.add_bulk_dir(&builder.doc_out(host), dest);
+        tarball.add_bulk_dir(builder.doc_out(host), dest);
         tarball.add_file(builder.src.join("src/doc/robots.txt"), dest, 0o644);
         Some(tarball.generate())
     }
@@ -117,7 +117,7 @@ impl Step for JsonDocs {
         let mut tarball = Tarball::new(builder, "rust-docs-json", &host.triple);
         tarball.set_product_name("Rust Documentation In JSON Format");
         tarball.is_preview(true);
-        tarball.add_bulk_dir(&builder.json_doc_out(host), dest);
+        tarball.add_bulk_dir(builder.json_doc_out(host), dest);
         Some(tarball.generate())
     }
 }
@@ -148,7 +148,7 @@ impl Step for RustcDocs {
 
         let mut tarball = Tarball::new(builder, "rustc-docs", &host.triple);
         tarball.set_product_name("Rustc Documentation");
-        tarball.add_bulk_dir(&builder.compiler_doc_out(host), "share/doc/rust/html/rustc");
+        tarball.add_bulk_dir(builder.compiler_doc_out(host), "share/doc/rust/html/rustc");
         Some(tarball.generate())
     }
 }
@@ -1046,6 +1046,21 @@ impl Step for PlainSourceTarball {
                 // which uses the unstable `public-dependency` feature.
                 .env("RUSTC_BOOTSTRAP", "1")
                 .current_dir(plain_dst_src);
+
+            // Vendor packages that are required by opt-dist to collect PGO profiles.
+            let pkgs_for_pgo_training = build_helper::LLVM_PGO_CRATES
+                .iter()
+                .chain(build_helper::RUSTC_PGO_CRATES)
+                .map(|pkg| {
+                    let mut manifest_path =
+                        builder.src.join("./src/tools/rustc-perf/collector/compile-benchmarks");
+                    manifest_path.push(pkg);
+                    manifest_path.push("Cargo.toml");
+                    manifest_path
+                });
+            for manifest_path in pkgs_for_pgo_training {
+                cmd.arg("--sync").arg(manifest_path);
+            }
 
             let config = if !builder.config.dry_run() {
                 t!(String::from_utf8(t!(cmd.output()).stdout))

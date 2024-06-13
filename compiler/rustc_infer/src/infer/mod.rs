@@ -2,7 +2,7 @@ pub use at::DefineOpaqueTypes;
 pub use freshen::TypeFreshener;
 pub use lexical_region_resolve::RegionResolutionError;
 pub use relate::combine::CombineFields;
-pub use relate::combine::ObligationEmittingRelation;
+pub use relate::combine::PredicateEmittingRelation;
 pub use relate::StructurallyRelateAliases;
 pub use rustc_macros::{TypeFoldable, TypeVisitable};
 pub use rustc_middle::ty::IntVarValue;
@@ -11,9 +11,8 @@ pub use RegionVariableOrigin::*;
 pub use SubregionOrigin::*;
 pub use ValuePairs::*;
 
-use crate::traits::{
-    self, ObligationCause, ObligationInspector, PredicateObligations, TraitEngine,
-};
+use crate::infer::relate::RelateResult;
+use crate::traits::{self, ObligationCause, ObligationInspector, PredicateObligation, TraitEngine};
 use error_reporting::TypeErrCtxt;
 use free_regions::RegionRelations;
 use lexical_region_resolve::LexicalRegionResolutions;
@@ -39,7 +38,6 @@ use rustc_middle::traits::select;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::fold::BoundVarReplacerDelegate;
 use rustc_middle::ty::fold::{TypeFoldable, TypeFolder, TypeSuperFoldable};
-use rustc_middle::ty::relate::RelateResult;
 use rustc_middle::ty::visit::TypeVisitableExt;
 use rustc_middle::ty::{self, GenericParamDefKind, InferConst, Ty, TyCtxt};
 use rustc_middle::ty::{ConstVid, EffectVid, FloatVid, IntVid, TyVid};
@@ -62,7 +60,7 @@ pub mod opaque_types;
 pub mod outlives;
 mod projection;
 pub mod region_constraints;
-mod relate;
+pub mod relate;
 pub mod resolve;
 pub(crate) mod snapshot;
 pub mod type_variable;
@@ -71,7 +69,7 @@ pub mod type_variable;
 #[derive(Debug)]
 pub struct InferOk<'tcx, T> {
     pub value: T,
-    pub obligations: PredicateObligations<'tcx>,
+    pub obligations: Vec<PredicateObligation<'tcx>>,
 }
 pub type InferResult<'tcx, T> = Result<InferOk<'tcx, T>, TypeError<'tcx>>;
 
@@ -751,7 +749,7 @@ impl<'tcx, T> InferOk<'tcx, T> {
 }
 
 impl<'tcx> InferOk<'tcx, ()> {
-    pub fn into_obligations(self) -> PredicateObligations<'tcx> {
+    pub fn into_obligations(self) -> Vec<PredicateObligation<'tcx>> {
         self.obligations
     }
 }

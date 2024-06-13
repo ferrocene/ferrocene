@@ -13,15 +13,14 @@
 //@ ignore-nvptx64-nvidia-cuda
 // FIXME: can't find crate for `std`
 
-use run_make_support::{rustc, tmp_dir};
-use std::fs;
+use run_make_support::fs_wrapper as fs;
+use run_make_support::rustc;
 
 fn main() {
-    // FIXME(Oneirical): Use run_make_support::fs_wrapper here.
-    fs::create_dir(tmp_dir().join("src")).unwrap();
-    fs::create_dir(tmp_dir().join("incr")).unwrap();
-    fs::copy("a.rs", tmp_dir().join("src/main.rs")).unwrap();
-    rustc().incremental(tmp_dir().join("incr")).input(tmp_dir().join("src/main.rs")).run();
-    fs::copy("b.rs", tmp_dir().join("src/main.rs")).unwrap();
-    rustc().incremental(tmp_dir().join("incr")).input(tmp_dir().join("src/main.rs")).run();
+    fs::create_dir("src");
+    fs::create_dir("incr");
+    fs::copy("a.rs", "src/main.rs");
+    rustc().incremental("incr").input("src/main.rs").run();
+    fs::copy("b.rs", "src/main.rs");
+    rustc().incremental("incr").input("src/main.rs").run();
 }

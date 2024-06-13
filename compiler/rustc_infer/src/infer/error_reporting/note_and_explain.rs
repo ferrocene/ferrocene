@@ -21,17 +21,25 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
         sp: Span,
         body_owner_def_id: DefId,
     ) {
-        use ty::error::TypeError::*;
         debug!("note_and_explain_type_err err={:?} cause={:?}", err, cause);
 
         let tcx = self.tcx;
 
         match err {
-            ArgumentSorts(values, _) | Sorts(values) => {
+            TypeError::ArgumentSorts(values, _) | TypeError::Sorts(values) => {
                 match (*values.expected.kind(), *values.found.kind()) {
                     (ty::Closure(..), ty::Closure(..)) => {
                         diag.note("no two closures, even if identical, have the same type");
                         diag.help("consider boxing your closure and/or using it as a trait object");
+                    }
+                    (ty::Coroutine(def_id1, ..), ty::Coroutine(def_id2, ..))
+                        if self.tcx.coroutine_is_async(def_id1)
+                            && self.tcx.coroutine_is_async(def_id2) =>
+                    {
+                        diag.note("no two async blocks, even if identical, have the same type");
+                        diag.help(
+                            "consider pinning your async block and casting it to a trait object",
+                        );
                     }
                     (ty::Alias(ty::Opaque, ..), ty::Alias(ty::Opaque, ..)) => {
                         // Issue #63167
@@ -483,7 +491,7 @@ impl<T> Trait<T> for X {
                     values.found.kind(),
                 );
             }
-            CyclicTy(ty) => {
+            TypeError::CyclicTy(ty) => {
                 // Watch out for various cases of cyclic types and try to explain.
                 if ty.is_closure() || ty.is_coroutine() || ty.is_coroutine_closure() {
                     diag.note(
@@ -494,7 +502,7 @@ impl<T> Trait<T> for X {
                     );
                 }
             }
-            TargetFeatureCast(def_id) => {
+            TypeError::TargetFeatureCast(def_id) => {
                 let target_spans = tcx.get_attrs(def_id, sym::target_feature).map(|attr| attr.span);
                 diag.note(
                     "functions with `#[target_feature]` can only be coerced to `unsafe` function pointers"

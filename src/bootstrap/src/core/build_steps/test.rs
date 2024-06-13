@@ -309,7 +309,7 @@ impl Step for Cargo {
         // Forcibly disable tests using nightly features since any changes to
         // those features won't be able to land.
         cargo.env("CARGO_TEST_DISABLE_NIGHTLY", "1");
-        cargo.env("PATH", &path_for_cargo(builder, compiler));
+        cargo.env("PATH", path_for_cargo(builder, compiler));
 
         #[cfg(feature = "build-metrics")]
         builder.metrics.begin_test_suite(
@@ -1102,6 +1102,8 @@ impl Step for Tidy {
     /// Once tidy passes, this step also runs `fmt --check` if tests are being run
     /// for the `dev` or `nightly` channels.
     fn run(self, builder: &Builder<'_>) {
+        builder.build.update_submodule(Path::new("src/tools/rustc-perf"));
+
         let mut cmd = builder.tool_cmd(Tool::Tidy);
         cmd.arg(&builder.src);
         cmd.arg(&builder.initial_cargo);
@@ -1487,12 +1489,6 @@ impl Step for RunMake {
         });
     }
 }
-
-host_test!(RunMakeFullDeps {
-    path: "tests/run-make-fulldeps",
-    mode: "run-make",
-    suite: "run-make-fulldeps"
-});
 
 default_test!(Assembly { path: "tests/assembly", mode: "assembly", suite: "assembly" });
 
@@ -1979,9 +1975,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 add_link_lib_path(vec![llvm_libdir.trim().into()], &mut cmd);
             }
 
-            if !builder.config.dry_run()
-                && (matches!(suite, "run-make" | "run-make-fulldeps") || mode == "coverage-run")
-            {
+            if !builder.config.dry_run() && matches!(mode, "run-make" | "coverage-run") {
                 // The llvm/bin directory contains many useful cross-platform
                 // tools. Pass the path to run-make tests so they can use them.
                 // (The coverage-run tests also need these tools to process
@@ -1993,7 +1987,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
                 cmd.arg("--llvm-bin-dir").arg(llvm_bin_path);
             }
 
-            if !builder.config.dry_run() && matches!(suite, "run-make" | "run-make-fulldeps") {
+            if !builder.config.dry_run() && mode == "run-make" {
                 // If LLD is available, add it to the PATH
                 if builder.config.lld_enabled {
                     let lld_install_root =
@@ -2013,7 +2007,7 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
 
         // Only pass correct values for these flags for the `run-make` suite as it
         // requires that a C++ compiler was configured which isn't always the case.
-        if !builder.config.dry_run() && matches!(suite, "run-make" | "run-make-fulldeps") {
+        if !builder.config.dry_run() && mode == "run-make" {
             cmd.arg("--cc")
                 .arg(builder.cc(target))
                 .arg("--cxx")
@@ -2571,7 +2565,7 @@ fn prepare_cargo_test(
         cargo.arg("-p").arg(krate);
     }
 
-    cargo.arg("--").args(&builder.config.test_args()).args(libtest_args);
+    cargo.arg("--").args(builder.config.test_args()).args(libtest_args);
     if !builder.config.verbose_tests {
         cargo.arg("--quiet");
     }
@@ -3172,7 +3166,7 @@ impl Step for TierCheck {
             &[],
         );
         cargo.arg(builder.src.join("src/doc/rustc/src/platform-support.md"));
-        cargo.arg(&builder.rustc(self.compiler));
+        cargo.arg(builder.rustc(self.compiler));
         if builder.is_verbose() {
             cargo.arg("--verbose");
         }

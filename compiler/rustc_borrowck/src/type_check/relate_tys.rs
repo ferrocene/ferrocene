@@ -1,14 +1,15 @@
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::ErrorGuaranteed;
+use rustc_infer::infer::relate::{PredicateEmittingRelation, StructurallyRelateAliases};
+use rustc_infer::infer::relate::{Relate, RelateResult, TypeRelation};
 use rustc_infer::infer::NllRegionVariableOrigin;
-use rustc_infer::infer::{ObligationEmittingRelation, StructurallyRelateAliases};
-use rustc_infer::traits::{Obligation, PredicateObligations};
+use rustc_infer::traits::solve::Goal;
+use rustc_infer::traits::Obligation;
 use rustc_middle::mir::ConstraintCategory;
 use rustc_middle::span_bug;
 use rustc_middle::traits::query::NoSolution;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::fold::FnMutDelegate;
-use rustc_middle::ty::relate::{Relate, RelateResult, TypeRelation};
 use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
 use rustc_span::symbol::sym;
 use rustc_span::{Span, Symbol};
@@ -82,7 +83,7 @@ pub struct NllTypeRelating<'me, 'bccx, 'tcx> {
     /// - Bivariant means that it doesn't matter.
     ambient_variance: ty::Variance,
 
-    ambient_variance_info: ty::VarianceDiagInfo<'tcx>,
+    ambient_variance_info: ty::VarianceDiagInfo<TyCtxt<'tcx>>,
 }
 
 impl<'me, 'bccx, 'tcx> NllTypeRelating<'me, 'bccx, 'tcx> {
@@ -153,9 +154,7 @@ impl<'me, 'bccx, 'tcx> NllTypeRelating<'me, 'bccx, 'tcx> {
                 "expected at least one opaque type in `relate_opaques`, got {a} and {b}."
             ),
         };
-        let cause = ObligationCause::dummy_with_span(self.span());
-        let obligations = infcx.handle_opaque_type(a, b, &cause, self.param_env())?.obligations;
-        self.register_obligations(obligations);
+        self.register_goals(infcx.handle_opaque_type(a, b, self.span(), self.param_env())?);
         Ok(())
     }
 
@@ -296,7 +295,7 @@ impl<'me, 'bccx, 'tcx> NllTypeRelating<'me, 'bccx, 'tcx> {
         &mut self,
         sup: ty::Region<'tcx>,
         sub: ty::Region<'tcx>,
-        info: ty::VarianceDiagInfo<'tcx>,
+        info: ty::VarianceDiagInfo<TyCtxt<'tcx>>,
     ) {
         let sub = self.type_checker.borrowck_context.universal_regions.to_region_vid(sub);
         let sup = self.type_checker.borrowck_context.universal_regions.to_region_vid(sup);
@@ -314,7 +313,7 @@ impl<'me, 'bccx, 'tcx> NllTypeRelating<'me, 'bccx, 'tcx> {
     }
 }
 
-impl<'bccx, 'tcx> TypeRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
+impl<'bccx, 'tcx> TypeRelation<TyCtxt<'tcx>> for NllTypeRelating<'_, 'bccx, 'tcx> {
     fn tcx(&self) -> TyCtxt<'tcx> {
         self.type_checker.infcx.tcx
     }
@@ -324,10 +323,10 @@ impl<'bccx, 'tcx> TypeRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
     }
 
     #[instrument(skip(self, info), level = "trace", ret)]
-    fn relate_with_variance<T: Relate<'tcx>>(
+    fn relate_with_variance<T: Relate<TyCtxt<'tcx>>>(
         &mut self,
         variance: ty::Variance,
-        info: ty::VarianceDiagInfo<'tcx>,
+        info: ty::VarianceDiagInfo<TyCtxt<'tcx>>,
         a: T,
         b: T,
     ) -> RelateResult<'tcx, T> {
@@ -445,7 +444,7 @@ impl<'bccx, 'tcx> TypeRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
         b: ty::Binder<'tcx, T>,
     ) -> RelateResult<'tcx, ty::Binder<'tcx, T>>
     where
-        T: Relate<'tcx>,
+        T: Relate<TyCtxt<'tcx>>,
     {
         // We want that
         //
@@ -533,7 +532,7 @@ impl<'bccx, 'tcx> TypeRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
     }
 }
 
-impl<'bccx, 'tcx> ObligationEmittingRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
+impl<'bccx, 'tcx> PredicateEmittingRelation<'tcx> for NllTypeRelating<'_, 'bccx, 'tcx> {
     fn span(&self) -> Span {
         self.locations.span(self.type_checker.body)
     }
@@ -550,22 +549,32 @@ impl<'bccx, 'tcx> ObligationEmittingRelation<'tcx> for NllTypeRelating<'_, 'bccx
         &mut self,
         obligations: impl IntoIterator<Item: ty::Upcast<TyCtxt<'tcx>, ty::Predicate<'tcx>>>,
     ) {
-        self.register_obligations(
-            obligations
-                .into_iter()
-                .map(|to_pred| {
-                    Obligation::new(self.tcx(), ObligationCause::dummy(), self.param_env(), to_pred)
-                })
-                .collect(),
+        let tcx = self.tcx();
+        let param_env = self.param_env();
+        self.register_goals(
+            obligations.into_iter().map(|to_pred| Goal::new(tcx, param_env, to_pred)),
         );
     }
 
-    fn register_obligations(&mut self, obligations: PredicateObligations<'tcx>) {
+    fn register_goals(
+        &mut self,
+        obligations: impl IntoIterator<Item = Goal<'tcx, ty::Predicate<'tcx>>>,
+    ) {
         let _: Result<_, ErrorGuaranteed> = self.type_checker.fully_perform_op(
             self.locations,
             self.category,
             InstantiateOpaqueType {
-                obligations,
+                obligations: obligations
+                    .into_iter()
+                    .map(|goal| {
+                        Obligation::new(
+                            self.tcx(),
+                            ObligationCause::dummy_with_span(self.span()),
+                            goal.param_env,
+                            goal.predicate,
+                        )
+                    })
+                    .collect(),
                 // These fields are filled in during execution of the operation
                 base_universe: None,
                 region_constraints: None,
@@ -573,7 +582,7 @@ impl<'bccx, 'tcx> ObligationEmittingRelation<'tcx> for NllTypeRelating<'_, 'bccx
         );
     }
 
-    fn register_type_relate_obligation(&mut self, a: Ty<'tcx>, b: Ty<'tcx>) {
+    fn register_alias_relate_predicate(&mut self, a: Ty<'tcx>, b: Ty<'tcx>) {
         self.register_predicates([ty::Binder::dummy(match self.ambient_variance {
             ty::Variance::Covariant => ty::PredicateKind::AliasRelate(
                 a.into(),

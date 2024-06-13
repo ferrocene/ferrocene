@@ -55,21 +55,23 @@ This API is completely unstable and subject to change.
 
 */
 
+// tidy-alphabetical-start
+#![allow(internal_features)]
 #![allow(rustc::diagnostic_outside_of_impl)]
 #![allow(rustc::potential_query_instability)]
 #![allow(rustc::untranslatable_diagnostic)]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
-#![feature(rustdoc_internals)]
-#![allow(internal_features)]
 #![feature(control_flow_enum)]
 #![feature(if_let_guard)]
 #![feature(is_sorted)]
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
 #![feature(never_type)]
+#![feature(rustdoc_internals)]
 #![feature(slice_partition_dedup)]
 #![feature(try_blocks)]
+// tidy-alphabetical-end
 
 #[macro_use]
 extern crate tracing;
@@ -190,6 +192,10 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
         }
     });
 
+    // Freeze definitions as we don't add new ones at this point. This improves performance by
+    // allowing lock-free access to them.
+    tcx.untracked().definitions.freeze();
+
     // FIXME: Remove this when we implement creating `DefId`s
     // for anon constants during their parents' typeck.
     // Typeck all body owners in parallel will produce queries
@@ -200,10 +206,6 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
             tcx.ensure().typeck(item_def_id);
         }
     });
-
-    // Freeze definitions as we don't add new ones at this point. This improves performance by
-    // allowing lock-free access to them.
-    tcx.untracked().definitions.freeze();
 
     tcx.ensure().check_unused_traits(());
 }

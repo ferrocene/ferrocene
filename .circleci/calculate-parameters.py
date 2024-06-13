@@ -34,8 +34,8 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
-AARCH64_LINUX_BUILD_HOST = "aarch64-unknown-linux-gnu"
-X86_64_LINUX_BUILD_HOST = "x86_64-unknown-linux-gnu"
+AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
+X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
 # x86_64-unknown-linux-gnu builds a number of cross compilation targets
 # for us and is special cased somewhat.
 X86_64_LINUX_BUILD_STD_TARGETS = [
@@ -47,16 +47,16 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-LINUX_SELF_TEST_TARGETS = [X86_64_LINUX_BUILD_HOST] + [AARCH64_LINUX_BUILD_HOST] + X86_64_LINUX_BUILD_STD_TARGETS
+LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
 
-AARCH64_MAC_BUILD_HOST = "aarch64-apple-darwin"
+AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
 # We don't currently produce x86_64 Apple host tools, but we will one day
 AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
-MAC_SELF_TEST_TARGETS = [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
+MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
 
 # Tagets only built (and tested!) on Windows
-X86_64_WINDOWS_BUILD_HOST = "x86_64-pc-windows-msvc"
-WINDOWS_SELF_TEST_TARGETS = [X86_64_WINDOWS_BUILD_HOST] + X86_64_LINUX_BUILD_STD_TARGETS
+X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
+WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -125,7 +125,7 @@ def calculate_llvm_rebuild(target: str):
     url: urllib.parse.ParseResult = urllib.parse.urlparse(
         subprocess.run(
             ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
-            env={"FERROCENE_HOST": target, "PATH": os.environ.get("PATH")},
+            env={**os.environ, "FERROCENE_HOST": target},
             stdout=subprocess.PIPE,
         ).stdout.strip()
     ).decode("utf-8")
@@ -150,13 +150,13 @@ def calculate_targets(host_plus_stage: str):
     # in this universe.
     if stage == "build":
         if host == "x86_64-unknown-linux-gnu":
-            targets = [X86_64_LINUX_BUILD_HOST]
+            targets = X86_64_LINUX_BUILD_HOSTS
         elif host == "aarch64-unknown-linux-gnu":
-            targets = [AARCH64_LINUX_BUILD_HOST]
+            targets = AARCH64_LINUX_BUILD_HOSTS
         elif host == "aarch64-apple-darwin":
-            targets = [AARCH64_MAC_BUILD_HOST] + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
+            targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
         elif host == "x86_64-pc-windows-msvc":
-            targets = [X86_64_WINDOWS_BUILD_HOST]
+            targets = X86_64_WINDOWS_BUILD_HOSTS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":

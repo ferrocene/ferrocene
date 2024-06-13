@@ -65,6 +65,7 @@ RUN apt-get update \
 # qemu-user-static.
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
+# This was removed in 24.04 and is a copy of the 23.04 file.
 COPY ./binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to

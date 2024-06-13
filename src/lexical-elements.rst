@@ -547,6 +547,7 @@ Literals
        BooleanLiteral
      | ByteLiteral
      | ByteStringLiteral
+     | CStringLiteral
      | CharacterLiteral
      | NumericLiteral
      | StringLiteral
@@ -702,6 +703,116 @@ The :t:`type` of a :t:`raw byte string literal` of size ``N`` is ``&'static
    br""
    br#""#
    br##"left #"# right"##
+
+.. _fls_U1gHCy16emVe:
+
+C String Literals
+~~~~~~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+   CStringLiteral ::=
+       RawCStringLiteral
+     | SimpleCStringLiteral
+
+.. rubric:: Legality Rules
+
+:dp:`fls_VKCW830CzhhN`
+A :t:`c string literal` is a :t:`literal` that consists of multiple characters
+with an implicit 0x00 byte appended to it.
+
+:dp:`fls_XJprzaEn82Xs`
+The character sequence 0x0D 0xCA (carriage return, new line) is replaced by 0xCA
+(new line) inside of a :t:`c string literal`.
+
+.. _fls_p090c5oTnElW:
+
+Simple C String Literals
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   SimpleCStringLiteral ::=
+       $$c"$$ SimpleCStringContent* $$"$$
+
+   SimpleCStringContent ::=
+       AsciiEscape
+     | SimpleStringCharacter
+     | StringContinuation
+     | UnicodeEscape
+
+:dp:`fls_fnwQHo7twAom`
+A :t:`simple c string literal` is any :t:`Unicode` character except characters
+0x0D (carriage return), 0x22 (quotation mark), 0x5C (reverse solidus) and 0x00
+(null byte).
+
+:dp:`fls_hp1DTpqDwuLC`
+:ds:`StringContinuation` is the character sequence 0x5C 0x0A (reverse solidus,
+new line).
+
+.. rubric:: Legality Rules
+
+:dp:`fls_nPI7j0siGP8G`
+A :t:`simple c string literal` is a :t:`c string literal` where the characters are
+:t:`Unicode` characters.
+
+:dp:`fls_Ae7LM4Wg0NA7`
+The :t:`type` of a :t:`simple string literal` is :std:`&'static
+[core::ffi::CStr]`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   c""
+   c"cat"
+   c"\tcol\nrow"
+   c"bell\x07"
+   c"\u{B80a}"
+   c"\
+   multi\
+   line\
+   string"
+
+.. _fls_G4LdypF3rL6i:
+
+Raw C String Literals
+^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   RawCStringLiteral ::=
+       $$cr$$ RawCStringContent
+
+   RawCStringContent ::=
+       NestedRawCStringContent
+     | $$"$$ ~[$$\r$$]* $$"$$
+
+   NestedRawCStringContent ::=
+       $$#$$ RawCStringContent $$#$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_gLrei65i8Uzq`
+A :t:`raw c string literal` is a :t:`simple c string literal` that does not
+recognize :t:`[escaped character]s`.
+
+:dp:`fls_9nJHsg9dCi66`
+The :t:`type` of a :t:`simple string literal` is :std:`&'static
+[core::ffi::CStr]`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   cr""
+   cr#""#
+   cr##"left #"# right"##
 
 .. _fls_hv9jtycp0o1y:
 
@@ -1097,7 +1208,7 @@ The :t:`type` of a :t:`simple string literal` is ``&'static str``.
    "cat"
    "\tcol\nrow"
    "bell\x07"
-   "\uB80a"
+   "\u{B80a}"
    "\
    multi\
    line\

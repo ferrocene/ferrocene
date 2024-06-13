@@ -1026,6 +1026,18 @@ C signed int type
 :dp:`fls_8QIcvapJehqY`
 :dt:`C signed int type` is the `signed int` :t:`type` of the :t:`C` language.
 
+.. _fls_roz4WXH5JZFj:
+
+c string literal
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_g3NHtaOhTB7g`
+A :dt:`c string literal` is a :t:`literal` that consists of multiple characters
+with an implicit 0x00 byte appended to it.
+
+:dp:`fls_FZ6QSpjmVme5`
+See :s:`CStringLiteral`.
+
 .. _fls_Egfa8tdbqllA:
 
 Call conformance
@@ -5279,6 +5291,18 @@ not recognize :t:`[escaped character]s`.
 :dp:`fls_5x71i3ay3na2`
 See ``RawByteStringLiteral.``
 
+.. _fls_yGGvg3e0nPOh:
+
+raw c string literal
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qhWBzqoYZL0e`
+A :dt:`raw c string literal` is a :t:`simple c string literal` that does not
+recognize :t:`[escaped character]s`.
+
+:dp:`fls_WpFJyq6q4k6E`
+See ``RawCStringLiteral.``
+
 .. _fls_uv4dyt4gi32x:
 
 raw pointer
@@ -6014,6 +6038,19 @@ of multiple :s:`[AsciiCharacter]s`.
 
 :dp:`fls_OfI70zK68TnQ`
 See :s:`SimpleByteStringLiteral`.
+
+.. _fls_fx2hhB0HHSUG:
+
+simple c string literal
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qoHXrmds9SgI`
+A :dt:`simple c string literal` is any :t:`Unicode` character except characters
+0x0D (carriage return), 0x22 (quotation mark), 0x5C (reverse solidus) and 0x00
+(null byte).
+
+:dp:`fls_ggm5FNUqg9EY`
+See :s:`SimpleCStringLiteral`.
 
 .. _fls_6mcm7xdcyn40:
 

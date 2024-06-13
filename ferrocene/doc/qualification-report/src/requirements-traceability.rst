@@ -23,7 +23,7 @@ above:
 .. list-table::
    :header-rows: 1
 
-   * - ID
+   * - Requirement ID
      - Targets
      - Reasoning
 

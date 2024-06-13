@@ -65,7 +65,7 @@ RUN apt-get update \
 # qemu-user-static.
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-# COPY --from=noble /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ./binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.12.x has been chosen as it's the same minor

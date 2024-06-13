@@ -95,7 +95,7 @@ def run():
 def subcommand_download(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
 
-    s3_cp_cmd = shlex.quote(f"aws s3 cp {s3_url} - | zstd --decompress - -o {TARBALL_PATH}")
+    s3_cp_cmd = f"aws s3 cp {shlex.quote(s3_url)} - | zstd --decompress - -o {shlex.quote(TARBALL_PATH)}"
     s3_cp = subprocess.run(s3_cp_cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
     
     # Use python tar to avoid Windows 'weirdness'

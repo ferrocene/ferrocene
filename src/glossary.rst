@@ -455,6 +455,15 @@ associated trait function
 An :dt:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+.. _fls_fufF4UmzLg5G:
+
+associated trait implementation function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_bzdXloUGlVSC`
+An :dt:`associated trait implementation function` is an :t:`associated function`
+that appears within a :t:`trait implementation`.
+
 .. _fls_47xtji9Pk8Lw:
 
 associated trait implementation item

@@ -4549,7 +4549,19 @@ numeric literal
 A :dt:`numeric literal` is a :t:`literal` that denotes a number.
 
 :dp:`fls_swue4tma9fmf`
-See ``NumericLiteral.``
+See :s:`NumericLiteral`.
+
+.. _fls_CmvuNXmowCz8:
+
+numeric literal pattern
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_azqQ3JxD5Lt7`
+A :dt:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
+literal`.
+
+:dp:`fls_CmvuNXmowCz8`
+See :s:`LiteralPattern`.
 
 .. _fls_rayjriyofmpa:
 

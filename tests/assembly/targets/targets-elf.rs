@@ -573,18 +573,6 @@
 //@ revisions: x86_64_wrs_vxworks
 //@ [x86_64_wrs_vxworks] compile-flags: --target x86_64-wrs-vxworks
 //@ [x86_64_wrs_vxworks] needs-llvm-components: x86
-<<<<<<< HEAD
-
-// Ferrocene-specific targets
-
-//@ revisions: i386_lynx_lynxos178
-//@ [i386_lynx_lynxos178] compile-flags: --target i386-lynx-lynxos178
-//@ [i386_lynx_lynxos178] needs-llvm-components: x86
-//@ revisions: aarch64_unknown_ferrocenecoretest
-//@ [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
-//@ [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
-
-=======
 // FIXME: disabled since it requires a custom LLVM until the upstream LLVM adds support for the target (https://github.com/espressif/llvm-project/issues/4)
 /*
     revisions: xtensa_esp32_none_elf
@@ -597,7 +585,16 @@
     [xtensa_esp32s3_none_elf] compile-flags: --target xtensa-esp32s3-none-elf
     [xtensa_esp32s3_none_elf] needs-llvm-components: xtensa
 */
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+// Ferrocene-specific targets
+
+//@ revisions: i386_lynx_lynxos178
+//@ [i386_lynx_lynxos178] compile-flags: --target i386-lynx-lynxos178
+//@ [i386_lynx_lynxos178] needs-llvm-components: x86
+//@ revisions: aarch64_unknown_ferrocenecoretest
+//@ [aarch64_unknown_ferrocenecoretest] compile-flags: --target aarch64-unknown-ferrocenecoretest
+//@ [aarch64_unknown_ferrocenecoretest] needs-llvm-components: aarch64
+
 // Sanity-check that each target can produce assembly code.
 
 #![feature(no_core, lang_items)]

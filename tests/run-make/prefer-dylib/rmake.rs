@@ -12,3 +12,5 @@ fn main() {
     // This time the command should fail.
     run_fail("foo");
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

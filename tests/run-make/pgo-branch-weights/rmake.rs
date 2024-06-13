@@ -43,3 +43,6 @@ fn main() {
         .stdin(fs_wrapper::read("interesting.ll"))
         .run();
 }
+
+// ferrocene-annotations: um_rustc_C_link_args
+// ferrocene-annotations: um_rustc_C_codegen_units

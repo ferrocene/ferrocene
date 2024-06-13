@@ -749,10 +749,6 @@ A :t:`simple c string literal` is any :t:`Unicode` character except characters
 0x0D (carriage return), 0x22 (quotation mark), 0x5C (reverse solidus) and 0x00
 (null byte).
 
-:dp:`fls_hp1DTpqDwuLC`
-:ds:`StringContinuation` is the character sequence 0x5C 0x0A (reverse solidus,
-new line).
-
 .. rubric:: Legality Rules
 
 :dp:`fls_nPI7j0siGP8G`

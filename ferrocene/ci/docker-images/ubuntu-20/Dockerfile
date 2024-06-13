@@ -64,8 +64,11 @@ RUN apt-get update \
 # This requires the binfmt-support package, which is normally a dependency of
 # qemu-user-static.
 COPY --from=jammy /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY --from=jammy /usr/bin/qemu-riscv64-static /usr/bin/qemu-riscv64-static
 COPY --from=jammy /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
+COPY --from=jammy /usr/libexec/qemu-binfmt/riscv64-binfmt-P /usr/libexec/qemu-binfmt/riscv64-binfmt-P
 COPY --from=jammy /usr/share/binfmts/qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY --from=jammy /usr/share/binfmts/qemu-riscv64 /usr/share/binfmts/qemu-riscv64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.10.x has been chosen as it's the same minor
@@ -122,6 +125,16 @@ RUN curl -Lo /tmp/cmake.tar.gz https://github.com/Kitware/CMake/releases/downloa
     && make install \
     && rm -rf /tmp/cmake /tmp/cmake.tar.gz
 
+# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
+# are too old to be useful.
+RUN mkdir /opt/riscv-toolchain \
+    && curl -Lo /tmp/riscv-toolchain.tar.gz https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz \
+    && echo "ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7 /tmp/riscv-toolchain.tar.gz" | sha256sum -c \
+    && tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1 \
+    && rm /tmp/riscv-toolchain.tar.gz \
+    && /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+ENV PATH "/opt/riscv-toolchain/bin:$PATH"
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY sudoers /etc/sudoers
@@ -136,6 +149,8 @@ ENV CC_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-gcc
 ENV CXX_aarch64_unknown_ferrocenecoretest=aarch64-linux-gnu-g++
 ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
+ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
+ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

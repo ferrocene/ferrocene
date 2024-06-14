@@ -699,6 +699,15 @@ binding argument
 A :dt:`binding argument` is a :t:`generic argument` that supplies the :t:`type`
 of an :t:`associated trait type`.
 
+.. _fls_t2cit5QOte8U:
+
+binding bound argument
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_D3i3n4RIReCA`
+A :dt:`binding bound argument` is a :t:`generic argument` that further imposes
+:t:`[bound]s` on an :t:`associated trait type`.
+
 .. _fls_bv1k866tai6j:
 
 binding mode
@@ -4068,7 +4077,6 @@ main function signature
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 :dp:`fls_QijObGZEIykU`
-
 A :dt:`main function signature` is a :t:`function signature` subject to specific
 restrictions.
 

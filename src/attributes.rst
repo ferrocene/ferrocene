@@ -122,6 +122,7 @@ Built-in Attributes
        AutomaticallyDerivedContent
      | CfgAttrContent
      | CfgContent
+     | CollapseDebuginfoContent
      | ColdContent
      | CrateNameContent
      | CrateTypeContent
@@ -1448,6 +1449,42 @@ Attribute ``type_length_limit``
 
 Macros Attributes
 ~~~~~~~~~~~~~~~~~
+
+.. _fls_qyudjGHZfyJH:
+
+Attribute ``collapsable_debuginfo``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   CollapseDebuginfoContent ::=
+       $$collapsable_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
+   CollapseDebuginfoKind ::=
+       $$no
+     | $$external$$
+     | $$yes$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_EzKHtWHmXMAZ`
+:t:`Attribute` :c:`collapsable_debuginfo` shall apply to :t:`[declarative macro]s`.
+
+:dp:`fls_BCvJpfQMYEcD`
+:t:`Attribute` :dc:`collapse_debuginfo` changes the debug location information
+for the expanded code of the :t:`declarative macro` to its invocation site. This
+repeats recursively to the top most expansion of a :t:`declarative macro` that
+is not annotated with :t:`attribute` :c:`collapse_debuginfo`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   #[collapse_debuginfo]
+   macro_rules! m {
+       () => {};
+   }
 
 .. _fls_e0a96eb6ux3y:
 

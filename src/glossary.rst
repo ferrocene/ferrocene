@@ -455,6 +455,15 @@ associated trait function
 An :dt:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+.. _fls_fufF4UmzLg5G:
+
+associated trait implementation function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_bzdXloUGlVSC`
+An :dt:`associated trait implementation function` is an :t:`associated function`
+that appears within a :t:`trait implementation`.
+
 .. _fls_47xtji9Pk8Lw:
 
 associated trait implementation item
@@ -4549,7 +4558,19 @@ numeric literal
 A :dt:`numeric literal` is a :t:`literal` that denotes a number.
 
 :dp:`fls_swue4tma9fmf`
-See ``NumericLiteral.``
+See :s:`NumericLiteral`.
+
+.. _fls_CmvuNXmowCz8:
+
+numeric literal pattern
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_azqQ3JxD5Lt7`
+A :dt:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
+literal`.
+
+:dp:`fls_CmvuNXmowCz8`
+See :s:`LiteralPattern`.
 
 .. _fls_rayjriyofmpa:
 
@@ -5289,7 +5310,7 @@ A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does
 not recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
-See ``RawByteStringLiteral.``
+See :s:`RawByteStringLiteral`.
 
 .. _fls_yGGvg3e0nPOh:
 
@@ -5301,7 +5322,7 @@ A :dt:`raw c string literal` is a :t:`simple c string literal` that does not
 recognize :t:`[escaped character]s`.
 
 :dp:`fls_WpFJyq6q4k6E`
-See ``RawCStringLiteral.``
+See :s:`RawCStringLiteral`.
 
 .. _fls_uv4dyt4gi32x:
 

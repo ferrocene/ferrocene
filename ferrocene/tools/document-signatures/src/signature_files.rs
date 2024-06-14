@@ -75,12 +75,15 @@ impl<'opts> SignatureFiles<'opts> {
     }
 
     pub(crate) fn write(&mut self, name: &str, contents: &[u8]) -> Result<(), Error> {
+        let Some(s3_bucket) = &self.options.s3_bucket else {
+            panic!("uploading signatures is only supported with the s3 backend");
+        };
         let uuid = Uuid::new_v4();
 
         // First off, we upload the file to S3, named after the UUID.
         let mut command = Command::new("aws")
             .args(["s3", "cp", "-"])
-            .arg(format!("s3://{}/{uuid}", self.options.s3_bucket))
+            .arg(format!("s3://{s3_bucket}/{uuid}"))
             .stdin(Stdio::piped())
             .spawn()
             .with_context(|| format!("failed to invoke AWS CLI to upload {name}"))?;

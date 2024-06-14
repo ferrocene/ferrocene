@@ -111,6 +111,10 @@ Files: ferrocene/tools/flip-link/*
 Copyright: The Knurling-rs developers
 License: MIT OR Apache-2.0
 
+Files: ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64
+Copyright: Colin Watson
+License: GPL-3.0-or-later
+
 # Reuse cannot process the LLVM source tree, and so the copyrights for the LLVM
 # submodule are written out here manually. The collect-licence-metadata tool
 # has a specific exception coded within it to ignore ./src/llvm-project so

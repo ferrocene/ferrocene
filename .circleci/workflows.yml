@@ -20,13 +20,13 @@ parameters:
   docker-image-tag--ubuntu-20:
     type: string
     default: ""
-  docker-image-tag--ubuntu-23:
+  docker-image-tag--ubuntu-24:
     type: string
     default: ""
   docker-image-rebuild--ci-docker-images--ubuntu-20:
     type: boolean
     default: false
-  docker-image-rebuild--ci-docker-images--ubuntu-23:
+  docker-image-rebuild--ci-docker-images--ubuntu-24:
     type: boolean
     default: false
   docker-repository-url--ci-docker-images:
@@ -77,7 +77,7 @@ jobs:
   # test suite for all the supported targets will be run when bors tries to
   # merge the PR anyway.
   commit-checks:
-    executor: docker-ubuntu-23
+    executor: docker-ubuntu-24
     resource_class: large # 4-core
     environment:
       FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
@@ -583,14 +583,14 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
       - build-docker:
-          name: build-docker--ubuntu-23
-          image: ubuntu-23
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-23 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-23 >>
+          name: build-docker--ubuntu-24
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-24 >>
 
       - commit-checks:
           requires:
-            - build-docker--ubuntu-23
+            - build-docker--ubuntu-24
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -1047,9 +1047,9 @@ executors:
       - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-20 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
-  docker-ubuntu-23:
+  docker-ubuntu-24:
     docker:
-      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-23 >>
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-24 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:

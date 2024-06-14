@@ -45,8 +45,6 @@ RUN apt-get update \
         libc6-dev-arm64-cross \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
-        # Needed for riscv64gc-unknown-linux-gnu cross compilation
-        gcc-riscv64-linux-gnu \
         # Needed for the wasm32-unknown-unknown target
         clang \
         # Needed to install AWS CLI during the build:
@@ -112,11 +110,6 @@ RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_6
     && unzip -q -d /tmp/awscli /tmp/awscli.zip \
     && /tmp/awscli/aws/install \
     && rm -rf /tmp/awscli /tmp/awscli.zip
-
-# Install AWS CLI's Session manager plugin according to the official instructions
-# https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-debian-and-ubuntu.html
-RUN curl -Lo /tmp/aws-session-manager-plugin.deb "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
-    && dpkg -i /tmp/aws-session-manager-plugin.deb
 
 # Install cmake from source code, as the version in the Ubuntu 20.04 archives
 # is too old to build the latest LLVM.

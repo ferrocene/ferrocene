@@ -1,8 +1,10 @@
+// tidy-alphabetical-start
 #![feature(assert_matches)]
 #![feature(box_patterns)]
 #![feature(const_type_name)]
 #![feature(cow_is_borrowed)]
 #![feature(decl_macro)]
+#![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(is_sorted)]
 #![feature(let_chains)]
@@ -12,7 +14,7 @@
 #![feature(round_char_boundary)]
 #![feature(try_blocks)]
 #![feature(yeet_expr)]
-#![feature(if_let_guard)]
+// tidy-alphabetical-end
 
 #[macro_use]
 extern crate tracing;
@@ -55,7 +57,6 @@ mod remove_place_mention;
 // This pass is public to allow external drivers to perform MIR cleanup
 mod add_subtyping_projections;
 pub mod cleanup_post_borrowck;
-mod const_debuginfo;
 mod copy_prop;
 mod coroutine;
 mod cost_checker;
@@ -106,6 +107,7 @@ mod check_alignment;
 pub mod simplify;
 mod simplify_branches;
 mod simplify_comparison_integral;
+mod single_use_consts;
 mod sroa;
 mod unreachable_enum_branching;
 mod unreachable_prop;
@@ -211,7 +213,7 @@ fn remap_mir_for_const_eval_select<'tcx>(
 }
 
 fn is_mir_available(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
-    tcx.hir().maybe_body_owned_by(def_id).is_some()
+    tcx.mir_keys(()).contains(&def_id)
 }
 
 /// Finds the full set of `DefId`s within the current crate that have
@@ -221,16 +223,6 @@ fn mir_keys(tcx: TyCtxt<'_>, (): ()) -> FxIndexSet<LocalDefId> {
 
     // All body-owners have MIR associated with them.
     set.extend(tcx.hir().body_owners());
-
-    // Inline consts' bodies are created in
-    // typeck instead of during ast lowering, like all other bodies so far.
-    for def_id in tcx.hir().body_owners() {
-        // Incremental performance optimization: only load typeck results for things that actually have inline consts
-        if tcx.hir_owner_nodes(tcx.hir().body_owned_by(def_id).id().hir_id.owner).has_inline_consts
-        {
-            set.extend(tcx.typeck(def_id).inline_consts.values())
-        }
-    }
 
     // Additionally, tuple struct/variant constructors have MIR, but
     // they don't have a BodyId, so we need to build them separately.
@@ -603,7 +595,7 @@ fn run_optimization_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
             &gvn::GVN,
             &simplify::SimplifyLocals::AfterGVN,
             &dataflow_const_prop::DataflowConstProp,
-            &const_debuginfo::ConstDebugInfo,
+            &single_use_consts::SingleUseConsts,
             &o1(simplify_branches::SimplifyConstCondition::AfterConstProp),
             &jump_threading::JumpThreading,
             &early_otherwise_branch::EarlyOtherwiseBranch,

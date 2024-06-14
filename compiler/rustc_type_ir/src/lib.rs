@@ -1,9 +1,11 @@
+// tidy-alphabetical-start
+#![allow(rustc::usage_of_ty_tykind)]
 #![cfg_attr(
     feature = "nightly",
     feature(associated_type_defaults, min_specialization, never_type, rustc_attrs, negative_impls)
 )]
-#![allow(rustc::usage_of_ty_tykind)]
 #![cfg_attr(feature = "nightly", allow(internal_features))]
+// tidy-alphabetical-end
 
 #[cfg(feature = "nightly")]
 extern crate self as rustc_type_ir;
@@ -21,24 +23,25 @@ use std::hash::Hash;
 #[cfg(not(feature = "nightly"))]
 use std::sync::Arc as Lrc;
 
+// These modules are `pub` since they are not glob-imported.
 #[macro_use]
 pub mod visit;
 #[cfg(feature = "nightly")]
 pub mod codec;
+pub mod error;
 pub mod fold;
 pub mod inherent;
 pub mod ir_print;
 pub mod lift;
+pub mod relate;
 pub mod solve;
-pub mod ty_info;
-pub mod ty_kind;
 
+// These modules are not `pub` since they are glob-imported.
 #[macro_use]
 mod macros;
 mod binder;
 mod canonical;
 mod const_kind;
-mod debug;
 mod flags;
 mod generic_arg;
 mod infcx;
@@ -46,6 +49,8 @@ mod interner;
 mod predicate;
 mod predicate_kind;
 mod region_kind;
+mod ty_info;
+mod ty_kind;
 mod upcast;
 
 pub use binder::*;
@@ -53,7 +58,6 @@ pub use canonical::*;
 #[cfg(feature = "nightly")]
 pub use codec::*;
 pub use const_kind::*;
-pub use debug::{DebugWithInfcx, WithInfcx};
 pub use flags::*;
 pub use generic_arg::*;
 pub use infcx::InferCtxtLike;

@@ -15,11 +15,10 @@ use rustc_index::{Idx, IndexSlice, IndexVec};
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_middle::hir::place::PlaceBase as HirPlaceBase;
 use rustc_middle::middle::region;
-use rustc_middle::mir::interpret::Scalar;
 use rustc_middle::mir::*;
 use rustc_middle::query::TyCtxtAt;
 use rustc_middle::thir::{self, ExprId, LintLevel, LocalVarId, Param, ParamId, PatKind, Thir};
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{self, ScalarInt, Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::{bug, span_bug};
 use rustc_span::symbol::sym;
 use rustc_span::Span;
@@ -568,8 +567,11 @@ fn construct_const<'a, 'tcx>(
             ..
         }) => (*span, ty.span),
         Node::AnonConst(ct) => (ct.span, ct.span),
-        Node::Expr(&hir::Expr { span, kind: hir::ExprKind::ConstBlock(_), .. }) => (span, span),
-        node => span_bug!(tcx.def_span(def), "can't build MIR for {def:?}: {node:#?}"),
+        Node::ConstBlock(_) => {
+            let span = tcx.def_span(def);
+            (span, span)
+        }
+        _ => span_bug!(tcx.def_span(def), "can't build MIR for {:?}", def),
     };
 
     let infcx = tcx.infer_ctxt().build();
@@ -1011,14 +1013,14 @@ fn parse_float_into_constval<'tcx>(
     float_ty: ty::FloatTy,
     neg: bool,
 ) -> Option<ConstValue<'tcx>> {
-    parse_float_into_scalar(num, float_ty, neg).map(ConstValue::Scalar)
+    parse_float_into_scalar(num, float_ty, neg).map(|s| ConstValue::Scalar(s.into()))
 }
 
 pub(crate) fn parse_float_into_scalar(
     num: Symbol,
     float_ty: ty::FloatTy,
     neg: bool,
-) -> Option<Scalar> {
+) -> Option<ScalarInt> {
     let num = num.as_str();
     match float_ty {
         // FIXME(f16_f128): When available, compare to the library parser as with `f32` and `f64`
@@ -1027,7 +1029,7 @@ pub(crate) fn parse_float_into_scalar(
             if neg {
                 f = -f;
             }
-            Some(Scalar::from_f16(f))
+            Some(ScalarInt::from(f))
         }
         ty::FloatTy::F32 => {
             let Ok(rust_f) = num.parse::<f32>() else { return None };
@@ -1050,7 +1052,7 @@ pub(crate) fn parse_float_into_scalar(
                 f = -f;
             }
 
-            Some(Scalar::from_f32(f))
+            Some(ScalarInt::from(f))
         }
         ty::FloatTy::F64 => {
             let Ok(rust_f) = num.parse::<f64>() else { return None };
@@ -1073,7 +1075,7 @@ pub(crate) fn parse_float_into_scalar(
                 f = -f;
             }
 
-            Some(Scalar::from_f64(f))
+            Some(ScalarInt::from(f))
         }
         // FIXME(f16_f128): When available, compare to the library parser as with `f32` and `f64`
         ty::FloatTy::F128 => {
@@ -1081,7 +1083,7 @@ pub(crate) fn parse_float_into_scalar(
             if neg {
                 f = -f;
             }
-            Some(Scalar::from_f128(f))
+            Some(ScalarInt::from(f))
         }
     }
 }

@@ -35,11 +35,11 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
     /// <https://linux.die.net/man/2/socketpair>
     fn socketpair(
         &mut self,
-        domain: &OpTy<'tcx, Provenance>,
-        type_: &OpTy<'tcx, Provenance>,
-        protocol: &OpTy<'tcx, Provenance>,
-        sv: &OpTy<'tcx, Provenance>,
-    ) -> InterpResult<'tcx, Scalar<Provenance>> {
+        domain: &OpTy<'tcx>,
+        type_: &OpTy<'tcx>,
+        protocol: &OpTy<'tcx>,
+        sv: &OpTy<'tcx>,
+    ) -> InterpResult<'tcx, Scalar> {
         let this = self.eval_context_mut();
 
         let _domain = this.read_scalar(domain)?.to_i32()?;
@@ -51,9 +51,9 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
 
         let fds = &mut this.machine.fds;
         let sv0 = fds.insert_fd(FileDescriptor::new(SocketPair));
-        let sv0 = Scalar::try_from_int(sv0, sv.layout.size).unwrap();
+        let sv0 = Scalar::from_int(sv0, sv.layout.size);
         let sv1 = fds.insert_fd(FileDescriptor::new(SocketPair));
-        let sv1 = Scalar::try_from_int(sv1, sv.layout.size).unwrap();
+        let sv1 = Scalar::from_int(sv1, sv.layout.size);
 
         this.write_scalar(sv0, &sv)?;
         this.write_scalar(sv1, &sv.offset(sv.layout.size, sv.layout, this)?)?;

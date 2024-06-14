@@ -149,6 +149,10 @@ impl<'tcx> Const<'tcx> {
 }
 
 impl<'tcx> rustc_type_ir::inherent::Const<TyCtxt<'tcx>> for Const<'tcx> {
+    fn try_to_target_usize(self, interner: TyCtxt<'tcx>) -> Option<u64> {
+        self.try_to_target_usize(interner)
+    }
+
     fn new_infer(tcx: TyCtxt<'tcx>, infer: ty::InferConst) -> Self {
         Const::new_infer(tcx, infer)
     }
@@ -167,6 +171,10 @@ impl<'tcx> rustc_type_ir::inherent::Const<TyCtxt<'tcx>> for Const<'tcx> {
 
     fn new_unevaluated(interner: TyCtxt<'tcx>, uv: ty::UnevaluatedConst<'tcx>) -> Self {
         Const::new_unevaluated(interner, uv)
+    }
+
+    fn new_expr(interner: TyCtxt<'tcx>, expr: ty::Expr<'tcx>) -> Self {
+        Const::new_expr(interner, expr)
     }
 }
 
@@ -368,7 +376,7 @@ impl<'tcx> Const<'tcx> {
         param_env: ParamEnv<'tcx>,
     ) -> Option<(Ty<'tcx>, ScalarInt)> {
         let (ty, scalar) = self.try_eval_scalar(tcx, param_env)?;
-        let val = scalar.try_to_int().ok()?;
+        let val = scalar.try_to_scalar_int().ok()?;
         Some((ty, val))
     }
 
@@ -380,7 +388,7 @@ impl<'tcx> Const<'tcx> {
         let (ty, scalar) = self.try_eval_scalar_int(tcx, param_env)?;
         let size = tcx.layout_of(param_env.with_reveal_all_normalized(tcx).and(ty)).ok()?.size;
         // if `ty` does not depend on generic parameters, use an empty param_env
-        scalar.try_to_bits(size).ok()
+        Some(scalar.to_bits(size))
     }
 
     #[inline]
@@ -397,7 +405,7 @@ impl<'tcx> Const<'tcx> {
         param_env: ParamEnv<'tcx>,
     ) -> Option<u64> {
         let (_, scalar) = self.try_eval_scalar_int(tcx, param_env)?;
-        scalar.try_to_target_usize(tcx).ok()
+        Some(scalar.to_target_usize(tcx))
     }
 
     #[inline]

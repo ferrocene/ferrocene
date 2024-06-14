@@ -32,6 +32,8 @@ use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_errors::{Diag, EmissionGuarantee};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
+use rustc_infer::infer::relate::MatchAgainstFreshVars;
+use rustc_infer::infer::relate::TypeRelation;
 use rustc_infer::infer::BoundRegionConversionTime;
 use rustc_infer::infer::BoundRegionConversionTime::HigherRankedType;
 use rustc_infer::infer::DefineOpaqueTypes;
@@ -40,10 +42,9 @@ use rustc_middle::bug;
 use rustc_middle::dep_graph::dep_kinds;
 use rustc_middle::dep_graph::DepNodeIndex;
 use rustc_middle::mir::interpret::ErrorHandled;
-use rustc_middle::ty::_match::MatchAgainstFreshVars;
 use rustc_middle::ty::abstract_const::NotConstEvaluatable;
+use rustc_middle::ty::error::TypeErrorToStringExt;
 use rustc_middle::ty::print::PrintTraitRefExt as _;
-use rustc_middle::ty::relate::TypeRelation;
 use rustc_middle::ty::GenericArgsRef;
 use rustc_middle::ty::{self, PolyProjectionPredicate, Upcast};
 use rustc_middle::ty::{Ty, TyCtxt, TypeFoldable, TypeVisitableExt};
@@ -2562,7 +2563,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         let InferOk { obligations, .. } = self
             .infcx
             .at(&cause, obligation.param_env)
-            .eq(DefineOpaqueTypes::Yes, placeholder_obligation_trait_ref, impl_trait_ref)
+            .eq(DefineOpaqueTypes::No, placeholder_obligation_trait_ref, impl_trait_ref)
             .map_err(|e| {
                 debug!("match_impl: failed eq_trait_refs due to `{}`", e.to_string(self.tcx()))
             })?;

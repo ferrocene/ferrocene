@@ -9,7 +9,6 @@ use crate::core::builder;
 use crate::core::builder::{Builder, Cargo as CargoCommand, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::channel::GitInfo;
-use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::output;
 use crate::utils::helpers::{add_dylib_path, exe, t};
 use crate::Compiler;
@@ -110,9 +109,8 @@ impl Step for ToolBuild {
             &self.target,
         );
 
-        let mut cargo = Command::from(cargo);
         // we check this below
-        let build_success = builder.run_cmd(BootstrapCommand::from(&mut cargo).allow_failure());
+        let build_success = compile::stream_cargo(builder, cargo, vec![], &mut |_| {});
 
         builder.save_toolstate(
             tool,
@@ -201,7 +199,7 @@ pub fn prepare_tool_cargo(
         cargo.env("CFG_COMMIT_DATE", date);
     }
     if !features.is_empty() {
-        cargo.arg("--features").arg(&features.join(", "));
+        cargo.arg("--features").arg(features.join(", "));
     }
 
     // Enable internal lints for clippy and rustdoc
@@ -528,10 +526,7 @@ impl Step for Rustdoc {
         // If the rustdoc output is piped to e.g. `head -n1` we want the process
         // to be killed, rather than having an error bubble up and cause a
         // panic.
-        // FIXME: Synthetic #[cfg(bootstrap)]. Remove when the bootstrap compiler supports it.
-        if build_compiler.stage > 0 {
-            cargo.rustflag("-Zon-broken-pipe=kill");
-        }
+        cargo.rustflag("-Zon-broken-pipe=kill");
 
         let _guard = builder.msg_tool(
             Kind::Build,

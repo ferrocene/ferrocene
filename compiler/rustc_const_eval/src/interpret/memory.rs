@@ -867,19 +867,26 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             .ok_or_else(|| err_ub!(InvalidFunctionPointer(Pointer::new(alloc_id, offset))).into())
     }
 
-    pub fn get_ptr_vtable(
+    /// Get the dynamic type of the given vtable pointer.
+    /// If `expected_trait` is `Some`, it must be a vtable for the given trait.
+    pub fn get_ptr_vtable_ty(
         &self,
         ptr: Pointer<Option<M::Provenance>>,
-    ) -> InterpResult<'tcx, (Ty<'tcx>, Option<ty::PolyExistentialTraitRef<'tcx>>)> {
+        expected_trait: Option<&'tcx ty::List<ty::PolyExistentialPredicate<'tcx>>>,
+    ) -> InterpResult<'tcx, Ty<'tcx>> {
         trace!("get_ptr_vtable({:?})", ptr);
         let (alloc_id, offset, _tag) = self.ptr_get_alloc_id(ptr)?;
         if offset.bytes() != 0 {
             throw_ub!(InvalidVTablePointer(Pointer::new(alloc_id, offset)))
         }
-        match self.tcx.try_get_global_alloc(alloc_id) {
-            Some(GlobalAlloc::VTable(ty, trait_ref)) => Ok((ty, trait_ref)),
-            _ => throw_ub!(InvalidVTablePointer(Pointer::new(alloc_id, offset))),
+        let Some(GlobalAlloc::VTable(ty, vtable_trait)) = self.tcx.try_get_global_alloc(alloc_id)
+        else {
+            throw_ub!(InvalidVTablePointer(Pointer::new(alloc_id, offset)))
+        };
+        if let Some(expected_trait) = expected_trait {
+            self.check_vtable_for_type(vtable_trait, expected_trait)?;
         }
+        Ok(ty)
     }
 
     pub fn alloc_mark_immutable(&mut self, id: AllocId) -> InterpResult<'tcx> {
@@ -1344,7 +1351,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
     /// Test if this value might be null.
     /// If the machine does not support ptr-to-int casts, this is conservative.
     pub fn scalar_may_be_null(&self, scalar: Scalar<M::Provenance>) -> InterpResult<'tcx, bool> {
-        Ok(match scalar.try_to_int() {
+        Ok(match scalar.try_to_scalar_int() {
             Ok(int) => int.is_null(),
             Err(_) => {
                 // Can only happen during CTFE.

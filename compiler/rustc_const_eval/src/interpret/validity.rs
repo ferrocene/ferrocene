@@ -343,20 +343,16 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
         match tail.kind() {
             ty::Dynamic(data, _, ty::Dyn) => {
                 let vtable = meta.unwrap_meta().to_pointer(self.ecx)?;
-                // Make sure it is a genuine vtable pointer.
-                let (_dyn_ty, dyn_trait) = try_validation!(
-                    self.ecx.get_ptr_vtable(vtable),
+                // Make sure it is a genuine vtable pointer for the right trait.
+                try_validation!(
+                    self.ecx.get_ptr_vtable_ty(vtable, Some(data)),
                     self.path,
                     Ub(DanglingIntPointer(..) | InvalidVTablePointer(..)) =>
-                        InvalidVTablePtr { value: format!("{vtable}") }
+                        InvalidVTablePtr { value: format!("{vtable}") },
+                    Ub(InvalidVTableTrait { expected_trait, vtable_trait }) => {
+                        InvalidMetaWrongTrait { expected_trait, vtable_trait: *vtable_trait }
+                    },
                 );
-                // Make sure it is for the right trait.
-                if dyn_trait != data.principal() {
-                    throw_validation_failure!(
-                        self.path,
-                        InvalidMetaWrongTrait { expected_trait: data, vtable_trait: dyn_trait }
-                    );
-                }
             }
             ty::Slice(..) | ty::Str => {
                 let _len = meta.unwrap_meta().to_target_usize(self.ecx)?;
@@ -653,8 +649,8 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
         let WrappingRange { start, end } = valid_range;
         let max_value = size.unsigned_int_max();
         assert!(end <= max_value);
-        let bits = match scalar.try_to_int() {
-            Ok(int) => int.assert_bits(size),
+        let bits = match scalar.try_to_scalar_int() {
+            Ok(int) => int.to_bits(size),
             Err(_) => {
                 // So this is a pointer then, and casting to an int failed.
                 // Can only happen during CTFE.

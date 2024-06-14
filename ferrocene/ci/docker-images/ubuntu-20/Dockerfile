@@ -152,11 +152,6 @@ RUN <<-EOF
     rm -rf /tmp/awscli /tmp/awscli.zip
 EOF
 
-# Install AWS CLI's Session manager plugin according to the official instructions
-# https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-debian-and-ubuntu.html
-RUN curl -Lo /tmp/aws-session-manager-plugin.deb "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
-    && dpkg -i /tmp/aws-session-manager-plugin.deb
-
 # Install cmake from source code, as the version in the Ubuntu 20.04 archives
 # is too old to build the latest LLVM.
 RUN <<-EOF

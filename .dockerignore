@@ -1,0 +1,5 @@
+# If you know how to make the dockerfile work without bulk ignoring everything,
+# please update it to do so!
+**
+!requirements.txt
+!ferrocene/ci/docker-images

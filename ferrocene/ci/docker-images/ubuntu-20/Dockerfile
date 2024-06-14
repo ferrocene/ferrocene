@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# Build with `docker build -t ubuntu-20 -f ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
+
 # This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
 # container is below (FROM ubuntu:20.04). This is needed because the version of
 # QEMU in the Ubuntu 20.04 archives is too old, so we install QEMU on Ubuntu
@@ -66,7 +68,7 @@ RUN apt-get update \
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
 # This was removed in 24.04 and is a copy of the 23.04 file.
-COPY ./binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.12.x has been chosen as it's the same minor
@@ -119,7 +121,7 @@ RUN curl -Lo /tmp/cmake.tar.gz https://github.com/Kitware/CMake/releases/downloa
 
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
-COPY sudoers /etc/sudoers
+COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
 
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8

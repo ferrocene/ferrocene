@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# Build with `docker build -t ubuntu-24 -f ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
+
 FROM --platform=linux/amd64 ubuntu:24.04
 
 RUN apt-get update \

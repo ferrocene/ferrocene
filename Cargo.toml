@@ -79,7 +79,6 @@ dladdr = []
 kernel32 = []
 libunwind = []
 unix-backtrace = []
-verify-windows-sys = []
 
 [[example]]
 name = "backtrace"

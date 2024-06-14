@@ -11,9 +11,8 @@
 //! Note though that since we're loading all this support dynamically we can't
 //! actually use the raw definitions in `windows_sys`, but rather we need to define
 //! the function pointer types ourselves and use that. We don't really want to
-//! be in the business of duplicating auto-generated bindings, so we have a Cargo feature
-//! `verify-windows-sys` which asserts that all bindings match those in `windows_sys.rs` and
-//! this feature is enabled on CI.
+//! be in the business of duplicating auto-generated bindings, so we assert that all bindings match
+//! those in `windows_sys.rs`.
 //!
 //! Finally, you'll note here that the dll for `dbghelp.dll` is never unloaded,
 //! and that's currently intentional. The thinking is that we can globally cache
@@ -31,8 +30,8 @@ use core::mem;
 use core::ptr;
 use core::slice;
 
-// This is only used when we're double-checking function signatures against windows-sys.
-#[cfg(feature = "verify-windows-sys")]
+// This is used when we're double-checking function signatures against windows-sys.
+#[inline(always)]
 fn assert_equal_types<T>(a: T, _b: T) -> T {
     a
 }
@@ -92,8 +91,7 @@ macro_rules! dbghelp {
                         self.$name = self.symbol(name.as_bytes())?;
                     }
                     let ret = mem::transmute::<usize, $name>(self.$name);
-                    #[cfg(feature = "verify-windows-sys")]
-                    assert_equal_types(ret, $name);
+                    assert_equal_types(ret, super::windows_sys::$name);
                     Some(ret)
                 }
             })*

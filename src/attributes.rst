@@ -1240,7 +1240,7 @@ Attribute ``no_main``
 
 :dp:`fls_6qig3s3qpj0i`
 :t:`Attribute` :dc:`no_main` indicates that the symbols of the
-:t:`main function` will not be present in a binary.
+:t:`program entry point` will not be present in a binary.
 
 .. rubric:: Examples
 

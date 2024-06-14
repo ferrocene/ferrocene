@@ -114,21 +114,30 @@ A :t:`crate` is a unit of compilation and linking that contains a tree of
 nested :t:`[module]s`.
 
 :dp:`fls_9ub6ks8qrang`
-A :t:`binary crate` is a :t:`crate` that contains a :t:`main function`. A tool
-can compile a :t:`binary crate` to an executable.
+A :t:`binary crate` is a :t:`crate` that has a :t:`function` in scope of its
+:t:`crate root module` under the :t:`name` ``main`` with a :t:`main function
+signature`. A tool can compile a :t:`binary crate` to an executable.
+
+:dp:`fls_jQqXxPyND1ds`
+The :t:`function` in scope of a :t:`binary crate`'s :t:`crate root module` under
+the :t:`name` ``main`` with a :t:`main function signature` is the :t:`binary
+crate`'s :t:`program entry point`.
 
 :dp:`fls_d9nn4yuiw1ja`
-A :t:`library crate` is either a :t:`crate` without a :t:`main function` or a
-:t:`crate` subject to :t:`attribute` :c:`no_main`. A tool is free to compile a
-:t:`library crate` to a shared library.
+A :t:`library crate` is either a :t:`crate` that does not have a :t:`function`
+in scope of its :t:`crate root module` under the :t:`name` ``main`` with a
+:t:`main function signature` or a :t:`crate` subject to :t:`attribute`
+:c:`no_main`. A tool is free to compile a :t:`library crate` to a shared
+library.
 
 :dp:`fls_Mf62VqAhoZ3c`
 A :t:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
 A tool is free to compile a :t:`proc-macro crate` to a shared library.
 
-:dp:`fls_cXLyCjs9T3Mj`
-A :t:`proc-macro crate` shall not declare :t:`[item]s` with
-:t:`public visibility` unless the :t:`item` is a :t:`procedural macro`.
+:dp:`fls_RJJmN4tP7j4m`
+A :t:`proc-macro crate` shall not declare :t:`[item]s` in its :t:`crate root
+module` with  :t:`public visibility` unless the :t:`item` is a :t:`procedural
+macro`.
 
 :dp:`fls_h93C3wfbAoz1`
 Only a :t:`proc-macro crate` shall declare :t:`[procedural macro]s`.
@@ -224,3 +233,14 @@ for all :t:`[attribute]s` up to the invoked :t:`attribute` :c:`cfg`.
 An :t:`attribute` :c:`cfg_attr` where the related :t:`configuration predicate`
 evaluates to ``false`` is not considered part of a Rust program.
 
+
+.. _fls_8JB3SJqamdpU:
+
+Program Entry Point
+-------------------
+
+.. rubric:: Legality Rules
+
+:dp:`fls_dp64b08em9BJ`
+A :t:`program entry point` is a :t:`function` that is invoked at the start of
+a Rust program.

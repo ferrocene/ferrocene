@@ -655,7 +655,9 @@ binary crate
 ^^^^^^^^^^^^
 
 :dp:`fls_8gfe7hajxkd7`
-A :dt:`binary crate` is a :t:`crate` that contains a :t:`main function`.
+A :dt:`binary crate` is a :t:`crate` that has a :t:`function` in scope of its
+:t:`crate root module` under the :t:`name` ``main`` with a :t:`main function
+signature`.
 
 .. _fls_or4o65fyt28y:
 
@@ -3721,8 +3723,10 @@ library crate
 ^^^^^^^^^^^^^
 
 :dp:`fls_3m8lg4mdc2x0`
-A :dt:`library crate` is either a :t:`crate` without a :t:`main function` or a
-:t:`crate` subject to :t:`attribute` :c:`no_main`.
+A :dt:`library crate` is either a :t:`crate` that does not have a :t:`function`
+in scope of its :t:`crate root module` under the :t:`name` ``main`` with a
+:t:`main function signature` or a :t:`crate` subject to :t:`attribute`
+:c:`no_main`.
 
 .. _fls_vdhaa61g6kah:
 
@@ -4058,14 +4062,15 @@ macro transcription
 :dt:`Macro transcription` is the process of producing the expansion of a
 :t:`declarative macro`.
 
-.. _fls_dz192n9muwpg:
+.. _fls_MJ1YWiOpxAa8:
 
-main function
-^^^^^^^^^^^^^
+main function signature
+^^^^^^^^^^^^^^^^^^^^^^^
 
-:dp:`fls_au3ovrkenr59`
-A :dt:`main function` is a :t:`function` that acts as an entry point into
-a program.
+:dp:`fls_QijObGZEIykU`
+
+A :dt:`main function signature` is a :t:`function signature` subject to specific
+restrictions.
 
 .. _fls_fizf1byuspv2:
 
@@ -5065,6 +5070,15 @@ procedural macro
 :dp:`fls_u4utpx4zgund`
 A :dt:`procedural macro` is a :t:`macro` that encapsulates syntactic
 transformations in a :t:`function`.
+
+.. _fls_SIFecOZqloyx:
+
+program entry point
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_9m37hN9zgEQf`
+A :dt:`program entry point` is a :t:`function` that is invoked at the start of
+a Rust program.
 
 .. _fls_v2rjlovqsdyr:
 

@@ -40,9 +40,10 @@ RUN apt-get update \
         # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
         binfmt-support \
         # Needed for aarch64-unknown-linux-gnu cross-compilation
+        libc6-dev-arm64-cross \
+        gcc-aarch64-linux-gnu \
         g++-aarch64-linux-gnu \
         binutils-aarch64-linux-gnu \
-        libc6-dev-arm64-cross \
         # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
         gcc-arm-none-eabi \
         # Needed for the wasm32-unknown-unknown target

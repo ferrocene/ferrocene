@@ -44,6 +44,7 @@ based on software engineering best practices.
    :caption: Partnerships
 
    partners/oxidos
+   partners/qnx
 
 .. appendices::
    :caption: Appendices

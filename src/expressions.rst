@@ -20,6 +20,7 @@ Expressions
        OuterAttributeOrDoc* (
            AsyncBlockExpression
          | BlockExpression
+         | ConstBlockExpression
          | IfExpression
          | IfLetExpression
          | LoopExpression
@@ -315,6 +316,9 @@ A :t:`constant context` is a :t:`construct` that requires a
 
 * :dp:`fls_ib8p7dfwddx2`
   The :t:`static initializer` of a :t:`static`.
+
+* :dp:`fls_ucFupTeCyylb`
+  The :t:`block expression` of a :t:`const block expression`.
 
 :dp:`fls_ox6sgl9n43g2`
 It is a static error to create a :t:`mutable reference` in a
@@ -781,6 +785,48 @@ the :t:`[capture target]s` of the :t:`async block expression`.
 .. code-block:: rust
 
    async {
+       42
+   }
+
+.. _fls_G59PiNQkVUnQ:
+
+Const Blocks
+~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   ConstBlockExpression ::=
+       $$const$$ BlockExpression
+
+.. rubric:: Legality Rules
+
+:dp:`fls_0lcunL4bo8ka`
+A :t:`const block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``const`` and encapsulates behavior which is evaluated
+statically.
+
+:dp:`fls_veEGzEbpT4ny`
+An :t:`const block expression` denotes a new :t:`control flow boundary`.
+
+:dp:`fls_PiUS1hF3dv9U`
+The :t:`block expression` of a :t:`const block expression` shall be a
+:t:`constant expression`.
+
+:dp:`fls_wuwb0SnpP6Zu`
+The :t:`type` of a :t:`const block expression` is the :t:`type` of the
+containing :t:`block expression`.
+
+:dp:`fls_2i7TD7VoQk4B`
+The :t:`value` of a :t:`const block expression` is the :t:`value` of the
+contained :t:`block expression`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   const {
        42
    }
 

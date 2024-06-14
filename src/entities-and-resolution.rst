@@ -496,6 +496,10 @@ related :t:`let statement` appears.
 The :t:`binding` of a :t:`match arm` is :t:`in scope` within its related
 :t:`[expression]s` and related :t:`match arm guard`.
 
+:dp:`fls_eBacCVlDaKYK`
+A :t:`binding` declared outside of a :t:`const block expression` is not :t:`in
+scope` within such a :t:`const block expression`.
+
 .. _fls_ftphlagzd2te:
 
 Generic Parameter Scope

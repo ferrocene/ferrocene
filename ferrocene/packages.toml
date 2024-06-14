@@ -95,7 +95,6 @@ targets = [
 name = "rust-std"
 subset = "default"
 
-
 [groups.oxidos]
 targets = ["wasm32-unknown-unknown"]
 

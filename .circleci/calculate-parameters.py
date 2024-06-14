@@ -124,7 +124,7 @@ def calculate_llvm_rebuild(target: str):
     """
     url: urllib.parse.ParseResult = urllib.parse.urlparse(
         subprocess.run(
-            ["ferrocene/ci/scripts/llvm-cache.sh", "s3-url"],
+            ["ferrocene/ci/scripts/llvm-cache.py", "s3-url"],
             env={**os.environ, "FERROCENE_HOST": target},
             stdout=subprocess.PIPE,
         ).stdout.strip()

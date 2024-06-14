@@ -5289,7 +5289,7 @@ A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does
 not recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
-See ``RawByteStringLiteral.``
+See :s:`RawByteStringLiteral`.
 
 .. _fls_yGGvg3e0nPOh:
 
@@ -5301,7 +5301,7 @@ A :dt:`raw c string literal` is a :t:`simple c string literal` that does not
 recognize :t:`[escaped character]s`.
 
 :dp:`fls_WpFJyq6q4k6E`
-See ``RawCStringLiteral.``
+See :s:`RawCStringLiteral`.
 
 .. _fls_uv4dyt4gi32x:
 

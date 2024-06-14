@@ -496,6 +496,7 @@ pub type EXCEPTION_ROUTINE = Option<
         dispatchercontext: *const core::ffi::c_void,
     ) -> EXCEPTION_DISPOSITION,
 >;
+pub const FALSE: BOOL = 0i32;
 pub type FARPROC = Option<unsafe extern "system" fn() -> isize>;
 pub type FILE_MAP = u32;
 pub const FILE_MAP_READ: FILE_MAP = 4u32;

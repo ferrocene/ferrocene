@@ -2,6 +2,7 @@
 --config std flatten
 --filter
 Windows.Win32.Foundation.CloseHandle
+Windows.Win32.Foundation.FALSE
 Windows.Win32.Foundation.HINSTANCE
 Windows.Win32.Foundation.INVALID_HANDLE_VALUE
 Windows.Win32.Foundation.TRUE

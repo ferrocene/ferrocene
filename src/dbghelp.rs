@@ -291,7 +291,7 @@ pub fn init() -> Result<Init, ()> {
         let mut lock = LOCK.load(SeqCst);
         if lock.is_null() {
             let name = mutex_name();
-            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr());
+            lock = CreateMutexA(ptr::null_mut(), FALSE, name.as_ptr());
             if lock.is_null() {
                 return Err(());
             }
@@ -302,7 +302,7 @@ pub fn init() -> Result<Init, ()> {
             }
         }
         debug_assert!(!lock.is_null());
-        let r = WaitForSingleObjectEx(lock, INFINITE, 0);
+        let r = WaitForSingleObjectEx(lock, INFINITE, FALSE);
         debug_assert_eq!(r, 0);
         let ret = Init { lock };
 

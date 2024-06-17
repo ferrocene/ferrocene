@@ -483,6 +483,7 @@ jobs:
       - ferrocene-git-shallow-clone:
           depth: 1
       - aws-oidc-auth
+      - ferrocene-setup-windows
       - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool

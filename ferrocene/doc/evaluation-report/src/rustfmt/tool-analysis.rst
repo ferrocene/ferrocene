@@ -12,18 +12,20 @@ Potential Errors
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25
 
    * - Error identifier
      - Use case
      - Description
      - Risk
      - Mitigation
+     - Detectable
    * - .. id:: RUSTFMT_ERR_01
      - :id:`RUSTFMT_UC1_FMT`
      - rustfmt emits code with a different semantic meaning than the input
      - Change in program semantics
-     - :id:`RUSTFMT_AVD_CHECK_DIFF_001`, :id:`RUSTFMT_AVD_TESTS_002`
+     - | :id:`RUSTFMT_AVD_CHECK_DIFF_001`, 
+       | :id:`RUSTFMT_AVD_TESTS_002`
+     - YES
 
 .. end of table
 
@@ -38,14 +40,16 @@ Detection Measures and Usage Restriction
    * - Measure identifier
      - Description
    * - .. id:: RUSTFMT_AVD_CHECK_DIFF_001
-     - After running rustfmt, the user must review the changes in the source code to ensure no semantics changed.
+     - After running rustfmt, the user must review the changes in the source
+       code to ensure no semantics changed.
    * - .. id:: RUSTFMT_AVD_TESTS_002
-     - After running rustfmt, sufficient tests need to pass to ensure the correctness of the program.
+     - After running rustfmt, sufficient tests need to pass to ensure the
+       correctness of the program.
 
 .. end of table
 
-Tool Evaluation Results
------------------------
+ISO 26262 Tool Classification
+-----------------------------
 
 During this analysis, we highlighted some of the potential errors concerning
 rustfmt that impacts the safety-related software code. Hence, the tool
@@ -62,5 +66,10 @@ qualification methods.
 IEC 61508 Tool Classification
 -----------------------------
 
-rustfmt provides a tool to format Rust code to conform with automotive
-[|iso_ref|] TCL 1/ASIL D level and industrial [|iec_ref|] class T3.
+rustfmt is a industrial [|iec_ref|] class T3 tool, because it generates outputs
+which can directly contribute to the executable code of the safety-related
+system.
+
+Nevertheless, we need no qualification methods, because the detection measures
+and usage restrictions listed above give us high confidence to detect all
+potential errors. 

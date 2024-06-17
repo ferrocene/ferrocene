@@ -96,7 +96,7 @@ The **tidy test suite** checks for consistency in the compiler codebase. It
 includes a variety of miscellaneous checks.
 
 Self-Test Test Suite
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 .. id:: RUSTC_TS8_SELF
 

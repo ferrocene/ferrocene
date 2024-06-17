@@ -9,32 +9,89 @@ One of the partner projects of Ferrocene is `QNX
 This page contains the information relevant to Ferrous Systems employees
 working on Ferrocene.
 
-Setting up a development toolchain
-----------------------------------
+.. note::
+    
+    QNX only supports x86-64 Linux (glibc) and x86-64 Windows.
+    
+    QNX does not support Apple Silicon macOS. QNX is deprecating support
+    for x86-64 macOS.
+
+
+Windows Setup
+-------------
+
+First, ensure you have a `myQNX
+<https://www.qnx.com/account/index.html>`_ account and that a
+**QNX Software Development Platform Subscription - Developer License**
+is deployed to it.
+
+Then, download the `QNX Software Center
+<https://www.qnx.com/download/group.html?programid=29178>`_ for Windows and
+run it.
+
+An InstallShield installer will run as administrator. Choose a location
+to install QNX, we use ``D:\qnx`` for the rest of this guide.
 
 .. note::
-    These instructions are are intended to be run on a x86_64 Linux host only.
-    `WSL2 <https://learn.microsoft.com/en-us/windows/wsl/install>`_ or `Lima
-    <https://github.com/lima-vm/lima>`_ work sufficiently if needed.
+    
+    If you are uncomfortable with the Windows GUI, you may instead
+    follow the Linux instructions (with minor modifications) below using the
+    ``D:\qnx\QNX Software Center\qnxsoftwarecenter_clt.bat`` in place of
+    ``qnxsoftwarecenter_clt.bat`` in Powershell, Nushell, or cmd.exe.
 
-    Afterward, you may move copy your ``qnx`` folder to the host Windows or
-    Mac installation.
+After, you can launch the "QNX Software Center" application from the Start
+Menu.
 
-    QNX Software Center is also available for Windows, but setup may have
-    different steps which we have not tested. QNX Software Center is not
-    available for Mac.
+Log in, if prompted.
+
+Select "Add Installation...".
+
+Expand the "QNX® Software Development Platform 7.1" section.
+
+Select "QNX® Software Development Platform 7.1":
+
+.. figure:: ../figures/qnx.png
+
+    QNX SDP Installation
+
+The software will now prompt you to select a license key, select the previously
+deployed **QNX Software Development Platform Subscription - Developer
+License**.
+
+Choose an installation folder, we use ``D:\qnx\qnx710`` for the rest of this
+guide.
+
+In the "Install" screen, "QNX® Software Development Platform 7.1" should be
+selected. Hit "Next >", then hit "Finish".
+
+QNX Software Center will now download the toolchain. A summary will be
+produced after, dismiss it when you are satisfied.
+
+Your installation will be located in the installation folder you chose.
+For example, ``D:\qnx\qnx710``.
 
 
+Linux Setup
+-----------
 
-Download the `QNX Software Center (for Linux Hosts)
-<https://www.qnx.com/download/group.html?programid=29178>`_ and place it in
-``qnx/qnx-software-center.run``.
+
+Download the `QNX Software Center
+<https://www.qnx.com/download/group.html?programid=29178>`_ for Linux. In the
+below example, the downloaded ``.run`` file has been saved as
+``$HOME/qnx-software-center.run``
 
 .. code-block::
 
+    cd $HOME
     chmod +x qnx/qnx-software-center.run
     qnx/qnx-software-center.run --tar xvf -C qnx
 
+
+.. note::
+    
+    If you are uncomfortable with the Linux command line, you may instead
+    follow the Windows instructions above, starting from "Log in, if
+    prompted" now.
 
 Then, install QNX 7.1.0:
 
@@ -44,6 +101,7 @@ Then, install QNX 7.1.0:
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"
 
+    cd $HOME/
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -activateLicenseKey $LICENSE_KEY
@@ -56,47 +114,18 @@ Then, install QNX 7.1.0:
         -destination qnx/qnx710 \
         -cleanInstall
 
-To optionally add the Mac host toolchain:
+Finally, you can source your QNX toolchain in ``bash``:
 
 .. code-block::
 
-    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installPackage com.qnx.qnx710.host.macosx.x86_64 \
-        -destination qnx/qnx710
-
-To optionally add the Windows host toolchain:
-
-.. code-block::
-
-    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installPackage com.qnx.qnx710.host.win.x86_64 \
-        -destination qnx/qnx710
-
-The Linux host toolchain should already be installed, but if you are using a
-different host platform to install, optionally add the Linx host toolchain: 
-
-.. code-block::
-
-    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installPackage com.qnx.qnx710.host.linux.x86_64 \
-        -destination qnx/qnx710
-
-
-To activate your QNX toolchain:
-
-.. code-block::
-
+    cd $HOME/
     source qnx/qnx710/qnxsdp-env.sh
+    qcc --help
 
-
-If required, you can then archive the installation and your licenses, then move it to the host:
-
-    tar -cv -I 'zstd -T0' -f qnx/qnx710.tar.xz -C qnx/ qnx710
-
-
+.. note::
+    
+    You need to source this in any shell you wish to use QNX in. You may wish
+    to add ``source $HOME/qnx/qnx710/qnxsdp-env.sh`` to your ``~/.bashrc``
 
 Creating a CI/CD deployment
 ---------------------------
@@ -163,5 +192,15 @@ Finally, create an archive of the deployment and upload it to the S3 URL which t
 
 .. code-block::
 
+    cd $HOME
     tar -cv -I 'zstd -T0' -f qnx/qnx710-deployment.tar.xz -C qnx/qnx710-deployment/ qnx710
     aws s3 cp qnx/qnx710-deployment.tar.xz s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz
+
+On CI/CD hosts:
+
+.. code-block::
+
+    cd $HOME
+    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -x --zstd -f-
+    source qnx/qnx710/qnxsdp-env.sh
+    qcc --help

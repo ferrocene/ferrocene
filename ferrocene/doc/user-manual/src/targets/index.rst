@@ -106,13 +106,13 @@ should not be used in production.
      - ``aarch64-unknown-nto-qnx710``
      - Cross-compilation
      - Full
-     - \-
+     - Only available on targets supported by QNX (:ref:`x86_64-unknown-linux-gnu` and :ref:`x86_64-pc-windows-msvc`)
 
    * - :target:`x86_64-pc-nto-qnx710`
      - ``x86_64-pc-nto-qnx710``
      - Cross-compilation
      - Full
-     - \-
+     - Only available on targets supported by QNX (:ref:`x86_64-unknown-linux-gnu` and :ref:`x86_64-pc-windows-msvc`)
 
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``

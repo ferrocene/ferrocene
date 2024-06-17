@@ -30,6 +30,8 @@ This guide contains the following chapters: 
 * *Compilation targets* describes qualified (supported) and unqualified (experimental)
   Ferrocene compilation targets.
 
+* *rustfmt* describes how to install and use ``rustfmt``.
+
 * *References* provides further support and information about other
   documentation.
 

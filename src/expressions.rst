@@ -3870,7 +3870,7 @@ While Loops
        $$while$$ IterationExpression LoopBody
 
    IterationExpression ::=
-       Expression
+       SubjectExpression
 
 .. rubric:: Legality Rules
 

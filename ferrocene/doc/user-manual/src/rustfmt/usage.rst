@@ -4,7 +4,7 @@
 Using ``rustfmt``
 =================
 
-``rustfmt`` formats Rust code or checks if Rust code is well formatted.
+``rustfmt`` formats Rust code or checks if Rust code is well-formatted.
 
 ``rustfmt <file>...``
 ---------------------
@@ -14,7 +14,7 @@ To format one or more files, just pass the paths to ``rusfmt``. This will format
 ``rustfmt --check <file>...``
 -----------------------------
 
-If the ``--check`` option is used, ``rusfmt`` checks if the files are well formatted. It reports what it would format, but will not modify any files. For example:
+If the ``--check`` option is used, ``rusfmt`` checks if the files are well-formatted. It reports what it would format, but will not modify any files. For example:
 
 .. code-block::
 
@@ -39,4 +39,4 @@ When running with ``--check``, ``rustfmt`` will exit with status code ``0`` if `
 
    Use of ``cargo fmt`` is not qualified, and thus can't be used in a safety critical environment: in that case, you must invoke ``rustfmt`` directly.
 
-``rustfmt`` can be used "through" ``cargo`` to improve the user experience. ``cargo fmt`` will format all the files in a cargo project. ``cargo fmt --check`` will check that all files in a cargo project are well formatted.
+``rustfmt`` can be used "through" ``cargo`` to improve the user experience. ``cargo fmt`` will format all the files in a cargo project. ``cargo fmt --check`` will check that all files in a cargo project are well-formatted.

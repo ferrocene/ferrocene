@@ -1,5 +1,4 @@
 run-make/allocator-shim-circular-deps/Makefile
-run-make/allow-non-lint-warnings-cmdline/Makefile
 run-make/archive-duplicate-names/Makefile
 run-make/atomic-lock-free/Makefile
 run-make/branch-protection-check-IBT/Makefile
@@ -18,7 +17,6 @@ run-make/compiler-lookup-paths-2/Makefile
 run-make/compiler-lookup-paths/Makefile
 run-make/compiler-rt-works-on-mingw/Makefile
 run-make/compressed-debuginfo/Makefile
-run-make/const_fn_mir/Makefile
 run-make/crate-hash-rustc-version/Makefile
 run-make/crate-name-priority/Makefile
 run-make/cross-lang-lto-clang/Makefile
@@ -254,9 +252,6 @@ run-make/std-core-cycle/Makefile
 run-make/symbol-mangling-hashed/Makefile
 run-make/symbol-visibility/Makefile
 run-make/symbols-include-type-name/Makefile
-run-make/symlinked-extern/Makefile
-run-make/symlinked-libraries/Makefile
-run-make/symlinked-rlib/Makefile
 run-make/sysroot-crates-are-unstable/Makefile
 run-make/target-cpu-native/Makefile
 run-make/target-specs/Makefile

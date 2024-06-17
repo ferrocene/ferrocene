@@ -1049,7 +1049,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "clippy"
-version = "0.1.80"
+version = "0.1.81"
 dependencies = [
  "anstream",
  "clippy_config",
@@ -1076,7 +1076,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_config"
-version = "0.1.80"
+version = "0.1.81"
 dependencies = [
  "rustc-semver",
  "serde",
@@ -1099,7 +1099,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_lints"
-version = "0.1.80"
+version = "0.1.81"
 dependencies = [
  "arrayvec",
  "cargo_metadata 0.18.1",
@@ -1124,7 +1124,7 @@ dependencies = [
 
 [[package]]
 name = "clippy_utils"
-version = "0.1.80"
+version = "0.1.81"
 dependencies = [
  "arrayvec",
  "clippy_config",
@@ -1500,7 +1500,7 @@ dependencies = [
 
 [[package]]
 name = "declare_clippy_lint"
-version = "0.1.80"
+version = "0.1.81"
 dependencies = [
  "itertools 0.12.1",
  "quote",
@@ -3166,9 +3166,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-i18n-helpers"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1f71f5961d6f3376e1ff3e5989c2e3ecccc3e8a00f3a3acde446847f84852e4"
+checksum = "8c8f972ab672d366c3dad77ea5aa7bae68db2d25fbeb889849f97469d7b658e4"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3701,7 +3701,7 @@ checksum = "1e401f977ab385c9e4e3ab30627d6f26d00e2c73eef317493c4ec6d468726cf8"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall 0.5.1",
+ "redox_syscall 0.5.2",
  "smallvec",
  "windows-targets 0.52.5",
 ]
@@ -4228,9 +4228,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "469052894dcb553421e483e4209ee581a45100d31b4018de03e5a7ad86374a7e"
+checksum = "c82cf8cff14456045f55ec4241383baeff27af886adb72ffb2162f99911de0fd"
 dependencies = [
  "bitflags 2.5.0",
 ]
@@ -4376,7 +4376,7 @@ dependencies = [
 
 [[package]]
 name = "run_make_support"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "gimli 0.28.1",
  "object 0.34.0",
@@ -5129,7 +5129,6 @@ dependencies = [
  "rustc_middle",
  "rustc_span",
  "rustc_target",
- "rustc_type_ir",
  "smallvec",
  "tracing",
 ]

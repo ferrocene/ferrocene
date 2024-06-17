@@ -96,36 +96,36 @@ ISO 26262 requirements
      - :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
 
    * - 11.4.5.2
-     - See sub items below
-     - See sub items below
+     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
+     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 11.4.5.2.a
-     - See sub items below
-     - See sub items below
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.a.1
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.a.2
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.b
-     - See sub items below
-     - See sub items below
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.b.1
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.b.2
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - See super section above
+     - See super section above
 
    * - 11.4.5.2.b.3
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - See super section above
+     - See super section above
 
    * - 11.4.5.3
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`

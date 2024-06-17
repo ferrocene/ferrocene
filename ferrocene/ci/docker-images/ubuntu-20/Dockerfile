@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# Build with `docker build -t ubuntu-20 -f ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
+# From the root of this repository, build with
+# `docker build -t ubuntu-20 -f ferrocene/ci/docker-images/ubuntu-20/Dockerfile .`
 
 # This Ubuntu 24.04 container is only used to grab a more recent QEMU, the real
 # container is below (FROM ubuntu:20.04). This is needed because the version of

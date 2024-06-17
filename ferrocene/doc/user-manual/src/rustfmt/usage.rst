@@ -6,6 +6,9 @@ Using ``rustfmt``
 
 ``rustfmt`` formats Rust code or checks if Rust code is well-formatted.
 
+Code is "well formatted" if it complies with the
+:ref:`formatting rules<configuration>`.
+
 ``rustfmt <file>...``
 ---------------------
 
@@ -39,6 +42,17 @@ When running with ``--check``, ``rustfmt`` will exit with status code ``0`` if
 with ``1`` if there was some error during formatting (for example a parsing or
 internal error) and ``0`` if formatting completed without error (whether or not
 changes were made).
+
+.. _configuration:
+
+Configuration
+-------------
+
+By default ``rustfmt`` formats code according to the
+`Rust Style Guide <../../../doc/style-guide/index.html>`_. The formatting can
+be customized with :doc:`the various config options</rustfmt/config>`. They can
+be set in a config file (``rustfmt.toml`` or ``.rustfmt.toml``) or passed via
+the command-line (``--config``).
 
 ``cargo fmt``
 -------------

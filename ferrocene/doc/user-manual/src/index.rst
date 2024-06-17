@@ -42,6 +42,7 @@ Ferrocene User Manual
 
    rustfmt/install
    rustfmt/usage
+   rustfmt/config
 
 .. appendices::
    :numbered:

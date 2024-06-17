@@ -7,23 +7,17 @@ Ferrocene User Manual
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: About this manual:
+   :caption: About this manual
 
    overview
 
 .. toctree::
    :numbered:
    :maxdepth: 2
-   :caption: About rustc:
+   :caption: rustc
 
    rustc/system-requirements
    rustc/install
-
-.. toctree::
-   :numbered:
-   :maxdepth: 2
-   :caption: Using rustc:
-
    rustc/file-formats
    rustc/library
    rustc/executable
@@ -32,8 +26,8 @@ Ferrocene User Manual
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
-   :caption: Compilation targets:
+   :maxdepth: 1
+   :caption: Compilation targets
 
    targets/index
    targets/aarch64-unknown-none
@@ -52,7 +46,7 @@ Ferrocene User Manual
 .. appendices::
    :numbered:
    :maxdepth: 2
-   :caption: Reference:
+   :caption: Reference
 
    rustc/cli
    rustfmt/cli

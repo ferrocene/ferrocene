@@ -54,3 +54,7 @@ fn main() {
         rustc().input("dummy.rs").print("link-args").arg("-Clink-dead-code").run().stdout_utf8();
     assert!(!regex.is_match(&stdout));
 }
+
+// ferrocene-annotations: um_rustc_C_extra_filename
+// ferrocene-annotations: um_rustc_C_link_dead_code
+// ferrocene-annotations: um_rustc_C_codegen_units

@@ -18,3 +18,5 @@ fn main() {
     out.assert_stdout_contains("lfoo");
     out.assert_stdout_contains("lbar");
 }
+
+// ferrocene-annotations: um_rustc_C_link_arg

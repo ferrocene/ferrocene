@@ -4,7 +4,7 @@
 .. _aarch64-unknown-nto-qnx710:
 
 :target:`aarch64-unknown-nto-qnx710`
-==============================
+====================================
 
 The ``aarch64-unknown-nto-qnx710`` Ferrocene target provides support for QNX on
 ARMv8-A processors operating in Aarch64 mode.
@@ -20,9 +20,12 @@ ARMv8-A processors operating in Aarch64 mode.
 Prerequisites
 -------------
 
-This target uses `QNX Software Development Platform 7.1.0 (QNX SDP 7.1.0)
-<https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform/sdp-7-1>`_.
+This target requires `QNX Software Development Platform 7.1.0 (QNX SDP 7.1.0)
+<https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform/sdp-7-1>`_
+to be installed.
 
+Typically this is done through `QNX Software Center
+<https://www.qnx.com/download/group.html?programid=29178>`_.
 
 
 Archives to install

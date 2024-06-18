@@ -11,10 +11,11 @@ working on Ferrocene.
 
 .. note::
     
-    QNX only supports :target:`x86_64-unknown-linux-gnu` and :target:`x86_64-pc-windows-msvc`.
+    QNX only supports :target:`x86_64-unknown-linux-gnu` and
+    :target:`x86_64-pc-windows-msvc` as host platforms.
     
-    QNX does not support :ref:`aarch64-apple-darwin`. QNX is deprecating support
-    for :target:`x86_64-apple-darwin`.
+    QNX does not support :ref:`aarch64-apple-darwin` as a host platform. QNX is
+    deprecating support for :target:`x86_64-apple-darwin` as a host platform.
 
 
 Windows Setup

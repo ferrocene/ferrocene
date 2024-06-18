@@ -38,7 +38,7 @@ to install QNX, we use ``D:\qnx`` for the rest of this guide.
     If you are uncomfortable with the Windows GUI, you may instead
     follow the Linux instructions (with minor modifications) below using the
     ``D:\qnx\QNX Software Center\qnxsoftwarecenter_clt.bat`` in place of
-    ``qnxsoftwarecenter_clt.bat`` in Powershell, Nushell, or cmd.exe.
+    ``qnxsoftwarecenter_clt.sh`` in Powershell, Nushell, or cmd.exe.
 
 After, you can launch the "QNX Software Center" application from the Start
 Menu.
@@ -76,7 +76,12 @@ Linux Setup
 -----------
 
 
-Download the `QNX Software Center
+First, ensure you have a `myQNX
+<https://www.qnx.com/account/index.html>`_ account and that a
+**QNX Software Development Platform Subscription - Developer License**
+is deployed to it.
+
+Then, download the `QNX Software Center
 <https://www.qnx.com/download/group.html?programid=29178>`_ for Linux. In the
 below example, the downloaded ``.run`` file has been saved as
 ``$HOME/qnx-software-center.run``
@@ -90,7 +95,8 @@ below example, the downloaded ``.run`` file has been saved as
 
 .. note::
     
-    If you are uncomfortable with the Linux command line, you may instead
+    If you are uncomfortable with the Linux command line, a GUI is available.
+    You may instead run `./qnx/qnxsoftwarecenter/qnxsoftwarecenter` and
     follow the Windows instructions above, starting from "Log in, if
     prompted" now.
 

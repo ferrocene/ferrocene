@@ -5,8 +5,12 @@ Overview
 ========
 
 This Manual describes the use of Ferrocene |ferrocene_version|, the |iso_ref|
-and |iec_ref| qualified version of the Rust toolchain. Ferrocene is based on rustc
-version |rust_version|.
+and |iec_ref| qualified version of the Rust toolchain.
+
+Ferrocene is based on:
+
+* rustc version |rust_version|.
+* rustfmt version |rustfmt_version|.
 
 This Manual assumes familiarity with rustc and the Rust language, and outlines
 usage instructions specific to Ferrocene.
@@ -34,8 +38,7 @@ Further Relevant Documentation
 
 The Ferrocene documentation package includes:
 
-* The :doc:`specification:index`, which describes the expected behavior of Rust
-  as implemented by the Ferrocene compiler.
+* The :doc:`specification:index`, which describes the expected behavior of Rust.
 
 * The :doc:`safety-manual:index`, which includes usage and constraints
   guidelines of using the Ferrocene toolchain according to functional

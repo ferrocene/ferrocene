@@ -4,16 +4,16 @@
 Tool Options
 ============
 
-Ferrocene Options
------------------
+Compiler Options
+----------------
 
 Ferrocene is qualified exclusively for the following command line options:
 
 - Users shall pass command line option ``--edition 2021`` to each invocation of
-  the Ferrocene compiler.
+  rustc.
 
 - Users shall pass command line option ``-C opt-level=2`` to each invocation of
-  the Ferrocene compiler.
+  rustc.
 
 - Users shall pass all target-specific command line options, as listed in the
   page of the target in the :doc:`Compilation Targets

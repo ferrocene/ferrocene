@@ -1,6 +1,7 @@
 //! Validates the MIR to ensure that invariants are upheld.
 
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_hir::LangItem;
 use rustc_index::bit_set::BitSet;
 use rustc_index::IndexVec;
 use rustc_infer::traits::Reveal;
@@ -9,7 +10,7 @@ use rustc_middle::mir::visit::{NonUseContext, PlaceContext, Visitor};
 use rustc_middle::mir::*;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{
-    self, CoroutineArgsExt, InstanceDef, ParamEnv, ScalarInt, Ty, TyCtxt, TypeVisitableExt,
+    self, CoroutineArgsExt, InstanceKind, ParamEnv, ScalarInt, Ty, TyCtxt, TypeVisitableExt,
     Variance,
 };
 use rustc_middle::{bug, span_bug};
@@ -43,7 +44,7 @@ impl<'tcx> MirPass<'tcx> for Validator {
         // terribly important that they pass the validator. However, I think other passes might
         // still see them, in which case they might be surprised. It would probably be better if we
         // didn't put this through the MIR pipeline at all.
-        if matches!(body.source.instance, InstanceDef::Intrinsic(..) | InstanceDef::Virtual(..)) {
+        if matches!(body.source.instance, InstanceKind::Intrinsic(..) | InstanceKind::Virtual(..)) {
             return;
         }
         let def_id = body.source.def_id();
@@ -94,7 +95,7 @@ impl<'tcx> MirPass<'tcx> for Validator {
         }
 
         if let MirPhase::Runtime(_) = body.phase {
-            if let ty::InstanceDef::Item(_) = body.source.instance {
+            if let ty::InstanceKind::Item(_) = body.source.instance {
                 if body.has_free_regions() {
                     cfg_checker.fail(
                         Location::START,
@@ -689,7 +690,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                     }
                     ty::Adt(adt_def, args) => {
                         // see <https://github.com/rust-lang/rust/blob/7601adcc764d42c9f2984082b49948af652df986/compiler/rustc_middle/src/ty/layout.rs#L861-L864>
-                        if Some(adt_def.did()) == self.tcx.lang_items().dyn_metadata() {
+                        if self.tcx.is_lang_item(adt_def.did(), LangItem::DynMetadata) {
                             self.fail(
                                 location,
                                 format!(

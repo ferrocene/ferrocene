@@ -31,8 +31,8 @@ Supported targets
 
 Supported targets are provided with the highest level of assurance. They are
 qualified for use in safety-critical contexts (when used with a qualified
-Ferrocene compiler), and the full Ferrocene test suite is executed on the
-target for every code change.
+rustc), and the full Ferrocene test suite is executed on the target for every
+code change.
 
 .. list-table::
    :header-rows: 1

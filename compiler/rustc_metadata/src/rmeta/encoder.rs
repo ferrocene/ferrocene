@@ -1693,7 +1693,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 record!(self.tables.mir_coroutine_witnesses[def_id.to_def_id()] <- witnesses);
             }
 
-            let instance = ty::InstanceDef::Item(def_id.to_def_id());
+            let instance = ty::InstanceKind::Item(def_id.to_def_id());
             let unused = tcx.unused_generic_params(instance);
             self.tables.unused_generic_params.set(def_id.local_def_index, unused);
         }
@@ -2020,7 +2020,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
                 // if this is an impl of `CoerceUnsized`, create its
                 // "unsized info", else just store None
-                if Some(trait_ref.def_id) == tcx.lang_items().coerce_unsized_trait() {
+                if tcx.is_lang_item(trait_ref.def_id, LangItem::CoerceUnsized) {
                     let coerce_unsized_info = tcx.coerce_unsized_info(def_id).unwrap();
                     record!(self.tables.coerce_unsized_info[def_id] <- coerce_unsized_info);
                 }

@@ -1,8 +1,8 @@
 //! The `Visitor` responsible for actually checking a `mir::Body` for invalid operations.
 
 use rustc_errors::{Diag, ErrorGuaranteed};
-use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
+use rustc_hir::{self as hir, LangItem};
 use rustc_index::bit_set::BitSet;
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_infer::traits::ObligationCause;
@@ -10,7 +10,7 @@ use rustc_middle::mir::visit::{MutatingUseContext, NonMutatingUseContext, PlaceC
 use rustc_middle::mir::*;
 use rustc_middle::span_bug;
 use rustc_middle::ty::{self, adjustment::PointerCoercion, Ty, TyCtxt};
-use rustc_middle::ty::{Instance, InstanceDef, TypeVisitableExt};
+use rustc_middle::ty::{Instance, InstanceKind, TypeVisitableExt};
 use rustc_mir_dataflow::Analysis;
 use rustc_span::{sym, Span, Symbol, DUMMY_SP};
 use rustc_trait_selection::traits::error_reporting::TypeErrCtxtExt as _;
@@ -769,7 +769,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
 
                         if let Ok(Some(instance)) =
                             Instance::resolve(tcx, param_env, callee, fn_args)
-                            && let InstanceDef::Item(def) = instance.def
+                            && let InstanceKind::Item(def) = instance.def
                         {
                             // Resolve a trait method call to its concrete implementation, which may be in a
                             // `const` trait impl. This is only used for the const stability check below, since
@@ -801,7 +801,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 // const-eval.
 
                 // const-eval of the `begin_panic` fn assumes the argument is `&str`
-                if Some(callee) == tcx.lang_items().begin_panic_fn() {
+                if tcx.is_lang_item(callee, LangItem::BeginPanic) {
                     match args[0].node.ty(&self.ccx.body.local_decls, tcx).kind() {
                         ty::Ref(_, ty, _) if ty.is_str() => return,
                         _ => self.check_op(ops::PanicNonStr),
@@ -819,7 +819,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     }
                 }
 
-                if Some(callee) == tcx.lang_items().exchange_malloc_fn() {
+                if tcx.is_lang_item(callee, LangItem::ExchangeMalloc) {
                     self.check_op(ops::HeapAllocation);
                     return;
                 }

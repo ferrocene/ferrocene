@@ -51,7 +51,7 @@ Ensure that file ownership and system permissions are correctly set.
 FST_005: Version fetch failed
 -----------------------------
 
-This error occurs when the invocation of the Ferrocene compiler failed.
+This error occurs when the invocation of rustc failed.
 
 **Suggested fixes**
 
@@ -60,8 +60,7 @@ Reinstall the Ferrocene toolchain.
 FST_006: Version parse failed
 -----------------------------
 
-This error occurs when the versions of the Ferrocene compiler cannot be
-parsed.
+This error occurs when the version of rustc cannot be parsed.
 
 **Suggested fixes**
 
@@ -72,7 +71,7 @@ FST_007: Binary version mismatch
 --------------------------------
 
 This error occurs when the version of the ``ferrocene-self-test`` binary and
-that of the Ferrocene compiler are not the same.
+that of rustc are not the same.
 
 **Suggested fixes**
 
@@ -80,7 +79,7 @@ Do not use the same ``ferrocene-self-test`` binary with different Ferrocene
 toolchains.
 
 Reinstall the Ferrocene toolchain in order to obtain the expected
-``ferrocene-self-test`` binary or Ferrocene compiler.
+``ferrocene-self-test`` or ``rustc`` binary.
 
 FST_008: Missing target library
 -------------------------------

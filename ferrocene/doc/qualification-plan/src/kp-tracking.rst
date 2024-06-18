@@ -21,8 +21,7 @@ Each KP file has the following format:
 
 * ``tag``: A designator of the KP severity. The tags are as follows:
 
-  * ``wrong-compiler-code``: The KP causes the Ferrocene compiler to generate
-    wrong code.
+  * ``wrong-compiler-code``: The KP causes rustc to generate wrong code.
 
   * ``wrong-library-code``: The KP causes a Ferrocene library to generate
     wrong code.
@@ -30,12 +29,11 @@ Each KP file has the following format:
   * ``wrong-linking``: The KP causes the linker to either incorrectly link a
     symbol or fail to link altogether.
 
-  * ``accepts-invalid``: The KP causes the Ferrocene compiler to accept
-    invalid code, and possibly generate wrong code.
+  * ``accepts-invalid``: The KP causes rustc to accept invalid code, and
+    possibly generate wrong code.
 
-  * ``diagnostic``: The KP causes the Ferrocene compiler to suppress a
-    safety-related error diagnostic, or emit a spurious safety-related error
-    diagnostic.
+  * ``diagnostic``: The KP causes rustc to suppress a safety-related error
+    diagnostic, or emit a spurious safety-related error diagnostic.
 
 * ``introduced-commit``: The commit number when the KP was introduced.
 

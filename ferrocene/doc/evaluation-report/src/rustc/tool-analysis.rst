@@ -265,8 +265,8 @@ Potential Errors by Classes Traceability Matrix
 Potential errors are the result of the HazOp analysis, it should be documented
 in the HazOp Report documents.
 
-Tool Evaluation Results
------------------------
+ISO 26262 Tool Classification
+-----------------------------
 
 During this analysis, we highlighted some of the potential errors concerning
 Ferrocene that impacts the safety-related software code. Hence, the tool
@@ -292,6 +292,6 @@ applicable.
 IEC 61508 Tool Classification
 -----------------------------
 
-Ferrocene provides a development environment capable of compiling
-and linking programs for the target architecture to conform with automotive
-[|iso_ref|] TCL 3/ASIL D level and industrial [|iec_ref|] class T3.
+Ferrocene provides a development environment capable of compiling and linking
+programs for the target architecture to conform with industrial [|iec_ref|]
+class T3.

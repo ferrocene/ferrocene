@@ -5,5 +5,6 @@ Installing ``rustfmt``
 ======================
 
 Download the archive for your host target and follow the
-:doc:`installation instructions </rustc/install>`. Please refer to the target
-documentation of your host target to find which archive you need to download.
+:doc:`installation instructions </rustc/install>`. Please refer to the
+:doc:`target documentation </targets/index>` of your host target to find which
+archive you need to download.

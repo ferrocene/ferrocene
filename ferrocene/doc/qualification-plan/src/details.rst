@@ -4,9 +4,18 @@
 Ferrocene Details
 =================
 
-The Ferrocene toolchain consists of the ``rustc`` compiler driver, which
-internally invokes the Rust Front-End, LLVM, and LLD, in order to produce a
-library or an executable from an input Rust program.
+The Ferrocene toolchain consists of multiple tools. Following is a list of the
+qualified ones:
+
+* ``rustc``
+* ``rustfmt``
+
+rustc
+-----
+
+The ``rustc`` compiler driver, which internally invokes the Rust Front-End,
+LLVM, and LLD, in order to produce a library or an executable from an input
+Rust program.
 
 .. figure:: figures/toolchain-workflow.svg
 
@@ -14,7 +23,7 @@ library or an executable from an input Rust program.
 
 
 Rust Front-End
---------------
+^^^^^^^^^^^^^^
 
 The Rust Front-End is responsible for verifying the syntax and semantics of a
 Rust program, and for translating the program into LLVM IR for processing by
@@ -26,7 +35,7 @@ LLVM.
 
 
 Front-End: Internal Representations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""
 
 The Rust Front-End employs several internal representations to model the syntax
 and semantics of a Rust program.
@@ -52,7 +61,7 @@ and semantics of a Rust program.
 
 
 Front-End: Processing
-^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""
 
 The processing performed by the Rust Front-End is based on semantic queries as
 opposed to compilation passes, where a query can be issued on any construct
@@ -146,7 +155,7 @@ Front-End, we identify the following distinct "processors":
 
 
 LLVM
-----
+^^^^
 
 LLVM is responsible for the various optimizations of a LLVM IR program, and for
 the generation of static libraries and object files.
@@ -157,7 +166,7 @@ the generation of static libraries and object files.
 
 
 LLVM: Internal Representations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""
 
 LLVM employs only one internal representation, referred to simply as LLVM IR, to
 model an input program.
@@ -170,7 +179,7 @@ textual form.
 
 
 LLVM: Processing
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 
 :Pass: An LLVM Pass is an abstraction that represents a single isolated
        processing step. LLVM has a library of passes that cover various kinds of
@@ -185,7 +194,7 @@ LLVM: Processing
 
 
 LLD
----
+^^^
 
 LLD is the default linker bundled with LLVM. It is a drop-in replacement for GNU
 linkers, and accepts the same command line arguments and linker scripts. It is
@@ -194,3 +203,10 @@ responsible for producing shared libraries and executables from object files.
 .. figure:: figures/lld-architecture.svg
 
    LLD Architecture
+
+
+rustfmt
+-------
+
+The ``rustfmt`` Rust formatter, which formats or checks the formatting of
+source code.

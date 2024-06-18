@@ -16,7 +16,7 @@ Associated requirement ID: :id:`RUSTC_AVD_CHECK_INSTALL_001`
 Before using the Ferrocene toolchain, the user shall ensure that the
 appropriate tool package has been installed, and installation verified
 according to the verification procedure described in
-:doc:`Installation Procedures </rustc/procedures>`.
+:doc:`Installation Procedures </procedures>`.
 
 Cleaning environment variables
 ------------------------------
@@ -94,7 +94,7 @@ Problem mitigation
 .. id:: RUSTC_CSTR_0080_KP
 
 The user shall implement mitigation strategies for known problems
-documented in the :ref:`rustc/known-problems:Known Problems` manual.
+documented in the :ref:`known-problems:Known Problems` manual.
 
 Tracking new problems
 ---------------------

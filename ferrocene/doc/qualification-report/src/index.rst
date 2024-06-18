@@ -17,7 +17,7 @@ qualification, in accordance to the standards above.
    statement
 
 .. toctree::
-   :caption: ``rustc`` test results:
+   :caption: rustc test results:
    :numbered:
    :maxdepth: 2
 

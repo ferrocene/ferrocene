@@ -16,21 +16,21 @@ scope, in accordance to the standards above.
 
    user-responsibility
    customer-interactions
+   environment
+   procedures
+   changelog
+   known-problems
 
 .. toctree::
    :maxdepth: 2
    :caption: rustc
    :numbered:
 
-   rustc/environment
-   rustc/procedures
    rustc/usage
-   rustc/unsafety
    rustc/options
-   rustc/changelog
-   rustc/known-problems
-   rustc/degraded-environment
    rustc/constraints
+   rustc/unsafety
+   rustc/degraded-environment
 
 .. toctree::
    :maxdepth: 2
@@ -38,8 +38,8 @@ scope, in accordance to the standards above.
    :numbered:
 
    rustfmt/usage
-   rustfmt/constraints
    rustfmt/options
+   rustfmt/constraints
 
 .. appendices::
    :maxdepth: 2

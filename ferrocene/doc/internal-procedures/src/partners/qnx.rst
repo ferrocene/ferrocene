@@ -121,7 +121,14 @@ Finally, you can source your QNX toolchain in ``bash``:
 
     cd $HOME/
     source qnx/qnx710/qnxsdp-env.sh
-    qcc --help
+    qcc
+
+If everything is working, the output of ``qcc`` should be:
+
+.. code-block::
+
+    $ qcc
+    cc: no files to process
 
 .. note::
     

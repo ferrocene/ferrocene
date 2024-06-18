@@ -20,8 +20,12 @@ x86-64 processors.
 Prerequisites
 -------------
 
-This target uses `QNX Software Development Platform 7.1.0 (QNX SDP 7.1.0)
-<https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform/sdp-7-1>`_.
+This target requires `QNX Software Development Platform 7.1.0 (QNX SDP 7.1.0)
+<https://blackberry.qnx.com/en/products/foundation-software/qnx-software-development-platform/sdp-7-1>`_
+to be installed.
+
+Typically this is done through `QNX Software Center
+<https://www.qnx.com/download/group.html?programid=29178>`_.
 
 
 

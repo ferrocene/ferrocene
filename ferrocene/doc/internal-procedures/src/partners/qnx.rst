@@ -11,10 +11,10 @@ working on Ferrocene.
 
 .. note::
     
-    QNX only supports x86-64 Linux (glibc) and x86-64 Windows.
+    QNX only supports :target:`x86_64-unknown-linux-gnu` and :target:`x86_64-pc-windows-msvc`.
     
-    QNX does not support Apple Silicon macOS. QNX is deprecating support
-    for x86-64 macOS.
+    QNX does not support :ref:`aarch64-apple-darwin`. QNX is deprecating support
+    for :target:`x86_64-apple-darwin`.
 
 
 Windows Setup

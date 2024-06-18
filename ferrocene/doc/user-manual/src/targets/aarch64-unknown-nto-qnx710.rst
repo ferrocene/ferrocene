@@ -28,8 +28,8 @@ Typically this is done through `QNX Software Center
 <https://www.qnx.com/download/group.html?programid=29178>`_.
 
 Ferrocene documents how our internal QNX toolchains are installed and
-configured in :doc:`internal procedures (QNX) <internal-procedures:partners/qnx>`. Your organizational
-needs may differ.
+configured in :doc:`internal procedures (QNX) <internal-procedures:partners/qnx>`.
+Your organizational and licensing needs may differ.
 
 Archives to install
 -------------------

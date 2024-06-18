@@ -104,6 +104,7 @@ use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, DefIdSet, LOCAL_CRATE};
 use rustc_hir::definitions::DefPathDataName;
+use rustc_hir::LangItem;
 use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::middle::exported_symbols::{SymbolExportInfo, SymbolExportLevel};
@@ -113,7 +114,7 @@ use rustc_middle::mir::mono::{
 };
 use rustc_middle::query::Providers;
 use rustc_middle::ty::print::{characteristic_def_id_of_type, with_no_trimmed_paths};
-use rustc_middle::ty::{self, visit::TypeVisitableExt, InstanceDef, TyCtxt};
+use rustc_middle::ty::{self, visit::TypeVisitableExt, InstanceKind, TyCtxt};
 use rustc_session::config::{DumpMonoStatsFormat, SwitchWithOptPath};
 use rustc_session::CodegenUnits;
 use rustc_span::symbol::Symbol;
@@ -619,20 +620,20 @@ fn characteristic_def_id_of_mono_item<'tcx>(
     match mono_item {
         MonoItem::Fn(instance) => {
             let def_id = match instance.def {
-                ty::InstanceDef::Item(def) => def,
-                ty::InstanceDef::VTableShim(..)
-                | ty::InstanceDef::ReifyShim(..)
-                | ty::InstanceDef::FnPtrShim(..)
-                | ty::InstanceDef::ClosureOnceShim { .. }
-                | ty::InstanceDef::ConstructCoroutineInClosureShim { .. }
-                | ty::InstanceDef::CoroutineKindShim { .. }
-                | ty::InstanceDef::Intrinsic(..)
-                | ty::InstanceDef::DropGlue(..)
-                | ty::InstanceDef::Virtual(..)
-                | ty::InstanceDef::CloneShim(..)
-                | ty::InstanceDef::ThreadLocalShim(..)
-                | ty::InstanceDef::FnPtrAddrShim(..)
-                | ty::InstanceDef::AsyncDropGlueCtorShim(..) => return None,
+                ty::InstanceKind::Item(def) => def,
+                ty::InstanceKind::VTableShim(..)
+                | ty::InstanceKind::ReifyShim(..)
+                | ty::InstanceKind::FnPtrShim(..)
+                | ty::InstanceKind::ClosureOnceShim { .. }
+                | ty::InstanceKind::ConstructCoroutineInClosureShim { .. }
+                | ty::InstanceKind::CoroutineKindShim { .. }
+                | ty::InstanceKind::Intrinsic(..)
+                | ty::InstanceKind::DropGlue(..)
+                | ty::InstanceKind::Virtual(..)
+                | ty::InstanceKind::CloneShim(..)
+                | ty::InstanceKind::ThreadLocalShim(..)
+                | ty::InstanceKind::FnPtrAddrShim(..)
+                | ty::InstanceKind::AsyncDropGlueCtorShim(..) => return None,
             };
 
             // If this is a method, we want to put it into the same module as
@@ -776,28 +777,28 @@ fn mono_item_visibility<'tcx>(
     };
 
     let def_id = match instance.def {
-        InstanceDef::Item(def_id)
-        | InstanceDef::DropGlue(def_id, Some(_))
-        | InstanceDef::AsyncDropGlueCtorShim(def_id, Some(_)) => def_id,
+        InstanceKind::Item(def_id)
+        | InstanceKind::DropGlue(def_id, Some(_))
+        | InstanceKind::AsyncDropGlueCtorShim(def_id, Some(_)) => def_id,
 
         // We match the visibility of statics here
-        InstanceDef::ThreadLocalShim(def_id) => {
+        InstanceKind::ThreadLocalShim(def_id) => {
             return static_visibility(tcx, can_be_internalized, def_id);
         }
 
         // These are all compiler glue and such, never exported, always hidden.
-        InstanceDef::VTableShim(..)
-        | InstanceDef::ReifyShim(..)
-        | InstanceDef::FnPtrShim(..)
-        | InstanceDef::Virtual(..)
-        | InstanceDef::Intrinsic(..)
-        | InstanceDef::ClosureOnceShim { .. }
-        | InstanceDef::ConstructCoroutineInClosureShim { .. }
-        | InstanceDef::CoroutineKindShim { .. }
-        | InstanceDef::DropGlue(..)
-        | InstanceDef::AsyncDropGlueCtorShim(..)
-        | InstanceDef::CloneShim(..)
-        | InstanceDef::FnPtrAddrShim(..) => return Visibility::Hidden,
+        InstanceKind::VTableShim(..)
+        | InstanceKind::ReifyShim(..)
+        | InstanceKind::FnPtrShim(..)
+        | InstanceKind::Virtual(..)
+        | InstanceKind::Intrinsic(..)
+        | InstanceKind::ClosureOnceShim { .. }
+        | InstanceKind::ConstructCoroutineInClosureShim { .. }
+        | InstanceKind::CoroutineKindShim { .. }
+        | InstanceKind::DropGlue(..)
+        | InstanceKind::AsyncDropGlueCtorShim(..)
+        | InstanceKind::CloneShim(..)
+        | InstanceKind::FnPtrAddrShim(..) => return Visibility::Hidden,
     };
 
     // The `start_fn` lang item is actually a monomorphized instance of a
@@ -812,8 +813,8 @@ fn mono_item_visibility<'tcx>(
     //        internalization, but we have to understand that it's referenced
     //        from the `main` symbol we'll generate later.
     //
-    //        This may be fixable with a new `InstanceDef` perhaps? Unsure!
-    if tcx.lang_items().start_fn() == Some(def_id) {
+    //        This may be fixable with a new `InstanceKind` perhaps? Unsure!
+    if tcx.is_lang_item(def_id, LangItem::Start) {
         *can_be_internalized = false;
         return Visibility::Hidden;
     }

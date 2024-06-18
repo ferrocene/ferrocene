@@ -177,7 +177,7 @@ fn dump_path<'tcx>(
     // All drop shims have the same DefId, so we have to add the type
     // to get unique file names.
     let shim_disambiguator = match source.instance {
-        ty::InstanceDef::DropGlue(_, Some(ty)) => {
+        ty::InstanceKind::DropGlue(_, Some(ty)) => {
             // Unfortunately, pretty-printed typed are not very filename-friendly.
             // We dome some filtering.
             let mut s = ".".to_owned();
@@ -188,7 +188,7 @@ fn dump_path<'tcx>(
             }));
             s
         }
-        ty::InstanceDef::AsyncDropGlueCtorShim(_, Some(ty)) => {
+        ty::InstanceKind::AsyncDropGlueCtorShim(_, Some(ty)) => {
             // Unfortunately, pretty-printed typed are not very filename-friendly.
             // We dome some filtering.
             let mut s = ".".to_owned();
@@ -280,7 +280,7 @@ pub fn write_mir_pretty<'tcx>(
             // are shared between mir_for_ctfe and optimized_mir
             write_mir_fn(tcx, tcx.mir_for_ctfe(def_id), &mut |_, _| Ok(()), w)?;
         } else {
-            let instance_mir = tcx.instance_mir(ty::InstanceDef::Item(def_id));
+            let instance_mir = tcx.instance_mir(ty::InstanceKind::Item(def_id));
             render_body(w, instance_mir)?;
         }
     }
@@ -1287,7 +1287,7 @@ fn use_verbose(ty: Ty<'_>, fn_def: bool) -> bool {
 }
 
 impl<'tcx> Visitor<'tcx> for ExtraComments<'tcx> {
-    fn visit_constant(&mut self, constant: &ConstOperand<'tcx>, _location: Location) {
+    fn visit_const_operand(&mut self, constant: &ConstOperand<'tcx>, _location: Location) {
         let ConstOperand { span, user_ty, const_ } = constant;
         if use_verbose(const_.ty(), true) {
             self.push("mir::ConstOperand");
@@ -1415,7 +1415,7 @@ pub fn write_allocations<'tcx>(
     struct CollectAllocIds(BTreeSet<AllocId>);
 
     impl<'tcx> Visitor<'tcx> for CollectAllocIds {
-        fn visit_constant(&mut self, c: &ConstOperand<'tcx>, _: Location) {
+        fn visit_const_operand(&mut self, c: &ConstOperand<'tcx>, _: Location) {
             match c.const_ {
                 Const::Ty(_, _) | Const::Unevaluated(..) => {}
                 Const::Val(val, _) => {

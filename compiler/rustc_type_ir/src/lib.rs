@@ -47,6 +47,7 @@ mod flags;
 mod generic_arg;
 mod infcx;
 mod interner;
+mod opaque_ty;
 mod predicate;
 mod predicate_kind;
 mod region_kind;
@@ -63,6 +64,7 @@ pub use flags::*;
 pub use generic_arg::*;
 pub use infcx::InferCtxtLike;
 pub use interner::*;
+pub use opaque_ty::*;
 pub use predicate::*;
 pub use predicate_kind::*;
 pub use region_kind::*;
@@ -74,6 +76,7 @@ pub use DynKind::*;
 pub use InferTy::*;
 pub use RegionKind::*;
 pub use TyKind::*;
+pub use Variance::*;
 
 rustc_index::newtype_index! {
     /// A [De Bruijn index][dbi] is a standard means of representing

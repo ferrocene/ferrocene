@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 include ../tools.mk
 RUSTC_FLAGS = -C link-arg="-lfoo" -C link-arg="-lbar" --print link-args
 

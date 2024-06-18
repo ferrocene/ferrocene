@@ -230,7 +230,7 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
         let def_id = instance.def_id();
 
         if self.tcx.has_attr(def_id, sym::rustc_const_panic_str)
-            || Some(def_id) == self.tcx.lang_items().begin_panic_fn()
+            || self.tcx.is_lang_item(def_id, LangItem::BeginPanic)
         {
             let args = self.copy_fn_args(args);
             // &str or &&str
@@ -245,7 +245,7 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
             let span = self.find_closest_untracked_caller_location();
             let (file, line, col) = self.location_triple_for_span(span);
             return Err(ConstEvalErrKind::Panic { msg, file, line, col }.into());
-        } else if Some(def_id) == self.tcx.lang_items().panic_fmt() {
+        } else if self.tcx.is_lang_item(def_id, LangItem::PanicFmt) {
             // For panic_fmt, call const_panic_fmt instead.
             let const_def_id = self.tcx.require_lang_item(LangItem::ConstPanicFmt, None);
             let new_instance = ty::Instance::expect_resolve(
@@ -256,7 +256,7 @@ impl<'tcx> CompileTimeInterpCx<'tcx> {
             );
 
             return Ok(Some(new_instance));
-        } else if Some(def_id) == self.tcx.lang_items().align_offset_fn() {
+        } else if self.tcx.is_lang_item(def_id, LangItem::AlignOffset) {
             let args = self.copy_fn_args(args);
             // For align_offset, we replace the function call if the pointer has no address.
             match self.align_offset(instance, &args, dest, ret)? {
@@ -398,10 +398,10 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
 
     fn load_mir(
         ecx: &InterpCx<'tcx, Self>,
-        instance: ty::InstanceDef<'tcx>,
+        instance: ty::InstanceKind<'tcx>,
     ) -> InterpResult<'tcx, &'tcx mir::Body<'tcx>> {
         match instance {
-            ty::InstanceDef::Item(def) => Ok(ecx.tcx.mir_for_ctfe(def)),
+            ty::InstanceKind::Item(def) => Ok(ecx.tcx.mir_for_ctfe(def)),
             _ => Ok(ecx.tcx.instance_mir(instance)),
         }
     }
@@ -424,7 +424,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
         };
 
         // Only check non-glue functions
-        if let ty::InstanceDef::Item(def) = instance.def {
+        if let ty::InstanceKind::Item(def) = instance.def {
             // Execution might have wandered off into other crates, so we cannot do a stability-
             // sensitive check here. But we can at least rule out functions that are not const at
             // all. That said, we have to allow calling functions inside a trait marked with
@@ -540,7 +540,7 @@ impl<'tcx> interpret::Machine<'tcx> for CompileTimeMachine<'tcx> {
                     );
                 }
                 return Ok(Some(ty::Instance {
-                    def: ty::InstanceDef::Item(instance.def_id()),
+                    def: ty::InstanceKind::Item(instance.def_id()),
                     args: instance.args,
                 }));
             }

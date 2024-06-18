@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 //@ revisions: nofallback fallback
 //@ only-windows - the number of `Error` impls is platform-dependent
 //@[fallback] check-pass

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 # This test intentionally feeds invalid inputs to codegen and checks if the error message outputs contain specific helpful indications.
 
 # ignore-cross-compile

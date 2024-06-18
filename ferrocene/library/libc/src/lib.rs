@@ -13,6 +13,7 @@
     unused_macros,
     unused_macro_rules,
     // Ferrocene-specific:
+    dead_code,
     elided_lifetimes_in_paths,
     hidden_glob_reexports,
     ambiguous_glob_reexports

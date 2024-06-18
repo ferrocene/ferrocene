@@ -102,13 +102,13 @@ should not be used in production.
      - Bare-metal
      - \-
 
-   * - :target:`aarch64-unknown-nto-qnx710`
+   * - :ref:`aarch64-unknown-nto-qnx710`
      - ``aarch64-unknown-nto-qnx710``
      - Cross-compilation
      - Full
      - Can only be cross-compiled from :ref:`x86_64-unknown-linux-gnu` and :ref:`x86_64-pc-windows-msvc`.
 
-   * - :target:`x86_64-pc-nto-qnx710`
+   * - :ref:`x86_64-pc-nto-qnx710`
      - ``x86_64-pc-nto-qnx710``
      - Cross-compilation
      - Full

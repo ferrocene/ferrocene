@@ -8,3 +8,6 @@
 fn main() {}
 
 // ferrocene-annotations: um_rustc_F
+//
+// ferrocene-annotations: fls_sun645voqex6
+// Attribute crate_name

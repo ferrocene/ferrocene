@@ -174,7 +174,7 @@ Install the QNX Software Center:
     qnx/qnx-software-center.run --tar xvf -C qnx
 
 
-Create a deployment containing Linux, Mac, and Windows toolchains:
+Create a deployment containing Linux and Windows toolchains:
 
 .. code-block::
     
@@ -190,12 +190,17 @@ Create a deployment containing Linux, Mac, and Windows toolchains:
         -mirrorBaseline qnx710
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installBaseline com.qnx.qnx710 \
-        -installPackage com.qnx.qnx710.host.macosx.x86_64 \
         -installPackage com.qnx.qnx710.host.win.x86_64 \
         -installPackage com.qnx.qnx710.host.linux.x86_64 \
         -destination qnx/qnx710 \
         -cleanInstall
+    rm -rf \
+        qnx/qnx710/target/qnx7/usr/help \
+        qnx/qnx710/target/qnx7/etc/usr/help \
+        qnx/qnx710/target/qnx7/armle-v7 \
+        qnx/qnx710/target/qnx7/usr/include/python3.11 \
+        qnx/qnx710/target/x86_64/usr/lib/python3.11 \
+        qnx/qnx710/.packages
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -deploySdpInstallation qnx/qnx710 \

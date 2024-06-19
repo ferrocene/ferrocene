@@ -109,3 +109,6 @@ fn main() {}
 //
 // ferrocene-annotations: fls_zakwockktml8
 // Attribute no_builtins
+//
+// ferrocene-annotations: fls_bqw87nz4qbrb
+// Attribute automatically_derived

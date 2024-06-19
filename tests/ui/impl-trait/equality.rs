@@ -39,8 +39,8 @@ impl Leak for i32 {
     fn leak(self) -> i32 { self }
 }
 
-<<<<<<< HEAD
-fn main() {}
+fn main() {
+}
 
 // ferrocene-annotations: fls_46ork6fz5o2e
 // Implementation Coherence
@@ -56,7 +56,3 @@ fn main() {}
 //
 // ferrocene-annotations: fls_exe4zodlwfez
 // Type Unification
-=======
-fn main() {
-}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -4569,7 +4569,7 @@ numeric literal pattern
 A :dt:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
 literal`.
 
-:dp:`fls_CmvuNXmowCz8`
+:dp:`fls_QYDZm7pKy1nW`
 See :s:`LiteralPattern`.
 
 .. _fls_rayjriyofmpa:

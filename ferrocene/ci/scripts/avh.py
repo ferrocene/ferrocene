@@ -6,10 +6,11 @@ import argparse
 import avh_api
 import json
 import uuid
+import pandas
+import os
+import subprocess
 from pprint import pprint
 from time import sleep
-import pandas as pd
-import os
 from avh_api.api import arm_api
 from avh_api.model.instance_create_options import InstanceCreateOptions
 
@@ -28,6 +29,11 @@ def arguments():
 
     stop_parser = subparsers.add_parser("stop", help="Stop an AVH instance")
     stop_parser.add_argument('instance', help='The AVH instance name')
+
+    stop_parser = subparsers.add_parser("forward", help="Port forward to an AVH instance")
+    stop_parser.add_argument('instance', help='The AVH instance name')
+    stop_parser.add_argument('local_port', help='The local port to forward to the remote')
+    stop_parser.add_argument('remote_port', help='The remote port to forward to the local')
 
     # create_parser = subparsers.add_parser("create", help="Create an AVH instance")
     # create_parser.add_argument('instance', help='The AVH instance name')
@@ -49,7 +55,7 @@ def show_instances(instances):
             "flavorName": instance.flavorName
         }
         frames.append(frame)
-    dataframes = pd.DataFrame.from_records(frames)
+    dataframes = pandas.DataFrame.from_records(frames)
     print(dataframes)
 
 def get_instance(avh_client, uuid_or_name):
@@ -106,7 +112,27 @@ def subcommand_start(avh_token, args):
             poll_count += 1
 
     print(f"Started {instance.name}!")
+    return
 
+def subcommand_forward(avh_token, args):
+    """
+    Port forward to an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    
+    api_response = avh_client.v1_get_instance_quick_connect_command(instance.id)
+
+    split_response = api_response.split(" ")
+    assert split_response[0] == "ssh"
+    assert split_response[1] == "-J"
+    gateway_user_and_host = split_response[2]
+    assert "@" in gateway_user_and_host
+    user_and_host = split_response[3]
+    assert "@" in user_and_host
+
+    print(f"Running `{api_response}`")
+    subprocess.run(split_response)
     return
 
 def subcommand_stop(avh_token, args):
@@ -160,7 +186,9 @@ def run():
         subcommand_start(avh_token, args)
     elif args.subcommand == "stop":
         subcommand_stop(avh_token, args)
-    elif args.subcommand == "destroy":
+    elif args.subcommand == "forward":
+        subcommand_forward(avh_token, args)
+    elif args.subcommand == "create":
         subcommand_create(avh_token, args)
     elif args.subcommand == "destroy":
         subcommand_destroy(avh_token, args)

@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# From the root of this repository, build with
+# `docker build -t ubuntu-24 -f ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
+
 FROM --platform=linux/amd64 ubuntu:24.04
 
 RUN apt-get update \
@@ -18,14 +21,13 @@ RUN apt-get update \
         curl \
         ca-certificates \
         python3 \
-        python3-venv \
-        python3-pip \
         libedit-dev \
         libssl-dev \
         zlib1g-dev \
         moreutils \
         cmake \
         python-is-python3 \
+        pipx \
         # Needed by the `commit-checks` CI job:
         llvm-17-tools \
         llvm-17-dev \
@@ -42,11 +44,6 @@ RUN curl -Lo /tmp/awscli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_6
     && /tmp/awscli/aws/install \
     && rm -rf /tmp/awscli /tmp/awscli.zip
 
-# Python3 is installed by apt, and we use the same version than the container ubuntu-20
-COPY reuse-requirements.txt /tmp/reuse-requirements.txt
-RUN python3 -m pip install --break-system-packages -r /tmp/reuse-requirements.txt && \
-    rm -rf /tmp/reuse-requirements.txt
-
 # Tell programs relying on the system language (like Python) to use UTF-8.
 ENV LANG=C.UTF-8
 
@@ -59,3 +56,12 @@ RUN mkdir /home/ci \
     && chown -R ci: /home/ci
 USER ci
 WORKDIR /home/ci
+
+# We prefer uv over other solutions, it's in Rust and fast
+ENV PATH="/home/ci/.local/bin:$PATH"
+RUN pipx install uv
+# Setup the venv
+COPY requirements.txt /tmp/requirements.txt
+RUN uv venv \
+    && uv pip sync /tmp/requirements.txt
+ENV PATH="/home/ci/.venv/bin:$PATH"

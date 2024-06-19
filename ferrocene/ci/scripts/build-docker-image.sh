@@ -26,5 +26,5 @@ aws ecr get-login-password --region "${ECR_REGION}" \
     | docker login --username AWS --password-stdin "${registry}"
 
 # Build and push the image
-docker build -t "${image}" "ferrocene/ci/docker-images/${IMAGE_NAME}"
+docker build -t "${image}" -f "ferrocene/ci/docker-images/${IMAGE_NAME}/Dockerfile" .
 docker push "${image}"

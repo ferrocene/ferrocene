@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+# If you know how to make the .dockerignore work without bulk ignoring everything,
+# please update it to do so!
+**
+!requirements.txt
+!ferrocene/ci/docker-images

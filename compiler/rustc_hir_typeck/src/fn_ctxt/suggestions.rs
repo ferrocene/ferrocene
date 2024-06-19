@@ -460,16 +460,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             // but those checks need to be a bit more delicate and the benefit is diminishing.
             if self.can_eq(self.param_env, found_ty_inner, peeled) && error_tys_equate_as_ref {
                 let sugg = prefix_wrap(".as_ref()");
-                err.subdiagnostic(
-                    self.dcx(),
-                    errors::SuggestConvertViaMethod {
-                        span: expr.span.shrink_to_hi(),
-                        sugg,
-                        expected,
-                        found,
-                        borrow_removal_span,
-                    },
-                );
+                err.subdiagnostic(errors::SuggestConvertViaMethod {
+                    span: expr.span.shrink_to_hi(),
+                    sugg,
+                    expected,
+                    found,
+                    borrow_removal_span,
+                });
                 return true;
             } else if let Some((deref_ty, _)) =
                 self.autoderef(expr.span, found_ty_inner).silence_errors().nth(1)
@@ -477,16 +474,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 && error_tys_equate_as_ref
             {
                 let sugg = prefix_wrap(".as_deref()");
-                err.subdiagnostic(
-                    self.dcx(),
-                    errors::SuggestConvertViaMethod {
-                        span: expr.span.shrink_to_hi(),
-                        sugg,
-                        expected,
-                        found,
-                        borrow_removal_span,
-                    },
-                );
+                err.subdiagnostic(errors::SuggestConvertViaMethod {
+                    span: expr.span.shrink_to_hi(),
+                    sugg,
+                    expected,
+                    found,
+                    borrow_removal_span,
+                });
                 return true;
             } else if let ty::Adt(adt, _) = found_ty_inner.peel_refs().kind()
                 && self.tcx.is_lang_item(adt.did(), LangItem::String)
@@ -573,7 +567,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     end: span.shrink_to_hi(),
                 },
             };
-            err.subdiagnostic(self.dcx(), suggest_boxing);
+            err.subdiagnostic(suggest_boxing);
 
             true
         } else {
@@ -814,28 +808,22 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         match &fn_decl.output {
             &hir::FnRetTy::DefaultReturn(span) if expected.is_unit() && !can_suggest => {
                 // `fn main()` must return `()`, do not suggest changing return type
-                err.subdiagnostic(self.dcx(), errors::ExpectedReturnTypeLabel::Unit { span });
+                err.subdiagnostic(errors::ExpectedReturnTypeLabel::Unit { span });
                 return true;
             }
             &hir::FnRetTy::DefaultReturn(span) if expected.is_unit() => {
                 if let Some(found) = found.make_suggestable(self.tcx, false, None) {
-                    err.subdiagnostic(
-                        self.dcx(),
-                        errors::AddReturnTypeSuggestion::Add { span, found: found.to_string() },
-                    );
+                    err.subdiagnostic(errors::AddReturnTypeSuggestion::Add {
+                        span,
+                        found: found.to_string(),
+                    });
                     return true;
                 } else if let Some(sugg) = suggest_impl_trait(self, self.param_env, found) {
-                    err.subdiagnostic(
-                        self.dcx(),
-                        errors::AddReturnTypeSuggestion::Add { span, found: sugg },
-                    );
+                    err.subdiagnostic(errors::AddReturnTypeSuggestion::Add { span, found: sugg });
                     return true;
                 } else {
                     // FIXME: if `found` could be `impl Iterator` we should suggest that.
-                    err.subdiagnostic(
-                        self.dcx(),
-                        errors::AddReturnTypeSuggestion::MissingHere { span },
-                    );
+                    err.subdiagnostic(errors::AddReturnTypeSuggestion::MissingHere { span });
                     return true;
                 }
             }
@@ -856,39 +844,36 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     debug!(?found);
                     if found.is_suggestable(self.tcx, false) {
                         if ty.span.is_empty() {
-                            err.subdiagnostic(
-                                self.dcx(),
-                                errors::AddReturnTypeSuggestion::Add {
-                                    span: ty.span,
-                                    found: found.to_string(),
-                                },
-                            );
+                            err.subdiagnostic(errors::AddReturnTypeSuggestion::Add {
+                                span: ty.span,
+                                found: found.to_string(),
+                            });
                             return true;
                         } else {
-                            err.subdiagnostic(
-                                self.dcx(),
-                                errors::ExpectedReturnTypeLabel::Other { span: ty.span, expected },
-                            );
+                            err.subdiagnostic(errors::ExpectedReturnTypeLabel::Other {
+                                span: ty.span,
+                                expected,
+                            });
                         }
                     }
                 } else {
                     // Only point to return type if the expected type is the return type, as if they
                     // are not, the expectation must have been caused by something else.
-                    debug!("return type {:?}", hir_ty);
+                    debug!(?hir_ty, "return type");
                     let ty = self.lowerer().lower_ty(hir_ty);
-                    debug!("return type {:?}", ty);
-                    debug!("expected type {:?}", expected);
+                    debug!(?ty, "return type (lowered)");
+                    debug!(?expected, "expected type");
                     let bound_vars = self.tcx.late_bound_vars(hir_ty.hir_id.owner.into());
                     let ty = Binder::bind_with_vars(ty, bound_vars);
                     let ty = self.normalize(hir_ty.span, ty);
                     let ty = self.tcx.instantiate_bound_regions_with_erased(ty);
                     if self.can_coerce(expected, ty) {
-                        err.subdiagnostic(
-                            self.dcx(),
-                            errors::ExpectedReturnTypeLabel::Other { span: hir_ty.span, expected },
-                        );
+                        err.subdiagnostic(errors::ExpectedReturnTypeLabel::Other {
+                            span: hir_ty.span,
+                            expected,
+                        });
                         self.try_suggest_return_impl_trait(err, expected, found, fn_id);
-                        self.note_caller_chooses_ty_for_ty_param(err, expected, found);
+                        self.try_note_caller_chooses_ty_for_ty_param(err, expected, found);
                         return true;
                     }
                 }
@@ -898,21 +883,30 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         false
     }
 
-    fn note_caller_chooses_ty_for_ty_param(
+    fn try_note_caller_chooses_ty_for_ty_param(
         &self,
         diag: &mut Diag<'_>,
         expected: Ty<'tcx>,
         found: Ty<'tcx>,
     ) {
-        if let ty::Param(expected_ty_as_param) = expected.kind() {
-            diag.subdiagnostic(
-                self.dcx(),
-                errors::NoteCallerChoosesTyForTyParam {
-                    ty_param_name: expected_ty_as_param.name,
-                    found_ty: found,
-                },
-            );
+        // Only show the note if:
+        // 1. `expected` ty is a type parameter;
+        // 2. The `expected` type parameter does *not* occur in the return expression type. This can
+        //    happen for e.g. `fn foo<T>(t: &T) -> T { t }`, where `expected` is `T` but `found` is
+        //    `&T`. Saying "the caller chooses a type for `T` which can be different from `&T`" is
+        //    "well duh" and is only confusing and not helpful.
+        let ty::Param(expected_ty_as_param) = expected.kind() else {
+            return;
+        };
+
+        if found.contains(expected) {
+            return;
         }
+
+        diag.subdiagnostic(errors::NoteCallerChoosesTyForTyParam {
+            ty_param_name: expected_ty_as_param.name,
+            found_ty: found,
+        });
     }
 
     /// check whether the return type is a generic type with a trait bound
@@ -1136,7 +1130,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let sp = self.tcx.sess.source_map().start_point(expr.span).with_parent(None);
         if let Some(sp) = self.tcx.sess.psess.ambiguous_block_expr_parse.borrow().get(&sp) {
             // `{ 42 } &&x` (#61475) or `{ 42 } && if x { 1 } else { 0 }`
-            err.subdiagnostic(self.dcx(), ExprParenthesesNeeded::surrounding(*sp));
+            err.subdiagnostic(ExprParenthesesNeeded::surrounding(*sp));
             true
         } else {
             false
@@ -1250,7 +1244,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 } else {
                     return false;
                 };
-                diag.subdiagnostic(self.dcx(), subdiag);
+                diag.subdiagnostic(subdiag);
                 return true;
             }
         }

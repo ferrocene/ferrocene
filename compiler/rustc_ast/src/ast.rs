@@ -307,6 +307,8 @@ impl TraitBoundModifiers {
 pub enum GenericBound {
     Trait(PolyTraitRef, TraitBoundModifiers),
     Outlives(Lifetime),
+    /// Precise capturing syntax: `impl Sized + use<'a>`
+    Use(ThinVec<PreciseCapturingArg>, Span),
 }
 
 impl GenericBound {
@@ -314,6 +316,7 @@ impl GenericBound {
         match self {
             GenericBound::Trait(t, ..) => t.span,
             GenericBound::Outlives(l) => l.ident.span,
+            GenericBound::Use(_, span) => *span,
         }
     }
 }
@@ -2162,7 +2165,7 @@ pub enum TyKind {
     /// The `NodeId` exists to prevent lowering from having to
     /// generate `NodeId`s on the fly, which would complicate
     /// the generation of opaque `type Foo = impl Trait` items significantly.
-    ImplTrait(NodeId, GenericBounds, Option<P<(ThinVec<PreciseCapturingArg>, Span)>>),
+    ImplTrait(NodeId, GenericBounds),
     /// No-op; kept solely so that we can pretty-print faithfully.
     Paren(P<Ty>),
     /// Unused for now.
@@ -3158,13 +3161,16 @@ pub struct Delegation {
     pub path: Path,
     pub rename: Option<Ident>,
     pub body: Option<P<Block>>,
+    /// The item was expanded from a glob delegation item.
+    pub from_glob: bool,
 }
 
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct DelegationMac {
     pub qself: Option<P<QSelf>>,
     pub prefix: Path,
-    pub suffixes: ThinVec<(Ident, Option<Ident>)>,
+    // Some for list delegation, and None for glob delegation.
+    pub suffixes: Option<ThinVec<(Ident, Option<Ident>)>>,
     pub body: Option<P<Block>>,
 }
 
@@ -3291,7 +3297,7 @@ pub enum ItemKind {
     ///
     /// E.g. `reuse <Type as Trait>::name { target_expr_template }`.
     Delegation(Box<Delegation>),
-    /// A list delegation item (`reuse prefix::{a, b, c}`).
+    /// A list or glob delegation item (`reuse prefix::{a, b, c}`, `reuse prefix::*`).
     /// Treated similarly to a macro call and expanded early.
     DelegationMac(Box<DelegationMac>),
 }
@@ -3372,7 +3378,7 @@ pub enum AssocItemKind {
     MacCall(P<MacCall>),
     /// An associated delegation item.
     Delegation(Box<Delegation>),
-    /// An associated delegation item list.
+    /// An associated list or glob delegation item.
     DelegationMac(Box<DelegationMac>),
 }
 

@@ -567,8 +567,8 @@ declare_features! (
     (unstable, optimize_attribute, "1.34.0", Some(54882)),
     /// Allows postfix match `expr.match { ... }`
     (unstable, postfix_match, "1.79.0", Some(121618)),
-    /// Allows `use<'a, 'b, A, B>` in `impl use<...> Trait` for precise capture of generic args.
-    (incomplete, precise_capturing, "1.79.0", Some(123432)),
+    /// Allows `use<'a, 'b, A, B>` in `impl Trait + use<...>` for precise capture of generic args.
+    (unstable, precise_capturing, "1.79.0", Some(123432)),
     /// Allows macro attributes on expressions, statements and non-inline modules.
     (unstable, proc_macro_hygiene, "1.30.0", Some(54727)),
     /// Allows `&raw const $place_expr` and `&raw mut $place_expr` expressions.
@@ -588,6 +588,8 @@ declare_features! (
     (incomplete, return_type_notation, "1.70.0", Some(109417)),
     /// Allows `extern "rust-cold"`.
     (unstable, rust_cold_cc, "1.63.0", Some(97544)),
+    /// Shortern the tail expression lifetime
+    (unstable, shorter_tail_lifetimes, "1.79.0", Some(123739)),
     /// Allows the use of SIMD types in functions declared in `extern` blocks.
     (unstable, simd_ffi, "1.0.0", Some(27731)),
     /// Allows specialization of implementations (RFC 1210).

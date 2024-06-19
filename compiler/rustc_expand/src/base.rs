@@ -12,7 +12,7 @@ use rustc_ast::{self as ast, AttrVec, Attribute, HasAttrs, Item, NodeId, PatKind
 use rustc_attr::{self as attr, Deprecation, Stability};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::sync::{self, Lrc};
-use rustc_errors::{DiagCtxt, ErrorGuaranteed, PResult};
+use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed, PResult};
 use rustc_feature::Features;
 use rustc_lint_defs::{BufferedEarlyLint, RegisteredTools};
 use rustc_parse::{parser::Parser, MACRO_ARGUMENTS};
@@ -355,6 +355,10 @@ where
     ) -> MacroExpanderResult<'cx> {
         self(ecx, span, input)
     }
+}
+
+pub trait GlobDelegationExpander {
+    fn expand(&self, ecx: &mut ExtCtxt<'_>) -> ExpandResult<Vec<(Ident, Option<Ident>)>, ()>;
 }
 
 // Use a macro because forwarding to a simple function has type system issues
@@ -714,6 +718,9 @@ pub enum SyntaxExtensionKind {
         /// The produced AST fragment is appended to the input AST fragment.
         Box<dyn MultiItemModifier + sync::DynSync + sync::DynSend>,
     ),
+
+    /// A glob delegation.
+    GlobDelegation(Box<dyn GlobDelegationExpander + sync::DynSync + sync::DynSend>),
 }
 
 /// A struct representing a macro definition in "lowered" form ready for expansion.
@@ -748,7 +755,9 @@ impl SyntaxExtension {
     /// Returns which kind of macro calls this syntax extension.
     pub fn macro_kind(&self) -> MacroKind {
         match self.kind {
-            SyntaxExtensionKind::Bang(..) | SyntaxExtensionKind::LegacyBang(..) => MacroKind::Bang,
+            SyntaxExtensionKind::Bang(..)
+            | SyntaxExtensionKind::LegacyBang(..)
+            | SyntaxExtensionKind::GlobDelegation(..) => MacroKind::Bang,
             SyntaxExtensionKind::Attr(..)
             | SyntaxExtensionKind::LegacyAttr(..)
             | SyntaxExtensionKind::NonMacroAttr => MacroKind::Attr,
@@ -922,6 +931,32 @@ impl SyntaxExtension {
         SyntaxExtension::default(SyntaxExtensionKind::NonMacroAttr, edition)
     }
 
+    pub fn glob_delegation(
+        trait_def_id: DefId,
+        impl_def_id: LocalDefId,
+        edition: Edition,
+    ) -> SyntaxExtension {
+        struct GlobDelegationExpanderImpl {
+            trait_def_id: DefId,
+            impl_def_id: LocalDefId,
+        }
+        impl GlobDelegationExpander for GlobDelegationExpanderImpl {
+            fn expand(
+                &self,
+                ecx: &mut ExtCtxt<'_>,
+            ) -> ExpandResult<Vec<(Ident, Option<Ident>)>, ()> {
+                match ecx.resolver.glob_delegation_suffixes(self.trait_def_id, self.impl_def_id) {
+                    Ok(suffixes) => ExpandResult::Ready(suffixes),
+                    Err(Indeterminate) if ecx.force_mode => ExpandResult::Ready(Vec::new()),
+                    Err(Indeterminate) => ExpandResult::Retry(()),
+                }
+            }
+        }
+
+        let expander = GlobDelegationExpanderImpl { trait_def_id, impl_def_id };
+        SyntaxExtension::default(SyntaxExtensionKind::GlobDelegation(Box::new(expander)), edition)
+    }
+
     pub fn expn_data(
         &self,
         parent: LocalExpnId,
@@ -1030,6 +1065,16 @@ pub trait ResolverExpand {
 
     /// Tools registered with `#![register_tool]` and used by tool attributes and lints.
     fn registered_tools(&self) -> &RegisteredTools;
+
+    /// Mark this invocation id as a glob delegation.
+    fn register_glob_delegation(&mut self, invoc_id: LocalExpnId);
+
+    /// Names of specific methods to which glob delegation expands.
+    fn glob_delegation_suffixes(
+        &mut self,
+        trait_def_id: DefId,
+        impl_def_id: LocalDefId,
+    ) -> Result<Vec<(Ident, Option<Ident>)>, Indeterminate>;
 }
 
 pub trait LintStoreExpand {
@@ -1135,7 +1180,7 @@ impl<'a> ExtCtxt<'a> {
         }
     }
 
-    pub fn dcx(&self) -> &'a DiagCtxt {
+    pub fn dcx(&self) -> DiagCtxtHandle<'a> {
         self.sess.dcx()
     }
 
@@ -1256,7 +1301,7 @@ pub fn resolve_path(sess: &Session, path: impl Into<PathBuf>, span: Span) -> PRe
 }
 
 pub fn parse_macro_name_and_helper_attrs(
-    dcx: &rustc_errors::DiagCtxt,
+    dcx: DiagCtxtHandle<'_>,
     attr: &Attribute,
     macro_type: &str,
 ) -> Option<(Symbol, Vec<Symbol>)> {
@@ -1358,7 +1403,7 @@ fn pretty_printing_compatibility_hack(item: &Item, sess: &Session) {
         if crate_matches {
             // FIXME: make this translatable
             #[allow(rustc::untranslatable_diagnostic)]
-            sess.psess.dcx.emit_fatal(errors::ProcMacroBackCompat {
+            sess.dcx().emit_fatal(errors::ProcMacroBackCompat {
                 crate_name: "rental".to_string(),
                 fixed_version: "0.5.6".to_string(),
             });

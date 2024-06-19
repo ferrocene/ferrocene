@@ -523,14 +523,9 @@ pub fn noop_visit_ty<T: MutVisitor>(ty: &mut P<Ty>, vis: &mut T) {
         TyKind::TraitObject(bounds, _syntax) => {
             visit_vec(bounds, |bound| vis.visit_param_bound(bound))
         }
-        TyKind::ImplTrait(id, bounds, precise_capturing) => {
+        TyKind::ImplTrait(id, bounds) => {
             vis.visit_id(id);
             visit_vec(bounds, |bound| vis.visit_param_bound(bound));
-            if let Some((precise_capturing, _span)) = precise_capturing.as_deref_mut() {
-                for arg in precise_capturing {
-                    vis.visit_precise_capturing_arg(arg);
-                }
-            }
         }
         TyKind::MacCall(mac) => vis.visit_mac_call(mac),
         TyKind::AnonStruct(id, fields) | TyKind::AnonUnion(id, fields) => {
@@ -923,6 +918,11 @@ fn noop_visit_param_bound<T: MutVisitor>(pb: &mut GenericBound, vis: &mut T) {
     match pb {
         GenericBound::Trait(ty, _modifier) => vis.visit_poly_trait_ref(ty),
         GenericBound::Outlives(lifetime) => noop_visit_lifetime(lifetime, vis),
+        GenericBound::Use(args, _) => {
+            for arg in args {
+                vis.visit_precise_capturing_arg(arg);
+            }
+        }
     }
 }
 
@@ -1162,7 +1162,14 @@ impl NoopVisitItemKind for ItemKind {
             }
             ItemKind::MacCall(m) => vis.visit_mac_call(m),
             ItemKind::MacroDef(def) => vis.visit_macro_def(def),
-            ItemKind::Delegation(box Delegation { id, qself, path, rename, body }) => {
+            ItemKind::Delegation(box Delegation {
+                id,
+                qself,
+                path,
+                rename,
+                body,
+                from_glob: _,
+            }) => {
                 vis.visit_id(id);
                 vis.visit_qself(qself);
                 vis.visit_path(path);
@@ -1176,10 +1183,12 @@ impl NoopVisitItemKind for ItemKind {
             ItemKind::DelegationMac(box DelegationMac { qself, prefix, suffixes, body }) => {
                 vis.visit_qself(qself);
                 vis.visit_path(prefix);
-                for (ident, rename) in suffixes {
-                    vis.visit_ident(ident);
-                    if let Some(rename) = rename {
-                        vis.visit_ident(rename);
+                if let Some(suffixes) = suffixes {
+                    for (ident, rename) in suffixes {
+                        vis.visit_ident(ident);
+                        if let Some(rename) = rename {
+                            vis.visit_ident(rename);
+                        }
                     }
                 }
                 if let Some(body) = body {
@@ -1218,7 +1227,14 @@ impl NoopVisitItemKind for AssocItemKind {
                 visit_opt(ty, |ty| visitor.visit_ty(ty));
             }
             AssocItemKind::MacCall(mac) => visitor.visit_mac_call(mac),
-            AssocItemKind::Delegation(box Delegation { id, qself, path, rename, body }) => {
+            AssocItemKind::Delegation(box Delegation {
+                id,
+                qself,
+                path,
+                rename,
+                body,
+                from_glob: _,
+            }) => {
                 visitor.visit_id(id);
                 visitor.visit_qself(qself);
                 visitor.visit_path(path);
@@ -1232,10 +1248,12 @@ impl NoopVisitItemKind for AssocItemKind {
             AssocItemKind::DelegationMac(box DelegationMac { qself, prefix, suffixes, body }) => {
                 visitor.visit_qself(qself);
                 visitor.visit_path(prefix);
-                for (ident, rename) in suffixes {
-                    visitor.visit_ident(ident);
-                    if let Some(rename) = rename {
-                        visitor.visit_ident(rename);
+                if let Some(suffixes) = suffixes {
+                    for (ident, rename) in suffixes {
+                        visitor.visit_ident(ident);
+                        if let Some(rename) = rename {
+                            visitor.visit_ident(rename);
+                        }
                     }
                 }
                 if let Some(body) = body {

@@ -13,3 +13,5 @@ fn main() {
 
     cmd("nm").arg("used.o").run().assert_stdout_contains("FOO");
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

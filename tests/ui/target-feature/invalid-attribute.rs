@@ -122,3 +122,6 @@ fn main() {
     || {};
     //~^ NOTE not a function
 }
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

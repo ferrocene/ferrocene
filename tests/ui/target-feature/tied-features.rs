@@ -32,3 +32,7 @@ unsafe fn bar() {}
 #[target_feature(enable = "paca")]
 #[target_feature(enable = "pacg")]
 unsafe fn baz() {}
+
+
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

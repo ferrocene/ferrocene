@@ -18,3 +18,6 @@ fn main() {}
 
 // ferrocene-annotations: fls_ahmnqhm8anlb
 // Built-in Attributes
+//
+// ferrocene-annotations: fls_spdmit5fy7el
+// Attribute target_feature

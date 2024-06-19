@@ -113,26 +113,33 @@ Crates
 A :t:`crate` is a unit of compilation and linking that contains a tree of
 nested :t:`[module]s`.
 
+:dp:`fls_unxalgMqIr3v`
+The :t:`crate type` of a :t:`crate` is the value of the :t:`attribute`
+``crate_type`` of a :t:`crate` or the value of ``--crate-type`` flag passed to
+the tool compiling the :t:`crate`.
+
+:dp:`fls_e7jGvXvTsFpC`
+The :t:`crate type` of a :t:`crate` if not specified is ``bin``.
+
+:dp:`fls_kQiJPwb2Hjcc`
+A :t:`crate` may be subject to multiple :t:`[crate type]s`, treating each type
+as a separate :t:`crate`.
+
 :dp:`fls_9ub6ks8qrang`
-A :t:`binary crate` is a :t:`crate` that has a :t:`function` in scope of its
-:t:`crate root module` under the :t:`name` ``main`` with a :t:`main function
-signature`. A tool can compile a :t:`binary crate` to an executable.
+A :t:`binary crate` is a :t:`crate` whose :t:`crate type` is ``bin``.
+
+:dp:`fls_OyFwBtDGVimT`
+A :t:`binary crate` that is not subject to :t:`attribute` ``no_main`` shall have
+a :t:`function` in scope of its :t:`crate root module` under the :t:`name`
+``main`` with a :t:`main function signature`.
 
 :dp:`fls_jQqXxPyND1ds`
 The :t:`function` in scope of a :t:`binary crate`'s :t:`crate root module` under
 the :t:`name` ``main`` with a :t:`main function signature` is the :t:`binary
 crate`'s :t:`program entry point`.
 
-:dp:`fls_d9nn4yuiw1ja`
-A :t:`library crate` is either a :t:`crate` that does not have a :t:`function`
-in scope of its :t:`crate root module` under the :t:`name` ``main`` with a
-:t:`main function signature` or a :t:`crate` subject to :t:`attribute`
-:c:`no_main`. A tool is free to compile a :t:`library crate` to a shared
-library.
-
 :dp:`fls_Mf62VqAhoZ3c`
-A :t:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
-A tool is free to compile a :t:`proc-macro crate` to a shared library.
+A :t:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.
 
 :dp:`fls_RJJmN4tP7j4m`
 A :t:`proc-macro crate` shall not declare :t:`[item]s` in its :t:`crate root
@@ -244,3 +251,28 @@ Program Entry Point
 :dp:`fls_dp64b08em9BJ`
 A :t:`program entry point` is a :t:`function` that is invoked at the start of
 a Rust program.
+
+:dp:`fls_sbGnkm8Ephiu`
+A :t:`main function signature` is a :t:`function signature` subject to the
+following restrictions:
+
+* :dp:`fls_o4fxok23134r`
+  It lacks :t:`[function qualifier]s` ``async`` and ``unsafe``,
+
+* :dp:`fls_bk755pvc1l53`
+  Its :t:`ABI` is Rust,
+
+* :dp:`fls_a3je4wc53bmo`
+  It lacks :t:`[generic parameter]s`,
+
+* :dp:`fls_w8q15zp7kyl0`
+  It lacks :t:`[function parameter]s`,
+
+* :dp:`fls_4psnfphsgdek`
+  It lacks a :t:`return type`,
+
+* :dp:`fls_m7xfrhqif74`
+  It lacks a :t:`where clause`,
+
+* :dp:`fls_qq9fzrw4aykd`
+  It has a :t:`function body`.

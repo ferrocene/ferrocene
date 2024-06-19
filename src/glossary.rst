@@ -655,9 +655,7 @@ binary crate
 ^^^^^^^^^^^^
 
 :dp:`fls_8gfe7hajxkd7`
-A :dt:`binary crate` is a :t:`crate` that has a :t:`function` in scope of its
-:t:`crate root module` under the :t:`name` ``main`` with a :t:`main function
-signature`.
+A :dt:`binary crate` is a :t:`crate` whose :t:`crate type` is ``bin``.
 
 .. _fls_or4o65fyt28y:
 
@@ -1567,6 +1565,16 @@ crate root module
 :dp:`fls_oo4nmqv78wno`
 A :dt:`crate root module` is the root of the nested :t:`module` tree of a
 :t:`crate`.
+
+.. _fls_lVpE4uFDsXH4:
+
+crate type
+^^^^^^^^^^
+
+:dp:`fls_eaxsgPMFNH7f`
+The :dt:`crate type` of a :t:`crate` is the value of the :t:`attribute`
+``crate_type`` of a :t:`crate` or the value of ``--crate-type`` flag passed to
+the tool compiling the :t:`crate`.
 
 .. _fls_76cj65bptdpn:
 
@@ -3726,17 +3734,6 @@ lexical element
 A :dt:`lexical element` is the most basic syntactic element in program
 text.
 
-.. _fls_r1sk7vdgckym:
-
-library crate
-^^^^^^^^^^^^^
-
-:dp:`fls_3m8lg4mdc2x0`
-A :dt:`library crate` is either a :t:`crate` that does not have a :t:`function`
-in scope of its :t:`crate root module` under the :t:`name` ``main`` with a
-:t:`main function signature` or a :t:`crate` subject to :t:`attribute`
-:c:`no_main`.
-
 .. _fls_vdhaa61g6kah:
 
 lifetime
@@ -5068,7 +5065,7 @@ proc-macro crate
 .. _fls_AjjdLZWiL9Tq:
 
 :dp:`fls_DfTszT1PjV7o`
-A :dt:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
+A :t:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.
 
 .. _fls_sp5wdsxwmxf:
 
@@ -5210,7 +5207,7 @@ A :dt:`range pattern` is a :t:`pattern` that matches :t:`[value]s` which fall
 within a range.
 
 :dp:`fls_r36uf3y2denr`
-See ``RangePattern.``
+See ``RangePattern``.
 
 .. _fls_3ls9xlgt8ei1:
 

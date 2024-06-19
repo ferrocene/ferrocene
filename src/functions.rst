@@ -176,35 +176,6 @@ An :t:`unsafe function` is a :t:`function` subject to :t:`keyword` ``unsafe``.
 :dp:`fls_5hn8fkf7rcvz`
 The invocation of an :t:`unsafe function` shall require :t:`unsafe context`.
 
-:dp:`fls_kNdIXl86g6Du`
-A :t:`function`'s :t:`name` shall not be the :t:`name` ``main`` unless it is in
-a :t:`crate root module` of a :t:`crate`.
-
-:dp:`fls_sbGnkm8Ephiu`
-A :t:`main function signature` is a :t:`function signature` subject to the
-following restrictions:
-
-* :dp:`fls_o4fxok23134r`
-  It lacks :t:`[function qualifier]s` ``async`` and ``unsafe``,
-
-* :dp:`fls_bk755pvc1l53`
-  Its :t:`ABI` is Rust,
-
-* :dp:`fls_a3je4wc53bmo`
-  It lacks :t:`[generic parameter]s`,
-
-* :dp:`fls_w8q15zp7kyl0`
-  It lacks :t:`[function parameter]s`,
-
-* :dp:`fls_4psnfphsgdek`
-  It lacks a :t:`return type`,
-
-* :dp:`fls_m7xfrhqif74`
-  It lacks a :t:`where clause`,
-
-* :dp:`fls_qq9fzrw4aykd`
-  It has a :t:`function body`.
-
 .. rubric:: Examples
 
 .. code-block:: rust

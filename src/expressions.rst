@@ -685,13 +685,13 @@ The :t:`type` of a :t:`block expression` is determined as follows:
 * :dp:`fls_ltEygvWDtHXE`
   If the :t:`block expression` contains at least one :t:`break expression` and
   has a :t:`tail expression`, then the :t:`type` is the :t:`unified type` of
-  the :t:`break types` of all :t:`[break expression]s` and the :t:`type` of the
+  the :t:`[break type]s` of all :t:`[break expression]s` and the :t:`type` of the
   :t:`tail expression`.
 
 * :dp:`fls_97v4fnekrRXI`
   Otherwise, if the :t:`block expression` contains at least one
   :t:`break expression`, then the :t:`type` is the :t:`unified type` of the
-  :t:`break types` of all :t:`[break expression]s`.
+  :t:`[break type]s` of all :t:`[break expression]s`.
 
 * :dp:`fls_ob76y2ymdd27`
   Otherwise, if the :t:`block expression` has a :t:`tail expression`, then the

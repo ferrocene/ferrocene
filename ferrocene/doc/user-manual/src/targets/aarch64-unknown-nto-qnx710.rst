@@ -11,8 +11,12 @@ ARMv8-A processors operating in Aarch64 mode.
 
 .. note::
     
-    QNX only supports :ref:`x86_64-unknown-linux-gnu` and
+   QNX SDP only supports :ref:`x86_64-unknown-linux-gnu` and
     :ref:`x86_64-pc-windows-msvc` as host platforms.
+
+    Currently, Ferrocene only tests cross compiling from :ref:`x86_64-unknown-linux-gnu`
+    to :target:`aarch64-unknown-nto-qnx710`. Compiling from :ref:`x86_64-pc-windows-msvc`
+    will be supported in the future.
     
     QNX does not support :ref:`aarch64-apple-darwin` as a host platform. QNX is
     deprecating support for :target:`x86_64-apple-darwin` as a host platform.

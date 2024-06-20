@@ -484,7 +484,6 @@ jobs:
           depth: 1
       - aws-oidc-auth
       - ferrocene-setup-windows
-      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh

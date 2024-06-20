@@ -1,0 +1,5 @@
+# If you edit this, also run:
+#    uv pip compile requirements.in -o requirements.txt
+boto3
+reuse
+pyyaml

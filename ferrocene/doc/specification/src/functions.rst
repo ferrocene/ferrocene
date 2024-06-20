@@ -76,10 +76,10 @@ A :t:`function` shall not specify a :t:`self parameter` unless it is an
 :t:`associated function`.
 
 :dp:`fls_AAYJDCNMJgTq`
-The :t:`type` of a :t:`parameter` is determined as follows:
+The :t:`type` of a :t:`function parameter` is determined as follows:
 
 * :dp:`fls_PGtp39f6gJwU`
-  If the :t:`parameter` is a :t:`self parameter` without a :s:`TypeSpecification`:
+  If the :t:`function parameter` is a :t:`self parameter` without a :s:`TypeSpecification`:
 
   * :dp:`fls_yZ2yIXxmy2ri`
     And the :t:`self parameter` has token ``&`` and :t:`keyword` ``mut``, then the :t:`type` is ``&mut Self``.

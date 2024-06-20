@@ -162,6 +162,10 @@ def is_syntax_identifier(identifier):
     # the problematic part of the identifier.
     if identifier.startswith("XID_"):
         identifier = identifier[len("XID_") :]
+    # An unfortunate case where we end up with a single letter prefix violating
+    # our rules. Special case this like above by avoiding the rule breakage.
+    if identifier == "CStringLiteral":
+        identifier = "CstringLiteral"
 
     expected = EXPECT_UPPER
     for char in identifier:

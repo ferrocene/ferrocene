@@ -3035,8 +3035,8 @@ A :t:`constructee` indicates the :t:`enum variant`, :t:`struct`, or :t:`union`
 whose value is being constructed by a :t:`struct expression`.
 
 :dp:`fls_uib1ml41mfrn`
-A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`,
-a :t:`struct value`, or a :t:`union value` to be used as a base for
+A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`, or
+a :t:`struct value` to be used as a base for
 construction in a :t:`struct expression`.
 
 :dp:`fls_gfu267bpl9ql`
@@ -3870,7 +3870,7 @@ While Loops
        $$while$$ IterationExpression LoopBody
 
    IterationExpression ::=
-       Expression
+       SubjectExpression
 
 .. rubric:: Legality Rules
 

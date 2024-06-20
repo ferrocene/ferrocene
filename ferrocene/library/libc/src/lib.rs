@@ -2,7 +2,6 @@
 #![crate_name = "libc"]
 #![crate_type = "rlib"]
 #![allow(
-    dead_code, // Ferrocene specific
     elided_lifetimes_in_paths, // Ferrocene specific
     hidden_glob_reexports, // Ferrocene specific
     ambiguous_glob_reexports, // Ferrocene specific

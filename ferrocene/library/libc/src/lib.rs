@@ -2,6 +2,10 @@
 #![crate_name = "libc"]
 #![crate_type = "rlib"]
 #![allow(
+    dead_code, // Ferrocene specific
+    elided_lifetimes_in_paths, // Ferrocene specific
+    hidden_glob_reexports, // Ferrocene specific
+    ambiguous_glob_reexports, // Ferrocene specific
     renamed_and_removed_lints, // Keep this order.
     unknown_lints, // Keep this order.
     bad_style,
@@ -12,11 +16,6 @@
     redundant_semicolons,
     unused_macros,
     unused_macro_rules,
-    // Ferrocene-specific:
-    dead_code,
-    elided_lifetimes_in_paths,
-    hidden_glob_reexports,
-    ambiguous_glob_reexports
 )]
 #![cfg_attr(libc_deny_warnings, deny(warnings))]
 // Attributes needed when building as part of the standard library

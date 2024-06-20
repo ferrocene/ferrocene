@@ -806,7 +806,7 @@ Union Types
 
 :dp:`fls_nskmnzq95yqm`
 A :t:`union type` is an :t:`abstract data type` that is a sum of other
-:t:`types`.
+:t:`[type]s`.
 
 :dp:`fls_I5fN5Fmo5CyK`
 A :t:`union` without any :t:`[union field]s` is rejected, but may still be consumed by
@@ -1431,7 +1431,7 @@ For a :t:`thin pointer`, the :t:`size` and :t:`alignment` are those of :t:`type`
 
 :dp:`fls_nrqG8i3fmpm4`
 For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of
-a :c:`thin pointer`.
+a :t:`thin pointer`.
 
 :dp:`fls_e5hivr6m5s3h`
 For a :t:`fat pointer`, the :t:`size` and :t:`alignment` are tool-defined, but

@@ -410,7 +410,7 @@ declaration of ``crate_visible_function``.
    crate::outer_module::inner_module::crate_visible_function();
 
 :dp:`fls_no853u27p4f3`
-The following is an :t:`unqualified path expression`` with a generic argument.
+The following is an :t:`unqualified path expression` with a generic argument.
 
 .. code-block:: rust
 

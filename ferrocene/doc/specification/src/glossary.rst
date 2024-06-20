@@ -106,7 +106,7 @@ adjusted call operand
 
 :dp:`fls_mchqbc64iu0u`
 An :dt:`adjusted call operand` is a :t:`call operand` with possible
-:t:`auto dereferencing` adjustments.
+:t:`auto-dereferencing` adjustments.
 
 .. _fls_j775guurkgo4:
 

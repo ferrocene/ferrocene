@@ -2,7 +2,6 @@
 #![crate_name = "libc"]
 #![crate_type = "rlib"]
 #![allow(
-    dead_code, // Ferrocene specific
     elided_lifetimes_in_paths, // Ferrocene specific
     hidden_glob_reexports, // Ferrocene specific
     ambiguous_glob_reexports, // Ferrocene specific
@@ -16,6 +15,10 @@
     redundant_semicolons,
     unused_macros,
     unused_macro_rules,
+    // FIXME: temporarily allow dead_code to fix CI:
+    // - https://github.com/rust-lang/libc/issues/3740
+    // - https://github.com/rust-lang/rust/pull/126456
+    dead_code,
 )]
 #![cfg_attr(libc_deny_warnings, deny(warnings))]
 // Attributes needed when building as part of the standard library

@@ -421,7 +421,7 @@ the :t:`token` stream produced from the related :s:`EnumDeclaration`,
 
 :dp:`fls_H5ipqqlH3pJh`
 A :t:`derive macro` adds all its declared :t:`[derive helper attribute]s` into
-the :t:`derive helper attribute scope` of the :t:`abstract data type` the
+the :t:`derive helper attribute` scope of the :t:`abstract data type` the
 :t:`attribute` is attached to.
 
 :dp:`fls_mobky5ck1mi`

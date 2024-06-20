@@ -455,6 +455,15 @@ associated trait function
 An :dt:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+.. _fls_fufF4UmzLg5G:
+
+associated trait implementation function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_bzdXloUGlVSC`
+An :dt:`associated trait implementation function` is an :t:`associated function`
+that appears within a :t:`trait implementation`.
+
 .. _fls_47xtji9Pk8Lw:
 
 associated trait implementation item
@@ -1025,6 +1034,18 @@ C signed int type
 
 :dp:`fls_8QIcvapJehqY`
 :dt:`C signed int type` is the `signed int` :t:`type` of the :t:`C` language.
+
+.. _fls_roz4WXH5JZFj:
+
+c string literal
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_g3NHtaOhTB7g`
+A :dt:`c string literal` is a :t:`literal` that consists of multiple characters
+with an implicit 0x00 byte appended to it.
+
+:dp:`fls_FZ6QSpjmVme5`
+See :s:`CStringLiteral`.
 
 .. _fls_Egfa8tdbqllA:
 
@@ -4537,7 +4558,19 @@ numeric literal
 A :dt:`numeric literal` is a :t:`literal` that denotes a number.
 
 :dp:`fls_swue4tma9fmf`
-See ``NumericLiteral.``
+See :s:`NumericLiteral`.
+
+.. _fls_CmvuNXmowCz8:
+
+numeric literal pattern
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_azqQ3JxD5Lt7`
+A :dt:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
+literal`.
+
+:dp:`fls_QYDZm7pKy1nW`
+See :s:`LiteralPattern`.
 
 .. _fls_rayjriyofmpa:
 
@@ -5277,7 +5310,19 @@ A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does
 not recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
-See ``RawByteStringLiteral.``
+See :s:`RawByteStringLiteral`.
+
+.. _fls_yGGvg3e0nPOh:
+
+raw c string literal
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qhWBzqoYZL0e`
+A :dt:`raw c string literal` is a :t:`simple c string literal` that does not
+recognize :t:`[escaped character]s`.
+
+:dp:`fls_WpFJyq6q4k6E`
+See :s:`RawCStringLiteral`.
 
 .. _fls_uv4dyt4gi32x:
 
@@ -6014,6 +6059,19 @@ of multiple :s:`[AsciiCharacter]s`.
 
 :dp:`fls_OfI70zK68TnQ`
 See :s:`SimpleByteStringLiteral`.
+
+.. _fls_fx2hhB0HHSUG:
+
+simple c string literal
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qoHXrmds9SgI`
+A :dt:`simple c string literal` is any :t:`Unicode` character except characters
+0x0D (carriage return), 0x22 (quotation mark), 0x5C (reverse solidus) and 0x00
+(null byte).
+
+:dp:`fls_ggm5FNUqg9EY`
+See :s:`SimpleCStringLiteral`.
 
 .. _fls_6mcm7xdcyn40:
 

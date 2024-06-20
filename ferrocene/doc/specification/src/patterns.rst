@@ -266,6 +266,14 @@ Literal Patterns
 :dp:`fls_pah15qa54irs`
 A :t:`literal pattern` is a :t:`pattern` that matches a :t:`literal`.
 
+:dp:`fls_COQKJC0dvtNO`
+A :t:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
+literal`.
+
+:dp:`fls_JP8YSbxSN0Ym`
+A :t:`numeric literal pattern`'s :t:`numeric literal` value shall not be a IEEE
+floating-point ``NaN``.
+
 :dp:`fls_co60bzvwashg`
 The :t:`type` of a :t:`literal pattern` is the :t:`type` of the specified
 :t:`literal`.

@@ -15,7 +15,6 @@ Installation
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25, 5
 
    * - Error identifier
      - Use case
@@ -39,7 +38,6 @@ Rust Driver
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25, 5
 
    * - Error identifier
      - Use case
@@ -148,7 +146,6 @@ Rust Front-End
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25, 5
 
    * - Error identifier
      - Use case
@@ -226,7 +223,6 @@ LLVM
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25, 5
 
    * - Error identifier
      - Use case
@@ -306,7 +302,6 @@ Linking
 .. list-table::
    :align: left
    :header-rows: 1
-   :widths: 15, 15, 25, 20, 25, 5
 
    * - Error identifier
      - Use case

@@ -36,8 +36,7 @@ RUN <<-EOF
 
     apt-get update
     # Update all the dependencies
-    # apt-get upgrade -y
-    
+    apt-get upgrade -y
 
     # Install required packages
     apt-install \

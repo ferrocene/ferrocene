@@ -8,9 +8,9 @@
 
    .. cli:option:: --check
 
-      Check if the input is formatted correctly.
+      Check if the input is well-formatted.
 
-      Exits with status code 0 if input is formatted correctly.
+      Exits with status code 0 if input is well-formatted.
       Exits with status code 1 and prints a diff if formatting is not correct.
 
    .. cli:option:: --emit [files|stdout]
@@ -24,15 +24,15 @@
 
       Backup any modified files.
 
-      Before a file is modified, rustfmt will create a copy of it in the same directory,
-      with the ``.bk`` extension.
-      Note that existing ``.bk`` files are over-written.
+      Before a file is modified, rustfmt will create a copy of it in the same
+      path, with the ``.bk`` extension. Note that existing ``.bk`` files are
+      silently over-written.
 
    .. cli:option:: --config-path
 
-      Recursively searches the given path for the ``rustfmt.toml`` or ``.rustfmt.toml`` config file.
-      If not found, it reverts to the default behavior of searching the parent directories of the
-      file to be formatted.
+      Recursively searches the given path for the ``rustfmt.toml`` or
+      ``.rustfmt.toml`` config file. If not found, it reverts to the default
+      behavior of searching the parent directories of the file to be formatted.
 
    .. cli:option:: --edition [2015|2018|2021]
 
@@ -47,19 +47,23 @@
 
    .. cli:option:: --print-config [Path for the configuration file]
 
-      Dumps a default or minimal config to PATH. A minimal config is the subset of the current config file used for formatting the current program. ``current`` writes to stdout current config as if formatting the file at PATH.
+      Dumps a default or minimal config to PATH. A minimal config is the subset
+      of the current config file used for formatting the current program.
+      ``current`` writes to stdout current config as if formatting the file at
+      PATH.
 
    .. cli:option:: --files-with-diff
 
       Short option: ``-l``.
 
-      Prints the names of mismatched files that were formatted.
-      When used with --check,
-      this option instead prints the names of files that are not well-formatted.
+      Prints the names of mismatched files that were formatted. When used with
+      ``--check``, this option instead prints the names of files that are not
+      well-formatted.
 
    .. cli:option:: --config [key1=val1,key2=val2...]
 
-      Set options from command line. These settings take priority over .rustfmt.toml
+      Set options from command line. These settings take priority over
+      ``.rustfmt.toml``
 
    .. cli:option:: --verbose
 
@@ -83,5 +87,6 @@
 
       Short option: ``-h``.
 
-      Show this message or help about a specific topic: ``config`` or ``file-lines``
+      Show this message or help about a specific topic: ``config`` or
+      ``file-lines``
 

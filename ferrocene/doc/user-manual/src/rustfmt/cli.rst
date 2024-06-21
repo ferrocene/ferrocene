@@ -5,6 +5,7 @@
 ==================================
 
 .. cli:program:: rustfmt
+   :no_traceability_matrix:
 
    .. cli:option:: --check
 
@@ -88,4 +89,3 @@
 
       Show this message or help about a specific topic: ``config`` or
       ``file-lines``.
-

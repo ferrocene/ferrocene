@@ -1,14 +1,19 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+
+from dataclasses import dataclass
+import re
+import string
+
 from docutils import nodes
+from docutils.parsers.rst import directives
+
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
-import re
 import sphinx
-import string
 
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
@@ -18,17 +23,28 @@ class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
+    option_spec = {"no_traceability_matrix": directives.flag}
 
     def run(self):
+        # if there already is program data in storage, a ProgramDirective is
+        # within a ProgramDirective, which isn't supported
         if PROGRAM_STORAGE in self.env.temp_data:
             warn("cli:program inside cli:program isn't supported", self.get_location())
             return []
-        self.env.temp_data[PROGRAM_STORAGE] = self.arguments[0]
 
+        # store arguments, so they can be accessed by child `OptionDirective`s
+        self.env.temp_data[PROGRAM_STORAGE] = ProgramStorage(
+            self.arguments[0],
+            "no_traceability_matrix" in self.options,
+        )
+
+        # parse and process content of `ProgramDirective`` (one or more `OptionDirective`s)
         node = nodes.container()
         self.state.nested_parse(self.content, self.content_offset, node)
 
+        # clear program storage
         del self.env.temp_data[PROGRAM_STORAGE]
+
         return [node]
 
 
@@ -43,11 +59,16 @@ class OptionDirective(ObjectDescription):
     def add_target_and_index(self, name_cls, sig, signode):
         if PROGRAM_STORAGE not in self.env.temp_data:
             warn("cli:option outside cli:program isn't supported", self.get_location())
-            program = "PLACEHOLDER"
+            program_storage = ProgramStorage("PLACEHOLDER", False)
         else:
-            program = self.env.temp_data[PROGRAM_STORAGE]
+            program_storage: ProgramStorage = self.env.temp_data[PROGRAM_STORAGE]
 
-        option = Option(self.env.docname, program, sig)
+        option = Option(
+            self.env.docname,
+            program_storage.program_name,
+            sig,
+            program_storage.no_traceability_matrix,
+        )
 
         signode["ids"].append(option.id())
 
@@ -61,10 +82,11 @@ ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 class Option:
-    def __init__(self, document, program, option):
+    def __init__(self, document, program, option, no_traceability_matrix):
         self.document = document
         self.program = program
         self.option = option
+        self.no_traceability_matrix = no_traceability_matrix
 
     def id(self):
         option = (
@@ -149,3 +171,9 @@ def warn(message, location):
 
 def setup(app):
     app.add_domain(CliDomain)
+
+
+@dataclass
+class ProgramStorage:
+    program_name: str
+    no_traceability_matrix: bool

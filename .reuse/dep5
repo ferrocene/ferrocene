@@ -115,6 +115,10 @@ Files: ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64
 Copyright: Colin Watson
 License: GPL-3.0-or-later
 
+Files: requirements.txt
+Copyright: The Ferrocene Developers
+License: MIT OR Apache-2.0
+
 # Reuse cannot process the LLVM source tree, and so the copyrights for the LLVM
 # submodule are written out here manually. The collect-licence-metadata tool
 # has a specific exception coded within it to ignore ./src/llvm-project so

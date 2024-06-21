@@ -24,9 +24,9 @@
 
       Backup any modified files.
 
-      Before a file is modified, rustfmt will create a copy of it in the same
-      path, with the ``.bk`` extension. Note that existing ``.bk`` files are
-      silently over-written.
+      Before a file is modified, rustfmt will create a copy with the same
+      path, except with ``.rs`` extension replaced by ``.bk``.
+      Note that existing ``.bk`` files are silently over-written.
 
    .. cli:option:: --config-path
 
@@ -62,31 +62,30 @@
 
    .. cli:option:: --config [key1=val1,key2=val2...]
 
-      Set options from command line. These settings take priority over
-      ``.rustfmt.toml``
+      Set options from command line. These settings take priority over ``.rustfmt.toml``.
 
    .. cli:option:: --verbose
 
       Short option: ``-v``.
 
-      Print verbose output
+      Print verbose output.
 
    .. cli:option:: --quiet
 
       Short option: ``-q``.
 
-      Print less output
+      Print less output.
 
    .. cli:option:: --version
 
       Short option: ``-V``.
 
-      Show version information
+      Show version information.
 
    .. cli:option:: --help [=TOPIC]
 
       Short option: ``-h``.
 
       Show this message or help about a specific topic: ``config`` or
-      ``file-lines``
+      ``file-lines``.
 

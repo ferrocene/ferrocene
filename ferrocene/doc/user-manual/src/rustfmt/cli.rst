@@ -24,9 +24,9 @@
 
       Backup any modified files.
 
-      Before a file is modified, rustfmt will create a copy of it in the same
-      path, with the ``.bk`` extension. Note that existing ``.bk`` files are
-      silently over-written.
+      Before a file is modified, rustfmt will create a copy with the same
+      path, except with ``.rs`` extension replaced by ``.bk``.
+      Note that existing ``.bk`` files are silently over-written.
 
    .. cli:option:: --config-path
 

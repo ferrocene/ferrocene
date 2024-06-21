@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Using ``rustfmt``
-=================
+Using
+=====
 
 ``rustfmt`` formats Rust code or checks if Rust code is well-formatted.
 

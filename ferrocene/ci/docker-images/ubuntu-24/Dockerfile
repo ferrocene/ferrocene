@@ -57,8 +57,6 @@ EOF
 # and the version in the Ubuntu 24.04 is a snap.
 RUN <<-EOF
     set -xe
-    URL=""
-    SHA=""
     if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
         ARCH="x86_64"
         SHA="0556162145e68889a27f835307b9dad56de60fda4256d2e246e9699f24535a08"

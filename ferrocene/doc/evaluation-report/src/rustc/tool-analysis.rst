@@ -51,8 +51,11 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - An used environment variable is set to an incorrect value
-     - Undefined behavior
+     - | An used environment
+       | variable is set to an
+       | incorrect value
+     - | Undefined
+       | behavior
      - :id:`RUSTC_AVD_CHECK_CLEAN_ENV_002`
      - YES
    * - .. id:: RUSTC_ERR_DRIVER_03
@@ -61,8 +64,10 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - An invalid option is passed
-     - Undefined behavior
+     - | An invalid option is
+       | passed
+     - | Undefined
+       | behavior
      - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - YES
    * - .. id:: RUSTC_ERR_DRIVER_04
@@ -71,8 +76,10 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - Error diagnostics are not correctly emited
-     - Undefined behavior
+     - | Error diagnostics are
+       | not correctly emited
+     - | Undefined
+       | behavior
      - | :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`,
        | :id:`RUSTC_AVD_TEST_007`
      - NO
@@ -82,8 +89,11 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - The output is generated with missing part
-     - Wrong code
+     - | The output is
+       | generated with
+       | missing part
+     - | Wrong
+       | code
      - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - NO
    * - .. id:: RUSTC_ERR_DRIVER_06
@@ -92,8 +102,12 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - The behavior is incorrect because of concurrent modification
-     - Undefined behavior
+     - | The behavior is
+       | incorrect because
+       | of concurrent
+       | modification
+     - | Undefined
+       | behavior
      - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
      - NO
    * - .. id:: RUSTC_ERR_DRIVER_07
@@ -102,8 +116,10 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - A warning is generated instead of an error
-     - Undefined behavior
+     - | A warning is generated
+       | instead of an error
+     - | Undefined
+       | behavior
      - :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
      - NO
    * - .. id:: RUSTC_ERR_DRIVER_08
@@ -112,8 +128,10 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - The compilation has a wrong behavior
-     - Wrong code
+     - | The compilation has
+       | a wrong behavior
+     - | Wrong
+       | code
      - :id:`RUSTC_AVD_TEST_007`
      - NO
    * - .. id:: RUSTC_ERR_DRIVER_09
@@ -122,8 +140,11 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - An incomplete input is accepted leading to an undefined behavior
-     - Undefined behavior
+     - | An incomplete input is
+       | accepted leading to an
+       | undefined behavior
+     - | Undefined
+       | behavior
      - :id:`RUSTC_AVD_TEST_007`
      - YES
    * - .. id:: RUSTC_ERR_DRIVER_10
@@ -132,8 +153,11 @@ Rust Driver
        | :id:`RUSTC_UC3_EXEC`,
        | :id:`RUSTC_UC4_EXEC_RLIB`,
        | :id:`RUSTC_UC5_EXEC_CLIB`
-     - Some object files are silently not generated
-     - Use an artifact from a previous build
+     - | Some object files are
+       | silently not generated
+     - | Use an artifact
+       | from a previous
+       | build
      - :id:`RUSTC_AVD_CLEAN_004`
      - NO
 

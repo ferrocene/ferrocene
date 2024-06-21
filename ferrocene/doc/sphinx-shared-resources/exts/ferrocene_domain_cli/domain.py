@@ -1,14 +1,18 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+
+import re
+import string
+
 from docutils import nodes
+from docutils.parsers.rst import directives
+
+import sphinx
 from sphinx import addnodes
 from sphinx.directives import SphinxDirective, ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
-import re
-import sphinx
-import string
 
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
@@ -18,6 +22,7 @@ class ProgramDirective(SphinxDirective):
     has_content = True
     required_arguments = 1
     final_argument_whitespace = True
+    option_spec = {"no_traceability_matrix": directives.flag}
 
     def run(self):
         if PROGRAM_STORAGE in self.env.temp_data:
@@ -29,7 +34,14 @@ class ProgramDirective(SphinxDirective):
         self.state.nested_parse(self.content, self.content_offset, node)
 
         del self.env.temp_data[PROGRAM_STORAGE]
-        return [node]
+
+        node_list = [node]
+
+        generate_traceability_matrix = "no_traceability_matrix" in self.options
+        if generate_traceability_matrix:
+            node_list.append(nodes.paragraph(text="WIP"))
+
+        return node_list
 
 
 class OptionDirective(ObjectDescription):

@@ -5,6 +5,7 @@
 ==================================
 
 .. cli:program:: rustfmt
+   :no_traceability_matrix:
 
    .. cli:option:: --check
 

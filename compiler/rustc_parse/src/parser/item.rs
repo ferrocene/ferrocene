@@ -633,7 +633,7 @@ impl<'a> Parser<'a> {
                     // This notably includes paths passed through `ty` macro fragments (#46438).
                     TyKind::Path(None, path) => path,
                     other => {
-                        if let TyKind::ImplTrait(_, bounds, None) = other
+                        if let TyKind::ImplTrait(_, bounds) = other
                             && let [bound] = bounds.as_slice()
                         {
                             // Suggest removing extra `impl` keyword:
@@ -707,15 +707,25 @@ impl<'a> Parser<'a> {
         };
 
         let (ident, item_kind) = if self.eat(&token::PathSep) {
-            let (suffixes, _) = self.parse_delim_comma_seq(Delimiter::Brace, |p| {
-                Ok((p.parse_path_segment_ident()?, rename(p)?))
-            })?;
+            let suffixes = if self.eat(&token::BinOp(token::Star)) {
+                None
+            } else {
+                let parse_suffix = |p: &mut Self| Ok((p.parse_path_segment_ident()?, rename(p)?));
+                Some(self.parse_delim_comma_seq(Delimiter::Brace, parse_suffix)?.0)
+            };
             let deleg = DelegationMac { qself, prefix: path, suffixes, body: body(self)? };
             (Ident::empty(), ItemKind::DelegationMac(Box::new(deleg)))
         } else {
             let rename = rename(self)?;
             let ident = rename.unwrap_or_else(|| path.segments.last().unwrap().ident);
-            let deleg = Delegation { id: DUMMY_NODE_ID, qself, path, rename, body: body(self)? };
+            let deleg = Delegation {
+                id: DUMMY_NODE_ID,
+                qself,
+                path,
+                rename,
+                body: body(self)?,
+                from_glob: false,
+            };
             (ident, ItemKind::Delegation(Box::new(deleg)))
         };
 
@@ -1237,7 +1247,11 @@ impl<'a> Parser<'a> {
         // FIXME(#100717): needs variant for each `ItemKind` (instead of using `ItemKind::descr()`)
         let span = self.psess.source_map().guess_head_span(span);
         let descr = kind.descr();
-        self.dcx().emit_err(errors::BadItemKind { span, descr, ctx });
+        let help = match kind {
+            ItemKind::DelegationMac(deleg) if deleg.suffixes.is_none() => None,
+            _ => Some(()),
+        };
+        self.dcx().emit_err(errors::BadItemKind { span, descr, ctx, help });
         None
     }
 
@@ -1966,7 +1980,7 @@ impl<'a> Parser<'a> {
         if self.token.kind == token::Not {
             if let Err(mut err) = self.unexpected() {
                 // Encounter the macro invocation
-                err.subdiagnostic(self.dcx(), MacroExpandsToAdtField { adt_ty });
+                err.subdiagnostic(MacroExpandsToAdtField { adt_ty });
                 return Err(err);
             }
         }
@@ -2382,13 +2396,10 @@ impl<'a> Parser<'a> {
                             .into_iter()
                             .any(|s| self.prev_token.is_ident_named(s));
 
-                        err.subdiagnostic(
-                            self.dcx(),
-                            errors::FnTraitMissingParen {
-                                span: self.prev_token.span,
-                                machine_applicable,
-                            },
-                        );
+                        err.subdiagnostic(errors::FnTraitMissingParen {
+                            span: self.prev_token.span,
+                            machine_applicable,
+                        });
                     }
                     return Err(err);
                 }

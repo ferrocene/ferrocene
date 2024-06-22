@@ -11,9 +11,9 @@ Link with ISO 26262 Requirements
 #. Qualification of a software tool (Part 8 - Sections
    11.4.6, 11.4.7, 11.4.8, 11.4.9)
 
-Since this is the first Ferrocene qualification, consequently, Part 8 -
-Section 11.4.7 is not considered as applicable. Ferrocene confidence will
-be established starting from this qualified version.
+Though this is not the first Ferrocene qualification,
+Part 8 - Section 11.4.7 is not yet considered applicable,
+as there is no data collected of its use.
 
 In addition, Ferrocene follows an open source development model.
 Nevertheless, Ferrocene is the qualified version of the open source Rust

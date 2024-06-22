@@ -741,7 +741,6 @@ impl<'a> Builder<'a> {
                 tool::Rls,
                 tool::RustAnalyzer,
                 tool::RustAnalyzerProcMacroSrv,
-                tool::RustDemangler,
                 tool::Rustdoc,
                 tool::Clippy,
                 tool::CargoClippy,
@@ -783,7 +782,6 @@ impl<'a> Builder<'a> {
                 clippy::RemoteTestServer,
                 clippy::Rls,
                 clippy::RustAnalyzer,
-                clippy::RustDemangler,
                 clippy::Rustdoc,
                 clippy::Rustfmt,
                 clippy::RustInstaller,
@@ -856,7 +854,6 @@ impl<'a> Builder<'a> {
                 test::Miri,
                 test::CargoMiri,
                 test::Clippy,
-                test::RustDemangler,
                 test::CompiletestTest,
                 test::CrateRunMakeSupport,
                 test::RustdocJSStd,
@@ -934,7 +931,6 @@ impl<'a> Builder<'a> {
                 dist::Rls,
                 dist::RustAnalyzer,
                 dist::Rustfmt,
-                dist::RustDemangler,
                 dist::Clippy,
                 dist::Miri,
                 dist::LlvmTools,
@@ -959,6 +955,7 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
+<<<<<<< HEAD
                 // install::Docs,
                 // install::Std,
                 // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
@@ -988,6 +985,22 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::FlipLink,
                 crate::ferrocene::install::SelfTest,
                 crate::ferrocene::install::FerroceneDocs,
+=======
+                install::Docs,
+                install::Std,
+                // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
+                // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
+                // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
+                // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
+                install::Rustc,
+                install::Cargo,
+                install::RustAnalyzer,
+                install::Rustfmt,
+                install::Clippy,
+                install::Miri,
+                install::LlvmTools,
+                install::Src,
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
@@ -1104,23 +1117,12 @@ impl<'a> Builder<'a> {
     }
 
     pub fn doc_rust_lang_org_channel(&self) -> String {
-        // When using precompiled compiler from CI, we need to use CI rustc's channel and
-        // ignore `rust.channel` from the configuration. Otherwise most of the rustdoc tests
-        // will fail due to incompatible `DOC_RUST_LANG_ORG_CHANNEL`.
-        let channel = if let Some(commit) = self.config.download_rustc_commit() {
-            self.config
-                .read_file_by_commit(&PathBuf::from("src/ci/channel"), commit)
-                .trim()
-                .to_owned()
-        } else {
-            match &*self.config.channel {
-                "stable" => &self.version,
-                "beta" => "beta",
-                "nightly" | "dev" => "nightly",
-                // custom build of rustdoc maybe? link to the latest stable docs just in case
-                _ => "stable",
-            }
-            .to_owned()
+        let channel = match &*self.config.channel {
+            "stable" => &self.version,
+            "beta" => "beta",
+            "nightly" | "dev" => "nightly",
+            // custom build of rustdoc maybe? link to the latest stable docs just in case
+            _ => "stable",
         };
 
         format!("https://doc.rust-lang.org/{channel}")

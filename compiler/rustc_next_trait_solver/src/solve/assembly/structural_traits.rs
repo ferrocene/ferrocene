@@ -2,7 +2,7 @@
 //! traits, `Copy`/`Clone`.
 
 use rustc_ast_ir::{Movability, Mutability};
-use rustc_data_structures::fx::FxHashMap;
+use rustc_type_ir::data_structures::HashMap;
 use rustc_type_ir::fold::{TypeFoldable, TypeFolder, TypeSuperFoldable};
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
@@ -10,20 +10,20 @@ use rustc_type_ir::{self as ty, Interner, Upcast as _};
 use rustc_type_ir_macros::{TypeFoldable_Generic, TypeVisitable_Generic};
 use tracing::instrument;
 
-use crate::infcx::SolverDelegate;
+use crate::delegate::SolverDelegate;
 use crate::solve::{EvalCtxt, Goal, NoSolution};
 
 // Calculates the constituent types of a type for `auto trait` purposes.
 #[instrument(level = "trace", skip(ecx), ret)]
-pub(in crate::solve) fn instantiate_constituent_tys_for_auto_trait<Infcx, I>(
-    ecx: &EvalCtxt<'_, Infcx>,
+pub(in crate::solve) fn instantiate_constituent_tys_for_auto_trait<D, I>(
+    ecx: &EvalCtxt<'_, D>,
     ty: I::Ty,
 ) -> Result<Vec<ty::Binder<I, I::Ty>>, NoSolution>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
-    let tcx = ecx.interner();
+    let tcx = ecx.cx();
     match ty.kind() {
         ty::Uint(_)
         | ty::Int(_)
@@ -76,7 +76,7 @@ where
         }
 
         ty::CoroutineWitness(def_id, args) => Ok(ecx
-            .interner()
+            .cx()
             .bound_coroutine_hidden_types(def_id)
             .into_iter()
             .map(|bty| bty.instantiate(tcx, &args))
@@ -101,12 +101,12 @@ where
 }
 
 #[instrument(level = "trace", skip(ecx), ret)]
-pub(in crate::solve) fn instantiate_constituent_tys_for_sized_trait<Infcx, I>(
-    ecx: &EvalCtxt<'_, Infcx>,
+pub(in crate::solve) fn instantiate_constituent_tys_for_sized_trait<D, I>(
+    ecx: &EvalCtxt<'_, D>,
     ty: I::Ty,
 ) -> Result<Vec<ty::Binder<I, I::Ty>>, NoSolution>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
     match ty.kind() {
@@ -159,8 +159,8 @@ where
         //   "best effort" optimization and `sized_constraint` may return `Some`, even
         //   if the ADT is sized for all possible args.
         ty::Adt(def, args) => {
-            if let Some(sized_crit) = def.sized_constraint(ecx.interner()) {
-                Ok(vec![ty::Binder::dummy(sized_crit.instantiate(ecx.interner(), &args))])
+            if let Some(sized_crit) = def.sized_constraint(ecx.cx()) {
+                Ok(vec![ty::Binder::dummy(sized_crit.instantiate(ecx.cx(), &args))])
             } else {
                 Ok(vec![])
             }
@@ -169,12 +169,12 @@ where
 }
 
 #[instrument(level = "trace", skip(ecx), ret)]
-pub(in crate::solve) fn instantiate_constituent_tys_for_copy_clone_trait<Infcx, I>(
-    ecx: &EvalCtxt<'_, Infcx>,
+pub(in crate::solve) fn instantiate_constituent_tys_for_copy_clone_trait<D, I>(
+    ecx: &EvalCtxt<'_, D>,
     ty: I::Ty,
 ) -> Result<Vec<ty::Binder<I, I::Ty>>, NoSolution>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
     match ty.kind() {
@@ -222,10 +222,10 @@ where
 
         // only when `coroutine_clone` is enabled and the coroutine is movable
         // impl Copy/Clone for Coroutine where T: Copy/Clone forall T in (upvars, witnesses)
-        ty::Coroutine(def_id, args) => match ecx.interner().coroutine_movability(def_id) {
+        ty::Coroutine(def_id, args) => match ecx.cx().coroutine_movability(def_id) {
             Movability::Static => Err(NoSolution),
             Movability::Movable => {
-                if ecx.interner().features().coroutine_clone() {
+                if ecx.cx().features().coroutine_clone() {
                     let coroutine = args.as_coroutine();
                     Ok(vec![
                         ty::Binder::dummy(coroutine.tupled_upvars_ty()),
@@ -239,10 +239,10 @@ where
 
         // impl Copy/Clone for CoroutineWitness where T: Copy/Clone forall T in coroutine_hidden_types
         ty::CoroutineWitness(def_id, args) => Ok(ecx
-            .interner()
+            .cx()
             .bound_coroutine_hidden_types(def_id)
             .into_iter()
-            .map(|bty| bty.instantiate(ecx.interner(), &args))
+            .map(|bty| bty.instantiate(ecx.cx(), &args))
             .collect()),
     }
 }
@@ -304,9 +304,10 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
             let kind_ty = args.kind_ty();
             let sig = args.coroutine_closure_sig().skip_binder();
 
-            let coroutine_ty = if let Some(closure_kind) = kind_ty.to_opt_closure_kind()
-                && !args.tupled_upvars_ty().is_ty_var()
-            {
+            // FIXME: let_chains
+            let kind = kind_ty.to_opt_closure_kind();
+            let coroutine_ty = if kind.is_some() && !args.tupled_upvars_ty().is_ty_var() {
+                let closure_kind = kind.unwrap();
                 if !closure_kind.extends(goal_kind) {
                     return Err(NoSolution);
                 }
@@ -411,10 +412,11 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
             let kind_ty = args.kind_ty();
             let sig = args.coroutine_closure_sig().skip_binder();
             let mut nested = vec![];
-            let coroutine_ty = if let Some(closure_kind) = kind_ty.to_opt_closure_kind()
-                && !args.tupled_upvars_ty().is_ty_var()
-            {
-                if !closure_kind.extends(goal_kind) {
+
+            // FIXME: let_chains
+            let kind = kind_ty.to_opt_closure_kind();
+            let coroutine_ty = if kind.is_some() && !args.tupled_upvars_ty().is_ty_var() {
+                if !kind.unwrap().extends(goal_kind) {
                     return Err(NoSolution);
                 }
 
@@ -654,17 +656,17 @@ fn coroutine_closure_to_ambiguous_coroutine<I: Interner>(
 // This is unsound in general and once that is fixed, we don't need to
 // normalize eagerly here. See https://github.com/lcnr/solver-woes/issues/9
 // for more details.
-pub(in crate::solve) fn predicates_for_object_candidate<Infcx, I>(
-    ecx: &EvalCtxt<'_, Infcx>,
+pub(in crate::solve) fn predicates_for_object_candidate<D, I>(
+    ecx: &EvalCtxt<'_, D>,
     param_env: I::ParamEnv,
     trait_ref: ty::TraitRef<I>,
     object_bounds: I::BoundExistentialPredicates,
 ) -> Vec<Goal<I, I::Predicate>>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
-    let tcx = ecx.interner();
+    let tcx = ecx.cx();
     let mut requirements = vec![];
     requirements
         .extend(tcx.super_predicates_of(trait_ref.def_id).iter_instantiated(tcx, &trait_ref.args));
@@ -683,7 +685,7 @@ where
         );
     }
 
-    let mut replace_projection_with = FxHashMap::default();
+    let mut replace_projection_with = HashMap::default();
     for bound in object_bounds {
         if let ty::ExistentialPredicate::Projection(proj) = bound.skip_binder() {
             let proj = proj.with_self_ty(tcx, trait_ref.self_ty());
@@ -710,39 +712,43 @@ where
         .collect()
 }
 
-struct ReplaceProjectionWith<'a, Infcx: SolverDelegate<Interner = I>, I: Interner> {
-    ecx: &'a EvalCtxt<'a, Infcx>,
+struct ReplaceProjectionWith<'a, D: SolverDelegate<Interner = I>, I: Interner> {
+    ecx: &'a EvalCtxt<'a, D>,
     param_env: I::ParamEnv,
-    mapping: FxHashMap<I::DefId, ty::Binder<I, ty::ProjectionPredicate<I>>>,
+    mapping: HashMap<I::DefId, ty::Binder<I, ty::ProjectionPredicate<I>>>,
     nested: Vec<Goal<I, I::Predicate>>,
 }
 
-impl<Infcx: SolverDelegate<Interner = I>, I: Interner> TypeFolder<I>
-    for ReplaceProjectionWith<'_, Infcx, I>
+impl<D: SolverDelegate<Interner = I>, I: Interner> TypeFolder<I>
+    for ReplaceProjectionWith<'_, D, I>
 {
-    fn interner(&self) -> I {
-        self.ecx.interner()
+    fn cx(&self) -> I {
+        self.ecx.cx()
     }
 
     fn fold_ty(&mut self, ty: I::Ty) -> I::Ty {
-        if let ty::Alias(ty::Projection, alias_ty) = ty.kind()
-            && let Some(replacement) = self.mapping.get(&alias_ty.def_id)
-        {
-            // We may have a case where our object type's projection bound is higher-ranked,
-            // but the where clauses we instantiated are not. We can solve this by instantiating
-            // the binder at the usage site.
-            let proj = self.ecx.instantiate_binder_with_infer(*replacement);
-            // FIXME: Technically this equate could be fallible...
-            self.nested.extend(
-                self.ecx
-                    .eq_and_get_goals(
-                        self.param_env,
-                        alias_ty,
-                        proj.projection_term.expect_ty(self.ecx.interner()),
-                    )
-                    .expect("expected to be able to unify goal projection with dyn's projection"),
-            );
-            proj.term.expect_ty()
+        if let ty::Alias(ty::Projection, alias_ty) = ty.kind() {
+            if let Some(replacement) = self.mapping.get(&alias_ty.def_id) {
+                // We may have a case where our object type's projection bound is higher-ranked,
+                // but the where clauses we instantiated are not. We can solve this by instantiating
+                // the binder at the usage site.
+                let proj = self.ecx.instantiate_binder_with_infer(*replacement);
+                // FIXME: Technically this equate could be fallible...
+                self.nested.extend(
+                    self.ecx
+                        .eq_and_get_goals(
+                            self.param_env,
+                            alias_ty,
+                            proj.projection_term.expect_ty(self.ecx.cx()),
+                        )
+                        .expect(
+                            "expected to be able to unify goal projection with dyn's projection",
+                        ),
+                );
+                proj.term.expect_ty()
+            } else {
+                ty.super_fold_with(self)
+            }
         } else {
             ty.super_fold_with(self)
         }

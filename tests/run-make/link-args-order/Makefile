@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 # ignore-msvc
 
 include ../tools.mk

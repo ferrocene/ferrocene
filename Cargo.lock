@@ -1130,6 +1130,7 @@ dependencies = [
  "clippy_config",
  "itertools 0.12.1",
  "rustc-semver",
+ "rustc_apfloat",
 ]
 
 [[package]]
@@ -4286,14 +4287,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust-demangler"
-version = "0.0.1"
-dependencies = [
- "regex",
- "rustc-demangle",
-]
-
-[[package]]
 name = "rustbook"
 version = "0.1.0"
 dependencies = [
@@ -5575,6 +5568,7 @@ dependencies = [
 name = "rustc_span"
 version = "0.0.0"
 dependencies = [
+ "derivative",
  "indexmap",
  "itoa",
  "md-5",
@@ -5719,6 +5713,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.5.0",
  "derivative",
+ "indexmap",
  "rustc_ast_ir",
  "rustc_data_structures",
  "rustc_index",

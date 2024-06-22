@@ -878,9 +878,9 @@ impl<'tcx> InferCtxt<'tcx> {
 
         self.enter_forall(predicate, |ty::SubtypePredicate { a_is_expected, a, b }| {
             if a_is_expected {
-                Ok(self.at(cause, param_env).sub(DefineOpaqueTypes::No, a, b))
+                Ok(self.at(cause, param_env).sub(DefineOpaqueTypes::Yes, a, b))
             } else {
-                Ok(self.at(cause, param_env).sup(DefineOpaqueTypes::No, b, a))
+                Ok(self.at(cause, param_env).sup(DefineOpaqueTypes::Yes, b, a))
             }
         })
     }
@@ -1719,7 +1719,7 @@ struct InferenceLiteralEraser<'tcx> {
 }
 
 impl<'tcx> TypeFolder<TyCtxt<'tcx>> for InferenceLiteralEraser<'tcx> {
-    fn interner(&self) -> TyCtxt<'tcx> {
+    fn cx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
 
@@ -1859,7 +1859,7 @@ fn replace_param_and_infer_args_with_placeholder<'tcx>(
     }
 
     impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReplaceParamAndInferWithPlaceholder<'tcx> {
-        fn interner(&self) -> TyCtxt<'tcx> {
+        fn cx(&self) -> TyCtxt<'tcx> {
             self.tcx
         }
 

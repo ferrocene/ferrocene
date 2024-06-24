@@ -42,6 +42,7 @@ shipped as a preview.
   - ``clippy``
   - ``rustfmt``
   - ``rust-analyzer``
+  - ``rust-demangler``
 
 Changes
 -------

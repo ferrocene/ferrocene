@@ -955,7 +955,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
-<<<<<<< HEAD
                 // install::Docs,
                 // install::Std,
                 // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
@@ -985,22 +984,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::FlipLink,
                 crate::ferrocene::install::SelfTest,
                 crate::ferrocene::install::FerroceneDocs,
-=======
-                install::Docs,
-                install::Std,
-                // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
-                // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
-                // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
-                // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
-                install::Rustc,
-                install::Cargo,
-                install::RustAnalyzer,
-                install::Rustfmt,
-                install::Clippy,
-                install::Miri,
-                install::LlvmTools,
-                install::Src,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,

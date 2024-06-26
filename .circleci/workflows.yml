@@ -255,6 +255,27 @@ jobs:
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
+  aarch64-linux-avh-test:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: ""
+      FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+
+    steps:
+      - ferrocene-job-test-avh:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          avh-host: laughing-tadpole
+
   x86_64-linux-traceability-matrix:
     executor: docker-ubuntu-20
     resource_class: medium # 2-core
@@ -592,6 +613,30 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
+      # - build-docker:
+      #     name: build-docker--ubuntu-20
+      #     image: ubuntu-20
+      #     tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+      #     rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
+      # - x86_64-linux-llvm:
+      #     requires:
+      #       - build-docker--ubuntu-20
+      # - x86_64-linux-build:
+      #     requires:
+      #       - x86_64-linux-llvm
+      # - aarch64-linux-avh-test:
+      #     name: aarch64-linux-avh-compiletest
+      #     job: test:compiletest
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+      # - aarch64-linux-avh-test:
+      #     name: aarch64-linux-avh-test-library
+      #     job: test:library
+      #     resource-class: large # 4-core
+      #     requires:
+      #       - x86_64-linux-build
+
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -819,6 +864,66 @@ commands:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
       - ferrocene-ci
+
+
+  ferrocene-job-test-avh:
+    description: Collection of steps for test jobs in AVH
+    parameters:
+      docker-image-tag:
+        type: string
+      restore-from-job:
+        type: string
+      avh-host:
+        type: string
+        default: ""
+      avh-source-port:
+        type: integer
+        default: 12345
+      avh-dest-port:
+        type: integer
+        default: 12345
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Restore files from the << parameters.restore-from-job >> job
+          command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+
+      - run:
+          name: Pull the Docker image used for CI
+          command: |
+            aws ecr get-login-password --region us-east-1 \
+              | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
+
+      - run:
+          name: Start AVH host
+          command: ./ferrocene/ci/scripts/avh.py start << parameters.avh-host >>
+
+      - run:
+          name: Create AVH port forward in the background
+          background: true
+          command: ./ferrocene/ci/scripts/avh.py port-forward << parameters.avh-host >> << parameters.avh-source-port >> << parameters.avh-dest-port >>
+         
+      - ferrocene-ci:
+          wrapper: |
+            docker run \
+              --rm \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+              --workdir /home/ci/project \
+              --volume $(pwd):/home/ci/project \
+              --volume /tmp/emulator:/tmp/emulator \
+              --user $(id -u):$(id -g) \
+              --network host \
+              --interactive \
+              --tty \
+              << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \   
+
+      - run:
+          name: Stop AVH host
+          command: ./ferrocene/ci/scripts/avh.py stop << parameters.avh-host >>
+
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs

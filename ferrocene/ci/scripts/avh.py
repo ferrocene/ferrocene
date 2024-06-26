@@ -95,7 +95,15 @@ def subcommand_start(avh_token, args):
     instance = get_instance(avh_client, args.instance)
     show_instances([instance])
 
-    api_response = avh_client.v1_start_instance(instance.id)
+    try:
+        api_response = avh_client.v1_start_instance(instance.id)
+    except avh_api.exceptions.ApiException as e:
+        if e.reason == "Conflict":
+            print(f"{args.instance} is already started")
+            exit(0)
+        else:
+            print(f"{e}")
+            exit(1)
 
     print(f"Starting {instance.name}!")
 

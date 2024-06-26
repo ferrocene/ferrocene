@@ -128,11 +128,18 @@ def subcommand_forward(avh_token, args):
     assert split_response[1] == "-J"
     gateway_user_and_host = split_response[2]
     assert "@" in gateway_user_and_host
+
     user_and_host = split_response[3]
     assert "@" in user_and_host
 
-    print(f"Running `{api_response}`")
-    subprocess.run(split_response)
+    host = user_and_host.split("@")[1]
+    port_forwarding_arg = f"{args.local_port}:{host}:{args.remote_port}"
+
+    full_command = split_response + ["-L", port_forwarding_arg]
+    full_command_text = " ".join(full_command)
+
+    print(f"Running `{full_command_text}`")
+    subprocess.run(full_command)
     return
 
 def subcommand_stop(avh_token, args):

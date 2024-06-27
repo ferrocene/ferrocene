@@ -28,3 +28,7 @@ fn main() {
         .run_fail()
         .assert_stderr_contains(r#""a" "b" "c" "d" "e" "f""#);
 }
+
+// ferrocene-annotations: um_rustc_C_link_args
+// ferrocene-annotations: um_rustc_C_link_arg
+// ferrocene-annotations: um_rustc_C_linker_flavor

@@ -15,3 +15,5 @@ fn main() {
     rustc().input("lib.rs").arg("-Clto=thin").opt_level("3").incremental("inc-thin").run();
     rustc().input("lib.rs").arg("-Clto=thin").opt_level("3").incremental("inc-thin").run();
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

@@ -22,3 +22,5 @@ fn main() {
         .input("foo.rs")
         .run();
 }
+
+// ferrocene-annotations: um_rustc_C_relocation_model

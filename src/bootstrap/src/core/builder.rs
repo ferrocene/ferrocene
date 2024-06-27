@@ -9,10 +9,7 @@ use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-<<<<<<< HEAD
-use std::sync::{atomic, OnceLock};
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+use std::sync::atomic;
 use std::time::{Duration, Instant};
 
 use crate::core::build_steps::tool::{self, SourceType};
@@ -688,11 +685,8 @@ pub enum Kind {
     Setup,
     Suggest,
     Vendor,
-<<<<<<< HEAD
-    Sign,
-=======
     Perf,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    Sign, // for Ferrocene
 }
 
 impl Kind {
@@ -714,11 +708,8 @@ impl Kind {
             Kind::Setup => "setup",
             Kind::Suggest => "suggest",
             Kind::Vendor => "vendor",
-<<<<<<< HEAD
-            Kind::Sign => "sign",
-=======
             Kind::Perf => "perf",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            Kind::Sign => "sign", // for Ferrocene
         }
     }
 
@@ -984,7 +975,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::partners::oxidos::DistOxidOs,
             ),
             Kind::Install => describe!(
-<<<<<<< HEAD
                 // install::Docs,
                 // install::Std,
                 // // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
@@ -1014,22 +1004,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::FlipLink,
                 crate::ferrocene::install::SelfTest,
                 crate::ferrocene::install::FerroceneDocs,
-=======
-                install::Docs,
-                install::Std,
-                // During the Rust compiler (rustc) installation process, we copy the entire sysroot binary
-                // path (build/host/stage2/bin). Since the building tools also make their copy in the sysroot
-                // binary path, we must install rustc before the tools. Otherwise, the rust-installer will
-                // install the same binaries twice for each tool, leaving backup files (*.old) as a result.
-                install::Rustc,
-                install::Cargo,
-                install::RustAnalyzer,
-                install::Rustfmt,
-                install::Clippy,
-                install::Miri,
-                install::LlvmTools,
-                install::Src,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             ),
             Kind::Run => describe!(
                 crate::ferrocene::run::TraceabilityMatrix,
@@ -1131,11 +1105,8 @@ impl<'a> Builder<'a> {
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
             Subcommand::Vendor { .. } => (Kind::Vendor, &paths[..]),
-<<<<<<< HEAD
-            Subcommand::Sign => (Kind::Sign, &paths[..]),
-=======
             Subcommand::Perf { .. } => (Kind::Perf, &paths[..]),
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+            Subcommand::Sign => (Kind::Sign, &paths[..]), // for Ferrocene
         };
 
         Self::new_internal(build, kind, paths.to_owned())

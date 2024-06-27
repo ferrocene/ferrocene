@@ -9,6 +9,10 @@ import uuid
 import pandas
 import os
 import subprocess
+from fabric import Connection
+import sys
+import time
+from threading import Event
 from pprint import pprint
 from time import sleep
 from avh_api.api import arm_api
@@ -134,16 +138,63 @@ def subcommand_forward(avh_token, args):
     split_response = api_response.split(" ")
     assert split_response[0] == "ssh"
     assert split_response[1] == "-J"
+    jump_user_and_host = split_response[2]
+    assert "@" in jump_user_and_host
+    [jump_user, jump_host] = jump_user_and_host.split("@")
+
+    user_and_host = split_response[3]
+    assert "@" in user_and_host
+    [user, host] = user_and_host.split("@")
+
+
+    try:
+        jump_client = Connection(jump_host, user=jump_user)
+    except Exception as e:
+        print(f"Failed to connect to jump host: {e}")
+        sys.exit(1)
+
+
+    try:
+        ssh_client = Connection(
+            host,
+            user="user",
+            gateway=jump_client,
+            connect_kwargs={"password": "password"}
+        )
+    except Exception as e:
+        print(f"Failed to connect to destination host: {e}")
+        sys.exit(1)
+
+
+    try:
+        print("Connected! Beginning port forward...")
+        with ssh_client.forward_local(int(args.local_port), remote_port=int(args.remote_port)):
+            while True:
+                time.sleep(1000)
+    except KeyboardInterrupt:
+        print("Port forwarding stopped.")
+        sys.exit(0)
+    return
+
+def subcommand_shell(avh_token, args):
+    """
+    Shell to an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    
+    api_response = avh_client.v1_get_instance_quick_connect_command(instance.id)
+
+    split_response = api_response.split(" ")
+    assert split_response[0] == "ssh"
+    assert split_response[1] == "-J"
     gateway_user_and_host = split_response[2]
     assert "@" in gateway_user_and_host
 
     user_and_host = split_response[3]
     assert "@" in user_and_host
 
-    host = user_and_host.split("@")[1]
-    port_forwarding_arg = f"{args.local_port}:{host}:{args.remote_port}"
-
-    full_command = split_response + ["-L", port_forwarding_arg]
+    full_command = split_response
     full_command_text = " ".join(full_command)
 
     print(f"Running `{full_command_text}`")

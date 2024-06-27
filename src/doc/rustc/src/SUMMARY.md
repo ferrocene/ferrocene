@@ -82,11 +82,8 @@
     - [x86_64-fortanix-unknown-sgx](platform-support/x86_64-fortanix-unknown-sgx.md)
     - [x86_64-unknown-linux-none.md](platform-support/x86_64-unknown-linux-none.md)
     - [x86_64-unknown-none](platform-support/x86_64-unknown-none.md)
-<<<<<<< HEAD
-    - [i386-lynx-lynxos178](platform-support/i386-lynx-lynxos178.md)
-=======
     - [xtensa-\*-none-elf](platform-support/xtensa.md)
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    - [i386-lynx-lynxos178](platform-support/i386-lynx-lynxos178.md)
 - [Targets](targets/index.md)
     - [Built-in Targets](targets/built-in.md)
     - [Custom Targets](targets/custom.md)

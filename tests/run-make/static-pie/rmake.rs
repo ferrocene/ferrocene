@@ -71,3 +71,6 @@ fn main() {
     test("clang");
     test("gcc");
 }
+
+// ferrocene-annotations: um_rustc_C_linker_flavor
+// ferrocene-annotations: um_rustc_C_linker

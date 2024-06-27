@@ -150,6 +150,9 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             ExprKind::LogicalOp { op, lhs, rhs } => {
                 let condition_scope = this.local_scope();
                 let source_info = this.source_info(expr.span);
+
+                this.visit_coverage_branch_operation(op, expr.span);
+
                 // We first evaluate the left-hand side of the predicate ...
                 let (then_block, else_block) =
                     this.in_if_then_scope(condition_scope, expr.span, |this| {
@@ -235,7 +238,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             }
             ExprKind::Call { ty: _, fun, ref args, from_hir_call, fn_span } => {
                 let fun = unpack!(block = this.as_local_operand(block, fun));
-                let args: Vec<_> = args
+                let args: Box<[_]> = args
                     .into_iter()
                     .copied()
                     .map(|arg| Spanned {
@@ -482,7 +485,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         operands,
                         options,
                         line_spans,
-                        targets,
+                        targets: targets.into_boxed_slice(),
                         unwind: if options.contains(InlineAsmOptions::MAY_UNWIND) {
                             UnwindAction::Continue
                         } else {

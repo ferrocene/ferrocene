@@ -975,7 +975,9 @@ impl UnOp {
     }
 }
 
-/// A statement
+/// A statement. No `attrs` or `tokens` fields because each `StmtKind` variant
+/// contains an AST node with those fields. (Except for `StmtKind::Empty`,
+/// which never has attrs or tokens)
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct Stmt {
     pub id: NodeId,
@@ -2124,7 +2126,8 @@ pub struct BareFnTy {
     pub ext: Extern,
     pub generic_params: ThinVec<GenericParam>,
     pub decl: P<FnDecl>,
-    /// Span of the `fn(...) -> ...` part.
+    /// Span of the `[unsafe] [extern] fn(...) -> ...` part, i.e. everything
+    /// after the generic params (if there are any, e.g. `for<'a>`).
     pub decl_span: Span,
 }
 
@@ -3182,38 +3185,6 @@ pub struct StaticItem {
     pub expr: Option<P<Expr>>,
 }
 
-/// A static item in `extern` block.
-// This struct is identical to StaticItem for now but it's going to have a safety attribute.
-#[derive(Clone, Encodable, Decodable, Debug)]
-pub struct StaticForeignItem {
-    pub ty: P<Ty>,
-    pub safety: Safety,
-    pub mutability: Mutability,
-    pub expr: Option<P<Expr>>,
-}
-
-impl From<StaticItem> for StaticForeignItem {
-    fn from(static_item: StaticItem) -> StaticForeignItem {
-        StaticForeignItem {
-            ty: static_item.ty,
-            safety: static_item.safety,
-            mutability: static_item.mutability,
-            expr: static_item.expr,
-        }
-    }
-}
-
-impl From<StaticForeignItem> for StaticItem {
-    fn from(static_item: StaticForeignItem) -> StaticItem {
-        StaticItem {
-            ty: static_item.ty,
-            safety: static_item.safety,
-            mutability: static_item.mutability,
-            expr: static_item.expr,
-        }
-    }
-}
-
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub struct ConstItem {
     pub defaultness: Defaultness,
@@ -3428,7 +3399,7 @@ impl TryFrom<ItemKind> for AssocItemKind {
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub enum ForeignItemKind {
     /// A foreign static item (`static FOO: u8`).
-    Static(Box<StaticForeignItem>),
+    Static(Box<StaticItem>),
     /// An foreign function.
     Fn(Box<Fn>),
     /// An foreign type.

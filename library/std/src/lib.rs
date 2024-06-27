@@ -273,18 +273,17 @@
 //
 // Language features:
 // tidy-alphabetical-start
+#![cfg_attr(bootstrap, feature(c_unwind))]
 #![feature(alloc_error_handler)]
 #![feature(allocator_internals)]
 #![feature(allow_internal_unsafe)]
 #![feature(allow_internal_unstable)]
 #![feature(asm_experimental_arch)]
-#![feature(c_unwind)]
 #![feature(cfg_sanitizer_cfi)]
 #![feature(cfg_target_thread_local)]
 #![feature(cfi_encoding)]
 #![feature(concat_idents)]
 #![feature(const_mut_refs)]
-#![feature(const_trait_impl)]
 #![feature(decl_macro)]
 #![feature(deprecated_suggestion)]
 #![feature(doc_cfg)]
@@ -338,7 +337,6 @@
 #![feature(hint_assert_unchecked)]
 #![feature(ip)]
 #![feature(maybe_uninit_slice)]
-#![feature(maybe_uninit_uninit_array)]
 #![feature(maybe_uninit_write_slice)]
 #![feature(panic_can_unwind)]
 #![feature(panic_info_message)]
@@ -408,7 +406,6 @@
 #![feature(const_ip)]
 #![feature(const_ipv4)]
 #![feature(const_ipv6)]
-#![feature(const_maybe_uninit_uninit_array)]
 #![feature(const_waker)]
 #![feature(thread_local_internals)]
 // tidy-alphabetical-end

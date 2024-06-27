@@ -795,8 +795,13 @@ _arguments "${_arguments_options[@]}" : \
 '*::paths -- paths for the subcommand:_files' \
 && ret=0
 ;;
+<<<<<<< HEAD
 (sign)
 _arguments "${_arguments_options[@]}" : \
+=======
+(perf)
+_arguments "${_arguments_options[@]}" \
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:( )' \
@@ -862,7 +867,11 @@ _x.py_commands() {
 'setup:Set up the environment for development' \
 'suggest:Suggest a subset of tests to run, based on modified files' \
 'vendor:Vendor dependencies' \
+<<<<<<< HEAD
 'sign:Sign Ferrocene qualification documents' \
+=======
+'perf:Perform profiling and benchmarking of the compiler using the \`rustc-perf\` benchmark suite' \
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
     )
     _describe -t commands 'x.py commands' commands "$@"
 }
@@ -920,6 +929,11 @@ _x.py__install_commands() {
 _x.py__miri_commands() {
     local commands; commands=()
     _describe -t commands 'x.py miri commands' commands "$@"
+}
+(( $+functions[_x.py__perf_commands] )) ||
+_x.py__perf_commands() {
+    local commands; commands=()
+    _describe -t commands 'x.py perf commands' commands "$@"
 }
 (( $+functions[_x.py__run_commands] )) ||
 _x.py__run_commands() {

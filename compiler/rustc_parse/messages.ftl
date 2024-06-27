@@ -133,6 +133,8 @@ parse_dot_dot_dot_for_remaining_fields = expected field pattern, found `{$token_
 parse_dot_dot_dot_range_to_pattern_not_allowed = range-to patterns with `...` are not allowed
     .suggestion = use `..=` instead
 
+parse_dot_dot_range_attribute = attributes are not allowed on range expressions starting with `..`
+
 parse_dotdotdot = unexpected token: `...`
     .suggest_exclusive_range = use `..` for an exclusive range
     .suggest_inclusive_range = or `..=` for an inclusive range
@@ -363,6 +365,10 @@ parse_inner_doc_comment_not_permitted = expected outer doc comment
     .suggestion = you might have meant to write a regular comment
     .label_does_not_annotate_this = the inner doc comment doesn't annotate this {$item}
     .sugg_change_inner_to_outer = to annotate the {$item}, change the doc comment from inner to outer style
+
+parse_invalid_attr_unsafe = `{$name}` is not an unsafe attribute
+    .suggestion = remove the `unsafe(...)`
+    .note = extraneous unsafe is not allowed in attributes
 
 parse_invalid_block_macro_segment = cannot use a `block` macro fragment here
     .label = the `block` fragment is within this context
@@ -863,6 +869,11 @@ parse_unmatched_angle_brackets = {$num_extra_brackets ->
             [one] remove extra angle bracket
            *[other] remove extra angle brackets
         }
+
+parse_unsafe_attr_outside_unsafe = unsafe attribute used without unsafe
+    .label = usage of unsafe attribute
+parse_unsafe_attr_outside_unsafe_suggestion = wrap the attribute in `unsafe(...)`
+
 
 parse_unskipped_whitespace = whitespace symbol '{$ch}' is not skipped
     .label = {parse_unskipped_whitespace}

@@ -73,8 +73,6 @@ const_eval_division_by_zero =
     dividing by zero
 const_eval_division_overflow =
     overflow in signed division (dividing MIN by -1)
-const_eval_double_storage_live =
-    StorageLive on a local that was already live
 
 const_eval_dyn_call_not_a_method =
     `dyn` call trying to call something that is not a method
@@ -91,6 +89,8 @@ const_eval_exact_div_has_remainder =
 
 const_eval_extern_static =
     cannot access extern static ({$did})
+const_eval_extern_type_field = `extern type` field does not have a known offset
+
 const_eval_fn_ptr_call =
     function pointers need an RFC before allowed to be called in {const_eval_const_context}s
 const_eval_for_loop_into_iter_non_const =
@@ -343,8 +343,7 @@ const_eval_unallowed_fn_pointer_call = function pointer calls are not allowed in
 const_eval_unallowed_heap_allocations =
     allocations are not allowed in {const_eval_const_context}s
     .label = allocation not allowed in {const_eval_const_context}s
-    .teach_note =
-        The value of statics and constants must be known at compile time, and they live for the entire lifetime of a program. Creating a boxed value allocates memory on the heap at runtime, and therefore cannot be done at compile time.
+    .teach_note = The value of statics and constants must be known at compile time, and they live for the entire lifetime of a program. Creating a boxed value allocates memory on the heap at runtime, and therefore cannot be done at compile time.
 
 const_eval_unallowed_inline_asm =
     inline assembly is not allowed in {const_eval_const_context}s

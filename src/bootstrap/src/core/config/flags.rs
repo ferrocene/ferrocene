@@ -488,9 +488,15 @@ Arguments:
         #[arg(long)]
         versioned_dirs: bool,
     },
+<<<<<<< HEAD
     /// Sign Ferrocene qualification documents
     #[clap(long_about = "\n")]
     Sign,
+=======
+    /// Perform profiling and benchmarking of the compiler using the
+    /// `rustc-perf` benchmark suite.
+    Perf {},
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }
 
 impl Subcommand {
@@ -513,6 +519,7 @@ impl Subcommand {
             Subcommand::Sign { .. } => Kind::Sign,
             Subcommand::Suggest { .. } => Kind::Suggest,
             Subcommand::Vendor { .. } => Kind::Vendor,
+            Subcommand::Perf { .. } => Kind::Perf,
         }
     }
 

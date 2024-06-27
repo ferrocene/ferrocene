@@ -23,7 +23,7 @@ fn associated_type_bounds<'tcx>(
     span: Span,
     filter: PredicateFilter,
 ) -> &'tcx [(ty::Clause<'tcx>, Span)] {
-    let item_ty = Ty::new_projection(
+    let item_ty = Ty::new_projection_from_args(
         tcx,
         assoc_item_def_id.to_def_id(),
         GenericArgs::identity_for_item(tcx, assoc_item_def_id),
@@ -59,7 +59,7 @@ fn associated_type_bounds<'tcx>(
 /// impl trait it isn't possible to write a suitable predicate on the
 /// containing function and for type-alias impl trait we don't have a backwards
 /// compatibility issue.
-#[instrument(level = "trace", skip(tcx), ret)]
+#[instrument(level = "trace", skip(tcx, item_ty))]
 fn opaque_type_bounds<'tcx>(
     tcx: TyCtxt<'tcx>,
     opaque_def_id: LocalDefId,
@@ -108,7 +108,7 @@ pub(super) fn explicit_item_bounds_with_filter(
                 tcx,
                 opaque_def_id.expect_local(),
                 opaque_ty.bounds,
-                Ty::new_projection(
+                Ty::new_projection_from_args(
                     tcx,
                     def_id.to_def_id(),
                     ty::GenericArgs::identity_for_item(tcx, def_id),
@@ -203,7 +203,7 @@ struct AssocTyToOpaque<'tcx> {
 }
 
 impl<'tcx> TypeFolder<TyCtxt<'tcx>> for AssocTyToOpaque<'tcx> {
-    fn interner(&self) -> TyCtxt<'tcx> {
+    fn cx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
 

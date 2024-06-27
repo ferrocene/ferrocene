@@ -1,4 +1,3 @@
-// tidy-alphabetical-start
 pub use self::Level::*;
 use rustc_ast::node_id::NodeId;
 use rustc_ast::{AttrId, Attribute};
@@ -15,7 +14,6 @@ use rustc_span::edition::Edition;
 use rustc_span::symbol::MacroRulesNormalizedIdent;
 use rustc_span::{sym, symbol::Ident, Span, Symbol};
 use rustc_target::spec::abi::Abi;
-// tidy-alphabetical-end
 
 use serde::{Deserialize, Serialize};
 
@@ -693,6 +691,10 @@ pub enum BuiltinLintDiag {
         /// The span of the unnecessarily-qualified path to remove.
         removal_span: Span,
     },
+    UnsafeAttrOutsideUnsafe {
+        attribute_name_span: Span,
+        sugg_spans: (Span, Span),
+    },
     AssociatedConstElidedLifetime {
         elided: bool,
         span: Span,
@@ -741,6 +743,9 @@ pub enum BuiltinLintDiag {
     },
     InnerAttributeUnstable {
         is_macro: bool,
+    },
+    OutOfScopeMacroCalls {
+        path: String,
     },
 }
 

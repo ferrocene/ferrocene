@@ -75,7 +75,11 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('setup', 'setup', [CompletionResultType]::ParameterValue, 'Set up the environment for development')
             [CompletionResult]::new('suggest', 'suggest', [CompletionResultType]::ParameterValue, 'Suggest a subset of tests to run, based on modified files')
             [CompletionResult]::new('vendor', 'vendor', [CompletionResultType]::ParameterValue, 'Vendor dependencies')
+<<<<<<< HEAD
             [CompletionResult]::new('sign', 'sign', [CompletionResultType]::ParameterValue, 'Sign Ferrocene qualification documents')
+=======
+            [CompletionResult]::new('perf', 'perf', [CompletionResultType]::ParameterValue, 'Perform profiling and benchmarking of the compiler using the `rustc-perf` benchmark suite')
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             break
         }
         'x.py;build' {
@@ -776,7 +780,11 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             break
         }
+<<<<<<< HEAD
         'x.py;sign' {
+=======
+        'x.py;perf' {
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('--config', 'config', [CompletionResultType]::ParameterName, 'TOML configuration file for build')
             [CompletionResult]::new('--build-dir', 'build-dir', [CompletionResultType]::ParameterName, 'Build directory, overrides `build.build-dir` in `config.toml`')
             [CompletionResult]::new('--build', 'build', [CompletionResultType]::ParameterName, 'build target of the stage0 compiler')

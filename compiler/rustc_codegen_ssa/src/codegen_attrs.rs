@@ -15,11 +15,7 @@ use rustc_span::{sym, Span};
 use rustc_target::spec::{abi, SanitizerSet};
 
 use crate::errors;
-use crate::target_features::from_target_feature;
-use crate::{
-    errors::{ExpectedCoverageSymbol, ExpectedUsedSymbol},
-    target_features::check_target_feature_trait_unsafe,
-};
+use crate::target_features::{check_target_feature_trait_unsafe, from_target_feature};
 
 fn linkage_by_name(tcx: TyCtxt<'_>, def_id: LocalDefId, name: &str) -> Linkage {
     use rustc_middle::mir::mono::Linkage::*;
@@ -128,21 +124,6 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                         .emit();
                 }
             }
-            sym::coverage => {
-                let inner = attr.meta_item_list();
-                match inner.as_deref() {
-                    Some([item]) if item.has_name(sym::off) => {
-                        codegen_fn_attrs.flags |= CodegenFnAttrFlags::NO_COVERAGE;
-                    }
-                    Some([item]) if item.has_name(sym::on) => {
-                        // Allow #[coverage(on)] for being explicit, maybe also in future to enable
-                        // coverage on a smaller scope within an excluded larger scope.
-                    }
-                    Some(_) | None => {
-                        tcx.dcx().emit_err(ExpectedCoverageSymbol { span: attr.span });
-                    }
-                }
-            }
             sym::rustc_std_internal_symbol => {
                 codegen_fn_attrs.flags |= CodegenFnAttrFlags::RUSTC_STD_INTERNAL_SYMBOL
             }
@@ -174,7 +155,7 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
                         codegen_fn_attrs.flags |= CodegenFnAttrFlags::USED;
                     }
                     Some(_) => {
-                        tcx.dcx().emit_err(ExpectedUsedSymbol { span: attr.span });
+                        tcx.dcx().emit_err(errors::ExpectedUsedSymbol { span: attr.span });
                     }
                     None => {
                         // Unfortunately, unconditionally using `llvm.used` causes
@@ -587,7 +568,6 @@ fn codegen_fn_attrs(tcx: TyCtxt<'_>, did: LocalDefId) -> CodegenFnAttrs {
     }
 
     if codegen_fn_attrs.flags.contains(CodegenFnAttrFlags::NAKED) {
-        codegen_fn_attrs.flags |= CodegenFnAttrFlags::NO_COVERAGE;
         codegen_fn_attrs.inline = InlineAttr::Never;
     }
 

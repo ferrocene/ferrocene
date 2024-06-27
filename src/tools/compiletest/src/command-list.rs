@@ -32,6 +32,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "ignore-32bit",
     "ignore-64bit",
     "ignore-aarch64",
+    "ignore-aarch64-unknown-ferrocenecoretest",
     "ignore-aarch64-unknown-linux-gnu",
     "ignore-android",
     "ignore-apple",

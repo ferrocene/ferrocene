@@ -50,6 +50,7 @@ RUN <<-EOF
         ca-certificates \
         libedit-dev \
         libssl-dev \
+        libffi-dev \
         zlib1g-dev \
         moreutils \
         zstd \
@@ -105,7 +106,7 @@ RUN <<-EOF
     curl -OL https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tar.xz
     echo "56bfef1fdfc1221ce6720e43a661e3eb41785dd914ce99698d8c7896af4bdaa1 Python-3.12.3.tar.xz" | sha256sum -c
     tar xf Python-3.12.3.tar.xz --strip-components=1
-    ./configure
+    ./configure --enable-optimizations
     make -j$(nproc)
     make install
     rm -rf /tmp/python
@@ -205,4 +206,5 @@ RUN <<-EOF
     curl -LsSf https://astral.sh/uv/install.sh | sh
     uv venv
     uv pip sync /tmp/requirements.txt
+    echo "source .venv/bin/activate" > ~/.bashrc
 EOF

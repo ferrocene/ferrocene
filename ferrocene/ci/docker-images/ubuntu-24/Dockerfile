@@ -31,6 +31,7 @@ RUN <<-EOF
         python3 \
         libedit-dev \
         libssl-dev \
+        libffi-dev \
         zlib1g-dev \
         moreutils \
         cmake \
@@ -99,4 +100,5 @@ RUN <<-EOF
     curl -LsSf https://astral.sh/uv/install.sh | sh
     uv venv
     uv pip sync /tmp/requirements.txt
+    echo "source .venv/bin/activate" > ~/.bashrc
 EOF

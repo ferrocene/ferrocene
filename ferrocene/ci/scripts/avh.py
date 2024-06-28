@@ -34,19 +34,64 @@ def arguments():
     stop_parser = subparsers.add_parser("stop", help="Stop an AVH instance")
     stop_parser.add_argument('instance', help='The AVH instance name')
 
-    stop_parser = subparsers.add_parser("forward", help="Port forward to an AVH instance")
-    stop_parser.add_argument('instance', help='The AVH instance name')
-    stop_parser.add_argument('local_port', help='The local port to forward to the remote')
-    stop_parser.add_argument('remote_port', help='The remote port to forward to the local')
+    forward_parser = subparsers.add_parser("forward", help="Port forward to an AVH instance")
+    forward_parser.add_argument('instance', help='The AVH instance name')
+    forward_parser.add_argument('local_port', help='The local port to forward to the remote')
+    forward_parser.add_argument('remote_port', help='The remote port to forward to the local')
 
-    # create_parser = subparsers.add_parser("create", help="Create an AVH instance")
-    # create_parser.add_argument('instance', help='The AVH instance name')
+    shell_parser = subparsers.add_parser("shell", help="Shell to an AVH instance")
+    shell_parser.add_argument('instance', help='The AVH instance name')
 
-    # destroy_parser = subparsers.add_parser("destroy", help="Create an AVH instance")
-    # destroy_parser.add_argument('instance', help='The AVH instance name')
+    put_parser = subparsers.add_parser("put", help="Put a file on an AVH instance")
+    put_parser.add_argument('instance', help='The AVH instance name')
+    put_parser.add_argument('source', help='The source path')
+    put_parser.add_argument('destination', help='The destination path')
+
+    get_parser = subparsers.add_parser("get", help="Get a file from an AVH instance")
+    get_parser.add_argument('instance', help='The AVH instance name')
+    get_parser.add_argument('source', help='The source path')
+    get_parser.add_argument('destination', help='The destination path')
+
+    run_parser = subparsers.add_parser("run", help="Run a command on an AVH instance")
+    run_parser.add_argument('instance', help='The AVH instance name')
+    run_parser.add_argument('command', help='The command to run')
+    run_parser.add_argument('--forward', nargs=2, help='Forward from source to destination')
 
     return parser.parse_args()
 
+
+def run():
+    args = arguments()
+    try:
+        avh_token = os.environ["AVH_TOKEN"]
+    except:
+        print("Set AVH_TOKEN environment to an ARM AVH token")
+        exit(1)
+
+    # match added in 3.10
+    if args.subcommand == "show":
+        subcommand_show(avh_token, args)
+    elif args.subcommand == "start":
+        subcommand_start(avh_token, args)
+    elif args.subcommand == "stop":
+        subcommand_stop(avh_token, args)
+    elif args.subcommand == "forward":
+        subcommand_forward(avh_token, args)
+    elif args.subcommand == "create":
+        subcommand_create(avh_token, args)
+    elif args.subcommand == "destroy":
+        subcommand_destroy(avh_token, args)
+    elif args.subcommand == "shell":
+        subcommand_shell(avh_token, args)
+    elif args.subcommand == "put":
+        subcommand_put(avh_token, args)
+    elif args.subcommand == "get":
+        subcommand_get(avh_token, args)
+    elif args.subcommand == "run":
+        subcommand_run(avh_token, args)
+    else:
+        print("Unhandled subcommand")
+        exit(1)
 
 def show_instances(instances):
     frames = []
@@ -126,14 +171,8 @@ def subcommand_start(avh_token, args):
     print(f"Started {instance.name}!")
     return
 
-def subcommand_forward(avh_token, args):
-    """
-    Port forward to an AVH instance
-    """
-    avh_client = build_avh_client(avh_token)
-    instance = get_instance(avh_client, args.instance)
-    
-    api_response = avh_client.v1_get_instance_quick_connect_command(instance.id)
+def get_ssh_client(avh_client, instance_id):
+    api_response = avh_client.v1_get_instance_quick_connect_command(instance_id)
 
     split_response = api_response.split(" ")
     assert split_response[0] == "ssh"
@@ -145,7 +184,6 @@ def subcommand_forward(avh_token, args):
     user_and_host = split_response[3]
     assert "@" in user_and_host
     [user, host] = user_and_host.split("@")
-
 
     try:
         jump_client = Connection(jump_host, user=jump_user)
@@ -163,8 +201,17 @@ def subcommand_forward(avh_token, args):
         )
     except Exception as e:
         print(f"Failed to connect to destination host: {e}")
-        sys.exit(1)
+        sys.exit(1)  
+    return ssh_client
 
+def subcommand_forward(avh_token, args):
+    """
+    Port forward to an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    api_response = avh_client.v1_get_instance_quick_connect_command(instance.id)
+    ssh_client = get_ssh_client(avh_client, instance.id)
 
     try:
         print("Connected! Beginning port forward...")
@@ -173,8 +220,62 @@ def subcommand_forward(avh_token, args):
                 time.sleep(1000)
     except KeyboardInterrupt:
         print("Port forwarding stopped.")
-        sys.exit(0)
     return
+
+
+def subcommand_get(avh_token, args):
+    """
+    Copy from an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    source = args.source
+    destination = args.destination
+    ssh_client = get_ssh_client(avh_client, instance.id)
+
+    print(f"Connected! Getting from {source} on {instance.name} to {destination}")
+    ssh_client.get(source, destination, preserve_mode=True)
+    return
+
+def subcommand_put(avh_token, args):
+    """
+    Copy to an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    source = args.source
+    destination = args.destination
+    ssh_client = get_ssh_client(avh_client, instance.id)
+
+    print(f"Connected! Putting to {source} on {instance.name} from {destination}")
+    ssh_client.put(source, destination, preserve_mode=True)
+    return
+
+def subcommand_run(avh_token, args):
+    """
+    Copy to an AVH instance
+    """
+    avh_client = build_avh_client(avh_token)
+    instance = get_instance(avh_client, args.instance)
+    command = args.command
+    ssh_client = get_ssh_client(avh_client, instance.id)
+
+    if args.forward:
+        source_port = int(args.forward[0])
+        destination_port = int(args.forward[1])
+        print(f"Connected! Running to `{command}` on {instance.name} with forward from {source_port} to {destination_port}")
+        with ssh_client.forward_local(source_port, remote_port=destination_port):
+            ssh_client.run(command)
+            try:
+                while True:
+                    time.sleep(1000)
+            except KeyboardInterrupt:
+                print("Port forwarding stopped.")
+    else:
+        print(f"Connected! Running to `{command}` on {instance.name}")
+        ssh_client.run(command)
+    return
+
 
 def subcommand_shell(avh_token, args):
     """
@@ -226,7 +327,6 @@ def subcommand_stop(avh_token, args):
             poll_count += 1
 
     print(f"Stopped {instance.name}!")
-
     return
 
 def build_avh_client(avh_token):
@@ -235,31 +335,6 @@ def build_avh_client(avh_token):
     )
     api_client = avh_api.ApiClient(configuration)
     return arm_api.ArmApi(api_client)
-
-
-def run():
-    args = arguments()
-    try:
-        avh_token = os.environ["AVH_TOKEN"]
-    except:
-        print("Set AVH_TOKEN environment to an ARM AVH token")
-        exit(1)
-
-    # match added in 3.10
-    if args.subcommand == "show":
-        subcommand_show(avh_token, args)
-    elif args.subcommand == "start":
-        subcommand_start(avh_token, args)
-    elif args.subcommand == "stop":
-        subcommand_stop(avh_token, args)
-    elif args.subcommand == "forward":
-        subcommand_forward(avh_token, args)
-    elif args.subcommand == "create":
-        subcommand_create(avh_token, args)
-    elif args.subcommand == "destroy":
-        subcommand_destroy(avh_token, args)
-    else:
-        print(f"Unknown command {args.subcommand}")
 
 if __name__ == "__main__":
     run()

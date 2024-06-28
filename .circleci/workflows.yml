@@ -268,7 +268,7 @@ jobs:
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
-        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        AVH_TOKEN=$AVH_API_KEY TCP_TIMEOUT=500 TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
 
     steps:
       - ferrocene-job-test-avh:
@@ -613,29 +613,29 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
-      # - build-docker:
-      #     name: build-docker--ubuntu-20
-      #     image: ubuntu-20
-      #     tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
-      #     rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
-      # - x86_64-linux-llvm:
-      #     requires:
-      #       - build-docker--ubuntu-20
-      # - x86_64-linux-build:
-      #     requires:
-      #       - x86_64-linux-llvm
-      # - aarch64-linux-avh-test:
-      #     name: aarch64-linux-avh-compiletest
-      #     job: test:compiletest
-      #     resource-class: large # 4-core
-      #     requires:
-      #       - x86_64-linux-build
-      # - aarch64-linux-avh-test:
-      #     name: aarch64-linux-avh-test-library
-      #     job: test:library
-      #     resource-class: large # 4-core
-      #     requires:
-      #       - x86_64-linux-build
+      - build-docker:
+          name: build-docker--ubuntu-20
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
+      - x86_64-linux-llvm:
+          requires:
+            - build-docker--ubuntu-20
+      - x86_64-linux-build:
+          requires:
+            - x86_64-linux-llvm
+      - aarch64-linux-avh-test:
+          name: aarch64-linux-avh-compiletest
+          job: test:compiletest
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - aarch64-linux-avh-test:
+          name: aarch64-linux-avh-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:
@@ -900,6 +900,16 @@ commands:
       - run:
           name: Start AVH host
           command: ./ferrocene/ci/scripts/avh.py start << parameters.avh-host >>
+
+      - run:
+          name: Put the remote-test-server onto the AVH host
+          command: |
+            ./x build src/tools/remote-test-server --target aarch64-unknown-linux-gnu --stage 2
+            ./ferrocene/ci/scripts/avh.py put << parameters.avh-host >> "build/x86_64-unknown-linux-gnu/stage2-tools/aarch64-unknown-linux-gnu/release/remote-test-server" "remote-test-server"
+
+      - run:
+          name: Run the remote-test-server on the AVH host
+          command: ./ferrocene/ci/scripts/avh.py run << parameters.avh-host >> "./remote-test-server --bind 0.0.0.0:<< parameters.avh-dest-port >> -v"
 
       - run:
           name: Create AVH port forward in the background

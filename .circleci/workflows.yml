@@ -887,6 +887,7 @@ commands:
         type: integer
         default: 12345
     steps:
+      - setup-venv
       - aws-oidc-auth
       - ferrocene-checkout:
           llvm-subset: true
@@ -1067,6 +1068,19 @@ commands:
       - run:
           name: Setup Windows environment
           command: ferrocene/ci/scripts/setup-windows.sh
+
+  setup-venv:
+    description: Setup the Python venv
+    steps:
+      - run:
+          name: Setup the Python venv
+          command: |
+              curl -LsSf https://astral.sh/uv/install.sh | sh
+              uv venv ~/.venv
+              source ~/.venv/bin/activate
+              uv pip sync requirements.txt
+
+              echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
 
   ferrocene-checkout:
     description: Checkout the Ferrocene source code

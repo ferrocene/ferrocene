@@ -100,5 +100,5 @@ RUN <<-EOF
     curl -LsSf https://astral.sh/uv/install.sh | sh
     uv venv
     uv pip sync /tmp/requirements.txt
-    echo "source .venv/bin/activate" > ~/.bashrc
+    echo "source .venv/bin/activate" >> ~/.bashrc
 EOF

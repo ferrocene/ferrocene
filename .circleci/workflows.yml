@@ -262,6 +262,8 @@ jobs:
         type: string
       resource-class:
         type: string
+      avh-host:
+        type: string
     resource_class: << parameters.resource-class >>
     environment:
       FERROCENE_HOST: ""
@@ -274,7 +276,7 @@ jobs:
       - ferrocene-job-test-avh:
           docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
-          avh-host: laughing-tadpole
+          avh-host: << parameters.avh-host >>
 
   x86_64-linux-traceability-matrix:
     executor: docker-ubuntu-20
@@ -628,12 +630,14 @@ workflows:
           name: aarch64-linux-avh-compiletest
           job: test:compiletest
           resource-class: large # 4-core
+          avh-host: test-compiletest
           requires:
             - x86_64-linux-build
       - aarch64-linux-avh-test:
           name: aarch64-linux-avh-test-library
           job: test:library
           resource-class: large # 4-core
+          avh-host: test-library
           requires:
             - x86_64-linux-build
 

@@ -16,5 +16,3 @@ iec_ref = "IEC-61508:2010"
 iec_doc = "Functional safety of electrical/electronic/programmable electronic safety-related systems"
 9001_ref = "ISO-9001:2015"
 9001_doc = "Quality management systems — Requirements"
-
-rustfmt_version = "unknown" # TODO substitute dynamically

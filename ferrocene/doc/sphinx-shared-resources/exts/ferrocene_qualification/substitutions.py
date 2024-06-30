@@ -31,6 +31,7 @@ class AddCustomSubstitutions(SphinxTransform):
         # look at sphinx-substitutions.toml for the rest of the substitutions
         self.add_substitution("doc_title", self.app.config["html_short_title"])
         self.add_substitution("doc_short_title", self.app.config["ferrocene_id"])
+        self.add_substitution("rustfmt_version", self.app.config["rustfmt_version"])
         self.add_substitution(
             "ferrocene_version",
             self.app.config["ferrocene_version"],

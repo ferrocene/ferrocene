@@ -7,6 +7,7 @@ use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use std::collections::HashMap;
 use std::ffi::OsString;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -192,7 +193,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
 
         let rustfmt_manifest_path =
             builder.src.join("src").join("tools").join("rustfmt").join("Cargo.toml");
-        let rustfmt_manifest: toml::Value = std::fs::read_to_string(&rustfmt_manifest_path)
+        let rustfmt_manifest: toml::Value = fs::read_to_string(&rustfmt_manifest_path)
             .expect("could not read rustfmt manifest file")
             .parse()
             .expect("could not parse rustfmt manifest file");
@@ -201,7 +202,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .expect("could not parse rustfmt version from its manifest file");
 
         let ferrocene_version =
-            std::fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
+            fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
         let ferrocene_version = ferrocene_version.trim();
 
         // Note that we must pass all paths to Sphinx relative to the directory containing conf.py.
@@ -245,7 +246,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg("-D")
             .arg(format!(
                 "rust_version={}",
-                std::fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
+                fs::read_to_string(&builder.src.join("src").join("version")).unwrap().trim(),
             ))
             // Load extensions from the shared resources as well:
             .env("PYTHONPATH", relative_path(&src, &shared_resources.join("exts")));
@@ -761,7 +762,7 @@ impl Step for TechnicalReport {
 
         if !cache_path.exists() {
             if let Some(parent) = cache_path.parent() {
-                std::fs::create_dir_all(parent).unwrap();
+                fs::create_dir_all(parent).unwrap();
             }
             builder.config.download_file(url, &cache_path, "");
         }
@@ -807,8 +808,8 @@ impl Step for Index {
 // Note: this function is correct for the use made in this module, but it will not work correctly
 // if paths don't exists or the paths do not have any segments in common.
 fn relative_path(base: &Path, path: &Path) -> PathBuf {
-    let base = std::fs::canonicalize(base).unwrap_or_else(|_| base.to_path_buf());
-    let path = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let base = fs::canonicalize(base).unwrap_or_else(|_| base.to_path_buf());
+    let path = fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
 
     let common = base
         .components()

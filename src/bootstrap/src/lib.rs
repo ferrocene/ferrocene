@@ -213,6 +213,7 @@ pub struct Build {
 #[derive(Debug, Clone)]
 struct Crate {
     name: String,
+    version: String,
     deps: HashSet<String>,
     path: PathBuf,
     has_lib: bool,

@@ -223,7 +223,10 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg("-A")
             .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
             .arg("-D")
-            .arg(format!("rustfmt_version={}", builder.crates.get("rustfmt-nightly").unwrap().version))
+            .arg(format!(
+                "rustfmt_version={}",
+                builder.crates.get("rustfmt-nightly").unwrap().version,
+            ))
             // Provide the correct substitutions:
             .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))

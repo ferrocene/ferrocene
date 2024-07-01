@@ -9,7 +9,7 @@ use rustc_middle::mir;
 use rustc_middle::mir::tcx::PlaceTy;
 use rustc_middle::ty::layout::{HasTyCtxt, LayoutOf, TyAndLayout};
 use rustc_middle::ty::{self, Ty};
-use rustc_target::abi::{Align, FieldsShape, Int, Pointer, TagEncoding};
+use rustc_target::abi::{Align, FieldsShape, Int, Pointer, Size, TagEncoding};
 use rustc_target::abi::{VariantIdx, Variants};
 
 /// The location and extra runtime properties of the place.
@@ -33,6 +33,30 @@ impl<V: CodegenObject> PlaceValue<V> {
     /// Sets `llextra` to `None`.
     pub fn new_sized(llval: V, align: Align) -> PlaceValue<V> {
         PlaceValue { llval, llextra: None, align }
+    }
+
+
+    /// Allocates a stack slot in the function for a value
+    /// of the specified size and alignment.
+    ///
+    /// The allocation itself is untyped.
+    pub fn alloca<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx, Value = V>>(
+        bx: &mut Bx,
+        size: Size,
+        align: Align,
+    ) -> PlaceValue<V> {
+        let llval = bx.alloca(size, align);
+        PlaceValue::new_sized(llval, align)
+    }
+
+    /// Creates a `PlaceRef` to this location with the given type.
+    pub fn with_type<'tcx>(self, layout: TyAndLayout<'tcx>) -> PlaceRef<'tcx, V> {
+        debug_assert!(
+            layout.is_unsized() || layout.abi.is_uninhabited() || self.llextra.is_none(),
+            "Had pointer metadata {:?} for sized type {layout:?}",
+            self.llextra,
+        );
+        PlaceRef { val: self, layout }
     }
 }
 
@@ -83,6 +107,15 @@ impl<'a, 'tcx, V: CodegenObject> PlaceRef<'tcx, V> {
         assert!(layout.is_sized(), "tried to statically allocate unsized place");
         let tmp = bx.alloca(layout.size, align);
         Self::new_sized_aligned(tmp, layout, align)
+    }
+
+    pub fn alloca_size<Bx: BuilderMethods<'a, 'tcx, Value = V>>(
+        bx: &mut Bx,
+        size: Size,
+        layout: TyAndLayout<'tcx>,
+    ) -> Self {
+        assert!(layout.is_sized(), "tried to statically allocate unsized place");
+        PlaceValue::alloca(bx, size, layout.align.abi).with_type(layout)
     }
 
     /// Returns a place for an indirect reference to an unsized place.

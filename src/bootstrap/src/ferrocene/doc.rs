@@ -191,16 +191,6 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
 
         let should_serve = builder.should_serve::<P>();
 
-        let rustfmt_manifest_path =
-            builder.src.join("src").join("tools").join("rustfmt").join("Cargo.toml");
-        let rustfmt_manifest: toml::Value = fs::read_to_string(&rustfmt_manifest_path)
-            .expect("could not read rustfmt manifest file")
-            .parse()
-            .expect("could not parse rustfmt manifest file");
-        let rustfmt_version = rustfmt_manifest["package"]["version"]
-            .as_str()
-            .expect("could not parse rustfmt version from its manifest file");
-
         let ferrocene_version =
             fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();
         let ferrocene_version = ferrocene_version.trim();
@@ -233,7 +223,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .arg("-A")
             .arg(format!("ferrocene_breadcrumbs_index={path_to_root}/index.html"))
             .arg("-D")
-            .arg(format!("rustfmt_version={rustfmt_version}"))
+            .arg(format!("rustfmt_version={}", builder.crates.get("rustfmt-nightly").unwrap().version))
             // Provide the correct substitutions:
             .arg("-D")
             .arg(path_define("ferrocene_substitutions_path", &relative_path(&src, &substitutions)))

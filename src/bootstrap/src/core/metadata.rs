@@ -18,6 +18,7 @@ struct Output {
 #[derive(Debug, Deserialize)]
 struct Package {
     name: String,
+    version: String,
     source: Option<String>,
     manifest_path: String,
     dependencies: Vec<Dependency>,
@@ -52,7 +53,7 @@ pub fn build(build: &mut Build) {
                 .map(|dep| dep.name)
                 .collect();
             let has_lib = package.targets.iter().any(|t| t.kind.iter().any(|k| k == "lib"));
-            let krate = Crate { name: name.clone(), deps, path, has_lib };
+            let krate = Crate { name: name.clone(), version: package.version, deps, path, has_lib };
             let relative_path = krate.local_path(build);
             build.crates.insert(name.clone(), krate);
             let existing_path = build.crate_paths.insert(relative_path, name);

@@ -43,13 +43,14 @@ On MacOS, you can use the Docker CLI connected to a Lima host:
 
 On Windows, it's generally recommended to do CI imitation within WSL2. Enable
 WSL2 from an administrator Powershell if you haven't done so already, then
-`ubuntu-24.04`,. from there, follow the Linux instructions above:
+`ubuntu-24.04`.
 
 .. code-block:: Powershell
 
    wsl --install
    wsl --install -d Ubuntu-24.04
 
+From there, follow the Linux instructions above.
 
 Installing Python
 ^^^^^^^^^^^^^^^^^
@@ -85,7 +86,7 @@ Using the Python virtual environment
 
 Ferrocene uses ``uv`` to manage our Python dependencies. There are a number of
 ways to install ``uv <https://github.com/astral-sh/uv>``_, but we recommend the
-``curl`` (Linux, MacOS) or ``powershell``  (Windows) methods:
+``curl`` (Linux, MacOS) or ``powershell`` (Windows) methods:
 
 .. code-block:: bash
 
@@ -119,6 +120,9 @@ Using the CI ``config.toml``
 To create the ``config.toml`` used by the CI, set ``FERROCENE_HOST`` to your host triple,
 then run the ``configure.sh``:
 
+.. warning::
+
+   This will overwrite your existing `config.toml`, consider backing it up.
 
 .. code-block:: bash
 
@@ -176,13 +180,13 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       ubuntu-20 bash
 
-Inside the container, run ``x.py clean`` then run the ``SCRIPT``, line by line
+Inside the container, run ``./x clean`` then run the ``SCRIPT``, line by line
 if desired:
 
 .. code-block:: bash
 
-   ./x.py clean
-   ./x.py --stage 2 dist rust-std
+   ./x clean
+   ./x --stage 2 dist rust-std
 
 If you wish to preserve your ``build/`` artifacts, it may make sense to
 re-clone the Ferrocene repository inside the container.
@@ -210,7 +214,7 @@ portable.
 New scripts should be written in Python unless they are trivial and only run
 on Linux/macOS jobs.
 
-Before attempting to fix a bug in Bash script, evaluate if it would make sense
+Before attempting to fix a bug in a Bash script, evaluate if it would make sense
 to convert it to Python. During evaluation, check for these signals that a bash
 script should be rewritten in Python:
 

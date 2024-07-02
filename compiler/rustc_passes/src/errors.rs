@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::fluent_generated as fluent;
-use rustc_ast::{ast, Label};
+use rustc_ast::Label;
 use rustc_errors::{
     codes::*, Applicability, Diag, DiagCtxtHandle, DiagSymbolList, Diagnostic, EmissionGuarantee,
     Level, MultiSpan, SubdiagMessageOp, Subdiagnostic,
@@ -60,21 +60,9 @@ pub struct InlineNotFnOrClosure {
     pub defn_span: Span,
 }
 
-#[derive(LintDiagnostic)]
-#[diag(passes_coverage_ignored_function_prototype)]
-pub struct IgnoredCoverageFnProto;
-
-#[derive(LintDiagnostic)]
-#[diag(passes_coverage_propagate)]
-pub struct IgnoredCoveragePropagate;
-
-#[derive(LintDiagnostic)]
-#[diag(passes_coverage_fn_defn)]
-pub struct IgnoredCoverageFnDefn;
-
 #[derive(Diagnostic)]
-#[diag(passes_coverage_not_coverable, code = E0788)]
-pub struct IgnoredCoverageNotCoverable {
+#[diag(passes_coverage_not_fn_or_closure, code = E0788)]
+pub struct CoverageNotFnOrClosure {
     #[primary_span]
     pub attr_span: Span,
     #[label]
@@ -863,15 +851,6 @@ pub struct InvalidAttrAtCrateLevel {
     pub item: Option<ItemFollowingInnerAttr>,
 }
 
-#[derive(Diagnostic)]
-#[diag(passes_invalid_attr_unsafe)]
-#[note]
-pub struct InvalidAttrUnsafe {
-    #[primary_span]
-    pub span: Span,
-    pub name: ast::Path,
-}
-
 #[derive(Clone, Copy)]
 pub struct ItemFollowingInnerAttr {
     pub span: Span,
@@ -1574,7 +1553,7 @@ pub enum MultipleDeadCodes<'tcx> {
         participle: &'tcx str,
         name_list: DiagSymbolList,
         #[subdiagnostic]
-        change_fields_suggestion: ChangeFieldsToBeOfUnitType,
+        change_fields_suggestion: ChangeFields,
         #[subdiagnostic]
         parent_info: Option<ParentInfo<'tcx>>,
         #[subdiagnostic]
@@ -1601,11 +1580,18 @@ pub struct IgnoredDerivedImpls {
 }
 
 #[derive(Subdiagnostic)]
-#[multipart_suggestion(passes_change_fields_to_be_of_unit_type, applicability = "has-placeholders")]
-pub struct ChangeFieldsToBeOfUnitType {
-    pub num: usize,
-    #[suggestion_part(code = "()")]
-    pub spans: Vec<Span>,
+pub enum ChangeFields {
+    #[multipart_suggestion(
+        passes_change_fields_to_be_of_unit_type,
+        applicability = "has-placeholders"
+    )]
+    ChangeToUnitTypeOrRemove {
+        num: usize,
+        #[suggestion_part(code = "()")]
+        spans: Vec<Span>,
+    },
+    #[help(passes_remove_fields)]
+    Remove { num: usize },
 }
 
 #[derive(Diagnostic)]

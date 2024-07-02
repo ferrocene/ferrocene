@@ -5,14 +5,16 @@ use std::ops::{ControlFlow, Deref};
 
 #[cfg(feature = "nightly")]
 use rustc_macros::{HashStable_NoContext, TyDecodable, TyEncodable};
+#[cfg(feature = "nightly")]
 use rustc_serialize::Decodable;
 use tracing::debug;
 
+use crate::data_structures::SsoHashSet;
 use crate::fold::{FallibleTypeFolder, TypeFoldable, TypeFolder, TypeSuperFoldable};
 use crate::inherent::*;
 use crate::lift::Lift;
 use crate::visit::{Flags, TypeSuperVisitable, TypeVisitable, TypeVisitableExt, TypeVisitor};
-use crate::{self as ty, Interner, SsoHashSet};
+use crate::{self as ty, Interner};
 
 /// Binder is a binder for higher-ranked lifetimes or types. It is part of the
 /// compiler's representation for things like `for<'a> Fn(&'a isize)`
@@ -55,6 +57,7 @@ where
     }
 }
 
+#[cfg(feature = "nightly")]
 macro_rules! impl_binder_encode_decode {
     ($($t:ty),+ $(,)?) => {
         $(
@@ -82,6 +85,7 @@ macro_rules! impl_binder_encode_decode {
     }
 }
 
+#[cfg(feature = "nightly")]
 impl_binder_encode_decode! {
     ty::FnSig<I>,
     ty::TraitPredicate<I>,
@@ -316,7 +320,7 @@ impl<I: Interner> TypeVisitor<I> for ValidateBoundVars<I> {
                 if self.bound_vars.len() <= idx {
                     panic!("Not enough bound vars: {:?} not found in {:?}", t, self.bound_vars);
                 }
-                bound_ty.assert_eq(self.bound_vars[idx]);
+                bound_ty.assert_eq(self.bound_vars.get(idx).unwrap());
             }
             _ => {}
         };
@@ -331,7 +335,7 @@ impl<I: Interner> TypeVisitor<I> for ValidateBoundVars<I> {
                 if self.bound_vars.len() <= idx {
                     panic!("Not enough bound vars: {:?} not found in {:?}", r, self.bound_vars);
                 }
-                br.assert_eq(self.bound_vars[idx]);
+                br.assert_eq(self.bound_vars.get(idx).unwrap());
             }
 
             _ => (),
@@ -361,6 +365,7 @@ impl<I: Interner> TypeVisitor<I> for ValidateBoundVars<I> {
 #[cfg_attr(feature = "nightly", derive(TyEncodable, TyDecodable, HashStable_NoContext))]
 pub struct EarlyBinder<I: Interner, T> {
     value: T,
+    #[derivative(Debug = "ignore")]
     _tcx: PhantomData<I>,
 }
 
@@ -430,15 +435,14 @@ impl<I: Interner, T> EarlyBinder<I, Option<T>> {
     }
 }
 
-impl<'s, I: Interner, Iter: IntoIterator> EarlyBinder<I, Iter>
+impl<I: Interner, Iter: IntoIterator> EarlyBinder<I, Iter>
 where
     Iter::Item: TypeFoldable<I>,
 {
-    pub fn iter_instantiated(
-        self,
-        tcx: I,
-        args: &'s [I::GenericArg],
-    ) -> IterInstantiated<'s, I, Iter> {
+    pub fn iter_instantiated<A>(self, tcx: I, args: A) -> IterInstantiated<I, Iter, A>
+    where
+        A: SliceLike<Item = I::GenericArg>,
+    {
         IterInstantiated { it: self.value.into_iter(), tcx, args }
     }
 
@@ -449,15 +453,16 @@ where
     }
 }
 
-pub struct IterInstantiated<'s, I: Interner, Iter: IntoIterator> {
+pub struct IterInstantiated<I: Interner, Iter: IntoIterator, A> {
     it: Iter::IntoIter,
     tcx: I,
-    args: &'s [I::GenericArg],
+    args: A,
 }
 
-impl<I: Interner, Iter: IntoIterator> Iterator for IterInstantiated<'_, I, Iter>
+impl<I: Interner, Iter: IntoIterator, A> Iterator for IterInstantiated<I, Iter, A>
 where
     Iter::Item: TypeFoldable<I>,
+    A: SliceLike<Item = I::GenericArg>,
 {
     type Item = Iter::Item;
 
@@ -473,10 +478,11 @@ where
     }
 }
 
-impl<I: Interner, Iter: IntoIterator> DoubleEndedIterator for IterInstantiated<'_, I, Iter>
+impl<I: Interner, Iter: IntoIterator, A> DoubleEndedIterator for IterInstantiated<I, Iter, A>
 where
     Iter::IntoIter: DoubleEndedIterator,
     Iter::Item: TypeFoldable<I>,
+    A: SliceLike<Item = I::GenericArg>,
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         Some(
@@ -486,10 +492,11 @@ where
     }
 }
 
-impl<I: Interner, Iter: IntoIterator> ExactSizeIterator for IterInstantiated<'_, I, Iter>
+impl<I: Interner, Iter: IntoIterator, A> ExactSizeIterator for IterInstantiated<I, Iter, A>
 where
     Iter::IntoIter: ExactSizeIterator,
     Iter::Item: TypeFoldable<I>,
+    A: SliceLike<Item = I::GenericArg>,
 {
 }
 
@@ -584,8 +591,11 @@ impl<I: Interner, T: Iterator> Iterator for EarlyBinderIter<I, T> {
 }
 
 impl<I: Interner, T: TypeFoldable<I>> ty::EarlyBinder<I, T> {
-    pub fn instantiate(self, tcx: I, args: &[I::GenericArg]) -> T {
-        let mut folder = ArgFolder { tcx, args, binders_passed: 0 };
+    pub fn instantiate<A>(self, tcx: I, args: A) -> T
+    where
+        A: SliceLike<Item = I::GenericArg>,
+    {
+        let mut folder = ArgFolder { tcx, args: args.as_slice(), binders_passed: 0 };
         self.value.fold_with(&mut folder)
     }
 
@@ -620,7 +630,7 @@ struct ArgFolder<'a, I: Interner> {
 
 impl<'a, I: Interner> TypeFolder<I> for ArgFolder<'a, I> {
     #[inline]
-    fn interner(&self) -> I {
+    fn cx(&self) -> I {
         self.tcx
     }
 
@@ -840,7 +850,7 @@ impl<'a, I: Interner> ArgFolder<'a, I> {
             return val;
         }
 
-        let result = ty::fold::shift_vars(TypeFolder::interner(self), val, self.binders_passed);
+        let result = ty::fold::shift_vars(TypeFolder::cx(self), val, self.binders_passed);
         debug!("shift_vars: shifted result = {:?}", result);
 
         result

@@ -630,7 +630,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                     let trait_pred_and_ty = trait_pred.map_bound(|inner| {
                         (
                             ty::TraitPredicate {
-                                trait_ref: ty::TraitRef::new(
+                                trait_ref: ty::TraitRef::new_from_args(
                                     self.tcx,
                                     inner.trait_ref.def_id,
                                     self.tcx.mk_args(
@@ -2776,97 +2776,115 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                 let mut this = "this bound";
                 let mut note = None;
                 let mut help = None;
-                if let ty::PredicateKind::Clause(clause) = predicate.kind().skip_binder()
-                    && let ty::ClauseKind::Trait(trait_pred) = clause
-                {
-                    let def_id = trait_pred.def_id();
-                    let visible_item = if let Some(local) = def_id.as_local() {
-                        // Check for local traits being reachable.
-                        let vis = &tcx.resolutions(()).effective_visibilities;
-                        // Account for non-`pub` traits in the root of the local crate.
-                        let is_locally_reachable = tcx.parent(def_id).is_crate_root();
-                        vis.is_reachable(local) || is_locally_reachable
-                    } else {
-                        // Check for foreign traits being reachable.
-                        tcx.visible_parent_map(()).get(&def_id).is_some()
-                    };
-                    if tcx.is_lang_item(def_id, LangItem::Sized) {
-                        // Check if this is an implicit bound, even in foreign crates.
-                        if tcx
-                            .generics_of(item_def_id)
-                            .own_params
-                            .iter()
-                            .any(|param| tcx.def_span(param.def_id) == span)
-                        {
-                            a = "an implicit `Sized`";
-                            this = "the implicit `Sized` requirement on this type parameter";
-                        }
-                        if let Some(hir::Node::TraitItem(hir::TraitItem {
-                            generics,
-                            kind: hir::TraitItemKind::Type(bounds, None),
-                            ..
-                        })) = tcx.hir().get_if_local(item_def_id)
-                        // Do not suggest relaxing if there is an explicit `Sized` obligation.
-                        && !bounds.iter()
-                            .filter_map(|bound| bound.trait_ref())
-                            .any(|tr| tr.trait_def_id() == tcx.lang_items().sized_trait())
-                        {
-                            let (span, separator) = if let [.., last] = bounds {
-                                (last.span().shrink_to_hi(), " +")
+                if let ty::PredicateKind::Clause(clause) = predicate.kind().skip_binder() {
+                    match clause {
+                        ty::ClauseKind::Trait(trait_pred) => {
+                            let def_id = trait_pred.def_id();
+                            let visible_item = if let Some(local) = def_id.as_local() {
+                                // Check for local traits being reachable.
+                                let vis = &tcx.resolutions(()).effective_visibilities;
+                                // Account for non-`pub` traits in the root of the local crate.
+                                let is_locally_reachable = tcx.parent(def_id).is_crate_root();
+                                vis.is_reachable(local) || is_locally_reachable
                             } else {
-                                (generics.span.shrink_to_hi(), ":")
+                                // Check for foreign traits being reachable.
+                                tcx.visible_parent_map(()).get(&def_id).is_some()
                             };
-                            err.span_suggestion_verbose(
-                                span,
-                                "consider relaxing the implicit `Sized` restriction",
-                                format!("{separator} ?Sized"),
-                                Applicability::MachineApplicable,
-                            );
+                            if tcx.is_lang_item(def_id, LangItem::Sized) {
+                                // Check if this is an implicit bound, even in foreign crates.
+                                if tcx
+                                    .generics_of(item_def_id)
+                                    .own_params
+                                    .iter()
+                                    .any(|param| tcx.def_span(param.def_id) == span)
+                                {
+                                    a = "an implicit `Sized`";
+                                    this =
+                                        "the implicit `Sized` requirement on this type parameter";
+                                }
+                                if let Some(hir::Node::TraitItem(hir::TraitItem {
+                                    generics,
+                                    kind: hir::TraitItemKind::Type(bounds, None),
+                                    ..
+                                })) = tcx.hir().get_if_local(item_def_id)
+                                    // Do not suggest relaxing if there is an explicit `Sized` obligation.
+                                    && !bounds.iter()
+                                        .filter_map(|bound| bound.trait_ref())
+                                        .any(|tr| tr.trait_def_id() == tcx.lang_items().sized_trait())
+                                {
+                                    let (span, separator) = if let [.., last] = bounds {
+                                        (last.span().shrink_to_hi(), " +")
+                                    } else {
+                                        (generics.span.shrink_to_hi(), ":")
+                                    };
+                                    err.span_suggestion_verbose(
+                                        span,
+                                        "consider relaxing the implicit `Sized` restriction",
+                                        format!("{separator} ?Sized"),
+                                        Applicability::MachineApplicable,
+                                    );
+                                }
+                            }
+                            if let DefKind::Trait = tcx.def_kind(item_def_id)
+                                && !visible_item
+                            {
+                                note = Some(format!(
+                                    "`{short_item_name}` is a \"sealed trait\", because to implement it \
+                                    you also need to implement `{}`, which is not accessible; this is \
+                                    usually done to force you to use one of the provided types that \
+                                    already implement it",
+                                    with_no_trimmed_paths!(tcx.def_path_str(def_id)),
+                                ));
+                                let impls_of = tcx.trait_impls_of(def_id);
+                                let impls = impls_of
+                                    .non_blanket_impls()
+                                    .values()
+                                    .flatten()
+                                    .chain(impls_of.blanket_impls().iter())
+                                    .collect::<Vec<_>>();
+                                if !impls.is_empty() {
+                                    let len = impls.len();
+                                    let mut types = impls
+                                        .iter()
+                                        .map(|t| {
+                                            with_no_trimmed_paths!(format!(
+                                                "  {}",
+                                                tcx.type_of(*t).instantiate_identity(),
+                                            ))
+                                        })
+                                        .collect::<Vec<_>>();
+                                    let post = if types.len() > 9 {
+                                        types.truncate(8);
+                                        format!("\nand {} others", len - 8)
+                                    } else {
+                                        String::new()
+                                    };
+                                    help = Some(format!(
+                                        "the following type{} implement{} the trait:\n{}{post}",
+                                        pluralize!(len),
+                                        if len == 1 { "s" } else { "" },
+                                        types.join("\n"),
+                                    ));
+                                }
+                            }
                         }
-                    }
-                    if let DefKind::Trait = tcx.def_kind(item_def_id)
-                        && !visible_item
-                    {
-                        note = Some(format!(
-                            "`{short_item_name}` is a \"sealed trait\", because to implement it \
-                             you also need to implement `{}`, which is not accessible; this is \
-                             usually done to force you to use one of the provided types that \
-                             already implement it",
-                            with_no_trimmed_paths!(tcx.def_path_str(def_id)),
-                        ));
-                        let impls_of = tcx.trait_impls_of(def_id);
-                        let impls = impls_of
-                            .non_blanket_impls()
-                            .values()
-                            .flatten()
-                            .chain(impls_of.blanket_impls().iter())
-                            .collect::<Vec<_>>();
-                        if !impls.is_empty() {
-                            let len = impls.len();
-                            let mut types = impls
-                                .iter()
-                                .map(|t| {
-                                    with_no_trimmed_paths!(format!(
-                                        "  {}",
-                                        tcx.type_of(*t).instantiate_identity(),
-                                    ))
-                                })
-                                .collect::<Vec<_>>();
-                            let post = if types.len() > 9 {
-                                types.truncate(8);
-                                format!("\nand {} others", len - 8)
+                        ty::ClauseKind::ConstArgHasType(..) => {
+                            let descr =
+                                format!("required by a const generic parameter in `{item_name}`");
+                            if span.is_visible(sm) {
+                                let msg = format!(
+                                    "required by this const generic parameter in `{short_item_name}`"
+                                );
+                                multispan.push_span_label(span, msg);
+                                err.span_note(multispan, descr);
                             } else {
-                                String::new()
-                            };
-                            help = Some(format!(
-                                "the following type{} implement{} the trait:\n{}{post}",
-                                pluralize!(len),
-                                if len == 1 { "s" } else { "" },
-                                types.join("\n"),
-                            ));
+                                err.span_note(tcx.def_span(item_def_id), descr);
+                            }
+                            return;
                         }
+                        _ => (),
                     }
-                };
+                }
                 let descr = format!("required by {a} bound in `{item_name}`");
                 if span.is_visible(sm) {
                     let msg = format!("required by {this} in `{short_item_name}`");
@@ -2897,53 +2915,27 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             }
             ObligationCauseCode::RepeatElementCopy {
                 is_constable,
-                elt_type,
+                elt_type: _,
                 elt_span,
-                elt_stmt_span,
+                elt_stmt_span: _,
             } => {
                 err.note(
                     "the `Copy` trait is required because this value will be copied for each element of the array",
                 );
-                let value_kind = match is_constable {
-                    IsConstable::Fn => Some("the result of the function call"),
-                    IsConstable::Ctor => Some("the result of the constructor"),
-                    _ => None,
-                };
                 let sm = tcx.sess.source_map();
-                if let Some(value_kind) = value_kind
+                if matches!(is_constable, IsConstable::Fn | IsConstable::Ctor)
                     && let Ok(snip) = sm.span_to_snippet(elt_span)
                 {
-                    let help_msg = format!(
-                        "consider creating a new `const` item and initializing it with {value_kind} \
-                        to be used in the repeat position"
-                    );
-                    let indentation = sm.indentation_before(elt_stmt_span).unwrap_or_default();
-                    err.multipart_suggestion(
-                        help_msg,
-                        vec![
-                            (
-                                elt_stmt_span.shrink_to_lo(),
-                                format!(
-                                    "const ARRAY_REPEAT_VALUE: {elt_type} = {snip};\n{indentation}"
-                                ),
-                            ),
-                            (elt_span, "ARRAY_REPEAT_VALUE".to_string()),
-                        ],
+                    err.span_suggestion(
+                        elt_span,
+                        "create an inline `const` block",
+                        format!("const {{ {snip} }}"),
                         Applicability::MachineApplicable,
                     );
                 } else {
                     // FIXME: we may suggest array::repeat instead
                     err.help("consider using `core::array::from_fn` to initialize the array");
                     err.help("see https://doc.rust-lang.org/stable/std/array/fn.from_fn.html for more information");
-                }
-
-                if tcx.sess.is_nightly_build()
-                    && matches!(is_constable, IsConstable::Fn | IsConstable::Ctor)
-                {
-                    err.help(
-                        "create an inline `const` block, see RFC #2920 \
-                         <https://github.com/rust-lang/rfcs/pull/2920> for more information",
-                    );
                 }
             }
             ObligationCauseCode::VariableType(hir_id) => {
@@ -3937,7 +3929,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
 
             // Extract `<U as Deref>::Target` assoc type and check that it is `T`
             && let Some(deref_target_did) = tcx.lang_items().deref_target()
-            && let projection = Ty::new_projection(tcx,deref_target_did, tcx.mk_args(&[ty::GenericArg::from(found_ty)]))
+            && let projection = Ty::new_projection_from_args(tcx,deref_target_did, tcx.mk_args(&[ty::GenericArg::from(found_ty)]))
             && let InferOk { value: deref_target, obligations } = infcx.at(&ObligationCause::dummy(), param_env).normalize(projection)
             && obligations.iter().all(|obligation| infcx.predicate_must_hold_modulo_regions(obligation))
             && infcx.can_eq(param_env, deref_target, target_ty)
@@ -4272,7 +4264,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
             // This corresponds to `<ExprTy as Iterator>::Item = _`.
             let projection = ty::Binder::dummy(ty::PredicateKind::Clause(
                 ty::ClauseKind::Projection(ty::ProjectionPredicate {
-                    projection_term: ty::AliasTerm::new(self.tcx, proj.def_id, args),
+                    projection_term: ty::AliasTerm::new_from_args(self.tcx, proj.def_id, args),
                     term: ty.into(),
                 }),
             ));
@@ -4918,7 +4910,7 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for ReplaceImplTraitFolder<'tcx> {
         t.super_fold_with(self)
     }
 
-    fn interner(&self) -> TyCtxt<'tcx> {
+    fn cx(&self) -> TyCtxt<'tcx> {
         self.tcx
     }
 }

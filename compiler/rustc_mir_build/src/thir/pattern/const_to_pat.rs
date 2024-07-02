@@ -220,7 +220,7 @@ impl<'tcx> ConstToPat<'tcx> {
             tcx,
             ObligationCause::dummy(),
             self.param_env,
-            ty::TraitRef::new(
+            ty::TraitRef::new_from_args(
                 tcx,
                 partial_eq_trait_id,
                 tcx.with_opt_host_effect_param(
@@ -369,10 +369,10 @@ impl<'tcx> ConstToPat<'tcx> {
             ty::Float(flt) => {
                 let v = cv.unwrap_leaf();
                 let is_nan = match flt {
-                    ty::FloatTy::F16 => unimplemented!("f16_f128"),
+                    ty::FloatTy::F16 => v.to_f16().is_nan(),
                     ty::FloatTy::F32 => v.to_f32().is_nan(),
                     ty::FloatTy::F64 => v.to_f64().is_nan(),
-                    ty::FloatTy::F128 => unimplemented!("f16_f128"),
+                    ty::FloatTy::F128 => v.to_f128().is_nan(),
                 };
                 if is_nan {
                     // NaNs are not ever equal to anything so they make no sense as patterns.

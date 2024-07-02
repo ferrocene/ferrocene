@@ -58,10 +58,6 @@ name = "clippy"
 subset = "default"
 
 [[groups.hosts.packages]]
-name = "rust-demangler"
-subset = "default"
-
-[[groups.hosts.packages]]
 name = "ferrocene-self-test"
 subset = "default"
 

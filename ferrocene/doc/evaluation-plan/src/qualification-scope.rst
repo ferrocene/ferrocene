@@ -26,7 +26,6 @@ only. This includes but is not limited to:
 * ``cargo``
 * ``cargo-clippy``
 * ``rust-analyzer``
-* ``rust-demangler``
 * ``rust-gdb``
 * ``rustdoc``
 * the various llvm tools (example being ``llvm-objcopy``)

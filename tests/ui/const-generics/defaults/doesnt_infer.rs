@@ -12,6 +12,7 @@ fn main() {
     let foo = Foo::<1>::foo();
     let foo = Foo::foo();
     //~^ ERROR type annotations needed for `Foo<_>`
+    //~| ERROR type annotations needed
 }
 
 // ferrocene-annotations: fls_lv7w7aalpwm5

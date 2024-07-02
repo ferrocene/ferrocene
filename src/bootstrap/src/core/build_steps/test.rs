@@ -27,7 +27,7 @@ use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-use crate::utils::exec::BootstrapCommand;
+use crate::utils::exec::{BootstrapCommand, OutputMode};
 use crate::utils::helpers::{
     self, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,
     linker_args, linker_flags, output, t, target_supports_cranelift_backend, up_to_date,
@@ -157,7 +157,10 @@ You can skip linkcheck with --skip src/tools/linkchecker"
         let _guard =
             builder.msg(Kind::Test, compiler.stage, "Linkcheck", bootstrap_host, bootstrap_host);
         let _time = helpers::timeit(builder);
-        builder.run_delaying_failure(linkchecker.arg(builder.out.join(host.triple).join("doc")));
+        builder.run_tracked(
+            BootstrapCommand::from(linkchecker.arg(builder.out.join(host.triple).join("doc")))
+                .delay_failure(),
+        );
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
@@ -202,7 +205,7 @@ impl Step for HtmlCheck {
         if !check_if_tidy_is_installed() {
             eprintln!("not running HTML-check tool because `tidy` is missing");
             eprintln!(
-                "Note that `tidy` is not the in-tree `src/tools/tidy` but needs to be installed"
+                "You need the HTML tidy tool https://www.html-tidy.org/, this tool is *not* part of the rust project and needs to be installed separately, for example via your package manager."
             );
             panic!("Cannot run html-check tests");
         }
@@ -214,8 +217,11 @@ impl Step for HtmlCheck {
             builder,
         ));
 
-        builder.run_delaying_failure(
-            builder.tool_cmd(Tool::HtmlChecker).arg(builder.doc_out(self.target)),
+        builder.run_tracked(
+            BootstrapCommand::from(
+                builder.tool_cmd(Tool::HtmlChecker).arg(builder.doc_out(self.target)),
+            )
+            .delay_failure(),
         );
     }
 }
@@ -262,7 +268,7 @@ impl Step for Cargotest {
             .env("RUSTC", builder.rustc(compiler))
             .env("RUSTDOC", builder.rustdoc(compiler));
         add_rustdoc_cargo_linker_args(cmd, builder, compiler.host, LldThreads::No);
-        builder.run_delaying_failure(cmd);
+        builder.run_tracked(BootstrapCommand::from(cmd).delay_failure());
     }
 }
 
@@ -430,65 +436,6 @@ impl Step for Rustfmt {
         cargo.add_rustc_lib_path(builder);
 
         run_cargo_test(cargo, &[], &[], "rustfmt", "rustfmt", compiler, host, builder);
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct RustDemangler {
-    stage: u32,
-    host: TargetSelection,
-}
-
-impl Step for RustDemangler {
-    type Output = ();
-    const ONLY_HOSTS: bool = true;
-
-    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.path("src/tools/rust-demangler")
-    }
-
-    fn make_run(run: RunConfig<'_>) {
-        run.builder.ensure(RustDemangler { stage: run.builder.top_stage, host: run.target });
-    }
-
-    /// Runs `cargo test` for rust-demangler.
-    fn run(self, builder: &Builder<'_>) {
-        let stage = self.stage;
-        let host = self.host;
-        let compiler = builder.compiler(stage, host);
-
-        let rust_demangler = builder.ensure(tool::RustDemangler {
-            compiler,
-            target: self.host,
-            extra_features: Vec::new(),
-        });
-        let mut cargo = tool::prepare_tool_cargo(
-            builder,
-            compiler,
-            Mode::ToolRustc,
-            host,
-            "test",
-            "src/tools/rust-demangler",
-            SourceType::InTree,
-            &[],
-        );
-
-        let dir = testdir(builder, compiler.host);
-        t!(fs::create_dir_all(dir));
-
-        cargo.env("RUST_DEMANGLER_DRIVER_PATH", rust_demangler);
-        cargo.add_rustc_lib_path(builder);
-
-        run_cargo_test(
-            cargo,
-            &[],
-            &[],
-            "rust-demangler",
-            "rust-demangler",
-            compiler,
-            host,
-            builder,
-        );
     }
 }
 
@@ -873,7 +820,7 @@ impl Step for RustdocTheme {
             .env("RUSTC_BOOTSTRAP", "1");
         cmd.args(linker_args(builder, self.compiler.host, LldThreads::No));
 
-        builder.run_delaying_failure(&mut cmd);
+        builder.run_tracked(BootstrapCommand::from(&mut cmd).delay_failure());
     }
 }
 
@@ -1102,8 +1049,6 @@ impl Step for Tidy {
     /// Once tidy passes, this step also runs `fmt --check` if tests are being run
     /// for the `dev` or `nightly` channels.
     fn run(self, builder: &Builder<'_>) {
-        builder.build.update_submodule(Path::new("src/tools/rustc-perf"));
-
         let mut cmd = builder.tool_cmd(Tool::Tidy);
         cmd.arg(&builder.src);
         cmd.arg(&builder.initial_cargo);
@@ -1153,7 +1098,7 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
         }
 
         builder.info("tidy check");
-        builder.run_delaying_failure(&mut cmd);
+        builder.run_tracked(BootstrapCommand::from(&mut cmd).delay_failure());
 
         builder.info("x.py completions check");
         let [bash, zsh, fish, powershell] = ["x.py.sh", "x.py.zsh", "x.py.fish", "x.py.ps1"]
@@ -2244,7 +2189,8 @@ impl BookTest {
             compiler.host,
         );
         let _time = helpers::timeit(builder);
-        let toolstate = if builder.run_delaying_failure(&mut rustbook_cmd) {
+        let cmd = BootstrapCommand::from(&mut rustbook_cmd).delay_failure();
+        let toolstate = if builder.run_tracked(cmd).is_success() {
             ToolState::TestPass
         } else {
             ToolState::TestFail
@@ -2377,7 +2323,8 @@ impl Step for ErrorIndex {
         let guard =
             builder.msg(Kind::Test, compiler.stage, "error-index", compiler.host, compiler.host);
         let _time = helpers::timeit(builder);
-        builder.run_quiet(&mut tool);
+        builder
+            .run_tracked(BootstrapCommand::from(&mut tool).output_mode(OutputMode::OnlyOnFailure));
         drop(guard);
         // The tests themselves need to link to std, so make sure it is
         // available.
@@ -2406,11 +2353,11 @@ fn markdown_test(builder: &Builder<'_>, compiler: Compiler, markdown: &Path) -> 
     let test_args = builder.config.test_args().join(" ");
     cmd.arg("--test-args").arg(test_args);
 
-    if builder.config.verbose_tests {
-        builder.run_delaying_failure(&mut cmd)
-    } else {
-        builder.run_quiet_delaying_failure(&mut cmd)
+    let mut cmd = BootstrapCommand::from(&mut cmd).delay_failure();
+    if !builder.config.verbose_tests {
+        cmd = cmd.quiet();
     }
+    builder.run_tracked(cmd).is_success()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -2435,7 +2382,8 @@ impl Step for RustcGuide {
 
         let src = builder.src.join(relative_path);
         let mut rustbook_cmd = builder.tool_cmd(Tool::Rustbook);
-        let toolstate = if builder.run_delaying_failure(rustbook_cmd.arg("linkcheck").arg(&src)) {
+        let cmd = BootstrapCommand::from(rustbook_cmd.arg("linkcheck").arg(&src)).delay_failure();
+        let toolstate = if builder.run_tracked(cmd).is_success() {
             ToolState::TestPass
         } else {
             ToolState::TestFail
@@ -3101,7 +3049,7 @@ impl Step for Bootstrap {
             .current_dir(builder.src.join("src/bootstrap/"));
         // NOTE: we intentionally don't pass test_args here because the args for unittest and cargo test are mutually incompatible.
         // Use `python -m unittest` manually if you want to pass arguments.
-        builder.run_delaying_failure(&mut check_bootstrap);
+        builder.run_tracked(BootstrapCommand::from(&mut check_bootstrap).delay_failure());
 
         let mut cmd = Command::new(&builder.initial_cargo);
         cmd.arg("test")
@@ -3178,7 +3126,7 @@ impl Step for TierCheck {
             self.compiler.host,
             self.compiler.host,
         );
-        builder.run_delaying_failure(&mut cargo.into());
+        builder.run_tracked(BootstrapCommand::from(&mut cargo.into()).delay_failure());
     }
 }
 
@@ -3264,7 +3212,7 @@ impl Step for RustInstaller {
         cmd.env("CARGO", &builder.initial_cargo);
         cmd.env("RUSTC", &builder.initial_rustc);
         cmd.env("TMP_DIR", &tmpdir);
-        builder.run_delaying_failure(&mut cmd);
+        builder.run_tracked(BootstrapCommand::from(&mut cmd).delay_failure());
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

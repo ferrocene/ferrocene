@@ -105,6 +105,9 @@ pub struct AttributeTemplate {
     pub word: bool,
     /// If `Some`, the attribute is allowed to take a list of items like `#[allow(..)]`.
     pub list: Option<&'static str>,
+    /// If non-empty, the attribute is allowed to take a list containing exactly
+    /// one of the listed words, like `#[coverage(off)]`.
+    pub one_of: &'static [Symbol],
     /// If `Some`, the attribute is allowed to be a name/value pair where the
     /// value is a string, like `#[must_use = "reason"]`.
     pub name_value_str: Option<&'static str>,
@@ -165,19 +168,20 @@ pub enum AttributeDuplicates {
 /// E.g., `template!(Word, List: "description")` means that the attribute
 /// supports forms `#[attr]` and `#[attr(description)]`.
 macro_rules! template {
-    (Word) => { template!(@ true, None, None) };
-    (List: $descr: expr) => { template!(@ false, Some($descr), None) };
-    (NameValueStr: $descr: expr) => { template!(@ false, None, Some($descr)) };
-    (Word, List: $descr: expr) => { template!(@ true, Some($descr), None) };
-    (Word, NameValueStr: $descr: expr) => { template!(@ true, None, Some($descr)) };
+    (Word) => { template!(@ true, None, &[], None) };
+    (List: $descr: expr) => { template!(@ false, Some($descr), &[], None) };
+    (OneOf: $one_of: expr) => { template!(@ false, None, $one_of, None) };
+    (NameValueStr: $descr: expr) => { template!(@ false, None, &[], Some($descr)) };
+    (Word, List: $descr: expr) => { template!(@ true, Some($descr), &[], None) };
+    (Word, NameValueStr: $descr: expr) => { template!(@ true, None, &[], Some($descr)) };
     (List: $descr1: expr, NameValueStr: $descr2: expr) => {
-        template!(@ false, Some($descr1), Some($descr2))
+        template!(@ false, Some($descr1), &[], Some($descr2))
     };
     (Word, List: $descr1: expr, NameValueStr: $descr2: expr) => {
-        template!(@ true, Some($descr1), Some($descr2))
+        template!(@ true, Some($descr1), &[], Some($descr2))
     };
-    (@ $word: expr, $list: expr, $name_value_str: expr) => { AttributeTemplate {
-        word: $word, list: $list, name_value_str: $name_value_str
+    (@ $word: expr, $list: expr, $one_of: expr, $name_value_str: expr) => { AttributeTemplate {
+        word: $word, list: $list, one_of: $one_of, name_value_str: $name_value_str
     } };
 }
 
@@ -365,9 +369,9 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         allow, Normal, template!(List: r#"lint1, lint2, ..., /*opt*/ reason = "...""#),
         DuplicatesOk, EncodeCrossCrate::No,
     ),
-    gated!(
-        expect, Normal, template!(List: r#"lint1, lint2, ..., /*opt*/ reason = "...""#), DuplicatesOk,
-        EncodeCrossCrate::No, lint_reasons, experimental!(expect)
+    ungated!(
+        expect, Normal, template!(List: r#"lint1, lint2, ..., /*opt*/ reason = "...""#),
+        DuplicatesOk, EncodeCrossCrate::No,
     ),
     ungated!(
         forbid, Normal, template!(List: r#"lint1, lint2, ..., /*opt*/ reason = "...""#),
@@ -478,8 +482,8 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         EncodeCrossCrate::No, experimental!(no_sanitize)
     ),
     gated!(
-        coverage, Normal, template!(Word, List: "on|off"),
-        WarnFollowing, EncodeCrossCrate::No,
+        coverage, Normal, template!(OneOf: &[sym::off, sym::on]),
+        ErrorPreceding, EncodeCrossCrate::No,
         coverage_attribute, experimental!(coverage)
     ),
 
@@ -573,6 +577,12 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     gated!(
         coroutine, Normal, template!(Word), ErrorFollowing,
         EncodeCrossCrate::No, coroutines, experimental!(coroutines)
+    ),
+
+    // `#[pointee]` attribute to designate the pointee type in SmartPointer derive-macro
+    gated!(
+        pointee, Normal, template!(Word), ErrorFollowing,
+        EncodeCrossCrate::No, derive_smart_pointer, experimental!(pointee)
     ),
 
     // ==========================================================================
@@ -1089,11 +1099,11 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         "the `#[custom_mir]` attribute is just used for the Rust test suite",
     ),
     rustc_attr!(
-        TEST, rustc_dump_program_clauses, Normal, template!(Word),
+        TEST, rustc_dump_item_bounds, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
-        TEST, rustc_dump_env_program_clauses, Normal, template!(Word),
+        TEST, rustc_dump_predicates, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(
@@ -1143,10 +1153,6 @@ pub fn is_valid_for_get_attr(name: Symbol) -> bool {
         | FutureWarnPreceding => true,
         DuplicatesOk | WarnFollowingWordOnly => false,
     })
-}
-
-pub fn is_unsafe_attr(name: Symbol) -> bool {
-    BUILTIN_ATTRIBUTE_MAP.get(&name).is_some_and(|attr| attr.safety == AttributeSafety::Unsafe)
 }
 
 pub static BUILTIN_ATTRIBUTE_MAP: LazyLock<FxHashMap<Symbol, &BuiltinAttribute>> =

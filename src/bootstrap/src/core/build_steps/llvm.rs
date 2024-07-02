@@ -217,6 +217,7 @@ pub(crate) fn is_ci_llvm_available(config: &Config, asserts: bool) -> bool {
         ("arm-unknown-linux-gnueabihf", false),
         ("armv7-unknown-linux-gnueabihf", false),
         ("loongarch64-unknown-linux-gnu", false),
+        ("loongarch64-unknown-linux-musl", false),
         ("mips-unknown-linux-gnu", false),
         ("mips64-unknown-linux-gnuabi64", false),
         ("mips64el-unknown-linux-gnuabi64", false),
@@ -406,18 +407,21 @@ impl Step for Llvm {
             cfg.define("LLVM_LINK_LLVM_DYLIB", "ON");
         }
 
-        if (target.starts_with("riscv") || target.starts_with("csky"))
+        if (target.starts_with("csky")
+            || target.starts_with("riscv")
+            || target.starts_with("sparc-"))
             && !target.contains("freebsd")
             && !target.contains("openbsd")
             && !target.contains("netbsd")
         {
-            // RISC-V and CSKY GCC erroneously requires linking against
+            // CSKY and RISC-V GCC erroneously requires linking against
             // `libatomic` when using 1-byte and 2-byte C++
             // atomics but the LLVM build system check cannot
             // detect this. Therefore it is set manually here.
             // Some BSD uses Clang as its system compiler and
             // provides no libatomic in its base system so does
-            // not want this.
+            // not want this. 32-bit SPARC requires linking against
+            // libatomic as well.
             ldflags.exe.push(" -latomic");
             ldflags.shared.push(" -latomic");
         }

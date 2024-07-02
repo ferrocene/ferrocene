@@ -21,7 +21,7 @@ KINDS = [
 class DefIdNode(nodes.Element):
     def __init__(self, kind, text):
         text, id = parse_target_from_text(text)
-        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(id))
+        super().__init__(def_kind=kind, def_text=text, def_id=id_from_text(kind, id))
 
     def astext(self):
         return self["def_text"]
@@ -35,7 +35,7 @@ class DefRefNode(nodes.Element):
             ref_kind=kind,
             ref_source_doc=source_doc,
             ref_text=text,
-            ref_target=id_from_text(target),
+            ref_target=id_from_text(kind, target),
         )
 
     def astext(self):
@@ -211,8 +211,17 @@ def get_object_types():
     return result
 
 
-def id_from_text(text):
-    return "".join(c if c.isalnum() else "_" for c in text.lower())
+def id_from_text(kind, text):
+    # We lowercase the text so that capitalization does not matter for
+    # references and definitions, which is sometimes the case for when they are
+    # used as the start of a sentence.
+    # Notably though, this breaks for paragraph ids which are unique randomized
+    # strings where capitalization matters for hyperlinking, so we don't do so
+    # for those
+    return "".join(
+        c if c.isalnum() else "_"
+        for c in (text if kind == "paragraph" else text.lower())
+    )
 
 
 def setup(app):

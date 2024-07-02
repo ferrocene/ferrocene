@@ -34,11 +34,18 @@ ECR_REGION = "us-east-1"
 # How long should it take before an image is rebuilt.
 REBUILD_IMAGES_OLDER_THAN_DAYS = 7
 
+# QNX targets only work on x86_64 Windows, x86_64 Linux, and x86_64 Mac
+# They must be excluded on, for example, aarch64 Mac
+QNX_TARGETS = [
+    "aarch64-unknown-nto-qnx710",
+    "x86_64-pc-nto-qnx710",
+]
+
 # Targets only built (and self-tested!) on Linux.
 LINUX_ONLY_TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
 # x86_64-unknown-linux-gnu builds a number of cross compilation targets
 # for us and is special cased somewhat.
-LINUX_BUILT_CROSS_TARGETS = [
+X86_64_LINUX_BUILT_CROSS_TARGETS = [
     "aarch64-unknown-none",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
@@ -47,15 +54,15 @@ LINUX_BUILT_CROSS_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+X86_64_LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS + QNX_TARGETS
 
 # Targets only built (and tested!) on Mac
 MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-MAC_ALL_TARGETS = MAC_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+AARCH64_MAC_ALL_TARGETS = MAC_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS
 
 # Tagets only built (and tested!) on Windows
 WINDOWS_ONLY_TARGETS = ["x86_64-pc-windows-msvc"]
-WINDOWS_ALL_TARGETS = WINDOWS_ONLY_TARGETS + LINUX_BUILT_CROSS_TARGETS
+X86_64_WINDOWS_ALL_TARGETS = WINDOWS_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -158,16 +165,16 @@ def calculate_targets(host_plus_stage: str):
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std-only":
         if host == "x86_64-unknown-linux-gnu":
-            targets = LINUX_ALL_TARGETS
+            targets = X86_64_LINUX_ALL_TARGETS
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
         if host == "x86_64-unknown-linux-gnu":
-            targets = LINUX_ALL_TARGETS
+            targets = X86_64_LINUX_ALL_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets = MAC_ALL_TARGETS
+            targets = AARCH64_MAC_ALL_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets = WINDOWS_ALL_TARGETS
+            targets = X86_64_WINDOWS_ALL_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

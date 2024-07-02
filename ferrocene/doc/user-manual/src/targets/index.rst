@@ -102,6 +102,18 @@ should not be used in production.
      - Bare-metal
      - \-
 
+   * - :ref:`aarch64-unknown-nto-qnx710`
+     - ``aarch64-unknown-nto-qnx710``
+     - Cross-compilation
+     - Full
+     - Can only be cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
+   * - :ref:`x86_64-pc-nto-qnx710`
+     - ``x86_64-pc-nto-qnx710``
+     - Cross-compilation
+     - Full
+     - Can only be cross-compiled from :ref:`x86_64-unknown-linux-gnu`.
+
    * - :target:`wasm32-unknown-unknown`
      - ``wasm32-unknown-unknown``
      - Cross-compilation

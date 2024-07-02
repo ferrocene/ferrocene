@@ -65,6 +65,8 @@ To create the library, run:
 
    $ rustc --edition 2021 --crate-type lib ops.rs
 
+.. include:: ../partials/criticalup-run.rst
+
 .. include:: ../partials/target-flags-note.rst
 
 This invocation produces library file ``libops.rlib``.

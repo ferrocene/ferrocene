@@ -38,6 +38,8 @@ To create the executable, run:
 
    $ rustc --edition 2021 hw.rs
 
+.. include:: ../partials/criticalup-run.rst
+
 .. include:: ../partials/target-flags-note.rst
 
 This invocation produces executable ``hw``. Running ``hw`` should yield:
@@ -73,6 +75,8 @@ To create the executable, run:
 .. code-block::
 
    $ rustc --edition 2021 -L ../rust_library --extern ops use_ops.rs
+
+.. include:: ../partials/criticalup-run.rst
 
 .. include:: ../partials/target-flags-note.rst
 

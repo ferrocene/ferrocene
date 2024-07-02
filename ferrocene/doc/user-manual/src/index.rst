@@ -49,6 +49,7 @@ Ferrocene User Manual
    :caption: Reference:
 
    cli
+   criticalup
    self-test/error-codes
 
 Indices and tables

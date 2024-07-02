@@ -13,10 +13,12 @@ Imitating the CI
 
 Sometimes it is useful to imitate the CI to reproduce failures.
 
-The CI's Linux jobs typically run in containers, and can be almost exactly
-reproduced. Mac and Windows jobs cannot run in containers, and are more
-difficult to reproduce. If present with the option, attempt to reproduce
-Linux CI failures first.
+The Linux jobs on CI typically run in containers and can be almost exactly
+reproduced. Mac and Windows jobs on CI cannot run in containers and are more
+difficult to reproduce.
+
+If you are presented the option, it's a good idea to reproduce Linux CI
+failures first.
 
 
 Installing Docker (with Buildkit)
@@ -27,22 +29,29 @@ You do not need to download or use `Docker Desktop
 choose to use Docker Desktop, install it as directed on the Website and skip
 the rest of this section.
 
-On Linux, install Docker and `docker-buildx` from your package manager, for
-example, `apt install docker.io docker-buildx`. On some distributions, you may
-need to start the service with `systemctl enable --now docker`.
+On Linux, install Docker and ``docker-buildx`` from your package manager. On
+Ubuntu 20.04 and up:
+
+.. code-block:: bash
+
+   apt install docker.io docker-buildx
+   
+On some distributions, you may need to start the service with
+``systemctl enable --now docker``. If you just installed ``docker-buildx``,
+restart the Docker service.
 
 On MacOS, you can use the Docker CLI connected to a Lima host:
 
 .. code-block:: bash
 
-   brew install Lima docker
+   brew install lima docker
    limactl start template://docker
    docker context create lima-docker --docker "host=unix://{{.Dir}}/sock/docker.sock"
    docker context use lima-docker
    docker run --rm hello-world
 
 On Windows, it's generally recommended to do CI imitation within WSL2. Enable
-WSL2 from an administrator Powershell if you haven't done so already, then
+WSL2 from an administrator Powershell if you haven't done so already, then setup
 `ubuntu-24.04`.
 
 .. code-block:: Powershell
@@ -64,8 +73,8 @@ On Linux, install Python with your distribution's package manager, for example:
 
    apt install python
 
-On macOS, Python is already installed if you have a working XCode toolchain or
-XCode Developer Tools installed, for example:
+On macOS, Python is probably already installed (if you have a working XCode toolchain or
+XCode Developer Tools installed). To install XCode Developer Tools:
 
 .. code-block:: bash
    
@@ -74,19 +83,25 @@ XCode Developer Tools installed, for example:
 
 .. warning::
    
-   Do not install Python or ``pip`` via Homebrew, if you have already done so,
-   remove them.
+   Avoid installing Python or ``pip`` via Homebrew, this can lead to long term
+   system disfunction. If you have already done so, consider removing them.
 
-On Windows, run ``winget install Python.Python.3.12`` or get it from the
-`website <https://www.python.org/downloads/windows/>`_.
+On Windows, get Python from the
+`website <https://www.python.org/downloads/windows/>`_, or use `winget
+<https://learn.microsoft.com/en-us/windows/package-manager/winget/>`_:
+
+.. code-block:: powershell
+
+   winget install Python.Python.3.12
 
 
 Using the Python virtual environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ferrocene uses ``uv`` to manage our Python dependencies. There are a number of
-ways to install ``uv <https://github.com/astral-sh/uv>``_, but we recommend the
-``curl`` (Linux, MacOS) or ``powershell`` (Windows) methods:
+ways to install `listed in the repository <https://github.com/astral-sh/uv>`_,
+but we recommend the ``curl`` (Linux, MacOS) or ``powershell`` (Windows)
+methods:
 
 .. code-block:: bash
 
@@ -96,7 +111,7 @@ ways to install ``uv <https://github.com/astral-sh/uv>``_, but we recommend the
 
    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-Follow the onscreen instructions post-install to ensure `uv` is present on your
+Follow the onscreen instructions post-install to ensure ``uv`` is present on your
 ``$PATH``.
 
 Set up the virtual environment:
@@ -180,23 +195,28 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       ubuntu-20 bash
 
-Inside the container, run ``./x clean`` then run the ``SCRIPT``, line by line
-if desired:
+.. note::
+
+   If you wish to preserve your ``build/`` artifacts, it may make sense to
+   re-clone the Ferrocene repository inside the container.
+
+Inside the container, run ``./x clean`` then run the lines of the ``SCRIPT``
+of the job:
 
 .. code-block:: bash
 
    ./x clean
    ./x --stage 2 dist rust-std
 
-If you wish to preserve your ``build/`` artifacts, it may make sense to
-re-clone the Ferrocene repository inside the container.
 
 Making changes to the CI
 ------------------------
 
 Effort should be made to avoid tying to tightly to CircleCI, Ferrocene is
-likely to change CI providers in the future. Non-trivial ``run:`` tasks in
-the CI should be made scripts in ``ferrocene/ci/scripts/``.
+likely to change CI providers in the future.
+
+Non-trivial ``run:`` tasks in the CI should be made scripts in
+``ferrocene/ci/scripts/``.
 
 
 Tooling Pragmatism
@@ -219,7 +239,7 @@ to convert it to Python. During evaluation, check for these signals that a bash
 script should be rewritten in Python:
 
 * The script runs in Windows jobs at all
-   * bash on Windows is problematic and has been the source of a number of
+   * ``bash.exe`` on Windows is problematic and has been the source of a number of
      bugs.
 * The script calls `shasum` or other hashing related functionality
    * There are tangible differences between Linux, macOS, and Windows' Bash

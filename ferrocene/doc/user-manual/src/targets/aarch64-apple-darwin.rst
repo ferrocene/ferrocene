@@ -42,14 +42,14 @@ Install one of:
 Archives to install
 -------------------
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing </install>` this
 target as a host platform:
 
 * ``rustc-aarch64-apple-darwin``
 * ``rust-std-aarch64-apple-darwin``
 * ``ferrocene-self-test-aarch64-apple-darwin``
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing </install>` this
 target as a cross-compilation target:
 
 * ``rust-std-aarch64-apple-darwin``

@@ -50,14 +50,14 @@ Archives to install
 -------------------
 
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing </install>` this
 target as a host platform:
 
 * ``rustc-x86_64-pc-windows-msvc``
 * ``rust-std-x86_64-pc-windows-msvc``
 * ``ferrocene-self-test-x86_64-pc-windows-msvc``
 
-The following archives are needed when :doc:`installing </rustc/install>` this
+The following archives are needed when :doc:`installing </install>` this
 target as a cross-compilation target:
 
 * ``rust-std-x86_64-pc-windows-msvc``

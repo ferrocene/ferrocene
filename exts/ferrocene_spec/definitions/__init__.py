@@ -214,7 +214,7 @@ def get_object_types():
 def id_from_text(kind, text):
     # We lowercase the text so that capitalization does not matter for
     # references and definitions, which is sometimes the case for when they are
-    # used as the start of a sentence.
+    # used at the start of a sentence.
     # Notably though, this breaks for paragraph ids which are unique randomized
     # strings where capitalization matters for hyperlinking, so we don't do so
     # for those

@@ -29,7 +29,7 @@ Version 1.79.0 (2024-06-13)
 * :dp:`fls_HbxNaRTX5XoS`
   `Stabilize WebAssembly target features that are in phase 4 and 5. <https://github.com/rust-lang/rust/pull/117457/>`_
 
-  * :dp:`fls_Dbufw279W10c`
+  * :dp:`fls_Dasfwf79310c`
     No change: `cfg` and `cfg_attr` configuration predicates are not part of the FLS.
 
 * :dp:`fls_Dbufw279W10c`
@@ -41,13 +41,13 @@ Version 1.79.0 (2024-06-13)
 * :dp:`fls_mdAd1wCv1hMI`
   `Stabilize the \`unnameable_types\` lint for public types that can't be named. <https://github.com/rust-lang/rust/pull/120144/>`_
 
-  * :dp:`fls_7gae0TTCRc3v`
+  * :dp:`fls_hhfg0T312c3v`
     No change: Lints are not part of the FLS.
 
 * :dp:`fls_sH93ZYSVlOOv`
   `Enable debuginfo in macros, and stabilize \`-C collapse-macro-debuginfo\` and \`#[collapse_debuginfo]\`. <https://github.com/rust-lang/rust/pull/120845/>`_
 
-  * :dp:`fls_7gae0TTCRc3v`
+  * :dp:`fls_7gae0TTCRc32`
     New section: Attribute `collapse_debuginfo` :p:`fls_qyudjGHZfyJH`
 
 * :dp:`fls_0bG3GNvXbmiS`
@@ -89,7 +89,7 @@ Version 1.79.0 (2024-06-13)
   * :dp:`fls_FE6Rujg0JzpG`
     Various changes:
 
-    * :dp:`fls_FE6Rujg0JzpG`
+    * :dp:`fls_12aas6RugJzd`
       New section: Program Entry Point :p:`fls_8JB3SJqamdpU`
 
     * :dp:`fls_gSXmkIYYhTfP`
@@ -98,7 +98,7 @@ Version 1.79.0 (2024-06-13)
     * :dp:`fls_b3x3YUEfjKZy`
       Removal of definition `main function`
 
-    * :dp:`fls_b3x3YUEfjKZy`
+    * :dp:`fls_42a1YU4ffKZa`
       binary crate and proc-macro crate rewritten :p:`fls_9ub6ks8qrang` :p:`fls_Mf62VqAhoZ3c`
 
     * :dp:`fls_Xtl4nwOusufp`
@@ -151,13 +151,13 @@ Version 1.78.0 (2024-05-02)
 * :dp:`fls_mGo1ObKqvauG`
   `Make matching on NaN a hard error, and remove the rest of \`illegal_floating_point_literal_pattern\` <https://github.com/rust-lang/rust/pull/116284/>`_
 
-  * :dp:`fls_rerCWvAc0vU4`
+  * :dp:`fls_8fsC2vAc0asa`
     New paragraph: :p:`fls_JP8YSbxSN0Ym`
 
 * :dp:`fls_rerCWvAc0vU4`
   `static mut: allow mutable reference to arbitrary types, not just slices and arrays <https://github.com/rust-lang/rust/pull/117614/>`_
 
-  * :dp:`fls_rerCWvAc0vU4`
+  * :dp:`fls_ffeAD2Ac0U12`
     No change: This lifted restriction is not described in the FLS.
 
 * :dp:`fls_J2h9pGT9tGP0`
@@ -208,7 +208,7 @@ Version 1.78.0 (2024-05-02)
   * :dp:`fls_0DUycmb1P2Os`
     No change: The FLS does not specify type inference to such a degree.
 
-* :dp:`fls_0DUycmb1P2Os`
+* :dp:`fls_0gsyc3a1P2s2`
   `\`trait Trait: Auto {}\`: allow upcasting from \`dyn Trait\` to \`dyn Trait + Auto\` <https://github.com/rust-lang/rust/pull/119338>`_
 
 .. _fls_rDta70LeEpBl:

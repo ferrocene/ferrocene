@@ -311,12 +311,16 @@ Generic Arguments
 
    GenericArgument ::=
        BindingArgument
+     | BindingBoundArgument
      | ConstantArgument
      | LifetimeArgument
      | TypeArgument
 
    BindingArgument ::=
        Identifier $$=$$ TypeSpecification
+
+   BindingBoundArgument ::=
+       Identifier $$:$$ TypeBoundList
 
    ConstantArgument ::=
        BlockExpression
@@ -348,6 +352,16 @@ A :s:`LifetimeArgument` shall precede :s:`[BindingArgument]s`,
 :dp:`fls_9pda3ja0ihks`
 A :t:`binding argument` is a :t:`generic argument` that supplies the :t:`type`
 of an :t:`associated trait type`.
+
+:dp:`fls_mcUMWsYcxzmZ`
+A :t:`binding bound argument` is a :t:`generic argument` that further imposes
+:t:`[bound]s` on an :t:`associated trait type`.
+
+:dp:`fls_dxMfAI4EZVS5`
+A :t:`binding bound argument` shall only be used within the confines of a
+:t:`type bound predicate`'s :t:`[bound]s`, :t:`[impl trait type]`'s
+:t:`[bound]s`, :t:`associated type`'s :t:`[bound]s` or :t:`trait`'s
+:t:`[supertrait]s`.
 
 :dp:`fls_i3z9ueoe99zd`
 A :t:`constant argument` is a :t:`generic argument` that supplies the

@@ -122,6 +122,7 @@ Built-in Attributes
        AutomaticallyDerivedContent
      | CfgAttrContent
      | CfgContent
+     | CollapseDebuginfoContent
      | ColdContent
      | CrateNameContent
      | CrateTypeContent
@@ -1240,7 +1241,7 @@ Attribute ``no_main``
 
 :dp:`fls_6qig3s3qpj0i`
 :t:`Attribute` :dc:`no_main` indicates that the symbols of the
-:t:`main function` will not be present in a binary.
+:t:`program entry point` will not be present in a binary.
 
 .. rubric:: Examples
 
@@ -1448,6 +1449,42 @@ Attribute ``type_length_limit``
 
 Macros Attributes
 ~~~~~~~~~~~~~~~~~
+
+.. _fls_qyudjGHZfyJH:
+
+Attribute ``collapse_debuginfo``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   CollapseDebuginfoContent ::=
+       $$collapse_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
+   CollapseDebuginfoKind ::=
+       $$no
+     | $$external$$
+     | $$yes$$
+
+.. rubric:: Legality Rules
+
+:dp:`fls_EzKHtWHmXMAZ`
+:t:`Attribute` :c:`collapse_debuginfo` shall apply to :t:`[declarative macro]s`.
+
+:dp:`fls_BCvJpfQMYEcD`
+:t:`Attribute` :dc:`collapse_debuginfo` changes the debug location information
+for the expanded code of the :t:`declarative macro` to its invocation site. This
+repeats recursively to the top most expansion of a :t:`declarative macro` that
+is not annotated with :t:`attribute` :c:`collapse_debuginfo`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   #[collapse_debuginfo(yes)]
+   macro_rules! m {
+       () => {};
+   }
 
 .. _fls_e0a96eb6ux3y:
 

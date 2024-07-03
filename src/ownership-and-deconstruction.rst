@@ -625,6 +625,18 @@ An :dt:`extending expression` is either
   :t:`array expression`, a :t:`borrow expression`, a :t:`struct expression`, a
   :t:`tuple expression`, or a :t:`type cast expression`, or
 
+* :dp:`fls_Rj9zhVutfQod`
+  The :t:`block expression` and :t:`else expression` of an :t:`if expression`
+  that is an :t:`extending expression`.
+
+* :dp:`fls_oodpp3LpXC13`
+  The :t:`expression` of an :t:`else expression` that is an :t:`extending
+  expression`.
+
+* :dp:`fls_xGThCPoTUSAi`
+  The :t:`expression` of a :t:`match arm` of a :t:`match expression` that is an
+  :t:`extending expression`.
+
 * :dp:`fls_iqw0d1l1lj3i`
   The :t:`tail expression` of a :t:`block expression` that is an
   :t:`extending expression`.

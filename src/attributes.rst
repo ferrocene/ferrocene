@@ -1452,15 +1452,15 @@ Macros Attributes
 
 .. _fls_qyudjGHZfyJH:
 
-Attribute ``collapsable_debuginfo``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Attribute ``collapse_debuginfo``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. rubric:: Syntax
 
 .. syntax::
 
    CollapseDebuginfoContent ::=
-       $$collapsable_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
+       $$collapse_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
    CollapseDebuginfoKind ::=
        $$no
      | $$external$$
@@ -1469,7 +1469,7 @@ Attribute ``collapsable_debuginfo``
 .. rubric:: Legality Rules
 
 :dp:`fls_EzKHtWHmXMAZ`
-:t:`Attribute` :c:`collapsable_debuginfo` shall apply to :t:`[declarative macro]s`.
+:t:`Attribute` :c:`collapse_debuginfo` shall apply to :t:`[declarative macro]s`.
 
 :dp:`fls_BCvJpfQMYEcD`
 :t:`Attribute` :dc:`collapse_debuginfo` changes the debug location information
@@ -1481,7 +1481,7 @@ is not annotated with :t:`attribute` :c:`collapse_debuginfo`.
 
 .. code-block:: rust
 
-   #[collapse_debuginfo]
+   #[collapse_debuginfo(yes)]
    macro_rules! m {
        () => {};
    }

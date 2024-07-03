@@ -1342,6 +1342,16 @@ to either ``true`` or ``false``, and controls :t:`conditional compilation`.
 :dp:`fls_99ioki0M64fD`
 See :s:`ConfigurationPredicate`.
 
+.. _fls_vuBjK3kdImTn:
+
+const block expression
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_5ApoJzRSTZGH`
+A :dt:`const block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``const`` and encapsulates behavior which is evaluated
+statically.
+
 .. _fls_yw57di94gwpf:
 
 constant

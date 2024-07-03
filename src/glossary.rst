@@ -5075,7 +5075,7 @@ proc-macro crate
 .. _fls_AjjdLZWiL9Tq:
 
 :dp:`fls_DfTszT1PjV7o`
-A :t:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.
+A :dt:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.
 
 .. _fls_sp5wdsxwmxf:
 

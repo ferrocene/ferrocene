@@ -189,7 +189,11 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             .collect::<Vec<_>>()
             .join("/");
 
-        let should_serve = builder.should_serve::<P>();
+        let should_serve = match self.mode {
+            SphinxMode::Html => builder.should_serve::<P>(),
+            SphinxMode::XmlDoctrees => false,
+            SphinxMode::OnlyObjectsInv => false,
+        };
 
         let ferrocene_version =
             fs::read_to_string(&builder.src.join("ferrocene").join("version")).unwrap();

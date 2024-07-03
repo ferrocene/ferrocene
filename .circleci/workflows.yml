@@ -189,6 +189,7 @@ jobs:
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
+          qnx: true
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
@@ -321,9 +322,10 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--self-test >>
     steps:
-      - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - aws-oidc-auth
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -412,6 +414,7 @@ jobs:
           depth: 1
       - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - aws-oidc-auth
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -477,9 +480,10 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--self-test >>
     steps:
-      - aws-oidc-auth
       - ferrocene-git-shallow-clone:
           depth: 1
+      - aws-oidc-auth
+      - ferrocene-setup-windows
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -783,6 +787,9 @@ commands:
       llvm-subset:
         type: boolean
         default: true
+      qnx:
+        type: boolean
+        default: false
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
@@ -803,7 +810,11 @@ commands:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
                 command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
-
+      - when:
+          condition:
+            equal: [<<parameters.qnx>>, true]
+          steps:
+            - setup-qnx-toolchain: {}
       - ferrocene-ci
 
   ferrocene-job-test-container:
@@ -1008,6 +1019,19 @@ commands:
       - store_artifacts:
           path: /tmp/metrics
           destination: metrics
+
+  setup-qnx-toolchain:
+    description: Setup QNX Toolchain
+    steps:
+      - run:
+          name: Fetch QNX710 toolchain
+          command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -v -x --zstd -f-
+      - run:
+          name: Set PATH to include QNX710 tools
+          command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+      - run:
+          name: Test qcc
+          command: qcc -v || true
 
   aws-oidc-auth:
     description: Authenticate with AWS using OIDC

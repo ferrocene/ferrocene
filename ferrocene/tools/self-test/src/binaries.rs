@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
@@ -28,7 +29,10 @@ fn check_binary(
     hash: CommitHashOf,
 ) -> Result<(), Error> {
     let bin_dir = sysroot.join("bin");
+    #[cfg(not(windows))]
     let bin = bin_dir.join(name);
+    #[cfg(windows)]
+    let bin = bin_dir.join(&format!("{name}.exe"));
 
     check_file(&bin, &bin_dir, name)?;
     let version = get_version(&bin, name)?;
@@ -43,17 +47,19 @@ fn check_file(bin: &Path, bin_dir: &Path, name: &str) -> Result<(), Error> {
     /// Minimum file permission the binary should have.
     ///
     /// The numeric value is `0o555`. The symbolic value is `r-xr-xr-x`.`
+    #[cfg(unix)] // Windows does permissions different.
     const MODE: u32 = 0o555;
 
     match std::fs::metadata(bin) {
         Ok(metadata) => {
             if !metadata.is_file() || bin.is_symlink() {
-                Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
-            } else if metadata.permissions().mode() & MODE != MODE {
-                Err(Error::WrongBinaryPermissions { path: bin.into() })
-            } else {
-                Ok(())
+                return Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() });
             }
+            #[cfg(unix)] // Windows does permissions different.
+            if metadata.permissions().mode() & MODE != MODE {
+                return Err(Error::WrongBinaryPermissions { path: bin.into() });
+            }
+            Ok(())
         }
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
             Err(Error::MissingBinary { directory: bin_dir.into(), name: name.into() })
@@ -153,6 +159,11 @@ mod tests {
     use crate::test_utils::{CliVersionContent, TestUtils};
     use std::ffi::OsString;
 
+    #[cfg(unix)]
+    const RUSTC_EXECUTABLE: &str = "rustc";
+    #[cfg(windows)]
+    const RUSTC_EXECUTABLE: &str = "rustc.exe";
+
     #[test]
     fn test_check_binary_missing_file() {
         let utils = TestUtils::new();
@@ -167,7 +178,7 @@ mod tests {
 
         check_optional_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust)
             .unwrap();
-        utils.assert_report_skipped("optional binary rustc (not present)");
+        utils.assert_report_skipped(&format!("optional binary rustc (not present)"));
     }
 
     #[test]
@@ -184,6 +195,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_no_access_to_parent_directory() {
         let utils = TestUtils::new();
 
@@ -207,7 +219,7 @@ mod tests {
     #[test]
     fn test_check_binary_cant_invoke_executable() {
         let utils = TestUtils::new();
-        let bin = utils.bin("rustc").create();
+        let bin = utils.bin(RUSTC_EXECUTABLE).create();
 
         #[cfg(not(target_os = "macos"))]
         const BROKEN_BINARY: &[u8] = &[];
@@ -233,7 +245,7 @@ mod tests {
     #[test]
     fn test_check_failing_binary() {
         let utils = TestUtils::new();
-        let bin = utils.bin("rustc").exit(1).create();
+        let bin = utils.bin(RUSTC_EXECUTABLE).exit(1).create();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
@@ -256,7 +268,11 @@ mod tests {
     #[test]
     fn test_check_binary_with_invalid_output() {
         let utils = TestUtils::new();
-        utils.bin("rustc").expected_args(&["-vV"]).stdout("this is not the output of -vV").create();
+        utils
+            .bin(RUSTC_EXECUTABLE)
+            .expected_args(&["-vV"])
+            .stdout("this is not the output of -vV")
+            .create();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
@@ -304,7 +320,7 @@ mod tests {
         expected_found: &str,
     ) {
         let utils = TestUtils::new();
-        utils.bin("rustc").expected_args(&["-vV"]).stdout(&content.serialize()).create();
+        utils.bin(RUSTC_EXECUTABLE).expected_args(&["-vV"]).stdout(&content.serialize()).create();
 
         match check_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust) {
             Ok(()) => panic!("should've failed"),
@@ -319,6 +335,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))] // Windows does permissions differently
     fn test_check_binary_wrong_permissions() {
         const PERMISSIONS: &[&[u32]] = &[
             // No permissions whatsoever
@@ -359,6 +376,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(windows))] // Windows does permissions differently
     #[test]
     fn test_check_binary_good_permissions() {
         let utils = TestUtils::new();

@@ -122,7 +122,12 @@ add --set rust.debug-logging=false
 #
 # If this configuration is missing the system allocator will be used, slowing
 # down the compiler.
-add --set rust.jemalloc
+#
+# On Windows, Jemalloc is not tested, and manual testing suggests it is not
+# supported.
+if [[ "${FERROCENE_HOST}" != "x86_64-pc-windows-msvc" ]]; then
+    add --set rust.jemalloc
+fi
 
 # Adds a custom string to the output of `rustc --version` to properly mark this
 # is not the upstream compiler.
@@ -137,6 +142,31 @@ add --release-description="Ferrocene by Ferrous Systems"
 #   functionality, reliability or security! NEVER change these items.        #
 #                                                                            #
 ##############################################################################
+
+# Set the target used for the build itself (build system, initial compiler
+# stages, etc). This depends on the OS used in CI.
+#
+# If this configuration is missing or changed, the wrong build platform will be
+# used by the build system.
+if [[ -x "${FERROCENE_BUILD_HOST+x}" ]]; then
+    add "--build=${FERROCENE_BUILD_HOST}"
+fi
+
+# The Rust build system defaults to calling `cc` on Windows, which does not exist
+if [[ is_internal && "${FERROCENE_BUILD_HOST:-}" = "x86_64-pc-windows-msvc" ]]; then
+    add --set target.aarch64-unknown-none.cc=clang
+    add --set target.aarch64-unknown-none.cxx=clang
+    add --set target.aarch64-unknown-none.ar=llvm-ar
+    add --set target.thumbv7em-none-eabi.cc=clang
+    add --set target.thumbv7em-none-eabi.cxx=clang
+    add --set target.thumbv7em-none-eabi.ar=llvm-ar
+    add --set target.thumbv7em-none-eabihf.cc=clang
+    add --set target.thumbv7em-none-eabihf.cxx=clang
+    add --set target.thumbv7em-none-eabihf.ar=llvm-ar
+    add --set target.wasm32-unknown-unknown.cc=clang
+    add --set target.wasm32-unknown-unknown.cxx=clang
+    add --set target.wasm32-unknown-unknown.ar=lld-ar
+fi
 
 # Set the host platform to build. The environment variable is set from the CI
 # configuration (see the .circleci directory).

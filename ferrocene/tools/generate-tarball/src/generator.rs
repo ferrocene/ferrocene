@@ -7,7 +7,7 @@ use crate::signatures::{sign_manifest_with_aws_kms, SignatureContext};
 use crate::tarballer::Tarballer;
 use crate::util::{copy_recursive, create_dir_all, path_to_str, remove_dir_all};
 use anyhow::Result;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, clap::Args)]
 pub struct Generator {
@@ -74,7 +74,7 @@ pub struct Generator {
     ferrocene_managed_prefix: Vec<String>,
     /// Path of a binary that should be proxied by criticalup.
     #[clap(long, value_name = "PATH")]
-    ferrocene_proxied_binary: Vec<String>,
+    ferrocene_proxied_binary: Vec<PathBuf>,
     /// Name of the Ferrocene component.
     #[clap(long, value_name = "NAME")]
     ferrocene_component: String,
@@ -127,7 +127,7 @@ impl Generator {
                     component: &ferrocene_component,
                     commit_sha: &commit_sha,
                     package_dir: &package_dir,
-                    proxied_binaries: ferrocene_proxied_binary.iter().map(String::as_str).collect(),
+                    proxied_binaries: ferrocene_proxied_binary.iter().map(PathBuf::as_path).collect(),
                     managed_prefixes: &ferrocene_managed_prefix,
                 },
                 &key_arn,

@@ -112,10 +112,16 @@ should not be used in production.
      - ``x86_64-apple-darwin``
      - Cross-compilation
      - Full
-     - Available as a cross-compile target on :target:`aarch64-apple-darwin`.
+     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
 
-   * - :target:`aarch64-apple-darwin`
+   * - :ref:`aarch64-apple-darwin`
      - ``aarch64-apple-darwin``
+     - Host platform
+     - Full
+     - \-
+
+   * - :ref:`x86_64-pc-windows-msvc`
+     - ``x86_64-pc-windows-msvc``
      - Host platform
      - Full
      - \-

@@ -34,7 +34,7 @@ def find_all_compiletests(exclude: list[str] | None, deprioritize: list[str] | N
 
         weight = 1 if entry.name in deprioritize else 0
 
-        found.append(Task(str(entry.relative_to(REPOSITORY_ROOT)), weight))
+        found.append(Task(entry.relative_to(REPOSITORY_ROOT).as_posix(), weight))
     return found
 
 
@@ -73,7 +73,7 @@ JOBS_DEFINITION: JobsDefinition = {
         # Build the documentation on a different jobs, since building it takes
         # a while and with a separate job we can run dist inside the same job
         # as linkchecker (which also needs to generate docs).
-        "docs": ["ferrocene-docs", "ferrocene-test-outcomes"],
+        "docs": ["ferrocene-docs", "ferrocene-test-outcomes", "ferrocene-docs-doctrees"],
 
         # Build the source code tarball on a different job, since that requires
         # a (slower) clone of the whole LLVM submodule, not just the subset,

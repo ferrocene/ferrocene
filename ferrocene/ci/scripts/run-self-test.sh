@@ -11,11 +11,22 @@ SKIP_CLEANUP="${SKIP_CLEANUP:-}"
 BUCKET="ferrocene-ci-artifacts"
 PREFIX="ferrocene/dist/${COMMIT}"
 
-root="$(mktemp -d)"
+TAR="tar"
+FERROCENE_SELF_TEST="ferrocene-self-test"
+# Ensure we use GNU tar on Windows, bsdtar will not handle links well.
+# bsdtar (the default tar.exe) does not handle symlinks properly,
+# and will get 'stuck' in a cycle while unpacking and packing.
+# GNU Tar does not have this issue.
+if [[ "${OSTYPE}" = "msys" ]]; then
+    TAR="/c/Program Files/Git/usr/bin/tar.exe"
+    FERROCENE_SELF_TEST="ferrocene-self-test.exe"
+fi
+
+TEMPDIR="$(mktemp -d -p .)"
 
 if [[ -z "$SKIP_CLEANUP" ]]; then
     cleanup() {
-        rm -rf "${root}"
+        rm -rf "${TEMPDIR}"
     }
     trap cleanup EXIT
 fi
@@ -37,13 +48,14 @@ download() {
     target="$2"
 
     echo "===> downloading ${package} for ${target}"
-    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${root}/archives/${package}-${target}-${version}.tar.xz"
+    aws s3 cp "s3://${BUCKET}/${PREFIX}/${package}-${target}-${version}.tar.xz" "${TEMPDIR}/archives/${package}-${target}-${version}.tar.xz"
 }
 
-mkdir -p "${root}/archives"
+mkdir -p "${TEMPDIR}/archives"
 download ferrocene-self-test "${FERROCENE_HOST}"
 download rustc "${FERROCENE_HOST}"
 download cargo "${FERROCENE_HOST}"
+download llvm-tools "${FERROCENE_HOST}" # This appears to be only required for Windows
 
 IFS=',' read -ra targets <<< "${FERROCENE_TARGETS:-}"
 targets+=("${FERROCENE_HOST}")
@@ -51,12 +63,12 @@ for target in ${targets[@]:-}; do
     download rust-std "${target}"
 done
 
-mkdir -p "${root}/sysroot"
-for archive in ${root}/archives/*; do
+mkdir -p "${TEMPDIR}/sysroot"
+for archive in ${TEMPDIR}/archives/*; do
     echo "===> installing $(basename ${archive})"
 
-    tar -C "${root}/sysroot" -xf "${archive}"
+    ${TAR} -C "${TEMPDIR}/sysroot" -xf "${archive}"
 done
 
 echo "===> running the self-test tool"
-"${root}/sysroot/bin/ferrocene-self-test"
+"${TEMPDIR}/sysroot/bin/${FERROCENE_SELF_TEST}"

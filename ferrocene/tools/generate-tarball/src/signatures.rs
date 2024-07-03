@@ -9,6 +9,7 @@ use criticaltrust::signatures::SignedPayload;
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs::File;
+#[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
 use tokio::runtime::Runtime;
@@ -17,7 +18,7 @@ pub(crate) struct SignatureContext<'a> {
     pub(crate) component: &'a str,
     pub(crate) commit_sha: &'a str,
     pub(crate) package_dir: &'a Path,
-    pub(crate) proxied_binaries: HashSet<&'a str>,
+    pub(crate) proxied_binaries: HashSet<&'a Path>,
     pub(crate) managed_prefixes: &'a [String],
 }
 
@@ -70,16 +71,26 @@ fn collect_files(
         let entry = entry?.path();
         let relative_path = entry
             .strip_prefix(ctx.package_dir)
-            .unwrap()
-            .to_str()
+            .unwrap();
+
+        #[cfg(not(windows))]
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path);
+        #[cfg(windows)] // Ensure we're not checking for the `.exe` instead of the file name
+        let needs_proxy = ctx.proxied_binaries.contains(&relative_path.with_extension("").as_path());
+        
+        let relative_path = relative_path.to_str()
             .ok_or_else(|| anyhow!("path {entry:?} is not utf-8"))?;
 
+            
         if entry.is_file() {
             package.files.push(PackageFile {
                 path: relative_path.into(),
                 sha256: hash_file(&entry)?,
+                #[cfg(not(windows))]
                 posix_mode: entry.metadata()?.mode(),
-                needs_proxy: ctx.proxied_binaries.contains(&relative_path),
+                #[cfg(windows)]
+                posix_mode: 0,
+                needs_proxy,
             });
         } else if entry.is_dir() {
             collect_files(package, ctx, &entry)?;
@@ -95,6 +106,7 @@ fn hash_file(path: &Path) -> Result<Vec<u8>, Error> {
     Ok(sha256.finalize().to_vec())
 }
 
+#[cfg(not(windows))]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,6 +117,9 @@ mod tests {
     use std::os::unix::prelude::PermissionsExt;
     use tempfile::TempDir;
 
+    // This insta snapshot is complex and brittle to maintain on Windows
+    // Windows does not have file modes, and filters don't provide a reliable way to
+    // remap Windows paths to Linux and back.
     #[test]
     fn test_sign_manifest() -> Result<(), Error> {
         let package_dir = TempDir::new()?;
@@ -116,6 +131,7 @@ mod tests {
             }
             let mut file = File::create(path)?;
             file.write_all(contents)?;
+            #[cfg(unix)]
             file.set_permissions(Permissions::from_mode(mode))?;
             Ok::<_, Error>(())
         };
@@ -135,7 +151,7 @@ mod tests {
                 component: "demo-package",
                 commit_sha: "000000",
                 package_dir: package_dir.path(),
-                proxied_binaries: ["bin/rustc"].into_iter().collect(),
+                proxied_binaries: [Path::new("bin/rustc")].into_iter().collect(),
                 managed_prefixes: &["lib/rustlib/x86_64-unknown-linux-gnu/lib/".into()],
             },
             &key,

@@ -2,17 +2,20 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
 use std::io::Write;
+#[cfg(unix)]
 use std::os::unix::prelude::PermissionsExt;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use super::TestUtils;
+#[cfg(not(windows))] // Related functions not exposed on Windows
 use crate::env;
 
 #[must_use]
 pub(crate) struct BinBuilder<'a> {
     utils: &'a TestUtils,
     name: &'a str,
+    #[cfg(not(windows))] // Windows does not have file modes
     mode: Option<u32>,
     stdout: Option<String>,
     stderr: Option<String>,
@@ -27,6 +30,7 @@ impl<'a> BinBuilder<'a> {
         Self {
             utils,
             name,
+            #[cfg(not(windows))]
             mode: None,
             stdout: None,
             stderr: None,
@@ -37,6 +41,7 @@ impl<'a> BinBuilder<'a> {
         }
     }
 
+    #[cfg(not(windows))] // Windows does not have file modes
     pub(crate) fn mode(mut self, mode: u32) -> Self {
         self.mode = Some(mode);
         self
@@ -47,6 +52,7 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    #[cfg(not(windows))] // Tests using this are excluded on Windows
     pub(crate) fn stderr(mut self, stderr: &str) -> Self {
         self.stderr = Some(stderr.into());
         self
@@ -57,6 +63,7 @@ impl<'a> BinBuilder<'a> {
         self
     }
 
+    #[cfg(not(windows))] // Tests using this are excluded on Windows
     #[allow(non_snake_case)]
     pub(crate) fn behaves_like_vV(self) -> Self {
         let stdout = format!(
@@ -133,6 +140,7 @@ impl<'a> BinBuilder<'a> {
         stdin.write_all(self.program.as_bytes()).unwrap();
         assert!(rustc.wait().unwrap().success());
 
+        #[cfg(not(windows))]
         if let Some(mode) = self.mode {
             let mut perms = bin.metadata().unwrap().permissions();
             perms.set_mode(mode);

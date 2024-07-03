@@ -19,21 +19,27 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
         name: "addition.rs",
         contents: include_bytes!("../sample-programs/addition.rs"),
         rustflags: &["--crate-type", "lib", "--edition", "2021"],
-        expected_artifacts: &["libaddition.rlib"],
+        expected_executables: &[],
+        expected_libraries: &[],
+        expected_rlibs: &["addition"],
         executable_output: None,
     },
     SampleProgram {
         name: "subtraction.rs",
         contents: include_bytes!("../sample-programs/subtraction.rs"),
         rustflags: &["--crate-type", "staticlib", "--edition", "2021"],
-        expected_artifacts: &["libsubtraction.a"],
+        expected_executables: &[],
+        expected_libraries: &["subtraction"],
+        expected_rlibs: &[],
         executable_output: None,
     },
     SampleProgram {
         name: "subtraction-sys.rs",
         contents: include_bytes!("../sample-programs/subtraction-sys.rs"),
         rustflags: &["--crate-type", "lib", "--edition", "2021", "-l", "subtraction"],
-        expected_artifacts: &["libsubtraction_sys.rlib"],
+        expected_executables: &[],
+        expected_libraries: &[],
+        expected_rlibs: &["subtraction_sys"],
         executable_output: None,
     },
     SampleProgram {
@@ -49,7 +55,9 @@ static SAMPLE_PROGRAMS: &[SampleProgram] = &[
             "--extern",
             "subtraction_sys",
         ],
-        expected_artifacts: &["assertion"],
+        expected_executables: &["assertion"],
+        expected_libraries: &[],
+        expected_rlibs: &[],
         // See assertion.rs
         executable_output: Some(b"123456789"),
     },
@@ -84,7 +92,36 @@ fn check_target(
     let mut expected_artifacts = ExpectedFiles::new(&ctx.output_dir);
 
     for program in programs {
-        expected_artifacts.add(program.expected_artifacts);
+        let expected_binary_paths = program
+            .expected_executables
+            .into_iter()
+            .flat_map(|expected| match target.spec.triple {
+                windows if windows.ends_with("-pc-windows-msvc") => {
+                    vec![format!("{expected}.exe"), format!("{expected}.pdb")]
+                }
+                _ => vec![expected.to_string()],
+            })
+            .collect::<Vec<_>>();
+        expected_artifacts.add(expected_binary_paths);
+
+        let expected_library_paths = program
+            .expected_libraries
+            .into_iter()
+            .map(|expected| match target.spec.triple {
+                windows if windows.ends_with("-pc-windows-msvc") => format!("{expected}.lib"),
+                _ => format!("lib{expected}.a"),
+            })
+            .collect::<Vec<_>>();
+        expected_artifacts.add(expected_library_paths);
+
+        let expected_rlib_paths = program
+            .expected_rlibs
+            .into_iter()
+            .map(|expected| format!("lib{expected}.rlib"))
+            .collect::<Vec<_>>();
+        eprintln!("expected_rlib_paths: {expected_rlib_paths:?}");
+        expected_artifacts.add(expected_rlib_paths);
+
         compile(&ctx, program)?;
         expected_artifacts.check(program.name)?;
 
@@ -164,7 +201,7 @@ fn run(ctx: &Context<'_>, program: &SampleProgram, expected_output: &[u8]) -> Re
 
 struct ExpectedFiles {
     path: PathBuf,
-    expected: HashSet<&'static str>,
+    expected: HashSet<String>,
 }
 
 impl ExpectedFiles {
@@ -172,8 +209,8 @@ impl ExpectedFiles {
         Self { path: path.into(), expected: HashSet::new() }
     }
 
-    fn add(&mut self, files: &[&'static str]) {
-        self.expected.extend(files.iter().copied());
+    fn add(&mut self, files: impl IntoIterator<Item = String>) {
+        self.expected.extend(files);
     }
 
     /// Check that all, and those only, compilation artifacts are present.
@@ -236,7 +273,12 @@ struct SampleProgram {
     name: &'static str,
     contents: &'static [u8],
     rustflags: &'static [&'static str],
-    expected_artifacts: &'static [&'static str],
+    /// Executable names on Linux/Mac are `{name}`, on Windows they are `{name}.exe`
+    expected_executables: &'static [&'static str],
+    /// rlibs are always `{name}.rlib`
+    expected_rlibs: &'static [&'static str],
+    /// Libraries on Linux/Mac are `lib{name}.a`, on Windows they are `{name}.lib`
+    expected_libraries: &'static [&'static str],
     executable_output: Option<&'static [u8]>,
 }
 
@@ -287,7 +329,7 @@ mod tests {
                         "-C linker=rust-lld",
                         source
                     ] => {
-                        assert_eq!("foo.rs", source.rsplit_once('/').unwrap().1);
+                        assert_eq!("foo.rs", source.rsplit_once(std::path::MAIN_SEPARATOR).unwrap().1);
                         std::fs::write(format!("{out_dir}/libfoo.rlib"), b"").unwrap();
                     }
                     // Second invocation
@@ -300,7 +342,7 @@ mod tests {
                         "-C linker=rust-lld",
                         source
                     ] => {
-                        assert_eq!("bar.rs", source.rsplit_once('/').unwrap().1);
+                        assert_eq!("bar.rs", source.rsplit_once(std::path::MAIN_SEPARATOR).unwrap().1);
                         std::fs::write(format!("{out_dir}/bar"), b"").unwrap();
                     }
                     other => panic!("unexpected args: {other:?}"),
@@ -313,14 +355,18 @@ mod tests {
                 name: "foo.rs",
                 contents: b"pub fn foo() {}",
                 rustflags: &["--crate-type", "lib"],
-                expected_artifacts: &["libfoo.rlib"],
+                expected_rlibs: &["foo"],
+                expected_executables: &[],
+                expected_libraries: &[],
                 executable_output: None,
             },
             SampleProgram {
                 name: "bar.rs",
                 contents: b"fn main() {}",
                 rustflags: &["--crate-type", "bin"],
-                expected_artifacts: &["bar"],
+                expected_rlibs: &[],
+                expected_executables: &["bar"],
+                expected_libraries: &[],
                 executable_output: None,
             },
         ];
@@ -348,7 +394,7 @@ mod tests {
         let create = |name| std::fs::write(dir.join(name), b"").unwrap();
 
         let mut expected = ExpectedFiles::new(dir);
-        expected.add(&["foo", "bar"]);
+        expected.add(vec!["foo".to_string(), "bar".to_string()]);
         match expected.check("binary") {
             Err(Error::MissingCompilationArtifact { name, after_compiling }) => {
                 assert_eq!("bar", name);
@@ -380,7 +426,7 @@ mod tests {
             other => panic!("unexpected result: {other:?}"),
         }
 
-        expected.add(&["baz"]);
+        expected.add(vec!["baz".to_string()]);
         expected.check("binary").unwrap();
     }
 
@@ -410,7 +456,9 @@ mod tests {
             name: "example.rs",
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &[],
-            expected_artifacts: &[],
+            expected_executables: &[],
+            expected_libraries: &[],
+            expected_rlibs: &[],
             executable_output: None,
         };
 
@@ -455,7 +503,9 @@ mod tests {
             name: "example.rs",
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &[],
-            expected_artifacts: &[],
+            expected_executables: &[],
+            expected_rlibs: &[],
+            expected_libraries: &[],
             executable_output: None,
         };
 
@@ -534,7 +584,9 @@ mod tests {
             name: "example.rs",
             contents: b"fn main() { println!(\"Hello world!\"); }\n",
             rustflags: &["--extern", "foo"],
-            expected_artifacts: &["example"],
+            expected_executables: &["example"],
+            expected_rlibs: &[],
+            expected_libraries: &[],
             executable_output: None,
         };
 

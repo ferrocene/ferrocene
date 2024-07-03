@@ -91,9 +91,9 @@ targets = [
   "x86_64-pc-nto-qnx710",
 ]
 
-[[groups.cross-compilation.packages]]
+[[groups.qnx.packages]]
 name = "rust-std"
-subset = "default"
+subset = "qnx"
 
 [groups.oxidos]
 targets = ["wasm32-unknown-unknown"]

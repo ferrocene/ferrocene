@@ -51,6 +51,7 @@ Ferrocene User Manual
    :maxdepth: 2
    :caption: Reference
 
+   criticalup
    rustc/cli
    rustfmt/cli
    self-test/error-codes

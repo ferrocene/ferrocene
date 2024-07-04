@@ -7,8 +7,8 @@
 Ferrocene Specification Changelog
 =================================
 
-Version 1.79.0 (2024-06-13)
----------------------------
+Language changes in Rust 1.79.0
+-------------------------------
 
 * `Stabilize inline \`const {}\` expressions. <https://github.com/rust-lang/rust/pull/104087/>`_
 
@@ -73,8 +73,8 @@ Version 1.79.0 (2024-06-13)
 
   * No change: the exact trait solver is not part of the FLS
 
-Version 1.78.0 (2024-05-02)
----------------------------
+Language changes in Rust 1.78.0
+-------------------------------
 
 * `Stabilize \`#[cfg(target_abi = ...)]\` <https://github.com/rust-lang/rust/pull/119590/>`_
 
@@ -130,8 +130,8 @@ Version 1.78.0 (2024-05-02)
 
 * `\`trait Trait: Auto {}\`: allow upcasting from \`dyn Trait\` to \`dyn Trait + Auto\` <https://github.com/rust-lang/rust/pull/119338>`_
 
-Version 1.77.0 (2024-03-21)
----------------------------
+language changes in Rust 1.77.0
+-------------------------------
 
 * `Reveal opaque types within the defining body for exhaustiveness checking. <https://github.com/rust-lang/rust/pull/116821/>`_
 

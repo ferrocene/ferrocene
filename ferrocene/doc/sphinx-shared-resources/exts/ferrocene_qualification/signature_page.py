@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+
+# std imports
 import datetime
 import json
 import os
 import shutil
+
+# 3rd-party imports
 import sphinx
 import tomli
 

@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+
+# 3rd-party imports
 from docutils import nodes
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType

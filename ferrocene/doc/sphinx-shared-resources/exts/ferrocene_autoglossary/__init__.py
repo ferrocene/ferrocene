@@ -8,15 +8,20 @@
 # The extension requires no configuration, and just adding a glossary directive
 # is enough for the extension to work.
 
-from . import debug, lexer
-from .lexer import Term, MatchedTerm
+# std imports
 from dataclasses import dataclass
+import string
+
+# 3rd-party imports
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.transforms import SphinxTransform
 import sphinx
-import string
+
+# local imports
+from . import debug, lexer
+from .lexer import Term, MatchedTerm
 
 
 class GlossaryCollector(EnvironmentCollector):

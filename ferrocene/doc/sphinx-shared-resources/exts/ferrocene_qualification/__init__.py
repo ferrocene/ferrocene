@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-from . import substitutions, document_id, domain, signature_page, target
+
+# std imports
 import string
+
+# local imports
+from . import substitutions, document_id, domain, signature_page, target
 
 
 def setup(app):

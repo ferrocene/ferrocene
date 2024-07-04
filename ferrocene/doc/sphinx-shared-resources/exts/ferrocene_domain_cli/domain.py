@@ -2,10 +2,12 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 
+# std imports
 from dataclasses import dataclass
 import re
 import string
 
+# 3rd-party imports
 from docutils import nodes
 from docutils.parsers.rst import directives
 

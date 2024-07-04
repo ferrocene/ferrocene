@@ -4,11 +4,15 @@
 # Note: check out debug.py within the extension for useful tools to check the
 # lexer behavior when making changes to this file.
 
+
+# std imports
 from dataclasses import dataclass
-from docutils import nodes
-from sphinx import addnodes
 from typing import Optional
 import string
+
+# 3rd-party imports
+from docutils import nodes
+from sphinx import addnodes
 
 
 FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH = string.ascii_letters + string.digits

@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+
+# std imports
+import gc
+
+# 3rd-party imports
 from docutils import nodes
 from sphinx import addnodes as sphinxnodes
 from sphinx.directives.other import TocTree
 from sphinx.environment.collectors.toctree import TocTreeCollector
-import gc
 
 
 class AppendicesDirective(TocTree):

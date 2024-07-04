@@ -5,6 +5,8 @@
 # the name of the product). This extension sets some default substitutions, and
 # supports loading additional ones from a TOML file.
 
+
+# 3rd-party imports
 from docutils import nodes
 from sphinx.transforms import SphinxTransform
 import docutils

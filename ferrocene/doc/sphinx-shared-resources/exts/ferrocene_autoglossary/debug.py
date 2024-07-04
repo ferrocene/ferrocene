@@ -6,9 +6,13 @@
 # building the docs (and contains the path to that file). It is helpful when
 # making changes to the lexer.
 
+
+# std imports
+import os
+
+# local imports
 from . import lexer
 from .lexer import MatchedTerm
-import os
 
 
 def write_lexer_outcome(app, env):

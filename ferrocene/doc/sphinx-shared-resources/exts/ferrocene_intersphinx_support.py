@@ -14,9 +14,13 @@
 #   configuration. This is needed because the format of intersphinx_mapping is
 #   too complex to be provided with the -D flag.
 
+
+# std imports
+import json
+
+# 3rd-party imports
 from sphinx.builders import Builder
 from sphinx.builders.html import StandaloneHTMLBuilder
-import json
 import sphinx
 
 

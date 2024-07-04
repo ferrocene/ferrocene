@@ -63,14 +63,18 @@ Language changes in Rust 1.79.0
 
 * `Stabilize importing \`main\` from other modules or crates. <https://github.com/rust-lang/rust/pull/122060/>`_
 
-  * Various changes:
+  * No change: this lifted restriction was not previously described in the FLS
+
+  * While updating the FLS to account for this feature, we realized that the
+    way the FLS described crate types was incorrect. We rectified this:
 
     * New section: :ref:`fls_8JB3SJqamdpU`
-    * New definition: :t:`crate type` :p:`fls_unxalgMqIr3v` :p:`fls_e7jGvXvTsFpC` :p:`fls_kQiJPwb2Hjcc`
-    * Removal of definition `main function`
-    * binary crate and proc-macro crate rewritten :p:`fls_9ub6ks8qrang` :p:`fls_Mf62VqAhoZ3c`
-    * library crate removed
-    * Introduction of `main function signature` functions :p:`fls_sbGnkm8Ephiu`
+    * New glossary entry: :t:`crate type`
+    * New paragraphs: :p:`fls_unxalgMqIr3v`, :p:`fls_e7jGvXvTsFpC`, :p:`fls_kQiJPwb2Hjcc`, :p:`fls_OyFwBtDGVimT`
+    * Updated glossary entries: :t:`binary crate`, :t:`proc-macro crate`
+    * Updated paragraphs: :p:`fls_9ub6ks8qrang`, :p:`fls_Mf62VqAhoZ3c`
+    * Moved paragraph: :p:`fls_sbGnkm8Ephiu`
+    * Removed paragraph about library crates
 
 * `Check return types of function types for well-formedness <https://github.com/rust-lang/rust/pull/115538>`_
 

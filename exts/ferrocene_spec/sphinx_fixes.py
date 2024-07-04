@@ -4,6 +4,7 @@
 from docutils import nodes
 from sphinx.transforms import SphinxTransform, SortIds
 
+
 # Sphinx by default sorts all ids of the form `id[0-9]+` to the end.
 # Our IDs are section name and fls_ id pairs, so in some cases this transform
 # will instead sort the section name to the back, but not always!

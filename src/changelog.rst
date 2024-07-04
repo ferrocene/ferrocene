@@ -12,7 +12,7 @@ Version 1.79.0 (2024-06-13)
 
 * `Stabilize inline \`const {}\` expressions. <https://github.com/rust-lang/rust/pull/104087/>`_
 
-  * New section: Const blocks :p:`fls_G59PiNQkVUnQ`
+  * New section: :ref:`fls_G59PiNQkVUnQ`
 
 * `Prevent opaque types being instantiated twice with different regions within the same function. <https://github.com/rust-lang/rust/pull/116935/>`_
 
@@ -32,7 +32,7 @@ Version 1.79.0 (2024-06-13)
 
 * `Enable debuginfo in macros, and stabilize \`-C collapse-macro-debuginfo\` and \`#[collapse_debuginfo]\`. <https://github.com/rust-lang/rust/pull/120845/>`_
 
-  * New section: Attribute `collapse_debuginfo` :p:`fls_qyudjGHZfyJH`
+  * New section: :ref:`fls_qyudjGHZfyJH`
 
 * `Propagate temporary lifetime extension into \`if\` and \`match\` expressions. <https://github.com/rust-lang/rust/pull/121346/>`_
 
@@ -58,7 +58,7 @@ Version 1.79.0 (2024-06-13)
 
   * Various changes:
 
-    * New section: Program Entry Point :p:`fls_8JB3SJqamdpU`
+    * New section: :ref:`fls_8JB3SJqamdpU`
     * New definition: :t:`crate type` :p:`fls_unxalgMqIr3v` :p:`fls_e7jGvXvTsFpC` :p:`fls_kQiJPwb2Hjcc`
     * Removal of definition `main function`
     * binary crate and proc-macro crate rewritten :p:`fls_9ub6ks8qrang` :p:`fls_Mf62VqAhoZ3c`
@@ -143,7 +143,7 @@ Version 1.77.0 (2024-03-21)
 
 * `Stabilize C-string literals. <https://github.com/rust-lang/rust/pull/117472/>`_
 
-  * New section: :p:`fls_U1gHCy16emVe`
+  * New section: :ref:`fls_U1gHCy16emVe`
 
 * `Stabilize THIR unsafeck. <https://github.com/rust-lang/rust/pull/117673/>`_
 

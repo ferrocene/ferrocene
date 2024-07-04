@@ -2,8 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 from . import definitions, informational, syntax_directive, std_role, paragraph_ids
-from . import items_with_rubric
-from .utils import FlsSortIds
+from . import items_with_rubric, sphinx_fixes
 from sphinx.domains import Domain
 
 
@@ -38,11 +37,11 @@ class SpecDomain(Domain):
 
 def setup(app):
     app.add_domain(SpecDomain)
-    app.add_transform(FlsSortIds)
     definitions.setup(app)
     paragraph_ids.setup(app)
     informational.setup(app)
     items_with_rubric.setup(app)
+    sphinx_fixes.setup(app)
 
     app.add_config_value(
         name="spec_std_docs_url",

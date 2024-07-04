@@ -8,14 +8,15 @@ import re
 import string
 
 # 3rd-party imports
-from docutils import nodes
+from docutils import nodes as docutils_nodes
 from docutils.parsers.rst import directives
 
 from sphinx import addnodes
+from sphinx.builders import Builder
 from sphinx.directives import SphinxDirective, ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
-import sphinx
+from sphinx.util import logging as sphinx_logging, nodes as sphinx_nodes
 
 
 PROGRAM_STORAGE = "ferrocene_domain_cli:program"
@@ -41,7 +42,7 @@ class ProgramDirective(SphinxDirective):
         )
 
         # parse and process content of `ProgramDirective`` (one or more `OptionDirective`s)
-        node = nodes.container()
+        node = docutils_nodes.container()
         self.state.nested_parse(self.content, self.content_offset, node)
 
         # clear program storage
@@ -58,7 +59,9 @@ class OptionDirective(ObjectDescription):
     def handle_signature(self, sig, signode):
         signode += addnodes.desc_name("", sig)
 
-    def add_target_and_index(self, name_cls, sig, signode):
+    def add_target_and_index(
+        self, _name_cls, sig: str, signode: addnodes.desc_signature
+    ):
         if PROGRAM_STORAGE not in self.env.temp_data:
             warn("cli:option outside cli:program isn't supported", self.get_location())
             program_storage = ProgramStorage("PLACEHOLDER", False)
@@ -74,7 +77,7 @@ class OptionDirective(ObjectDescription):
 
         signode["ids"].append(option.id())
 
-        domain = self.env.get_domain("cli")
+        domain: CliDomain = self.env.get_domain("cli")
         domain.add_option(option)
 
 
@@ -84,7 +87,9 @@ ALLOWED_CHARS_IN_OPTION_ID = string.ascii_letters + string.digits + "_"
 
 
 class Option:
-    def __init__(self, document, program, option, no_traceability_matrix):
+    def __init__(
+        self, document: str, program: str, option: str, no_traceability_matrix: bool
+    ):
         self.document = document
         self.program = program
         self.option = option
@@ -124,38 +129,53 @@ class CliDomain(Domain):
     # Bump whenever the format of the data changes!
     data_version = 1
 
-    def add_option(self, option):
-        self.data["options"][f"{option.program} {option.option}"] = option
+    def add_option(self, option: Option):
+        self.get_options()[f"{option.program} {option.option}"] = option
 
-    def get_options(self):
+    def get_options(self) -> dict[str, Option]:
         return self.data["options"]
 
-    def clear_doc(self, docname):
-        self.data["options"] = {
-            key: item
-            for key, item in self.data["options"].items()
-            if item.document != docname
-        }
+    def set_options(self, options: dict[str, Option]):
+        self.data["options"] = options
+
+    def clear_doc(self, docname: str):
+        self.set_options(
+            {
+                key: item
+                for key, item in self.get_options().items()
+                if item.document != docname
+            }
+        )
 
     def merge_domaindata(self, docnames, otherdata):
-        for key, option in otherdata["options"].items():
+        otheroptions: dict[str, Option] = otherdata["options"]
+        for key, option in otheroptions.items():
             if option.document in docnames:
-                self.data["options"][key] = option
+                self.get_options()[key] = option
 
-    def resolve_xref(self, env, fromdocname, builder, type, target, node, contnode):
+    def resolve_xref(
+        self,
+        _env,
+        fromdocname: str,
+        builder: Builder,
+        type: str,
+        target: str,
+        _node,
+        contnode: docutils_nodes.Node,
+    ):
         if type != "option":
             raise RuntimeError(f"unsupported xref type {type}")
 
-        if target not in self.data["options"]:
+        if target not in self.get_options():
             return
-        option = self.data["options"][target]
+        option = self.get_options()[target]
 
-        return sphinx.util.nodes.make_refnode(
+        return sphinx_nodes.make_refnode(
             builder, fromdocname, option.document, option.id(), contnode
         )
 
     def get_objects(self):
-        for key, option in self.data["options"].items():
+        for key, option in self.get_options().items():
             yield (
                 key,  # Name
                 f"{option.program} {option.option}",  # Display name
@@ -167,7 +187,7 @@ class CliDomain(Domain):
 
 
 def warn(message, location):
-    logger = sphinx.util.logging.getLogger(__name__)
+    logger = sphinx_logging.getLogger(__name__)
     logger.warn(message, location=location)
 
 

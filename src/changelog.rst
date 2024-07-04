@@ -4,8 +4,19 @@
 .. default-domain:: spec
 .. informational-page::
 
-Ferrocene Specification Changelog
-=================================
+FLS Changelog
+=============
+
+This page describes the changes that have been applied to the FLS itself to
+address changes and new features introduced in each Rust release. Every item
+listed in the "Language" section of the release note is reproduced here, along
+with the change that has been applied due to it.
+
+.. caution::
+
+   This page is **not** an exhaustive list of all of the changes in a release,
+   just the language changes that had an impact to the FLS. See the `release
+   notes`_ for a full list of changes.
 
 Language changes in Rust 1.79.0
 -------------------------------
@@ -168,3 +179,8 @@ language changes in Rust 1.77.0
 * `Deny braced macro invocations in let-else. <https://github.com/rust-lang/rust/pull/119062/>`_
 
   * New paragraph: :p:`fls_1s1UikGU5YQb`
+
+.. Note: for the publicly rendered version of the FLS we want to link to
+   upstream's release notes. In the Ferrocene subtree this should be replaced
+   to the link to the Ferrocene release notes!
+.. _release notes: https://doc.rust-lang.org/releases.html

@@ -16,10 +16,10 @@ Leadership roles
      - Florian Gilcher
 
    * - Product Manager
-     - Florian Gilcher and Pietro Albini
+     - Brigitte Markmann
 
    * - Project Manager
-     - Brigitte Markmann and Leslie Glass
+     - Brigitte Markmann
 
    * - Technical Lead
      - Pietro Albini

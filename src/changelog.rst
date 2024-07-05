@@ -74,7 +74,6 @@ Language changes in Rust 1.79.0
     * Updated glossary entries: :t:`binary crate`, :t:`proc-macro crate`
     * Updated paragraphs: :p:`fls_9ub6ks8qrang`, :p:`fls_Mf62VqAhoZ3c`
     * Moved paragraph: :p:`fls_sbGnkm8Ephiu`
-    * Removed paragraph about library crates
 
 * `Check return types of function types for well-formedness <https://github.com/rust-lang/rust/pull/115538>`_
 

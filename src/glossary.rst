@@ -3744,6 +3744,14 @@ lexical element
 A :dt:`lexical element` is the most basic syntactic element in program
 text.
 
+.. _fls_r1sk7vdgckym:
+
+library crate
+^^^^^^^^^^^^^
+
+:dp:`fls_3m8lg4mdc2x0`
+A :dt:`library crate` is a :t:`crate` that is not a :t:`binary crate`.
+
 .. _fls_vdhaa61g6kah:
 
 lifetime

@@ -19,8 +19,10 @@
 import json
 
 # 3rd-party imports
+from sphinx.application import Sphinx
 from sphinx.builders import Builder
 from sphinx.builders.html import StandaloneHTMLBuilder
+from sphinx.config import Config
 import sphinx
 
 
@@ -64,10 +66,10 @@ class IntersphinxBuilder(Builder):
     def get_outdated_docs(self):
         return []
 
-    def prepare_writing(self, docnames):
+    def prepare_writing(self, _docnames):
         pass
 
-    def write_doc(self, docname, doctree):
+    def write_doc(self, _docname, _doctree):
         pass
 
     def get_target_uri(self, docname, typ=None):
@@ -75,7 +77,7 @@ class IntersphinxBuilder(Builder):
         return self.standalone_html_builder.get_target_uri(docname, typ)
 
 
-def inject_intersphinx_mappings(app, config):
+def inject_intersphinx_mappings(_app: Sphinx, config: Config):
     if config.ferrocene_intersphinx_mappings is not None:
         for inventory in json.loads(config.ferrocene_intersphinx_mappings):
             config.intersphinx_mapping[inventory["name"]] = (
@@ -84,7 +86,7 @@ def inject_intersphinx_mappings(app, config):
             )
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_builder(IntersphinxBuilder)
 
     app.add_config_value("ferrocene_intersphinx_mappings", None, "env", [str])

@@ -48,7 +48,7 @@ class ProgramDirective(SphinxDirective):
         # clear program storage
         del self.env.temp_data[PROGRAM_STORAGE]
 
-        return [node]
+        return node.children
 
 
 class OptionDirective(ObjectDescription):

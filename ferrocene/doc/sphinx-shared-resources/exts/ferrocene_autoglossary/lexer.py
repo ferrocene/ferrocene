@@ -7,18 +7,44 @@
 
 # std imports
 from dataclasses import dataclass
-from typing import Optional
+from typing import Iterator
 import string
 
 # 3rd-party imports
 from docutils import nodes
+
 from sphinx import addnodes
 
 
 FORBID_MATCH_WHEN_PREVIOUS_ENDS_WITH = string.ascii_letters + string.digits
 
 
-def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None):
+@dataclass
+class LexableNode:
+    node: nodes.Element
+    inside_definition_of: set[str] | None
+
+
+@dataclass
+class Term:
+    name: str
+    document: str
+    anchor: str
+    abbreviation: bool
+
+
+@dataclass
+class MatchedTerm:
+    term: Term
+    text: str
+
+
+def find_lexable_nodes(
+    node: nodes.Element,
+    *,
+    inside_glossary=False,
+    inside_definition_of: set[str] | None = None
+) -> Iterator[LexableNode]:
     if type(node) is nodes.Text:
         yield LexableNode(node=node, inside_definition_of=inside_definition_of)
     elif type(node) is addnodes.glossary:
@@ -44,17 +70,11 @@ def find_lexable_nodes(node, *, inside_glossary=False, inside_definition_of=None
             yield result
 
 
-@dataclass
-class LexableNode:
-    node: object
-    inside_definition_of: Optional[set[str]]
-
-
-def lexer(text, terms):
+def lexer(text: str, terms: list[Term]):
     return _filter_matches(_split_into_matches(text, terms))
 
 
-def _filter_matches(matches):
+def _filter_matches(matches: Iterator[str | MatchedTerm]) -> Iterator[str | MatchedTerm]:
     previous_token_allows_match = True
 
     for token in matches:
@@ -72,7 +92,7 @@ def _filter_matches(matches):
         yield token
 
 
-def _split_into_matches(text, terms):
+def _split_into_matches(text: str, terms: list[Term]) -> Iterator[str | MatchedTerm]:
     normalized_text = normalize(text)
     while text:
         # We need to look for all possible matches of all possible terms,
@@ -114,21 +134,7 @@ def _split_into_matches(text, terms):
             break
 
 
-@dataclass
-class Term:
-    name: str
-    document: str
-    anchor: str
-    abbreviation: bool
-
-
-@dataclass
-class MatchedTerm:
-    term: Term
-    text: str
-
-
-def normalize(name):
+def normalize(name: str):
     # This can be expanded to apply more normalizations before checking for
     # matches. The only constraint is that this function CANNOT add or remove
     # chars to the input, it MUST be the same length.

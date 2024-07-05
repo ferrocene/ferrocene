@@ -10,12 +10,18 @@
 # std imports
 import os
 
+# 3rd-party imports
+from docutils import nodes
+
+from sphinx.application import Sphinx
+from sphinx.environment import BuildEnvironment
+
 # local imports
 from . import lexer
-from .lexer import MatchedTerm
+from .lexer import MatchedTerm, Term
 
 
-def write_lexer_outcome(app, env):
+def write_lexer_outcome(app: Sphinx, env: BuildEnvironment):
     debug_file = os.environ.get("AUTOGLOSSARY_DEBUG_FILE")
     if debug_file is None or app.builder.name == "ferrocene-intersphinx":
         return
@@ -33,7 +39,7 @@ def write_lexer_outcome(app, env):
 
     from . import State  # Imported here to avoid circular dependencies
 
-    terms = State.get(env).terms
+    terms: list[Term] = State.get(env).terms
 
     for docname in sorted(env.found_docs):
         doctree = env.get_doctree(docname)
@@ -45,7 +51,7 @@ def write_lexer_outcome(app, env):
             output.write(f"{node_location(node.node)}: {rendered}\n")
 
 
-def render_lexed_node(terms, node):
+def render_lexed_node(terms: list[Term], node: nodes.Element):
     result = ""
     has_matches = False
 
@@ -62,11 +68,8 @@ def render_lexed_node(terms, node):
         return result
 
 
-def node_location(node):
-    if (
-        getattr(node, "source", None) is not None
-        and getattr(node, "line", None) is not None
-    ):
+def node_location(node: nodes.Element):
+    if node.source is not None and node.line is not None:
         return f"{node.source}:{node.line}"
     elif node.parent is not None:
         return node_location(node.parent)
@@ -74,5 +77,5 @@ def node_location(node):
         return "<unknown>"
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.connect("env-check-consistency", write_lexer_outcome)

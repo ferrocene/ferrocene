@@ -10,14 +10,18 @@
 
 # std imports
 from dataclasses import dataclass
+from typing import Self
 import string
 
 # 3rd-party imports
-from docutils import nodes
+from docutils import nodes as docutils_nodes
+
 from sphinx import addnodes
+from sphinx.application import Sphinx
+from sphinx.environment import BuildEnvironment
 from sphinx.environment.collectors import EnvironmentCollector
 from sphinx.transforms import SphinxTransform
-import sphinx
+from sphinx.util import nodes as sphinx_nodes
 
 # local imports
 from . import debug, lexer
@@ -25,23 +29,25 @@ from .lexer import Term, MatchedTerm
 
 
 class GlossaryCollector(EnvironmentCollector):
-    def clear_doc(self, app, env, docname):
-        state = State.get(env)
-        state.terms = [item for item in state.terms if item.document != docname]
+    def clear_doc(self, _app, env: BuildEnvironment, docname: str):
+        terms: list[Term] = State.get(env).terms
+        terms = [item for item in terms if item.document != docname]
 
-    def merge_other(self, app, env, docnames, other):
-        state = State.get(env)
-        other_state = State.get(other)
-        for item in other_state.terms:
+    def merge_other(
+        self, _app, env: BuildEnvironment, docnames: list[str], other: BuildEnvironment
+    ):
+        terms: list[Term] = State.get(env).terms
+        other_terms: list[Term] = State.get(other).terms
+        for item in other_terms:
             if item.document in docnames:
-                state.terms.append(item)
+                terms.append(item)
 
-    def process_doc(self, app, document):
-        state = State.get(app.env)
+    def process_doc(self, app: Sphinx, document: addnodes.document):
+        terms: list[Term] = State.get(app.env).terms
         for glossary in document.findall(addnodes.glossary):
-            for term in glossary.findall(nodes.term):
+            for term in glossary.findall(docutils_nodes.term):
                 name = term.astext()
-                state.terms.append(
+                terms.append(
                     Term(
                         name=name,
                         document=app.env.docname,
@@ -57,33 +63,33 @@ class LinkToTermsTransform(SphinxTransform):
     default_priority = 100
 
     def apply(self):
-        state = State.get(self.env)
+        state: list[Term] = State.get(self.env).terms
         for node in lexer.find_lexable_nodes(self.document):
             self.apply_to_node(state, node.node)
 
-    def apply_to_node(self, state, node):
-        lexed = list(lexer.lexer(node.astext(), state.terms))
+    def apply_to_node(self, terms: list[Term], node: docutils_nodes.Element):
+        lexed = list(lexer.lexer(node.astext(), terms))
         if len(lexed) == 1 and type(lexed[0]) is str:
             # Do nothing if the lexed version returned the same string.
             pass
         else:
-            container = nodes.inline()
+            container = docutils_nodes.inline()
             for part in lexed:
                 if type(part) is str:
-                    container.append(nodes.Text(part))
+                    container.append(docutils_nodes.Text(part))
                 elif type(part) is MatchedTerm:
                     container.append(self.make_link(part))
                 else:
                     raise RuntimeError("unexpected result of lexer")
             node.parent.replace(node, container)
 
-    def make_link(self, matched):
-        node = sphinx.util.nodes.make_refnode(
+    def make_link(self, matched: MatchedTerm):
+        node = sphinx_nodes.make_refnode(
             self.app.builder,
             self.env.docname,
             matched.term.document,
             matched.term.anchor,
-            nodes.Text(matched.text),
+            docutils_nodes.Text(matched.text),
         )
         node["classes"].append("ferrocene-autoglossary")
         return node
@@ -113,13 +119,13 @@ class PruneGlossaryTransform(SphinxTransform):
         # other than the glossary the dependencies will be None, while if it's
         # only referenced by other glossary entries the value will be the names
         # of those entries.
-        used_terms = dict()
+        used_terms: dict[str, set[str] | None] = dict()
 
-        state = State.get(self.env)
+        terms: list[Term] = State.get(self.env).terms
         for docname in self.env.all_docs.keys():
             doctree = self.env.get_doctree(docname)
             for node in lexer.find_lexable_nodes(doctree):
-                for part in lexer.lexer(node.node.astext(), state.terms):
+                for part in lexer.lexer(node.node.astext(), terms):
                     if type(part) is not MatchedTerm:
                         continue
                     name = part.term.name
@@ -150,9 +156,9 @@ class PruneGlossaryTransform(SphinxTransform):
 
         return {term for term, deps in used_terms.items() if deps is None}
 
-    def prune(self, glossary, used_terms):
-        for item in list(glossary.findall(nodes.definition_list_item)):
-            for term in item.findall(nodes.term):
+    def prune(self, glossary: addnodes.glossary, used_terms: set[str]):
+        for item in list(glossary.findall(docutils_nodes.definition_list_item)):
+            for term in item.findall(docutils_nodes.term):
                 if term.astext() in used_terms:
                     break
             else:
@@ -163,14 +169,14 @@ class PruneGlossaryTransform(SphinxTransform):
 class State:
     terms: list[Term]
 
-    def get(env):
+    def get(env: BuildEnvironment) -> Self:
         key = "ferrocene_autoglossary"
         if not hasattr(env, key):
             setattr(env, key, State(terms=list()))
         return getattr(env, key)
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_env_collector(GlossaryCollector)
     app.add_post_transform(LinkToTermsTransform)
     app.add_post_transform(PruneGlossaryTransform)

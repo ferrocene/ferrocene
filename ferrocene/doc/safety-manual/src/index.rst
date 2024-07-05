@@ -14,9 +14,8 @@ scope, in accordance to the standards above.
    :caption: General
    :numbered:
 
-   user-responsibility
+   scope
    customer-interactions
-   environment
    procedures
    changelog
    known-problems

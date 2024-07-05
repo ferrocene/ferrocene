@@ -4,6 +4,9 @@
 Environment
 ===========
 
+This qualification applies to Ferrocene |ferrocene_version|, which includes
+Rust |rust_version|.
+
 This qualification is restricted to the following environment:
 
 .. list-table::

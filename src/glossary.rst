@@ -5057,6 +5057,14 @@ primitive representation
 :dt:`Primitive representation` is the :t:`type representation` of
 :t:`[integer type]s`.
 
+.. _fls_mk3sa7OvtJvB:
+
+principal trait
+^^^^^^^^^^^^^^^
+
+:dp:`fls_YtYOHoPaMPFX`
+The :dt:`principal trait` of :t:`trait object type` is its first :t:`trait bound`.
+
 .. _fls_v1u1mevpj0kj:
 
 private visibility

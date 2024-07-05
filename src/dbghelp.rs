@@ -287,7 +287,7 @@ pub struct Init {
 /// synchronization. Also note that it is safe to call this function multiple
 /// times recursively.
 pub fn init() -> Result<Init, ()> {
-    use core::sync::atomic::{AtomicUsize, Ordering::SeqCst};
+    use core::sync::atomic::{AtomicPtr, Ordering::SeqCst};
 
     // Helper function for generating a name that's unique to the process.
     fn mutex_name() -> [u8; 33] {
@@ -341,22 +341,21 @@ pub fn init() -> Result<Init, ()> {
         //
         // After we've actually go the lock we simply acquire it, and our `Init`
         // handle we hand out will be responsible for dropping it eventually.
-        static LOCK: AtomicUsize = AtomicUsize::new(0);
+        static LOCK: AtomicPtr<c_void> = AtomicPtr::new(ptr::null_mut());
         let mut lock = LOCK.load(SeqCst);
-        if lock == 0 {
+        if lock.is_null() {
             let name = mutex_name();
-            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr().cast::<i8>()) as usize;
-            if lock == 0 {
+            lock = CreateMutexA(ptr::null_mut(), 0, name.as_ptr().cast::<i8>());
+            if lock.is_null() {
                 return Err(());
             }
-            if let Err(other) = LOCK.compare_exchange(0, lock, SeqCst, SeqCst) {
-                debug_assert!(other != 0);
-                CloseHandle(lock as HANDLE);
+            if let Err(other) = LOCK.compare_exchange(ptr::null_mut(), lock, SeqCst, SeqCst) {
+                debug_assert!(!other.is_null());
+                CloseHandle(lock);
                 lock = other;
             }
         }
-        debug_assert!(lock != 0);
-        let lock = lock as HANDLE;
+        debug_assert!(!lock.is_null());
         let r = WaitForSingleObjectEx(lock, INFINITE, FALSE);
         debug_assert_eq!(r, 0);
         let ret = Init { lock };

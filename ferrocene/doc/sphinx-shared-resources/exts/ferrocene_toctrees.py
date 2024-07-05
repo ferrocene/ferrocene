@@ -6,9 +6,12 @@
 import gc
 
 # 3rd-party imports
-from docutils import nodes
-from sphinx import addnodes as sphinxnodes
+from docutils import nodes as docutils_nodes
+
+from sphinx import addnodes
+from sphinx.application import Sphinx
 from sphinx.directives.other import TocTree
+from sphinx.environment import BuildEnvironment
 from sphinx.environment.collectors.toctree import TocTreeCollector
 
 
@@ -16,7 +19,7 @@ class AppendicesDirective(TocTree):
     def run(self):
         result = super().run()
 
-        def compat_check(condition):
+        def compat_check(condition: bool):
             if not condition:
                 raise RuntimeError(
                     "bug: the toctree Sphinx directive used by appendix emitted "
@@ -27,9 +30,9 @@ class AppendicesDirective(TocTree):
         # ensure it contains what we expect.
         compat_check(isinstance(result, list))
         compat_check(len(result) == 1)
-        compat_check(isinstance(result[0], nodes.compound))
+        compat_check(isinstance(result[0], docutils_nodes.compound))
         compat_check(len(result[0].children) == 1)
-        compat_check(isinstance(result[0].children[0], sphinxnodes.toctree))
+        compat_check(isinstance(result[0].children[0], addnodes.toctree))
 
         # Mark this toctree as containing appendices, so that the environment
         # collector can distinguish it from normal toctrees.
@@ -64,7 +67,7 @@ class TocTreeCollectorWithAppendices(TocTreeCollector):
 
         for docname in env.numbered_toctrees:
             doctree = env.get_doctree(docname)
-            for toctree in doctree.findall(sphinxnodes.toctree):
+            for toctree in doctree.findall(addnodes.toctree):
                 self.__replace_toctree(env, toctree)
 
                 self.__chapter_offset = self.__chapter_max
@@ -72,27 +75,27 @@ class TocTreeCollectorWithAppendices(TocTreeCollector):
 
         return result
 
-    def __replace_toctree(self, env, toctree):
+    def __replace_toctree(self, env: BuildEnvironment, toctree: addnodes.toctree):
         self.__within_appendices = "are_appendices" in toctree
         for _, ref in toctree["entries"]:
             env.titles[ref]["secnumber"] = self.__renumber(env.titles[ref]["secnumber"])
             if ref in env.tocs:
                 self.__replace_toc(env, ref, env.tocs[ref])
 
-    def __replace_toc(self, env, ref, node):
-        if isinstance(node, nodes.reference):
+    def __replace_toc(self, env: BuildEnvironment, ref: str, node: docutils_nodes.Element):
+        if isinstance(node, docutils_nodes.reference):
             fixed_number = self.__renumber(node["secnumber"])
             node["secnumber"] = fixed_number
             env.toc_secnumbers[ref][node["anchorname"]] = fixed_number
 
-        elif isinstance(node, sphinxnodes.toctree):
+        elif isinstance(node, addnodes.toctree):
             raise RuntimeError("nested toctrees are not supported")
 
         else:
             for child in node.children:
                 self.__replace_toc(env, ref, child)
 
-    def __renumber(self, number):
+    def __renumber(self, number: tuple[int | str, ...]) -> tuple[int | str, ...]:
         if not number:
             return number
 
@@ -112,7 +115,7 @@ class TocTreeCollectorWithAppendices(TocTreeCollector):
 
 # This extension needs to replace the builtin TocTreeCollector, so it's safer
 # to disable it. That'll avoid two TocTreeCollectors running in the build.
-def disable_builtin_toctree_collector(app):
+def disable_builtin_toctree_collector(app: Sphinx):
     for obj in gc.get_objects():
         if not isinstance(obj, TocTreeCollector):
             continue
@@ -126,7 +129,7 @@ def disable_builtin_toctree_collector(app):
         obj.disable(app)
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_directive("appendices", AppendicesDirective)
 
     disable_builtin_toctree_collector(app)

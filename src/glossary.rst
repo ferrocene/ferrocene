@@ -3750,7 +3750,8 @@ library crate
 ^^^^^^^^^^^^^
 
 :dp:`fls_3m8lg4mdc2x0`
-A :dt:`library crate` is a :t:`crate` that is not a :t:`binary crate`.
+A :dt:`library crate` is a :t:`crate` whose :t:`crate type` is ``lib``, ``rlib``,
+``staticlib``, ``dylib``, or ``cdylib``.
 
 .. _fls_vdhaa61g6kah:
 

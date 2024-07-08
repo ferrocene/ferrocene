@@ -139,7 +139,8 @@ the :t:`name` ``main`` with a :t:`main function signature` is the :t:`binary
 crate`'s :t:`program entry point`.
 
 :dp:`fls_d9nn4yuiw1ja`
-A :t:`library crate` is a :t:`crate` that is not a :t:`binary crate`.
+A :t:`library crate` is a :t:`crate` whose :t:`crate type` is ``lib``, ``rlib``,
+``staticlib``, ``dylib``, or ``cdylib``.
 
 :dp:`fls_Mf62VqAhoZ3c`
 A :t:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.

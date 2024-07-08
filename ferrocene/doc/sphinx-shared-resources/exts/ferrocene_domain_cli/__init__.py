@@ -27,6 +27,5 @@ def setup(app):
         #
         # Version history:
         # - 0: initial implementation
-        # - 1: add no_traceability_matrix flag
-        "env_version": "1",
+        "env_version": "0",
     }

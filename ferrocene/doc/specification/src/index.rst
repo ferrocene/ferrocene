@@ -40,6 +40,7 @@ Ferrocene Language Specification
    licenses
    glossary
    undefined-behavior
+   changelog
 
 Indices and tables
 ------------------

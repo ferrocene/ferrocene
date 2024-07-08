@@ -1123,6 +1123,21 @@ An :t:`impl trait type` is a :t:`type` that implements a :t:`trait`, where the
 An :t:`impl trait type` shall appear only within a :t:`function parameter` or
 the :t:`return type` of a :t:`function`.
 
+:dp:`fls_3aKZB0ILIkZw`
+An :t:`anonymous return type` is an :t:`impl trait type` ascribed to a
+:t:`function` :t:`return type`.
+
+:dp:`fls_Xo1ODwOyX7Vm`
+An :t:`anonymous return type` behaves as if it contained all declared :t:`[type
+parameter]s` of the :t:`return type`'s :t:`function` and its parent :t:`trait`
+or :t:`implementation`.
+
+:dp:`fls_kTGFLFymTWch`
+An :t:`anonymous return type` derived from an :t:`async function` behaves as if
+it contained all declared :t:`[type parameter]s` and :t:`[lifetime parameter]s`
+of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
+:t:`implementation`.
+
 :dp:`fls_ECjhEI7eCwAj`
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
 
@@ -1156,10 +1171,14 @@ Trait Object Types
 A :t:`trait object type` is a :t:`type` that implements a :t:`trait`, where the
 :t:`type` is not known at compile time.
 
+:dp:`fls_eWac7zOda3lh`
+The :t:`principal trait` of :t:`trait object type` is the first :t:`trait bound`.
+
 :dp:`fls_9z8oleh0wdel`
-The first :t:`trait bound` of a :t:`trait object type` shall denote an
-:t:`object safe` :t:`trait`. Any subsequent :t:`[trait bound]s` shall denote
-:t:`[auto trait]s`.
+The :t:`principal trait` shall denote an :t:`object safe` :t:`trait`.
+
+:dp:`fls_hJII8XYAtZeY`
+All non-:t:`principal trait` :t:`[trait bound]s` shall denote :t:`[auto trait]s`.
 
 :dp:`fls_s0oy2c8t4yz9`
 A :t:`trait object type` shall not contain :t:`[opt-out trait bound]s`.
@@ -1991,6 +2010,11 @@ occur when:
 * :dp:`fls_sf0c3fbx8z57`
   The source :t:`type` is the :t:`never type` and the target :t:`type` is any
   :t:`type`.
+
+* :dp:`fls_SYnFJBhi0IWj`
+  The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a
+  :t:`trait object type` with the same :t:`[trait bound]s` and additional
+  :t:`[auto trait]s`.
 
 :dp:`fls_iiiu2q7pym4p`
 An :t:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized type`

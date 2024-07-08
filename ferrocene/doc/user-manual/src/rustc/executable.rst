@@ -18,7 +18,7 @@ The examples in this chapter assume the following directory structure:
        └── libops.rlib
 
 Directory ``rust_library`` and its byproducts are described
-`here <library.html>`_.
+in :doc:`library`.
 
 Building a simple executable
 ----------------------------
@@ -52,7 +52,7 @@ Building a linked executable
 ----------------------------
 
 We are going to build an executable that depends on library ``libops`` we
-created in the `Building a library <library.html>`_ step.
+created in the :doc:`library` step.
 Source file ``./executable/use_ops.rs`` contains:
 
 .. code-block:: rust

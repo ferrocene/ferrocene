@@ -12,6 +12,9 @@ def write_traceability_ids(app):
 
     options_by_document = defaultdict(list)
     for option in env.get_domain("cli").get_options().values():
+        if option.no_traceability_matrix:
+            continue
+
         options_by_document[option.document].append(
             {
                 "id": option.id(),

@@ -61,4 +61,4 @@ html_short_title = "Language Specification"
 
 lint_alphabetical_section_titles = ["glossary"]
 
-lint_no_paragraph_ids = ["index"]
+lint_no_paragraph_ids = ["index", "changelog"]

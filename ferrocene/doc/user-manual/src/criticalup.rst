@@ -10,4 +10,4 @@ CriticalUp is the official Ferrocene toolchain installer and manager. It is a
 tool like ``rustup``.
 
 Find more details about using ``criticalup`` in the
-`CriticalUp User Documentation <https://criticalup.ferrocene.dev/index.html>`_.
+`CriticalUp User Documentation <https://criticalup.ferrocene.dev>`_.

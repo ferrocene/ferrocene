@@ -1123,6 +1123,21 @@ An :t:`impl trait type` is a :t:`type` that implements a :t:`trait`, where the
 An :t:`impl trait type` shall appear only within a :t:`function parameter` or
 the :t:`return type` of a :t:`function`.
 
+:dp:`fls_3aKZB0ILIkZw`
+An :t:`anonymous return type` is an :t:`impl trait type` ascribed to a
+:t:`function` :t:`return type`.
+
+:dp:`fls_Xo1ODwOyX7Vm`
+An :t:`anonymous return type` behaves as if it contained all declared :t:`[type
+parameter]s` of the :t:`return type`'s :t:`function` and its parent :t:`trait`
+or :t:`implementation`.
+
+:dp:`fls_kTGFLFymTWch`
+An :t:`anonymous return type` derived from an :t:`async function` behaves as if
+it contained all declared :t:`[type parameter]s` and :t:`[lifetime parameter]s`
+of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
+:t:`implementation`.
+
 :dp:`fls_ECjhEI7eCwAj`
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
 

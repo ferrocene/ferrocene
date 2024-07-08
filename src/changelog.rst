@@ -82,7 +82,7 @@ Language changes in Rust 1.79.0
 
 * `Rework \`impl Trait\` lifetime inference <https://github.com/rust-lang/rust/pull/116891/>`_
 
-  * No change: capturing of lifestime within ``impl Trait`` types is not described in the FLS
+  * No paragraphs: :p:`fls_Xo1ODwOyX7Vm`, :p:`fls_kTGFLFymTWch`
 
 * `Change inductive trait solver cycles to be ambiguous <https://github.com/rust-lang/rust/pull/122791>`_
 

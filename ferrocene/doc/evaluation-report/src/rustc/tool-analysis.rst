@@ -17,19 +17,22 @@ Installation
    :header-rows: 1
 
    * - Error identifier
-     - Use case
      - Description
      - Risk
-     - Mitigation
      - Detectable
+     - Mitigation
    * - .. id:: RUSTC_ERR_INSTALL_01
-     - :id:`RUSTC_UC0_INST`
      - Ferrocene was not correctly installed
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_INSTALL_001`
      - NO
+     - :id:`RUSTC_AVD_CHECK_INSTALL_001`
 
 .. end of table
+
+Use cases
+*********
+
+* :id:`RUSTC_UC0_INST`
 
 
 Rust Driver
@@ -40,104 +43,67 @@ Rust Driver
    :header-rows: 1
 
    * - Error identifier
-     - Use case
      - Description
      - Risk
-     - Mitigation
      - Detectable
+     - Mitigation
    * - .. id:: RUSTC_ERR_DRIVER_02
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An used environment variable is set to an incorrect value
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_CLEAN_ENV_002`
      - YES
+     - :id:`RUSTC_AVD_CHECK_CLEAN_ENV_002`
    * - .. id:: RUSTC_ERR_DRIVER_03
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An invalid option is passed
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - YES
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
    * - .. id:: RUSTC_ERR_DRIVER_04
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Error diagnostics are not correctly emited
      - Undefined behavior
+     - NO
      - | :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`,
        | :id:`RUSTC_AVD_TEST_007`
-     - NO
    * - .. id:: RUSTC_ERR_DRIVER_05
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The output is generated with missing part
      - Wrong code
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - NO
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
    * - .. id:: RUSTC_ERR_DRIVER_06
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The behavior is incorrect because of concurrent modification
      - Undefined behavior
-     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
      - NO
+     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
    * - .. id:: RUSTC_ERR_DRIVER_07
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - A warning is generated instead of an error
      - Undefined behavior
-     - :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
      - NO
+     - :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
    * - .. id:: RUSTC_ERR_DRIVER_08
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The compilation has a wrong behavior
      - Wrong code
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_DRIVER_09
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An incomplete input is accepted leading to an undefined behavior
      - Undefined behavior
-     - :id:`RUSTC_AVD_TEST_007`
      - YES
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_DRIVER_10
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Some object files are silently not generated
      - Use an artifact from a previous build
-     - :id:`RUSTC_AVD_CLEAN_004`
      - NO
+     - :id:`RUSTC_AVD_CLEAN_004`
 
 .. end of table
+
+Use cases
+*********
+
+* :id:`RUSTC_UC1_RLIB`,
+* :id:`RUSTC_UC2_STATICLIB`,
+* :id:`RUSTC_UC3_EXEC`,
+* :id:`RUSTC_UC4_EXEC_RLIB`,
+* :id:`RUSTC_UC5_EXEC_CLIB`
 
 
 Rust Front-End
@@ -148,73 +114,51 @@ Rust Front-End
    :header-rows: 1
 
    * - Error identifier
-     - Use case
      - Description
      - Risk
-     - Mitigation
      - Detectable
+     - Mitigation
    * - .. id:: RUSTC_ERR_RUST_FE_11
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Input has invalid contents
      - Invalid code generated
-     - :id:`RUSTC_AVD_TEST_007`
      - YES
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_RUST_FE_12
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Error diagnostics is invalid
      - Invalid code generated
-     - :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
      - NO
+     - :id:`RUSTC_AVD_WARNING_AS_ERROR_005`
    * - .. id:: RUSTC_ERR_RUST_FE_13
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Invalid output generated from valid input
      - Invalid code generated
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_RUST_FE_14
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The behavior is incorrect because of concurrent modifications
      - Invalid code generated
-     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
      - NO
+     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
    * - .. id:: RUSTC_ERR_RUST_FE_15
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Invalid input is accepted
      - Undefined behavior
-     - :id:`RUSTC_AVD_TEST_007`
      - YES
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_RUST_FE_16
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Incorrect number of inputs are accepted
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - YES
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
 
 .. end of table
+
+Use cases
+*********
+
+* :id:`RUSTC_UC1_RLIB`,
+* :id:`RUSTC_UC2_STATICLIB`,
+* :id:`RUSTC_UC3_EXEC`,
+* :id:`RUSTC_UC4_EXEC_RLIB`,
+* :id:`RUSTC_UC5_EXEC_CLIB`
 
 
 LLVM
@@ -225,75 +169,53 @@ LLVM
    :header-rows: 1
 
    * - Error identifier
-     - Use case
      - Description
      - Risk
-     - Mitigation
      - Detectable
+     - Mitigation
    * - .. id:: RUSTC_ERR_LLVM_17
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Input parameter has invalid value
      - Most likely LLVM will crash. Invalid code could also be generated
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_LLVM_18
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An object file is invalid
      - Invalid code generated
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - NO
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
    * - .. id:: RUSTC_ERR_LLVM_19
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An object file or static library is not correctly translated to machine code
      - Undefined behavior
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_LLVM_20
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The behavior is incorrect because of concurrent modifications
      - Invalid code generated
-     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
      - NO
+     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
    * - .. id:: RUSTC_ERR_LLVM_21
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An object or static library exposes additional symbols
      - Internal functionality might become callable from the outside
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_LLVM_22
-     - | :id:`RUSTC_UC1_RLIB`,
-       | :id:`RUSTC_UC2_STATICLIB`,
-       | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Output does not contain expected variables or functions
      - Invalid code generated
+     - NO
      - | :id:`RUSTC_AVD_CHECK_CLEAN_ENV_002`,
        | :id:`RUSTC_AVD_CLEAN_004`,
        | :id:`RUSTC_AVD_TEST_007`
-     - NO
 
 .. end of table
+
+Use cases
+*********
+
+* :id:`RUSTC_UC1_RLIB`,
+* :id:`RUSTC_UC2_STATICLIB`,
+* :id:`RUSTC_UC3_EXEC`,
+* :id:`RUSTC_UC4_EXEC_RLIB`,
+* :id:`RUSTC_UC5_EXEC_CLIB`
 
 
 Linking
@@ -304,61 +226,49 @@ Linking
    :header-rows: 1
 
    * - Error identifier
-     - Use case
      - Description
      - Risk
-     - Mitigation
      - Detectable
+     - Mitigation
    * - .. id:: RUSTC_ERR_LINK_23
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Invalid input is accepted
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - NO
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
    * - .. id:: RUSTC_ERR_LINK_24
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Invalid executable or library produced
      - Undefined behavior
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
    * - .. id:: RUSTC_ERR_LINK_25
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - The behavior is incorrect because of concurrent modifications
      - Undefined behavior
-     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
      - NO
+     - :id:`RUSTC_AVD_PARALLEL_BUILD_006`
    * - .. id:: RUSTC_ERR_LINK_26
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Incorrect number of inputs are accepted
      - Undefined behavior
-     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
      - YES
+     - :id:`RUSTC_AVD_CHECK_BUILD_SCRIPT_003`
    * - .. id:: RUSTC_ERR_LINK_27
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - An input is missing
      - Invalid code generated but won't run
-     - :id:`RUSTC_AVD_CHECK_INSTALL_001`
      - YES
+     - :id:`RUSTC_AVD_CHECK_INSTALL_001`
    * - .. id:: RUSTC_ERR_LINK_28
-     - | :id:`RUSTC_UC3_EXEC`,
-       | :id:`RUSTC_UC4_EXEC_RLIB`,
-       | :id:`RUSTC_UC5_EXEC_CLIB`
      - Error diagnostics not emmited
      - Invalid or missing code not detected by user may be linked against subsequent stage
-     - :id:`RUSTC_AVD_TEST_007`
      - NO
+     - :id:`RUSTC_AVD_TEST_007`
 
 .. end of table
+
+Use cases
+*********
+
+* :id:`RUSTC_UC3_EXEC`,
+* :id:`RUSTC_UC4_EXEC_RLIB`,
+* :id:`RUSTC_UC5_EXEC_CLIB`
 
 
 Detection Measures and Usage Restriction

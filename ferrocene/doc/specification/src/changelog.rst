@@ -188,4 +188,4 @@ language changes in Rust 1.77.0
 .. Note: for the publicly rendered version of the FLS we want to link to
    upstream's release notes. In the Ferrocene subtree this should be replaced
    to the link to the Ferrocene release notes!
-.. _release notes: https://doc.rust-lang.org/releases.html
+.. _release notes: ../release-notes/index.html

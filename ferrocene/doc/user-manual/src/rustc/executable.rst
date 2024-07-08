@@ -18,7 +18,7 @@ The examples in this chapter assume the following directory structure:
        └── libops.rlib
 
 Directory ``rust_library`` and its byproducts are described
-`here <library.html>`_.
+in :doc:`library`.
 
 Building a simple executable
 ----------------------------

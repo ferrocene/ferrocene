@@ -3,6 +3,8 @@
 
 # If you edit this, also run:
 #    uv pip compile requirements.in -o requirements.txt
+#    uv pip install -r requirements.txt
 boto3
 reuse
 pyyaml
+zstandard

@@ -53,3 +53,8 @@ reason = "QEMU user space emulation outputs an extra message when an abort happe
 tests = ["tests/incremental/issue-80691-bad-eval-cache.rs"]
 targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "QEMU user space emulation uses a different exit code for aborting"
+
+[["tests/codegen"]]
+tests = ["tests/codegen/vec_pop_push_noop.rs"]
+targets = ["aarch64-unknown-ferrocenecoretest"]
+reason = "Remove when https://github.com/rust-lang/rust/issues/127395 is fixed"

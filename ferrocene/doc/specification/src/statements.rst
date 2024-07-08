@@ -75,11 +75,16 @@ alternatively executes a :t:`block expression`.
 If a :t:`let statement` lacks a :t:`block expression`, then the :t:`pattern` of
 the :t:`let statement` shall be an :t:`irrefutable pattern`.
 
+:dp:`fls_1s1UikGU5YQb`
+If a :t:`let statement` has a :t:`block expression`, then the :s:`Expression` of
+the :s:`LetInitializer` shall not be a :s:`LazyBooleanExpression` or end with
+token ``}``.
+
 :dp:`fls_iB25BeFys0j8`
 The :t:`expected type` of the :t:`pattern` of the :t:`let statement` is determined as follows:
 
 * :dp:`fls_zObyLdya4DYc`
-  If the :t:`let statement` lacks a :t:`type ascription` and a :t:`let initializer, then the :t:`expected type` is the :t:`inferred type`.
+  If the :t:`let statement` lacks a :t:`type ascription` and a :t:`let initializer`, then the :t:`expected type` is the :t:`inferred type`.
 
 * :dp:`fls_r38TXWKQPjxv`
   If the :t:`let statement` lacks a :t:`type ascription`, then the :t:`expected type` is the :t:`type` of the :t:`let initializer`.

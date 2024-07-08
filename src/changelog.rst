@@ -145,6 +145,8 @@ Language changes in Rust 1.78.0
 
 * `\`trait Trait: Auto {}\`: allow upcasting from \`dyn Trait\` to \`dyn Trait + Auto\` <https://github.com/rust-lang/rust/pull/119338>`_
 
+  * New paragraph: :p:`fls_SYnFJBhi0IWj`
+
 language changes in Rust 1.77.0
 -------------------------------
 

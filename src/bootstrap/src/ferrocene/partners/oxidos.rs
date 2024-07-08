@@ -46,6 +46,8 @@ const OXIDOS_ALLOW_LINTS: &[&str] = &[
     "static-mut-ref",
     // The source contains redundant prelude imports which are now linted against
     "unused-imports",
+    // Avoid "struct `Foo` is never constructed" errors
+    "dead-code",
 ];
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]

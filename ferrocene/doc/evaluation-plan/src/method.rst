@@ -93,15 +93,15 @@ HazOp analysis:
 
 .. list-table::
 
-   * - Error identifier 
+   * - Error identifier
      - ERR_TOOLID_XXX where TOOLID is the name of the tool causing the error, and XXX a number.
-   * - Use case 
+   * - Use case
      - The use case where the error is determined.
-   * - Description 
+   * - Description
      - The potential error descriptions.
-   * - Risk 
+   * - Risk
      - Possible effects of the potential error.
-   * - Mitigation 
+   * - Mitigation
      - The detection or mitigation method identifier, if available.
    * - Detectable
      - YES or NO, indicates if the error could be detected.
@@ -120,6 +120,10 @@ table describes a countermeasure entry:
      - The description of the check or the avoidance mechanism.
 
 .. end of table
+
+If all use cases of all potential errors in the table are exactly the same, the
+column can be omitted and instead a list of use cases has to be added after the
+table. This is to avoid repetition.
 
 HazOp Organization
 ^^^^^^^^^^^^^^^^^^

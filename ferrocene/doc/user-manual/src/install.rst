@@ -22,7 +22,7 @@ Installation
 ------------
 
 Preferred way of installing and managing Ferrocene toolchain(s) is via our
-``rustup`` like tool called `CriticalUp <../criticalup.html>`_.
+``rustup`` like tool called :ref:`CriticalUp <criticalup_overview>`.
 
 Find more details about using ``criticalup`` in the
 `CriticalUp User Documentation <https://criticalup.ferrocene.dev>`_.

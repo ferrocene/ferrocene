@@ -1193,7 +1193,7 @@ commands:
     steps:
       - run:
           name: Fetch QNX710 toolchain
-          command: ferrocene\ci\scripts\setup-qnx-toolchain.py
+          command: ferrocene/ci/scripts/setup-qnx-toolchain.py
       - run:
           name: Set PATH to include QNX710 tools
           command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"

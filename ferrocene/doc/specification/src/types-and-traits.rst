@@ -806,7 +806,11 @@ Union Types
 
 :dp:`fls_nskmnzq95yqm`
 A :t:`union type` is an :t:`abstract data type` that is a sum of other
-:t:`types`.
+:t:`[type]s`.
+
+:dp:`fls_I5fN5Fmo5CyK`
+A :t:`union` without any :t:`[union field]s` is rejected, but may still be consumed by
+:t:`[macro]s`.
 
 :dp:`fls_1caus8ybmfli`
 The :t:`name` of a :t:`union field` shall be unique within the related
@@ -1119,6 +1123,21 @@ An :t:`impl trait type` is a :t:`type` that implements a :t:`trait`, where the
 An :t:`impl trait type` shall appear only within a :t:`function parameter` or
 the :t:`return type` of a :t:`function`.
 
+:dp:`fls_3aKZB0ILIkZw`
+An :t:`anonymous return type` is an :t:`impl trait type` ascribed to a
+:t:`function` :t:`return type`.
+
+:dp:`fls_Xo1ODwOyX7Vm`
+An :t:`anonymous return type` behaves as if it contained all declared :t:`[type
+parameter]s` of the :t:`return type`'s :t:`function` and its parent :t:`trait`
+or :t:`implementation`.
+
+:dp:`fls_kTGFLFymTWch`
+An :t:`anonymous return type` derived from an :t:`async function` behaves as if
+it contained all declared :t:`[type parameter]s` and :t:`[lifetime parameter]s`
+of the :t:`return type`'s :t:`function` and its parent :t:`trait` or
+:t:`implementation`.
+
 :dp:`fls_ECjhEI7eCwAj`
 An :t:`impl trait type` shall not contain :t:`[opt-out trait bound]s`.
 
@@ -1152,10 +1171,14 @@ Trait Object Types
 A :t:`trait object type` is a :t:`type` that implements a :t:`trait`, where the
 :t:`type` is not known at compile time.
 
+:dp:`fls_eWac7zOda3lh`
+The :t:`principal trait` of :t:`trait object type` is the first :t:`trait bound`.
+
 :dp:`fls_9z8oleh0wdel`
-The first :t:`trait bound` of a :t:`trait object type` shall denote an
-:t:`object safe` :t:`trait`. Any subsequent :t:`[trait bound]s` shall denote
-:t:`[auto trait]s`.
+The :t:`principal trait` shall denote an :t:`object safe` :t:`trait`.
+
+:dp:`fls_hJII8XYAtZeY`
+All non-:t:`principal trait` :t:`[trait bound]s` shall denote :t:`[auto trait]s`.
 
 :dp:`fls_s0oy2c8t4yz9`
 A :t:`trait object type` shall not contain :t:`[opt-out trait bound]s`.
@@ -1427,7 +1450,7 @@ For a :t:`thin pointer`, the :t:`size` and :t:`alignment` are those of :t:`type`
 
 :dp:`fls_nrqG8i3fmpm4`
 For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of
-a :c:`thin pointer`.
+a :t:`thin pointer`.
 
 :dp:`fls_e5hivr6m5s3h`
 For a :t:`fat pointer`, the :t:`size` and :t:`alignment` are tool-defined, but
@@ -1734,11 +1757,11 @@ proceeds as follows:
       Otherwise, :t:`type unification` fails.
 
 #. :dp:`fls_Hb95CPyUpCmc`
-   Otherwise, if one :t:`type` ``T`` is an :t:`floating-point type variable`,
+   Otherwise, if one :t:`type` ``T`` is a :t:`floating-point type variable`,
    behavior depends on the other :t:`type` ``U``:
 
    #. :dp:`fls_jEZVWlfVPevb`
-      If ``U`` is an :t:`floating-point type` or an
+      If ``U`` is a :t:`floating-point type` or an
       :t:`floating-point type variable`, the :t:`floating-point type variable`
       ``T`` is assigned :t:`type` ``U``.
 
@@ -1987,6 +2010,11 @@ occur when:
 * :dp:`fls_sf0c3fbx8z57`
   The source :t:`type` is the :t:`never type` and the target :t:`type` is any
   :t:`type`.
+
+* :dp:`fls_SYnFJBhi0IWj`
+  The source :t:`type` is a :t:`trait object type` and the target :t:`type` is a
+  :t:`trait object type` with the same :t:`[trait bound]s` and additional
+  :t:`[auto trait]s`.
 
 :dp:`fls_iiiu2q7pym4p`
 An :t:`unsized coercion` is a :t:`type coercion` that converts a :t:`sized type`
@@ -3015,7 +3043,7 @@ A :t:`trait` is :t:`invariant` in all inputs, including the :c:`Self` parameter.
 
 :dp:`fls_abn5ycx11zpm`
 The :t:`variance` of a :t:`generic parameter` of an :t:`abstract data type` or
-an :t:`tuple type` is determined as follows:
+a :t:`tuple type` is determined as follows:
 
 #. :dp:`fls_hvfyog9ygn6q`
    For each :t:`generic parameter` ``G``:

@@ -106,7 +106,7 @@ adjusted call operand
 
 :dp:`fls_mchqbc64iu0u`
 An :dt:`adjusted call operand` is a :t:`call operand` with possible
-:t:`auto dereferencing` adjustments.
+:t:`auto-dereferencing` adjustments.
 
 .. _fls_j775guurkgo4:
 
@@ -455,6 +455,15 @@ associated trait function
 An :dt:`associated trait function` is an :t:`associated function` that appears
 within a :t:`trait`.
 
+.. _fls_fufF4UmzLg5G:
+
+associated trait implementation function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_bzdXloUGlVSC`
+An :dt:`associated trait implementation function` is an :t:`associated function`
+that appears within a :t:`trait implementation`.
+
 .. _fls_47xtji9Pk8Lw:
 
 associated trait implementation item
@@ -646,7 +655,7 @@ binary crate
 ^^^^^^^^^^^^
 
 :dp:`fls_8gfe7hajxkd7`
-A :dt:`binary crate` is a :t:`crate` that contains a :t:`main function`.
+A :dt:`binary crate` is a :t:`crate` whose :t:`crate type` is ``bin``.
 
 .. _fls_or4o65fyt28y:
 
@@ -687,6 +696,15 @@ binding argument
 :dp:`fls_9lzcasl4tw7k`
 A :dt:`binding argument` is a :t:`generic argument` that supplies the :t:`type`
 of an :t:`associated trait type`.
+
+.. _fls_t2cit5QOte8U:
+
+binding bound argument
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_D3i3n4RIReCA`
+A :dt:`binding bound argument` is a :t:`generic argument` that further imposes
+:t:`[bound]s` on an :t:`associated trait type`.
 
 .. _fls_bv1k866tai6j:
 
@@ -1026,6 +1044,18 @@ C signed int type
 :dp:`fls_8QIcvapJehqY`
 :dt:`C signed int type` is the `signed int` :t:`type` of the :t:`C` language.
 
+.. _fls_roz4WXH5JZFj:
+
+c string literal
+^^^^^^^^^^^^^^^^
+
+:dp:`fls_g3NHtaOhTB7g`
+A :dt:`c string literal` is a :t:`literal` that consists of multiple characters
+with an implicit 0x00 byte appended to it.
+
+:dp:`fls_FZ6QSpjmVme5`
+See :s:`CStringLiteral`.
+
 .. _fls_Egfa8tdbqllA:
 
 Call conformance
@@ -1312,6 +1342,16 @@ to either ``true`` or ``false``, and controls :t:`conditional compilation`.
 :dp:`fls_99ioki0M64fD`
 See :s:`ConfigurationPredicate`.
 
+.. _fls_vuBjK3kdImTn:
+
+const block expression
+^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_5ApoJzRSTZGH`
+A :dt:`const block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``const`` and encapsulates behavior which is evaluated
+statically.
+
 .. _fls_yw57di94gwpf:
 
 constant
@@ -1535,6 +1575,16 @@ crate root module
 :dp:`fls_oo4nmqv78wno`
 A :dt:`crate root module` is the root of the nested :t:`module` tree of a
 :t:`crate`.
+
+.. _fls_lVpE4uFDsXH4:
+
+crate type
+^^^^^^^^^^
+
+:dp:`fls_eaxsgPMFNH7f`
+The :dt:`crate type` of a :t:`crate` is the value of the :t:`attribute`
+``crate_type`` of a :t:`crate` or the value of ``--crate-type`` flag passed to
+the tool compiling the :t:`crate`.
 
 .. _fls_76cj65bptdpn:
 
@@ -3700,8 +3750,8 @@ library crate
 ^^^^^^^^^^^^^
 
 :dp:`fls_3m8lg4mdc2x0`
-A :dt:`library crate` is either a :t:`crate` without a :t:`main function` or a
-:t:`crate` subject to :t:`attribute` :c:`no_main`.
+A :dt:`library crate` is a :t:`crate` whose :t:`crate type` is ``lib``, ``rlib``,
+``staticlib``, ``dylib``, or ``cdylib``.
 
 .. _fls_vdhaa61g6kah:
 
@@ -4037,14 +4087,14 @@ macro transcription
 :dt:`Macro transcription` is the process of producing the expansion of a
 :t:`declarative macro`.
 
-.. _fls_dz192n9muwpg:
+.. _fls_MJ1YWiOpxAa8:
 
-main function
-^^^^^^^^^^^^^
+main function signature
+^^^^^^^^^^^^^^^^^^^^^^^
 
-:dp:`fls_au3ovrkenr59`
-A :dt:`main function` is a :t:`function` that acts as an entry point into
-a program.
+:dp:`fls_QijObGZEIykU`
+A :dt:`main function signature` is a :t:`function signature` subject to specific
+restrictions.
 
 .. _fls_fizf1byuspv2:
 
@@ -4537,7 +4587,19 @@ numeric literal
 A :dt:`numeric literal` is a :t:`literal` that denotes a number.
 
 :dp:`fls_swue4tma9fmf`
-See ``NumericLiteral.``
+See :s:`NumericLiteral`.
+
+.. _fls_CmvuNXmowCz8:
+
+numeric literal pattern
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_azqQ3JxD5Lt7`
+A :dt:`numeric literal pattern` is a :t:`pattern` that matches a :t:`numeric
+literal`.
+
+:dp:`fls_QYDZm7pKy1nW`
+See :s:`LiteralPattern`.
 
 .. _fls_rayjriyofmpa:
 
@@ -5004,6 +5066,14 @@ primitive representation
 :dt:`Primitive representation` is the :t:`type representation` of
 :t:`[integer type]s`.
 
+.. _fls_mk3sa7OvtJvB:
+
+principal trait
+^^^^^^^^^^^^^^^
+
+:dp:`fls_YtYOHoPaMPFX`
+The :dt:`principal trait` of :t:`trait object type` is its first :t:`trait bound`.
+
 .. _fls_v1u1mevpj0kj:
 
 private visibility
@@ -5022,7 +5092,7 @@ proc-macro crate
 .. _fls_AjjdLZWiL9Tq:
 
 :dp:`fls_DfTszT1PjV7o`
-A :dt:`proc-macro crate` is a :t:`crate` that contains :t:`[procedural macro]s`.
+A :dt:`proc-macro crate` is a :t:`crate` whose :t:`crate type` is ``proc-macro``.
 
 .. _fls_sp5wdsxwmxf:
 
@@ -5032,6 +5102,15 @@ procedural macro
 :dp:`fls_u4utpx4zgund`
 A :dt:`procedural macro` is a :t:`macro` that encapsulates syntactic
 transformations in a :t:`function`.
+
+.. _fls_SIFecOZqloyx:
+
+program entry point
+^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_9m37hN9zgEQf`
+A :dt:`program entry point` is a :t:`function` that is invoked at the start of
+a Rust program.
 
 .. _fls_v2rjlovqsdyr:
 
@@ -5155,7 +5234,7 @@ A :dt:`range pattern` is a :t:`pattern` that matches :t:`[value]s` which fall
 within a range.
 
 :dp:`fls_r36uf3y2denr`
-See ``RangePattern.``
+See ``RangePattern``.
 
 .. _fls_3ls9xlgt8ei1:
 
@@ -5277,7 +5356,19 @@ A :dt:`raw byte string literal` is a :t:`simple byte string literal` that does
 not recognize :t:`[escaped character]s`.
 
 :dp:`fls_5x71i3ay3na2`
-See ``RawByteStringLiteral.``
+See :s:`RawByteStringLiteral`.
+
+.. _fls_yGGvg3e0nPOh:
+
+raw c string literal
+^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qhWBzqoYZL0e`
+A :dt:`raw c string literal` is a :t:`simple c string literal` that does not
+recognize :t:`[escaped character]s`.
+
+:dp:`fls_WpFJyq6q4k6E`
+See :s:`RawCStringLiteral`.
 
 .. _fls_uv4dyt4gi32x:
 
@@ -6014,6 +6105,19 @@ of multiple :s:`[AsciiCharacter]s`.
 
 :dp:`fls_OfI70zK68TnQ`
 See :s:`SimpleByteStringLiteral`.
+
+.. _fls_fx2hhB0HHSUG:
+
+simple c string literal
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qoHXrmds9SgI`
+A :dt:`simple c string literal` is any :t:`Unicode` character except characters
+0x0D (carriage return), 0x22 (quotation mark), 0x5C (reverse solidus) and 0x00
+(null byte).
+
+:dp:`fls_ggm5FNUqg9EY`
+See :s:`SimpleCStringLiteral`.
 
 .. _fls_6mcm7xdcyn40:
 

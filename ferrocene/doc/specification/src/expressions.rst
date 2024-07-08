@@ -20,6 +20,7 @@ Expressions
        OuterAttributeOrDoc* (
            AsyncBlockExpression
          | BlockExpression
+         | ConstBlockExpression
          | IfExpression
          | IfLetExpression
          | LoopExpression
@@ -315,6 +316,9 @@ A :t:`constant context` is a :t:`construct` that requires a
 
 * :dp:`fls_ib8p7dfwddx2`
   The :t:`static initializer` of a :t:`static`.
+
+* :dp:`fls_ucFupTeCyylb`
+  The :t:`block expression` of a :t:`const block expression`.
 
 :dp:`fls_ox6sgl9n43g2`
 It is a static error to create a :t:`mutable reference` in a
@@ -685,13 +689,13 @@ The :t:`type` of a :t:`block expression` is determined as follows:
 * :dp:`fls_ltEygvWDtHXE`
   If the :t:`block expression` contains at least one :t:`break expression` and
   has a :t:`tail expression`, then the :t:`type` is the :t:`unified type` of
-  the :t:`break types` of all :t:`[break expression]s` and the :t:`type` of the
+  the :t:`[break type]s` of all :t:`[break expression]s` and the :t:`type` of the
   :t:`tail expression`.
 
 * :dp:`fls_97v4fnekrRXI`
   Otherwise, if the :t:`block expression` contains at least one
   :t:`break expression`, then the :t:`type` is the :t:`unified type` of the
-  :t:`break types` of all :t:`[break expression]s`.
+  :t:`[break type]s` of all :t:`[break expression]s`.
 
 * :dp:`fls_ob76y2ymdd27`
   Otherwise, if the :t:`block expression` has a :t:`tail expression`, then the
@@ -781,6 +785,48 @@ the :t:`[capture target]s` of the :t:`async block expression`.
 .. code-block:: rust
 
    async {
+       42
+   }
+
+.. _fls_G59PiNQkVUnQ:
+
+Const Blocks
+~~~~~~~~~~~~
+
+.. rubric:: Syntax
+
+.. syntax::
+
+   ConstBlockExpression ::=
+       $$const$$ BlockExpression
+
+.. rubric:: Legality Rules
+
+:dp:`fls_0lcunL4bo8ka`
+A :t:`const block expression` is a :t:`block expression` that is specified
+with :t:`keyword` ``const`` and encapsulates behavior which is evaluated
+statically.
+
+:dp:`fls_veEGzEbpT4ny`
+An :t:`const block expression` denotes a new :t:`control flow boundary`.
+
+:dp:`fls_PiUS1hF3dv9U`
+The :t:`block expression` of a :t:`const block expression` shall be a
+:t:`constant expression`.
+
+:dp:`fls_wuwb0SnpP6Zu`
+The :t:`type` of a :t:`const block expression` is the :t:`type` of the
+containing :t:`block expression`.
+
+:dp:`fls_2i7TD7VoQk4B`
+The :t:`value` of a :t:`const block expression` is the :t:`value` of the
+contained :t:`block expression`.
+
+.. rubric:: Examples
+
+.. code-block:: rust
+
+   const {
        42
    }
 
@@ -2853,7 +2899,7 @@ Indexing Expressions
 .. rubric:: Legality Rules
 
 :dp:`fls_X9kdEAPTqsAe`
-A :t:`indexable type` is a :t:`type` that implements the
+An :t:`indexable type` is a :t:`type` that implements the
 :std:`core::ops::Index` :t:`trait`.
 
 :dp:`fls_42ijvuqqqlvh`
@@ -3035,8 +3081,8 @@ A :t:`constructee` indicates the :t:`enum variant`, :t:`struct`, or :t:`union`
 whose value is being constructed by a :t:`struct expression`.
 
 :dp:`fls_uib1ml41mfrn`
-A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`,
-a :t:`struct value`, or a :t:`union value` to be used as a base for
+A :t:`base initializer` is a :t:`construct` that specifies an :t:`enum value`, or
+a :t:`struct value` to be used as a base for
 construction in a :t:`struct expression`.
 
 :dp:`fls_gfu267bpl9ql`
@@ -3747,10 +3793,10 @@ The :t:`type` of a :t:`subject expression` shall implement the
 The :t:`expected type` of the :t:`pattern` is the :t:`associated type` :std:`core::iter::IntoIterator::Item` of the :t:`subject expression`'s :std:`core::iter::IntoIterator` implementation.
 
 :dp:`fls_bmTjhKdpfgCB`
-The :t:`type` of an :t:`for loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`for loop expression` is the :t:`unit type`.
 
 :dp:`fls_FkxLf91WKiIo`
-The :t:`value` of an :t:`for loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`for loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3815,7 +3861,7 @@ An :t:`infinite loop expression` is a :t:`loop expression` that continues to
 evaluate its :t:`loop body` indefinitely.
 
 :dp:`fls_b314wjbv0zwe`
-The :t:`type` of a :t:`infinite loop expression` is determined as follows:
+The :t:`type` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_rpedapxnv8w3`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,
@@ -3827,7 +3873,7 @@ The :t:`type` of a :t:`infinite loop expression` is determined as follows:
   :t:`[break type]s` of all :t:`[break expression]s`.
 
 :dp:`fls_q3qpcf2fz7h`
-The :t:`value` of a :t:`infinite loop expression` is determined as follows:
+The :t:`value` of an :t:`infinite loop expression` is determined as follows:
 
 * :dp:`fls_2ulbzmuuny3g`
   If the :t:`infinite loop expression` does not contain a :t:`break expression`,
@@ -3870,7 +3916,7 @@ While Loops
        $$while$$ IterationExpression LoopBody
 
    IterationExpression ::=
-       Expression
+       SubjectExpression
 
 .. rubric:: Legality Rules
 
@@ -3887,10 +3933,10 @@ of a :t:`while loop expression`.
 The :t:`type` of an :t:`iteration expression` shall be :t:`type` :c:`bool`.
 
 :dp:`fls_P8iyTN6KZCVA`
-The :t:`type` of an :t:`while loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while loop expression` is the :t:`unit type`.
 
 :dp:`fls_s6hRa5spz64w`
-The :t:`value` of an :t:`while loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 
@@ -3943,10 +3989,10 @@ a :t:`value` that can be matched against its :t:`pattern`.
 The :t:`expected type` of the :t:`pattern` is the :t:`type` of the :t:`subject let expression`.
 
 :dp:`fls_gTfSLePwHTES`
-The :t:`type` of an :t:`while let loop expression` is the :t:`unit type`.
+The :t:`type` of a :t:`while let loop expression` is the :t:`unit type`.
 
 :dp:`fls_pTq4LIGIoAtN`
-The :t:`value` of an :t:`while let loop expression` is the :t:`unit value`.
+The :t:`value` of a :t:`while let loop expression` is the :t:`unit value`.
 
 .. rubric:: Dynamic Semantics
 

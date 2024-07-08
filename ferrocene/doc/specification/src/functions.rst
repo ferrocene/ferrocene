@@ -76,10 +76,10 @@ A :t:`function` shall not specify a :t:`self parameter` unless it is an
 :t:`associated function`.
 
 :dp:`fls_AAYJDCNMJgTq`
-The :t:`type` of a :t:`parameter` is determined as follows:
+The :t:`type` of a :t:`function parameter` is determined as follows:
 
 * :dp:`fls_PGtp39f6gJwU`
-  If the :t:`parameter` is a :t:`self parameter` without a :s:`TypeSpecification`:
+  If the :t:`function parameter` is a :t:`self parameter` without a :s:`TypeSpecification`:
 
   * :dp:`fls_yZ2yIXxmy2ri`
     And the :t:`self parameter` has token ``&`` and :t:`keyword` ``mut``, then the :t:`type` is ``&mut Self``.
@@ -175,34 +175,6 @@ An :t:`unsafe function` is a :t:`function` subject to :t:`keyword` ``unsafe``.
 
 :dp:`fls_5hn8fkf7rcvz`
 The invocation of an :t:`unsafe function` shall require :t:`unsafe context`.
-
-:dp:`fls_nw49shkqx40b`
-A :t:`main function` is a :t:`function` that acts as an entry point into a
-program. A :t:`main function` is subject to the following restrictions:
-
-* :dp:`fls_o4fxok23134r`
-  It lacks :t:`[function qualifier]s` ``async`` and ``unsafe``,
-
-* :dp:`fls_bk755pvc1l53`
-  Its :t:`ABI` is Rust,
-
-* :dp:`fls_5j2vbkt2hitj`
-  Its :t:`name` is the word ``main``,
-
-* :dp:`fls_a3je4wc53bmo`
-  It lacks :t:`[generic parameter]s`,
-
-* :dp:`fls_w8q15zp7kyl0`
-  It lacks :t:`[function parameter]s`,
-
-* :dp:`fls_4psnfphsgdek`
-  It lacks a :t:`return type`,
-
-* :dp:`fls_m7xfrhqif74`
-  It lacks a :t:`where clause`,
-
-* :dp:`fls_qq9fzrw4aykd`
-  It has a :t:`function body`.
 
 .. rubric:: Examples
 

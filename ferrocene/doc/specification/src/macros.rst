@@ -421,7 +421,7 @@ the :t:`token` stream produced from the related :s:`EnumDeclaration`,
 
 :dp:`fls_H5ipqqlH3pJh`
 A :t:`derive macro` adds all its declared :t:`[derive helper attribute]s` into
-the :t:`derive helper attribute scope` of the :t:`abstract data type` the
+the :t:`derive helper attribute` scope of the :t:`abstract data type` the
 :t:`attribute` is attached to.
 
 :dp:`fls_mobky5ck1mi`
@@ -648,8 +648,8 @@ Macro Expansion
 
    #. :dp:`fls_tu6kmwm4v9nj`
       If the :t:`macro invocation` appears as part of a
-      :t:`pattern-without-range`, the output is required to constitute zero or
-      more :t:`[pattern]s`.
+      :t:`pattern-without-range`, the output is required to constitute a
+      :t:`[pattern]`.
 
    #. :dp:`fls_3zn4dz19nyvq`
       If the :t:`macro invocation` appears as part of a :t:`statement`, the

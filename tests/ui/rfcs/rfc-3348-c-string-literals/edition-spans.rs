@@ -14,3 +14,9 @@ const _: () = {
 };
 
 fn main() {}
+
+// ferrocene-annotations: fls_u1ghcy16emve
+// C String Literals
+//
+// ferrocene-annotations: fls_p090c5otnelw
+// Simple C String Literals

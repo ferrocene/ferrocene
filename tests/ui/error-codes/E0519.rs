@@ -6,3 +6,6 @@
 #![crate_type = "lib"]
 
 extern crate crateresolve1; //~ ERROR E0519
+
+// ferrocene-annotations: fls_sun645voqex6
+// Attribute crate_name

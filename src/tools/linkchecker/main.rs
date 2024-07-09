@@ -58,7 +58,7 @@ const LINKCHECK_EXCEPTIONS: &[(&str, &[&str])] = &[
     //
     // The technical report is missing most of the time, as it's only included in stable releases.
     // This is fine though, because that section is hidden by the build system with `display: none`
-    // when the link is missing. We thus ignore it to avoid linkchecker complain.
+    // when the link is missing. We thus ignore it to avoid a linkchecker complaint.
     ("index.html", &["qualification/technical-report.pdf"]),
 ];
 

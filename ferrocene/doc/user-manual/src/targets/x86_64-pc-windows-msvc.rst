@@ -29,16 +29,16 @@ This target uses Microsoft's ``Link.exe`` linker. It can be obtained from
 Install one of:
 
 * The Visual Studio edition best suited for you, or
-* `Build Tools for Visual Studio 2022` under `Tools for Visual Studio`
+* ``Build Tools for Visual Studio 2022`` under ``Tools for Visual Studio``
 
-`Build Tools for Visual Studio 2022`` can be installed via ``winget``:
+``Build Tools for Visual Studio 2022`` can be installed via ``winget``:
 
 .. code-block::
 
     winget install --id=Microsoft.VisualStudio.2022.BuildTools  -e
 
-If prompted for which components to enable, enable `Desktop
-development with C++`, or select all of the following individual components:
+If prompted for which components to enable, enable ``Desktop
+development with C++``, or select all of the following individual components:
 
 * The most recent "C++ x64/x86 build tools"
 * The most recent "Windows 11 SDK"

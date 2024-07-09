@@ -149,3 +149,6 @@ fn foo_from<'life, 'borrow, 'compact, 'reborrow>(
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

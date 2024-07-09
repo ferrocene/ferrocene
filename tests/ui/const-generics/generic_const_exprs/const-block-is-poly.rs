@@ -9,3 +9,6 @@ fn foo<T>() {
 fn main() {
     foo::<i32>();
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

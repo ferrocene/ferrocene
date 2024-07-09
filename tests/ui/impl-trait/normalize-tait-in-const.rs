@@ -32,3 +32,6 @@ const BAR: () = {
 };
 
 fn main() {}
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

@@ -22,3 +22,6 @@ fn bar<T: ?Sized>() -> fn(&T) -> &'static str {
 fn main() {
     assert_eq!("i32", bar::<dyn Trait>()(&1i32));
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

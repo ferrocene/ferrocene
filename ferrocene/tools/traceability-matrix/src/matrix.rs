@@ -11,14 +11,12 @@ use crate::documentations::{CliOption, Documentation, Section};
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
     singular: "section",
     plural: "sections",
-    hide_in_annotation_mode: false,
     include_title_when_copying: true,
 };
 
 pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
     singular: "command line option",
     plural: "command line options",
-    hide_in_annotation_mode: false,
     include_title_when_copying: false,
 };
 
@@ -265,7 +263,6 @@ impl Element {
 pub(crate) struct ElementKind {
     pub(crate) singular: &'static str,
     pub(crate) plural: &'static str,
-    pub(crate) hide_in_annotation_mode: bool,
     pub(crate) include_title_when_copying: bool,
 }
 

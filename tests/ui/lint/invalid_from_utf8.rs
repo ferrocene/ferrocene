@@ -1,7 +1,6 @@
 //@ check-pass
 
 #![feature(concat_bytes)]
-
 #![warn(invalid_from_utf8_unchecked)]
 #![warn(invalid_from_utf8)]
 
@@ -117,3 +116,6 @@ pub fn from_utf8_with_indirections() {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

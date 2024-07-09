@@ -19,3 +19,6 @@ fn main() {
         //FIXME ~^ ERROR can't drop
     }
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

@@ -99,3 +99,6 @@ fn serde() {
     struct Thing;
     impl Serde for &Thing {}
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

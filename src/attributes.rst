@@ -1462,7 +1462,7 @@ Attribute ``collapse_debuginfo``
    CollapseDebuginfoContent ::=
        $$collapse_debuginfo$$  $$($$ CollapseDebuginfoKind $$)$$
    CollapseDebuginfoKind ::=
-       $$no
+       $$no$$
      | $$external$$
      | $$yes$$
 

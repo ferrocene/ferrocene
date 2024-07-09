@@ -107,3 +107,6 @@ macro_rules! finally {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

@@ -120,3 +120,6 @@ fn main() {
     }
     std::process::exit(ret); // #loc_exit
 }
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

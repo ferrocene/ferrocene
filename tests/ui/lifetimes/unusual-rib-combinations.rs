@@ -28,6 +28,3 @@ struct Bar<const N: &'a (dyn for<'a> Foo<'a>)>;
 //~^ ERROR the type of const parameters must not depend on other generic parameters
 
 fn main() {}
-
-// ferrocene-annotations: fls_g59pinqkvunq
-// Const Blocks

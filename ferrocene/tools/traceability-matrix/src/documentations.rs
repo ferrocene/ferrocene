@@ -40,9 +40,7 @@ pub(crate) struct Section {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct Paragraph {
-    pub(crate) id: String,
-    pub(crate) number: String,
-    pub(crate) link: String,
+    // We don't care about the fields in the paragraph.
 }
 
 #[derive(Debug, Deserialize)]

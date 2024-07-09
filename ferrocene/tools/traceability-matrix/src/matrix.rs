@@ -6,26 +6,17 @@ use std::fmt::Debug;
 use std::ops::Deref;
 
 use crate::annotations::{AnnotatedFile, Annotations};
-use crate::documentations::{CliOption, Documentation, Paragraph, Section};
+use crate::documentations::{CliOption, Documentation, Section};
 
 pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
-    singular: "section",
-    plural: "sections",
-    hide_in_annotation_mode: false,
+    singular: "specification section",
+    plural: "specification sections",
     include_title_when_copying: true,
-};
-
-pub(crate) const ELEMENT_KIND_PARAGRAPH: ElementKind = ElementKind {
-    singular: "paragraph",
-    plural: "paragraphs",
-    hide_in_annotation_mode: true,
-    include_title_when_copying: false,
 };
 
 pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
     singular: "command line option",
     plural: "command line options",
-    hide_in_annotation_mode: false,
     include_title_when_copying: false,
 };
 
@@ -34,7 +25,6 @@ pub(crate) fn prepare(
     annotations: &Annotations,
 ) -> anyhow::Result<TraceabilityMatrix> {
     let mut matrix = TraceabilityMatrix {
-        paragraphs: MatrixAnalysis::new(&ELEMENT_KIND_PARAGRAPH),
         sections: MatrixAnalysis::new(&ELEMENT_KIND_SECTION),
         cli_options: MatrixAnalysis::new(&ELEMENT_KIND_CLI_OPTION),
         unknown_annotations: Vec::new(),
@@ -65,14 +55,13 @@ pub(crate) fn prepare(
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct TraceabilityMatrix {
     pub(crate) sections: MatrixAnalysis,
-    pub(crate) paragraphs: MatrixAnalysis,
     pub(crate) cli_options: MatrixAnalysis,
     pub(crate) unknown_annotations: Vec<UnknownAnnotation>,
 }
 
 impl TraceabilityMatrix {
     pub(crate) fn analyses_by_kind(&self) -> impl Iterator<Item = &MatrixAnalysis> {
-        [&self.sections, &self.paragraphs, &self.cli_options].into_iter()
+        [&self.sections, &self.cli_options].into_iter()
     }
 
     fn analyze_document<'a>(
@@ -100,27 +89,11 @@ impl TraceabilityMatrix {
                 if page.informational || section.informational {
                     extra_section_tests.push(LinkTest::Informational);
                 }
-                let has_annotations = self.sections.add(
+                self.sections.add(
                     annotations,
                     &extra_section_tests,
                     Element::section(&matrix_page, section, to_url(&section.link)),
                 );
-
-                let extra_paragraph_tests = has_annotations
-                    .then(|| LinkTest::InheritFromSection {
-                        section_id: section.id.clone(),
-                        section_number: ElementNumber(section.number.clone()),
-                    })
-                    .map_or_else(Vec::new, |lt| vec![lt]);
-
-                for paragraph in &section.paragraphs {
-                    seen_ids.insert(&paragraph.id);
-                    self.paragraphs.add(
-                        annotations,
-                        &extra_paragraph_tests,
-                        Element::paragraph(&matrix_page, paragraph, to_url(&paragraph.link)),
-                    );
-                }
             }
 
             for option in &page.options {
@@ -189,6 +162,10 @@ impl MatrixAnalysis {
             true
         }
     }
+
+    pub(crate) fn informational_count(&self) -> usize {
+        self.linked.iter().filter(|l| l.informational()).count()
+    }
 }
 
 fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&String>
@@ -214,8 +191,8 @@ impl Deref for Link {
 }
 
 impl Link {
-    pub(crate) fn hide_in_annotation_mode(&self) -> bool {
-        self.tests.iter().all(|t| t.hide_in_annotation_mode())
+    pub(crate) fn informational(&self) -> bool {
+        self.tests.iter().any(|t| matches!(t, LinkTest::Informational))
     }
 }
 
@@ -224,19 +201,9 @@ pub(crate) enum LinkTest {
     File(AnnotatedFile),
     NoParagraphsInSection,
     Informational,
-    InheritFromSection { section_id: String, section_number: ElementNumber },
 }
 
 impl LinkTest {
-    fn hide_in_annotation_mode(&self) -> bool {
-        match self {
-            LinkTest::File(_) => false,
-            LinkTest::NoParagraphsInSection => true,
-            LinkTest::Informational => true,
-            LinkTest::InheritFromSection { .. } => false,
-        }
-    }
-
     fn unwrap_file(&self) -> Option<&AnnotatedFile> {
         match self {
             LinkTest::File(annotated) => Some(annotated),
@@ -276,17 +243,6 @@ impl Element {
         }
     }
 
-    fn paragraph(matrix_page: &Page, paragraph: &Paragraph, link: String) -> Self {
-        Self {
-            kind: &ELEMENT_KIND_PARAGRAPH,
-            id: paragraph.id.clone(),
-            number: Some(ElementNumber(paragraph.number.clone())),
-            title: None,
-            link,
-            page: matrix_page.clone(),
-        }
-    }
-
     fn section(matrix_page: &Page, section: &Section, link: String) -> Self {
         Self {
             kind: &ELEMENT_KIND_SECTION,
@@ -303,7 +259,6 @@ impl Element {
 pub(crate) struct ElementKind {
     pub(crate) singular: &'static str,
     pub(crate) plural: &'static str,
-    pub(crate) hide_in_annotation_mode: bool,
     pub(crate) include_title_when_copying: bool,
 }
 
@@ -378,7 +333,7 @@ mod tests {
     use std::path::Path;
 
     use crate::annotations::AnnotationSource;
-    use crate::documentations::{Document, TraceabilityIds};
+    use crate::documentations::{Document, Paragraph, TraceabilityIds};
 
     #[test]
     fn test_prepare() -> anyhow::Result<()> {
@@ -398,11 +353,7 @@ mod tests {
                                 title: "Example section".into(),
                                 link: "example.html#example-section".into(),
                                 informational: false,
-                                paragraphs: vec![Paragraph {
-                                    id: "fls_02".into(),
-                                    number: "12:4".into(),
-                                    link: "example.html#fls_02".into(),
-                                }],
+                                paragraphs: vec![Paragraph {}],
                             },
                             Section {
                                 id: "fls_03".into(),
@@ -410,18 +361,7 @@ mod tests {
                                 title: "Example subsection".into(),
                                 link: "example.html#example-subsection".into(),
                                 informational: false,
-                                paragraphs: vec![
-                                    Paragraph {
-                                        id: "fls_04".into(),
-                                        number: "12.2:3".into(),
-                                        link: "example.html#fls_04".into(),
-                                    },
-                                    Paragraph {
-                                        id: "fls_04b".into(),
-                                        number: "12.2:4".into(),
-                                        link: "example.html#fls_04b".into(),
-                                    },
-                                ],
+                                paragraphs: vec![Paragraph {}, Paragraph {}],
                             },
                             Section {
                                 id: "fls_05".into(),
@@ -437,11 +377,7 @@ mod tests {
                                 title: "Example informational section".into(),
                                 link: "example.html#example-informational-section".into(),
                                 informational: true,
-                                paragraphs: vec![Paragraph {
-                                    id: "fls_09".into(),
-                                    number: "12.2.2:1".into(),
-                                    link: "example.html#fls_09".into(),
-                                }],
+                                paragraphs: vec![Paragraph {}],
                             },
                         ],
                         options: vec![CliOption {
@@ -461,11 +397,7 @@ mod tests {
                             title: "Example information".into(),
                             link: "information.html#example-information".into(),
                             informational: false,
-                            paragraphs: vec![Paragraph {
-                                id: "fls_07".into(),
-                                number: "A.1:1".into(),
-                                link: "information.html#fls_07".into(),
-                            }],
+                            paragraphs: vec![Paragraph {}],
                         }],
                         options: vec![],
                     },
@@ -476,13 +408,6 @@ mod tests {
         let annotations = Annotations {
             ids: BTreeMap::from([
                 ("fls_03".into(), BTreeSet::from([test_itself("/example/foobar.rs")])),
-                (
-                    "fls_04".into(),
-                    BTreeSet::from([
-                        test_itself("/example/foo.rs"),
-                        test_itself("/example/bar.rs"),
-                    ]),
-                ),
                 (
                     "fls_99".into(),
                     BTreeSet::from([
@@ -501,104 +426,6 @@ mod tests {
 
         assert_eq!(
             TraceabilityMatrix {
-                paragraphs: MatrixAnalysis {
-                    kind: &ELEMENT_KIND_PARAGRAPH,
-                    linked: BTreeSet::from([
-                        Link {
-                            element: Element {
-                                kind: &ELEMENT_KIND_PARAGRAPH,
-                                id: "fls_04".into(),
-                                number: Some("12.2:3".into()),
-                                title: None,
-                                link: "../fls/example.html#fls_04".into(),
-                                page: Page {
-                                    documentation: "FLS".into(),
-                                    name: "Example document".into(),
-                                    link: "../fls/example.html".into()
-                                },
-                            },
-                            tests: vec![
-                                link_test_itself("/example/bar.rs"),
-                                link_test_itself("/example/foo.rs"),
-                                LinkTest::InheritFromSection {
-                                    section_id: "fls_03".into(),
-                                    section_number: "12.2".into()
-                                },
-                            ],
-                            untested_targets: Default::default(),
-                        },
-                        Link {
-                            element: Element {
-                                kind: &ELEMENT_KIND_PARAGRAPH,
-                                id: "fls_04b".into(),
-                                number: Some("12.2:4".into()),
-                                title: None,
-                                link: "../fls/example.html#fls_04b".into(),
-                                page: Page {
-                                    documentation: "FLS".into(),
-                                    name: "Example document".into(),
-                                    link: "../fls/example.html".into()
-                                },
-                            },
-                            tests: vec![LinkTest::InheritFromSection {
-                                section_id: "fls_03".into(),
-                                section_number: "12.2".into()
-                            }],
-                            untested_targets: Default::default(),
-                        },
-                        Link {
-                            element: Element {
-                                kind: &ELEMENT_KIND_PARAGRAPH,
-                                id: "fls_09".into(),
-                                number: Some("12.2.2:1".into()),
-                                title: None,
-                                link: "../fls/example.html#fls_09".into(),
-                                page: Page {
-                                    documentation: "FLS".into(),
-                                    name: "Example document".into(),
-                                    link: "../fls/example.html".into()
-                                }
-                            },
-                            tests: vec![LinkTest::InheritFromSection {
-                                section_id: "fls_08".into(),
-                                section_number: "12.2.2".into()
-                            }],
-                            untested_targets: Default::default(),
-                        },
-                        Link {
-                            element: Element {
-                                kind: &ELEMENT_KIND_PARAGRAPH,
-                                id: "fls_07".into(),
-                                number: Some("A.1:1".into()),
-                                title: None,
-                                link: "../fls/information.html#fls_07".into(),
-                                page: Page {
-                                    documentation: "FLS".into(),
-                                    name: "Information".into(),
-                                    link: "../fls/information.html".into(),
-                                },
-                            },
-                            tests: vec![LinkTest::InheritFromSection {
-                                section_id: "fls_06".into(),
-                                section_number: "A.1".into()
-                            }],
-                            untested_targets: Default::default(),
-                        },
-                    ]),
-                    unlinked: BTreeSet::from([Element {
-                        kind: &ELEMENT_KIND_PARAGRAPH,
-                        id: "fls_02".into(),
-                        number: Some("12:4".into()),
-                        title: None,
-                        link: "../fls/example.html#fls_02".into(),
-                        page: Page {
-                            documentation: "FLS".into(),
-                            name: "Example document".into(),
-                            link: "../fls/example.html".into()
-                        },
-                    }]),
-                    partially_linked: Default::default(),
-                },
                 sections: MatrixAnalysis {
                     kind: &ELEMENT_KIND_SECTION,
                     linked: BTreeSet::from([

@@ -11,6 +11,7 @@
     <body>
         <header>
             <h1>Traceability matrix report</h1>
+            <a href="../index.html">Go back to the documentation index</a>
         </header>
 
         {% if !considers_ignored_tests %}
@@ -21,19 +22,12 @@
         </div>
         {% endif %}
 
-        <label class="top-note">
-            <input type="checkbox" id="toggle-annotation-mode">
-            Enable section linking mode. This hides informational sections,
-            empty sections and all paragraphs. This also allows clicking on an
-            ID to copy the annotation.
-        </label>
-
         <table>
             <thead>
                 <tr>
                     <th colspan="2"></th>
                     {% for kind in summary[0].kinds %}
-                        <th colspan="3">{{ kind.kind.plural|capitalize }}</th>
+                        <th colspan="4">{{ kind.kind.plural|capitalize }}</th>
                     {% endfor %}
                 </tr>
                 <tr>
@@ -41,6 +35,7 @@
                     <th>Page</th>
                     {% for _ in summary[0].kinds %}
                         <th>Linked #</th>
+                        <th>Informational #</th>
                         <th>Total #</th>
                         <th>Completion</th>
                     {% endfor %}
@@ -60,9 +55,10 @@
                         </td>
                         {% for kind in row.kinds %}
                             {% if kind.total == 0 %}
-                                <td colspan="3"></td>
+                                <td colspan="4"></td>
                             {% else %}
                                 <td>{{ kind.linked }}</td>
+                                <td>{{ kind.informational }}</td>
                                 <td>{{ kind.total }}</td>
                                 <td>{{ kind.percentage|fmt("{:.2}") }}%</td>
                             {% endif %}
@@ -95,8 +91,10 @@
         {% endif %}
 
         {% for analysis in matrix.analyses_by_kind() %}
-            {% if analysis.kind.hide_in_annotation_mode %}<div class="hide-in-annotation-mode">{% endif %}
             <h2>All {{ analysis.kind.plural }}</h2>
+            {% if analysis.informational_count() > 0 %}
+                <p>{{ analysis.informational_count() }} informational {{ analysis.kind.plural }} are not included in this table.</p>
+            {% endif %}
             <table>
                 <thead>
                     <tr>
@@ -125,7 +123,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if analysis.kind.hide_in_annotation_mode %}</div>{% endif %}
         {% endfor %}
 
         {% if !ignored_tests.is_empty() %}
@@ -154,7 +151,8 @@
 </html>
 
 {%- macro row_with_tests(color, link) -%}
-    <tr id="{{ link.element.id }}" {% if link.hide_in_annotation_mode() %} class="hide-in-annotation-mode"{% endif %}>
+    {% if !link.informational() %}
+    <tr id="{{ link.element.id }}">
         <td><div class="circle {{ color }}"></div></td>
         <td>{% call page_link(link.element.page) %}</td>
         <td>{% call element_link(link.element) %}</td>
@@ -175,8 +173,6 @@
                     {% match test %}
                         {% when LinkTest::File with (file) %}
                             {% call file_link(file) %}
-                        {% when LinkTest::InheritFromSection with { section_id, section_number} %}
-                            inherited from <a href="#{{ section_id }}">section {{ section_number }}</a>
                         {% when LinkTest::Informational %}
                             informational
                         {% when LinkTest::NoParagraphsInSection %}
@@ -190,6 +186,7 @@
             {% endif %}
         </td>
     </tr>
+    {% endif %}
 {%- endmacro -%}
 
 {%- macro page_link(page) -%}

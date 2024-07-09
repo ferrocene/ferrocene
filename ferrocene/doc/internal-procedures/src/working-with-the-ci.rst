@@ -135,10 +135,6 @@ Using the CI ``config.toml``
 To create the ``config.toml`` used by the CI, set ``FERROCENE_HOST`` to your host triple,
 then run the ``configure.sh``:
 
-.. warning::
-
-   This will overwrite your existing ```config.toml``, consider backing it up.
-
 .. code-block:: bash
 
    CI=true FERROCENE_HOST=aarch64-unknown-linux-gnu ./ferrocene/ci/configure.sh 

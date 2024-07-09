@@ -23,9 +23,9 @@
 
         <label class="top-note">
             <input type="checkbox" id="toggle-annotation-mode">
-            Enable section linking mode. This hides informational sections,
-            empty sections and all paragraphs. This also allows clicking on an
-            ID to copy the annotation.
+            Enable section linking mode. This hides informational and empty
+            sections. This also allows clicking on an ID to copy the
+            annotation.
         </label>
 
         <table>
@@ -175,8 +175,6 @@
                     {% match test %}
                         {% when LinkTest::File with (file) %}
                             {% call file_link(file) %}
-                        {% when LinkTest::InheritFromSection with { section_id, section_number} %}
-                            inherited from <a href="#{{ section_id }}">section {{ section_number }}</a>
                         {% when LinkTest::Informational %}
                             informational
                         {% when LinkTest::NoParagraphsInSection %}

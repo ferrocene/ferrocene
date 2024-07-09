@@ -95,7 +95,6 @@
         {% endif %}
 
         {% for analysis in matrix.analyses_by_kind() %}
-            {% if analysis.kind.hide_in_annotation_mode %}<div class="hide-in-annotation-mode">{% endif %}
             <h2>All {{ analysis.kind.plural }}</h2>
             <table>
                 <thead>
@@ -125,7 +124,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% if analysis.kind.hide_in_annotation_mode %}</div>{% endif %}
         {% endfor %}
 
         {% if !ignored_tests.is_empty() %}

@@ -4,8 +4,11 @@
 
 # 3rd-party imports
 from docutils import nodes
+from sphinx.application import Sphinx
+from sphinx.config import Config
+from sphinx.environment import BuildEnvironment
+from sphinx.util import logging as sphinx_logging
 from sphinx.util.docutils import SphinxRole
-import sphinx
 import tomli
 
 
@@ -27,7 +30,14 @@ class TargetRole(SphinxRole):
         ], []
 
 
-def render_target_name(env, config, target, *, include_triple=False, location=None):
+def render_target_name(
+    env: BuildEnvironment,
+    config: Config,
+    target: str,
+    *,
+    include_triple=False,
+    location: str | None = None,
+):
     if target in env.ferrocene_target_names:
         inline = nodes.inline()
         inline += nodes.Text(env.ferrocene_target_names[target])
@@ -38,18 +48,18 @@ def render_target_name(env, config, target, *, include_triple=False, location=No
         return inline
     else:
         config = config["ferrocene_target_names_path"]
-        logger = sphinx.util.logging.getLogger(__name__)
+        logger = sphinx_logging.getLogger(__name__)
         logger.warning(f"missing target {target} in {config}", location=location)
         return nodes.problematic("", target)
 
 
-def load_target_names(app, env, _docnames):
+def load_target_names(app: Sphinx, env: BuildEnvironment, _docnames):
     with open(app.config["ferrocene_target_names_path"], "rb") as f:
         target_names = tomli.load(f)
     env.ferrocene_target_names = target_names
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.connect("env-before-read-docs", load_target_names)
     app.add_role("target", TargetRole())
     app.add_role("target-with-triple", TargetRole(include_triple=True))

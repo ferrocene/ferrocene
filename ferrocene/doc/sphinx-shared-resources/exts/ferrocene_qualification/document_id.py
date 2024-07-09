@@ -12,27 +12,30 @@
 
 
 # std imports
+from typing import Any
 import hashlib
 import os
 import struct
 
 # 3rd-party imports
 from docutils import nodes
+from sphinx.application import Sphinx
+from sphinx.environment import BuildEnvironment
 from sphinx.transforms import SphinxTransform
-import sphinx
+from sphinx.util import display as sphinx_display
 
 
 class Hasher:
     def __init__(self):
         self.state = hashlib.sha1()
 
-    def string(self, string):
+    def string(self, string: str):
         encoded = string.encode("utf-8")
 
         self.state.update(struct.pack("<Q", len(encoded)))
         self.state.update(encoded)
 
-    def node(self, node):
+    def node(self, node: nodes.Element):
         self.string(node.tagname)
 
         if isinstance(node, nodes.Text):
@@ -68,19 +71,21 @@ class HashDocument(SphinxTransform):
         self.env.ferrocene_document_ids[self.env.docname] = hasher.finalize()
 
 
-def env_purge_doc(app, env, docname):
+def env_purge_doc(_app: Sphinx, env: BuildEnvironment, docname: str):
     if not hasattr(env, "ferrocene_document_ids"):
         env.ferrocene_document_ids = {}
     if docname in env.ferrocene_document_ids:
         del env.ferrocene_document_ids[docname]
 
 
-def env_merge_info(app, env, docnames, other):
+def env_merge_info(
+    _app: Sphinx, env: BuildEnvironment, docnames: list[str], other: BuildEnvironment
+):
     for doc in docnames:
         env.ferrocene_document_ids[doc] = other.ferrocene_document_ids[doc]
 
 
-def env_updated(app, env):
+def env_updated(app: Sphinx, env: BuildEnvironment):
     hasher = Hasher()
     for document, hash in sorted(app.env.ferrocene_document_ids.items()):
         hasher.string(document)
@@ -97,24 +102,26 @@ def env_updated(app, env):
         return env.all_docs.keys()
 
 
-def html_page_context(app, pagename, templatename, context, doctree):
+def html_page_context(
+    app: Sphinx, _pagename, _templatename, context: dict[str, Any], _doctree
+):
     context["document_id"] = app.env.ferrocene_document_id
 
 
-def write_document_id(app):
-    with sphinx.util.display.progress_message("writing document id"):
+def write_document_id(app: Sphinx):
+    with sphinx_display.progress_message("writing document id"):
         with open(os.path.join(app.outdir, "document-id.txt"), "w") as f:
             f.write(f"{app.env.ferrocene_document_id}\n")
 
 
-def build_finished(app, exception):
+def build_finished(app: Sphinx, exception: Exception | None):
     if exception is not None:
         return
     if app.builder.name == "html":
         write_document_id(app)
 
 
-def setup(app):
+def setup(app: Sphinx):
     # We're not using an EnvCollector since it doesn't allow to set the
     # priority for the transform. Instead, our custom transform can set its
     # priority to 999. The downside is we have to connect events manually.

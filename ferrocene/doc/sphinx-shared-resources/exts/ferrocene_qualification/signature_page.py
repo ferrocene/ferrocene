@@ -3,23 +3,25 @@
 
 
 # std imports
+from typing import Any
 import datetime
 import json
 import os
 import shutil
 
 # 3rd-party imports
-import sphinx
+from sphinx.application import Sphinx
+from sphinx.util import display as sphinx_display
 import tomli
 
 
 class SignatureStatus:
-    def __init__(self, app):
+    def __init__(self, app: Sphinx):
         self.app = app
-        self.loaded_files = []
-        self.copiable_files = {}
-        self.context = {}
-        self.private_files = {}
+        self.loaded_files: list[str] = []
+        self.copiable_files: dict[str, str] = {}
+        self.context: dict[str, dict[str, Any]] = {}
+        self.private_files: dict[str, str] = {}
 
         if app.config.ferrocene_signature is None:
             self.state = "not_needed"
@@ -57,7 +59,7 @@ class SignatureStatus:
         except FileNotFoundError:
             self.state = "inconsistent"
 
-    def load_file(self, name, *, copy=False):
+    def load_file(self, name: str, *, copy=False):
         path = f"{self.app.srcdir}/../signature/{name}"
         self.loaded_files.append(path)
         if copy:
@@ -65,7 +67,7 @@ class SignatureStatus:
         with open(path) as f:
             return f.read()
 
-    def load_private_file(self, name, *, copy=False):
+    def load_private_file(self, name: str, *, copy=False):
         try:
             uuid = self.private_files[name]
         except KeyError:
@@ -77,7 +79,7 @@ class SignatureStatus:
             return f.read()
 
 
-def doctree_read(app, doctree):
+def doctree_read(app: Sphinx, _doctree):
     # We want to regenerate the signature/index.html page whenever the
     # signature files change.
     #
@@ -95,7 +97,7 @@ def doctree_read(app, doctree):
         app.env.note_dependency(file)
 
 
-def html_collect_pages(app):
+def html_collect_pages(app: Sphinx):
     # Generate the signature/index.html file.
     signature = SignatureStatus(app)
     if signature.state != "not_needed":
@@ -106,21 +108,23 @@ def html_collect_pages(app):
         )
 
 
-def html_page_context(app, pagename, templatename, context, doctree):
+def html_page_context(
+    app: Sphinx, _pagename, _templatename, context: dict[str, Any], _doctree
+):
     # Add a variable to all Sphinx templates on whether the document is signed.
     # This is used by the breadcrumbs template to decide whether to include the
     # link to the signature page or not.
     context["ferrocene_signature"] = app.config.ferrocene_signature
 
 
-def build_finished(app, exception):
+def build_finished(app: Sphinx, exception: Exception | None):
     if exception is not None:
         return
 
     if app.builder.name != "html":
         return
 
-    with sphinx.util.display.progress_message("copying signature files"):
+    with sphinx_display.progress_message("copying signature files"):
         os.makedirs(f"{app.outdir}/signature", exist_ok=True)
         signature = SignatureStatus(app)
         for name, path in signature.copiable_files.items():
@@ -144,7 +148,7 @@ def build_finished(app, exception):
             f.write("signatures\n")
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.connect("doctree-read", doctree_read)
     app.connect("html-collect-pages", html_collect_pages)
     app.connect("html-page-context", html_page_context)

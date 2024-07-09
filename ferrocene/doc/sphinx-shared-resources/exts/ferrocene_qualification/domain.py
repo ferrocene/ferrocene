@@ -4,14 +4,17 @@
 
 # 3rd-party imports
 from docutils import nodes
+from sphinx import addnodes
+from sphinx.application import Sphinx
+from sphinx.builders import Builder
 from sphinx.directives import ObjectDescription
 from sphinx.domains import Domain, ObjType
 from sphinx.roles import XRefRole
-import sphinx
+from sphinx.util import nodes as sphinx_nodes
 
 
 class Id:
-    def __init__(self, document, id):
+    def __init__(self, document: str, id: str):
         self.document = document
         self.id = id
 
@@ -30,11 +33,13 @@ class IdDirective(ObjectDescription):
         signode += prefix
         signode += nodes.literal("", sig)
 
-    def add_target_and_index(self, name_cls, sig, signode):
+    def add_target_and_index(
+        self, _name_cls, sig: str, signode: addnodes.desc_signature
+    ):
         id = Id(self.env.docname, sig)
         signode["ids"].append(id.id)
 
-        domain = self.env.get_domain("qualification")
+        domain: QualificationDomain = self.env.get_domain("qualification")
         domain.add_id(id)
 
 
@@ -55,38 +60,51 @@ class QualificationDomain(Domain):
     # Bump whenever the format of the data changes!
     data_version = 1
 
-    def add_id(self, id):
-        self.data["ids"][id.id] = id
+    def add_id(self, id: Id):
+        self.get_ids()[id.id] = id
 
-    def clear_doc(self, docname):
+    def get_ids(self) -> dict[str, Id]:
+        return self.data["ids"]
+
+    def clear_doc(self, docname: str):
         self.data["ids"] = {
             key: value
-            for key, value in self.data["ids"].items()
+            for key, value in self.get_ids().items()
             if value.document != docname
         }
 
     def merge_domaindata(self, docnames, otherdata):
-        for key, value in otherdata["ids"].items():
-            if value.document in docnames:
-                self.data["ids"][value.id] = value
+        other_ids: dict[str, Id] = otherdata["ids"]
+        for other_id in other_ids.values():
+            if other_id.document in docnames:
+                self.get_ids()[other_id.id] = other_id
 
-    def resolve_xref(self, env, fromdocname, builder, type, target, node, contnode):
+    def resolve_xref(
+        self,
+        _env,
+        fromdocname: str,
+        builder: Builder,
+        type: str,
+        target: str,
+        _node,
+        contnode: nodes.Node,
+    ):
         if type != "id":
             raise RuntimeError(f"unsupported xref type {type}")
 
-        if target not in self.data["ids"]:
+        if target not in self.get_ids():
             return
-        id = self.data["ids"][target]
+        id = self.get_ids()[target]
 
-        return sphinx.util.nodes.make_refnode(
+        return sphinx_nodes.make_refnode(
             builder, fromdocname, id.document, id.id, contnode
         )
 
     def get_objects(self):
-        for id in self.data["ids"].values():
+        for id in self.get_ids().values():
             # (name, display_name, type, document, anchor, priority)
             yield id.id, id.id, "id", id.document, id.id, 1
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_domain(QualificationDomain)

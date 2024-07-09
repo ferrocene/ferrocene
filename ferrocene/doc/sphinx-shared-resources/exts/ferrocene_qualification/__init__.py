@@ -5,11 +5,15 @@
 # std imports
 import string
 
+# 3rd-party imports
+from sphinx.application import Sphinx
+from sphinx.config import Config
+
 # local imports
 from . import substitutions, document_id, domain, signature_page, target
 
 
-def setup(app):
+def setup(app: Sphinx):
     substitutions.setup(app)
     document_id.setup(app)
     domain.setup(app)
@@ -33,7 +37,7 @@ def setup(app):
     }
 
 
-def validate_config(app, config):
+def validate_config(_app: Sphinx, config: Config):
     for required in [
         "ferrocene_id",
         "ferrocene_substitutions_path",

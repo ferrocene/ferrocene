@@ -15,14 +15,21 @@ a {
 header {
     color: #fff;
     background: #194e80;
-    margin: -1em;
-    margin-bottom: 0;
+    margin: -1em -1em 1em -1em;
     padding: 1em;
+
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
 }
 
 header h1 {
     margin: 0;
     font-size: 1.25em;
+}
+
+header a {
+    color: #fff;
 }
 
 /* Lists */
@@ -120,7 +127,7 @@ div.circle.green {
 
 div.top-error {
     padding: 1em;
-    margin: 0 -1em;
+    margin: -1em -1em 1em -1em;
 
     border-bottom: 1px solid #f00;
     background: #fee;
@@ -129,23 +136,10 @@ div.top-error {
 
 /* Annotation mode */
 
-label.top-note {
-    display: block;
-    cursor: pointer;
-
-    padding: 1em;
-    margin: 0 -1em 1em -1em;
-    border-bottom: 1px solid #ccc;
-}
-
-body.annotation-mode .copiable {
+.copiable {
     cursor: pointer;
     text-decoration: underline;
     text-decoration-style: dotted;
-}
-
-body.annotation-mode .hide-in-annotation-mode {
-    display: none;
 }
 
 /* Popup messages */

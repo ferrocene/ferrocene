@@ -83,7 +83,7 @@ XCode Developer Tools installed). To install XCode Developer Tools:
 
 .. warning::
    
-   Avoid installing Python or ``pip`` via Homebrew, this can lead to long term
+   Avoid installing Python or ``pip`` via Homebrew, because it can lead to long term
    system disfunction. If you have already done so, consider removing them.
 
 On Windows, get Python from the

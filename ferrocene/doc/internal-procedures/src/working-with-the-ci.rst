@@ -98,7 +98,7 @@ On Windows, get Python from the
 Using the Python virtual environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ferrocene uses ``uv`` to manage our Python dependencies. There are a number of
+Ferrocene uses ``uv`` to manage Python dependencies. There are a number of
 ways to install `listed in the repository <https://github.com/astral-sh/uv>`_,
 but we recommend the ``curl`` (Linux, MacOS) or ``powershell`` (Windows)
 methods:

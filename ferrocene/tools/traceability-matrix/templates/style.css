@@ -129,23 +129,10 @@ div.top-error {
 
 /* Annotation mode */
 
-label.top-note {
-    display: block;
-    cursor: pointer;
-
-    padding: 1em;
-    margin: 0 -1em 1em -1em;
-    border-bottom: 1px solid #ccc;
-}
-
-body.annotation-mode .copiable {
+.copiable {
     cursor: pointer;
     text-decoration: underline;
     text-decoration-style: dotted;
-}
-
-body.annotation-mode .hide-in-annotation-mode {
-    display: none;
 }
 
 /* Popup messages */

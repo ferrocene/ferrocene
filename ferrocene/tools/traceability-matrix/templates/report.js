@@ -3,26 +3,11 @@
 
 "use strict";
 
-let toggleAnnotationMode = document.getElementById("toggle-annotation-mode");
 let popup = document.getElementById("annotation-copied-popup");
 let popupTimeout = null;
 
-let refreshAnnotationMode = () => {
-    if (toggleAnnotationMode.checked) {
-        document.body.classList.add("annotation-mode");
-    } else {
-        document.body.classList.remove("annotation-mode");
-    }
-};
-toggleAnnotationMode.addEventListener("change", refreshAnnotationMode);
-refreshAnnotationMode();
-
 document.querySelectorAll(".copiable").forEach(elem => {
     elem.addEventListener("click", (event => {
-        // Only enable this when annotation mode is enabled.
-        if (!toggleAnnotationMode.checked) {
-            return;
-        }
         event.preventDefault();
 
         let text = "// ferrocene-annotations: " + elem.innerText + "\n";

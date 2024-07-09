@@ -11,3 +11,6 @@ impl<T> Local { //~ ERROR missing generics for struct `Local`
     //~^ ERROR: this struct takes 1 argument but 0 arguments were supplied
 }
 //~^ ERROR `main` function not found
+
+// ferrocene-annotations: fls_8jb3sjqamdpu
+// Program Entry Point

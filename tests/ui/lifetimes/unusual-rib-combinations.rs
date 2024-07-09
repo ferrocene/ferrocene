@@ -28,6 +28,3 @@ struct Bar<const N: &'a (dyn for<'a> Foo<'a>)>;
 //~| ERROR `&dyn for<'a> Foo<'a>` is forbidden as the type of a const generic parameter
 
 fn main() {}
-
-// ferrocene-annotations: fls_g59pinqkvunq
-// Const Blocks

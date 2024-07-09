@@ -6,7 +6,7 @@
 Ferrocene 24.08.0
 =================
 
-Ferrocene 24.08.0 is the second major release of Ferrocene.
+Ferrocene 24.08.0 is the third major release of Ferrocene.
 
 The highlights of this release are the inclusion of Rust 1.79.0 and new
 experimental platform support, including Windows and macOS as hosts, and QNX as

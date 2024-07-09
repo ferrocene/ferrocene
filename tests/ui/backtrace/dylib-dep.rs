@@ -113,3 +113,6 @@ fn inner_inlined(main_pos: Pos, outer_pos: Pos) {
     // (un)fortunately, LLVM somehow merges two consecutive such calls into one node.
     inner_further_inlined(main_pos, outer_pos, pos!());
 }
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

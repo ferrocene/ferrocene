@@ -22,3 +22,6 @@ fn main() {
     // prevent FOO from getting optimized out
     std::hint::black_box(&FOO);
 }
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

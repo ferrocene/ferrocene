@@ -56,3 +56,6 @@ fn main() {
     });
     std::process::exit(ret);
 }
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

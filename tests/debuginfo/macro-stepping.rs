@@ -129,3 +129,6 @@ fn zzz() {()}
 fn opaque(_: u32) {}
 
 include!("macro-stepping.inc");
+
+// ferrocene-annotations: fls_qyudjghzfyjh
+// Attribute collapse_debuginfo

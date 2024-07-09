@@ -188,10 +188,6 @@ impl Deref for Link {
 }
 
 impl Link {
-    pub(crate) fn hide_in_annotation_mode(&self) -> bool {
-        self.tests.iter().all(|t| t.hide_in_annotation_mode())
-    }
-
     pub(crate) fn informational(&self) -> bool {
         self.tests.iter().any(|t| matches!(t, LinkTest::Informational))
     }
@@ -205,14 +201,6 @@ pub(crate) enum LinkTest {
 }
 
 impl LinkTest {
-    fn hide_in_annotation_mode(&self) -> bool {
-        match self {
-            LinkTest::File(_) => false,
-            LinkTest::NoParagraphsInSection => true,
-            LinkTest::Informational => true,
-        }
-    }
-
     fn unwrap_file(&self) -> Option<&AnnotatedFile> {
         match self {
             LinkTest::File(annotated) => Some(annotated),

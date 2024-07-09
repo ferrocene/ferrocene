@@ -15,6 +15,6 @@ fn main() {
     dbg!(string);
 }
 
-// ferrocene-annotations: um_rustc_C_inline_threshold
+// ferrocene-annotations: um_rustc_C_llvm_args
 // ferrocene-annotations: um_rustc_C_debuginfo
 // ferrocene-annotations: um_rustc_C_link_dead_code

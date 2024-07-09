@@ -124,7 +124,7 @@
       Multiple ``extra-filename`` code generation options are allowed on the
       command line, where precedence increases from left to right.
 
-   .. cli:option:: -C inline-threshold=<threshold>
+   .. cli:option:: -C llvm-args=<args>
 
       .. caution::
 
@@ -132,35 +132,15 @@
          qualification, and must not be used in a safety critical
          context. Its documentation is presented for your convenience.
 
-      Code generation option ``inline-threshold`` indicates the default
-      threshold for inlining a function.
-
-      ``<threshold>`` must be an unsigned integer.
-
-      Inlining is based on a cost model, where a higher threshold allows for
-      more inlining. The default threshold depends on the optimization level,
-      as specified by code generation option ``opt-level``, as follows:
-
-      ============= ==========================================================
-      ``opt-level`` threshold default
-      ============= ==========================================================
-      ``0``         No default. Only inline-always functions are inlined.
-      ``1``         No default. Only inline-always functions and LLVM lifetime
-                    intrinsics are inlined.
-      ``2``         225
-      ``3``         275
-      ``s``         75
-      ``z``         25
-      ============= ==========================================================
+      Code generation option ``llvm-args`` can be used to pass a list of arguments
+      directly to LLVM.
+      The list must be separated by spaces.
 
       Example:
 
       .. code-block::
 
-         $ rustc -C inline-threshold=123 my_program.rs
-
-      Multiple ``inline-treshold`` code generation options are allowed on the
-      command line, where the precedence increases from left to right.
+         $ rustc -C llvm-args=--inline-threshold=123 my_program.rs
 
    .. cli:option:: -C link-arg=<arg>
 

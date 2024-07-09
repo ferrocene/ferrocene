@@ -15,8 +15,7 @@ a {
 header {
     color: #fff;
     background: #194e80;
-    margin: -1em;
-    margin-bottom: 0;
+    margin: -1em -1em 1em -1em;
     padding: 1em;
 }
 
@@ -120,7 +119,7 @@ div.circle.green {
 
 div.top-error {
     padding: 1em;
-    margin: 0 -1em;
+    margin: -1em -1em 1em -1em;
 
     border-bottom: 1px solid #f00;
     background: #fee;

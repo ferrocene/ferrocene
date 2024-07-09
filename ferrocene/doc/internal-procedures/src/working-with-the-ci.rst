@@ -191,7 +191,7 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
 
 .. code-block:: bash
 
-   docker run --rm -ti -w /ferrocene \
+   docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       ubuntu-20 bash
 

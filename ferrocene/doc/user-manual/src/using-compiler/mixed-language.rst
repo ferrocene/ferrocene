@@ -72,6 +72,8 @@ To create the executable, run:
 
    $ rustc --edition 2021 -L ../c_library -l factorial call_factorial_from_rust.rs
 
+.. include:: ../partials/criticalup-run.rst
+
 .. include:: ../partials/target-flags-note.rst
 
 This invocation produces executable ``call_factorial_from_rust``. Running
@@ -116,6 +118,8 @@ To create a static library, run:
 
    $ rustc --edition 2021 --crate-type staticlib factorial.rs
 
+.. include:: ../partials/criticalup-run.rst
+
 .. include:: ../partials/target-flags-note.rst
 
 This invocation produces library ``libfactorial.a``.
@@ -125,6 +129,8 @@ To create a dynamic library, run:
 .. code-block::
 
    $ rustc --edition 2021 --crate-type cdylib factorial.rs
+
+.. include:: ../partials/criticalup-run.rst
 
 .. include:: ../partials/target-flags-note.rst
 

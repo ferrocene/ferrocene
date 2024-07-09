@@ -18,7 +18,7 @@ The examples in this chapter assume the following directory structure:
        └── libops.rlib
 
 Directory ``rust_library`` and its byproducts are described
-`here <library.html>`_.
+in :doc:`library`.
 
 Building a simple executable
 ----------------------------
@@ -38,6 +38,8 @@ To create the executable, run:
 
    $ rustc --edition 2021 hw.rs
 
+.. include:: ../partials/criticalup-run.rst
+
 .. include:: ../partials/target-flags-note.rst
 
 This invocation produces executable ``hw``. Running ``hw`` should yield:
@@ -50,7 +52,7 @@ Building a linked executable
 ----------------------------
 
 We are going to build an executable that depends on library ``libops`` we
-created in the `Building a library <library.html>`_ step.
+created in the :doc:`library` step.
 Source file ``./executable/use_ops.rs`` contains:
 
 .. code-block:: rust
@@ -73,6 +75,8 @@ To create the executable, run:
 .. code-block::
 
    $ rustc --edition 2021 -L ../rust_library --extern ops use_ops.rs
+
+.. include:: ../partials/criticalup-run.rst
 
 .. include:: ../partials/target-flags-note.rst
 

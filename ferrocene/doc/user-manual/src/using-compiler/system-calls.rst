@@ -18,7 +18,7 @@ To check which approach applies to your program, consult your OS manual. Some
 OSes provide a C API as the only stable way to perform system calls.
 
 To perform a system call through a C library, refer to
-`Building mixed-language programs <mixed-language.html>`_.
+:doc:`mixed-language`.
 
 We are going to perform the ``WRITE`` system call on a 64-bit ARM machine
 running Linux. On these targets, system calls are performed using the SVC

@@ -83,8 +83,8 @@ XCode Developer Tools installed). To install XCode Developer Tools:
 
 .. warning::
    
-   Avoid installing Python or ``pip`` via Homebrew, this can lead to long term
-   system disfunction. If you have already done so, consider removing them.
+   Avoid installing Python or ``pip`` via Homebrew, because it can lead to long term
+   system dysfunction. If you have already done so, consider removing them.
 
 On Windows, get Python from the
 `website <https://www.python.org/downloads/windows/>`_, or use `winget
@@ -98,7 +98,7 @@ On Windows, get Python from the
 Using the Python virtual environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ferrocene uses ``uv`` to manage our Python dependencies. There are a number of
+Ferrocene uses ``uv`` to manage Python dependencies. There are a number of
 ways to install `listed in the repository <https://github.com/astral-sh/uv>`_,
 but we recommend the ``curl`` (Linux, MacOS) or ``powershell`` (Windows)
 methods:
@@ -134,10 +134,6 @@ Using the CI ``config.toml``
 
 To create the ``config.toml`` used by the CI, set ``FERROCENE_HOST`` to your host triple,
 then run the ``configure.sh``:
-
-.. warning::
-
-   This will overwrite your existing ```config.toml``, consider backing it up.
 
 .. code-block:: bash
 
@@ -191,7 +187,7 @@ For Linux jobs, enter the Docker container specified by the ``executor`` line:
 
 .. code-block:: bash
 
-   docker run --rm -ti -w /ferrocene \
+   docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
       ubuntu-20 bash
 

@@ -8,3 +8,6 @@ fn main(arguments: Vec<String>) { //~ ERROR `main` function has wrong type
     //~| ERROR cannot find value `debug` in this scope
     //~| ERROR expected value, found module `m1::arguments`
 }
+
+// ferrocene-annotations: fls_8jb3sjqamdpu
+// Program Entry Point

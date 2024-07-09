@@ -6,3 +6,6 @@
 pub struct ConstDefaultUnstable<const N: usize = { const { 3 } }>;
 
 pub fn main() {}
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

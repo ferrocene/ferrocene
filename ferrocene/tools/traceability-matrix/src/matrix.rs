@@ -8,8 +8,11 @@ use std::ops::Deref;
 use crate::annotations::{AnnotatedFile, Annotations};
 use crate::documentations::{CliOption, Documentation, Section};
 
-pub(crate) const ELEMENT_KIND_SECTION: ElementKind =
-    ElementKind { singular: "section", plural: "sections", include_title_when_copying: true };
+pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
+    singular: "specification section",
+    plural: "specification sections",
+    include_title_when_copying: true,
+};
 
 pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
     singular: "command line option",

@@ -159,6 +159,10 @@ impl MatrixAnalysis {
             true
         }
     }
+
+    pub(crate) fn informational_count(&self) -> usize {
+        self.linked.iter().filter(|l| l.informational()).count()
+    }
 }
 
 fn filter_targets_from_tests<F>(tests: &[LinkTest], getter: F) -> BTreeSet<&String>

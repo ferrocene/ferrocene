@@ -98,6 +98,9 @@
 
         {% for analysis in matrix.analyses_by_kind() %}
             <h2>All {{ analysis.kind.plural }}</h2>
+            {% if analysis.informational_count() > 0 %}
+                <p>{{ analysis.informational_count() }} informational {{ analysis.kind.plural }} are not included in this table.</p>
+            {% endif %}
             <table>
                 <thead>
                     <tr>
@@ -154,6 +157,7 @@
 </html>
 
 {%- macro row_with_tests(color, link) -%}
+    {% if !link.informational() %}
     <tr id="{{ link.element.id }}" {% if link.hide_in_annotation_mode() %} class="hide-in-annotation-mode"{% endif %}>
         <td><div class="circle {{ color }}"></div></td>
         <td>{% call page_link(link.element.page) %}</td>
@@ -188,6 +192,7 @@
             {% endif %}
         </td>
     </tr>
+    {% endif %}
 {%- endmacro -%}
 
 {%- macro page_link(page) -%}

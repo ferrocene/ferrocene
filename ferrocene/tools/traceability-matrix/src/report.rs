@@ -26,7 +26,7 @@ struct SummaryRow<'a> {
 
 impl SummaryRow<'_> {
     fn color(&self) -> &'static str {
-        let linked = self.kinds.iter().map(|k| k.linked).sum::<usize>();
+        let linked = self.kinds.iter().map(|k| k.linked + k.informational).sum::<usize>();
         let total = self.kinds.iter().map(|k| k.total).sum::<usize>();
 
         if linked == total {
@@ -43,6 +43,7 @@ impl SummaryRow<'_> {
 struct SummaryItem {
     kind: &'static ElementKind,
     linked: usize,
+    informational: usize,
     total: usize,
     percentage: f32,
 }
@@ -69,7 +70,18 @@ pub(crate) fn generate(
 fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     let sample_kinds = matrix
         .analyses_by_kind()
-        .map(|a| (a.kind, SummaryItem { kind: a.kind, linked: 0, total: 0, percentage: 0.0 }))
+        .map(|a| {
+            (
+                a.kind,
+                SummaryItem {
+                    kind: a.kind,
+                    linked: 0,
+                    informational: 0,
+                    total: 0,
+                    percentage: 0.0,
+                },
+            )
+        })
         .collect::<HashMap<_, _>>();
 
     // The table is created in an earlier step because we want to make sure all kinds are present,
@@ -88,14 +100,20 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     for analysis in matrix.analyses_by_kind() {
         let kind_all = all.get_mut(&analysis.kind).unwrap();
 
-        for_each_page(analysis.linked.iter().map(|a| a.deref()), &mut rows, |page| {
-            page.linked += 1;
-            kind_all.linked += 1;
+        for item in &analysis.linked {
+            let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
+            if item.informational() {
+                page.informational += 1;
+                kind_all.informational += 1;
+            } else {
+                page.linked += 1;
+                kind_all.linked += 1;
+            }
             page.total += 1;
             kind_all.total += 1;
-        });
+        }
 
-        let mut f = |page: &mut SummaryItem| {
+        let mut f = |page: &mut SummaryItem, _: &Element| {
             page.total += 1;
             kind_all.total += 1;
         };
@@ -124,7 +142,8 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
             if kind.total == 0 {
                 kind.percentage = 100.0;
             } else {
-                kind.percentage = kind.linked as f32 * 100.0 / kind.total as f32;
+                kind.percentage =
+                    (kind.linked + kind.informational) as f32 * 100.0 / kind.total as f32;
             }
         }
     }
@@ -137,11 +156,11 @@ fn for_each_page<'a, F, I>(
     rows: &mut HashMap<&Page, HashMap<&ElementKind, SummaryItem>>,
     mut f: F,
 ) where
-    F: FnMut(&mut SummaryItem),
+    F: FnMut(&mut SummaryItem, &'a Element),
     I: Iterator<Item = &'a Element>,
 {
     for item in items {
         let page = rows.get_mut(&item.page).unwrap().get_mut(&item.kind).unwrap();
-        f(page);
+        f(page, item);
     }
 }

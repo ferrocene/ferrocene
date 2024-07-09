@@ -33,7 +33,7 @@
                 <tr>
                     <th colspan="2"></th>
                     {% for kind in summary[0].kinds %}
-                        <th colspan="3">{{ kind.kind.plural|capitalize }}</th>
+                        <th colspan="4">{{ kind.kind.plural|capitalize }}</th>
                     {% endfor %}
                 </tr>
                 <tr>
@@ -41,6 +41,7 @@
                     <th>Page</th>
                     {% for _ in summary[0].kinds %}
                         <th>Linked #</th>
+                        <th>Informational #</th>
                         <th>Total #</th>
                         <th>Completion</th>
                     {% endfor %}
@@ -60,9 +61,10 @@
                         </td>
                         {% for kind in row.kinds %}
                             {% if kind.total == 0 %}
-                                <td colspan="3"></td>
+                                <td colspan="4"></td>
                             {% else %}
                                 <td>{{ kind.linked }}</td>
+                                <td>{{ kind.informational }}</td>
                                 <td>{{ kind.total }}</td>
                                 <td>{{ kind.percentage|fmt("{:.2}") }}%</td>
                             {% endif %}

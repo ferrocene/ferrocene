@@ -8,11 +8,8 @@ use std::ops::Deref;
 use crate::annotations::{AnnotatedFile, Annotations};
 use crate::documentations::{CliOption, Documentation, Section};
 
-pub(crate) const ELEMENT_KIND_SECTION: ElementKind = ElementKind {
-    singular: "section",
-    plural: "sections",
-    include_title_when_copying: true,
-};
+pub(crate) const ELEMENT_KIND_SECTION: ElementKind =
+    ElementKind { singular: "section", plural: "sections", include_title_when_copying: true };
 
 pub(crate) const ELEMENT_KIND_CLI_OPTION: ElementKind = ElementKind {
     singular: "command line option",
@@ -190,6 +187,10 @@ impl Link {
     pub(crate) fn hide_in_annotation_mode(&self) -> bool {
         self.tests.iter().all(|t| t.hide_in_annotation_mode())
     }
+
+    pub(crate) fn informational(&self) -> bool {
+        self.tests.iter().any(|t| matches!(t, LinkTest::Informational))
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
@@ -365,10 +366,7 @@ mod tests {
                                 title: "Example subsection".into(),
                                 link: "example.html#example-subsection".into(),
                                 informational: false,
-                                paragraphs: vec![
-                                    Paragraph {},
-                                    Paragraph {},
-                                ],
+                                paragraphs: vec![Paragraph {}, Paragraph {}],
                             },
                             Section {
                                 id: "fls_05".into(),

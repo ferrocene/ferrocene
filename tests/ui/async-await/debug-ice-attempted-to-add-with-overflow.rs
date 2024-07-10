@@ -8,3 +8,6 @@ async fn main() {
     [0usize; 0xffff_ffff_ffff_ffff].await;
     //~^ ERROR `[usize; usize::MAX]` is not a future
 }
+
+// ferrocene-annotations: fls_8jb3sjqamdpu
+// Program Entry Point

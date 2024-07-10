@@ -22,3 +22,6 @@ fn get_elem<const LANE: u32>(a: int8x4_t) -> u8 {
 fn main() {
     get_elem::<4>(int8x4_t(0,0,0,0));
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

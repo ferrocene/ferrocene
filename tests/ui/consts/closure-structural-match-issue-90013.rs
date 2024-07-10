@@ -4,3 +4,6 @@
 fn main() {
     const { || {} };
 }
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

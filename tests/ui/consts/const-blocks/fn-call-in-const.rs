@@ -20,3 +20,6 @@ const _: [u32; 2] = [type_copy(); 2];
 const _: [Option<Bar>; 2] = [const { type_no_copy() }; 2];
 
 fn main() {}
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

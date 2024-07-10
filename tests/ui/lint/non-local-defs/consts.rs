@@ -86,3 +86,6 @@ const _: u32 = {
 
     1
 };
+
+// ferrocene-annotations: fls_g59pinqkvunq
+// Const Blocks

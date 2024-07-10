@@ -10,3 +10,6 @@ impl<'a> Foo<fn(&'a ())> {
 }
 
 fn main(_: for<'a> fn(Foo<fn(&'a ())>::Assoc)) {} //~ ERROR `main` function has wrong type
+
+// ferrocene-annotations: fls_8jb3sjqamdpu
+// Program Entry Point

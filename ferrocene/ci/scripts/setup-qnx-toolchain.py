@@ -5,7 +5,6 @@
 import argparse
 import tarfile
 import boto3
-import lzma
 import zstandard
 
 TARBALL_BUCKET = "ferrocene-ci-mirrors"

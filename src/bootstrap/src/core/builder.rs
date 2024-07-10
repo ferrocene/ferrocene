@@ -25,6 +25,7 @@ use crate::utils::helpers::{check_cfg_arg, libdir, linker_flags, output, t, LldT
 use crate::EXTRA_CHECK_CFGS;
 use crate::{Build, CLang, Crate, DocTests, GitRepo, Mode};
 
+use crate::utils::exec::BootstrapCommand;
 pub use crate::Compiler;
 
 use clap::ValueEnum;
@@ -1285,7 +1286,7 @@ impl<'a> Builder<'a> {
 
     /// Adds the compiler's directory of dynamic libraries to `cmd`'s dynamic
     /// library lookup path.
-    pub fn add_rustc_lib_path(&self, compiler: Compiler, cmd: &mut Command) {
+    pub fn add_rustc_lib_path(&self, compiler: Compiler, cmd: &mut BootstrapCommand) {
         // Windows doesn't need dylib path munging because the dlls for the
         // compiler live next to the compiler and the system will find them
         // automatically.
@@ -1318,11 +1319,11 @@ impl<'a> Builder<'a> {
         self.ensure(tool::Rustdoc { compiler })
     }
 
-    pub fn cargo_clippy_cmd(&self, run_compiler: Compiler) -> Command {
+    pub fn cargo_clippy_cmd(&self, run_compiler: Compiler) -> BootstrapCommand {
         if run_compiler.stage == 0 {
             // `ensure(Clippy { stage: 0 })` *builds* clippy with stage0, it doesn't use the beta clippy.
             let cargo_clippy = self.build.config.download_clippy();
-            let mut cmd = Command::new(cargo_clippy);
+            let mut cmd = BootstrapCommand::new(cargo_clippy);
             cmd.env("CARGO", &self.initial_cargo);
             return cmd;
         }
@@ -1341,13 +1342,13 @@ impl<'a> Builder<'a> {
         let mut dylib_path = helpers::dylib_path();
         dylib_path.insert(0, self.sysroot(run_compiler).join("lib"));
 
-        let mut cmd = Command::new(cargo_clippy);
+        let mut cmd = BootstrapCommand::new(cargo_clippy);
         cmd.env(helpers::dylib_path_var(), env::join_paths(&dylib_path).unwrap());
         cmd.env("CARGO", &self.initial_cargo);
         cmd
     }
 
-    pub fn cargo_miri_cmd(&self, run_compiler: Compiler) -> Command {
+    pub fn cargo_miri_cmd(&self, run_compiler: Compiler) -> BootstrapCommand {
         assert!(run_compiler.stage > 0, "miri can not be invoked at stage 0");
         let build_compiler = self.compiler(run_compiler.stage - 1, self.build.build);
 
@@ -1363,7 +1364,7 @@ impl<'a> Builder<'a> {
             extra_features: Vec::new(),
         });
         // Invoke cargo-miri, make sure it can find miri and cargo.
-        let mut cmd = Command::new(cargo_miri);
+        let mut cmd = BootstrapCommand::new(cargo_miri);
         cmd.env("MIRI", &miri);
         cmd.env("CARGO", &self.initial_cargo);
         // Need to add the `run_compiler` libs. Those are the libs produces *by* `build_compiler`,
@@ -1378,8 +1379,8 @@ impl<'a> Builder<'a> {
         cmd
     }
 
-    pub fn rustdoc_cmd(&self, compiler: Compiler) -> Command {
-        let mut cmd = Command::new(self.bootstrap_out.join("rustdoc"));
+    pub fn rustdoc_cmd(&self, compiler: Compiler) -> BootstrapCommand {
+        let mut cmd = BootstrapCommand::new(self.bootstrap_out.join("rustdoc"));
         cmd.env("RUSTC_STAGE", compiler.stage.to_string())
             .env("RUSTC_SYSROOT", self.sysroot(compiler))
             // Note that this is *not* the sysroot_libdir because rustdoc must be linked
@@ -1420,7 +1421,7 @@ impl<'a> Builder<'a> {
         mode: Mode,
         target: TargetSelection,
         cmd: &str, // FIXME make this properly typed
-    ) -> Command {
+    ) -> BootstrapCommand {
         let mut cargo;
         if cmd == "clippy" {
             cargo = self.cargo_clippy_cmd(compiler);
@@ -1433,7 +1434,7 @@ impl<'a> Builder<'a> {
             cargo = self.cargo_miri_cmd(compiler);
             cargo.arg("miri").arg(subcmd);
         } else {
-            cargo = Command::new(&self.initial_cargo);
+            cargo = BootstrapCommand::new(&self.initial_cargo);
             cargo.arg(cmd);
         }
 
@@ -2177,7 +2178,7 @@ impl<'a> Builder<'a> {
         // Try to use a sysroot-relative bindir, in case it was configured absolutely.
         cargo.env("RUSTC_INSTALL_BINDIR", self.config.bindir_relative());
 
-        self.ci_env.force_coloring_in_ci(&mut cargo);
+        self.ci_env.force_coloring_in_ci(&mut cargo.command);
 
         // When we build Rust dylibs they're all intended for intermediate
         // usage, so make sure we pass the -Cprefer-dynamic flag instead of
@@ -2468,7 +2469,7 @@ impl HostFlags {
 
 #[derive(Debug)]
 pub struct Cargo {
-    command: Command,
+    command: BootstrapCommand,
     compiler: Compiler,
     target: TargetSelection,
     rustflags: Rustflags,
@@ -2693,8 +2694,8 @@ impl Cargo {
     }
 }
 
-impl From<Cargo> for Command {
-    fn from(mut cargo: Cargo) -> Command {
+impl From<Cargo> for BootstrapCommand {
+    fn from(mut cargo: Cargo) -> BootstrapCommand {
         let rustflags = &cargo.rustflags.0;
         if !rustflags.is_empty() {
             cargo.command.env("RUSTFLAGS", rustflags);
@@ -2713,7 +2714,12 @@ impl From<Cargo> for Command {
         if !cargo.allow_features.is_empty() {
             cargo.command.env("RUSTC_ALLOW_FEATURES", cargo.allow_features);
         }
-
         cargo.command
+    }
+}
+
+impl From<Cargo> for Command {
+    fn from(cargo: Cargo) -> Command {
+        BootstrapCommand::from(cargo).command
     }
 }

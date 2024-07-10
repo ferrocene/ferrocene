@@ -585,6 +585,13 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
         EncodeCrossCrate::No, derive_smart_pointer, experimental!(pointee)
     ),
 
+    // RFC 3543
+    // `#[patchable_function_entry(prefix_nops = m, entry_nops = n)]`
+    gated!(
+        patchable_function_entry, Normal, template!(List: "prefix_nops = m, entry_nops = n"), ErrorPreceding,
+        EncodeCrossCrate::Yes, experimental!(patchable_function_entry)
+    ),
+
     // ==========================================================================
     // Internal attributes: Stability, deprecation, and unsafe:
     // ==========================================================================
@@ -825,6 +832,10 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     rustc_attr!(
         rustc_const_panic_str, Normal, template!(Word), WarnFollowing,
         EncodeCrossCrate::Yes, INTERNAL_UNSTABLE
+    ),
+    rustc_attr!(
+        rustc_runtime, Normal, template!(Word), WarnFollowing,
+        EncodeCrossCrate::No, INTERNAL_UNSTABLE
     ),
 
     // ==========================================================================
@@ -1104,6 +1115,10 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     ),
     rustc_attr!(
         TEST, rustc_dump_predicates, Normal, template!(Word),
+        WarnFollowing, EncodeCrossCrate::No
+    ),
+    rustc_attr!(
+        TEST, rustc_dump_def_parents, Normal, template!(Word),
         WarnFollowing, EncodeCrossCrate::No
     ),
     rustc_attr!(

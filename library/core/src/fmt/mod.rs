@@ -459,6 +459,12 @@ impl<'a> Arguments<'a> {
     }
 }
 
+// Manually implementing these results in better error messages.
+#[stable(feature = "rust1", since = "1.0.0")]
+impl !Send for Arguments<'_> {}
+#[stable(feature = "rust1", since = "1.0.0")]
+impl !Sync for Arguments<'_> {}
+
 #[stable(feature = "rust1", since = "1.0.0")]
 impl Debug for Arguments<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> Result {
@@ -2478,8 +2484,7 @@ impl Display for char {
 #[stable(feature = "rust1", since = "1.0.0")]
 impl<T: ?Sized> Pointer for *const T {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        // Cast is needed here because `.expose_provenance()` requires `T: Sized`.
-        pointer_fmt_inner((*self as *const ()).expose_provenance(), f)
+        pointer_fmt_inner(self.expose_provenance(), f)
     }
 }
 

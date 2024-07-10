@@ -2327,7 +2327,7 @@ impl<'a> Parser<'a> {
         let before = self.prev_token.clone();
         let binder = if self.check_keyword(kw::For) {
             let lo = self.token.span;
-            let lifetime_defs = self.parse_late_bound_lifetime_defs()?;
+            let (lifetime_defs, _) = self.parse_late_bound_lifetime_defs()?;
             let span = lo.to(self.prev_token.span);
 
             self.psess.gated_spans.gate(sym::closure_lifetime_binder, span);
@@ -3432,8 +3432,9 @@ impl<'a> Parser<'a> {
             }
         }
         let capture_clause = self.parse_capture_clause()?;
+        let decl_span = lo.to(self.prev_token.span);
         let (attrs, body) = self.parse_inner_attrs_and_block()?;
-        let kind = ExprKind::Gen(capture_clause, body, kind);
+        let kind = ExprKind::Gen(capture_clause, body, kind, decl_span);
         Ok(self.mk_expr_with_attrs(lo.to(self.prev_token.span), kind, attrs))
     }
 
@@ -4022,7 +4023,7 @@ impl MutVisitor for CondChecker<'_> {
             | ExprKind::Match(_, _, _)
             | ExprKind::Closure(_)
             | ExprKind::Block(_, _)
-            | ExprKind::Gen(_, _, _)
+            | ExprKind::Gen(_, _, _, _)
             | ExprKind::TryBlock(_)
             | ExprKind::Underscore
             | ExprKind::Path(_, _)

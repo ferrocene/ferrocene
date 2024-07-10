@@ -63,9 +63,9 @@ def arguments():
 def run():
     args = arguments()
     try:
-        avh_token = os.environ["AVH_TOKEN"]
+        avh_token = os.environ["AVH_API_KEY"]
     except:
-        print("Set AVH_TOKEN environment to an ARM AVH token")
+        print("Set AVH_API_KEY environment to an ARM AVH token")
         exit(1)
 
     # match added in 3.10

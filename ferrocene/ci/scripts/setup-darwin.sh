@@ -15,8 +15,3 @@ brew install --cask gcc-arm-embedded
 # https://github.com/cypress-io/cypress/issues/28033#issuecomment-1879102700
 # https://support.circleci.com/hc/en-us/articles/19334402064027-Troubleshooting-slow-uploads-to-S3-for-jobs-using-an-m1-macOS-resource-class
 sudo sysctl net.inet.tcp.tso=0
-
-# Install `uv` and set up a venv.
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv
-uv pip sync requirements.txt

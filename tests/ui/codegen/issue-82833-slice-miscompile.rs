@@ -1,5 +1,5 @@
 //@ run-pass
-//@ compile-flags: -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Copt-level=0 -Cdebuginfo=2
+//@ compile-flags: -Ccodegen-units=1 -Cllvm-args=--inline-threshold=0 -Clink-dead-code -Copt-level=0 -Cdebuginfo=2
 
 // Make sure LLVM does not miscompile this.
 
@@ -15,6 +15,6 @@ fn main() {
     dbg!(string);
 }
 
-// ferrocene-annotations: um_rustc_C_inline_threshold
+// ferrocene-annotations: um_rustc_C_llvm_args
 // ferrocene-annotations: um_rustc_C_debuginfo
 // ferrocene-annotations: um_rustc_C_link_dead_code

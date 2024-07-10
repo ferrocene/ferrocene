@@ -944,7 +944,6 @@ marker_impls! {
 #[lang = "destruct"]
 #[rustc_on_unimplemented(message = "can't drop `{Self}`", append_const_msg)]
 #[rustc_deny_explicit_impl(implement_via_object = false)]
-#[const_trait]
 pub trait Destruct {}
 
 /// A marker for tuple types.
@@ -1018,4 +1017,13 @@ pub trait FnPtr: Copy + Clone {
     /// Returns the address of the function pointer.
     #[lang = "fn_ptr_addr"]
     fn addr(self) -> *const ();
+}
+
+/// Derive macro generating impls of traits related to smart pointers.
+#[cfg(not(bootstrap))]
+#[rustc_builtin_macro]
+#[allow_internal_unstable(dispatch_from_dyn, coerce_unsized, unsize)]
+#[unstable(feature = "derive_smart_pointer", issue = "123430")]
+pub macro SmartPointer($item:item) {
+    /* compiler built-in */
 }

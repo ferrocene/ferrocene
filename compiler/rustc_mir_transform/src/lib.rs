@@ -51,11 +51,11 @@ mod abort_unwinding_calls;
 mod add_call_guards;
 mod add_moves_for_packed_drops;
 mod add_retag;
+mod add_subtyping_projections;
+mod check_alignment;
 mod check_const_item_mutation;
 mod check_packed_ref;
-mod remove_place_mention;
 // This pass is public to allow external drivers to perform MIR cleanup
-mod add_subtyping_projections;
 pub mod cleanup_post_borrowck;
 mod copy_prop;
 mod coroutine;
@@ -88,12 +88,12 @@ mod lower_slice_len;
 mod match_branches;
 mod mentioned_items;
 mod multiple_return_terminators;
-mod normalize_array_len;
 mod nrvo;
 mod prettify;
 mod promote_consts;
 mod ref_prop;
 mod remove_noop_landing_pads;
+mod remove_place_mention;
 mod remove_storage_markers;
 mod remove_uninit_drops;
 mod remove_unneeded_drops;
@@ -103,7 +103,6 @@ mod reveal_all;
 mod shim;
 mod ssa;
 // This pass is public to allow external drivers to perform MIR cleanup
-mod check_alignment;
 pub mod simplify;
 mod simplify_branches;
 mod simplify_comparison_integral;
@@ -161,8 +160,9 @@ fn remap_mir_for_const_eval_select<'tcx>(
             } if let ty::FnDef(def_id, _) = *const_.ty().kind()
                 && tcx.is_intrinsic(def_id, sym::const_eval_select) =>
             {
-                let [tupled_args, called_in_const, called_at_rt]: [_; 3] =
-                    std::mem::take(args).try_into().unwrap();
+                let Ok([tupled_args, called_in_const, called_at_rt]) = take_array(args) else {
+                    unreachable!()
+                };
                 let ty = tupled_args.node.ty(&body.local_decls, tcx);
                 let fields = ty.tuple_fields();
                 let num_args = fields.len();
@@ -210,6 +210,11 @@ fn remap_mir_for_const_eval_select<'tcx>(
         }
     }
     body
+}
+
+fn take_array<T, const N: usize>(b: &mut Box<[T]>) -> Result<[T; N], Box<[T]>> {
+    let b: Box<[T; N]> = std::mem::take(b).try_into()?;
+    Ok(*b)
 }
 
 fn is_mir_available(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
@@ -581,9 +586,6 @@ fn run_optimization_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
             &o1(simplify::SimplifyCfg::AfterUnreachableEnumBranching),
             // Inlining may have introduced a lot of redundant code and a large move pattern.
             // Now, we need to shrink the generated MIR.
-
-            // Has to run after `slice::len` lowering
-            &normalize_array_len::NormalizeArrayLen,
             &ref_prop::ReferencePropagation,
             &sroa::ScalarReplacementOfAggregates,
             &match_branches::MatchBranchSimplification,

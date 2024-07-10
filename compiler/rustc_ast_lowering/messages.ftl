@@ -78,7 +78,7 @@ ast_lowering_inline_asm_unsupported_target =
 ast_lowering_invalid_abi =
     invalid ABI: found `{$abi}`
     .label = invalid ABI
-    .note = invoke `{$command}` for a full list of supported calling conventions.
+    .note = invoke `{$command}` for a full list of supported calling conventions
 
 ast_lowering_invalid_abi_clobber_abi =
     invalid ABI for `clobber_abi`
@@ -129,6 +129,9 @@ ast_lowering_never_pattern_with_guard =
     .suggestion = remove this guard
 
 ast_lowering_no_precise_captures_on_apit = `use<...>` precise capturing syntax not allowed in argument-position `impl Trait`
+
+ast_lowering_no_precise_captures_on_rpitit = `use<...>` precise capturing syntax is currently not allowed in return-position `impl Trait` in traits
+    .note = currently, return-position `impl Trait` in traits and trait implementations capture all lifetimes in scope
 
 ast_lowering_previously_used_here = previously used here
 

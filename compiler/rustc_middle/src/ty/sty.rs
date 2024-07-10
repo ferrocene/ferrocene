@@ -499,7 +499,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn new_opaque(tcx: TyCtxt<'tcx>, def_id: DefId, args: GenericArgsRef<'tcx>) -> Ty<'tcx> {
-        Ty::new_alias(tcx, ty::Opaque, AliasTy::new(tcx, def_id, args))
+        Ty::new_alias(tcx, ty::Opaque, AliasTy::new_from_args(tcx, def_id, args))
     }
 
     /// Constructs a `TyKind::Error` type with current `ErrorGuaranteed`
@@ -667,6 +667,15 @@ impl<'tcx> Ty<'tcx> {
         repr: DynKind,
     ) -> Ty<'tcx> {
         Ty::new(tcx, Dynamic(obj, reg, repr))
+    }
+
+    #[inline]
+    pub fn new_projection_from_args(
+        tcx: TyCtxt<'tcx>,
+        item_def_id: DefId,
+        args: ty::GenericArgsRef<'tcx>,
+    ) -> Ty<'tcx> {
+        Ty::new_alias(tcx, ty::Projection, AliasTy::new_from_args(tcx, item_def_id, args))
     }
 
     #[inline]
@@ -1409,7 +1418,7 @@ impl<'tcx> Ty<'tcx> {
                 let assoc_items = tcx.associated_item_def_ids(
                     tcx.require_lang_item(hir::LangItem::DiscriminantKind, None),
                 );
-                Ty::new_projection(tcx, assoc_items[0], tcx.mk_args(&[self.into()]))
+                Ty::new_projection_from_args(tcx, assoc_items[0], tcx.mk_args(&[self.into()]))
             }
 
             ty::Pat(ty, _) => ty.discriminant_ty(tcx),
@@ -1635,6 +1644,34 @@ impl<'tcx> Ty<'tcx> {
             Err(tail) => bug!(
                 "`ptr_metadata_ty` failed to get metadata for type: {self:?} (tail = {tail:?})"
             ),
+        }
+    }
+
+    /// Given a pointer or reference type, returns the type of the *pointee*'s
+    /// metadata. If it can't be determined exactly (perhaps due to still
+    /// being generic) then a projection through `ptr::Pointee` will be returned.
+    ///
+    /// This is particularly useful for getting the type of the result of
+    /// [`UnOp::PtrMetadata`](crate::mir::UnOp::PtrMetadata).
+    ///
+    /// Panics if `self` is not dereferencable.
+    #[track_caller]
+    pub fn pointee_metadata_ty_or_projection(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
+        let Some(pointee_ty) = self.builtin_deref(true) else {
+            bug!("Type {self:?} is not a pointer or reference type")
+        };
+        if pointee_ty.is_trivially_sized(tcx) {
+            tcx.types.unit
+        } else {
+            match pointee_ty.ptr_metadata_ty_or_tail(tcx, |x| x) {
+                Ok(metadata_ty) => metadata_ty,
+                Err(tail_ty) => {
+                    let Some(metadata_def_id) = tcx.lang_items().metadata_type() else {
+                        bug!("No metadata_type lang item while looking at {self:?}")
+                    };
+                    Ty::new_projection(tcx, metadata_def_id, [tail_ty])
+                }
+            }
         }
     }
 

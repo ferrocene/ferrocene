@@ -45,6 +45,9 @@ _x.py() {
             x.py,miri)
                 cmd="x.py__miri"
                 ;;
+            x.py,perf)
+                cmd="x.py__perf"
+                ;;
             x.py,run)
                 cmd="x.py__run"
                 ;;
@@ -70,7 +73,7 @@ _x.py() {
 
     case "${cmd}" in
         x.py)
-            opts="-v -i -j -h --verbose --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --error-format --json-output --color --bypass-bootstrap-lock --llvm-skip-rebuild --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --help [PATHS]... [ARGS]... build check clippy fix fmt doc test miri bench clean dist install run setup suggest vendor sign"
+            opts="-v -i -j -h --verbose --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --error-format --json-output --color --bypass-bootstrap-lock --llvm-skip-rebuild --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --help [PATHS]... [ARGS]... build check clippy fix fmt doc test miri bench clean dist install run setup suggest vendor perf sign"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -2224,6 +2227,199 @@ _x.py() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --config)
+                    local oldifs
+                    if [ -n "${IFS+x}" ]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    if [ -n "${oldifs+x}" ]; then
+                        IFS="$oldifs"
+                    fi
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o filenames
+                    fi
+                    return 0
+                    ;;
+                --build-dir)
+                    COMPREPLY=()
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o plusdirs
+                    fi
+                    return 0
+                    ;;
+                --build)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --host)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --target)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --exclude)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --skip)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --rustc-error-format)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --on-fail)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --stage)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --keep-stage)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --keep-stage-std)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --src)
+                    COMPREPLY=()
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o plusdirs
+                    fi
+                    return 0
+                    ;;
+                --jobs)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                -j)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --warnings)
+                    COMPREPLY=($(compgen -W "deny warn default" -- "${cur}"))
+                    return 0
+                    ;;
+                --error-format)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                --color)
+                    COMPREPLY=($(compgen -W "always never auto" -- "${cur}"))
+                    return 0
+                    ;;
+                --llvm-skip-rebuild)
+                    COMPREPLY=($(compgen -W "true false" -- "${cur}"))
+                    return 0
+                    ;;
+                --rust-profile-generate)
+                    local oldifs
+                    if [ -n "${IFS+x}" ]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    if [ -n "${oldifs+x}" ]; then
+                        IFS="$oldifs"
+                    fi
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o filenames
+                    fi
+                    return 0
+                    ;;
+                --rust-profile-use)
+                    local oldifs
+                    if [ -n "${IFS+x}" ]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    if [ -n "${oldifs+x}" ]; then
+                        IFS="$oldifs"
+                    fi
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o filenames
+                    fi
+                    return 0
+                    ;;
+                --llvm-profile-use)
+                    local oldifs
+                    if [ -n "${IFS+x}" ]; then
+                        oldifs="$IFS"
+                    fi
+                    IFS=$'\n'
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    if [ -n "${oldifs+x}" ]; then
+                        IFS="$oldifs"
+                    fi
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o filenames
+                    fi
+                    return 0
+                    ;;
+                --reproducible-artifact)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --set)
+                    COMPREPLY=("${cur}")
+                    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+                        compopt -o nospace
+                    fi
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        x.py__perf)
+            opts="-v -i -j -h --verbose --incremental --config --build-dir --build --host --target --exclude --skip --include-default-paths --rustc-error-format --on-fail --dry-run --dump-bootstrap-shims --stage --keep-stage --keep-stage-std --src --jobs --warnings --error-format --json-output --color --bypass-bootstrap-lock --llvm-skip-rebuild --rust-profile-generate --rust-profile-use --llvm-profile-use --llvm-profile-generate --enable-bolt-settings --skip-stage0-validation --reproducible-artifact --set --help [PATHS]... [ARGS]..."
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
                 --config)
                     local oldifs
                     if [ -n "${IFS+x}" ]; then

@@ -870,7 +870,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
         trait_def_id: DefId,
     ) {
         let trait_args = self.fresh_args_for_item(self.span, trait_def_id);
-        let trait_ref = ty::TraitRef::new(self.tcx, trait_def_id, trait_args);
+        let trait_ref = ty::TraitRef::new_from_args(self.tcx, trait_def_id, trait_args);
 
         if self.tcx.is_trait_alias(trait_def_id) {
             // For trait aliases, recursively assume all explicitly named traits are relevant
@@ -1357,6 +1357,8 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
         traits::SelectionContext::new(self).select(&obligation)
     }
 
+    /// Used for ambiguous method call error reporting. Uses probing that throws away the result internally,
+    /// so do not use to make a decision that may lead to a successful compilation.
     fn candidate_source(&self, candidate: &Candidate<'tcx>, self_ty: Ty<'tcx>) -> CandidateSource {
         match candidate.kind {
             InherentImplCandidate(_) => {
@@ -1370,8 +1372,10 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
                     self.instantiate_binder_with_fresh_vars(self.span, infer::FnCall, trait_ref);
                 let (xform_self_ty, _) =
                     self.xform_self_ty(candidate.item, trait_ref.self_ty(), trait_ref.args);
+                // Guide the trait selection to show impls that have methods whose type matches
+                // up with the `self` parameter of the method.
                 let _ = self.at(&ObligationCause::dummy(), self.param_env).sup(
-                    DefineOpaqueTypes::No,
+                    DefineOpaqueTypes::Yes,
                     xform_self_ty,
                     self_ty,
                 );

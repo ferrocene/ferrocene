@@ -43,11 +43,13 @@ pub(crate) fn rewrite_path(
 ) -> Option<String> {
     let skip_count = qself.as_ref().map_or(0, |x| x.position);
 
-    let mut result = if path.is_global() && qself.is_none() && path_context != PathContext::Import {
-        "::".to_owned()
-    } else {
-        String::new()
-    };
+    // 32 covers almost all path lengths measured when compiling core, and there isn't a big
+    // downside from allocating slightly more than necessary.
+    let mut result = String::with_capacity(32);
+
+    if path.is_global() && qself.is_none() && path_context != PathContext::Import {
+        result.push_str("::");
+    }
 
     let mut span_lo = path.span.lo();
 
@@ -171,6 +173,17 @@ impl<'a> Rewrite for SegmentParam<'a> {
             SegmentParam::LifeTime(lt) => lt.rewrite(context, shape),
             SegmentParam::Type(ty) => ty.rewrite(context, shape),
             SegmentParam::Binding(atc) => atc.rewrite(context, shape),
+        }
+    }
+}
+
+impl Rewrite for ast::PreciseCapturingArg {
+    fn rewrite(&self, context: &RewriteContext<'_>, shape: Shape) -> Option<String> {
+        match self {
+            ast::PreciseCapturingArg::Lifetime(lt) => lt.rewrite(context, shape),
+            ast::PreciseCapturingArg::Arg(p, _) => {
+                rewrite_path(context, PathContext::Type, &None, p, shape)
+            }
         }
     }
 }
@@ -562,9 +575,10 @@ impl Rewrite for ast::GenericBound {
                     .map(|s| format!("{constness}{asyncness}{polarity}{s}"))
                     .map(|s| if has_paren { format!("({})", s) } else { s })
             }
+            ast::GenericBound::Use(ref args, span) => {
+                overflow::rewrite_with_angle_brackets(context, "use", args.iter(), shape, span)
+            }
             ast::GenericBound::Outlives(ref lifetime) => lifetime.rewrite(context, shape),
-            // FIXME(precise_capturing): Should implement formatting before stabilization.
-            ast::GenericBound::Use(..) => None,
         }
     }
 }
@@ -693,10 +707,12 @@ impl Rewrite for ast::Ty {
                 };
                 let mut res = bounds.rewrite(context, shape)?;
                 // We may have falsely removed a trailing `+` inside macro call.
-                if context.inside_macro() && bounds.len() == 1 {
-                    if context.snippet(self.span).ends_with('+') && !res.ends_with('+') {
-                        res.push('+');
-                    }
+                if context.inside_macro()
+                    && bounds.len() == 1
+                    && context.snippet(self.span).ends_with('+')
+                    && !res.ends_with('+')
+                {
+                    res.push('+');
                 }
                 Some(format!("{prefix}{res}"))
             }
@@ -929,9 +945,7 @@ fn rewrite_bare_fn(
 fn is_generic_bounds_in_order(generic_bounds: &[ast::GenericBound]) -> bool {
     let is_trait = |b: &ast::GenericBound| match b {
         ast::GenericBound::Outlives(..) => false,
-        ast::GenericBound::Trait(..) => true,
-        // FIXME(precise_capturing): This ordering fn should be reworked.
-        ast::GenericBound::Use(..) => false,
+        ast::GenericBound::Trait(..) | ast::GenericBound::Use(..) => true,
     };
     let is_lifetime = |b: &ast::GenericBound| !is_trait(b);
     let last_trait_index = generic_bounds.iter().rposition(is_trait);
@@ -965,9 +979,8 @@ fn join_bounds_inner(
     let generic_bounds_in_order = is_generic_bounds_in_order(items);
     let is_bound_extendable = |s: &str, b: &ast::GenericBound| match b {
         ast::GenericBound::Outlives(..) => true,
-        ast::GenericBound::Trait(..) => last_line_extendable(s),
-        // FIXME(precise_capturing): This ordering fn should be reworked.
-        ast::GenericBound::Use(..) => true,
+        // We treat `use<>` like a trait bound here.
+        ast::GenericBound::Trait(..) | ast::GenericBound::Use(..) => last_line_extendable(s),
     };
 
     // Whether a GenericBound item is a PathSegment segment that includes internal array
@@ -989,6 +1002,7 @@ fn join_bounds_inner(
                 }
             }
         }
+        ast::GenericBound::Use(args, _) => args.len() > 1,
         _ => false,
     };
 

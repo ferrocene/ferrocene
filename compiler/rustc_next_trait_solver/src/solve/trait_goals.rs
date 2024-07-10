@@ -1,14 +1,14 @@
 //! Dealing with trait goals, i.e. `T: Trait<'a, U>`.
 
 use rustc_ast_ir::Movability;
-use rustc_data_structures::fx::FxIndexSet;
+use rustc_type_ir::data_structures::IndexSet;
 use rustc_type_ir::inherent::*;
 use rustc_type_ir::lang_items::TraitSolverLangItem;
 use rustc_type_ir::visit::TypeVisitableExt as _;
 use rustc_type_ir::{self as ty, Interner, TraitPredicate, Upcast as _};
 use tracing::{instrument, trace};
 
-use crate::infcx::SolverDelegate;
+use crate::delegate::SolverDelegate;
 use crate::solve::assembly::structural_traits::{self, AsyncCallableRelevantTypes};
 use crate::solve::assembly::{self, Candidate};
 use crate::solve::inspect::ProbeKind;
@@ -17,9 +17,9 @@ use crate::solve::{
     NoSolution, QueryResult, Reveal, SolverMode,
 };
 
-impl<Infcx, I> assembly::GoalKind<Infcx> for TraitPredicate<I>
+impl<D, I> assembly::GoalKind<D> for TraitPredicate<I>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
     fn self_ty(self) -> I::Ty {
@@ -30,8 +30,8 @@ where
         self.trait_ref
     }
 
-    fn with_self_ty(self, tcx: I, self_ty: I::Ty) -> Self {
-        self.with_self_ty(tcx, self_ty)
+    fn with_self_ty(self, cx: I, self_ty: I::Ty) -> Self {
+        self.with_self_ty(cx, self_ty)
     }
 
     fn trait_def_id(self, _: I) -> I::DefId {
@@ -39,22 +39,21 @@ where
     }
 
     fn consider_impl_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, TraitPredicate<I>>,
         impl_def_id: I::DefId,
     ) -> Result<Candidate<I>, NoSolution> {
-        let tcx = ecx.interner();
+        let cx = ecx.cx();
 
-        let impl_trait_ref = tcx.impl_trait_ref(impl_def_id);
-        if !tcx
-            .args_may_unify_deep(goal.predicate.trait_ref.args, impl_trait_ref.skip_binder().args)
+        let impl_trait_ref = cx.impl_trait_ref(impl_def_id);
+        if !cx.args_may_unify_deep(goal.predicate.trait_ref.args, impl_trait_ref.skip_binder().args)
         {
             return Err(NoSolution);
         }
 
         // An upper bound of the certainty of this goal, used to lower the certainty
         // of reservation impl to ambiguous during coherence.
-        let impl_polarity = tcx.impl_polarity(impl_def_id);
+        let impl_polarity = cx.impl_polarity(impl_def_id);
         let maximal_certainty = match (impl_polarity, goal.predicate.polarity) {
             // In intercrate mode, this is ambiguous. But outside of intercrate,
             // it's not a real impl.
@@ -77,13 +76,13 @@ where
         ecx.probe_trait_candidate(CandidateSource::Impl(impl_def_id)).enter(|ecx| {
             let impl_args = ecx.fresh_args_for_item(impl_def_id);
             ecx.record_impl_args(impl_args);
-            let impl_trait_ref = impl_trait_ref.instantiate(tcx, &impl_args);
+            let impl_trait_ref = impl_trait_ref.instantiate(cx, impl_args);
 
             ecx.eq(goal.param_env, goal.predicate.trait_ref, impl_trait_ref)?;
-            let where_clause_bounds = tcx
+            let where_clause_bounds = cx
                 .predicates_of(impl_def_id)
-                .iter_instantiated(tcx, &impl_args)
-                .map(|pred| goal.with(tcx, pred));
+                .iter_instantiated(cx, impl_args)
+                .map(|pred| goal.with(cx, pred));
             ecx.add_goals(GoalSource::ImplWhereBound, where_clause_bounds);
 
             ecx.evaluate_added_goals_and_make_canonical_response(maximal_certainty)
@@ -91,7 +90,7 @@ where
     }
 
     fn consider_error_guaranteed_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         _guar: I::ErrorGuaranteed,
     ) -> Result<Candidate<I>, NoSolution> {
         // FIXME: don't need to enter a probe here.
@@ -100,11 +99,11 @@ where
     }
 
     fn probe_and_match_goal_against_assumption(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         source: CandidateSource<I>,
         goal: Goal<I, Self>,
         assumption: I::Clause,
-        then: impl FnOnce(&mut EvalCtxt<'_, Infcx>) -> QueryResult<I>,
+        then: impl FnOnce(&mut EvalCtxt<'_, D>) -> QueryResult<I>,
     ) -> Result<Candidate<I>, NoSolution> {
         if let Some(trait_clause) = assumption.as_trait_clause() {
             if trait_clause.def_id() == goal.predicate.def_id()
@@ -128,7 +127,7 @@ where
     }
 
     fn consider_auto_trait_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -174,20 +173,20 @@ where
     }
 
     fn consider_trait_alias_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
             return Err(NoSolution);
         }
 
-        let tcx = ecx.interner();
+        let cx = ecx.cx();
 
         ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
-            let nested_obligations = tcx
+            let nested_obligations = cx
                 .predicates_of(goal.predicate.def_id())
-                .iter_instantiated(tcx, &goal.predicate.trait_ref.args)
-                .map(|p| goal.with(tcx, p));
+                .iter_instantiated(cx, goal.predicate.trait_ref.args)
+                .map(|p| goal.with(cx, p));
             // FIXME(-Znext-solver=coinductive): Should this be `GoalSource::ImplWhereBound`?
             ecx.add_goals(GoalSource::Misc, nested_obligations);
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
@@ -195,7 +194,7 @@ where
     }
 
     fn consider_builtin_sized_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -210,7 +209,7 @@ where
     }
 
     fn consider_builtin_copy_clone_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -225,20 +224,20 @@ where
     }
 
     fn consider_builtin_pointer_like_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
             return Err(NoSolution);
         }
 
-        let tcx = ecx.interner();
+        let cx = ecx.cx();
         // But if there are inference variables, we have to wait until it's resolved.
         if (goal.param_env, goal.predicate.self_ty()).has_non_region_infer() {
             return ecx.forced_ambiguity(MaybeCause::Ambiguity);
         }
 
-        if tcx.layout_is_pointer_like(goal.param_env, goal.predicate.self_ty()) {
+        if cx.layout_is_pointer_like(goal.param_env, goal.predicate.self_ty()) {
             ecx.probe_builtin_trait_candidate(BuiltinImplSource::Misc)
                 .enter(|ecx| ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes))
         } else {
@@ -247,7 +246,7 @@ where
     }
 
     fn consider_builtin_fn_ptr_trait_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         let self_ty = goal.predicate.self_ty();
@@ -278,7 +277,7 @@ where
     }
 
     fn consider_builtin_fn_trait_candidates(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
         goal_kind: ty::ClosureKind,
     ) -> Result<Candidate<I>, NoSolution> {
@@ -286,10 +285,10 @@ where
             return Err(NoSolution);
         }
 
-        let tcx = ecx.interner();
+        let cx = ecx.cx();
         let tupled_inputs_and_output =
             match structural_traits::extract_tupled_inputs_and_output_from_callable(
-                tcx,
+                cx,
                 goal.predicate.self_ty(),
                 goal_kind,
             )? {
@@ -299,14 +298,14 @@ where
                 }
             };
         let output_is_sized_pred = tupled_inputs_and_output.map_bound(|(_, output)| {
-            ty::TraitRef::new(tcx, tcx.require_lang_item(TraitSolverLangItem::Sized), [output])
+            ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Sized), [output])
         });
 
         let pred = tupled_inputs_and_output
             .map_bound(|(inputs, _)| {
-                ty::TraitRef::new(tcx, goal.predicate.def_id(), [goal.predicate.self_ty(), inputs])
+                ty::TraitRef::new(cx, goal.predicate.def_id(), [goal.predicate.self_ty(), inputs])
             })
-            .upcast(tcx);
+            .upcast(cx);
         // A built-in `Fn` impl only holds if the output is sized.
         // (FIXME: technically we only need to check this if the type is a fn ptr...)
         Self::probe_and_consider_implied_clause(
@@ -314,12 +313,12 @@ where
             CandidateSource::BuiltinImpl(BuiltinImplSource::Misc),
             goal,
             pred,
-            [(GoalSource::ImplWhereBound, goal.with(tcx, output_is_sized_pred))],
+            [(GoalSource::ImplWhereBound, goal.with(cx, output_is_sized_pred))],
         )
     }
 
     fn consider_builtin_async_fn_trait_candidates(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
         goal_kind: ty::ClosureKind,
     ) -> Result<Candidate<I>, NoSolution> {
@@ -327,20 +326,20 @@ where
             return Err(NoSolution);
         }
 
-        let tcx = ecx.interner();
+        let cx = ecx.cx();
         let (tupled_inputs_and_output_and_coroutine, nested_preds) =
             structural_traits::extract_tupled_inputs_and_output_from_async_callable(
-                tcx,
+                cx,
                 goal.predicate.self_ty(),
                 goal_kind,
                 // This region doesn't matter because we're throwing away the coroutine type
-                Region::new_static(tcx),
+                Region::new_static(cx),
             )?;
         let output_is_sized_pred = tupled_inputs_and_output_and_coroutine.map_bound(
             |AsyncCallableRelevantTypes { output_coroutine_ty, .. }| {
                 ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(TraitSolverLangItem::Sized),
+                    cx,
+                    cx.require_lang_item(TraitSolverLangItem::Sized),
                     [output_coroutine_ty],
                 )
             },
@@ -349,12 +348,12 @@ where
         let pred = tupled_inputs_and_output_and_coroutine
             .map_bound(|AsyncCallableRelevantTypes { tupled_inputs_ty, .. }| {
                 ty::TraitRef::new(
-                    tcx,
+                    cx,
                     goal.predicate.def_id(),
                     [goal.predicate.self_ty(), tupled_inputs_ty],
                 )
             })
-            .upcast(tcx);
+            .upcast(cx);
         // A built-in `AsyncFn` impl only holds if the output is sized.
         // (FIXME: technically we only need to check this if the type is a fn ptr...)
         Self::probe_and_consider_implied_clause(
@@ -362,18 +361,18 @@ where
             CandidateSource::BuiltinImpl(BuiltinImplSource::Misc),
             goal,
             pred,
-            [goal.with(tcx, output_is_sized_pred)]
+            [goal.with(cx, output_is_sized_pred)]
                 .into_iter()
-                .chain(nested_preds.into_iter().map(|pred| goal.with(tcx, pred)))
+                .chain(nested_preds.into_iter().map(|pred| goal.with(cx, pred)))
                 .map(|goal| (GoalSource::ImplWhereBound, goal)),
         )
     }
 
     fn consider_builtin_async_fn_kind_helper_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
-        let [closure_fn_kind_ty, goal_kind_ty] = **goal.predicate.trait_ref.args else {
+        let [closure_fn_kind_ty, goal_kind_ty] = *goal.predicate.trait_ref.args.as_slice() else {
             panic!();
         };
 
@@ -397,7 +396,7 @@ where
     /// impl Tuple for (T1, .., Tn) {}
     /// ```
     fn consider_builtin_tuple_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -413,7 +412,7 @@ where
     }
 
     fn consider_builtin_pointee_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -425,7 +424,7 @@ where
     }
 
     fn consider_builtin_future_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -437,8 +436,8 @@ where
         };
 
         // Coroutines are not futures unless they come from `async` desugaring
-        let tcx = ecx.interner();
-        if !tcx.coroutine_is_async(def_id) {
+        let cx = ecx.cx();
+        if !cx.coroutine_is_async(def_id) {
             return Err(NoSolution);
         }
 
@@ -451,7 +450,7 @@ where
     }
 
     fn consider_builtin_iterator_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -463,8 +462,8 @@ where
         };
 
         // Coroutines are not iterators unless they come from `gen` desugaring
-        let tcx = ecx.interner();
-        if !tcx.coroutine_is_gen(def_id) {
+        let cx = ecx.cx();
+        if !cx.coroutine_is_gen(def_id) {
             return Err(NoSolution);
         }
 
@@ -477,7 +476,7 @@ where
     }
 
     fn consider_builtin_fused_iterator_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -489,8 +488,8 @@ where
         };
 
         // Coroutines are not iterators unless they come from `gen` desugaring
-        let tcx = ecx.interner();
-        if !tcx.coroutine_is_gen(def_id) {
+        let cx = ecx.cx();
+        if !cx.coroutine_is_gen(def_id) {
             return Err(NoSolution);
         }
 
@@ -501,7 +500,7 @@ where
     }
 
     fn consider_builtin_async_iterator_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -513,8 +512,8 @@ where
         };
 
         // Coroutines are not iterators unless they come from `gen` desugaring
-        let tcx = ecx.interner();
-        if !tcx.coroutine_is_async_gen(def_id) {
+        let cx = ecx.cx();
+        if !cx.coroutine_is_async_gen(def_id) {
             return Err(NoSolution);
         }
 
@@ -527,7 +526,7 @@ where
     }
 
     fn consider_builtin_coroutine_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -540,8 +539,8 @@ where
         };
 
         // `async`-desugared coroutines do not implement the coroutine trait
-        let tcx = ecx.interner();
-        if !tcx.is_general_coroutine(def_id) {
+        let cx = ecx.cx();
+        if !cx.is_general_coroutine(def_id) {
             return Err(NoSolution);
         }
 
@@ -550,8 +549,8 @@ where
             ecx,
             CandidateSource::BuiltinImpl(BuiltinImplSource::Misc),
             goal,
-            ty::TraitRef::new(tcx, goal.predicate.def_id(), [self_ty, coroutine.resume_ty()])
-                .upcast(tcx),
+            ty::TraitRef::new(cx, goal.predicate.def_id(), [self_ty, coroutine.resume_ty()])
+                .upcast(cx),
             // Technically, we need to check that the coroutine types are Sized,
             // but that's already proven by the coroutine being WF.
             [],
@@ -559,7 +558,7 @@ where
     }
 
     fn consider_builtin_discriminant_kind_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -572,7 +571,7 @@ where
     }
 
     fn consider_builtin_async_destruct_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -585,7 +584,7 @@ where
     }
 
     fn consider_builtin_destruct_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -601,7 +600,7 @@ where
     }
 
     fn consider_builtin_transmute_candidate(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Result<Candidate<I>, NoSolution> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -634,7 +633,7 @@ where
     /// impl<'a, T: Trait + 'a> Unsize<dyn Trait + 'a> for T {}
     /// ```
     fn consider_structural_builtin_unsize_candidates(
-        ecx: &mut EvalCtxt<'_, Infcx>,
+        ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, Self>,
     ) -> Vec<Candidate<I>> {
         if goal.predicate.polarity != ty::PredicatePolarity::Positive {
@@ -657,7 +656,7 @@ where
                 return vec![];
             };
 
-            let goal = goal.with(ecx.interner(), (a_ty, b_ty));
+            let goal = goal.with(ecx.cx(), (a_ty, b_ty));
             match (a_ty.kind(), b_ty.kind()) {
                 (ty::Infer(ty::TyVar(..)), ..) => panic!("unexpected infer {a_ty:?} {b_ty:?}"),
 
@@ -705,9 +704,9 @@ where
     }
 }
 
-impl<Infcx, I> EvalCtxt<'_, Infcx>
+impl<D, I> EvalCtxt<'_, D>
 where
-    Infcx: SolverDelegate<Interner = I>,
+    D: SolverDelegate<Interner = I>,
     I: Interner,
 {
     /// Trait upcasting allows for coercions between trait objects:
@@ -727,7 +726,7 @@ where
         b_data: I::BoundExistentialPredicates,
         b_region: I::Region,
     ) -> Vec<Candidate<I>> {
-        let tcx = self.interner();
+        let cx = self.cx();
         let Goal { predicate: (a_ty, _b_ty), .. } = goal;
 
         let mut responses = vec![];
@@ -745,8 +744,7 @@ where
             ));
         } else if let Some(a_principal) = a_data.principal() {
             for new_a_principal in
-                Infcx::elaborate_supertraits(self.interner(), a_principal.with_self_ty(tcx, a_ty))
-                    .skip(1)
+                D::elaborate_supertraits(self.cx(), a_principal.with_self_ty(cx, a_ty)).skip(1)
             {
                 responses.extend(self.consider_builtin_upcast_to_principal(
                     goal,
@@ -756,7 +754,7 @@ where
                     b_data,
                     b_region,
                     Some(new_a_principal.map_bound(|trait_ref| {
-                        ty::ExistentialTraitRef::erase_self_ty(tcx, trait_ref)
+                        ty::ExistentialTraitRef::erase_self_ty(cx, trait_ref)
                     })),
                 ));
             }
@@ -771,11 +769,11 @@ where
         b_data: I::BoundExistentialPredicates,
         b_region: I::Region,
     ) -> Result<Candidate<I>, NoSolution> {
-        let tcx = self.interner();
+        let cx = self.cx();
         let Goal { predicate: (a_ty, _), .. } = goal;
 
         // Can only unsize to an object-safe trait.
-        if b_data.principal_def_id().is_some_and(|def_id| !tcx.trait_is_object_safe(def_id)) {
+        if b_data.principal_def_id().is_some_and(|def_id| !cx.trait_is_object_safe(def_id)) {
             return Err(NoSolution);
         }
 
@@ -784,24 +782,20 @@ where
             // (i.e. the principal, all of the associated types match, and any auto traits)
             ecx.add_goals(
                 GoalSource::ImplWhereBound,
-                b_data.into_iter().map(|pred| goal.with(tcx, pred.with_self_ty(tcx, a_ty))),
+                b_data.iter().map(|pred| goal.with(cx, pred.with_self_ty(cx, a_ty))),
             );
 
             // The type must be `Sized` to be unsized.
             ecx.add_goal(
                 GoalSource::ImplWhereBound,
                 goal.with(
-                    tcx,
-                    ty::TraitRef::new(
-                        tcx,
-                        tcx.require_lang_item(TraitSolverLangItem::Sized),
-                        [a_ty],
-                    ),
+                    cx,
+                    ty::TraitRef::new(cx, cx.require_lang_item(TraitSolverLangItem::Sized), [a_ty]),
                 ),
             );
 
             // The type must outlive the lifetime of the `dyn` we're unsizing into.
-            ecx.add_goal(GoalSource::Misc, goal.with(tcx, ty::OutlivesPredicate(a_ty, b_region)));
+            ecx.add_goal(GoalSource::Misc, goal.with(cx, ty::OutlivesPredicate(a_ty, b_region)));
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
         })
     }
@@ -821,14 +815,14 @@ where
         // We may upcast to auto traits that are either explicitly listed in
         // the object type's bounds, or implied by the principal trait ref's
         // supertraits.
-        let a_auto_traits: FxIndexSet<I::DefId> = a_data
+        let a_auto_traits: IndexSet<I::DefId> = a_data
             .auto_traits()
             .into_iter()
             .chain(a_data.principal_def_id().into_iter().flat_map(|principal_def_id| {
-                self.interner()
+                self.cx()
                     .supertrait_def_ids(principal_def_id)
                     .into_iter()
-                    .filter(|def_id| self.interner().trait_is_auto(*def_id))
+                    .filter(|def_id| self.cx().trait_is_auto(*def_id))
             }))
             .collect();
 
@@ -837,7 +831,7 @@ where
         // having any inference side-effects. We process obligations because
         // unification may initially succeed due to deferred projection equality.
         let projection_may_match =
-            |ecx: &mut EvalCtxt<'_, Infcx>,
+            |ecx: &mut EvalCtxt<'_, D>,
              source_projection: ty::Binder<I, ty::ExistentialProjection<I>>,
              target_projection: ty::Binder<I, ty::ExistentialProjection<I>>| {
                 source_projection.item_def_id() == target_projection.item_def_id()
@@ -852,7 +846,7 @@ where
             };
 
         self.probe_trait_candidate(source).enter(|ecx| {
-            for bound in b_data {
+            for bound in b_data.iter() {
                 match bound.skip_binder() {
                     // Check that a's supertrait (upcast_principal) is compatible
                     // with the target (b_ty).
@@ -896,7 +890,7 @@ where
             // Also require that a_ty's lifetime outlives b_ty's lifetime.
             ecx.add_goal(
                 GoalSource::ImplWhereBound,
-                Goal::new(ecx.interner(), param_env, ty::OutlivesPredicate(a_region, b_region)),
+                Goal::new(ecx.cx(), param_env, ty::OutlivesPredicate(a_region, b_region)),
             );
 
             ecx.evaluate_added_goals_and_make_canonical_response(Certainty::Yes)
@@ -942,31 +936,28 @@ where
         a_args: I::GenericArgs,
         b_args: I::GenericArgs,
     ) -> Result<Candidate<I>, NoSolution> {
-        let tcx = self.interner();
+        let cx = self.cx();
         let Goal { predicate: (_a_ty, b_ty), .. } = goal;
 
-        let unsizing_params = tcx.unsizing_params_for_adt(def.def_id());
+        let unsizing_params = cx.unsizing_params_for_adt(def.def_id());
         // We must be unsizing some type parameters. This also implies
         // that the struct has a tail field.
         if unsizing_params.is_empty() {
             return Err(NoSolution);
         }
 
-        let tail_field_ty = def.struct_tail_ty(tcx).unwrap();
+        let tail_field_ty = def.struct_tail_ty(cx).unwrap();
 
-        let a_tail_ty = tail_field_ty.instantiate(tcx, &a_args);
-        let b_tail_ty = tail_field_ty.instantiate(tcx, &b_args);
+        let a_tail_ty = tail_field_ty.instantiate(cx, a_args);
+        let b_tail_ty = tail_field_ty.instantiate(cx, b_args);
 
         // Instantiate just the unsizing params from B into A. The type after
         // this instantiation must be equal to B. This is so we don't unsize
         // unrelated type parameters.
-        let new_a_args = tcx.mk_args_from_iter(
-            a_args
-                .iter()
-                .enumerate()
-                .map(|(i, a)| if unsizing_params.contains(i as u32) { b_args[i] } else { *a }),
-        );
-        let unsized_a_ty = Ty::new_adt(tcx, def, new_a_args);
+        let new_a_args = cx.mk_args_from_iter(a_args.iter().enumerate().map(|(i, a)| {
+            if unsizing_params.contains(i as u32) { b_args.get(i).unwrap() } else { a }
+        }));
+        let unsized_a_ty = Ty::new_adt(cx, def, new_a_args);
 
         // Finally, we require that `TailA: Unsize<TailB>` for the tail field
         // types.
@@ -974,10 +965,10 @@ where
         self.add_goal(
             GoalSource::ImplWhereBound,
             goal.with(
-                tcx,
+                cx,
                 ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(TraitSolverLangItem::Unsize),
+                    cx,
+                    cx.require_lang_item(TraitSolverLangItem::Unsize),
                     [a_tail_ty, b_tail_ty],
                 ),
             ),
@@ -1002,25 +993,24 @@ where
         a_tys: I::Tys,
         b_tys: I::Tys,
     ) -> Result<Candidate<I>, NoSolution> {
-        let tcx = self.interner();
+        let cx = self.cx();
         let Goal { predicate: (_a_ty, b_ty), .. } = goal;
 
         let (&a_last_ty, a_rest_tys) = a_tys.split_last().unwrap();
-        let &b_last_ty = b_tys.last().unwrap();
+        let b_last_ty = b_tys.last().unwrap();
 
         // Instantiate just the tail field of B., and require that they're equal.
-        let unsized_a_ty =
-            Ty::new_tup_from_iter(tcx, a_rest_tys.iter().copied().chain([b_last_ty]));
+        let unsized_a_ty = Ty::new_tup_from_iter(cx, a_rest_tys.iter().copied().chain([b_last_ty]));
         self.eq(goal.param_env, unsized_a_ty, b_ty)?;
 
         // Similar to ADTs, require that we can unsize the tail.
         self.add_goal(
             GoalSource::ImplWhereBound,
             goal.with(
-                tcx,
+                cx,
                 ty::TraitRef::new(
-                    tcx,
-                    tcx.require_lang_item(TraitSolverLangItem::Unsize),
+                    cx,
+                    cx.require_lang_item(TraitSolverLangItem::Unsize),
                     [a_last_ty, b_last_ty],
                 ),
             ),
@@ -1062,11 +1052,9 @@ where
             // takes precedence over the structural auto trait candidate being
             // assembled.
             ty::Coroutine(def_id, _)
-                if self
-                    .interner()
-                    .is_lang_item(goal.predicate.def_id(), TraitSolverLangItem::Unpin) =>
+                if self.cx().is_lang_item(goal.predicate.def_id(), TraitSolverLangItem::Unpin) =>
             {
-                match self.interner().coroutine_movability(def_id) {
+                match self.cx().coroutine_movability(def_id) {
                     Movability::Static => Some(Err(NoSolution)),
                     Movability::Movable => Some(
                         self.probe_builtin_trait_candidate(BuiltinImplSource::Misc).enter(|ecx| {
@@ -1111,7 +1099,7 @@ where
             | ty::Tuple(_)
             | ty::Adt(_, _) => {
                 let mut disqualifying_impl = None;
-                self.interner().for_each_relevant_impl(
+                self.cx().for_each_relevant_impl(
                     goal.predicate.def_id(),
                     goal.predicate.self_ty(),
                     |impl_def_id| {
@@ -1140,7 +1128,7 @@ where
         source: CandidateSource<I>,
         goal: Goal<I, TraitPredicate<I>>,
         constituent_tys: impl Fn(
-            &EvalCtxt<'_, Infcx>,
+            &EvalCtxt<'_, D>,
             I::Ty,
         ) -> Result<Vec<ty::Binder<I, I::Ty>>, NoSolution>,
     ) -> Result<Candidate<I>, NoSolution> {
@@ -1151,10 +1139,7 @@ where
                     .into_iter()
                     .map(|ty| {
                         ecx.enter_forall(ty, |ty| {
-                            goal.with(
-                                ecx.interner(),
-                                goal.predicate.with_self_ty(ecx.interner(), ty),
-                            )
+                            goal.with(ecx.cx(), goal.predicate.with_self_ty(ecx.cx(), ty))
                         })
                     })
                     .collect::<Vec<_>>(),

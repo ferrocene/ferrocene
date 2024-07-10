@@ -4,13 +4,12 @@ use std::collections::BTreeSet;
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::fmt::{Debug, Write};
-use std::fs::{self, File};
+use std::fs;
 use std::hash::Hash;
-use std::io::{BufRead, BufReader};
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::{atomic, OnceLock};
+use std::sync::atomic;
 use std::time::{Duration, Instant};
 
 use crate::core::build_steps::tool::{self, SourceType};
@@ -277,7 +276,7 @@ impl PathSet {
     /// This is used for `StepDescription::krate`, which passes all matching crates at once to
     /// `Step::make_run`, rather than calling it many times with a single crate.
     /// See `tests.rs` for examples.
-    fn intersection_removing_matches(&self, needles: &mut Vec<&Path>, module: Kind) -> PathSet {
+    fn intersection_removing_matches(&self, needles: &mut Vec<PathBuf>, module: Kind) -> PathSet {
         let mut check = |p| {
             for (i, n) in needles.iter().enumerate() {
                 let matched = Self::check(p, n, module);
@@ -349,7 +348,7 @@ const PATH_REMAP: &[(&str, &[&str])] = &[
     ),
 ];
 
-fn remap_paths(paths: &mut Vec<&Path>) {
+fn remap_paths(paths: &mut Vec<PathBuf>) {
     let mut remove = vec![];
     let mut add = vec![];
     for (i, path) in paths.iter().enumerate().filter_map(|(i, path)| path.to_str().map(|s| (i, s)))
@@ -358,7 +357,7 @@ fn remap_paths(paths: &mut Vec<&Path>) {
             // Remove leading and trailing slashes so `tests/` and `tests` are equivalent
             if path.trim_matches(std::path::is_separator) == search {
                 remove.push(i);
-                add.extend(replace.iter().map(Path::new));
+                add.extend(replace.iter().map(PathBuf::from));
                 break;
             }
         }
@@ -441,8 +440,25 @@ impl StepDescription {
             }
         }
 
-        // strip CurDir prefix if present
-        let mut paths: Vec<_> = paths.iter().map(|p| p.strip_prefix(".").unwrap_or(p)).collect();
+        // Attempt to resolve paths to be relative to the builder source directory.
+        let mut paths: Vec<PathBuf> = paths
+            .iter()
+            .map(|p| {
+                // If the path does not exist, it may represent the name of a Step, such as `tidy` in `x test tidy`
+                if !p.exists() {
+                    return p.clone();
+                }
+
+                // Make the path absolute, strip the prefix, and convert to a PathBuf.
+                match std::path::absolute(p) {
+                    Ok(p) => p.strip_prefix(&builder.src).unwrap_or(&p).to_path_buf(),
+                    Err(e) => {
+                        eprintln!("ERROR: {:?}", e);
+                        panic!("Due to the above error, failed to resolve path: {:?}", p);
+                    }
+                }
+            })
+            .collect();
 
         remap_paths(&mut paths);
 
@@ -580,7 +596,7 @@ impl<'a> ShouldRun<'a> {
     ///
     /// [`path`]: ShouldRun::path
     pub fn paths(mut self, paths: &[&str]) -> Self {
-        let submodules_paths = self.builder.get_all_submodules();
+        let submodules_paths = build_helper::util::parse_gitmodules(&self.builder.src);
 
         self.paths.insert(PathSet::Set(
             paths
@@ -632,7 +648,7 @@ impl<'a> ShouldRun<'a> {
     /// (for now, just `all_krates` and `paths`, but we may want to add an `aliases` function in the future?)
     fn pathset_for_paths_removing_matches(
         &self,
-        paths: &mut Vec<&Path>,
+        paths: &mut Vec<PathBuf>,
         kind: Kind,
     ) -> Vec<PathSet> {
         let mut sets = vec![];
@@ -669,7 +685,8 @@ pub enum Kind {
     Setup,
     Suggest,
     Vendor,
-    Sign,
+    Perf,
+    Sign, // for Ferrocene
 }
 
 impl Kind {
@@ -691,7 +708,8 @@ impl Kind {
             Kind::Setup => "setup",
             Kind::Suggest => "suggest",
             Kind::Vendor => "vendor",
-            Kind::Sign => "sign",
+            Kind::Perf => "perf",
+            Kind::Sign => "sign", // for Ferrocene
         }
     }
 
@@ -703,6 +721,7 @@ impl Kind {
             Kind::Run => "Running",
             Kind::Suggest => "Suggesting",
             Kind::Clippy => "Linting",
+            Kind::Perf => "Profiling & benchmarking",
             _ => {
                 let title_letter = self.as_str()[0..1].to_ascii_uppercase();
                 return format!("{title_letter}{}ing", &self.as_str()[1..]);
@@ -741,7 +760,6 @@ impl<'a> Builder<'a> {
                 tool::Rls,
                 tool::RustAnalyzer,
                 tool::RustAnalyzerProcMacroSrv,
-                tool::RustDemangler,
                 tool::Rustdoc,
                 tool::Clippy,
                 tool::CargoClippy,
@@ -759,7 +777,8 @@ impl<'a> Builder<'a> {
                 tool::RustdocGUITest,
                 tool::OptimizedDist,
                 tool::CoverageDump,
-                tool::LlvmBitcodeLinker
+                tool::LlvmBitcodeLinker,
+                tool::RustcPerf,
             ),
             Kind::Clippy => describe!(
                 clippy::Std,
@@ -783,7 +802,6 @@ impl<'a> Builder<'a> {
                 clippy::RemoteTestServer,
                 clippy::Rls,
                 clippy::RustAnalyzer,
-                clippy::RustDemangler,
                 clippy::Rustdoc,
                 clippy::Rustfmt,
                 clippy::RustInstaller,
@@ -856,7 +874,6 @@ impl<'a> Builder<'a> {
                 test::Miri,
                 test::CargoMiri,
                 test::Clippy,
-                test::RustDemangler,
                 test::CompiletestTest,
                 test::CrateRunMakeSupport,
                 test::RustdocJSStd,
@@ -934,7 +951,6 @@ impl<'a> Builder<'a> {
                 dist::Rls,
                 dist::RustAnalyzer,
                 dist::Rustfmt,
-                dist::RustDemangler,
                 dist::Clippy,
                 dist::Miri,
                 dist::LlvmTools,
@@ -969,7 +985,6 @@ impl<'a> Builder<'a> {
                 // install::Cargo,
                 // install::RustAnalyzer,
                 // install::Rustfmt,
-                // install::RustDemangler,
                 // install::Clippy,
                 // install::Miri,
                 // install::LlvmTools,
@@ -980,7 +995,6 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::install::Cargo,
                 crate::ferrocene::install::RustAnalyzer,
                 crate::ferrocene::install::Rustfmt,
-                crate::ferrocene::install::RustDemangler,
                 crate::ferrocene::install::Clippy,
                 crate::ferrocene::install::Miri,
                 crate::ferrocene::install::LlvmTools,
@@ -1016,7 +1030,7 @@ impl<'a> Builder<'a> {
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()
-            Kind::Format | Kind::Suggest => vec![],
+            Kind::Format | Kind::Suggest | Kind::Perf => vec![],
         }
     }
 
@@ -1089,7 +1103,8 @@ impl<'a> Builder<'a> {
                 path.as_ref().map_or([].as_slice(), |path| std::slice::from_ref(path)),
             ),
             Subcommand::Vendor { .. } => (Kind::Vendor, &paths[..]),
-            Subcommand::Sign => (Kind::Sign, &paths[..]),
+            Subcommand::Perf { .. } => (Kind::Perf, &paths[..]),
+            Subcommand::Sign => (Kind::Sign, &paths[..]), // for Ferrocene
         };
 
         Self::new_internal(build, kind, paths.to_owned())
@@ -1104,23 +1119,12 @@ impl<'a> Builder<'a> {
     }
 
     pub fn doc_rust_lang_org_channel(&self) -> String {
-        // When using precompiled compiler from CI, we need to use CI rustc's channel and
-        // ignore `rust.channel` from the configuration. Otherwise most of the rustdoc tests
-        // will fail due to incompatible `DOC_RUST_LANG_ORG_CHANNEL`.
-        let channel = if let Some(commit) = self.config.download_rustc_commit() {
-            self.config
-                .read_file_by_commit(&PathBuf::from("src/ci/channel"), commit)
-                .trim()
-                .to_owned()
-        } else {
-            match &*self.config.channel {
-                "stable" => &self.version,
-                "beta" => "beta",
-                "nightly" | "dev" => "nightly",
-                // custom build of rustdoc maybe? link to the latest stable docs just in case
-                _ => "stable",
-            }
-            .to_owned()
+        let channel = match &*self.config.channel {
+            "stable" => &self.version,
+            "beta" => "beta",
+            "nightly" | "dev" => "nightly",
+            // custom build of rustdoc maybe? link to the latest stable docs just in case
+            _ => "stable",
         };
 
         format!("https://doc.rust-lang.org/{channel}")
@@ -2312,28 +2316,6 @@ impl<'a> Builder<'a> {
         self.verbose_than(1, || println!("{}< {:?}", "  ".repeat(self.stack.borrow().len()), step));
         self.cache.put(step, out.clone());
         out
-    }
-
-    /// Return paths of all submodules.
-    pub fn get_all_submodules(&self) -> &[String] {
-        static SUBMODULES_PATHS: OnceLock<Vec<String>> = OnceLock::new();
-
-        let init_submodules_paths = |src: &PathBuf| {
-            let file = File::open(src.join(".gitmodules")).unwrap();
-
-            let mut submodules_paths = vec![];
-            for line in BufReader::new(file).lines().map_while(Result::ok) {
-                let line = line.trim();
-                if line.starts_with("path") {
-                    let actual_path = line.split(' ').last().expect("Couldn't get value of path");
-                    submodules_paths.push(actual_path.to_owned());
-                }
-            }
-
-            submodules_paths
-        };
-
-        SUBMODULES_PATHS.get_or_init(|| init_submodules_paths(&self.src))
     }
 
     /// Ensure that a given step is built *only if it's supposed to be built by default*, returning

@@ -10,9 +10,7 @@ use rustc_ast::{MetaItemKind, MetaItemLit, NestedMetaItem};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::{Applicability, IntoDiagArg, MultiSpan};
 use rustc_errors::{DiagCtxtHandle, StashKey};
-use rustc_feature::{
-    is_unsafe_attr, AttributeDuplicates, AttributeType, BuiltinAttribute, BUILTIN_ATTRIBUTE_MAP,
-};
+use rustc_feature::{AttributeDuplicates, AttributeType, BuiltinAttribute, BUILTIN_ATTRIBUTE_MAP};
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{self as hir};
@@ -116,8 +114,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         let mut seen = FxHashMap::default();
         let attrs = self.tcx.hir().attrs(hir_id);
         for attr in attrs {
-            self.check_unsafe_attr(attr);
-
             match attr.path().as_slice() {
                 [sym::diagnostic, sym::do_not_recommend] => {
                     self.check_do_not_recommend(attr.span, hir_id, target)
@@ -126,7 +122,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     self.check_diagnostic_on_unimplemented(attr.span, hir_id, target)
                 }
                 [sym::inline] => self.check_inline(hir_id, attr, span, target),
-                [sym::coverage] => self.check_coverage(hir_id, attr, span, target),
+                [sym::coverage] => self.check_coverage(attr, span, target),
                 [sym::non_exhaustive] => self.check_non_exhaustive(hir_id, attr, span, target),
                 [sym::marker] => self.check_marker(hir_id, attr, span, target),
                 [sym::target_feature] => {
@@ -312,21 +308,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         true
     }
 
-    /// Checks if `unsafe()` is applied to an invalid attribute.
-    fn check_unsafe_attr(&self, attr: &Attribute) {
-        if !attr.is_doc_comment() {
-            let attr_item = attr.get_normal_item();
-            if let ast::Safety::Unsafe(unsafe_span) = attr_item.unsafety {
-                if !is_unsafe_attr(attr.name_or_empty()) {
-                    self.dcx().emit_err(errors::InvalidAttrUnsafe {
-                        span: unsafe_span,
-                        name: attr_item.path.clone(),
-                    });
-                }
-            }
-        }
-    }
-
     /// Checks if `#[diagnostic::on_unimplemented]` is applied to a trait definition
     fn check_diagnostic_on_unimplemented(
         &self,
@@ -388,47 +369,18 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
     }
 
-    /// Checks if a `#[coverage]` is applied directly to a function
-    fn check_coverage(&self, hir_id: HirId, attr: &Attribute, span: Span, target: Target) -> bool {
+    /// Checks that `#[coverage(..)]` is applied to a function/closure/method,
+    /// or to an impl block or module.
+    fn check_coverage(&self, attr: &Attribute, span: Span, target: Target) -> bool {
         match target {
-            // #[coverage] on function is fine
             Target::Fn
             | Target::Closure
-            | Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent) => true,
-
-            // function prototypes can't be covered
-            Target::Method(MethodKind::Trait { body: false }) | Target::ForeignFn => {
-                self.tcx.emit_node_span_lint(
-                    UNUSED_ATTRIBUTES,
-                    hir_id,
-                    attr.span,
-                    errors::IgnoredCoverageFnProto,
-                );
-                true
-            }
-
-            Target::Mod | Target::ForeignMod | Target::Impl | Target::Trait => {
-                self.tcx.emit_node_span_lint(
-                    UNUSED_ATTRIBUTES,
-                    hir_id,
-                    attr.span,
-                    errors::IgnoredCoveragePropagate,
-                );
-                true
-            }
-
-            Target::Expression | Target::Statement | Target::Arm => {
-                self.tcx.emit_node_span_lint(
-                    UNUSED_ATTRIBUTES,
-                    hir_id,
-                    attr.span,
-                    errors::IgnoredCoverageFnDefn,
-                );
-                true
-            }
+            | Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent)
+            | Target::Impl
+            | Target::Mod => true,
 
             _ => {
-                self.dcx().emit_err(errors::IgnoredCoverageNotCoverable {
+                self.dcx().emit_err(errors::CoverageNotFnOrClosure {
                     attr_span: attr.span,
                     defn_span: span,
                 });

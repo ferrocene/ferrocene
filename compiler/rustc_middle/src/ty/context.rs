@@ -240,7 +240,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         assert_matches!(self.def_kind(trait_def_id), DefKind::Trait);
         let trait_generics = self.generics_of(trait_def_id);
         (
-            ty::TraitRef::new(self, trait_def_id, args.truncate_to(self, trait_generics)),
+            ty::TraitRef::new_from_args(self, trait_def_id, args.truncate_to(self, trait_generics)),
             &args[trait_generics.count()..],
         )
     }
@@ -261,12 +261,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.check_args_compatible(def_id, args)
     }
 
-    fn check_and_mk_args(
-        self,
-        def_id: DefId,
-        args: impl IntoIterator<Item: Into<ty::GenericArg<'tcx>>>,
-    ) -> ty::GenericArgsRef<'tcx> {
-        self.check_and_mk_args(def_id, args)
+    fn debug_assert_args_compatible(self, def_id: DefId, args: ty::GenericArgsRef<'tcx>) {
+        self.debug_assert_args_compatible(def_id, args);
     }
 
     fn intern_canonical_goal_evaluation_step(
@@ -1677,11 +1673,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Converts a `DefPathHash` to its corresponding `DefId` in the current compilation
     /// session, if it still exists. This is used during incremental compilation to
     /// turn a deserialized `DefPathHash` into its current `DefId`.
-    pub fn def_path_hash_to_def_id(
-        self,
-        hash: DefPathHash,
-        err_msg: &dyn std::fmt::Debug,
-    ) -> DefId {
+    pub fn def_path_hash_to_def_id(self, hash: DefPathHash) -> Option<DefId> {
         debug!("def_path_hash_to_def_id({:?})", hash);
 
         let stable_crate_id = hash.stable_crate_id();
@@ -1689,13 +1681,9 @@ impl<'tcx> TyCtxt<'tcx> {
         // If this is a DefPathHash from the local crate, we can look up the
         // DefId in the tcx's `Definitions`.
         if stable_crate_id == self.stable_crate_id(LOCAL_CRATE) {
-            self.untracked
-                .definitions
-                .read()
-                .local_def_path_hash_to_def_id(hash, err_msg)
-                .to_def_id()
+            Some(self.untracked.definitions.read().local_def_path_hash_to_def_id(hash)?.to_def_id())
         } else {
-            self.def_path_hash_to_def_id_extern(hash, stable_crate_id)
+            Some(self.def_path_hash_to_def_id_extern(hash, stable_crate_id))
         }
     }
 

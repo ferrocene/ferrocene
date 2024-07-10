@@ -2990,3 +2990,41 @@ pub(crate) struct ExprRArrowCall {
     #[suggestion(style = "short", applicability = "machine-applicable", code = ".")]
     pub span: Span,
 }
+
+#[derive(Diagnostic)]
+#[diag(parse_dot_dot_range_attribute)]
+pub(crate) struct DotDotRangeAttribute {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(parse_invalid_attr_unsafe)]
+#[note]
+pub struct InvalidAttrUnsafe {
+    #[primary_span]
+    pub span: Span,
+    pub name: Path,
+}
+
+#[derive(Diagnostic)]
+#[diag(parse_unsafe_attr_outside_unsafe)]
+pub struct UnsafeAttrOutsideUnsafe {
+    #[primary_span]
+    #[label]
+    pub span: Span,
+    #[subdiagnostic]
+    pub suggestion: UnsafeAttrOutsideUnsafeSuggestion,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion(
+    parse_unsafe_attr_outside_unsafe_suggestion,
+    applicability = "machine-applicable"
+)]
+pub struct UnsafeAttrOutsideUnsafeSuggestion {
+    #[suggestion_part(code = "unsafe(")]
+    pub left: Span,
+    #[suggestion_part(code = ")")]
+    pub right: Span,
+}

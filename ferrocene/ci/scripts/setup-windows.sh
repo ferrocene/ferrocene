@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-set -euo pipefail
+set -xeuo pipefail
 IFS=$'\n\t'
 
 # All of our Python scripts have `#!/usr/bin/env python3` as their shebang,
@@ -38,3 +38,8 @@ fi
 # Use `cmake.portable` to ensure it is added to path and because the virtual package
 # was previously broken intermittently.
 choco install -y cmake.portable ninja zstandard gcc-arm-embedded llvm
+
+# Install `uv` and set up a venv.
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv venv
+uv pip sync requirements.txt

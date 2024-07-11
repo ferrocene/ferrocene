@@ -55,8 +55,9 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
+X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
-AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS 
+AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + X86_64_LINUX_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
 AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
@@ -173,7 +174,7 @@ def calculate_targets(host_plus_stage: str):
             raise Exception(f"Host {host} not supported at this time, please add support")
     elif stage == "std":
         if host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_BUILD_STD_TARGETS
+            targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":

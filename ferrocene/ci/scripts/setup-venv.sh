@@ -15,7 +15,12 @@ source $HOME/.cargo/env
 echo "source $HOME/.cargo/env" >> $BASH_ENV
 
 uv venv ~/.venv
-source ~/.venv/bin/activate
-echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
+if [[ "${OSTYPE}" = "msys" ]]; then
+    source ~/.venv/Scripts/activate
+    echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
+else
+    source ~/.venv/bin/activate
+    echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
+fi
 
 uv pip sync requirements.txt

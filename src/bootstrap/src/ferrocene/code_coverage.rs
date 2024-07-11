@@ -51,7 +51,7 @@ impl Step for ProfilerBuiltinsNoCore {
         cargo.arg("--no-default-features");
 
         let mut cmd: Command = cargo.into();
-        builder.run_cmd(BootstrapCommand::from(&mut cmd).fail_fast());
+        builder.run(BootstrapCommand::from(&mut cmd).fail_fast());
 
         let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
 

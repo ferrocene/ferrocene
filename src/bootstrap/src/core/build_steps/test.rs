@@ -2434,13 +2434,8 @@ impl Step for CrateLibrustc {
 ///
 /// Returns whether the test succeeded.
 #[allow(clippy::too_many_arguments)] // FIXME: reduce the number of args and remove this.
-<<<<<<< HEAD
 pub(crate) fn run_cargo_test<'a>(
-    cargo: impl Into<Command>,
-=======
-fn run_cargo_test<'a>(
     cargo: impl Into<BootstrapCommand>,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     libtest_args: &[&str],
     crates: &[String],
     primary_crate: &str,

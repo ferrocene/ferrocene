@@ -35,3 +35,5 @@ fn main() {
     rustc().input("debug.rs").opt_level("1").arg("-Cdebug-assertions=yes").run();
     run_fail("debug");
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

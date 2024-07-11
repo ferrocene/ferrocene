@@ -905,12 +905,8 @@ _x.py_commands() {
 'setup:Set up the environment for development' \
 'suggest:Suggest a subset of tests to run, based on modified files' \
 'vendor:Vendor dependencies' \
-<<<<<<< HEAD
-'perf:Perform profiling and benchmarking of the compiler using the \`rustc-perf\` benchmark suite' \
-'sign:Sign Ferrocene qualification documents' \
-=======
 'perf:Perform profiling and benchmarking of the compiler using the \`rustc-perf-wrapper\` tool' \
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+'sign:Sign Ferrocene qualification documents' \
     )
     _describe -t commands 'x.py commands' commands "$@"
 }

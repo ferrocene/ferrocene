@@ -29,7 +29,7 @@ impl Step for FlipLink {
         builder.info(format!("Building {PATH}").as_str());
 
         let compiler = builder.compiler(0, builder.config.build);
-        let mut cmd = prepare_tool_cargo(
+        let cmd = prepare_tool_cargo(
             builder,
             compiler,
             Mode::ToolBootstrap,
@@ -38,10 +38,9 @@ impl Step for FlipLink {
             PATH,
             SourceType::Submodule,
             &[],
-        )
-        .into();
+        );
 
-        builder.run(&mut cmd);
+        builder.run(cmd);
 
         builder
             .cargo_out(compiler, Mode::ToolBootstrap, self.target)

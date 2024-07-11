@@ -22,3 +22,5 @@ fn main() {
     rustc().arg("-C").arg("debuginfo=0").arg("-C").arg("debuginfo=2").input("main.rs").run();
     rustc().arg("-C").arg("debuginfo=2").arg("-C").arg("debuginfo=0").input("main.rs").run();
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

@@ -191,7 +191,7 @@ impl Step for GenerateCoverageReport {
 
         let bootstrap_cmd = BootstrapCommand::from(&mut cmd);
 
-        builder.run_cmd(bootstrap_cmd);
+        builder.run(bootstrap_cmd);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

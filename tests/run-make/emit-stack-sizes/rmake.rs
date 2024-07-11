@@ -21,3 +21,5 @@ fn main() {
         .run()
         .assert_stdout_contains(".stack_sizes");
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

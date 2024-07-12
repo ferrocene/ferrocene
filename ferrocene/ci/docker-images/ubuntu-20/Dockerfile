@@ -23,7 +23,7 @@ ARG BUILDPLATFORM
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
 
-FROM --platform=linux/amd64 ubuntu:20.04
+FROM --platform=$TARGETPLATFORM ubuntu:20.04
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM
@@ -59,11 +59,21 @@ RUN <<-EOF
     # Replace this with qemu-user-static once we're not on Ubuntu 20.04.
     apt-install binfmt-support
     
-    # Needed for aarch64-unknown-linux-gnu cross-compilation
-    apt-install \
-        g++-aarch64-linux-gnu \
-        binutils-aarch64-linux-gnu \
-        libc6-dev-arm64-cross
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        # Needed for aarch64-unknown-linux-gnu cross-compilation
+        apt-install \
+            g++-aarch64-linux-gnu \
+            gcc-aarch64-linux-gnu \
+            binutils-aarch64-linux-gnu \
+            libc6-dev-arm64-cross
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        # Needed for x86_64-unknown-linux-gnu cross-compilation
+        apt-install \
+            g++-x86-64-linux-gnu \
+            gcc-x86-64-linux-gnu \
+            binutils-x86-64-linux-gnu \
+            libc6-dev-amd64-cross
+    fi
     
     # Needed for thumbv7em-none-eabihf & armv8r-none-eabihf cross-compilation
     apt-install gcc-arm-none-eabi
@@ -119,9 +129,20 @@ EOF
 # If you are reading this comment because you need to upgrade past NodeJS 16,
 # you will unfortunately need to change this to build NodeJS from source.
 RUN <<-EOF
+    set -xe
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        ARCH="x64"
+        SHA="874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87"
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        ARCH="arm64"
+        SHA="e88d86154d1ce53dc52fd74d79d4bfdf0b05f58c0bb2639adfa36e9378b770c4"
+    else
+        echo "Unsupported platform"
+        exit 1
+    fi
     mkdir /opt/nodejs
-    curl -Lo /tmp/nodejs.tar.xz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.xz
-    echo "874463523f26ed528634580247f403d200ba17a31adf2de98a7b124c6eb33d87 /tmp/nodejs.tar.xz" | sha256sum -c
+    curl -Lo /tmp/nodejs.tar.xz https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-${ARCH}.tar.xz
+    echo "${SHA} /tmp/nodejs.tar.xz" | sha256sum -c
     tar xf /tmp/nodejs.tar.xz -C /opt/nodejs --strip-components=1
     rm /tmp/nodejs.tar.xz
     /opt/nodejs/bin/node --version

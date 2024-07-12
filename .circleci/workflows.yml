@@ -17,22 +17,37 @@ version: 2.1
 # * `docker-repository-url--`: calculates the URL of an ECR repository
 #
 parameters:
-  docker-image-tag--ubuntu-20:
+  docker-image-tag--x86_64--ubuntu-20:
     type: string
     default: ""
-  docker-image-tag--ubuntu-24:
+  docker-image-tag--aarch64--ubuntu-20:
     type: string
     default: ""
-  docker-image-rebuild--ci-docker-images--ubuntu-20:
+  docker-image-tag--x86_64--ubuntu-24:
+    type: string
+    default: ""
+  docker-image-tag--aarch64--ubuntu-24:
+    type: string
+    default: ""
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20:
     type: boolean
     default: false
-  docker-image-rebuild--ci-docker-images--ubuntu-24:
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20:
+    type: boolean
+    default: false
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24:
+    type: boolean
+    default: false
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-24:
     type: boolean
     default: false
   docker-repository-url--ci-docker-images:
     type: string
     default: ""
   llvm-rebuild--x86_64-unknown-linux-gnu:
+    type: boolean
+    default: false
+  llvm-rebuild--aarch64-unknown-linux-gnu:
     type: boolean
     default: false
   llvm-rebuild--aarch64-apple-darwin:
@@ -47,7 +62,13 @@ parameters:
   targets--x86_64-unknown-linux-gnu--self-test:
     type: string
     default: ""
-  targets--x86_64-unknown-linux-gnu--std-only:
+  targets--x86_64-unknown-linux-gnu--std:
+    type: string
+    default: ""
+  targets--aarch64-unknown-linux-gnu--build:
+    type: string
+    default: ""
+  targets--aarch64-unknown-linux-gnu--self-test:
     type: string
     default: ""
   targets--aarch64-apple-darwin--build:
@@ -77,7 +98,7 @@ jobs:
   # test suite for all the supported targets will be run when bors tries to
   # merge the PR anyway.
   commit-checks:
-    executor: docker-ubuntu-24
+    executor: docker-x86_64-ubuntu-24
     resource_class: large # 4-core
     environment:
       FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
@@ -102,7 +123,7 @@ jobs:
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
   misc-checks:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -123,7 +144,7 @@ jobs:
   # x86_64-unknown-linux-gnu jobs
 
   x86_64-linux-build:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -135,7 +156,7 @@ jobs:
     steps: [ferrocene-job-build]
 
   x86_64-linux-docs:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -156,7 +177,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -168,7 +189,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-tools:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -180,11 +201,11 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-targets:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std-only >>
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-unknown-linux-gnu--std >>
       SCRIPT: |
         ./x.py --stage 2 dist rust-std
     steps:
@@ -193,7 +214,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-dist-src:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -207,7 +228,7 @@ jobs:
           llvm-subset: false
 
   wasm-dist-oxidos:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: large # 4-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -219,7 +240,7 @@ jobs:
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-generic-test-container:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     parameters:
       job:
         type: string
@@ -252,12 +273,12 @@ jobs:
 
     steps:
       - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
   x86_64-linux-traceability-matrix:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: medium # 2-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -291,11 +312,11 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
-          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-llvm:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -316,7 +337,7 @@ jobs:
           command: echo
 
   x86_64-linux-self-test:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -326,6 +347,80 @@ jobs:
           depth: 1
       - aws-oidc-auth
       - setup-qnx-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
+
+  # aarch64-unknown-linux-gnu jobs
+
+  aarch64-linux-llvm:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.xlarge # 8-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--aarch64-unknown-linux-gnu >>
+          steps:
+            - aws-oidc-auth
+            - ferrocene-checkout
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  aarch64-linux-build:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.xlarge # 8-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps: [ferrocene-job-build]
+
+  aarch64-linux-dist:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.xlarge # 8-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: aarch64-linux-build
+
+  aarch64-linux-dist-tools:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.xlarge # 8-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - ferrocene-job-dist:
+          restore-from-job: aarch64-linux-build
+
+  aarch64-linux-self-test:
+    executor: docker-aarch64-ubuntu-20
+    resource_class: arm.medium # 2-core
+    environment:
+      FERROCENE_HOST: aarch64-unknown-linux-gnu
+      FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--self-test >>
+    steps:
+      - aws-oidc-auth
+      - ferrocene-git-shallow-clone:
+          depth: 1
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -489,7 +584,7 @@ jobs:
           command: ferrocene/ci/scripts/run-self-test.sh
 
   finish-build:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: small # 1-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
@@ -516,7 +611,7 @@ jobs:
   # Simple job used to run "something" when no other jobs are supposed to be
   # run. See the `skip` workflow for more information.
   skip:
-    executor: docker-ubuntu-20
+    executor: docker-x86_64-ubuntu-20
     resource_class: small # 1-core
     steps:
       - run:
@@ -529,10 +624,10 @@ jobs:
   # Job to build and upload a Docker image defined ferrocene/ci/docker-images.
   # If the image exists in the remote storage and is up to date, the job will
   # early exit without doing any work.
-  build-docker:
-    description: Job that builds and uploads a Docker image, if needed.
+  build-docker-x86_64:
+    description: Job that builds and uploads a Docker image on an x86_64 host, if needed.
     docker:
-      - image: cimg/base:current-22.04
+      - image: cimg/base:current
     resource_class: large # 4-core
     parameters:
       image:
@@ -552,7 +647,43 @@ jobs:
             - aws-oidc-auth
             - ferrocene-git-shallow-clone:
                 depth: 1
-            - setup_remote_docker
+            - setup_remote_docker:
+                version: default
+            - run:
+                name: Build and upload the Docker image, if needed
+                command: ferrocene/ci/scripts/build-docker-image.sh
+                environment:
+                  IMAGE_NAME: << parameters.image >>
+                  IMAGE_TAG: << parameters.tag >>
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  build-docker-aarch64:
+    description: Job that builds and uploads a Docker image on an aarch64 host, if needed.
+    docker:
+      - image: cimg/base:current
+    resource_class: arm.medium # 2-core
+    parameters:
+      image:
+        description: The image that needs to be built
+        type: string
+      tag:
+        description: The tag of the image that needs to be build
+        type: string
+      rebuild:
+        description: Whether the image should be rebuilt or not
+        type: boolean
+    steps:
+      - when:
+          condition: << parameters.rebuild >>
+          steps:
+            - aws-cli/install
+            - aws-oidc-auth
+            - ferrocene-git-shallow-clone:
+                depth: 1
+            - setup_remote_docker:
+                version: default # Only default and edge are supported: https://circleci.com/docs/building-docker-images/#docker-version
             - run:
                 name: Build and upload the Docker image, if needed
                 command: ferrocene/ci/scripts/build-docker-image.sh
@@ -586,11 +717,11 @@ workflows:
           - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
           - equal: [<< pipeline.git.branch >>, "trying.tmp"]
     jobs:
-      - build-docker:
+      - build-docker-x86_64:
           name: build-docker--ubuntu-24
           image: ubuntu-24
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-24 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-24 >>
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
 
       - commit-checks:
           requires:
@@ -603,19 +734,25 @@ workflows:
         - equal: [<< pipeline.git.branch >>, "staging"]
         - equal: [<< pipeline.git.branch >>, "trying"]
     jobs:
-      - build-docker:
-          name: build-docker--ubuntu-20
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-20--x86_64
           image: ubuntu-20
-          tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
-          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--ubuntu-20 >>
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
+
+      - build-docker-aarch64:
+          name: build-docker--ubuntu-20--aarch64
+          image: ubuntu-20
+          tag: << pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20 >>
 
       - misc-checks:
           requires:
-            - build-docker--ubuntu-20
+            - build-docker--ubuntu-20--x86_64
 
       - x86_64-linux-llvm:
           requires:
-            - build-docker--ubuntu-20
+            - build-docker--ubuntu-20--x86_64
       - x86_64-linux-build:
           requires:
             - x86_64-linux-llvm
@@ -688,6 +825,26 @@ workflows:
             - x86_64-linux-dist
             - x86_64-linux-dist-tools
             - x86_64-linux-dist-targets
+            - aarch64-linux-dist
+
+      - aarch64-linux-llvm:
+          requires:
+            - build-docker--ubuntu-20--aarch64
+      - aarch64-linux-build:
+          requires:
+            - aarch64-linux-llvm
+      - aarch64-linux-dist:
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-dist-tools:
+          requires:
+            - aarch64-linux-build
+      - aarch64-linux-self-test:
+          requires:
+            - aarch64-linux-dist
+            - aarch64-linux-dist-tools
+            - x86_64-linux-dist-targets
+            - x86_64-linux-dist
 
       - aarch64-darwin-llvm: {}
       - aarch64-darwin-build:
@@ -722,6 +879,7 @@ workflows:
             - x86_64-linux-self-test
             - x86_64-windows-self-test
             - wasm-dist-oxidos
+            - aarch64-linux-self-test
             - aarch64-darwin-self-test
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
@@ -1066,14 +1224,24 @@ commands:
           command: aws sts get-caller-identity
 
 executors:
-  docker-ubuntu-20:
+  docker-x86_64-ubuntu-20:
     docker:
-      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-20 >>
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
-  docker-ubuntu-24:
+  docker-aarch64-ubuntu-20:
     docker:
-      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--ubuntu-24 >>
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-20 >>
+        aws_auth:
+          oidc_role_arn: $AWS_ROLE_ARN
+  docker-x86_64-ubuntu-24:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+        aws_auth:
+          oidc_role_arn: $AWS_ROLE_ARN
+  docker-aarch64-ubuntu-24:
+    docker:
+      - image: << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< pipeline.parameters.docker-image-tag--aarch64--ubuntu-24 >>
         aws_auth:
           oidc_role_arn: $AWS_ROLE_ARN
   linux-vm:

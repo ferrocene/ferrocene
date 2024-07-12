@@ -138,6 +138,12 @@ should not be used in production.
      - Full
      - \-
 
+   * - :target:`aarch64-unknown-linux-gnu`
+     - ``aarch64-unknown-linux-gnu``
+     - Host platform
+     - Full
+     - \-
+
 
 If your project needs support for one of these targets, please reach out to the
 Ferrocene support team.

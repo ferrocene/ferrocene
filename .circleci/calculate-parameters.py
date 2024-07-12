@@ -42,10 +42,11 @@ QNX_TARGETS = [
 ]
 
 # Targets only built (and self-tested!) on Linux.
-LINUX_ONLY_TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
+X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
 # x86_64-unknown-linux-gnu builds a number of cross compilation targets
 # for us and is special cased somewhat.
-X86_64_LINUX_BUILT_CROSS_TARGETS = [
+X86_64_LINUX_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
@@ -54,24 +55,30 @@ X86_64_LINUX_BUILT_CROSS_TARGETS = [
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
 ]
-X86_64_LINUX_ALL_TARGETS = LINUX_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS + QNX_TARGETS
+X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
+AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + X86_64_LINUX_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
-MAC_ONLY_TARGETS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-AARCH64_MAC_ALL_TARGETS = MAC_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS
+AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
+# We don't currently produce x86_64 Apple host tools, but we will one day
+AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
+AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
 
 # Tagets only built (and tested!) on Windows
-WINDOWS_ONLY_TARGETS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_ALL_TARGETS = WINDOWS_ONLY_TARGETS + X86_64_LINUX_BUILT_CROSS_TARGETS
+X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
+X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
 
 
-def calculate_docker_image_tag(image: str):
+def calculate_docker_image_tag(platform_plus_image: str):
     """
     Calculates the value of parameters starting with `docker-image-tag--`.
     """
+    platform, image = platform_plus_image.split("--", 1)
+
     path = os.path.join(DOCKER_IMAGES_PATH, image)
     if not os.path.exists(os.path.join(path, "Dockerfile")):
         raise ScriptError(f"unknown Docker image: {image}")
@@ -90,18 +97,18 @@ def calculate_docker_image_tag(image: str):
             hash.update(file.encode("utf-8"))
             hash.update(f.read())
 
-    return f"{image}-{hash.hexdigest()}"
+    return f"{platform}-{image}-{hash.hexdigest()}"
 
 
-def calculate_docker_image_rebuild(repo_plus_image: str) -> bool:
+def calculate_docker_image_rebuild(repo_plus_platform_plus_image: str) -> bool:
     """
     Calculate the value of parameters starting with `docker-image-rebuild--`
     """
-    repo, image = repo_plus_image.split("--", 1)
+    repo, platform, image = repo_plus_platform_plus_image.split("--", 2)
     try:
         image = ecr.describe_images(
             repositoryName=repo,
-            imageIds=[{"imageTag": calculate_docker_image_tag(image)}],
+            imageIds=[{"imageTag": calculate_docker_image_tag(f"{platform}--{image}")}],
         )["imageDetails"][0]
     except ecr.exceptions.ImageNotFoundException:
         # Image doesn't exist, build it.
@@ -155,26 +162,30 @@ def calculate_targets(host_plus_stage: str):
     # The CI does not run Python 3.10 and thus `match` statements don't exist yet
     # in this universe.
     if stage == "build":
-        if host == "x86_64-unknown-linux-gnu":
-            targets = LINUX_ONLY_TARGETS
+        if host == "aarch64-unknown-linux-gnu":
+            targets = AARCH64_LINUX_BUILD_HOSTS
+        elif host == "x86_64-unknown-linux-gnu":
+            targets = X86_64_LINUX_BUILD_HOSTS
         elif host == "aarch64-apple-darwin":
-            targets = MAC_ONLY_TARGETS
+            targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
         elif host == "x86_64-pc-windows-msvc":
-            targets = WINDOWS_ONLY_TARGETS
+            targets = X86_64_WINDOWS_BUILD_HOSTS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
-    elif stage == "std-only":
+    elif stage == "std":
         if host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_ALL_TARGETS
+            targets = X86_64_LINUX_BUILD_STD_TARGETS_ALL
         else:
             raise Exception("Only the `x86_64-unknown-linux-gnu` currently runs the `std-only` stage.")
     elif stage == "self-test":
-        if host == "x86_64-unknown-linux-gnu":
-            targets = X86_64_LINUX_ALL_TARGETS
+        if host == "aarch64-unknown-linux-gnu":
+            targets = AARCH64_LINUX_SELF_TEST_TARGETS    
+        elif host == "x86_64-unknown-linux-gnu":
+            targets = X86_64_LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":
-            targets = AARCH64_MAC_ALL_TARGETS
+            targets = AARCH64_MAC_SELF_TEST_TARGETS
         elif host == "x86_64-pc-windows-msvc":
-            targets = X86_64_WINDOWS_ALL_TARGETS
+            targets = X86_64_WINDOWS_SELF_TEST_TARGETS
         else:
             raise Exception(f"Host {host} not supported at this time, please add support")
     else:

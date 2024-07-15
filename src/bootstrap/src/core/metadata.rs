@@ -89,5 +89,10 @@ fn workspace_members(build: &Build) -> Vec<Package> {
     };
 
     // Collects `metadata.packages` from all workspaces.
-    collect_metadata("Cargo.toml")
+
+    let packages = collect_metadata("Cargo.toml");
+    let ra_packages = collect_metadata("src/tools/rust-analyzer/Cargo.toml");
+    let bootstrap_packages = collect_metadata("src/bootstrap/Cargo.toml");
+
+    packages.into_iter().chain(ra_packages).chain(bootstrap_packages).collect()
 }

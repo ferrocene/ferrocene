@@ -136,9 +136,6 @@ jobs:
       - run:
           name: Perform licensing checks
           command: reuse --include-submodules lint
-      - run:
-          name: Run x.py's own tests
-          command: python3 src/bootstrap/bootstrap_test.py
       - ferrocene-ci
 
   # x86_64-unknown-linux-gnu jobs

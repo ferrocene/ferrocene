@@ -271,6 +271,7 @@ jobs:
     steps:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
@@ -310,6 +311,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-llvm:
@@ -1004,6 +1006,8 @@ commands:
     parameters:
       docker-image-tag:
         type: string
+      run-emulator-docker-image-tag:
+        type: string
       restore-from-job:
         type: string
       emulator-script:
@@ -1034,6 +1038,7 @@ commands:
             aws ecr get-login-password --region us-east-1 \
               | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
             docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1077,7 +1082,7 @@ commands:
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
+                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
                     << parameters.emulator-script >>
 
       - ferrocene-ci:

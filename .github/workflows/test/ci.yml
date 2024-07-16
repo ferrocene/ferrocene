@@ -1,0 +1,232 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+name: CI
+on:
+  push:
+    branches:
+      - trying
+  pull_request:
+    branches:
+      - "**"
+
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+defaults:
+  run:
+    # On Linux, macOS, and Windows, use the system-provided bash as the default
+    # shell. (This should only make a difference on Windows, where the default
+    # shell is PowerShell.)
+    shell: bash
+
+concurrency:
+  # For a given workflow, if we push to the same branch, cancel all previous builds on that branch.
+  # We add an exception for try builds (try branch) and unrolled rollup builds (try-perf), which
+  # are all triggered on the same branch, but which should be able to run concurrently.
+  group: ${{ github.workflow }}-${{ ((github.ref == 'refs/heads/trying') && github.sha) || github.ref }}
+  cancel-in-progress: true
+
+# Many of these environments are set via `./ferrocene/ci/github-actions/calculate-parameters.py`
+env:
+  docker-image-tag--x86_64--ubuntu-20: null
+  docker-image-tag--aarch64--ubuntu-20: null
+  docker-image-tag--x86_64--ubuntu-24: null
+  docker-image-tag--aarch64--ubuntu-24: null
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20: null
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20: null
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24: null
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-24: null
+  docker-repository-url--ci-docker-images: null
+  llvm-rebuild--x86_64-unknown-linux-gnu: null
+  llvm-rebuild--aarch64-unknown-linux-gnu: null
+  llvm-rebuild--aarch64-apple-darwin: null
+  llvm-rebuild--x86_64-pc-windows-msvc: null
+  targets--x86_64-unknown-linux-gnu--build: null
+  targets--x86_64-unknown-linux-gnu--self-test: null
+  targets--x86_64-unknown-linux-gnu--std: null
+  targets--aarch64-unknown-linux-gnu--build: null
+  targets--aarch64-unknown-linux-gnu--self-test: null
+  targets--aarch64-apple-darwin--build: null
+  targets--aarch64-apple-darwin--self-test: null
+  targets--x86_64-pc-windows-msvc--build: null
+  targets--x86_64-pc-windows-msvc--self-test: null
+
+jobs:
+  # The job matrix for `calculate_matrix` is defined in src/ci/github-actions/jobs.yml.
+  # It calculates which jobs should be executed, based on the data of the ${{ github }} context.
+  # If you want to modify CI jobs, take a look at src/ci/github-actions/jobs.yml.
+  calculate_matrix:
+    name: Calculate job matrix
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.jobs.outputs.jobs }}
+      run_type: ${{ steps.jobs.outputs.run_type }}
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v4
+      - run: ferrocene/ci/scripts/setup-venv.sh
+      - name: Calculate the CI job matrix
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: python3 ferrocene/ci/github-actions/calculate-parameters.py >> $GITHUB_OUTPUT
+        id: jobs
+
+  llvm:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+
+
+  build:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+  
+  dist:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+  
+  dist-targets:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+
+  test:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+
+  self-test:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+
+  tracability-matrix:
+    name: ${{ matrix.name }}
+    needs: [ calculate_matrix ]
+    runs-on: ubuntu-latest
+    # runs-on: "${{ matrix.os }}"
+    # defaults:
+    #   run:
+    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+    timeout-minutes: 240
+    env:
+      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    continue-on-error: false
+    strategy:
+      matrix:
+        # Check the `calculate_matrix` job to see how is the matrix defined.
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+    steps:
+      - run: echo "${{ matrix }}"
+    

@@ -13,14 +13,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 source $HOME/.cargo/env
 echo "source $HOME/.cargo/env" >> $BASH_ENV
+echo "PATH=$HOME/.cargo/bin:$HOME/.venv/bin:$PATH" >> $GITHUB_ENV
 
 uv venv ~/.venv
-if [[ "${OSTYPE}" = "msys" ]]; then
-    source ~/.venv/Scripts/activate
-    echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
-else
-    source ~/.venv/bin/activate
-    echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
-fi
+export VIRTUAL_ENV=$HOME/.venv
+echo "VIRTUAL_ENV=$HOME/.venv" >> $BASH_ENV
+echo "VIRTUAL_ENV=$HOME/.venv" >> $GITHUB_ENV
 
 uv pip sync requirements.txt

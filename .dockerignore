@@ -5,4 +5,5 @@
 # please update it to do so!
 **
 !requirements.txt
-!ferrocene/ci/docker-images
+!ferrocene/ci/
+!.github/

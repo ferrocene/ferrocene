@@ -1072,6 +1072,7 @@ commands:
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
                     --interactive \

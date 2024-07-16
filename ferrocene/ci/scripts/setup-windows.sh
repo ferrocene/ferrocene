@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-set -euo pipefail
+set -xeuo pipefail
 IFS=$'\n\t'
 
 # All of our Python scripts have `#!/usr/bin/env python3` as their shebang,

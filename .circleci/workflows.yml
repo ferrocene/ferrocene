@@ -442,6 +442,7 @@ jobs:
           steps:
             - ferrocene-checkout
             - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - setup-venv
             - aws-oidc-auth
             - ferrocene-ci
       - run:
@@ -913,11 +914,13 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
+            - setup-venv
       - when:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
+            - setup-venv
       - aws-oidc-auth
       - ferrocene-ci
       # Persist the build artifacts so following jobs don't have to start from
@@ -953,11 +956,13 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin
+            - setup-venv
       - when:
           condition:
             equal: [<<parameters.os>>, "windows"]
           steps:
             - ferrocene-setup-windows
+            - setup-venv
       - aws-oidc-auth
       - when:
           condition:  <<parameters.restore-from-job>>
@@ -1114,6 +1119,14 @@ commands:
       - run:
           name: Setup Windows environment
           command: ferrocene/ci/scripts/setup-windows.sh
+
+  # This task can be skipped inside docker containers, it's mainly intended for Mac/Windows hosts.
+  setup-venv:
+    description: Setup uv and the Python venv
+    steps:
+      - run:
+          name: Setup uv and the Python venv
+          command: ferrocene/ci/scripts/setup-venv.sh
 
   ferrocene-checkout:
     description: Checkout the Ferrocene source code

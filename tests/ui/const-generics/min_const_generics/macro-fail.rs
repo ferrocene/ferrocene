@@ -16,6 +16,7 @@ fn make_marker() -> impl Marker<gimme_a_const!(marker)> {
   //~| ERROR: type provided when a constant was expected
   Example::<gimme_a_const!(marker)>
   //~^ ERROR: type provided when a constant was expected
+  //~| ERROR type annotations needed
 }
 
 fn from_marker(_: impl Marker<{
@@ -35,11 +36,13 @@ fn main() {
   }>;
 
   let _fail = Example::<external_macro!()>;
-  //~^ ERROR: type provided when a constant was expected
+  //~^ ERROR: type provided when a constant
+  //~| ERROR type annotations needed
 
   let _fail = Example::<gimme_a_const!()>;
   //~^ ERROR unexpected end of macro invocation
   //~| ERROR: type provided when a constant was expected
+  //~| ERROR type annotations needed
 }
 
 // ferrocene-annotations: fls_xa7lp0zg1ol2

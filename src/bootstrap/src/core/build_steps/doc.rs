@@ -249,6 +249,7 @@ impl Step for TheBook {
         let shared_assets = builder.ensure(SharedAssets { target });
 
         // build the command first so we don't nest GHA groups
+        // FIXME: this doesn't do anything!
         builder.rustdoc_cmd(compiler);
 
         // build the redirect pages
@@ -300,7 +301,7 @@ fn invoke_rustdoc(
         cmd.arg("-Z").arg("unstable-options").arg("--disable-minification");
     }
 
-    builder.run(&mut cmd);
+    builder.run(cmd);
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -397,7 +398,7 @@ impl Step for Standalone {
             } else {
                 cmd.arg("--markdown-css").arg("rust.css");
             }
-            builder.run(&mut cmd);
+            builder.run(cmd);
         }
 
         // We open doc/index.html as the default if invoked as `x.py doc --open`
@@ -496,7 +497,7 @@ impl Step for Releases {
                 cmd.arg("--disable-minification");
             }
 
-            builder.run(&mut cmd);
+            builder.run(cmd);
         }
 
         // We open doc/RELEASES.html as the default if invoked as `x.py doc --open RELEASES.md`
@@ -745,7 +746,7 @@ fn doc_std(
         format!("library{} in {} format", crate_description(requested_crates), format.as_str());
     let _guard = builder.msg_doc(compiler, description, target);
 
-    builder.run(&mut cargo.into());
+    builder.run(cargo);
     builder.cp_link_r(&out_dir, out);
 }
 
@@ -870,7 +871,7 @@ impl Step for Rustc {
         let proc_macro_out_dir = builder.stage_out(compiler, Mode::Rustc).join("doc");
         symlink_dir_force(&builder.config, &out, &proc_macro_out_dir);
 
-        builder.run(&mut cargo.into());
+        builder.run(cargo);
 
         if !builder.config.dry_run() {
             // Sanity check on linked compiler crates
@@ -896,12 +897,11 @@ impl Step for Rustc {
 macro_rules! tool_doc {
     (
         $tool: ident,
-        $should_run: literal,
         $path: literal,
         $(rustc_tool = $rustc_tool:literal, )?
-        $(in_tree = $in_tree:literal ,)?
         $(is_library = $is_library:expr,)?
         $(crates = $crates:expr)?
+        $(, submodule $(= $submodule:literal)? )?
        ) => {
         #[derive(Debug, Clone, Hash, PartialEq, Eq)]
         pub struct $tool {
@@ -915,7 +915,7 @@ macro_rules! tool_doc {
 
             fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
                 let builder = run.builder;
-                run.crate_or_deps($should_run).default_condition(builder.config.compiler_docs)
+                run.path($path).default_condition(builder.config.compiler_docs)
             }
 
             fn make_run(run: RunConfig<'_>) {
@@ -929,6 +929,15 @@ macro_rules! tool_doc {
             /// we do not merge it with the other documentation from std, test and
             /// proc_macros. This is largely just a wrapper around `cargo doc`.
             fn run(self, builder: &Builder<'_>) {
+                let source_type = SourceType::InTree;
+                $(
+                    let _ = source_type; // silence the "unused variable" warning
+                    let source_type = SourceType::Submodule;
+
+                    let path = Path::new(submodule_helper!( $path, submodule $( = $submodule )? ));
+                    builder.update_submodule(&path);
+                )?
+
                 let stage = builder.top_stage;
                 let target = self.target;
 
@@ -948,12 +957,6 @@ macro_rules! tool_doc {
                     // with strange errors, but only on a full bors test ...
                     builder.ensure(compile::Rustc::new(compiler, target));
                 }
-
-                let source_type = if true $(&& $in_tree)? {
-                    SourceType::InTree
-                } else {
-                    SourceType::Submodule
-                };
 
                 // Build cargo command.
                 let mut cargo = prepare_tool_cargo(
@@ -1001,7 +1004,7 @@ macro_rules! tool_doc {
                 symlink_dir_force(&builder.config, &out, &proc_macro_out_dir);
 
                 let _guard = builder.msg_doc(compiler, stringify!($tool).to_lowercase(), target);
-                builder.run(&mut cargo.into());
+                builder.run(cargo);
 
                 if !builder.config.dry_run() {
                     // Sanity check on linked doc directories
@@ -1016,21 +1019,14 @@ macro_rules! tool_doc {
     }
 }
 
-tool_doc!(Rustdoc, "rustdoc-tool", "src/tools/rustdoc", crates = ["rustdoc", "rustdoc-json-types"]);
-tool_doc!(
-    Rustfmt,
-    "rustfmt-nightly",
-    "src/tools/rustfmt",
-    crates = ["rustfmt-nightly", "rustfmt-config_proc_macro"]
-);
-tool_doc!(Clippy, "clippy", "src/tools/clippy", crates = ["clippy_config", "clippy_utils"]);
-tool_doc!(Miri, "miri", "src/tools/miri", crates = ["miri"]);
+tool_doc!(Rustdoc, "src/tools/rustdoc", crates = ["rustdoc", "rustdoc-json-types"]);
+tool_doc!(Rustfmt, "src/tools/rustfmt", crates = ["rustfmt-nightly", "rustfmt-config_proc_macro"]);
+tool_doc!(Clippy, "src/tools/clippy", crates = ["clippy_config", "clippy_utils"]);
+tool_doc!(Miri, "src/tools/miri", crates = ["miri"]);
 tool_doc!(
     Cargo,
-    "cargo",
     "src/tools/cargo",
     rustc_tool = false,
-    in_tree = false,
     crates = [
         "cargo",
         "cargo-credential",
@@ -1042,12 +1038,12 @@ tool_doc!(
         "crates-io",
         "mdman",
         "rustfix",
-    ]
+    ],
+    submodule = "src/tools/cargo"
 );
-tool_doc!(Tidy, "tidy", "src/tools/tidy", rustc_tool = false, crates = ["tidy"]);
+tool_doc!(Tidy, "src/tools/tidy", rustc_tool = false, crates = ["tidy"]);
 tool_doc!(
     Bootstrap,
-    "bootstrap",
     "src/bootstrap",
     rustc_tool = false,
     is_library = true,
@@ -1055,7 +1051,6 @@ tool_doc!(
 );
 tool_doc!(
     RunMakeSupport,
-    "run_make_support",
     "src/tools/run-make-support",
     rustc_tool = false,
     is_library = true,
@@ -1093,7 +1088,7 @@ impl Step for ErrorIndex {
         index.arg(out);
         index.arg(&builder.version);
 
-        builder.run(&mut index);
+        builder.run(index);
     }
 }
 
@@ -1129,7 +1124,7 @@ impl Step for UnstableBookGen {
         cmd.arg(builder.src.join("src"));
         cmd.arg(out);
 
-        builder.run(&mut cmd);
+        builder.run(cmd);
     }
 }
 
@@ -1224,7 +1219,7 @@ impl Step for RustcBook {
             self.compiler.host,
             self.target,
         );
-        builder.run(&mut cmd);
+        builder.run(cmd);
         drop(doc_generator_guard);
 
         // Run rustbook/mdbook to generate the HTML pages.

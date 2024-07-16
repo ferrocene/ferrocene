@@ -2,14 +2,22 @@
 use crate::interface::{initialize_checked_jobserver, parse_cfg};
 use rustc_data_structures::profiling::TimePassesFormat;
 use rustc_errors::{emitter::HumanReadableErrorType, registry, ColorConfig};
+use rustc_session::config::{build_configuration, build_session_options, rustc_optgroups};
 use rustc_session::config::{
-    build_configuration, build_session_options, rustc_optgroups, BranchProtection, CFGuard, Cfg,
-    CollapseMacroDebuginfo, CoverageLevel, CoverageOptions, DebugInfo, DumpMonoStatsFormat,
-    ErrorOutputType, ExternEntry, ExternLocation, Externs, FunctionReturn, InliningThreshold,
-    Input, InstrumentCoverage, InstrumentXRay, LinkSelfContained, LinkerPluginLto, LocationDetail,
-    LtoCli, NextSolverConfig, OomStrategy, Options, OutFileName, OutputType, OutputTypes, PAuthKey,
-    PacRet, Passes, Polonius, ProcMacroExecutionStrategy, Strip, SwitchWithOptPath,
-    SymbolManglingVersion, WasiExecModel,
+    BranchProtection, CFGuard, Cfg, CollapseMacroDebuginfo, CoverageLevel, CoverageOptions,
+    DebugInfo, DumpMonoStatsFormat, ErrorOutputType,
+};
+use rustc_session::config::{
+    ExternEntry, ExternLocation, Externs, FunctionReturn, InliningThreshold, Input,
+    InstrumentCoverage, InstrumentXRay, LinkSelfContained, LinkerPluginLto,
+};
+use rustc_session::config::{
+    LocationDetail, LtoCli, NextSolverConfig, OomStrategy, Options, OutFileName, OutputType,
+    OutputTypes, PAuthKey, PacRet, Passes, PatchableFunctionEntry,
+};
+use rustc_session::config::{
+    Polonius, ProcMacroExecutionStrategy, Strip, SwitchWithOptPath, SymbolManglingVersion,
+    WasiExecModel,
 };
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
@@ -813,6 +821,11 @@ fn test_unstable_options_tracking_hash() {
     tracked!(packed_bundled_libs, true);
     tracked!(panic_abort_tests, true);
     tracked!(panic_in_drop, PanicStrategy::Abort);
+    tracked!(
+        patchable_function_entry,
+        PatchableFunctionEntry::from_total_and_prefix_nops(10, 5)
+            .expect("total must be greater than or equal to prefix")
+    );
     tracked!(plt, Some(true));
     tracked!(polonius, Polonius::Legacy);
     tracked!(precise_enum_drop_elaboration, false);

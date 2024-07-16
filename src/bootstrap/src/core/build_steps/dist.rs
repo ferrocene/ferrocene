@@ -26,6 +26,7 @@ use crate::core::build_steps::tool::{self, Tool};
 use crate::core::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::utils::channel::{self, Info};
+use crate::utils::exec::BootstrapCommand;
 use crate::utils::helpers::{
     exe, is_dylib, move_file, output, t, target_supports_cranelift_backend, timeit,
 };
@@ -1613,14 +1614,14 @@ impl Step for Extended {
             let _ = fs::remove_dir_all(&pkg);
 
             let pkgbuild = |component: &str| {
-                let mut cmd = Command::new("pkgbuild");
+                let mut cmd = BootstrapCommand::new("pkgbuild");
                 cmd.arg("--identifier")
                     .arg(format!("org.rust-lang.{}", component))
                     .arg("--scripts")
                     .arg(pkg.join(component))
                     .arg("--nopayload")
                     .arg(pkg.join(component).with_extension("pkg"));
-                builder.run(&mut cmd);
+                builder.run(cmd);
             };
 
             let prepare = |name: &str| {
@@ -1650,7 +1651,7 @@ impl Step for Extended {
             builder.create_dir(&pkg.join("res"));
             builder.create(&pkg.join("res/LICENSE.txt"), &license);
             builder.install(&etc.join("gfx/rust-logo.png"), &pkg.join("res"), 0o644);
-            let mut cmd = Command::new("productbuild");
+            let mut cmd = BootstrapCommand::new("productbuild");
             cmd.arg("--distribution")
                 .arg(xform(&etc.join("pkg/Distribution.xml")))
                 .arg("--resources")
@@ -1663,7 +1664,7 @@ impl Step for Extended {
                 .arg("--package-path")
                 .arg(&pkg);
             let _time = timeit(builder);
-            builder.run(&mut cmd);
+            builder.run(cmd);
         }
 
         if target.is_windows() {
@@ -1718,7 +1719,7 @@ impl Step for Extended {
 
             let heat_flags = ["-nologo", "-gg", "-sfrag", "-srd", "-sreg"];
             builder.run(
-                Command::new(&heat)
+                BootstrapCommand::new(&heat)
                     .current_dir(&exe)
                     .arg("dir")
                     .arg("rustc")
@@ -1734,7 +1735,7 @@ impl Step for Extended {
             );
             if built_tools.contains("rust-docs") {
                 builder.run(
-                    Command::new(&heat)
+                    BootstrapCommand::new(&heat)
                         .current_dir(&exe)
                         .arg("dir")
                         .arg("rust-docs")
@@ -1752,7 +1753,7 @@ impl Step for Extended {
                 );
             }
             builder.run(
-                Command::new(&heat)
+                BootstrapCommand::new(&heat)
                     .current_dir(&exe)
                     .arg("dir")
                     .arg("cargo")
@@ -1769,7 +1770,7 @@ impl Step for Extended {
                     .arg(etc.join("msi/remove-duplicates.xsl")),
             );
             builder.run(
-                Command::new(&heat)
+                BootstrapCommand::new(&heat)
                     .current_dir(&exe)
                     .arg("dir")
                     .arg("rust-std")
@@ -1785,7 +1786,7 @@ impl Step for Extended {
             );
             if built_tools.contains("rust-analyzer") {
                 builder.run(
-                    Command::new(&heat)
+                    BootstrapCommand::new(&heat)
                         .current_dir(&exe)
                         .arg("dir")
                         .arg("rust-analyzer")
@@ -1804,7 +1805,7 @@ impl Step for Extended {
             }
             if built_tools.contains("clippy") {
                 builder.run(
-                    Command::new(&heat)
+                    BootstrapCommand::new(&heat)
                         .current_dir(&exe)
                         .arg("dir")
                         .arg("clippy")
@@ -1823,7 +1824,7 @@ impl Step for Extended {
             }
             if built_tools.contains("miri") {
                 builder.run(
-                    Command::new(&heat)
+                    BootstrapCommand::new(&heat)
                         .current_dir(&exe)
                         .arg("dir")
                         .arg("miri")
@@ -1841,7 +1842,7 @@ impl Step for Extended {
                 );
             }
             builder.run(
-                Command::new(&heat)
+                BootstrapCommand::new(&heat)
                     .current_dir(&exe)
                     .arg("dir")
                     .arg("rust-analysis")
@@ -1859,7 +1860,7 @@ impl Step for Extended {
             );
             if target.ends_with("windows-gnu") {
                 builder.run(
-                    Command::new(&heat)
+                    BootstrapCommand::new(&heat)
                         .current_dir(&exe)
                         .arg("dir")
                         .arg("rust-mingw")
@@ -1878,7 +1879,7 @@ impl Step for Extended {
             let candle = |input: &Path| {
                 let output = exe.join(input.file_stem().unwrap()).with_extension("wixobj");
                 let arch = if target.contains("x86_64") { "x64" } else { "x86" };
-                let mut cmd = Command::new(&candle);
+                let mut cmd = BootstrapCommand::new(&candle);
                 cmd.current_dir(&exe)
                     .arg("-nologo")
                     .arg("-dRustcDir=rustc")
@@ -1907,7 +1908,7 @@ impl Step for Extended {
                 if target.ends_with("windows-gnu") {
                     cmd.arg("-dGccDir=rust-mingw");
                 }
-                builder.run(&mut cmd);
+                builder.run(cmd);
             };
             candle(&xform(&etc.join("msi/rust.wxs")));
             candle(&etc.join("msi/ui.wxs"));
@@ -1939,7 +1940,7 @@ impl Step for Extended {
 
             builder.info(&format!("building `msi` installer with {light:?}"));
             let filename = format!("{}-{}.msi", pkgname(builder, "rust"), target.triple);
-            let mut cmd = Command::new(&light);
+            let mut cmd = BootstrapCommand::new(&light);
             cmd.arg("-nologo")
                 .arg("-ext")
                 .arg("WixUIExtension")
@@ -1976,7 +1977,7 @@ impl Step for Extended {
             cmd.arg("-sice:ICE57");
 
             let _time = timeit(builder);
-            builder.run(&mut cmd);
+            builder.run(cmd);
 
             if !builder.config.dry_run() {
                 t!(move_file(exe.join(&filename), distdir(builder).join(&filename)));
@@ -1985,7 +1986,7 @@ impl Step for Extended {
     }
 }
 
-fn add_env(builder: &Builder<'_>, cmd: &mut Command, target: TargetSelection) {
+fn add_env(builder: &Builder<'_>, cmd: &mut BootstrapCommand, target: TargetSelection) {
     let mut parts = builder.version.split('.');
     cmd.env("CFG_RELEASE_INFO", builder.rust_version())
         .env("CFG_RELEASE_NUM", &builder.version)
@@ -2285,9 +2286,6 @@ impl Step for RustDev {
 
         builder.ensure(crate::core::build_steps::llvm::Llvm { target });
 
-        // We want to package `lld` to use it with `download-ci-llvm`.
-        builder.ensure(crate::core::build_steps::llvm::Lld { target });
-
         let src_bindir = builder.llvm_out(target).join("bin");
         // If updating this, you likely want to change
         // src/bootstrap/download-ci-llvm-stamp as well, otherwise local users
@@ -2304,10 +2302,15 @@ impl Step for RustDev {
             }
         }
 
-        // We don't build LLD on some platforms, so only add it if it exists
-        let lld_path = builder.lld_out(target).join("bin").join(exe("lld", target));
-        if lld_path.exists() {
-            tarball.add_file(lld_path, "bin", 0o755);
+        if builder.config.lld_enabled {
+            // We want to package `lld` to use it with `download-ci-llvm`.
+            let lld_out = builder.ensure(crate::core::build_steps::llvm::Lld { target });
+
+            // We don't build LLD on some platforms, so only add it if it exists
+            let lld_path = lld_out.join("bin").join(exe("lld", target));
+            if lld_path.exists() {
+                tarball.add_file(lld_path, "bin", 0o755);
+            }
         }
 
         tarball.add_file(builder.llvm_filecheck(target), "bin", 0o755);

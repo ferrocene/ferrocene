@@ -1183,13 +1183,20 @@ commands:
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
     steps:
       - run:
           name: Fetch QNX710 toolchain
           command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -v -x --zstd -f-
-      - run:
-          name: Set PATH to include QNX710 tools
-          command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX710 tools
+                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
       - run:
           name: Test qcc
           command: qcc -v || true

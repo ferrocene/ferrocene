@@ -1083,7 +1083,7 @@ commands:
                     --interactive \
                     --tty \
                     << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
-                    << parameters.emulator-script >>
+                    bash -c "<< parameters.emulator-script >>"
 
       - ferrocene-ci:
           wrapper: |

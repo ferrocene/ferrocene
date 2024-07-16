@@ -350,6 +350,28 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  x86_64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710/qnxsdp-env.sh; set -u; TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -835,6 +857,20 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
       - aarch64-linux-llvm:
           requires:
             - build-docker--ubuntu-20--aarch64
@@ -886,6 +922,8 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test

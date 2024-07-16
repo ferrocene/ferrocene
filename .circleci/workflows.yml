@@ -871,6 +871,13 @@ workflows:
           requires:
             - x86_64-linux-build
 
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-compiletest
+          job: test:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
       - aarch64-linux-llvm:
           requires:
             - build-docker--ubuntu-20--aarch64
@@ -924,6 +931,7 @@ workflows:
             - x86_64-windows-self-test
             - x86_64-qnx-test-library
             - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test

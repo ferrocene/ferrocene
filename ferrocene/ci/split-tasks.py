@@ -122,6 +122,33 @@ JOBS_DEFINITION: JobsDefinition = {
             ],
         ),
 
+        # like 'test:compiletest' minus the ONLY_HOSTS test groups
+        # the ONLY_HOSTS tests will run on the host even when
+        # `--target $NOT_THE_HOST` is passed to `x.py test`
+        # this avoids re-running tests on the same host triple across
+        # different CI jobs
+        "compiletest-no-only-hosts": find_all_compiletests(
+            exclude=[
+                # see `test:compiletest`
+                "auxiliary",
+                "rustdoc-gui",
+
+                # ONLY_HOST tests
+                "coverage-run-rustdoc",
+                "pretty",
+                "rustdoc",
+                "rustdoc-js",
+                "rustdoc-js-std",
+                "rustdoc-json",
+                "rustdoc-ui",
+                "ui-fulldeps",
+            ],
+            deprioritize=[
+                # see `test:compiletest`
+                "run-make-fulldeps",
+            ],
+        ),
+
         # Library tests are the second slowest part of a test run, so we run
         # them in a separate job to reduce the CI wall clock time. Note that
         # stdlib tests are run in a separate job, as those require IPv6 and

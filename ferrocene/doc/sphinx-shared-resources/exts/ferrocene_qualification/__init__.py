@@ -2,12 +2,12 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 from . import (
-    substitutions,
     document_id,
     domain,
-    signature_page,
-    target,
     intersphinx_support,
+    signature_page,
+    substitutions,
+    target,
 )
 import string
 

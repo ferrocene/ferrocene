@@ -1049,9 +1049,13 @@ commands:
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs
+    # a separate Docker image can be used to run a newer version of e.g. QEMU than
+    # the version available in `docker-image-tag`
     parameters:
+      # the "preparing the emulator" and other steps will run in this Docker image
       docker-image-tag:
         type: string
+      # the "running the emulator" step will run in this Docker image
       run-emulator-docker-image-tag:
         type: string
       restore-from-job:

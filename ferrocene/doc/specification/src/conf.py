@@ -23,12 +23,10 @@ author = "The Ferrocene Developers"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "ferrocene_intersphinx_support",
     "ferrocene_qualification",
     "ferrocene_spec",
     "ferrocene_spec_lints",
     "ferrocene_toctrees",
-    "sphinx.ext.intersphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

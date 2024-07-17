@@ -6,16 +6,11 @@ copyright = "The Ferrocene Developers"
 author = "The Ferrocene Developers"
 
 extensions = [
-    # ferrocene
-    "ferrocene_intersphinx_support",
+    "ferrocene_autoglossary",
+    "ferrocene_domain_cli",
     "ferrocene_qualification",
     "ferrocene_toctrees",
-    "ferrocene_domain_cli",
-    "ferrocene_autoglossary",
-    # 3rd-party
     "myst_parser",
-    # sphinx.ext
-    "sphinx.ext.intersphinx",
     "sphinx.ext.autosectionlabel",
 ]
 

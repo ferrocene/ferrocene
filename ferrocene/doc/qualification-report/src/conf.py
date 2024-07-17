@@ -15,9 +15,6 @@ extensions = [
     "ferrocene_qualification",
     "ferrocene_test_outcomes",
     "ferrocene_autoglossary",
-
-    "sphinx.ext.intersphinx",
-    "ferrocene_intersphinx_support",
 ]
 
 ferrocene_id = "QR"

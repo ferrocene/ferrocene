@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-# This extension adds some helpers needed to integrate Ferrocene's build system
+# This module adds some helpers needed to integrate Ferrocene's build system
 # with InterSphinx. More specifically, the extension:
 #
 # - Defines the "ferrocene-intersphinx" Sphinx builder, which only produces the
@@ -18,6 +18,7 @@ from sphinx.builders import Builder
 from sphinx.builders.html import StandaloneHTMLBuilder
 import json
 import sphinx
+import sphinx.ext.intersphinx
 
 
 class IntersphinxBuilder(Builder):
@@ -81,13 +82,11 @@ def inject_intersphinx_mappings(app, config):
 
 
 def setup(app):
+    # Automatically enable the sphinx.ext.intersphinx extension without
+    # requiring users to configure it in their conf.py.
+    sphinx.ext.intersphinx.setup(app)
+
     app.add_builder(IntersphinxBuilder)
 
     app.add_config_value("ferrocene_intersphinx_mappings", None, "env", [str])
     app.connect("config-inited", inject_intersphinx_mappings, priority=1)
-
-    return {
-        "version": "0",
-        "parallel_read_safe": True,
-        "parallel_write_safe": True,
-    }

@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
-from . import substitutions, document_id, domain, signature_page, target
+from . import (
+    substitutions,
+    document_id,
+    domain,
+    signature_page,
+    target,
+    intersphinx_support,
+)
 import string
 
 
@@ -11,6 +18,7 @@ def setup(app):
     domain.setup(app)
     signature_page.setup(app)
     target.setup(app)
+    intersphinx_support.setup(app)
 
     app.connect("config-inited", validate_config)
     app.add_config_value("ferrocene_id", None, "env", [str])

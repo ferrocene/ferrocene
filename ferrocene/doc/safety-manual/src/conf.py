@@ -10,9 +10,6 @@ extensions = [
     "ferrocene_qualification",
     "ferrocene_domain_cli",
     "ferrocene_autoglossary",
-
-    "sphinx.ext.intersphinx",
-    "ferrocene_intersphinx_support",
     "sphinx.ext.autosectionlabel",
 ]
 

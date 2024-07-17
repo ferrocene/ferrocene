@@ -18,6 +18,9 @@ documents the features of each extension.
 This extension implements "global" features that are not tied to any specific
 document, and should be imported in each document.
 
+The extension also enables ``sphinx.ext.intersphinx`` without the need to
+manually enable it in ``conf.py``.
+
 Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -215,12 +218,6 @@ each document containing a glossary. It serves two purposes:
 
 * Automatically adds links to terms defined in ``glossary`` directives across
   the document, without the need to manually use the builtin ``:term:`` role.
-
-``ferrocene_intersphinx_support`` extension
--------------------------------------------
-
-This extension is required by the build system to enable interlinking between
-documents. It must be added to all documents and requires no maintainer action.
 
 ``ferrocene_document_list`` extension
 -------------------------------------

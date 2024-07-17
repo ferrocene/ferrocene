@@ -281,6 +281,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
         match self.mode {
             SphinxMode::Html => {
                 intersphinx_ensure_steps(builder, self.target);
+                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building {}", P::SOURCE));
 
@@ -294,6 +295,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             }
             SphinxMode::XmlDoctrees => {
                 intersphinx_ensure_steps(builder, self.target);
+                add_external_sphinx_needs_argument(&self, builder, &src, &mut cmd);
 
                 builder.info(&format!("Building XML doctrees of {}", P::SOURCE));
                 cmd.args(&["-b", "xml"]);
@@ -436,6 +438,72 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     // extension then takes care of registering the mappings with InterSphinx.
     let serialized = serde_json::to_string(&inventories).unwrap();
     cmd.arg("-D").arg(format!("ferrocene_intersphinx_mappings={serialized}"));
+}
+
+fn add_external_sphinx_needs_argument<P: Step + IsSphinxBook>(
+    book: &SphinxBook<P>,
+    builder: &Builder<'_>,
+    src: &Path,
+    cmd: &mut BootstrapCommand,
+) {
+    #[derive(serde_derive::Serialize)]
+    struct ExternalNeed {
+        base_url: String,
+        json_path: PathBuf,
+    }
+
+    #[derive(serde_derive::Deserialize)]
+    struct NeedsJson {
+        versions: HashMap<String, serde_json::Value>,
+    }
+
+    match book.mode {
+        SphinxMode::Html | SphinxMode::XmlDoctrees => {}
+        SphinxMode::OnlyObjectsInv => return,
+    }
+    if builder.config.dry_run() {
+        return;
+    }
+
+    let path_to_root = std::iter::repeat("..")
+        .take(P::DEST.chars().filter(|c| *c == '/').count() + 1)
+        .collect::<Vec<_>>()
+        .join("/");
+
+    let mut needs = Vec::new();
+    for config in intersphinx_configs() {
+        // Sphinx-needs complains if you provide the same document's needs.json as external.
+        if config.dest == P::DEST {
+            continue;
+        }
+
+        let json_path = builder
+            .out
+            .join(book.target.triple)
+            .join("ferrocene")
+            .join("objectsinv-out")
+            .join(config.dest)
+            .join("needs.json");
+
+        // When there are no requirements defined in a document, sphinx-needs still generates a
+        // needs.json file, but it doesn't contain information about any version. This results in
+        // the sphinx-needs extension then failing to load the external needs.json, as it expects
+        // the version to be there. We thus parse the files before including them in the array to
+        // discard any empty one.
+        let json_raw = std::fs::read(&json_path).unwrap();
+        let json_contents: NeedsJson = serde_json::from_slice(&json_raw).unwrap();
+        if json_contents.versions.is_empty() {
+            continue;
+        }
+
+        needs.push(ExternalNeed {
+            base_url: format!("{path_to_root}/{}", config.dest),
+            json_path: relative_path(src, &json_path),
+        });
+    }
+
+    let serialized = serde_json::to_string(&needs).unwrap();
+    cmd.arg("-D").arg(format!("ferrocene_external_needs={serialized}"));
 }
 
 fn path_define(key: &str, value: &Path) -> OsString {

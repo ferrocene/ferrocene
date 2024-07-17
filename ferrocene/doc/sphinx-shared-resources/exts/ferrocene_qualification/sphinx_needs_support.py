@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 import sphinx_needs
+import json
 
 
 def configure_sphinx_needs(app, config):
@@ -49,11 +50,16 @@ def configure_sphinx_needs(app, config):
         },
     ]
 
+    if config.ferrocene_external_needs is not None:
+        config.needs_external_needs = json.loads(config.ferrocene_external_needs)
+
     config.needs_title_optional = True
     config.needs_build_json = True
+    config.needs_reproducible_json = True
 
 
 def setup(app):
     sphinx_needs.setup(app)
 
+    app.add_config_value("ferrocene_external_needs", None, "env", str)
     app.connect("config-inited", configure_sphinx_needs, priority=100)

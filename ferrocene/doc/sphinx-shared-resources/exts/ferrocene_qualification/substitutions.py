@@ -5,10 +5,12 @@
 # the name of the product). This extension sets some default substitutions, and
 # supports loading additional ones from a TOML file.
 
+
+# 3rd-party imports
 from docutils import nodes
-from sphinx.transforms import SphinxTransform
-import docutils
-import sphinx
+from docutils.transforms.references import Substitutions
+from sphinx.application import Sphinx
+from sphinx.transforms import DefaultSubstitutions, SphinxTransform
 import tomli
 
 
@@ -16,8 +18,8 @@ class AddCustomSubstitutions(SphinxTransform):
     # Run this step before substitutions are applied.
     default_priority = (
         min(
-            sphinx.transforms.DefaultSubstitutions.default_priority,
-            docutils.transforms.references.Substitutions.default_priority,
+            DefaultSubstitutions.default_priority,
+            Substitutions.default_priority,
         )
         - 1
     )
@@ -41,7 +43,7 @@ class AddCustomSubstitutions(SphinxTransform):
             self.app.config["rust_version"],
         )
 
-    def add_substitution(self, name, value):
+    def add_substitution(self, name: str, value: str):
         substitution = nodes.substitution_definition()
         substitution["names"].append(name)
         substitution += nodes.Text(value)
@@ -50,5 +52,5 @@ class AddCustomSubstitutions(SphinxTransform):
         self.document.substitution_names[nodes.fully_normalize_name(name)] = name
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_transform(AddCustomSubstitutions)

@@ -7,11 +7,13 @@
 # dependencies globally). Each book should have a `make.py` script that updates
 # the submodules, import this shared module, and calls the main function here.
 
+
+# std imports
 from pathlib import Path
 import argparse
 import subprocess
-import venv
 import sys
+import venv
 
 
 def build_docs(root, env, builder, clear, serve, debug):

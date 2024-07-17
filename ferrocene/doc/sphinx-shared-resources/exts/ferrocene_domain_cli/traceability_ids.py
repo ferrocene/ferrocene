@@ -1,17 +1,25 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# std imports
 from collections import defaultdict
 import json
 import os
-import sphinx
+
+# 3rd-party imports
+from sphinx.util import display as sphinx_display
+from sphinx.application import Sphinx
+
+# local imports
+from .domain import CliDomain
 
 
-def write_traceability_ids(app):
+def write_traceability_ids(app: Sphinx):
     env = app.env
 
     options_by_document = defaultdict(list)
-    for option in env.get_domain("cli").get_options().values():
+    domain: CliDomain = env.get_domain("cli")
+    for option in domain.get_options().values():
         if option.no_traceability_matrix:
             continue
 
@@ -46,7 +54,7 @@ def write_traceability_ids(app):
         json.dump({"documents": documents}, f)
 
 
-def build_finished(app, exception):
+def build_finished(app: Sphinx, exception: Exception | None):
     # The build finished hook also runs when an exception is raised.
     if exception is not None:
         return
@@ -54,9 +62,9 @@ def build_finished(app, exception):
     if app.builder.name != "html":
         return
 
-    with sphinx.util.display.progress_message("dumping traceability ids"):
+    with sphinx_display.progress_message("dumping traceability ids"):
         write_traceability_ids(app)
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.connect("build-finished", build_finished)

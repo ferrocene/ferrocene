@@ -15,9 +15,6 @@ extensions = [
     "ferrocene_qualification",
     "ferrocene_relnotes",
     "ferrocene_autoglossary",
-
-    "sphinx.ext.intersphinx",
-    "ferrocene_intersphinx_support",
 ]
 
 html_theme = "ferrocene"

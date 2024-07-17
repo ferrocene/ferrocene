@@ -6,6 +6,7 @@ from . import (
     domain,
     intersphinx_support,
     signature_page,
+    sphinx_needs_support,
     substitutions,
     target,
 )
@@ -19,6 +20,7 @@ def setup(app):
     signature_page.setup(app)
     target.setup(app)
     intersphinx_support.setup(app)
+    sphinx_needs_support.setup(app)
 
     app.connect("config-inited", validate_config)
     app.add_config_value("ferrocene_id", None, "env", [str])

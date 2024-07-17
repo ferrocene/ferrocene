@@ -153,6 +153,7 @@ fn child_stdout_read_buf() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(any(target_os = "nto"), ignore)]
 fn test_process_status() {
     let mut status = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "exit 1"]).status().unwrap()
@@ -170,6 +171,7 @@ fn test_process_status() {
 }
 
 #[test]
+#[cfg_attr(any(target_os = "nto"), ignore)]
 fn test_process_output_fail_to_start() {
     match Command::new("/no-binary-by-this-name-should-exist").output() {
         Err(e) => assert_eq!(e.kind(), ErrorKind::NotFound),
@@ -179,6 +181,7 @@ fn test_process_output_fail_to_start() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(any(target_os = "nto"), ignore)]
 fn test_process_output_output() {
     let Output { status, stdout, stderr } = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "echo hello"]).output().unwrap()
@@ -194,6 +197,7 @@ fn test_process_output_output() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(any(target_os = "nto"), ignore)]
 fn test_process_output_error() {
     let Output { status, stdout, stderr } = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "mkdir ."]).output().unwrap()
@@ -232,6 +236,7 @@ fn test_finish_twice() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(any(target_os = "nto"), ignore)]
 fn test_wait_with_output_once() {
     let prog = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "echo hello"]).stdout(Stdio::piped()).spawn().unwrap()
@@ -290,6 +295,7 @@ fn test_override_env() {
 
 #[test]
 #[cfg_attr(target_os = "vxworks", ignore)]
+#[cfg_attr(target_os = "nto", ignore)]
 fn test_add_to_env() {
     let result = env_cmd().env("RUN_TEST_NEW_ENV", "123").output().unwrap();
     let output = String::from_utf8_lossy(&result.stdout).to_string();

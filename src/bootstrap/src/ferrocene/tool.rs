@@ -1,11 +1,11 @@
 pub(crate) mod flip_link;
 
 use std::path::PathBuf;
-use std::process::Command;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
 use crate::core::config::TargetSelection;
+use crate::utils::exec::BootstrapCommand;
 use crate::{exe, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub(crate) struct SelfTest {
 
 impl SelfTest {
     pub(super) fn update_command(
-        cmd: &mut Command,
+        cmd: &mut BootstrapCommand,
         builder: &Builder<'_>,
         target: TargetSelection,
     ) {

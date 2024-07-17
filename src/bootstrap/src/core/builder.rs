@@ -2479,6 +2479,13 @@ pub struct Cargo {
     allow_features: String,
 }
 
+// ferrocene addition
+impl AsMut<BootstrapCommand> for Cargo {
+    fn as_mut(&mut self) -> &mut BootstrapCommand {
+        &mut self.command
+    }
+}
+
 impl Cargo {
     /// Calls `Builder::cargo` and `Cargo::configure_linker` to prepare an invocation of `cargo` to be run.
     pub fn new(

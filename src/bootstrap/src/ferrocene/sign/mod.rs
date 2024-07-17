@@ -13,8 +13,8 @@ use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
+use crate::utils::exec::BootstrapCommand;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
@@ -84,7 +84,7 @@ macro_rules! documents {
             builder: &Builder<'_>,
             target: TargetSelection,
             condition: impl Fn(&Path) -> bool,
-            f: impl Fn(Command, &Path, &Path),
+            f: impl Fn(BootstrapCommand, &Path, &Path),
         ) {
             $({
                 let source_dir = builder.src.join(crate::ferrocene::doc::$name::SOURCE);
@@ -115,12 +115,14 @@ documents![
     InternalProcedures,
 ];
 
-pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(builder: &Builder<'_>) -> Command {
+pub(super) fn document_signatures_cmd<B: Step + IsSphinxBook>(
+    builder: &Builder<'_>,
+) -> BootstrapCommand {
     let cosign = builder.ensure(cosign::CosignBinary);
     let cache_dir = builder.ensure(CacheSignatureFiles::<B>::new());
     let tool = builder.tool_exe(Tool::FerroceneDocumentSignatures);
 
-    let mut cmd = Command::new(&tool);
+    let mut cmd = BootstrapCommand::new(&tool);
     cmd.env("DOCUMENT_SIGNATURES_COSIGN_BINARY", &cosign);
     cmd.env("DOCUMENT_SIGNATURES_S3_CACHE_DIR", &cache_dir);
     match &builder.config.ferrocene_document_signatures {

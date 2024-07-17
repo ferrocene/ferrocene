@@ -29,3 +29,5 @@ fn main() {
         .run()
         .assert_stdout_contains("bar");
 }
+
+// ferrocene-annotations: um_rustc_C_link_args

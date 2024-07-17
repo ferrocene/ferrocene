@@ -26,12 +26,8 @@ use crate::core::builder::{Builder, Compiler, Kind, RunConfig, ShouldRun, Step};
 use crate::core::config::flags::get_completion;
 use crate::core::config::flags::Subcommand;
 use crate::core::config::TargetSelection;
-<<<<<<< HEAD
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
-use crate::utils::exec::{BootstrapCommand, OutputMode};
-=======
 use crate::utils::exec::BootstrapCommand;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::helpers::{
     self, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,
     linker_args, linker_flags, t, target_supports_cranelift_backend, up_to_date, LldThreads,

@@ -8,11 +8,7 @@ use std::fs;
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-<<<<<<< HEAD
-use std::process::Command;
 use std::sync::atomic;
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::time::{Duration, Instant};
 
 use crate::core::build_steps::tool::{self, SourceType};

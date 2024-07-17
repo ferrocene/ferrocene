@@ -21,3 +21,5 @@ fn main() {
     fs_wrapper::remove_file(dynamic_lib_name("m3"));
     run_fail("m4");
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

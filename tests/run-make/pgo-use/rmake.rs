@@ -53,3 +53,6 @@ fn main() {
     reversed_ir.push('\n');
     llvm_filecheck().patterns("filecheck-patterns.txt").stdin(reversed_ir.as_bytes()).run();
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level
+// ferrocene-annotations: um_rustc_C_codegen_units

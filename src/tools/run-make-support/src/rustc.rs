@@ -86,7 +86,8 @@ impl Rustc {
     }
 
     /// Specify type(s) of output files to generate.
-    pub fn emit(&mut self, kinds: &str) -> &mut Self {
+    pub fn emit<S: AsRef<str>>(&mut self, kinds: S) -> &mut Self {
+        let kinds = kinds.as_ref();
         self.cmd.arg(format!("--emit={kinds}"));
         self
     }
@@ -107,7 +108,11 @@ impl Rustc {
     }
 
     /// Remap source path prefixes in all output.
-    pub fn remap_path_prefix<P: AsRef<Path>>(&mut self, from: P, to: P) -> &mut Self {
+    pub fn remap_path_prefix<P: AsRef<Path>, P2: AsRef<Path>>(
+        &mut self,
+        from: P,
+        to: P2,
+    ) -> &mut Self {
         let from = from.as_ref().to_string_lossy();
         let to = to.as_ref().to_string_lossy();
 

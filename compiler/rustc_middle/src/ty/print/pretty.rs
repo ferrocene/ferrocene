@@ -1667,7 +1667,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                                 Some(GlobalAlloc::Static(def_id)) => {
                                     p!(write("<static({:?})>", def_id))
                                 }
-                                Some(GlobalAlloc::Function(_)) => p!("<function>"),
+                                Some(GlobalAlloc::Function { .. }) => p!("<function>"),
                                 Some(GlobalAlloc::VTable(..)) => p!("<vtable>"),
                                 None => p!("<dangling pointer>"),
                             }
@@ -1679,7 +1679,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             ty::FnPtr(_) => {
                 // FIXME: We should probably have a helper method to share code with the "Byte strings"
                 // printing above (which also has to handle pointers to all sorts of things).
-                if let Some(GlobalAlloc::Function(instance)) =
+                if let Some(GlobalAlloc::Function { instance, .. }) =
                     self.tcx().try_get_global_alloc(prov.alloc_id())
                 {
                     self.typed_value(
@@ -1710,22 +1710,24 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             ty::Bool if int == ScalarInt::FALSE => p!("false"),
             ty::Bool if int == ScalarInt::TRUE => p!("true"),
             // Float
-            ty::Float(ty::FloatTy::F16) => {
-                let val = Half::try_from(int).unwrap();
-                p!(write("{}{}f16", val, if val.is_finite() { "" } else { "_" }))
-            }
-            ty::Float(ty::FloatTy::F32) => {
-                let val = Single::try_from(int).unwrap();
-                p!(write("{}{}f32", val, if val.is_finite() { "" } else { "_" }))
-            }
-            ty::Float(ty::FloatTy::F64) => {
-                let val = Double::try_from(int).unwrap();
-                p!(write("{}{}f64", val, if val.is_finite() { "" } else { "_" }))
-            }
-            ty::Float(ty::FloatTy::F128) => {
-                let val = Quad::try_from(int).unwrap();
-                p!(write("{}{}f128", val, if val.is_finite() { "" } else { "_" }))
-            }
+            ty::Float(fty) => match fty {
+                ty::FloatTy::F16 => {
+                    let val = Half::try_from(int).unwrap();
+                    p!(write("{}{}f16", val, if val.is_finite() { "" } else { "_" }))
+                }
+                ty::FloatTy::F32 => {
+                    let val = Single::try_from(int).unwrap();
+                    p!(write("{}{}f32", val, if val.is_finite() { "" } else { "_" }))
+                }
+                ty::FloatTy::F64 => {
+                    let val = Double::try_from(int).unwrap();
+                    p!(write("{}{}f64", val, if val.is_finite() { "" } else { "_" }))
+                }
+                ty::FloatTy::F128 => {
+                    let val = Quad::try_from(int).unwrap();
+                    p!(write("{}{}f128", val, if val.is_finite() { "" } else { "_" }))
+                }
+            },
             // Int
             ty::Uint(_) | ty::Int(_) => {
                 let int =

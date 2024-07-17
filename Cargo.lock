@@ -3973,7 +3973,19 @@ dependencies = [
  "bitflags 2.6.0",
  "getopts",
  "memchr",
- "pulldown-cmark-escape",
+ "pulldown-cmark-escape 0.10.1",
+ "unicase",
+]
+
+[[package]]
+name = "pulldown-cmark"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8746739f11d39ce5ad5c2520a9b75285310dbfe78c541ccf832d38615765aec0"
+dependencies = [
+ "bitflags 2.6.0",
+ "memchr",
+ "pulldown-cmark-escape 0.11.0",
  "unicase",
 ]
 
@@ -3982,6 +3994,12 @@ name = "pulldown-cmark-escape"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd348ff538bc9caeda7ee8cad2d1d48236a1f443c1fa3913c6a02fe0043b1dd3"
+
+[[package]]
+name = "pulldown-cmark-escape"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "007d8adb5ddab6f8e3f491ac63566a7d5002cc7ed73901f72057943fa71ae1ae"
 
 [[package]]
 name = "pulldown-cmark-to-cmark"
@@ -5024,6 +5042,7 @@ dependencies = [
  "rustc_middle",
  "rustc_span",
  "rustc_target",
+ "rustc_type_ir",
  "smallvec",
  "tracing",
 ]
@@ -5476,7 +5495,7 @@ name = "rustc_resolve"
 version = "0.0.0"
 dependencies = [
  "bitflags 2.6.0",
- "pulldown-cmark 0.9.6",
+ "pulldown-cmark 0.11.0",
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_pretty",
@@ -5755,6 +5774,7 @@ dependencies = [
  "indexmap",
  "itertools",
  "minifier",
+ "pulldown-cmark 0.9.6",
  "regex",
  "rustdoc-json-types",
  "serde",
@@ -7487,9 +7507,9 @@ dependencies = [
 
 [[package]]
 name = "windows-bindgen"
-version = "0.57.0"
+version = "0.58.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ccb96113d6277ba543c0f77e1c5494af8094bf9daf9b85acdc3f1b620e7c7b4"
+checksum = "91cd28d93c692351f3a6e5615567c56756e330bee1c99c6bdd57bfc5ab15f589"
 dependencies = [
  "proc-macro2",
  "rayon",
@@ -7510,9 +7530,9 @@ dependencies = [
 
 [[package]]
 name = "windows-metadata"
-version = "0.57.0"
+version = "0.58.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8308d076825b9d9e5abc64f8113e96d02b2aeeba869b20fdd65c7e70cda13dfc"
+checksum = "2e837f3c3012cfe9e7086302a93f441a7999439be1ad4c530d55d2f6d2921809"
 
 [[package]]
 name = "windows-sys"

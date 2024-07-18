@@ -23,6 +23,7 @@ based on software engineering best practices.
    backports
    release-notes
    bors
+   external-contributions
 
 .. toctree::
    :maxdepth: 4

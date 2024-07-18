@@ -98,6 +98,16 @@ cmd_prepare() {
         --data-size=5000 --data-inodes=40000 --noprompt \
         --hostname="${vm_hostname}" --type=qemu --arch=x86_64 \
         --ip="${vm_ipv4_addr}" --ssh-ident=none
+
+    # as per https://www.qnx.com/support/knowledgebase.html?id=5015Y000001gM7T
+    # the ifs.build script needs to include the libpci.so.2.3 file in the IFS
+    # but the stock version does not so patch it and then re-generate ifs.bin
+    local ifsbuild=output/build/ifs.build
+    grep 'lib/libpci.so.2.3' "${ifsbuild}" || sed -i 's|lib/libpci.so|lib/libpci.so\
+lib/libpci.so.2.3|' "${ifsbuild}"
+    rm output/ifs.bin
+    mkifs "${ifsbuild}" output/ifs.bin
+
     cp output/{disk-qemu{,.vmdk},ifs.bin} "${emulatordir}/"
     popd
     rm -rf "${tmpdir}"

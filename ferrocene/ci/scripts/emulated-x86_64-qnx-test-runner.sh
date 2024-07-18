@@ -140,7 +140,7 @@ cmd_run() {
     on_vm cp /mnt/remote-test-server /tmp/
     on_vm chmod +x /tmp/remote-test-server
 
-    on_vm_nowait /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
+    on_vm_nowait RUST_TEST_THREADS=1 /tmp/remote-test-server -v --bind 0.0.0.0:12345 --sequential
 
     while read -r line; do
         echo "QEMU: $line"

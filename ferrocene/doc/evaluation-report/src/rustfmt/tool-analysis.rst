@@ -30,6 +30,8 @@ Potential Errors
 .. end of table
 
 
+.. _rustfmt_avd:
+
 Detection Measures and Usage Restriction
 ----------------------------------------
 
@@ -62,6 +64,8 @@ potential errors is very high. Therefore, the tool error detection class is
 Using clause 11.4.5.4 in part 8 of the [|iso_ref|] standard, we can conclude that in
 the worst case the Tool Classification Level is **TCL1**. Therefore we need no
 qualification methods.
+
+.. _rustfmt_iec_tool_classification:
 
 IEC 61508 Tool Classification
 -----------------------------

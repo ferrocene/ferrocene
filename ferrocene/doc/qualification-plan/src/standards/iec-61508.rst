@@ -37,7 +37,7 @@ IEC 61508 requirements
    * - 7.4.4.6
      - | :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
        | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - :ref:`Evaluation Report - rustfmt - Tool analysis - IEC 61508 Tool Classification <rustfmt_iec_tool_classification>`
 
    * - 7.4.4.7
      - See sub items below
@@ -73,7 +73,7 @@ IEC 61508 requirements
 
    * - 7.4.4.8
      - N/A
-     - N/A
+     - :ref:`Evaluation Report - rustfmt - Tool analysis - Detection Measures and Usage Restriction <rustfmt_avd>`
 
    * - 7.4.4.9
      - N/A

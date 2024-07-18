@@ -65,7 +65,7 @@ ISO 26262 requirements
 
    * - 11.4.4.2.c
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - N/A
+     - See ``rustc`` column
 
    * - 11.4.4.2.d
      - :doc:`Safety Manual - rustc - Degraded environment <safety-manual:rustc/degraded-environment>`

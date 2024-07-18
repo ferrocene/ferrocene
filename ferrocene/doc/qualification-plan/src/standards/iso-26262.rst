@@ -45,7 +45,7 @@ ISO 26262 requirements
 
    * - 11.4.4.1.e
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
-     - N/A
+     - :ref:`Evaluation Report - rustfmt - Tool analysis - ISO 26262 Tool Classification <rustfmt_iso_tool_classification>`
 
    * - 11.4.4.1.f
      - :doc:`Evaluation Report - Qualification Method <evaluation-report:rustc/method>`

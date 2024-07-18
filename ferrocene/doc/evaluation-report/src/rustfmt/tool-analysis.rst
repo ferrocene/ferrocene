@@ -50,6 +50,8 @@ Detection Measures and Usage Restriction
 
 .. end of table
 
+.. _rustfmt_iso_tool_classification:
+
 ISO 26262 Tool Classification
 -----------------------------
 
@@ -61,9 +63,9 @@ Moreover, this analysis shows us that the likelihood of detecting these
 potential errors is very high. Therefore, the tool error detection class is
 **TD1**.
 
-Using clause 11.4.5.4 in part 8 of the [|iso_ref|] standard, we can conclude that in
-the worst case the Tool Classification Level is **TCL1**. Therefore we need no
-qualification methods.
+Using clause 11.4.5.4 in part 8 of the [|iso_ref|] standard, we can conclude
+that in the worst case the Tool Classification Level is **TCL1** up to ASIL D.
+Therefore we need no qualification methods.
 
 .. _rustfmt_iec_tool_classification:
 

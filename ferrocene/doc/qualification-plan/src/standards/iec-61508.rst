@@ -85,23 +85,23 @@ IEC 61508 requirements
 
    * - 7.4.4.10.a
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - ?
+     - N/A
 
    * - 7.4.4.10.b
      - :doc:`Safety Manual - rustc - Tool options <safety-manual:rustc/options>`
-     - ?
+     - N/A
 
    * - 7.4.4.10.c
      - :doc:`Evaluation Report - rustc - Qualification method <evaluation-report:rustc/method>`
-     - ?
+     - N/A
 
    * - 7.4.4.10.d
      - :doc:`Safety Manual - rustc - Tool options <safety-manual:rustc/options>`
-     - ?
+     - N/A
 
    * - 7.4.4.10.e
      - :doc:`Safety Manual - rustc - Tool options <safety-manual:rustc/options>`
-     - ?
+     - N/A
 
    * - 7.4.4.11
      - N/A

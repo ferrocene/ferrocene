@@ -18,11 +18,65 @@ documents the features of each extension.
 This extension implements "global" features that are not tied to any specific
 document, and should be imported in each document.
 
-The extension also enables ``sphinx.ext.intersphinx`` without the need to
-manually enable it in ``conf.py``.
+The extension also enables ``sphinx.ext.intersphinx`` and ``sphinx-needs``
+without the need to manually enable them in ``conf.py``.
+
+``sphinx-needs`` integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The extension configures `sphinx-needs`_ to load IDs from other qualification
+documents. The following nodes are available:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Sphinx directive
+     - ID prefix
+     - Purpose
+
+   * - ``hazop-use``
+     - ``USE_``
+     - Use cases when building the HazOp
+
+   * - ``hazop-error``
+     - ``ERR_``
+     - Potential errors detected during the HazOp
+
+   * - ``hazop-mitigation``
+     - ``MIT_``
+     - Mitigation for the potential errors in the HazOp
+
+   * - ``constraint``
+     - ``CONSTR_``
+     - Constraint the user must follow (for example in the safety manual)
+
+The following link types are also available to create relationships between
+needs:
+
+.. list-table::
+
+   * - Role
+     - Purpose
+
+   * - ``:link:``
+     - General purpose link (builtin)
+
+   * - ``:caused_by:``
+     - Points to the node causing this node to exist (for HazOp)
+
+   * - ``:mitigates:``
+     - Points to the node mitigating the existence of this node (for HazOp)
+
+New custom nodes and link types can be added as needed in
+`sphinx_needs_support.py`_.
 
 Defining and linking to IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. caution::
+
+   The use of IDs managed by this extension is deprecated, and should be
+   replaced with the use of `sphinx-needs`_.
 
 Our qualification documents contain IDs defining every concept and item
 referenced across our qualification material for example - ``RUSTC_ERR_DRIVER_04``.
@@ -298,4 +352,6 @@ It is possible to inject the Rust changelog for a range of versions with the
       :to: 1.76.0
 
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html
+.. _sphinx-needs: https://sphinx-needs.readthedocs.io/en/latest/https://sphinx-needs.readthedocs.io/en/latest/
+.. _sphinx_needs_support.py: https://github.com/ferrocene/ferrocene/blob/main/ferrocene/doc/sphinx-shared-resources/exts/ferrocene_qualification/sphinx_needs_support.py
 .. _Jinja: https://palletsprojects.com/p/jinja/

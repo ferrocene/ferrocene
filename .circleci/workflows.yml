@@ -873,7 +873,7 @@ workflows:
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
-          job: test:compiletest-no-only-hosts
+          job: qnx:compiletest-no-only-hosts
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build

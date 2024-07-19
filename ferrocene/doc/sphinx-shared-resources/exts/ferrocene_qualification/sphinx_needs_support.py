@@ -22,13 +22,6 @@ def configure_sphinx_needs(app, config):
             "style": "",
         },
         {
-            "directive": "hazop-mitigation",
-            "title": "Mitigation",
-            "prefix": "MIT_",
-            "color": "",
-            "style": "",
-        },
-        {
             "directive": "constraint",
             "title": "Constraint",
             "prefix": "CONSTR_",

@@ -42,10 +42,6 @@ documents. The following nodes are available:
      - ``ERR_``
      - Potential errors detected during the HazOp
 
-   * - ``hazop-mitigation``
-     - ``MIT_``
-     - Mitigation for the potential errors in the HazOp
-
    * - ``constraint``
      - ``CONSTR_``
      - Constraint the user must follow (for example in the safety manual)

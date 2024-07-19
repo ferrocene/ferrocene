@@ -23,18 +23,8 @@ Potential Errors
 Detection Measures and Usage Restriction
 ----------------------------------------
 
-.. hazop-mitigation::
-   :id: MIT_RUSTFMT_CHECK_DIFF
-   :mitigates: ERR_RUSTFMT_CHANGED_SEMANTICS
-
-   After running rustfmt, the user must review the changes in the source.
-
-.. hazop-mitigation::
-   :id: MIT_RUSTFMT_RUN_TESTS
-   :mitigates: ERR_RUSTFMT_CHANGED_SEMANTICS
-
-   After running rustfmt, sufficient tests need to pass to ensure the
-   correctness of the program.
+Detection measures and usage restrictions are documented in the :doc:`safety
+manual <safety-manual:rustfmt/constraints>`.
 
 .. _rustfmt_iso_tool_classification:
 

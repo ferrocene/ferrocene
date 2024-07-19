@@ -37,6 +37,11 @@ pub struct Tarballer {
     #[clap(value_name = "FORMAT", default_value_t)]
     #[clap(long)]
     pub compression_formats: CompressionFormats,
+    /// Modification time that will be set for all files added to the archive.
+    /// The default is the date of the first Rust commit from 2006.
+    /// This serves for better reproducibility of the archives.
+    #[arg(long, value_name = "FILE_MTIME", default_value_t = 1153704088)]
+    pub override_file_mtime: u64,
 }
 
 impl Tarballer {
@@ -46,7 +51,14 @@ impl Tarballer {
             return Ok(());
         }
 
-        let Self { input, output, work_dir, compression_profile, compression_formats } = self;
+        let Self {
+            input,
+            output,
+            work_dir,
+            compression_profile,
+            compression_formats,
+            override_file_mtime,
+        } = self;
         let tarball_name = output + ".tar";
         let encoder = CombinedEncoder::new(
             compression_formats
@@ -78,7 +90,7 @@ impl Tarballer {
             }
             for path in files {
                 let src = base.join(&path);
-                append_path(&mut builder, &src, &path)
+                append_path(&mut builder, &src, &path, override_file_mtime)
                     .with_context(|| format!("failed to tar file '{}'", src.display()))?;
             }
             builder
@@ -94,10 +106,17 @@ impl Tarballer {
     }
 }
 
-fn append_path<W: Write>(builder: &mut Builder<W>, src: &Path, path: &String) -> Result<()> {
+fn append_path<W: Write>(
+    builder: &mut Builder<W>,
+    src: &Path,
+    path: &String,
+    override_file_mtime: u64,
+) -> Result<()> {
     let stat = symlink_metadata(src)?;
     let mut header = Header::new_gnu();
     header.set_metadata(&stat);
+    header.set_mtime(override_file_mtime);
+
     if stat.file_type().is_symlink() {
         let link = read_link(src)?;
         builder.append_link(&mut header, path, &link)?;

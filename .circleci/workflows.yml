@@ -1202,7 +1202,7 @@ commands:
             else
                 export PATH=$HOME/.venv/bin/:$PATH
             fi
-            ferrocene/ci/scripts/setup-qnx-toolchain.py
+            python ferrocene/ci/scripts/setup-qnx-toolchain.py
       - run:
           name: Set PATH to include QNX710 tools
           command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"

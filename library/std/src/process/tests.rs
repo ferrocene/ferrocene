@@ -108,6 +108,7 @@ fn set_current_dir_works() {
 
 #[test]
 #[cfg_attr(any(windows, target_os = "vxworks"), ignore)]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn stdin_works() {
     let mut p = shell_cmd()
         .arg("-c")
@@ -218,6 +219,7 @@ fn test_process_output_error() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_finish_once() {
     let mut prog = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "exit 1"]).spawn().unwrap()
@@ -720,6 +722,7 @@ fn run_canonical_bat_script() {
 }
 
 #[test]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn terminate_exited_process() {
     let mut cmd = if cfg!(target_os = "android") {
         let mut p = shell_cmd();

@@ -345,7 +345,7 @@ fi
 # access to the document signature files stored in AWS. In that case, configure
 # the build system to ignore document signatures.
 if ! is_internal; then
-    add --set ferrocene.ignore-document-signatures=true
+    add --set ferrocene.document-signatures=disabled
 fi
 
 ###############################################

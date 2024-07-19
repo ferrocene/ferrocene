@@ -122,11 +122,27 @@ JOBS_DEFINITION: JobsDefinition = {
             ],
         ),
 
+        # Library tests are the second slowest part of a test run, so we run
+        # them in a separate job to reduce the CI wall clock time. Note that
+        # stdlib tests are run in a separate job, as those require IPv6 and
+        # thus can't be executed in containers due to CircleCI limitations.
+        "library": ["library/core", "library/alloc", "library/test"],
+
+        # The standard library tests require IPv6, which is not available in
+        # containers. Run them separately in a VM.
+        "library-std": ["library/std"],
+    },
+
+    "qnx": {
         # like 'test:compiletest' minus the ONLY_HOSTS test groups
         # the ONLY_HOSTS tests will run on the host even when
         # `--target $NOT_THE_HOST` is passed to `x.py test`
         # this avoids re-running tests on the same host triple across
         # different CI jobs
+        #
+        # this is in a separate category and not under `test:` because that
+        # would make repeated arguments appear in the output of
+        # `split-tasks.py test`
         "compiletest-no-only-hosts": find_all_compiletests(
             exclude=[
                 # see `test:compiletest`
@@ -148,16 +164,6 @@ JOBS_DEFINITION: JobsDefinition = {
                 "run-make-fulldeps",
             ],
         ),
-
-        # Library tests are the second slowest part of a test run, so we run
-        # them in a separate job to reduce the CI wall clock time. Note that
-        # stdlib tests are run in a separate job, as those require IPv6 and
-        # thus can't be executed in containers due to CircleCI limitations.
-        "library": ["library/core", "library/alloc", "library/test"],
-
-        # The standard library tests require IPv6, which is not available in
-        # containers. Run them separately in a VM.
-        "library-std": ["library/std"],
     },
 }
 # fmt: on

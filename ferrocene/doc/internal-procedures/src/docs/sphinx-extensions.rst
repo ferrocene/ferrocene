@@ -348,6 +348,6 @@ It is possible to inject the Rust changelog for a range of versions with the
       :to: 1.76.0
 
 .. _Sphinx domain: https://www.sphinx-doc.org/en/master/usage/domains/index.html
-.. _sphinx-needs: https://sphinx-needs.readthedocs.io/en/latest/https://sphinx-needs.readthedocs.io/en/latest/
+.. _sphinx-needs: https://sphinx-needs.readthedocs.io/en/latest/
 .. _sphinx_needs_support.py: https://github.com/ferrocene/ferrocene/blob/main/ferrocene/doc/sphinx-shared-resources/exts/ferrocene_qualification/sphinx_needs_support.py
 .. _Jinja: https://palletsprojects.com/p/jinja/

@@ -48,8 +48,9 @@ RUN <<-EOF
         llvm-17-dev \
         unzip
 
-    # Needed to run QNX VM
+    # Needed to run QNX VMs
     apt-install \
+        qemu-system-arm \
         qemu-system-x86 \
         bridge-utils \
         dnsmasq \

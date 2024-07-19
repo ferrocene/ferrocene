@@ -107,7 +107,7 @@ cmd_prepare() {
     pushd "${emulatordir}"/src
     cp "${qnxdir}"/bsp/BSP_xilinx-zynq-zcu102_br-710_be-710_SVN928034_JBN10.zip ./bsp.zip
     unzip -q ./bsp.zip -d .
-    rm ./bsp.zip
+    rm -f ./bsp.zip
     make >"${emulatordir}"/make-bsp.log 2>&1
     popd
 

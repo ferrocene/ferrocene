@@ -73,11 +73,11 @@ ISO 26262 requirements
 
    * - 11.4.4.2.e
      - :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
-     - See ``rustc`` column
+     - N/A
 
    * - 11.4.4.2.f
      - :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
-     - See ``rustc`` column
+     - :ref:`Evaluation Report - rustfmt - Tool analysis - Detection Measures and Usage Restriction <rustfmt_avd>`
 
    * - 11.4.5.1
      - See sub items below

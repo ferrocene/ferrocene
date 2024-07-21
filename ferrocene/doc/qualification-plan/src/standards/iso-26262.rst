@@ -173,7 +173,7 @@ ISO 26262 requirements
 
    * - 11.4.6.2.h
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
-     - :doc:`Safety Manual - Known problems <safety-manual:rustc/constraints>`
+     - N/A
 
    * - 11.4.7
      - N/A

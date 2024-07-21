@@ -69,7 +69,7 @@ Documentation validation
 
 In addition to this process, the safety manager (or a person delegated by the
 safety manager) must review the documents before each release, checking that
-the documentation's contents are valid, up-to-date, and complete, that all
+the documentation's contents are valid, up-to-date, and complete, and that all
 applicable requirements have been successfully covered.
 
 They must also do a quick check to ensure there are no unexpected problems

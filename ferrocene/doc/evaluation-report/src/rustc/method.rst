@@ -13,7 +13,7 @@ qualification method is "Validation of the software tool in accordance with
 jobs are carried out for all targets. These jobs launch several test suites,
 including a non-regression test suite, in a correctly configured environment to
 be sure of the tool conformance. In particular, the following test suites are
-executed for every code change that is merged.
+executed before any change is merged.
 
 Test Suites
 -----------

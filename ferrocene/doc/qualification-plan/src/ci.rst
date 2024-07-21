@@ -21,12 +21,12 @@ part of the same workflow used for testing. Building and storing packages for
 every PR simplifies the release process (as it can reuse the binaries built by
 CI), and allows quick bisection to identify the change that introduced a bug.
 
-Updating Tests Suites
----------------------
+Updating Test Suites
+--------------------
 
 As part of the testing process, it is essential to ensure that the test suites
 are adapted to the evolution of Ferrocene. Consequently, the creation of new
-tests or updates of existing tests suites is required:
+tests or updates of existing test suites is required:
 
 * Updates for test suites maintained by upstream are merged whenever we pull
   new changes in.

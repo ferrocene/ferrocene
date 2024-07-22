@@ -767,3 +767,11 @@ pre.spec-syntax .spec-syntax-literal {
     background: var(--spec-syntax-literal-bg);
     border-radius: 0.2em;
 }
+
+/********+***********
+ *   sphinx-needs   *
+ ********************/
+
+a.external_link:after {
+    content: "" !important;
+}

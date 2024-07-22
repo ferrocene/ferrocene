@@ -6,72 +6,56 @@
 Use Cases
 =========
 
-Installing rustfmt
-------------------
+.. hazop-use:: Installing rustfmt
+   :id: USE_RUSTFMT_INSTALL
 
-.. id:: RUSTFMT_UC0_INST
+   | **Actor(s):** User, tar (compression utility)
+   | **Input:** A rustfmt release tarball.
+   | **Output:** The rustfmt binary in the Ferrocene directory.
+   | **Environment constraints:** tar is correctly installed.
 
-**Actor(s):** User, tar (compression utility)
+   **Description:**
 
-**Input:** A rustfmt release tarball.
+   1. The `user` downloads the rustfmt archive.
 
-**Output:** The rustfmt binary in the Ferrocene directory.
+   2. The `user` extracts the archive into the installation directory using `tar`::
 
-**Environment constraints:** tar is correctly installed.
+       tar -C path/to/installation -xf path/to/archive.tar.xz
 
-**Description:**
+.. hazop-use:: Format a file
+   :id: USE_RUSTFMT_FORMAT
 
-1. The `user` downloads the rustfmt archive.
+   | **Actor(s):** User, rustfmt.
+   | **Input:** One or multiple Rust source files.
+   | **Output:** Rust source files with the same paths, potentially modified.
+   | **Environment constraints:** rustfmt is installed.
 
-2. The `user` extracts the archive into the installation directory using `tar`::
+   **Description:**
 
-    tar -C path/to/installation -xf path/to/archive.tar.xz
+   1. The `user` calls `rustfmt` with the following command line arguments::
 
-Format a file
--------------
+       <path>...
+       # where <path> is the path to a Rust source file.
 
-.. id:: RUSTFMT_UC1_FMT
+   2. `rustfmt` modifies Rust source files if they are not well-formatted.
 
-**Actor(s):** User, rustfmt.
 
-**Input:** One or multiple Rust source files.
+.. hazop-use:: Check formatting of a file
+   :id: USE_RUSTFMT_CHECK
 
-**Output:** Rust source files with the same paths, potentially modified.
+   | **Actor(s):** User, rustfmt.
+   | **Input:** One or multiple Rust source files.
+   | **Output:** A terminal exit code.
+   | **Output:** A diff between current and well-formatted code (omitted if code is well-formatted).
+   | **Environment constraints:** rustfmt is installed.
 
-**Environment constraints:** rustfmt is installed.
+   **Description:**
 
-**Description:**
+   1. The `user` calls `rustfmt` with the following command line arguments::
 
-1. The `user` calls `rustfmt` with the following command line arguments::
+       --check
+       <path>...
+       # where <path> is the path to a Rust source file.
 
-    <path>...
-    # where <path> is the path to a Rust source file.
-
-2. `rustfmt` modifies Rust source files if they are not well-formatted.
-
-Check formatting of a file
---------------------------
-
-.. id:: RUSTFMT_UC2_CHECK
-
-**Actor(s):** User, rustfmt.
-
-**Input:** One or multiple Rust source files.
-
-**Output:**
-
-- A terminal exit code.
-- Diff between current and well-formatted code. Omitted if code is well-formatted.
-
-**Environment constraints:** rustfmt is installed.
-
-**Description:**
-
-1. The `user` calls `rustfmt` with the following command line arguments::
-
-    --check
-    <path>...
-    # where <path> is the path to a Rust source file.
-
-2. `rustfmt` outputs a terminal status code, indicating if the checked files
-   are well-formatted.
+   2. `rustfmt` outputs a terminal status code, indicating if the checked files
+      are well-formatted.

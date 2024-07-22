@@ -32,7 +32,7 @@ IEC 61508 requirements
 
    * - 7.4.4.5
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
+     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 7.4.4.6
      - | :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`

@@ -9,46 +9,22 @@ Tool Analysis
 Potential Errors
 ----------------
 
-.. list-table::
-   :align: left
-   :header-rows: 1
+.. hazop-error::
+   :id: ERR_RUSTFMT_CHANGED_SEMANTICS
+   :caused_by: USE_RUSTFMT_FORMAT
 
-   * - Error identifier
-     - Use case
-     - Description
-     - Risk
-     - Mitigation
-     - Detectable
-   * - .. id:: RUSTFMT_ERR_01
-     - :id:`RUSTFMT_UC1_FMT`
-     - rustfmt emits code with a different semantic meaning than the input
-     - Change in program semantics
-     - | :id:`RUSTFMT_AVD_CHECK_DIFF_001`, 
-       | :id:`RUSTFMT_AVD_TESTS_002`
-     - YES
+   | **Risk:** Change in program semantics
+   | **Detectable:** YES
 
-.. end of table
-
+   rustfmt emits code with a different semantic meaning than the input.
 
 .. _rustfmt_avd:
 
 Detection Measures and Usage Restriction
 ----------------------------------------
 
-.. list-table::
-   :align: left
-   :header-rows: 1
-
-   * - Measure identifier
-     - Description
-   * - .. id:: RUSTFMT_AVD_CHECK_DIFF_001
-     - After running rustfmt, the user must review the changes in the source
-       code to ensure no semantics changed.
-   * - .. id:: RUSTFMT_AVD_TESTS_002
-     - After running rustfmt, sufficient tests need to pass to ensure the
-       correctness of the program.
-
-.. end of table
+Detection measures and usage restrictions are documented in the :doc:`safety
+manual <safety-manual:rustfmt/constraints>`.
 
 .. _rustfmt_iso_tool_classification:
 

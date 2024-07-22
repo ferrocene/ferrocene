@@ -19,6 +19,7 @@ Qualified tools are:
 
 * ``rustc``
 * ``rustfmt``
+* ``rust-lld`` when used according to the :doc:`safety-manual:rustc/options`
 
 Other development tools are not qualified and are distributed for convenience
 only. This includes but is not limited to:

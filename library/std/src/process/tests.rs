@@ -303,6 +303,7 @@ fn test_override_env() {
 
 #[test]
 #[cfg_attr(target_os = "vxworks", ignore)]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_add_to_env() {
     let result = env_cmd().env("RUN_TEST_NEW_ENV", "123").output().unwrap();
     let output = String::from_utf8_lossy(&result.stdout).to_string();

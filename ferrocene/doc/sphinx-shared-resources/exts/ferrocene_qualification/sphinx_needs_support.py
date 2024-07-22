@@ -43,6 +43,20 @@ def configure_sphinx_needs(app, config):
         },
     ]
 
+    config.needs_default_layout = "ferrocene"
+    config.needs_layouts = {
+        # Forked from the builtin "clean" layout, but without the arrow to
+        # collapse the meta information. That arrow generates HTML that
+        # linkchecker doesn't like, unfortunately :(
+        "ferrocene": {
+            "grid": "simple",
+            "layout": {
+                "head": ['<<meta("type_name")>>: **<<meta("title")>>** <<meta_id()>>'],
+                "meta": ["<<meta_all(no_links=True)>>", "<<meta_links_all()>>"],
+            },
+        },
+    }
+
     if config.ferrocene_external_needs is not None:
         config.needs_external_needs = json.loads(config.ferrocene_external_needs)
 

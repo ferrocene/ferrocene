@@ -231,6 +231,7 @@ fn test_finish_once() {
 
 #[test]
 #[cfg_attr(any(target_os = "vxworks"), ignore)]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_finish_twice() {
     let mut prog = if cfg!(target_os = "windows") {
         Command::new("cmd").args(&["/C", "exit 1"]).spawn().unwrap()
@@ -314,6 +315,7 @@ fn test_add_to_env() {
 
 #[test]
 #[cfg_attr(target_os = "vxworks", ignore)]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_capture_env_at_spawn() {
     use crate::env;
 

@@ -21,3 +21,5 @@ fn main() {
     let re = regex::Regex::new(r#"declare\ hidden\ i32\ .*normal"#).unwrap();
     assert_eq!(count_regex_matches_in_files_with_extension(&re, "ll"), 2);
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

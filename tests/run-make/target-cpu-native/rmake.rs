@@ -12,3 +12,5 @@ fn main() {
     // to be printed out.
     assert!(out.is_empty());
 }
+
+// ferrocene-annotations: um_rustc_C_target_cpu

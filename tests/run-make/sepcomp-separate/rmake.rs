@@ -13,3 +13,5 @@ fn main() {
     let re = regex::Regex::new(r#"define\ .*magic_fn"#).unwrap();
     assert_eq!(count_regex_matches_in_files_with_extension(&re, "ll"), 3);
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

@@ -26,3 +26,5 @@ fn main() {
     assert!(re.is_match(&out));
     assert!(re.is_match(&out2));
 }
+
+// ferrocene-annotations: um_rustc_C_link_arg

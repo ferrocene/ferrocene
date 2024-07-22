@@ -28,7 +28,6 @@ use rustc_hir::{ExprKind, HirId, Node, QPath};
 use rustc_hir_analysis::check::intrinsicck::InlineAsmCtxt;
 use rustc_hir_analysis::check::potentially_plural_count;
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
-use rustc_hir_analysis::structured_errors::StructuredDiag;
 use rustc_index::IndexVec;
 use rustc_infer::infer::error_reporting::{FailureCode, ObligationCauseExt};
 use rustc_infer::infer::TypeTrace;
@@ -40,6 +39,7 @@ use rustc_middle::{bug, span_bug};
 use rustc_session::Session;
 use rustc_span::symbol::{kw, Ident};
 use rustc_span::{sym, BytePos, Span, DUMMY_SP};
+use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{self, ObligationCauseCode, SelectionContext};
 
 use std::iter;
@@ -405,9 +405,22 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     ty: Ty<'tcx>,
                     cast_ty: &str,
                 ) {
-                    use rustc_hir_analysis::structured_errors::MissingCastForVariadicArg;
+                    let (sugg_span, replace, help) =
+                        if let Ok(snippet) = sess.source_map().span_to_snippet(span) {
+                            (Some(span), format!("{snippet} as {cast_ty}"), None)
+                        } else {
+                            (None, "".to_string(), Some(()))
+                        };
 
-                    MissingCastForVariadicArg { sess, span, ty, cast_ty }.diagnostic().emit();
+                    sess.dcx().emit_err(errors::PassToVariadicFunction {
+                        span,
+                        ty,
+                        cast_ty,
+                        help,
+                        replace,
+                        sugg_span,
+                        teach: sess.teach(E0617).then_some(()),
+                    });
                 }
 
                 // There are a few types which get autopromoted when passed via varargs
@@ -1384,7 +1397,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 Some(format!("provide the argument{}", if plural { "s" } else { "" }))
             }
             SuggestionText::Remove(plural) => {
-                err.multipart_suggestion(
+                err.multipart_suggestion_verbose(
                     format!("remove the extra argument{}", if plural { "s" } else { "" }),
                     suggestions,
                     Applicability::HasPlaceholders,

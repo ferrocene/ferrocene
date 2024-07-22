@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 include ../tools.mk
 
 # Check that cross-crate inlined items are inlined in all compilation units

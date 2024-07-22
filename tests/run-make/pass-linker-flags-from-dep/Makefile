@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; fix the conflict and remove this line
 include ../tools.mk
 
 all:

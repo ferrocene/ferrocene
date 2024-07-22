@@ -81,8 +81,8 @@ use rustc_span::symbol::sym;
 use rustc_span::Span;
 use rustc_target::abi::{FieldIdx, VariantIdx};
 use rustc_target::spec::PanicStrategy;
+use rustc_trait_selection::error_reporting::traits::TypeErrCtxtExt as _;
 use rustc_trait_selection::infer::TyCtxtInferExt as _;
-use rustc_trait_selection::traits::error_reporting::TypeErrCtxtExt as _;
 use rustc_trait_selection::traits::ObligationCtxt;
 use rustc_trait_selection::traits::{ObligationCause, ObligationCauseCode};
 use std::{iter, ops};
@@ -1367,6 +1367,10 @@ fn can_unwind<'tcx>(tcx: TyCtxt<'tcx>, body: &Body<'tcx>) -> bool {
             | TerminatorKind::Call { .. }
             | TerminatorKind::InlineAsm { .. }
             | TerminatorKind::Assert { .. } => return true,
+
+            TerminatorKind::TailCall { .. } => {
+                unreachable!("tail calls can't be present in generators")
+            }
         }
     }
 
@@ -1916,6 +1920,7 @@ impl<'tcx> Visitor<'tcx> for EnsureCoroutineFieldAssignmentsNeverAlias<'_> {
             | TerminatorKind::UnwindResume
             | TerminatorKind::UnwindTerminate(_)
             | TerminatorKind::Return
+            | TerminatorKind::TailCall { .. }
             | TerminatorKind::Unreachable
             | TerminatorKind::Drop { .. }
             | TerminatorKind::Assert { .. }

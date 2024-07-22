@@ -50,7 +50,7 @@ impl Step for TraceabilityMatrix {
 
             let dest = test_annotations_base.join(format!("{}.json", suite.replace('/', "-")));
             builder.run(
-                Command::new(&compiletest)
+                BootstrapCommand::new(&compiletest)
                     .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
                     .env("FERROCENE_DEST", dest)
                     .env("FERROCENE_SRC_BASE", builder.src.join(suite))
@@ -163,7 +163,7 @@ impl Step for GenerateCoverageReport {
         assert!(coverage_src_path.exists());
         assert!(core_tests_binary_path.exists());
 
-        let mut cmd = Command::new("grcov");
+        let mut cmd = BootstrapCommand::new("grcov");
         cmd.arg(coverage_report_data_dir)
             .arg("-s")
             .arg(coverage_src_path)
@@ -189,9 +189,7 @@ impl Step for GenerateCoverageReport {
             // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
             .env("RUSTC", rustc_path);
 
-        let bootstrap_cmd = BootstrapCommand::from(&mut cmd);
-
-        builder.run(bootstrap_cmd);
+        builder.run(cmd);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

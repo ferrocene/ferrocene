@@ -4,7 +4,6 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::BootstrapCommand;
-use crate::Command;
 use crate::Mode;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -50,8 +49,7 @@ impl Step for ProfilerBuiltinsNoCore {
         cargo.arg(&*target_dir.to_string_lossy());
         cargo.arg("--no-default-features");
 
-        let mut cmd: Command = cargo.into();
-        builder.run(BootstrapCommand::from(&mut cmd).fail_fast());
+        builder.run(BootstrapCommand::from(cargo).fail_fast());
 
         let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
 

@@ -5,11 +5,11 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
+use crate::utils::exec::BootstrapCommand;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -52,13 +52,13 @@ struct VirtualEnv {
 }
 
 impl VirtualEnv {
-    fn cmd(&self, bin: &str) -> Command {
+    fn cmd(&self, bin: &str) -> BootstrapCommand {
         #[cfg(not(target_os = "windows"))]
         const BIN_DIR: &str = "bin";
         #[cfg(target_os = "windows")]
         const BIN_DIR: &str = "scripts";
 
-        Command::new(self.path.join(BIN_DIR).join(bin))
+        BootstrapCommand::new(self.path.join(BIN_DIR).join(bin))
     }
 }
 
@@ -94,7 +94,7 @@ impl Step for SphinxVirtualEnv {
         }
         builder.info("Installing dependencies for building Sphinx documentation");
         builder.run(
-            Command::new(
+            BootstrapCommand::new(
                 builder
                     .config
                     .python
@@ -388,7 +388,7 @@ fn add_intersphinx_arguments<P: Step + IsSphinxBook>(
     book: &SphinxBook<P>,
     builder: &Builder<'_>,
     src: &Path,
-    cmd: &mut Command,
+    cmd: &mut BootstrapCommand,
 ) {
     #[derive(serde_derive::Serialize)]
     struct Inventory {

@@ -63,6 +63,11 @@ pub struct Generator {
     #[clap(value_name = "FORMAT", default_value_t)]
     #[clap(long)]
     compression_formats: CompressionFormats,
+    /// Modification time that will be set for all files added to the archive.
+    /// The default is the date of the first Rust commit from 2006.
+    /// This serves for better reproducibility of the archives.
+    #[arg(long, value_name = "FILE_MTIME", default_value_t = 1153704088)]
+    override_file_mtime: u64,
     /// The commit SHA of the current build
     #[clap(long, value_name = "SHA")]
     ferrocene_commit_sha: Option<String>,
@@ -101,6 +106,7 @@ impl Generator {
             output_dir,
             compression_profile,
             compression_formats,
+            override_file_mtime,
             ferrocene_commit_sha,
             ferrocene_signing_kms_key_arn,
             ferrocene_managed_prefix,
@@ -146,6 +152,7 @@ impl Generator {
             output: path_to_str(&output)?.into(),
             compression_profile,
             compression_formats,
+            override_file_mtime,
         };
         tarballer.run()?;
 

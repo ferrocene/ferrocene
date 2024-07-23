@@ -40,7 +40,7 @@ impl Step for FlipLink {
             &[],
         );
 
-        builder.run(cmd);
+        builder.run(&mut cmd.into_cmd());
 
         builder
             .cargo_out(compiler, Mode::ToolBootstrap, self.target)

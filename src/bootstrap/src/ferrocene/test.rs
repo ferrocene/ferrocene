@@ -27,16 +27,19 @@ impl Step for TraceabilityMatrixTool {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info("Testing ferrocene/tools/traceability-matrix");
-        builder.run(tool::prepare_tool_cargo(
-            builder,
-            builder.compiler(0, self.host),
-            Mode::ToolBootstrap,
-            self.host,
-            "test",
-            "ferrocene/tools/traceability-matrix",
-            SourceType::InTree,
-            &[],
-        ));
+        builder.run(
+            &mut tool::prepare_tool_cargo(
+                builder,
+                builder.compiler(0, self.host),
+                Mode::ToolBootstrap,
+                self.host,
+                "test",
+                "ferrocene/tools/traceability-matrix",
+                SourceType::InTree,
+                &[],
+            )
+            .into_cmd(),
+        );
     }
 }
 

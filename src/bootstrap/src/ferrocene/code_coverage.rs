@@ -49,7 +49,7 @@ impl Step for ProfilerBuiltinsNoCore {
         cargo.arg(&*target_dir.to_string_lossy());
         cargo.arg("--no-default-features");
 
-        builder.run(BootstrapCommand::from(cargo).fail_fast());
+        builder.run(&mut BootstrapCommand::from(cargo).fail_fast());
 
         let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
 

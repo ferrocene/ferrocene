@@ -83,6 +83,9 @@ def split_release_notes(doctree):
             raise RuntimeError("top-level section without title")
 
         raw_version = title.split(" ")[1]
+        # Needed if version is not SemVer compatible
+        if len(raw_version.split(".")) == 2:
+            raw_version += ".0"
         try:
             version = Version.parse(raw_version)
         except ValueError as e:

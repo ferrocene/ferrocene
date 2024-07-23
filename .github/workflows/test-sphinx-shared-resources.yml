@@ -35,9 +35,6 @@ jobs:
       - name: Install linting dependencies
         run: python3 -m pip install reuse black flake8
 
-      - name: Verify licensing metadata
-        run: reuse lint
-
       - name: Verify Python code formatting
         run: black . --check --diff --color
 

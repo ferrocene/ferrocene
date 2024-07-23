@@ -2,17 +2,24 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
 ---
-
-name: CI
-on: [push, pull_request]
+name: Test sphinx-shared-resources
+on:
+  pull_request:
+    paths:
+      - .github/workflows/test-sphinx-shared-resources.yml
+      - ferrocene/doc/sphinx-shared-resources/**
 
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: ferrocene/doc/sphinx-shared-resources/
+
 jobs:
   lint:
     name: Lints
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 

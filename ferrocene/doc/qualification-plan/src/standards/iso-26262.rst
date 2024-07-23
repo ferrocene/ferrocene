@@ -4,6 +4,8 @@
 ISO 26262 requirements
 ======================
 
+The following are sections in |iso_ref| Part 8.
+
 .. list-table::
    :header-rows: 1
 

@@ -119,7 +119,6 @@ fn check_target(
             .into_iter()
             .map(|expected| format!("lib{expected}.rlib"))
             .collect::<Vec<_>>();
-        eprintln!("expected_rlib_paths: {expected_rlib_paths:?}");
         expected_artifacts.add(expected_rlib_paths);
 
         compile(&ctx, program)?;

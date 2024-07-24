@@ -235,13 +235,15 @@ class ScriptError(RuntimeError):
 
 def arguments():
     parser = argparse.ArgumentParser(
-        prog="avh.py",
-        description="Manage various aspects of ARM AVH",
+        prog="calculate.py",
+        description="Create GHA params",
     )
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     parameters_parser = subparsers.add_parser("parameters", help="Build parameters")
-    jobs_parser = subparsers.add_parser("jobs", help="Build jobs")
+    jobs_parser = subparsers.add_parser("jobs", help="Build a matrix for a specific job")
+
+    jobs_parser.add_argument("job", help="Job")
 
     return parser.parse_args()
 
@@ -264,15 +266,25 @@ if __name__ == "__main__":
             "name": "aarch64-unknown-linux-gnu",
             "os": "linux"
         }
-        jobs = {
-            "llvm": [aarch64_unknown_linux_gnu],
-            "build": [aarch64_unknown_linux_gnu],
-            "dist": [aarch64_unknown_linux_gnu],
-            "dist_targets": [aarch64_unknown_linux_gnu],
-            "test": [aarch64_unknown_linux_gnu],
-            "self_test": [aarch64_unknown_linux_gnu],
+        x86_64_unknown_linux_gnu = {
+            "name": "x86_64-unknown-linux-gnu",
+            "os": "linux"
         }
-        print(f"jobs={shlex.quote(json.dumps(jobs))}")
+        
+        all_tagets = []
+
+        match args.job:
+            case "llvm":
+                jobs = [aarch64_unknown_linux_gnu, x86_64_unknown_linux_gnu]
+            case "build":
+                jobs = [aarch64_unknown_linux_gnu, x86_64_unknown_linux_gnu]
+            case "dist":
+                jobs = [aarch64_unknown_linux_gnu, x86_64_unknown_linux_gnu]
+            case _:
+                print(f"error: No job with that name")
+                exit(1)
+
+        print(json.dumps(jobs))
         # for key, value in jobs.items():
         #     print(f"{key}=\"{json.dumps(value)}\"\n")
 

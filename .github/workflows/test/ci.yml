@@ -63,20 +63,23 @@ jobs:
     name: Calculate job matrix
     runs-on: ubuntu-latest
     outputs:
-      jobs: ${{ steps.jobs.outputs.jobs }}
+      jobs_llvm: ${{ steps.jobs.outputs.jobs_llvm }}
+      jobs_build: ${{ steps.jobs.outputs.jobs_build }}
+      jobs_dist: ${{ steps.jobs.outputs.jobs_dist }}
       run_type: ${{ steps.jobs.outputs.run_type }}
     steps:
       - name: Checkout the source code
         uses: actions/checkout@v4
       - run: ferrocene/ci/scripts/setup-venv.sh
-      - name: Calculate the CI job matrix
-        env:
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        run: python3 ferrocene/ci/github-actions/calculate-parameters.py >> $GITHUB_OUTPUT
+      - name: Calculate the jobs
         id: jobs
+        run: |
+          echo "jobs_llvm=$(python3 ferrocene/ci/github-actions/calculate.py jobs llvm)" >> $GITHUB_OUTPUT
+          echo "jobs_build=$(python3 ferrocene/ci/github-actions/calculate.py jobs build)" >> $GITHUB_OUTPUT
+          echo "jobs_dist=$(python3 ferrocene/ci/github-actions/calculate.py jobs dist)" >> $GITHUB_OUTPUT
 
   llvm:
-    name: ${{ matrix.name }}
+    name: llvm-${{ matrix.name }}
     needs: [ calculate_matrix ]
     runs-on: ubuntu-latest
     # runs-on: "${{ matrix.os }}"
@@ -93,13 +96,13 @@ jobs:
     strategy:
       matrix:
         # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs_llvm) }}
     steps:
-      - run: echo "${{ matrix }}"
+      - run: echo "${{ matrix.name }} - ${{ matrix.os }}"
 
 
   build:
-    name: ${{ matrix.name }}
+    name: build-${{ matrix.name }}
     needs: [ calculate_matrix ]
     runs-on: ubuntu-latest
     # runs-on: "${{ matrix.os }}"
@@ -116,12 +119,12 @@ jobs:
     strategy:
       matrix:
         # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs_build) }}
     steps:
-      - run: echo "${{ matrix }}"
+      - run: echo "${{ matrix.name }} - ${{ matrix.os }}"
   
   dist:
-    name: ${{ matrix.name }}
+    name: dist-${{ matrix.name }}
     needs: [ calculate_matrix ]
     runs-on: ubuntu-latest
     # runs-on: "${{ matrix.os }}"
@@ -138,95 +141,95 @@ jobs:
     strategy:
       matrix:
         # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs_dist) }}
     steps:
-      - run: echo "${{ matrix }}"
+      - run: echo "${{ matrix.name }} - ${{ matrix.os }}"
   
-  dist-targets:
-    name: ${{ matrix.name }}
-    needs: [ calculate_matrix ]
-    runs-on: ubuntu-latest
-    # runs-on: "${{ matrix.os }}"
-    # defaults:
-    #   run:
-    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
-    timeout-minutes: 240
-    env:
-      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
-      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    continue-on-error: false
-    strategy:
-      matrix:
-        # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
-    steps:
-      - run: echo "${{ matrix }}"
+  # dist-targets:
+  #   name: ${{ matrix.name }}
+  #   needs: [ calculate_matrix ]
+  #   runs-on: ubuntu-latest
+  #   # runs-on: "${{ matrix.os }}"
+  #   # defaults:
+  #   #   run:
+  #   #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+  #   timeout-minutes: 240
+  #   env:
+  #     CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  #     # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+  #     HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  #     DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   continue-on-error: false
+  #   strategy:
+  #     matrix:
+  #       # Check the `calculate_matrix` job to see how is the matrix defined.
+  #       include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+  #   steps:
+  #     - run: echo "${{ matrix }}"
 
-  test:
-    name: ${{ matrix.name }}
-    needs: [ calculate_matrix ]
-    runs-on: ubuntu-latest
-    # runs-on: "${{ matrix.os }}"
-    # defaults:
-    #   run:
-    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
-    timeout-minutes: 240
-    env:
-      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
-      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    continue-on-error: false
-    strategy:
-      matrix:
-        # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
-    steps:
-      - run: echo "${{ matrix }}"
+  # test:
+  #   name: ${{ matrix.name }}
+  #   needs: [ calculate_matrix ]
+  #   runs-on: ubuntu-latest
+  #   # runs-on: "${{ matrix.os }}"
+  #   # defaults:
+  #   #   run:
+  #   #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+  #   timeout-minutes: 240
+  #   env:
+  #     CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  #     # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+  #     HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  #     DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   continue-on-error: false
+  #   strategy:
+  #     matrix:
+  #       # Check the `calculate_matrix` job to see how is the matrix defined.
+  #       include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+  #   steps:
+  #     - run: echo "${{ matrix }}"
 
-  self-test:
-    name: ${{ matrix.name }}
-    needs: [ calculate_matrix ]
-    runs-on: ubuntu-latest
-    # runs-on: "${{ matrix.os }}"
-    # defaults:
-    #   run:
-    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
-    timeout-minutes: 240
-    env:
-      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
-      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    continue-on-error: false
-    strategy:
-      matrix:
-        # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
-    steps:
-      - run: echo "${{ matrix }}"
+  # self-test:
+  #   name: ${{ matrix.name }}
+  #   needs: [ calculate_matrix ]
+  #   runs-on: ubuntu-latest
+  #   # runs-on: "${{ matrix.os }}"
+  #   # defaults:
+  #   #   run:
+  #   #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+  #   timeout-minutes: 240
+  #   env:
+  #     CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  #     # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+  #     HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  #     DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   continue-on-error: false
+  #   strategy:
+  #     matrix:
+  #       # Check the `calculate_matrix` job to see how is the matrix defined.
+  #       include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+  #   steps:
+  #     - run: echo "${{ matrix }}"
 
-  tracability-matrix:
-    name: ${{ matrix.name }}
-    needs: [ calculate_matrix ]
-    runs-on: ubuntu-latest
-    # runs-on: "${{ matrix.os }}"
-    # defaults:
-    #   run:
-    #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
-    timeout-minutes: 240
-    env:
-      CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-      # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
-      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    continue-on-error: false
-    strategy:
-      matrix:
-        # Check the `calculate_matrix` job to see how is the matrix defined.
-        include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
-    steps:
-      - run: echo "${{ matrix }}"
+  # tracability-matrix:
+  #   name: ${{ matrix.name }}
+  #   needs: [ calculate_matrix ]
+  #   runs-on: ubuntu-latest
+  #   # runs-on: "${{ matrix.os }}"
+  #   # defaults:
+  #   #   run:
+  #   #     shell: ${{ contains(matrix.os, 'windows') && 'msys2 {0}' || 'bash' }}
+  #   timeout-minutes: 240
+  #   env:
+  #     CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  #     # commit of PR sha or commit sha. `GITHUB_SHA` is not accurate for PRs.
+  #     HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  #     DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   continue-on-error: false
+  #   strategy:
+  #     matrix:
+  #       # Check the `calculate_matrix` job to see how is the matrix defined.
+  #       include: ${{ fromJSON(needs.calculate_matrix.outputs.jobs).dist }}
+  #   steps:
+  #     - run: echo "${{ matrix }}"
     

@@ -763,6 +763,12 @@ sphinx_books! [
         src: "ferrocene/doc/internal-procedures",
         dest: "qualification/internal-procedures",
     },
+    {
+        ty: SelfTestRequirements,
+        name: "self-test-requirements",
+        src: "ferrocene/doc/self-test-requirements",
+        dest: "self-test-requirements",
+    },
 ];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]

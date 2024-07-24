@@ -512,7 +512,7 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
-  aarch64-darwin-generic-test-vm:
+  aarch64-darwin-generic-test-runner:
     macos:
       xcode: "15.3.0"
     parameters:
@@ -750,25 +750,25 @@ workflows:
       - aarch64-darwin-dist-tools:
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library
           job: test:library
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-compiletest
           job: test:compiletest
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library-std
           job: test:library-std
           resource-class: macos.m1.large.gen1 # 8 cores
@@ -908,25 +908,25 @@ workflows:
       - aarch64-darwin-dist-tools:
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test
           job: test
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library
           job: test:library
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-compiletest
           job: test:compiletest
           resource-class: macos.m1.large.gen1 # 8 cores
           requires:
             - aarch64-darwin-build
-      - aarch64-darwin-generic-test-vm:
+      - aarch64-darwin-generic-test-runner:
           name: aarch64-darwin-test-library-std
           job: test:library-std
           resource-class: macos.m1.large.gen1 # 8 cores

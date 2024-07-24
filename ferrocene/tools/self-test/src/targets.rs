@@ -36,7 +36,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "x86_64-apple-darwin", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
-    TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::CrossCc(&["q"]) },
+    TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
 ];
 
 #[derive(Debug)]

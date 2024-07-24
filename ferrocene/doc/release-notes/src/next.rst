@@ -9,6 +9,12 @@ Next Ferrocene release
 This page contains the changes to be introduced in the upcoming Ferrocene
 release.
 
+New features
+------------
+
+* The ``rustfmt`` code formatter version |rustfmt_version| is now supported and
+  qualified for safety critical use.
+
 New experimental features
 -------------------------
 

@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+# This script primarily exists to workaround the fact that on Windows BSD/GNU tar
+# are almost unusably slow. 
+
 import argparse
 import tarfile
 import boto3

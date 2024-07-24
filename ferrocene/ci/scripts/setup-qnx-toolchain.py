@@ -20,6 +20,7 @@ def main():
 
     with zstd_decompressor.stream_reader(body) as stream:
         print("Began decompressing...")
+        # It is important for Windows that the tarball was created with `--dereference`
         with tarfile.open(mode="r|", fileobj=stream) as tarball:
             print("Began extraction...")
             tarball.extractall(filter="data")

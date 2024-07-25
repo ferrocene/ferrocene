@@ -19,6 +19,7 @@ use rustc_span::source_map::Spanned;
 use rustc_span::symbol::{kw, sym, Ident};
 use rustc_span::{BytePos, Span, DUMMY_SP};
 use rustc_target::abi::FieldIdx;
+use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{ObligationCause, ObligationCauseCode};
 use ty::VariantDef;
 
@@ -2217,7 +2218,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 debug!("check_pat_ref: expected={:?}", expected);
                 match *expected.kind() {
                     ty::Ref(_, r_ty, r_mutbl)
-                        if (new_match_ergonomics && r_mutbl >= pat_mutbl)
+                        if (no_ref_mut_behind_and && r_mutbl >= pat_mutbl)
                             || r_mutbl == pat_mutbl =>
                     {
                         if no_ref_mut_behind_and && r_mutbl == Mutability::Not {

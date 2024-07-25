@@ -35,8 +35,8 @@ use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::{Span, DUMMY_SP};
 use rustc_target::abi::FieldIdx;
 use rustc_target::spec::abi;
+use rustc_trait_selection::error_reporting::traits::suggestions::NextTypeParamName;
 use rustc_trait_selection::infer::InferCtxtExt;
-use rustc_trait_selection::traits::error_reporting::suggestions::NextTypeParamName;
 use rustc_trait_selection::traits::ObligationCtxt;
 use std::cell::Cell;
 use std::iter;
@@ -1194,6 +1194,11 @@ fn trait_def(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::TraitDef {
         _ => span_bug!(item.span, "trait_def_of_item invoked on non-trait"),
     };
 
+    let constness = if tcx.has_attr(def_id, sym::const_trait) {
+        hir::Constness::Const
+    } else {
+        hir::Constness::NotConst
+    };
     let paren_sugar = tcx.has_attr(def_id, sym::rustc_paren_sugar);
     if paren_sugar && !tcx.features().unboxed_closures {
         tcx.dcx().emit_err(errors::ParenSugarAttribute { span: item.span });
@@ -1201,6 +1206,7 @@ fn trait_def(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::TraitDef {
 
     let is_marker = tcx.has_attr(def_id, sym::marker);
     let rustc_coinductive = tcx.has_attr(def_id, sym::rustc_coinductive);
+    let is_fundamental = tcx.has_attr(def_id, sym::fundamental);
 
     // FIXME: We could probably do way better attribute validation here.
     let mut skip_array_during_method_dispatch = false;
@@ -1348,10 +1354,12 @@ fn trait_def(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::TraitDef {
     ty::TraitDef {
         def_id: def_id.to_def_id(),
         safety,
+        constness,
         paren_sugar,
         has_auto_impl: is_auto,
         is_marker,
         is_coinductive: rustc_coinductive || is_auto,
+        is_fundamental,
         skip_array_during_method_dispatch,
         skip_boxed_slice_during_method_dispatch,
         specialization_kind,
@@ -1680,7 +1688,7 @@ fn check_impl_constness(
     }
 
     let trait_def_id = hir_trait_ref.trait_def_id()?;
-    if tcx.has_attr(trait_def_id, sym::const_trait) {
+    if tcx.is_const_trait(trait_def_id) {
         return None;
     }
 

@@ -189,7 +189,7 @@ impl Step for GenerateCoverageReport {
             // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
             .env("RUSTC", rustc_path);
 
-        builder.run(cmd);
+        builder.run(&mut cmd);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

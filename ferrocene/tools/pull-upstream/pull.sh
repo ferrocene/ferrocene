@@ -195,7 +195,7 @@ if ! git merge "${TEMP_BRANCH}" --no-edit -m "${merge_message}"; then
             marker="$1"
             who="$2"
             for changed_file in $(git status --porcelain=v1 | sed -n "s/^${marker} //p"); do
-                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; fix the conflict and remove this line\\n/" "${changed_file}"
+                sed -i "1s/^/<<<PULL-UPSTREAM>>> file deleted ${who}; move the Ferrocene annotations if any, and delete this file\\n/" "${changed_file}"
             done
         }
         handle_deleted_files DU "in Ferrocene" # DU means "deleted by us"

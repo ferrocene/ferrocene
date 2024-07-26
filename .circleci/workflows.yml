@@ -536,6 +536,7 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
+            - setup-venv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps

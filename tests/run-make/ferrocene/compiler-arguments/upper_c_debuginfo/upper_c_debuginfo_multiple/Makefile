@@ -1,3 +1,6 @@
+# ignore-apple
+#   On Mac, signatures mean that the diff'd files are not equal when we expect them to be.
+
 include ../../../../tools.mk
 
 # Multiple debuginfo arguments are passed with different options.

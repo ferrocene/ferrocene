@@ -1,4 +1,6 @@
 # only-aarch64
+# ignore-apple
+#   On Mac, we can be sure the CPU is never an a53 (Apple does not make those)
 
 # regression test for rust-lang/rust#118095
 

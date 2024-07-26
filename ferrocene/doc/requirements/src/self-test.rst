@@ -47,72 +47,70 @@ Checks for targets
 
 .. note::
 
-   **target** refers to the following:
+   - ``$target`` refers to any of the targets listed
+   - ``$hash`` is a 16 character hexadecimal string
 
-   - ``x86_64-unknown-linux-gnu`` triple, which refers to _x86-64 Linux (glibc)_
-   - ``aarch64-unknown-none`` triple, which refers to *Armv8-A bare-metal*
+All targets
+^^^^^^^^^^^
 
-x86_64-unknown-linux-gnu
-^^^^^^^^^^^^^^^^^^^^^^^^
+.. note:: The following checks apply to these targets:
 
-Inside of ``lib/rustlib/x86_64-unknown-linux-gnu/lib`` directory,
-relative to the root of the installation,
-should exist these regular files,
-where ``$hash`` is a 16 character hexadecimal string:
+  - :target:`x86_64-unknown-linux-gnu`
+  - :target:`aarch64-unknown-none`
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
-- ``libstd-$hash.rlib``
-- ``libtest-$hash.rlib``
-- ``libproc_macro-$hash.rlib``
+- Inside of ``lib/rustlib/$target/lib`` directory,
+  relative to the root of the installation,
+  should exist these regular files:
 
-.. note:: Other files in that directory are ignored.
+  - ``libcore-$hash.rlib``
+  - ``liballoc-$hash.rlib``
 
-Inside of ``lib/rustlib/x86_64-unknown-linux-gnu/lib`` directory,
-relative to the root of the installation,
-should not exist duplicates of these regular files,
-where ``$hash`` is a 16 character hexadecimal string:
+- Inside of ``lib/rustlib/$target/lib`` directory,
+  relative to the root of the installation,
+  should not exist duplicates of these regular files:
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
-- ``libstd-$hash.rlib``
-- ``libtest-$hash.rlib``
-- ``libproc_macro-$hash.rlib``
+  - ``libcore-$hash.rlib``
+  - ``liballoc-$hash.rlib``
 
-.. note:: Other files in that directory are ignored.
+Targets with a ``std`` library
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-aarch64-unknown-none
-^^^^^^^^^^^^^^^^^^^^
+.. note:: The following checks apply to these targets:
 
-Inside of ``lib/rustlib/aarch64-unknown-none/lib`` directory,
-relative to the root of the installation,
-should exist these regular files,
-where ``$hash`` is a 16 character hexadecimal string:
+   - :target:`x86_64-unknown-linux-gnu`
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
+- Inside of ``lib/rustlib/$target/lib`` directory,
+  relative to the root of the installation,
+  should exist these regular files:
 
-Inside of ``lib/rustlib/aarch64-unknown-none/lib`` directory,
-relative to the root of the installation,
-should not exist duplicates of these regular files,
-where ``$hash`` is a 16 character hexadecimal string:
+  - ``libstd-$hash.rlib``
+  - ``libtest-$hash.rlib``
+  - ``libproc_macro-$hash.rlib``
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
+- Inside of ``lib/rustlib/$target/lib`` directory,
+  relative to the root of the installation,
+  should not exist duplicates of these regular files:
+    
+  - ``libstd-$hash.rlib``
+  - ``libtest-$hash.rlib``
+  - ``libproc_macro-$hash.rlib``
 
 Checks for linkers
 ------------------
 
-x86_64-unknown-linux-gnu
-^^^^^^^^^^^^^^^^^^^^^^^^
+.. note:: The following checks apply to these targets:
+
+   - :target:`x86_64-unknown-linux-gnu`
+
+   ``$target`` refers to any of the targets listed above
 
 Check if we can create temporary directories.
 
-Inside of ``lib/rustlib/x86_64-unknown-linux-gnu/bin`` directory,
+Inside of ``lib/rustlib/$target/bin`` directory,
 relative to the root of the installation,
 should exist the regular file named ``rust-lld``.
 
-Inside of ``lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld`` directory,
+Inside of ``lib/rustlib/$target/bin/gcc-ld`` directory,
 relative to the root of the installation,
 should exist the regular file named ``ld.lld``,
 which is the linker wrapper.
@@ -127,6 +125,14 @@ where ``$arg`` is command line arguments that the system linker accepts.
 
 Checks for compilation
 ----------------------
+
+All targets
+^^^^^^^^^^^
+
+.. note:: The following checks apply to these targets:
+
+  - :target:`x86_64-unknown-linux-gnu`
+  - :target:`aarch64-unknown-none`
 
 Check if we can create temporary directories.
 
@@ -143,9 +149,13 @@ where ``$basename`` is the file name without the extension:
 - ``$basename.a`` for ``staticlib`` crate type
 - ``$basename`` for ``bin`` crate type
 
-x86_64-unknown-linux-gnu
-^^^^^^^^^^^^^^^^^^^^^^^^
+Host targets
+^^^^^^^^^^^^
 
-Check if a sample program that ``rustc`` can be executed on the host platform.
+.. note:: The following checks apply to these targets:
+
+  - :target:`x86_64-unknown-linux-gnu`
+
+Check if a sample program that ``rustc`` produced can be executed.
 
 Check if the output of the program is as expected.

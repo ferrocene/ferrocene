@@ -63,7 +63,6 @@ KEEP_LLVM_BINARIES=[
 
 def arguments():
     parser = argparse.ArgumentParser(
-        prog="llvm-cache.py",
         description="Report various data about LLVM caches",
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
@@ -180,7 +179,7 @@ def build_llvm_tarball(ferrocene_host):
             f = open(os.path.join(dirname, file), "wt")
             f.write(f"""
                 #!/usr/bin/env sh
-                echo "Binary {file} soft-removed by ferrocene/ci/scripts/llvm-cache.py"
+                echo "Binary {file} soft-removed by ferrocene/ci/scripts/llvm_cache.py"
                 exit 1
             """)
 

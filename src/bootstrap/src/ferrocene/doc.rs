@@ -764,10 +764,10 @@ sphinx_books! [
         dest: "qualification/internal-procedures",
     },
     {
-        ty: SelfTestRequirements,
-        name: "self-test-requirements",
-        src: "ferrocene/doc/self-test-requirements",
-        dest: "self-test-requirements",
+        ty: Requirements,
+        name: "requirements",
+        src: "ferrocene/doc/requirements",
+        dest: "requirements",
     },
 ];
 

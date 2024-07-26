@@ -1,13 +1,14 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. default-domain:: qualification
+`ferrocene-self-test` tool
+==========================
 
 General checks
-==============
+--------------
 
 Checks for executables
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. note::
 

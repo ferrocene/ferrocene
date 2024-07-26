@@ -18,6 +18,7 @@ import sys
 import urllib.parse
 import yaml
 from typing import Callable
+import llvm_cache
 
 
 # Path of the YAML file to extract the needed parameters from.
@@ -137,13 +138,7 @@ def calculate_llvm_rebuild(target: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url: urllib.parse.ParseResult = urllib.parse.urlparse(
-        subprocess.run(
-            ["ferrocene/ci/scripts/llvm-cache.py", "s3-url"],
-            env={"FERROCENE_HOST": target},
-            stdout=subprocess.PIPE,
-        ).stdout.strip()
-    ).decode("utf-8")
+    url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
     assert url.scheme == "s3"
 
     try:
@@ -230,7 +225,7 @@ class ScriptError(RuntimeError):
 
 if __name__ == "__main__":
     # Ensure we're using a consistent working directory
-    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
     try:
         print(json.dumps(prepare_parameters(), indent=4))

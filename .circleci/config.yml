@@ -68,14 +68,7 @@ jobs:
       - run:
           name: Calculate the parameters for the workflow
           command: |
-            export VIRTUAL_ENV=$HOME/.venv
-            if [[ "${OSTYPE}" = "msys" ]]; then
-                export PATH=$HOME/.venv/Scripts/:$PATH
-            else
-                export PATH=$HOME/.venv/bin/:$PATH
-            fi
-            . ~/.venv/bin/activate
-            $HOME/.venv/bin/python .circleci/calculate-parameters.py > /tmp/continue-parameters.json
+            ferrocene/ci/scripts/calculate_parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
 
       - continuation/continue:

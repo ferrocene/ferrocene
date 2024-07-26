@@ -14,10 +14,10 @@ import sys
 import shlex
 import cache
 import logging
+import urllib.parse
 
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"
-
 
 TARBALL_PATH = "llvm-cache.tar"
 COMPRESSED_TARBALL_PATH = f"{TARBALL_PATH}.zst"
@@ -199,7 +199,7 @@ def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    return s3_url
+    return urllib.parse.urlparse(s3_url)
 
 def get_llvm_cache_hash():
     """
@@ -210,7 +210,7 @@ def get_llvm_cache_hash():
     m = hashlib.sha256()
 
     files = [
-        "ferrocene/ci/scripts/llvm-cache.py", # __file__ is an absolute path
+        "ferrocene/ci/scripts/llvm_cache.py", # __file__ is an absolute path
         "ferrocene/ci/configure.sh",
         "src/version",
     ];

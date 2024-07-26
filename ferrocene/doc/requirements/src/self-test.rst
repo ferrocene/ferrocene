@@ -25,26 +25,22 @@ The executable should be a regular file.
 
 The executable should have read and execute permissions set for all users.
 
-When executed with ``-vV`` command-line options,
-the executable should exit successfully.
+When executed with ``-vV`` command-line options, the following apply:
 
-When executed with ``-vV`` command-line options,
-the output of the executable should be UTF-8 text.
+- The executable should exit successfully.
 
-When executed with ``-vV`` command-line options,
-the output of the executable should have at least 3 values: host, commit-hash, and release.
+- The output of the executable should be UTF-8 text.
 
-When executed with ``-vV`` command-line options,
-the value of ``host`` from the output of the executable should match the target-triple
-of the executing environment.
+- The output of the executable should have at least 3 values: host, commit-hash, and release.
 
-When executed with ``-vV`` command-line options,
-the value of ``commit-hash`` from the output of the executable should match the 
-commit hash of the Ferrocene release corresponding to the installed Ferrocene toolchain.
+- The value of ``host`` from the output of the executable should match the target-triple
+  of the executing environment.
 
-When executed with ``-vV`` command-line options,
-the value of ``release`` from the output of the executable should match the
-version of the Ferrocene release corresponding to the installed Ferrocene toolchain.
+- The value of ``commit-hash`` from the output of the executable should match the 
+  commit hash of the Ferrocene release corresponding to the installed Ferrocene toolchain.
+
+- The value of ``release`` from the output of the executable should match the
+  version of the Ferrocene release corresponding to the installed Ferrocene toolchain.
 
 Checks for targets
 ------------------

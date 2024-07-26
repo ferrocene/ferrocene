@@ -137,7 +137,7 @@ then run the ``configure.sh``:
 
 .. code-block:: bash
 
-   CI=true FERROCENE_HOST=aarch64-unknown-linux-gnu ./ferrocene/ci/configure.sh 
+   CI=true FERROCENE_HOST=<your_host_triple> ./ferrocene/ci/configure.sh 
 
 
 Using the CI Docker images
@@ -183,14 +183,24 @@ reflect that.
 For Mac or Windows jobs, you can coarsely reproduce the CI by running the
 lines in ``SCRIPT``, line by line if desired.
 
-For Linux jobs, enter the Docker container specified by the ``executor`` line:
+For Linux jobs, before running the container, make sure you are logged 
+in to ``aws`` with ``aws sso login --profile ferrocene-ci``.
+Then enter the Docker container specified by the ``executor`` line. Mount the 
+ferrocene directory as well as your identifier for ``aws``. 
 
 .. code-block:: bash
 
    docker run --rm --tty --interactive --workdir /ferrocene \
       --mount "type=bind,src=$(pwd),dst=/ferrocene" \
+      --mount "type=bind,src=$(HOME/.aws/),dst=/home/ci/.aws" \
       ubuntu-20 bash
 
+Inside the container, run:
+
+.. code-block:: bash
+
+   aws sts get-caller-identity --profile ferrocene-ci
+   
 .. note::
 
    If you wish to preserve your ``build/`` artifacts, it may make sense to

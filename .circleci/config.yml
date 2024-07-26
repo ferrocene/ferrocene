@@ -68,7 +68,7 @@ jobs:
       - run:
           name: Calculate the parameters for the workflow
           command: |
-            python3 .circleci/calculate-parameters.py > /tmp/continue-parameters.json
+            .circleci/calculate-parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
 
       - continuation/continue:

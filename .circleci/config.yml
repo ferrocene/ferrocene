@@ -62,8 +62,8 @@ jobs:
             git checkout -b "${CIRCLE_BRANCH}" "${CIRCLE_SHA1}"
 
       - run:
-          name: Install Python dependencies
-          command: pip install --user pyyaml boto3
+          name: Setup uv and the Python venv
+          command: ferrocene/ci/scripts/setup-venv.sh
 
       - run:
           name: Calculate the parameters for the workflow

@@ -99,12 +99,6 @@ def calculate_docker_image_tag(platform_plus_image: str):
             hash.update(file.encode("utf-8"))
             hash.update(f.read())
 
-    # The docker files depend on `requirements.txt` for their venv.
-    requirements_file = "requirements.txt"
-    with open(requirements_file, "rb") as rf:
-        hash.update(requirements_file.encode("utf-8"))
-        hash.update(rf.read())
-
     return f"{platform}-{image}-{hash.hexdigest()}"
 
 

@@ -41,3 +41,5 @@ fn main() {
     run_fail("foo");
     fs_wrapper::rename("bar.tmp", dynamic_lib_name("bar"));
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

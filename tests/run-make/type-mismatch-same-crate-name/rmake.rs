@@ -27,3 +27,5 @@ fn main() {
         .assert_stderr_contains("expected trait `crateA::bar::Bar`, found trait `Bar`")
         .assert_stderr_contains("different versions of crate `crateA`");
 }
+
+// ferrocene-annotations: um_rustc_C_metadata

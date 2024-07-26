@@ -15,8 +15,8 @@ use crate::core::config::TargetSelection;
 use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::t;
-use crate::utils::exec::BootstrapCommand;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
+use std::process::Command;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {
@@ -149,7 +149,7 @@ impl Step for SourceTarball {
         }
 
         // Vendor Rust dependencies
-        let mut vendor = BootstrapCommand::new(&builder.initial_cargo);
+        let mut vendor = Command::new(&builder.initial_cargo);
         vendor.arg("vendor").arg("vendor/rust").current_dir(&dest_dir);
         vendor.env("RUSTC_BOOTSTRAP", "1"); // std's Cargo.toml uses unstable features
         for extra in EXTRA_CARGO_TOMLS {
@@ -157,7 +157,7 @@ impl Step for SourceTarball {
         }
         vendor.arg("--versioned-dirs"); // See https://github.com/rust-lang/rust/pull/122892
         if !builder.config.dry_run() {
-            let config = crate::output(&mut vendor.command);
+            let config = crate::output(&mut vendor);
             builder.create_dir(&dest_dir.join(".cargo"));
             builder.create(&dest_dir.join(".cargo").join("config.toml"), &config);
         }

@@ -19,3 +19,5 @@ fn main() {
     fs_wrapper::remove_file(object_file);
     fs_wrapper::remove_file(bin_name("foobar"));
 }
+
+// ferrocene-annotations: um_rustc_C_extra_filename

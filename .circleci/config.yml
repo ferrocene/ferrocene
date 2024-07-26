@@ -74,7 +74,8 @@ jobs:
             else
                 export PATH=$HOME/.venv/bin/:$PATH
             fi
-            .circleci/calculate-parameters.py > /tmp/continue-parameters.json
+            . ~/.venv/bin/activate
+            $HOME/.venv/bin/python .circleci/calculate-parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
 
       - continuation/continue:

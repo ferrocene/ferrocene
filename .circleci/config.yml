@@ -68,7 +68,13 @@ jobs:
       - run:
           name: Calculate the parameters for the workflow
           command: |
-            $HOME/.venv/bin/python .circleci/calculate-parameters.py > /tmp/continue-parameters.json
+            export VIRTUAL_ENV=$HOME/.venv
+            if [[ "${OSTYPE}" = "msys" ]]; then
+                export PATH=$HOME/.venv/Scripts/:$PATH
+            else
+                export PATH=$HOME/.venv/bin/:$PATH
+            fi
+            .circleci/calculate-parameters.py > /tmp/continue-parameters.json
             cat /tmp/continue-parameters.json
 
       - continuation/continue:

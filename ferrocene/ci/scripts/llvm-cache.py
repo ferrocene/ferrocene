@@ -12,6 +12,8 @@ import pathlib
 import tarfile
 import sys
 import shlex
+import cache
+import logging
 
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"
@@ -64,6 +66,7 @@ def arguments():
         prog="llvm-cache.py",
         description="Report various data about LLVM caches",
     )
+    parser.add_argument('-v', '--verbose', action='count', default=0)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
@@ -77,6 +80,16 @@ def arguments():
 
 def main():
     args = arguments()
+
+    match args.verbose:
+        case 0:
+            log_level = logging.INFO
+        case 1:
+            log_level = logging.DEBUG
+        case _:
+            log_level = logging.TRACE
+    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%I:%M:%S %p", level=log_level)
+
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
     except:
@@ -96,23 +109,12 @@ def main():
 def subcommand_download(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
 
-    s3_cp_cmd = f"aws s3 cp {shlex.quote(s3_url)} - | zstd --decompress - -o {shlex.quote(TARBALL_PATH)}"
-    s3_cp = subprocess.run(s3_cp_cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    
-    # Use python tar to avoid Windows 'weirdness'
-    tar = tarfile.open(TARBALL_PATH, "r")
-    tar.extractall()
-    tar.close()
-
-    os.remove(TARBALL_PATH)
+    cache.retrieve(s3_url, ".")
 
 def subcommand_prepare(ferrocene_host):
     tarball = build_llvm_tarball(ferrocene_host)
-
     s3_url = get_s3_url(ferrocene_host);
-    s3_cp_cmd = ["aws", "s3", "cp", COMPRESSED_TARBALL_PATH, s3_url]
-    s3_cp = subprocess.run(s3_cp_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    os.remove(COMPRESSED_TARBALL_PATH)
+    cache.store(s3_url, tarball)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)

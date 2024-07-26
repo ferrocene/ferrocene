@@ -2,6 +2,8 @@
 //@ failure-status: 101
 //@ build-fail
 //@ ignore-cross-compile
+//@ ignore-aarch64
+//    On aarch64 this test does not produce the final line of the stderr about 64 bit code
 
 // Note: we have different behavior when cross-compiling (compared to when not),
 // so this test is disabled when cross-compiling.

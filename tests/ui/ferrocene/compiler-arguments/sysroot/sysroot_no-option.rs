@@ -3,7 +3,7 @@
 //
 //@ check-fail
 //@ ignore-cross-compile The error message is different when cross-compiling
-//@ compile-flags: --sysroot=
+//@ compile-flags: --sysroot=  --target=x86_64-unknown-linux-gnu
 //~^^^^^^ ERROR can't find crate for `std`
 
 fn main() {}

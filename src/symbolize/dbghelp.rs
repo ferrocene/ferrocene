@@ -17,7 +17,7 @@
 
 #![allow(bad_style)]
 
-use super::super::{dbghelp, windows::*};
+use super::super::{dbghelp, windows_sys::*};
 use super::{BytesOrWideString, ResolveWhat, SymbolName};
 use core::ffi::c_void;
 use core::marker;
@@ -126,10 +126,10 @@ pub unsafe fn resolve(what: ResolveWhat<'_>, cb: &mut dyn FnMut(&super::Symbol))
 unsafe fn resolve_legacy(
     dbghelp: &dbghelp::Init,
     addr: *mut c_void,
-    _inline_context: Option<DWORD>,
+    _inline_context: Option<u32>,
     cb: &mut dyn FnMut(&super::Symbol),
 ) -> Option<()> {
-    let addr = super::adjust_ip(addr) as DWORD64;
+    let addr = super::adjust_ip(addr) as u64;
     do_resolve(
         |info| dbghelp.SymFromAddrW()(GetCurrentProcess(), addr, &mut 0, info),
         |line| dbghelp.SymGetLineFromAddrW64()(GetCurrentProcess(), addr, &mut 0, line),
@@ -145,7 +145,7 @@ unsafe fn resolve_legacy(
 unsafe fn resolve_with_inline(
     dbghelp: &dbghelp::Init,
     addr: *mut c_void,
-    inline_context: Option<DWORD>,
+    inline_context: Option<u32>,
     cb: &mut dyn FnMut(&super::Symbol),
 ) -> Option<()> {
     let current_process = GetCurrentProcess();
@@ -153,7 +153,7 @@ unsafe fn resolve_with_inline(
     let SymFromInlineContextW = (*dbghelp.dbghelp()).SymFromInlineContextW()?;
     let SymGetLineFromInlineContextW = (*dbghelp.dbghelp()).SymGetLineFromInlineContextW()?;
 
-    let addr = super::adjust_ip(addr) as DWORD64;
+    let addr = super::adjust_ip(addr) as u64;
 
     let (inlined_frame_count, inline_context) = if let Some(ic) = inline_context {
         (0, ic)
@@ -205,10 +205,10 @@ unsafe fn do_resolve(
     get_line_from_addr: impl FnOnce(&mut IMAGEHLP_LINEW64) -> BOOL,
     cb: &mut dyn FnMut(&super::Symbol),
 ) {
-    const SIZE: usize = 2 * MAX_SYM_NAME + mem::size_of::<SYMBOL_INFOW>();
+    const SIZE: usize = 2 * MAX_SYM_NAME as usize + mem::size_of::<SYMBOL_INFOW>();
     let mut data = Aligned8([0u8; SIZE]);
     let info = &mut *data.0.as_mut_ptr().cast::<SYMBOL_INFOW>();
-    info.MaxNameLen = MAX_SYM_NAME as ULONG;
+    info.MaxNameLen = MAX_SYM_NAME as u32;
     // the struct size in C.  the value is different to
     // `size_of::<SYMBOL_INFOW>() - MAX_SYM_NAME + 1` (== 81)
     // due to struct alignment.
@@ -232,7 +232,7 @@ unsafe fn do_resolve(
         0,
         name_ptr,
         name_len as i32,
-        name_buffer.as_mut_ptr().cast::<i8>(),
+        name_buffer.as_mut_ptr(),
         name_buffer.len() as i32,
         core::ptr::null_mut(),
         core::ptr::null_mut(),
@@ -248,12 +248,12 @@ unsafe fn do_resolve(
     let name = ptr::addr_of!(name_buffer[..name_len]);
 
     let mut line = mem::zeroed::<IMAGEHLP_LINEW64>();
-    line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as DWORD;
+    line.SizeOfStruct = mem::size_of::<IMAGEHLP_LINEW64>() as u32;
 
     let mut filename = None;
     let mut lineno = None;
     if get_line_from_addr(&mut line) == TRUE {
-        lineno = Some(line.LineNumber as u32);
+        lineno = Some(line.LineNumber);
 
         let base = line.FileName;
         let mut len = 0;

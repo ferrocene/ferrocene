@@ -49,9 +49,6 @@ version = "0.36.0"
 default-features = false
 features = ['read_core', 'elf', 'macho', 'pe', 'xcoff', 'unaligned', 'archive']
 
-[target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3.9", optional = true }
-
 [build-dependencies]
 # Only needed for Android, but cannot be target dependent
 # https://github.com/rust-lang/cargo/issues/4932
@@ -82,20 +79,6 @@ dladdr = []
 kernel32 = []
 libunwind = []
 unix-backtrace = []
-verify-winapi = [
-  'winapi/dbghelp',
-  'winapi/handleapi',
-  'winapi/libloaderapi',
-  'winapi/memoryapi',
-  'winapi/minwindef',
-  'winapi/processthreadsapi',
-  'winapi/synchapi',
-  'winapi/tlhelp32',
-  'winapi/winbase',
-  'winapi/winnt',
-  'winapi/winnls',
-  'winapi/stringapiset',
-]
 
 [[example]]
 name = "backtrace"

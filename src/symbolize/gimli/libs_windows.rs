@@ -1,4 +1,4 @@
-use super::super::super::windows::*;
+use super::super::super::windows_sys::*;
 use super::mystd::os::windows::prelude::*;
 use super::{coff, mmap, Library, LibrarySegment, OsString};
 use alloc::vec;
@@ -23,7 +23,7 @@ unsafe fn add_loaded_images(ret: &mut Vec<Library>) {
     }
 
     let mut me = MaybeUninit::<MODULEENTRY32W>::zeroed().assume_init();
-    me.dwSize = mem::size_of_val(&me) as DWORD;
+    me.dwSize = mem::size_of_val(&me) as u32;
     if Module32FirstW(snap, &mut me) == TRUE {
         loop {
             if let Some(lib) = load_library(&me) {

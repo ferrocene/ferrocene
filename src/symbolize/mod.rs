@@ -318,8 +318,8 @@ impl<'a> SymbolName<'a> {
         };
 
         SymbolName {
-            bytes: bytes,
-            demangled: demangled,
+            bytes,
+            demangled,
             #[cfg(feature = "cpp_demangle")]
             cpp_demangled: cpp,
         }

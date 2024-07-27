@@ -8,7 +8,7 @@
 
 #![allow(bad_style)]
 
-use super::super::windows::*;
+use super::super::windows_sys::*;
 use core::ffi::c_void;
 
 #[derive(Clone, Copy)]
@@ -17,7 +17,7 @@ pub struct Frame {
     ip: *mut c_void,
     sp: *mut c_void,
     #[cfg(not(target_env = "gnu"))]
-    inline_context: Option<DWORD>,
+    inline_context: Option<u32>,
 }
 
 // we're just sending around raw pointers and reading them, never interpreting
@@ -43,23 +43,23 @@ impl Frame {
     }
 
     #[cfg(not(target_env = "gnu"))]
-    pub fn inline_context(&self) -> Option<DWORD> {
+    pub fn inline_context(&self) -> Option<u32> {
         self.inline_context
     }
 }
 
-#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in winapi right now
+#[repr(C, align(16))] // required by `CONTEXT`, is a FIXME in windows metadata right now
 struct MyContext(CONTEXT);
 
 #[cfg(any(target_arch = "x86_64", target_arch = "arm64ec"))]
 impl MyContext {
     #[inline(always)]
-    fn ip(&self) -> DWORD64 {
+    fn ip(&self) -> u64 {
         self.0.Rip
     }
 
     #[inline(always)]
-    fn sp(&self) -> DWORD64 {
+    fn sp(&self) -> u64 {
         self.0.Rsp
     }
 }
@@ -67,13 +67,13 @@ impl MyContext {
 #[cfg(target_arch = "aarch64")]
 impl MyContext {
     #[inline(always)]
-    fn ip(&self) -> DWORD64 {
-        self.0.Pc
+    fn ip(&self) -> usize {
+        self.0.Pc as usize
     }
 
     #[inline(always)]
-    fn sp(&self) -> DWORD64 {
-        self.0.Sp
+    fn sp(&self) -> usize {
+        self.0.Sp as usize
     }
 }
 
@@ -133,7 +133,7 @@ pub unsafe fn trace(cb: &mut dyn FnMut(&super::Frame) -> bool) {
             ip,
             fn_entry,
             &mut context.0,
-            ptr::addr_of_mut!(handler_data).cast::<PVOID>(),
+            ptr::addr_of_mut!(handler_data).cast::<*mut c_void>(),
             &mut establisher_frame,
             ptr::null_mut(),
         );

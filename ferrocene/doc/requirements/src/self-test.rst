@@ -45,6 +45,16 @@ When executed with ``-vV`` command-line options, the following apply:
 Checks for targets
 ------------------
 
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Has a standard library (``std``)
+   * - :target-with-triple:`x86_64-unknown-linux-gnu`
+     - yes
+   * - :target-with-triple:`aarch64-unknown-none`
+     - no
+
 .. note::
 
    - ``$target`` refers to any of the targets listed
@@ -52,11 +62,6 @@ Checks for targets
 
 All targets
 ^^^^^^^^^^^
-
-.. note:: The following checks apply to these targets:
-
-  - :target:`x86_64-unknown-linux-gnu`
-  - :target:`aarch64-unknown-none`
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
   relative to the root of the installation,
@@ -72,12 +77,8 @@ All targets
   - ``libcore-$hash.rlib``
   - ``liballoc-$hash.rlib``
 
-Targets with a ``std`` library
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. note:: The following checks apply to these targets:
-
-   - :target:`x86_64-unknown-linux-gnu`
+Targets with ``std``
+^^^^^^^^^^^^^^^^^^^^
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
   relative to the root of the installation,
@@ -126,13 +127,18 @@ where ``$arg`` is command line arguments that the system linker accepts.
 Checks for compilation
 ----------------------
 
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Host target
+   * - :target-with-triple:`x86_64-unknown-linux-gnu`
+     - yes
+   * - :target-with-triple:`aarch64-unknown-none`
+     - no
+
 All targets
 ^^^^^^^^^^^
-
-.. note:: The following checks apply to these targets:
-
-  - :target:`x86_64-unknown-linux-gnu`
-  - :target:`aarch64-unknown-none`
 
 Check if we can create temporary directories.
 
@@ -151,10 +157,6 @@ where ``$basename`` is the file name without the extension:
 
 Host targets
 ^^^^^^^^^^^^
-
-.. note:: The following checks apply to these targets:
-
-  - :target:`x86_64-unknown-linux-gnu`
 
 Check if a sample program that ``rustc`` produced can be executed.
 

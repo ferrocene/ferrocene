@@ -51,21 +51,21 @@ Checks for targets
    * - Target
      - Has a standard library (``std``)
    * - :target-with-triple:`x86_64-unknown-linux-gnu`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-unknown-none`
      -
    * - :target-with-triple:`x86_64-pc-windows-msvc`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-unknown-linux-gnu`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-apple-darwin`
-     - yes
+     - ✔
    * - :target-with-triple:`x86_64-apple-darwin`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-unknown-nto-qnx710`
-     - yes
+     - ✔
    * - :target-with-triple:`x86_64-pc-nto-qnx710`
-     - yes
+     - ✔
    * - :target-with-triple:`armv8r-none-eabihf`
      -
    * - :target-with-triple:`thumbv7em-none-eabi`
@@ -157,15 +157,15 @@ Checks for compilation
    * - Target
      - Host target
    * - :target-with-triple:`x86_64-unknown-linux-gnu`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-unknown-none`
      -
    * - :target-with-triple:`x86_64-pc-windows-msvc`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-unknown-linux-gnu`
-     - yes
+     - ✔
    * - :target-with-triple:`aarch64-apple-darwin`
-     - yes
+     - ✔
    * - :target-with-triple:`x86_64-apple-darwin`
      -
    * - :target-with-triple:`aarch64-unknown-nto-qnx710`

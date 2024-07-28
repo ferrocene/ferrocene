@@ -2,7 +2,7 @@
 use crate::resolve;
 use crate::PrintFmt;
 use crate::{resolve_frame, trace, BacktraceFmt, Symbol, SymbolName};
-use std::ffi::c_void;
+use core::ffi::c_void;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::prelude::v1::*;
@@ -27,6 +27,101 @@ use serde::{Deserialize, Serialize};
 pub struct Backtrace {
     // Frames here are listed from top-to-bottom of the stack
     frames: Vec<BacktraceFrame>,
+}
+
+#[derive(Clone, Copy)]
+struct TracePtr(*mut c_void);
+/// SAFETY: These pointers are always valid within a process and are not used for mutation.
+unsafe impl Send for TracePtr {}
+/// SAFETY: These pointers are always valid within a process and are not used for mutation.
+unsafe impl Sync for TracePtr {}
+
+impl TracePtr {
+    fn into_void(self) -> *mut c_void {
+        self.0
+    }
+    #[cfg(feature = "serde")]
+    fn from_addr(addr: usize) -> Self {
+        TracePtr(addr as *mut c_void)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TracePtr {
+    #[inline]
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct PrimitiveVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for PrimitiveVisitor {
+            type Value = TracePtr;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("usize")
+            }
+
+            #[inline]
+            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(TracePtr(v as usize as *mut c_void))
+            }
+
+            #[inline]
+            fn visit_u16<E>(self, v: u16) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(TracePtr(v as usize as *mut c_void))
+            }
+
+            #[inline]
+            fn visit_u32<E>(self, v: u32) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                if usize::BITS >= 32 {
+                    Ok(TracePtr(v as usize as *mut c_void))
+                } else {
+                    Err(E::invalid_type(
+                        serde::de::Unexpected::Unsigned(v as _),
+                        &self,
+                    ))
+                }
+            }
+
+            #[inline]
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                if usize::BITS >= 64 {
+                    Ok(TracePtr(v as usize as *mut c_void))
+                } else {
+                    Err(E::invalid_type(
+                        serde::de::Unexpected::Unsigned(v as _),
+                        &self,
+                    ))
+                }
+            }
+        }
+
+        deserializer.deserialize_u64(PrimitiveVisitor)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TracePtr {
+    #[inline]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        serializer.serialize_u64(self.0 as usize as u64)
+    }
 }
 
 fn _assert_send_sync() {
@@ -54,9 +149,9 @@ enum Frame {
     Raw(crate::Frame),
     #[cfg(feature = "serde")]
     Deserialized {
-        ip: usize,
-        symbol_address: usize,
-        module_base_address: Option<usize>,
+        ip: TracePtr,
+        symbol_address: TracePtr,
+        module_base_address: Option<TracePtr>,
     },
 }
 
@@ -65,7 +160,7 @@ impl Frame {
         match *self {
             Frame::Raw(ref f) => f.ip(),
             #[cfg(feature = "serde")]
-            Frame::Deserialized { ip, .. } => ip as *mut c_void,
+            Frame::Deserialized { ip, .. } => ip.into_void(),
         }
     }
 
@@ -73,7 +168,7 @@ impl Frame {
         match *self {
             Frame::Raw(ref f) => f.symbol_address(),
             #[cfg(feature = "serde")]
-            Frame::Deserialized { symbol_address, .. } => symbol_address as *mut c_void,
+            Frame::Deserialized { symbol_address, .. } => symbol_address.into_void(),
         }
     }
 
@@ -84,7 +179,7 @@ impl Frame {
             Frame::Deserialized {
                 module_base_address,
                 ..
-            } => module_base_address.map(|addr| addr as *mut c_void),
+            } => module_base_address.map(|addr| addr.into_void()),
         }
     }
 
@@ -94,7 +189,7 @@ impl Frame {
         let sym = |symbol: &Symbol| {
             symbols.push(BacktraceSymbol {
                 name: symbol.name().map(|m| m.as_bytes().to_vec()),
-                addr: symbol.addr().map(|a| a as usize),
+                addr: symbol.addr().map(TracePtr),
                 filename: symbol.filename().map(|m| m.to_owned()),
                 lineno: symbol.lineno(),
                 colno: symbol.colno(),
@@ -104,7 +199,7 @@ impl Frame {
             Frame::Raw(ref f) => resolve_frame(f, sym),
             #[cfg(feature = "serde")]
             Frame::Deserialized { ip, .. } => {
-                resolve(ip as *mut c_void, sym);
+                resolve(ip.into_void(), sym);
             }
         }
         symbols
@@ -124,7 +219,7 @@ impl Frame {
 #[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct BacktraceSymbol {
     name: Option<Vec<u8>>,
-    addr: Option<usize>,
+    addr: Option<TracePtr>,
     filename: Option<PathBuf>,
     lineno: Option<u32>,
     colno: Option<u32>,
@@ -347,7 +442,7 @@ impl BacktraceSymbol {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn addr(&self) -> Option<*mut c_void> {
-        self.addr.map(|s| s as *mut c_void)
+        self.addr.map(|s| s.into_void())
     }
 
     /// Same as `Symbol::filename`
@@ -468,7 +563,7 @@ mod serde_impls {
             SerializedFrame {
                 ip: frame.ip() as usize,
                 symbol_address: frame.symbol_address() as usize,
-                module_base_address: frame.module_base_address().map(|addr| addr as usize),
+                module_base_address: frame.module_base_address().map(|sym_a| sym_a as usize),
                 symbols: symbols.clone(),
             }
             .serialize(s)
@@ -483,9 +578,9 @@ mod serde_impls {
             let frame: SerializedFrame = SerializedFrame::deserialize(d)?;
             Ok(BacktraceFrame {
                 frame: Frame::Deserialized {
-                    ip: frame.ip,
-                    symbol_address: frame.symbol_address,
-                    module_base_address: frame.module_base_address,
+                    ip: TracePtr::from_addr(frame.ip),
+                    symbol_address: TracePtr::from_addr(frame.symbol_address),
+                    module_base_address: frame.module_base_address.map(TracePtr::from_addr),
                 },
                 symbols: frame.symbols,
             })

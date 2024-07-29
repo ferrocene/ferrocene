@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-`ferrocene-self-test` tool
-==========================
+``ferrocene-self-test`` tool
+============================
 
 General checks
 --------------

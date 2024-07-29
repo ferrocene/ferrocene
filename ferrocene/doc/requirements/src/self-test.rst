@@ -19,8 +19,6 @@ Checks for executables
 
 The executable should exist in the ``bin`` directory, relative to the root of the installation.
 
-The metadata of the executable should be fetchable.
-
 The executable should be a regular file.
 
 The executable should have read and execute permissions set for all users.

@@ -521,7 +521,14 @@ jobs:
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
+      # On Windows, the virtualenv detection seems to struggle at times.
+      SCRIPT: |
+        if [[ "${OSTYPE}" = "msys" ]]; then
+            source $HOME/.venv/Scripts/activate
+        else
+            source $HOME/.venv/bin/activate
+        fi
+        ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -1196,11 +1203,10 @@ commands:
           name: Fetch QNX710 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            export VIRTUAL_ENV=$HOME/.venv
             if [[ "${OSTYPE}" = "msys" ]]; then
-                export PATH=$HOME/.venv/Scripts/:$PATH
+                source $HOME/.venv/Scripts/activate
             else
-                export PATH=$HOME/.venv/bin/:$PATH
+                source $HOME/.venv/bin/activate
             fi
             python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst
       - run:

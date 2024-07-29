@@ -29,7 +29,16 @@ When executed with ``-vV`` command-line options, the following apply:
 
 - The output of the executable should be UTF-8 text.
 
-- The output of the executable should have at least 3 values: host, commit-hash, and release.
+- The output of the executable should have at least 3 key-value pairs,
+  with these 3 keys: ``host``, ``commit-hash``, and ``release``.
+
+  Example output for rustc:
+
+  .. code-block:: text
+
+     commit-hash: f228f60438264270168a59eba2bc4aaca0ca7c02
+     host: x86_64-unknown-linux-gnu
+     release: 1.81.0-nightly
 
 - The value of ``host`` from the output of the executable should match the target-triple
   of the executing environment.

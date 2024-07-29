@@ -65,7 +65,7 @@ All targets
 
 .. note::
 
-   These checks are for all targets listed in :doc:`user-manual:targets/index`.
+   These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
   relative to the root of the installation,
@@ -86,7 +86,8 @@ Targets with ``std``
 
 .. note::
 
-   These checks are for all targets marked as having Full standard library support in
+   These checks are for all locally-installed targets
+   which are also marked as having Full standard library support in
    :doc:`user-manual:targets/index`.
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
@@ -141,7 +142,7 @@ All targets
 
 .. note::
 
-   These checks are for all targets listed in :doc:`user-manual:targets/index`
+   These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
 
 Check if we can create temporary directories.
 
@@ -163,7 +164,8 @@ Host targets
 
 .. note::
 
-   These checks are for all targets marked as Host platforms in
+   These checks are for all locally-installed targets
+   which are also marked as Host platforms in
    :doc:`user-manual:targets/index`.
 
 Check if a sample program that ``rustc`` produced can be executed.

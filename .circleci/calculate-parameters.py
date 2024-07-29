@@ -67,7 +67,7 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
+X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -87,6 +87,8 @@ def calculate_docker_image_tag(platform_plus_image: str):
     for root, _, files in os.walk(path):
         for file in files:
             all_files.append(os.path.join(root, file))
+    # The docker files depend on `requirements.txt` for their venv.
+    all_files.append("requirements.txt")
 
     # This is done in two steps to guarantee a stable sorting for the files,
     # otherwise inconsistencies in the filesystem could result in different

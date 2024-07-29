@@ -190,36 +190,39 @@ Create a deployment containing Linux and Windows toolchains:
         -mirrorBaseline qnx710
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
+        -installBaseline com.qnx.qnx710 \
         -installPackage com.qnx.qnx710.host.win.x86_64 \
         -installPackage com.qnx.qnx710.host.linux.x86_64 \
         -destination qnx/qnx710 \
         -cleanInstall
-    rm -rf \
-        qnx/qnx710/target/qnx7/usr/help \
-        qnx/qnx710/target/qnx7/etc/usr/help \
-        qnx/qnx710/target/qnx7/armle-v7 \
-        qnx/qnx710/target/qnx7/usr/include/python3.11 \
-        qnx/qnx710/target/x86_64/usr/lib/python3.11 \
-        qnx/qnx710/.packages
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -deploySdpInstallation qnx/qnx710 \
         -deployLicense $LICENSE_KEY \
         -installationDeployAs qnx/qnx710-deployment
 
-Finally, create an archive of the deployment and upload it to the S3 URL which the CI attempts to pull from:
+Finally, create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
 
     cd $HOME
-    tar -cv -I 'zstd -T0' -f qnx/qnx710-deployment.tar.xz -C qnx/qnx710-deployment/ qnx710
+    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx710-deployment.tar.xz -C qnx/qnx710-deployment/ qnx710
     aws s3 cp qnx/qnx710-deployment.tar.xz s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz
 
-On CI/CD hosts:
+On CI/CD hosts we use a Python script to setup the toolchain:
+
+.. code-block::
+
+    cd $HOME
+    git/ferrocene/ferrocene/ferrocene/ci/scripts/setup-qnx-toolchain.py
+    source qnx/qnx710/qnxsdp-env.sh
+    qcc -v
+
+It's also possible to use ``tar`` directly, but it can be problematic on Windows hosts.
 
 .. code-block::
 
     cd $HOME
     aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -x --zstd -f-
     source qnx/qnx710/qnxsdp-env.sh
-    qcc --help
+    qcc -v

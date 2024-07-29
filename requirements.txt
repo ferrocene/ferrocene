@@ -40,3 +40,5 @@ six==1.16.0
     # via python-dateutil
 urllib3==2.2.1
     # via botocore
+zstandard==0.22.0
+    # via -r requirements.in

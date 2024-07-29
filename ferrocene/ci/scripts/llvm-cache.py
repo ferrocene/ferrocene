@@ -75,7 +75,7 @@ def arguments():
     return parser.parse_args()
 
 
-def run():
+def main():
     args = arguments()
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
@@ -236,4 +236,4 @@ def get_llvm_cache_hash():
 
 
 if __name__ == "__main__":
-    run()
+    main()

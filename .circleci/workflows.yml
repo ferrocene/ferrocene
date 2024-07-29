@@ -507,7 +507,6 @@ jobs:
           depth: 1
       - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
       - aws-oidc-auth
-      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -577,6 +576,8 @@ jobs:
           depth: 1
       - aws-oidc-auth
       - ferrocene-setup-windows
+      - setup-venv
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -1193,7 +1194,15 @@ commands:
     steps:
       - run:
           name: Fetch QNX710 toolchain
-          command: aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -v -x --zstd -f-
+          # On Windows, the virtualenv detection seems to struggle at times.
+          command: |
+            export VIRTUAL_ENV=$HOME/.venv
+            if [[ "${OSTYPE}" = "msys" ]]; then
+                export PATH=$HOME/.venv/Scripts/:$PATH
+            else
+                export PATH=$HOME/.venv/bin/:$PATH
+            fi
+            python ferrocene/ci/scripts/setup-qnx-toolchain.py
       - run:
           name: Set PATH to include QNX710 tools
           command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"

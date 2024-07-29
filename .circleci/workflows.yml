@@ -740,41 +740,6 @@ workflows:
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
 
-      - aarch64-darwin-llvm: {}
-      - aarch64-darwin-build:
-          requires:
-            - aarch64-darwin-llvm
-      - aarch64-darwin-dist:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-dist-tools:
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test
-          job: test
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library
-          job: test:library
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-compiletest
-          job: test:compiletest
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-      - aarch64-darwin-generic-test-runner:
-          name: aarch64-darwin-test-library-std
-          job: test:library-std
-          resource-class: macos.m1.large.gen1 # 8 cores
-          requires:
-            - aarch64-darwin-build
-
       - commit-checks:
           requires:
             - build-docker--ubuntu-24

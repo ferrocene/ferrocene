@@ -108,16 +108,16 @@ def main():
 def subcommand_download(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
 
-    cache.retrieve(s3_url, ".")
+    cache.retrieve(s3_url.geturl(), ".")
 
 def subcommand_prepare(ferrocene_host):
     tarball = build_llvm_tarball(ferrocene_host)
     s3_url = get_s3_url(ferrocene_host);
-    cache.store(s3_url, tarball)
+    cache.store(s3_url.geturl(), tarball)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
-    print(s3_url)
+    print(s3_url.geturl())
 
 def build_llvm_tarball(ferrocene_host):
     """
@@ -198,7 +198,7 @@ def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    return urllib.parse.urlparse(s3_url).geturl()
+    return urllib.parse.urlparse(s3_url)
 
 def get_llvm_cache_hash():
     """

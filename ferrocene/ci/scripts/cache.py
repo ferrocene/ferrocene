@@ -45,13 +45,14 @@ def retrieve(s3_url, out_dir):
     return
 
 
-def store(s3_url, in_dir):
+def store(s3_url, in_dir, upload=True, cleanup=True):
     """
     Store write a zstd compressed tarball of `in_dir` to the S3 URL `s3_url`.
+
+    Pass `upload=False` to avoid the upload to s3 during testing.
     """
     [bucket, key] = parse_s3_url(s3_url)
 
-    s3 = boto3.client('s3')
     zstd_compressor = zstandard.ZstdCompressor()
     
     # It proved to be quite difficult to stream a zstd compression stream
@@ -63,13 +64,17 @@ def store(s3_url, in_dir):
                 logging.info("Began archiving...")
                 os.chdir(in_dir)
                 tarball.add(".") # Always do relative to the directory passed.
-        logging.info("Done compression and archiving.")
+        logging.info(f"Done compression and archiving to `{temporary_file.name}`.")
 
-        logging.info(f"Beginning upload of `{temporary_file.name}` to `{s3_url}`...")
-        s3.upload_file(temporary_file.name, bucket, key)
-        logging.info(f"Done upload to `{s3_url}`.")
-        os.unlink(temporary_file.name)
-        logging.info(f"Removed `{temporary_file.name}`.")
+        if upload == True:
+            logging.info(f"Beginning upload of `{temporary_file.name}` to `{s3_url}`...")
+            s3 = boto3.client('s3')
+            s3.upload_file(temporary_file.name, bucket, key)
+            logging.info(f"Done upload to `{s3_url}`.")
+        
+        if cleanup == True:
+            os.unlink(temporary_file.name)
+            logging.info(f"Removed `{temporary_file.name}`.")
     
     return
 
@@ -83,6 +88,8 @@ def arguments():
     store_parser = subparsers.add_parser("store", help="Store a path as a `.tar.xz` at the specified AWS S3 URL")
     store_parser.add_argument("s3_url", help="The `s3://<bucket>/<key>` url")
     store_parser.add_argument("in_dir", help="The directory to store")
+    store_parser.add_argument("--upload", default=True, help="If the tarball should be actually be uploaded to s3")
+    store_parser.add_argument("--cleanup", default=True, help="If the tarball should be removed when finished")
 
     retrieve_parser = subparsers.add_parser("retrieve", help="Retrieve a `.tar.xz` from the specified AWS S3 URL and unpack it to a path")
     retrieve_parser.add_argument("s3_url", help="The `s3://<bucket>/<key>` url")
@@ -104,7 +111,7 @@ def main():
 
     match args.subcommand:
         case "store":
-            store(args.s3_url, args.in_dir)
+            store(args.s3_url, args.in_dir, upload=args.upload)
 
         case "retrieve":
             retrieve(args.s3_url, args.out_dir)

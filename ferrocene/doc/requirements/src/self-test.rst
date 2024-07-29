@@ -67,19 +67,19 @@ All targets
 
    These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
 
-- Inside of ``lib/rustlib/$target/lib`` directory,
-  relative to the root of the installation,
-  should exist these regular files:
+Inside of ``lib/rustlib/$target/lib`` directory,
+relative to the root of the installation,
+should exist these regular files:
 
-  - ``libcore-$hash.rlib``
-  - ``liballoc-$hash.rlib``
+- ``libcore-$hash.rlib``
+- ``liballoc-$hash.rlib``
 
-- Inside of ``lib/rustlib/$target/lib`` directory,
-  relative to the root of the installation,
-  should not exist duplicates of these regular files:
+Inside of ``lib/rustlib/$target/lib`` directory,
+relative to the root of the installation,
+should not exist duplicates of these regular files:
 
-  - ``libcore-$hash.rlib``
-  - ``liballoc-$hash.rlib``
+- ``libcore-$hash.rlib``
+- ``liballoc-$hash.rlib``
 
 Targets with ``std``
 ^^^^^^^^^^^^^^^^^^^^
@@ -90,21 +90,21 @@ Targets with ``std``
    which are also marked as having Full standard library support in
    :doc:`user-manual:targets/index`.
 
-- Inside of ``lib/rustlib/$target/lib`` directory,
-  relative to the root of the installation,
-  should exist these regular files:
+Inside of ``lib/rustlib/$target/lib`` directory,
+relative to the root of the installation,
+should exist these regular files:
 
-  - ``libstd-$hash.rlib``
-  - ``libtest-$hash.rlib``
-  - ``libproc_macro-$hash.rlib``
+- ``libstd-$hash.rlib``
+- ``libtest-$hash.rlib``
+- ``libproc_macro-$hash.rlib``
 
-- Inside of ``lib/rustlib/$target/lib`` directory,
-  relative to the root of the installation,
-  should not exist duplicates of these regular files:
-    
-  - ``libstd-$hash.rlib``
-  - ``libtest-$hash.rlib``
-  - ``libproc_macro-$hash.rlib``
+Inside of ``lib/rustlib/$target/lib`` directory,
+relative to the root of the installation,
+should not exist duplicates of these regular files:
+
+- ``libstd-$hash.rlib``
+- ``libtest-$hash.rlib``
+- ``libproc_macro-$hash.rlib``
 
 Checks for linkers
 ------------------

@@ -198,7 +198,7 @@ def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    return urllib.parse.urlparse(s3_url)
+    return urllib.parse.urlparse(s3_url).geturl()
 
 def get_llvm_cache_hash():
     """

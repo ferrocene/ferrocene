@@ -11,7 +11,7 @@ extensions = [
     "ferrocene_toctrees",
 ]
 
-ferrocene_id = "REQ"
+ferrocene_id = "FR"
 
 html_theme = "ferrocene"
 html_title = project

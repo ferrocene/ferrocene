@@ -1222,8 +1222,8 @@ fn rustc_llvm_env(builder: &Builder<'_>, cargo: &mut Cargo, target: TargetSelect
     if builder.config.llvm_use_libcxx {
         cargo.env("LLVM_USE_LIBCXX", "1");
     }
-    if builder.config.llvm_optimize && !builder.config.llvm_release_debuginfo {
-        cargo.env("LLVM_NDEBUG", "1");
+    if builder.config.llvm_assertions {
+        cargo.env("LLVM_ASSERTIONS", "1");
     }
 }
 
@@ -2089,7 +2089,8 @@ pub fn stream_cargo(
     tail_args: Vec<String>,
     cb: &mut dyn FnMut(CargoMessage<'_>),
 ) -> bool {
-    let mut cargo = cargo.into_cmd().command;
+    let mut cmd = cargo.into_cmd();
+    let cargo = cmd.as_command_mut();
     // Instruct Cargo to give us json messages on stdout, critically leaving
     // stderr as piped so we can get those pretty colors.
     let mut message_format = if builder.config.json_output {

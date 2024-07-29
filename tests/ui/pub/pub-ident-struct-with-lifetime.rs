@@ -1,5 +1,5 @@
 pub S<'a> {
-//~^ ERROR missing `struct` for struct definition
+//~^ ERROR missing `enum` or `struct` for enum or struct definition
 }
 fn main() {}
 

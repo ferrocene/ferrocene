@@ -19,9 +19,6 @@ import urllib.parse
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"
 
-TARBALL_PATH = "llvm-cache.tar"
-COMPRESSED_TARBALL_PATH = f"{TARBALL_PATH}.zst"
-
 # Note that this *ignores* symlinks. If you need a binary that's actually a
 # symlink please add to the list the binary the symlink points *to*.
 KEEP_LLVM_BINARIES=[
@@ -69,6 +66,8 @@ def arguments():
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
+    prepare_parser.add_argument("--upload", default=True, help="If the tarball should be actually be uploaded to s3")
+    prepare_parser.add_argument("--cleanup", default=True, help="If the tarball should be removed when finished")
     
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
 
@@ -101,7 +100,7 @@ def main():
     elif args.subcommand == "download":
         subcommand_download(ferrocene_host)
     elif args.subcommand == "prepare":
-        subcommand_prepare(ferrocene_host)
+        subcommand_prepare(ferrocene_host, upload=args.upload, cleanup=args.cleanup)
     else:
         print(f"Unknown command {args.subcommand}")
 
@@ -110,16 +109,16 @@ def subcommand_download(ferrocene_host):
 
     cache.retrieve(s3_url.geturl(), ".")
 
-def subcommand_prepare(ferrocene_host):
-    tarball = build_llvm_tarball(ferrocene_host)
+def subcommand_prepare(ferrocene_host, upload=True, cleanup=True):
+    tarball = prepare_llvm_build(ferrocene_host)
     s3_url = get_s3_url(ferrocene_host);
-    cache.store(s3_url.geturl(), tarball)
+    cache.store(s3_url.geturl(), tarball, upload=upload, cleanup=cleanup)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
     print(s3_url.geturl())
 
-def build_llvm_tarball(ferrocene_host):
+def prepare_llvm_build(ferrocene_host):
     """
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
@@ -183,16 +182,7 @@ def build_llvm_tarball(ferrocene_host):
                 exit 1
             """)
 
-    # Use python tar to avoid Windows 'weirdness'
-    tar = tarfile.open(TARBALL_PATH, "w")
-    tar.add(f"build/{ferrocene_host}/llvm")
-    tar.close()
-
-    compress_cmd = ["zstd", "-1", "-T0", TARBALL_PATH, "-o", COMPRESSED_TARBALL_PATH]
-    compress = subprocess.run(compress_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-    os.remove(TARBALL_PATH)
-    return COMPRESSED_TARBALL_PATH
+    return f"build/{ferrocene_host}/llvm"
 
 def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()

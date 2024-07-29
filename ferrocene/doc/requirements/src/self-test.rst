@@ -52,37 +52,6 @@ When executed with ``-vV`` command-line options, the following apply:
 Checks for targets
 ------------------
 
-.. list-table::
-   :header-rows: 1
-
-   * - Target
-     - Has a standard library (``std``)
-   * - :target-with-triple:`x86_64-unknown-linux-gnu`
-     - ✔
-   * - :target-with-triple:`aarch64-unknown-none`
-     -
-   * - :target-with-triple:`x86_64-pc-windows-msvc`
-     - ✔
-   * - :target-with-triple:`aarch64-unknown-linux-gnu`
-     - ✔
-   * - :target-with-triple:`aarch64-apple-darwin`
-     - ✔
-   * - :target-with-triple:`x86_64-apple-darwin`
-     - ✔
-   * - :target-with-triple:`aarch64-unknown-nto-qnx710`
-     - ✔
-   * - :target-with-triple:`x86_64-pc-nto-qnx710`
-     - ✔
-   * - :target-with-triple:`armv8r-none-eabihf`
-     -
-   * - :target-with-triple:`thumbv7em-none-eabi`
-     -
-   * - :target-with-triple:`thumbv7em-none-eabihf`
-     -
-   * - :target-with-triple:`armv7r-none-eabihf`
-     -
-   * - :target-with-triple:`armebv7r-none-eabihf`
-     -
 
 .. note::
 
@@ -93,6 +62,10 @@ Checks for targets
 
 All targets
 ^^^^^^^^^^^
+
+.. note::
+
+   These checks are for all targets listed in :doc:`user-manual:targets/index`.
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
   relative to the root of the installation,
@@ -110,6 +83,11 @@ All targets
 
 Targets with ``std``
 ^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+   These checks are for all targets marked as having Full standard library support in
+   :doc:`user-manual:targets/index`.
 
 - Inside of ``lib/rustlib/$target/lib`` directory,
   relative to the root of the installation,
@@ -158,40 +136,12 @@ where ``$arg`` is command line arguments that the system linker accepts.
 Checks for compilation
 ----------------------
 
-.. list-table::
-   :header-rows: 1
-
-   * - Target
-     - Host target
-   * - :target-with-triple:`x86_64-unknown-linux-gnu`
-     - ✔
-   * - :target-with-triple:`aarch64-unknown-none`
-     -
-   * - :target-with-triple:`x86_64-pc-windows-msvc`
-     - ✔
-   * - :target-with-triple:`aarch64-unknown-linux-gnu`
-     - ✔
-   * - :target-with-triple:`aarch64-apple-darwin`
-     - ✔
-   * - :target-with-triple:`x86_64-apple-darwin`
-     -
-   * - :target-with-triple:`aarch64-unknown-nto-qnx710`
-     -
-   * - :target-with-triple:`x86_64-pc-nto-qnx710`
-     -
-   * - :target-with-triple:`armv8r-none-eabihf`
-     -
-   * - :target-with-triple:`thumbv7em-none-eabi`
-     -
-   * - :target-with-triple:`thumbv7em-none-eabihf`
-     -
-   * - :target-with-triple:`armv7r-none-eabihf`
-     -
-   * - :target-with-triple:`armebv7r-none-eabihf`
-     -
-
 All targets
 ^^^^^^^^^^^
+
+.. note::
+
+   These checks are for all targets listed in :doc:`user-manual:targets/index`
 
 Check if we can create temporary directories.
 
@@ -210,6 +160,11 @@ where ``$basename`` is the file name without the extension:
 
 Host targets
 ^^^^^^^^^^^^
+
+.. note::
+
+   These checks are for all targets marked as Host platforms in
+   :doc:`user-manual:targets/index`.
 
 Check if a sample program that ``rustc`` produced can be executed.
 

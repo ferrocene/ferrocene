@@ -26,13 +26,13 @@ There are also two variants of the standard library available:
 * **Full**: provides the ``core``, ``alloc``, ``std``, ``test`` and
   ``proc_macro`` built-in crates.
 
-Supported targets
+Qualified targets
 -----------------
 
-Supported targets are provided with the highest level of assurance. They are
-qualified for use in safety-critical contexts (when used with a qualified
-rustc), and the full Ferrocene test suite is executed on the target for every
-code change.
+Qualified targets are provided with the highest level of assurance and support.
+They are qualified for use in safety-critical contexts (when used with a
+qualified rustc), and the full Ferrocene test suite is executed on the target
+for every code change.
 
 .. list-table::
    :header-rows: 1
@@ -55,13 +55,52 @@ code change.
      - Bare-metal
      - \-
 
+Quality managed targets
+-----------------------
+
+.. note::
+
+  Quality managed targets cannot be used in safety-critical contexts.
+
+Quality managed targets are targets which are suitable for development, but not
+qualified. Support is available. They should not be used in production. The
+Ferrocene test suite successfully executed on the target. 
+
+For any of the follow reasons, the target is not qualified:
+
+* A small number of tests may be deemed irrelevant to the target, and disabled.
+  This may have rendered the
+  :doc:`Traceability Matrix <qualification-report:requirements-traceability>`
+  unsatisfied.
+* The target is deemed unlikely to be part of the production deployment
+  pipeline, but likely to be used by developers during R&D.
+* The target is in the process of qualification, but is not completed yet.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Triple
+     - Kind
+     - Standard library
+     - Notes
+
+   * - :ref:`aarch64-apple-darwin`
+     - ``aarch64-apple-darwin``
+     - Host platform
+     - Full
+     - Quality managed because it was deemed unlikely to be part of production deployment.
+
 Experimental targets
 --------------------
 
-Experimental targets cannot be used in safety-critical contexts, and there is
-no guarantee that the Ferrocene test suite is successfully executed on the
-target. They are provided as a preview, with limited support available. They
-should not be used in production.
+.. note::
+  
+  Experimental targets cannot be used in safety-critical contexts.
+
+There is no guarantee that the Ferrocene test suite is successfully executed on
+the target. They are provided as a preview, with limited support available.
+They should not be used in production.
 
 .. list-table::
    :header-rows: 1

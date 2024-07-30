@@ -124,6 +124,16 @@ relative to the root of the installation,
 should exist the regular file named ``ld.lld``,
 which is the linker wrapper.
 
+Platforms that need a C compiler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+   The following checks apply to these Host platforms:
+
+   - :target:`x86_64-unknown-linux-gnu`
+   - :target:`aarch64-unknown-linux-gnu`
+
 Search for a system C compiler in the ``PATH`` environment variable.
 
 Use the system C compiler to compile a sample program,

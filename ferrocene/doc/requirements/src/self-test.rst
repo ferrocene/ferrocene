@@ -109,11 +109,11 @@ should not exist duplicates of these regular files:
 Checks for linkers
 ------------------
 
-.. note:: The following checks apply to these targets:
+.. note::
 
-   - :target:`x86_64-unknown-linux-gnu`
+   These checks are for the host platform, which is where ``ferrocene-self-test`` is executed.
 
-   ``$target`` refers to any of the targets listed above
+   ``$target`` refers to this host platform.
 
 Inside of ``lib/rustlib/$target/bin`` directory,
 relative to the root of the installation,

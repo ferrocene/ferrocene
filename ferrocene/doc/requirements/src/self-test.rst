@@ -142,6 +142,9 @@ and use the linker wrapper for the linking stage.
 Check that the system C compiler passes ``-Wl,$arg`` arguments to the linker,
 where ``$arg`` is command line arguments that the system linker accepts.
 
+Ensure that the linker command line arguments that can be accepted are of
+:ref:`the form documented in the Safety Manual <linker-options>`.
+
 Checks for compilation
 ----------------------
 

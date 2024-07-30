@@ -66,10 +66,10 @@ def arguments():
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
-    prepare_parser.add_argument("--upload", default=True, help="If the tarball should be actually be uploaded to s3")
-    prepare_parser.add_argument("--cleanup", default=True, help="If the tarball should be removed when finished")
+    prepare_parser.add_argument("--url", help="Manually set the output `tar.zst` location")
     
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
+    download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
 
     s3_url_parser = subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
 
@@ -98,21 +98,24 @@ def main():
     if args.subcommand == "s3-url":
         subcommand_s3_url(ferrocene_host)
     elif args.subcommand == "download":
-        subcommand_download(ferrocene_host)
+        subcommand_download(ferrocene_host, args.url)
     elif args.subcommand == "prepare":
-        subcommand_prepare(ferrocene_host, upload=args.upload, cleanup=args.cleanup)
+        subcommand_prepare(ferrocene_host, args.url)
     else:
         print(f"Unknown command {args.subcommand}")
 
-def subcommand_download(ferrocene_host):
-    s3_url = get_s3_url(ferrocene_host)
+def subcommand_download(ferrocene_host, url):
+    if url == None:
+        url = get_s3_url(ferrocene_host).geturl()
 
-    cache.retrieve(s3_url.geturl(), ".")
+    cache.retrieve(url, ".")
 
-def subcommand_prepare(ferrocene_host, upload=True, cleanup=True):
+def subcommand_prepare(ferrocene_host, url):
+    if url == None:
+        url = get_s3_url(ferrocene_host).geturl()
+
     tarball = prepare_llvm_build(ferrocene_host)
-    s3_url = get_s3_url(ferrocene_host);
-    cache.store(s3_url.geturl(), tarball, upload=upload, cleanup=cleanup)
+    cache.store(url, tarball)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)

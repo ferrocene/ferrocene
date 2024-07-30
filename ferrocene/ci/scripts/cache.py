@@ -72,11 +72,11 @@ def store(path, in_dir):
         logging.info(f"Done compression and archiving to `{temporary_file.name}`.")
 
         if path.startswith("s3://"):
-            [bucket, key] = parse_s3_url(s3_url)
-            logging.info(f"Beginning upload of `{temporary_file.name}` to `{s3_url}`...")
+            [bucket, key] = parse_s3_url(path)
+            logging.info(f"Beginning upload of `{temporary_file.name}` to `{path}`...")
             s3 = boto3.client('s3')
             s3.upload_file(temporary_file.name, bucket, key)
-            logging.info(f"Done upload to `{s3_url}`.")
+            logging.info(f"Done upload to `{path}`.")
 
             os.unlink(temporary_file.name)
             logging.info(f"Removed `{temporary_file.name}`.")

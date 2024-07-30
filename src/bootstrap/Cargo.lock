@@ -71,9 +71,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.9.2"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1bc3887947e51b03a2aa6dff41aaf64f2bd8f7369ebcb1ef49b2b54b6a0d1de"
+checksum = "40723b8fb387abc38f4f4a37c09073622e41dd12327033091ef8950659e6dc0c"
 dependencies = [
  "memchr",
  "regex-automata",
@@ -122,9 +122,9 @@ dependencies = [
 
 [[package]]
 name = "clap_complete"
-version = "4.5.10"
+version = "4.5.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbeb5ae3a578b7f639911ed31e98a48e16ef6f44e62d275184bb755a093fea55"
+checksum = "c6ae69fbb0833c6fcd5a8d4b8609f108c7ad95fc11e248d853ff2c42a90df26a"
 dependencies = [
  "clap",
 ]
@@ -516,11 +516,12 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.120"
+version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e0d21c9a8cae1235ad58a00c11cb40d4b1e5c784f1ef2c537876ed6ffd8b7c5"
+checksum = "4ab380d7d9f22ef3f21ad3e6c1ebe8e4fc7a2000ccba2e4d71fc96f15b2cb609"
 dependencies = [
  "itoa",
+ "memchr",
  "ryu",
  "serde",
 ]
@@ -604,9 +605,9 @@ checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
 
 [[package]]
 name = "version_check"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "walkdir"

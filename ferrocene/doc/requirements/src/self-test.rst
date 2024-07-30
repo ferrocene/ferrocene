@@ -30,15 +30,11 @@ When executed with ``-vV`` command-line options, the following apply:
 - The output of the executable should be UTF-8 text.
 
 - The output of the executable should have at least 3 key-value pairs,
-  with these 3 keys: ``host``, ``commit-hash``, and ``release``.
+  with these 3 keys: ``host``, ``commit-hash``, and ``release``:
 
-  Example output for rustc:
-
-  .. code-block:: text
-
-     commit-hash: f228f60438264270168a59eba2bc4aaca0ca7c02
-     host: x86_64-unknown-linux-gnu
-     release: 1.81.0-nightly
+  - ``host`` is the target triple of the platform that the executable is built for
+  - ``commit-hash`` is an identifier for the Git commit from which the Ferrocene release was built
+  - ``release`` is the name of the upstream release from which the Ferrocene release was based
 
 - The value of ``host`` from the output of the executable should match the target-triple
   of the executing environment.

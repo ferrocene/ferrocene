@@ -115,8 +115,6 @@ Checks for linkers
 
    ``$target`` refers to any of the targets listed above
 
-Check if we can create temporary directories.
-
 Inside of ``lib/rustlib/$target/bin`` directory,
 relative to the root of the installation,
 should exist the regular file named ``rust-lld``.
@@ -143,8 +141,6 @@ All targets
 .. note::
 
    These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
-
-Check if we can create temporary directories.
 
 Check if we can compile the following Rust crate types:
 

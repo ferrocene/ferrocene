@@ -122,19 +122,16 @@ Structure
 ~~~~~~~~~
 
 :dp:`fls_6lrqailxjb02`
-This document contains 21 chapters, 2 appendices, and an index.
+This document contains 22 chapters, 4 appendices, and an index.
 
 :dp:`fls_tys7ciqnp8bn`
 The specification of the Rust language is separated into:
 
 * :dp:`fls_3ubhkaheu8i1`
-  Chapters 1 through 21,
+  Chapters 1 through 22,
 
 * :dp:`fls_xw3grr2g5zgi`
-  :doc:`licenses`
-
-* :dp:`fls_k6obg07c1i71`
-  :doc:`glossary`
+  Appendices A through D
 
 :dp:`fls_6srbinvnyd54`
 The specification is normative, except for the material in each of the items
@@ -147,13 +144,7 @@ listed below, which is informative:
   Each subchapter whose title starts with the word "Example" or "Examples".
 
 :dp:`fls_xgk91jrbpyoc`
-The following appendices are informative:
-
-* :dp:`fls_enkvrkfqwyt8`
-  :doc:`licenses`
-
-* :dp:`fls_yfyiaipc9omp`
-  :doc:`glossary`
+All appendices are informative.
 
 :dp:`fls_jc4upf6685bw`
 Each chapter is divided into subchapters that have a common structure. Each

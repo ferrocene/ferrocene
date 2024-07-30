@@ -174,10 +174,10 @@ def prepare_llvm_build(ferrocene_host):
             name = path.as_posix()
 
         if name in KEEP_LLVM_BINARIES:
-            print(f"Skipped {file}", file=sys.stderr)
+            logging.debug(f"Skipped {file}")
             continue
         else:
-            print(f"Soft-removing {file}", file=sys.stderr)
+            logging.debug(f"Soft-removing {file}")
             f = open(os.path.join(dirname, file), "wt")
             f.write(f"""
                 #!/usr/bin/env sh

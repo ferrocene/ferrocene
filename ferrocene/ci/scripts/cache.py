@@ -13,6 +13,7 @@ import io
 import threading
 import tempfile
 import os
+import shutil
 import logging
 
 def parse_s3_url(s3_url):
@@ -81,7 +82,7 @@ def store(path, in_dir):
             os.unlink(temporary_file.name)
             logging.info(f"Removed `{temporary_file.name}`.")
         else:
-            os.rename(temporary_file.name, path)
+            shutil.move(temporary_file.name, path)
             logging.info(f"Moved `{temporary_file.name}` to `{path}`")
     return
 

@@ -129,7 +129,7 @@ of Ferrocene executables and shared libraries:
    * - ``--build-id``
      - The *Build ID* option
 
-   * - ``--eh-frame-header``
+   * - ``--eh-frame-hdr``
      - The *Exception Frame Header* option
 
    * - ``--hash-style <style>``

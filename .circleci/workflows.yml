@@ -523,7 +523,7 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       # On Windows, the virtualenv detection seems to struggle at times, give it a kick
       SCRIPT: |
-        VIRTUAL_ENV=$HOME/.venv PATH=$HOME/.venv/Scripts $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py prepare
+        VIRTUAL_ENV=$HOME/.venv PATH=$HOME/.venv/Scripts:$PATH $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.

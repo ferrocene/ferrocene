@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 # Regression test for calling an inline function that uses a raw-dylib function.
 
 # only-windows

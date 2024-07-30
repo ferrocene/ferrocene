@@ -24,7 +24,6 @@ mod convert;
 mod decode;
 mod methods;
 
-// stable re-exports
 #[stable(feature = "try_from", since = "1.34.0")]
 pub use self::convert::CharTryFromError;
 #[stable(feature = "char_from_str", since = "1.20.0")]
@@ -32,11 +31,10 @@ pub use self::convert::ParseCharError;
 #[stable(feature = "decode_utf16", since = "1.9.0")]
 pub use self::decode::{DecodeUtf16, DecodeUtf16Error};
 
-// perma-unstable re-exports
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-pub use self::methods::encode_utf16_raw;
+pub use self::methods::encode_utf16_raw; // perma-unstable
 #[unstable(feature = "char_internals", reason = "exposed only for libstd", issue = "none")]
-pub use self::methods::encode_utf8_raw;
+pub use self::methods::encode_utf8_raw; // perma-unstable
 
 use crate::ascii;
 use crate::error::Error;
@@ -123,7 +121,7 @@ pub const fn from_u32(i: u32) -> Option<char> {
 /// Converts a `u32` to a `char`, ignoring validity. Use [`char::from_u32_unchecked`].
 /// instead.
 #[stable(feature = "char_from_unchecked", since = "1.5.0")]
-#[rustc_const_unstable(feature = "const_char_from_u32_unchecked", issue = "89259")]
+#[rustc_const_stable(feature = "const_char_from_u32_unchecked", since = "CURRENT_RUSTC_VERSION")]
 #[must_use]
 #[inline]
 pub const unsafe fn from_u32_unchecked(i: u32) -> char {

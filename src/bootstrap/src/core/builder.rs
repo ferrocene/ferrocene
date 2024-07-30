@@ -1698,11 +1698,11 @@ impl<'a> Builder<'a> {
         }
 
         // This tells Cargo (and in turn, rustc) to output more complete
-        // dependency information.  Most importantly for rustbuild, this
+        // dependency information.  Most importantly for bootstrap, this
         // includes sysroot artifacts, like libstd, which means that we don't
-        // need to track those in rustbuild (an error prone process!). This
+        // need to track those in bootstrap (an error prone process!). This
         // feature is currently unstable as there may be some bugs and such, but
-        // it represents a big improvement in rustbuild's reliability on
+        // it represents a big improvement in bootstrap's reliability on
         // rebuilds, so we're using it here.
         //
         // For some additional context, see #63470 (the PR originally adding
@@ -1714,7 +1714,7 @@ impl<'a> Builder<'a> {
                 // Restrict the allowed features so we don't depend on nightly
                 // accidentally.
                 //
-                // binary-dep-depinfo is used by rustbuild itself for all
+                // binary-dep-depinfo is used by bootstrap itself for all
                 // compilations.
                 //
                 // Lots of tools depend on proc_macro2 and proc-macro-error.
@@ -2071,6 +2071,10 @@ impl<'a> Builder<'a> {
         if mode == Mode::Rustc {
             rustflags.arg("-Zunstable-options");
             rustflags.arg("-Wrustc::internal");
+            // FIXME(edition_2024): Change this to `-Wrust_2024_idioms` when all
+            // of the individual lints are satisfied.
+            rustflags.arg("-Wkeyword_idents_2024");
+            rustflags.arg("-Wunsafe_op_in_unsafe_fn");
         }
 
         if self.config.rust_frame_pointers {
@@ -2178,7 +2182,7 @@ impl<'a> Builder<'a> {
         // Try to use a sysroot-relative bindir, in case it was configured absolutely.
         cargo.env("RUSTC_INSTALL_BINDIR", self.config.bindir_relative());
 
-        self.ci_env.force_coloring_in_ci(cargo.as_command_mut());
+        cargo.force_coloring_in_ci(self.ci_env);
 
         // When we build Rust dylibs they're all intended for intermediate
         // usage, so make sure we pass the -Cprefer-dynamic flag instead of

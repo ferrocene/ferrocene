@@ -24,6 +24,7 @@ use tracing::{debug, instrument};
 use util::visit_bindings;
 
 // helper functions, broken out by category:
+mod match_pair;
 mod simplify;
 mod test;
 mod util;
@@ -1195,17 +1196,27 @@ impl<'pat, 'tcx> TestCase<'pat, 'tcx> {
     }
 }
 
+/// Node in a tree of "match pairs", where each pair consists of a place to be
+/// tested, and a test to perform on that place.
+///
+/// Each node also has a list of subpairs (possibly empty) that must also match,
+/// and a reference to the THIR pattern it represents.
 #[derive(Debug, Clone)]
 pub(crate) struct MatchPair<'pat, 'tcx> {
     /// This place...
-    // This can be `None` if it referred to a non-captured place in a closure.
-    // Invariant: place.is_none() => test_case is Irrefutable
-    // In other words this must be `Some(_)` after simplification.
+    ///
+    /// ---
+    /// This can be `None` if it referred to a non-captured place in a closure.
+    ///
+    /// Invariant: Can only be `None` when `test_case` is `Irrefutable`.
+    /// Therefore this must be `Some(_)` after simplification.
     place: Option<Place<'tcx>>,
 
     /// ... must pass this test...
-    // Invariant: after creation and simplification in `Candidate::new()`, this must not be
-    // `Irrefutable`.
+    ///
+    /// ---
+    /// Invariant: after creation and simplification in [`FlatPat::new`],
+    /// this must not be [`TestCase::Irrefutable`].
     test_case: TestCase<'pat, 'tcx>,
 
     /// ... and these subpairs must match.
@@ -1536,10 +1547,13 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         start_block: BasicBlock,
         candidates: &'b mut [&'c mut Candidate<'pat, 'tcx>],
     ) -> BlockAnd<&'b mut [&'c mut Candidate<'pat, 'tcx>]> {
-        // We can't expand or-patterns freely. The rule is: if the candidate has an
-        // or-pattern as its only remaining match pair, we can expand it freely. If it has
-        // other match pairs, we can expand it but we can't process more candidates after
-        // it.
+        // We can't expand or-patterns freely. The rule is:
+        // - If a candidate doesn't start with an or-pattern, we include it in
+        //   the expansion list as-is (i.e. it "expands" to itself).
+        // - If a candidate has an or-pattern as its only remaining match pair,
+        //   we can expand it.
+        // - If it starts with an or-pattern but also has other match pairs,
+        //   we can expand it, but we can't process more candidates after it.
         //
         // If we didn't stop, the `otherwise` cases could get mixed up. E.g. in the
         // following, or-pattern simplification (in `merge_trivial_subcandidates`) makes it
@@ -1556,17 +1570,17 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         // }
         // ```
         //
-        // We therefore split the `candidates` slice in two, expand or-patterns in the first half,
+        // We therefore split the `candidates` slice in two, expand or-patterns in the first part,
         // and process the rest separately.
-        let mut expand_until = 0;
-        for (i, candidate) in candidates.iter().enumerate() {
-            expand_until = i + 1;
-            if candidate.match_pairs.len() > 1 && candidate.starts_with_or_pattern() {
-                // The candidate has an or-pattern as well as more match pairs: we must
-                // split the candidates list here.
-                break;
-            }
-        }
+        let expand_until = candidates
+            .iter()
+            .position(|candidate| {
+                // If a candidate starts with an or-pattern and has more match pairs,
+                // we can expand it, but we must stop expanding _after_ it.
+                candidate.match_pairs.len() > 1 && candidate.starts_with_or_pattern()
+            })
+            .map(|pos| pos + 1) // Stop _after_ the found candidate
+            .unwrap_or(candidates.len()); // Otherwise, include all candidates
         let (candidates_to_expand, remaining_candidates) = candidates.split_at_mut(expand_until);
 
         // Expand one level of or-patterns for each candidate in `candidates_to_expand`.
@@ -1581,6 +1595,8 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     expanded_candidates.push(subcandidate);
                 }
             } else {
+                // A candidate that doesn't start with an or-pattern has nothing to
+                // expand, so it is included in the post-expansion list as-is.
                 expanded_candidates.push(candidate);
             }
         }

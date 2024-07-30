@@ -76,7 +76,7 @@ Any C compiler acting as a linker driver, must:
 - Accept the ``-fuse-ld=lld`` argument, which must cause the C compiler to use
   ``lld`` as the linker instead of its default linker.
 
-- Accept the ``-B <path>`` argument, which must cause the C compiler search
+- Accept the ``-B <path>`` argument, which must cause the C compiler to search
   the path ``<path>`` for the ``lld`` linker binary.
 
 Regardless of whether a C compiler is used as a *linker driver* or not, only the

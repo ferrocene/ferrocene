@@ -59,3 +59,5 @@ fn main() {
         .normalize(r#"\r"#, "")
         .run();
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

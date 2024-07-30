@@ -15,3 +15,5 @@ fn main() {
     // Notice the space at the end of -lc, which emulates the output of pkg-config.
     rustc().arg("-Clink-args=-lc ").input("empty.rs").run();
 }
+
+// ferrocene-annotations: um_rustc_C_link_args

@@ -25,3 +25,5 @@ fn main() {
     rustc_foo.run();
     rustc_foo_panic.run();
 }
+
+// ferrocene-annotations: um_rustc_C_link_args

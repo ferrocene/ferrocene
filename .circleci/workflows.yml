@@ -1208,7 +1208,7 @@ commands:
             else
                 source $HOME/.venv/bin/activate
             fi
-            python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst
+            python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst .
       - run:
           name: Set PATH to include QNX710 tools
           command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"

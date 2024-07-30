@@ -160,9 +160,7 @@ Host targets
 
 .. note::
 
-   These checks are for all locally-installed targets
-   which are also marked as Host platforms in
-   :doc:`user-manual:targets/index`.
+   These checks are for the host platform, which is where ``ferrocene-self-test`` is executed.
 
 Check if a sample program that ``rustc`` produced can be executed.
 

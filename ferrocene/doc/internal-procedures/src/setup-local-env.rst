@@ -45,7 +45,8 @@ Configuring AWS CLI
 -------------------
 
 To authorize the AWS CLI to access our AWS resources, you need to add the
-following snippet to the ``~/.aws/config`` file in your work device:
+following snippet to the ``~/.aws/config`` (``C:\Users\USERNAME\.aws\config`` on Windows) file
+in your work device:
 
 .. code-block:: text
 

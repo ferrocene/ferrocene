@@ -58,7 +58,7 @@ class SignatureStatus:
         self.loaded_files.append(path)
         if copy:
             self.copiable_files[name] = path
-        with open(path) as f:
+        with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
     def load_private_file(self, name, *, copy=False):
@@ -69,7 +69,7 @@ class SignatureStatus:
         path = f"{self.app.config.ferrocene_private_signature_files_dir}/{uuid}"
         if copy:
             self.copiable_files[name] = path
-        with open(path) as f:
+        with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
 

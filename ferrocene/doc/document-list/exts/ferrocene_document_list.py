@@ -18,7 +18,7 @@ class DocumentId(SphinxRole):
             return [], [self.error(self.text)]
         if not os.path.exists(path):
             return [], [self.error(path)]
-        with open(path) as file:
+        with open(path, "r", encoding="utf-8") as file:
             id = file.read()
         node = nodes.literal(text=id)
         return [node], []

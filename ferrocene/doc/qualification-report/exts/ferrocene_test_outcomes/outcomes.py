@@ -80,7 +80,7 @@ class Outcomes:
     platforms: OrderedDict[(str, str), Platform] = field(default_factory=OrderedDict)
 
     def load_file(self, file):
-        with open(file) as f:
+        with open(file, "r", encoding="utf-8") as f:
             contents = json.load(f)
 
         if "format_version" not in contents:

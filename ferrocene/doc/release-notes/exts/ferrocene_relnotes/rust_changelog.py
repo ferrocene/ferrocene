@@ -47,7 +47,7 @@ def load_release_notes(app):
 
 
 def read_release_notes(path):
-    with open(path) as f:
+    with open(path, "r", encoding="utf-8") as f:
         content = f.read()
 
     parsed = docutils.core.publish_doctree(

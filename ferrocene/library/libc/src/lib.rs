@@ -5,6 +5,7 @@
     elided_lifetimes_in_paths, // Ferrocene specific
     hidden_glob_reexports, // Ferrocene specific
     ambiguous_glob_reexports, // Ferrocene specific
+    unsafe_op_in_unsafe_fn, // Ferrocene specific
     renamed_and_removed_lints, // Keep this order.
     unknown_lints, // Keep this order.
     bad_style,

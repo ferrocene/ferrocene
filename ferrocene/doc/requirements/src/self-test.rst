@@ -4,11 +4,8 @@
 ``ferrocene-self-test`` tool
 ============================
 
-General checks
---------------
-
 Checks for executables
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 .. req::
    :id: REQ_0OAUY3U

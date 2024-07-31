@@ -37,7 +37,7 @@ Checks for executables
    :id: REQ_GVLWOTQ
    :implements: REQ_0OAUY3U
 
-   Check the behavior of ``-vV`` command-line options.
+   Check the behavior of ``--verbose --version`` command-line options.
 
 .. req::
    :id: REQ_6OAFM70

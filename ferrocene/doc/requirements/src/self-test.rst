@@ -4,6 +4,32 @@
 ``ferrocene-self-test`` tool
 ============================
 
+.. req:: Purpose
+   :id: REQ_LSGKACM
+
+   The tool is used to ensure that the Ferrocene toolchain is installed correctly.
+
+.. req:: Environment
+   :id: REQ_THXJWWD
+
+   The tool should be executed on any of the host platforms listed in
+   :doc:`user-manual:targets/index`.
+
+.. req:: Execution
+   :id: REQ_P2OXII1
+
+   The tool should be executed on the command line.
+
+.. req:: Command line interface
+   :id: REQ_9A6740M
+
+   The tool accepts no command line arguments, and will ignore them if present.
+
+.. req:: Output
+   :id: REQ_42QU5MK
+
+   The tool displays checks it performs, and quits with a fail exit status when any check fails.
+
 Checks for executables
 ----------------------
 

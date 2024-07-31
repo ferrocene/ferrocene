@@ -36,15 +36,6 @@ When executed with ``-vV`` command-line options, the following apply:
   - ``commit-hash`` is an identifier for the Git commit from which the Ferrocene release was built
   - ``release`` is the name of the upstream release from which the Ferrocene release was based
 
-- The value of ``host`` from the output of the executable should match the target-triple
-  of the executing environment.
-
-- The value of ``commit-hash`` from the output of the executable should match the 
-  commit hash of the Ferrocene release corresponding to the installed Ferrocene toolchain.
-
-- The value of ``release`` from the output of the executable should match the
-  version of the Ferrocene release corresponding to the installed Ferrocene toolchain.
-
 Checks for targets
 ------------------
 

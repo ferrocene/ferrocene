@@ -9,7 +9,7 @@ use crate::utils::exec::BootstrapCommand;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{absolute, Path, PathBuf};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -871,10 +871,10 @@ impl Step for Index {
 }
 
 // Note: this function is correct for the use made in this module, but it will not work correctly
-// if paths don't exists or the paths do not have any segments in common.
+// if the paths do not have any segments in common.
 fn relative_path(base: &Path, path: &Path) -> PathBuf {
-    let base = fs::canonicalize(base).unwrap_or_else(|_| base.to_path_buf());
-    let path = fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let base = absolute(base).unwrap_or_else(|_| base.to_owned());
+    let path = absolute(path).unwrap_or_else(|_| path.to_owned());
 
     let common = base
         .components()

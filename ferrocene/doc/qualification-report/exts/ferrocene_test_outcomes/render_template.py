@@ -61,7 +61,7 @@ class RenderOutcomesTemplate(SphinxDirective):
 
 def render_template(directive, template, context):
     path = f"{directive.env.srcdir}/{template}"
-    with open(path) as f:
+    with open(path, "r", encoding="utf-8") as f:
         content = f.read()
     directive.env.note_dependency(path)
 

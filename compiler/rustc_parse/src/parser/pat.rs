@@ -4,11 +4,11 @@ use crate::errors::{
     DotDotDotRestPattern, EnumPatternInsteadOfIdentifier, ExpectedBindingLeftOfAt,
     ExpectedCommaAfterPatternField, GenericArgsInPatRequireTurbofishSyntax,
     InclusiveRangeExtraEquals, InclusiveRangeMatchArrow, InclusiveRangeNoEnd, InvalidMutInPattern,
-    PatternOnWrongSideOfAt, RemoveLet, RepeatedMutInPattern, SwitchRefBoxOrder,
-    TopLevelOrPatternNotAllowed, TopLevelOrPatternNotAllowedSugg, TrailingVertNotAllowed,
-    UnexpectedExpressionInPattern, UnexpectedLifetimeInPattern, UnexpectedParenInRangePat,
-    UnexpectedParenInRangePatSugg, UnexpectedVertVertBeforeFunctionParam,
-    UnexpectedVertVertInPattern,
+    ParenRangeSuggestion, PatternOnWrongSideOfAt, RemoveLet, RepeatedMutInPattern,
+    SwitchRefBoxOrder, TopLevelOrPatternNotAllowed, TopLevelOrPatternNotAllowedSugg,
+    TrailingVertNotAllowed, UnexpectedExpressionInPattern, UnexpectedLifetimeInPattern,
+    UnexpectedParenInRangePat, UnexpectedParenInRangePatSugg,
+    UnexpectedVertVertBeforeFunctionParam, UnexpectedVertVertInPattern, WrapInParens,
 };
 use crate::parser::expr::{could_be_unclosed_char_literal, LhsExpr};
 use crate::{maybe_recover_from_interpolated_ty_qpath, maybe_whole};
@@ -24,7 +24,7 @@ use rustc_errors::{Applicability, Diag, PResult};
 use rustc_session::errors::ExprParenthesesNeeded;
 use rustc_span::source_map::{respan, Spanned};
 use rustc_span::symbol::{kw, sym, Ident};
-use rustc_span::{ErrorGuaranteed, Span};
+use rustc_span::{BytePos, ErrorGuaranteed, Span};
 use thin_vec::{thin_vec, ThinVec};
 
 #[derive(PartialEq, Copy, Clone)]
@@ -236,11 +236,15 @@ impl<'a> Parser<'a> {
 
         if let PatKind::Or(pats) = &pat.kind {
             let span = pat.span;
-            let pat = pprust::pat_to_string(&pat);
             let sub = if pats.len() == 1 {
-                Some(TopLevelOrPatternNotAllowedSugg::RemoveLeadingVert { span, pat })
+                Some(TopLevelOrPatternNotAllowedSugg::RemoveLeadingVert {
+                    span: span.with_hi(span.lo() + BytePos(1)),
+                })
             } else {
-                Some(TopLevelOrPatternNotAllowedSugg::WrapInParens { span, pat })
+                Some(TopLevelOrPatternNotAllowedSugg::WrapInParens {
+                    span,
+                    suggestion: WrapInParens { lo: span.shrink_to_lo(), hi: span.shrink_to_hi() },
+                })
             };
 
             let err = self.dcx().create_err(match syntax_loc {
@@ -538,12 +542,12 @@ impl<'a> Parser<'a> {
                     None => PatKind::Path(qself, path),
                 }
             }
-        } else if let token::Lifetime(lt) = self.token.kind
+        } else if let Some(lt) = self.token.lifetime()
             // In pattern position, we're totally fine with using "next token isn't colon"
             // as a heuristic. We could probably just always try to recover if it's a lifetime,
             // because we never have `'a: label {}` in a pattern position anyways, but it does
             // keep us from suggesting something like `let 'a: Ty = ..` => `let 'a': Ty = ..`
-            && could_be_unclosed_char_literal(Ident::with_dummy_span(lt))
+            && could_be_unclosed_char_literal(lt)
             && !self.look_ahead(1, |token| matches!(token.kind, token::Colon))
         {
             // Recover a `'a` as a `'a'` literal
@@ -599,7 +603,10 @@ impl<'a> Parser<'a> {
         self.bump(); // `...`
 
         // The user probably mistook `...` for a rest pattern `..`.
-        self.dcx().emit_err(DotDotDotRestPattern { span: lo });
+        self.dcx().emit_err(DotDotDotRestPattern {
+            span: lo,
+            suggestion: lo.with_lo(lo.hi() - BytePos(1)),
+        });
         PatKind::Rest
     }
 
@@ -664,18 +671,26 @@ impl<'a> Parser<'a> {
             _ => return,
         }
 
-        self.dcx()
-            .emit_err(AmbiguousRangePattern { span: pat.span, pat: pprust::pat_to_string(pat) });
+        self.dcx().emit_err(AmbiguousRangePattern {
+            span: pat.span,
+            suggestion: ParenRangeSuggestion {
+                lo: pat.span.shrink_to_lo(),
+                hi: pat.span.shrink_to_hi(),
+            },
+        });
     }
 
     /// Parse `&pat` / `&mut pat`.
     fn parse_pat_deref(&mut self, expected: Option<Expected>) -> PResult<'a, PatKind> {
         self.expect_and()?;
-        if let token::Lifetime(name) = self.token.kind {
+        if let Some(lifetime) = self.token.lifetime() {
             self.bump(); // `'a`
 
-            self.dcx()
-                .emit_err(UnexpectedLifetimeInPattern { span: self.prev_token.span, symbol: name });
+            self.dcx().emit_err(UnexpectedLifetimeInPattern {
+                span: self.prev_token.span,
+                symbol: lifetime.name,
+                suggestion: self.prev_token.span.until(self.token.span),
+            });
         }
 
         let mutbl = self.parse_mutability();
@@ -913,10 +928,13 @@ impl<'a> Parser<'a> {
                 self.dcx().emit_err(InclusiveRangeExtraEquals { span: span_with_eq })
             }
             token::Gt if no_space => {
-                let after_pat = span.with_hi(span.hi() - rustc_span::BytePos(1)).shrink_to_hi();
+                let after_pat = span.with_hi(span.hi() - BytePos(1)).shrink_to_hi();
                 self.dcx().emit_err(InclusiveRangeMatchArrow { span, arrow: tok.span, after_pat })
             }
-            _ => self.dcx().emit_err(InclusiveRangeNoEnd { span }),
+            _ => self.dcx().emit_err(InclusiveRangeNoEnd {
+                span,
+                suggestion: span.with_lo(span.hi() - BytePos(1)),
+            }),
         }
     }
 

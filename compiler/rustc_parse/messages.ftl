@@ -1,7 +1,7 @@
 parse_add_paren = try adding parentheses
 
 parse_ambiguous_range_pattern = the range pattern here has ambiguous interpretation
-    .suggestion = add parentheses to clarify the precedence
+parse_ambiguous_range_pattern_suggestion = add parentheses to clarify the precedence
 
 parse_array_brackets_instead_of_braces = this is a block expression, not an array
     .suggestion = to make an array, use square brackets instead of curly braces
@@ -323,10 +323,10 @@ parse_incorrect_semicolon =
     .suggestion = remove this semicolon
     .help = {$name} declarations are not followed by a semicolon
 
-parse_incorrect_use_of_await =
-    incorrect use of `await`
+parse_incorrect_use_of_await = incorrect use of `await`
     .parentheses_suggestion = `await` is not a method call, remove the parentheses
-    .postfix_suggestion = `await` is a postfix operation
+
+parse_incorrect_use_of_await_postfix_suggestion = `await` is a postfix operation
 
 parse_incorrect_visibility_restriction = incorrect visibility restriction
     .help = some possible visibility restrictions are:
@@ -388,6 +388,9 @@ parse_invalid_dyn_keyword = invalid `dyn` keyword
 parse_invalid_expression_in_let_else = a `{$operator}` expression cannot be directly assigned in `let...else`
 parse_invalid_identifier_with_leading_number = identifiers cannot start with a number
 
+parse_invalid_label =
+    invalid label name `{$name}`
+
 parse_invalid_literal_suffix_on_tuple_index = suffixes on a tuple index are invalid
     .label = invalid suffix `{$suffix}`
     .tuple_exception_line_1 = `{$suffix}` is *temporarily* accepted on tuple index fields as it was incorrectly accepted on stable for a few releases
@@ -413,6 +416,9 @@ parse_invalid_unicode_escape = invalid unicode character escape
 
 parse_invalid_variable_declaration =
     invalid variable declaration
+
+parse_keyword_lifetime =
+    lifetimes cannot use keyword names
 
 parse_kw_bad_case = keyword `{$kw}` is written in the wrong case
     .suggestion = write it in the correct case
@@ -644,7 +650,7 @@ parse_parentheses_with_struct_fields = invalid `struct` delimiters or `fn` call 
     .suggestion_no_fields_for_fn = if `{$type}` is a function, use the arguments directly
 
 parse_parenthesized_lifetime = parenthesized lifetime bounds are not supported
-    .suggestion = remove the parentheses
+parse_parenthesized_lifetime_suggestion = remove the parentheses
 
 parse_path_single_colon = path separator must be a double colon
     .suggestion = use a double colon instead

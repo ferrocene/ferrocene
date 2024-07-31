@@ -29,7 +29,7 @@ use rustc_hir_analysis::check::intrinsicck::InlineAsmCtxt;
 use rustc_hir_analysis::check::potentially_plural_count;
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer;
 use rustc_index::IndexVec;
-use rustc_infer::infer::error_reporting::{FailureCode, ObligationCauseExt};
+use rustc_infer::error_reporting::infer::{FailureCode, ObligationCauseExt};
 use rustc_infer::infer::TypeTrace;
 use rustc_infer::infer::{DefineOpaqueTypes, InferOk};
 use rustc_middle::ty::adjustment::AllowTwoPhase;
@@ -946,6 +946,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 provided_ty,
                 provided_args[*provided_idx],
                 &mut err,
+            );
+
+            self.suggest_deref_unwrap_or(
+                &mut err,
+                error_span,
+                callee_ty,
+                call_ident,
+                expected_ty,
+                provided_ty,
+                provided_args[*provided_idx],
+                is_method,
             );
 
             // Call out where the function is defined
@@ -2554,7 +2565,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         .and_then(|node| node.generics())
                         .into_iter()
                         .flat_map(|generics| generics.params)
-                        .find(|gen| &gen.def_id.to_def_id() == res_def_id)
+                        .find(|param| &param.def_id.to_def_id() == res_def_id)
                 } else {
                     None
                 }

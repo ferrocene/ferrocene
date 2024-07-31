@@ -120,11 +120,8 @@ pub struct VarsOs {
 /// # Examples
 ///
 /// ```
-/// use std::env;
-///
-/// // We will iterate through the references to the element returned by
-/// // env::vars();
-/// for (key, value) in env::vars() {
+/// // Print all environment variables.
+/// for (key, value) in std::env::vars() {
 ///     println!("{key}: {value}");
 /// }
 /// ```
@@ -150,11 +147,8 @@ pub fn vars() -> Vars {
 /// # Examples
 ///
 /// ```
-/// use std::env;
-///
-/// // We will iterate through the references to the element returned by
-/// // env::vars_os();
-/// for (key, value) in env::vars_os() {
+/// // Print all environment variables.
+/// for (key, value) in std::env::vars_os() {
 ///     println!("{key:?}: {value:?}");
 /// }
 /// ```
@@ -366,11 +360,8 @@ impl Error for VarError {
 #[rustc_deprecated_safe_2024]
 #[stable(feature = "env", since = "1.0.0")]
 pub unsafe fn set_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(key: K, value: V) {
-    _set_var(key.as_ref(), value.as_ref())
-}
-
-unsafe fn _set_var(key: &OsStr, value: &OsStr) {
-    os_imp::setenv(key, value).unwrap_or_else(|e| {
+    let (key, value) = (key.as_ref(), value.as_ref());
+    unsafe { os_imp::setenv(key, value) }.unwrap_or_else(|e| {
         panic!("failed to set environment variable `{key:?}` to `{value:?}`: {e}")
     })
 }
@@ -433,11 +424,8 @@ unsafe fn _set_var(key: &OsStr, value: &OsStr) {
 #[rustc_deprecated_safe_2024]
 #[stable(feature = "env", since = "1.0.0")]
 pub unsafe fn remove_var<K: AsRef<OsStr>>(key: K) {
-    _remove_var(key.as_ref())
-}
-
-unsafe fn _remove_var(key: &OsStr) {
-    os_imp::unsetenv(key)
+    let key = key.as_ref();
+    unsafe { os_imp::unsetenv(key) }
         .unwrap_or_else(|e| panic!("failed to remove environment variable `{key:?}`: {e}"))
 }
 

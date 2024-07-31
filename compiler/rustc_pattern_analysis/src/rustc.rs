@@ -40,8 +40,14 @@ pub type WitnessPat<'p, 'tcx> = crate::pat::WitnessPat<RustcPatCtxt<'p, 'tcx>>;
 ///
 /// Use `.inner()` or deref to get to the `Ty<'tcx>`.
 #[repr(transparent)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RevealedTy<'tcx>(Ty<'tcx>);
+
+impl<'tcx> fmt::Display for RevealedTy<'tcx> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(fmt)
+    }
+}
 
 impl<'tcx> fmt::Debug for RevealedTy<'tcx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -462,7 +468,12 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                     // This is a box pattern.
                     ty::Adt(adt, ..) if adt.is_box() => Struct,
                     ty::Ref(..) => Ref,
-                    _ => bug!("pattern has unexpected type: pat: {:?}, ty: {:?}", pat, ty),
+                    _ => span_bug!(
+                        pat.span,
+                        "pattern has unexpected type: pat: {:?}, ty: {:?}",
+                        pat.kind,
+                        ty.inner()
+                    ),
                 };
             }
             PatKind::DerefPattern { .. } => {
@@ -518,7 +529,12 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                             .map(|ipat| self.lower_pat(&ipat.pattern).at_index(ipat.field.index()))
                             .collect();
                     }
-                    _ => bug!("pattern has unexpected type: pat: {:?}, ty: {:?}", pat, ty),
+                    _ => span_bug!(
+                        pat.span,
+                        "pattern has unexpected type: pat: {:?}, ty: {}",
+                        pat.kind,
+                        ty.inner()
+                    ),
                 }
             }
             PatKind::Constant { value } => {
@@ -663,7 +679,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                             }
                         }
                     }
-                    _ => bug!("invalid type for range pattern: {}", ty.inner()),
+                    _ => span_bug!(pat.span, "invalid type for range pattern: {}", ty.inner()),
                 };
                 fields = vec![];
                 arity = 0;
@@ -674,7 +690,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                         Some(length.eval_target_usize(cx.tcx, cx.param_env) as usize)
                     }
                     ty::Slice(_) => None,
-                    _ => span_bug!(pat.span, "bad ty {:?} for slice pattern", ty),
+                    _ => span_bug!(pat.span, "bad ty {} for slice pattern", ty.inner()),
                 };
                 let kind = if slice.is_some() {
                     SliceKind::VarLen(prefix.len(), suffix.len())

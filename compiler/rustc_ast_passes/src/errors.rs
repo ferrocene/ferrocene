@@ -70,6 +70,13 @@ pub struct ForbiddenBound {
 }
 
 #[derive(Diagnostic)]
+#[diag(ast_passes_forbidden_const_param)]
+pub struct ForbiddenConstParam {
+    #[primary_span]
+    pub const_param_spans: Vec<Span>,
+}
+
+#[derive(Diagnostic)]
 #[diag(ast_passes_fn_param_too_many)]
 pub struct FnParamTooMany {
     #[primary_span]
@@ -220,6 +227,13 @@ pub struct InvalidSafetyOnItem {
 #[derive(Diagnostic)]
 #[diag(ast_passes_bare_fn_invalid_safety)]
 pub struct InvalidSafetyOnBareFn {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(ast_passes_unsafe_static)]
+pub struct UnsafeStatic {
     #[primary_span]
     pub span: Span,
 }

@@ -10,35 +10,63 @@ General checks
 Checks for executables
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. note::
+.. req::
+   :id: REQ_0OAUY3U
 
-   **executable** refers to the following:
+   These executables should be checked:
 
-   - ``rustc``
-   - ``rustdoc``
+   - rustc
+   - rustdoc
 
-The executable should exist in the ``bin`` directory, relative to the root of the installation.
+.. req::
+   :id: REQ_N1VBW46
+   :implements: REQ_0OAUY3U
 
-The executable should be a regular file.
+   The executable should exist in the ``bin`` directory, relative to the root of the installation.
 
-The executable should have read and execute permissions set for all users.
+.. req::
+   :id: REQ_R2UQ8D3
+   :implements: REQ_0OAUY3U
 
-When executed with ``-vV`` command-line options, the following apply:
+   The executable should be a regular file.
 
-- The executable should exit successfully.
+.. req::
+   :id: REQ_NUP1G0D
+   :implements: REQ_0OAUY3U
 
-- The output of the executable should be UTF-8 text.
+   The executable should have read and execute permissions set for all users.
 
-- The output of the executable should have at least 3 key-value pairs,
-  with these 3 keys: ``host``, ``commit-hash``, and ``release``:
+.. req::
+   :id: REQ_GVLWOTQ
+   :implements: REQ_0OAUY3U
 
-  - ``host`` is the target triple of the platform that the executable is built for
-  - ``commit-hash`` is an identifier for the Git commit from which the Ferrocene release was built
-  - ``release`` is the name of the upstream release from which the Ferrocene release was based
+   Check the behavior of ``-vV`` command-line options.
+
+.. req::
+   :id: REQ_6OAFM70
+   :implements: REQ_GVLWOTQ
+
+   The executable should exit successfully.
+
+.. req::
+   :id: REQ_ABPRHHQ
+   :implements: REQ_GVLWOTQ
+
+   The output of the executable should be UTF-8 text.
+
+.. req::
+   :id: REQ_SL5USTK
+   :implements: REQ_GVLWOTQ
+
+   The output of the executable should have at least 3 key-value pairs,
+   with these 3 keys: ``host``, ``commit-hash``, and ``release``:
+
+   - ``host`` is the target triple of the platform that the executable is built for
+   - ``commit-hash`` is an identifier for the Git commit from which the Ferrocene release was built
+   - ``release`` is the name of the upstream release from which the Ferrocene release was based
 
 Checks for targets
 ------------------
-
 
 .. note::
 
@@ -54,19 +82,27 @@ All targets
 
    These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
 
-Inside of ``lib/rustlib/$target/lib`` directory,
-relative to the root of the installation,
-should exist these regular files:
+.. req::
+   :id: REQ_0640QY8
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
+   Inside of ``lib/rustlib/$target/lib`` directory,
+   relative to the root of the installation,
+   these regular files should be checked:
 
-Inside of ``lib/rustlib/$target/lib`` directory,
-relative to the root of the installation,
-should not exist duplicates of these regular files:
+   - ``libcore-$hash.rlib``
+   - ``liballoc-$hash.rlib``
 
-- ``libcore-$hash.rlib``
-- ``liballoc-$hash.rlib``
+.. req::
+   :id: REQ_XWYY918
+   :implements: REQ_0640QY8
+
+   The files should exist.
+
+.. req::
+   :id: REQ_TI55HCF
+   :implements: REQ_0640QY8
+
+   The files should not have duplicates, which can happen if the ``$hash`` is different.
 
 Targets with ``std``
 ^^^^^^^^^^^^^^^^^^^^
@@ -77,21 +113,28 @@ Targets with ``std``
    which are also marked as having Full standard library support in
    :doc:`user-manual:targets/index`.
 
-Inside of ``lib/rustlib/$target/lib`` directory,
-relative to the root of the installation,
-should exist these regular files:
+.. req::
+   :id: REQ_RUCUMJJ
 
-- ``libstd-$hash.rlib``
-- ``libtest-$hash.rlib``
-- ``libproc_macro-$hash.rlib``
+   Inside of ``lib/rustlib/$target/lib`` directory,
+   relative to the root of the installation,
+   these regular files should be checked:
 
-Inside of ``lib/rustlib/$target/lib`` directory,
-relative to the root of the installation,
-should not exist duplicates of these regular files:
+   - ``libstd-$hash.rlib``
+   - ``libtest-$hash.rlib``
+   - ``libproc_macro-$hash.rlib``
 
-- ``libstd-$hash.rlib``
-- ``libtest-$hash.rlib``
-- ``libproc_macro-$hash.rlib``
+.. req::
+   :id: REQ_GAPK9QF
+   :implements: REQ_RUCUMJJ
+
+   The files should exist.
+
+.. req::
+   :id: REQ_IJN9ZPU
+   :implements: REQ_RUCUMJJ
+
+   The files should not have duplicates, which can happen if the ``$hash`` is different.
 
 Checks for linkers
 ------------------
@@ -102,14 +145,20 @@ Checks for linkers
 
    ``$target`` refers to this host platform.
 
-Inside of ``lib/rustlib/$target/bin`` directory,
-relative to the root of the installation,
-should exist the regular file named ``rust-lld``.
+.. req::
+   :id: REQ_QQDV24N
 
-Inside of ``lib/rustlib/$target/bin/gcc-ld`` directory,
-relative to the root of the installation,
-should exist the regular file named ``ld.lld``,
-which is the linker wrapper.
+   Inside of ``lib/rustlib/$target/bin`` directory,
+   relative to the root of the installation,
+   should exist the regular file named ``rust-lld``.
+
+.. req::
+   :id: REQ_J42HAPX
+
+   Inside of ``lib/rustlib/$target/bin/gcc-ld`` directory,
+   relative to the root of the installation,
+   should exist the regular file named ``ld.lld``,
+   which is the linker wrapper.
 
 Platforms that need a C compiler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -121,16 +170,28 @@ Platforms that need a C compiler
    - :target:`x86_64-unknown-linux-gnu`
    - :target:`aarch64-unknown-linux-gnu`
 
-Search for a system C compiler in the ``PATH`` environment variable.
+.. req::
+   :id: REQ_GR1AK1Q
 
-Use the system C compiler to compile a sample program,
-and use the linker wrapper for the linking stage.
+   Search for a system C compiler in the ``PATH`` environment variable.
 
-Check that the system C compiler passes ``-Wl,$arg`` arguments to the linker,
-where ``$arg`` is command line arguments that the system linker accepts.
+.. req::
+   :id: REQ_FCE5QJ5
 
-Ensure that the linker command line arguments that can be accepted are of
-:ref:`the form documented in the Safety Manual <linker-options>`.
+   Use the system C compiler to compile a sample program,
+   and use the linker wrapper for the linking stage.
+
+.. req::
+   :id: REQ_5Q3NRL3
+
+   Check that the system C compiler passes ``-Wl,$arg`` arguments to the linker,
+   where ``$arg`` is command line arguments that the system linker accepts.
+
+.. req::
+   :id: REQ_1MN4JOQ
+
+   Ensure that the linker command line arguments that can be accepted are of
+   :ref:`the form documented in the Safety Manual <linker-options>`.
 
 Checks for compilation
 ----------------------
@@ -142,18 +203,24 @@ All targets
 
    These checks are for all locally-installed targets listed in :doc:`user-manual:targets/index`.
 
-Check if we can compile the following Rust crate types:
+.. req::
+   :id: REQ_99TXVWC
 
-- ``lib``
-- ``staticlib``
-- ``bin``
+   Check if we can compile the following Rust crate types:
 
-Check that *only* the following artefacts are produced by ``rustc`` for each crate type compilation,
-where ``$basename`` is the file name without the extension:
+   - ``lib``
+   - ``staticlib``
+   - ``bin``
 
-- ``$basename.rlib`` for ``lib`` crate type
-- ``$basename.a`` for ``staticlib`` crate type
-- ``$basename`` for ``bin`` crate type
+.. req::
+   :id: REQ_SV3CV3N
+
+   Check that *only* the following artefacts are produced by ``rustc`` for each crate type compilation,
+   where ``$basename`` is the file name without the extension:
+
+   - ``$basename.rlib`` for ``lib`` crate type
+   - ``$basename.a`` for ``staticlib`` crate type
+   - ``$basename`` for ``bin`` crate type
 
 Host targets
 ^^^^^^^^^^^^
@@ -162,6 +229,12 @@ Host targets
 
    These checks are for the host platform, which is where ``ferrocene-self-test`` is executed.
 
-Check if a sample program that ``rustc`` produced can be executed.
+.. req::
+   :id: REQ_8TNOYG8
 
-Check if the output of the program is as expected.
+   Check if a sample program that ``rustc`` produced can be executed.
+
+.. req::
+   :id: REQ_B07M5S2
+
+   Check if the output of the program is as expected.

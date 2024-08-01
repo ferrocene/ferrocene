@@ -523,7 +523,9 @@ jobs:
       FERROCENE_HOST: x86_64-pc-windows-msvc
       # On Windows, the virtualenv detection seems to struggle at times, give it a kick
       SCRIPT: |
-        VIRTUAL_ENV=$HOME/.venv PATH=$HOME/.venv/Scripts:$PATH $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py prepare
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -555,11 +557,14 @@ jobs:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      # On Windows, the virtualenv detection seems to struggle at times, give it a kick
       SCRIPT: |
-        ferrocene/ci/scripts/llvm_cache.py download
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist $($HOME/.venv/Scripts/python.exe ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist $($HOME/.venv/Scripts/python.exe ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
@@ -1063,7 +1068,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUALENV']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
@@ -1078,7 +1083,7 @@ commands:
           wrapper: |
             docker run \
               --rm \
-              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUALENV']))") \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \

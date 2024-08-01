@@ -365,6 +365,7 @@ jobs:
         set +u; source ./qnx710/qnxsdp-env.sh; set -u; TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
+      - ferrocene-checkout
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:

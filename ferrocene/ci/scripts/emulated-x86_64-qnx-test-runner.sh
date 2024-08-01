@@ -134,7 +134,7 @@ cmd_run() {
     echo
     echo "===> starting remote-test-server"
     # `std::net` tests need this
-    on_vm 'echo "127.0.0.1 localhost" >> /etc/hosts'
+    on_vm 'grep -q localhost /etc/hosts || echo "127.0.0.1 localhost" >> /etc/hosts'
 
     on_vm mount -t dos /dev/hd1t6 /mnt
     on_vm cp /mnt/remote-test-server /tmp/

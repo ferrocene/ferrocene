@@ -4,8 +4,13 @@ error: this file contains an unclosed delimiter
 LL | use foo::{bar, baz;
    |          - unclosed delimiter
 ...
+<<<<<<< HEAD
 LL | // Simple Path Resolution
    |                           ^
+=======
+LL | fn main() {}
+   |             ^
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 error: aborting due to 1 previous error
 

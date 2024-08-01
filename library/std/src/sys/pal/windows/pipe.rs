@@ -1,7 +1,7 @@
 use crate::os::windows::prelude::*;
 
 use crate::ffi::OsStr;
-use crate::io::{self, BorrowedCursor, IoSlice, IoSliceMut, Read};
+use crate::io::{self, BorrowedCursor, IoSlice, IoSliceMut};
 use crate::mem;
 use crate::path::Path;
 use crate::ptr;
@@ -37,6 +37,23 @@ impl FromInner<Handle> for AnonPipe {
 pub struct Pipes {
     pub ours: AnonPipe,
     pub theirs: AnonPipe,
+}
+
+/// Create true unnamed anonymous pipe.
+pub fn unnamed_anon_pipe() -> io::Result<(AnonPipe, AnonPipe)> {
+    let mut read_pipe = c::INVALID_HANDLE_VALUE;
+    let mut write_pipe = c::INVALID_HANDLE_VALUE;
+
+    let ret = unsafe { c::CreatePipe(&mut read_pipe, &mut write_pipe, ptr::null_mut(), 0) };
+
+    if ret == 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok((
+            AnonPipe::from_inner(unsafe { Handle::from_raw_handle(read_pipe) }),
+            AnonPipe::from_inner(unsafe { Handle::from_raw_handle(write_pipe) }),
+        ))
+    }
 }
 
 /// Although this looks similar to `anon_pipe` in the Unix module it's actually
@@ -181,7 +198,7 @@ pub fn spawn_pipe_relay(
     their_handle_inheritable: bool,
 ) -> io::Result<AnonPipe> {
     // We need this handle to live for the lifetime of the thread spawned below.
-    let source = source.duplicate()?;
+    let source = source.try_clone()?;
 
     // create a new pair of anon pipes.
     let Pipes { theirs, ours } = anon_pipe(ours_readable, their_handle_inheritable)?;
@@ -221,15 +238,6 @@ fn random_number() -> usize {
     }
 }
 
-// Abstracts over `ReadFileEx` and `WriteFileEx`
-type AlertableIoFn = unsafe extern "system" fn(
-    BorrowedHandle<'_>,
-    *mut core::ffi::c_void,
-    u32,
-    *mut c::OVERLAPPED,
-    c::LPOVERLAPPED_COMPLETION_ROUTINE,
-) -> c::BOOL;
-
 impl AnonPipe {
     pub fn handle(&self) -> &Handle {
         &self.inner
@@ -237,14 +245,18 @@ impl AnonPipe {
     pub fn into_handle(self) -> Handle {
         self.inner
     }
-    fn duplicate(&self) -> io::Result<Self> {
+
+    pub fn try_clone(&self) -> io::Result<Self> {
         self.inner.duplicate(0, false, c::DUPLICATE_SAME_ACCESS).map(|inner| AnonPipe { inner })
     }
 
     pub fn read(&self, buf: &mut [u8]) -> io::Result<usize> {
         let result = unsafe {
             let len = crate::cmp::min(buf.len(), u32::MAX as usize) as u32;
-            self.alertable_io_internal(c::ReadFileEx, buf.as_mut_ptr() as _, len)
+            let ptr = buf.as_mut_ptr();
+            self.alertable_io_internal(|overlapped, callback| {
+                c::ReadFileEx(self.inner.as_raw_handle(), ptr, len, overlapped, callback)
+            })
         };
 
         match result {
@@ -260,7 +272,10 @@ impl AnonPipe {
     pub fn read_buf(&self, mut buf: BorrowedCursor<'_>) -> io::Result<()> {
         let result = unsafe {
             let len = crate::cmp::min(buf.capacity(), u32::MAX as usize) as u32;
-            self.alertable_io_internal(c::ReadFileEx, buf.as_mut().as_mut_ptr() as _, len)
+            let ptr = buf.as_mut().as_mut_ptr().cast::<u8>();
+            self.alertable_io_internal(|overlapped, callback| {
+                c::ReadFileEx(self.inner.as_raw_handle(), ptr, len, overlapped, callback)
+            })
         };
 
         match result {
@@ -295,7 +310,9 @@ impl AnonPipe {
     pub fn write(&self, buf: &[u8]) -> io::Result<usize> {
         unsafe {
             let len = crate::cmp::min(buf.len(), u32::MAX as usize) as u32;
-            self.alertable_io_internal(c::WriteFileEx, buf.as_ptr() as _, len)
+            self.alertable_io_internal(|overlapped, callback| {
+                c::WriteFileEx(self.inner.as_raw_handle(), buf.as_ptr(), len, overlapped, callback)
+            })
         }
     }
 
@@ -323,12 +340,9 @@ impl AnonPipe {
     /// [`ReadFileEx`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfileex
     /// [`WriteFileEx`]: https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-writefileex
     /// [Asynchronous Procedure Call]: https://docs.microsoft.com/en-us/windows/win32/sync/asynchronous-procedure-calls
-    #[allow(unsafe_op_in_unsafe_fn)]
     unsafe fn alertable_io_internal(
         &self,
-        io: AlertableIoFn,
-        buf: *mut core::ffi::c_void,
-        len: u32,
+        io: impl FnOnce(&mut c::OVERLAPPED, c::LPOVERLAPPED_COMPLETION_ROUTINE) -> c::BOOL,
     ) -> io::Result<usize> {
         // Use "alertable I/O" to synchronize the pipe I/O.
         // This has four steps.
@@ -366,20 +380,25 @@ impl AnonPipe {
             lpOverlapped: *mut c::OVERLAPPED,
         ) {
             // Set `async_result` using a pointer smuggled through `hEvent`.
-            let result =
-                AsyncResult { error: dwErrorCode, transferred: dwNumberOfBytesTransferred };
-            *(*lpOverlapped).hEvent.cast::<Option<AsyncResult>>() = Some(result);
+            // SAFETY:
+            // At this point, the OVERLAPPED struct will have been written to by the OS,
+            // except for our `hEvent` field which we set to a valid AsyncResult pointer (see below)
+            unsafe {
+                let result =
+                    AsyncResult { error: dwErrorCode, transferred: dwNumberOfBytesTransferred };
+                *(*lpOverlapped).hEvent.cast::<Option<AsyncResult>>() = Some(result);
+            }
         }
 
         // STEP 1: Start the I/O operation.
-        let mut overlapped: c::OVERLAPPED = crate::mem::zeroed();
+        let mut overlapped: c::OVERLAPPED = unsafe { crate::mem::zeroed() };
         // `hEvent` is unused by `ReadFileEx` and `WriteFileEx`.
         // Therefore the documentation suggests using it to smuggle a pointer to the callback.
         overlapped.hEvent = core::ptr::addr_of_mut!(async_result) as *mut _;
 
         // Asynchronous read of the pipe.
         // If successful, `callback` will be called once it completes.
-        let result = io(self.inner.as_handle(), buf, len, &mut overlapped, Some(callback));
+        let result = io(&mut overlapped, Some(callback));
         if result == c::FALSE {
             // We can return here because the call failed.
             // After this we must not return until the I/O completes.
@@ -390,7 +409,7 @@ impl AnonPipe {
         let result = loop {
             // STEP 2: Enter an alertable state.
             // The second parameter of `SleepEx` is used to make this sleep alertable.
-            c::SleepEx(c::INFINITE, c::TRUE);
+            unsafe { c::SleepEx(c::INFINITE, c::TRUE) };
             if let Some(result) = async_result {
                 break result;
             }

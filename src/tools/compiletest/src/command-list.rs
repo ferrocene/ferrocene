@@ -203,6 +203,7 @@ const KNOWN_DIRECTIVE_NAMES: &[&str] = &[
     "only-wasm32-wasip1",
     "only-watchos",
     "only-windows",
+    "only-windows-gnu",
     "only-x86",
     "only-x86_64",
     "only-x86_64-fortanix-unknown-sgx",

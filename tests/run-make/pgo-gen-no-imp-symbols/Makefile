@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 include ../tools.mk
 
 COMPILE_FLAGS=-O -Ccodegen-units=1 -Cprofile-generate="$(TMPDIR)" -Zno-profiler-runtime

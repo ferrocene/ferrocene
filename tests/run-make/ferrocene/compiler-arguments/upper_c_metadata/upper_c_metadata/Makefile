@@ -1,5 +1,4 @@
-# ignore-apple
-#   On Mac, signatures mean that the diff'd files are not equal when we expect them to be.
+# ignore-apple On Mac, signatures mean that the diff'd files are not equal when we expect them to be.
 include ../../../../tools.mk
 
 # From rustc documentation:

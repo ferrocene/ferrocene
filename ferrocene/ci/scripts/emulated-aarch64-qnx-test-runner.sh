@@ -125,17 +125,17 @@ cmd_prepare() {
 
     # remove unused services from startup script
     line_ranges=(
-        '455,460'
-        '280,300'
-        '272,273'
-        '261,267'
-        '242,247'
-        '198,219'
-        '182,187'
-        '163,167'
-        '112,130'
-        '65,103'
-        '9,10'
+        '455,460' # qconn
+        '280,300' # I2C, SPI, OCM, PCI, CAN
+        '272,273' # qconn
+        '261,267' # USB
+        '242,247' # QSPI
+        '198,219' # GPIO, PCI
+        '182,187' # USB
+        '163,167' # SPI
+        '112,130' # SPI, OCM, telnet
+        '65,103' # USB, PCI, QSPI, I2C, CAN
+        '9,10' # raw image compression (added back below)
     )
     for line_range in ${line_ranges[@]}; do
         sed -i "${line_range}d" "${buildscript}"

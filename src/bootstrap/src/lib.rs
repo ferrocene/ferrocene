@@ -544,6 +544,7 @@ impl Build {
             // even though that has no relation to the upstream for the submodule.
             let current_branch = helpers::git(Some(&self.src))
                 .capture_stdout()
+                .allow_failure()
                 .run_always()
                 .args(["symbolic-ref", "--short", "HEAD"])
                 .run(self)
@@ -1443,6 +1444,19 @@ Executed at: {executed_at}"#,
         }
 
         None
+    }
+
+    /// Returns whether it's requested that `wasm-component-ld` is built as part
+    /// of the sysroot. This is done either with the `extended` key in
+    /// `config.toml` or with the `tools` set.
+    fn build_wasm_component_ld(&self) -> bool {
+        if self.config.extended {
+            return true;
+        }
+        match &self.config.tools {
+            Some(set) => set.contains("wasm-component-ld"),
+            None => false,
+        }
     }
 
     /// Returns the root of the "rootfs" image that this target will be using,

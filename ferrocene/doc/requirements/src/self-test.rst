@@ -40,6 +40,7 @@ Checks for executables
 
    - rustc
    - rustdoc
+   - cargo (if installed)
 
 .. req::
    :id: REQ_N1VBW46

@@ -264,6 +264,11 @@ jobs:
     environment:
       FERROCENE_HOST: ""
       FERROCENE_TARGETS: aarch64-unknown-ferrocenecoretest
+      UBUNTU_RELEASE: 22.04.1
+      UBUNTU_ARCH: arm64
+      QEMU_ARCH: aarch64
+      REMOTE_TEST_SERVER_TARGET: aarch64-unknown-linux-gnu
+      UBUNTU_SHA256: b2259205f2e94971e9e146ad1e30925d05d05e6575685cc0125b83746105ec45
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: |
         TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
@@ -272,7 +277,33 @@ jobs:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+          emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
+
+  riscv64gc-linux-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: ""
+      FERROCENE_TARGETS: riscv64gc-unknown-linux-gnu
+      UBUNTU_RELEASE: 22.04.1
+      UBUNTU_ARCH: riscv64
+      QEMU_ARCH: riscv64
+      REMOTE_TEST_SERVER_TARGET: riscv64gc-unknown-linux-gnu
+      UBUNTU_SHA256: 88a60f4685fcd33ae41fb27a1f0e1ca6c1fca10a9c5eb4b4e645342adc1a0c52
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      SCRIPT: |
+        TEST_DEVICE_ADDR=127.0.0.1:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+
+    steps:
+      - ferrocene-job-test-vm:
+          docker-image-tag: << pipeline.parameters.docker-image-tag--ubuntu-20 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: ferrocene/ci/scripts/emulated-test-runner.sh
 
   x86_64-linux-traceability-matrix:
     executor: docker-x86_64-ubuntu-20
@@ -766,6 +797,8 @@ workflows:
             - x86_64-linux-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
+            - riscv64-linux-test-library
+            - riscv64-linux-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -810,6 +843,19 @@ workflows:
             - x86_64-linux-build
       - aarch64-linux-generic-test-vm:
           name: aarch64-linux-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - riscv64gc-linux-generic-test-vm:
+          name: riscv64-linux-compiletest
+          job: test:compiletest
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+      - riscv64gc-linux-generic-test-vm:
+          name: riscv64-linux-test-library
           job: test:library
           resource-class: large # 4-core
           requires:
@@ -1040,7 +1086,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['PATH', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \
@@ -1061,7 +1107,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['PATH', 'LANG', 'SUDO_USER']))") \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
@@ -1076,7 +1122,7 @@ commands:
           wrapper: |
             docker run \
               --rm \
-              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['PATH', 'LANG', 'SUDO_USER']))") \
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \

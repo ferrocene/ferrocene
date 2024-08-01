@@ -101,9 +101,12 @@ EOF
 # This requires the binfmt-support package, which is normally a dependency of
 # qemu-user-static.
 COPY --from=noble /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY --from=noble /usr/bin/qemu-riscv64-static /usr/bin/qemu-riscv64-static
 COPY --from=noble /usr/libexec/qemu-binfmt/aarch64-binfmt-P /usr/libexec/qemu-binfmt/aarch64-binfmt-P
-# This was removed in 24.04 and is a copy of the 23.04 file.
+COPY --from=noble /usr/libexec/qemu-binfmt/riscv64-binfmt-P /usr/libexec/qemu-binfmt/riscv64-binfmt-P
+# This was removed in 24.04 and is a copy of the 23.04 file contained in `qemu-user-binfmt`.
 COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64 /usr/share/binfmts/qemu-aarch64
+COPY ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-riscv64 /usr/share/binfmts/qemu-riscv64
 
 # We need a newer Python than what's included in Ubuntu 20.04, so we have to
 # build it from source. Python 3.12.x has been chosen as it's the same minor
@@ -188,6 +191,30 @@ RUN <<-EOF
     rm -rf /tmp/cmake /tmp/cmake.tar.gz
 EOF
 
+# Install a version of the RISC-V 64 bit toolchain that is modern, as the packaged ones on Ubuntu 20.04
+# are too old to be useful (they don't know about the `z` ISA flag).
+#
+# We get x86_64 Linux binaries from https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux
+#
+# These builds are unfortunately only for x86_64. To add new targets, we'll need to use a newer Ubuntu
+# image, or build our own from source via https://github.com/riscv-collab/riscv-gnu-toolchain.
+RUN <<-EOF
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then
+        mkdir /opt/riscv-toolchain
+        curl -Lo /tmp/riscv-toolchain.tar.gz https://buildbot.embecosm.com/job/riscv64-linux-gcc-ubuntu2004/20/artifact/riscv64-embecosm-linux-gcc-ubuntu2004-20240407.tar.gz
+        echo "ddebec169a6c3a29b6cd0133f54f93c8f7addab9b3b5fb5366fa73dda834d7b7 /tmp/riscv-toolchain.tar.gz" | sha256sum -c
+        tar xf /tmp/riscv-toolchain.tar.gz -C /opt/riscv-toolchain --strip-components=1
+        rm /tmp/riscv-toolchain.tar.gz
+        /opt/riscv-toolchain/bin/riscv64-unknown-linux-gnu-gcc --version
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then
+        echo "riscv64gc-unknown-linux-gnu toolchain setup skipped on aarch64-unknown-linux-gnu host."
+    else
+        echo "Unsupported platform"
+        exit 1
+    fi
+EOF
+ENV PATH "/opt/riscv-toolchain/bin:$PATH"
+
 # To run chroot inside the container we need sudo access. Copy a configuration
 # file allowing all users inside the container to use sudo.
 COPY ferrocene/ci/docker-images/ubuntu-20/sudoers /etc/sudoers
@@ -204,6 +231,8 @@ ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
 ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
+ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
+ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

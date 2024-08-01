@@ -123,6 +123,9 @@ cmd_prepare() {
 
     buildscript="${emulatordir}"/src/images/zcu102.build
 
+    sha256sum "${buildscript}" | grep -q '^5cb44fba650dfd69d8ad00e4f2d684a8f7bb97bdbad5cd246e17097c05d99e3b ' || \
+        panic "upstream file zcu102.build appears to have changed; this cmd_prepare function may need to be updated"
+
     # remove unused services from startup script
     line_ranges=(
         '455,460' # qconn

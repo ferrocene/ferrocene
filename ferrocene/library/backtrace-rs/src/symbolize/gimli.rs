@@ -226,6 +226,7 @@ cfg_if::cfg_if! {
             target_os = "hurd",
             target_os = "openbsd",
             target_os = "netbsd",
+            target_os = "nto",
             all(target_os = "android", feature = "dl_iterate_phdr"),
         ),
         not(target_env = "uclibc"),

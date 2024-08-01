@@ -200,4 +200,14 @@ pub const CONFIG_CHANGE_HISTORY: &[ChangeInfo] = &[
         severity: ChangeSeverity::Warning,
         summary: "`llvm.lld` is enabled by default for the dist profile. If set to false, `lld` will not be included in the dist build.",
     },
+    ChangeInfo {
+        change_id: 127913,
+        severity: ChangeSeverity::Warning,
+        summary: "`debug-logging` option has been removed from the default `tools` profile.",
+    },
+    ChangeInfo {
+        change_id: 127866,
+        severity: ChangeSeverity::Info,
+        summary: "the `wasm-component-ld` tool is now built as part of `build.extended` and can be a member of `build.tools`",
+    },
 ];

@@ -83,3 +83,23 @@ Commit and push
 
 After having fixed the conflicts, commit your changes, push them to the branch
 and ask for a code review from another member of the team.
+
+Tidy check failures
+-------------------
+
+License failures
+^^^^^^^^^^^^^^^^
+
+If you encounter failures about ``invalid license`` from ``tidy check`` like the following, you must manually
+`add the license in tidy's deps.rs <https://github.com/ferrocene/ferrocene/blob/main/src/tools/tidy/src/deps.rs>`_.
+
+.. code-block:: shell
+
+   tidy check
+   tidy error: invalid license `BSD-2-Clause` in `registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.6.6`
+   tidy error: invalid license `BSD-2-Clause` in `registry+https://github.com/rust-lang/crates.io-index#zerocopy-derive@0.6.6`
+   tidy error: invalid license `BSD-2-Clause` in `registry+https://github.com/rust-lang/crates.io-index#zerocopy@0.6.6`
+   tidy error: invalid license `BSD-2-Clause` in `registry+https://github.com/rust-lang/crates.io-index#zerocopy-derive@0.6.6`
+   some tidy checks failed
+
+Then you can just commit and push the ``deps.rs`` changes.

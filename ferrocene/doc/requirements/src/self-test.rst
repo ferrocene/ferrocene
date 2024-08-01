@@ -38,9 +38,9 @@ Checks for executables
 
    These executables should be checked:
 
-   - rustc
-   - rustdoc
-   - cargo (if installed)
+   - ``rustc``
+   - ``rustdoc``
+   - ``cargo`` (if installed)
 
 .. req::
    :id: REQ_N1VBW46

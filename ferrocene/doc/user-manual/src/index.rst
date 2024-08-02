@@ -34,6 +34,7 @@ Ferrocene User Manual
    targets/x86_64-unknown-linux-gnu
    targets/x86_64-pc-windows-msvc
    targets/aarch64-apple-darwin
+   targets/x86_64-apple-darwin
    targets/aarch64-unknown-nto-qnx710
    targets/x86_64-pc-nto-qnx710
 

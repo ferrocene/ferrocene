@@ -366,6 +366,7 @@ jobs:
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
+      - setup-venv
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:

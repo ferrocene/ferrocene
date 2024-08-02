@@ -1,3 +1,4 @@
+# ignore-apple On Mac, signatures mean that the diff'd files are not equal when we expect them to be.
 # needs-dynamic-linking
 
 include ../../../../tools.mk

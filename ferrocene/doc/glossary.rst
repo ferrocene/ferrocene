@@ -142,7 +142,7 @@ Abbreviated Terms
        International Electrotechnical Commission
 
    ISO
-       International Standard Organization
+       International Organization for Standardization
 
    MIR
        Mid-Level Intermediate Representation

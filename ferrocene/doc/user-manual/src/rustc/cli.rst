@@ -414,7 +414,7 @@
    .. cli:option:: -C prefer-dynamic=<flag>
 
       Code generation option ``prefer-dynamic`` indicates whether dynamic
-      linking is preferable when both a static and dynamic versions of a
+      linking is preferable when both a static and a dynamic version of a
       library are available.
 
       ``<flag>`` must be either ``off``, ``on``, ``n``, ``no``, ``y``, or
@@ -425,7 +425,7 @@
       ================================ ============================
       ``<flag>``                       effects
       ================================ ============================
-      ``on``, ``y``, ``yes``, no value Use dynamic linkind.
+      ``on``, ``y``, ``yes``, no value Use dynamic linking.
       ``off``, ``n``, ``no``           Default. Use static linking.
       ================================ ============================
 

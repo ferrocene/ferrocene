@@ -370,6 +370,7 @@ jobs:
       - setup-qnx-toolchain:
           source-env-script: false
       - ferrocene-job-test-vm:
+          checkout-source: false
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
@@ -1065,10 +1066,16 @@ commands:
       emulator-script:
         type: string
         default: ""
+      checkout-source:
+        type: boolean
+        default: true
     steps:
       - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
+      - when:
+          condition: << parameters.checkout-source >>
+          steps:
+            - ferrocene-checkout:
+                llvm-subset: true
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>

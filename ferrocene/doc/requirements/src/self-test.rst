@@ -18,8 +18,8 @@
 .. req:: Environment
    :id: REQ_67EQEVF
 
-   The tool should only execute with success if it is distributed with the same Ferrocene toolchain
-   version that it is checking.
+   The tool should only execute with success if it was distributed with the same Ferrocene toolchain
+   that it is checking.
 
 .. req:: Execution
    :id: REQ_P2OXII1

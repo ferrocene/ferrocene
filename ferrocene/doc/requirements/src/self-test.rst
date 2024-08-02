@@ -15,6 +15,12 @@
    The tool should be executed on any of the host platforms listed in
    :doc:`user-manual:targets/index`.
 
+.. req:: Environment
+   :id: REQ_67EQEVF
+
+   The tool should only execute with success if it is distributed with the same Ferrocene toolchain
+   version that it is checking.
+
 .. req:: Execution
    :id: REQ_P2OXII1
 

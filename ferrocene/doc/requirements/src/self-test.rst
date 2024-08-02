@@ -34,7 +34,8 @@
 .. req:: Output
    :id: REQ_42QU5MK
 
-   The tool displays checks it performs, and quits with a fail exit status when any check fails.
+   The tool displays the checks it performs,
+   and quits with a fail exit status when any of the checks fails.
 
 Checks for executables
 ----------------------

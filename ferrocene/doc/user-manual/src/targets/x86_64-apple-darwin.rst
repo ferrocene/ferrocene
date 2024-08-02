@@ -1,9 +1,9 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-.. _aarch64-apple-darwin:
+.. _x86_64-apple-darwin:
 
-:target:`aarch64-apple-darwin`
+:target:`x86_64-apple-darwin`
 ================================
 
 .. warning::
@@ -13,7 +13,7 @@
    target. They are provided as a preview, with limited support available. They
    should not be used in production.
 
-The ``aarch64-apple-darwin`` Ferrocene target provides support for macOS (Darwin) on
+The ``x86_64-apple-darwin`` Ferrocene target provides support for macOS (Darwin) on
 Apple Silicon.
 
 Prerequisites
@@ -45,18 +45,18 @@ Archives to install
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a host platform:
 
-* ``rustc-aarch64-apple-darwin``
-* ``rust-std-aarch64-apple-darwin``
-* ``ferrocene-self-test-aarch64-apple-darwin``
+* ``rustc-x86_64-apple-darwin``
+* ``rust-std-x86_64-apple-darwin``
+* ``ferrocene-self-test-x86_64-apple-darwin``
 
 The following archives are needed when :doc:`installing </rustc/install>` this
 target as a cross-compilation target:
 
-* ``rust-std-aarch64-apple-darwin``
+* ``rust-std-x86_64-apple-darwin``
 
 To install the optional ``rustfmt`` tool, the following archive is needed:
 
-* ``rustfmt-aarch64-apple-darwin``
+* ``rustfmt-x86_64-apple-darwin``
 
 Required compiler flags
 -----------------------
@@ -64,4 +64,4 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-- ``--target=aarch64-apple-darwin``
+- ``--target=x86_64-apple-darwin``

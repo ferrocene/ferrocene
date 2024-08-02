@@ -61,12 +61,14 @@ X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_
 AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + X86_64_LINUX_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
-AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-# We don't currently produce x86_64 Apple host tools, but we will one day
-AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
-AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
+AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
+AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
 
-# Tagets only built (and tested!) on Windows
+# x86_64 Macs are done via aarch64 with Rosetta, since CircleCI has deprecated x86_64 Macs.
+X86_64_MAC_BUILD_HOSTS = ["x86_64-apple-darwin"]
+X86_64_MAC_SELF_TEST_TARGETS = X86_64_MAC_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
+
+# Targets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
 X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 
@@ -164,7 +166,9 @@ def calculate_targets(host_plus_stage: str):
         elif host == "x86_64-unknown-linux-gnu":
             targets = X86_64_LINUX_BUILD_HOSTS
         elif host == "aarch64-apple-darwin":
-            targets = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS # We don't currently produce x86_64 Apple host tools, but we will one day
+            targets = AARCH64_MAC_BUILD_HOSTS
+        elif host == "x86_64-apple-darwin":
+            targets = X86_64_MAC_BUILD_HOSTS
         elif host == "x86_64-pc-windows-msvc":
             targets = X86_64_WINDOWS_BUILD_HOSTS
         else:
@@ -181,6 +185,8 @@ def calculate_targets(host_plus_stage: str):
             targets = X86_64_LINUX_SELF_TEST_TARGETS
         elif host == "aarch64-apple-darwin":
             targets = AARCH64_MAC_SELF_TEST_TARGETS
+        elif host == "x86_64-apple-darwin":
+            targets = X86_64_MAC_SELF_TEST_TARGETS
         elif host == "x86_64-pc-windows-msvc":
             targets = X86_64_WINDOWS_SELF_TEST_TARGETS
         else:

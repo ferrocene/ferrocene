@@ -53,6 +53,9 @@ parameters:
   llvm-rebuild--aarch64-apple-darwin:
     type: boolean
     default: false
+  llvm-rebuild--x86_64-apple-darwin:
+    type: boolean
+    default: false
   llvm-rebuild--x86_64-pc-windows-msvc:
     type: boolean
     default: false
@@ -75,6 +78,12 @@ parameters:
     type: string
     default: ""
   targets--aarch64-apple-darwin--self-test:
+    type: string
+    default: ""
+  targets--x86_64-apple-darwin--build:
+    type: string
+    default: ""
+  targets--x86_64-apple-darwin--self-test:
     type: string
     default: ""
   targets--x86_64-pc-windows-msvc--build:
@@ -530,6 +539,116 @@ jobs:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
+
+  # x86_64-apple-darwin jobs
+
+  x86_64-darwin-llvm:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,x86_64-apple-darwin
+      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to using too much memory, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--x86_64-apple-darwin >>
+          steps:
+            - ferrocene-checkout
+            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - setup-venv
+            - aws-oidc-auth
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  x86_64-darwin-build:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm-cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - ferrocene-job-build:
+          os: darwin
+
+  x86_64-darwin-dist:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: x86_64-darwin-build
+
+  x86_64-darwin-dist-tools:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+    - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: x86_64-darwin-build
+
+  x86_64-darwin-self-test:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.medium.gen1 # 4 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--self-test >>
+    steps:
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - aws-oidc-auth
+      - setup-qnx-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: ferrocene/ci/scripts/run-self-test.sh
+
+  x86_64-darwin-generic-test-runner:
+    macos:
+      xcode: "15.3.0"
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - ferrocene-job-test-container:
+          os: darwin
+          restore-from-job: x86_64-darwin-build
+
   # x86_64-pc-windows-msvc jobs
 
   x86_64-windows-llvm:
@@ -791,8 +910,14 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
-            - aarch64-linux-test-library
-            - aarch64-linux-compiletest
+            - aarch64-darwin-test
+            - aarch64-darwin-test-library
+            - aarch64-darwin-test-library-std
+            - aarch64-darwin-compiletest
+            - x86_64-darwin-test
+            - x86_64-darwin-test-library
+            - x86_64-darwin-test-library-std
+            - x86_64-darwin-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -910,6 +1035,46 @@ workflows:
           requires:
             - aarch64-darwin-dist
             - aarch64-darwin-dist-tools
+            - x86_64-linux-dist-targets
+
+      - x86_64-darwin-llvm: {}
+      - x86_64-darwin-build:
+          requires:
+            - x86_64-darwin-llvm
+      - x86_64-darwin-dist:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-dist-tools:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test
+          job: test
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library
+          job: test:library
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-compiletest
+          job: test:compiletest
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library-std
+          job: test:library-std
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-self-test:
+          requires:
+            - x86_64-darwin-dist
+            - x86_64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}

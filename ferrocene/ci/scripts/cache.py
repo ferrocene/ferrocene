@@ -22,7 +22,7 @@ def parse_s3_url(s3_url):
     return [bucket, key]
 
 
-def retrieve(path, out_dir):
+def retrieve(path, out_dir, exclude=[]):
     """
     Retrieve a zstd compressed tarball from `path` (an `s3://` url or local path) and unpack it into `out_dir`.
     """
@@ -45,13 +45,22 @@ def retrieve(path, out_dir):
         # It is important for Windows that the tarball was created with `--dereference`
         with tarfile.open(mode="r|", fileobj=zstd_stream) as tarball:
             logging.info("Began unarchiving...")
-            tarball.extractall(path=out_dir, filter="data")
+
+            def exclusions(members):
+                nonlocal exclude
+                for tarinfo in members:
+                    if tarinfo.name in exclude:
+                        logging.debug(f"Excluding {tarinfo.name}...") 
+                    else:
+                        yield tarinfo
+            
+            tarball.extractall(path=out_dir, members=exclusions(tarball), filter="data")
     logging.info(f"Done decompression and unarchiving of `{path}` to `{out_dir}`.")
 
     return
 
 
-def store(path, in_dir):
+def store(path, in_dir, exclude=[]):
     """
     Store write a zstd compressed tarball of `in_dir` to the `path` (an `s3://` url or local path) .
     """
@@ -65,7 +74,15 @@ def store(path, in_dir):
             logging.info(f"Began compression to `{temporary_file.name}`...")
             with tarfile.TarFile.open(mode='w|', dereference=True, fileobj=zstd_stream) as tarball:
                 logging.info(f"Began archiving `{in_dir}`...")
-                tarball.add(in_dir, recursive=True) # Always do relative to the directory passed.
+                
+                def exclusions(tarinfo):
+                    nonlocal exclude
+                    if tarinfo.name in exclude:
+                        logging.debug(f"Excluding {tarinfo.name}...") 
+                    else:
+                        return tarinfo
+
+                tarball.add(in_dir, recursive=True, filter=exclusions) # Always do relative to the directory passed.
                 tarball.close()
             zstd_stream.flush()
             zstd_stream.close()
@@ -96,10 +113,12 @@ def arguments():
     store_parser = subparsers.add_parser("store", help="Store a path as a `.tar.xz` at the specified AWS S3 URL (or local path)")
     store_parser.add_argument("path", help="A local path or a `s3://<bucket>/<key>` url")
     store_parser.add_argument("in_dir", help="The directory to store")
+    store_parser.add_argument("--exclude", action="append", default=[], help="Paths to exclude")
 
     retrieve_parser = subparsers.add_parser("retrieve", help="Retrieve a `.tar.xz` from the specified AWS S3 URL (or local path) and unpack it to a path")
     retrieve_parser.add_argument("path", help="A local path or a `s3://<bucket>/<key>` url")
     retrieve_parser.add_argument("out_dir", help="The directory to expand into")
+    retrieve_parser.add_argument("--exclude", action="append", default=[], help="Paths to exclude")
 
     return parser.parse_args()
 
@@ -117,10 +136,14 @@ def main():
 
     match args.subcommand:
         case "store":
+<<<<<<< HEAD
             store(args.path, args.in_dir)
 
+=======
+            store(args.path, args.in_dir, exclude=args.exclude)
+>>>>>>> 6331046343b (Use cache.py in place of persist-between-jobs.sh)
         case "retrieve":
-            retrieve(args.path, args.out_dir)
+            retrieve(args.path, args.out_dir, exclude=args.exclude)
         case _:
             print("Unknown command, see --help")
             exit(1)

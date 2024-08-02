@@ -4,14 +4,10 @@ error[E0765]: unterminated double quote string
 LL |                   """;
    |  ___________________^
 LL | | }
-<<<<<<< HEAD
 LL | |
 LL | | // ferrocene-annotations: fls_boyhlu5srp6u
 LL | | // String Literals
-   | |___________________^
-=======
-   | |_^
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+   | |__________________^
 
 error: aborting due to 1 previous error
 

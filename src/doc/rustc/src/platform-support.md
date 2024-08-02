@@ -393,9 +393,6 @@ target | std | host | notes
 [`xtensa-esp32s2-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S2
 [`xtensa-esp32s3-none-elf`](platform-support/xtensa.md) | * |  | Xtensa ESP32-S3
 [`xtensa-esp32s3-espidf`](platform-support/esp-idf.md) | ✓ |  | Xtensa ESP32-S3
-<<<<<<< HEAD
-`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
-=======
 [`thumbv6m-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv6M with NuttX
 [`thumbv7m-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv7M with NuttX
 [`thumbv7em-nuttx-eabi`](platform-support/nuttx.md) | * |  | ARMv7EM with NuttX
@@ -408,6 +405,6 @@ target | std | host | notes
 [`riscv32imafc-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 32bit with NuttX
 [`riscv64imac-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 64bit with NuttX
 [`riscv64gc-unknown-nuttx-elf`](platform-support/nuttx.md) | * |  | RISC-V 64bit with NuttX
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+`aarch64-unknown-ferrocenecoretest` | ✓ | ✓ | Internal target for tests
 
 [runs on NVIDIA GPUs]: https://github.com/japaric-archived/nvptx#targets

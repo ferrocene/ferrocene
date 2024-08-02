@@ -11,19 +11,13 @@ error: this file contains an unclosed delimiter
   --> $DIR/issue-81827.rs:13:14
    |
 LL | fn r()->i{0|{#[cfg(r(0{]0
-<<<<<<< HEAD
    |          -  -          - missing open `[` for this delimiter
    |          |  |
-=======
-   |          -  -          - ^
-   |          |  |          |
-   |          |  |          missing open `[` for this delimiter
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
    |          |  unclosed delimiter
    |          unclosed delimiter
 ...
 LL | // Functions
-   |              ^
+   |             ^
 
 error: aborting due to 2 previous errors
 

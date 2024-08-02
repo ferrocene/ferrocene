@@ -43,16 +43,12 @@ error[E0766]: unterminated double quote byte string
 LL |       b"a
    |  ______^
 LL | | }
-<<<<<<< HEAD
 LL | |
 LL | | // ferrocene-annotations: fls_fqaffyrjob7v
 ...  |
 LL | | // ferrocene-annotations: fls_e7zgqroy2qxn
 LL | | // Value Expressions
-   | |_____________________^
-=======
-   | |_^
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+   | |____________________^
 
 error: aborting due to 6 previous errors
 

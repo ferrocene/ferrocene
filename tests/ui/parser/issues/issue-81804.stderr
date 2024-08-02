@@ -10,18 +10,12 @@ error: this file contains an unclosed delimiter
   --> $DIR/issue-81804.rs:9:14
    |
 LL | fn p([=(}
-<<<<<<< HEAD
    |     -- unclosed delimiter
    |     |
-=======
-   |     --   ^
-   |     ||
-   |     |unclosed delimiter
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
    |     unclosed delimiter
 ...
 LL | // Functions
-   |              ^
+   |             ^
 
 error: aborting due to 2 previous errors
 

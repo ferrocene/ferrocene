@@ -12,13 +12,12 @@ import pathlib
 import tarfile
 import sys
 import shlex
+import cache
+import logging
+import urllib.parse
 
 CACHE_BUCKET="ferrocene-ci-caches"
 CACHE_PREFIX="prebuilt-llvm"
-
-
-TARBALL_PATH = "llvm-cache.tar"
-COMPRESSED_TARBALL_PATH = f"{TARBALL_PATH}.zst"
 
 # Note that this *ignores* symlinks. If you need a binary that's actually a
 # symlink please add to the list the binary the symlink points *to*.
@@ -61,14 +60,16 @@ KEEP_LLVM_BINARIES=[
 
 def arguments():
     parser = argparse.ArgumentParser(
-        prog="llvm-cache.py",
         description="Report various data about LLVM caches",
     )
+    parser.add_argument('-v', '--verbose', action='count', default=0)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
     prepare_parser = subparsers.add_parser("prepare", help="Build and cache LLVM")
+    prepare_parser.add_argument("--url", help="Manually set the output `tar.zst` location")
     
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
+    download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
 
     s3_url_parser = subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
 
@@ -77,6 +78,16 @@ def arguments():
 
 def main():
     args = arguments()
+
+    match args.verbose:
+        case 0:
+            log_level = logging.INFO
+        case 1:
+            log_level = logging.DEBUG
+        case _:
+            log_level = logging.TRACE
+    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", datefmt="%I:%M:%S %p", level=log_level)
+
     try:
         ferrocene_host = os.environ["FERROCENE_HOST"]
     except:
@@ -87,38 +98,30 @@ def main():
     if args.subcommand == "s3-url":
         subcommand_s3_url(ferrocene_host)
     elif args.subcommand == "download":
-        subcommand_download(ferrocene_host)
+        subcommand_download(ferrocene_host, args.url)
     elif args.subcommand == "prepare":
-        subcommand_prepare(ferrocene_host)
+        subcommand_prepare(ferrocene_host, args.url)
     else:
         print(f"Unknown command {args.subcommand}")
 
-def subcommand_download(ferrocene_host):
-    s3_url = get_s3_url(ferrocene_host)
+def subcommand_download(ferrocene_host, url):
+    if url == None:
+        url = get_s3_url(ferrocene_host).geturl()
 
-    s3_cp_cmd = f"aws s3 cp {shlex.quote(s3_url)} - | zstd --decompress - -o {shlex.quote(TARBALL_PATH)}"
-    s3_cp = subprocess.run(s3_cp_cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    
-    # Use python tar to avoid Windows 'weirdness'
-    tar = tarfile.open(TARBALL_PATH, "r")
-    tar.extractall()
-    tar.close()
+    cache.retrieve(url, ".")
 
-    os.remove(TARBALL_PATH)
+def subcommand_prepare(ferrocene_host, url):
+    if url == None:
+        url = get_s3_url(ferrocene_host).geturl()
 
-def subcommand_prepare(ferrocene_host):
-    tarball = build_llvm_tarball(ferrocene_host)
-
-    s3_url = get_s3_url(ferrocene_host);
-    s3_cp_cmd = ["aws", "s3", "cp", COMPRESSED_TARBALL_PATH, s3_url]
-    s3_cp = subprocess.run(s3_cp_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-    os.remove(COMPRESSED_TARBALL_PATH)
+    tarball = prepare_llvm_build(ferrocene_host)
+    cache.store(url, tarball)
 
 def subcommand_s3_url(ferrocene_host):
     s3_url = get_s3_url(ferrocene_host)
-    print(s3_url)
+    print(s3_url.geturl())
 
-def build_llvm_tarball(ferrocene_host):
+def prepare_llvm_build(ferrocene_host):
     """
     Build LLVM and generate a tarball we can cache with all the build artifacts.
     """
@@ -171,33 +174,24 @@ def build_llvm_tarball(ferrocene_host):
             name = path.as_posix()
 
         if name in KEEP_LLVM_BINARIES:
-            print(f"Skipped {file}", file=sys.stderr)
+            logging.debug(f"Skipped {file}")
             continue
         else:
-            print(f"Soft-removing {file}", file=sys.stderr)
+            logging.debug(f"Soft-removing {file}")
             f = open(os.path.join(dirname, file), "wt")
             f.write(f"""
                 #!/usr/bin/env sh
-                echo "Binary {file} soft-removed by ferrocene/ci/scripts/llvm-cache.py"
+                echo "Binary {file} soft-removed by ferrocene/ci/scripts/llvm_cache.py"
                 exit 1
             """)
 
-    # Use python tar to avoid Windows 'weirdness'
-    tar = tarfile.open(TARBALL_PATH, "w")
-    tar.add(f"build/{ferrocene_host}/llvm")
-    tar.close()
-
-    compress_cmd = ["zstd", "-1", "-T0", TARBALL_PATH, "-o", COMPRESSED_TARBALL_PATH]
-    compress = subprocess.run(compress_cmd, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-    os.remove(TARBALL_PATH)
-    return COMPRESSED_TARBALL_PATH
+    return f"build/{ferrocene_host}/llvm"
 
 def get_s3_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"
-    return s3_url
+    return urllib.parse.urlparse(s3_url)
 
 def get_llvm_cache_hash():
     """
@@ -208,7 +202,7 @@ def get_llvm_cache_hash():
     m = hashlib.sha256()
 
     files = [
-        "ferrocene/ci/scripts/llvm-cache.py", # __file__ is an absolute path
+        "ferrocene/ci/scripts/llvm_cache.py", # __file__ is an absolute path
         "ferrocene/ci/configure.sh",
         "src/version",
     ];

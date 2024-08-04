@@ -132,6 +132,39 @@ JOBS_DEFINITION: JobsDefinition = {
         # containers. Run them separately in a VM.
         "library-std": ["library/std"],
     },
+
+    "qnx": {
+        # like 'test:compiletest' minus the ONLY_HOSTS test groups
+        # the ONLY_HOSTS tests will run on the host even when
+        # `--target $NOT_THE_HOST` is passed to `x.py test`
+        # this avoids re-running tests on the same host triple across
+        # different CI jobs
+        #
+        # this is in a separate category and not under `test:` because that
+        # would make repeated arguments appear in the output of
+        # `split-tasks.py test`
+        "compiletest-no-only-hosts": find_all_compiletests(
+            exclude=[
+                # see `test:compiletest`
+                "auxiliary",
+                "rustdoc-gui",
+
+                # ONLY_HOST tests
+                "coverage-run-rustdoc",
+                "pretty",
+                "rustdoc",
+                "rustdoc-js",
+                "rustdoc-js-std",
+                "rustdoc-json",
+                "rustdoc-ui",
+                "ui-fulldeps",
+            ],
+            deprioritize=[
+                # see `test:compiletest`
+                "run-make-fulldeps",
+            ],
+        ),
+    },
 }
 # fmt: on
 

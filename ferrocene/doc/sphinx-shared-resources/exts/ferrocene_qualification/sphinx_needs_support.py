@@ -28,6 +28,13 @@ def configure_sphinx_needs(app, config):
             "color": "",
             "style": "",
         },
+        {
+            "directive": "req",
+            "title": "Requirement",
+            "prefix": "REQ_",
+            "color": "",
+            "style": "",
+        },
     ]
 
     config.needs_extra_links = [
@@ -40,6 +47,11 @@ def configure_sphinx_needs(app, config):
             "option": "mitigates",
             "incoming": "mitigated by",
             "outgoing": "mitigates",
+        },
+        {
+            "option": "implements",
+            "incoming": "implemented by",
+            "outgoing": "implements",
         },
     ]
 

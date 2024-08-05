@@ -168,3 +168,27 @@ SPDX-FileCopyrightText = [
     "2003-2019 University of Illinois at Urbana-Champaign.",
 ]
 SPDX-License-Identifier = "NCSA AND Apache-2.0 WITH LLVM-exception"
+
+[[annotations]]
+path = "ferrocene/library/libc/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Rust libc developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "ferrocene/tools/flip-link/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Knurling-rs developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64"
+precedence = "override"
+SPDX-FileCopyrightText = "Colin Watson"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "requirements.txt"
+precedence = "override"
+SPDX-FileCopyrightText = "The Ferrocene Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"

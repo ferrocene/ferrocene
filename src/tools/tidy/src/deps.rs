@@ -2,7 +2,7 @@
 
 use build_helper::ci::CiEnv;
 use cargo_metadata::{Metadata, Package, PackageId};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::read_dir;
 use std::path::Path;
 
@@ -121,13 +121,16 @@ const EXCEPTIONS: ExceptionList = &[
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
-    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),      // rustc
-    ("wasm-metadata", "Apache-2.0 WITH LLVM-exception"),     // rustc
-    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc
-    ("wast", "Apache-2.0 WITH LLVM-exception"),              // rustc
-    ("wat", "Apache-2.0 WITH LLVM-exception"),               // rustc
-    ("wit-component", "Apache-2.0 WITH LLVM-exception"),     // rustc
-    ("wit-parser", "Apache-2.0 WITH LLVM-exception"),        // rustc
+    ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"),
+    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),      // rustc; new license after 0.215.0
+    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),        // rustc
+    ("wasm-metadata", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc; new license after 0.215.0
+    ("wasmparser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
+    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc; new license after 0.215.0
+    ("wast", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),              // rustc
+    ("wat", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),               // rustc
+    ("wit-component", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc
+    ("wit-parser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
     // tidy-alphabetical-end
 ];
 
@@ -662,8 +665,15 @@ fn check_runtime_license_exceptions(
 ///
 /// Packages listed in `exceptions` are allowed for tools.
 fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], bad: &mut bool) {
-    // Validate the EXCEPTIONS list hasn't changed.
+    // to handle multiple versions of a crate with difference licensing terms we group
+    // repeated entries in `exceptions`
+    let mut grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
     for (name, license) in exceptions {
+        grouped_exceptions.entry(name).or_default().push(license);
+    }
+
+    // Validate the EXCEPTIONS list hasn't changed.
+    for (name, licenses) in &grouped_exceptions {
         // Check that the package actually exists.
         if !metadata.packages.iter().any(|p| p.name == *name) {
             tidy_error!(
@@ -677,7 +687,7 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         for pkg in metadata.packages.iter().filter(|p| p.name == *name) {
             match &pkg.license {
                 None => {
-                    if *license == NON_STANDARD_LICENSE
+                    if *licenses == [NON_STANDARD_LICENSE]
                         && EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str())
                     {
                         continue;
@@ -689,9 +699,9 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
                     );
                 }
                 Some(pkg_license) => {
-                    if pkg_license.as_str() != *license {
+                    if licenses.iter().all(|license| *license != pkg_license.as_str()) {
                         println!("dependency exception `{name}` license has changed");
-                        println!("    previously `{license}` now `{pkg_license}`");
+                        println!("    previously `{licenses:?}` now `{pkg_license}`");
                         println!("    update EXCEPTIONS for the new license");
                         *bad = true;
                     }

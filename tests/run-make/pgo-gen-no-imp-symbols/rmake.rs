@@ -25,3 +25,5 @@ fn main() {
     assert!(!out.contains("__imp___llvm_profile_")); // 64 bit
     assert!(!out.contains("__imp____llvm_profile_")); // 32 bit
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

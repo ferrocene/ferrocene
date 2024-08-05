@@ -23,3 +23,5 @@ fn main() {
     rustc().input("param_passing.rs").arg("-lbad").opt_level("3").run();
     run("param_passing");
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

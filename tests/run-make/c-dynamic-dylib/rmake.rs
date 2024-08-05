@@ -15,3 +15,5 @@ fn main() {
     rfs::remove_file(dynamic_lib_name("cfoo"));
     run_fail("bar");
 }
+
+// ferrocene-annotations: um_rustc_C_prefer_dynamic

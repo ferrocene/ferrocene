@@ -28,3 +28,5 @@ fn main() {
     rustc().cfg("after").input("d.rs").extern_("a", "liba-1.rlib").run();
     run("d");
 }
+
+// ferrocene-annotations: um_rustc_C_metadata

@@ -549,7 +549,7 @@ jobs:
     environment:
       FERROCENE_HOST: x86_64-apple-darwin
       FERROCENE_TARGETS: x86_64-apple-darwin,x86_64-apple-darwin
-      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to using too much memory, decrease this number.
@@ -871,6 +871,47 @@ workflows:
       - commit-checks:
           requires:
             - build-docker--ubuntu-24
+
+
+      - x86_64-darwin-llvm: {}
+      - x86_64-darwin-build:
+          requires:
+            - x86_64-darwin-llvm
+      - x86_64-darwin-dist:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-dist-tools:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test
+          job: test
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library
+          job: test:library
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-compiletest
+          job: test:compiletest
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library-std
+          job: test:library-std
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-self-test:
+          requires:
+            - x86_64-darwin-dist
+            - x86_64-darwin-dist-tools
+            # - x86_64-linux-dist-targets
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:

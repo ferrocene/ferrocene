@@ -55,3 +55,5 @@ fn main() {
         .run_fail();
     run_fail("b");
 }
+
+// ferrocene-annotations: um_rustc_C_rpath

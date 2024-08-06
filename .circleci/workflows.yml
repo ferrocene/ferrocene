@@ -578,8 +578,8 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
       SCRIPT: |
         ferrocene/ci/scripts/llvm_cache.py download
-        ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
+        arch -x86_64 ./x.py --stage 2 build library src/tools/rustdoc
+        arch -x86_64 ./x.py --stage 1 build src/tools/rustdoc
     steps:
       - macos/install-rosetta
       - ferrocene-job-build:
@@ -594,8 +594,8 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist rust-std
+        arch -x86_64 ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        arch -x86_64 ./x.py --stage 2 dist rust-std
     steps:
       - macos/install-rosetta
       - ferrocene-job-dist:
@@ -611,7 +611,7 @@ jobs:
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        arch -x86_64 ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     steps:
       - macos/install-rosetta
       - ferrocene-job-dist:
@@ -634,7 +634,7 @@ jobs:
       - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
-          command: ferrocene/ci/scripts/run-self-test.sh
+          command: arch -x86_64 ferrocene/ci/scripts/run-self-test.sh
 
   x86_64-darwin-generic-test-runner:
     macos:
@@ -649,7 +649,7 @@ jobs:
       FERROCENE_HOST: x86_64-apple-darwin
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        arch -x86_64 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - macos/install-rosetta
       - ferrocene-job-test-container:

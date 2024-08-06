@@ -47,6 +47,13 @@ def main():
 
     base, head = get_base_and_head(token, repository, pr_number)
 
+    subprocess.run(
+        ["git", "fetch", f"https://github.com/{repository}", base, head],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+
     current_branch = subprocess.run(
         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
         stdout=subprocess.PIPE,

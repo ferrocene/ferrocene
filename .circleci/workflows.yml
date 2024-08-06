@@ -271,6 +271,7 @@ jobs:
     steps:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
@@ -310,6 +311,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-llvm:
@@ -348,6 +350,31 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  x86_64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710/qnxsdp-env.sh; set -u; TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -853,6 +880,27 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
       - aarch64-linux-llvm:
           requires:
             - build-docker--ubuntu-20--aarch64
@@ -928,6 +976,9 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
@@ -1057,18 +1108,30 @@ commands:
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs
+    # a separate Docker image can be used to run a newer version of e.g. QEMU than
+    # the version available in `docker-image-tag`
     parameters:
+      # the "preparing the emulator" and other steps will run in this Docker image
       docker-image-tag:
+        type: string
+      # the "running the emulator" step will run in this Docker image
+      run-emulator-docker-image-tag:
         type: string
       restore-from-job:
         type: string
       emulator-script:
         type: string
         default: ""
+      checkout-source:
+        type: boolean
+        default: true
     steps:
       - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
+      - when:
+          condition: << parameters.checkout-source >>
+          steps:
+            - ferrocene-checkout:
+                llvm-subset: true
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1090,6 +1153,7 @@ commands:
             aws ecr get-login-password --region us-east-1 \
               | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
             docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1103,7 +1167,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \
@@ -1124,22 +1188,23 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
-                    << parameters.emulator-script >>
+                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
+                    bash -c "<< parameters.emulator-script >>"
 
       - ferrocene-ci:
           wrapper: |
             docker run \
               --rm \
-              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \
@@ -1254,6 +1319,10 @@ commands:
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
     steps:
       - run:
           name: Fetch QNX710 toolchain
@@ -1265,9 +1334,12 @@ commands:
                 source $HOME/.venv/bin/activate
             fi
             python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst .
-      - run:
-          name: Set PATH to include QNX710 tools
-          command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX710 tools
+                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
       - run:
           name: Test qcc
           command: qcc -v || true

@@ -43,12 +43,7 @@ def subcommand_store(ferrocene_host, workspace_id, path=None, job=None):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         if os.path.exists(location):
-            if os.path.islink(location):
-                logging.debug(f"Removing problematic link `{location}`...")
-                os.unlink(location)
-            else:
-                logging.debug(f"Removing problematic directory `{location}`...")
-                shutil.rmtree(location)
+            os.unlink(location)
 
     cache.store(path, "build", exclude=["build/metrics.json"])
     return

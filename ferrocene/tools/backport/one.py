@@ -2,13 +2,16 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
 
+import argparse
 import os
 import requests
 import sys
 import subprocess
 
 
+GITHUB_REPOSITORY_ENV = "GITHUB_REPOSITORY"
 DEFAULT_REPOSITORY = "ferrocene/ferrocene"
+RUST_REPOSITORY = "rust-lang/rust"
 
 
 def get_base_and_head(token, repository, pr_number):
@@ -22,14 +25,20 @@ def get_base_and_head(token, repository, pr_number):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(f"usage: {sys.argv[0]} <pr-number>")
-        exit(1)
-    pr_number = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--rust", help="Pull from rust-lang/rust instead", action="store_true"
+    )
+    parser.add_argument("pr_number", help="The PR to backport")
+    args = parser.parse_args()
+
+    pr_number = args.pr_number
+    if args.rust:
+        os.environ[GITHUB_REPOSITORY_ENV] = RUST_REPOSITORY
 
     current_dir = os.path.abspath(os.path.dirname(__file__))
 
-    repository = os.environ.get("GITHUB_REPOSITORY", DEFAULT_REPOSITORY)
+    repository = os.environ.get(GITHUB_REPOSITORY_ENV, DEFAULT_REPOSITORY)
     try:
         token = os.environ["GITHUB_TOKEN"]
     except KeyError:

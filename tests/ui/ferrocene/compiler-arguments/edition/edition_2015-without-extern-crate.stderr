@@ -1,8 +1,8 @@
-error[E0433]: failed to resolve: maybe a missing crate `some_crate`?
+error[E0433]: failed to resolve: you might be missing crate `some_crate`
   --> $DIR/edition_2015-without-extern-crate.rs:6:7
    |
 LL |     ::some_crate::hello();
-   |       ^^^^^^^^^^ maybe a missing crate `some_crate`?
+   |       ^^^^^^^^^^ you might be missing crate `some_crate`
    |
    = help: consider adding `extern crate some_crate` to use the `some_crate` crate
 

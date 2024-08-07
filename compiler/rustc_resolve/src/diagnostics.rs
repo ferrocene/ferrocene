@@ -1448,7 +1448,10 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
         );
 
         if macro_kind == MacroKind::Bang && ident.name == sym::macro_rules {
-            err.subdiagnostic(MaybeMissingMacroRulesName { span: ident.span });
+            let label_span = ident.span.shrink_to_hi();
+            let mut spans = MultiSpan::from_span(label_span);
+            spans.push_span_label(label_span, "put a macro name here");
+            err.subdiagnostic(MaybeMissingMacroRulesName { spans: spans });
             return;
         }
 
@@ -2012,7 +2015,7 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
                 )
             } else if ident.name == sym::core {
                 (
-                    format!("maybe a missing crate `{ident}`?"),
+                    format!("you might be missing crate `{ident}`"),
                     Some((
                         vec![(ident.span, "std".to_string())],
                         "try using `std` instead of `core`".to_string(),
@@ -2021,7 +2024,7 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
                 )
             } else if self.tcx.sess.is_rust_2015() {
                 (
-                    format!("maybe a missing crate `{ident}`?"),
+                    format!("you might be missing crate `{ident}`"),
                     Some((
                         vec![],
                         format!(

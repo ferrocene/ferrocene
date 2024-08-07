@@ -15,7 +15,7 @@ LL | fn p([=(}
    |     unclosed delimiter
 ...
 LL | // Functions
-   |              ^
+   |             ^
 
 error: aborting due to 2 previous errors
 

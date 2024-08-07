@@ -99,14 +99,14 @@ impl Step for SourceTarball {
 
     fn run(self, builder: &Builder<'_>) -> Vec<GeneratedTarball> {
         // Configuration of what should be included in the tarball.
-        const DIRS: &[&str] =
-            &["src", "compiler", "library", "tests", "ferrocene", "LICENSES", ".reuse"];
+        const DIRS: &[&str] = &["src", "compiler", "library", "tests", "ferrocene", "LICENSES"];
         const FILES: &[&str] = &[
             "COPYRIGHT",
             "LICENSE-APACHE",
             "LICENSE-MIT",
             "README.md",
             "RELEASES.md",
+            "REUSE.toml",
             "config.example.toml",
             "Cargo.toml",
             "Cargo.lock",

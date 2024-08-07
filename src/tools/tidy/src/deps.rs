@@ -2,7 +2,7 @@
 
 use build_helper::ci::CiEnv;
 use cargo_metadata::{Metadata, Package, PackageId};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::read_dir;
 use std::path::Path;
 
@@ -50,30 +50,33 @@ type ExceptionList = &'static [(&'static str, &'static str)];
 /// * Optionally a tuple of:
 ///     * A list of crates for which dependencies need to be explicitly allowed.
 ///     * The list of allowed dependencies.
+/// * Submodules required for the workspace.
 // FIXME auto detect all cargo workspaces
-pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>)] = &[
+pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>, &[&str])] = &[
     // The root workspace has to be first for check_rustfix to work.
-    (".", EXCEPTIONS, Some((&["rustc-main"], PERMITTED_RUSTC_DEPENDENCIES))),
+    (".", EXCEPTIONS, Some((&["rustc-main"], PERMITTED_RUSTC_DEPENDENCIES)), &[]),
     // Outside of the alphabetical section because rustfmt formats it using multiple lines.
     (
         "compiler/rustc_codegen_cranelift",
         EXCEPTIONS_CRANELIFT,
         Some((&["rustc_codegen_cranelift"], PERMITTED_CRANELIFT_DEPENDENCIES)),
+        &[],
     ),
     // tidy-alphabetical-start
-    ("compiler/rustc_codegen_gcc", EXCEPTIONS_GCC, None),
+    ("compiler/rustc_codegen_gcc", EXCEPTIONS_GCC, None, &[]),
     //("library/backtrace", &[], None), // FIXME uncomment once rust-lang/backtrace#562 has been synced back to the rust repo
     //("library/portable-simd", &[], None), // FIXME uncomment once rust-lang/portable-simd#363 has been synced back to the rust repo
     //("library/stdarch", EXCEPTIONS_STDARCH, None), // FIXME uncomment once rust-lang/stdarch#1462 has been synced back to the rust repo
-    ("src/bootstrap", EXCEPTIONS_BOOTSTRAP, None),
-    ("src/ci/docker/host-x86_64/test-various/uefi_qemu_test", EXCEPTIONS_UEFI_QEMU_TEST, None),
-    //("src/etc/test-float-parse", &[], None), // FIXME uncomment once all deps are vendored
-    ("src/tools/cargo", EXCEPTIONS_CARGO, None),
+    ("src/bootstrap", EXCEPTIONS_BOOTSTRAP, None, &[]),
+    ("src/ci/docker/host-x86_64/test-various/uefi_qemu_test", EXCEPTIONS_UEFI_QEMU_TEST, None, &[]),
+    ("src/etc/test-float-parse", EXCEPTIONS, None, &[]),
+    ("src/tools/cargo", EXCEPTIONS_CARGO, None, &["src/tools/cargo"]),
     //("src/tools/miri/test-cargo-miri", &[], None), // FIXME uncomment once all deps are vendored
     //("src/tools/miri/test_dependencies", &[], None), // FIXME uncomment once all deps are vendored
-    ("src/tools/rust-analyzer", EXCEPTIONS_RUST_ANALYZER, None),
-    ("src/tools/rustc-perf", EXCEPTIONS_RUSTC_PERF, None),
-    ("src/tools/x", &[], None),
+    ("src/tools/rust-analyzer", EXCEPTIONS_RUST_ANALYZER, None, &[]),
+    ("src/tools/rustbook", EXCEPTIONS_RUSTBOOK, None, &["src/doc/book"]),
+    ("src/tools/rustc-perf", EXCEPTIONS_RUSTC_PERF, None, &["src/tools/rustc-perf"]),
+    ("src/tools/x", &[], None, &[]),
     // tidy-alphabetical-end
 ];
 
@@ -118,13 +121,16 @@ const EXCEPTIONS: ExceptionList = &[
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
-    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),      // rustc
-    ("wasm-metadata", "Apache-2.0 WITH LLVM-exception"),     // rustc
-    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc
-    ("wast", "Apache-2.0 WITH LLVM-exception"),              // rustc
-    ("wat", "Apache-2.0 WITH LLVM-exception"),               // rustc
-    ("wit-component", "Apache-2.0 WITH LLVM-exception"),     // rustc
-    ("wit-parser", "Apache-2.0 WITH LLVM-exception"),        // rustc
+    ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"),
+    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),      // rustc; new license after 0.215.0
+    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),        // rustc
+    ("wasm-metadata", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc; new license after 0.215.0
+    ("wasmparser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
+    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc; new license after 0.215.0
+    ("wast", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),              // rustc
+    ("wat", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),               // rustc
+    ("wit-component", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc
+    ("wit-parser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
     // tidy-alphabetical-end
 ];
 
@@ -188,6 +194,13 @@ const EXCEPTIONS_RUSTC_PERF: ExceptionList = &[
     ("ryu", "Apache-2.0 OR BSL-1.0"),
     ("snap", "BSD-3-Clause"),
     ("subtle", "BSD-3-Clause"),
+    // tidy-alphabetical-end
+];
+
+const EXCEPTIONS_RUSTBOOK: ExceptionList = &[
+    // tidy-alphabetical-start
+    ("mdbook", "MPL-2.0"),
+    ("ryu", "Apache-2.0 OR BSL-1.0"),
     // tidy-alphabetical-end
 ];
 
@@ -284,7 +297,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "darling_macro",
     "datafrog",
     "deranged",
-    "derivative",
+    "derive-where",
     "derive_more",
     "derive_setters",
     "digest",
@@ -550,16 +563,8 @@ const PERMITTED_CRANELIFT_DEPENDENCIES: &[&str] = &[
 pub fn check(root: &Path, cargo: &Path, bad: &mut bool) {
     let mut checked_runtime_licenses = false;
 
-    let submodules = build_helper::util::parse_gitmodules(root);
-    for &(workspace, exceptions, permitted_deps) in WORKSPACES {
-        // Skip if it's a submodule, not in a CI environment, and not initialized.
-        //
-        // This prevents enforcing developers to fetch submodules for tidy.
-        if submodules.contains(&workspace.into())
-            && !CiEnv::is_ci()
-            // If the directory is empty, we can consider it as an uninitialized submodule.
-            && read_dir(root.join(workspace)).unwrap().next().is_none()
-        {
+    for &(workspace, exceptions, permitted_deps, submodules) in WORKSPACES {
+        if has_missing_submodule(root, submodules) {
             continue;
         }
 
@@ -590,6 +595,17 @@ pub fn check(root: &Path, cargo: &Path, bad: &mut bool) {
     // Sanity check to ensure we don't accidentally remove the workspace containing the runtime
     // crates.
     assert!(checked_runtime_licenses);
+}
+
+/// Used to skip a check if a submodule is not checked out, and not in a CI environment.
+///
+/// This helps prevent enforcing developers to fetch submodules for tidy.
+pub fn has_missing_submodule(root: &Path, submodules: &[&str]) -> bool {
+    !CiEnv::is_ci()
+        && submodules.iter().any(|submodule| {
+            // If the directory is empty, we can consider it as an uninitialized submodule.
+            read_dir(root.join(submodule)).unwrap().next().is_none()
+        })
 }
 
 /// Check that all licenses of runtime dependencies are in the valid list in `LICENSES`.
@@ -649,8 +665,15 @@ fn check_runtime_license_exceptions(
 ///
 /// Packages listed in `exceptions` are allowed for tools.
 fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], bad: &mut bool) {
-    // Validate the EXCEPTIONS list hasn't changed.
+    // to handle multiple versions of a crate with difference licensing terms we group
+    // repeated entries in `exceptions`
+    let mut grouped_exceptions: HashMap<&str, Vec<&str>> = HashMap::new();
     for (name, license) in exceptions {
+        grouped_exceptions.entry(name).or_default().push(license);
+    }
+
+    // Validate the EXCEPTIONS list hasn't changed.
+    for (name, licenses) in &grouped_exceptions {
         // Check that the package actually exists.
         if !metadata.packages.iter().any(|p| p.name == *name) {
             tidy_error!(
@@ -664,7 +687,7 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
         for pkg in metadata.packages.iter().filter(|p| p.name == *name) {
             match &pkg.license {
                 None => {
-                    if *license == NON_STANDARD_LICENSE
+                    if *licenses == [NON_STANDARD_LICENSE]
                         && EXCEPTIONS_NON_STANDARD_LICENSE_DEPS.contains(&pkg.name.as_str())
                     {
                         continue;
@@ -676,9 +699,9 @@ fn check_license_exceptions(metadata: &Metadata, exceptions: &[(&str, &str)], ba
                     );
                 }
                 Some(pkg_license) => {
-                    if pkg_license.as_str() != *license {
+                    if licenses.iter().all(|license| *license != pkg_license.as_str()) {
                         println!("dependency exception `{name}` license has changed");
-                        println!("    previously `{license}` now `{pkg_license}`");
+                        println!("    previously `{licenses:?}` now `{pkg_license}`");
                         println!("    update EXCEPTIONS for the new license");
                         *bad = true;
                     }

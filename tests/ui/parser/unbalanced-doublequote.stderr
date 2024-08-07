@@ -8,7 +8,7 @@ LL | | // ferrocene-annotations: fls_hucd52suu6it
 ...  |
 LL | | // ferrocene-annotations: fls_boyhlu5srp6u
 LL | | // String Literals
-   | |___________________^
+   | |__________________^
 
 error: aborting due to 1 previous error
 

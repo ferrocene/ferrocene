@@ -17,7 +17,7 @@ LL | fn r()->i{0|{#[cfg(r(0{]0
    |          unclosed delimiter
 ...
 LL | // Functions
-   |              ^
+   |             ^
 
 error: aborting due to 2 previous errors
 

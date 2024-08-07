@@ -13,7 +13,11 @@ cross-compilation targets.
 New features
 ------------
 
-* The Rust version has been updated to 1.79.0.
+* Updated the Rust version to include the changes in Rust 1.77.0, 1.77.1,
+  1.77.2, 1.78.0 and 1.79.0. A backport of `Rust PR #128271`_ is also included
+  to fix a bug introduced in Rust 1.78.0.
+
+.. _Rust PR #128271: https://github.com/rust-lang/rust/pull/128271
 
 New experimental features
 -------------------------

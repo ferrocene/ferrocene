@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 # ignore-cross-compile
 # This test makes sure all generic instances get re-exported from Rust dylibs for use by
 # `-Zshare-generics`. There are two rlibs (`instance_provider_a` and `instance_provider_b`)

@@ -1,13 +1,7 @@
 //! Miscellaneous type-system utilities that are too small to deserve their own modules.
 
-use crate::middle::codegen_fn_attrs::CodegenFnAttrFlags;
-use crate::query::{IntoQueryParam, Providers};
-use crate::ty::layout::{FloatExt, IntegerExt};
-use crate::ty::{
-    self, Asyncness, FallibleTypeFolder, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable,
-    TypeVisitableExt, Upcast,
-};
-use crate::ty::{GenericArgKind, GenericArgsRef};
+use std::{fmt, iter};
+
 use rustc_apfloat::Float as _;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stable_hasher::{Hash128, HashStable, StableHasher};
@@ -23,8 +17,15 @@ use rustc_span::sym;
 use rustc_target::abi::{Float, Integer, IntegerType, Size};
 use rustc_target::spec::abi::Abi;
 use smallvec::{smallvec, SmallVec};
-use std::{fmt, iter};
 use tracing::{debug, instrument, trace};
+
+use crate::middle::codegen_fn_attrs::CodegenFnAttrFlags;
+use crate::query::{IntoQueryParam, Providers};
+use crate::ty::layout::{FloatExt, IntegerExt};
+use crate::ty::{
+    self, Asyncness, FallibleTypeFolder, GenericArgKind, GenericArgsRef, Ty, TyCtxt, TypeFoldable,
+    TypeFolder, TypeSuperFoldable, TypeVisitableExt, Upcast,
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Discr<'tcx> {
@@ -78,7 +79,7 @@ impl<'tcx> Discr<'tcx> {
         let (val, oflo) = if signed {
             let min = size.signed_int_min();
             let max = size.signed_int_max();
-            let val = size.sign_extend(self.val) as i128;
+            let val = size.sign_extend(self.val);
             assert!(n < (i128::MAX as u128));
             let n = n as i128;
             let oflo = val > max - n;

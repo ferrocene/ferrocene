@@ -1,32 +1,20 @@
 //! A bunch of methods and structures more or less related to resolving imports.
 
-use crate::diagnostics::{import_candidates, DiagMode, Suggestion};
-use crate::errors::{
-    CannotBeReexportedCratePublic, CannotBeReexportedCratePublicNS, CannotBeReexportedPrivate,
-    CannotBeReexportedPrivateNS, CannotDetermineImportResolution, CannotGlobImportAllCrates,
-    ConsiderAddingMacroExport, ConsiderMarkingAsPub, IsNotDirectlyImportable,
-    ItemsInTraitsAreNotImportable,
-};
-use crate::Determinacy::{self, *};
-use crate::{module_to_string, names_to_string, ImportSuggestion};
-use crate::{AmbiguityError, Namespace::*};
-use crate::{AmbiguityKind, BindingKey, ResolutionError, Resolver, Segment};
-use crate::{Finalize, Module, ModuleOrUniformRoot, ParentScope, PerNS, ScopeSet};
-use crate::{NameBinding, NameBindingData, NameBindingKind, PathResult, Used};
+use std::cell::Cell;
+use std::mem;
 
 use rustc_ast::NodeId;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::intern::Interned;
-use rustc_errors::{codes::*, pluralize, struct_span_code_err, Applicability, MultiSpan};
+use rustc_errors::codes::*;
+use rustc_errors::{pluralize, struct_span_code_err, Applicability, MultiSpan};
 use rustc_hir::def::{self, DefKind, PartialRes};
 use rustc_hir::def_id::DefId;
-use rustc_middle::metadata::ModChild;
-use rustc_middle::metadata::Reexport;
-use rustc_middle::span_bug;
-use rustc_middle::ty;
+use rustc_middle::metadata::{ModChild, Reexport};
+use rustc_middle::{span_bug, ty};
 use rustc_session::lint::builtin::{
     AMBIGUOUS_GLOB_REEXPORTS, HIDDEN_GLOB_REEXPORTS, PUB_USE_OF_PRIVATE_EXTERN_CRATE,
-    UNUSED_IMPORTS,
+    REDUNDANT_IMPORTS, UNUSED_IMPORTS,
 };
 use rustc_session::lint::BuiltinLintDiag;
 use rustc_span::edit_distance::find_best_match_for_name;
@@ -36,8 +24,20 @@ use rustc_span::Span;
 use smallvec::SmallVec;
 use tracing::debug;
 
-use std::cell::Cell;
-use std::mem;
+use crate::diagnostics::{import_candidates, DiagMode, Suggestion};
+use crate::errors::{
+    CannotBeReexportedCratePublic, CannotBeReexportedCratePublicNS, CannotBeReexportedPrivate,
+    CannotBeReexportedPrivateNS, CannotDetermineImportResolution, CannotGlobImportAllCrates,
+    ConsiderAddingMacroExport, ConsiderMarkingAsPub, IsNotDirectlyImportable,
+    ItemsInTraitsAreNotImportable,
+};
+use crate::Determinacy::{self, *};
+use crate::Namespace::*;
+use crate::{
+    module_to_string, names_to_string, AmbiguityError, AmbiguityKind, BindingKey, Finalize,
+    ImportSuggestion, Module, ModuleOrUniformRoot, NameBinding, NameBindingData, NameBindingKind,
+    ParentScope, PathResult, PerNS, ResolutionError, Resolver, ScopeSet, Segment, Used,
+};
 
 type Res = def::Res<NodeId>;
 
@@ -48,6 +48,7 @@ pub(crate) enum ImportKind<'a> {
         /// `source` in `use prefix::source as target`.
         source: Ident,
         /// `target` in `use prefix::source as target`.
+        /// It will directly use `source` when the format is `use prefix::source`.
         target: Ident,
         /// Bindings to which `source` refers to.
         source_bindings: PerNS<Cell<Result<NameBinding<'a>, Determinacy>>>,
@@ -1387,14 +1388,12 @@ impl<'a, 'tcx> Resolver<'a, 'tcx> {
             let mut redundant_spans: Vec<_> = redundant_span.present_items().collect();
             redundant_spans.sort();
             redundant_spans.dedup();
-            /* FIXME(unused_imports): Add this back as a new lint
-            self.lint_buffer.buffer_lint_with_diagnostic(
-                UNUSED_IMPORTS,
+            self.lint_buffer.buffer_lint(
+                REDUNDANT_IMPORTS,
                 id,
                 import.span,
                 BuiltinLintDiag::RedundantImport(redundant_spans, source),
             );
-            */
             return true;
         }
 

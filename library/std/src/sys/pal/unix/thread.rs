@@ -1,16 +1,18 @@
-use crate::cmp;
 use crate::ffi::CStr;
-use crate::io;
 use crate::mem::{self, ManuallyDrop};
 use crate::num::NonZero;
-use crate::ptr;
-use crate::sys::{os, stack_overflow};
-use crate::time::Duration;
-
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
 use crate::sys::weak::dlsym;
-#[cfg(any(target_os = "solaris", target_os = "illumos", target_os = "nto"))]
+#[cfg(any(
+    target_os = "solaris",
+    target_os = "illumos",
+    target_os = "nto",
+    target_os = "vxworks"
+))]
 use crate::sys::weak::weak;
+use crate::sys::{os, stack_overflow};
+use crate::time::Duration;
+use crate::{cmp, io, ptr};
 #[cfg(not(any(target_os = "l4re", target_os = "vxworks", target_os = "espidf")))]
 pub const DEFAULT_MIN_STACK_SIZE: usize = 2 * 1024 * 1024;
 #[cfg(target_os = "l4re")]
@@ -215,17 +217,38 @@ impl Thread {
         }
     }
 
+    #[cfg(target_os = "vxworks")]
+    pub fn set_name(name: &CStr) {
+        // FIXME(libc): adding real STATUS, ERROR type eventually.
+        weak! {
+            fn taskNameSet(
+                libc::TASK_ID, *mut libc::c_char
+            ) -> libc::c_int
+        }
+
+        // We can't assume taskNameSet is necessarily available.
+        // VX_TASK_NAME_LEN can be found set to 31,
+        // however older versions can be set to only 10.
+        // FIXME(vxworks): if the minimum supported VxWorks is >= 7, the maximum length can be changed to 31.
+        if let Some(f) = taskNameSet.get() {
+            const VX_TASK_NAME_LEN: usize = 10;
+
+            let name = truncate_cstr::<{ VX_TASK_NAME_LEN }>(name);
+            let status = unsafe { f(libc::taskIdSelf(), name.as_mut_ptr()) };
+            debug_assert_eq!(res, libc::OK);
+        }
+    }
+
     #[cfg(any(
         target_env = "newlib",
         target_os = "l4re",
         target_os = "emscripten",
         target_os = "redox",
-        target_os = "vxworks",
         target_os = "hurd",
         target_os = "aix",
     ))]
     pub fn set_name(_name: &CStr) {
-        // Newlib, Emscripten, and VxWorks have no way to set a thread name.
+        // Newlib and Emscripten have no way to set a thread name.
     }
 
     #[cfg(not(target_os = "espidf"))]
@@ -294,6 +317,7 @@ impl Drop for Thread {
     target_os = "nto",
     target_os = "solaris",
     target_os = "illumos",
+    target_os = "vxworks",
     target_vendor = "apple",
 ))]
 fn truncate_cstr<const MAX_WITH_NUL: usize>(cstr: &CStr) -> [libc::c_char; MAX_WITH_NUL] {
@@ -458,8 +482,18 @@ pub fn available_parallelism() -> io::Result<NonZero<usize>> {
 
                 Ok(NonZero::new_unchecked(sinfo.cpu_count as usize))
             }
+        } else if #[cfg(target_os = "vxworks")] {
+            // Note: there is also `vxCpuConfiguredGet`, closer to _SC_NPROCESSORS_CONF
+            // expectations than the actual cores availability.
+            extern "C" {
+                fn vxCpuEnabledGet() -> libc::cpuset_t;
+            }
+
+            // always fetches a valid bitmask
+            let set = unsafe { vxCpuEnabledGet() };
+            Ok(NonZero::new_unchecked(set.count_ones() as usize))
         } else {
-            // FIXME: implement on vxWorks, Redox, l4re
+            // FIXME: implement on Redox, l4re
             Err(io::const_io_error!(io::ErrorKind::Unsupported, "Getting the number of hardware threads is not supported on the target platform"))
         }
     }
@@ -475,11 +509,9 @@ mod cgroups {
     use crate::borrow::Cow;
     use crate::ffi::OsString;
     use crate::fs::{exists, File};
-    use crate::io::Read;
-    use crate::io::{BufRead, BufReader};
+    use crate::io::{BufRead, BufReader, Read};
     use crate::os::unix::ffi::OsStringExt;
-    use crate::path::Path;
-    use crate::path::PathBuf;
+    use crate::path::{Path, PathBuf};
     use crate::str::from_utf8;
 
     #[derive(PartialEq)]

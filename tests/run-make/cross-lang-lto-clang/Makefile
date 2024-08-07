@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 # needs-force-clang-based-tests
 
 # This test makes sure that cross-language inlining actually works by checking

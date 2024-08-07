@@ -1,6 +1,13 @@
-use std::{env, io::IsTerminal, sync::Arc};
+use std::env;
+use std::io::IsTerminal;
+use std::sync::Arc;
 
+<<<<<<< HEAD
 use compiletest::{common::Mode, ferrocene_annotations, log_config, parse_config, run_tests};
+=======
+use compiletest::common::Mode;
+use compiletest::{log_config, parse_config, run_tests};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 
 fn main() {
     tracing_subscriber::fmt::init();

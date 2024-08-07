@@ -1,9 +1,6 @@
-use super::diagnostics::{dummy_arg, ConsumeClosingDelim};
-use super::ty::{AllowPlus, RecoverQPath, RecoverReturnSign};
-use super::{AttrWrapper, FollowedByType, ForceCollect, Parser, PathStyle, Trailing};
-use crate::errors::{self, MacroExpandsToAdtField};
-use crate::fluent_generated as fluent;
-use crate::maybe_whole;
+use std::fmt::Write;
+use std::mem;
+
 use ast::token::IdentIsRaw;
 use rustc_ast::ast::*;
 use rustc_ast::ptr::P;
@@ -12,17 +9,20 @@ use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use rustc_ast::util::case::Case;
 use rustc_ast::{self as ast};
 use rustc_ast_pretty::pprust;
-use rustc_errors::{codes::*, struct_span_code_err, Applicability, PResult, StashKey};
+use rustc_errors::codes::*;
+use rustc_errors::{struct_span_code_err, Applicability, PResult, StashKey};
 use rustc_span::edit_distance::edit_distance;
 use rustc_span::edition::Edition;
-use rustc_span::source_map;
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::ErrorGuaranteed;
-use rustc_span::{Span, DUMMY_SP};
-use std::fmt::Write;
-use std::mem;
+use rustc_span::{source_map, ErrorGuaranteed, Span, DUMMY_SP};
 use thin_vec::{thin_vec, ThinVec};
 use tracing::debug;
+
+use super::diagnostics::{dummy_arg, ConsumeClosingDelim};
+use super::ty::{AllowPlus, RecoverQPath, RecoverReturnSign};
+use super::{AttrWrapper, FollowedByType, ForceCollect, Parser, PathStyle, Trailing};
+use crate::errors::{self, MacroExpandsToAdtField};
+use crate::{fluent_generated as fluent, maybe_whole};
 
 impl<'a> Parser<'a> {
     /// Parses a source module as a crate. This is the main entry point for the parser.
@@ -1192,13 +1192,14 @@ impl<'a> Parser<'a> {
         mut safety: Safety,
     ) -> PResult<'a, ItemInfo> {
         let abi = self.parse_abi(); // ABI?
+        // FIXME: This recovery should be tested better.
         if safety == Safety::Default
             && self.token.is_keyword(kw::Unsafe)
             && self.look_ahead(1, |t| t.kind == token::OpenDelim(Delimiter::Brace))
         {
             self.expect(&token::OpenDelim(Delimiter::Brace)).unwrap_err().emit();
             safety = Safety::Unsafe(self.token.span);
-            self.eat_keyword(kw::Unsafe);
+            let _ = self.eat_keyword(kw::Unsafe);
         }
         let module = ast::ForeignMod {
             safety,
@@ -1759,7 +1760,7 @@ impl<'a> Parser<'a> {
                     }
                 }
             }
-            self.eat(&token::CloseDelim(Delimiter::Brace));
+            self.expect(&token::CloseDelim(Delimiter::Brace))?;
         } else {
             let token_str = super::token_descr(&self.token);
             let where_str = if parsed_where { "" } else { "`where`, or " };
@@ -1902,7 +1903,7 @@ impl<'a> Parser<'a> {
                         if let Some(_guar) = guar {
                             // Handle a case like `Vec<u8>>,` where we can continue parsing fields
                             // after the comma
-                            self.eat(&token::Comma);
+                            let _ = self.eat(&token::Comma);
 
                             // `check_trailing_angle_brackets` already emitted a nicer error, as
                             // proven by the presence of `_guar`. We can continue parsing.
@@ -2483,12 +2484,15 @@ impl<'a> Parser<'a> {
     /// `check_pub` adds additional `pub` to the checks in case users place it
     /// wrongly, can be used to ensure `pub` never comes after `default`.
     pub(super) fn check_fn_front_matter(&mut self, check_pub: bool, case: Case) -> bool {
+        const ALL_QUALS: &[Symbol] =
+            &[kw::Pub, kw::Gen, kw::Const, kw::Async, kw::Unsafe, kw::Safe, kw::Extern];
+
         // We use an over-approximation here.
         // `const const`, `fn const` won't parse, but we're not stepping over other syntax either.
         // `pub` is added in case users got confused with the ordering like `async pub fn`,
         // only if it wasn't preceded by `default` as `default pub` is invalid.
         let quals: &[Symbol] = if check_pub {
-            &[kw::Pub, kw::Gen, kw::Const, kw::Async, kw::Unsafe, kw::Safe, kw::Extern]
+            ALL_QUALS
         } else {
             &[kw::Gen, kw::Const, kw::Async, kw::Unsafe, kw::Safe, kw::Extern]
         };
@@ -2518,9 +2522,9 @@ impl<'a> Parser<'a> {
             || self.check_keyword_case(kw::Extern, case)
                 && self.look_ahead(1, |t| t.can_begin_string_literal())
                 && (self.look_ahead(2, |t| t.is_keyword_case(kw::Fn, case)) ||
-                    // this branch is only for better diagnostic in later, `pub` is not allowed here
+                    // this branch is only for better diagnostics; `pub`, `unsafe`, etc. are not allowed here
                     (self.may_recover()
-                        && self.look_ahead(2, |t| t.is_keyword(kw::Pub))
+                        && self.look_ahead(2, |t| ALL_QUALS.iter().any(|&kw| t.is_keyword(kw)))
                         && self.look_ahead(3, |t| t.is_keyword_case(kw::Fn, case))))
     }
 

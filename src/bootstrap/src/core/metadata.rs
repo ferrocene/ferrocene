@@ -82,11 +82,12 @@ fn workspace_members(build: &Build) -> Vec<Package> {
             .arg("--no-deps")
             .arg("--manifest-path")
             .arg(build.src.join(manifest_path));
-        let metadata_output = cargo.capture_stdout().run_always().run(build).stdout();
+        let metadata_output = cargo.run_always().run_capture_stdout(build).stdout();
         let Output { packages, .. } = t!(serde_json::from_str(&metadata_output));
         packages
     };
 
+<<<<<<< HEAD
     // Collects `metadata.packages` from all workspaces.
 
     let packages = collect_metadata("Cargo.toml");
@@ -94,4 +95,11 @@ fn workspace_members(build: &Build) -> Vec<Package> {
     let bootstrap_packages = collect_metadata("src/bootstrap/Cargo.toml");
 
     packages.into_iter().chain(ra_packages).chain(bootstrap_packages).collect()
+=======
+    // Collects `metadata.packages` from the root and library workspaces.
+    let mut packages = vec![];
+    packages.extend(collect_metadata("Cargo.toml"));
+    packages.extend(collect_metadata("library/Cargo.toml"));
+    packages
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

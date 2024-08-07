@@ -1,13 +1,11 @@
-use std::{
-    io::Error,
-    path::{Path, PathBuf},
-};
+use std::io::Error;
+use std::path::{Path, PathBuf};
 
-use crate::fluent_generated as fluent;
 use rustc_ast::Label;
+use rustc_errors::codes::*;
 use rustc_errors::{
-    codes::*, Applicability, Diag, DiagCtxtHandle, DiagSymbolList, Diagnostic, EmissionGuarantee,
-    Level, MultiSpan, SubdiagMessageOp, Subdiagnostic,
+    Applicability, Diag, DiagCtxtHandle, DiagSymbolList, Diagnostic, EmissionGuarantee, Level,
+    MultiSpan, SubdiagMessageOp, Subdiagnostic,
 };
 use rustc_hir::{self as hir, ExprKind, Target};
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
@@ -15,6 +13,7 @@ use rustc_middle::ty::{MainDefinition, Ty};
 use rustc_span::{Span, Symbol, DUMMY_SP};
 
 use crate::check_attr::ProcMacroKind;
+use crate::fluent_generated as fluent;
 use crate::lang_items::Duplicate;
 
 #[derive(LintDiagnostic)]
@@ -69,6 +68,10 @@ pub struct CoverageNotFnOrClosure {
     pub defn_span: Span,
 }
 
+#[derive(LintDiagnostic)]
+#[diag(passes_optimize_not_fn_or_closure)]
+pub struct OptimizeNotFnOrClosure;
+
 #[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_fn)]
 pub struct AttrShouldBeAppliedToFn {
@@ -77,13 +80,6 @@ pub struct AttrShouldBeAppliedToFn {
     #[label]
     pub defn_span: Span,
     pub on_crate: bool,
-}
-
-#[derive(Diagnostic)]
-#[diag(passes_naked_tracked_caller, code = E0736)]
-pub struct NakedTrackedCaller {
-    #[primary_span]
-    pub attr_span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -641,6 +637,13 @@ pub struct Confusables {
 }
 
 #[derive(Diagnostic)]
+#[diag(passes_coroutine_on_non_closure)]
+pub struct CoroutineOnNonClosure {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(passes_empty_confusables)]
 pub(crate) struct EmptyConfusables {
     #[primary_span]
@@ -1124,13 +1127,6 @@ pub struct UnlabeledCfInWhileCondition<'a> {
     pub cf_type: &'a str,
 }
 
-#[derive(Diagnostic)]
-#[diag(passes_cannot_inline_naked_function)]
-pub struct CannotInlineNakedFunction {
-    #[primary_span]
-    pub span: Span,
-}
-
 #[derive(LintDiagnostic)]
 #[diag(passes_undefined_naked_function_abi)]
 pub struct UndefinedNakedFunctionAbi;
@@ -1194,6 +1190,17 @@ pub struct NakedFunctionsMustUseNoreturn {
     pub span: Span,
     #[suggestion(code = ", options(noreturn)", applicability = "machine-applicable")]
     pub last_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(passes_naked_functions_incompatible_attribute, code = E0736)]
+pub struct NakedFunctionIncompatibleAttribute {
+    #[primary_span]
+    #[label]
+    pub span: Span,
+    #[label(passes_naked_attribute)]
+    pub naked_span: Span,
+    pub attr: Symbol,
 }
 
 #[derive(Diagnostic)]

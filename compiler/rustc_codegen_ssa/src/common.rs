@@ -1,15 +1,14 @@
 #![allow(non_camel_case_types)]
 
 use rustc_hir::LangItem;
-use rustc_middle::mir;
-use rustc_middle::ty::Instance;
-use rustc_middle::ty::{self, layout::TyAndLayout, TyCtxt};
-use rustc_middle::{bug, span_bug};
+use rustc_middle::ty::layout::TyAndLayout;
+use rustc_middle::ty::{self, Instance, TyCtxt};
+use rustc_middle::{bug, mir, span_bug};
 use rustc_span::Span;
 
 use crate::traits::*;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum IntPredicate {
     IntEQ,
     IntNE,
@@ -23,7 +22,7 @@ pub enum IntPredicate {
     IntSLE,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum RealPredicate {
     RealPredicateFalse,
     RealOEQ,
@@ -43,7 +42,7 @@ pub enum RealPredicate {
     RealPredicateTrue,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum AtomicRmwBinOp {
     AtomicXchg,
     AtomicAdd,
@@ -58,7 +57,7 @@ pub enum AtomicRmwBinOp {
     AtomicUMin,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum AtomicOrdering {
     Unordered,
     Relaxed,
@@ -68,7 +67,7 @@ pub enum AtomicOrdering {
     SequentiallyConsistent,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum SynchronizationScope {
     SingleThread,
     CrossThread,
@@ -106,8 +105,9 @@ pub enum TypeKind {
 //            for now we content ourselves with providing a no-op HashStable
 //            implementation for CGUs.
 mod temp_stable_hash_impls {
-    use crate::ModuleCodegen;
     use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
+
+    use crate::ModuleCodegen;
 
     impl<HCX, M> HashStable<HCX> for ModuleCodegen<M> {
         fn hash_stable(&self, _: &mut HCX, _: &mut StableHasher) {

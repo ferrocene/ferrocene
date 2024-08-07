@@ -69,9 +69,6 @@ passes_break_non_loop =
     .suggestion = use `break` on its own without a value inside this `{$kind}` loop
     .break_expr_suggestion = alternatively, you might have meant to use the available loop label
 
-passes_cannot_inline_naked_function =
-    naked functions cannot be inlined
-
 passes_cannot_stabilize_deprecated =
     an API can't be stabilized after it is deprecated
     .label = invalid version
@@ -102,6 +99,10 @@ passes_continue_labeled_block =
     `continue` pointing to a labeled block
     .label = labeled blocks cannot be `continue`'d
     .block_label = labeled block the `continue` points to
+
+passes_coroutine_on_non_closure =
+    attribute should be applied to closures
+    .label = not a closure
 
 passes_coverage_not_fn_or_closure =
     attribute should be applied to a function definition or closure
@@ -485,15 +486,17 @@ passes_naked_functions_asm_block =
 passes_naked_functions_asm_options =
     asm options unsupported in naked functions: {$unsupported_options}
 
+passes_naked_functions_incompatible_attribute =
+    attribute incompatible with `#[naked]`
+    .label = the `{$attr}` attribute is incompatible with `#[naked]`
+    .naked_attribute = function marked with `#[naked]` here
+
 passes_naked_functions_must_use_noreturn =
     asm in naked functions must use `noreturn` option
     .suggestion = consider specifying that the asm block is responsible for returning from the function
 
 passes_naked_functions_operands =
     only `const` and `sym` operands are supported in naked functions
-
-passes_naked_tracked_caller =
-    cannot use `#[track_caller]` with `#[naked]`
 
 passes_no_link =
     attribute should be applied to an `extern crate` item
@@ -542,6 +545,10 @@ passes_only_has_effect_on =
         [implementation_block] implementation blocks
         *[unspecified] (unspecified--this is a compiler bug)
     }
+
+passes_optimize_not_fn_or_closure =
+    attribute should be applied to function or closure
+    .label = not a function or closure
 
 passes_outer_crate_level_attr =
     crate-level attribute should be an inner attribute: add an exclamation mark: `#![foo]`

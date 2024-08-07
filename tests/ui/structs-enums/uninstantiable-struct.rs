@@ -1,6 +1,5 @@
 //@ run-pass
-#[allow(dead_code)]
-pub struct Z(&'static Z);
+pub struct Z(#[allow(dead_code)] &'static Z);
 
 pub fn main() {}
 

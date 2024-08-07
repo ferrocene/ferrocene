@@ -1,8 +1,10 @@
 use rustc_ast::TraitObjectSyntax;
-use rustc_errors::{codes::*, Diag, EmissionGuarantee, StashKey};
+use rustc_errors::codes::*;
+use rustc_errors::{Diag, EmissionGuarantee, StashKey};
 use rustc_hir as hir;
 use rustc_hir::def::{DefKind, Res};
-use rustc_lint_defs::{builtin::BARE_TRAIT_OBJECTS, Applicability};
+use rustc_lint_defs::builtin::BARE_TRAIT_OBJECTS;
+use rustc_lint_defs::Applicability;
 use rustc_span::Span;
 use rustc_trait_selection::error_reporting::traits::suggestions::NextTypeParamName;
 
@@ -34,7 +36,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 .ok()
                 .is_some_and(|s| s.trim_end().ends_with('<'));
 
-        let is_global = poly_trait_ref.trait_ref.path.is_global();
+        let is_global = poly_trait_ref.0.trait_ref.path.is_global();
 
         let mut sugg = vec![(
             self_ty.span.shrink_to_lo(),
@@ -176,7 +178,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let mut is_downgradable = true;
         let is_object_safe = match self_ty.kind {
             hir::TyKind::TraitObject(objects, ..) => {
-                objects.iter().all(|o| match o.trait_ref.path.res {
+                objects.iter().all(|(o, _)| match o.trait_ref.path.res {
                     Res::Def(DefKind::Trait, id) => {
                         if Some(id) == owner {
                             // For recursive traits, don't downgrade the error. (#119652)

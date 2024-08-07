@@ -1,8 +1,3 @@
-use crate::hir::ModuleItems;
-use crate::middle::debugger_visualizer::DebuggerVisualizerFile;
-use crate::query::LocalCrate;
-use crate::ty::TyCtxt;
-use rustc_ast as ast;
 use rustc_ast::visit::{walk_list, VisitorResult};
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
@@ -13,12 +8,17 @@ use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId, LOCAL_CRATE};
 use rustc_hir::definitions::{DefKey, DefPath, DefPathHash};
 use rustc_hir::intravisit::Visitor;
 use rustc_hir::*;
-use rustc_hir_pretty as pprust_hir;
 use rustc_middle::hir::nested_filter;
 use rustc_span::def_id::StableCrateId;
 use rustc_span::symbol::{kw, sym, Ident, Symbol};
 use rustc_span::{ErrorGuaranteed, Span};
 use rustc_target::spec::abi::Abi;
+use {rustc_ast as ast, rustc_hir_pretty as pprust_hir};
+
+use crate::hir::ModuleItems;
+use crate::middle::debugger_visualizer::DebuggerVisualizerFile;
+use crate::query::LocalCrate;
+use crate::ty::TyCtxt;
 
 // FIXME: the structure was necessary in the past but now it
 // only serves as "namespace" for HIR-related methods, and can be
@@ -744,6 +744,10 @@ impl<'hir> Map<'hir> {
             Node::Expr(expr) => expr,
             _ => bug!("expected expr, found {}", self.node_to_string(id)),
         }
+    }
+
+    pub fn opt_delegation_sig_id(self, def_id: LocalDefId) -> Option<DefId> {
+        self.tcx.opt_hir_owner_node(def_id)?.fn_decl()?.opt_delegation_sig_id()
     }
 
     #[inline]

@@ -333,16 +333,11 @@ mod defaults {
 }
 
 mod dist {
-<<<<<<< HEAD
-    use super::{first, run_build, second, Config};
-    use crate::{core::builder::*, ferrocene::code_coverage::ProfilerBuiltinsNoCore};
-    use pretty_assertions::assert_eq;
-=======
     use pretty_assertions::assert_eq;
 
     use super::{first, run_build, Config};
     use crate::core::builder::*;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 
     fn configure(host: &[&str], target: &[&str]) -> Config {
         Config { stage: 2, ..super::configure("dist", host, target) }

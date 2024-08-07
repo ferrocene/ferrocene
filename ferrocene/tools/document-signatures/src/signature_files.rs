@@ -5,15 +5,17 @@
 //! the scenes, the files are written to an S3 bucket and recorded in the `signature.toml` file,
 //! and files are read from the `src/bootstrap`-maintained cache.
 
-use crate::{CliOptions, TOML_HEADER_COMMENTS};
-use anyhow::{bail, Context, Error};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufWriter, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+use anyhow::{bail, Context, Error};
 use tempfile::NamedTempFile;
 use uuid::Uuid;
+
+use crate::{CliOptions, TOML_HEADER_COMMENTS};
 
 pub(crate) struct SignatureFiles<'opts> {
     signature_toml: Signature,

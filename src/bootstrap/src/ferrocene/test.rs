@@ -5,7 +5,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::error_when_signatures_are_ignored;
-use crate::Mode;
+use crate::{Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct TraceabilityMatrixTool {
@@ -27,19 +27,19 @@ impl Step for TraceabilityMatrixTool {
 
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         builder.info("Testing ferrocene/tools/traceability-matrix");
-        builder.run(
-            &mut tool::prepare_tool_cargo(
-                builder,
-                builder.compiler(0, self.host),
-                Mode::ToolBootstrap,
-                self.host,
-                "test",
-                "ferrocene/tools/traceability-matrix",
-                SourceType::InTree,
-                &[],
-            )
-            .into_cmd(),
-        );
+
+        tool::prepare_tool_cargo(
+            builder,
+            builder.compiler(0, self.host),
+            Mode::ToolBootstrap,
+            self.host,
+            Kind::Test,
+            "ferrocene/tools/traceability-matrix",
+            SourceType::InTree,
+            &[],
+        )
+        .into_cmd()
+        .run(builder);
     }
 }
 
@@ -69,14 +69,14 @@ impl Step for SelfTest {
             builder.compiler(0, self.target),
             Mode::ToolBootstrap,
             self.target,
-            "test",
+            Kind::Test,
             "ferrocene/tools/self-test",
             SourceType::InTree,
             &[],
         )
         .into();
         crate::ferrocene::tool::SelfTest::update_command(&mut cmd, builder, self.target);
-        builder.run(&mut cmd);
+        cmd.run(builder);
     }
 }
 
@@ -113,7 +113,7 @@ impl Step for CheckDocumentSignatures {
             |source| source.join("signature").join("signature.toml").exists(),
             // Function executed
             |mut cmd, source, output| {
-                builder.run(cmd.arg("verify").arg(source).arg(output));
+                cmd.arg("verify").arg(source).arg(output).run(builder);
             },
         );
     }
@@ -138,7 +138,7 @@ impl Step for GenerateTarball {
             compiler,
             Mode::ToolBootstrap,
             self.target,
-            "test",
+            Kind::Test,
             "ferrocene/tools/generate-tarball",
             SourceType::InTree,
             &[],

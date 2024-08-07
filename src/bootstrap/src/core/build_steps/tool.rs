@@ -317,16 +317,12 @@ macro_rules! bootstrap_tool {
 }
 
 bootstrap_tool!(
-<<<<<<< HEAD
     // Ferrocene-specific
     FerroceneTraceabilityMatrix, "ferrocene/tools/traceability-matrix", "traceability-matrix";
     FerroceneDocumentSignatures, "ferrocene/tools/document-signatures", "document-signatures";
     FerroceneGenerateTarball, "ferrocene/tools/generate-tarball", "generate-tarball";
 
-    Rustbook, "src/tools/rustbook", "rustbook";
-=======
     Rustbook, "src/tools/rustbook", "rustbook", submodules = SUBMODULES_FOR_RUSTBOOK;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     UnstableBookGen, "src/tools/unstable-book-gen", "unstable-book-gen";
     Tidy, "src/tools/tidy", "tidy";
     Linkchecker, "src/tools/linkchecker", "linkchecker";

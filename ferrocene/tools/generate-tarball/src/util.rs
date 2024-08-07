@@ -2,15 +2,15 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
-use anyhow::{format_err, Context, Result};
 use std::fs;
-use std::path::Path;
-use walkdir::WalkDir;
-
 #[cfg(unix)]
 use std::os::unix::fs::symlink as symlink_file;
 #[cfg(windows)]
 use std::os::windows::fs::symlink_file;
+use std::path::Path;
+
+use anyhow::{format_err, Context, Result};
+use walkdir::WalkDir;
 
 /// Converts a `&Path` to a UTF-8 `&str`.
 pub fn path_to_str(path: &Path) -> Result<&str> {

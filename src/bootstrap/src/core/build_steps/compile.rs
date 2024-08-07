@@ -24,14 +24,13 @@ use crate::core::builder::{
     crate_description, Builder, Cargo, Kind, PathSet, RunConfig, ShouldRun, Step, TaskPath,
 };
 use crate::core::config::{DebuginfoLevel, LlvmLibunwind, RustcLto, TargetSelection};
+use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils::exec::command;
 use crate::utils::helpers::{
     self, exe, get_clang_cl_resource_dir, get_closest_merge_base_commit, is_debug_info, is_dylib,
     symlink_dir, t, up_to_date,
 };
 use crate::{CLang, Compiler, DependencyType, GitRepo, Mode, LLVM_TOOLS};
-
-use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Std {

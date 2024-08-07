@@ -2,12 +2,14 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
+use std::path::{Path, PathBuf};
+
+use anyhow::Result;
+
 use crate::compression::{CompressionFormats, CompressionProfile};
 use crate::signatures::{sign_manifest_with_aws_kms, SignatureContext};
 use crate::tarballer::Tarballer;
 use crate::util::{copy_recursive, create_dir_all, path_to_str, remove_dir_all};
-use anyhow::Result;
-use std::path::{Path, PathBuf};
 
 #[derive(Debug, clap::Args)]
 pub struct Generator {

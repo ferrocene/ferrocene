@@ -87,19 +87,11 @@ fn workspace_members(build: &Build) -> Vec<Package> {
         packages
     };
 
-<<<<<<< HEAD
-    // Collects `metadata.packages` from all workspaces.
-
-    let packages = collect_metadata("Cargo.toml");
-    let ra_packages = collect_metadata("src/tools/rust-analyzer/Cargo.toml");
-    let bootstrap_packages = collect_metadata("src/bootstrap/Cargo.toml");
-
-    packages.into_iter().chain(ra_packages).chain(bootstrap_packages).collect()
-=======
     // Collects `metadata.packages` from the root and library workspaces.
     let mut packages = vec![];
     packages.extend(collect_metadata("Cargo.toml"));
     packages.extend(collect_metadata("library/Cargo.toml"));
+    packages.extend(collect_metadata("src/tools/rust-analyzer/Cargo.toml"));
+    packages.extend(collect_metadata("src/bootstrap/Cargo.toml"));
     packages
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

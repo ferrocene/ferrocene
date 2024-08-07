@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::core::builder::{Builder, ShouldRun, Step};
 use std::path::PathBuf;
+
+use crate::core::builder::{Builder, ShouldRun, Step};
 
 // Latest version and checksums available at: https://github.com/sigstore/cosign/releases
 const COSIGN_VERSION: &str = "2.2.3";

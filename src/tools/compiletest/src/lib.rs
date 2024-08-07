@@ -18,15 +18,8 @@ mod read2;
 pub mod runtest;
 pub mod util;
 
-<<<<<<< HEAD
 pub mod ferrocene_annotations;
 
-use crate::common::{expected_output_path, output_base_dir, output_relative_path, UI_EXTENSIONS};
-use crate::common::{Config, Debugger, Mode, PassMode, TestPaths};
-use crate::util::logv;
-use build_helper::git::{get_git_modified_files, get_git_untracked_files};
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use core::panic;
 use std::collections::HashSet;
 use std::ffi::{OsStr, OsString};

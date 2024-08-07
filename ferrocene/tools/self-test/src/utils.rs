@@ -63,8 +63,9 @@ pub(crate) fn get_sysroot() -> Option<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
+
+    use super::*;
 
     #[test]
     fn test_find_binary_in_path_empty_path() {

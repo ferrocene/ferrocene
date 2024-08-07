@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::io::Read;
+use std::path::Path;
+use std::process::Command;
+
+use anyhow::{anyhow, Context, Error};
+
 use crate::config::Config;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
 use crate::CliOptions;
-use anyhow::{anyhow, Context, Error};
-use std::io::Read;
-use std::path::Path;
-use std::process::Command;
 
 pub(crate) fn verify(
     source_dir: &Path,

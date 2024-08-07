@@ -2,16 +2,17 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
-use anyhow::{anyhow, Error};
-use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
-use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
-use criticaltrust::signatures::SignedPayload;
-use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs::File;
 #[cfg(unix)]
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
+
+use anyhow::{anyhow, Error};
+use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
+use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
+use criticaltrust::signatures::SignedPayload;
+use sha2::{Digest, Sha256};
 use tokio::runtime::Runtime;
 
 pub(crate) struct SignatureContext<'a> {
@@ -107,13 +108,15 @@ fn hash_file(path: &Path) -> Result<Vec<u8>, Error> {
 #[cfg(not(windows))]
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
-    use criticaltrust::signatures::Keychain;
     use std::fs::Permissions;
     use std::io::Write;
     use std::os::unix::prelude::PermissionsExt;
+
+    use criticaltrust::keys::{EphemeralKeyPair, KeyAlgorithm};
+    use criticaltrust::signatures::Keychain;
     use tempfile::TempDir;
+
+    use super::*;
 
     // This insta snapshot is complex and brittle to maintain on Windows
     // Windows does not have file modes, and filters don't provide a reliable way to

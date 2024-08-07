@@ -1,6 +1,0 @@
-# SPDX-License-Identifier: MIT OR Apache-2.0
-# SPDX-FileCopyrightText: The Ferrocene Developers
-
-[files]
-"pinned.toml" = "749de2b9-4779-4a62-8051-757c60d7f8db"
-"safety-manager.cosign-bundle" = "f9434560-d485-4c24-a70f-246a6092ec62"

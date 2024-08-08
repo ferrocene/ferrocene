@@ -584,7 +584,7 @@ jobs:
       - macos/install-rosetta
       - ferrocene-job-build:
           os: darwin
-          wrapper: arch -x86_64 zfs
+          wrapper: arch -x86_64 zsh
 
   x86_64-darwin-dist:
     macos:
@@ -602,7 +602,7 @@ jobs:
       - ferrocene-job-dist:
           os: darwin
           restore-from-job: x86_64-darwin-build
-          wrapper: arch -x86_64 zfs
+          wrapper: arch -x86_64 zsh
 
   x86_64-darwin-dist-tools:
     macos:
@@ -619,7 +619,7 @@ jobs:
       - ferrocene-job-dist:
             os: darwin
             restore-from-job: x86_64-darwin-build
-            wrapper: arch -x86_64 zfs
+            wrapper: arch -x86_64 zsh
 
   x86_64-darwin-self-test:
     macos:
@@ -658,7 +658,7 @@ jobs:
       - ferrocene-job-test-container:
           os: darwin
           restore-from-job: x86_64-darwin-build
-          wrapper: arch -x86_64 zfs
+          wrapper: arch -x86_64 zsh
 
   # x86_64-pc-windows-msvc jobs
 

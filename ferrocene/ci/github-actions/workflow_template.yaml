@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# SPDX-FileCopyrightText: The Ferrocene Developers
+
+name: CI
+on:
+  push:
+    branches:
+      - trying
+  pull_request:
+    branches:
+      - "**"
+
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+defaults:
+  run:
+    # On Linux, macOS, and Windows, use the system-provided bash as the default
+    # shell. (This should only make a difference on Windows, where the default
+    # shell is PowerShell.)
+    shell: bash
+
+concurrency:
+  # For a given workflow, if we push to the same branch, cancel all previous builds on that branch.
+  # We add an exception for try builds (try branch) and unrolled rollup builds (try-perf), which
+  # are all triggered on the same branch, but which should be able to run concurrently.
+  group: ${{ github.workflow }}-${{ ((github.ref == 'refs/heads/trying') && github.sha) || github.ref }}
+  cancel-in-progress: true
+
+# Many of these environments are set via `./ferrocene/ci/github-actions/calculate-parameters.py`
+env:
+  docker-image-tag--x86_64--ubuntu-20: null
+  docker-image-tag--aarch64--ubuntu-20: null
+  docker-image-tag--x86_64--ubuntu-24: null
+  docker-image-tag--aarch64--ubuntu-24: null
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20: null
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-20: null
+  docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24: null
+  docker-image-rebuild--ci-docker-images--aarch64--ubuntu-24: null
+  docker-repository-url--ci-docker-images: null
+  llvm-rebuild--x86_64-unknown-linux-gnu: null
+  llvm-rebuild--aarch64-unknown-linux-gnu: null
+  llvm-rebuild--aarch64-apple-darwin: null
+  llvm-rebuild--x86_64-pc-windows-msvc: null
+  targets--x86_64-unknown-linux-gnu--build: null
+  targets--x86_64-unknown-linux-gnu--self-test: null
+  targets--x86_64-unknown-linux-gnu--std: null
+  targets--aarch64-unknown-linux-gnu--build: null
+  targets--aarch64-unknown-linux-gnu--self-test: null
+  targets--aarch64-apple-darwin--build: null
+  targets--aarch64-apple-darwin--self-test: null
+  targets--x86_64-pc-windows-msvc--build: null
+  targets--x86_64-pc-windows-msvc--self-test: null
+
+jobs:
+  # The job matrix for `calculate_matrix` is defined in src/ci/github-actions/jobs.yml.
+  # It calculates which jobs should be executed, based on the data of the ${{ github }} context.
+  # If you want to modify CI jobs, take a look at src/ci/github-actions/jobs.yml.
+  calculate_matrix:

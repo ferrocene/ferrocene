@@ -1101,6 +1101,7 @@ commands:
             equal: [<<parameters.os>>, "darwin"]
           steps:
             - ferrocene-setup-darwin  # Darwin does not come with awscli, setup it before aws steps
+            - setup-venv
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job

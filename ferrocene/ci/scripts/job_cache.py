@@ -7,6 +7,7 @@ import cache
 import os
 import logging
 import shutil
+import platform
 from pathlib import Path
 
 CACHE_BUCKET="ferrocene-ci-caches"
@@ -43,7 +44,17 @@ def subcommand_store(ferrocene_host, workspace_id, path=None, job=None):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         if os.path.exists(location):
-            os.unlink(location)
+            # Windows gets *extremely* confused by symlink directories
+            if platform.system == "Windows":
+                logging.debug(f"Removing problematic link `{location}`...")
+                os.unlink(location)
+            else:
+                if os.path.islink(location):
+                    logging.debug(f"Removing problematic link `{location}`...")
+                    os.unlink(location)
+                else:
+                    logging.debug(f"Removing problematic directory `{location}`...")
+                    shutil.rmtree(location)
 
     cache.store(path, "build", exclude=["build/metrics.json"])
     return
@@ -109,7 +120,7 @@ def main():
     try:
         workspace_id = os.environ["CIRCLE_WORKFLOW_WORKSPACE_ID"]
     except:
-        print("Set CIRCLE_WORKFLOW_WORKSPACE_ID environment to a Rust triple")
+        print("Set CIRCLE_WORKFLOW_WORKSPACE_ID environment to a value")
         exit(1)
 
     match args.subcommand:

@@ -620,7 +620,7 @@ jobs:
           depth: 1
       - run:
           name: Restore files from the x86_64-linux-build
-          command: ferrocene/ci/scripts/cache.py retrieve $(ferrocene/ci/scripts/job-cache-url.sh x86_64-linux-build) ./build --exclude build/metrics.json
+          command: ferrocene/ci/scripts/cache.py retrieve $(ferrocene/ci/scripts/job-cache-url.sh x86_64-linux-build) ./build
       - run:
           name: Configure
           command: ferrocene/ci/configure.sh
@@ -1026,7 +1026,7 @@ commands:
           steps:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
-                command: ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>) --exclude build/metrics.json
+                command: ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>)
       - when:
           condition:
             equal: [<<parameters.qnx>>, true]
@@ -1053,7 +1053,7 @@ commands:
       - aws-oidc-auth
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >> --exclude build/metrics.json
+          command: ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>
       - ferrocene-ci
 
   ferrocene-job-test-vm:
@@ -1072,7 +1072,7 @@ commands:
           llvm-subset: true
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/cache.py retrieve --job << parameters.restore-from-job >>) --exclude build/metrics.json
+          command: ferrocene/ci/scripts/cache.py retrieve --job << parameters.restore-from-job >>)
       - run:
           name: Enable IPv6 for Docker
           command: |

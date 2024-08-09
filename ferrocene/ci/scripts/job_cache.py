@@ -17,7 +17,9 @@ def get_problematic_symlinks(ferrocene_host):
     """
     In the build directory, there exists several cyclic symlinks.
 
-    We need to tear those down and rebuild them on restore.
+    We need to tear those down and rebuild them on restore. This is done
+    primarily because on Windows symlinks are 'scary' and 'new' and don't
+    work right.
     """
     return {
         f"build/{ferrocene_host}/stage0-sysroot/lib/rustlib/rustc-src": os.getcwd(),
@@ -30,9 +32,9 @@ def get_problematic_symlinks(ferrocene_host):
     }
 
 
-
 def job_cache_url(workspace_id, job):
     return f"s3://{CACHE_BUCKET}/{CACHE_PREFIX}/{workspace_id}/{job}.tar.zst"
+
 
 def subcommand_store(ferrocene_host, workspace_id, path=None, job=None):
     if path == None:
@@ -53,11 +55,12 @@ def subcommand_store(ferrocene_host, workspace_id, path=None, job=None):
                     logging.debug(f"Removing problematic link `{location}`...")
                     os.unlink(location)
                 else:
-                    logging.debug(f"Removing problematic directory `{location}`...")
+                    logging.debug(f"Removing problematic directory link `{location}`...")
                     shutil.rmtree(location)
 
     cache.store(path, "build", exclude=["build/metrics.json"])
     return
+
 
 def subcommand_retrieve(ferrocene_host, workspace_id, path=None, job=None):
     if path == None:
@@ -82,6 +85,7 @@ def subcommand_retrieve(ferrocene_host, workspace_id, path=None, job=None):
 
     return
 
+
 def arguments():
     parser = argparse.ArgumentParser(
         description="Store and retrieve job caches as s3 items",
@@ -98,6 +102,7 @@ def arguments():
     retrieve_parser.add_argument("--job", default=None, help="The job name to retrieve")
 
     return parser.parse_args()
+
 
 def main():
     args = arguments()
@@ -131,6 +136,7 @@ def main():
         case _:
             print("Unknown command, see --help")
             exit(1)
+
 
 if __name__ == "__main__":
     main()

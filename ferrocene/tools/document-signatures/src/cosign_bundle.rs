@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::io::{BufReader, Cursor};
+use std::path::Path;
+
 use anyhow::Error;
 use asn1_rs::oid;
 use base64::Engine;
-use std::io::{BufReader, Cursor};
-use std::path::Path;
 use x509_parser::certificate::X509Certificate;
 use x509_parser::extensions::{GeneralName, ParsedExtension};
 use x509_parser::pem::Pem;

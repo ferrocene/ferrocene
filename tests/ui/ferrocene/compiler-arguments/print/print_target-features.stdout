@@ -8,10 +8,8 @@ Features supported by rustc for this target:
     avx512bw                        - Enable AVX-512 Byte and Word Instructions.
     avx512cd                        - Enable AVX-512 Conflict Detection Instructions.
     avx512dq                        - Enable AVX-512 Doubleword and Quadword Instructions.
-    avx512er                        - Enable AVX-512 Exponential and Reciprocal Instructions.
     avx512f                         - Enable AVX-512 instructions.
     avx512ifma                      - Enable AVX-512 Integer Fused Multiple-Add.
-    avx512pf                        - Enable AVX-512 PreFetch Instructions.
     avx512vbmi                      - Enable AVX-512 Vector Byte Manipulation Instructions.
     avx512vbmi2                     - Enable AVX-512 further Vector Byte Manipulation Instructions.
     avx512vl                        - Enable AVX-512 Vector Length eXtensions.
@@ -53,8 +51,6 @@ Features supported by rustc for this target:
 Code-generation features supported by LLVM for this target:
     16bit-mode                      - 16-bit mode (i8086).
     32bit-mode                      - 32-bit mode (80386).
-    3dnow                           - Enable 3DNow! instructions.
-    3dnowa                          - Enable 3DNow! Athlon instructions.
     64bit                           - Support 64-bit instructions.
     64bit-mode                      - 64-bit mode (x86_64).
     allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
@@ -127,7 +123,6 @@ Code-generation features supported by LLVM for this target:
     prefer-256-bit                  - Prefer 256-bit AVX instructions.
     prefer-mask-registers           - Prefer AVX512 mask registers over PTEST/MOVMSK.
     prefetchi                       - Prefetch instruction with T0 or T1 Hint.
-    prefetchwt1                     - Prefetch with Intent to Write and T1 Hint.
     prfchw                          - Support PRFCHW instructions.
     ptwrite                         - Support ptwrite instruction.
     raoint                          - Support RAO-INT instructions.

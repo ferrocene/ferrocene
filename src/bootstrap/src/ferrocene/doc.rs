@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::collections::HashMap;
+use std::ffi::OsString;
+use std::fs;
+use std::path::{absolute, Path, PathBuf};
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::config::TargetSelection;
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::utils::exec::BootstrapCommand;
-use std::collections::HashMap;
-use std::ffi::OsString;
-use std::fs;
-use std::path::{absolute, Path, PathBuf};
 
 pub(crate) trait IsSphinxBook {
     const SOURCE: &'static str;
@@ -93,20 +94,22 @@ impl Step for SphinxVirtualEnv {
             builder.remove_dir(&venv);
         }
         builder.info("Installing dependencies for building Sphinx documentation");
-        builder.run(
-            BootstrapCommand::new(
-                builder
-                    .config
-                    .python
-                    .as_ref()
-                    .expect("Python is required to build Sphinx documentation"),
-            )
-            .args(&["-m", "venv"])
-            .arg(&venv),
-        );
+
+        BootstrapCommand::new(
+            builder
+                .config
+                .python
+                .as_ref()
+                .expect("Python is required to build Sphinx documentation"),
+        )
+        .args(&["-m", "venv"])
+        .arg(&venv)
+        .run(builder);
         let venv = VirtualEnv { path: venv };
-        builder
-            .run(venv.cmd("pip").args(&["install", "--require-hashes", "-r"]).arg(&requirements));
+        venv.cmd("pip")
+            .args(&["install", "--require-hashes", "-r"])
+            .arg(&requirements)
+            .run(builder);
         builder.copy_link(&requirements, &installed_requirements);
 
         venv
@@ -363,7 +366,7 @@ impl<P: Step + IsSphinxBook> Step for SphinxBook<P> {
             cmd.arg("--open-browser");
         }
 
-        builder.run(&mut cmd);
+        cmd.run(builder);
 
         if !should_serve {
             builder.maybe_open_in_browser::<P>(&out.join("index.html"));

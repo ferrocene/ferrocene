@@ -1,20 +1,18 @@
-use crate::errors;
 use rustc_ast::ast;
 use rustc_attr::InstructionSetAttr;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::Applicability;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::DefId;
-use rustc_hir::def_id::LocalDefId;
-use rustc_hir::def_id::LOCAL_CRATE;
+use rustc_hir::def_id::{DefId, LocalDefId, LOCAL_CRATE};
 use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::parse::feature_err;
-use rustc_span::symbol::sym;
-use rustc_span::symbol::Symbol;
+use rustc_span::symbol::{sym, Symbol};
 use rustc_span::Span;
+
+use crate::errors;
 
 pub fn from_target_feature(
     tcx: TyCtxt<'_>,
@@ -80,6 +78,7 @@ pub fn from_target_feature(
                 Some(sym::loongarch_target_feature) => rust_features.loongarch_target_feature,
                 Some(sym::lahfsahf_target_feature) => rust_features.lahfsahf_target_feature,
                 Some(sym::prfchw_target_feature) => rust_features.prfchw_target_feature,
+                Some(sym::sha512_sm_x86) => rust_features.sha512_sm_x86,
                 Some(sym::x86_amx_intrinsics) => rust_features.x86_amx_intrinsics,
                 Some(sym::xop_target_feature) => rust_features.xop_target_feature,
                 Some(sym::s390x_target_feature) => rust_features.s390x_target_feature,
@@ -97,6 +96,14 @@ pub fn from_target_feature(
             }
             Some(Symbol::intern(feature))
         }));
+    }
+
+    for (feature, requires) in tcx.sess.target.implicit_target_features() {
+        if target_features.iter().any(|f| f.as_str() == *feature)
+            && !target_features.iter().any(|f| f.as_str() == *requires)
+        {
+            target_features.push(Symbol::intern(requires));
+        }
     }
 }
 

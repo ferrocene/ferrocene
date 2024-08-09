@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::path::PathBuf;
+
+use build_helper::git::get_git_merge_base;
+
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneTestOutcomes;
-use build_helper::git::get_git_merge_base;
-use std::path::PathBuf;
 
 static DOWNLOAD_PREFIX: &str = "s3://ferrocene-ci-artifacts/ferrocene/dist";
 

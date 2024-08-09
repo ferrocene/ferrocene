@@ -1,9 +1,9 @@
-use crate::back::write::create_informational_target_machine;
-use crate::errors::{
-    FixedX18InvalidArch, InvalidTargetFeaturePrefix, PossibleFeature, TargetFeatureDisableOrEnable,
-    UnknownCTargetFeature, UnknownCTargetFeaturePrefix, UnstableCTargetFeature,
-};
-use crate::llvm;
+use std::ffi::{c_char, c_void, CStr, CString};
+use std::fmt::Write;
+use std::path::Path;
+use std::sync::Once;
+use std::{ptr, slice, str};
+
 use libc::c_int;
 use rustc_codegen_ssa::base::wants_wasm_eh;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
@@ -16,13 +16,12 @@ use rustc_span::symbol::Symbol;
 use rustc_target::spec::{MergeFunctions, PanicStrategy};
 use rustc_target::target_features::{RUSTC_SPECIAL_FEATURES, RUSTC_SPECIFIC_FEATURES};
 
-use std::ffi::{c_char, c_void, CStr, CString};
-use std::fmt::Write;
-use std::path::Path;
-use std::ptr;
-use std::slice;
-use std::str;
-use std::sync::Once;
+use crate::back::write::create_informational_target_machine;
+use crate::errors::{
+    FixedX18InvalidArch, InvalidTargetFeaturePrefix, PossibleFeature, TargetFeatureDisableOrEnable,
+    UnknownCTargetFeature, UnknownCTargetFeaturePrefix, UnstableCTargetFeature,
+};
+use crate::llvm;
 
 static INIT: Once = Once::new();
 
@@ -644,6 +643,22 @@ pub(crate) fn global_llvm_features(sess: &Session, diagnostics: bool) -> Vec<Str
             sess.dcx().emit_fatal(FixedX18InvalidArch { arch: &sess.target.arch });
         } else {
             features.push("+reserve-x18".into());
+        }
+    }
+
+    // This is a workaround for a LLVM bug that doesn't implicitly enable
+    // `simd128` when `relaxed-simd` is.
+    // See <https://github.com/llvm/llvm-project/pull/99803>, which didn't make
+    // it into a released version of LLVM yet.
+    //
+    // This doesn't use the "implicit target feature" system because it is only
+    // used for function attributes in other targets, which fixes this bug as
+    // well on the function attribute level.
+    if sess.target.families.contains(&"wasm".into()) {
+        if features.iter().any(|f| f == "+relaxed-simd")
+            && !features.iter().any(|f| f == "+simd128")
+        {
+            features.push("+simd128".into());
         }
     }
 

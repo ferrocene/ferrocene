@@ -6,6 +6,7 @@ pub(crate) mod flip_link;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::rc::Rc;
 
 use serde_json::json;
@@ -16,7 +17,6 @@ use crate::ferrocene::doc::ensure_all_xml_doctrees;
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::t;
 use crate::utils::tarball::{GeneratedTarball, Tarball};
-use std::process::Command;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct Docs {

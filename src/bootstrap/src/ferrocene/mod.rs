@@ -12,12 +12,13 @@ pub(crate) mod test;
 pub(crate) mod test_outcomes;
 pub(crate) mod tool;
 
-use crate::builder::Builder;
-use crate::core::config::{Config, TargetSelection};
-use crate::t;
 use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
+
+use crate::builder::Builder;
+use crate::core::config::{Config, TargetSelection};
+use crate::t;
 
 /// Helper function used to download files from S3. This is used to be able to download artifacts
 /// from our buckets for download-ci-llvm and download-rustc.

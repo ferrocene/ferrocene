@@ -4,7 +4,10 @@ error[E0433]: failed to resolve: you might be missing crate `some_crate`
 LL |     ::some_crate::hello();
    |       ^^^^^^^^^^ you might be missing crate `some_crate`
    |
-   = help: consider adding `extern crate some_crate` to use the `some_crate` crate
+help: consider importing the `some_crate` crate
+   |
+LL + extern crate some_crate;
+   |
 
 error: aborting due to 1 previous error
 

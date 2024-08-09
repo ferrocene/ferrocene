@@ -1,3 +1,6 @@
+use std::fmt::Debug;
+use std::iter;
+
 use hir::def_id::DefId;
 use rustc_hir as hir;
 use rustc_index::bit_set::BitSet;
@@ -18,9 +21,6 @@ use rustc_span::sym;
 use rustc_span::symbol::Symbol;
 use rustc_target::abi::*;
 use tracing::{debug, instrument, trace};
-
-use std::fmt::Debug;
-use std::iter;
 
 use crate::errors::{
     MultipleArrayFieldsSimdType, NonPrimitiveSimdType, OversizedSimdType, ZeroLengthSimdType,
@@ -733,9 +733,7 @@ fn coroutine_saved_local_eligibility(
                     // point, so it is no longer a candidate.
                     trace!(
                         "removing local {:?} in >1 variant ({:?}, {:?})",
-                        local,
-                        variant_index,
-                        idx
+                        local, variant_index, idx
                     );
                     ineligible_locals.insert(*local);
                     assignments[*local] = Ineligible(None);

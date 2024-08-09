@@ -6,7 +6,7 @@ use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
 use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
-use crate::{exe, Mode};
+use crate::{exe, Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SelfTest {
@@ -51,7 +51,7 @@ impl Step for SelfTest {
             compiler,
             Mode::ToolBootstrap,
             self.target,
-            "build",
+            Kind::Build,
             "ferrocene/tools/self-test",
             SourceType::InTree,
             &[],
@@ -59,7 +59,7 @@ impl Step for SelfTest {
         .into();
         Self::update_command(&mut cmd, builder, self.target);
 
-        builder.run(&mut cmd);
+        cmd.run(builder);
 
         builder
             .cargo_out(compiler, Mode::ToolBootstrap, self.target)

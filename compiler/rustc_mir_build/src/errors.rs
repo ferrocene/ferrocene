@@ -1,14 +1,16 @@
-use crate::fluent_generated as fluent;
+use rustc_errors::codes::*;
 use rustc_errors::{
-    codes::*, Applicability, Diag, Diagnostic, EmissionGuarantee, Level, MultiSpan,
-    SubdiagMessageOp, Subdiagnostic,
+    Applicability, Diag, DiagArgValue, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level,
+    MultiSpan, SubdiagMessageOp, Subdiagnostic,
 };
-use rustc_errors::{DiagArgValue, DiagCtxtHandle};
 use rustc_macros::{Diagnostic, LintDiagnostic, Subdiagnostic};
 use rustc_middle::ty::{self, Ty};
-use rustc_pattern_analysis::{errors::Uncovered, rustc::RustcPatCtxt};
+use rustc_pattern_analysis::errors::Uncovered;
+use rustc_pattern_analysis::rustc::RustcPatCtxt;
 use rustc_span::symbol::Symbol;
 use rustc_span::Span;
+
+use crate::fluent_generated as fluent;
 
 #[derive(LintDiagnostic)]
 #[diag(mir_build_unconditional_recursion)]
@@ -582,11 +584,23 @@ pub(crate) struct NonConstPath {
 
 #[derive(LintDiagnostic)]
 #[diag(mir_build_unreachable_pattern)]
-pub(crate) struct UnreachablePattern {
+pub(crate) struct UnreachablePattern<'tcx> {
     #[label]
     pub(crate) span: Option<Span>,
-    #[label(mir_build_catchall_label)]
-    pub(crate) catchall: Option<Span>,
+    #[subdiagnostic]
+    pub(crate) matches_no_values: Option<UnreachableMatchesNoValues<'tcx>>,
+    #[label(mir_build_unreachable_covered_by_catchall)]
+    pub(crate) covered_by_catchall: Option<Span>,
+    #[label(mir_build_unreachable_covered_by_one)]
+    pub(crate) covered_by_one: Option<Span>,
+    #[note(mir_build_unreachable_covered_by_many)]
+    pub(crate) covered_by_many: Option<MultiSpan>,
+}
+
+#[derive(Subdiagnostic)]
+#[note(mir_build_unreachable_matches_no_values)]
+pub(crate) struct UnreachableMatchesNoValues<'tcx> {
+    pub(crate) ty: Ty<'tcx>,
 }
 
 #[derive(Diagnostic)]
@@ -844,7 +858,7 @@ pub(crate) struct PatternNotCovered<'s, 'tcx> {
     pub(crate) span: Span,
     pub(crate) origin: &'s str,
     #[subdiagnostic]
-    pub(crate) uncovered: Uncovered<'tcx>,
+    pub(crate) uncovered: Uncovered,
     #[subdiagnostic]
     pub(crate) inform: Option<Inform>,
     #[subdiagnostic]

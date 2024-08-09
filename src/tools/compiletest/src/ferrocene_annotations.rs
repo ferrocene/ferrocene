@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::common::{Config, Mode, TestPaths};
-use crate::find_tests_in_dir;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs::File;
@@ -10,6 +8,9 @@ use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::sync::Arc;
+
+use crate::common::{Config, Mode, TestPaths};
+use crate::find_tests_in_dir;
 
 const BULK_ANNOTATIONS_FILE_NAME: &str = "ferrocene-annotations";
 

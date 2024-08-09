@@ -8,10 +8,11 @@ mod sign;
 mod signature_files;
 mod verify;
 
-use anyhow::{Context, Error};
 use std::env::VarError;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+use anyhow::{Context, Error};
 
 // \u{2d} replaces "-" to avoid REUSE mistakenly detecting these lines as a license.
 const TOML_HEADER_COMMENTS: &str = "\

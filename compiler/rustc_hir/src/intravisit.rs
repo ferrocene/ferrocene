@@ -64,12 +64,13 @@
 //! This order consistency is required in a few places in rustc, for
 //! example coroutine inference, and possibly also HIR borrowck.
 
-use crate::hir::*;
 use rustc_ast::visit::{try_visit, visit_opt, walk_list, VisitorResult};
 use rustc_ast::{Attribute, Label};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::{Ident, Symbol};
 use rustc_span::Span;
+
+use crate::hir::*;
 
 pub trait IntoVisitor<'hir> {
     type Visitor: Visitor<'hir>;
@@ -902,7 +903,9 @@ pub fn walk_ty<'v, V: Visitor<'v>>(visitor: &mut V, typ: &'v Ty<'v>) -> V::Resul
             try_visit!(visitor.visit_array_length(length));
         }
         TyKind::TraitObject(bounds, ref lifetime, _syntax) => {
-            walk_list!(visitor, visit_poly_trait_ref, bounds);
+            for (bound, _modifier) in bounds {
+                try_visit!(visitor.visit_poly_trait_ref(bound));
+            }
             try_visit!(visitor.visit_lifetime(lifetime));
         }
         TyKind::Typeof(ref expression) => try_visit!(visitor.visit_anon_const(expression)),

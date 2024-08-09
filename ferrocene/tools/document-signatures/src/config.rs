@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use anyhow::Error;
 use std::collections::HashMap;
 use std::path::Path;
+
+use anyhow::Error;
 
 static IDPS: &[IdP] = &[IdP {
     display_name: "Microsoft",

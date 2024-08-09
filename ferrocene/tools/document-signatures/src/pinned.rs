@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::TOML_HEADER_COMMENTS;
+use std::path::Path;
+use std::process::{Command, Stdio};
+
 use anyhow::{Context, Error};
 use base64::Engine;
 use sha2::{Digest, Sha256};
-use std::path::Path;
-use std::process::{Command, Stdio};
+
+use crate::TOML_HEADER_COMMENTS;
 
 const TAR_REPRODUCIBILITY_FLAGS: &[&str] = &[
     // Use a consistent ordering for the files in the archive.

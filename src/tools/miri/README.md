@@ -398,6 +398,8 @@ to Miri failing to detect cases of undefined behavior in a program.
   application instead of raising an error within the context of Miri (and halting
   execution). Note that code might not expect these operations to ever panic, so
   this flag can lead to strange (mis)behavior.
+* `-Zmiri-recursive-validation` is a *highly experimental* flag that makes validity checking
+  recurse below references.
 * `-Zmiri-retag-fields[=<all|none|scalar>]` controls when Stacked Borrows retagging recurses into
   fields. `all` means it always recurses (the default, and equivalent to `-Zmiri-retag-fields`
   without an explicit value), `none` means it never recurses, `scalar` means it only recurses for
@@ -473,6 +475,19 @@ Moreover, Miri recognizes some environment variables:
 Miri provides some `extern` functions that programs can import to access
 Miri-specific functionality. They are declared in
 [/tests/utils/miri\_extern.rs](/tests/utils/miri_extern.rs).
+
+## Entry point for no-std binaries
+
+Binaries that do not use the standard library are expected to declare a function like this so that
+Miri knows where it is supposed to start execution:
+
+```rust
+#[cfg(miri)]
+#[no_mangle]
+fn miri_start(argc: isize, argv: *const *const u8) -> isize {
+    // Call the actual start function that your project implements, based on your target's conventions.
+}
+```
 
 ## Contributing and getting help
 

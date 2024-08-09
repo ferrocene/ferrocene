@@ -2,9 +2,13 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
+use std::fmt;
+use std::io::Write;
+use std::path::Path;
+use std::str::FromStr;
+
 use anyhow::{Context, Error};
 use rayon::prelude::*;
-use std::{fmt, io::Write, path::Path, str::FromStr};
 use xz2::write::XzEncoder;
 
 #[derive(Default, Debug, Copy, Clone)]

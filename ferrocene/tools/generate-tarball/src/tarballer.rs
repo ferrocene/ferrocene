@@ -2,17 +2,16 @@
 // SPDX-FileCopyrightText: The Ferrocene Developers
 // SPDX-FileCopyrightText: The Rust Project Developers (see https://thanks.rust-lang.org)
 
-use anyhow::{bail, Context, Result};
 use std::fs::{read_link, symlink_metadata};
 use std::io::{BufWriter, Write};
 use std::path::Path;
+
+use anyhow::{bail, Context, Result};
 use tar::{Builder, Header};
 use walkdir::WalkDir;
 
-use crate::{
-    compression::{CombinedEncoder, CompressionFormats, CompressionProfile},
-    util::{open_file, path_to_str},
-};
+use crate::compression::{CombinedEncoder, CompressionFormats, CompressionProfile};
+use crate::util::{open_file, path_to_str};
 
 #[derive(Debug)]
 #[derive(clap::Args)]

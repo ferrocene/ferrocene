@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
 use crate::core::config::TargetSelection;
-use crate::{exe, Mode};
+use crate::{exe, Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct FlipLink {
@@ -34,13 +34,13 @@ impl Step for FlipLink {
             compiler,
             Mode::ToolBootstrap,
             self.target,
-            "build",
+            Kind::Build,
             PATH,
             SourceType::Submodule,
             &[],
         );
 
-        builder.run(&mut cmd.into_cmd());
+        cmd.into_cmd().run(builder);
 
         builder
             .cargo_out(compiler, Mode::ToolBootstrap, self.target)

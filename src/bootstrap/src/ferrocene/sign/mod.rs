@@ -8,13 +8,14 @@
 mod cosign;
 pub(crate) mod signature_files;
 
+use std::path::{Path, PathBuf};
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{self, TargetSelection};
 use crate::ferrocene::doc::{IsSphinxBook, SphinxMode};
 use crate::ferrocene::sign::signature_files::CacheSignatureFiles;
 use crate::utils::exec::BootstrapCommand;
-use std::path::{Path, PathBuf};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct SignDocument<S: Step<Output = PathBuf> + IsSphinxBook> {
@@ -35,12 +36,12 @@ impl<S: Step<Output = PathBuf> + IsSphinxBook> Step for SignDocument<S> {
         error_when_signatures_are_ignored(builder, "sign a document");
 
         let document = builder.ensure(self.document);
-        builder.run(
-            document_signatures_cmd::<S>(builder)
-                .arg("sign")
-                .arg(builder.src.join(S::SOURCE))
-                .arg(&document),
-        );
+
+        document_signatures_cmd::<S>(builder)
+            .arg("sign")
+            .arg(builder.src.join(S::SOURCE))
+            .arg(&document)
+            .run(builder);
     }
 }
 

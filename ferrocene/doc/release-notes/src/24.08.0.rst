@@ -14,10 +14,13 @@ New features
 ------------
 
 * Updated the Rust version to include the changes in Rust 1.77.0, 1.77.1,
-  1.77.2, 1.78.0 and 1.79.0. A backport of `Rust PR #128271`_ is also included
-  to fix a bug introduced in Rust 1.78.0.
+  1.77.2, 1.78.0 and 1.79.0. Backports of `Rust PR #128271`_, `Rust PR
+  #127364`_ and `Rust PR #126154`_ are also included to fix bugs introduced in
+  Rust 1.78.0.
 
 .. _Rust PR #128271: https://github.com/rust-lang/rust/pull/128271
+.. _Rust PR #127364: https://github.com/rust-lang/rust/pull/127364
+.. _Rust PR #126154: https://github.com/rust-lang/rust/pull/126154
 
 New experimental features
 -------------------------

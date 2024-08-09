@@ -122,9 +122,9 @@ should not be used in production.
 
    * - :target:`x86_64-apple-darwin`
      - ``x86_64-apple-darwin``
-     - Cross-compilation
+     - Host platform
      - Full
-     - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
+     - \-
 
    * - :ref:`aarch64-apple-darwin`
      - ``aarch64-apple-darwin``

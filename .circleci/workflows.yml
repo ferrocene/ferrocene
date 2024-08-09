@@ -561,7 +561,8 @@ jobs:
           condition: << pipeline.parameters.llvm-rebuild--x86_64-apple-darwin >>
           steps:
             - ferrocene-checkout
-            - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+            - ferrocene-setup-darwin: # Darwin does not come with awscli, setup it before aws steps
+                wrapper: arch -x86_64 zsh
             - setup-venv
             - aws-oidc-auth
             - ferrocene-ci
@@ -1194,7 +1195,8 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin
+            - ferrocene-setup-darwin:
+                wrapper: <<parameters.wrapper>>
             - setup-venv
       - when:
           condition:
@@ -1405,10 +1407,14 @@ commands:
 
   ferrocene-setup-darwin:
     description: Prepare the Darwin environment
+    parameters:
+      wrapper:
+        type: string
+        default: ""
     steps:
       - run:
           name: Setup Darwin environment
-          command: ferrocene/ci/scripts/setup-darwin.sh
+          command: << parameters.wrapper >> ferrocene/ci/scripts/setup-darwin.sh
           
 
   ferrocene-setup-windows:

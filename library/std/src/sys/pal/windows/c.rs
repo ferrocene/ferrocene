@@ -12,8 +12,6 @@ use crate::os::raw::{c_char, c_int, c_uint, c_ulong, c_ushort, c_void};
 use crate::os::windows::io::{AsRawHandle, BorrowedHandle};
 use crate::ptr;
 
-pub(super) mod windows_targets;
-
 mod windows_sys;
 pub use windows_sys::*;
 

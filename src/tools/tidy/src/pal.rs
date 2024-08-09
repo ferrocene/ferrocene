@@ -35,6 +35,7 @@ use std::path::Path;
 
 // Paths that may contain platform-specific code.
 const EXCEPTION_PATHS: &[&str] = &[
+    "library/windows_targets",
     "library/panic_abort",
     "library/panic_unwind",
     "library/unwind",

@@ -1,0 +1,42 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+IEC 62304 requirements
+======================
+
+The following are sections in |iec_med_ref|.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Clause
+     - ``rustc``
+     - ``rustfmt``
+
+   * - 5.1.4
+     - | :doc:`Safety Manual - rustc - Usage <safety-manual:rustc/usage>`
+       | :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
+     - | :doc:`Safety Manual - rustfmt - Usage <safety-manual:rustfmt/usage>`
+       | :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
+
+   * - 5.1.10
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+
+   * - 5.1.11
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+
+   * - B.5.8
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+     - | :doc:`Qualified Scope <safety-manual:scope>`
+       | :doc:`Released Ferrocene Series <release-notes:index>`
+
+   * - C.7
+     - | :doc:`Applied tool validation acc. to IEC 61508 <qualification-plan:standards/iec-61508>`
+     - | :doc:`Applied tool validation acc. to IEC 61508 <qualification-plan:standards/iec-61508>`

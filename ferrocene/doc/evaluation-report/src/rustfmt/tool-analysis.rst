@@ -55,3 +55,10 @@ system.
 Nevertheless, we need no qualification methods, because the detection measures
 and usage restrictions listed above give us high confidence to detect all
 potential errors. 
+
+IEC 62304 Tool Classification
+-----------------------------
+
+[|iec_med_ref|] does not provide an own scheme to classify and qualify tools used in its context, but recommends the application
+of techniques and tools as defined in [|iec_ref|]. Therefore, with the qualification of Ferrocene adhering to an IEC 61508 Tool Classification,
+Ferrocene can be used for development, release and maintenance of medical device software up to Class C.

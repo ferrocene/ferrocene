@@ -5,9 +5,9 @@ Handling Backports
 ==================
 
 All development of Ferrocene happens in the ``main`` branch, but occasionally
-we have to backport PRs from ``main`` into a release branch. This usually
-happens when preparing the documentation for an upcoming release, or when a bug
-fix also affects a supported release.
+we have to backport PRs from ``main`` or from upstream ``rust-lang/rust`` into a release branch.
+This usually happens when preparing the documentation for an upcoming release, or when a bug fix
+also affects a supported release.
 
 We developed tooling to aid backporting: this page explains how it works and
 how to use it.
@@ -84,15 +84,16 @@ manually remove backport target labels!
 Manual Backports
 ----------------
 
-If backporting would result in a conflict, a manual backport is required, where
-it's up to the developer to manually fix the conflict. PRs with backport
-conflicts have the ``backport:manual`` label.
+If backporting would result in a conflict or the backport source is in the ``rust-lang/rust``
+repository, a manual backport is required, where it's up to the developer to manually fix the
+conflict. Ferrocene PRs with backport conflicts have the ``backport:manual`` label.
 
-To backport a PR, create a branch targeting the release branch you want to
+To backport a PR, create a branch targeting the ``release/1.*`` branch you want to
 backport to, and run:
 
-.. code-block::
+.. code-block:: console
 
+   # When backporting a rust-lang/rust PR, add a `--rust` flag to the invocation
    ferrocene/tools/backport/one.py PR_NUMBER
 
 The command will configure and execute a git rebase to backport the PR's

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 # needs-force-clang-based-tests
 
 # FIXME(#126180): This test doesn't actually run anywhere, because the only

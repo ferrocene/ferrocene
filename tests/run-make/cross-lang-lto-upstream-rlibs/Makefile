@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 include ../tools.mk
 
 # ignore windows due to libLLVM being present in PATH and the PATH and library path being the same

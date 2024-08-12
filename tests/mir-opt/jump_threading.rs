@@ -93,19 +93,19 @@ fn dfa() {
     // CHECK:     {{_.*}} = DFA::A;
     // CHECK:     goto -> bb1;
     // CHECK: bb1: {
-    // CHECK:     switchInt({{.*}}) -> [0: bb4, 1: bb5, 2: bb6, 3: bb3, otherwise: bb2];
+    // CHECK:     switchInt({{.*}}) -> [0: bb6, 1: bb5, 2: bb4, 3: bb3, otherwise: bb2];
     // CHECK: bb2: {
     // CHECK:     unreachable;
     // CHECK: bb3: {
     // CHECK:     return;
     // CHECK: bb4: {
-    // CHECK:     {{_.*}} = DFA::B;
+    // CHECK:     {{_.*}} = DFA::D;
     // CHECK:     goto -> bb1;
     // CHECK: bb5: {
     // CHECK:     {{_.*}} = DFA::C;
     // CHECK:     goto -> bb1;
     // CHECK: bb6: {
-    // CHECK:     {{_.*}} = DFA::D;
+    // CHECK:     {{_.*}} = DFA::B;
     // CHECK:     goto -> bb1;
     let mut state = DFA::A;
     loop {
@@ -521,6 +521,16 @@ fn aggregate_copy() -> u32 {
     if c == 2 { b.0 } else { 13 }
 }
 
+fn floats() -> u32 {
+    // CHECK-LABEL: fn floats(
+    // CHECK: switchInt(
+
+    // Test for issue #128243, where float equality was assumed to be bitwise.
+    // When adding float support, it must be ensured that this continues working properly.
+    let x = if true { -0.0 } else { 1.0 };
+    if x == 0.0 { 0 } else { 1 }
+}
+
 fn main() {
     // CHECK-LABEL: fn main(
     too_complex(Ok(0));
@@ -535,6 +545,7 @@ fn main() {
     disappearing_bb(7);
     aggregate(7);
     assume(7, false);
+    floats();
 }
 
 // EMIT_MIR jump_threading.too_complex.JumpThreading.diff
@@ -550,3 +561,4 @@ fn main() {
 // EMIT_MIR jump_threading.aggregate.JumpThreading.diff
 // EMIT_MIR jump_threading.assume.JumpThreading.diff
 // EMIT_MIR jump_threading.aggregate_copy.JumpThreading.diff
+// EMIT_MIR jump_threading.floats.JumpThreading.diff

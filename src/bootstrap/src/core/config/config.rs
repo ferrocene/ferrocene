@@ -4,29 +4,27 @@
 //! how the build runs.
 
 use std::cell::{Cell, RefCell};
-use std::cmp;
 use std::collections::{HashMap, HashSet};
-use std::env;
 use std::fmt::{self, Display};
-use std::fs;
 use std::io::IsTerminal;
 use std::path::{absolute, Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
 use std::sync::OnceLock;
+use std::{cmp, env, fs};
+
+use build_helper::exit;
+use build_helper::git::GitConfig;
+use serde::{Deserialize, Deserializer};
+use serde_derive::Deserialize;
 
 use crate::core::build_steps::compile::CODEGEN_BACKEND_PREFIX;
 use crate::core::build_steps::llvm;
+pub use crate::core::config::flags::Subcommand;
 use crate::core::config::flags::{Color, Flags, Warnings};
 use crate::utils::cache::{Interned, INTERNER};
 use crate::utils::channel::{self, GitInfo};
 use crate::utils::helpers::{self, exe, get_closest_merge_base_commit, output, t};
-use build_helper::exit;
-use serde::{Deserialize, Deserializer};
-use serde_derive::Deserialize;
-
-pub use crate::core::config::flags::Subcommand;
-use build_helper::git::GitConfig;
 
 macro_rules! check_ci_llvm {
     ($name:expr) => {
@@ -220,6 +218,7 @@ pub struct Config {
     pub llvm_thin_lto: bool,
     pub llvm_release_debuginfo: bool,
     pub llvm_static_stdcpp: bool,
+    pub llvm_libzstd: bool,
     /// `None` if `llvm_from_ci` is true and we haven't yet downloaded llvm.
     #[cfg(not(test))]
     llvm_link_shared: Cell<Option<bool>>,
@@ -556,6 +555,11 @@ impl TargetSelection {
 
     pub fn is_windows(&self) -> bool {
         self.contains("windows")
+    }
+
+    /// Path to the file defining the custom target, if any.
+    pub fn filepath(&self) -> Option<&Path> {
+        self.file.as_ref().map(Path::new)
     }
 }
 
@@ -934,6 +938,7 @@ define_config! {
         plugins: Option<bool> = "plugins",
         ccache: Option<StringOrBool> = "ccache",
         static_libstdcpp: Option<bool> = "static-libstdcpp",
+        libzstd: Option<bool> = "libzstd",
         ninja: Option<bool> = "ninja",
         targets: Option<String> = "targets",
         experimental_targets: Option<String> = "experimental-targets",
@@ -1225,6 +1230,7 @@ impl Config {
             llvm_optimize: true,
             ninja_in_file: true,
             llvm_static_stdcpp: false,
+            llvm_libzstd: false,
             backtrace: true,
             rust_optimize: RustOptimize::Bool(true),
             rust_optimize_tests: true,
@@ -1398,7 +1404,11 @@ impl Config {
         // Give a hard error if `--config` or `RUST_BOOTSTRAP_CONFIG` are set to a missing path,
         // but not if `config.toml` hasn't been created.
         let mut toml = if !using_default_path || toml_path.exists() {
-            config.config = Some(toml_path.clone());
+            config.config = Some(if cfg!(not(feature = "bootstrap-self-test")) {
+                toml_path.canonicalize().unwrap()
+            } else {
+                toml_path.clone()
+            });
             get_toml(&toml_path)
         } else {
             config.config = None;
@@ -1860,6 +1870,7 @@ impl Config {
                 plugins,
                 ccache,
                 static_libstdcpp,
+                libzstd,
                 ninja,
                 targets,
                 experimental_targets,
@@ -1894,6 +1905,7 @@ impl Config {
             set(&mut config.llvm_thin_lto, thin_lto);
             set(&mut config.llvm_release_debuginfo, release_debuginfo);
             set(&mut config.llvm_static_stdcpp, static_libstdcpp);
+            set(&mut config.llvm_libzstd, libzstd);
             if let Some(v) = link_shared {
                 config.llvm_link_shared.set(Some(v));
             }
@@ -1918,6 +1930,23 @@ impl Config {
             config.llvm_from_ci = config.parse_download_ci_llvm(download_ci_llvm, asserts);
 
             if config.llvm_from_ci {
+                let warn = |option: &str| {
+                    println!(
+                        "WARNING: `{option}` will only be used on `compiler/rustc_llvm` build, not for the LLVM build."
+                    );
+                    println!(
+                        "HELP: To use `{option}` for LLVM builds, set `download-ci-llvm` option to false."
+                    );
+                };
+
+                if static_libstdcpp.is_some() {
+                    warn("static-libstdcpp");
+                }
+
+                if link_shared.is_some() {
+                    warn("link-shared");
+                }
+
                 // None of the LLVM options, except assertions, are supported
                 // when using downloaded LLVM. We could just ignore these but
                 // that's potentially confusing, so force them to not be
@@ -1927,9 +1956,7 @@ impl Config {
                 check_ci_llvm!(optimize_toml);
                 check_ci_llvm!(thin_lto);
                 check_ci_llvm!(release_debuginfo);
-                // CI-built LLVM can be either dynamic or static. We won't know until we download it.
-                check_ci_llvm!(link_shared);
-                check_ci_llvm!(static_libstdcpp);
+                check_ci_llvm!(libzstd);
                 check_ci_llvm!(targets);
                 check_ci_llvm!(experimental_targets);
                 check_ci_llvm!(clang_cl);
@@ -2242,7 +2269,7 @@ impl Config {
 
         // CI should always run stage 2 builds, unless it specifically states otherwise
         #[cfg(not(test))]
-        if flags.stage.is_none() && crate::CiEnv::current() != crate::CiEnv::None {
+        if flags.stage.is_none() && build_helper::ci::CiEnv::is_ci() {
             match config.cmd {
                 Subcommand::Test { .. }
                 | Subcommand::Miri { .. }
@@ -2550,8 +2577,11 @@ impl Config {
             .unwrap_or_else(|| SplitDebuginfo::default_for_platform(target))
     }
 
-    pub fn submodules(&self, rust_info: &GitInfo) -> bool {
-        self.submodules.unwrap_or(rust_info.is_managed_git_subrepository())
+    /// Returns whether or not submodules should be managed by bootstrap.
+    pub fn submodules(&self) -> bool {
+        // If not specified in config, the default is to only manage
+        // submodules if we're currently inside a git repository.
+        self.submodules.unwrap_or(self.rust_info.is_managed_git_subrepository())
     }
 
     pub fn codegen_backends(&self, target: TargetSelection) -> &[String] {

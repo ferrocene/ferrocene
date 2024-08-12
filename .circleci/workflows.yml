@@ -1167,7 +1167,7 @@ commands:
       - setup-venv
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
-          command: ferrocene/ci/scripts/cache.py retrieve --job << parameters.restore-from-job >>
+          command: ferrocene/ci/scripts/job_cache.py retrieve --job << parameters.restore-from-job >>
       - run:
           name: Enable IPv6 for Docker
           command: |

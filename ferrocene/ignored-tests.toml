@@ -62,4 +62,24 @@ reason = "Remove when https://github.com/rust-lang/rust/issues/127395 is fixed"
 [["tests/debuginfo"]]
 tests = ["tests/debuginfo/basic-types-mut-globals.rs"]
 targets = ["x86_64-unknown-linux-gnu"]
-reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648" 
+reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648"
+
+[["tests/ui"]]
+tests = [
+    "tests/ui/backtrace/dylib-dep.rs",
+    "tests/ui/backtrace/line-tables-only.rs",
+    "tests/ui/backtrace/std-backtrace.rs",
+    "tests/ui/backtrace/backtrace.rs",
+    "tests/ui/ferrocene/compiler-arguments/print/print_target-libdir.rs",
+    "tests/ui/panics/issue-47429-short-backtraces.rs#legacy",
+    "tests/ui/panics/issue-47429-short-backtraces.rs#v0",
+    "tests/ui/panics/runtime-switch.rs#legacy",
+    "tests/ui/panics/runtime-switch.rs#v0",
+    "tests/ui/panics/short-ice-remove-middle-frames-2.rs",
+    "tests/ui/panics/short-ice-remove-middle-frames.rs",
+    "tests/ui/runtime/backtrace-debuginfo.rs",
+    "tests/ui/structs-enums/enum-rec/issue-17431-6.rs",
+    "tests/ui/threads-sendsync/tcp-stress.rs",
+]
+targets = ["x86_64-pc-nto-qnx710"]
+reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"

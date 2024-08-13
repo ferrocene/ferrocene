@@ -118,3 +118,8 @@ fn main() {
         .output("rsmain")
         .run();
 }
+
+// ferrocene-annotations: um_rustc_C_link_arg
+// ferrocene-annotations: um_rustc_C_opt_level
+// ferrocene-annotations: um_rustc_C_linker
+// ferrocene-annotations: um_rustc_C_codegen_units

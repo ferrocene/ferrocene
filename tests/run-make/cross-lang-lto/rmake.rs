@@ -108,3 +108,6 @@ struct LibBuild {
     lto: Option<&'static str>,
     emit_obj: bool,
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level
+// ferrocene-annotations: um_rustc_C_codegen_units

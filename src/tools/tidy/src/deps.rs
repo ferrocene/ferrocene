@@ -1,12 +1,6 @@
 //! Checks the licenses of third-party dependencies.
 
-<<<<<<< HEAD
-use build_helper::ci::CiEnv;
-use cargo_metadata::{Metadata, Package, PackageId};
 use std::collections::{HashMap, HashSet};
-=======
-use std::collections::HashSet;
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use std::fs::read_dir;
 use std::path::Path;
 
@@ -118,11 +112,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("colored", "MPL-2.0"),                                  // rustfmt
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
-<<<<<<< HEAD
-    ("fortanix-sgx-abi", "MPL-2.0"),                         // libstd but only for `sgx` target. FIXME: this dependency violates the documentation comment above.
     ("insta", "Apache-2.0"),                                 // generate-tarball
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     ("instant", "BSD-3-Clause"),                             // rustc_driver/tracing-subscriber/parking_lot
     ("mdbook", "MPL-2.0"),                                   // mdbook
     ("option-ext", "MPL-2.0"),                               // cargo-miri (via `directories`)
@@ -300,11 +290,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "cc",
     "cfg-if",
     "cfg_aliases",
-<<<<<<< HEAD
-    "compiler_builtins",
     "const-oid", // this is a false positive: it's only used by generate-tarball
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",

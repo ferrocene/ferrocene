@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::ffi::OsStr;
+use std::path::PathBuf;
+
 use crate::builder::{Builder, Kind, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::compile::run_cargo;
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
 use crate::utils::tarball::Tarball;
 use crate::{t, Compiler, Mode};
-use std::ffi::OsStr;
-use std::path::PathBuf;
 
 const OXIDOS_CRATES: &[&str] = &[
     // List of OxidOS crates to prebuild. Their dependencies will be built and included in the
@@ -135,7 +136,7 @@ impl Step for BuildOxidOS {
         let _guard = builder.msg(Kind::Build, compiler.stage, self.name(), compiler.host, target);
 
         let mode = Mode::ToolCustom { name: self.name() };
-        let mut cargo = builder.cargo(compiler, mode, SourceType::InTree, target, "build");
+        let mut cargo = builder.cargo(compiler, mode, SourceType::InTree, target, Kind::Build);
 
         cargo.current_dir(&source);
         cargo.rustflag(&format!("-Zallow-features={}", OXIDOS_ALLOW_UNSTABLE_FEATURES.join(",")));

@@ -95,15 +95,6 @@ codegen-units = 1
 # FIXME: LTO cannot be enabled for binaries in a workspace
 # <https://github.com/rust-lang/cargo/issues/9330>
 # lto = true
-<<<<<<< HEAD
 
 [patch.crates-io]
-# See comments in `library/rustc-std-workspace-core/README.md` for what's going on
-# here
-rustc-std-workspace-core = { path = 'library/rustc-std-workspace-core' }
-rustc-std-workspace-alloc = { path = 'library/rustc-std-workspace-alloc' }
-rustc-std-workspace-std = { path = 'library/rustc-std-workspace-std' }
-
 libc = { path = 'ferrocene/library/libc' }
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

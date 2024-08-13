@@ -31,3 +31,5 @@ fn main() {
         .run();
     llvm_filecheck().patterns("filecheck-patterns.txt").stdin(rfs::read("interesting.ll")).run();
 }
+
+// ferrocene-annotations: um_rustc_C_codegen_units

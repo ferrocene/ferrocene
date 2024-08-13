@@ -20,3 +20,5 @@ fn main() {
         1
     );
 }
+
+// ferrocene-annotations: um_rustc_C_opt_level

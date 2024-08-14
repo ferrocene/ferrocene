@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
-use crate::error::{CommandError, CommandErrorKind, Error};
 use std::error::Error as _;
+
+use crate::error::{CommandError, CommandErrorKind, Error};
 
 const TERMINAL_WIDTH: usize = 79;
 

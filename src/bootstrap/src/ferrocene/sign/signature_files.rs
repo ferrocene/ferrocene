@@ -1,15 +1,17 @@
-use crate::core::builder::{Builder, ShouldRun, Step};
-use crate::core::config::FerroceneDocumentSignatures;
-use crate::ferrocene::doc::IsSphinxBook;
-use crate::t;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
+
 use tar::Archive;
 use xz2::read::XzDecoder;
+
+use crate::core::builder::{Builder, ShouldRun, Step};
+use crate::core::config::FerroceneDocumentSignatures;
+use crate::ferrocene::doc::IsSphinxBook;
+use crate::t;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CacheSignatureFiles<B: Step + IsSphinxBook> {

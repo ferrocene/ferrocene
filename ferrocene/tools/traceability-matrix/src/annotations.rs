@@ -201,8 +201,9 @@ impl Annotations {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use tempfile::{NamedTempFile, TempDir};
+
+    use super::*;
 
     #[test]
     fn test_load_file() -> anyhow::Result<()> {

@@ -327,11 +327,10 @@ impl<T: Into<String>> From<T> for ElementNumber {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use std::collections::BTreeMap;
     use std::path::Path;
 
+    use super::*;
     use crate::annotations::AnnotationSource;
     use crate::documentations::{Document, Paragraph, TraceabilityIds};
 

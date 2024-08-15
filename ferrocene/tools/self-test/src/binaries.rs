@@ -154,10 +154,11 @@ impl CommitHashOf {
 
 #[cfg(test)]
 mod tests {
+    use std::ffi::OsString;
+
     use super::*;
     use crate::error::CommandErrorKind;
     use crate::test_utils::{CliVersionContent, TestUtils};
-    use std::ffi::OsString;
 
     #[cfg(unix)]
     const RUSTC_EXECUTABLE: &str = "rustc";

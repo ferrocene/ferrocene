@@ -94,9 +94,7 @@ pub(crate) enum Error {
         #[source]
         error: std::io::Error,
     },
-    #[error(
-        "sample program {name} should have produced {expected:?}, actually produced {found:?}"
-    )]
+    #[error("sample program {name} should have produced {expected:?}, actually produced {found:?}")]
     SampleProgramOutputWrong { name: String, expected: Vec<u8>, found: Vec<u8> },
 }
 

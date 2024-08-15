@@ -455,9 +455,11 @@ pub(crate) fn report_linker_flags(reporter: &dyn Reporter, targets: &[Target]) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{error::FindBinaryInPathError, test_utils::TestUtils};
     use std::ffi::OsString;
+
+    use super::*;
+    use crate::error::FindBinaryInPathError;
+    use crate::test_utils::TestUtils;
 
     #[test]
     fn test_find_bundled_lld() {

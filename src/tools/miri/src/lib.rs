@@ -10,7 +10,6 @@
 #![feature(yeet_expr)]
 #![feature(nonzero_ops)]
 #![feature(let_chains)]
-#![cfg_attr(bootstrap, feature(lint_reasons))]
 #![feature(trait_upcasting)]
 #![feature(strict_overflow_ops)]
 #![feature(is_none_or)]
@@ -143,6 +142,7 @@ pub use crate::diagnostics::{
 };
 pub use crate::eval::{
     create_ecx, eval_entry, AlignmentCheck, BacktraceStyle, IsolatedOp, MiriConfig, RejectOpWith,
+    ValidationMode,
 };
 pub use crate::helpers::{AccessKind, EvalContextExt as _};
 pub use crate::machine::{

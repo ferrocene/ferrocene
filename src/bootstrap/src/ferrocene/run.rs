@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // SPDX-FileCopyrightText: The Ferrocene Developers
 
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::time::UNIX_EPOCH;
+
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::Tool;
 use crate::core::config::{FerroceneTraceabilityMatrixMode, TargetSelection};
 use crate::ferrocene::doc::{Specification, SphinxMode, UserManual};
 use crate::ferrocene::test_outcomes::TestOutcomesDir;
 use crate::utils::exec::BootstrapCommand;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::time::UNIX_EPOCH;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub(crate) struct TraceabilityMatrix {
@@ -49,14 +50,13 @@ impl Step for TraceabilityMatrix {
             builder.info(&format!("Loading test annotations from {suite}"));
 
             let dest = test_annotations_base.join(format!("{}.json", suite.replace('/', "-")));
-            builder.run(
-                BootstrapCommand::new(&compiletest)
-                    .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
-                    .env("FERROCENE_DEST", dest)
-                    .env("FERROCENE_SRC_BASE", builder.src.join(suite))
-                    .env("FERROCENE_MODE", mode)
-                    .env("FERROCENE_SUITE", suite),
-            );
+            BootstrapCommand::new(&compiletest)
+                .env("FERROCENE_COLLECT_ANNOTATIONS", "1")
+                .env("FERROCENE_DEST", dest)
+                .env("FERROCENE_SRC_BASE", builder.src.join(suite))
+                .env("FERROCENE_MODE", mode)
+                .env("FERROCENE_SUITE", suite)
+                .run(builder);
         }
 
         let html_output = builder
@@ -98,7 +98,7 @@ impl Step for TraceabilityMatrix {
             cmd.env("TRACEABILITY_MATRIX_TEST_OUTCOMES_DIR", dir);
         }
 
-        builder.run(&mut cmd);
+        cmd.run(builder);
         html_output
     }
 }
@@ -189,7 +189,7 @@ impl Step for GenerateCoverageReport {
             // https://github.com/rust-embedded/cargo-binutils/blob/5c38490e1abf91af51d0a345bb581e37facd28ff/src/rustc.rs#L8.
             .env("RUSTC", rustc_path);
 
-        builder.run(&mut cmd);
+        cmd.run(builder);
     }
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {

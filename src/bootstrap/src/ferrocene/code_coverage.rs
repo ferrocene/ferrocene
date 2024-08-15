@@ -3,8 +3,7 @@ use std::path::Path;
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
 use crate::core::build_steps::tool::SourceType;
 use crate::core::config::TargetSelection;
-use crate::BootstrapCommand;
-use crate::Mode;
+use crate::{BootstrapCommand, Kind, Mode};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub(crate) struct ProfilerBuiltinsNoCore {
@@ -37,7 +36,7 @@ impl Step for ProfilerBuiltinsNoCore {
         // [ProfilerBuiltinNoCore step] Builds profiler_builtins with no core -> profiler_builtins_no_core.rlib
         // [Core Tests step] Compile tests of core with -Cinsturment-coverage -> link against profiler_builtins_no_core.rlib
 
-        let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, "build");
+        let mut cargo = builder.cargo(compiler, Mode::Std, SourceType::InTree, target, Kind::Build);
 
         cargo.current_dir(Path::new("library/profiler_builtins"));
 
@@ -49,7 +48,7 @@ impl Step for ProfilerBuiltinsNoCore {
         cargo.arg(&*target_dir.to_string_lossy());
         cargo.arg("--no-default-features");
 
-        builder.run(&mut BootstrapCommand::from(cargo).fail_fast());
+        BootstrapCommand::from(cargo).fail_fast().run(builder);
 
         let cargo_dir = if builder.config.rust_optimize.is_release() { "release" } else { "debug" };
 

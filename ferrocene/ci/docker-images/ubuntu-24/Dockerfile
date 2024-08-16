@@ -5,6 +5,7 @@
 # `docker build -t ubuntu-24 -f ferrocene/ci/docker-images/ubuntu-24/Dockerfile .`
 
 FROM --platform=$TARGETPLATFORM ubuntu:24.04
+LABEL org.opencontainers.image.source https://github.com/ferrocene/ferrocene
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM

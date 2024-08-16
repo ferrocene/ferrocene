@@ -4,8 +4,8 @@
 # Gate PRs on the `full` CircleCI workflow
 status = ["full"]
 
-# Wait until the `commit` CircleCI workflow passes before queueing a PR
-pr_status = ["commit"]
+# Wait until the `commit` GHA workflow passes before queueing a PR
+pr_status = ["Commit / %"]
 
 # Consider the build as failed if it takes more than three hours to finish
 # A normal build should take less, but there are slower parts of the build that

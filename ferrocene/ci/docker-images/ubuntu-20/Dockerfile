@@ -24,6 +24,7 @@ RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-user-static
 
 FROM --platform=$TARGETPLATFORM ubuntu:20.04
+LABEL org.opencontainers.image.source https://github.com/ferrocene/ferrocene
 
 # As a multiplatform container we support all these: https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
 ARG TARGETPLATFORM

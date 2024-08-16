@@ -16,9 +16,11 @@ echo "source $HOME/.cargo/env" >> $BASH_ENV
 
 uv venv ~/.venv
 if [[ "${OSTYPE}" = "msys" ]]; then
+    # CircleCI
     source ~/.venv/Scripts/activate
     echo "source $HOME/.venv/Scripts/activate" >> $BASH_ENV
 else
+    # CircleCI
     source ~/.venv/bin/activate
     echo "source $HOME/.venv/bin/activate" >> $BASH_ENV
 fi

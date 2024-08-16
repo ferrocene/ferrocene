@@ -1,0 +1,93 @@
+name: "Commit"
+
+on:
+  pull_request:
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+
+# If the user commits something, then quickly commits something else,
+# cancel the earlier job so only one runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  # Job dedicated to running quick checks for each commit pushed in open
+  # PRs and personal branches. The job must balance providing quick feedback
+  # and providing useful feedback, focusing on catching the most common errors
+  # as soon as possible.
+  #
+  # It's fine if this job only runs a small subset of the test suite: the full
+  # test suite for all the supported targets will be run when bors tries to
+  # merge the PR anyway.
+  checks:
+    name: "Checks"
+    runs-on: ubuntu-latest
+    environment: ferrocene-ci
+    # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
+    timeout-minutes: 10
+    steps:
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: false # We use scripts to checkout a subset for this job
+      - name: Clone llvm subset
+        run: ferrocene/ci/scripts/clone-llvm-subset.sh
+      - name: Checkout submodules
+        run: ferrocene/ci/scripts/checkout-submodules.sh
+      - name: Change file modification time to be consistent
+        run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
+        
+      - name: Setup uv & venv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv python install 3.12
+          uv venv
+          uv pip sync requirements.txt
+        
+      - name: Check whether git conflict markers are present
+        run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
+      - name: Perform licensing checks
+        run: uv run reuse --include-submodules lint
+      
+      - name: Authenicate docker with Azure
+        run: az acr login --name ferrocenecr
+      - name: "Determine if the Docker image should be built"
+        id: docker
+        # Sometimes the image pull just stops, and it's unclear why. Make sure to exit early if so
+        # to save CI minutes.
+        timeout-minutes: 3
+        run: |
+          uv run ./ferrocene/ci/scripts/container.py ensure-built x86_64 ubuntu-24
+          echo "uri=$(uv run ./ferrocene/ci/scripts/container.py uri x86_64 ubuntu-24)" >> "$GITHUB_OUTPUT"
+
+      - name: Execute the build
+        run: |
+          docker run \
+            --user ci-user \
+            --rm \
+            --workdir /home/ci/ferrocene \
+            --mount type=bind,source=$(pwd),target=/home/ci/ferrocene \
+            --env "CI=1" \
+            --env "SCRIPT=$SCRIPT" \
+            --env "FERROCENE_CUSTOM_LLVM=$FERROCENE_CUSTOM_LLVM" \
+            --env "FERROCENE_HOST=$FERROCENE_HOST" \
+            ${{ steps.docker.outputs.uri }} \
+            ferrocene/ci/run.sh
+        env:
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: |
+            ./x.py test tidy
+            ./x.py check library compiler/rustc
+            ./x.py run ferrocene/tools/traceability-matrix

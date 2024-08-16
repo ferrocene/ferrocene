@@ -61,7 +61,7 @@ jobs:
       # GitHub App that has only read access to those repos, and we use that app to
       # generate a temporary token.
       - name: Authenticate with GitHub to fetch from repositories
-        run: ferrocene/ci/github-app-auth.py
+        run: ferrocene/ci/scripts/github_app_auth.py
         env:
           # https://github.com/organizations/ferrocene/settings/apps/ferrocene-pull-subtrees
           APP_ID: 200501

@@ -45,7 +45,7 @@ jobs:
       # them. To work around that we're using a fresh token from an ad-hoc
       # GitHub App with access to push new branches to this repo.
       - name: Authenticate with GitHub to create branches
-        run: ferrocene/ci/github-app-auth.py
+        run: ferrocene/ci/scripts/github_app_auth.py
         env:
           # https://github.com/organizations/ferrocene/settings/apps/ferrocene-backport
           APP_ID: 298770

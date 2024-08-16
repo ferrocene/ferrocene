@@ -1839,6 +1839,8 @@ supported_targets! {
 
     ("i386-lynx-lynxos178", i386_lynx_lynxos178),
     ("aarch64-unknown-ferrocenecoretest", aarch64_unknown_ferrocenecoretest),
+    ("armv8r-none-eabihf-ferrocenecoretest", armv8r_none_eabihf_ferrocenecoretest),
+    ("armv8r-none-linux-gnueabihf", armv8r_none_linux_gnueabihf),
 
     ("aarch64-unknown-linux-ohos", aarch64_unknown_linux_ohos),
     ("armv7-unknown-linux-ohos", armv7_unknown_linux_ohos),

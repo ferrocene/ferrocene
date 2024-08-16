@@ -38,6 +38,8 @@ pub struct Finder {
 const STAGE0_MISSING_TARGETS: &[&str] = &[
     // just a dummy comment so the list doesn't get onelined
     "aarch64-unknown-ferrocenecoretest",
+    "armv8r-none-eabihf-ferrocenecoretest",
+    "armv8r-none-linux-gnueabihf",
 ];
 
 /// Minimum version threshold for libstdc++ required when using prebuilt LLVM

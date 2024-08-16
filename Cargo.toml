@@ -95,6 +95,3 @@ codegen-units = 1
 # FIXME: LTO cannot be enabled for binaries in a workspace
 # <https://github.com/rust-lang/cargo/issues/9330>
 # lto = true
-
-[patch.crates-io]
-libc = { path = 'ferrocene/library/libc' }

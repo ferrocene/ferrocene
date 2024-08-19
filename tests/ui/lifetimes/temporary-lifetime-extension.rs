@@ -31,3 +31,6 @@ fn main() {
     };
     println!("{a:?} {b:?} {c:?} {d:?} {e:?} {f:?} {g:?} {h:?}");
 }
+
+// ferrocene-annotations: fls_5eima0pd31c0
+// Drop Scope Extension

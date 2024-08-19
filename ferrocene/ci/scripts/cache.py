@@ -45,7 +45,7 @@ def retrieve(path, out_dir):
         # It is important for Windows that the tarball was created with `--dereference`
         with tarfile.open(mode="r|", fileobj=zstd_stream) as tarball:
             logging.info("Began unarchiving...")
-            tarball.extractall(path=out_dir)
+            tarball.extractall(path=out_dir, filter="data")
     logging.info(f"Done decompression and unarchiving of `{path}` to `{out_dir}`.")
 
     return
@@ -117,7 +117,7 @@ def main():
 
     match args.subcommand:
         case "store":
-            store(args.path, args.in_dir, upload=args.upload)
+            store(args.path, args.in_dir)
 
         case "retrieve":
             retrieve(args.path, args.out_dir)

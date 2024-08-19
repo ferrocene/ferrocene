@@ -146,7 +146,9 @@ cmd_prepare() {
 
     # add binaries to IFS
     sed -i '365i /bin/mkdir=mkdir\
-/sbin/remote-test-server=remote-test-server' "${buildscript}"
+/sbin/remote-test-server=remote-test-server\
+/bin/head=head\
+/bin/sh=sh' "${buildscript}"
 
     # signal that boot is complete
     sed -i '326i echo "Boot complete"' "${buildscript}"

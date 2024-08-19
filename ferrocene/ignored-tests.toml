@@ -95,8 +95,6 @@ tests = [
       "tests/ui/panics/runtime-switch.rs#v0",
       "tests/ui/panics/short-ice-remove-middle-frames-2.rs",
       "tests/ui/panics/short-ice-remove-middle-frames.rs",
-      "tests/ui/process/println-with-broken-pipe.rs",
-      "tests/ui/process/process-sigpipe.rs",
       "tests/ui/runtime/backtrace-debuginfo.rs",
       "tests/ui/structs-enums/enum-rec/issue-17431-6.rs",
       "tests/ui/threads-sendsync/tcp-stress.rs",

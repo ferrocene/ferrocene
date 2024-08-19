@@ -170,6 +170,12 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "NCSA AND Apache-2.0 WITH LLVM-exception"
 
 [[annotations]]
+path = "ferrocene/library/backtrace-rs/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Rust Project Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
 path = "ferrocene/library/libc/**"
 precedence = "override"
 SPDX-FileCopyrightText = "The Rust libc developers"

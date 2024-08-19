@@ -764,7 +764,7 @@ mod dist {
         let mut config = configure(&["A-A"], &["A-A"]);
         config.cmd = Subcommand::Test {
             test_args: vec![],
-            rustc_args: vec![],
+            compiletest_rustc_args: vec![],
             no_fail_fast: false,
             doc: false,
             no_doc: true,

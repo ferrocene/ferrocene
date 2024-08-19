@@ -849,18 +849,14 @@ impl Build {
                 "-tools-custom"
             }
         };
-<<<<<<< HEAD
-        let mut out = self
-            .out
-            .join(&*compiler.host.triple)
-            .join(format!("stage{}{}", compiler.stage, suffix));
+        let mut out =
+            self.out.join(compiler.host).join(format!("stage{}{}", compiler.stage, suffix));
+
+        // Ferrocene addition to give custom tools a separate build directory
         if let Some(subdir) = subdir {
             out = out.join(subdir)
         }
         out
-=======
-        self.out.join(compiler.host).join(format!("stage{}{}", compiler.stage, suffix))
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     }
 
     /// Returns the root output directory for all Cargo output in a given stage,

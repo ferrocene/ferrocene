@@ -2299,18 +2299,10 @@ impl<'a> Builder<'a> {
             rustdocflags.arg("--cfg=parallel_compiler");
         }
 
-<<<<<<< HEAD
-        // Pass the value of `--rustc-args` from test command. If it's not a test command, this won't set anything.
-        self.config.cmd.rustc_args().iter().for_each(|v| {
-            rustflags.arg(v);
-        });
-
         if target.contains("ferrocenecoretest") {
             rustflags.arg("-Zpanic-abort-tests");
         }
 
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         Cargo {
             command: cargo,
             compiler,

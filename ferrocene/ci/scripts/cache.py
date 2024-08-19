@@ -31,6 +31,7 @@ def retrieve(path, out_dir, exclude=[]):
         [bucket, key] = parse_s3_url(path)
 
         s3 = boto3.client("s3")
+        logging.info(f"Getting s3 object at `{path}`...")
         response = s3.get_object(Bucket=bucket, Key=key)
         stream = response["Body"]
         logging.info(f"Got s3 object at `{path}`...")

@@ -86,7 +86,6 @@ reason = "Experimental target which does not yet pass all tests. To be fixed in 
 
 [["tests/ui"]]
 tests = [
-      "tests/run-make/fix-cortex-a53-843419",
       "tests/ui/backtrace/backtrace.rs",
       "tests/ui/backtrace/dylib-dep.rs",
       "tests/ui/backtrace/line-tables-only.rs",
@@ -103,6 +102,13 @@ tests = [
       "tests/ui/runtime/backtrace-debuginfo.rs",
       "tests/ui/structs-enums/enum-rec/issue-17431-6.rs",
       "tests/ui/threads-sendsync/tcp-stress.rs",
+]
+targets = ["aarch64-unknown-nto-qnx710"]
+reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"
+
+[["tests/run-make"]]
+tests = [
+      "tests/run-make/fix-cortex-a53-843419",
 ]
 targets = ["aarch64-unknown-nto-qnx710"]
 reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"

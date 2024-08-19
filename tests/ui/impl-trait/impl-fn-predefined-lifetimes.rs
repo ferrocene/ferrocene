@@ -12,3 +12,6 @@ fn _b<'a>() -> impl Fn(&'a u8) -> (impl Debug + 'a) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

@@ -27,3 +27,9 @@
   ref: libc-0.2
   after:
     - update-cargo-lock
+
+- path: ferrocene/library/backtrace-rs
+  repo: rust-lang/backtrace-rs
+  ref: master
+  after:
+    - update-cargo-lock

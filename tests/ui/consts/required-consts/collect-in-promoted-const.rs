@@ -24,3 +24,6 @@ fn f<T>() {
 fn main() {
     f::<i32>();
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

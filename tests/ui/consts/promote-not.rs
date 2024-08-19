@@ -98,3 +98,6 @@ fn main() {
     let x: &'static _ = &UnionWithCell { f1: 0 };
     //~^ ERROR temporary value dropped while borrowed
 }
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

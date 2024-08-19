@@ -55,7 +55,7 @@ def retrieve(path, out_dir, exclude=[]):
                     else:
                         yield tarinfo
             
-            tarball.extractall(path=out_dir, members=exclusions(tarball))
+            tarball.extractall(path=out_dir, filter='data', members=exclusions(tarball))
     logging.info(f"Done decompression and unarchiving of `{path}` to `{out_dir}`.")
 
     return

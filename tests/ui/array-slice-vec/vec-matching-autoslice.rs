@@ -20,3 +20,6 @@ pub fn main() {
         ([_, _], _) => panic!(),
     }
 }
+
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

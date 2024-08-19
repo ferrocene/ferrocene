@@ -53,3 +53,6 @@ pub fn main() {
 //
 // ferrocene-annotations: fls_6tl1fx99yn6c
 // Range patterns
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

@@ -164,3 +164,6 @@ mod signed {
         m!(0, ..VAL_1 | VAL_2..); //~ ERROR non-exhaustive patterns
     }
 }
+
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

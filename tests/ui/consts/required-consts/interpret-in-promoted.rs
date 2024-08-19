@@ -14,3 +14,6 @@ pub const FOO: () = unsafe {
 };
 
 fn main() {}
+
+// ferrocene-annotations: fls_wttihxen35as
+// Constant Promotion

@@ -97,3 +97,6 @@ fn matched(string: &Option<&str>, mut num: Option<i32>) {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_5eima0pd31c0
+// Drop Scope Extension

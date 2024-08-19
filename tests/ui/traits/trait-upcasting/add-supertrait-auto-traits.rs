@@ -13,3 +13,6 @@ fn upcast(x: &dyn Source) -> &(dyn Target + Send) { x }
 fn same(x: &dyn Source) -> &(dyn Source + Send) { x }
 
 fn main() {}
+
+// ferrocene-annotations: fls_dw33yt5g6m0k
+// Type Coercion

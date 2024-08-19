@@ -227,3 +227,6 @@ fn main() {
     range_to();
     range_from();
 }
+
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

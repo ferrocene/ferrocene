@@ -37,3 +37,6 @@ fn main() {
     m!('a', ..'\u{0}');
     //~^ ERROR lower range bound must be less than upper
 }
+
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

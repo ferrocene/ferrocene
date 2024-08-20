@@ -79,3 +79,6 @@ fn main() {
 //
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions
+//
+// ferrocene-annotations: fls_2krxnq8q9ef1
+// Literal Patterns

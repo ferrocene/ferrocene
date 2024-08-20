@@ -19,3 +19,6 @@ fn main() {
     let muh = 69;
     println!("{:?}", bar(&meh, &muh));
 }
+
+// ferrocene-annotations: fls_exe4zodlwfez
+// Type Unification

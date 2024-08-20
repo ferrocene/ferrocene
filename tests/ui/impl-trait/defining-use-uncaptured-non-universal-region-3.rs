@@ -11,3 +11,6 @@ fn foo<const FOO: &'static str>() -> impl Bar<"asdf"> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

@@ -9,3 +9,6 @@ trait Foo {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

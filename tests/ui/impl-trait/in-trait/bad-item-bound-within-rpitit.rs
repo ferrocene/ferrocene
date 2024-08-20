@@ -22,3 +22,6 @@ impl<'a, I: 'a + Iterable> Iterable for &'a I {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_3xqobbu7wfsf
+// Impl Trait Types

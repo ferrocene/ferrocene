@@ -152,9 +152,9 @@ imagesize==1.4.1 \
     --hash=sha256:0d8d18d08f840c19d0ee7ca1fd82490fdc3729b7ac93f49870406ddde8ef8d8b \
     --hash=sha256:69150444affb9cb0d5cc5a92b3676f0b2fb7cd9ae39e947a5e11a36b4497cd4a
     # via sphinx
-importlib-metadata==8.2.0 \
-    --hash=sha256:11901fa0c2f97919b288679932bb64febaeacf289d18ac84dd68cb2e74213369 \
-    --hash=sha256:72e8d4399996132204f9a16dcc751af254a48f8d1b20b9ff0f98d4a8f901e73d
+importlib-metadata==8.3.0 \
+    --hash=sha256:42817a4a0be5845d22c6e212db66a94ad261e2318d80b3e0d363894a79df2b67 \
+    --hash=sha256:9c8fa6e8ea0f9516ad5c8db9246a731c948193c7754d3babb0114a05b27dd364
     # via -r requirements.in
 jinja2==3.1.3 \
     --hash=sha256:7d6d50dd97d52cbc355597bd845fabfbac3f551e1f99619e39a35ce8c370b5fa \

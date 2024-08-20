@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 UPSTREAM_REPO="https://github.com/rust-lang/rust"
 TEMP_BRANCH="pull-upstream-temp--do-not-use-for-real-code"
-DIRECTORIES_CONTAINING_LOCKFILES=("" "src/bootstrap/")
+DIRECTORIES_CONTAINING_LOCKFILES=("" "library" "src/bootstrap/")
 GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 
 # Set a default max of merges per PR to 30, if it was not overridden in the

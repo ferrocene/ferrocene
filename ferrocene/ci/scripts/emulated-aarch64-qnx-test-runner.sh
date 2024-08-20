@@ -148,7 +148,8 @@ cmd_prepare() {
     sed -i '365i /bin/mkdir=mkdir\
 /sbin/remote-test-server=remote-test-server\
 /bin/head=head\
-/bin/sh=sh' "${buildscript}"
+/bin/sh=sh\
+/bin/echo=echo' "${buildscript}"
 
     # signal that boot is complete
     sed -i '326i echo "Boot complete"' "${buildscript}"

@@ -9,7 +9,6 @@ use std::sync::OnceLock;
 use build_helper::ci::CiEnv;
 use xz2::bufread::XzDecoder;
 
-use crate::core::config::BUILDER_CONFIG_FILENAME;
 use crate::utils::exec::{command, BootstrapCommand};
 use crate::utils::helpers::{check_run, exe, hex_encode, move_file, program_out_of_date};
 use crate::{t, Config};
@@ -295,7 +294,6 @@ impl Config {
             if original_path == directory_prefix {
                 continue;
             }
-<<<<<<< HEAD
 
             // Ferrocene tarballs' contents are different. Compared to upstream, this handles
             // Ferrocene and upstream tarballs seamlessly together.
@@ -311,15 +309,6 @@ impl Config {
                 Err(_) => &original_path,
             };
 
-=======
-            let mut short_path = t!(original_path.strip_prefix(directory_prefix));
-            let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
-
-            if !(short_path.starts_with(pattern) || (is_ci_rustc && is_builder_config)) {
-                continue;
-            }
-            short_path = short_path.strip_prefix(pattern).unwrap_or(short_path);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             let dst_path = dst.join(short_path);
             self.verbose(|| {
                 println!("extracting {} to {}", original_path.display(), dst.display())

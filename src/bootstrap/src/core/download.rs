@@ -9,6 +9,7 @@ use std::sync::OnceLock;
 use build_helper::ci::CiEnv;
 use xz2::bufread::XzDecoder;
 
+use crate::core::config::BUILDER_CONFIG_FILENAME;
 use crate::utils::exec::{command, BootstrapCommand};
 use crate::utils::helpers::{check_run, exe, hex_encode, move_file, program_out_of_date};
 use crate::{t, Config};
@@ -280,11 +281,12 @@ impl Config {
 
         let mut tar = tar::Archive::new(decompressor);
 
+        let is_ci_rustc = dst.ends_with("ci-rustc");
+
         // `compile::Sysroot` needs to know the contents of the `rustc-dev` tarball to avoid adding
         // it to the sysroot unless it was explicitly requested. But parsing the 100 MB tarball is slow.
         // Cache the entries when we extract it so we only have to read it once.
-        let mut recorded_entries =
-            if dst.ends_with("ci-rustc") { recorded_entries(dst, pattern) } else { None };
+        let mut recorded_entries = if is_ci_rustc { recorded_entries(dst, pattern) } else { None };
 
         for member in t!(tar.entries()) {
             let mut member = t!(member);
@@ -293,6 +295,7 @@ impl Config {
             if original_path == directory_prefix {
                 continue;
             }
+<<<<<<< HEAD
 
             // Ferrocene tarballs' contents are different. Compared to upstream, this handles
             // Ferrocene and upstream tarballs seamlessly together.
@@ -308,6 +311,15 @@ impl Config {
                 Err(_) => &original_path,
             };
 
+=======
+            let mut short_path = t!(original_path.strip_prefix(directory_prefix));
+            let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
+
+            if !(short_path.starts_with(pattern) || (is_ci_rustc && is_builder_config)) {
+                continue;
+            }
+            short_path = short_path.strip_prefix(pattern).unwrap_or(short_path);
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             let dst_path = dst.join(short_path);
             self.verbose(|| {
                 println!("extracting {} to {}", original_path.display(), dst.display())
@@ -720,9 +732,7 @@ download-rustc = false
             let file_times = fs::FileTimes::new().set_accessed(now).set_modified(now);
 
             let llvm_config = llvm_root.join("bin").join(exe("llvm-config", self.build));
-            let llvm_config_file = t!(File::options().write(true).open(llvm_config));
-
-            t!(llvm_config_file.set_times(file_times));
+            t!(crate::utils::helpers::set_file_times(llvm_config, file_times));
 
             if self.should_fix_bins_and_dylibs() {
                 let llvm_lib = llvm_root.join("lib");

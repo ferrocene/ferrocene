@@ -65,10 +65,9 @@ use crate::query::plumbing::{
 };
 use crate::traits::query::{
     CanonicalAliasGoal, CanonicalPredicateGoal, CanonicalTyGoal,
-    CanonicalTypeOpAscribeUserTypeGoal, CanonicalTypeOpEqGoal, CanonicalTypeOpNormalizeGoal,
-    CanonicalTypeOpProvePredicateGoal, CanonicalTypeOpSubtypeGoal, DropckConstraint,
-    DropckOutlivesResult, MethodAutoderefStepsResult, NoSolution, NormalizationResult,
-    OutlivesBound,
+    CanonicalTypeOpAscribeUserTypeGoal, CanonicalTypeOpNormalizeGoal,
+    CanonicalTypeOpProvePredicateGoal, DropckConstraint, DropckOutlivesResult,
+    MethodAutoderefStepsResult, NoSolution, NormalizationResult, OutlivesBound,
 };
 use crate::traits::{
     specialization_graph, CodegenObligationError, EvaluationResult, ImplSource,
@@ -1521,7 +1520,7 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query extern_crate(def_id: DefId) -> Option<&'tcx ExternCrate> {
+    query extern_crate(def_id: CrateNum) -> Option<&'tcx ExternCrate> {
         eval_always
         desc { "getting crate's ExternCrateData" }
         separate_provide_extern
@@ -2088,26 +2087,6 @@ rustc_queries! {
         NoSolution,
     > {
         desc { "evaluating `type_op_ascribe_user_type` `{:?}`", goal.value.value }
-    }
-
-    /// Do not call this query directly: part of the `Eq` type-op
-    query type_op_eq(
-        goal: CanonicalTypeOpEqGoal<'tcx>
-    ) -> Result<
-        &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ()>>,
-        NoSolution,
-    > {
-        desc { "evaluating `type_op_eq` `{:?}`", goal.value.value }
-    }
-
-    /// Do not call this query directly: part of the `Subtype` type-op
-    query type_op_subtype(
-        goal: CanonicalTypeOpSubtypeGoal<'tcx>
-    ) -> Result<
-        &'tcx Canonical<'tcx, canonical::QueryResponse<'tcx, ()>>,
-        NoSolution,
-    > {
-        desc { "evaluating `type_op_subtype` `{:?}`", goal.value.value }
     }
 
     /// Do not call this query directly: part of the `ProvePredicate` type-op

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ compile-flags: -Zmir-opt-level=0
 //@ error-pattern: cannot use f32::to_bits on a NaN
 #![feature(const_float_bits_conv)]

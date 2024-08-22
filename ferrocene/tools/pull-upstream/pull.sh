@@ -13,7 +13,7 @@ GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 # - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
 # - "library/Cargo.lock" because we vendor libc package, so the lockfile may differ from upstream
 # - "src/bootstrap/Cargo.lock" because we have custom changes to bootstrap
-DIRECTORIES_CONTAINING_LOCKFILES=("" "library" "src/bootstrap/")
+DIRECTORIES_CONTAINING_LOCKFILES=("" "library/" "src/bootstrap/")
 
 # Set a default max of merges per PR to 30, if it was not overridden in the
 # environment.

@@ -24,9 +24,10 @@ pub fn target() -> Target {
         options: TargetOptions {
             features: "+v8a".into(),
             max_atomic_width: Some(128),
+            // Enable the Cortex-A53 errata 843419 mitigation by default
             pre_link_args: TargetOptions::link_args(
                 LinkerFlavor::Gnu(Cc::Yes, Lld::No),
-                &["-Vgcc_ntoaarch64le_cxx"],
+                &["-Vgcc_ntoaarch64le_cxx", "-Wl,--fix-cortex-a53-843419"],
             ),
             env: "nto71".into(),
             ..base::nto_qnx::opts()

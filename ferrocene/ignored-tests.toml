@@ -63,10 +63,3 @@ reason = "Remove when https://github.com/rust-lang/rust/issues/127395 is fixed"
 tests = ["tests/debuginfo/basic-types-mut-globals.rs"]
 targets = ["x86_64-unknown-linux-gnu"]
 reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648"
-
-[["tests/run-make"]]
-tests = [
-      "tests/run-make/fix-cortex-a53-843419",
-]
-targets = ["aarch64-unknown-nto-qnx710"]
-reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"

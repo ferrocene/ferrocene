@@ -24,17 +24,19 @@ endif
 all:
   # 1. check that linker is invoked with the errata workaround flag
 	$(RUSTC) $(RUSTC_FLAGS) main.rs | $(CGREP) -- --fix-cortex-a53-843419
-ifeq ($(TARGET),aarch64-unknown-none)
+  # # Targets that use GCC / LD as linker
+ifeq ($(TARGET),aarch64-unknown-nto-qnx710)
+  # 2. check that the first two required pre-condition instructions (ADRP then LDR) are NOT there. GCC will replace ADRP with ADR
+	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -v -e 'adrp[[:space:]]+x0'
+	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -e 'adr[[:space:]]+x0'
+	aarch64-linux-gnu-objdump --start-address=0xffc --stop-address=0x1000 -Cd $(TMPDIR)/main | $(CGREP) -e 'ldr[[:space:]]+x1'
+else
+  # # Targets that use LLD as linker
   # 2. check that the first two required pre-condition instructions (ADRP then LDR) are there
   # 3. check that the third problematic instruction (LDR) is NOT there. LLD will replace it with a different instruction
 	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -e 'adrp[[:space:]]+x0'
 	aarch64-linux-gnu-objdump --start-address=0xffc --stop-address=0x1000 -Cd $(TMPDIR)/main | $(CGREP) -e 'ldr[[:space:]]+x1'
 	aarch64-linux-gnu-objdump --start-address=0x1000 --stop-address=0x1004 -Cd $(TMPDIR)/main | $(CGREP) -v -e 'ldr[[:space:]]x0'
-else
-  # 2. check that the first two required pre-condition instructions (ADRP then LDR) are NOT there. GCC will replace ADRP with ADR
-	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -v -e 'adrp[[:space:]]+x0'
-	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -e 'adr[[:space:]]+x0'
-	aarch64-linux-gnu-objdump --start-address=0xffc --stop-address=0x1000 -Cd $(TMPDIR)/main | $(CGREP) -e 'ldr[[:space:]]+x1'
 endif
 
 # Example assembly

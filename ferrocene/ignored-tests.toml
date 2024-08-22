@@ -97,10 +97,3 @@ tests = [
 ]
 targets = ["aarch64-unknown-nto-qnx710"]
 reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"
-
-[["tests/run-make"]]
-tests = [
-      "tests/run-make/fix-cortex-a53-843419",
-]
-targets = ["aarch64-unknown-nto-qnx710"]
-reason = "Experimental target which does not yet pass all tests. To be fixed in follow-up PRs"

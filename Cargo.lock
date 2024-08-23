@@ -22,7 +22,6 @@ name = "as-if-std"
 version = "0.1.0"
 dependencies = [
  "addr2line",
- "cc",
  "cfg-if",
  "libc",
  "miniz_oxide",

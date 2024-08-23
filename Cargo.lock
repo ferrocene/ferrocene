@@ -22,7 +22,6 @@ name = "as-if-std"
 version = "0.1.0"
 dependencies = [
  "addr2line",
- "cc",
  "cfg-if",
  "libc",
  "miniz_oxide",
@@ -36,7 +35,6 @@ name = "backtrace"
 version = "0.3.73"
 dependencies = [
  "addr2line",
- "cc",
  "cfg-if",
  "cpp_demangle",
  "dylib-dep",

@@ -1,7 +1,7 @@
 set -ex
 
 ANDROID_NDK_URL=https://dl.google.com/android/repository
-ANDROID_NDK_ARCHIVE=android-ndk-r25b-linux.zip
+ANDROID_NDK_ARCHIVE=android-ndk-r26d-linux.zip
 
 mkdir /android-toolchain
 cd /android-toolchain

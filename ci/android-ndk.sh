@@ -5,7 +5,7 @@ ANDROID_NDK_ARCHIVE=android-ndk-r26d-linux.zip
 
 mkdir /android-toolchain
 cd /android-toolchain
-curl -fO $ANDROID_NDK_URL/$ANDROID_NDK_ARCHIVE
+curl --retry 20 -fO $ANDROID_NDK_URL/$ANDROID_NDK_ARCHIVE
 unzip -q $ANDROID_NDK_ARCHIVE
 rm $ANDROID_NDK_ARCHIVE
 mv android-ndk-* ndk

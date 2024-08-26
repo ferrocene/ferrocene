@@ -1,0 +1,31 @@
+name: "Setup"
+description: "Setup the runner"
+inputs:
+  llvm-subset:
+    description: If a a minimal subset of the llvm-project monorepo should be cloned
+    type: boolean
+    required: false
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    # By default, checkout of submodules is 
+    - name: Clone llvm subset
+      if: inputs.llvm-subset
+      shell: bash
+      run: ferrocene/ci/scripts/clone-llvm-subset.sh
+    - name: Checkout submodules
+      shell: bash
+      run: ferrocene/ci/scripts/checkout-submodules.sh
+    - name: Change file modification time to be consistent
+      shell: bash
+      run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
+        
+    - name: Setup uv & venv
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv python install 3.12
+        uv venv
+        uv pip sync requirements.txt

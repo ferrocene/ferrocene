@@ -30,38 +30,22 @@ jobs:
     # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
     timeout-minutes: 10
     steps:
-      - name: Azure CLI Login
-        uses: azure/login@v2
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-azure/
         with:
           client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-runner/
         with:
-          fetch-depth: 1
-          submodules: false # We use scripts to checkout a subset for this job
-      - name: Clone llvm subset
-        run: ferrocene/ci/scripts/clone-llvm-subset.sh
-      - name: Checkout submodules
-        run: ferrocene/ci/scripts/checkout-submodules.sh
-      - name: Change file modification time to be consistent
-        run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
-        
-      - name: Setup uv & venv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv python install 3.12
-          uv venv
-          uv pip sync requirements.txt
+          llvm-subset: true
+
         
       - name: Check whether git conflict markers are present
         run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
       - name: Perform licensing checks
         run: uv run reuse --include-submodules lint
       
-      - name: Authenicate docker with Azure
-        run: az acr login --name ferrocenecr
       - name: "Determine if the Docker image should be built"
         id: docker
         # Sometimes the image pull just stops, and it's unclear why. Make sure to exit early if so

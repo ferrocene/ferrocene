@@ -21,7 +21,7 @@ on:
         type: string
         description: "The GitHub Runner to run on"
       environment:
-        type: environment
+        type: string
     # outputs:
 
 

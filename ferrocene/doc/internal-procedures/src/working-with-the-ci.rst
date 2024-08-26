@@ -61,44 +61,16 @@ WSL2 from an administrator Powershell if you haven't done so already, then setup
 
 From there, follow the Linux instructions above.
 
-Installing Python
-^^^^^^^^^^^^^^^^^
-
-Ferrocene's CI pins Python 3.12.x currently. In general, any modern Python
-should be sufficient for local CI imitation.
-
-On Linux, install Python with your distribution's package manager, for example:
-
-.. code-block:: bash
-
-   apt install python
-
-On macOS, Python is probably already installed (if you have a working XCode toolchain or
-XCode Developer Tools installed). To install XCode Developer Tools:
-
-.. code-block:: bash
-   
-   xcode-select --install
-
-
-.. warning::
-   
-   Avoid installing Python or ``pip`` via Homebrew, because it can lead to long term
-   system dysfunction. If you have already done so, consider removing them.
-
-On Windows, get Python from the
-`website <https://www.python.org/downloads/windows/>`_, or use `winget
-<https://learn.microsoft.com/en-us/windows/package-manager/winget/>`_:
-
-.. code-block:: powershell
-
-   winget install Python.Python.3.12
-
 
 Using the Python virtual environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ferrocene uses ``uv`` to manage Python dependencies. There are a number of
+.. note:
+
+   You do not need to install Python, or modify your system Python.
+
+
+Ferrocene uses ``uv`` to manage Python and dependencies. There are a number of
 ways to install `listed in the repository <https://github.com/astral-sh/uv>`_,
 but we recommend the ``curl`` (Linux, MacOS) or ``powershell`` (Windows)
 methods:
@@ -118,15 +90,23 @@ Set up the virtual environment:
 
 .. code-block:: bash
 
+   uv python install 3.12
    uv venv
-   source .venv/bin/activate
    uv pip sync requirements.txt
 
-You need to source the virtual enviroment each time you wish to use it:
+You can then source the virtual enviroment each time you wish to use it:
 
 .. code-block:: bash
 
    source .venv/bin/activate
+
+If you infrequently use Python scripts, or want to use them in a oneshot command:
+
+.. code-block:: bash
+
+   uv run $COMMAND
+
+For example, to run our licensing checks you can run ``reuse --include-submodules lint``
 
 
 Using the CI ``config.toml``

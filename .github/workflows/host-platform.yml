@@ -1,0 +1,115 @@
+name: Host Platform
+run-name: Host Platform (${{inputs.host-triple}})
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: "The Rust triple of the host platform"
+      self-test-triples:
+        # We cannot specify an array here
+        # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
+        #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+        type: string
+        description: "A comma separated list of triples"
+      test:
+        type: boolean
+        description: "Run the test suite"
+        default: true
+      runner:
+        type: string
+        description: "The GitHub Runner to run on"
+      environment:
+        type: environment
+    # outputs:
+
+
+jobs:
+  llvm:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    steps:
+      # - uses: actions/checkout@v4
+      # - uses: ./.github/actions/setup/
+      - run: echo "test"
+  build:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    needs: [llvm]
+    steps:
+      # - uses: actions/checkout@v4
+      # - uses: ./.github/actions/setup/
+      - run: echo "test"
+  # dist:
+  #   runs-on: ${{ inputs.runner }}
+  #   needs: [build]
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     # - uses: ./.github/actions/setup/
+  #     - run: echo "test"
+  # dist-tools:
+  #   runs-on: ${{ inputs.runner }}
+  #   needs: [build]
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     # - uses: ./.github/actions/setup/
+  #     - run: echo "test"
+  # self-test:
+  #   runs-on: ${{ inputs.runner }}
+  #   needs:
+  #     - dist
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     #   with:
+  #     #     submodules: false
+  #     # - uses: ./.github/actions/setup/
+  #     #   with:
+  #     #     qnx: true
+  #     - run: echo "test"
+
+  test:
+    if: inputs.test
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    needs:
+      - build
+    steps:
+      # - uses: actions/checkout@v4
+      #   with:
+      #     submodules: false
+      # - uses: ./.github/actions/setup/
+      - run: echo "test"
+  # compiletest:
+  #   if: inputs.test
+  #   runs-on: ${{ inputs.runner }}
+  #   needs:
+  #     - build
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     #   with:
+  #     #     submodules: false
+  #     # - uses: ./.github/actions/setup/
+  #     - run: echo "test"
+  # test-library:
+  #   if: inputs.test
+  #   runs-on: ${{ inputs.runner }}
+  #   needs:
+  #     - build
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     #   with:
+  #     #     submodules: false
+  #     # - uses: ./.github/actions/setup/
+  #     - run: echo "test"
+  # test-library-std:
+  #   if: inputs.test
+  #   runs-on: ${{ inputs.runner }}
+  #   needs:
+  #     - build
+  #   steps:
+  #     # - uses: actions/checkout@v4
+  #     #   with:
+  #     #     submodules: false
+  #     # - uses: ./.github/actions/setup/
+  #     - run: echo "test"

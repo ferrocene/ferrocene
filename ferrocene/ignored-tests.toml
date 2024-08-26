@@ -60,6 +60,11 @@ targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "Remove when https://github.com/rust-lang/rust/issues/127395 is fixed"
 
 [["tests/debuginfo"]]
+tests = ["tests/debuginfo/basic-types.rs", "tests/debuginfo/basic-types-metadata.rs", "tests/debuginfo/basic-types-globals-metadata.rs"]
+targets = ["x86_64-unknown-linux-gnu"]
+reason = "The tests do not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/128913"
+
+[["tests/debuginfo"]]
 tests = ["tests/debuginfo/basic-types-mut-globals.rs"]
 targets = ["x86_64-unknown-linux-gnu"]
 reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648"

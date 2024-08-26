@@ -19,8 +19,8 @@ Classifying and describing a problem
 
 When describing a new issue, the first step is to check if the issue applies to
 one of our supported targets.
-If that is not the case, we can discard it as it
-won't be relevant to our customers.
+If that is not the case, we can discard it and record it in the `ignored-issues.yml` list with the
+target as its ignore reason as it won't be relevant to our customers.
 
 If it does apply, copy the `template.md` into the src folder, rename it to `KP-R<ISSUE-NUMBER>.md`
 and fill out the sections appropriately.
@@ -49,12 +49,13 @@ frontmatter `introduced-commit`
 The `introduced-commit` frontmatter lists the hash of the commit that
 introduced the issue.
 The hash is used to figure out from what Ferrocene version the issue applies.
-If it is not known since when the issue exists, leave it blank.
+If it is not known since when the issue exists, set the field to `unknown`,
+marking it applicable on all releases.
 
 frontmatter `fixed-commit`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `fixed-commit` frontmatter lists the hash of the commit that fixed the
+The `fixed-commit` frontmatter lists the hash of the commit(s) that fixed the
 issue if it has already been fixed.
 Leave it blank if the issue is still open.
 

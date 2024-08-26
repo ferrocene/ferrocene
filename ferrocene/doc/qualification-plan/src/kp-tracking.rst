@@ -40,12 +40,20 @@ Each KP file has the following format:
 * ``fixed-commit``: A set of commit numbers belonging to various releases that
   contain the fix for the KP.
 
+* ``duplicate``: The KP this KP is a duplicate of. This field is only used when it becomes known
+  that a KP is a duplicate after it has already been recorded.
+
+* ``test-paths``: A set of paths to tests within the ferrocene repository that verify that the KP
+  has been successfully fixed.
+
 * ``Description``: A detailed description of the KP, possibly accompanied by
   code examples.
 
 * ``Workaround``: A mitigation strategy for avoiding the KP.
 
 * ``Detection``: A textual description of methods for detecting the KP.
+
+* ``Mitigation``: A textual description of methods for fixing detected occurences of a KP in code.
 
 The following screenshot shows the contents of a KP.
 
@@ -64,8 +72,7 @@ A KP may be identified through several sources:
 * Some other source, e.g. an article, mailing list, or newsgroup of interest
   observes a defect.
 
-Regardless of its source, a KP receives a dedicated GitHub issue. Once a fix for
-the KP has been found, the fix goes through the :ref:`development:Development
-Process`. Any reproducers are retained as regression tests and are integrated
-into the Ferrocene test suite. Finally, a KP file is created for the KP, and the
-Safety Manual is updated.
+Regardless of its source, a KP receives a dedicated entry in the KP manual.
+Once a fix for the KP has been found, the fix goes through the
+:ref:`development:Development Process`. Any reproducers are retained as
+regression tests and are integrated into the Ferrocene test suite.

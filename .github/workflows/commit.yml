@@ -30,13 +30,16 @@ jobs:
     # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-azure/
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Azure
+        uses: ./.github/actions/setup-azure/
         with:
           client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - uses: ./.github/actions/setup-runner/
+      - name: Setup Runner
+        uses: ./.github/actions/setup-runner/
         with:
           llvm-subset: true
 

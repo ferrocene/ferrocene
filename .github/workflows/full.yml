@@ -5,6 +5,7 @@ on:
     branches:
       - trying
       - staging
+      - hoverbear/gha-migration-full
 
 permissions:
   id-token: write # This is required for requesting the JWT

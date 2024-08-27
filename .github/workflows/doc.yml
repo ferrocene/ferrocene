@@ -1,0 +1,109 @@
+name: Doc host
+run-name: Doc
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      artifact-doc:
+        description: The name of the doc job artifact
+        value: ${{ jobs.doc.outputs.artifact-name }}
+
+jobs:
+
+  doc:
+    runs-on: ${{ inputs.runner }}
+    env:
+      ARTIFACT: doc-${{inputs.host-triple}}
+      ARTIFACT_USAGE: usage-doc-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+    outputs:
+      artifact-name: ${{ env.ARTIFACT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume:  ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AWS_OIDC_GHA_ARN_STAGING || secrets.AWS_OIDC_GHA_ARN_TRYING }}
+
+
+      - name: Restore build cache
+        uses: ./.github/actions/restore-build-cache/
+        with:
+          build-artifact: ${{ inputs.build-artifact }}
+          build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download usage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-outcomes
+          pattern: usage-*
+          merge-multiple: true
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          test-outcomes-dir: /tmp/test-outcomes
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          # Run dist before test to make sure the tarballs we test are uploaded
+          # to CI beforehand, for manual inspection in case of failures.
+          script: |
+            ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+          # # TODO: Re-add this when we auth with AWS
+          # ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: build/dist
+          retention-days: 1
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

@@ -1,0 +1,200 @@
+name: Build host
+run-name: Build (${{inputs.host-triple}})
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      cache-llvm-uri:
+        description: The URI of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.uri }}
+      cache-llvm-name:
+        description: The filename of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.name }}
+      artifact-build:
+        description: The name of the build job artifact
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+jobs:
+
+  # A job to build LLVM.
+  llvm:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      name: ${{ steps.check.outputs.name }}
+      uri: ${{ steps.check.outputs.uri }}
+    env:
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: runner.os == 'Linux'
+        run: az acr login --name ferrocenecr
+      # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+      - name: Cache Azure storage token
+        run: az account get-access-token --scope https://storage.azure.com/.default --output none 
+
+      - name: Check cache
+        id: check
+        shell: bash
+        run: |
+          set -e
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
+          name="${{ inputs.host-triple }}-$hash.tar.zst"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/$name
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+          
+          set +e
+          state="miss"
+          az storage blob show \
+            --name $name \
+            --container-name ferrocene-llvm-cache \
+            --account-name ferroceneci \
+            --auth-mode login
+          if [ $? -eq 0 ]; then
+            state="hit"
+          fi
+          set -e
+
+          echo "state=$state" >> $GITHUB_OUTPUT
+
+          echo "Cache $state: LLVM (${{ inputs.host-triple }})"
+          echo "::notice title=Cache $state: LLVM (${{ inputs.host-triple }})::$uri"
+
+      - name: Run
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
+
+      # In case it expired
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Store cache
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        shell: bash
+        run: |
+          set -e
+          az storage blob upload \
+            --file llvm_cache.tar.zst \
+            --name ${{ steps.check.outputs.name }} \
+            --container-name ferrocene-llvm-cache \
+            --account-name ferroceneci \
+            --auth-mode login
+
+        
+  build:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    needs:
+      - llvm
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      ARTIFACT_USAGE: usage-build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+      # https://github.com/Azure/login/issues/372#issuecomment-2056289617
+      - name: Cache Azure storage token
+        run: az account get-access-token --scope https://storage.azure.com/.default --output none 
+
+      - name: Get LLVM cache
+        shell: bash
+        run: |
+          az storage blob download \
+            --file llvm_cache.tar.zst \
+            --name ${{ needs.llvm.outputs.name }} \
+            --container-name ferrocene-llvm-cache \
+            --account-name ferroceneci \
+            --auth-mode login
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
+          rm llvm_cache.tar.zst
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          script: |
+            uv run x.py --stage 2 build library src/tools/rustdoc
+            uv run x.py --stage 1 build src/tools/rustdoc
+
+      - name: Pre artifact upload steps
+        shell: bash
+        run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: build.tar
+          retention-days: 1
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

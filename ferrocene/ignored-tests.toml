@@ -49,13 +49,6 @@ tests = [
 targets = ["aarch64-unknown-ferrocenecoretest"]
 reason = "QEMU user space emulation outputs an extra message when an abort happens"
 
-[["tests/rustdoc-ui"]]
-tests = [
-      "tests/rustdoc-ui/unportable-markdown.rs",
-]
-targets = ["aarch64-apple-darwin"]
-reason = "This test seems to rely on some potentially random ordering"
-
 [["tests/incremental"]]
 tests = ["tests/incremental/issue-80691-bad-eval-cache.rs"]
 targets = ["aarch64-unknown-ferrocenecoretest"]

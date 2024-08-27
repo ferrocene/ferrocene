@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
 # SPDX-FileCopyrightText: The Ferrocene Developers
-set -xeuo pipefail
+set -xeo pipefail
 
 # Ensure we never get asked/prompted, always take the new config
 echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections

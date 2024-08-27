@@ -1,25 +1,21 @@
-name: Host Platform
-run-name: Host Platform (${{inputs.host-triple}})
+name: Test Host
+run-name: Test Host (${{inputs.host-triple}})
 
 on:
   workflow_call:
     inputs:
       host-triple:
         type: string
-        description: "The Rust triple of the host platform"
+        description: The Rust triple of the host platform
       self-test-triples:
         # We cannot specify an array here
         # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
         #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
         type: string
-        description: "A comma separated list of triples"
-      test:
-        type: boolean
-        description: "Run the test suite"
-        default: true
+        description: A comma separated list of triples to self-test on
       runner:
         type: string
-        description: "The GitHub Runner to run on"
+        description: The GitHub Runner to run on
       environment:
         type: string
     # outputs:
@@ -30,8 +26,15 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: ./.github/actions/setup/
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      - name: Setup Azure
+        uses: ./.github/actions/setup-azure/
+        with:
+          client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: echo "test"
   build:
     runs-on: ${{ inputs.runner }}

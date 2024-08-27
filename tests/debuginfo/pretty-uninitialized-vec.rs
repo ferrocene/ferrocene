@@ -1,5 +1,4 @@
-//@ ignore-windows failing on win32 bot
-//@ ignore-freebsd: gdb package too new
+//@ ignore-windows-gnu: #128981
 //@ ignore-android: FIXME(#10381)
 //@ compile-flags:-g
 //@ min-gdb-version: 8.1

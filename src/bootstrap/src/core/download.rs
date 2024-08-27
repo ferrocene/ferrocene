@@ -280,11 +280,12 @@ impl Config {
 
         let mut tar = tar::Archive::new(decompressor);
 
+        let is_ci_rustc = dst.ends_with("ci-rustc");
+
         // `compile::Sysroot` needs to know the contents of the `rustc-dev` tarball to avoid adding
         // it to the sysroot unless it was explicitly requested. But parsing the 100 MB tarball is slow.
         // Cache the entries when we extract it so we only have to read it once.
-        let mut recorded_entries =
-            if dst.ends_with("ci-rustc") { recorded_entries(dst, pattern) } else { None };
+        let mut recorded_entries = if is_ci_rustc { recorded_entries(dst, pattern) } else { None };
 
         for member in t!(tar.entries()) {
             let mut member = t!(member);
@@ -720,9 +721,7 @@ download-rustc = false
             let file_times = fs::FileTimes::new().set_accessed(now).set_modified(now);
 
             let llvm_config = llvm_root.join("bin").join(exe("llvm-config", self.build));
-            let llvm_config_file = t!(File::options().write(true).open(llvm_config));
-
-            t!(llvm_config_file.set_times(file_times));
+            t!(crate::utils::helpers::set_file_times(llvm_config, file_times));
 
             if self.should_fix_bins_and_dylibs() {
                 let llvm_lib = llvm_root.join("lib");

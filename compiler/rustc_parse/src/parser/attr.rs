@@ -4,11 +4,14 @@ use rustc_ast::token::{self, Delimiter};
 use rustc_errors::codes::*;
 use rustc_errors::{Diag, PResult};
 use rustc_span::symbol::kw;
-use rustc_span::{sym, BytePos, Span};
+use rustc_span::{BytePos, Span};
 use thin_vec::ThinVec;
 use tracing::debug;
 
-use super::{AttrWrapper, Capturing, FnParseMode, ForceCollect, Parser, ParserRange, PathStyle};
+use super::{
+    AttrWrapper, Capturing, FnParseMode, ForceCollect, Parser, ParserRange, PathStyle, Trailing,
+    UsePreAttrPos,
+};
 use crate::{errors, fluent_generated as fluent, maybe_whole};
 
 // Public for rustfmt usage
@@ -162,7 +165,7 @@ impl<'a> Parser<'a> {
         }
         loop {
             // skip any other attributes, we want the item
-            if snapshot.token.kind == token::Pound {
+            if snapshot.token == token::Pound {
                 if let Err(err) = snapshot.parse_attribute(InnerAttrPolicy::Permitted) {
                     err.cancel();
                     return Some(replacement_span);
@@ -257,11 +260,11 @@ impl<'a> Parser<'a> {
     pub fn parse_attr_item(&mut self, force_collect: ForceCollect) -> PResult<'a, ast::AttrItem> {
         maybe_whole!(self, NtMeta, |attr| attr.into_inner());
 
-        let do_parse = |this: &mut Self, _empty_attrs| {
+        // Attr items don't have attributes.
+        self.collect_tokens(None, AttrWrapper::empty(), force_collect, |this, _empty_attrs| {
             let is_unsafe = this.eat_keyword(kw::Unsafe);
             let unsafety = if is_unsafe {
                 let unsafe_span = this.prev_token.span;
-                this.psess.gated_spans.gate(sym::unsafe_attributes, unsafe_span);
                 this.expect(&token::OpenDelim(Delimiter::Parenthesis))?;
                 ast::Safety::Unsafe(unsafe_span)
             } else {
@@ -273,10 +276,12 @@ impl<'a> Parser<'a> {
             if is_unsafe {
                 this.expect(&token::CloseDelim(Delimiter::Parenthesis))?;
             }
-            Ok((ast::AttrItem { unsafety, path, args, tokens: None }, false))
-        };
-        // Attr items don't have attributes.
-        self.collect_tokens_trailing_token(AttrWrapper::empty(), force_collect, do_parse)
+            Ok((
+                ast::AttrItem { unsafety, path, args, tokens: None },
+                Trailing::No,
+                UsePreAttrPos::No,
+            ))
+        })
     }
 
     /// Parses attributes that appear after the opening of an item. These should
@@ -309,8 +314,8 @@ impl<'a> Parser<'a> {
             };
             if let Some(attr) = attr {
                 // If we are currently capturing tokens (i.e. we are within a call to
-                // `Parser::collect_tokens_trailing_tokens`) record the token positions of this
-                // inner attribute, for possible later processing in a `LazyAttrTokenStream`.
+                // `Parser::collect_tokens`) record the token positions of this inner attribute,
+                // for possible later processing in a `LazyAttrTokenStream`.
                 if let Capturing::Yes = self.capture_state.capturing {
                     let end_pos = self.num_bump_calls;
                     let parser_range = ParserRange(start_pos..end_pos);
@@ -343,7 +348,7 @@ impl<'a> Parser<'a> {
 
         // Presumably, the majority of the time there will only be one attr.
         let mut expanded_attrs = Vec::with_capacity(1);
-        while self.token.kind != token::Eof {
+        while self.token != token::Eof {
             let lo = self.token.span;
             let item = self.parse_attr_item(ForceCollect::Yes)?;
             expanded_attrs.push((item, lo.to(self.prev_token.span)));
@@ -359,7 +364,7 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_meta_seq_top(&mut self) -> PResult<'a, ThinVec<ast::NestedMetaItem>> {
         // Presumably, the majority of the time there will only be one attr.
         let mut nmis = ThinVec::with_capacity(1);
-        while self.token.kind != token::Eof {
+        while self.token != token::Eof {
             nmis.push(self.parse_meta_item_inner()?);
             if !self.eat(&token::Comma) {
                 break;
@@ -400,7 +405,6 @@ impl<'a> Parser<'a> {
         };
         let unsafety = if is_unsafe {
             let unsafe_span = self.prev_token.span;
-            self.psess.gated_spans.gate(sym::unsafe_attributes, unsafe_span);
             self.expect(&token::OpenDelim(Delimiter::Parenthesis))?;
 
             ast::Safety::Unsafe(unsafe_span)

@@ -1,0 +1,25 @@
+name: "Setup Azure"
+description: "Setup Azure on the runner"
+inputs:
+  client-id:
+    description: The Azure provided client-id
+    type: string
+  tenant-id:
+    description: The Azure provided tenant-id
+    type: string
+  subscription-id:
+    description: The Azure provided subscription-id
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
+    - name: Authenicate docker with Azure
+      shell: bash
+      run: az acr login --name ferrocenecr

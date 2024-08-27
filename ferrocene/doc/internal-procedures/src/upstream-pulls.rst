@@ -81,7 +81,7 @@ need to find a new test case and finding it can be deferred.
 Commit and push
 ^^^^^^^^^^^^^^^
 
-After having fixed the conflicts, commit your changes, push them to the branch
+After having fixed the conflicts, commit your changes, push them to the branch,
 and ask for a code review from another member of the team.
 
 Tidy check failures

@@ -106,7 +106,11 @@ If you infrequently use Python scripts, or want to use them in a oneshot command
 
    uv run $COMMAND
 
-For example, to run our licensing checks you can run ``reuse --include-submodules lint``
+For example, to run our licensing checks you can run:
+
+.. code-block:: bash
+   
+   uv run reuse --include-submodules lint
 
 
 Using the CI ``config.toml``

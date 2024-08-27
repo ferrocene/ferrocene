@@ -176,7 +176,6 @@ cfg_if::cfg_if! {
                 unix,
                 not(target_os = "emscripten"),
                 not(all(target_os = "ios", target_arch = "arm")),
-                not(all(target_os = "nto", target_env = "nto70")),
             ),
             all(
                 target_env = "sgx",

@@ -48,6 +48,7 @@ jobs:
     environment: ${{ inputs.environment }}
     needs: [llvm]
     outputs:
+      artifact-name: build-${{inputs.host-triple}}
       artifact-id: ${{ steps.artifact.outputs.artifact-id }}
       artifact-url: ${{ steps.artifact.outputs.artifact-url }}
     steps:
@@ -86,7 +87,7 @@ jobs:
       #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build.outputs.artifact-id }}
+          name: ${{ needs.build.outputs.artifact-name }}
       - run: |
           echo "dist goes here"
           mkdir build
@@ -96,6 +97,7 @@ jobs:
         with:
           name: dist-${{inputs.host-triple}}
           path: build
+          retention-days: 1
   # dist-tools:
   #   runs-on: ${{ inputs.runner }}
   #   needs: [build]

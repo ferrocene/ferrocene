@@ -45,7 +45,7 @@ validity of the predetermined TCL prior to the use of this software tool in a
 safety-related development.
 
 Furthermore, according to clause 11.4.3 of [|iso_ref|] part 8, the user
-shall ensure the usage, the environment and the functional constraints of this
+shall ensure the usage, the environment, and the functional constraints of this
 software tool comply with its evaluation criteria or its qualification.
 
 Ferrocene is accompanied by the appropriate documentation to support this

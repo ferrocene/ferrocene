@@ -47,7 +47,7 @@ There are multiple kinds of merge conflicts:
 General conflict
 """"""""""""""""
 
-For general conflicts the output will look similar to this::
+For general conflicts, the output will look similar to this::
 
   compiler/rustc_abi/Cargo.toml: conflict between lines 18 and 20
 
@@ -58,7 +58,7 @@ Fix the conflict manually and stage the changed files::
 Deletion conflict
 """""""""""""""""
 
-For deletion conflicts the output will look similar to this::
+For deletion conflicts, the output will look similar to this::
 
   compiler/rustc_abi/src/layout.rs: file deleted by one side of the merge
 
@@ -74,7 +74,7 @@ changed the file for is preserved. For example if we changed a bootstrap file,
 we need to port this change to another file. Usually this change needs to
 happen in the same PR.
 
-Some changes might be deferred to a follow-up PR. For example if the deleted
+Some changes might be deferred to a follow-up PR. For example, if the deleted
 file was a test case used in the traceability matrix, we may
 need to find a new test case and finding it can be deferred.
 

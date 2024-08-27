@@ -15,7 +15,6 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
-
 jobs:
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
@@ -23,6 +22,10 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
+      additional-triples: |
+        [
+          "aarch64-unknown-unknown",
+        ]
       runner: ubuntu-latest
 
   build-x86_64-pc-windows-msvc:

@@ -7,18 +7,30 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
-      build-triples:
+      additional-triples:
         type: string
-        description: Additional Rust triples to build using this platform
+        description: In a JSON array, additional Rust triples to build using this platform (do not include the host)
       runner:
         type: string
         description: The GitHub Runner to run on
       environment:
         type: string
     outputs:
-      cached-llvm:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      cache-llvm:
         description: The URI of the (pre-cached or new built, then cached) llvm.tar.zst
         value: ${{ jobs.llvm.outputs.uri }}
+      artifact-build:
+        description: The name of the build job artifact
+        value: ${{ jobs.build.outputs.artifact-name }}
+      artifact-dist:
+        description: The name of the dist job artifact
+        value: ${{ jobs.dist.outputs.artifact-name }}
+      artifact-tools:
+        description: The name of the tools job artifact
+        value: ${{ jobs.tools.outputs.artifact-name }}
 
 
 jobs:
@@ -47,13 +59,14 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     needs: [llvm]
+    env:
+      artifact: build-${{inputs.host-triple}}
     outputs:
-      artifact-name: build-${{inputs.host-triple}}
-      artifact-id: ${{ steps.artifact.outputs.artifact-id }}
-      artifact-url: ${{ steps.artifact.outputs.artifact-url }}
+      artifact-name: ${{ env.artifact }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup/
+      - name: Setup
+        uses: ./.github/actions/setup/
       # - name: Setup Azure
       #   uses: ./.github/actions/setup-azure/
       #   with:
@@ -68,17 +81,20 @@ jobs:
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: build-${{inputs.host-triple}}
+          name: ${{ env.artifact }}
           path: build
+
   dist:
     runs-on: ${{ inputs.runner }}
     needs: [build]
+    env:
+      artifact: dist-${{inputs.host-triple}}
     outputs:
-      artifact-id: ${{ steps.artifact.outputs.artifact-id }}
-      artifact-url: ${{ steps.artifact.outputs.artifact-url }}
+      artifact-name: ${{ env.artifact }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup/
+      - name: Setup
+        uses: ./.github/actions/setup/
       # - name: Setup Azure
       #   uses: ./.github/actions/setup-azure/
       #   with:
@@ -95,25 +111,37 @@ jobs:
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: dist-${{inputs.host-triple}}
+          name: ${{ env.artifact }}
           path: build
           retention-days: 1
-  # dist-tools:
-  #   runs-on: ${{ inputs.runner }}
-  #   needs: [build]
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
-  # self-test:
-  #   runs-on: ${{ inputs.runner }}
-  #   needs:
-  #     - dist
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     #   with:
-  #     #     submodules: false
-  #     # - uses: ./.github/actions/setup/
-  #     #   with:
-  #     #     qnx: true
-  #     - run: echo "test"
+
+  tools:
+    runs-on: ${{ inputs.runner }}
+    needs: [build]
+    env:
+      artifact: tools-${{inputs.host-triple}}
+    outputs:
+      artifact-name: ${{ env.artifact }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      # - name: Setup Azure
+      #   uses: ./.github/actions/setup-azure/
+      #   with:
+      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
+      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+      - run: |
+          echo "tools goes here"
+          mkdir build
+          touch build/boop
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: ${{ env.artifact }}
+          path: build
+          retention-days: 1

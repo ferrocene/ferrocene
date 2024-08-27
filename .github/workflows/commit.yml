@@ -22,7 +22,7 @@ jobs:
   # merge the PR anyway.
   checks:
     name: "Checks"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
     timeout-minutes: 10
     steps:

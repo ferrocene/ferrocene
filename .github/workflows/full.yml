@@ -17,14 +17,16 @@ concurrency:
 
 
 jobs:
-  x86_64-unknown-linux-gnu:
+  build-x86_64-unknown-linux-gnu:
+    name: Build (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/build-host.yml
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
       runner: ubuntu-latest
 
-  x86_64-pc-windows-msvc:
+  build-x86_64-pc-windows-msvc:
+    name: Build (x86_64-pc-windows-msvc)
     uses: ./.github/workflows/build-host.yml
     secrets: inherit
     with:

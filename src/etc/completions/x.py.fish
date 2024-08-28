@@ -75,10 +75,7 @@ complete -c x.py -n "__fish_x.py_needs_command" -a "setup" -d 'Set up the enviro
 complete -c x.py -n "__fish_x.py_needs_command" -a "suggest" -d 'Suggest a subset of tests to run, based on modified files'
 complete -c x.py -n "__fish_x.py_needs_command" -a "vendor" -d 'Vendor dependencies'
 complete -c x.py -n "__fish_x.py_needs_command" -a "perf" -d 'Perform profiling and benchmarking of the compiler using the `rustc-perf-wrapper` tool'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_x.py_needs_command" -a "sign" -d 'Sign Ferrocene qualification documents'
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand build" -l build -d 'build target of the stage0 compiler' -r -f
@@ -283,12 +280,9 @@ complete -c x.py -n "__fish_x.py_using_subcommand doc" -l llvm-profile-use -d 'u
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l set -d 'override options in config.toml' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l open -d 'open the docs in a browser'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l serve -d 'start a live-relodaing web server'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l fresh -d 'ignore caches when building the documentation'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l debug-sphinx -d 'allow easier debugging of Sphinx extensions'
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -l json -d 'render the documentation in JSON format in addition to the usual HTML format'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_x.py_using_subcommand doc" -s i -l incremental -d 'use incremental compilation'
@@ -337,11 +331,8 @@ complete -c x.py -n "__fish_x.py_using_subcommand test" -l bless -d 'whether to 
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l force-rerun -d 'rerun tests even if the inputs are unchanged'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l only-modified -d 'only run tests that result has been changed'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l rustfix-coverage -d 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l coverage -d 'generate coverage for tests'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l ferrocene-test-one-crate-per-cargo-call -d 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report'
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x.py -n "__fish_x.py_using_subcommand test" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_x.py_using_subcommand test" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -553,10 +544,7 @@ complete -c x.py -n "__fish_x.py_using_subcommand run" -l rust-profile-use -d 'u
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l reproducible-artifact -d 'Additional reproducible artifacts that should be added to the reproducible artifacts archive' -r
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l set -d 'override options in config.toml' -r -f
-<<<<<<< HEAD
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l bless -d 'update all files of failing tests'
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 complete -c x.py -n "__fish_x.py_using_subcommand run" -s v -l verbose -d 'use verbose output (-vv for very verbose)'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -s i -l incremental -d 'use incremental compilation'
 complete -c x.py -n "__fish_x.py_using_subcommand run" -l include-default-paths -d 'include default paths in addition to the provided ones'
@@ -707,7 +695,6 @@ complete -c x.py -n "__fish_x.py_using_subcommand perf" -l llvm-profile-generate
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_x.py_using_subcommand perf" -s h -l help -d 'Print help (see more with \'--help\')'
-<<<<<<< HEAD
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l config -d 'TOML configuration file for build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l build-dir -d 'Build directory, overrides `build.build-dir` in `config.toml`' -r -f -a "(__fish_complete_directories)"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l build -d 'build target of the stage0 compiler' -r -f
@@ -742,5 +729,3 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-generate
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l enable-bolt-settings -d 'Enable BOLT link flags'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l skip-stage0-validation -d 'Skip stage0 compiler validation'
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -s h -l help -d 'Print help (see more with \'--help\')'
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

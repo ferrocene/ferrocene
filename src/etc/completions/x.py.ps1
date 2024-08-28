@@ -320,12 +320,9 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--reproducible-artifact', '--reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
             [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in config.toml')
             [CompletionResult]::new('--open', '--open', [CompletionResultType]::ParameterName, 'open the docs in a browser')
-<<<<<<< HEAD
             [CompletionResult]::new('--serve', '--serve', [CompletionResultType]::ParameterName, 'start a live-relodaing web server')
             [CompletionResult]::new('--fresh', '--fresh', [CompletionResultType]::ParameterName, 'ignore caches when building the documentation')
             [CompletionResult]::new('--debug-sphinx', '--debug-sphinx', [CompletionResultType]::ParameterName, 'allow easier debugging of Sphinx extensions')
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('--json', '--json', [CompletionResultType]::ParameterName, 'render the documentation in JSON format in addition to the usual HTML format')
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
@@ -381,11 +378,8 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--force-rerun', '--force-rerun', [CompletionResultType]::ParameterName, 'rerun tests even if the inputs are unchanged')
             [CompletionResult]::new('--only-modified', '--only-modified', [CompletionResultType]::ParameterName, 'only run tests that result has been changed')
             [CompletionResult]::new('--rustfix-coverage', '--rustfix-coverage', [CompletionResultType]::ParameterName, 'enable this to generate a Rustfix coverage file, which is saved in `/<build_base>/rustfix_missing_coverage.txt`')
-<<<<<<< HEAD
             [CompletionResult]::new('--coverage', '--coverage', [CompletionResultType]::ParameterName, 'generate coverage for tests')
             [CompletionResult]::new('--ferrocene-test-one-crate-per-cargo-call', '--ferrocene-test-one-crate-per-cargo-call', [CompletionResultType]::ParameterName, 'Test only one crate per Cargo invocation. This is needed by the Ferrocene qualification documents to ensure there is enough granularity for the test outcomes report')
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')
@@ -639,10 +633,7 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--llvm-profile-use', '--llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')
             [CompletionResult]::new('--reproducible-artifact', '--reproducible-artifact', [CompletionResultType]::ParameterName, 'Additional reproducible artifacts that should be added to the reproducible artifacts archive')
             [CompletionResult]::new('--set', '--set', [CompletionResultType]::ParameterName, 'override options in config.toml')
-<<<<<<< HEAD
             [CompletionResult]::new('--bless', '--bless', [CompletionResultType]::ParameterName, 'update all files of failing tests')
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             [CompletionResult]::new('-v', '-v', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('--verbose', '--verbose', [CompletionResultType]::ParameterName, 'use verbose output (-vv for very verbose)')
             [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'use incremental compilation')
@@ -824,7 +815,6 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--skip-stage0-validation', '--skip-stage0-validation', [CompletionResultType]::ParameterName, 'Skip stage0 compiler validation')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-<<<<<<< HEAD
             break
         }
         'x.py;sign' {
@@ -866,8 +856,6 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--skip-stage0-validation', '--skip-stage0-validation', [CompletionResultType]::ParameterName, 'Skip stage0 compiler validation')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             break
         }
     })

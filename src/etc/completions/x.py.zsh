@@ -796,7 +796,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (perf)
 _arguments "${_arguments_options[@]}" : \
-<<<<<<< HEAD
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:( )' \
@@ -840,8 +839,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (sign)
 _arguments "${_arguments_options[@]}" : \
-=======
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
 '--config=[TOML configuration file for build]:FILE:_files' \
 '--build-dir=[Build directory, overrides \`build.build-dir\` in \`config.toml\`]:DIR:_files -/' \
 '--build=[build target of the stage0 compiler]:BUILD:( )' \

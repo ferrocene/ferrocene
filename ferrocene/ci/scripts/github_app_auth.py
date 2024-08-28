@@ -33,15 +33,7 @@ def req(session, method, url):
     return resp.json()
 
 
-if __name__ == "__main__":
-    for var in ["APP_PRIVATE_KEY", "APP_ID"]:
-        if var not in os.environ:
-            print(f"error: missing environment variable {var}")
-            exit(1)
-
-    app_id = os.environ["APP_ID"]
-    private_key = os.environ["APP_PRIVATE_KEY"]
-
+def get_token(app_id, private_key):
     http = authenticate_session(app_id, private_key)
     installations = req(http, "GET", "https://api.github.com/app/installations")
 
@@ -53,6 +45,23 @@ if __name__ == "__main__":
         exit(1)
 
     token = req(http, "POST", installations[0]["access_tokens_url"])["token"]
+
+    # We never want to print this on GHA, ensure the caller doesn't forget.
+    if 'GITHUB_ACTIONS' in os.environ and os.environ['GITHUB_ACTIONS'] == True:
+        print(f"::add-mask::{token}")
+    
+    return token
+
+if __name__ == "__main__":
+    for var in ["APP_PRIVATE_KEY", "APP_ID"]:
+        if var not in os.environ:
+            print(f"error: missing environment variable {var}")
+            exit(1)
+
+    app_id = os.environ["APP_ID"]
+    private_key = os.environ["APP_PRIVATE_KEY"]
+
+    token = get_token(app_id, private_key)
 
     print(f"::add-mask::{token}")
     with open(os.environ["GITHUB_OUTPUT"], "a") as f:

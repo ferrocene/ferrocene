@@ -33,7 +33,7 @@ jobs:
           path: ${{ env.ORIGIN_REPO_PATH }}
 
       - name: Authenticate with GitHub
-        run: ferrocene/ci/github-app-auth.py
+        run: ferrocene/ci/scripts/github_app_auth.py
         env:
           # https://github.com/organizations/ferrocene/settings/apps/ferrocene-mirror-shared-resources
           APP_ID: 852121

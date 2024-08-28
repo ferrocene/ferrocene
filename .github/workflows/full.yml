@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/host/build.yml
+    uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
@@ -26,7 +26,7 @@ jobs:
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/host/dist.yml
+    uses: ./.github/workflows/dist.yml
     needs:
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
@@ -37,7 +37,7 @@ jobs:
 
   build-x86_64-pc-windows-msvc:
     name: Build (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/host/build.yml
+    uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
@@ -45,7 +45,7 @@ jobs:
 
   dist-x86_64-pc-windows-msvc:
     name: Build (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/host/dist.yml
+    uses: ./.github/workflows/dist.yml
     needs:
       - build-x86_64-pc-windows-msvc
     secrets: inherit

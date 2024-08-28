@@ -34,22 +34,68 @@ jobs:
       host-triple: x86_64-unknown-linux-gnu
       runner: ubuntu-latest
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
 
-  # build-x86_64-pc-windows-msvc:
-  #   name: Build (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/host-build.yml
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-pc-windows-msvc
-  #     runner: windows-latest
+  test-x86_64-unknown-linux-gnu:
+    name: Test (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/host-test.yml
+    needs:
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ubuntu-latest
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
 
-  # dist-x86_64-pc-windows-msvc:
-  #   name: Build (x86_64-pc-windows-msvc)
-  #   uses: ./.github/workflows/host-dist.yml
-  #   needs:
-  #     - build-x86_64-pc-windows-msvc
-  #   secrets: inherit
-  #   with:
-  #     host-triple: x86_64-pc-windows-msvc
-  #     runner: windows-latest
-  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+  targets:
+    name: Build additional targets
+    uses: ./.github/workflows/targets.yml
+    needs:
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      triples: >
+        aarch64-unknown-none,
+        thumbv7em-none-eabi,
+        thumbv7em-none-eabihf,
+        armv8r-none-eabihf,
+        wasm32-unknown-unknown,
+        armv7r-none-eabihf,
+        armebv7r-none-eabihf
+      runner: ubuntu-latest
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+
+  build-x86_64-pc-windows-msvc:
+    name: Build (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/host-build.yml
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      runner: windows-latest
+
+  dist-x86_64-pc-windows-msvc:
+    name: Dist (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/host-dist.yml
+    needs:
+      - build-x86_64-pc-windows-msvc
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      runner: windows-latest
+      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+
+  test-x86_64-pc-windows-msvc:
+    name: Test (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/host-test.yml
+    needs:
+      - build-x86_64-pc-windows-msvc
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      runner: windows-latest
+      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}

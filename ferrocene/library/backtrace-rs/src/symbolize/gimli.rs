@@ -100,7 +100,7 @@ impl Mapping {
             // only borrow `map` and `stash` and we're preserving them below.
             cx: unsafe { core::mem::transmute::<Context<'_>, Context<'static>>(cx) },
             _map: data,
-            stash: stash,
+            stash,
         })
     }
 }
@@ -122,13 +122,11 @@ impl<'data> Context<'data> {
             if cfg!(not(target_os = "aix")) {
                 let data = object.section(stash, id.name()).unwrap_or(&[]);
                 Ok(EndianSlice::new(data, Endian))
+            } else if let Some(name) = id.xcoff_name() {
+                let data = object.section(stash, name).unwrap_or(&[]);
+                Ok(EndianSlice::new(data, Endian))
             } else {
-                if let Some(name) = id.xcoff_name() {
-                    let data = object.section(stash, name).unwrap_or(&[]);
-                    Ok(EndianSlice::new(data, Endian))
-                } else {
-                    Ok(EndianSlice::new(&[], Endian))
-                }
+                Ok(EndianSlice::new(&[], Endian))
             }
         })
         .ok()?;

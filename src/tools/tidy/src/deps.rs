@@ -122,16 +122,7 @@ const EXCEPTIONS: ExceptionList = &[
     ("similar", "Apache-2.0"),                               // generate-tarball
     ("snap", "BSD-3-Clause"),                                // rustc
     ("subtle", "BSD-3-Clause"),                              // generate-tarball
-    ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"),
-    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),      // rustc; new license after 0.215.0
-    ("wasm-encoder", "Apache-2.0 WITH LLVM-exception"),        // rustc
-    ("wasm-metadata", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc; new license after 0.215.0
-    ("wasmparser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
-    ("wasmparser", "Apache-2.0 WITH LLVM-exception"),        // rustc; new license after 0.215.0
-    ("wast", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),              // rustc
-    ("wat", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),               // rustc
-    ("wit-component", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),     // rustc
-    ("wit-parser", "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"),        // rustc
+    ("wasi-preview1-component-adapter-provider", "Apache-2.0 WITH LLVM-exception"), // rustc
     // tidy-alphabetical-end
 ];
 
@@ -517,6 +508,7 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_core",
     "rand_xorshift",
     "rustc-demangle",
+    "shlex",
     "unicode-width",
     "unwinding",
     "wasi",

@@ -529,7 +529,7 @@ fn check_opaque_precise_captures<'tcx>(tcx: TyCtxt<'tcx>, opaque_def_id: LocalDe
 
         match tcx.named_bound_var(hir_id) {
             Some(ResolvedArg::EarlyBound(def_id)) => {
-                expected_captures.insert(def_id);
+                expected_captures.insert(def_id.to_def_id());
 
                 // Make sure we allow capturing these lifetimes through `Self` and
                 // `T::Assoc` projection syntax, too. These will occur when we only
@@ -538,7 +538,7 @@ fn check_opaque_precise_captures<'tcx>(tcx: TyCtxt<'tcx>, opaque_def_id: LocalDe
                 // feature -- see <https://github.com/rust-lang/rust/pull/115659>.
                 if let DefKind::LifetimeParam = tcx.def_kind(def_id)
                     && let Some(def_id) = tcx
-                        .map_opaque_lifetime_to_parent_lifetime(def_id.expect_local())
+                        .map_opaque_lifetime_to_parent_lifetime(def_id)
                         .opt_param_def_id(tcx, tcx.parent(opaque_def_id.to_def_id()))
                 {
                     shadowed_captures.insert(def_id);
@@ -1564,7 +1564,7 @@ fn check_type_alias_type_params_are_used<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalD
             // * compare the param span to the pred span to detect lone user-written `Sized` bounds
             let has_explicit_bounds = bounded_params.is_empty()
                 || (*bounded_params).get(&param.index).is_some_and(|&&pred_sp| pred_sp != span);
-            let const_param_help = (!has_explicit_bounds).then_some(());
+            let const_param_help = !has_explicit_bounds;
 
             let mut diag = tcx.dcx().create_err(errors::UnusedGenericParameter {
                 span,

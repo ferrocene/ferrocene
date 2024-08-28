@@ -55,7 +55,7 @@ impl Config {
     /// Returns false if do not execute at all, otherwise returns its
     /// `status.success()`.
     pub(crate) fn check_run(&self, cmd: &mut BootstrapCommand) -> bool {
-        if self.dry_run() {
+        if self.dry_run() && !cmd.run_always {
             return true;
         }
         self.verbose(|| println!("running: {cmd:?}"));
@@ -634,8 +634,6 @@ impl Config {
         };
 
         // For the beta compiler, put special effort into ensuring the checksums are valid.
-        // FIXME: maybe we should do this for download-rustc as well? but it would be a pain to update
-        // this on each and every nightly ...
         let checksum = if should_verify {
             let error = format!(
                 "src/stage0 doesn't contain a checksum for {url}. \

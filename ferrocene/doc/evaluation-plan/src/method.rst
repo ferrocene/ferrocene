@@ -18,24 +18,6 @@ Through this analysis, the following potential error are identified:
 * Potential errors that do not appear in use cases.
 * Potential errors without an impact for safety.
 
-Errors, with the possibility of detection and mitigation, are added in
-the :doc:`safety-manual:index` with the following form:
-
-.. list-table::
-
-   * - Error identifier 
-     - An identifier for the error with format ERR_NAME_XXX where NAME is a short name describing the faulty feature, and XXX is a number.
-   * - Error description 
-     - The description of the error.
-   * - Condition of appearance 
-     - Condition to reproduce the error.
-   * - Effects 
-     - The effects of the error for the safety-critical products.
-   * - Workaround/Mitigation 
-     - The description of the mitigation and/or the workaround.
-
-.. end of table
-
 For potential errors with no mitigation or test mitigation only, a test will be
 added in the :doc:`qualification-plan:index` to verify these potential errors
 cannot happen.

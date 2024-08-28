@@ -25,14 +25,16 @@ the :doc:`safety-manual:index` with the following form:
 
    * - Error identifier 
      - An identifier for the error with format ERR_NAME_XXX where NAME is a short name describing the faulty feature, and XXX is a number.
-   * - Error description 
+   * - Description
      - The description of the error.
-   * - Condition of appearance 
+   * - Use case
      - Condition to reproduce the error.
-   * - Effects 
+   * - Risk
      - The effects of the error for the safety-critical products.
-   * - Workaround/Mitigation 
+   * - Mitigation
      - The description of the mitigation and/or the workaround.
+   * - Detectable
+     - Indicates if the error is detectable.
 
 .. end of table
 

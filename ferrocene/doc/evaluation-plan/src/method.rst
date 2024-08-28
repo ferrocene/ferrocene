@@ -11,7 +11,7 @@ of each error will be determined. This is done by evaluating the use cases of
 the tool based on the usage in the activities of safety-critical product
 development that this tool replaces or simplifies.
 
-Through this analysis, the following potential error are identified:
+Through this analysis, the following potential errors are identified:
 
 * Potential errors with the possibility to detect and to mitigate them.
 * Potential errors without the possibility to detect or to mitigate them.

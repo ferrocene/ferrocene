@@ -1395,7 +1395,7 @@ pub struct LetExpr<'hir> {
     pub pat: &'hir Pat<'hir>,
     pub ty: Option<&'hir Ty<'hir>>,
     pub init: &'hir Expr<'hir>,
-    /// `Recovered::Yes` when this let expressions is not in a syntanctically valid location.
+    /// `Recovered::Yes` when this let expressions is not in a syntactically valid location.
     /// Used to prevent building MIR in such situations.
     pub recovered: ast::Recovered,
 }
@@ -2773,7 +2773,6 @@ impl PreciseCapturingArg<'_> {
 /// resolution to. Lifetimes don't have this problem, and for them, it's actually
 /// kind of detrimental to use a custom node type versus just using [`Lifetime`],
 /// since resolve_bound_vars operates on `Lifetime`s.
-// FIXME(precise_capturing): Investigate storing this as a path instead?
 #[derive(Debug, Clone, Copy, HashStable_Generic)]
 pub struct PreciseCapturingNonLifetimeArg {
     pub hir_id: HirId,

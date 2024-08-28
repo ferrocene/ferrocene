@@ -54,6 +54,7 @@ _x.py() {
             x.py,setup)
                 cmd="x.py__setup"
                 ;;
+<<<<<<< HEAD
             x.py,sign)
                 cmd="x.py__sign"
                 ;;
@@ -63,6 +64,14 @@ _x.py() {
             x.py,test)
                 cmd="x.py__test"
                 ;;
+=======
+            x.py,suggest)
+                cmd="x.py__suggest"
+                ;;
+            x.py,test)
+                cmd="x.py__test"
+                ;;
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             x.py,vendor)
                 cmd="x.py__vendor"
                 ;;
@@ -2983,6 +2992,7 @@ _x.py() {
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o nospace
                     fi
+<<<<<<< HEAD
                     return 0
                     ;;
                 *)
@@ -3176,6 +3186,8 @@ _x.py() {
                     if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
                         compopt -o nospace
                     fi
+=======
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
                     return 0
                     ;;
                 *)

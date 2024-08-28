@@ -33,8 +33,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup/
+      # - name: Setup
+      #   uses: ./.github/actions/setup/
       # - name: Setup Azure
       #   uses: ./.github/actions/setup-azure/
       #   with:
@@ -58,8 +58,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup/
+      # - name: Setup
+      #   uses: ./.github/actions/setup/
       # - name: Setup Azure
       #   uses: ./.github/actions/setup-azure/
       #   with:

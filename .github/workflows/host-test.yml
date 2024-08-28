@@ -16,103 +16,72 @@ on:
       runner:
         type: string
         description: The GitHub Runner to run on
+      build-run-id:
+        type: string
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
       environment:
         type: string
     # outputs:
 
 
 jobs:
-  llvm:
+
+  test:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        with:
+          submodules: false
+      - uses: ./.github/actions/setup/
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact }}
+          run-id: ${{ inputs.build-run-id }}
       - run: echo "test"
-  build:
-    runs-on: ${{ inputs.runner }}
-    environment: ${{ inputs.environment }}
-    needs: [llvm]
-    steps:
-      # - uses: actions/checkout@v4
-      # - uses: ./.github/actions/setup/
-      - run: echo "test"
-  # dist:
-  #   runs-on: ${{ inputs.runner }}
-  #   needs: [build]
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
-  # dist-tools:
-  #   runs-on: ${{ inputs.runner }}
-  #   needs: [build]
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
-  # self-test:
-  #   runs-on: ${{ inputs.runner }}
-  #   needs:
-  #     - dist
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     #   with:
-  #     #     submodules: false
-  #     # - uses: ./.github/actions/setup/
-  #     #   with:
-  #     #     qnx: true
-  #     - run: echo "test"
 
-  test:
-    if: inputs.test
+  compiletest:
     runs-on: ${{ inputs.runner }}
-    environment: ${{ inputs.environment }}
-    needs:
-      - build
     steps:
       # - uses: actions/checkout@v4
       #   with:
       #     submodules: false
       # - uses: ./.github/actions/setup/
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact }}
+          run-id: ${{ inputs.build-run-id }}
       - run: echo "test"
-  # compiletest:
-  #   if: inputs.test
-  #   runs-on: ${{ inputs.runner }}
-  #   needs:
-  #     - build
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     #   with:
-  #     #     submodules: false
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
-  # test-library:
-  #   if: inputs.test
-  #   runs-on: ${{ inputs.runner }}
-  #   needs:
-  #     - build
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     #   with:
-  #     #     submodules: false
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
-  # test-library-std:
-  #   if: inputs.test
-  #   runs-on: ${{ inputs.runner }}
-  #   needs:
-  #     - build
-  #   steps:
-  #     # - uses: actions/checkout@v4
-  #     #   with:
-  #     #     submodules: false
-  #     # - uses: ./.github/actions/setup/
-  #     - run: echo "test"
+
+  test-library:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      # - uses: ./.github/actions/setup/
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact }}
+          run-id: ${{ inputs.build-run-id }}
+      - run: echo "test"
+
+  test-library-std:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      # - uses: ./.github/actions/setup/
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact }}
+          run-id: ${{ inputs.build-run-id }}
+      - run: echo "test"

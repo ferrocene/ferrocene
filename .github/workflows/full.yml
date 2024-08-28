@@ -18,20 +18,38 @@ concurrency:
 jobs:
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/build-host.yml
+    uses: ./.github/workflows/host/build.yml
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      additional-triples: |
-        [
-          "aarch64-unknown-unknown",
-        ]
       runner: ubuntu-latest
+
+  dist-x86_64-unknown-linux-gnu:
+    name: Dist (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/host/dist.yml
+    needs:
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ubuntu-latest
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
 
   build-x86_64-pc-windows-msvc:
     name: Build (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/build-host.yml
+    uses: ./.github/workflows/host/build.yml
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
       runner: windows-latest
+
+  dist-x86_64-pc-windows-msvc:
+    name: Build (x86_64-pc-windows-msvc)
+    uses: ./.github/workflows/host/dist.yml
+    needs:
+      - build-x86_64-pc-windows-msvc
+    secrets: inherit
+    with:
+      host-triple: x86_64-pc-windows-msvc
+      runner: windows-latest
+      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}

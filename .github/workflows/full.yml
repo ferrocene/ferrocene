@@ -41,6 +41,7 @@ jobs:
     uses: ./.github/workflows/host-test.yml
     needs:
       - build-x86_64-unknown-linux-gnu
+      - targets
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
@@ -93,6 +94,7 @@ jobs:
     uses: ./.github/workflows/host-test.yml
     needs:
       - build-x86_64-pc-windows-msvc
+      - targets
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc

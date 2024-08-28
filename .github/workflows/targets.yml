@@ -38,7 +38,7 @@ jobs:
   targets:
     runs-on: ${{ inputs.runner }}
     env:
-      artifact: dist-${{inputs.host-triple}}
+      artifact: targets-${{inputs.host-triple}}
     outputs:
       artifact-name: ${{ env.artifact }}
     steps:
@@ -55,7 +55,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.build-artifact-name }}
+          name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
       - run: |
           echo "targets ${{ inputs.triples }} goes here"

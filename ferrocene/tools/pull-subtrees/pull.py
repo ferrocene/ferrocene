@@ -385,6 +385,7 @@ def run_capture(*args, **kwargs):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", help="branch this pull is targeting", default=None)
+    parser.add_argument("--subtree", help="subtree to pull", default=None)
     parser.add_argument(
         "--automation", action="store_true", help="automatically create PRs"
     )
@@ -398,6 +399,8 @@ if __name__ == "__main__":
     repo_root = retrieve_git_repo_root()
     for subtree in parse_configuration(config_file):
         if args.target not in subtree.into:
+            continue
+        if args.subtree is not None and args.subtree != subtree.repo:
             continue
         if args.automation:
             PullSubtreePR(subtree, args.target).create()

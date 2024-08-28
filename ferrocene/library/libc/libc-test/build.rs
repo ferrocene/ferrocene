@@ -1656,6 +1656,7 @@ fn test_android(target: &str) {
                "sys/fsuid.h",
                "sys/inotify.h",
                "sys/ioctl.h",
+               "sys/klog.h",
                "sys/mman.h",
                "sys/mount.h",
                "sys/personality.h",
@@ -2575,6 +2576,7 @@ fn test_freebsd(target: &str) {
         // skip those that are manually verified
         match name {
             // FIXME: https://github.com/rust-lang/libc/issues/1272
+            // Also, `execvpe` is introduced in FreeBSD 14.1
             "execv" | "execve" | "execvp" | "execvpe" | "fexecve" => true,
 
             // The `uname` function in the `utsname.h` FreeBSD header is a C
@@ -3433,6 +3435,7 @@ fn test_linux(target: &str) {
                "sys/eventfd.h",
                "sys/file.h",
                "sys/fsuid.h",
+               "sys/klog.h",
                "sys/inotify.h",
                "sys/ioctl.h",
                "sys/ipc.h",

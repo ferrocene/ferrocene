@@ -28,7 +28,7 @@ the :doc:`safety-manual:index` with the following form:
    * - Description
      - The description of the error.
    * - Use case
-     - Condition to reproduce the error.
+     -
    * - Risk
      - The effects of the error for the safety-critical products.
    * - Mitigation

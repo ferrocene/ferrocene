@@ -1,5 +1,5 @@
 name: Test Host
-run-name: Test Host (${{inputs.host-triple}})
+run-name: Test (${{inputs.host-triple}})
 
 on:
   workflow_call:

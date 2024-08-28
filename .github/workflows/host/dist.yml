@@ -1,0 +1,99 @@
+name: Dist host
+run-name: Dist (${{inputs.host-triple}})
+
+on:
+  workflow_call:
+    inputs:
+      host-triple:
+        type: string
+        description: The Rust triple of the host platform
+      runner:
+        type: string
+        description: The GitHub Runner to run on
+      build-run-id:
+        type: number
+        description: The run id of the build workflow
+      build-artifact:
+        type: string
+        description: The artifact from the build workflow
+      environment:
+        type: string
+    outputs:
+      run-id:
+        description: The id of the workflow run
+        value: ${{ github.run_id }}
+      artifact-dist:
+        description: The name of the dist job artifact
+        value: ${{ jobs.dist.outputs.artifact-name }}
+      artifact-tools:
+        description: The name of the tools job artifact
+        value: ${{ jobs.tools.outputs.artifact-name }}
+
+
+jobs:
+
+  dist:
+    runs-on: ${{ inputs.runner }}
+    env:
+      artifact: dist-${{inputs.host-triple}}
+    outputs:
+      artifact-name: ${{ env.artifact }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      # - name: Setup Azure
+      #   uses: ./.github/actions/setup-azure/
+      #   with:
+      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
+      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact-name }}
+          run-id: ${{ inputs.build-run-id }}
+      - run: |
+          echo "dist goes here"
+          mkdir build
+          touch build/boop
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: ${{ env.artifact }}
+          path: build
+          retention-days: 1
+
+  tools:
+    runs-on: ${{ inputs.runner }}
+    env:
+      artifact: tools-${{inputs.host-triple}}
+    outputs:
+      artifact-name: ${{ env.artifact }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      # - name: Setup Azure
+      #   uses: ./.github/actions/setup-azure/
+      #   with:
+      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
+      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact-name }}
+          run-id: ${{ inputs.build-run-id }}
+      - run: |
+          echo "tools goes here"
+          mkdir build
+          touch build/boop
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: ${{ env.artifact }}
+          path: build
+          retention-days: 1

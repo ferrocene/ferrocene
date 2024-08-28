@@ -2441,18 +2441,32 @@ impl Step for CrateLibrustc {
     const ONLY_HOSTS: bool = true;
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
-        run.crate_or_deps("rustc-main")
+        run.crate_or_deps("rustc-main").path("compiler")
     }
 
     fn make_run(run: RunConfig<'_>) {
         let builder = run.builder;
         let host = run.build_triple();
         let compiler = builder.compiler_for(builder.top_stage, host, host);
-        let crates = run
-            .paths
-            .iter()
-            .map(|p| builder.crate_paths[&p.assert_single_path().path].clone())
-            .collect();
+
+        let crates = match &*run.paths {
+            [crate::PathSet::Set(set)]
+                if set.len() == 1
+                    && set.first().unwrap().path == <_ as AsRef<Path>>::as_ref("compiler") =>
+            {
+                run.builder
+                    .in_tree_crates("rustc-main", None)
+                    .iter()
+                    .map(|krate| krate.local_path(run.builder))
+                    .map(|p| builder.crate_paths[&p].clone())
+                    .collect()
+            }
+            _ => run
+                .paths
+                .iter()
+                .map(|p| builder.crate_paths[&p.assert_single_path().path].clone())
+                .collect(),
+        };
 
         builder.ensure(CrateLibrustc { compiler, target: run.target, crates });
     }

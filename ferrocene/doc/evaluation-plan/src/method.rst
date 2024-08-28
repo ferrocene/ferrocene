@@ -46,7 +46,7 @@ Identify Use Cases
 ------------------
 
 For each tool, the use cases needed for the Tool Qualification Process need to
-be identified. For each use case,  the input artifacts (e.g a C file, a Rust
+be identified. For each use case, the input artifacts (e.g a C file, a Rust
 file, etc.), the output artifacts (object file, executable, etc.), and usage
 constraints must also be listed. The following table represents all the
 information that is required to describe a use case.

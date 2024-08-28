@@ -1,5 +1,5 @@
 --out src/windows_sys.rs
---config std flatten
+--config sys flatten
 --filter
 Windows.Win32.Foundation.CloseHandle
 Windows.Win32.Foundation.FALSE

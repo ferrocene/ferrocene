@@ -22,7 +22,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: ubuntu-latest
+      runner: ubuntu-24.04
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
@@ -32,7 +32,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: ubuntu-latest
+      runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
 
@@ -45,7 +45,19 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: ubuntu-latest
+      runner: ubuntu-24.04
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+
+  doc-x86_64-unknown-linux-gnu:
+    name: Doc (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/host-doc.yml
+    needs:
+      - build-x86_64-unknown-linux-gnu
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
 
@@ -65,7 +77,7 @@ jobs:
         wasm32-unknown-unknown,
         armv7r-none-eabihf,
         armebv7r-none-eabihf
-      runner: ubuntu-latest
+      runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
 
@@ -75,7 +87,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      runner: windows-latest
+      runner: windows-2022
 
   dist-x86_64-pc-windows-msvc:
     name: Dist (x86_64-pc-windows-msvc)
@@ -85,7 +97,7 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      runner: windows-latest
+      runner: windows-2022
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
@@ -98,6 +110,40 @@ jobs:
     secrets: inherit
     with:
       host-triple: x86_64-pc-windows-msvc
-      runner: windows-latest
+      runner: windows-2022
       build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+
+
+  build-aarch64-apple-darwin:
+    name: Build (aarch64-apple-darwin)
+    uses: ./.github/workflows/host-build.yml
+    secrets: inherit
+    with:
+      host-triple: aarch64-apple-darwin
+      runner: macos-14
+
+  dist-aarch64-apple-darwin:
+    name: Dist (aarch64-apple-darwin)
+    uses: ./.github/workflows/host-dist.yml
+    needs:
+      - build-aarch64-apple-darwin
+    secrets: inherit
+    with:
+      host-triple: aarch64-apple-darwin
+      runner: macos-14
+      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
+
+  test-aarch64-apple-darwin:
+    name: Test (aarch64-apple-darwin)
+    uses: ./.github/workflows/host-test.yml
+    needs:
+      - build-aarch64-apple-darwin
+      - targets
+    secrets: inherit
+    with:
+      host-triple: aarch64-apple-darwin
+      runner: macos-14
+      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}

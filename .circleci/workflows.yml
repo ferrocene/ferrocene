@@ -53,6 +53,9 @@ parameters:
   llvm-rebuild--aarch64-apple-darwin:
     type: boolean
     default: false
+  llvm-rebuild--x86_64-apple-darwin:
+    type: boolean
+    default: false
   llvm-rebuild--x86_64-pc-windows-msvc:
     type: boolean
     default: false
@@ -77,6 +80,12 @@ parameters:
   targets--aarch64-apple-darwin--self-test:
     type: string
     default: ""
+  targets--x86_64-apple-darwin--build:
+    type: string
+    default: ""
+  targets--x86_64-apple-darwin--self-test:
+    type: string
+    default: ""
   targets--x86_64-pc-windows-msvc--build:
     type: string
     default: ""
@@ -87,6 +96,7 @@ parameters:
 orbs:
   aws-cli: circleci/aws-cli@4.0
   win: circleci/windows@5.0
+  macos: circleci/macos@2.5.2
 
 jobs:
   # Container dedicated to running quick checks for each commit pushed in open
@@ -583,6 +593,127 @@ jobs:
           os: darwin
           restore-from-job: aarch64-darwin-build
 
+
+  # x86_64-apple-darwin jobs
+
+  x86_64-darwin-llvm:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: x86_64-apple-darwin,x86_64-apple-darwin
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to using too much memory, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
+    steps:
+      - macos/install-rosetta
+      - when:
+          condition: << pipeline.parameters.llvm-rebuild--x86_64-apple-darwin >>
+          steps:
+            - ferrocene-checkout
+            - ferrocene-setup-darwin: # Darwin does not come with awscli, setup it before aws steps
+                wrapper: arch -x86_64 zsh
+            - setup-venv
+            - aws-oidc-auth
+            - ferrocene-ci
+      - run:
+          name: Empty step to make sure the job always has steps
+          command: echo
+
+  x86_64-darwin-build:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - macos/install-rosetta
+      - ferrocene-job-build:
+          os: darwin
+          wrapper: arch -x86_64 zsh
+
+  x86_64-darwin-dist:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist rust-std
+    steps:
+      - macos/install-rosetta
+      - ferrocene-job-dist:
+          os: darwin
+          restore-from-job: x86_64-darwin-build
+          wrapper: arch -x86_64 zsh
+
+  x86_64-darwin-dist-tools:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.large.gen1 # 8 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+      - macos/install-rosetta
+      - ferrocene-job-dist:
+            os: darwin
+            restore-from-job: x86_64-darwin-build
+            wrapper: arch -x86_64 zsh
+
+  x86_64-darwin-self-test:
+    macos:
+      xcode: "15.3.0"
+    resource_class: macos.m1.medium.gen1 # 4 cores
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-apple-darwin--self-test >>
+    steps:
+      - macos/install-rosetta
+      - ferrocene-git-shallow-clone:
+          depth: 1
+      - ferrocene-setup-darwin # Darwin does not come with awscli, setup it before aws steps
+      - aws-oidc-auth
+      - setup-qnx-toolchain: {}
+      - run:
+          name: Download dist artifacts and run the self-test tool
+          command: arch -x86_64 ferrocene/ci/scripts/run-self-test.sh
+
+  x86_64-darwin-generic-test-runner:
+    macos:
+      xcode: "15.3.0"
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-apple-darwin
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        arch -x86_64 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - macos/install-rosetta
+      - ferrocene-job-test-container:
+          os: darwin
+          restore-from-job: x86_64-darwin-build
+          wrapper: arch -x86_64 zsh
+
   # x86_64-pc-windows-msvc jobs
 
   x86_64-windows-llvm:
@@ -806,6 +937,47 @@ workflows:
           requires:
             - build-docker--ubuntu-24
 
+
+      - x86_64-darwin-llvm: {}
+      - x86_64-darwin-build:
+          requires:
+            - x86_64-darwin-llvm
+      - x86_64-darwin-dist:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-dist-tools:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test
+          job: test
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library
+          job: test:library
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-compiletest
+          job: test:compiletest
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library-std
+          job: test:library-std
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-self-test:
+          requires:
+            - x86_64-darwin-dist
+            - x86_64-darwin-dist-tools
+            # - x86_64-linux-dist-targets
+
   # Main workflow used by bors to ensure every PR is fully green.
   full:
     when:
@@ -844,8 +1016,14 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
-            - aarch64-linux-test-library
-            - aarch64-linux-compiletest
+            - aarch64-darwin-test
+            - aarch64-darwin-test-library
+            - aarch64-darwin-test-library-std
+            - aarch64-darwin-compiletest
+            - x86_64-darwin-test
+            - x86_64-darwin-test-library
+            - x86_64-darwin-test-library-std
+            - x86_64-darwin-compiletest
       - x86_64-linux-traceability-matrix:
           requires: *test-outcomes-dependencies
       - x86_64-linux-dist:
@@ -1007,6 +1185,46 @@ workflows:
             - aarch64-darwin-dist-tools
             - x86_64-linux-dist-targets
 
+      - x86_64-darwin-llvm: {}
+      - x86_64-darwin-build:
+          requires:
+            - x86_64-darwin-llvm
+      - x86_64-darwin-dist:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-dist-tools:
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test
+          job: test
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library
+          job: test:library
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-compiletest
+          job: test:compiletest
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-generic-test-runner:
+          name: x86_64-darwin-test-library-std
+          job: test:library-std
+          resource-class: macos.m1.large.gen1 # 8 cores
+          requires:
+            - x86_64-darwin-build
+      - x86_64-darwin-self-test:
+          requires:
+            - x86_64-darwin-dist
+            - x86_64-darwin-dist-tools
+            - x86_64-linux-dist-targets
+
       - x86_64-windows-llvm: {}
       - x86_64-windows-dist:
           requires:
@@ -1036,6 +1254,11 @@ workflows:
             - aarch64-darwin-test-library
             - aarch64-darwin-test-library-std
             - aarch64-darwin-compiletest
+            - aarch64-darwin-self-test
+            - x86_64-darwin-test
+            - x86_64-darwin-test-library
+            - x86_64-darwin-test-library-std
+            - x86_64-darwin-compiletest
 
   # CircleCI doesn't like a build when no jobs are actually executed, treating
   # it as a build failure. Due to how our workflows are setup this will happen
@@ -1063,6 +1286,9 @@ commands:
       os:
         type: string
         default: linux # Or `windows` or `darwin`
+      wrapper:
+        type: string
+        default: ""
     steps:
       - ferrocene-checkout:
           llvm-subset: true
@@ -1070,7 +1296,8 @@ commands:
           condition:
             equal: [<<parameters.os>>, "darwin"]
           steps:
-            - ferrocene-setup-darwin
+            - ferrocene-setup-darwin:
+                wrapper: <<parameters.wrapper>>
             - setup-venv
       - when:
           condition:
@@ -1079,7 +1306,8 @@ commands:
             - ferrocene-setup-windows
             - setup-venv
       - aws-oidc-auth
-      - ferrocene-ci
+      - ferrocene-ci:
+          wrapper: <<parameters.wrapper>>
       # Persist the build artifacts so following jobs don't have to start from
       # scratch. The build directory is shrinked beforehand to avoid persisting
       # too much data (slowing down uploads and downloads).
@@ -1105,6 +1333,9 @@ commands:
       qnx:
         type: boolean
         default: false
+      wrapper:
+        type: string
+        default: ""
     steps:
       - ferrocene-checkout:
           llvm-subset: << parameters.llvm-subset >>
@@ -1132,7 +1363,8 @@ commands:
             equal: [<<parameters.qnx>>, true]
           steps:
             - setup-qnx-toolchain: {}
-      - ferrocene-ci
+      - ferrocene-ci:
+          wrapper: <<parameters.wrapper>>
 
   ferrocene-job-test-container:
     description: Collection of steps for test jobs in containers
@@ -1142,6 +1374,9 @@ commands:
       os:
         type: string
         default: linux # Or `windows` or `darwin`
+      wrapper:
+        type: string
+        default: ""
     steps:
       - ferrocene-checkout:
           llvm-subset: true
@@ -1154,7 +1389,8 @@ commands:
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
-      - ferrocene-ci
+      - ferrocene-ci:
+          wrapper: <<parameters.wrapper>>
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs
@@ -1286,10 +1522,14 @@ commands:
 
   ferrocene-setup-darwin:
     description: Prepare the Darwin environment
+    parameters:
+      wrapper:
+        type: string
+        default: ""
     steps:
       - run:
           name: Setup Darwin environment
-          command: ferrocene/ci/scripts/setup-darwin.sh
+          command: << parameters.wrapper >> ferrocene/ci/scripts/setup-darwin.sh
           
 
   ferrocene-setup-windows:

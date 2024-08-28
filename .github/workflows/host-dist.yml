@@ -11,7 +11,7 @@ on:
         type: string
         description: The GitHub Runner to run on
       build-run-id:
-        type: number
+        type: string
         description: The run id of the build workflow
       build-artifact:
         type: string

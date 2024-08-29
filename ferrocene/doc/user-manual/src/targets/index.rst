@@ -26,10 +26,10 @@ There are also two variants of the standard library available:
 * **Full**: provides the ``core``, ``alloc``, ``std``, ``test`` and
   ``proc_macro`` built-in crates.
 
-Supported targets
+Qualified targets
 -----------------
 
-Supported targets are provided with the highest level of assurance. They are
+Qualified targets are provided with the highest level of assurance. They are
 qualified for use in safety-critical contexts (when used with a qualified
 rustc), and the full Ferrocene test suite is executed on the target for every
 code change.
@@ -53,6 +53,36 @@ code change.
      - ``aarch64-unknown-none``
      - Cross-compilation
      - Bare-metal
+     - \-
+
+Quality managed targets
+-----------------------
+
+Quality managed targets are targets which are suitable for use in production 
+outside of safety critical contexts. Support is available. The Ferrocene test
+suite successfully executed on the target. Known problems are tracked and
+available.
+
+For any of the following reasons, the target is not qualified:
+
+* The target is deemed unlikely to be part of a safety critical context.
+* The target is in the process of qualification, but is not completed yet.
+
+Quality managed targets are not qualified, but can usually be qualified on request.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Target
+     - Triple
+     - Kind
+     - Standard library
+     - Notes
+
+   * - :ref:`aarch64-apple-darwin`
+     - ``aarch64-apple-darwin``
+     - Host platform
+     - Full
      - \-
 
 Experimental targets
@@ -125,12 +155,6 @@ should not be used in production.
      - Cross-compilation
      - Full
      - Available as a cross-compile target on :ref:`aarch64-apple-darwin`.
-
-   * - :ref:`aarch64-apple-darwin`
-     - ``aarch64-apple-darwin``
-     - Host platform
-     - Full
-     - \-
 
    * - :ref:`x86_64-pc-windows-msvc`
      - ``x86_64-pc-windows-msvc``

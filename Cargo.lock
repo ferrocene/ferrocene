@@ -2405,6 +2405,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "html_parser"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6f56db07b6612644f6f7719f8ef944f75fff9d6378fdf3d316fd32194184abd"
+dependencies = [
+ "doc-comment",
+ "pest",
+ "pest_derive",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3121,13 +3136,13 @@ version = "0.1.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "html_parser",
  "mdbook",
  "pulldown-cmark 0.10.3",
  "pulldown-cmark-to-cmark",
  "serde_json",
  "thiserror",
  "toml 0.8.16",
- "xmlparser",
 ]
 
 [[package]]

@@ -16,8 +16,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
+  # Matrix cannot be used here as later jobs will `need` specific containers
+  # and we do not want to make those jobs wait for all containers.
+  container-x86_64-ubuntu-24:
+    name: Container (x86_64, ubuntu-24)
+    uses: ./.github/workflows/container.yml
+    secrets: inherit
+    with:
+      name: ubuntu-24
+      architecture: x86_64
+      runner: ubuntu-24.04
+
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
+    needs:
+      - container-x86_64-ubuntu-24
     uses: ./.github/workflows/host-build.yml
     secrets: inherit
     with:
@@ -28,6 +41,7 @@ jobs:
     name: Dist (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-dist.yml
     needs:
+      - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -40,6 +54,7 @@ jobs:
     name: Test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-test.yml
     needs:
+      - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -53,6 +68,7 @@ jobs:
     name: Doc (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-doc.yml
     needs:
+      - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -65,6 +81,7 @@ jobs:
     name: Build additional targets
     uses: ./.github/workflows/targets.yml
     needs:
+      - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -151,6 +168,7 @@ jobs:
   tracability-matrix:
     name: Tracability Matrix
     needs:
+      - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
       - test-x86_64-unknown-linux-gnu
       - test-x86_64-pc-windows-msvc

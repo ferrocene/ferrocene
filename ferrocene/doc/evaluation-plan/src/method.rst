@@ -90,7 +90,7 @@ HazOp analysis:
 
 .. end of table
 
-The associated detection measure and/or mitigation should be identified with an
+The associated detection measure and/or mitigation should be identified with a
 unique name, and with a detailed description of the measure. The following
 table describes a countermeasure entry:
 

@@ -83,6 +83,15 @@ pub struct AttrShouldBeAppliedToFn {
 }
 
 #[derive(Diagnostic)]
+#[diag(passes_should_be_applied_to_fn_or_unit_struct)]
+pub struct AttrShouldBeAppliedToFnOrUnitStruct {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label]
+    pub defn_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag(passes_should_be_applied_to_fn, code = E0739)]
 pub struct TrackedCallerWrongLocation {
     #[primary_span]
@@ -372,13 +381,6 @@ pub struct FfiConstInvalidTarget {
 }
 
 #[derive(LintDiagnostic)]
-#[diag(passes_must_use_async)]
-pub struct MustUseAsync {
-    #[label]
-    pub span: Span,
-}
-
-#[derive(LintDiagnostic)]
 #[diag(passes_must_use_no_effect)]
 pub struct MustUseNoEffect {
     pub article: &'static str,
@@ -616,6 +618,15 @@ pub struct RustcSafeIntrinsic {
 #[derive(Diagnostic)]
 #[diag(passes_rustc_std_internal_symbol)]
 pub struct RustcStdInternalSymbol {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag(passes_rustc_pub_transparent)]
+pub struct RustcPubTransparent {
     #[primary_span]
     pub attr_span: Span,
     #[label]

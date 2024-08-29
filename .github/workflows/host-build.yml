@@ -10,6 +10,9 @@ on:
       runner:
         type: string
         description: The GitHub Runner to run on
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
       environment:
         type: string
     outputs:
@@ -29,23 +32,28 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     outputs:
-      uri: ${{ steps.build-llvm.outputs.uri }}
+      uri: ${{ steps.run.outputs.uri }}
+    env:
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      # - name: Setup
-      #   uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Build
-        id: build-llvm
-        run: |
-          echo "llvm goes here"
-          echo "uri=some://cache.url/for/testing" >> "$GITHUB_OUTPUT"
+      - name: Setup
+        uses: ./.github/actions/setup/
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        run: az acr login --name ferrocenecr
+
+      - name: Run
+        id: run
+        run: uv run ferrocene/ci/run.sh
         
   build:
     runs-on: ${{ inputs.runner }}
@@ -53,27 +61,36 @@ jobs:
     needs:
       - llvm
     env:
-      artifact: build-${{inputs.host-triple}}
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      SCRIPT: |
+        ./ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
     outputs:
-      artifact-name: ${{ env.artifact }}
+      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      # - name: Setup
-      #   uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - run: |
-          echo "got llvm from ${{ needs.llvm.outputs.uri }}"
-          echo "build goes here"
-          mkdir build
-          touch build/boop
+      - name: Setup
+        uses: ./.github/actions/setup/
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        run: az acr login --name ferrocenecr
+
+      - name: Run
+        id: run
+        run: uv run ferrocene/ci/run.sh
+
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: ${{ env.artifact }}
+          name: ${{ env.ARTIFACT }}
           path: build

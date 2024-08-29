@@ -36,6 +36,7 @@ jobs:
     with:
       host-triple: x86_64-unknown-linux-gnu
       runner: ubuntu-24.04
+      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
@@ -49,6 +50,7 @@ jobs:
       runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
 
   test-x86_64-unknown-linux-gnu:
     name: Test (x86_64-unknown-linux-gnu)
@@ -63,6 +65,7 @@ jobs:
       runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
 
   doc-x86_64-unknown-linux-gnu:
     name: Doc (x86_64-unknown-linux-gnu)
@@ -76,6 +79,7 @@ jobs:
       runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
 
   targets:
     name: Build additional targets
@@ -97,6 +101,7 @@ jobs:
       runner: ubuntu-24.04
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
 
   build-x86_64-pc-windows-msvc:
     name: Build (x86_64-pc-windows-msvc)

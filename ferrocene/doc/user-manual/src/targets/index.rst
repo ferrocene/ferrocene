@@ -34,6 +34,10 @@ qualified for use in safety-critical contexts (when used with a qualified
 rustc), and the full Ferrocene test suite is executed on the target for every
 code change.
 
+Only stable releases of qualified targets are qualified. Other releases, such
+as beta, should be considered Quality Managed. Specific releases can be
+qualified upon request.
+
 .. list-table::
    :header-rows: 1
 
@@ -65,7 +69,7 @@ available.
 
 For any of the following reasons, the target is not qualified:
 
-* The target is deemed unlikely to be part of a safety critical context.
+* The target is deemed unlikely to be used in a safety critical context.
 * The target is in the process of qualification, but is not completed yet.
 
 Quality managed targets are not qualified, but can usually be qualified on request.

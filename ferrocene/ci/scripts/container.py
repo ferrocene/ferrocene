@@ -47,7 +47,7 @@ def build_docker_client():
 def repo_for_image(image):
    return f"ferrocene/{image}"
 
-def ensure_built(platform, image):
+def ensure_built(platform, image, pull=False):
     docker_client = build_docker_client()
     sought_address = uri(platform, image)
     
@@ -80,11 +80,14 @@ def ensure_built(platform, image):
 
     match (remote_image, local_image):
         case (True, False):
-            logging.info(f"Pulling")
-            subprocess.run(
-                ["docker", "pull", sought_address],
-                check=True
-            )
+            if pull:
+                logging.info(f"Pulling")
+                subprocess.run(
+                    ["docker", "pull", sought_address],
+                    check=True
+                )
+            else:
+                logging.info(f"Image present in repository")
         case (False, False):
             logging.info(f"Building")
             # The docker python package API does not, in fact, use buildkit.
@@ -127,6 +130,7 @@ def arguments():
     ensure_built_parser = subparsers.add_parser("ensure-built")
     ensure_built_parser.add_argument('platform')
     ensure_built_parser.add_argument('image')
+    ensure_built_parser.add_argument('--pull', default=False)
 
     uri_parser = subparsers.add_parser("uri")
     uri_parser.add_argument('platform')
@@ -148,7 +152,7 @@ def main():
         case "digest":
             print(digest(args.image))
         case "ensure-built":
-            ensure_built(args.platform, args.image)
+            ensure_built(args.platform, args.image, pull=args.pull)
         case "uri":
             print(uri(args.platform, args.image))
         case _:

@@ -35,7 +35,7 @@ rustc), and the full Ferrocene test suite is executed on the target for every
 code change.
 
 Only stable releases of qualified targets are qualified. Other releases, such
-as beta, should be considered Quality Managed. Specific releases can be
+as beta, should be considered Quality Managed. Such releases can be
 qualified upon request.
 
 .. list-table::

@@ -45,13 +45,10 @@ unsafe extern "C" fn callback(
     vec: *mut libc::c_void,
 ) -> libc::c_int {
     // SAFETY: We are guaranteed these fields:
-    let libc::dl_phdr_info {
-        dlpi_addr,
-        dlpi_name,
-        dlpi_phdr,
-        dlpi_phnum,
-        ..
-    } = unsafe { *info };
+    let dlpi_addr = unsafe { (*info).dlpi_addr };
+    let dlpi_name = unsafe { (*info).dlpi_name };
+    let dlpi_phdr = unsafe { (*info).dlpi_phdr };
+    let dlpi_phnum = unsafe { (*info).dlpi_phnum };
     // SAFETY: We assured this.
     let libs = unsafe { &mut *vec.cast::<Vec<Library>>() };
     // most implementations give us the main program first

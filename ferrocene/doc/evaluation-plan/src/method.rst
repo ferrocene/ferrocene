@@ -77,7 +77,7 @@ organize a brainstorming session in order to detect all potential errors. It is
 based on the use of specific words called "Guide Words" that guide
 brainstorming sessions around deviations in toolchain usages. These guide words
 should be used systematically with each parameter and applied to each toolchain
-node and the associated deviation should be evaluated by answering the following
+node, and the associated deviation should be evaluated by answering the following
 questions:
 
 * Does the hazard exist?

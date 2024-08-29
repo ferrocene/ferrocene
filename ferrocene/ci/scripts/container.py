@@ -130,7 +130,7 @@ def arguments():
     ensure_built_parser = subparsers.add_parser("ensure-built")
     ensure_built_parser.add_argument('platform')
     ensure_built_parser.add_argument('image')
-    ensure_built_parser.add_argument('--pull', default=False)
+    ensure_built_parser.add_argument('--pull', action='store_true', default=False)
 
     uri_parser = subparsers.add_parser("uri")
     uri_parser.add_argument('platform')

@@ -481,10 +481,6 @@ passes_must_not_suspend =
     `must_not_suspend` attribute should be applied to a struct, enum, union, or trait
     .label = is not a struct, enum, union, or trait
 
-passes_must_use_async =
-    `must_use` attribute on `async` functions applies to the anonymous `Future` returned by the function, not the value within
-    .label = this attribute does nothing, the `Future`s returned by async functions are already `must_use`
-
 passes_must_use_no_effect =
     `#[must_use]` has no effect when applied to {$article} {$target}
 
@@ -657,6 +653,10 @@ passes_rustc_lint_opt_ty =
     `#[rustc_lint_opt_ty]` should be applied to a struct
     .label = not a struct
 
+passes_rustc_pub_transparent =
+    attribute should be applied to `#[repr(transparent)]` types
+    .label = not a `#[repr(transparent)]` type
+
 passes_rustc_safe_intrinsic =
     attribute should be applied to intrinsic functions
     .label = not an intrinsic function
@@ -671,6 +671,10 @@ passes_should_be_applied_to_fn =
         [true] cannot be applied to crates
         *[false] not a function definition
     }
+
+passes_should_be_applied_to_fn_or_unit_struct =
+    attribute should be applied to a function definition or unit struct
+    .label = not a function definition or a unit struct
 
 passes_should_be_applied_to_static =
     attribute should be applied to a static

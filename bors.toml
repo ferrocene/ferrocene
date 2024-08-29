@@ -5,7 +5,7 @@
 status = ["full"]
 
 # Wait until the `commit` GHA workflow passes before queueing a PR
-pr_status = ["Commit / %"]
+pr_status = ["Commit / Checks"]
 
 # Consider the build as failed if it takes more than three hours to finish
 # A normal build should take less, but there are slower parts of the build that

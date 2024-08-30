@@ -61,7 +61,6 @@ jobs:
         run: |
           docker run \
             --rm \
-            --tty \
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \

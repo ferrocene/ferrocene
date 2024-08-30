@@ -16,6 +16,9 @@ on:
       build-artifact:
         type: string
         description: The artifact from the build workflow
+      container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
       environment:
         type: string
     outputs:

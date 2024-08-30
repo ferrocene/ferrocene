@@ -31,5 +31,3 @@
 - path: ferrocene/library/backtrace-rs
   repo: rust-lang/backtrace-rs
   ref: master
-  after:
-    - update-cargo-lock backtrace library

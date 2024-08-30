@@ -16,11 +16,7 @@ const TARGET_CNT: usize = 200;
 fn main() {
     // This test has a chance to time out, try to not let it time out
     thread::spawn(move || -> () {
-<<<<<<< HEAD
         thread::sleep(Duration::from_secs(120));
-=======
-        thread::sleep(Duration::from_secs(30));
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         process::exit(1);
     });
 

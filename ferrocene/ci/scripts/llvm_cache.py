@@ -71,7 +71,8 @@ def arguments():
     download_parser = subparsers.add_parser("download", help="Download the existing LLVM cache")
     download_parser.add_argument("--url", help="Manually set the input `tar.zst` location")
 
-    s3_url_parser = subparsers.add_parser("s3-url", help="Calculate the LLVM cache URL")
+    url_parser = subparsers.add_parser("url", help="Calculate the LLVM cache URL")
+    hash_parser = subparsers.add_parser("hash", help="Calculate the LLVM cache hash")
 
     return parser.parse_args()
 
@@ -95,8 +96,10 @@ def main():
         exit(1)
 
     # match added in 3.10
-    if args.subcommand == "s3-url":
-        subcommand_s3_url(ferrocene_host)
+    if args.subcommand == "url":
+        subcommand_url(ferrocene_host)
+    elif args.subcommand == "hash":
+        subcommand_hash()
     elif args.subcommand == "download":
         subcommand_download(ferrocene_host, args.url)
     elif args.subcommand == "prepare":
@@ -106,20 +109,24 @@ def main():
 
 def subcommand_download(ferrocene_host, url):
     if url == None:
-        url = get_s3_url(ferrocene_host).geturl()
+        url = get_url(ferrocene_host).geturl()
 
     cache.retrieve(url, ".")
 
 def subcommand_prepare(ferrocene_host, url):
     if url == None:
-        url = get_s3_url(ferrocene_host).geturl()
+        url = get_url(ferrocene_host).geturl()
 
     tarball = prepare_llvm_build(ferrocene_host)
     cache.store(url, tarball)
 
-def subcommand_s3_url(ferrocene_host):
-    s3_url = get_s3_url(ferrocene_host)
-    print(s3_url.geturl())
+def subcommand_url(ferrocene_host):
+    cache_url = get_url(ferrocene_host)
+    print(cache_url.geturl())
+
+def subcommand_hash():
+    hash_val = get_llvm_cache_hash()
+    print(hash_val)
 
 def prepare_llvm_build(ferrocene_host):
     """
@@ -187,7 +194,7 @@ def prepare_llvm_build(ferrocene_host):
 
     return f"build/{ferrocene_host}/llvm"
 
-def get_s3_url(ferrocene_host):
+def get_url(ferrocene_host):
     cache_hash = get_llvm_cache_hash()
     cache_file = f"{CACHE_PREFIX}/{ferrocene_host}-{cache_hash}.tar.zst"
     s3_url = f"s3://{CACHE_BUCKET}/{cache_file}"

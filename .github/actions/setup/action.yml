@@ -33,17 +33,17 @@ runs:
     - name: Install dependencies (Ubuntu)
       if: (runner.os == 'Linux') && inputs.build-dependencies
       shell: bash
-      run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
+      run: ferrocene/ci/scripts/setup-ubuntu.sh
 
     - name: Install dependencies (Windows)
       if: (runner.os == 'Windows') && inputs.build-dependencies
       shell: bash
-      run: sudo ferrocene/ci/scripts/setup-windows.sh
+      run: ferrocene/ci/scripts/setup-windows.sh
 
     - name: Install dependencies (macOS)
       if: (runner.os == 'macOS') && inputs.build-dependencies
       shell: bash
-      run: sudo ferrocene/ci/scripts/setup-darwin.sh
+      run: ferrocene/ci/scripts/setup-darwin.sh
 
     - name: Setup uv, Python, and venv
       if: inputs.setup-venv

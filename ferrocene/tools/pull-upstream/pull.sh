@@ -11,7 +11,6 @@ GENERATED_COMPLETIONS_DIR="src/etc/completions/"
 
 # We handle some lockfiles separately from upstream:
 # - "Cargo.lock" because we have custom tools that share the same workspace as the main workspace
-# - "library/Cargo.lock" because we vendor libc package, so the lockfile may differ from upstream
 # - "src/bootstrap/Cargo.lock" because we have custom changes to bootstrap
 #
 # NOTE: consider modifying this array when adding to the list:

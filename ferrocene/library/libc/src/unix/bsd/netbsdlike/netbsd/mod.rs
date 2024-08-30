@@ -401,11 +401,6 @@ s! {
         pub sdl_data: [::c_char; 12],
     }
 
-    pub struct mmsghdr {
-        pub msg_hdr: ::msghdr,
-        pub msg_len: ::c_uint,
-    }
-
     pub struct __exit_status {
         pub e_termination: u16,
         pub e_exit: u16,
@@ -2781,20 +2776,6 @@ extern "C" {
 
     pub fn kqueue1(flags: ::c_int) -> ::c_int;
 
-    pub fn sendmmsg(
-        sockfd: ::c_int,
-        msgvec: *mut ::mmsghdr,
-        vlen: ::c_uint,
-        flags: ::c_int,
-    ) -> ::c_int;
-    pub fn recvmmsg(
-        sockfd: ::c_int,
-        msgvec: *mut ::mmsghdr,
-        vlen: ::c_uint,
-        flags: ::c_int,
-        timeout: *mut ::timespec,
-    ) -> ::c_int;
-
     pub fn _lwp_self() -> lwpid_t;
     pub fn memmem(
         haystack: *const ::c_void,
@@ -2884,6 +2865,22 @@ extern "C" {
     pub fn getrandom(buf: *mut ::c_void, buflen: ::size_t, flags: ::c_uint) -> ::ssize_t;
 
     pub fn reboot(mode: ::c_int, bootstr: *mut ::c_char) -> ::c_int;
+
+    #[link_name = "___lwp_park60"]
+    pub fn _lwp_park(
+        clock: ::clockid_t,
+        flags: ::c_int,
+        ts: *const ::timespec,
+        unpark: ::lwpid_t,
+        hint: *const ::c_void,
+        unparkhint: *mut ::c_void,
+    ) -> ::c_int;
+    pub fn _lwp_unpark(lwp: ::lwpid_t, hint: *const ::c_void) -> ::c_int;
+    pub fn _lwp_unpark_all(
+        targets: *const ::lwpid_t,
+        ntargets: ::size_t,
+        hint: *const ::c_void,
+    ) -> ::c_int;
 }
 
 #[link(name = "rt")]

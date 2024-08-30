@@ -33,6 +33,16 @@ runs:
       shell: bash
       run: ferrocene/ci/scripts/setup-ubuntu.sh
 
+    - name: Install dependencies (Windows)
+      if: contains(runner.name, 'windows') && inputs.build-dependencies
+      shell: bash
+      run: sudo ferrocene/ci/scripts/setup-windows.sh
+
+    - name: Install dependencies (macOS)
+      if: contains(runner.name, 'macos') && inputs.build-dependencies
+      shell: bash
+      run: sudo ferrocene/ci/scripts/setup-darwin.sh
+
     - name: Setup uv, Python, and venv
       if: ${{ inputs.setup-venv != 'false' }}
       shell: bash

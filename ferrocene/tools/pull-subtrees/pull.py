@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 import argparse
+import itertools
 import os
 import subprocess
 import sys
@@ -59,7 +60,7 @@ def parse_configuration(path):
         actions = []
         if "after" in item:
             for action in item["after"]:
-                if action not in AFTER_ACTIONS:
+                if action.split(" ")[0] not in AFTER_ACTIONS:
                     print(f"error: unknown after action: {action}")
                     poisoned = True
                     continue
@@ -247,12 +248,13 @@ def update_subtree(repo_root, subtree):
 
     for action in subtree.after:
         print(f"executing after action {action}")
-        AFTER_ACTIONS[action](subtree, repo_root)
+        action = action.split(" ")
+        AFTER_ACTIONS[action[0]](subtree, repo_root, action[1:])
 
     return diff
 
 
-def action_update_cargo_lock(subtree, repo_root):
+def action_update_cargo_lock(subtree, repo_root, params):
     # Force Cargo to refresh the Cargo.lock without building anythiing.
     run(
         ["cargo", "metadata", "--format-version=1"],
@@ -266,6 +268,40 @@ def action_update_cargo_lock(subtree, repo_root):
     if status.strip():
         run(["git", "add", "Cargo.lock"], cwd=repo_root)
         run(["git", "commit", "-m", "update Cargo.lock"], cwd=repo_root)
+
+    if len(params) < 2:
+        raise RuntimeError("update-cargo-lock expects at least two parameters")
+
+    for [package_name, workspace] in itertools.batched(params, 2):
+        run(
+            [
+                "cargo",
+                "update",
+                "--manifest-path",
+                f"{repo_root}/{workspace}/Cargo.toml",
+                "-p",
+                package_name,
+            ],
+            # Some Cargo.tomls use unstable features.
+            env={"RUSTC_BOOTSTRAP": "1", **os.environ},
+            stdout=subprocess.DEVNULL,
+            cwd=repo_root,
+        )
+
+        lockfile = f"{repo_root}/{workspace}/Cargo.lock"
+        status = run_capture(["git", "status", "--porcelain", lockfile], cwd=repo_root)
+        if status.strip():
+            run(
+                [
+                    "git",
+                    "add",
+                    lockfile,
+                ],
+                cwd=repo_root,
+            )
+            run(
+                ["git", "commit", "-m", f"update {workspace}/Cargo.lock"], cwd=repo_root
+            )
 
 
 AFTER_ACTIONS = {

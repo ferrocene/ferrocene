@@ -15,26 +15,6 @@ Ferrocene is based on:
 This Manual assumes familiarity with rustc and the Rust language, and outlines
 usage instructions specific to Ferrocene.
 
-Structure
----------
-
-This guide contains the following chapters: 
-
-* *About Ferrocene* describes the requirements and process of installing and
-  running the Ferrocene toolchain.
-
-* *Using Ferrocene* describes how to build programs using the Ferrocene
-  toolchain. This includes an overview on how to build libraries, executables,
-  as well as mixed language compilation and system calls. 
-
-* *Compilation targets* describes qualified (supported) and unqualified (experimental)
-  Ferrocene compilation targets.
-
-* *rustfmt* describes how to install and use ``rustfmt``.
-
-* *References* provides further support and information about other
-  documentation.
-
 Further Relevant Documentation
 ------------------------------
 

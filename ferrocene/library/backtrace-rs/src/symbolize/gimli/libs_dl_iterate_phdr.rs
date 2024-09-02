@@ -35,31 +35,50 @@ fn infer_current_exe(base_addr: usize) -> OsString {
     env::current_exe().map(|e| e.into()).unwrap_or_default()
 }
 
-// `info` should be a valid pointers.
-// `vec` should be a valid pointer to a `std::Vec`.
+/// # Safety
+/// `info` must be a valid pointer.
+/// `vec` must be a valid pointer to `Vec<Library>`
+#[forbid(unsafe_op_in_unsafe_fn)]
 unsafe extern "C" fn callback(
     info: *mut libc::dl_phdr_info,
     _size: libc::size_t,
     vec: *mut libc::c_void,
 ) -> libc::c_int {
-    let info = &*info;
-    let libs = &mut *vec.cast::<Vec<Library>>();
-    let is_main_prog = info.dlpi_name.is_null() || *info.dlpi_name == 0;
-    let name = if is_main_prog {
-        // The man page for dl_iterate_phdr says that the first object visited by
-        // callback is the main program; so the first time we encounter a
-        // nameless entry, we can assume its the main program and try to infer its path.
-        // After that, we cannot continue that assumption, and we use an empty string.
-        if libs.is_empty() {
-            infer_current_exe(info.dlpi_addr as usize)
-        } else {
-            OsString::new()
-        }
+    // SAFETY: We are guaranteed these fields:
+    let dlpi_addr = unsafe { (*info).dlpi_addr };
+    let dlpi_name = unsafe { (*info).dlpi_name };
+    let dlpi_phdr = unsafe { (*info).dlpi_phdr };
+    let dlpi_phnum = unsafe { (*info).dlpi_phnum };
+    // SAFETY: We assured this.
+    let libs = unsafe { &mut *vec.cast::<Vec<Library>>() };
+    // most implementations give us the main program first
+    let is_main = libs.is_empty();
+    // we may be statically linked, which means we are main and mostly one big blob of code
+    let is_static = dlpi_addr == 0;
+    // sometimes we get a null or 0-len CStr, based on libc's whims, but these mean the same thing
+    let no_given_name = dlpi_name.is_null()
+        // SAFETY: we just checked for null
+        || unsafe { *dlpi_name == 0 };
+    let name = if is_static {
+        // don't try to look up our name from /proc/self/maps, it'll get silly
+        env::current_exe().unwrap_or_default().into_os_string()
+    } else if is_main && no_given_name {
+        infer_current_exe(dlpi_addr as usize)
     } else {
-        let bytes = CStr::from_ptr(info.dlpi_name).to_bytes();
-        OsStr::from_bytes(bytes).to_owned()
+        // this fallback works even if we are main, because some platforms give the name anyways
+        if dlpi_name.is_null() {
+            OsString::new()
+        } else {
+            // SAFETY: we just checked for nullness
+            OsStr::from_bytes(unsafe { CStr::from_ptr(dlpi_name) }.to_bytes()).to_owned()
+        }
     };
-    let headers = slice::from_raw_parts(info.dlpi_phdr, info.dlpi_phnum as usize);
+    let headers = if dlpi_phdr.is_null() || dlpi_phnum == 0 {
+        &[]
+    } else {
+        // SAFETY: We just checked for nullness or 0-len slices
+        unsafe { slice::from_raw_parts(dlpi_phdr, dlpi_phnum as usize) }
+    };
     libs.push(Library {
         name,
         segments: headers
@@ -69,7 +88,7 @@ unsafe extern "C" fn callback(
                 stated_virtual_memory_address: (*header).p_vaddr as usize,
             })
             .collect(),
-        bias: info.dlpi_addr as usize,
+        bias: dlpi_addr as usize,
     });
     0
 }

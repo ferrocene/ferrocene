@@ -1530,6 +1530,7 @@ fn test_wasi(target: &str) {
         "dirent.h",
         "errno.h",
         "fcntl.h",
+        "langinfo.h",
         "limits.h",
         "locale.h",
         "malloc.h",
@@ -1541,6 +1542,7 @@ fn test_wasi(target: &str) {
         "stdio.h",
         "stdlib.h",
         "string.h",
+        "sys/ioctl.h",
         "sys/resource.h",
         "sys/select.h",
         "sys/socket.h",
@@ -1549,15 +1551,19 @@ fn test_wasi(target: &str) {
         "sys/types.h",
         "sys/uio.h",
         "sys/utsname.h",
-        "sys/ioctl.h",
         "time.h",
         "unistd.h",
         "wasi/api.h",
-        "wasi/libc.h",
         "wasi/libc-find-relpath.h",
         "wasi/libc-nocwd.h",
+        "wasi/libc.h",
         "wchar.h",
     }
+
+    // Currently `ctest2` doesn't support macros-in-static-expressions and will
+    // panic on them. That affects `CLOCK_*` defines in wasi to set this here
+    // to omit them.
+    cfg.cfg("libc_ctest", None);
 
     cfg.type_name(move |ty, is_struct, is_union| match ty {
         "FILE" | "fd_set" | "DIR" => ty.to_string(),
@@ -1577,19 +1583,26 @@ fn test_wasi(target: &str) {
         }
     });
 
-    // Looks like LLD doesn't merge duplicate imports, so if the Rust
-    // code imports from a module and the C code also imports from a
-    // module we end up with two imports of function pointers which
-    // import the same thing but have different function pointers
-    cfg.skip_fn_ptrcheck(|f| f.starts_with("__wasi"));
+    // These have a different and internal type in header files and are only
+    // used here to generate a pointer to them in bindings so skip these tests.
+    cfg.skip_static(|c| c.starts_with("_CLOCK_"));
+
+    cfg.skip_fn(|f| match f {
+        // This function doesn't actually exist in libc's header files
+        "__errno_location" => true,
+
+        // The `timeout` argument to this function is `*const` in Rust but
+        // mutable in C which causes a mismatch. Avoiding breakage by changing
+        // this in wasi-libc and instead accepting that this is slightly
+        // different.
+        "select" => true,
+
+        _ => false,
+    });
 
     // d_name is declared as a flexible array in WASI libc, so it
     // doesn't support sizeof.
     cfg.skip_field(|s, field| s == "dirent" && field == "d_name");
-
-    // Currently Rust/clang disagree on function argument ABI, so skip these
-    // tests. For more info see WebAssembly/tool-conventions#88
-    cfg.skip_roundtrip(|_| true);
 
     cfg.generate("../src/lib.rs", "main.rs");
 }
@@ -1656,6 +1669,7 @@ fn test_android(target: &str) {
                "sys/fsuid.h",
                "sys/inotify.h",
                "sys/ioctl.h",
+               "sys/klog.h",
                "sys/mman.h",
                "sys/mount.h",
                "sys/personality.h",
@@ -2575,6 +2589,7 @@ fn test_freebsd(target: &str) {
         // skip those that are manually verified
         match name {
             // FIXME: https://github.com/rust-lang/libc/issues/1272
+            // Also, `execvpe` is introduced in FreeBSD 14.1
             "execv" | "execve" | "execvp" | "execvpe" | "fexecve" => true,
 
             // The `uname` function in the `utsname.h` FreeBSD header is a C
@@ -3433,6 +3448,7 @@ fn test_linux(target: &str) {
                "sys/eventfd.h",
                "sys/file.h",
                "sys/fsuid.h",
+               "sys/klog.h",
                "sys/inotify.h",
                "sys/ioctl.h",
                "sys/ipc.h",
@@ -4193,6 +4209,12 @@ fn test_linux(target: &str) {
             {
                 true
             }
+
+            // FIXME: Requires >= 6.6 kernel headers.
+            "SYS_fchmodat2" => true,
+
+            // FIXME: Requires >= 6.10 kernel headers.
+            "SYS_mseal" => true,
 
             // FIXME: seems to not be available all the time (from <include/linux/sched.h>:
             "PF_VCPU"

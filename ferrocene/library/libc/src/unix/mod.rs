@@ -313,6 +313,11 @@ pub const ATF_PERM: ::c_int = 0x04;
 pub const ATF_PUBL: ::c_int = 0x08;
 pub const ATF_USETRAILERS: ::c_int = 0x10;
 
+extern "C" {
+    pub static in6addr_loopback: in6_addr;
+    pub static in6addr_any: in6_addr;
+}
+
 cfg_if! {
     if #[cfg(any(target_os = "l4re", target_os = "espidf"))] {
         // required libraries for L4Re and the ESP-IDF framework are linked externally, ATM
@@ -595,7 +600,10 @@ extern "C" {
         target_vendor = "nintendo"
     )))]
     #[cfg_attr(target_os = "netbsd", link_name = "__socket30")]
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_socket")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_socket"
+    )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_socket")]
     pub fn socket(domain: ::c_int, ty: ::c_int, protocol: ::c_int) -> ::c_int;
     #[cfg(not(all(
@@ -607,7 +615,10 @@ extern "C" {
         all(target_os = "macos", target_arch = "x86"),
         link_name = "connect$UNIX2003"
     )]
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_connect")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_connect"
+    )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_connect")]
     pub fn connect(socket: ::c_int, address: *const sockaddr, len: socklen_t) -> ::c_int;
     #[cfg_attr(
@@ -669,7 +680,10 @@ extern "C" {
         all(target_os = "macos", target_arch = "x86"),
         link_name = "socketpair$UNIX2003"
     )]
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_socketpair")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_socketpair"
+    )]
     pub fn socketpair(
         domain: ::c_int,
         type_: ::c_int,
@@ -685,7 +699,10 @@ extern "C" {
         all(target_os = "macos", target_arch = "x86"),
         link_name = "sendto$UNIX2003"
     )]
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_sendto")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_sendto"
+    )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_sendto")]
     pub fn sendto(
         socket: ::c_int,
@@ -1056,6 +1073,7 @@ extern "C" {
     pub fn times(buf: *mut ::tms) -> ::clock_t;
 
     pub fn pthread_self() -> ::pthread_t;
+    pub fn pthread_equal(t1: ::pthread_t, t2: ::pthread_t) -> ::c_int;
     #[cfg_attr(
         all(target_os = "macos", target_arch = "x86"),
         link_name = "pthread_join$UNIX2003"
@@ -1163,7 +1181,10 @@ extern "C" {
     pub fn pthread_rwlockattr_init(attr: *mut pthread_rwlockattr_t) -> ::c_int;
     pub fn pthread_rwlockattr_destroy(attr: *mut pthread_rwlockattr_t) -> ::c_int;
 
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_getsockopt")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_getsockopt"
+    )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_getsockopt")]
     pub fn getsockopt(
         sockfd: ::c_int,
@@ -1186,7 +1207,10 @@ extern "C" {
         target_arch = "powerpc",
         target_vendor = "nintendo"
     )))]
-    #[cfg_attr(target_os = "illumos", link_name = "__xnet_getaddrinfo")]
+    #[cfg_attr(
+        any(target_os = "illumos", target_os = "solaris"),
+        link_name = "__xnet_getaddrinfo"
+    )]
     #[cfg_attr(target_os = "espidf", link_name = "lwip_getaddrinfo")]
     pub fn getaddrinfo(
         node: *const c_char,

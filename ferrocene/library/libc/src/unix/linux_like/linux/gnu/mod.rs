@@ -1405,7 +1405,6 @@ extern "C" {
     pub fn reallocarray(ptr: *mut ::c_void, nmemb: ::size_t, size: ::size_t) -> *mut ::c_void;
 
     pub fn ctermid(s: *mut ::c_char) -> *mut ::c_char;
-    pub fn ioctl(fd: ::c_int, request: ::c_ulong, ...) -> ::c_int;
     pub fn backtrace(buf: *mut *mut ::c_void, sz: ::c_int) -> ::c_int;
     pub fn glob64(
         pattern: *const ::c_char,
@@ -1541,6 +1540,8 @@ extern "C" {
 
     // Added in `glibc` 2.34
     pub fn close_range(first: ::c_uint, last: ::c_uint, flags: ::c_int) -> ::c_int;
+
+    pub fn mq_notify(mqdes: ::mqd_t, sevp: *const ::sigevent) -> ::c_int;
 }
 
 cfg_if! {

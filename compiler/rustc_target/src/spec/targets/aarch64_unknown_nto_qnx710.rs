@@ -1,6 +1,7 @@
-use crate::spec::{base, Cc, LinkerFlavor, Lld, Target, TargetOptions};
+use crate::spec::Target;
 
 pub fn target() -> Target {
+<<<<<<< HEAD
     Target {
         llvm_target: "aarch64-unknown-unknown".into(),
         metadata: crate::spec::TargetMetadata {
@@ -33,4 +34,10 @@ pub fn target() -> Target {
             ..base::nto_qnx::opts()
         },
     }
+=======
+    let mut base = super::aarch64_unknown_nto_qnx700::target();
+    base.metadata.description = Some("ARM64 QNX Neutrino 7.1 RTOS".into());
+    base.options.env = "nto71".into();
+    base
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 }

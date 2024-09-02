@@ -59,6 +59,14 @@ The `fixed-commit` frontmatter lists the hash of the commit(s) that fixed the
 issue if it has already been fixed.
 Leave it blank if the issue is still open.
 
+frontmatter `duplicate`
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The duplicate field is optional and marks whether a new problem is a duplicate 
+of an older one.
+`introduced-commit` and/or `fixed-commit` may be different; the problem is marked as duplicate if 
+it is marked as duplicate upstream.
+
 heading `Description`
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -71,17 +79,11 @@ heading `Workaround`
 The `Workaround` section describes how to avoid running into the issue.
 This usually consists of rules that forbid certain code patterns.
 
-heading `Detection`
-^^^^^^^^^^^^^^^^^^^
-
-The `Detection` section describes how to detect occurrences of this issue.
-This usually consists of instructions like looking for certain code patterns or
-strings.
 
 heading `Mitigation`
 ^^^^^^^^^^^^^^^^^^^^
 
-The `Mitigation` section describes how to fix detected occurrences of the issue
+The `Mitigation` section describes how to detect and fix occurrences of the issue
 in a codebase.
 This usually consists of instructions on either removing the offending code
 patterns or replacing them with similar behaving constructs that do not invoke

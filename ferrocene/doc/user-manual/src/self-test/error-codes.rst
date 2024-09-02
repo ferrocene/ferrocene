@@ -161,7 +161,7 @@ program.
 
 Ensure that the operating system is supported by the Ferrocene toolchain.
 
-Ensure that the prerequisites of the Ferrocene toolchain has been properly
+Ensure that the prerequisites of the Ferrocene toolchain have been properly
 installed.
 
 Ensure that the Ferrocene toolchain has been properly installed.

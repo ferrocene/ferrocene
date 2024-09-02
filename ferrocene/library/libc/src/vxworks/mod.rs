@@ -782,6 +782,7 @@ pub const S_IFSOCK: ::c_int = 0xc000;
 pub const S_ISUID: ::c_int = 0x0800;
 pub const S_ISGID: ::c_int = 0x0400;
 pub const S_ISTXT: ::c_int = 0x0200;
+pub const S_ISVTX: ::c_int = 0o1000;
 pub const S_IRUSR: ::c_int = 0x0100;
 pub const S_IWUSR: ::c_int = 0x0080;
 pub const S_IXUSR: ::c_int = 0x0040;
@@ -1812,6 +1813,10 @@ extern "C" {
     pub fn taskIdSelf() -> ::TASK_ID;
     pub fn taskDelay(ticks: ::_Vx_ticks_t) -> ::c_int;
 
+    // taskLib.h
+    pub fn taskNameSet(task_id: ::TASK_ID, task_name: *mut ::c_char) -> ::c_int;
+    pub fn taskNameGet(task_id: ::TASK_ID, buf_name: *mut ::c_char, bufsize: ::size_t) -> ::c_int;
+
     // rtpLibCommon.h
     pub fn rtpInfoGet(rtpId: ::RTP_ID, rtpStruct: *mut ::RTP_DESC) -> ::c_int;
     pub fn rtpSpawn(
@@ -1871,6 +1876,10 @@ extern "C" {
     ) -> ::c_int;
     pub fn mq_getattr(mqd: ::mqd_t, attr: *mut ::mq_attr) -> ::c_int;
     pub fn mq_setattr(mqd: ::mqd_t, newattr: *const ::mq_attr, oldattr: *mut ::mq_attr) -> ::c_int;
+
+    // vxCpuLib.h
+    fn vxCpuEnabledGet() -> ::cpuset_t; // Get set of running CPU's in the system
+    fn vxCpuConfiguredGet() -> ::cpuset_t; // Get set of Configured CPU's in the system
 }
 
 //Dummy functions, these don't really exist in VxWorks.

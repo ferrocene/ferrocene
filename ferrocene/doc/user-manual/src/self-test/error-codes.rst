@@ -110,6 +110,16 @@ This error occurs when a Ferrocene toolchain library is not accessible.
 
 Ensure that file ownership and system permissions are correctly set.
 
+FLS_011: C Compiler not found
+-----------------------------
+
+This error occurs when the Ferrocene self-test tool is unable to find a C
+compiler when needed for a specific target.
+
+**Suggested fixes**
+
+Install a suitable C compiler for that target, such as GCC or clang.
+
 FST_015: Bundled linker missing
 -------------------------------
 
@@ -221,3 +231,21 @@ compiler which emits only valid linker arguments to the linker.
 **Suggested fixes**
 
 Install a suitable C compiler for that target, such as GCC or clang.
+
+FLS_025: Running sample program failed
+--------------------------------------
+
+This error occurs when a sample program could not be executed with success.
+
+**Suggested fixes**
+
+Ensure that the Ferrocene toolchain has been properly installed.
+
+FLS_026: Sample program output is wrong
+---------------------------------------
+
+This error occurs when a sample program produces unexpected output.
+
+**Suggested fixes**
+
+Ensure that the Ferrocene toolchain has been properly installed.

@@ -71,7 +71,7 @@ FST_007: Binary version mismatch
 --------------------------------
 
 This error occurs when the version of the ``ferrocene-self-test`` binary and
-that of rustc are not the same.
+that of ``rustc`` are not the same.
 
 **Suggested fixes**
 

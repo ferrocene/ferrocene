@@ -25,12 +25,6 @@ LL |     let x: u8 = 1000;
    = note: the literal `1000` does not fit into the type `u8` whose range is `0..=255`
    = note: `#[deny(overflowing_literals)]` on by default
 
-warning[E0602]: unknown lint: `=overflowing_literals`
-   |
-   = help: did you mean: `overflowing_literals`
-   = note: requested on the command line with `-A =overflowing_literals`
-   = note: duplicate diagnostic emitted due to `-Z deduplicate-diagnostics=no`
-
-error: aborting due to 1 previous error; 4 warnings emitted
+error: aborting due to 1 previous error; 3 warnings emitted
 
 For more information about this error, try `rustc --explain E0602`.

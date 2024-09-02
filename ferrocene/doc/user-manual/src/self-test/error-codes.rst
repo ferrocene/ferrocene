@@ -51,7 +51,7 @@ Ensure that file ownership and system permissions are correctly set.
 FST_005: Version fetch failed
 -----------------------------
 
-This error occurs when the invocation of rustc failed.
+This error occurs when the invocation of a Ferrocene tool failed.
 
 **Suggested fixes**
 
@@ -60,7 +60,7 @@ Reinstall the Ferrocene toolchain.
 FST_006: Version parse failed
 -----------------------------
 
-This error occurs when the version of rustc cannot be parsed.
+This error occurs when the version of a Ferrocene tool cannot be parsed.
 
 **Suggested fixes**
 

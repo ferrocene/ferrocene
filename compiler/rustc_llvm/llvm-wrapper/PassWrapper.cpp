@@ -713,7 +713,7 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     LLVMModuleRef ModuleRef, LLVMTargetMachineRef TMRef,
     LLVMRustPassBuilderOptLevel OptLevelRust, LLVMRustOptStage OptStage,
     bool IsLinkerPluginLTO, bool NoPrepopulatePasses, bool VerifyIR,
-    bool UseThinLTOBuffers, bool MergeFunctions, bool UnrollLoops,
+    bool LintIR, bool UseThinLTOBuffers, bool MergeFunctions, bool UnrollLoops,
     bool SLPVectorize, bool LoopVectorize, bool DisableSimplifyLibCalls,
     bool EmitLifetimeMarkers, LLVMRustSanitizerOptions *SanitizerOptions,
     const char *PGOGenPath, const char *PGOUsePath, bool InstrumentCoverage,
@@ -839,6 +839,13 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     PipelineStartEPCallbacks.push_back(
         [VerifyIR](ModulePassManager &MPM, OptimizationLevel Level) {
           MPM.addPass(VerifierPass());
+        });
+  }
+
+  if (LintIR) {
+    PipelineStartEPCallbacks.push_back(
+        [](ModulePassManager &MPM, OptimizationLevel Level) {
+          MPM.addPass(createModuleToFunctionPassAdaptor(LintPass()));
         });
   }
 
@@ -1205,7 +1212,11 @@ struct LLVMRustThinLTOData {
   // Not 100% sure what these are, but they impact what's internalized and
   // what's inlined across modules, I believe.
 #if LLVM_VERSION_GE(18, 0)
+#if LLVM_VERSION_GE(20, 0)
+  FunctionImporter::ImportListsTy ImportLists;
+#else
   DenseMap<StringRef, FunctionImporter::ImportMapTy> ImportLists;
+#endif
   DenseMap<StringRef, FunctionImporter::ExportSetTy> ExportLists;
   DenseMap<StringRef, GVSummaryMapTy> ModuleToDefinedGVSummaries;
 #else
@@ -1414,13 +1425,13 @@ LLVMRustPrepareThinLTOInternalize(const LLVMRustThinLTOData *Data,
   return true;
 }
 
-extern "C" bool LLVMRustPrepareThinLTOImport(const LLVMRustThinLTOData *Data,
+extern "C" bool LLVMRustPrepareThinLTOImport(LLVMRustThinLTOData *Data,
                                              LLVMModuleRef M,
                                              LLVMTargetMachineRef TM) {
   Module &Mod = *unwrap(M);
   TargetMachine &Target = *unwrap(TM);
 
-  const auto &ImportList = Data->ImportLists.lookup(Mod.getModuleIdentifier());
+  const auto &ImportList = Data->ImportLists[Mod.getModuleIdentifier()];
   auto Loader = [&](StringRef Identifier) {
     const auto &Memory = Data->ModuleMap.lookup(Identifier);
     auto &Context = Mod.getContext();
@@ -1603,7 +1614,7 @@ extern "C" void LLVMRustComputeLTOCacheKey(RustStringRef KeyOut,
                                            LLVMRustThinLTOData *Data) {
   SmallString<40> Key;
   llvm::lto::Config conf;
-  const auto &ImportList = Data->ImportLists.lookup(ModId);
+  const auto &ImportList = Data->ImportLists[ModId];
   const auto &ExportList = Data->ExportLists.lookup(ModId);
   const auto &ResolvedODR = Data->ResolvedODR.lookup(ModId);
   const auto &DefinedGlobals = Data->ModuleToDefinedGVSummaries.lookup(ModId);

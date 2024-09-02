@@ -66,6 +66,7 @@ use rustc_trait_selection::traits::{
     self, NormalizeExt, ObligationCause, ObligationCauseCode, ObligationCtxt,
 };
 use smallvec::{smallvec, SmallVec};
+use tracing::{debug, instrument};
 
 use crate::errors::SuggestBoxingForReturnImplTrait;
 use crate::FnCtxt;
@@ -850,8 +851,6 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                     }
 
                     // Safe `#[target_feature]` functions are not assignable to safe fn pointers (RFC 2396).
-                    // FIXME(struct_target_features): should this be true also for functions that inherit
-                    // target features from structs?
 
                     if b_hdr.safety == hir::Safety::Safe
                         && !self.tcx.codegen_fn_attrs(def_id).target_features.is_empty()

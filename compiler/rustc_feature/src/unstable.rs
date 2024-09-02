@@ -471,6 +471,8 @@ declare_features! (
     (unstable, ffi_const, "1.45.0", Some(58328)),
     /// Allows the use of `#[ffi_pure]` on foreign functions.
     (unstable, ffi_pure, "1.45.0", Some(58329)),
+    /// Controlling the behavior of fmt::Debug
+    (unstable, fmt_debug, "CURRENT_RUSTC_VERSION", Some(129709)),
     /// Allows using `#[repr(align(...))]` on function items
     (unstable, fn_align, "1.53.0", Some(82232)),
     /// Support delegating implementation of functions to other already implemented functions.
@@ -595,8 +597,6 @@ declare_features! (
     (unstable, strict_provenance, "1.61.0", Some(95228)),
     /// Allows string patterns to dereference values to match them.
     (unstable, string_deref_patterns, "1.67.0", Some(87121)),
-    /// Allows structs to carry target_feature information.
-    (incomplete, struct_target_features, "CURRENT_RUSTC_VERSION", Some(129107)),
     /// Allows the use of `#[target_feature]` on safe functions.
     (unstable, target_feature_11, "1.45.0", Some(69098)),
     /// Allows using `#[thread_local]` on `static` items.

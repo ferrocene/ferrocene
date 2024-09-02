@@ -12,6 +12,9 @@
 #![feature(let_chains)]
 #![feature(trait_upcasting)]
 #![feature(strict_overflow_ops)]
+#![feature(strict_provenance)]
+#![feature(exposed_provenance)]
+#![feature(pointer_is_aligned_to)]
 // Configure clippy and other lints
 #![allow(
     clippy::collapsible_else_if,
@@ -35,6 +38,7 @@
     clippy::box_default,
     clippy::needless_question_mark,
     clippy::needless_lifetimes,
+    clippy::too_long_first_doc_paragraph,
     rustc::diagnostic_outside_of_impl,
     // We are not implementing queries here so it's fine
     rustc::potential_query_instability,

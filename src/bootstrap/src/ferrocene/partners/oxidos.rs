@@ -49,6 +49,8 @@ const OXIDOS_ALLOW_LINTS: &[&str] = &[
     "unused-imports",
     // Avoid "struct `Foo` is never constructed" errors
     "dead-code",
+    // Allow "elided lifetime has a name" warnings
+    "elided_named_lifetimes",
 ];
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]

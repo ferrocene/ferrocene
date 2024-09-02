@@ -28,6 +28,7 @@ use rustc_middle::ty::{
 use rustc_middle::{bug, span_bug};
 use rustc_span::symbol::sym;
 use rustc_span::{BytePos, Span, Symbol, DUMMY_SP};
+use tracing::{debug, instrument};
 
 use super::on_unimplemented::{AppendConstMessage, OnUnimplementedNote};
 use super::suggestions::get_explanation_based_on_obligation;
@@ -438,8 +439,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         let is_target_feature_fn = if let ty::FnDef(def_id, _) =
                             *leaf_trait_ref.skip_binder().self_ty().kind()
                         {
-                            // FIXME(struct_target_features): should a function that inherits
-                            // target_features through arguments implement Fn traits?
                             !self.tcx.codegen_fn_attrs(def_id).target_features.is_empty()
                         } else {
                             false

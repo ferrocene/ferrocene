@@ -56,6 +56,17 @@ jobs:
         if: runner.os == 'Linux'
         run: az acr login --name ferrocenecr
 
+      - name: Store cache
+        id: test-store
+        shell: bash
+        run: |
+          set -e
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
+          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/test-${{ inputs.host-triple }}-$hash
+          echo "boop" > tester
+          az storage copy -s tester -d $uri
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+
       - name: Run
         if: inputs.container == ''
         shell: bash
@@ -114,6 +125,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
 
       - name: Get LLVM cache
@@ -123,12 +135,12 @@ jobs:
           uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
 
       - name: Run
-        if: inputs.container == ''
+        if: ${{ inputs.container == '' }}
         shell: bash
         run: uv run ferrocene/ci/run.sh
 
       - name: Run in container
-        if: inputs.container != ''
+        if: ${{ inputs.container != '' }}
         shell: bash
         run: |
           docker run \

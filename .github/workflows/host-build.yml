@@ -36,6 +36,10 @@ jobs:
     env:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
+      # This tries to strike a balance between the highest concurrency possible
+      # and not running out of memory during a build. If building LLVM fails
+      # due to the OOM killer killing the build, decrease this number.
+      LLVM_BUILD_PARALLELISM: 18
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,6 +70,7 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
@@ -77,6 +82,7 @@ jobs:
         id: store
         shell: bash
         run: |
+          set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
           uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/${{ inputs.host-triple }}-$hash.tar.zst
           az storage copy -s llvm_cache.tar.zst -d $uri

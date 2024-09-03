@@ -54,7 +54,7 @@ pub fn add_placeholder_note<G: EmissionGuarantee>(err: &mut Diag<'_, G>) {
     );
 }
 
-pub fn suggest_increasing_recursion_limit<'tcx, G: EmissionGuarantee>(
+pub(crate) fn suggest_increasing_recursion_limit<'tcx, G: EmissionGuarantee>(
     tcx: TyCtxt<'tcx>,
     err: &mut Diag<'_, G>,
     overflowing_predicates: &[ty::Predicate<'tcx>],
@@ -723,7 +723,7 @@ impl<'a, 'tcx> ProofTreeVisitor<'tcx> for AmbiguityCausesVisitor<'a, 'tcx> {
                     // FIXME: While this matches the behavior of the
                     // old solver, it is not the only way in which the unknowable
                     // candidates *weaken* coherence, they can also force otherwise
-                    // sucessful normalization to be ambiguous.
+                    // successful normalization to be ambiguous.
                     Ok(Certainty::Maybe(_) | Certainty::Yes) => {
                         ambiguity_cause = None;
                         break;

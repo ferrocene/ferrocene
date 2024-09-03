@@ -35,7 +35,7 @@ jobs:
       uri: ${{ steps.store.outputs.uri }}
     env:
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
+      SCRIPT: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -59,7 +59,7 @@ jobs:
       - name: Run
         if: inputs.container == ''
         shell: bash
-        run: uv run bash ferrocene/ci/run.sh
+        run: ferrocene/ci/run.sh
 
       - name: Run in container
         if: inputs.container != ''
@@ -76,7 +76,7 @@ jobs:
             --user $(id -u):$(id -g) \
             --network host \
             ${{ inputs.container }}
-            uv run bash ferrocene/ci/run.sh
+            ferrocene/ci/run.sh
 
       - name: Store cache
         id: store
@@ -120,7 +120,7 @@ jobs:
         shell: bash
         run: |
           az storage copy -s $uri -d llvm_cache.tar.zst
-          ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
+          uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
 
       - name: Run
         if: inputs.container == ''

@@ -65,7 +65,7 @@ frontmatter `duplicate`
 The duplicate field is optional and marks whether a new problem is a duplicate 
 of an older one.
 `introduced-commit` and/or `fixed-commit` may be different; the problem is marked as duplicate if 
-it is marked as duplicate upstream.
+it is considered as duplicate upstream.
 
 heading `Description`
 ^^^^^^^^^^^^^^^^^^^^^

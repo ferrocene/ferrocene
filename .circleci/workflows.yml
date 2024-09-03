@@ -89,6 +89,36 @@ orbs:
   win: circleci/windows@5.0
 
 jobs:
+  # Container dedicated to running quick checks for each commit pushed in open
+  # PRs and personal branches. The job must balance providing quick feedback
+  # and providing useful feedback, focusing on catching the most common errors
+  # as soon as possible.
+  #
+  # It's fine if this job only runs a small subset of the test suite: the full
+  # test suite for all the supported targets will be run when bors tries to
+  # merge the PR anyway.
+  commit-checks:
+    executor: docker-x86_64-ubuntu-24
+    resource_class: large # 4-core
+    environment:
+      FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      SCRIPT: |
+        ./x.py test tidy
+        ./x.py check library compiler/rustc
+        ./x.py run ferrocene/tools/traceability-matrix
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout:
+          llvm-subset: true
+      - run:
+          name: Check whether git conflict markers are present
+          command: ferrocene/ci/scripts/detect-conflict-markers.py
+      - run:
+          name: Perform licensing checks
+          command: reuse --include-submodules lint
+      - ferrocene-ci
+
   # Container dedicated to running ad-hoc tests that don't depend on an
   # individual target. If you have a test you don't know where to run it, this
   # is the place for it.
@@ -745,6 +775,36 @@ jobs:
 
 workflows:
   version: 2
+
+  # Quick workflow used to check that PRs and personal branches are not
+  # completely broken. The full CI will be run by bors later anyway.
+  commit:
+    when:
+      not:
+        or:
+          # All commits landing on the `main` branch were checked by bors already:
+          - equal: [<< pipeline.git.branch >>, "main"]
+          - matches:
+              pattern: "^release\\/.*"
+              value: << pipeline.git.branch >>
+          # These branches run the `full` workflow already:
+          - equal: [<< pipeline.git.branch >>, "staging"]
+          - equal: [<< pipeline.git.branch >>, "trying"]
+          # These branches are a temporary scratchpad for bors to work on, and
+          # should not run any CI whatsoever:
+          - equal: [<< pipeline.git.branch >>, "staging.tmp"]
+          - equal: [<< pipeline.git.branch >>, "staging-squash-merge.tmp"]
+          - equal: [<< pipeline.git.branch >>, "trying.tmp"]
+    jobs:
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
+      - commit-checks:
+          requires:
+            - build-docker--ubuntu-24
 
   # Main workflow used by bors to ensure every PR is fully green.
   full:

@@ -51,7 +51,7 @@ Ensure that file ownership and system permissions are correctly set.
 FST_005: Version fetch failed
 -----------------------------
 
-This error occurs when the invocation of rustc failed.
+This error occurs when the invocation of a Ferrocene tool failed.
 
 **Suggested fixes**
 
@@ -60,7 +60,7 @@ Reinstall the Ferrocene toolchain.
 FST_006: Version parse failed
 -----------------------------
 
-This error occurs when the version of rustc cannot be parsed.
+This error occurs when the version of a Ferrocene tool cannot be parsed.
 
 **Suggested fixes**
 
@@ -71,7 +71,7 @@ FST_007: Binary version mismatch
 --------------------------------
 
 This error occurs when the version of the ``ferrocene-self-test`` binary and
-that of rustc are not the same.
+that of ``rustc`` are not the same.
 
 **Suggested fixes**
 
@@ -109,6 +109,16 @@ This error occurs when a Ferrocene toolchain library is not accessible.
 **Suggested fixes**
 
 Ensure that file ownership and system permissions are correctly set.
+
+FLS_011: C Compiler not found
+-----------------------------
+
+This error occurs when the Ferrocene self-test tool is unable to find a C
+compiler when needed for a specific target.
+
+**Suggested fixes**
+
+Install a suitable C compiler for that target, such as GCC or clang.
 
 FST_015: Bundled linker missing
 -------------------------------
@@ -161,7 +171,7 @@ program.
 
 Ensure that the operating system is supported by the Ferrocene toolchain.
 
-Ensure that the prerequisites of the Ferrocene toolchain has been properly
+Ensure that the prerequisites of the Ferrocene toolchain have been properly
 installed.
 
 Ensure that the Ferrocene toolchain has been properly installed.
@@ -221,3 +231,21 @@ compiler which emits only valid linker arguments to the linker.
 **Suggested fixes**
 
 Install a suitable C compiler for that target, such as GCC or clang.
+
+FLS_025: Running sample program failed
+--------------------------------------
+
+This error occurs when a sample program could not be executed with success.
+
+**Suggested fixes**
+
+Ensure that the Ferrocene toolchain has been properly installed.
+
+FLS_026: Sample program output is wrong
+---------------------------------------
+
+This error occurs when a sample program produces unexpected output.
+
+**Suggested fixes**
+
+Ensure that the Ferrocene toolchain has been properly installed.

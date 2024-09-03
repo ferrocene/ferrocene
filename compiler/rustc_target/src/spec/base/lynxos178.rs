@@ -1,6 +1,6 @@
 use crate::spec::{PanicStrategy, RelocModel, TargetOptions};
 
-pub fn opts() -> TargetOptions {
+pub(crate) fn opts() -> TargetOptions {
     TargetOptions {
         os: "lynxos178".into(),
         vendor: "lynx".into(),

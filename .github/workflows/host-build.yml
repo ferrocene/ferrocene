@@ -71,7 +71,7 @@ jobs:
             --user $(id -u):$(id -g) \
             --network host \
             ${{ inputs.container }}
-            uv run ferrocene/ci/run.sh
+            uv run bash ferrocene/ci/run.sh
 
       - name: Store cache
         id: store

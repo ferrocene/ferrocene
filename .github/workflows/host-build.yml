@@ -55,7 +55,7 @@ jobs:
       - name: Run
         if: inputs.container == ''
         shell: bash
-        run: uv run ferrocene/ci/run.sh
+        run: uv run bash ferrocene/ci/run.sh
 
       - name: Run in container
         if: inputs.container != ''
@@ -77,7 +77,7 @@ jobs:
         id: store
         shell: bash
         run: |
-          hash=$(ferrocene/ci/scripts/llvm_cache.py hash)
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
           uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/${{ inputs.host-triple }}-$hash.tar.zst
           az storage copy -s llvm_cache.tar.zst -d $uri
           echo "uri=$uri" >> $GITHUB_OUTPUT

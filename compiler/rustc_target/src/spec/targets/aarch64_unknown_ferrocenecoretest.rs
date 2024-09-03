@@ -9,7 +9,7 @@
 
 use crate::spec::{cvs, Cc, LinkerFlavor, Lld, Target, TargetOptions};
 
-pub fn target() -> Target {
+pub(crate) fn target() -> Target {
     let mut target = super::aarch64_unknown_none::target();
     target.os = "linux".into();
     target.env = "gnu".into();

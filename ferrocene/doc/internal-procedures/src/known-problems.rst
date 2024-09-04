@@ -59,6 +59,14 @@ The `fixed-commit` frontmatter lists the hash of the commit(s) that fixed the
 issue if it has already been fixed.
 Leave it blank if the issue is still open.
 
+frontmatter `duplicate`
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The duplicate field is optional and marks whether a new problem is a duplicate 
+of an older one. `introduced-commit` and/or `fixed-commit` may be different. 
+The problem is marked as duplicate if 
+it is considered as duplicate upstream.
+
 heading `Description`
 ^^^^^^^^^^^^^^^^^^^^^
 

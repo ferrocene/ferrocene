@@ -10,6 +10,8 @@ use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
 pub(crate) enum Error {
+    #[error("CLI args are not used, so should not be provided")]
+    CliArgsProvided,
     #[error("could not detect the sysroot of the Ferrocene installation")]
     NoSysroot,
     #[error("binary {name} expected (inside {}), but is not there", directory.display())]
@@ -113,6 +115,7 @@ impl Error {
             Error::DuplicateTargetLibrary { .. } => 9,
             Error::TargetLibraryDiscoveryFailed { .. } => 10,
             Error::CCompilerNotFound { .. } => 11,
+            Error::CliArgsProvided => 12,
             Error::BundledLinkerMissing(_) => 15,
             Error::NonUtf8Path { .. } => 16,
             Error::TemporaryCompilationDirectoryCreationFailed { .. } => 17,

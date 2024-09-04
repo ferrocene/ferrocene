@@ -29,7 +29,8 @@
 .. req:: Command line interface
    :id: REQ_9A6740M
 
-   The tool accepts no command line arguments, and will ignore them if present.
+   The tool accepts no command line arguments,
+   and quits with a fail exit status when they are present.
 
 .. req:: Output
    :id: REQ_42QU5MK

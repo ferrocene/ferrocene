@@ -78,4 +78,8 @@ jobs:
 workflows:
   version: 2
   setup:
+    when:
+    or:
+      - equal: [<< pipeline.git.branch >>, "staging"]
+      - equal: [<< pipeline.git.branch >>, "trying"]
     jobs: [setup]

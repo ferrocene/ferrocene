@@ -59,6 +59,11 @@ jobs:
       - name: Store cache
         id: test-store
         shell: bash
+        env:
+          AZURE_STORAGE_ACCOUNT: ferroceneci
+          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
@@ -92,6 +97,11 @@ jobs:
       - name: Store cache
         id: store
         shell: bash
+        env:
+          AZURE_STORAGE_ACCOUNT: ferroceneci
+          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
@@ -130,6 +140,11 @@ jobs:
 
       - name: Get LLVM cache
         shell: bash
+        env:
+          AZURE_STORAGE_ACCOUNT: ferroceneci
+          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           az storage copy -s $uri -d llvm_cache.tar.zst
           uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst

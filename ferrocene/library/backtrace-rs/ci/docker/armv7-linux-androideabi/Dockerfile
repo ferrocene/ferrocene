@@ -14,5 +14,5 @@ RUN /android-ndk.sh
 ENV PATH=$PATH:/android-toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin
 
 # TODO: run tests in an emulator eventually
-ENV CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=armv7a-linux-androideabi19-clang \
+ENV CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=armv7a-linux-androideabi21-clang \
     CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_RUNNER=echo

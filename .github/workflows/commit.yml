@@ -1,0 +1,60 @@
+name: "Commit"
+# This is an unpriviledged job with no Azure/AWS auth which is suitable for
+# running on arbitrary PRs authored by anyone, even people we've yet to trust.
+
+on:
+  pull_request:
+
+# If the user commits something, then quickly commits something else,
+# cancel the earlier job so only one runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job dedicated to running quick checks for each commit pushed in open
+  # PRs and personal branches. The job must balance providing quick feedback
+  # and providing useful feedback, focusing on catching the most common errors
+  # as soon as possible.
+  #
+  # It's fine if this job only runs a small subset of the test suite: the full
+  # test suite for all the supported targets will be run when bors tries to
+  # merge the PR anyway.
+  checks:
+    name: "Checks"
+    runs-on: ubuntu-24.04
+    # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          llvm-subset: true
+          # We call this later with `INSTALL_LLVM` and `SKIP_UPGRADE` set for speed
+          build-dependencies: false
+        
+      - name: Check whether git conflict markers are present
+        run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
+      - name: Perform licensing checks
+        run: uv run reuse --include-submodules lint
+
+      - name: Install (minimal) build dependencies
+        run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
+        env:
+          SKIP_UPGRADE: 1
+          INSTALL_LLVM: 1
+
+      # We deliberately avoid using docker containers as that would require either adding 
+      # a couple minutes to the build, or doing auth/trust related things that would impact
+      # the experience for new contributors. (eg. not being able to run external contributor tests)
+      - name: Execute the build
+        run: ferrocene/ci/run.sh
+        env:
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
+          FERROCENE_HOST: x86_64-unknown-linux-gnu
+          SCRIPT: |
+            ./x.py test tidy
+            ./x.py check library compiler/rustc
+            ./x.py run ferrocene/tools/traceability-matrix

@@ -53,6 +53,7 @@ Ferrocene User Manual
 
    self-test/install
    self-test/using
+   self-test/error-codes
 
 .. appendices::
    :numbered:
@@ -62,7 +63,6 @@ Ferrocene User Manual
    criticalup
    rustc/cli
    rustfmt/cli
-   self-test/error-codes
    terms
 
 Indices and tables

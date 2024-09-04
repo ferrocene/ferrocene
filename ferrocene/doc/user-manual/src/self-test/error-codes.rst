@@ -4,6 +4,8 @@
 Error codes
 ===========
 
+These are emitted whenever ``ferrocene-self-test`` encounters errors.
+
 FST_001: No sysroot
 -------------------
 

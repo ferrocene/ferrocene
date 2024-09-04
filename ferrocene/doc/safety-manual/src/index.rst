@@ -40,6 +40,14 @@ scope, in accordance to the standards above.
    rustfmt/options
    rustfmt/constraints
 
+.. toctree::
+   :maxdepth: 2
+   :caption: ferrocene-self-test
+   :numbered:
+
+   self-test/usage
+   self-test/constraints
+
 .. appendices::
    :maxdepth: 2
    :caption: Appendices:

@@ -56,17 +56,21 @@ jobs:
         if: runner.os == 'Linux'
         run: az acr login --name ferrocenecr
 
-      - name: Azure CLI script
-        uses: azure/CLI@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            set -ex
-            hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
-            uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/test-${{ inputs.host-triple }}-$hash
-            echo "boop" > tester
-            az storage copy -s tester -d $uri
-            echo "uri=$uri" >> $GITHUB_OUTPUT
+      - name: Store cache
+        id: test-store
+        shell: bash
+        env:
+          AZURE_STORAGE_ACCOUNT: ferroceneci
+          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          set -e
+          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
+          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/test-${{ inputs.host-triple }}-$hash
+          echo "boop" > tester
+          az storage copy -s tester -d $uri
+          echo "uri=$uri" >> $GITHUB_OUTPUT
 
       - name: Run
         if: inputs.container == ''

@@ -62,14 +62,15 @@ jobs:
         env:
           AZURE_STORAGE_ACCOUNT: ferroceneci
           AZURE_CONTAINER_NAME: ferrocene-llvm-cache
-          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
-          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/test-${{ inputs.host-triple }}-$hash
+          uri=https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/test-${{ inputs.host-triple }}-$hash
           echo "boop" > tester
-          az storage copy -s tester -d $uri
+          az storage copy \
+            --source tester \
+            --destination $uri \
+            --auth-mode login
           echo "uri=$uri" >> $GITHUB_OUTPUT
 
       - name: Run

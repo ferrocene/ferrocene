@@ -21,6 +21,9 @@ use crate::report::{Reporter, StderrReporter};
 use crate::utils::get_sysroot;
 
 fn main_inner(reporter: &dyn Reporter) -> Result<(), Error> {
+    if std::env::args().len() > 1 {
+        return Err(Error::CliArgsProvided);
+    }
     let env = Env::gather()?;
 
     let sysroot = get_sysroot().ok_or(Error::NoSysroot)?;

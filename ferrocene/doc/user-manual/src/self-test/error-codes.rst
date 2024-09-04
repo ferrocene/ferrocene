@@ -120,6 +120,15 @@ compiler when needed for a specific target.
 
 Install a suitable C compiler for that target, such as GCC or clang.
 
+FST_012: CLI arguments should not be provided
+---------------------------------------------
+
+This error occurs when the Ferrocene self-test tool is executed with CLI arguments.
+
+**Suggested fixes**
+
+Do not provide any CLI arguments to the tool.
+
 FST_015: Bundled linker missing
 -------------------------------
 

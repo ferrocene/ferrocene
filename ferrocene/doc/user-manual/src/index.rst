@@ -46,6 +46,14 @@ Ferrocene User Manual
    rustfmt/usage
    rustfmt/config
 
+.. toctree::
+   :numbered:
+   :maxdepth: 2
+   :caption: ferrocene-self-test
+
+   self-test/install
+   self-test/using
+
 .. appendices::
    :numbered:
    :maxdepth: 2

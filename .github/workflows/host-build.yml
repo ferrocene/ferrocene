@@ -76,6 +76,7 @@ jobs:
           echo "uri=$uri" >> $GITHUB_OUTPUT
           
           set +e
+          state="miss"
           az storage blob show \
             --name $name \
             --container-name ferrocene-llvm-cache \
@@ -83,20 +84,18 @@ jobs:
             --auth-mode login
           if [ $? -eq 0 ]; then
             state="hit"
-          else
-            state="miss"
           fi
           set -e
 
           echo "state=$cache" >> $GITHUB_OUTPUT
 
       - name: Run
-        if: inputs.container == '' && steps.check.outputs.state == 'miss'
+        if: inputs.container == '' && steps.check.outputs.state != 'hit'
         shell: bash
         run: ferrocene/ci/run.sh
 
       - name: Run in container
-        if: inputs.container != '' && steps.check.outputs.state == 'miss'
+        if: inputs.container != '' && steps.check.outputs.state != 'hit'
         shell: bash
         run: |
           docker run \

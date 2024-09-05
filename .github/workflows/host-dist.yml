@@ -7,6 +7,9 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -38,65 +41,121 @@ jobs:
   dist:
     runs-on: ${{ inputs.runner }}
     env:
-      artifact: dist-${{inputs.host-triple}}
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
     outputs:
-      artifact-name: ${{ env.artifact }}
+      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      # - name: Setup
-      #   uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: |
-          echo "dist goes here"
-          mkdir build
-          touch build/boop
+
+      - name: Run
+        if: ${{ inputs.container == '' }}
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: ${{ inputs.container != '' }}
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh
+
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: ${{ env.artifact }}
+          name: ${{ env.ARTIFACT }}
           path: build
           retention-days: 1
 
   tools:
     runs-on: ${{ inputs.runner }}
     env:
-      artifact: tools-${{inputs.host-triple}}
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
     outputs:
-      artifact-name: ${{ env.artifact }}
+      artifact-name: ${{ env.ARTIFACT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      # - name: Setup
-      #   uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: |
-          echo "tools goes here"
-          mkdir build
-          touch build/boop
+
+      - name: Run
+        if: ${{ inputs.container == '' }}
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: ${{ inputs.container != '' }}
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh
+
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: ${{ env.artifact }}
+          name: ${{ env.ARTIFACT }}
           path: build
           retention-days: 1

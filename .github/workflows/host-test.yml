@@ -7,6 +7,9 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
       self-test-triples:
         # We cannot specify an array here
         # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
@@ -35,56 +38,207 @@ jobs:
   test:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
         with:
-          submodules: false
-      - uses: ./.github/actions/setup/
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: echo "test"
+
+      - name: Run
+        if: inputs.container == ''
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: inputs.container != ''
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env LLVM_BUILD_PARALLELISM \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh
 
   compiletest:
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
     steps:
-      # - uses: actions/checkout@v4
-      #   with:
-      #     submodules: false
-      # - uses: ./.github/actions/setup/
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: echo "test"
+
+      - name: Run
+        if: inputs.container == ''
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: inputs.container != ''
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env LLVM_BUILD_PARALLELISM \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh
 
   test-library:
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
         with:
-          submodules: false
-      # - uses: ./.github/actions/setup/
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: echo "test"
+
+      - name: Run
+        if: inputs.container == ''
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: inputs.container != ''
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env LLVM_BUILD_PARALLELISM \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh
 
   test-library-std:
     runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT: build-${{inputs.host-triple}}
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+      SCRIPT: |
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
         with:
-          submodules: false
-      # - uses: ./.github/actions/setup/
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - run: echo "test"
+
+      - name: Run
+        if: inputs.container == ''
+        shell: bash
+        run: ferrocene/ci/run.sh
+
+      - name: Run in container
+        if: inputs.container != ''
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env LLVM_BUILD_PARALLELISM \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container }}
+            ferrocene/ci/run.sh

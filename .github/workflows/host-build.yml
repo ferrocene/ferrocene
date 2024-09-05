@@ -58,6 +58,7 @@ jobs:
 
       - name: Check cache
         id: check
+        continue-on-error: true # We capture the `.outcome` to detect a cache-miss
         shell: bash
         run: |
           set -e

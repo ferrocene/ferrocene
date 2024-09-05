@@ -170,42 +170,17 @@ jobs:
       build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
       build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}
   
-  tracability-matrix:
+  traceability-matrix:
     name: Tracability Matrix
+    uses: ./.github/workflows/traceability-matrix.yml
     needs:
       - container-x86_64-ubuntu-24
       - build-x86_64-unknown-linux-gnu
       - test-x86_64-unknown-linux-gnu
       - test-x86_64-pc-windows-msvc
       - test-aarch64-apple-darwin
-    runs-on: ubuntu-24.04
-    env:
-      artifact: tracability-matrix
-    outputs:
-      artifact-name: ${{ env.artifact }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      # - name: Setup
-      #   uses: ./.github/actions/setup/
-      # - name: Setup Azure
-      #   uses: ./.github/actions/setup-azure/
-      #   with:
-      #     client-id: ${{ secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-      #     tenant-id: ${{ secrets.AZURE_OIDC_GHA_DIRECTORY_ID_TRYING }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-          run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      - run: |
-          echo "tracability-matrix goes here"
-          mkdir build
-          touch build/boop
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: ${{ env.artifact }}
-          path: build
-          retention-days: 1
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: ubuntu-24.04
+      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
+      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}   

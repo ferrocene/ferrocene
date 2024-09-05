@@ -41,7 +41,7 @@ jobs:
   dist:
     runs-on: ${{ inputs.runner }}
     env:
-      ARTIFACT: build-${{inputs.host-triple}}
+      ARTIFACT: dist-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
@@ -96,13 +96,13 @@ jobs:
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
-          path: build
+          path: build/dist
           retention-days: 1
 
   tools:
     runs-on: ${{ inputs.runner }}
     env:
-      ARTIFACT: build-${{inputs.host-triple}}
+      ARTIFACT: tools-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
@@ -157,5 +157,5 @@ jobs:
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
-          path: build
+          path: build/dist
           retention-days: 1

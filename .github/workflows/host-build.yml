@@ -32,7 +32,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     outputs:
-      uri: ${{ steps.store.outputs.uri }}
+      name: ${{ steps.check.outputs.name }}
     env:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       SCRIPT: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
@@ -56,29 +56,28 @@ jobs:
         if: runner.os == 'Linux'
         run: az acr login --name ferrocenecr
 
-      - name: Store cache
-        id: test-store
+      - name: Check cache
+        id: check
         shell: bash
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
-          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/test-${{ inputs.host-triple }}-$hash
-          echo "boop" > tester
-          az storage blob upload \
-            --file tester \
-            --name tester \
+          name=$${{ inputs.host-triple }}-$hash.tar.zst
+          echo "name=$name" >> $GITHUB_OUTPUT
+          
+          az storage blob show \
+            --name $name \
             --container-name ferrocene-llvm-cache \
             --account-name ferroceneci \
             --auth-mode login
-          echo "uri=$uri" >> $GITHUB_OUTPUT
 
       - name: Run
-        if: inputs.container == ''
+        if: inputs.container == '' && steps.check.outcome == 'failure'
         shell: bash
         run: ferrocene/ci/run.sh
 
       - name: Run in container
-        if: inputs.container != ''
+        if: inputs.container != '' && steps.check.outcome == 'failure'
         shell: bash
         run: |
           docker run \
@@ -97,17 +96,15 @@ jobs:
       - name: Store cache
         id: store
         shell: bash
-        env:
-          AZURE_STORAGE_ACCOUNT: ferroceneci
-          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
-          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           set -e
-          hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
-          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/${{ inputs.host-triple }}-$hash.tar.zst
-          az storage copy -s llvm_cache.tar.zst -d $uri
-          echo "uri=$uri" >> $GITHUB_OUTPUT
+          az storage blob upload \
+            --file llvm_cache.tar.zst \
+            --name ${{ steps.check.outputs.name }} \
+            --container-name ferrocene-llvm-cache \
+            --account-name ferroceneci \
+            --auth-mode login
+
         
   build:
     runs-on: ${{ inputs.runner }}
@@ -140,13 +137,13 @@ jobs:
 
       - name: Get LLVM cache
         shell: bash
-        env:
-          AZURE_STORAGE_ACCOUNT: ferroceneci
-          AZURE_CONTAINER_NAME: ferrocene-llvm-cache
-          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
-          az storage copy -s $uri -d llvm_cache.tar.zst
+          az storage blob download \
+            --file llvm_cache.tar.zst \
+            --name ${{ needs.llvm.outputs.name }} \
+            --container-name ferrocene-llvm-cache \
+            --account-name ferroceneci \
+            --auth-mode login
           uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
 
       - name: Run

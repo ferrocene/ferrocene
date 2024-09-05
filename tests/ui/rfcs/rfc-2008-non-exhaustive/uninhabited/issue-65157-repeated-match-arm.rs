@@ -11,13 +11,15 @@ use uninhabited::PartiallyInhabitedVariants;
 
 pub fn foo(x: PartiallyInhabitedVariants) {
     match x {
-        PartiallyInhabitedVariants::Struct { .. } => {},
-        PartiallyInhabitedVariants::Struct { .. } => {},
+        PartiallyInhabitedVariants::Struct { .. } => {}
         //~^ ERROR unreachable pattern
-        _ => {},
+        PartiallyInhabitedVariants::Struct { .. } => {}
+        //~^ ERROR unreachable pattern
+        _ => {}
     }
 }
 
+<<<<<<< HEAD
 fn main() { }
 
 // ferrocene-annotations: fls_dw33yt5g6m0k
@@ -26,3 +28,6 @@ fn main() { }
 // Never Type
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions
+=======
+fn main() {}
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code

@@ -34,6 +34,8 @@ on:
 
 
 jobs:
+
+  # A job to build LLVM.
   llvm:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
@@ -164,7 +166,7 @@ jobs:
             --account-name ferroceneci \
             --auth-mode login
           uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
-          rm llvm_cache.zst
+          rm llvm_cache.tar.zst
 
       - name: Run
         if: ${{ inputs.container == '' }}

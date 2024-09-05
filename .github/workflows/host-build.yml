@@ -112,7 +112,7 @@ jobs:
             ferrocene/ci/run.sh
 
       - name: Store cache
-        id: store
+        if: steps.check.outputs.state != 'hit'
         shell: bash
         run: |
           set -e

@@ -87,7 +87,7 @@ jobs:
           fi
           set -e
 
-          echo "state=$cache" >> $GITHUB_OUTPUT
+          echo "state=$state" >> $GITHUB_OUTPUT
 
       - name: Run
         if: inputs.container == '' && steps.check.outputs.state != 'hit'

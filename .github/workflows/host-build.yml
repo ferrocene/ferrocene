@@ -7,6 +7,9 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
+      triples:
+        type: string
+        description: A comma separated list of targets to build
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -19,9 +22,12 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      cache-llvm:
-        description: The URI of the (pre-cached or new built, then cached) llvm.tar.zst
+      cache-llvm-uri:
+        description: The URI of the (pre-cached or new built, then cached) LLVM build
         value: ${{ jobs.llvm.outputs.uri }}
+      cache-llvm-name:
+        description: The filename of the (pre-cached or new built, then cached) LLVM build
+        value: ${{ jobs.llvm.outputs.name }}
       artifact-build:
         description: The name of the build job artifact
         value: ${{ jobs.build.outputs.artifact-name }}
@@ -33,6 +39,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       name: ${{ steps.check.outputs.name }}
+      uri: ${{ steps.check.outputs.uri }}
     env:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       SCRIPT: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
@@ -58,27 +65,38 @@ jobs:
 
       - name: Check cache
         id: check
-        continue-on-error: true # We capture the `.outcome` to detect a cache-miss
         shell: bash
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
           name="${{ inputs.host-triple }}-$hash.tar.zst"
           echo "name=$name" >> $GITHUB_OUTPUT
+
+          uri=https://ferroceneci.blob.core.windows.net/ferrocene-llvm-cache/$name
+          echo "uri=$uri" >> $GITHUB_OUTPUT
           
+          set +e
           az storage blob show \
             --name $name \
             --container-name ferrocene-llvm-cache \
             --account-name ferroceneci \
             --auth-mode login
+          if [ $? -eq 0 ]; then
+            state="hit"
+          else
+            state="miss"
+          fi
+          set -e
+
+          echo "state=$cache" >> $GITHUB_OUTPUT
 
       - name: Run
-        if: inputs.container == '' && steps.check.outcome == 'failure'
+        if: inputs.container == '' && steps.check.outputs.state == 'miss'
         shell: bash
         run: ferrocene/ci/run.sh
 
       - name: Run in container
-        if: inputs.container != '' && steps.check.outcome == 'failure'
+        if: inputs.container != '' && steps.check.outputs.state == 'miss'
         shell: bash
         run: |
           docker run \
@@ -114,10 +132,11 @@ jobs:
       - llvm
     env:
       ARTIFACT: build-${{inputs.host-triple}}
-      FERROCENE_HOST: x86_64-unknown-linux-gnu
-      FERROCENE_TARGETS: aarch64-unknown-linux-gnu
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
-        echo "Hello!"
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -146,11 +165,12 @@ jobs:
             --account-name ferroceneci \
             --auth-mode login
           uv run ferrocene/ci/scripts/llvm_cache.py download --url llvm_cache.tar.zst
+          rm llvm_cache.zst
 
       - name: Run
         if: ${{ inputs.container == '' }}
         shell: bash
-        run: uv run ferrocene/ci/run.sh
+        run: ferrocene/ci/run.sh
 
       - name: Run in container
         if: ${{ inputs.container != '' }}
@@ -166,7 +186,7 @@ jobs:
             --user $(id -u):$(id -g) \
             --network host \
             ${{ inputs.container }}
-            uv run ferrocene/ci/run.sh
+            ferrocene/ci/run.sh
 
       - uses: actions/upload-artifact@v4
         id: artifact

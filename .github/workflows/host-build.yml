@@ -62,7 +62,7 @@ jobs:
         run: |
           set -e
           hash=$(uv run ferrocene/ci/scripts/llvm_cache.py hash)
-          name=$${{ inputs.host-triple }}-$hash.tar.zst
+          name="${{ inputs.host-triple }}-$hash.tar.zst"
           echo "name=$name" >> $GITHUB_OUTPUT
           
           az storage blob show \

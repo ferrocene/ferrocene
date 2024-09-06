@@ -18,14 +18,18 @@ on:
         required: true
 
 permissions:
-  contents: write
   pull-requests: write
   issues: write
+  # Pushes are done by the GitHub app, to be able to trigger workflows.
+  # Marking this as `read` rather than `write` so that pushes accidentally
+  # using the builtin token rather than the app will fail loudly.
+  contents: read
 
 jobs:
   run:
     name: ${{ matrix.branch }}
     runs-on: ubuntu-latest
+    environment: automations
 
     strategy:
       fail-fast: false
@@ -34,8 +38,6 @@ jobs:
           - master # be sure to change the name in ferrocene/tools/pull-upstream/pull.sh if this changes
           - beta
           - stable
-
-    environment: automation-pull-upstream
 
     steps:
       - name: Checkout the Ferrocene repository
@@ -56,20 +58,23 @@ jobs:
 
       # The builtin GitHub token doesn't have the "workflows" permissions, and
       # so it can't create new branches with the .github/workflows directory in
-      # them. To work around that we're using a fresh token from an ad-hoc
-      # GitHub App with access to push new branches to this repo.
+      # them, or push commits changing files in that directory.
+      #
+      # Another limitation of the builtin GitHub token is that commits pushed
+      # through it don't start other GitHub Actions workflows, to prevent
+      # accidental infinte loops. Still, that's not acceptable for us, as we
+      # need to run CI on commits produced by this automation.
+      #
+      # To work around both problems we're using a fresh token from an ad-hoc
+      # GitHub App with access to push content to this repo.
       - name: Authenticate with GitHub to create branches
-        run: ferrocene/ci/scripts/github_app_auth.py
+        run: ferrocene/ci/scripts/github_app_auth.py --set-git-credentials
         env:
-          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-pull-upstream
-          APP_ID: 211522
-          APP_PRIVATE_KEY: "${{ secrets.PULL_UPSTREAM_APP_PRIVATE_KEY }}"
-        id: github_app_auth
+          APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
+          APP_PRIVATE_KEY: "${{ secrets.AUTOMATIONS_APP_PRIVATE_KEY }}"
 
       - name: Create the release branch if missing
         run: ferrocene/tools/pull-upstream/create-release-branch.sh ${{ matrix.branch }}
-        env:
-          HTTP_PUSH_TOKEN: "${{ steps.github_app_auth.outputs.token }}"
         if: matrix.branch != 'master'
         id: create_branch
 

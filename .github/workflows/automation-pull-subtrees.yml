@@ -12,14 +12,18 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
   pull-requests: write
   issues: write
+  # Pushes are done by the GitHub app, to be able to trigger workflows.
+  # Marking this as `read` rather than `write` so that pushes accidentally
+  # using the builtin token rather than the app will fail loudly.
+  contents: read
 
 jobs:
   run:
     name: ${{ matrix.branch }}
     runs-on: ubuntu-24.04
+    environment: automations
 
     strategy:
       fail-fast: false
@@ -46,6 +50,23 @@ jobs:
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+
+      # The builtin GitHub token doesn't have the "workflows" permissions, and
+      # so it can't create new branches with the .github/workflows directory in
+      # them, or push commits changing files in that directory.
+      #
+      # Another limitation of the builtin GitHub token is that commits pushed
+      # through it don't start other GitHub Actions workflows, to prevent
+      # accidental infinte loops. Still, that's not acceptable for us, as we
+      # need to run CI on commits produced by this automation.
+      #
+      # To work around both problems we're using a fresh token from an ad-hoc
+      # GitHub App with access to push content to this repo.
+      - name: Authenticate with GitHub to create branches
+        run: ferrocene/ci/scripts/github_app_auth.py --set-git-credentials
+        env:
+          APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
+          APP_PRIVATE_KEY: "${{ secrets.AUTOMATIONS_APP_PRIVATE_KEY }}"
 
       # Some subtrees require updating the Cargo.lock once they're updated, and
       # updating the Cargo.lock requires subtrees to be present.

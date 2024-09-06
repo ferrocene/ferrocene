@@ -98,15 +98,7 @@ else
     fi
     git branch "${branch_name}" "${last_commit}"
 
-    # On GitHub Actions we have to use a different token to push than the
-    # included one. This allows switching to that token.
-    origin="${FERROCENE_ORIGIN}"
-    if [[ -v HTTP_PUSH_TOKEN ]]; then
-        origin="https://ghost:${HTTP_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
-    fi
-    # The "-c http.https://github.com.extraheader=" ignores the authentication
-    # token set by the actions/checkout action, in case we push over HTTP.
-    git -c "http.https://github.com.extraheader=" push "${origin}" "${branch_name}"
+    git push "${FERROCENE_ORIGIN}" "${branch_name}"
 fi
 
 # Let other parts of the GitHub Actions workflow know what the branch name is.

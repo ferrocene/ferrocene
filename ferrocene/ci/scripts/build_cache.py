@@ -32,19 +32,23 @@ def subcommand_pre_upload(ferrocene_host):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         # Windows gets *extremely* confused by symlink directories
-        if platform.system == "Windows":
-            logging.debug(f"Removing problematic link `{location}`...")
+        if platform.system() == "Windows":
+            logging.info(f"Removing cyclic link `{location}`")
             os.unlink(location)
         else:
             if os.path.islink(location):
-                logging.debug(f"Removing problematic link `{location}`...")
+                logging.info(f"Removing cyclic link `{location}`")
                 os.unlink(location)
             else:
-                logging.debug(f"Removing problematic directory link `{location}`...")
+                logging.info(f"Removing cyclic directory link `{location}`")
                 shutil.rmtree(location)
 
-    shutil.rmtree("build/cache")
-    shutil.rmtree("build/tmp")
+    for path in ["build/cache", "build/tmp"]:
+        if os.path.exists(path):
+            logging.info(f"Removing {path}")
+            shutil.rmtree(path)
+        else:
+            logging.info(f"Skipped removing {path}, does not exist")
 
     return
 
@@ -54,13 +58,13 @@ def subcommand_post_download(ferrocene_host):
     for location in problematic_symlinks:
         target = problematic_symlinks[location]
         if os.path.exists(target):
-            logging.debug(f"Rebuilding problematic link to `{target}` at `{location}`...")
+            logging.info(f"Rebuilding cyclic link to `{target}` at `{location}`")
             parent = Path(location).parent
             if not os.path.exists(parent):
                 os.makedirs(parent)
             os.symlink(target, location)
         else:
-            logging.info(f"Unable to link to `{target}` at `{location}`, does not exist...")
+            logging.info(f"Unable to link to `{target}` at `{location}`, does not exist")
 
     return
 

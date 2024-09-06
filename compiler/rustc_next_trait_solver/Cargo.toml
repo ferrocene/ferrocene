@@ -27,3 +27,4 @@ nightly = [
     "rustc_index/nightly",
     "rustc_type_ir/nightly",
 ]
+rustc_use_parallel_compiler = ['rustc_data_structures?/rustc_use_parallel_compiler']

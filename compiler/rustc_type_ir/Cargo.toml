@@ -32,6 +32,7 @@ nightly = [
     "rustc_index/nightly",
     "rustc_ast_ir/nightly"
 ]
+rustc_use_parallel_compiler = ['rustc_data_structures/rustc_use_parallel_compiler']
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(bootstrap)'] }

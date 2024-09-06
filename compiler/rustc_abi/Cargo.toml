@@ -27,4 +27,5 @@ nightly = [
     "rustc_index/nightly",
 ]
 randomize = ["dep:rand", "dep:rand_xoshiro", "nightly"]
+rustc_use_parallel_compiler = ['rustc_data_structures/rustc_use_parallel_compiler']
 # tidy-alphabetical-end

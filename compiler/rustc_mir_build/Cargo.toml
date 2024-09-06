@@ -26,3 +26,8 @@ rustc_target = { path = "../rustc_target" }
 rustc_trait_selection = { path = "../rustc_trait_selection" }
 tracing = "0.1"
 # tidy-alphabetical-end
+
+[features]
+# tidy-alphabetical-start
+rustc_use_parallel_compiler = ['rustc_errors/rustc_use_parallel_compiler']
+# tidy-alphabetical-end

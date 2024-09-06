@@ -26,3 +26,7 @@ unicode-width = "0.1.4"
 [dev-dependencies]
 termcolor = "1.2"
 
+[features]
+# tidy-alphabetical-start
+rustc_use_parallel_compiler = ['rustc_errors/rustc_use_parallel_compiler']
+# tidy-alphabetical-end

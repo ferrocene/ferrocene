@@ -700,15 +700,13 @@ impl Build {
 
     /// Gets the space-separated set of activated features for the compiler.
     fn rustc_features(&self, kind: Kind, target: TargetSelection, crates: &[String]) -> String {
-        let _possible_features_by_crates: HashSet<_> = crates
+        let possible_features_by_crates: HashSet<_> = crates
             .iter()
             .flat_map(|krate| &self.crates[krate].features)
             .map(std::ops::Deref::deref)
             .collect();
-        let check = |_feature: &str| -> bool {
-            //crates.is_empty() || possible_features_by_crates.contains(feature)
-            // change necessary while resolver is broken
-            true
+        let check = |feature: &str| -> bool {
+            crates.is_empty() || possible_features_by_crates.contains(feature)
         };
         let mut features = vec![];
         if self.config.jemalloc && check("jemalloc") {
@@ -721,7 +719,7 @@ impl Build {
         if self.config.rustc_parallel && check("rustc_use_parallel_compiler") {
             features.push("rustc_use_parallel_compiler");
         }
-        if self.config.rust_randomize_layout {
+        if self.config.rust_randomize_layout && check("rustc_randomized_layouts") {
             features.push("rustc_randomized_layouts");
         }
 

@@ -26,6 +26,7 @@ rustc = [
     "dep:rustc_target",
     "dep:rustc_ast_ir",
 ]
+rustc_use_parallel_compiler = ['rustc_data_structures/rustc_use_parallel_compiler']
 
 [dev-dependencies]
 # tidy-alphabetical-start

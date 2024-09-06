@@ -19,3 +19,4 @@ nightly = [
     "dep:rustc_macros",
     "dep:rustc_span",
 ]
+rustc_use_parallel_compiler = ['rustc_data_structures?/rustc_use_parallel_compiler']

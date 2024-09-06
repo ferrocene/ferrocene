@@ -20,3 +20,8 @@ sha2 = "0.10.1"
 tracing = "0.1"
 unicode-width = "0.1.4"
 # tidy-alphabetical-end
+
+[features]
+# tidy-alphabetical-start
+rustc_use_parallel_compiler = ['rustc_data_structures/rustc_use_parallel_compiler']
+# tidy-alphabetical-end

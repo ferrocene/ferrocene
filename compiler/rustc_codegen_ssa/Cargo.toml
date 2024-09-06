@@ -49,6 +49,11 @@ wasm-encoder = "0.216.0"
 libc = "0.2.50"
 # tidy-alphabetical-end
 
+[features]
+# tidy-alphabetical-start
+rustc_use_parallel_compiler = ['rustc_errors/rustc_use_parallel_compiler']
+# tidy-alphabetical-end
+
 [dependencies.object]
 version = "0.36.2"
 default-features = false

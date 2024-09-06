@@ -42,3 +42,4 @@ rustc = [
     "smallvec/may_dangle",
     "rustc_index/nightly",
 ]
+rustc_use_parallel_compiler = ['rustc_errors?/rustc_use_parallel_compiler']

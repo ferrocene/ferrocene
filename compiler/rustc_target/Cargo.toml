@@ -24,3 +24,8 @@ default-features = false
 features = ["elf", "macho"]
 version = "0.36.2"
 # tidy-alphabetical-end
+
+[features]
+# tidy-alphabetical-start
+rustc_use_parallel_compiler = ['rustc_data_structures/rustc_use_parallel_compiler']
+# tidy-alphabetical-end

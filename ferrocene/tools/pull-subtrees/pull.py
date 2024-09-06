@@ -12,9 +12,6 @@
 # Required enviroment variables for the --automation flag:
 # - `GITHUB_TOKEN`: API token with access to the repo contents, issues and RPs
 # - `GITHUB_REPOSITORY`: name of the GitHub repository to run this script on
-#
-# If the `HTTP_CLONE_TOKEN` environment variable is provided, that token will
-# be used for HTTP cloning, rather than using SSH for cloning.
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -87,12 +84,6 @@ def resolve_commit(ref):
 
 
 def fetch_latest_commit(subtree):
-    if "HTTP_CLONE_TOKEN" in os.environ:
-        token = os.environ["HTTP_CLONE_TOKEN"]
-        pull_url = f"https://ghost:{token}@github.com/{subtree.repo}"
-    else:
-        pull_url = f"git@github.com:{subtree.repo}"
-
     print(f"fetching latest commit from {subtree.repo} {subtree.ref}")
     run(
         [
@@ -103,7 +94,7 @@ def fetch_latest_commit(subtree):
             "http.https://github.com.extraheader=",
             # Fetch the latest commit in the subtree's ref
             "fetch",
-            pull_url,
+            "https://github.com/{subtree.repo}",
             subtree.ref,
         ]
     )

@@ -12,14 +12,18 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
   pull-requests: write
   issues: write
+  # Pushes are done by the GitHub app, to be able to trigger workflows.
+  # Marking this as `read` rather than `write` so that pushes accidentally
+  # using the builtin token rather than the app will fail loudly.
+  contents: read
 
 jobs:
   run:
     name: ${{ matrix.branch }}
     runs-on: ubuntu-24.04
+    environment: automations
 
     strategy:
       fail-fast: false
@@ -27,7 +31,6 @@ jobs:
         branch:
           - main
 
-    environment: automation-pull-subtrees
     steps:
       - name: Checkout the Ferrocene repository
         uses: actions/checkout@v4
@@ -48,25 +51,22 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      # The pull-subtrees automation needs to fetch from the repositories the
-      # subtrees are based on, but since those repositories are private we need to
-      # authenticate on GitHub Actions with some kind of credentials.
+      # The builtin GitHub token doesn't have the "workflows" permissions, and
+      # so it can't create new branches with the .github/workflows directory in
+      # them, or push commits changing files in that directory.
       #
-      # Unfortunately deploy keys are not feasible, as a single deploy key can only
-      # clone one repository, and git doesn't make it easy to use multiple keys for
-      # different repositories. Personal access tokens are also not adequate as
-      # there's no way to scope the repositories a token has access to.
+      # Another limitation of the builtin GitHub token is that commits pushed
+      # through it don't start other GitHub Actions workflows, to prevent
+      # accidental infinte loops. Still, that's not acceptable for us, as we
+      # need to run CI on commits produced by this automation.
       #
-      # To limit the permissions as much as possible, we then decided to create a
-      # GitHub App that has only read access to those repos, and we use that app to
-      # generate a temporary token.
-      - name: Authenticate with GitHub to fetch from repositories
-        run: ferrocene/ci/scripts/github_app_auth.py
+      # To work around both problems we're using a fresh token from an ad-hoc
+      # GitHub App with access to push content to this repo.
+      - name: Authenticate with GitHub to create branches
+        run: ferrocene/ci/scripts/github_app_auth.py --set-git-credentials
         env:
-          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-pull-subtrees
-          APP_ID: 200501
-          APP_PRIVATE_KEY: "${{ secrets.PULL_SUBTREES_APP_PRIVATE_KEY }}"
-        id: github_app_auth
+          APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
+          APP_PRIVATE_KEY: "${{ secrets.AUTOMATIONS_APP_PRIVATE_KEY }}"
 
       # Some subtrees require updating the Cargo.lock once they're updated, and
       # updating the Cargo.lock requires subtrees to be present.
@@ -77,4 +77,3 @@ jobs:
         run: python3 ferrocene/tools/pull-subtrees/pull.py --automation --target ${{ matrix.branch }}
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          HTTP_CLONE_TOKEN: "${{ steps.github_app_auth.outputs.token }}"

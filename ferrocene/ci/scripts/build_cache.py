@@ -98,9 +98,9 @@ def main():
         exit(1)
 
     match args.subcommand:
-        case "pre_upload":
+        case "pre-upload":
             subcommand_pre_upload(ferrocene_host)
-        case "post_download":
+        case "post-download":
             subcommand_post_download(ferrocene_host)
         case _:
             print("Unknown command, see --help")

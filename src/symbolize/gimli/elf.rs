@@ -5,8 +5,9 @@ use super::mystd::fs;
 use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
 use super::mystd::path::{Path, PathBuf};
 use super::Either;
-use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash, Vec};
+use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::convert::{TryFrom, TryInto};
 use core::str;
 use object::elf::{

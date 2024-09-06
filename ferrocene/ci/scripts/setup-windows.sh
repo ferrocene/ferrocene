@@ -35,6 +35,4 @@ else
     echo "Windows Defender Realtime Protection already disabled"
 fi
 
-# Use `cmake.portable` to ensure it is added to path and because the virtual package
-# was previously broken intermittently.
-choco install -y cmake.portable ninja zstandard gcc-arm-embedded llvm
+winget install Kitware.CMake Ninja-build.Ninja Meta.ZStandard Arm.GnuArmEmbeddedToolchain LLVM.LLVM

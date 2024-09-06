@@ -64,4 +64,4 @@ Required compiler flags
 To use the target, the following additional flags must be provided to
 ``rustc``:
 
-- ``--target=x86_64-unknown-linux-gnu``
+- ``--target aarch64-apple-darwin``

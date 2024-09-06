@@ -28,7 +28,7 @@ def get_problematic_symlinks(ferrocene_host):
     }
 
 
-def subcommand_deconstitute(ferrocene_host):
+def subcommand_pre_upload(ferrocene_host):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         # Windows gets *extremely* confused by symlink directories
@@ -42,10 +42,14 @@ def subcommand_deconstitute(ferrocene_host):
             else:
                 logging.debug(f"Removing problematic directory link `{location}`...")
                 shutil.rmtree(location)
+
+    shutil.rmtree("build/cache")
+    shutil.rmtree("build/tmp")
+
     return
 
 
-def subcommand_reconstitute(ferrocene_host):
+def subcommand_post_download(ferrocene_host):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         target = problematic_symlinks[location]
@@ -68,9 +72,9 @@ def arguments():
     parser.add_argument('-v', '--verbose', action='count', default=0)
     subparsers = parser.add_subparsers(dest="subcommand", help="sub-command help")
 
-    store_parser = subparsers.add_parser("deconstitute", help="Tear apart cyclic symlinks that the build system likes to use.")
+    store_parser = subparsers.add_parser("pre-upload", help="Prepare the build directory for cache upload.")
 
-    retrieve_parser = subparsers.add_parser("reconstitute", help="Rebuild cyclic symlinks that the build system likes to use.")
+    retrieve_parser = subparsers.add_parser("post-download", help="Restore the build directory to a usable state (eg reconsitute cyclic symlinks).")
 
     return parser.parse_args()
 
@@ -94,10 +98,10 @@ def main():
         exit(1)
 
     match args.subcommand:
-        case "deconstitute":
-            subcommand_deconstitute(ferrocene_host)
-        case "reconstitute":
-            subcommand_reconstitute(ferrocene_host)
+        case "pre_upload":
+            subcommand_pre_upload(ferrocene_host)
+        case "post_download":
+            subcommand_post_download(ferrocene_host)
         case _:
             print("Unknown command, see --help")
             exit(1)

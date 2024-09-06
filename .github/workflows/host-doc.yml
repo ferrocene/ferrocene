@@ -67,7 +67,7 @@ jobs:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
       - name: Reconstitute known cyclic symlinks
-        run: uv run ./ferrocene/ci/scripts/build_dir_symlinks.py reconstitute
+        run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Run
         if: ${{ inputs.container == '' }}

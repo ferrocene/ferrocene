@@ -85,14 +85,6 @@ Validation
 The Ferrocene toolchain contains a validation binary called
 ``ferrocene-self-test``, useful to verify the installation of the Ferrocene
 toolchain. The tool will analyze the installation and the surrounding
-environment, and note if known installation problems are detected. To execute
-the tool, run:
+environment, and note if known installation problems are detected.
 
-.. code-block::
-
-   PATH_TO_INSTALLATION_DIRECTORY/bin/ferrocene-self-test
-
-All the performed checks will be displayed. If any check fails, an error will
-be emitted along with an ID. You can look up the identifier in :doc:`the error
-codes list </self-test/error-codes>` to learn more about the failure and ways to
-fix it.
+See :doc:`this page <../self-test/using>` on how to use it.

@@ -21,8 +21,6 @@ jobs:
     name: Create PR
     runs-on: ubuntu-latest
 
-    environment: automation-backport
-
     steps:
       - name: Checkout the Ferrocene repository
         uses: actions/checkout@v4
@@ -39,18 +37,6 @@ jobs:
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-
-      # The builtin GitHub token doesn't have the "workflows" permissions, and
-      # so it can't create new branches with the .github/workflows directory in
-      # them. To work around that we're using a fresh token from an ad-hoc
-      # GitHub App with access to push new branches to this repo.
-      - name: Authenticate with GitHub to create branches
-        run: ferrocene/ci/scripts/github_app_auth.py
-        env:
-          # https://github.com/organizations/ferrocene/settings/apps/ferrocene-backport
-          APP_ID: 298770
-          APP_PRIVATE_KEY: "${{ secrets.BACKPORT_APP_PRIVATE_KEY }}"
-        id: github_app_auth
 
       - name: Run the backport automation
         run: python3 ferrocene/tools/backport/all.py

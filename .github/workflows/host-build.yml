@@ -190,7 +190,7 @@ jobs:
             ferrocene/ci/run.sh
 
       - name: Deconstitute known cyclic symlinks
-        run: uv run ./ferrocene/ci/scripts/build_dir_symlinks.py deconstitute
+        run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
       - uses: actions/upload-artifact@v4
         id: artifact
         with:

@@ -393,7 +393,7 @@ fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
     Some(())
 }
 
-const DEBUG_PATH: &[u8] = b"/usr/lib/debug";
+const DEBUG_PATH: &str = "/usr/lib/debug";
 
 fn debug_path_exists() -> bool {
     cfg_if::cfg_if! {
@@ -403,7 +403,7 @@ fn debug_path_exists() -> bool {
 
             let mut exists = DEBUG_PATH_EXISTS.load(Ordering::Relaxed);
             if exists == 0 {
-                exists = if Path::new(OsStr::from_bytes(DEBUG_PATH)).is_dir() {
+                exists = if Path::new(DEBUG_PATH).is_dir() {
                     1
                 } else {
                     2
@@ -484,7 +484,7 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
     if debug_path_exists() {
         // Try "/usr/lib/debug/parent/filename"
         f.clear();
-        f.push(OsStr::from_bytes(DEBUG_PATH));
+        f.push(DEBUG_PATH);
         f.push(parent.strip_prefix("/").unwrap());
         f.push(filename);
         if f.is_file() {

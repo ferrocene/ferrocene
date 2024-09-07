@@ -1,4 +1,4 @@
-use super::mystd::fs::Path;
+use super::mystd::path::Path;
 use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
 use alloc::sync::Arc;
 use alloc::vec::Vec;

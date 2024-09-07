@@ -1,6 +1,6 @@
 use super::mystd::ffi::{OsStr, OsString};
-use super::mystd::fs::Path;
 use super::mystd::os::unix::ffi::OsStrExt;
+use super::mystd::path::Path;
 use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
 use alloc::sync::Arc;
 use alloc::vec::Vec;

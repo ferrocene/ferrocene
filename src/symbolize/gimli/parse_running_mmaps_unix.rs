@@ -5,7 +5,7 @@
 use super::mystd::ffi::OsString;
 use super::mystd::fs::File;
 use super::mystd::io::Read;
-use alloc::str::String;
+use alloc::string::String;
 use alloc::vec::Vec;
 use core::str::FromStr;
 

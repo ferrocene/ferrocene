@@ -6,7 +6,7 @@ use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::{Path, PathBuf};
 use super::Either;
 use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
-use alloc::str::String;
+use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::convert::{TryFrom, TryInto};
@@ -422,8 +422,8 @@ fn debug_path_exists() -> bool {
 /// The format of build id paths is documented at:
 /// https://sourceware.org/gdb/onlinedocs/gdb/Separate-Debug-Files.html
 fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
-    const BUILD_ID_PATH: &[u8] = b"/usr/lib/debug/.build-id/";
-    const BUILD_ID_SUFFIX: &[u8] = b".debug";
+    const BUILD_ID_PATH: &str = "/usr/lib/debug/.build-id/";
+    const BUILD_ID_SUFFIX: &str = ".debug";
 
     if build_id.len() < 2 {
         return None;
@@ -435,7 +435,7 @@ fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
 
     let mut path =
         String::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
-    path.extend(BUILD_ID_PATH);
+    path.push_str(BUILD_ID_PATH);
     path.push(char::from_digit((build_id[0] >> 4) as u32, 16)?);
     path.push(char::from_digit((build_id[0] & 0xf) as u32, 16)?);
     path.push('/');
@@ -443,7 +443,7 @@ fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
         path.push(char::from_digit((byte >> 4) as u32, 16)?);
         path.push(char::from_digit((byte & 0xf) as u32, 16)?);
     }
-    path.extend(BUILD_ID_SUFFIX);
+    path.push_str(BUILD_ID_SUFFIX);
     Some(PathBuf::from(path))
 }
 

@@ -1,11 +1,12 @@
 #![allow(clippy::useless_conversion)]
 
-use super::mystd::ffi::{OsStr, OsString};
+use super::mystd::ffi::OsStr;
 use super::mystd::fs;
-use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
+use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::{Path, PathBuf};
 use super::Either;
 use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash};
+use alloc::str::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::convert::{TryFrom, TryInto};
@@ -433,25 +434,17 @@ fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
     }
 
     let mut path =
-        Vec::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
+        String::with_capacity(BUILD_ID_PATH.len() + BUILD_ID_SUFFIX.len() + build_id.len() * 2 + 1);
     path.extend(BUILD_ID_PATH);
-    path.push(hex(build_id[0] >> 4));
-    path.push(hex(build_id[0] & 0xf));
-    path.push(b'/');
+    path.push(char::from_digit((build_id[0] >> 4) as u32, 16)?);
+    path.push(char::from_digit((build_id[0] & 0xf) as u32, 16)?);
+    path.push('/');
     for byte in &build_id[1..] {
-        path.push(hex(byte >> 4));
-        path.push(hex(byte & 0xf));
+        path.push(char::from_digit((byte >> 4) as u32, 16)?);
+        path.push(char::from_digit((byte & 0xf) as u32, 16)?);
     }
     path.extend(BUILD_ID_SUFFIX);
-    Some(PathBuf::from(OsString::from_vec(path)))
-}
-
-fn hex(byte: u8) -> u8 {
-    if byte < 10 {
-        b'0' + byte
-    } else {
-        b'a' + byte - 10
-    }
+    Some(PathBuf::from(path))
 }
 
 /// Locate a file specified in a `.gnu_debuglink` section.
@@ -468,9 +461,8 @@ fn hex(byte: u8) -> u8 {
 fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
     let path = fs::canonicalize(path).ok()?;
     let parent = path.parent()?;
-    let mut f = PathBuf::from(OsString::with_capacity(
-        DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2,
-    ));
+    let mut f =
+        PathBuf::with_capacity(DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2);
     let filename = Path::new(OsStr::from_bytes(filename));
 
     // Try "/parent/filename" if it differs from "path"
@@ -481,9 +473,7 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
     }
 
     // Try "/parent/.debug/filename"
-    let mut s = OsString::from(f);
-    s.clear();
-    f = PathBuf::from(s);
+    f.clear();
     f.push(parent);
     f.push(".debug");
     f.push(filename);
@@ -493,9 +483,7 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
 
     if debug_path_exists() {
         // Try "/usr/lib/debug/parent/filename"
-        let mut s = OsString::from(f);
-        s.clear();
-        f = PathBuf::from(s);
+        f.clear();
         f.push(OsStr::from_bytes(DEBUG_PATH));
         f.push(parent.strip_prefix("/").unwrap());
         f.push(filename);

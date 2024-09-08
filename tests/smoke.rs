@@ -190,20 +190,20 @@ fn smoke_test_frames() {
                 );
             }
             if expected_line != 0 {
-                assert!(
-                    line == expected_line,
-                    "bad line number on frame for `{expected_name}`: {line} != {expected_line}"
-                );
+                assert_eq!(
+                    line,
+                    expected_line,
+                    "bad line number on frame for `{expected_name}`: {line} != {expected_line}");
             }
 
             // dbghelp on MSVC doesn't support column numbers
             if !cfg!(target_env = "msvc") {
                 let col = col.expect("didn't find a column number");
                 if expected_col != 0 {
-                    assert!(
-                        col == expected_col,
-                        "bad column number on frame for `{expected_name}`: {col} != {expected_col}",
-                    );
+                    assert_eq!(
+                        col,
+                        expected_col,
+                        "bad column number on frame for `{expected_name}`: {col} != {expected_col}");
                 }
             }
         }

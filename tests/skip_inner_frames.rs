@@ -44,4 +44,8 @@ fn backtrace_new_should_start_with_call_site_trace() {
     let this_ip = backtrace_new_should_start_with_call_site_trace as *mut c_void;
     let frame_ip = b.frames().first().unwrap().symbol_address();
     assert_eq!(this_ip, frame_ip);
+
+    let trace = format!("{b:?}");
+    // FIXME: need more stacktrace content tests
+    assert!(trace.ends_with("\n"));
 }

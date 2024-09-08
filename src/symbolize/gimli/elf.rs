@@ -1,3 +1,5 @@
+#![allow(clippy::useless_conversion)]
+
 use super::mystd::ffi::{OsStr, OsString};
 use super::mystd::fs;
 use super::mystd::os::unix::ffi::{OsStrExt, OsStringExt};
@@ -21,7 +23,7 @@ impl Mapping {
     pub fn new(path: &Path) -> Option<Mapping> {
         let map = super::mmap(path)?;
         Mapping::mk_or_other(map, |map, stash| {
-            let object = Object::parse(&map)?;
+            let object = Object::parse(map)?;
 
             // Try to locate an external debug file using the build ID.
             if let Some(path_debug) = object.build_id().and_then(locate_build_id) {
@@ -47,7 +49,7 @@ impl Mapping {
     fn new_debug(original_path: &Path, path: PathBuf, crc: Option<u32>) -> Option<Mapping> {
         let map = super::mmap(&path)?;
         Mapping::mk(map, |map, stash| {
-            let object = Object::parse(&map)?;
+            let object = Object::parse(map)?;
 
             if let Some(_crc) = crc {
                 // TODO: check crc
@@ -224,7 +226,7 @@ impl<'a> Object<'a> {
             .map(|(_index, section)| section)
     }
 
-    pub fn search_symtab<'b>(&'b self, addr: u64) -> Option<&'b [u8]> {
+    pub fn search_symtab(&self, addr: u64) -> Option<&[u8]> {
         // Same sort of binary search as Windows above
         let i = match self.syms.binary_search_by_key(&addr, |sym| sym.address) {
             Ok(i) => i,

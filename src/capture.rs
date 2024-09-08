@@ -1,3 +1,5 @@
+#![allow(clippy::from_over_into)]
+
 #[cfg(feature = "serde")]
 use crate::resolve;
 use crate::PrintFmt;
@@ -351,7 +353,7 @@ impl From<crate::Frame> for BacktraceFrame {
     }
 }
 
-// we don't want implementing `impl From<Backtrace> for Vec<BacktraceFrame>` on purpose,
+// we don't want to implement `impl From<Backtrace> for Vec<BacktraceFrame>` on purpose,
 // because "... additional directions for Vec<T> can weaken type inference ..."
 // more information on https://github.com/rust-lang/backtrace-rs/pull/526
 impl Into<Vec<BacktraceFrame>> for Backtrace {
@@ -452,7 +454,7 @@ impl BacktraceSymbol {
     /// This function requires the `std` feature of the `backtrace` crate to be
     /// enabled, and the `std` feature is enabled by default.
     pub fn filename(&self) -> Option<&Path> {
-        self.filename.as_ref().map(|p| &**p)
+        self.filename.as_deref()
     }
 
     /// Same as `Symbol::lineno`

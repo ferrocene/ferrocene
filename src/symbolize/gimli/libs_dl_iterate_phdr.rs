@@ -14,7 +14,7 @@ pub(super) fn native_libraries() -> Vec<Library> {
     unsafe {
         libc::dl_iterate_phdr(Some(callback), core::ptr::addr_of_mut!(ret).cast());
     }
-    return ret;
+    ret
 }
 
 fn infer_current_exe(base_addr: usize) -> OsString {
@@ -84,8 +84,8 @@ unsafe extern "C" fn callback(
         segments: headers
             .iter()
             .map(|header| LibrarySegment {
-                len: (*header).p_memsz as usize,
-                stated_virtual_memory_address: (*header).p_vaddr as usize,
+                len: header.p_memsz as usize,
+                stated_virtual_memory_address: header.p_vaddr as usize,
             })
             .collect(),
         bias: dlpi_addr as usize,

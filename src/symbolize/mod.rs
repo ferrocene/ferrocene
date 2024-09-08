@@ -63,7 +63,7 @@ pub fn resolve<F: FnMut(&Symbol)>(addr: *mut c_void, cb: F) {
     unsafe { resolve_unsynchronized(addr, cb) }
 }
 
-/// Resolve a previously capture frame to a symbol, passing the symbol to the
+/// Resolve a previously captured frame to a symbol, passing the symbol to the
 /// specified closure.
 ///
 /// This function performs the same function as `resolve` except that it takes a

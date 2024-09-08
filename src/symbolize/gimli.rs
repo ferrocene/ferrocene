@@ -12,7 +12,6 @@ use super::SymbolName;
 use addr2line::gimli;
 use core::convert::TryInto;
 use core::mem;
-use core::u32;
 use libc::c_void;
 use mystd::ffi::OsString;
 use mystd::fs::File;
@@ -335,7 +334,7 @@ impl Cache {
         // never happen, and symbolicating backtraces would be ssssllllooooowwww.
         static mut MAPPINGS_CACHE: Option<Cache> = None;
 
-        f(MAPPINGS_CACHE.get_or_insert_with(|| Cache::new()))
+        f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
     }
 
     fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {

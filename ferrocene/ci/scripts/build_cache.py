@@ -18,37 +18,40 @@ def get_problematic_symlinks(ferrocene_host):
     action doesn't understand this concept, and OOMs.
     """
     return {
-        f"build/{ferrocene_host}/stage0-sysroot/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage0-sysroot/lib/rustlib/src": os.getcwd(),
-        f"build/{ferrocene_host}/stage1/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage1/lib/rustlib/src": os.getcwd(),
-        f"build/{ferrocene_host}/stage2/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage2/lib/rustlib/src": os.getcwd(),
-        "build/host": f"build/{ferrocene_host}",
+        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage1", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage1", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage2", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage2", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", "host"): Path("build", ferrocene_host),
     }
 
 
 def subcommand_pre_upload(ferrocene_host):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
-        # Windows gets *extremely* confused by symlink directories
-        if platform.system() == "Windows":
-            logging.info(f"Removing cyclic link `{location}`")
-            os.unlink(location)
-        else:
-            if os.path.islink(location):
+        try:
+            # Windows gets *extremely* confused by symlink directories
+            if platform.system() == "Windows":
                 logging.info(f"Removing cyclic link `{location}`")
-                os.unlink(location)
+                location.unlink()
             else:
-                logging.info(f"Removing cyclic directory link `{location}`")
-                shutil.rmtree(location)
+                if location.is_symlink():
+                    logging.info(f"Removing cyclic link `{location}`")
+                    location.unlink()
+                else:
+                    logging.info(f"Removing cyclic directory link `{location}`")
+                    location.unlink()
+        except Exception as e:
+            logging.warn(f"Unable to remove {location}: {e}")
 
     for path in ["build/cache", "build/tmp"]:
         if os.path.exists(path):
             logging.info(f"Removing {path}")
             shutil.rmtree(path)
         else:
-            logging.info(f"Skipped removing {path}, does not exist")
+            logging.warn(f"Skipped removing {path}, does not exist")
 
     return
 

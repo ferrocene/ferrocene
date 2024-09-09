@@ -34,7 +34,14 @@ Language changes in Rust 1.80.0
   * No change: this previous restriction is not specified in the FLS
 
 * `Stabilize `exclusive_range_pattern` feature <https://github.com/rust-lang/rust/pull/124459/>`_
-* `Guarantee layout and ABI of `Result` in some scenarios <https://github.com/rust-lang/rust/pull/124870>`_
+
+  * Changed syntax: :s:`RangePattern`
+
+  * New syntax: :s:`ExclusiveRangePattern`
+
+  * Changed paragraph: :p:`fls_8Q6NfRx4j5V7`
+
+  * New paragraphs: :p:`fls_3PyquOKjA7SI`, :p:`fls_8bdOqkO1NuJW`, :p:`fls_EDL1Pi56KQ2H`
 
 Language changes in Rust 1.79.0
 -------------------------------

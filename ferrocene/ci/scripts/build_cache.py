@@ -7,8 +7,11 @@ import os
 import logging
 import shutil
 import platform
+import tarfile
 from pathlib import Path
 
+build_directory = Path("build")
+tarball_location = Path("build.tar")
 
 def get_problematic_symlinks(ferrocene_host):
     """
@@ -34,35 +37,43 @@ def subcommand_pre_upload(ferrocene_host):
         try:
             # Windows gets *extremely* confused by symlink directories
             if platform.system() == "Windows":
-                logging.info(f"Removing cyclic link `{location}`")
-                location.unlink()
+                os.unlink(location)
             else:
-                if location.is_symlink():
-                    logging.info(f"Removing cyclic link `{location}`")
-                    location.unlink()
+                if os.path.islink(location):
+                    os.unlink(location)
                 else:
-                    logging.info(f"Removing cyclic directory link `{location}`")
-                    location.unlink()
+                    shutil.rmtree(location)
+            logging.info(f"Removing cyclic link `{location}`")
         except Exception as e:
-            logging.warn(f"Unable to remove {location}: {e}")
+            logging.warning(f"Unable to remove {location}: {e}")
 
-    for path in ["build/cache", "build/tmp"]:
-        if os.path.exists(path):
-            logging.info(f"Removing {path}")
-            shutil.rmtree(path)
+    for location in [Path("build", "cache"), Path("build", "tmp")]:
+        if location.exists():
+            logging.info(f"Removing {location}")
+            shutil.rmtree(location)
         else:
-            logging.warn(f"Skipped removing {path}, does not exist")
+            logging.warning(f"Skipped removing {location}, does not exist")
+
+    with tarfile.TarFile.open(tarball_location, mode='w', dereference=True) as tarball:
+        logging.info(f"Began archiving `{build_directory}`...")
+        tarball.add(build_directory, recursive=True) # Always do relative to the directory passed.
+        tarball.close()
 
     return
 
 
 def subcommand_post_download(ferrocene_host):
+    # It is important for Windows that the tarball was created with `--dereference`
+    with tarfile.open(tarball_location, mode="r") as tarball:
+        logging.info("Began unarchiving...")
+        tarball.extractall(filter="data")
+
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         target = problematic_symlinks[location]
-        if os.path.exists(target):
+        if Path(target).exists():
             logging.info(f"Rebuilding cyclic link to `{target}` at `{location}`")
-            parent = Path(location).parent
+            parent = location.parent
             if not os.path.exists(parent):
                 os.makedirs(parent)
             os.symlink(target, location)

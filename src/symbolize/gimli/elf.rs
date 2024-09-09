@@ -45,6 +45,47 @@ impl Mapping {
         })
     }
 
+    /// On Android, shared objects can be loaded directly from a ZIP archive
+    /// (see: [`super::Library::zip_offset`]).
+    ///
+    /// If `zip_offset` is not None, we interpret the `path` as an
+    /// "embedded" library path, and the value of `zip_offset` tells us where
+    /// in the ZIP archive the library data starts.
+    ///
+    /// We expect `zip_offset` to be page-aligned because the dynamic linker
+    /// requires this. Otherwise, loading the embedded library will fail.
+    ///
+    /// If we fail to load an embedded library for any reason, we fallback to
+    /// interpreting the path as a literal file on disk (same as calling [`Self::new`]).
+    #[cfg(target_os = "android")]
+    pub fn new_android(path: &Path, zip_offset: Option<u64>) -> Option<Mapping> {
+        fn map_embedded_library(path: &Path, zip_offset: u64) -> Option<Mapping> {
+            // get path of ZIP archive (delimited by `!/`)
+            let zip_path = Path::new(super::extract_zip_path_android(path.as_os_str())?);
+
+            let file = fs::File::open(zip_path).ok()?;
+            let len = file.metadata().ok()?.len();
+
+            // NOTE: we map the remainder of the entire archive instead of just the library so we don't have to determine its length
+            // NOTE: mmap will fail if `zip_offset` is not page-aligned
+            let map = unsafe {
+                super::mmap::Mmap::map(&file, usize::try_from(len - zip_offset).ok()?, zip_offset)
+            }?;
+
+            Mapping::mk(map, |map, stash| {
+                Context::new(stash, Object::parse(&map)?, None, None)
+            })
+        }
+
+        // if ZIP offset is given, try mapping as a ZIP-embedded library
+        // otherwise, fallback to mapping as a literal filepath
+        if let Some(zip_offset) = zip_offset {
+            map_embedded_library(path, zip_offset).or_else(|| Self::new(path))
+        } else {
+            Self::new(path)
+        }
+    }
+
     /// Load debuginfo from an external debug file.
     fn new_debug(original_path: &Path, path: PathBuf, crc: Option<u32>) -> Option<Mapping> {
         let map = super::mmap(&path)?;

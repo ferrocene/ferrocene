@@ -195,4 +195,4 @@ jobs:
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
-          path: build
+          path: build.tar

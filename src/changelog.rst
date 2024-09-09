@@ -18,6 +18,15 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.80.0
+-------------------------------
+
+* `Document maximum allocation size <https://github.com/rust-lang/rust/pull/116675/>`_
+* `Allow zero-byte offsets and ZST read/writes on arbitrary pointers <https://github.com/rust-lang/rust/pull/117329/>`_
+* `Support C23's variadics without a named parameter <https://github.com/rust-lang/rust/pull/124048/>`_
+* `Stabilize `exclusive_range_pattern` feature <https://github.com/rust-lang/rust/pull/124459/>`_
+* `Guarantee layout and ABI of `Result` in some scenarios <https://github.com/rust-lang/rust/pull/124870>`_
+
 Language changes in Rust 1.79.0
 -------------------------------
 

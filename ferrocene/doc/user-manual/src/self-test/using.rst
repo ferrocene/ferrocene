@@ -12,7 +12,7 @@ The most easy way to use the tool is with `CriticalUp <https://criticalup.ferroc
 
    criticalup run ferrocene-self-test
 
-If, instead, the toolchain was installed manually, ``ferrocene-self-test`` can be run directly:
+If, instead, the toolchain was installed manually, the tool can be run directly:
 
 .. code::
 
@@ -20,8 +20,8 @@ If, instead, the toolchain was installed manually, ``ferrocene-self-test`` can b
 
 .. note::
 
-   - ``ferrocene-self-test`` can only be used with the toolchain it is distributed with
-   - ``ferrocene-self-test`` does not accept any command line options
+   - The tool can only be used with the toolchain it is distributed with
+   - The tool does not accept any command line options
 
 All the performed checks will be displayed.
 If any check fails, an error will be emitted along with an ID.

@@ -26,6 +26,9 @@ Language changes in Rust 1.80.0
   * New paragraphs: :p:`fls_CUJyMj0Sj8NS`, :p:`fls_kaomYy0Ml4Nh`, :p:`fls_B5cmkWfD5GNt`, :p:`fls_oqhQ62mDLckN`, :p:`fls_uhwpuv6cx4ip`, :p:`fls_xuuFKmm181bs`
 
 * `Allow zero-byte offsets and ZST read/writes on arbitrary pointers <https://github.com/rust-lang/rust/pull/117329/>`_
+
+  * No change: this previous restriction is not specified in the FLS
+
 * `Support C23's variadics without a named parameter <https://github.com/rust-lang/rust/pull/124048/>`_
 * `Stabilize `exclusive_range_pattern` feature <https://github.com/rust-lang/rust/pull/124459/>`_
 * `Guarantee layout and ABI of `Result` in some scenarios <https://github.com/rust-lang/rust/pull/124870>`_

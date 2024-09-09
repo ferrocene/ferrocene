@@ -18,6 +18,19 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+Language changes in Rust 1.81.0
+-------------------------------
+
+* `Abort on uncaught panics in `extern "C"` functions. <https://github.com/rust-lang/rust/pull/116088/>`_
+* `Fix ambiguous cases of multiple `&` in elided self lifetimes. <https://github.com/rust-lang/rust/pull/117967/>`_
+* `Stabilize `#[expect]` for lints (RFC 2383), <https://github.com/rust-lang/rust/pull/120924/>`_ like `#[allow]` with a warning if the lint is _not_ fulfilled.
+* `Change method resolution to constrain hidden types instead of rejecting method candidates. <https://github.com/rust-lang/rust/pull/123962/>`_
+* `Bump `elided_lifetimes_in_associated_constant` to deny. <https://github.com/rust-lang/rust/pull/124211/>`_
+* `\`offset_from\`: always allow pointers to point to the same address. <https://github.com/rust-lang/rust/pull/124921/>`_
+* `Allow constraining opaque types during subtyping in the trait system. <https://github.com/rust-lang/rust/pull/125447/>`_
+* `Allow constraining opaque types during various unsizing casts. <https://github.com/rust-lang/rust/pull/125610/>`_
+* `Deny keyword lifetimes pre-expansion. <https://github.com/rust-lang/rust/pull/126762/>`_
+
 Language changes in Rust 1.80.0
 -------------------------------
 

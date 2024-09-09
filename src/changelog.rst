@@ -22,6 +22,9 @@ Language changes in Rust 1.81.0
 -------------------------------
 
 * `Abort on uncaught panics in `extern "C"` functions. <https://github.com/rust-lang/rust/pull/116088/>`_
+
+  * No change: unwinding is not specified in the FLS
+
 * `Fix ambiguous cases of multiple `&` in elided self lifetimes. <https://github.com/rust-lang/rust/pull/117967/>`_
 * `Stabilize `#[expect]` for lints (RFC 2383), <https://github.com/rust-lang/rust/pull/120924/>`_ like `#[allow]` with a warning if the lint is _not_ fulfilled.
 * `Change method resolution to constrain hidden types instead of rejecting method candidates. <https://github.com/rust-lang/rust/pull/123962/>`_

@@ -30,6 +30,9 @@ Language changes in Rust 1.80.0
   * No change: this previous restriction is not specified in the FLS
 
 * `Support C23's variadics without a named parameter <https://github.com/rust-lang/rust/pull/124048/>`_
+
+  * No change: this previous restriction is not specified in the FLS
+
 * `Stabilize `exclusive_range_pattern` feature <https://github.com/rust-lang/rust/pull/124459/>`_
 * `Guarantee layout and ABI of `Result` in some scenarios <https://github.com/rust-lang/rust/pull/124870>`_
 

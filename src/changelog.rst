@@ -57,6 +57,8 @@ Language changes in Rust 1.81.0
 
 * `Deny keyword lifetimes pre-expansion. <https://github.com/rust-lang/rust/pull/126762/>`_
 
+  * No change: the FLS already specifies this restriction in :s:`Lifetime`
+
 Language changes in Rust 1.80.0
 -------------------------------
 

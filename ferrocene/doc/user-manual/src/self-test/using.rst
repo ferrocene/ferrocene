@@ -18,7 +18,10 @@ If, instead, the toolchain was installed manually, ``ferrocene-self-test`` can b
 
    <toolchain directory root>/bin/ferrocene-self-test
 
-.. note:: ``ferrocene-self-test`` can only be used with the toolchain it is distributed with.
+.. note::
+
+   - ``ferrocene-self-test`` can only be used with the toolchain it is distributed with
+   - ``ferrocene-self-test`` does not accept any command line options
 
 All the performed checks will be displayed.
 If any check fails, an error will be emitted along with an ID.

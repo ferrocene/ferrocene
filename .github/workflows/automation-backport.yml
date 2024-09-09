@@ -23,6 +23,7 @@ jobs:
   run:
     name: Create PR
     runs-on: ubuntu-latest
+    environment: automations
 
     steps:
       - name: Checkout the Ferrocene repository

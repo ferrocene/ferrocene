@@ -52,6 +52,9 @@ Language changes in Rust 1.81.0
   * No change: the concrete type inference resolution is not part of the FLS
 
 * `Allow constraining opaque types during various unsizing casts. <https://github.com/rust-lang/rust/pull/125610/>`_
+
+  * No change: the concrete type inference resolution is not part of the FLS
+
 * `Deny keyword lifetimes pre-expansion. <https://github.com/rust-lang/rust/pull/126762/>`_
 
 Language changes in Rust 1.80.0

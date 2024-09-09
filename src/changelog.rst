@@ -26,6 +26,11 @@ Language changes in Rust 1.81.0
   * No change: unwinding is not specified in the FLS
 
 * `Fix ambiguous cases of multiple `&` in elided self lifetimes. <https://github.com/rust-lang/rust/pull/117967/>`_
+
+  * Changed paragraph: :p:`fls_crb6m6b3cdwh`
+
+  * New paragraph: :p:`fls_d4u3y82hdadc`
+
 * `Stabilize `#[expect]` for lints (RFC 2383), <https://github.com/rust-lang/rust/pull/120924/>`_ like `#[allow]` with a warning if the lint is _not_ fulfilled.
 * `Change method resolution to constrain hidden types instead of rejecting method candidates. <https://github.com/rust-lang/rust/pull/123962/>`_
 * `Bump `elided_lifetimes_in_associated_constant` to deny. <https://github.com/rust-lang/rust/pull/124211/>`_

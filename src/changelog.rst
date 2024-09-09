@@ -44,6 +44,9 @@ Language changes in Rust 1.81.0
   * No change: lints are not part of the FLS
 
 * `\`offset_from\`: always allow pointers to point to the same address. <https://github.com/rust-lang/rust/pull/124921/>`_
+
+  * No change: this previous restriction is not specified in the FLS
+
 * `Allow constraining opaque types during subtyping in the trait system. <https://github.com/rust-lang/rust/pull/125447/>`_
 * `Allow constraining opaque types during various unsizing casts. <https://github.com/rust-lang/rust/pull/125610/>`_
 * `Deny keyword lifetimes pre-expansion. <https://github.com/rust-lang/rust/pull/126762/>`_

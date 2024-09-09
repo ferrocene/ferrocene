@@ -22,6 +22,9 @@ Language changes in Rust 1.80.0
 -------------------------------
 
 * `Document maximum allocation size <https://github.com/rust-lang/rust/pull/116675/>`_
+
+  * New paragraphs: :p:`fls_CUJyMj0Sj8NS`, :p:`fls_kaomYy0Ml4Nh`, :p:`fls_B5cmkWfD5GNt`, :p:`fls_oqhQ62mDLckN`, :p:`fls_uhwpuv6cx4ip`, :p:`fls_xuuFKmm181bs`
+
 * `Allow zero-byte offsets and ZST read/writes on arbitrary pointers <https://github.com/rust-lang/rust/pull/117329/>`_
 * `Support C23's variadics without a named parameter <https://github.com/rust-lang/rust/pull/124048/>`_
 * `Stabilize `exclusive_range_pattern` feature <https://github.com/rust-lang/rust/pull/124459/>`_

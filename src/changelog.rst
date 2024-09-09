@@ -36,6 +36,9 @@ Language changes in Rust 1.81.0
   * New paragraph: :p:`fls_NrTL2FruARAv`
 
 * `Change method resolution to constrain hidden types instead of rejecting method candidates. <https://github.com/rust-lang/rust/pull/123962/>`_
+
+  * No change: the concrete type inference resolution is not part of the FLS
+
 * `Bump `elided_lifetimes_in_associated_constant` to deny. <https://github.com/rust-lang/rust/pull/124211/>`_
 * `\`offset_from\`: always allow pointers to point to the same address. <https://github.com/rust-lang/rust/pull/124921/>`_
 * `Allow constraining opaque types during subtyping in the trait system. <https://github.com/rust-lang/rust/pull/125447/>`_

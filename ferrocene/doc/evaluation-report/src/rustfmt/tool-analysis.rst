@@ -60,5 +60,5 @@ IEC 62304 Tool Classification
 -----------------------------
 
 [|iec_med_ref|] does not provide an own scheme to classify and qualify tools used in its context, but recommends the application
-of techniques and tools as defined in [|iec_ref|]. Therefore, with the qualification of Ferrocene adhering to an IEC 61508 Tool Classification,
-Ferrocene can be used for development, release and maintenance of medical device software up to Class C.
+of techniques and tools as defined in [|iec_ref|]. Therefore, with the qualification of rustfmt adhering to an IEC 61508 Tool Classification,
+rustfmt can be used in the development of medical device software up to Class C.

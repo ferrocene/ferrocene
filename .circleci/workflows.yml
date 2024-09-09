@@ -620,6 +620,26 @@ jobs:
 
   # This job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
+  x86_64-windows-build:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      # On Windows, the virtualenv detection seems to struggle at times, give it a kick
+      SCRIPT: |
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - ferrocene-job-build:
+          os: windows
+
   x86_64-windows-dist:
     executor:
       name: win/server-2022
@@ -641,6 +661,27 @@ jobs:
     steps:
       - ferrocene-job-dist:
           os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-generic-test-runner:
+    executor:
+      name: win/server-2022
+      size: << parameters.size >>
+      shell: bash.exe -euo pipefail
+    parameters:
+      job:
+        type: string
+      size:
+        type: string
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - ferrocene-job-test-container:
+          os: windows
+          restore-from-job: x86_64-windows-build
 
   x86_64-windows-self-test:
     executor:
@@ -978,9 +1019,18 @@ workflows:
             - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
+      - x86_64-windows-build:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test
+          job: test
+          size: large
+          requires:
+            - x86_64-windows-build
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
@@ -1057,6 +1107,9 @@ commands:
           name: Shrink the build directory before persisting it
           command: ferrocene/ci/scripts/shrink-build-directory.sh
       - run:
+          name: Prune cyclic symlinks in build directory.
+          command: ferrocene/ci/scripts/build_cache.sh pre-upload
+      - run:
           name: Persist build output between jobs
           command: ferrocene/ci/scripts/persist-between-jobs.sh upload ./build
 
@@ -1097,6 +1150,9 @@ commands:
             - run:
                 name: Restore files from the << parameters.restore-from-job >> job
                 command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+            - run:
+                name: Restore cyclic symlinks in build directory.
+                command: ferrocene/ci/scripts/build_cache.sh post-download
       - when:
           condition:
             equal: [<<parameters.qnx>>, true]
@@ -1124,6 +1180,9 @@ commands:
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - run:
+          name: Restore cyclic symlinks in build directory.
+          command: ferrocene/ci/scripts/build_cache.sh post-download
       - ferrocene-ci
 
   ferrocene-job-test-vm:
@@ -1155,6 +1214,9 @@ commands:
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
+      - run:
+          name: Restore cyclic symlinks in build directory.
+          command: ferrocene/ci/scripts/build_cache.sh post-download
       - run:
           name: Enable IPv6 for Docker
           command: |

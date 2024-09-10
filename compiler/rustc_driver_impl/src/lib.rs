@@ -7,7 +7,6 @@
 // tidy-alphabetical-start
 #![allow(internal_features)]
 #![allow(rustc::untranslatable_diagnostic)] // FIXME: make this translatable
-#![cfg_attr(bootstrap, feature(unsafe_extern_blocks))]
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/nightly-rustc/")]
 #![doc(rust_logo)]
 #![feature(decl_macro)]
@@ -61,7 +60,6 @@ use rustc_session::lint::{Lint, LintId};
 use rustc_session::output::collect_crate_types;
 use rustc_session::{config, filesearch, EarlyDiagCtxt, Session};
 use rustc_span::source_map::FileLoader;
-use rustc_span::symbol::sym;
 use rustc_span::FileName;
 use rustc_target::json::ToJson;
 use rustc_target::spec::{Target, TargetTriple};
@@ -777,16 +775,8 @@ fn print_crate_info(
                     .config
                     .iter()
                     .filter_map(|&(name, value)| {
-                        // Note that crt-static is a specially recognized cfg
-                        // directive that's printed out here as part of
-                        // rust-lang/rust#37406, but in general the
-                        // `target_feature` cfg is gated under
-                        // rust-lang/rust#29717. For now this is just
-                        // specifically allowing the crt-static cfg and that's
-                        // it, this is intended to get into Cargo and then go
-                        // through to build scripts.
-                        if (name != sym::target_feature || value != Some(sym::crt_dash_static))
-                            && !sess.is_nightly_build()
+                        // On stable, exclude unstable flags.
+                        if !sess.is_nightly_build()
                             && find_gated_cfg(|cfg_sym| cfg_sym == name).is_some()
                         {
                             return None;
@@ -871,9 +861,9 @@ fn print_crate_info(
                 use rustc_target::spec::current_apple_deployment_target;
 
                 if sess.target.is_like_osx {
-                    let (major, minor) = current_apple_deployment_target(&sess.target)
-                        .expect("unknown Apple target OS");
-                    println_info!("deployment_target={}", format!("{major}.{minor}"))
+                    let (major, minor, patch) = current_apple_deployment_target(&sess.target);
+                    let patch = if patch != 0 { format!(".{patch}") } else { String::new() };
+                    println_info!("deployment_target={major}.{minor}{patch}")
                 } else {
                     #[allow(rustc::diagnostic_outside_of_impl)]
                     sess.dcx().fatal("only Apple targets currently support deployment version info")

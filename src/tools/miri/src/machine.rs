@@ -535,9 +535,9 @@ pub struct MiriMachine<'tcx> {
     pub(crate) basic_block_count: u64,
 
     /// Handle of the optional shared object file for native functions.
-    #[cfg(target_os = "linux")]
+    #[cfg(unix)]
     pub native_lib: Option<(libloading::Library, std::path::PathBuf)>,
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix))]
     pub native_lib: Option<!>,
 
     /// Run a garbage collector for BorTags every N basic blocks.
@@ -572,6 +572,9 @@ pub struct MiriMachine<'tcx> {
     /// Invariant: the promised alignment will never be less than the native alignment of the
     /// allocation.
     pub(crate) symbolic_alignment: RefCell<FxHashMap<AllocId, (Size, Align)>>,
+
+    /// A cache of "data range" computations for unions (i.e., the offsets of non-padding bytes).
+    union_data_ranges: FxHashMap<Ty<'tcx>, RangeSet>,
 }
 
 impl<'tcx> MiriMachine<'tcx> {
@@ -678,7 +681,7 @@ impl<'tcx> MiriMachine<'tcx> {
             report_progress: config.report_progress,
             basic_block_count: 0,
             clock: Clock::new(config.isolated_op == IsolatedOp::Allow),
-            #[cfg(target_os = "linux")]
+            #[cfg(unix)]
             native_lib: config.native_lib.as_ref().map(|lib_file_path| {
                 let target_triple = layout_cx.tcx.sess.opts.target_triple.triple();
                 // Check if host target == the session target.
@@ -700,9 +703,9 @@ impl<'tcx> MiriMachine<'tcx> {
                     lib_file_path.clone(),
                 )
             }),
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(not(unix))]
             native_lib: config.native_lib.as_ref().map(|_| {
-                panic!("loading external .so files is only supported on Linux")
+                panic!("calling functions from native libraries via FFI is only supported on Unix")
             }),
             gc_interval: config.gc_interval,
             since_gc: 0,
@@ -714,6 +717,7 @@ impl<'tcx> MiriMachine<'tcx> {
             allocation_spans: RefCell::new(FxHashMap::default()),
             const_cache: RefCell::new(FxHashMap::default()),
             symbolic_alignment: RefCell::new(FxHashMap::default()),
+            union_data_ranges: FxHashMap::default(),
         }
     }
 
@@ -826,6 +830,7 @@ impl VisitProvenance for MiriMachine<'_> {
             allocation_spans: _,
             const_cache: _,
             symbolic_alignment: _,
+            union_data_ranges: _,
         } = self;
 
         threads.visit_provenance(visit);
@@ -1277,12 +1282,12 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
     ) -> InterpResult<'tcx, Cow<'b, Allocation<Self::Provenance, Self::AllocExtra, Self::Bytes>>>
     {
         let kind = Self::GLOBAL_KIND.unwrap().into();
-        let alloc = alloc.adjust_from_tcx(&ecx.tcx,
+        let alloc = alloc.adjust_from_tcx(
+            &ecx.tcx,
             |bytes, align| ecx.get_global_alloc_bytes(id, kind, bytes, align),
             |ptr| ecx.global_root_pointer(ptr),
         )?;
-        let extra =
-            Self::init_alloc_extra(ecx, id, kind, alloc.size(), alloc.align)?;
+        let extra = Self::init_alloc_extra(ecx, id, kind, alloc.size(), alloc.align)?;
         Ok(Cow::Owned(alloc.with_extra(extra)))
     }
 
@@ -1626,5 +1631,13 @@ impl<'tcx> Machine<'tcx> for MiriMachine<'tcx> {
         } else {
             ecx.machine.rng.borrow_mut().gen::<usize>() % ADDRS_PER_ANON_GLOBAL
         }
+    }
+
+    fn cached_union_data_range<'e>(
+        ecx: &'e mut InterpCx<'tcx, Self>,
+        ty: Ty<'tcx>,
+        compute_range: impl FnOnce() -> RangeSet,
+    ) -> Cow<'e, RangeSet> {
+        Cow::Borrowed(ecx.machine.union_data_ranges.entry(ty).or_insert_with(compute_range))
     }
 }

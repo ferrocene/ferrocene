@@ -34,6 +34,7 @@ pub mod rfs {
 }
 
 // Re-exports of third-party library crates.
+// tidy-alphabetical-start
 pub use bstr;
 pub use gimli;
 pub use libc;
@@ -41,6 +42,7 @@ pub use object;
 pub use regex;
 pub use serde_json;
 pub use wasmparser;
+// tidy-alphabetical-end
 
 // Re-exports of external dependencies.
 pub use external_deps::{c_build, cc, clang, htmldocck, llvm, python, rustc, rustdoc};
@@ -71,7 +73,7 @@ pub use env::{env_var, env_var_os, set_current_dir};
 pub use run::{cmd, run, run_fail, run_with_args};
 
 /// Helpers for checking target information.
-pub use targets::{is_darwin, is_msvc, is_windows, llvm_components_contain, target, uname};
+pub use targets::{is_darwin, is_msvc, is_windows, llvm_components_contain, target, uname, apple_os};
 
 /// Helpers for building names of output artifacts that are potentially target-specific.
 pub use artifact_names::{

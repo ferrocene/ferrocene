@@ -35,6 +35,7 @@ use rustc_data_structures::tagged_ptr::CopyTaggedPtr;
 use rustc_errors::{Diag, ErrorGuaranteed, StashKey};
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, DocLinkResMap, LifetimeRes, Res};
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LocalDefId, LocalDefIdMap};
+use rustc_hir::LangItem;
 use rustc_index::IndexVec;
 use rustc_macros::{
     extension, Decodable, Encodable, HashStable, TyDecodable, TyEncodable, TypeFoldable,
@@ -262,7 +263,6 @@ pub struct ImplTraitHeader<'tcx> {
     pub trait_ref: ty::EarlyBinder<'tcx, ty::TraitRef<'tcx>>,
     pub polarity: ImplPolarity,
     pub safety: hir::Safety,
-    pub do_not_recommend: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, TypeFoldable, TypeVisitable)]
@@ -1570,8 +1570,15 @@ impl<'tcx> TyCtxt<'tcx> {
             flags.insert(ReprFlags::RANDOMIZE_LAYOUT);
         }
 
+        // box is special, on the one hand the compiler assumes an ordered layout, with the pointer
+        // always at offset zero. On the other hand we want scalar abi optimizations.
+        let is_box = self.is_lang_item(did.to_def_id(), LangItem::OwnedBox);
+
         // This is here instead of layout because the choice must make it into metadata.
-        if !self.consider_optimizing(|| format!("Reorder fields of {:?}", self.def_path_str(did))) {
+        if is_box
+            || !self
+                .consider_optimizing(|| format!("Reorder fields of {:?}", self.def_path_str(did)))
+        {
             flags.insert(ReprFlags::IS_LINEAR);
         }
 
@@ -1786,6 +1793,37 @@ impl<'tcx> TyCtxt<'tcx> {
         } else {
             debug_assert!(rustc_feature::encode_cross_crate(attr));
             self.item_attrs(did).iter().filter(filter_fn)
+        }
+    }
+
+    /// Get an attribute from the diagnostic attribute namespace
+    ///
+    /// This function requests an attribute with the following structure:
+    ///
+    /// `#[diagnostic::$attr]`
+    ///
+    /// This function performs feature checking, so if an attribute is returned
+    /// it can be used by the consumer
+    pub fn get_diagnostic_attr(
+        self,
+        did: impl Into<DefId>,
+        attr: Symbol,
+    ) -> Option<&'tcx ast::Attribute> {
+        let did: DefId = did.into();
+        if did.as_local().is_some() {
+            // it's a crate local item, we need to check feature flags
+            if rustc_feature::is_stable_diagnostic_attribute(attr, self.features()) {
+                self.get_attrs_by_path(did, &[sym::diagnostic, sym::do_not_recommend]).next()
+            } else {
+                None
+            }
+        } else {
+            // we filter out unstable diagnostic attributes before
+            // encoding attributes
+            debug_assert!(rustc_feature::encode_cross_crate(attr));
+            self.item_attrs(did)
+                .iter()
+                .find(|a| matches!(a.path().as_ref(), [sym::diagnostic, a] if *a == attr))
         }
     }
 

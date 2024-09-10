@@ -25,11 +25,10 @@ use rustc_target::abi::{Abi, FieldIdx, HasDataLayout, Size, TargetDataLayout, Va
 use tracing::{debug, instrument, trace};
 
 use crate::errors::{AssertLint, AssertLintKind};
-use crate::MirLint;
 
-pub struct KnownPanicsLint;
+pub(super) struct KnownPanicsLint;
 
-impl<'tcx> MirLint<'tcx> for KnownPanicsLint {
+impl<'tcx> crate::MirLint<'tcx> for KnownPanicsLint {
     fn run_lint(&self, tcx: TyCtxt<'tcx>, body: &Body<'tcx>) {
         if body.tainted_by_errors.is_some() {
             return;
@@ -853,7 +852,7 @@ const MAX_ALLOC_LIMIT: u64 = 1024;
 
 /// The mode that `ConstProp` is allowed to run in for a given `Local`.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ConstPropMode {
+enum ConstPropMode {
     /// The `Local` can be propagated into and reads of this `Local` can also be propagated.
     FullConstProp,
     /// The `Local` can only be propagated into and from its own block.
@@ -865,7 +864,7 @@ pub enum ConstPropMode {
 
 /// A visitor that determines locals in a MIR body
 /// that can be const propagated
-pub struct CanConstProp {
+struct CanConstProp {
     can_const_prop: IndexVec<Local, ConstPropMode>,
     // False at the beginning. Once set, no more assignments are allowed to that local.
     found_assignment: BitSet<Local>,
@@ -873,7 +872,7 @@ pub struct CanConstProp {
 
 impl CanConstProp {
     /// Returns true if `local` can be propagated
-    pub fn check<'tcx>(
+    fn check<'tcx>(
         tcx: TyCtxt<'tcx>,
         param_env: ParamEnv<'tcx>,
         body: &Body<'tcx>,

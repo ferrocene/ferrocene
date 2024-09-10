@@ -19,8 +19,7 @@ pub fn foo(x: PartiallyInhabitedVariants) {
     }
 }
 
-<<<<<<< HEAD
-fn main() { }
+fn main() {}
 
 // ferrocene-annotations: fls_dw33yt5g6m0k
 // Type Coercion
@@ -28,6 +27,3 @@ fn main() { }
 // Never Type
 // ferrocene-annotations: fls_e5td0fa92fay
 // Match Expressions
-=======
-fn main() {}
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

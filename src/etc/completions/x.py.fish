@@ -694,7 +694,6 @@ complete -c x.py -n "__fish_x.py_using_subcommand sign" -s j -l jobs -d 'number 
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l warnings -d 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour' -r -f -a "{deny\t'',warn\t'',default\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l error-format -d 'rustc error format' -r -f
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l color -d 'whether to use color in cargo and rustc output' -r -f -a "{always\t'',never\t'',auto\t''}"
-complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-skip-rebuild -d 'whether rebuilding llvm should be skipped, overriding `skip-rebuld` in config.toml' -r -f -a "{true\t'',false\t''}"
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l rust-profile-generate -d 'generate PGO profile with rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l rust-profile-use -d 'use PGO profile for rustc build' -r -F
 complete -c x.py -n "__fish_x.py_using_subcommand sign" -l llvm-profile-use -d 'use PGO profile for LLVM build' -r -F

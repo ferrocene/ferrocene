@@ -818,7 +818,6 @@ Register-ArgumentCompleter -Native -CommandName 'x.py' -ScriptBlock {
             [CompletionResult]::new('--warnings', '--warnings', [CompletionResultType]::ParameterName, 'if value is deny, will deny warnings if value is warn, will emit warnings otherwise, use the default configured behaviour')
             [CompletionResult]::new('--error-format', '--error-format', [CompletionResultType]::ParameterName, 'rustc error format')
             [CompletionResult]::new('--color', '--color', [CompletionResultType]::ParameterName, 'whether to use color in cargo and rustc output')
-            [CompletionResult]::new('--llvm-skip-rebuild', '--llvm-skip-rebuild', [CompletionResultType]::ParameterName, 'whether rebuilding llvm should be skipped, overriding `skip-rebuld` in config.toml')
             [CompletionResult]::new('--rust-profile-generate', '--rust-profile-generate', [CompletionResultType]::ParameterName, 'generate PGO profile with rustc build')
             [CompletionResult]::new('--rust-profile-use', '--rust-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for rustc build')
             [CompletionResult]::new('--llvm-profile-use', '--llvm-profile-use', [CompletionResultType]::ParameterName, 'use PGO profile for LLVM build')

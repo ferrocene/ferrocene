@@ -9,10 +9,10 @@ use std::sync::OnceLock;
 use build_helper::ci::CiEnv;
 use xz2::bufread::XzDecoder;
 
+use crate::core::config::BUILDER_CONFIG_FILENAME;
 use crate::utils::exec::{command, BootstrapCommand};
 use crate::utils::helpers::{check_run, exe, hex_encode, move_file, program_out_of_date};
 use crate::{t, Config};
-
 static SHOULD_FIX_BINS_AND_DYLIBS: OnceLock<bool> = OnceLock::new();
 
 /// `Config::try_run` wrapper for this module to avoid warnings on `try_run`, since we don't have access to a `builder` yet.
@@ -258,18 +258,12 @@ impl Config {
             // attempts will be made, since the first attempt isn't a *re*try.
             "--retry",
             "3",
-<<<<<<< HEAD
-            "-Sf",
-            "-L", // Follow redirects
-            "-SRf",
-=======
             // show errors, even if --silent is specified
             "--show-error",
             // set timestamp of downloaded file to that of the server
             "--remote-time",
             // fail on non-ok http status
             "--fail",
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         ]);
         // Don't print progress in CI; the \r wrapping looks bad and downloads don't take long enough for progress to be useful.
         if CiEnv::is_ci() {
@@ -341,29 +335,25 @@ impl Config {
                 continue;
             }
 
-<<<<<<< HEAD
             // Ferrocene tarballs' contents are different. Compared to upstream, this handles
             // Ferrocene and upstream tarballs seamlessly together.
             let short_path = match original_path.strip_prefix(directory_prefix) {
                 // Upstream tarballs:
-                Ok(short_path) => match short_path.strip_prefix(pattern) {
-                    Ok(short_path) => short_path,
-                    Err(_) => continue, // Path does not begin with pattern
-                },
+                Ok(short_path) => {
+                    let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
+                    if !(short_path.starts_with(pattern)
+                        || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
+                    {
+                        continue;
+                    }
+                    short_path.strip_prefix(pattern).unwrap_or(short_path)
+                }
                 // Ferrocene tarballs:
                 // For Ferrocene we don't check the pattern, as it's used to filter down the
                 // contents of upstream tarballs.
                 Err(_) => &original_path,
             };
 
-=======
-            if !(short_path.starts_with(pattern)
-                || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
-            {
-                continue;
-            }
-            short_path = short_path.strip_prefix(pattern).unwrap_or(short_path);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             let dst_path = dst.join(short_path);
             self.verbose(|| {
                 println!("extracting {} to {}", original_path.display(), dst.display())

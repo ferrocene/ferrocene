@@ -54,17 +54,14 @@ pub fn build(build: &mut Build) {
                 .map(|dep| dep.name)
                 .collect();
             let has_lib = package.targets.iter().any(|t| t.kind.iter().any(|k| k == "lib"));
-<<<<<<< HEAD
-            let krate = Crate { name: name.clone(), version: package.version, deps, path, has_lib };
-=======
             let krate = Crate {
                 name: name.clone(),
                 deps,
                 path,
+                version: package.version,
                 has_lib,
                 features: package.features.keys().cloned().collect(),
             };
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             let relative_path = krate.local_path(build);
             build.crates.insert(name.clone(), krate);
             let existing_path = build.crate_paths.insert(relative_path, name);

@@ -188,6 +188,12 @@ SPDX-FileCopyrightText = "The Knurling-rs developers"
 SPDX-License-Identifier = "MIT OR Apache-2.0"
 
 [[annotations]]
+path = "ferrocene/tools/qcc-wrapper/**/"
+precedence = "override"
+SPDX-FileCopyrightText = "The Ferrocene Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
 path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64"
 precedence = "override"
 SPDX-FileCopyrightText = "Colin Watson"

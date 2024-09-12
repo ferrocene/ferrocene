@@ -45,15 +45,6 @@ Potential Errors
 
    Tool creates, changes, or deletes toolchain files/directories.
 
-.. hazop-error::
-   :id: ERR_SELF_TEST_VERSION_CHECK
-   :caused_by: USE_SELF_TEST_CHECK
-
-   | **Risk:** Invalid output
-   | **Detectable:** NO
-
-   Tool fails to detect that its toolchain is the wrong version.
-
 .. _self-test_avd:
 
 Detection Measures and Usage Restriction

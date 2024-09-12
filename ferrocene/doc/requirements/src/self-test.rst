@@ -43,6 +43,11 @@
    The tool displays the checks it performs,
    and quits with a fail exit status when any of the checks fails.
 
+.. req:: No modification
+   :id: REQ_TGNURZN
+
+   The tool should not modify the toolchain in any way.
+
 Checks for executables
 ----------------------
 

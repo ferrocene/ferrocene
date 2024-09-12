@@ -34,9 +34,9 @@ Use Cases
    | - Text on the console/terminal
    | - Console exit status
    | **Environment constraints:**
-   | - ferrocene-self-test is installed.
-   | - Ferrocene toolchain is installed
-   | - There is a compatible and C compiler in PATH
+   | - ``ferrocene-self-test`` is correctly installed
+   | - Ferrocene toolchain is correctly installed
+   | - There is a compatible C compiler in PATH
 
    **Description:**
 

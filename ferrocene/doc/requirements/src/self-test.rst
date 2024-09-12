@@ -16,6 +16,11 @@
    :doc:`user-manual:targets/index`.
 
 .. req:: Environment
+   :id: REQ_3RG87TT
+
+   The tool should exit with a failure when PATH environment variable does not exist.
+
+.. req:: Environment
    :id: REQ_67EQEVF
 
    The tool should only execute with success if it was distributed with the same Ferrocene toolchain

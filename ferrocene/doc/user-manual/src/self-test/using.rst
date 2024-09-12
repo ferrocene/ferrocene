@@ -27,3 +27,21 @@ All the performed checks will be displayed.
 If any check fails, an error will be emitted along with an ID.
 You can look up the identifier in :doc:`the error codes list <error-codes>`
 to learn more about the failure and ways to fix it.
+
+Environment variables
+---------------------
+
+The tool makes use of the following:
+
+- **PATH**
+
+  The tool will quit early if this variable is not found,
+  because it is used to find particular executables as part of its checks.
+
+- **FST_PRINT_DETAILED_ARGS**
+
+  Specifying this variable will make the tool display more detailed output for some of its checks.
+
+- **FST_PRINT_DETAILED_ERRORS**
+
+  Specifying this variable will make the tool display more detailed errors for some of its checks.

@@ -17,12 +17,10 @@ Constraints
    Ensure that ``ferrocene-self-test`` checks all installed targets,
    by looking if they appear on console output.
 
-.. constraint:: Verify displayed errors
-   :id: CONSTR_SELF_TEST_ERRORS
-   :mitigates: ERR_SELF_TEST_FALSE_POSITIVES
+.. constraint:: Follow tool suggestions
+   :id: CONSTR_SELF_TEST_ERROR_SUGGESTIONS
 
-   Follow tool suggestions on how to mitigate the error, then re-run.
-   If the errors persist, verify manually where feasible.
+   Follow tool suggestions on how to handle toolchain errors it finds.
 
 .. constraint:: Successful execution
    :id: CONSTR_SELF_TEST_EXECUTION_SUCCESS

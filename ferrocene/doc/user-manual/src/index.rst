@@ -46,6 +46,15 @@ Ferrocene User Manual
    rustfmt/usage
    rustfmt/config
 
+.. toctree::
+   :numbered:
+   :maxdepth: 2
+   :caption: ferrocene-self-test
+
+   self-test/install
+   self-test/using
+   self-test/error-codes
+
 .. appendices::
    :numbered:
    :maxdepth: 2
@@ -54,7 +63,6 @@ Ferrocene User Manual
    criticalup
    rustc/cli
    rustfmt/cli
-   self-test/error-codes
    terms
 
 Indices and tables

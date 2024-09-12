@@ -1,7 +1,7 @@
 .. SPDX-License-Identifier: MIT OR Apache-2.0
    SPDX-FileCopyrightText: The Ferrocene Developers
 
-Installing
-==========
+Usage
+=====
 
-.. include:: ../partials/installing.rst
+Refer to :doc:`the User manual <user-manual:self-test/using>`.

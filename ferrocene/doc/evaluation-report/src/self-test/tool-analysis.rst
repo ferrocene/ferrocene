@@ -10,7 +10,7 @@ Potential Errors
 ----------------
 
 .. hazop-error::
-   :id: ERR_SELF_TEST_TARGET_CHECKS
+   :id: ERR_SELF_TEST_MISSING_TARGET_CHECKS
    :caused_by: USE_SELF_TEST_CHECK
 
    | **Risk:** Invalid output
@@ -25,7 +25,7 @@ Potential Errors
    | **Risk:** Invalid output
    | **Detectable:** NO
 
-   Tool fails to detect faulty toolchain installation.
+   Tool fails to detect a faulty toolchain installation.
 
 .. hazop-error::
    :id: ERR_SELF_TEST_FALSE_POSITIVES

@@ -23,7 +23,7 @@ Use Cases
 
        tar -C path/to/installation -xf path/to/ferrocene-self-test-$hash.tar.xz
 
-.. hazop-use:: Check toolchain installtion
+.. hazop-use:: Check toolchain installation
    :id: USE_SELF_TEST_CHECK
 
    | **Actor(s):** User, ferrocene-self-test.
@@ -38,4 +38,4 @@ Use Cases
 
    **Description:**
 
-   The `user` calls `ferrocene-self-test` without any command line arguments
+   The `user` calls `ferrocene-self-test` without any command line arguments.

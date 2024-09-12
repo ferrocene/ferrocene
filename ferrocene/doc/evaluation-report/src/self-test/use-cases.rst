@@ -30,7 +30,9 @@ Use Cases
    | **Input:**
    | - The PATH environment variable
    | - The files in the installation directory
-   | **Output:** Text on the console/terminal.
+   | **Output:**
+   | - Text on the console/terminal
+   | - Console exit status
    | **Environment constraints:**
    | - ferrocene-self-test is installed.
    | - Ferrocene toolchain is installed

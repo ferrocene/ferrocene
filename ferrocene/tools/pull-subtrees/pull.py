@@ -94,7 +94,7 @@ def fetch_latest_commit(subtree):
             "http.https://github.com.extraheader=",
             # Fetch the latest commit in the subtree's ref
             "fetch",
-            "https://github.com/{subtree.repo}",
+            f"https://github.com/{subtree.repo}",
             subtree.ref,
         ]
     )

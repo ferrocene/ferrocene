@@ -4,7 +4,7 @@
 Tool Options
 ============
 
-``rustfmt`` can be used with all stable CLI options.
+``rustfmt`` must only be used with its stable CLI options.
 
 For convenience, :doc:`user-manual:rustfmt/cli` provides further details on CLI
 options available to the end user.

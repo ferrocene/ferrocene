@@ -181,6 +181,10 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         }
     }
 
+    fn evaluation_is_concurrent(&self) -> bool {
+        self.sess.threads() > 1
+    }
+
     fn expand_abstract_consts<T: TypeFoldable<TyCtxt<'tcx>>>(self, t: T) -> T {
         self.expand_abstract_consts(t)
     }
@@ -2003,7 +2007,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 ));
             }
         }
-        return None;
+        None
     }
 
     /// Checks if the bound region is in Impl Item.

@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 //@ compile-flags: -Zmir-opt-level=0 -Znext-solver
 //@ known-bug: #110395
 // FIXME(effects) run-pass

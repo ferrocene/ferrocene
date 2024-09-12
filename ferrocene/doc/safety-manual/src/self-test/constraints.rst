@@ -9,7 +9,7 @@ Constraints
    :mitigates: ERR_SELF_TEST_FALSE_NEGATIVES, ERR_SELF_TEST_FALSE_POSITIVES
 
    While executing the tool,
-   the user must ensure that the toolchain is not modified.
+   the user must not modify the toolchain.
 
 .. constraint:: Installed targets
    :id: CONSTR_SELF_TEST_INSTALLED_TARGETS

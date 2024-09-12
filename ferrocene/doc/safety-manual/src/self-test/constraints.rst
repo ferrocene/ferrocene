@@ -15,7 +15,8 @@ Constraints
    :id: CONSTR_SELF_TEST_INSTALLED_TARGETS
    :mitigates: ERR_SELF_TEST_MISSING_TARGET_CHECKS
 
-   Ensure all installed targets are checked by looking at console output.
+   Ensure that ``ferrocene-self-test`` checks all installed targets,
+   by looking if they appear on console output.
 
 .. constraint:: Verify displayed errors
    :id: CONSTR_SELF_TEST_ERRORS

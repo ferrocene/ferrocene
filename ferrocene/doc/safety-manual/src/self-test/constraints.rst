@@ -8,8 +8,7 @@ Constraints
    :id: CONSTR_SELF_TEST_DO_NOT_MODIFY
    :mitigates: ERR_SELF_TEST_FALSE_NEGATIVES, ERR_SELF_TEST_FALSE_POSITIVES
 
-   While executing the tool,
-   the user must not modify the toolchain.
+   The user must not modify the toolchain while the tool is executing.
 
 .. constraint:: Installed targets
    :id: CONSTR_SELF_TEST_INSTALLED_TARGETS

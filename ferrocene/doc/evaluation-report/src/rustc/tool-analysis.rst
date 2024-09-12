@@ -23,8 +23,7 @@ Installation
      - Risk
      - Mitigation
      - Detectable
-   * - .. _rustc_install_error:
-       .. id:: RUSTC_ERR_INSTALL_01
+   * - .. id:: RUSTC_ERR_INSTALL_01
      - :id:`RUSTC_UC0_INST`
      - Ferrocene was not correctly installed
      - Undefined behavior

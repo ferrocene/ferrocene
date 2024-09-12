@@ -31,7 +31,7 @@ Potential Errors
    :id: ERR_SELF_TEST_FALSE_POSITIVES
    :caused_by: USE_SELF_TEST_CHECK
 
-   | **Risk:** :ref:`A broken Ferrocene Installation <rustc_install_error>`
+   | **Risk:** A broken Ferrocene Installation (:id:`RUSTC_ERR_INSTALL_01`)
    | **Detectable:** YES
 
    Tool falsely indicates a faulty toolchain installation.

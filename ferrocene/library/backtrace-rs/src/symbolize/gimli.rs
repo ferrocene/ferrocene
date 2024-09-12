@@ -12,7 +12,6 @@ use super::SymbolName;
 use addr2line::gimli;
 use core::convert::TryInto;
 use core::mem;
-use core::u32;
 use libc::c_void;
 use mystd::ffi::OsString;
 use mystd::fs::File;
@@ -187,7 +186,7 @@ impl<'data> Context<'data> {
 fn mmap(path: &Path) -> Option<Mmap> {
     let file = File::open(path).ok()?;
     let len = file.metadata().ok()?.len().try_into().ok()?;
-    unsafe { Mmap::map(&file, len) }
+    unsafe { Mmap::map(&file, len, 0) }
 }
 
 cfg_if::cfg_if! {
@@ -269,6 +268,21 @@ struct Cache {
 
 struct Library {
     name: OsString,
+    #[cfg(target_os = "android")]
+    /// On Android, the dynamic linker [can map libraries directly from a
+    /// ZIP archive][ndk-linker-changes] (typically an `.apk`).
+    ///
+    /// The linker requires that these libraries are stored uncompressed
+    /// and page-aligned.
+    ///
+    /// These "embedded" libraries have filepaths of the form
+    /// `/path/to/my.apk!/lib/mylib.so` (where `/path/to/my.apk` is the archive
+    /// and `lib/mylib.so` is the name of the library within the archive).
+    ///
+    /// This mechanism is present on Android since API level 23.
+    ///
+    /// [ndk-linker-changes]: https://android.googlesource.com/platform/bionic/+/main/android-changes-for-ndk-developers.md#opening-shared-libraries-directly-from-an-apk
+    zip_offset: Option<u64>,
     #[cfg(target_os = "aix")]
     /// On AIX, the library mmapped can be a member of a big-archive file.
     /// For example, with a big-archive named libfoo.a containing libbar.so,
@@ -295,17 +309,31 @@ struct LibrarySegment {
     len: usize,
 }
 
-#[cfg(target_os = "aix")]
 fn create_mapping(lib: &Library) -> Option<Mapping> {
-    let name = &lib.name;
-    let member_name = &lib.member_name;
-    Mapping::new(name.as_ref(), member_name)
+    cfg_if::cfg_if! {
+        if #[cfg(target_os = "aix")] {
+            Mapping::new(lib.name.as_ref(), &lib.member_name)
+        } else if #[cfg(target_os = "android")] {
+            Mapping::new_android(lib.name.as_ref(), lib.zip_offset)
+        } else {
+            Mapping::new(lib.name.as_ref())
+        }
+    }
 }
 
-#[cfg(not(target_os = "aix"))]
-fn create_mapping(lib: &Library) -> Option<Mapping> {
-    let name = &lib.name;
-    Mapping::new(name.as_ref())
+/// Try to extract the archive path from an "embedded" library path
+/// (e.g. `/path/to/my.apk` from `/path/to/my.apk!/mylib.so`).
+///
+/// Returns `None` if the path does not contain a `!/` separator.
+#[cfg(target_os = "android")]
+fn extract_zip_path_android(path: &mystd::ffi::OsStr) -> Option<&mystd::ffi::OsStr> {
+    use mystd::os::unix::ffi::OsStrExt;
+
+    path.as_bytes()
+        .windows(2)
+        .enumerate()
+        .find(|(_, chunk)| chunk == b"!/")
+        .map(|(index, _)| mystd::ffi::OsStr::from_bytes(path.as_bytes().split_at(index).0))
 }
 
 // unsafe because this is required to be externally synchronized
@@ -335,7 +363,7 @@ impl Cache {
         // never happen, and symbolicating backtraces would be ssssllllooooowwww.
         static mut MAPPINGS_CACHE: Option<Cache> = None;
 
-        f(MAPPINGS_CACHE.get_or_insert_with(|| Cache::new()))
+        f(MAPPINGS_CACHE.get_or_insert_with(Cache::new))
     }
 
     fn avma_to_svma(&self, addr: *const u8) -> Option<(usize, *const u8)> {

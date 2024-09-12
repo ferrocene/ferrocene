@@ -18,26 +18,24 @@
 //! Next:
 //!
 //! ```
-//! fn main() {
 //! # // Unsafe here so test passes on no_std.
 //! # #[cfg(feature = "std")] {
-//!     backtrace::trace(|frame| {
-//!         let ip = frame.ip();
-//!         let symbol_address = frame.symbol_address();
+//! backtrace::trace(|frame| {
+//!     let ip = frame.ip();
+//!     let symbol_address = frame.symbol_address();
 //!
-//!         // Resolve this instruction pointer to a symbol name
-//!         backtrace::resolve_frame(frame, |symbol| {
-//!             if let Some(name) = symbol.name() {
-//!                 // ...
-//!             }
-//!             if let Some(filename) = symbol.filename() {
-//!                 // ...
-//!             }
-//!         });
-//!
-//!         true // keep going to the next frame
+//!     // Resolve this instruction pointer to a symbol name
+//!     backtrace::resolve_frame(frame, |symbol| {
+//!         if let Some(name) = symbol.name() {
+//!             // ...
+//!         }
+//!         if let Some(filename) = symbol.filename() {
+//!             // ...
+//!         }
 //!     });
-//! }
+//!
+//!     true // keep going to the next frame
+//! });
 //! # }
 //! ```
 //!

@@ -196,7 +196,7 @@ impl<'a> Iterator for NoteIter<'a> {
     type Item = Note<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         // Check if we've reached the end.
-        if self.base.len() == 0 || self.error {
+        if self.base.is_empty() || self.error {
             return None;
         }
         // We transmute out an nhdr but we carefully consider the resulting

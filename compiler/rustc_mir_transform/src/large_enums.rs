@@ -23,11 +23,11 @@ use rustc_target::abi::{HasDataLayout, Size, TagEncoding, Variants};
 /// In summary, what this does is at runtime determine which enum variant is active,
 /// and instead of copying all the bytes of the largest possible variant,
 /// copy only the bytes for the currently active variant.
-pub struct EnumSizeOpt {
+pub(super) struct EnumSizeOpt {
     pub(crate) discrepancy: u64,
 }
 
-impl<'tcx> MirPass<'tcx> for EnumSizeOpt {
+impl<'tcx> crate::MirPass<'tcx> for EnumSizeOpt {
     fn is_enabled(&self, sess: &Session) -> bool {
         // There are some differences in behavior on wasm and ARM that are not properly
         // understood, so we conservatively treat this optimization as unsound:

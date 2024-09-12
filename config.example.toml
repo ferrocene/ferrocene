@@ -78,6 +78,9 @@
 # Indicates whether the LLVM plugin is enabled or not
 #plugins = false
 
+# Wheter to build Enzyme as AutoDiff backend.
+#enzyme = false
+
 # Indicates whether ccache is used when building LLVM. Set to `true` to use the first `ccache` in
 # PATH, or set an absolute path to use a specific version.
 #ccache = false
@@ -519,6 +522,9 @@
 # are disabled statically" because `max_level_info` is enabled, set this value to `true`.
 #debug-logging = rust.debug-assertions (boolean)
 
+# Whether or not to build rustc, tools and the libraries with randomized type layout
+#randomize-layout = false
+
 # Whether or not overflow checks are enabled for the compiler and standard
 # library.
 #
@@ -635,7 +641,7 @@
 #stack-protector = "none"
 
 # Prints each test name as it is executed, to help debug issues in the test harness itself.
-#verbose-tests = false
+#verbose-tests = if is_verbose { true } else { false }
 
 # Flag indicating whether tests are compiled with optimizations (the -O flag).
 #optimize-tests = true

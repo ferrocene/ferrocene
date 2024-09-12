@@ -7,9 +7,9 @@ use rustc_middle::ty::{self, ParamEnv, Ty, TyCtxt};
 use rustc_session::Session;
 use tracing::{debug, trace};
 
-pub struct CheckAlignment;
+pub(super) struct CheckAlignment;
 
-impl<'tcx> MirPass<'tcx> for CheckAlignment {
+impl<'tcx> crate::MirPass<'tcx> for CheckAlignment {
     fn is_enabled(&self, sess: &Session) -> bool {
         // FIXME(#112480) MSVC and rustc disagree on minimum stack alignment on x86 Windows
         if sess.target.llvm_target == "i686-pc-windows-msvc" {

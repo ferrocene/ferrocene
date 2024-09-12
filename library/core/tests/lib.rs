@@ -1,5 +1,4 @@
 // tidy-alphabetical-start
-#![cfg_attr(bootstrap, feature(offset_of_nested))]
 #![cfg_attr(target_has_atomic = "128", feature(integer_atomics))]
 #![cfg_attr(test, feature(cfg_match))]
 #![feature(alloc_layout_extra)]
@@ -112,7 +111,6 @@
 #![feature(unsize)]
 #![feature(unsized_tuple_coercion)]
 #![feature(unwrap_infallible)]
-#![feature(waker_getters)]
 // tidy-alphabetical-end
 #![allow(internal_features)]
 #![deny(fuzzy_provenance_casts)]

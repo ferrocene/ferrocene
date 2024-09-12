@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use serde_derive::Deserialize;
@@ -22,6 +23,7 @@ struct Package {
     manifest_path: String,
     dependencies: Vec<Dependency>,
     targets: Vec<Target>,
+    features: BTreeMap<String, Vec<String>>,
 }
 
 /// For more information, see the output of
@@ -52,7 +54,14 @@ pub fn build(build: &mut Build) {
                 .map(|dep| dep.name)
                 .collect();
             let has_lib = package.targets.iter().any(|t| t.kind.iter().any(|k| k == "lib"));
-            let krate = Crate { name: name.clone(), version: package.version, deps, path, has_lib };
+            let krate = Crate {
+                name: name.clone(),
+                deps,
+                path,
+                version: package.version,
+                has_lib,
+                features: package.features.keys().cloned().collect(),
+            };
             let relative_path = krate.local_path(build);
             build.crates.insert(name.clone(), krate);
             let existing_path = build.crate_paths.insert(relative_path, name);

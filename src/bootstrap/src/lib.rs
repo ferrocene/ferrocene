@@ -78,6 +78,9 @@ const LLD_FILE_NAMES: &[&str] = &["ld.lld", "ld64.lld", "lld-link", "wasm-ld"];
 #[allow(clippy::type_complexity)] // It's fine for hard-coded list and type is explained above.
 const EXTRA_CHECK_CFGS: &[(Option<Mode>, &str, Option<&[&'static str]>)] = &[
     (None, "bootstrap", None),
+    (Some(Mode::Rustc), "llvm_enzyme", None),
+    (Some(Mode::Codegen), "llvm_enzyme", None),
+    (Some(Mode::ToolRustc), "llvm_enzyme", None),
     (Some(Mode::Rustc), "parallel_compiler", None),
     (Some(Mode::ToolRustc), "parallel_compiler", None),
     (Some(Mode::ToolRustc), "rust_analyzer", None),
@@ -141,6 +144,7 @@ pub struct Build {
     clippy_info: GitInfo,
     miri_info: GitInfo,
     rustfmt_info: GitInfo,
+    enzyme_info: GitInfo,
     in_tree_llvm_info: GitInfo,
     local_rebuild: bool,
     fail_fast: bool,
@@ -185,6 +189,7 @@ struct Crate {
     deps: HashSet<String>,
     path: PathBuf,
     has_lib: bool,
+    features: Vec<String>,
 }
 
 impl Crate {
@@ -315,6 +320,7 @@ impl Build {
         let clippy_info = GitInfo::new(omit_git_hash, &src.join("src/tools/clippy"));
         let miri_info = GitInfo::new(omit_git_hash, &src.join("src/tools/miri"));
         let rustfmt_info = GitInfo::new(omit_git_hash, &src.join("src/tools/rustfmt"));
+        let enzyme_info = GitInfo::new(omit_git_hash, &src.join("src/tools/enzyme"));
 
         // we always try to use git for LLVM builds
         let in_tree_llvm_info = GitInfo::new(false, &src.join("src/llvm-project"));
@@ -341,14 +347,20 @@ impl Build {
         .trim()
         .to_string();
 
-        let initial_libdir = initial_target_dir
-            .parent()
-            .unwrap()
-            .parent()
-            .unwrap()
-            .strip_prefix(&initial_sysroot)
-            .unwrap()
-            .to_path_buf();
+        // FIXME(Zalathar): Determining this path occasionally fails locally for
+        // unknown reasons, so we print some extra context to help track down why.
+        let find_initial_libdir = || {
+            let initial_libdir =
+                initial_target_dir.parent()?.parent()?.strip_prefix(&initial_sysroot).ok()?;
+            Some(initial_libdir.to_path_buf())
+        };
+        let Some(initial_libdir) = find_initial_libdir() else {
+            panic!(
+                "couldn't determine `initial_libdir` \
+                from target dir {initial_target_dir:?} \
+                and sysroot {initial_sysroot:?}"
+            )
+        };
 
         let version = std::fs::read_to_string(src.join("src").join("version"))
             .expect("failed to read src/version");
@@ -402,6 +414,7 @@ impl Build {
             clippy_info,
             miri_info,
             rustfmt_info,
+            enzyme_info,
             in_tree_llvm_info,
             cc: RefCell::new(HashMap::new()),
             cxx: RefCell::new(HashMap::new()),
@@ -686,17 +699,30 @@ impl Build {
     }
 
     /// Gets the space-separated set of activated features for the compiler.
-    fn rustc_features(&self, kind: Kind, target: TargetSelection) -> String {
+    fn rustc_features(&self, kind: Kind, target: TargetSelection, crates: &[String]) -> String {
+        let _possible_features_by_crates: HashSet<_> = crates
+            .iter()
+            .flat_map(|krate| &self.crates[krate].features)
+            .map(std::ops::Deref::deref)
+            .collect();
+        let check = |_feature: &str| -> bool {
+            //crates.is_empty() || possible_features_by_crates.contains(feature)
+            // change necessary while resolver is broken
+            true
+        };
         let mut features = vec![];
-        if self.config.jemalloc {
+        if self.config.jemalloc && check("jemalloc") {
             features.push("jemalloc");
         }
-        if self.config.llvm_enabled(target) || kind == Kind::Check {
+        if (self.config.llvm_enabled(target) || kind == Kind::Check) && check("llvm") {
             features.push("llvm");
         }
         // keep in sync with `bootstrap/compile.rs:rustc_cargo_env`
-        if self.config.rustc_parallel {
+        if self.config.rustc_parallel && check("rustc_use_parallel_compiler") {
             features.push("rustc_use_parallel_compiler");
+        }
+        if self.config.rust_randomize_layout {
+            features.push("rustc_randomized_layouts");
         }
 
         // If debug logging is on, then we want the default for tracing:
@@ -704,7 +730,7 @@ impl Build {
         // which is everything (including debug/trace/etc.)
         // if its unset, if debug_assertions is on, then debug_logging will also be on
         // as well as tracing *ignoring* this feature when debug_assertions is on
-        if !self.config.rust_debug_logging {
+        if !self.config.rust_debug_logging && check("max_level_info") {
             features.push("max_level_info");
         }
 
@@ -767,6 +793,10 @@ impl Build {
         } else {
             self.out.join(target).join("llvm")
         }
+    }
+
+    fn enzyme_out(&self, target: TargetSelection) -> PathBuf {
+        self.out.join(&*target.triple).join("enzyme")
     }
 
     fn lld_out(&self, target: TargetSelection) -> PathBuf {
@@ -1411,16 +1441,17 @@ Executed at: {executed_at}"#,
         None
     }
 
-    /// Returns whether it's requested that `wasm-component-ld` is built as part
-    /// of the sysroot. This is done either with the `extended` key in
-    /// `config.toml` or with the `tools` set.
-    fn build_wasm_component_ld(&self) -> bool {
-        if self.config.extended {
-            return true;
+    /// Returns whether the specified tool is configured as part of this build.
+    ///
+    /// This requires that both the `extended` key is set and the `tools` key is
+    /// either unset or specifically contains the specified tool.
+    fn tool_enabled(&self, tool: &str) -> bool {
+        if !self.config.extended {
+            return false;
         }
         match &self.config.tools {
-            Some(set) => set.contains("wasm-component-ld"),
-            None => false,
+            Some(set) => set.contains(tool),
+            None => true,
         }
     }
 

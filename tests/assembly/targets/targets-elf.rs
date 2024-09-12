@@ -129,6 +129,9 @@
 //@ revisions: armv7_linux_androideabi
 //@ [armv7_linux_androideabi] compile-flags: --target armv7-linux-androideabi
 //@ [armv7_linux_androideabi] needs-llvm-components: arm
+//@ revisions: armv7_rtems_eabihf
+//@ [armv7_rtems_eabihf] compile-flags: --target armv7-rtems-eabihf
+//@ [armv7_rtems_eabihf] needs-llvm-components: arm
 //@ revisions: armv7_sony_vita_newlibeabihf
 //@ [armv7_sony_vita_newlibeabihf] compile-flags: --target armv7-sony-vita-newlibeabihf
 //@ [armv7_sony_vita_newlibeabihf] needs-llvm-components: arm
@@ -549,6 +552,9 @@
 //@ revisions: x86_64_unknown_haiku
 //@ [x86_64_unknown_haiku] compile-flags: --target x86_64-unknown-haiku
 //@ [x86_64_unknown_haiku] needs-llvm-components: x86
+//@ revisions: x86_64_unknown_hurd_gnu
+//@ [x86_64_unknown_hurd_gnu] compile-flags: --target x86_64-unknown-hurd-gnu
+//@ [x86_64_unknown_hurd_gnu] needs-llvm-components: x86
 //@ revisions: x86_64_unknown_hermit
 //@ [x86_64_unknown_hermit] compile-flags: --target x86_64-unknown-hermit
 //@ [x86_64_unknown_hermit] needs-llvm-components: x86

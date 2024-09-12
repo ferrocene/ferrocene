@@ -280,6 +280,7 @@ target | std | host | notes
 `armv6-unknown-freebsd` | ✓ | ✓ | Armv6 FreeBSD
 [`armv6-unknown-netbsd-eabihf`](platform-support/netbsd.md) | ✓ | ✓ | Armv6 NetBSD w/hard-float
 [`armv6k-nintendo-3ds`](platform-support/armv6k-nintendo-3ds.md) | ? |  | Armv6k Nintendo 3DS, Horizon (Requires devkitARM toolchain)
+[`armv7-rtems-eabihf`](platform-support/armv7-rtems-eabihf.md) | ? |  | RTEMS OS for ARM BSPs
 [`armv7-sony-vita-newlibeabihf`](platform-support/armv7-sony-vita-newlibeabihf.md) | ✓ |  | Armv7-A Cortex-A9 Sony PlayStation Vita (requires VITASDK toolchain)
 [`armv7-unknown-linux-uclibceabi`](platform-support/armv7-unknown-linux-uclibceabi.md) | ✓ | ✓ | Armv7-A Linux with uClibc, softfloat
 [`armv7-unknown-linux-uclibceabihf`](platform-support/armv7-unknown-linux-uclibceabihf.md) | ✓ | ? | Armv7-A Linux with uClibc, hardfloat
@@ -382,6 +383,7 @@ target | std | host | notes
 [`x86_64-unikraft-linux-musl`](platform-support/unikraft-linux-musl.md) | ✓ |   | 64-bit Unikraft with musl 1.2.3
 `x86_64-unknown-dragonfly` | ✓ | ✓ | 64-bit DragonFlyBSD
 `x86_64-unknown-haiku` | ✓ | ✓ | 64-bit Haiku
+[`x86_64-unknown-hurd-gnu`](platform-support/hurd.md) | ✓ | ✓ | 64-bit GNU/Hurd
 [`x86_64-unknown-hermit`](platform-support/hermit.md) | ✓ |  | x86_64 Hermit
 `x86_64-unknown-l4re-uclibc` | ? |  |
 [`x86_64-unknown-openbsd`](platform-support/openbsd.md) | ✓ | ✓ | 64-bit OpenBSD

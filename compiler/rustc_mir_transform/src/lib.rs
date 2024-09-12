@@ -11,6 +11,7 @@
 #![feature(round_char_boundary)]
 #![feature(try_blocks)]
 #![feature(yeet_expr)]
+#![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
 use hir::ConstContext;
@@ -26,13 +27,12 @@ use rustc_hir::intravisit::{self, Visitor};
 use rustc_index::IndexVec;
 use rustc_middle::mir::{
     AnalysisPhase, Body, CallSource, ClearCrossCrate, ConstOperand, ConstQualifs, LocalDecl,
-    MirPass, MirPhase, Operand, Place, ProjectionElem, Promoted, RuntimePhase, Rvalue, SourceInfo,
+    MirPhase, Operand, Place, ProjectionElem, Promoted, RuntimePhase, Rvalue, SourceInfo,
     Statement, StatementKind, TerminatorKind, START_BLOCK,
 };
 use rustc_middle::ty::{self, TyCtxt, TypeVisitableExt};
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, query, span_bug};
-use rustc_mir_dataflow::rustc_peek;
 use rustc_span::source_map::Spanned;
 use rustc_span::{sym, DUMMY_SP};
 use rustc_trait_selection::traits;
@@ -41,7 +41,7 @@ use tracing::{debug, trace};
 #[macro_use]
 mod pass_manager;
 
-use pass_manager::{self as pm, Lint, MirLint, WithMinOptLevel};
+use pass_manager::{self as pm, Lint, MirLint, MirPass, WithMinOptLevel};
 
 mod abort_unwinding_calls;
 mod add_call_guards;
@@ -73,6 +73,8 @@ mod errors;
 mod ffi_unwind_calls;
 mod function_item_references;
 mod gvn;
+// Made public so that `mir_drops_elaborated_and_const_checked` can be overridden
+// by custom rustc drivers, running all the steps by themselves. See #114628.
 pub mod inline;
 mod instsimplify;
 mod jump_threading;
@@ -96,6 +98,7 @@ mod remove_unneeded_drops;
 mod remove_zsts;
 mod required_consts;
 mod reveal_all;
+mod sanity_check;
 mod shim;
 mod ssa;
 // This pass is public to allow external drivers to perform MIR cleanup
@@ -288,7 +291,7 @@ fn mir_built(tcx: TyCtxt<'_>, def: LocalDefId) -> &Steal<Body<'_>> {
             &Lint(function_item_references::FunctionItemReferences),
             // What we need to do constant evaluation.
             &simplify::SimplifyCfg::Initial,
-            &rustc_peek::SanityCheck, // Just a lint
+            &Lint(sanity_check::SanityCheck),
         ],
         None,
     );
@@ -459,8 +462,8 @@ fn mir_drops_elaborated_and_const_checked(tcx: TyCtxt<'_>, def: LocalDefId) -> &
     tcx.alloc_steal_mir(body)
 }
 
-// Made public such that `mir_drops_elaborated_and_const_checked` can be overridden
-// by custom rustc drivers, running all the steps by themselves.
+// Made public so that `mir_drops_elaborated_and_const_checked` can be overridden
+// by custom rustc drivers, running all the steps by themselves. See #114628.
 pub fn run_analysis_to_runtime_passes<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
     assert!(body.phase == MirPhase::Analysis(AnalysisPhase::Initial));
     let did = body.source.def_id();

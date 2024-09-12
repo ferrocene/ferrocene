@@ -9,10 +9,10 @@ use std::sync::OnceLock;
 use build_helper::ci::CiEnv;
 use xz2::bufread::XzDecoder;
 
+use crate::core::config::BUILDER_CONFIG_FILENAME;
 use crate::utils::exec::{command, BootstrapCommand};
 use crate::utils::helpers::{check_run, exe, hex_encode, move_file, program_out_of_date};
 use crate::{t, Config};
-
 static SHOULD_FIX_BINS_AND_DYLIBS: OnceLock<bool> = OnceLock::new();
 
 /// `Config::try_run` wrapper for this module to avoid warnings on `try_run`, since we don't have access to a `builder` yet.
@@ -232,27 +232,42 @@ impl Config {
     fn download_http_with_retries(&self, tempfile: &Path, url: &str, help_on_error: &str) {
         println!("downloading {url}");
         // Try curl. If that fails and we are on windows, fallback to PowerShell.
+        // options should be kept in sync with
+        // src/bootstrap/src/core/download.rs
+        // for consistency
         let mut curl = command("curl");
         curl.args([
-            "-y",
+            // follow redirect
+            "--location",
+            // timeout if speed is < 10 bytes/sec for > 30 seconds
+            "--speed-time",
             "30",
-            "-Y",
-            "10", // timeout if speed is < 10 bytes/sec for > 30 seconds
+            "--speed-limit",
+            "10",
+            // timeout if cannot connect within 30 seconds
             "--connect-timeout",
-            "30", // timeout if cannot connect within 30 seconds
-            "-o",
+            "30",
+            // output file
+            "--output",
             tempfile.to_str().unwrap(),
+            // if there is an error, don't restart the download,
+            // instead continue where it left off.
             "--continue-at",
             "-",
+            // retry up to 3 times.  note that this means a maximum of 4
+            // attempts will be made, since the first attempt isn't a *re*try.
             "--retry",
             "3",
-            "-Sf",
-            "-L", // Follow redirects
-            "-SRf",
+            // show errors, even if --silent is specified
+            "--show-error",
+            // set timestamp of downloaded file to that of the server
+            "--remote-time",
+            // fail on non-ok http status
+            "--fail",
         ]);
         // Don't print progress in CI; the \r wrapping looks bad and downloads don't take long enough for progress to be useful.
         if CiEnv::is_ci() {
-            curl.arg("-s");
+            curl.arg("--silent");
         } else {
             curl.arg("--progress-bar");
         }
@@ -305,6 +320,7 @@ impl Config {
         let mut tar = tar::Archive::new(decompressor);
 
         let is_ci_rustc = dst.ends_with("ci-rustc");
+        let is_ci_llvm = dst.ends_with("ci-llvm");
 
         // `compile::Sysroot` needs to know the contents of the `rustc-dev` tarball to avoid adding
         // it to the sysroot unless it was explicitly requested. But parsing the 100 MB tarball is slow.
@@ -323,10 +339,15 @@ impl Config {
             // Ferrocene and upstream tarballs seamlessly together.
             let short_path = match original_path.strip_prefix(directory_prefix) {
                 // Upstream tarballs:
-                Ok(short_path) => match short_path.strip_prefix(pattern) {
-                    Ok(short_path) => short_path,
-                    Err(_) => continue, // Path does not begin with pattern
-                },
+                Ok(short_path) => {
+                    let is_builder_config = short_path.to_str() == Some(BUILDER_CONFIG_FILENAME);
+                    if !(short_path.starts_with(pattern)
+                        || ((is_ci_rustc || is_ci_llvm) && is_builder_config))
+                    {
+                        continue;
+                    }
+                    short_path.strip_prefix(pattern).unwrap_or(short_path)
+                }
                 // Ferrocene tarballs:
                 // For Ferrocene we don't check the pattern, as it's used to filter down the
                 // contents of upstream tarballs.
@@ -714,17 +735,22 @@ download-rustc = false
 
     #[cfg(not(feature = "bootstrap-self-test"))]
     pub(crate) fn maybe_download_ci_llvm(&self) {
+        use build_helper::exit;
+
         use crate::core::build_steps::llvm::detect_llvm_sha;
+        use crate::core::config::check_incompatible_options_for_ci_llvm;
 
         if !self.llvm_from_ci {
             return;
         }
+
         let llvm_root = self.ci_llvm_root();
         let llvm_stamp = llvm_root.join(".llvm-stamp");
         let llvm_sha = detect_llvm_sha(self, self.rust_info.is_managed_git_subrepository());
         let key = format!("{}{}", llvm_sha, self.llvm_assertions);
         if program_out_of_date(&llvm_stamp, &key) && !self.dry_run() {
             self.download_ci_llvm(&llvm_sha);
+
             if self.should_fix_bins_and_dylibs() {
                 for entry in t!(fs::read_dir(llvm_root.join("bin"))) {
                     self.fix_bin_or_dylib(&t!(entry).path());
@@ -757,6 +783,26 @@ download-rustc = false
 
             t!(fs::write(llvm_stamp, key));
         }
+
+        if let Some(config_path) = &self.config {
+            let current_config_toml = Self::get_toml(config_path).unwrap();
+
+            match self.get_builder_toml("ci-llvm") {
+                Ok(ci_config_toml) => {
+                    t!(check_incompatible_options_for_ci_llvm(current_config_toml, ci_config_toml));
+                }
+                Err(e) if e.to_string().contains("unknown field") => {
+                    println!(
+                        "WARNING: CI LLVM has some fields that are no longer supported in bootstrap; download-ci-llvm will be disabled."
+                    );
+                    println!("HELP: Consider rebasing to a newer commit if available.");
+                }
+                Err(e) => {
+                    eprintln!("ERROR: Failed to parse CI LLVM config.toml: {e}");
+                    exit!(2);
+                }
+            };
+        };
     }
 
     #[cfg(not(feature = "bootstrap-self-test"))]

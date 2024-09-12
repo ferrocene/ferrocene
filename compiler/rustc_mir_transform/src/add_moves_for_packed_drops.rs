@@ -35,16 +35,16 @@ use crate::util;
 ///
 /// The storage instructions are required to avoid stack space
 /// blowup.
-pub struct AddMovesForPackedDrops;
+pub(super) struct AddMovesForPackedDrops;
 
-impl<'tcx> MirPass<'tcx> for AddMovesForPackedDrops {
+impl<'tcx> crate::MirPass<'tcx> for AddMovesForPackedDrops {
     fn run_pass(&self, tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
         debug!("add_moves_for_packed_drops({:?} @ {:?})", body.source, body.span);
         add_moves_for_packed_drops(tcx, body);
     }
 }
 
-pub fn add_moves_for_packed_drops<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
+fn add_moves_for_packed_drops<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
     let patch = add_moves_for_packed_drops_patch(tcx, body);
     patch.apply(body);
 }

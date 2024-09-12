@@ -8,7 +8,7 @@ use rustc_hir::LangItem;
 use rustc_middle::mir::*;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 
-pub struct AddRetag;
+pub(super) struct AddRetag;
 
 /// Determine whether this type may contain a reference (or box), and thus needs retagging.
 /// We will only recurse `depth` times into Tuples/ADTs to bound the cost of this.
@@ -48,7 +48,7 @@ fn may_contain_reference<'tcx>(ty: Ty<'tcx>, depth: u32, tcx: TyCtxt<'tcx>) -> b
     }
 }
 
-impl<'tcx> MirPass<'tcx> for AddRetag {
+impl<'tcx> crate::MirPass<'tcx> for AddRetag {
     fn is_enabled(&self, sess: &rustc_session::Session) -> bool {
         sess.opts.unstable_opts.mir_emit_retag
     }

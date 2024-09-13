@@ -210,7 +210,9 @@ def cli():
     else:
         flags += get_flags_for_default_job(JOBS_DEFINITION, split[0])
 
-    print(" ".join(flags))
+    flag_arg = " ".join(flags)
+    print(f"Split tasks: {flag_arg}", file=sys.stderr)
+    print(flag_arg)
 
 
 def err(message):

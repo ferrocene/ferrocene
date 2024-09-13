@@ -433,6 +433,7 @@ Range Patterns
    RangePattern ::=
        HalfOpenRangePattern
      | InclusiveRangePattern
+     | ExclusiveRangePattern
      | ObsoleteRangePattern
 
    HalfOpenRangePattern ::=
@@ -440,6 +441,9 @@ Range Patterns
 
    InclusiveRangePattern ::=
        RangePatternLowBound $$..=$$ RangePatternHighBound
+
+   ExclusiveRangePattern ::=
+       RangePatternLowBound $$..$$ RangePatternHighBound
 
    ObsoleteRangePattern ::=
        RangePatternLowBound $$...$$ RangePatternHighBound
@@ -471,6 +475,10 @@ A :t:`half-open range pattern` is a :t:`range pattern` with only a
 An :t:`inclusive range pattern` is a :t:`range pattern` with both a
 :t:`range pattern low bound` and a :t:`range pattern high bound`.
 
+:dp:`fls_3PyquOKjA7SI`
+An :t:`exclusive range pattern` is a :t:`range pattern` with both a
+:t:`range pattern low bound` and a :t:`range pattern high bound`.
+
 :dp:`fls_akf9x5r6e0ta`
 An :t:`obsolete range pattern` is a :t:`range pattern` that uses obsolete syntax
 to express an :t:`inclusive range pattern`.
@@ -494,6 +502,10 @@ when the context is a :t:`slice pattern`.
 The :t:`range pattern low bound` of an :t:`inclusive range pattern` shall be
 less than or equal to its :t:`range pattern high bound`.
 
+:dp:`fls_8bdOqkO1NuJW`
+The :t:`range pattern low bound` of an :t:`exclusive range pattern` shall be
+less than to its :t:`range pattern high bound`.
+
 :dp:`fls_s2b5n4snc4d7`
 An :t:`obsolete range pattern` is equivalent to an :t:`inclusive range pattern`.
 
@@ -508,11 +520,11 @@ The :t:`[type]s` of the :t:`range pattern low bound` and the
 :dp:`fls_3js1645tgh31`
 The :t:`type` of a :t:`range pattern` is determined as follows:
 
-* :dp:`fls_wfqrbwrogjnq`
-  If the :t:`range pattern` is expressed as an :t:`inclusive range pattern` or
-  an :t:`obsolete range pattern`, then the :t:`type` is the :t:`unified type` of
-  the :t:`[type]s` of the :t:`range pattern low bound` and the
-  :t:`range pattern high bound`.
+* :dp:`fls_8Q6NfRx4j5V7`
+  If the :t:`range pattern` is expressed as an :t:`inclusive range pattern`, an
+  :t:`exclusive range pattern`, or an :t:`obsolete range pattern`, then the
+  :t:`type` is the :t:`unified type` of the :t:`[type]s` of the
+  :t:`range pattern low bound` and the :t:`range pattern high bound`.
 
 * :dp:`fls_rgr7t33s0m7m`
   Otherwise the :t:`type` is the :t:`type` of the :t:`range pattern low bound`.
@@ -1422,6 +1434,12 @@ Range Pattern Matching
    pattern` or an :t:`obsolete range pattern` and the context :t:`value` is in
    the inclusive range from the :t:`range pattern low bound` to the
    :t:`range pattern high bound`, then matching succeeds.
+
+#. :dp:`fls_EDL1Pi56KQ2H`
+   If the :t:`range pattern` is expressed as an :t:`exclusive range pattern`
+   and the context :t:`value` is in the exclusive range from the
+   :t:`range pattern low bound` to the :t:`range pattern high bound`, then
+   matching succeeds.
 
 #. :dp:`fls_n4t3xah1pk7i`
    Otherwise matching fails.

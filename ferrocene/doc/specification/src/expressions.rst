@@ -1082,7 +1082,7 @@ It is undefined behavior to dereference a :t:`raw pointer` that is either
 .. rubric:: Examples
 
 :dp:`fls_9ifaterm8nop`
-See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``ref_answer``.
+See :p:`fls_350qejoq9i23` for the declaration of ``ref_answer``.
 
 .. code-block:: rust
 
@@ -2237,7 +2237,7 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 .. rubric:: Examples
 
 :dp:`fls_vdxkpvmpwl3s`
-See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``answer``.
+See :p:`fls_2jd0mgw4zja4` for the declaration of ``answer``.
 
 .. code-block:: rust
 
@@ -3599,7 +3599,7 @@ The :t:`evaluation` of a :t:`field access expression` evaluates its
 .. rubric:: Examples
 
 :dp:`fls_x27yayh4z787`
-See :p:`6.8.1. <fls_hv4grs2tcuiw>` for the declaration of ``alice``.
+See :p:`fls_vsxsbqps64o` for the declaration of ``alice``.
 
 .. code-block:: rust
 

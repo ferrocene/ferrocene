@@ -16,7 +16,7 @@ pub struct Mmap {
 }
 
 impl Mmap {
-    pub unsafe fn map(file: &File, len: usize) -> Option<Mmap> {
+    pub unsafe fn map(file: &File, len: usize, offset: u64) -> Option<Mmap> {
         let file = file.try_clone().ok()?;
         let mapping = CreateFileMappingA(
             file.as_raw_handle(),
@@ -29,7 +29,13 @@ impl Mmap {
         if mapping.is_null() {
             return None;
         }
-        let ptr = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, len);
+        let ptr = MapViewOfFile(
+            mapping,
+            FILE_MAP_READ,
+            (offset >> 32) as u32,
+            offset as u32,
+            len,
+        );
         CloseHandle(mapping);
         if ptr.Value.is_null() {
             return None;

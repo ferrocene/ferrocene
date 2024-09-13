@@ -94,9 +94,14 @@ Dev Phase 2: Code Development
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 During this phase, one or more Ferrocene developers work in a branch, both
-locally and in the Ferrocene GitHub repository. The branch can be called
-everything except for ``main``, ``release/*``, ``automation/*``, or other
-reserved branch names.
+locally and in the Ferrocene GitHub repository.
+The branch can be called anything except the following:
+
+- ``main``
+- ``release/*``
+- ``automation/*``
+- ``trying``
+- ``staging``
 
 To avoid conflicts, it is strongly recommended that the main developer for a
 branch adds a prefix to the branch name unique to them (like ``pa-`` or

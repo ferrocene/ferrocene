@@ -235,7 +235,6 @@ fn rustc_minor_nightly() -> (u32, bool) {
         };
     }
 
-<<<<<<< HEAD
     let rustc = env::var_os("RUSTC").expect("Failed to get rustc version: missing RUSTC env");
     let mut cmd = match env::var_os("RUSTC_WRAPPER").as_ref() {
         Some(wrapper) if !wrapper.is_empty() => {
@@ -245,20 +244,8 @@ fn rustc_minor_nightly() -> (u32, bool) {
         }
         _ => Command::new(rustc),
     };
-||||||| parent of 18b8da967 (Handle rustc version output correctly when `clippy-driver` used)
-    let rustc = env::var_os("RUSTC").expect("Failed to get rustc version: missing RUSTC env");
-    let mut cmd = if let Some(wrapper) = env::var_os("RUSTC_WRAPPER").filter(|w| !w.is_empty()) {
-        let mut cmd = Command::new(wrapper);
-        cmd.arg(rustc);
-        cmd
-    } else {
-        Command::new(rustc)
-    };
-=======
     let mut output = rustc_version_cmd(false);
->>>>>>> 18b8da967 (Handle rustc version output correctly when `clippy-driver` used)
 
-<<<<<<< HEAD
     let output = cmd
         .arg("--version")
         .output()
@@ -269,20 +256,8 @@ fn rustc_minor_nightly() -> (u32, bool) {
             "failed to run rustc: {}",
             String::from_utf8_lossy(output.stderr.as_slice())
         );
-||||||| parent of 18b8da967 (Handle rustc version output correctly when `clippy-driver` used)
-    let output = cmd
-        .arg("--version")
-        .output()
-        .expect("Failed to get rustc version");
-    if !output.status.success() {
-        panic!(
-            "failed to run rustc: {}",
-            String::from_utf8_lossy(output.stderr.as_slice())
-        );
-=======
     if otry!(str::from_utf8(&output.stdout).ok()).starts_with("clippy") {
         output = rustc_version_cmd(true);
->>>>>>> 18b8da967 (Handle rustc version output correctly when `clippy-driver` used)
     }
 
     let version = otry!(str::from_utf8(&output.stdout).ok());

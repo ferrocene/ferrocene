@@ -357,11 +357,26 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     }
 }
 
-fn decompress_zstd(input: &[u8], output: &mut [u8]) -> Option<()> {
+fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
     use ruzstd::io::Read;
 
-    let mut decoder = ruzstd::StreamingDecoder::new(input).ok()?;
-    decoder.read_exact(output).ok()
+    while !input.is_empty() {
+        let mut decoder = ruzstd::StreamingDecoder::new(&mut input).ok()?;
+        loop {
+            let bytes_written = decoder.read(output).ok()?;
+            if bytes_written == 0 {
+                break;
+            }
+            output = &mut output[bytes_written..];
+        }
+    }
+
+    if !output.is_empty() {
+        // Lengths didn't match, something is wrong.
+        return None;
+    }
+
+    Some(())
 }
 
 const DEBUG_PATH: &[u8] = b"/usr/lib/debug";

@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use build_helper::git::get_git_merge_base;
+use build_helper::git::get_closest_merge_commit;
 
 use crate::core::builder::{Builder, ShouldRun, Step};
 use crate::core::config::FerroceneTestOutcomes;
@@ -23,9 +23,10 @@ impl Step for TestOutcomesDir {
     fn run(self, builder: &Builder<'_>) -> Self::Output {
         match &builder.config.ferrocene_test_outcomes {
             FerroceneTestOutcomes::DownloadCi => {
-                let commit = get_git_merge_base(&builder.config.git_config(), None).expect(
-                    "failed to retrieve the git commit for ferrocene.test-outcomes=download-ci",
-                );
+                let commit = get_closest_merge_commit(None, &builder.config.git_config(), &[])
+                    .expect(
+                        "failed to retrieve the git commit for ferrocene.test-outcomes=download-ci",
+                    );
                 Some(download_and_extract_outcomes(builder, &commit))
             }
             FerroceneTestOutcomes::Disabled => None,

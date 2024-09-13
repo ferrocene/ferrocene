@@ -3,6 +3,7 @@ use lint::BuiltinLintDiag;
 use rustc_ast::ptr::P;
 use rustc_ast::token::{self, Delimiter};
 use rustc_ast::tokenstream::TokenStream;
+use rustc_ast::AsmMacro;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_errors::PResult;
 use rustc_expand::base::*;
@@ -484,6 +485,7 @@ fn parse_reg<'a>(
 
 fn expand_preparsed_asm(
     ecx: &mut ExtCtxt<'_>,
+    asm_macro: ast::AsmMacro,
     args: AsmArgs,
 ) -> ExpandResult<Result<ast::InlineAsm, ErrorGuaranteed>, ()> {
     let mut template = vec![];
@@ -774,6 +776,7 @@ fn expand_preparsed_asm(
     }
 
     ExpandResult::Ready(Ok(ast::InlineAsm {
+        asm_macro,
         template,
         template_strs: template_strs.into_boxed_slice(),
         operands: args.operands,
@@ -790,7 +793,7 @@ pub(super) fn expand_asm<'cx>(
 ) -> MacroExpanderResult<'cx> {
     ExpandResult::Ready(match parse_args(ecx, sp, tts, false) {
         Ok(args) => {
-            let ExpandResult::Ready(mac) = expand_preparsed_asm(ecx, args) else {
+            let ExpandResult::Ready(mac) = expand_preparsed_asm(ecx, AsmMacro::Asm, args) else {
                 return ExpandResult::Retry(());
             };
             let expr = match mac {
@@ -812,6 +815,45 @@ pub(super) fn expand_asm<'cx>(
     })
 }
 
+pub(super) fn expand_naked_asm<'cx>(
+    ecx: &'cx mut ExtCtxt<'_>,
+    sp: Span,
+    tts: TokenStream,
+) -> MacroExpanderResult<'cx> {
+    ExpandResult::Ready(match parse_args(ecx, sp, tts, false) {
+        Ok(args) => {
+            let ExpandResult::Ready(mac) = expand_preparsed_asm(ecx, AsmMacro::NakedAsm, args)
+            else {
+                return ExpandResult::Retry(());
+            };
+            let expr = match mac {
+                Ok(mut inline_asm) => {
+                    // for future compatibility, we always set the NORETURN option.
+                    //
+                    // When we turn `asm!` into `naked_asm!` with this implementation, we can drop
+                    // the `options(noreturn)`, which makes the upgrade smooth when `naked_asm!`
+                    // starts disallowing the `noreturn` option in the future
+                    inline_asm.options |= ast::InlineAsmOptions::NORETURN;
+
+                    P(ast::Expr {
+                        id: ast::DUMMY_NODE_ID,
+                        kind: ast::ExprKind::InlineAsm(P(inline_asm)),
+                        span: sp,
+                        attrs: ast::AttrVec::new(),
+                        tokens: None,
+                    })
+                }
+                Err(guar) => DummyResult::raw_expr(sp, Some(guar)),
+            };
+            MacEager::expr(expr)
+        }
+        Err(err) => {
+            let guar = err.emit();
+            DummyResult::any(sp, guar)
+        }
+    })
+}
+
 pub(super) fn expand_global_asm<'cx>(
     ecx: &'cx mut ExtCtxt<'_>,
     sp: Span,
@@ -819,7 +861,8 @@ pub(super) fn expand_global_asm<'cx>(
 ) -> MacroExpanderResult<'cx> {
     ExpandResult::Ready(match parse_args(ecx, sp, tts, true) {
         Ok(args) => {
-            let ExpandResult::Ready(mac) = expand_preparsed_asm(ecx, args) else {
+            let ExpandResult::Ready(mac) = expand_preparsed_asm(ecx, AsmMacro::GlobalAsm, args)
+            else {
                 return ExpandResult::Retry(());
             };
             match mac {

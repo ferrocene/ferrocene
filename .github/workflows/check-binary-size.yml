@@ -126,7 +126,7 @@ jobs:
               { flag: "wx" },
             );
       - name: Upload size data
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.1.7
         with:
           name: size-files
           path: ${{ env.SIZE_DATA_DIR }}/${{ env.SIZE_DATA_FILE }}

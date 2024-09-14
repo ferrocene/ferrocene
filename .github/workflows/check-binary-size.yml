@@ -45,11 +45,11 @@ jobs:
       # patched in to std. It's cloned here to access the Github action for
       # building and measuring the test binary.
       - name: Clone backtrace to access Github action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ env.BACKTRACE_DIR }}
       - name: Clone Rustc
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: rust-lang/rust
           path: ${{ env.RUSTC_DIR }}
@@ -140,7 +140,7 @@ jobs:
       pull-requests: write
     steps:
       # Clone backtrace to access Github composite actions to report size.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download size data
         uses: actions/download-artifact@v4.1.7
         with:

@@ -22,6 +22,12 @@ jobs:
             rust: beta
           - os: ubuntu-20.04
             rust: nightly
+          - os: ubuntu-24.04
+            rust: stable
+          - os: ubuntu-24.04
+            rust: beta
+          - os: ubuntu-24.04
+            rust: nightly
           - os: macos-latest
             rust: stable
           - os: macos-latest
@@ -55,6 +61,12 @@ jobs:
         shell: bash
         if: contains(matrix.rust, 'i686')
 
+      # Starting with Ubuntu 22.04 libc6-dbg is needed.
+      - name: Install libc debug info
+        run: sudo apt-get install -y libc6-dbg
+        shell: bash
+        if: contains(matrix.os, 'ubuntu-24.04')
+
       - name: Enable collapse_debuginfo based on version
         run: echo RUSTFLAGS="--cfg dbginfo=\"collapsible\" $RUSTFLAGS" >> $GITHUB_ENV
         shell: bash
@@ -80,6 +92,11 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         env:
           RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zlib"
+      - run: cargo test
+        if: contains(matrix.os, 'ubuntu-24.04') ||
+            (contains(matrix.os, 'ubuntu') && contains(matrix.rust, 'nightly'))
+        env:
+          RUSTFLAGS: "-C link-arg=-Wl,--compress-debug-sections=zstd"
 
       # Test that, on macOS, packed/unpacked debuginfo both work
       - run: cargo clean && cargo test
@@ -248,7 +265,7 @@ jobs:
         with:
           submodules: true
       - name: Install Rust
-        run: rustup update 1.65.0 --no-self-update && rustup default 1.65.0
+        run: rustup update 1.73.0 --no-self-update && rustup default 1.73.0
       - run: cargo build
 
   miri:

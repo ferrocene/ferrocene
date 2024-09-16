@@ -68,6 +68,7 @@ jobs:
       # To work around both problems we're using a fresh token from an ad-hoc
       # GitHub App with access to push content to this repo.
       - name: Authenticate with GitHub to create branches
+        id: auth # The script sets the output `token`
         run: ferrocene/ci/scripts/github_app_auth.py --set-git-credentials
         env:
           APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
@@ -84,5 +85,5 @@ jobs:
       - name: Run the pull-upstream automation
         run: python3 ferrocene/tools/pull-upstream/automation.py ${{ matrix.branch }} ${{ steps.create_branch.outputs.name || 'main' }}
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"
           MAX_MERGES_PER_PR: "${{ github.event_name == 'workflow_dispatch' && inputs.max_merges_per_pr || 30 }}"

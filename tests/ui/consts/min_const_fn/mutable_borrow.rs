@@ -1,3 +1,4 @@
+<<<PULL-UPSTREAM>>> file deleted upstream; move the Ferrocene annotations if any, and delete this file
 const fn mutable_ref_in_const() -> u8 {
     let mut a = 0;
     let b = &mut a; //~ ERROR mutable references

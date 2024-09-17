@@ -17,6 +17,7 @@ in accordance with the standards above.
    qualification-scope
    link-with-iso-requirements
    link-with-iec-requirements
+   link-with-iec-62304-requirements
    method
 
 .. appendices::

@@ -11,12 +11,11 @@ x86-64 processors.
 
 .. note::
     
-    QNX SDP only supports :ref:`x86_64-unknown-linux-gnu` and
-    :ref:`x86_64-pc-windows-msvc` as host platforms.
+    QNX SDP only supports :ref:`x86_64-unknown-linux-gnu` and :ref:`x86_64-pc-windows-msvc` as host platforms.
 
     Currently, Ferrocene only tests cross compiling from :ref:`x86_64-unknown-linux-gnu`
     to :target:`x86_64-pc-nto-qnx710`. Compiling from :ref:`x86_64-pc-windows-msvc`
-    will be supported in the future.
+    will be tested in the future.
     
     QNX does not support :ref:`aarch64-apple-darwin` as a host platform. QNX is
     deprecating support for :target:`x86_64-apple-darwin` as a host platform.

@@ -54,6 +54,7 @@ jobs:
       # To work around both problems we're using a fresh token from an ad-hoc
       # GitHub App with access to push content to this repo.
       - name: Authenticate with GitHub to create branches
+        id: auth # The script sets the output `token`
         run: ferrocene/ci/scripts/github_app_auth.py --set-git-credentials
         env:
           APP_ID: "${{ vars.AUTOMATIONS_APP_ID }}"
@@ -62,5 +63,5 @@ jobs:
       - name: Run the backport automation
         run: python3 ferrocene/tools/backport/all.py
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: "${{ steps.auth.outputs.token }}"
           PYTHONUNBUFFERED: "true"

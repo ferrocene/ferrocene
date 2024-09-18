@@ -814,6 +814,12 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
+            - aarch64-qnx-test-library
+            - aarch64-qnx-test-library-std
+            - aarch64-qnx-test-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
       - x86_64-linux-traceability-matrix:
@@ -993,12 +999,6 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-library-std
-            - x86_64-qnx-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-library-std
-            - aarch64-qnx-test-compiletest
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test

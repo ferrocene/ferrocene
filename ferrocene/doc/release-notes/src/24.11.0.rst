@@ -1,0 +1,46 @@
+.. SPDX-License-Identifier: MIT OR Apache-2.0
+   SPDX-FileCopyrightText: The Ferrocene Developers
+
+Ferrocene 24.11.0
+======================
+
+Ferrocene 24.11.0 is the fourth major release of Ferrocene.
+
+The highlights of this release are the inclusion of Rust 1.81.0, qualification
+of the ``rustfmt`` code formatter, and qualification of the
+:target:`aarch64-unknown-nto-qnx710` and
+:target:`x86_64-pc-nto-qnx710` targets.
+
+New features
+------------
+
+* The ``rustfmt`` code formatter version |rustfmt_version| is now supported and
+  qualified for safety critical use.
+* Two new targets are now supported and qualified for safety critical use.
+
+  * :target-with-triple:`aarch64-unknown-nto-qnx710`
+  * :target-with-triple:`x86_64-pc-nto-qnx710`
+
+New experimental features
+-------------------------
+
+Experimental features are not qualified for safety critical use, and are
+shipped as a preview.
+
+* Experimental support has been added for a new host platform.
+  Note that experimental targets are not qualified for safety critical use. The
+  new target is:
+
+  * :target-with-triple:`aarch64-unknown-linux-gnu`
+
+Rust changes
+------------
+
+This release includes the following changes introduced by the upstream Rust
+project. Note that this changelog is maintained by upstream. The target support
+changes described here describe Rust's support levels, and have no correlation
+to the targets and platforms supported by Ferrocene.
+
+.. rust-changelog::
+   :from: 1.79.0
+   :to: 1.81.0

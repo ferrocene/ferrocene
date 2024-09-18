@@ -13,6 +13,12 @@ in Ferrocene releases.
    next
 
 .. toctree::
+   :caption: Ferrocene 24.11 series:
+   :maxdepth: 1
+
+   24.11.0
+
+.. toctree::
    :caption: Ferrocene 24.08 series:
    :maxdepth: 1
 

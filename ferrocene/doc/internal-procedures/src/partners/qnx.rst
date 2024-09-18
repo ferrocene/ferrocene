@@ -51,7 +51,9 @@ Select "Add Installation...".
 
 Expand the "QNX® Software Development Platform 7.1" section.
 
-Select "QNX® Software Development Platform 7.1":
+Select "QNX® Software Development Platform 7.1" and ensure the version is
+"Stable (7.1 BuildID 472)", you may need to uncheck "Show Only Latest Version"
+at the bottom of the window:
 
 .. figure:: ../figures/qnx.png
 
@@ -102,13 +104,14 @@ below example, the downloaded ``.run`` file has been saved as
     follow the Windows instructions above, starting from "Log in, if
     prompted" now.
 
-Then, install QNX 7.1.0:
+Then, install QNX 7.1.0 BuildID 472:
 
 .. code-block::
     
     LICENSE_KEY="FILL_ME_IN"
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"
+    QNX_VERSION="7.1.0.00472T202006132107S"
 
     cd $HOME/
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
@@ -116,11 +119,11 @@ Then, install QNX 7.1.0:
         -activateLicenseKey $LICENSE_KEY
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -mirrorBaseline qnx710
+        -mirrorBaseline qnx710-472
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installBaseline com.qnx.qnx710 \
-        -destination qnx/qnx710 \
+        -installBaseline com.qnx.qnx710/$QNX_VERSION \
+        -destination qnx/qnx710-472 \
         -cleanInstall
 
 Finally, you can source your QNX toolchain in ``bash``:
@@ -183,42 +186,42 @@ Create a deployment containing Linux and Windows toolchains:
     LICENSE_KEY="FILL_ME_IN"
     QNX_USER="FILL_ME_IN"
     QNX_PASSWORD="FILL_ME_IN"
+    QNX_VERSION="7.1.0.00472T202006132107S"
+    QNX_HOST_VERSION="0.0.2.00472T202006132107S"
+    QNX_BSP_VERSION="0.0.3.00010T202012081457E"
 
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
         -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -activateLicenseKey $LICENSE_KEY
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
         -mirrorBaseline qnx710
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -installBaseline com.qnx.qnx710 \
-        -installPackage com.qnx.qnx710.host.win.x86_64 \
-        -installPackage com.qnx.qnx710.host.linux.x86_64 \
-        -installPackage com.qnx.qnx710.bsp.xilinx_xzynq_zcu102 \
-        -destination qnx/qnx710 \
+        -installBaseline com.qnx.qnx710/$QNX_VERSION \
+        -installPackage com.qnx.qnx710.host.win.x86_64/$QNX_HOST_VERSION \
+        -installPackage com.qnx.qnx710.host.linux.x86_64/$QNX_HOST_VERSION \
+        -installPackage com.qnx.qnx710.bsp.xilinx_xzynq_zcu102/$QNX_BSP_VERSION \
+        -destination qnx/qnx710-472 \
         -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
-        -myqnx.user $QNX_USER -myqnx.password $QNX_PASSWORD \
-        -deploySdpInstallation qnx/qnx710 \
+        -deploySdpInstallation qnx/qnx710-472 \
         -deployLicense $LICENSE_KEY \
-        -installationDeployAs qnx/qnx710-deployment
+        -installationDeployAs qnx/qnx710-472-deployment
 
 Finally, create an archive of the deployment (with dereferenced symlinks) and upload it to the S3 URL which the CI attempts to pull from:
 
 .. code-block::
 
     cd $HOME
-    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx710-deployment.tar.xz -C qnx/qnx710-deployment/ qnx710
-    aws s3 cp qnx/qnx710-deployment.tar.xz s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz
+    tar -cv --dereference -I 'zstd -T0' -f qnx/qnx710-472-deployment.tar.zst -C qnx/qnx710-472-deployment/ qnx710-472
+    aws s3 cp qnx/qnx710-472-deployment.tar.zst s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst
 
 On CI/CD hosts we use a Python script to setup the toolchain:
 
 .. code-block::
 
     cd $HOME
-    git/ferrocene/ferrocene/ferrocene/ci/scripts/setup-qnx-toolchain.py
-    source qnx/qnx710/qnxsdp-env.sh
+    ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
+    source qnx/qnx710-472/qnxsdp-env.sh
     qcc -v
 
 It's also possible to use ``tar`` directly, but it can be problematic on Windows hosts.
@@ -226,6 +229,6 @@ It's also possible to use ``tar`` directly, but it can be problematic on Windows
 .. code-block::
 
     cd $HOME
-    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.xz - | tar -x --zstd -f-
-    source qnx/qnx710/qnxsdp-env.sh
+    aws s3 cp s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst - | tar -x --zstd -f-
+    source qnx/qnx710-472/qnxsdp-env.sh
     qcc -v

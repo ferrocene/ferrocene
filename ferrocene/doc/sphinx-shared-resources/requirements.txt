@@ -461,9 +461,9 @@ sphinx==7.4.7 \
     #   sphinx-needs
     #   sphinxcontrib-jquery
     #   sphinxcontrib-plantuml
-sphinx-autobuild==2024.9.3 \
-    --hash=sha256:55fe9bcc05dab659650d79bed0e6beb8b6032234edbf23f028f2cac3471f0c2d \
-    --hash=sha256:75929a5a92b932da8d29837406d6d973a927c456f30986a27f1f20b067897892
+sphinx-autobuild==2024.9.17 \
+    --hash=sha256:18f74618ad434018b9c52eab2526dfeb813e89fc14021361f26d8ca84c98458d \
+    --hash=sha256:a8e6e888283c2cc599d0dbc073f89be95628ca2d6c5c41ed086ab206bb7c9b99
     # via -r requirements.in
 sphinx-data-viewer==0.1.4 \
     --hash=sha256:9b82cf55a4c0358a4176e98c8a91e7a9b26a326930e18b10e53f0d393ebe5416 \

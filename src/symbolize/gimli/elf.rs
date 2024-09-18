@@ -317,7 +317,7 @@ impl<'a> Object<'a> {
         let section = self.section_header(".gnu_debuglink")?;
         let data = section.data(self.endian, self.data).ok()?;
         let len = data.iter().position(|x| *x == 0)?;
-        let filename = &data[..len];
+        let filename = OsStr::from_bytes(&data[..len]);
         let offset = (len + 1 + 3) & !3;
         let crc_bytes = data
             .get(offset..offset + 4)
@@ -332,7 +332,7 @@ impl<'a> Object<'a> {
         let section = self.section_header(".gnu_debugaltlink")?;
         let data = section.data(self.endian, self.data).ok()?;
         let len = data.iter().position(|x| *x == 0)?;
-        let filename = &data[..len];
+        let filename = OsStr::from_bytes(&data[..len]);
         let build_id = &data[len + 1..];
         let path_sup = locate_debugaltlink(path, filename, build_id)?;
         Some((path_sup, build_id))
@@ -460,12 +460,12 @@ fn locate_build_id(build_id: &[u8]) -> Option<PathBuf> {
 /// gdb also allows the user to customize the debug search path, but we don't.
 ///
 /// gdb also supports debuginfod, but we don't yet.
-fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
+fn locate_debuglink(path: &Path, filename: &OsStr) -> Option<PathBuf> {
     let path = fs::canonicalize(path).ok()?;
     let parent = path.parent()?;
     let mut f =
         PathBuf::with_capacity(DEBUG_PATH.len() + parent.as_os_str().len() + filename.len() + 2);
-    let filename = Path::new(OsStr::from_bytes(filename));
+    let filename = Path::new(filename);
 
     // Try "/parent/filename" if it differs from "path"
     f.push(parent);
@@ -509,8 +509,8 @@ fn locate_debuglink(path: &Path, filename: &[u8]) -> Option<PathBuf> {
 /// gdb also allows the user to customize the debug search path, but we don't.
 ///
 /// gdb also supports debuginfod, but we don't yet.
-fn locate_debugaltlink(path: &Path, filename: &[u8], build_id: &[u8]) -> Option<PathBuf> {
-    let filename = Path::new(OsStr::from_bytes(filename));
+fn locate_debugaltlink(path: &Path, filename: &OsStr, build_id: &[u8]) -> Option<PathBuf> {
+    let filename = Path::new(filename);
     if filename.is_absolute() {
         if filename.is_file() {
             return Some(filename.into());
@@ -528,11 +528,6 @@ fn locate_debugaltlink(path: &Path, filename: &[u8], build_id: &[u8]) -> Option<
     locate_build_id(build_id)
 }
 
-fn convert_path<R: gimli::Reader>(r: &R) -> Result<PathBuf, gimli::Error> {
-    let bytes = r.to_slice()?;
-    Ok(PathBuf::from(OsStr::from_bytes(&bytes)))
-}
-
 pub(super) fn handle_split_dwarf<'data>(
     package: Option<&gimli::DwarfPackage<EndianSlice<'data, Endian>>>,
     stash: &'data Stash,
@@ -546,10 +541,10 @@ pub(super) fn handle_split_dwarf<'data>(
 
     let mut path = PathBuf::new();
     if let Some(p) = load.comp_dir.as_ref() {
-        path.push(convert_path(p).ok()?);
+        path.push(OsStr::from_bytes(&p));
     }
 
-    path.push(convert_path(load.path.as_ref()?).ok()?);
+    path.push(OsStr::from_bytes(&load.path.as_ref()?));
 
     if let Some(map_dwo) = super::mmap(&path) {
         let map_dwo = stash.cache_mmap(map_dwo);

@@ -943,7 +943,9 @@
 # Only applies when the host or target is pc-windows-gnu.
 #include-mingw-linker = true
 
-<<<<<<< HEAD
+# Whether to vendor dependencies for the dist tarball.
+#vendor = if "is a tarball source" || "is a git repository" { true } else { false }
+
 # =============================================================================
 # Ferrocene options
 #
@@ -1017,7 +1019,3 @@
 # while working locally.
 # https://public-docs.ferrocene.dev/main/qualification/internal-procedures/setup-local-env.html#configuring-aws-cli
 #aws-profile = "ferrocene-ci"
-=======
-# Whether to vendor dependencies for the dist tarball.
-#vendor = if "is a tarball source" || "is a git repository" { true } else { false }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

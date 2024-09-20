@@ -170,36 +170,6 @@ SPDX-FileCopyrightText = [
 SPDX-License-Identifier = "NCSA AND Apache-2.0 WITH LLVM-exception"
 
 [[annotations]]
-<<<<<<< HEAD
-path = "ferrocene/library/backtrace-rs/**"
-precedence = "override"
-SPDX-FileCopyrightText = "The Rust Project Developers"
-SPDX-License-Identifier = "MIT OR Apache-2.0"
-
-[[annotations]]
-path = "ferrocene/library/libc/**"
-precedence = "override"
-SPDX-FileCopyrightText = "The Rust libc developers"
-SPDX-License-Identifier = "MIT OR Apache-2.0"
-
-[[annotations]]
-path = "ferrocene/tools/flip-link/**"
-precedence = "override"
-SPDX-FileCopyrightText = "The Knurling-rs developers"
-SPDX-License-Identifier = "MIT OR Apache-2.0"
-
-[[annotations]]
-path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64"
-precedence = "override"
-SPDX-FileCopyrightText = "Colin Watson"
-SPDX-License-Identifier = "GPL-3.0-or-later"
-
-[[annotations]]
-path = "requirements.txt"
-precedence = "override"
-SPDX-FileCopyrightText = "The Ferrocene Developers"
-SPDX-License-Identifier = "MIT OR Apache-2.0"
-=======
 path = "src/gcc/**"
 precedence = "override"
 SPDX-FileCopyrightText = [
@@ -232,4 +202,33 @@ SPDX-FileCopyrightText = [
     "Copyright (C) 2000-2024 Free Software Foundation, Inc.",
 ]
 SPDX-License-Identifier = "GCC-exception-3.1"
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+
+[[annotations]]
+path = "ferrocene/library/backtrace-rs/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Rust Project Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "ferrocene/library/libc/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Rust libc developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "ferrocene/tools/flip-link/**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Knurling-rs developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "ferrocene/ci/docker-images/ubuntu-20/binfmt-qemu-aarch64"
+precedence = "override"
+SPDX-FileCopyrightText = "Colin Watson"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "requirements.txt"
+precedence = "override"
+SPDX-FileCopyrightText = "The Ferrocene Developers"
+SPDX-License-Identifier = "MIT OR Apache-2.0"

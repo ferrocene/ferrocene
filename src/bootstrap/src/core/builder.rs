@@ -14,11 +14,7 @@ use clap::ValueEnum;
 
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::build_steps::{
-<<<<<<< HEAD
-    check, clean, clippy, compile, dist, doc, llvm, run, setup, test, vendor,
-=======
-    check, clean, clippy, compile, dist, doc, gcc, install, llvm, run, setup, test, vendor,
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
+    check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, vendor,
 };
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};

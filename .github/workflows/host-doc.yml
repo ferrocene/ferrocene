@@ -29,6 +29,9 @@ on:
         description: The name of the doc job artifact
         value: ${{ jobs.doc.outputs.artifact-name }}
 
+env:
+  # TODO: Remove this when we auth with AWS
+  OUTSIDE_FERROUS: 1
 
 jobs:
 
@@ -37,10 +40,10 @@ jobs:
     env:
       ARTIFACT: doc-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      SCRIPT:
-        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        # Run dist before test to make sure the tarballs we test are uploaded
-        # to CI beforehand, for manual inspection in case of failures.
+      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+      # Run dist before test to make sure the tarballs we test are uploaded
+      # to CI beforehand, for manual inspection in case of failures.
+      SCRIPT: |
         ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
         ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
     outputs:

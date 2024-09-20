@@ -32,6 +32,9 @@ on:
         type: string
     # outputs:
 
+env:
+  # TODO: Remove this when we auth with AWS
+  OUTSIDE_FERROUS: 1
 
 jobs:
 

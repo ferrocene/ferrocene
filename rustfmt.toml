@@ -54,5 +54,6 @@ ignore = [
     # Code automatically generated and included.
     "compiler/rustc_codegen_gcc/src/intrinsic/archs.rs",
     "compiler/rustc_codegen_gcc/example",
+    "ferrocene/library/backtrace-rs",
     "ferrocene/library/libc",
 ]

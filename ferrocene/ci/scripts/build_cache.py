@@ -37,13 +37,19 @@ def subcommand_pre_upload(ferrocene_host):
         try:
             # Windows gets *extremely* confused by symlink directories
             if platform.system() == "Windows":
-                os.unlink(location)
+                try:
+                    shutil.rmtree(location)
+                    logging.info(f"Removed cyclic link `{location}`, via rmtree")
+                except Exception as e:
+                    os.unlink(location)
+                    logging.info(f"Removed cyclic link `{location}`, via unlink")
             else:
                 if os.path.islink(location):
                     os.unlink(location)
+                    logging.info(f"Removed cyclic link `{location}` via `unlink`")
                 else:
                     shutil.rmtree(location)
-            logging.info(f"Removing cyclic link `{location}`")
+                    logging.info(f"Removed cyclic link `{location}` via `rmtree`")
         except Exception as e:
             logging.warning(f"Unable to remove {location}: {e}")
 

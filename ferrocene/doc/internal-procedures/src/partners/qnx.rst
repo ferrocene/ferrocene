@@ -5,7 +5,9 @@ QNX
 ===
 
 One of the partner projects of Ferrocene is `QNX
-<https://blackberry.qnx.com/>`_, an embedded OS designed for automotive use.
+<https://blackberry.qnx.com/>`_, an embedded real-time OS commonplace in automotive,
+medical applications, automated manufacturing, trains, and more.
+
 This page contains the information relevant to Ferrous Systems employees
 working on Ferrocene.
 

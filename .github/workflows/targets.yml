@@ -35,6 +35,9 @@ on:
         description: The name of the targets artifact
         value: ${{ jobs.targets.outputs.artifact-name }}
 
+env:
+  # TODO: Remove this when we auth with AWS
+  OUTSIDE_FERROUS: 1
 
 jobs:
 
@@ -85,6 +88,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \

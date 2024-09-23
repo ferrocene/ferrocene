@@ -49,7 +49,7 @@ jobs:
       FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -73,7 +73,7 @@ jobs:
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - name: Reconstitute known cyclic symlinks
+      - name: Post artifact download steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Run
@@ -90,6 +90,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
@@ -112,7 +114,7 @@ jobs:
       FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -136,7 +138,7 @@ jobs:
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - name: Reconstitute known cyclic symlinks
+      - name: Post artifact download steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Run
@@ -153,6 +155,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \

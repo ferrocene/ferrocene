@@ -147,7 +147,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-linux-gnu
       SCRIPT: |
-        ./ferrocene/ci/scripts/llvm-cache.py download
+        ./ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
@@ -271,6 +271,7 @@ jobs:
     steps:
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
           emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
@@ -310,6 +311,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           restore-from-job: x86_64-linux-build
 
   x86_64-linux-llvm:
@@ -317,7 +319,7 @@ jobs:
     resource_class: xlarge # 8-core
     environment:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
-      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -348,6 +350,57 @@ jobs:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
 
+  x86_64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: x86_64-pc-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
+
+  aarch64-qnx-generic-test-vm:
+    executor: linux-vm
+    parameters:
+      job:
+        type: string
+      resource-class:
+        type: string
+    resource_class: << parameters.resource-class >>
+    environment:
+      FERROCENE_HOST: x86_64-unknown-linux-gnu
+      FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
+      SCRIPT: |
+        set +u; source ./qnx710/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - aws-oidc-auth
+      - ferrocene-checkout
+      - setup-venv
+      - setup-qnx-toolchain:
+          source-env-script: false
+      - ferrocene-job-test-vm:
+          checkout-source: false
+          docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
+          run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          restore-from-job: x86_64-linux-build
+          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -356,7 +409,7 @@ jobs:
     resource_class: arm.xlarge # 8-core
     environment:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
-      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -379,7 +432,7 @@ jobs:
       FERROCENE_HOST: aarch64-unknown-linux-gnu
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-unknown-linux-gnu--build >>
       SCRIPT: |
-        ferrocene/ci/scripts/llvm-cache.py download
+        ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps: [ferrocene-job-build]
@@ -431,7 +484,7 @@ jobs:
     environment:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: aarch64-apple-darwin,x86_64-apple-darwin
-      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      SCRIPT: ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to using too much memory, decrease this number.
@@ -457,7 +510,7 @@ jobs:
       FERROCENE_HOST: aarch64-apple-darwin
       FERROCENE_TARGETS: << pipeline.parameters.targets--aarch64-apple-darwin--build >>
       SCRIPT: |
-        ferrocene/ci/scripts/llvm-cache.py download
+        ferrocene/ci/scripts/llvm_cache.py download
         ./x.py --stage 2 build library src/tools/rustdoc
         ./x.py --stage 1 build src/tools/rustdoc
     steps:
@@ -521,7 +574,11 @@ jobs:
     environment:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
-      SCRIPT: ferrocene/ci/scripts/llvm-cache.py prepare
+      # On Windows, the virtualenv detection seems to struggle at times, give it a kick
+      SCRIPT: |
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py prepare
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -536,6 +593,7 @@ jobs:
             - aws-oidc-auth
             - ferrocene-checkout
             - ferrocene-setup-windows
+            - setup-venv
             - ferrocene-ci
       - run:
           name: Empty step to make sure the job always has steps
@@ -552,11 +610,14 @@ jobs:
       FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      # On Windows, the virtualenv detection seems to struggle at times, give it a kick
       SCRIPT: |
-        ferrocene/ci/scripts/llvm-cache.py download
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist $($HOME/.venv/Scripts/python.exe ferrocene/ci/split-tasks.py dist)
+        ./x.py --stage 2 dist $($HOME/.venv/Scripts/python.exe ferrocene/ci/split-tasks.py dist:tools)
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
@@ -577,6 +638,7 @@ jobs:
       - aws-oidc-auth
       - ferrocene-setup-windows
       - setup-venv
+      - setup-qnx-toolchain: {}
       - run:
           name: Download dist artifacts and run the self-test tool
           command: ferrocene/ci/scripts/run-self-test.sh
@@ -825,6 +887,48 @@ workflows:
             - x86_64-linux-dist-targets
             - aarch64-linux-dist
 
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - x86_64-qnx-generic-test-vm:
+          name: x86_64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-library
+          job: test:library
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-library-std
+          job: test:library-std
+          resource-class: large # 4-core
+          requires:
+            - x86_64-linux-build
+
+      - aarch64-qnx-generic-test-vm:
+          name: aarch64-qnx-test-compiletest
+          job: qnx:compiletest-no-only-hosts
+          resource-class: xlarge # 8-core
+          requires:
+            - x86_64-linux-build
+
       - aarch64-linux-llvm:
           requires:
             - build-docker--ubuntu-20--aarch64
@@ -876,6 +980,12 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
+            - aarch64-qnx-test-library
+            - aarch64-qnx-test-library-std
+            - aarch64-qnx-test-compiletest
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
@@ -993,18 +1103,30 @@ commands:
 
   ferrocene-job-test-vm:
     description: Collection of steps for test jobs in VMs
+    # a separate Docker image can be used to run a newer version of e.g. QEMU than
+    # the version available in `docker-image-tag`
     parameters:
+      # the "preparing the emulator" and other steps will run in this Docker image
       docker-image-tag:
+        type: string
+      # the "running the emulator" step will run in this Docker image
+      run-emulator-docker-image-tag:
         type: string
       restore-from-job:
         type: string
       emulator-script:
         type: string
         default: ""
+      checkout-source:
+        type: boolean
+        default: true
     steps:
       - aws-oidc-auth
-      - ferrocene-checkout:
-          llvm-subset: true
+      - when:
+          condition: << parameters.checkout-source >>
+          steps:
+            - ferrocene-checkout:
+                llvm-subset: true
       - run:
           name: Restore files from the << parameters.restore-from-job >> job
           command: ferrocene/ci/scripts/persist-between-jobs.sh restore << parameters.restore-from-job >>
@@ -1026,6 +1148,7 @@ commands:
             aws ecr get-login-password --region us-east-1 \
               | docker login -u AWS --password-stdin << pipeline.parameters.docker-repository-url--ci-docker-images >>
             docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >>
+            docker pull << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >>
 
       - when:
           condition: << parameters.emulator-script >>
@@ -1039,7 +1162,7 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER']))") \
                     -e SCRIPT="<< parameters.emulator-script >> prepare" \
                     -e REMOTE_TEST_SERVER_STAGE=2 \
                     --workdir /home/ci/project \
@@ -1060,22 +1183,23 @@ commands:
                 command: |
                   docker run \
                     --rm \
-                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+                    $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
                     --workdir /home/ci/project \
                     --volume $(pwd):/home/ci/project \
                     --volume /tmp/emulator:/tmp/emulator \
+                    --user $(id -u):$(id -g) \
                     --network host \
                     --privileged \
                     --interactive \
                     --tty \
-                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.docker-image-tag >> \
-                    << parameters.emulator-script >>
+                    << pipeline.parameters.docker-repository-url--ci-docker-images >>:<< parameters.run-emulator-docker-image-tag >> \
+                    bash -c "<< parameters.emulator-script >>"
 
       - ferrocene-ci:
           wrapper: |
             docker run \
               --rm \
-              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['LANG', 'SUDO_USER']))") \
+              $(python3 -c "import os; print(' '.join('--env ' + var for var in os.environ if var not in ['HOME', 'LANG', 'SUDO_USER', 'PATH', 'VIRTUAL_ENV']))") \
               --workdir /home/ci/project \
               --volume $(pwd):/home/ci/project \
               --volume /tmp/emulator:/tmp/emulator \
@@ -1190,21 +1314,27 @@ commands:
 
   setup-qnx-toolchain:
     description: Setup QNX Toolchain
+    parameters:
+      source-env-script:
+        type: boolean
+        default: true
     steps:
       - run:
           name: Fetch QNX710 toolchain
           # On Windows, the virtualenv detection seems to struggle at times.
           command: |
-            export VIRTUAL_ENV=$HOME/.venv
             if [[ "${OSTYPE}" = "msys" ]]; then
-                export PATH=$HOME/.venv/Scripts/:$PATH
+                source $HOME/.venv/Scripts/activate
             else
-                export PATH=$HOME/.venv/bin/:$PATH
+                source $HOME/.venv/bin/activate
             fi
-            python ferrocene/ci/scripts/setup-qnx-toolchain.py
-      - run:
-          name: Set PATH to include QNX710 tools
-          command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+            python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst .
+      - when:
+          condition: << parameters.source-env-script >>
+          steps:
+            - run:
+                name: Set PATH to include QNX710 tools
+                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
       - run:
           name: Test qcc
           command: qcc -v || true

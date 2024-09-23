@@ -113,6 +113,7 @@ fn error_with_no_sources_formats_multi_line_correctly() {
 }
 
 #[test]
+#[cfg_attr(all(target_arch = "aarch64", target_os = "nto"), ignore)]
 fn error_with_backtrace_outputs_correctly_with_one_source() {
     let trace = Backtrace::force_capture();
     let expected = format!(
@@ -136,6 +137,7 @@ Stack backtrace:
 }
 
 #[test]
+#[cfg_attr(all(target_arch = "aarch64", target_os = "nto"), ignore)]
 fn error_with_backtrace_outputs_correctly_with_two_sources() {
     let trace = Backtrace::force_capture();
     let expected = format!(

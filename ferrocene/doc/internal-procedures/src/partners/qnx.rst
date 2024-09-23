@@ -193,6 +193,7 @@ Create a deployment containing Linux and Windows toolchains:
         -installBaseline com.qnx.qnx710 \
         -installPackage com.qnx.qnx710.host.win.x86_64 \
         -installPackage com.qnx.qnx710.host.linux.x86_64 \
+        -installPackage com.qnx.qnx710.bsp.xilinx_xzynq_zcu102 \
         -destination qnx/qnx710 \
         -cleanInstall
     qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \

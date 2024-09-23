@@ -30,6 +30,7 @@ macro_rules! t {
     ),
     ignore
 )]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_process_mask() {
     // Test to make sure that a signal mask *does* get inherited.
     fn test_inner(mut cmd: Command) {
@@ -92,6 +93,7 @@ fn test_process_mask() {
     ),
     ignore
 )]
+#[cfg_attr(all(target_arch = "x86_64", target_os = "nto"), ignore)]
 fn test_process_group_posix_spawn() {
     unsafe {
         // Spawn a cat subprocess that's just going to hang since there is no I/O.

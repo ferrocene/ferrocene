@@ -18,6 +18,7 @@ import sys
 import urllib.parse
 import yaml
 from typing import Callable
+import llvm_cache
 
 
 # Path of the YAML file to extract the needed parameters from.
@@ -67,7 +68,7 @@ AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_
 
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS
+X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)
@@ -137,13 +138,7 @@ def calculate_llvm_rebuild(target: str):
     """
     Calculates the value of parameters starting with `llvm-rebuild--`
     """
-    url: urllib.parse.ParseResult = urllib.parse.urlparse(
-        subprocess.run(
-            ["ferrocene/ci/scripts/llvm-cache.py", "s3-url"],
-            env={"FERROCENE_HOST": target},
-            stdout=subprocess.PIPE,
-        ).stdout.strip()
-    ).decode("utf-8")
+    url: urllib.parse.ParseResult = llvm_cache.get_s3_url(target)
     assert url.scheme == "s3"
 
     try:
@@ -230,7 +225,7 @@ class ScriptError(RuntimeError):
 
 if __name__ == "__main__":
     # Ensure we're using a consistent working directory
-    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
     try:
         print(json.dumps(prepare_parameters(), indent=4))

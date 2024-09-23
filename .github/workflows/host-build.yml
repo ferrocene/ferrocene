@@ -108,6 +108,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -139,8 +141,8 @@ jobs:
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
       SCRIPT: |
-        ./x.py --stage 2 build library src/tools/rustdoc
-        ./x.py --stage 1 build src/tools/rustdoc
+        uv run x.py --stage 2 build library src/tools/rustdoc
+        uv run x.py --stage 1 build src/tools/rustdoc
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -185,6 +187,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
@@ -192,10 +196,11 @@ jobs:
             ${{ inputs.container }}
             ferrocene/ci/run.sh
 
-      - name: Deconstitute known cyclic symlinks
+      - name: Pre artifact upload steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
           path: build.tar
+          retention-days: 1

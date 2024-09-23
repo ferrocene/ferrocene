@@ -82,7 +82,7 @@ def subcommand_post_download(ferrocene_host):
             parent = location.parent
             if not os.path.exists(parent):
                 os.makedirs(parent)
-            os.symlink(target, location)
+            os.symlink(target, location, target_is_directory=True)
         else:
             logging.info(f"Unable to link to `{target}` at `{location}`, does not exist")
 

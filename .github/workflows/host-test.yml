@@ -84,6 +84,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -138,6 +140,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -192,6 +196,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -246,6 +252,8 @@ jobs:
             --interactive \
             --env SCRIPT \
             --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \

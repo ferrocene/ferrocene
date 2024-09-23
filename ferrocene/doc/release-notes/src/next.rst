@@ -14,6 +14,10 @@ New features
 
 * The ``rustfmt`` code formatter version |rustfmt_version| is now supported and
   qualified for safety critical use.
+* Two new qualified targets have been added.
+  
+  * :target-with-triple:`aarch64-unknown-nto-qnx710`
+  * :target-with-triple:`x86_64-pc-nto-qnx710`
 
 New experimental features
 -------------------------

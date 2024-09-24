@@ -2865,7 +2865,7 @@ checksum = "baff4b617f7df3d896f97fe922b64817f6cd9a756bb81d40f8883f2f66dcb401"
 
 [[package]]
 name = "libc"
-version = "0.2.155"
+version = "0.2.156"
 dependencies = [
  "rustc-std-workspace-core",
 ]

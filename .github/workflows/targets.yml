@@ -71,7 +71,7 @@ jobs:
         with:
           name: ${{ inputs.build-artifact }}
           run-id: ${{ inputs.build-run-id }}
-      - name: Reconstitute known cyclic symlinks
+      - name: Post artifact download steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Run
@@ -90,6 +90,7 @@ jobs:
             --env FERROCENE_HOST \
             --env FERROCENE_TARGETS \
             --env OUTSIDE_FERROUS \
+            --env CI \
             --env LLVM_BUILD_PARALLELISM \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \

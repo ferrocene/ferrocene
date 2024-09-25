@@ -116,3 +116,6 @@ fn main() { }
 //
 // ferrocene-annotations: fls_1h0olpc7vbui
 // Type Path Resolution
+//
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

@@ -102,6 +102,10 @@ conflicts: resolve them, and then run ``git rebase --continue`` to proceed.
 Once the rebase finishes, you can backport other PRs or push the branch to
 GitHub for review.
 
+In the case of the backported PR fixing a known problem, the backport must be
+accompanied by at least one `tests/ui` test if the backported PR itself did not
+add a respective test.
+
 Note that the manual backport script also adds the correct metadata needed for
 :ref:`backport-phase-cleanup` to run: as long as you use the script, you will
 not need to manually remove the backport labels from the PR.

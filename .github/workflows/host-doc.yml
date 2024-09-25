@@ -88,6 +88,7 @@ jobs:
             --env FERROCENE_HOST \
             --env FERROCENE_TARGETS \
             --env OUTSIDE_FERROUS \
+            --env CI \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \

@@ -287,7 +287,7 @@ add --enable-profiler
 # which is not available on WASM bare metal.
 #
 # If this configuration is missing, building the WASM target will fail.
-add --set target.wasm32-unknown-unknown.profiler=false
+# add --set target.wasm32-unknown-unknown.profiler=false
 
 # Build and include LLD in the resulting compiler package.
 #

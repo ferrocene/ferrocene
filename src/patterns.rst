@@ -281,8 +281,8 @@ The :t:`type` of a :t:`literal pattern` is the :t:`type` of the specified
 .. rubric:: Examples
 
 :dp:`fls_fqclaznjgtb1`
-Two literal patterns in the context of a match expression. See :p:`5.1.1.
-<fls_yeajwokikkdi>` for the declaration of ``x``.
+Two literal patterns in the context of a match expression.
+See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 
 .. code-block:: rust
 
@@ -321,7 +321,7 @@ The :t:`type` of a :t:`parenthesized pattern` is the :t:`type` of its nested
 .. rubric:: Examples
 
 :dp:`fls_2xq8852gihn9`
-See :p:`5.1.1. <fls_yeajwokikkdi>` for the declaration of ``x``.
+See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 
 .. code-block:: rust
 
@@ -411,7 +411,7 @@ The :t:`type` of a :t:`path pattern` is the :t:`type` of the :t:`constant`,
    enum Enum { Variant }
 
 :dp:`fls_u59rilepu8z9`
-See :p:`5.1.1. <fls_yeajwokikkdi>` for the declaration of ``x``.
+See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 
 .. code-block:: rust
 
@@ -504,7 +504,7 @@ less than or equal to its :t:`range pattern high bound`.
 
 :dp:`fls_8bdOqkO1NuJW`
 The :t:`range pattern low bound` of an :t:`exclusive range pattern` shall be
-less than to its :t:`range pattern high bound`.
+less than its :t:`range pattern high bound`.
 
 :dp:`fls_s2b5n4snc4d7`
 An :t:`obsolete range pattern` is equivalent to an :t:`inclusive range pattern`.
@@ -540,8 +540,8 @@ A :t:`qualified path expression` of a :t:`range pattern` shall refer to an
 .. rubric:: Examples
 
 :dp:`fls_3wwpq8i6mo2a`
-Two range patterns in the context of a match expression. See :p:`5.1.1.
-<fls_yeajwokikkdi>` for the declaration of ``x``.
+Two range patterns in the context of a match expression.
+See :p:`fls_sfyfdxhvhk44` for the declaration of ``x``.
 
 .. code-block:: rust
 
@@ -590,8 +590,8 @@ The :t:`type` of a :t:`reference pattern` is determined as follows:
 .. rubric:: Examples
 
 :dp:`fls_mpeuhov0umfa`
-A reference pattern in the context of a match expression. See :p:`5.1.3.
-<fls_yowuqu7bcu7b>` for the declaration of ``ref_x``.
+A reference pattern in the context of a match expression.
+See :p:`fls_2xq8852gihn9` for the declaration of ``ref_x``.
 
 .. code-block:: rust
 
@@ -750,7 +750,7 @@ A :t:`struct pattern` is an :t:`irrefutable pattern` if
   All of its :t:`[subpattern]s` are :t:`[irrefutable pattern]s`, and
 
 * :dp:`fls_p4OplpUvS04l`
-  The :t:`deconstructree` is either:
+  The :t:`deconstructee` is either:
 
   * :dp:`fls_pre3YwAv01FE`
     A :t:`struct type` or a :t:`union type`, or
@@ -943,6 +943,9 @@ a :t:`union type` when the :t:`field` contains data that is invalid for the
 
 .. rubric:: Examples
 
+:dp:`fls_zRCiKnhQebyp`
+A record struct pattern deconstructing a record struct.
+
 .. code-block:: rust
 
    struct RecordStruct {
@@ -958,6 +961,11 @@ a :t:`union type` when the :t:`field` contains data that is invalid for the
        RecordStruct { .. } => (),
    }
 
+:dp:`fls_D5tAGzrjXFTu`
+A record struct pattern deconstructing a tuple struct.
+
+.. code-block:: rust
+
    struct TupleStruct (
        u32,
        u32,
@@ -970,6 +978,11 @@ a :t:`union type` when the :t:`field` contains data that is invalid for the
        TupleStruct { 0: 55, .. } => (),
        TupleStruct { .. } => (),
    }
+
+:dp:`fls_FhvMzLPRlY7p`
+A record struct pattern deconstructing a union.
+
+.. code-block:: rust
 
    union Union {
        first : u32,
@@ -1055,7 +1068,7 @@ A :s:`RecordStructRestPattern` is allowed even if all :t:`[field]s` of the
 .. rubric:: Examples
 
 :dp:`fls_2u99arsbnlnk`
-See :p:`5.1.9.1. <fls_nruvg0es3kx7>` for the declarations of ``TupleStruct`` and
+See :p:`fls_D5tAGzrjXFTu` for the declarations of ``TupleStruct`` and
 ``tuple_struct_value``.
 
 .. code-block:: rust
@@ -1175,8 +1188,8 @@ it matches.
 .. rubric:: Examples
 
 :dp:`fls_j3u6x1ensrbe`
-An underscore pattern in the context of a let statement. See :p:`5.1.10.
-<fls_fo48m62q2y0v>` for the declaration of ``pair``.
+An underscore pattern in the context of a let statement.
+See :p:`fls_8r81vtv5hnrd` for the declaration of ``pair``.
 
 .. code-block:: rust
 

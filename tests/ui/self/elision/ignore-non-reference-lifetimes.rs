@@ -22,3 +22,6 @@ impl<'a> Foo2<'a> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

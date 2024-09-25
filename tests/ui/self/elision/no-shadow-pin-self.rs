@@ -15,3 +15,6 @@ impl<P> Trait for Pin<P> {
 }
 
 fn main() {}
+
+// ferrocene-annotations: fls_hethxxbcg7ja
+// Function Lifetime Elision

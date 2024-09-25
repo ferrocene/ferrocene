@@ -10,3 +10,6 @@
 #[warn(dead_code, reason = "This is also reasonable")]
 
 fn main() {}
+
+// ferrocene-annotations: fls_ahmnqhm8anlb
+// Built-in Attributes

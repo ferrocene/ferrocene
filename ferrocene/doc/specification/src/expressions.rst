@@ -1082,7 +1082,7 @@ It is undefined behavior to dereference a :t:`raw pointer` that is either
 .. rubric:: Examples
 
 :dp:`fls_9ifaterm8nop`
-See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``ref_answer``.
+See :p:`fls_350qejoq9i23` for the declaration of ``ref_answer``.
 
 .. code-block:: rust
 
@@ -1719,7 +1719,17 @@ The :t:`evaluation` of a :t:`shift left expression` proceeds as follows:
    The :t:`right operand` is evaluated.
 
 #. :dp:`fls_f0p70y92k14f`
-   ``core::ops::Shl::shl(left_operand, right_operand)`` is invoked.
+   If the types of both :t:`[operand]s` are :t:`[integer type]s`, then the
+   :t:`shift left expression` evaluates to the value of the left :t:`operand`
+   whose bits are shifted left by the number of positions the right :t:`operand`
+   evaluates to. Vacated bits are filled with zeros. ``lhs << rhs`` evaluates
+   to :math:`\mathrm{lhs} \times 2 ^ \mathrm{rhs}`, casted to the type of the left
+   :t:`operand`. If the value of the right :t:`operand` is negative or greater
+   than or equal to the width of the left operand, then the operation results in
+   an :t:`arithmetic overflow`.
+
+#. :dp:`fls_8QGbl2SBU3R0`
+   Otherwise, ``core::ops::Shl::shl(left_operand, right_operand)`` is invoked.
 
 :dp:`fls_303r0u6ug215`
 The :t:`evaluation` of a :t:`shift right expression` proceeds as follows:
@@ -1730,8 +1740,20 @@ The :t:`evaluation` of a :t:`shift right expression` proceeds as follows:
 #. :dp:`fls_gurl2ve58drz`
    The :t:`right operand` is evaluated.
 
+#. :dp:`fls_r02OGonXp93A`
+   If the types of both :t:`[operand]s` are :t:`[integer type]s`, then the
+   :t:`shift right expression` evaluates to the value of the left :t:`operand`
+   whose bits are shifted right by the number of positions the right
+   :t:`operand` evaluates to. If the type of the left :t:`operand` is any
+   :t:`signed integer type` and is negative, then vacated bits are filled
+   with ones. Otherwise, vacated bits are filled with zeros. ``lhs >> rhs``
+   evaluates to :math:`\mathrm{lhs} / 2^ \mathrm{rhs}`, casted to the type of
+   the left :t:`operand`. If the value of the right :t:`operand` is negative,
+   greater than or equal to the width of the left operand, then the operation
+   results in an :t:`arithmetic overflow`.
+
 #. :dp:`fls_xkyj83mcb9d5`
-   ``core::ops::Shr::shr(left_operand, right_operand)`` is invoked.
+   Otherwise, ``core::ops::Shr::shr(left_operand, right_operand)`` is invoked.
 
 .. rubric:: Examples
 
@@ -2237,7 +2259,7 @@ The :t:`evaluation` of a :dt:`numeric cast` proceeds as follows:
 .. rubric:: Examples
 
 :dp:`fls_vdxkpvmpwl3s`
-See :p:`6.4.1. <fls_ltflbfba9d5r>` for the declaration of ``answer``.
+See :p:`fls_2jd0mgw4zja4` for the declaration of ``answer``.
 
 .. code-block:: rust
 
@@ -3599,7 +3621,7 @@ The :t:`evaluation` of a :t:`field access expression` evaluates its
 .. rubric:: Examples
 
 :dp:`fls_x27yayh4z787`
-See :p:`6.8.1. <fls_hv4grs2tcuiw>` for the declaration of ``alice``.
+See :p:`fls_vsxsbqps64o` for the declaration of ``alice``.
 
 .. code-block:: rust
 
@@ -5099,9 +5121,11 @@ Arithmetic Overflow
 -------------------
 
 :dp:`fls_oFIRXBPXu6Zv`
-An :t:`arithmetic overflow` occurs when an :t:`arithmetic expression` or a
-:t:`negation expression` computes a :t:`value` of a :t:`scalar type` that lies
-outside of the range of valid :t:`[value]s` for the :t:`scalar type`.
+An :t:`arithmetic overflow` occurs when an :t:`operator expression` computes a
+:t:`value` of a :t:`scalar type` that lies outside of the range of valid
+:t:`[value]s` for the :t:`scalar type` or when one or more :t:`operand` of an
+:t:`operator expression` lies outside of the range of valid :t:`[value]s` for
+the operation.
 
 .. rubric:: Dynamic Semantics
 

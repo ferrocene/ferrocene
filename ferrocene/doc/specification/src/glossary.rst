@@ -2087,6 +2087,18 @@ evaluation
 :dt:`Evaluation` is the process by which an :t:`expression` achieves its
 runtime effects.
 
+.. _fls_EJSzYb4IxvtR:
+
+exclusive range pattern
+^^^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_qxsV6ZxFfDHm`
+An :dt:`exclusive range pattern` is a :t:`range pattern` with both a
+:t:`range pattern low bound` and a :t:`range pattern high bound`.
+
+:dp:`fls_kHIWYUPhxikM`
+See :s:`ExclusiveRangePattern`.
+
 .. _fls_nw0eg7gwayrg:
 
 executed

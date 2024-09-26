@@ -27,6 +27,7 @@ if [[ -f config.toml ]]; then
     echo
 fi
 
+echo "Configuring"
 # Generate `config.toml`.
 ferrocene/ci/configure.sh
 
@@ -43,6 +44,9 @@ ferrocene/ci/configure.sh
 #   preventing spurious rebuilds if a build script uses `rerun-if-changed`
 #   inside the sources directory.
 export CARGO_HOME="$(pwd)/build/cargo-home"
+
+echo "Running:"
+echo "${SCRIPT}"
 
 # Give control to the actual CI script. $SCRIPT
 exec bash -euo pipefail -c "${SCRIPT}"

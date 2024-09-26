@@ -12,8 +12,7 @@ release.
 New features
 ------------
 
-* The ``rustfmt`` code formatter version |rustfmt_version| is now supported and
-  qualified for safety critical use.
+There have been no new features since last release.
 
 New experimental features
 -------------------------
@@ -21,8 +20,4 @@ New experimental features
 Experimental features are not qualified for safety critical use, and are
 shipped as a preview.
 
-* Experimental support has been added for a new host platform.
-  Note that experimental targets are not qualified for safety critical use. The
-  new target is:
-
-  * :target-with-triple:`aarch64-unknown-linux-gnu`
+There have been no new experimental features since last release.

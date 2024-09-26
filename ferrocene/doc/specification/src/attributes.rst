@@ -223,6 +223,9 @@ The following :t:`[built-in attribute]s` are :dt:`[diagnostics attribute]s`:
 * :dp:`fls_29y8icoou1gx`
   :t:`Attribute` ``warn``.
 
+* :dp:`fls_NrTL2FruARAv`
+  :t:`Attribute` ``expect``.
+
 :dp:`fls_3fxhz0olhbcy`
 The following :t:`[built-in attribute]s` are :dt:`[documentation attribute]s`:
 

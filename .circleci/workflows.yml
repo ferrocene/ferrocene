@@ -362,7 +362,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: x86_64-pc-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.11:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -374,7 +374,7 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
+          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh"
 
   aarch64-qnx-generic-test-vm:
     executor: linux-vm
@@ -388,7 +388,7 @@ jobs:
       FERROCENE_HOST: x86_64-unknown-linux-gnu
       FERROCENE_TARGETS: aarch64-unknown-nto-qnx710
       SCRIPT: |
-        set +u; source ./qnx710/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+        set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; RUST_TEST_THREADS=1 TEST_DEVICE_ADDR=172.31.1.105:12345 ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
     steps:
       - aws-oidc-auth
       - ferrocene-checkout
@@ -400,7 +400,7 @@ jobs:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
           restore-from-job: x86_64-linux-build
-          emulator-script: "set +u; source ./qnx710/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
+          emulator-script: "set +u; source ./qnx710-472/qnxsdp-env.sh; set -u; ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh"
 
   # aarch64-unknown-linux-gnu jobs
 
@@ -825,6 +825,12 @@ workflows:
             - x86_64-linux-test-library
             - x86_64-linux-test-library-std
             - x86_64-linux-compiletest
+            - x86_64-qnx-test-library
+            - x86_64-qnx-test-library-std
+            - x86_64-qnx-test-compiletest
+            - aarch64-qnx-test-library
+            - aarch64-qnx-test-library-std
+            - aarch64-qnx-test-compiletest
             - aarch64-linux-test-library
             - aarch64-linux-compiletest
       - x86_64-linux-traceability-matrix:
@@ -980,12 +986,6 @@ workflows:
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
             - x86_64-windows-self-test
-            - x86_64-qnx-test-library
-            - x86_64-qnx-test-library-std
-            - x86_64-qnx-test-compiletest
-            - aarch64-qnx-test-library
-            - aarch64-qnx-test-library-std
-            - aarch64-qnx-test-compiletest
             - wasm-dist-oxidos
             - aarch64-linux-self-test
             - aarch64-darwin-self-test
@@ -1328,13 +1328,13 @@ commands:
             else
                 source $HOME/.venv/bin/activate
             fi
-            python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-deployment.tar.zst .
+            python ferrocene/ci/scripts/cache.py retrieve s3://ferrocene-ci-mirrors/manual/qnx/qnx710-472-deployment.tar.zst .
       - when:
           condition: << parameters.source-env-script >>
           steps:
             - run:
                 name: Set PATH to include QNX710 tools
-                command: echo 'source $(pwd)/qnx710/qnxsdp-env.sh' >> "$BASH_ENV"
+                command: echo 'source $(pwd)/qnx710-472/qnxsdp-env.sh' >> "$BASH_ENV"
       - run:
           name: Test qcc
           command: qcc -v || true

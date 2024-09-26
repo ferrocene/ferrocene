@@ -11,12 +11,11 @@ x86-64 processors.
 
 .. note::
     
-    QNX SDP only supports :ref:`x86_64-unknown-linux-gnu` and
-    :ref:`x86_64-pc-windows-msvc` as host platforms.
+    QNX SDP only supports :ref:`x86_64-unknown-linux-gnu` and :ref:`x86_64-pc-windows-msvc` as host platforms.
 
     Currently, Ferrocene only tests cross compiling from :ref:`x86_64-unknown-linux-gnu`
     to :target:`x86_64-pc-nto-qnx710`. Compiling from :ref:`x86_64-pc-windows-msvc`
-    will be supported in the future.
+    will be tested in the future.
     
     QNX does not support :ref:`aarch64-apple-darwin` as a host platform. QNX is
     deprecating support for :target:`x86_64-apple-darwin` as a host platform.
@@ -30,6 +29,22 @@ to be installed.
 
 Typically this is done through `QNX Software Center
 <https://www.qnx.com/download/group.html?programid=29178>`_.
+
+Ferrocene is qualified using a specific version QNX SDP version. In safety
+critical contexts you must ensure 7.1.0.00472T202006132107S (also known as
+7.1 BuildID 472) is used.
+
+.. code-block::
+
+    QNX_VERSION="7.1.0.00472T202006132107S"
+
+    qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt \
+        -installBaseline com.qnx.qnx710/$QNX_VERSION \
+        -destination qnx/qnx710-472 \
+        -cleanInstall
+
+In an existing QNX 7.1.0 install you can check for the presence of the
+``.packages/metadata/com.qnx.qnx710/7.1.0.00472T202006132107S/`` directory.
 
 Ferrocene documents how our internal QNX toolchains are installed and
 configured in :doc:`internal procedures (QNX) <internal-procedures:partners/qnx>`.
@@ -49,16 +64,13 @@ Required shell environment
 To use the target, the following procedures must be undertaken in the shell
 running the build.
 
-You must source ``qnxsdp-env.sh`` from your QNX SDP 7.1.0 installation:
+You must ensure ``$HOME`` is set to a valid path, then source ``qnxsdp-env.sh``
+from your QNX SDP 7.1.0 installation:
 
 .. code-block::
 
     source $QNX_SDP_710_INSTALL/qnxsdp-env.sh
 
-    CC_x86_64-pc-nto-qnx710=qcc
-    CFLAGS_x86_64-pc-nto-qnx710=-Vgcc_ntox86_64_cxx
-    CXX_x86_64-pc-nto-qnx710=qcc
-    AR_x86_64_pc_nto_qnx710=ntox86_64-ar
 
 On :ref:`x86_64-pc-windows-msvc`, there exists a ``qnxsdp-env.bat`` if
 required. Ferrocene is internally tested using ``bash.exe`` provided by

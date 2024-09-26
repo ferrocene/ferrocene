@@ -23,8 +23,8 @@ jobs:
   checks:
     name: "Checks"
     runs-on: ubuntu-24.04
-    # This job typically takes ~5 mins, if it takes significantly longer something is probably wrong.
-    timeout-minutes: 10
+    # This job typically takes ~10 mins, if it takes significantly longer something is probably wrong.
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
           llvm-subset: true
           # We call this later with `INSTALL_LLVM` and `SKIP_UPGRADE` set for speed
           build-dependencies: false
-        
+
       - name: Check whether git conflict markers are present
         run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
       - name: Perform licensing checks
@@ -46,7 +46,7 @@ jobs:
           SKIP_UPGRADE: 1
           INSTALL_LLVM: 1
 
-      # We deliberately avoid using docker containers as that would require either adding 
+      # We deliberately avoid using docker containers as that would require either adding
       # a couple minutes to the build, or doing auth/trust related things that would impact
       # the experience for new contributors. (eg. not being able to run external contributor tests)
       - name: Execute the build

@@ -14,6 +14,17 @@ Values
 A :t:`value` is either a :t:`literal` or the result of a computation, that may
 be stored in a memory location, and interpreted based on some :t:`type`.
 
+:dp:`fls_CUJyMj0Sj8NS`
+An :dt:`allocated object` is a :t:`value` stored at some memory address.
+
+:dp:`fls_kaomYy0Ml4Nh`
+An :t:`[allocated object]s` :dt:`base address` is the the memory address the
+object is stored.
+
+:dp:`fls_B5cmkWfD5GNt`
+An :t:`[allocated object]s` :dt:`memory size` is the number of bytes the object
+spans in memory from its :t:`base address`.
+
 :dp:`fls_rixdyyc525xp`
 Two :t:`[value]s` :t:`overlap` when
 
@@ -36,6 +47,20 @@ Two :t:`[value]s` :t:`overlap` when
 :dp:`fls_6lg0oaaopc26`
 It is undefined behavior to create a :t:`value` from uninitialized memory unless
 the :t:`type` of the :t:`value` is a :t:`union type`.
+
+:dp:`fls_oqhQ62mDLckN`
+It is undefined behavior to create an :t:`allocated object` at :t:`base address`
+:c:`null`.
+
+:dp:`fls_uhwpuv6cx4ip`
+It is undefined behavior to create an :t:`allocated object` with :t:`memory
+size` ``size`` at a :t:`base address` ``base`` where ``base + size`` is greater
+than the architectures maximum :c:`usize` value.
+
+:dp:`fls_xuuFKmm181bs`
+It is undefined behavior to create an :t:`allocated object` with :t:`memory
+size` ``size`` where ``size`` is greater than the architectures maximum
+:c:`isize` value.
 
 .. _fls_ixjc5jaamx84:
 

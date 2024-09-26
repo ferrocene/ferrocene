@@ -3200,6 +3200,10 @@ An :dt:`input lifetime` is one of the following :t:`[lifetime]s`:
   :std:`core::ops::Fn`, :std:`core::ops::FnMut`, and :std:`core::ops::FnOnce`
   :t:`[trait]s`.
 
+:dp:`fls_d4u3y82hdadc`
+A :dt:`self input lifetime` is an :t:`input lifetime` of a :t:`self parameter`
+that is a :t:`lifetime` of a :t:`reference type` whose referent is :c:`Self`.
+
 * :dp:`fls_ks8wlufmhz6d`
   Any :t:`lifetime` related to an :t:`implementing type` and an
   :t:`implemented trait` of an :t:`implementation`.
@@ -3231,10 +3235,10 @@ An :dt:`output lifetime` is one of the following :t:`[lifetime]s`:
    :t:`lifetime` is assigned to all :t:`elided` :t:`[output lifetime]s`.
 
 #. :dp:`fls_crb6m6b3cdwh`
-   If a :t:`function` has a :t:`self parameter` of the form ``&self``,
-   ``&mut self``, or ``self: T`` where ``T`` is a :t:`type` with a
-   :t:`lifetime`, then the :t:`lifetime` of the :t:`self parameter` is assigned
-   to all :t:`elided` :t:`[output lifetime]s`.
+   If a :t:`function` has a :t:`self parameter` with exactly 1
+   :t:`self input lifetime`, then the :t:`lifetime` of the
+   :t:`self input lifetime` is assigned to all :t:`elided`
+   :t:`[output lifetime]s`.
 
 #. :dp:`fls_ac9tdlfwp5et`
    Otherwise this is a static error.

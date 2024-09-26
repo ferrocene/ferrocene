@@ -2865,7 +2865,7 @@ checksum = "baff4b617f7df3d896f97fe922b64817f6cd9a756bb81d40f8883f2f66dcb401"
 
 [[package]]
 name = "libc"
-version = "0.2.155"
+version = "0.2.156"
 dependencies = [
  "rustc-std-workspace-core",
 ]
@@ -6385,6 +6385,7 @@ dependencies = [
  "std_detect",
  "unwind",
  "wasi",
+ "windows-targets 0.0.0",
 ]
 
 [[package]]
@@ -7682,6 +7683,10 @@ checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
 dependencies = [
  "windows-targets 0.52.6",
 ]
+
+[[package]]
+name = "windows-targets"
+version = "0.0.0"
 
 [[package]]
 name = "windows-targets"

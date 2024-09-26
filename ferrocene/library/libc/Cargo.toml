@@ -1,6 +1,6 @@
 [package]
 name = "libc"
-version = "0.2.155"
+version = "0.2.156"
 authors = ["The Rust Project Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -46,7 +46,8 @@ targets = [
     "armv7-wrs-vxworks-eabihf",
     "armv7r-none-eabi",
     "armv7r-none-eabihf",
-    "hexagon-unknown-linux-musl",
+    # FIXME(hexagon): excluded due to duplicate symbol errors
+    # "hexagon-unknown-linux-musl",
     "i586-pc-windows-msvc",
     "i586-unknown-linux-gnu",
     "i586-unknown-linux-musl",

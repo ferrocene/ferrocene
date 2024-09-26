@@ -2,7 +2,7 @@ use crate::alloc::{GlobalAlloc, Layout, System};
 use crate::ffi::c_void;
 use crate::ptr;
 use crate::sync::atomic::{AtomicPtr, Ordering};
-use crate::sys::c::{self, windows_targets};
+use crate::sys::c;
 use crate::sys::common::alloc::{realloc_fallback, MIN_ALIGN};
 use core::mem::MaybeUninit;
 

@@ -327,13 +327,14 @@ s! {
         // to false. So I'm just removing these, and if uClibc changes
         // the #if block in the future to include the following fields, these
         // will probably need including here. tsidea, skrap
-        #[cfg(not(target_env = "uclibc"))]
+        // QNX (NTO) platform does not define these fields
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
         pub dlpi_adds: ::c_ulonglong,
-        #[cfg(not(target_env = "uclibc"))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
         pub dlpi_subs: ::c_ulonglong,
-        #[cfg(not(target_env = "uclibc"))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
         pub dlpi_tls_modid: ::size_t,
-        #[cfg(not(target_env = "uclibc"))]
+        #[cfg(not(any(target_env = "uclibc", target_os = "nto")))]
         pub dlpi_tls_data: *mut ::c_void,
     }
 
@@ -4135,6 +4136,7 @@ pub const FAN_NOFD: ::c_int = -1;
 pub const FAN_NOPIDFD: ::c_int = FAN_NOFD;
 pub const FAN_EPIDFD: ::c_int = -2;
 
+// linux/futex.h
 pub const FUTEX_WAIT: ::c_int = 0;
 pub const FUTEX_WAKE: ::c_int = 1;
 pub const FUTEX_FD: ::c_int = 2;
@@ -4153,6 +4155,10 @@ pub const FUTEX_LOCK_PI2: ::c_int = 13;
 pub const FUTEX_PRIVATE_FLAG: ::c_int = 128;
 pub const FUTEX_CLOCK_REALTIME: ::c_int = 256;
 pub const FUTEX_CMD_MASK: ::c_int = !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
+
+pub const FUTEX_WAITERS: u32 = 0x80000000;
+pub const FUTEX_OWNER_DIED: u32 = 0x40000000;
+pub const FUTEX_TID_MASK: u32 = 0x3fffffff;
 
 pub const FUTEX_BITSET_MATCH_ANY: ::c_int = 0xffffffff;
 

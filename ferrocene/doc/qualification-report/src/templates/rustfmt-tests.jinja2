@@ -1,0 +1,122 @@
+{# SPDX-License-Identifier: MIT OR Apache-2.0 #}
+{# SPDX-FileCopyrightText: The Ferrocene Developers #}
+
+.. default-domain:: qualification
+
+{% macro no_outcomes_error() %}
+.. error::
+
+   The ``ferrocene.test-outcomes`` setting in ``config.toml`` was not set.
+   The test outcomes won't be populated until you configure it.
+{% endmacro %}
+
+{% macro no_matching_outcomes_warning() %}
+.. warning::
+
+   No matching test outcomes were found for this suite.
+{% endmacro %}
+
+
+{% macro unconditional_pass(suite) %}
+The {{ suite }} suite is a pass/fail test suite integrated into the Ferrocene
+CI infrastructure.
+
+The {{ suite }} test suite is verified as part of
+:ref:`qualification-plan:ci-phase-full`. As indicated in
+:doc:`qualification-plan:development`, a PR is merged into the repository only
+when it passes full testing.
+
+As a result, the {{ suite }} test suite reports a **pass** for this
+qualification.
+{% endmacro %}
+
+{% macro cargo_tests_summary(bootstrap_type, only_match_root_node=False) %}
+{% if platform_outcomes is none %}
+{{ no_outcomes_error() }}
+{% else %}
+{% set invocations = platform_outcomes.filter_invocations(bootstrap_type, only_match_root_node=only_match_root_node) | list %}
+{% if invocations %}
+.. list-table::
+   :header-rows: 1
+
+   * - Crate name
+     - Passed tests
+     - Ignored tests
+     - Failed tests
+     - Total tests
+
+   {% for invocation in invocations %}
+
+   * - {% if invocation.kind.crates -%}
+           {% for crate in invocation.kind.crates %}{% if not loop.first %}, {% endif %}``{{ crate }}``{% endfor %}
+       {%- else -%}
+           N/A
+       {%- endif %}
+
+       .. rst-class:: align-right
+     - {{ invocation.passed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.ignored_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.failed_tests }}
+
+       .. rst-class:: align-right
+     - {{ invocation.total_tests() }}
+   {% endfor %}
+{% else %}
+{{ no_matching_outcomes_warning() }}
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
+:target:`{{ host }}`
+{{ "=" * 256 }} {# Sphinx requires the line to be at least as long as the title #}
+
+This page outlines the testing of Ferrocene |ferrocene_version| (based on Rust
+|rust_version|) in the following environment:
+
+.. list-table::
+   :header-rows: 1
+
+   * -
+     - Target name
+     - Target triple
+
+   * - Host platform:
+     - :target:`{{ host }}`
+     - ``{{ host }}``
+
+Test results
+============
+
+The following are the results of the Ferrocene test suites. For further
+details of each test suite, refer to
+:doc:`Evaluation Report : Qualification Method <evaluation-report:rustc/method>`.
+
+Rustfmt Test Suite
+-----------------------
+
+**Test suite:** :id:`RUSTFMT_TS1`
+
+
+{{ cargo_tests_summary("bootstrap::core::build_steps::test::Rustfmt") }}
+
+
+{% if platform_outcomes.ignored_doc_tests %}
+.. note::
+
+   The {{ platform_outcomes.ignored_doc_tests|length }} ignored documentation
+   tests are **not** included here.
+
+   Rust's documentation and testing tooling considers all snippets of code in
+   the generated documentation to be a test by default, and snippets that are
+   not meant to be valid Rust code (or Rust code at all) would cause test
+   failures if not ignored explicitly.
+
+   Because of that, we don't consider ignored documentation tests to be valid
+   tests that were skipped by our testing infrastructure: we consider them not
+   to be tests at all.
+{% endif %}

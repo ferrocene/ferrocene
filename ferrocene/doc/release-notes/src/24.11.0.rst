@@ -41,5 +41,5 @@ changes described here describe Rust's support levels, and have no correlation
 to the targets and platforms supported by Ferrocene.
 
 .. rust-changelog::
-   :from: 1.79.0
+   :from: 1.80.0
    :to: 1.81.0

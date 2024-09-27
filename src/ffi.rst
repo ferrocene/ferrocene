@@ -77,6 +77,10 @@ The following :t:`[ABI]s` are supported:
   ``extern "system"`` - The operating system-dependent :t:`ABI`, referred to as
   :dt:`external system ABI`.
 
+* :dp:`fls_NQAzj5ai1La5`
+  ``extern "system-unwind"`` - The same as ``extern "system"`` with the
+  addition that unwinding across FFI is permitted.
+
 :dp:`fls_r2drzo3dixe4`
 A :t:`function` without an explicit :t:`ABI` has implicit :t:`Rust ABI`, unless
 it appears within an :t:`external block`.
@@ -118,8 +122,8 @@ include, but may not be limited to, the following:
 
 :dp:`fls_M4LqHf8hbPA8`
 It is undefined behavior when a foreign exception crosses a
-:t:`foreign function interface` boundary with an :t:`ABI` other than
-``extern "C-unwind"``.
+:t:`foreign function interface` boundary with an :t:`ABI` that does not end in
+``-unwind``.
 
 .. rubric:: Examples
 

@@ -205,7 +205,7 @@ All :t:`[path]s` that refer to a :t:`static` refer to the same memory location.
 A :t:`static` is not :t:`dropped` during :t:`destruction`.
 
 :dp:`fls_dowxbphqvk3n`
-A :t:`mutable static` whose :t:`type` is not subject to
+An :t:`immutable static` whose :t:`type` is not subject to
 :t:`interior mutability` may reside in read-only memory.
 
 .. rubric:: Undefined Behavior

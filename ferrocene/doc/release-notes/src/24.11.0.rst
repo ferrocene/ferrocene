@@ -13,6 +13,7 @@ and qualification of the :target:`aarch64-unknown-nto-qnx710` and
 New features
 ------------
 
+* Updated the Rust version to include changes in Rust 1.80.0 and 1.81.0.
 * Ferrocene is now supported and qualified for use in medical devices (IEC 62304).
 * Two new targets are now supported and qualified for safety critical use.
 

@@ -27,14 +27,6 @@ qualification, in accordance to the standards above.
    rustc/x86_64-unknown-linux-gnu
    rustc/x86_64-pc-nto-qnx710
 
-.. toctree::
-   :caption: rustfmt test results:
-   :numbered:
-   :maxdepth: 2
-
-   rustfmt/index
-   rustfmt/x86_64-unknown-linux-gnu
-
 .. appendices::
    :caption: Appendices:
    :numbered:

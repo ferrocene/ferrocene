@@ -14,6 +14,7 @@ qualification of the ``rustfmt`` code formatter, and qualification of the
 New features
 ------------
 
+* Updated the Rust version to include changes in Rust 1.80.0 and 1.81.0.
 * Ferrocene is now supported and qualified for use in medical devices (IEC 62304).
 * The ``rustfmt`` code formatter is now supported and qualified for safety
   critical use.

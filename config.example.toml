@@ -943,6 +943,9 @@
 # Only applies when the host or target is pc-windows-gnu.
 #include-mingw-linker = true
 
+# Whether to vendor dependencies for the dist tarball.
+#vendor = if "is a tarball source" || "is a git repository" { true } else { false }
+
 # =============================================================================
 # Ferrocene options
 #

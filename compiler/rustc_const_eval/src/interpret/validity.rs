@@ -617,6 +617,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
                         if ptr_expected_mutbl == Mutability::Mut
                             && alloc_actual_mutbl == Mutability::Not
                         {
+                            // This can actually occur with transmutes.
                             throw_validation_failure!(self.path, MutableRefToImmutable);
                         }
                         // In a const, everything must be completely immutable.

@@ -8,7 +8,7 @@ pub(crate) fn opts() -> TargetOptions {
         families: cvs!["unix"],
         has_rpath: true,
         has_thread_local: false,
-        linker: Some("qcc".into()),
+        linker: Some("qcc-wrapper".into()),
         os: "nto".into(),
         position_independent_executables: true,
         static_position_independent_executables: true,

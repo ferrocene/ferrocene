@@ -1,0 +1,4 @@
+[package]
+edition = "2021"
+name = "qcc-wrapper"
+publish = false

@@ -424,12 +424,22 @@ if __name__ == "__main__":
 
     config_file = Path(__file__).parent / "subtrees.yml"
     repo_root = retrieve_git_repo_root()
+
+    did_use_subtree_arg = False
+
     for subtree in parse_configuration(config_file):
         if args.target not in subtree.into:
             continue
-        if args.subtree is not None and args.subtree != subtree.repo:
-            continue
+        if args.subtree is not None:
+            if args.subtree == subtree.repo:
+                did_use_subtree_arg = True
+            else:
+                continue
         if args.automation:
             PullSubtreePR(subtree, args.target).create()
         else:
             update_subtree(repo_root, subtree)
+
+    if not (args.subtree is not None and did_use_subtree_arg):
+        print(f"warning: --subtree={args.subtree} did not match any subtree in the configuration")
+

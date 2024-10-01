@@ -183,5 +183,5 @@ jobs:
     with:
       host-triple: x86_64-unknown-linux-gnu
       runner: ubuntu-24.04
-      build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}
-      build-artifact: ${{ needs.build-aarch64-apple-darwin.outputs.artifact-build }}   
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}   

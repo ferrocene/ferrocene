@@ -63,6 +63,11 @@ Now run::
 The script will attempt to update all the registered subtrees in order
 until all succeed or the first one fails.
 
+The `--subtree` argument can be used to perform a manual pull for a single subtree::
+  ferrocene/tools/pull-subtrees/pull.py --target main --subtree <SUBTREE_REPO>
+
+Note that `<SUBTREE_REPO>` must be the repository of the subtree and not its path.
+
 If merging fails for one of the subtrees the script will stop and report which
 one failed as well as the conflicts that have occured.
 

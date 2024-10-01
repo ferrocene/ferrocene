@@ -18,31 +18,32 @@ concurrency:
 jobs:
   # Matrix cannot be used here as later jobs will `need` specific containers
   # and we do not want to make those jobs wait for all containers.
-  container-x86_64-ubuntu-24:
-    name: Container (x86_64, ubuntu-24)
+  container-x86_64-ubuntu-20:
+    name: Container (x86_64, ubuntu-20)
     uses: ./.github/workflows/container.yml
     secrets: inherit
     with:
-      name: ubuntu-24
+      name: ubuntu-20
       architecture: x86_64
       runner: ubuntu-24.04
+    
 
   build-x86_64-unknown-linux-gnu:
     name: Build (x86_64-unknown-linux-gnu)
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
     uses: ./.github/workflows/host-build.yml
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
-      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   dist-x86_64-unknown-linux-gnu:
     name: Dist (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-dist.yml
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -50,13 +51,13 @@ jobs:
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   test-x86_64-unknown-linux-gnu:
     name: Test (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-test.yml
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - targets
     secrets: inherit
@@ -65,13 +66,13 @@ jobs:
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   doc-x86_64-unknown-linux-gnu:
     name: Doc (x86_64-unknown-linux-gnu)
     uses: ./.github/workflows/host-doc.yml
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -79,13 +80,13 @@ jobs:
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   targets:
     name: Build additional targets
     uses: ./.github/workflows/targets.yml
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
@@ -101,7 +102,7 @@ jobs:
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   build-x86_64-pc-windows-msvc:
     name: Build (x86_64-pc-windows-msvc)
@@ -174,7 +175,7 @@ jobs:
     name: Tracability Matrix
     uses: ./.github/workflows/traceability-matrix.yml
     needs:
-      - container-x86_64-ubuntu-24
+      - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - test-x86_64-unknown-linux-gnu
       - test-x86_64-pc-windows-msvc

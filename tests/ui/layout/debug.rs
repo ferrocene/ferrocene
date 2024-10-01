@@ -77,15 +77,13 @@ impl S {
 #[rustc_layout(debug)]
 type Impossible = (str, str); //~ ERROR: cannot be known at compilation time
 
-<<<<<<< HEAD
+// Test that computing the layout of an empty union doesn't ICE.
+#[rustc_layout(debug)]
+union EmptyUnion {} //~ ERROR: has an unknown layout
+//~^ ERROR: unions cannot have zero fields
+
 // ferrocene-annotations: fls_rjxpof29a3nl
 // Struct Type Representation
 //
 // ferrocene-annotations: fls_cmq8ogs84ivh
 // Union Type Representation
-=======
-// Test that computing the layout of an empty union doesn't ICE.
-#[rustc_layout(debug)]
-union EmptyUnion {} //~ ERROR: has an unknown layout
-//~^ ERROR: unions cannot have zero fields
->>>>>>> pull-upstream-temp--do-not-use-for-real-code

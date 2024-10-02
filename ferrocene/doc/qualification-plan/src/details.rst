@@ -8,7 +8,6 @@ The Ferrocene toolchain consists of multiple tools. Following is a list of the
 qualified ones:
 
 * ``rustc``
-* ``rustfmt``
 
 rustc
 -----
@@ -207,10 +206,3 @@ responsible for producing shared libraries and executables from object files.
 .. figure:: figures/lld-architecture.svg
 
    LLD Architecture
-
-
-rustfmt
--------
-
-The ``rustfmt`` Rust formatter, which formats or checks the formatting of
-source code.

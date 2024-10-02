@@ -7,8 +7,7 @@ Ferrocene 24.11.0
 Ferrocene 24.11.0 is the fourth major release of Ferrocene.
 
 The highlights of this release are the inclusion of Rust 1.81.0, medical qualification,
-qualification of the ``rustfmt`` code formatter, and qualification of the
-:target:`aarch64-unknown-nto-qnx710` and
+and qualification of the :target:`aarch64-unknown-nto-qnx710` and
 :target:`x86_64-pc-nto-qnx710` targets.
 
 New features
@@ -16,8 +15,6 @@ New features
 
 * Updated the Rust version to include changes in Rust 1.80.0 and 1.81.0.
 * Ferrocene is now supported and qualified for use in medical devices (IEC 62304).
-* The ``rustfmt`` code formatter is now supported and qualified for safety
-  critical use.
 * Two new targets are now supported and qualified for safety critical use.
 
   * :target-with-triple:`aarch64-unknown-nto-qnx710`

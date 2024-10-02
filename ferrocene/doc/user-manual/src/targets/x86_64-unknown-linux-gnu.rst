@@ -49,10 +49,6 @@ target as a cross-compilation target:
 
 * ``rust-std-x86_64-unknown-linux-gnu``
 
-To install the optional ``rustfmt`` tool, the following archive is needed:
-
-* ``rustfmt-x86_64-unknown-linux-gnu``
-
 Required compiler flags
 -----------------------
 

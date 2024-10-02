@@ -44,8 +44,9 @@ jobs:
       # Run dist before test to make sure the tarballs we test are uploaded
       # to CI beforehand, for manual inspection in case of failures.
       SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)\
+      # # TODO: Re-add this when we auth with AWS
+      # ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:

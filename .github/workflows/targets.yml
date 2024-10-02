@@ -103,4 +103,5 @@ jobs:
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
+          path: build/dist
           retention-days: 1

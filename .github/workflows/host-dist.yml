@@ -35,10 +35,6 @@ on:
         description: The name of the tools job artifact
         value: ${{ jobs.tools.outputs.artifact-name }}
 
-env:
-  # TODO: Remove this when we auth with AWS
-  OUTSIDE_FERROUS: 1
-
 jobs:
 
   dist:

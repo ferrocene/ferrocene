@@ -35,10 +35,6 @@ on:
         description: The name of the targets artifact
         value: ${{ jobs.targets.outputs.artifact-name }}
 
-env:
-  # TODO: Remove this when we auth with AWS
-  OUTSIDE_FERROUS: 1
-
 jobs:
 
   targets:

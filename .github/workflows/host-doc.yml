@@ -29,10 +29,6 @@ on:
         description: The name of the doc job artifact
         value: ${{ jobs.doc.outputs.artifact-name }}
 
-env:
-  # TODO: Remove this when we auth with AWS
-  OUTSIDE_FERROUS: 1
-
 jobs:
 
   doc:

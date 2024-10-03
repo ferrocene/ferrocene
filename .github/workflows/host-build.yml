@@ -32,10 +32,6 @@ on:
         description: The name of the build job artifact
         value: ${{ jobs.build.outputs.artifact-name }}
 
-env:
-  # TODO: Remove this when we auth with AWS
-  OUTSIDE_FERROUS: 1
-
 jobs:
 
   # A job to build LLVM.

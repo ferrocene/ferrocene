@@ -225,6 +225,7 @@ def get_llvm_cache_hash():
         buf = f.read()
         shasum = hashlib.sha256(buf)
         m.update(str.encode(shasum.hexdigest()))
+        f.close()
 
     # Hashing all of the LLVM source code takes time. Instead we can simply get
     # the hash of the tree from git, saving time and achieving the same effect.

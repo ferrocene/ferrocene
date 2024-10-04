@@ -37,8 +37,8 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: true
-          build-dependencies: false
+          llvm-subset: 'true'
+          build-dependencies: 'false'
 
       - name: Azure CLI Login
         uses: azure/login@v2

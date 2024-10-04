@@ -3,24 +3,22 @@ description: "Setup the runner and prepare the git repo"
 inputs:
   llvm-subset:
     description: If a a minimal subset of the llvm-project monorepo should be cloned
-    type: boolean
     required: false
-    default: false
+    default: 'false'
   setup-venv:
     description: If the venv should be set up
-    type: boolean
     required: false
-    default: true
+    default: 'true'
   build-dependencies:
     description: If the dependencies required for a build should be installed
     required: false
-    default: true
+    default: 'true'
 
 runs:
   using: "composite"
   steps:
     - name: Clone llvm subset
-      if: ${{ inputs.llvm-subset == true }}
+      if: ${{ inputs.llvm-subset == "true" }}
       shell: bash
       run: ferrocene/ci/scripts/clone-llvm-subset.sh
     - name: Checkout submodules
@@ -31,17 +29,17 @@ runs:
       run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
 
     - name: Install dependencies (Ubuntu)
-      if: ${{ (runner.os == 'Linux') && inputs.build-dependencies }}
+      if: ${{ (runner.os == 'Linux') && inputs.build-dependencies == 'true' }}
       shell: bash
       run: ferrocene/ci/scripts/setup-ubuntu.sh
 
     - name: Install dependencies (Windows)
-      if: ${{ (runner.os == 'Windows') && inputs.build-dependencies }}
+      if: ${{ (runner.os == 'Windows') && inputs.build-dependencies == 'true' }}
       shell: bash
       run: ferrocene/ci/scripts/setup-windows.sh
 
     - name: Install dependencies (macOS)
-      if: ${{ (runner.os == 'macOS') && inputs.build-dependencies }}
+      if: ${{ (runner.os == 'macOS') && inputs.build-dependencies == 'true' }}
       shell: bash
       run: ferrocene/ci/scripts/setup-darwin.sh
 

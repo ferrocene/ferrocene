@@ -3,13 +3,10 @@ description: "Setup Azure on the runner"
 inputs:
   client-id:
     description: The Azure provided client-id
-    type: string
   tenant-id:
     description: The Azure provided tenant-id
-    type: string
   subscription-id:
     description: The Azure provided subscription-id
-    type: string
 
 runs:
   using: "composite"

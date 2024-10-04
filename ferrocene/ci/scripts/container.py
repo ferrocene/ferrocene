@@ -93,7 +93,7 @@ def ensure_built(platform, image, pull=False):
             # The docker python package API does not, in fact, use buildkit.
             # Instead, we are forced to use Docker via the CLI (which uses buildkit in our configuration)
             subprocess.run(
-                ["docker", "build", "--platform", docker_platform, "--tag", sought_address, "--file", f"ferrocene/ci/docker-images/{image}/Dockerfile", "."],
+                ["docker", "buildx", "build", "--platform", docker_platform, "--tag", sought_address, "--file", f"ferrocene/ci/docker-images/{image}/Dockerfile", "."],
                 check=True
             )
 

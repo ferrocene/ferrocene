@@ -18,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - name: Clone llvm subset
-      if: ${{ inputs.llvm-subset == "true" }}
+      if: ${{ inputs.llvm-subset == 'true' }}
       shell: bash
       run: ferrocene/ci/scripts/clone-llvm-subset.sh
     - name: Checkout submodules

@@ -44,7 +44,7 @@ runs:
       run: ferrocene/ci/scripts/setup-darwin.sh
 
     - name: Setup uv, Python, and venv
-      if: ${{ inputs.setup-venv }}
+      if: ${{ inputs.setup-venv == 'true' }}
       shell: bash
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh

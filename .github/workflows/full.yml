@@ -67,33 +67,33 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  doc:
-    name: Doc
-    uses: ./.github/workflows/doc.yml
-    needs:
-      - container-x86_64-ubuntu-20
-      - build-x86_64-unknown-linux-gnu
-    secrets: inherit
-    with:
-      host-triple: x86_64-unknown-linux-gnu
-      runner: 8core-x86_64-unknown-linux-gnu
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  # doc:
+  #   name: Doc
+  #   uses: ./.github/workflows/doc.yml
+  #   needs:
+  #     - container-x86_64-ubuntu-20
+  #     - build-x86_64-unknown-linux-gnu
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-unknown-linux-gnu
+  #     runner: 8core-x86_64-unknown-linux-gnu
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  source:
-    name: Source
-    uses: ./.github/workflows/source.yml
-    needs:
-      - container-x86_64-ubuntu-20
-      - build-x86_64-unknown-linux-gnu
-    secrets: inherit
-    with:
-      host-triple: x86_64-unknown-linux-gnu
-      runner: 8core-x86_64-unknown-linux-gnu
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  # source:
+  #   name: Source
+  #   uses: ./.github/workflows/source.yml
+  #   needs:
+  #     - container-x86_64-ubuntu-20
+  #     - build-x86_64-unknown-linux-gnu
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-unknown-linux-gnu
+  #     runner: 8core-x86_64-unknown-linux-gnu
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   targets:
     name: Build additional targets

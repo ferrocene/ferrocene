@@ -111,7 +111,7 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh
 
       - name: Store cache
@@ -189,7 +189,7 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh
 
       - name: Pre artifact upload steps

@@ -88,7 +88,7 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh
 
   compiletest:
@@ -145,7 +145,7 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh
 
   test-library:
@@ -202,7 +202,7 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh
 
   test-library-std:
@@ -259,5 +259,5 @@ jobs:
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
             --user $(id -u):$(id -g) \
             --network host \
-            ${{ inputs.container }}
+            ${{ inputs.container }} \
             ferrocene/ci/run.sh

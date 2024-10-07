@@ -34,5 +34,5 @@ of the tool according to this qualification:
   environment, settings etc.).
 * List of the potential errors with mitigations or workarounds to enable risk management.
 
-Following the recommendation of following best principles of [|iec_ref|], the :doc:`link-with-iec-requirements` 
+Following the recommendation of following best principles of [|iec_ref|], the :doc:`link-with-iec-61508-requirements` 
 describes how the tool qualification activities of [|iec_ref|] are applied.

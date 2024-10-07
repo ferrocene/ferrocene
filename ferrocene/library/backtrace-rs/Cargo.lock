@@ -27,6 +27,7 @@ dependencies = [
  "miniz_oxide",
  "object",
  "rustc-demangle",
+ "ruzstd",
  "windows-targets",
 ]
 
@@ -43,6 +44,7 @@ dependencies = [
  "miniz_oxide",
  "object",
  "rustc-demangle",
+ "ruzstd",
  "serde",
  "windows-targets",
 ]
@@ -149,6 +151,12 @@ name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
+
+[[package]]
+name = "ruzstd"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99c3938e133aac070997ddc684d4b393777d293ba170f2988c8fd5ea2ad4ce21"
 
 [[package]]
 name = "serde"

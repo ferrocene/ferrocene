@@ -44,7 +44,6 @@ dependencies = [
  "miniz_oxide",
  "object",
  "rustc-demangle",
- "ruzstd",
  "serde",
  "windows-targets",
 ]

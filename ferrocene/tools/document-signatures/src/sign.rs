@@ -47,6 +47,7 @@ pub(crate) fn sign(
         .arg(pinned_temp.path())
         .arg("--bundle")
         .arg(bundle_temp.path())
+        .arg("--yes")
         .status()?;
     if !status.success() {
         anyhow::bail!("failed to invoke cosign (exited with status {status})");

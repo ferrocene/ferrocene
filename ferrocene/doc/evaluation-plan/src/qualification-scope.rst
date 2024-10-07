@@ -18,7 +18,6 @@ they are used in their code.
 Qualified tools are:
 
 * ``rustc``
-* ``rustfmt``
 
 Other development tools are not qualified and are distributed for convenience
 only. This includes but is not limited to:
@@ -28,4 +27,5 @@ only. This includes but is not limited to:
 * ``rust-analyzer``
 * ``rust-gdb``
 * ``rustdoc``
+* ``rustfmt``
 * the various llvm tools (example being ``llvm-objcopy``)

@@ -5,4 +5,4 @@ IEC 62304 requirements
 ======================
 
 [|iec_med_ref|] does not specify its own tool classification, evaluation and qualification scheme. In Annex C.7 it references to [|iec_ref|] to be used for methods and techniques that are not specified by [|iec_med_ref|].
-Therefore, for both rustc and rustfmt, refer to the :doc:`requirements table of IEC 61508 <iec-61508>`.
+Therefore, for  rustc, refer to the :doc:`requirements table of IEC 61508 <iec-61508>`.

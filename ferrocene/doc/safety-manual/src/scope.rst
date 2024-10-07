@@ -10,9 +10,6 @@ This qualification applies to Ferrocene |ferrocene_version|, limited to:
   :doc:`specification:index`, and according to the requirements and
   restrictions outlined in this safety manual.
 
-* rustfmt |rustfmt_version|, according to the requirements and restrictions
-  outlined in this safety manual.
-
 This qualification is restricted to the following environment:
 
 .. list-table::

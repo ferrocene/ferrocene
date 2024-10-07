@@ -11,208 +11,156 @@ The following are sections in |iso_ref| Part 8.
 
    * - Clause
      - ``rustc``
-     - ``rustfmt``
 
    * - 11.4.1
-     - See the traceability below
      - See the traceability below
 
    * - 11.4.2
      - N/A
-     - N/A
 
    * - 11.4.3
      - :doc:`Safety Manual - rustc - Usage <safety-manual:rustc/usage>`
-     - :doc:`Safety Manual - rustfmt - Usage <safety-manual:rustfmt/usage>`
 
    * - 11.4.4.1
-     - See sub items below
      - See sub items below
 
    * - 11.4.4.1.a
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - See ``rustc`` column
 
    * - 11.4.4.1.b
      - :doc:`Safety Manual - rustc - Tool options <safety-manual:rustc/options>`
-     - :doc:`Safety Manual - rustfmt - Tool options <safety-manual:rustfmt/options>`
 
    * - 11.4.4.1.c
      - :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
-     - :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
 
    * - 11.4.4.1.d
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - See ``rustc`` column
 
    * - 11.4.4.1.e
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
-     - :ref:`Evaluation Report - rustfmt - Tool analysis - ISO 26262 Tool Classification <rustfmt_iso_tool_classification>`
 
    * - 11.4.4.1.f
      - :doc:`Evaluation Report - Qualification Method <evaluation-report:rustc/method>`
-     - N/A
 
    * - 11.4.4.2
-     - See sub items below
      - See sub items below
 
    * - 11.4.4.2.a
      - :doc:`Qualification Plan - Ferrocene details <qualification-plan:details>`
-     - :doc:`User Manual - rustfmt - Usage <user-manual:rustfmt/usage>`
 
    * - 11.4.4.2.b
      - :doc:`User Manual <user-manual:index>`
-     - See ``rustc`` column
 
    * - 11.4.4.2.c
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - See ``rustc`` column
 
    * - 11.4.4.2.d
      - :doc:`Safety Manual - rustc - Degraded environment <safety-manual:rustc/degraded-environment>`
-     - N/A
 
    * - 11.4.4.2.e
      - :doc:`Safety Manual - Known problems <safety-manual:known-problems>`
-     - See ``rustc`` column
 
    * - 11.4.4.2.f
      - :doc:`Safety Manual - Known Problems <safety-manual:known-problems>`
-     - See ``rustc`` column
 
    * - 11.4.5.1
-     - See sub items below
      - See sub items below
 
    * - 11.4.5.1.a
      - :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
-     - :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
 
    * - 11.4.5.1.b
      - :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
-     - :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
 
    * - 11.4.5.1.c
      - :doc:`Evaluation Report - rustc - Use cases <evaluation-report:rustc/use-cases>`
-     - :doc:`Evaluation Report - rustfmt - Use cases <evaluation-report:rustfmt/use-cases>`
 
    * - 11.4.5.2
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 11.4.5.2.a
-     - See super section above
      - See super section above
 
    * - 11.4.5.2.a.1
      - See super section above
-     - See super section above
 
    * - 11.4.5.2.a.2
-     - See super section above
      - See super section above
 
    * - 11.4.5.2.b
      - See super section above
-     - See super section above
 
    * - 11.4.5.2.b.1
-     - See super section above
      - See super section above
 
    * - 11.4.5.2.b.2
      - See super section above
-     - See super section above
 
    * - 11.4.5.2.b.3
-     - See super section above
      - See super section above
 
    * - 11.4.5.3
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 11.4.5.4
      - :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 11.4.6.1
      - :doc:`Evaluation Report - rustc - Qualification method <evaluation-report:rustc/method>`
-     - N/A
 
    * - 11.4.6.2
-     - See sub items below
      - See sub items below
 
    * - 11.4.6.2.a
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - See ``rustc`` column
 
    * - 11.4.6.2.b
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
-     - :doc:`Evaluation Report - rustfmt - Tool analysis <evaluation-report:rustfmt/tool-analysis>`
 
    * - 11.4.6.2.c
      - :doc:`Qualification Report - Acceptability Statement <qualification-report:statement>`
-     - N/A
 
    * - 11.4.6.2.d
      - :doc:`Safety Manual - Qualification Scope <safety-manual:scope>`
-     - See ``rustc`` column
 
    * - 11.4.6.2.e
      - :doc:`Qualification Plan - Ferrocene organization <../organization>`
-     - See ``rustc`` column
 
    * - 11.4.6.2.f
      - :doc:`Evaluation Report - rustc - Qualification method <evaluation-report:rustc/method>`
-     - N/A
 
    * - 11.4.6.2.g
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
-     - N/A
 
    * - 11.4.6.2.h
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
-     - N/A
 
    * - 11.4.7
-     - N/A
      - N/A
 
    * - 11.4.8.1
      - :doc:`Evaluation Report - rustc - Qualification method <evaluation-report:rustc/method>`
-     - N/A
 
    * - 11.4.8.2
      - :doc:`Qualification Plan - Development process <qualification-plan:development>`
-     - See ``rustc`` column
 
    * - 11.4.8.3
      - :doc:`Qualification Plan - Development process <qualification-plan:development>`
-     - See ``rustc`` column
 
    * - 11.4.9
      - :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
-     - N/A
 
    * - 11.4.9.1
      - See items 11.4.9.2 below
-     - N/A
 
    * - 11.4.9.2
-     - See sub items below
      - See sub items below
 
    * - 11.4.9.2.a
      - :doc:`Qualification Plan - Validation process <qualification-plan:validation>`
-     - N/A
 
    * - 11.4.9.2.b
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
-     - N/A
 
    * - 11.4.9.2.c
      - :doc:`Safety Manual - rustc - Degraded environment <safety-manual:rustc/degraded-environment>`
-     - N/A

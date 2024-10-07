@@ -43,7 +43,6 @@ jobs:
       uri: ${{ steps.check.outputs.uri }}
     env:
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      SCRIPT: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
       # This tries to strike a balance between the highest concurrency possible
       # and not running out of memory during a build. If building LLVM fails
       # due to the OOM killer killing the build, decrease this number.
@@ -91,31 +90,13 @@ jobs:
           echo "state=$state" >> $GITHUB_OUTPUT
 
       - name: Run
-        if: inputs.container == '' && steps.check.outputs.state != 'hit'
-        shell: bash
-        run: ferrocene/ci/run.sh
-
-      - name: Run in container
-        if: inputs.container != '' && steps.check.outputs.state != 'hit'
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env SCRIPT \
-            --env FERROCENE_HOST \
-            --env FERROCENE_TARGETS \
-            --env OUTSIDE_FERROUS \
-            --env LLVM_BUILD_PARALLELISM \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.container }} \
-            ferrocene/ci/run.sh
+        if: ${{ steps.check.outputs.state != 'hit' }}
+        uses: ./.github/actions/run/
+        with:
+          script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
 
       - name: Store cache
-        if: steps.check.outputs.state != 'hit'
+        if: ${{ steps.check.outputs.state != 'hit' }}
         shell: bash
         run: |
           set -e
@@ -136,9 +117,6 @@ jobs:
       ARTIFACT: build-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
-      SCRIPT: |
-        uv run x.py --stage 2 build library src/tools/rustdoc
-        uv run x.py --stage 1 build src/tools/rustdoc
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -170,27 +148,11 @@ jobs:
           rm llvm_cache.tar.zst
 
       - name: Run
-        if: ${{ inputs.container == '' }}
-        shell: bash
-        run: ferrocene/ci/run.sh
-
-      - name: Run in container
-        if: ${{ inputs.container != '' }}
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env SCRIPT \
-            --env FERROCENE_HOST \
-            --env FERROCENE_TARGETS \
-            --env OUTSIDE_FERROUS \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.container }} \
-            ferrocene/ci/run.sh
+        uses: ./.github/actions/run/
+        with:
+          script: |
+            uv run x.py --stage 2 build library src/tools/rustdoc
+            uv run x.py --stage 1 build src/tools/rustdoc
 
       - name: Pre artifact upload steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload

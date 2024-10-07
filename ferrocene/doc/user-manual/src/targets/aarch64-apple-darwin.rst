@@ -54,10 +54,6 @@ target as a cross-compilation target:
 
 * ``rust-std-aarch64-apple-darwin``
 
-To install the optional ``rustfmt`` tool, the following archive is needed:
-
-* ``rustfmt-aarch64-apple-darwin``
-
 Required compiler flags
 -----------------------
 

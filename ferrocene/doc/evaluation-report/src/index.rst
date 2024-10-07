@@ -26,15 +26,6 @@ It describes the evaluation of Ferrocene in accordance to the standards above.
    rustc/method
    rustc/potential-errors
 
-.. toctree::
-   :caption: rustfmt
-   :numbered:
-   :maxdepth: 3
-
-   rustfmt/hazop-nodes
-   rustfmt/use-cases
-   rustfmt/tool-analysis
-
 .. appendices::
    :caption: Appendices
    :numbered:

@@ -70,6 +70,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:src)

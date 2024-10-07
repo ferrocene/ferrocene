@@ -37,7 +37,6 @@ on:
 
 
 jobs:
-
   traceability-matrix:
     runs-on: ${{ inputs.runner }}
     env:

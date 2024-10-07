@@ -93,6 +93,7 @@ jobs:
         if: ${{ steps.check.outputs.state != 'hit' }}
         uses: ./.github/actions/run/
         with:
+          container: ${{ inputs.container }}
           script: uv run ferrocene/ci/scripts/llvm_cache.py prepare --url llvm_cache.tar.zst
 
       - name: Store cache
@@ -150,6 +151,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          container: ${{ inputs.container }}
           script: |
             uv run x.py --stage 2 build library src/tools/rustdoc
             uv run x.py --stage 1 build src/tools/rustdoc

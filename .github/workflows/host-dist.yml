@@ -72,6 +72,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
@@ -118,6 +119,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)

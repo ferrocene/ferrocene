@@ -36,13 +36,6 @@ jobs:
     env:
       ARTIFACT: doc-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-      # Run dist before test to make sure the tarballs we test are uploaded
-      # to CI beforehand, for manual inspection in case of failures.
-      SCRIPT: |
-        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
-      # # TODO: Re-add this when we auth with AWS
-      # ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
     steps:
@@ -70,28 +63,16 @@ jobs:
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Run
-        if: ${{ inputs.container == '' }}
-        shell: bash
-        run: ferrocene/ci/run.sh
-
-      - name: Run in container
-        if: ${{ inputs.container != '' }}
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env SCRIPT \
-            --env FERROCENE_HOST \
-            --env FERROCENE_TARGETS \
-            --env OUTSIDE_FERROUS \
-            --env CI \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.container }} \
-            ferrocene/ci/run.sh
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          # Run dist before test to make sure the tarballs we test are uploaded
+          # to CI beforehand, for manual inspection in case of failures.
+          script: |
+            ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:docs)
+          # # TODO: Re-add this when we auth with AWS
+          # ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:docs)
 
       - uses: actions/upload-artifact@v4
         id: artifact

@@ -162,11 +162,6 @@ jobs:
             uv run x.py --stage 2 build library src/tools/rustdoc
             uv run x.py --stage 1 build src/tools/rustdoc
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-
       - name: Pre artifact upload steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload
       - uses: actions/upload-artifact@v4
@@ -175,3 +170,8 @@ jobs:
           name: ${{ env.ARTIFACT }}
           path: build.tar
           retention-days: 1
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}

@@ -16,7 +16,7 @@ application of tool classification and qualification according to [|iec_ref|] is
 
 In addition, Ferrocene follows an open source development model.
 Nevertheless, Ferrocene is the qualified version of the open source Rust
-toolchain, and will therefore follow a develoment process in accordance to
+toolchain, and will therefore follow a development process in accordance to
 [|iso_ref|] Clause 11.4.8, as well as classification accordance to [|iec_ref|].
 
 In order to respect these three steps, we'll manage five documents:

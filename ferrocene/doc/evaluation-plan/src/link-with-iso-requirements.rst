@@ -17,7 +17,7 @@ as there is no data collected of its use.
 
 In addition, Ferrocene follows an open source development model.
 Nevertheless, Ferrocene is the qualified version of the open source Rust
-toolchain, and will therefore follow a develoment process in accordance to
+toolchain, and will therefore follow a development process in accordance to
 11.4.8.
 
 In order to respect these three steps, we'll manage five documents:

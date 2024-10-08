@@ -17,6 +17,6 @@ runs:
     - uses: actions/upload-artifact@v4
       id: artifact
       with:
-        name: ${{ env.ARTIFACT }}
+        name: ${{ inputs.artifact }}
         path:  /tmp/metrics/
         retention-days: 1

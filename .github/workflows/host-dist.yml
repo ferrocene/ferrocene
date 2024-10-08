@@ -88,11 +88,6 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-      
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
 
       - uses: actions/upload-artifact@v4
         id: artifact
@@ -100,6 +95,11 @@ jobs:
           name: ${{ env.ARTIFACT }}
           path: build/dist
           retention-days: 1
+      
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
 
   tools:
     runs-on: ${{ inputs.runner }}
@@ -145,14 +145,14 @@ jobs:
           script: |
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
 
-      - name: Generate usage report
-        uses: ./.github/actions/usage-report/
-        with:
-          artifact: ${{ env.ARTIFACT_USAGE }}
-
       - uses: actions/upload-artifact@v4
         id: artifact
         with:
           name: ${{ env.ARTIFACT }}
           path: build/dist
           retention-days: 1
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}

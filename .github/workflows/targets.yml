@@ -41,10 +41,12 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: targets-${{inputs.host-triple}}
+      ARTIFACT_USAGE: test-library-std-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -77,6 +79,11 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 dist rust-std
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
 
       - uses: actions/upload-artifact@v4
         id: artifact

@@ -10,6 +10,9 @@ on:
       triples:
         type: string
         description: A comma separated list of targets to build
+      host-tools:
+        type: boolean
+        description: If the host tools should be tested (enables the 'test' job)
       self-test-triples:
         # We cannot specify an array here
         # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
@@ -53,6 +56,7 @@ on:
 jobs:
 
   test:
+    if: ${{ inputs.host-tools }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:

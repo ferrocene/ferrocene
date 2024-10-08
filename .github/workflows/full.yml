@@ -120,6 +120,7 @@ jobs:
       - targets
     secrets: inherit
     with:
+      host-tools: false
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}

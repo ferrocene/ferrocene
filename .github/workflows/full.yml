@@ -111,6 +111,23 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
+  test-aarch64-unknown-linux-gnu:
+    name: Test (aarch64-unknown-linux-gnu by x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/target-test.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      - targets
+    secrets: inherit
+    with:
+      host-triple: x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      emulator-container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+
   # build-x86_64-pc-windows-msvc:
   #   name: Build (x86_64-pc-windows-msvc)
   #   uses: ./.github/workflows/host-build.yml

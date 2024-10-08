@@ -77,7 +77,7 @@ jobs:
         uses: ./.github/actions/build-cache/
         with:
           name: ${{ inputs.build-artifact }}
-          run-id: ${{ inputs.build-run-id }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -131,7 +131,7 @@ jobs:
         uses: ./.github/actions/build-cache/
         with:
           name: ${{ inputs.build-artifact }}
-          run-id: ${{ inputs.build-run-id }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - name: Run
         uses: ./.github/actions/run/

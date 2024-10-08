@@ -69,6 +69,9 @@ def subcommand_pre_upload(ferrocene_host):
 
 
 def subcommand_post_download(ferrocene_host):
+    """
+    Extract the tarball, rebuild the symlinks.
+    """
     # It is important for Windows that the tarball was created with `--dereference`
     with tarfile.open(tarball_location, mode="r") as tarball:
         logging.info("Began unarchiving...")
@@ -85,6 +88,9 @@ def subcommand_post_download(ferrocene_host):
             os.symlink(target, location, target_is_directory=True)
         else:
             logging.info(f"Unable to link to `{target}` at `{location}`, does not exist")
+
+
+
 
     return
 

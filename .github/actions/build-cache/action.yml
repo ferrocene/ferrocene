@@ -17,6 +17,8 @@ runs:
     - name: Post artifact download steps
       shell: bash
       run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
+    # This is *technically* run during setup, but we do it again to make sure the *cache*
+    # is also covered.
     - name: Reset modification time to last commit
       shell: bash
       run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh

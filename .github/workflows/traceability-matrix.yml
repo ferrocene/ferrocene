@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/build-cache/
         with:
           name: ${{ inputs.build-artifact }}
-          run-id: ${{ inputs.build-run-id }}
+          build-run-id: ${{ inputs.build-run-id }}
 
       - run: |
           echo "tracability-matrix goes here"

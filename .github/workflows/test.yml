@@ -1,20 +1,21 @@
-name: Test target
-run-name: Test target (${{inputs.host-triple}})
-# This job runs the required tests for *targets* not *hosts* in a QEMU VM.
-
+name: Test
+run-name: Test (${{inputs.host-triple}})
 
 on:
   workflow_call:
     inputs:
-      std:
-        type: boolean
-        description: If std should also be tested.
       host-triple:
         type: string
         description: The Rust triple of the host platform
-      triple:
+      triples:
         type: string
-        description: The Rust triple of the target platform to test
+        description: A comma separated list of targets to build
+      self-test-triples:
+        # We cannot specify an array here
+        # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
+        #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+        type: string
+        description: A comma separated list of triples to self-test on
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -35,20 +36,37 @@ on:
         description: The script (path) of the emulator script
       environment:
         type: string
-    # outputs:
+    outputs:
+      artifact-test-usage:
+        description: The name of the resource usage report artifact for the test job
+        value: ${{ jobs.test.outputs.artifact-usage }}
+      artifact-compiletest-usage:
+        description: The name of the resource usage report artifact for the compiletest job
+        value: ${{ jobs.compiletest.outputs.artifact-usage }}
+      artifact-library-usage:
+        description: The name of the resource usage report artifact for the library job
+        value: ${{ jobs.library.outputs.artifact-usage }}
+      artifact-library-std-usage:
+        description: The name of the resource usage report artifact for the library-std job
+        value: ${{ jobs.library-std.outputs.artifact-usage }}
 
 jobs:
-  compiletest:
+
+  test:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: test-compiletest-${{inputs.triple}}
+      ARTIFACT_USAGE: test-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -69,6 +87,7 @@ jobs:
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
       - name: Prepare emulator
+        if: ${{ inputs.emulator-script != '' }}
         shell: bash
         run: |
           docker run \
@@ -85,6 +104,7 @@ jobs:
             bash -c "${{ inputs.emulator-script }} prepare"
 
       - name: Run emulator in background
+        if: ${{ inputs.emulator-script != '' }}
         shell: bash
         run: |
             docker run \
@@ -103,23 +123,79 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: 127.0.0.1:12345 
+          test-device-addr: ${{ (inputs.emulator-script != '') && '127.0.0.1:12345' || ''}}
+          container: ${{ inputs.container }}
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+
+  compiletest:
+    runs-on: ${{ inputs.runner }}
+    environment: ${{ inputs.environment }}
+    env:
+      ARTIFACT_USAGE: test-compiletest-${{inputs.host-triple}}-usage
+      FERROCENE_HOST: ${{ inputs.host-triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
+      
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Authenicate docker with Azure
+        if: ${{ (runner.os == 'Linux') }}
+        run: az acr login --name ferrocenecr
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact }}
+          run-id: ${{ inputs.build-run-id }}
+      - name: Post artifact download steps
+        run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
-  test-library:
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+
+  library:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: test-library-${{inputs.host-triple}}
+      ARTIFACT_USAGE: test-library-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -147,18 +223,26 @@ jobs:
           script: |
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
-  test-library-std:
-    if: ${{ inputs.std }}
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+
+  library-std:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: test-std-${{inputs.host-triple}}
+      ARTIFACT_USAGE: test-library-std-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triple }}
+      FERROCENE_TARGETS: ${{ inputs.triples }}
+    outputs:
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup/
+        with:
+          build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       - name: Azure CLI Login
         uses: azure/login@v2
@@ -185,3 +269,8 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}

@@ -28,12 +28,20 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
+      
       artifact-dist:
         description: The name of the dist job artifact
         value: ${{ jobs.dist.outputs.artifact-name }}
+      artifact-dist-usage:
+        description: The name of the resource usage report artifact for the dist job
+        value: ${{ jobs.dist.outputs.artifact-usage }}
+
       artifact-tools:
         description: The name of the tools job artifact
         value: ${{ jobs.tools.outputs.artifact-name }}
+      artifact-tools-usage:
+        description: The name of the resource usage report artifact for the tools job
+        value: ${{ jobs.dist.outputs.artifact-usage }}
 
 jobs:
 
@@ -41,10 +49,12 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: dist-${{inputs.host-triple}}
+      ARTIFACT_USAGE: dist-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT }}-usage
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,6 +88,11 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
+      
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
 
       - uses: actions/upload-artifact@v4
         id: artifact
@@ -90,10 +105,12 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: tools-${{inputs.host-triple}}
+      ARTIFACT_USAGE: tools-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -127,6 +144,11 @@ jobs:
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
             uv run x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
 
       - uses: actions/upload-artifact@v4
         id: artifact

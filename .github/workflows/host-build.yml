@@ -118,10 +118,12 @@ jobs:
       - llvm
     env:
       ARTIFACT: build-${{inputs.host-triple}}
+      ARTIFACT_USAGE: build-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triples }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
+      artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -159,6 +161,11 @@ jobs:
           script: |
             uv run x.py --stage 2 build library src/tools/rustdoc
             uv run x.py --stage 1 build src/tools/rustdoc
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
 
       - name: Pre artifact upload steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py pre-upload

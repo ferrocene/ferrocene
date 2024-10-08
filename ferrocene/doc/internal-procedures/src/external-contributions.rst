@@ -10,7 +10,7 @@ from forks. Before executing, confidence in the code needs to be established.
 To establish confidence, the code must be reviewed by a Ferrocene Developer and
 marked as trusted.
 
-The worflow to establish confidence is as follows:
+The workflow to establish confidence is as follows:
 
 1. Review the changes. The main threats are leaking credentials and arbitrary
    code execution. If the PR includes any suspicious changes, talk to the PR

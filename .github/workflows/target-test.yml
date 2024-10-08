@@ -1,21 +1,20 @@
-name: Test host
-run-name: Test host (${{inputs.host-triple}})
+name: Test target
+run-name: Test target (${{inputs.host-triple}})
+# This job runs the required tests for *targets* not *hosts* in a QEMU VM.
+
 
 on:
   workflow_call:
     inputs:
+      std:
+        type: boolean
+        description: If std should also be tested.
       host-triple:
         type: string
         description: The Rust triple of the host platform
-      triples:
+      triple:
         type: string
-        description: A comma separated list of targets to build
-      self-test-triples:
-        # We cannot specify an array here
-        # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
-        #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
-        type: string
-        description: A comma separated list of triples to self-test on
+        description: The Rust triple of the target platform to test
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -28,57 +27,24 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
+      emulator-container:
+        type: string
+        description: The container URI to run the build in, if any (Linux only)
+      emulator-script:
+        type: string
+        description: The script (path) of the emulator script
       environment:
         type: string
     # outputs:
 
 jobs:
-
-  test:
-    runs-on: ${{ inputs.runner }}
-    environment: ${{ inputs.environment }}
-    env:
-      ARTIFACT: test-${{inputs.host-triple}}
-      FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup/
-      
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/hoverbear/gha-migration') && secrets.AZURE_OIDC_GHA_CLIENT_ID_STAGING || secrets.AZURE_OIDC_GHA_CLIENT_ID_TRYING }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Authenicate docker with Azure
-        if: ${{ (runner.os == 'Linux') }}
-        run: az acr login --name ferrocenecr
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.build-artifact }}
-          run-id: ${{ inputs.build-run-id }}
-      - name: Post artifact download steps
-        run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
-
-      - name: Run
-        uses: ./.github/actions/run/
-        with:
-          container: ${{ inputs.container }}
-          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-          script: |
-            ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
-
   compiletest:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: test-compiletest-${{inputs.host-triple}}
+      ARTIFACT: test-compiletest-${{inputs.triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -102,9 +68,42 @@ jobs:
       - name: Post artifact download steps
         run: uv run ./ferrocene/ci/scripts/build_cache.py post-download
 
+      - name: Prepare emulator
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }} prepare"
+
+      - name: Run emulator in background
+        shell: bash
+        run: |
+            docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }}" & 
+
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: 127.0.0.1:12345 
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -116,7 +115,7 @@ jobs:
     env:
       ARTIFACT: test-library-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -149,12 +148,13 @@ jobs:
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
   test-library-std:
+    if: ${{ inputs.std }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
       ARTIFACT: test-std-${{inputs.host-triple}}
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup

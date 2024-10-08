@@ -91,6 +91,8 @@ jobs:
 
           echo "state=$state" >> $GITHUB_OUTPUT
 
+          echo "::notice title=LLVM-cache-uri::$uri - $state"
+
       - name: Run
         if: ${{ steps.check.outputs.state != 'hit' }}
         uses: ./.github/actions/run/

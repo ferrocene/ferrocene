@@ -9,8 +9,9 @@ set -xeo pipefail
 if [[ ! -z "${SKIP_UPGRADE}" ]]; then
     echo 'Skipping upgrade, $SKIP_UPGRADE is set. Use caution if any artifacts are produced.'
 else
-    sudo apt update
-    sudo apt upgrade -y
+    # TODO: Stop skipping around this, it was broken at some point during dev in GHA, the issue looked transient.
+    # sudo apt update
+    # sudo apt upgrade -y
 fi
 
 sudo apt install -y \

@@ -7,9 +7,9 @@ on:
       host-triple:
         type: string
         description: The Rust triple of the host platform
-      triples:
+      triple:
         type: string
-        description: A comma separated list of targets to build
+        description: The target triple to test on
       host-tools:
         type: boolean
         default: true
@@ -63,7 +63,7 @@ jobs:
     env:
       ARTIFACT_USAGE: test-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -143,7 +143,7 @@ jobs:
     env:
       ARTIFACT_USAGE: test-compiletest-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -168,6 +168,40 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Prepare emulator
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }} prepare"
+
+      - name: Run emulator in background
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+            docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }}" & 
 
       - name: Run
         uses: ./.github/actions/run/
@@ -188,7 +222,7 @@ jobs:
     env:
       ARTIFACT_USAGE: test-library-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -213,6 +247,40 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Prepare emulator
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }} prepare"
+
+      - name: Run emulator in background
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+            docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }}" & 
 
       - name: Run
         uses: ./.github/actions/run/
@@ -233,7 +301,7 @@ jobs:
     env:
       ARTIFACT_USAGE: test-library-std-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
-      FERROCENE_TARGETS: ${{ inputs.triples }}
+      FERROCENE_TARGETS: ${{ inputs.triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
     steps:
@@ -258,6 +326,40 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Prepare emulator
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+          docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }} prepare"
+
+      - name: Run emulator in background
+        if: ${{ inputs.emulator-script != '' }}
+        shell: bash
+        run: |
+            docker run \
+            --rm \
+            --interactive \
+            --env CI \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.emulator-container }} \
+            bash -c "${{ inputs.emulator-script }}" & 
 
       - name: Run
         uses: ./.github/actions/run/

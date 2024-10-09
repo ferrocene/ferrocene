@@ -66,16 +66,16 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/build-cache/
         with:
-          name: ${{ inputs.build-artifact }}
+          build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
-      - run: |
-          echo "tracability-matrix goes here"
-          mkdir build
-          touch build/boop
+      # - run: |
+      #     echo "tracability-matrix goes here"
+      #     mkdir build
+      #     touch build/boop
 
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: ${{ env.ARTIFACT }}
-          retention-days: 1
+      # - uses: actions/upload-artifact@v4
+      #   id: artifact
+      #   with:
+      #     name: ${{ env.ARTIFACT }}
+      #     retention-days: 1

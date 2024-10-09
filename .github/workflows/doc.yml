@@ -59,7 +59,7 @@ jobs:
       - name: Restore build cache
         uses: ./.github/actions/build-cache/
         with:
-          name: ${{ inputs.build-artifact }}
+          build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
       - name: Run

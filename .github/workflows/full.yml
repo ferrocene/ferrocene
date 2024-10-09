@@ -61,6 +61,7 @@ jobs:
       # - targets
     secrets: inherit
     with:
+      triple: x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -121,6 +122,7 @@ jobs:
     secrets: inherit
     with:
       host-tools: false
+      triple: aarch64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
@@ -157,6 +159,7 @@ jobs:
   #     # - targets
   #   secrets: inherit
   #   with:
+  #     triple: x86_64-pc-windows-msvc
   #     host-triple: x86_64-pc-windows-msvc
   #     runner: 8core-x86_64-pc-windows-msvc
   #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
@@ -191,6 +194,7 @@ jobs:
   #     # - targets
   #   secrets: inherit
   #   with:
+  #     triple: aarch64-apple-darwin
   #     host-triple: aarch64-apple-darwin
   #     runner: macos-14-xlarge
   #     build-run-id: ${{ needs.build-aarch64-apple-darwin.outputs.run-id }}

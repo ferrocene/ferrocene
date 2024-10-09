@@ -31,9 +31,6 @@ on:
       run-id:
         description: The id of the workflow run
         value: ${{ github.run_id }}
-      artifact-targets:
-        description: The name of the targets artifact
-        value: ${{ jobs.traceability-matrix.outputs.artifact-name }}
 
 
 jobs:

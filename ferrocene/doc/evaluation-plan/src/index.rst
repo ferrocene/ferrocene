@@ -15,8 +15,8 @@ in accordance with the standards above.
 
    purpose
    qualification-scope
-   link-with-iso-requirements
-   link-with-iec-requirements
+   link-with-iso-26262-requirements
+   link-with-iec-61508-requirements
    link-with-iec-62304-requirements
    method
 

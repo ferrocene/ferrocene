@@ -266,11 +266,17 @@ jobs:
       - name: Prepare emulator
         if: ${{ inputs.emulator-script != '' }}
         shell: bash
+        env:
+          SCRIPT: bash -c "${{ inputs.emulator-script }} prepare"
         run: |
           docker run \
             --rm \
             --interactive \
             --env CI \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env REMOTE_TEST_SERVER_STAGE=2 \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -278,16 +284,22 @@ jobs:
             --user $(id -u):$(id -g) \
             --network host \
             ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }} prepare"
+            ferrocene/ci/run.sh
 
       - name: Run emulator in background
         if: ${{ inputs.emulator-script != '' }}
         shell: bash
+        env:
+          SCRIPT: bash -c "${{ inputs.emulator-script }}"
         run: |
             docker run \
             --rm \
             --interactive \
             --env CI \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
             --env REMOTE_TEST_SERVER_STAGE=2 \
             --workdir /home/ci/project \
             --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
@@ -295,7 +307,7 @@ jobs:
             --user $(id -u):$(id -g) \
             --network host \
             ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }}" & 
+            ferrocene/ci/run.sh & 
 
       - name: Run
         uses: ./.github/actions/run/

@@ -9,7 +9,9 @@ use super::{gimli, Context, Endian, EndianSlice, Mapping, Stash, Vec};
 use alloc::sync::Arc;
 use core::convert::{TryFrom, TryInto};
 use core::str;
-use object::elf::{ELFCOMPRESS_ZLIB, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED};
+use object::elf::{
+    ELFCOMPRESS_ZLIB, ELFCOMPRESS_ZSTD, ELF_NOTE_GNU, NT_GNU_BUILD_ID, SHF_COMPRESSED,
+};
 use object::read::elf::{CompressionHeader, FileHeader, SectionHeader, SectionTable, Sym};
 use object::read::StringTable;
 use object::{BigEndian, Bytes, NativeEndian};
@@ -213,7 +215,8 @@ impl<'a> Object<'a> {
             let mut data = Bytes(section.data(self.endian, self.data).ok()?);
 
             // Check for DWARF-standard (gABI) compression, i.e., as generated
-            // by ld's `--compress-debug-sections=zlib-gabi` flag.
+            // by ld's `--compress-debug-sections=zlib-gabi` and
+            // `--compress-debug-sections=zstd` flags.
             let flags: u64 = section.sh_flags(self.endian).into();
             if (flags & u64::from(SHF_COMPRESSED)) == 0 {
                 // Not compressed.
@@ -221,14 +224,21 @@ impl<'a> Object<'a> {
             }
 
             let header = data.read::<<Elf as FileHeader>::CompressionHeader>().ok()?;
-            if header.ch_type(self.endian) != ELFCOMPRESS_ZLIB {
-                // Zlib compression is the only known type.
-                return None;
+            match header.ch_type(self.endian) {
+                ELFCOMPRESS_ZLIB => {
+                    let size = usize::try_from(header.ch_size(self.endian)).ok()?;
+                    let buf = stash.allocate(size);
+                    decompress_zlib(data.0, buf)?;
+                    return Some(buf);
+                }
+                ELFCOMPRESS_ZSTD => {
+                    let size = usize::try_from(header.ch_size(self.endian)).ok()?;
+                    let buf = stash.allocate(size);
+                    decompress_zstd(data.0, buf)?;
+                    return Some(buf);
+                }
+                _ => return None, // Unknown compression type.
             }
-            let size = usize::try_from(header.ch_size(self.endian)).ok()?;
-            let buf = stash.allocate(size);
-            decompress_zlib(data.0, buf)?;
-            return Some(buf);
         }
 
         // Check for the nonstandard GNU compression format, i.e., as generated
@@ -345,6 +355,40 @@ fn decompress_zlib(input: &[u8], output: &mut [u8]) -> Option<()> {
     } else {
         None
     }
+}
+
+fn decompress_zstd(mut input: &[u8], mut output: &mut [u8]) -> Option<()> {
+    use ruzstd::frame::ReadFrameHeaderError;
+    use ruzstd::frame_decoder::FrameDecoderError;
+    use ruzstd::io::Read;
+
+    while !input.is_empty() {
+        let mut decoder = match ruzstd::StreamingDecoder::new(&mut input) {
+            Ok(decoder) => decoder,
+            Err(FrameDecoderError::ReadFrameHeaderError(ReadFrameHeaderError::SkipFrame {
+                length,
+                ..
+            })) => {
+                input = &input.get(length as usize..)?;
+                continue;
+            }
+            Err(_) => return None,
+        };
+        loop {
+            let bytes_written = decoder.read(output).ok()?;
+            if bytes_written == 0 {
+                break;
+            }
+            output = &mut output[bytes_written..];
+        }
+    }
+
+    if !output.is_empty() {
+        // Lengths didn't match, something is wrong.
+        return None;
+    }
+
+    Some(())
 }
 
 const DEBUG_PATH: &[u8] = b"/usr/lib/debug";

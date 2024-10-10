@@ -10,13 +10,13 @@ runs:
     - name: Generate usage report
       shell: bash
       run: |
-        mkdir -p /tmp/metrics
-        uv run ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > /tmp/metrics/report.html
-        cp build/metrics.json /tmp/metrics/raw.json
+        mkdir -p tmp/metrics
+        uv run ferrocene/ci/scripts/generate-resources-usage-report.py build/metrics.json > tmp/metrics/report.html
+        cp build/metrics.json tmp/metrics/raw.json
 
     - uses: actions/upload-artifact@v4
       id: artifact
       with:
         name: ${{ inputs.artifact }}
-        path:  /tmp/metrics/
+        path:  tmp/metrics/
         retention-days: 1

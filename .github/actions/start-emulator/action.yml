@@ -1,0 +1,76 @@
+name: "Start emulator"
+description: "Start the emulator."
+inputs:
+  container:
+    description: The container URI to run the emulator in, if any (Linux only)
+  prepare-command:
+    description: The command to prepare the emulator
+  start-command:
+    description: The command to start the emulator
+runs:
+  using: "composite"
+  steps:
+    - name: Create emulator dir
+      if: ${{ inputs.script != '' }}
+      shell: bash
+      run: mkdir /tmp/emulator
+      
+    - name: Prepare emulator (in container)
+      if: ${{ (inputs.prepare-command != '') && (inputs.container != '') }}
+      shell: bash
+      env:
+        SCRIPT: bash -c "${{ inputs.prepare-command }}"
+      run: |
+        docker run \
+          --rm \
+          --interactive \
+          --env CI \
+          --env SCRIPT \
+          --env FERROCENE_HOST \
+          --env FERROCENE_TARGETS \
+          --env OUTSIDE_FERROUS \
+          --env REMOTE_TEST_SERVER_STAGE=2 \
+          --workdir /home/ci/project \
+          --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+          --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+          --user $(id -u):$(id -g) \
+          --network host \
+          ${{ inputs.container }} \
+          ferrocene/ci/run.sh
+
+    - name: Prepare emulator
+      if: ${{ (inputs.prepare-command != '') && (inputs.container == '') }}
+      shell: bash
+      env:
+        SCRIPT: bash -c "${{ inputs.prepare-command }}"
+      run: ferrocene/ci/run.sh
+
+    - name: Run emulator in background (in container)
+      if: ${{ (inputs.start-command != '') && (inputs.container != '') }}
+      shell: bash
+      env:
+        SCRIPT: bash -c "${{ inputs.start-command }}"
+      run: |
+          docker run \
+          --rm \
+          --interactive \
+          --env CI \
+          --env SCRIPT \
+          --env FERROCENE_HOST \
+          --env FERROCENE_TARGETS \
+          --env OUTSIDE_FERROUS \
+          --env REMOTE_TEST_SERVER_STAGE=2 \
+          --workdir /home/ci/project \
+          --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+          --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+          --user $(id -u):$(id -g) \
+          --network host \
+          ${{ inputs.container }} \
+          ferrocene/ci/run.sh & 
+
+    - name: Run emulator in background
+      if: ${{ (inputs.start-command != '') && (inputs.container == '') }}
+      shell: bash
+      env:
+        SCRIPT: bash -c "${{ inputs.start-command }}"
+      run: ferrocene/ci/run.sh &

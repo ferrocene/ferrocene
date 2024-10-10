@@ -35,9 +35,12 @@ on:
       emulator-container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
-      emulator-script:
+      emulator-prepare-command:
         type: string
-        description: The script (path) of the emulator script
+        description: The command to prepare the emulator
+      emulator-start-command:
+        type: string
+        description: The command to start the emulator
       environment:
         type: string
     outputs:
@@ -89,44 +92,12 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
-      - name: Create emulator dir
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: mkdir /tmp/emulator
-        
-      - name: Prepare emulator
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }} prepare"
-
-      - name: Run emulator in background
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-            docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }}" & 
+      - name: Start emulator
+        uses: ./.github/actions/start-emulator/
+        with:
+          container: ${{ inputs.emulator-container }}
+          prepare-command: ${{ inputs.emulator-prepare-command }}
+          start-command: ${{ inputs.emulator-start-command }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -173,45 +144,13 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Create emulator dir
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: mkdir /tmp/emulator
-        
-      - name: Prepare emulator
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }} prepare"
-
-      - name: Run emulator in background
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-            docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }}" & 
+      
+      - name: Start emulator
+        uses: ./.github/actions/start-emulator/
+        with:
+          container: ${{ inputs.emulator-container }}
+          prepare-command: ${{ inputs.emulator-prepare-command }}
+          start-command: ${{ inputs.emulator-start-command }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -258,56 +197,12 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
-      - name: Create emulator dir
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: mkdir /tmp/emulator
-        
-      - name: Prepare emulator
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        env:
-          SCRIPT: bash -c "${{ inputs.emulator-script }} prepare"
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env SCRIPT \
-            --env FERROCENE_HOST \
-            --env FERROCENE_TARGETS \
-            --env OUTSIDE_FERROUS \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            ferrocene/ci/run.sh
-
-      - name: Run emulator in background
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        env:
-          SCRIPT: bash -c "${{ inputs.emulator-script }}"
-        run: |
-            docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env SCRIPT \
-            --env FERROCENE_HOST \
-            --env FERROCENE_TARGETS \
-            --env OUTSIDE_FERROUS \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            ferrocene/ci/run.sh & 
+      - name: Start emulator
+        uses: ./.github/actions/start-emulator/
+        with:
+          container: ${{ inputs.emulator-container }}
+          prepare-command: ${{ inputs.emulator-prepare-command }}
+          start-command: ${{ inputs.emulator-start-command }}
 
       - name: Run
         uses: ./.github/actions/run/
@@ -354,44 +249,12 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
-      - name: Create emulator dir
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: mkdir /tmp/emulator
-        
-      - name: Prepare emulator
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-          docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }} prepare"
-
-      - name: Run emulator in background
-        if: ${{ inputs.emulator-script != '' }}
-        shell: bash
-        run: |
-            docker run \
-            --rm \
-            --interactive \
-            --env CI \
-            --env REMOTE_TEST_SERVER_STAGE=2 \
-            --workdir /home/ci/project \
-            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-            --user $(id -u):$(id -g) \
-            --network host \
-            ${{ inputs.emulator-container }} \
-            bash -c "${{ inputs.emulator-script }}" & 
+      - name: Start emulator
+        uses: ./.github/actions/start-emulator/
+        with:
+          container: ${{ inputs.emulator-container }}
+          prepare-command: ${{ inputs.emulator-prepare-command }}
+          start-command: ${{ inputs.emulator-start-command }}
 
       - name: Run
         uses: ./.github/actions/run/

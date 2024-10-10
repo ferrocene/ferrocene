@@ -208,6 +208,7 @@ jobs:
       - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
       - test-x86_64-unknown-linux-gnu
+      - test-aarch64-unknown-linux-gnu
       # - test-x86_64-pc-windows-msvc
       # - test-aarch64-apple-darwin
     secrets: inherit

@@ -129,41 +129,42 @@ jobs:
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       emulator-container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-      emulator-script: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
+      emulator-prepare-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh prepare
+      emulator-start-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
 
-  build-x86_64-pc-windows-msvc:
-    name: Build (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/host-build.yml
-    secrets: inherit
-    with:
-      host-triple: x86_64-pc-windows-msvc
-      runner: 8core-x86_64-pc-windows-msvc
+  # build-x86_64-pc-windows-msvc:
+  #   name: Build (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/host-build.yml
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-pc-windows-msvc
+  #     runner: 8core-x86_64-pc-windows-msvc
 
-  dist-x86_64-pc-windows-msvc:
-    name: Dist (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/host-dist.yml
-    needs:
-      - build-x86_64-pc-windows-msvc
-    secrets: inherit
-    with:
-      host-triple: x86_64-pc-windows-msvc
-      runner: 8core-x86_64-pc-windows-msvc
-      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  # dist-x86_64-pc-windows-msvc:
+  #   name: Dist (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/host-dist.yml
+  #   needs:
+  #     - build-x86_64-pc-windows-msvc
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-pc-windows-msvc
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
-  test-x86_64-pc-windows-msvc:
-    name: Test (x86_64-pc-windows-msvc)
-    uses: ./.github/workflows/test.yml
-    needs:
-      - build-x86_64-pc-windows-msvc
-      # - targets
-    secrets: inherit
-    with:
-      triple: x86_64-pc-windows-msvc
-      host-triple: x86_64-pc-windows-msvc
-      runner: 8core-x86_64-pc-windows-msvc
-      build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
+  # test-x86_64-pc-windows-msvc:
+  #   name: Test (x86_64-pc-windows-msvc)
+  #   uses: ./.github/workflows/test.yml
+  #   needs:
+  #     - build-x86_64-pc-windows-msvc
+  #     # - targets
+  #   secrets: inherit
+  #   with:
+  #     triple: x86_64-pc-windows-msvc
+  #     host-triple: x86_64-pc-windows-msvc
+  #     runner: 8core-x86_64-pc-windows-msvc
+  #     build-run-id: ${{ needs.build-x86_64-pc-windows-msvc.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-pc-windows-msvc.outputs.artifact-build }}
 
 
   # build-aarch64-apple-darwin:

@@ -102,7 +102,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: ${{ (inputs.emulator-script != '') && '127.0.0.1:12345' || ''}}
+          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |

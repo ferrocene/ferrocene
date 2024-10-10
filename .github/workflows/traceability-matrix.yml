@@ -70,10 +70,23 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
-      # - run: |
-      #     echo "tracability-matrix goes here"
-      #     mkdir build
-      #     touch build/boop
+      - name: Download usage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-outcomes
+          pattern: artifact-*-usage
+          merge-multiple: true
+
+      - name: Run
+        uses: ./.github/actions/run/
+        with:
+          container: ${{ inputs.container }}
+          configure: |
+            --set ferrocene.test-outcomes=custom
+            --set ferrocene.test-outcomes-dir=test-outcomes
+          # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+          script: |
+            ./x.py run ferrocene/tools/traceability-matrix
 
       # - uses: actions/upload-artifact@v4
       #   id: artifact

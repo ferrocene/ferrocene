@@ -5,6 +5,8 @@ inputs:
     description: The container address
   script:
     description: The script to run
+  configure:
+    description: Args to pass to the configure script
   test-device-addr:
     description: The test device address to use
 
@@ -24,6 +26,7 @@ runs:
       env:
         TEST_DEVICE_ADDR: ${{ inputs.test-device-addr }}
         SCRIPT: ${{ inputs.script }}
+        RUST_CONFIGURE_ARGS: ${{ input.configure }}
       # Due to a GHA limitation, `TEST_DEVICE_ADDR` is always set, but sometimes empty.
       # Detect if it's empty and unset it.
       run: |
@@ -41,6 +44,7 @@ runs:
           --env OUTSIDE_FERROUS \
           --env LLVM_BUILD_PARALLELISM \
           --env TEST_DEVICE_ADDR \
+          --env RUST_CONFIGURE_ARGS \
           --workdir /home/ci/project \
           --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
           --user $(id -u):$(id -g) \

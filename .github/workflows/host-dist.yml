@@ -98,6 +98,7 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
 
   tools:
     runs-on: ${{ inputs.runner }}
@@ -152,3 +153,4 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

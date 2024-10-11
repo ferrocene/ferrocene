@@ -2,9 +2,7 @@ name: "Download QNX deployment"
 description: "Fetch a QNX deployment"
 inputs:
   version:
-    description: The QNX version (eg '7.1.0')
-  build-id:
-    description: The BuildID (eg '472')
+    description: The QNX version and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
 
 runs:
   using: "composite"
@@ -13,17 +11,18 @@ runs:
       id: calculate
       shell: bash
       env:
-        FILENAME: qnx-deployment-${{ inputs.version }}-${{ inputs.build-id }}.tar.zst
+        FILENAME: qnx-deployment-${{ inputs.version }}.tar.zst
       run: |
         echo "filename=$FILENAME" >> $GITHUB_OUTPUT
     - name: Download QNX deployment
       shell: bash
       run: |
-        az storage blob show \
+        az storage blob download \
           --name ${{ steps.calculate.filename }} \
           --container-name qnx \
           --account-name ferroceneci \
-          --auth-mode login
+          --auth-mode login \
+          --file ${{ steps.calculate.filename }}
     - name: Unpack the QNX deployment
       shell: bash
       run: |

@@ -69,7 +69,8 @@ jobs:
 
           echo "state=$state" >> $GITHUB_OUTPUT
 
-          echo "::notice title=Docker (${{ inputs.architecture }} ${{ inputs.name }}) Cache $state::$uri"
+          echo "Docker (${{ inputs.architecture }} ${{ inputs.name }}) cache $state"
+          echo "::notice title=Docker (${{ inputs.architecture }} ${{ inputs.name }}) cache $state::$uri"
       
       - id: container
         if: ${{ steps.check.outputs.state != 'hit' }}

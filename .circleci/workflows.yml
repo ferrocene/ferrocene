@@ -789,6 +789,12 @@ workflows:
           tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-20 >>
 
+      - build-docker-x86_64:
+          name: build-docker--ubuntu-24--x86_64
+          image: ubuntu-24
+          tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-24 >>
+          rebuild: << pipeline.parameters.docker-image-rebuild--ci-docker-images--x86_64--ubuntu-24 >>
+
       - build-docker-aarch64:
           name: build-docker--ubuntu-20--aarch64
           image: ubuntu-20
@@ -888,6 +894,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-library-std
@@ -895,6 +902,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - x86_64-qnx-generic-test-vm:
           name: x86_64-qnx-test-compiletest
@@ -902,6 +910,7 @@ workflows:
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library
@@ -909,6 +918,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-library-std
@@ -916,6 +926,7 @@ workflows:
           resource-class: large # 4-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-qnx-generic-test-vm:
           name: aarch64-qnx-test-compiletest
@@ -923,6 +934,7 @@ workflows:
           resource-class: xlarge # 8-core
           requires:
             - x86_64-linux-build
+            - build-docker--ubuntu-24--x86_64
 
       - aarch64-linux-llvm:
           requires:

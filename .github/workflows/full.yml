@@ -47,19 +47,19 @@ jobs:
       runner: 8core-x86_64-unknown-linux-gnu
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  dist-x86_64-unknown-linux-gnu:
-    name: Dist (x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/host-dist.yml
-    needs:
-      - container-x86_64-ubuntu-20
-      - build-x86_64-unknown-linux-gnu
-    secrets: inherit
-    with:
-      host-triple: x86_64-unknown-linux-gnu
-      runner: 8core-x86_64-unknown-linux-gnu
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  # dist-x86_64-unknown-linux-gnu:
+  #   name: Dist (x86_64-unknown-linux-gnu)
+  #   uses: ./.github/workflows/host-dist.yml
+  #   needs:
+  #     - container-x86_64-ubuntu-20
+  #     - build-x86_64-unknown-linux-gnu
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-unknown-linux-gnu
+  #     runner: 8core-x86_64-unknown-linux-gnu
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   # test-x86_64-unknown-linux-gnu:
   #   name: Test (x86_64-unknown-linux-gnu)

@@ -38,7 +38,7 @@ describing the conflict and requiring the upstream pull to be done manually.
 Backtrace subtree pull
 ^^^^^^^^^^^^^^^^^^^^^^
 
-When `rust-lang/backtrace-rs` is updated, the modifications to it's `Cargo.toml`
+When `rust-lang/backtrace-rs` is updated, the modifications to its `Cargo.toml`
 file must be done in `std/cargo.toml` instead, where a comment marks the start of
 the `backtrace` crate dependencies.
 

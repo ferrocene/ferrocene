@@ -73,8 +73,7 @@ jobs:
       - name: Download QNX
         uses: ./.github/actions/qnx/
         with:
-          version: "7.1.0"
-          build-id: "472"
+          version: "7.1.0-472"
 
       - name: Run
         uses: ./.github/actions/run/

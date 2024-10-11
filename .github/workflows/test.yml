@@ -45,9 +45,10 @@ on:
       emulator-start-command:
         type: string
         description: The command to start the emulator
-      prelude-command:
+      qnx-version:
         type: string
-        description: Any prelude to run before the tests (eg. sourcing scripts)
+        default: ""
+        description: The QNX version (if any) and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
       environment:
         type: string
     outputs:
@@ -100,6 +101,11 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
+
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
         with:
@@ -114,7 +120,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.prelude-command }}
+            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -155,6 +161,11 @@ jobs:
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
+
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
       
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
@@ -169,7 +180,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.prelude-command }}
+            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -211,6 +222,11 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
+
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
         with:
@@ -224,7 +240,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.prelude-command }}
+            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -267,6 +283,11 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
+
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
         with:
@@ -280,7 +301,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ inputs.prelude-command }}
+            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report

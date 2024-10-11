@@ -3,17 +3,6 @@
 # SPDX-FileCopyrightText: The Ferrocene Developers
 set -xeo pipefail
 
-# Sometimes (eg the commit job) we want to skip doing anything time intensive like upgrading.
-# Jobs which actually produce artifacts should *always* upgrade as they may otherwise miss critical
-# security upgrades.
-if [[ ! -z "${SKIP_UPGRADE}" ]]; then
-    echo 'Skipping upgrade, $SKIP_UPGRADE is set. Use caution if any artifacts are produced.'
-else
-    # TODO: Stop skipping around this, it was broken at some point during dev in GHA, the issue looked transient.
-    # sudo apt update
-    # sudo apt upgrade -y
-fi
-
 sudo apt install -y \
     git \
     build-essential \

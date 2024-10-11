@@ -10,10 +10,14 @@ on:
       triple:
         type: string
         description: The target triple to test on
-      host-tools:
+      test-host-tools:
         type: boolean
         default: true
         description: If the host tools should be tested (enables the 'test' job)
+      test-std:
+        type: boolean
+        default: true
+        description: If the stdlib should be tested (enables the `library-std` job)
       self-test-triples:
         # We cannot specify an array here
         # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
@@ -60,7 +64,7 @@ on:
 jobs:
 
   test:
-    if: ${{ inputs.host-tools }}
+    if: ${{ inputs.test-host-tools }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
@@ -218,6 +222,7 @@ jobs:
           artifact: ${{ env.ARTIFACT_USAGE }}
 
   library-std:
+    if: ${{ inputs.test-std }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:

@@ -68,6 +68,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
+      ARTIFACT: test-${{inputs.triple}}
       ARTIFACT_USAGE: test-${{inputs.triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
@@ -116,11 +117,13 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
 
   compiletest:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
+      ARTIFACT: test-compiletest-${{inputs.triple}}
       ARTIFACT_USAGE: test-compiletest-${{inputs.triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
@@ -168,11 +171,13 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
 
   library:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
+      ARTIFACT: test-compiletest-${{inputs.triple}}
       ARTIFACT_USAGE: test-library-${{inputs.triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
@@ -220,12 +225,14 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}
 
   library-std:
     if: ${{ inputs.test-std }}
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
+      ARTIFACT: test-library-std-${{inputs.triple}}
       ARTIFACT_USAGE: test-library-std-${{inputs.triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}
@@ -273,3 +280,4 @@ jobs:
         uses: ./.github/actions/usage-report/
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

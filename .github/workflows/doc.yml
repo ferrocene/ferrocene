@@ -35,6 +35,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     env:
       ARTIFACT: doc-${{inputs.host-triple}}
+      ARTIFACT_USAGE: doc-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
     outputs:
       artifact-name: ${{ env.ARTIFACT }}
@@ -80,3 +81,9 @@ jobs:
           name: ${{ env.ARTIFACT }}
           path: build/dist
           retention-days: 1
+
+      - name: Generate usage report
+        uses: ./.github/actions/usage-report/
+        with:
+          artifact: ${{ env.ARTIFACT_USAGE }}
+          name: ${{ env.ARTIFACT }}

@@ -25,8 +25,8 @@ repository's history, resulting in a single bigger repository.
 Subtrees provide builtin tooling to keep those inclusions up to date as the
 merged repository changes.
 
-What is an Subtree Pull
-------------------------
+What is a Subtree Pull
+----------------------
 
 Similar to upstream pulls, a subtree pull pulls in new commits from a corresponding
 subtree into the Ferrocene repository to keep them in sync. Likewise this
@@ -34,6 +34,18 @@ procedure is usually performed by a periodic Github Action that opens a pull
 request automatically, only requiring sign off of a reviewer to get merged.
 Sometimes merge conflicts may occur in which case automation opens an issue
 describing the conflict and requiring the upstream pull to be done manually.
+
+Backtrace subtree pull
+^^^^^^^^^^^^^^^^^^^^^^
+
+When `rust-lang/backtrace-rs` is updated, the modifications to it's `Cargo.toml`
+file must be done in `std/cargo.toml` instead, where a comment marks the start of
+the `backtrace` crate dependencies.
+
+In addition, `<new-crate>/rustc-dep-of-std` must be added to the `backtrace` array in
+`[features]`.
+
+Finally, the crate must be added to `PERMITTED_STDLIB_DEPENDENCIES` in `tidy/src/deps.rs`.
 
 Manual intervention when the automation fails
 ---------------------------------------------

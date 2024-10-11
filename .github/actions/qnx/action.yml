@@ -18,16 +18,16 @@ runs:
       shell: bash
       run: |
         az storage blob download \
-          --name ${{ steps.calculate.filename }} \
+          --name ${{ steps.calculate.outputs.filename }} \
           --container-name qnx \
           --account-name ferroceneci \
           --auth-mode login \
-          --file ${{ steps.calculate.filename }}
+          --file ${{ steps.calculate.outputs.filename }}
     - name: Unpack the QNX deployment
       shell: bash
       run: |
-        uv run ferrocene/ci/scripts/cache.py retrieve ${{ steps.calculate.filename }} .
+        uv run ferrocene/ci/scripts/cache.py retrieve ${{ steps.calculate.outputs.filename }} .
     - name: Remove downloaded artifact
       shell: bash
       run: |
-        rm -rf ${{ steps.calculate.filename }}
+        rm -rf ${{ steps.calculate.outputs.filename }}

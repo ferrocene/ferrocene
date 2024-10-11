@@ -91,8 +91,8 @@ jobs:
 
           echo "state=$state" >> $GITHUB_OUTPUT
 
-          echo "${{ inputs.host-triple }} LLVM cache $state"
-          echo "::notice title=${{ inputs.host-triple }} LLVM cache $state::$uri"
+          echo "Cache $state: LLVM (${{ inputs.host-triple }})"
+          echo "::notice title=Cache $state: LLVM (${{ inputs.host-triple }})::$uri"
 
       - name: Run
         if: ${{ steps.check.outputs.state != 'hit' }}

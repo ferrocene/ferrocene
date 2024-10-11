@@ -61,7 +61,7 @@ jobs:
           
           set +e
           state="miss"
-          docker inspect ${uri}
+          docker manifest inspect ${uri}
           if [ $? -eq 0 ]; then
             state="hit"
           fi

@@ -65,7 +65,7 @@ jobs:
         run: az acr login --name ferrocenecr
 
       - name: Restore build cache
-        uses: ./.github/actions/build-cache/
+        uses: ./.github/actions/restore-build-cache/
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}

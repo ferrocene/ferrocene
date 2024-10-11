@@ -50,7 +50,28 @@ jobs:
         shell: bash
         run: az acr login --name ferrocenecr
 
+      - name: Check cache
+        id: check
+        shell: bash
+        run: |
+          set -e
+
+          uri=$(uv run ./ferrocene/ci/scripts/container.py uri ${{ inputs.architecture }} ${{ inputs.name }})
+          echo "uri=$uri" >> $GITHUB_OUTPUT
+          
+          set +e
+          state="miss"
+          docker inspect ${uri}
+          if [ $? -eq 0 ]; then
+            state="hit"
+          fi
+          set -e
+
+          echo "state=$state" >> $GITHUB_OUTPUT
+
+          echo "::notice title=Docker (${{ inputs.architecture }} ${{ inputs.name }}) Cache $state::$uri"
+      
       - id: container
+        if: ${{ steps.check.outputs.state != 'hit' }}
         run: |
           uv run ./ferrocene/ci/scripts/container.py ensure-built ${{ inputs.architecture }} ${{ inputs.name }}
-          echo "uri=$(uv run ./ferrocene/ci/scripts/container.py uri ${{ inputs.architecture }} ${{ inputs.name }})" >> "$GITHUB_OUTPUT"

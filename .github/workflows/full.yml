@@ -121,7 +121,8 @@ jobs:
       - targets
     secrets: inherit
     with:
-      host-tools: false
+      test-host-tools: false
+      test-std: false
       triple: aarch64-unknown-ferrocenecoretest
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu

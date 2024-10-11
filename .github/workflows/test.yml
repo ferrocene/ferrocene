@@ -45,6 +45,9 @@ on:
       emulator-start-command:
         type: string
         description: The command to start the emulator
+      prelude-command:
+        type: string
+        description: Any prelude to run before the tests (eg. sourcing scripts)
       environment:
         type: string
     outputs:
@@ -111,6 +114,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ inputs.prelude-command }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -165,6 +169,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ inputs.prelude-command }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -219,6 +224,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ inputs.prelude-command }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -274,6 +280,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            ${{ inputs.prelude-command }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report

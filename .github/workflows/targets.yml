@@ -70,12 +70,19 @@ jobs:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
 
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0"
+          build-id: "472"
+
       - name: Run
         uses: ./.github/actions/run/
         with:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
+            source qnx/qnx710-472/qnxsdp-env.sh
             ./x.py --stage 2 dist rust-std
 
       - uses: actions/upload-artifact@v4

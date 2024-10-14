@@ -39,11 +39,14 @@ Backtrace subtree pull
 ^^^^^^^^^^^^^^^^^^^^^^
 
 When `rust-lang/backtrace-rs` is updated, the modifications to its `Cargo.toml`
-file must be done in `std/cargo.toml` instead, where a comment marks the start of
-the `backtrace` crate dependencies.
+file must be copied over to the relevant section in `library/std/Cargo.toml` instead,
+where a comment marks the start of the `backtrace` crate dependencies.
 
-In addition, `<new-crate>/rustc-dep-of-std` must be added to the `backtrace` array in
-`[features]`.
+This is due to `std` including the sources of backtrace-rs directly, instead of
+depending on it as a cargo dependency.
+
+In addition, for any new dependency added this way, `<new-crate>/rustc-dep-of-std` must be
+added to the `backtrace` array in `[features]`.
 
 Finally, the crate must be added to `PERMITTED_STDLIB_DEPENDENCIES` in `tidy/src/deps.rs`.
 

@@ -1,2 +1,4 @@
 error: Argument to option 'json' missing
+       Usage:
+           --json CONFIG       Configure the JSON output of the compiler
 

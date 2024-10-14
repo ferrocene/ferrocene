@@ -1,2 +1,4 @@
 error: Argument to option 'explain' missing
+       Usage:
+           --explain OPT       Provide a detailed explanation of an error message
 

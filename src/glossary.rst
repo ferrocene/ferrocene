@@ -2278,8 +2278,7 @@ fat pointer type
 ^^^^^^^^^^^^^^^^
 
 :dp:`fls_l8ew6udd79hh`
-A :dt:`fat pointer type` is an :t:`indirection type` that refers to a
-:t:`dynamically sized type`.
+A :dt:`fat pointer type` is an :t:`indirection type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
 
 .. _fls_qi21fdknzez6:
 

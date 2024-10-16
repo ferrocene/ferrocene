@@ -23,10 +23,10 @@
 )]
 #![cfg_attr(libc_deny_warnings, deny(warnings))]
 // Attributes needed when building as part of the standard library
-// ferrocene addition
 // link_cfg is internal
 #![cfg_attr(
     feature = "rustc-dep-of-std",
+    // ferrocene addition
     allow(internal_features),
     feature(link_cfg, no_core)
 )]

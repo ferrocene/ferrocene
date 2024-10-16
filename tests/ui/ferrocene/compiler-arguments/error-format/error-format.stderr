@@ -1,2 +1,5 @@
 error: Argument to option 'error-format' missing
+       Usage:
+           --error-format human|json|short
+                               How errors and other messages are produced
 

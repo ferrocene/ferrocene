@@ -52,7 +52,7 @@ jobs:
       - name: Execute the build
         run: ferrocene/ci/run.sh
         env:
-          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-17
+          FERROCENE_CUSTOM_LLVM: /usr/lib/llvm-18
           FERROCENE_HOST: x86_64-unknown-linux-gnu
           SCRIPT: |
             ./x.py test tidy

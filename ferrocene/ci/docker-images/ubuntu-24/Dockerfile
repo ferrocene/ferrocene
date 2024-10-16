@@ -44,8 +44,8 @@ RUN <<-EOF
 
     # Needed by the `commit-checks` CI job:
     apt-install \
-        llvm-17-tools \
-        llvm-17-dev \
+        llvm-18-tools \
+        llvm-18-dev \
         unzip
 
     # Needed to run QNX VMs

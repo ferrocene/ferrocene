@@ -148,7 +148,7 @@ fn get_simple_intrinsic<'ll>(
     Some(cx.get_intrinsic(llvm_name))
 }
 
-impl<'ll, 'tcx> IntrinsicCallMethods<'tcx> for Builder<'_, 'll, 'tcx> {
+impl<'ll, 'tcx> IntrinsicCallBuilderMethods<'tcx> for Builder<'_, 'll, 'tcx> {
     fn codegen_intrinsic_call(
         &mut self,
         instance: ty::Instance<'tcx>,
@@ -2066,14 +2066,14 @@ fn generic_simd_intrinsic<'ll, 'tcx>(
         };
     }
 
-    arith_red!(simd_reduce_add_ordered: vector_reduce_add, vector_reduce_fadd, true, add, 0.0);
+    arith_red!(simd_reduce_add_ordered: vector_reduce_add, vector_reduce_fadd, true, add, -0.0);
     arith_red!(simd_reduce_mul_ordered: vector_reduce_mul, vector_reduce_fmul, true, mul, 1.0);
     arith_red!(
         simd_reduce_add_unordered: vector_reduce_add,
         vector_reduce_fadd_reassoc,
         false,
         add,
-        0.0
+        -0.0
     );
     arith_red!(
         simd_reduce_mul_unordered: vector_reduce_mul,

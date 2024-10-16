@@ -17,7 +17,7 @@ use rustc_ast::visit::{visit_opt, walk_list, AssocCtxt, BoundKind, FnCtxt, FnKin
 use rustc_ast::*;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_errors::codes::*;
-use rustc_errors::{Applicability, DiagArgValue, IntoDiagArg, StashKey};
+use rustc_errors::{Applicability, DiagArgValue, IntoDiagArg, StashKey, Suggestions};
 use rustc_hir::def::Namespace::{self, *};
 use rustc_hir::def::{self, CtorKind, DefKind, LifetimeRes, NonMacroAttrKind, PartialRes, PerNS};
 use rustc_hir::def_id::{DefId, LocalDefId, CRATE_DEF_ID, LOCAL_CRATE};
@@ -402,6 +402,8 @@ pub(crate) enum PathSource<'a> {
     TraitItem(Namespace),
     // Paths in delegation item
     Delegation,
+    /// An arg in a `use<'a, N>` precise-capturing bound.
+    PreciseCapturingArg(Namespace),
 }
 
 impl<'a> PathSource<'a> {
@@ -413,6 +415,7 @@ impl<'a> PathSource<'a> {
             | PathSource::TupleStruct(..)
             | PathSource::Delegation => ValueNS,
             PathSource::TraitItem(ns) => ns,
+            PathSource::PreciseCapturingArg(ns) => ns,
         }
     }
 
@@ -423,7 +426,10 @@ impl<'a> PathSource<'a> {
             | PathSource::Pat
             | PathSource::Struct
             | PathSource::TupleStruct(..) => true,
-            PathSource::Trait(_) | PathSource::TraitItem(..) | PathSource::Delegation => false,
+            PathSource::Trait(_)
+            | PathSource::TraitItem(..)
+            | PathSource::Delegation
+            | PathSource::PreciseCapturingArg(..) => false,
         }
     }
 
@@ -466,6 +472,7 @@ impl<'a> PathSource<'a> {
                 _ => "value",
             },
             PathSource::Delegation => "function",
+            PathSource::PreciseCapturingArg(..) => "type or const parameter",
         }
     }
 
@@ -534,6 +541,15 @@ impl<'a> PathSource<'a> {
                 _ => false,
             },
             PathSource::Delegation => matches!(res, Res::Def(DefKind::Fn | DefKind::AssocFn, _)),
+            PathSource::PreciseCapturingArg(ValueNS) => {
+                matches!(res, Res::Def(DefKind::ConstParam, _))
+            }
+            // We allow `SelfTyAlias` here so we can give a more descriptive error later.
+            PathSource::PreciseCapturingArg(TypeNS) => matches!(
+                res,
+                Res::Def(DefKind::TyParam, _) | Res::SelfTyParam { .. } | Res::SelfTyAlias { .. }
+            ),
+            PathSource::PreciseCapturingArg(MacroNS) => false,
         }
     }
 
@@ -551,6 +567,8 @@ impl<'a> PathSource<'a> {
             (PathSource::Pat | PathSource::TupleStruct(..), false) => E0531,
             (PathSource::TraitItem(..), true) => E0575,
             (PathSource::TraitItem(..), false) => E0576,
+            (PathSource::PreciseCapturingArg(..), true) => E0799,
+            (PathSource::PreciseCapturingArg(..), false) => E0800,
         }
     }
 }
@@ -1077,9 +1095,19 @@ impl<'ra: 'ast, 'ast, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'r
                 };
                 // Like `Ty::Param`, we try resolving this as both a const and a type.
                 if !check_ns(TypeNS) && check_ns(ValueNS) {
-                    self.smart_resolve_path(*id, &None, path, PathSource::Expr(None));
+                    self.smart_resolve_path(
+                        *id,
+                        &None,
+                        path,
+                        PathSource::PreciseCapturingArg(ValueNS),
+                    );
                 } else {
-                    self.smart_resolve_path(*id, &None, path, PathSource::Type);
+                    self.smart_resolve_path(
+                        *id,
+                        &None,
+                        path,
+                        PathSource::PreciseCapturingArg(TypeNS),
+                    );
                 }
             }
         }
@@ -1889,7 +1917,10 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
             );
 
             let inferred = match source {
-                PathSource::Trait(..) | PathSource::TraitItem(..) | PathSource::Type => false,
+                PathSource::Trait(..)
+                | PathSource::TraitItem(..)
+                | PathSource::Type
+                | PathSource::PreciseCapturingArg(..) => false,
                 PathSource::Expr(..)
                 | PathSource::Pat
                 | PathSource::Struct
@@ -3982,7 +4013,9 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                         Applicability::MaybeIncorrect,
                     ))
                 } else if res.is_none()
-                    && let PathSource::Type | PathSource::Expr(_) = source
+                    && let PathSource::Type
+                    | PathSource::Expr(_)
+                    | PathSource::PreciseCapturingArg(..) = source
                 {
                     this.suggest_adding_generic_parameter(path, source)
                 } else {
@@ -4052,17 +4085,23 @@ impl<'a, 'ast, 'ra: 'ast, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 err.sort_span = parent_err.sort_span;
                 err.is_lint = parent_err.is_lint.clone();
 
-                // merge the parent's suggestions with the typo suggestions
-                fn append_result<T, E>(res1: &mut Result<Vec<T>, E>, res2: Result<Vec<T>, E>) {
-                    match res1 {
-                        Ok(vec1) => match res2 {
-                            Ok(mut vec2) => vec1.append(&mut vec2),
-                            Err(e) => *res1 = Err(e),
-                        },
-                        Err(_) => (),
-                    };
+                // merge the parent_err's suggestions with the typo (err's) suggestions
+                match &mut err.suggestions {
+                    Suggestions::Enabled(typo_suggestions) => match &mut parent_err.suggestions {
+                        Suggestions::Enabled(parent_suggestions) => {
+                            // If both suggestions are enabled, append parent_err's suggestions to err's suggestions.
+                            typo_suggestions.append(parent_suggestions)
+                        }
+                        Suggestions::Sealed(_) | Suggestions::Disabled => {
+                            // If the parent's suggestions are either sealed or disabled, it signifies that
+                            // new suggestions cannot be added or removed from the diagnostic. Therefore,
+                            // we assign both types of suggestions to err's suggestions and discard the
+                            // existing suggestions in err.
+                            err.suggestions = std::mem::take(&mut parent_err.suggestions);
+                        }
+                    },
+                    Suggestions::Sealed(_) | Suggestions::Disabled => (),
                 }
-                append_result(&mut err.suggestions, parent_err.suggestions.clone());
 
                 parent_err.cancel();
 

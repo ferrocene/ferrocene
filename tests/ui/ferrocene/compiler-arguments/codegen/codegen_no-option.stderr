@@ -1,2 +1,5 @@
 error: Argument to option 'codegen' missing
+       Usage:
+           -C, --codegen OPT[=VALUE]
+                               Set a codegen option
 

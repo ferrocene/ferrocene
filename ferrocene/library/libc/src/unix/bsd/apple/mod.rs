@@ -56,6 +56,7 @@ pub type thread_inspect_t = ::mach_port_t;
 pub type thread_act_t = ::mach_port_t;
 pub type thread_act_array_t = *mut ::thread_act_t;
 pub type policy_t = ::c_int;
+pub type mach_error_t = ::kern_return_t;
 pub type mach_vm_address_t = u64;
 pub type mach_vm_offset_t = u64;
 pub type mach_vm_size_t = u64;
@@ -3787,6 +3788,19 @@ pub const PTHREAD_PROCESS_PRIVATE: ::c_int = 2;
 pub const PTHREAD_PROCESS_SHARED: ::c_int = 1;
 pub const PTHREAD_CREATE_JOINABLE: ::c_int = 1;
 pub const PTHREAD_CREATE_DETACHED: ::c_int = 2;
+pub const PTHREAD_INHERIT_SCHED: ::c_int = 1;
+pub const PTHREAD_EXPLICIT_SCHED: ::c_int = 2;
+pub const PTHREAD_CANCEL_ENABLE: ::c_int = 0x01;
+pub const PTHREAD_CANCEL_DISABLE: ::c_int = 0x00;
+pub const PTHREAD_CANCEL_DEFERRED: ::c_int = 0x02;
+pub const PTHREAD_CANCEL_ASYNCHRONOUS: ::c_int = 0x00;
+pub const PTHREAD_CANCELED: *mut ::c_void = 1 as *mut ::c_void;
+pub const PTHREAD_SCOPE_SYSTEM: ::c_int = 1;
+pub const PTHREAD_SCOPE_PROCESS: ::c_int = 2;
+pub const PTHREAD_PRIO_NONE: ::c_int = 0;
+pub const PTHREAD_PRIO_INHERIT: ::c_int = 1;
+pub const PTHREAD_PRIO_PROTECT: ::c_int = 2;
+
 #[cfg(target_arch = "aarch64")]
 pub const PTHREAD_STACK_MIN: ::size_t = 16384;
 #[cfg(not(target_arch = "aarch64"))]
@@ -4181,11 +4195,18 @@ pub const TCP_CONNECTION_INFO: ::c_int = 0x106;
 
 pub const SOL_LOCAL: ::c_int = 0;
 
+/// Retrieve peer credentials.
 pub const LOCAL_PEERCRED: ::c_int = 0x001;
+/// Retrieve peer PID.
 pub const LOCAL_PEERPID: ::c_int = 0x002;
+/// Retrieve effective peer PID.
 pub const LOCAL_PEEREPID: ::c_int = 0x003;
+/// Retrieve peer UUID.
 pub const LOCAL_PEERUUID: ::c_int = 0x004;
+/// Retrieve effective peer UUID.
 pub const LOCAL_PEEREUUID: ::c_int = 0x005;
+/// Retrieve peer audit token.
+pub const LOCAL_PEERTOKEN: ::c_int = 0x006;
 
 pub const SOL_SOCKET: ::c_int = 0xffff;
 
@@ -5757,6 +5778,40 @@ extern "C" {
     pub fn mach_timebase_info(info: *mut ::mach_timebase_info) -> ::c_int;
     pub fn mach_host_self() -> mach_port_t;
     pub fn mach_thread_self() -> mach_port_t;
+    pub fn pthread_once(
+        once_control: *mut ::pthread_once_t,
+        init_routine: ::Option<unsafe extern "C" fn()>,
+    ) -> ::c_int;
+    pub fn pthread_attr_getinheritsched(
+        attr: *const ::pthread_attr_t,
+        inheritsched: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_attr_getschedpolicy(
+        attr: *const ::pthread_attr_t,
+        policy: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_attr_getscope(
+        attr: *const ::pthread_attr_t,
+        contentionscope: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_attr_getstackaddr(
+        attr: *const ::pthread_attr_t,
+        stackaddr: *mut *mut ::c_void,
+    ) -> ::c_int;
+    pub fn pthread_attr_getdetachstate(
+        attr: *const ::pthread_attr_t,
+        detachstate: *mut ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_attr_setinheritsched(
+        attr: *mut ::pthread_attr_t,
+        inheritsched: ::c_int,
+    ) -> ::c_int;
+    pub fn pthread_attr_setschedpolicy(attr: *mut ::pthread_attr_t, policy: ::c_int) -> ::c_int;
+    pub fn pthread_attr_setscope(attr: *mut ::pthread_attr_t, contentionscope: ::c_int) -> ::c_int;
+    pub fn pthread_attr_setstackaddr(
+        attr: *mut ::pthread_attr_t,
+        stackaddr: *mut ::c_void,
+    ) -> ::c_int;
     pub fn pthread_setname_np(name: *const ::c_char) -> ::c_int;
     pub fn pthread_getname_np(thread: ::pthread_t, name: *mut ::c_char, len: ::size_t) -> ::c_int;
     pub fn pthread_mach_thread_np(thread: ::pthread_t) -> ::mach_port_t;
@@ -6275,6 +6330,8 @@ extern "C" {
     pub fn copyfile_state_alloc() -> copyfile_state_t;
     pub fn copyfile_state_get(s: copyfile_state_t, flags: u32, dst: *mut ::c_void) -> ::c_int;
     pub fn copyfile_state_set(s: copyfile_state_t, flags: u32, src: *const ::c_void) -> ::c_int;
+
+    pub fn mach_error_string(error_value: ::mach_error_t) -> *mut ::c_char;
 
     // Added in macOS 10.13
     // ISO/IEC 9899:2011 ("ISO C11") K.3.7.4.1

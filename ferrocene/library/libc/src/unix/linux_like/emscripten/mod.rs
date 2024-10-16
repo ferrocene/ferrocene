@@ -775,6 +775,8 @@ pub const POSIX_MADV_RANDOM: ::c_int = 1;
 pub const POSIX_MADV_SEQUENTIAL: ::c_int = 2;
 pub const POSIX_MADV_WILLNEED: ::c_int = 3;
 
+pub const AT_EACCESS: ::c_int = 0x200;
+
 pub const S_IEXEC: mode_t = 64;
 pub const S_IWRITE: mode_t = 128;
 pub const S_IREAD: mode_t = 256;
@@ -1790,6 +1792,24 @@ extern "C" {
         buf: *mut ::c_char,
         buflen: ::size_t,
         result: *mut *mut passwd,
+    ) -> ::c_int;
+
+    // grp.h
+    pub fn getgrgid(gid: ::gid_t) -> *mut ::group;
+    pub fn getgrnam(name: *const ::c_char) -> *mut ::group;
+    pub fn getgrnam_r(
+        name: *const ::c_char,
+        grp: *mut ::group,
+        buf: *mut ::c_char,
+        buflen: ::size_t,
+        result: *mut *mut ::group,
+    ) -> ::c_int;
+    pub fn getgrgid_r(
+        gid: ::gid_t,
+        grp: *mut ::group,
+        buf: *mut ::c_char,
+        buflen: ::size_t,
+        result: *mut *mut ::group,
     ) -> ::c_int;
 }
 

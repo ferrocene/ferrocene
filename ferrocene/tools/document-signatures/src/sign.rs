@@ -7,11 +7,11 @@ use std::process::Command;
 use anyhow::{Context, Error};
 use tempfile::NamedTempFile;
 
+use crate::CliOptions;
 use crate::config::Config;
 use crate::cosign_bundle::RawCosignBundle;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
-use crate::CliOptions;
 
 pub(crate) fn sign(
     source_dir: &Path,

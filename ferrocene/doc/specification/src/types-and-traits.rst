@@ -1373,6 +1373,12 @@ Type Layout
 :dp:`fls_kdbq02iguzgl`
 All :t:`[value]s` have an :t:`alignment` and a :t:`size`.
 
+:dp:`fls_26Xgem831Nqg`
+A :dt:`dynamically sized type` is a :t:`type` that does not implement the :std:`core::marker::Sized` :t:`trait`.
+
+:dp:`fls_ozYgHEHFTT5c`
+A :dt:`fat pointer type` is an :t:`indirection type` whose contained :t:`type specification` is a :t:`dynamically sized type`.
+
 :dp:`fls_muxfn9soi47l`
 The :t:`alignment` of a :t:`value` specifies which addresses are valid for
 storing the :t:`value`. :t:`Alignment` is measured in bytes, is at least one,
@@ -1453,8 +1459,9 @@ For a :t:`function pointer type`, the :t:`size` and :t:`alignment` are those of
 a :t:`thin pointer`.
 
 :dp:`fls_e5hivr6m5s3h`
-For a :t:`fat pointer`, the :t:`size` and :t:`alignment` are tool-defined, but
+For a :t:`fat pointer type`, the :t:`size` and :t:`alignment` are tool-defined, but
 are at least those of a :t:`thin pointer`.
+For a :t:`fat pointer type` whose contained :t:`type` is that of a :t:`slice` or :t:`trait object type` the :t:`size` is that of two times the size of :t:`type` :c:`usize` and the :t:`alignment` is that of :t:`type` :c:`usize`.
 
 :dp:`fls_hlbsjggfxnt2`
 For a :t:`trait object type`, the :t:`layout` is the same as the :t:`value`

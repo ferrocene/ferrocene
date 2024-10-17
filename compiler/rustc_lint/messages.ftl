@@ -395,6 +395,8 @@ lint_improper_ctypes_opaque = opaque types have no C equivalent
 lint_improper_ctypes_pat_help = consider using the base type instead
 
 lint_improper_ctypes_pat_reason = pattern types have no C equivalent
+
+lint_improper_ctypes_recursion_limit_reached = type is infinitely recursive
 lint_improper_ctypes_slice_help = consider using a raw pointer instead
 
 lint_improper_ctypes_slice_reason = slices have no C equivalent
@@ -769,6 +771,13 @@ lint_single_use_lifetime = lifetime parameter `{$ident}` only used once
 
 lint_span_use_eq_ctxt = use `.eq_ctxt()` instead of `.ctxt() == .ctxt()`
 
+lint_static_mut_refs_lint = creating a {$shared_label}reference to mutable static is discouraged
+    .label = {$shared_label}reference to mutable static
+    .suggestion = use `&raw const` instead to create a raw pointer
+    .suggestion_mut = use `&raw mut` instead to create a raw pointer
+    .shared_note = shared references to mutable statics are dangerous; it's undefined behavior if the static is mutated or if a mutable reference is created for it while the shared reference lives
+    .mut_note = mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+
 lint_supertrait_as_deref_target = this `Deref` implementation is covered by an implicit supertrait coercion
     .label = `{$self_ty}` implements `Deref<Target = dyn {$target_principal}>` which conflicts with supertrait `{$supertrait_principal}`
     .label2 = target type is a supertrait of `{$self_ty}`
@@ -889,6 +898,8 @@ lint_unnameable_test_items = cannot test inner items
 
 lint_unnecessary_qualification = unnecessary qualification
     .suggestion = remove the unnecessary path segments
+
+lint_unqualified_local_imports = `use` of a local item without leading `self::`, `super::`, or `crate::`
 
 lint_unsafe_attr_outside_unsafe = unsafe attribute used without unsafe
     .label = usage of unsafe attribute

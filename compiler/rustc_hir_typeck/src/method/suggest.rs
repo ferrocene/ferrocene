@@ -13,7 +13,7 @@ use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::sorted_map::SortedMap;
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
-use rustc_errors::{pluralize, struct_span_code_err, Applicability, Diag, MultiSpan, StashKey};
+use rustc_errors::{Applicability, Diag, MultiSpan, StashKey, pluralize, struct_span_code_err};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::{self, Visitor};
@@ -21,21 +21,21 @@ use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir, ExprKind, HirId, Node, PathSegment, QPath};
 use rustc_infer::infer::{self, RegionVariableOrigin};
 use rustc_middle::bug;
-use rustc_middle::ty::fast_reject::{simplify_type, DeepRejectCtxt, TreatParams};
+use rustc_middle::ty::fast_reject::{DeepRejectCtxt, TreatParams, simplify_type};
 use rustc_middle::ty::print::{
-    with_crate_prefix, with_forced_trimmed_paths, PrintTraitRefExt as _,
+    PrintTraitRefExt as _, with_crate_prefix, with_forced_trimmed_paths,
 };
 use rustc_middle::ty::{self, GenericArgKind, IsSuggestable, Ty, TyCtxt, TypeVisitableExt};
 use rustc_span::def_id::DefIdSet;
-use rustc_span::symbol::{kw, sym, Ident};
+use rustc_span::symbol::{Ident, kw, sym};
 use rustc_span::{
-    edit_distance, ErrorGuaranteed, ExpnKind, FileName, MacroKind, Span, Symbol, DUMMY_SP,
+    DUMMY_SP, ErrorGuaranteed, ExpnKind, FileName, MacroKind, Span, Symbol, edit_distance,
 };
 use rustc_trait_selection::error_reporting::traits::on_unimplemented::OnUnimplementedNote;
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt as _;
 use rustc_trait_selection::traits::{
-    supertraits, FulfillmentError, Obligation, ObligationCause, ObligationCauseCode,
+    FulfillmentError, Obligation, ObligationCause, ObligationCauseCode, supertraits,
 };
 use tracing::{debug, info, instrument};
 
@@ -1721,20 +1721,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         }
 
-        if item_name.name == sym::as_str && rcvr_ty.peel_refs().is_str() {
-            let msg = "remove this method call";
-            let mut fallback_span = true;
-            if let SelfSource::MethodCall(expr) = source {
-                let call_expr = self.tcx.hir().expect_expr(self.tcx.parent_hir_id(expr.hir_id));
-                if let Some(span) = call_expr.span.trim_start(expr.span) {
-                    err.span_suggestion(span, msg, "", Applicability::MachineApplicable);
-                    fallback_span = false;
-                }
-            }
-            if fallback_span {
-                err.span_label(span, msg);
-            }
-        } else if let Some(similar_candidate) = similar_candidate {
+        if let Some(similar_candidate) = similar_candidate {
             // Don't emit a suggestion if we found an actual method
             // that had unsatisfied trait bounds
             if unsatisfied_predicates.is_empty()

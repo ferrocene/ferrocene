@@ -24,8 +24,8 @@ apt install -y \
 
 if [[ ! -z "${INSTALL_LLVM}" ]]; then
     apt install -y \
-        llvm-17-tools \
-        llvm-17-dev
+        llvm-18-tools \
+        llvm-18-dev
 else
     echo 'Not installing LLVM, $INSTALL_LLVM is unset.'
 fi

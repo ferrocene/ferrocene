@@ -1,2 +1,4 @@
 error: Argument to option 'out-dir' missing
+       Usage:
+           --out-dir DIR       Write output to compiler-chosen filename in <dir>
 

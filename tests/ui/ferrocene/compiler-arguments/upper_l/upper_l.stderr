@@ -1,2 +1,6 @@
 error: Argument to option 'L' missing
+       Usage:
+           -L [KIND=]PATH      Add a directory to the library search path. The
+                               optional KIND can be one of dependency, crate, native,
+                               framework, or all (the default).
 

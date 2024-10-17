@@ -71,16 +71,13 @@ fn build_summary(matrix: &TraceabilityMatrix) -> Vec<SummaryRow<'_>> {
     let sample_kinds = matrix
         .analyses_by_kind()
         .map(|a| {
-            (
-                a.kind,
-                SummaryItem {
-                    kind: a.kind,
-                    linked: 0,
-                    informational: 0,
-                    total: 0,
-                    percentage: 0.0,
-                },
-            )
+            (a.kind, SummaryItem {
+                kind: a.kind,
+                linked: 0,
+                informational: 0,
+                total: 0,
+                percentage: 0.0,
+            })
         })
         .collect::<HashMap<_, _>>();
 

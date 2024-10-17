@@ -28,7 +28,8 @@ pub(crate) fn target() -> Target {
             features: "+v8a".into(),
             max_atomic_width: Some(128),
             pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[
-                "-Vgcc_ntoaarch64le_cxx", "-Wl,--fix-cortex-a53-843419"
+                "-Vgcc_ntoaarch64le_cxx",
+                "-Wl,--fix-cortex-a53-843419",
             ]),
             env: "nto70".into(),
             ..base::nto_qnx::opts()

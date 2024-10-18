@@ -6,7 +6,7 @@ inputs:
 outputs:
   directory:
     description: The directory QNX was unpacked to. (eg 'qnx-7.1.0-427')
-    value: ${{ steps. }}
+    value: ${{ steps.directory.outputs.directory }}
 
 runs:
   using: "composite"
@@ -36,6 +36,7 @@ runs:
       run: |
         rm -rf ${{ steps.calculate.outputs.filename }}
     - name: Set output directory
+      id: directory
       shell: bash
       env:
         DIRECTORY: qnx-${{ inputs.version }}

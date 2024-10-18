@@ -64,16 +64,16 @@ jobs:
         if: ${{ (runner.os == 'Linux') }}
         run: az acr login --name ferrocenecr
 
+      - name: Download QNX
+        uses: ./.github/actions/qnx/
+        with:
+          version: "7.1.0-472"
+
       - name: Restore build cache
         uses: ./.github/actions/restore-build-cache/
         with:
           build-artifact: ${{ inputs.build-artifact }}
           build-run-id: ${{ inputs.build-run-id }}
-
-      - name: Download QNX
-        uses: ./.github/actions/qnx/
-        with:
-          version: "7.1.0-472"
 
       - name: Run
         uses: ./.github/actions/run/

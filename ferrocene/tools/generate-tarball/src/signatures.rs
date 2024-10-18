@@ -8,7 +8,7 @@ use std::fs::File;
 use std::os::unix::prelude::MetadataExt;
 use std::path::Path;
 
-use anyhow::{anyhow, Error};
+use anyhow::{Error, anyhow};
 use criticaltrust::keys::{AwsKmsKeyPair, KeyPair, KeyRole};
 use criticaltrust::manifests::{ManifestVersion, Package, PackageFile, PackageManifest};
 use criticaltrust::signatures::SignedPayload;

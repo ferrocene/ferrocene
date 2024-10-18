@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use anyhow::Result;
 
 use crate::compression::{CompressionFormats, CompressionProfile};
-use crate::signatures::{sign_manifest_with_aws_kms, SignatureContext};
+use crate::signatures::{SignatureContext, sign_manifest_with_aws_kms};
 use crate::tarballer::Tarballer;
 use crate::util::{copy_recursive, create_dir_all, path_to_str, remove_dir_all};
 

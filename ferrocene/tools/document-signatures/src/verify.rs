@@ -5,12 +5,12 @@ use std::io::Read;
 use std::path::Path;
 use std::process::Command;
 
-use anyhow::{anyhow, Context, Error};
+use anyhow::{Context, Error, anyhow};
 
+use crate::CliOptions;
 use crate::config::Config;
 use crate::pinned::Pinned;
 use crate::signature_files::SignatureFiles;
-use crate::CliOptions;
 
 pub(crate) fn verify(
     source_dir: &Path,

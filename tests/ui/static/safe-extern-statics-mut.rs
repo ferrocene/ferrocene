@@ -10,10 +10,8 @@ extern "C" {
 fn main() {
     let b = B; //~ ERROR use of mutable static is unsafe
     let rb = &B; //~ ERROR use of mutable static is unsafe
-    //~^ WARN shared reference to mutable static is discouraged [static_mut_refs]
     let xb = XB; //~ ERROR use of mutable static is unsafe
     let xrb = &XB; //~ ERROR use of mutable static is unsafe
-    //~^ WARN shared reference to mutable static is discouraged [static_mut_refs]
 }
 
 // ferrocene-annotations: fls_tmoh3y9oyqsy

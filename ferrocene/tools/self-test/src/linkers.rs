@@ -526,12 +526,8 @@ mod tests {
             .create();
 
         // Having constructed a fake C compiler, we should be able to call it
-        cross_compile_test_program(
-            &test_cc,
-            Path::new("/some/fake/lld/path"),
-            temp_dir.path(),
-            &[],
-        )
+        cross_compile_test_program(&test_cc, Path::new("/some/fake/lld/path"), temp_dir.path(), &[
+        ])
         .expect("Working C compiler");
     }
 

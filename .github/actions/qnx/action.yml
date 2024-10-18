@@ -3,6 +3,10 @@ description: "Fetch a QNX deployment"
 inputs:
   version:
     description: The QNX version and BuildID (eg '7.1.0-472' for 7.1.0 BuildID 472)
+outputs:
+  directory:
+    description: The directory QNX was unpacked to. (eg 'qnx-7.1.0-427')
+    value: ${{ steps. }}
 
 runs:
   using: "composite"
@@ -31,3 +35,9 @@ runs:
       shell: bash
       run: |
         rm -rf ${{ steps.calculate.outputs.filename }}
+    - name: Set output directory
+      shell: bash
+      env:
+        DIRECTORY: qnx-${{ inputs.version }}
+      run: |
+        echo "directory=$DIRECTORY" >> $GITHUB_OUTPUT

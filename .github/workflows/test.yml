@@ -97,6 +97,7 @@ jobs:
 
       - name: Download QNX
         if: ${{ inputs.qnx-version != '' }}
+        id: qnx
         uses: ./.github/actions/qnx/
         with:
           version: ${{ inputs.qnx-version }}
@@ -121,7 +122,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -165,6 +166,7 @@ jobs:
 
       - name: Download QNX
         if: ${{ inputs.qnx-version != '' }}
+        id: qnx
         uses: ./.github/actions/qnx/
         with:
           version: ${{ inputs.qnx-version }}
@@ -182,7 +184,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -226,6 +228,7 @@ jobs:
 
       - name: Download QNX
         if: ${{ inputs.qnx-version != '' }}
+        id: qnx
         uses: ./.github/actions/qnx/
         with:
           version: ${{ inputs.qnx-version }}
@@ -243,7 +246,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -288,6 +291,7 @@ jobs:
 
       - name: Download QNX
         if: ${{ inputs.qnx-version != '' }}
+        id: qnx
         uses: ./.github/actions/qnx/
         with:
           version: ${{ inputs.qnx-version }}
@@ -305,7 +309,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('source qnx-{}/qnxsdp-env.sh', inputs.qnx-version)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report

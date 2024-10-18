@@ -65,6 +65,7 @@ jobs:
         run: az acr login --name ferrocenecr
 
       - name: Download QNX
+        id: qnx
         uses: ./.github/actions/qnx/
         with:
           version: "7.1.0-472"
@@ -81,7 +82,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            source qnx/qnx710-472/qnxsdp-env.sh
+            source ${{ steps.qnx.outputs.directory }}/qnxsdp-env.sh
             ./x.py --stage 2 dist rust-std
 
       - uses: actions/upload-artifact@v4

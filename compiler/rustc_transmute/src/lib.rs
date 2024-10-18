@@ -5,6 +5,10 @@
 #![warn(unreachable_pub)]
 // tidy-alphabetical-end
 
+// ferrocene change: This crate is not build upstream without the rustc feature
+// and a bunch of things here are unused in those cases
+#![cfg_attr(not(feature = "rustc"), allow(dead_code))]
+
 pub(crate) use rustc_data_structures::fx::{FxIndexMap as Map, FxIndexSet as Set};
 
 pub mod layout;

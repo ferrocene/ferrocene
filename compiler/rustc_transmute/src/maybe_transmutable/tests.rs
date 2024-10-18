@@ -107,7 +107,7 @@ mod bool {
             #[cfg(feature = "rustc")]
             let mut set = crate::Set::default();
             #[cfg(not(feature = "rustc"))]
-            let mut set = std::collections::HashSet::new();
+            let mut set = rustc_data_structures::fx::FxHashSet::default();
             set.extend(alts);
             set
         };

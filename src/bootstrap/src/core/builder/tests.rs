@@ -361,9 +361,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
-            host: b
-        },]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: a }, dist::Mingw {
             host: b
         },]);
@@ -384,9 +381,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
-            host: b
-        },]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: a }, dist::Mingw {
             host: b
         },]);
@@ -434,11 +428,6 @@ mod dist {
         let b = TargetSelection::from_user("B-B");
         let c = TargetSelection::from_user("C-C");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[
-            dist::Docs { host: a },
-            dist::Docs { host: b },
-            dist::Docs { host: c },
-        ]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[
             dist::Mingw { host: a },
             dist::Mingw { host: b },
@@ -478,9 +467,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-        assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
-            host: b
-        },]);
         assert_eq!(first(cache.all::<dist::Mingw>()), &[dist::Mingw { host: a }, dist::Mingw {
             host: b
         },]);

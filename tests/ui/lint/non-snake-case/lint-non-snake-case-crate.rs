@@ -10,9 +10,12 @@
 
 // But should fire on non-binary crates.
 
+//@[cdylib_] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
 //@[cdylib_] ignore-musl (dylibs are not supported)
+//@[dylib_] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
 //@[dylib_] ignore-musl (dylibs are not supported)
 //@[dylib_] ignore-wasm (dylib is not supported)
+//@[proc_macro_] ignore-aarch64-unknown-ferrocenecoretest (dylibs are not supported)
 //@[proc_macro_] ignore-wasm (dylib is not supported)
 
 //@[cdylib_] compile-flags: --crate-type=cdylib

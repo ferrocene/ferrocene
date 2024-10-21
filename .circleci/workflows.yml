@@ -1326,6 +1326,8 @@ commands:
     steps:
       - run:
           name: Execute the build
+          # dist ferrocene-src can take more than the default 10m timeout
+          no_output_timeout: 15m
           command: << parameters.wrapper >> ferrocene/ci/run.sh
 
       - run:

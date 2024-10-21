@@ -316,6 +316,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "fluent-langneg",
     "fluent-syntax",
     "fnv",
+    "foldhash", // dependency of `hashbrown`
     "generic-array",
     "getopts",
     "getrandom",

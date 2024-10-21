@@ -113,12 +113,12 @@ jobs:
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
           start-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
 
       - name: Run
@@ -128,8 +128,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -183,12 +183,12 @@ jobs:
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
           start-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
 
       - name: Run
@@ -197,7 +197,7 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
@@ -252,12 +252,12 @@ jobs:
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
           start-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
 
       - name: Run
@@ -266,8 +266,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -322,12 +322,12 @@ jobs:
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
           start-command: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
 
       - name: Run
@@ -336,8 +336,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE="{}/license/licenses"', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report

@@ -161,5 +161,13 @@ pub mod xous;
 #[cfg(any(unix, target_os = "hermit", target_os = "wasi", doc))]
 pub mod fd;
 
+#[cfg(target_os = "nuttx")]
+#[path = "nuttx/fd/mod.rs"]
+pub mod fd;
+
+#[cfg(target_os = "nuttx")]
+#[path = "nuttx/mod.rs"]
+pub mod unix;
+
 #[cfg(any(target_os = "linux", target_os = "android", doc))]
 mod net;

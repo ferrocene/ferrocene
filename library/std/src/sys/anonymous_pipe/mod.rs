@@ -1,7 +1,7 @@
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 cfg_if::cfg_if! {
-    if #[cfg(unix)] {
+    if #[cfg(any(unix, target_os = "nuttx"))] {
         mod unix;
         pub use unix::{AnonPipe, pipe};
     } else if #[cfg(windows)] {

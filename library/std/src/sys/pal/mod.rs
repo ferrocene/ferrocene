@@ -25,7 +25,10 @@
 pub mod common;
 
 cfg_if::cfg_if! {
-    if #[cfg(unix)] {
+    if #[cfg(target_os = "nuttx")] {
+        mod nuttx;
+        pub use self::nuttx::*;
+    } else if #[cfg(unix)] {
         mod unix;
         pub use self::unix::*;
     } else if #[cfg(windows)] {

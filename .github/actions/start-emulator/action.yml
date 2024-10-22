@@ -1,12 +1,22 @@
 name: "Start emulator"
 description: "Start the emulator."
 inputs:
-  container:
-    description: The container URI to run the emulator in, if any (Linux only)
-  prepare-command:
-    description: The command to prepare the emulator
-  start-command:
-    description: The command to start the emulator
+
+  container-prepare:
+    description: |
+      The container URI to prepare the emulator in, if any (Linux only).
+
+      Generally, this should be the same (glibc version-wise) container used in build
+      Otherwise, you may encounter strange issues with linking due to pthread/glibc not matching.
+  container-run:
+    description: |
+      The container URI to run the emulator in, if any (Linux only).
+
+      This can be a newer (glibc version-wise) container than the `container-prepare`, but should not be older.
+  command-prepare:
+    description: The command to prepare the emulator.
+  command-start:
+    description: The command to start the emulator.
 runs:
   using: "composite"
   steps:
@@ -15,13 +25,14 @@ runs:
       run: mkdir /tmp/emulator
       
     - name: Prepare emulator (in container)
-      if: ${{ (inputs.prepare-command != '') && (inputs.container != '') }}
+      if: ${{ (inputs.command-prepare != '') && (inputs.container-prepare != '') }}
       shell: bash
       env:
-        SCRIPT: bash -c "${{ inputs.prepare-command }}"
+        SCRIPT: bash -c "${{ inputs.command-prepare }}"
       run: |
         docker run \
           --rm \
+          --privileged \
           --interactive \
           --env CI \
           --env SCRIPT \
@@ -35,24 +46,25 @@ runs:
           --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
           --user $(id -u):$(id -g) \
           --network host \
-          ${{ inputs.container }} \
+          ${{ inputs.container-prepare }} \
           ferrocene/ci/run.sh
 
     - name: Prepare emulator
-      if: ${{ (inputs.prepare-command != '') && (inputs.container == '') }}
+      if: ${{ (inputs.command-prepare != '') && (inputs.container-prepare == '') }}
       shell: bash
       env:
-        SCRIPT: bash -c "${{ inputs.prepare-command }}"
+        SCRIPT: bash -c "${{ inputs.command-prepare }}"
       run: ferrocene/ci/run.sh
 
     - name: Run emulator in background (in container)
-      if: ${{ (inputs.start-command != '') && (inputs.container != '') }}
+      if: ${{ (inputs.command-start != '') && (inputs.container-run != '') }}
       shell: bash
       env:
-        SCRIPT: bash -c "${{ inputs.start-command }}"
+        SCRIPT: bash -c "${{ inputs.command-start }}"
       run: |
           docker run \
           --rm \
+          --privileged \
           --interactive \
           --env CI \
           --env SCRIPT \
@@ -66,12 +78,12 @@ runs:
           --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
           --user $(id -u):$(id -g) \
           --network host \
-          ${{ inputs.container }} \
+          ${{ inputs.container-run }} \
           ferrocene/ci/run.sh & 
 
     - name: Run emulator in background
-      if: ${{ (inputs.start-command != '') && (inputs.container == '') }}
+      if: ${{ (inputs.command-start != '') && (inputs.container-run == '') }}
       shell: bash
       env:
-        SCRIPT: bash -c "${{ inputs.start-command }}"
+        SCRIPT: bash -c "${{ inputs.command-start }}"
       run: ferrocene/ci/run.sh &

@@ -62,24 +62,30 @@ runs:
       env:
         SCRIPT: bash -c "${{ inputs.command-start }}"
       run: |
-          docker run \
-          --rm \
-          --privileged \
-          --interactive \
-          --env CI \
-          --env SCRIPT \
-          --env FERROCENE_HOST \
-          --env FERROCENE_TARGETS \
-          --env OUTSIDE_FERROUS \
-          --env REMOTE_TEST_SERVER_STAGE=2 \
-          --env RUST_CONFIGURE_ARGS \
-          --workdir /home/ci/project \
-          --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
-          --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
-          --user $(id -u):$(id -g) \
-          --network host \
-          ${{ inputs.container-run }} \
-          ferrocene/ci/run.sh & 
+          CONTAINER=$(docker create \
+            --privileged \
+            --interactive \
+            --env CI \
+            --env SCRIPT \
+            --env FERROCENE_HOST \
+            --env FERROCENE_TARGETS \
+            --env OUTSIDE_FERROUS \
+            --env REMOTE_TEST_SERVER_STAGE=2 \
+            --env RUST_CONFIGURE_ARGS \
+            --workdir /home/ci/project \
+            --mount "type=bind,src=$(pwd),dst=/home/ci/project" \
+            --mount "type=bind,src=/tmp/emulator,dst=/tmp/emulator" \
+            --user $(id -u):$(id -g) \
+            --network host \
+            ${{ inputs.container-run }} \
+            ferrocene/ci/run.sh)
+          
+          echo "Container is $CONTAINER"
+          docker start $CONTAINER"
+
+          sleep 5
+
+          docker logs $CONTAINER
 
     - name: Run emulator in background
       if: ${{ (inputs.command-start != '') && (inputs.container-run == '') }}

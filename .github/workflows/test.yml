@@ -110,6 +110,7 @@ jobs:
 
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
@@ -180,6 +181,7 @@ jobs:
       
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
@@ -194,6 +196,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -249,6 +252,7 @@ jobs:
 
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
@@ -263,6 +267,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -319,6 +324,7 @@ jobs:
 
       - name: Start emulator
         uses: ./.github/actions/start-emulator/
+        if: ${{ inputs.emulator-start-command != '' }}
         with:
           container: ${{ inputs.emulator-container }}
           prepare-command: |
@@ -333,6 +339,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
+          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |

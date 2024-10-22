@@ -112,12 +112,13 @@ jobs:
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
-          container: ${{ inputs.emulator-container }}
-          prepare-command: |
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
-          start-command: |
+          command-start: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
@@ -183,12 +184,13 @@ jobs:
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
-          container: ${{ inputs.emulator-container }}
-          prepare-command: |
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
-          start-command: |
+          command-start: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
@@ -200,8 +202,8 @@ jobs:
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
-            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={}/license/licenses', steps.qnx.outputs.directory)) || '' }}
-            ${{ (inputs.qnx-version != '' && format('source {}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
+            ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
 
       - name: Generate usage report
@@ -254,12 +256,13 @@ jobs:
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
-          container: ${{ inputs.emulator-container }}
-          prepare-command: |
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
-          start-command: |
+          command-start: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}
@@ -326,12 +329,13 @@ jobs:
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
-          container: ${{ inputs.emulator-container }}
-          prepare-command: |
+          container-prepare: ${{ inputs.container }}
+          container-run: ${{ inputs.emulator-container }}
+          command-prepare: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-prepare-command }}
-          start-command: |
+          command-start: |
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ${{ inputs.emulator-start-command }}

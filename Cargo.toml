@@ -69,6 +69,7 @@ exclude = [
   # stdarch has its own Cargo workspace
   "library/stdarch",
   "library/windows_targets",
+  "src/tools/rustc-perf/site",
 ]
 
 [profile.release.package.compiler_builtins]

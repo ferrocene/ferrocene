@@ -122,6 +122,7 @@ impl Step for SourceTarball {
             "src/bootstrap/Cargo.toml",
             "src/tools/cargo/Cargo.toml",
             "src/tools/rust-analyzer/Cargo.toml",
+            "src/tools/rustc-perf/site/Cargo.toml",
         ];
 
         let mut subsetter = Subsetter::new(builder, "ferrocene-src", "");

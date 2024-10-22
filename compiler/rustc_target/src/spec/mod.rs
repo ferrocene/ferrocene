@@ -2448,8 +2448,9 @@ fn add_link_args_iter(
     insert(flavor);
     match flavor {
         LinkerFlavor::Gnu(cc, lld) => {
-            assert_eq!(lld, Lld::No);
-            insert(LinkerFlavor::Gnu(cc, Lld::Yes));
+            if lld == Lld::No {
+                insert(LinkerFlavor::Gnu(cc, Lld::Yes));
+            }
         }
         LinkerFlavor::Darwin(cc, lld) => {
             assert_eq!(lld, Lld::No);

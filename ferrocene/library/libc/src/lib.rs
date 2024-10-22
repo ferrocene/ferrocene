@@ -137,6 +137,12 @@ cfg_if! {
 
         mod solid;
         pub use solid::*;
+    } else if #[cfg(target_os = "nuttx")] {
+        mod fixed_width_ints;
+        pub use fixed_width_ints::*;
+
+        mod nuttx;
+        pub use nuttx::*;
     } else if #[cfg(unix)] {
         mod fixed_width_ints;
         pub use fixed_width_ints::*;

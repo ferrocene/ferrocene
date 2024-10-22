@@ -2309,7 +2309,7 @@ impl<'a> Builder<'a> {
             rustdocflags.arg("--cfg=parallel_compiler");
         }
 
-        if target.contains("ferrocenecoretest") {
+        if target.contains("ferrocenecoretest") || target.contains("nuttx") {
             rustflags.arg("-Zpanic-abort-tests");
         }
 

@@ -141,6 +141,7 @@ jobs:
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "127.0.0.1:12345"
       emulator-container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
       emulator-prepare-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh prepare
       emulator-start-command: ferrocene/ci/scripts/emulated-aarch64-test-runner.sh
@@ -163,6 +164,7 @@ jobs:
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.11:12345"
       emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
@@ -186,6 +188,7 @@ jobs:
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
       container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+      test-device-addr: "172.31.1.11:12345"
       emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
       emulator-prepare-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh prepare
       emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh

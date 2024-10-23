@@ -18,12 +18,6 @@ on:
         type: boolean
         default: true
         description: If the stdlib should be tested (enables the `library-std` job)
-      self-test-triples:
-        # We cannot specify an array here
-        # See: https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_callinputsinput_idtype
-        #      https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
-        type: string
-        description: A comma separated list of triples to self-test on
       runner:
         type: string
         description: The GitHub Runner to run on
@@ -45,6 +39,9 @@ on:
       emulator-start-command:
         type: string
         description: The command to start the emulator
+      test-device-addr:
+        type: string
+        description: The test device address used by the emulator script
       qnx-version:
         type: string
         default: ""
@@ -127,7 +124,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -204,7 +201,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -281,7 +278,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |
@@ -359,7 +356,7 @@ jobs:
       - name: Run
         uses: ./.github/actions/run/
         with:
-          test-device-addr: ${{ (inputs.emulator-start-command != '') && '127.0.0.1:12345' || ''}}
+          test-device-addr: ${{ inputs.test-device-addr }}
           container: ${{ inputs.container }}
           # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
           script: |

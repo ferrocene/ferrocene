@@ -47,7 +47,7 @@ The following are sections in |iec_ref| Part 3.
      - | :doc:`Evaluation Report - rustc - Tool analysis <evaluation-report:rustc/tool-analysis>`
        | :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
      - :ref:`Evaluation Report - rustfmt - Tool analysis - Tool Classification <rustfmt_iec_tool_classification>`
-     - :ref:`Evaluation Report - ferrocene-self-test - Tool analysis - Tool Classification <ferrocene_self_test_iec_tool_classification>`
+     - :ref:`Evaluation Report - ferrocene-self-test - Tool analysis - Tool Classification <self_test_iec_tool_classification>`
 
    * - 7.4.4.7
      - See sub items below

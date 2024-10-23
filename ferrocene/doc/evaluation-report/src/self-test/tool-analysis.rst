@@ -53,7 +53,7 @@ Detection Measures and Usage Restriction
 Detection measures and usage restrictions are documented in the :doc:`safety
 manual <safety-manual:self-test/constraints>`.
 
-.. _ferrocene_self_test_iso_tool_classification:
+.. _self_test_iso_tool_classification:
 
 ISO 26262 Tool Classification
 -----------------------------
@@ -77,7 +77,7 @@ According to clause 11.4.2 in part 8 of the [|iso_ref|] standard,
 this choice depends on the user's software development life-cycle and their validation strategy.
 The user has the responsibility to determine whether this level, or a better one, is applicable.
 
-.. _ferrocene_self_test_iec_tool_classification:
+.. _self_test_iec_tool_classification:
 
 IEC 61508 Tool Classification
 -----------------------------

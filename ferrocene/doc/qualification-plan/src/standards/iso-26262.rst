@@ -57,7 +57,7 @@ The following are sections in |iso_ref| Part 8.
    * - 11.4.4.1.e
      - :doc:`Qualification Report - Acceptability statement <qualification-report:statement>`
      - :ref:`Evaluation Report - rustfmt - Tool analysis - Tool Classification <rustfmt_iso_tool_classification>`
-     - :ref:`Evaluation Report - ferrocene-self-test - Tool analysis - Tool Classification <ferrocene_self_test_iso_tool_classification>`
+     - :ref:`Evaluation Report - ferrocene-self-test - Tool analysis - Tool Classification <self_test_iso_tool_classification>`
 
    * - 11.4.4.1.f
      - :doc:`Evaluation Report - Qualification Method <evaluation-report:rustc/method>`

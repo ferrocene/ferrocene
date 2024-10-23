@@ -81,7 +81,7 @@ runs:
             ferrocene/ci/run.sh)
           
           echo "Container is $CONTAINER"
-          docker start $CONTAINER"
+          docker start $CONTAINER
 
           sleep 5
 

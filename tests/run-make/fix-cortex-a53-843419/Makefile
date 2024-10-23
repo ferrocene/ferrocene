@@ -26,7 +26,7 @@ all:
   # 1. check that linker is invoked with the errata workaround flag
 	$(RUSTC) $(RUSTC_FLAGS) main.rs | $(CGREP) -- --fix-cortex-a53-843419
   # # Targets that use GCC / LD as linker
-ifeq ($(TARGET),aarch64-unknown-nto-qnx710)
+ifeq ($(TARGET),no-target-uses-gnu-ld)
   # 2. check that the first two required pre-condition instructions (ADRP then LDR) are NOT there. GCC will replace ADRP with ADR
 	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -v -e 'adrp[[:space:]]+x0'
 	aarch64-linux-gnu-objdump --start-address=0xff8 --stop-address=0xffc -Cd $(TMPDIR)/main | $(CGREP) -e 'adr[[:space:]]+x0'

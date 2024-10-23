@@ -77,17 +77,17 @@ The following are sections in |iec_ref| Part 3.
    * - 7.4.4.7.e
      - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - N/A
-     - TODO
+     - TODO: add reference to test result page when it exists
 
    * - 7.4.4.7.f
      - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - N/A
-     - TODO
+     - TODO: add reference to test result page when it exists
 
    * - 7.4.4.7.g
      - :doc:`Qualification Report - Test results <qualification-report:rustc/index>`
      - N/A
-     - TODO
+     - TODO: add reference to test result page when it exists
 
    * - 7.4.4.8
      - N/A

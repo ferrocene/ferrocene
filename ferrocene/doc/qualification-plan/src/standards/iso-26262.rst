@@ -217,7 +217,7 @@ The following are sections in |iso_ref| Part 8.
    * - 11.4.6.2.h
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
      - N/A
-     - TODO
+     - TODO: add reference to test result page when it exists
 
    * - 11.4.7
      - N/A
@@ -262,7 +262,7 @@ The following are sections in |iso_ref| Part 8.
    * - 11.4.9.2.b
      - :doc:`Qualification Report - rustc - Test results <qualification-report:rustc/index>`
      - N/A
-     - TODO
+     - TODO: add reference to test result page when it exists
 
    * - 11.4.9.2.c
      - :doc:`Safety Manual - rustc - Degraded environment <safety-manual:rustc/degraded-environment>`

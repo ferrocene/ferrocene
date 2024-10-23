@@ -166,8 +166,8 @@ The following are sections in |iec_ref| Part 3.
 
    * - 7.4.4.14
      - This qualification
-     - This qualification
-     - This qualification
+     - N/A
+     - N/A
 
    * - 7.4.4.15
      - See sub items below

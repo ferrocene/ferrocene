@@ -109,6 +109,7 @@ jobs:
           build-run-id: ${{ inputs.build-run-id }}
 
       - name: Start emulator
+        id: start-emulator
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
@@ -133,6 +134,10 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.container && always() }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -181,6 +186,7 @@ jobs:
           version: ${{ inputs.qnx-version }}
       
       - name: Start emulator
+        id: start-emulator
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
@@ -205,6 +211,10 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:compiletest) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.container && always() }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -253,6 +263,7 @@ jobs:
           version: ${{ inputs.qnx-version }}
 
       - name: Start emulator
+        id: start-emulator
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
@@ -277,6 +288,10 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.container && always() }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
@@ -326,6 +341,7 @@ jobs:
           version: ${{ inputs.qnx-version }}
 
       - name: Start emulator
+        id: start-emulator
         uses: ./.github/actions/start-emulator/
         if: ${{ inputs.emulator-start-command != '' }}
         with:
@@ -350,6 +366,10 @@ jobs:
             ${{ (inputs.qnx-version != '' && format('export QNX_LICENSE_FILE={0}/license/licenses', steps.qnx.outputs.directory)) || '' }}
             ${{ (inputs.qnx-version != '' && format('source {0}/qnxsdp-env.sh', steps.qnx.outputs.directory)) || '' }}
             ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
+
+      - name: Output container logs
+        if: ${{ inputs.container && always() }}
+        run: docker logs ${{ steps.start-emulator.outputs.container }}
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/

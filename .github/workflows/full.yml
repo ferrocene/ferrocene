@@ -133,7 +133,10 @@ jobs:
       test-host-tools: false
       test-std: false
       triple: aarch64-unknown-ferrocenecoretest
-      host-triple: x86_64-unknown-linux-gnu
+      # In the old CircleCI jobs, we did not pass this...
+      # When this is enabled, we experienced test failures where it was
+      # trying to test the x86_64 artifacts in CI
+      host-triple: "" # x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}

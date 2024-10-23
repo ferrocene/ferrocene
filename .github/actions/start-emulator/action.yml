@@ -1,7 +1,6 @@
 name: "Start emulator"
 description: "Start the emulator."
 inputs:
-
   container-prepare:
     description: |
       The container URI to prepare the emulator in, if any (Linux only).
@@ -17,6 +16,11 @@ inputs:
     description: The command to prepare the emulator.
   command-start:
     description: The command to start the emulator.
+outputs:
+  container:
+    description: The container ID of the emulator, if applicable
+    value: ${{ steps.start.outputs.container }}
+
 runs:
   using: "composite"
   steps:
@@ -58,6 +62,7 @@ runs:
 
     - name: Run emulator in background (in container)
       if: ${{ (inputs.command-start != '') && (inputs.container-run != '') }}
+      id: start
       shell: bash
       env:
         SCRIPT: bash -c "${{ inputs.command-start }}"
@@ -81,9 +86,10 @@ runs:
             ferrocene/ci/run.sh)
           
           echo "Container is $CONTAINER"
+          echo "container=$CONTAINER" >> $GITHUB_OUTPUT
           docker start $CONTAINER
 
-          sleep 5
+          sleep 10
 
           docker logs $CONTAINER
 

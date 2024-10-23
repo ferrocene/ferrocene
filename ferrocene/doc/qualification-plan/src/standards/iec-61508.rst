@@ -131,8 +131,8 @@ The following are sections in |iec_ref| Part 3.
 
    * - 7.4.4.11
      - N/A
-     - N/A
-     - N/A
+     - :doc:`Safety Manual - rustfmt - Implementation language <safety-manual:rustfmt/implementation>`
+     - :doc:`Safety Manual - ferrocene-self-test - Implementation language <safety-manual:rustfmt/implementation>`
 
    * - 7.4.4.12
      - :doc:`Qualification Plan - Development process <qualification-plan:development>`

@@ -39,6 +39,7 @@ scope, in accordance to the standards above.
    rustfmt/usage
    rustfmt/options
    rustfmt/constraints
+   rustfmt/implementation
 
 .. toctree::
    :maxdepth: 2
@@ -47,6 +48,7 @@ scope, in accordance to the standards above.
 
    self-test/usage
    self-test/constraints
+   self-test/implementation
 
 .. appendices::
    :maxdepth: 2

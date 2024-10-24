@@ -228,6 +228,8 @@ ENV CC_armv8r_none_eabihf=arm-none-eabi-gcc
 ENV CXX_armv8r_none_eabihf=arm-none-eabi-g++
 ENV CFLAGS_aarch64_unknown_nto_qnx710=-Vgcc_ntoaarch64le_cxx
 ENV CFLAGS_x86_64_pc_nto_qnx710=-Vgcc_ntox86_64_cxx
+ENV CC_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-gcc
+ENV CXX_riscv64gc_unknown_linux_gnu=riscv64-unknown-linux-gnu-g++
 
 # Automatic CFLAGs do not work for some targets.
 ENV CFLAGS_armv8r_none_eabihf="-march=armv8-r -mfpu=fp-armv8"

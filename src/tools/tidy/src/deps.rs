@@ -37,6 +37,7 @@ const LICENSES: &[&str] = &[
     "Unlicense OR MIT",
     "Unlicense/MIT",
     "Zlib OR Apache-2.0 OR MIT",                           // tinyvec
+    "Zlib",                                                // hashbrown, foldhash
     // tidy-alphabetical-end
 ];
 
@@ -315,6 +316,7 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "fluent-langneg",
     "fluent-syntax",
     "fnv",
+    "foldhash", // dependency of `hashbrown`
     "generic-array",
     "getopts",
     "getrandom",

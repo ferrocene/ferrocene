@@ -62,10 +62,16 @@ Leave it blank if the issue is still open.
 frontmatter `duplicate`
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The duplicate field is optional and marks whether a new problem is a duplicate 
-of an older one. `introduced-commit` and/or `fixed-commit` may be different. 
-The problem is marked as duplicate if 
+The duplicate field is optional and marks whether a new problem is a duplicate
+of an older one. `introduced-commit` and/or `fixed-commit` may be different.
+The problem is marked as duplicate if
 it is considered as duplicate upstream.
+
+frontmatter `test-paths`
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The `test-paths` field references paths of all tests that test the absence of the fixed known problem.
+This field is only populated for known problems that have their `fixed-commit` filled out.
 
 heading `Description`
 ^^^^^^^^^^^^^^^^^^^^^

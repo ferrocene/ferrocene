@@ -61,21 +61,21 @@ jobs:
   #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
   #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  # test-x86_64-unknown-linux-gnu:
-  #   name: Test (x86_64-unknown-linux-gnu)
-  #   uses: ./.github/workflows/test.yml
-  #   needs:
-  #     - container-x86_64-ubuntu-20
-  #     - build-x86_64-unknown-linux-gnu
-  #     # - targets
-  #   secrets: inherit
-  #   with:
-  #     triple: x86_64-unknown-linux-gnu
-  #     host-triple: x86_64-unknown-linux-gnu
-  #     runner: 8core-x86_64-unknown-linux-gnu
-  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  test-x86_64-unknown-linux-gnu:
+    name: Test (x86_64-unknown-linux-gnu)
+    uses: ./.github/workflows/test.yml
+    needs:
+      - container-x86_64-ubuntu-20
+      - build-x86_64-unknown-linux-gnu
+      # - targets
+    secrets: inherit
+    with:
+      triple: x86_64-unknown-linux-gnu
+      host-triple: x86_64-unknown-linux-gnu
+      runner: 8core-x86_64-unknown-linux-gnu
+      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   # doc:
   #   name: Doc
@@ -173,32 +173,32 @@ jobs:
   #     emulator-start-command: ./ferrocene/ci/scripts/emulated-x86_64-qnx-test-runner.sh
   #     qnx-version: "7.1.0-472"
 
-  test-aarch64-unknown-nto-qnx710:
-    name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
-    uses: ./.github/workflows/test.yml
-    needs:
-      - container-x86_64-ubuntu-20
-      - container-x86_64-ubuntu-24
-      - build-x86_64-unknown-linux-gnu
-      - targets
-    secrets: inherit
-    with:
-      test-host-tools: false
-      test-std: true
-      triple: aarch64-unknown-nto-qnx710
-      # In the old CircleCI jobs, we did not pass this...
-      # When this is enabled, we experienced test failures where it was
-      # trying to test the x86_64 artifacts in CI
-      host-triple: "" # x86_64-unknown-linux-gnu
-      runner: 8core-x86_64-unknown-linux-gnu
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
-      test-device-addr: "172.31.1.105:12345"
-      emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
-      emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
-      emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
-      qnx-version: "7.1.0-472"
+  # test-aarch64-unknown-nto-qnx710:
+  #   name: Test (aarch64-unknown-nto-qnx710 by x86_64-unknown-linux-gnu)
+  #   uses: ./.github/workflows/test.yml
+  #   needs:
+  #     - container-x86_64-ubuntu-20
+  #     - container-x86_64-ubuntu-24
+  #     - build-x86_64-unknown-linux-gnu
+  #     - targets
+  #   secrets: inherit
+  #   with:
+  #     test-host-tools: false
+  #     test-std: true
+  #     triple: aarch64-unknown-nto-qnx710
+  #     # In the old CircleCI jobs, we did not pass this...
+  #     # When this is enabled, we experienced test failures where it was
+  #     # trying to test the x86_64 artifacts in CI
+  #     host-triple: "" # x86_64-unknown-linux-gnu
+  #     runner: 8core-x86_64-unknown-linux-gnu
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  #     test-device-addr: "172.31.1.105:12345"
+  #     emulator-container: ${{ needs.container-x86_64-ubuntu-24.outputs.uri }}
+  #     emulator-prepare-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh prepare
+  #     emulator-start-command: ./ferrocene/ci/scripts/emulated-aarch64-qnx-test-runner.sh
+  #     qnx-version: "7.1.0-472"
 
   # build-x86_64-pc-windows-msvc:
   #   name: Build (x86_64-pc-windows-msvc)
@@ -275,15 +275,15 @@ jobs:
     needs:
       - container-x86_64-ubuntu-20
       - build-x86_64-unknown-linux-gnu
-      # - test-x86_64-unknown-linux-gnu
+      - test-x86_64-unknown-linux-gnu
       # - test-aarch64-unknown-ferrocenecoretest
       # - test-x86_64-pc-nto-qnx710
-      - test-aarch64-unknown-nto-qnx710
+      # - test-aarch64-unknown-nto-qnx710
       # - test-x86_64-pc-windows-msvc
       # - test-aarch64-apple-darwin
     secrets: inherit
     with:
       host-triple: x86_64-unknown-linux-gnu
-      runner: ubuntu-24.04
+      runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
       build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}   

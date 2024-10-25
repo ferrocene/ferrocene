@@ -493,6 +493,8 @@ pub fn filter_tests(opts: &TestOpts, tests: Vec<TestDescAndFn>) -> Vec<TestDescA
     // Excludes #[should_panic] tests
     if opts.exclude_should_panic {
         filtered.retain(|test| test.desc.should_panic == ShouldPanic::No);
+    } else if opts.only_should_panic {
+        filtered.retain(|test| test.desc.should_panic == ShouldPanic::Yes);
     }
 
     // maybe unignore tests

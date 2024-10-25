@@ -14,6 +14,7 @@ pub struct TestOpts {
     pub filter_exact: bool,
     pub force_run_in_process: bool,
     pub exclude_should_panic: bool,
+    pub only_should_panic: bool,
     pub run_ignored: RunIgnored,
     pub run_tests: bool,
     pub bench_benchmarks: bool,
@@ -54,6 +55,7 @@ fn optgroups() -> getopts::Options {
         .optflag("", "ignored", "Run only ignored tests")
         .optflag("", "force-run-in-process", "Forces tests to run in-process when panic=abort")
         .optflag("", "exclude-should-panic", "Excludes tests marked as should_panic")
+        .optflag("", "only-should-panic", "Only executes tests marked as should_panic")
         .optflag("", "test", "Run tests and not benchmarks")
         .optflag("", "bench", "Run benchmarks instead of tests")
         .optflag("", "list", "List all tests and benchmarks")
@@ -258,6 +260,13 @@ fn parse_opts_impl(matches: getopts::Matches) -> OptRes {
     // Unstable flags
     let force_run_in_process = unstable_optflag!(matches, allow_unstable, "force-run-in-process");
     let exclude_should_panic = unstable_optflag!(matches, allow_unstable, "exclude-should-panic");
+    let only_should_panic = unstable_optflag!(matches, allow_unstable, "only-should-panic");
+    if exclude_should_panic && only_should_panic {
+        return Err(
+            "cannot use `--exclude-should-panic` and `--only-should-panic` at the same time"
+                .to_string(),
+        );
+    }
     let time_options = get_time_options(&matches, allow_unstable)?;
     let shuffle = get_shuffle(&matches, allow_unstable)?;
     let shuffle_seed = get_shuffle_seed(&matches, allow_unstable)?;
@@ -287,6 +296,7 @@ fn parse_opts_impl(matches: getopts::Matches) -> OptRes {
         filter_exact: exact,
         force_run_in_process,
         exclude_should_panic,
+        only_should_panic,
         run_ignored,
         run_tests,
         bench_benchmarks,

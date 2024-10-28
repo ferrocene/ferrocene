@@ -90,6 +90,7 @@ pub(crate) const WORKSPACES: &[(&str, ExceptionList, Option<(&[&str], &[&str])>,
 const EXCEPTIONS: ExceptionList = &[
     // tidy-alphabetical-start
     ("ar_archive_writer", "Apache-2.0 WITH LLVM-exception"), // rustc
+    ("arrayref", "BSD-2-Clause"),                            // rustc
     ("aws-config", "Apache-2.0"),                            // generate-tarball, through criticaltrust
     ("aws-credential-types", "Apache-2.0"),                  // generate-tarball, through criticaltrust
     ("aws-http", "Apache-2.0"),                              // generate-tarball, through criticaltrust
@@ -109,7 +110,9 @@ const EXCEPTIONS: ExceptionList = &[
     ("aws-smithy-types", "Apache-2.0"),                      // generate-tarball, through criticaltrust
     ("aws-smithy-xml", "Apache-2.0"),                        // generate-tarball, through criticaltrust
     ("aws-types", "Apache-2.0"),                             // generate-tarball, through criticaltrust
+    ("blake3", "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"),  // rustc
     ("colored", "MPL-2.0"),                                  // rustfmt
+    ("constant_time_eq", "CC0-1.0 OR MIT-0 OR Apache-2.0"),  // rustc
     ("dissimilar", "Apache-2.0"),                            // rustdoc, rustc_lexer (few tests) via expect-test, (dev deps)
     ("fluent-langneg", "Apache-2.0"),                        // rustc (fluent translations)
     ("insta", "Apache-2.0"),                                 // generate-tarball
@@ -273,15 +276,18 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "annotate-snippets",
     "anstyle",
     "ar_archive_writer",
+    "arrayref",
     "arrayvec",
     "autocfg",
     "bitflags",
+    "blake3",
     "block-buffer",
     "byteorder", // via ruzstd in object in thorin-dwp
     "cc",
     "cfg-if",
     "cfg_aliases",
     "const-oid", // this is a false positive: it's only used by generate-tarball
+    "constant_time_eq",
     "cpufeatures",
     "crc32fast",
     "crossbeam-channel",
@@ -296,7 +302,6 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "datafrog",
     "deranged",
     "derive-where",
-    "derive_more",
     "derive_setters",
     "digest",
     "displaydoc",
@@ -461,6 +466,9 @@ const PERMITTED_RUSTC_DEPENDENCIES: &[&str] = &[
     "winapi-x86_64-pc-windows-gnu",
     "windows",
     "windows-core",
+    "windows-implement",
+    "windows-interface",
+    "windows-result",
     "windows-sys",
     "windows-targets",
     "windows_aarch64_gnullvm",
@@ -509,6 +517,7 @@ const PERMITTED_STDLIB_DEPENDENCIES: &[&str] = &[
     "rand_xorshift",
     "rustc-demangle",
     "ruzstd",
+    "shlex",
     "unicode-width",
     "unwinding",
     "wasi",

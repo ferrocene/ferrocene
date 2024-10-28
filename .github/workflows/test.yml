@@ -227,7 +227,7 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: test-compiletest-${{inputs.triple}}
+      ARTIFACT: test-library-${{inputs.triple}}
       ARTIFACT_USAGE: test-library-${{inputs.triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
       FERROCENE_TARGETS: ${{ inputs.triple }}

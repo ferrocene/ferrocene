@@ -26,6 +26,7 @@ const LICENSES: &[&str] = &[
     "BSD-2-Clause",                                        // zerocopy
     "ISC",
     "MIT / Apache-2.0",
+    "MIT AND (MIT OR Apache-2.0)",                         // libm
     "MIT OR Apache-2.0 OR LGPL-2.1-or-later",              // r-efi, r-efi-alloc
     "MIT OR Apache-2.0 OR Zlib",                           // tinyvec_macros
     "MIT OR Apache-2.0",

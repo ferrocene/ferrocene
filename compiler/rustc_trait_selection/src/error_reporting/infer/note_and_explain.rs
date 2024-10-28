@@ -1,14 +1,14 @@
 use rustc_errors::Applicability::{MachineApplicable, MaybeIncorrect};
-use rustc_errors::{pluralize, Diag, MultiSpan};
+use rustc_errors::{Diag, MultiSpan, pluralize};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_middle::traits::{ObligationCause, ObligationCauseCode};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::fast_reject::DeepRejectCtxt;
 use rustc_middle::ty::print::{FmtPrinter, Printer};
-use rustc_middle::ty::{self, suggest_constraining_type_param, Ty};
+use rustc_middle::ty::{self, Ty, suggest_constraining_type_param};
 use rustc_span::def_id::DefId;
-use rustc_span::{sym, BytePos, Span, Symbol};
+use rustc_span::{BytePos, Span, Symbol, sym};
 use tracing::debug;
 
 use crate::error_reporting::TypeErrCtxt;
@@ -720,7 +720,7 @@ fn foo(&self) -> Self::T { String::new() }
         if let ty::Alias(ty::Opaque, ty::AliasTy { def_id, .. }) = *proj_ty.self_ty().kind() {
             let opaque_local_def_id = def_id.as_local();
             let opaque_hir_ty = if let Some(opaque_local_def_id) = opaque_local_def_id {
-                tcx.hir().expect_item(opaque_local_def_id).expect_opaque_ty()
+                tcx.hir().expect_opaque_ty(opaque_local_def_id)
             } else {
                 return false;
             };

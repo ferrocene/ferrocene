@@ -2,13 +2,14 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use rustc_data_structures::sync::{IntoDynSyncSend, Lrc};
-use rustc_errors::emitter::{stderr_destination, DynEmitter, Emitter, HumanEmitter, SilentEmitter};
+use rustc_errors::emitter::{DynEmitter, Emitter, HumanEmitter, SilentEmitter, stderr_destination};
 use rustc_errors::translation::Translate;
 use rustc_errors::{ColorConfig, Diag, DiagCtxt, DiagInner, Level as DiagnosticLevel};
 use rustc_session::parse::ParseSess as RawParseSess;
 use rustc_span::{
+    BytePos, Span,
     source_map::{FilePathMapping, SourceMap},
-    symbol, BytePos, Span,
+    symbol,
 };
 
 use crate::config::file_lines::LineRange;
@@ -45,7 +46,7 @@ impl SilentOnIgnoredFilesEmitter {
 }
 
 impl Translate for SilentOnIgnoredFilesEmitter {
-    fn fluent_bundle(&self) -> Option<&Lrc<rustc_errors::FluentBundle>> {
+    fn fluent_bundle(&self) -> Option<&rustc_errors::FluentBundle> {
         self.emitter.fluent_bundle()
     }
 
@@ -55,7 +56,7 @@ impl Translate for SilentOnIgnoredFilesEmitter {
 }
 
 impl Emitter for SilentOnIgnoredFilesEmitter {
-    fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+    fn source_map(&self) -> Option<&SourceMap> {
         None
     }
 
@@ -343,7 +344,7 @@ mod tests {
         }
 
         impl Translate for TestEmitter {
-            fn fluent_bundle(&self) -> Option<&Lrc<rustc_errors::FluentBundle>> {
+            fn fluent_bundle(&self) -> Option<&rustc_errors::FluentBundle> {
                 None
             }
 
@@ -353,7 +354,7 @@ mod tests {
         }
 
         impl Emitter for TestEmitter {
-            fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+            fn source_map(&self) -> Option<&SourceMap> {
                 None
             }
 
@@ -394,7 +395,9 @@ mod tests {
         }
 
         fn get_ignore_list(config: &str) -> IgnoreList {
-            Config::from_toml(config, Path::new("")).unwrap().ignore()
+            Config::from_toml(config, Path::new("./rustfmt.toml"))
+                .unwrap()
+                .ignore()
         }
 
         #[test]

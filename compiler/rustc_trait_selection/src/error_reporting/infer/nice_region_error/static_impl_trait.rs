@@ -3,7 +3,7 @@
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::{Applicability, Diag, ErrorGuaranteed, MultiSpan, Subdiagnostic};
 use rustc_hir::def_id::DefId;
-use rustc_hir::intravisit::{walk_ty, Visitor};
+use rustc_hir::intravisit::{Visitor, walk_ty};
 use rustc_hir::{
     self as hir, GenericBound, GenericParam, GenericParamKind, Item, ItemKind, Lifetime,
     LifetimeName, LifetimeParamKind, MissingLifetimeKind, Node, TyKind,
@@ -11,9 +11,9 @@ use rustc_hir::{
 use rustc_middle::ty::{
     self, AssocItemContainer, StaticLifetimeVisitor, Ty, TyCtxt, TypeSuperVisitable, TypeVisitor,
 };
+use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::symbol::Ident;
-use rustc_span::Span;
 use tracing::debug;
 
 use crate::error_reporting::infer::nice_region_error::NiceRegionError;
@@ -284,14 +284,9 @@ pub fn suggest_new_region_bound(
         }
         match fn_return.kind {
             // FIXME(precise_captures): Suggest adding to `use<...>` list instead.
-            TyKind::OpaqueDef(item_id, _, _) => {
-                let item = tcx.hir().item(item_id);
-                let ItemKind::OpaqueTy(opaque) = &item.kind else {
-                    return;
-                };
-
+            TyKind::OpaqueDef(opaque, _) => {
                 // Get the identity type for this RPIT
-                let did = item_id.owner_id.to_def_id();
+                let did = opaque.def_id.to_def_id();
                 let ty = Ty::new_opaque(tcx, did, ty::GenericArgs::identity_for_item(tcx, did));
 
                 if let Some(span) = opaque.bounds.iter().find_map(|arg| match arg {
@@ -329,12 +324,9 @@ pub fn suggest_new_region_bound(
                             .params
                             .iter()
                             .filter(|p| {
-                                matches!(
-                                    p.kind,
-                                    GenericParamKind::Lifetime {
-                                        kind: hir::LifetimeParamKind::Explicit
-                                    }
-                                )
+                                matches!(p.kind, GenericParamKind::Lifetime {
+                                    kind: hir::LifetimeParamKind::Explicit
+                                })
                             })
                             .map(|p| {
                                 if let hir::ParamName::Plain(name) = p.name {

@@ -11,13 +11,13 @@ use rustc_hir::def::{DefKind, Res};
 use rustc_middle::ty::print::RegionHighlightMode;
 use rustc_middle::ty::{self, GenericArgKind, GenericArgsRef, RegionVid, Ty};
 use rustc_middle::{bug, span_bug};
-use rustc_span::symbol::{kw, sym, Symbol};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::symbol::{Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use tracing::{debug, instrument};
 
-use crate::universal_regions::DefiningTy;
 use crate::MirBorrowckCtxt;
+use crate::universal_regions::DefiningTy;
 
 /// A name for a particular region used in emitting diagnostics. This name could be a generated
 /// name like `'1`, a name used by the user like `'a`, or a name like `'static`.
@@ -830,20 +830,14 @@ impl<'tcx> MirBorrowckCtxt<'_, '_, 'tcx> {
     ///
     /// [`OpaqueDef`]: hir::TyKind::OpaqueDef
     fn get_future_inner_return_ty(&self, hir_ty: &'tcx hir::Ty<'tcx>) -> &'tcx hir::Ty<'tcx> {
-        let hir = self.infcx.tcx.hir();
-
-        let hir::TyKind::OpaqueDef(id, _, _) = hir_ty.kind else {
+        let hir::TyKind::OpaqueDef(opaque_ty, _) = hir_ty.kind else {
             span_bug!(
                 hir_ty.span,
                 "lowered return type of async fn is not OpaqueDef: {:?}",
                 hir_ty
             );
         };
-        let opaque_ty = hir.item(id);
-        if let hir::ItemKind::OpaqueTy(hir::OpaqueTy {
-            bounds: [hir::GenericBound::Trait(trait_ref, _)],
-            ..
-        }) = opaque_ty.kind
+        if let hir::OpaqueTy { bounds: [hir::GenericBound::Trait(trait_ref, _)], .. } = opaque_ty
             && let Some(segment) = trait_ref.trait_ref.path.segments.last()
             && let Some(args) = segment.args
             && let [constraint] = args.constraints

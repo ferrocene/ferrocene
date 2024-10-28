@@ -5,14 +5,14 @@
 
 use rustc_ast::{InlineAsmOptions, InlineAsmTemplatePiece, Mutability};
 use rustc_data_structures::packed::Pu128;
-use rustc_hir::def_id::DefId;
 use rustc_hir::CoroutineKind;
+use rustc_hir::def_id::DefId;
 use rustc_index::IndexVec;
 use rustc_macros::{HashStable, TyDecodable, TyEncodable, TypeFoldable, TypeVisitable};
+use rustc_span::Span;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::source_map::Spanned;
 use rustc_span::symbol::Symbol;
-use rustc_span::Span;
 use rustc_target::abi::{FieldIdx, VariantIdx};
 use rustc_target::asm::InlineAsmRegOrRegClass;
 use smallvec::SmallVec;
@@ -579,7 +579,8 @@ pub struct CopyNonOverlapping<'tcx> {
     pub count: Operand<'tcx>,
 }
 
-/// Represents how a `TerminatorKind::Call` was constructed, used for diagnostics
+/// Represents how a [`TerminatorKind::Call`] was constructed.
+/// Used only for diagnostics.
 #[derive(Clone, Copy, TyEncodable, TyDecodable, Debug, PartialEq, Hash, HashStable)]
 #[derive(TypeFoldable, TypeVisitable)]
 pub enum CallSource {
@@ -601,6 +602,25 @@ pub enum CallSource {
 impl CallSource {
     pub fn from_hir_call(self) -> bool {
         matches!(self, CallSource::Normal)
+    }
+}
+
+#[derive(Clone, Copy, Debug, TyEncodable, TyDecodable, Hash, HashStable, PartialEq)]
+#[derive(TypeFoldable, TypeVisitable)]
+/// The macro that an inline assembly block was created by
+pub enum InlineAsmMacro {
+    /// The `asm!` macro
+    Asm,
+    /// The `naked_asm!` macro
+    NakedAsm,
+}
+
+impl InlineAsmMacro {
+    pub const fn diverges(self, options: InlineAsmOptions) -> bool {
+        match self {
+            InlineAsmMacro::Asm => options.contains(InlineAsmOptions::NORETURN),
+            InlineAsmMacro::NakedAsm => true,
+        }
     }
 }
 
@@ -858,6 +878,9 @@ pub enum TerminatorKind<'tcx> {
     /// Block ends with an inline assembly block. This is a terminator since
     /// inline assembly is allowed to diverge.
     InlineAsm {
+        /// Macro used to create this inline asm: one of `asm!` or `naked_asm!`
+        asm_macro: InlineAsmMacro,
+
         /// The template for the inline assembly, with placeholders.
         template: &'tcx [InlineAsmTemplatePiece],
 
@@ -873,7 +896,7 @@ pub enum TerminatorKind<'tcx> {
 
         /// Valid targets for the inline assembly.
         /// The first element is the fallthrough destination, unless
-        /// InlineAsmOptions::NORETURN is set.
+        /// asm_macro == InlineAsmMacro::NakedAsm or InlineAsmOptions::NORETURN is set.
         targets: Box<[BasicBlock]>,
 
         /// Action to be taken if the inline assembly unwinds. This is present
@@ -1134,8 +1157,10 @@ pub enum ProjectionElem<V, T> {
     ConstantIndex {
         /// index or -index (in Python terms), depending on from_end
         offset: u64,
-        /// The thing being indexed must be at least this long. For arrays this
-        /// is always the exact length.
+        /// The thing being indexed must be at least this long -- otherwise, the
+        /// projection is UB.
+        ///
+        /// For arrays this is always the exact length.
         min_length: u64,
         /// Counting backwards from end? This is always false when indexing an
         /// array.
@@ -1403,9 +1428,7 @@ pub enum CastKind {
     /// * [`PointerCoercion::MutToConstPointer`]
     ///
     /// Both are runtime nops, so should be [`CastKind::PtrToPtr`] instead in runtime MIR.
-    PointerCoercion(PointerCoercion),
-    /// Cast into a dyn* object.
-    DynStar,
+    PointerCoercion(PointerCoercion, CoercionSource),
     IntToInt,
     FloatToInt,
     FloatToFloat,
@@ -1419,6 +1442,16 @@ pub enum CastKind {
     ///
     /// Allowed only in [`MirPhase::Runtime`]; Earlier it's a [`TerminatorKind::Call`].
     Transmute,
+}
+
+/// Represents how a [`CastKind::PointerCoercion`] was constructed.
+/// Used only for diagnostics.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, TyEncodable, TyDecodable, Hash, HashStable)]
+pub enum CoercionSource {
+    /// The coercion was manually written by the user with an `as` cast.
+    AsCast,
+    /// The coercion was automatically inserted by the compiler.
+    Implicit,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, Hash, HashStable)]

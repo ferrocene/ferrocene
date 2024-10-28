@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::result;
 use std::sync::Arc;
 
-use rustc_ast::{token, LitKind, MetaItemKind};
+use rustc_ast::{LitKind, MetaItemKind, token};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stable_hasher::StableHasher;
@@ -21,10 +21,10 @@ use rustc_query_system::query::print_query_stack;
 use rustc_session::config::{self, Cfg, CheckCfg, ExpectedValues, Input, OutFileName};
 use rustc_session::filesearch::{self, sysroot_candidates};
 use rustc_session::parse::ParseSess;
-use rustc_session::{lint, CompilerIO, EarlyDiagCtxt, Session};
+use rustc_session::{CompilerIO, EarlyDiagCtxt, Session, lint};
+use rustc_span::FileName;
 use rustc_span::source_map::{FileLoader, RealFileLoader, SourceMapInputs};
 use rustc_span::symbol::sym;
-use rustc_span::FileName;
 use tracing::trace;
 
 use crate::util;
@@ -174,7 +174,7 @@ pub(crate) fn parse_check_cfg(dcx: DiagCtxtHandle<'_>, specs: Vec<String>) -> Ch
             }
         };
 
-        let meta_item = match parser.parse_meta_item(AllowLeadingUnsafe::Yes) {
+        let meta_item = match parser.parse_meta_item(AllowLeadingUnsafe::No) {
             Ok(meta_item) if parser.token == token::Eof => meta_item,
             Ok(..) => expected_error(),
             Err(err) => {
@@ -389,12 +389,13 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
     let file_loader = config.file_loader.unwrap_or_else(|| Box::new(RealFileLoader));
     let path_mapping = config.opts.file_path_mapping();
     let hash_kind = config.opts.unstable_opts.src_hash_algorithm(&target);
+    let checksum_hash_kind = config.opts.unstable_opts.checksum_hash_algorithm();
 
     util::run_in_thread_pool_with_globals(
         &early_dcx,
         config.opts.edition,
         config.opts.unstable_opts.threads,
-        SourceMapInputs { file_loader, path_mapping, hash_kind },
+        SourceMapInputs { file_loader, path_mapping, hash_kind, checksum_hash_kind },
         |current_gcx| {
             // The previous `early_dcx` can't be reused here because it doesn't
             // impl `Send`. Creating a new one is fine.
@@ -427,7 +428,7 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
                 Err(e) => early_dcx.early_fatal(format!("failed to load fluent bundle: {e}")),
             };
 
-            let mut locale_resources = Vec::from(config.locale_resources);
+            let mut locale_resources = config.locale_resources;
             locale_resources.push(codegen_backend.locale_resource());
 
             let mut sess = rustc_session::build_session(

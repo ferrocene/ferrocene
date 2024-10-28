@@ -7,7 +7,8 @@ use gccjit::{
     BinaryOp, Block, ComparisonOp, Context, Function, LValue, Location, RValue, ToRValue, Type,
     UnaryOp,
 };
-use rustc_apfloat::{ieee, Float, Round, Status};
+use rustc_apfloat::{Float, Round, Status, ieee};
+use rustc_codegen_ssa::MemFlags;
 use rustc_codegen_ssa::common::{
     AtomicOrdering, AtomicRmwBinOp, IntPredicate, RealPredicate, SynchronizationScope, TypeKind,
 };
@@ -17,7 +18,6 @@ use rustc_codegen_ssa::traits::{
     BackendTypes, BaseTypeCodegenMethods, BuilderMethods, ConstCodegenMethods,
     LayoutTypeCodegenMethods, OverflowOp, StaticBuilderMethods,
 };
-use rustc_codegen_ssa::MemFlags;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrs;
@@ -25,22 +25,19 @@ use rustc_middle::ty::layout::{
     FnAbiError, FnAbiOfHelpers, FnAbiRequest, HasParamEnv, HasTyCtxt, LayoutError, LayoutOfHelpers,
 };
 use rustc_middle::ty::{Instance, ParamEnv, Ty, TyCtxt};
-use rustc_span::def_id::DefId;
 use rustc_span::Span;
+use rustc_span::def_id::DefId;
 use rustc_target::abi::call::FnAbi;
 use rustc_target::abi::{self, Align, HasDataLayout, Size, TargetDataLayout, WrappingRange};
 use rustc_target::spec::{HasTargetSpec, HasWasmCAbiOpt, Target, WasmCAbi};
 
-use crate::common::{type_is_pointer, SignType, TypeReflection};
+use crate::common::{SignType, TypeReflection, type_is_pointer};
 use crate::context::CodegenCx;
 use crate::intrinsic::llvm;
 use crate::type_of::LayoutGccExt;
 
 // TODO(antoyo)
 type Funclet = ();
-
-// TODO(antoyo): remove this variable.
-static mut RETURN_VALUE_COUNT: usize = 0;
 
 enum ExtremumOperation {
     Max,
@@ -50,13 +47,18 @@ enum ExtremumOperation {
 pub struct Builder<'a: 'gcc, 'gcc, 'tcx> {
     pub cx: &'a CodegenCx<'gcc, 'tcx>,
     pub block: Block<'gcc>,
-    stack_var_count: Cell<usize>,
     pub location: Option<Location<'gcc>>,
+    value_counter: Cell<u64>,
 }
 
 impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
     fn with_cx(cx: &'a CodegenCx<'gcc, 'tcx>, block: Block<'gcc>) -> Self {
-        Builder { cx, block, stack_var_count: Cell::new(0), location: None }
+        Builder { cx, block, location: None, value_counter: Cell::new(0) }
+    }
+
+    fn next_value_counter(&self) -> u64 {
+        self.value_counter.set(self.value_counter.get() + 1);
+        self.value_counter.get()
     }
 
     fn atomic_extremum(
@@ -138,7 +140,7 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
     ) -> RValue<'gcc> {
         let size = get_maybe_pointer_size(src);
         let compare_exchange =
-            self.context.get_builtin_function(&format!("__atomic_compare_exchange_{}", size));
+            self.context.get_builtin_function(format!("__atomic_compare_exchange_{}", size));
         let order = self.context.new_rvalue_from_int(self.i32_type, order.to_gcc());
         let failure_order = self.context.new_rvalue_from_int(self.i32_type, failure_order.to_gcc());
         let weak = self.context.new_rvalue_from_int(self.bool_type, weak as i32);
@@ -152,11 +154,14 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         // NOTE: not sure why, but we have the wrong type here.
         let int_type = compare_exchange.get_param(2).to_rvalue().get_type();
         let src = self.context.new_bitcast(self.location, src, int_type);
-        self.context.new_call(
-            self.location,
-            compare_exchange,
-            &[dst, expected, src, weak, order, failure_order],
-        )
+        self.context.new_call(self.location, compare_exchange, &[
+            dst,
+            expected,
+            src,
+            weak,
+            order,
+            failure_order,
+        ])
     }
 
     pub fn assign(&self, lvalue: LValue<'gcc>, value: RValue<'gcc>) {
@@ -267,10 +272,12 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
                             actual_val.dereference(self.location).to_rvalue()
                         }
                     } else {
+                        // FIXME: this condition seems wrong: it will pass when both types are not
+                        // a vector.
                         assert!(
                             (!expected_ty.is_vector() || actual_ty.is_vector())
                                 && (expected_ty.is_vector() || !actual_ty.is_vector()),
-                            "{:?} ({}) -> {:?} ({}), index: {:?}[{}]",
+                            "{:?} (is vector: {}) -> {:?} (is vector: {}), Function: {:?}[{}]",
                             actual_ty,
                             actual_ty.is_vector(),
                             expected_ty,
@@ -280,6 +287,8 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
                         );
                         // TODO(antoyo): perhaps use __builtin_convertvector for vector casting.
                         // TODO: remove bitcast now that vector types can be compared?
+                        // ==> We use bitcast to avoid having to do many manual casts from e.g. __m256i to __v32qi (in
+                        // the case of _mm256_aesenc_epi128).
                         self.bitcast(actual_val, expected_ty)
                     }
                 } else {
@@ -322,11 +331,10 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         let void_type = self.context.new_type::<()>();
         let current_func = self.block.get_function();
         if return_type != void_type {
-            unsafe { RETURN_VALUE_COUNT += 1 };
             let result = current_func.new_local(
                 self.location,
                 return_type,
-                &format!("returnValue{}", unsafe { RETURN_VALUE_COUNT }),
+                format!("returnValue{}", self.next_value_counter()),
             );
             self.block.add_assignment(
                 self.location,
@@ -338,7 +346,7 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
             self.block
                 .add_eval(self.location, self.cx.context.new_call(self.location, func, &args));
             // Return dummy value when not having return value.
-            self.context.new_rvalue_from_long(self.isize_type, 0)
+            self.context.new_rvalue_zero(self.isize_type)
         }
     }
 
@@ -364,6 +372,7 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         let args = {
             let function_address_names = self.function_address_names.borrow();
             let original_function_name = function_address_names.get(&func_ptr);
+            func_ptr = llvm::adjust_function(self.context, &func_name, func_ptr, args);
             llvm::adjust_intrinsic_arguments(
                 self,
                 gcc_func,
@@ -382,7 +391,6 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         let current_func = self.block.get_function();
 
         if return_type != void_type {
-            unsafe { RETURN_VALUE_COUNT += 1 };
             let return_value = self.cx.context.new_call_through_ptr(self.location, func_ptr, &args);
             let return_value = llvm::adjust_intrinsic_return_value(
                 self,
@@ -395,7 +403,7 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
             let result = current_func.new_local(
                 self.location,
                 return_value.get_type(),
-                &format!("ptrReturnValue{}", unsafe { RETURN_VALUE_COUNT }),
+                format!("ptrReturnValue{}", self.next_value_counter()),
             );
             self.block.add_assignment(self.location, result, return_value);
             result.to_rvalue()
@@ -419,17 +427,7 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
                 self.cx.context.new_call_through_ptr(self.location, func_ptr, &args),
             );
             // Return dummy value when not having return value.
-            let result = current_func.new_local(
-                self.location,
-                self.isize_type,
-                "dummyValueThatShouldNeverBeUsed",
-            );
-            self.block.add_assignment(
-                self.location,
-                result,
-                self.context.new_rvalue_from_long(self.isize_type, 0),
-            );
-            result.to_rvalue()
+            self.context.new_rvalue_zero(self.isize_type)
         }
     }
 
@@ -444,11 +442,10 @@ impl<'a, 'gcc, 'tcx> Builder<'a, 'gcc, 'tcx> {
         let return_type = self.context.new_type::<bool>();
         let current_func = self.block.get_function();
         // TODO(antoyo): return the new_call() directly? Since the overflow function has no side-effects.
-        unsafe { RETURN_VALUE_COUNT += 1 };
         let result = current_func.new_local(
             self.location,
             return_type,
-            &format!("overflowReturnValue{}", unsafe { RETURN_VALUE_COUNT }),
+            format!("overflowReturnValue{}", self.next_value_counter()),
         );
         self.block.add_assignment(
             self.location,
@@ -500,6 +497,7 @@ impl<'a, 'gcc, 'tcx> Deref for Builder<'a, 'gcc, 'tcx> {
 
 impl<'gcc, 'tcx> BackendTypes for Builder<'_, 'gcc, 'tcx> {
     type Value = <CodegenCx<'gcc, 'tcx> as BackendTypes>::Value;
+    type Metadata = <CodegenCx<'gcc, 'tcx> as BackendTypes>::Metadata;
     type Function = <CodegenCx<'gcc, 'tcx> as BackendTypes>::Function;
     type BasicBlock = <CodegenCx<'gcc, 'tcx> as BackendTypes>::BasicBlock;
     type Type = <CodegenCx<'gcc, 'tcx> as BackendTypes>::Type;
@@ -926,9 +924,8 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
     fn alloca(&mut self, size: Size, align: Align) -> RValue<'gcc> {
         let ty = self.cx.type_array(self.cx.type_i8(), size.bytes()).get_aligned(align.bytes());
         // TODO(antoyo): It might be better to return a LValue, but fixing the rustc API is non-trivial.
-        self.stack_var_count.set(self.stack_var_count.get() + 1);
         self.current_func()
-            .new_local(self.location, ty, &format!("stack_var_{}", self.stack_var_count.get()))
+            .new_local(self.location, ty, format!("stack_var_{}", self.next_value_counter()))
             .get_address(self.location)
     }
 
@@ -951,11 +948,10 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         };
         let ptr = self.context.new_cast(self.location, ptr, aligned_type.make_pointer());
         let deref = ptr.dereference(self.location).to_rvalue();
-        unsafe { RETURN_VALUE_COUNT += 1 };
         let loaded_value = function.new_local(
             self.location,
             aligned_type,
-            &format!("loadedValue{}", unsafe { RETURN_VALUE_COUNT }),
+            format!("loadedValue{}", self.next_value_counter()),
         );
         block.add_assignment(self.location, loaded_value, deref);
         loaded_value.to_rvalue()
@@ -976,7 +972,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         // TODO(antoyo): use ty.
         // TODO(antoyo): handle alignment.
         let atomic_load =
-            self.context.get_builtin_function(&format!("__atomic_load_{}", size.bytes()));
+            self.context.get_builtin_function(format!("__atomic_load_{}", size.bytes()));
         let ordering = self.context.new_rvalue_from_int(self.i32_type, order.to_gcc());
 
         let volatile_const_void_ptr_type =
@@ -1079,11 +1075,9 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
         let align = dest.val.align.restrict_for_offset(dest.layout.field(self.cx(), 0).size);
         cg_elem.val.store(self, PlaceRef::new_sized_aligned(current_val, cg_elem.layout, align));
 
-        let next = self.inbounds_gep(
-            self.backend_type(cg_elem.layout),
-            current.to_rvalue(),
-            &[self.const_usize(1)],
-        );
+        let next = self.inbounds_gep(self.backend_type(cg_elem.layout), current.to_rvalue(), &[
+            self.const_usize(1),
+        ]);
         self.llbb().add_assignment(self.location, current, next);
         self.br(header_bb);
 
@@ -1134,7 +1128,7 @@ impl<'a, 'gcc, 'tcx> BuilderMethods<'a, 'tcx> for Builder<'a, 'gcc, 'tcx> {
     ) {
         // TODO(antoyo): handle alignment.
         let atomic_store =
-            self.context.get_builtin_function(&format!("__atomic_store_{}", size.bytes()));
+            self.context.get_builtin_function(format!("__atomic_store_{}", size.bytes()));
         let ordering = self.context.new_rvalue_from_int(self.i32_type, order.to_gcc());
         let volatile_const_void_ptr_type =
             self.context.new_type::<()>().make_volatile().make_pointer();

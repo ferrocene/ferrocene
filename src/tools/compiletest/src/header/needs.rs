@@ -1,5 +1,5 @@
 use crate::common::{Config, Sanitizer};
-use crate::header::{llvm_has_libzstd, IgnoreDecision};
+use crate::header::{IgnoreDecision, llvm_has_libzstd};
 
 pub(super) fn handle_needs(
     cache: &CachedNeedsConditions,
@@ -78,6 +78,11 @@ pub(super) fn handle_needs(
             name: "needs-sanitizer-safestack",
             condition: cache.sanitizer_safestack,
             ignore_reason: "ignored on targets without SafeStack support",
+        },
+        Need {
+            name: "needs-enzyme",
+            condition: config.has_enzyme,
+            ignore_reason: "ignored when LLVM Enzyme is disabled",
         },
         Need {
             name: "needs-run-enabled",

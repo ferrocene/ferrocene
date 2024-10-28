@@ -23,11 +23,11 @@ use rustc_data_structures::captures::Captures;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{
-    struct_span_code_err, Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, StashKey, E0228,
+    Applicability, Diag, DiagCtxtHandle, E0228, ErrorGuaranteed, StashKey, struct_span_code_err,
 };
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::intravisit::{self, walk_generics, Visitor};
+use rustc_hir::intravisit::{self, Visitor, walk_generics};
 use rustc_hir::{self as hir, GenericParamKind, Node};
 use rustc_infer::infer::{InferCtxt, TyCtxtInferExt};
 use rustc_infer::traits::ObligationCause;
@@ -36,8 +36,8 @@ use rustc_middle::query::Providers;
 use rustc_middle::ty::util::{Discr, IntTypeExt};
 use rustc_middle::ty::{self, AdtKind, Const, IsSuggestable, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_span::symbol::{kw, sym, Ident, Symbol};
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::symbol::{Ident, Symbol, kw, sym};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::spec::abi;
 use rustc_trait_selection::error_reporting::traits::suggestions::NextTypeParamName;
 use rustc_trait_selection::infer::InferCtxtExt;
@@ -260,8 +260,7 @@ fn reject_placeholder_type_signatures_in_item<'tcx>(
         | hir::ItemKind::Trait(_, _, generics, ..)
         | hir::ItemKind::Impl(hir::Impl { generics, .. })
         | hir::ItemKind::Struct(_, generics) => (generics, true),
-        hir::ItemKind::OpaqueTy(hir::OpaqueTy { generics, .. })
-        | hir::ItemKind::TyAlias(_, generics) => (generics, false),
+        hir::ItemKind::TyAlias(_, generics) => (generics, false),
         // `static`, `fn` and `const` are handled elsewhere to suggest appropriate type.
         _ => return,
     };
@@ -326,6 +325,19 @@ impl<'tcx> Visitor<'tcx> for CollectItemTypesVisitor<'tcx> {
             // any further errors in case one typeck fails.
         }
         intravisit::walk_expr(self, expr);
+    }
+
+    /// Don't call `type_of` on opaque types, since that depends on type checking function bodies.
+    /// `check_item_type` ensures that it's called instead.
+    fn visit_opaque_ty(&mut self, opaque: &'tcx hir::OpaqueTy<'tcx>) {
+        let def_id = opaque.def_id;
+        self.tcx.ensure().generics_of(def_id);
+        self.tcx.ensure().predicates_of(def_id);
+        self.tcx.ensure().explicit_item_bounds(def_id);
+        self.tcx.ensure().explicit_item_super_predicates(def_id);
+        self.tcx.ensure().item_bounds(def_id);
+        self.tcx.ensure().item_super_predicates(def_id);
+        intravisit::walk_opaque_ty(self, opaque);
     }
 
     fn visit_trait_item(&mut self, trait_item: &'tcx hir::TraitItem<'tcx>) {
@@ -460,7 +472,7 @@ impl<'tcx> HirTyLowerer<'tcx> for ItemCtxt<'tcx> {
                                 [] => (generics.span, format!("<{lt_name}>")),
                                 [bound, ..] => (bound.span.shrink_to_lo(), format!("{lt_name}, ")),
                             };
-                            mpart_sugg = Some(errors::AssociatedTypeTraitUninferredGenericParamsMultipartSuggestion {
+                            mpart_sugg = Some(errors::AssociatedItemTraitUninferredGenericParamsMultipartSuggestion {
                                 fspan: lt_sp,
                                 first: sugg,
                                 sspan: span.with_hi(item_segment.ident.span.lo()),
@@ -502,11 +514,12 @@ impl<'tcx> HirTyLowerer<'tcx> for ItemCtxt<'tcx> {
             }
             Ty::new_error(
                 self.tcx(),
-                self.tcx().dcx().emit_err(errors::AssociatedTypeTraitUninferredGenericParams {
+                self.tcx().dcx().emit_err(errors::AssociatedItemTraitUninferredGenericParams {
                     span,
                     inferred_sugg,
                     bound,
                     mpart_sugg,
+                    what: "type",
                 }),
             )
         }
@@ -728,18 +741,6 @@ fn lower_item(tcx: TyCtxt<'_>, item_id: hir::ItemId) {
             if let Some(ctor_def_id) = struct_def.ctor_def_id() {
                 lower_variant_ctor(tcx, ctor_def_id);
             }
-        }
-
-        // Don't call `type_of` on opaque types, since that depends on type
-        // checking function bodies. `check_item_type` ensures that it's called
-        // instead.
-        hir::ItemKind::OpaqueTy(..) => {
-            tcx.ensure().generics_of(def_id);
-            tcx.ensure().predicates_of(def_id);
-            tcx.ensure().explicit_item_bounds(def_id);
-            tcx.ensure().explicit_item_super_predicates(def_id);
-            tcx.ensure().item_bounds(def_id);
-            tcx.ensure().item_super_predicates(def_id);
         }
 
         hir::ItemKind::TyAlias(..) => {
@@ -1851,12 +1852,8 @@ fn coroutine_for_closure(tcx: TyCtxt<'_>, def_id: LocalDefId) -> DefId {
 }
 
 fn is_type_alias_impl_trait<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> bool {
-    match tcx.hir_node_by_def_id(def_id) {
-        Node::Item(hir::Item { kind: hir::ItemKind::OpaqueTy(opaque), .. }) => {
-            matches!(opaque.origin, hir::OpaqueTyOrigin::TyAlias { .. })
-        }
-        _ => bug!("tried getting opaque_ty_origin for non-opaque: {:?}", def_id),
-    }
+    let opaque = tcx.hir().expect_opaque_ty(def_id);
+    matches!(opaque.origin, hir::OpaqueTyOrigin::TyAlias { .. })
 }
 
 fn rendered_precise_capturing_args<'tcx>(
@@ -1869,12 +1866,10 @@ fn rendered_precise_capturing_args<'tcx>(
         return tcx.rendered_precise_capturing_args(opaque_def_id);
     }
 
-    tcx.hir_node_by_def_id(def_id).expect_item().expect_opaque_ty().bounds.iter().find_map(
-        |bound| match bound {
-            hir::GenericBound::Use(args, ..) => {
-                Some(&*tcx.arena.alloc_from_iter(args.iter().map(|arg| arg.name())))
-            }
-            _ => None,
-        },
-    )
+    tcx.hir_node_by_def_id(def_id).expect_opaque_ty().bounds.iter().find_map(|bound| match bound {
+        hir::GenericBound::Use(args, ..) => {
+            Some(&*tcx.arena.alloc_from_iter(args.iter().map(|arg| arg.name())))
+        }
+        _ => None,
+    })
 }

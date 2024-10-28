@@ -26,6 +26,13 @@ parse_async_move_block_in_2015 = `async move` blocks are only allowed in Rust 20
 parse_async_move_order_incorrect = the order of `move` and `async` is incorrect
     .suggestion = try switching the order
 
+parse_at_dot_dot_in_struct_pattern = `@ ..` is not supported in struct patterns
+    .suggestion = bind to each field separately or, if you don't need them, just remove `{$ident} @`
+
+parse_at_in_struct_pattern = Unexpected `@` in struct pattern
+    .note = struct patterns use `field: pattern` syntax to bind to fields
+    .help = consider replacing `new_name @ field_name` with `field_name: new_name` if that is what you intended
+
 parse_attr_after_generic = trailing attribute after generic parameter
     .label = attributes must go before parameters
 
@@ -670,7 +677,7 @@ parse_parentheses_with_struct_fields = invalid `struct` delimiters or `fn` call 
 parse_parenthesized_lifetime = parenthesized lifetime bounds are not supported
 parse_parenthesized_lifetime_suggestion = remove the parentheses
 
-parse_path_single_colon = path separator must be a double colon
+parse_path_double_colon = path separator must be a double colon
     .suggestion = use a double colon instead
 
 parse_pattern_method_param_without_body = patterns aren't allowed in methods without bodies
@@ -805,7 +812,8 @@ parse_unexpected_expr_in_pat =
        *[false] a pattern
     }, found an expression
 
-    .label = arbitrary expressions are not allowed in patterns
+    .label = not a pattern
+    .note = arbitrary expressions are not allowed in patterns: <https://doc.rust-lang.org/book/ch18-00-patterns.html>
 
 parse_unexpected_expr_in_pat_const_sugg = consider extracting the expression into a `const`
 

@@ -25,16 +25,19 @@ pub enum PointerCoercion {
     ArrayToPointer,
 
     /// Unsize a pointer/reference value, e.g., `&[T; n]` to
-    /// `&[T]`. Note that the source could be a thin or fat pointer.
-    /// This will do things like convert thin pointers to fat
+    /// `&[T]`. Note that the source could be a thin or wide pointer.
+    /// This will do things like convert thin pointers to wide
     /// pointers, or convert structs containing thin pointers to
-    /// structs containing fat pointers, or convert between fat
+    /// structs containing wide pointers, or convert between wide
     /// pointers. We don't store the details of how the transform is
     /// done (in fact, we don't know that, because it might depend on
     /// the precise type parameters). We just store the target
     /// type. Codegen backends and miri figure out what has to be done
     /// based on the precise source/target type at hand.
     Unsize,
+
+    /// Go from a pointer-like type to a `dyn*` object.
+    DynStar,
 }
 
 /// Represents coercing a value to a different type of value.
@@ -102,8 +105,8 @@ pub enum Adjust<'tcx> {
 
     Pointer(PointerCoercion),
 
-    /// Cast into a dyn* object.
-    DynStar,
+    /// Take a pinned reference and reborrow as a `Pin<&mut T>` or `Pin<&T>`.
+    ReborrowPin(ty::Region<'tcx>, hir::Mutability),
 }
 
 /// An overloaded autoderef step, representing a `Deref(Mut)::deref(_mut)`

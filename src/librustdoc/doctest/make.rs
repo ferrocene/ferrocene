@@ -10,10 +10,10 @@ use rustc_errors::{ColorConfig, FatalError};
 use rustc_parse::new_parser_from_source_str;
 use rustc_parse::parser::attr::InnerAttrPolicy;
 use rustc_session::parse::ParseSess;
+use rustc_span::FileName;
 use rustc_span::edition::Edition;
 use rustc_span::source_map::SourceMap;
 use rustc_span::symbol::sym;
-use rustc_span::FileName;
 use tracing::debug;
 
 use super::GlobalTestOptions;
@@ -48,7 +48,7 @@ impl DocTestBuilder {
     ) -> Self {
         let can_merge_doctests = can_merge_doctests
             && lang_str.is_some_and(|lang_str| {
-                !lang_str.compile_fail && !lang_str.test_harness && !lang_str.standalone
+                !lang_str.compile_fail && !lang_str.test_harness && !lang_str.standalone_crate
             });
 
         let SourceInfo { crate_attrs, maybe_crate_attrs, crates, everything_else } =
@@ -252,8 +252,8 @@ fn parse_source(
     info: &mut ParseSourceInfo,
     crate_name: &Option<&str>,
 ) -> ParsingResult {
-    use rustc_errors::emitter::{Emitter, HumanEmitter};
     use rustc_errors::DiagCtxt;
+    use rustc_errors::emitter::{Emitter, HumanEmitter};
     use rustc_parse::parser::ForceCollect;
     use rustc_span::source_map::FilePathMapping;
 
@@ -441,8 +441,8 @@ fn check_if_attr_is_complete(source: &str, edition: Edition) -> Option<AttrKind>
 
     rustc_driver::catch_fatal_errors(|| {
         rustc_span::create_session_if_not_set_then(edition, |_| {
-            use rustc_errors::emitter::HumanEmitter;
             use rustc_errors::DiagCtxt;
+            use rustc_errors::emitter::HumanEmitter;
             use rustc_span::source_map::FilePathMapping;
 
             let filename = FileName::anon_source_code(source);

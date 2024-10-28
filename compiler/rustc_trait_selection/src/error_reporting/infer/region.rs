@@ -2,7 +2,7 @@ use std::iter;
 
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_errors::{
-    struct_span_code_err, Applicability, Diag, Subdiagnostic, E0309, E0310, E0311, E0495,
+    Applicability, Diag, E0309, E0310, E0311, E0495, Subdiagnostic, struct_span_code_err,
 };
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
@@ -17,13 +17,13 @@ use rustc_span::{BytePos, ErrorGuaranteed, Span, Symbol};
 use rustc_type_ir::Upcast as _;
 use tracing::{debug, instrument};
 
-use super::nice_region_error::find_anon_type;
 use super::ObligationCauseAsDiagArg;
-use crate::error_reporting::infer::ObligationCauseExt;
+use super::nice_region_error::find_anon_type;
 use crate::error_reporting::TypeErrCtxt;
+use crate::error_reporting::infer::ObligationCauseExt;
 use crate::errors::{
-    self, note_and_explain, FulfillReqLifetime, LfBoundNotSatisfied, OutlivesBound,
-    OutlivesContent, RefLongerThanData, RegionOriginNote, WhereClauseSuggestions,
+    self, FulfillReqLifetime, LfBoundNotSatisfied, OutlivesBound, OutlivesContent,
+    RefLongerThanData, RegionOriginNote, WhereClauseSuggestions, note_and_explain,
 };
 use crate::fluent_generated as fluent;
 use crate::infer::region_constraints::GenericKind;
@@ -842,14 +842,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         lifetime: Region<'tcx>,
         add_lt_suggs: &mut Vec<(Span, String)>,
     ) -> String {
-        struct LifetimeReplaceVisitor<'a, 'tcx> {
-            tcx: TyCtxt<'tcx>,
+        struct LifetimeReplaceVisitor<'a> {
             needle: hir::LifetimeName,
             new_lt: &'a str,
             add_lt_suggs: &'a mut Vec<(Span, String)>,
         }
 
-        impl<'hir, 'tcx> hir::intravisit::Visitor<'hir> for LifetimeReplaceVisitor<'_, 'tcx> {
+        impl<'hir> hir::intravisit::Visitor<'hir> for LifetimeReplaceVisitor<'_> {
             fn visit_lifetime(&mut self, lt: &'hir hir::Lifetime) {
                 if lt.res == self.needle {
                     self.add_lt_suggs.push(lt.suggestion(self.new_lt));
@@ -857,10 +856,9 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             }
 
             fn visit_ty(&mut self, ty: &'hir hir::Ty<'hir>) {
-                let hir::TyKind::OpaqueDef(item_id, _, _) = ty.kind else {
+                let hir::TyKind::OpaqueDef(opaque_ty, _) = ty.kind else {
                     return hir::intravisit::walk_ty(self, ty);
                 };
-                let opaque_ty = self.tcx.hir().item(item_id).expect_opaque_ty();
                 if let Some(&(_, b)) =
                     opaque_ty.lifetime_mapping.iter().find(|&(a, _)| a.res == self.needle)
                 {
@@ -905,7 +903,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         };
 
         let mut visitor = LifetimeReplaceVisitor {
-            tcx: self.tcx,
             needle: hir::LifetimeName::Param(lifetime_def_id),
             add_lt_suggs,
             new_lt: &new_lt,
@@ -1269,9 +1266,9 @@ fn suggest_precise_capturing<'tcx>(
     diag: &mut Diag<'_>,
 ) {
     let hir::OpaqueTy { bounds, origin, .. } =
-        tcx.hir_node_by_def_id(opaque_def_id).expect_item().expect_opaque_ty();
+        tcx.hir_node_by_def_id(opaque_def_id).expect_opaque_ty();
 
-    let hir::OpaqueTyOrigin::FnReturn(fn_def_id) = *origin else {
+    let hir::OpaqueTyOrigin::FnReturn { parent: fn_def_id, .. } = *origin else {
         return;
     };
 

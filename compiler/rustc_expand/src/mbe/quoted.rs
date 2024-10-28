@@ -1,24 +1,20 @@
-use rustc_ast::token::NtExprKind::*;
 use rustc_ast::token::{self, Delimiter, IdentIsRaw, NonterminalKind, Token};
-use rustc_ast::{tokenstream, NodeId};
+use rustc_ast::{NodeId, tokenstream};
 use rustc_ast_pretty::pprust;
 use rustc_feature::Features;
-use rustc_session::parse::feature_err;
 use rustc_session::Session;
-use rustc_span::edition::Edition;
-use rustc_span::symbol::{kw, sym, Ident};
+use rustc_session::parse::feature_err;
 use rustc_span::Span;
+use rustc_span::edition::Edition;
+use rustc_span::symbol::{Ident, kw, sym};
 
 use crate::errors;
 use crate::mbe::macro_parser::count_metavar_decls;
 use crate::mbe::{Delimited, KleeneOp, KleeneToken, MetaVarExpr, SequenceRepetition, TokenTree};
 
-const VALID_FRAGMENT_NAMES_MSG: &str = "valid fragment specifiers are \
-    `ident`, `block`, `stmt`, `expr`, `pat`, `ty`, `lifetime`, `literal`, `path`, `meta`, `tt`, \
-    `item` and `vis`";
-pub(crate) const VALID_FRAGMENT_NAMES_MSG_2021: &str = "valid fragment specifiers are \
-    `ident`, `block`, `stmt`, `expr`, `expr_2021`, `pat`, `ty`, `lifetime`, `literal`, `path`, \
-    `meta`, `tt`, `item` and `vis`";
+pub(crate) const VALID_FRAGMENT_NAMES_MSG: &str = "valid fragment specifiers are \
+    `ident`, `block`, `stmt`, `expr`, `pat`, `ty`, `lifetime`, `literal`, `path`, \
+    `meta`, `tt`, `item` and `vis`, along with `expr_2021` and `pat_param` for edition compatibility";
 
 /// Takes a `tokenstream::TokenStream` and returns a `Vec<self::TokenTree>`. Specifically, this
 /// takes a generic `TokenStream`, such as is used in the rest of the compiler, and returns a
@@ -92,39 +88,13 @@ pub(super) fn parse(
                                     };
                                     let kind = NonterminalKind::from_symbol(fragment.name, edition)
                                         .unwrap_or_else(|| {
-                                            let help = match fragment.name {
-                                                sym::expr_2021 => {
-                                                    format!(
-                                                        "fragment specifier `expr_2021` \
-                                                         requires Rust 2021 or later\n\
-                                                         {VALID_FRAGMENT_NAMES_MSG}"
-                                                    )
-                                                }
-                                                _ if edition().at_least_rust_2021()
-                                                    && features.expr_fragment_specifier_2024 =>
-                                                {
-                                                    VALID_FRAGMENT_NAMES_MSG_2021.into()
-                                                }
-                                                _ => VALID_FRAGMENT_NAMES_MSG.into(),
-                                            };
                                             sess.dcx().emit_err(errors::InvalidFragmentSpecifier {
                                                 span,
                                                 fragment,
-                                                help,
+                                                help: VALID_FRAGMENT_NAMES_MSG.into(),
                                             });
                                             NonterminalKind::Ident
                                         });
-                                    if kind == NonterminalKind::Expr(Expr2021 { inferred: false })
-                                        && !features.expr_fragment_specifier_2024
-                                    {
-                                        rustc_session::parse::feature_err(
-                                            sess,
-                                            sym::expr_fragment_specifier_2024,
-                                            span,
-                                            "fragment specifier `expr_2021` is unstable",
-                                        )
-                                        .emit();
-                                    }
                                     result.push(TokenTree::MetaVarDecl(span, ident, Some(kind)));
                                     continue;
                                 }
@@ -207,10 +177,10 @@ fn parse_tree<'a>(
                 Some(&tokenstream::TokenTree::Delimited(delim_span, _, delim, ref tts)) => {
                     if parsing_patterns {
                         if delim != Delimiter::Parenthesis {
-                            span_dollar_dollar_or_metavar_in_the_lhs_err(
-                                sess,
-                                &Token { kind: token::OpenDelim(delim), span: delim_span.entire() },
-                            );
+                            span_dollar_dollar_or_metavar_in_the_lhs_err(sess, &Token {
+                                kind: token::OpenDelim(delim),
+                                span: delim_span.entire(),
+                            });
                         }
                     } else {
                         match delim {
@@ -263,10 +233,12 @@ fn parse_tree<'a>(
                     // Count the number of captured "names" (i.e., named metavars)
                     let num_captures =
                         if parsing_patterns { count_metavar_decls(&sequence) } else { 0 };
-                    TokenTree::Sequence(
-                        delim_span,
-                        SequenceRepetition { tts: sequence, separator, kleene, num_captures },
-                    )
+                    TokenTree::Sequence(delim_span, SequenceRepetition {
+                        tts: sequence,
+                        separator,
+                        kleene,
+                        num_captures,
+                    })
                 }
 
                 // `tree` is followed by an `ident`. This could be `$meta_var` or the `$crate`
@@ -287,10 +259,10 @@ fn parse_tree<'a>(
                     _,
                 )) => {
                     if parsing_patterns {
-                        span_dollar_dollar_or_metavar_in_the_lhs_err(
-                            sess,
-                            &Token { kind: token::Dollar, span: dollar_span2 },
-                        );
+                        span_dollar_dollar_or_metavar_in_the_lhs_err(sess, &Token {
+                            kind: token::Dollar,
+                            span: dollar_span2,
+                        });
                     } else {
                         maybe_emit_macro_metavar_expr_feature(features, sess, dollar_span2);
                     }
@@ -315,14 +287,12 @@ fn parse_tree<'a>(
 
         // `tree` is the beginning of a delimited set of tokens (e.g., `(` or `{`). We need to
         // descend into the delimited set and further parse it.
-        &tokenstream::TokenTree::Delimited(span, spacing, delim, ref tts) => TokenTree::Delimited(
-            span,
-            spacing,
-            Delimited {
+        &tokenstream::TokenTree::Delimited(span, spacing, delim, ref tts) => {
+            TokenTree::Delimited(span, spacing, Delimited {
                 delim,
                 tts: parse(tts, parsing_patterns, sess, node_id, features, edition),
-            },
-        ),
+            })
+        }
     }
 }
 

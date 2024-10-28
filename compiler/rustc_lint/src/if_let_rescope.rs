@@ -11,8 +11,8 @@ use rustc_macros::LintDiagnostic;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::lint::{FutureIncompatibilityReason, Level};
 use rustc_session::{declare_lint, impl_lint_pass};
-use rustc_span::edition::Edition;
 use rustc_span::Span;
+use rustc_span::edition::Edition;
 
 use crate::{LateContext, LateLintPass};
 
@@ -122,7 +122,11 @@ impl IfLetRescope {
         }
         let tcx = cx.tcx;
         let source_map = tcx.sess.source_map();
-        let expr_end = expr.span.shrink_to_hi();
+        let expr_end = match expr.kind {
+            hir::ExprKind::If(_cond, conseq, None) => conseq.span.shrink_to_hi(),
+            hir::ExprKind::If(_cond, _conseq, Some(alt)) => alt.span.shrink_to_hi(),
+            _ => return,
+        };
         let mut add_bracket_to_match_head = match_head_needs_bracket(tcx, expr);
         let mut significant_droppers = vec![];
         let mut lifetime_ends = vec![];
@@ -145,7 +149,10 @@ impl IfLetRescope {
                 recovered: Recovered::No,
             }) = cond.kind
             {
-                let if_let_pat = expr.span.shrink_to_lo().between(init.span);
+                // Peel off round braces
+                let if_let_pat = source_map
+                    .span_take_while(expr.span, |&ch| ch == '(' || ch.is_whitespace())
+                    .between(init.span);
                 // The consequent fragment is always a block.
                 let before_conseq = conseq.span.shrink_to_lo();
                 let lifetime_end = source_map.end_point(conseq.span);
@@ -159,6 +166,8 @@ impl IfLetRescope {
                     if ty_ascription.is_some()
                         || !expr.span.can_be_used_for_suggestions()
                         || !pat.span.can_be_used_for_suggestions()
+                        || !if_let_pat.can_be_used_for_suggestions()
+                        || !before_conseq.can_be_used_for_suggestions()
                     {
                         // Our `match` rewrites does not support type ascription,
                         // so we just bail.
@@ -210,25 +219,20 @@ impl IfLetRescope {
             }
         }
         if let Some((span, hir_id)) = first_if_to_lint {
-            tcx.emit_node_span_lint(
-                IF_LET_RESCOPE,
-                hir_id,
-                span,
-                IfLetRescopeLint {
-                    significant_droppers,
-                    lifetime_ends,
-                    rewrite: first_if_to_rewrite.then_some(IfLetRescopeRewrite {
-                        match_heads,
-                        consequent_heads,
-                        closing_brackets: ClosingBrackets {
-                            span: expr_end,
-                            count: closing_brackets,
-                            empty_alt,
-                        },
-                        alt_heads,
-                    }),
-                },
-            );
+            tcx.emit_node_span_lint(IF_LET_RESCOPE, hir_id, span, IfLetRescopeLint {
+                significant_droppers,
+                lifetime_ends,
+                rewrite: first_if_to_rewrite.then_some(IfLetRescopeRewrite {
+                    match_heads,
+                    consequent_heads,
+                    closing_brackets: ClosingBrackets {
+                        span: expr_end,
+                        count: closing_brackets,
+                        empty_alt,
+                    },
+                    alt_heads,
+                }),
+            });
         }
     }
 }
@@ -243,6 +247,23 @@ impl<'tcx> LateLintPass<'tcx> for IfLetRescope {
             return;
         }
         if let (Level::Allow, _) = cx.tcx.lint_level_at_node(IF_LET_RESCOPE, expr.hir_id) {
+            return;
+        }
+        if let hir::ExprKind::Loop(block, _label, hir::LoopSource::While, _span) = expr.kind
+            && let Some(value) = block.expr
+            && let hir::ExprKind::If(cond, _conseq, _alt) = value.kind
+            && let hir::ExprKind::Let(..) = cond.kind
+        {
+            // Recall that `while let` is lowered into this:
+            // ```
+            // loop {
+            //     if let .. { body } else { break; }
+            // }
+            // ```
+            // There is no observable change in drop order on the overall `if let` expression
+            // given that the `{ break; }` block is trivial so the edition change
+            // means nothing substantial to this `while` statement.
+            self.skip.insert(value.hir_id);
             return;
         }
         if expr_parent_is_stmt(cx.tcx, expr.hir_id)
@@ -309,7 +330,7 @@ impl Subdiagnostic for IfLetRescopeRewrite {
                 .chain(repeat('}').take(closing_brackets.count))
                 .collect(),
         ));
-        let msg = f(diag, crate::fluent_generated::lint_suggestion.into());
+        let msg = f(diag, crate::fluent_generated::lint_suggestion);
         diag.multipart_suggestion_with_style(
             msg,
             suggestions,

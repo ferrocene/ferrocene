@@ -5,13 +5,13 @@ use std::borrow::Cow;
 
 use rustc_ast::util::unicode::TEXT_FLOW_CONTROL_CHARS;
 use rustc_errors::{
-    elided_lifetime_in_path_suggestion, Applicability, Diag, DiagArgValue, LintDiagnostic,
+    Applicability, Diag, DiagArgValue, LintDiagnostic, elided_lifetime_in_path_suggestion,
 };
 use rustc_middle::middle::stability;
-use rustc_session::lint::{BuiltinLintDiag, ElidedLifetimeResolution};
 use rustc_session::Session;
-use rustc_span::symbol::kw;
+use rustc_session::lint::{BuiltinLintDiag, ElidedLifetimeResolution};
 use rustc_span::BytePos;
+use rustc_span::symbol::kw;
 use tracing::debug;
 
 use crate::lints::{self, ElidedNamedLifetime};
@@ -399,12 +399,6 @@ pub(super) fn decorate_lint(sess: &Session, diagnostic: BuiltinLintDiag, diag: &
         }
         BuiltinLintDiag::CfgAttrNoAttributes => {
             lints::CfgAttrNoAttributes.decorate_lint(diag);
-        }
-        BuiltinLintDiag::CrateTypeInCfgAttr => {
-            lints::CrateTypeInCfgAttr.decorate_lint(diag);
-        }
-        BuiltinLintDiag::CrateNameInCfgAttr => {
-            lints::CrateNameInCfgAttr.decorate_lint(diag);
         }
         BuiltinLintDiag::MissingFragmentSpecifier => {
             lints::MissingFragmentSpecifier.decorate_lint(diag);

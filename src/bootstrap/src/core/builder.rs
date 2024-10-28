@@ -1,4 +1,4 @@
-use std::any::{type_name, Any};
+use std::any::{Any, type_name};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
@@ -12,6 +12,7 @@ use std::{env, fs};
 
 use clap::ValueEnum;
 
+pub use crate::Compiler;
 use crate::core::build_steps::tool::{self, SourceType};
 use crate::core::build_steps::{
     check, clean, clippy, compile, dist, doc, gcc, llvm, run, setup, test, vendor,
@@ -19,14 +20,13 @@ use crate::core::build_steps::{
 use crate::core::config::flags::{Color, Subcommand};
 use crate::core::config::{DryRun, SplitDebuginfo, TargetSelection};
 use crate::utils::cache::Cache;
-use crate::utils::exec::{command, BootstrapCommand};
+use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
-    self, add_dylib_path, add_link_lib_path, check_cfg_arg, exe, libdir, linker_args, linker_flags,
-    t, LldThreads,
+    self, LldThreads, add_dylib_path, add_link_lib_path, check_cfg_arg, exe, libdir, linker_args,
+    linker_flags, t,
 };
-pub use crate::Compiler;
 use crate::{
-    prepare_behaviour_dump_dir, Build, CLang, Crate, DocTests, GitRepo, Mode, EXTRA_CHECK_CFGS,
+    Build, CLang, Crate, DocTests, EXTRA_CHECK_CFGS, GitRepo, Mode, prepare_behaviour_dump_dir,
 };
 
 #[cfg(test)]
@@ -317,33 +317,30 @@ const PATH_REMAP: &[(&str, &[&str])] = &[
     // actual path is `proc-macro-srv-cli`
     ("rust-analyzer-proc-macro-srv", &["src/tools/rust-analyzer/crates/proc-macro-srv-cli"]),
     // Make `x test tests` function the same as `x t tests/*`
-    (
-        "tests",
-        &[
-            // tidy-alphabetical-start
-            "tests/assembly",
-            "tests/codegen",
-            "tests/codegen-units",
-            "tests/coverage",
-            "tests/coverage-run-rustdoc",
-            "tests/crashes",
-            "tests/debuginfo",
-            "tests/incremental",
-            "tests/mir-opt",
-            "tests/pretty",
-            "tests/run-make",
-            "tests/run-pass-valgrind",
-            "tests/rustdoc",
-            "tests/rustdoc-gui",
-            "tests/rustdoc-js",
-            "tests/rustdoc-js-std",
-            "tests/rustdoc-json",
-            "tests/rustdoc-ui",
-            "tests/ui",
-            "tests/ui-fulldeps",
-            // tidy-alphabetical-end
-        ],
-    ),
+    ("tests", &[
+        // tidy-alphabetical-start
+        "tests/assembly",
+        "tests/codegen",
+        "tests/codegen-units",
+        "tests/coverage",
+        "tests/coverage-run-rustdoc",
+        "tests/crashes",
+        "tests/debuginfo",
+        "tests/incremental",
+        "tests/mir-opt",
+        "tests/pretty",
+        "tests/run-make",
+        "tests/run-pass-valgrind",
+        "tests/rustdoc",
+        "tests/rustdoc-gui",
+        "tests/rustdoc-js",
+        "tests/rustdoc-js-std",
+        "tests/rustdoc-json",
+        "tests/rustdoc-ui",
+        "tests/ui",
+        "tests/ui-fulldeps",
+        // tidy-alphabetical-end
+    ]),
 ];
 
 fn remap_paths(paths: &mut Vec<PathBuf>) {
@@ -977,6 +974,7 @@ impl<'a> Builder<'a> {
                 doc::Releases,
                 doc::RunMakeSupport,
                 doc::BuildHelper,
+                doc::Compiletest,
             ),
             Kind::Dist => describe!(
                 dist::Docs,
@@ -1057,6 +1055,7 @@ impl<'a> Builder<'a> {
                 run::GenerateWindowsSys,
                 run::GenerateCompletions,
             ),
+<<<<<<< HEAD
             Kind::Sign => describe!(
                 // Qualification Documents
                 crate::ferrocene::sign::DocumentList,
@@ -1069,6 +1068,11 @@ impl<'a> Builder<'a> {
                 crate::ferrocene::sign::InternalProcedures,
             ),
             Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
+=======
+            Kind::Setup => {
+                describe!(setup::Profile, setup::Hook, setup::Link, setup::Editor)
+            }
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()
@@ -1606,7 +1610,9 @@ impl<'a> Builder<'a> {
             // rustc_llvm. But if LLVM is stale, that'll be a tiny amount
             // of work comparatively, and we'd likely need to rebuild it anyway,
             // so that's okay.
-            if crate::core::build_steps::llvm::prebuilt_llvm_config(self, target).should_build() {
+            if crate::core::build_steps::llvm::prebuilt_llvm_config(self, target, false)
+                .should_build()
+            {
                 cargo.env("RUST_CHECK", "1");
             }
         }
@@ -1631,8 +1637,8 @@ impl<'a> Builder<'a> {
         let libdir = self.rustc_libdir(compiler);
 
         let sysroot_str = sysroot.as_os_str().to_str().expect("sysroot should be UTF-8");
-        if !matches!(self.config.dry_run, DryRun::SelfCheck) {
-            self.verbose_than(0, || println!("using sysroot {sysroot_str}"));
+        if self.is_verbose() && !matches!(self.config.dry_run, DryRun::SelfCheck) {
+            println!("using sysroot {sysroot_str}");
         }
 
         let mut rustflags = Rustflags::new(target);
@@ -1656,12 +1662,6 @@ impl<'a> Builder<'a> {
             // so it has no way of knowing the sysroot.
             rustflags.arg("--sysroot");
             rustflags.arg(sysroot_str);
-        }
-
-        // https://rust-lang.zulipchat.com/#narrow/stream/182449-t-compiler.2Fhelp/topic/.E2.9C.94.20link.20new.20library.20into.20stage1.2Frustc
-        if self.config.llvm_enzyme {
-            rustflags.arg("-l");
-            rustflags.arg("Enzyme-19");
         }
 
         let use_new_symbol_mangling = match self.config.rust_new_symbol_mangling {
@@ -2091,6 +2091,11 @@ impl<'a> Builder<'a> {
 
         if self.config.backtrace_on_ice {
             cargo.env("RUSTC_BACKTRACE_ON_ICE", "1");
+        }
+
+        if self.is_verbose() {
+            // This provides very useful logs especially when debugging build cache-related stuff.
+            cargo.env("CARGO_LOG", "cargo::core::compiler::fingerprint=info");
         }
 
         cargo.env("RUSTC_VERBOSE", self.verbosity.to_string());

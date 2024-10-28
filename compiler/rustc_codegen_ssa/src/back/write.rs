@@ -2,8 +2,8 @@ use std::any::Any;
 use std::assert_matches::assert_matches;
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
+use std::sync::mpsc::{Receiver, Sender, channel};
 use std::{fs, io, mem, str, thread};
 
 use jobserver::{Acquired, Client};
@@ -11,7 +11,6 @@ use rustc_ast::attr;
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_data_structures::memmap::Mmap;
 use rustc_data_structures::profiling::{SelfProfilerRef, VerboseTimingGuard};
-use rustc_data_structures::sync::Lrc;
 use rustc_errors::emitter::Emitter;
 use rustc_errors::translation::Translate;
 use rustc_errors::{
@@ -23,16 +22,16 @@ use rustc_hir::def_id::{CrateNum, LOCAL_CRATE};
 use rustc_incremental::{
     copy_cgu_workproduct_to_incr_comp_cache_dir, in_incr_comp_dir, in_incr_comp_dir_sess,
 };
-use rustc_metadata::fs::copy_to_stdout;
 use rustc_metadata::EncodedMetadata;
+use rustc_metadata::fs::copy_to_stdout;
 use rustc_middle::bug;
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
 use rustc_middle::middle::exported_symbols::SymbolExportInfo;
 use rustc_middle::ty::TyCtxt;
+use rustc_session::Session;
 use rustc_session::config::{
     self, CrateType, Lto, OutFileName, OutputFilenames, OutputType, Passes, SwitchWithOptPath,
 };
-use rustc_session::Session;
 use rustc_span::source_map::SourceMap;
 use rustc_span::symbol::sym;
 use rustc_span::{BytePos, FileName, InnerSpan, Pos, Span};
@@ -45,8 +44,8 @@ use super::symbol_export::symbol_name_for_instance_in_crate;
 use crate::errors::ErrorCreatingRemarkDir;
 use crate::traits::*;
 use crate::{
-    errors, CachedModuleCodegen, CodegenResults, CompiledModule, CrateInfo, ModuleCodegen,
-    ModuleKind,
+    CachedModuleCodegen, CodegenResults, CompiledModule, CrateInfo, ModuleCodegen, ModuleKind,
+    errors,
 };
 
 const PRE_LTO_BC_EXT: &str = "pre-lto.bc";
@@ -1889,7 +1888,7 @@ impl SharedEmitter {
 }
 
 impl Translate for SharedEmitter {
-    fn fluent_bundle(&self) -> Option<&Lrc<FluentBundle>> {
+    fn fluent_bundle(&self) -> Option<&FluentBundle> {
         None
     }
 
@@ -1924,7 +1923,7 @@ impl Emitter for SharedEmitter {
         );
     }
 
-    fn source_map(&self) -> Option<&Lrc<SourceMap>> {
+    fn source_map(&self) -> Option<&SourceMap> {
         None
     }
 }

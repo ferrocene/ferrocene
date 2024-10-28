@@ -5,7 +5,7 @@
 #![doc(rust_logo)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
-#![feature(control_flow_enum)]
+#![feature(file_buffered)]
 #![feature(let_chains)]
 #![feature(never_type)]
 #![feature(rustc_attrs)]
@@ -37,13 +37,13 @@ use rustc_middle::mir::*;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, ParamEnv, RegionVid, TyCtxt};
 use rustc_middle::{bug, span_bug};
+use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::{
     EverInitializedPlaces, MaybeInitializedPlaces, MaybeUninitializedPlaces,
 };
 use rustc_mir_dataflow::move_paths::{
     InitIndex, InitLocation, LookupResult, MoveData, MoveOutIndex, MovePathIndex,
 };
-use rustc_mir_dataflow::Analysis;
 use rustc_session::lint::builtin::UNUSED_MUT;
 use rustc_span::{Span, Symbol};
 use rustc_target::abi::FieldIdx;
@@ -86,7 +86,7 @@ use borrow_set::{BorrowData, BorrowSet};
 use dataflow::{BorrowIndex, BorrowckDomain, BorrowckResults, Borrows};
 use nll::PoloniusOutput;
 use place_ext::PlaceExt;
-use places_conflict::{places_conflict, PlaceConflictBias};
+use places_conflict::{PlaceConflictBias, places_conflict};
 use region_infer::RegionInferenceContext;
 use renumber::RegionCtxt;
 
@@ -742,6 +742,7 @@ impl<'a, 'tcx, R> rustc_mir_dataflow::ResultsVisitor<'a, 'tcx, R>
             }
 
             TerminatorKind::InlineAsm {
+                asm_macro: _,
                 template: _,
                 operands,
                 options: _,
@@ -1612,13 +1613,9 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, '_, 'tcx> {
             match elem {
                 ProjectionElem::Deref => match place_ty.ty.kind() {
                     ty::Ref(..) | ty::RawPtr(..) => {
-                        self.move_errors.push(MoveError::new(
-                            place,
-                            location,
-                            BorrowedContent {
-                                target_place: place_ref.project_deeper(&[elem], tcx),
-                            },
-                        ));
+                        self.move_errors.push(MoveError::new(place, location, BorrowedContent {
+                            target_place: place_ref.project_deeper(&[elem], tcx),
+                        }));
                         return;
                     }
                     ty::Adt(adt, _) => {

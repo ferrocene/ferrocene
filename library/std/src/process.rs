@@ -148,7 +148,15 @@
 #![stable(feature = "process", since = "1.0.0")]
 #![deny(unsafe_op_in_unsafe_fn)]
 
-#[cfg(all(test, not(any(target_os = "emscripten", target_env = "sgx", target_os = "xous"))))]
+#[cfg(all(
+    test,
+    not(any(
+        target_os = "emscripten",
+        target_os = "wasi",
+        target_env = "sgx",
+        target_os = "xous"
+    ))
+))]
 mod tests;
 
 use crate::convert::Infallible;
@@ -157,7 +165,7 @@ use crate::io::prelude::*;
 use crate::io::{self, BorrowedCursor, IoSlice, IoSliceMut};
 use crate::num::NonZero;
 use crate::path::Path;
-use crate::sys::pipe::{read2, AnonPipe};
+use crate::sys::pipe::{AnonPipe, read2};
 use crate::sys::process as imp;
 #[stable(feature = "command_access", since = "1.57.0")]
 pub use crate::sys_common::process::CommandEnvs;

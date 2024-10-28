@@ -5,11 +5,13 @@
 #![feature(rustc_private)]
 #![feature(assert_matches)]
 #![feature(box_patterns)]
+#![feature(file_buffered)]
 #![feature(if_let_guard)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
 #![feature(never_type)]
+#![feature(os_str_display)]
 #![feature(round_char_boundary)]
 #![feature(test)]
 #![feature(type_alias_impl_trait)]
@@ -18,7 +20,6 @@
 #![warn(rustc::internal)]
 #![allow(clippy::collapsible_if, clippy::collapsible_else_if)]
 #![allow(rustc::diagnostic_outside_of_impl)]
-#![allow(rustc::potential_query_instability)]
 #![allow(rustc::untranslatable_diagnostic)]
 
 extern crate thin_vec;
@@ -73,14 +74,14 @@ extern crate jemalloc_sys;
 use std::env::{self, VarError};
 use std::io::{self, IsTerminal};
 use std::process;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed, FatalError};
 use rustc_interface::interface;
 use rustc_middle::ty::TyCtxt;
-use rustc_session::config::{make_crate_type_option, ErrorOutputType, RustcOptGroup};
-use rustc_session::{getopts, EarlyDiagCtxt};
+use rustc_session::config::{ErrorOutputType, RustcOptGroup, make_crate_type_option};
+use rustc_session::{EarlyDiagCtxt, getopts};
 use tracing::info;
 
 use crate::clean::utils::DOC_RUST_LANG_ORG_CHANNEL;
@@ -97,7 +98,7 @@ use crate::clean::utils::DOC_RUST_LANG_ORG_CHANNEL;
 /// Commas between elements are required (even if the expression is a block).
 macro_rules! map {
     ($( $key: expr => $val: expr ),* $(,)*) => {{
-        let mut map = ::rustc_data_structures::fx::FxHashMap::default();
+        let mut map = ::rustc_data_structures::fx::FxIndexMap::default();
         $( map.insert($key, $val); )*
         map
     }}

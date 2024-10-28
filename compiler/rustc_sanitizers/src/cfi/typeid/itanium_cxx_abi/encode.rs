@@ -7,7 +7,7 @@
 
 use std::fmt::Write as _;
 
-use rustc_data_structures::base_n::{ToBaseN, ALPHANUMERIC_ONLY, CASE_INSENSITIVE};
+use rustc_data_structures::base_n::{ALPHANUMERIC_ONLY, CASE_INSENSITIVE, ToBaseN};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_hir as hir;
 use rustc_middle::bug;
@@ -22,8 +22,8 @@ use rustc_target::abi::Integer;
 use rustc_target::spec::abi::Abi;
 use tracing::instrument;
 
-use crate::cfi::typeid::itanium_cxx_abi::transform::{TransformTy, TransformTyOptions};
 use crate::cfi::typeid::TypeIdOptions;
+use crate::cfi::typeid::itanium_cxx_abi::transform::{TransformTy, TransformTyOptions};
 
 /// Options for encode_ty.
 pub(crate) type EncodeTyOptions = TypeIdOptions;
@@ -145,7 +145,7 @@ fn encode_const<'tcx>(
                     let _ = write!(s, "{val}");
                 }
                 ty::Bool => {
-                    let val = c.try_eval_bool(tcx, ty::ParamEnv::reveal_all()).unwrap();
+                    let val = c.try_to_bool().expect("expected monomorphic const in cfi");
                     let _ = write!(s, "{val}");
                 }
                 _ => {
@@ -315,7 +315,7 @@ fn encode_region<'tcx>(region: Region<'tcx>, dict: &mut FxHashMap<DictKey<'tcx>,
 /// Encodes a ty:Ty using the Itanium C++ ABI with vendor extended type qualifiers and types for
 /// Rust types that are not used at the FFI boundary.
 #[instrument(level = "trace", skip(tcx, dict))]
-pub fn encode_ty<'tcx>(
+pub(crate) fn encode_ty<'tcx>(
     tcx: TyCtxt<'tcx>,
     ty: Ty<'tcx>,
     dict: &mut FxHashMap<DictKey<'tcx>, usize>,
@@ -411,7 +411,7 @@ pub fn encode_ty<'tcx>(
 
         ty::Array(ty0, len) => {
             // A<array-length><element-type>
-            let len = len.eval_target_usize(tcx, ty::ParamEnv::reveal_all());
+            let len = len.try_to_target_usize(tcx).expect("expected monomorphic const in cfi");
             let mut s = String::from("A");
             let _ = write!(s, "{len}");
             s.push_str(&encode_ty(tcx, *ty0, dict, options));

@@ -2,8 +2,8 @@ use rustc_hir as hir;
 use rustc_infer::infer::{DefineOpaqueTypes, InferOk, TyCtxtInferExt};
 use rustc_infer::traits;
 use rustc_middle::ty::{self, Upcast};
-use rustc_span::def_id::DefId;
 use rustc_span::DUMMY_SP;
+use rustc_span::def_id::DefId;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
 use thin_vec::ThinVec;
 use tracing::{debug, instrument, trace};
@@ -87,6 +87,7 @@ pub(crate) fn synthesize_blanket_impls(
                 item_id: clean::ItemId::Blanket { impl_id: impl_def_id, for_: item_def_id },
                 inner: Box::new(clean::ItemInner {
                     attrs: Default::default(),
+                    stability: None,
                     kind: clean::ImplItem(Box::new(clean::Impl {
                         safety: hir::Safety::Safe,
                         generics: clean_ty_generics(

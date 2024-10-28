@@ -16,10 +16,10 @@ use rustc_middle::mir::*;
 use rustc_middle::span_bug;
 use rustc_middle::ty::adjustment::PointerCoercion;
 use rustc_middle::ty::{self, Instance, InstanceKind, Ty, TypeVisitableExt};
+use rustc_mir_dataflow::Analysis;
 use rustc_mir_dataflow::impls::MaybeStorageLive;
 use rustc_mir_dataflow::storage::always_storage_live_locals;
-use rustc_mir_dataflow::Analysis;
-use rustc_span::{sym, Span, Symbol, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span, Symbol, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::{self, ObligationCauseCode, ObligationCtxt};
 use tracing::{debug, instrument, trace};
@@ -317,7 +317,6 @@ impl<'mir, 'tcx> Checker<'mir, 'tcx> {
         {
             self.error_emitted = Some(guar);
         }
-        self.check_op_spanned(ops::StaticAccess, span)
     }
 
     /// Returns whether this place can possibly escape the evaluation of the current const/static
@@ -440,6 +439,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                     | PointerCoercion::UnsafeFnPointer
                     | PointerCoercion::ClosureFnPointer(_)
                     | PointerCoercion::ReifyFnPointer,
+                    _,
                 ),
                 _,
                 _,
@@ -447,8 +447,12 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 // These are all okay; they only change the type, not the data.
             }
 
-            Rvalue::Cast(CastKind::PointerCoercion(PointerCoercion::Unsize), _, _) => {
-                // Unsizing is implemented for CTFE.
+            Rvalue::Cast(
+                CastKind::PointerCoercion(PointerCoercion::Unsize | PointerCoercion::DynStar, _),
+                _,
+                _,
+            ) => {
+                // Unsizing and `dyn*` coercions are implemented for CTFE.
             }
 
             Rvalue::Cast(CastKind::PointerExposeProvenance, _, _) => {
@@ -456,10 +460,6 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
             }
             Rvalue::Cast(CastKind::PointerWithExposedProvenance, _, _) => {
                 // Since no pointer can ever get exposed (rejected above), this is easy to support.
-            }
-
-            Rvalue::Cast(CastKind::DynStar, _, _) => {
-                // `dyn*` coercion is implemented for CTFE.
             }
 
             Rvalue::Cast(_, _, _) => {}

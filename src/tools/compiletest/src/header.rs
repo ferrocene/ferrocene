@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use std::env;
 use std::fs::File;
-use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::OnceLock;
@@ -11,7 +11,7 @@ use regex::Regex;
 use tracing::*;
 
 use crate::common::{Config, Debugger, FailMode, Mode, PassMode};
-use crate::header::cfg::{parse_cfg_name_directive, MatchOutcome};
+use crate::header::cfg::{MatchOutcome, parse_cfg_name_directive};
 use crate::header::needs::CachedNeedsConditions;
 use crate::util::static_regex;
 use crate::{extract_cdb_version, extract_gdb_version};
@@ -125,7 +125,7 @@ pub struct TestProps {
     // Build documentation for all specified aux-builds as well
     pub build_aux_docs: bool,
     /// Build the documentation for each crate in a unique output directory.
-    /// Uses <root output directory>/docs/<test name>/doc
+    /// Uses `<root output directory>/docs/<test name>/doc`.
     pub unique_doc_out_dir: bool,
     // Flag to force a crate to be built with the host architecture
     pub force_host: bool,
@@ -218,6 +218,8 @@ pub struct TestProps {
     pub filecheck_flags: Vec<String>,
     /// Don't automatically insert any `--check-cfg` args
     pub no_auto_check_cfg: bool,
+    /// Run tests which require enzyme being build
+    pub has_enzyme: bool,
 }
 
 mod directives {
@@ -322,6 +324,7 @@ impl TestProps {
             llvm_cov_flags: vec![],
             filecheck_flags: vec![],
             no_auto_check_cfg: false,
+            has_enzyme: false,
         }
     }
 
@@ -1115,6 +1118,7 @@ fn expand_variables(mut value: String, config: &Config) -> String {
     const CWD: &str = "{{cwd}}";
     const SRC_BASE: &str = "{{src-base}}";
     const BUILD_BASE: &str = "{{build-base}}";
+    const RUST_SRC_BASE: &str = "{{rust-src-base}}";
     const SYSROOT_BASE: &str = "{{sysroot-base}}";
     const TARGET_LINKER: &str = "{{target-linker}}";
     const TARGET: &str = "{{target}}";
@@ -1142,6 +1146,13 @@ fn expand_variables(mut value: String, config: &Config) -> String {
 
     if value.contains(TARGET) {
         value = value.replace(TARGET, &config.target);
+    }
+
+    if value.contains(RUST_SRC_BASE) {
+        let src_base = config.sysroot_base.join("lib/rustlib/src/rust");
+        src_base.try_exists().expect(&*format!("{} should exists", src_base.display()));
+        let src_base = src_base.read_link().unwrap_or(src_base);
+        value = value.replace(RUST_SRC_BASE, &src_base.to_string_lossy());
     }
 
     value
@@ -1304,12 +1315,12 @@ pub fn llvm_has_libzstd(config: &Config) -> bool {
     false
 }
 
-/// Takes a directive of the form "<version1> [- <version2>]",
-/// returns the numeric representation of <version1> and <version2> as
-/// tuple: (<version1> as u32, <version2> as u32)
+/// Takes a directive of the form `"<version1> [- <version2>]"`,
+/// returns the numeric representation of `<version1>` and `<version2>` as
+/// tuple: `(<version1> as u32, <version2> as u32)`.
 ///
-/// If the <version2> part is omitted, the second component of the tuple
-/// is the same as <version1>.
+/// If the `<version2>` part is omitted, the second component of the tuple
+/// is the same as `<version1>`.
 fn extract_version_range<F>(line: &str, parse: F) -> Option<(u32, u32)>
 where
     F: Fn(&str) -> Option<u32>,

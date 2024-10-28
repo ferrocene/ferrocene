@@ -1,17 +1,17 @@
 use std::fmt::Write;
 
-use rustc_data_structures::fx::FxHashSet;
+use rustc_data_structures::fx::FxIndexSet;
 use rustc_span::edition::Edition;
 
 use crate::doctest::{
-    run_test, DocTestBuilder, GlobalTestOptions, IndividualTestOptions, RunnableDocTest,
-    RustdocOptions, ScrapedDocTest, TestFailure, UnusedExterns,
+    DocTestBuilder, GlobalTestOptions, IndividualTestOptions, RunnableDocTest, RustdocOptions,
+    ScrapedDocTest, TestFailure, UnusedExterns, run_test,
 };
 use crate::html::markdown::{Ignore, LangString};
 
 /// Convenient type to merge compatible doctests into one.
 pub(crate) struct DocTestRunner {
-    crate_attrs: FxHashSet<String>,
+    crate_attrs: FxIndexSet<String>,
     ids: String,
     output: String,
     supports_color: bool,
@@ -21,7 +21,7 @@ pub(crate) struct DocTestRunner {
 impl DocTestRunner {
     pub(crate) fn new() -> Self {
         Self {
-            crate_attrs: FxHashSet::default(),
+            crate_attrs: FxIndexSet::default(),
             ids: String::new(),
             output: String::new(),
             supports_color: true,

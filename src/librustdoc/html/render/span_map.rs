@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use rustc_data_structures::fx::FxHashMap;
+use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::intravisit::{self, Visitor};
@@ -10,7 +10,7 @@ use rustc_middle::ty::TyCtxt;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::{BytePos, ExpnKind, Span};
 
-use crate::clean::{self, rustc_span, PrimitiveType};
+use crate::clean::{self, PrimitiveType, rustc_span};
 use crate::html::sources;
 
 /// This enum allows us to store two different kinds of information:
@@ -44,7 +44,7 @@ pub(crate) fn collect_spans_and_sources(
     src_root: &Path,
     include_sources: bool,
     generate_link_to_definition: bool,
-) -> (FxHashMap<PathBuf, String>, FxHashMap<Span, LinkFromSrc>) {
+) -> (FxIndexMap<PathBuf, String>, FxHashMap<Span, LinkFromSrc>) {
     let mut visitor = SpanMapVisitor { tcx, matches: FxHashMap::default() };
 
     if include_sources {
@@ -243,7 +243,6 @@ impl<'tcx> Visitor<'tcx> for SpanMapVisitor<'tcx> {
             | ItemKind::ExternCrate(_)
             | ItemKind::ForeignMod { .. }
             | ItemKind::GlobalAsm(_)
-            | ItemKind::OpaqueTy(_)
             // We already have "visit_mod" above so no need to check it here.
             | ItemKind::Mod(_) => {}
         }

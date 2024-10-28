@@ -2,7 +2,7 @@
 
 use std::iter;
 
-use rustc_ast::InlineAsmOptions;
+use rustc_ast::{AsmMacro, InlineAsmOptions};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir as hir;
@@ -221,14 +221,10 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 this.in_breakable_scope(Some(loop_block), destination, expr_span, move |this| {
                     // conduct the test, if necessary
                     let body_block = this.cfg.start_new_block();
-                    this.cfg.terminate(
-                        loop_block,
-                        source_info,
-                        TerminatorKind::FalseUnwind {
-                            real_target: body_block,
-                            unwind: UnwindAction::Continue,
-                        },
-                    );
+                    this.cfg.terminate(loop_block, source_info, TerminatorKind::FalseUnwind {
+                        real_target: body_block,
+                        unwind: UnwindAction::Continue,
+                    });
                     this.diverge_from(loop_block);
 
                     // The “return” value of the loop body must always be a unit. We therefore
@@ -259,30 +255,26 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
 
                 debug!("expr_into_dest: fn_span={:?}", fn_span);
 
-                this.cfg.terminate(
-                    block,
-                    source_info,
-                    TerminatorKind::Call {
-                        func: fun,
-                        args,
-                        unwind: UnwindAction::Continue,
-                        destination,
-                        // The presence or absence of a return edge affects control-flow sensitive
-                        // MIR checks and ultimately whether code is accepted or not. We can only
-                        // omit the return edge if a return type is visibly uninhabited to a module
-                        // that makes the call.
-                        target: expr
-                            .ty
-                            .is_inhabited_from(this.tcx, this.parent_module, this.param_env)
-                            .then_some(success),
-                        call_source: if from_hir_call {
-                            CallSource::Normal
-                        } else {
-                            CallSource::OverloadedOperator
-                        },
-                        fn_span,
+                this.cfg.terminate(block, source_info, TerminatorKind::Call {
+                    func: fun,
+                    args,
+                    unwind: UnwindAction::Continue,
+                    destination,
+                    // The presence or absence of a return edge affects control-flow sensitive
+                    // MIR checks and ultimately whether code is accepted or not. We can only
+                    // omit the return edge if a return type is visibly uninhabited to a module
+                    // that makes the call.
+                    target: expr
+                        .ty
+                        .is_inhabited_from(this.tcx, this.parent_module, this.param_env)
+                        .then_some(success),
+                    call_source: if from_hir_call {
+                        CallSource::Normal
+                    } else {
+                        CallSource::OverloadedOperator
                     },
-                );
+                    fn_span,
+                });
                 this.diverge_from(block);
                 success.unit()
             }
@@ -392,6 +384,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 block.unit()
             }
             ExprKind::InlineAsm(box InlineAsmExpr {
+                asm_macro,
                 template,
                 ref operands,
                 options,
@@ -400,11 +393,8 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 use rustc_middle::{mir, thir};
 
                 let destination_block = this.cfg.start_new_block();
-                let mut targets = if options.contains(InlineAsmOptions::NORETURN) {
-                    vec![]
-                } else {
-                    vec![destination_block]
-                };
+                let mut targets =
+                    if asm_macro.diverges(options) { vec![] } else { vec![destination_block] };
 
                 let operands = operands
                     .into_iter()
@@ -469,11 +459,9 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                             let tmp = this.get_unit_temp();
                             let target =
                                 this.ast_block(tmp, target, block, source_info).into_block();
-                            this.cfg.terminate(
-                                target,
-                                source_info,
-                                TerminatorKind::Goto { target: destination_block },
-                            );
+                            this.cfg.terminate(target, source_info, TerminatorKind::Goto {
+                                target: destination_block,
+                            });
 
                             mir::InlineAsmOperand::Label { target_index }
                         }
@@ -484,22 +472,27 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     this.cfg.push_assign_unit(block, source_info, destination, this.tcx);
                 }
 
-                this.cfg.terminate(
-                    block,
-                    source_info,
-                    TerminatorKind::InlineAsm {
-                        template,
-                        operands,
-                        options,
-                        line_spans,
-                        targets: targets.into_boxed_slice(),
-                        unwind: if options.contains(InlineAsmOptions::MAY_UNWIND) {
-                            UnwindAction::Continue
-                        } else {
-                            UnwindAction::Unreachable
-                        },
+                let asm_macro = match asm_macro {
+                    AsmMacro::Asm => InlineAsmMacro::Asm,
+                    AsmMacro::GlobalAsm => {
+                        span_bug!(expr_span, "unexpected global_asm! in inline asm")
+                    }
+                    AsmMacro::NakedAsm => InlineAsmMacro::NakedAsm,
+                };
+
+                this.cfg.terminate(block, source_info, TerminatorKind::InlineAsm {
+                    asm_macro,
+                    template,
+                    operands,
+                    options,
+                    line_spans,
+                    targets: targets.into_boxed_slice(),
+                    unwind: if options.contains(InlineAsmOptions::MAY_UNWIND) {
+                        UnwindAction::Continue
+                    } else {
+                        UnwindAction::Unreachable
                     },
-                );
+                });
                 if options.contains(InlineAsmOptions::MAY_UNWIND) {
                     this.diverge_from(block);
                 }
@@ -562,11 +555,12 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     )
                 );
                 let resume = this.cfg.start_new_block();
-                this.cfg.terminate(
-                    block,
-                    source_info,
-                    TerminatorKind::Yield { value, resume, resume_arg: destination, drop: None },
-                );
+                this.cfg.terminate(block, source_info, TerminatorKind::Yield {
+                    value,
+                    resume,
+                    resume_arg: destination,
+                    drop: None,
+                });
                 this.coroutine_drop_cleanup(block);
                 resume.unit()
             }

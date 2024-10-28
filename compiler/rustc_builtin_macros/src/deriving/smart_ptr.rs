@@ -1,5 +1,5 @@
-use ast::ptr::P;
 use ast::HasAttrs;
+use ast::ptr::P;
 use rustc_ast::mut_visit::MutVisitor;
 use rustc_ast::visit::BoundKind;
 use rustc_ast::{
@@ -9,9 +9,9 @@ use rustc_ast::{
 use rustc_attr as attr;
 use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_expand::base::{Annotatable, ExtCtxt};
-use rustc_span::symbol::{sym, Ident};
+use rustc_span::symbol::{Ident, sym};
 use rustc_span::{Span, Symbol};
-use thin_vec::{thin_vec, ThinVec};
+use thin_vec::{ThinVec, thin_vec};
 
 macro_rules! path {
     ($span:expr, $($part:ident)::*) => { vec![$(Ident::new(sym::$part, $span),)*] }
@@ -310,7 +310,7 @@ pub(crate) fn expand_deriving_smart_ptr(
     // Add the impl blocks for `DispatchFromDyn` and `CoerceUnsized`.
     let gen_args = vec![GenericArg::Type(alt_self_type.clone())];
     add_impl_block(impl_generics.clone(), sym::DispatchFromDyn, gen_args.clone());
-    add_impl_block(impl_generics.clone(), sym::CoerceUnsized, gen_args.clone());
+    add_impl_block(impl_generics.clone(), sym::CoerceUnsized, gen_args);
 }
 
 fn contains_maybe_sized_bound_on_pointee(predicates: &[WherePredicate], pointee: Symbol) -> bool {

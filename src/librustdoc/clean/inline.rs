@@ -4,25 +4,25 @@ use std::iter::once;
 use std::sync::Arc;
 
 use rustc_data_structures::fx::FxHashSet;
+use rustc_hir::Mutability;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, DefIdSet, LocalDefId, LocalModDefId};
-use rustc_hir::Mutability;
 use rustc_metadata::creader::{CStore, LoadedMacro};
 use rustc_middle::ty::fast_reject::SimplifiedType;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::hygiene::MacroKind;
-use rustc_span::symbol::{sym, Symbol};
-use thin_vec::{thin_vec, ThinVec};
+use rustc_span::symbol::{Symbol, sym};
+use thin_vec::{ThinVec, thin_vec};
 use tracing::{debug, trace};
 use {rustc_ast as ast, rustc_hir as hir};
 
 use super::Item;
 use crate::clean::{
-    self, clean_bound_vars, clean_generics, clean_impl_item, clean_middle_assoc_item,
-    clean_middle_field, clean_middle_ty, clean_poly_fn_sig, clean_trait_ref_with_constraints,
-    clean_ty, clean_ty_alias_inner_type, clean_ty_generics, clean_variant_def, utils, Attributes,
-    AttributesExt, ImplKind, ItemId, Type,
+    self, Attributes, AttributesExt, ImplKind, ItemId, Type, clean_bound_vars, clean_generics,
+    clean_impl_item, clean_middle_assoc_item, clean_middle_field, clean_middle_ty,
+    clean_poly_fn_sig, clean_trait_ref_with_constraints, clean_ty, clean_ty_alias_inner_type,
+    clean_ty_generics, clean_variant_def, utils,
 };
 use crate::core::DocContext;
 use crate::formats::item_type::ItemType;
@@ -373,7 +373,7 @@ pub(crate) fn build_impls(
     let tcx = cx.tcx;
 
     // for each implementation of an item represented by `did`, build the clean::Item for that impl
-    for &did in tcx.inherent_impls(did).into_iter().flatten() {
+    for &did in tcx.inherent_impls(did).into_iter() {
         cx.with_param_env(did, |cx| {
             build_impl(cx, did, attrs, ret);
         });
@@ -388,7 +388,7 @@ pub(crate) fn build_impls(
     if tcx.has_attr(did, sym::rustc_has_incoherent_inherent_impls) {
         let type_ =
             if tcx.is_trait(did) { SimplifiedType::Trait(did) } else { SimplifiedType::Adt(did) };
-        for &did in tcx.incoherent_impls(type_).into_iter().flatten() {
+        for &did in tcx.incoherent_impls(type_).into_iter() {
             cx.with_param_env(did, |cx| {
                 build_impl(cx, did, attrs, ret);
             });
@@ -672,6 +672,7 @@ fn build_module_items(
                     item_id: ItemId::DefId(did),
                     inner: Box::new(clean::ItemInner {
                         attrs: Default::default(),
+                        stability: None,
                         kind: clean::ImportItem(clean::Import::new_simple(
                             item.ident.name,
                             clean::ImportSource {
@@ -837,8 +838,7 @@ pub(crate) fn record_extern_trait(cx: &mut DocContext<'_>, did: DefId) {
     }
 
     {
-        if cx.external_traits.borrow().contains_key(&did) || cx.active_extern_traits.contains(&did)
-        {
+        if cx.external_traits.contains_key(&did) || cx.active_extern_traits.contains(&did) {
             return;
         }
     }
@@ -850,6 +850,6 @@ pub(crate) fn record_extern_trait(cx: &mut DocContext<'_>, did: DefId) {
     debug!("record_extern_trait: {did:?}");
     let trait_ = build_external_trait(cx, did);
 
-    cx.external_traits.borrow_mut().insert(did, trait_);
+    cx.external_traits.insert(did, trait_);
     cx.active_extern_traits.remove(&did);
 }

@@ -5,7 +5,7 @@ use std::fmt::Write;
 use std::ops::ControlFlow;
 
 use rustc_data_structures::fx::FxHashMap;
-use rustc_errors::{into_diag_arg_using_display, Applicability, Diag, DiagArgValue, IntoDiagArg};
+use rustc_errors::{Applicability, Diag, DiagArgValue, IntoDiagArg, into_diag_arg_using_display};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem, PredicateOrigin, WherePredicate};
@@ -507,14 +507,8 @@ impl<'v> hir::intravisit::Visitor<'v> for TraitObjectVisitor<'v> {
                     ..
                 },
                 _,
-            ) => {
-                self.0.push(ty);
-            }
-            hir::TyKind::OpaqueDef(item_id, _, _) => {
-                self.0.push(ty);
-                let item = self.1.item(item_id);
-                hir::intravisit::walk_item(self, item);
-            }
+            )
+            | hir::TyKind::OpaqueDef(..) => self.0.push(ty),
             _ => {}
         }
         hir::intravisit::walk_ty(self, ty);

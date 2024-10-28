@@ -9,7 +9,7 @@ mod tests;
 mod unexpand;
 
 use rustc_hir as hir;
-use rustc_hir::intravisit::{walk_expr, Visitor};
+use rustc_hir::intravisit::{Visitor, walk_expr};
 use rustc_middle::hir::map::Map;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::mir::coverage::{
@@ -94,9 +94,8 @@ fn instrument_function_for_coverage<'tcx>(tcx: TyCtxt<'tcx>, mir_body: &mut mir:
         return;
     }
 
-    let bcb_has_counter_mappings = |bcb| bcbs_with_counter_mappings.contains(bcb);
     let coverage_counters =
-        CoverageCounters::make_bcb_counters(&basic_coverage_blocks, bcb_has_counter_mappings);
+        CoverageCounters::make_bcb_counters(&basic_coverage_blocks, &bcbs_with_counter_mappings);
 
     let mappings = create_mappings(tcx, &hir_info, &extracted_mappings, &coverage_counters);
     if mappings.is_empty() {
@@ -147,18 +146,14 @@ fn create_mappings<'tcx>(
 
     let source_file = source_map.lookup_source_file(body_span.lo());
 
-    use rustc_session::config::RemapPathScopeComponents;
     use rustc_session::RemapFileNameExt;
+    use rustc_session::config::RemapPathScopeComponents;
     let file_name = Symbol::intern(
         &source_file.name.for_scope(tcx.sess, RemapPathScopeComponents::MACRO).to_string_lossy(),
     );
 
-    let term_for_bcb = |bcb| {
-        coverage_counters
-            .bcb_counter(bcb)
-            .expect("all BCBs with spans were given counters")
-            .as_term()
-    };
+    let term_for_bcb =
+        |bcb| coverage_counters.term_for_bcb(bcb).expect("all BCBs with spans were given counters");
     let region_for_span = |span: Span| make_source_region(source_map, file_name, span, body_span);
 
     // Fully destructure the mappings struct to make sure we don't miss any kinds.

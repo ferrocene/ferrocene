@@ -6,22 +6,22 @@ use std::sync::Arc;
 
 use rustc_data_structures::profiling::TimePassesFormat;
 use rustc_errors::emitter::HumanReadableErrorType;
-use rustc_errors::{registry, ColorConfig};
+use rustc_errors::{ColorConfig, registry};
 use rustc_session::config::{
-    build_configuration, build_session_options, rustc_optgroups, BranchProtection, CFGuard, Cfg,
-    CollapseMacroDebuginfo, CoverageLevel, CoverageOptions, DebugInfo, DumpMonoStatsFormat,
-    ErrorOutputType, ExternEntry, ExternLocation, Externs, FmtDebug, FunctionReturn,
-    InliningThreshold, Input, InstrumentCoverage, InstrumentXRay, LinkSelfContained,
-    LinkerPluginLto, LocationDetail, LtoCli, MirIncludeSpans, NextSolverConfig, OomStrategy,
-    Options, OutFileName, OutputType, OutputTypes, PAuthKey, PacRet, Passes,
+    BranchProtection, CFGuard, Cfg, CollapseMacroDebuginfo, CoverageLevel, CoverageOptions,
+    DebugInfo, DumpMonoStatsFormat, ErrorOutputType, ExternEntry, ExternLocation, Externs,
+    FmtDebug, FunctionReturn, InliningThreshold, Input, InstrumentCoverage, InstrumentXRay,
+    LinkSelfContained, LinkerPluginLto, LocationDetail, LtoCli, MirIncludeSpans, NextSolverConfig,
+    OomStrategy, Options, OutFileName, OutputType, OutputTypes, PAuthKey, PacRet, Passes,
     PatchableFunctionEntry, Polonius, ProcMacroExecutionStrategy, Strip, SwitchWithOptPath,
-    SymbolManglingVersion, WasiExecModel,
+    SymbolManglingVersion, WasiExecModel, build_configuration, build_session_options,
+    rustc_optgroups,
 };
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
 use rustc_session::utils::{CanonicalizedPath, NativeLib, NativeLibKind};
-use rustc_session::{build_session, filesearch, getopts, CompilerIO, EarlyDiagCtxt, Session};
-use rustc_span::edition::{Edition, DEFAULT_EDITION};
+use rustc_session::{CompilerIO, EarlyDiagCtxt, Session, build_session, filesearch, getopts};
+use rustc_span::edition::{DEFAULT_EDITION, Edition};
 use rustc_span::source_map::{RealFileLoader, SourceMapInputs};
 use rustc_span::symbol::sym;
 use rustc_span::{FileName, SourceFileHashAlgorithm};
@@ -44,10 +44,12 @@ where
     let sysroot = filesearch::materialize_sysroot(sessopts.maybe_sysroot.clone());
     let target = rustc_session::config::build_target_config(&early_dcx, &sessopts, &sysroot);
     let hash_kind = sessopts.unstable_opts.src_hash_algorithm(&target);
+    let checksum_hash_kind = sessopts.unstable_opts.checksum_hash_algorithm();
     let sm_inputs = Some(SourceMapInputs {
         file_loader: Box::new(RealFileLoader) as _,
         path_mapping: sessopts.file_path_mapping(),
         hash_kind,
+        checksum_hash_kind,
     });
 
     rustc_span::create_session_globals_then(DEFAULT_EDITION, sm_inputs, || {
@@ -770,7 +772,7 @@ fn test_unstable_options_tracking_hash() {
     tracked!(crate_attr, vec!["abc".to_string()]);
     tracked!(cross_crate_inline_threshold, InliningThreshold::Always);
     tracked!(debug_info_for_profiling, true);
-    tracked!(default_hidden_visibility, Some(true));
+    tracked!(default_visibility, Some(rustc_target::spec::SymbolVisibility::Hidden));
     tracked!(dep_info_omit_d_target, true);
     tracked!(direct_access_external_data, Some(true));
     tracked!(dual_proc_macros, true);

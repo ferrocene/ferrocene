@@ -140,10 +140,10 @@ pub(crate) fn coroutine_by_move_body_def_id<'tcx>(
             // If the parent capture is by-ref, then we need to apply an additional
             // deref before applying any further projections to this place.
             if parent_capture.is_by_ref() {
-                child_precise_captures.insert(
-                    0,
-                    Projection { ty: parent_capture.place.ty(), kind: ProjectionKind::Deref },
-                );
+                child_precise_captures.insert(0, Projection {
+                    ty: parent_capture.place.ty(),
+                    kind: ProjectionKind::Deref,
+                });
             }
             // If the child capture is by-ref, then we need to apply a "ref"
             // projection (i.e. `&`) at the end. But wait! We don't have that
@@ -223,14 +223,14 @@ pub(crate) fn coroutine_by_move_body_def_id<'tcx>(
 
     // Inherited from the by-ref coroutine.
     body_def.codegen_fn_attrs(tcx.codegen_fn_attrs(coroutine_def_id).clone());
-    body_def.constness(tcx.constness(coroutine_def_id).clone());
-    body_def.coroutine_kind(tcx.coroutine_kind(coroutine_def_id).clone());
+    body_def.constness(tcx.constness(coroutine_def_id));
+    body_def.coroutine_kind(tcx.coroutine_kind(coroutine_def_id));
     body_def.def_ident_span(tcx.def_ident_span(coroutine_def_id));
     body_def.def_span(tcx.def_span(coroutine_def_id));
-    body_def.explicit_predicates_of(tcx.explicit_predicates_of(coroutine_def_id).clone());
+    body_def.explicit_predicates_of(tcx.explicit_predicates_of(coroutine_def_id));
     body_def.generics_of(tcx.generics_of(coroutine_def_id).clone());
-    body_def.param_env(tcx.param_env(coroutine_def_id).clone());
-    body_def.predicates_of(tcx.predicates_of(coroutine_def_id).clone());
+    body_def.param_env(tcx.param_env(coroutine_def_id));
+    body_def.predicates_of(tcx.predicates_of(coroutine_def_id));
 
     // The type of the coroutine is the `by_move_coroutine_ty`.
     body_def.type_of(ty::EarlyBinder::bind(by_move_coroutine_ty));

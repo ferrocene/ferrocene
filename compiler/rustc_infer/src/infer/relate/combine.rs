@@ -1,4 +1,4 @@
-//! There are four type combiners: [TypeRelating], [Lub], and [Glb],
+//! There are four type combiners: [TypeRelating], `Lub`, and `Glb`,
 //! and `NllTypeRelating` in rustc_borrowck, which is only used for NLL.
 //!
 //! Each implements the trait [TypeRelation] and contains methods for
@@ -26,24 +26,28 @@ use rustc_middle::ty::{self, InferConst, IntType, Ty, TyCtxt, TypeVisitableExt, 
 pub use rustc_next_trait_solver::relate::combine::*;
 use tracing::debug;
 
-use super::glb::Glb;
-use super::lub::Lub;
+use super::lattice::{LatticeOp, LatticeOpKind};
 use super::type_relating::TypeRelating;
 use super::{RelateResult, StructurallyRelateAliases};
-use crate::infer::{relate, DefineOpaqueTypes, InferCtxt, TypeTrace};
+use crate::infer::{DefineOpaqueTypes, InferCtxt, TypeTrace, relate};
 use crate::traits::{Obligation, PredicateObligation};
 
 #[derive(Clone)]
-pub struct CombineFields<'infcx, 'tcx> {
+pub(crate) struct CombineFields<'infcx, 'tcx> {
     pub infcx: &'infcx InferCtxt<'tcx>,
+    // Immutable fields
     pub trace: TypeTrace<'tcx>,
     pub param_env: ty::ParamEnv<'tcx>,
-    pub goals: Vec<Goal<'tcx, ty::Predicate<'tcx>>>,
     pub define_opaque_types: DefineOpaqueTypes,
+    // Mutable fields
+    //
+    // Adding any additional field likely requires
+    // changes to the cache of `TypeRelating`.
+    pub goals: Vec<Goal<'tcx, ty::Predicate<'tcx>>>,
 }
 
 impl<'infcx, 'tcx> CombineFields<'infcx, 'tcx> {
-    pub fn new(
+    pub(crate) fn new(
         infcx: &'infcx InferCtxt<'tcx>,
         trace: TypeTrace<'tcx>,
         param_env: ty::ParamEnv<'tcx>,
@@ -279,41 +283,41 @@ impl<'tcx> InferCtxt<'tcx> {
 }
 
 impl<'infcx, 'tcx> CombineFields<'infcx, 'tcx> {
-    pub fn tcx(&self) -> TyCtxt<'tcx> {
+    pub(crate) fn tcx(&self) -> TyCtxt<'tcx> {
         self.infcx.tcx
     }
 
-    pub fn equate<'a>(
+    pub(crate) fn equate<'a>(
         &'a mut self,
         structurally_relate_aliases: StructurallyRelateAliases,
     ) -> TypeRelating<'a, 'infcx, 'tcx> {
         TypeRelating::new(self, structurally_relate_aliases, ty::Invariant)
     }
 
-    pub fn sub<'a>(&'a mut self) -> TypeRelating<'a, 'infcx, 'tcx> {
+    pub(crate) fn sub<'a>(&'a mut self) -> TypeRelating<'a, 'infcx, 'tcx> {
         TypeRelating::new(self, StructurallyRelateAliases::No, ty::Covariant)
     }
 
-    pub fn sup<'a>(&'a mut self) -> TypeRelating<'a, 'infcx, 'tcx> {
+    pub(crate) fn sup<'a>(&'a mut self) -> TypeRelating<'a, 'infcx, 'tcx> {
         TypeRelating::new(self, StructurallyRelateAliases::No, ty::Contravariant)
     }
 
-    pub fn lub<'a>(&'a mut self) -> Lub<'a, 'infcx, 'tcx> {
-        Lub::new(self)
+    pub(crate) fn lub<'a>(&'a mut self) -> LatticeOp<'a, 'infcx, 'tcx> {
+        LatticeOp::new(self, LatticeOpKind::Lub)
     }
 
-    pub fn glb<'a>(&'a mut self) -> Glb<'a, 'infcx, 'tcx> {
-        Glb::new(self)
+    pub(crate) fn glb<'a>(&'a mut self) -> LatticeOp<'a, 'infcx, 'tcx> {
+        LatticeOp::new(self, LatticeOpKind::Glb)
     }
 
-    pub fn register_obligations(
+    pub(crate) fn register_obligations(
         &mut self,
         obligations: impl IntoIterator<Item = Goal<'tcx, ty::Predicate<'tcx>>>,
     ) {
         self.goals.extend(obligations);
     }
 
-    pub fn register_predicates(
+    pub(crate) fn register_predicates(
         &mut self,
         obligations: impl IntoIterator<Item: Upcast<TyCtxt<'tcx>, ty::Predicate<'tcx>>>,
     ) {

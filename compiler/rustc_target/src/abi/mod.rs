@@ -1,11 +1,11 @@
 use std::fmt;
 use std::ops::Deref;
 
-use rustc_data_structures::intern::Interned;
-use rustc_macros::HashStable_Generic;
 pub use Float::*;
 pub use Integer::*;
 pub use Primitive::*;
+use rustc_data_structures::intern::Interned;
+use rustc_macros::HashStable_Generic;
 
 use crate::json::{Json, ToJson};
 
@@ -135,7 +135,7 @@ impl<'a> Layout<'a> {
 /// Note that the layout is NOT guaranteed to always be identical
 /// to that obtained from `layout_of(ty)`, as we need to produce
 /// layouts for which Rust types do not exist, such as enum variants
-/// or synthetic fields of enums (i.e., discriminants) and fat pointers.
+/// or synthetic fields of enums (i.e., discriminants) and wide pointers.
 #[derive(Copy, Clone, PartialEq, Eq, Hash, HashStable_Generic)]
 pub struct TyAndLayout<'a, Ty> {
     pub ty: Ty,

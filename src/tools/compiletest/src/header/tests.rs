@@ -1,10 +1,9 @@
 use std::io::Read;
 use std::path::Path;
-use std::str::FromStr;
 
 use super::iter_header;
 use crate::common::{Config, Debugger, Mode};
-use crate::header::{parse_normalize_rule, EarlyProps, HeadersCache};
+use crate::header::{EarlyProps, HeadersCache, parse_normalize_rule};
 
 fn make_test_description<R: Read>(
     config: &Config,
@@ -226,10 +225,9 @@ fn revisions() {
     let config: Config = cfg().build();
 
     assert_eq!(parse_rs(&config, "//@ revisions: a b c").revisions, vec!["a", "b", "c"],);
-    assert_eq!(
-        parse_makefile(&config, "# revisions: hello there").revisions,
-        vec!["hello", "there"],
-    );
+    assert_eq!(parse_makefile(&config, "# revisions: hello there").revisions, vec![
+        "hello", "there"
+    ],);
 }
 
 #[test]
@@ -575,14 +573,12 @@ fn families() {
 
 #[test]
 fn ignore_mode() {
-    for &mode in Mode::STR_VARIANTS {
+    for mode in ["coverage-map", "coverage-run"] {
         // Indicate profiler support so that "coverage-run" tests aren't skipped.
         let config: Config = cfg().mode(mode).profiler_support(true).build();
         let other = if mode == "coverage-run" { "coverage-map" } else { "coverage-run" };
 
         assert_ne!(mode, other);
-        assert_eq!(config.mode, Mode::from_str(mode).unwrap());
-        assert_ne!(config.mode, Mode::from_str(other).unwrap());
 
         assert!(check_ignore(&config, &format!("//@ ignore-mode-{mode}")));
         assert!(!check_ignore(&config, &format!("//@ ignore-mode-{other}")));

@@ -18,8 +18,8 @@ use crate::ty::{
     TraitDef, Ty, TyConst, TyConstId, TyKind, UintTy, VariantDef,
 };
 use crate::{
-    mir, Crate, CrateItem, CrateItems, CrateNum, DefId, Error, Filename, ImplTraitDecls, ItemKind,
-    Symbol, TraitDecls,
+    Crate, CrateItem, CrateItems, CrateNum, DefId, Error, Filename, ImplTraitDecls, ItemKind,
+    Symbol, TraitDecls, mir,
 };
 
 /// This trait defines the interface between stable_mir and the Rust compiler.
@@ -255,7 +255,7 @@ where
     if TLV.is_set() {
         Err(Error::from("StableMIR already running"))
     } else {
-        let ptr: *const () = std::ptr::addr_of!(context) as _;
+        let ptr: *const () = (&raw const context) as _;
         TLV.set(&Cell::new(ptr), || Ok(f()))
     }
 }

@@ -1,18 +1,13 @@
 //! Linux `eventfd` implementation.
 use std::cell::{Cell, RefCell};
 use std::io;
-use std::io::{Error, ErrorKind};
-use std::mem;
+use std::io::ErrorKind;
 
-use rustc_target::abi::Endian;
-
+use crate::concurrency::VClock;
 use crate::shims::unix::fd::FileDescriptionRef;
 use crate::shims::unix::linux::epoll::{EpollReadyEvents, EvalContextExt as _};
 use crate::shims::unix::*;
-use crate::{concurrency::VClock, *};
-
-// We'll only do reads and writes in chunks of size u64.
-const U64_ARRAY_SIZE: usize = mem::size_of::<u64>();
+use crate::*;
 
 /// Maximum value that the eventfd counter can hold.
 const MAX_COUNTER: u64 = u64::MAX - 1;
@@ -42,7 +37,7 @@ impl FileDescription for Event {
         // We only check the status of EPOLLIN and EPOLLOUT flags for eventfd. If other event flags
         // need to be supported in the future, the check should be added here.
 
-        Ok(EpollReadyEvents {
+        interp_ok(EpollReadyEvents {
             epollin: self.counter.get() != 0,
             epollout: self.counter.get() != MAX_COUNTER,
             ..EpollReadyEvents::new()
@@ -54,7 +49,7 @@ impl FileDescription for Event {
         _communicate_allowed: bool,
         _ecx: &mut MiriInterpCx<'tcx>,
     ) -> InterpResult<'tcx, io::Result<()>> {
-        Ok(Ok(()))
+        interp_ok(Ok(()))
     }
 
     /// Read the counter in the buffer and return the counter if succeeded.
@@ -62,37 +57,46 @@ impl FileDescription for Event {
         &self,
         self_ref: &FileDescriptionRef,
         _communicate_allowed: bool,
-        bytes: &mut [u8],
+        ptr: Pointer,
+        len: usize,
+        dest: &MPlaceTy<'tcx>,
         ecx: &mut MiriInterpCx<'tcx>,
-    ) -> InterpResult<'tcx, io::Result<usize>> {
+    ) -> InterpResult<'tcx> {
+        // We're treating the buffer as a `u64`.
+        let ty = ecx.machine.layouts.u64;
         // Check the size of slice, and return error only if the size of the slice < 8.
-        let Some(bytes) = bytes.first_chunk_mut::<U64_ARRAY_SIZE>() else {
-            return Ok(Err(Error::from(ErrorKind::InvalidInput)));
-        };
+        if len < ty.size.bytes_usize() {
+            return ecx.set_last_error_and_return(ErrorKind::InvalidInput, dest);
+        }
+
+        // eventfd read at the size of u64.
+        let buf_place = ecx.ptr_to_mplace_unaligned(ptr, ty);
+
         // Block when counter == 0.
         let counter = self.counter.get();
         if counter == 0 {
             if self.is_nonblock {
-                return Ok(Err(Error::from(ErrorKind::WouldBlock)));
-            } else {
-                //FIXME: blocking is not supported
-                throw_unsup_format!("eventfd: blocking is unsupported");
+                return ecx.set_last_error_and_return(ErrorKind::WouldBlock, dest);
             }
+
+            throw_unsup_format!("eventfd: blocking is unsupported");
         } else {
             // Synchronize with all prior `write` calls to this FD.
             ecx.acquire_clock(&self.clock.borrow());
-            // Return the counter in the host endianness using the buffer provided by caller.
-            *bytes = match ecx.tcx.sess.target.endian {
-                Endian::Little => counter.to_le_bytes(),
-                Endian::Big => counter.to_be_bytes(),
-            };
+
+            // Give old counter value to userspace, and set counter value to 0.
+            ecx.write_int(counter, &buf_place)?;
             self.counter.set(0);
+
             // When any of the event happened, we check and update the status of all supported event
             // types for current file description.
             ecx.check_and_update_readiness(self_ref)?;
 
-            return Ok(Ok(U64_ARRAY_SIZE));
+            // Tell userspace how many bytes we wrote.
+            ecx.write_int(buf_place.layout.size.bytes(), dest)?;
         }
+
+        interp_ok(())
     }
 
     /// A write call adds the 8-byte integer value supplied in
@@ -103,7 +107,7 @@ impl FileDescription for Event {
     /// write either blocks until a read is performed on the
     /// file descriptor, or fails with the error EAGAIN if the
     /// file descriptor has been made nonblocking.
-
+    ///
     /// A write fails with the error EINVAL if the size of the
     /// supplied buffer is less than 8 bytes, or if an attempt is
     /// made to write the value 0xffffffffffffffff.
@@ -111,21 +115,25 @@ impl FileDescription for Event {
         &self,
         self_ref: &FileDescriptionRef,
         _communicate_allowed: bool,
-        bytes: &[u8],
+        ptr: Pointer,
+        len: usize,
+        dest: &MPlaceTy<'tcx>,
         ecx: &mut MiriInterpCx<'tcx>,
-    ) -> InterpResult<'tcx, io::Result<usize>> {
+    ) -> InterpResult<'tcx> {
+        // We're treating the buffer as a `u64`.
+        let ty = ecx.machine.layouts.u64;
         // Check the size of slice, and return error only if the size of the slice < 8.
-        let Some(bytes) = bytes.first_chunk::<U64_ARRAY_SIZE>() else {
-            return Ok(Err(Error::from(ErrorKind::InvalidInput)));
-        };
-        // Convert from bytes to int according to host endianness.
-        let num = match ecx.tcx.sess.target.endian {
-            Endian::Little => u64::from_le_bytes(*bytes),
-            Endian::Big => u64::from_be_bytes(*bytes),
-        };
+        if len < ty.layout.size.bytes_usize() {
+            return ecx.set_last_error_and_return(ErrorKind::InvalidInput, dest);
+        }
+
+        // Read the user supplied value from the pointer.
+        let buf_place = ecx.ptr_to_mplace_unaligned(ptr, ty);
+        let num = ecx.read_scalar(&buf_place)?.to_u64()?;
+
         // u64::MAX as input is invalid because the maximum value of counter is u64::MAX - 1.
         if num == u64::MAX {
-            return Ok(Err(Error::from(ErrorKind::InvalidInput)));
+            return ecx.set_last_error_and_return(ErrorKind::InvalidInput, dest);
         }
         // If the addition does not let the counter to exceed the maximum value, update the counter.
         // Else, block.
@@ -137,20 +145,19 @@ impl FileDescription for Event {
                 }
                 self.counter.set(new_count);
             }
-            None | Some(u64::MAX) => {
+            None | Some(u64::MAX) =>
                 if self.is_nonblock {
-                    return Ok(Err(Error::from(ErrorKind::WouldBlock)));
+                    return ecx.set_last_error_and_return(ErrorKind::WouldBlock, dest);
                 } else {
-                    //FIXME: blocking is not supported
                     throw_unsup_format!("eventfd: blocking is unsupported");
-                }
-            }
+                },
         };
         // When any of the event happened, we check and update the status of all supported event
         // types for current file description.
         ecx.check_and_update_readiness(self_ref)?;
 
-        Ok(Ok(U64_ARRAY_SIZE))
+        // Return how many bytes we read.
+        ecx.write_int(buf_place.layout.size.bytes(), dest)
     }
 }
 
@@ -212,6 +219,6 @@ pub trait EvalContextExt<'tcx>: crate::MiriInterpCxExt<'tcx> {
             clock: RefCell::new(VClock::default()),
         });
 
-        Ok(Scalar::from_i32(fd_value))
+        interp_ok(Scalar::from_i32(fd_value))
     }
 }

@@ -1251,7 +1251,7 @@ mod prim_f16 {}
 ///   - **Unchanged NaN propagation**: The quiet bit and payload are copied from any input operand
 ///     that is a NaN. If the inputs and outputs do not have the same size (i.e., for `as` casts), the
 ///     same rules as for "quieting NaN propagation" apply, with one caveat: if the output is smaller
-///     than the input, droppig the low-order bits may result in a payload of 0; a payload of 0 is not
+///     than the input, dropping the low-order bits may result in a payload of 0; a payload of 0 is not
 ///     possible with a signaling NaN (the all-0 significand encodes an infinity) so unchanged NaN
 ///     propagation cannot occur with some inputs.
 ///   - **Target-specific NaN**: The quiet bit is set and the payload is picked from a target-specific
@@ -1761,6 +1761,8 @@ mod prim_ref {}
 /// - `i32` is ABI-compatible with `NonZero<i32>`, and similar for all other integer types.
 /// - If `T` is guaranteed to be subject to the [null pointer
 ///   optimization](option/index.html#representation), then `T` and `Option<T>` are ABI-compatible.
+///   Furthermore, if `U` satisfies the requirements [outlined here](result/index.html#representation),
+///   then `T` and `Result<T, U>` and `Result<U, T>` are all ABI-compatible.
 ///
 /// Furthermore, ABI compatibility satisfies the following general properties:
 ///

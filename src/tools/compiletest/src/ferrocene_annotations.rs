@@ -153,10 +153,10 @@ impl Collector {
             std::fs::create_dir_all(parent).unwrap();
         }
         let mut file = BufWriter::new(File::create(dest).unwrap());
-        serde_json::to_writer(
-            &mut file,
-            &Output { bulk_annotations_file_name: BULK_ANNOTATIONS_FILE_NAME, tests: &self.tests },
-        )
+        serde_json::to_writer(&mut file, &Output {
+            bulk_annotations_file_name: BULK_ANNOTATIONS_FILE_NAME,
+            tests: &self.tests,
+        })
         .unwrap();
         file.write_all(b"\n").unwrap();
         file.flush().unwrap();

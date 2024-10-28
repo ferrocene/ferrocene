@@ -4,8 +4,8 @@
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
-use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
 use crate::Env;
+use crate::error::{CommandError, CommandErrorKind, FindBinaryInPathError};
 
 pub(crate) fn run_command(command: &mut Command) -> Result<CommandOutput, CommandError> {
     command.stdout(Stdio::piped());

@@ -105,21 +105,21 @@ jobs:
   #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
   #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
-  targets:
-    name: Build additional targets
-    uses: ./.github/workflows/targets.yml
-    needs:
-      - container-x86_64-ubuntu-20
-      - build-x86_64-unknown-linux-gnu
-    secrets: inherit
-    with:
-      host-triple: x86_64-unknown-linux-gnu
-      # Do not try to break this up into multiple lines. YAML is not your friend.
-      triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
-      runner: 8core-x86_64-unknown-linux-gnu
-      build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
-      build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
-      container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
+  # targets:
+  #   name: Build additional targets
+  #   uses: ./.github/workflows/targets.yml
+  #   needs:
+  #     - container-x86_64-ubuntu-20
+  #     - build-x86_64-unknown-linux-gnu
+  #   secrets: inherit
+  #   with:
+  #     host-triple: x86_64-unknown-linux-gnu
+  #     # Do not try to break this up into multiple lines. YAML is not your friend.
+  #     triples: "aarch64-unknown-none,thumbv7em-none-eabi,thumbv7em-none-eabihf,armv8r-none-eabihf,wasm32-unknown-unknown,armv7r-none-eabihf,armebv7r-none-eabihf,aarch64-unknown-nto-qnx710,x86_64-pc-nto-qnx710"
+  #     runner: 8core-x86_64-unknown-linux-gnu
+  #     build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}
+  #     build-artifact: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.artifact-build }}
+  #     container: ${{ needs.container-x86_64-ubuntu-20.outputs.uri }}
 
   # test-aarch64-unknown-ferrocenecoretest:
   #   name: Test (aarch64-unknown-ferrocenecoretest by x86_64-unknown-linux-gnu)

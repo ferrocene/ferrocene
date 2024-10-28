@@ -6,7 +6,7 @@ use std::fmt::{Debug, Write};
 use std::hash::Hash;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::{atomic, LazyLock};
+use std::sync::{LazyLock, atomic};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 

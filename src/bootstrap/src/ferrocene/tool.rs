@@ -3,10 +3,10 @@ pub(crate) mod flip_link;
 use std::path::PathBuf;
 
 use crate::builder::{Builder, RunConfig, ShouldRun, Step};
-use crate::core::build_steps::tool::{prepare_tool_cargo, SourceType};
+use crate::core::build_steps::tool::{SourceType, prepare_tool_cargo};
 use crate::core::config::TargetSelection;
 use crate::utils::exec::BootstrapCommand;
-use crate::{exe, Kind, Mode};
+use crate::{Kind, Mode, exe};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct SelfTest {

@@ -111,14 +111,14 @@ A :t:`refutable constant` is a :t:`constant` of a :t:`refutable type`.
 .. rubric:: Examples
 
 :dp:`fls_sgu9bnp7xajv`
-``x`` is an :t:`irrefutable pattern` because it always matches ``42``.
+``x`` is an :t:`irrefutable pattern` because it matches all possible values of type ``i32``.
 
 .. code-block:: rust
 
    let x = 42;
 
 :dp:`fls_cl1g4fxfa020`
-``y`` is a :t:`refutable pattern` because it does not match ``value`` when
+``core::option::Option::Some(y)`` is a :t:`refutable pattern` because it does not match ``value`` when
 ``value`` denotes :std:`core::option::Option::None`.
 
 .. code-block:: rust
@@ -708,7 +708,7 @@ A slice pattern in the context of a match expression.
 
 .. syntax::
 
-   match v {
+   match v.as_slice() {
        [a, b, c] => (),
        _ => ()
    }

@@ -174,7 +174,7 @@ should not be used in production.
      - \-
 
    * - :target:`riscv64gc-unknown-linux-gnu`
-     - ``aarch64-unknown-linux-gnu``
+     - ``riscv64gc-unknown-linux-gnu``
      - Cross-compilation
      - Full
      - \-

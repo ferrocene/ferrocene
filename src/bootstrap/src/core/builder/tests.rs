@@ -325,7 +325,7 @@ mod defaults {
 mod dist {
     use pretty_assertions::assert_eq;
 
-    use super::{first, run_build, second, Config};
+    use super::{Config, first, run_build, second};
     use crate::core::builder::*;
     use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 

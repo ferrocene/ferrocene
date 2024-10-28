@@ -113,7 +113,6 @@ jobs:
       - build-x86_64-unknown-linux-gnu
     secrets: inherit
     with:
-      triple: x86_64-unknown-linux-gnu
       host-triple: x86_64-unknown-linux-gnu
       runner: 8core-x86_64-unknown-linux-gnu
       build-run-id: ${{ needs.build-x86_64-unknown-linux-gnu.outputs.run-id }}

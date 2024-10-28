@@ -139,6 +139,7 @@ jobs:
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
           name: ${{ env.ARTIFACT }}
@@ -217,6 +218,7 @@ jobs:
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
           name: ${{ env.ARTIFACT }}
@@ -295,6 +297,7 @@ jobs:
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
           name: ${{ env.ARTIFACT }}
@@ -374,6 +377,7 @@ jobs:
 
       - name: Generate usage report
         uses: ./.github/actions/usage-report/
+        if: ${{ always() }}
         with:
           artifact: ${{ env.ARTIFACT_USAGE }}
           name: ${{ env.ARTIFACT }}

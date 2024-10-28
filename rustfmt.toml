@@ -47,6 +47,7 @@ ignore = [
     "src/tools/rustfmt",
     "src/gcc",
     "ferrocene/tools/flip-link",
+    "ferrocene/tools/probe-rs",
 
     # These are ignored by a standard cargo fmt run.
     "compiler/rustc_codegen_cranelift/scripts",

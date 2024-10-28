@@ -82,7 +82,7 @@ JOBS_DEFINITION: JobsDefinition = {
 
         "oxidos": ["ferrocene-oxidos"],
 
-        "tools": ["rust-analyzer", "clippy", "rustfmt", "flip-link"],
+        "tools": ["rust-analyzer", "clippy", "rustfmt", "flip-link", "probe-rs"],
     },
 
     "test": {

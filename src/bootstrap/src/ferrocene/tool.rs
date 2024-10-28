@@ -1,4 +1,5 @@
 pub(crate) mod flip_link;
+pub(crate) mod probe_rs;
 
 use std::path::PathBuf;
 

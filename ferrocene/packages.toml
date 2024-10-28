@@ -65,6 +65,10 @@ subset = "default"
 name = "flip-link"
 subset = "default"
 
+[[groups.hosts.packages]]
+name = "probe-rs"
+subset = "default"
+
 [groups.cross-compilation]
 targets = [
   "aarch64-unknown-none",

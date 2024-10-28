@@ -61,3 +61,6 @@
 	path = src/gcc
 	url = https://github.com/rust-lang/gcc.git
 	shallow = true
+[submodule "ferrocene/tools/probe-rs"]
+	path = ferrocene/tools/probe-rs
+	url = https://github.com/probe-rs/probe-rs

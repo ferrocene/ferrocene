@@ -325,11 +325,7 @@ mod defaults {
 mod dist {
     use pretty_assertions::assert_eq;
 
-<<<<<<< HEAD
     use super::{first, run_build, second, Config};
-=======
-    use super::{Config, first, run_build};
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
     use crate::core::builder::*;
     use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 
@@ -365,23 +361,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-<<<<<<< HEAD
-        assert_eq!(
-            first(cache.all::<dist::Mingw>()),
-            &[dist::Mingw { host: a }, dist::Mingw { host: b },]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Rustc>()),
-            &[dist::Rustc { compiler: Compiler { host: a, stage: 2 } },]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Std>()),
-            &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 2 }, target: b },
-            ]
-        );
-=======
         assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
             host: b
         },]);
@@ -395,7 +374,6 @@ mod dist {
             dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
             dist::Std { compiler: Compiler { host: a, stage: 2 }, target: b },
         ]);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
     }
 
@@ -406,36 +384,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-<<<<<<< HEAD
-        assert_eq!(
-            first(cache.all::<dist::Mingw>()),
-            &[dist::Mingw { host: a }, dist::Mingw { host: b },]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Rustc>()),
-            &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
-            ]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Std>()),
-            &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
-            ]
-        );
-        assert_eq!(
-            first(cache.all::<compile::Std>()),
-            &[
-                std!(A => A, stage = 0),
-                std!(A => A, stage = 1),
-                std!(A => A, stage = 2),
-                std!(A => B, stage = 1),
-                std!(A => B, stage = 2),
-            ],
-        );
-=======
         assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
             host: b
         },]);
@@ -457,7 +405,6 @@ mod dist {
             std!(A => B, stage = 1),
             std!(A => B, stage = 2),
         ],);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
     }
 
@@ -487,27 +434,6 @@ mod dist {
         let b = TargetSelection::from_user("B-B");
         let c = TargetSelection::from_user("C-C");
 
-<<<<<<< HEAD
-        assert_eq!(
-            first(cache.all::<dist::Mingw>()),
-            &[dist::Mingw { host: a }, dist::Mingw { host: b }, dist::Mingw { host: c },]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Rustc>()),
-            &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
-            ]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Std>()),
-            &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
-                dist::Std { compiler: Compiler { host: a, stage: 2 }, target: c },
-            ]
-        );
-=======
         assert_eq!(first(cache.all::<dist::Docs>()), &[
             dist::Docs { host: a },
             dist::Docs { host: b },
@@ -527,7 +453,6 @@ mod dist {
             dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
             dist::Std { compiler: Compiler { host: a, stage: 2 }, target: c },
         ]);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
     }
 
@@ -553,26 +478,6 @@ mod dist {
         let a = TargetSelection::from_user("A-A");
         let b = TargetSelection::from_user("B-B");
 
-<<<<<<< HEAD
-        assert_eq!(
-            first(cache.all::<dist::Mingw>()),
-            &[dist::Mingw { host: a }, dist::Mingw { host: b },]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Rustc>()),
-            &[
-                dist::Rustc { compiler: Compiler { host: a, stage: 2 } },
-                dist::Rustc { compiler: Compiler { host: b, stage: 2 } },
-            ]
-        );
-        assert_eq!(
-            first(cache.all::<dist::Std>()),
-            &[
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
-                dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
-            ]
-        );
-=======
         assert_eq!(first(cache.all::<dist::Docs>()), &[dist::Docs { host: a }, dist::Docs {
             host: b
         },]);
@@ -587,7 +492,6 @@ mod dist {
             dist::Std { compiler: Compiler { host: a, stage: 1 }, target: a },
             dist::Std { compiler: Compiler { host: a, stage: 1 }, target: b },
         ]);
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
         assert_eq!(first(cache.all::<dist::Src>()), &[dist::Src]);
         assert_eq!(first(cache.all::<compile::Std>()), &[
             std!(A => A, stage = 0),

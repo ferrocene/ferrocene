@@ -1055,7 +1055,6 @@ impl<'a> Builder<'a> {
                 run::GenerateWindowsSys,
                 run::GenerateCompletions,
             ),
-<<<<<<< HEAD
             Kind::Sign => describe!(
                 // Qualification Documents
                 crate::ferrocene::sign::DocumentList,
@@ -1067,12 +1066,9 @@ impl<'a> Builder<'a> {
                 // QMS Documents
                 crate::ferrocene::sign::InternalProcedures,
             ),
-            Kind::Setup => describe!(setup::Profile, setup::Hook, setup::Link, setup::Vscode),
-=======
             Kind::Setup => {
                 describe!(setup::Profile, setup::Hook, setup::Link, setup::Editor)
             }
->>>>>>> pull-upstream-temp--do-not-use-for-real-code
             Kind::Clean => describe!(clean::CleanAll, clean::Rustc, clean::Std),
             Kind::Vendor => describe!(vendor::Vendor),
             // special-cased in Build::build()

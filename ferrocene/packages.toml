@@ -75,6 +75,7 @@ targets = [
   "armv7r-none-eabihf",
   "armebv7r-none-eabihf",
   "wasm32-unknown-unknown",
+  "riscv64gc-unknown-linux-gnu",
 ]
 
 [[groups.cross-compilation.packages]]

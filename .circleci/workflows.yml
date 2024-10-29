@@ -310,6 +310,7 @@ jobs:
       # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
       SCRIPT: ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py test:library-std) --ferrocene-test-one-crate-per-cargo-call
     steps:
+      - aws-oidc-auth
       - ferrocene-job-test-vm:
           docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>
           run-emulator-docker-image-tag: << pipeline.parameters.docker-image-tag--x86_64--ubuntu-20 >>

@@ -630,6 +630,7 @@ jobs:
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
@@ -648,6 +649,7 @@ jobs:
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
@@ -665,6 +667,7 @@ jobs:
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
@@ -684,6 +687,7 @@ jobs:
       job:
         type: string
     environment:
+      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       SCRIPT: |
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.

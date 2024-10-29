@@ -137,12 +137,7 @@ def main():
 
     match args.subcommand:
         case "store":
-<<<<<<< HEAD
-            store(args.path, args.in_dir)
-
-=======
             store(args.path, args.in_dir, exclude=args.exclude)
->>>>>>> 6331046343b (Use cache.py in place of persist-between-jobs.sh)
         case "retrieve":
             retrieve(args.path, args.out_dir, exclude=args.exclude)
         case _:

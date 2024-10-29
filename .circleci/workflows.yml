@@ -624,24 +624,74 @@ jobs:
 
   # This job caused us to extend our CircleCI TTL via
   # https://support.circleci.com/hc/en-us/articles/17136864790299-How-to-configure-your-OIDC-token-s-TTL-at-the-Organization-and-Project-Levels
+  x86_64-windows-build:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
+        export VIRTUAL_ENV=$HOME/.venv
+        export PATH=$HOME/.venv/Scripts:$PATH
+        $HOME/.venv/Scripts/python.exe ferrocene/ci/scripts/llvm_cache.py download
+        ./x.py --stage 2 build library src/tools/rustdoc
+        ./x.py --stage 1 build src/tools/rustdoc
+    steps:
+      - ferrocene-job-build:
+          os: windows
+
   x86_64-windows-dist:
     executor:
       name: win/server-2022
       size: large # 8-core
       shell: bash.exe -euo pipefail
     environment:
-      FERROCENE_BUILD_HOST: x86_64-pc-windows-msvc
       FERROCENE_HOST: x86_64-pc-windows-msvc
       FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
       SCRIPT: |
-        uv run ferrocene/ci/scripts/llvm_cache.py download
         # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
-        ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist)
-        ./x.py --stage 2 dist $(uv run ferrocene/ci/split-tasks.py dist:tools)
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist)
         ./x.py --stage 2 dist rust-std
     steps:
       - ferrocene-job-dist:
           os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-dist-tools:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      FERROCENE_TARGETS: << pipeline.parameters.targets--x86_64-pc-windows-msvc--build >>
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 dist $(ferrocene/ci/split-tasks.py dist:tools)
+    steps:
+    - ferrocene-job-dist:
+          os: windows
+          restore-from-job: x86_64-windows-build
+
+  x86_64-windows-generic-test-runner:
+    executor:
+      name: win/server-2022
+      size: large # 8-core
+      shell: bash.exe -euo pipefail
+    parameters:
+      job:
+        type: string
+    environment:
+      FERROCENE_HOST: x86_64-pc-windows-msvc
+      SCRIPT: |
+        # See ferrocene/ci/split-tasks.py for a list of tasks executed by this.
+        ./x.py --stage 2 test $(ferrocene/ci/split-tasks.py << parameters.job >>) --ferrocene-test-one-crate-per-cargo-call
+    steps:
+      - ferrocene-job-test-container:
+          os: windows
+          restore-from-job: x86_64-windows-build
 
   x86_64-windows-self-test:
     executor:
@@ -997,12 +1047,39 @@ workflows:
             - x86_64-linux-dist-targets
 
       - x86_64-windows-llvm: {}
-      - x86_64-windows-dist:
+      - x86_64-windows-build:
           requires:
             - x86_64-windows-llvm
+      - x86_64-windows-dist:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-dist-tools:
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test
+          job: test
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test-library
+          job: test:library
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-compiletest
+          job: test:compiletest
+          requires:
+            - x86_64-windows-build
+      - x86_64-windows-generic-test-runner:
+          name: x86_64-windows-test-library-std
+          job: test:library-std
+          requires:
+            - x86_64-windows-build
       - x86_64-windows-self-test:
           requires:
             - x86_64-windows-dist
+            - x86_64-windows-dist-tools
             - x86_64-linux-dist-targets
 
       - finish-build:
@@ -1011,6 +1088,10 @@ workflows:
             - x86_64-linux-dist-src
             - x86_64-linux-traceability-matrix
             - x86_64-linux-self-test
+            - x86_64-windows-test
+            - x86_64-windows-test-library
+            - x86_64-windows-test-library-std
+            - x86_64-windows-compiletest
             - x86_64-windows-self-test
             - wasm-dist-oxidos
             - aarch64-linux-self-test

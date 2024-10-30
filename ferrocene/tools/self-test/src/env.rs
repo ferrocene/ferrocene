@@ -48,7 +48,7 @@ impl Env {
         print_detailed_errors: bool,
     ) -> Result<Self, Error> {
         Ok(Self {
-            path: path.ok_or_else(|| Error::CCompilerNotFound {
+            path: path.ok_or(Error::CCompilerNotFound {
                 error: crate::error::FindBinaryInPathError::NoEnvironmentVariable,
             })?,
             print_detailed_args,

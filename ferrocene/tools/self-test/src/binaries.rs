@@ -179,7 +179,7 @@ mod tests {
 
         check_optional_binary(utils.reporter(), utils.sysroot(), "rustc", CommitHashOf::Rust)
             .unwrap();
-        utils.assert_report_skipped(&format!("optional binary rustc (not present)"));
+        utils.assert_report_skipped("optional binary rustc (not present)");
     }
 
     #[test]

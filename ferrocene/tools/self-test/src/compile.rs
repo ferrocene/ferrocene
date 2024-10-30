@@ -94,7 +94,7 @@ fn check_target(
     for program in programs {
         let expected_binary_paths = program
             .expected_executables
-            .into_iter()
+            .iter()
             .flat_map(|expected| match target.spec.triple {
                 windows if windows.ends_with("-pc-windows-msvc") => {
                     vec![format!("{expected}.exe"), format!("{expected}.pdb")]
@@ -106,7 +106,7 @@ fn check_target(
 
         let expected_library_paths = program
             .expected_libraries
-            .into_iter()
+            .iter()
             .map(|expected| match target.spec.triple {
                 windows if windows.ends_with("-pc-windows-msvc") => format!("{expected}.lib"),
                 _ => format!("lib{expected}.a"),
@@ -116,7 +116,7 @@ fn check_target(
 
         let expected_rlib_paths = program
             .expected_rlibs
-            .into_iter()
+            .iter()
             .map(|expected| format!("lib{expected}.rlib"))
             .collect::<Vec<_>>();
         expected_artifacts.add(expected_rlib_paths);

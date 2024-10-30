@@ -137,6 +137,12 @@ should not be used in production.
      - Bare-metal
      - \-
 
+  * - :target:`armv8m-none-eabihf`
+    - ``armv8m-none-eabihf``
+    - Cross-compilation
+    - Bare-metal
+    - \-
+
    * - :target:`armv7r-none-eabihf`
      - ``armv7r-none-eabihf``
      - Cross-compilation

@@ -137,8 +137,8 @@ should not be used in production.
      - Bare-metal
      - \-
 
-   * - :target:`armv8m-none-eabihf`
-     - ``armv8m-none-eabihf``
+   * - :target:`thumbv8m.base-none-eabi`
+     - ``thumbv8m.base-none-eabi``
      - Cross-compilation
      - Bare-metal
      - \-

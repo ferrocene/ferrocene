@@ -28,7 +28,7 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     },
     TargetSpec { triple: "aarch64-unknown-none", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv8r-none-eabihf", std: false, linker: Linker::BundledLld },
-    TargetSpec { triple: "armv8m-none-eabihf", std: false, linker: Linker::BundledLld },
+    TargetSpec { triple: "thumbv8m.base-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabihf", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "thumbv7em-none-eabi", std: false, linker: Linker::BundledLld },
     TargetSpec { triple: "armv7r-none-eabihf", std: false, linker: Linker::BundledLld },

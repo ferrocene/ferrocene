@@ -17,18 +17,17 @@ def get_problematic_symlinks(ferrocene_host):
     """
     In the build directory, there exists several cyclic symlinks.
 
-    We need to tear those down and rebuild them on restore. This is done
-    primarily because on Windows symlinks are 'scary' and 'new' and don't
-    work right.
+    We need to tear those down and rebuild them on restore, because Github Actions' upload artifact
+    action doesn't understand this concept, and OOMs.
     """
     return {
-        f"build/{ferrocene_host}/stage0-sysroot/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage0-sysroot/lib/rustlib/src": os.getcwd(),
-        f"build/{ferrocene_host}/stage1/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage1/lib/rustlib/src": os.getcwd(),
-        f"build/{ferrocene_host}/stage2/lib/rustlib/rustc-src": os.getcwd(),
-        f"build/{ferrocene_host}/stage2/lib/rustlib/src": os.getcwd(),
-        "build/host": f"build/{ferrocene_host}",
+        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage0-sysroot", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage1", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage1", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage2", "lib", "rustlib", "rustc-src"): os.getcwd(),
+        Path("build", ferrocene_host, "stage2", "lib", "rustlib", "src"): os.getcwd(),
+        Path("build", "host"): Path("build", ferrocene_host),
     }
 
 
@@ -45,18 +44,32 @@ def subcommand_store(ferrocene_host, workspace_id, path=None, job=None):
 
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
-        if os.path.exists(location):
+        try:
             # Windows gets *extremely* confused by symlink directories
-            if platform.system == "Windows":
-                logging.debug(f"Removing problematic link `{location}`...")
-                os.unlink(location)
+            if platform.system() == "Windows":
+                try:
+                    shutil.rmtree(location)
+                    logging.info(f"Removed cyclic link `{location}`, via rmtree")
+                except Exception as e:
+                    os.unlink(location)
+                    logging.info(f"Removed cyclic link `{location}`, via unlink")
             else:
                 if os.path.islink(location):
-                    logging.debug(f"Removing problematic link `{location}`...")
                     os.unlink(location)
+                    logging.info(f"Removed cyclic link `{location}` via `unlink`")
                 else:
-                    logging.debug(f"Removing problematic directory link `{location}`...")
                     shutil.rmtree(location)
+                    logging.info(f"Removed cyclic link `{location}` via `rmtree`")
+        except Exception as e:
+            logging.warning(f"Unable to remove {location}: {e}")
+
+
+    for location in [Path("build", "cache"), Path("build", "tmp")]:
+        if location.exists():
+            logging.info(f"Removing {location}")
+            shutil.rmtree(location)
+        else:
+            logging.warning(f"Skipped removing {location}, does not exist")
 
     cache.store(path, "build", exclude=["build/metrics.json"])
     return
@@ -74,14 +87,14 @@ def subcommand_retrieve(ferrocene_host, workspace_id, path=None, job=None):
     problematic_symlinks = get_problematic_symlinks(ferrocene_host)
     for location in problematic_symlinks:
         target = problematic_symlinks[location]
-        if os.path.exists(target):
-            logging.debug(f"Rebuilding problematic link to `{target}` at `{location}`...")
-            parent = Path(location).parent
+        if Path(target).exists():
+            logging.info(f"Rebuilding cyclic link to `{target}` at `{location}`")
+            parent = location.parent
             if not os.path.exists(parent):
                 os.makedirs(parent)
-            os.symlink(target, location)
+            os.symlink(target, location, target_is_directory=True)
         else:
-            logging.info(f"Unable to link to `{target}` at `{location}`, does not exist...")
+            logging.info(f"Unable to link to `{target}` at `{location}`, does not exist")
 
     return
 

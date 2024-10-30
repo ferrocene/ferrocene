@@ -195,7 +195,7 @@ should not be used in production.
      - ``riscv64gc-unknown-linux-gnu``
      - Cross-compilation
      - Full
-     - \-
+     - Available as a cross-compile target on :target:`aarch64-unknown-linux-gnu` and :ref:`x86_64-unknown-linux-gnu`.
 
 
 If your project needs support for one of these targets, please reach out to the

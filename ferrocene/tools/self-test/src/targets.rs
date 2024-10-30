@@ -40,6 +40,13 @@ static SUPPORTED_TARGETS: &[TargetSpec] = &[
     TargetSpec { triple: "x86_64-pc-windows-msvc", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "aarch64-unknown-nto-qnx710", std: true, linker: Linker::BundledLld },
     TargetSpec { triple: "x86_64-pc-nto-qnx710", std: true, linker: Linker::BundledLld },
+    TargetSpec {
+        triple: "riscv64gc-unknown-linux-gnu",
+        std: true,
+        // https://www.embecosm.com/resources/tool-chain-downloads/#riscv-linux's toolchains use
+        // the `riscv64-unknown-linux-gnu-` prefix instead of `riscv64-linux-gnu-`
+        linker: Linker::CrossCc(&["riscv64-unknown-linux-gnu-"]),
+    },
 ];
 
 #[derive(Debug)]

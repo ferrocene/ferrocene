@@ -27,3 +27,4 @@ shipped as a preview.
   * :target-with-triple:`thumbv8m.base-none-eabi`
   * :target-with-triple:`thumbv8m.main-none-eabi`
   * :target-with-triple:`thumbv8m.main-none-eabihf`
+  * :target-with-triple:`riscv64gc-unknown-linux-gnu`

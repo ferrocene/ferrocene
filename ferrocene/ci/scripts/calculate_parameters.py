@@ -42,12 +42,7 @@ QNX_TARGETS = [
     "x86_64-pc-nto-qnx710",
 ]
 
-# Targets only built (and self-tested!) on Linux.
-AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
-X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
-# x86_64-unknown-linux-gnu builds a number of cross compilation targets
-# for us and is special cased somewhat.
-X86_64_LINUX_BUILD_STD_TARGETS = [
+GENERIC_BUILD_STD_TARGETS = [
     "aarch64-unknown-none",
     "thumbv7em-none-eabi",
     "thumbv7em-none-eabihf",
@@ -58,21 +53,28 @@ X86_64_LINUX_BUILD_STD_TARGETS = [
     "wasm32-unknown-unknown",
     "armv7r-none-eabihf",
     "armebv7r-none-eabihf",
+]
+
+# Targets only built (and self-tested!) on Linux.
+AARCH64_LINUX_BUILD_HOSTS = ["aarch64-unknown-linux-gnu"]
+X86_64_LINUX_BUILD_HOSTS = ["x86_64-unknown-linux-gnu"]
+X86_64_LINUX_BUILD_STD_TARGETS = [
     "riscv64gc-unknown-linux-gnu",
 ]
-X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
-X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
-AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + X86_64_LINUX_BUILD_STD_TARGETS
+# x86_64-unknown-linux-gnu builds our generic cross compilation targets
+# for us and is special cased somewhat. (This is used in `calculate_targets()`)
+X86_64_LINUX_BUILD_STD_TARGETS_ALL = X86_64_LINUX_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS_ALL
+AARCH64_LINUX_SELF_TEST_TARGETS = X86_64_LINUX_BUILD_HOSTS + AARCH64_LINUX_BUILD_HOSTS  + GENERIC_BUILD_STD_TARGETS
 
 # Targets only built (and tested!) on Mac
-AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
-# We don't currently produce x86_64 Apple host tools, but we will one day
+AARCH64_MAC_BUILD_HOSTS = ["aarch64-apple-darwin"]
 AARCH64_MAC_BUILD_STD_TARGETS = ["x86_64-apple-darwin"]
-AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + X86_64_LINUX_BUILD_STD_TARGETS
+AARCH64_MAC_SELF_TEST_TARGETS = AARCH64_MAC_BUILD_HOSTS + AARCH64_MAC_BUILD_STD_TARGETS + GENERIC_BUILD_STD_TARGETS
 
 # Tagets only built (and tested!) on Windows
 X86_64_WINDOWS_BUILD_HOSTS = ["x86_64-pc-windows-msvc"]
-X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + X86_64_LINUX_BUILD_STD_TARGETS + QNX_TARGETS
+X86_64_WINDOWS_SELF_TEST_TARGETS = X86_64_WINDOWS_BUILD_HOSTS + GENERIC_BUILD_STD_TARGETS + QNX_TARGETS
 
 s3 = boto3.client("s3", region_name=S3_REGION)
 ecr = boto3.client("ecr", region_name=ECR_REGION)

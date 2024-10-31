@@ -60,6 +60,8 @@ Language changes in Rust 1.82.0
 
 * `Do not require \`T\` to be live when dropping \`[T; 0]\` <https://github.com/rust-lang/rust/pull/128438>`_
 
+  * No change: The drop interaction with the borrow checker is not specified as the borrow checker is not specified in the FLS
+
 * `Stabilize \`const\` operands in inline assembly <https://github.com/rust-lang/rust/pull/128570>`_
 
 * `Stabilize floating-point arithmetic in \`const fn\` <https://github.com/rust-lang/rust/pull/128596>`_

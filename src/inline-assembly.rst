@@ -616,6 +616,7 @@ Register Arguments
    RegisterExpression ::=
        InputOutputRegisterExpression
      | SimpleRegisterExpression
+     | ConstRegisterExpression
 
    InputOutputRegisterExpression ::=
        InputRegisterExpression $$=>$$ OutputRegisterExpression
@@ -630,6 +631,9 @@ Register Arguments
    SimpleRegisterExpression ::=
        Expression
      | UnderscoreExpression
+
+   ConstRegisterExpression ::=
+       $$const$$ Expression
 
 .. rubric:: Legality Rules
 
@@ -682,6 +686,9 @@ initial :t:`value` of a :t:`register`.
 An :t:`output register expression` is an :t:`expression` that is assigned the
 :t:`value` of a :t:`register`.
 
+:dp:`fls_81Ju1TEqJ48K`
+A :dt:`const register expression` is an :t:`expression` that is evaluated at compile-time.
+
 :dp:`fls_kkrcyk96w8x1`
 An :t:`input-output register expression` is a :t:`construct` that specifies
 both an :t:`input register expression` and an :t:`output register expression`.
@@ -690,9 +697,11 @@ both an :t:`input register expression` and an :t:`output register expression`.
 A :t:`simple register expression` is either an :t:`expression` or an
 :t:`underscore expression`.
 
-:dp:`fls_vu30cuq4y0ht`
-A :t:`register expression` is either an :t:`input-output register expression`
-or a :t:`simple register expression`.
+:dp:`fls_j9XOoXDmN5Dq`
+A :t:`register expression` is either an :t:`input-output register expression`, a :t:`simple register expression` or a :t:`const register expression`.
+
+:dp:`fls_jU8zg4k8dFsY`
+The :t:`type` of a :t:`const register expression` shall be an :t:`integer type`.
 
 :dp:`fls_66owmltvhnu4`
 The :t:`type` of an :t:`input register expression`,

@@ -34,6 +34,8 @@ Language changes in Rust 1.82.0
 
 * `\`addr_of(_mut)!\` macros and the newly stabilized \`&raw (const|mut)\` are now safe to use with all static items <https://github.com/rust-lang/rust/pull/125834>`_
 
+  * No change: `addr_of` is not specified as it is a library defined macro, `&raw (const|mut)` appears as a new feature separately below
+
 * `size_of_val_raw: for length 0 this is safe to call <https://github.com/rust-lang/rust/pull/126152/>`_
 
 * `Reorder trait bound modifiers *after* \`for<...>\` binder in trait bounds <https://github.com/rust-lang/rust/pull/127054/>`_

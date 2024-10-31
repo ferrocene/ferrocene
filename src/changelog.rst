@@ -30,6 +30,8 @@ Language changes in Rust 1.82.0
 
 * `Enforce supertrait outlives obligations when using trait impls <https://github.com/rust-lang/rust/pull/124336>`_
 
+  * No change: the concrete type inference resolution is not part of the FLS
+
 * `\`addr_of(_mut)!\` macros and the newly stabilized \`&raw (const|mut)\` are now safe to use with all static items <https://github.com/rust-lang/rust/pull/125834>`_
 
 * `size_of_val_raw: for length 0 this is safe to call <https://github.com/rust-lang/rust/pull/126152/>`_

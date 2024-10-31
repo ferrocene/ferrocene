@@ -56,6 +56,8 @@ Language changes in Rust 1.82.0
 
 * `Stabilize nested field access in \`offset_of!\` <https://github.com/rust-lang/rust/pull/128284>`_
 
+  * No change: `offset_of` is a library defined macro
+
 * `Do not require \`T\` to be live when dropping \`[T; 0]\` <https://github.com/rust-lang/rust/pull/128438>`_
 
 * `Stabilize \`const\` operands in inline assembly <https://github.com/rust-lang/rust/pull/128570>`_

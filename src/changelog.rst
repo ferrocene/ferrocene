@@ -18,6 +18,40 @@ with the change that has been applied due to it.
    just the language changes that had an impact to the FLS. See the `release
    notes`_ for a full list of changes.
 
+
+Language changes in Rust 1.82.0
+-------------------------------
+
+* `Don't make statement nonterminals match pattern nonterminals <https://github.com/rust-lang/rust/pull/120221/>`_
+
+* `Patterns matching empty types can now be omitted in common cases <https://github.com/rust-lang/rust/pull/122792>`_
+
+* `Enforce supertrait outlives obligations when using trait impls <https://github.com/rust-lang/rust/pull/124336>`_
+
+* `\`addr_of(_mut)!\` macros and the newly stabilized \`&raw (const|mut)\` are now safe to use with all static items <https://github.com/rust-lang/rust/pull/125834>`_
+
+* `size_of_val_raw: for length 0 this is safe to call <https://github.com/rust-lang/rust/pull/126152/>`_
+
+* `Reorder trait bound modifiers *after* \`for<...>\` binder in trait bounds <https://github.com/rust-lang/rust/pull/127054/>`_
+
+* `Stabilize opaque type precise capturing (RFC 3617) <https://github.com/rust-lang/rust/pull/127672>`_
+
+* `Stabilize \`&raw const\` and \`&raw mut\` operators (RFC 2582) <https://github.com/rust-lang/rust/pull/127679>`_
+
+* `Stabilize unsafe extern blocks (RFC 3484) <https://github.com/rust-lang/rust/pull/127921>`_
+
+* `Stabilize nested field access in \`offset_of!\` <https://github.com/rust-lang/rust/pull/128284>`_
+
+* `Do not require \`T\` to be live when dropping \`[T; 0]\` <https://github.com/rust-lang/rust/pull/128438>`_
+
+* `Stabilize \`const\` operands in inline assembly <https://github.com/rust-lang/rust/pull/128570>`_
+
+* `Stabilize floating-point arithmetic in \`const fn\` <https://github.com/rust-lang/rust/pull/128596>`_
+
+* `Stabilize explicit opt-in to unsafe attributes <https://github.com/rust-lang/rust/pull/128771>`_
+
+* `Document NaN bit patterns guarantees <https://github.com/rust-lang/rust/pull/129559>`_
+
 Language changes in Rust 1.81.0
 -------------------------------
 

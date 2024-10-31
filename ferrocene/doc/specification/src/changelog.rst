@@ -64,6 +64,12 @@ Language changes in Rust 1.82.0
 
 * `Stabilize \`const\` operands in inline assembly <https://github.com/rust-lang/rust/pull/128570>`_
 
+  * Note: These changes affect content that is informational.
+
+  * New syntax: :s:`ConstRegisterExpression`
+
+  * New paragraphs: :p:`fls_81Ju1TEqJ48K`, :p:`fls_j9XOoXDmN5Dq`, :p:`fls_jU8zg4k8dFsY`
+
 * `Stabilize floating-point arithmetic in \`const fn\` <https://github.com/rust-lang/rust/pull/128596>`_
 
 * `Stabilize explicit opt-in to unsafe attributes <https://github.com/rust-lang/rust/pull/128771>`_

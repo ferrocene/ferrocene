@@ -38,6 +38,8 @@ Language changes in Rust 1.82.0
 
 * `size_of_val_raw: for length 0 this is safe to call <https://github.com/rust-lang/rust/pull/126152/>`_
 
+  * No change: `size_of_val_raw` is a library defined function
+
 * `Reorder trait bound modifiers *after* \`for<...>\` binder in trait bounds <https://github.com/rust-lang/rust/pull/127054/>`_
 
 * `Stabilize opaque type precise capturing (RFC 3617) <https://github.com/rust-lang/rust/pull/127672>`_

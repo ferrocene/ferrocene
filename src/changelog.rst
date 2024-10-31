@@ -42,6 +42,8 @@ Language changes in Rust 1.82.0
 
 * `Reorder trait bound modifiers *after* \`for<...>\` binder in trait bounds <https://github.com/rust-lang/rust/pull/127054/>`_
 
+  * Changed syntax: :s:`TraitBound`
+
 * `Stabilize opaque type precise capturing (RFC 3617) <https://github.com/rust-lang/rust/pull/127672>`_
 
 * `Stabilize \`&raw const\` and \`&raw mut\` operators (RFC 2582) <https://github.com/rust-lang/rust/pull/127679>`_

@@ -2839,7 +2839,7 @@ Trait and Lifetime Bounds
        $$($$ TraitBound $$)$$
 
    TraitBound ::=
-       $$?$$? ForGenericParameterList? TypePath
+       ($$?$$ | ForGenericParameterList)? TypePath
 
    ForGenericParameterList ::=
        $$for$$ GenericParameterList

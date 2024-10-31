@@ -24,6 +24,8 @@ Language changes in Rust 1.82.0
 
 * `Don't make statement nonterminals match pattern nonterminals <https://github.com/rust-lang/rust/pull/120221/>`_
 
+  * No change: Exact parsing behavior of non-terminals within declarative macros is not specified
+
 * `Patterns matching empty types can now be omitted in common cases <https://github.com/rust-lang/rust/pull/122792>`_
 
 * `Enforce supertrait outlives obligations when using trait impls <https://github.com/rust-lang/rust/pull/124336>`_

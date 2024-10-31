@@ -48,6 +48,10 @@ Language changes in Rust 1.82.0
 
 * `Stabilize \`&raw const\` and \`&raw mut\` operators (RFC 2582) <https://github.com/rust-lang/rust/pull/127679>`_
 
+  * New section: :ref:`fls_vXGuvRWOLbEE`
+
+  * New paragraphs: :p:`fls_K7SbApHPmwjM`
+
 * `Stabilize unsafe extern blocks (RFC 3484) <https://github.com/rust-lang/rust/pull/127921>`_
 
 * `Stabilize nested field access in \`offset_of!\` <https://github.com/rust-lang/rust/pull/128284>`_

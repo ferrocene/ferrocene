@@ -5357,6 +5357,17 @@ an included :t:`range expression high bound`.
 :dp:`fls_krei7lc6lo8q`
 See :s:`RangeToInclusiveExpression`.
 
+.. _fls_YLhE2qpzYXRK:
+
+raw borrow expression
+^^^^^^^^^^^^^^^^^^^^^
+
+:dp:`fls_Fe39wLb0vvEg`
+A :dt:`raw borrow expression` is an :t:`expression` that creates a :t:`raw pointer` to the memory location of its :t:`operand` without incurring a :t:`borrow`.
+
+:dp:`fls_I71jq8BGyLqi`
+See :s:`RawBorrowExpression`.
+
 .. _fls_ipeh92kh17ze:
 
 raw byte string literal

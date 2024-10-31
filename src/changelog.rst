@@ -76,6 +76,8 @@ Language changes in Rust 1.82.0
 
 * `Document NaN bit patterns guarantees <https://github.com/rust-lang/rust/pull/129559>`_
 
+  * New paragraph: :p:`fls_nuFAwLHOdQBx`
+
 Language changes in Rust 1.81.0
 -------------------------------
 

@@ -379,6 +379,11 @@ Floating Point Types
 :dp:`fls_yqflrq9s6p6n`
 :t:`Type` :c:`f64` is equivalent to the IEEE 754-2008 binary64 :t:`type`.
 
+.. rubric:: Dynamic Semantics
+
+:dp:`fls_nuFAwLHOdQBx`
+Operations on values of :t:`floating point types` may not preserve the sign bit in case of the value being a IEEE floating-point ``NaN``.
+
 .. _fls_3qnpv2z7yjil:
 
 Integer Types

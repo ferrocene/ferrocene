@@ -19,6 +19,8 @@ on:
       container:
         type: string
         description: The container URI to run the build in, if any (Linux only)
+      environment:
+        type: string
     outputs:
       artifact-checks-usage:
         description: The name of the resource usage report artifact for the checks job
@@ -30,8 +32,8 @@ jobs:
     runs-on: ${{ inputs.runner }}
     environment: ${{ inputs.environment }}
     env:
-      ARTIFACT: checks-${{inputs.triple}}
-      ARTIFACT_USAGE: checks-${{inputs.triple}}-usage
+      ARTIFACT: checks-${{inputs.host-triple}}
+      ARTIFACT_USAGE: checks-${{inputs.host-triple}}-usage
       FERROCENE_HOST: ${{ inputs.host-triple }}
     outputs:
       artifact-usage: ${{ env.ARTIFACT_USAGE }}
@@ -40,6 +42,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
+          llvm-subset: true
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       - name: Azure CLI Login

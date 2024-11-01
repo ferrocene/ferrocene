@@ -31,9 +31,9 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: true
+          llvm-subset: 'true'
           # We call this later with `INSTALL_LLVM` and `SKIP_UPGRADE` set for speed
-          build-dependencies: false
+          build-dependencies: 'false'
 
       - name: Check whether git conflict markers are present
         run: uv run ferrocene/ci/scripts/detect-conflict-markers.py
@@ -43,7 +43,6 @@ jobs:
       - name: Install (minimal) build dependencies
         run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
         env:
-          SKIP_UPGRADE: 1
           INSTALL_LLVM: 1
 
       # We deliberately avoid using docker containers as that would require either adding

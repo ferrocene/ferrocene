@@ -3,24 +3,22 @@ description: "Setup the runner and prepare the git repo"
 inputs:
   llvm-subset:
     description: If a a minimal subset of the llvm-project monorepo should be cloned
-    type: boolean
     required: false
-    default: false
+    default: 'false'
   setup-venv:
     description: If the venv should be set up
-    type: boolean
     required: false
-    default: true
+    default: 'true'
   build-dependencies:
     description: If the dependencies required for a build should be installed
     required: false
-    default: true
+    default: 'true'
 
 runs:
   using: "composite"
   steps:
     - name: Clone llvm subset
-      if: inputs.llvm-subset
+      if: ${{ inputs.llvm-subset != 'false' }}
       shell: bash
       run: ferrocene/ci/scripts/clone-llvm-subset.sh
     - name: Checkout submodules
@@ -31,12 +29,12 @@ runs:
       run: ferrocene/ci/scripts/reset-mtime-to-last-commit.sh
 
     - name: Install dependencies (Ubuntu)
-      if: contains(runner.name, 'ubuntu') && inputs.build-dependencies
+      if: ${{ contains(runner.name, 'ubuntu') && inputs.build-dependencies != 'false' }}
       shell: bash
       run: sudo ferrocene/ci/scripts/setup-ubuntu.sh
 
     - name: Setup uv, Python, and venv
-      if: inputs.setup-venv
+      if: ${{ inputs.setup-venv != 'false' }}
       shell: bash
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh

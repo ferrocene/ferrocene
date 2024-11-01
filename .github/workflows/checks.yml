@@ -42,7 +42,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup/
         with:
-          llvm-subset: true
+          llvm-subset: 'true'
           build-dependencies: ${{ (inputs.container != '') && 'false' || 'true' }}
       
       - name: Azure CLI Login

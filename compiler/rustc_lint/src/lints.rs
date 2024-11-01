@@ -13,15 +13,15 @@ use rustc_hir::{self as hir, MissingLifetimeKind};
 use rustc_macros::{LintDiagnostic, Subdiagnostic};
 use rustc_middle::ty::inhabitedness::InhabitedPredicate;
 use rustc_middle::ty::{Clause, PolyExistentialTraitRef, Ty, TyCtxt};
-use rustc_session::lint::AmbiguityErrorDiag;
 use rustc_session::Session;
+use rustc_session::lint::AmbiguityErrorDiag;
 use rustc_span::edition::Edition;
 use rustc_span::symbol::{Ident, MacroRulesNormalizedIdent};
-use rustc_span::{sym, Span, Symbol};
+use rustc_span::{Span, Symbol, sym};
 
 use crate::builtin::{InitError, ShorthandAssocTyCollector, TypeAliasBounds};
 use crate::errors::{OverruledAttributeSub, RequestedLevel};
-use crate::{fluent_generated as fluent, LateContext};
+use crate::{LateContext, fluent_generated as fluent};
 
 // array_into_iter.rs
 #[derive(LintDiagnostic)]
@@ -3061,3 +3061,39 @@ pub(crate) struct UnsafeAttrOutsideUnsafeSuggestion {
 pub(crate) struct OutOfScopeMacroCalls {
     pub path: String,
 }
+
+#[derive(LintDiagnostic)]
+#[diag(lint_static_mut_refs_lint)]
+pub(crate) struct RefOfMutStatic<'a> {
+    #[label]
+    pub span: Span,
+    #[subdiagnostic]
+    pub sugg: Option<MutRefSugg>,
+    pub shared_label: &'a str,
+    #[note(lint_shared_note)]
+    pub shared_note: bool,
+    #[note(lint_mut_note)]
+    pub mut_note: bool,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum MutRefSugg {
+    #[multipart_suggestion(lint_suggestion, style = "verbose", applicability = "maybe-incorrect")]
+    Shared {
+        #[suggestion_part(code = "&raw const ")]
+        span: Span,
+    },
+    #[multipart_suggestion(
+        lint_suggestion_mut,
+        style = "verbose",
+        applicability = "maybe-incorrect"
+    )]
+    Mut {
+        #[suggestion_part(code = "&raw mut ")]
+        span: Span,
+    },
+}
+
+#[derive(LintDiagnostic)]
+#[diag(lint_unqualified_local_imports)]
+pub(crate) struct UnqualifiedLocalImportsDiag {}

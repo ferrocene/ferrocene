@@ -119,6 +119,7 @@
 #![feature(const_bigint_helper_methods)]
 #![feature(const_black_box)]
 #![feature(const_cell_into_inner)]
+#![feature(const_char_encode_utf16)]
 #![feature(const_char_encode_utf8)]
 #![feature(const_eval_select)]
 #![feature(const_exact_div)]
@@ -393,6 +394,8 @@ pub mod panicking;
 #[unstable(feature = "core_pattern_types", issue = "123646")]
 pub mod pat;
 pub mod pin;
+#[unstable(feature = "random", issue = "130703")]
+pub mod random;
 #[unstable(feature = "new_range_api", issue = "125687")]
 pub mod range;
 pub mod result;

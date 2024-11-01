@@ -1,8 +1,5 @@
 //@ min-lldb-version: 310
 
-//@ ignore-aarch64-unknown-ferrocenecoretest
-//@ ignore-aarch64-darwin-ferrocenecoretest
-
 //@ compile-flags:-g
 
 // === GDB TESTS ===================================================================================

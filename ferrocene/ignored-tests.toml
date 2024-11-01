@@ -68,3 +68,8 @@ reason = "The tests do not pass on CI, to be revisited later. https://github.com
 tests = ["tests/debuginfo/basic-types-mut-globals.rs"]
 targets = ["x86_64-unknown-linux-gnu"]
 reason = "The test does not pass on CI, to be revisited later. https://github.com/rust-lang/rust/pull/127001#discussion_r1666568648"
+
+[["tests/debuginfo"]]
+tests = ["tests/debuginfo/constant-ordering-prologue.rs"]
+targets = ["aarch64-unknown-ferrocenecoretest", "aarch64-darwin"]
+reason = "The test does not pass on CI, to be revisited later. For 'aarch64-darwin': remove the target from here once https://github.com/rust-lang/rust/issues/73908 is complete."

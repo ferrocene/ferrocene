@@ -18,8 +18,8 @@ use crate::core::builder::{
     self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
 use crate::core::config::TargetSelection;
-use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::core::config::flags::{Subcommand, get_completion};
+use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils::exec::{BootstrapCommand, command};
 use crate::utils::helpers::{
     self, LldThreads, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,

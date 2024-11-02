@@ -15,18 +15,22 @@ use crate::core::build_steps::tool::{self, SourceType, Tool};
 use crate::core::build_steps::toolstate::ToolState;
 use crate::core::build_steps::{compile, dist, llvm};
 use crate::core::builder::{
-    self, crate_description, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step,
+    self, Alias, Builder, Compiler, Kind, RunConfig, ShouldRun, Step, crate_description,
 };
-use crate::core::config::flags::{get_completion, Subcommand};
 use crate::core::config::TargetSelection;
+<<<<<<< HEAD
 use crate::ferrocene::code_coverage::ProfilerBuiltinsNoCore;
 use crate::utils::exec::{command, BootstrapCommand};
+=======
+use crate::core::config::flags::{Subcommand, get_completion};
+use crate::utils::exec::{BootstrapCommand, command};
+>>>>>>> pull-upstream-temp--do-not-use-for-real-code
 use crate::utils::helpers::{
-    self, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,
-    linker_args, linker_flags, t, target_supports_cranelift_backend, up_to_date, LldThreads,
+    self, LldThreads, add_link_lib_path, add_rustdoc_cargo_linker_args, dylib_path, dylib_path_var,
+    linker_args, linker_flags, t, target_supports_cranelift_backend, up_to_date,
 };
 use crate::utils::render_tests::{add_flags_and_try_run_tests, try_run_tests};
-use crate::{envify, CLang, DocTests, GitRepo, Mode};
+use crate::{CLang, DocTests, GitRepo, Mode, envify};
 
 const ADB_TEST_DIR: &str = "/data/local/tmp/work";
 
@@ -1076,12 +1080,8 @@ HELP: to skip test's attempt to check tidiness, pass `--skip src/tools/tidy` to 
                 crate::exit!(1);
             }
             let all = false;
-            crate::core::build_steps::format::format(
-                builder,
-                !builder.config.cmd.bless(),
-                all,
-                &[],
-            );
+            crate::core::build_steps::format::format(builder, !builder.config.cmd.bless(), all, &[
+            ]);
         }
 
         builder.info("tidy check");
@@ -1733,6 +1733,11 @@ NOTE: if you're sure you want to do this, please open an issue as to why. In the
         cmd.arg("--rustc-path").arg(builder.rustc(compiler));
 
         let is_rustdoc = suite.ends_with("rustdoc-ui") || suite.ends_with("rustdoc-js");
+
+        if mode == "run-make" {
+            let cargo = builder.ensure(tool::Cargo { compiler, target: compiler.host });
+            cmd.arg("--cargo-path").arg(cargo);
+        }
 
         // Avoid depending on rustdoc when we don't need it.
         if mode == "rustdoc"
@@ -3493,11 +3498,10 @@ impl Step for CodegenGCC {
         let compiler = self.compiler;
         let target = self.target;
 
-        builder.ensure(compile::Std::new_with_extra_rust_args(
-            compiler,
-            target,
-            &["-Csymbol-mangling-version=v0", "-Cpanic=abort"],
-        ));
+        builder.ensure(compile::Std::new_with_extra_rust_args(compiler, target, &[
+            "-Csymbol-mangling-version=v0",
+            "-Cpanic=abort",
+        ]));
 
         // If we're not doing a full bootstrap but we're testing a stage2
         // version of libstd, then what we're actually testing is the libstd

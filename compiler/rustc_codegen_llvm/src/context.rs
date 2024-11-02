@@ -7,7 +7,7 @@ use libc::c_uint;
 use rustc_codegen_ssa::base::{wants_msvc_seh, wants_wasm_eh};
 use rustc_codegen_ssa::errors as ssa_errors;
 use rustc_codegen_ssa::traits::*;
-use rustc_data_structures::base_n::{ToBaseN, ALPHANUMERIC_ONLY};
+use rustc_data_structures::base_n::{ALPHANUMERIC_ONLY, ToBaseN};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::small_c_str::SmallCStr;
 use rustc_hir::def_id::DefId;
@@ -18,12 +18,12 @@ use rustc_middle::ty::layout::{
 };
 use rustc_middle::ty::{self, Instance, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
+use rustc_session::Session;
 use rustc_session::config::{
     BranchProtection, CFGuard, CFProtection, CrateType, DebugInfo, PAuthKey, PacRet,
 };
-use rustc_session::Session;
 use rustc_span::source_map::Spanned;
-use rustc_span::{Span, DUMMY_SP};
+use rustc_span::{DUMMY_SP, Span};
 use rustc_target::abi::{HasDataLayout, TargetDataLayout, VariantIdx};
 use rustc_target::spec::{HasTargetSpec, RelocModel, SmallDataThresholdSupport, Target, TlsModel};
 use smallvec::SmallVec;
@@ -35,8 +35,8 @@ use crate::type_::Type;
 use crate::value::Value;
 use crate::{attributes, coverageinfo, debuginfo, llvm, llvm_util};
 
-/// There is one `CodegenCx` per compilation unit. Each one has its own LLVM
-/// `llvm::Context` so that several compilation units may be optimized in parallel.
+/// There is one `CodegenCx` per codegen unit. Each one has its own LLVM
+/// `llvm::Context` so that several codegen units may be processed in parallel.
 /// All other LLVM data structures in the `CodegenCx` are tied to that `llvm::Context`.
 pub(crate) struct CodegenCx<'ll, 'tcx> {
     pub tcx: TyCtxt<'tcx>,
@@ -231,7 +231,8 @@ pub(crate) unsafe fn create_module<'ll>(
         }
     }
 
-    // Enable LTO unit splitting if specified or if CFI is enabled. (See https://reviews.llvm.org/D53891.)
+    // Enable LTO unit splitting if specified or if CFI is enabled. (See
+    // https://reviews.llvm.org/D53891.)
     if sess.is_split_lto_unit_enabled() || sess.is_sanitizer_cfi_enabled() {
         let enable_split_lto_unit = c"EnableSplitLTOUnit".as_ptr();
         unsafe {
